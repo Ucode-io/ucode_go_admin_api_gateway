@@ -119,7 +119,7 @@ func (h *Handler) SendCode(c *gin.Context) {
 	//	return
 	//}
 
-	respObject, err := services.BuilderService().Login().LoginWithOtp(
+	respObject, err := services.GetBuilderServiceByType(resource.NodeType).Login().LoginWithOtp(
 		c.Request.Context(),
 		&pbObject.PhoneOtpRequst{
 			PhoneNumber: phone,
@@ -370,7 +370,7 @@ func (h *Handler) RegisterOtp(c *gin.Context) {
 	//	return
 	//}
 
-	_, err = services.BuilderService().ObjectBuilderAuth().Create(
+	_, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderAuth().Create(
 		context.Background(),
 		&pbObject.CommonMessage{
 			TableSlug: c.Param("table_slug"),
@@ -383,7 +383,7 @@ func (h *Handler) RegisterOtp(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.BuilderService().Login().LoginWithOtp(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).Login().LoginWithOtp(
 		context.Background(),
 		&pbObject.PhoneOtpRequst{
 			PhoneNumber: body.Data["phone"].(string),

@@ -147,7 +147,7 @@ func (h *Handler) CreateObject(c *gin.Context) {
 				return
 			}
 
-			_, err = services.BuilderService().ObjectBuilder().Create(
+			_, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().Create(
 				context.Background(),
 				&obs.CommonMessage{
 					TableSlug: key[1:],
@@ -204,7 +204,7 @@ func (h *Handler) CreateObject(c *gin.Context) {
 	//start = time.Now()
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().ObjectBuilder().Create(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().Create(
 			context.Background(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("table_slug"),
@@ -366,7 +366,7 @@ func (h *Handler) GetSingle(c *gin.Context) {
 	//}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().ObjectBuilder().GetSingle(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().GetSingle(
 			context.Background(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("table_slug"),
@@ -512,7 +512,7 @@ func (h *Handler) GetSingleSlim(c *gin.Context) {
 		h.log.Error("Error while getting redis", logger.Error(err))
 	}
 
-	resp, err := services.BuilderService().ObjectBuilder().GetSingleSlim(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().GetSingleSlim(
 		context.Background(),
 		&obs.CommonMessage{
 			TableSlug: c.Param("table_slug"),
@@ -642,7 +642,7 @@ func (h *Handler) UpdateObject(c *gin.Context) {
 	//}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		singleObject, err = services.BuilderService().ObjectBuilder().GetSingle(
+		singleObject, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().GetSingle(
 			context.Background(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("table_slug"),
@@ -711,7 +711,7 @@ func (h *Handler) UpdateObject(c *gin.Context) {
 	}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().ObjectBuilder().Update(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().Update(
 			context.Background(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("table_slug"),
@@ -914,7 +914,7 @@ func (h *Handler) DeleteObject(c *gin.Context) {
 	}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().ObjectBuilder().Delete(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().Delete(
 			context.Background(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("table_slug"),
@@ -1027,19 +1027,6 @@ func (h *Handler) GetList(c *gin.Context) {
 		return
 	}
 
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -1066,20 +1053,6 @@ func (h *Handler) GetList(c *gin.Context) {
 		return
 	}
 
-	// fmt.Println("\n Resource env id", resource.ResourceEnvironmentId)
-
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
 	if viewId, ok := objectRequest.Data["builder_service_view_id"].(string); ok {
 		if util.IsValidUUID(viewId) {
 			switch resource.ResourceType {
@@ -1098,7 +1071,7 @@ func (h *Handler) GetList(c *gin.Context) {
 					}
 				}
 
-				resp, err = services.BuilderService().ObjectBuilder().GroupByColumns(
+				resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().GroupByColumns(
 					context.Background(),
 					&obs.CommonMessage{
 						TableSlug: c.Param("table_slug"),
@@ -1140,7 +1113,6 @@ func (h *Handler) GetList(c *gin.Context) {
 	} else {
 		switch resource.ResourceType {
 		case pb.ResourceType_MONGODB:
-			// start := time.Now()
 
 			redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))))
 			if err == nil {
@@ -1156,7 +1128,7 @@ func (h *Handler) GetList(c *gin.Context) {
 				}
 			}
 
-			resp, err = services.BuilderService().ObjectBuilder().GetList(
+			resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().GetList(
 				context.Background(),
 				&obs.CommonMessage{
 					TableSlug: c.Param("table_slug"),
@@ -1338,7 +1310,7 @@ func (h *Handler) GetListSlim(c *gin.Context) {
 	} else {
 		h.log.Error("Error while getting redis while get list ", logger.Error(err))
 	}
-	resp, err := services.BuilderService().ObjectBuilder().GetListSlim(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().GetListSlim(
 		context.Background(),
 		&obs.CommonMessage{
 			TableSlug: c.Param("table_slug"),
@@ -1463,7 +1435,7 @@ func (h *Handler) GetListInExcel(c *gin.Context) {
 	//}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().ObjectBuilder().GetListInExcel(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().GetListInExcel(
 			context.Background(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("table_slug"),
@@ -1613,7 +1585,7 @@ func (h *Handler) DeleteManyToMany(c *gin.Context) {
 	}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().ObjectBuilder().ManyToManyDelete(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().ManyToManyDelete(
 			context.Background(),
 			&m2mMessage,
 		)
@@ -1773,7 +1745,7 @@ func (h *Handler) AppendManyToMany(c *gin.Context) {
 	}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().ObjectBuilder().ManyToManyAppend(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().ManyToManyAppend(
 			context.Background(),
 			&m2mMessage,
 		)
@@ -1960,7 +1932,7 @@ func (h *Handler) UpsertObject(c *gin.Context) {
 				h.handleResponse(c, status_http.InvalidArgument, err.Error())
 				return
 			}
-			// _, err = services.BuilderService()..ObjectBuilde().Create(
+			// _, err = services.GetBuilderServiceByType(resource.NodeType)..ObjectBuilde().Create(
 			// 	context.Background(),
 			// 	&obs.CommonMessage{
 			// 		TableSlug: key[1:],
@@ -1985,7 +1957,7 @@ func (h *Handler) UpsertObject(c *gin.Context) {
 	var resp *obs.CommonMessage
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().ObjectBuilder().Batch(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().Batch(
 			context.Background(),
 			&obs.BatchRequest{
 				TableSlug:     c.Param("table_slug"),
@@ -2198,7 +2170,7 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 	var resp *obs.CommonMessage
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().ObjectBuilder().MultipleUpdate(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().MultipleUpdate(
 			context.Background(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("table_slug"),
@@ -2218,7 +2190,7 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.BuilderService().ObjectBuilder().MultipleUpdate(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().MultipleUpdate(
 			context.Background(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("table_slug"),
@@ -2350,7 +2322,7 @@ func (h *Handler) GetFinancialAnalytics(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.BuilderService().ObjectBuilder().GetFinancialAnalytics(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().GetFinancialAnalytics(
 		context.Background(),
 		&obs.CommonMessage{
 			TableSlug: c.Param("table_slug"),
@@ -2521,7 +2493,7 @@ func (h *Handler) GetListGroupBy(c *gin.Context) {
 		return
 	}
 	fmt.Println("projectId: ", resource.ResourceEnvironmentId)
-	tableResp, err := services.BuilderService().ObjectBuilder().GetGroupByField(
+	tableResp, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().GetGroupByField(
 		context.Background(),
 		&obs.CommonMessage{
 			TableSlug: c.Param("table_slug"),
@@ -2562,7 +2534,7 @@ func (h *Handler) GetListGroupBy(c *gin.Context) {
 		}
 
 		fmt.Println("projectId 22: ", resource.ResourceEnvironmentId)
-		selectedTableResp, err := services.BuilderService().ObjectBuilder().GetGroupByField(
+		selectedTableResp, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().GetGroupByField(
 			context.Background(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("table_slug"),
@@ -2693,7 +2665,7 @@ func (h *Handler) GetGroupByField(c *gin.Context) {
 			}
 		}
 
-		resp, err = services.BuilderService().ObjectBuilder().GetGroupByField(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().GetGroupByField(
 			context.Background(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("table_slug"),
@@ -2814,7 +2786,7 @@ func (h *Handler) DeleteManyObject(c *gin.Context) {
 	}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().ObjectBuilder().DeleteMany(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().DeleteMany(
 			context.Background(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("table_slug"),
@@ -2957,7 +2929,7 @@ func (h *Handler) GetListWithOutRelation(c *gin.Context) {
 			}
 		}
 
-		resp, err = services.BuilderService().ObjectBuilder().GetListWithOutRelations(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().GetListWithOutRelations(
 			context.Background(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("table_slug"),

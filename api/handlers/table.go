@@ -37,6 +37,7 @@ func (h *Handler) CreateTable(c *gin.Context) {
 		err                   error
 		resourceEnvironmentId string
 		resourceType          pb.ResourceType
+		nodeType              string
 	)
 
 	err = c.ShouldBindJSON(&tableRequest)
@@ -95,6 +96,7 @@ func (h *Handler) CreateTable(c *gin.Context) {
 
 		resourceEnvironmentId = resource.ResourceEnvironmentId
 		resourceType = resource.ResourceType
+		nodeType = resource.NodeType
 	} else {
 		resourceEnvironment, err := services.CompanyService().Resource().GetResourceEnvironment(
 			c.Request.Context(),
@@ -110,6 +112,7 @@ func (h *Handler) CreateTable(c *gin.Context) {
 
 		resourceEnvironmentId = resourceEnvironment.GetId()
 		resourceType = pb.ResourceType(resourceEnvironment.ResourceType)
+		nodeType = resourceEnvironment.GetNodeType()
 	}
 
 	var fields []*obs.CreateFieldsRequest
@@ -164,7 +167,7 @@ func (h *Handler) CreateTable(c *gin.Context) {
 
 	switch resourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().Table().Create(
+		resp, err = services.GetBuilderServiceByType(nodeType).Table().Create(
 			context.Background(),
 			&table,
 		)
@@ -208,6 +211,7 @@ func (h *Handler) GetTableByID(c *gin.Context) {
 		err                   error
 		resourceEnvironmentId string
 		resourceType          pb.ResourceType
+		nodeType              string
 	)
 
 	if !util.IsValidUUID(tableID) {
@@ -253,6 +257,7 @@ func (h *Handler) GetTableByID(c *gin.Context) {
 
 		resourceEnvironmentId = resource.ResourceEnvironmentId
 		resourceType = resource.ResourceType
+		nodeType = resource.NodeType
 	} else {
 		resourceEnvironment, err := services.CompanyService().Resource().GetResourceEnvironment(
 			c.Request.Context(),
@@ -268,11 +273,12 @@ func (h *Handler) GetTableByID(c *gin.Context) {
 
 		resourceEnvironmentId = resourceEnvironment.GetId()
 		resourceType = pb.ResourceType(resourceEnvironment.ResourceType)
+		nodeType = resourceEnvironment.GetNodeType()
 	}
 
 	switch resourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().Table().GetByID(
+		resp, err = services.GetBuilderServiceByType(nodeType).Table().GetByID(
 			context.Background(),
 			&obs.TablePrimaryKey{
 				Id:        tableID,
@@ -321,6 +327,7 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 		resp                  *obs.GetAllTablesResponse
 		resourceEnvironmentId string
 		resourceType          pb.ResourceType
+		nodeType              string
 	)
 	offset, err := h.getOffsetParam(c)
 	if err != nil {
@@ -372,6 +379,7 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 
 		resourceEnvironmentId = resource.ResourceEnvironmentId
 		resourceType = resource.ResourceType
+		nodeType = resource.NodeType
 	} else {
 		resourceEnvironment, err := services.CompanyService().Resource().GetResourceEnvironment(
 			c.Request.Context(),
@@ -387,6 +395,7 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 
 		resourceEnvironmentId = resourceEnvironment.GetId()
 		resourceType = pb.ResourceType(resourceEnvironment.ResourceType)
+		nodeType = resourceEnvironment.GetNodeType()
 	}
 	var isLoginTable bool
 	var isLoginTableStr = c.Query("is_login_table")
@@ -396,7 +405,7 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 
 	switch resourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().Table().GetAll(
+		resp, err = services.GetBuilderServiceByType(nodeType).Table().GetAll(
 			context.Background(),
 			&obs.GetAllTablesRequest{
 				Limit:        int32(limit),
@@ -453,6 +462,7 @@ func (h *Handler) UpdateTable(c *gin.Context) {
 		resp                  *emptypb.Empty
 		resourceEnvironmentId string
 		resourceType          pb.ResourceType
+		nodeType              string
 	)
 
 	err := c.ShouldBindJSON(&table)
@@ -509,6 +519,7 @@ func (h *Handler) UpdateTable(c *gin.Context) {
 
 		resourceEnvironmentId = resource.ResourceEnvironmentId
 		resourceType = resource.ResourceType
+		nodeType = resource.NodeType
 	} else {
 		resourceEnvironment, err := services.CompanyService().Resource().GetResourceEnvironment(
 			c.Request.Context(),
@@ -524,6 +535,7 @@ func (h *Handler) UpdateTable(c *gin.Context) {
 
 		resourceEnvironmentId = resourceEnvironment.GetId()
 		resourceType = pb.ResourceType(resourceEnvironment.ResourceType)
+		nodeType = resourceEnvironment.GetNodeType()
 	}
 	structData, err := helper.ConvertMapToStruct(table.Attributes)
 	if err != nil {
@@ -534,7 +546,7 @@ func (h *Handler) UpdateTable(c *gin.Context) {
 	table.ProjectId = resourceEnvironmentId
 	switch resourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().Table().Update(
+		resp, err = services.GetBuilderServiceByType(nodeType).Table().Update(
 			context.Background(),
 			&obs.UpdateTableRequest{
 				Id:                table.Id,
@@ -625,6 +637,7 @@ func (h *Handler) DeleteTable(c *gin.Context) {
 		resp                  *emptypb.Empty
 		resourceEnvironmentId string
 		resourceType          pb.ResourceType
+		nodeType              string
 	)
 
 	if !util.IsValidUUID(tableID) {
@@ -676,6 +689,7 @@ func (h *Handler) DeleteTable(c *gin.Context) {
 
 		resourceEnvironmentId = resource.ResourceEnvironmentId
 		resourceType = resource.ResourceType
+		nodeType = resource.NodeType
 	} else {
 		resourceEnvironment, err := services.CompanyService().Resource().GetResourceEnvironment(
 			c.Request.Context(),
@@ -691,11 +705,12 @@ func (h *Handler) DeleteTable(c *gin.Context) {
 
 		resourceEnvironmentId = resourceEnvironment.GetId()
 		resourceType = pb.ResourceType(resourceEnvironment.ResourceType)
+		nodeType = resourceEnvironment.GetNodeType()
 	}
 
 	switch resourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().Table().Delete(
+		resp, err = services.GetBuilderServiceByType(nodeType).Table().Delete(
 			context.Background(),
 			&obs.TablePrimaryKey{
 				Id:         tableID,
@@ -777,7 +792,7 @@ func (h *Handler) GetListTableHistory(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.BuilderService().Table().GetListTableHistory(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).Table().GetListTableHistory(
 		context.Background(),
 		&obs.GetTableHistoryRequest{
 			ProjectId: resource.ResourceEnvironmentId,
@@ -844,7 +859,7 @@ func (h *Handler) GetTableHistoryById(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.BuilderService().Table().GetTableHistoryById(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).Table().GetTableHistoryById(
 		context.Background(),
 		&obs.TableHistoryPrimaryKey{
 			ProjectId: resource.ResourceEnvironmentId,
@@ -923,7 +938,7 @@ func (h *Handler) RevertTableHistory(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.BuilderService().Table().RevertTableHistory(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).Table().RevertTableHistory(
 		context.Background(),
 		&obs.RevertTableHistoryRequest{
 			ProjectId:  resource.ResourceEnvironmentId,
@@ -999,7 +1014,7 @@ func (h *Handler) InsetrVersionsIdsToTableHistory(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.BuilderService().Table().InsertVersionsToCommit(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).Table().InsertVersionsToCommit(
 		context.Background(),
 		&obs.InsertVersionsToCommitRequest{
 			ProjectId:  resource.ResourceEnvironmentId,
@@ -1111,7 +1126,7 @@ func (h *Handler) GetTableDetails(c *gin.Context) {
 	}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().ObjectBuilder().GetTableDetails(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().GetTableDetails(
 			context.Background(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("table_slug"),

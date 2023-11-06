@@ -59,6 +59,7 @@ message ResourceEnvironmentV2MultiCompany {
     string display_color = 9;
     string description = 10;
     google.protobuf.Struct client_types = 11;
+    string node_type = 12;
 }
 
 message Project2 {
@@ -340,6 +341,7 @@ message V2LoginRequest {
     string otp = 12;
     string sms_id = 13;
     string type = 14;
+    string node_type = 15;
 }
 
 message V2LoginWithOptionRequest {

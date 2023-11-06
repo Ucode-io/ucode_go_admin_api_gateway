@@ -145,7 +145,7 @@ func (h *Handler) GetListV2(c *gin.Context) {
 					}
 				}
 
-				resp, err = services.BuilderService().ObjectBuilder().GroupByColumns(
+				resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().GroupByColumns(
 					context.Background(),
 					&obs.CommonMessage{
 						TableSlug: c.Param("table_slug"),
@@ -204,7 +204,7 @@ func (h *Handler) GetListV2(c *gin.Context) {
 				}
 			}
 
-			resp, err = services.BuilderService().ObjectBuilder().GetList2(
+			resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().GetList2(
 				context.Background(),
 				&obs.CommonMessage{
 					TableSlug: c.Param("table_slug"),
@@ -359,7 +359,7 @@ func (h *Handler) GetListSlimV2(c *gin.Context) {
 	} else {
 		h.log.Error("Error while getting redis while get list ", logger.Error(err))
 	}
-	resp, err := services.BuilderService().ObjectBuilder().GetListSlimV2(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().GetListSlimV2(
 		context.Background(),
 		&obs.CommonMessage{
 			TableSlug: c.Param("table_slug"),

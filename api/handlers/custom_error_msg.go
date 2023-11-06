@@ -71,7 +71,7 @@ func (h *Handler) CreateCustomErrorMessage(c *gin.Context) {
 	customErrorMessages.ProjectId = resource.ResourceEnvironmentId
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().CustomErrorMessage().Create(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).CustomErrorMessage().Create(
 			context.Background(),
 			&customErrorMessages,
 		)
@@ -150,7 +150,7 @@ func (h *Handler) GetByIdCustomErrorMessage(c *gin.Context) {
 	}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().CustomErrorMessage().GetById(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).CustomErrorMessage().GetById(
 			context.Background(),
 			&obs.CustomErrorMessagePK{
 				Id:        c.Param("id"),
@@ -236,7 +236,7 @@ func (h *Handler) GetAllCustomErrorMessage(c *gin.Context) {
 	}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().CustomErrorMessage().GetList(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).CustomErrorMessage().GetList(
 			context.Background(),
 			&obs.GetCustomErrorMessageListRequest{
 				TableId:   c.Query("table_id"),
@@ -327,7 +327,7 @@ func (h *Handler) UpdateCustomErrorMessage(c *gin.Context) {
 	customErrorMessages.ProjectId = resource.ResourceEnvironmentId
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().CustomErrorMessage().Update(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).CustomErrorMessage().Update(
 			context.Background(),
 			&customErrorMessages,
 		)
@@ -406,7 +406,7 @@ func (h *Handler) DeleteCustomErrorMessage(c *gin.Context) {
 	}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().CustomErrorMessage().Delete(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).CustomErrorMessage().Delete(
 			context.Background(),
 			&obs.CustomErrorMessagePK{
 				Id:        c.Param("id"),

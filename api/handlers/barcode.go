@@ -86,7 +86,7 @@ func (h *Handler) GetNewGeneratedBarCode(c *gin.Context) {
 	//	return
 	//}
 
-	resp, err := services.BuilderService().Barcode().Generate(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).Barcode().Generate(
 		context.Background(),
 		&obs.BarcodeGenerateReq{
 			TableSlug: tableSlug,
@@ -178,7 +178,7 @@ func (h *Handler) GetNewGeneratedCode(c *gin.Context) {
 	//	return
 	//}
 
-	resp, err := services.BuilderService().Barcode().GenerateCodeWithPrefix(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).Barcode().GenerateCodeWithPrefix(
 		context.Background(),
 		&obs.CodeGenerateReq{
 			TableSlug: tableSlug,

@@ -93,7 +93,7 @@ func (h *Handler) CreateEvent(c *gin.Context) {
 	//}
 	event.ProjectId = resource.ResourceEnvironmentId
 
-	resp, err := services.BuilderService().Event().Create(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).Event().Create(
 		context.Background(),
 		&event,
 	)
@@ -186,7 +186,7 @@ func (h *Handler) GetEventByID(c *gin.Context) {
 	//	return
 	//}
 
-	resp, err := services.BuilderService().Event().GetSingle(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).Event().GetSingle(
 		context.Background(),
 		&obs.EventPrimaryKey{
 			Id:        eventID,
@@ -274,7 +274,7 @@ func (h *Handler) GetAllEvents(c *gin.Context) {
 	//	return
 	//}
 
-	resp, err := services.BuilderService().Event().GetList(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).Event().GetList(
 		context.Background(),
 		&obs.GetEventsListRequest{
 			TableSlug: c.DefaultQuery("table_slug", ""),
@@ -372,7 +372,7 @@ func (h *Handler) UpdateEvent(c *gin.Context) {
 	//}
 	event.ProjectId = resource.ResourceEnvironmentId
 
-	resp, err := services.BuilderService().Event().Update(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).Event().Update(
 		context.Background(),
 		&event,
 	)
@@ -465,7 +465,7 @@ func (h *Handler) DeleteEvent(c *gin.Context) {
 	//	return
 	//}
 
-	resp, err := services.BuilderService().Event().Delete(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).Event().Delete(
 		context.Background(),
 		&obs.EventPrimaryKey{
 			Id:        eventID,

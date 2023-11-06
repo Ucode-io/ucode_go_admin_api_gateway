@@ -111,7 +111,7 @@ func (h *Handler) CreateFunction(c *gin.Context) {
 	// function.CommitId = commitID
 	// function.CommitGuid = commitGuid
 
-	resp, err := services.BuilderService().Function().Create(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).Function().Create(
 		context.Background(),
 		&obs.CreateFunctionRequest{
 			Path:        function.Path,
@@ -210,7 +210,7 @@ func (h *Handler) GetFunctionByID(c *gin.Context) {
 	//	return
 	//}
 
-	resp, err := services.BuilderService().Function().GetSingle(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).Function().GetSingle(
 		context.Background(),
 		&obs.FunctionPrimaryKey{
 			Id:        functionID,
@@ -305,7 +305,7 @@ func (h *Handler) GetAllFunctions(c *gin.Context) {
 	//	return
 	//}
 
-	resp, err := services.BuilderService().Function().GetList(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).Function().GetList(
 		context.Background(),
 		&obs.GetAllFunctionsRequest{
 			Search:    c.DefaultQuery("search", ""),
@@ -409,7 +409,7 @@ func (h *Handler) UpdateFunction(c *gin.Context) {
 	//	return
 	//}
 
-	resp, err := services.BuilderService().Function().Update(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).Function().Update(
 		context.Background(),
 		&obs.Function{
 			Id:          function.ID,
@@ -509,7 +509,7 @@ func (h *Handler) DeleteFunction(c *gin.Context) {
 	//	return
 	//}
 
-	resp, err := services.BuilderService().Function().Delete(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).Function().Delete(
 		context.Background(),
 		&obs.FunctionPrimaryKey{
 			Id:        functionID,
@@ -658,7 +658,7 @@ func (h *Handler) InvokeFunction(c *gin.Context) {
 		return
 	}
 	if c.Query("form_input") != "true" && c.Query("use_no_limit") != "true" {
-		_, err = services.BuilderService().CustomEvent().UpdateByFunctionId(
+		_, err = services.GetBuilderServiceByType(resource.NodeType).CustomEvent().UpdateByFunctionId(
 			context.Background(),
 			&obs.UpdateByFunctionIdRequest{
 				FunctionId: invokeFunction.FunctionID,

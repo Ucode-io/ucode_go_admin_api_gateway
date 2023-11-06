@@ -93,7 +93,7 @@ func (h *Handler) CreateHtmlTemplate(c *gin.Context) {
 	//}
 	htmlTemplate.ProjectId = resource.ResourceEnvironmentId
 
-	resp, err := services.BuilderService().HtmlTemplate().Create(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).HtmlTemplate().Create(
 		context.Background(),
 		&htmlTemplate,
 	)
@@ -185,7 +185,7 @@ func (h *Handler) GetSingleHtmlTemplate(c *gin.Context) {
 	//	return
 	//}
 
-	resp, err := services.BuilderService().HtmlTemplate().GetSingle(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).HtmlTemplate().GetSingle(
 		context.Background(),
 		&obs.HtmlTemplatePrimaryKey{
 			Id:        htmlTemplateID,
@@ -282,7 +282,7 @@ func (h *Handler) UpdateHtmlTemplate(c *gin.Context) {
 	//}
 	htmlTemplate.ProjectId = resource.ResourceEnvironmentId
 
-	resp, err := services.BuilderService().HtmlTemplate().Update(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).HtmlTemplate().Update(
 		context.Background(),
 		&htmlTemplate,
 	)
@@ -375,7 +375,7 @@ func (h *Handler) DeleteHtmlTemplate(c *gin.Context) {
 	//	return
 	//}
 
-	resp, err := services.BuilderService().HtmlTemplate().Delete(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).HtmlTemplate().Delete(
 		context.Background(),
 		&obs.HtmlTemplatePrimaryKey{
 			Id:        htmlTemplateID,
@@ -465,7 +465,7 @@ func (h *Handler) GetHtmlTemplateList(c *gin.Context) {
 	//	return
 	//}
 
-	resp, err := services.BuilderService().HtmlTemplate().GetList(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).HtmlTemplate().GetList(
 		context.Background(),
 		&obs.GetAllHtmlTemplateRequest{
 			TableSlug: c.Query("table_slug"),

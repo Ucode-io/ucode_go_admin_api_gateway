@@ -80,7 +80,7 @@ func (h *Handler) CopyProjectTemplate(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.BuilderService().ObjectBuilder().CopyFromProject(
+	resp, err := services.GetBuilderServiceByType(toResource.NodeType).ObjectBuilder().CopyFromProject(
 		context.Background(),
 		&obs.CopyFromProjectRequestMessage{
 			ProjectId:     toResource.ResourceEnvironmentId,

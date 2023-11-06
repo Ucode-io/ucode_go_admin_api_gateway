@@ -156,7 +156,7 @@ func (h *Handler) GetGlobalProjectTemplate(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().Menu().GetAll(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).Menu().GetAll(
 			context.Background(),
 			&obs.GetAllMenusRequest{
 				Limit:       int32(limit),

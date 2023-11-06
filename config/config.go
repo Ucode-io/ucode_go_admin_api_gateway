@@ -46,6 +46,9 @@ type Config struct {
 	ObjectBuilderServiceHost string
 	ObjectBuilderGRPCPort    string
 
+	HighObjectBuilderServiceHost string
+	HighObjectBuilderGRPCPort    string
+
 	TemplateServiceHost string
 	TemplateGRPCPort    string
 
@@ -177,6 +180,9 @@ func Load() Config {
 
 	config.ObjectBuilderServiceHost = cast.ToString(GetOrReturnDefaultValue("OBJECT_BUILDER_SERVICE_HOST", "localhost"))
 	config.ObjectBuilderGRPCPort = cast.ToString(GetOrReturnDefaultValue("OBJECT_BUILDER_GRPC_PORT", ":9102"))
+
+	config.HighObjectBuilderServiceHost = cast.ToString(GetOrReturnDefaultValue("OBJECT_BUILDER_SERVICE_HOST", "localhost"))
+	config.HighObjectBuilderGRPCPort = cast.ToString(GetOrReturnDefaultValue("OBJECT_BUILDER_GRPC_PORT", ":9109"))
 
 	config.TemplateServiceHost = cast.ToString(GetOrReturnDefaultValue("TEMPLATE_SERVICE_HOST", "localhost"))
 	config.TemplateGRPCPort = cast.ToString(GetOrReturnDefaultValue("TEMPLATE_GRPC_PORT", ":9119"))

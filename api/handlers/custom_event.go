@@ -109,7 +109,7 @@ func (h *Handler) CreateCustomEvent(c *gin.Context) {
 	// }
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().CustomEvent().Create(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).CustomEvent().Create(
 			context.Background(),
 			&obs.CreateCustomEventRequest{
 				TableSlug:  customevent.TableSlug,
@@ -127,7 +127,7 @@ func (h *Handler) CreateCustomEvent(c *gin.Context) {
 			},
 		)
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.BuilderService().CustomEvent().Create(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).CustomEvent().Create(
 			context.Background(),
 			&obs.CreateCustomEventRequest{
 				TableSlug:  customevent.TableSlug,
@@ -234,7 +234,7 @@ func (h *Handler) GetCustomEventByID(c *gin.Context) {
 	//	return
 	//}
 
-	resp, err := services.BuilderService().CustomEvent().GetSingle(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).CustomEvent().GetSingle(
 		context.Background(),
 		&obs.CustomEventPrimaryKey{
 			Id:        customeventID,
@@ -324,7 +324,7 @@ func (h *Handler) GetAllCustomEvents(c *gin.Context) {
 	//}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().CustomEvent().GetList(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).CustomEvent().GetList(
 			context.Background(),
 			&obs.GetCustomEventsListRequest{
 				TableSlug: c.DefaultQuery("table_slug", ""),
@@ -442,7 +442,7 @@ func (h *Handler) UpdateCustomEvent(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.BuilderService().CustomEvent().Update(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).CustomEvent().Update(
 		context.Background(),
 		&obs.CustomEvent{
 			Id:         customevent.Id,
@@ -546,7 +546,7 @@ func (h *Handler) DeleteCustomEvent(c *gin.Context) {
 	//	return
 	//}
 
-	resp, err := services.BuilderService().CustomEvent().Delete(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).CustomEvent().Delete(
 		context.Background(),
 		&obs.CustomEventPrimaryKey{
 			Id:        customeventID,

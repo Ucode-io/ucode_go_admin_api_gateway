@@ -107,7 +107,7 @@ func (h *Handler) CreateRelation(c *gin.Context) {
 	// relation.CommitGuid = commitGuid
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().Relation().Create(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).Relation().Create(
 			context.Background(),
 			&relation,
 		)
@@ -220,7 +220,7 @@ func (h *Handler) GetAllRelations(c *gin.Context) {
 	//}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().Relation().GetAll(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).Relation().GetAll(
 			context.Background(),
 			&obs.GetAllRelationsRequest{
 				Limit:     int32(limit),
@@ -342,7 +342,7 @@ func (h *Handler) UpdateRelation(c *gin.Context) {
 	relation.ProjectId = resource.ResourceEnvironmentId
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().Relation().Update(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).Relation().Update(
 			context.Background(),
 			&relation,
 		)
@@ -450,7 +450,7 @@ func (h *Handler) DeleteRelation(c *gin.Context) {
 	//}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().Relation().Delete(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).Relation().Delete(
 			context.Background(),
 			&obs.RelationPrimaryKey{
 				Id:        relationID,
@@ -557,7 +557,7 @@ func (h *Handler) GetRelationCascaders(c *gin.Context) {
 	//}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().Cascading().GetCascadings(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).Cascading().GetCascadings(
 			context.Background(),
 			&obs.GetCascadingRequest{
 				TableSlug: c.Param("table_slug"),

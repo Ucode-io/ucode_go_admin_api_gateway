@@ -46,6 +46,7 @@ message Resource {
     bool is_configured = 5;
     string vault_path = 6;
     string project_id = 7;
+    string node_type = 8;
 }
 
 message Environment {
@@ -94,6 +95,7 @@ message ResourceEnvironment {
     string username = 11;
     string database = 12;
     bool default = 13;
+    string node_type = 14;
 }
 
 message Empty {

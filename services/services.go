@@ -2,11 +2,13 @@ package services
 
 import (
 	"context"
+	"fmt"
 	"ucode/ucode_go_api_gateway/config"
 )
 
 type ServiceManagerI interface {
 	BuilderService() BuilderServiceI
+	HighBuilderService() BuilderServiceI
 	AuthService() AuthServiceI
 	CompanyService() CompanyServiceI
 	AnalyticsService() AnalyticsServiceI
@@ -24,10 +26,12 @@ type ServiceManagerI interface {
 	NotificationService() NotificationServiceI
 	PostgresBuilderService() PostgresBuilderServiceI
 	ConvertTemplateService() ConvertTemplateServiceI
+	GetBuilderServiceByType(nodeType string) BuilderServiceI
 }
 
 type grpcClients struct {
 	builderService           BuilderServiceI
+	highBuilderService       BuilderServiceI
 	authService              AuthServiceI
 	companyService           CompanyServiceI
 	analyticsService         AnalyticsServiceI
@@ -49,6 +53,11 @@ type grpcClients struct {
 
 func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, error) {
 	builderServiceClient, err := NewBuilderServiceClient(ctx, cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	highBuilderServiceClient, err := NewHighBuilderServiceClient(ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -139,6 +148,7 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 		analyticsService:         analyticsServiceClient,
 		authService:              authServiceClient,
 		builderService:           builderServiceClient,
+		highBuilderService:       highBuilderServiceClient,
 		posService:               posServiceClient,
 		smsService:               smsServiceClient,
 		companyService:           companyServiceClient,
@@ -156,9 +166,26 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 	}, nil
 }
 
+func (g grpcClients) GetBuilderServiceByType(nodeType string) BuilderServiceI {
+	switch nodeType {
+	case config.LOW_NODE_TYPE:
+		return g.builderService
+	case config.HIGH_NODE_TYPE:
+		return g.highBuilderService
+	}
+
+	fmt.Println("!!!Warning get default low type object builder service")
+	return g.builderService
+}
+
 func (g grpcClients) BuilderService() BuilderServiceI {
 	return g.builderService
 }
+
+func (g grpcClients) HighBuilderService() BuilderServiceI {
+	return g.highBuilderService
+}
+
 func (g grpcClients) ChatService() ChatServiceI {
 	return g.chatService
 }

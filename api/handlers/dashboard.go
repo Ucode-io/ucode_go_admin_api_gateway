@@ -109,7 +109,7 @@ func (h *Handler) CreateDashboard(c *gin.Context) {
 	// dashboard.CommitId = commitID
 	// dashboard.CommitGuid = commitGuid
 
-	resp, err := services.BuilderService().Dashboard().Create(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).Dashboard().Create(
 		context.Background(),
 		&dashboard,
 	)
@@ -202,7 +202,7 @@ func (h *Handler) GetSingleDashboard(c *gin.Context) {
 	//	return
 	//}
 
-	resp, err := services.BuilderService().Dashboard().GetSingle(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).Dashboard().GetSingle(
 		context.Background(),
 		&obs.DashboardPrimaryKey{
 			Id:        dashboardID,
@@ -299,7 +299,7 @@ func (h *Handler) UpdateDashboard(c *gin.Context) {
 	//}
 	dashboard.ProjectId = resource.ResourceEnvironmentId
 
-	resp, err := services.BuilderService().Dashboard().Update(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).Dashboard().Update(
 		context.Background(),
 		&dashboard,
 	)
@@ -392,7 +392,7 @@ func (h *Handler) DeleteDashboard(c *gin.Context) {
 	//	return
 	//}
 
-	resp, err := services.BuilderService().Dashboard().Delete(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).Dashboard().Delete(
 		context.Background(),
 		&obs.DashboardPrimaryKey{
 			Id:        dashboardID,
@@ -481,7 +481,7 @@ func (h *Handler) GetAllDashboards(c *gin.Context) {
 	//	return
 	//}
 
-	resp, err := services.BuilderService().Dashboard().GetList(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).Dashboard().GetList(
 		context.Background(),
 		&obs.GetAllDashboardsRequest{
 			Name:      c.Query("name"),

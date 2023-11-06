@@ -892,7 +892,7 @@ func (h *Handler) InvokeFunctionByPath(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, errStr)
 		return
 	}
-	// _, err = services.BuilderService().CustomEvent().UpdateByFunctionId(
+	// _, err = services.GetBuilderServiceByType(resource.NodeType).CustomEvent().UpdateByFunctionId(
 	// 	context.Background(),
 	// 	&obs.UpdateByFunctionIdRequest{
 	// 		FunctionId: invokeFunction.FunctionID,

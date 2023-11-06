@@ -15,11 +15,11 @@ import (
 )
 
 type DoInvokeFuntionStruct struct {
-	CustomEvents          []*obs.CustomEvent
-	IDs                   []string
-	TableSlug             string
-	ObjectData            map[string]interface{}
-	Method                string
+	CustomEvents           []*obs.CustomEvent
+	IDs                    []string
+	TableSlug              string
+	ObjectData             map[string]interface{}
+	Method                 string
 	ObjectDataBeforeUpdate map[string]interface{}
 }
 
@@ -82,7 +82,7 @@ func GetListCustomEvents(tableSlug, roleId, method string, c *gin.Context, h *Ha
 	//}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		res, err = services.BuilderService().CustomEvent().GetList(
+		res, err = services.GetBuilderServiceByType(resource.NodeType).CustomEvent().GetList(
 			context.Background(),
 			&obs.GetCustomEventsListRequest{
 				TableSlug: tableSlug,
@@ -226,7 +226,7 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *Handler) 
 			}
 			return customEvent.GetFunctions()[0].Name, errors.New(errStr)
 		}
-		// _, err = services.BuilderService().CustomEvent().UpdateByFunctionId(context.Background(), &obs.UpdateByFunctionIdRequest{
+		// _, err = services.GetBuilderServiceByType(resource.NodeType).CustomEvent().UpdateByFunctionId(context.Background(), &obs.UpdateByFunctionIdRequest{
 		// 	FunctionId: customEvent.Functions[0].Id,
 		// 	ObjectIds:  request.IDs,
 		// 	FieldSlug:  customEvent.Functions[0].Path + "_disable",

@@ -102,7 +102,7 @@ func (h *Handler) CreateVariable(c *gin.Context) {
 	// variable.CommitId = commitID
 	// variable.CommitGuid = commitGuid
 
-	resp, err := services.BuilderService().Variable().Create(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).Variable().Create(
 		context.Background(),
 		&variable,
 	)
@@ -195,7 +195,7 @@ func (h *Handler) GetSingleVariable(c *gin.Context) {
 	//	return
 	//}
 
-	resp, err := services.BuilderService().Variable().GetSingle(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).Variable().GetSingle(
 		context.Background(),
 		&obs.VariablePrimaryKey{
 			Id:        variableID,
@@ -292,7 +292,7 @@ func (h *Handler) UpdateVariable(c *gin.Context) {
 	//}
 	variable.ProjectId = resource.ResourceEnvironmentId
 
-	resp, err := services.BuilderService().Variable().Update(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).Variable().Update(
 		context.Background(),
 		&variable,
 	)
@@ -380,7 +380,7 @@ func (h *Handler) DeleteVariable(c *gin.Context) {
 	//	h.handleResponse(c, status_http.GRPCError, err.Error())
 	//	return
 	//}
-	resp, err := services.BuilderService().Variable().Delete(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).Variable().Delete(
 		context.Background(),
 		&obs.VariablePrimaryKey{
 			Id:        variableID,
@@ -465,7 +465,7 @@ func (h *Handler) GetAllVariables(c *gin.Context) {
 	//	h.handleResponse(c, status_http.GRPCError, err.Error())
 	//	return
 	//}
-	resp, err := services.BuilderService().Variable().GetList(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).Variable().GetList(
 		context.Background(),
 		&obs.GetAllVariablesRequest{
 			Slug:        c.Query("slug"),

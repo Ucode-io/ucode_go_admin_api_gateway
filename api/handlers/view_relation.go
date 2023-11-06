@@ -96,7 +96,7 @@ func (h *Handler) GetViewRelation(c *gin.Context) {
 	var resp *obs.GetViewRelationResponse
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().Section().GetViewRelation(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).Section().GetViewRelation(
 			context.Background(),
 			&obs.GetAllSectionsRequest{
 				TableId:   c.Query("table_id"),
@@ -220,7 +220,7 @@ func (h *Handler) UpsertViewRelations(c *gin.Context) {
 	var resp *emptypb.Empty
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		// resp, err = services.BuilderService().Section().UpsertViewRelations(
+		// resp, err = services.GetBuilderServiceByType(resource.NodeType).Section().UpsertViewRelations(
 		// 	context.Background(),
 		// 	&viewRelation,
 		// )

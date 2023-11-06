@@ -97,7 +97,7 @@ type NewRequestBody struct {
 	Data map[string]interface{} `json:"data,omitempty"`
 }
 
-func (h *Handler) DynamicReportHelper(requestData NewRequestBody, services services.ServiceManagerI, resourceEnvironmentId string) (Response, error) {
+func (h *Handler) DynamicReportHelper(requestData NewRequestBody, services services.ServiceManagerI, resourceEnvironmentId string, nodeType string) (Response, error) {
 
 	var (
 		response Response
