@@ -17,6 +17,7 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
+	"google.golang.org/grpc/status"
 )
 
 // GetListV2 godoc
@@ -243,6 +244,149 @@ func (h *Handler) GetListV2(c *gin.Context) {
 		}
 	}
 
+	statusHttp.CustomMessage = resp.GetCustomMessage()
+	h.handleResponse(c, statusHttp, resp)
+}
+
+// GetListSlimV2 godoc
+// @Security ApiKeyAuth
+// @ID get_list_objects_slim_v2
+// @Router /v2/object-slim/get-list/{table_slug} [GET]
+// @Summary Get all objects slim v2
+// @Description Get all objects slim v2
+// @Tags Object
+// @Accept json
+// @Produce json
+// @Param table_slug path string true "table_slug"
+// @Param limit query number false "limit"
+// @Param offset query number false "offset"
+// @Param data query string false "data"
+// @Success 200 {object} status_http.Response{data=models.CommonMessage} "ObjectBody"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *Handler) GetListSlimV2(c *gin.Context) {
+	var (
+		objectRequest models.CommonMessage
+		queryData     string
+		statusHttp    = status_http.GrpcStatusToHTTP["Ok"]
+	)
+	queryParams := c.Request.URL.Query()
+	if ok := queryParams.Has("data"); ok {
+		queryData = queryParams.Get("data")
+	}
+
+	queryMap := make(map[string]interface{})
+	err := json.Unmarshal([]byte(queryData), &queryMap)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	offset, err := h.getOffsetParam(c)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
+	limit, err := h.getLimitParam(c)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+	queryMap["limit"] = limit
+	queryMap["offset"] = offset
+
+	objectRequest.Data = queryMap
+	tokenInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err.Error())
+		return
+	}
+	objectRequest.Data["tables"] = tokenInfo.GetTables()
+	objectRequest.Data["user_id_from_token"] = tokenInfo.GetUserId()
+	objectRequest.Data["role_id_from_token"] = tokenInfo.GetRoleId()
+	objectRequest.Data["client_type_id_from_token"] = tokenInfo.GetClientTypeId()
+	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))))
+	if err == nil {
+		resp := make(map[string]interface{})
+		m := make(map[string]interface{})
+		err = json.Unmarshal([]byte(redisResp), &m)
+		if err != nil {
+			h.log.Error("Error while unmarshal redis", logger.Error(err))
+		} else {
+			resp["data"] = m
+			h.handleResponse(c, status_http.OK, resp)
+			return
+		}
+	} else {
+		h.log.Error("Error while getting redis while get list ", logger.Error(err))
+	}
+	resp, err := services.BuilderService().ObjectBuilder().GetListSlimV2(
+		context.Background(),
+		&obs.CommonMessage{
+			TableSlug: c.Param("table_slug"),
+			Data:      structData,
+			ProjectId: resource.ResourceEnvironmentId,
+		},
+	)
+	if err != nil {
+		statusHttp = status_http.GrpcStatusToHTTP["Internal"]
+		stat, ok := status.FromError(err)
+		if ok {
+			statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
+			statusHttp.CustomMessage = stat.Message()
+		}
+		h.handleResponse(c, statusHttp, err.Error())
+		return
+	}
+
+	if err == nil {
+		if resp.IsCached {
+			jsonData, _ := resp.GetData().MarshalJSON()
+			err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second)
+			if err != nil {
+				h.log.Error("Error while setting redis", logger.Error(err))
+			}
+		}
+	}
 	statusHttp.CustomMessage = resp.GetCustomMessage()
 	h.handleResponse(c, statusHttp, resp)
 }

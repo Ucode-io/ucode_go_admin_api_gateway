@@ -13,6 +13,7 @@ service ObjectBuilderService {
     rpc GetList2(CommonMessage) returns (CommonMessage) {}
     rpc GetSingleSlim(CommonMessage) returns (CommonMessage) {}
     rpc GetListSlim(CommonMessage) returns (CommonMessage) {}
+    rpc GetListSlimV2(CommonMessage) returns (CommonMessage) {}
     rpc GetRecursiveList(CommonMessage) returns (CommonMessage) {}
     rpc Update(CommonMessage) returns (CommonMessage) {}
     rpc Delete(CommonMessage) returns (CommonMessage) {}

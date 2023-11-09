@@ -9,6 +9,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
+	tmp "ucode/ucode_go_api_gateway/genproto/template_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
 	"ucode/ucode_go_api_gateway/services"
@@ -429,6 +430,7 @@ func (h *Handler) UpdateMenu(c *gin.Context) {
 				MicrofrontendId: menu.MicrofrontendId,
 				WebpageId:       menu.WebpageId,
 				Attributes:      attributes,
+				IsVisible:       menu.IsVisible,
 			},
 		)
 
@@ -516,6 +518,31 @@ func (h *Handler) DeleteMenu(c *gin.Context) {
 	}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
+
+		oldMenu, err := services.BuilderService().Menu().GetByID(
+			context.Background(),
+			&obs.MenuPrimaryKey{
+				Id:        menuID,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		if oldMenu.Type == "WIKI" {
+			_, err = services.TemplateService().Note().DeleteNote(
+				context.Background(),
+				&tmp.DeleteNoteReq{
+					Id:         oldMenu.WikiId,
+					ProjectId:  projectId.(string),
+					ResourceId: resource.ResourceEnvironmentId,
+					VersionId:  "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
+				},
+			)
+		}
+
 		resp, err = services.BuilderService().Menu().Delete(
 			context.Background(),
 			&obs.MenuPrimaryKey{
@@ -1556,4 +1583,91 @@ func (h *Handler) DeleteMenuTemplate(c *gin.Context) {
 	}
 
 	h.handleResponse(c, status_http.NoContent, resp)
+}
+
+// GetAllMenus godoc
+// @ID get_wiki_folder
+// @Router /menu/wiki_folder [GET]
+// @Summary Get wiki folder
+// @Description Get wiki folder
+// @Tags Menu
+// @Accept json
+// @Produce json
+// @Param filters query obs.GetWikiFolderRequest true "filters"
+// @Success 200 {object} status_http.Response{data=obs.GetAllMenusResponse} "MenuBody"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *Handler) GetWikiFolder(c *gin.Context) {
+
+	offset, err := h.getOffsetParam(c)
+	var (
+		resp *obs.GetAllMenusResponse
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
+	limit, err := h.getLimitParam(c)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	projectId := c.DefaultQuery("project_id", "")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId := c.DefaultQuery("environment_id", "")
+	if !util.IsValidUUID(environmentId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId,
+			EnvironmentId: environmentId,
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+	// authInfo, _ := h.GetAuthInfo(c)
+	limit = 100
+
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = services.BuilderService().Menu().GetWikiFolder(
+			context.Background(),
+			&obs.GetWikiFolderRequest{
+				ProjectId: resource.ResourceEnvironmentId,
+				ParentId:  c.DefaultQuery("parent_id", ""),
+				IsVisible: true,
+			},
+		)
+	case pb.ResourceType_POSTGRESQL:
+		resp, err = services.PostgresBuilderService().Menu().GetAll(
+			context.Background(),
+			&obs.GetAllMenusRequest{
+				Limit:     int32(limit),
+				Offset:    int32(offset),
+				Search:    c.DefaultQuery("search", ""),
+				ProjectId: resource.ResourceEnvironmentId,
+				ParentId:  c.DefaultQuery("parent_id", ""),
+			},
+		)
+	}
+	h.handleResponse(c, status_http.OK, resp)
 }

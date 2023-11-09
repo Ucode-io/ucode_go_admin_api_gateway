@@ -69,6 +69,7 @@ message GetAllFunctionsResponse {
 message FunctionPrimaryKey {
     string id = 1;
     string project_id = 2;
+    string path = 3;
 }
 
 message UpdateManyUrlAndPassword {

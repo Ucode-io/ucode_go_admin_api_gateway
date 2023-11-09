@@ -41,12 +41,12 @@ func DoRequest(url string, method string, body interface{}) (responseModel model
 	if err != nil {
 		return
 	}
-	fmt.Println("\n\ncheck do::", string(respByte))
+	// fmt.Println("\n\ncheck do::", string(respByte))
 
 	err = json.Unmarshal(respByte, &responseModel)
 	if err != nil {
 	}
-	fmt.Println("responseModel", responseModel)
+	// fmt.Println("responseModel", responseModel)
 
 	return
 }
