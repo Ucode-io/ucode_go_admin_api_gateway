@@ -431,6 +431,7 @@ func (h *Handler) UpdateMenu(c *gin.Context) {
 				WebpageId:       menu.WebpageId,
 				Attributes:      attributes,
 				IsVisible:       menu.IsVisible,
+				WikiId:          menu.WikiId,
 			},
 		)
 
