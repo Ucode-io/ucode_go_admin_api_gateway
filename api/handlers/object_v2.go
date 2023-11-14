@@ -75,18 +75,15 @@ func (h *Handler) GetListV2(c *gin.Context) {
 		return
 	}
 
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	defer cancel()
 
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
+	service, conn, err := services.BuilderService().ObjectBuilderConnPool(ctx)
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err)
+		return
+	}
+	defer conn.Close()
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -114,18 +111,6 @@ func (h *Handler) GetListV2(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
 	if viewId, ok := objectRequest.Data["builder_service_view_id"].(string); ok {
 		if util.IsValidUUID(viewId) {
 			switch resource.ResourceType {
@@ -145,7 +130,7 @@ func (h *Handler) GetListV2(c *gin.Context) {
 					}
 				}
 
-				resp, err = services.BuilderService().ObjectBuilder().GroupByColumns(
+				resp, err = service.GroupByColumns(
 					context.Background(),
 					&obs.CommonMessage{
 						TableSlug: c.Param("table_slug"),
@@ -204,7 +189,7 @@ func (h *Handler) GetListV2(c *gin.Context) {
 				}
 			}
 
-			resp, err = services.BuilderService().ObjectBuilder().GetList2(
+			resp, err = service.GetList2(
 				context.Background(),
 				&obs.CommonMessage{
 					TableSlug: c.Param("table_slug"),
@@ -318,6 +303,17 @@ func (h *Handler) GetListSlimV2(c *gin.Context) {
 		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	defer cancel()
+
+	service, conn, err := services.BuilderService().ObjectBuilderConnPool(ctx)
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err)
+		return
+	}
+	defer conn.Close()
+
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -359,7 +355,7 @@ func (h *Handler) GetListSlimV2(c *gin.Context) {
 	} else {
 		h.log.Error("Error while getting redis while get list ", logger.Error(err))
 	}
-	resp, err := services.BuilderService().ObjectBuilder().GetListSlimV2(
+	resp, err := service.GetListSlimV2(
 		context.Background(),
 		&obs.CommonMessage{
 			TableSlug: c.Param("table_slug"),
