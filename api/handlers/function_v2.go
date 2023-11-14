@@ -1048,19 +1048,19 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 	if isOwnData, ok := resp.Attributes["is_own_data"].(bool); ok {
 		// fmt.Println("\n Run func test 8", "\n")
 		if isOwnData {
-			if _, ok := resp.Data["code"]; ok {
-
-				if err == nil && c.Request.Method == "GET" && resource.ProjectId == "1acd7a8f-a038-4e07-91cb-b689c368d855" {
-					jsonData, _ := json.Marshal(resp.Data)
-					err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("ett-%s-%s-%s", requestData.Path, requestData.Params.Encode(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second)
-					if err != nil {
-						h.log.Error("Error while setting redis", logger.Error(err))
-					}
+			if err == nil && c.Request.Method == "GET" && resource.ProjectId == "1acd7a8f-a038-4e07-91cb-b689c368d855" {
+				jsonData, _ := json.Marshal(resp.Data)
+				err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("ett-%s-%s-%s", requestData.Path, requestData.Params.Encode(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second)
+				if err != nil {
+					h.log.Error("Error while setting redis", logger.Error(err))
 				}
+			}
 
+			if _, ok := resp.Data["code"]; ok {
 				c.JSON(cast.ToInt(resp.Data["code"]), resp.Data)
 				return
 			}
+
 			c.JSON(200, resp.Data)
 			return
 		}
