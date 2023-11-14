@@ -35,7 +35,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 	r.POST("/verify-email/:sms_id/:otp", h.VerifyEmail)
 	r.POST("/register-email-otp/:table_slug", h.RegisterEmailOtp)
 	r.GET("/v1/login-microfront", h.GetLoginMicroFrontBySubdomain)
-	r.GET("/v3/note/note-id", h.GetSingleNoteWithoutToken)
+	r.GET("/v3/note/:note-id", h.GetSingleNoteWithoutToken)
 
 	r.GET("/menu/wiki_folder", h.GetWikiFolder)
 
