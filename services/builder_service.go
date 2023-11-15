@@ -74,7 +74,7 @@ func NewBuilderServiceClient(ctx context.Context, cfg config.Config) (BuilderSer
 		return conn, err
 	}
 
-	objectbuilderServicePool, err := grpcpool.New(factory, 5, 5, time.Second)
+	objectbuilderServicePool, err := grpcpool.New(factory, 3, 3, time.Second)
 	if err != nil {
 		fmt.Printf("Failed to create gRPC pool: %v\n", err)
 		return nil, err
