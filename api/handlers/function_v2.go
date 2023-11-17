@@ -1002,6 +1002,7 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 	requestData.Body = bodyReq
 
 	if c.Request.Method == "GET" && resource.ProjectId == "1acd7a8f-a038-4e07-91cb-b689c368d855" {
+		fmt.Println("ETT Cache:", fmt.Sprintf("ett-%s-%s-%s", requestData.Path, requestData.Params.Encode(), resource.ResourceEnvironmentId))
 		redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("ett-%s-%s-%s", requestData.Path, requestData.Params.Encode(), resource.ResourceEnvironmentId))))
 		if err == nil {
 			resp := make(map[string]interface{})

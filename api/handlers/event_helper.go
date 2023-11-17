@@ -15,11 +15,11 @@ import (
 )
 
 type DoInvokeFuntionStruct struct {
-	CustomEvents          []*obs.CustomEvent
-	IDs                   []string
-	TableSlug             string
-	ObjectData            map[string]interface{}
-	Method                string
+	CustomEvents           []*obs.CustomEvent
+	IDs                    []string
+	TableSlug              string
+	ObjectData             map[string]interface{}
+	Method                 string
 	ObjectDataBeforeUpdate map[string]interface{}
 }
 
