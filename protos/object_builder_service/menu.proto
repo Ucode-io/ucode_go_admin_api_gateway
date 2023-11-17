@@ -141,6 +141,7 @@ message Menu {
     google.protobuf.Struct attributes = 12;
     string wiki_id = 13;
     bool is_visible = 14;
+    bool is_static = 15;
 }
 
 message MenuForGetAll {
@@ -159,6 +160,7 @@ message MenuForGetAll {
     string report_setting_id = 13;
     string pivot_template_id = 15;
     string wiki_id = 16;
+    bool is_static = 17;
 }
 
 message GetAllMenusResponse {

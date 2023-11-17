@@ -141,6 +141,7 @@ message CreateResourceReq {
     string company_id = 3;
     string user_id = 4;
     string environment_id = 5;
+    string node_type = 6;
 }
 
 message CreateResourceRes {
@@ -148,6 +149,7 @@ message CreateResourceRes {
     ServiceType service_type = 2;
     ResourceType resource_type = 3;
     string company_id = 4;
+    string node_type = 5;
 }
 
 message SetDefaultResourceReq {
@@ -249,6 +251,7 @@ message UpdateResourceRequest {
     bool is_configured = 6;
     Resource.Credentials credentials = 7;
     bool default = 8;
+    string node_type = 9;
 }
 
 message UpdateResourceResponse {
@@ -314,4 +317,5 @@ message ResourceEnvironmentWithPassword {
     string resource_id = 8;
     string environment_id = 9;
     string version_id = 10;
+    string node_type = 11;
 }
