@@ -31,6 +31,7 @@ func (h *Handler) GetTablePermission(c *gin.Context) {
 		resp                  *obs.GetPermissionsByTableSlugResponse
 		resourceEnvironmentId string
 		resourceType          pb.ResourceType
+		nodeType              string
 	)
 
 	namespace := c.GetString("namespace")
@@ -70,7 +71,8 @@ func (h *Handler) GetTablePermission(c *gin.Context) {
 		}
 
 		resourceEnvironmentId = resource.ResourceEnvironmentId
-		resourceType = resource.ResourceType
+		resourceEnvironmentId = resource.ResourceEnvironmentId
+		nodeType = resource.NodeType
 	} else {
 		resourceEnvironment, err := services.CompanyService().Resource().GetResourceEnvironment(
 			c.Request.Context(),
@@ -86,12 +88,13 @@ func (h *Handler) GetTablePermission(c *gin.Context) {
 
 		resourceEnvironmentId = resourceEnvironment.GetId()
 		resourceType = pb.ResourceType(resourceEnvironment.ResourceType)
+		nodeType = resourceEnvironment.GetNodeType()
 	}
 	authInfo, _ := h.GetAuthInfo(c)
 
 	switch resourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().Permission().GetPermissionsByTableSlug(
+		resp, err = services.GetBuilderServiceByType(nodeType).Permission().GetPermissionsByTableSlug(
 			context.Background(),
 			&obs.GetPermissionsByTableSlugRequest{
 				ProjectId:     resourceEnvironmentId,
@@ -145,6 +148,7 @@ func (h *Handler) UpdateTablePermission(c *gin.Context) {
 		resp                  *emptypb.Empty
 		resourceEnvironmentId string
 		resourceType          pb.ResourceType
+		nodeType              string
 	)
 
 	err := c.ShouldBindJSON(&tablePermission)
@@ -191,6 +195,7 @@ func (h *Handler) UpdateTablePermission(c *gin.Context) {
 
 		resourceEnvironmentId = resource.ResourceEnvironmentId
 		resourceType = resource.ResourceType
+		nodeType = resource.NodeType
 	} else {
 		resourceEnvironment, err := services.CompanyService().Resource().GetResourceEnvironment(
 			c.Request.Context(),
@@ -206,12 +211,13 @@ func (h *Handler) UpdateTablePermission(c *gin.Context) {
 
 		resourceEnvironmentId = resourceEnvironment.GetId()
 		resourceType = pb.ResourceType(resourceEnvironment.ResourceType)
+		nodeType = resourceEnvironment.GetNodeType()
 	}
 
 	tablePermission.ProjectId = resourceEnvironmentId
 	switch resourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().Permission().UpdatePermissionsByTableSlug(
+		resp, err = services.GetBuilderServiceByType(nodeType).Permission().UpdatePermissionsByTableSlug(
 			context.Background(),
 			&tablePermission,
 		)

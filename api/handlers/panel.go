@@ -95,7 +95,7 @@ func (h *Handler) UpdateCoordinates(c *gin.Context) {
 	//}
 	panelCoordinates.ProjectId = resource.ResourceEnvironmentId
 
-	resp, err := services.BuilderService().Panel().UpdateCoordinates(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).Panel().UpdateCoordinates(
 		context.Background(),
 		&panelCoordinates,
 	)
@@ -188,7 +188,7 @@ func (h *Handler) GetSinglePanel(c *gin.Context) {
 	//	return
 	//}
 
-	resp, err := services.BuilderService().Panel().GetSingle(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).Panel().GetSingle(
 		context.Background(),
 		&obs.PanelPrimaryKey{
 			Id:        panelID,
@@ -309,7 +309,7 @@ func (h *Handler) CreatePanel(c *gin.Context) {
 	// panel.CommitId = commitID
 	// panel.CommitGuid = commitGuid
 
-	resp, err := services.BuilderService().Panel().Create(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).Panel().Create(
 		context.Background(),
 		&panel,
 	)
@@ -396,7 +396,7 @@ func (h *Handler) GetAllPanels(c *gin.Context) {
 	//	return
 	//}
 
-	resp, err := services.BuilderService().Panel().GetList(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).Panel().GetList(
 		context.Background(),
 		&obs.GetAllPanelsRequest{
 			Title:     c.DefaultQuery("title", ""),
@@ -511,7 +511,7 @@ func (h *Handler) UpdatePanel(c *gin.Context) {
 	//}
 	panel.ProjectId = resource.ResourceEnvironmentId
 
-	resp, err := services.BuilderService().Panel().Update(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).Panel().Update(
 		context.Background(),
 		&panel,
 	)
@@ -604,7 +604,7 @@ func (h *Handler) DeletePanel(c *gin.Context) {
 	//	return
 	//}
 
-	resp, err := services.BuilderService().Panel().Delete(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).Panel().Delete(
 		context.Background(),
 		&obs.PanelPrimaryKey{
 			Id:        panelID,

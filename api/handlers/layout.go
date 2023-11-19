@@ -58,6 +58,7 @@ func (h *Handler) GetListLayouts(c *gin.Context) {
 	}
 
 	var resourceEnvironmentId string
+	var nodeType string
 	if !resourceIdOk {
 		resource, err := services.CompanyService().ServiceResource().GetSingle(
 			c.Request.Context(),
@@ -73,6 +74,7 @@ func (h *Handler) GetListLayouts(c *gin.Context) {
 		}
 
 		resourceEnvironmentId = resource.ResourceEnvironmentId
+		nodeType = resource.NodeType
 	} else {
 		resourceEnvironment, err := services.CompanyService().Resource().GetResourceEnvironment(
 			c.Request.Context(),
@@ -87,6 +89,7 @@ func (h *Handler) GetListLayouts(c *gin.Context) {
 		}
 
 		resourceEnvironmentId = resourceEnvironment.GetId()
+		nodeType = resourceEnvironment.NodeType
 	}
 	var isDefault = false
 	var languageSettings = ""
@@ -98,14 +101,14 @@ func (h *Handler) GetListLayouts(c *gin.Context) {
 	}
 	authInfo, _ := h.GetAuthInfo(c)
 
-	resp, err := services.BuilderService().Layout().GetAll(
+	resp, err := services.GetBuilderServiceByType(nodeType).Layout().GetAll(
 		context.Background(),
 		&object_builder_service.GetListLayoutRequest{
-			TableSlug: tableSlug,
-			TableId:   tableId,
-			ProjectId: resourceEnvironmentId,
-			IsDefualt: isDefault,
-			RoleId:    authInfo.GetRoleId(),
+			TableSlug:       tableSlug,
+			TableId:         tableId,
+			ProjectId:       resourceEnvironmentId,
+			IsDefualt:       isDefault,
+			RoleId:          authInfo.GetRoleId(),
 			LanguageSetting: languageSettings,
 		},
 	)
@@ -167,6 +170,7 @@ func (h *Handler) UpdateLayout(c *gin.Context) {
 	}
 
 	var resourceEnvironmentId string
+	var nodeType string
 	if !resourceIdOk {
 		resource, err := services.CompanyService().ServiceResource().GetSingle(
 			c.Request.Context(),
@@ -182,6 +186,7 @@ func (h *Handler) UpdateLayout(c *gin.Context) {
 		}
 
 		resourceEnvironmentId = resource.ResourceEnvironmentId
+		nodeType = resource.NodeType
 	} else {
 		resourceEnvironment, err := services.CompanyService().Resource().GetResourceEnvironment(
 			c.Request.Context(),
@@ -196,10 +201,11 @@ func (h *Handler) UpdateLayout(c *gin.Context) {
 		}
 
 		resourceEnvironmentId = resourceEnvironment.GetId()
+		nodeType = resourceEnvironment.GetNodeType()
 	}
 
 	input.ProjectId = resourceEnvironmentId
-	resp, err := services.BuilderService().Layout().Update(
+	resp, err := services.GetBuilderServiceByType(nodeType).Layout().Update(
 		context.Background(),
 		&input,
 	)

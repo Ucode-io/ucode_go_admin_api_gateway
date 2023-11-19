@@ -92,7 +92,7 @@ func (h *Handler) ExcelReader(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		res, err = services.BuilderService().Excel().ExcelRead(
+		res, err = services.GetBuilderServiceByType(resource.NodeType).Excel().ExcelRead(
 			context.Background(),
 			&object_builder_service.ExcelReadRequest{
 				Id:        excelId,
@@ -211,7 +211,7 @@ func (h *Handler) ExcelToDb(c *gin.Context) {
 	//}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		_, err = services.BuilderService().Excel().ExcelToDb(
+		_, err = services.GetBuilderServiceByType(resource.NodeType).Excel().ExcelToDb(
 			context.Background(),
 			&object_builder_service.ExcelToDbRequest{
 				Id:        c.Param("excel_id"),

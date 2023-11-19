@@ -93,7 +93,7 @@ func (h *Handler) CreateDocument(c *gin.Context) {
 	//}
 	document.ProjectId = resource.ResourceEnvironmentId
 
-	resp, err := services.BuilderService().Document().Create(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).Document().Create(
 		context.Background(),
 		&document,
 	)
@@ -186,7 +186,7 @@ func (h *Handler) GetSingleDocument(c *gin.Context) {
 	//	return
 	//}
 
-	resp, err := services.BuilderService().Document().GetSingle(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).Document().GetSingle(
 		context.Background(),
 		&obs.DocumentPrimaryKey{
 			Id:        documentID,
@@ -288,7 +288,7 @@ func (h *Handler) UpdateDocument(c *gin.Context) {
 	//}
 	document.ProjectId = resource.ResourceEnvironmentId
 
-	resp, err := services.BuilderService().Document().Update(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).Document().Update(
 		context.Background(),
 		&document,
 	)
@@ -380,7 +380,7 @@ func (h *Handler) DeleteDocument(c *gin.Context) {
 	//	return
 	//}
 
-	resp, err := services.BuilderService().Document().Delete(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).Document().Delete(
 		context.Background(),
 		&obs.DocumentPrimaryKey{
 			Id:        documentID,
@@ -475,7 +475,7 @@ func (h *Handler) GetDocumentList(c *gin.Context) {
 	//	return
 	//}
 
-	resp, err := services.BuilderService().Document().GetList(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).Document().GetList(
 		context.Background(),
 		&obs.GetAllDocumentsRequest{
 			ObjectId:  c.Query("object_id"),

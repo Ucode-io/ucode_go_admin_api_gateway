@@ -87,7 +87,7 @@ func (h *Handler) ExportToJSON(c *gin.Context) {
 
 	body.ProjectId = resource.ResourceEnvironmentId
 
-	response, err := services.BuilderService().TableHelpers().ExportToJSON(c.Request.Context(), &body)
+	response, err := services.GetBuilderServiceByType(resource.NodeType).TableHelpers().ExportToJSON(c.Request.Context(), &body)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -173,7 +173,7 @@ func (h *Handler) ImportFromJSON(c *gin.Context) {
 
 	body.ProjectId = resource.ResourceEnvironmentId
 
-	_, err = services.BuilderService().TableHelpers().ImportFromJSON(c.Request.Context(), &body)
+	_, err = services.GetBuilderServiceByType(resource.NodeType).TableHelpers().ImportFromJSON(c.Request.Context(), &body)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return

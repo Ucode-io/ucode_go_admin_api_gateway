@@ -28,8 +28,11 @@ import (
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) CreateTableFolder(c *gin.Context) {
-	var tableFolder models.CreateTableFolderRequest
-	var resourceEnvironmentId string
+	var (
+		tableFolder           models.CreateTableFolderRequest
+		resourceEnvironmentId string
+		nodeType              string
+	)
 
 	err := c.ShouldBindJSON(&tableFolder)
 	if err != nil {
@@ -74,6 +77,7 @@ func (h *Handler) CreateTableFolder(c *gin.Context) {
 		}
 
 		resourceEnvironmentId = resource.ResourceEnvironmentId
+		nodeType = resource.NodeType
 	} else {
 		resourceEnvironment, err := services.CompanyService().Resource().GetResourceEnvironment(
 			c.Request.Context(),
@@ -88,9 +92,10 @@ func (h *Handler) CreateTableFolder(c *gin.Context) {
 		}
 
 		resourceEnvironmentId = resourceEnvironment.GetId()
+		nodeType = resourceEnvironment.GetNodeType()
 	}
 
-	resp, err := services.BuilderService().TableFolder().Create(
+	resp, err := services.GetBuilderServiceByType(nodeType).TableFolder().Create(
 		context.Background(),
 		&object_builder_service.TableFolderRequest{
 			Title:     tableFolder.Title,
@@ -149,6 +154,7 @@ func (h *Handler) GetTableFolderByID(c *gin.Context) {
 	}
 
 	var resourceEnvironmentId string
+	var nodeType string
 	if !resourceIdOk {
 		resource, err := services.CompanyService().ServiceResource().GetSingle(
 			c.Request.Context(),
@@ -164,6 +170,7 @@ func (h *Handler) GetTableFolderByID(c *gin.Context) {
 		}
 
 		resourceEnvironmentId = resource.ResourceEnvironmentId
+		nodeType = resource.NodeType
 	} else {
 		resourceEnvironment, err := services.CompanyService().Resource().GetResourceEnvironment(
 			c.Request.Context(),
@@ -178,9 +185,10 @@ func (h *Handler) GetTableFolderByID(c *gin.Context) {
 		}
 
 		resourceEnvironmentId = resourceEnvironment.GetId()
+		nodeType = resourceEnvironment.GetNodeType()
 	}
 
-	resp, err := services.BuilderService().TableFolder().GetByID(
+	resp, err := services.GetBuilderServiceByType(nodeType).TableFolder().GetByID(
 		context.Background(),
 		&object_builder_service.TableFolderPrimaryKey{
 			Id:        Id,
@@ -206,8 +214,8 @@ func (h *Handler) GetTableFolderByID(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetAllTableFolders(c *gin.Context) {
 	var (
-		//resourceEnvironment *company_service.ResourceEnvironment
 		resourceEnvironmentId string
+		nodeType              string
 	)
 	offset, err := h.getOffsetParam(c)
 	if err != nil {
@@ -258,6 +266,7 @@ func (h *Handler) GetAllTableFolders(c *gin.Context) {
 		}
 
 		resourceEnvironmentId = resource.ResourceEnvironmentId
+		nodeType = resource.NodeType
 	} else {
 		resourceEnvironment, err := services.CompanyService().Resource().GetResourceEnvironment(
 			c.Request.Context(),
@@ -272,9 +281,10 @@ func (h *Handler) GetAllTableFolders(c *gin.Context) {
 		}
 
 		resourceEnvironmentId = resourceEnvironment.GetId()
+		nodeType = resourceEnvironment.GetNodeType()
 	}
 
-	resp, err := services.BuilderService().TableFolder().GetAll(
+	resp, err := services.GetBuilderServiceByType(nodeType).TableFolder().GetAll(
 		context.Background(),
 		&object_builder_service.GetAllTableFoldersRequest{
 			Offset:    int32(offset),
@@ -302,9 +312,9 @@ func (h *Handler) GetAllTableFolders(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) UpdateTableFolder(c *gin.Context) {
 	var (
-		tableFolder object_builder_service.TableFolder
-		//resourceEnvironment *company_service.ResourceEnvironment
+		tableFolder           object_builder_service.TableFolder
 		resourceEnvironmentId string
+		nodeType              string
 	)
 
 	err := c.ShouldBindJSON(&tableFolder)
@@ -350,6 +360,7 @@ func (h *Handler) UpdateTableFolder(c *gin.Context) {
 		}
 
 		resourceEnvironmentId = resource.ResourceEnvironmentId
+		nodeType = resource.NodeType
 	} else {
 		resourceEnvironment, err := services.CompanyService().Resource().GetResourceEnvironment(
 			c.Request.Context(),
@@ -364,9 +375,10 @@ func (h *Handler) UpdateTableFolder(c *gin.Context) {
 		}
 
 		resourceEnvironmentId = resourceEnvironment.GetId()
+		nodeType = resourceEnvironment.GetNodeType()
 	}
 
-	resp, err := services.BuilderService().TableFolder().Update(
+	resp, err := services.GetBuilderServiceByType(nodeType).TableFolder().Update(
 		context.Background(),
 		&object_builder_service.TableFolder{
 			Title:     tableFolder.Title,
@@ -397,6 +409,7 @@ func (h *Handler) UpdateTableFolder(c *gin.Context) {
 func (h *Handler) DeleteTableFolder(c *gin.Context) {
 	Id := c.Param("id")
 	resourceEnvironmentId := ""
+	nodeType := ""
 	if !util.IsValidUUID(Id) {
 		h.handleResponse(c, status_http.InvalidArgument, "table id is an invalid uuid")
 		return
@@ -439,6 +452,7 @@ func (h *Handler) DeleteTableFolder(c *gin.Context) {
 		}
 
 		resourceEnvironmentId = resource.ResourceEnvironmentId
+		nodeType = resource.NodeType
 	} else {
 		resourceEnvironment, err := services.CompanyService().Resource().GetResourceEnvironment(
 			c.Request.Context(),
@@ -453,9 +467,10 @@ func (h *Handler) DeleteTableFolder(c *gin.Context) {
 		}
 
 		resourceEnvironmentId = resourceEnvironment.GetId()
+		nodeType = resourceEnvironment.GetNodeType()
 	}
 
-	resp, err := services.BuilderService().TableFolder().Delete(
+	resp, err := services.GetBuilderServiceByType(nodeType).TableFolder().Delete(
 		context.Background(),
 		&obs.TableFolderPrimaryKey{
 			Id:        Id,

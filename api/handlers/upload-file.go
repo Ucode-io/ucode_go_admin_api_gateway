@@ -280,7 +280,7 @@ func (h *Handler) UploadFile(c *gin.Context) {
 	//	return
 	//}
 
-	_, err = services.BuilderService().ObjectBuilder().Create(
+	_, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().Create(
 		context.Background(),
 		&object_builder_service.CommonMessage{
 			TableSlug: "file",

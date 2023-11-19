@@ -96,7 +96,7 @@ func (h *Handler) GetEventLogs(c *gin.Context) {
 	//	return
 	//}
 
-	res, err := services.BuilderService().EventLogs().GetList(
+	res, err := services.GetBuilderServiceByType(resource.NodeType).EventLogs().GetList(
 		context.Background(),
 		&obs.GetEventLogsListRequest{
 			TableSlug: c.Query("table_slug"),
@@ -191,7 +191,7 @@ func (h *Handler) GetEventLogById(c *gin.Context) {
 	//	h.handleResponse(c, status_http.GRPCError, err.Error())
 	//	return
 	//}
-	resp, err := services.BuilderService().EventLogs().GetSingle(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).EventLogs().GetSingle(
 		context.Background(),
 		&obs.GetEventLogById{
 			Id:        eventLogID,

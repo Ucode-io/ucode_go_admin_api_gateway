@@ -121,7 +121,7 @@ func (h *Handler) CreateField(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		for _, field := range fields {
-			resp, err = services.BuilderService().Field().Create(
+			resp, err = services.GetBuilderServiceByType(resource.NodeType).Field().Create(
 				context.Background(),
 				field,
 			)
@@ -290,7 +290,7 @@ func (h *Handler) GetAllFields(c *gin.Context) {
 	limit = 100
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().Field().GetAll(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).Field().GetAll(
 			context.Background(),
 			&obs.GetAllFieldsRequest{
 				Limit:            int32(limit),
@@ -432,7 +432,7 @@ func (h *Handler) UpdateField(c *gin.Context) {
 
 	if !fieldRequest.EnableMultilanguage {
 		field.EnableMultilanguage = false
-		fields, err := services.BuilderService().Field().GetAll(context.Background(), &obs.GetAllFieldsRequest{
+		fields, err := services.GetBuilderServiceByType(resource.NodeType).Field().GetAll(context.Background(), &obs.GetAllFieldsRequest{
 			TableId:   fieldRequest.TableID,
 			ProjectId: resource.ResourceEnvironmentId,
 		})
@@ -444,7 +444,7 @@ func (h *Handler) UpdateField(c *gin.Context) {
 			if len(value.GetSlug()) > 3 && len(fieldRequest.Slug) > 3 && (value.GetType() == "SINGLE_LINE" || value.GetType() == "MULTI_LINE") {
 				if fieldRequest.Slug[:len(fieldRequest.Slug)-3] == value.GetSlug()[:len(value.GetSlug())-3] && fieldRequest.Slug != value.GetSlug() {
 					go func(arg *obs.Field) {
-						_, err := services.BuilderService().Field().Delete(context.Background(), &obs.FieldPrimaryKey{
+						_, err := services.GetBuilderServiceByType(resource.NodeType).Field().Delete(context.Background(), &obs.FieldPrimaryKey{
 							Id:        arg.GetId(),
 							ProjectId: resource.GetResourceEnvironmentId(),
 						})
@@ -473,7 +473,7 @@ func (h *Handler) UpdateField(c *gin.Context) {
 		// 		fmt.Println("match field slug:",  fieldRequest.Slug[:len(fieldRequest.Slug)-3]+"_"+value.GetShortName())
 		// 		go func(arg *pb.Language, project_id string) {
 		// 			// id, _ := uuid.NewRandom()
-		// 			// _, err := services.BuilderService().Field().Create(context.Background(), &obs.CreateFieldRequest{
+		// 			// _, err := services.GetBuilderServiceByType(resource.NodeType).Field().Create(context.Background(), &obs.CreateFieldRequest{
 		// 			// 	Id:                  id.String(),
 		// 			// 	Default:             fieldRequest.Default,
 		// 			// 	Type:                fieldRequest.Type,
@@ -503,7 +503,7 @@ func (h *Handler) UpdateField(c *gin.Context) {
 	field.ProjectId = resource.ResourceEnvironmentId
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().Field().Update(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).Field().Update(
 			context.Background(),
 			&field,
 		)
@@ -611,7 +611,7 @@ func (h *Handler) DeleteField(c *gin.Context) {
 	//}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().Field().Delete(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).Field().Delete(
 			context.Background(),
 			&obs.FieldPrimaryKey{
 				Id:        fieldID,

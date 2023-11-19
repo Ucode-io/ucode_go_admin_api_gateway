@@ -61,16 +61,6 @@ func (h *Handler) CreateObject(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
-	defer cancel()
-
-	service, conn, err := services.BuilderService().ObjectBuilderConnPool(ctx)
-	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
-	defer conn.Close()
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -98,6 +88,16 @@ func (h *Handler) CreateObject(c *gin.Context) {
 	}
 	objectRequest.Data["company_service_project_id"] = resource.GetProjectId()
 	objectRequest.Data["company_service_environment_id"] = resource.GetEnvironmentId()
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	defer cancel()
+
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err)
+		return
+	}
+	defer conn.Close()
 
 	var id string
 	uid, _ := uuid.NewRandom()
@@ -295,16 +295,6 @@ func (h *Handler) GetSingle(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
-	defer cancel()
-
-	service, conn, err := services.BuilderService().ObjectBuilderConnPool(ctx)
-	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
-	defer conn.Close()
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -329,6 +319,16 @@ func (h *Handler) GetSingle(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	defer cancel()
+
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err)
+		return
+	}
+	defer conn.Close()
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
@@ -411,16 +411,6 @@ func (h *Handler) GetSingleSlim(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
-	defer cancel()
-
-	service, conn, err := services.BuilderService().ObjectBuilderConnPool(ctx)
-	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
-	defer conn.Close()
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -445,6 +435,16 @@ func (h *Handler) GetSingleSlim(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	defer cancel()
+
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err)
+		return
+	}
+	defer conn.Close()
 
 	redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))))
 	if err == nil {
@@ -539,16 +539,6 @@ func (h *Handler) UpdateObject(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
-	defer cancel()
-
-	service, conn, err := services.BuilderService().ObjectBuilderConnPool(ctx)
-	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
-	defer conn.Close()
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -574,6 +564,16 @@ func (h *Handler) UpdateObject(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	defer cancel()
+
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err)
+		return
+	}
+	defer conn.Close()
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
@@ -762,16 +762,6 @@ func (h *Handler) DeleteObject(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
-	defer cancel()
-
-	service, conn, err := services.BuilderService().ObjectBuilderConnPool(ctx)
-	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
-	defer conn.Close()
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -796,6 +786,16 @@ func (h *Handler) DeleteObject(c *gin.Context) {
 	objectRequest.Data["id"] = objectID
 	objectRequest.Data["company_service_project_id"] = projectId.(string)
 	objectRequest.Data["company_service_environment_id"] = environmentId.(string)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	defer cancel()
+
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err)
+		return
+	}
+	defer conn.Close()
 
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
 	if err != nil {
@@ -947,16 +947,6 @@ func (h *Handler) GetList(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
-	defer cancel()
-
-	service, conn, err := services.BuilderService().ObjectBuilderConnPool(ctx)
-	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
-	defer conn.Close()
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -982,6 +972,16 @@ func (h *Handler) GetList(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	defer cancel()
+
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err)
+		return
+	}
+	defer conn.Close()
 
 	if viewId, ok := objectRequest.Data["builder_service_view_id"].(string); ok {
 		if util.IsValidUUID(viewId) {
@@ -1043,7 +1043,6 @@ func (h *Handler) GetList(c *gin.Context) {
 	} else {
 		switch resource.ResourceType {
 		case pb.ResourceType_MONGODB:
-			// start := time.Now()
 
 			redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))))
 			if err == nil {
@@ -1179,16 +1178,6 @@ func (h *Handler) GetListSlim(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
-	defer cancel()
-
-	service, conn, err := services.BuilderService().ObjectBuilderConnPool(ctx)
-	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
-	defer conn.Close()
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -1214,6 +1203,16 @@ func (h *Handler) GetListSlim(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	defer cancel()
+
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err)
+		return
+	}
+	defer conn.Close()
 
 	redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))))
 	if err == nil {
@@ -1302,16 +1301,6 @@ func (h *Handler) GetListInExcel(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
-	defer cancel()
-
-	service, conn, err := services.BuilderService().ObjectBuilderConnPool(ctx)
-	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
-	defer conn.Close()
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -1338,6 +1327,16 @@ func (h *Handler) GetListInExcel(c *gin.Context) {
 		return
 	}
 
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	defer cancel()
+
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err)
+		return
+	}
+	defer conn.Close()
+	
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = service.GetListInExcel(
@@ -1412,16 +1411,6 @@ func (h *Handler) DeleteManyToMany(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
-	defer cancel()
-
-	service, conn, err := services.BuilderService().ObjectBuilderConnPool(ctx)
-	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
-	defer conn.Close()
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -1447,6 +1436,16 @@ func (h *Handler) DeleteManyToMany(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	defer cancel()
+
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err)
+		return
+	}
+	defer conn.Close()
 
 	m2mMessage.ProjectId = resource.ResourceEnvironmentId
 	fromOfs := c.Query("from-ofs")
@@ -1556,16 +1555,6 @@ func (h *Handler) AppendManyToMany(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
-	defer cancel()
-
-	service, conn, err := services.BuilderService().ObjectBuilderConnPool(ctx)
-	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
-	defer conn.Close()
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -1591,6 +1580,16 @@ func (h *Handler) AppendManyToMany(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	defer cancel()
+
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err)
+		return
+	}
+	defer conn.Close()
 
 	m2mMessage.ProjectId = resource.ResourceEnvironmentId
 	fromOfs := c.Query("from-ofs")
@@ -1701,16 +1700,6 @@ func (h *Handler) UpsertObject(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
-	defer cancel()
-
-	service, conn, err := services.BuilderService().ObjectBuilderConnPool(ctx)
-	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
-	defer conn.Close()
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -1736,6 +1725,16 @@ func (h *Handler) UpsertObject(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	defer cancel()
+
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err)
+		return
+	}
+	defer conn.Close()
 
 	objects := objectRequest.Data["objects"].([]interface{})
 	editedObjects := make([]interface{}, 0, len(objects))
@@ -1790,7 +1789,7 @@ func (h *Handler) UpsertObject(c *gin.Context) {
 				h.handleResponse(c, status_http.InvalidArgument, err.Error())
 				return
 			}
-			// _, err = services.BuilderService()..ObjectBuilde().Create(
+			// _, err = services.GetBuilderServiceByType(resource.NodeType)..ObjectBuilde().Create(
 			// 	context.Background(),
 			// 	&obs.CommonMessage{
 			// 		TableSlug: key[1:],
@@ -1925,16 +1924,6 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
-	defer cancel()
-
-	service, conn, err := services.BuilderService().ObjectBuilderConnPool(ctx)
-	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
-	defer conn.Close()
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -1960,6 +1949,16 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	defer cancel()
+
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err)
+		return
+	}
+	defer conn.Close()
 
 	objects := objectRequest.Data["objects"].([]interface{})
 	editedObjects := make([]map[string]interface{}, 0, len(objects))
@@ -2110,16 +2109,6 @@ func (h *Handler) GetFinancialAnalytics(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
-	defer cancel()
-
-	service, conn, err := services.BuilderService().ObjectBuilderConnPool(ctx)
-	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
-	defer conn.Close()
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -2145,6 +2134,16 @@ func (h *Handler) GetFinancialAnalytics(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	defer cancel()
+
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err)
+		return
+	}
+	defer conn.Close()
 
 	//tokenInfo := h.GetAuthInfo
 	objectRequest.Data["tables"] = authInfo.GetTables()
@@ -2295,16 +2294,6 @@ func (h *Handler) GetListGroupBy(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
-	defer cancel()
-
-	service, conn, err := services.BuilderService().ObjectBuilderConnPool(ctx)
-	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
-	defer conn.Close()
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -2331,6 +2320,16 @@ func (h *Handler) GetListGroupBy(c *gin.Context) {
 		return
 	}
 
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	defer cancel()
+
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err)
+		return
+	}
+	defer conn.Close()
+	
 	structData, err := helper.ConvertMapToStruct(object.Data)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
@@ -2458,16 +2457,6 @@ func (h *Handler) GetGroupByField(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
-	defer cancel()
-
-	service, conn, err := services.BuilderService().ObjectBuilderConnPool(ctx)
-	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
-	defer conn.Close()
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -2493,6 +2482,17 @@ func (h *Handler) GetGroupByField(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	defer cancel()
+
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err)
+		return
+	}
+	defer conn.Close()
+	
 	fmt.Println("projectId: ", resource.ResourceEnvironmentId)
 
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
@@ -2584,17 +2584,6 @@ func (h *Handler) DeleteManyObject(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
-	defer cancel()
-
-	service, conn, err := services.BuilderService().ObjectBuilderConnPool(ctx)
-	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
-	defer conn.Close()
-
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -2619,6 +2608,16 @@ func (h *Handler) DeleteManyObject(c *gin.Context) {
 	data["company_service_project_id"] = projectId.(string)
 	data["company_service_environment_id"] = environmentId.(string)
 	data["ids"] = objectRequest.Ids
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	defer cancel()
+
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err)
+		return
+	}
+	defer conn.Close()
 
 	structData, err := helper.ConvertMapToStruct(data)
 	if err != nil {
@@ -2748,16 +2747,6 @@ func (h *Handler) GetListWithOutRelation(c *gin.Context) {
 		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
-	defer cancel()
-
-	service, conn, err := services.BuilderService().ObjectBuilderConnPool(ctx)
-	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
-	defer conn.Close()
 	
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -2784,6 +2773,16 @@ func (h *Handler) GetListWithOutRelation(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	defer cancel()
+
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err)
+		return
+	}
+	defer conn.Close()
 
 	fmt.Println("\n Resource env id", resource.ResourceEnvironmentId)
 

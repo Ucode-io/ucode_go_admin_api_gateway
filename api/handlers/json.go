@@ -90,7 +90,7 @@ func (h *Handler) GetLanguageJson(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	resp, err = services.BuilderService().ObjectBuilder().GetList(
+	resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().GetList(
 		context.Background(),
 		&obs.CommonMessage{
 			TableSlug: "file",

@@ -101,7 +101,7 @@ func (h *Handler) CreateFieldsAndRelations(c *gin.Context) {
 	request.ProjectId = resource.ResourceEnvironmentId
 
 	// Creating Fields and relations
-	resp, err := services.BuilderService().FieldsAndRelations().CreateFieldsAndRelations(c.Request.Context(), &request)
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).FieldsAndRelations().CreateFieldsAndRelations(c.Request.Context(), &request)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return

@@ -102,7 +102,7 @@ func (h *Handler) UpsertPermissionsByAppId(c *gin.Context) {
 	//	return
 	//}
 
-	resp, err := services.BuilderService().Permission().UpsertPermissionsByAppId(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).Permission().UpsertPermissionsByAppId(
 		context.Background(),
 		&obs.UpsertPermissionsByAppIdRequest{
 			AppId:     c.Param("app_id"),
@@ -204,7 +204,7 @@ func (h *Handler) GetAllPermissionByRoleId(c *gin.Context) {
 	//	return
 	//}
 
-	resp, err := services.BuilderService().Permission().GetAllPermissionsByRoleId(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).Permission().GetAllPermissionsByRoleId(
 		context.Background(),
 		&obs.GetAllPermissionRequest{
 			RoleId:    c.Param("role_id"),
@@ -294,7 +294,7 @@ func (h *Handler) GetFieldPermissions(c *gin.Context) {
 	//	return
 	//}
 
-	resp, err := services.BuilderService().Permission().GetFieldPermissions(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).Permission().GetFieldPermissions(
 		context.Background(),
 		&obs.GetFieldPermissionRequest{
 			RoleId:    c.Param("role_id"),
@@ -385,7 +385,7 @@ func (h *Handler) GetActionPermissions(c *gin.Context) {
 	//	return
 	//}
 
-	resp, err := services.BuilderService().Permission().GetActionPermissions(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).Permission().GetActionPermissions(
 		context.Background(),
 		&obs.GetActionPermissionRequest{
 			RoleId:    c.Param("role_id"),
@@ -476,7 +476,7 @@ func (h *Handler) GetViewRelationPermissions(c *gin.Context) {
 	//	return
 	//}
 
-	resp, err := services.BuilderService().Permission().GetViewRelationPermissions(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).Permission().GetViewRelationPermissions(
 		context.Background(),
 		&obs.GetActionPermissionRequest{
 			RoleId:    c.Param("role_id"),

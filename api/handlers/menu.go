@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"errors"
-	"fmt"
 	"reflect"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -95,7 +94,7 @@ func (h *Handler) CreateMenu(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().Menu().Create(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).Menu().Create(
 			context.Background(),
 			&obs.CreateMenuRequest{
 				Label:           menu.Label,
@@ -225,7 +224,7 @@ func (h *Handler) GetMenuByID(c *gin.Context) {
 	//}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().Menu().GetByID(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).Menu().GetByID(
 			context.Background(),
 			&obs.MenuPrimaryKey{
 				Id:        menuID,
@@ -268,7 +267,6 @@ func (h *Handler) GetMenuByID(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetAllMenus(c *gin.Context) {
-	fmt.Println(">>>>> #1 ")
 	offset, err := h.getOffsetParam(c)
 	var (
 		resp *obs.GetAllMenusResponse
@@ -320,7 +318,8 @@ func (h *Handler) GetAllMenus(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().Menu().GetAll(
+
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).Menu().GetAll(
 			context.Background(),
 			&obs.GetAllMenusRequest{
 				Limit:     int32(limit),
@@ -331,6 +330,7 @@ func (h *Handler) GetAllMenus(c *gin.Context) {
 				RoleId:    authInfo.GetRoleId(),
 			},
 		)
+
 	case pb.ResourceType_POSTGRESQL:
 		resp, err = services.PostgresBuilderService().Menu().GetAll(
 			context.Background(),
@@ -416,7 +416,7 @@ func (h *Handler) UpdateMenu(c *gin.Context) {
 	}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().Menu().Update(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).Menu().Update(
 			context.Background(),
 			&obs.Menu{
 				Id:              menu.Id,
@@ -520,7 +520,7 @@ func (h *Handler) DeleteMenu(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 
-		oldMenu, err := services.BuilderService().Menu().GetByID(
+		oldMenu, err := services.GetBuilderServiceByType(resource.NodeType).Menu().GetByID(
 			context.Background(),
 			&obs.MenuPrimaryKey{
 				Id:        menuID,
@@ -544,7 +544,7 @@ func (h *Handler) DeleteMenu(c *gin.Context) {
 			)
 		}
 
-		resp, err = services.BuilderService().Menu().Delete(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).Menu().Delete(
 			context.Background(),
 			&obs.MenuPrimaryKey{
 				Id:        menuID,
@@ -633,7 +633,7 @@ func (h *Handler) UpdateMenuOrder(c *gin.Context) {
 	}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().Menu().UpdateMenuOrder(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).Menu().UpdateMenuOrder(
 			context.Background(),
 			&obs.UpdateMenuOrderRequest{
 				Menus:     menus.GetMenus(),
@@ -727,7 +727,7 @@ func (h *Handler) CreateMenuSettings(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().Menu().CreateMenuSettings(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).Menu().CreateMenuSettings(
 			context.Background(),
 			&menu,
 		)
@@ -815,7 +815,7 @@ func (h *Handler) GetAllMenuSettings(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().Menu().GetAllMenuSettings(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).Menu().GetAllMenuSettings(
 			context.Background(),
 			&obs.GetAllMenuSettingsRequest{
 				Limit:     int32(limit),
@@ -896,7 +896,7 @@ func (h *Handler) GetMenuSettingByID(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().Menu().GetByIDMenuSettings(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).Menu().GetByIDMenuSettings(
 			context.Background(),
 			&obs.MenuSettingPrimaryKey{
 				Id:         ID,
@@ -999,7 +999,7 @@ func (h *Handler) UpdateMenuSettings(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().Menu().UpdateMenuSettings(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).Menu().UpdateMenuSettings(
 			context.Background(),
 			&menu,
 		)
@@ -1076,7 +1076,7 @@ func (h *Handler) DeleteMenuSettings(c *gin.Context) {
 	}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().Menu().DeleteMenuSettings(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).Menu().DeleteMenuSettings(
 			context.Background(),
 			&obs.MenuSettingPrimaryKey{
 				Id:        ID,
@@ -1171,7 +1171,7 @@ func (h *Handler) CreateMenuTemplate(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().Menu().CreateMenuTemplate(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).Menu().CreateMenuTemplate(
 			context.Background(),
 			&menu,
 		)
@@ -1259,7 +1259,7 @@ func (h *Handler) GetAllMenuTemplates(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().Menu().GetAllMenuTemplate(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).Menu().GetAllMenuTemplate(
 			context.Background(),
 			&obs.GetAllMenuSettingsRequest{
 				Limit:     int32(limit),
@@ -1363,7 +1363,7 @@ func (h *Handler) GetMenuTemplateByID(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().Menu().GetByIDMenuTemplate(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).Menu().GetByIDMenuTemplate(
 			context.Background(),
 			&obs.MenuSettingPrimaryKey{
 				Id:        ID,
@@ -1478,7 +1478,7 @@ func (h *Handler) UpdateMenuTemplate(c *gin.Context) {
 	menu.ProjectId = resource.ResourceEnvironmentId
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().Menu().UpdateMenuTemplate(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).Menu().UpdateMenuTemplate(
 			context.Background(),
 			&menu,
 		)
@@ -1555,7 +1555,7 @@ func (h *Handler) DeleteMenuTemplate(c *gin.Context) {
 	}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().Menu().DeleteMenuTemplate(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).Menu().DeleteMenuTemplate(
 			context.Background(),
 			&obs.MenuSettingPrimaryKey{
 				Id:        ID,
@@ -1650,7 +1650,7 @@ func (h *Handler) GetWikiFolder(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().Menu().GetWikiFolder(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).Menu().GetWikiFolder(
 			context.Background(),
 			&obs.GetWikiFolderRequest{
 				ProjectId: resource.ResourceEnvironmentId,

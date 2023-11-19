@@ -117,7 +117,7 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 	//	return
 	//}
 
-	respObject, err := services.BuilderService().Login().LoginWithEmailOtp(
+	respObject, err := services.GetBuilderServiceByType(resource.NodeType).Login().LoginWithEmailOtp(
 		c.Request.Context(),
 		&pbObject.EmailOtpRequest{
 			Email:      request.Email,
@@ -368,7 +368,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
-	_, err = services.BuilderService().ObjectBuilderAuth().Create(
+	_, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderAuth().Create(
 		context.Background(),
 		&pbObject.CommonMessage{
 			TableSlug: c.Param("table_slug"),
@@ -381,7 +381,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.BuilderService().Login().LoginWithEmailOtp(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).Login().LoginWithEmailOtp(
 		context.Background(),
 		&pbObject.EmailOtpRequest{
 			Email:      body.Data["email"].(string),

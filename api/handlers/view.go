@@ -109,7 +109,7 @@ func (h *Handler) CreateView(c *gin.Context) {
 	// view.CommitGuid = commitGuid
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().View().Create(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).View().Create(
 			context.Background(),
 			&view,
 		)
@@ -216,7 +216,7 @@ func (h *Handler) GetSingleView(c *gin.Context) {
 	//}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().View().GetSingle(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).View().GetSingle(
 			context.Background(),
 			&obs.ViewPrimaryKey{
 				Id:        viewID,
@@ -330,7 +330,7 @@ func (h *Handler) UpdateView(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().View().Update(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).View().Update(
 			context.Background(),
 			&view,
 		)
@@ -437,7 +437,7 @@ func (h *Handler) DeleteView(c *gin.Context) {
 	//}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().View().Delete(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).View().Delete(
 			context.Background(),
 			&obs.ViewPrimaryKey{
 				Id:        viewID,
@@ -545,7 +545,7 @@ func (h *Handler) GetViewList(c *gin.Context) {
 	//}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().View().GetList(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).View().GetList(
 			context.Background(),
 			&obs.GetAllViewsRequest{
 				TableSlug: c.Query("table_slug"),
@@ -666,7 +666,7 @@ func (h *Handler) ConvertHtmlToPdf(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		log.Println("\n\nConvertHtmlToPdf---->")
-		resp, err = services.BuilderService().View().ConvertHtmlToPdf(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).View().ConvertHtmlToPdf(
 			c.Request.Context(),
 			&obs.HtmlBody{
 				Data:      structData,
@@ -681,7 +681,7 @@ func (h *Handler) ConvertHtmlToPdf(c *gin.Context) {
 		}
 	case pb.ResourceType_POSTGRESQL:
 		log.Println("\n\nConvertHtmlToPdf---->")
-		resp, err = services.BuilderService().View().ConvertHtmlToPdf(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).View().ConvertHtmlToPdf(
 			c.Request.Context(),
 			&obs.HtmlBody{
 				Data:      structData,
@@ -791,7 +791,7 @@ func (h *Handler) ConvertTemplateToHtml(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 
-		resp, err = services.BuilderService().View().ConvertTemplateToHtml(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).View().ConvertTemplateToHtml(
 			context.Background(),
 			&obs.HtmlBody{
 				Data:      structData,
@@ -806,7 +806,7 @@ func (h *Handler) ConvertTemplateToHtml(c *gin.Context) {
 		}
 	case pb.ResourceType_POSTGRESQL:
 
-		resp, err = services.BuilderService().View().ConvertTemplateToHtml(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).View().ConvertTemplateToHtml(
 			context.Background(),
 			&obs.HtmlBody{
 				Data:      structData,
@@ -885,7 +885,7 @@ func (h *Handler) UpdateViewOrder(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().View().UpdateViewOrder(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).View().UpdateViewOrder(
 			context.Background(),
 			&view,
 		)

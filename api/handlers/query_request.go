@@ -982,7 +982,7 @@ func (h *Handler) GetQueryHistory(c *gin.Context) {
 	// }
 
 	// // Get User Data
-	// respAuthersData, err := services.BuilderService().ObjectBuilder().GetList(
+	// respAuthersData, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().GetList(
 	// 	c.Request.Context(),
 
 	// 	&builder.CommonMessage{

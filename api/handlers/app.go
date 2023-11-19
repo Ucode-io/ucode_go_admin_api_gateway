@@ -102,7 +102,7 @@ func (h *Handler) CreateApp(c *gin.Context) {
 	// app.CommitGuid = commitGuid
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().App().Create(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).App().Create(
 			context.Background(),
 			&app,
 		)
@@ -210,7 +210,7 @@ func (h *Handler) GetAppByID(c *gin.Context) {
 	//}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().App().GetByID(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).App().GetByID(
 			context.Background(),
 			&obs.AppPrimaryKey{
 				Id:        appID,
@@ -325,7 +325,7 @@ func (h *Handler) GetAllApps(c *gin.Context) {
 	authInfo, _ := h.GetAuthInfo(c)
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().App().GetAll(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).App().GetAll(
 			context.Background(),
 			&obs.GetAllAppsRequest{
 				Limit:     int32(limit),
@@ -437,7 +437,7 @@ func (h *Handler) UpdateApp(c *gin.Context) {
 	app.ProjectId = resource.ResourceEnvironmentId
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().App().Update(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).App().Update(
 			context.Background(),
 			&app,
 		)
@@ -545,7 +545,7 @@ func (h *Handler) DeleteApp(c *gin.Context) {
 	//}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().App().Delete(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).App().Delete(
 			context.Background(),
 			&obs.AppPrimaryKey{
 				Id:        appID,

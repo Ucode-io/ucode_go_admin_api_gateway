@@ -601,7 +601,6 @@ func (h *Handler) CreateWebPageV2(c *gin.Context) {
 		webpage tmp.CreateWebPageReq
 	)
 
-
 	err := c.ShouldBindJSON(&webpage)
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
@@ -1375,7 +1374,7 @@ func (h *Handler) GetWebPageHistory(c *gin.Context) {
 	// }
 
 	// // Get User Data
-	// respAuthersData, err := services.BuilderService().ObjectBuilder().GetList(
+	// respAuthersData, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().GetList(
 	// 	c.Request.Context(),
 
 	// 	&builder.CommonMessage{

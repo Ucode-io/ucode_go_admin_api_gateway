@@ -126,7 +126,7 @@ func (h *Handler) UploadToFolder(c *gin.Context) {
 
 	fmt.Println("TEST 1")
 
-	resp, err := services.BuilderService().File().Create(context.Background(), &obs.CreateFileRequest{
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).File().Create(context.Background(), &obs.CreateFileRequest{
 		Id:               fName.String(),
 		Title:            title,
 		Storage:          folder_name,
@@ -214,7 +214,7 @@ func (h *Handler) GetSingleFile(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.BuilderService().File().GetSingle(
+	resp, err := services.GetBuilderServiceByType(resourse.NodeType).File().GetSingle(
 		context.Background(),
 		&obs.FilePrimaryKey{
 			Id:        fileID,
@@ -310,7 +310,7 @@ func (h *Handler) UpdateFile(c *gin.Context) {
 	//	return
 	//}
 
-	resp, err := services.BuilderService().File().Update(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).File().Update(
 		context.Background(),
 		&obs.File{
 			Id:               file.Id,
@@ -380,7 +380,7 @@ func (h *Handler) DeleteFile(c *gin.Context) {
 		return
 	}
 
-	res, err := services.BuilderService().File().GetSingle(
+	res, err := services.GetBuilderServiceByType(resource.NodeType).File().GetSingle(
 		context.Background(),
 		&obs.FilePrimaryKey{
 			Id:        id,
@@ -410,7 +410,7 @@ func (h *Handler) DeleteFile(c *gin.Context) {
 		log.Println(err)
 	}
 
-	resp, err := services.BuilderService().File().Delete(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).File().Delete(
 		context.Background(),
 		&obs.FileDeleteRequest{
 			Ids:       delete_request,
@@ -482,7 +482,7 @@ func (h *Handler) DeleteFiles(c *gin.Context) {
 		return
 	}
 
-	res, err := services.BuilderService().File().GetSingle(
+	res, err := services.GetBuilderServiceByType(resource.NodeType).File().GetSingle(
 		context.Background(),
 		&obs.FilePrimaryKey{
 			Id:        file.Objects[0].ObjectId,
@@ -514,7 +514,7 @@ func (h *Handler) DeleteFiles(c *gin.Context) {
 		}
 	}
 
-	resp, err := services.BuilderService().File().Delete(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).File().Delete(
 		context.Background(),
 		&obs.FileDeleteRequest{
 			Ids:       delete_request,
@@ -587,7 +587,7 @@ func (h *Handler) GetAllFiles(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.BuilderService().File().GetList(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).File().GetList(
 		context.Background(),
 		&obs.GetAllFilesRequest{
 			Search:     c.DefaultQuery("search", ""),

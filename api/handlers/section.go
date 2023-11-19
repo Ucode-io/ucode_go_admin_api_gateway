@@ -86,7 +86,7 @@ func (h *Handler) GetAllSections(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		// resp, err = services.BuilderService().Section().GetAll(
+		// resp, err = services.GetBuilderServiceByType(resource.NodeType).Section().GetAll(
 		// 	context.Background(),
 		// 	&obs.GetAllSectionsRequest{
 		// 		TableId:   c.Query("table_id"),
@@ -214,7 +214,7 @@ func (h *Handler) UpdateSection(c *gin.Context) {
 	// sections.CommitGuid = commitGuid
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		// resp, err = services.BuilderService().Section().Update(
+		// resp, err = services.GetBuilderServiceByType(resource.NodeType).Section().Update(
 		// 	context.Background(),
 		// 	&sections,
 		// )

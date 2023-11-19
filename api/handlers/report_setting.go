@@ -121,7 +121,7 @@ func (h *Handler) DynamicReport(c *gin.Context) {
 	if c.Query("click_action") == "true" {
 		reportSetting = objectRequest.Data["report_setting"]
 	} else {
-		reportSetting, err = services.BuilderService().ReportSetting().GetByIdPivotTemplate(
+		reportSetting, err = services.GetBuilderServiceByType(resource.NodeType).ReportSetting().GetByIdPivotTemplate(
 			context.Background(),
 			&obs.PivotTemplatePrimaryKey{
 				Id:                    c.Query("id"),
@@ -139,7 +139,7 @@ func (h *Handler) DynamicReport(c *gin.Context) {
 	objectRequest.Data["report_setting"] = reportSetting
 	response, err := h.DynamicReportHelper(NewRequestBody{
 		Data: objectRequest.Data,
-	}, services, resource.ResourceEnvironmentId)
+	}, services, resource.ResourceEnvironmentId, resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
@@ -198,7 +198,7 @@ func (h *Handler) GetByIdReportSetting(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.BuilderService().ReportSetting().GetByIdReportSetting(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).ReportSetting().GetByIdReportSetting(
 		context.Background(),
 		&obs.AppReportSettingPrimaryKey{
 			Id:                    c.Param("id"),
@@ -260,7 +260,7 @@ func (h *Handler) GetListReportSetting(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.BuilderService().ReportSetting().GetListReportSetting(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).ReportSetting().GetListReportSetting(
 		context.Background(),
 		&obs.GetListReportSettingRequest{
 			ResourceEnvironmentId: resource.ResourceEnvironmentId,
@@ -331,7 +331,7 @@ func (h *Handler) UpsertReportSetting(c *gin.Context) {
 	}
 	upsertReportSettingRequestObs.ResourceEnvironmentId = resource.ResourceEnvironmentId
 
-	resp, err := services.BuilderService().ReportSetting().UpsertReportSetting(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).ReportSetting().UpsertReportSetting(
 		context.Background(),
 		&upsertReportSettingRequestObs,
 	)
@@ -395,7 +395,7 @@ func (h *Handler) DeleteReportSetting(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.BuilderService().ReportSetting().DeleteReportSetting(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).ReportSetting().DeleteReportSetting(
 		context.Background(),
 		&obs.AppReportSettingPrimaryKey{
 			Id:                    c.Param("id"),
@@ -464,7 +464,7 @@ func (h *Handler) SavePivotTemplate(c *gin.Context) {
 		return
 	}
 	savePivotTemplateRequestObs.ResourceEnvironmentId = resource.ResourceEnvironmentId
-	resp, err := services.BuilderService().ReportSetting().SavePivotTemplate(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).ReportSetting().SavePivotTemplate(
 		context.Background(),
 		&savePivotTemplateRequestObs,
 	)
@@ -524,7 +524,7 @@ func (h *Handler) GetByIdPivotTemplate(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.BuilderService().ReportSetting().GetByIdPivotTemplate(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).ReportSetting().GetByIdPivotTemplate(
 		context.Background(),
 		&obs.PivotTemplatePrimaryKey{
 			Id:                    c.Param("id"),
@@ -587,7 +587,7 @@ func (h *Handler) GetListPivotTemplate(c *gin.Context) {
 		return
 	}
 	fmt.Println("test 11")
-	resp, err := services.BuilderService().ReportSetting().GetListPivotTemplate(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).ReportSetting().GetListPivotTemplate(
 		context.Background(),
 		&obs.GetListPivotTemplateRequest{
 			Status:                c.DefaultQuery("status", "SAVED"),
@@ -657,7 +657,7 @@ func (h *Handler) UpsertPivotTemplate(c *gin.Context) {
 		return
 	}
 	upsertTemplateRequestObs.ResourceEnvironmentId = resource.ResourceEnvironmentId
-	resp, err := services.BuilderService().ReportSetting().UpsertPivotTemplate(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).ReportSetting().UpsertPivotTemplate(
 		context.Background(),
 		&upsertTemplateRequestObs,
 	)
@@ -722,7 +722,7 @@ func (h *Handler) RemovePivotTemplate(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.BuilderService().ReportSetting().RemovePivotTemplate(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).ReportSetting().RemovePivotTemplate(
 		context.Background(),
 		&obs.RemovePivotTemplateSettingRequest{
 			Id:                    id,
