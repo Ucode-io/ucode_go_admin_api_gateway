@@ -64,7 +64,7 @@ func (h *Handler) CreateApp(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -77,7 +77,7 @@ func (h *Handler) CreateApp(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+	//resourceEnvironment, err := h.companyServices.Resource().GetResEnvByResIdEnvId(
 	//	context.Background(),
 	//	&company_service.GetResEnvByResIdEnvIdRequest{
 	//		EnvironmentId: environmentId.(string),
@@ -183,7 +183,7 @@ func (h *Handler) GetAppByID(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -196,7 +196,7 @@ func (h *Handler) GetAppByID(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+	//resourceEnvironment, err := h.companyServices.Resource().GetResEnvByResIdEnvId(
 	//	context.Background(),
 	//	&company_service.GetResEnvByResIdEnvIdRequest{
 	//		EnvironmentId: environmentId.(string),
@@ -295,7 +295,7 @@ func (h *Handler) GetAllApps(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -310,7 +310,7 @@ func (h *Handler) GetAllApps(c *gin.Context) {
 	limit = 100
 
 	// We get resource_environment relation
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+	//resourceEnvironment, err := h.companyServices.Resource().GetResEnvByResIdEnvId(
 	//	context.Background(),
 	//	&company_service.GetResEnvByResIdEnvIdRequest{
 	//		EnvironmentId: environmentId.(string),
@@ -409,7 +409,7 @@ func (h *Handler) UpdateApp(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -422,7 +422,7 @@ func (h *Handler) UpdateApp(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+	//resourceEnvironment, err := h.companyServices.Resource().GetResEnvByResIdEnvId(
 	//	context.Background(),
 	//	&company_service.GetResEnvByResIdEnvIdRequest{
 	//		EnvironmentId: environmentId.(string),
@@ -518,7 +518,7 @@ func (h *Handler) DeleteApp(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -531,7 +531,7 @@ func (h *Handler) DeleteApp(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+	//resourceEnvironment, err := h.companyServices.Resource().GetResEnvByResIdEnvId(
 	//	context.Background(),
 	//	&company_service.GetResEnvByResIdEnvIdRequest{
 	//		EnvironmentId: environmentId.(string),

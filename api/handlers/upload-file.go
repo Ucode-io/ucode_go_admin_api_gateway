@@ -228,19 +228,6 @@ func (h *Handler) UploadFile(c *gin.Context) {
 		return
 	}
 
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -254,7 +241,7 @@ func (h *Handler) UploadFile(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -266,19 +253,6 @@ func (h *Handler) UploadFile(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
 
 	_, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().Create(
 		context.Background(),
@@ -328,13 +302,20 @@ func (h *Handler) UploadTemplate(c *gin.Context) {
 		return
 	}
 
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
 
-	resp, err := h.companyServices.ConvertTemplateService().ConvertTemplateService().WkHtmlToPdf(
+	resp, err := services.ConvertTemplateService().ConvertTemplateService().WkHtmlToPdf(
 		context.Background(),
 		&convert_template.WkHtmlToPdfRequest{
 			TemplateName: c.Param("template_name"),

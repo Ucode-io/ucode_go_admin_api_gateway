@@ -32,7 +32,7 @@ func (h *Handler) CreateEnvironment(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.CompanyService().Environment().Create(
+	resp, err := h.companyServices.Environment().Create(
 		c.Request.Context(),
 		&environmentRequest,
 	)
@@ -66,7 +66,7 @@ func (h *Handler) GetSingleEnvironment(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.CompanyService().Environment().GetById(
+	resp, err := h.companyServices.Environment().GetById(
 		c.Request.Context(),
 		&obs.EnvironmentPrimaryKey{
 			Id: environmentID,
@@ -105,7 +105,7 @@ func (h *Handler) UpdateEnvironment(c *gin.Context) {
 
 	structData, err := helper.ConvertMapToStruct(environment.Data)
 
-	resp, err := h.companyServices.CompanyService().Environment().Update(
+	resp, err := h.companyServices.Environment().Update(
 		c.Request.Context(),
 		&obs.Environment{
 			Id:           environment.Id,
@@ -146,7 +146,7 @@ func (h *Handler) DeleteEnvironment(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.CompanyService().Environment().Delete(
+	resp, err := h.companyServices.Environment().Delete(
 		c.Request.Context(),
 		&obs.EnvironmentPrimaryKey{Id: environmentID},
 	)
@@ -186,7 +186,7 @@ func (h *Handler) GetAllEnvironments(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.CompanyService().Environment().GetList(
+	resp, err := h.companyServices.Environment().GetList(
 		c.Request.Context(),
 		&obs.GetEnvironmentListRequest{
 			Offset:    int32(offset),

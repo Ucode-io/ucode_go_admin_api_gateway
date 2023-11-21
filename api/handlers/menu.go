@@ -59,13 +59,6 @@ func (h *Handler) CreateMenu(c *gin.Context) {
 		return
 	}
 
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -79,7 +72,7 @@ func (h *Handler) CreateMenu(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -171,19 +164,6 @@ func (h *Handler) GetMenuByID(c *gin.Context) {
 		return
 	}
 
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -197,7 +177,7 @@ func (h *Handler) GetMenuByID(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -210,18 +190,6 @@ func (h *Handler) GetMenuByID(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Menu().GetByID(
@@ -301,7 +269,7 @@ func (h *Handler) GetAllMenus(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -402,7 +370,7 @@ func (h *Handler) UpdateMenu(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -505,7 +473,7 @@ func (h *Handler) DeleteMenu(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -619,7 +587,7 @@ func (h *Handler) UpdateMenuOrder(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -710,7 +678,7 @@ func (h *Handler) CreateMenuSettings(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -800,7 +768,7 @@ func (h *Handler) GetAllMenuSettings(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -881,7 +849,7 @@ func (h *Handler) GetMenuSettingByID(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -922,7 +890,7 @@ func (h *Handler) GetMenuSettingByID(c *gin.Context) {
 		}
 	}
 	if IsEmptyStruct(resp.MenuTemplate) {
-		resp.MenuTemplate, err = GetMenuTemplateById(template_id, services)
+		resp.MenuTemplate, err = h.GetMenuTemplateById(template_id, services)
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
@@ -982,7 +950,7 @@ func (h *Handler) UpdateMenuSettings(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -1062,7 +1030,7 @@ func (h *Handler) DeleteMenuSettings(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -1154,7 +1122,7 @@ func (h *Handler) CreateMenuTemplate(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -1244,7 +1212,7 @@ func (h *Handler) GetAllMenuTemplates(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -1285,7 +1253,7 @@ func (h *Handler) GetAllMenuTemplates(c *gin.Context) {
 			return
 		}
 	}
-	globalMenus, err := services.CompanyService().Company().GetAllMenuTemplate(context.Background(), &emptypb.Empty{})
+	globalMenus, err := h.companyServices.Company().GetAllMenuTemplate(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -1348,7 +1316,7 @@ func (h *Handler) GetMenuTemplateByID(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -1389,7 +1357,7 @@ func (h *Handler) GetMenuTemplateByID(c *gin.Context) {
 	}
 
 	if resp == (&obs.MenuTemplate{}) {
-		resp, err = GetMenuTemplateById(ID, services)
+		resp, err = h.GetMenuTemplateById(ID, services)
 		if err != nil {
 			return
 		}
@@ -1398,9 +1366,9 @@ func (h *Handler) GetMenuTemplateByID(c *gin.Context) {
 	h.handleResponse(c, status_http.OK, resp)
 }
 
-func GetMenuTemplateById(id string, services services.ServiceManagerI) (*obs.MenuTemplate, error) {
+func (h *Handler) GetMenuTemplateById(id string, services services.ServiceManagerI) (*obs.MenuTemplate, error) {
 	var resp *obs.MenuTemplate
-	global, err := services.CompanyService().Company().GetMenuTemplateById(context.Background(), &pb.GetMenuTemplateRequest{
+	global, err := h.companyServices.Company().GetMenuTemplateById(context.Background(), &pb.GetMenuTemplateRequest{
 		Id: id,
 	})
 	if err != nil {
@@ -1462,7 +1430,7 @@ func (h *Handler) UpdateMenuTemplate(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -1541,7 +1509,7 @@ func (h *Handler) DeleteMenuTemplate(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -1633,7 +1601,7 @@ func (h *Handler) GetWikiFolder(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId,

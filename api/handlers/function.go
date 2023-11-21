@@ -76,7 +76,7 @@ func (h *Handler) CreateFunction(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -89,7 +89,7 @@ func (h *Handler) CreateFunction(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+	//resourceEnvironment, err := h.companyServices.Resource().GetResEnvByResIdEnvId(
 	//	context.Background(),
 	//	&company_service.GetResEnvByResIdEnvIdRequest{
 	//		EnvironmentId: environmentId.(string),
@@ -184,7 +184,7 @@ func (h *Handler) GetFunctionByID(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -197,7 +197,7 @@ func (h *Handler) GetFunctionByID(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+	//resourceEnvironment, err := h.companyServices.Resource().GetResEnvByResIdEnvId(
 	//	context.Background(),
 	//	&company_service.GetResEnvByResIdEnvIdRequest{
 	//		EnvironmentId: environmentId.(string),
@@ -279,7 +279,7 @@ func (h *Handler) GetAllFunctions(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -292,7 +292,7 @@ func (h *Handler) GetAllFunctions(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+	//resourceEnvironment, err := h.companyServices.Resource().GetResEnvByResIdEnvId(
 	//	context.Background(),
 	//	&company_service.GetResEnvByResIdEnvIdRequest{
 	//		EnvironmentId: environmentId.(string),
@@ -383,7 +383,7 @@ func (h *Handler) UpdateFunction(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -396,7 +396,7 @@ func (h *Handler) UpdateFunction(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+	//resourceEnvironment, err := h.companyServices.Resource().GetResEnvByResIdEnvId(
 	//	context.Background(),
 	//	&company_service.GetResEnvByResIdEnvIdRequest{
 	//		EnvironmentId: environmentId.(string),
@@ -483,7 +483,7 @@ func (h *Handler) DeleteFunction(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -496,7 +496,7 @@ func (h *Handler) DeleteFunction(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+	//resourceEnvironment, err := h.companyServices.Resource().GetResEnvByResIdEnvId(
 	//	context.Background(),
 	//	&company_service.GetResEnvByResIdEnvIdRequest{
 	//		EnvironmentId: environmentId.(string),
@@ -580,7 +580,7 @@ func (h *Handler) InvokeFunction(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -593,7 +593,7 @@ func (h *Handler) InvokeFunction(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+	//resourceEnvironment, err := h.companyServices.Resource().GetResEnvByResIdEnvId(
 	//	context.Background(),
 	//	&company_service.GetResEnvByResIdEnvIdRequest{
 	//		EnvironmentId: environmentId.(string),
@@ -617,7 +617,7 @@ func (h *Handler) InvokeFunction(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	apiKeys, err := services.AuthService().ApiKey().GetList(context.Background(), &auth_service.GetListReq{
+	apiKeys, err := h.authService.ApiKey().GetList(context.Background(), &auth_service.GetListReq{
 		EnvironmentId: environmentId.(string),
 		ProjectId:     resource.ProjectId,
 	})

@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/google/uuid"
 	"strings"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
@@ -14,6 +13,8 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/gitlab"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
+
+	"github.com/google/uuid"
 
 	"ucode/ucode_go_api_gateway/api/status_http"
 
@@ -78,7 +79,7 @@ func (h *Handler) CreateMicroFrontEnd(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -90,14 +91,14 @@ func (h *Handler) CreateMicroFrontEnd(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	environment, err := services.CompanyService().Environment().GetById(context.Background(), &company_service.EnvironmentPrimaryKey{
+	environment, err := h.companyServices.Environment().GetById(context.Background(), &company_service.EnvironmentPrimaryKey{
 		Id: environmentId.(string),
 	})
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	project, err := services.CompanyService().Project().GetById(context.Background(), &company_service.GetProjectByIdRequest{
+	project, err := h.companyServices.Project().GetById(context.Background(), &company_service.GetProjectByIdRequest{
 		ProjectId: environment.GetProjectId(),
 	})
 	if project.GetTitle() == "" {
@@ -240,7 +241,7 @@ func (h *Handler) GetMicroFrontEndByID(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -316,7 +317,7 @@ func (h *Handler) GetAllMicroFrontEnd(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -389,7 +390,7 @@ func (h *Handler) UpdateMicroFrontEnd(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -465,7 +466,7 @@ func (h *Handler) DeleteMicroFrontEnd(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),

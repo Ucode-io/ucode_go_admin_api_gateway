@@ -84,7 +84,7 @@ func (h *Handler) CreateNewFunction(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -96,14 +96,14 @@ func (h *Handler) CreateNewFunction(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	environment, err := services.CompanyService().Environment().GetById(context.Background(), &company_service.EnvironmentPrimaryKey{
+	environment, err := h.companyServices.Environment().GetById(context.Background(), &company_service.EnvironmentPrimaryKey{
 		Id: environmentId.(string),
 	})
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	project, err := services.CompanyService().Project().GetById(context.Background(), &company_service.GetProjectByIdRequest{
+	project, err := h.companyServices.Project().GetById(context.Background(), &company_service.GetProjectByIdRequest{
 		ProjectId: environment.GetProjectId(),
 	})
 	if project.GetTitle() == "" {
@@ -215,7 +215,7 @@ func (h *Handler) GetNewFunctionByID(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -228,7 +228,7 @@ func (h *Handler) GetNewFunctionByID(c *gin.Context) {
 		return
 	}
 
-	//environment, err := services.CompanyService().Environment().GetById(context.Background(), &company_service.EnvironmentPrimaryKey{
+	//environment, err := h.companyServices.Environment().GetById(context.Background(), &company_service.EnvironmentPrimaryKey{
 	//	Id: environmentId.(string),
 	//})
 	//if err != nil {
@@ -236,7 +236,7 @@ func (h *Handler) GetNewFunctionByID(c *gin.Context) {
 	//	return
 	//}
 	//if util.IsValidUUID(resourceId.(string)) {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
@@ -248,7 +248,7 @@ func (h *Handler) GetNewFunctionByID(c *gin.Context) {
 	//		return
 	//	}
 	//} else {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetDefaultResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
@@ -363,7 +363,7 @@ func (h *Handler) GetAllNewFunctions(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -376,7 +376,7 @@ func (h *Handler) GetAllNewFunctions(c *gin.Context) {
 		return
 	}
 
-	environment, err := services.CompanyService().Environment().GetById(
+	environment, err := h.companyServices.Environment().GetById(
 		context.Background(),
 		&company_service.EnvironmentPrimaryKey{
 			Id: environmentId.(string),
@@ -388,7 +388,7 @@ func (h *Handler) GetAllNewFunctions(c *gin.Context) {
 		return
 	}
 	//if util.IsValidUUID(resourceId.(string)) {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
@@ -400,7 +400,7 @@ func (h *Handler) GetAllNewFunctions(c *gin.Context) {
 	//		return
 	//	}
 	//} else {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetDefaultResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
@@ -479,7 +479,7 @@ func (h *Handler) UpdateNewFunction(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -491,11 +491,11 @@ func (h *Handler) UpdateNewFunction(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	environment, err := services.CompanyService().Environment().GetById(context.Background(), &company_service.EnvironmentPrimaryKey{
+	environment, err := h.companyServices.Environment().GetById(context.Background(), &company_service.EnvironmentPrimaryKey{
 		Id: environmentId.(string),
 	})
 	//if util.IsValidUUID(resourceId.(string)) {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
@@ -507,7 +507,7 @@ func (h *Handler) UpdateNewFunction(c *gin.Context) {
 	//		return
 	//	}
 	//} else {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetDefaultResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
@@ -588,7 +588,7 @@ func (h *Handler) DeleteNewFunction(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -600,7 +600,7 @@ func (h *Handler) DeleteNewFunction(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	//environment, err := services.CompanyService().Environment().GetById(context.Background(), &company_service.EnvironmentPrimaryKey{
+	//environment, err := h.companyServices.Environment().GetById(context.Background(), &company_service.EnvironmentPrimaryKey{
 	//	Id: environmentId.(string),
 	//})
 	resp, err := services.FunctionService().FunctionService().GetSingle(
@@ -636,7 +636,7 @@ func (h *Handler) DeleteNewFunction(c *gin.Context) {
 		return
 	}
 	//if util.IsValidUUID(resourceId.(string)) {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
@@ -648,7 +648,7 @@ func (h *Handler) DeleteNewFunction(c *gin.Context) {
 	//		return
 	//	}
 	//} else {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetDefaultResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
@@ -731,7 +731,7 @@ func (h *Handler) GetAllNewFunctionsForApp(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -743,7 +743,7 @@ func (h *Handler) GetAllNewFunctionsForApp(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+	//resourceEnvironment, err := h.companyServices.Resource().GetResEnvByResIdEnvId(
 	//	context.Background(),
 	//	&company_service.GetResEnvByResIdEnvIdRequest{
 	//		EnvironmentId: environmentId.(string),
@@ -802,25 +802,12 @@ func (h *Handler) InvokeFunctionByPath(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
+	// namespace := c.GetString("namespace")
+	// services, err := h.GetService(namespace)
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.Forbidden, err)
+	// 	return
+	// }
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -835,7 +822,7 @@ func (h *Handler) InvokeFunctionByPath(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -848,20 +835,7 @@ func (h *Handler) InvokeFunctionByPath(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
-
-	apiKeys, err := services.AuthService().ApiKey().GetList(context.Background(), &auth_service.GetListReq{
+	apiKeys, err := h.authService.ApiKey().GetList(context.Background(), &auth_service.GetListReq{
 		EnvironmentId: environmentId.(string),
 		ProjectId:     resource.ProjectId,
 	})
@@ -892,19 +866,7 @@ func (h *Handler) InvokeFunctionByPath(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, errStr)
 		return
 	}
-	// _, err = services.GetBuilderServiceByType(resource.NodeType).CustomEvent().UpdateByFunctionId(
-	// 	context.Background(),
-	// 	&obs.UpdateByFunctionIdRequest{
-	// 		FunctionId: invokeFunction.FunctionID,
-	// 		ObjectIds:  invokeFunction.ObjectIDs,
-	// 		FieldSlug:  function.Path + "_disable",
-	// 		ProjectId:  resourceEnvironment.GetId(),
-	// 	},
-	// )
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.GRPCError, err.Error())
-	// 	return
-	// }
+
 	h.handleResponse(c, status_http.Created, resp)
 }
 
@@ -960,7 +922,7 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 		return
 	}
 	// fmt.Println("\n Run func test #1", environmentId, "\n")
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),

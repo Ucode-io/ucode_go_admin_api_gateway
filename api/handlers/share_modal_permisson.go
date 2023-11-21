@@ -57,7 +57,7 @@ func (h *Handler) GetTablePermission(c *gin.Context) {
 	}
 
 	if !resourceIdOk {
-		resource, err := services.CompanyService().ServiceResource().GetSingle(
+		resource, err := h.companyServices.ServiceResource().GetSingle(
 			c.Request.Context(),
 			&pb.GetSingleServiceResourceReq{
 				ProjectId:     projectId.(string),
@@ -74,7 +74,7 @@ func (h *Handler) GetTablePermission(c *gin.Context) {
 		resourceEnvironmentId = resource.ResourceEnvironmentId
 		nodeType = resource.NodeType
 	} else {
-		resourceEnvironment, err := services.CompanyService().Resource().GetResourceEnvironment(
+		resourceEnvironment, err := h.companyServices.Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&pb.GetResourceEnvironmentReq{
 				EnvironmentId: environmentId.(string),
@@ -180,7 +180,7 @@ func (h *Handler) UpdateTablePermission(c *gin.Context) {
 	}
 
 	if !resourceIdOk {
-		resource, err := services.CompanyService().ServiceResource().GetSingle(
+		resource, err := h.companyServices.ServiceResource().GetSingle(
 			c.Request.Context(),
 			&pb.GetSingleServiceResourceReq{
 				ProjectId:     projectId.(string),
@@ -197,7 +197,7 @@ func (h *Handler) UpdateTablePermission(c *gin.Context) {
 		resourceType = resource.ResourceType
 		nodeType = resource.NodeType
 	} else {
-		resourceEnvironment, err := services.CompanyService().Resource().GetResourceEnvironment(
+		resourceEnvironment, err := h.companyServices.Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&pb.GetResourceEnvironmentReq{
 				EnvironmentId: environmentId.(string),

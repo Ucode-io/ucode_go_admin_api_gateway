@@ -144,7 +144,7 @@ func CreateCodeServerV2(data CodeServer) error {
 	return nil
 }
 
-func DeleteCodeServer(ctx context.Context, srvs services.ServiceManagerI, cfg config.Config) error {
+func DeleteCodeServer(ctx context.Context, srvs services.ServiceManagerI, cfg config.Config, comp services.CompanyServiceI) error {
 	log.Println("!!!---DeleteCodeServer--->")
 	var (
 		allFunctions = make([]*pb.Function, 0)
@@ -152,7 +152,7 @@ func DeleteCodeServer(ctx context.Context, srvs services.ServiceManagerI, cfg co
 	)
 
 	req := &company_service.GetListResourceEnvironmentReq{}
-	resEnvsIds, err := srvs.CompanyService().Resource().GetListResourceEnvironment(ctx, req)
+	resEnvsIds, err := comp.Resource().GetListResourceEnvironment(ctx, req)
 	if err != nil {
 		log.Println("error while getting resource environments")
 		return err

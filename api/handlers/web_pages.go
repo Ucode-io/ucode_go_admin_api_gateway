@@ -41,25 +41,12 @@ func (h *Handler) CreateWebPage(c *gin.Context) {
 		return
 	}
 
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
-
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -74,7 +61,7 @@ func (h *Handler) CreateWebPage(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -87,20 +74,7 @@ func (h *Handler) CreateWebPage(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
-
-	resp, err := h.companyServices.BuilderService().WebPage().Create(
+	resp, err := services.BuilderService().WebPage().Create(
 		context.Background(),
 		&obs.CreateWebPageRequest{
 			Title:      webPage.Title,
@@ -132,12 +106,6 @@ func (h *Handler) CreateWebPage(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetWebPagesById(c *gin.Context) {
 
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
 		err := errors.New("error getting resource id")
@@ -145,7 +113,14 @@ func (h *Handler) GetWebPagesById(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.BuilderService().WebPage().GetById(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.BuilderService().WebPage().GetById(
 		context.Background(),
 		&obs.WebPageId{
 			Id:        c.Param("guid"),
@@ -187,25 +162,12 @@ func (h *Handler) GetWebPagesList(c *gin.Context) {
 		return
 	}
 
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
-
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -220,7 +182,7 @@ func (h *Handler) GetWebPagesList(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -233,20 +195,7 @@ func (h *Handler) GetWebPagesList(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
-
-	resp, err := h.companyServices.BuilderService().WebPage().GetAll(
+	resp, err := services.BuilderService().WebPage().GetAll(
 		context.Background(),
 		&obs.GetAllWebPagesRequest{
 			Limit:     int32(limit),
@@ -293,25 +242,12 @@ func (h *Handler) UpdateWebPage(c *gin.Context) {
 		return
 	}
 
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
-
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -326,7 +262,7 @@ func (h *Handler) UpdateWebPage(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -339,20 +275,7 @@ func (h *Handler) UpdateWebPage(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
-
-	resp, err := h.companyServices.BuilderService().WebPage().Update(
+	resp, err := services.BuilderService().WebPage().Update(
 		context.Background(),
 		&obs.WebPage{
 			Id:         guid,
@@ -391,11 +314,12 @@ func (h *Handler) DeleteWebPage(c *gin.Context) {
 		return
 	}
 
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
 
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
@@ -404,7 +328,7 @@ func (h *Handler) DeleteWebPage(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.BuilderService().WebPage().Delete(
+	resp, err := services.BuilderService().WebPage().Delete(
 		context.Background(),
 		&obs.WebPageId{
 			Id:        webPageId,

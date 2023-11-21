@@ -74,7 +74,7 @@ func (h *Handler) CreateObject(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -307,7 +307,7 @@ func (h *Handler) GetSingle(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -423,7 +423,7 @@ func (h *Handler) GetSingleSlim(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -552,7 +552,7 @@ func (h *Handler) UpdateObject(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -687,7 +687,7 @@ func (h *Handler) UpdateObject(c *gin.Context) {
 			return
 		}
 
-		_, err = services.AuthService().Session().UpdateSessionsByRoleId(
+		_, err = h.authService.Session().UpdateSessionsByRoleId(
 			context.Background(),
 			&authPb.UpdateSessionByRoleIdRequest{
 				RoleId:    objectRequest.Data["role_id"].(string),
@@ -775,7 +775,7 @@ func (h *Handler) DeleteObject(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -960,7 +960,7 @@ func (h *Handler) GetList(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -1191,7 +1191,7 @@ func (h *Handler) GetListSlim(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -1314,7 +1314,7 @@ func (h *Handler) GetListInExcel(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -1336,7 +1336,7 @@ func (h *Handler) GetListInExcel(c *gin.Context) {
 		return
 	}
 	defer conn.Close()
-	
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = service.GetListInExcel(
@@ -1424,7 +1424,7 @@ func (h *Handler) DeleteManyToMany(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -1568,7 +1568,7 @@ func (h *Handler) AppendManyToMany(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -1713,7 +1713,7 @@ func (h *Handler) UpsertObject(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -1858,7 +1858,7 @@ func (h *Handler) UpsertObject(c *gin.Context) {
 			h.handleResponse(c, status_http.BadRequest, err.Error())
 			return
 		}
-		_, err = services.AuthService().Session().UpdateSessionsByRoleId(
+		_, err = h.authService.Session().UpdateSessionsByRoleId(
 			context.Background(),
 			&authPb.UpdateSessionByRoleIdRequest{
 				RoleId:    objectRequest.Data["role_id"].(string),
@@ -1937,7 +1937,7 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -1984,7 +1984,6 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 		return
 	}
 	objectRequest.Data["objects"] = editedObjects
-
 
 	fromOfs := c.Query("from-ofs")
 	if fromOfs != "true" {
@@ -2122,7 +2121,7 @@ func (h *Handler) GetFinancialAnalytics(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -2286,7 +2285,7 @@ func (h *Handler) GetListGroupBy(c *gin.Context) {
 			},
 		}
 	}
-	
+
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
@@ -2307,7 +2306,7 @@ func (h *Handler) GetListGroupBy(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -2329,7 +2328,7 @@ func (h *Handler) GetListGroupBy(c *gin.Context) {
 		return
 	}
 	defer conn.Close()
-	
+
 	structData, err := helper.ConvertMapToStruct(object.Data)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
@@ -2470,7 +2469,7 @@ func (h *Handler) GetGroupByField(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -2492,7 +2491,7 @@ func (h *Handler) GetGroupByField(c *gin.Context) {
 		return
 	}
 	defer conn.Close()
-	
+
 	fmt.Println("projectId: ", resource.ResourceEnvironmentId)
 
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
@@ -2597,7 +2596,7 @@ func (h *Handler) DeleteManyObject(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -2747,7 +2746,7 @@ func (h *Handler) GetListWithOutRelation(c *gin.Context) {
 		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
-	
+
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -2761,7 +2760,7 @@ func (h *Handler) GetListWithOutRelation(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),

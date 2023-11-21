@@ -36,13 +36,20 @@ func (h *Handler) CreateQuery(c *gin.Context) {
 		return
 	}
 
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
 	attributes, err := helper.ConvertMapToStruct(query.Attributes)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
 
-	resp, err := h.companyServices.BuilderService().Queries().Create(
+	resp, err := services.BuilderService().Queries().Create(
 		context.Background(),
 		&obs.CreateQueryRequest{
 			Title:         query.Title,
@@ -73,8 +80,15 @@ func (h *Handler) CreateQuery(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetQueryByID(c *gin.Context) {
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
 	guid := c.Param("guid")
-	resp, err := h.companyServices.BuilderService().Queries().GetById(
+	resp, err := services.BuilderService().Queries().GetById(
 		context.Background(),
 		&obs.QueryId{
 			Id: guid,
@@ -115,25 +129,12 @@ func (h *Handler) GetQueryList(c *gin.Context) {
 		return
 	}
 
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
-
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -148,7 +149,7 @@ func (h *Handler) GetQueryList(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -161,20 +162,7 @@ func (h *Handler) GetQueryList(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
-
-	resp, err := h.companyServices.BuilderService().Queries().GetAll(
+	resp, err := services.BuilderService().Queries().GetAll(
 		context.Background(),
 		&obs.GetAllQueriesRequest{
 			Limit:         int32(limit),
@@ -223,25 +211,12 @@ func (h *Handler) UpdateQuery(c *gin.Context) {
 		return
 	}
 
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
-
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -256,7 +231,7 @@ func (h *Handler) UpdateQuery(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -269,20 +244,7 @@ func (h *Handler) UpdateQuery(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
-
-	resp, err := h.companyServices.BuilderService().Queries().Update(
+	resp, err := services.BuilderService().Queries().Update(
 		context.Background(),
 		&obs.Query{
 			Id:            guid,
@@ -322,11 +284,12 @@ func (h *Handler) DeleteQuery(c *gin.Context) {
 		return
 	}
 
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
 
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
@@ -335,7 +298,7 @@ func (h *Handler) DeleteQuery(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.BuilderService().QueryFolder().Delete(
+	resp, err := services.BuilderService().QueryFolder().Delete(
 		context.Background(),
 		&obs.QueryFolderId{
 			Id:        queryId,

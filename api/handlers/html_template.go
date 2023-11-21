@@ -66,7 +66,7 @@ func (h *Handler) CreateHtmlTemplate(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -79,7 +79,7 @@ func (h *Handler) CreateHtmlTemplate(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+	//resourceEnvironment, err := h.companyServices.Resource().GetResEnvByResIdEnvId(
 	//	context.Background(),
 	//	&company_service.GetResEnvByResIdEnvIdRequest{
 	//		EnvironmentId: environmentId.(string),
@@ -159,7 +159,7 @@ func (h *Handler) GetSingleHtmlTemplate(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -172,7 +172,7 @@ func (h *Handler) GetSingleHtmlTemplate(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+	//resourceEnvironment, err := h.companyServices.Resource().GetResEnvByResIdEnvId(
 	//	context.Background(),
 	//	&company_service.GetResEnvByResIdEnvIdRequest{
 	//		EnvironmentId: environmentId.(string),
@@ -255,7 +255,7 @@ func (h *Handler) UpdateHtmlTemplate(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -268,7 +268,7 @@ func (h *Handler) UpdateHtmlTemplate(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+	//resourceEnvironment, err := h.companyServices.Resource().GetResEnvByResIdEnvId(
 	//	context.Background(),
 	//	&company_service.GetResEnvByResIdEnvIdRequest{
 	//		EnvironmentId: environmentId.(string),
@@ -349,7 +349,7 @@ func (h *Handler) DeleteHtmlTemplate(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -362,7 +362,7 @@ func (h *Handler) DeleteHtmlTemplate(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+	//resourceEnvironment, err := h.companyServices.Resource().GetResEnvByResIdEnvId(
 	//	context.Background(),
 	//	&company_service.GetResEnvByResIdEnvIdRequest{
 	//		EnvironmentId: environmentId.(string),
@@ -439,7 +439,7 @@ func (h *Handler) GetHtmlTemplateList(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -452,7 +452,7 @@ func (h *Handler) GetHtmlTemplateList(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+	//resourceEnvironment, err := h.companyServices.Resource().GetResEnvByResIdEnvId(
 	//	context.Background(),
 	//	&company_service.GetResEnvByResIdEnvIdRequest{
 	//		EnvironmentId: environmentId.(string),

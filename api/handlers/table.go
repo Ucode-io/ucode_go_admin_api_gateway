@@ -81,7 +81,7 @@ func (h *Handler) CreateTable(c *gin.Context) {
 	}
 
 	if !resourceIdOk {
-		resource, err := services.CompanyService().ServiceResource().GetSingle(
+		resource, err := h.companyServices.ServiceResource().GetSingle(
 			c.Request.Context(),
 			&pb.GetSingleServiceResourceReq{
 				ProjectId:     projectId.(string),
@@ -98,7 +98,7 @@ func (h *Handler) CreateTable(c *gin.Context) {
 		resourceType = resource.ResourceType
 		nodeType = resource.NodeType
 	} else {
-		resourceEnvironment, err := services.CompanyService().Resource().GetResourceEnvironment(
+		resourceEnvironment, err := h.companyServices.Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&pb.GetResourceEnvironmentReq{
 				EnvironmentId: environmentId.(string),
@@ -242,7 +242,7 @@ func (h *Handler) GetTableByID(c *gin.Context) {
 	}
 
 	if !resourceIdOk {
-		resource, err := services.CompanyService().ServiceResource().GetSingle(
+		resource, err := h.companyServices.ServiceResource().GetSingle(
 			c.Request.Context(),
 			&pb.GetSingleServiceResourceReq{
 				ProjectId:     projectId.(string),
@@ -259,7 +259,7 @@ func (h *Handler) GetTableByID(c *gin.Context) {
 		resourceType = resource.ResourceType
 		nodeType = resource.NodeType
 	} else {
-		resourceEnvironment, err := services.CompanyService().Resource().GetResourceEnvironment(
+		resourceEnvironment, err := h.companyServices.Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&pb.GetResourceEnvironmentReq{
 				EnvironmentId: environmentId.(string),
@@ -364,7 +364,7 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 	}
 
 	if !resourceIdOk {
-		resource, err := services.CompanyService().ServiceResource().GetSingle(
+		resource, err := h.companyServices.ServiceResource().GetSingle(
 			c.Request.Context(),
 			&pb.GetSingleServiceResourceReq{
 				ProjectId:     projectId.(string),
@@ -381,7 +381,7 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 		resourceType = resource.ResourceType
 		nodeType = resource.NodeType
 	} else {
-		resourceEnvironment, err := services.CompanyService().Resource().GetResourceEnvironment(
+		resourceEnvironment, err := h.companyServices.Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&pb.GetResourceEnvironmentReq{
 				EnvironmentId: environmentId.(string),
@@ -504,7 +504,7 @@ func (h *Handler) UpdateTable(c *gin.Context) {
 	}
 
 	if !resourceIdOk {
-		resource, err := services.CompanyService().ServiceResource().GetSingle(
+		resource, err := h.companyServices.ServiceResource().GetSingle(
 			c.Request.Context(),
 			&pb.GetSingleServiceResourceReq{
 				ProjectId:     projectId.(string),
@@ -521,7 +521,7 @@ func (h *Handler) UpdateTable(c *gin.Context) {
 		resourceType = resource.ResourceType
 		nodeType = resource.NodeType
 	} else {
-		resourceEnvironment, err := services.CompanyService().Resource().GetResourceEnvironment(
+		resourceEnvironment, err := h.companyServices.Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&pb.GetResourceEnvironmentReq{
 				EnvironmentId: environmentId.(string),
@@ -674,7 +674,7 @@ func (h *Handler) DeleteTable(c *gin.Context) {
 	}
 
 	if !resourceIdOk {
-		resource, err := services.CompanyService().ServiceResource().GetSingle(
+		resource, err := h.companyServices.ServiceResource().GetSingle(
 			c.Request.Context(),
 			&pb.GetSingleServiceResourceReq{
 				ProjectId:     projectId.(string),
@@ -691,7 +691,7 @@ func (h *Handler) DeleteTable(c *gin.Context) {
 		resourceType = resource.ResourceType
 		nodeType = resource.NodeType
 	} else {
-		resourceEnvironment, err := services.CompanyService().Resource().GetResourceEnvironment(
+		resourceEnvironment, err := h.companyServices.Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&pb.GetResourceEnvironmentReq{
 				EnvironmentId: environmentId.(string),
@@ -779,7 +779,7 @@ func (h *Handler) GetListTableHistory(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -846,7 +846,7 @@ func (h *Handler) GetTableHistoryById(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -925,7 +925,7 @@ func (h *Handler) RevertTableHistory(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -1001,7 +1001,7 @@ func (h *Handler) InsetrVersionsIdsToTableHistory(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -1112,7 +1112,7 @@ func (h *Handler) GetTableDetails(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),

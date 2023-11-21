@@ -79,7 +79,7 @@ func (h *Handler) CreateWebPageFolder(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -96,7 +96,7 @@ func (h *Handler) CreateWebPageFolder(c *gin.Context) {
 	folder.ProjectId = projectId.(string)
 	folder.ResourceId = resource.ResourceEnvironmentId
 	//if util.IsValidUUID(environmentId.(string)) {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
@@ -108,7 +108,7 @@ func (h *Handler) CreateWebPageFolder(c *gin.Context) {
 	//		return
 	//	}
 	//} else {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetDefaultResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
@@ -192,7 +192,7 @@ func (h *Handler) GetSingleWebPageFolder(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -206,7 +206,7 @@ func (h *Handler) GetSingleWebPageFolder(c *gin.Context) {
 	}
 	//
 	//if util.IsValidUUID(environmentId.(string)) {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
@@ -218,7 +218,7 @@ func (h *Handler) GetSingleWebPageFolder(c *gin.Context) {
 	//		return
 	//	}
 	//} else {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetDefaultResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
@@ -307,7 +307,7 @@ func (h *Handler) UpdateWebPageFolder(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -321,7 +321,7 @@ func (h *Handler) UpdateWebPageFolder(c *gin.Context) {
 	}
 	folder.EnvironmentId = environmentId.(string)
 	//if util.IsValidUUID(environmentId.(string)) {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
@@ -333,7 +333,7 @@ func (h *Handler) UpdateWebPageFolder(c *gin.Context) {
 	//		return
 	//	}
 	//} else {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetDefaultResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
@@ -418,7 +418,7 @@ func (h *Handler) DeleteWebPageFolder(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -432,7 +432,7 @@ func (h *Handler) DeleteWebPageFolder(c *gin.Context) {
 	}
 	//
 	//if util.IsValidUUID(environmentId.(string)) {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
@@ -444,7 +444,7 @@ func (h *Handler) DeleteWebPageFolder(c *gin.Context) {
 	//		return
 	//	}
 	//} else {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetDefaultResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
@@ -526,7 +526,7 @@ func (h *Handler) GetListWebPageFolder(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -540,7 +540,7 @@ func (h *Handler) GetListWebPageFolder(c *gin.Context) {
 	}
 	//
 	//if util.IsValidUUID(environmentId.(string)) {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
@@ -552,7 +552,7 @@ func (h *Handler) GetListWebPageFolder(c *gin.Context) {
 	//		return
 	//	}
 	//} else {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetDefaultResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
@@ -640,7 +640,7 @@ func (h *Handler) CreateWebPageV2(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -654,7 +654,7 @@ func (h *Handler) CreateWebPageV2(c *gin.Context) {
 	}
 	webpage.EnvironmentId = environmentId.(string)
 	//if util.IsValidUUID(environmentId.(string)) {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
@@ -666,7 +666,7 @@ func (h *Handler) CreateWebPageV2(c *gin.Context) {
 	//		return
 	//	}
 	//} else {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetDefaultResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
@@ -773,7 +773,7 @@ func (h *Handler) GetSingleWebPageV2(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -787,7 +787,7 @@ func (h *Handler) GetSingleWebPageV2(c *gin.Context) {
 	}
 	//
 	//if util.IsValidUUID(environmentId.(string)) {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
@@ -799,7 +799,7 @@ func (h *Handler) GetSingleWebPageV2(c *gin.Context) {
 	//		return
 	//	}
 	//} else {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetDefaultResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
@@ -914,7 +914,7 @@ func (h *Handler) UpdateWebPageV2(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -928,7 +928,7 @@ func (h *Handler) UpdateWebPageV2(c *gin.Context) {
 	}
 	webPage.EnvironmentId = environmentId.(string)
 	//if util.IsValidUUID(environmentId.(string)) {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
@@ -940,7 +940,7 @@ func (h *Handler) UpdateWebPageV2(c *gin.Context) {
 	//		return
 	//	}
 	//} else {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetDefaultResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
@@ -1055,7 +1055,7 @@ func (h *Handler) DeleteWebPageV2(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -1069,7 +1069,7 @@ func (h *Handler) DeleteWebPageV2(c *gin.Context) {
 	}
 	//
 	//if util.IsValidUUID(environmentId.(string)) {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
@@ -1081,7 +1081,7 @@ func (h *Handler) DeleteWebPageV2(c *gin.Context) {
 	//		return
 	//	}
 	//} else {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetDefaultResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
@@ -1179,7 +1179,7 @@ func (h *Handler) GetListWebPageV2(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -1193,7 +1193,7 @@ func (h *Handler) GetListWebPageV2(c *gin.Context) {
 	}
 
 	//if util.IsValidUUID(environmentId.(string)) {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
@@ -1205,7 +1205,7 @@ func (h *Handler) GetListWebPageV2(c *gin.Context) {
 	//		return
 	//	}
 	//} else {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetDefaultResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
@@ -1299,7 +1299,7 @@ func (h *Handler) GetWebPageHistory(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -1453,7 +1453,7 @@ func (h *Handler) RevertWebPage(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -1555,7 +1555,7 @@ func (h *Handler) InsertManyVersionForWebPageService(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),

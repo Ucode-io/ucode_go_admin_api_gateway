@@ -10,7 +10,7 @@ import (
 
 type Cronjob struct {
 	Interval time.Duration
-	Function func(context.Context, services.ServiceManagerI, config.Config) error
+	Function func(context.Context, services.ServiceManagerI, config.Config, services.CompanyServiceI) error
 }
 
 func ExecuteCron() []Cronjob {

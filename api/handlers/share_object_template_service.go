@@ -69,7 +69,7 @@ func (h *Handler) CreateUserTemplate(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -83,7 +83,7 @@ func (h *Handler) CreateUserTemplate(c *gin.Context) {
 	}
 
 	//if util.IsValidUUID(environmentId.(string)) {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
@@ -95,7 +95,7 @@ func (h *Handler) CreateUserTemplate(c *gin.Context) {
 	//		return
 	//	}
 	//} else {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetDefaultResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
@@ -186,7 +186,7 @@ func (h *Handler) GetSingleUserTemplate(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -200,7 +200,7 @@ func (h *Handler) GetSingleUserTemplate(c *gin.Context) {
 	}
 
 	//if util.IsValidUUID(environmentId.(string)) {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
@@ -212,7 +212,7 @@ func (h *Handler) GetSingleUserTemplate(c *gin.Context) {
 	//		return
 	//	}
 	//} else {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetDefaultResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
@@ -300,7 +300,7 @@ func (h *Handler) UpdateUserTemplate(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -314,7 +314,7 @@ func (h *Handler) UpdateUserTemplate(c *gin.Context) {
 	}
 
 	//if util.IsValidUUID(environmentId.(string)) {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
@@ -326,7 +326,7 @@ func (h *Handler) UpdateUserTemplate(c *gin.Context) {
 	//		return
 	//	}
 	//} else {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetDefaultResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
@@ -417,7 +417,7 @@ func (h *Handler) DeleteUserTemplate(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -431,7 +431,7 @@ func (h *Handler) DeleteUserTemplate(c *gin.Context) {
 	}
 
 	//if util.IsValidUUID(environmentId.(string)) {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
@@ -443,7 +443,7 @@ func (h *Handler) DeleteUserTemplate(c *gin.Context) {
 	//		return
 	//	}
 	//} else {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetDefaultResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
@@ -525,7 +525,7 @@ func (h *Handler) GetListUserTemplate(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -539,7 +539,7 @@ func (h *Handler) GetListUserTemplate(c *gin.Context) {
 	}
 
 	//if util.IsValidUUID(environmentId.(string)) {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
@@ -551,7 +551,7 @@ func (h *Handler) GetListUserTemplate(c *gin.Context) {
 	//		return
 	//	}
 	//} else {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetDefaultResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
@@ -639,7 +639,7 @@ func (h *Handler) CreateSharingToken(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -653,7 +653,7 @@ func (h *Handler) CreateSharingToken(c *gin.Context) {
 	}
 
 	//if util.IsValidUUID(environmentId.(string)) {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
@@ -665,7 +665,7 @@ func (h *Handler) CreateSharingToken(c *gin.Context) {
 	//		return
 	//	}
 	//} else {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetDefaultResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
@@ -758,7 +758,7 @@ func (h *Handler) UpdateSharingToken(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -772,7 +772,7 @@ func (h *Handler) UpdateSharingToken(c *gin.Context) {
 	}
 
 	//if util.IsValidUUID(environmentId.(string)) {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
@@ -784,7 +784,7 @@ func (h *Handler) UpdateSharingToken(c *gin.Context) {
 	//		return
 	//	}
 	//} else {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetDefaultResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
@@ -874,7 +874,7 @@ func (h *Handler) GetObjectToken(c *gin.Context) {
 	//}
 	//
 	//if util.IsValidUUID(environmentId.(string)) {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
@@ -886,7 +886,7 @@ func (h *Handler) GetObjectToken(c *gin.Context) {
 	//		return
 	//	}
 	//} else {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetDefaultResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
@@ -910,7 +910,7 @@ func (h *Handler) GetObjectToken(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),

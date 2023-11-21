@@ -100,7 +100,7 @@ func (h *Handler) CreateApiReference(c *gin.Context) {
 		AuthorId:   authInfo.GetUserId(),
 		ProjectId:  projectId.(string),
 	}
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -192,7 +192,7 @@ func (h *Handler) GetApiReferenceByID(c *gin.Context) {
 		// version_id = activeVersion.GetVersionId()
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -302,7 +302,7 @@ func (h *Handler) GetAllApiReferences(c *gin.Context) {
 	// 	h.handleResponse(c, status_http.GRPCError, err.Error())
 	// 	return
 	// }
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -416,7 +416,7 @@ func (h *Handler) UpdateApiReference(c *gin.Context) {
 		AuthorId:   authInfo.GetUserId(),
 		ProjectId:  projectId.(string),
 	}
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -492,7 +492,7 @@ func (h *Handler) DeleteApiReference(c *gin.Context) {
 	// 	h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err).Error())
 	// 	return
 	// }
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -581,7 +581,7 @@ func (h *Handler) GetApiReferenceChanges(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"+err.Error()))
 		return
 	}
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -748,7 +748,7 @@ func (h *Handler) RevertApiReference(c *gin.Context) {
 	// 	h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err).Error())
 	// 	return
 	// }
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -846,7 +846,7 @@ func (h *Handler) InsertManyVersionForApiReference(c *gin.Context) {
 	// 	h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err).Error())
 	// 	return
 	// }
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),

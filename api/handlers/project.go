@@ -27,7 +27,7 @@ import (
 func (h *Handler) GetCompanyProjectById(c *gin.Context) {
 	projectId := c.Param("project_id")
 
-	resp, err := h.companyServices.CompanyService().Project().GetById(
+	resp, err := h.companyServices.Project().GetById(
 		context.Background(),
 		&company_service.GetProjectByIdRequest{
 			ProjectId: projectId,
@@ -85,7 +85,7 @@ func (h *Handler) GetCompanyProjectList(c *gin.Context) {
 		}
 	}
 
-	resp, err := h.companyServices.CompanyService().Project().GetList(
+	resp, err := h.companyServices.Project().GetList(
 		context.Background(),
 		&company_service.GetProjectListRequest{
 			Limit:     int32(limit),
@@ -140,7 +140,7 @@ func (h *Handler) UpdateCompanyProject(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.CompanyService().Project().Update(
+	resp, err := h.companyServices.Project().Update(
 		context.Background(),
 		&project,
 	)
@@ -169,7 +169,7 @@ func (h *Handler) UpdateCompanyProject(c *gin.Context) {
 func (h *Handler) DeleteCompanyProject(c *gin.Context) {
 	projectId := c.Param("project_id")
 
-	resp, err := h.companyServices.CompanyService().Project().Delete(
+	resp, err := h.companyServices.Project().Delete(
 		context.Background(),
 		&company_service.DeleteProjectRequest{
 			ProjectId: projectId,

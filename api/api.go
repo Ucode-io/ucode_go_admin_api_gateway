@@ -701,7 +701,7 @@ func RedirectUrl(c *gin.Context, h *handlers.Handler) (*gin.Context, error) {
 		ProjectId: projectId.(string),
 		EnvId:     envId.(string),
 		Path:      path,
-	})
+	}, h.GetCompanyService(c))
 	if err != nil {
 		return c, errors.New("cant change")
 	}

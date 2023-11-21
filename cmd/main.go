@@ -45,12 +45,21 @@ func main() {
 
 	newRedis := redis.NewRedis(cfg)
 
+	// auth connection
 	authSrvc, err := services.NewAuthGrpcClient(ctx, cfg)
 	if err != nil {
 		log.Error("[ucode] error while establishing auth grpc conn", logger.Error(err))
 		return
 	}
 
+	// company connection
+	compSrvc, err := services.NewCompanyServiceClient(ctx, cfg)
+	if err != nil {
+		log.Error("[ucode] error while establishing company grpc conn", logger.Error(err))
+		return
+	}
+
+	// separately services connections
 	grpcSvcs, err := services.NewGrpcClients(ctx, cfg)
 	if err != nil {
 		log.Error("[ucode] error while establishing grpc conn", logger.Error(err))
@@ -64,17 +73,16 @@ func main() {
 
 	r.Use(gin.Logger(), gin.Recovery())
 
-	h := handlers.NewHandler(cfg, log, serviceNodes, grpcSvcs, authSrvc, newRedis)
+	h := handlers.NewHandler(cfg, log, serviceNodes, compSrvc, authSrvc, newRedis)
 
 	api.SetUpAPI(r, h, cfg)
 	cronjobs := crons.ExecuteCron()
 	for _, cronjob := range cronjobs {
 		go func(ctx context.Context, cronjob crons.Cronjob) {
 			for {
-				// tc := time.NewTicker(cronjob.Interval)
 				select {
 				case <-time.After(cronjob.Interval):
-					err := cronjob.Function(ctx, grpcSvcs, cfg)
+					err := cronjob.Function(ctx, grpcSvcs, cfg, compSrvc)
 					if err != nil {
 					}
 				case <-ctx.Done():

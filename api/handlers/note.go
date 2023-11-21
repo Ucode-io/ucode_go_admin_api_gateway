@@ -72,7 +72,7 @@ func (h *Handler) CreateNoteFolder(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -86,7 +86,7 @@ func (h *Handler) CreateNoteFolder(c *gin.Context) {
 	}
 
 	//if util.IsValidUUID(environmentId.(string)) {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
@@ -98,7 +98,7 @@ func (h *Handler) CreateNoteFolder(c *gin.Context) {
 	//		return
 	//	}
 	//} else {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetDefaultResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
@@ -192,7 +192,7 @@ func (h *Handler) GetSingleNoteFolder(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -206,7 +206,7 @@ func (h *Handler) GetSingleNoteFolder(c *gin.Context) {
 	}
 
 	//if util.IsValidUUID(environmentId.(string)) {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
@@ -218,7 +218,7 @@ func (h *Handler) GetSingleNoteFolder(c *gin.Context) {
 	//		return
 	//	}
 	//} else {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetDefaultResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
@@ -307,7 +307,7 @@ func (h *Handler) UpdateNoteFolder(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -321,7 +321,7 @@ func (h *Handler) UpdateNoteFolder(c *gin.Context) {
 	}
 
 	//if util.IsValidUUID(environmentId.(string)) {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
@@ -333,7 +333,7 @@ func (h *Handler) UpdateNoteFolder(c *gin.Context) {
 	//		return
 	//	}
 	//} else {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetDefaultResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
@@ -427,7 +427,7 @@ func (h *Handler) DeleteNoteFolder(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -441,7 +441,7 @@ func (h *Handler) DeleteNoteFolder(c *gin.Context) {
 	}
 
 	//if util.IsValidUUID(environmentId.(string)) {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
@@ -453,7 +453,7 @@ func (h *Handler) DeleteNoteFolder(c *gin.Context) {
 	//		return
 	//	}
 	//} else {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetDefaultResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
@@ -534,7 +534,7 @@ func (h *Handler) GetListNoteFolder(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -548,7 +548,7 @@ func (h *Handler) GetListNoteFolder(c *gin.Context) {
 	}
 
 	//if util.IsValidUUID(environmentId.(string)) {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
@@ -560,7 +560,7 @@ func (h *Handler) GetListNoteFolder(c *gin.Context) {
 	//		return
 	//	}
 	//} else {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetDefaultResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
@@ -640,7 +640,7 @@ func (h *Handler) GetNoteFolderCommits(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -654,7 +654,7 @@ func (h *Handler) GetNoteFolderCommits(c *gin.Context) {
 	}
 
 	//if util.IsValidUUID(environmentId.(string)) {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
@@ -666,7 +666,7 @@ func (h *Handler) GetNoteFolderCommits(c *gin.Context) {
 	//		return
 	//	}
 	//} else {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetDefaultResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
@@ -745,7 +745,7 @@ func (h *Handler) CreateNote(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -854,7 +854,7 @@ func (h *Handler) GetSingleNote(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -907,7 +907,7 @@ func (h *Handler) GetSingleNoteWithoutToken(c *gin.Context) {
 
 	environmentId := c.DefaultQuery("environment_id", "")
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId,
@@ -996,7 +996,7 @@ func (h *Handler) UpdateNote(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -1010,7 +1010,7 @@ func (h *Handler) UpdateNote(c *gin.Context) {
 	}
 
 	//if util.IsValidUUID(environmentId.(string)) {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
@@ -1022,7 +1022,7 @@ func (h *Handler) UpdateNote(c *gin.Context) {
 	//		return
 	//	}
 	//} else {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetDefaultResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
@@ -1116,7 +1116,7 @@ func (h *Handler) DeleteNote(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -1130,7 +1130,7 @@ func (h *Handler) DeleteNote(c *gin.Context) {
 	}
 
 	//if util.IsValidUUID(environmentId.(string)) {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
@@ -1142,7 +1142,7 @@ func (h *Handler) DeleteNote(c *gin.Context) {
 	//		return
 	//	}
 	//} else {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetDefaultResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
@@ -1237,7 +1237,7 @@ func (h *Handler) GetListNote(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -1251,7 +1251,7 @@ func (h *Handler) GetListNote(c *gin.Context) {
 	}
 
 	//if util.IsValidUUID(environmentId.(string)) {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
@@ -1263,7 +1263,7 @@ func (h *Handler) GetListNote(c *gin.Context) {
 	//		return
 	//	}
 	//} else {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetDefaultResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
@@ -1346,7 +1346,7 @@ func (h *Handler) GetNoteCommits(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -1360,7 +1360,7 @@ func (h *Handler) GetNoteCommits(c *gin.Context) {
 	}
 
 	//if util.IsValidUUID(environmentId.(string)) {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
@@ -1372,7 +1372,7 @@ func (h *Handler) GetNoteCommits(c *gin.Context) {
 	//		return
 	//	}
 	//} else {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+	//	resourceEnvironment, err = h.companyServices.Resource().GetDefaultResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),

@@ -31,7 +31,14 @@ func (h *Handler) CreateCommit(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.VersioningService().Commit().Create(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.VersioningService().Commit().Create(
 		context.Background(),
 		&commit,
 	)
@@ -65,7 +72,14 @@ func (h *Handler) GetCommitByID(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.VersioningService().Commit().GetByID(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.VersioningService().Commit().GetByID(
 		context.Background(),
 		&obs.CommitPrimaryKey{
 			Id: commitID,
@@ -105,13 +119,20 @@ func (h *Handler) GetAllCommits(c *gin.Context) {
 		return
 	}
 
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
-	resp, err := h.companyServices.VersioningService().Commit().GetList(
+	resp, err := services.VersioningService().Commit().GetList(
 		context.Background(),
 		&obs.GetCommitListRequest{
 			Limit:         int32(limit),

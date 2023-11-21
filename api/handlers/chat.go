@@ -47,7 +47,14 @@ func (h *Handler) CreatChat(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.ChatService().Chat().CreateChat(c.Request.Context(), &chat_service.CreateChatRequest{
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.ChatService().Chat().CreateChat(c.Request.Context(), &chat_service.CreateChatRequest{
 		UserId: body.UserId,
 		Chat: &chat_service.Chat{
 			SenderName:    body.Chat.Sender_name,
@@ -93,8 +100,15 @@ func (h *Handler) GetChatList(c *gin.Context) {
 		return
 	}
 
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
 	Search := c.Query("search")
-	resp, err := h.companyServices.ChatService().Chat().GetChatList(c.Request.Context(), &chat_service.GetChatListRequest{
+	resp, err := services.ChatService().Chat().GetChatList(c.Request.Context(), &chat_service.GetChatListRequest{
 		EnvironmentId: environmentID.(string),
 		Search:        Search,
 	})
@@ -127,8 +141,15 @@ func (h *Handler) GetChatByChatID(c *gin.Context) {
 		return
 	}
 
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
 	idstr := c.Param("id")
-	resp, err := h.companyServices.ChatService().Chat().GetChatByChatId(c.Request.Context(), &chat_service.GetChatByChatIdRequest{
+	resp, err := services.ChatService().Chat().GetChatByChatId(c.Request.Context(), &chat_service.GetChatByChatIdRequest{
 		ChatId: idstr,
 	})
 
@@ -165,6 +186,13 @@ func (h *Handler) CreateBot(c *gin.Context) {
 		return
 	}
 
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
 	environmentId, ok := c.Get("environment_id")
 
 	if !ok {
@@ -176,7 +204,7 @@ func (h *Handler) CreateBot(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, "environment_id not found")
 		return
 	}
-	resp, err := h.companyServices.ChatService().Chat().CreateBot(c.Request.Context(), &chat_service.CreateBotRequest{
+	resp, err := services.ChatService().Chat().CreateBot(c.Request.Context(), &chat_service.CreateBotRequest{
 		BotToken:      body.BotToken,
 		EnvironmentId: environmentId.(string),
 	})
@@ -215,7 +243,14 @@ func (h *Handler) GetBotTokenList(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.ChatService().Chat().GetBotTokenList(c.Request.Context(), &chat_service.GetBotTokenListRequest{
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.ChatService().Chat().GetBotTokenList(c.Request.Context(), &chat_service.GetBotTokenListRequest{
 		EnvironmentId: environmentId.(string),
 	})
 
@@ -253,7 +288,14 @@ func (h *Handler) UpdateBotToken(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.ChatService().Chat().UpdateBotToken(c.Request.Context(), &chat_service.UpdateBotTokenRequest{
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.ChatService().Chat().UpdateBotToken(c.Request.Context(), &chat_service.UpdateBotTokenRequest{
 		BotId:    body.BotId,
 		BotToken: body.BotToken,
 	})
@@ -285,8 +327,16 @@ func (h *Handler) DeleteBotToken(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, "id not found")
 		return
 	}
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
 	idstr := c.Param("id")
-	resp, err := h.companyServices.ChatService().Chat().DeleteBotToken(c.Request.Context(), &chat_service.DeleteBotTokenRequest{
+	resp, err := services.ChatService().Chat().DeleteBotToken(c.Request.Context(), &chat_service.DeleteBotTokenRequest{
 		BotId: idstr,
 	})
 
@@ -317,8 +367,16 @@ func (h *Handler) GetBotTokenByBotID(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, "id not found")
 		return
 	}
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
 	idstr := c.Param("id")
-	resp, err := h.companyServices.ChatService().Chat().GetBotTokenByBotId(c.Request.Context(), &chat_service.GetBotByBotIdRequest{
+	resp, err := services.ChatService().Chat().GetBotTokenByBotId(c.Request.Context(), &chat_service.GetBotByBotIdRequest{
 		BotId: idstr,
 	})
 

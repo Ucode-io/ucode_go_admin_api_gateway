@@ -81,7 +81,7 @@ func (h *Handler) CreateField(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -95,7 +95,7 @@ func (h *Handler) CreateField(c *gin.Context) {
 	}
 	if fieldRequest.EnableMultilanguage {
 		if fieldRequest.Type == "SINGLE_LINE" || fieldRequest.Type == "MULTI_LINE" {
-			languages, err := services.CompanyService().Project().GetById(context.Background(), &pb.GetProjectByIdRequest{
+			languages, err := h.companyServices.Project().GetById(context.Background(), &pb.GetProjectByIdRequest{
 				ProjectId: resource.GetProjectId(),
 			})
 			if err != nil {
@@ -262,7 +262,7 @@ func (h *Handler) GetAllFields(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -275,7 +275,7 @@ func (h *Handler) GetAllFields(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+	//resourceEnvironment, err := h.companyServices.Resource().GetResEnvByResIdEnvId(
 	//	context.Background(),
 	//	&company_service.GetResEnvByResIdEnvIdRequest{
 	//		EnvironmentId: environmentId.(string),
@@ -417,7 +417,7 @@ func (h *Handler) UpdateField(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -459,7 +459,7 @@ func (h *Handler) UpdateField(c *gin.Context) {
 	} else {
 		// do nothing
 		// field.EnableMultilanguage = true
-		// languaegs, err := services.CompanyService().Project().GetById(context.Background(), &pb.GetProjectByIdRequest{
+		// languaegs, err := h.companyServices.Project().GetById(context.Background(), &pb.GetProjectByIdRequest{
 		// 	ProjectId: resource.GetProjectId(),
 		// })
 		// if err != nil {
@@ -584,7 +584,7 @@ func (h *Handler) DeleteField(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -597,7 +597,7 @@ func (h *Handler) DeleteField(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+	//resourceEnvironment, err := h.companyServices.Resource().GetResEnvByResIdEnvId(
 	//	context.Background(),
 	//	&company_service.GetResEnvByResIdEnvIdRequest{
 	//		EnvironmentId: environmentId.(string),

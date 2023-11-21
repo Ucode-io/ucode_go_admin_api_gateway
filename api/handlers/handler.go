@@ -16,13 +16,13 @@ type Handler struct {
 	log             logger.LoggerI
 	services        services.ServiceNodesI
 	storage         storage.StorageI
-	companyServices services.ServiceManagerI
+	companyServices services.CompanyServiceI
 	authService     services.AuthServiceManagerI
 	apikeyService   services.AuthServiceManagerI
 	redis           storage.RedisStorageI
 }
 
-func NewHandler(cfg config.Config, log logger.LoggerI, svcs services.ServiceNodesI, cmpServ services.ServiceManagerI, authService services.AuthServiceManagerI, redis storage.RedisStorageI) Handler {
+func NewHandler(cfg config.Config, log logger.LoggerI, svcs services.ServiceNodesI, cmpServ services.CompanyServiceI, authService services.AuthServiceManagerI, redis storage.RedisStorageI) Handler {
 	return Handler{
 		cfg:             cfg,
 		log:             log,
@@ -31,6 +31,14 @@ func NewHandler(cfg config.Config, log logger.LoggerI, svcs services.ServiceNode
 		authService:     authService,
 		redis:           redis,
 	}
+}
+
+func (h *Handler) GetCompanyService(c *gin.Context) services.CompanyServiceI {
+	return h.companyServices
+}
+
+func (h *Handler) GetAuthService(c *gin.Context) services.AuthServiceManagerI {
+	return h.authService
 }
 
 func (h *Handler) handleResponse(c *gin.Context, status status_http.Status, data interface{}) {

@@ -39,7 +39,7 @@ func (h *Handler) GetGlobalCompanyProjectList(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.CompanyService().Project().GetList(
+	resp, err := h.companyServices.Project().GetList(
 		context.Background(),
 		&company_service.GetProjectListRequest{
 			Limit:     int32(limit),
@@ -79,7 +79,7 @@ func (h *Handler) GetGlobalProjectEnvironments(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.CompanyService().Environment().GetList(
+	resp, err := h.companyServices.Environment().GetList(
 		c.Request.Context(),
 		&pb.GetEnvironmentListRequest{
 			Offset:    int32(offset),
@@ -138,7 +138,7 @@ func (h *Handler) GetGlobalProjectTemplate(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),

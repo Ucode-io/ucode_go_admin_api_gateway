@@ -49,7 +49,7 @@ func (h *Handler) AddResourceToProject(c *gin.Context) {
 	request.ProjectId = projectId.(string)
 	request.EnvironmentId = environmentId.(string)
 
-	resp, err := h.companyServices.CompanyService().Resource().AddResourceToProject(
+	resp, err := h.companyServices.Resource().AddResourceToProject(
 		context.Background(),
 		request,
 	)
@@ -99,7 +99,7 @@ func (h *Handler) UpdateProjectResource(c *gin.Context) {
 	request.ProjectId = projectId.(string)
 	request.EnvironmentId = environmentId.(string)
 
-	resp, err := h.companyServices.CompanyService().Resource().UpdateProjectResource(
+	resp, err := h.companyServices.Resource().UpdateProjectResource(
 		context.Background(),
 		request,
 	)
@@ -149,7 +149,7 @@ func (h *Handler) GetListProjectResourceList(c *gin.Context) {
 		request.Type = pb.ResourceType(pb.ResourceType_value[c.DefaultQuery("type", "")])
 	}
 
-	resp, err := h.companyServices.CompanyService().Resource().GetProjectResourceList(
+	resp, err := h.companyServices.Resource().GetProjectResourceList(
 		context.Background(),
 		request,
 	)
@@ -196,7 +196,7 @@ func (h *Handler) GetSingleProjectResource(c *gin.Context) {
 	request.EnvironmentId = environmentId.(string)
 	request.Id = c.Param("id")
 
-	resp, err := h.companyServices.CompanyService().Resource().GetSingleProjectResouece(
+	resp, err := h.companyServices.Resource().GetSingleProjectResouece(
 		context.Background(),
 		request,
 	)
@@ -243,7 +243,7 @@ func (h *Handler) DeleteProjectResource(c *gin.Context) {
 	request.EnvironmentId = environmentId.(string)
 	request.Id = c.Param("id")
 
-	resp, err := h.companyServices.CompanyService().Resource().DeleteProjectResource(
+	resp, err := h.companyServices.Resource().DeleteProjectResource(
 		c.Request.Context(),
 		request,
 	)

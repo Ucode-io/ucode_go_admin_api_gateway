@@ -26,7 +26,7 @@ import (
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetResource(c *gin.Context) {
 
-	resp, err := h.companyServices.CompanyService().Resource().GetResource(
+	resp, err := h.companyServices.Resource().GetResource(
 		context.Background(),
 		&company_service.GetResourceRequest{
 			Id: c.Param("resource_id"),
@@ -78,7 +78,7 @@ func (h *Handler) AddProjectResource(c *gin.Context) {
 		}
 	}
 
-	resp, err := h.companyServices.CompanyService().Resource().AddResource(
+	resp, err := h.companyServices.Resource().AddResource(
 		c.Request.Context(),
 		&company,
 	)
@@ -128,7 +128,7 @@ func (h *Handler) ConfigureProjectResource(c *gin.Context) {
 		}
 	}
 
-	resp, err := h.companyServices.CompanyService().Resource().ConfigureResource(
+	resp, err := h.companyServices.Resource().ConfigureResource(
 		c.Request.Context(),
 		&company,
 	)
@@ -163,7 +163,7 @@ func (h *Handler) CreateProjectResource(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.CompanyService().Resource().CreateResource(
+	resp, err := h.companyServices.Resource().CreateResource(
 		c.Request.Context(),
 		&company,
 	)
@@ -198,7 +198,7 @@ func (h *Handler) RemoveProjectResource(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.CompanyService().Resource().RemoveResource(
+	resp, err := h.companyServices.Resource().RemoveResource(
 		c.Request.Context(),
 		&company,
 	)
@@ -233,7 +233,7 @@ func (h *Handler) UpdateResource(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.CompanyService().Resource().UpdateResource(
+	resp, err := h.companyServices.Resource().UpdateResource(
 		c.Request.Context(),
 		&resource,
 	)
@@ -273,13 +273,13 @@ func (h *Handler) GetResourceList(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.CompanyService().Resource().GetResourceList(
+	resp, err := h.companyServices.Resource().GetResourceList(
 		context.Background(),
 		&company_service.GetResourceListRequest{
-			Limit:     int32(limit),
-			Offset:    int32(offset),
-			Search:    c.DefaultQuery("search", ""),
-			ProjectId: c.DefaultQuery("project_id", ""),
+			Limit:         int32(limit),
+			Offset:        int32(offset),
+			Search:        c.DefaultQuery("search", ""),
+			ProjectId:     c.DefaultQuery("project_id", ""),
 			EnvironmentId: c.DefaultQuery("environment_id", ""),
 		},
 	)
@@ -322,7 +322,7 @@ func (h *Handler) ReconnectProjectResource(c *gin.Context) {
 
 	company.ProjectId = projectId.(string)
 
-	resp, err := h.companyServices.CompanyService().Resource().ReconnectResource(
+	resp, err := h.companyServices.Resource().ReconnectResource(
 		c.Request.Context(),
 		&company,
 	)
@@ -350,7 +350,7 @@ func (h *Handler) ReconnectProjectResource(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetResourceEnvironment(c *gin.Context) {
 
-	resp, err := h.companyServices.CompanyService().Resource().GetResourceByResEnvironId(
+	resp, err := h.companyServices.Resource().GetResourceByResEnvironId(
 		context.Background(),
 		&company_service.GetResourceRequest{
 			Id: c.Param("resource_id"),
@@ -385,7 +385,7 @@ func (h *Handler) GetServiceResources(c *gin.Context) {
 		return
 	}
 
-	res, err := h.companyServices.CompanyService().Resource().GetServiceResources(c.Request.Context(), &company_service.GetServiceResourcesReq{
+	res, err := h.companyServices.Resource().GetServiceResources(c.Request.Context(), &company_service.GetServiceResourcesReq{
 		ProjectId:     c.DefaultQuery("project-id", ""),
 		EnvironmentId: environmentId.(string),
 	})
@@ -427,7 +427,7 @@ func (h *Handler) SetDefaultResource(c *gin.Context) {
 		return
 	}
 
-	res, err := h.companyServices.CompanyService().Resource().SetDefaultResource(c.Request.Context(), &company_service.SetDefaultResourceReq{
+	res, err := h.companyServices.Resource().SetDefaultResource(c.Request.Context(), &company_service.SetDefaultResourceReq{
 		ProjectId:     c.DefaultQuery("project-id", ""),
 		EnvironmentId: environmentId.(string),
 		ServiceType:   req.GetServiceType(),

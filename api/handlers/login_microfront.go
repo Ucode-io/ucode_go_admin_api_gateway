@@ -38,12 +38,12 @@ func (h *Handler) BindLoginMicroFrontToProject(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
+	// namespace := c.GetString("namespace")
+	// services, err := h.GetService(namespace)
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.Forbidden, err)
+	// 	return
+	// }
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -61,7 +61,7 @@ func (h *Handler) BindLoginMicroFrontToProject(c *gin.Context) {
 	data.ProjectId = projectId.(string)
 	data.EnvironmentId = environmentId.(string)
 
-	res, err := services.CompanyService().Project().CreateProjectLoginMicroFront(
+	res, err := h.companyServices.Project().CreateProjectLoginMicroFront(
 		context.Background(),
 		&data,
 	)
@@ -96,7 +96,7 @@ func (h *Handler) UpdateLoginMicroFrontProject(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.CompanyService().Project().UpdateProjectLoginMicroFront(
+	resp, err := h.companyServices.Project().UpdateProjectLoginMicroFront(
 		context.Background(),
 		&req,
 	)
@@ -138,7 +138,7 @@ func (h *Handler) GetLoginMicroFrontBySubdomain(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.CompanyService().Project().GetProjectLoginMicroFront(
+	resp, err := h.companyServices.Project().GetProjectLoginMicroFront(
 		context.Background(),
 		&company_service.GetProjectLoginMicroFrontRequest{
 			Subdomain: subdomain,
@@ -155,7 +155,7 @@ func (h *Handler) GetLoginMicroFrontBySubdomain(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     resp.ProjectId,

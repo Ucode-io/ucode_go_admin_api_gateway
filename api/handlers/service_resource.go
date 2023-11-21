@@ -48,7 +48,7 @@ func (h *Handler) UpdateServiceResource(c *gin.Context) {
 	}
 	data.EnvironmentId = environmentId.(string)
 
-	resp, err := h.companyServices.CompanyService().ServiceResource().Update(
+	resp, err := h.companyServices.ServiceResource().Update(
 		context.Background(),
 		&data,
 	)
@@ -88,7 +88,7 @@ func (h *Handler) GetListServiceResource(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.CompanyService().ServiceResource().GetList(
+	resp, err := h.companyServices.ServiceResource().GetList(
 		context.Background(),
 		&pb.GetListServiceResourceReq{
 			ProjectId:     projectId.(string),

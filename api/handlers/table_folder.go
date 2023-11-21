@@ -63,7 +63,7 @@ func (h *Handler) CreateTableFolder(c *gin.Context) {
 	}
 
 	if !resourceIdOk {
-		resource, err := services.CompanyService().ServiceResource().GetSingle(
+		resource, err := h.companyServices.ServiceResource().GetSingle(
 			c.Request.Context(),
 			&pb.GetSingleServiceResourceReq{
 				ProjectId:     projectId.(string),
@@ -79,7 +79,7 @@ func (h *Handler) CreateTableFolder(c *gin.Context) {
 		resourceEnvironmentId = resource.ResourceEnvironmentId
 		nodeType = resource.NodeType
 	} else {
-		resourceEnvironment, err := services.CompanyService().Resource().GetResourceEnvironment(
+		resourceEnvironment, err := h.companyServices.Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&pb.GetResourceEnvironmentReq{
 				EnvironmentId: environmentId.(string),
@@ -156,7 +156,7 @@ func (h *Handler) GetTableFolderByID(c *gin.Context) {
 	var resourceEnvironmentId string
 	var nodeType string
 	if !resourceIdOk {
-		resource, err := services.CompanyService().ServiceResource().GetSingle(
+		resource, err := h.companyServices.ServiceResource().GetSingle(
 			c.Request.Context(),
 			&pb.GetSingleServiceResourceReq{
 				ProjectId:     projectId.(string),
@@ -172,7 +172,7 @@ func (h *Handler) GetTableFolderByID(c *gin.Context) {
 		resourceEnvironmentId = resource.ResourceEnvironmentId
 		nodeType = resource.NodeType
 	} else {
-		resourceEnvironment, err := services.CompanyService().Resource().GetResourceEnvironment(
+		resourceEnvironment, err := h.companyServices.Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&pb.GetResourceEnvironmentReq{
 				EnvironmentId: environmentId.(string),
@@ -252,7 +252,7 @@ func (h *Handler) GetAllTableFolders(c *gin.Context) {
 	}
 
 	if !resourceIdOk {
-		resource, err := services.CompanyService().ServiceResource().GetSingle(
+		resource, err := h.companyServices.ServiceResource().GetSingle(
 			c.Request.Context(),
 			&pb.GetSingleServiceResourceReq{
 				ProjectId:     projectId.(string),
@@ -268,7 +268,7 @@ func (h *Handler) GetAllTableFolders(c *gin.Context) {
 		resourceEnvironmentId = resource.ResourceEnvironmentId
 		nodeType = resource.NodeType
 	} else {
-		resourceEnvironment, err := services.CompanyService().Resource().GetResourceEnvironment(
+		resourceEnvironment, err := h.companyServices.Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&pb.GetResourceEnvironmentReq{
 				EnvironmentId: environmentId.(string),
@@ -346,7 +346,7 @@ func (h *Handler) UpdateTableFolder(c *gin.Context) {
 	}
 
 	if !resourceIdOk {
-		resource, err := services.CompanyService().ServiceResource().GetSingle(
+		resource, err := h.companyServices.ServiceResource().GetSingle(
 			c.Request.Context(),
 			&pb.GetSingleServiceResourceReq{
 				ProjectId:     projectId.(string),
@@ -362,7 +362,7 @@ func (h *Handler) UpdateTableFolder(c *gin.Context) {
 		resourceEnvironmentId = resource.ResourceEnvironmentId
 		nodeType = resource.NodeType
 	} else {
-		resourceEnvironment, err := services.CompanyService().Resource().GetResourceEnvironment(
+		resourceEnvironment, err := h.companyServices.Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&pb.GetResourceEnvironmentReq{
 				EnvironmentId: environmentId.(string),
@@ -438,7 +438,7 @@ func (h *Handler) DeleteTableFolder(c *gin.Context) {
 	}
 
 	if !resourceIdOk {
-		resource, err := services.CompanyService().ServiceResource().GetSingle(
+		resource, err := h.companyServices.ServiceResource().GetSingle(
 			c.Request.Context(),
 			&pb.GetSingleServiceResourceReq{
 				ProjectId:     projectId.(string),
@@ -454,7 +454,7 @@ func (h *Handler) DeleteTableFolder(c *gin.Context) {
 		resourceEnvironmentId = resource.ResourceEnvironmentId
 		nodeType = resource.NodeType
 	} else {
-		resourceEnvironment, err := services.CompanyService().Resource().GetResourceEnvironment(
+		resourceEnvironment, err := h.companyServices.Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&pb.GetResourceEnvironmentReq{
 				EnvironmentId: environmentId.(string),
