@@ -909,9 +909,10 @@ func (h *Handler) DeleteObject(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetList(c *gin.Context) {
 	var (
-		objectRequest models.CommonMessage
-		resp          *obs.CommonMessage
-		statusHttp    = status_http.GrpcStatusToHTTP["Ok"]
+		objectRequest               models.CommonMessage
+		resp                        *obs.CommonMessage
+		beforeActions, afterActions []*obs.CustomEvent
+		statusHttp                  = status_http.GrpcStatusToHTTP["Ok"]
 	)
 
 	err := c.ShouldBindJSON(&objectRequest)
@@ -982,6 +983,34 @@ func (h *Handler) GetList(c *gin.Context) {
 		return
 	}
 	defer conn.Close()
+
+	fromOfs := c.Query("from-ofs")
+	// fmt.Println("from-ofs::", fromOfs)
+	if fromOfs != "true" {
+		beforeActions, afterActions, err = GetListCustomEvents(c.Param("table_slug"), "", "GETLIST", c, h)
+		if err != nil {
+			h.handleResponse(c, status_http.InvalidArgument, err.Error())
+			return
+		}
+	}
+
+	go func() {
+		if len(beforeActions) > 0 {
+			functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
+				CustomEvents: beforeActions,
+				TableSlug:    c.Param("table_slug"),
+				ObjectData:   objectRequest.Data,
+				Method:       "GETLIST",
+			},
+				c,
+				h,
+			)
+			if err != nil {
+				h.handleResponse(c, status_http.InvalidArgument, err.Error()+" in "+functionName)
+				return
+			}
+		}
+	}()
 
 	if viewId, ok := objectRequest.Data["builder_service_view_id"].(string); ok {
 		if util.IsValidUUID(viewId) {
@@ -1097,6 +1126,26 @@ func (h *Handler) GetList(c *gin.Context) {
 			}
 		}
 	}
+
+	go func() {
+		if len(afterActions) > 0 {
+			functionName, err := DoInvokeFuntion(
+				DoInvokeFuntionStruct{
+					CustomEvents:           afterActions,
+					TableSlug:              c.Param("table_slug"),
+					ObjectData:             objectRequest.Data,
+					Method:                 "GETLIST",
+					ObjectDataBeforeUpdate: resp.Data.AsMap(),
+				},
+				c, // gin context,
+				h, // handler
+			)
+			if err != nil {
+				h.handleResponse(c, status_http.InvalidArgument, err.Error()+" in "+functionName)
+				return
+			}
+		}
+	}()
 
 	statusHttp.CustomMessage = resp.GetCustomMessage()
 	h.handleResponse(c, statusHttp, resp)
@@ -1336,7 +1385,7 @@ func (h *Handler) GetListInExcel(c *gin.Context) {
 		return
 	}
 	defer conn.Close()
-	
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = service.GetListInExcel(
@@ -1985,7 +2034,6 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 	}
 	objectRequest.Data["objects"] = editedObjects
 
-
 	fromOfs := c.Query("from-ofs")
 	if fromOfs != "true" {
 		beforeActions, afterActions, err = GetListCustomEvents(c.Param("table_slug"), "", "MULTIPLE_UPDATE", c, h)
@@ -2286,7 +2334,7 @@ func (h *Handler) GetListGroupBy(c *gin.Context) {
 			},
 		}
 	}
-	
+
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
@@ -2329,7 +2377,7 @@ func (h *Handler) GetListGroupBy(c *gin.Context) {
 		return
 	}
 	defer conn.Close()
-	
+
 	structData, err := helper.ConvertMapToStruct(object.Data)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
@@ -2492,7 +2540,7 @@ func (h *Handler) GetGroupByField(c *gin.Context) {
 		return
 	}
 	defer conn.Close()
-	
+
 	fmt.Println("projectId: ", resource.ResourceEnvironmentId)
 
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
@@ -2747,7 +2795,7 @@ func (h *Handler) GetListWithOutRelation(c *gin.Context) {
 		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
-	
+
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
