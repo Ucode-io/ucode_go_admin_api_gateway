@@ -1001,10 +1001,13 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 	requestData.Params = c.Request.URL.Query()
 	requestData.Body = bodyReq
 
-	var key = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("ett-%s-%s-%s", c.Request.Header.Get("Prev_path"), requestData.Params.Encode(), resource.ResourceEnvironmentId)))
+	var (
+		key     = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("ett-%s-%s-%s", c.Request.Header.Get("Prev_path"), requestData.Params.Encode(), resource.ResourceEnvironmentId)))
+		waitKey = resource.ProjectId + key
+	)
 	if c.Request.Method == "GET" && resource.ProjectId == "1acd7a8f-a038-4e07-91cb-b689c368d855" {
 
-		redisResp, err := h.redis.Get(context.Background(), key)
+		redisResp, err := h.redis.Get(context.Background(), waitKey)
 		if err != nil {
 			h.log.Error("Error while Get ETT redis", logger.Error(err))
 		}
@@ -1031,7 +1034,7 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 			}
 		}
 
-		err = h.redis.SetX(context.Background(), key, "WAIT", 14*time.Second)
+		err = h.redis.SetX(context.Background(), waitKey, "WAIT", 14*time.Second)
 		if err != nil {
 			h.log.Error("Error while SetX redis", logger.Error(err))
 		}
