@@ -1001,21 +1001,39 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 	requestData.Params = c.Request.URL.Query()
 	requestData.Body = bodyReq
 
+	var key = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("ett-%s-%s-%s", c.Request.Header.Get("Prev_path"), requestData.Params.Encode(), resource.ResourceEnvironmentId)))
 	if c.Request.Method == "GET" && resource.ProjectId == "1acd7a8f-a038-4e07-91cb-b689c368d855" {
-		fmt.Println("ETT Cache:", fmt.Sprintf("ett-%s-%s-%s", c.Request.Header.Get("Prev_path"), requestData.Params.Encode(), resource.ResourceEnvironmentId))
-		redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("ett-%s-%s-%s", c.Request.Header.Get("Prev_path"), requestData.Params.Encode(), resource.ResourceEnvironmentId))))
-		if err == nil {
-			resp := make(map[string]interface{})
-			m := make(map[string]interface{})
-			err = json.Unmarshal([]byte(redisResp), &m)
-			if err != nil {
-				h.log.Error("Error while unmarshal redis", logger.Error(err))
-			} else {
-				resp["data"] = m
-				c.JSON(cast.ToInt(m["code"]), m)
-				fmt.Println("\n\n ~~>> ett redis return response \n\n")
-				return
+
+		redisResp, err := h.redis.Get(context.Background(), key)
+		if err != nil {
+			h.log.Error("Error while Get ETT redis", logger.Error(err))
+		}
+
+		if redisResp == "WAIT" {
+			for {
+				redisResp, err := h.redis.Get(context.Background(), key)
+				if err == nil {
+					resp := make(map[string]interface{})
+					m := make(map[string]interface{})
+					err = json.Unmarshal([]byte(redisResp), &m)
+					if err != nil {
+						h.log.Error("Error while unmarshal redis", logger.Error(err))
+					} else {
+						resp["data"] = m
+						c.JSON(cast.ToInt(m["code"]), m)
+						fmt.Printf("\n\n ~~>> ett redis return response \n\n")
+						return
+					}
+					break
+				}
+
+				time.Sleep(time.Millisecond * 10)
 			}
+		}
+
+		err = h.redis.SetX(context.Background(), key, "WAIT", 14*time.Second)
+		if err != nil {
+			h.log.Error("Error while SetX redis", logger.Error(err))
 		}
 	}
 
@@ -1051,7 +1069,7 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 		if isOwnData {
 			if err == nil && c.Request.Method == "GET" && resource.ProjectId == "1acd7a8f-a038-4e07-91cb-b689c368d855" {
 				jsonData, _ := json.Marshal(resp.Data)
-				err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("ett-%s-%s-%s", c.Request.Header.Get("Prev_path"), requestData.Params.Encode(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second)
+				err = h.redis.SetX(context.Background(), key, string(jsonData), 15*time.Second)
 				if err != nil {
 					h.log.Error("Error while setting redis", logger.Error(err))
 				}
