@@ -4,6 +4,7 @@ import (
 	"context"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
+	"ucode/ucode_go_api_gateway/genproto/company_service"
 	pb "ucode/ucode_go_api_gateway/genproto/scenario_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
@@ -34,13 +35,6 @@ func (h *Handler) CreateCategoryScenario(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err.Error())
-		return
-	}
-
 	EnvironmentId, _ := c.Get("environment_id")
 	if !util.IsValidUUID(EnvironmentId.(string)) {
 		h.handleResponse(c, status_http.BadRequest, "environment_id not found")
@@ -52,6 +46,25 @@ func (h *Handler) CreateCategoryScenario(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&company_service.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: EnvironmentId.(string),
+			ServiceType:   company_service.ServiceType_API_REF_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
 
 	resp, err := services.ScenarioService().CategoryService().Create(
 		context.Background(),
@@ -90,13 +103,6 @@ func (h *Handler) GetCategoryScenario(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err.Error())
-		return
-	}
-
 	EnvironmentId, _ := c.Get("environment_id")
 	if !util.IsValidUUID(EnvironmentId.(string)) {
 		h.handleResponse(c, status_http.BadRequest, "environment_id not found")
@@ -108,6 +114,25 @@ func (h *Handler) GetCategoryScenario(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&company_service.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: EnvironmentId.(string),
+			ServiceType:   company_service.ServiceType_API_REF_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
 
 	resp, err := services.ScenarioService().CategoryService().Get(
 		context.Background(),
@@ -160,13 +185,6 @@ func (h *Handler) GetListCategoryScenario(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err.Error())
-		return
-	}
-
 	EnvironmentId, _ := c.Get("environment_id")
 	if !util.IsValidUUID(EnvironmentId.(string)) {
 		h.handleResponse(c, status_http.BadRequest, "environment_id not found")
@@ -178,6 +196,25 @@ func (h *Handler) GetListCategoryScenario(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&company_service.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: EnvironmentId.(string),
+			ServiceType:   company_service.ServiceType_API_REF_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
 
 	resp, err := services.ScenarioService().CategoryService().GetList(
 		c.Request.Context(),

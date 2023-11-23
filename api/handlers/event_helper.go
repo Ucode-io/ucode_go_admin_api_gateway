@@ -28,12 +28,6 @@ func GetListCustomEvents(tableSlug, roleId, method string, c *gin.Context, h *Ha
 	var (
 		res *obs.GetCustomEventsListResponse
 	)
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -60,6 +54,12 @@ func GetListCustomEvents(tableSlug, roleId, method string, c *gin.Context, h *Ha
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:

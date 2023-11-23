@@ -35,26 +35,6 @@ func (h *Handler) UpdateCoordinates(c *gin.Context) {
 		return
 	}
 
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -81,18 +61,12 @@ func (h *Handler) UpdateCoordinates(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := h.companyServices.Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
+
 	panelCoordinates.ProjectId = resource.ResourceEnvironmentId
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Panel().UpdateCoordinates(
@@ -129,26 +103,6 @@ func (h *Handler) GetSinglePanel(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -157,7 +111,7 @@ func (h *Handler) GetSinglePanel(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
+		err := errors.New("error getting environment id | not valid")
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
@@ -175,18 +129,11 @@ func (h *Handler) GetSinglePanel(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := h.companyServices.Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Panel().GetSingle(
 		context.Background(),
@@ -240,26 +187,6 @@ func (h *Handler) CreatePanel(c *gin.Context) {
 		HasPagination: panelRequest.HasPagination,
 	}
 
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -286,28 +213,12 @@ func (h *Handler) CreatePanel(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := h.companyServices.Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
 	panel.ProjectId = resource.ResourceEnvironmentId
-
-	// commitID, commitGuid, err := h.CreateAutoCommit(c, environmentId.(string), config.COMMIT_TYPE_PANEL)
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err))
-	// 	return
-	// }
-
-	// panel.CommitId = commitID
-	// panel.CommitGuid = commitGuid
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Panel().Create(
 		context.Background(),
@@ -337,26 +248,6 @@ func (h *Handler) CreatePanel(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetAllPanels(c *gin.Context) {
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -365,7 +256,7 @@ func (h *Handler) GetAllPanels(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
+		err := errors.New("error getting environment id | not valid")
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
@@ -383,18 +274,11 @@ func (h *Handler) GetAllPanels(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := h.companyServices.Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Panel().GetList(
 		context.Background(),
@@ -451,26 +335,6 @@ func (h *Handler) UpdatePanel(c *gin.Context) {
 		HasPagination: panelRequest.HasPagination,
 	}
 
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -497,18 +361,12 @@ func (h *Handler) UpdatePanel(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := h.companyServices.Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
+
 	panel.ProjectId = resource.ResourceEnvironmentId
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Panel().Update(
@@ -545,26 +403,6 @@ func (h *Handler) DeletePanel(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -573,7 +411,7 @@ func (h *Handler) DeletePanel(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
+		err := errors.New("error getting environment id | not valid")
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
@@ -591,18 +429,11 @@ func (h *Handler) DeletePanel(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := h.companyServices.Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Panel().Delete(
 		context.Background(),

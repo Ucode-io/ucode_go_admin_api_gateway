@@ -43,26 +43,6 @@ func (h *Handler) CreateFunction(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -89,27 +69,11 @@ func (h *Handler) CreateFunction(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := h.companyServices.Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
-
-	// commitID, commitGuid, err := h.CreateAutoCommit(c, environmentId.(string), config.COMMIT_TYPE_FUNCTION)
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err))
-	// 	return
-	// }
-
-	// function.CommitId = commitID
-	// function.CommitGuid = commitGuid
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Function().Create(
 		context.Background(),
@@ -151,26 +115,6 @@ func (h *Handler) GetFunctionByID(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -179,7 +123,7 @@ func (h *Handler) GetFunctionByID(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
+		err := errors.New("error getting environment id | not valid")
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
@@ -197,18 +141,11 @@ func (h *Handler) GetFunctionByID(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := h.companyServices.Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Function().GetSingle(
 		context.Background(),
@@ -246,26 +183,6 @@ func (h *Handler) GetAllFunctions(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -292,18 +209,11 @@ func (h *Handler) GetAllFunctions(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := h.companyServices.Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Function().GetList(
 		context.Background(),
@@ -344,32 +254,6 @@ func (h *Handler) UpdateFunction(c *gin.Context) {
 		return
 	}
 
-	// structData, err := helper.ConvertMapToStruct(function.Body)
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.BadRequest, err.Error())
-	// 	return
-	// }
-
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -396,18 +280,11 @@ func (h *Handler) UpdateFunction(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := h.companyServices.Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Function().Update(
 		context.Background(),
@@ -450,26 +327,6 @@ func (h *Handler) DeleteFunction(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -478,7 +335,7 @@ func (h *Handler) DeleteFunction(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
+		err := errors.New("error getting environment id | not valid")
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
@@ -496,18 +353,11 @@ func (h *Handler) DeleteFunction(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := h.companyServices.Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Function().Delete(
 		context.Background(),
@@ -547,26 +397,6 @@ func (h *Handler) InvokeFunction(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -593,18 +423,11 @@ func (h *Handler) InvokeFunction(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := h.companyServices.Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
 
 	function, err := services.FunctionService().FunctionService().GetSingle(
 		context.Background(),

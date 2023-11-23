@@ -42,13 +42,6 @@ func (h *Handler) CreateMenu(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
 	if menu.Attributes == nil {
 		menu.Attributes = make(map[string]interface{})
 	}
@@ -84,6 +77,12 @@ func (h *Handler) CreateMenu(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
@@ -157,13 +156,6 @@ func (h *Handler) GetMenuByID(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -172,7 +164,7 @@ func (h *Handler) GetMenuByID(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
+		err := errors.New("error getting environment id | not valid")
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
@@ -189,6 +181,12 @@ func (h *Handler) GetMenuByID(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
@@ -249,12 +247,6 @@ func (h *Handler) GetAllMenus(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -284,6 +276,17 @@ func (h *Handler) GetAllMenus(c *gin.Context) {
 	authInfo, _ := h.GetAuthInfo(c)
 	limit = 100
 
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		"ENTER_PRICE",
+	)
+
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 
@@ -298,6 +301,10 @@ func (h *Handler) GetAllMenus(c *gin.Context) {
 				RoleId:    authInfo.GetRoleId(),
 			},
 		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 
 	case pb.ResourceType_POSTGRESQL:
 		resp, err = services.PostgresBuilderService().Menu().GetAll(
@@ -311,6 +318,10 @@ func (h *Handler) GetAllMenus(c *gin.Context) {
 				RoleId:    authInfo.GetRoleId(),
 			},
 		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 	h.handleResponse(c, status_http.OK, resp)
 }
@@ -337,13 +348,6 @@ func (h *Handler) UpdateMenu(c *gin.Context) {
 	err := c.ShouldBindJSON(&menu)
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
-		return
-	}
-
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
 
@@ -382,6 +386,13 @@ func (h *Handler) UpdateMenu(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Menu().Update(
@@ -453,13 +464,6 @@ func (h *Handler) DeleteMenu(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -468,7 +472,7 @@ func (h *Handler) DeleteMenu(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
+		err := errors.New("error getting environment id | not valid")
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
@@ -485,6 +489,13 @@ func (h *Handler) DeleteMenu(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 
@@ -567,13 +578,6 @@ func (h *Handler) UpdateMenuOrder(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -599,6 +603,13 @@ func (h *Handler) UpdateMenuOrder(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Menu().UpdateMenuOrder(
@@ -658,13 +669,6 @@ func (h *Handler) CreateMenuSettings(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -690,6 +694,12 @@ func (h *Handler) CreateMenuSettings(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
 
 	menu.ProjectId = resource.ResourceEnvironmentId
 
@@ -748,12 +758,6 @@ func (h *Handler) GetAllMenuSettings(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -780,6 +784,12 @@ func (h *Handler) GetAllMenuSettings(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
@@ -829,13 +839,6 @@ func (h *Handler) GetMenuSettingByID(c *gin.Context) {
 	}
 	template_id := c.Query("template_id")
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -844,7 +847,7 @@ func (h *Handler) GetMenuSettingByID(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
+		err := errors.New("error getting environment id | not valid")
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
@@ -861,6 +864,12 @@ func (h *Handler) GetMenuSettingByID(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
@@ -930,13 +939,6 @@ func (h *Handler) UpdateMenuSettings(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -962,6 +964,12 @@ func (h *Handler) UpdateMenuSettings(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
 
 	menu.ProjectId = resource.ResourceEnvironmentId
 
@@ -1010,13 +1018,6 @@ func (h *Handler) DeleteMenuSettings(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -1025,7 +1026,7 @@ func (h *Handler) DeleteMenuSettings(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
+		err := errors.New("error getting environment id | not valid")
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
@@ -1042,6 +1043,13 @@ func (h *Handler) DeleteMenuSettings(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Menu().DeleteMenuSettings(
@@ -1102,13 +1110,6 @@ func (h *Handler) CreateMenuTemplate(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -1134,6 +1135,12 @@ func (h *Handler) CreateMenuTemplate(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
 
 	menu.ProjectId = resource.ResourceEnvironmentId
 
@@ -1192,12 +1199,6 @@ func (h *Handler) GetAllMenuTemplates(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -1224,6 +1225,12 @@ func (h *Handler) GetAllMenuTemplates(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
@@ -1296,13 +1303,6 @@ func (h *Handler) GetMenuTemplateByID(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -1311,7 +1311,7 @@ func (h *Handler) GetMenuTemplateByID(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
+		err := errors.New("error getting environment id | not valid")
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
@@ -1328,6 +1328,12 @@ func (h *Handler) GetMenuTemplateByID(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
@@ -1410,13 +1416,6 @@ func (h *Handler) UpdateMenuTemplate(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -1442,6 +1441,12 @@ func (h *Handler) UpdateMenuTemplate(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
 
 	menu.ProjectId = resource.ResourceEnvironmentId
 	switch resource.ResourceType {
@@ -1489,13 +1494,6 @@ func (h *Handler) DeleteMenuTemplate(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -1504,7 +1502,7 @@ func (h *Handler) DeleteMenuTemplate(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
+		err := errors.New("error getting environment id | not valid")
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
@@ -1521,6 +1519,13 @@ func (h *Handler) DeleteMenuTemplate(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Menu().DeleteMenuTemplate(
@@ -1582,12 +1587,6 @@ func (h *Handler) GetWikiFolder(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
 
 	projectId := c.DefaultQuery("project_id", "")
 	if !util.IsValidUUID(projectId) {
@@ -1615,6 +1614,12 @@ func (h *Handler) GetWikiFolder(c *gin.Context) {
 	}
 	// authInfo, _ := h.GetAuthInfo(c)
 	limit = 100
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId,
+		resource.NodeType,
+	)
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:

@@ -118,13 +118,6 @@ func (h *Handler) GetGlobalProjectTemplate(c *gin.Context) {
 		resp *obs.GetAllMenusResponse
 	)
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -133,7 +126,7 @@ func (h *Handler) GetGlobalProjectTemplate(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
+		err := errors.New("error getting environment id | not valid")
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
@@ -153,6 +146,12 @@ func (h *Handler) GetGlobalProjectTemplate(c *gin.Context) {
 	authInfo, _ := h.GetAuthInfo(c)
 	limit := 1000
 	offset := 0
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:

@@ -52,7 +52,6 @@ type BuilderServiceI interface {
 }
 
 func NewBuilderServiceClient(ctx context.Context, cfg config.Config) (BuilderServiceI, error) {
-
 	connObjectBuilderService, err := grpc.DialContext(
 		ctx,
 		cfg.ObjectBuilderServiceHost+cfg.ObjectBuilderGRPCPort,

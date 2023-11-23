@@ -7,6 +7,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/handlers"
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/pkg/crons"
+	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/services"
 	"ucode/ucode_go_api_gateway/storage/redis"
@@ -15,12 +16,13 @@ import (
 )
 
 func main() {
-	cfg := config.Load()
+
+	baseConf := config.BaseLoad()
 
 	var loggerLevel = new(string)
 	*loggerLevel = logger.LevelDebug
 
-	switch cfg.Environment {
+	switch baseConf.Environment {
 	case config.DebugMode:
 		*loggerLevel = logger.LevelDebug
 		gin.SetMode(gin.DebugMode)
@@ -43,58 +45,51 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	newRedis := redis.NewRedis(cfg)
-
 	// auth connection
-	authSrvc, err := services.NewAuthGrpcClient(ctx, cfg)
+	authSrvc, err := services.NewAuthGrpcClient(ctx, baseConf)
 	if err != nil {
 		log.Error("[ucode] error while establishing auth grpc conn", logger.Error(err))
 		return
 	}
 
 	// company connection
-	compSrvc, err := services.NewCompanyServiceClient(ctx, cfg)
+	compSrvc, err := services.NewCompanyServiceClient(ctx, baseConf)
 	if err != nil {
 		log.Error("[ucode] error while establishing company grpc conn", logger.Error(err))
 		return
 	}
 
-	// separately services connections
-	grpcSvcs, err := services.NewGrpcClients(ctx, cfg)
-	if err != nil {
-		log.Error("[ucode] error while establishing grpc conn", logger.Error(err))
-		return
-	}
-
+	// get enterprice projects and load config
 	serviceNodes := services.NewServiceNodes()
-	serviceNodes.Add(grpcSvcs, cfg.UcodeNamespace)
+	projectServiceNodes, mapProjectConfs := helper.EnterPriceProjectsGrpcSvcs(ctx, compSrvc, serviceNodes, log)
+
+	newRedis := redis.NewRedis(mapProjectConfs)
 
 	r := gin.New()
 
 	r.Use(gin.Logger(), gin.Recovery())
 
-	h := handlers.NewHandler(cfg, log, serviceNodes, compSrvc, authSrvc, newRedis)
+	h := handlers.NewHandler(baseConf, mapProjectConfs, log, projectServiceNodes, compSrvc, authSrvc, newRedis)
 
-	api.SetUpAPI(r, h, cfg)
+	api.SetUpAPI(r, h, baseConf)
 	cronjobs := crons.ExecuteCron()
 	for _, cronjob := range cronjobs {
 		go func(ctx context.Context, cronjob crons.Cronjob) {
 			for {
 				select {
 				case <-time.After(cronjob.Interval):
-					err := cronjob.Function(ctx, grpcSvcs, cfg, compSrvc)
-					if err != nil {
-					}
+					// err := cronjob.Function(ctx, grpcSvcs, baseConf, compSrvc)
+					// if err != nil {
+					// }
 				case <-ctx.Done():
 					return
 				}
 			}
 		}(ctx, cronjob)
-
 	}
 
 	log.Info("server is running...")
-	if err := r.Run(cfg.HTTPPort); err != nil {
+	if err := r.Run(baseConf.HTTPPort); err != nil {
 		return
 	}
 }

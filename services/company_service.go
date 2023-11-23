@@ -27,7 +27,7 @@ type companyServiceClient struct {
 	redirectService    company_service.RedirectUrlServiceClient
 }
 
-func NewCompanyServiceClient(ctx context.Context, cfg config.Config) (CompanyServiceI, error) {
+func NewCompanyServiceClient(ctx context.Context, cfg config.BaseConfig) (CompanyServiceI, error) {
 
 	connCompanyService, err := grpc.DialContext(
 		ctx,

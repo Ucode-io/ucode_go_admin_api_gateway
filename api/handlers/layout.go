@@ -35,13 +35,6 @@ func (h *Handler) GetListLayouts(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
 	resourceId, resourceIdOk := c.Get("resource_id")
 
 	projectId, ok := c.Get("project_id")
@@ -52,7 +45,7 @@ func (h *Handler) GetListLayouts(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
+		err := errors.New("error getting environment id | not valid")
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
@@ -101,6 +94,12 @@ func (h *Handler) GetListLayouts(c *gin.Context) {
 	}
 	authInfo, _ := h.GetAuthInfo(c)
 
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		nodeType,
+	)
+
 	resp, err := services.GetBuilderServiceByType(nodeType).Layout().GetAll(
 		context.Background(),
 		&object_builder_service.GetListLayoutRequest{
@@ -143,12 +142,6 @@ func (h *Handler) UpdateLayout(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
 	if input.TableId == "" {
 		h.handleResponse(c, status_http.BadRequest, errors.New("table id is required"))
 		return
@@ -203,6 +196,12 @@ func (h *Handler) UpdateLayout(c *gin.Context) {
 		resourceEnvironmentId = resourceEnvironment.GetId()
 		nodeType = resourceEnvironment.GetNodeType()
 	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		nodeType,
+	)
 
 	input.ProjectId = resourceEnvironmentId
 	resp, err := services.GetBuilderServiceByType(nodeType).Layout().Update(

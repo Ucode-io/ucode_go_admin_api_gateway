@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"strconv"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
@@ -12,7 +13,8 @@ import (
 )
 
 type Handler struct {
-	cfg             config.Config
+	baseConf        config.BaseConfig
+	projectConfs    map[string]config.Config
 	log             logger.LoggerI
 	services        services.ServiceNodesI
 	storage         storage.StorageI
@@ -22,9 +24,10 @@ type Handler struct {
 	redis           storage.RedisStorageI
 }
 
-func NewHandler(cfg config.Config, log logger.LoggerI, svcs services.ServiceNodesI, cmpServ services.CompanyServiceI, authService services.AuthServiceManagerI, redis storage.RedisStorageI) Handler {
+func NewHandler(baseConf config.BaseConfig, projectConfs map[string]config.Config, log logger.LoggerI, svcs services.ServiceNodesI, cmpServ services.CompanyServiceI, authService services.AuthServiceManagerI, redis storage.RedisStorageI) Handler {
 	return Handler{
-		cfg:             cfg,
+		baseConf:        baseConf,
+		projectConfs:    projectConfs,
 		log:             log,
 		services:        svcs,
 		companyServices: cmpServ,
@@ -39,6 +42,28 @@ func (h *Handler) GetCompanyService(c *gin.Context) services.CompanyServiceI {
 
 func (h *Handler) GetAuthService(c *gin.Context) services.AuthServiceManagerI {
 	return h.authService
+}
+
+func (h *Handler) GetProjectConfig(c *gin.Context, projectId string) config.Config {
+	return h.projectConfs[projectId]
+}
+
+func (h *Handler) GetProjectSrvc(c context.Context, projectId string, nodeType string) (services.ServiceManagerI, error) {
+	if nodeType == config.ENTER_PRICE_TYPE {
+		srvc, err := h.services.Get(projectId)
+		if err != nil {
+			return nil, err
+		}
+
+		return srvc, nil
+	} else {
+		srvc, err := h.services.Get(h.baseConf.UcodeNamespace)
+		if err != nil {
+			return nil, err
+		}
+
+		return srvc, nil
+	}
 }
 
 func (h *Handler) handleResponse(c *gin.Context, status status_http.Status, data interface{}) {
@@ -81,12 +106,18 @@ func (h *Handler) handleResponse(c *gin.Context, status status_http.Status, data
 }
 
 func (h *Handler) getOffsetParam(c *gin.Context) (offset int, err error) {
-	offsetStr := c.DefaultQuery("offset", h.cfg.DefaultOffset)
+	// if h.projectConf.DefaultOffset != "" {
+	// 	h.projectConf.DefaultOffset = h.baseConf.DefaultOffset
+	// }
+	offsetStr := c.DefaultQuery("offset", h.baseConf.DefaultOffset)
 	return strconv.Atoi(offsetStr)
 }
 
 func (h *Handler) getLimitParam(c *gin.Context) (limit int, err error) {
-	limitStr := c.DefaultQuery("limit", h.cfg.DefaultLimit)
+	// if h.projectConf.DefaultLimit != "" {
+	// 	h.projectConf.DefaultLimit = h.baseConf.DefaultLimit
+	// }
+	limitStr := c.DefaultQuery("limit", h.baseConf.DefaultLimit)
 	return strconv.Atoi(limitStr)
 }
 

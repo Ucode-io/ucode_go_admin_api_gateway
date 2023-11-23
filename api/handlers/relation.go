@@ -37,26 +37,6 @@ func (h *Handler) CreateRelation(c *gin.Context) {
 		return
 	}
 
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -83,28 +63,13 @@ func (h *Handler) CreateRelation(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := h.companyServices.Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
 
 	relation.ProjectId = resource.ResourceEnvironmentId
-	// commitID, commitGuid, err := h.CreateAutoCommit(c, environmentId.(string), config.COMMIT_TYPE_RELATION)
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err))
-	// 	return
-	// }
-
-	// relation.CommitId = commitID
-	// relation.CommitGuid = commitGuid
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Relation().Create(
@@ -161,25 +126,6 @@ func (h *Handler) GetAllRelations(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -206,18 +152,12 @@ func (h *Handler) GetAllRelations(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := h.companyServices.Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Relation().GetAll(
@@ -282,25 +222,6 @@ func (h *Handler) UpdateRelation(c *gin.Context) {
 		return
 	}
 
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -327,18 +248,12 @@ func (h *Handler) UpdateRelation(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := h.companyServices.Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
+
 	relation.ProjectId = resource.ResourceEnvironmentId
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
@@ -391,25 +306,6 @@ func (h *Handler) DeleteRelation(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -418,7 +314,7 @@ func (h *Handler) DeleteRelation(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
+		err := errors.New("error getting environment id | not valid")
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
@@ -436,18 +332,11 @@ func (h *Handler) DeleteRelation(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := h.companyServices.Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Relation().Delete(
@@ -498,25 +387,6 @@ func (h *Handler) GetRelationCascaders(c *gin.Context) {
 		resp *obs.CommonMessage
 	)
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -525,7 +395,7 @@ func (h *Handler) GetRelationCascaders(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
+		err := errors.New("error getting environment id | not valid")
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
@@ -543,18 +413,12 @@ func (h *Handler) GetRelationCascaders(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := h.companyServices.Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Cascading().GetCascadings(

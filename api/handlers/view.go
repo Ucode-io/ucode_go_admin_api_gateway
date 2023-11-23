@@ -40,25 +40,6 @@ func (h *Handler) CreateView(c *gin.Context) {
 		return
 	}
 
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -85,28 +66,13 @@ func (h *Handler) CreateView(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := h.companyServices.Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
+
 	view.ProjectId = resource.ResourceEnvironmentId
-
-	// commitID, commitGuid, err := h.CreateAutoCommit(c, environmentId.(string), config.COMMIT_TYPE_VIEW)
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err))
-	// 	return
-	// }
-
-	// view.CommitId = commitID
-	// view.CommitGuid = commitGuid
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).View().Create(
@@ -157,25 +123,6 @@ func (h *Handler) GetSingleView(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -184,7 +131,7 @@ func (h *Handler) GetSingleView(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
+		err := errors.New("error getting environment id | not valid")
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
@@ -202,18 +149,12 @@ func (h *Handler) GetSingleView(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := h.companyServices.Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).View().GetSingle(
@@ -269,25 +210,6 @@ func (h *Handler) UpdateView(c *gin.Context) {
 		return
 	}
 
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -314,18 +236,12 @@ func (h *Handler) UpdateView(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := h.companyServices.Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
+
 	view.ProjectId = resource.ResourceEnvironmentId
 
 	switch resource.ResourceType {
@@ -378,25 +294,6 @@ func (h *Handler) DeleteView(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -405,7 +302,7 @@ func (h *Handler) DeleteView(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
+		err := errors.New("error getting environment id | not valid")
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
@@ -423,18 +320,12 @@ func (h *Handler) DeleteView(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := h.companyServices.Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).View().Delete(
@@ -486,25 +377,6 @@ func (h *Handler) GetViewList(c *gin.Context) {
 		resp *obs.GetAllViewsResponse
 	)
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -513,7 +385,7 @@ func (h *Handler) GetViewList(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
+		err := errors.New("error getting environment id | not valid")
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
@@ -531,18 +403,12 @@ func (h *Handler) GetViewList(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := h.companyServices.Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).View().GetList(
@@ -606,25 +472,6 @@ func (h *Handler) ConvertHtmlToPdf(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -651,18 +498,12 @@ func (h *Handler) ConvertHtmlToPdf(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := h.companyServices.Resource().GetResEnvByResIdEnvId(
-	//	c.Request.Context(),
-	//	&pb.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		log.Println("\n\nConvertHtmlToPdf---->")
@@ -731,25 +572,6 @@ func (h *Handler) ConvertTemplateToHtml(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -776,18 +598,12 @@ func (h *Handler) ConvertTemplateToHtml(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := h.companyServices.Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 
@@ -849,13 +665,6 @@ func (h *Handler) UpdateViewOrder(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -882,6 +691,12 @@ func (h *Handler) UpdateViewOrder(c *gin.Context) {
 		return
 	}
 	view.ProjectId = resource.ResourceEnvironmentId
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:

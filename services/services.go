@@ -9,8 +9,6 @@ import (
 type ServiceManagerI interface {
 	BuilderService() BuilderServiceI
 	HighBuilderService() BuilderServiceI
-	// AuthService() AuthServiceI
-	// CompanyService() CompanyServiceI
 	AnalyticsService() AnalyticsServiceI
 	ApiReferenceService() ApiReferenceServiceI
 	SmsService() SmsServiceI
@@ -30,10 +28,8 @@ type ServiceManagerI interface {
 }
 
 type grpcClients struct {
-	builderService     BuilderServiceI
-	highBuilderService BuilderServiceI
-	// authService              AuthServiceI
-	// companyService           CompanyServiceI
+	builderService           BuilderServiceI
+	highBuilderService       BuilderServiceI
 	analyticsService         AnalyticsServiceI
 	apiReferenceService      ApiReferenceServiceI
 	smsService               SmsServiceI
@@ -62,20 +58,10 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 		return nil, err
 	}
 
-	// authServiceClient, err := NewAuthServiceClient(ctx, cfg)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
 	chatServiceClient, err := NewChatServiceClient(ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
-
-	// companyServiceClient, err := NewCompanyServiceClient(ctx, cfg)
-	// if err != nil {
-	// 	return nil, err
-	// }
 
 	analyticsServiceClient, err := NewAnalyticsServiceClient(ctx, cfg)
 	if err != nil {
@@ -146,14 +132,12 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 	}
 
 	return grpcClients{
-		apiReferenceService: apiReferenceClient,
-		analyticsService:    analyticsServiceClient,
-		// authService:              authServiceClient,
-		builderService:     builderServiceClient,
-		highBuilderService: highBuilderServiceClient,
-		posService:         posServiceClient,
-		smsService:         smsServiceClient,
-		// companyService:           companyServiceClient,
+		apiReferenceService:      apiReferenceClient,
+		analyticsService:         analyticsServiceClient,
+		builderService:           builderServiceClient,
+		highBuilderService:       highBuilderServiceClient,
+		posService:               posServiceClient,
+		smsService:               smsServiceClient,
 		functionService:          functionServiceClient,
 		templateService:          templateServiceClient,
 		versioningService:        versioningServiceClient,
@@ -191,14 +175,6 @@ func (g grpcClients) HighBuilderService() BuilderServiceI {
 func (g grpcClients) ChatService() ChatServiceI {
 	return g.chatService
 }
-
-// func (g grpcClients) AuthService() AuthServiceI {
-// 	return g.authService
-// }
-
-// func (g grpcClients) CompanyService() CompanyServiceI {
-// 	return g.companyService
-// }
 
 func (g grpcClients) AnalyticsService() AnalyticsServiceI {
 	return g.analyticsService

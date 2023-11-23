@@ -45,13 +45,6 @@ func (h *Handler) CreateApiReference(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
 	environmentId, ok := c.Get("environment_id")
 	if !ok {
 		err = errors.New("error getting environment id")
@@ -69,30 +62,12 @@ func (h *Handler) CreateApiReference(c *gin.Context) {
 		return
 	}
 
-	// versionGuid, commitGuid, err := h.CreateAutoCommitForAdminChange(c, environmentId.(string), config.COMMIT_TYPE_FIELD, apiReference.GetProjectId())
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err).Error())
-	// 	return
-	// }
-
 	authInfo, err := h.adminAuthInfo(c)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error getting auth info: %w", err).Error())
 		return
 	}
 
-	// activeVersion, err := services.VersioningService().Release().GetCurrentActive(
-	// 	c.Request.Context(),
-	// 	&vcs.GetCurrentReleaseRequest{
-	// 		EnvironmentId: environmentId.(string),
-	// 	},
-	// )
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.GRPCError, err.Error())
-	// 	return
-	// }
-
-	// apiReference.VersionId = activeVersion.GetVersionId()
 	apiReference.CommitInfo = &ars.CommitInfo{
 		Guid:       "",
 		CommitType: config.COMMIT_TYPE_FIELD,
@@ -112,6 +87,13 @@ func (h *Handler) CreateApiReference(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
+
 	apiReference.ResourceId = resource.GetResourceEnvironmentId()
 	apiReference.ProjectId = projectId.(string)
 	// set: commit_id
@@ -151,13 +133,6 @@ func (h *Handler) GetApiReferenceByID(c *gin.Context) {
 
 	if !util.IsValidUUID(id) {
 		h.handleResponse(c, status_http.InvalidArgument, "api reference id is an invalid uuid")
-		return
-	}
-
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
 
@@ -204,6 +179,12 @@ func (h *Handler) GetApiReferenceByID(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
 
 	resp, err := services.ApiReferenceService().ApiReference().Get(
 		c.Request.Context(),
@@ -270,12 +251,7 @@ func (h *Handler) GetAllApiReferences(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
+
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -292,16 +268,6 @@ func (h *Handler) GetAllApiReferences(c *gin.Context) {
 		return
 	}
 
-	// activeVersion, err := services.VersioningService().Release().GetCurrentActive(
-	// 	c.Request.Context(),
-	// 	&vcs.GetCurrentReleaseRequest{
-	// 		EnvironmentId: environmentId.(string),
-	// 	},
-	// )
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.GRPCError, err.Error())
-	// 	return
-	// }
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
@@ -314,6 +280,13 @@ func (h *Handler) GetAllApiReferences(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
+
 	resp, err := services.ApiReferenceService().ApiReference().GetList(
 		context.Background(),
 		&ars.GetListApiReferenceRequest{
@@ -361,13 +334,6 @@ func (h *Handler) UpdateApiReference(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
 	environmentId, ok := c.Get("environment_id")
 	if !ok {
 		err = errors.New("error getting environment id")
@@ -385,11 +351,24 @@ func (h *Handler) UpdateApiReference(c *gin.Context) {
 		return
 	}
 
-	// versionGuid, commitGuid, err := h.CreateAutoCommitForAdminChange(c, environmentId.(string), config.COMMIT_TYPE_FIELD, apiReference.GetProjectId())
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err).Error())
-	// 	return
-	// }
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_API_REF_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
 
 	authInfo, err := h.adminAuthInfo(c)
 	if err != nil {
@@ -416,18 +395,7 @@ func (h *Handler) UpdateApiReference(c *gin.Context) {
 		AuthorId:   authInfo.GetUserId(),
 		ProjectId:  projectId.(string),
 	}
-	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId.(string),
-			EnvironmentId: environmentId.(string),
-			ServiceType:   pb.ServiceType_API_REF_SERVICE,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
+
 	apiReference.ResourceId = resource.ResourceEnvironmentId
 	apiReference.ProjectId = projectId.(string)
 	resp, err := services.ApiReferenceService().ApiReference().Update(
@@ -469,16 +437,9 @@ func (h *Handler) DeleteApiReference(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
 	environmentId, ok := c.Get("environment_id")
 	if !ok {
-		err = errors.New("error getting environment id")
+		err := errors.New("error getting environment id")
 		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"+err.Error()))
 		return
 	}
@@ -504,6 +465,13 @@ func (h *Handler) DeleteApiReference(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
+
 	resp, err := services.ApiReferenceService().ApiReference().Delete(
 		c.Request.Context(),
 		&ars.DeleteApiReferenceRequest{
@@ -554,14 +522,6 @@ func (h *Handler) GetApiReferenceChanges(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.log.Error("error getting service", logger.Error(err))
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
 	limit, err := h.getLimitParam(c)
 	if err != nil {
 		h.log.Error("error getting limit param", logger.Error(err))
@@ -593,6 +553,13 @@ func (h *Handler) GetApiReferenceChanges(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
+
 	resp, err := services.ApiReferenceService().ApiReference().GetApiReferenceChanges(
 		context.Background(),
 		&ars.GetListApiReferenceChangesRequest{
@@ -646,29 +613,6 @@ func (h *Handler) GetApiReferenceChanges(c *gin.Context) {
 			}
 		}
 	}
-	// reqAutherGuids, err := helper.ConvertMapToStruct(map[string]interface{}{
-	// 	"guid": []string{},
-	// })
-	// if err != nil {
-	// 	h.log.Error("error converting map to struct", logger.Error(err))
-	// 	h.handleResponse(c, status_http.GRPCError, err.Error())
-	// 	return
-	// }
-
-	// // Get User Data
-	// respAuthersData, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().GetList(
-	// 	c.Request.Context(),
-
-	// 	&builder.CommonMessage{
-	// 		TableSlug: "users",
-	// 		Data:      reqAutherGuids,
-	// 	},
-	// )
-	// if err != nil {
-	// 	h.log.Error("error getting user data", logger.Error(err))
-	// 	h.handleResponse(c, status_http.GRPCError, err.Error())
-	// 	return
-	// }
 
 	h.handleResponse(c, status_http.OK, resp)
 }
@@ -718,14 +662,6 @@ func (h *Handler) RevertApiReference(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.log.Error("error getting service", logger.Error(err))
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
 	environmentId, ok := c.Get("environment_id")
 	if !ok {
 		err = errors.New("error getting environment id")
@@ -760,6 +696,13 @@ func (h *Handler) RevertApiReference(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
+
 	resp, err := services.ApiReferenceService().ApiReference().RevertApiReference(
 		context.Background(),
 		&ars.RevertApiReferenceRequest{
@@ -831,14 +774,6 @@ func (h *Handler) InsertManyVersionForApiReference(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.log.Error("error getting service", logger.Error(err))
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
 	body.EnvironmentId = environmentID.(string)
 	body.Guid = api_reference_id
 	// _, commitId, err := h.CreateAutoCommitForAdminChange(c, environmentID.(string), config.COMMIT_TYPE_FIELD, body.GetProjectId())
@@ -858,6 +793,13 @@ func (h *Handler) InsertManyVersionForApiReference(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
+
 	body.ResourceId = resource.ResourceEnvironmentId
 	body.ProjectId = projectId.(string)
 	resp, err := services.ApiReferenceService().ApiReference().CreateManyApiReference(c.Request.Context(), &body)

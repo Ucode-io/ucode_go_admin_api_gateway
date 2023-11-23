@@ -58,13 +58,6 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -90,6 +83,12 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
 
 	respObject, err := services.GetBuilderServiceByType(resource.NodeType).Login().LoginWithEmailOtp(
 		c.Request.Context(),
@@ -158,13 +157,6 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
-
-	// namespace := c.GetString("namespace")
-	// services, err := h.GetService(namespace)
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.Forbidden, err)
-	// 	return
-	// }
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {

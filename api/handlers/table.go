@@ -58,13 +58,6 @@ func (h *Handler) CreateTable(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
 	resourceId, resourceIdOk := c.Get("resource_id")
 
 	projectId, ok := c.Get("project_id")
@@ -114,6 +107,12 @@ func (h *Handler) CreateTable(c *gin.Context) {
 		resourceType = pb.ResourceType(resourceEnvironment.ResourceType)
 		nodeType = resourceEnvironment.GetNodeType()
 	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		nodeType,
+	)
 
 	var fields []*obs.CreateFieldsRequest
 	for _, field := range tableRequest.Fields {
@@ -219,13 +218,6 @@ func (h *Handler) GetTableByID(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
 	resourceId, resourceIdOk := c.Get("resource_id")
 
 	projectId, ok := c.Get("project_id")
@@ -275,6 +267,12 @@ func (h *Handler) GetTableByID(c *gin.Context) {
 		resourceType = pb.ResourceType(resourceEnvironment.ResourceType)
 		nodeType = resourceEnvironment.GetNodeType()
 	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		nodeType,
+	)
 
 	switch resourceType {
 	case pb.ResourceType_MONGODB:
@@ -341,13 +339,6 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
 	resourceId, resourceIdOk := c.Get("resource_id")
 
 	projectId, ok := c.Get("project_id")
@@ -402,6 +393,12 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 	if isLoginTableStr == "true" {
 		isLoginTable = true
 	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		nodeType,
+	)
 
 	switch resourceType {
 	case pb.ResourceType_MONGODB:
@@ -481,13 +478,6 @@ func (h *Handler) UpdateTable(c *gin.Context) {
 	table.Name = fmt.Sprintf("Auto Created Commit Update table - %s", time.Now().Format(time.RFC1123))
 	table.CommitType = config.COMMIT_TYPE_TABLE
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
 	resourceId, resourceIdOk := c.Get("resource_id")
 
 	projectId, ok := c.Get("project_id")
@@ -542,6 +532,12 @@ func (h *Handler) UpdateTable(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, err)
 		return
 	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		nodeType,
+	)
 
 	table.ProjectId = resourceEnvironmentId
 	switch resourceType {
@@ -651,13 +647,6 @@ func (h *Handler) DeleteTable(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
 	resourceId, resourceIdOk := c.Get("resource_id")
 
 	projectId, ok := c.Get("project_id")
@@ -707,6 +696,12 @@ func (h *Handler) DeleteTable(c *gin.Context) {
 		resourceType = pb.ResourceType(resourceEnvironment.ResourceType)
 		nodeType = resourceEnvironment.GetNodeType()
 	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		nodeType,
+	)
 
 	switch resourceType {
 	case pb.ResourceType_MONGODB:
@@ -760,13 +755,6 @@ func (h *Handler) GetListTableHistory(c *gin.Context) {
 	//resourceEnvironment *company_service.ResourceEnvironment
 	)
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -775,7 +763,7 @@ func (h *Handler) GetListTableHistory(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
+		err := errors.New("error getting environment id | not valid")
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
@@ -791,6 +779,12 @@ func (h *Handler) GetListTableHistory(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Table().GetListTableHistory(
 		context.Background(),
@@ -826,13 +820,6 @@ func (h *Handler) GetTableHistoryById(c *gin.Context) {
 	//resourceEnvironment *company_service.ResourceEnvironment
 	)
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -841,7 +828,7 @@ func (h *Handler) GetTableHistoryById(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
+		err := errors.New("error getting environment id | not valid")
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
@@ -858,6 +845,12 @@ func (h *Handler) GetTableHistoryById(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Table().GetTableHistoryById(
 		context.Background(),
@@ -905,13 +898,6 @@ func (h *Handler) RevertTableHistory(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -937,6 +923,12 @@ func (h *Handler) RevertTableHistory(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Table().RevertTableHistory(
 		context.Background(),
@@ -981,13 +973,6 @@ func (h *Handler) InsetrVersionsIdsToTableHistory(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -1013,6 +998,12 @@ func (h *Handler) InsetrVersionsIdsToTableHistory(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Table().InsertVersionsToCommit(
 		context.Background(),
@@ -1079,26 +1070,6 @@ func (h *Handler) GetTableDetails(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -1124,6 +1095,13 @@ func (h *Handler) GetTableDetails(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().GetTableDetails(

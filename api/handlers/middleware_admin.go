@@ -111,7 +111,7 @@ func (h *Handler) AdminAuthMiddleware() gin.HandlerFunc {
 			c.Abort()
 		}
 		c.Set("Auth_Admin", res)
-		c.Set("namespace", h.cfg.UcodeNamespace)
+		// c.Set("namespace", h.cfg.UcodeNamespace)
 		c.Next()
 	}
 }

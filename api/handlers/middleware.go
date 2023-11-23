@@ -23,12 +23,12 @@ import (
 func (h *Handler) NodeMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
-		c.Set("namespace", h.cfg.UcodeNamespace)
+		c.Set(h.baseConf.UcodeNamespace, h.baseConf.UcodeNamespace)
 		c.Next()
 	}
 }
 
-func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
+func (h *Handler) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		var (
@@ -136,7 +136,7 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 
 		}
 		c.Set("Auth", res)
-		c.Set("namespace", h.cfg.UcodeNamespace)
+		// c.Set("namespace", h.cfg.UcodeNamespace)
 
 		c.Next()
 
@@ -213,7 +213,7 @@ func (h *Handler) ResEnvMiddleware() gin.HandlerFunc {
 	}
 }
 
-func (h *Handler) GlobalAuthMiddleware(cfg config.Config) gin.HandlerFunc {
+func (h *Handler) GlobalAuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		var (
@@ -265,7 +265,7 @@ func (h *Handler) GlobalAuthMiddleware(cfg config.Config) gin.HandlerFunc {
 		c.Set("project_id", c.Query("project-id"))
 
 		c.Set("Auth", res)
-		c.Set("namespace", h.cfg.UcodeNamespace)
+		// c.Set("namespace", h.cfg.UcodeNamespace)
 
 		c.Next()
 
