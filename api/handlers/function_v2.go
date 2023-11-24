@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"sync"
 	"time"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
@@ -28,6 +29,11 @@ import (
 
 const (
 	FUNCTION = "FUNCTION"
+)
+
+var (
+	resourceWaitKeyMap = map[string]models.WaitKey{}
+	functionWaitKeyMap = map[string]models.WaitKey{}
 )
 
 // CreateNewFunction godoc
@@ -960,18 +966,74 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 		return
 	}
 	// fmt.Println("\n Run func test #1", environmentId, "\n")
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId.(string),
-			EnvironmentId: environmentId.(string),
-			ServiceType:   pb.ServiceType_FUNCTION_SERVICE,
-		},
+
+	var (
+		resourceKey     = fmt.Sprintf("%s-%s", projectId.(string), environmentId.(string))
+		resourceWaitKey = fmt.Sprintf("ETT-%s-%s", projectId.(string), environmentId.(string))
+		resource        = &pb.ServiceResourceModel{}
+		lock            = sync.RWMutex{}
 	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+
+	// resourceTime := time.Now()
+
+	if _, ok := resourceWaitKeyMap[resourceWaitKey]; ok {
+
+		if resourceWaitKeyMap[resourceWaitKey].Timeout.Err() == context.DeadlineExceeded {
+			delete(resourceWaitKeyMap, resourceWaitKey)
+		}
+
+		if resourceWaitKeyMap[resourceWaitKey].Value == "WAIT" {
+			waitTimeoutCtx, _ := context.WithDeadline(context.Background(), time.Now().Add(time.Second*20))
+			for {
+				redisResource, err := h.redis.Get(context.Background(), resourceKey)
+				if err == nil {
+					err = json.Unmarshal([]byte(redisResource), &resource)
+					if err != nil {
+						h.log.Error("Error while unmarshal resource redis", logger.Error(err))
+						return
+					}
+					break
+				}
+
+				if waitTimeoutCtx.Err() == context.DeadlineExceeded {
+					break
+				}
+				time.Sleep(time.Millisecond * 1)
+			}
+		}
+	} else {
+
+		lock.Lock()
+		ctxWait, _ := context.WithTimeout(context.Background(), time.Second*280)
+		resourceWaitKeyMap[resourceWaitKey] = models.WaitKey{Value: "WAIT", Timeout: ctxWait}
+		lock.Unlock()
+
+		resource, err = services.CompanyService().ServiceResource().GetSingle(
+			c.Request.Context(),
+			&pb.GetSingleServiceResourceReq{
+				ProjectId:     projectId.(string),
+				EnvironmentId: environmentId.(string),
+				ServiceType:   pb.ServiceType_FUNCTION_SERVICE,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		body, err := json.Marshal(resource)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		err = h.redis.SetX(context.Background(), resourceKey, string(body), 5*time.Minute)
+		if err != nil {
+			h.log.Error("Error while setting redis", logger.Error(err))
+		}
 	}
+
+	// fmt.Println(":::::resourceTime:", time.Since(resourceTime))
 	// fmt.Println("\n Run func test #3", resource.ResourceEnvironmentId, "\n")
 	// fmt.Println("\n Run func test #3.1", c.Param("function-id"), "\n")
 	function, err := services.FunctionService().FunctionService().GetSingle(
@@ -1002,44 +1064,56 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 	requestData.Body = bodyReq
 
 	var (
-		key     = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("ett-%s-%s-%s", c.Request.Header.Get("Prev_path"), requestData.Params.Encode(), resource.ResourceEnvironmentId)))
-		waitKey = resource.ProjectId + key
+		key          = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("ett-%s-%s-%s", c.Request.Header.Get("Prev_path"), requestData.Params.Encode(), resource.ResourceEnvironmentId)))
+		waitKey      = resource.ProjectId + key
+		functionLock = sync.RWMutex{}
 	)
 	if c.Request.Method == "GET" && resource.ProjectId == "1acd7a8f-a038-4e07-91cb-b689c368d855" {
 
-		redisResp, err := h.redis.Get(context.Background(), waitKey)
-		if err != nil {
-			h.log.Error("Error while Get ETT redis", logger.Error(err))
-		}
+		if _, ok := functionWaitKeyMap[waitKey]; ok {
 
-		if redisResp == "WAIT" {
-			for {
-				redisResp, err := h.redis.Get(context.Background(), key)
-				if err == nil {
-					resp := make(map[string]interface{})
-					m := make(map[string]interface{})
-					err = json.Unmarshal([]byte(redisResp), &m)
-					if err != nil {
-						h.log.Error("Error while unmarshal redis", logger.Error(err))
-					} else {
-						resp["data"] = m
-						c.JSON(cast.ToInt(m["code"]), m)
-						fmt.Printf("\n\n ~~>> ett redis return response \n\n")
-						return
+			if functionWaitKeyMap[waitKey].Timeout.Err() == context.DeadlineExceeded {
+				delete(functionWaitKeyMap, waitKey)
+			}
+
+			if functionWaitKeyMap[waitKey].Value == "WAIT" {
+				redisDataTime := time.Now()
+
+				waitTimeoutCtx, _ := context.WithDeadline(context.Background(), time.Now().Add(time.Second*20))
+				for {
+					redisResp, err := h.redis.Get(context.Background(), key)
+					if err == nil {
+						resp := make(map[string]interface{})
+						m := make(map[string]interface{})
+						err = json.Unmarshal([]byte(redisResp), &m)
+						if err != nil {
+							h.log.Error("Error while unmarshal redis", logger.Error(err))
+						} else {
+							resp["data"] = m
+							c.JSON(cast.ToInt(m["code"]), m)
+							fmt.Print("\n\n ~~>> ett redis return response ", time.Since(redisDataTime), "\n\n")
+							return
+						}
+						break
 					}
-					break
+
+					if waitTimeoutCtx.Err() == context.DeadlineExceeded {
+						break
+					}
+					time.Sleep(time.Millisecond * 1)
 				}
 
-				time.Sleep(time.Millisecond * 10)
+				// fmt.Println(":::::::redisGetDataTime:", time.Since(redisDataTime))
 			}
 		}
 
-		err = h.redis.SetX(context.Background(), waitKey, "WAIT", 14*time.Second)
-		if err != nil {
-			h.log.Error("Error while SetX redis", logger.Error(err))
-		}
+		functionLock.Lock()
+		ctxWait, _ := context.WithTimeout(context.Background(), time.Second*14)
+		functionWaitKeyMap[waitKey] = models.WaitKey{Value: "WAIT", Timeout: ctxWait}
+		functionLock.Unlock()
 	}
 
+	// doRequestTime := time.Now()
 	// h.log.Info("\n\nFunction run request", logger.Any("auth", authInfo), logger.Any("request_data", requestData), logger.Any("req", c.Request))
 	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+function.Path, "POST", models.FunctionRunV2{
 		Auth:        models.AuthData{},
@@ -1050,6 +1124,7 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 			"app_id":     authInfo.Data["app_id"],
 		},
 	})
+	// fmt.Println("doRequestTime:", time.Since(doRequestTime))
 
 	// fmt.Println("\n Run func test 5", "\n")
 	if err != nil {

@@ -1,10 +1,13 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
 	"strings"
+	"sync"
+	"time"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
@@ -16,6 +19,8 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
+
+var waitKeyMap = map[string]models.WaitKey{}
 
 func (h *Handler) AdminAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -75,35 +80,90 @@ func (h *Handler) AdminAuthMiddleware() gin.HandlerFunc {
 			c.Set("resource_id", resourceId)
 		case "API-KEY":
 			appId := c.GetHeader("X-API-KEY")
-			apiKey, err := h.authService.ApiKey().GetEnvID(
-				c.Request.Context(),
-				&auth_service.GetReq{
-					Id: appId,
-				},
+
+			// apikeysTime := time.Now()
+
+			var (
+				appIdWaitKey, appIdKey = appId + "X-API-KEY", appId
+
+				apiJson []byte
+				apiKey  = &auth_service.GetRes{}
+				lock    = sync.RWMutex{}
+				err     error
 			)
-			if err != nil {
-				h.handleResponse(c, status_http.BadRequest, err.Error())
-				c.Abort()
-				return
+
+			if _, ok := waitKeyMap[appIdWaitKey]; ok {
+
+				if waitKeyMap[appIdWaitKey].Timeout.Err() == context.DeadlineExceeded {
+					delete(waitKeyMap, appIdWaitKey)
+				}
+
+				if waitKeyMap[appIdWaitKey].Value == "WAIT" {
+					waitTimeoutCtx, _ := context.WithTimeout(context.Background(), time.Second*20)
+					for {
+						redisAppId, err := h.redis.Get(context.Background(), appIdKey)
+						if err == nil {
+							apiJson = []byte(redisAppId)
+							err = json.Unmarshal([]byte(redisAppId), &apiKey)
+							if err != nil {
+								h.handleResponse(c, status_http.BadRequest, "cant get auth info")
+								c.Abort()
+								return
+							}
+
+							break
+						}
+
+						if waitTimeoutCtx.Err() == context.DeadlineExceeded {
+							break
+						}
+						time.Sleep(time.Millisecond * 1)
+					}
+				}
+			} else {
+
+				lock.Lock()
+				ctxWait, _ := context.WithTimeout(context.Background(), time.Second*280)
+				waitKeyMap[appIdWaitKey] = models.WaitKey{Value: "WAIT", Timeout: ctxWait}
+				lock.Unlock()
+
+				apiKey, err = h.authService.ApiKey().GetEnvID(
+					c.Request.Context(),
+					&auth_service.GetReq{
+						Id: appId,
+					},
+				)
+				if err != nil {
+					h.handleResponse(c, status_http.BadRequest, err.Error())
+					c.Abort()
+					return
+				}
+
+				apiJson, err = json.Marshal(apiKey)
+				if err != nil {
+					h.handleResponse(c, status_http.BadRequest, "cant get auth info")
+					c.Abort()
+					return
+				}
+
+				err = h.redis.SetX(context.Background(), appIdKey, string(apiJson), 5*time.Minute)
+				if err != nil {
+					h.log.Error("Error while setting redis", logger.Error(err))
+				}
 			}
-			apiJson, err := json.Marshal(apiKey)
-			if err != nil {
-				h.handleResponse(c, status_http.BadRequest, "cant get auth info")
-				c.Abort()
-				return
-			}
+
 			err = json.Unmarshal(apiJson, &data)
 			if err != nil {
 				h.handleResponse(c, status_http.BadRequest, "cant get auth info")
 				c.Abort()
 				return
 			}
-			c.Set("auth", models.AuthData{
-				Type: "API-KEY",
-				Data: data,
-			})
+
+			c.Set("auth", models.AuthData{Type: "API-KEY", Data: data})
 			c.Set("environment_id", apiKey.GetEnvironmentId())
 			c.Set("project_id", apiKey.GetProjectId())
+
+			// fmt.Println("::::::apikeysTime:", time.Since(apikeysTime))
 		default:
 			err := errors.New("error invalid authorization method")
 			h.log.Error("--AuthMiddleware--", logger.Error(err))
