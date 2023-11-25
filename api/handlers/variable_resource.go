@@ -49,7 +49,7 @@ func (h *Handler) AddDataToVariableResource(c *gin.Context) {
 	request.ProjectId = projectId.(string)
 	request.EnvironmentId = environmentId.(string)
 
-	resp, err := h.companyServices.CompanyService().Resource().CreateVariableResource(
+	resp, err := h.companyServices.Resource().CreateVariableResource(
 		context.Background(),
 		request,
 	)
@@ -99,7 +99,7 @@ func (h *Handler) UpdateVariableResource(c *gin.Context) {
 	request.ProjectId = projectId.(string)
 	request.EnvironmentId = environmentId.(string)
 
-	resp, err := h.companyServices.CompanyService().Resource().UpdateVariableResource(
+	resp, err := h.companyServices.Resource().UpdateVariableResource(
 		context.Background(),
 		request,
 	)
@@ -146,7 +146,7 @@ func (h *Handler) GetListVariableResource(c *gin.Context) {
 	request.EnvironmentId = environmentId.(string)
 	request.ProjectResourceId = c.Param("project-resource-id")
 
-	resp, err := h.companyServices.CompanyService().Resource().GetVariableResourceList(
+	resp, err := h.companyServices.Resource().GetVariableResourceList(
 		context.Background(),
 		request,
 	)
@@ -195,7 +195,7 @@ func (h *Handler) GetSingleVariableResource(c *gin.Context) {
 	request.Key = c.DefaultQuery("key", "")
 	request.Id = c.DefaultQuery("id", "")
 
-	resp, err := h.companyServices.CompanyService().Resource().GetSingleVariableResource(
+	resp, err := h.companyServices.Resource().GetSingleVariableResource(
 		context.Background(),
 		request,
 	)
@@ -242,7 +242,7 @@ func (h *Handler) DeleteVariableResource(c *gin.Context) {
 	request.EnvironmentId = environmentId.(string)
 	request.Id = c.Param("id")
 
-	resp, err := h.companyServices.CompanyService().Resource().DeleteVariableResource(
+	resp, err := h.companyServices.Resource().DeleteVariableResource(
 		c.Request.Context(),
 		request,
 	)

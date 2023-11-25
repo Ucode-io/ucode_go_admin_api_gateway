@@ -40,13 +40,6 @@ func (h *Handler) CreateTableFolder(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
 	resourceId, resourceIdOk := c.Get("resource_id")
 
 	projectId, ok := c.Get("project_id")
@@ -63,7 +56,7 @@ func (h *Handler) CreateTableFolder(c *gin.Context) {
 	}
 
 	if !resourceIdOk {
-		resource, err := services.CompanyService().ServiceResource().GetSingle(
+		resource, err := h.companyServices.ServiceResource().GetSingle(
 			c.Request.Context(),
 			&pb.GetSingleServiceResourceReq{
 				ProjectId:     projectId.(string),
@@ -79,7 +72,7 @@ func (h *Handler) CreateTableFolder(c *gin.Context) {
 		resourceEnvironmentId = resource.ResourceEnvironmentId
 		nodeType = resource.NodeType
 	} else {
-		resourceEnvironment, err := services.CompanyService().Resource().GetResourceEnvironment(
+		resourceEnvironment, err := h.companyServices.Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&pb.GetResourceEnvironmentReq{
 				EnvironmentId: environmentId.(string),
@@ -94,6 +87,12 @@ func (h *Handler) CreateTableFolder(c *gin.Context) {
 		resourceEnvironmentId = resourceEnvironment.GetId()
 		nodeType = resourceEnvironment.GetNodeType()
 	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		nodeType,
+	)
 
 	resp, err := services.GetBuilderServiceByType(nodeType).TableFolder().Create(
 		context.Background(),
@@ -125,16 +124,10 @@ func (h *Handler) CreateTableFolder(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetTableFolderByID(c *gin.Context) {
 	Id := c.Param("id")
+	var err error
 
 	if !util.IsValidUUID(Id) {
 		h.handleResponse(c, status_http.InvalidArgument, "table id is an invalid uuid")
-		return
-	}
-
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
 
@@ -156,7 +149,7 @@ func (h *Handler) GetTableFolderByID(c *gin.Context) {
 	var resourceEnvironmentId string
 	var nodeType string
 	if !resourceIdOk {
-		resource, err := services.CompanyService().ServiceResource().GetSingle(
+		resource, err := h.companyServices.ServiceResource().GetSingle(
 			c.Request.Context(),
 			&pb.GetSingleServiceResourceReq{
 				ProjectId:     projectId.(string),
@@ -172,7 +165,7 @@ func (h *Handler) GetTableFolderByID(c *gin.Context) {
 		resourceEnvironmentId = resource.ResourceEnvironmentId
 		nodeType = resource.NodeType
 	} else {
-		resourceEnvironment, err := services.CompanyService().Resource().GetResourceEnvironment(
+		resourceEnvironment, err := h.companyServices.Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&pb.GetResourceEnvironmentReq{
 				EnvironmentId: environmentId.(string),
@@ -187,6 +180,12 @@ func (h *Handler) GetTableFolderByID(c *gin.Context) {
 		resourceEnvironmentId = resourceEnvironment.GetId()
 		nodeType = resourceEnvironment.GetNodeType()
 	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		nodeType,
+	)
 
 	resp, err := services.GetBuilderServiceByType(nodeType).TableFolder().GetByID(
 		context.Background(),
@@ -229,13 +228,6 @@ func (h *Handler) GetAllTableFolders(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
 	resourceId, resourceIdOk := c.Get("resource_id")
 
 	projectId, ok := c.Get("project_id")
@@ -252,7 +244,7 @@ func (h *Handler) GetAllTableFolders(c *gin.Context) {
 	}
 
 	if !resourceIdOk {
-		resource, err := services.CompanyService().ServiceResource().GetSingle(
+		resource, err := h.companyServices.ServiceResource().GetSingle(
 			c.Request.Context(),
 			&pb.GetSingleServiceResourceReq{
 				ProjectId:     projectId.(string),
@@ -268,7 +260,7 @@ func (h *Handler) GetAllTableFolders(c *gin.Context) {
 		resourceEnvironmentId = resource.ResourceEnvironmentId
 		nodeType = resource.NodeType
 	} else {
-		resourceEnvironment, err := services.CompanyService().Resource().GetResourceEnvironment(
+		resourceEnvironment, err := h.companyServices.Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&pb.GetResourceEnvironmentReq{
 				EnvironmentId: environmentId.(string),
@@ -283,6 +275,12 @@ func (h *Handler) GetAllTableFolders(c *gin.Context) {
 		resourceEnvironmentId = resourceEnvironment.GetId()
 		nodeType = resourceEnvironment.GetNodeType()
 	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		nodeType,
+	)
 
 	resp, err := services.GetBuilderServiceByType(nodeType).TableFolder().GetAll(
 		context.Background(),
@@ -323,13 +321,6 @@ func (h *Handler) UpdateTableFolder(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
 	resourceId, resourceIdOk := c.Get("resource_id")
 
 	projectId, ok := c.Get("project_id")
@@ -346,7 +337,7 @@ func (h *Handler) UpdateTableFolder(c *gin.Context) {
 	}
 
 	if !resourceIdOk {
-		resource, err := services.CompanyService().ServiceResource().GetSingle(
+		resource, err := h.companyServices.ServiceResource().GetSingle(
 			c.Request.Context(),
 			&pb.GetSingleServiceResourceReq{
 				ProjectId:     projectId.(string),
@@ -362,7 +353,7 @@ func (h *Handler) UpdateTableFolder(c *gin.Context) {
 		resourceEnvironmentId = resource.ResourceEnvironmentId
 		nodeType = resource.NodeType
 	} else {
-		resourceEnvironment, err := services.CompanyService().Resource().GetResourceEnvironment(
+		resourceEnvironment, err := h.companyServices.Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&pb.GetResourceEnvironmentReq{
 				EnvironmentId: environmentId.(string),
@@ -377,6 +368,12 @@ func (h *Handler) UpdateTableFolder(c *gin.Context) {
 		resourceEnvironmentId = resourceEnvironment.GetId()
 		nodeType = resourceEnvironment.GetNodeType()
 	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		nodeType,
+	)
 
 	resp, err := services.GetBuilderServiceByType(nodeType).TableFolder().Update(
 		context.Background(),
@@ -415,13 +412,6 @@ func (h *Handler) DeleteTableFolder(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
 	resourceId, resourceIdOk := c.Get("resource_id")
 
 	projectId, ok := c.Get("project_id")
@@ -432,13 +422,13 @@ func (h *Handler) DeleteTableFolder(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
+		err := errors.New("error getting environment id | not valid")
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
 
 	if !resourceIdOk {
-		resource, err := services.CompanyService().ServiceResource().GetSingle(
+		resource, err := h.companyServices.ServiceResource().GetSingle(
 			c.Request.Context(),
 			&pb.GetSingleServiceResourceReq{
 				ProjectId:     projectId.(string),
@@ -454,7 +444,7 @@ func (h *Handler) DeleteTableFolder(c *gin.Context) {
 		resourceEnvironmentId = resource.ResourceEnvironmentId
 		nodeType = resource.NodeType
 	} else {
-		resourceEnvironment, err := services.CompanyService().Resource().GetResourceEnvironment(
+		resourceEnvironment, err := h.companyServices.Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&pb.GetResourceEnvironmentReq{
 				EnvironmentId: environmentId.(string),
@@ -469,6 +459,12 @@ func (h *Handler) DeleteTableFolder(c *gin.Context) {
 		resourceEnvironmentId = resourceEnvironment.GetId()
 		nodeType = resourceEnvironment.GetNodeType()
 	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		nodeType,
+	)
 
 	resp, err := services.GetBuilderServiceByType(nodeType).TableFolder().Delete(
 		context.Background(),

@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 	"ucode/ucode_go_api_gateway/api/models"
+	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/logger"
@@ -101,7 +102,7 @@ func (h *Handler) AdminAuthMiddleware() gin.HandlerFunc {
 				if waitKeyMap[appIdWaitKey].Value == "WAIT" {
 					waitTimeoutCtx, _ := context.WithTimeout(context.Background(), time.Second*20)
 					for {
-						redisAppId, err := h.redis.Get(context.Background(), appIdKey)
+						redisAppId, err := h.redis.Get(context.Background(), appIdKey, h.baseConf.UcodeNamespace, config.LOW_NODE_TYPE)
 						if err == nil {
 							apiJson = []byte(redisAppId)
 							err = json.Unmarshal([]byte(redisAppId), &apiKey)
@@ -146,7 +147,7 @@ func (h *Handler) AdminAuthMiddleware() gin.HandlerFunc {
 					return
 				}
 
-				err = h.redis.SetX(context.Background(), appIdKey, string(apiJson), 5*time.Minute)
+				err = h.redis.SetX(context.Background(), appIdKey, string(apiJson), 5*time.Minute, h.baseConf.UcodeNamespace, config.LOW_NODE_TYPE)
 				if err != nil {
 					h.log.Error("Error while setting redis", logger.Error(err))
 				}
@@ -171,7 +172,7 @@ func (h *Handler) AdminAuthMiddleware() gin.HandlerFunc {
 			c.Abort()
 		}
 		c.Set("Auth_Admin", res)
-		c.Set("namespace", h.cfg.UcodeNamespace)
+		// c.Set("namespace", h.cfg.UcodeNamespace)
 		c.Next()
 	}
 }

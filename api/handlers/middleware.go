@@ -23,12 +23,12 @@ import (
 func (h *Handler) NodeMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
-		c.Set("namespace", h.cfg.UcodeNamespace)
+		c.Set(h.baseConf.UcodeNamespace, h.baseConf.UcodeNamespace)
 		c.Next()
 	}
 }
 
-func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
+func (h *Handler) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		var (
@@ -99,7 +99,7 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 				return
 			}
 
-			resource, err := h.companyServices.CompanyService().Resource().GetResourceByEnvID(
+			resource, err := h.companyServices.Resource().GetResourceByEnvID(
 				c.Request.Context(),
 				&company_service.GetResourceByEnvIDRequest{
 					EnvId: apikeys.GetEnvironmentId(),
@@ -136,7 +136,7 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 
 		}
 		c.Set("Auth", res)
-		c.Set("namespace", h.cfg.UcodeNamespace)
+		// c.Set("namespace", h.cfg.UcodeNamespace)
 
 		c.Next()
 
@@ -160,7 +160,7 @@ func (h *Handler) ResEnvMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		services, err := h.GetService(namespace)
+		_, err := h.GetService(namespace)
 		if err != nil {
 			h.handleResponse(c, status_http.Forbidden, err)
 			return
@@ -194,7 +194,7 @@ func (h *Handler) ResEnvMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		resourceEnvironment, err := services.CompanyService().Resource().GetResourceEnvironment(
+		resourceEnvironment, err := h.companyServices.Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&company_service.GetResourceEnvironmentReq{
 				EnvironmentId: environmentID,
@@ -213,7 +213,7 @@ func (h *Handler) ResEnvMiddleware() gin.HandlerFunc {
 	}
 }
 
-func (h *Handler) GlobalAuthMiddleware(cfg config.Config) gin.HandlerFunc {
+func (h *Handler) GlobalAuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		var (
@@ -265,7 +265,7 @@ func (h *Handler) GlobalAuthMiddleware(cfg config.Config) gin.HandlerFunc {
 		c.Set("project_id", c.Query("project-id"))
 
 		c.Set("Auth", res)
-		c.Set("namespace", h.cfg.UcodeNamespace)
+		// c.Set("namespace", h.cfg.UcodeNamespace)
 
 		c.Next()
 

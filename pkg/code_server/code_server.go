@@ -23,7 +23,7 @@ type CodeServer struct {
 	HelmUninstall  string
 }
 
-func CreateCodeServer(functionName string, cfg config.Config, id string) (string, error) {
+func CreateCodeServer(functionName string, cfg config.BaseConfig, id string) (string, error) {
 
 	// command := fmt.Sprintf("--username udevs --password %s code-server https://gitlab.udevs.io/api/v4/projects/1512/packages/helm/stable", cfg.GitlabIntegrationToken)
 	cmd := exec.Command("helm", "repo", "add", "--username", "udevs", "--password", cfg.GitlabIntegrationToken, "code-server", "https://gitlab.udevs.io/api/v4/projects/1512/packages/helm/stable")
@@ -144,7 +144,7 @@ func CreateCodeServerV2(data CodeServer) error {
 	return nil
 }
 
-func DeleteCodeServer(ctx context.Context, srvs services.ServiceManagerI, cfg config.Config) error {
+func DeleteCodeServer(ctx context.Context, srvs services.ServiceManagerI, cfg config.BaseConfig, comp services.CompanyServiceI) error {
 	log.Println("!!!---DeleteCodeServer--->")
 	var (
 		allFunctions = make([]*pb.Function, 0)
@@ -152,7 +152,7 @@ func DeleteCodeServer(ctx context.Context, srvs services.ServiceManagerI, cfg co
 	)
 
 	req := &company_service.GetListResourceEnvironmentReq{}
-	resEnvsIds, err := srvs.CompanyService().Resource().GetListResourceEnvironment(ctx, req)
+	resEnvsIds, err := comp.Resource().GetListResourceEnvironment(ctx, req)
 	if err != nil {
 		log.Println("error while getting resource environments")
 		return err
@@ -216,7 +216,7 @@ func DeleteCodeServer(ctx context.Context, srvs services.ServiceManagerI, cfg co
 	return nil
 }
 
-func DeleteCodeServerByPath(path string, cfg config.Config) error {
+func DeleteCodeServerByPath(path string, cfg config.BaseConfig) error {
 
 	var stdout bytes.Buffer
 	cmd := exec.Command("helm", "uninstall", path, "-n", "test")

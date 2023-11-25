@@ -7,7 +7,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/status_http"
 	ars "ucode/ucode_go_api_gateway/genproto/api_reference_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
-	"ucode/ucode_go_api_gateway/pkg/helper"
+	help "ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
@@ -41,13 +41,6 @@ func (h *Handler) CreateCategory(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
 	environmentId, ok := c.Get("environment_id")
 	if !ok {
 		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is not set").Error())
@@ -65,7 +58,7 @@ func (h *Handler) CreateCategory(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -78,17 +71,16 @@ func (h *Handler) CreateCategory(c *gin.Context) {
 		return
 	}
 
-	// versionGuid, commitGuid, err := h.CreateAutoCommitForAdminChange(
-	// 	c, environmentId.(string),
-	// 	config.COMMIT_TYPE_FIELD, category.GetProjectId(),
-	// )
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err).Error())
-	// 	return
-	// }
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
-	// category.CommitId = uuid.NewString()
-	// category.VersionId = uuid.NewString()
 	category.ResourceId = resource.ResourceEnvironmentId
 	category.ProjectId = projectId.(string)
 
@@ -131,13 +123,6 @@ func (h *Handler) GetApiCategoryByID(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err.Error())
-		return
-	}
-
 	environmentId, ok := c.Get("environment_id")
 	if !ok {
 		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is not set").Error())
@@ -154,18 +139,7 @@ func (h *Handler) GetApiCategoryByID(c *gin.Context) {
 		return
 	}
 
-	// activeVersion, err := services.VersioningService().Release().GetCurrentActive(
-	// 	c.Request.Context(),
-	// 	&vcs.GetCurrentReleaseRequest{
-	// 		EnvironmentId: environmentId.(string),
-	// 	},
-	// )
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -177,6 +151,17 @@ func (h *Handler) GetApiCategoryByID(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
 	resp, err := services.ApiReferenceService().Category().Get(
 		context.Background(),
 		&ars.GetCategoryRequest{
@@ -224,13 +209,6 @@ func (h *Handler) GetAllCategories(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
 	environmentId, ok := c.Get("environment_id")
 	if !ok {
 		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is not set").Error())
@@ -241,17 +219,7 @@ func (h *Handler) GetAllCategories(c *gin.Context) {
 		return
 	}
 
-	// activeVersion, err := services.VersioningService().Release().GetCurrentActive(
-	// 	c.Request.Context(),
-	// 	&vcs.GetCurrentReleaseRequest{
-	// 		EnvironmentId: environmentId.(string),
-	// 	},
-	// )
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.GRPCError, err.Error())
-	// 	return
-	// }
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -263,6 +231,17 @@ func (h *Handler) GetAllCategories(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
 	resp, err := services.ApiReferenceService().Category().GetList(
 		context.Background(),
 		&ars.GetListCategoryRequest{
@@ -328,39 +307,32 @@ func (h *Handler) UpdateCategory(c *gin.Context) {
 		return
 	}
 
-	// versionGuid, commitGuid, err := h.CreateAutoCommitForAdminChange(
-	// 	c, environmentId.(string),
-	// 	config.COMMIT_TYPE_FIELD, category.ProjectID,
-	// )
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err).Error())
-	// 	return
-	// }
-
 	category.CommitId = uuid.NewString()
 	category.VersionId = uuid.NewString()
-
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.log.Error("error getting service", logger.Error(err))
-		h.handleResponse(c, status_http.Forbidden, err.Error())
-		return
-	}
-	attributes, err := helper.ConvertMapToStruct(category.Attributes)
+	attributes, err := help.ConvertMapToStruct(category.Attributes)
 	if err != nil {
 		h.log.Error("error converting map to struct", logger.Error(err))
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_API_REF_SERVICE,
 		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
 	)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
@@ -411,13 +383,6 @@ func (h *Handler) DeleteCategory(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
 	environmentId, ok := c.Get("environment_id")
 	if !ok {
 		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is not set").Error())
@@ -434,17 +399,7 @@ func (h *Handler) DeleteCategory(c *gin.Context) {
 		return
 	}
 
-	// activeVersion, err := services.VersioningService().Release().GetCurrentActive(
-	// 	c.Request.Context(),
-	// 	&vcs.GetCurrentReleaseRequest{
-	// 		EnvironmentId: environmentId.(string),
-	// 	},
-	// )
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.GRPCError, err.Error())
-	// 	return
-	// }
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -456,6 +411,17 @@ func (h *Handler) DeleteCategory(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
 	resp, err := services.ApiReferenceService().Category().Delete(
 		context.Background(),
 		&ars.DeleteCategoryRequest{

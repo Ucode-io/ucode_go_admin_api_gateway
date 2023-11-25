@@ -21,24 +21,8 @@ var DynamicReportFormula = []string{"SUM", "COUNT", "AVERAGE", "MAX", "MIN", "FI
 var CountReq = 0
 
 type Config struct {
-	ServiceName string
-	Environment string // debug, test, release
-	Version     string
-
-	ServiceHost string
-	HTTPPort    string
-	HTTPScheme  string
-
 	DefaultOffset string
 	DefaultLimit  string
-
-	Postgres struct {
-		Host     string
-		Port     int
-		Username string
-		Password string
-		Database string
-	}
 
 	CorporateServiceHost string
 	CorporateGRPCPort    string
@@ -52,9 +36,6 @@ type Config struct {
 	TemplateServiceHost string
 	TemplateGRPCPort    string
 
-	AuthServiceHost string
-	AuthGRPCPort    string
-
 	PosServiceHost string
 	PosGRPCPort    string
 
@@ -66,9 +47,6 @@ type Config struct {
 
 	VersioningServiceHost string
 	VersioningGRPCPort    string
-
-	CompanyServiceHost string
-	CompanyServicePort string
 
 	IntegrationServiceHost string
 	IntegrationGRPCPort    string
@@ -96,11 +74,6 @@ type Config struct {
 
 	UcodeNamespace string
 
-	AdminHost string
-	AppHost   string
-	ApiHost   string
-	Localhost string
-
 	CLIENT_HOST            string
 	SUPERADMIN_HOST        string
 	GitlabIntegrationToken string
@@ -126,11 +99,6 @@ type Config struct {
 	GetRequestRedisDatabase int
 	GetRequestRedisPassword string
 
-	HelmRepoAddFunction    string
-	HelmRepoUpdateFunction string
-	HelmInstallFunction    string
-	HelmUninstallFunction  string
-
 	HelmRepoAddFMicroFE    string
 	HelmRepoUpdateMicroFE  string
 	HelmInstallMicroFE     string
@@ -138,11 +106,49 @@ type Config struct {
 	GitlabGroupIdMicroFE   int
 	GitlabProjectIdMicroFE int
 	GitlabHostMicroFE      string
-	PathToCloneMicroFE     string
 }
 
-// Load ...
-func Load() Config {
+type BaseConfig struct {
+	ServiceName string
+	Environment string
+	Version     string
+
+	ServiceHost string
+	HTTPPort    string
+	HTTPScheme  string
+
+	AuthServiceHost string
+	AuthGRPCPort    string
+
+	CompanyServiceHost string
+	CompanyServicePort string
+
+	MinioEndpoint        string
+	MinioAccessKeyID     string
+	MinioSecretAccessKey string
+	MinioProtocol        bool
+
+	GitlabGroupIdMicroFE   int
+	GitlabProjectIdMicroFE int
+	GitlabHostMicroFE      string
+
+	DefaultOffset string
+	DefaultLimit  string
+
+	CLIENT_HOST            string
+	SUPERADMIN_HOST        string
+	GitlabIntegrationToken string
+	GitlabIntegrationURL   string
+	GitlabGroupId          int
+	GitlabProjectId        int
+	PathToClone            string
+	SecretKey              string
+	PlatformType           string
+
+	UcodeNamespace string
+}
+
+func BaseLoad() BaseConfig {
 	if err := godotenv.Load("/app/.env"); err != nil {
 		if err := godotenv.Load(".env"); err != nil {
 			fmt.Println("No .env file found")
@@ -150,7 +156,7 @@ func Load() Config {
 		fmt.Println("No /app/.env file found")
 	}
 
-	config := Config{}
+	config := BaseConfig{}
 
 	config.ServiceName = cast.ToString(GetOrReturnDefaultValue("SERVICE_NAME", "ucode/ucode_go_api_gateway"))
 	config.Environment = cast.ToString(GetOrReturnDefaultValue("ENVIRONMENT", DebugMode))
@@ -160,20 +166,42 @@ func Load() Config {
 	config.HTTPPort = cast.ToString(GetOrReturnDefaultValue("HTTP_PORT", ":8001"))
 	config.HTTPScheme = cast.ToString(GetOrReturnDefaultValue("HTTP_SCHEME", "http"))
 
+	config.AuthServiceHost = cast.ToString(GetOrReturnDefaultValue("AUTH_SERVICE_HOST", "localhost"))
+	config.AuthGRPCPort = cast.ToString(GetOrReturnDefaultValue("AUTH_GRPC_PORT", ":9103"))
+
+	config.CompanyServiceHost = cast.ToString(GetOrReturnDefaultValue("COMPANY_SERVICE_HOST", "localhost"))
+	config.CompanyServicePort = cast.ToString(GetOrReturnDefaultValue("COMPANY_GRPC_PORT", ":8092"))
+
 	config.MinioAccessKeyID = cast.ToString(GetOrReturnDefaultValue("MINIO_ACCESS_KEY", "Mouch0aij8hui2Aivie7Weethoobee3o"))
 	config.MinioSecretAccessKey = cast.ToString(GetOrReturnDefaultValue("MINIO_SECRET_KEY", "eezei5eaJah7mohNgohxo1Eb3wiex1sh"))
 	config.MinioEndpoint = cast.ToString(GetOrReturnDefaultValue("MINIO_ENDPOINT", "dev-cdn-api.ucode.run"))
 	config.MinioProtocol = cast.ToBool(GetOrReturnDefaultValue("MINIO_PROTOCOL", true))
 
+	config.GitlabGroupIdMicroFE = cast.ToInt(GetOrReturnDefaultValue("GITLAB_GROUP_ID_MICROFE", 2604))
+	config.GitlabProjectIdMicroFE = cast.ToInt(GetOrReturnDefaultValue("GITLAB_PROJECT_ID_MICROFE", 1993))
+	config.GitlabHostMicroFE = cast.ToString(GetOrReturnDefaultValue("GITLAB_HOST_MICROFE", "test-page.ucode.run"))
+
 	config.DefaultOffset = cast.ToString(GetOrReturnDefaultValue("DEFAULT_OFFSET", "0"))
 	config.DefaultLimit = "100"
-	// config.DefaultLimit = cast.ToString(GetOrReturnDefaultValue("DEFAULT_LIMIT", "10000000"))
 
-	config.Postgres.Host = cast.ToString(GetOrReturnDefaultValue("POSTGRES_HOST", "161.35.26.178"))
-	config.Postgres.Port = cast.ToInt(GetOrReturnDefaultValue("POSTGRES_PORT", 30032))
-	config.Postgres.Username = cast.ToString(GetOrReturnDefaultValue("POSTGRES_USERNAME", "admin_api_gateway"))
-	config.Postgres.Password = cast.ToString(GetOrReturnDefaultValue("POSTGRES_PASSWORD", "aoM0zohB"))
-	config.Postgres.Database = cast.ToString(GetOrReturnDefaultValue("POSTGRES_DATABASE", "admin_api_gateway"))
+	config.GitlabIntegrationToken = cast.ToString(GetOrReturnDefaultValue("GITLAB_TOKEN", "glpat-aPL4syqxcHdqWyhxVTMP"))
+	config.GitlabIntegrationURL = cast.ToString(GetOrReturnDefaultValue("GITLAB_URL", "https://gitlab.udevs.io"))
+	config.GitlabGroupId = cast.ToInt(GetOrReturnDefaultValue("GITLAB_GROUP_ID", 0))
+	config.GitlabProjectId = cast.ToInt(GetOrReturnDefaultValue("GITLAB_PROJECT_ID", 0))
+	config.PathToClone = cast.ToString(GetOrReturnDefaultValue("CLONE_PATH", "./app"))
+
+	config.UcodeNamespace = "u-code"
+
+	return config
+}
+
+// Load ...
+func Load() Config {
+
+	config := Config{}
+
+	config.DefaultOffset = cast.ToString(GetOrReturnDefaultValue("DEFAULT_OFFSET", "0"))
+	config.DefaultLimit = "100"
 
 	config.CorporateServiceHost = cast.ToString(GetOrReturnDefaultValue("CORPORATE_SERVICE_HOST", "localhost"))
 	config.CorporateGRPCPort = cast.ToString(GetOrReturnDefaultValue("CORPORATE_GRPC_PORT", ":9101"))
@@ -182,22 +210,10 @@ func Load() Config {
 	config.ObjectBuilderGRPCPort = cast.ToString(GetOrReturnDefaultValue("OBJECT_BUILDER_LOW_GRPC_PORT", ":9102"))
 
 	config.HighObjectBuilderServiceHost = cast.ToString(GetOrReturnDefaultValue("OBJECT_BUILDER_SERVICE_HIGHT_HOST", "localhost"))
-	config.HighObjectBuilderGRPCPort = cast.ToString(GetOrReturnDefaultValue("OBJECT_BUILDER_HIGH_GRPC_PORT", ":9109"))
-
-	// config.ObjectBuilderServiceHost = cast.ToString(GetOrReturnDefaultValue("OBJECT_BUILDER_SERVICE_HOST", "localhost"))
-	// config.ObjectBuilderGRPCPort = cast.ToString(GetOrReturnDefaultValue("OBJECT_BUILDER_GRPC_PORT", ":9102"))
-
-	// config.HighObjectBuilderServiceHost = cast.ToString(GetOrReturnDefaultValue("OBJECT_BUILDER_SERVICE_HOST", "localhost"))
-	// config.HighObjectBuilderGRPCPort = cast.ToString(GetOrReturnDefaultValue("OBJECT_BUILDER_GRPC_PORT", ":9109"))
+	config.HighObjectBuilderGRPCPort = cast.ToString(GetOrReturnDefaultValue("OBJECT_BUILDER_HIGH_GRPC_PORT", ":9108"))
 
 	config.TemplateServiceHost = cast.ToString(GetOrReturnDefaultValue("TEMPLATE_SERVICE_HOST", "localhost"))
 	config.TemplateGRPCPort = cast.ToString(GetOrReturnDefaultValue("TEMPLATE_GRPC_PORT", ":9119"))
-
-	config.AuthServiceHost = cast.ToString(GetOrReturnDefaultValue("AUTH_SERVICE_HOST", "localhost"))
-	config.AuthGRPCPort = cast.ToString(GetOrReturnDefaultValue("AUTH_GRPC_PORT", ":9103"))
-
-	config.CompanyServiceHost = cast.ToString(GetOrReturnDefaultValue("COMPANY_SERVICE_HOST", "localhost"))
-	config.CompanyServicePort = cast.ToString(GetOrReturnDefaultValue("COMPANY_GRPC_PORT", ":8092"))
 
 	config.IntegrationServiceHost = cast.ToString(GetOrReturnDefaultValue("INTEGRATION_SERVICE_HOST", "localhost"))
 	config.IntegrationGRPCPort = cast.ToString(GetOrReturnDefaultValue("INTEGRATION_GRPC_PORT", ":9110"))
@@ -222,13 +238,6 @@ func Load() Config {
 
 	config.FunctionServiceHost = cast.ToString(GetOrReturnDefaultValue("FUNCTION_SERVICE_HOST", "localhost"))
 	config.FunctionServicePort = cast.ToString(GetOrReturnDefaultValue("FUNCTION_GRPC_PORT", ":8100"))
-	config.GitlabIntegrationToken = cast.ToString(GetOrReturnDefaultValue("GITLAB_TOKEN", "glpat-aPL4syqxcHdqWyhxVTMP"))
-	config.GitlabIntegrationURL = cast.ToString(GetOrReturnDefaultValue("GITLAB_URL", "https://gitlab.udevs.io"))
-	config.GitlabGroupId = cast.ToInt(GetOrReturnDefaultValue("GITLAB_GROUP_ID", 0))
-	config.GitlabProjectId = cast.ToInt(GetOrReturnDefaultValue("GITLAB_PROJECT_ID", 0))
-	config.PathToClone = cast.ToString(GetOrReturnDefaultValue("CLONE_PATH", "./app"))
-	config.ScenarioServiceHost = cast.ToString(GetOrReturnDefaultValue("SCENARIO_SERVICE_HOST", "localhost"))
-	config.ScenarioGRPCPort = cast.ToString(GetOrReturnDefaultValue("SCENARIO_GRPC_PORT", ":9108"))
 
 	config.QueryServiceHost = cast.ToString(GetOrReturnDefaultValue("QUERY_SERVICE_HOST", "localhost"))
 	config.QueryServicePort = cast.ToString(GetOrReturnDefaultValue("QUERY_GRPC_PORT", ":8228"))
@@ -237,12 +246,6 @@ func Load() Config {
 
 	config.UcodeNamespace = "cp-region-type-id"
 	config.SecretKey = "Here$houldBe$ome$ecretKey"
-
-	config.AdminHost = cast.ToString(GetOrReturnDefaultValue("ADMIN_HOST", "test.admin.u-code.io"))
-	config.AppHost = cast.ToString(GetOrReturnDefaultValue("APP_HOST", "test.app.u-code.io"))
-	config.ApiHost = cast.ToString(GetOrReturnDefaultValue("API_HOST", "test.admin.api.u-code.io"))
-	config.PlatformType = cast.ToString(GetOrReturnDefaultValue("PLATFORM_TYPE", "super-admin"))
-	config.AdminHostForCodeServer = cast.ToString(GetOrReturnDefaultValue("HOST_FOR_CODE_SERVER", "test.admin"))
 
 	config.ChatServiceGrpcHost = cast.ToString(GetOrReturnDefaultValue("CHAT_SERVICE_HOST", "localhost"))
 	config.ChatServiceGrpcPort = cast.ToString(GetOrReturnDefaultValue("CHAT_GRPC_PORT", ":9001"))
@@ -257,15 +260,6 @@ func Load() Config {
 	config.GetRequestRedisPort = cast.ToString(GetOrReturnDefaultValue("GET_REQUEST_REDIS_PORT", "6601"))
 	config.GetRequestRedisDatabase = cast.ToInt(GetOrReturnDefaultValue("GET_REQUEST_REDIS_DATABASE", 0))
 	config.GetRequestRedisPassword = cast.ToString(GetOrReturnDefaultValue("GET_REQUEST_REDIS_PASSWORD", "redis_password"))
-
-	config.HelmRepoAddFunction = cast.ToString(GetOrReturnDefaultValue("HELM_REPO_ADD_FUNCTION", ""))
-	config.HelmRepoUpdateFunction = cast.ToString(GetOrReturnDefaultValue("HELM_REPO_UPDATE_FUNCTION", ""))
-	config.HelmInstallFunction = cast.ToString(GetOrReturnDefaultValue("HELM_INSTALL_FUNCTION", ""))
-	config.HelmUninstallFunction = cast.ToString(GetOrReturnDefaultValue("HELM_UNINSTALL_FUNCTION", ""))
-
-	config.GitlabGroupIdMicroFE = cast.ToInt(GetOrReturnDefaultValue("GITLAB_GROUP_ID_MICROFE", 2604))
-	config.GitlabProjectIdMicroFE = cast.ToInt(GetOrReturnDefaultValue("GITLAB_PROJECT_ID_MICROFE", 1993))
-	config.GitlabHostMicroFE = cast.ToString(GetOrReturnDefaultValue("GITLAB_HOST_MICROFE", "test-page.ucode.run"))
 
 	return config
 }

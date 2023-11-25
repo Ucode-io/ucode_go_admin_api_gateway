@@ -30,25 +30,12 @@ func (h *Handler) CreateIntegration(c *gin.Context) {
 		return
 	}
 
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
+	// namespace := c.GetString("namespace")
+	// services, err := h.GetService(namespace)
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.Forbidden, err)
+	// 	return
+	// }
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -56,41 +43,9 @@ func (h *Handler) CreateIntegration(c *gin.Context) {
 		return
 	}
 
-	//environmentId, ok := c.Get("environment_id")
-	//if !ok || !util.IsValidUUID(environmentId.(string)) {
-	//	err = errors.New("error getting environment id | not valid")
-	//	h.handleResponse(c, status_http.BadRequest, err)
-	//	return
-	//}
-
-	//resource, err := services.CompanyService().ServiceResource().GetSingle(
-	//	c.Request.Context(),
-	//	&pb.GetSingleServiceResourceReq{
-	//		ProjectId:     projectId.(string),
-	//		EnvironmentId: environmentId.(string),
-	//		ServiceType:   pb.ServiceType_BUILDER_SERVICE,
-	//	},
-	//)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
-
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
 	integration.ProjectId = projectId.(string)
 
-	resp, err := services.AuthService().Integration().CreateIntegration(
+	resp, err := h.authService.Integration().CreateIntegration(
 		c.Request.Context(),
 		&integration,
 	)
@@ -132,12 +87,12 @@ func (h *Handler) GetIntegrationList(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
+	// namespace := c.GetString("namespace")
+	// services, err := h.GetService(namespace)
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.Forbidden, err)
+	// 	return
+	// }
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -146,7 +101,7 @@ func (h *Handler) GetIntegrationList(c *gin.Context) {
 	}
 
 	//@TODO::protobuff already has project_id field
-	resp, err := services.AuthService().Integration().GetIntegrationList(
+	resp, err := h.authService.Integration().GetIntegrationList(
 		c.Request.Context(),
 		&auth_service.GetIntegrationListRequest{
 			Limit:            int32(limit),
@@ -178,15 +133,15 @@ func (h *Handler) GetIntegrationList(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetIntegrationSessions(c *gin.Context) {
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
+	// namespace := c.GetString("namespace")
+	// services, err := h.GetService(namespace)
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.Forbidden, err)
+	// 	return
+	// }
 
 	//@TODO:: no project_id field
-	resp, err := services.AuthService().Integration().GetIntegrationSessions(
+	resp, err := h.authService.Integration().GetIntegrationSessions(
 		c.Request.Context(),
 		&auth_service.IntegrationPrimaryKey{
 			Id: c.Param("integration-id"),
@@ -222,12 +177,12 @@ func (h *Handler) AddSessionToIntegration(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
+	// namespace := c.GetString("namespace")
+	// services, err := h.GetService(namespace)
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.Forbidden, err)
+	// 	return
+	// }
 
 	integrationID := c.Param("integration-id")
 	if !util.IsValidUUID(integrationID) {
@@ -237,7 +192,7 @@ func (h *Handler) AddSessionToIntegration(c *gin.Context) {
 	login.IntegrationId = integrationID
 
 	//@TODO:: no project_id field
-	resp, err := services.AuthService().Integration().AddSessionToIntegration(
+	resp, err := h.authService.Integration().AddSessionToIntegration(
 		c.Request.Context(),
 		&login,
 	)
@@ -269,15 +224,15 @@ func (h *Handler) GetIntegrationByID(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
+	// namespace := c.GetString("namespace")
+	// services, err := h.GetService(namespace)
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.Forbidden, err)
+	// 	return
+	// }
 
 	//@TODO:: no project id field
-	resp, err := services.AuthService().Integration().GetIntegrationByID(
+	resp, err := h.authService.Integration().GetIntegrationByID(
 		c.Request.Context(),
 		&auth_service.IntegrationPrimaryKey{
 			Id: IntegrationID,
@@ -311,15 +266,15 @@ func (h *Handler) DeleteIntegration(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
+	// namespace := c.GetString("namespace")
+	// services, err := h.GetService(namespace)
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.Forbidden, err)
+	// 	return
+	// }
 
 	//@TODO:: no project id field
-	resp, err := services.AuthService().Integration().DeleteIntegration(
+	resp, err := h.authService.Integration().DeleteIntegration(
 		c.Request.Context(),
 		&auth_service.IntegrationPrimaryKey{
 			Id: IntegrationID,
@@ -360,15 +315,15 @@ func (h *Handler) GetIntegrationToken(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
+	// namespace := c.GetString("namespace")
+	// services, err := h.GetService(namespace)
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.Forbidden, err)
+	// 	return
+	// }
 
 	//@TODO:: no project id field
-	resp, err := services.AuthService().Integration().GetIntegrationToken(
+	resp, err := h.authService.Integration().GetIntegrationToken(
 		c.Request.Context(),
 		&auth_service.GetIntegrationTokenRequest{
 			IntegrationId: integrationID,
@@ -410,14 +365,14 @@ func (h *Handler) RemoveSessionFromIntegration(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
+	// namespace := c.GetString("namespace")
+	// services, err := h.GetService(namespace)
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.Forbidden, err)
+	// 	return
+	// }
 
-	resp, err := services.AuthService().Integration().DeleteSessionFromIntegration(
+	resp, err := h.authService.Integration().DeleteSessionFromIntegration(
 		c.Request.Context(),
 		&auth_service.GetIntegrationTokenRequest{
 			IntegrationId: integrationID,

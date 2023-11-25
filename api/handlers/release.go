@@ -59,7 +59,14 @@ func (h *Handler) CreateRelease(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.VersioningService().Release().Create(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.VersioningService().Release().Create(
 		c.Request.Context(),
 		&obs.CreateReleaseRequest{
 			ProjectId:     release.GetProjectId(),
@@ -118,7 +125,14 @@ func (h *Handler) GetReleaseByID(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.VersioningService().Release().GetByID(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.VersioningService().Release().GetByID(
 		c.Request.Context(),
 		&obs.ReleasePrimaryKey{
 			Id:            versionID,
@@ -179,7 +193,14 @@ func (h *Handler) GetAllReleases(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.VersioningService().Release().GetList(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.VersioningService().Release().GetList(
 		c.Request.Context(),
 		&obs.GetReleaseListRequest{
 			Limit:         int32(limit),
@@ -232,6 +253,13 @@ func (h *Handler) UpdateRelease(c *gin.Context) {
 		return
 	}
 
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
 	environmentID, ok := c.Get("environment_id")
 	if !ok {
 		err = errors.New("error getting environment id")
@@ -245,7 +273,7 @@ func (h *Handler) UpdateRelease(c *gin.Context) {
 
 	release.EnvironmentId = environmentID.(string)
 	release.Id = version_id
-	resp, err := h.companyServices.VersioningService().Release().Update(
+	resp, err := services.VersioningService().Release().Update(
 		c.Request.Context(),
 		&release,
 	)
@@ -299,7 +327,14 @@ func (h *Handler) DeleteRelease(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.VersioningService().Release().Delete(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.VersioningService().Release().Delete(
 		context.Background(),
 		&obs.ReleasePrimaryKey{
 			Id:            versionID,
@@ -361,7 +396,14 @@ func (h *Handler) SetCurrentRelease(c *gin.Context) {
 
 	release.EnvironmentId = environmentID.(string)
 
-	resp, err := h.companyServices.VersioningService().Release().SetCurrentActive(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.VersioningService().Release().SetCurrentActive(
 		c.Request.Context(),
 		&release,
 	)
@@ -395,7 +437,14 @@ func (h *Handler) GetCurrentRelease(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.VersioningService().Release().GetCurrentActive(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.VersioningService().Release().GetCurrentActive(
 		context.Background(),
 		&obs.GetCurrentReleaseRequest{
 			EnvironmentId: environmentId,

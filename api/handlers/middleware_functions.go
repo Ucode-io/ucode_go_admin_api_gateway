@@ -106,6 +106,13 @@ func (h *Handler) CreateAutoCommit(c *gin.Context, environmentID, commitType str
 		return "", "", err
 	}
 
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
 	if !util.IsValidUUID(authInfo.GetUserId()) {
 		err := errors.New("invalid or missing user id")
 		h.log.Error("--CreateAutoCommit--", logger.Error(err))
@@ -124,7 +131,7 @@ func (h *Handler) CreateAutoCommit(c *gin.Context, environmentID, commitType str
 		return "", "", err
 	}
 
-	commit, err := h.companyServices.VersioningService().Commit().Insert(
+	commit, err := services.VersioningService().Commit().Insert(
 		c.Request.Context(),
 		&versioning_service.CreateCommitRequest{
 			AuthorId:      authInfo.GetUserId(),
@@ -147,6 +154,13 @@ func (h *Handler) CreateAutoCommitForAdminChange(c *gin.Context, environmentID, 
 		return "", "", err
 	}
 
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
 	if !util.IsValidUUID(authInfo.GetUserId()) {
 		err := errors.New("invalid or missing user id")
 		h.log.Error("--CreateAutoCommit--", logger.Error(err))
@@ -165,7 +179,7 @@ func (h *Handler) CreateAutoCommitForAdminChange(c *gin.Context, environmentID, 
 		return "", "", err
 	}
 
-	commit, err := h.companyServices.VersioningService().Commit().Insert(
+	commit, err := services.VersioningService().Commit().Insert(
 		c.Request.Context(),
 		&versioning_service.CreateCommitRequest{
 			AuthorId:      authInfo.GetUserId(),

@@ -34,7 +34,7 @@ func (h *Handler) CreateCompany(c *gin.Context) {
 		return
 	}
 	authInfo, _ := h.GetAuthInfo(c)
-	companyPKey, err := h.companyServices.CompanyService().Company().Create(context.Background(), &company_service.CreateCompanyRequest{
+	companyPKey, err := h.companyServices.Company().Create(context.Background(), &company_service.CreateCompanyRequest{
 		Title:       company.Name,
 		Logo:        "",
 		Description: "",
@@ -45,7 +45,7 @@ func (h *Handler) CreateCompany(c *gin.Context) {
 		return
 	}
 
-	project, err := h.companyServices.CompanyService().Project().Create(context.Background(), &company_service.CreateProjectRequest{
+	project, err := h.companyServices.Project().Create(context.Background(), &company_service.CreateProjectRequest{
 		CompanyId:    companyPKey.GetId(),
 		K8SNamespace: "cp-region-type-id",
 		Title:        company.Name,
@@ -55,7 +55,7 @@ func (h *Handler) CreateCompany(c *gin.Context) {
 		return
 	}
 
-	_, err = h.companyServices.CompanyService().Environment().Create(
+	_, err = h.companyServices.Environment().Create(
 		context.Background(),
 		&company_service.CreateEnvironmentRequest{
 			ProjectId:    project.GetProjectId(),
@@ -102,7 +102,7 @@ func (h *Handler) CreateCompany(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetCompanyByID(c *gin.Context) {
 	companyId := c.Param("company_id")
-	resp, err := h.companyServices.CompanyService().Company().GetById(
+	resp, err := h.companyServices.Company().GetById(
 		context.Background(),
 		&company_service.GetCompanyByIdRequest{
 			Id: companyId,
@@ -143,7 +143,7 @@ func (h *Handler) GetCompanyList(c *gin.Context) {
 	companies := make([]*company_service.Company, 0, len(userProjects.GetCompanies()))
 	for _, company := range userProjects.GetCompanies() {
 
-		companyFromService, err := h.companyServices.CompanyService().Company().GetById(
+		companyFromService, err := h.companyServices.Company().GetById(
 			context.Background(),
 			&company_service.GetCompanyByIdRequest{
 				Id: company.GetId(),
@@ -190,7 +190,7 @@ func (h *Handler) GetCompanyListWithProjects(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.CompanyService().Company().GetListWithProjects(
+	resp, err := h.companyServices.Company().GetListWithProjects(
 		context.Background(),
 		&company_service.GetListWithProjectsRequest{
 			Limit:    int32(limit),
@@ -251,7 +251,7 @@ func (h *Handler) UpdateCompany(c *gin.Context) {
 	// 	return
 	// }
 
-	resp, err := h.companyServices.CompanyService().Company().Update(
+	resp, err := h.companyServices.Company().Update(
 		context.Background(),
 		&company_service.Company{
 			Id:          companyId,
@@ -294,7 +294,7 @@ func (h *Handler) DeleteCompany(c *gin.Context) {
 	// 	return
 	// }
 
-	resp, err := h.companyServices.CompanyService().Company().Delete(
+	resp, err := h.companyServices.Company().Delete(
 		context.Background(),
 		&company_service.DeleteCompanyRequest{
 			Id: companyId,
@@ -331,7 +331,7 @@ func (h *Handler) CreateCompanyProject(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.CompanyService().Project().Create(
+	resp, err := h.companyServices.Project().Create(
 		context.Background(),
 		&company_service.CreateProjectRequest{
 			Title:        project.Title,
@@ -364,7 +364,7 @@ func (h *Handler) CreateCompanyProject(c *gin.Context) {
 		return
 	}
 
-	_, err = h.companyServices.CompanyService().Environment().Create(
+	_, err = h.companyServices.Environment().Create(
 		c.Request.Context(),
 		&company_service.CreateEnvironmentRequest{
 			ProjectId:    resp.ProjectId,

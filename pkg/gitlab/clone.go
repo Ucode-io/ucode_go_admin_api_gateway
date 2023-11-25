@@ -7,7 +7,7 @@ import (
 	"ucode/ucode_go_api_gateway/config"
 )
 
-func CloneForkToPath(path string, cfg config.Config) error {
+func CloneForkToPath(path string, cfg config.BaseConfig) error {
 
 	//git -c core.sshCommand="ssh -i /key/ssh-privatekey” clone git@gitlab.udevs.io:ucode/ucode_go_admin_api_gateway.git
 	// path = strings.TrimPrefix(path, "https://")
@@ -53,7 +53,7 @@ func CloneForkToPathV2(path string, cfg config.Config) error {
 	return nil
 }
 
-func DeletedClonedRepoByPath(path string, cfg config.Config) error {
+func DeletedClonedRepoByPath(path string, cfg config.BaseConfig) error {
 
 	//git -c core.sshCommand="ssh -i /key/ssh-privatekey” clone git@gitlab.udevs.io:ucode/ucode_go_admin_api_gateway.git
 	// path = strings.TrimPrefix(path, "https://")

@@ -54,7 +54,7 @@ func (h *Handler) CopyProjectTemplate(c *gin.Context) {
 		return
 	}
 
-	fromResource, err := services.CompanyService().ServiceResource().GetSingle(
+	fromResource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     body.FromProjectId,
@@ -67,7 +67,7 @@ func (h *Handler) CopyProjectTemplate(c *gin.Context) {
 		return
 	}
 
-	toResource, err := services.CompanyService().ServiceResource().GetSingle(
+	toResource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),

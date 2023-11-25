@@ -93,7 +93,7 @@ func (h *Handler) SendCode(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -106,7 +106,7 @@ func (h *Handler) SendCode(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+	//resourceEnvironment, err := h.companyServices.Resource().GetResEnvByResIdEnvId(
 	//	context.Background(),
 	//	&company_service.GetResEnvByResIdEnvIdRequest{
 	//		EnvironmentId: environmentId.(string),
@@ -240,7 +240,7 @@ func (h *Handler) Verify(c *gin.Context) {
 		return
 	}
 
-	_, err = services.CompanyService().ServiceResource().GetSingle(
+	_, err = h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -253,7 +253,7 @@ func (h *Handler) Verify(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+	//resourceEnvironment, err := h.companyServices.Resource().GetResEnvByResIdEnvId(
 	//	context.Background(),
 	//	&company_service.GetResEnvByResIdEnvIdRequest{
 	//		EnvironmentId: environmentId.(string),
@@ -266,7 +266,7 @@ func (h *Handler) Verify(c *gin.Context) {
 	//	return
 	//}
 
-	res, err := services.AuthService().Session().SessionAndTokenGenerator(
+	res, err := h.authService.Session().SessionAndTokenGenerator(
 		context.Background(),
 		&pbAuth.SessionAndTokenRequest{
 			LoginData: convertedToAuthPb,
@@ -344,7 +344,7 @@ func (h *Handler) RegisterOtp(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -357,7 +357,7 @@ func (h *Handler) RegisterOtp(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+	//resourceEnvironment, err := h.companyServices.Resource().GetResEnvByResIdEnvId(
 	//	context.Background(),
 	//	&company_service.GetResEnvByResIdEnvIdRequest{
 	//		EnvironmentId: environmentId.(string),
@@ -397,7 +397,7 @@ func (h *Handler) RegisterOtp(c *gin.Context) {
 	}
 
 	convertedToAuthPb := helper.ConvertPbToAnotherPb(resp)
-	res, err := services.AuthService().Session().SessionAndTokenGenerator(
+	res, err := h.authService.Session().SessionAndTokenGenerator(
 		context.Background(),
 		&pbAuth.SessionAndTokenRequest{
 			LoginData: convertedToAuthPb,

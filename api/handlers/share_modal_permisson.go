@@ -34,13 +34,6 @@ func (h *Handler) GetTablePermission(c *gin.Context) {
 		nodeType              string
 	)
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
 	resourceId, resourceIdOk := c.Get("resource_id")
 
 	projectId, ok := c.Get("project_id")
@@ -51,13 +44,13 @@ func (h *Handler) GetTablePermission(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
+		err := errors.New("error getting environment id | not valid")
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
 
 	if !resourceIdOk {
-		resource, err := services.CompanyService().ServiceResource().GetSingle(
+		resource, err := h.companyServices.ServiceResource().GetSingle(
 			c.Request.Context(),
 			&pb.GetSingleServiceResourceReq{
 				ProjectId:     projectId.(string),
@@ -74,7 +67,7 @@ func (h *Handler) GetTablePermission(c *gin.Context) {
 		resourceEnvironmentId = resource.ResourceEnvironmentId
 		nodeType = resource.NodeType
 	} else {
-		resourceEnvironment, err := services.CompanyService().Resource().GetResourceEnvironment(
+		resourceEnvironment, err := h.companyServices.Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&pb.GetResourceEnvironmentReq{
 				EnvironmentId: environmentId.(string),
@@ -91,6 +84,12 @@ func (h *Handler) GetTablePermission(c *gin.Context) {
 		nodeType = resourceEnvironment.GetNodeType()
 	}
 	authInfo, _ := h.GetAuthInfo(c)
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		nodeType,
+	)
 
 	switch resourceType {
 	case pb.ResourceType_MONGODB:
@@ -157,13 +156,6 @@ func (h *Handler) UpdateTablePermission(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
 	resourceId, resourceIdOk := c.Get("resource_id")
 
 	projectId, ok := c.Get("project_id")
@@ -180,7 +172,7 @@ func (h *Handler) UpdateTablePermission(c *gin.Context) {
 	}
 
 	if !resourceIdOk {
-		resource, err := services.CompanyService().ServiceResource().GetSingle(
+		resource, err := h.companyServices.ServiceResource().GetSingle(
 			c.Request.Context(),
 			&pb.GetSingleServiceResourceReq{
 				ProjectId:     projectId.(string),
@@ -197,7 +189,7 @@ func (h *Handler) UpdateTablePermission(c *gin.Context) {
 		resourceType = resource.ResourceType
 		nodeType = resource.NodeType
 	} else {
-		resourceEnvironment, err := services.CompanyService().Resource().GetResourceEnvironment(
+		resourceEnvironment, err := h.companyServices.Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&pb.GetResourceEnvironmentReq{
 				EnvironmentId: environmentId.(string),
@@ -213,6 +205,12 @@ func (h *Handler) UpdateTablePermission(c *gin.Context) {
 		resourceType = pb.ResourceType(resourceEnvironment.ResourceType)
 		nodeType = resourceEnvironment.GetNodeType()
 	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		nodeType,
+	)
 
 	tablePermission.ProjectId = resourceEnvironmentId
 	switch resourceType {

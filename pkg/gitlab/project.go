@@ -40,7 +40,7 @@ func CreateProjectFork(projectName string, data IntegrationData) (response model
 	return resp, err
 }
 
-func DeleteForkedProject(repoName string, cfg config.Config) (response models.GitlabIntegrationResponse, err error) {
+func DeleteForkedProject(repoName string, cfg config.BaseConfig) (response models.GitlabIntegrationResponse, err error) {
 
 	resp, err := DoRequest(cfg.GitlabIntegrationURL+"/api/v4/projects/ucode_functions_group%2"+"F"+repoName, cfg.GitlabIntegrationToken, "DELETE", nil)
 	if resp.Code >= 400 {

@@ -35,26 +35,13 @@ func (h *Handler) CreateRedirectUrl(c *gin.Context) {
 		return
 	}
 
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
+	// namespace := c.GetString("namespace")
+	// services, err := h.GetService(namespace)
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.Forbidden, err)
+	// 	return
+	// }
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
-	//
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -70,7 +57,7 @@ func (h *Handler) CreateRedirectUrl(c *gin.Context) {
 	data.ProjectId = projectId.(string)
 	data.EnvId = environmentId.(string)
 
-	res, err := services.CompanyService().Redirect().Create(
+	res, err := h.companyServices.Redirect().Create(
 		context.Background(),
 		&data,
 	)
@@ -107,12 +94,12 @@ func (h *Handler) GetSingleRedirectUrl(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
+	// namespace := c.GetString("namespace")
+	// services, err := h.GetService(namespace)
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.Forbidden, err)
+	// 	return
+	// }
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -120,26 +107,14 @@ func (h *Handler) GetSingleRedirectUrl(c *gin.Context) {
 		return
 	}
 
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
-
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
+		err := errors.New("error getting environment id | not valid")
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
 
-	res, err := services.CompanyService().Redirect().GetSingle(
+	res, err := h.companyServices.Redirect().GetSingle(
 		context.Background(),
 		&pb.GetSingleRedirectUrlReq{
 			Id: id,
@@ -179,26 +154,13 @@ func (h *Handler) UpdateRedirectUrl(c *gin.Context) {
 		return
 	}
 
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
+	// namespace := c.GetString("namespace")
+	// services, err := h.GetService(namespace)
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.Forbidden, err)
+	// 	return
+	// }
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
-	//
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -215,7 +177,7 @@ func (h *Handler) UpdateRedirectUrl(c *gin.Context) {
 	data.ProjectId = projectId.(string)
 	data.EnvId = environmentId.(string)
 
-	res, err := services.CompanyService().Redirect().Update(
+	res, err := h.companyServices.Redirect().Update(
 		context.Background(),
 		&data,
 	)
@@ -252,12 +214,12 @@ func (h *Handler) DeleteRedirectUrl(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
+	// namespace := c.GetString("namespace")
+	// services, err := h.GetService(namespace)
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.Forbidden, err)
+	// 	return
+	// }
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -265,27 +227,14 @@ func (h *Handler) DeleteRedirectUrl(c *gin.Context) {
 		return
 	}
 
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
-	//
-
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
+		err := errors.New("error getting environment id | not valid")
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
 
-	res, err := services.CompanyService().Redirect().Delete(
+	res, err := h.companyServices.Redirect().Delete(
 		context.Background(),
 		&pb.DeleteRedirectUrlReq{
 			Id: id,
@@ -331,18 +280,12 @@ func (h *Handler) GetListRedirectUrl(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
+	// namespace := c.GetString("namespace")
+	// services, err := h.GetService(namespace)
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.Forbidden, err)
+	// 	return
+	// }
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -350,13 +293,6 @@ func (h *Handler) GetListRedirectUrl(c *gin.Context) {
 		return
 	}
 
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
-	//
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		err = errors.New("error getting environment id | not valid")
@@ -364,7 +300,7 @@ func (h *Handler) GetListRedirectUrl(c *gin.Context) {
 		return
 	}
 
-	res, err := services.CompanyService().Redirect().GetList(
+	res, err := h.companyServices.Redirect().GetList(
 		context.Background(),
 		&pb.GetListRedirectUrlReq{
 			ProjectId: projectId.(string),
@@ -406,14 +342,14 @@ func (h *Handler) UpdateRedirectUrlOrder(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
+	// namespace := c.GetString("namespace")
+	// services, err := h.GetService(namespace)
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.Forbidden, err)
+	// 	return
+	// }
 
-	res, err := services.CompanyService().Redirect().UpdateOrder(
+	res, err := h.companyServices.Redirect().UpdateOrder(
 		context.Background(),
 		&data,
 	)

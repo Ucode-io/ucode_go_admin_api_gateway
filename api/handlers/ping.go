@@ -33,12 +33,12 @@ func (h *Handler) Ping(c *gin.Context) {
 // @Success 200 {object} status_http.Response{data=config.Config} "Response data"
 // @Failure 400 {object} status_http.Response{}
 func (h *Handler) GetConfig(c *gin.Context) {
-	switch h.cfg.Environment {
+	switch h.baseConf.Environment {
 	case config.DebugMode:
-		h.handleResponse(c, status_http.OK, h.cfg)
+		h.handleResponse(c, status_http.OK, h.baseConf)
 		return
 	case config.TestMode:
-		h.handleResponse(c, status_http.OK, h.cfg.Environment)
+		h.handleResponse(c, status_http.OK, h.baseConf)
 		return
 	case config.ReleaseMode:
 		h.handleResponse(c, status_http.OK, "private data")
