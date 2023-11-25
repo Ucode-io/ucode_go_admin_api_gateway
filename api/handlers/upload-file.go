@@ -252,6 +252,10 @@ func (h *Handler) UploadFile(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	_, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().Create(
 		context.Background(),

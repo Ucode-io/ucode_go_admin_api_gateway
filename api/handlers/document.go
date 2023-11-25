@@ -64,6 +64,10 @@ func (h *Handler) CreateDocument(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	document.ProjectId = resource.ResourceEnvironmentId
 
@@ -132,6 +136,10 @@ func (h *Handler) GetSingleDocument(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Document().GetSingle(
 		context.Background(),
@@ -206,6 +214,10 @@ func (h *Handler) UpdateDocument(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	document.ProjectId = resource.ResourceEnvironmentId
 
@@ -274,6 +286,10 @@ func (h *Handler) DeleteDocument(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Document().Delete(
 		context.Background(),
@@ -343,6 +359,10 @@ func (h *Handler) GetDocumentList(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Document().GetList(
 		context.Background(),

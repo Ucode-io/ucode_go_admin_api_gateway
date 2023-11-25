@@ -85,6 +85,10 @@ func (h *Handler) CreateNewFunction(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	environment, err := h.companyServices.Environment().GetById(context.Background(), &company_service.EnvironmentPrimaryKey{
 		Id: environmentId.(string),
@@ -210,6 +214,10 @@ func (h *Handler) GetNewFunctionByID(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	fmt.Println("\n URL function by id path >>", functionID, "\n")
 	function, err := services.FunctionService().FunctionService().GetSingle(
@@ -331,6 +339,10 @@ func (h *Handler) GetAllNewFunctions(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.FunctionService().FunctionService().GetList(
 		context.Background(),
@@ -408,6 +420,10 @@ func (h *Handler) UpdateNewFunction(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.FunctionService().FunctionService().Update(
 		context.Background(),
@@ -483,6 +499,10 @@ func (h *Handler) DeleteNewFunction(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.FunctionService().FunctionService().GetSingle(
 		context.Background(),
@@ -617,6 +637,10 @@ func (h *Handler) GetAllNewFunctionsForApp(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	if err != nil {
 		err = errors.New("error getting resource environment id")
@@ -788,6 +812,10 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	function, err := services.FunctionService().FunctionService().GetSingle(
 		context.Background(),
@@ -818,7 +846,7 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 
 	if c.Request.Method == "GET" && resource.ProjectId == "1acd7a8f-a038-4e07-91cb-b689c368d855" {
 		fmt.Println("ETT Cache:", fmt.Sprintf("ett-%s-%s-%s", c.Request.Header.Get("Prev_path"), requestData.Params.Encode(), resource.ResourceEnvironmentId))
-		redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("ett-%s-%s-%s", c.Request.Header.Get("Prev_path"), requestData.Params.Encode(), resource.ResourceEnvironmentId))), projectId.(string))
+		redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("ett-%s-%s-%s", c.Request.Header.Get("Prev_path"), requestData.Params.Encode(), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
 		if err == nil {
 			resp := make(map[string]interface{})
 			m := make(map[string]interface{})
@@ -866,7 +894,7 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 		if isOwnData {
 			if err == nil && c.Request.Method == "GET" && resource.ProjectId == "1acd7a8f-a038-4e07-91cb-b689c368d855" {
 				jsonData, _ := json.Marshal(resp.Data)
-				err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("ett-%s-%s-%s", c.Request.Header.Get("Prev_path"), requestData.Params.Encode(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, projectId.(string))
+				err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("ett-%s-%s-%s", c.Request.Header.Get("Prev_path"), requestData.Params.Encode(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
 				if err != nil {
 					h.log.Error("Error while setting redis", logger.Error(err))
 				}

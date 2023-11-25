@@ -68,6 +68,10 @@ func (h *Handler) CreateApp(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	app.ProjectId = resource.ResourceEnvironmentId
 
@@ -152,6 +156,10 @@ func (h *Handler) GetAppByID(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
@@ -247,6 +255,10 @@ func (h *Handler) GetAllApps(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	authInfo, _ := h.GetAuthInfo(c)
 	switch resource.ResourceType {
@@ -333,6 +345,10 @@ func (h *Handler) UpdateApp(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	app.ProjectId = resource.ResourceEnvironmentId
 	switch resource.ResourceType {
@@ -416,6 +432,10 @@ func (h *Handler) DeleteApp(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:

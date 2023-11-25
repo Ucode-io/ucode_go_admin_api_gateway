@@ -66,6 +66,10 @@ func (h *Handler) CreateFunctionFolder(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	if functionFolder.Type == "" {
 		functionFolder.Type = "FUNCTION"
@@ -142,6 +146,10 @@ func (h *Handler) GetFunctionFolderById(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.FunctionService().FunctionService().GetSingle(
 		context.Background(),
@@ -221,6 +229,10 @@ func (h *Handler) GetAllFunctionFolder(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.FunctionService().FunctionFolderService().GetList(
 		context.Background(),
@@ -294,6 +306,10 @@ func (h *Handler) UpdateFunctionFolder(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	if functionFolder.Type == "" {
 		functionFolder.Type = "FUNCTION"
@@ -371,6 +387,10 @@ func (h *Handler) DeleteFunctionFolder(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	if err != nil {
 		err = errors.New("error getting resource environment id")

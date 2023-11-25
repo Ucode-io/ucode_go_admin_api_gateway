@@ -72,6 +72,10 @@ func (h *Handler) GetQueryRows(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.AnalyticsService().Query().GetQueryRows(
 		context.Background(),

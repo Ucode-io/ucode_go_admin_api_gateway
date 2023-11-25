@@ -70,6 +70,10 @@ func (h *Handler) CreateNoteFolder(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	folderNote.ProjectId = projectId.(string)
 	folderNote.ResourceId = resource.ResourceEnvironmentId
@@ -152,6 +156,10 @@ func (h *Handler) GetSingleNoteFolder(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	res, err := services.TemplateService().Note().GetSingleFolderNote(
 		context.Background(),
@@ -227,6 +235,10 @@ func (h *Handler) UpdateNoteFolder(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	folderNote.ProjectId = projectId.(string)
 	folderNote.ResourceId = resource.ResourceEnvironmentId
@@ -309,6 +321,10 @@ func (h *Handler) DeleteNoteFolder(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	res, err := services.TemplateService().Note().DeleteFolderNote(
 		context.Background(),
@@ -376,6 +392,10 @@ func (h *Handler) GetListNoteFolder(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	res, err := services.TemplateService().Note().GetListFolderNote(
 		context.Background(),
@@ -443,6 +463,10 @@ func (h *Handler) GetNoteFolderCommits(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	res, err := services.TemplateService().Note().GetNoteFolderObjectCommits(
 		context.Background(),
@@ -522,6 +546,10 @@ func (h *Handler) CreateNote(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	note.ProjectId = projectId.(string)
 	note.ResourceId = resource.ResourceEnvironmentId
@@ -630,6 +658,10 @@ func (h *Handler) GetSingleNote(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	res, err := services.TemplateService().Note().GetSingleNote(
 		context.Background(),
@@ -757,6 +789,10 @@ func (h *Handler) UpdateNote(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	note.ProjectId = projectId.(string)
 	note.ResourceId = resource.ResourceEnvironmentId
@@ -839,6 +875,10 @@ func (h *Handler) DeleteNote(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	res, err := services.TemplateService().Note().DeleteNote(
 		context.Background(),
@@ -921,6 +961,10 @@ func (h *Handler) GetListNote(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	res, err := services.TemplateService().Note().GetListNote(
 		context.Background(),
@@ -991,6 +1035,10 @@ func (h *Handler) GetNoteCommits(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	res, err := services.TemplateService().Note().GetNoteObjectCommits(
 		context.Background(),

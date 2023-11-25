@@ -71,6 +71,10 @@ func (h *Handler) CreateView(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	view.ProjectId = resource.ResourceEnvironmentId
 	switch resource.ResourceType {
@@ -154,6 +158,10 @@ func (h *Handler) GetSingleView(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
@@ -241,6 +249,10 @@ func (h *Handler) UpdateView(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	view.ProjectId = resource.ResourceEnvironmentId
 
@@ -325,6 +337,10 @@ func (h *Handler) DeleteView(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
@@ -408,6 +424,10 @@ func (h *Handler) GetViewList(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
@@ -503,6 +523,10 @@ func (h *Handler) ConvertHtmlToPdf(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
@@ -603,6 +627,10 @@ func (h *Handler) ConvertTemplateToHtml(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
@@ -697,6 +725,10 @@ func (h *Handler) UpdateViewOrder(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:

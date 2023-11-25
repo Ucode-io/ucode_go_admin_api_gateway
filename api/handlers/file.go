@@ -82,6 +82,10 @@ func (h *Handler) UploadToFolder(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	var title string = file.File.Filename
 
@@ -267,6 +271,10 @@ func (h *Handler) UpdateFile(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).File().Update(
 		context.Background(),
@@ -336,6 +344,10 @@ func (h *Handler) DeleteFile(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	res, err := services.GetBuilderServiceByType(resource.NodeType).File().GetSingle(
 		context.Background(),
@@ -437,6 +449,10 @@ func (h *Handler) DeleteFiles(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	res, err := services.GetBuilderServiceByType(resource.NodeType).File().GetSingle(
 		context.Background(),
@@ -532,6 +548,10 @@ func (h *Handler) GetAllFiles(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).File().GetList(
 		context.Background(),

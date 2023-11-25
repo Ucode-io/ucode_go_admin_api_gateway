@@ -80,6 +80,10 @@ func (h *Handler) CreateWebPageFolder(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	res, err := services.WebPageService().Folder().CreateFolder(
 		context.Background(),
@@ -149,6 +153,10 @@ func (h *Handler) GetSingleWebPageFolder(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	res, err := services.WebPageService().Folder().GetSingleFolder(
 		context.Background(),
@@ -227,6 +235,10 @@ func (h *Handler) UpdateWebPageFolder(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	res, err := services.WebPageService().Folder().UpdateFolder(
 		context.Background(),
@@ -296,6 +308,10 @@ func (h *Handler) DeleteWebPageFolder(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	res, err := services.WebPageService().Folder().DeleteFolder(
 		context.Background(),
@@ -363,6 +379,10 @@ func (h *Handler) GetListWebPageFolder(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	res, err := services.WebPageService().Folder().GetListFolder(
 		context.Background(),
@@ -443,6 +463,10 @@ func (h *Handler) CreateWebPageV2(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	webpage.EnvironmentId = environmentId.(string)
 	webpage.ProjectId = projectId.(string)
@@ -538,6 +562,10 @@ func (h *Handler) GetSingleWebPageV2(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	res, err := services.WebPageService().WebPage().GetSingleWebPage(
 		context.Background(),
@@ -645,6 +673,10 @@ func (h *Handler) UpdateWebPageV2(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	webPage.EnvironmentId = environmentId.(string)
 	webPage.ProjectId = projectId.(string)
@@ -748,6 +780,10 @@ func (h *Handler) DeleteWebPageV2(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	res, err := services.WebPageService().WebPage().DeleteWebPage(
 		context.Background(),
@@ -832,6 +868,10 @@ func (h *Handler) GetListWebPageV2(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	res, err := services.WebPageService().WebPage().GetListWebPage(
 		context.Background(),
@@ -924,6 +964,10 @@ func (h *Handler) GetWebPageHistory(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.WebPageService().WebPage().GetWebPageChanges(
 		context.Background(),
@@ -1091,6 +1135,10 @@ func (h *Handler) RevertWebPage(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.WebPageService().WebPage().RevertWebPage(
 		context.Background(),
@@ -1176,7 +1224,11 @@ func (h *Handler) InsertManyVersionForWebPageService(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
-	
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
 	body.EnvironmentId = environmentId.(string)
 	if !util.IsValidUUID(body.GetEnvironmentId()) {
 		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is invalid uuid").Error())

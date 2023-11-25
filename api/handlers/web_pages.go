@@ -72,6 +72,10 @@ func (h *Handler) CreateWebPage(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.BuilderService().WebPage().Create(
 		context.Background(),
@@ -192,6 +196,10 @@ func (h *Handler) GetWebPagesList(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.BuilderService().WebPage().GetAll(
 		context.Background(),
@@ -271,6 +279,10 @@ func (h *Handler) UpdateWebPage(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.BuilderService().WebPage().Update(
 		context.Background(),

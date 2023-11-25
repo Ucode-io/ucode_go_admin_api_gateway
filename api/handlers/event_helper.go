@@ -60,6 +60,10 @@ func GetListCustomEvents(tableSlug, roleId, method string, c *gin.Context, h *Ha
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:

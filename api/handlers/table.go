@@ -785,6 +785,10 @@ func (h *Handler) GetListTableHistory(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Table().GetListTableHistory(
 		context.Background(),
@@ -851,6 +855,10 @@ func (h *Handler) GetTableHistoryById(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Table().GetTableHistoryById(
 		context.Background(),
@@ -929,6 +937,10 @@ func (h *Handler) RevertTableHistory(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Table().RevertTableHistory(
 		context.Background(),
@@ -1004,6 +1016,10 @@ func (h *Handler) InsetrVersionsIdsToTableHistory(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Table().InsertVersionsToCommit(
 		context.Background(),
@@ -1101,6 +1117,10 @@ func (h *Handler) GetTableDetails(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:

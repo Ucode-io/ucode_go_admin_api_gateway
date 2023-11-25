@@ -61,6 +61,10 @@ func (h *Handler) ExcelReader(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	var res *object_builder_service.ExcelReadResponse
 
@@ -156,6 +160,10 @@ func (h *Handler) ExcelToDb(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:

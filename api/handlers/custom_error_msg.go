@@ -68,6 +68,10 @@ func (h *Handler) CreateCustomErrorMessage(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	customErrorMessages.ProjectId = resource.ResourceEnvironmentId
 	switch resource.ResourceType {
@@ -149,6 +153,10 @@ func (h *Handler) GetByIdCustomErrorMessage(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
@@ -236,6 +244,10 @@ func (h *Handler) GetAllCustomErrorMessage(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
@@ -327,6 +339,10 @@ func (h *Handler) UpdateCustomErrorMessage(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	customErrorMessages.ProjectId = resource.ResourceEnvironmentId
 	switch resource.ResourceType {
@@ -408,6 +424,10 @@ func (h *Handler) DeleteCustomErrorMessage(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:

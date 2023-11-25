@@ -79,6 +79,10 @@ func (h *Handler) CreateField(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	if fieldRequest.EnableMultilanguage {
 		if fieldRequest.Type == "SINGLE_LINE" || fieldRequest.Type == "MULTI_LINE" {
@@ -247,6 +251,10 @@ func (h *Handler) GetAllFields(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	limit = 100
 	switch resource.ResourceType {
@@ -376,6 +384,10 @@ func (h *Handler) UpdateField(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	if !fieldRequest.EnableMultilanguage {
 		field.EnableMultilanguage = false
@@ -529,6 +541,10 @@ func (h *Handler) DeleteField(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:

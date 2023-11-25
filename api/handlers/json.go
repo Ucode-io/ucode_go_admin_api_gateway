@@ -89,6 +89,10 @@ func (h *Handler) GetLanguageJson(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().GetList(
 		context.Background(),

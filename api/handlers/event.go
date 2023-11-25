@@ -64,6 +64,10 @@ func (h *Handler) CreateEvent(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	event.ProjectId = resource.ResourceEnvironmentId
 
@@ -132,6 +136,10 @@ func (h *Handler) GetEventByID(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Event().GetSingle(
 		context.Background(),
@@ -194,6 +202,10 @@ func (h *Handler) GetAllEvents(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Event().GetList(
 		context.Background(),
@@ -264,6 +276,10 @@ func (h *Handler) UpdateEvent(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	event.ProjectId = resource.ResourceEnvironmentId
 
@@ -332,6 +348,10 @@ func (h *Handler) DeleteEvent(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Event().Delete(
 		context.Background(),

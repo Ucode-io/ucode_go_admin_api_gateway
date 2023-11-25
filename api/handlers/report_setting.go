@@ -117,6 +117,10 @@ func (h *Handler) DynamicReport(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	if c.Query("click_action") == "true" {
 		reportSetting = objectRequest.Data["report_setting"]
@@ -197,6 +201,10 @@ func (h *Handler) GetByIdReportSetting(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).ReportSetting().GetByIdReportSetting(
 		context.Background(),
@@ -259,6 +267,10 @@ func (h *Handler) GetListReportSetting(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).ReportSetting().GetListReportSetting(
 		context.Background(),
@@ -330,6 +342,10 @@ func (h *Handler) UpsertReportSetting(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	upsertReportSettingRequestObs.ResourceEnvironmentId = resource.ResourceEnvironmentId
 
@@ -397,6 +413,10 @@ func (h *Handler) DeleteReportSetting(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).ReportSetting().DeleteReportSetting(
 		context.Background(),
@@ -467,6 +487,10 @@ func (h *Handler) SavePivotTemplate(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	savePivotTemplateRequestObs.ResourceEnvironmentId = resource.ResourceEnvironmentId
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).ReportSetting().SavePivotTemplate(
@@ -528,6 +552,10 @@ func (h *Handler) GetByIdPivotTemplate(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).ReportSetting().GetByIdPivotTemplate(
 		context.Background(),
@@ -591,6 +619,10 @@ func (h *Handler) GetListPivotTemplate(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).ReportSetting().GetListPivotTemplate(
 		context.Background(),
@@ -662,6 +694,10 @@ func (h *Handler) UpsertPivotTemplate(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	upsertTemplateRequestObs.ResourceEnvironmentId = resource.ResourceEnvironmentId
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).ReportSetting().UpsertPivotTemplate(
@@ -729,6 +765,10 @@ func (h *Handler) RemovePivotTemplate(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).ReportSetting().RemovePivotTemplate(
 		context.Background(),

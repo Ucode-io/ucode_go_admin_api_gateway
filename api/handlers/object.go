@@ -87,6 +87,10 @@ func (h *Handler) CreateObject(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
 	defer cancel()
@@ -317,6 +321,10 @@ func (h *Handler) GetSingle(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
 	defer cancel()
@@ -432,6 +440,10 @@ func (h *Handler) GetSingleSlim(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
 	defer cancel()
@@ -443,7 +455,7 @@ func (h *Handler) GetSingleSlim(c *gin.Context) {
 	}
 	defer conn.Close()
 
-	redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string))
+	redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
 	if err == nil {
 		resp := make(map[string]interface{})
 		m := make(map[string]interface{})
@@ -479,7 +491,7 @@ func (h *Handler) GetSingleSlim(c *gin.Context) {
 	}
 
 	jsonData, _ := resp.GetData().MarshalJSON()
-	err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, projectId.(string))
+	err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
 	if err != nil {
 		h.log.Error("Error while setting redis", logger.Error(err))
 	}
@@ -560,6 +572,10 @@ func (h *Handler) UpdateObject(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
 	defer cancel()
@@ -782,6 +798,10 @@ func (h *Handler) DeleteObject(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
 	defer cancel()
@@ -967,6 +987,10 @@ func (h *Handler) GetList(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
 	defer cancel()
@@ -982,7 +1006,7 @@ func (h *Handler) GetList(c *gin.Context) {
 		if util.IsValidUUID(viewId) {
 			switch resource.ResourceType {
 			case pb.ResourceType_MONGODB:
-				redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string))
+				redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
 				if err == nil {
 					resp := make(map[string]interface{})
 					m := make(map[string]interface{})
@@ -1008,7 +1032,7 @@ func (h *Handler) GetList(c *gin.Context) {
 				if err == nil {
 					if resp.IsCached {
 						jsonData, _ := resp.GetData().MarshalJSON()
-						err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, projectId.(string))
+						err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
 						if err != nil {
 							h.log.Error("Error while setting redis", logger.Error(err))
 						}
@@ -1039,7 +1063,7 @@ func (h *Handler) GetList(c *gin.Context) {
 		switch resource.ResourceType {
 		case pb.ResourceType_MONGODB:
 
-			redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string))
+			redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
 			if err == nil {
 				resp := make(map[string]interface{})
 				m := make(map[string]interface{})
@@ -1065,7 +1089,7 @@ func (h *Handler) GetList(c *gin.Context) {
 			if err == nil {
 				if resp.IsCached {
 					jsonData, _ := resp.GetData().MarshalJSON()
-					err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, projectId.(string))
+					err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
 					if err != nil {
 						h.log.Error("Error while setting redis", logger.Error(err))
 					}
@@ -1197,6 +1221,10 @@ func (h *Handler) GetListSlim(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
 	defer cancel()
@@ -1208,7 +1236,7 @@ func (h *Handler) GetListSlim(c *gin.Context) {
 	}
 	defer conn.Close()
 
-	redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string))
+	redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
 	if err == nil {
 		resp := make(map[string]interface{})
 		m := make(map[string]interface{})
@@ -1245,7 +1273,7 @@ func (h *Handler) GetListSlim(c *gin.Context) {
 	if err == nil {
 		if resp.IsCached {
 			jsonData, _ := resp.GetData().MarshalJSON()
-			err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, projectId.(string))
+			err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
 			if err != nil {
 				h.log.Error("Error while setting redis", logger.Error(err))
 			}
@@ -1319,6 +1347,10 @@ func (h *Handler) GetListInExcel(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
 	defer cancel()
@@ -1428,6 +1460,10 @@ func (h *Handler) DeleteManyToMany(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
 	defer cancel()
@@ -1571,6 +1607,10 @@ func (h *Handler) AppendManyToMany(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
 	defer cancel()
@@ -1715,6 +1755,10 @@ func (h *Handler) UpsertObject(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
 	defer cancel()
@@ -1939,6 +1983,10 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
 	defer cancel()
@@ -2122,6 +2170,10 @@ func (h *Handler) GetFinancialAnalytics(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
 	defer cancel()
@@ -2306,6 +2358,10 @@ func (h *Handler) GetListGroupBy(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
 	defer cancel()
@@ -2468,6 +2524,10 @@ func (h *Handler) GetGroupByField(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
 	defer cancel()
@@ -2491,7 +2551,7 @@ func (h *Handler) GetGroupByField(c *gin.Context) {
 	case pb.ResourceType_MONGODB:
 		// start := time.Now()
 
-		redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("group-%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string))
+		redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("group-%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
 		if err == nil {
 			resp := make(map[string]interface{})
 			m := make(map[string]interface{})
@@ -2516,7 +2576,7 @@ func (h *Handler) GetGroupByField(c *gin.Context) {
 
 		if err == nil {
 			jsonData, _ := resp.GetData().MarshalJSON()
-			err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("group-%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, projectId.(string))
+			err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("group-%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
 			if err != nil {
 				h.log.Error("Error while setting redis", logger.Error(err))
 			}
@@ -2594,6 +2654,10 @@ func (h *Handler) DeleteManyObject(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
 	defer cancel()
@@ -2758,6 +2822,10 @@ func (h *Handler) GetListWithOutRelation(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
 	defer cancel()
@@ -2775,7 +2843,7 @@ func (h *Handler) GetListWithOutRelation(c *gin.Context) {
 	case pb.ResourceType_MONGODB:
 		// start := time.Now()
 
-		redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string))
+		redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
 		if err == nil {
 			resp := make(map[string]interface{})
 			m := make(map[string]interface{})
@@ -2801,7 +2869,7 @@ func (h *Handler) GetListWithOutRelation(c *gin.Context) {
 		if err == nil {
 			if resp.IsCached {
 				jsonData, _ := resp.GetData().MarshalJSON()
-				err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, projectId.(string))
+				err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
 				if err != nil {
 					h.log.Error("Error while setting redis", logger.Error(err))
 				}

@@ -89,6 +89,10 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	respObject, err := services.GetBuilderServiceByType(resource.NodeType).Login().LoginWithEmailOtp(
 		c.Request.Context(),

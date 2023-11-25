@@ -64,6 +64,10 @@ func (h *Handler) CreateVariable(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	variable.ProjectId = resource.ResourceEnvironmentId
 
@@ -132,6 +136,10 @@ func (h *Handler) GetSingleVariable(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Variable().GetSingle(
 		context.Background(),
@@ -201,6 +209,10 @@ func (h *Handler) UpdateVariable(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	variable.ProjectId = resource.ResourceEnvironmentId
 
@@ -269,6 +281,10 @@ func (h *Handler) DeleteVariable(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Variable().Delete(
 		context.Background(),
@@ -331,6 +347,10 @@ func (h *Handler) GetAllVariables(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Variable().GetList(
 		context.Background(),

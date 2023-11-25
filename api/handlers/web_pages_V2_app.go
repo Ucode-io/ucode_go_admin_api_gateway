@@ -67,6 +67,10 @@ func (h *Handler) CreateWebPageApp(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	app.EnvironmentId = environmentId.(string)
 	app.ProjectId = projectId.(string)
@@ -140,6 +144,10 @@ func (h *Handler) GetSingleWebPageApp(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	res, err := services.WebPageService().App().GetSingleApp(
 		context.Background(),
@@ -218,6 +226,10 @@ func (h *Handler) UpdateWebPageApp(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	res, err := services.WebPageService().App().UpdateApp(
 		context.Background(),
@@ -287,6 +299,10 @@ func (h *Handler) DeleteWebPageApp(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	res, err := services.WebPageService().App().DeleteApp(
 		context.Background(),
@@ -354,6 +370,10 @@ func (h *Handler) GetListWebPageApp(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	res, err := services.WebPageService().App().GetListApp(
 		context.Background(),

@@ -66,6 +66,10 @@ func (h *Handler) UpdateCoordinates(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	panelCoordinates.ProjectId = resource.ResourceEnvironmentId
 
@@ -134,6 +138,10 @@ func (h *Handler) GetSinglePanel(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Panel().GetSingle(
 		context.Background(),
@@ -218,6 +226,10 @@ func (h *Handler) CreatePanel(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 	panel.ProjectId = resource.ResourceEnvironmentId
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Panel().Create(
@@ -279,6 +291,10 @@ func (h *Handler) GetAllPanels(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Panel().GetList(
 		context.Background(),
@@ -366,6 +382,10 @@ func (h *Handler) UpdatePanel(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	panel.ProjectId = resource.ResourceEnvironmentId
 
@@ -434,6 +454,10 @@ func (h *Handler) DeletePanel(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Panel().Delete(
 		context.Background(),

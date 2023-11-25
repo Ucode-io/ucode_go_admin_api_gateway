@@ -75,6 +75,10 @@ func (h *Handler) UpsertPermissionsByAppId(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Permission().UpsertPermissionsByAppId(
 		context.Background(),
@@ -151,6 +155,10 @@ func (h *Handler) GetAllPermissionByRoleId(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Permission().GetAllPermissionsByRoleId(
 		context.Background(),
@@ -215,6 +223,10 @@ func (h *Handler) GetFieldPermissions(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Permission().GetFieldPermissions(
 		context.Background(),
@@ -280,6 +292,10 @@ func (h *Handler) GetActionPermissions(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Permission().GetActionPermissions(
 		context.Background(),
@@ -344,6 +360,10 @@ func (h *Handler) GetViewRelationPermissions(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Permission().GetViewRelationPermissions(
 		context.Background(),

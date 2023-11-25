@@ -74,6 +74,10 @@ func (h *Handler) CreateFunction(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Function().Create(
 		context.Background(),
@@ -146,6 +150,10 @@ func (h *Handler) GetFunctionByID(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Function().GetSingle(
 		context.Background(),
@@ -214,6 +222,10 @@ func (h *Handler) GetAllFunctions(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Function().GetList(
 		context.Background(),
@@ -285,6 +297,10 @@ func (h *Handler) UpdateFunction(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Function().Update(
 		context.Background(),
@@ -358,6 +374,10 @@ func (h *Handler) DeleteFunction(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Function().Delete(
 		context.Background(),
@@ -428,6 +448,10 @@ func (h *Handler) InvokeFunction(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	function, err := services.FunctionService().FunctionService().GetSingle(
 		context.Background(),

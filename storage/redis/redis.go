@@ -30,10 +30,16 @@ func NewRedis(cfg map[string]config.Config) storage.RedisStorageI {
 	}
 }
 
-func (s Storage) SetX(ctx context.Context, key string, value string, duration time.Duration, projectId string) error {
+func (s Storage) SetX(ctx context.Context, key string, value string, duration time.Duration, projectId string, nodeType string) error {
+	if nodeType != config.ENTER_PRICE_TYPE {
+		projectId = config.BaseLoad().UcodeNamespace
+	}
 	return s.pool[projectId].SetEX(ctx, key, value, duration).Err()
 }
 
-func (s Storage) Get(ctx context.Context, key string, projectId string) (string, error) {
+func (s Storage) Get(ctx context.Context, key string, projectId string, nodeType string) (string, error) {
+	if nodeType != config.ENTER_PRICE_TYPE {
+		projectId = config.BaseLoad().UcodeNamespace
+	}
 	return s.pool[projectId].Get(ctx, key).Result()
 }

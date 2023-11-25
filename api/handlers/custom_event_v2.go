@@ -74,6 +74,10 @@ func (h *Handler) CreateNewCustomEvent(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	commitID, _ := uuid.NewRandom()
 
@@ -154,6 +158,10 @@ func (h *Handler) GetNewCustomEventByID(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.FunctionService().CustomEventService().GetSingle(
 		context.Background(),
@@ -216,6 +224,10 @@ func (h *Handler) GetAllNewCustomEvents(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	tokenInfo, _ := h.GetAuthInfo(c)
 
@@ -295,6 +307,10 @@ func (h *Handler) UpdateNewCustomEvent(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.FunctionService().CustomEventService().Update(
 		context.Background(),
@@ -373,6 +389,10 @@ func (h *Handler) DeleteNewCustomEvent(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.FunctionService().CustomEventService().Delete(
 		context.Background(),

@@ -59,9 +59,25 @@ func main() {
 		return
 	}
 
-	// get enterprice projects and load config
 	serviceNodes := services.NewServiceNodes()
+	// u-code grpc services
+	uConf := config.Load()
+	grpcSvcs, err := services.NewGrpcClients(ctx, uConf)
+	if err != nil {
+		log.Error("Error adding grpc client with base config. NewGrpcClients", logger.Error(err))
+		return
+	}
+
+	err = serviceNodes.Add(grpcSvcs, baseConf.UcodeNamespace)
+	if err != nil {
+		log.Error("Error adding grpc client to serviceNode. ServiceNode", logger.Error(err))
+		return
+	}
+	log.Info(" --- U-code services --- added to serviceNodes")
+
+	// pooling grpc services of enterprice projects
 	projectServiceNodes, mapProjectConfs := helper.EnterPriceProjectsGrpcSvcs(ctx, compSrvc, serviceNodes, log)
+	mapProjectConfs[baseConf.UcodeNamespace] = uConf
 
 	newRedis := redis.NewRedis(mapProjectConfs)
 

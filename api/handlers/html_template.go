@@ -64,6 +64,10 @@ func (h *Handler) CreateHtmlTemplate(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	htmlTemplate.ProjectId = resource.ResourceEnvironmentId
 
@@ -131,6 +135,10 @@ func (h *Handler) GetSingleHtmlTemplate(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).HtmlTemplate().GetSingle(
 		context.Background(),
@@ -200,6 +208,10 @@ func (h *Handler) UpdateHtmlTemplate(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	htmlTemplate.ProjectId = resource.ResourceEnvironmentId
 
@@ -268,6 +280,10 @@ func (h *Handler) DeleteHtmlTemplate(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).HtmlTemplate().Delete(
 		context.Background(),
@@ -331,6 +347,10 @@ func (h *Handler) GetHtmlTemplateList(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).HtmlTemplate().GetList(
 		context.Background(),

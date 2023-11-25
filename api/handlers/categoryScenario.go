@@ -65,6 +65,10 @@ func (h *Handler) CreateCategoryScenario(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.ScenarioService().CategoryService().Create(
 		context.Background(),
@@ -133,6 +137,10 @@ func (h *Handler) GetCategoryScenario(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.ScenarioService().CategoryService().Get(
 		context.Background(),
@@ -215,6 +223,10 @@ func (h *Handler) GetListCategoryScenario(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.ScenarioService().CategoryService().GetList(
 		c.Request.Context(),

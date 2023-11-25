@@ -71,6 +71,10 @@ func (h *Handler) CreateTemplateFolder(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	folder.ProjectId = projectId.(string)
 	folder.ResourceId = resource.ResourceEnvironmentId
@@ -153,6 +157,10 @@ func (h *Handler) GetSingleTemplateFolder(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	res, err := services.TemplateService().Template().GetSingleFolder(
 		context.Background(),
@@ -228,6 +236,10 @@ func (h *Handler) UpdateTemplateFolder(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	folder.ProjectId = projectId.(string)
 	folder.ResourceId = resource.ResourceEnvironmentId
@@ -310,6 +322,10 @@ func (h *Handler) DeleteTemplateFolder(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	res, err := services.TemplateService().Template().DeleteFolder(
 		context.Background(),
@@ -377,6 +393,10 @@ func (h *Handler) GetListTemplateFolder(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	res, err := services.TemplateService().Template().GetListFolder(
 		context.Background(),
@@ -444,6 +464,10 @@ func (h *Handler) GetTemplateFolderCommits(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	res, err := services.TemplateService().Template().GetTemplateFolderObjectCommits(
 		context.Background(),
@@ -519,6 +543,10 @@ func (h *Handler) CreateTemplate(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	template.ProjectId = projectId.(string)
 	template.ResourceId = resource.ResourceEnvironmentId
@@ -601,6 +629,10 @@ func (h *Handler) GetSingleTemplate(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	res, err := services.TemplateService().Template().GetSingleTemplate(
 		context.Background(),
@@ -676,6 +708,10 @@ func (h *Handler) UpdateTemplate(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	template.ProjectId = projectId.(string)
 	template.ResourceId = resource.ResourceEnvironmentId
@@ -758,6 +794,10 @@ func (h *Handler) DeleteTemplate(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	res, err := services.TemplateService().Template().DeleteTemplate(
 		context.Background(),
@@ -840,6 +880,10 @@ func (h *Handler) GetListTemplate(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	res, err := services.TemplateService().Template().GetListTemplate(
 		context.Background(),
@@ -910,6 +954,10 @@ func (h *Handler) GetTemplateCommits(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	res, err := services.TemplateService().Template().GetTemplateObjectCommits(
 		context.Background(),
@@ -991,6 +1039,10 @@ func (h *Handler) ConvertHtmlToPdfV2(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.TemplateService().Template().ConvertHtmlToPdf(
 		context.Background(),
@@ -1073,6 +1125,10 @@ func (h *Handler) ConvertTemplateToHtmlV2(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.TemplateService().Template().ConvertTemplateToHtml(
 		context.Background(),

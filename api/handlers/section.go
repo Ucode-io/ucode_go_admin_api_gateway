@@ -69,6 +69,10 @@ func (h *Handler) GetAllSections(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
@@ -162,9 +166,13 @@ func (h *Handler) UpdateSection(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	sections.ProjectId = resource.ResourceEnvironmentId
-	
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		// resp, err = services.GetBuilderServiceByType(resource.NodeType).Section().Update(

@@ -58,6 +58,10 @@ func (h *Handler) GetNewGeneratedBarCode(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Barcode().Generate(
 		context.Background(),
@@ -123,6 +127,10 @@ func (h *Handler) GetNewGeneratedCode(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Barcode().GenerateCodeWithPrefix(
 		context.Background(),

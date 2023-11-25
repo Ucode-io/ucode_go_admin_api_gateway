@@ -83,6 +83,10 @@ func (h *Handler) CreateMenu(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
@@ -187,6 +191,10 @@ func (h *Handler) GetMenuByID(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
@@ -279,9 +287,8 @@ func (h *Handler) GetAllMenus(c *gin.Context) {
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
 		projectId.(string),
-		"ENTER_PRICE",
+		resource.NodeType,
 	)
-
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -392,6 +399,10 @@ func (h *Handler) UpdateMenu(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
@@ -495,6 +506,10 @@ func (h *Handler) DeleteMenu(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
@@ -609,6 +624,10 @@ func (h *Handler) UpdateMenuOrder(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
@@ -700,6 +719,10 @@ func (h *Handler) CreateMenuSettings(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	menu.ProjectId = resource.ResourceEnvironmentId
 
@@ -790,6 +813,10 @@ func (h *Handler) GetAllMenuSettings(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
@@ -870,6 +897,10 @@ func (h *Handler) GetMenuSettingByID(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
@@ -970,6 +1001,10 @@ func (h *Handler) UpdateMenuSettings(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	menu.ProjectId = resource.ResourceEnvironmentId
 
@@ -1049,6 +1084,10 @@ func (h *Handler) DeleteMenuSettings(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
@@ -1141,6 +1180,10 @@ func (h *Handler) CreateMenuTemplate(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	menu.ProjectId = resource.ResourceEnvironmentId
 
@@ -1231,6 +1274,10 @@ func (h *Handler) GetAllMenuTemplates(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
@@ -1334,6 +1381,10 @@ func (h *Handler) GetMenuTemplateByID(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
@@ -1447,6 +1498,10 @@ func (h *Handler) UpdateMenuTemplate(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	menu.ProjectId = resource.ResourceEnvironmentId
 	switch resource.ResourceType {
@@ -1525,6 +1580,10 @@ func (h *Handler) DeleteMenuTemplate(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:

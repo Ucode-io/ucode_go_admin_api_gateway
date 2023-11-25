@@ -63,6 +63,10 @@ func (h *Handler) ExportToJSON(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	body.ProjectId = resource.ResourceEnvironmentId
 
@@ -128,6 +132,10 @@ func (h *Handler) ImportFromJSON(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	body.ProjectId = resource.ResourceEnvironmentId
 

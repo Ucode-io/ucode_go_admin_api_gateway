@@ -76,6 +76,10 @@ func (h *Handler) CreateCategory(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	category.ResourceId = resource.ResourceEnvironmentId
 	category.ProjectId = projectId.(string)
@@ -153,6 +157,10 @@ func (h *Handler) GetApiCategoryByID(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.ApiReferenceService().Category().Get(
 		context.Background(),
@@ -229,6 +237,10 @@ func (h *Handler) GetAllCategories(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.ApiReferenceService().Category().GetList(
 		context.Background(),
@@ -322,6 +334,10 @@ func (h *Handler) UpdateCategory(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.ApiReferenceService().Category().Update(
 		context.Background(),
@@ -401,6 +417,10 @@ func (h *Handler) DeleteCategory(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.ApiReferenceService().Category().Delete(
 		context.Background(),

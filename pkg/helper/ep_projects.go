@@ -16,7 +16,6 @@ func EnterPriceProjectsGrpcSvcs(ctx context.Context, compSrvc services.CompanySe
 	)
 	if err != nil {
 		log.Error("Error getting enter prise project. GetList", logger.Error(err))
-		return nil, nil
 	}
 
 	mapProjectConf := map[string]config.Config{}
@@ -53,23 +52,15 @@ func EnterPriceProjectsGrpcSvcs(ctx context.Context, compSrvc services.CompanySe
 
 		grpcSvcs, err := services.NewGrpcClients(ctx, projectConf)
 		if err != nil {
-			log.Error("Error connecting enter prise project. NewGrpcClients", logger.Error(err))
-			// return nil, nil
+			log.Error("Error connecting grpc client "+v.ProjectId, logger.Error(err))
 		}
 
-		if v.ProjectId == "64e03057-5e41-4672-a341-d7c38d66f560" {
-			err := serviceNodes.Add(grpcSvcs, config.BaseLoad().UcodeNamespace)
-			if err != nil {
-				log.Error("Error adding to grpc pooling u-code projects", logger.Error(err))
-				// return nil, nil
-			}
-		} else {
-			err := serviceNodes.Add(grpcSvcs, v.ProjectId)
-			if err != nil {
-				log.Error("Error adding to grpc pooling enter prise project ", logger.Error(err))
-				// return nil, nil
-			}
+		err = serviceNodes.Add(grpcSvcs, v.ProjectId)
+		if err != nil {
+			log.Error("Error adding to grpc pooling enter prise project. ServiceNode "+v.ProjectId, logger.Error(err))
 		}
+
+		log.Info(" --- " + v.ProjectId + " --- added to serviceNodes")
 
 		mapProjectConf[v.ProjectId] = projectConf
 	}

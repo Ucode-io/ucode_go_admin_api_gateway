@@ -66,6 +66,10 @@ func (h *Handler) CreateQueryFolder(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.BuilderService().QueryFolder().Create(
 		context.Background(),
@@ -186,6 +190,10 @@ func (h *Handler) GetQueryFolderList(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.BuilderService().QueryFolder().GetAll(
 		context.Background(),

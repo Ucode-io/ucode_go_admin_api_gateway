@@ -68,6 +68,10 @@ func (h *Handler) GetEventLogs(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	res, err := services.GetBuilderServiceByType(resource.NodeType).EventLogs().GetList(
 		context.Background(),
@@ -137,6 +141,10 @@ func (h *Handler) GetEventLogById(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).EventLogs().GetSingle(
 		context.Background(),

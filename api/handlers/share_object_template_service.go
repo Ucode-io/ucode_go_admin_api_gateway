@@ -67,6 +67,10 @@ func (h *Handler) CreateUserTemplate(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	user.ProjectId = projectId.(string)
 	user.ResourceId = resource.ResourceEnvironmentId
@@ -139,6 +143,10 @@ func (h *Handler) GetSingleUserTemplate(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	res, err := services.TemplateService().UserPermission().GetSingleUserPermission(
 		context.Background(),
@@ -212,6 +220,10 @@ func (h *Handler) UpdateUserTemplate(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	user.ProjectId = projectId.(string)
 	user.ResourceId = resource.ResourceEnvironmentId
@@ -284,6 +296,10 @@ func (h *Handler) DeleteUserTemplate(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	res, err := services.TemplateService().UserPermission().DeleteUserPermission(
 		context.Background(),
@@ -353,6 +369,10 @@ func (h *Handler) GetListUserTemplate(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	res, err := services.TemplateService().UserPermission().GetListUserPermission(
 		context.Background(),
@@ -427,6 +447,10 @@ func (h *Handler) CreateSharingToken(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	share.ProjectId = projectId.(string)
 	share.ResourceId = resource.ResourceEnvironmentId
@@ -500,6 +524,10 @@ func (h *Handler) UpdateSharingToken(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	share.ProjectId = projectId.(string)
 	share.ResourceId = resource.ResourceEnvironmentId
@@ -540,7 +568,7 @@ func (h *Handler) GetObjectToken(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
-	
+
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -571,6 +599,10 @@ func (h *Handler) GetObjectToken(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	res, err := services.TemplateService().Share().GetObjectToken(
 		context.Background(),

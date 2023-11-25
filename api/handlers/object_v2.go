@@ -99,6 +99,10 @@ func (h *Handler) GetListV2(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
 	defer cancel()
@@ -114,7 +118,7 @@ func (h *Handler) GetListV2(c *gin.Context) {
 		if util.IsValidUUID(viewId) {
 			switch resource.ResourceType {
 			case pb.ResourceType_MONGODB:
-				redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string))
+				redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
 				if err == nil {
 					resp := make(map[string]interface{})
 					m := make(map[string]interface{})
@@ -141,7 +145,7 @@ func (h *Handler) GetListV2(c *gin.Context) {
 				if err == nil {
 					if resp.IsCached {
 						jsonData, _ := resp.GetData().MarshalJSON()
-						err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, projectId.(string))
+						err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
 						if err != nil {
 							h.log.Error("Error while setting redis", logger.Error(err))
 						}
@@ -171,7 +175,7 @@ func (h *Handler) GetListV2(c *gin.Context) {
 	} else {
 		switch resource.ResourceType {
 		case pb.ResourceType_MONGODB:
-			redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string))
+			redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
 			if err == nil {
 				resp := make(map[string]interface{})
 				m := make(map[string]interface{})
@@ -200,7 +204,7 @@ func (h *Handler) GetListV2(c *gin.Context) {
 			if err == nil {
 				if resp.IsCached {
 					jsonData, _ := resp.GetData().MarshalJSON()
-					err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, projectId.(string))
+					err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
 					if err != nil {
 						h.log.Error("Error while setting redis", logger.Error(err))
 					}
@@ -327,6 +331,10 @@ func (h *Handler) GetListSlimV2(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
 	defer cancel()
@@ -338,7 +346,7 @@ func (h *Handler) GetListSlimV2(c *gin.Context) {
 	}
 	defer conn.Close()
 
-	redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string))
+	redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
 	if err == nil {
 		resp := make(map[string]interface{})
 		m := make(map[string]interface{})
@@ -375,7 +383,7 @@ func (h *Handler) GetListSlimV2(c *gin.Context) {
 	if err == nil {
 		if resp.IsCached {
 			jsonData, _ := resp.GetData().MarshalJSON()
-			err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, projectId.(string))
+			err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
 			if err != nil {
 				h.log.Error("Error while setting redis", logger.Error(err))
 			}

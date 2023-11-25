@@ -93,6 +93,10 @@ func (h *Handler) CreateApiReference(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	apiReference.ResourceId = resource.GetResourceEnvironmentId()
 	apiReference.ProjectId = projectId.(string)
@@ -185,6 +189,10 @@ func (h *Handler) GetApiReferenceByID(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.ApiReferenceService().ApiReference().Get(
 		c.Request.Context(),
@@ -286,6 +294,10 @@ func (h *Handler) GetAllApiReferences(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.ApiReferenceService().ApiReference().GetList(
 		context.Background(),
@@ -369,6 +381,10 @@ func (h *Handler) UpdateApiReference(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	authInfo, err := h.adminAuthInfo(c)
 	if err != nil {
@@ -471,6 +487,10 @@ func (h *Handler) DeleteApiReference(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.ApiReferenceService().ApiReference().Delete(
 		c.Request.Context(),
@@ -559,6 +579,10 @@ func (h *Handler) GetApiReferenceChanges(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.ApiReferenceService().ApiReference().GetApiReferenceChanges(
 		context.Background(),
@@ -702,6 +726,10 @@ func (h *Handler) RevertApiReference(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.ApiReferenceService().ApiReference().RevertApiReference(
 		context.Background(),
@@ -799,6 +827,10 @@ func (h *Handler) InsertManyVersionForApiReference(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	body.ResourceId = resource.ResourceEnvironmentId
 	body.ProjectId = projectId.(string)

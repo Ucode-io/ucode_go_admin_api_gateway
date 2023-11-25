@@ -69,6 +69,10 @@ func (h *Handler) CreateCustomEvent(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	structData, err := helper.ConvertMapToStruct(customevent.Attributes)
 	if err != nil {
@@ -175,6 +179,10 @@ func (h *Handler) GetCustomEventByID(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).CustomEvent().GetSingle(
 		context.Background(),
@@ -244,6 +252,10 @@ func (h *Handler) GetAllCustomEvents(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
@@ -332,6 +344,10 @@ func (h *Handler) UpdateCustomEvent(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	structData, err := helper.ConvertMapToStruct(customevent.Attributes)
 	if err != nil {
@@ -416,6 +432,10 @@ func (h *Handler) DeleteCustomEvent(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).CustomEvent().Delete(
 		context.Background(),

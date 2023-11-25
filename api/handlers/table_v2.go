@@ -76,6 +76,10 @@ func (h *Handler) V2CreateTable(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	var fields []*postgresObs.CreateFieldsRequest
 	for _, field := range tableRequest.Fields {
@@ -188,6 +192,10 @@ func (h *Handler) V2GetTableByID(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 	resp, err := services.PostgresBuilderService().Table().GetByID(
 		context.Background(),
 		&postgresObs.TablePrimaryKey{
@@ -264,6 +272,10 @@ func (h *Handler) V2GetAllTables(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.PostgresBuilderService().Table().GetAll(
 		context.Background(),
@@ -345,6 +357,10 @@ func (h *Handler) V2UpdateTable(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	table.ProjectId = resource.ResourceEnvironmentId
 	table.AuthorId = authInfo.GetUserId()
@@ -416,6 +432,10 @@ func (h *Handler) V2DeleteTable(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.PostgresBuilderService().Table().Delete(
 		context.Background(),

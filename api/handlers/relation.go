@@ -68,6 +68,10 @@ func (h *Handler) CreateRelation(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	relation.ProjectId = resource.ResourceEnvironmentId
 	switch resource.ResourceType {
@@ -157,6 +161,10 @@ func (h *Handler) GetAllRelations(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
@@ -253,6 +261,10 @@ func (h *Handler) UpdateRelation(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	relation.ProjectId = resource.ResourceEnvironmentId
 	switch resource.ResourceType {
@@ -337,6 +349,10 @@ func (h *Handler) DeleteRelation(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Relation().Delete(
@@ -418,6 +434,10 @@ func (h *Handler) GetRelationCascaders(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:

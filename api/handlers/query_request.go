@@ -82,6 +82,10 @@ func (h *Handler) CreateQueryRequest(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	query.ProjectId = projectId.(string)
 	query.ResourceId = resource.ResourceEnvironmentId
@@ -175,6 +179,10 @@ func (h *Handler) GetSingleQueryRequest(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	res, err := services.QueryService().Query().GetSingleQuery(
 		context.Background(),
@@ -285,6 +293,10 @@ func (h *Handler) UpdateQueryRequest(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	query.ProjectId = projectId.(string)
 	query.ResourceId = resource.ResourceEnvironmentId
@@ -375,6 +387,10 @@ func (h *Handler) DeleteQueryRequest(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	res, err := services.QueryService().Query().DeleteQuery(
 		context.Background(),
@@ -457,6 +473,10 @@ func (h *Handler) GetListQueryRequest(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	res, err := services.QueryService().Query().GetListQuery(
 		context.Background(),
@@ -541,6 +561,10 @@ func (h *Handler) QueryRun(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	query.ResourceId = resource.ResourceEnvironmentId
 	query.ProjectId = projectId.(string)
@@ -650,6 +674,10 @@ func (h *Handler) GetQueryHistory(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.QueryService().Query().GetQueryHistory(
 		context.Background(),
@@ -776,6 +804,10 @@ func (h *Handler) RevertQuery(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	versionGuid, commitGuid, err := h.CreateAutoCommitForAdminChange(c, environmentId.(string), config.COMMIT_TYPE_FIELD, body.ProjectId)
 	if err != nil {
@@ -867,6 +899,10 @@ func (h *Handler) InsertManyVersionForQueryService(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	body.ProjectId = projectId.(string)
 	body.ResourceId = resource.ResourceEnvironmentId
@@ -947,6 +983,10 @@ func (h *Handler) GetSingleQueryLog(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.QueryService().Log().GetSingleLog(
 		context.Background(),
@@ -1038,6 +1078,10 @@ func (h *Handler) GetListQueryLog(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.QueryService().Log().GetListLog(
 		context.Background(),

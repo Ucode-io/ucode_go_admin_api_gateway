@@ -64,6 +64,10 @@ func (h *Handler) CreateFieldsAndRelations(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	request.ProjectId = resource.ResourceEnvironmentId
 

@@ -85,6 +85,10 @@ func (h *Handler) CreateMicroFrontEnd(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	environment, err := h.companyServices.Environment().GetById(context.Background(), &company_service.EnvironmentPrimaryKey{
 		Id: environmentId.(string),
@@ -247,6 +251,10 @@ func (h *Handler) GetMicroFrontEndByID(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	function, err := services.FunctionService().FunctionService().GetSingle(
 		context.Background(),
@@ -322,6 +330,10 @@ func (h *Handler) GetAllMicroFrontEnd(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.FunctionService().FunctionService().GetList(
 		context.Background(),
@@ -395,6 +407,10 @@ func (h *Handler) UpdateMicroFrontEnd(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.FunctionService().FunctionService().Update(
 		context.Background(),
@@ -470,6 +486,10 @@ func (h *Handler) DeleteMicroFrontEnd(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.FunctionService().FunctionService().GetSingle(
 		context.Background(),

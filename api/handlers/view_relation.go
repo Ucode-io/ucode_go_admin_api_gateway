@@ -66,6 +66,10 @@ func (h *Handler) GetViewRelation(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	var resp *obs.GetViewRelationResponse
 	switch resource.ResourceType {
@@ -123,7 +127,7 @@ func (h *Handler) UpsertViewRelations(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
-	
+
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")

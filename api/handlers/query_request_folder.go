@@ -67,6 +67,10 @@ func (h *Handler) CreateQueryRequestFolder(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	folder.ResourceId = resource.ResourceEnvironmentId
 	folder.ProjectId = projectId.(string)
@@ -139,6 +143,10 @@ func (h *Handler) GetSingleQueryRequestFolder(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	res, err := services.QueryService().Folder().GetSingleFolder(
 		context.Background(),
@@ -214,6 +222,10 @@ func (h *Handler) UpdateQueryRequestFolder(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	folder.ProjectId = projectId.(string)
 	folder.ResourceId = resource.ResourceEnvironmentId
@@ -286,6 +298,10 @@ func (h *Handler) DeleteQueryRequestFolder(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	res, err := services.QueryService().Folder().DeleteFolder(
 		context.Background(),
