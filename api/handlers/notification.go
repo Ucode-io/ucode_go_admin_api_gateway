@@ -23,6 +23,7 @@ import (
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) CreateUserFCMToken(c *gin.Context) {
 
+	h.handleResponse(c, status_http.Created, nil)
 	var (
 		req npb.CreateUserTokenRequest
 	)
