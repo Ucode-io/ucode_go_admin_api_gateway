@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"time"
 	"ucode/ucode_go_api_gateway/api"
 	"ucode/ucode_go_api_gateway/api/handlers"
@@ -77,6 +78,15 @@ func main() {
 
 	// pooling grpc services of enterprice projects
 	projectServiceNodes, mapProjectConfs := helper.EnterPriceProjectsGrpcSvcs(ctx, compSrvc, serviceNodes, log)
+	fmt.Println("\n\n error")
+	if projectServiceNodes == nil {
+		projectServiceNodes = serviceNodes
+	}
+
+	if mapProjectConfs == nil {
+		mapProjectConfs = make(map[string]config.Config)
+	}
+
 	mapProjectConfs[baseConf.UcodeNamespace] = uConf
 
 	newRedis := redis.NewRedis(mapProjectConfs)
