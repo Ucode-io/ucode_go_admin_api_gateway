@@ -690,14 +690,9 @@ func RedirectUrl(c *gin.Context, h *handlers.Handler) (*gin.Context, error) {
 		return c, errors.New("something went wrong")
 	}
 
-	namespace := c.GetString("namespace")
-	svcs, err := h.GetService(namespace)
-	if err != nil {
-		return c, errors.New("something went wrong")
-	}
 	c.Request.Header.Add("prev_path", path)
 
-	pathM, err := helper.FindUrlTo(svcs, helper.MatchingData{
+	pathM, err := helper.FindUrlTo(helper.MatchingData{
 		ProjectId: projectId.(string),
 		EnvId:     envId.(string),
 		Path:      path,
