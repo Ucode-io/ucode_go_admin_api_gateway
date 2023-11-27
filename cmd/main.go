@@ -71,7 +71,7 @@ func main() {
 
 	err = serviceNodes.Add(grpcSvcs, baseConf.UcodeNamespace)
 	if err != nil {
-		log.Error("Error adding grpc client to serviceNode. ServiceNode!", logger.Error(err))
+		log.Error("Error adding grpc client to serviceNode. ServiceNode!!", logger.Error(err))
 		return
 	}
 	log.Info(" --- U-code services --- added to serviceNodes")
