@@ -13,7 +13,7 @@ type MatchingData struct {
 	Path      string
 }
 
-func FindUrlTo(s services.ServiceManagerI, data MatchingData, comp services.CompanyServiceI) (string, error) {
+func FindUrlTo(data MatchingData, comp services.CompanyServiceI) (string, error) {
 	res, err := comp.Redirect().GetList(context.Background(), &pb.GetListRedirectUrlReq{
 		ProjectId: data.ProjectId,
 		EnvId:     data.EnvId,
