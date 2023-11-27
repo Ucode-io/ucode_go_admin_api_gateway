@@ -731,7 +731,7 @@ func RedirectUrl(c *gin.Context, h *handlers.Handler) (*gin.Context, error) {
 
 	c.Request.Header.Add("auth", string(auth))
 
-	fmt.Println("\n URL second path >>", c.Request.URL.Path, "\n")
+	fmt.Println("\n URL second path >", c.Request.URL.Path, "\n")
 	return c, nil
 }
 
