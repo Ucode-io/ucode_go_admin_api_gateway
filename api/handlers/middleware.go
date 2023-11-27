@@ -1,15 +1,19 @@
 package handlers
 
 import (
+	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 
+	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 
 	"github.com/gin-gonic/gin"
@@ -87,34 +91,101 @@ func (h *Handler) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 				return
 			}
 
-			apikeys, err := h.authService.ApiKey().GetEnvID(
-				c.Request.Context(),
-				&auth_service.GetReq{
-					Id: app_id,
-				},
+			// apikeysTime := time.Now()
+
+			var (
+				appIdKey, resourceAppIdKey = app_id, app_id + "resource"
+
+				apiJson  []byte
+				apikeys  = &auth_service.GetRes{}
+				resource = &company_service.GetResourceByEnvIDResponse{}
 			)
-			if err != nil {
-				h.handleResponse(c, status_http.BadRequest, err.Error())
-				c.Abort()
-				return
+
+			redisAppId, err := h.redis.Get(context.Background(), appIdKey, h.baseConf.UcodeNamespace, config.LOW_NODE_TYPE)
+			if err == nil {
+				apiJson = []byte(redisAppId)
+				err = json.Unmarshal([]byte(redisAppId), &apikeys)
+				if err != nil {
+					h.handleResponse(c, status_http.BadRequest, "cant get auth info")
+					c.Abort()
+					return
+				}
+			} else {
+
+				apikeys, err = h.authService.ApiKey().GetEnvID(
+					c.Request.Context(),
+					&auth_service.GetReq{
+						Id: app_id,
+					},
+				)
+				if err != nil {
+					h.handleResponse(c, status_http.BadRequest, err.Error())
+					c.Abort()
+					return
+				}
+
+				apiJson, err = json.Marshal(apikeys)
+				if err != nil {
+					h.handleResponse(c, status_http.BadRequest, "cant get auth info")
+					c.Abort()
+					return
+				}
+
+				err = h.redis.SetX(context.Background(), appIdKey, string(apiJson), 5*time.Minute, h.baseConf.UcodeNamespace, config.LOW_NODE_TYPE)
+				if err != nil {
+					h.log.Error("Error while setting redis", logger.Error(err))
+				}
 			}
 
-			resource, err := h.companyServices.Resource().GetResourceByEnvID(
-				c.Request.Context(),
-				&company_service.GetResourceByEnvIDRequest{
-					EnvId: apikeys.GetEnvironmentId(),
-				},
-			)
+			redisResource, err := h.redis.Get(context.Background(), appIdKey, h.baseConf.UcodeNamespace, config.LOW_NODE_TYPE)
+			if err == nil {
+				err = json.Unmarshal([]byte(redisResource), &resource)
+				if err != nil {
+					h.handleResponse(c, status_http.BadRequest, "cant get auth info")
+					c.Abort()
+					return
+				}
+			} else {
+				resource, err = h.companyServices.Resource().GetResourceByEnvID(
+					c.Request.Context(),
+					&company_service.GetResourceByEnvIDRequest{
+						EnvId: apikeys.GetEnvironmentId(),
+					},
+				)
+				if err != nil {
+					h.handleResponse(c, status_http.BadRequest, err.Error())
+					c.Abort()
+					return
+				}
+
+				resourceBody, err := json.Marshal(resource)
+				if err != nil {
+					h.handleResponse(c, status_http.BadRequest, "cant get auth info")
+					c.Abort()
+					return
+				}
+
+				err = h.redis.SetX(context.Background(), resourceAppIdKey, string(resourceBody), 5*time.Minute, h.baseConf.UcodeNamespace, config.LOW_NODE_TYPE)
+				if err != nil {
+					h.log.Error("Error while setting redis", logger.Error(err))
+				}
+			}
+
+			data := make(map[string]interface{})
+			err = json.Unmarshal(apiJson, &data)
 			if err != nil {
-				h.handleResponse(c, status_http.BadRequest, err.Error())
+				h.handleResponse(c, status_http.BadRequest, "cant get auth info")
 				c.Abort()
 				return
 			}
 
 			// fmt.Println("\n\n >>>> api key ", apikeys, "\n\n")
+			c.Set("auth", models.AuthData{Type: "API-KEY", Data: data})
 			c.Set("resource_id", resource.GetResource().GetId())
 			c.Set("environment_id", apikeys.GetEnvironmentId())
 			c.Set("project_id", apikeys.GetProjectId())
+
+			// fmt.Println(">>>>>>>>>>>>>>>apikeysTime:", time.Since(apikeysTime))
 		default:
 			if !strings.Contains(c.Request.URL.Path, "api") {
 				err := errors.New("error invalid authorization method")

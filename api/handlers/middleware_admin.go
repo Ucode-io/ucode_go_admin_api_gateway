@@ -1,15 +1,12 @@
 package handlers
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
-	"sync"
-	"time"
 	"ucode/ucode_go_api_gateway/api/models"
-	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/logger"
@@ -17,118 +14,87 @@ import (
 	"ucode/ucode_go_api_gateway/api/status_http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/cast"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
-var waitKeyMap = map[string]models.WaitKey{}
-
 func (h *Handler) AdminAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var (
-			res = &auth_service.HasAccessSuperAdminRes{}
-			ok  bool
-		)
 
-		data := make(map[string]interface{})
-
-		bearerToken := c.GetHeader("Authorization")
-		strArr := strings.Split(bearerToken, " ")
-
-		if len(strArr) < 1 && (strArr[0] != "Bearer" && strArr[0] != "API-KEY") {
-			h.log.Error("---ERR->Unexpected token format")
-			_ = c.AbortWithError(http.StatusForbidden, errors.New("token error: wrong format"))
-			return
-		}
-
-		switch strArr[0] {
-		case "Bearer":
-			res, ok = h.adminHasAccess(c)
-			if !ok {
-				_ = c.AbortWithError(401, errors.New("unauthorized"))
-				return
-			}
-
-			resourceId := c.GetHeader("Resource-Id")
-			environmentId := c.GetHeader("Environment-Id")
-			if res.ProjectId != "" {
-				c.Set("project_id", res.ProjectId)
-			}
-			if res.EnvId != "" {
-				environmentId = res.EnvId
-			}
-
-			apiJson, err := json.Marshal(res)
+		if cast.ToBool(c.GetHeader("redirect")) {
+			var authData = models.AuthData{}
+			err := json.Unmarshal([]byte(c.GetHeader("auth")), &authData)
 			if err != nil {
+				fmt.Println(err)
 				h.handleResponse(c, status_http.BadRequest, "cant get auth info")
 				c.Abort()
 				return
 			}
 
-			err = json.Unmarshal(apiJson, &data)
-			if err != nil {
-				h.handleResponse(c, status_http.BadRequest, "cant get auth info")
-				c.Abort()
-				return
-			}
-
-			c.Set("auth", models.AuthData{
-				Type: "BEARER",
-				Data: data,
-			})
-
-			c.Set("environment_id", environmentId)
-			c.Set("resource_id", resourceId)
-		case "API-KEY":
-			appId := c.GetHeader("X-API-KEY")
-
-			// apikeysTime := time.Now()
+			c.Set("auth", authData)
+			c.Set("resource_id", c.GetHeader("resource_id"))
+			c.Set("environment_id", c.GetHeader("environment_id"))
+			c.Set("project_id", c.GetHeader("project_id"))
+		} else {
 
 			var (
-				appIdWaitKey, appIdKey = appId + "X-API-KEY", appId
-
-				apiJson []byte
-				apiKey  = &auth_service.GetRes{}
-				lock    = sync.RWMutex{}
-				err     error
+				res = &auth_service.HasAccessSuperAdminRes{}
+				ok  bool
 			)
 
-			if _, ok := waitKeyMap[appIdWaitKey]; ok {
+			data := make(map[string]interface{})
 
-				if waitKeyMap[appIdWaitKey].Timeout.Err() == context.DeadlineExceeded {
-					delete(waitKeyMap, appIdWaitKey)
+			bearerToken := c.GetHeader("Authorization")
+			strArr := strings.Split(bearerToken, " ")
+
+			if len(strArr) < 1 && (strArr[0] != "Bearer" && strArr[0] != "API-KEY") {
+				h.log.Error("---ERR->Unexpected token format")
+				_ = c.AbortWithError(http.StatusForbidden, errors.New("token error: wrong format"))
+				return
+			}
+
+			switch strArr[0] {
+			case "Bearer":
+				res, ok = h.adminHasAccess(c)
+				if !ok {
+					_ = c.AbortWithError(401, errors.New("unauthorized"))
+					return
 				}
 
-				if waitKeyMap[appIdWaitKey].Value == "WAIT" {
-					waitTimeoutCtx, _ := context.WithTimeout(context.Background(), time.Second*20)
-					for {
-						redisAppId, err := h.redis.Get(context.Background(), appIdKey, h.baseConf.UcodeNamespace, config.LOW_NODE_TYPE)
-						if err == nil {
-							apiJson = []byte(redisAppId)
-							err = json.Unmarshal([]byte(redisAppId), &apiKey)
-							if err != nil {
-								h.handleResponse(c, status_http.BadRequest, "cant get auth info")
-								c.Abort()
-								return
-							}
-
-							break
-						}
-
-						if waitTimeoutCtx.Err() == context.DeadlineExceeded {
-							break
-						}
-						time.Sleep(time.Millisecond * 1)
-					}
+				resourceId := c.GetHeader("Resource-Id")
+				environmentId := c.GetHeader("Environment-Id")
+				if res.ProjectId != "" {
+					c.Set("project_id", res.ProjectId)
 				}
-			} else {
+				if res.EnvId != "" {
+					environmentId = res.EnvId
+				}
 
-				lock.Lock()
-				ctxWait, _ := context.WithTimeout(context.Background(), time.Second*280)
-				waitKeyMap[appIdWaitKey] = models.WaitKey{Value: "WAIT", Timeout: ctxWait}
-				lock.Unlock()
+				apiJson, err := json.Marshal(res)
+				if err != nil {
+					h.handleResponse(c, status_http.BadRequest, "cant get auth info")
+					c.Abort()
+					return
+				}
 
-				apiKey, err = h.authService.ApiKey().GetEnvID(
+				err = json.Unmarshal(apiJson, &data)
+				if err != nil {
+					h.handleResponse(c, status_http.BadRequest, "cant get auth info")
+					c.Abort()
+					return
+				}
+
+				c.Set("auth", models.AuthData{
+					Type: "BEARER",
+					Data: data,
+				})
+
+				c.Set("environment_id", environmentId)
+				c.Set("resource_id", resourceId)
+			case "API-KEY":
+				appId := c.GetHeader("X-API-KEY")
+				apiKey, err := h.authService.ApiKey().GetEnvID(
 					c.Request.Context(),
 					&auth_service.GetReq{
 						Id: appId,
@@ -139,40 +105,35 @@ func (h *Handler) AdminAuthMiddleware() gin.HandlerFunc {
 					c.Abort()
 					return
 				}
-
-				apiJson, err = json.Marshal(apiKey)
+				apiJson, err := json.Marshal(apiKey)
 				if err != nil {
 					h.handleResponse(c, status_http.BadRequest, "cant get auth info")
 					c.Abort()
 					return
 				}
-
-				err = h.redis.SetX(context.Background(), appIdKey, string(apiJson), 5*time.Minute, h.baseConf.UcodeNamespace, config.LOW_NODE_TYPE)
+				err = json.Unmarshal(apiJson, &data)
 				if err != nil {
-					h.log.Error("Error while setting redis", logger.Error(err))
+					h.handleResponse(c, status_http.BadRequest, "cant get auth info")
+					c.Abort()
+					return
 				}
-			}
-
-			err = json.Unmarshal(apiJson, &data)
-			if err != nil {
-				h.handleResponse(c, status_http.BadRequest, "cant get auth info")
+				c.Set("auth", models.AuthData{
+					Type: "API-KEY",
+					Data: data,
+				})
+				c.Set("environment_id", apiKey.GetEnvironmentId())
+				c.Set("project_id", apiKey.GetProjectId())
+			default:
+				err := errors.New("error invalid authorization method")
+				h.log.Error("--AuthMiddleware--", logger.Error(err))
+				h.handleResponse(c, status_http.BadRequest, err.Error())
 				c.Abort()
-				return
 			}
 
-			c.Set("auth", models.AuthData{Type: "API-KEY", Data: data})
-			c.Set("environment_id", apiKey.GetEnvironmentId())
-			c.Set("project_id", apiKey.GetProjectId())
-
-			// fmt.Println("::::::apikeysTime:", time.Since(apikeysTime))
-		default:
-			err := errors.New("error invalid authorization method")
-			h.log.Error("--AuthMiddleware--", logger.Error(err))
-			h.handleResponse(c, status_http.BadRequest, err.Error())
-			c.Abort()
+			c.Set("Auth_Admin", res)
+			// c.Set("namespace", h.cfg.UcodeNamespace)
 		}
-		c.Set("Auth_Admin", res)
-		// c.Set("namespace", h.cfg.UcodeNamespace)
+
 		c.Next()
 	}
 }

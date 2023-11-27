@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"ucode/ucode_go_api_gateway/api/docs"
@@ -9,6 +10,7 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/helper"
 
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/cast"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
 )
@@ -692,11 +694,21 @@ func RedirectUrl(c *gin.Context, h *handlers.Handler) (*gin.Context, error) {
 
 	c.Request.Header.Add("prev_path", path)
 
-	pathM, err := helper.FindUrlTo(helper.MatchingData{
+	data := helper.MatchingData{
 		ProjectId: projectId.(string),
 		EnvId:     envId.(string),
 		Path:      path,
-	}, h.GetCompanyService(c))
+	}
+
+	// companyRedirectGetListTime := time.Now()
+	res, err := h.CompanyRedirectGetList(data, h.GetCompanyService(c))
+	if err != nil {
+		return c, errors.New("cant change")
+	}
+
+	// fmt.Println(">>>>>>>>>>>>>>>CompanyRedirectGetList:", time.Since(companyRedirectGetListTime))
+
+	pathM, err := helper.FindUrlTo(res, data, h.GetCompanyService(c))
 	if err != nil {
 		return c, errors.New("cant change")
 	}
@@ -706,6 +718,19 @@ func RedirectUrl(c *gin.Context, h *handlers.Handler) (*gin.Context, error) {
 	}
 
 	c.Request.URL.Path = pathM
+
+	c.Request.Header.Add("redirect", "true")
+	c.Request.Header.Add("resource_id", cast.ToString(c.Value("resource_id")))
+	c.Request.Header.Add("environment_id", cast.ToString(c.Value("environment_id")))
+	c.Request.Header.Add("project_id", cast.ToString(c.Value("project_id")))
+
+	auth, err := json.Marshal(c.Value("auth"))
+	if err != nil {
+		return c, errors.New("something went wrong")
+	}
+
+	c.Request.Header.Add("auth", string(auth))
+
 	fmt.Println("\n URL second path >>", c.Request.URL.Path, "\n")
 	return c, nil
 }

@@ -876,6 +876,8 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 		}
 	}
 
+	// fmt.Println(">>>>>>>>>>>>>>>resourceTime:", time.Since(resourceTime))
+
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
 		projectId.(string),
@@ -906,7 +908,6 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 	}
 
 	authInfo := authInfoAny.(models.AuthData)
-
 	requestData.Method = c.Request.Method
 	requestData.Headers = c.Request.Header
 	requestData.Path = c.Request.URL.Path
