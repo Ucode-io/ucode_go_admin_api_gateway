@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"time"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
@@ -14,6 +15,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+var (
+	waitRedirectMap = helper.NewConcurrentMap()
+)
+
 func (h *Handler) Proxy(c *gin.Context) {
 	h.handleResponse(c, status_http.OK, "PROXY response")
 }
@@ -22,15 +27,39 @@ func (h *Handler) CompanyRedirectGetList(data helper.MatchingData, comp services
 	var (
 		key = "redirect-" + data.ProjectId + data.EnvId
 		res = &pb.GetListRedirectUrlRes{}
+		err error
 	)
 
-	redisResource, err := h.redis.Get(context.Background(), key, h.baseConf.UcodeNamespace, config.LOW_NODE_TYPE)
-	if err == nil {
-		err = json.Unmarshal([]byte(redisResource), &res)
-		if err != nil {
-			return nil, err
+	waitMap := waitRedirectMap.ReadFromMap(key)
+	if waitMap.Value == config.CACHE_WAIT {
+		if waitMap.Timeout.Err() == context.DeadlineExceeded {
+			waitRedirectMap.DeleteKey(key)
+		}
+
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		for {
+			redisGetTime := time.Now()
+			redisResource, err := h.redis.Get(context.Background(), key, h.baseConf.UcodeNamespace, config.LOW_NODE_TYPE)
+			fmt.Println("redisGetTime:", time.Since(redisGetTime))
+			if err == nil {
+				err = json.Unmarshal([]byte(redisResource), &res)
+				if err != nil {
+					return nil, err
+				}
+				break
+			}
+
+			if ctx.Err() == context.DeadlineExceeded {
+				break
+			}
+
+			time.Sleep(time.Millisecond * 10)
 		}
 	} else {
+		ctx, _ := context.WithTimeout(context.Background(), 280*time.Second)
+		waitRedirectMap.AddKey(key, helper.WaitKey{Value: config.CACHE_WAIT, Timeout: ctx})
+
 		res, err = comp.Redirect().GetList(context.Background(), &pb.GetListRedirectUrlReq{
 			ProjectId: data.ProjectId,
 			EnvId:     data.EnvId,

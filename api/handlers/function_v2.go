@@ -8,15 +8,16 @@ import (
 	"fmt"
 	"io"
 	"strings"
-	"sync"
 	"time"
 	"ucode/ucode_go_api_gateway/api/models"
+	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	fc "ucode/ucode_go_api_gateway/genproto/new_function_service"
 	"ucode/ucode_go_api_gateway/pkg/code_server"
 	"ucode/ucode_go_api_gateway/pkg/gitlab"
+	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
@@ -32,8 +33,7 @@ const (
 )
 
 var (
-	resourceWaitKeyMap = map[string]models.WaitKey{}
-	functionWaitKeyMap = map[string]models.WaitKey{}
+	waitFunctionResourceMap = helper.NewConcurrentMap()
 )
 
 // CreateNewFunction godoc
@@ -774,8 +774,6 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 		invokeFunction models.InvokeFunctionRequest
 	)
 
-	// functionId := c.Param("function-id")
-
 	bodyReq, err := io.ReadAll(c.Request.Body)
 	if err != nil {
 		h.log.Error("cant parse body or an empty body received", logger.Any("req", c.Request))
@@ -791,7 +789,6 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
-	// fmt.Println("\n Run func test #1", projectId, "\n")
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
@@ -799,57 +796,43 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
-	// fmt.Println("\n Run func test #1", environmentId, "\n")
 
 	var (
 		resourceKey     = fmt.Sprintf("%s-%s", projectId.(string), environmentId.(string))
 		resourceWaitKey = fmt.Sprintf("ETT-%s-%s", projectId.(string), environmentId.(string))
 		resource        = &pb.ServiceResourceModel{}
-		lock            = sync.RWMutex{}
-	)
-
-	resource, err = h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId.(string),
-			EnvironmentId: environmentId.(string),
-			ServiceType:   pb.ServiceType_FUNCTION_SERVICE,
-		},
 	)
 
 	// resourceTime := time.Now()
-
-	if _, ok := resourceWaitKeyMap[resourceWaitKey]; ok {
-
-		if resourceWaitKeyMap[resourceWaitKey].Timeout.Err() == context.DeadlineExceeded {
-			delete(resourceWaitKeyMap, resourceWaitKey)
+	waitResourceMap := waitFunctionResourceMap.ReadFromMap(resourceWaitKey)
+	if waitResourceMap.Value == config.CACHE_WAIT {
+		if waitResourceMap.Timeout.Err() == context.DeadlineExceeded {
+			waitFunctionResourceMap.DeleteKey(resourceWaitKey)
 		}
 
-		if resourceWaitKeyMap[resourceWaitKey].Value == "WAIT" {
-			waitTimeoutCtx, _ := context.WithDeadline(context.Background(), time.Now().Add(time.Second*20))
-			for {
-				redisResource, err := h.redis.Get(context.Background(), resourceKey, resource.ProjectId, resource.NodeType)
-				if err == nil {
-					err = json.Unmarshal([]byte(redisResource), &resource)
-					if err != nil {
-						h.log.Error("Error while unmarshal resource redis", logger.Error(err))
-						return
-					}
-					break
-				}
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
 
-				if waitTimeoutCtx.Err() == context.DeadlineExceeded {
-					break
+		for {
+			redisResource, err := h.redis.Get(context.Background(), resourceKey, resource.ProjectId, resource.NodeType)
+			if err == nil {
+				err = json.Unmarshal([]byte(redisResource), &resource)
+				if err != nil {
+					h.log.Error("Error while unmarshal resource redis", logger.Error(err))
+					return
 				}
-				time.Sleep(time.Millisecond * 1)
+				break
 			}
+
+			if ctx.Err() == context.DeadlineExceeded {
+				break
+			}
+
+			time.Sleep(time.Millisecond * 10)
 		}
 	} else {
-
-		lock.Lock()
-		ctxWait, _ := context.WithTimeout(context.Background(), time.Second*280)
-		resourceWaitKeyMap[resourceWaitKey] = models.WaitKey{Value: "WAIT", Timeout: ctxWait}
-		lock.Unlock()
+		ctx, _ := context.WithTimeout(context.Background(), 280*time.Second)
+		waitFunctionResourceMap.AddKey(resourceWaitKey, helper.WaitKey{Value: config.CACHE_WAIT, Timeout: ctx})
 
 		resource, err = h.companyServices.ServiceResource().GetSingle(
 			c.Request.Context(),
@@ -875,8 +858,50 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 			h.log.Error("Error while setting redis", logger.Error(err))
 		}
 	}
-
 	// fmt.Println(">>>>>>>>>>>>>>>resourceTime:", time.Since(resourceTime))
+
+	var key = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("ett-%s-%s-%s", c.Request.Header.Get("Prev_path"), requestData.Params.Encode(), resource.ResourceEnvironmentId)))
+
+	waitFunctionMap := waitFunctionResourceMap.ReadFromMap(key)
+	if waitFunctionMap.Value == config.CACHE_WAIT {
+		if waitFunctionMap.Timeout.Err() == context.DeadlineExceeded {
+			waitFunctionResourceMap.DeleteKey(key)
+		}
+
+		redisDataTime := time.Now()
+
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		for {
+			redisResp, err := h.redis.Get(context.Background(), key, resource.ProjectId, resource.NodeType)
+			if err == nil {
+				resp := make(map[string]interface{})
+				m := make(map[string]interface{})
+				err = json.Unmarshal([]byte(redisResp), &m)
+				if err != nil {
+					h.log.Error("Error while unmarshal redis", logger.Error(err))
+				} else {
+					resp["data"] = m
+					c.JSON(cast.ToInt(m["code"]), m)
+					fmt.Print("\n\n ~~>> ett redis return response ", time.Since(redisDataTime), "\n\n")
+					return
+				}
+				break
+			}
+
+			if ctx.Err() == context.DeadlineExceeded {
+				break
+			}
+
+			time.Sleep(time.Millisecond * 10)
+		}
+	}
+
+	if c.Request.Method == "GET" && resource.ProjectId == "1acd7a8f-a038-4e07-91cb-b689c368d855" {
+		ctx, _ := context.WithTimeout(context.Background(), 14*time.Second)
+		waitFunctionResourceMap.AddKey(key, helper.WaitKey{Value: config.CACHE_WAIT, Timeout: ctx})
+	}
 
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
@@ -899,7 +924,6 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	// fmt.Println("\n Run func test #4", function, "\n")
 
 	authInfoAny, ok := c.Get("auth")
 	if !ok {
@@ -914,58 +938,6 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 	requestData.Params = c.Request.URL.Query()
 	requestData.Body = bodyReq
 
-	var (
-		key          = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("ett-%s-%s-%s", c.Request.Header.Get("Prev_path"), requestData.Params.Encode(), resource.ResourceEnvironmentId)))
-		waitKey      = resource.ProjectId + key
-		functionLock = sync.RWMutex{}
-	)
-	if c.Request.Method == "GET" && resource.ProjectId == "1acd7a8f-a038-4e07-91cb-b689c368d855" {
-
-		if _, ok := functionWaitKeyMap[waitKey]; ok {
-
-			if functionWaitKeyMap[waitKey].Timeout.Err() == context.DeadlineExceeded {
-				delete(functionWaitKeyMap, waitKey)
-			}
-
-			if functionWaitKeyMap[waitKey].Value == "WAIT" {
-				redisDataTime := time.Now()
-
-				waitTimeoutCtx, _ := context.WithDeadline(context.Background(), time.Now().Add(time.Second*20))
-				for {
-					redisResp, err := h.redis.Get(context.Background(), key, resource.ProjectId, resource.NodeType)
-					if err == nil {
-						resp := make(map[string]interface{})
-						m := make(map[string]interface{})
-						err = json.Unmarshal([]byte(redisResp), &m)
-						if err != nil {
-							h.log.Error("Error while unmarshal redis", logger.Error(err))
-						} else {
-							resp["data"] = m
-							c.JSON(cast.ToInt(m["code"]), m)
-							fmt.Print("\n\n ~~>> ett redis return response ", time.Since(redisDataTime), "\n\n")
-							return
-						}
-						break
-					}
-
-					if waitTimeoutCtx.Err() == context.DeadlineExceeded {
-						break
-					}
-					time.Sleep(time.Millisecond * 1)
-				}
-
-				// fmt.Println(":::::::redisGetDataTime:", time.Since(redisDataTime))
-			}
-		}
-
-		functionLock.Lock()
-		ctxWait, _ := context.WithTimeout(context.Background(), time.Second*14)
-		functionWaitKeyMap[waitKey] = models.WaitKey{Value: "WAIT", Timeout: ctxWait}
-		functionLock.Unlock()
-	}
-
-	// doRequestTime := time.Now()
-	// h.log.Info("\n\nFunction run request", logger.Any("auth", authInfo), logger.Any("request_data", requestData), logger.Any("req", c.Request))
 	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+function.Path, "POST", models.FunctionRunV2{
 		Auth:        models.AuthData{},
 		RequestData: requestData,
@@ -975,17 +947,11 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 			"app_id":     authInfo.Data["app_id"],
 		},
 	})
-	// fmt.Println("doRequestTime:", time.Since(doRequestTime))
 
-	// fmt.Println("\n Run func test 5", "\n")
 	if err != nil {
-		// fmt.Println("\n Run func test 6", "\n")
-		// fmt.Println("error in do request", err)
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	} else if resp.Status == "error" {
-		// fmt.Println("\n Run func test 7", "\n")
-		// fmt.Println("error in response status", err)
 		var errStr = resp.Status
 		if resp.Data != nil && resp.Data["message"] != nil {
 			errStr = resp.Data["message"].(string)
@@ -993,12 +959,12 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, errStr)
 		return
 	}
+
 	if isOwnData, ok := resp.Attributes["is_own_data"].(bool); ok {
-		// fmt.Println("\n Run func test 8", "\n")
 		if isOwnData {
 			if err == nil && c.Request.Method == "GET" && resource.ProjectId == "1acd7a8f-a038-4e07-91cb-b689c368d855" {
 				jsonData, _ := json.Marshal(resp.Data)
-				err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("ett-%s-%s-%s", c.Request.Header.Get("Prev_path"), requestData.Params.Encode(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
+				err = h.redis.SetX(context.Background(), key, string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
 				if err != nil {
 					h.log.Error("Error while setting redis", logger.Error(err))
 				}
@@ -1013,6 +979,6 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 			return
 		}
 	}
-	// fmt.Println("\n Run func test 9", "\n")
+
 	h.handleResponse(c, status_http.OK, resp)
 }

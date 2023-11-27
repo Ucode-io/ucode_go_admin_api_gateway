@@ -28,4 +28,5 @@ const (
 	LOW_NODE_TYPE                        = "LOW"
 	HIGH_NODE_TYPE                       = "HIGH"
 	ENTER_PRICE_TYPE                     = "ENTER_PRICE"
+	CACHE_WAIT                           = "WAIT"
 )
