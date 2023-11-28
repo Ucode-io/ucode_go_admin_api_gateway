@@ -225,6 +225,7 @@ message V2RolePrimaryKey {
     string project_id = 2;
     int32 resource_type = 3;
     string node_type = 4;
+    string resource_environment_id = 5;
 }
 
 message V2GetRolesListRequest {
@@ -235,6 +236,7 @@ message V2GetRolesListRequest {
     string project_id = 5;
     int32 resource_type = 6;
     string node_type = 7;
+    string resource_environment_id = 8;
 }
 
 message V2AddRoleRequest {
@@ -246,6 +248,7 @@ message V2AddRoleRequest {
     int32 resource_type = 7;
     bool grant_access = 8;
     string node_type = 9;
+    string resource_environment_id = 10;
 }
 
 message V2UpdateRoleRequest {
@@ -258,4 +261,5 @@ message V2UpdateRoleRequest {
     int32 resource_type = 7;
     bool grant_access = 8;
     string node_type = 9;
+    string resource_environment_id = 10;
 }

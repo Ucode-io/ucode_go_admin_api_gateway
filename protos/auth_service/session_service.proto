@@ -163,6 +163,7 @@ message HasAccessRequest {
     string client_platform_id = 3;
     string path = 4;
     string method = 5;
+    string node_type = 6;
 }
 
 message HasAccessResponse {

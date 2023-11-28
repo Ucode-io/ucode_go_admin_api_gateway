@@ -297,6 +297,7 @@ message V2CreateClientTypeRequest {
     string table_slug = 10;
     string default_page = 11;
     string node_type = 12;
+    string resource_envrironment_id = 13;
 
 }
 
@@ -308,6 +309,7 @@ message V2GetClientTypeListRequest {
     int32 resource_type = 5;
     repeated string guids = 6;
     string node_type = 7;
+    string resource_envrironment_id = 8;
 }
 
 message V2UpdateClientTypeRequest {
@@ -323,6 +325,7 @@ message V2UpdateClientTypeRequest {
     string table_slug = 11;
     string default_page = 12;
     string node_type = 13;
+    string resource_envrironment_id = 14;
 }
 
 message V2ClientTypePrimaryKey {
@@ -330,4 +333,5 @@ message V2ClientTypePrimaryKey {
     string project_id = 2;
     int32 resource_type = 3;
     string node_type = 4;
+    string resource_envrironment_id = 5;
 }
