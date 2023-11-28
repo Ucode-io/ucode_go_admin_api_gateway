@@ -862,6 +862,19 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 	}
 	// fmt.Println(">>>>>>>>>>>>>>>resourceTime:", time.Since(resourceTime))
 
+	authInfoAny, ok := c.Get("auth")
+	if !ok {
+		h.handleResponse(c, status_http.InvalidArgument, "cant get auth info")
+		return
+	}
+
+	authInfo := authInfoAny.(models.AuthData)
+	requestData.Method = c.Request.Method
+	requestData.Headers = c.Request.Header
+	requestData.Path = c.Request.URL.Path
+	requestData.Params = c.Request.URL.Query()
+	requestData.Body = bodyReq
+
 	var key = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("ett-%s-%s-%s", c.Request.Header.Get("Prev_path"), requestData.Params.Encode(), resource.ResourceEnvironmentId)))
 
 	waitFunctionMap := waitFunctionResourceMap.ReadFromMap(key)
@@ -928,19 +941,6 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 		return
 	}
 	// fmt.Println(">>>>>>>>>>>>>>>getSingleFunctionTime:", time.Since(getSingleFunctionTime))
-
-	authInfoAny, ok := c.Get("auth")
-	if !ok {
-		h.handleResponse(c, status_http.InvalidArgument, "cant get auth info")
-		return
-	}
-
-	authInfo := authInfoAny.(models.AuthData)
-	requestData.Method = c.Request.Method
-	requestData.Headers = c.Request.Header
-	requestData.Path = c.Request.URL.Path
-	requestData.Params = c.Request.URL.Query()
-	requestData.Body = bodyReq
 
 	// doRequestTime := time.Now()
 	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+function.Path, "POST", models.FunctionRunV2{
