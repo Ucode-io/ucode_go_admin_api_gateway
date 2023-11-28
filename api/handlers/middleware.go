@@ -11,6 +11,7 @@ import (
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
+	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 
 	"ucode/ucode_go_api_gateway/api/models"
@@ -24,6 +25,10 @@ import (
 // 	CLIENT_HOST     string = "test.app.u-code.io"
 // )
 
+var (
+	waitApiResourceMap = helper.NewConcurrentMap()
+)
+
 func (h *Handler) NodeMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
@@ -34,7 +39,6 @@ func (h *Handler) NodeMiddleware() gin.HandlerFunc {
 
 func (h *Handler) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
-
 		var (
 			res = &auth_service.V2HasAccessUserRes{}
 			ok  bool
@@ -96,21 +100,43 @@ func (h *Handler) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 			var (
 				appIdKey, resourceAppIdKey = app_id, app_id + "resource"
 
+				err      error
 				apiJson  []byte
 				apikeys  = &auth_service.GetRes{}
 				resource = &company_service.GetResourceByEnvIDResponse{}
 			)
 
-			redisAppId, err := h.redis.Get(context.Background(), appIdKey, h.baseConf.UcodeNamespace, config.LOW_NODE_TYPE)
-			if err == nil {
-				apiJson = []byte(redisAppId)
-				err = json.Unmarshal([]byte(redisAppId), &apikeys)
-				if err != nil {
-					h.handleResponse(c, status_http.BadRequest, "cant get auth info")
-					c.Abort()
-					return
+			waitApiMap := waitApiResourceMap.ReadFromMap(appIdKey)
+			if waitApiMap.Value == config.CACHE_WAIT {
+				if waitApiMap.Timeout.Err() == context.DeadlineExceeded {
+					waitApiResourceMap.DeleteKey(appIdKey)
+				}
+
+				ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+				defer cancel()
+
+				for {
+					redisAppId, err := h.redis.Get(context.Background(), appIdKey, h.baseConf.UcodeNamespace, config.LOW_NODE_TYPE)
+					if err == nil {
+						apiJson = []byte(redisAppId)
+						err = json.Unmarshal([]byte(redisAppId), &apikeys)
+						if err != nil {
+							h.handleResponse(c, status_http.BadRequest, "cant get auth info")
+							c.Abort()
+							return
+						}
+						break
+					}
+
+					if ctx.Err() == context.DeadlineExceeded {
+						break
+					}
+
+					time.Sleep(time.Millisecond * 10)
 				}
 			} else {
+				ctx, _ := context.WithTimeout(context.Background(), 280*time.Second)
+				waitApiResourceMap.AddKey(appIdKey, helper.WaitKey{Value: config.CACHE_WAIT, Timeout: ctx})
 
 				apikeys, err = h.authService.ApiKey().GetEnvID(
 					c.Request.Context(),
@@ -137,16 +163,38 @@ func (h *Handler) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 				}
 			}
 
-			redisResource, err := h.redis.Get(context.Background(), appIdKey, h.baseConf.UcodeNamespace, config.LOW_NODE_TYPE)
-			if err == nil {
-				err = json.Unmarshal([]byte(redisResource), &resource)
-				if err != nil {
-					h.handleResponse(c, status_http.BadRequest, "cant get auth info")
-					c.Abort()
-					return
+			waitResourceMap := waitApiResourceMap.ReadFromMap(resourceAppIdKey)
+			if waitResourceMap.Value == config.CACHE_WAIT {
+				if waitResourceMap.Timeout.Err() == context.DeadlineExceeded {
+					waitApiResourceMap.DeleteKey(resourceAppIdKey)
+				}
+
+				ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+				defer cancel()
+
+				for {
+					redisResource, err := h.redis.Get(context.Background(), resourceAppIdKey, h.baseConf.UcodeNamespace, config.LOW_NODE_TYPE)
+					if err == nil {
+						err = json.Unmarshal([]byte(redisResource), &resource)
+						if err != nil {
+							h.handleResponse(c, status_http.BadRequest, "cant get auth info")
+							c.Abort()
+							return
+						}
+						break
+					}
+
+					if ctx.Err() == context.DeadlineExceeded {
+						break
+					}
+
+					time.Sleep(time.Millisecond * 10)
 				}
 			} else {
-				resource, err = h.companyServices.Resource().GetResourceByEnvID(
+				ctx, _ := context.WithTimeout(context.Background(), 280*time.Second)
+				waitApiResourceMap.AddKey(resourceAppIdKey, helper.WaitKey{Value: config.CACHE_WAIT, Timeout: ctx})
+
+				resource, err := h.companyServices.Resource().GetResourceByEnvID(
 					c.Request.Context(),
 					&company_service.GetResourceByEnvIDRequest{
 						EnvId: apikeys.GetEnvironmentId(),
@@ -210,7 +258,6 @@ func (h *Handler) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 		// c.Set("namespace", h.cfg.UcodeNamespace)
 
 		c.Next()
-
 	}
 }
 
