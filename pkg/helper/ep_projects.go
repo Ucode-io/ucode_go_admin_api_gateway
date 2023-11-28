@@ -64,6 +64,14 @@ func EnterPriceProjectsGrpcSvcs(ctx context.Context, compSrvc services.CompanySe
 
 			log.Info(" --- " + v.ProjectId + " --- added to serviceNodes")
 
+			// static
+			// if v.ProjectId == "1acd7a8f-a038-4e07-91cb-b689c368d855" {
+			projectConf.GetRequestRedisHost = config.Load().GetRequestRedisHost
+			projectConf.GetRequestRedisPort = config.Load().GetRequestRedisPort
+			projectConf.GetRequestRedisDatabase = config.Load().GetRequestRedisDatabase
+			projectConf.GetRequestRedisPassword = config.Load().GetRequestRedisPassword
+			// }
+
 			mapProjectConf[v.ProjectId] = projectConf
 		}
 
