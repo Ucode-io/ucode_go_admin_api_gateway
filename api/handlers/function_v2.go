@@ -808,29 +808,31 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 	if waitResourceMap.Value == config.CACHE_WAIT {
 		if waitResourceMap.Timeout.Err() == context.DeadlineExceeded {
 			waitFunctionResourceMap.DeleteKey(resourceWaitKey)
-		}
+		} else {
+			ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
+			defer cancel()
 
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-
-		for {
-			redisResource, err := h.redis.Get(context.Background(), resourceKey, resource.ProjectId, resource.NodeType)
-			if err == nil {
-				err = json.Unmarshal([]byte(redisResource), &resource)
-				if err != nil {
-					h.log.Error("Error while unmarshal resource redis", logger.Error(err))
-					return
+			for {
+				redisResource, err := h.redis.Get(context.Background(), resourceKey, resource.ProjectId, resource.NodeType)
+				if err == nil {
+					err = json.Unmarshal([]byte(redisResource), &resource)
+					if err != nil {
+						h.log.Error("Error while unmarshal resource redis", logger.Error(err))
+						return
+					}
+					break
 				}
-				break
-			}
 
-			if ctx.Err() == context.DeadlineExceeded {
-				break
-			}
+				if ctx.Err() == context.DeadlineExceeded {
+					break
+				}
 
-			time.Sleep(time.Millisecond * 10)
+				time.Sleep(time.Millisecond * 10)
+			}
 		}
-	} else {
+	}
+
+	if resource.ResourceEnvironmentId == "" {
 		ctx, _ := context.WithTimeout(context.Background(), 280*time.Second)
 		waitFunctionResourceMap.AddKey(resourceWaitKey, helper.WaitKey{Value: config.CACHE_WAIT, Timeout: ctx})
 
@@ -863,38 +865,38 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 	var key = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("ett-%s-%s-%s", c.Request.Header.Get("Prev_path"), requestData.Params.Encode(), resource.ResourceEnvironmentId)))
 
 	waitFunctionMap := waitFunctionResourceMap.ReadFromMap(key)
-	if waitFunctionMap.Value == config.CACHE_WAIT {
+	if waitFunctionMap.Value == config.CACHE_WAIT && c.Request.Method == "GET" && resource.ProjectId == "1acd7a8f-a038-4e07-91cb-b689c368d855" {
 		if waitFunctionMap.Timeout.Err() == context.DeadlineExceeded {
 			waitFunctionResourceMap.DeleteKey(key)
-		}
+		} else {
+			redisDataTime := time.Now()
 
-		redisDataTime := time.Now()
+			ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
+			defer cancel()
 
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-
-		for {
-			redisResp, err := h.redis.Get(context.Background(), key, resource.ProjectId, resource.NodeType)
-			if err == nil {
-				resp := make(map[string]interface{})
-				m := make(map[string]interface{})
-				err = json.Unmarshal([]byte(redisResp), &m)
-				if err != nil {
-					h.log.Error("Error while unmarshal redis", logger.Error(err))
-				} else {
-					resp["data"] = m
-					c.JSON(cast.ToInt(m["code"]), m)
-					fmt.Print("\n\n ~~>> ett redis return response ", time.Since(redisDataTime), "\n\n")
-					return
+			for {
+				redisResp, err := h.redis.Get(context.Background(), key, resource.ProjectId, resource.NodeType)
+				if err == nil {
+					resp := make(map[string]interface{})
+					m := make(map[string]interface{})
+					err = json.Unmarshal([]byte(redisResp), &m)
+					if err != nil {
+						h.log.Error("Error while unmarshal redis", logger.Error(err))
+					} else {
+						resp["data"] = m
+						c.JSON(cast.ToInt(m["code"]), m)
+						fmt.Print("\n\n ~~>> ett redis return response ", time.Since(redisDataTime), "\n\n")
+						return
+					}
+					break
 				}
-				break
-			}
 
-			if ctx.Err() == context.DeadlineExceeded {
-				break
-			}
+				if ctx.Err() == context.DeadlineExceeded {
+					break
+				}
 
-			time.Sleep(time.Millisecond * 10)
+				time.Sleep(time.Millisecond * 10)
+			}
 		}
 	}
 
@@ -903,6 +905,7 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 		waitFunctionResourceMap.AddKey(key, helper.WaitKey{Value: config.CACHE_WAIT, Timeout: ctx})
 	}
 
+	// getSingleFunctionTime := time.Now()
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
 		projectId.(string),
@@ -924,6 +927,7 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+	// fmt.Println(">>>>>>>>>>>>>>>getSingleFunctionTime:", time.Since(getSingleFunctionTime))
 
 	authInfoAny, ok := c.Get("auth")
 	if !ok {
@@ -938,6 +942,7 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 	requestData.Params = c.Request.URL.Query()
 	requestData.Body = bodyReq
 
+	// doRequestTime := time.Now()
 	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+function.Path, "POST", models.FunctionRunV2{
 		Auth:        models.AuthData{},
 		RequestData: requestData,
@@ -947,7 +952,6 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 			"app_id":     authInfo.Data["app_id"],
 		},
 	})
-
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
@@ -959,6 +963,7 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, errStr)
 		return
 	}
+	// fmt.Println(">>>>>>>>>>>>>>>doRequestTime:", time.Since(doRequestTime))
 
 	if isOwnData, ok := resp.Attributes["is_own_data"].(bool); ok {
 		if isOwnData {

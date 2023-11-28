@@ -1,5 +1,7 @@
 package config
 
+import "time"
+
 const (
 	COMMIT_TYPE_APP                      = "APP"
 	COMMIT_TYPE_TABLE                    = "TABLE"
@@ -29,4 +31,8 @@ const (
 	HIGH_NODE_TYPE                       = "HIGH"
 	ENTER_PRICE_TYPE                     = "ENTER_PRICE"
 	CACHE_WAIT                           = "WAIT"
+)
+
+const (
+	REDIS_WAIT_TIMEOUT = 200 * time.Millisecond
 )

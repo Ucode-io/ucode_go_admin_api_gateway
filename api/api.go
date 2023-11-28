@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"time"
 	"ucode/ucode_go_api_gateway/api/docs"
 	"ucode/ucode_go_api_gateway/api/handlers"
 	"ucode/ucode_go_api_gateway/config"
@@ -701,12 +700,12 @@ func RedirectUrl(c *gin.Context, h *handlers.Handler) (*gin.Context, error) {
 		Path:      path,
 	}
 
-	companyRedirectGetListTime := time.Now()
+	// companyRedirectGetListTime := time.Now()
 	res, err := h.CompanyRedirectGetList(data, h.GetCompanyService(c))
 	if err != nil {
 		return c, errors.New("cant change")
 	}
-	fmt.Println(">>>>>>>>>>>>>>>CompanyRedirectGetList:", time.Since(companyRedirectGetListTime))
+	// fmt.Println(">>>>>>>>>>>>>>>CompanyRedirectGetList:", time.Since(companyRedirectGetListTime))
 
 	pathM, err := helper.FindUrlTo(res, data, h.GetCompanyService(c))
 	if err != nil {
