@@ -59,7 +59,7 @@ func EnterPriceProjectsGrpcSvcs(ctx context.Context, compSrvc services.CompanySe
 
 			err = serviceNodes.Add(grpcSvcs, v.ProjectId)
 			if err != nil {
-				log.Error("Error adding to grpc pooling enter prise project. ServiceNode "+v.ProjectId, logger.Error(err))
+				log.Error("Error adding to grpc pooling enter prise project. ServiceNode ! "+v.ProjectId, logger.Error(err))
 			}
 
 			log.Info(" --- " + v.ProjectId + " --- added to serviceNodes")
