@@ -118,9 +118,8 @@ func (h *Handler) UpdateLoginMicroFrontProject(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetLoginMicroFrontBySubdomain(c *gin.Context) {
 	subdomain := c.DefaultQuery("subdomain", "")
-	projectId := c.DefaultQuery("project-id", "")
 
-	if subdomain == "" && projectId == "" {
+	if subdomain == "" {
 		h.handleResponse(c, status_http.InvalidArgument, "subdomain or project-id is required")
 		return
 	}
@@ -129,7 +128,6 @@ func (h *Handler) GetLoginMicroFrontBySubdomain(c *gin.Context) {
 		context.Background(),
 		&company_service.GetProjectLoginMicroFrontRequest{
 			Subdomain: subdomain,
-			ProjectId: projectId,
 		},
 	)
 	if err != nil {
@@ -157,7 +155,7 @@ func (h *Handler) GetLoginMicroFrontBySubdomain(c *gin.Context) {
 
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
-		projectId,
+		resp.ProjectId,
 		resource.NodeType,
 	)
 
