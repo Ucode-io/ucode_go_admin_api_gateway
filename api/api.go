@@ -736,7 +736,7 @@ func RedirectUrl(c *gin.Context, h *handlers.Handler) (*gin.Context, error) {
 
 func testAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.Set("environment_id", "063dad1e-4596-483a-8638-14f9b99922c3")
+		c.Set("environment_id", "063dad1e-4596-483a-86a38-14f9b99922c3")
 		u := c.Request.URL.Query()
 		u.Set("project-id", "d6042238-0f60-4f30-8c1a-af78883f1d52")
 		c.Request.URL.RawQuery = u.Encode()
