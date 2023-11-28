@@ -324,6 +324,9 @@ func (h *Handler) UploadTemplate(c *gin.Context) {
 		return
 	}
 
+	fmt.Println("\nProject ID:", projectId)
+	fmt.Println("\nEnvironment ID:", environmentId)
+
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
