@@ -2,6 +2,7 @@ package helper
 
 import (
 	"context"
+	"strconv"
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/services"
@@ -23,6 +24,11 @@ func EnterPriceProjectsGrpcSvcs(ctx context.Context, compSrvc services.CompanySe
 		mapProjectConf := map[string]config.Config{}
 
 		for _, v := range epProjects.Configs {
+			num, err := strconv.Atoi(v.REDIS_DATABASE)
+			if err != nil {
+				log.Error("Error:", logger.Error(err))
+			}
+
 			projectConf := config.Config{
 				ConvertTemplateServiceGrpcPort: v.CONVERT_TEMPLATE_GRPC_PORT,
 				ConvertTemplateServiceGrpcHost: v.CONVERT_TEMPLATE_SERVICE_HOST,
@@ -50,6 +56,10 @@ func EnterPriceProjectsGrpcSvcs(ctx context.Context, compSrvc services.CompanySe
 				TemplateServiceHost:            v.TEMPLATE_SERVICE_HOST,
 				VersioningGRPCPort:             v.VERSIONING_GRPC_PORT,
 				VersioningServiceHost:          v.VERSIONING_SERVICE_HOST,
+				GetRequestRedisHost:            v.REDIS_HOST,
+				GetRequestRedisPort:            v.REDIS_PORT,
+				GetRequestRedisDatabase:        num,
+				GetRequestRedisPassword:        v.REDIS_PASSWORD,
 			}
 
 			grpcSvcs, err := services.NewGrpcClients(ctx, projectConf)
@@ -63,14 +73,6 @@ func EnterPriceProjectsGrpcSvcs(ctx context.Context, compSrvc services.CompanySe
 			}
 
 			log.Info(" --- " + v.ProjectId + " --- added to serviceNodes")
-
-			// static
-			// if v.ProjectId == "1acd7a8f-a038-4e07-91cb-b689c368d855" {
-			projectConf.GetRequestRedisHost = config.Load().GetRequestRedisHost
-			projectConf.GetRequestRedisPort = config.Load().GetRequestRedisPort
-			projectConf.GetRequestRedisDatabase = config.Load().GetRequestRedisDatabase
-			projectConf.GetRequestRedisPassword = config.Load().GetRequestRedisPassword
-			// }
 
 			mapProjectConf[v.ProjectId] = projectConf
 		}
