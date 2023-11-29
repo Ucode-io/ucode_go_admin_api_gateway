@@ -75,6 +75,10 @@ message ProjectConfig {
     string COMPANY_SERVICE_MONGO_USER = 37;
     string COMPANY_SERVICE_MONGO_PASSWORD = 38;
     google.protobuf.Struct others = 39;
+    string REDIS_HOST = 40;
+    string REDIS_PORT = 41;
+    string REDIS_DATABASE = 42;
+    string REDIS_PASSWORD = 43;
 }
 
 message ProjectLoginMicroFrontend {
