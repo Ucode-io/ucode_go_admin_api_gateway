@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"time"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
@@ -31,37 +30,41 @@ func (h *Handler) CompanyRedirectGetList(data helper.MatchingData, comp services
 	)
 
 	waitMap := waitRedirectMap.ReadFromMap(key)
-	if waitMap.Value == config.CACHE_WAIT {
+
+	if waitMap.Timeout != nil {
 		if waitMap.Timeout.Err() == context.DeadlineExceeded {
 			waitRedirectMap.DeleteKey(key)
-		} else {
-			ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
-			defer cancel()
-			for {
-				redisGetTime := time.Now()
-				redisResource, err := h.redis.Get(context.Background(), key, h.baseConf.UcodeNamespace, config.LOW_NODE_TYPE)
-				fmt.Println("redisGetTime:", time.Since(redisGetTime))
-				if err == nil {
-					err = json.Unmarshal([]byte(redisResource), &res)
-					if err != nil {
-						return nil, err
-					}
-					break
-				}
+			waitMap = waitRedirectMap.ReadFromMap(key)
+		}
+	}
 
-				if ctx.Err() == context.DeadlineExceeded {
-					break
-				}
+	if waitMap.Value != config.CACHE_WAIT {
+		ctx, _ := context.WithTimeout(context.Background(), 280*time.Second)
+		waitRedirectMap.AddKey(key, helper.WaitKey{Value: config.CACHE_WAIT, Timeout: ctx})
+	}
 
-				time.Sleep(time.Millisecond * 10)
+	if waitMap.Value == config.CACHE_WAIT {
+		ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
+		defer cancel()
+		for {
+			redisResource, err := h.redis.Get(context.Background(), key, h.baseConf.UcodeNamespace, config.LOW_NODE_TYPE)
+			if err == nil {
+				err = json.Unmarshal([]byte(redisResource), &res)
+				if err != nil {
+					return nil, err
+				}
+				break
 			}
+
+			if ctx.Err() == context.DeadlineExceeded {
+				break
+			}
+
+			time.Sleep(time.Millisecond * 10)
 		}
 	}
 
 	if len(res.RedirectUrls) <= 0 {
-		ctx, _ := context.WithTimeout(context.Background(), 280*time.Second)
-		waitRedirectMap.AddKey(key, helper.WaitKey{Value: config.CACHE_WAIT, Timeout: ctx})
-
 		res, err = comp.Redirect().GetList(context.Background(), &pb.GetListRedirectUrlReq{
 			ProjectId: data.ProjectId,
 			EnvId:     data.EnvId,

@@ -805,37 +805,42 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 
 	// resourceTime := time.Now()
 	waitResourceMap := waitFunctionResourceMap.ReadFromMap(resourceWaitKey)
-	if waitResourceMap.Value == config.CACHE_WAIT {
+	if waitResourceMap.Timeout != nil {
 		if waitResourceMap.Timeout.Err() == context.DeadlineExceeded {
 			waitFunctionResourceMap.DeleteKey(resourceWaitKey)
-		} else {
-			ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
-			defer cancel()
+			waitResourceMap = waitFunctionResourceMap.ReadFromMap(resourceWaitKey)
+		}
+	}
 
-			for {
-				redisResource, err := h.redis.Get(context.Background(), resourceKey, resource.ProjectId, resource.NodeType)
-				if err == nil {
-					err = json.Unmarshal([]byte(redisResource), &resource)
-					if err != nil {
-						h.log.Error("Error while unmarshal resource redis", logger.Error(err))
-						return
-					}
-					break
+	if waitResourceMap.Value != config.CACHE_WAIT {
+		ctx, _ := context.WithTimeout(context.Background(), 280*time.Second)
+		waitFunctionResourceMap.AddKey(resourceWaitKey, helper.WaitKey{Value: config.CACHE_WAIT, Timeout: ctx})
+	}
+
+	if waitResourceMap.Value == config.CACHE_WAIT {
+		ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
+		defer cancel()
+
+		for {
+			redisResource, err := h.redis.Get(context.Background(), resourceKey, resource.ProjectId, resource.NodeType)
+			if err == nil {
+				err = json.Unmarshal([]byte(redisResource), &resource)
+				if err != nil {
+					h.log.Error("Error while unmarshal resource redis", logger.Error(err))
+					return
 				}
-
-				if ctx.Err() == context.DeadlineExceeded {
-					break
-				}
-
-				time.Sleep(time.Millisecond * 10)
+				break
 			}
+
+			if ctx.Err() == context.DeadlineExceeded {
+				break
+			}
+
+			time.Sleep(time.Millisecond * 10)
 		}
 	}
 
 	if resource.ResourceEnvironmentId == "" {
-		ctx, _ := context.WithTimeout(context.Background(), 280*time.Second)
-		waitFunctionResourceMap.AddKey(resourceWaitKey, helper.WaitKey{Value: config.CACHE_WAIT, Timeout: ctx})
-
 		resource, err = h.companyServices.ServiceResource().GetSingle(
 			c.Request.Context(),
 			&pb.GetSingleServiceResourceReq{
@@ -878,44 +883,45 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 	var key = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("ett-%s-%s-%s", c.Request.Header.Get("Prev_path"), requestData.Params.Encode(), resource.ResourceEnvironmentId)))
 
 	waitFunctionMap := waitFunctionResourceMap.ReadFromMap(key)
-	if waitFunctionMap.Value == config.CACHE_WAIT && c.Request.Method == "GET" && resource.ProjectId == "1acd7a8f-a038-4e07-91cb-b689c368d855" {
+	if waitFunctionMap.Timeout != nil {
 		if waitFunctionMap.Timeout.Err() == context.DeadlineExceeded {
 			waitFunctionResourceMap.DeleteKey(key)
-		} else {
-			redisDataTime := time.Now()
-
-			ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
-			defer cancel()
-
-			for {
-				redisResp, err := h.redis.Get(context.Background(), key, resource.ProjectId, resource.NodeType)
-				if err == nil {
-					resp := make(map[string]interface{})
-					m := make(map[string]interface{})
-					err = json.Unmarshal([]byte(redisResp), &m)
-					if err != nil {
-						h.log.Error("Error while unmarshal redis", logger.Error(err))
-					} else {
-						resp["data"] = m
-						c.JSON(cast.ToInt(m["code"]), m)
-						fmt.Print("\n\n ~~>> ett redis return response ", time.Since(redisDataTime), "\n\n")
-						return
-					}
-					break
-				}
-
-				if ctx.Err() == context.DeadlineExceeded {
-					break
-				}
-
-				time.Sleep(time.Millisecond * 10)
-			}
+			waitFunctionMap = waitFunctionResourceMap.ReadFromMap(key)
 		}
 	}
 
-	if c.Request.Method == "GET" && resource.ProjectId == "1acd7a8f-a038-4e07-91cb-b689c368d855" {
+	if waitFunctionMap.Value != config.CACHE_WAIT && c.Request.Method == "GET" && resource.ProjectId == "1acd7a8f-a038-4e07-91cb-b689c368d855" {
 		ctx, _ := context.WithTimeout(context.Background(), 14*time.Second)
 		waitFunctionResourceMap.AddKey(key, helper.WaitKey{Value: config.CACHE_WAIT, Timeout: ctx})
+	}
+
+	if waitFunctionMap.Value == config.CACHE_WAIT && c.Request.Method == "GET" && resource.ProjectId == "1acd7a8f-a038-4e07-91cb-b689c368d855" {
+
+		redisDataTime := time.Now()
+
+		ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
+		defer cancel()
+
+		for {
+			waitFunctionMap := waitFunctionResourceMap.ReadFromMap(key)
+			resp := make(map[string]interface{})
+			m := make(map[string]interface{})
+			err = json.Unmarshal(waitFunctionMap.Body, &m)
+			if err != nil {
+				h.log.Error("Error while unmarshal redis", logger.Error(err))
+			} else {
+				resp["data"] = m
+				c.JSON(cast.ToInt(m["code"]), m)
+				fmt.Print("\n\n ~~>> ett redis return response ", time.Since(redisDataTime), "\n\n")
+				return
+			}
+
+			if ctx.Err() == context.DeadlineExceeded {
+				break
+			}
+
+			time.Sleep(time.Millisecond * 20)
+		}
 	}
 
 	// getSingleFunctionTime := time.Now()
@@ -969,11 +975,11 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 		if isOwnData {
 			if err == nil && c.Request.Method == "GET" && resource.ProjectId == "1acd7a8f-a038-4e07-91cb-b689c368d855" {
 				jsonData, _ := json.Marshal(resp.Data)
-				err = h.redis.SetX(context.Background(), key, string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
-				if err != nil {
-					h.log.Error("Error while setting redis", logger.Error(err))
-				}
+				waitFunctionResourceMap.WriteBody(key, jsonData)
 			}
+
+			// DoRequestCount++
+			// fmt.Println("::::::::::::::::::::::::::::::::::::::::::::::::::::::::", DoRequestCount)
 
 			if _, ok := resp.Data["code"]; ok {
 				c.JSON(cast.ToInt(resp.Data["code"]), resp.Data)
@@ -987,3 +993,5 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 
 	h.handleResponse(c, status_http.OK, resp)
 }
+
+// var DoRequestCount int

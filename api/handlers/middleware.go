@@ -107,39 +107,44 @@ func (h *Handler) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 			)
 
 			waitApiMap := waitApiResourceMap.ReadFromMap(appIdKey)
-			if waitApiMap.Value == config.CACHE_WAIT {
+			if waitApiMap.Timeout != nil {
 				if waitApiMap.Timeout.Err() == context.DeadlineExceeded {
 					waitApiResourceMap.DeleteKey(appIdKey)
-				} else {
-					ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
-					defer cancel()
+					waitApiMap = waitApiResourceMap.ReadFromMap(appIdKey)
+				}
+			}
 
-					for {
-						redisAppId, err := h.redis.Get(context.Background(), appIdKey, h.baseConf.UcodeNamespace, config.LOW_NODE_TYPE)
-						if err == nil {
-							apiJson = []byte(redisAppId)
-							err = json.Unmarshal([]byte(redisAppId), &apikeys)
-							if err != nil {
-								h.handleResponse(c, status_http.BadRequest, "cant get auth info")
-								c.Abort()
-								return
-							}
-							break
+			if waitApiMap.Value != config.CACHE_WAIT {
+				ctx, _ := context.WithTimeout(context.Background(), 280*time.Second)
+				waitApiResourceMap.AddKey(appIdKey, helper.WaitKey{Value: config.CACHE_WAIT, Timeout: ctx})
+			}
+
+			if waitApiMap.Value == config.CACHE_WAIT {
+				ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
+				defer cancel()
+
+				for {
+					redisAppId, err := h.redis.Get(context.Background(), appIdKey, h.baseConf.UcodeNamespace, config.LOW_NODE_TYPE)
+					if err == nil {
+						apiJson = []byte(redisAppId)
+						err = json.Unmarshal([]byte(redisAppId), &apikeys)
+						if err != nil {
+							h.handleResponse(c, status_http.BadRequest, "cant get auth info")
+							c.Abort()
+							return
 						}
-
-						if ctx.Err() == context.DeadlineExceeded {
-							break
-						}
-
-						time.Sleep(time.Millisecond * 10)
+						break
 					}
+
+					if ctx.Err() == context.DeadlineExceeded {
+						break
+					}
+
+					time.Sleep(time.Millisecond * 10)
 				}
 			}
 
 			if apikeys.AppId == "" {
-				ctx, _ := context.WithTimeout(context.Background(), 280*time.Second)
-				waitApiResourceMap.AddKey(appIdKey, helper.WaitKey{Value: config.CACHE_WAIT, Timeout: ctx})
-
 				apikeys, err = h.authService.ApiKey().GetEnvID(
 					c.Request.Context(),
 					&auth_service.GetReq{
@@ -166,38 +171,43 @@ func (h *Handler) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 			}
 
 			waitResourceMap := waitApiResourceMap.ReadFromMap(resourceAppIdKey)
-			if waitResourceMap.Value == config.CACHE_WAIT {
+			if waitResourceMap.Timeout != nil {
 				if waitResourceMap.Timeout.Err() == context.DeadlineExceeded {
 					waitApiResourceMap.DeleteKey(resourceAppIdKey)
-				} else {
-					ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
-					defer cancel()
+					waitResourceMap = waitApiResourceMap.ReadFromMap(resourceAppIdKey)
+				}
+			}
 
-					for {
-						redisResource, err := h.redis.Get(context.Background(), resourceAppIdKey, h.baseConf.UcodeNamespace, config.LOW_NODE_TYPE)
-						if err == nil {
-							err = json.Unmarshal([]byte(redisResource), &resource)
-							if err != nil {
-								h.handleResponse(c, status_http.BadRequest, "cant get auth info")
-								c.Abort()
-								return
-							}
-							break
+			if waitApiMap.Value != config.CACHE_WAIT {
+				ctx, _ := context.WithTimeout(context.Background(), 280*time.Second)
+				waitApiResourceMap.AddKey(resourceAppIdKey, helper.WaitKey{Value: config.CACHE_WAIT, Timeout: ctx})
+			}
+
+			if waitResourceMap.Value == config.CACHE_WAIT {
+				ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
+				defer cancel()
+
+				for {
+					redisResource, err := h.redis.Get(context.Background(), resourceAppIdKey, h.baseConf.UcodeNamespace, config.LOW_NODE_TYPE)
+					if err == nil {
+						err = json.Unmarshal([]byte(redisResource), &resource)
+						if err != nil {
+							h.handleResponse(c, status_http.BadRequest, "cant get auth info")
+							c.Abort()
+							return
 						}
-
-						if ctx.Err() == context.DeadlineExceeded {
-							break
-						}
-
-						time.Sleep(time.Millisecond * 10)
+						break
 					}
+
+					if ctx.Err() == context.DeadlineExceeded {
+						break
+					}
+
+					time.Sleep(time.Millisecond * 10)
 				}
 			}
 
 			if resource.Resource == nil {
-				ctx, _ := context.WithTimeout(context.Background(), 280*time.Second)
-				waitApiResourceMap.AddKey(resourceAppIdKey, helper.WaitKey{Value: config.CACHE_WAIT, Timeout: ctx})
-
 				resource, err := h.companyServices.Resource().GetResourceByEnvID(
 					c.Request.Context(),
 					&company_service.GetResourceByEnvIDRequest{
