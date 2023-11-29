@@ -21,7 +21,6 @@ import (
 
 func (h *Handler) AdminAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-
 		if cast.ToBool(c.GetHeader("redirect")) {
 			var authData = models.AuthData{}
 			err := json.Unmarshal([]byte(c.GetHeader("auth")), &authData)

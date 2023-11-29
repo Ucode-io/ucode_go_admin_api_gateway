@@ -115,7 +115,7 @@ func (h *Handler) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 			}
 
 			if waitApiMap.Value != config.CACHE_WAIT {
-				ctx, _ := context.WithTimeout(context.Background(), 280*time.Second)
+				ctx, _ := context.WithTimeout(context.Background(), config.REDIS_TIMEOUT)
 				waitApiResourceMap.AddKey(appIdKey, helper.WaitKey{Value: config.CACHE_WAIT, Timeout: ctx})
 			}
 
@@ -124,15 +124,18 @@ func (h *Handler) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 				defer cancel()
 
 				for {
-					redisAppId, err := h.redis.Get(context.Background(), appIdKey, h.baseConf.UcodeNamespace, config.LOW_NODE_TYPE)
-					if err == nil {
-						apiJson = []byte(redisAppId)
-						err = json.Unmarshal([]byte(redisAppId), &apikeys)
+					waitApiMap := waitApiResourceMap.ReadFromMap(appIdKey)
+					apiJson = waitApiMap.Body
+					if len(waitApiMap.Body) > 0 {
+						err = json.Unmarshal(waitApiMap.Body, &apikeys)
 						if err != nil {
 							h.handleResponse(c, status_http.BadRequest, "cant get auth info")
 							c.Abort()
 							return
 						}
+					}
+
+					if apikeys.AppId != "" {
 						break
 					}
 
@@ -140,7 +143,7 @@ func (h *Handler) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 						break
 					}
 
-					time.Sleep(time.Millisecond * 10)
+					time.Sleep(config.REDIS_SLEEP)
 				}
 			}
 
@@ -164,10 +167,7 @@ func (h *Handler) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 					return
 				}
 
-				err = h.redis.SetX(context.Background(), appIdKey, string(apiJson), 5*time.Minute, h.baseConf.UcodeNamespace, config.LOW_NODE_TYPE)
-				if err != nil {
-					h.log.Error("Error while setting redis", logger.Error(err))
-				}
+				waitApiResourceMap.WriteBody(appIdKey, apiJson)
 			}
 
 			waitResourceMap := waitApiResourceMap.ReadFromMap(resourceAppIdKey)
@@ -179,7 +179,7 @@ func (h *Handler) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 			}
 
 			if waitApiMap.Value != config.CACHE_WAIT {
-				ctx, _ := context.WithTimeout(context.Background(), 280*time.Second)
+				ctx, _ := context.WithTimeout(context.Background(), config.REDIS_TIMEOUT)
 				waitApiResourceMap.AddKey(resourceAppIdKey, helper.WaitKey{Value: config.CACHE_WAIT, Timeout: ctx})
 			}
 
@@ -188,14 +188,17 @@ func (h *Handler) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 				defer cancel()
 
 				for {
-					redisResource, err := h.redis.Get(context.Background(), resourceAppIdKey, h.baseConf.UcodeNamespace, config.LOW_NODE_TYPE)
-					if err == nil {
-						err = json.Unmarshal([]byte(redisResource), &resource)
+					waitResourceMap := waitApiResourceMap.ReadFromMap(resourceAppIdKey)
+					if len(waitResourceMap.Body) > 0 {
+						err = json.Unmarshal(waitResourceMap.Body, &resource)
 						if err != nil {
 							h.handleResponse(c, status_http.BadRequest, "cant get auth info")
 							c.Abort()
 							return
 						}
+					}
+
+					if resource.Resource != nil {
 						break
 					}
 
@@ -203,7 +206,7 @@ func (h *Handler) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 						break
 					}
 
-					time.Sleep(time.Millisecond * 10)
+					time.Sleep(config.REDIS_SLEEP)
 				}
 			}
 
@@ -227,10 +230,7 @@ func (h *Handler) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 					return
 				}
 
-				err = h.redis.SetX(context.Background(), resourceAppIdKey, string(resourceBody), 5*time.Minute, h.baseConf.UcodeNamespace, config.LOW_NODE_TYPE)
-				if err != nil {
-					h.log.Error("Error while setting redis", logger.Error(err))
-				}
+				waitApiResourceMap.WriteBody(resourceAppIdKey, resourceBody)
 			}
 
 			data := make(map[string]interface{})

@@ -8,7 +8,6 @@ import (
 	"ucode/ucode_go_api_gateway/config"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
-	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/services"
 
 	"github.com/gin-gonic/gin"
@@ -39,7 +38,7 @@ func (h *Handler) CompanyRedirectGetList(data helper.MatchingData, comp services
 	}
 
 	if waitMap.Value != config.CACHE_WAIT {
-		ctx, _ := context.WithTimeout(context.Background(), 280*time.Second)
+		ctx, _ := context.WithTimeout(context.Background(), config.REDIS_TIMEOUT)
 		waitRedirectMap.AddKey(key, helper.WaitKey{Value: config.CACHE_WAIT, Timeout: ctx})
 	}
 
@@ -47,12 +46,15 @@ func (h *Handler) CompanyRedirectGetList(data helper.MatchingData, comp services
 		ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
 		defer cancel()
 		for {
-			redisResource, err := h.redis.Get(context.Background(), key, h.baseConf.UcodeNamespace, config.LOW_NODE_TYPE)
-			if err == nil {
-				err = json.Unmarshal([]byte(redisResource), &res)
+			waitMap := waitRedirectMap.ReadFromMap(key)
+			if len(waitMap.Body) > 0 {
+				err = json.Unmarshal(waitMap.Body, &res)
 				if err != nil {
 					return nil, err
 				}
+			}
+
+			if len(res.RedirectUrls) > 0 {
 				break
 			}
 
@@ -60,7 +62,7 @@ func (h *Handler) CompanyRedirectGetList(data helper.MatchingData, comp services
 				break
 			}
 
-			time.Sleep(time.Millisecond * 10)
+			time.Sleep(config.REDIS_SLEEP)
 		}
 	}
 
@@ -80,10 +82,7 @@ func (h *Handler) CompanyRedirectGetList(data helper.MatchingData, comp services
 			return nil, err
 		}
 
-		err = h.redis.SetX(context.Background(), key, string(body), 5*time.Minute, h.baseConf.UcodeNamespace, config.LOW_NODE_TYPE)
-		if err != nil {
-			h.log.Error("Error while setting redis", logger.Error(err))
-		}
+		waitRedirectMap.WriteBody(key, body)
 	}
 
 	return res, nil

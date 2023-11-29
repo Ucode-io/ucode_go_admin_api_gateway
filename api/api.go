@@ -655,11 +655,13 @@ func MaxAllowed(n int) gin.HandlerFunc {
 	}
 
 	return func(c *gin.Context) {
-		acquire()       // before request
-		defer release() // after request
+		go func() {
+			acquire()       // before request
+			defer release() // after request
 
-		c.Set("sem", sem)
-		c.Set("count_request", countReq)
+			c.Set("sem", sem)
+			c.Set("count_request", countReq)
+		}()
 
 		c.Next()
 	}

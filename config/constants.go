@@ -34,5 +34,7 @@ const (
 )
 
 const (
-	REDIS_WAIT_TIMEOUT = 200 * time.Millisecond
+	REDIS_TIMEOUT      = 5 * time.Minute
+	REDIS_WAIT_TIMEOUT = 1 * time.Second
+	REDIS_SLEEP        = 100 * time.Millisecond
 )
