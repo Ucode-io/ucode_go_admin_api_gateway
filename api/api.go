@@ -28,7 +28,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 	r.Use(h.NodeMiddleware())
 
 	r.GET("/ping", h.Ping)
-	r.GET("/config", h.GetConfig)
+	// r.GET("/config", h.GetConfig)
 
 	r.POST("/send-code", h.SendCode)
 	r.POST("/verify/:sms_id/:otp", h.Verify)
