@@ -17,7 +17,12 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/cast"
 	"google.golang.org/grpc/status"
+)
+
+var (
+	waitSlimResourceMap = helper.NewConcurrentMap()
 )
 
 // GetListV2 godoc
@@ -313,17 +318,71 @@ func (h *Handler) GetListSlimV2(c *gin.Context) {
 		return
 	}
 
-	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId.(string),
-			EnvironmentId: environmentId.(string),
-			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
-		},
+	var (
+		resourceKey = fmt.Sprintf("%s-%s", projectId.(string), environmentId.(string))
+		resource    = &pb.ServiceResourceModel{}
 	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+
+	waitResourceMap := waitSlimResourceMap.ReadFromMap(resourceKey)
+	if waitResourceMap.Timeout != nil {
+		if waitResourceMap.Timeout.Err() == context.DeadlineExceeded {
+			waitSlimResourceMap.DeleteKey(resourceKey)
+			waitResourceMap = waitSlimResourceMap.ReadFromMap(resourceKey)
+		}
+	}
+
+	if waitResourceMap.Value != config.CACHE_WAIT {
+		ctx, _ := context.WithTimeout(context.Background(), config.REDIS_TIMEOUT)
+		waitSlimResourceMap.AddKey(resourceKey, helper.WaitKey{Value: config.CACHE_WAIT, Timeout: ctx})
+	}
+
+	if waitResourceMap.Value == config.CACHE_WAIT {
+		ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
+		defer cancel()
+
+		for {
+			waitResourceMap := waitSlimResourceMap.ReadFromMap(resourceKey)
+			if len(waitResourceMap.Body) > 0 {
+				err = json.Unmarshal(waitResourceMap.Body, &resource)
+				if err != nil {
+					h.log.Error("Error while unmarshal resource redis", logger.Error(err))
+					return
+				}
+			}
+
+			if resource.ResourceEnvironmentId != "" {
+				break
+			}
+
+			if ctx.Err() == context.DeadlineExceeded {
+				break
+			}
+
+			time.Sleep(config.REDIS_SLEEP)
+		}
+	}
+
+	if resource.ResourceEnvironmentId == "" {
+		resource, err = h.companyServices.ServiceResource().GetSingle(
+			c.Request.Context(),
+			&pb.GetSingleServiceResourceReq{
+				ProjectId:     projectId.(string),
+				EnvironmentId: environmentId.(string),
+				ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		body, err := json.Marshal(resource)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		waitSlimResourceMap.WriteBody(resourceKey, body)
 	}
 
 	services, err := h.GetProjectSrvc(
@@ -343,21 +402,65 @@ func (h *Handler) GetListSlimV2(c *gin.Context) {
 	}
 	defer conn.Close()
 
-	redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
-	if err == nil {
-		resp := make(map[string]interface{})
-		m := make(map[string]interface{})
-		err = json.Unmarshal([]byte(redisResp), &m)
-		if err != nil {
-			h.log.Error("Error while unmarshal redis", logger.Error(err))
-		} else {
-			resp["data"] = m
-			h.handleResponse(c, status_http.OK, resp)
-			return
+	var slimKey = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId)))
+	if cast.ToBool(c.Query("is_wait_cached")) {
+		waitSlimMap := waitSlimResourceMap.ReadFromMap(slimKey)
+		if waitSlimMap.Timeout != nil {
+			if waitSlimMap.Timeout.Err() == context.DeadlineExceeded {
+				waitSlimResourceMap.DeleteKey(slimKey)
+				waitSlimMap = waitSlimResourceMap.ReadFromMap(slimKey)
+			}
+		}
+
+		if waitSlimMap.Value != config.CACHE_WAIT {
+			ctx, _ := context.WithTimeout(context.Background(), 15*time.Second)
+			waitSlimResourceMap.AddKey(slimKey, helper.WaitKey{Value: config.CACHE_WAIT, Timeout: ctx})
+		}
+
+		if waitSlimMap.Value == config.CACHE_WAIT {
+			ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
+			defer cancel()
+
+			for {
+				waitSlimMap := waitSlimResourceMap.ReadFromMap(slimKey)
+
+				if len(waitSlimMap.Body) > 0 {
+					m := make(map[string]interface{})
+					err = json.Unmarshal(waitSlimMap.Body, &m)
+					if err != nil {
+						h.handleResponse(c, status_http.GRPCError, err.Error())
+						return
+					}
+
+					h.handleResponse(c, status_http.OK, map[string]interface{}{"data": m})
+					return
+				}
+
+				if ctx.Err() == context.DeadlineExceeded {
+					break
+				}
+
+				time.Sleep(config.REDIS_SLEEP)
+			}
 		}
 	} else {
-		h.log.Error("Error while getting redis while get list ", logger.Error(err))
+		redisResp, err := h.redis.Get(context.Background(), slimKey, projectId.(string), resource.NodeType)
+		if err == nil {
+			resp := make(map[string]interface{})
+			m := make(map[string]interface{})
+			err = json.Unmarshal([]byte(redisResp), &m)
+			if err != nil {
+				h.log.Error("Error while unmarshal redis", logger.Error(err))
+			} else {
+				resp["data"] = m
+				h.handleResponse(c, status_http.OK, resp)
+				return
+			}
+		} else {
+			h.log.Error("Error while getting redis while get list ", logger.Error(err))
+		}
 	}
+
 	resp, err := service.GetListSlimV2(
 		context.Background(),
 		&obs.CommonMessage{
@@ -378,14 +481,18 @@ func (h *Handler) GetListSlimV2(c *gin.Context) {
 	}
 
 	if err == nil {
-		if resp.IsCached {
+		if cast.ToBool(c.Query("is_wait_cached")) {
 			jsonData, _ := resp.GetData().MarshalJSON()
-			err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
+			waitSlimResourceMap.WriteBody(slimKey, jsonData)
+		} else if resp.IsCached {
+			jsonData, _ := resp.GetData().MarshalJSON()
+			err = h.redis.SetX(context.Background(), slimKey, string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
 			if err != nil {
 				h.log.Error("Error while setting redis", logger.Error(err))
 			}
 		}
 	}
+
 	statusHttp.CustomMessage = resp.GetCustomMessage()
 	h.handleResponse(c, statusHttp, resp)
 }
