@@ -37040,6 +37040,9 @@
                 "is_default": {
                     "type": "boolean"
                 },
+                "node_type": {
+                    "type": "string"
+                },
                 "project_id": {
                     "type": "string"
                 },
@@ -37226,6 +37229,9 @@
                 "environment_id": {
                     "type": "string"
                 },
+                "node_type": {
+                    "type": "string"
+                },
                 "project_id": {
                     "type": "string"
                 },
@@ -37241,6 +37247,9 @@
             "type": "object",
             "properties": {
                 "company_id": {
+                    "type": "string"
+                },
+                "node_type": {
                     "type": "string"
                 },
                 "project_id": {
@@ -37754,6 +37763,9 @@
                 "is_configured": {
                     "type": "boolean"
                 },
+                "node_type": {
+                    "type": "string"
+                },
                 "project_id": {
                     "type": "string"
                 },
@@ -37798,6 +37810,9 @@
                     }
                 },
                 "id": {
+                    "type": "string"
+                },
+                "node_type": {
                     "type": "string"
                 },
                 "project_id": {
@@ -37849,6 +37864,9 @@
                 "name": {
                     "type": "string"
                 },
+                "node_type": {
+                    "type": "string"
+                },
                 "resource_environment_id": {
                     "type": "string"
                 }
@@ -37884,6 +37902,9 @@
                     "type": "string"
                 },
                 "id": {
+                    "type": "string"
+                },
+                "node_type": {
                     "type": "string"
                 },
                 "project_id": {
@@ -38019,6 +38040,9 @@
                 "is_configured": {
                     "type": "boolean"
                 },
+                "node_type": {
+                    "type": "string"
+                },
                 "project_id": {
                     "type": "string"
                 },
@@ -38101,9 +38125,6 @@
         "config.Config": {
             "type": "object",
             "properties": {
-                "adminHost": {
-                    "type": "string"
-                },
                 "adminHostForCodeServer": {
                     "type": "string"
                 },
@@ -38113,22 +38134,10 @@
                 "analyticsServiceHost": {
                     "type": "string"
                 },
-                "apiHost": {
-                    "type": "string"
-                },
                 "apiReferenceServiceHost": {
                     "type": "string"
                 },
                 "apiReferenceServicePort": {
-                    "type": "string"
-                },
-                "appHost": {
-                    "type": "string"
-                },
-                "authGRPCPort": {
-                    "type": "string"
-                },
-                "authServiceHost": {
                     "type": "string"
                 },
                 "chatServiceGrpcHost": {
@@ -38138,12 +38147,6 @@
                     "type": "string"
                 },
                 "client_HOST": {
-                    "type": "string"
-                },
-                "companyServiceHost": {
-                    "type": "string"
-                },
-                "companyServicePort": {
                     "type": "string"
                 },
                 "convertTemplateServiceGrpcHost": {
@@ -38162,10 +38165,6 @@
                     "type": "string"
                 },
                 "defaultOffset": {
-                    "type": "string"
-                },
-                "environment": {
-                    "description": "debug, test, release",
                     "type": "string"
                 },
                 "functionServiceHost": {
@@ -38207,43 +38206,28 @@
                 "gitlabProjectIdMicroFE": {
                     "type": "integer"
                 },
-                "helmInstallFunction": {
-                    "type": "string"
-                },
                 "helmInstallMicroFE": {
                     "type": "string"
                 },
                 "helmRepoAddFMicroFE": {
                     "type": "string"
                 },
-                "helmRepoAddFunction": {
-                    "type": "string"
-                },
-                "helmRepoUpdateFunction": {
-                    "type": "string"
-                },
                 "helmRepoUpdateMicroFE": {
-                    "type": "string"
-                },
-                "helmUninstallFunction": {
                     "type": "string"
                 },
                 "helmUninstallMicroFE": {
                     "type": "string"
                 },
-                "httpport": {
+                "highObjectBuilderGRPCPort": {
                     "type": "string"
                 },
-                "httpscheme": {
+                "highObjectBuilderServiceHost": {
                     "type": "string"
                 },
                 "integrationGRPCPort": {
                     "type": "string"
                 },
                 "integrationServiceHost": {
-                    "type": "string"
-                },
-                "localhost": {
                     "type": "string"
                 },
                 "minioAccessKeyID": {
@@ -38273,9 +38257,6 @@
                 "pathToClone": {
                     "type": "string"
                 },
-                "pathToCloneMicroFE": {
-                    "type": "string"
-                },
                 "platformType": {
                     "type": "string"
                 },
@@ -38284,26 +38265,6 @@
                 },
                 "posServiceHost": {
                     "type": "string"
-                },
-                "postgres": {
-                    "type": "object",
-                    "properties": {
-                        "database": {
-                            "type": "string"
-                        },
-                        "host": {
-                            "type": "string"
-                        },
-                        "password": {
-                            "type": "string"
-                        },
-                        "port": {
-                            "type": "integer"
-                        },
-                        "username": {
-                            "type": "string"
-                        }
-                    }
                 },
                 "postgresBuilderServiceHost": {
                     "type": "string"
@@ -38326,12 +38287,6 @@
                 "secretKey": {
                     "type": "string"
                 },
-                "serviceHost": {
-                    "type": "string"
-                },
-                "serviceName": {
-                    "type": "string"
-                },
                 "smsGRPCPort": {
                     "type": "string"
                 },
@@ -38348,9 +38303,6 @@
                     "type": "string"
                 },
                 "ucodeNamespace": {
-                    "type": "string"
-                },
-                "version": {
                     "type": "string"
                 },
                 "versioningGRPCPort": {
@@ -38980,6 +38932,9 @@
             "type": "object",
             "properties": {
                 "description": {
+                    "type": "string"
+                },
+                "framework_type": {
                     "type": "string"
                 },
                 "function_folder_id": {
@@ -39815,6 +39770,9 @@
                 },
                 "webpage_id": {
                     "type": "string"
+                },
+                "wiki_id": {
+                    "type": "string"
                 }
             }
         },
@@ -40311,6 +40269,9 @@
                     "type": "string"
                 },
                 "environment_id": {
+                    "type": "string"
+                },
+                "framework_type": {
                     "type": "string"
                 },
                 "function_folder_id": {
@@ -42318,6 +42279,9 @@
                 "id": {
                     "type": "string"
                 },
+                "is_static": {
+                    "type": "boolean"
+                },
                 "is_visible": {
                     "type": "boolean"
                 },
@@ -42367,6 +42331,9 @@
                 },
                 "id": {
                     "type": "string"
+                },
+                "is_static": {
+                    "type": "boolean"
                 },
                 "label": {
                     "type": "string"

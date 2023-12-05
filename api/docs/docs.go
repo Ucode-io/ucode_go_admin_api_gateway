@@ -37051,6 +37051,9 @@ const docTemplate = `{
                 "is_default": {
                     "type": "boolean"
                 },
+                "node_type": {
+                    "type": "string"
+                },
                 "project_id": {
                     "type": "string"
                 },
@@ -37237,6 +37240,9 @@ const docTemplate = `{
                 "environment_id": {
                     "type": "string"
                 },
+                "node_type": {
+                    "type": "string"
+                },
                 "project_id": {
                     "type": "string"
                 },
@@ -37252,6 +37258,9 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "company_id": {
+                    "type": "string"
+                },
+                "node_type": {
                     "type": "string"
                 },
                 "project_id": {
@@ -37765,6 +37774,9 @@ const docTemplate = `{
                 "is_configured": {
                     "type": "boolean"
                 },
+                "node_type": {
+                    "type": "string"
+                },
                 "project_id": {
                     "type": "string"
                 },
@@ -37809,6 +37821,9 @@ const docTemplate = `{
                     }
                 },
                 "id": {
+                    "type": "string"
+                },
+                "node_type": {
                     "type": "string"
                 },
                 "project_id": {
@@ -37860,6 +37875,9 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "node_type": {
+                    "type": "string"
+                },
                 "resource_environment_id": {
                     "type": "string"
                 }
@@ -37895,6 +37913,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
+                    "type": "string"
+                },
+                "node_type": {
                     "type": "string"
                 },
                 "project_id": {
@@ -38030,6 +38051,9 @@ const docTemplate = `{
                 "is_configured": {
                     "type": "boolean"
                 },
+                "node_type": {
+                    "type": "string"
+                },
                 "project_id": {
                     "type": "string"
                 },
@@ -38112,9 +38136,6 @@ const docTemplate = `{
         "config.Config": {
             "type": "object",
             "properties": {
-                "adminHost": {
-                    "type": "string"
-                },
                 "adminHostForCodeServer": {
                     "type": "string"
                 },
@@ -38124,22 +38145,10 @@ const docTemplate = `{
                 "analyticsServiceHost": {
                     "type": "string"
                 },
-                "apiHost": {
-                    "type": "string"
-                },
                 "apiReferenceServiceHost": {
                     "type": "string"
                 },
                 "apiReferenceServicePort": {
-                    "type": "string"
-                },
-                "appHost": {
-                    "type": "string"
-                },
-                "authGRPCPort": {
-                    "type": "string"
-                },
-                "authServiceHost": {
                     "type": "string"
                 },
                 "chatServiceGrpcHost": {
@@ -38149,12 +38158,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "client_HOST": {
-                    "type": "string"
-                },
-                "companyServiceHost": {
-                    "type": "string"
-                },
-                "companyServicePort": {
                     "type": "string"
                 },
                 "convertTemplateServiceGrpcHost": {
@@ -38173,10 +38176,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "defaultOffset": {
-                    "type": "string"
-                },
-                "environment": {
-                    "description": "debug, test, release",
                     "type": "string"
                 },
                 "functionServiceHost": {
@@ -38218,43 +38217,28 @@ const docTemplate = `{
                 "gitlabProjectIdMicroFE": {
                     "type": "integer"
                 },
-                "helmInstallFunction": {
-                    "type": "string"
-                },
                 "helmInstallMicroFE": {
                     "type": "string"
                 },
                 "helmRepoAddFMicroFE": {
                     "type": "string"
                 },
-                "helmRepoAddFunction": {
-                    "type": "string"
-                },
-                "helmRepoUpdateFunction": {
-                    "type": "string"
-                },
                 "helmRepoUpdateMicroFE": {
-                    "type": "string"
-                },
-                "helmUninstallFunction": {
                     "type": "string"
                 },
                 "helmUninstallMicroFE": {
                     "type": "string"
                 },
-                "httpport": {
+                "highObjectBuilderGRPCPort": {
                     "type": "string"
                 },
-                "httpscheme": {
+                "highObjectBuilderServiceHost": {
                     "type": "string"
                 },
                 "integrationGRPCPort": {
                     "type": "string"
                 },
                 "integrationServiceHost": {
-                    "type": "string"
-                },
-                "localhost": {
                     "type": "string"
                 },
                 "minioAccessKeyID": {
@@ -38284,9 +38268,6 @@ const docTemplate = `{
                 "pathToClone": {
                     "type": "string"
                 },
-                "pathToCloneMicroFE": {
-                    "type": "string"
-                },
                 "platformType": {
                     "type": "string"
                 },
@@ -38295,26 +38276,6 @@ const docTemplate = `{
                 },
                 "posServiceHost": {
                     "type": "string"
-                },
-                "postgres": {
-                    "type": "object",
-                    "properties": {
-                        "database": {
-                            "type": "string"
-                        },
-                        "host": {
-                            "type": "string"
-                        },
-                        "password": {
-                            "type": "string"
-                        },
-                        "port": {
-                            "type": "integer"
-                        },
-                        "username": {
-                            "type": "string"
-                        }
-                    }
                 },
                 "postgresBuilderServiceHost": {
                     "type": "string"
@@ -38337,12 +38298,6 @@ const docTemplate = `{
                 "secretKey": {
                     "type": "string"
                 },
-                "serviceHost": {
-                    "type": "string"
-                },
-                "serviceName": {
-                    "type": "string"
-                },
                 "smsGRPCPort": {
                     "type": "string"
                 },
@@ -38359,9 +38314,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "ucodeNamespace": {
-                    "type": "string"
-                },
-                "version": {
                     "type": "string"
                 },
                 "versioningGRPCPort": {
@@ -38991,6 +38943,9 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "description": {
+                    "type": "string"
+                },
+                "framework_type": {
                     "type": "string"
                 },
                 "function_folder_id": {
@@ -39826,6 +39781,9 @@ const docTemplate = `{
                 },
                 "webpage_id": {
                     "type": "string"
+                },
+                "wiki_id": {
+                    "type": "string"
                 }
             }
         },
@@ -40322,6 +40280,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "environment_id": {
+                    "type": "string"
+                },
+                "framework_type": {
                     "type": "string"
                 },
                 "function_folder_id": {
@@ -42329,6 +42290,9 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "is_static": {
+                    "type": "boolean"
+                },
                 "is_visible": {
                     "type": "boolean"
                 },
@@ -42378,6 +42342,9 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "string"
+                },
+                "is_static": {
+                    "type": "boolean"
                 },
                 "label": {
                     "type": "string"
