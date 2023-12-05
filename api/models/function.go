@@ -22,6 +22,7 @@ type CreateFunctionRequest struct {
 	CommitGuid       string `json:"-"`
 	VersionId        string `json:"-"`
 	FunctionFolderId string `json:"function_folder_id"`
+	FrameworkType    string `json:"framework_type"`
 }
 
 type InvokeFunctionRequest struct {

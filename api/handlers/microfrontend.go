@@ -109,19 +109,44 @@ func (h *Handler) CreateMicroFrontEnd(c *gin.Context) {
 	projectName = strings.ToLower(projectName)
 	var functionPath = projectName + "_" + strings.ReplaceAll(function.Path, "-", "_")
 
-	respCreateFork, err := gitlab.CreateProjectFork(functionPath, gitlab.IntegrationData{
-		GitlabIntegrationUrl:   h.baseConf.GitlabIntegrationURL,
-		GitlabIntegrationToken: h.baseConf.GitlabIntegrationToken,
-		GitlabProjectId:        h.baseConf.GitlabProjectIdMicroFE,
-		GitlabGroupId:          h.baseConf.GitlabGroupIdMicroFE,
-	})
-	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+	var respCreateFork models.GitlabIntegrationResponse
+	if function.FrameworkType == "REACT" {
+		respCreateFork, err = gitlab.CreateProjectFork(functionPath, gitlab.IntegrationData{
+			GitlabIntegrationUrl:   h.baseConf.GitlabIntegrationURL,
+			GitlabIntegrationToken: h.baseConf.GitlabIntegrationToken,
+			GitlabProjectId:        h.baseConf.GitlabProjectIdMicroFEReact,
+			GitlabGroupId:          h.baseConf.GitlabGroupIdMicroFE,
+		})
+		if err != nil {
+			h.handleResponse(c, status_http.InvalidArgument, err.Error())
+			return
+		}
+	} else if function.FrameworkType == "VUE" {
+		respCreateFork, err = gitlab.CreateProjectFork(functionPath, gitlab.IntegrationData{
+			GitlabIntegrationUrl:   h.baseConf.GitlabIntegrationURL,
+			GitlabIntegrationToken: h.baseConf.GitlabIntegrationToken,
+			GitlabProjectId:        h.baseConf.GitlabProjectIdMicroFEVue,
+			GitlabGroupId:          h.baseConf.GitlabGroupIdMicroFE,
+		})
+		if err != nil {
+			h.handleResponse(c, status_http.InvalidArgument, err.Error())
+			return
+		}
+	} else if function.FrameworkType == "ANGULAR" {
+		respCreateFork, err = gitlab.CreateProjectFork(functionPath, gitlab.IntegrationData{
+			GitlabIntegrationUrl:   h.baseConf.GitlabIntegrationURL,
+			GitlabIntegrationToken: h.baseConf.GitlabIntegrationToken,
+			GitlabProjectId:        h.baseConf.GitlabProjectIdMicroFEAngular,
+			GitlabGroupId:          h.baseConf.GitlabGroupIdMicroFE,
+		})
+		if err != nil {
+			h.handleResponse(c, status_http.InvalidArgument, err.Error())
+			return
+		}
+	} else {
+		h.handleResponse(c, status_http.InvalidArgument, "framework type is not valid, it should be [REACT, VUE or ANGULAR]")
 		return
 	}
-
-	// fmt.Println("response", respCreateFork.Message["id"])
-	//projectId := respCreateFork.Message["id"].(float64)
 
 	_, err = gitlab.UpdateProject(gitlab.IntegrationData{
 		GitlabIntegrationUrl:   h.baseConf.GitlabIntegrationURL,
@@ -187,6 +212,7 @@ func (h *Handler) CreateMicroFrontEnd(c *gin.Context) {
 			FunctionFolderId: function.FunctionFolderId,
 			Type:             MICROFE,
 			Url:              repoHost,
+			FrameworkType:    function.FrameworkType,
 		},
 	)
 
