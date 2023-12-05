@@ -322,6 +322,10 @@ func (h *Handler) ReconnectProjectResource(c *gin.Context) {
 
 	company.ProjectId = projectId.(string)
 
+	if len(c.Query("project-id")) > 0 {
+		company.ProjectId = c.Query("project-id")
+	}
+
 	resp, err := h.companyServices.Resource().ReconnectResource(
 		c.Request.Context(),
 		&company,
