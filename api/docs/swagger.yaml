@@ -601,6 +601,8 @@ definitions:
         type: boolean
       is_default:
         type: boolean
+      node_type:
+        type: string
       project_id:
         type: string
       resource_type:
@@ -722,6 +724,8 @@ definitions:
         type: string
       environment_id:
         type: string
+      node_type:
+        type: string
       project_id:
         type: string
       resource:
@@ -732,6 +736,8 @@ definitions:
   company_service.CreateResourceRes:
     properties:
       company_id:
+        type: string
+      node_type:
         type: string
       project_id:
         type: string
@@ -1064,6 +1070,8 @@ definitions:
         type: string
       is_configured:
         type: boolean
+      node_type:
+        type: string
       project_id:
         type: string
       resource_type:
@@ -1110,6 +1118,8 @@ definitions:
         type: array
       id:
         type: string
+      node_type:
+        type: string
       project_id:
         type: string
       resource_type:
@@ -1142,6 +1152,8 @@ definitions:
         type: boolean
       name:
         type: string
+      node_type:
+        type: string
       resource_environment_id:
         type: string
     type: object
@@ -1152,6 +1164,8 @@ definitions:
       environment_id:
         type: string
       id:
+        type: string
+      node_type:
         type: string
       project_id:
         type: string
@@ -1245,6 +1259,8 @@ definitions:
         type: string
       is_configured:
         type: boolean
+      node_type:
+        type: string
       project_id:
         type: string
       resource_type:
@@ -1298,35 +1314,21 @@ definitions:
     type: object
   config.Config:
     properties:
-      adminHost:
-        type: string
       adminHostForCodeServer:
         type: string
       analyticsGRPCPort:
         type: string
       analyticsServiceHost:
         type: string
-      apiHost:
-        type: string
       apiReferenceServiceHost:
         type: string
       apiReferenceServicePort:
-        type: string
-      appHost:
-        type: string
-      authGRPCPort:
-        type: string
-      authServiceHost:
         type: string
       chatServiceGrpcHost:
         type: string
       chatServiceGrpcPort:
         type: string
       client_HOST:
-        type: string
-      companyServiceHost:
-        type: string
-      companyServicePort:
         type: string
       convertTemplateServiceGrpcHost:
         type: string
@@ -1339,9 +1341,6 @@ definitions:
       defaultLimit:
         type: string
       defaultOffset:
-        type: string
-      environment:
-        description: debug, test, release
         type: string
       functionServiceHost:
         type: string
@@ -1369,31 +1368,21 @@ definitions:
         type: integer
       gitlabProjectIdMicroFE:
         type: integer
-      helmInstallFunction:
-        type: string
       helmInstallMicroFE:
         type: string
       helmRepoAddFMicroFE:
         type: string
-      helmRepoAddFunction:
-        type: string
-      helmRepoUpdateFunction:
-        type: string
       helmRepoUpdateMicroFE:
-        type: string
-      helmUninstallFunction:
         type: string
       helmUninstallMicroFE:
         type: string
-      httpport:
+      highObjectBuilderGRPCPort:
         type: string
-      httpscheme:
+      highObjectBuilderServiceHost:
         type: string
       integrationGRPCPort:
         type: string
       integrationServiceHost:
-        type: string
-      localhost:
         type: string
       minioAccessKeyID:
         type: string
@@ -1413,27 +1402,12 @@ definitions:
         type: string
       pathToClone:
         type: string
-      pathToCloneMicroFE:
-        type: string
       platformType:
         type: string
       posGRPCPort:
         type: string
       posServiceHost:
         type: string
-      postgres:
-        properties:
-          database:
-            type: string
-          host:
-            type: string
-          password:
-            type: string
-          port:
-            type: integer
-          username:
-            type: string
-        type: object
       postgresBuilderServiceHost:
         type: string
       postgresBuilderServicePort:
@@ -1448,10 +1422,6 @@ definitions:
         type: string
       secretKey:
         type: string
-      serviceHost:
-        type: string
-      serviceName:
-        type: string
       smsGRPCPort:
         type: string
       smsServiceHost:
@@ -1463,8 +1433,6 @@ definitions:
       templateServiceHost:
         type: string
       ucodeNamespace:
-        type: string
-      version:
         type: string
       versioningGRPCPort:
         type: string
@@ -1878,6 +1846,8 @@ definitions:
   models.CreateFunctionRequest:
     properties:
       description:
+        type: string
+      framework_type:
         type: string
       function_folder_id:
         type: string
@@ -2428,6 +2398,8 @@ definitions:
         type: string
       webpage_id:
         type: string
+      wiki_id:
+        type: string
     type: object
   models.MicrofrontForLoginPage:
     properties:
@@ -2752,6 +2724,8 @@ definitions:
       description:
         type: string
       environment_id:
+        type: string
+      framework_type:
         type: string
       function_folder_id:
         type: string
@@ -4065,6 +4039,8 @@ definitions:
         type: string
       id:
         type: string
+      is_static:
+        type: boolean
       is_visible:
         type: boolean
       label:
@@ -4098,6 +4074,8 @@ definitions:
         type: string
       id:
         type: string
+      is_static:
+        type: boolean
       label:
         type: string
       layout_id:
