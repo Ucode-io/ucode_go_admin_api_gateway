@@ -46,7 +46,7 @@ func (h *Handler) UpdateServiceResource(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
-	data.EnvironmentId = environmentId.(string)
+	// data.EnvironmentId = environmentId.(string)
 
 	resp, err := h.companyServices.ServiceResource().Update(
 		context.Background(),
