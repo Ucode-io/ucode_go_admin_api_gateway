@@ -280,6 +280,19 @@ func (h *HandlerV1) GetSingle(c *gin.Context) {
 		return
 	}
 
+	tokenInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err.Error())
+		return
+	}
+	if tokenInfo != nil {
+		if tokenInfo.Tables != nil {
+			object.Data["tables"] = tokenInfo.GetTables()
+		}
+		object.Data["user_id_from_token"] = tokenInfo.GetUserId()
+		object.Data["role_id_from_token"] = tokenInfo.GetRoleId()
+		object.Data["client_type_id_from_token"] = tokenInfo.GetClientTypeId()
+	}
 	object.Data["id"] = objectID
 
 	structData, err := helper.ConvertMapToStruct(object.Data)
