@@ -13,6 +13,7 @@ import "google/protobuf/struct.proto";
 service RelationService {
     rpc Create(CreateRelationRequest) returns (CreateRelationRequest) {}
     rpc GetAll(GetAllRelationsRequest) returns (GetAllRelationsResponse) {}
+    rpc GetByID(RelationPrimaryKey) returns (RelationForGetAll) {}
     rpc Update(UpdateRelationRequest) returns (google.protobuf.Empty) {}
     rpc Delete(RelationPrimaryKey) returns (google.protobuf.Empty) {}
 }
