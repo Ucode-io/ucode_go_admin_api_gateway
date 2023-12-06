@@ -714,7 +714,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 		v2Version.GET("/relations/:collection", h.V2.GetAllRelations)
 		v2Version.POST("/relations/:collection", h.V2.CreateRelation)
 		v2Version.PUT("/relations/:collection", h.V2.UpdateRelation)
-		v2Version.DELETE("/relations/:collection/:id", h.V2.DeleteField)
+		v2Version.DELETE("/relations/:collection/:id", h.V2.DeleteRelation)
 		v2Version.GET("/relations/:collection/cascading", h.V2.GetRelationCascading)
 
 		// utils
