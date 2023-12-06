@@ -27,7 +27,7 @@ type GetSingleNotificationRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
 }
 
 func (x *GetSingleNotificationRequest) Reset() {
@@ -74,16 +74,16 @@ type GetAllNotificationsRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserId        string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	Type          string `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
-	Status        string `protobuf:"bytes,3,opt,name=status,proto3" json:"status,omitempty"`
-	Sort          string `protobuf:"bytes,4,opt,name=sort,proto3" json:"sort,omitempty"`
-	Limit         int32  `protobuf:"varint,5,opt,name=limit,proto3" json:"limit,omitempty"`
-	Offset        int32  `protobuf:"varint,6,opt,name=offset,proto3" json:"offset,omitempty"`
-	ResEnvId      string `protobuf:"bytes,7,opt,name=res_env_id,json=resEnvId,proto3" json:"res_env_id,omitempty"`
-	CategoryId    string `protobuf:"bytes,8,opt,name=category_id,json=categoryId,proto3" json:"category_id,omitempty"`
-	ProjectId     string `protobuf:"bytes,9,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	EnvironmentId string `protobuf:"bytes,10,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
+	UserId        string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id"`
+	Type          string `protobuf:"bytes,2,opt,name=type,proto3" json:"type"`
+	Status        string `protobuf:"bytes,3,opt,name=status,proto3" json:"status"`
+	Sort          string `protobuf:"bytes,4,opt,name=sort,proto3" json:"sort"`
+	Limit         int32  `protobuf:"varint,5,opt,name=limit,proto3" json:"limit"`
+	Offset        int32  `protobuf:"varint,6,opt,name=offset,proto3" json:"offset"`
+	ResEnvId      string `protobuf:"bytes,7,opt,name=res_env_id,json=resEnvId,proto3" json:"res_env_id"`
+	CategoryId    string `protobuf:"bytes,8,opt,name=category_id,json=categoryId,proto3" json:"category_id"`
+	ProjectId     string `protobuf:"bytes,9,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	EnvironmentId string `protobuf:"bytes,10,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
 }
 
 func (x *GetAllNotificationsRequest) Reset() {
@@ -193,10 +193,10 @@ type GetAllNotificationsResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Notifications []*Notification `protobuf:"bytes,1,rep,name=notifications,proto3" json:"notifications,omitempty"`
-	Count         int32           `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
-	EnvironmentId string          `protobuf:"bytes,3,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
-	ProjectId     string          `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Notifications []*Notification `protobuf:"bytes,1,rep,name=notifications,proto3" json:"notifications"`
+	Count         int32           `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
+	EnvironmentId string          `protobuf:"bytes,3,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
+	ProjectId     string          `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *GetAllNotificationsResponse) Reset() {
@@ -264,13 +264,13 @@ type CreateNotificationRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserId        string        `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	Type          string        `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
-	Status        string        `protobuf:"bytes,3,opt,name=status,proto3" json:"status,omitempty"`
-	Data          *Notification `protobuf:"bytes,4,opt,name=data,proto3" json:"data,omitempty"`
-	Token         string        `protobuf:"bytes,5,opt,name=token,proto3" json:"token,omitempty"`
-	EnvironmentId string        `protobuf:"bytes,6,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
-	CategoryId    string        `protobuf:"bytes,7,opt,name=category_id,json=categoryId,proto3" json:"category_id,omitempty"`
+	UserId        string        `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id"`
+	Type          string        `protobuf:"bytes,2,opt,name=type,proto3" json:"type"`
+	Status        string        `protobuf:"bytes,3,opt,name=status,proto3" json:"status"`
+	Data          *Notification `protobuf:"bytes,4,opt,name=data,proto3" json:"data"`
+	Token         string        `protobuf:"bytes,5,opt,name=token,proto3" json:"token"`
+	EnvironmentId string        `protobuf:"bytes,6,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
+	CategoryId    string        `protobuf:"bytes,7,opt,name=category_id,json=categoryId,proto3" json:"category_id"`
 }
 
 func (x *CreateNotificationRequest) Reset() {
@@ -359,11 +359,11 @@ type UpdateNotificationRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id                     string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	NotifStatusId          string `protobuf:"bytes,2,opt,name=notif_status_id,json=notifStatusId,proto3" json:"notif_status_id,omitempty"`
-	NotificationStatusName string `protobuf:"bytes,3,opt,name=notification_status_name,json=notificationStatusName,proto3" json:"notification_status_name,omitempty"`
-	SuccessSends           int64  `protobuf:"varint,4,opt,name=success_sends,json=successSends,proto3" json:"success_sends,omitempty"`
-	FailedSends            int64  `protobuf:"varint,5,opt,name=failed_sends,json=failedSends,proto3" json:"failed_sends,omitempty"`
+	Id                     string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	NotifStatusId          string `protobuf:"bytes,2,opt,name=notif_status_id,json=notifStatusId,proto3" json:"notif_status_id"`
+	NotificationStatusName string `protobuf:"bytes,3,opt,name=notification_status_name,json=notificationStatusName,proto3" json:"notification_status_name"`
+	SuccessSends           int64  `protobuf:"varint,4,opt,name=success_sends,json=successSends,proto3" json:"success_sends"`
+	FailedSends            int64  `protobuf:"varint,5,opt,name=failed_sends,json=failedSends,proto3" json:"failed_sends"`
 }
 
 func (x *UpdateNotificationRequest) Reset() {
@@ -438,7 +438,7 @@ type DeleteNotificationRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
 }
 
 func (x *DeleteNotificationRequest) Reset() {
@@ -485,13 +485,13 @@ type NotificationInfo struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Title          string `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
-	Content        string `protobuf:"bytes,2,opt,name=content,proto3" json:"content,omitempty"`
-	Language       string `protobuf:"bytes,3,opt,name=language,proto3" json:"language,omitempty"`
-	Code           string `protobuf:"bytes,4,opt,name=code,proto3" json:"code,omitempty"`
-	CreatedAt      string `protobuf:"bytes,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	NotificationId string `protobuf:"bytes,6,opt,name=notification_id,json=notificationId,proto3" json:"notification_id,omitempty"`
-	Id             string `protobuf:"bytes,7,opt,name=id,proto3" json:"id,omitempty"`
+	Title          string `protobuf:"bytes,1,opt,name=title,proto3" json:"title"`
+	Content        string `protobuf:"bytes,2,opt,name=content,proto3" json:"content"`
+	Language       string `protobuf:"bytes,3,opt,name=language,proto3" json:"language"`
+	Code           string `protobuf:"bytes,4,opt,name=code,proto3" json:"code"`
+	CreatedAt      string `protobuf:"bytes,5,opt,name=created_at,json=createdAt,proto3" json:"created_at"`
+	NotificationId string `protobuf:"bytes,6,opt,name=notification_id,json=notificationId,proto3" json:"notification_id"`
+	Id             string `protobuf:"bytes,7,opt,name=id,proto3" json:"id"`
 }
 
 func (x *NotificationInfo) Reset() {
@@ -580,19 +580,19 @@ type Notification struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id               string              `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	NotificationInfo []*NotificationInfo `protobuf:"bytes,2,rep,name=notification_info,json=notificationInfo,proto3" json:"notification_info,omitempty"`
-	SenderId         string              `protobuf:"bytes,4,opt,name=sender_id,json=senderId,proto3" json:"sender_id,omitempty"`
-	PlatformId       string              `protobuf:"bytes,5,opt,name=platform_id,json=platformId,proto3" json:"platform_id,omitempty"`
-	NotifStatusId    string              `protobuf:"bytes,6,opt,name=notif_status_id,json=notifStatusId,proto3" json:"notif_status_id,omitempty"`
-	CreatedAt        string              `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	EnvironmentId    string              `protobuf:"bytes,8,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
-	Status           string              `protobuf:"bytes,9,opt,name=status,proto3" json:"status,omitempty"`
-	CategoryId       string              `protobuf:"bytes,10,opt,name=category_id,json=categoryId,proto3" json:"category_id,omitempty"`
-	Title            string              `protobuf:"bytes,11,opt,name=title,proto3" json:"title,omitempty"`
-	Notifs           []*ManyNotifs       `protobuf:"bytes,12,rep,name=notifs,proto3" json:"notifs,omitempty"`
-	SuccessSends     int64               `protobuf:"varint,13,opt,name=success_sends,json=successSends,proto3" json:"success_sends,omitempty"`
-	FailedSends      int64               `protobuf:"varint,14,opt,name=failed_sends,json=failedSends,proto3" json:"failed_sends,omitempty"`
+	Id               string              `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	NotificationInfo []*NotificationInfo `protobuf:"bytes,2,rep,name=notification_info,json=notificationInfo,proto3" json:"notification_info"`
+	SenderId         string              `protobuf:"bytes,4,opt,name=sender_id,json=senderId,proto3" json:"sender_id"`
+	PlatformId       string              `protobuf:"bytes,5,opt,name=platform_id,json=platformId,proto3" json:"platform_id"`
+	NotifStatusId    string              `protobuf:"bytes,6,opt,name=notif_status_id,json=notifStatusId,proto3" json:"notif_status_id"`
+	CreatedAt        string              `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at"`
+	EnvironmentId    string              `protobuf:"bytes,8,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
+	Status           string              `protobuf:"bytes,9,opt,name=status,proto3" json:"status"`
+	CategoryId       string              `protobuf:"bytes,10,opt,name=category_id,json=categoryId,proto3" json:"category_id"`
+	Title            string              `protobuf:"bytes,11,opt,name=title,proto3" json:"title"`
+	Notifs           []*ManyNotifs       `protobuf:"bytes,12,rep,name=notifs,proto3" json:"notifs"`
+	SuccessSends     int64               `protobuf:"varint,13,opt,name=success_sends,json=successSends,proto3" json:"success_sends"`
+	FailedSends      int64               `protobuf:"varint,14,opt,name=failed_sends,json=failedSends,proto3" json:"failed_sends"`
 }
 
 func (x *Notification) Reset() {
@@ -723,13 +723,13 @@ type NotificationUsers struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id             string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	UserId         string `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	SentCount      int64  `protobuf:"varint,3,opt,name=sent_count,json=sentCount,proto3" json:"sent_count,omitempty"`
-	NotificationId string `protobuf:"bytes,4,opt,name=notification_id,json=notificationId,proto3" json:"notification_id,omitempty"`
-	Status         string `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"`
-	CreatedAt      string `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	ScheduledAt    string `protobuf:"bytes,7,opt,name=scheduled_at,json=scheduledAt,proto3" json:"scheduled_at,omitempty"`
+	Id             string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	UserId         string `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id"`
+	SentCount      int64  `protobuf:"varint,3,opt,name=sent_count,json=sentCount,proto3" json:"sent_count"`
+	NotificationId string `protobuf:"bytes,4,opt,name=notification_id,json=notificationId,proto3" json:"notification_id"`
+	Status         string `protobuf:"bytes,5,opt,name=status,proto3" json:"status"`
+	CreatedAt      string `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at"`
+	ScheduledAt    string `protobuf:"bytes,7,opt,name=scheduled_at,json=scheduledAt,proto3" json:"scheduled_at"`
 }
 
 func (x *NotificationUsers) Reset() {
@@ -818,9 +818,9 @@ type NotificationStatus struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name      string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	CreatedAt string `protobuf:"bytes,3,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Name      string `protobuf:"bytes,2,opt,name=name,proto3" json:"name"`
+	CreatedAt string `protobuf:"bytes,3,opt,name=created_at,json=createdAt,proto3" json:"created_at"`
 }
 
 func (x *NotificationStatus) Reset() {
@@ -881,8 +881,8 @@ type ManyNotificationData struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserId string        `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	Data   *Notification `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
+	UserId string        `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id"`
+	Data   *Notification `protobuf:"bytes,2,opt,name=data,proto3" json:"data"`
 }
 
 func (x *ManyNotificationData) Reset() {
@@ -936,7 +936,7 @@ type CreateManyNotificationRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	NotiticationData []*ManyNotificationData `protobuf:"bytes,1,rep,name=notitication_data,json=notiticationData,proto3" json:"notitication_data,omitempty"`
+	NotiticationData []*ManyNotificationData `protobuf:"bytes,1,rep,name=notitication_data,json=notiticationData,proto3" json:"notitication_data"`
 }
 
 func (x *CreateManyNotificationRequest) Reset() {
@@ -983,8 +983,8 @@ type ManyNotifs struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserId      string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	ScheduledAt string `protobuf:"bytes,2,opt,name=scheduled_at,json=scheduledAt,proto3" json:"scheduled_at,omitempty"`
+	UserId      string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id"`
+	ScheduledAt string `protobuf:"bytes,2,opt,name=scheduled_at,json=scheduledAt,proto3" json:"scheduled_at"`
 }
 
 func (x *ManyNotifs) Reset() {
@@ -1038,13 +1038,13 @@ type CreateNotificationManyUserRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Notifs           []*ManyNotifs `protobuf:"bytes,1,rep,name=notifs,proto3" json:"notifs,omitempty"`
-	NotificationData *Notification `protobuf:"bytes,2,opt,name=notificationData,proto3" json:"notificationData,omitempty"`
-	SenderId         string        `protobuf:"bytes,3,opt,name=sender_id,json=senderId,proto3" json:"sender_id,omitempty"`
-	EnvironmentId    string        `protobuf:"bytes,4,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
-	CategoryId       string        `protobuf:"bytes,5,opt,name=category_id,json=categoryId,proto3" json:"category_id,omitempty"`
-	Title            string        `protobuf:"bytes,6,opt,name=title,proto3" json:"title,omitempty"`
-	ProjectId        string        `protobuf:"bytes,7,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Notifs           []*ManyNotifs `protobuf:"bytes,1,rep,name=notifs,proto3" json:"notifs"`
+	NotificationData *Notification `protobuf:"bytes,2,opt,name=notificationData,proto3" json:"notificationData"`
+	SenderId         string        `protobuf:"bytes,3,opt,name=sender_id,json=senderId,proto3" json:"sender_id"`
+	EnvironmentId    string        `protobuf:"bytes,4,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
+	CategoryId       string        `protobuf:"bytes,5,opt,name=category_id,json=categoryId,proto3" json:"category_id"`
+	Title            string        `protobuf:"bytes,6,opt,name=title,proto3" json:"title"`
+	ProjectId        string        `protobuf:"bytes,7,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *CreateNotificationManyUserRequest) Reset() {
@@ -1133,8 +1133,8 @@ type GetAllUsersNotifications struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserIds         []string `protobuf:"bytes,1,rep,name=user_ids,json=userIds,proto3" json:"user_ids,omitempty"`
-	NotificationIds []string `protobuf:"bytes,2,rep,name=notification_ids,json=notificationIds,proto3" json:"notification_ids,omitempty"`
+	UserIds         []string `protobuf:"bytes,1,rep,name=user_ids,json=userIds,proto3" json:"user_ids"`
+	NotificationIds []string `protobuf:"bytes,2,rep,name=notification_ids,json=notificationIds,proto3" json:"notification_ids"`
 }
 
 func (x *GetAllUsersNotifications) Reset() {
@@ -1188,8 +1188,8 @@ type GetNotificationInfoRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	NotificationId string `protobuf:"bytes,1,opt,name=notification_id,json=notificationId,proto3" json:"notification_id,omitempty"`
-	Language       string `protobuf:"bytes,2,opt,name=language,proto3" json:"language,omitempty"`
+	NotificationId string `protobuf:"bytes,1,opt,name=notification_id,json=notificationId,proto3" json:"notification_id"`
+	Language       string `protobuf:"bytes,2,opt,name=language,proto3" json:"language"`
 }
 
 func (x *GetNotificationInfoRequest) Reset() {
@@ -1243,7 +1243,7 @@ type GetNotificationInfoResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	NotificationInfo []*NotificationInfo `protobuf:"bytes,1,rep,name=notification_info,json=notificationInfo,proto3" json:"notification_info,omitempty"`
+	NotificationInfo []*NotificationInfo `protobuf:"bytes,1,rep,name=notification_info,json=notificationInfo,proto3" json:"notification_info"`
 }
 
 func (x *GetNotificationInfoResponse) Reset() {

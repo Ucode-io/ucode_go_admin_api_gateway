@@ -26,9 +26,9 @@ type CreateCountry struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	CountryId string `protobuf:"bytes,1,opt,name=countryId,proto3" json:"countryId,omitempty"`
-	Name      string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Lang      string `protobuf:"bytes,3,opt,name=lang,proto3" json:"lang,omitempty"`
+	CountryId string `protobuf:"bytes,1,opt,name=countryId,proto3" json:"countryId"`
+	Name      string `protobuf:"bytes,2,opt,name=name,proto3" json:"name"`
+	Lang      string `protobuf:"bytes,3,opt,name=lang,proto3" json:"lang"`
 }
 
 func (x *CreateCountry) Reset() {
@@ -89,9 +89,9 @@ type Country struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	CountryId string `protobuf:"bytes,1,opt,name=countryId,proto3" json:"countryId,omitempty"`
-	Name      string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Lang      string `protobuf:"bytes,3,opt,name=lang,proto3" json:"lang,omitempty"`
+	CountryId string `protobuf:"bytes,1,opt,name=countryId,proto3" json:"countryId"`
+	Name      string `protobuf:"bytes,2,opt,name=name,proto3" json:"name"`
+	Lang      string `protobuf:"bytes,3,opt,name=lang,proto3" json:"lang"`
 }
 
 func (x *Country) Reset() {
@@ -152,9 +152,9 @@ type GetListCountriesRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Limit  int32  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
-	Offset int32  `protobuf:"varint,2,opt,name=offset,proto3" json:"offset,omitempty"`
-	Lang   string `protobuf:"bytes,3,opt,name=lang,proto3" json:"lang,omitempty"`
+	Limit  int32  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit"`
+	Offset int32  `protobuf:"varint,2,opt,name=offset,proto3" json:"offset"`
+	Lang   string `protobuf:"bytes,3,opt,name=lang,proto3" json:"lang"`
 }
 
 func (x *GetListCountriesRequest) Reset() {
@@ -215,8 +215,8 @@ type GetListCountriesResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Countries []*Country `protobuf:"bytes,1,rep,name=countries,proto3" json:"countries,omitempty"`
-	Total     int32      `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	Countries []*Country `protobuf:"bytes,1,rep,name=countries,proto3" json:"countries"`
+	Total     int32      `protobuf:"varint,2,opt,name=total,proto3" json:"total"`
 }
 
 func (x *GetListCountriesResponse) Reset() {
@@ -270,7 +270,7 @@ type CountryId struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	CountryId string `protobuf:"bytes,1,opt,name=countryId,proto3" json:"countryId,omitempty"`
+	CountryId string `protobuf:"bytes,1,opt,name=countryId,proto3" json:"countryId"`
 }
 
 func (x *CountryId) Reset() {
@@ -317,8 +317,8 @@ type ReloadCountriesListRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Countries []*Country `protobuf:"bytes,1,rep,name=countries,proto3" json:"countries,omitempty"`
-	Lang      string     `protobuf:"bytes,2,opt,name=lang,proto3" json:"lang,omitempty"`
+	Countries []*Country `protobuf:"bytes,1,rep,name=countries,proto3" json:"countries"`
+	Lang      string     `protobuf:"bytes,2,opt,name=lang,proto3" json:"lang"`
 }
 
 func (x *ReloadCountriesListRequest) Reset() {
@@ -372,8 +372,8 @@ type DeleteCountryRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	CountryId string `protobuf:"bytes,1,opt,name=countryId,proto3" json:"countryId,omitempty"`
-	Lang      string `protobuf:"bytes,2,opt,name=lang,proto3" json:"lang,omitempty"`
+	CountryId string `protobuf:"bytes,1,opt,name=countryId,proto3" json:"countryId"`
+	Lang      string `protobuf:"bytes,2,opt,name=lang,proto3" json:"lang"`
 }
 
 func (x *DeleteCountryRequest) Reset() {
@@ -427,7 +427,7 @@ type DeleteCountry struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	RowAffect int64 `protobuf:"varint,1,opt,name=rowAffect,proto3" json:"rowAffect,omitempty"`
+	RowAffect int64 `protobuf:"varint,1,opt,name=rowAffect,proto3" json:"rowAffect"`
 }
 
 func (x *DeleteCountry) Reset() {

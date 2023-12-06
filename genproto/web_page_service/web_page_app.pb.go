@@ -27,8 +27,8 @@ type Pages struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	DefaultPage string `protobuf:"bytes,1,opt,name=default_page,json=defaultPage,proto3" json:"default_page,omitempty"`
-	LoginPage   string `protobuf:"bytes,2,opt,name=login_page,json=loginPage,proto3" json:"login_page,omitempty"`
+	DefaultPage string `protobuf:"bytes,1,opt,name=default_page,json=defaultPage,proto3" json:"default_page"`
+	LoginPage   string `protobuf:"bytes,2,opt,name=login_page,json=loginPage,proto3" json:"login_page"`
 }
 
 func (x *Pages) Reset() {
@@ -82,15 +82,15 @@ type App struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id            string           `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	ProjectId     string           `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	Name          string           `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
-	Logo          string           `protobuf:"bytes,4,opt,name=logo,proto3" json:"logo,omitempty"`
-	SubDomain     string           `protobuf:"bytes,5,opt,name=sub_domain,json=subDomain,proto3" json:"sub_domain,omitempty"`
-	EnvironmentId string           `protobuf:"bytes,6,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
-	ResourceId    string           `protobuf:"bytes,7,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
-	Pages         *Pages           `protobuf:"bytes,8,opt,name=pages,proto3" json:"pages,omitempty"`
-	Routes        *structpb.Struct `protobuf:"bytes,9,opt,name=Routes,proto3" json:"Routes,omitempty"`
+	Id            string           `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	ProjectId     string           `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	Name          string           `protobuf:"bytes,3,opt,name=name,proto3" json:"name"`
+	Logo          string           `protobuf:"bytes,4,opt,name=logo,proto3" json:"logo"`
+	SubDomain     string           `protobuf:"bytes,5,opt,name=sub_domain,json=subDomain,proto3" json:"sub_domain"`
+	EnvironmentId string           `protobuf:"bytes,6,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
+	ResourceId    string           `protobuf:"bytes,7,opt,name=resource_id,json=resourceId,proto3" json:"resource_id"`
+	Pages         *Pages           `protobuf:"bytes,8,opt,name=pages,proto3" json:"pages"`
+	Routes        *structpb.Struct `protobuf:"bytes,9,opt,name=Routes,proto3" json:"Routes"`
 }
 
 func (x *App) Reset() {
@@ -193,14 +193,14 @@ type CreateAppReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId     string           `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	Name          string           `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Logo          string           `protobuf:"bytes,3,opt,name=logo,proto3" json:"logo,omitempty"`
-	SubDomain     string           `protobuf:"bytes,4,opt,name=sub_domain,json=subDomain,proto3" json:"sub_domain,omitempty"`
-	EnvironmentId string           `protobuf:"bytes,5,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
-	ResourceId    string           `protobuf:"bytes,6,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
-	Pages         *Pages           `protobuf:"bytes,7,opt,name=pages,proto3" json:"pages,omitempty"`
-	Routes        *structpb.Struct `protobuf:"bytes,8,opt,name=Routes,proto3" json:"Routes,omitempty"`
+	ProjectId     string           `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	Name          string           `protobuf:"bytes,2,opt,name=name,proto3" json:"name"`
+	Logo          string           `protobuf:"bytes,3,opt,name=logo,proto3" json:"logo"`
+	SubDomain     string           `protobuf:"bytes,4,opt,name=sub_domain,json=subDomain,proto3" json:"sub_domain"`
+	EnvironmentId string           `protobuf:"bytes,5,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
+	ResourceId    string           `protobuf:"bytes,6,opt,name=resource_id,json=resourceId,proto3" json:"resource_id"`
+	Pages         *Pages           `protobuf:"bytes,7,opt,name=pages,proto3" json:"pages"`
+	Routes        *structpb.Struct `protobuf:"bytes,8,opt,name=Routes,proto3" json:"Routes"`
 }
 
 func (x *CreateAppReq) Reset() {
@@ -296,11 +296,11 @@ type GetListAppReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId     string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	Limit         int32  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
-	Offset        int32  `protobuf:"varint,3,opt,name=offset,proto3" json:"offset,omitempty"`
-	EnvironmentId string `protobuf:"bytes,4,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
-	ResourceId    string `protobuf:"bytes,5,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
+	ProjectId     string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	Limit         int32  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit"`
+	Offset        int32  `protobuf:"varint,3,opt,name=offset,proto3" json:"offset"`
+	EnvironmentId string `protobuf:"bytes,4,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
+	ResourceId    string `protobuf:"bytes,5,opt,name=resource_id,json=resourceId,proto3" json:"resource_id"`
 }
 
 func (x *GetListAppReq) Reset() {
@@ -375,8 +375,8 @@ type GetListAppRes struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Apps  []*App `protobuf:"bytes,1,rep,name=Apps,proto3" json:"Apps,omitempty"`
-	Count int32  `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	Apps  []*App `protobuf:"bytes,1,rep,name=Apps,proto3" json:"Apps"`
+	Count int32  `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
 }
 
 func (x *GetListAppRes) Reset() {
@@ -430,10 +430,10 @@ type GetSingleAppReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id            string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	ProjectId     string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	EnvironmentId string `protobuf:"bytes,3,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
-	ResourceId    string `protobuf:"bytes,4,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
+	Id            string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	ProjectId     string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	EnvironmentId string `protobuf:"bytes,3,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
+	ResourceId    string `protobuf:"bytes,4,opt,name=resource_id,json=resourceId,proto3" json:"resource_id"`
 }
 
 func (x *GetSingleAppReq) Reset() {
@@ -501,8 +501,8 @@ type GetSingleAppRes struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Apps  []*App `protobuf:"bytes,1,rep,name=Apps,proto3" json:"Apps,omitempty"`
-	Count int32  `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	Apps  []*App `protobuf:"bytes,1,rep,name=Apps,proto3" json:"Apps"`
+	Count int32  `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
 }
 
 func (x *GetSingleAppRes) Reset() {
@@ -556,15 +556,15 @@ type UpdateAppReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id            string           `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	ProjectId     string           `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	Name          string           `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
-	Logo          string           `protobuf:"bytes,4,opt,name=logo,proto3" json:"logo,omitempty"`
-	SubDomain     string           `protobuf:"bytes,5,opt,name=sub_domain,json=subDomain,proto3" json:"sub_domain,omitempty"`
-	EnvironmentId string           `protobuf:"bytes,6,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
-	ResourceId    string           `protobuf:"bytes,7,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
-	Pages         *Pages           `protobuf:"bytes,8,opt,name=pages,proto3" json:"pages,omitempty"`
-	Routes        *structpb.Struct `protobuf:"bytes,9,opt,name=Routes,proto3" json:"Routes,omitempty"`
+	Id            string           `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	ProjectId     string           `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	Name          string           `protobuf:"bytes,3,opt,name=name,proto3" json:"name"`
+	Logo          string           `protobuf:"bytes,4,opt,name=logo,proto3" json:"logo"`
+	SubDomain     string           `protobuf:"bytes,5,opt,name=sub_domain,json=subDomain,proto3" json:"sub_domain"`
+	EnvironmentId string           `protobuf:"bytes,6,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
+	ResourceId    string           `protobuf:"bytes,7,opt,name=resource_id,json=resourceId,proto3" json:"resource_id"`
+	Pages         *Pages           `protobuf:"bytes,8,opt,name=pages,proto3" json:"pages"`
+	Routes        *structpb.Struct `protobuf:"bytes,9,opt,name=Routes,proto3" json:"Routes"`
 }
 
 func (x *UpdateAppReq) Reset() {
@@ -667,10 +667,10 @@ type DeleteAppReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id            string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	ProjectId     string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	EnvironmentId string `protobuf:"bytes,3,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
-	ResourceId    string `protobuf:"bytes,4,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
+	Id            string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	ProjectId     string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	EnvironmentId string `protobuf:"bytes,3,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
+	ResourceId    string `protobuf:"bytes,4,opt,name=resource_id,json=resourceId,proto3" json:"resource_id"`
 }
 
 func (x *DeleteAppReq) Reset() {

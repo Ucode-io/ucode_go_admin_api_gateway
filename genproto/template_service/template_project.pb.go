@@ -79,13 +79,13 @@ type RegisterProjectRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	K8SNamespace string                              `protobuf:"bytes,1,opt,name=k8s_namespace,json=k8sNamespace,proto3" json:"k8s_namespace,omitempty"`
-	ProjectId    string                              `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	SecretPath   string                              `protobuf:"bytes,3,opt,name=secret_path,json=secretPath,proto3" json:"secret_path,omitempty"`
-	Credentials  *RegisterProjectRequest_Credentials `protobuf:"bytes,4,opt,name=credentials,proto3" json:"credentials,omitempty"`
-	UserId       string                              `protobuf:"bytes,5,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	ResourceId   string                              `protobuf:"bytes,6,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
-	ResourceType ResourceType                        `protobuf:"varint,8,opt,name=resource_type,json=resourceType,proto3,enum=template_service.ResourceType" json:"resource_type,omitempty"`
+	K8SNamespace string                              `protobuf:"bytes,1,opt,name=k8s_namespace,json=k8sNamespace,proto3" json:"k8s_namespace"`
+	ProjectId    string                              `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	SecretPath   string                              `protobuf:"bytes,3,opt,name=secret_path,json=secretPath,proto3" json:"secret_path"`
+	Credentials  *RegisterProjectRequest_Credentials `protobuf:"bytes,4,opt,name=credentials,proto3" json:"credentials"`
+	UserId       string                              `protobuf:"bytes,5,opt,name=user_id,json=userId,proto3" json:"user_id"`
+	ResourceId   string                              `protobuf:"bytes,6,opt,name=resource_id,json=resourceId,proto3" json:"resource_id"`
+	ResourceType ResourceType                        `protobuf:"varint,8,opt,name=resource_type,json=resourceType,proto3,enum=template_service.ResourceType" json:"resource_type"`
 }
 
 func (x *RegisterProjectRequest) Reset() {
@@ -174,8 +174,8 @@ type DeregisterProjectRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	K8SNamespace string `protobuf:"bytes,1,opt,name=k8s_namespace,json=k8sNamespace,proto3" json:"k8s_namespace,omitempty"`
-	ProjectId    string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	K8SNamespace string `protobuf:"bytes,1,opt,name=k8s_namespace,json=k8sNamespace,proto3" json:"k8s_namespace"`
+	ProjectId    string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *DeregisterProjectRequest) Reset() {
@@ -229,9 +229,9 @@ type RegisterDeregisterProjectResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	K8SNamespace string `protobuf:"bytes,1,opt,name=k8s_namespace,json=k8sNamespace,proto3" json:"k8s_namespace,omitempty"`
-	HasError     bool   `protobuf:"varint,2,opt,name=has_error,json=hasError,proto3" json:"has_error,omitempty"`
-	ErrorMessage string `protobuf:"bytes,3,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
+	K8SNamespace string `protobuf:"bytes,1,opt,name=k8s_namespace,json=k8sNamespace,proto3" json:"k8s_namespace"`
+	HasError     bool   `protobuf:"varint,2,opt,name=has_error,json=hasError,proto3" json:"has_error"`
+	ErrorMessage string `protobuf:"bytes,3,opt,name=error_message,json=errorMessage,proto3" json:"error_message"`
 }
 
 func (x *RegisterDeregisterProjectResponse) Reset() {
@@ -292,7 +292,7 @@ type RegisterManyProjectsRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Projects []*RegisterProjectRequest `protobuf:"bytes,1,rep,name=projects,proto3" json:"projects,omitempty"`
+	Projects []*RegisterProjectRequest `protobuf:"bytes,1,rep,name=projects,proto3" json:"projects"`
 }
 
 func (x *RegisterManyProjectsRequest) Reset() {
@@ -339,7 +339,7 @@ type RegisterManyProjectsResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Projects map[string]*RegisterDeregisterProjectResponse `protobuf:"bytes,1,rep,name=projects,proto3" json:"projects,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	Projects map[string]*RegisterDeregisterProjectResponse `protobuf:"bytes,1,rep,name=projects,proto3" json:"projects" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 }
 
 func (x *RegisterManyProjectsResponse) Reset() {
@@ -386,7 +386,7 @@ type DeregisterManyProjectsRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Projects []*DeregisterProjectRequest `protobuf:"bytes,1,rep,name=projects,proto3" json:"projects,omitempty"`
+	Projects []*DeregisterProjectRequest `protobuf:"bytes,1,rep,name=projects,proto3" json:"projects"`
 }
 
 func (x *DeregisterManyProjectsRequest) Reset() {
@@ -433,7 +433,7 @@ type DeregisterManyProjectsResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Projects map[string]*RegisterDeregisterProjectResponse `protobuf:"bytes,1,rep,name=projects,proto3" json:"projects,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	Projects map[string]*RegisterDeregisterProjectResponse `protobuf:"bytes,1,rep,name=projects,proto3" json:"projects" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 }
 
 func (x *DeregisterManyProjectsResponse) Reset() {
@@ -480,11 +480,11 @@ type RegisterProjectRequest_Credentials struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Host     string `protobuf:"bytes,1,opt,name=host,proto3" json:"host,omitempty"`
-	Port     string `protobuf:"bytes,2,opt,name=port,proto3" json:"port,omitempty"`
-	Username string `protobuf:"bytes,3,opt,name=username,proto3" json:"username,omitempty"`
-	Password string `protobuf:"bytes,4,opt,name=password,proto3" json:"password,omitempty"`
-	Database string `protobuf:"bytes,5,opt,name=database,proto3" json:"database,omitempty"`
+	Host     string `protobuf:"bytes,1,opt,name=host,proto3" json:"host"`
+	Port     string `protobuf:"bytes,2,opt,name=port,proto3" json:"port"`
+	Username string `protobuf:"bytes,3,opt,name=username,proto3" json:"username"`
+	Password string `protobuf:"bytes,4,opt,name=password,proto3" json:"password"`
+	Database string `protobuf:"bytes,5,opt,name=database,proto3" json:"database"`
 }
 
 func (x *RegisterProjectRequest_Credentials) Reset() {

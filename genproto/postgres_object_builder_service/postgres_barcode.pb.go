@@ -25,8 +25,8 @@ type BarcodeGenerateReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	TableSlug string `protobuf:"bytes,1,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
-	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	TableSlug string `protobuf:"bytes,1,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *BarcodeGenerateReq) Reset() {
@@ -80,7 +80,7 @@ type BarcodeGenerateRes struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Number string `protobuf:"bytes,1,opt,name=number,proto3" json:"number,omitempty"`
+	Number string `protobuf:"bytes,1,opt,name=number,proto3" json:"number"`
 }
 
 func (x *BarcodeGenerateRes) Reset() {
@@ -127,9 +127,9 @@ type CodeGenerateReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	TableSlug string `protobuf:"bytes,1,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
-	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	FieldId   string `protobuf:"bytes,3,opt,name=field_id,json=fieldId,proto3" json:"field_id,omitempty"`
+	TableSlug string `protobuf:"bytes,1,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	FieldId   string `protobuf:"bytes,3,opt,name=field_id,json=fieldId,proto3" json:"field_id"`
 }
 
 func (x *CodeGenerateReq) Reset() {
@@ -190,7 +190,7 @@ type CodeGenerateRes struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Code string `protobuf:"bytes,1,opt,name=code,proto3" json:"code,omitempty"`
+	Code string `protobuf:"bytes,1,opt,name=code,proto3" json:"code"`
 }
 
 func (x *CodeGenerateRes) Reset() {

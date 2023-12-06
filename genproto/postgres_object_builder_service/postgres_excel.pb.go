@@ -26,8 +26,8 @@ type ExcelReadRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *ExcelReadRequest) Reset() {
@@ -81,10 +81,10 @@ type ExcelToDbRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string           `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	TableSlug string           `protobuf:"bytes,2,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
-	Data      *structpb.Struct `protobuf:"bytes,3,opt,name=data,proto3" json:"data,omitempty"`
-	ProjectId string           `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Id        string           `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	TableSlug string           `protobuf:"bytes,2,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
+	Data      *structpb.Struct `protobuf:"bytes,3,opt,name=data,proto3" json:"data"`
+	ProjectId string           `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *ExcelToDbRequest) Reset() {
@@ -190,7 +190,7 @@ type ExcelReadResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Rows []string `protobuf:"bytes,1,rep,name=rows,proto3" json:"rows,omitempty"`
+	Rows []string `protobuf:"bytes,1,rep,name=rows,proto3" json:"rows"`
 }
 
 func (x *ExcelReadResponse) Reset() {
@@ -237,7 +237,7 @@ type Row struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Column []string `protobuf:"bytes,1,rep,name=column,proto3" json:"column,omitempty"`
+	Column []string `protobuf:"bytes,1,rep,name=column,proto3" json:"column"`
 }
 
 func (x *Row) Reset() {

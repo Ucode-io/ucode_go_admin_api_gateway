@@ -26,16 +26,16 @@ type CreateFileRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id               string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Title            string   `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
-	Description      string   `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	Tags             []string `protobuf:"bytes,4,rep,name=tags,proto3" json:"tags,omitempty"`
-	Storage          string   `protobuf:"bytes,5,opt,name=storage,proto3" json:"storage,omitempty"`
-	FileNameDisk     string   `protobuf:"bytes,6,opt,name=file_name_disk,json=fileNameDisk,proto3" json:"file_name_disk,omitempty"`
-	FileNameDownload string   `protobuf:"bytes,7,opt,name=file_name_download,json=fileNameDownload,proto3" json:"file_name_download,omitempty"`
-	Link             string   `protobuf:"bytes,8,opt,name=link,proto3" json:"link,omitempty"`
-	FileSize         int64    `protobuf:"varint,9,opt,name=file_size,json=fileSize,proto3" json:"file_size,omitempty"`
-	ProjectId        string   `protobuf:"bytes,10,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Id               string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Title            string   `protobuf:"bytes,2,opt,name=title,proto3" json:"title"`
+	Description      string   `protobuf:"bytes,3,opt,name=description,proto3" json:"description"`
+	Tags             []string `protobuf:"bytes,4,rep,name=tags,proto3" json:"tags"`
+	Storage          string   `protobuf:"bytes,5,opt,name=storage,proto3" json:"storage"`
+	FileNameDisk     string   `protobuf:"bytes,6,opt,name=file_name_disk,json=fileNameDisk,proto3" json:"file_name_disk"`
+	FileNameDownload string   `protobuf:"bytes,7,opt,name=file_name_download,json=fileNameDownload,proto3" json:"file_name_download"`
+	Link             string   `protobuf:"bytes,8,opt,name=link,proto3" json:"link"`
+	FileSize         int64    `protobuf:"varint,9,opt,name=file_size,json=fileSize,proto3" json:"file_size"`
+	ProjectId        string   `protobuf:"bytes,10,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *CreateFileRequest) Reset() {
@@ -145,16 +145,16 @@ type File struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id               string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Title            string   `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
-	Description      string   `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	Tags             []string `protobuf:"bytes,4,rep,name=tags,proto3" json:"tags,omitempty"`
-	Storage          string   `protobuf:"bytes,5,opt,name=storage,proto3" json:"storage,omitempty"`
-	FileNameDisk     string   `protobuf:"bytes,6,opt,name=file_name_disk,json=fileNameDisk,proto3" json:"file_name_disk,omitempty"`
-	FileNameDownload string   `protobuf:"bytes,7,opt,name=file_name_download,json=fileNameDownload,proto3" json:"file_name_download,omitempty"`
-	Link             string   `protobuf:"bytes,8,opt,name=link,proto3" json:"link,omitempty"`
-	FileSize         int64    `protobuf:"varint,9,opt,name=file_size,json=fileSize,proto3" json:"file_size,omitempty"`
-	ProjectId        string   `protobuf:"bytes,10,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Id               string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Title            string   `protobuf:"bytes,2,opt,name=title,proto3" json:"title"`
+	Description      string   `protobuf:"bytes,3,opt,name=description,proto3" json:"description"`
+	Tags             []string `protobuf:"bytes,4,rep,name=tags,proto3" json:"tags"`
+	Storage          string   `protobuf:"bytes,5,opt,name=storage,proto3" json:"storage"`
+	FileNameDisk     string   `protobuf:"bytes,6,opt,name=file_name_disk,json=fileNameDisk,proto3" json:"file_name_disk"`
+	FileNameDownload string   `protobuf:"bytes,7,opt,name=file_name_download,json=fileNameDownload,proto3" json:"file_name_download"`
+	Link             string   `protobuf:"bytes,8,opt,name=link,proto3" json:"link"`
+	FileSize         int64    `protobuf:"varint,9,opt,name=file_size,json=fileSize,proto3" json:"file_size"`
+	ProjectId        string   `protobuf:"bytes,10,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *File) Reset() {
@@ -264,8 +264,8 @@ type GetAllFilesResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Files []*File `protobuf:"bytes,1,rep,name=files,proto3" json:"files,omitempty"`
-	Count int32   `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	Files []*File `protobuf:"bytes,1,rep,name=files,proto3" json:"files"`
+	Count int32   `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
 }
 
 func (x *GetAllFilesResponse) Reset() {
@@ -319,10 +319,10 @@ type GetAllFilesRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Search     string `protobuf:"bytes,1,opt,name=search,proto3" json:"search,omitempty"`
-	Sort       string `protobuf:"bytes,2,opt,name=sort,proto3" json:"sort,omitempty"`
-	ProjectId  string `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	FolderName string `protobuf:"bytes,4,opt,name=folder_name,json=folderName,proto3" json:"folder_name,omitempty"`
+	Search     string `protobuf:"bytes,1,opt,name=search,proto3" json:"search"`
+	Sort       string `protobuf:"bytes,2,opt,name=sort,proto3" json:"sort"`
+	ProjectId  string `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	FolderName string `protobuf:"bytes,4,opt,name=folder_name,json=folderName,proto3" json:"folder_name"`
 }
 
 func (x *GetAllFilesRequest) Reset() {
@@ -390,8 +390,8 @@ type FilePrimaryKey struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *FilePrimaryKey) Reset() {
@@ -445,8 +445,8 @@ type FileDeleteRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Ids       []string `protobuf:"bytes,1,rep,name=ids,proto3" json:"ids,omitempty"`
-	ProjectId string   `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Ids       []string `protobuf:"bytes,1,rep,name=ids,proto3" json:"ids"`
+	ProjectId string   `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *FileDeleteRequest) Reset() {

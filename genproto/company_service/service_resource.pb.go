@@ -25,16 +25,16 @@ type ServiceResourceModel struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id                    string       `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	ServiceType           ServiceType  `protobuf:"varint,2,opt,name=service_type,json=serviceType,proto3,enum=company_service.ServiceType" json:"service_type,omitempty"`
-	ProjectId             string       `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	Title                 string       `protobuf:"bytes,4,opt,name=title,proto3" json:"title,omitempty"`
-	Description           string       `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
-	ResourceEnvironmentId string       `protobuf:"bytes,6,opt,name=resource_environment_id,json=resourceEnvironmentId,proto3" json:"resource_environment_id,omitempty"`
-	ResourceId            string       `protobuf:"bytes,7,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
-	EnvironmentId         string       `protobuf:"bytes,8,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
-	ResourceType          ResourceType `protobuf:"varint,9,opt,name=resource_type,json=resourceType,proto3,enum=company_service.ResourceType" json:"resource_type,omitempty"`
-	NodeType              string       `protobuf:"bytes,10,opt,name=node_type,json=nodeType,proto3" json:"node_type,omitempty"`
+	Id                    string       `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	ServiceType           ServiceType  `protobuf:"varint,2,opt,name=service_type,json=serviceType,proto3,enum=company_service.ServiceType" json:"service_type"`
+	ProjectId             string       `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	Title                 string       `protobuf:"bytes,4,opt,name=title,proto3" json:"title"`
+	Description           string       `protobuf:"bytes,5,opt,name=description,proto3" json:"description"`
+	ResourceEnvironmentId string       `protobuf:"bytes,6,opt,name=resource_environment_id,json=resourceEnvironmentId,proto3" json:"resource_environment_id"`
+	ResourceId            string       `protobuf:"bytes,7,opt,name=resource_id,json=resourceId,proto3" json:"resource_id"`
+	EnvironmentId         string       `protobuf:"bytes,8,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
+	ResourceType          ResourceType `protobuf:"varint,9,opt,name=resource_type,json=resourceType,proto3,enum=company_service.ResourceType" json:"resource_type"`
+	NodeType              string       `protobuf:"bytes,10,opt,name=node_type,json=nodeType,proto3" json:"node_type"`
 }
 
 func (x *ServiceResourceModel) Reset() {
@@ -144,9 +144,9 @@ type GetListServiceResourceReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId     string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	EnvironmentId string `protobuf:"bytes,2,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
-	ResourceId    string `protobuf:"bytes,3,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
+	ProjectId     string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	EnvironmentId string `protobuf:"bytes,2,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
+	ResourceId    string `protobuf:"bytes,3,opt,name=resource_id,json=resourceId,proto3" json:"resource_id"`
 }
 
 func (x *GetListServiceResourceReq) Reset() {
@@ -207,9 +207,9 @@ type GetListServiceResourceRes struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ServiceResources map[string]*ServiceResourceModel `protobuf:"bytes,1,rep,name=service_resources,json=serviceResources,proto3" json:"service_resources,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
-	Resources        []*Resource                      `protobuf:"bytes,2,rep,name=resources,proto3" json:"resources,omitempty"`
-	ResourceTypes    map[int32]string                 `protobuf:"bytes,3,rep,name=resource_types,json=resourceTypes,proto3" json:"resource_types,omitempty" protobuf_key:"varint,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	ServiceResources map[string]*ServiceResourceModel `protobuf:"bytes,1,rep,name=service_resources,json=serviceResources,proto3" json:"service_resources" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	Resources        []*Resource                      `protobuf:"bytes,2,rep,name=resources,proto3" json:"resources"`
+	ResourceTypes    map[int32]string                 `protobuf:"bytes,3,rep,name=resource_types,json=resourceTypes,proto3" json:"resource_types" protobuf_key:"varint,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 }
 
 func (x *GetListServiceResourceRes) Reset() {
@@ -270,10 +270,10 @@ type GetSingleServiceResourceReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id            string      `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	ProjectId     string      `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	EnvironmentId string      `protobuf:"bytes,3,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
-	ServiceType   ServiceType `protobuf:"varint,4,opt,name=service_type,json=serviceType,proto3,enum=company_service.ServiceType" json:"service_type,omitempty"`
+	Id            string      `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	ProjectId     string      `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	EnvironmentId string      `protobuf:"bytes,3,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
+	ServiceType   ServiceType `protobuf:"varint,4,opt,name=service_type,json=serviceType,proto3,enum=company_service.ServiceType" json:"service_type"`
 }
 
 func (x *GetSingleServiceResourceReq) Reset() {
@@ -341,9 +341,9 @@ type UpdateServiceResourceReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ServiceResources []*ServiceResourceModel `protobuf:"bytes,1,rep,name=service_resources,json=serviceResources,proto3" json:"service_resources,omitempty"`
-	ProjectId        string                  `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	EnvironmentId    string                  `protobuf:"bytes,3,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
+	ServiceResources []*ServiceResourceModel `protobuf:"bytes,1,rep,name=service_resources,json=serviceResources,proto3" json:"service_resources"`
+	ProjectId        string                  `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	EnvironmentId    string                  `protobuf:"bytes,3,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
 }
 
 func (x *UpdateServiceResourceReq) Reset() {
@@ -404,7 +404,7 @@ type UpdateServiceResourceRes struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	RowsAffected int32 `protobuf:"varint,1,opt,name=rows_affected,json=rowsAffected,proto3" json:"rows_affected,omitempty"`
+	RowsAffected int32 `protobuf:"varint,1,opt,name=rows_affected,json=rowsAffected,proto3" json:"rows_affected"`
 }
 
 func (x *UpdateServiceResourceRes) Reset() {
@@ -451,8 +451,8 @@ type GetListServiceResourceRes_ResourceTypeList struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id   int32  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Id   int32  `protobuf:"varint,1,opt,name=id,proto3" json:"id"`
+	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name"`
 }
 
 func (x *GetListServiceResourceRes_ResourceTypeList) Reset() {

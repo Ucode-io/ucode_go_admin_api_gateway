@@ -27,27 +27,27 @@ type FacturaMongo struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Version               int32                  `protobuf:"varint,1,opt,name=Version,proto3" json:"Version,omitempty"`
-	FacturaType           int32                  `protobuf:"varint,2,opt,name=FacturaType,proto3" json:"FacturaType,omitempty"`
-	SingleSidedType       int32                  `protobuf:"varint,3,opt,name=SingleSidedType,proto3" json:"SingleSidedType,omitempty"`
-	HasMarking            bool                   `protobuf:"varint,4,opt,name=HasMarking,proto3" json:"HasMarking,omitempty"`
-	FacturaId             string                 `protobuf:"bytes,5,opt,name=FacturaId,proto3" json:"FacturaId,omitempty"`
-	FacturaDoc            *FacturaDoc            `protobuf:"bytes,6,opt,name=FacturaDoc,proto3" json:"FacturaDoc,omitempty"`
-	OldFacturaDoc         *OldFacturaDoc         `protobuf:"bytes,7,opt,name=OldFacturaDoc,proto3" json:"OldFacturaDoc,omitempty"`
-	ContractDoc           *ContractDoc           `protobuf:"bytes,8,opt,name=ContractDoc,proto3" json:"ContractDoc,omitempty"`
-	FacturaEmpowermentDoc *FacturaEmpowermentDoc `protobuf:"bytes,9,opt,name=FacturaEmpowermentDoc,proto3" json:"FacturaEmpowermentDoc,omitempty"`
-	ItemReleasedDoc       *ItemReleasedDoc       `protobuf:"bytes,10,opt,name=ItemReleasedDoc,proto3" json:"ItemReleasedDoc,omitempty"`
-	SellerTin             string                 `protobuf:"bytes,11,opt,name=SellerTin,proto3" json:"SellerTin,omitempty"`
-	BuyerTin              string                 `protobuf:"bytes,12,opt,name=BuyerTin,proto3" json:"BuyerTin,omitempty"`
-	Seller                *Client                `protobuf:"bytes,13,opt,name=Seller,proto3" json:"Seller,omitempty"`
-	Buyer                 *Client                `protobuf:"bytes,14,opt,name=Buyer,proto3" json:"Buyer,omitempty"`
-	ForeignCompany        *ForeignCompany        `protobuf:"bytes,15,opt,name=ForeignCompany,proto3" json:"ForeignCompany,omitempty"`
-	ProductList           *ProductListFac        `protobuf:"bytes,16,opt,name=ProductList,proto3" json:"ProductList,omitempty"`
-	IncomeType            int32                  `protobuf:"varint,17,opt,name=IncomeType,proto3" json:"IncomeType,omitempty"`
-	LotId                 string                 `protobuf:"bytes,18,opt,name=LotId,proto3" json:"LotId,omitempty"`
-	ContractId            string                 `protobuf:"bytes,19,opt,name=ContractId,proto3" json:"ContractId,omitempty"`
-	WaybillId             string                 `protobuf:"bytes,20,opt,name=WaybillId,proto3" json:"WaybillId,omitempty"`
-	Status                string                 `protobuf:"bytes,21,opt,name=Status,proto3" json:"Status,omitempty"`
+	Version               int32                  `protobuf:"varint,1,opt,name=Version,proto3" json:"Version"`
+	FacturaType           int32                  `protobuf:"varint,2,opt,name=FacturaType,proto3" json:"FacturaType"`
+	SingleSidedType       int32                  `protobuf:"varint,3,opt,name=SingleSidedType,proto3" json:"SingleSidedType"`
+	HasMarking            bool                   `protobuf:"varint,4,opt,name=HasMarking,proto3" json:"HasMarking"`
+	FacturaId             string                 `protobuf:"bytes,5,opt,name=FacturaId,proto3" json:"FacturaId"`
+	FacturaDoc            *FacturaDoc            `protobuf:"bytes,6,opt,name=FacturaDoc,proto3" json:"FacturaDoc"`
+	OldFacturaDoc         *OldFacturaDoc         `protobuf:"bytes,7,opt,name=OldFacturaDoc,proto3" json:"OldFacturaDoc"`
+	ContractDoc           *ContractDoc           `protobuf:"bytes,8,opt,name=ContractDoc,proto3" json:"ContractDoc"`
+	FacturaEmpowermentDoc *FacturaEmpowermentDoc `protobuf:"bytes,9,opt,name=FacturaEmpowermentDoc,proto3" json:"FacturaEmpowermentDoc"`
+	ItemReleasedDoc       *ItemReleasedDoc       `protobuf:"bytes,10,opt,name=ItemReleasedDoc,proto3" json:"ItemReleasedDoc"`
+	SellerTin             string                 `protobuf:"bytes,11,opt,name=SellerTin,proto3" json:"SellerTin"`
+	BuyerTin              string                 `protobuf:"bytes,12,opt,name=BuyerTin,proto3" json:"BuyerTin"`
+	Seller                *Client                `protobuf:"bytes,13,opt,name=Seller,proto3" json:"Seller"`
+	Buyer                 *Client                `protobuf:"bytes,14,opt,name=Buyer,proto3" json:"Buyer"`
+	ForeignCompany        *ForeignCompany        `protobuf:"bytes,15,opt,name=ForeignCompany,proto3" json:"ForeignCompany"`
+	ProductList           *ProductListFac        `protobuf:"bytes,16,opt,name=ProductList,proto3" json:"ProductList"`
+	IncomeType            int32                  `protobuf:"varint,17,opt,name=IncomeType,proto3" json:"IncomeType"`
+	LotId                 string                 `protobuf:"bytes,18,opt,name=LotId,proto3" json:"LotId"`
+	ContractId            string                 `protobuf:"bytes,19,opt,name=ContractId,proto3" json:"ContractId"`
+	WaybillId             string                 `protobuf:"bytes,20,opt,name=WaybillId,proto3" json:"WaybillId"`
+	Status                string                 `protobuf:"bytes,21,opt,name=Status,proto3" json:"Status"`
 }
 
 func (x *FacturaMongo) Reset() {
@@ -234,16 +234,16 @@ type Factura struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Factura    *FacturaMongo `protobuf:"bytes,1,opt,name=Factura,proto3" json:"Factura,omitempty"`
-	PdfUrlUz   string        `protobuf:"bytes,2,opt,name=PdfUrlUz,proto3" json:"PdfUrlUz,omitempty"`
-	PdfUrlRu   string        `protobuf:"bytes,3,opt,name=PdfUrlRu,proto3" json:"PdfUrlRu,omitempty"`
-	Status     string        `protobuf:"bytes,4,opt,name=Status,proto3" json:"Status,omitempty"`
-	PageStatus string        `protobuf:"bytes,5,opt,name=PageStatus,proto3" json:"PageStatus,omitempty"`
-	CreatedAt  string        `protobuf:"bytes,6,opt,name=CreatedAt,proto3" json:"CreatedAt,omitempty"`
-	UpdatedAt  string        `protobuf:"bytes,7,opt,name=UpdatedAt,proto3" json:"UpdatedAt,omitempty"`
-	Sign       string        `protobuf:"bytes,8,opt,name=Sign,proto3" json:"Sign,omitempty"`
-	HtmlUz     string        `protobuf:"bytes,9,opt,name=HtmlUz,proto3" json:"HtmlUz,omitempty"`
-	HtmlRu     string        `protobuf:"bytes,10,opt,name=HtmlRu,proto3" json:"HtmlRu,omitempty"`
+	Factura    *FacturaMongo `protobuf:"bytes,1,opt,name=Factura,proto3" json:"Factura"`
+	PdfUrlUz   string        `protobuf:"bytes,2,opt,name=PdfUrlUz,proto3" json:"PdfUrlUz"`
+	PdfUrlRu   string        `protobuf:"bytes,3,opt,name=PdfUrlRu,proto3" json:"PdfUrlRu"`
+	Status     string        `protobuf:"bytes,4,opt,name=Status,proto3" json:"Status"`
+	PageStatus string        `protobuf:"bytes,5,opt,name=PageStatus,proto3" json:"PageStatus"`
+	CreatedAt  string        `protobuf:"bytes,6,opt,name=CreatedAt,proto3" json:"CreatedAt"`
+	UpdatedAt  string        `protobuf:"bytes,7,opt,name=UpdatedAt,proto3" json:"UpdatedAt"`
+	Sign       string        `protobuf:"bytes,8,opt,name=Sign,proto3" json:"Sign"`
+	HtmlUz     string        `protobuf:"bytes,9,opt,name=HtmlUz,proto3" json:"HtmlUz"`
+	HtmlRu     string        `protobuf:"bytes,10,opt,name=HtmlRu,proto3" json:"HtmlRu"`
 }
 
 func (x *Factura) Reset() {
@@ -353,8 +353,8 @@ type FacturaDoc struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	FacturaNo   string `protobuf:"bytes,1,opt,name=FacturaNo,proto3" json:"FacturaNo,omitempty"`
-	FacturaDate string `protobuf:"bytes,2,opt,name=FacturaDate,proto3" json:"FacturaDate,omitempty"`
+	FacturaNo   string `protobuf:"bytes,1,opt,name=FacturaNo,proto3" json:"FacturaNo"`
+	FacturaDate string `protobuf:"bytes,2,opt,name=FacturaDate,proto3" json:"FacturaDate"`
 }
 
 func (x *FacturaDoc) Reset() {
@@ -408,9 +408,9 @@ type OldFacturaDoc struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	OldFacturaId   string `protobuf:"bytes,1,opt,name=OldFacturaId,proto3" json:"OldFacturaId,omitempty"`
-	OldFacturaNo   string `protobuf:"bytes,2,opt,name=OldFacturaNo,proto3" json:"OldFacturaNo,omitempty"`
-	OldFacturaDate string `protobuf:"bytes,3,opt,name=OldFacturaDate,proto3" json:"OldFacturaDate,omitempty"`
+	OldFacturaId   string `protobuf:"bytes,1,opt,name=OldFacturaId,proto3" json:"OldFacturaId"`
+	OldFacturaNo   string `protobuf:"bytes,2,opt,name=OldFacturaNo,proto3" json:"OldFacturaNo"`
+	OldFacturaDate string `protobuf:"bytes,3,opt,name=OldFacturaDate,proto3" json:"OldFacturaDate"`
 }
 
 func (x *OldFacturaDoc) Reset() {
@@ -471,11 +471,11 @@ type FacturaEmpowermentDoc struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	EmpowermentNo          string `protobuf:"bytes,1,opt,name=EmpowermentNo,proto3" json:"EmpowermentNo,omitempty"`
-	EmpowermentDateOfIssue string `protobuf:"bytes,2,opt,name=EmpowermentDateOfIssue,proto3" json:"EmpowermentDateOfIssue,omitempty"`
-	AgentFacturaId         string `protobuf:"bytes,3,opt,name=AgentFacturaId,proto3" json:"AgentFacturaId,omitempty"`
-	AgentFio               string `protobuf:"bytes,4,opt,name=AgentFio,proto3" json:"AgentFio,omitempty"`
-	AgentPinfl             string `protobuf:"bytes,5,opt,name=AgentPinfl,proto3" json:"AgentPinfl,omitempty"`
+	EmpowermentNo          string `protobuf:"bytes,1,opt,name=EmpowermentNo,proto3" json:"EmpowermentNo"`
+	EmpowermentDateOfIssue string `protobuf:"bytes,2,opt,name=EmpowermentDateOfIssue,proto3" json:"EmpowermentDateOfIssue"`
+	AgentFacturaId         string `protobuf:"bytes,3,opt,name=AgentFacturaId,proto3" json:"AgentFacturaId"`
+	AgentFio               string `protobuf:"bytes,4,opt,name=AgentFio,proto3" json:"AgentFio"`
+	AgentPinfl             string `protobuf:"bytes,5,opt,name=AgentPinfl,proto3" json:"AgentPinfl"`
 }
 
 func (x *FacturaEmpowermentDoc) Reset() {
@@ -550,8 +550,8 @@ type ItemReleasedDoc struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ItemReleasedFio   string `protobuf:"bytes,1,opt,name=ItemReleasedFio,proto3" json:"ItemReleasedFio,omitempty"`
-	ItemReleasedPinfl string `protobuf:"bytes,2,opt,name=ItemReleasedPinfl,proto3" json:"ItemReleasedPinfl,omitempty"`
+	ItemReleasedFio   string `protobuf:"bytes,1,opt,name=ItemReleasedFio,proto3" json:"ItemReleasedFio"`
+	ItemReleasedPinfl string `protobuf:"bytes,2,opt,name=ItemReleasedPinfl,proto3" json:"ItemReleasedPinfl"`
 }
 
 func (x *ItemReleasedDoc) Reset() {
@@ -605,11 +605,11 @@ type ForeignCompany struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	CountryId string `protobuf:"bytes,1,opt,name=CountryId,proto3" json:"CountryId,omitempty"`
-	Name      string `protobuf:"bytes,2,opt,name=Name,proto3" json:"Name,omitempty"`
-	Address   string `protobuf:"bytes,3,opt,name=Address,proto3" json:"Address,omitempty"`
-	Bank      string `protobuf:"bytes,4,opt,name=Bank,proto3" json:"Bank,omitempty"`
-	Account   string `protobuf:"bytes,5,opt,name=Account,proto3" json:"Account,omitempty"`
+	CountryId string `protobuf:"bytes,1,opt,name=CountryId,proto3" json:"CountryId"`
+	Name      string `protobuf:"bytes,2,opt,name=Name,proto3" json:"Name"`
+	Address   string `protobuf:"bytes,3,opt,name=Address,proto3" json:"Address"`
+	Bank      string `protobuf:"bytes,4,opt,name=Bank,proto3" json:"Bank"`
+	Account   string `protobuf:"bytes,5,opt,name=Account,proto3" json:"Account"`
 }
 
 func (x *ForeignCompany) Reset() {
@@ -684,15 +684,15 @@ type ProductListFac struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	FacturaProductId     string             `protobuf:"bytes,1,opt,name=FacturaProductId,proto3" json:"FacturaProductId,omitempty"`
-	Tin                  string             `protobuf:"bytes,2,opt,name=Tin,proto3" json:"Tin,omitempty"`
-	HasExcise            bool               `protobuf:"varint,3,opt,name=HasExcise,proto3" json:"HasExcise,omitempty"`
-	HasVat               bool               `protobuf:"varint,4,opt,name=HasVat,proto3" json:"HasVat,omitempty"`
-	HasCommittent        bool               `protobuf:"varint,5,opt,name=HasCommittent,proto3" json:"HasCommittent,omitempty"`
-	HasLgota             bool               `protobuf:"varint,6,opt,name=HasLgota,proto3" json:"HasLgota,omitempty"`
-	HasMedical           bool               `protobuf:"varint,7,opt,name=HasMedical,proto3" json:"HasMedical,omitempty"`
-	HideReportCommittent bool               `protobuf:"varint,8,opt,name=HideReportCommittent,proto3" json:"HideReportCommittent,omitempty"`
-	Products             []*FacturaProducts `protobuf:"bytes,9,rep,name=Products,proto3" json:"Products,omitempty"`
+	FacturaProductId     string             `protobuf:"bytes,1,opt,name=FacturaProductId,proto3" json:"FacturaProductId"`
+	Tin                  string             `protobuf:"bytes,2,opt,name=Tin,proto3" json:"Tin"`
+	HasExcise            bool               `protobuf:"varint,3,opt,name=HasExcise,proto3" json:"HasExcise"`
+	HasVat               bool               `protobuf:"varint,4,opt,name=HasVat,proto3" json:"HasVat"`
+	HasCommittent        bool               `protobuf:"varint,5,opt,name=HasCommittent,proto3" json:"HasCommittent"`
+	HasLgota             bool               `protobuf:"varint,6,opt,name=HasLgota,proto3" json:"HasLgota"`
+	HasMedical           bool               `protobuf:"varint,7,opt,name=HasMedical,proto3" json:"HasMedical"`
+	HideReportCommittent bool               `protobuf:"varint,8,opt,name=HideReportCommittent,proto3" json:"HideReportCommittent"`
+	Products             []*FacturaProducts `protobuf:"bytes,9,rep,name=Products,proto3" json:"Products"`
 }
 
 func (x *ProductListFac) Reset() {
@@ -795,35 +795,35 @@ type FacturaProducts struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Index                  int32                  `protobuf:"varint,1,opt,name=Index,proto3" json:"Index,omitempty"`
-	OrdNo                  string                 `protobuf:"bytes,2,opt,name=OrdNo,proto3" json:"OrdNo,omitempty"`
-	CommittentName         string                 `protobuf:"bytes,3,opt,name=CommittentName,proto3" json:"CommittentName,omitempty"`
-	CommittentTin          string                 `protobuf:"bytes,4,opt,name=CommittentTin,proto3" json:"CommittentTin,omitempty"`
-	CommittentVatRegCode   string                 `protobuf:"bytes,5,opt,name=CommittentVatRegCode,proto3" json:"CommittentVatRegCode,omitempty"`
-	CatalogCode            string                 `protobuf:"bytes,6,opt,name=CatalogCode,proto3" json:"CatalogCode,omitempty"`
-	CatalogName            string                 `protobuf:"bytes,7,opt,name=CatalogName,proto3" json:"CatalogName,omitempty"`
-	Barcode                string                 `protobuf:"bytes,8,opt,name=Barcode,proto3" json:"Barcode,omitempty"`
-	Name                   string                 `protobuf:"bytes,9,opt,name=Name,proto3" json:"Name,omitempty"`
-	Serial                 string                 `protobuf:"bytes,10,opt,name=Serial,proto3" json:"Serial,omitempty"`
-	MeasureId              string                 `protobuf:"bytes,11,opt,name=MeasureId,proto3" json:"MeasureId,omitempty"`
-	BaseSumma              float32                `protobuf:"fixed32,12,opt,name=BaseSumma,proto3" json:"BaseSumma,omitempty"`
-	ProfitRate             float32                `protobuf:"fixed32,13,opt,name=ProfitRate,proto3" json:"ProfitRate,omitempty"`
-	Count                  float32                `protobuf:"fixed32,14,opt,name=Count,proto3" json:"Count,omitempty"`
-	Summa                  float32                `protobuf:"fixed32,15,opt,name=Summa,proto3" json:"Summa,omitempty"`
-	DeliverySum            float32                `protobuf:"fixed32,16,opt,name=DeliverySum,proto3" json:"DeliverySum,omitempty"`
-	ExciseRate             float32                `protobuf:"fixed32,17,opt,name=ExciseRate,proto3" json:"ExciseRate,omitempty"`
-	ExciseSum              float32                `protobuf:"fixed32,18,opt,name=ExciseSum,proto3" json:"ExciseSum,omitempty"`
-	VatRate                float32                `protobuf:"fixed32,19,opt,name=VatRate,proto3" json:"VatRate,omitempty"`
-	VatSum                 float32                `protobuf:"fixed32,20,opt,name=VatSum,proto3" json:"VatSum,omitempty"`
-	DeliverySumWithVat     float32                `protobuf:"fixed32,21,opt,name=DeliverySumWithVat,proto3" json:"DeliverySumWithVat,omitempty"`
-	WithoutVat             bool                   `protobuf:"varint,22,opt,name=WithoutVat,proto3" json:"WithoutVat,omitempty"`
-	PackageCode            string                 `protobuf:"bytes,23,opt,name=PackageCode,proto3" json:"PackageCode,omitempty"`
-	PackageName            string                 `protobuf:"bytes,24,opt,name=PackageName,proto3" json:"PackageName,omitempty"`
-	LgotaId                *wrapperspb.Int32Value `protobuf:"bytes,25,opt,name=LgotaId,proto3" json:"LgotaId,omitempty"`
-	CommittentVatRegStatus *wrapperspb.Int32Value `protobuf:"bytes,26,opt,name=CommittentVatRegStatus,proto3" json:"CommittentVatRegStatus,omitempty"`
-	Marks                  *Marks                 `protobuf:"bytes,27,opt,name=Marks,proto3" json:"Marks,omitempty"`
-	ExchangeInfo           *ExchangeInfo          `protobuf:"bytes,28,opt,name=ExchangeInfo,proto3" json:"ExchangeInfo,omitempty"`
-	MeasureName            string                 `protobuf:"bytes,29,opt,name=MeasureName,proto3" json:"MeasureName,omitempty"`
+	Index                  int32                  `protobuf:"varint,1,opt,name=Index,proto3" json:"Index"`
+	OrdNo                  string                 `protobuf:"bytes,2,opt,name=OrdNo,proto3" json:"OrdNo"`
+	CommittentName         string                 `protobuf:"bytes,3,opt,name=CommittentName,proto3" json:"CommittentName"`
+	CommittentTin          string                 `protobuf:"bytes,4,opt,name=CommittentTin,proto3" json:"CommittentTin"`
+	CommittentVatRegCode   string                 `protobuf:"bytes,5,opt,name=CommittentVatRegCode,proto3" json:"CommittentVatRegCode"`
+	CatalogCode            string                 `protobuf:"bytes,6,opt,name=CatalogCode,proto3" json:"CatalogCode"`
+	CatalogName            string                 `protobuf:"bytes,7,opt,name=CatalogName,proto3" json:"CatalogName"`
+	Barcode                string                 `protobuf:"bytes,8,opt,name=Barcode,proto3" json:"Barcode"`
+	Name                   string                 `protobuf:"bytes,9,opt,name=Name,proto3" json:"Name"`
+	Serial                 string                 `protobuf:"bytes,10,opt,name=Serial,proto3" json:"Serial"`
+	MeasureId              string                 `protobuf:"bytes,11,opt,name=MeasureId,proto3" json:"MeasureId"`
+	BaseSumma              float32                `protobuf:"fixed32,12,opt,name=BaseSumma,proto3" json:"BaseSumma"`
+	ProfitRate             float32                `protobuf:"fixed32,13,opt,name=ProfitRate,proto3" json:"ProfitRate"`
+	Count                  float32                `protobuf:"fixed32,14,opt,name=Count,proto3" json:"Count"`
+	Summa                  float32                `protobuf:"fixed32,15,opt,name=Summa,proto3" json:"Summa"`
+	DeliverySum            float32                `protobuf:"fixed32,16,opt,name=DeliverySum,proto3" json:"DeliverySum"`
+	ExciseRate             float32                `protobuf:"fixed32,17,opt,name=ExciseRate,proto3" json:"ExciseRate"`
+	ExciseSum              float32                `protobuf:"fixed32,18,opt,name=ExciseSum,proto3" json:"ExciseSum"`
+	VatRate                float32                `protobuf:"fixed32,19,opt,name=VatRate,proto3" json:"VatRate"`
+	VatSum                 float32                `protobuf:"fixed32,20,opt,name=VatSum,proto3" json:"VatSum"`
+	DeliverySumWithVat     float32                `protobuf:"fixed32,21,opt,name=DeliverySumWithVat,proto3" json:"DeliverySumWithVat"`
+	WithoutVat             bool                   `protobuf:"varint,22,opt,name=WithoutVat,proto3" json:"WithoutVat"`
+	PackageCode            string                 `protobuf:"bytes,23,opt,name=PackageCode,proto3" json:"PackageCode"`
+	PackageName            string                 `protobuf:"bytes,24,opt,name=PackageName,proto3" json:"PackageName"`
+	LgotaId                *wrapperspb.Int32Value `protobuf:"bytes,25,opt,name=LgotaId,proto3" json:"LgotaId"`
+	CommittentVatRegStatus *wrapperspb.Int32Value `protobuf:"bytes,26,opt,name=CommittentVatRegStatus,proto3" json:"CommittentVatRegStatus"`
+	Marks                  *Marks                 `protobuf:"bytes,27,opt,name=Marks,proto3" json:"Marks"`
+	ExchangeInfo           *ExchangeInfo          `protobuf:"bytes,28,opt,name=ExchangeInfo,proto3" json:"ExchangeInfo"`
+	MeasureName            string                 `protobuf:"bytes,29,opt,name=MeasureName,proto3" json:"MeasureName"`
 }
 
 func (x *FacturaProducts) Reset() {
@@ -1066,10 +1066,10 @@ type Marks struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProductType    int32    `protobuf:"varint,1,opt,name=ProductType,proto3" json:"ProductType,omitempty"`
-	Kiz            []string `protobuf:"bytes,2,rep,name=Kiz,proto3" json:"Kiz,omitempty"`
-	NomUpak        []string `protobuf:"bytes,3,rep,name=NomUpak,proto3" json:"NomUpak,omitempty"`
-	IdentTransUpak []string `protobuf:"bytes,4,rep,name=IdentTransUpak,proto3" json:"IdentTransUpak,omitempty"`
+	ProductType    int32    `protobuf:"varint,1,opt,name=ProductType,proto3" json:"ProductType"`
+	Kiz            []string `protobuf:"bytes,2,rep,name=Kiz,proto3" json:"Kiz"`
+	NomUpak        []string `protobuf:"bytes,3,rep,name=NomUpak,proto3" json:"NomUpak"`
+	IdentTransUpak []string `protobuf:"bytes,4,rep,name=IdentTransUpak,proto3" json:"IdentTransUpak"`
 }
 
 func (x *Marks) Reset() {
@@ -1137,9 +1137,9 @@ type ExchangeInfo struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProductCode       string `protobuf:"bytes,1,opt,name=ProductCode,proto3" json:"ProductCode,omitempty"`
-	ProductProperties string `protobuf:"bytes,2,opt,name=ProductProperties,proto3" json:"ProductProperties,omitempty"`
-	PlanPositionId    int32  `protobuf:"varint,3,opt,name=PlanPositionId,proto3" json:"PlanPositionId,omitempty"`
+	ProductCode       string `protobuf:"bytes,1,opt,name=ProductCode,proto3" json:"ProductCode"`
+	ProductProperties string `protobuf:"bytes,2,opt,name=ProductProperties,proto3" json:"ProductProperties"`
+	PlanPositionId    int32  `protobuf:"varint,3,opt,name=PlanPositionId,proto3" json:"PlanPositionId"`
 }
 
 func (x *ExchangeInfo) Reset() {

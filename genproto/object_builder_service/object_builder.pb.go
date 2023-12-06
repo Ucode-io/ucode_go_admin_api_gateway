@@ -27,12 +27,12 @@ type CommonMessage struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	TableSlug     string           `protobuf:"bytes,1,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
-	Data          *structpb.Struct `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
-	ProjectId     string           `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	VersionId     string           `protobuf:"bytes,4,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
-	CustomMessage string           `protobuf:"bytes,5,opt,name=custom_message,json=customMessage,proto3" json:"custom_message,omitempty"`
-	IsCached      bool             `protobuf:"varint,6,opt,name=is_cached,json=isCached,proto3" json:"is_cached,omitempty"`
+	TableSlug     string           `protobuf:"bytes,1,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
+	Data          *structpb.Struct `protobuf:"bytes,2,opt,name=data,proto3" json:"data"`
+	ProjectId     string           `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	VersionId     string           `protobuf:"bytes,4,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	CustomMessage string           `protobuf:"bytes,5,opt,name=custom_message,json=customMessage,proto3" json:"custom_message"`
+	IsCached      bool             `protobuf:"varint,6,opt,name=is_cached,json=isCached,proto3" json:"is_cached"`
 }
 
 func (x *CommonMessage) Reset() {
@@ -114,12 +114,12 @@ type ManyToManyMessage struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	TableFrom string   `protobuf:"bytes,1,opt,name=table_from,json=tableFrom,proto3" json:"table_from,omitempty"`
-	TableTo   string   `protobuf:"bytes,2,opt,name=table_to,json=tableTo,proto3" json:"table_to,omitempty"`
-	IdFrom    string   `protobuf:"bytes,3,opt,name=id_from,json=idFrom,proto3" json:"id_from,omitempty"`
-	IdTo      []string `protobuf:"bytes,4,rep,name=id_to,json=idTo,proto3" json:"id_to,omitempty"`
-	ProjectId string   `protobuf:"bytes,5,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	VersionId string   `protobuf:"bytes,6,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
+	TableFrom string   `protobuf:"bytes,1,opt,name=table_from,json=tableFrom,proto3" json:"table_from"`
+	TableTo   string   `protobuf:"bytes,2,opt,name=table_to,json=tableTo,proto3" json:"table_to"`
+	IdFrom    string   `protobuf:"bytes,3,opt,name=id_from,json=idFrom,proto3" json:"id_from"`
+	IdTo      []string `protobuf:"bytes,4,rep,name=id_to,json=idTo,proto3" json:"id_to"`
+	ProjectId string   `protobuf:"bytes,5,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	VersionId string   `protobuf:"bytes,6,opt,name=version_id,json=versionId,proto3" json:"version_id"`
 }
 
 func (x *ManyToManyMessage) Reset() {
@@ -201,10 +201,10 @@ type BatchRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	TableSlug     string           `protobuf:"bytes,1,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
-	Data          *structpb.Struct `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
-	UpdatedFields []string         `protobuf:"bytes,3,rep,name=updated_fields,json=updatedFields,proto3" json:"updated_fields,omitempty"`
-	ProjectId     string           `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	TableSlug     string           `protobuf:"bytes,1,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
+	Data          *structpb.Struct `protobuf:"bytes,2,opt,name=data,proto3" json:"data"`
+	UpdatedFields []string         `protobuf:"bytes,3,rep,name=updated_fields,json=updatedFields,proto3" json:"updated_fields"`
+	ProjectId     string           `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *BatchRequest) Reset() {
@@ -272,20 +272,20 @@ type MenuRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Label           string           `protobuf:"bytes,1,opt,name=label,proto3" json:"label,omitempty"`
-	Icon            string           `protobuf:"bytes,2,opt,name=icon,proto3" json:"icon,omitempty"`
-	TableId         string           `protobuf:"bytes,3,opt,name=table_id,json=tableId,proto3" json:"table_id,omitempty"`
-	LayoutId        string           `protobuf:"bytes,4,opt,name=layout_id,json=layoutId,proto3" json:"layout_id,omitempty"`
-	ParentId        string           `protobuf:"bytes,5,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
-	Type            string           `protobuf:"bytes,6,opt,name=type,proto3" json:"type,omitempty"`
-	Id              string           `protobuf:"bytes,7,opt,name=id,proto3" json:"id,omitempty"`
-	ProjectId       string           `protobuf:"bytes,8,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	Data            *structpb.Struct `protobuf:"bytes,9,opt,name=data,proto3" json:"data,omitempty"`
-	MicrofrontendId string           `protobuf:"bytes,10,opt,name=microfrontend_id,json=microfrontendId,proto3" json:"microfrontend_id,omitempty"`
-	WebpageId       string           `protobuf:"bytes,11,opt,name=webpage_id,json=webpageId,proto3" json:"webpage_id,omitempty"`
-	Attributes      *structpb.Struct `protobuf:"bytes,12,opt,name=attributes,proto3" json:"attributes,omitempty"`
-	ReportSettingId string           `protobuf:"bytes,13,opt,name=report_setting_id,json=reportSettingId,proto3" json:"report_setting_id,omitempty"`
-	PivotTemplateId string           `protobuf:"bytes,15,opt,name=pivot_template_id,json=pivotTemplateId,proto3" json:"pivot_template_id,omitempty"`
+	Label           string           `protobuf:"bytes,1,opt,name=label,proto3" json:"label"`
+	Icon            string           `protobuf:"bytes,2,opt,name=icon,proto3" json:"icon"`
+	TableId         string           `protobuf:"bytes,3,opt,name=table_id,json=tableId,proto3" json:"table_id"`
+	LayoutId        string           `protobuf:"bytes,4,opt,name=layout_id,json=layoutId,proto3" json:"layout_id"`
+	ParentId        string           `protobuf:"bytes,5,opt,name=parent_id,json=parentId,proto3" json:"parent_id"`
+	Type            string           `protobuf:"bytes,6,opt,name=type,proto3" json:"type"`
+	Id              string           `protobuf:"bytes,7,opt,name=id,proto3" json:"id"`
+	ProjectId       string           `protobuf:"bytes,8,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	Data            *structpb.Struct `protobuf:"bytes,9,opt,name=data,proto3" json:"data"`
+	MicrofrontendId string           `protobuf:"bytes,10,opt,name=microfrontend_id,json=microfrontendId,proto3" json:"microfrontend_id"`
+	WebpageId       string           `protobuf:"bytes,11,opt,name=webpage_id,json=webpageId,proto3" json:"webpage_id"`
+	Attributes      *structpb.Struct `protobuf:"bytes,12,opt,name=attributes,proto3" json:"attributes"`
+	ReportSettingId string           `protobuf:"bytes,13,opt,name=report_setting_id,json=reportSettingId,proto3" json:"report_setting_id"`
+	PivotTemplateId string           `protobuf:"bytes,15,opt,name=pivot_template_id,json=pivotTemplateId,proto3" json:"pivot_template_id"`
 }
 
 func (x *MenuRequest) Reset() {
@@ -423,9 +423,9 @@ type CopyFromProjectRequestMessage struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId     string         `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	FromProjectId string         `protobuf:"bytes,2,opt,name=from_project_id,json=fromProjectId,proto3" json:"from_project_id,omitempty"`
-	Menus         []*MenuRequest `protobuf:"bytes,3,rep,name=menus,proto3" json:"menus,omitempty"`
+	ProjectId     string         `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	FromProjectId string         `protobuf:"bytes,2,opt,name=from_project_id,json=fromProjectId,proto3" json:"from_project_id"`
+	Menus         []*MenuRequest `protobuf:"bytes,3,rep,name=menus,proto3" json:"menus"`
 }
 
 func (x *CopyFromProjectRequestMessage) Reset() {

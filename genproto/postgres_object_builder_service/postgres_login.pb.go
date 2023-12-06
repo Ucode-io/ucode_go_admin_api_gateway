@@ -75,10 +75,10 @@ type LoginDataReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserId                string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	ClientType            string `protobuf:"bytes,2,opt,name=client_type,json=clientType,proto3" json:"client_type,omitempty"`
-	ProjectId             string `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	ResourceEnvironmentId string `protobuf:"bytes,4,opt,name=resource_environment_id,json=resourceEnvironmentId,proto3" json:"resource_environment_id,omitempty"`
+	UserId                string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id"`
+	ClientType            string `protobuf:"bytes,2,opt,name=client_type,json=clientType,proto3" json:"client_type"`
+	ProjectId             string `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	ResourceEnvironmentId string `protobuf:"bytes,4,opt,name=resource_environment_id,json=resourceEnvironmentId,proto3" json:"resource_environment_id"`
 }
 
 func (x *LoginDataReq) Reset() {
@@ -146,14 +146,14 @@ type LoginDataRes struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserFound      bool                `protobuf:"varint,1,opt,name=user_found,json=userFound,proto3" json:"user_found,omitempty"`
-	ClientPlatform *ClientPlatform     `protobuf:"bytes,2,opt,name=client_platform,json=clientPlatform,proto3" json:"client_platform,omitempty"`
-	ClientType     *ClientType         `protobuf:"bytes,3,opt,name=client_type,json=clientType,proto3" json:"client_type,omitempty"`
-	UserId         string              `protobuf:"bytes,4,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	Role           *Role               `protobuf:"bytes,5,opt,name=role,proto3" json:"role,omitempty"`
-	Permissions    []*RecordPermission `protobuf:"bytes,6,rep,name=permissions,proto3" json:"permissions,omitempty"`
-	LoginTableSlug string              `protobuf:"bytes,7,opt,name=login_table_slug,json=loginTableSlug,proto3" json:"login_table_slug,omitempty"`
-	AppPermissions []*RecordPermission `protobuf:"bytes,8,rep,name=app_permissions,json=appPermissions,proto3" json:"app_permissions,omitempty"`
+	UserFound      bool                `protobuf:"varint,1,opt,name=user_found,json=userFound,proto3" json:"user_found"`
+	ClientPlatform *ClientPlatform     `protobuf:"bytes,2,opt,name=client_platform,json=clientPlatform,proto3" json:"client_platform"`
+	ClientType     *ClientType         `protobuf:"bytes,3,opt,name=client_type,json=clientType,proto3" json:"client_type"`
+	UserId         string              `protobuf:"bytes,4,opt,name=user_id,json=userId,proto3" json:"user_id"`
+	Role           *Role               `protobuf:"bytes,5,opt,name=role,proto3" json:"role"`
+	Permissions    []*RecordPermission `protobuf:"bytes,6,rep,name=permissions,proto3" json:"permissions"`
+	LoginTableSlug string              `protobuf:"bytes,7,opt,name=login_table_slug,json=loginTableSlug,proto3" json:"login_table_slug"`
+	AppPermissions []*RecordPermission `protobuf:"bytes,8,rep,name=app_permissions,json=appPermissions,proto3" json:"app_permissions"`
 }
 
 func (x *LoginDataRes) Reset() {
@@ -249,9 +249,9 @@ type GetUserUpdatedPermissionRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ClientTypeId string `protobuf:"bytes,1,opt,name=client_type_id,json=clientTypeId,proto3" json:"client_type_id,omitempty"`
-	UserId       string `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	ProjectId    string `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	ClientTypeId string `protobuf:"bytes,1,opt,name=client_type_id,json=clientTypeId,proto3" json:"client_type_id"`
+	UserId       string `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id"`
+	ProjectId    string `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *GetUserUpdatedPermissionRequest) Reset() {
@@ -312,11 +312,11 @@ type EmailOtpRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Email      string `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`
-	ClientType string `protobuf:"bytes,2,opt,name=client_type,json=clientType,proto3" json:"client_type,omitempty"`
-	ProjectId  string `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	TableSlug  string `protobuf:"bytes,4,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
-	Guid       string `protobuf:"bytes,5,opt,name=guid,proto3" json:"guid,omitempty"`
+	Email      string `protobuf:"bytes,1,opt,name=email,proto3" json:"email"`
+	ClientType string `protobuf:"bytes,2,opt,name=client_type,json=clientType,proto3" json:"client_type"`
+	ProjectId  string `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	TableSlug  string `protobuf:"bytes,4,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
+	Guid       string `protobuf:"bytes,5,opt,name=guid,proto3" json:"guid"`
 }
 
 func (x *EmailOtpRequest) Reset() {
@@ -391,9 +391,9 @@ type PhoneOtpRequst struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	PhoneNumber string `protobuf:"bytes,1,opt,name=phone_number,json=phoneNumber,proto3" json:"phone_number,omitempty"`
-	ClientType  string `protobuf:"bytes,2,opt,name=client_type,json=clientType,proto3" json:"client_type,omitempty"`
-	ProjectId   string `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	PhoneNumber string `protobuf:"bytes,1,opt,name=phone_number,json=phoneNumber,proto3" json:"phone_number"`
+	ClientType  string `protobuf:"bytes,2,opt,name=client_type,json=clientType,proto3" json:"client_type"`
+	ProjectId   string `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *PhoneOtpRequst) Reset() {
@@ -454,11 +454,11 @@ type LoginRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Password      string `protobuf:"bytes,1,opt,name=password,proto3" json:"password,omitempty"`
-	Login         string `protobuf:"bytes,2,opt,name=login,proto3" json:"login,omitempty"`
-	ClientType    string `protobuf:"bytes,3,opt,name=client_type,json=clientType,proto3" json:"client_type,omitempty"`
-	LoginStrategy string `protobuf:"bytes,4,opt,name=login_strategy,json=loginStrategy,proto3" json:"login_strategy,omitempty"`
-	ProjectId     string `protobuf:"bytes,5,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Password      string `protobuf:"bytes,1,opt,name=password,proto3" json:"password"`
+	Login         string `protobuf:"bytes,2,opt,name=login,proto3" json:"login"`
+	ClientType    string `protobuf:"bytes,3,opt,name=client_type,json=clientType,proto3" json:"client_type"`
+	LoginStrategy string `protobuf:"bytes,4,opt,name=login_strategy,json=loginStrategy,proto3" json:"login_strategy"`
+	ProjectId     string `protobuf:"bytes,5,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *LoginRequest) Reset() {
@@ -533,10 +533,10 @@ type ClientPlatform struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Guid      string `protobuf:"bytes,1,opt,name=guid,proto3" json:"guid,omitempty"`
-	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	Name      string `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
-	Subdomain string `protobuf:"bytes,4,opt,name=subdomain,proto3" json:"subdomain,omitempty"`
+	Guid      string `protobuf:"bytes,1,opt,name=guid,proto3" json:"guid"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	Name      string `protobuf:"bytes,3,opt,name=name,proto3" json:"name"`
+	Subdomain string `protobuf:"bytes,4,opt,name=subdomain,proto3" json:"subdomain"`
 }
 
 func (x *ClientPlatform) Reset() {
@@ -604,13 +604,13 @@ type ClientType struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Guid         string             `protobuf:"bytes,1,opt,name=guid,proto3" json:"guid,omitempty"`
-	Name         string             `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	ConfirmBy    ConfirmStrategies  `protobuf:"varint,3,opt,name=confirm_by,json=confirmBy,proto3,enum=postgres_object_builder_service.ConfirmStrategies" json:"confirm_by,omitempty"`
-	SelfRegister bool               `protobuf:"varint,4,opt,name=self_register,json=selfRegister,proto3" json:"self_register,omitempty"`
-	SelfRecover  bool               `protobuf:"varint,5,opt,name=self_recover,json=selfRecover,proto3" json:"self_recover,omitempty"`
-	ProjectId    string             `protobuf:"bytes,6,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	Tables       []*TableClientType `protobuf:"bytes,7,rep,name=tables,proto3" json:"tables,omitempty"`
+	Guid         string             `protobuf:"bytes,1,opt,name=guid,proto3" json:"guid"`
+	Name         string             `protobuf:"bytes,2,opt,name=name,proto3" json:"name"`
+	ConfirmBy    ConfirmStrategies  `protobuf:"varint,3,opt,name=confirm_by,json=confirmBy,proto3,enum=postgres_object_builder_service.ConfirmStrategies" json:"confirm_by"`
+	SelfRegister bool               `protobuf:"varint,4,opt,name=self_register,json=selfRegister,proto3" json:"self_register"`
+	SelfRecover  bool               `protobuf:"varint,5,opt,name=self_recover,json=selfRecover,proto3" json:"self_recover"`
+	ProjectId    string             `protobuf:"bytes,6,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	Tables       []*TableClientType `protobuf:"bytes,7,rep,name=tables,proto3" json:"tables"`
 }
 
 func (x *ClientType) Reset() {
@@ -699,11 +699,11 @@ type Role struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Guid             string `protobuf:"bytes,1,opt,name=guid,proto3" json:"guid,omitempty"`
-	ClientTypeId     string `protobuf:"bytes,2,opt,name=client_type_id,json=clientTypeId,proto3" json:"client_type_id,omitempty"`
-	Name             string `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
-	ClientPlatformId string `protobuf:"bytes,4,opt,name=client_platform_id,json=clientPlatformId,proto3" json:"client_platform_id,omitempty"`
-	ProjectId        string `protobuf:"bytes,5,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Guid             string `protobuf:"bytes,1,opt,name=guid,proto3" json:"guid"`
+	ClientTypeId     string `protobuf:"bytes,2,opt,name=client_type_id,json=clientTypeId,proto3" json:"client_type_id"`
+	Name             string `protobuf:"bytes,3,opt,name=name,proto3" json:"name"`
+	ClientPlatformId string `protobuf:"bytes,4,opt,name=client_platform_id,json=clientPlatformId,proto3" json:"client_platform_id"`
+	ProjectId        string `protobuf:"bytes,5,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *Role) Reset() {
@@ -778,14 +778,14 @@ type RecordPermission struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Guid         string `protobuf:"bytes,1,opt,name=guid,proto3" json:"guid,omitempty"`
-	ClientTypeId string `protobuf:"bytes,2,opt,name=client_type_id,json=clientTypeId,proto3" json:"client_type_id,omitempty"`
-	RoleId       string `protobuf:"bytes,3,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
-	TableSlug    string `protobuf:"bytes,4,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
-	Read         string `protobuf:"bytes,5,opt,name=read,proto3" json:"read,omitempty"`
-	Write        string `protobuf:"bytes,6,opt,name=write,proto3" json:"write,omitempty"`
-	Update       string `protobuf:"bytes,7,opt,name=update,proto3" json:"update,omitempty"`
-	Delete       string `protobuf:"bytes,8,opt,name=delete,proto3" json:"delete,omitempty"`
+	Guid         string `protobuf:"bytes,1,opt,name=guid,proto3" json:"guid"`
+	ClientTypeId string `protobuf:"bytes,2,opt,name=client_type_id,json=clientTypeId,proto3" json:"client_type_id"`
+	RoleId       string `protobuf:"bytes,3,opt,name=role_id,json=roleId,proto3" json:"role_id"`
+	TableSlug    string `protobuf:"bytes,4,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
+	Read         string `protobuf:"bytes,5,opt,name=read,proto3" json:"read"`
+	Write        string `protobuf:"bytes,6,opt,name=write,proto3" json:"write"`
+	Update       string `protobuf:"bytes,7,opt,name=update,proto3" json:"update"`
+	Delete       string `protobuf:"bytes,8,opt,name=delete,proto3" json:"delete"`
 }
 
 func (x *RecordPermission) Reset() {
@@ -881,12 +881,12 @@ type TableClientType struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Slug      string           `protobuf:"bytes,1,opt,name=slug,proto3" json:"slug,omitempty"`
-	ViewSlug  string           `protobuf:"bytes,2,opt,name=view_slug,json=viewSlug,proto3" json:"view_slug,omitempty"`
-	Label     string           `protobuf:"bytes,3,opt,name=label,proto3" json:"label,omitempty"`
-	Data      *structpb.Struct `protobuf:"bytes,4,opt,name=data,proto3" json:"data,omitempty"`
-	Icon      string           `protobuf:"bytes,5,opt,name=icon,proto3" json:"icon,omitempty"`
-	ViewLabel string           `protobuf:"bytes,6,opt,name=view_label,json=viewLabel,proto3" json:"view_label,omitempty"`
+	Slug      string           `protobuf:"bytes,1,opt,name=slug,proto3" json:"slug"`
+	ViewSlug  string           `protobuf:"bytes,2,opt,name=view_slug,json=viewSlug,proto3" json:"view_slug"`
+	Label     string           `protobuf:"bytes,3,opt,name=label,proto3" json:"label"`
+	Data      *structpb.Struct `protobuf:"bytes,4,opt,name=data,proto3" json:"data"`
+	Icon      string           `protobuf:"bytes,5,opt,name=icon,proto3" json:"icon"`
+	ViewLabel string           `protobuf:"bytes,6,opt,name=view_label,json=viewLabel,proto3" json:"view_label"`
 }
 
 func (x *TableClientType) Reset() {
@@ -968,21 +968,21 @@ type User struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Guid             string `protobuf:"bytes,1,opt,name=guid,proto3" json:"guid,omitempty"`
-	ProjectId        string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	ClientPlatformId string `protobuf:"bytes,3,opt,name=client_platform_id,json=clientPlatformId,proto3" json:"client_platform_id,omitempty"`
-	ClientTypeId     string `protobuf:"bytes,4,opt,name=client_type_id,json=clientTypeId,proto3" json:"client_type_id,omitempty"`
-	RoleId           string `protobuf:"bytes,5,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
-	Phone            string `protobuf:"bytes,6,opt,name=phone,proto3" json:"phone,omitempty"`
-	Email            string `protobuf:"bytes,7,opt,name=email,proto3" json:"email,omitempty"`
-	Login            string `protobuf:"bytes,8,opt,name=login,proto3" json:"login,omitempty"`
-	Password         string `protobuf:"bytes,9,opt,name=password,proto3" json:"password,omitempty"`
-	Active           int32  `protobuf:"varint,10,opt,name=active,proto3" json:"active,omitempty"`
-	ExpiresAt        string `protobuf:"bytes,11,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
-	CreatedAt        string `protobuf:"bytes,12,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt        string `protobuf:"bytes,13,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	Name             string `protobuf:"bytes,14,opt,name=name,proto3" json:"name,omitempty"`
-	PhotoUrl         string `protobuf:"bytes,15,opt,name=photo_url,json=photoUrl,proto3" json:"photo_url,omitempty"`
+	Guid             string `protobuf:"bytes,1,opt,name=guid,proto3" json:"guid"`
+	ProjectId        string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	ClientPlatformId string `protobuf:"bytes,3,opt,name=client_platform_id,json=clientPlatformId,proto3" json:"client_platform_id"`
+	ClientTypeId     string `protobuf:"bytes,4,opt,name=client_type_id,json=clientTypeId,proto3" json:"client_type_id"`
+	RoleId           string `protobuf:"bytes,5,opt,name=role_id,json=roleId,proto3" json:"role_id"`
+	Phone            string `protobuf:"bytes,6,opt,name=phone,proto3" json:"phone"`
+	Email            string `protobuf:"bytes,7,opt,name=email,proto3" json:"email"`
+	Login            string `protobuf:"bytes,8,opt,name=login,proto3" json:"login"`
+	Password         string `protobuf:"bytes,9,opt,name=password,proto3" json:"password"`
+	Active           int32  `protobuf:"varint,10,opt,name=active,proto3" json:"active"`
+	ExpiresAt        string `protobuf:"bytes,11,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at"`
+	CreatedAt        string `protobuf:"bytes,12,opt,name=created_at,json=createdAt,proto3" json:"created_at"`
+	UpdatedAt        string `protobuf:"bytes,13,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at"`
+	Name             string `protobuf:"bytes,14,opt,name=name,proto3" json:"name"`
+	PhotoUrl         string `protobuf:"bytes,15,opt,name=photo_url,json=photoUrl,proto3" json:"photo_url"`
 }
 
 func (x *User) Reset() {
@@ -1127,14 +1127,14 @@ type V2LoginResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserFound      bool                `protobuf:"varint,1,opt,name=user_found,json=userFound,proto3" json:"user_found,omitempty"`
-	ClientPlatform *ClientPlatform     `protobuf:"bytes,2,opt,name=client_platform,json=clientPlatform,proto3" json:"client_platform,omitempty"`
-	ClientType     *ClientType         `protobuf:"bytes,3,opt,name=client_type,json=clientType,proto3" json:"client_type,omitempty"`
-	UserId         string              `protobuf:"bytes,4,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	Role           *Role               `protobuf:"bytes,5,opt,name=role,proto3" json:"role,omitempty"`
-	Permissions    []*RecordPermission `protobuf:"bytes,6,rep,name=permissions,proto3" json:"permissions,omitempty"`
-	LoginTableSlug string              `protobuf:"bytes,7,opt,name=login_table_slug,json=loginTableSlug,proto3" json:"login_table_slug,omitempty"`
-	AppPermissions []*RecordPermission `protobuf:"bytes,8,rep,name=app_permissions,json=appPermissions,proto3" json:"app_permissions,omitempty"`
+	UserFound      bool                `protobuf:"varint,1,opt,name=user_found,json=userFound,proto3" json:"user_found"`
+	ClientPlatform *ClientPlatform     `protobuf:"bytes,2,opt,name=client_platform,json=clientPlatform,proto3" json:"client_platform"`
+	ClientType     *ClientType         `protobuf:"bytes,3,opt,name=client_type,json=clientType,proto3" json:"client_type"`
+	UserId         string              `protobuf:"bytes,4,opt,name=user_id,json=userId,proto3" json:"user_id"`
+	Role           *Role               `protobuf:"bytes,5,opt,name=role,proto3" json:"role"`
+	Permissions    []*RecordPermission `protobuf:"bytes,6,rep,name=permissions,proto3" json:"permissions"`
+	LoginTableSlug string              `protobuf:"bytes,7,opt,name=login_table_slug,json=loginTableSlug,proto3" json:"login_table_slug"`
+	AppPermissions []*RecordPermission `protobuf:"bytes,8,rep,name=app_permissions,json=appPermissions,proto3" json:"app_permissions"`
 }
 
 func (x *V2LoginResponse) Reset() {

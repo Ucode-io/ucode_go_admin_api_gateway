@@ -26,8 +26,8 @@ type RegisterCompanyRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Name     string                                   `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	UserInfo *RegisterCompanyRequest_RegisterUserInfo `protobuf:"bytes,2,opt,name=user_info,json=userInfo,proto3" json:"user_info,omitempty"`
+	Name     string                                   `protobuf:"bytes,1,opt,name=name,proto3" json:"name"`
+	UserInfo *RegisterCompanyRequest_RegisterUserInfo `protobuf:"bytes,2,opt,name=user_info,json=userInfo,proto3" json:"user_info"`
 }
 
 func (x *RegisterCompanyRequest) Reset() {
@@ -81,7 +81,7 @@ type CompanyPrimaryKey struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
 }
 
 func (x *CompanyPrimaryKey) Reset() {
@@ -128,8 +128,8 @@ type UpdateCompanyRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id   string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Id   string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name"`
 }
 
 func (x *UpdateCompanyRequest) Reset() {
@@ -183,10 +183,10 @@ type GetComapnyListRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Limit  int32  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
-	Offset int32  `protobuf:"varint,2,opt,name=offset,proto3" json:"offset,omitempty"`
-	Search string `protobuf:"bytes,3,opt,name=search,proto3" json:"search,omitempty"`
-	UserId string `protobuf:"bytes,4,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Limit  int32  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit"`
+	Offset int32  `protobuf:"varint,2,opt,name=offset,proto3" json:"offset"`
+	Search string `protobuf:"bytes,3,opt,name=search,proto3" json:"search"`
+	UserId string `protobuf:"bytes,4,opt,name=user_id,json=userId,proto3" json:"user_id"`
 }
 
 func (x *GetComapnyListRequest) Reset() {
@@ -254,8 +254,8 @@ type GetListCompanyResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Count     int32      `protobuf:"varint,1,opt,name=count,proto3" json:"count,omitempty"`
-	Companies []*Company `protobuf:"bytes,2,rep,name=companies,proto3" json:"companies,omitempty"`
+	Count     int32      `protobuf:"varint,1,opt,name=count,proto3" json:"count"`
+	Companies []*Company `protobuf:"bytes,2,rep,name=companies,proto3" json:"companies"`
 }
 
 func (x *GetListCompanyResponse) Reset() {
@@ -309,11 +309,11 @@ type RegisterCompanyRequest_RegisterUserInfo struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Phone     string `protobuf:"bytes,1,opt,name=phone,proto3" json:"phone,omitempty"`
-	Email     string `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
-	Login     string `protobuf:"bytes,3,opt,name=login,proto3" json:"login,omitempty"`
-	Password  string `protobuf:"bytes,4,opt,name=password,proto3" json:"password,omitempty"`
-	ExpiresAt string `protobuf:"bytes,5,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
+	Phone     string `protobuf:"bytes,1,opt,name=phone,proto3" json:"phone"`
+	Email     string `protobuf:"bytes,2,opt,name=email,proto3" json:"email"`
+	Login     string `protobuf:"bytes,3,opt,name=login,proto3" json:"login"`
+	Password  string `protobuf:"bytes,4,opt,name=password,proto3" json:"password"`
+	ExpiresAt string `protobuf:"bytes,5,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at"`
 }
 
 func (x *RegisterCompanyRequest_RegisterUserInfo) Reset() {
