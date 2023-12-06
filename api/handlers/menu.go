@@ -935,7 +935,7 @@ func (h *Handler) GetMenuSettingByID(c *gin.Context) {
 			return
 		}
 	}
-	if IsEmptyStruct(resp.MenuTemplate) {
+	if IsEmptyStruct2(resp.MenuTemplate) {
 		resp.MenuTemplate, err = h.GetMenuTemplateById(template_id, services)
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
@@ -947,7 +947,7 @@ func (h *Handler) GetMenuSettingByID(c *gin.Context) {
 	h.handleResponse(c, status_http.OK, resp)
 }
 
-func IsEmptyStruct(s interface{}) bool {
+func IsEmptyStruct2(s interface{}) bool {
 	return reflect.DeepEqual(s, reflect.Zero(reflect.TypeOf(s)).Interface())
 }
 

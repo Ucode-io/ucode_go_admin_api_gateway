@@ -114,7 +114,6 @@ func (h *Handler) V2CreateTable(c *gin.Context) {
 		Icon:              tableRequest.Icon,
 		Fields:            fields,
 		SubtitleFieldSlug: tableRequest.SubtitleFieldSlug,
-		AppId:             tableRequest.AppID,
 		IncrementId: &postgresObs.IncrementID{
 			WithIncrementId: tableRequest.IncrementID.WithIncrementID,
 			DigitNumber:     tableRequest.IncrementID.DigitNumber,

@@ -615,6 +615,117 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 
 	}
 
+	v2Version := r.Group("/v2")
+	v2Version.Use(h.V2.AuthMiddleware())
+	{
+		// collections group
+		v2Collection := v2Version.Group("/collections")
+		{
+
+			// error messages
+			v2Collection.GET("/:collection/error_messages", h.V2.GetAllErrorMessage)
+			v2Collection.POST("/:collection/error_messages", h.V2.CreateErrorMessage)
+			v2Collection.PUT("/:collection/error_messages", h.V2.UpdateErrorMessage)
+			v2Collection.GET("/:collection/error_messages/:id", h.V2.GetByIdErrorMessage)
+			v2Collection.DELETE("/:collection/error_messages/:id", h.V2.DeleteErrorMessage)
+
+			// automation
+			v2Collection.GET("/:collection/automation", h.V2.GetAllAutomation)
+			v2Collection.POST("/:collection/automation", h.V2.CreateAutomation)
+			v2Collection.PUT("/:collection/automation", h.V2.UpdateAutomation)
+			v2Collection.GET("/:collection/automation/:id", h.V2.GetByIdAutomation)
+			v2Collection.DELETE("/:collection/automation/:id", h.V2.DeleteAutomation)
+
+			// import data
+			v2Collection.POST("/:collection/import/:id", h.V2.ImportData)
+			v2Collection.POST("/:collection/import/fields/:id", h.V2.ExcelReader)
+
+			// layout
+			v2Collection.GET("/:collection/layout", h.V2.GetListLayouts)
+			v2Collection.PUT("/:collection/layout", h.V2.UpdateLayout)
+			// collection
+			v2Collection.POST("", h.V2.CreateCollection)
+			v2Collection.PUT("", h.V2.UpdateCollection)
+			v2Collection.GET("", h.V2.GetAllCollections)
+			v2Collection.GET("/:collection", h.V2.GetSingleCollection)
+			v2Collection.DELETE("/:collection", h.V2.DeleteCollection)
+
+		}
+
+		// items group
+		v2Items := v2Version.Group("/items")
+		{
+			v2Items.GET("/:collection", h.V2.GetAllItems)
+			v2Items.GET("/:collection/:id", h.V2.GetSingleItem)
+			v2Items.POST("/:collection", h.V2.CreateItem)
+			v2Items.POST("/:collection/multiple-insert", h.V2.CreateItems)
+			v2Items.PUT("/:collection", h.V2.UpdateItem)
+			v2Items.PATCH("/:collection", h.V2.MultipleUpdateItems)
+			v2Items.DELETE("/:collection", h.V2.DeleteItems)
+			v2Items.DELETE("/:collection/:id", h.V2.DeleteItem)
+
+			v2Items.PUT("/many-to-many", h.V2.AppendManyToMany)
+			v2Items.DELETE("/many-to-many", h.V2.DeleteManyToMany)
+		}
+
+		// menu group
+		v2Menus := v2Version.Group("/menus")
+		{
+			v2Menus.GET("", h.V2.GetAllMenus)
+			v2Menus.GET("/:id", h.V2.GetMenuByID)
+			v2Menus.PUT("", h.V2.UpdateMenu)
+			v2Menus.POST("", h.V2.CreateMenu)
+			v2Menus.DELETE("/:id", h.V2.DeleteMenu)
+			v2Menus.PUT("/menu-order", h.V2.UpdateMenuOrder)
+
+			v2Menus.POST("/menu-settings", h.V2.CreateMenuSettings)
+			v2Menus.PUT("/menu-settings", h.V2.UpdateMenuSettings)
+
+			v2Menus.GET("/menu-template", h.V2.GetAllMenuTemplates)
+			v2Menus.GET("/menu-template/:id", h.V2.GetMenuTemplateByID)
+			v2Menus.PUT("/menu-template", h.V2.UpdateMenuTemplate)
+			v2Menus.POST("/menu-template", h.V2.CreateMenuTemplate)
+			v2Menus.DELETE("/menu-template", h.V2.DeleteMenuTemplate)
+		}
+
+		// user group
+		v2User := v2Version.Group("/user")
+		{
+			v2User.GET("/:id/menu-settings", h.V2.GetMenuSettingByUserID)
+		}
+		// view group
+		v2View := v2Version.Group("/views")
+		{
+			v2View.GET("/:collection", h.V2.GetAllViews)
+			v2View.POST("/:collection", h.V2.CreateView)
+			v2View.PUT("/:collection", h.V2.UpdateView)
+			v2View.DELETE("/:collection/:id", h.V2.DeleteView)
+			v2View.PUT("/:collection/update-order", h.V2.UpdateViewOrder)
+		}
+
+		// fields
+		v2Version.GET("/fields/:collection", h.V2.GetAllFields)
+		v2Version.POST("/fields/:collection", h.V2.CreateField)
+		v2Version.PUT("/fields/:collection", h.V2.UpdateField)
+		v2Version.DELETE("/fields/:collection/:id", h.V2.DeleteField)
+
+		// relations
+		v2Version.GET("/relations/:collection/:id", h.V2.GetByIdRelation)
+		v2Version.GET("/relations/:collection", h.V2.GetAllRelations)
+		v2Version.POST("/relations/:collection", h.V2.CreateRelation)
+		v2Version.PUT("/relations/:collection", h.V2.UpdateRelation)
+		v2Version.DELETE("/relations/:collection/:id", h.V2.DeleteField)
+		v2Version.GET("/relations/:collection/cascading", h.V2.GetRelationCascading)
+
+		// utils
+		v2Utils := v2Version.Group("/utils")
+		{
+			v2Utils.GET("/barcode/:collection/:type", h.V2.GetGeneratedBarcode)
+			v2Utils.POST("/export/:collection/html-to-pdf", h.V2.ConvertHtmlToPdf)
+			v2Utils.POST("/export/:collection", h.V2.ExportData)
+		}
+	}
+
 	r.Any("/api/*any", h.AuthMiddleware(cfg), proxyMiddleware(r, &h), h.Proxy)
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

@@ -170,6 +170,7 @@ message FieldResponse {
     bool show_label = 13;
     bool enable_multilanguage = 14;
     bool is_editable = 15;
+    bool is_visible_layout = 16;
 } 
 
 message FieldForSection {
@@ -180,6 +181,7 @@ message FieldForSection {
     string relation_type = 5;
     bool show_label = 6;
     google.protobuf.Struct attributes = 7;
+    bool is_visible_layout = 8;
 }
 
 message UpdateSectionsRequest {
