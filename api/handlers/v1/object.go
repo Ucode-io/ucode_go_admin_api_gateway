@@ -286,9 +286,6 @@ func (h *HandlerV1) GetSingle(c *gin.Context) {
 		return
 	}
 	if tokenInfo != nil {
-		if tokenInfo.Tables != nil {
-			object.Data["tables"] = tokenInfo.GetTables()
-		}
 		object.Data["user_id_from_token"] = tokenInfo.GetUserId()
 		object.Data["role_id_from_token"] = tokenInfo.GetRoleId()
 		object.Data["client_type_id_from_token"] = tokenInfo.GetClientTypeId()
@@ -348,24 +345,24 @@ func (h *HandlerV1) GetSingle(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = service.GetSingle(
-			context.Background(),
-			&obs.CommonMessage{
-				TableSlug: c.Param("table_slug"),
-				Data:      structData,
+	resp, err = service.GetSingle(
+		context.Background(),
+		&obs.CommonMessage{
+			TableSlug: c.Param("table_slug"),
+			Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-		if err != nil {
-			statusHttp = status_http.GrpcStatusToHTTP["Internal"]
-			stat, ok := status.FromError(err)
-			if ok {
-				statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
-				statusHttp.CustomMessage = stat.Message()
-			}
-			h.handleResponse(c, statusHttp, err.Error())
-			return
+		},
+	)
+	if err != nil {
+		statusHttp = status_http.GrpcStatusToHTTP["Internal"]
+		stat, ok := status.FromError(err)
+		if ok {
+			statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
+			statusHttp.CustomMessage = stat.Message()
 		}
+		h.handleResponse(c, statusHttp, err.Error())
+		return
+	}
 	case pb.ResourceType_POSTGRESQL:
 		resp, err = services.PostgresBuilderService().ObjectBuilder().GetSingle(
 			context.Background(),
