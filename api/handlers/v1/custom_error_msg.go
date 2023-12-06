@@ -1,4 +1,4 @@
-package v2
+package v1
 
 import (
 	"context"
@@ -12,21 +12,20 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-// CreateErrorMessage godoc
+// CreateCustomErrorMessage godoc
 // @Security ApiKeyAuth
-// @ID create_error_message
-// @Router /v2/collections/{collection}/error_messages [POST]
-// @Summary Create error message
-// @Description Create error message
-// @Tags Collections
+// @ID create_custom_error_message
+// @Router /v1/custom-error-message [POST]
+// @Summary Create custom error message
+// @Description Create custom error message
+// @Tags CustomErrorMessage
 // @Accept json
 // @Produce json
-// @Param collection path string true "collection"
 // @Param table body obs.CreateCustomErrorMessage  true "CreateCustomErrorMessageBody"
 // @Success 200 {object} status_http.Response{data=string} "Custom Error Message data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *HandlerV2) CreateErrorMessage(c *gin.Context) {
+func (h *HandlerV1) CreateCustomErrorMessage(c *gin.Context) {
 	var (
 		customErrorMessages obs.CreateCustomErrorMessage
 		resp                *obs.CustomErrorMessage
@@ -66,7 +65,7 @@ func (h *HandlerV2) CreateErrorMessage(c *gin.Context) {
 
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
-		resource.GetProjectId(),
+		projectId.(string),
 		resource.NodeType,
 	)
 	if err != nil {
@@ -101,26 +100,25 @@ func (h *HandlerV2) CreateErrorMessage(c *gin.Context) {
 	h.handleResponse(c, status_http.OK, resp)
 }
 
-// GetByIdErrorMessage godoc
+// GetByIdCustomErrorMessage godoc
 // @Security ApiKeyAuth
-// @ID Get_by_id_error_message
-// @Router /v2/collections/{collection}/error_messages/{id} [GET]
-// @Summary Error message by id
-// @Description Error message by id
-// @Tags Collections
+// @ID Get_by_id_custom_error_message
+// @Router /v1/custom-error-message/{id} [GET]
+// @Summary Get by id custom error message
+// @Description Get by id custom error message
+// @Tags CustomErrorMessage
 // @Accept json
 // @Produce json
-// @Param collection path string true "collection"
 // @Param id path string  true "id"
-// @Success 200 {object} status_http.Response{data=string} "Error Message data"
+// @Success 200 {object} status_http.Response{data=string} "Custom Error Message data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *HandlerV2) GetByIdErrorMessage(c *gin.Context) {
+func (h *HandlerV1) GetByIdCustomErrorMessage(c *gin.Context) {
 	var (
 		resp *obs.CustomErrorMessage
 	)
 	if !util.IsValidUUID(c.Param("id")) {
-		h.handleResponse(c, status_http.InvalidArgument, "error message id is an invalid uuid")
+		h.handleResponse(c, status_http.InvalidArgument, "custom error message id is an invalid uuid")
 		return
 	}
 
@@ -152,7 +150,7 @@ func (h *HandlerV2) GetByIdErrorMessage(c *gin.Context) {
 
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
-		resource.GetProjectId(),
+		projectId.(string),
 		resource.NodeType,
 	)
 	if err != nil {
@@ -192,21 +190,20 @@ func (h *HandlerV2) GetByIdErrorMessage(c *gin.Context) {
 	h.handleResponse(c, status_http.OK, resp)
 }
 
-// GetAllErrorMessage godoc
+// GetAllCustomErrorMessage godoc
 // @Security ApiKeyAuth
-// @ID get_all_error_message
-// @Router /v2/collections/{collection}/error_messages [GET]
-// @Summary Get all error messages
-// @Description Get all error messages
-// @Tags Collections
+// @ID get_all_custom_error_message
+// @Router /v1/custom-error-message [GET]
+// @Summary Get all custom error messages
+// @Description Get all custom error messages
+// @Tags CustomErrorMessage
 // @Accept json
 // @Produce json
-// @Param collection path string true "collection"
 // @Param filters query obs.GetCustomErrorMessageListRequest true "filters"
-// @Success 200 {object} status_http.Response{data=string} "ErrorMessageBody"
+// @Success 200 {object} status_http.Response{data=string} "CustomErrorMessageBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *HandlerV2) GetAllErrorMessage(c *gin.Context) {
+func (h *HandlerV1) GetAllCustomErrorMessage(c *gin.Context) {
 
 	var (
 		resp *obs.GetCustomErrorMessageListResponse
@@ -224,8 +221,8 @@ func (h *HandlerV2) GetAllErrorMessage(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
-	if c.Param("collection") == "" {
-		h.handleResponse(c, status_http.BadRequest, "collection is required")
+	if c.Query("table_id") == "" && c.Query("table_slug") == "" {
+		h.handleResponse(c, status_http.BadEnvironment, "table_id or table_slug is required")
 		return
 	}
 
@@ -244,7 +241,7 @@ func (h *HandlerV2) GetAllErrorMessage(c *gin.Context) {
 
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
-		resource.GetProjectId(),
+		projectId.(string),
 		resource.NodeType,
 	)
 	if err != nil {
@@ -257,7 +254,8 @@ func (h *HandlerV2) GetAllErrorMessage(c *gin.Context) {
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).CustomErrorMessage().GetList(
 			context.Background(),
 			&obs.GetCustomErrorMessageListRequest{
-				TableSlug: c.Param("collection"),
+				TableId:   c.Query("table_id"),
+				TableSlug: c.Query("table_slug"),
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
@@ -270,7 +268,8 @@ func (h *HandlerV2) GetAllErrorMessage(c *gin.Context) {
 		resp, err = services.PostgresBuilderService().CustomErrorMessage().GetList(
 			context.Background(),
 			&obs.GetCustomErrorMessageListRequest{
-				TableSlug: c.Param("collection"),
+				TableId:   c.Query("table_id"),
+				TableSlug: c.Query("table_slug"),
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
@@ -284,21 +283,20 @@ func (h *HandlerV2) GetAllErrorMessage(c *gin.Context) {
 	h.handleResponse(c, status_http.OK, resp)
 }
 
-// UpdateErrorMessage godoc
+// UpdateCustomErrorMessage godoc
 // @Security ApiKeyAuth
-// @ID update_error_message
-// @Router /v2/collections/{collection}/error_messages [PUT]
-// @Summary Update error message
-// @Description Update error message
-// @Tags Collections
+// @ID update_custom_error_message
+// @Router /v1/custom-error-message [PUT]
+// @Summary Update custom error message
+// @Description Update custom error message
+// @Tags CustomErrorMessage
 // @Accept json
 // @Produce json
-// @Param collection path string true "collection"
-// @Param table body obs.CustomErrorMessage  true "UpdateErrorMessageBody"
-// @Success 200 {object} status_http.Response{data=string} "Error Message data"
+// @Param table body obs.CustomErrorMessage  true "UpdateCustomErrorMessageBody"
+// @Success 200 {object} status_http.Response{data=string} "Custom Error Message data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *HandlerV2) UpdateErrorMessage(c *gin.Context) {
+func (h *HandlerV1) UpdateCustomErrorMessage(c *gin.Context) {
 	var (
 		customErrorMessages obs.CustomErrorMessage
 		resp                *emptypb.Empty
@@ -338,7 +336,7 @@ func (h *HandlerV2) UpdateErrorMessage(c *gin.Context) {
 
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
-		resource.GetProjectId(),
+		projectId.(string),
 		resource.NodeType,
 	)
 	if err != nil {
@@ -373,21 +371,20 @@ func (h *HandlerV2) UpdateErrorMessage(c *gin.Context) {
 	h.handleResponse(c, status_http.OK, resp)
 }
 
-// DeleteErrorMessage godoc
+// DeleteCustomErrorMessage godoc
 // @Security ApiKeyAuth
-// @ID delete_error_message
-// @Router /v2/collections/{collection}/error_messages/{id} [DELETE]
-// @Summary Delete error message
-// @Description Delete error message
-// @Tags Collections
+// @ID delete_custom_error_message
+// @Router /v1/custom-error-message/{id} [DELETE]
+// @Summary Delete custom error message
+// @Description Delete custom error message
+// @Tags CustomErrorMessage
 // @Accept json
 // @Produce json
-// @Param collection path string true "collection"
 // @Param id path string true "id"
 // @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *HandlerV2) DeleteErrorMessage(c *gin.Context) {
+func (h *HandlerV1) DeleteCustomErrorMessage(c *gin.Context) {
 	var (
 		resp *emptypb.Empty
 	)
@@ -424,7 +421,7 @@ func (h *HandlerV2) DeleteErrorMessage(c *gin.Context) {
 
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
-		resource.GetProjectId(),
+		projectId.(string),
 		resource.NodeType,
 	)
 	if err != nil {

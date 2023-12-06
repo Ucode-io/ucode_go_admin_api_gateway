@@ -1,4 +1,4 @@
-package v2
+package v1
 
 import (
 	"context"
@@ -12,27 +12,26 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-// CreateErrorMessage godoc
+// CreateApp godoc
 // @Security ApiKeyAuth
-// @ID create_error_message
-// @Router /v2/collections/{collection}/error_messages [POST]
-// @Summary Create error message
-// @Description Create error message
-// @Tags Collections
+// @ID create_app
+// @Router /v1/app [POST]
+// @Summary Create app
+// @Description Create app
+// @Tags App
 // @Accept json
 // @Produce json
-// @Param collection path string true "collection"
-// @Param table body obs.CreateCustomErrorMessage  true "CreateCustomErrorMessageBody"
-// @Success 200 {object} status_http.Response{data=string} "Custom Error Message data"
+// @Param app body obs.AppRequest true "CreateAppRequestBody"
+// @Success 201 {object} status_http.Response{data=obs.CreateAppResponse} "App data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *HandlerV2) CreateErrorMessage(c *gin.Context) {
+func (h *HandlerV1) CreateApp(c *gin.Context) {
 	var (
-		customErrorMessages obs.CreateCustomErrorMessage
-		resp                *obs.CustomErrorMessage
+		app  obs.AppRequest
+		resp *obs.CreateAppResponse
 	)
 
-	err := c.ShouldBindJSON(&customErrorMessages)
+	err := c.ShouldBindJSON(&app)
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
@@ -66,7 +65,7 @@ func (h *HandlerV2) CreateErrorMessage(c *gin.Context) {
 
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
-		resource.GetProjectId(),
+		projectId.(string),
 		resource.NodeType,
 	)
 	if err != nil {
@@ -74,12 +73,13 @@ func (h *HandlerV2) CreateErrorMessage(c *gin.Context) {
 		return
 	}
 
-	customErrorMessages.ProjectId = resource.ResourceEnvironmentId
+	app.ProjectId = resource.ResourceEnvironmentId
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.GetBuilderServiceByType(resource.NodeType).CustomErrorMessage().Create(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).App().Create(
 			context.Background(),
-			&customErrorMessages,
+			&app,
 		)
 
 		if err != nil {
@@ -87,130 +87,43 @@ func (h *HandlerV2) CreateErrorMessage(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().CustomErrorMessage().Create(
+		resp, err = services.PostgresBuilderService().App().Create(
 			context.Background(),
-			&customErrorMessages,
+			&app,
 		)
 
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
-
 	}
-	h.handleResponse(c, status_http.OK, resp)
+
+	h.handleResponse(c, status_http.Created, resp)
 }
 
-// GetByIdErrorMessage godoc
+// GetAppByID godoc
 // @Security ApiKeyAuth
-// @ID Get_by_id_error_message
-// @Router /v2/collections/{collection}/error_messages/{id} [GET]
-// @Summary Error message by id
-// @Description Error message by id
-// @Tags Collections
+// @ID get_app_by_id
+// @Router /v1/app/{app_id} [GET]
+// @Summary Get app by id
+// @Description Get app by id
+// @Tags App
 // @Accept json
 // @Produce json
-// @Param collection path string true "collection"
-// @Param id path string  true "id"
-// @Success 200 {object} status_http.Response{data=string} "Error Message data"
-// @Response 400 {object} status_http.Response{data=string} "Bad Request"
-// @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *HandlerV2) GetByIdErrorMessage(c *gin.Context) {
-	var (
-		resp *obs.CustomErrorMessage
-	)
-	if !util.IsValidUUID(c.Param("id")) {
-		h.handleResponse(c, status_http.InvalidArgument, "error message id is an invalid uuid")
-		return
-	}
-
-	projectId, ok := c.Get("project_id")
-	if !ok || !util.IsValidUUID(projectId.(string)) {
-		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
-		return
-	}
-
-	environmentId, ok := c.Get("environment_id")
-	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err := errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
-		return
-	}
-
-	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId.(string),
-			EnvironmentId: environmentId.(string),
-			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		resource.GetProjectId(),
-		resource.NodeType,
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
-	switch resource.ResourceType {
-	case pb.ResourceType_MONGODB:
-		resp, err = services.GetBuilderServiceByType(resource.NodeType).CustomErrorMessage().GetById(
-			context.Background(),
-			&obs.CustomErrorMessagePK{
-				Id:        c.Param("id"),
-				ProjectId: resource.GetResourceEnvironmentId(),
-			},
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().CustomErrorMessage().GetById(
-			context.Background(),
-			&obs.CustomErrorMessagePK{
-				Id:        c.Param("id"),
-				ProjectId: resource.GetResourceEnvironmentId(),
-			},
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
-	}
-	h.handleResponse(c, status_http.OK, resp)
-}
-
-// GetAllErrorMessage godoc
-// @Security ApiKeyAuth
-// @ID get_all_error_message
-// @Router /v2/collections/{collection}/error_messages [GET]
-// @Summary Get all error messages
-// @Description Get all error messages
-// @Tags Collections
-// @Accept json
-// @Produce json
-// @Param collection path string true "collection"
-// @Param filters query obs.GetCustomErrorMessageListRequest true "filters"
-// @Success 200 {object} status_http.Response{data=string} "ErrorMessageBody"
+// @Param app_id path string true "app_id"
+// @Success 200 {object} status_http.Response{data=obs.App} "AppBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *HandlerV2) GetAllErrorMessage(c *gin.Context) {
-
+func (h *HandlerV1) GetAppByID(c *gin.Context) {
+	appID := c.Param("app_id")
 	var (
-		resp *obs.GetCustomErrorMessageListResponse
+		resp *obs.App
 	)
+
+	if !util.IsValidUUID(appID) {
+		h.handleResponse(c, status_http.InvalidArgument, "app id is an invalid uuid")
+		return
+	}
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -222,10 +135,6 @@ func (h *HandlerV2) GetAllErrorMessage(c *gin.Context) {
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		err := errors.New("error getting environment id | not valid")
 		h.handleResponse(c, status_http.BadRequest, err)
-		return
-	}
-	if c.Param("collection") == "" {
-		h.handleResponse(c, status_http.BadRequest, "collection is required")
 		return
 	}
 
@@ -244,7 +153,7 @@ func (h *HandlerV2) GetAllErrorMessage(c *gin.Context) {
 
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
-		resource.GetProjectId(),
+		projectId.(string),
 		resource.NodeType,
 	)
 	if err != nil {
@@ -254,27 +163,25 @@ func (h *HandlerV2) GetAllErrorMessage(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.GetBuilderServiceByType(resource.NodeType).CustomErrorMessage().GetList(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).App().GetByID(
 			context.Background(),
-			&obs.GetCustomErrorMessageListRequest{
-				TableSlug: c.Param("collection"),
+			&obs.AppPrimaryKey{
+				Id:        appID,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
-
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().CustomErrorMessage().GetList(
+		resp, err = services.PostgresBuilderService().App().GetByID(
 			context.Background(),
-			&obs.GetCustomErrorMessageListRequest{
-				TableSlug: c.Param("collection"),
+			&obs.AppPrimaryKey{
+				Id:        appID,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
-
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
@@ -284,27 +191,124 @@ func (h *HandlerV2) GetAllErrorMessage(c *gin.Context) {
 	h.handleResponse(c, status_http.OK, resp)
 }
 
-// UpdateErrorMessage godoc
+// GetAllApps godoc
 // @Security ApiKeyAuth
-// @ID update_error_message
-// @Router /v2/collections/{collection}/error_messages [PUT]
-// @Summary Update error message
-// @Description Update error message
-// @Tags Collections
+// @ID get_all_apps
+// @Router /v1/app [GET]
+// @Summary Get all apps
+// @Description Get all apps
+// @Tags App
 // @Accept json
 // @Produce json
-// @Param collection path string true "collection"
-// @Param table body obs.CustomErrorMessage  true "UpdateErrorMessageBody"
-// @Success 200 {object} status_http.Response{data=string} "Error Message data"
+// @Param X-API-KEY header string true "API key for the endpoint"
+// @Param filters query obs.GetAllAppsRequest true "filters"
+// @Success 200 {object} status_http.Response{data=obs.GetAllAppsResponse} "AppBody"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *HandlerV1) GetAllApps(c *gin.Context) {
+	offset, err := h.getOffsetParam(c)
+	var (
+		resp *obs.GetAllAppsResponse
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
+	limit, err := h.getLimitParam(c)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
+	limit = 100
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+	limit = 100
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	authInfo, _ := h.GetAuthInfo(c)
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).App().GetAll(
+			context.Background(),
+			&obs.GetAllAppsRequest{
+				Limit:     int32(limit),
+				Offset:    int32(offset),
+				Search:    c.DefaultQuery("search", ""),
+				ProjectId: resource.ResourceEnvironmentId,
+				RoleId:    authInfo.GetRoleId(),
+			},
+		)
+	case pb.ResourceType_POSTGRESQL:
+		resp, err = services.PostgresBuilderService().App().GetAll(
+			context.Background(),
+			&obs.GetAllAppsRequest{
+				Limit:     int32(limit),
+				Offset:    int32(offset),
+				Search:    c.DefaultQuery("search", ""),
+				ProjectId: resource.ResourceEnvironmentId,
+				RoleId:    authInfo.GetRoleId(),
+			},
+		)
+	}
+
+	h.handleResponse(c, status_http.OK, resp)
+}
+
+// UpdateApp godoc
+// @Security ApiKeyAuth
+// @ID update_app
+// @Router /v1/app [PUT]
+// @Summary Update app
+// @Description Update app
+// @Tags App
+// @Accept json
+// @Produce json
+// @Param app body obs.UpdateAppRequest  true "UpdateAppRequestBody"
+// @Success 200 {object} status_http.Response{data=obs.App} "App data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *HandlerV2) UpdateErrorMessage(c *gin.Context) {
+func (h *HandlerV1) UpdateApp(c *gin.Context) {
 	var (
-		customErrorMessages obs.CustomErrorMessage
-		resp                *emptypb.Empty
+		app  obs.UpdateAppRequest
+		resp *emptypb.Empty
 	)
 
-	err := c.ShouldBindJSON(&customErrorMessages)
+	err := c.ShouldBindJSON(&app)
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
@@ -338,7 +342,7 @@ func (h *HandlerV2) UpdateErrorMessage(c *gin.Context) {
 
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
-		resource.GetProjectId(),
+		projectId.(string),
 		resource.NodeType,
 	)
 	if err != nil {
@@ -346,12 +350,12 @@ func (h *HandlerV2) UpdateErrorMessage(c *gin.Context) {
 		return
 	}
 
-	customErrorMessages.ProjectId = resource.ResourceEnvironmentId
+	app.ProjectId = resource.ResourceEnvironmentId
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.GetBuilderServiceByType(resource.NodeType).CustomErrorMessage().Update(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).App().Update(
 			context.Background(),
-			&customErrorMessages,
+			&app,
 		)
 
 		if err != nil {
@@ -359,40 +363,41 @@ func (h *HandlerV2) UpdateErrorMessage(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().CustomErrorMessage().Update(
+		resp, err = services.PostgresBuilderService().App().Update(
 			context.Background(),
-			&customErrorMessages,
+			&app,
 		)
 
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
-
 	}
+
 	h.handleResponse(c, status_http.OK, resp)
 }
 
-// DeleteErrorMessage godoc
+// DeleteApp godoc
 // @Security ApiKeyAuth
-// @ID delete_error_message
-// @Router /v2/collections/{collection}/error_messages/{id} [DELETE]
-// @Summary Delete error message
-// @Description Delete error message
-// @Tags Collections
+// @ID delete_app
+// @Router /v1/app/{app_id} [DELETE]
+// @Summary Delete App
+// @Description Delete App
+// @Tags App
 // @Accept json
 // @Produce json
-// @Param collection path string true "collection"
-// @Param id path string true "id"
+// @Param app_id path string true "app_id"
 // @Success 204
-// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *HandlerV2) DeleteErrorMessage(c *gin.Context) {
+func (h *HandlerV1) DeleteApp(c *gin.Context) {
+	appID := c.Param("app_id")
 	var (
 		resp *emptypb.Empty
 	)
-	if !util.IsValidUUID(c.Param("id")) {
-		h.handleResponse(c, status_http.BadRequest, "invalid custom error message id")
+
+	if !util.IsValidUUID(appID) {
+		h.handleResponse(c, status_http.InvalidArgument, "app id is an invalid uuid")
 		return
 	}
 
@@ -424,7 +429,7 @@ func (h *HandlerV2) DeleteErrorMessage(c *gin.Context) {
 
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
-		resource.GetProjectId(),
+		projectId.(string),
 		resource.NodeType,
 	)
 	if err != nil {
@@ -434,11 +439,11 @@ func (h *HandlerV2) DeleteErrorMessage(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.GetBuilderServiceByType(resource.NodeType).CustomErrorMessage().Delete(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).App().Delete(
 			context.Background(),
-			&obs.CustomErrorMessagePK{
-				Id:        c.Param("id"),
-				ProjectId: resource.GetResourceEnvironmentId(),
+			&obs.AppPrimaryKey{
+				Id:        appID,
+				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
 
@@ -447,11 +452,11 @@ func (h *HandlerV2) DeleteErrorMessage(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().CustomErrorMessage().Delete(
+		resp, err = services.PostgresBuilderService().App().Delete(
 			context.Background(),
-			&obs.CustomErrorMessagePK{
-				Id:        c.Param("id"),
-				ProjectId: resource.GetResourceEnvironmentId(),
+			&obs.AppPrimaryKey{
+				Id:        appID,
+				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
 
@@ -461,5 +466,6 @@ func (h *HandlerV2) DeleteErrorMessage(c *gin.Context) {
 		}
 
 	}
-	h.handleResponse(c, status_http.OK, resp)
+
+	h.handleResponse(c, status_http.NoContent, resp)
 }

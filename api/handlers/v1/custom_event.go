@@ -1,38 +1,38 @@
-package v2
+package v1
 
 import (
 	"context"
 	"errors"
+	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
+	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
-	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-// CreateErrorMessage godoc
+// CreateCustomEvent godoc
 // @Security ApiKeyAuth
-// @ID create_error_message
-// @Router /v2/collections/{collection}/error_messages [POST]
-// @Summary Create error message
-// @Description Create error message
-// @Tags Collections
+// @ID create_custom_event
+// @Router /v1/custom-event [POST]
+// @Summary Create CustomEvent
+// @Description Create CustomEvent
+// @Tags CustomEvent
 // @Accept json
 // @Produce json
-// @Param collection path string true "collection"
-// @Param table body obs.CreateCustomErrorMessage  true "CreateCustomErrorMessageBody"
-// @Success 200 {object} status_http.Response{data=string} "Custom Error Message data"
+// @Param Customevent body obs.CreateCustomEventRequest true "CreateCustomEventRequestBody"
+// @Success 201 {object} status_http.Response{data=string} "CustomEvent data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *HandlerV2) CreateErrorMessage(c *gin.Context) {
+func (h *HandlerV1) CreateCustomEvent(c *gin.Context) {
 	var (
-		customErrorMessages obs.CreateCustomErrorMessage
-		resp                *obs.CustomErrorMessage
+		customevent models.CreateCustomEventRequest
+		resp        *obs.CustomEvent
 	)
 
-	err := c.ShouldBindJSON(&customErrorMessages)
+	err := c.ShouldBindJSON(&customevent)
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
@@ -66,7 +66,7 @@ func (h *HandlerV2) CreateErrorMessage(c *gin.Context) {
 
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
-		resource.GetProjectId(),
+		projectId.(string),
 		resource.NodeType,
 	)
 	if err != nil {
@@ -74,143 +74,79 @@ func (h *HandlerV2) CreateErrorMessage(c *gin.Context) {
 		return
 	}
 
-	customErrorMessages.ProjectId = resource.ResourceEnvironmentId
-	switch resource.ResourceType {
-	case pb.ResourceType_MONGODB:
-		resp, err = services.GetBuilderServiceByType(resource.NodeType).CustomErrorMessage().Create(
-			context.Background(),
-			&customErrorMessages,
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().CustomErrorMessage().Create(
-			context.Background(),
-			&customErrorMessages,
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
-	}
-	h.handleResponse(c, status_http.OK, resp)
-}
-
-// GetByIdErrorMessage godoc
-// @Security ApiKeyAuth
-// @ID Get_by_id_error_message
-// @Router /v2/collections/{collection}/error_messages/{id} [GET]
-// @Summary Error message by id
-// @Description Error message by id
-// @Tags Collections
-// @Accept json
-// @Produce json
-// @Param collection path string true "collection"
-// @Param id path string  true "id"
-// @Success 200 {object} status_http.Response{data=string} "Error Message data"
-// @Response 400 {object} status_http.Response{data=string} "Bad Request"
-// @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *HandlerV2) GetByIdErrorMessage(c *gin.Context) {
-	var (
-		resp *obs.CustomErrorMessage
-	)
-	if !util.IsValidUUID(c.Param("id")) {
-		h.handleResponse(c, status_http.InvalidArgument, "error message id is an invalid uuid")
-		return
-	}
-
-	projectId, ok := c.Get("project_id")
-	if !ok || !util.IsValidUUID(projectId.(string)) {
-		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
-		return
-	}
-
-	environmentId, ok := c.Get("environment_id")
-	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err := errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
-		return
-	}
-
-	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId.(string),
-			EnvironmentId: environmentId.(string),
-			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
-		},
-	)
+	structData, err := helper.ConvertMapToStruct(customevent.Attributes)
 	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		resource.GetProjectId(),
-		resource.NodeType,
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.GetBuilderServiceByType(resource.NodeType).CustomErrorMessage().GetById(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).CustomEvent().Create(
 			context.Background(),
-			&obs.CustomErrorMessagePK{
-				Id:        c.Param("id"),
-				ProjectId: resource.GetResourceEnvironmentId(),
+			&obs.CreateCustomEventRequest{
+				TableSlug:  customevent.TableSlug,
+				EventPath:  customevent.EventPath,
+				Label:      customevent.Label,
+				Icon:       customevent.Icon,
+				Url:        customevent.Url,
+				Disable:    customevent.Disable,
+				ActionType: customevent.ActionType,
+				Method:     customevent.Method,
+				Attributes: structData,
+				ProjectId:  resource.ResourceEnvironmentId, //added resource id
+				// CommitId:   commitID,
+				// CommitGuid: commitGuid,
 			},
 		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().CustomErrorMessage().GetById(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).CustomEvent().Create(
 			context.Background(),
-			&obs.CustomErrorMessagePK{
-				Id:        c.Param("id"),
-				ProjectId: resource.GetResourceEnvironmentId(),
+			&obs.CreateCustomEventRequest{
+				TableSlug:  customevent.TableSlug,
+				EventPath:  customevent.EventPath,
+				Label:      customevent.Label,
+				Icon:       customevent.Icon,
+				Url:        customevent.Url,
+				Disable:    customevent.Disable,
+				ActionType: customevent.ActionType,
+				Method:     customevent.Method,
+				Attributes: structData,
+				ProjectId:  resource.ResourceEnvironmentId, //added resource id
+				// CommitId:   commitID,
+				// CommitGuid: commitGuid,
 			},
 		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
 	}
-	h.handleResponse(c, status_http.OK, resp)
+
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.Created, resp)
 }
 
-// GetAllErrorMessage godoc
+// GetCustomEventByID godoc
 // @Security ApiKeyAuth
-// @ID get_all_error_message
-// @Router /v2/collections/{collection}/error_messages [GET]
-// @Summary Get all error messages
-// @Description Get all error messages
-// @Tags Collections
+// @ID get_custom_event_by_id
+// @Router /v1/custom-event/{custom_event_id} [GET]
+// @Summary Get CustomEvent by id
+// @Description Get CustomEvent by id
+// @Tags CustomEvent
 // @Accept json
 // @Produce json
-// @Param collection path string true "collection"
-// @Param filters query obs.GetCustomErrorMessageListRequest true "filters"
-// @Success 200 {object} status_http.Response{data=string} "ErrorMessageBody"
+// @Param custom_event_id path string true "custom_event_id"
+// @Success 200 {object} status_http.Response{data=string} "CustomEventBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *HandlerV2) GetAllErrorMessage(c *gin.Context) {
+func (h *HandlerV1) GetCustomEventByID(c *gin.Context) {
+	customeventID := c.Param("custom_event_id")
 
-	var (
-		resp *obs.GetCustomErrorMessageListResponse
-	)
+	if !util.IsValidUUID(customeventID) {
+		h.handleResponse(c, status_http.InvalidArgument, "Customevent id is an invalid uuid")
+		return
+	}
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -222,10 +158,6 @@ func (h *HandlerV2) GetAllErrorMessage(c *gin.Context) {
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		err := errors.New("error getting environment id | not valid")
 		h.handleResponse(c, status_http.BadRequest, err)
-		return
-	}
-	if c.Param("collection") == "" {
-		h.handleResponse(c, status_http.BadRequest, "collection is required")
 		return
 	}
 
@@ -244,7 +176,80 @@ func (h *HandlerV2) GetAllErrorMessage(c *gin.Context) {
 
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
-		resource.GetProjectId(),
+		projectId.(string),
+		resource.NodeType,
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).CustomEvent().GetSingle(
+		context.Background(),
+		&obs.CustomEventPrimaryKey{
+			Id:        customeventID,
+			ProjectId: resource.EnvironmentId,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.OK, resp)
+}
+
+// GetAllCustomEvents godoc
+// @Security ApiKeyAuth
+// @ID get_all_custom_events
+// @Router /v1/custom-event [GET]
+// @Summary Get all custom events
+// @Description Get all custom events
+// @Tags CustomEvent
+// @Accept json
+// @Produce json
+// @Param filters query obs.GetCustomEventsListRequest true "filters"
+// @Success 200 {object} status_http.Response{data=string} "CustomEventBody"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *HandlerV1) GetAllCustomEvents(c *gin.Context) {
+	var resp *obs.GetCustomEventsListResponse
+
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err.Error())
+		return
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
 		resource.NodeType,
 	)
 	if err != nil {
@@ -254,10 +259,11 @@ func (h *HandlerV2) GetAllErrorMessage(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.GetBuilderServiceByType(resource.NodeType).CustomErrorMessage().GetList(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).CustomEvent().GetList(
 			context.Background(),
-			&obs.GetCustomErrorMessageListRequest{
-				TableSlug: c.Param("collection"),
+			&obs.GetCustomEventsListRequest{
+				TableSlug: c.DefaultQuery("table_slug", ""),
+				RoleId:    authInfo.GetRoleId(),
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
@@ -267,10 +273,11 @@ func (h *HandlerV2) GetAllErrorMessage(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().CustomErrorMessage().GetList(
+		resp, err = services.PostgresBuilderService().CustomEvent().GetList(
 			context.Background(),
-			&obs.GetCustomErrorMessageListRequest{
-				TableSlug: c.Param("collection"),
+			&obs.GetCustomEventsListRequest{
+				TableSlug: c.DefaultQuery("table_slug", ""),
+				RoleId:    authInfo.GetRoleId(),
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
@@ -284,27 +291,23 @@ func (h *HandlerV2) GetAllErrorMessage(c *gin.Context) {
 	h.handleResponse(c, status_http.OK, resp)
 }
 
-// UpdateErrorMessage godoc
+// UpdateCustomEvent godoc
 // @Security ApiKeyAuth
-// @ID update_error_message
-// @Router /v2/collections/{collection}/error_messages [PUT]
-// @Summary Update error message
-// @Description Update error message
-// @Tags Collections
+// @ID update_Customevent
+// @Router /v1/custom-event [PUT]
+// @Summary Update Customevent
+// @Description Update custom event
+// @Tags CustomEvent
 // @Accept json
 // @Produce json
-// @Param collection path string true "collection"
-// @Param table body obs.CustomErrorMessage  true "UpdateErrorMessageBody"
-// @Success 200 {object} status_http.Response{data=string} "Error Message data"
+// @Param Customevent body models.CustomEvent true "UpdateCustomEventRequestBody"
+// @Success 200 {object} status_http.Response{data=string} "CustomEvent data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *HandlerV2) UpdateErrorMessage(c *gin.Context) {
-	var (
-		customErrorMessages obs.CustomErrorMessage
-		resp                *emptypb.Empty
-	)
+func (h *HandlerV1) UpdateCustomEvent(c *gin.Context) {
+	var customevent models.CustomEvent
 
-	err := c.ShouldBindJSON(&customErrorMessages)
+	err := c.ShouldBindJSON(&customevent)
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
@@ -338,7 +341,7 @@ func (h *HandlerV2) UpdateErrorMessage(c *gin.Context) {
 
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
-		resource.GetProjectId(),
+		projectId.(string),
 		resource.NodeType,
 	)
 	if err != nil {
@@ -346,53 +349,55 @@ func (h *HandlerV2) UpdateErrorMessage(c *gin.Context) {
 		return
 	}
 
-	customErrorMessages.ProjectId = resource.ResourceEnvironmentId
-	switch resource.ResourceType {
-	case pb.ResourceType_MONGODB:
-		resp, err = services.GetBuilderServiceByType(resource.NodeType).CustomErrorMessage().Update(
-			context.Background(),
-			&customErrorMessages,
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().CustomErrorMessage().Update(
-			context.Background(),
-			&customErrorMessages,
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
+	structData, err := helper.ConvertMapToStruct(customevent.Attributes)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
 	}
+
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).CustomEvent().Update(
+		context.Background(),
+		&obs.CustomEvent{
+			Id:         customevent.Id,
+			TableSlug:  customevent.TableSlug,
+			EventPath:  customevent.EventPath,
+			Label:      customevent.Label,
+			Icon:       customevent.Icon,
+			Url:        customevent.Url,
+			Disable:    customevent.Disable,
+			ActionType: customevent.ActionType,
+			Method:     customevent.Method,
+			Attributes: structData,
+			ProjectId:  resource.ResourceEnvironmentId,
+		},
+	)
+
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
 	h.handleResponse(c, status_http.OK, resp)
 }
 
-// DeleteErrorMessage godoc
+// DeleteCustomEvent godoc
 // @Security ApiKeyAuth
-// @ID delete_error_message
-// @Router /v2/collections/{collection}/error_messages/{id} [DELETE]
-// @Summary Delete error message
-// @Description Delete error message
-// @Tags Collections
+// @ID delete_custom_event
+// @Router /v1/custom-event/{custom_event_id} [DELETE]
+// @Summary Delete CustomEvent
+// @Description Delete CustomEvent
+// @Tags CustomEvent
 // @Accept json
 // @Produce json
-// @Param collection path string true "collection"
-// @Param id path string true "id"
+// @Param custom_event_id path string true "custom_event_id"
 // @Success 204
-// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *HandlerV2) DeleteErrorMessage(c *gin.Context) {
-	var (
-		resp *emptypb.Empty
-	)
-	if !util.IsValidUUID(c.Param("id")) {
-		h.handleResponse(c, status_http.BadRequest, "invalid custom error message id")
+func (h *HandlerV1) DeleteCustomEvent(c *gin.Context) {
+	customeventID := c.Param("custom_event_id")
+
+	if !util.IsValidUUID(customeventID) {
+		h.handleResponse(c, status_http.InvalidArgument, "Customevent id is an invalid uuid")
 		return
 	}
 
@@ -424,7 +429,7 @@ func (h *HandlerV2) DeleteErrorMessage(c *gin.Context) {
 
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
-		resource.GetProjectId(),
+		projectId.(string),
 		resource.NodeType,
 	)
 	if err != nil {
@@ -432,34 +437,18 @@ func (h *HandlerV2) DeleteErrorMessage(c *gin.Context) {
 		return
 	}
 
-	switch resource.ResourceType {
-	case pb.ResourceType_MONGODB:
-		resp, err = services.GetBuilderServiceByType(resource.NodeType).CustomErrorMessage().Delete(
-			context.Background(),
-			&obs.CustomErrorMessagePK{
-				Id:        c.Param("id"),
-				ProjectId: resource.GetResourceEnvironmentId(),
-			},
-		)
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).CustomEvent().Delete(
+		context.Background(),
+		&obs.CustomEventPrimaryKey{
+			Id:        customeventID,
+			ProjectId: resource.ResourceEnvironmentId,
+		},
+	)
 
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().CustomErrorMessage().Delete(
-			context.Background(),
-			&obs.CustomErrorMessagePK{
-				Id:        c.Param("id"),
-				ProjectId: resource.GetResourceEnvironmentId(),
-			},
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
 	}
-	h.handleResponse(c, status_http.OK, resp)
+
+	h.handleResponse(c, status_http.NoContent, resp)
 }

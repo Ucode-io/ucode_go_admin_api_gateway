@@ -1,4 +1,4 @@
-package v2
+package v1
 
 import (
 	"context"
@@ -23,7 +23,7 @@ type DoInvokeFuntionStruct struct {
 	ObjectDataBeforeUpdate map[string]interface{}
 }
 
-func GetListCustomEvents(tableSlug, roleId, method string, c *gin.Context, h *HandlerV2) (beforeEvents, afterEvents []*obs.CustomEvent, err error) {
+func GetListCustomEvents(tableSlug, roleId, method string, c *gin.Context, h *HandlerV1) (beforeEvents, afterEvents []*obs.CustomEvent, err error) {
 
 	var (
 		res *obs.GetCustomEventsListResponse
@@ -57,7 +57,7 @@ func GetListCustomEvents(tableSlug, roleId, method string, c *gin.Context, h *Ha
 
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
-		resource.GetProjectId(),
+		projectId.(string),
 		resource.NodeType,
 	)
 	if err != nil {
@@ -111,14 +111,13 @@ func GetListCustomEvents(tableSlug, roleId, method string, c *gin.Context, h *Ha
 	return
 }
 
-func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *HandlerV2) (functionName string, err error) {
-
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
+func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *HandlerV1) (functionName string, err error) {
+	// namespace := c.GetString("namespace")
+	// services, err := h.GetService(namespace)
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.Forbidden, err)
+	// 	return
+	// }
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -192,6 +191,15 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *HandlerV2
 			}
 			return customEvent.GetFunctions()[0].Name, errors.New(errStr)
 		}
+		// _, err = services.GetBuilderServiceByType(resource.NodeType).CustomEvent().UpdateByFunctionId(context.Background(), &obs.UpdateByFunctionIdRequest{
+		// 	FunctionId: customEvent.Functions[0].Id,
+		// 	ObjectIds:  request.IDs,
+		// 	FieldSlug:  customEvent.Functions[0].Path + "_disable",
+		// 	ProjectId:  resourceEnvironment.GetId(),
+		// })
+		// if err != nil {
+		// 	return customEvent.Functions[0].Name, err
+		// }
 	}
 	return
 }

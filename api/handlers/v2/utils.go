@@ -372,7 +372,7 @@ func (h *HandlerV2) ExportData(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().GetListInExcel(

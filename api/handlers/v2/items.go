@@ -88,7 +88,6 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 		return
 	}
 
-
 	objectRequest.Data["company_service_project_id"] = resource.GetProjectId()
 	objectRequest.Data["company_service_environment_id"] = resource.GetEnvironmentId()
 
@@ -136,9 +135,16 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 		}
 	}
 
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err)
+		return
+	}
+	defer conn.Close()
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().Create(
+		resp, err = service.Create(
 			context.Background(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("collection"),
@@ -264,6 +270,13 @@ func (h *HandlerV2) CreateItems(c *gin.Context) {
 		return
 	}
 
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err)
+		return
+	}
+	defer conn.Close()
+
 	request := make(map[string]interface{})
 	request["company_service_project_id"] = resource.GetProjectId()
 	request["company_service_environment_id"] = resource.GetEnvironmentId()
@@ -301,7 +314,7 @@ func (h *HandlerV2) CreateItems(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().Create(
+		resp, err = service.Create(
 			context.Background(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("collection"),
@@ -404,8 +417,6 @@ func (h *HandlerV2) GetSingleItem(c *gin.Context) {
 		return
 	}
 
-	
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -441,9 +452,16 @@ func (h *HandlerV2) GetSingleItem(c *gin.Context) {
 		return
 	}
 
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err)
+		return
+	}
+	defer conn.Close()
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().GetSingle(
+		resp, err = service.GetSingle(
 			context.Background(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("collection"),
@@ -535,7 +553,6 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 		return
 	}
 
-	
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -572,6 +589,12 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 		return
 	}
 
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err)
+		return
+	}
+	defer conn.Close()
 
 	if viewId, ok := objectRequest["builder_service_view_id"].(string); ok {
 		if util.IsValidUUID(viewId) {
@@ -591,7 +614,7 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 					}
 				}
 
-				resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().GroupByColumns(
+				resp, err = service.GroupByColumns(
 					context.Background(),
 					&obs.CommonMessage{
 						TableSlug: c.Param("collection"),
@@ -771,10 +794,16 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 		return
 	}
 
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err)
+		return
+	}
+	defer conn.Close()
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		singleObject, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().GetSingle(
+		singleObject, err = service.GetSingle(
 			context.Background(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("collection"),
@@ -842,7 +871,7 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 	}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().Update(
+		resp, err = service.Update(
 			context.Background(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("collection"),
@@ -923,7 +952,7 @@ func (h *HandlerV2) MultipleUpdateItems(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
-	
+
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -960,6 +989,13 @@ func (h *HandlerV2) MultipleUpdateItems(c *gin.Context) {
 		return
 	}
 
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err)
+		return
+	}
+	defer conn.Close()
+
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
 
 	if err != nil {
@@ -994,7 +1030,7 @@ func (h *HandlerV2) MultipleUpdateItems(c *gin.Context) {
 	var resp *obs.CommonMessage
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().MultipleUpdate(
+		resp, err = service.MultipleUpdate(
 			context.Background(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("collection"),
@@ -1014,7 +1050,7 @@ func (h *HandlerV2) MultipleUpdateItems(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().MultipleUpdate(
+		resp, err = service.MultipleUpdate(
 			context.Background(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("collection"),
@@ -1083,7 +1119,7 @@ func (h *HandlerV2) DeleteItem(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, "item id is an invalid uuid")
 		return
 	}
-	
+
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -1118,6 +1154,13 @@ func (h *HandlerV2) DeleteItem(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err)
+		return
+	}
+	defer conn.Close()
 
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
 	if err != nil {
@@ -1156,7 +1199,7 @@ func (h *HandlerV2) DeleteItem(c *gin.Context) {
 	}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().Delete(
+		resp, err = service.Delete(
 			context.Background(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("collection"),
@@ -1245,7 +1288,7 @@ func (h *HandlerV2) DeleteItems(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, "ids is required and must be an array of strings")
 		return
 	}
-	
+
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -1281,6 +1324,13 @@ func (h *HandlerV2) DeleteItems(c *gin.Context) {
 		return
 	}
 
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err)
+		return
+	}
+	defer conn.Close()
+
 	structData, err := helper.ConvertMapToStruct(data)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
@@ -1313,7 +1363,7 @@ func (h *HandlerV2) DeleteItems(c *gin.Context) {
 	}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().DeleteMany(
+		resp, err = service.DeleteMany(
 			context.Background(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("collection"),
@@ -1397,7 +1447,6 @@ func (h *HandlerV2) DeleteManyToMany(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 	}
 
-	
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -1434,6 +1483,13 @@ func (h *HandlerV2) DeleteManyToMany(c *gin.Context) {
 		return
 	}
 
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err)
+		return
+	}
+	defer conn.Close()
+
 	m2mMessage.ProjectId = resource.ResourceEnvironmentId
 	fromOfs := c.Query("from-ofs")
 	if fromOfs != "true" {
@@ -1461,7 +1517,7 @@ func (h *HandlerV2) DeleteManyToMany(c *gin.Context) {
 	}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().ManyToManyDelete(
+		resp, err = service.ManyToManyDelete(
 			context.Background(),
 			&m2mMessage,
 		)
@@ -1534,7 +1590,6 @@ func (h *HandlerV2) AppendManyToMany(c *gin.Context) {
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 	}
-	
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -1572,6 +1627,13 @@ func (h *HandlerV2) AppendManyToMany(c *gin.Context) {
 		return
 	}
 
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err)
+		return
+	}
+	defer conn.Close()
+	
 	m2mMessage.ProjectId = resource.ResourceEnvironmentId
 	fromOfs := c.Query("from-ofs")
 	if fromOfs != "true" {
@@ -1599,7 +1661,7 @@ func (h *HandlerV2) AppendManyToMany(c *gin.Context) {
 	}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().ManyToManyAppend(
+		resp, err = service.ManyToManyAppend(
 			context.Background(),
 			&m2mMessage,
 		)

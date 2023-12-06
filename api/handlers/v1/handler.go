@@ -1,10 +1,8 @@
-package handlers
+package v1
 
 import (
 	"context"
 	"strconv"
-	v1 "ucode/ucode_go_api_gateway/api/handlers/v1"
-	v2 "ucode/ucode_go_api_gateway/api/handlers/v2"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/pkg/logger"
@@ -14,7 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type Handler struct {
+type HandlerV1 struct {
 	baseConf        config.BaseConfig
 	projectConfs    map[string]config.Config
 	log             logger.LoggerI
@@ -24,12 +22,10 @@ type Handler struct {
 	authService     services.AuthServiceManagerI
 	apikeyService   services.AuthServiceManagerI
 	redis           storage.RedisStorageI
-	V1              v1.HandlerV1
-	V2              v2.HandlerV2
 }
 
-func NewHandler(baseConf config.BaseConfig, projectConfs map[string]config.Config, log logger.LoggerI, svcs services.ServiceNodesI, cmpServ services.CompanyServiceI, authService services.AuthServiceManagerI, redis storage.RedisStorageI) Handler {
-	return Handler{
+func NewHandlerV1(baseConf config.BaseConfig, projectConfs map[string]config.Config, log logger.LoggerI, svcs services.ServiceNodesI, cmpServ services.CompanyServiceI, authService services.AuthServiceManagerI, redis storage.RedisStorageI) HandlerV1 {
+	return HandlerV1{
 		baseConf:        baseConf,
 		projectConfs:    projectConfs,
 		log:             log,
@@ -37,24 +33,10 @@ func NewHandler(baseConf config.BaseConfig, projectConfs map[string]config.Confi
 		companyServices: cmpServ,
 		authService:     authService,
 		redis:           redis,
-		V1:              v1.NewHandlerV1(baseConf, projectConfs, log, svcs, cmpServ, authService, redis),
-		V2:              v2.NewHandlerV2(baseConf, projectConfs, log, svcs, cmpServ, authService, redis),
 	}
 }
 
-func (h *Handler) GetCompanyService(c *gin.Context) services.CompanyServiceI {
-	return h.companyServices
-}
-
-func (h *Handler) GetAuthService(c *gin.Context) services.AuthServiceManagerI {
-	return h.authService
-}
-
-func (h *Handler) GetProjectConfig(c *gin.Context, projectId string) config.Config {
-	return h.projectConfs[projectId]
-}
-
-func (h *Handler) GetProjectSrvc(c context.Context, projectId string, nodeType string) (services.ServiceManagerI, error) {
+func (h *HandlerV1) GetProjectSrvc(c context.Context, projectId string, nodeType string) (services.ServiceManagerI, error) {
 	if nodeType == config.ENTER_PRICE_TYPE {
 		srvc, err := h.services.Get(projectId)
 		if err != nil {
@@ -72,7 +54,7 @@ func (h *Handler) GetProjectSrvc(c context.Context, projectId string, nodeType s
 	}
 }
 
-func (h *Handler) handleResponse(c *gin.Context, status status_http.Status, data interface{}) {
+func (h *HandlerV1) handleResponse(c *gin.Context, status status_http.Status, data interface{}) {
 	switch code := status.Code; {
 	// case code < 300:
 	// 	h.log.Info(
@@ -111,23 +93,17 @@ func (h *Handler) handleResponse(c *gin.Context, status status_http.Status, data
 	})
 }
 
-func (h *Handler) getOffsetParam(c *gin.Context) (offset int, err error) {
-	// if h.projectConf.DefaultOffset != "" {
-	// 	h.projectConf.DefaultOffset = h.baseConf.DefaultOffset
-	// }
+func (h *HandlerV1) getOffsetParam(c *gin.Context) (offset int, err error) {
 	offsetStr := c.DefaultQuery("offset", h.baseConf.DefaultOffset)
 	return strconv.Atoi(offsetStr)
 }
 
-func (h *Handler) getLimitParam(c *gin.Context) (limit int, err error) {
-	// if h.projectConf.DefaultLimit != "" {
-	// 	h.projectConf.DefaultLimit = h.baseConf.DefaultLimit
-	// }
+func (h *HandlerV1) getLimitParam(c *gin.Context) (limit int, err error) {
 	limitStr := c.DefaultQuery("limit", h.baseConf.DefaultLimit)
 	return strconv.Atoi(limitStr)
 }
 
-func (h *Handler) getPageParam(c *gin.Context) (page int, err error) {
+func (h *HandlerV1) getPageParam(c *gin.Context) (page int, err error) {
 	pageStr := c.DefaultQuery("page", "1")
 	return strconv.Atoi(pageStr)
 }
