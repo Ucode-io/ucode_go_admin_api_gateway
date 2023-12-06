@@ -26,7 +26,7 @@ type GetListAppleIdSettingsRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
 }
 
 func (x *GetListAppleIdSettingsRequest) Reset() {
@@ -73,7 +73,7 @@ type AppleIdSettingsPrimaryKey struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 }
 
 func (x *AppleIdSettingsPrimaryKey) Reset() {
@@ -120,7 +120,7 @@ type GetListAppleIdSettingsResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Items []*AppleIdSettings `protobuf:"bytes,1,rep,name=items,proto3" json:"items"`
+	Items []*AppleIdSettings `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
 }
 
 func (x *GetListAppleIdSettingsResponse) Reset() {
@@ -167,12 +167,12 @@ type AppleIdSettings struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	TeamId    string `protobuf:"bytes,2,opt,name=team_id,json=teamId,proto3" json:"team_id"`
-	ClientId  string `protobuf:"bytes,3,opt,name=client_id,json=clientId,proto3" json:"client_id"`
-	KeyId     string `protobuf:"bytes,4,opt,name=key_id,json=keyId,proto3" json:"key_id"`
-	Secret    string `protobuf:"bytes,5,opt,name=secret,proto3" json:"secret"`
-	ProjectId string `protobuf:"bytes,6,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	TeamId    string `protobuf:"bytes,2,opt,name=team_id,json=teamId,proto3" json:"team_id,omitempty"`
+	ClientId  string `protobuf:"bytes,3,opt,name=client_id,json=clientId,proto3" json:"client_id,omitempty"`
+	KeyId     string `protobuf:"bytes,4,opt,name=key_id,json=keyId,proto3" json:"key_id,omitempty"`
+	Secret    string `protobuf:"bytes,5,opt,name=secret,proto3" json:"secret,omitempty"`
+	ProjectId string `protobuf:"bytes,6,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
 }
 
 func (x *AppleIdSettings) Reset() {
@@ -254,10 +254,10 @@ type AppleId struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	TeamId   string `protobuf:"bytes,1,opt,name=team_id,json=teamId,proto3" json:"team_id"`
-	ClientId string `protobuf:"bytes,2,opt,name=client_id,json=clientId,proto3" json:"client_id"`
-	KeyId    string `protobuf:"bytes,3,opt,name=key_id,json=keyId,proto3" json:"key_id"`
-	Secret   string `protobuf:"bytes,4,opt,name=secret,proto3" json:"secret"`
+	TeamId   string `protobuf:"bytes,1,opt,name=team_id,json=teamId,proto3" json:"team_id,omitempty"`
+	ClientId string `protobuf:"bytes,2,opt,name=client_id,json=clientId,proto3" json:"client_id,omitempty"`
+	KeyId    string `protobuf:"bytes,3,opt,name=key_id,json=keyId,proto3" json:"key_id,omitempty"`
+	Secret   string `protobuf:"bytes,4,opt,name=secret,proto3" json:"secret,omitempty"`
 }
 
 func (x *AppleId) Reset() {

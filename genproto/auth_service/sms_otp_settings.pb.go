@@ -28,8 +28,8 @@ type GetListSmsOtpSettingsRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId     string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	EnvironmentId string `protobuf:"bytes,2,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
+	ProjectId     string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	EnvironmentId string `protobuf:"bytes,2,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
 }
 
 func (x *GetListSmsOtpSettingsRequest) Reset() {
@@ -83,7 +83,7 @@ type SmsOtpSettingsPrimaryKey struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 }
 
 func (x *SmsOtpSettingsPrimaryKey) Reset() {
@@ -130,7 +130,7 @@ type SmsOtpSettingsResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Items []*SmsOtpSettings `protobuf:"bytes,1,rep,name=items,proto3" json:"items"`
+	Items []*SmsOtpSettings `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
 }
 
 func (x *SmsOtpSettingsResponse) Reset() {
@@ -177,14 +177,14 @@ type SmsOtpSettings struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id            string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	Login         string `protobuf:"bytes,2,opt,name=login,proto3" json:"login"`
-	Password      string `protobuf:"bytes,3,opt,name=password,proto3" json:"password"`
-	DefaultOtp    string `protobuf:"bytes,4,opt,name=default_otp,json=defaultOtp,proto3" json:"default_otp"`
-	NumberOfOtp   int32  `protobuf:"varint,5,opt,name=number_of_otp,json=numberOfOtp,proto3" json:"number_of_otp"`
-	ProjectId     string `protobuf:"bytes,6,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	EnvironmentId string `protobuf:"bytes,7,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
-	Originator    string `protobuf:"bytes,8,opt,name=originator,proto3" json:"originator"`
+	Id            string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Login         string `protobuf:"bytes,2,opt,name=login,proto3" json:"login,omitempty"`
+	Password      string `protobuf:"bytes,3,opt,name=password,proto3" json:"password,omitempty"`
+	DefaultOtp    string `protobuf:"bytes,4,opt,name=default_otp,json=defaultOtp,proto3" json:"default_otp,omitempty"`
+	NumberOfOtp   int32  `protobuf:"varint,5,opt,name=number_of_otp,json=numberOfOtp,proto3" json:"number_of_otp,omitempty"`
+	ProjectId     string `protobuf:"bytes,6,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	EnvironmentId string `protobuf:"bytes,7,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
+	Originator    string `protobuf:"bytes,8,opt,name=originator,proto3" json:"originator,omitempty"`
 }
 
 func (x *SmsOtpSettings) Reset() {
@@ -280,13 +280,13 @@ type CreateSmsOtpSettingsRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	DefaultOtp    string `protobuf:"bytes,1,opt,name=default_otp,json=defaultOtp,proto3" json:"default_otp"`
-	Login         string `protobuf:"bytes,2,opt,name=login,proto3" json:"login"`
-	Password      string `protobuf:"bytes,3,opt,name=password,proto3" json:"password"`
-	NumberOfOtp   int32  `protobuf:"varint,4,opt,name=number_of_otp,json=numberOfOtp,proto3" json:"number_of_otp"`
-	ProjectId     string `protobuf:"bytes,5,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	EnvironmentId string `protobuf:"bytes,6,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
-	Originator    string `protobuf:"bytes,7,opt,name=originator,proto3" json:"originator"`
+	DefaultOtp    string `protobuf:"bytes,1,opt,name=default_otp,json=defaultOtp,proto3" json:"default_otp,omitempty"`
+	Login         string `protobuf:"bytes,2,opt,name=login,proto3" json:"login,omitempty"`
+	Password      string `protobuf:"bytes,3,opt,name=password,proto3" json:"password,omitempty"`
+	NumberOfOtp   int32  `protobuf:"varint,4,opt,name=number_of_otp,json=numberOfOtp,proto3" json:"number_of_otp,omitempty"`
+	ProjectId     string `protobuf:"bytes,5,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	EnvironmentId string `protobuf:"bytes,6,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
+	Originator    string `protobuf:"bytes,7,opt,name=originator,proto3" json:"originator,omitempty"`
 }
 
 func (x *CreateSmsOtpSettingsRequest) Reset() {

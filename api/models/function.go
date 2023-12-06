@@ -37,6 +37,18 @@ type InvokeFunctionResponse struct {
 	Attributes map[string]interface{} `json:"attributes"`
 }
 
+type GetListClientApiResp struct {
+	Response       []map[string]interface{} `json:"response"`
+	Fields         []map[string]interface{} `json:"fields"`
+	Views          []map[string]interface{} `json:"views"`
+	RelationFields []map[string]interface{} `json:"relation_fields"`
+}
+
+type InvokeFunctionResponse2 struct {
+	Status string               `json:"status"`
+	Data   GetListClientApiResp `json:"data"`
+}
+
 type NewInvokeFunctionRequest struct {
 	Data map[string]interface{} `json:"data"`
 }

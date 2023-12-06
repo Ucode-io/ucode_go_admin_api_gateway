@@ -26,11 +26,11 @@ type GetListForObjectRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId  string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	LanguageId string `protobuf:"bytes,2,opt,name=language_id,json=languageId,proto3" json:"language_id"`
-	ActionType string `protobuf:"bytes,3,opt,name=action_type,json=actionType,proto3" json:"action_type"`
-	TableSlug  string `protobuf:"bytes,4,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
-	TableId    string `protobuf:"bytes,5,opt,name=table_id,json=tableId,proto3" json:"table_id"`
+	ProjectId  string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	LanguageId string `protobuf:"bytes,2,opt,name=language_id,json=languageId,proto3" json:"language_id,omitempty"`
+	ActionType string `protobuf:"bytes,3,opt,name=action_type,json=actionType,proto3" json:"action_type,omitempty"`
+	TableSlug  string `protobuf:"bytes,4,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
+	TableId    string `protobuf:"bytes,5,opt,name=table_id,json=tableId,proto3" json:"table_id,omitempty"`
 }
 
 func (x *GetListForObjectRequest) Reset() {
@@ -105,8 +105,8 @@ type CustomErrorMessagePK struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
 }
 
 func (x *CustomErrorMessagePK) Reset() {
@@ -160,13 +160,13 @@ type CreateCustomErrorMessage struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId  string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	TableId    string `protobuf:"bytes,2,opt,name=table_id,json=tableId,proto3" json:"table_id"`
-	Message    string `protobuf:"bytes,3,opt,name=message,proto3" json:"message"`
-	ErrorId    string `protobuf:"bytes,4,opt,name=error_id,json=errorId,proto3" json:"error_id"`
-	Code       int32  `protobuf:"varint,5,opt,name=code,proto3" json:"code"`
-	LanguageId string `protobuf:"bytes,6,opt,name=language_id,json=languageId,proto3" json:"language_id"`
-	ActionType string `protobuf:"bytes,7,opt,name=action_type,json=actionType,proto3" json:"action_type"`
+	ProjectId  string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	TableId    string `protobuf:"bytes,2,opt,name=table_id,json=tableId,proto3" json:"table_id,omitempty"`
+	Message    string `protobuf:"bytes,3,opt,name=message,proto3" json:"message,omitempty"`
+	ErrorId    string `protobuf:"bytes,4,opt,name=error_id,json=errorId,proto3" json:"error_id,omitempty"`
+	Code       int32  `protobuf:"varint,5,opt,name=code,proto3" json:"code,omitempty"`
+	LanguageId string `protobuf:"bytes,6,opt,name=language_id,json=languageId,proto3" json:"language_id,omitempty"`
+	ActionType string `protobuf:"bytes,7,opt,name=action_type,json=actionType,proto3" json:"action_type,omitempty"`
 }
 
 func (x *CreateCustomErrorMessage) Reset() {
@@ -255,14 +255,14 @@ type CustomErrorMessage struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id         string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	TableId    string `protobuf:"bytes,2,opt,name=table_id,json=tableId,proto3" json:"table_id"`
-	Message    string `protobuf:"bytes,3,opt,name=message,proto3" json:"message"`
-	ErrorId    string `protobuf:"bytes,4,opt,name=error_id,json=errorId,proto3" json:"error_id"`
-	Code       int32  `protobuf:"varint,5,opt,name=code,proto3" json:"code"`
-	LanguageId string `protobuf:"bytes,6,opt,name=language_id,json=languageId,proto3" json:"language_id"`
-	ProjectId  string `protobuf:"bytes,7,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	ActionType string `protobuf:"bytes,8,opt,name=action_type,json=actionType,proto3" json:"action_type"`
+	Id         string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	TableId    string `protobuf:"bytes,2,opt,name=table_id,json=tableId,proto3" json:"table_id,omitempty"`
+	Message    string `protobuf:"bytes,3,opt,name=message,proto3" json:"message,omitempty"`
+	ErrorId    string `protobuf:"bytes,4,opt,name=error_id,json=errorId,proto3" json:"error_id,omitempty"`
+	Code       int32  `protobuf:"varint,5,opt,name=code,proto3" json:"code,omitempty"`
+	LanguageId string `protobuf:"bytes,6,opt,name=language_id,json=languageId,proto3" json:"language_id,omitempty"`
+	ProjectId  string `protobuf:"bytes,7,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	ActionType string `protobuf:"bytes,8,opt,name=action_type,json=actionType,proto3" json:"action_type,omitempty"`
 }
 
 func (x *CustomErrorMessage) Reset() {
@@ -358,8 +358,8 @@ type VariableForCustomErrorMessage struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Key   string `protobuf:"bytes,1,opt,name=key,proto3" json:"key"`
-	Value string `protobuf:"bytes,2,opt,name=value,proto3" json:"value"`
+	Key   string `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
+	Value string `protobuf:"bytes,2,opt,name=value,proto3" json:"value,omitempty"`
 }
 
 func (x *VariableForCustomErrorMessage) Reset() {
@@ -413,8 +413,8 @@ type GetCustomErrorMessageListResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	CustomErrorMessages []*CustomErrorMessage `protobuf:"bytes,1,rep,name=custom_error_messages,json=customErrorMessages,proto3" json:"custom_error_messages"`
-	Count               int32                 `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
+	CustomErrorMessages []*CustomErrorMessage `protobuf:"bytes,1,rep,name=custom_error_messages,json=customErrorMessages,proto3" json:"custom_error_messages,omitempty"`
+	Count               int32                 `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
 }
 
 func (x *GetCustomErrorMessageListResponse) Reset() {
@@ -468,9 +468,9 @@ type GetCustomErrorMessageListRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	TableSlug string `protobuf:"bytes,1,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
-	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	TableId   string `protobuf:"bytes,3,opt,name=table_id,json=tableId,proto3" json:"table_id"`
+	TableSlug string `protobuf:"bytes,1,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	TableId   string `protobuf:"bytes,3,opt,name=table_id,json=tableId,proto3" json:"table_id,omitempty"`
 }
 
 func (x *GetCustomErrorMessageListRequest) Reset() {

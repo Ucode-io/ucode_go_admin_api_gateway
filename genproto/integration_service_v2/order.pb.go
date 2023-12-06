@@ -25,11 +25,11 @@ type GetPurchaseListRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserId  string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id"`
-	OrderId string `protobuf:"bytes,2,opt,name=order_id,json=orderId,proto3" json:"order_id"`
-	Status  string `protobuf:"bytes,3,opt,name=status,proto3" json:"status"`
-	Limit   int32  `protobuf:"varint,4,opt,name=limit,proto3" json:"limit"`
-	Offset  int32  `protobuf:"varint,5,opt,name=offset,proto3" json:"offset"`
+	UserId  string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	OrderId string `protobuf:"bytes,2,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
+	Status  string `protobuf:"bytes,3,opt,name=status,proto3" json:"status,omitempty"`
+	Limit   int32  `protobuf:"varint,4,opt,name=limit,proto3" json:"limit,omitempty"`
+	Offset  int32  `protobuf:"varint,5,opt,name=offset,proto3" json:"offset,omitempty"`
 }
 
 func (x *GetPurchaseListRequest) Reset() {
@@ -104,8 +104,8 @@ type GetPurchaseListResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Orders []*Purchase `protobuf:"bytes,1,rep,name=orders,proto3" json:"orders"`
-	Count  int32       `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
+	Orders []*Purchase `protobuf:"bytes,1,rep,name=orders,proto3" json:"orders,omitempty"`
+	Count  int32       `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
 }
 
 func (x *GetPurchaseListResponse) Reset() {
@@ -159,8 +159,8 @@ type GetPurchaseRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id     string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	UserId string `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id"`
+	Id     string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	UserId string `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 }
 
 func (x *GetPurchaseRequest) Reset() {
@@ -214,7 +214,7 @@ type GetPurchaseResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Purchase *Purchase `protobuf:"bytes,1,opt,name=purchase,proto3" json:"purchase"`
+	Purchase *Purchase `protobuf:"bytes,1,opt,name=purchase,proto3" json:"purchase,omitempty"`
 }
 
 func (x *GetPurchaseResponse) Reset() {
@@ -261,15 +261,15 @@ type Purchase struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id          string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	UserId      string `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id"`
-	ProductId   string `protobuf:"bytes,3,opt,name=product_id,json=productId,proto3" json:"product_id"`
-	ProductType string `protobuf:"bytes,4,opt,name=product_type,json=productType,proto3" json:"product_type"`
-	ProductName string `protobuf:"bytes,5,opt,name=product_name,json=productName,proto3" json:"product_name"`
-	Status      string `protobuf:"bytes,6,opt,name=status,proto3" json:"status"`
-	Price       int32  `protobuf:"varint,7,opt,name=price,proto3" json:"price"`
-	CreatedAt   string `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at"`
-	UpdatedAt   string `protobuf:"bytes,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at"`
+	Id          string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	UserId      string `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	ProductId   string `protobuf:"bytes,3,opt,name=product_id,json=productId,proto3" json:"product_id,omitempty"`
+	ProductType string `protobuf:"bytes,4,opt,name=product_type,json=productType,proto3" json:"product_type,omitempty"`
+	ProductName string `protobuf:"bytes,5,opt,name=product_name,json=productName,proto3" json:"product_name,omitempty"`
+	Status      string `protobuf:"bytes,6,opt,name=status,proto3" json:"status,omitempty"`
+	Price       int32  `protobuf:"varint,7,opt,name=price,proto3" json:"price,omitempty"`
+	CreatedAt   string `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt   string `protobuf:"bytes,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 }
 
 func (x *Purchase) Reset() {
@@ -372,12 +372,12 @@ type CreatePurchaseRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserId      string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id"`
-	ProductId   string `protobuf:"bytes,2,opt,name=product_id,json=productId,proto3" json:"product_id"`
-	Price       int32  `protobuf:"varint,3,opt,name=price,proto3" json:"price"`
-	ProductType string `protobuf:"bytes,4,opt,name=product_type,json=productType,proto3" json:"product_type"`
-	Status      string `protobuf:"bytes,5,opt,name=status,proto3" json:"status"`
-	ProductName string `protobuf:"bytes,6,opt,name=product_name,json=productName,proto3" json:"product_name"`
+	UserId      string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	ProductId   string `protobuf:"bytes,2,opt,name=product_id,json=productId,proto3" json:"product_id,omitempty"`
+	Price       int32  `protobuf:"varint,3,opt,name=price,proto3" json:"price,omitempty"`
+	ProductType string `protobuf:"bytes,4,opt,name=product_type,json=productType,proto3" json:"product_type,omitempty"`
+	Status      string `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"`
+	ProductName string `protobuf:"bytes,6,opt,name=product_name,json=productName,proto3" json:"product_name,omitempty"`
 }
 
 func (x *CreatePurchaseRequest) Reset() {
@@ -459,9 +459,9 @@ type CreatePurchaseResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserId    string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id"`
-	ProductId string `protobuf:"bytes,2,opt,name=product_id,json=productId,proto3" json:"product_id"`
-	Id        string `protobuf:"bytes,3,opt,name=id,proto3" json:"id"`
+	UserId    string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	ProductId string `protobuf:"bytes,2,opt,name=product_id,json=productId,proto3" json:"product_id,omitempty"`
+	Id        string `protobuf:"bytes,3,opt,name=id,proto3" json:"id,omitempty"`
 }
 
 func (x *CreatePurchaseResponse) Reset() {
@@ -522,9 +522,9 @@ type CheckHasAccessRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProductId   string `protobuf:"bytes,1,opt,name=product_id,json=productId,proto3" json:"product_id"`
-	UserId      string `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id"`
-	ProductType string `protobuf:"bytes,3,opt,name=product_type,json=productType,proto3" json:"product_type"`
+	ProductId   string `protobuf:"bytes,1,opt,name=product_id,json=productId,proto3" json:"product_id,omitempty"`
+	UserId      string `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	ProductType string `protobuf:"bytes,3,opt,name=product_type,json=productType,proto3" json:"product_type,omitempty"`
 }
 
 func (x *CheckHasAccessRequest) Reset() {
@@ -585,7 +585,7 @@ type CheckHasAccessResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	HasAccess bool `protobuf:"varint,1,opt,name=has_access,json=hasAccess,proto3" json:"has_access"`
+	HasAccess bool `protobuf:"varint,1,opt,name=has_access,json=hasAccess,proto3" json:"has_access,omitempty"`
 }
 
 func (x *CheckHasAccessResponse) Reset() {

@@ -26,11 +26,11 @@ type TableFolderRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Title     string `protobuf:"bytes,1,opt,name=title,proto3" json:"title"`
-	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	ParentId  string `protobuf:"bytes,3,opt,name=parent_id,json=parentId,proto3" json:"parent_id"`
-	Icon      string `protobuf:"bytes,4,opt,name=icon,proto3" json:"icon"`
-	AppId     string `protobuf:"bytes,5,opt,name=app_id,json=appId,proto3" json:"app_id"`
+	Title     string `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	ParentId  string `protobuf:"bytes,3,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
+	Icon      string `protobuf:"bytes,4,opt,name=icon,proto3" json:"icon,omitempty"`
+	AppId     string `protobuf:"bytes,5,opt,name=app_id,json=appId,proto3" json:"app_id,omitempty"`
 }
 
 func (x *TableFolderRequest) Reset() {
@@ -105,11 +105,11 @@ type CreateTableFolderResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	Title     string `protobuf:"bytes,2,opt,name=title,proto3" json:"title"`
-	ProjectId string `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	Icon      string `protobuf:"bytes,4,opt,name=icon,proto3" json:"icon"`
-	AppId     string `protobuf:"bytes,5,opt,name=app_id,json=appId,proto3" json:"app_id"`
+	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Title     string `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
+	ProjectId string `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Icon      string `protobuf:"bytes,4,opt,name=icon,proto3" json:"icon,omitempty"`
+	AppId     string `protobuf:"bytes,5,opt,name=app_id,json=appId,proto3" json:"app_id,omitempty"`
 }
 
 func (x *CreateTableFolderResponse) Reset() {
@@ -184,12 +184,12 @@ type TableFolder struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	Title     string `protobuf:"bytes,2,opt,name=title,proto3" json:"title"`
-	ProjectId string `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	ParentId  string `protobuf:"bytes,4,opt,name=parent_id,json=parentId,proto3" json:"parent_id"`
-	Icon      string `protobuf:"bytes,5,opt,name=icon,proto3" json:"icon"`
-	AppId     string `protobuf:"bytes,6,opt,name=app_id,json=appId,proto3" json:"app_id"`
+	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Title     string `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
+	ProjectId string `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	ParentId  string `protobuf:"bytes,4,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
+	Icon      string `protobuf:"bytes,5,opt,name=icon,proto3" json:"icon,omitempty"`
+	AppId     string `protobuf:"bytes,6,opt,name=app_id,json=appId,proto3" json:"app_id,omitempty"`
 }
 
 func (x *TableFolder) Reset() {
@@ -271,8 +271,8 @@ type GetAllTableFoldersResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Folders []*TableFolder `protobuf:"bytes,1,rep,name=folders,proto3" json:"folders"`
-	Count   int32          `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
+	Folders []*TableFolder `protobuf:"bytes,1,rep,name=folders,proto3" json:"folders,omitempty"`
+	Count   int32          `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
 }
 
 func (x *GetAllTableFoldersResponse) Reset() {
@@ -326,8 +326,8 @@ type TableFolderPrimaryKey struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
 }
 
 func (x *TableFolderPrimaryKey) Reset() {
@@ -381,11 +381,11 @@ type GetAllTableFoldersRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Offset    int32  `protobuf:"varint,1,opt,name=offset,proto3" json:"offset"`
-	Limit     int32  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit"`
-	Search    string `protobuf:"bytes,3,opt,name=search,proto3" json:"search"`
-	ProjectId string `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	AppId     string `protobuf:"bytes,5,opt,name=app_id,json=appId,proto3" json:"app_id"`
+	Offset    int32  `protobuf:"varint,1,opt,name=offset,proto3" json:"offset,omitempty"`
+	Limit     int32  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
+	Search    string `protobuf:"bytes,3,opt,name=search,proto3" json:"search,omitempty"`
+	ProjectId string `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	AppId     string `protobuf:"bytes,5,opt,name=app_id,json=appId,proto3" json:"app_id,omitempty"`
 }
 
 func (x *GetAllTableFoldersRequest) Reset() {

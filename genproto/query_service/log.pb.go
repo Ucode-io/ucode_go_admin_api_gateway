@@ -27,16 +27,16 @@ type Log struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id            string           `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	QueryId       string           `protobuf:"bytes,2,opt,name=query_id,json=queryId,proto3" json:"query_id"`
-	UserId        string           `protobuf:"bytes,3,opt,name=user_id,json=userId,proto3" json:"user_id"`
-	ProjectId     string           `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	EnvironmentId string           `protobuf:"bytes,5,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
-	Request       *structpb.Struct `protobuf:"bytes,6,opt,name=request,proto3" json:"request"`
-	Response      string           `protobuf:"bytes,7,opt,name=response,proto3" json:"response"`
-	CreatedAt     string           `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at"`
-	ResourceId    string           `protobuf:"bytes,9,opt,name=resource_id,json=resourceId,proto3" json:"resource_id"`
-	Duration      float32          `protobuf:"fixed32,10,opt,name=duration,proto3" json:"duration"`
+	Id            string           `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	QueryId       string           `protobuf:"bytes,2,opt,name=query_id,json=queryId,proto3" json:"query_id,omitempty"`
+	UserId        string           `protobuf:"bytes,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	ProjectId     string           `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	EnvironmentId string           `protobuf:"bytes,5,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
+	Request       *structpb.Struct `protobuf:"bytes,6,opt,name=request,proto3" json:"request,omitempty"`
+	Response      string           `protobuf:"bytes,7,opt,name=response,proto3" json:"response,omitempty"`
+	CreatedAt     string           `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	ResourceId    string           `protobuf:"bytes,9,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
+	Duration      float32          `protobuf:"fixed32,10,opt,name=duration,proto3" json:"duration,omitempty"`
 }
 
 func (x *Log) Reset() {
@@ -146,10 +146,10 @@ type GetSingleLogReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id            string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	ProjectId     string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	EnvironmentId string `protobuf:"bytes,3,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
-	ResourceId    string `protobuf:"bytes,4,opt,name=resource_id,json=resourceId,proto3" json:"resource_id"`
+	Id            string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ProjectId     string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	EnvironmentId string `protobuf:"bytes,3,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
+	ResourceId    string `protobuf:"bytes,4,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
 }
 
 func (x *GetSingleLogReq) Reset() {
@@ -217,12 +217,12 @@ type GetListLogReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId     string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	EnvironmentId string `protobuf:"bytes,2,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
-	QueryId       string `protobuf:"bytes,3,opt,name=query_id,json=queryId,proto3" json:"query_id"`
-	Limit         int64  `protobuf:"varint,4,opt,name=limit,proto3" json:"limit"`
-	Offset        int64  `protobuf:"varint,5,opt,name=offset,proto3" json:"offset"`
-	ResourceId    string `protobuf:"bytes,6,opt,name=resource_id,json=resourceId,proto3" json:"resource_id"`
+	ProjectId     string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	EnvironmentId string `protobuf:"bytes,2,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
+	QueryId       string `protobuf:"bytes,3,opt,name=query_id,json=queryId,proto3" json:"query_id,omitempty"`
+	Limit         int64  `protobuf:"varint,4,opt,name=limit,proto3" json:"limit,omitempty"`
+	Offset        int64  `protobuf:"varint,5,opt,name=offset,proto3" json:"offset,omitempty"`
+	ResourceId    string `protobuf:"bytes,6,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
 }
 
 func (x *GetListLogReq) Reset() {
@@ -304,8 +304,8 @@ type GetListLogRes struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Log   []*Log `protobuf:"bytes,1,rep,name=log,proto3" json:"log"`
-	Count int64  `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
+	Log   []*Log `protobuf:"bytes,1,rep,name=log,proto3" json:"log,omitempty"`
+	Count int64  `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
 }
 
 func (x *GetListLogRes) Reset() {

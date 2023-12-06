@@ -46,6 +46,7 @@ type BuilderServiceI interface {
 	Menu() object_builder_service.MenuServiceClient
 	CustomErrorMessage() object_builder_service.CustomErrorMessageServiceClient
 	ReportSetting() object_builder_service.ReportSettingServiceClient
+	ItemsService() object_builder_service.ItemsServiceClient
 	File() object_builder_service.FileServiceClient
 	// added to managing load
 	ObjectBuilderConnPool(ctx context.Context) (object_builder_service.ObjectBuilderServiceClient, *grpcpool.ClientConn, error)
@@ -115,6 +116,7 @@ func NewBuilderServiceClient(ctx context.Context, cfg config.Config) (BuilderSer
 		reportSettingService:      object_builder_service.NewReportSettingServiceClient(connObjectBuilderService),
 		fileService:               object_builder_service.NewFileServiceClient(connObjectBuilderService),
 		objectBuilderConnPool:     objectbuilderServicePool,
+		itemsService:              object_builder_service.NewItemsServiceClient(connObjectBuilderService),
 	}, nil
 }
 
@@ -154,6 +156,7 @@ type builderServiceClient struct {
 	reportSettingService      object_builder_service.ReportSettingServiceClient
 	fileService               object_builder_service.FileServiceClient
 	objectBuilderConnPool     *grpcpool.Pool
+	itemsService              object_builder_service.ItemsServiceClient
 }
 
 func (g *builderServiceClient) ObjectBuilderConnPool(ctx context.Context) (object_builder_service.ObjectBuilderServiceClient, *grpcpool.ClientConn, error) {
@@ -298,4 +301,8 @@ func (g *builderServiceClient) ReportSetting() object_builder_service.ReportSett
 
 func (g *builderServiceClient) File() object_builder_service.FileServiceClient {
 	return g.fileService
+}
+
+func (g *builderServiceClient) ItemsService() object_builder_service.ItemsServiceClient {
+	return g.itemsService
 }

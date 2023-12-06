@@ -27,27 +27,27 @@ type CreateFieldRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Default             string           `protobuf:"bytes,1,opt,name=default,proto3" json:"default"`
-	Type                string           `protobuf:"bytes,2,opt,name=type,proto3" json:"type"`
-	Index               string           `protobuf:"bytes,3,opt,name=index,proto3" json:"index"`
-	Label               string           `protobuf:"bytes,4,opt,name=label,proto3" json:"label"`
-	Slug                string           `protobuf:"bytes,5,opt,name=slug,proto3" json:"slug"`
-	TableId             string           `protobuf:"bytes,6,opt,name=table_id,json=tableId,proto3" json:"table_id"`
-	Attributes          *structpb.Struct `protobuf:"bytes,7,opt,name=attributes,proto3" json:"attributes"`
-	Id                  string           `protobuf:"bytes,8,opt,name=id,proto3" json:"id"`
-	IsVisible           bool             `protobuf:"varint,9,opt,name=is_visible,json=isVisible,proto3" json:"is_visible"`
-	AutofillTable       string           `protobuf:"bytes,10,opt,name=autofill_table,json=autofillTable,proto3" json:"autofill_table"`
-	AutofillField       string           `protobuf:"bytes,11,opt,name=autofill_field,json=autofillField,proto3" json:"autofill_field"`
-	Unique              bool             `protobuf:"varint,12,opt,name=unique,proto3" json:"unique"`
-	Automatic           bool             `protobuf:"varint,13,opt,name=automatic,proto3" json:"automatic"`
-	ProjectId           string           `protobuf:"bytes,14,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	CommitId            string           `protobuf:"bytes,15,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
-	VersionId           string           `protobuf:"bytes,16,opt,name=version_id,json=versionId,proto3" json:"version_id"`
-	RelationField       string           `protobuf:"bytes,17,opt,name=relation_field,json=relationField,proto3" json:"relation_field"`
-	ShowLabel           bool             `protobuf:"varint,18,opt,name=show_label,json=showLabel,proto3" json:"show_label"`
-	EnableMultilanguage bool             `protobuf:"varint,19,opt,name=enable_multilanguage,json=enableMultilanguage,proto3" json:"enable_multilanguage"`
-	HideMultilanguage   bool             `protobuf:"varint,20,opt,name=hide_multilanguage,json=hideMultilanguage,proto3" json:"hide_multilanguage"`
-	MinioFolder         string           `protobuf:"bytes,21,opt,name=minio_folder,json=minioFolder,proto3" json:"minio_folder"`
+	Default             string           `protobuf:"bytes,1,opt,name=default,proto3" json:"default,omitempty"`
+	Type                string           `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
+	Index               string           `protobuf:"bytes,3,opt,name=index,proto3" json:"index,omitempty"`
+	Label               string           `protobuf:"bytes,4,opt,name=label,proto3" json:"label,omitempty"`
+	Slug                string           `protobuf:"bytes,5,opt,name=slug,proto3" json:"slug,omitempty"`
+	TableId             string           `protobuf:"bytes,6,opt,name=table_id,json=tableId,proto3" json:"table_id,omitempty"`
+	Attributes          *structpb.Struct `protobuf:"bytes,7,opt,name=attributes,proto3" json:"attributes,omitempty"`
+	Id                  string           `protobuf:"bytes,8,opt,name=id,proto3" json:"id,omitempty"`
+	IsVisible           bool             `protobuf:"varint,9,opt,name=is_visible,json=isVisible,proto3" json:"is_visible,omitempty"`
+	AutofillTable       string           `protobuf:"bytes,10,opt,name=autofill_table,json=autofillTable,proto3" json:"autofill_table,omitempty"`
+	AutofillField       string           `protobuf:"bytes,11,opt,name=autofill_field,json=autofillField,proto3" json:"autofill_field,omitempty"`
+	Unique              bool             `protobuf:"varint,12,opt,name=unique,proto3" json:"unique,omitempty"`
+	Automatic           bool             `protobuf:"varint,13,opt,name=automatic,proto3" json:"automatic,omitempty"`
+	ProjectId           string           `protobuf:"bytes,14,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	CommitId            string           `protobuf:"bytes,15,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
+	VersionId           string           `protobuf:"bytes,16,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
+	RelationField       string           `protobuf:"bytes,17,opt,name=relation_field,json=relationField,proto3" json:"relation_field,omitempty"`
+	ShowLabel           bool             `protobuf:"varint,18,opt,name=show_label,json=showLabel,proto3" json:"show_label,omitempty"`
+	EnableMultilanguage bool             `protobuf:"varint,19,opt,name=enable_multilanguage,json=enableMultilanguage,proto3" json:"enable_multilanguage,omitempty"`
+	HideMultilanguage   bool             `protobuf:"varint,20,opt,name=hide_multilanguage,json=hideMultilanguage,proto3" json:"hide_multilanguage,omitempty"`
+	MinioFolder         string           `protobuf:"bytes,21,opt,name=minio_folder,json=minioFolder,proto3" json:"minio_folder,omitempty"`
 }
 
 func (x *CreateFieldRequest) Reset() {
@@ -234,20 +234,20 @@ type CreateFieldsRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id          string           `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	Default     string           `protobuf:"bytes,2,opt,name=default,proto3" json:"default"`
-	Type        string           `protobuf:"bytes,3,opt,name=type,proto3" json:"type"`
-	Index       string           `protobuf:"bytes,4,opt,name=index,proto3" json:"index"`
-	Label       string           `protobuf:"bytes,5,opt,name=label,proto3" json:"label"`
-	Slug        string           `protobuf:"bytes,6,opt,name=slug,proto3" json:"slug"`
-	Required    bool             `protobuf:"varint,7,opt,name=required,proto3" json:"required"`
-	Attributes  *structpb.Struct `protobuf:"bytes,8,opt,name=attributes,proto3" json:"attributes"`
-	IsVisible   bool             `protobuf:"varint,9,opt,name=is_visible,json=isVisible,proto3" json:"is_visible"`
-	Unique      bool             `protobuf:"varint,10,opt,name=unique,proto3" json:"unique"`
-	Automatic   bool             `protobuf:"varint,11,opt,name=automatic,proto3" json:"automatic"`
-	ProjectId   string           `protobuf:"bytes,12,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	CommitId    string           `protobuf:"bytes,13,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
-	MinioFolder string           `protobuf:"bytes,14,opt,name=minio_folder,json=minioFolder,proto3" json:"minio_folder"`
+	Id          string           `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Default     string           `protobuf:"bytes,2,opt,name=default,proto3" json:"default,omitempty"`
+	Type        string           `protobuf:"bytes,3,opt,name=type,proto3" json:"type,omitempty"`
+	Index       string           `protobuf:"bytes,4,opt,name=index,proto3" json:"index,omitempty"`
+	Label       string           `protobuf:"bytes,5,opt,name=label,proto3" json:"label,omitempty"`
+	Slug        string           `protobuf:"bytes,6,opt,name=slug,proto3" json:"slug,omitempty"`
+	Required    bool             `protobuf:"varint,7,opt,name=required,proto3" json:"required,omitempty"`
+	Attributes  *structpb.Struct `protobuf:"bytes,8,opt,name=attributes,proto3" json:"attributes,omitempty"`
+	IsVisible   bool             `protobuf:"varint,9,opt,name=is_visible,json=isVisible,proto3" json:"is_visible,omitempty"`
+	Unique      bool             `protobuf:"varint,10,opt,name=unique,proto3" json:"unique,omitempty"`
+	Automatic   bool             `protobuf:"varint,11,opt,name=automatic,proto3" json:"automatic,omitempty"`
+	ProjectId   string           `protobuf:"bytes,12,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	CommitId    string           `protobuf:"bytes,13,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
+	MinioFolder string           `protobuf:"bytes,14,opt,name=minio_folder,json=minioFolder,proto3" json:"minio_folder,omitempty"`
 }
 
 func (x *CreateFieldsRequest) Reset() {
@@ -385,30 +385,30 @@ type Field struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id                  string           `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	Default             string           `protobuf:"bytes,2,opt,name=default,proto3" json:"default"`
-	Type                string           `protobuf:"bytes,3,opt,name=type,proto3" json:"type"`
-	Index               string           `protobuf:"bytes,4,opt,name=index,proto3" json:"index"`
-	Label               string           `protobuf:"bytes,5,opt,name=label,proto3" json:"label"`
-	Slug                string           `protobuf:"bytes,6,opt,name=slug,proto3" json:"slug"`
-	TableId             string           `protobuf:"bytes,7,opt,name=table_id,json=tableId,proto3" json:"table_id"`
-	Required            bool             `protobuf:"varint,8,opt,name=required,proto3" json:"required"`
-	Attributes          *structpb.Struct `protobuf:"bytes,9,opt,name=attributes,proto3" json:"attributes"`
-	IsVisible           bool             `protobuf:"varint,10,opt,name=is_visible,json=isVisible,proto3" json:"is_visible"`
-	AutofillField       string           `protobuf:"bytes,11,opt,name=autofill_field,json=autofillField,proto3" json:"autofill_field"`
-	AutofillTable       string           `protobuf:"bytes,12,opt,name=autofill_table,json=autofillTable,proto3" json:"autofill_table"`
-	RelationId          string           `protobuf:"bytes,13,opt,name=relation_id,json=relationId,proto3" json:"relation_id"`
-	Unique              bool             `protobuf:"varint,14,opt,name=unique,proto3" json:"unique"`
-	Automatic           bool             `protobuf:"varint,15,opt,name=automatic,proto3" json:"automatic"`
-	ProjectId           string           `protobuf:"bytes,16,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	CommitId            string           `protobuf:"bytes,17,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
-	VersionId           string           `protobuf:"bytes,18,opt,name=version_id,json=versionId,proto3" json:"version_id"`
-	IsSystem            bool             `protobuf:"varint,19,opt,name=is_system,json=isSystem,proto3" json:"is_system"`
-	RelationField       string           `protobuf:"bytes,20,opt,name=relation_field,json=relationField,proto3" json:"relation_field"`
-	ShowLabel           bool             `protobuf:"varint,21,opt,name=show_label,json=showLabel,proto3" json:"show_label"`
-	EnableMultilanguage bool             `protobuf:"varint,22,opt,name=enable_multilanguage,json=enableMultilanguage,proto3" json:"enable_multilanguage"`
-	HideMultilanguage   bool             `protobuf:"varint,23,opt,name=hide_multilanguage,json=hideMultilanguage,proto3" json:"hide_multilanguage"`
-	MinioFolder         string           `protobuf:"bytes,24,opt,name=minio_folder,json=minioFolder,proto3" json:"minio_folder"`
+	Id                  string           `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Default             string           `protobuf:"bytes,2,opt,name=default,proto3" json:"default,omitempty"`
+	Type                string           `protobuf:"bytes,3,opt,name=type,proto3" json:"type,omitempty"`
+	Index               string           `protobuf:"bytes,4,opt,name=index,proto3" json:"index,omitempty"`
+	Label               string           `protobuf:"bytes,5,opt,name=label,proto3" json:"label,omitempty"`
+	Slug                string           `protobuf:"bytes,6,opt,name=slug,proto3" json:"slug,omitempty"`
+	TableId             string           `protobuf:"bytes,7,opt,name=table_id,json=tableId,proto3" json:"table_id,omitempty"`
+	Required            bool             `protobuf:"varint,8,opt,name=required,proto3" json:"required,omitempty"`
+	Attributes          *structpb.Struct `protobuf:"bytes,9,opt,name=attributes,proto3" json:"attributes,omitempty"`
+	IsVisible           bool             `protobuf:"varint,10,opt,name=is_visible,json=isVisible,proto3" json:"is_visible,omitempty"`
+	AutofillField       string           `protobuf:"bytes,11,opt,name=autofill_field,json=autofillField,proto3" json:"autofill_field,omitempty"`
+	AutofillTable       string           `protobuf:"bytes,12,opt,name=autofill_table,json=autofillTable,proto3" json:"autofill_table,omitempty"`
+	RelationId          string           `protobuf:"bytes,13,opt,name=relation_id,json=relationId,proto3" json:"relation_id,omitempty"`
+	Unique              bool             `protobuf:"varint,14,opt,name=unique,proto3" json:"unique,omitempty"`
+	Automatic           bool             `protobuf:"varint,15,opt,name=automatic,proto3" json:"automatic,omitempty"`
+	ProjectId           string           `protobuf:"bytes,16,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	CommitId            string           `protobuf:"bytes,17,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
+	VersionId           string           `protobuf:"bytes,18,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
+	IsSystem            bool             `protobuf:"varint,19,opt,name=is_system,json=isSystem,proto3" json:"is_system,omitempty"`
+	RelationField       string           `protobuf:"bytes,20,opt,name=relation_field,json=relationField,proto3" json:"relation_field,omitempty"`
+	ShowLabel           bool             `protobuf:"varint,21,opt,name=show_label,json=showLabel,proto3" json:"show_label,omitempty"`
+	EnableMultilanguage bool             `protobuf:"varint,22,opt,name=enable_multilanguage,json=enableMultilanguage,proto3" json:"enable_multilanguage,omitempty"`
+	HideMultilanguage   bool             `protobuf:"varint,23,opt,name=hide_multilanguage,json=hideMultilanguage,proto3" json:"hide_multilanguage,omitempty"`
+	MinioFolder         string           `protobuf:"bytes,24,opt,name=minio_folder,json=minioFolder,proto3" json:"minio_folder,omitempty"`
 }
 
 func (x *Field) Reset() {
@@ -616,9 +616,9 @@ type GetAllFieldsResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Fields []*Field         `protobuf:"bytes,1,rep,name=fields,proto3" json:"fields"`
-	Count  int32            `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
-	Data   *structpb.Struct `protobuf:"bytes,3,opt,name=data,proto3" json:"data"`
+	Fields []*Field         `protobuf:"bytes,1,rep,name=fields,proto3" json:"fields,omitempty"`
+	Count  int32            `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	Data   *structpb.Struct `protobuf:"bytes,3,opt,name=data,proto3" json:"data,omitempty"`
 }
 
 func (x *GetAllFieldsResponse) Reset() {
@@ -679,16 +679,16 @@ type GetAllFieldsRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	TableId          string `protobuf:"bytes,1,opt,name=table_id,json=tableId,proto3" json:"table_id"`
-	Limit            int32  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit"`
-	Offset           int32  `protobuf:"varint,3,opt,name=offset,proto3" json:"offset"`
-	Search           string `protobuf:"bytes,4,opt,name=search,proto3" json:"search"`
-	TableSlug        string `protobuf:"bytes,5,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
-	WithManyRelation bool   `protobuf:"varint,6,opt,name=with_many_relation,json=withManyRelation,proto3" json:"with_many_relation"`
-	WithOneRelation  bool   `protobuf:"varint,7,opt,name=with_one_relation,json=withOneRelation,proto3" json:"with_one_relation"`
-	RoleId           string `protobuf:"bytes,8,opt,name=role_id,json=roleId,proto3" json:"role_id"`
-	ProjectId        string `protobuf:"bytes,9,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	VersionId        string `protobuf:"bytes,10,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	TableId          string `protobuf:"bytes,1,opt,name=table_id,json=tableId,proto3" json:"table_id,omitempty"`
+	Limit            int32  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
+	Offset           int32  `protobuf:"varint,3,opt,name=offset,proto3" json:"offset,omitempty"`
+	Search           string `protobuf:"bytes,4,opt,name=search,proto3" json:"search,omitempty"`
+	TableSlug        string `protobuf:"bytes,5,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
+	WithManyRelation bool   `protobuf:"varint,6,opt,name=with_many_relation,json=withManyRelation,proto3" json:"with_many_relation,omitempty"`
+	WithOneRelation  bool   `protobuf:"varint,7,opt,name=with_one_relation,json=withOneRelation,proto3" json:"with_one_relation,omitempty"`
+	RoleId           string `protobuf:"bytes,8,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
+	ProjectId        string `protobuf:"bytes,9,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	VersionId        string `protobuf:"bytes,10,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
 }
 
 func (x *GetAllFieldsRequest) Reset() {
@@ -798,8 +798,8 @@ type FieldPrimaryKey struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
 }
 
 func (x *FieldPrimaryKey) Reset() {
@@ -853,12 +853,12 @@ type GetAllFieldsForItemsRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Collection       string `protobuf:"bytes,1,opt,name=collection,proto3" json:"collection"`
-	RoleId           string `protobuf:"bytes,2,opt,name=role_id,json=roleId,proto3" json:"role_id"`
-	ProjectId        string `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	VersionId        string `protobuf:"bytes,4,opt,name=version_id,json=versionId,proto3" json:"version_id"`
-	LanguageSettings string `protobuf:"bytes,5,opt,name=language_settings,json=languageSettings,proto3" json:"language_settings"`
-	WithRelations    bool   `protobuf:"varint,6,opt,name=with_relations,json=withRelations,proto3" json:"with_relations"`
+	Collection       string `protobuf:"bytes,1,opt,name=collection,proto3" json:"collection,omitempty"`
+	RoleId           string `protobuf:"bytes,2,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
+	ProjectId        string `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	VersionId        string `protobuf:"bytes,4,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
+	LanguageSettings string `protobuf:"bytes,5,opt,name=language_settings,json=languageSettings,proto3" json:"language_settings,omitempty"`
+	WithRelations    bool   `protobuf:"varint,6,opt,name=with_relations,json=withRelations,proto3" json:"with_relations,omitempty"`
 }
 
 func (x *GetAllFieldsForItemsRequest) Reset() {
@@ -940,8 +940,8 @@ type AllFields struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Collection string           `protobuf:"bytes,1,opt,name=collection,proto3" json:"collection"`
-	Data       *structpb.Struct `protobuf:"bytes,2,opt,name=data,proto3" json:"data"`
+	Collection string           `protobuf:"bytes,1,opt,name=collection,proto3" json:"collection,omitempty"`
+	Data       *structpb.Struct `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
 }
 
 func (x *AllFields) Reset() {

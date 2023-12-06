@@ -25,17 +25,17 @@ type Sms struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id               string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	CreatedAt        string `protobuf:"bytes,2,opt,name=created_at,json=createdAt,proto3" json:"created_at"`
-	Text             string `protobuf:"bytes,3,opt,name=text,proto3" json:"text"`
-	Recipient        string `protobuf:"bytes,4,opt,name=recipient,proto3" json:"recipient"`
-	ExpiresAt        string `protobuf:"bytes,5,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at"`
-	Otp              string `protobuf:"bytes,6,opt,name=otp,proto3" json:"otp"`
-	Type             string `protobuf:"bytes,7,opt,name=type,proto3" json:"type"`
-	SendCount        int64  `protobuf:"varint,8,opt,name=send_count,json=sendCount,proto3" json:"send_count"`
-	DevEmail         string `protobuf:"bytes,9,opt,name=dev_email,json=devEmail,proto3" json:"dev_email"`
-	DevEmailPassword string `protobuf:"bytes,10,opt,name=dev_email_password,json=devEmailPassword,proto3" json:"dev_email_password"`
-	Originator       string `protobuf:"bytes,11,opt,name=originator,proto3" json:"originator"`
+	Id               string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	CreatedAt        string `protobuf:"bytes,2,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	Text             string `protobuf:"bytes,3,opt,name=text,proto3" json:"text,omitempty"`
+	Recipient        string `protobuf:"bytes,4,opt,name=recipient,proto3" json:"recipient,omitempty"`
+	ExpiresAt        string `protobuf:"bytes,5,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
+	Otp              string `protobuf:"bytes,6,opt,name=otp,proto3" json:"otp,omitempty"`
+	Type             string `protobuf:"bytes,7,opt,name=type,proto3" json:"type,omitempty"`
+	SendCount        int64  `protobuf:"varint,8,opt,name=send_count,json=sendCount,proto3" json:"send_count,omitempty"`
+	DevEmail         string `protobuf:"bytes,9,opt,name=dev_email,json=devEmail,proto3" json:"dev_email,omitempty"`
+	DevEmailPassword string `protobuf:"bytes,10,opt,name=dev_email_password,json=devEmailPassword,proto3" json:"dev_email_password,omitempty"`
+	Originator       string `protobuf:"bytes,11,opt,name=originator,proto3" json:"originator,omitempty"`
 }
 
 func (x *Sms) Reset() {
@@ -152,11 +152,11 @@ type GenerateOtp struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	PhoneNumber  string `protobuf:"bytes,1,opt,name=phone_number,json=phoneNumber,proto3" json:"phone_number"`
-	ExpiresAt    string `protobuf:"bytes,2,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at"`
-	Otp          string `protobuf:"bytes,3,opt,name=otp,proto3" json:"otp"`
-	SmsId        string `protobuf:"bytes,4,opt,name=sms_id,json=smsId,proto3" json:"sms_id"`
-	ReceiverType string `protobuf:"bytes,5,opt,name=receiver_type,json=receiverType,proto3" json:"receiver_type"`
+	PhoneNumber  string `protobuf:"bytes,1,opt,name=phone_number,json=phoneNumber,proto3" json:"phone_number,omitempty"`
+	ExpiresAt    string `protobuf:"bytes,2,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
+	Otp          string `protobuf:"bytes,3,opt,name=otp,proto3" json:"otp,omitempty"`
+	SmsId        string `protobuf:"bytes,4,opt,name=sms_id,json=smsId,proto3" json:"sms_id,omitempty"`
+	ReceiverType string `protobuf:"bytes,5,opt,name=receiver_type,json=receiverType,proto3" json:"receiver_type,omitempty"`
 }
 
 func (x *GenerateOtp) Reset() {
@@ -231,8 +231,8 @@ type ConfirmOtpRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	SmsId string `protobuf:"bytes,1,opt,name=sms_id,json=smsId,proto3" json:"sms_id"`
-	Otp   string `protobuf:"bytes,2,opt,name=otp,proto3" json:"otp"`
+	SmsId string `protobuf:"bytes,1,opt,name=sms_id,json=smsId,proto3" json:"sms_id,omitempty"`
+	Otp   string `protobuf:"bytes,2,opt,name=otp,proto3" json:"otp,omitempty"`
 }
 
 func (x *ConfirmOtpRequest) Reset() {
@@ -286,7 +286,7 @@ type GetSmsRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	SmsId string `protobuf:"bytes,1,opt,name=sms_id,json=smsId,proto3" json:"sms_id"`
+	SmsId string `protobuf:"bytes,1,opt,name=sms_id,json=smsId,proto3" json:"sms_id,omitempty"`
 }
 
 func (x *GetSmsRequest) Reset() {

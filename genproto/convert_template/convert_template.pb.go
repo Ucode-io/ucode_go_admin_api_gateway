@@ -26,8 +26,8 @@ type WkHtmlToPdfRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	TemplateName string           `protobuf:"bytes,1,opt,name=template_name,json=templateName,proto3" json:"template_name"`
-	Data         *structpb.Struct `protobuf:"bytes,2,opt,name=data,proto3" json:"data"`
+	TemplateName string           `protobuf:"bytes,1,opt,name=template_name,json=templateName,proto3" json:"template_name,omitempty"`
+	Data         *structpb.Struct `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
 }
 
 func (x *WkHtmlToPdfRequest) Reset() {
@@ -81,8 +81,8 @@ type WkHtmlToPdfResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Filename string `protobuf:"bytes,1,opt,name=filename,proto3" json:"filename"`
-	Hash     string `protobuf:"bytes,2,opt,name=hash,proto3" json:"hash"`
+	Filename string `protobuf:"bytes,1,opt,name=filename,proto3" json:"filename,omitempty"`
+	Hash     string `protobuf:"bytes,2,opt,name=hash,proto3" json:"hash,omitempty"`
 }
 
 func (x *WkHtmlToPdfResponse) Reset() {

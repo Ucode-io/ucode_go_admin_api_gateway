@@ -27,9 +27,9 @@ type InsertVersionsToCommitRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id         string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	VersionIds []string `protobuf:"bytes,2,rep,name=version_ids,json=versionIds,proto3" json:"version_ids"`
-	ProjectId  string   `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	Id         string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	VersionIds []string `protobuf:"bytes,2,rep,name=version_ids,json=versionIds,proto3" json:"version_ids,omitempty"`
+	ProjectId  string   `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
 }
 
 func (x *InsertVersionsToCommitRequest) Reset() {
@@ -90,8 +90,8 @@ type GetTableHistoryRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	TableId   string `protobuf:"bytes,1,opt,name=table_id,json=tableId,proto3" json:"table_id"`
-	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	TableId   string `protobuf:"bytes,1,opt,name=table_id,json=tableId,proto3" json:"table_id,omitempty"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
 }
 
 func (x *GetTableHistoryRequest) Reset() {
@@ -145,8 +145,8 @@ type TableHistoryPrimaryKey struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
 }
 
 func (x *TableHistoryPrimaryKey) Reset() {
@@ -200,11 +200,11 @@ type RevertTableHistoryRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id         string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	ProjectId  string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	AuthorId   string `protobuf:"bytes,3,opt,name=author_id,json=authorId,proto3" json:"author_id"`
-	CommitType string `protobuf:"bytes,4,opt,name=commit_type,json=commitType,proto3" json:"commit_type"`
-	Name       string `protobuf:"bytes,5,opt,name=name,proto3" json:"name"`
+	Id         string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ProjectId  string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	AuthorId   string `protobuf:"bytes,3,opt,name=author_id,json=authorId,proto3" json:"author_id,omitempty"`
+	CommitType string `protobuf:"bytes,4,opt,name=commit_type,json=commitType,proto3" json:"commit_type,omitempty"`
+	Name       string `protobuf:"bytes,5,opt,name=name,proto3" json:"name,omitempty"`
 }
 
 func (x *RevertTableHistoryRequest) Reset() {
@@ -279,12 +279,12 @@ type TableHistory struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id         string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	CreatedAt  string   `protobuf:"bytes,2,opt,name=created_at,json=createdAt,proto3" json:"created_at"`
-	VersionIds []string `protobuf:"bytes,3,rep,name=version_ids,json=versionIds,proto3" json:"version_ids"`
-	AuthorId   string   `protobuf:"bytes,4,opt,name=author_id,json=authorId,proto3" json:"author_id"`
-	CommitType string   `protobuf:"bytes,5,opt,name=commit_type,json=commitType,proto3" json:"commit_type"`
-	Name       string   `protobuf:"bytes,6,opt,name=name,proto3" json:"name"`
+	Id         string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	CreatedAt  string   `protobuf:"bytes,2,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	VersionIds []string `protobuf:"bytes,3,rep,name=version_ids,json=versionIds,proto3" json:"version_ids,omitempty"`
+	AuthorId   string   `protobuf:"bytes,4,opt,name=author_id,json=authorId,proto3" json:"author_id,omitempty"`
+	CommitType string   `protobuf:"bytes,5,opt,name=commit_type,json=commitType,proto3" json:"commit_type,omitempty"`
+	Name       string   `protobuf:"bytes,6,opt,name=name,proto3" json:"name,omitempty"`
 }
 
 func (x *TableHistory) Reset() {
@@ -366,7 +366,7 @@ type GetTableHistoryResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Items []*TableHistory `protobuf:"bytes,1,rep,name=items,proto3" json:"items"`
+	Items []*TableHistory `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
 }
 
 func (x *GetTableHistoryResponse) Reset() {
@@ -413,29 +413,29 @@ type CreateTableRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Label             string                 `protobuf:"bytes,1,opt,name=label,proto3" json:"label"`
-	Description       string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description"`
-	Slug              string                 `protobuf:"bytes,3,opt,name=slug,proto3" json:"slug"`
-	Fields            []*CreateFieldsRequest `protobuf:"bytes,4,rep,name=fields,proto3" json:"fields"`
-	ShowInMenu        bool                   `protobuf:"varint,5,opt,name=show_in_menu,json=showInMenu,proto3" json:"show_in_menu"`
-	Icon              string                 `protobuf:"bytes,6,opt,name=icon,proto3" json:"icon"`
-	SubtitleFieldSlug string                 `protobuf:"bytes,7,opt,name=subtitle_field_slug,json=subtitleFieldSlug,proto3" json:"subtitle_field_slug"`
-	Sections          []*Section             `protobuf:"bytes,8,rep,name=sections,proto3" json:"sections"`
-	AppId             string                 `protobuf:"bytes,9,opt,name=app_id,json=appId,proto3" json:"app_id"`
-	IncrementId       *IncrementID           `protobuf:"bytes,10,opt,name=increment_id,json=incrementId,proto3" json:"increment_id"`
-	ProjectId         string                 `protobuf:"bytes,11,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	CommitId          string                 `protobuf:"bytes,12,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
-	VersionId         string                 `protobuf:"bytes,13,opt,name=version_id,json=versionId,proto3" json:"version_id"`
-	FolderId          string                 `protobuf:"bytes,14,opt,name=folder_id,json=folderId,proto3" json:"folder_id"`
-	AuthorId          string                 `protobuf:"bytes,15,opt,name=author_id,json=authorId,proto3" json:"author_id"`
-	CommitType        string                 `protobuf:"bytes,16,opt,name=commit_type,json=commitType,proto3" json:"commit_type"`
-	Name              string                 `protobuf:"bytes,17,opt,name=name,proto3" json:"name"`
-	IsCached          bool                   `protobuf:"varint,18,opt,name=is_cached,json=isCached,proto3" json:"is_cached"`
-	Layouts           []*LayoutRequest       `protobuf:"bytes,19,rep,name=layouts,proto3" json:"layouts"`
-	DefaultEditable   bool                   `protobuf:"varint,20,opt,name=default_editable,json=defaultEditable,proto3" json:"default_editable"`
-	SoftDelete        bool                   `protobuf:"varint,21,opt,name=soft_delete,json=softDelete,proto3" json:"soft_delete"`
-	OrderBy           bool                   `protobuf:"varint,22,opt,name=order_by,json=orderBy,proto3" json:"order_by"`
-	Attributes        *structpb.Struct       `protobuf:"bytes,23,opt,name=attributes,proto3" json:"attributes"`
+	Label             string                 `protobuf:"bytes,1,opt,name=label,proto3" json:"label,omitempty"`
+	Description       string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
+	Slug              string                 `protobuf:"bytes,3,opt,name=slug,proto3" json:"slug,omitempty"`
+	Fields            []*CreateFieldsRequest `protobuf:"bytes,4,rep,name=fields,proto3" json:"fields,omitempty"`
+	ShowInMenu        bool                   `protobuf:"varint,5,opt,name=show_in_menu,json=showInMenu,proto3" json:"show_in_menu,omitempty"`
+	Icon              string                 `protobuf:"bytes,6,opt,name=icon,proto3" json:"icon,omitempty"`
+	SubtitleFieldSlug string                 `protobuf:"bytes,7,opt,name=subtitle_field_slug,json=subtitleFieldSlug,proto3" json:"subtitle_field_slug,omitempty"`
+	Sections          []*Section             `protobuf:"bytes,8,rep,name=sections,proto3" json:"sections,omitempty"`
+	AppId             string                 `protobuf:"bytes,9,opt,name=app_id,json=appId,proto3" json:"app_id,omitempty"`
+	IncrementId       *IncrementID           `protobuf:"bytes,10,opt,name=increment_id,json=incrementId,proto3" json:"increment_id,omitempty"`
+	ProjectId         string                 `protobuf:"bytes,11,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	CommitId          string                 `protobuf:"bytes,12,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
+	VersionId         string                 `protobuf:"bytes,13,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
+	FolderId          string                 `protobuf:"bytes,14,opt,name=folder_id,json=folderId,proto3" json:"folder_id,omitempty"`
+	AuthorId          string                 `protobuf:"bytes,15,opt,name=author_id,json=authorId,proto3" json:"author_id,omitempty"`
+	CommitType        string                 `protobuf:"bytes,16,opt,name=commit_type,json=commitType,proto3" json:"commit_type,omitempty"`
+	Name              string                 `protobuf:"bytes,17,opt,name=name,proto3" json:"name,omitempty"`
+	IsCached          bool                   `protobuf:"varint,18,opt,name=is_cached,json=isCached,proto3" json:"is_cached,omitempty"`
+	Layouts           []*LayoutRequest       `protobuf:"bytes,19,rep,name=layouts,proto3" json:"layouts,omitempty"`
+	DefaultEditable   bool                   `protobuf:"varint,20,opt,name=default_editable,json=defaultEditable,proto3" json:"default_editable,omitempty"`
+	SoftDelete        bool                   `protobuf:"varint,21,opt,name=soft_delete,json=softDelete,proto3" json:"soft_delete,omitempty"`
+	OrderBy           bool                   `protobuf:"varint,22,opt,name=order_by,json=orderBy,proto3" json:"order_by,omitempty"`
+	Attributes        *structpb.Struct       `protobuf:"bytes,23,opt,name=attributes,proto3" json:"attributes,omitempty"`
 }
 
 func (x *CreateTableRequest) Reset() {
@@ -636,9 +636,9 @@ type IncrementID struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	WithIncrementId bool   `protobuf:"varint,1,opt,name=with_increment_id,json=withIncrementId,proto3" json:"with_increment_id"`
-	DigitNumber     int32  `protobuf:"varint,2,opt,name=digit_number,json=digitNumber,proto3" json:"digit_number"`
-	Prefix          string `protobuf:"bytes,3,opt,name=prefix,proto3" json:"prefix"`
+	WithIncrementId bool   `protobuf:"varint,1,opt,name=with_increment_id,json=withIncrementId,proto3" json:"with_increment_id,omitempty"`
+	DigitNumber     int32  `protobuf:"varint,2,opt,name=digit_number,json=digitNumber,proto3" json:"digit_number,omitempty"`
+	Prefix          string `protobuf:"bytes,3,opt,name=prefix,proto3" json:"prefix,omitempty"`
 }
 
 func (x *IncrementID) Reset() {
@@ -699,20 +699,20 @@ type CreateTableResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id                string           `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	Label             string           `protobuf:"bytes,2,opt,name=label,proto3" json:"label"`
-	Description       string           `protobuf:"bytes,3,opt,name=description,proto3" json:"description"`
-	Slug              string           `protobuf:"bytes,4,opt,name=slug,proto3" json:"slug"`
-	Fields            []*Field         `protobuf:"bytes,5,rep,name=fields,proto3" json:"fields"`
-	ShowInMenu        bool             `protobuf:"varint,6,opt,name=show_in_menu,json=showInMenu,proto3" json:"show_in_menu"`
-	Icon              string           `protobuf:"bytes,7,opt,name=icon,proto3" json:"icon"`
-	SubtitleFieldSlug string           `protobuf:"bytes,8,opt,name=subtitle_field_slug,json=subtitleFieldSlug,proto3" json:"subtitle_field_slug"`
-	Sections          []*Section       `protobuf:"bytes,9,rep,name=sections,proto3" json:"sections"`
-	IncrementId       *IncrementID     `protobuf:"bytes,10,opt,name=increment_id,json=incrementId,proto3" json:"increment_id"`
-	IsCached          bool             `protobuf:"varint,11,opt,name=is_cached,json=isCached,proto3" json:"is_cached"`
-	DefaultEditable   bool             `protobuf:"varint,12,opt,name=default_editable,json=defaultEditable,proto3" json:"default_editable"`
-	SoftDelete        bool             `protobuf:"varint,13,opt,name=soft_delete,json=softDelete,proto3" json:"soft_delete"`
-	Attributes        *structpb.Struct `protobuf:"bytes,14,opt,name=attributes,proto3" json:"attributes"`
+	Id                string           `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Label             string           `protobuf:"bytes,2,opt,name=label,proto3" json:"label,omitempty"`
+	Description       string           `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	Slug              string           `protobuf:"bytes,4,opt,name=slug,proto3" json:"slug,omitempty"`
+	Fields            []*Field         `protobuf:"bytes,5,rep,name=fields,proto3" json:"fields,omitempty"`
+	ShowInMenu        bool             `protobuf:"varint,6,opt,name=show_in_menu,json=showInMenu,proto3" json:"show_in_menu,omitempty"`
+	Icon              string           `protobuf:"bytes,7,opt,name=icon,proto3" json:"icon,omitempty"`
+	SubtitleFieldSlug string           `protobuf:"bytes,8,opt,name=subtitle_field_slug,json=subtitleFieldSlug,proto3" json:"subtitle_field_slug,omitempty"`
+	Sections          []*Section       `protobuf:"bytes,9,rep,name=sections,proto3" json:"sections,omitempty"`
+	IncrementId       *IncrementID     `protobuf:"bytes,10,opt,name=increment_id,json=incrementId,proto3" json:"increment_id,omitempty"`
+	IsCached          bool             `protobuf:"varint,11,opt,name=is_cached,json=isCached,proto3" json:"is_cached,omitempty"`
+	DefaultEditable   bool             `protobuf:"varint,12,opt,name=default_editable,json=defaultEditable,proto3" json:"default_editable,omitempty"`
+	SoftDelete        bool             `protobuf:"varint,13,opt,name=soft_delete,json=softDelete,proto3" json:"soft_delete,omitempty"`
+	Attributes        *structpb.Struct `protobuf:"bytes,14,opt,name=attributes,proto3" json:"attributes,omitempty"`
 }
 
 func (x *CreateTableResponse) Reset() {
@@ -850,27 +850,27 @@ type UpdateTableRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id                string           `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	Label             string           `protobuf:"bytes,2,opt,name=label,proto3" json:"label"`
-	Description       string           `protobuf:"bytes,3,opt,name=description,proto3" json:"description"`
-	Slug              string           `protobuf:"bytes,4,opt,name=slug,proto3" json:"slug"`
-	ShowInMenu        bool             `protobuf:"varint,5,opt,name=show_in_menu,json=showInMenu,proto3" json:"show_in_menu"`
-	Icon              string           `protobuf:"bytes,6,opt,name=icon,proto3" json:"icon"`
-	SubtitleFieldSlug string           `protobuf:"bytes,7,opt,name=subtitle_field_slug,json=subtitleFieldSlug,proto3" json:"subtitle_field_slug"`
-	IsVisible         bool             `protobuf:"varint,8,opt,name=is_visible,json=isVisible,proto3" json:"is_visible"`
-	IsOwnTable        bool             `protobuf:"varint,9,opt,name=is_own_table,json=isOwnTable,proto3" json:"is_own_table"`
-	IncrementId       *IncrementID     `protobuf:"bytes,10,opt,name=increment_id,json=incrementId,proto3" json:"increment_id"`
-	ProjectId         string           `protobuf:"bytes,11,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	FolderId          string           `protobuf:"bytes,12,opt,name=folder_id,json=folderId,proto3" json:"folder_id"`
-	AuthorId          string           `protobuf:"bytes,13,opt,name=author_id,json=authorId,proto3" json:"author_id"`
-	CommitType        string           `protobuf:"bytes,14,opt,name=commit_type,json=commitType,proto3" json:"commit_type"`
-	Name              string           `protobuf:"bytes,15,opt,name=name,proto3" json:"name"`
-	IsCached          bool             `protobuf:"varint,16,opt,name=is_cached,json=isCached,proto3" json:"is_cached"`
-	DefaultEditable   bool             `protobuf:"varint,17,opt,name=default_editable,json=defaultEditable,proto3" json:"default_editable"`
-	SoftDelete        bool             `protobuf:"varint,18,opt,name=soft_delete,json=softDelete,proto3" json:"soft_delete"`
-	IsLoginTable      bool             `protobuf:"varint,19,opt,name=is_login_table,json=isLoginTable,proto3" json:"is_login_table"`
-	Attributes        *structpb.Struct `protobuf:"bytes,20,opt,name=attributes,proto3" json:"attributes"`
-	OrderBy           bool             `protobuf:"varint,21,opt,name=order_by,json=orderBy,proto3" json:"order_by"`
+	Id                string           `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Label             string           `protobuf:"bytes,2,opt,name=label,proto3" json:"label,omitempty"`
+	Description       string           `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	Slug              string           `protobuf:"bytes,4,opt,name=slug,proto3" json:"slug,omitempty"`
+	ShowInMenu        bool             `protobuf:"varint,5,opt,name=show_in_menu,json=showInMenu,proto3" json:"show_in_menu,omitempty"`
+	Icon              string           `protobuf:"bytes,6,opt,name=icon,proto3" json:"icon,omitempty"`
+	SubtitleFieldSlug string           `protobuf:"bytes,7,opt,name=subtitle_field_slug,json=subtitleFieldSlug,proto3" json:"subtitle_field_slug,omitempty"`
+	IsVisible         bool             `protobuf:"varint,8,opt,name=is_visible,json=isVisible,proto3" json:"is_visible,omitempty"`
+	IsOwnTable        bool             `protobuf:"varint,9,opt,name=is_own_table,json=isOwnTable,proto3" json:"is_own_table,omitempty"`
+	IncrementId       *IncrementID     `protobuf:"bytes,10,opt,name=increment_id,json=incrementId,proto3" json:"increment_id,omitempty"`
+	ProjectId         string           `protobuf:"bytes,11,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	FolderId          string           `protobuf:"bytes,12,opt,name=folder_id,json=folderId,proto3" json:"folder_id,omitempty"`
+	AuthorId          string           `protobuf:"bytes,13,opt,name=author_id,json=authorId,proto3" json:"author_id,omitempty"`
+	CommitType        string           `protobuf:"bytes,14,opt,name=commit_type,json=commitType,proto3" json:"commit_type,omitempty"`
+	Name              string           `protobuf:"bytes,15,opt,name=name,proto3" json:"name,omitempty"`
+	IsCached          bool             `protobuf:"varint,16,opt,name=is_cached,json=isCached,proto3" json:"is_cached,omitempty"`
+	DefaultEditable   bool             `protobuf:"varint,17,opt,name=default_editable,json=defaultEditable,proto3" json:"default_editable,omitempty"`
+	SoftDelete        bool             `protobuf:"varint,18,opt,name=soft_delete,json=softDelete,proto3" json:"soft_delete,omitempty"`
+	IsLoginTable      bool             `protobuf:"varint,19,opt,name=is_login_table,json=isLoginTable,proto3" json:"is_login_table,omitempty"`
+	Attributes        *structpb.Struct `protobuf:"bytes,20,opt,name=attributes,proto3" json:"attributes,omitempty"`
+	OrderBy           bool             `protobuf:"varint,21,opt,name=order_by,json=orderBy,proto3" json:"order_by,omitempty"`
 }
 
 func (x *UpdateTableRequest) Reset() {
@@ -1057,27 +1057,27 @@ type Table struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id                string           `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	Label             string           `protobuf:"bytes,2,opt,name=label,proto3" json:"label"`
-	Description       string           `protobuf:"bytes,3,opt,name=description,proto3" json:"description"`
-	Slug              string           `protobuf:"bytes,4,opt,name=slug,proto3" json:"slug"`
-	ShowInMenu        bool             `protobuf:"varint,5,opt,name=show_in_menu,json=showInMenu,proto3" json:"show_in_menu"`
-	Icon              string           `protobuf:"bytes,6,opt,name=icon,proto3" json:"icon"`
-	SubtitleFieldSlug string           `protobuf:"bytes,7,opt,name=subtitle_field_slug,json=subtitleFieldSlug,proto3" json:"subtitle_field_slug"`
-	IsVisible         bool             `protobuf:"varint,8,opt,name=is_visible,json=isVisible,proto3" json:"is_visible"`
-	IsOwnTable        bool             `protobuf:"varint,9,opt,name=is_own_table,json=isOwnTable,proto3" json:"is_own_table"`
-	IncrementId       *IncrementID     `protobuf:"bytes,10,opt,name=increment_id,json=incrementId,proto3" json:"increment_id"`
-	ProjectId         string           `protobuf:"bytes,11,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	FolderId          string           `protobuf:"bytes,12,opt,name=folder_id,json=folderId,proto3" json:"folder_id"`
-	AuthorId          string           `protobuf:"bytes,13,opt,name=author_id,json=authorId,proto3" json:"author_id"`
-	CommitInfo        *CommitInfo      `protobuf:"bytes,14,opt,name=commit_info,json=commitInfo,proto3" json:"commit_info"`
-	IsCached          bool             `protobuf:"varint,15,opt,name=is_cached,json=isCached,proto3" json:"is_cached"`
-	RecordPermissions *Permission      `protobuf:"bytes,16,opt,name=record_permissions,json=recordPermissions,proto3" json:"record_permissions"`
-	DefaultEditable   bool             `protobuf:"varint,17,opt,name=default_editable,json=defaultEditable,proto3" json:"default_editable"`
-	SoftDelete        bool             `protobuf:"varint,18,opt,name=soft_delete,json=softDelete,proto3" json:"soft_delete"`
-	IsLoginTable      bool             `protobuf:"varint,19,opt,name=is_login_table,json=isLoginTable,proto3" json:"is_login_table"`
-	Attributes        *structpb.Struct `protobuf:"bytes,20,opt,name=attributes,proto3" json:"attributes"`
-	OrderBy           bool             `protobuf:"varint,21,opt,name=order_by,json=orderBy,proto3" json:"order_by"`
+	Id                string           `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Label             string           `protobuf:"bytes,2,opt,name=label,proto3" json:"label,omitempty"`
+	Description       string           `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	Slug              string           `protobuf:"bytes,4,opt,name=slug,proto3" json:"slug,omitempty"`
+	ShowInMenu        bool             `protobuf:"varint,5,opt,name=show_in_menu,json=showInMenu,proto3" json:"show_in_menu,omitempty"`
+	Icon              string           `protobuf:"bytes,6,opt,name=icon,proto3" json:"icon,omitempty"`
+	SubtitleFieldSlug string           `protobuf:"bytes,7,opt,name=subtitle_field_slug,json=subtitleFieldSlug,proto3" json:"subtitle_field_slug,omitempty"`
+	IsVisible         bool             `protobuf:"varint,8,opt,name=is_visible,json=isVisible,proto3" json:"is_visible,omitempty"`
+	IsOwnTable        bool             `protobuf:"varint,9,opt,name=is_own_table,json=isOwnTable,proto3" json:"is_own_table,omitempty"`
+	IncrementId       *IncrementID     `protobuf:"bytes,10,opt,name=increment_id,json=incrementId,proto3" json:"increment_id,omitempty"`
+	ProjectId         string           `protobuf:"bytes,11,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	FolderId          string           `protobuf:"bytes,12,opt,name=folder_id,json=folderId,proto3" json:"folder_id,omitempty"`
+	AuthorId          string           `protobuf:"bytes,13,opt,name=author_id,json=authorId,proto3" json:"author_id,omitempty"`
+	CommitInfo        *CommitInfo      `protobuf:"bytes,14,opt,name=commit_info,json=commitInfo,proto3" json:"commit_info,omitempty"`
+	IsCached          bool             `protobuf:"varint,15,opt,name=is_cached,json=isCached,proto3" json:"is_cached,omitempty"`
+	RecordPermissions *Permission      `protobuf:"bytes,16,opt,name=record_permissions,json=recordPermissions,proto3" json:"record_permissions,omitempty"`
+	DefaultEditable   bool             `protobuf:"varint,17,opt,name=default_editable,json=defaultEditable,proto3" json:"default_editable,omitempty"`
+	SoftDelete        bool             `protobuf:"varint,18,opt,name=soft_delete,json=softDelete,proto3" json:"soft_delete,omitempty"`
+	IsLoginTable      bool             `protobuf:"varint,19,opt,name=is_login_table,json=isLoginTable,proto3" json:"is_login_table,omitempty"`
+	Attributes        *structpb.Struct `protobuf:"bytes,20,opt,name=attributes,proto3" json:"attributes,omitempty"`
+	OrderBy           bool             `protobuf:"varint,21,opt,name=order_by,json=orderBy,proto3" json:"order_by,omitempty"`
 }
 
 func (x *Table) Reset() {
@@ -1264,11 +1264,11 @@ type CommitInfo struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id         string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	CommitType string   `protobuf:"bytes,2,opt,name=commit_type,json=commitType,proto3" json:"commit_type"`
-	CreatedAt  string   `protobuf:"bytes,3,opt,name=created_at,json=createdAt,proto3" json:"created_at"`
-	Name       string   `protobuf:"bytes,4,opt,name=name,proto3" json:"name"`
-	VersionIds []string `protobuf:"bytes,5,rep,name=version_ids,json=versionIds,proto3" json:"version_ids"`
+	Id         string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	CommitType string   `protobuf:"bytes,2,opt,name=commit_type,json=commitType,proto3" json:"commit_type,omitempty"`
+	CreatedAt  string   `protobuf:"bytes,3,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	Name       string   `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
+	VersionIds []string `protobuf:"bytes,5,rep,name=version_ids,json=versionIds,proto3" json:"version_ids,omitempty"`
 }
 
 func (x *CommitInfo) Reset() {
@@ -1343,8 +1343,8 @@ type GetAllTablesResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Tables []*Table `protobuf:"bytes,1,rep,name=tables,proto3" json:"tables"`
-	Count  int32    `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
+	Tables []*Table `protobuf:"bytes,1,rep,name=tables,proto3" json:"tables,omitempty"`
+	Count  int32    `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
 }
 
 func (x *GetAllTablesResponse) Reset() {
@@ -1398,12 +1398,12 @@ type TablePrimaryKey struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id         string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	ProjectId  string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	VersionId  string `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id"`
-	AuthorId   string `protobuf:"bytes,4,opt,name=author_id,json=authorId,proto3" json:"author_id"`
-	CommitType string `protobuf:"bytes,5,opt,name=commit_type,json=commitType,proto3" json:"commit_type"`
-	Name       string `protobuf:"bytes,6,opt,name=name,proto3" json:"name"`
+	Id         string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ProjectId  string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	VersionId  string `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
+	AuthorId   string `protobuf:"bytes,4,opt,name=author_id,json=authorId,proto3" json:"author_id,omitempty"`
+	CommitType string `protobuf:"bytes,5,opt,name=commit_type,json=commitType,proto3" json:"commit_type,omitempty"`
+	Name       string `protobuf:"bytes,6,opt,name=name,proto3" json:"name,omitempty"`
 }
 
 func (x *TablePrimaryKey) Reset() {
@@ -1485,14 +1485,14 @@ type GetAllTablesRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Offset       int32  `protobuf:"varint,1,opt,name=offset,proto3" json:"offset"`
-	Limit        int32  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit"`
-	Search       string `protobuf:"bytes,3,opt,name=search,proto3" json:"search"`
-	ProjectId    string `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	VersionId    string `protobuf:"bytes,5,opt,name=version_id,json=versionId,proto3" json:"version_id"`
-	FolderId     string `protobuf:"bytes,6,opt,name=folder_id,json=folderId,proto3" json:"folder_id"`
-	IsLoginTable bool   `protobuf:"varint,7,opt,name=is_login_table,json=isLoginTable,proto3" json:"is_login_table"`
-	RoleId       string `protobuf:"bytes,8,opt,name=role_id,json=roleId,proto3" json:"role_id"`
+	Offset       int32  `protobuf:"varint,1,opt,name=offset,proto3" json:"offset,omitempty"`
+	Limit        int32  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
+	Search       string `protobuf:"bytes,3,opt,name=search,proto3" json:"search,omitempty"`
+	ProjectId    string `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	VersionId    string `protobuf:"bytes,5,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
+	FolderId     string `protobuf:"bytes,6,opt,name=folder_id,json=folderId,proto3" json:"folder_id,omitempty"`
+	IsLoginTable bool   `protobuf:"varint,7,opt,name=is_login_table,json=isLoginTable,proto3" json:"is_login_table,omitempty"`
+	RoleId       string `protobuf:"bytes,8,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
 }
 
 func (x *GetAllTablesRequest) Reset() {
@@ -1588,13 +1588,13 @@ type Permission struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Read            string `protobuf:"bytes,1,opt,name=read,proto3" json:"read"`
-	Write           string `protobuf:"bytes,2,opt,name=write,proto3" json:"write"`
-	Update          string `protobuf:"bytes,3,opt,name=update,proto3" json:"update"`
-	Delete          string `protobuf:"bytes,4,opt,name=delete,proto3" json:"delete"`
-	Guid            string `protobuf:"bytes,5,opt,name=guid,proto3" json:"guid"`
-	IsPublic        bool   `protobuf:"varint,6,opt,name=is_public,json=isPublic,proto3" json:"is_public"`
-	IsHaveCondition bool   `protobuf:"varint,7,opt,name=is_have_condition,json=isHaveCondition,proto3" json:"is_have_condition"`
+	Read            string `protobuf:"bytes,1,opt,name=read,proto3" json:"read,omitempty"`
+	Write           string `protobuf:"bytes,2,opt,name=write,proto3" json:"write,omitempty"`
+	Update          string `protobuf:"bytes,3,opt,name=update,proto3" json:"update,omitempty"`
+	Delete          string `protobuf:"bytes,4,opt,name=delete,proto3" json:"delete,omitempty"`
+	Guid            string `protobuf:"bytes,5,opt,name=guid,proto3" json:"guid,omitempty"`
+	IsPublic        bool   `protobuf:"varint,6,opt,name=is_public,json=isPublic,proto3" json:"is_public,omitempty"`
+	IsHaveCondition bool   `protobuf:"varint,7,opt,name=is_have_condition,json=isHaveCondition,proto3" json:"is_have_condition,omitempty"`
 }
 
 func (x *Permission) Reset() {

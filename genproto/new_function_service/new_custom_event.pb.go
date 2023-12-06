@@ -27,20 +27,20 @@ type CreateCustomEventRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	TableSlug     string           `protobuf:"bytes,1,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
-	Icon          string           `protobuf:"bytes,2,opt,name=icon,proto3" json:"icon"`
-	EventPath     string           `protobuf:"bytes,3,opt,name=event_path,json=eventPath,proto3" json:"event_path"`
-	Label         string           `protobuf:"bytes,4,opt,name=label,proto3" json:"label"`
-	Url           string           `protobuf:"bytes,5,opt,name=url,proto3" json:"url"`
-	Disable       bool             `protobuf:"varint,6,opt,name=disable,proto3" json:"disable"`
-	ProjectId     string           `protobuf:"bytes,7,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	CommitId      string           `protobuf:"bytes,8,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
-	CommitGuid    string           `protobuf:"bytes,9,opt,name=commit_guid,json=commitGuid,proto3" json:"commit_guid"`
-	Method        string           `protobuf:"bytes,10,opt,name=method,proto3" json:"method"`
-	ActionType    string           `protobuf:"bytes,11,opt,name=action_type,json=actionType,proto3" json:"action_type"`
-	VersionId     string           `protobuf:"bytes,12,opt,name=version_id,json=versionId,proto3" json:"version_id"`
-	Attributes    *structpb.Struct `protobuf:"bytes,13,opt,name=attributes,proto3" json:"attributes"`
-	EnvironmentId string           `protobuf:"bytes,14,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
+	TableSlug     string           `protobuf:"bytes,1,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
+	Icon          string           `protobuf:"bytes,2,opt,name=icon,proto3" json:"icon,omitempty"`
+	EventPath     string           `protobuf:"bytes,3,opt,name=event_path,json=eventPath,proto3" json:"event_path,omitempty"`
+	Label         string           `protobuf:"bytes,4,opt,name=label,proto3" json:"label,omitempty"`
+	Url           string           `protobuf:"bytes,5,opt,name=url,proto3" json:"url,omitempty"`
+	Disable       bool             `protobuf:"varint,6,opt,name=disable,proto3" json:"disable,omitempty"`
+	ProjectId     string           `protobuf:"bytes,7,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	CommitId      string           `protobuf:"bytes,8,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
+	CommitGuid    string           `protobuf:"bytes,9,opt,name=commit_guid,json=commitGuid,proto3" json:"commit_guid,omitempty"`
+	Method        string           `protobuf:"bytes,10,opt,name=method,proto3" json:"method,omitempty"`
+	ActionType    string           `protobuf:"bytes,11,opt,name=action_type,json=actionType,proto3" json:"action_type,omitempty"`
+	VersionId     string           `protobuf:"bytes,12,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
+	Attributes    *structpb.Struct `protobuf:"bytes,13,opt,name=attributes,proto3" json:"attributes,omitempty"`
+	EnvironmentId string           `protobuf:"bytes,14,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
 }
 
 func (x *CreateCustomEventRequest) Reset() {
@@ -178,20 +178,20 @@ type CustomEvent struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id               string           `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	TableSlug        string           `protobuf:"bytes,2,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
-	EventPath        string           `protobuf:"bytes,3,opt,name=event_path,json=eventPath,proto3" json:"event_path"`
-	Label            string           `protobuf:"bytes,4,opt,name=label,proto3" json:"label"`
-	Icon             string           `protobuf:"bytes,5,opt,name=icon,proto3" json:"icon"`
-	Url              string           `protobuf:"bytes,6,opt,name=url,proto3" json:"url"`
-	Disable          bool             `protobuf:"varint,7,opt,name=disable,proto3" json:"disable"`
-	Function         *Function        `protobuf:"bytes,8,opt,name=function,proto3" json:"function"`
-	ProjectId        string           `protobuf:"bytes,9,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	Method           string           `protobuf:"bytes,10,opt,name=method,proto3" json:"method"`
-	ActionType       string           `protobuf:"bytes,11,opt,name=action_type,json=actionType,proto3" json:"action_type"`
-	Attributes       *structpb.Struct `protobuf:"bytes,12,opt,name=attributes,proto3" json:"attributes"`
-	ActionPermission *structpb.Struct `protobuf:"bytes,13,opt,name=action_permission,json=actionPermission,proto3" json:"action_permission"`
-	EnvironmentId    string           `protobuf:"bytes,14,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
+	Id               string           `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	TableSlug        string           `protobuf:"bytes,2,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
+	EventPath        string           `protobuf:"bytes,3,opt,name=event_path,json=eventPath,proto3" json:"event_path,omitempty"`
+	Label            string           `protobuf:"bytes,4,opt,name=label,proto3" json:"label,omitempty"`
+	Icon             string           `protobuf:"bytes,5,opt,name=icon,proto3" json:"icon,omitempty"`
+	Url              string           `protobuf:"bytes,6,opt,name=url,proto3" json:"url,omitempty"`
+	Disable          bool             `protobuf:"varint,7,opt,name=disable,proto3" json:"disable,omitempty"`
+	Function         *Function        `protobuf:"bytes,8,opt,name=function,proto3" json:"function,omitempty"`
+	ProjectId        string           `protobuf:"bytes,9,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Method           string           `protobuf:"bytes,10,opt,name=method,proto3" json:"method,omitempty"`
+	ActionType       string           `protobuf:"bytes,11,opt,name=action_type,json=actionType,proto3" json:"action_type,omitempty"`
+	Attributes       *structpb.Struct `protobuf:"bytes,12,opt,name=attributes,proto3" json:"attributes,omitempty"`
+	ActionPermission *structpb.Struct `protobuf:"bytes,13,opt,name=action_permission,json=actionPermission,proto3" json:"action_permission,omitempty"`
+	EnvironmentId    string           `protobuf:"bytes,14,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
 }
 
 func (x *CustomEvent) Reset() {
@@ -329,8 +329,8 @@ type GetCustomEventsListResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	CustomEvents []*CustomEvent `protobuf:"bytes,1,rep,name=custom_events,json=customEvents,proto3" json:"custom_events"`
-	Count        int32          `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
+	CustomEvents []*CustomEvent `protobuf:"bytes,1,rep,name=custom_events,json=customEvents,proto3" json:"custom_events,omitempty"`
+	Count        int32          `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
 }
 
 func (x *GetCustomEventsListResponse) Reset() {
@@ -384,11 +384,11 @@ type GetCustomEventsListRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	TableSlug     string `protobuf:"bytes,1,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
-	ProjectId     string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	Method        string `protobuf:"bytes,3,opt,name=method,proto3" json:"method"`
-	RoleId        string `protobuf:"bytes,4,opt,name=role_id,json=roleId,proto3" json:"role_id"`
-	EnvironmentId string `protobuf:"bytes,5,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
+	TableSlug     string `protobuf:"bytes,1,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
+	ProjectId     string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Method        string `protobuf:"bytes,3,opt,name=method,proto3" json:"method,omitempty"`
+	RoleId        string `protobuf:"bytes,4,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
+	EnvironmentId string `protobuf:"bytes,5,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
 }
 
 func (x *GetCustomEventsListRequest) Reset() {
@@ -463,8 +463,8 @@ type CustomEventPrimaryKey struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
 }
 
 func (x *CustomEventPrimaryKey) Reset() {
@@ -518,11 +518,11 @@ type UpdateByFunctionIdRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	FunctionId    string   `protobuf:"bytes,1,opt,name=function_id,json=functionId,proto3" json:"function_id"`
-	ObjectIds     []string `protobuf:"bytes,2,rep,name=object_ids,json=objectIds,proto3" json:"object_ids"`
-	FieldSlug     string   `protobuf:"bytes,3,opt,name=field_slug,json=fieldSlug,proto3" json:"field_slug"`
-	ProjectId     string   `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	EnvironmentId string   `protobuf:"bytes,5,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
+	FunctionId    string   `protobuf:"bytes,1,opt,name=function_id,json=functionId,proto3" json:"function_id,omitempty"`
+	ObjectIds     []string `protobuf:"bytes,2,rep,name=object_ids,json=objectIds,proto3" json:"object_ids,omitempty"`
+	FieldSlug     string   `protobuf:"bytes,3,opt,name=field_slug,json=fieldSlug,proto3" json:"field_slug,omitempty"`
+	ProjectId     string   `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	EnvironmentId string   `protobuf:"bytes,5,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
 }
 
 func (x *UpdateByFunctionIdRequest) Reset() {

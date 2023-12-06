@@ -38,3 +38,11 @@ const (
 	REDIS_WAIT_TIMEOUT = 1 * time.Second
 	REDIS_SLEEP        = 100 * time.Millisecond
 )
+
+var (
+	DynamicReportFormula = []string{"SUM", "COUNT", "AVERAGE", "MAX", "MIN", "FIRST", "LAST", "END_FIRST", "END_LAST"}
+	BarcodeTypes         = map[string]int{
+		"barcode": 1,
+		"codabar": 1,
+	}
+)

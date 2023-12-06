@@ -27,9 +27,9 @@ type UpdateViewOrderRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	TableSlug string   `protobuf:"bytes,1,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
-	ProjectId string   `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	Ids       []string `protobuf:"bytes,3,rep,name=ids,proto3" json:"ids"`
+	TableSlug string   `protobuf:"bytes,1,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
+	ProjectId string   `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Ids       []string `protobuf:"bytes,3,rep,name=ids,proto3" json:"ids,omitempty"`
 }
 
 func (x *UpdateViewOrderRequest) Reset() {
@@ -90,37 +90,37 @@ type CreateViewRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	TableSlug           string           `protobuf:"bytes,1,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
-	Type                string           `protobuf:"bytes,2,opt,name=type,proto3" json:"type"`
-	MainField           string           `protobuf:"bytes,3,opt,name=main_field,json=mainField,proto3" json:"main_field"`
-	Name                string           `protobuf:"bytes,4,opt,name=name,proto3" json:"name"`
-	DisableDates        *DisableDates    `protobuf:"bytes,5,opt,name=disable_dates,json=disableDates,proto3" json:"disable_dates"`
-	ViewFields          []string         `protobuf:"bytes,6,rep,name=view_fields,json=viewFields,proto3" json:"view_fields"`
-	QuickFilters        []*QuickFilter   `protobuf:"bytes,7,rep,name=quick_filters,json=quickFilters,proto3" json:"quick_filters"`
-	Users               []string         `protobuf:"bytes,8,rep,name=users,proto3" json:"users"`
-	GroupFields         []string         `protobuf:"bytes,9,rep,name=group_fields,json=groupFields,proto3" json:"group_fields"`
-	Columns             []string         `protobuf:"bytes,10,rep,name=columns,proto3" json:"columns"`
-	CalendarFromSlug    string           `protobuf:"bytes,11,opt,name=calendar_from_slug,json=calendarFromSlug,proto3" json:"calendar_from_slug"`
-	CalendarToSlug      string           `protobuf:"bytes,12,opt,name=calendar_to_slug,json=calendarToSlug,proto3" json:"calendar_to_slug"`
-	TimeInterval        int32            `protobuf:"varint,13,opt,name=time_interval,json=timeInterval,proto3" json:"time_interval"`
-	MultipleInsert      bool             `protobuf:"varint,14,opt,name=multiple_insert,json=multipleInsert,proto3" json:"multiple_insert"`
-	StatusFieldSlug     string           `protobuf:"bytes,15,opt,name=status_field_slug,json=statusFieldSlug,proto3" json:"status_field_slug"`
-	RelationTableSlug   string           `protobuf:"bytes,16,opt,name=relation_table_slug,json=relationTableSlug,proto3" json:"relation_table_slug"`
-	IsEditable          bool             `protobuf:"varint,17,opt,name=is_editable,json=isEditable,proto3" json:"is_editable"`
-	RelationId          string           `protobuf:"bytes,18,opt,name=relation_id,json=relationId,proto3" json:"relation_id"`
-	MultipleInsertField string           `protobuf:"bytes,19,opt,name=multiple_insert_field,json=multipleInsertField,proto3" json:"multiple_insert_field"`
-	UpdatedFields       []string         `protobuf:"bytes,20,rep,name=updated_fields,json=updatedFields,proto3" json:"updated_fields"`
-	AppId               string           `protobuf:"bytes,21,opt,name=app_id,json=appId,proto3" json:"app_id"`
-	TableLabel          string           `protobuf:"bytes,22,opt,name=table_label,json=tableLabel,proto3" json:"table_label"`
-	DefaultLimit        string           `protobuf:"bytes,23,opt,name=default_limit,json=defaultLimit,proto3" json:"default_limit"`
-	Attributes          *structpb.Struct `protobuf:"bytes,24,opt,name=attributes,proto3" json:"attributes"`
-	ProjectId           string           `protobuf:"bytes,25,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	CommitId            int64            `protobuf:"varint,26,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
-	CommitGuid          string           `protobuf:"bytes,27,opt,name=commit_guid,json=commitGuid,proto3" json:"commit_guid"`
-	DefaultEditable     bool             `protobuf:"varint,28,opt,name=default_editable,json=defaultEditable,proto3" json:"default_editable"`
-	Order               int32            `protobuf:"varint,29,opt,name=order,proto3" json:"order"`
-	NameUz              string           `protobuf:"bytes,30,opt,name=name_uz,json=nameUz,proto3" json:"name_uz"`
-	NameEn              string           `protobuf:"bytes,31,opt,name=name_en,json=nameEn,proto3" json:"name_en"`
+	TableSlug           string           `protobuf:"bytes,1,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
+	Type                string           `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
+	MainField           string           `protobuf:"bytes,3,opt,name=main_field,json=mainField,proto3" json:"main_field,omitempty"`
+	Name                string           `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
+	DisableDates        *DisableDates    `protobuf:"bytes,5,opt,name=disable_dates,json=disableDates,proto3" json:"disable_dates,omitempty"`
+	ViewFields          []string         `protobuf:"bytes,6,rep,name=view_fields,json=viewFields,proto3" json:"view_fields,omitempty"`
+	QuickFilters        []*QuickFilter   `protobuf:"bytes,7,rep,name=quick_filters,json=quickFilters,proto3" json:"quick_filters,omitempty"`
+	Users               []string         `protobuf:"bytes,8,rep,name=users,proto3" json:"users,omitempty"`
+	GroupFields         []string         `protobuf:"bytes,9,rep,name=group_fields,json=groupFields,proto3" json:"group_fields,omitempty"`
+	Columns             []string         `protobuf:"bytes,10,rep,name=columns,proto3" json:"columns,omitempty"`
+	CalendarFromSlug    string           `protobuf:"bytes,11,opt,name=calendar_from_slug,json=calendarFromSlug,proto3" json:"calendar_from_slug,omitempty"`
+	CalendarToSlug      string           `protobuf:"bytes,12,opt,name=calendar_to_slug,json=calendarToSlug,proto3" json:"calendar_to_slug,omitempty"`
+	TimeInterval        int32            `protobuf:"varint,13,opt,name=time_interval,json=timeInterval,proto3" json:"time_interval,omitempty"`
+	MultipleInsert      bool             `protobuf:"varint,14,opt,name=multiple_insert,json=multipleInsert,proto3" json:"multiple_insert,omitempty"`
+	StatusFieldSlug     string           `protobuf:"bytes,15,opt,name=status_field_slug,json=statusFieldSlug,proto3" json:"status_field_slug,omitempty"`
+	RelationTableSlug   string           `protobuf:"bytes,16,opt,name=relation_table_slug,json=relationTableSlug,proto3" json:"relation_table_slug,omitempty"`
+	IsEditable          bool             `protobuf:"varint,17,opt,name=is_editable,json=isEditable,proto3" json:"is_editable,omitempty"`
+	RelationId          string           `protobuf:"bytes,18,opt,name=relation_id,json=relationId,proto3" json:"relation_id,omitempty"`
+	MultipleInsertField string           `protobuf:"bytes,19,opt,name=multiple_insert_field,json=multipleInsertField,proto3" json:"multiple_insert_field,omitempty"`
+	UpdatedFields       []string         `protobuf:"bytes,20,rep,name=updated_fields,json=updatedFields,proto3" json:"updated_fields,omitempty"`
+	AppId               string           `protobuf:"bytes,21,opt,name=app_id,json=appId,proto3" json:"app_id,omitempty"`
+	TableLabel          string           `protobuf:"bytes,22,opt,name=table_label,json=tableLabel,proto3" json:"table_label,omitempty"`
+	DefaultLimit        string           `protobuf:"bytes,23,opt,name=default_limit,json=defaultLimit,proto3" json:"default_limit,omitempty"`
+	Attributes          *structpb.Struct `protobuf:"bytes,24,opt,name=attributes,proto3" json:"attributes,omitempty"`
+	ProjectId           string           `protobuf:"bytes,25,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	CommitId            int64            `protobuf:"varint,26,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
+	CommitGuid          string           `protobuf:"bytes,27,opt,name=commit_guid,json=commitGuid,proto3" json:"commit_guid,omitempty"`
+	DefaultEditable     bool             `protobuf:"varint,28,opt,name=default_editable,json=defaultEditable,proto3" json:"default_editable,omitempty"`
+	Order               int32            `protobuf:"varint,29,opt,name=order,proto3" json:"order,omitempty"`
+	NameUz              string           `protobuf:"bytes,30,opt,name=name_uz,json=nameUz,proto3" json:"name_uz,omitempty"`
+	NameEn              string           `protobuf:"bytes,31,opt,name=name_en,json=nameEn,proto3" json:"name_en,omitempty"`
 }
 
 func (x *CreateViewRequest) Reset() {
@@ -377,8 +377,8 @@ type QuickFilter struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	FieldId      string `protobuf:"bytes,1,opt,name=field_id,json=fieldId,proto3" json:"field_id"`
-	DefaultValue string `protobuf:"bytes,2,opt,name=default_value,json=defaultValue,proto3" json:"default_value"`
+	FieldId      string `protobuf:"bytes,1,opt,name=field_id,json=fieldId,proto3" json:"field_id,omitempty"`
+	DefaultValue string `protobuf:"bytes,2,opt,name=default_value,json=defaultValue,proto3" json:"default_value,omitempty"`
 }
 
 func (x *QuickFilter) Reset() {
@@ -432,38 +432,38 @@ type View struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id                  string           `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	TableSlug           string           `protobuf:"bytes,2,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
-	Type                string           `protobuf:"bytes,3,opt,name=type,proto3" json:"type"`
-	Name                string           `protobuf:"bytes,4,opt,name=name,proto3" json:"name"`
-	MainField           string           `protobuf:"bytes,5,opt,name=main_field,json=mainField,proto3" json:"main_field"`
-	DisableDates        *DisableDates    `protobuf:"bytes,6,opt,name=disable_dates,json=disableDates,proto3" json:"disable_dates"`
-	Columns             []string         `protobuf:"bytes,7,rep,name=columns,proto3" json:"columns"`
-	QuickFilters        []*QuickFilter   `protobuf:"bytes,8,rep,name=quick_filters,json=quickFilters,proto3" json:"quick_filters"`
-	Users               []string         `protobuf:"bytes,9,rep,name=users,proto3" json:"users"`
-	ViewFields          []string         `protobuf:"bytes,10,rep,name=view_fields,json=viewFields,proto3" json:"view_fields"`
-	GroupFields         []string         `protobuf:"bytes,11,rep,name=group_fields,json=groupFields,proto3" json:"group_fields"`
-	CalendarFromSlug    string           `protobuf:"bytes,12,opt,name=calendar_from_slug,json=calendarFromSlug,proto3" json:"calendar_from_slug"`
-	CalendarToSlug      string           `protobuf:"bytes,13,opt,name=calendar_to_slug,json=calendarToSlug,proto3" json:"calendar_to_slug"`
-	TimeInterval        int32            `protobuf:"varint,14,opt,name=time_interval,json=timeInterval,proto3" json:"time_interval"`
-	MultipleInsert      bool             `protobuf:"varint,15,opt,name=multiple_insert,json=multipleInsert,proto3" json:"multiple_insert"`
-	StatusFieldSlug     string           `protobuf:"bytes,16,opt,name=status_field_slug,json=statusFieldSlug,proto3" json:"status_field_slug"`
-	IsEditable          bool             `protobuf:"varint,17,opt,name=is_editable,json=isEditable,proto3" json:"is_editable"`
-	RelationTableSlug   string           `protobuf:"bytes,18,opt,name=relation_table_slug,json=relationTableSlug,proto3" json:"relation_table_slug"`
-	RelationId          string           `protobuf:"bytes,19,opt,name=relation_id,json=relationId,proto3" json:"relation_id"`
-	MultipleInsertField string           `protobuf:"bytes,20,opt,name=multiple_insert_field,json=multipleInsertField,proto3" json:"multiple_insert_field"`
-	UpdatedFields       []string         `protobuf:"bytes,21,rep,name=updated_fields,json=updatedFields,proto3" json:"updated_fields"`
-	AppId               string           `protobuf:"bytes,22,opt,name=app_id,json=appId,proto3" json:"app_id"`
-	TableLabel          string           `protobuf:"bytes,23,opt,name=table_label,json=tableLabel,proto3" json:"table_label"`
-	DefaultLimit        string           `protobuf:"bytes,24,opt,name=default_limit,json=defaultLimit,proto3" json:"default_limit"`
-	Attributes          *structpb.Struct `protobuf:"bytes,25,opt,name=attributes,proto3" json:"attributes"`
-	ProjectId           string           `protobuf:"bytes,26,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	DefaultEditable     bool             `protobuf:"varint,27,opt,name=default_editable,json=defaultEditable,proto3" json:"default_editable"`
-	Navigate            *Navigate        `protobuf:"bytes,28,opt,name=navigate,proto3" json:"navigate"`
-	FunctionPath        string           `protobuf:"bytes,29,opt,name=function_path,json=functionPath,proto3" json:"function_path"`
-	Order               int32            `protobuf:"varint,30,opt,name=order,proto3" json:"order"`
-	NameUz              string           `protobuf:"bytes,31,opt,name=name_uz,json=nameUz,proto3" json:"name_uz"`
-	NameEn              string           `protobuf:"bytes,32,opt,name=name_en,json=nameEn,proto3" json:"name_en"`
+	Id                  string           `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	TableSlug           string           `protobuf:"bytes,2,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
+	Type                string           `protobuf:"bytes,3,opt,name=type,proto3" json:"type,omitempty"`
+	Name                string           `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
+	MainField           string           `protobuf:"bytes,5,opt,name=main_field,json=mainField,proto3" json:"main_field,omitempty"`
+	DisableDates        *DisableDates    `protobuf:"bytes,6,opt,name=disable_dates,json=disableDates,proto3" json:"disable_dates,omitempty"`
+	Columns             []string         `protobuf:"bytes,7,rep,name=columns,proto3" json:"columns,omitempty"`
+	QuickFilters        []*QuickFilter   `protobuf:"bytes,8,rep,name=quick_filters,json=quickFilters,proto3" json:"quick_filters,omitempty"`
+	Users               []string         `protobuf:"bytes,9,rep,name=users,proto3" json:"users,omitempty"`
+	ViewFields          []string         `protobuf:"bytes,10,rep,name=view_fields,json=viewFields,proto3" json:"view_fields,omitempty"`
+	GroupFields         []string         `protobuf:"bytes,11,rep,name=group_fields,json=groupFields,proto3" json:"group_fields,omitempty"`
+	CalendarFromSlug    string           `protobuf:"bytes,12,opt,name=calendar_from_slug,json=calendarFromSlug,proto3" json:"calendar_from_slug,omitempty"`
+	CalendarToSlug      string           `protobuf:"bytes,13,opt,name=calendar_to_slug,json=calendarToSlug,proto3" json:"calendar_to_slug,omitempty"`
+	TimeInterval        int32            `protobuf:"varint,14,opt,name=time_interval,json=timeInterval,proto3" json:"time_interval,omitempty"`
+	MultipleInsert      bool             `protobuf:"varint,15,opt,name=multiple_insert,json=multipleInsert,proto3" json:"multiple_insert,omitempty"`
+	StatusFieldSlug     string           `protobuf:"bytes,16,opt,name=status_field_slug,json=statusFieldSlug,proto3" json:"status_field_slug,omitempty"`
+	IsEditable          bool             `protobuf:"varint,17,opt,name=is_editable,json=isEditable,proto3" json:"is_editable,omitempty"`
+	RelationTableSlug   string           `protobuf:"bytes,18,opt,name=relation_table_slug,json=relationTableSlug,proto3" json:"relation_table_slug,omitempty"`
+	RelationId          string           `protobuf:"bytes,19,opt,name=relation_id,json=relationId,proto3" json:"relation_id,omitempty"`
+	MultipleInsertField string           `protobuf:"bytes,20,opt,name=multiple_insert_field,json=multipleInsertField,proto3" json:"multiple_insert_field,omitempty"`
+	UpdatedFields       []string         `protobuf:"bytes,21,rep,name=updated_fields,json=updatedFields,proto3" json:"updated_fields,omitempty"`
+	AppId               string           `protobuf:"bytes,22,opt,name=app_id,json=appId,proto3" json:"app_id,omitempty"`
+	TableLabel          string           `protobuf:"bytes,23,opt,name=table_label,json=tableLabel,proto3" json:"table_label,omitempty"`
+	DefaultLimit        string           `protobuf:"bytes,24,opt,name=default_limit,json=defaultLimit,proto3" json:"default_limit,omitempty"`
+	Attributes          *structpb.Struct `protobuf:"bytes,25,opt,name=attributes,proto3" json:"attributes,omitempty"`
+	ProjectId           string           `protobuf:"bytes,26,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	DefaultEditable     bool             `protobuf:"varint,27,opt,name=default_editable,json=defaultEditable,proto3" json:"default_editable,omitempty"`
+	Navigate            *Navigate        `protobuf:"bytes,28,opt,name=navigate,proto3" json:"navigate,omitempty"`
+	FunctionPath        string           `protobuf:"bytes,29,opt,name=function_path,json=functionPath,proto3" json:"function_path,omitempty"`
+	Order               int32            `protobuf:"varint,30,opt,name=order,proto3" json:"order,omitempty"`
+	NameUz              string           `protobuf:"bytes,31,opt,name=name_uz,json=nameUz,proto3" json:"name_uz,omitempty"`
+	NameEn              string           `protobuf:"bytes,32,opt,name=name_en,json=nameEn,proto3" json:"name_en,omitempty"`
 }
 
 func (x *View) Reset() {
@@ -727,10 +727,10 @@ type Navigate struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Url     string            `protobuf:"bytes,1,opt,name=url,proto3" json:"url"`
-	Params  []*KeyStringValue `protobuf:"bytes,2,rep,name=params,proto3" json:"params"`
-	Cookie  []*KeyStringValue `protobuf:"bytes,3,rep,name=cookie,proto3" json:"cookie"`
-	Headers []*KeyStringValue `protobuf:"bytes,4,rep,name=headers,proto3" json:"headers"`
+	Url     string            `protobuf:"bytes,1,opt,name=url,proto3" json:"url,omitempty"`
+	Params  []*KeyStringValue `protobuf:"bytes,2,rep,name=params,proto3" json:"params,omitempty"`
+	Cookie  []*KeyStringValue `protobuf:"bytes,3,rep,name=cookie,proto3" json:"cookie,omitempty"`
+	Headers []*KeyStringValue `protobuf:"bytes,4,rep,name=headers,proto3" json:"headers,omitempty"`
 }
 
 func (x *Navigate) Reset() {
@@ -798,8 +798,8 @@ type KeyStringValue struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Key   string `protobuf:"bytes,1,opt,name=key,proto3" json:"key"`
-	Value string `protobuf:"bytes,2,opt,name=value,proto3" json:"value"`
+	Key   string `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
+	Value string `protobuf:"bytes,2,opt,name=value,proto3" json:"value,omitempty"`
 }
 
 func (x *KeyStringValue) Reset() {
@@ -853,8 +853,8 @@ type GetAllViewsResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Views []*View `protobuf:"bytes,1,rep,name=views,proto3" json:"views"`
-	Count int32   `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
+	Views []*View `protobuf:"bytes,1,rep,name=views,proto3" json:"views,omitempty"`
+	Count int32   `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
 }
 
 func (x *GetAllViewsResponse) Reset() {
@@ -908,10 +908,10 @@ type GetAllViewsRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	TableSlug string `protobuf:"bytes,1,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
-	AppId     string `protobuf:"bytes,2,opt,name=app_id,json=appId,proto3" json:"app_id"`
-	ProjectId string `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	RoleId    string `protobuf:"bytes,4,opt,name=role_id,json=roleId,proto3" json:"role_id"`
+	TableSlug string `protobuf:"bytes,1,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
+	AppId     string `protobuf:"bytes,2,opt,name=app_id,json=appId,proto3" json:"app_id,omitempty"`
+	ProjectId string `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	RoleId    string `protobuf:"bytes,4,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
 }
 
 func (x *GetAllViewsRequest) Reset() {
@@ -979,8 +979,8 @@ type ViewPrimaryKey struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
 }
 
 func (x *ViewPrimaryKey) Reset() {
@@ -1034,10 +1034,10 @@ type DisableDates struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	TableSlug    string `protobuf:"bytes,1,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
-	TimeFromSlug string `protobuf:"bytes,2,opt,name=time_from_slug,json=timeFromSlug,proto3" json:"time_from_slug"`
-	TimeToSlug   string `protobuf:"bytes,3,opt,name=time_to_slug,json=timeToSlug,proto3" json:"time_to_slug"`
-	DaySlug      string `protobuf:"bytes,4,opt,name=day_slug,json=daySlug,proto3" json:"day_slug"`
+	TableSlug    string `protobuf:"bytes,1,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
+	TimeFromSlug string `protobuf:"bytes,2,opt,name=time_from_slug,json=timeFromSlug,proto3" json:"time_from_slug,omitempty"`
+	TimeToSlug   string `protobuf:"bytes,3,opt,name=time_to_slug,json=timeToSlug,proto3" json:"time_to_slug,omitempty"`
+	DaySlug      string `protobuf:"bytes,4,opt,name=day_slug,json=daySlug,proto3" json:"day_slug,omitempty"`
 }
 
 func (x *DisableDates) Reset() {
@@ -1105,10 +1105,10 @@ type HtmlBody struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Html      string           `protobuf:"bytes,1,opt,name=html,proto3" json:"html"`
-	Data      *structpb.Struct `protobuf:"bytes,2,opt,name=data,proto3" json:"data"`
-	ProjectId string           `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	VersionId string           `protobuf:"bytes,4,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	Html      string           `protobuf:"bytes,1,opt,name=html,proto3" json:"html,omitempty"`
+	Data      *structpb.Struct `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
+	ProjectId string           `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	VersionId string           `protobuf:"bytes,4,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
 }
 
 func (x *HtmlBody) Reset() {
@@ -1176,7 +1176,7 @@ type PdfBody struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Link string `protobuf:"bytes,1,opt,name=link,proto3" json:"link"`
+	Link string `protobuf:"bytes,1,opt,name=link,proto3" json:"link,omitempty"`
 }
 
 func (x *PdfBody) Reset() {

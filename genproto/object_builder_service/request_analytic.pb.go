@@ -26,12 +26,12 @@ type RequestAnalytic struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id       string           `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	ApiKey   string           `protobuf:"bytes,2,opt,name=api_key,json=apiKey,proto3" json:"api_key"`
-	ApiUrl   string           `protobuf:"bytes,3,opt,name=api_url,json=apiUrl,proto3" json:"api_url"`
-	Status   int32            `protobuf:"varint,4,opt,name=status,proto3" json:"status"`
-	Request  *structpb.Struct `protobuf:"bytes,5,opt,name=request,proto3" json:"request"`
-	Response string           `protobuf:"bytes,6,opt,name=response,proto3" json:"response"`
+	Id       string           `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ApiKey   string           `protobuf:"bytes,2,opt,name=api_key,json=apiKey,proto3" json:"api_key,omitempty"`
+	ApiUrl   string           `protobuf:"bytes,3,opt,name=api_url,json=apiUrl,proto3" json:"api_url,omitempty"`
+	Status   int32            `protobuf:"varint,4,opt,name=status,proto3" json:"status,omitempty"`
+	Request  *structpb.Struct `protobuf:"bytes,5,opt,name=request,proto3" json:"request,omitempty"`
+	Response string           `protobuf:"bytes,6,opt,name=response,proto3" json:"response,omitempty"`
 }
 
 func (x *RequestAnalytic) Reset() {
@@ -113,8 +113,8 @@ type RequestAnalyticPrimaryKey struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
 }
 
 func (x *RequestAnalyticPrimaryKey) Reset() {
@@ -168,12 +168,12 @@ type CreateRequestAnalytic struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId string           `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	ApiKey    string           `protobuf:"bytes,2,opt,name=api_key,json=apiKey,proto3" json:"api_key"`
-	ApiUrl    string           `protobuf:"bytes,3,opt,name=api_url,json=apiUrl,proto3" json:"api_url"`
-	Status    int32            `protobuf:"varint,4,opt,name=status,proto3" json:"status"`
-	Request   *structpb.Struct `protobuf:"bytes,5,opt,name=request,proto3" json:"request"`
-	Response  string           `protobuf:"bytes,6,opt,name=response,proto3" json:"response"`
+	ProjectId string           `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	ApiKey    string           `protobuf:"bytes,2,opt,name=api_key,json=apiKey,proto3" json:"api_key,omitempty"`
+	ApiUrl    string           `protobuf:"bytes,3,opt,name=api_url,json=apiUrl,proto3" json:"api_url,omitempty"`
+	Status    int32            `protobuf:"varint,4,opt,name=status,proto3" json:"status,omitempty"`
+	Request   *structpb.Struct `protobuf:"bytes,5,opt,name=request,proto3" json:"request,omitempty"`
+	Response  string           `protobuf:"bytes,6,opt,name=response,proto3" json:"response,omitempty"`
 }
 
 func (x *CreateRequestAnalytic) Reset() {
@@ -255,8 +255,8 @@ type GetAllRequestAnalyticRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ApiKey    string `protobuf:"bytes,1,opt,name=api_key,json=apiKey,proto3" json:"api_key"`
-	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	ApiKey    string `protobuf:"bytes,1,opt,name=api_key,json=apiKey,proto3" json:"api_key,omitempty"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
 }
 
 func (x *GetAllRequestAnalyticRequest) Reset() {
@@ -310,8 +310,8 @@ type GetAllRequestAnalyticResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	RequestAnalytics []*RequestAnalytic `protobuf:"bytes,1,rep,name=request_analytics,json=requestAnalytics,proto3" json:"request_analytics"`
-	Count            int32              `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
+	RequestAnalytics []*RequestAnalytic `protobuf:"bytes,1,rep,name=request_analytics,json=requestAnalytics,proto3" json:"request_analytics,omitempty"`
+	Count            int32              `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
 }
 
 func (x *GetAllRequestAnalyticResponse) Reset() {

@@ -28,8 +28,8 @@ type GetGlobalPermissionsByRoleIdRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	RoleId    string `protobuf:"bytes,2,opt,name=role_id,json=roleId,proto3" json:"role_id"`
+	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	RoleId    string `protobuf:"bytes,2,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
 }
 
 func (x *GetGlobalPermissionsByRoleIdRequest) Reset() {
@@ -83,8 +83,8 @@ type GetAllPermissionRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	RoleId    string `protobuf:"bytes,1,opt,name=role_id,json=roleId,proto3" json:"role_id"`
-	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	RoleId    string `protobuf:"bytes,1,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
 }
 
 func (x *GetAllPermissionRequest) Reset() {
@@ -138,10 +138,10 @@ type GetFieldPermissionRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	RoleId    string `protobuf:"bytes,1,opt,name=role_id,json=roleId,proto3" json:"role_id"`
-	TableSlug string `protobuf:"bytes,2,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
-	ProjectId string `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	VersionId string `protobuf:"bytes,4,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	RoleId    string `protobuf:"bytes,1,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
+	TableSlug string `protobuf:"bytes,2,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
+	ProjectId string `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	VersionId string `protobuf:"bytes,4,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
 }
 
 func (x *GetFieldPermissionRequest) Reset() {
@@ -209,8 +209,8 @@ type UpsertPermissionsByAppIdResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	App  string           `protobuf:"bytes,1,opt,name=app,proto3" json:"app"`
-	Data *structpb.Struct `protobuf:"bytes,2,opt,name=data,proto3" json:"data"`
+	App  string           `protobuf:"bytes,1,opt,name=app,proto3" json:"app,omitempty"`
+	Data *structpb.Struct `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
 }
 
 func (x *UpsertPermissionsByAppIdResponse) Reset() {
@@ -264,9 +264,9 @@ type UpsertPermissionsByAppIdRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	AppId     string           `protobuf:"bytes,1,opt,name=app_id,json=appId,proto3" json:"app_id"`
-	Data      *structpb.Struct `protobuf:"bytes,2,opt,name=data,proto3" json:"data"`
-	ProjectId string           `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	AppId     string           `protobuf:"bytes,1,opt,name=app_id,json=appId,proto3" json:"app_id,omitempty"`
+	Data      *structpb.Struct `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
+	ProjectId string           `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
 }
 
 func (x *UpsertPermissionsByAppIdRequest) Reset() {
@@ -327,9 +327,9 @@ type GetActionPermissionRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	RoleId    string `protobuf:"bytes,1,opt,name=role_id,json=roleId,proto3" json:"role_id"`
-	TableSlug string `protobuf:"bytes,2,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
-	ProjectId string `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	RoleId    string `protobuf:"bytes,1,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
+	TableSlug string `protobuf:"bytes,2,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
+	ProjectId string `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
 }
 
 func (x *GetActionPermissionRequest) Reset() {
@@ -390,9 +390,9 @@ type GetListWithRoleAppTablePermissionsRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	RoleId    string `protobuf:"bytes,2,opt,name=role_id,json=roleId,proto3" json:"role_id"`
-	VersionId string `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	RoleId    string `protobuf:"bytes,2,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
+	VersionId string `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
 }
 
 func (x *GetListWithRoleAppTablePermissionsRequest) Reset() {
@@ -453,14 +453,14 @@ type RoleWithAppTablePermissions struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Name             string                               `protobuf:"bytes,1,opt,name=name,proto3" json:"name"`
-	Guid             string                               `protobuf:"bytes,2,opt,name=guid,proto3" json:"guid"`
-	ProjectId        string                               `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	ClientPlatformId string                               `protobuf:"bytes,4,opt,name=client_platform_id,json=clientPlatformId,proto3" json:"client_platform_id"`
-	ClientTypeId     string                               `protobuf:"bytes,5,opt,name=client_type_id,json=clientTypeId,proto3" json:"client_type_id"`
-	GrantAccess      bool                                 `protobuf:"varint,6,opt,name=grant_access,json=grantAccess,proto3" json:"grant_access"`
-	Tables           []*RoleWithAppTablePermissions_Table `protobuf:"bytes,7,rep,name=tables,proto3" json:"tables"`
-	GlobalPermission *GlobalPermission                    `protobuf:"bytes,8,opt,name=global_permission,json=globalPermission,proto3" json:"global_permission"`
+	Name             string                               `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Guid             string                               `protobuf:"bytes,2,opt,name=guid,proto3" json:"guid,omitempty"`
+	ProjectId        string                               `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	ClientPlatformId string                               `protobuf:"bytes,4,opt,name=client_platform_id,json=clientPlatformId,proto3" json:"client_platform_id,omitempty"`
+	ClientTypeId     string                               `protobuf:"bytes,5,opt,name=client_type_id,json=clientTypeId,proto3" json:"client_type_id,omitempty"`
+	GrantAccess      bool                                 `protobuf:"varint,6,opt,name=grant_access,json=grantAccess,proto3" json:"grant_access,omitempty"`
+	Tables           []*RoleWithAppTablePermissions_Table `protobuf:"bytes,7,rep,name=tables,proto3" json:"tables,omitempty"`
+	GlobalPermission *GlobalPermission                    `protobuf:"bytes,8,opt,name=global_permission,json=globalPermission,proto3" json:"global_permission,omitempty"`
 }
 
 func (x *RoleWithAppTablePermissions) Reset() {
@@ -556,21 +556,21 @@ type GlobalPermission struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id                    string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	MenuButton            bool   `protobuf:"varint,2,opt,name=menu_button,json=menuButton,proto3" json:"menu_button"`
-	Chat                  bool   `protobuf:"varint,3,opt,name=chat,proto3" json:"chat"`
-	SettingsButton        bool   `protobuf:"varint,4,opt,name=settings_button,json=settingsButton,proto3" json:"settings_button"`
-	ProjectSettingsButton bool   `protobuf:"varint,5,opt,name=project_settings_button,json=projectSettingsButton,proto3" json:"project_settings_button"`
-	ProfileSettingsButton bool   `protobuf:"varint,6,opt,name=profile_settings_button,json=profileSettingsButton,proto3" json:"profile_settings_button"`
-	MenuSettingButton     bool   `protobuf:"varint,7,opt,name=menu_setting_button,json=menuSettingButton,proto3" json:"menu_setting_button"`
-	RedirectsButton       bool   `protobuf:"varint,8,opt,name=redirects_button,json=redirectsButton,proto3" json:"redirects_button"`
-	ApiKeysButton         bool   `protobuf:"varint,9,opt,name=api_keys_button,json=apiKeysButton,proto3" json:"api_keys_button"`
-	EnvironmentsButton    bool   `protobuf:"varint,10,opt,name=environments_button,json=environmentsButton,proto3" json:"environments_button"`
-	ProjectsButton        bool   `protobuf:"varint,11,opt,name=projects_button,json=projectsButton,proto3" json:"projects_button"`
-	EnvironmentButton     bool   `protobuf:"varint,12,opt,name=environment_button,json=environmentButton,proto3" json:"environment_button"`
-	VersionButton         bool   `protobuf:"varint,13,opt,name=version_button,json=versionButton,proto3" json:"version_button"`
-	ProjectButton         bool   `protobuf:"varint,14,opt,name=project_button,json=projectButton,proto3" json:"project_button"`
-	SmsButton             bool   `protobuf:"varint,15,opt,name=sms_button,json=smsButton,proto3" json:"sms_button"`
+	Id                    string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	MenuButton            bool   `protobuf:"varint,2,opt,name=menu_button,json=menuButton,proto3" json:"menu_button,omitempty"`
+	Chat                  bool   `protobuf:"varint,3,opt,name=chat,proto3" json:"chat,omitempty"`
+	SettingsButton        bool   `protobuf:"varint,4,opt,name=settings_button,json=settingsButton,proto3" json:"settings_button,omitempty"`
+	ProjectSettingsButton bool   `protobuf:"varint,5,opt,name=project_settings_button,json=projectSettingsButton,proto3" json:"project_settings_button,omitempty"`
+	ProfileSettingsButton bool   `protobuf:"varint,6,opt,name=profile_settings_button,json=profileSettingsButton,proto3" json:"profile_settings_button,omitempty"`
+	MenuSettingButton     bool   `protobuf:"varint,7,opt,name=menu_setting_button,json=menuSettingButton,proto3" json:"menu_setting_button,omitempty"`
+	RedirectsButton       bool   `protobuf:"varint,8,opt,name=redirects_button,json=redirectsButton,proto3" json:"redirects_button,omitempty"`
+	ApiKeysButton         bool   `protobuf:"varint,9,opt,name=api_keys_button,json=apiKeysButton,proto3" json:"api_keys_button,omitempty"`
+	EnvironmentsButton    bool   `protobuf:"varint,10,opt,name=environments_button,json=environmentsButton,proto3" json:"environments_button,omitempty"`
+	ProjectsButton        bool   `protobuf:"varint,11,opt,name=projects_button,json=projectsButton,proto3" json:"projects_button,omitempty"`
+	EnvironmentButton     bool   `protobuf:"varint,12,opt,name=environment_button,json=environmentButton,proto3" json:"environment_button,omitempty"`
+	VersionButton         bool   `protobuf:"varint,13,opt,name=version_button,json=versionButton,proto3" json:"version_button,omitempty"`
+	ProjectButton         bool   `protobuf:"varint,14,opt,name=project_button,json=projectButton,proto3" json:"project_button,omitempty"`
+	SmsButton             bool   `protobuf:"varint,15,opt,name=sms_button,json=smsButton,proto3" json:"sms_button,omitempty"`
 }
 
 func (x *GlobalPermission) Reset() {
@@ -715,8 +715,8 @@ type GetListWithRoleAppTablePermissionsResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId string                       `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	Data      *RoleWithAppTablePermissions `protobuf:"bytes,2,opt,name=data,proto3" json:"data"`
+	ProjectId string                       `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Data      *RoleWithAppTablePermissions `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
 }
 
 func (x *GetListWithRoleAppTablePermissionsResponse) Reset() {
@@ -770,8 +770,8 @@ type UpdateRoleAppTablePermissionsRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId string                       `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	Data      *RoleWithAppTablePermissions `protobuf:"bytes,2,opt,name=data,proto3" json:"data"`
+	ProjectId string                       `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Data      *RoleWithAppTablePermissions `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
 }
 
 func (x *UpdateRoleAppTablePermissionsRequest) Reset() {
@@ -825,11 +825,11 @@ type MenuPermission struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id         string                     `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	Label      string                     `protobuf:"bytes,2,opt,name=label,proto3" json:"label"`
-	Type       string                     `protobuf:"bytes,3,opt,name=type,proto3" json:"type"`
-	Permission *MenuPermission_Permission `protobuf:"bytes,4,opt,name=permission,proto3" json:"permission"`
-	Attributes *structpb.Struct           `protobuf:"bytes,5,opt,name=attributes,proto3" json:"attributes"`
+	Id         string                     `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Label      string                     `protobuf:"bytes,2,opt,name=label,proto3" json:"label,omitempty"`
+	Type       string                     `protobuf:"bytes,3,opt,name=type,proto3" json:"type,omitempty"`
+	Permission *MenuPermission_Permission `protobuf:"bytes,4,opt,name=permission,proto3" json:"permission,omitempty"`
+	Attributes *structpb.Struct           `protobuf:"bytes,5,opt,name=attributes,proto3" json:"attributes,omitempty"`
 }
 
 func (x *MenuPermission) Reset() {
@@ -904,9 +904,9 @@ type GetAllMenuPermissionsRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	ParentId  string `protobuf:"bytes,2,opt,name=parent_id,json=parentId,proto3" json:"parent_id"`
-	RoleId    string `protobuf:"bytes,3,opt,name=role_id,json=roleId,proto3" json:"role_id"`
+	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	ParentId  string `protobuf:"bytes,2,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
+	RoleId    string `protobuf:"bytes,3,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
 }
 
 func (x *GetAllMenuPermissionsRequest) Reset() {
@@ -967,7 +967,7 @@ type GetAllMenuPermissionsResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Menus []*MenuPermission `protobuf:"bytes,1,rep,name=menus,proto3" json:"menus"`
+	Menus []*MenuPermission `protobuf:"bytes,1,rep,name=menus,proto3" json:"menus,omitempty"`
 }
 
 func (x *GetAllMenuPermissionsResponse) Reset() {
@@ -1014,9 +1014,9 @@ type UpdateMenuPermissionsRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId string            `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	RoleId    string            `protobuf:"bytes,2,opt,name=role_id,json=roleId,proto3" json:"role_id"`
-	Menus     []*MenuPermission `protobuf:"bytes,3,rep,name=menus,proto3" json:"menus"`
+	ProjectId string            `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	RoleId    string            `protobuf:"bytes,2,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
+	Menus     []*MenuPermission `protobuf:"bytes,3,rep,name=menus,proto3" json:"menus,omitempty"`
 }
 
 func (x *UpdateMenuPermissionsRequest) Reset() {
@@ -1077,10 +1077,10 @@ type UpdatePermissionsRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId   string                          `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	Guid        string                          `protobuf:"bytes,2,opt,name=guid,proto3" json:"guid"`
-	GrantAccess bool                            `protobuf:"varint,3,opt,name=grant_access,json=grantAccess,proto3" json:"grant_access"`
-	Table       *UpdatePermissionsRequest_Table `protobuf:"bytes,4,opt,name=table,proto3" json:"table"`
+	ProjectId   string                          `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Guid        string                          `protobuf:"bytes,2,opt,name=guid,proto3" json:"guid,omitempty"`
+	GrantAccess bool                            `protobuf:"varint,3,opt,name=grant_access,json=grantAccess,proto3" json:"grant_access,omitempty"`
+	Table       *UpdatePermissionsRequest_Table `protobuf:"bytes,4,opt,name=table,proto3" json:"table,omitempty"`
 }
 
 func (x *UpdatePermissionsRequest) Reset() {
@@ -1148,10 +1148,10 @@ type GetPermissionsByTableSlugRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	RoleId        string `protobuf:"bytes,1,opt,name=role_id,json=roleId,proto3" json:"role_id"`
-	CurrentRoleId string `protobuf:"bytes,2,opt,name=current_role_id,json=currentRoleId,proto3" json:"current_role_id"`
-	TableSlug     string `protobuf:"bytes,3,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
-	ProjectId     string `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	RoleId        string `protobuf:"bytes,1,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
+	CurrentRoleId string `protobuf:"bytes,2,opt,name=current_role_id,json=currentRoleId,proto3" json:"current_role_id,omitempty"`
+	TableSlug     string `protobuf:"bytes,3,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
+	ProjectId     string `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
 }
 
 func (x *GetPermissionsByTableSlugRequest) Reset() {
@@ -1219,8 +1219,8 @@ type GetPermissionsByTableSlugResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	CurrentUserPermission  *UpdatePermissionsRequest `protobuf:"bytes,1,opt,name=current_user_permission,json=currentUserPermission,proto3" json:"current_user_permission"`
-	SelectedUserPermission *UpdatePermissionsRequest `protobuf:"bytes,2,opt,name=selected_user_permission,json=selectedUserPermission,proto3" json:"selected_user_permission"`
+	CurrentUserPermission  *UpdatePermissionsRequest `protobuf:"bytes,1,opt,name=current_user_permission,json=currentUserPermission,proto3" json:"current_user_permission,omitempty"`
+	SelectedUserPermission *UpdatePermissionsRequest `protobuf:"bytes,2,opt,name=selected_user_permission,json=selectedUserPermission,proto3" json:"selected_user_permission,omitempty"`
 }
 
 func (x *GetPermissionsByTableSlugResponse) Reset() {
@@ -1274,10 +1274,10 @@ type GetTablePermissionRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	RoleId                string `protobuf:"bytes,1,opt,name=role_id,json=roleId,proto3" json:"role_id"`
-	TableSlug             string `protobuf:"bytes,2,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
-	ResourceEnvironmentId string `protobuf:"bytes,3,opt,name=resource_environment_id,json=resourceEnvironmentId,proto3" json:"resource_environment_id"`
-	Method                string `protobuf:"bytes,4,opt,name=method,proto3" json:"method"`
+	RoleId                string `protobuf:"bytes,1,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
+	TableSlug             string `protobuf:"bytes,2,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
+	ResourceEnvironmentId string `protobuf:"bytes,3,opt,name=resource_environment_id,json=resourceEnvironmentId,proto3" json:"resource_environment_id,omitempty"`
+	Method                string `protobuf:"bytes,4,opt,name=method,proto3" json:"method,omitempty"`
 }
 
 func (x *GetTablePermissionRequest) Reset() {
@@ -1345,7 +1345,7 @@ type GetTablePermissionResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	IsHavePermission bool `protobuf:"varint,1,opt,name=is_have_permission,json=isHavePermission,proto3" json:"is_have_permission"`
+	IsHavePermission bool `protobuf:"varint,1,opt,name=is_have_permission,json=isHavePermission,proto3" json:"is_have_permission,omitempty"`
 }
 
 func (x *GetTablePermissionResponse) Reset() {
@@ -1392,24 +1392,24 @@ type RoleWithAppTablePermissions_Table struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Label                string                                                       `protobuf:"bytes,1,opt,name=label,proto3" json:"label"`
-	Slug                 string                                                       `protobuf:"bytes,2,opt,name=slug,proto3" json:"slug"`
-	Description          string                                                       `protobuf:"bytes,3,opt,name=description,proto3" json:"description"`
-	ShowInMenu           bool                                                         `protobuf:"varint,4,opt,name=show_in_menu,json=showInMenu,proto3" json:"show_in_menu"`
-	IsChanged            bool                                                         `protobuf:"varint,5,opt,name=is_changed,json=isChanged,proto3" json:"is_changed"`
-	Icon                 string                                                       `protobuf:"bytes,6,opt,name=icon,proto3" json:"icon"`
-	SubtitleFieldSlug    string                                                       `protobuf:"bytes,7,opt,name=subtitle_field_slug,json=subtitleFieldSlug,proto3" json:"subtitle_field_slug"`
-	WithIncrementId      bool                                                         `protobuf:"varint,8,opt,name=with_increment_id,json=withIncrementId,proto3" json:"with_increment_id"`
-	DigitNumber          int32                                                        `protobuf:"varint,9,opt,name=digit_number,json=digitNumber,proto3" json:"digit_number"`
-	Id                   string                                                       `protobuf:"bytes,10,opt,name=id,proto3" json:"id"`
-	RecordPermissions    *RoleWithAppTablePermissions_Table_RecordPermission          `protobuf:"bytes,11,opt,name=record_permissions,json=recordPermissions,proto3" json:"record_permissions"`
-	FieldPermissions     []*RoleWithAppTablePermissions_Table_FieldPermission         `protobuf:"bytes,12,rep,name=field_permissions,json=fieldPermissions,proto3" json:"field_permissions"`
-	ViewPermissions      []*RoleWithAppTablePermissions_Table_ViewPermission          `protobuf:"bytes,13,rep,name=view_permissions,json=viewPermissions,proto3" json:"view_permissions"`
-	AutomaticFilters     *RoleWithAppTablePermissions_Table_AutomaticFilterWithMethod `protobuf:"bytes,14,opt,name=automatic_filters,json=automaticFilters,proto3" json:"automatic_filters"`
-	ActionPermissions    []*RoleWithAppTablePermissions_Table_ActionPermission        `protobuf:"bytes,15,rep,name=action_permissions,json=actionPermissions,proto3" json:"action_permissions"`
-	TableViewPermissions []*RoleWithAppTablePermissions_Table_TableViewPermission     `protobuf:"bytes,16,rep,name=table_view_permissions,json=tableViewPermissions,proto3" json:"table_view_permissions"`
-	CustomPermission     *RoleWithAppTablePermissions_Table_CustomPermission          `protobuf:"bytes,17,opt,name=custom_permission,json=customPermission,proto3" json:"custom_permission"`
-	Attributes           *structpb.Struct                                             `protobuf:"bytes,18,opt,name=attributes,proto3" json:"attributes"`
+	Label                string                                                       `protobuf:"bytes,1,opt,name=label,proto3" json:"label,omitempty"`
+	Slug                 string                                                       `protobuf:"bytes,2,opt,name=slug,proto3" json:"slug,omitempty"`
+	Description          string                                                       `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	ShowInMenu           bool                                                         `protobuf:"varint,4,opt,name=show_in_menu,json=showInMenu,proto3" json:"show_in_menu,omitempty"`
+	IsChanged            bool                                                         `protobuf:"varint,5,opt,name=is_changed,json=isChanged,proto3" json:"is_changed,omitempty"`
+	Icon                 string                                                       `protobuf:"bytes,6,opt,name=icon,proto3" json:"icon,omitempty"`
+	SubtitleFieldSlug    string                                                       `protobuf:"bytes,7,opt,name=subtitle_field_slug,json=subtitleFieldSlug,proto3" json:"subtitle_field_slug,omitempty"`
+	WithIncrementId      bool                                                         `protobuf:"varint,8,opt,name=with_increment_id,json=withIncrementId,proto3" json:"with_increment_id,omitempty"`
+	DigitNumber          int32                                                        `protobuf:"varint,9,opt,name=digit_number,json=digitNumber,proto3" json:"digit_number,omitempty"`
+	Id                   string                                                       `protobuf:"bytes,10,opt,name=id,proto3" json:"id,omitempty"`
+	RecordPermissions    *RoleWithAppTablePermissions_Table_RecordPermission          `protobuf:"bytes,11,opt,name=record_permissions,json=recordPermissions,proto3" json:"record_permissions,omitempty"`
+	FieldPermissions     []*RoleWithAppTablePermissions_Table_FieldPermission         `protobuf:"bytes,12,rep,name=field_permissions,json=fieldPermissions,proto3" json:"field_permissions,omitempty"`
+	ViewPermissions      []*RoleWithAppTablePermissions_Table_ViewPermission          `protobuf:"bytes,13,rep,name=view_permissions,json=viewPermissions,proto3" json:"view_permissions,omitempty"`
+	AutomaticFilters     *RoleWithAppTablePermissions_Table_AutomaticFilterWithMethod `protobuf:"bytes,14,opt,name=automatic_filters,json=automaticFilters,proto3" json:"automatic_filters,omitempty"`
+	ActionPermissions    []*RoleWithAppTablePermissions_Table_ActionPermission        `protobuf:"bytes,15,rep,name=action_permissions,json=actionPermissions,proto3" json:"action_permissions,omitempty"`
+	TableViewPermissions []*RoleWithAppTablePermissions_Table_TableViewPermission     `protobuf:"bytes,16,rep,name=table_view_permissions,json=tableViewPermissions,proto3" json:"table_view_permissions,omitempty"`
+	CustomPermission     *RoleWithAppTablePermissions_Table_CustomPermission          `protobuf:"bytes,17,opt,name=custom_permission,json=customPermission,proto3" json:"custom_permission,omitempty"`
+	Attributes           *structpb.Struct                                             `protobuf:"bytes,18,opt,name=attributes,proto3" json:"attributes,omitempty"`
 }
 
 func (x *RoleWithAppTablePermissions_Table) Reset() {
@@ -1575,13 +1575,13 @@ type RoleWithAppTablePermissions_Table_RecordPermission struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Read            string `protobuf:"bytes,1,opt,name=read,proto3" json:"read"`
-	Write           string `protobuf:"bytes,2,opt,name=write,proto3" json:"write"`
-	Update          string `protobuf:"bytes,3,opt,name=update,proto3" json:"update"`
-	Delete          string `protobuf:"bytes,4,opt,name=delete,proto3" json:"delete"`
-	Guid            string `protobuf:"bytes,5,opt,name=guid,proto3" json:"guid"`
-	IsHaveCondition bool   `protobuf:"varint,6,opt,name=is_have_condition,json=isHaveCondition,proto3" json:"is_have_condition"`
-	IsPublic        bool   `protobuf:"varint,7,opt,name=is_public,json=isPublic,proto3" json:"is_public"`
+	Read            string `protobuf:"bytes,1,opt,name=read,proto3" json:"read,omitempty"`
+	Write           string `protobuf:"bytes,2,opt,name=write,proto3" json:"write,omitempty"`
+	Update          string `protobuf:"bytes,3,opt,name=update,proto3" json:"update,omitempty"`
+	Delete          string `protobuf:"bytes,4,opt,name=delete,proto3" json:"delete,omitempty"`
+	Guid            string `protobuf:"bytes,5,opt,name=guid,proto3" json:"guid,omitempty"`
+	IsHaveCondition bool   `protobuf:"varint,6,opt,name=is_have_condition,json=isHaveCondition,proto3" json:"is_have_condition,omitempty"`
+	IsPublic        bool   `protobuf:"varint,7,opt,name=is_public,json=isPublic,proto3" json:"is_public,omitempty"`
 }
 
 func (x *RoleWithAppTablePermissions_Table_RecordPermission) Reset() {
@@ -1670,13 +1670,13 @@ type RoleWithAppTablePermissions_Table_FieldPermission struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	FieldId        string           `protobuf:"bytes,1,opt,name=field_id,json=fieldId,proto3" json:"field_id"`
-	Guid           string           `protobuf:"bytes,2,opt,name=guid,proto3" json:"guid"`
-	ViewPermission bool             `protobuf:"varint,3,opt,name=view_permission,json=viewPermission,proto3" json:"view_permission"`
-	EditPermission bool             `protobuf:"varint,4,opt,name=edit_permission,json=editPermission,proto3" json:"edit_permission"`
-	Label          string           `protobuf:"bytes,5,opt,name=label,proto3" json:"label"`
-	TableSlug      string           `protobuf:"bytes,6,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
-	Attributes     *structpb.Struct `protobuf:"bytes,7,opt,name=attributes,proto3" json:"attributes"`
+	FieldId        string           `protobuf:"bytes,1,opt,name=field_id,json=fieldId,proto3" json:"field_id,omitempty"`
+	Guid           string           `protobuf:"bytes,2,opt,name=guid,proto3" json:"guid,omitempty"`
+	ViewPermission bool             `protobuf:"varint,3,opt,name=view_permission,json=viewPermission,proto3" json:"view_permission,omitempty"`
+	EditPermission bool             `protobuf:"varint,4,opt,name=edit_permission,json=editPermission,proto3" json:"edit_permission,omitempty"`
+	Label          string           `protobuf:"bytes,5,opt,name=label,proto3" json:"label,omitempty"`
+	TableSlug      string           `protobuf:"bytes,6,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
+	Attributes     *structpb.Struct `protobuf:"bytes,7,opt,name=attributes,proto3" json:"attributes,omitempty"`
 }
 
 func (x *RoleWithAppTablePermissions_Table_FieldPermission) Reset() {
@@ -1765,15 +1765,15 @@ type RoleWithAppTablePermissions_Table_ViewPermission struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Guid             string           `protobuf:"bytes,1,opt,name=guid,proto3" json:"guid"`
-	Label            string           `protobuf:"bytes,2,opt,name=label,proto3" json:"label"`
-	RelationId       string           `protobuf:"bytes,3,opt,name=relation_id,json=relationId,proto3" json:"relation_id"`
-	ViewPermission   bool             `protobuf:"varint,4,opt,name=view_permission,json=viewPermission,proto3" json:"view_permission"`
-	EditPermission   bool             `protobuf:"varint,5,opt,name=edit_permission,json=editPermission,proto3" json:"edit_permission"`
-	CreatePermission bool             `protobuf:"varint,6,opt,name=create_permission,json=createPermission,proto3" json:"create_permission"`
-	DeletePermission bool             `protobuf:"varint,7,opt,name=delete_permission,json=deletePermission,proto3" json:"delete_permission"`
-	TableSlug        string           `protobuf:"bytes,8,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
-	Attributes       *structpb.Struct `protobuf:"bytes,9,opt,name=attributes,proto3" json:"attributes"`
+	Guid             string           `protobuf:"bytes,1,opt,name=guid,proto3" json:"guid,omitempty"`
+	Label            string           `protobuf:"bytes,2,opt,name=label,proto3" json:"label,omitempty"`
+	RelationId       string           `protobuf:"bytes,3,opt,name=relation_id,json=relationId,proto3" json:"relation_id,omitempty"`
+	ViewPermission   bool             `protobuf:"varint,4,opt,name=view_permission,json=viewPermission,proto3" json:"view_permission,omitempty"`
+	EditPermission   bool             `protobuf:"varint,5,opt,name=edit_permission,json=editPermission,proto3" json:"edit_permission,omitempty"`
+	CreatePermission bool             `protobuf:"varint,6,opt,name=create_permission,json=createPermission,proto3" json:"create_permission,omitempty"`
+	DeletePermission bool             `protobuf:"varint,7,opt,name=delete_permission,json=deletePermission,proto3" json:"delete_permission,omitempty"`
+	TableSlug        string           `protobuf:"bytes,8,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
+	Attributes       *structpb.Struct `protobuf:"bytes,9,opt,name=attributes,proto3" json:"attributes,omitempty"`
 }
 
 func (x *RoleWithAppTablePermissions_Table_ViewPermission) Reset() {
@@ -1876,11 +1876,11 @@ type RoleWithAppTablePermissions_Table_AutomaticFilter struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Guid        string `protobuf:"bytes,1,opt,name=guid,proto3" json:"guid"`
-	ObjectField string `protobuf:"bytes,2,opt,name=object_field,json=objectField,proto3" json:"object_field"`
-	CustomField string `protobuf:"bytes,3,opt,name=custom_field,json=customField,proto3" json:"custom_field"`
-	TableSlug   string `protobuf:"bytes,4,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
-	NotUseInTab bool   `protobuf:"varint,5,opt,name=not_use_in_tab,json=notUseInTab,proto3" json:"not_use_in_tab"`
+	Guid        string `protobuf:"bytes,1,opt,name=guid,proto3" json:"guid,omitempty"`
+	ObjectField string `protobuf:"bytes,2,opt,name=object_field,json=objectField,proto3" json:"object_field,omitempty"`
+	CustomField string `protobuf:"bytes,3,opt,name=custom_field,json=customField,proto3" json:"custom_field,omitempty"`
+	TableSlug   string `protobuf:"bytes,4,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
+	NotUseInTab bool   `protobuf:"varint,5,opt,name=not_use_in_tab,json=notUseInTab,proto3" json:"not_use_in_tab,omitempty"`
 }
 
 func (x *RoleWithAppTablePermissions_Table_AutomaticFilter) Reset() {
@@ -1955,12 +1955,12 @@ type RoleWithAppTablePermissions_Table_ActionPermission struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Guid          string           `protobuf:"bytes,1,opt,name=guid,proto3" json:"guid"`
-	CustomEventId string           `protobuf:"bytes,2,opt,name=custom_event_id,json=customEventId,proto3" json:"custom_event_id"`
-	Permission    bool             `protobuf:"varint,3,opt,name=permission,proto3" json:"permission"`
-	Label         string           `protobuf:"bytes,4,opt,name=label,proto3" json:"label"`
-	TableSlug     string           `protobuf:"bytes,5,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
-	Attributes    *structpb.Struct `protobuf:"bytes,6,opt,name=attributes,proto3" json:"attributes"`
+	Guid          string           `protobuf:"bytes,1,opt,name=guid,proto3" json:"guid,omitempty"`
+	CustomEventId string           `protobuf:"bytes,2,opt,name=custom_event_id,json=customEventId,proto3" json:"custom_event_id,omitempty"`
+	Permission    bool             `protobuf:"varint,3,opt,name=permission,proto3" json:"permission,omitempty"`
+	Label         string           `protobuf:"bytes,4,opt,name=label,proto3" json:"label,omitempty"`
+	TableSlug     string           `protobuf:"bytes,5,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
+	Attributes    *structpb.Struct `protobuf:"bytes,6,opt,name=attributes,proto3" json:"attributes,omitempty"`
 }
 
 func (x *RoleWithAppTablePermissions_Table_ActionPermission) Reset() {
@@ -2042,10 +2042,10 @@ type RoleWithAppTablePermissions_Table_AutomaticFilterWithMethod struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Read   []*RoleWithAppTablePermissions_Table_AutomaticFilter `protobuf:"bytes,1,rep,name=read,proto3" json:"read"`
-	Write  []*RoleWithAppTablePermissions_Table_AutomaticFilter `protobuf:"bytes,2,rep,name=write,proto3" json:"write"`
-	Update []*RoleWithAppTablePermissions_Table_AutomaticFilter `protobuf:"bytes,3,rep,name=update,proto3" json:"update"`
-	Delete []*RoleWithAppTablePermissions_Table_AutomaticFilter `protobuf:"bytes,4,rep,name=delete,proto3" json:"delete"`
+	Read   []*RoleWithAppTablePermissions_Table_AutomaticFilter `protobuf:"bytes,1,rep,name=read,proto3" json:"read,omitempty"`
+	Write  []*RoleWithAppTablePermissions_Table_AutomaticFilter `protobuf:"bytes,2,rep,name=write,proto3" json:"write,omitempty"`
+	Update []*RoleWithAppTablePermissions_Table_AutomaticFilter `protobuf:"bytes,3,rep,name=update,proto3" json:"update,omitempty"`
+	Delete []*RoleWithAppTablePermissions_Table_AutomaticFilter `protobuf:"bytes,4,rep,name=delete,proto3" json:"delete,omitempty"`
 }
 
 func (x *RoleWithAppTablePermissions_Table_AutomaticFilterWithMethod) Reset() {
@@ -2113,13 +2113,13 @@ type RoleWithAppTablePermissions_Table_TableViewPermission struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Guid       string           `protobuf:"bytes,1,opt,name=guid,proto3" json:"guid"`
-	Name       string           `protobuf:"bytes,2,opt,name=name,proto3" json:"name"`
-	View       bool             `protobuf:"varint,3,opt,name=view,proto3" json:"view"`
-	Edit       bool             `protobuf:"varint,4,opt,name=edit,proto3" json:"edit"`
-	Delete     bool             `protobuf:"varint,5,opt,name=delete,proto3" json:"delete"`
-	ViewId     string           `protobuf:"bytes,6,opt,name=view_id,json=viewId,proto3" json:"view_id"`
-	Attributes *structpb.Struct `protobuf:"bytes,7,opt,name=attributes,proto3" json:"attributes"`
+	Guid       string           `protobuf:"bytes,1,opt,name=guid,proto3" json:"guid,omitempty"`
+	Name       string           `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	View       bool             `protobuf:"varint,3,opt,name=view,proto3" json:"view,omitempty"`
+	Edit       bool             `protobuf:"varint,4,opt,name=edit,proto3" json:"edit,omitempty"`
+	Delete     bool             `protobuf:"varint,5,opt,name=delete,proto3" json:"delete,omitempty"`
+	ViewId     string           `protobuf:"bytes,6,opt,name=view_id,json=viewId,proto3" json:"view_id,omitempty"`
+	Attributes *structpb.Struct `protobuf:"bytes,7,opt,name=attributes,proto3" json:"attributes,omitempty"`
 }
 
 func (x *RoleWithAppTablePermissions_Table_TableViewPermission) Reset() {
@@ -2208,11 +2208,11 @@ type RoleWithAppTablePermissions_Table_CustomPermission struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ViewCreate  string `protobuf:"bytes,1,opt,name=view_create,json=viewCreate,proto3" json:"view_create"`
-	ShareModal  string `protobuf:"bytes,2,opt,name=share_modal,json=shareModal,proto3" json:"share_modal"`
-	Settings    string `protobuf:"bytes,3,opt,name=settings,proto3" json:"settings"`
-	Automation  string `protobuf:"bytes,4,opt,name=automation,proto3" json:"automation"`
-	LanguageBtn string `protobuf:"bytes,5,opt,name=language_btn,json=languageBtn,proto3" json:"language_btn"`
+	ViewCreate  string `protobuf:"bytes,1,opt,name=view_create,json=viewCreate,proto3" json:"view_create,omitempty"`
+	ShareModal  string `protobuf:"bytes,2,opt,name=share_modal,json=shareModal,proto3" json:"share_modal,omitempty"`
+	Settings    string `protobuf:"bytes,3,opt,name=settings,proto3" json:"settings,omitempty"`
+	Automation  string `protobuf:"bytes,4,opt,name=automation,proto3" json:"automation,omitempty"`
+	LanguageBtn string `protobuf:"bytes,5,opt,name=language_btn,json=languageBtn,proto3" json:"language_btn,omitempty"`
 }
 
 func (x *RoleWithAppTablePermissions_Table_CustomPermission) Reset() {
@@ -2287,11 +2287,11 @@ type MenuPermission_Permission struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Read         bool `protobuf:"varint,2,opt,name=read,proto3" json:"read"`
-	Write        bool `protobuf:"varint,3,opt,name=write,proto3" json:"write"`
-	Update       bool `protobuf:"varint,4,opt,name=update,proto3" json:"update"`
-	Delete       bool `protobuf:"varint,5,opt,name=delete,proto3" json:"delete"`
-	MenuSettings bool `protobuf:"varint,6,opt,name=menu_settings,json=menuSettings,proto3" json:"menu_settings"`
+	Read         bool `protobuf:"varint,2,opt,name=read,proto3" json:"read,omitempty"`
+	Write        bool `protobuf:"varint,3,opt,name=write,proto3" json:"write,omitempty"`
+	Update       bool `protobuf:"varint,4,opt,name=update,proto3" json:"update,omitempty"`
+	Delete       bool `protobuf:"varint,5,opt,name=delete,proto3" json:"delete,omitempty"`
+	MenuSettings bool `protobuf:"varint,6,opt,name=menu_settings,json=menuSettings,proto3" json:"menu_settings,omitempty"`
 }
 
 func (x *MenuPermission_Permission) Reset() {
@@ -2366,13 +2366,13 @@ type UpdatePermissionsRequest_Table struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id                string                                             `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	Slug              string                                             `protobuf:"bytes,2,opt,name=slug,proto3" json:"slug"`
-	Label             string                                             `protobuf:"bytes,3,opt,name=label,proto3" json:"label"`
-	RecordPermissions *UpdatePermissionsRequest_Table_RecordPermission   `protobuf:"bytes,4,opt,name=record_permissions,json=recordPermissions,proto3" json:"record_permissions"`
-	FieldPermissions  []*UpdatePermissionsRequest_Table_FieldPermission  `protobuf:"bytes,5,rep,name=field_permissions,json=fieldPermissions,proto3" json:"field_permissions"`
-	ViewPermissions   []*UpdatePermissionsRequest_Table_ViewPermission   `protobuf:"bytes,6,rep,name=view_permissions,json=viewPermissions,proto3" json:"view_permissions"`
-	ActionPermissions []*UpdatePermissionsRequest_Table_ActionPermission `protobuf:"bytes,7,rep,name=action_permissions,json=actionPermissions,proto3" json:"action_permissions"`
+	Id                string                                             `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Slug              string                                             `protobuf:"bytes,2,opt,name=slug,proto3" json:"slug,omitempty"`
+	Label             string                                             `protobuf:"bytes,3,opt,name=label,proto3" json:"label,omitempty"`
+	RecordPermissions *UpdatePermissionsRequest_Table_RecordPermission   `protobuf:"bytes,4,opt,name=record_permissions,json=recordPermissions,proto3" json:"record_permissions,omitempty"`
+	FieldPermissions  []*UpdatePermissionsRequest_Table_FieldPermission  `protobuf:"bytes,5,rep,name=field_permissions,json=fieldPermissions,proto3" json:"field_permissions,omitempty"`
+	ViewPermissions   []*UpdatePermissionsRequest_Table_ViewPermission   `protobuf:"bytes,6,rep,name=view_permissions,json=viewPermissions,proto3" json:"view_permissions,omitempty"`
+	ActionPermissions []*UpdatePermissionsRequest_Table_ActionPermission `protobuf:"bytes,7,rep,name=action_permissions,json=actionPermissions,proto3" json:"action_permissions,omitempty"`
 }
 
 func (x *UpdatePermissionsRequest_Table) Reset() {
@@ -2461,12 +2461,12 @@ type UpdatePermissionsRequest_Table_RecordPermission struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Read     string `protobuf:"bytes,1,opt,name=read,proto3" json:"read"`
-	Write    string `protobuf:"bytes,2,opt,name=write,proto3" json:"write"`
-	Update   string `protobuf:"bytes,3,opt,name=update,proto3" json:"update"`
-	Delete   string `protobuf:"bytes,4,opt,name=delete,proto3" json:"delete"`
-	Guid     string `protobuf:"bytes,5,opt,name=guid,proto3" json:"guid"`
-	IsPublic bool   `protobuf:"varint,6,opt,name=is_public,json=isPublic,proto3" json:"is_public"`
+	Read     string `protobuf:"bytes,1,opt,name=read,proto3" json:"read,omitempty"`
+	Write    string `protobuf:"bytes,2,opt,name=write,proto3" json:"write,omitempty"`
+	Update   string `protobuf:"bytes,3,opt,name=update,proto3" json:"update,omitempty"`
+	Delete   string `protobuf:"bytes,4,opt,name=delete,proto3" json:"delete,omitempty"`
+	Guid     string `protobuf:"bytes,5,opt,name=guid,proto3" json:"guid,omitempty"`
+	IsPublic bool   `protobuf:"varint,6,opt,name=is_public,json=isPublic,proto3" json:"is_public,omitempty"`
 }
 
 func (x *UpdatePermissionsRequest_Table_RecordPermission) Reset() {
@@ -2548,12 +2548,12 @@ type UpdatePermissionsRequest_Table_FieldPermission struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	FieldId        string `protobuf:"bytes,1,opt,name=field_id,json=fieldId,proto3" json:"field_id"`
-	Guid           string `protobuf:"bytes,2,opt,name=guid,proto3" json:"guid"`
-	ViewPermission bool   `protobuf:"varint,3,opt,name=view_permission,json=viewPermission,proto3" json:"view_permission"`
-	EditPermission bool   `protobuf:"varint,4,opt,name=edit_permission,json=editPermission,proto3" json:"edit_permission"`
-	Label          string `protobuf:"bytes,5,opt,name=label,proto3" json:"label"`
-	TableSlug      string `protobuf:"bytes,6,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
+	FieldId        string `protobuf:"bytes,1,opt,name=field_id,json=fieldId,proto3" json:"field_id,omitempty"`
+	Guid           string `protobuf:"bytes,2,opt,name=guid,proto3" json:"guid,omitempty"`
+	ViewPermission bool   `protobuf:"varint,3,opt,name=view_permission,json=viewPermission,proto3" json:"view_permission,omitempty"`
+	EditPermission bool   `protobuf:"varint,4,opt,name=edit_permission,json=editPermission,proto3" json:"edit_permission,omitempty"`
+	Label          string `protobuf:"bytes,5,opt,name=label,proto3" json:"label,omitempty"`
+	TableSlug      string `protobuf:"bytes,6,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
 }
 
 func (x *UpdatePermissionsRequest_Table_FieldPermission) Reset() {
@@ -2635,14 +2635,14 @@ type UpdatePermissionsRequest_Table_ViewPermission struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Guid             string `protobuf:"bytes,1,opt,name=guid,proto3" json:"guid"`
-	Label            string `protobuf:"bytes,2,opt,name=label,proto3" json:"label"`
-	RelationId       string `protobuf:"bytes,3,opt,name=relation_id,json=relationId,proto3" json:"relation_id"`
-	ViewPermission   bool   `protobuf:"varint,4,opt,name=view_permission,json=viewPermission,proto3" json:"view_permission"`
-	EditPermission   bool   `protobuf:"varint,5,opt,name=edit_permission,json=editPermission,proto3" json:"edit_permission"`
-	CreatePermission bool   `protobuf:"varint,6,opt,name=create_permission,json=createPermission,proto3" json:"create_permission"`
-	DeletePermission bool   `protobuf:"varint,7,opt,name=delete_permission,json=deletePermission,proto3" json:"delete_permission"`
-	TableSlug        string `protobuf:"bytes,8,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
+	Guid             string `protobuf:"bytes,1,opt,name=guid,proto3" json:"guid,omitempty"`
+	Label            string `protobuf:"bytes,2,opt,name=label,proto3" json:"label,omitempty"`
+	RelationId       string `protobuf:"bytes,3,opt,name=relation_id,json=relationId,proto3" json:"relation_id,omitempty"`
+	ViewPermission   bool   `protobuf:"varint,4,opt,name=view_permission,json=viewPermission,proto3" json:"view_permission,omitempty"`
+	EditPermission   bool   `protobuf:"varint,5,opt,name=edit_permission,json=editPermission,proto3" json:"edit_permission,omitempty"`
+	CreatePermission bool   `protobuf:"varint,6,opt,name=create_permission,json=createPermission,proto3" json:"create_permission,omitempty"`
+	DeletePermission bool   `protobuf:"varint,7,opt,name=delete_permission,json=deletePermission,proto3" json:"delete_permission,omitempty"`
+	TableSlug        string `protobuf:"bytes,8,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
 }
 
 func (x *UpdatePermissionsRequest_Table_ViewPermission) Reset() {
@@ -2738,11 +2738,11 @@ type UpdatePermissionsRequest_Table_ActionPermission struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Guid          string `protobuf:"bytes,1,opt,name=guid,proto3" json:"guid"`
-	CustomEventId string `protobuf:"bytes,2,opt,name=custom_event_id,json=customEventId,proto3" json:"custom_event_id"`
-	Permission    bool   `protobuf:"varint,3,opt,name=permission,proto3" json:"permission"`
-	Label         string `protobuf:"bytes,4,opt,name=label,proto3" json:"label"`
-	TableSlug     string `protobuf:"bytes,5,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
+	Guid          string `protobuf:"bytes,1,opt,name=guid,proto3" json:"guid,omitempty"`
+	CustomEventId string `protobuf:"bytes,2,opt,name=custom_event_id,json=customEventId,proto3" json:"custom_event_id,omitempty"`
+	Permission    bool   `protobuf:"varint,3,opt,name=permission,proto3" json:"permission,omitempty"`
+	Label         string `protobuf:"bytes,4,opt,name=label,proto3" json:"label,omitempty"`
+	TableSlug     string `protobuf:"bytes,5,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
 }
 
 func (x *UpdatePermissionsRequest_Table_ActionPermission) Reset() {

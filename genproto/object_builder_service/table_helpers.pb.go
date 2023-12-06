@@ -26,9 +26,9 @@ type ImportFromJSONRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	FileName  string `protobuf:"bytes,1,opt,name=file_name,json=fileName,proto3" json:"file_name"`
-	AppId     string `protobuf:"bytes,2,opt,name=app_id,json=appId,proto3" json:"app_id"`
-	ProjectId string `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	FileName  string `protobuf:"bytes,1,opt,name=file_name,json=fileName,proto3" json:"file_name,omitempty"`
+	AppId     string `protobuf:"bytes,2,opt,name=app_id,json=appId,proto3" json:"app_id,omitempty"`
+	ProjectId string `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
 }
 
 func (x *ImportFromJSONRequest) Reset() {
@@ -89,9 +89,9 @@ type ExportToJSONRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	AppId     string `protobuf:"bytes,1,opt,name=app_id,json=appId,proto3" json:"app_id"`
-	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	VersionId string `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	AppId     string `protobuf:"bytes,1,opt,name=app_id,json=appId,proto3" json:"app_id,omitempty"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	VersionId string `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
 }
 
 func (x *ExportToJSONRequest) Reset() {
@@ -152,7 +152,7 @@ type ExportToJSONReponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Link string `protobuf:"bytes,1,opt,name=link,proto3" json:"link"`
+	Link string `protobuf:"bytes,1,opt,name=link,proto3" json:"link,omitempty"`
 }
 
 func (x *ExportToJSONReponse) Reset() {

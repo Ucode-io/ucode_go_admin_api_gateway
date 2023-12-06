@@ -28,8 +28,8 @@ type AppReportSettingPrimaryKey struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id                    string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	ResourceEnvironmentId string `protobuf:"bytes,2,opt,name=resource_environment_id,json=resourceEnvironmentId,proto3" json:"resource_environment_id"`
+	Id                    string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ResourceEnvironmentId string `protobuf:"bytes,2,opt,name=resource_environment_id,json=resourceEnvironmentId,proto3" json:"resource_environment_id,omitempty"`
 }
 
 func (x *AppReportSettingPrimaryKey) Reset() {
@@ -83,15 +83,15 @@ type TableSetting struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id                      string               `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	Label                   string               `protobuf:"bytes,2,opt,name=label,proto3" json:"label"`
-	Slug                    string               `protobuf:"bytes,3,opt,name=slug,proto3" json:"slug"`
-	FieldsLength            int64                `protobuf:"varint,4,opt,name=fields_length,json=fieldsLength,proto3" json:"fields_length"`
-	DateFieldSlug           string               `protobuf:"bytes,5,opt,name=date_field_slug,json=dateFieldSlug,proto3" json:"date_field_slug"`
-	InsideRelationTableSlug string               `protobuf:"bytes,6,opt,name=inside_relation_table_slug,json=insideRelationTableSlug,proto3" json:"inside_relation_table_slug"`
-	TableFieldSettings      []*TableFieldSetting `protobuf:"bytes,7,rep,name=table_field_settings,json=tableFieldSettings,proto3" json:"table_field_settings"`
-	TableFieldSettingsIds   []string             `protobuf:"bytes,8,rep,name=table_field_settings_ids,json=tableFieldSettingsIds,proto3" json:"table_field_settings_ids"`
-	Attributes              *structpb.Struct     `protobuf:"bytes,9,opt,name=attributes,proto3" json:"attributes"`
+	Id                      string               `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Label                   string               `protobuf:"bytes,2,opt,name=label,proto3" json:"label,omitempty"`
+	Slug                    string               `protobuf:"bytes,3,opt,name=slug,proto3" json:"slug,omitempty"`
+	FieldsLength            int64                `protobuf:"varint,4,opt,name=fields_length,json=fieldsLength,proto3" json:"fields_length,omitempty"`
+	DateFieldSlug           string               `protobuf:"bytes,5,opt,name=date_field_slug,json=dateFieldSlug,proto3" json:"date_field_slug,omitempty"`
+	InsideRelationTableSlug string               `protobuf:"bytes,6,opt,name=inside_relation_table_slug,json=insideRelationTableSlug,proto3" json:"inside_relation_table_slug,omitempty"`
+	TableFieldSettings      []*TableFieldSetting `protobuf:"bytes,7,rep,name=table_field_settings,json=tableFieldSettings,proto3" json:"table_field_settings,omitempty"`
+	TableFieldSettingsIds   []string             `protobuf:"bytes,8,rep,name=table_field_settings_ids,json=tableFieldSettingsIds,proto3" json:"table_field_settings_ids,omitempty"`
+	Attributes              *structpb.Struct     `protobuf:"bytes,9,opt,name=attributes,proto3" json:"attributes,omitempty"`
 }
 
 func (x *TableSetting) Reset() {
@@ -194,9 +194,9 @@ type TableDataMessage struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id    string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	Label string `protobuf:"bytes,2,opt,name=label,proto3" json:"label"`
-	Slug  string `protobuf:"bytes,3,opt,name=slug,proto3" json:"slug"`
+	Id    string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Label string `protobuf:"bytes,2,opt,name=label,proto3" json:"label,omitempty"`
+	Slug  string `protobuf:"bytes,3,opt,name=slug,proto3" json:"slug,omitempty"`
 }
 
 func (x *TableDataMessage) Reset() {
@@ -257,19 +257,19 @@ type TableFieldSetting struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Label            string            `protobuf:"bytes,1,opt,name=label,proto3" json:"label"`
-	TableSlug        string            `protobuf:"bytes,2,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
-	FieldId          string            `protobuf:"bytes,3,opt,name=field_id,json=fieldId,proto3" json:"field_id"`
-	FieldSlug        string            `protobuf:"bytes,4,opt,name=field_slug,json=fieldSlug,proto3" json:"field_slug"`
-	FieldType        string            `protobuf:"bytes,5,opt,name=field_type,json=fieldType,proto3" json:"field_type"`
-	FieldIndex       int64             `protobuf:"varint,6,opt,name=field_index,json=fieldIndex,proto3" json:"field_index"`
-	Checked          bool              `protobuf:"varint,7,opt,name=checked,proto3" json:"checked"`
-	ViewFields       []*ViewField      `protobuf:"bytes,8,rep,name=view_fields,json=viewFields,proto3" json:"view_fields"`
-	TableFrom        *TableDataMessage `protobuf:"bytes,9,opt,name=table_from,json=tableFrom,proto3" json:"table_from"`
-	TableTo          *TableDataMessage `protobuf:"bytes,10,opt,name=table_to,json=tableTo,proto3" json:"table_to"`
-	Attributes       *structpb.Struct  `protobuf:"bytes,11,opt,name=attributes,proto3" json:"attributes"`
-	AggregateFormula string            `protobuf:"bytes,12,opt,name=aggregate_formula,json=aggregateFormula,proto3" json:"aggregate_formula"`
-	OrderNumber      int64             `protobuf:"varint,13,opt,name=order_number,json=orderNumber,proto3" json:"order_number"`
+	Label            string            `protobuf:"bytes,1,opt,name=label,proto3" json:"label,omitempty"`
+	TableSlug        string            `protobuf:"bytes,2,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
+	FieldId          string            `protobuf:"bytes,3,opt,name=field_id,json=fieldId,proto3" json:"field_id,omitempty"`
+	FieldSlug        string            `protobuf:"bytes,4,opt,name=field_slug,json=fieldSlug,proto3" json:"field_slug,omitempty"`
+	FieldType        string            `protobuf:"bytes,5,opt,name=field_type,json=fieldType,proto3" json:"field_type,omitempty"`
+	FieldIndex       int64             `protobuf:"varint,6,opt,name=field_index,json=fieldIndex,proto3" json:"field_index,omitempty"`
+	Checked          bool              `protobuf:"varint,7,opt,name=checked,proto3" json:"checked,omitempty"`
+	ViewFields       []*ViewField      `protobuf:"bytes,8,rep,name=view_fields,json=viewFields,proto3" json:"view_fields,omitempty"`
+	TableFrom        *TableDataMessage `protobuf:"bytes,9,opt,name=table_from,json=tableFrom,proto3" json:"table_from,omitempty"`
+	TableTo          *TableDataMessage `protobuf:"bytes,10,opt,name=table_to,json=tableTo,proto3" json:"table_to,omitempty"`
+	Attributes       *structpb.Struct  `protobuf:"bytes,11,opt,name=attributes,proto3" json:"attributes,omitempty"`
+	AggregateFormula string            `protobuf:"bytes,12,opt,name=aggregate_formula,json=aggregateFormula,proto3" json:"aggregate_formula,omitempty"`
+	OrderNumber      int64             `protobuf:"varint,13,opt,name=order_number,json=orderNumber,proto3" json:"order_number,omitempty"`
 }
 
 func (x *TableFieldSetting) Reset() {
@@ -400,8 +400,8 @@ type ViewField struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Slug string `protobuf:"bytes,1,opt,name=slug,proto3" json:"slug"`
-	Type string `protobuf:"bytes,2,opt,name=type,proto3" json:"type"`
+	Slug string `protobuf:"bytes,1,opt,name=slug,proto3" json:"slug,omitempty"`
+	Type string `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
 }
 
 func (x *ViewField) Reset() {
@@ -455,10 +455,10 @@ type FilterSetting struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Label   string             `protobuf:"bytes,1,opt,name=label,proto3" json:"label"`
-	Slug    string             `protobuf:"bytes,2,opt,name=slug,proto3" json:"slug"`
-	FieldId string             `protobuf:"bytes,3,opt,name=field_id,json=fieldId,proto3" json:"field_id"`
-	Field   *TableFieldSetting `protobuf:"bytes,4,opt,name=field,proto3" json:"field"`
+	Label   string             `protobuf:"bytes,1,opt,name=label,proto3" json:"label,omitempty"`
+	Slug    string             `protobuf:"bytes,2,opt,name=slug,proto3" json:"slug,omitempty"`
+	FieldId string             `protobuf:"bytes,3,opt,name=field_id,json=fieldId,proto3" json:"field_id,omitempty"`
+	Field   *TableFieldSetting `protobuf:"bytes,4,opt,name=field,proto3" json:"field,omitempty"`
 }
 
 func (x *FilterSetting) Reset() {
@@ -526,8 +526,8 @@ type ValueSetting struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Label   string          `protobuf:"bytes,1,opt,name=label,proto3" json:"label"`
-	Objects []*TableSetting `protobuf:"bytes,2,rep,name=objects,proto3" json:"objects"`
+	Label   string          `protobuf:"bytes,1,opt,name=label,proto3" json:"label,omitempty"`
+	Objects []*TableSetting `protobuf:"bytes,2,rep,name=objects,proto3" json:"objects,omitempty"`
 }
 
 func (x *ValueSetting) Reset() {
@@ -581,8 +581,8 @@ type RowRelation struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Label   string          `protobuf:"bytes,1,opt,name=label,proto3" json:"label"`
-	Objects []*TableSetting `protobuf:"bytes,2,rep,name=objects,proto3" json:"objects"`
+	Label   string          `protobuf:"bytes,1,opt,name=label,proto3" json:"label,omitempty"`
+	Objects []*TableSetting `protobuf:"bytes,2,rep,name=objects,proto3" json:"objects,omitempty"`
 }
 
 func (x *RowRelation) Reset() {
@@ -636,15 +636,15 @@ type AppReportSetting struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id             string           `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	MainTableLabel string           `protobuf:"bytes,3,opt,name=main_table_label,json=mainTableLabel,proto3" json:"main_table_label"`
-	MainTableSlug  string           `protobuf:"bytes,4,opt,name=main_table_slug,json=mainTableSlug,proto3" json:"main_table_slug"`
-	Rows           []*TableSetting  `protobuf:"bytes,5,rep,name=rows,proto3" json:"rows"`
-	RowsRelation   []*RowRelation   `protobuf:"bytes,6,rep,name=rows_relation,json=rowsRelation,proto3" json:"rows_relation"`
-	Columns        []*TableSetting  `protobuf:"bytes,7,rep,name=columns,proto3" json:"columns"`
-	Values         []*ValueSetting  `protobuf:"bytes,8,rep,name=values,proto3" json:"values"`
-	Filters        []*FilterSetting `protobuf:"bytes,9,rep,name=filters,proto3" json:"filters"`
-	Defaults       []*TableSetting  `protobuf:"bytes,10,rep,name=defaults,proto3" json:"defaults"`
+	Id             string           `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	MainTableLabel string           `protobuf:"bytes,3,opt,name=main_table_label,json=mainTableLabel,proto3" json:"main_table_label,omitempty"`
+	MainTableSlug  string           `protobuf:"bytes,4,opt,name=main_table_slug,json=mainTableSlug,proto3" json:"main_table_slug,omitempty"`
+	Rows           []*TableSetting  `protobuf:"bytes,5,rep,name=rows,proto3" json:"rows,omitempty"`
+	RowsRelation   []*RowRelation   `protobuf:"bytes,6,rep,name=rows_relation,json=rowsRelation,proto3" json:"rows_relation,omitempty"`
+	Columns        []*TableSetting  `protobuf:"bytes,7,rep,name=columns,proto3" json:"columns,omitempty"`
+	Values         []*ValueSetting  `protobuf:"bytes,8,rep,name=values,proto3" json:"values,omitempty"`
+	Filters        []*FilterSetting `protobuf:"bytes,9,rep,name=filters,proto3" json:"filters,omitempty"`
+	Defaults       []*TableSetting  `protobuf:"bytes,10,rep,name=defaults,proto3" json:"defaults,omitempty"`
 }
 
 func (x *AppReportSetting) Reset() {
@@ -747,16 +747,16 @@ type UpsertAppReportSettingRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id                    string           `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	ResourceEnvironmentId string           `protobuf:"bytes,2,opt,name=resource_environment_id,json=resourceEnvironmentId,proto3" json:"resource_environment_id"`
-	MainTableLabel        string           `protobuf:"bytes,3,opt,name=main_table_label,json=mainTableLabel,proto3" json:"main_table_label"`
-	MainTableSlug         string           `protobuf:"bytes,4,opt,name=main_table_slug,json=mainTableSlug,proto3" json:"main_table_slug"`
-	Rows                  []*TableSetting  `protobuf:"bytes,5,rep,name=rows,proto3" json:"rows"`
-	RowsRelation          []*RowRelation   `protobuf:"bytes,6,rep,name=rows_relation,json=rowsRelation,proto3" json:"rows_relation"`
-	Columns               []*TableSetting  `protobuf:"bytes,7,rep,name=columns,proto3" json:"columns"`
-	Values                []*ValueSetting  `protobuf:"bytes,8,rep,name=values,proto3" json:"values"`
-	Filters               []*FilterSetting `protobuf:"bytes,9,rep,name=filters,proto3" json:"filters"`
-	Defaults              []*TableSetting  `protobuf:"bytes,10,rep,name=defaults,proto3" json:"defaults"`
+	Id                    string           `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ResourceEnvironmentId string           `protobuf:"bytes,2,opt,name=resource_environment_id,json=resourceEnvironmentId,proto3" json:"resource_environment_id,omitempty"`
+	MainTableLabel        string           `protobuf:"bytes,3,opt,name=main_table_label,json=mainTableLabel,proto3" json:"main_table_label,omitempty"`
+	MainTableSlug         string           `protobuf:"bytes,4,opt,name=main_table_slug,json=mainTableSlug,proto3" json:"main_table_slug,omitempty"`
+	Rows                  []*TableSetting  `protobuf:"bytes,5,rep,name=rows,proto3" json:"rows,omitempty"`
+	RowsRelation          []*RowRelation   `protobuf:"bytes,6,rep,name=rows_relation,json=rowsRelation,proto3" json:"rows_relation,omitempty"`
+	Columns               []*TableSetting  `protobuf:"bytes,7,rep,name=columns,proto3" json:"columns,omitempty"`
+	Values                []*ValueSetting  `protobuf:"bytes,8,rep,name=values,proto3" json:"values,omitempty"`
+	Filters               []*FilterSetting `protobuf:"bytes,9,rep,name=filters,proto3" json:"filters,omitempty"`
+	Defaults              []*TableSetting  `protobuf:"bytes,10,rep,name=defaults,proto3" json:"defaults,omitempty"`
 }
 
 func (x *UpsertAppReportSettingRequest) Reset() {
@@ -866,9 +866,9 @@ type GetListReportSettingRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ResourceEnvironmentId string `protobuf:"bytes,1,opt,name=resource_environment_id,json=resourceEnvironmentId,proto3" json:"resource_environment_id"`
-	Offset                int32  `protobuf:"varint,2,opt,name=offset,proto3" json:"offset"`
-	Limit                 int32  `protobuf:"varint,3,opt,name=limit,proto3" json:"limit"`
+	ResourceEnvironmentId string `protobuf:"bytes,1,opt,name=resource_environment_id,json=resourceEnvironmentId,proto3" json:"resource_environment_id,omitempty"`
+	Offset                int32  `protobuf:"varint,2,opt,name=offset,proto3" json:"offset,omitempty"`
+	Limit                 int32  `protobuf:"varint,3,opt,name=limit,proto3" json:"limit,omitempty"`
 }
 
 func (x *GetListReportSettingRequest) Reset() {
@@ -929,8 +929,8 @@ type GetListReportSettingResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Count          int64               `protobuf:"varint,1,opt,name=count,proto3" json:"count"`
-	ReportSettings []*AppReportSetting `protobuf:"bytes,2,rep,name=report_settings,json=reportSettings,proto3" json:"report_settings"`
+	Count          int64               `protobuf:"varint,1,opt,name=count,proto3" json:"count,omitempty"`
+	ReportSettings []*AppReportSetting `protobuf:"bytes,2,rep,name=report_settings,json=reportSettings,proto3" json:"report_settings,omitempty"`
 }
 
 func (x *GetListReportSettingResponse) Reset() {
@@ -985,10 +985,10 @@ type PivotTemplatePrimaryKey struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id                    string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	ResourceEnvironmentId string `protobuf:"bytes,2,opt,name=resource_environment_id,json=resourceEnvironmentId,proto3" json:"resource_environment_id"`
-	FromDate              string `protobuf:"bytes,3,opt,name=from_date,json=fromDate,proto3" json:"from_date"`
-	ToDate                string `protobuf:"bytes,4,opt,name=to_date,json=toDate,proto3" json:"to_date"`
+	Id                    string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ResourceEnvironmentId string `protobuf:"bytes,2,opt,name=resource_environment_id,json=resourceEnvironmentId,proto3" json:"resource_environment_id,omitempty"`
+	FromDate              string `protobuf:"bytes,3,opt,name=from_date,json=fromDate,proto3" json:"from_date,omitempty"`
+	ToDate                string `protobuf:"bytes,4,opt,name=to_date,json=toDate,proto3" json:"to_date,omitempty"`
 }
 
 func (x *PivotTemplatePrimaryKey) Reset() {
@@ -1056,13 +1056,13 @@ type SavePivotTemplateRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ResourceEnvironmentId string `protobuf:"bytes,1,opt,name=resource_environment_id,json=resourceEnvironmentId,proto3" json:"resource_environment_id"`
-	PivotTableSlug        string `protobuf:"bytes,2,opt,name=pivot_table_slug,json=pivotTableSlug,proto3" json:"pivot_table_slug"`
-	FromDate              string `protobuf:"bytes,3,opt,name=from_date,json=fromDate,proto3" json:"from_date"`
-	ToDate                string `protobuf:"bytes,4,opt,name=to_date,json=toDate,proto3" json:"to_date"`
-	Status                string `protobuf:"bytes,5,opt,name=status,proto3" json:"status"`
-	CloneId               string `protobuf:"bytes,6,opt,name=clone_id,json=cloneId,proto3" json:"clone_id"`
-	ReportSettingId       string `protobuf:"bytes,7,opt,name=report_setting_id,json=reportSettingId,proto3" json:"report_setting_id"`
+	ResourceEnvironmentId string `protobuf:"bytes,1,opt,name=resource_environment_id,json=resourceEnvironmentId,proto3" json:"resource_environment_id,omitempty"`
+	PivotTableSlug        string `protobuf:"bytes,2,opt,name=pivot_table_slug,json=pivotTableSlug,proto3" json:"pivot_table_slug,omitempty"`
+	FromDate              string `protobuf:"bytes,3,opt,name=from_date,json=fromDate,proto3" json:"from_date,omitempty"`
+	ToDate                string `protobuf:"bytes,4,opt,name=to_date,json=toDate,proto3" json:"to_date,omitempty"`
+	Status                string `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"`
+	CloneId               string `protobuf:"bytes,6,opt,name=clone_id,json=cloneId,proto3" json:"clone_id,omitempty"`
+	ReportSettingId       string `protobuf:"bytes,7,opt,name=report_setting_id,json=reportSettingId,proto3" json:"report_setting_id,omitempty"`
 }
 
 func (x *SavePivotTemplateRequest) Reset() {
@@ -1151,22 +1151,22 @@ type PivotTemplateSetting struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id                    string                        `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	ResourceEnvironmentId string                        `protobuf:"bytes,2,opt,name=resource_environment_id,json=resourceEnvironmentId,proto3" json:"resource_environment_id"`
-	PivotTableSlug        string                        `protobuf:"bytes,3,opt,name=pivot_table_slug,json=pivotTableSlug,proto3" json:"pivot_table_slug"`
-	MainTableLabel        string                        `protobuf:"bytes,4,opt,name=main_table_label,json=mainTableLabel,proto3" json:"main_table_label"`
-	MainTableSlug         string                        `protobuf:"bytes,5,opt,name=main_table_slug,json=mainTableSlug,proto3" json:"main_table_slug"`
-	FromDate              string                        `protobuf:"bytes,6,opt,name=from_date,json=fromDate,proto3" json:"from_date"`
-	ToDate                string                        `protobuf:"bytes,7,opt,name=to_date,json=toDate,proto3" json:"to_date"`
-	Status                string                        `protobuf:"bytes,8,opt,name=status,proto3" json:"status"`
-	Rows                  []*PivotTemplateTableSetting  `protobuf:"bytes,9,rep,name=rows,proto3" json:"rows"`
-	RowsRelation          []*PivotTemplateRowRelation   `protobuf:"bytes,10,rep,name=rows_relation,json=rowsRelation,proto3" json:"rows_relation"`
-	Columns               []*PivotTemplateTableSetting  `protobuf:"bytes,11,rep,name=columns,proto3" json:"columns"`
-	Values                []*ValuePivotTemplateSetting  `protobuf:"bytes,12,rep,name=values,proto3" json:"values"`
-	Filters               []*FilterPivotTemplateSetting `protobuf:"bytes,13,rep,name=filters,proto3" json:"filters"`
-	Defaults              []*PivotTemplateTableSetting  `protobuf:"bytes,14,rep,name=defaults,proto3" json:"defaults"`
-	ReportSettingId       string                        `protobuf:"bytes,15,opt,name=report_setting_id,json=reportSettingId,proto3" json:"report_setting_id"`
-	InstanceId            string                        `protobuf:"bytes,16,opt,name=instance_id,json=instanceId,proto3" json:"instance_id"`
+	Id                    string                        `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ResourceEnvironmentId string                        `protobuf:"bytes,2,opt,name=resource_environment_id,json=resourceEnvironmentId,proto3" json:"resource_environment_id,omitempty"`
+	PivotTableSlug        string                        `protobuf:"bytes,3,opt,name=pivot_table_slug,json=pivotTableSlug,proto3" json:"pivot_table_slug,omitempty"`
+	MainTableLabel        string                        `protobuf:"bytes,4,opt,name=main_table_label,json=mainTableLabel,proto3" json:"main_table_label,omitempty"`
+	MainTableSlug         string                        `protobuf:"bytes,5,opt,name=main_table_slug,json=mainTableSlug,proto3" json:"main_table_slug,omitempty"`
+	FromDate              string                        `protobuf:"bytes,6,opt,name=from_date,json=fromDate,proto3" json:"from_date,omitempty"`
+	ToDate                string                        `protobuf:"bytes,7,opt,name=to_date,json=toDate,proto3" json:"to_date,omitempty"`
+	Status                string                        `protobuf:"bytes,8,opt,name=status,proto3" json:"status,omitempty"`
+	Rows                  []*PivotTemplateTableSetting  `protobuf:"bytes,9,rep,name=rows,proto3" json:"rows,omitempty"`
+	RowsRelation          []*PivotTemplateRowRelation   `protobuf:"bytes,10,rep,name=rows_relation,json=rowsRelation,proto3" json:"rows_relation,omitempty"`
+	Columns               []*PivotTemplateTableSetting  `protobuf:"bytes,11,rep,name=columns,proto3" json:"columns,omitempty"`
+	Values                []*ValuePivotTemplateSetting  `protobuf:"bytes,12,rep,name=values,proto3" json:"values,omitempty"`
+	Filters               []*FilterPivotTemplateSetting `protobuf:"bytes,13,rep,name=filters,proto3" json:"filters,omitempty"`
+	Defaults              []*PivotTemplateTableSetting  `protobuf:"bytes,14,rep,name=defaults,proto3" json:"defaults,omitempty"`
+	ReportSettingId       string                        `protobuf:"bytes,15,opt,name=report_setting_id,json=reportSettingId,proto3" json:"report_setting_id,omitempty"`
+	InstanceId            string                        `protobuf:"bytes,16,opt,name=instance_id,json=instanceId,proto3" json:"instance_id,omitempty"`
 }
 
 func (x *PivotTemplateSetting) Reset() {
@@ -1318,14 +1318,14 @@ type PivotTemplateTableSetting struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id                      string               `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	Label                   string               `protobuf:"bytes,2,opt,name=label,proto3" json:"label"`
-	Slug                    string               `protobuf:"bytes,3,opt,name=slug,proto3" json:"slug"`
-	Join                    bool                 `protobuf:"varint,4,opt,name=join,proto3" json:"join"`
-	OrderNumber             int64                `protobuf:"varint,5,opt,name=order_number,json=orderNumber,proto3" json:"order_number"`
-	Checked                 bool                 `protobuf:"varint,6,opt,name=checked,proto3" json:"checked"`
-	InsideRelationTableSlug string               `protobuf:"bytes,7,opt,name=inside_relation_table_slug,json=insideRelationTableSlug,proto3" json:"inside_relation_table_slug"`
-	TableFieldSettings      []*TableFieldSetting `protobuf:"bytes,8,rep,name=table_field_settings,json=tableFieldSettings,proto3" json:"table_field_settings"`
+	Id                      string               `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Label                   string               `protobuf:"bytes,2,opt,name=label,proto3" json:"label,omitempty"`
+	Slug                    string               `protobuf:"bytes,3,opt,name=slug,proto3" json:"slug,omitempty"`
+	Join                    bool                 `protobuf:"varint,4,opt,name=join,proto3" json:"join,omitempty"`
+	OrderNumber             int64                `protobuf:"varint,5,opt,name=order_number,json=orderNumber,proto3" json:"order_number,omitempty"`
+	Checked                 bool                 `protobuf:"varint,6,opt,name=checked,proto3" json:"checked,omitempty"`
+	InsideRelationTableSlug string               `protobuf:"bytes,7,opt,name=inside_relation_table_slug,json=insideRelationTableSlug,proto3" json:"inside_relation_table_slug,omitempty"`
+	TableFieldSettings      []*TableFieldSetting `protobuf:"bytes,8,rep,name=table_field_settings,json=tableFieldSettings,proto3" json:"table_field_settings,omitempty"`
 }
 
 func (x *PivotTemplateTableSetting) Reset() {
@@ -1421,9 +1421,9 @@ type PivotTemplateRowRelation struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Label       string                       `protobuf:"bytes,1,opt,name=label,proto3" json:"label"`
-	OrderNumber int64                        `protobuf:"varint,2,opt,name=order_number,json=orderNumber,proto3" json:"order_number"`
-	Objects     []*PivotTemplateTableSetting `protobuf:"bytes,3,rep,name=objects,proto3" json:"objects"`
+	Label       string                       `protobuf:"bytes,1,opt,name=label,proto3" json:"label,omitempty"`
+	OrderNumber int64                        `protobuf:"varint,2,opt,name=order_number,json=orderNumber,proto3" json:"order_number,omitempty"`
+	Objects     []*PivotTemplateTableSetting `protobuf:"bytes,3,rep,name=objects,proto3" json:"objects,omitempty"`
 }
 
 func (x *PivotTemplateRowRelation) Reset() {
@@ -1484,9 +1484,9 @@ type ValuePivotTemplateSetting struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Label       string          `protobuf:"bytes,1,opt,name=label,proto3" json:"label"`
-	OrderNumber int64           `protobuf:"varint,2,opt,name=order_number,json=orderNumber,proto3" json:"order_number"`
-	Objects     []*TableSetting `protobuf:"bytes,3,rep,name=objects,proto3" json:"objects"`
+	Label       string          `protobuf:"bytes,1,opt,name=label,proto3" json:"label,omitempty"`
+	OrderNumber int64           `protobuf:"varint,2,opt,name=order_number,json=orderNumber,proto3" json:"order_number,omitempty"`
+	Objects     []*TableSetting `protobuf:"bytes,3,rep,name=objects,proto3" json:"objects,omitempty"`
 }
 
 func (x *ValuePivotTemplateSetting) Reset() {
@@ -1547,10 +1547,10 @@ type FilterPivotTemplateSetting struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Label      string   `protobuf:"bytes,1,opt,name=label,proto3" json:"label"`
-	Slug       string   `protobuf:"bytes,2,opt,name=slug,proto3" json:"slug"`
-	FieldId    string   `protobuf:"bytes,3,opt,name=field_id,json=fieldId,proto3" json:"field_id"`
-	TableGuids []string `protobuf:"bytes,4,rep,name=table_guids,json=tableGuids,proto3" json:"table_guids"`
+	Label      string   `protobuf:"bytes,1,opt,name=label,proto3" json:"label,omitempty"`
+	Slug       string   `protobuf:"bytes,2,opt,name=slug,proto3" json:"slug,omitempty"`
+	FieldId    string   `protobuf:"bytes,3,opt,name=field_id,json=fieldId,proto3" json:"field_id,omitempty"`
+	TableGuids []string `protobuf:"bytes,4,rep,name=table_guids,json=tableGuids,proto3" json:"table_guids,omitempty"`
 }
 
 func (x *FilterPivotTemplateSetting) Reset() {
@@ -1618,8 +1618,8 @@ type RemovePivotTemplateSettingRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id                    string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	ResourceEnvironmentId string `protobuf:"bytes,2,opt,name=resource_environment_id,json=resourceEnvironmentId,proto3" json:"resource_environment_id"`
+	Id                    string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ResourceEnvironmentId string `protobuf:"bytes,2,opt,name=resource_environment_id,json=resourceEnvironmentId,proto3" json:"resource_environment_id,omitempty"`
 }
 
 func (x *RemovePivotTemplateSettingRequest) Reset() {
@@ -1673,8 +1673,8 @@ type GetListPivotTemplateRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ResourceEnvironmentId string `protobuf:"bytes,1,opt,name=resource_environment_id,json=resourceEnvironmentId,proto3" json:"resource_environment_id"`
-	Status                string `protobuf:"bytes,2,opt,name=status,proto3" json:"status"` // history, saved
+	ResourceEnvironmentId string `protobuf:"bytes,1,opt,name=resource_environment_id,json=resourceEnvironmentId,proto3" json:"resource_environment_id,omitempty"`
+	Status                string `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"` // history, saved
 }
 
 func (x *GetListPivotTemplateRequest) Reset() {
@@ -1728,8 +1728,8 @@ type GetListPivotTemplateResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Count          int64                   `protobuf:"varint,1,opt,name=count,proto3" json:"count"`
-	PivotTemplates []*PivotTemplateSetting `protobuf:"bytes,2,rep,name=pivot_templates,json=pivotTemplates,proto3" json:"pivot_templates"`
+	Count          int64                   `protobuf:"varint,1,opt,name=count,proto3" json:"count,omitempty"`
+	PivotTemplates []*PivotTemplateSetting `protobuf:"bytes,2,rep,name=pivot_templates,json=pivotTemplates,proto3" json:"pivot_templates,omitempty"`
 }
 
 func (x *GetListPivotTemplateResponse) Reset() {

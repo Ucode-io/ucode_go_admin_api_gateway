@@ -26,7 +26,7 @@ type GetMenuTemplateRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 }
 
 func (x *GetMenuTemplateRequest) Reset() {
@@ -73,8 +73,8 @@ type GatAllMenuTemplateResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	MenuTemplates []*MenuTemplate `protobuf:"bytes,1,rep,name=menu_templates,json=menuTemplates,proto3" json:"menu_templates"`
-	Count         int32           `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
+	MenuTemplates []*MenuTemplate `protobuf:"bytes,1,rep,name=menu_templates,json=menuTemplates,proto3" json:"menu_templates,omitempty"`
+	Count         int32           `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
 }
 
 func (x *GatAllMenuTemplateResponse) Reset() {
@@ -128,12 +128,12 @@ type MenuTemplate struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id               string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	Background       string `protobuf:"bytes,2,opt,name=background,proto3" json:"background"`
-	ActiveBackground string `protobuf:"bytes,3,opt,name=active_background,json=activeBackground,proto3" json:"active_background"`
-	Text             string `protobuf:"bytes,4,opt,name=text,proto3" json:"text"`
-	ActiveText       string `protobuf:"bytes,5,opt,name=active_text,json=activeText,proto3" json:"active_text"`
-	Title            string `protobuf:"bytes,6,opt,name=title,proto3" json:"title"`
+	Id               string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Background       string `protobuf:"bytes,2,opt,name=background,proto3" json:"background,omitempty"`
+	ActiveBackground string `protobuf:"bytes,3,opt,name=active_background,json=activeBackground,proto3" json:"active_background,omitempty"`
+	Text             string `protobuf:"bytes,4,opt,name=text,proto3" json:"text,omitempty"`
+	ActiveText       string `protobuf:"bytes,5,opt,name=active_text,json=activeText,proto3" json:"active_text,omitempty"`
+	Title            string `protobuf:"bytes,6,opt,name=title,proto3" json:"title,omitempty"`
 }
 
 func (x *MenuTemplate) Reset() {
@@ -215,7 +215,7 @@ type GetCompaniesByOwnerIdReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 }
 
 func (x *GetCompaniesByOwnerIdReq) Reset() {
@@ -262,7 +262,7 @@ type GetCompaniesByOwnerIdRes struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Companies []*Company `protobuf:"bytes,1,rep,name=companies,proto3" json:"companies"`
+	Companies []*Company `protobuf:"bytes,1,rep,name=companies,proto3" json:"companies,omitempty"`
 }
 
 func (x *GetCompaniesByOwnerIdRes) Reset() {
@@ -309,10 +309,10 @@ type CreateCompanyRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Title       string `protobuf:"bytes,1,opt,name=title,proto3" json:"title"`
-	Logo        string `protobuf:"bytes,2,opt,name=logo,proto3" json:"logo"`
-	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description"`
-	OwnerId     string `protobuf:"bytes,4,opt,name=owner_id,json=ownerId,proto3" json:"owner_id"`
+	Title       string `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
+	Logo        string `protobuf:"bytes,2,opt,name=logo,proto3" json:"logo,omitempty"`
+	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	OwnerId     string `protobuf:"bytes,4,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
 }
 
 func (x *CreateCompanyRequest) Reset() {
@@ -380,11 +380,11 @@ type Company struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id          string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	Name        string `protobuf:"bytes,2,opt,name=name,proto3" json:"name"`
-	Logo        string `protobuf:"bytes,3,opt,name=logo,proto3" json:"logo"`
-	Description string `protobuf:"bytes,4,opt,name=description,proto3" json:"description"`
-	OwnerId     string `protobuf:"bytes,5,opt,name=owner_id,json=ownerId,proto3" json:"owner_id"`
+	Id          string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name        string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Logo        string `protobuf:"bytes,3,opt,name=logo,proto3" json:"logo,omitempty"`
+	Description string `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
+	OwnerId     string `protobuf:"bytes,5,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
 }
 
 func (x *Company) Reset() {
@@ -459,12 +459,12 @@ type CompanyWithProjects struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id          string                    `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	Name        string                    `protobuf:"bytes,2,opt,name=name,proto3" json:"name"`
-	Logo        string                    `protobuf:"bytes,3,opt,name=logo,proto3" json:"logo"`
-	Description string                    `protobuf:"bytes,4,opt,name=description,proto3" json:"description"`
-	OwnerId     string                    `protobuf:"bytes,5,opt,name=owner_id,json=ownerId,proto3" json:"owner_id"`
-	Projects    []*ProjectWithoutResource `protobuf:"bytes,6,rep,name=projects,proto3" json:"projects"`
+	Id          string                    `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name        string                    `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Logo        string                    `protobuf:"bytes,3,opt,name=logo,proto3" json:"logo,omitempty"`
+	Description string                    `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
+	OwnerId     string                    `protobuf:"bytes,5,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
+	Projects    []*ProjectWithoutResource `protobuf:"bytes,6,rep,name=projects,proto3" json:"projects,omitempty"`
 }
 
 func (x *CompanyWithProjects) Reset() {
@@ -546,7 +546,7 @@ type CreateCompanyResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 }
 
 func (x *CreateCompanyResponse) Reset() {
@@ -593,11 +593,11 @@ type GetCompanyListRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Limit    int32  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit"`
-	Offset   int32  `protobuf:"varint,2,opt,name=offset,proto3" json:"offset"`
-	Search   string `protobuf:"bytes,3,opt,name=search,proto3" json:"search"`
-	ComanyId string `protobuf:"bytes,4,opt,name=comany_id,json=comanyId,proto3" json:"comany_id"`
-	OwnerId  string `protobuf:"bytes,5,opt,name=owner_id,json=ownerId,proto3" json:"owner_id"`
+	Limit    int32  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
+	Offset   int32  `protobuf:"varint,2,opt,name=offset,proto3" json:"offset,omitempty"`
+	Search   string `protobuf:"bytes,3,opt,name=search,proto3" json:"search,omitempty"`
+	ComanyId string `protobuf:"bytes,4,opt,name=comany_id,json=comanyId,proto3" json:"comany_id,omitempty"`
+	OwnerId  string `protobuf:"bytes,5,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
 }
 
 func (x *GetCompanyListRequest) Reset() {
@@ -672,8 +672,8 @@ type GetComanyListResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Count     int32      `protobuf:"varint,1,opt,name=count,proto3" json:"count"`
-	Companies []*Company `protobuf:"bytes,2,rep,name=companies,proto3" json:"companies"`
+	Count     int32      `protobuf:"varint,1,opt,name=count,proto3" json:"count,omitempty"`
+	Companies []*Company `protobuf:"bytes,2,rep,name=companies,proto3" json:"companies,omitempty"`
 }
 
 func (x *GetComanyListResponse) Reset() {
@@ -727,7 +727,7 @@ type GetCompanyByIdRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 }
 
 func (x *GetCompanyByIdRequest) Reset() {
@@ -774,7 +774,7 @@ type GetCompanyByIdResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Company *Company `protobuf:"bytes,1,opt,name=company,proto3" json:"company"`
+	Company *Company `protobuf:"bytes,1,opt,name=company,proto3" json:"company,omitempty"`
 }
 
 func (x *GetCompanyByIdResponse) Reset() {
@@ -821,7 +821,7 @@ type DeleteCompanyRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 }
 
 func (x *DeleteCompanyRequest) Reset() {
@@ -868,11 +868,11 @@ type GetListWithProjectsRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Limit    int32  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit"`
-	Offset   int32  `protobuf:"varint,2,opt,name=offset,proto3" json:"offset"`
-	Search   string `protobuf:"bytes,3,opt,name=search,proto3" json:"search"`
-	ComanyId string `protobuf:"bytes,4,opt,name=comany_id,json=comanyId,proto3" json:"comany_id"`
-	OwnerId  string `protobuf:"bytes,5,opt,name=owner_id,json=ownerId,proto3" json:"owner_id"`
+	Limit    int32  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
+	Offset   int32  `protobuf:"varint,2,opt,name=offset,proto3" json:"offset,omitempty"`
+	Search   string `protobuf:"bytes,3,opt,name=search,proto3" json:"search,omitempty"`
+	ComanyId string `protobuf:"bytes,4,opt,name=comany_id,json=comanyId,proto3" json:"comany_id,omitempty"`
+	OwnerId  string `protobuf:"bytes,5,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
 }
 
 func (x *GetListWithProjectsRequest) Reset() {
@@ -947,8 +947,8 @@ type GetListWithProjectsResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Count     int32                  `protobuf:"varint,1,opt,name=count,proto3" json:"count"`
-	Companies []*CompanyWithProjects `protobuf:"bytes,2,rep,name=companies,proto3" json:"companies"`
+	Count     int32                  `protobuf:"varint,1,opt,name=count,proto3" json:"count,omitempty"`
+	Companies []*CompanyWithProjects `protobuf:"bytes,2,rep,name=companies,proto3" json:"companies,omitempty"`
 }
 
 func (x *GetListWithProjectsResponse) Reset() {

@@ -27,41 +27,41 @@ type CreateRelationRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	TableFrom              string            `protobuf:"bytes,1,opt,name=table_from,json=tableFrom,proto3" json:"table_from"`
-	TableTo                string            `protobuf:"bytes,2,opt,name=table_to,json=tableTo,proto3" json:"table_to"`
-	Type                   string            `protobuf:"bytes,3,opt,name=type,proto3" json:"type"`
-	ViewFields             []string          `protobuf:"bytes,4,rep,name=view_fields,json=viewFields,proto3" json:"view_fields"`
-	Summaries              []*Summary        `protobuf:"bytes,5,rep,name=summaries,proto3" json:"summaries"`
-	Editable               bool              `protobuf:"varint,6,opt,name=editable,proto3" json:"editable"`
-	IsEditable             bool              `protobuf:"varint,7,opt,name=is_editable,json=isEditable,proto3" json:"is_editable"`
-	Title                  string            `protobuf:"bytes,8,opt,name=title,proto3" json:"title"`
-	ViewType               string            `protobuf:"bytes,9,opt,name=view_type,json=viewType,proto3" json:"view_type"`
-	Columns                []string          `protobuf:"bytes,10,rep,name=columns,proto3" json:"columns"`
-	QuickFilters           []*QuickFilter    `protobuf:"bytes,11,rep,name=quick_filters,json=quickFilters,proto3" json:"quick_filters"`
-	GroupFields            []string          `protobuf:"bytes,12,rep,name=group_fields,json=groupFields,proto3" json:"group_fields"`
-	RelationTableSlug      string            `protobuf:"bytes,13,opt,name=relation_table_slug,json=relationTableSlug,proto3" json:"relation_table_slug"`
-	DynamicTables          []*DynamicTable   `protobuf:"bytes,14,rep,name=dynamic_tables,json=dynamicTables,proto3" json:"dynamic_tables"`
-	RelationFieldSlug      string            `protobuf:"bytes,15,opt,name=relation_field_slug,json=relationFieldSlug,proto3" json:"relation_field_slug"`
-	AutoFilters            []*AutoFilter     `protobuf:"bytes,16,rep,name=auto_filters,json=autoFilters,proto3" json:"auto_filters"`
-	DefaultValues          []string          `protobuf:"bytes,17,rep,name=default_values,json=defaultValues,proto3" json:"default_values"`
-	IsUserIdDefault        bool              `protobuf:"varint,18,opt,name=is_user_id_default,json=isUserIdDefault,proto3" json:"is_user_id_default"`
-	Cascadings             []*Cascading      `protobuf:"bytes,19,rep,name=cascadings,proto3" json:"cascadings"`
-	ObjectIdFromJwt        bool              `protobuf:"varint,20,opt,name=object_id_from_jwt,json=objectIdFromJwt,proto3" json:"object_id_from_jwt"`
-	CascadingTreeTableSlug string            `protobuf:"bytes,21,opt,name=cascading_tree_table_slug,json=cascadingTreeTableSlug,proto3" json:"cascading_tree_table_slug"`
-	CascadingTreeFieldSlug string            `protobuf:"bytes,22,opt,name=cascading_tree_field_slug,json=cascadingTreeFieldSlug,proto3" json:"cascading_tree_field_slug"`
-	ActionRelations        []*ActionRelation `protobuf:"bytes,23,rep,name=action_relations,json=actionRelations,proto3" json:"action_relations"`
-	DefaultLimit           string            `protobuf:"bytes,24,opt,name=default_limit,json=defaultLimit,proto3" json:"default_limit"`
-	MultipleInsert         bool              `protobuf:"varint,25,opt,name=multiple_insert,json=multipleInsert,proto3" json:"multiple_insert"`
-	UpdatedFields          []string          `protobuf:"bytes,26,rep,name=updated_fields,json=updatedFields,proto3" json:"updated_fields"`
-	MultipleInsertField    string            `protobuf:"bytes,27,opt,name=multiple_insert_field,json=multipleInsertField,proto3" json:"multiple_insert_field"`
-	ProjectId              string            `protobuf:"bytes,28,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	CommitId               string            `protobuf:"bytes,29,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
-	VersionId              string            `protobuf:"bytes,30,opt,name=version_id,json=versionId,proto3" json:"version_id"`
-	Creatable              bool              `protobuf:"varint,31,opt,name=creatable,proto3" json:"creatable"`
-	DefaultEditable        bool              `protobuf:"varint,32,opt,name=default_editable,json=defaultEditable,proto3" json:"default_editable"`
-	FunctionPath           string            `protobuf:"bytes,33,opt,name=function_path,json=functionPath,proto3" json:"function_path"`
-	RelationButtons        bool              `protobuf:"varint,34,opt,name=relation_buttons,json=relationButtons,proto3" json:"relation_buttons"`
-	Attributes             *structpb.Struct  `protobuf:"bytes,35,opt,name=attributes,proto3" json:"attributes"`
+	TableFrom              string            `protobuf:"bytes,1,opt,name=table_from,json=tableFrom,proto3" json:"table_from,omitempty"`
+	TableTo                string            `protobuf:"bytes,2,opt,name=table_to,json=tableTo,proto3" json:"table_to,omitempty"`
+	Type                   string            `protobuf:"bytes,3,opt,name=type,proto3" json:"type,omitempty"`
+	ViewFields             []string          `protobuf:"bytes,4,rep,name=view_fields,json=viewFields,proto3" json:"view_fields,omitempty"`
+	Summaries              []*Summary        `protobuf:"bytes,5,rep,name=summaries,proto3" json:"summaries,omitempty"`
+	Editable               bool              `protobuf:"varint,6,opt,name=editable,proto3" json:"editable,omitempty"`
+	IsEditable             bool              `protobuf:"varint,7,opt,name=is_editable,json=isEditable,proto3" json:"is_editable,omitempty"`
+	Title                  string            `protobuf:"bytes,8,opt,name=title,proto3" json:"title,omitempty"`
+	ViewType               string            `protobuf:"bytes,9,opt,name=view_type,json=viewType,proto3" json:"view_type,omitempty"`
+	Columns                []string          `protobuf:"bytes,10,rep,name=columns,proto3" json:"columns,omitempty"`
+	QuickFilters           []*QuickFilter    `protobuf:"bytes,11,rep,name=quick_filters,json=quickFilters,proto3" json:"quick_filters,omitempty"`
+	GroupFields            []string          `protobuf:"bytes,12,rep,name=group_fields,json=groupFields,proto3" json:"group_fields,omitempty"`
+	RelationTableSlug      string            `protobuf:"bytes,13,opt,name=relation_table_slug,json=relationTableSlug,proto3" json:"relation_table_slug,omitempty"`
+	DynamicTables          []*DynamicTable   `protobuf:"bytes,14,rep,name=dynamic_tables,json=dynamicTables,proto3" json:"dynamic_tables,omitempty"`
+	RelationFieldSlug      string            `protobuf:"bytes,15,opt,name=relation_field_slug,json=relationFieldSlug,proto3" json:"relation_field_slug,omitempty"`
+	AutoFilters            []*AutoFilter     `protobuf:"bytes,16,rep,name=auto_filters,json=autoFilters,proto3" json:"auto_filters,omitempty"`
+	DefaultValues          []string          `protobuf:"bytes,17,rep,name=default_values,json=defaultValues,proto3" json:"default_values,omitempty"`
+	IsUserIdDefault        bool              `protobuf:"varint,18,opt,name=is_user_id_default,json=isUserIdDefault,proto3" json:"is_user_id_default,omitempty"`
+	Cascadings             []*Cascading      `protobuf:"bytes,19,rep,name=cascadings,proto3" json:"cascadings,omitempty"`
+	ObjectIdFromJwt        bool              `protobuf:"varint,20,opt,name=object_id_from_jwt,json=objectIdFromJwt,proto3" json:"object_id_from_jwt,omitempty"`
+	CascadingTreeTableSlug string            `protobuf:"bytes,21,opt,name=cascading_tree_table_slug,json=cascadingTreeTableSlug,proto3" json:"cascading_tree_table_slug,omitempty"`
+	CascadingTreeFieldSlug string            `protobuf:"bytes,22,opt,name=cascading_tree_field_slug,json=cascadingTreeFieldSlug,proto3" json:"cascading_tree_field_slug,omitempty"`
+	ActionRelations        []*ActionRelation `protobuf:"bytes,23,rep,name=action_relations,json=actionRelations,proto3" json:"action_relations,omitempty"`
+	DefaultLimit           string            `protobuf:"bytes,24,opt,name=default_limit,json=defaultLimit,proto3" json:"default_limit,omitempty"`
+	MultipleInsert         bool              `protobuf:"varint,25,opt,name=multiple_insert,json=multipleInsert,proto3" json:"multiple_insert,omitempty"`
+	UpdatedFields          []string          `protobuf:"bytes,26,rep,name=updated_fields,json=updatedFields,proto3" json:"updated_fields,omitempty"`
+	MultipleInsertField    string            `protobuf:"bytes,27,opt,name=multiple_insert_field,json=multipleInsertField,proto3" json:"multiple_insert_field,omitempty"`
+	ProjectId              string            `protobuf:"bytes,28,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	CommitId               string            `protobuf:"bytes,29,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
+	VersionId              string            `protobuf:"bytes,30,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
+	Creatable              bool              `protobuf:"varint,31,opt,name=creatable,proto3" json:"creatable,omitempty"`
+	DefaultEditable        bool              `protobuf:"varint,32,opt,name=default_editable,json=defaultEditable,proto3" json:"default_editable,omitempty"`
+	FunctionPath           string            `protobuf:"bytes,33,opt,name=function_path,json=functionPath,proto3" json:"function_path,omitempty"`
+	RelationButtons        bool              `protobuf:"varint,34,opt,name=relation_buttons,json=relationButtons,proto3" json:"relation_buttons,omitempty"`
+	Attributes             *structpb.Struct  `protobuf:"bytes,35,opt,name=attributes,proto3" json:"attributes,omitempty"`
 }
 
 func (x *CreateRelationRequest) Reset() {
@@ -346,8 +346,8 @@ type AutoFilter struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	FieldTo   string `protobuf:"bytes,1,opt,name=field_to,json=fieldTo,proto3" json:"field_to"`
-	FieldFrom string `protobuf:"bytes,2,opt,name=field_from,json=fieldFrom,proto3" json:"field_from"`
+	FieldTo   string `protobuf:"bytes,1,opt,name=field_to,json=fieldTo,proto3" json:"field_to,omitempty"`
+	FieldFrom string `protobuf:"bytes,2,opt,name=field_from,json=fieldFrom,proto3" json:"field_from,omitempty"`
 }
 
 func (x *AutoFilter) Reset() {
@@ -401,8 +401,8 @@ type DynamicTable struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	TableSlug  string   `protobuf:"bytes,1,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
-	ViewFields []string `protobuf:"bytes,2,rep,name=view_fields,json=viewFields,proto3" json:"view_fields"`
+	TableSlug  string   `protobuf:"bytes,1,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
+	ViewFields []string `protobuf:"bytes,2,rep,name=view_fields,json=viewFields,proto3" json:"view_fields,omitempty"`
 }
 
 func (x *DynamicTable) Reset() {
@@ -456,42 +456,42 @@ type UpdateRelationRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id                     string            `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	TableFrom              string            `protobuf:"bytes,2,opt,name=table_from,json=tableFrom,proto3" json:"table_from"`
-	TableTo                string            `protobuf:"bytes,3,opt,name=table_to,json=tableTo,proto3" json:"table_to"`
-	Type                   string            `protobuf:"bytes,4,opt,name=type,proto3" json:"type"`
-	ViewFields             []string          `protobuf:"bytes,5,rep,name=view_fields,json=viewFields,proto3" json:"view_fields"`
-	Summaries              []*Summary        `protobuf:"bytes,6,rep,name=summaries,proto3" json:"summaries"`
-	Editable               bool              `protobuf:"varint,7,opt,name=editable,proto3" json:"editable"`
-	IsEditable             bool              `protobuf:"varint,8,opt,name=is_editable,json=isEditable,proto3" json:"is_editable"`
-	Title                  string            `protobuf:"bytes,9,opt,name=title,proto3" json:"title"`
-	Columns                []string          `protobuf:"bytes,10,rep,name=columns,proto3" json:"columns"`
-	QuickFilters           []*QuickFilter    `protobuf:"bytes,11,rep,name=quick_filters,json=quickFilters,proto3" json:"quick_filters"`
-	GroupFields            []string          `protobuf:"bytes,12,rep,name=group_fields,json=groupFields,proto3" json:"group_fields"`
-	RelationTableSlug      string            `protobuf:"bytes,13,opt,name=relation_table_slug,json=relationTableSlug,proto3" json:"relation_table_slug"`
-	ViewType               string            `protobuf:"bytes,14,opt,name=view_type,json=viewType,proto3" json:"view_type"`
-	DynamicTables          []*DynamicTable   `protobuf:"bytes,15,rep,name=dynamic_tables,json=dynamicTables,proto3" json:"dynamic_tables"`
-	RelationFieldSlug      string            `protobuf:"bytes,16,opt,name=relation_field_slug,json=relationFieldSlug,proto3" json:"relation_field_slug"`
-	AutoFilters            []*AutoFilter     `protobuf:"bytes,17,rep,name=auto_filters,json=autoFilters,proto3" json:"auto_filters"`
-	DefaultValues          []string          `protobuf:"bytes,18,rep,name=default_values,json=defaultValues,proto3" json:"default_values"`
-	IsUserIdDefault        bool              `protobuf:"varint,19,opt,name=is_user_id_default,json=isUserIdDefault,proto3" json:"is_user_id_default"`
-	Cascadings             []*Cascading      `protobuf:"bytes,20,rep,name=cascadings,proto3" json:"cascadings"`
-	ObjectIdFromJwt        bool              `protobuf:"varint,21,opt,name=object_id_from_jwt,json=objectIdFromJwt,proto3" json:"object_id_from_jwt"`
-	CascadingTreeTableSlug string            `protobuf:"bytes,22,opt,name=cascading_tree_table_slug,json=cascadingTreeTableSlug,proto3" json:"cascading_tree_table_slug"`
-	CascadingTreeFieldSlug string            `protobuf:"bytes,23,opt,name=cascading_tree_field_slug,json=cascadingTreeFieldSlug,proto3" json:"cascading_tree_field_slug"`
-	ActionRelations        []*ActionRelation `protobuf:"bytes,24,rep,name=action_relations,json=actionRelations,proto3" json:"action_relations"`
-	DefaultLimit           string            `protobuf:"bytes,25,opt,name=default_limit,json=defaultLimit,proto3" json:"default_limit"`
-	MultipleInsert         bool              `protobuf:"varint,26,opt,name=multiple_insert,json=multipleInsert,proto3" json:"multiple_insert"`
-	UpdatedFields          []string          `protobuf:"bytes,27,rep,name=updated_fields,json=updatedFields,proto3" json:"updated_fields"`
-	MultipleInsertField    string            `protobuf:"bytes,28,opt,name=multiple_insert_field,json=multipleInsertField,proto3" json:"multiple_insert_field"`
-	ProjectId              string            `protobuf:"bytes,29,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	CommitId               string            `protobuf:"bytes,30,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
-	VersionId              string            `protobuf:"bytes,31,opt,name=version_id,json=versionId,proto3" json:"version_id"`
-	Creatable              bool              `protobuf:"varint,32,opt,name=creatable,proto3" json:"creatable"`
-	DefaultEditable        bool              `protobuf:"varint,33,opt,name=default_editable,json=defaultEditable,proto3" json:"default_editable"`
-	FunctionPath           string            `protobuf:"bytes,34,opt,name=function_path,json=functionPath,proto3" json:"function_path"`
-	RelationButtons        bool              `protobuf:"varint,35,opt,name=relation_buttons,json=relationButtons,proto3" json:"relation_buttons"`
-	Attributes             *structpb.Struct  `protobuf:"bytes,36,opt,name=attributes,proto3" json:"attributes"`
+	Id                     string            `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	TableFrom              string            `protobuf:"bytes,2,opt,name=table_from,json=tableFrom,proto3" json:"table_from,omitempty"`
+	TableTo                string            `protobuf:"bytes,3,opt,name=table_to,json=tableTo,proto3" json:"table_to,omitempty"`
+	Type                   string            `protobuf:"bytes,4,opt,name=type,proto3" json:"type,omitempty"`
+	ViewFields             []string          `protobuf:"bytes,5,rep,name=view_fields,json=viewFields,proto3" json:"view_fields,omitempty"`
+	Summaries              []*Summary        `protobuf:"bytes,6,rep,name=summaries,proto3" json:"summaries,omitempty"`
+	Editable               bool              `protobuf:"varint,7,opt,name=editable,proto3" json:"editable,omitempty"`
+	IsEditable             bool              `protobuf:"varint,8,opt,name=is_editable,json=isEditable,proto3" json:"is_editable,omitempty"`
+	Title                  string            `protobuf:"bytes,9,opt,name=title,proto3" json:"title,omitempty"`
+	Columns                []string          `protobuf:"bytes,10,rep,name=columns,proto3" json:"columns,omitempty"`
+	QuickFilters           []*QuickFilter    `protobuf:"bytes,11,rep,name=quick_filters,json=quickFilters,proto3" json:"quick_filters,omitempty"`
+	GroupFields            []string          `protobuf:"bytes,12,rep,name=group_fields,json=groupFields,proto3" json:"group_fields,omitempty"`
+	RelationTableSlug      string            `protobuf:"bytes,13,opt,name=relation_table_slug,json=relationTableSlug,proto3" json:"relation_table_slug,omitempty"`
+	ViewType               string            `protobuf:"bytes,14,opt,name=view_type,json=viewType,proto3" json:"view_type,omitempty"`
+	DynamicTables          []*DynamicTable   `protobuf:"bytes,15,rep,name=dynamic_tables,json=dynamicTables,proto3" json:"dynamic_tables,omitempty"`
+	RelationFieldSlug      string            `protobuf:"bytes,16,opt,name=relation_field_slug,json=relationFieldSlug,proto3" json:"relation_field_slug,omitempty"`
+	AutoFilters            []*AutoFilter     `protobuf:"bytes,17,rep,name=auto_filters,json=autoFilters,proto3" json:"auto_filters,omitempty"`
+	DefaultValues          []string          `protobuf:"bytes,18,rep,name=default_values,json=defaultValues,proto3" json:"default_values,omitempty"`
+	IsUserIdDefault        bool              `protobuf:"varint,19,opt,name=is_user_id_default,json=isUserIdDefault,proto3" json:"is_user_id_default,omitempty"`
+	Cascadings             []*Cascading      `protobuf:"bytes,20,rep,name=cascadings,proto3" json:"cascadings,omitempty"`
+	ObjectIdFromJwt        bool              `protobuf:"varint,21,opt,name=object_id_from_jwt,json=objectIdFromJwt,proto3" json:"object_id_from_jwt,omitempty"`
+	CascadingTreeTableSlug string            `protobuf:"bytes,22,opt,name=cascading_tree_table_slug,json=cascadingTreeTableSlug,proto3" json:"cascading_tree_table_slug,omitempty"`
+	CascadingTreeFieldSlug string            `protobuf:"bytes,23,opt,name=cascading_tree_field_slug,json=cascadingTreeFieldSlug,proto3" json:"cascading_tree_field_slug,omitempty"`
+	ActionRelations        []*ActionRelation `protobuf:"bytes,24,rep,name=action_relations,json=actionRelations,proto3" json:"action_relations,omitempty"`
+	DefaultLimit           string            `protobuf:"bytes,25,opt,name=default_limit,json=defaultLimit,proto3" json:"default_limit,omitempty"`
+	MultipleInsert         bool              `protobuf:"varint,26,opt,name=multiple_insert,json=multipleInsert,proto3" json:"multiple_insert,omitempty"`
+	UpdatedFields          []string          `protobuf:"bytes,27,rep,name=updated_fields,json=updatedFields,proto3" json:"updated_fields,omitempty"`
+	MultipleInsertField    string            `protobuf:"bytes,28,opt,name=multiple_insert_field,json=multipleInsertField,proto3" json:"multiple_insert_field,omitempty"`
+	ProjectId              string            `protobuf:"bytes,29,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	CommitId               string            `protobuf:"bytes,30,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
+	VersionId              string            `protobuf:"bytes,31,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
+	Creatable              bool              `protobuf:"varint,32,opt,name=creatable,proto3" json:"creatable,omitempty"`
+	DefaultEditable        bool              `protobuf:"varint,33,opt,name=default_editable,json=defaultEditable,proto3" json:"default_editable,omitempty"`
+	FunctionPath           string            `protobuf:"bytes,34,opt,name=function_path,json=functionPath,proto3" json:"function_path,omitempty"`
+	RelationButtons        bool              `protobuf:"varint,35,opt,name=relation_buttons,json=relationButtons,proto3" json:"relation_buttons,omitempty"`
+	Attributes             *structpb.Struct  `protobuf:"bytes,36,opt,name=attributes,proto3" json:"attributes,omitempty"`
 }
 
 func (x *UpdateRelationRequest) Reset() {
@@ -783,42 +783,42 @@ type RelationForGetAll struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id                     string            `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	TableFrom              *Table            `protobuf:"bytes,2,opt,name=table_from,json=tableFrom,proto3" json:"table_from"`
-	TableTo                *Table            `protobuf:"bytes,3,opt,name=table_to,json=tableTo,proto3" json:"table_to"`
-	Type                   string            `protobuf:"bytes,4,opt,name=type,proto3" json:"type"`
-	ViewFields             []*Field          `protobuf:"bytes,5,rep,name=view_fields,json=viewFields,proto3" json:"view_fields"`
-	Summaries              []*Summary        `protobuf:"bytes,6,rep,name=summaries,proto3" json:"summaries"`
-	Editable               bool              `protobuf:"varint,7,opt,name=editable,proto3" json:"editable"`
-	IsEditable             bool              `protobuf:"varint,8,opt,name=is_editable,json=isEditable,proto3" json:"is_editable"`
-	Title                  string            `protobuf:"bytes,9,opt,name=title,proto3" json:"title"`
-	Columns                []string          `protobuf:"bytes,10,rep,name=columns,proto3" json:"columns"`
-	QuickFilters           []*QuickFilter    `protobuf:"bytes,11,rep,name=quick_filters,json=quickFilters,proto3" json:"quick_filters"`
-	GroupFields            []string          `protobuf:"bytes,12,rep,name=group_fields,json=groupFields,proto3" json:"group_fields"`
-	RelationTableSlug      string            `protobuf:"bytes,13,opt,name=relation_table_slug,json=relationTableSlug,proto3" json:"relation_table_slug"`
-	ViewType               string            `protobuf:"bytes,14,opt,name=view_type,json=viewType,proto3" json:"view_type"`
-	DynamicTables          []*DynamicTable   `protobuf:"bytes,15,rep,name=dynamic_tables,json=dynamicTables,proto3" json:"dynamic_tables"`
-	RelationFieldSlug      string            `protobuf:"bytes,16,opt,name=relation_field_slug,json=relationFieldSlug,proto3" json:"relation_field_slug"`
-	AutoFilters            []*AutoFilter     `protobuf:"bytes,17,rep,name=auto_filters,json=autoFilters,proto3" json:"auto_filters"`
-	DefaultValues          []string          `protobuf:"bytes,18,rep,name=default_values,json=defaultValues,proto3" json:"default_values"`
-	FieldFrom              string            `protobuf:"bytes,19,opt,name=field_from,json=fieldFrom,proto3" json:"field_from"`
-	FieldTo                string            `protobuf:"bytes,20,opt,name=field_to,json=fieldTo,proto3" json:"field_to"`
-	IsUserIdDefault        bool              `protobuf:"varint,21,opt,name=is_user_id_default,json=isUserIdDefault,proto3" json:"is_user_id_default"`
-	Cascadings             []*Cascading      `protobuf:"bytes,22,rep,name=cascadings,proto3" json:"cascadings"`
-	ObjectIdFromJwt        bool              `protobuf:"varint,23,opt,name=object_id_from_jwt,json=objectIdFromJwt,proto3" json:"object_id_from_jwt"`
-	CascadingTreeTableSlug string            `protobuf:"bytes,24,opt,name=cascading_tree_table_slug,json=cascadingTreeTableSlug,proto3" json:"cascading_tree_table_slug"`
-	CascadingTreeFieldSlug string            `protobuf:"bytes,25,opt,name=cascading_tree_field_slug,json=cascadingTreeFieldSlug,proto3" json:"cascading_tree_field_slug"`
-	ActionRelations        []*ActionRelation `protobuf:"bytes,26,rep,name=action_relations,json=actionRelations,proto3" json:"action_relations"`
-	DefaultLimit           string            `protobuf:"bytes,27,opt,name=default_limit,json=defaultLimit,proto3" json:"default_limit"`
-	MultipleInsert         bool              `protobuf:"varint,28,opt,name=multiple_insert,json=multipleInsert,proto3" json:"multiple_insert"`
-	UpdatedFields          []string          `protobuf:"bytes,29,rep,name=updated_fields,json=updatedFields,proto3" json:"updated_fields"`
-	MultipleInsertField    string            `protobuf:"bytes,30,opt,name=multiple_insert_field,json=multipleInsertField,proto3" json:"multiple_insert_field"`
-	IsSystem               bool              `protobuf:"varint,31,opt,name=is_system,json=isSystem,proto3" json:"is_system"`
-	DefaultEditable        bool              `protobuf:"varint,32,opt,name=default_editable,json=defaultEditable,proto3" json:"default_editable"`
-	FunctionPath           string            `protobuf:"bytes,33,opt,name=function_path,json=functionPath,proto3" json:"function_path"`
-	RelationButtons        bool              `protobuf:"varint,34,opt,name=relation_buttons,json=relationButtons,proto3" json:"relation_buttons"`
-	Creatable              bool              `protobuf:"varint,35,opt,name=creatable,proto3" json:"creatable"`
-	Attributes             *structpb.Struct  `protobuf:"bytes,36,opt,name=attributes,proto3" json:"attributes"`
+	Id                     string            `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	TableFrom              *Table            `protobuf:"bytes,2,opt,name=table_from,json=tableFrom,proto3" json:"table_from,omitempty"`
+	TableTo                *Table            `protobuf:"bytes,3,opt,name=table_to,json=tableTo,proto3" json:"table_to,omitempty"`
+	Type                   string            `protobuf:"bytes,4,opt,name=type,proto3" json:"type,omitempty"`
+	ViewFields             []*Field          `protobuf:"bytes,5,rep,name=view_fields,json=viewFields,proto3" json:"view_fields,omitempty"`
+	Summaries              []*Summary        `protobuf:"bytes,6,rep,name=summaries,proto3" json:"summaries,omitempty"`
+	Editable               bool              `protobuf:"varint,7,opt,name=editable,proto3" json:"editable,omitempty"`
+	IsEditable             bool              `protobuf:"varint,8,opt,name=is_editable,json=isEditable,proto3" json:"is_editable,omitempty"`
+	Title                  string            `protobuf:"bytes,9,opt,name=title,proto3" json:"title,omitempty"`
+	Columns                []string          `protobuf:"bytes,10,rep,name=columns,proto3" json:"columns,omitempty"`
+	QuickFilters           []*QuickFilter    `protobuf:"bytes,11,rep,name=quick_filters,json=quickFilters,proto3" json:"quick_filters,omitempty"`
+	GroupFields            []string          `protobuf:"bytes,12,rep,name=group_fields,json=groupFields,proto3" json:"group_fields,omitempty"`
+	RelationTableSlug      string            `protobuf:"bytes,13,opt,name=relation_table_slug,json=relationTableSlug,proto3" json:"relation_table_slug,omitempty"`
+	ViewType               string            `protobuf:"bytes,14,opt,name=view_type,json=viewType,proto3" json:"view_type,omitempty"`
+	DynamicTables          []*DynamicTable   `protobuf:"bytes,15,rep,name=dynamic_tables,json=dynamicTables,proto3" json:"dynamic_tables,omitempty"`
+	RelationFieldSlug      string            `protobuf:"bytes,16,opt,name=relation_field_slug,json=relationFieldSlug,proto3" json:"relation_field_slug,omitempty"`
+	AutoFilters            []*AutoFilter     `protobuf:"bytes,17,rep,name=auto_filters,json=autoFilters,proto3" json:"auto_filters,omitempty"`
+	DefaultValues          []string          `protobuf:"bytes,18,rep,name=default_values,json=defaultValues,proto3" json:"default_values,omitempty"`
+	FieldFrom              string            `protobuf:"bytes,19,opt,name=field_from,json=fieldFrom,proto3" json:"field_from,omitempty"`
+	FieldTo                string            `protobuf:"bytes,20,opt,name=field_to,json=fieldTo,proto3" json:"field_to,omitempty"`
+	IsUserIdDefault        bool              `protobuf:"varint,21,opt,name=is_user_id_default,json=isUserIdDefault,proto3" json:"is_user_id_default,omitempty"`
+	Cascadings             []*Cascading      `protobuf:"bytes,22,rep,name=cascadings,proto3" json:"cascadings,omitempty"`
+	ObjectIdFromJwt        bool              `protobuf:"varint,23,opt,name=object_id_from_jwt,json=objectIdFromJwt,proto3" json:"object_id_from_jwt,omitempty"`
+	CascadingTreeTableSlug string            `protobuf:"bytes,24,opt,name=cascading_tree_table_slug,json=cascadingTreeTableSlug,proto3" json:"cascading_tree_table_slug,omitempty"`
+	CascadingTreeFieldSlug string            `protobuf:"bytes,25,opt,name=cascading_tree_field_slug,json=cascadingTreeFieldSlug,proto3" json:"cascading_tree_field_slug,omitempty"`
+	ActionRelations        []*ActionRelation `protobuf:"bytes,26,rep,name=action_relations,json=actionRelations,proto3" json:"action_relations,omitempty"`
+	DefaultLimit           string            `protobuf:"bytes,27,opt,name=default_limit,json=defaultLimit,proto3" json:"default_limit,omitempty"`
+	MultipleInsert         bool              `protobuf:"varint,28,opt,name=multiple_insert,json=multipleInsert,proto3" json:"multiple_insert,omitempty"`
+	UpdatedFields          []string          `protobuf:"bytes,29,rep,name=updated_fields,json=updatedFields,proto3" json:"updated_fields,omitempty"`
+	MultipleInsertField    string            `protobuf:"bytes,30,opt,name=multiple_insert_field,json=multipleInsertField,proto3" json:"multiple_insert_field,omitempty"`
+	IsSystem               bool              `protobuf:"varint,31,opt,name=is_system,json=isSystem,proto3" json:"is_system,omitempty"`
+	DefaultEditable        bool              `protobuf:"varint,32,opt,name=default_editable,json=defaultEditable,proto3" json:"default_editable,omitempty"`
+	FunctionPath           string            `protobuf:"bytes,33,opt,name=function_path,json=functionPath,proto3" json:"function_path,omitempty"`
+	RelationButtons        bool              `protobuf:"varint,34,opt,name=relation_buttons,json=relationButtons,proto3" json:"relation_buttons,omitempty"`
+	Creatable              bool              `protobuf:"varint,35,opt,name=creatable,proto3" json:"creatable,omitempty"`
+	Attributes             *structpb.Struct  `protobuf:"bytes,36,opt,name=attributes,proto3" json:"attributes,omitempty"`
 }
 
 func (x *RelationForGetAll) Reset() {
@@ -1110,8 +1110,8 @@ type GetAllRelationsResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Relations []*RelationForGetAll `protobuf:"bytes,1,rep,name=relations,proto3" json:"relations"`
-	Count     int32                `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
+	Relations []*RelationForGetAll `protobuf:"bytes,1,rep,name=relations,proto3" json:"relations,omitempty"`
+	Count     int32                `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
 }
 
 func (x *GetAllRelationsResponse) Reset() {
@@ -1165,13 +1165,13 @@ type GetAllRelationsRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	TableSlug         string `protobuf:"bytes,1,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
-	Limit             int32  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit"`
-	Offset            int32  `protobuf:"varint,3,opt,name=offset,proto3" json:"offset"`
-	TableId           string `protobuf:"bytes,4,opt,name=table_id,json=tableId,proto3" json:"table_id"`
-	RelationTableSlug string `protobuf:"bytes,5,opt,name=relation_table_slug,json=relationTableSlug,proto3" json:"relation_table_slug"`
-	ProjectId         string `protobuf:"bytes,6,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	VersionId         string `protobuf:"bytes,7,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	TableSlug         string `protobuf:"bytes,1,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
+	Limit             int32  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
+	Offset            int32  `protobuf:"varint,3,opt,name=offset,proto3" json:"offset,omitempty"`
+	TableId           string `protobuf:"bytes,4,opt,name=table_id,json=tableId,proto3" json:"table_id,omitempty"`
+	RelationTableSlug string `protobuf:"bytes,5,opt,name=relation_table_slug,json=relationTableSlug,proto3" json:"relation_table_slug,omitempty"`
+	ProjectId         string `protobuf:"bytes,6,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	VersionId         string `protobuf:"bytes,7,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
 }
 
 func (x *GetAllRelationsRequest) Reset() {
@@ -1260,8 +1260,8 @@ type RelationPrimaryKey struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
 }
 
 func (x *RelationPrimaryKey) Reset() {
@@ -1315,8 +1315,8 @@ type Summary struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	FieldName   string `protobuf:"bytes,1,opt,name=field_name,json=fieldName,proto3" json:"field_name"`
-	FormulaName string `protobuf:"bytes,2,opt,name=formula_name,json=formulaName,proto3" json:"formula_name"`
+	FieldName   string `protobuf:"bytes,1,opt,name=field_name,json=fieldName,proto3" json:"field_name,omitempty"`
+	FormulaName string `protobuf:"bytes,2,opt,name=formula_name,json=formulaName,proto3" json:"formula_name,omitempty"`
 }
 
 func (x *Summary) Reset() {
@@ -1370,10 +1370,10 @@ type Cascading struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	FieldSlug string `protobuf:"bytes,1,opt,name=field_slug,json=fieldSlug,proto3" json:"field_slug"`
-	TableSlug string `protobuf:"bytes,2,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
-	Label     string `protobuf:"bytes,3,opt,name=label,proto3" json:"label"`
-	Order     int32  `protobuf:"varint,4,opt,name=order,proto3" json:"order"`
+	FieldSlug string `protobuf:"bytes,1,opt,name=field_slug,json=fieldSlug,proto3" json:"field_slug,omitempty"`
+	TableSlug string `protobuf:"bytes,2,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
+	Label     string `protobuf:"bytes,3,opt,name=label,proto3" json:"label,omitempty"`
+	Order     int32  `protobuf:"varint,4,opt,name=order,proto3" json:"order,omitempty"`
 }
 
 func (x *Cascading) Reset() {
@@ -1441,8 +1441,8 @@ type CascadingTree struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	TableSlug string `protobuf:"bytes,1,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
-	FieldSlug string `protobuf:"bytes,2,opt,name=field_slug,json=fieldSlug,proto3" json:"field_slug"`
+	TableSlug string `protobuf:"bytes,1,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
+	FieldSlug string `protobuf:"bytes,2,opt,name=field_slug,json=fieldSlug,proto3" json:"field_slug,omitempty"`
 }
 
 func (x *CascadingTree) Reset() {
@@ -1496,8 +1496,8 @@ type ActionRelation struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Key   string `protobuf:"bytes,1,opt,name=key,proto3" json:"key"`
-	Value string `protobuf:"bytes,2,opt,name=value,proto3" json:"value"`
+	Key   string `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
+	Value string `protobuf:"bytes,2,opt,name=value,proto3" json:"value,omitempty"`
 }
 
 func (x *ActionRelation) Reset() {
