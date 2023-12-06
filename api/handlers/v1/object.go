@@ -290,7 +290,6 @@ func (h *HandlerV1) GetSingle(c *gin.Context) {
 		object.Data["role_id_from_token"] = tokenInfo.GetRoleId()
 		object.Data["client_type_id_from_token"] = tokenInfo.GetClientTypeId()
 	}
-	object.Data["language_setting"] = c.DefaultQuery("language_setting", "")
 
 	structData, err := helper.ConvertMapToStruct(object.Data)
 	if err != nil {
