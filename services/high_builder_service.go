@@ -77,5 +77,6 @@ func NewHighBuilderServiceClient(ctx context.Context, cfg config.Config) (Builde
 		reportSettingService:      object_builder_service.NewReportSettingServiceClient(connObjectBuilderService),
 		fileService:               object_builder_service.NewFileServiceClient(connObjectBuilderService),
 		objectBuilderConnPool:     objectbuilderServicePool,
+		itemsService:              object_builder_service.NewItemsServiceClient(connObjectBuilderService),
 	}, nil
 }

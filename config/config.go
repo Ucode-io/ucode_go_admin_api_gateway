@@ -17,7 +17,6 @@ const (
 	ReleaseMode = "release"
 )
 
-var DynamicReportFormula = []string{"SUM", "COUNT", "AVERAGE", "MAX", "MIN", "FIRST", "LAST", "END_FIRST", "END_LAST"}
 var CountReq = 0
 
 type Config struct {

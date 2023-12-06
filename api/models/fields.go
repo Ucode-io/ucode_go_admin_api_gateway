@@ -21,20 +21,22 @@ type Field struct {
 	RelationField       string                 `json:"relation_field"`
 	ShowLabel           bool                   `json:"show_label"`
 	EnableMultilanguage bool                   `json:"enable_multilanguage"`
+	MinioFolder         string                 `json:"minio_folder"`
 }
 
 type CreateFieldsRequest struct {
-	ID         string                 `json:"id"`
-	Default    string                 `json:"default"`
-	Type       string                 `json:"type"`
-	Index      string                 `json:"index"`
-	Label      string                 `json:"label"`
-	Slug       string                 `json:"slug"`
-	Required   bool                   `json:"required"`
-	Attributes map[string]interface{} `json:"attributes"`
-	IsVisible  bool                   `json:"is_visible"`
-	Unique     bool                   `json:"unique"`
-	Automatic  bool                   `json:"automatic"`
+	ID          string                 `json:"id"`
+	Default     string                 `json:"default"`
+	Type        string                 `json:"type"`
+	Index       string                 `json:"index"`
+	Label       string                 `json:"label"`
+	Slug        string                 `json:"slug"`
+	Required    bool                   `json:"required"`
+	Attributes  map[string]interface{} `json:"attributes"`
+	IsVisible   bool                   `json:"is_visible"`
+	Unique      bool                   `json:"unique"`
+	Automatic   bool                   `json:"automatic"`
+	MinioFolder string                 `json:"minio_folder"`
 }
 
 type CreateFieldRequest struct {
@@ -55,6 +57,7 @@ type CreateFieldRequest struct {
 	Automatic           bool                   `json:"automatic"`
 	ShowLabel           bool                   `json:"show_label"`
 	EnableMultilanguage bool                   `json:"enable_multilanguage"`
+	MinioFolder         string                 `json:"minio_folder"`
 }
 
 type GetAllFieldsResponse struct {
@@ -76,9 +79,9 @@ type CreateTableRequest struct {
 	ShowInMeny         bool                                         `json:"show_in_menu"`
 	Icon               string                                       `json:"icon"`
 	SubtitleFieldSlug  string                                       `json:"subtitle_field_slug"`
-	Sections           []*object_builder_service.Section            `json:"sections"`
+	// Sections           []*object_builder_service.Section            `json:"sections"`
 	Layouts            []*object_builder_service.LayoutRequest      `json:"layouts"`
-	AppID              string                                       `json:"app_id"`
+	// AppID              string                                       `json:"app_id"`
 	IncrementID        IncrementId                                  `json:"increment_id"`
 	CustomErrorMessage []*object_builder_service.CustomErrorMessage `json:"custom_error_messages"`
 	OrderBy            bool                                         `json:"order_by"`

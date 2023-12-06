@@ -3,6 +3,8 @@ package handlers
 import (
 	"context"
 	"strconv"
+	v1 "ucode/ucode_go_api_gateway/api/handlers/v1"
+	v2 "ucode/ucode_go_api_gateway/api/handlers/v2"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/pkg/logger"
@@ -22,6 +24,8 @@ type Handler struct {
 	authService     services.AuthServiceManagerI
 	apikeyService   services.AuthServiceManagerI
 	redis           storage.RedisStorageI
+	V1              v1.HandlerV1
+	V2              v2.HandlerV2
 }
 
 func NewHandler(baseConf config.BaseConfig, projectConfs map[string]config.Config, log logger.LoggerI, svcs services.ServiceNodesI, cmpServ services.CompanyServiceI, authService services.AuthServiceManagerI, redis storage.RedisStorageI) Handler {
@@ -33,6 +37,8 @@ func NewHandler(baseConf config.BaseConfig, projectConfs map[string]config.Confi
 		companyServices: cmpServ,
 		authService:     authService,
 		redis:           redis,
+		V1:              v1.NewHandlerV1(baseConf, projectConfs, log, svcs, cmpServ, authService, redis),
+		V2:              v2.NewHandlerV2(baseConf, projectConfs, log, svcs, cmpServ, authService, redis),
 	}
 }
 
