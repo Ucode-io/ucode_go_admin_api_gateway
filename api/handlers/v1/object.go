@@ -290,6 +290,7 @@ func (h *HandlerV1) GetSingle(c *gin.Context) {
 		object.Data["role_id_from_token"] = tokenInfo.GetRoleId()
 		object.Data["client_type_id_from_token"] = tokenInfo.GetClientTypeId()
 	}
+	object.Data["id"] = objectID
 
 	structData, err := helper.ConvertMapToStruct(object.Data)
 	if err != nil {
