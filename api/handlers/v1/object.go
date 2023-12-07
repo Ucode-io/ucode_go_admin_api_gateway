@@ -281,16 +281,15 @@ func (h *HandlerV1) GetSingle(c *gin.Context) {
 	}
 
 	tokenInfo, err := h.GetAuthInfo(c)
-	fmt.Println("token info->", tokenInfo)
 	if err != nil {
 		h.handleResponse(c, status_http.Forbidden, err.Error())
 		return
 	}
-	if tokenInfo != nil {
-		object.Data["user_id_from_token"] = tokenInfo.GetUserId()
-		object.Data["role_id_from_token"] = tokenInfo.GetRoleId()
-		object.Data["client_type_id_from_token"] = tokenInfo.GetClientTypeId()
-	}
+
+	object.Data["user_id_from_token"] = tokenInfo.GetUserId()
+	object.Data["role_id_from_token"] = tokenInfo.GetRoleId()
+	object.Data["client_type_id_from_token"] = tokenInfo.GetClientTypeId()
+
 	object.Data["id"] = objectID
 
 	structData, err := helper.ConvertMapToStruct(object.Data)
