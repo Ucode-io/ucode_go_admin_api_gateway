@@ -414,19 +414,21 @@ func (h *HandlerV2) GetSingleItem(c *gin.Context) {
 		h.handleResponse(c, status_http.Forbidden, err.Error())
 		return
 	}
-	fmt.Println("tokenInfo", tokenInfo)
+	fmt.Println("TOKEN->", tokenInfo)
 	if tokenInfo != nil {
 		object.Data["user_id_from_token"] = tokenInfo.GetUserId()
 		object.Data["role_id_from_token"] = tokenInfo.GetRoleId()
 		object.Data["client_type_id_from_token"] = tokenInfo.GetClientTypeId()
 	}
 	object.Data["id"] = objectID
+	fmt.Println("OBJECT DATA->", object.Data)
 
 	structData, err := helper.ConvertMapToStruct(object.Data)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
+	fmt.Println("STRUCT DATA->", structData)
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -455,15 +457,15 @@ func (h *HandlerV2) GetSingleItem(c *gin.Context) {
 
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
-		"1acd7a8f-a038-4e07-91cb-b689c368d855",
-		"LOW",
+		resource.GetProjectId(),
+		resource.NodeType,
 	)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	service, conn, err := services.GetBuilderServiceByType("LOW").ObjectBuilderConnPool(c.Request.Context())
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
 	if err != nil {
 		h.handleResponse(c, status_http.InternalServerError, err)
 		return
@@ -477,7 +479,7 @@ func (h *HandlerV2) GetSingleItem(c *gin.Context) {
 			&obs.CommonMessage{
 				TableSlug: c.Param("collection"),
 				Data:      structData,
-				ProjectId: "1acd7a8f-a038-4e07-91cb-b689c368d855",
+				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
 		if err != nil {
