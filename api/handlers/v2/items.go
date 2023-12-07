@@ -414,6 +414,7 @@ func (h *HandlerV2) GetSingleItem(c *gin.Context) {
 		h.handleResponse(c, status_http.Forbidden, err.Error())
 		return
 	}
+	fmt.Println("tokenInfo", tokenInfo)
 	if tokenInfo != nil {
 		object.Data["user_id_from_token"] = tokenInfo.GetUserId()
 		object.Data["role_id_from_token"] = tokenInfo.GetRoleId()
@@ -439,44 +440,44 @@ func (h *HandlerV2) GetSingleItem(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
-	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId.(string),
-			EnvironmentId: environmentId.(string),
-			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
+	// resource, err := h.companyServices.ServiceResource().GetSingle(
+	// 	c.Request.Context(),
+	// 	&pb.GetSingleServiceResourceReq{
+	// 		ProjectId:     projectId.(string),
+	// 		EnvironmentId: environmentId.(string),
+	// 		ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+	// 	},
+	// )
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.GRPCError, err.Error())
+	// 	return
+	// }
 
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
-		resource.GetProjectId(),
-		resource.NodeType,
+		"1acd7a8f-a038-4e07-91cb-b689c368d855",
+		"LOW",
 	)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
+	service, conn, err := services.GetBuilderServiceByType("LOW").ObjectBuilderConnPool(c.Request.Context())
 	if err != nil {
 		h.handleResponse(c, status_http.InternalServerError, err)
 		return
 	}
 	defer conn.Close()
 
-	switch resource.ResourceType {
-	case pb.ResourceType_MONGODB:
+	// switch resource.ResourceType {
+	// case pb.ResourceType_MONGODB:
 	resp, err = service.GetSingle(
 		context.Background(),
 		&obs.CommonMessage{
 			TableSlug: c.Param("collection"),
 			Data:      structData,
-				ProjectId: resource.ResourceEnvironmentId,
+			ProjectId: "1acd7a8f-a038-4e07-91cb-b689c368d855",
 		},
 	)
 	if err != nil {
@@ -489,20 +490,20 @@ func (h *HandlerV2) GetSingleItem(c *gin.Context) {
 		h.handleResponse(c, statusHttp, err.Error())
 		return
 	}
-	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().ObjectBuilder().GetSingle(
-			context.Background(),
-			&obs.CommonMessage{
-				TableSlug: c.Param("collection"),
-				Data:      structData,
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-	}
+	// case pb.ResourceType_POSTGRESQL:
+	// 	resp, err = services.PostgresBuilderService().ObjectBuilder().GetSingle(
+	// 		context.Background(),
+	// 		&obs.CommonMessage{
+	// 			TableSlug: c.Param("collection"),
+	// 			Data:      structData,
+	// 			ProjectId: resource.ResourceEnvironmentId,
+	// 		},
+	// 	)
+	// 	if err != nil {
+	// 		h.handleResponse(c, status_http.GRPCError, err.Error())
+	// 		return
+	// 	}
+	// }
 	statusHttp.CustomMessage = resp.GetCustomMessage()
 	h.handleResponse(c, statusHttp, resp)
 }
