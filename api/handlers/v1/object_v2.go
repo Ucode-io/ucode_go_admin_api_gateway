@@ -194,14 +194,14 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 				}
 			}
 
-			resp, err = service.GetList2(
-				context.Background(),
-				&obs.CommonMessage{
-					TableSlug: c.Param("table_slug"),
-					Data:      structData,
+	resp, err = service.GetList2(
+		context.Background(),
+		&obs.CommonMessage{
+			TableSlug: c.Param("table_slug"),
+			Data:      structData,
 					ProjectId: resource.ResourceEnvironmentId,
-				},
-			)
+		},
+	)
 
 			if err == nil {
 				if resp.IsCached {
