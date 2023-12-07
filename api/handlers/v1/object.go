@@ -285,10 +285,11 @@ func (h *HandlerV1) GetSingle(c *gin.Context) {
 		h.handleResponse(c, status_http.Forbidden, err.Error())
 		return
 	}
-
-	object.Data["user_id_from_token"] = tokenInfo.GetUserId()
-	object.Data["role_id_from_token"] = tokenInfo.GetRoleId()
-	object.Data["client_type_id_from_token"] = tokenInfo.GetClientTypeId()
+	if tokenInfo != nil {
+		object.Data["user_id_from_token"] = tokenInfo.GetUserId()
+		object.Data["role_id_from_token"] = tokenInfo.GetRoleId()
+		object.Data["client_type_id_from_token"] = tokenInfo.GetClientTypeId()
+	}
 
 	object.Data["id"] = objectID
 
