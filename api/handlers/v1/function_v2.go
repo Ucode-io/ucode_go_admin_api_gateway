@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/url"
 	"strings"
 	"time"
 	"ucode/ucode_go_api_gateway/api/models"
@@ -878,8 +879,13 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 	requestData.Path = c.Request.URL.Path
 	requestData.Params = c.Request.URL.Query()
 	requestData.Body = bodyReq
+	keyParams := c.Request.URL.Query()
 
-	var key = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("ett-%s-%s-%s", c.Request.Header.Get("Prev_path"), requestData.Params.Encode(), resource.ResourceEnvironmentId)))
+	if c.Param("function-id") == "b693cc12-8551-475f-91d5-4913c1739df4" {
+		keyParams = EasyToTravelGetProductsAgent(keyParams)
+	}
+
+	var key = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("ett-%s-%s-%s", c.Request.Header.Get("Prev_path"), keyParams.Encode(), resource.ResourceEnvironmentId)))
 
 	waitFunctionMap := waitFunctionResourceMap.ReadFromMap(key)
 	if waitFunctionMap.Timeout != nil {
@@ -996,3 +1002,27 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 }
 
 // var DoRequestCount int
+
+func EasyToTravelGetProductsAgent(params url.Values) url.Values {
+
+	if len(params) != 1 {
+		return params
+	}
+
+	var (
+		startTime = params.Get("startTime")
+	)
+
+	if len(startTime) > 0 {
+		if strings.Contains(startTime, "T") && strings.Contains(startTime, "Z") {
+			startTimeType, err := time.Parse("2006-01-02T15:04:05Z", startTime)
+			if err != nil {
+				return params
+			}
+
+			params.Set("startTime", strings.ToLower(startTimeType.Format("Monday-15")))
+		}
+	}
+
+	return params
+}
