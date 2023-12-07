@@ -409,6 +409,16 @@ func (h *HandlerV2) GetSingleItem(c *gin.Context) {
 		return
 	}
 
+	tokenInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err.Error())
+		return
+	}
+	if tokenInfo != nil {
+		object.Data["user_id_from_token"] = tokenInfo.GetUserId()
+		object.Data["role_id_from_token"] = tokenInfo.GetRoleId()
+		object.Data["client_type_id_from_token"] = tokenInfo.GetClientTypeId()
+	}
 	object.Data["id"] = objectID
 
 	structData, err := helper.ConvertMapToStruct(object.Data)
@@ -461,24 +471,24 @@ func (h *HandlerV2) GetSingleItem(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = service.GetSingle(
-			context.Background(),
-			&obs.CommonMessage{
-				TableSlug: c.Param("collection"),
-				Data:      structData,
+	resp, err = service.GetSingle(
+		context.Background(),
+		&obs.CommonMessage{
+			TableSlug: c.Param("collection"),
+			Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-		if err != nil {
-			statusHttp = status_http.GrpcStatusToHTTP["Internal"]
-			stat, ok := status.FromError(err)
-			if ok {
-				statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
-				statusHttp.CustomMessage = stat.Message()
-			}
-			h.handleResponse(c, statusHttp, err.Error())
-			return
+		},
+	)
+	if err != nil {
+		statusHttp = status_http.GrpcStatusToHTTP["Internal"]
+		stat, ok := status.FromError(err)
+		if ok {
+			statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
+			statusHttp.CustomMessage = stat.Message()
 		}
+		h.handleResponse(c, statusHttp, err.Error())
+		return
+	}
 	case pb.ResourceType_POSTGRESQL:
 		resp, err = services.PostgresBuilderService().ObjectBuilder().GetSingle(
 			context.Background(),
@@ -1633,7 +1643,7 @@ func (h *HandlerV2) AppendManyToMany(c *gin.Context) {
 		return
 	}
 	defer conn.Close()
-	
+
 	m2mMessage.ProjectId = resource.ResourceEnvironmentId
 	fromOfs := c.Query("from-ofs")
 	if fromOfs != "true" {
