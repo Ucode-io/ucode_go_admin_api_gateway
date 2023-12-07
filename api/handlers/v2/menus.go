@@ -152,7 +152,7 @@ func (h *HandlerV2) CreateMenu(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) GetMenuByID(c *gin.Context) {
-	menuID := c.Param("menu_id")
+	menuID := c.Param("id")
 	var (
 		resp *obs.Menu
 	)
@@ -162,68 +162,68 @@ func (h *HandlerV2) GetMenuByID(c *gin.Context) {
 		return
 	}
 
-	projectId, ok := c.Get("project_id")
-	if !ok || !util.IsValidUUID(projectId.(string)) {
-		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
-		return
-	}
+	// projectId, ok := c.Get("project_id")
+	// if !ok || !util.IsValidUUID(projectId.(string)) {
+	// 	h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+	// 	return
+	// }
 
-	environmentId, ok := c.Get("environment_id")
-	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err := errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
-		return
-	}
+	// environmentId, ok := c.Get("environment_id")
+	// if !ok || !util.IsValidUUID(environmentId.(string)) {
+	// 	err := errors.New("error getting environment id | not valid")
+	// 	h.handleResponse(c, status_http.BadRequest, err)
+	// 	return
+	// }
 
-	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId.(string),
-			EnvironmentId: environmentId.(string),
-			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
+	// resource, err := h.companyServices.ServiceResource().GetSingle(
+	// 	c.Request.Context(),
+	// 	&pb.GetSingleServiceResourceReq{
+	// 		ProjectId:     projectId.(string),
+	// 		EnvironmentId: environmentId.(string),
+	// 		ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+	// 	},
+	// )
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.GRPCError, err.Error())
+	// 	return
+	// }
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
+	// services, err := h.GetProjectSrvc(
+	// 	c.Request.Context(),
+	// 	projectId.(string),
+	// 	resource.NodeType,
+	// )
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.GRPCError, err.Error())
+	// 	return
+	// }
 
-	switch resource.ResourceType {
-	case pb.ResourceType_MONGODB:
-		resp, err = services.GetBuilderServiceByType(resource.NodeType).Menu().GetByID(
-			context.Background(),
-			&obs.MenuPrimaryKey{
-				Id:        menuID,
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Menu().GetByID(
-			context.Background(),
-			&obs.MenuPrimaryKey{
-				Id:        menuID,
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-	}
+	// switch resource.ResourceType {
+	// case pb.ResourceType_MONGODB:
+	// 	resp, err = services.GetBuilderServiceByType(resource.NodeType).Menu().GetByID(
+	// 		context.Background(),
+	// 		&obs.MenuPrimaryKey{
+	// 			Id:        menuID,
+	// 			ProjectId: resource.ResourceEnvironmentId,
+	// 		},
+	// 	)
+	// 	if err != nil {
+	// 		h.handleResponse(c, status_http.GRPCError, err.Error())
+	// 		return
+	// 	}
+	// case pb.ResourceType_POSTGRESQL:
+	// 	resp, err = services.PostgresBuilderService().Menu().GetByID(
+	// 		context.Background(),
+	// 		&obs.MenuPrimaryKey{
+	// 			Id:        menuID,
+	// 			ProjectId: resource.ResourceEnvironmentId,
+	// 		},
+	// 	)
+	// 	if err != nil {
+	// 		h.handleResponse(c, status_http.GRPCError, err.Error())
+	// 		return
+	// 	}
+	// }
 
 	h.handleResponse(c, status_http.OK, resp)
 }
