@@ -440,18 +440,18 @@ func (h *HandlerV2) GetSingleItem(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
-	// resource, err := h.companyServices.ServiceResource().GetSingle(
-	// 	c.Request.Context(),
-	// 	&pb.GetSingleServiceResourceReq{
-	// 		ProjectId:     projectId.(string),
-	// 		EnvironmentId: environmentId.(string),
-	// 		ServiceType:   pb.ServiceType_BUILDER_SERVICE,
-	// 	},
-	// )
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.GRPCError, err.Error())
-	// 	return
-	// }
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
@@ -470,40 +470,40 @@ func (h *HandlerV2) GetSingleItem(c *gin.Context) {
 	}
 	defer conn.Close()
 
-	// switch resource.ResourceType {
-	// case pb.ResourceType_MONGODB:
-	resp, err = service.GetSingle(
-		context.Background(),
-		&obs.CommonMessage{
-			TableSlug: c.Param("collection"),
-			Data:      structData,
-			ProjectId: "1acd7a8f-a038-4e07-91cb-b689c368d855",
-		},
-	)
-	if err != nil {
-		statusHttp = status_http.GrpcStatusToHTTP["Internal"]
-		stat, ok := status.FromError(err)
-		if ok {
-			statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
-			statusHttp.CustomMessage = stat.Message()
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = service.GetSingle(
+			context.Background(),
+			&obs.CommonMessage{
+				TableSlug: c.Param("collection"),
+				Data:      structData,
+				ProjectId: "1acd7a8f-a038-4e07-91cb-b689c368d855",
+			},
+		)
+		if err != nil {
+			statusHttp = status_http.GrpcStatusToHTTP["Internal"]
+			stat, ok := status.FromError(err)
+			if ok {
+				statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
+				statusHttp.CustomMessage = stat.Message()
+			}
+			h.handleResponse(c, statusHttp, err.Error())
+			return
 		}
-		h.handleResponse(c, statusHttp, err.Error())
-		return
+	case pb.ResourceType_POSTGRESQL:
+		resp, err = services.PostgresBuilderService().ObjectBuilder().GetSingle(
+			context.Background(),
+			&obs.CommonMessage{
+				TableSlug: c.Param("collection"),
+				Data:      structData,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
-	// case pb.ResourceType_POSTGRESQL:
-	// 	resp, err = services.PostgresBuilderService().ObjectBuilder().GetSingle(
-	// 		context.Background(),
-	// 		&obs.CommonMessage{
-	// 			TableSlug: c.Param("collection"),
-	// 			Data:      structData,
-	// 			ProjectId: resource.ResourceEnvironmentId,
-	// 		},
-	// 	)
-	// 	if err != nil {
-	// 		h.handleResponse(c, status_http.GRPCError, err.Error())
-	// 		return
-	// 	}
-	// }
 	statusHttp.CustomMessage = resp.GetCustomMessage()
 	h.handleResponse(c, statusHttp, resp)
 }
