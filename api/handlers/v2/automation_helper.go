@@ -155,6 +155,7 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *HandlerV2
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
 	var appId string
 	if len(apiKeys.Data) > 0 {
 		appId = apiKeys.Data[0].AppId
@@ -171,6 +172,7 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *HandlerV2
 		if err != nil {
 			return customEvent.GetFunctions()[0].Name, err
 		}
+
 		data["object_ids"] = request.IDs
 		data["table_slug"] = request.TableSlug
 		data["object_data"] = request.ObjectData
@@ -178,6 +180,8 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *HandlerV2
 		data["method"] = request.Method
 		data["app_id"] = appId
 		data["user_id"] = authInfo.GetUserId()
+		data["project_id"] = authInfo.GetProjectId()
+		data["environment_id"] = authInfo.GetEnvId()
 		invokeFunction.Data = data
 
 		// h.log.Info("function path: ", logger.Any("", customEvent.Functions[0].Path))

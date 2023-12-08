@@ -152,7 +152,7 @@ func (h *HandlerV2) CreateMenu(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) GetMenuByID(c *gin.Context) {
-	menuID := c.Param("menu_id")
+	menuID := c.Param("id")
 	var (
 		resp *obs.Menu
 	)
