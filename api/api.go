@@ -722,6 +722,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 		{
 			v2Utils.GET("/barcode/:collection/:type", h.V2.GetGeneratedBarcode)
 			v2Utils.POST("/export/:collection/html-to-pdf", h.V2.ConvertHtmlToPdf)
+			v2Utils.POST("/export/:collection/template-to-html", h.V2.ConvertTemplateToHtml)
 			v2Utils.POST("/export/:collection", h.V2.ExportData)
 		}
 	}
