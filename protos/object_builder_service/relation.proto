@@ -54,6 +54,7 @@ message CreateRelationRequest {
     string function_path = 33;
     bool relation_buttons = 34;
     google.protobuf.Struct attributes = 35;
+    string id = 36;
 }
 
 message AutoFilter {
