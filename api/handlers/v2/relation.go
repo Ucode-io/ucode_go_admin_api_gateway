@@ -484,7 +484,7 @@ func (h *HandlerV2) DeleteRelation(c *gin.Context) {
 	var (
 		resp *emptypb.Empty
 	)
-	relationID := c.Param("relation_id")
+	relationID := c.Param("id")
 
 	if !util.IsValidUUID(relationID) {
 		h.handleResponse(c, status_http.InvalidArgument, "relation id is an invalid uuid")
