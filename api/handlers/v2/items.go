@@ -19,6 +19,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/spf13/cast"
 
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/structpb"
@@ -147,9 +148,10 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 		resp, err = service.Create(
 			context.Background(),
 			&obs.CommonMessage{
-				TableSlug: c.Param("collection"),
-				Data:      structData,
-				ProjectId: resource.ResourceEnvironmentId,
+				TableSlug:         c.Param("collection"),
+				Data:              structData,
+				ProjectId:         resource.ResourceEnvironmentId,
+				BlockedLoginTable: cast.ToBool(c.DefaultQuery("blocked_login_table", "false")),
 			},
 		)
 		// this logic for custom error message, object builder service may be return 400, 404, 500
