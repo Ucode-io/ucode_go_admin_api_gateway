@@ -177,6 +177,8 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *HandlerV1
 		data["method"] = request.Method
 		data["app_id"] = appId
 		data["user_id"] = authInfo.GetUserId()
+		data["project_id"] = authInfo.GetProjectId()
+		data["environment_id"] = authInfo.GetEnvId()
 		invokeFunction.Data = data
 
 		// h.log.Info("function path: ", logger.Any("", customEvent.Functions[0].Path))
