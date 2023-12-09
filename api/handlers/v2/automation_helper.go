@@ -20,6 +20,7 @@ type DoInvokeFuntionStruct struct {
 	TableSlug              string
 	ObjectData             map[string]interface{}
 	Method                 string
+	ActionType             string
 	ObjectDataBeforeUpdate map[string]interface{}
 }
 
@@ -182,6 +183,7 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *HandlerV2
 		data["user_id"] = authInfo.GetUserId()
 		data["project_id"] = projectId
 		data["environment_id"] = environmentId
+		data["action_type"] = request.ActionType
 		invokeFunction.Data = data
 
 		// h.log.Info("function path: ", logger.Any("", customEvent.Functions[0].Path))

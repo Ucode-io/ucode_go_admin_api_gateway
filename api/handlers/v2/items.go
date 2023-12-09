@@ -126,6 +126,7 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 			TableSlug:    c.Param("collection"),
 			ObjectData:   objectRequest.Data,
 			Method:       "CREATE",
+			ActionType:   "BEFORE",
 		},
 			c,
 			h,
@@ -195,6 +196,7 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 				TableSlug:    c.Param("collection"),
 				ObjectData:   objectRequest.Data,
 				Method:       "CREATE",
+				ActionType:   "AFTER",
 			},
 			c, // gin context,
 			h, // handler
@@ -304,6 +306,7 @@ func (h *HandlerV2) CreateItems(c *gin.Context) {
 			TableSlug:    c.Param("collection"),
 			ObjectData:   request,
 			Method:       "CREATE_MANY",
+			ActionType:   "BEFORE",
 		},
 			c,
 			h,
@@ -369,6 +372,7 @@ func (h *HandlerV2) CreateItems(c *gin.Context) {
 				TableSlug:    c.Param("collection"),
 				ObjectData:   request,
 				Method:       "CREATE_MANY",
+				ActionType:   "AFTER",
 			},
 			c, // gin context,
 			h, // handler
@@ -872,6 +876,7 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 			TableSlug:    c.Param("collection"),
 			ObjectData:   objectRequest.Data,
 			Method:       "UPDATE",
+			ActionType:   "BEFORE",
 		},
 			c,
 			h,
@@ -925,6 +930,7 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 				ObjectData:             objectRequest.Data,
 				Method:                 "UPDATE",
 				ObjectDataBeforeUpdate: singleObject.Data.AsMap(),
+				ActionType:             "AFTER",
 			},
 			c, // gin context,
 			h, // handler
@@ -1030,6 +1036,7 @@ func (h *HandlerV2) MultipleUpdateItems(c *gin.Context) {
 			TableSlug:    c.Param("collection"),
 			ObjectData:   objectRequest.Data,
 			Method:       "MULTIPLE_UPDATE",
+			ActionType:   "BEFORE",
 		},
 			c,
 			h,
@@ -1085,6 +1092,7 @@ func (h *HandlerV2) MultipleUpdateItems(c *gin.Context) {
 				TableSlug:    c.Param("collection"),
 				ObjectData:   objectRequest.Data,
 				Method:       "MULTIPLE_UPDATE",
+				ActionType:   "AFTER",
 			},
 			c, // gin context
 			h, // handler
@@ -1200,6 +1208,7 @@ func (h *HandlerV2) DeleteItem(c *gin.Context) {
 			TableSlug:    c.Param("collection"),
 			ObjectData:   objectRequest.Data,
 			Method:       "DELETE",
+			ActionType:   "BEFORE",
 		},
 			c,
 			h,
@@ -1254,6 +1263,7 @@ func (h *HandlerV2) DeleteItem(c *gin.Context) {
 				TableSlug:    c.Param("collection"),
 				ObjectData:   objectRequest.Data,
 				Method:       "DELETE",
+				ActionType:   "AFTER",
 			},
 			c, // gin context,
 			h, // handler
