@@ -485,10 +485,12 @@ func (h *HandlerV1) InvokeFunction(c *gin.Context) {
 	// fmt.Println(function.Path)
 	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+function.Path, "POST", models.NewInvokeFunctionRequest{
 		Data: map[string]interface{}{
-			"object_ids": invokeFunction.ObjectIDs,
-			"app_id":     apiKeys.GetData()[0].GetAppId(),
-			"attributes": invokeFunction.Attributes,
-			"user_id":    authInfo.GetUserId(),
+			"object_ids":     invokeFunction.ObjectIDs,
+			"app_id":         apiKeys.GetData()[0].GetAppId(),
+			"attributes":     invokeFunction.Attributes,
+			"user_id":        authInfo.GetUserId(),
+			"project_id":     projectId,
+			"environment_id": environmentId,
 		},
 	})
 	if err != nil {
