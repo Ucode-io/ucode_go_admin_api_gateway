@@ -95,6 +95,7 @@ message V2HasAccessUserReq {
     string project_id = 2;
     string path = 3;
     string method = 4;
+    string environment_id = 5;
 }
 
 message V2HasAccessUserRes {

@@ -55,17 +55,17 @@ func (h *HandlerV1) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 		}
 		switch strArr[0] {
 		case "Bearer":
-			//if platformType != cfg.PlatformType {
+
 			res, ok = h.hasAccess(c)
 			if !ok {
 				h.log.Error("---ERR->AuthMiddleware->hasNotAccess-->")
 				c.Abort()
 				return
 			}
-			//}
+
 			resourceId := c.GetHeader("Resource-Id")
 			environmentId := c.GetHeader("Environment-Id")
-			projectId := c.Query("Project-Id")
+			projectId := c.Query("project-id")
 
 			if res.ProjectId != "" {
 				projectId = res.ProjectId

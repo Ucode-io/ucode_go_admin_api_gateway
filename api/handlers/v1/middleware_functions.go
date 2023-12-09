@@ -34,9 +34,11 @@ func (h *HandlerV1) hasAccess(c *gin.Context) (*auth_service.V2HasAccessUserRes,
 	resp, err := h.authService.Session().V2HasAccessUser(
 		c.Request.Context(),
 		&auth_service.V2HasAccessUserReq{
-			AccessToken: accessToken,
-			Path:        helper.GetURLWithTableSlug(c),
-			Method:      c.Request.Method,
+			AccessToken:   accessToken,
+			Path:          helper.GetURLWithTableSlug(c),
+			Method:        c.Request.Method,
+			ProjectId:     c.Query("project-id"),
+			EnvironmentId: c.GetHeader("Environment-Id"),
 		},
 	)
 	if err != nil {
@@ -50,6 +52,12 @@ func (h *HandlerV1) hasAccess(c *gin.Context) (*auth_service.V2HasAccessUserRes,
 		if errr.Error() == err.Error() {
 			h.log.Error("---ERR->HasAccess->User Expired-->")
 			h.handleResponse(c, status_http.Forbidden, err.Error())
+			return nil, false
+		}
+		errr = status.Error(codes.Unavailable, "User not access environment")
+		if errr.Error() == err.Error() {
+			h.log.Error("---ERR->HasAccess->User not access environment-->")
+			h.handleResponse(c, status_http.Unauthorized, err.Error())
 			return nil, false
 		}
 		h.log.Error("---ERR->HasAccess->Session->V2HasAccessUser--->", logger.Error(err))
