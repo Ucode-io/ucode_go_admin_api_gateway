@@ -835,6 +835,7 @@ func RedirectUrl(c *gin.Context, h *handlers.Handler) (*gin.Context, error) {
 	c.Request.Header.Add("resource_id", cast.ToString(c.Value("resource_id")))
 	c.Request.Header.Add("environment_id", cast.ToString(c.Value("environment_id")))
 	c.Request.Header.Add("project_id", cast.ToString(c.Value("project_id")))
+	c.Request.Header.Add("redirect", cast.ToString(true))
 
 	auth, err := json.Marshal(c.Value("auth"))
 	if err != nil {

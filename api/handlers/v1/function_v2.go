@@ -898,7 +898,7 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 	}
 
 	if waitFunctionMap.Value != config.CACHE_WAIT && c.Request.Method == "GET" && resource.ProjectId == "1acd7a8f-a038-4e07-91cb-b689c368d855" {
-		ctx, _ := context.WithTimeout(context.Background(), 14*time.Second)
+		ctx, _ := context.WithTimeout(context.Background(), 20*time.Second)
 		waitFunctionResourceMap.AddKey(key, helper.WaitKey{Value: config.CACHE_WAIT, Timeout: ctx})
 	}
 
