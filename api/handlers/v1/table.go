@@ -216,8 +216,6 @@ func (h *HandlerV1) GetTableByID(c *gin.Context) {
 		return
 	}
 
-	resourceId, resourceIdOk := c.Get("resource_id")
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
