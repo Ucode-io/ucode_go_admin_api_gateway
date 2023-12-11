@@ -456,8 +456,6 @@ func (h *HandlerV1) UpdateTable(c *gin.Context) {
 	table.Name = fmt.Sprintf("Auto Created Commit Update table - %s", time.Now().Format(time.RFC1123))
 	table.CommitType = config.COMMIT_TYPE_TABLE
 
-	resourceId, resourceIdOk := c.Get("resource_id")
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -471,40 +469,23 @@ func (h *HandlerV1) UpdateTable(c *gin.Context) {
 		return
 	}
 
-	if !resourceIdOk {
-		resource, err := h.companyServices.ServiceResource().GetSingle(
-			c.Request.Context(),
-			&pb.GetSingleServiceResourceReq{
-				ProjectId:     projectId.(string),
-				EnvironmentId: environmentId.(string),
-				ServiceType:   pb.ServiceType_BUILDER_SERVICE,
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
-		resourceEnvironmentId = resource.ResourceEnvironmentId
-		resourceType = resource.ResourceType
-		nodeType = resource.NodeType
-	} else {
-		resourceEnvironment, err := h.companyServices.Resource().GetResourceEnvironment(
-			c.Request.Context(),
-			&pb.GetResourceEnvironmentReq{
-				EnvironmentId: environmentId.(string),
-				ResourceId:    resourceId.(string),
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
-		resourceEnvironmentId = resourceEnvironment.GetId()
-		resourceType = pb.ResourceType(resourceEnvironment.ResourceType)
-		nodeType = resourceEnvironment.GetNodeType()
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
 	}
+
+	resourceEnvironmentId = resource.ResourceEnvironmentId
+	resourceType = resource.ResourceType
+	nodeType = resource.NodeType
+
 	structData, err := helper.ConvertMapToStruct(table.Attributes)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err)
