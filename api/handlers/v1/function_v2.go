@@ -918,6 +918,11 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 					return
 				}
 
+				if _, ok := m["code"]; ok {
+					c.JSON(cast.ToInt(m["code"]), m)
+					return
+				}
+
 				if c.Param("function-id") == "b693cc12-8551-475f-91d5-4913c1739df4" {
 					data, err := easy_to_travel.EasyToTravelAgentApiGetProduct(requestData.Params, m)
 					if err != nil {
@@ -998,6 +1003,11 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 				h.cache.Add(key, []byte(jsonData), 20*time.Second)
 			}
 
+			if _, ok := resp.Data["code"]; ok {
+				c.JSON(cast.ToInt(resp.Data["code"]), resp.Data)
+				return
+			}
+
 			if c.Param("function-id") == "b693cc12-8551-475f-91d5-4913c1739df4" {
 				data, err := easy_to_travel.EasyToTravelAgentApiGetProduct(requestData.Params, resp.Data)
 				if err != nil {
@@ -1016,11 +1026,6 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 
 			// DoRequestCount++
 			// fmt.Println("::::::::::::::::::::::::::::::::::::::::::::::::::::::::", DoRequestCount)
-
-			if _, ok := resp.Data["code"]; ok {
-				c.JSON(cast.ToInt(resp.Data["code"]), resp.Data)
-				return
-			}
 
 			c.JSON(200, resp.Data)
 			return
