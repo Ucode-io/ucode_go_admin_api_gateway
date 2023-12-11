@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
+	"ucode/ucode_go_api_gateway/pkg/caching"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/services"
 	"ucode/ucode_go_api_gateway/storage"
@@ -22,9 +23,10 @@ type HandlerV1 struct {
 	authService     services.AuthServiceManagerI
 	apikeyService   services.AuthServiceManagerI
 	redis           storage.RedisStorageI
+	cache           *caching.ExpiringLRUCache
 }
 
-func NewHandlerV1(baseConf config.BaseConfig, projectConfs map[string]config.Config, log logger.LoggerI, svcs services.ServiceNodesI, cmpServ services.CompanyServiceI, authService services.AuthServiceManagerI, redis storage.RedisStorageI) HandlerV1 {
+func NewHandlerV1(baseConf config.BaseConfig, projectConfs map[string]config.Config, log logger.LoggerI, svcs services.ServiceNodesI, cmpServ services.CompanyServiceI, authService services.AuthServiceManagerI, redis storage.RedisStorageI, cache *caching.ExpiringLRUCache) HandlerV1 {
 	return HandlerV1{
 		baseConf:        baseConf,
 		projectConfs:    projectConfs,
@@ -33,6 +35,7 @@ func NewHandlerV1(baseConf config.BaseConfig, projectConfs map[string]config.Con
 		companyServices: cmpServ,
 		authService:     authService,
 		redis:           redis,
+		cache:           cache,
 	}
 }
 

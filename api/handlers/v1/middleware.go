@@ -11,7 +11,7 @@ import (
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
-	"ucode/ucode_go_api_gateway/pkg/helper"
+	"ucode/ucode_go_api_gateway/pkg/caching"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 
 	"ucode/ucode_go_api_gateway/api/models"
@@ -26,7 +26,7 @@ import (
 // )
 
 var (
-	waitApiResourceMap = helper.NewConcurrentMap()
+	waitApiResourceMap = caching.NewConcurrentMap()
 )
 
 func (h *HandlerV1) NodeMiddleware() gin.HandlerFunc {
@@ -116,7 +116,7 @@ func (h *HandlerV1) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 
 			if waitApiMap.Value != config.CACHE_WAIT {
 				ctx, _ := context.WithTimeout(context.Background(), config.REDIS_TIMEOUT)
-				waitApiResourceMap.AddKey(appIdKey, helper.WaitKey{Value: config.CACHE_WAIT, Timeout: ctx})
+				waitApiResourceMap.AddKey(appIdKey, caching.WaitKey{Value: config.CACHE_WAIT, Timeout: ctx})
 			}
 
 			if waitApiMap.Value == config.CACHE_WAIT {
@@ -180,7 +180,7 @@ func (h *HandlerV1) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 
 			if waitApiMap.Value != config.CACHE_WAIT {
 				ctx, _ := context.WithTimeout(context.Background(), config.REDIS_TIMEOUT)
-				waitApiResourceMap.AddKey(resourceAppIdKey, helper.WaitKey{Value: config.CACHE_WAIT, Timeout: ctx})
+				waitApiResourceMap.AddKey(resourceAppIdKey, caching.WaitKey{Value: config.CACHE_WAIT, Timeout: ctx})
 			}
 
 			if waitResourceMap.Value == config.CACHE_WAIT {

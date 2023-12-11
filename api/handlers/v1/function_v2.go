@@ -16,9 +16,9 @@ import (
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	fc "ucode/ucode_go_api_gateway/genproto/new_function_service"
+	"ucode/ucode_go_api_gateway/pkg/caching"
 	"ucode/ucode_go_api_gateway/pkg/code_server"
 	"ucode/ucode_go_api_gateway/pkg/gitlab"
-	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
@@ -34,7 +34,7 @@ const (
 )
 
 var (
-	waitFunctionResourceMap = helper.NewConcurrentMap()
+	waitFunctionResourceMap = caching.NewConcurrentMap()
 )
 
 // CreateNewFunction godoc
@@ -816,7 +816,7 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 
 	if waitResourceMap.Value != config.CACHE_WAIT {
 		ctx, _ := context.WithTimeout(context.Background(), config.REDIS_TIMEOUT)
-		waitFunctionResourceMap.AddKey(resourceKey, helper.WaitKey{Value: config.CACHE_WAIT, Timeout: ctx})
+		waitFunctionResourceMap.AddKey(resourceKey, caching.WaitKey{Value: config.CACHE_WAIT, Timeout: ctx})
 	}
 
 	if waitResourceMap.Value == config.CACHE_WAIT {
@@ -889,20 +889,12 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 
 	var key = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("ett-%s-%s-%s", c.Request.Header.Get("Prev_path"), keyParams.Encode(), resource.ResourceEnvironmentId)))
 
-	waitFunctionMap := waitFunctionResourceMap.ReadFromMap(key)
-	if waitFunctionMap.Timeout != nil {
-		if waitFunctionMap.Timeout.Err() == context.DeadlineExceeded {
-			waitFunctionResourceMap.DeleteKey(key)
-			waitFunctionMap = waitFunctionResourceMap.ReadFromMap(key)
-		}
+	_, ok = h.cache.Get(config.CACHE_WAIT)
+	if !ok && c.Request.Method == "GET" && resource.ProjectId == "1acd7a8f-a038-4e07-91cb-b689c368d855" {
+		h.cache.Add(config.CACHE_WAIT, []byte(config.CACHE_WAIT), 20*time.Second)
 	}
 
-	if waitFunctionMap.Value != config.CACHE_WAIT && c.Request.Method == "GET" && resource.ProjectId == "1acd7a8f-a038-4e07-91cb-b689c368d855" {
-		ctx, _ := context.WithTimeout(context.Background(), 20*time.Second)
-		waitFunctionResourceMap.AddKey(key, helper.WaitKey{Value: config.CACHE_WAIT, Timeout: ctx})
-	}
-
-	if waitFunctionMap.Value == config.CACHE_WAIT && c.Request.Method == "GET" && resource.ProjectId == "1acd7a8f-a038-4e07-91cb-b689c368d855" {
+	if ok && c.Request.Method == "GET" && resource.ProjectId == "1acd7a8f-a038-4e07-91cb-b689c368d855" {
 
 		redisDataTime := time.Now()
 
@@ -910,11 +902,10 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 		defer cancel()
 
 		for {
-			waitFunctionMap := waitFunctionResourceMap.ReadFromMap(key)
-
-			if len(waitFunctionMap.Body) > 0 {
+			functionBody, ok := h.cache.Get(key)
+			if ok {
 				m := make(map[string]interface{})
-				err = json.Unmarshal(waitFunctionMap.Body, &m)
+				err = json.Unmarshal(functionBody, &m)
 				if err != nil {
 					h.handleResponse(c, status_http.GRPCError, err.Error())
 					return
@@ -984,7 +975,7 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 		if isOwnData {
 			if err == nil && c.Request.Method == "GET" && resource.ProjectId == "1acd7a8f-a038-4e07-91cb-b689c368d855" {
 				jsonData, _ := json.Marshal(resp.Data)
-				waitFunctionResourceMap.WriteBody(key, jsonData)
+				h.cache.Add(key, []byte(jsonData), 20*time.Second)
 			}
 
 			// DoRequestCount++

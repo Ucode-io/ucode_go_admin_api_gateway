@@ -12,6 +12,7 @@ import (
 	"ucode/ucode_go_api_gateway/config"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
+	"ucode/ucode_go_api_gateway/pkg/caching"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
@@ -22,7 +23,7 @@ import (
 )
 
 var (
-	waitSlimResourceMap = helper.NewConcurrentMap()
+	waitSlimResourceMap = caching.NewConcurrentMap()
 )
 
 // GetListV2 godoc
@@ -194,14 +195,14 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 				}
 			}
 
-	resp, err = service.GetList2(
-		context.Background(),
-		&obs.CommonMessage{
-			TableSlug: c.Param("table_slug"),
-			Data:      structData,
+			resp, err = service.GetList2(
+				context.Background(),
+				&obs.CommonMessage{
+					TableSlug: c.Param("table_slug"),
+					Data:      structData,
 					ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
+				},
+			)
 
 			if err == nil {
 				if resp.IsCached {
@@ -330,7 +331,7 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 
 	if waitResourceMap.Value != config.CACHE_WAIT {
 		ctx, _ := context.WithTimeout(context.Background(), config.REDIS_TIMEOUT)
-		waitSlimResourceMap.AddKey(resourceKey, helper.WaitKey{Value: config.CACHE_WAIT, Timeout: ctx})
+		waitSlimResourceMap.AddKey(resourceKey, caching.WaitKey{Value: config.CACHE_WAIT, Timeout: ctx})
 	}
 
 	if waitResourceMap.Value == config.CACHE_WAIT {
@@ -411,7 +412,7 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 
 		if waitSlimMap.Value != config.CACHE_WAIT {
 			ctx, _ := context.WithTimeout(context.Background(), 15*time.Second)
-			waitSlimResourceMap.AddKey(slimKey, helper.WaitKey{Value: config.CACHE_WAIT, Timeout: ctx})
+			waitSlimResourceMap.AddKey(slimKey, caching.WaitKey{Value: config.CACHE_WAIT, Timeout: ctx})
 		}
 
 		if waitSlimMap.Value == config.CACHE_WAIT {

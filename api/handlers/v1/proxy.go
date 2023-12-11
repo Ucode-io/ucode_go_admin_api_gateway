@@ -7,6 +7,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
+	"ucode/ucode_go_api_gateway/pkg/caching"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/services"
 
@@ -14,7 +15,7 @@ import (
 )
 
 var (
-	waitRedirectMap = helper.NewConcurrentMap()
+	waitRedirectMap = caching.NewConcurrentMap()
 )
 
 func (h *HandlerV1) Proxy(c *gin.Context) {
@@ -39,7 +40,7 @@ func (h *HandlerV1) CompanyRedirectGetList(data helper.MatchingData, comp servic
 
 	if waitMap.Value != config.CACHE_WAIT {
 		ctx, _ := context.WithTimeout(context.Background(), config.REDIS_TIMEOUT)
-		waitRedirectMap.AddKey(key, helper.WaitKey{Value: config.CACHE_WAIT, Timeout: ctx})
+		waitRedirectMap.AddKey(key, caching.WaitKey{Value: config.CACHE_WAIT, Timeout: ctx})
 	}
 
 	if waitMap.Value == config.CACHE_WAIT {

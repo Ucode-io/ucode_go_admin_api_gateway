@@ -7,6 +7,7 @@ import (
 	"ucode/ucode_go_api_gateway/api"
 	"ucode/ucode_go_api_gateway/api/handlers"
 	"ucode/ucode_go_api_gateway/config"
+	"ucode/ucode_go_api_gateway/pkg/caching"
 	"ucode/ucode_go_api_gateway/pkg/crons"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/logger"
@@ -93,11 +94,16 @@ func main() {
 
 	newRedis := redis.NewRedis(mapProjectConfs)
 
+	cache, err := caching.NewExpiringLRUCache(config.LRU_CACHE_SIZE)
+	if err != nil {
+		log.Error("Error adding caching.", logger.Error(err))
+	}
+
 	r := gin.New()
 
 	r.Use(gin.Logger(), gin.Recovery())
 
-	h := handlers.NewHandler(baseConf, mapProjectConfs, log, projectServiceNodes, compSrvc, authSrvc, newRedis)
+	h := handlers.NewHandler(baseConf, mapProjectConfs, log, projectServiceNodes, compSrvc, authSrvc, newRedis, cache)
 
 	api.SetUpAPI(r, h, baseConf)
 	cronjobs := crons.ExecuteCron()
