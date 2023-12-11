@@ -10,7 +10,6 @@ import (
 	pbObject "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mitchellh/mapstructure"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/types/known/structpb"
 )
@@ -201,8 +200,12 @@ func Contains(s []string, e string) bool {
 func InterfaceToMap(data interface{}) (map[string]interface{}, error) {
 	result := make(map[string]interface{})
 
-	// Use the mapstructure library for type assertion
-	err := mapstructure.Decode(data, &result)
+	body, err := json.Marshal(data)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(body, &result)
 	if err != nil {
 		return nil, err
 	}
