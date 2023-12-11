@@ -3,6 +3,7 @@ package v1
 import (
 	"context"
 	"errors"
+	"fmt"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
@@ -464,6 +465,7 @@ func (h *HandlerV1) InvokeFunction(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
 	apiKeys, err := h.authService.ApiKey().GetList(context.Background(), &auth_service.GetListReq{
 		EnvironmentId: environmentId.(string),
 		ProjectId:     resource.ProjectId,
@@ -472,6 +474,7 @@ func (h *HandlerV1) InvokeFunction(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
 	if len(apiKeys.Data) < 1 {
 		h.handleResponse(c, status_http.InvalidArgument, "Api key not found")
 		return
@@ -494,11 +497,11 @@ func (h *HandlerV1) InvokeFunction(c *gin.Context) {
 		},
 	})
 	if err != nil {
-		// fmt.Println("error in do request", err)
+		fmt.Println("error in do request >>1", err)
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	} else if resp.Status == "error" {
-		// fmt.Println("error in response status", err)
+		fmt.Println("error in response status >>2", err)
 		var errStr = resp.Status
 		if resp.Data != nil && resp.Data["message"] != nil {
 			errStr = resp.Data["message"].(string)
@@ -506,6 +509,7 @@ func (h *HandlerV1) InvokeFunction(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, errStr)
 		return
 	}
+	fmt.Println("test ~>>> 3")
 	if c.Query("form_input") != "true" && c.Query("use_no_limit") != "true" {
 		_, err = services.GetBuilderServiceByType(resource.NodeType).CustomEvent().UpdateByFunctionId(
 			context.Background(),
@@ -521,5 +525,6 @@ func (h *HandlerV1) InvokeFunction(c *gin.Context) {
 			return
 		}
 	}
+	fmt.Println("test ~>>> 4")
 	h.handleResponse(c, status_http.Created, resp)
 }
