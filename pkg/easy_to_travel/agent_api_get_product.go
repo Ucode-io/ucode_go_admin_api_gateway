@@ -51,12 +51,18 @@ func EasyToTravelAgentApiGetProduct(params url.Values, data map[string]interface
 		limit = cast.ToInt(metadata["limit"])
 	}
 
+	if len(startTime) <= 0 {
+		errorResponse.Code = 400
+		errorResponse.Message = "Bad request."
+		return errorResponse, err
+	}
+
 	if len(startTime) > 0 {
 		if strings.Contains(startTime, "T") && strings.Contains(startTime, "Z") {
 			startTimeType, err = time.Parse("2006-01-02T15:04:05Z", startTime)
 			if err != nil {
 				errorResponse.Code = 400
-				errorResponse.Message = "Bad request"
+				errorResponse.Message = "Bad request."
 				return errorResponse, err
 			}
 
@@ -71,14 +77,14 @@ func EasyToTravelAgentApiGetProduct(params url.Values, data map[string]interface
 			startTimeType, err = time.Parse(config.TIME_LAYOUT, startTime)
 			if err != nil {
 				errorResponse.Code = 400
-				errorResponse.Message = "Bad request"
+				errorResponse.Message = "Bad request."
 				return errorResponse, err
 			}
 		} else {
 			startTimeType, err = time.Parse("2006-01-02", startTime)
 			if err != nil {
 				errorResponse.Code = 400
-				errorResponse.Message = "Bad request"
+				errorResponse.Message = "Bad request."
 				return errorResponse, err
 			}
 
@@ -91,7 +97,7 @@ func EasyToTravelAgentApiGetProduct(params url.Values, data map[string]interface
 			startTimeType, err = time.Parse(config.TIME_LAYOUT, startTime)
 			if err != nil {
 				errorResponse.Code = 400
-				errorResponse.Message = "Bad request"
+				errorResponse.Message = "Bad request."
 				return errorResponse, err
 			}
 		}
@@ -102,7 +108,7 @@ func EasyToTravelAgentApiGetProduct(params url.Values, data map[string]interface
 			endTimeType, err = time.Parse("2006-01-02T15:04:05Z", endTime)
 			if err != nil {
 				errorResponse.Code = 400
-				errorResponse.Message = "Bad request"
+				errorResponse.Message = "Bad request."
 				return errorResponse, err
 			}
 
@@ -113,14 +119,14 @@ func EasyToTravelAgentApiGetProduct(params url.Values, data map[string]interface
 			endTimeType, err = time.Parse(config.TIME_LAYOUT, endTime)
 			if err != nil {
 				errorResponse.Code = 400
-				errorResponse.Message = "Bad request"
+				errorResponse.Message = "Bad request."
 				return errorResponse, err
 			}
 		} else {
 			endTimeType, err = time.Parse("2006-01-02", endTime)
 			if err != nil {
 				errorResponse.Code = 400
-				errorResponse.Message = "Bad request"
+				errorResponse.Message = "Bad request."
 				return errorResponse, err
 			}
 
@@ -129,7 +135,7 @@ func EasyToTravelAgentApiGetProduct(params url.Values, data map[string]interface
 			endTimeType, err = time.Parse(config.TIME_LAYOUT, endTime)
 			if err != nil {
 				errorResponse.Code = 400
-				errorResponse.Message = "Bad request"
+				errorResponse.Message = "Bad request."
 				return errorResponse, err
 			}
 		}
@@ -139,7 +145,7 @@ func EasyToTravelAgentApiGetProduct(params url.Values, data map[string]interface
 		endTimeType, err = time.Parse(config.TIME_LAYOUT, endTime)
 		if err != nil {
 			errorResponse.Code = 400
-			errorResponse.Message = "Bad request"
+			errorResponse.Message = "Bad request."
 			return errorResponse, err
 		}
 	}

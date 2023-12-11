@@ -927,6 +927,9 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 					data, err := easy_to_travel.EasyToTravelAgentApiGetProduct(requestData.Params, m)
 					if err != nil {
 						fmt.Println("Error while EasyToTravelAgentApiGetProduct function:", err.Error())
+						result, _ := helper.InterfaceToMap(data)
+						c.JSON(cast.ToInt(result["code"]), result)
+						return
 					}
 
 					m, err = helper.InterfaceToMap(data)
@@ -1012,7 +1015,8 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 				data, err := easy_to_travel.EasyToTravelAgentApiGetProduct(requestData.Params, resp.Data)
 				if err != nil {
 					fmt.Println("Error while EasyToTravelAgentApiGetProduct function:", err.Error())
-					c.JSON(http.StatusInternalServerError, resp.Data)
+					result, _ := helper.InterfaceToMap(data)
+					c.JSON(cast.ToInt(result["code"]), result)
 					return
 				}
 
