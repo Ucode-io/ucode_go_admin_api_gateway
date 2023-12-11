@@ -4,11 +4,13 @@ import (
 	"encoding/json"
 	"strconv"
 	"strings"
+	"time"
 
 	pb "ucode/ucode_go_api_gateway/genproto/auth_service"
 	pbObject "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 
 	"github.com/gin-gonic/gin"
+	"github.com/mitchellh/mapstructure"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/types/known/structpb"
 )
@@ -143,4 +145,67 @@ func ConvertStructToResponse(inputStruct *structpb.Struct) (map[string]interface
 	}
 	err = json.Unmarshal(marshelledInputStruct, &outputMap)
 	return outputMap, err
+}
+
+func DeleteKeys(m map[string]interface{}, keysToDelete ...string) {
+	for _, key := range keysToDelete {
+		delete(m, key)
+	}
+}
+
+func GetWeekdayRange(start, end time.Time) []string {
+	var weekdays []string
+
+	// Make sure start is at the beginning of the day
+	start = start.Truncate(24 * time.Hour)
+
+	// Iterate over each day between start and end
+	for current := start; !current.After(end); current = current.Add(24 * time.Hour) {
+		// Check if the current day is a weekday (Monday to Friday)
+		if current.Weekday() >= time.Sunday && current.Weekday() <= time.Saturday {
+			weekdays = append(weekdays, current.Format("Monday"))
+		}
+	}
+
+	return weekdays
+}
+
+func RemoveDuplicateStrings(arr []string) []string {
+	// Use a map to track unique values
+	uniqueMap := make(map[string]bool)
+	var uniqueArr []string
+
+	// Iterate over the array
+	for _, val := range arr {
+		// Check if the value is already in the map
+		if _, exists := uniqueMap[val]; !exists {
+			// If not, add it to the map and append to the unique array
+			uniqueMap[val] = true
+			uniqueArr = append(uniqueArr, strings.ToLower(val))
+		}
+	}
+
+	return uniqueArr
+}
+
+func Contains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
+}
+
+// InterfaceToMap converts an interface{} to a map[string]interface{}
+func InterfaceToMap(data interface{}) (map[string]interface{}, error) {
+	result := make(map[string]interface{})
+
+	// Use the mapstructure library for type assertion
+	err := mapstructure.Decode(data, &result)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }

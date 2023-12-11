@@ -38,6 +38,8 @@ const (
 	REDIS_TIMEOUT      = 5 * time.Minute
 	REDIS_WAIT_TIMEOUT = 1 * time.Second
 	REDIS_SLEEP        = 100 * time.Millisecond
+
+	TIME_LAYOUT = "15:04"
 )
 
 var (

@@ -28,6 +28,7 @@ require (
 	github.com/golang/protobuf v1.5.2
 	github.com/hashicorp/golang-lru v1.0.2
 	github.com/jackc/pgx/v4 v4.17.2
+	github.com/mitchellh/mapstructure v1.5.0
 	github.com/pkg/errors v0.9.1
 	github.com/processout/grpc-go-pool v1.2.1
 	github.com/saidamir98/udevs_pkg v0.0.0-20220413125729-5342e90c08a3

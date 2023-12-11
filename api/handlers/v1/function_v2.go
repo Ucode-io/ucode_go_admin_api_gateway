@@ -7,7 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"net/url"
+	"net/http"
 	"strings"
 	"time"
 	"ucode/ucode_go_api_gateway/api/models"
@@ -18,7 +18,9 @@ import (
 	fc "ucode/ucode_go_api_gateway/genproto/new_function_service"
 	"ucode/ucode_go_api_gateway/pkg/caching"
 	"ucode/ucode_go_api_gateway/pkg/code_server"
+	"ucode/ucode_go_api_gateway/pkg/easy_to_travel"
 	"ucode/ucode_go_api_gateway/pkg/gitlab"
+	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
@@ -884,11 +886,16 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 	keyParams := c.Request.URL.Query()
 
 	if c.Param("function-id") == "b693cc12-8551-475f-91d5-4913c1739df4" {
-		keyParams = EasyToTravelGetProductsAgent(keyParams)
+		if len(keyParams.Get("startTime")) > 0 {
+			keyParams.Del("startTime")
+		}
+
+		if len(keyParams.Get("endTime")) > 0 {
+			keyParams.Del("endTime")
+		}
 	}
 
 	var key = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("ett-%s-%s-%s", c.Request.Header.Get("Prev_path"), keyParams.Encode(), resource.ResourceEnvironmentId)))
-
 	_, ok = h.cache.Get(config.CACHE_WAIT)
 	if !ok && c.Request.Method == "GET" && resource.ProjectId == "1acd7a8f-a038-4e07-91cb-b689c368d855" {
 		h.cache.Add(config.CACHE_WAIT, []byte(config.CACHE_WAIT), 20*time.Second)
@@ -909,6 +916,19 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 				if err != nil {
 					h.handleResponse(c, status_http.GRPCError, err.Error())
 					return
+				}
+
+				if c.Param("function-id") == "b693cc12-8551-475f-91d5-4913c1739df4" {
+					data, err := easy_to_travel.EasyToTravelAgentApiGetProduct(requestData.Params, m)
+					if err != nil {
+						fmt.Println("Error while EasyToTravelAgentApiGetProduct function:", err.Error())
+					}
+
+					m, err = helper.InterfaceToMap(data)
+					if err != nil {
+						c.JSON(http.StatusInternalServerError, m)
+						return
+					}
 				}
 
 				c.JSON(cast.ToInt(m["code"]), m)
@@ -978,6 +998,22 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 				h.cache.Add(key, []byte(jsonData), 20*time.Second)
 			}
 
+			if c.Param("function-id") == "b693cc12-8551-475f-91d5-4913c1739df4" {
+				data, err := easy_to_travel.EasyToTravelAgentApiGetProduct(requestData.Params, resp.Data)
+				if err != nil {
+					fmt.Println("Error while EasyToTravelAgentApiGetProduct function:", err.Error())
+					c.JSON(http.StatusInternalServerError, resp.Data)
+					return
+				}
+
+				resp.Data, err = helper.InterfaceToMap(data)
+				if err != nil {
+					fmt.Println("Error while InterfaceToMap function:", err.Error())
+					c.JSON(http.StatusInternalServerError, resp.Data)
+					return
+				}
+			}
+
 			// DoRequestCount++
 			// fmt.Println("::::::::::::::::::::::::::::::::::::::::::::::::::::::::", DoRequestCount)
 
@@ -995,27 +1031,3 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 }
 
 // var DoRequestCount int
-
-func EasyToTravelGetProductsAgent(params url.Values) url.Values {
-
-	if len(params) != 1 {
-		return params
-	}
-
-	var (
-		startTime = params.Get("startTime")
-	)
-
-	if len(startTime) > 0 {
-		if strings.Contains(startTime, "T") && strings.Contains(startTime, "Z") {
-			startTimeType, err := time.Parse("2006-01-02T15:04:05Z", startTime)
-			if err != nil {
-				return params
-			}
-
-			params.Set("startTime", strings.ToLower(startTimeType.Format("Monday-15")))
-		}
-	}
-
-	return params
-}
