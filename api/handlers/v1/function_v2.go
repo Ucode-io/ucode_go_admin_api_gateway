@@ -898,7 +898,7 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 
 		redisDataTime := time.Now()
 
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
+		ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
 		defer cancel()
 
 		for {
@@ -1007,6 +1007,7 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 
 			if c.Param("function-id") == "b693cc12-8551-475f-91d5-4913c1739df4" {
 				data, err := easy_to_travel.EasyToTravelAgentApiGetProduct(requestData.Params, resp.Data)
+				time.Sleep(time.Millisecond * 150)
 				if err != nil {
 					fmt.Println("Error while EasyToTravelAgentApiGetProduct function:", err.Error())
 					result, _ := helper.InterfaceToMap(data)
