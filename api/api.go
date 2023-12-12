@@ -3,7 +3,6 @@ package api
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"ucode/ucode_go_api_gateway/api/docs"
 	"ucode/ucode_go_api_gateway/api/handlers"
 	"ucode/ucode_go_api_gateway/config"
@@ -794,7 +793,6 @@ func proxyMiddleware(r *gin.Engine, h *handlers.Handler) gin.HandlerFunc {
 }
 
 func RedirectUrl(c *gin.Context, h *handlers.Handler) (*gin.Context, error) {
-	fmt.Println("\n URL first path >>", c.Request.URL.Path, "\n")
 	path := c.Request.URL.Path
 	projectId, ok := c.Get("project_id")
 	if !ok {
@@ -821,7 +819,7 @@ func RedirectUrl(c *gin.Context, h *handlers.Handler) (*gin.Context, error) {
 	}
 	// fmt.Println(">>>>>>>>>>>>>>>CompanyRedirectGetList:", time.Since(companyRedirectGetListTime))
 
-	pathM, err := helper.FindUrlTo(res, data, h.GetCompanyService(c))
+	pathM, err := helper.FindUrlTo(res, data)
 	if err != nil {
 		return c, errors.New("cant change")
 	}
@@ -843,8 +841,6 @@ func RedirectUrl(c *gin.Context, h *handlers.Handler) (*gin.Context, error) {
 	}
 
 	c.Request.Header.Add("auth", string(auth))
-
-	fmt.Println("\n URL second path >>", c.Request.URL.Path, "\n")
 	return c, nil
 }
 

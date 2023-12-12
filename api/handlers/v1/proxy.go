@@ -31,10 +31,6 @@ func (h *HandlerV1) CompanyRedirectGetList(data helper.MatchingData, comp servic
 
 	var redirectWaitKey = config.CACHE_WAIT + "-redirect"
 	_, redirectOk := h.cache.Get(redirectWaitKey)
-	if !redirectOk {
-		h.cache.Add(redirectWaitKey, []byte(redirectWaitKey), config.REDIS_KEY_TIMEOUT)
-	}
-
 	if redirectOk {
 		ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
 		defer cancel()
@@ -58,6 +54,8 @@ func (h *HandlerV1) CompanyRedirectGetList(data helper.MatchingData, comp servic
 
 			time.Sleep(config.REDIS_SLEEP)
 		}
+	} else {
+		h.cache.Add(redirectWaitKey, []byte(redirectWaitKey), config.REDIS_KEY_TIMEOUT)
 	}
 
 	res, err = comp.Redirect().GetList(context.Background(), &pb.GetListRedirectUrlReq{

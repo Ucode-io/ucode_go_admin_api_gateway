@@ -3,7 +3,6 @@ package helper
 import (
 	"strings"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
-	"ucode/ucode_go_api_gateway/services"
 )
 
 type MatchingData struct {
@@ -12,7 +11,7 @@ type MatchingData struct {
 	Path      string
 }
 
-func FindUrlTo(res *company_service.GetListRedirectUrlRes, data MatchingData, comp services.CompanyServiceI) (string, error) {
+func FindUrlTo(res *company_service.GetListRedirectUrlRes, data MatchingData) (string, error) {
 
 	// start := time.Now()
 	//fmt.Println("RES::::::::::::::::::::::", res)

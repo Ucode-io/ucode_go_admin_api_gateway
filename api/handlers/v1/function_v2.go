@@ -810,10 +810,6 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 	// resourceTime := time.Now()
 	var singleResourceWaitKey = config.CACHE_WAIT + "-single-resource"
 	_, singleResourceOk := h.cache.Get(singleResourceWaitKey)
-	if !singleResourceOk {
-		h.cache.Add(singleResourceWaitKey, []byte(singleResourceWaitKey), config.REDIS_KEY_TIMEOUT)
-	}
-
 	if singleResourceOk {
 		ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
 		defer cancel()
@@ -838,6 +834,8 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 
 			time.Sleep(config.REDIS_SLEEP)
 		}
+	} else {
+		h.cache.Add(singleResourceWaitKey, []byte(singleResourceWaitKey), config.REDIS_KEY_TIMEOUT)
 	}
 
 	if resource.ResourceEnvironmentId == "" {
@@ -877,8 +875,9 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 	requestData.Params = c.Request.URL.Query()
 	requestData.Body = bodyReq
 	keyParams := c.Request.URL.Query()
+	var ettProductPath = []string{"easy-to-travel-get-products-agent-swagger", "b693cc12-8551-475f-91d5-4913c1739df4"}
 
-	if c.Param("function-id") == "b693cc12-8551-475f-91d5-4913c1739df4" {
+	if helper.Contains(ettProductPath, c.Param("function-id")) {
 		if len(keyParams.Get("startTime")) > 0 {
 			keyParams.Del("startTime")
 		}
@@ -890,83 +889,90 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 
 	var key = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("ett-%s-%s-%s", c.Request.Header.Get("Prev_path"), keyParams.Encode(), resource.ResourceEnvironmentId)))
 	_, ok = h.cache.Get(config.CACHE_WAIT)
-	if !ok && c.Request.Method == "GET" && resource.ProjectId == "1acd7a8f-a038-4e07-91cb-b689c368d855" {
-		h.cache.Add(config.CACHE_WAIT, []byte(config.CACHE_WAIT), 20*time.Second)
-	}
 
-	if ok && c.Request.Method == "GET" && resource.ProjectId == "1acd7a8f-a038-4e07-91cb-b689c368d855" {
+	if c.Request.Method == "GET" && resource.ProjectId == "1acd7a8f-a038-4e07-91cb-b689c368d855" {
+		if ok {
 
-		redisDataTime := time.Now()
+			redisDataTime := time.Now()
 
-		ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
-		defer cancel()
+			ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
+			defer cancel()
 
-		for {
-			functionBody, ok := h.cache.Get(key)
-			if ok {
-				m := make(map[string]interface{})
-				err = json.Unmarshal(functionBody, &m)
-				if err != nil {
-					h.handleResponse(c, status_http.GRPCError, err.Error())
-					return
-				}
+			for {
+				functionBody, ok := h.cache.Get(key)
+				if ok {
+					m := make(map[string]interface{})
+					err = json.Unmarshal(functionBody, &m)
+					if err != nil {
+						h.handleResponse(c, status_http.GRPCError, err.Error())
+						return
+					}
 
-				if _, ok := m["code"]; ok {
+					if _, ok := m["code"]; ok {
+						c.JSON(cast.ToInt(m["code"]), m)
+						return
+					}
+
+					if helper.Contains(ettProductPath, c.Param("function-id")) {
+						data, err := easy_to_travel.EasyToTravelAgentApiGetProduct(requestData.Params, m)
+						if err != nil {
+							fmt.Println("Error while EasyToTravelAgentApiGetProduct function:", err.Error())
+							result, _ := helper.InterfaceToMap(data)
+							c.JSON(cast.ToInt(result["code"]), result)
+							return
+						}
+
+						m, err = helper.InterfaceToMap(data)
+						if err != nil {
+							c.JSON(http.StatusInternalServerError, m)
+							return
+						}
+					}
+
 					c.JSON(cast.ToInt(m["code"]), m)
+					fmt.Print("\n\n ~~>> ett redis return response ", time.Since(redisDataTime), "\n\n")
 					return
 				}
 
-				if c.Param("function-id") == "b693cc12-8551-475f-91d5-4913c1739df4" {
-					data, err := easy_to_travel.EasyToTravelAgentApiGetProduct(requestData.Params, m)
-					if err != nil {
-						fmt.Println("Error while EasyToTravelAgentApiGetProduct function:", err.Error())
-						result, _ := helper.InterfaceToMap(data)
-						c.JSON(cast.ToInt(result["code"]), result)
-						return
-					}
-
-					m, err = helper.InterfaceToMap(data)
-					if err != nil {
-						c.JSON(http.StatusInternalServerError, m)
-						return
-					}
+				if ctx.Err() == context.DeadlineExceeded {
+					break
 				}
 
-				c.JSON(cast.ToInt(m["code"]), m)
-				fmt.Print("\n\n ~~>> ett redis return response ", time.Since(redisDataTime), "\n\n")
-				return
+				time.Sleep(config.REDIS_SLEEP)
 			}
-
-			if ctx.Err() == context.DeadlineExceeded {
-				break
-			}
-
-			time.Sleep(config.REDIS_SLEEP)
+		} else {
+			h.cache.Add(config.CACHE_WAIT, []byte(config.CACHE_WAIT), 20*time.Second)
 		}
 	}
 
-	// getSingleFunctionTime := time.Now()
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
+	var function = &fc.Function{}
+	if util.IsValidUUID(c.Param("function-id")) {
+		services, err := h.GetProjectSrvc(
+			c.Request.Context(),
+			projectId.(string),
+			resource.NodeType,
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 
-	function, err := services.FunctionService().FunctionService().GetSingle(
-		context.Background(),
-		&fc.FunctionPrimaryKey{
-			Id:        c.Param("function-id"),
-			ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+		function, err = services.FunctionService().FunctionService().GetSingle(
+			context.Background(),
+			&fc.FunctionPrimaryKey{
+				Id:        c.Param("function-id"),
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		function.Path = c.Param("function-id")
 	}
+	// getSingleFunctionTime := time.Now()
+
 	// fmt.Println(">>>>>>>>>>>>>>>getSingleFunctionTime:", time.Since(getSingleFunctionTime))
 
 	// doRequestTime := time.Now()
@@ -1005,7 +1011,7 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 				return
 			}
 
-			if c.Param("function-id") == "b693cc12-8551-475f-91d5-4913c1739df4" {
+			if helper.Contains(ettProductPath, c.Param("function-id")) {
 				data, err := easy_to_travel.EasyToTravelAgentApiGetProduct(requestData.Params, resp.Data)
 				time.Sleep(time.Millisecond * 50)
 				if err != nil {
