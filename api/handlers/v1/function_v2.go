@@ -898,7 +898,7 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 
 		redisDataTime := time.Now()
 
-		ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
 		defer cancel()
 
 		for {
