@@ -808,27 +808,20 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 	)
 
 	// resourceTime := time.Now()
-	waitResourceMap := waitFunctionResourceMap.ReadFromMap(resourceKey)
-	if waitResourceMap.Timeout != nil {
-		if waitResourceMap.Timeout.Err() == context.DeadlineExceeded {
-			waitFunctionResourceMap.DeleteKey(resourceKey)
-			waitResourceMap = waitFunctionResourceMap.ReadFromMap(resourceKey)
-		}
+	var singleResourceWaitKey = config.CACHE_WAIT + "-single-resource"
+	_, singleResourceOk := h.cache.Get(singleResourceWaitKey)
+	if !singleResourceOk {
+		h.cache.Add(singleResourceWaitKey, []byte(singleResourceWaitKey), config.REDIS_TIMEOUT)
 	}
 
-	if waitResourceMap.Value != config.CACHE_WAIT {
-		ctx, _ := context.WithTimeout(context.Background(), config.REDIS_TIMEOUT)
-		waitFunctionResourceMap.AddKey(resourceKey, caching.WaitKey{Value: config.CACHE_WAIT, Timeout: ctx})
-	}
-
-	if waitResourceMap.Value == config.CACHE_WAIT {
+	if singleResourceOk {
 		ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
 		defer cancel()
 
 		for {
-			waitResourceMap := waitFunctionResourceMap.ReadFromMap(resourceKey)
-			if len(waitResourceMap.Body) > 0 {
-				err = json.Unmarshal(waitResourceMap.Body, &resource)
+			singleResourceBody, ok := h.cache.Get(resourceKey)
+			if ok {
+				err = json.Unmarshal(singleResourceBody, &resource)
 				if err != nil {
 					h.log.Error("Error while unmarshal resource redis", logger.Error(err))
 					return
@@ -867,7 +860,7 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 			return
 		}
 
-		waitFunctionResourceMap.WriteBody(resourceKey, body)
+		h.cache.Add(resourceKey, body, config.REDIS_TIMEOUT)
 	}
 	// fmt.Println(">>>>>>>>>>>>>>>resourceTime:", time.Since(resourceTime))
 
@@ -953,31 +946,32 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 	}
 
 	// getSingleFunctionTime := time.Now()
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
+	// services, err := h.GetProjectSrvc(
+	// 	c.Request.Context(),
+	// 	projectId.(string),
+	// 	resource.NodeType,
+	// )
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.GRPCError, err.Error())
+	// 	return
+	// }
 
-	function, err := services.FunctionService().FunctionService().GetSingle(
-		context.Background(),
-		&fc.FunctionPrimaryKey{
-			Id:        c.Param("function-id"),
-			ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
+	// function, err := services.FunctionService().FunctionService().GetSingle(
+	// 	context.Background(),
+	// 	&fc.FunctionPrimaryKey{
+	// 		Id:        c.Param("function-id"),
+	// 		ProjectId: resource.ResourceEnvironmentId,
+	// 	},
+	// )
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.GRPCError, err.Error())
+	// 	return
+	// }
 	// fmt.Println(">>>>>>>>>>>>>>>getSingleFunctionTime:", time.Since(getSingleFunctionTime))
 
 	// doRequestTime := time.Now()
-	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+function.Path, "POST", models.FunctionRunV2{
+
+	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+"easy-to-travel-get-products-agent-swagger", "POST", models.FunctionRunV2{
 		Auth:        models.AuthData{},
 		RequestData: requestData,
 		Data: map[string]interface{}{

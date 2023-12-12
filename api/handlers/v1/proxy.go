@@ -29,27 +29,20 @@ func (h *HandlerV1) CompanyRedirectGetList(data helper.MatchingData, comp servic
 		err error
 	)
 
-	waitMap := waitRedirectMap.ReadFromMap(key)
-
-	if waitMap.Timeout != nil {
-		if waitMap.Timeout.Err() == context.DeadlineExceeded {
-			waitRedirectMap.DeleteKey(key)
-			waitMap = waitRedirectMap.ReadFromMap(key)
-		}
+	var redirectWaitKey = config.CACHE_WAIT + "-redirect"
+	_, redirectOk := h.cache.Get(redirectWaitKey)
+	if !redirectOk {
+		h.cache.Add(redirectWaitKey, []byte(redirectWaitKey), config.REDIS_TIMEOUT)
 	}
 
-	if waitMap.Value != config.CACHE_WAIT {
-		ctx, _ := context.WithTimeout(context.Background(), config.REDIS_TIMEOUT)
-		waitRedirectMap.AddKey(key, caching.WaitKey{Value: config.CACHE_WAIT, Timeout: ctx})
-	}
-
-	if waitMap.Value == config.CACHE_WAIT {
+	if redirectOk {
 		ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
 		defer cancel()
+
 		for {
-			waitMap := waitRedirectMap.ReadFromMap(key)
-			if len(waitMap.Body) > 0 {
-				err = json.Unmarshal(waitMap.Body, &res)
+			redirectBody, ok := h.cache.Get(key)
+			if ok {
+				err = json.Unmarshal(redirectBody, &res)
 				if err != nil {
 					return nil, err
 				}
@@ -83,7 +76,7 @@ func (h *HandlerV1) CompanyRedirectGetList(data helper.MatchingData, comp servic
 			return nil, err
 		}
 
-		waitRedirectMap.WriteBody(key, body)
+		h.cache.Add(key, body, config.REDIS_TIMEOUT)
 	}
 
 	return res, nil

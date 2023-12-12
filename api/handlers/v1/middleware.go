@@ -106,28 +106,21 @@ func (h *HandlerV1) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 				resource = &company_service.GetResourceByEnvIDResponse{}
 			)
 
-			waitApiMap := waitApiResourceMap.ReadFromMap(appIdKey)
-			if waitApiMap.Timeout != nil {
-				if waitApiMap.Timeout.Err() == context.DeadlineExceeded {
-					waitApiResourceMap.DeleteKey(appIdKey)
-					waitApiMap = waitApiResourceMap.ReadFromMap(appIdKey)
-				}
+			var appWaitkey = config.CACHE_WAIT + "-appID"
+			_, appIdOk := h.cache.Get(appWaitkey)
+			if !appIdOk {
+				h.cache.Add(appWaitkey, []byte(appWaitkey), config.REDIS_TIMEOUT)
 			}
 
-			if waitApiMap.Value != config.CACHE_WAIT {
-				ctx, _ := context.WithTimeout(context.Background(), config.REDIS_TIMEOUT)
-				waitApiResourceMap.AddKey(appIdKey, caching.WaitKey{Value: config.CACHE_WAIT, Timeout: ctx})
-			}
-
-			if waitApiMap.Value == config.CACHE_WAIT {
+			if appIdOk {
 				ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
 				defer cancel()
 
 				for {
-					waitApiMap := waitApiResourceMap.ReadFromMap(appIdKey)
-					apiJson = waitApiMap.Body
-					if len(waitApiMap.Body) > 0 {
-						err = json.Unmarshal(waitApiMap.Body, &apikeys)
+					appIdBody, ok := h.cache.Get(appIdKey)
+					if ok {
+						apiJson = appIdBody
+						err = json.Unmarshal(appIdBody, &apikeys)
 						if err != nil {
 							h.handleResponse(c, status_http.BadRequest, "cant get auth info")
 							c.Abort()
@@ -167,30 +160,23 @@ func (h *HandlerV1) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 					return
 				}
 
-				waitApiResourceMap.WriteBody(appIdKey, apiJson)
+				h.cache.Add(appIdKey, apiJson, config.REDIS_TIMEOUT)
 			}
 
-			waitResourceMap := waitApiResourceMap.ReadFromMap(resourceAppIdKey)
-			if waitResourceMap.Timeout != nil {
-				if waitResourceMap.Timeout.Err() == context.DeadlineExceeded {
-					waitApiResourceMap.DeleteKey(resourceAppIdKey)
-					waitResourceMap = waitApiResourceMap.ReadFromMap(resourceAppIdKey)
-				}
+			var resourceWaitKey = config.CACHE_WAIT + "-resource"
+			_, resourceOk := h.cache.Get(resourceWaitKey)
+			if !resourceOk {
+				h.cache.Add(resourceWaitKey, []byte(resourceWaitKey), config.REDIS_TIMEOUT)
 			}
 
-			if waitApiMap.Value != config.CACHE_WAIT {
-				ctx, _ := context.WithTimeout(context.Background(), config.REDIS_TIMEOUT)
-				waitApiResourceMap.AddKey(resourceAppIdKey, caching.WaitKey{Value: config.CACHE_WAIT, Timeout: ctx})
-			}
-
-			if waitResourceMap.Value == config.CACHE_WAIT {
+			if resourceOk {
 				ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
 				defer cancel()
 
 				for {
-					waitResourceMap := waitApiResourceMap.ReadFromMap(resourceAppIdKey)
-					if len(waitResourceMap.Body) > 0 {
-						err = json.Unmarshal(waitResourceMap.Body, &resource)
+					resourceBody, ok := h.cache.Get(resourceAppIdKey)
+					if ok {
+						err = json.Unmarshal(resourceBody, &resource)
 						if err != nil {
 							h.handleResponse(c, status_http.BadRequest, "cant get auth info")
 							c.Abort()
@@ -230,7 +216,7 @@ func (h *HandlerV1) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 					return
 				}
 
-				waitApiResourceMap.WriteBody(resourceAppIdKey, resourceBody)
+				h.cache.Add(resourceAppIdKey, resourceBody, config.REDIS_TIMEOUT)
 			}
 
 			data := make(map[string]interface{})
