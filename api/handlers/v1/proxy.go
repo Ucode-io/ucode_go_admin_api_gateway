@@ -49,7 +49,7 @@ func (h *HandlerV1) CompanyRedirectGetList(data helper.MatchingData, comp servic
 			}
 
 			if len(res.RedirectUrls) > 0 {
-				break
+				return res, nil
 			}
 
 			if ctx.Err() == context.DeadlineExceeded {
@@ -60,24 +60,22 @@ func (h *HandlerV1) CompanyRedirectGetList(data helper.MatchingData, comp servic
 		}
 	}
 
-	if len(res.RedirectUrls) <= 0 {
-		res, err = comp.Redirect().GetList(context.Background(), &pb.GetListRedirectUrlReq{
-			ProjectId: data.ProjectId,
-			EnvId:     data.EnvId,
-			Offset:    0,
-			Limit:     100,
-		})
-		if err != nil {
-			return nil, err
-		}
-
-		body, err := json.Marshal(res)
-		if err != nil {
-			return nil, err
-		}
-
-		h.cache.Add(key, body, config.REDIS_TIMEOUT)
+	res, err = comp.Redirect().GetList(context.Background(), &pb.GetListRedirectUrlReq{
+		ProjectId: data.ProjectId,
+		EnvId:     data.EnvId,
+		Offset:    0,
+		Limit:     100,
+	})
+	if err != nil {
+		return nil, err
 	}
+
+	body, err := json.Marshal(res)
+	if err != nil {
+		return nil, err
+	}
+
+	h.cache.Add(key, body, config.REDIS_TIMEOUT)
 
 	return res, nil
 }
