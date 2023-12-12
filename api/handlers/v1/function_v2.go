@@ -811,7 +811,7 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 	var singleResourceWaitKey = config.CACHE_WAIT + "-single-resource"
 	_, singleResourceOk := h.cache.Get(singleResourceWaitKey)
 	if !singleResourceOk {
-		h.cache.Add(singleResourceWaitKey, []byte(singleResourceWaitKey), config.REDIS_TIMEOUT)
+		h.cache.Add(singleResourceWaitKey, []byte(singleResourceWaitKey), config.REDIS_KEY_TIMEOUT)
 	}
 
 	if singleResourceOk {
@@ -1033,4 +1033,4 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 	h.handleResponse(c, status_http.OK, resp)
 }
 
-var DoRequestCount int
+// var DoRequestCount int

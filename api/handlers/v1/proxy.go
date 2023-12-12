@@ -32,7 +32,7 @@ func (h *HandlerV1) CompanyRedirectGetList(data helper.MatchingData, comp servic
 	var redirectWaitKey = config.CACHE_WAIT + "-redirect"
 	_, redirectOk := h.cache.Get(redirectWaitKey)
 	if !redirectOk {
-		h.cache.Add(redirectWaitKey, []byte(redirectWaitKey), config.REDIS_TIMEOUT)
+		h.cache.Add(redirectWaitKey, []byte(redirectWaitKey), config.REDIS_KEY_TIMEOUT)
 	}
 
 	if redirectOk {

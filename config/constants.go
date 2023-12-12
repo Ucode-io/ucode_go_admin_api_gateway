@@ -36,6 +36,7 @@ const (
 const (
 	LRU_CACHE_SIZE     = 10000
 	REDIS_TIMEOUT      = 5 * time.Minute
+	REDIS_KEY_TIMEOUT  = 280 * time.Second
 	REDIS_WAIT_TIMEOUT = 1 * time.Second
 	REDIS_SLEEP        = 100 * time.Millisecond
 

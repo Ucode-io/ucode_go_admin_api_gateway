@@ -30,6 +30,7 @@ func EasyToTravelAgentApiGetProduct(params url.Values, data map[string]interface
 
 		offset = 0
 		limit  = 20
+		total  int
 
 		startTime = params.Get("startTime")
 		endTime   = params.Get("endTime")
@@ -176,7 +177,7 @@ func EasyToTravelAgentApiGetProduct(params url.Values, data map[string]interface
 		noTimeRange, err := EasyToTravelAgentApiGetProductAttributes(product, timeData)
 		if err != nil {
 			errorResponse.Code = 400
-			errorResponse.Message = "Internal server error."
+			errorResponse.Message = "Bad request."
 			return response, err
 		}
 
@@ -187,8 +188,26 @@ func EasyToTravelAgentApiGetProduct(params url.Values, data map[string]interface
 		filterProduct = append(filterProduct, product)
 	}
 
+	total = len(filterProduct)
+
+	if limit+offset > 0 {
+		if offset <= len(filterProduct) {
+			filterProduct = filterProduct[offset:]
+		} else {
+			errorResponse.Code = 404
+			errorResponse.Message = "Wrong pagination parameters."
+			return response, err
+		}
+
+		if limit > 0 {
+			if limit <= len(filterProduct) {
+				filterProduct = filterProduct[:limit]
+			}
+		}
+	}
+
 	response.Results = filterProduct
-	response.Metadata = map[string]interface{}{"count": len(filterProduct), "limit": limit, "offset": offset, "total": cast.ToInt(metadata["total"])}
+	response.Metadata = map[string]interface{}{"count": len(filterProduct), "limit": limit, "offset": offset, "total": total}
 	return response, nil
 }
 

@@ -109,7 +109,7 @@ func (h *HandlerV1) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 			var appWaitkey = config.CACHE_WAIT + "-appID"
 			_, appIdOk := h.cache.Get(appWaitkey)
 			if !appIdOk {
-				h.cache.Add(appWaitkey, []byte(appWaitkey), config.REDIS_TIMEOUT)
+				h.cache.Add(appWaitkey, []byte(appWaitkey), config.REDIS_KEY_TIMEOUT)
 			}
 
 			if appIdOk {
@@ -166,7 +166,7 @@ func (h *HandlerV1) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 			var resourceWaitKey = config.CACHE_WAIT + "-resource"
 			_, resourceOk := h.cache.Get(resourceWaitKey)
 			if !resourceOk {
-				h.cache.Add(resourceWaitKey, []byte(resourceWaitKey), config.REDIS_TIMEOUT)
+				h.cache.Add(resourceWaitKey, []byte(resourceWaitKey), config.REDIS_KEY_TIMEOUT)
 			}
 
 			if resourceOk {
