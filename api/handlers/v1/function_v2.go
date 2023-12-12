@@ -946,32 +946,32 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 	}
 
 	// getSingleFunctionTime := time.Now()
-	// services, err := h.GetProjectSrvc(
-	// 	c.Request.Context(),
-	// 	projectId.(string),
-	// 	resource.NodeType,
-	// )
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.GRPCError, err.Error())
-	// 	return
-	// }
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
-	// function, err := services.FunctionService().FunctionService().GetSingle(
-	// 	context.Background(),
-	// 	&fc.FunctionPrimaryKey{
-	// 		Id:        c.Param("function-id"),
-	// 		ProjectId: resource.ResourceEnvironmentId,
-	// 	},
-	// )
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.GRPCError, err.Error())
-	// 	return
-	// }
+	function, err := services.FunctionService().FunctionService().GetSingle(
+		context.Background(),
+		&fc.FunctionPrimaryKey{
+			Id:        c.Param("function-id"),
+			ProjectId: resource.ResourceEnvironmentId,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 	// fmt.Println(">>>>>>>>>>>>>>>getSingleFunctionTime:", time.Since(getSingleFunctionTime))
 
 	// doRequestTime := time.Now()
 
-	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+"easy-to-travel-get-products-agent-swagger", "POST", models.FunctionRunV2{
+	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+function.Path, "POST", models.FunctionRunV2{
 		Auth:        models.AuthData{},
 		RequestData: requestData,
 		Data: map[string]interface{}{
@@ -1033,4 +1033,4 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 	h.handleResponse(c, status_http.OK, resp)
 }
 
-// var DoRequestCount int
+var DoRequestCount int
