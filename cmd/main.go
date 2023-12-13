@@ -75,6 +75,7 @@ func main() {
 		log.Error("Error adding grpc client to serviceNode. ServiceNode!!", logger.Error(err))
 		return
 	}
+
 	log.Info(" --- U-code services --- added to serviceNodes")
 
 	// pooling grpc services of enterprice projects
