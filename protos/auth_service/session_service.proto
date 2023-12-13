@@ -18,7 +18,7 @@ service SessionService {
     rpc V2LoginSuperAdmin(V2LoginSuperAdminReq) returns (V2LoginSuperAdminRes) {}
     rpc V2HasAccess(HasAccessRequest) returns (HasAccessResponse) {}
     rpc V2HasAccessUser(V2HasAccessUserReq) returns (V2HasAccessUserRes) {}
-    rpc V2RefreshToken(RefreshTokenRequest) returns (V2RefreshTokenResponse) {}
+    rpc V2RefreshToken(RefreshTokenRequest) returns (V2LoginResponse) {}
     rpc V2RefreshTokenSuperAdmin(RefreshTokenRequest) returns (V2RefreshTokenSuperAdminResponse) {}
     rpc SessionAndTokenGenerator (SessionAndTokenRequest) returns (V2LoginResponse) {}
     rpc UpdateSessionsByRoleId (UpdateSessionByRoleIdRequest) returns (google.protobuf.Empty) {}
@@ -95,6 +95,7 @@ message V2HasAccessUserReq {
     string project_id = 2;
     string path = 3;
     string method = 4;
+    string environment_id = 5;
 }
 
 message V2HasAccessUserRes {
@@ -163,6 +164,7 @@ message HasAccessRequest {
     string client_platform_id = 3;
     string path = 4;
     string method = 5;
+    string node_type = 6;
 }
 
 message HasAccessResponse {

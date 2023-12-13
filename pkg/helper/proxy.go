@@ -1,10 +1,8 @@
 package helper
 
 import (
-	"context"
 	"strings"
-	pb "ucode/ucode_go_api_gateway/genproto/company_service"
-	"ucode/ucode_go_api_gateway/services"
+	"ucode/ucode_go_api_gateway/genproto/company_service"
 )
 
 type MatchingData struct {
@@ -13,16 +11,7 @@ type MatchingData struct {
 	Path      string
 }
 
-func FindUrlTo(s services.ServiceManagerI, data MatchingData, comp services.CompanyServiceI) (string, error) {
-	res, err := comp.Redirect().GetList(context.Background(), &pb.GetListRedirectUrlReq{
-		ProjectId: data.ProjectId,
-		EnvId:     data.EnvId,
-		Offset:    0,
-		Limit:     100,
-	})
-	if err != nil {
-		return "", err
-	}
+func FindUrlTo(res *company_service.GetListRedirectUrlRes, data MatchingData) (string, error) {
 
 	// start := time.Now()
 	//fmt.Println("RES::::::::::::::::::::::", res)

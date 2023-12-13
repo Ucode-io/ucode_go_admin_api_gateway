@@ -17,10 +17,19 @@ type GetListRequest struct {
 }
 
 type UpsertCommonMessage struct {
-	Data map[string]interface{} `json:"data"`
-	UpdatedFields []string `json:"updated_fields"`
+	Data          map[string]interface{} `json:"data"`
+	UpdatedFields []string               `json:"updated_fields"`
 }
 
 type Ids struct {
 	Ids []string `json:"ids"`
+}
+
+type MultipleUpdateItems struct {
+	Ids  []string               `json:"ids"`
+	Data map[string]interface{} `json:"data"`
+}
+
+type MultipleInsertItems struct {
+	Items []map[string]interface{} `json:"items"`
 }

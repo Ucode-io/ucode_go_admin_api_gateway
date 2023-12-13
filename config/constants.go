@@ -1,5 +1,7 @@
 package config
 
+import "time"
+
 const (
 	COMMIT_TYPE_APP                      = "APP"
 	COMMIT_TYPE_TABLE                    = "TABLE"
@@ -28,4 +30,23 @@ const (
 	LOW_NODE_TYPE                        = "LOW"
 	HIGH_NODE_TYPE                       = "HIGH"
 	ENTER_PRICE_TYPE                     = "ENTER_PRICE"
+	CACHE_WAIT                           = "WAIT"
+)
+
+const (
+	LRU_CACHE_SIZE     = 10000
+	REDIS_TIMEOUT      = 5 * time.Minute
+	REDIS_KEY_TIMEOUT  = 280 * time.Second
+	REDIS_WAIT_TIMEOUT = 1 * time.Second
+	REDIS_SLEEP        = 100 * time.Millisecond
+
+	TIME_LAYOUT = "15:04"
+)
+
+var (
+	DynamicReportFormula = []string{"SUM", "COUNT", "AVERAGE", "MAX", "MIN", "FIRST", "LAST", "END_FIRST", "END_LAST"}
+	BarcodeTypes         = map[string]int{
+		"barcode": 1,
+		"codabar": 1,
+	}
 )

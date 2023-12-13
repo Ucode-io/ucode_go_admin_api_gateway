@@ -2,6 +2,7 @@ package helper
 
 import (
 	"context"
+	"strconv"
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/services"
@@ -23,6 +24,22 @@ func EnterPriceProjectsGrpcSvcs(ctx context.Context, compSrvc services.CompanySe
 		mapProjectConf := map[string]config.Config{}
 
 		for _, v := range epProjects.Configs {
+			num, err := strconv.Atoi(v.REDIS_DATABASE)
+			if err != nil {
+				log.Error("Error:", logger.Error(err))
+			}
+
+			// v.OBJECT_BUILDER_GRPC_PORT = ":9102"
+			// v.OBJECT_BUILDER_SERVICE_HOST = "localhost"
+
+			// v.REDIS_HOST = "localhost"
+			// v.REDIS_PORT = ":6379"
+			// v.REDIS_PASSWORD = ""
+			// num = 0
+
+			// v.FUNCTION_GRPC_PORT = ":8100"
+			// v.FUNCTION_SERVICE_HOST = "localhost"
+
 			projectConf := config.Config{
 				ConvertTemplateServiceGrpcPort: v.CONVERT_TEMPLATE_GRPC_PORT,
 				ConvertTemplateServiceGrpcHost: v.CONVERT_TEMPLATE_SERVICE_HOST,
@@ -50,6 +67,10 @@ func EnterPriceProjectsGrpcSvcs(ctx context.Context, compSrvc services.CompanySe
 				TemplateServiceHost:            v.TEMPLATE_SERVICE_HOST,
 				VersioningGRPCPort:             v.VERSIONING_GRPC_PORT,
 				VersioningServiceHost:          v.VERSIONING_SERVICE_HOST,
+				GetRequestRedisHost:            v.REDIS_HOST,
+				GetRequestRedisPort:            v.REDIS_PORT,
+				GetRequestRedisDatabase:        num,
+				GetRequestRedisPassword:        v.REDIS_PASSWORD,
 			}
 
 			grpcSvcs, err := services.NewGrpcClients(ctx, projectConf)
@@ -59,7 +80,7 @@ func EnterPriceProjectsGrpcSvcs(ctx context.Context, compSrvc services.CompanySe
 
 			err = serviceNodes.Add(grpcSvcs, v.ProjectId)
 			if err != nil {
-				log.Error("Error adding to grpc pooling enter prise project. ServiceNode "+v.ProjectId, logger.Error(err))
+				log.Error("Error adding to grpc pooling enter prise project. ServiceNode ! "+v.ProjectId, logger.Error(err))
 			}
 
 			log.Info(" --- " + v.ProjectId + " --- added to serviceNodes")
