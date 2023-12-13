@@ -146,6 +146,9 @@ ingress:
         - host: "api.easyto.travel"
           path: /
           servicePort: 8080
+        - hosts: "dev-test.api.easyto.travel"
+          path: /
+          servicePort: 8080
       tls:
         - secretName: api-admin-tls
           hosts:
@@ -153,6 +156,9 @@ ingress:
         - secretName: easyto-travel-tls
           hosts:
             - "api.easyto.travel"
+        - secretName: dev-test-api-tls
+          hosts:
+            - "dev-test.api.easyto.travel"
     - annotations:
         # type of authentication
         nginx.ingress.kubernetes.io/auth-type: basic
@@ -170,10 +176,16 @@ ingress:
         - host: "api.admin.u-code.io"
           path: /swagger
           servicePort: 8080
+        - host: "dev-test.api.easyto.travel"
+          path: /swagger
+          servicePort: 8080
       tls:
-        - secretName: admin-api-tls
+        - secretName: admin-api-swagger-tls
           hosts:
             - "api.admin.u-code.io"
+        - secretName: dev-admin-api-swagger-tls
+          hosts:
+            - "dev-test.api.easyto.travel"
 
 # resources:
 #    limits:
