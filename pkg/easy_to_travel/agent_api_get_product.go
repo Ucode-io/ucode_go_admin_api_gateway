@@ -1,6 +1,7 @@
 package easy_to_travel
 
 import (
+	"errors"
 	"net/url"
 	"strings"
 	"time"
@@ -178,7 +179,7 @@ func EasyToTravelAgentApiGetProduct(params url.Values, data map[string]interface
 		if err != nil {
 			errorResponse.Code = 400
 			errorResponse.Message = "Bad request."
-			return response, err
+			return errorResponse, err
 		}
 
 		if noTimeRange {
@@ -196,7 +197,7 @@ func EasyToTravelAgentApiGetProduct(params url.Values, data map[string]interface
 		} else {
 			errorResponse.Code = 404
 			errorResponse.Message = "Wrong pagination parameters."
-			return response, err
+			return errorResponse, errors.New("Wrong pagination parameters.")
 		}
 
 		if limit > 0 {
