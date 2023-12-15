@@ -1002,7 +1002,7 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 		return
 	}
 	// fmt.Println(">>>>>>>>>>>>>>>doRequestTime:", time.Since(doRequestTime))
-	fmt.Println("\n\n\n TEst #7")
+	fmt.Println("\n\n\n TEst #7 1")
 	if isOwnData, ok := resp.Attributes["is_own_data"].(bool); ok {
 		if isOwnData {
 			if err == nil && c.Request.Method == "GET" && resource.ProjectId == "1acd7a8f-a038-4e07-91cb-b689c368d855" {
