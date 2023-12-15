@@ -63,8 +63,10 @@ func (h *HandlerV1) AdminAuthMiddleware() gin.HandlerFunc {
 
 				resourceId := c.GetHeader("Resource-Id")
 				environmentId := c.GetHeader("Environment-Id")
+				projectId := c.DefaultQuery("project-id", "")
+
 				if res.ProjectId != "" {
-					c.Set("project_id", res.ProjectId)
+					projectId = res.ProjectId
 				}
 				if res.EnvId != "" {
 					environmentId = res.EnvId
@@ -91,6 +93,7 @@ func (h *HandlerV1) AdminAuthMiddleware() gin.HandlerFunc {
 
 				c.Set("environment_id", environmentId)
 				c.Set("resource_id", resourceId)
+				c.Set("project_id", projectId)
 			case "API-KEY":
 				appId := c.GetHeader("X-API-KEY")
 				apiKey, err := h.authService.ApiKey().GetEnvID(
