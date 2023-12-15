@@ -786,10 +786,12 @@ func proxyMiddleware(r *gin.Engine, h *handlers.Handler) gin.HandlerFunc {
 			err error
 		)
 		c, err = RedirectUrl(c, h)
-
+		fmt.Println("\n\n ForTest #12")
 		if err == nil {
+			fmt.Println("\n\n ForTest #13")
 			r.HandleContext(c)
 		}
+		fmt.Println("\n\n ForTest #14")
 		c.Next()
 	}
 }
@@ -847,8 +849,9 @@ func RedirectUrl(c *gin.Context, h *handlers.Handler) (*gin.Context, error) {
 	if err != nil {
 		return c, errors.New("something went wrong")
 	}
-	fmt.Println("\n\n ForTest #9")
+	fmt.Println("\n\n ForTest #10")
 	c.Request.Header.Add("auth", string(auth))
+	fmt.Println("\n\n ForTest #11")
 	return c, nil
 }
 
