@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"ucode/ucode_go_api_gateway/api/docs"
 	"ucode/ucode_go_api_gateway/api/handlers"
 	"ucode/ucode_go_api_gateway/config"
@@ -779,6 +780,7 @@ func MaxAllowed(n int) gin.HandlerFunc {
 }
 
 func proxyMiddleware(r *gin.Engine, h *handlers.Handler) gin.HandlerFunc {
+	fmt.Println("\n\n ForTest #1")
 	return func(c *gin.Context) {
 		var (
 			err error
@@ -793,6 +795,7 @@ func proxyMiddleware(r *gin.Engine, h *handlers.Handler) gin.HandlerFunc {
 }
 
 func RedirectUrl(c *gin.Context, h *handlers.Handler) (*gin.Context, error) {
+	fmt.Println("\n\n ForTest #2")
 	path := c.Request.URL.Path
 	projectId, ok := c.Get("project_id")
 	if !ok {
@@ -804,8 +807,9 @@ func RedirectUrl(c *gin.Context, h *handlers.Handler) (*gin.Context, error) {
 		return c, errors.New("something went wrong")
 	}
 
+	fmt.Println("\n\n ForTest #3")
 	c.Request.Header.Add("prev_path", path)
-
+	fmt.Println("\n\n ForTest #4")
 	data := helper.MatchingData{
 		ProjectId: projectId.(string),
 		EnvId:     envId.(string),
@@ -813,22 +817,26 @@ func RedirectUrl(c *gin.Context, h *handlers.Handler) (*gin.Context, error) {
 	}
 
 	// companyRedirectGetListTime := time.Now()
+	fmt.Println("\n\n ForTest #5")
 	res, err := h.V1.CompanyRedirectGetList(data, h.GetCompanyService(c))
+	fmt.Println("\n\n ForTest #6")
 	if err != nil {
 		return c, errors.New("cant change")
 	}
+	fmt.Println("\n\n ForTest #7")
 	// fmt.Println(">>>>>>>>>>>>>>>CompanyRedirectGetList:", time.Since(companyRedirectGetListTime))
 
 	pathM, err := helper.FindUrlTo(res, data)
 	if err != nil {
 		return c, errors.New("cant change")
 	}
-
+	fmt.Println("\n\n ForTest #8")
 	if path == pathM {
 		return c, errors.New("identical path")
 	}
 
 	c.Request.URL.Path = pathM
+	fmt.Println("\n\n ForTest #9")
 
 	c.Request.Header.Add("resource_id", cast.ToString(c.Value("resource_id")))
 	c.Request.Header.Add("environment_id", cast.ToString(c.Value("environment_id")))
@@ -839,7 +847,7 @@ func RedirectUrl(c *gin.Context, h *handlers.Handler) (*gin.Context, error) {
 	if err != nil {
 		return c, errors.New("something went wrong")
 	}
-
+	fmt.Println("\n\n ForTest #9")
 	c.Request.Header.Add("auth", string(auth))
 	return c, nil
 }
