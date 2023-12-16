@@ -948,9 +948,10 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 			h.cache.Add(config.CACHE_WAIT, []byte(config.CACHE_WAIT), 20*time.Second)
 		}
 	}
-
+	fmt.Println("\n\n\n TEst #5.1")
 	var function = &fc.Function{}
 	if util.IsValidUUID(c.Param("function-id")) {
+		fmt.Println("\n\n\n TEst #5.2")
 		services, err := h.GetProjectSrvc(
 			c.Request.Context(),
 			projectId.(string),
@@ -960,7 +961,7 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
-
+		fmt.Println("\n\n\n TEst #5.3")
 		function, err = services.FunctionService().FunctionService().GetSingle(
 			context.Background(),
 			&fc.FunctionPrimaryKey{
@@ -972,7 +973,9 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
+		fmt.Println("\n\n\n TEst #5.4")
 	} else {
+		fmt.Println("\n\n\n TEst #5.5")
 		function.Path = c.Param("function-id")
 	}
 	// getSingleFunctionTime := time.Now()
