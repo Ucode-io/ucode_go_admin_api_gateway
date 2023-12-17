@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -2939,4 +2940,248 @@ func (h *HandlerV1) GetListWithOutRelation(c *gin.Context) {
 
 	statusHttp.CustomMessage = resp.GetCustomMessage()
 	h.handleResponse(c, statusHttp, resp)
+}
+
+// GetListAggregate godoc
+// @Security ApiKeyAuth
+// @ID get_list_aggregate
+// @Router /v1/object/get-list-aggregate/{table_slug} [POST]
+// @Summary Get List Aggregate
+// @Description Get List Aggregate
+// @Tags Object
+// @Accept json
+// @Produce json
+// @Param table_slug path string true "table_slug"
+// @Param limit query string false "limit"
+// @Param offset query string false "offset"
+// @Param sort_type query string false "sort_type"
+// @Param object body models.CommonMessage true "GetGroupByFieldObjectRequestBody"
+// @Success 200 {object} status_http.Response{data=models.CommonMessage} "ObjectBody"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *HandlerV1) GetListAggregate(c *gin.Context) {
+
+	var (
+		objectRequest models.CommonMessage
+		resp          *obs.CommonMessage
+	)
+
+	err := c.ShouldBindJSON(&objectRequest)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	var object models.CommonMessage
+
+	object.Data = map[string]interface{}{
+		"match": map[string]interface{}{"$match": map[string]interface{}{}},
+		"sort":  map[string]interface{}{"$sort": map[string]interface{}{"_id": 1}},
+	}
+
+	if c.Query("limit") != "" {
+		object.Data["limit"] = cast.ToInt(c.Query("limit"))
+	}
+
+	if c.Query("offset") != "" {
+		object.Data["offset"] = cast.ToInt(c.Query("offset"))
+	}
+
+	if _, ok := objectRequest.Data["search"]; ok {
+		var (
+			searchQuery = map[string]interface{}{}
+			search      = cast.ToStringMap(objectRequest.Data["search"])
+		)
+		for key, value := range search {
+			searchQuery[key] = map[string]interface{}{"$regex": value, "$options": "i"}
+		}
+		object.Data["second_match"] = searchQuery
+	}
+
+	if _, ok := objectRequest.Data["match"]; ok {
+		var (
+			matchQuery = map[string]interface{}{}
+			match      = cast.ToStringMap(objectRequest.Data["match"])
+		)
+		for key, value := range match {
+			matchQuery[key] = value
+		}
+		object.Data["match"] = map[string]interface{}{"$match": matchQuery}
+	}
+
+	var groupQuery = map[string]interface{}{"_id": "$guid"}
+	if _, ok := objectRequest.Data["groups"]; ok {
+		var (
+			groupSlice = cast.ToStringSlice(objectRequest.Data["groups"])
+			groupLen   = len(groupSlice)
+		)
+		if groupLen > 0 {
+			if groupLen > 1 {
+				var manyGroup = map[string]interface{}{}
+				for _, value := range groupSlice {
+					manyGroup[value] = "$" + value
+				}
+				groupQuery = map[string]interface{}{"_id": manyGroup}
+			} else {
+				groupQuery = map[string]interface{}{"_id": "$" + groupSlice[0]}
+			}
+		}
+	}
+	groupQuery["guid"] = map[string]interface{}{"$first": "$guid"}
+
+	if _, ok := objectRequest.Data["group_selects"]; ok {
+		var groupSelects = cast.ToStringSlice(objectRequest.Data["group_selects"])
+		for _, value := range groupSelects {
+			groupQuery[value] = map[string]interface{}{"$first": "$" + value}
+		}
+	}
+	object.Data["query"] = map[string]interface{}{"$group": groupQuery}
+
+	if _, ok := objectRequest.Data["lookups"]; ok {
+		var (
+			lookups      = cast.ToSlice(objectRequest.Data["lookups"])
+			lookupsQuery = []interface{}{}
+		)
+		for _, objectLookup := range lookups {
+			var (
+				lookupMap     = cast.ToStringMap(objectLookup)
+				fromSlug      = cast.ToString(lookupMap["from"])
+				lastCharacter string
+			)
+
+			if len(fromSlug) > 0 {
+				lastCharacter = string(fromSlug[len(fromSlug)-1])
+			}
+
+			if lastCharacter != "s" {
+				if lastCharacter == "y" {
+					fromSlug = fromSlug[:len(fromSlug)-1]
+					fromSlug += "ies"
+				} else {
+					fromSlug += "s"
+				}
+			}
+
+			lookupsQuery = append(lookupsQuery, map[string]interface{}{
+				"$lookup": map[string]interface{}{
+					"from":         fromSlug,
+					"foreignField": lookupMap["from_field"],
+					"localField":   lookupMap["to_field"],
+					"as":           lookupMap["as"],
+				},
+			})
+		}
+		object.Data["lookups"] = lookupsQuery
+	}
+
+	var projectQuery = map[string]interface{}{"guid": 1}
+	if _, ok := objectRequest.Data["projects"]; ok {
+		var projects = cast.ToStringSlice(objectRequest.Data["projects"])
+		for _, value := range projects {
+			if strings.Contains(value, ".") {
+				var key = strings.ReplaceAll(value, ".", "_")
+				projectQuery[key] = map[string]interface{}{"$first": "$" + value}
+			} else {
+				projectQuery[value] = 1
+			}
+		}
+	}
+
+	if _, ok := objectRequest.Data["project_query"]; ok {
+		var projectQueries = cast.ToStringMap(objectRequest.Data["project_query"])
+		for key, value := range projectQueries {
+			projectQuery[key] = value
+		}
+	}
+	object.Data["project"] = map[string]interface{}{"$project": projectQuery}
+
+	if _, ok := objectRequest.Data["sorts"]; ok {
+		var (
+			sorts      = cast.ToStringSlice(objectRequest.Data["sorts"])
+			sortQuery  = map[string]interface{}{}
+			sortedType = 1
+		)
+
+		if len(c.Query("sort_type")) > 0 {
+			switch c.Query("sort_type") {
+			case "desc":
+				sortedType = -1
+			case "asc":
+				sortedType = 1
+			}
+		}
+
+		for _, value := range sorts {
+			sortQuery[value] = sortedType
+		}
+		object.Data["sort"] = map[string]interface{}{"$sort": sortQuery}
+	}
+
+	k, _ := json.Marshal(object)
+	fmt.Println(string(k))
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err)
+		return
+	}
+	defer conn.Close()
+
+	structData, err := helper.ConvertMapToStruct(object.Data)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
+	resp, err = service.GetGroupByField(
+		context.Background(),
+		&obs.CommonMessage{
+			TableSlug: c.Param("table_slug"),
+			Data:      structData,
+			ProjectId: "1",
+		},
+	)
+
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.OK, resp)
 }

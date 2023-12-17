@@ -118,6 +118,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 		v1.POST("/object/get-financial-analytics/:table_slug", h.V1.GetFinancialAnalytics)
 		v1.POST("/object/get-list-group-by/:table_slug/:column_table_slug", h.V1.GetListGroupBy)
 		v1.POST("/object/get-group-by-field/:table_slug", h.V1.GetGroupByField)
+		v1.POST("/object/get-list-aggregate/:table_slug", h.V1.GetListAggregate)
 		v1.POST("/object/get-list-without-relation/:table_slug", h.V1.GetListWithOutRelation)
 
 		// permission

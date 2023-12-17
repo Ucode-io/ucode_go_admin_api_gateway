@@ -1,0 +1,75 @@
+{
+    "data": {
+        "lookups": [
+            {
+                "$lookup": {
+                    "as": "terminal_data",
+                    "foreignField": "guid",
+                    "from": "terminals",
+                    "localField": "terminal_id"
+                }
+            },
+            {
+                "$lookup": {
+                    "as": "service_time_data",
+                    "foreignField": "product_id",
+                    "from": "service_times",
+                    "localField": "guid"
+                }
+            }
+        ],
+        "match": {
+            "$match": {}
+        },
+        "project": {
+            "$project": {
+                "address": 1,
+                "city_id": 1,
+                "guid": 1,
+                "product_inc_id": 1,
+                "terminal_data_title": {
+                    "$first": "$terminal_data.title"
+                },
+                "terminal_type": 1,
+                "title": 1
+            }
+        },
+        "query": {
+            "$group": {
+                "_id": "$guid",
+                "address": {
+                    "$first": "$address"
+                },
+                "city_id": {
+                    "$first": "$city_id"
+                },
+                "guid": {
+                    "$first": "$guid"
+                },
+                "product_inc_id": {
+                    "$first": "$product_inc_id"
+                },
+                "terminal_id": {
+                    "$first": "$terminal_id"
+                },
+                "terminal_type": {
+                    "$first": "$terminal_type"
+                },
+                "title": {
+                    "$first": "$title"
+                }
+            }
+        },
+        "second_match": {
+            "title": {
+                "$options": "i",
+                "$regex": "pre"
+            }
+        },
+        "sort": {
+            "$sort": {
+                "title": 1
+            }
+        }
+    }
+}
