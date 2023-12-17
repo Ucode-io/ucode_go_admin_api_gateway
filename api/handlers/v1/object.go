@@ -3043,13 +3043,33 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 	)
 
 	if len(cast.ToSlice(objectRequest.Data["group_selects"])) <= 0 || len(cast.ToSlice(objectRequest.Data["projects"])) <= 0 {
-		fieldResp, err = services.GetBuilderServiceByType(resource.NodeType).Field().GetAll(context.Background(), &obs.GetAllFieldsRequest{
-			TableSlug: c.Param("table_slug"),
-			ProjectId: resource.ResourceEnvironmentId,
-		})
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
+		var fieldKey = fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), projectId.(string), environmentId.(string))
+		fieldBody, ok := h.cache.Get(fieldKey)
+		if ok {
+			err = json.Unmarshal(fieldBody, &fieldResp)
+			if err != nil {
+				h.log.Error("Error while unmarshal resource redis", logger.Error(err))
+				return
+			}
+		}
+
+		if len(fieldResp.Fields) <= 0 {
+			fieldResp, err = services.GetBuilderServiceByType(resource.NodeType).Field().GetAll(context.Background(), &obs.GetAllFieldsRequest{
+				TableSlug: c.Param("table_slug"),
+				ProjectId: resource.ResourceEnvironmentId,
+			})
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+
+			body, err := json.Marshal(fieldResp)
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+
+			h.cache.Add(fieldKey, body, config.REDIS_TIMEOUT)
 		}
 	}
 
