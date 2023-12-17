@@ -29,16 +29,16 @@ func EnterPriceProjectsGrpcSvcs(ctx context.Context, compSrvc services.CompanySe
 				log.Error("Error:", logger.Error(err))
 			}
 
-			v.OBJECT_BUILDER_GRPC_PORT = ":9102"
-			v.OBJECT_BUILDER_SERVICE_HOST = "localhost"
+			// v.OBJECT_BUILDER_GRPC_PORT = ":9102"
+			// v.OBJECT_BUILDER_SERVICE_HOST = "localhost"
 
-			v.REDIS_HOST = "localhost"
-			v.REDIS_PORT = ":6379"
-			v.REDIS_PASSWORD = ""
-			num = 0
+			// v.REDIS_HOST = "localhost"
+			// v.REDIS_PORT = ":6379"
+			// v.REDIS_PASSWORD = ""
+			// num = 0
 
-			v.FUNCTION_GRPC_PORT = ":8100"
-			v.FUNCTION_SERVICE_HOST = "localhost"
+			// v.FUNCTION_GRPC_PORT = ":8100"
+			// v.FUNCTION_SERVICE_HOST = "localhost"
 
 			projectConf := config.Config{
 				ConvertTemplateServiceGrpcPort: v.CONVERT_TEMPLATE_GRPC_PORT,

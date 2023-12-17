@@ -8,6 +8,7 @@ import (
 	"time"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
+	"ucode/ucode_go_api_gateway/config"
 	authPb "ucode/ucode_go_api_gateway/genproto/auth_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
@@ -2985,20 +2986,74 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 		return
 	}
 
-	resource, err := h.companyServices.ServiceResource().GetSingle(
+	var (
+		resourceKey = fmt.Sprintf("%s-%s", projectId.(string), environmentId.(string))
+		resource    = &pb.ServiceResourceModel{}
+	)
+	singleResourceBody, ok := h.cache.Get(resourceKey)
+	if ok {
+		err = json.Unmarshal(singleResourceBody, &resource)
+		if err != nil {
+			h.log.Error("Error while unmarshal resource redis", logger.Error(err))
+			return
+		}
+	}
+
+	if resource.ResourceEnvironmentId == "" {
+		resource, err = h.companyServices.ServiceResource().GetSingle(
+			c.Request.Context(),
+			&pb.GetSingleServiceResourceReq{
+				ProjectId:     projectId.(string),
+				EnvironmentId: environmentId.(string),
+				ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		body, err := json.Marshal(resource)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		h.cache.Add(resourceKey, body, config.REDIS_TIMEOUT)
+	}
+
+	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId.(string),
-			EnvironmentId: environmentId.(string),
-			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
-		},
+		projectId.(string),
+		resource.NodeType,
 	)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	var object models.CommonMessage
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err)
+		return
+	}
+	defer conn.Close()
+
+	var (
+		object    models.CommonMessage
+		fieldResp = &obs.GetAllFieldsResponse{}
+	)
+
+	if len(cast.ToSlice(objectRequest.Data["group_selects"])) <= 0 || len(cast.ToSlice(objectRequest.Data["projects"])) <= 0 {
+		fieldResp, err = services.GetBuilderServiceByType(resource.NodeType).Field().GetAll(context.Background(), &obs.GetAllFieldsRequest{
+			TableSlug: c.Param("table_slug"),
+			ProjectId: "1",
+		})
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	}
 
 	object.Data = map[string]interface{}{
 		"match": map[string]interface{}{"$match": map[string]interface{}{}},
@@ -3060,6 +3115,10 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 		for _, value := range groupSelects {
 			groupQuery[value] = map[string]interface{}{"$first": "$" + value}
 		}
+	} else {
+		for _, field := range fieldResp.Fields {
+			groupQuery[field.Slug] = map[string]interface{}{"$first": "$" + field.Slug}
+		}
 	}
 	object.Data["query"] = map[string]interface{}{"$group": groupQuery}
 
@@ -3111,6 +3170,10 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 				projectQuery[value] = 1
 			}
 		}
+	} else {
+		for _, field := range fieldResp.Fields {
+			projectQuery[field.Slug] = 1
+		}
 	}
 
 	if _, ok := objectRequest.Data["project_query"]; ok {
@@ -3143,29 +3206,23 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 		object.Data["sort"] = map[string]interface{}{"$sort": sortQuery}
 	}
 
-	k, _ := json.Marshal(object)
-	fmt.Println(string(k))
-
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
-	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
-	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
-	defer conn.Close()
-
 	structData, err := helper.ConvertMapToStruct(object.Data)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
+	var key = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("aggregate-%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId)))
+	functionBody, ok := h.cache.Get(key)
+	if ok {
+		m := make(map[string]interface{})
+		err = json.Unmarshal(functionBody, &m)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+		resp := map[string]interface{}{"data": m}
+		h.handleResponse(c, status_http.OK, resp)
 		return
 	}
 
@@ -3177,11 +3234,13 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 			ProjectId: "1",
 		},
 	)
-
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	jsonData, _ := json.Marshal(resp.Data)
+	h.cache.Add(key, []byte(jsonData), 20*time.Second)
 
 	h.handleResponse(c, status_http.OK, resp)
 }
