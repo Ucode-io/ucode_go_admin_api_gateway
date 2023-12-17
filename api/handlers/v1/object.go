@@ -2582,8 +2582,6 @@ func (h *HandlerV1) GetGroupByField(c *gin.Context) {
 	}
 	defer conn.Close()
 
-	fmt.Println("projectId: ", resource.ResourceEnvironmentId)
-
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
@@ -3047,7 +3045,7 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 	if len(cast.ToSlice(objectRequest.Data["group_selects"])) <= 0 || len(cast.ToSlice(objectRequest.Data["projects"])) <= 0 {
 		fieldResp, err = services.GetBuilderServiceByType(resource.NodeType).Field().GetAll(context.Background(), &obs.GetAllFieldsRequest{
 			TableSlug: c.Param("table_slug"),
-			ProjectId: "1",
+			ProjectId: resource.ResourceEnvironmentId,
 		})
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
@@ -3231,7 +3229,7 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 		&obs.CommonMessage{
 			TableSlug: c.Param("table_slug"),
 			Data:      structData,
-			ProjectId: "1",
+			ProjectId: resource.ResourceEnvironmentId,
 		},
 	)
 	if err != nil {
