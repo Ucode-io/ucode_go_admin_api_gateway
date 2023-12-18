@@ -779,6 +779,8 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 		invokeFunction models.InvokeFunctionRequest
 	)
 
+	fmt.Println("\n\n\n TEst #1")
+
 	bodyReq, err := io.ReadAll(c.Request.Body)
 	if err != nil {
 		h.log.Error("cant parse body or an empty body received", logger.Any("req", c.Request))
@@ -801,6 +803,7 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
+	fmt.Println("\n\n\n TEst #2", projectId, environmentId)
 
 	var (
 		resourceKey = fmt.Sprintf("%s-%s", projectId.(string), environmentId.(string))
@@ -837,6 +840,7 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 	} else {
 		h.cache.Add(singleResourceWaitKey, []byte(singleResourceWaitKey), config.REDIS_KEY_TIMEOUT)
 	}
+	fmt.Println("\n\n\n TEst #3")
 
 	if resource.ResourceEnvironmentId == "" {
 		resource, err = h.companyServices.ServiceResource().GetSingle(
@@ -861,7 +865,7 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 		h.cache.Add(resourceKey, body, config.REDIS_TIMEOUT)
 	}
 	// fmt.Println(">>>>>>>>>>>>>>>resourceTime:", time.Since(resourceTime))
-
+	fmt.Println("\n\n\n TEst #4")
 	authInfoAny, ok := c.Get("auth")
 	if !ok {
 		h.handleResponse(c, status_http.InvalidArgument, "cant get auth info")
@@ -889,7 +893,7 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 
 	var key = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("ett-%s-%s-%s", c.Request.Header.Get("Prev_path"), keyParams.Encode(), resource.ResourceEnvironmentId)))
 	_, ok = h.cache.Get(config.CACHE_WAIT)
-
+	fmt.Println("\n\n\n TEst #5")
 	if c.Request.Method == "GET" && resource.ProjectId == "1acd7a8f-a038-4e07-91cb-b689c368d855" {
 		if ok {
 
@@ -944,9 +948,10 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 			h.cache.Add(config.CACHE_WAIT, []byte(config.CACHE_WAIT), 20*time.Second)
 		}
 	}
-
+	fmt.Println("\n\n\n TEst #5.1")
 	var function = &fc.Function{}
 	if util.IsValidUUID(c.Param("function-id")) {
+		fmt.Println("\n\n\n TEst #5.2")
 		services, err := h.GetProjectSrvc(
 			c.Request.Context(),
 			projectId.(string),
@@ -956,7 +961,7 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
-
+		fmt.Println("\n\n\n TEst #5.3")
 		function, err = services.FunctionService().FunctionService().GetSingle(
 			context.Background(),
 			&fc.FunctionPrimaryKey{
@@ -968,7 +973,9 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
+		fmt.Println("\n\n\n TEst #5.4")
 	} else {
+		fmt.Println("\n\n\n TEst #5.5")
 		function.Path = c.Param("function-id")
 	}
 	// getSingleFunctionTime := time.Now()
@@ -976,7 +983,7 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 	// fmt.Println(">>>>>>>>>>>>>>>getSingleFunctionTime:", time.Since(getSingleFunctionTime))
 
 	// doRequestTime := time.Now()
-
+	fmt.Println("\n\n\n TEst #6")
 	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+function.Path, "POST", models.FunctionRunV2{
 		Auth:        models.AuthData{},
 		RequestData: requestData,
@@ -998,7 +1005,7 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 		return
 	}
 	// fmt.Println(">>>>>>>>>>>>>>>doRequestTime:", time.Since(doRequestTime))
-
+	fmt.Println("\n\n\n TEst #7 1")
 	if isOwnData, ok := resp.Attributes["is_own_data"].(bool); ok {
 		if isOwnData {
 			if err == nil && c.Request.Method == "GET" && resource.ProjectId == "1acd7a8f-a038-4e07-91cb-b689c368d855" {
@@ -1036,7 +1043,7 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 			return
 		}
 	}
-
+	fmt.Println("\n\n\n TEst #8")
 	h.handleResponse(c, status_http.OK, resp)
 }
 
