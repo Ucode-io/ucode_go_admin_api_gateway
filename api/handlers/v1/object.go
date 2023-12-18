@@ -3011,13 +3011,14 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 			return
 		}
 
-		body, err := json.Marshal(resource)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
-		h.cache.Add(resourceKey, body, config.REDIS_TIMEOUT)
+		go func() {
+			body, err := json.Marshal(resource)
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+			h.cache.Add(resourceKey, body, config.REDIS_TIMEOUT)
+		}()
 	}
 
 	services, err := h.GetProjectSrvc(
@@ -3063,13 +3064,14 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 				return
 			}
 
-			body, err := json.Marshal(fieldResp)
-			if err != nil {
-				h.handleResponse(c, status_http.GRPCError, err.Error())
-				return
-			}
-
-			h.cache.Add(fieldKey, body, config.REDIS_TIMEOUT)
+			go func() {
+				body, err := json.Marshal(fieldResp)
+				if err != nil {
+					h.handleResponse(c, status_http.GRPCError, err.Error())
+					return
+				}
+				h.cache.Add(fieldKey, body, config.REDIS_TIMEOUT)
+			}()
 		}
 	}
 
@@ -3257,8 +3259,10 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 		return
 	}
 
-	jsonData, _ := json.Marshal(resp.Data)
-	h.cache.Add(key, []byte(jsonData), 20*time.Second)
+	go func() {
+		jsonData, _ := json.Marshal(resp.Data)
+		h.cache.Add(key, []byte(jsonData), 20*time.Second)
+	}()
 
 	h.handleResponse(c, status_http.OK, resp)
 }

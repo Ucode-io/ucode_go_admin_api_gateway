@@ -160,7 +160,9 @@ func (h *HandlerV1) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 					return
 				}
 
-				h.cache.Add(appIdKey, apiJson, config.REDIS_TIMEOUT)
+				go func() {
+					h.cache.Add(appIdKey, apiJson, config.REDIS_TIMEOUT)
+				}()
 			}
 
 			var resourceWaitKey = config.CACHE_WAIT + "-resource"
@@ -209,14 +211,14 @@ func (h *HandlerV1) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 					return
 				}
 
-				resourceBody, err := json.Marshal(resource)
-				if err != nil {
-					h.handleResponse(c, status_http.BadRequest, "cant get auth info")
-					c.Abort()
-					return
-				}
-
-				h.cache.Add(resourceAppIdKey, resourceBody, config.REDIS_TIMEOUT)
+				go func() {
+					resourceBody, err := json.Marshal(resource)
+					if err != nil {
+						h.handleResponse(c, status_http.BadRequest, "cant get auth info")
+						return
+					}
+					h.cache.Add(resourceAppIdKey, resourceBody, config.REDIS_TIMEOUT)
+				}()
 			}
 
 			data := make(map[string]interface{})

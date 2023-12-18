@@ -9236,6 +9236,7 @@
                         "items": {
                             "type": "string"
                         },
+                        "collectionFormat": "csv",
                         "name": "ids",
                         "in": "query"
                     },
@@ -11368,7 +11369,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/handlers.Path"
+                                            "$ref": "#/definitions/v1.Path"
                                         }
                                     }
                                 }
@@ -12961,6 +12962,7 @@
                         "items": {
                             "type": "string"
                         },
+                        "collectionFormat": "csv",
                         "name": "ids",
                         "in": "query"
                     },
@@ -18440,6 +18442,119 @@
                         "name": "table_slug",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "description": "GetGroupByFieldObjectRequestBody",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CommonMessage"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ObjectBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.CommonMessage"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/object/get-list-aggregate/{table_slug}": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get List Aggregate",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Object"
+                ],
+                "summary": "Get List Aggregate",
+                "operationId": "get_list_aggregate",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "table_slug",
+                        "name": "table_slug",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "limit",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "offset",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "sort_type",
+                        "name": "sort_type",
+                        "in": "query"
                     },
                     {
                         "description": "GetGroupByFieldObjectRequestBody",
@@ -28121,7 +28236,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/handlers.Path"
+                                            "$ref": "#/definitions/v1.Path"
                                         }
                                     }
                                 }
@@ -28333,7 +28448,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/handlers.Path"
+                                            "$ref": "#/definitions/v1.Path"
                                         }
                                     }
                                 }
@@ -28425,7 +28540,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/handlers.Path"
+                                            "$ref": "#/definitions/v1.Path"
                                         }
                                     }
                                 }
@@ -42657,17 +42772,6 @@
         "emptypb.Empty": {
             "type": "object"
         },
-        "handlers.Path": {
-            "type": "object",
-            "properties": {
-                "filename": {
-                    "type": "string"
-                },
-                "hash": {
-                    "type": "string"
-                }
-            }
-        },
         "integration_service_v2.PayzeLinkRequest": {
             "type": "object",
             "properties": {
@@ -45074,6 +45178,9 @@
         "object_builder_service.CommonMessage": {
             "type": "object",
             "properties": {
+                "blocked_login_table": {
+                    "type": "boolean"
+                },
                 "custom_message": {
                     "type": "string"
                 },
@@ -45497,6 +45604,9 @@
                     "items": {
                         "type": "string"
                     }
+                },
+                "id": {
+                    "type": "string"
                 },
                 "is_editable": {
                     "type": "boolean"
@@ -50450,6 +50560,17 @@
                     "type": "string"
                 },
                 "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "v1.Path": {
+            "type": "object",
+            "properties": {
+                "filename": {
+                    "type": "string"
+                },
+                "hash": {
                     "type": "string"
                 }
             }

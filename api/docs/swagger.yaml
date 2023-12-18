@@ -1447,13 +1447,6 @@ definitions:
     type: object
   emptypb.Empty:
     type: object
-  handlers.Path:
-    properties:
-      filename:
-        type: string
-      hash:
-        type: string
-    type: object
   integration_service_v2.PayzeLinkRequest:
     properties:
       data:
@@ -3031,6 +3024,8 @@ definitions:
     type: object
   object_builder_service.CommonMessage:
     properties:
+      blocked_login_table:
+        type: boolean
       custom_message:
         type: string
       data:
@@ -3311,6 +3306,8 @@ definitions:
         items:
           type: string
         type: array
+      id:
+        type: string
       is_editable:
         type: boolean
       is_user_id_default:
@@ -6550,6 +6547,13 @@ definitions:
       user_id:
         type: string
       username:
+        type: string
+    type: object
+  v1.Path:
+    properties:
+      filename:
+        type: string
+      hash:
         type: string
     type: object
   v2.Path:
@@ -11974,7 +11978,8 @@ paths:
       description: Get environment list
       operationId: get_environment_list
       parameters:
-      - in: query
+      - collectionFormat: csv
+        in: query
         items:
           type: string
         name: ids
@@ -13241,7 +13246,7 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/handlers.Path'
+                  $ref: '#/definitions/v1.Path'
               type: object
         "400":
           description: Bad Request
@@ -14023,7 +14028,8 @@ paths:
       description: Get global project environment list
       operationId: get_global_project_environment_list
       parameters:
-      - in: query
+      - collectionFormat: csv
+        in: query
         items:
           type: string
         name: ids
@@ -17342,6 +17348,71 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get Group By Field Object
+      tags:
+      - Object
+  /v1/object/get-list-aggregate/{table_slug}:
+    post:
+      consumes:
+      - application/json
+      description: Get List Aggregate
+      operationId: get_list_aggregate
+      parameters:
+      - description: table_slug
+        in: path
+        name: table_slug
+        required: true
+        type: string
+      - description: limit
+        in: query
+        name: limit
+        type: string
+      - description: offset
+        in: query
+        name: offset
+        type: string
+      - description: sort_type
+        in: query
+        name: sort_type
+        type: string
+      - description: GetGroupByFieldObjectRequestBody
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/models.CommonMessage'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ObjectBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.CommonMessage'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get List Aggregate
       tags:
       - Object
   /v1/object/get-list-group-by/{table_slug}/{column_table_slug}:
@@ -22399,7 +22470,7 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/handlers.Path'
+                  $ref: '#/definitions/v1.Path'
               type: object
         "400":
           description: Bad Request
@@ -22521,7 +22592,7 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/handlers.Path'
+                  $ref: '#/definitions/v1.Path'
               type: object
         "400":
           description: Bad Request
@@ -22572,7 +22643,7 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/handlers.Path'
+                  $ref: '#/definitions/v1.Path'
               type: object
         "400":
           description: Bad Request
