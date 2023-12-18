@@ -146,7 +146,7 @@ ingress:
         - host: "api.easyto.travel"
           path: /
           servicePort: 8080
-        - hosts: "dev-test.api.easyto.travel"
+        - host: "dev-test.api.easyto.travel"
           path: /
           servicePort: 8080
       tls:
@@ -177,6 +177,9 @@ ingress:
           path: /swagger
           servicePort: 8080
         - host: "dev-test.api.easyto.travel"
+          path: /swagger
+          servicePort: 8080
+        - host: "api.easyto.travel"
           path: /swagger
           servicePort: 8080
       tls:
