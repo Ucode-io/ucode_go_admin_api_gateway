@@ -9,8 +9,16 @@ import "section.proto";
 
 service LayoutService {
     rpc CreateAll(CreateLayoutRequest) returns (GetListLayoutResponse) {}
-    rpc Update(UpdateLayoutRequest) returns (google.protobuf.Empty) {}
+    rpc Update(LayoutRequest) returns (google.protobuf.Empty) {}
     rpc GetAll(GetListLayoutRequest) returns (GetListLayoutResponse) {}
+    rpc GetSingleLayout(GetSingleLayoutRequest) returns (LayoutRequest) {}
+}
+
+message GetSingleLayoutRequest {
+    string project_id = 1;
+    string table_id = 2;
+    string menu_id = 3;
+    string table_slug = 4;
 }
 
 message LayoutRequest {
@@ -26,6 +34,8 @@ message LayoutRequest {
     bool is_visible_section = 10;
     repeated FieldForSection summary_fields = 11;
     google.protobuf.Struct attributes = 12;
+    string menu_id = 13;
+    string project_id = 14;
 }
 
 message LayoutResponse {
@@ -41,6 +51,7 @@ message LayoutResponse {
     bool is_visible_section = 10;
     repeated FieldResponse summary_fields = 11;
     google.protobuf.Struct attributes = 12;
+    string menu_id = 13;
 }
 
 message GetListLayoutResponse {
@@ -196,9 +207,9 @@ message CreateLayoutRequest {
 }
 
 message UpdateLayoutRequest {
-    repeated LayoutRequest layouts = 1;
-    string project_id = 2;
-    string table_id = 3;
+    repeated LayoutRequest layout = 1;
+    string table_id = 2;
+    string project_id = 3;
 }
 
 message LayoutPrimaryKey {
@@ -213,4 +224,5 @@ message GetListLayoutRequest {
     string table_id = 4;
     string role_id = 5;
     string language_setting = 6;
+    string menu_id = 7;
 }
