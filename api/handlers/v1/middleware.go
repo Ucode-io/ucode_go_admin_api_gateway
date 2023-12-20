@@ -398,7 +398,7 @@ func (h *HandlerV1) RedirectAuthMiddleware(cfg config.BaseConfig) gin.HandlerFun
 			res = &auth_service.V2HasAccessUserRes{}
 			//platformType = c.GetHeader("Platform-Type")
 		)
-
+		fmt.Println("\n\n\n ~~~~~~~> RedirectAuthMiddleware")
 		app_id := c.DefaultQuery("x-api-key", "")
 		if app_id == "" {
 			err := errors.New("error invalid api-key method")
