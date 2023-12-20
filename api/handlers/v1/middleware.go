@@ -401,8 +401,10 @@ func (h *HandlerV1) RedirectAuthMiddleware(cfg config.BaseConfig) gin.HandlerFun
 		fmt.Println("\n\n\n ~~~~~~~> RedirectAuthMiddleware #1")
 		app_id := c.DefaultQuery("x-api-key", "")
 		if app_id == "" {
+			fmt.Println("\n\n\n ~~~~~~~> RedirectAuthMiddleware #1.1")
 			err := errors.New("error invalid api-key method")
 			h.log.Error("--AuthMiddleware--", logger.Error(err))
+			fmt.Println("\n\n\n ~~~~~~~> RedirectAuthMiddleware #1.2")
 			c.JSON(401, struct {
 				Code    int    `json:"code"`
 				Message string `json:"message"`
@@ -410,10 +412,11 @@ func (h *HandlerV1) RedirectAuthMiddleware(cfg config.BaseConfig) gin.HandlerFun
 				Code:    401,
 				Message: "The request requires an user authentication.",
 			})
+			fmt.Println("\n\n\n ~~~~~~~> RedirectAuthMiddleware #1.3")
 			c.Abort()
 			return
 		}
-
+		fmt.Println("\n\n\n ~~~~~~~> RedirectAuthMiddleware #1.4")
 		var (
 			appIdKey, resourceAppIdKey = app_id, app_id + "resource"
 
