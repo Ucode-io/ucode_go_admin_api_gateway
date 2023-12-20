@@ -30,6 +30,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 	r.GET("/ping", h.V1.Ping)
 	// r.GET("/config", h.GetConfig)
 
+	r.Any("/x-api/*any", h.V1.RedirectAuthMiddleware(cfg), proxyMiddleware(r, &h), h.V1.Proxy)
+
 	r.POST("/send-code", h.V1.SendCode)
 	r.POST("/verify/:sms_id/:otp", h.V1.Verify)
 	r.POST("/register-otp/:table_slug", h.V1.RegisterOtp)
@@ -730,7 +732,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 
 	r.Any("/api/*any", h.V1.AuthMiddleware(cfg), proxyMiddleware(r, &h), h.V1.Proxy)
 
-	r.Any("/x-api/*any", h.V1.RedirectAuthMiddleware(cfg), proxyMiddleware(r, &h), h.V1.Proxy)
+	// r.Any("/x-api/*any", h.V1.RedirectAuthMiddleware(cfg), proxyMiddleware(r, &h), h.V1.Proxy)
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 

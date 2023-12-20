@@ -398,7 +398,7 @@ func (h *HandlerV1) RedirectAuthMiddleware(cfg config.BaseConfig) gin.HandlerFun
 			res = &auth_service.V2HasAccessUserRes{}
 			//platformType = c.GetHeader("Platform-Type")
 		)
-		fmt.Println("\n\n\n ~~~~~~~> RedirectAuthMiddleware")
+		fmt.Println("\n\n\n ~~~~~~~> RedirectAuthMiddleware #1")
 		app_id := c.DefaultQuery("x-api-key", "")
 		if app_id == "" {
 			err := errors.New("error invalid api-key method")
@@ -428,7 +428,7 @@ func (h *HandlerV1) RedirectAuthMiddleware(cfg config.BaseConfig) gin.HandlerFun
 		if !appIdOk {
 			h.cache.Add(appWaitkey, []byte(appWaitkey), config.REDIS_KEY_TIMEOUT)
 		}
-
+		fmt.Println("\n\n\n ~~~~~~~> RedirectAuthMiddleware #2")
 		if appIdOk {
 			ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
 			defer cancel()
@@ -456,7 +456,7 @@ func (h *HandlerV1) RedirectAuthMiddleware(cfg config.BaseConfig) gin.HandlerFun
 				time.Sleep(config.REDIS_SLEEP)
 			}
 		}
-
+		fmt.Println("\n\n\n ~~~~~~~> RedirectAuthMiddleware #3")
 		if apikeys.AppId == "" {
 			apikeys, err = h.authService.ApiKey().GetEnvID(
 				c.Request.Context(),
@@ -487,6 +487,7 @@ func (h *HandlerV1) RedirectAuthMiddleware(cfg config.BaseConfig) gin.HandlerFun
 		if !resourceOk {
 			h.cache.Add(resourceWaitKey, []byte(resourceWaitKey), config.REDIS_KEY_TIMEOUT)
 		}
+		fmt.Println("\n\n\n ~~~~~~~> RedirectAuthMiddleware #4")
 
 		if resourceOk {
 			ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
@@ -514,7 +515,7 @@ func (h *HandlerV1) RedirectAuthMiddleware(cfg config.BaseConfig) gin.HandlerFun
 				time.Sleep(config.REDIS_SLEEP)
 			}
 		}
-
+		fmt.Println("\n\n\n ~~~~~~~> RedirectAuthMiddleware #5")
 		if resource.Resource == nil {
 			resource, err := h.companyServices.Resource().GetResourceByEnvID(
 				c.Request.Context(),
@@ -537,7 +538,7 @@ func (h *HandlerV1) RedirectAuthMiddleware(cfg config.BaseConfig) gin.HandlerFun
 				h.cache.Add(resourceAppIdKey, resourceBody, config.REDIS_TIMEOUT)
 			}()
 		}
-
+		fmt.Println("\n\n\n ~~~~~~~> RedirectAuthMiddleware #6")
 		data := make(map[string]interface{})
 		err = json.Unmarshal(apiJson, &data)
 		if err != nil {
