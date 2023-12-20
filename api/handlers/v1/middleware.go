@@ -399,15 +399,6 @@ func (h *HandlerV1) RedirectAuthMiddleware(cfg config.BaseConfig) gin.HandlerFun
 			//platformType = c.GetHeader("Platform-Type")
 		)
 
-		bearerToken := c.GetHeader("Authorization")
-		strArr := strings.Split(bearerToken, " ")
-
-		if len(strArr) < 1 && (strArr[0] != "Bearer" && strArr[0] != "API-KEY") {
-			h.log.Error("---ERR->Unexpected token format")
-			_ = c.AbortWithError(http.StatusForbidden, errors.New("token error: wrong format"))
-			return
-		}
-
 		app_id := c.DefaultQuery("x-api-key", "")
 		if app_id == "" {
 			err := errors.New("error invalid api-key method")
@@ -422,8 +413,6 @@ func (h *HandlerV1) RedirectAuthMiddleware(cfg config.BaseConfig) gin.HandlerFun
 			c.Abort()
 			return
 		}
-
-		// apikeysTime := time.Now()
 
 		var (
 			appIdKey, resourceAppIdKey = app_id, app_id + "resource"
