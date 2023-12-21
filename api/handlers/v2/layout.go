@@ -55,6 +55,9 @@ func (h *HandlerV2) GetSingleLayout(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+
+	authInfo, _ := h.GetAuthInfo(c)
+
 	fmt.Println("\n\n\n ~~~~~~~~~~~~~~~~> Layout test #4")
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Layout().GetSingleLayout(
 		context.Background(),
@@ -62,6 +65,7 @@ func (h *HandlerV2) GetSingleLayout(c *gin.Context) {
 			ProjectId: resource.ResourceEnvironmentId,
 			MenuId:    menuId,
 			TableSlug: tableSlug,
+			RoleId:    authInfo.RoleId,
 		},
 	)
 	fmt.Println("\n\n\n ~~~~~~~~~~~~~~~~> Layout test #4.1")
