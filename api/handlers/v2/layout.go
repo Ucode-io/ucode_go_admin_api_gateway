@@ -54,7 +54,7 @@ func (h *HandlerV2) GetSingleLayout(c *gin.Context) {
 		projectId.(string),
 		resourceEnvironment.NodeType,
 	)
-	fmt.Println("\n\n\n ~~~~~~~~~~~~~~~~> Layout test #4", services.GetBuilderServiceByType("LOW").Layout())
+	fmt.Println("\n\n\n ~~~~~~~~~~~~~~~~> Layout test #4")
 	resp, err := services.GetBuilderServiceByType(nodeType).Layout().GetSingleLayout(
 		context.Background(),
 		&object_builder_service.GetSingleLayoutRequest{
@@ -63,6 +63,7 @@ func (h *HandlerV2) GetSingleLayout(c *gin.Context) {
 			TableSlug: tableSlug,
 		},
 	)
+	fmt.Println("\n\n\n ~~~~~~~~~~~~~~~~> Layout test #4.1")
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
