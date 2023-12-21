@@ -16,6 +16,7 @@ import (
 func (h *HandlerV2) GetSingleLayout(c *gin.Context) {
 	tableSlug := c.Param("collection")
 	menuId := c.Param("menu_id")
+	fmt.Println("\n\n\n ~~~~~~~~~~~~~~~~> Layout test #1", menuId, tableSlug)
 
 	if tableSlug == "" && menuId == "" {
 		h.handleResponse(c, status_http.BadRequest, "table-slug or table-id is required")
