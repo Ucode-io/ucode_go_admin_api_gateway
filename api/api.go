@@ -299,6 +299,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 
 		v1.GET("/layout", h.V1.GetListLayouts)
 		v1.PUT("/layout", h.V1.UpdateLayout)
+		v1.GET("/layout/:table_id/:menu_id", h.V1.GetSingleLayout)
 
 		//menu
 		v1.POST("/menu", h.V1.CreateMenu)
@@ -646,6 +647,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 			// layout
 			v2Collection.GET("/:collection/layout", h.V2.GetListLayouts)
 			v2Collection.PUT("/:collection/layout", h.V2.UpdateLayout)
+			v2Collection.GET("/:collection/layout/:menu_id", h.V2.GetSingleLayout)
+			v2Collection.DELETE("/:collection/layout/:id", h.V2.DeleteLayout)
 			// collection
 			v2Collection.POST("", h.V2.CreateCollection)
 			v2Collection.PUT("", h.V2.UpdateCollection)

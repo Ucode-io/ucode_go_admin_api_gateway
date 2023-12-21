@@ -312,6 +312,7 @@ func (h *HandlerV2) GetAllMenus(c *gin.Context) {
 				ProjectId: resource.ResourceEnvironmentId,
 				ParentId:  c.DefaultQuery("parent_id", ""),
 				RoleId:    authInfo.GetRoleId(),
+				TableId:   c.DefaultQuery("table_id", ""),
 			},
 		)
 		if err != nil {

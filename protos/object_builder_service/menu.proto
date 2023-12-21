@@ -183,6 +183,7 @@ message GetAllMenusRequest {
     string parent_id = 6;
     string type = 7;
     bool for_template = 8;
+    string table_id = 9;
 }
 
 message UpdateMenuOrderRequest {

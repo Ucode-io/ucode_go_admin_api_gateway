@@ -12,6 +12,63 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func (h *HandlerV2) GetSingleLayout(c *gin.Context) {
+	tableSlug := c.Param("collection")
+	menuId := c.Param("menu_id")
+
+	if tableSlug == "" && menuId == "" {
+		h.handleResponse(c, status_http.BadRequest, "table-slug or table-id is required")
+		return
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err := errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	var nodeType string
+	resourceEnvironment, err := h.companyServices.Resource().GetResourceEnvironment(
+		c.Request.Context(),
+		&pb.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ProjectId:     projectId.(string),
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resourceEnvironment.NodeType,
+	)
+
+	resp, err := services.GetBuilderServiceByType(nodeType).Layout().GetSingleLayout(
+		context.Background(),
+		&object_builder_service.GetSingleLayoutRequest{
+			ProjectId: resourceEnvironment.GetProjectId(),
+			MenuId:    menuId,
+			TableSlug: tableSlug,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.OK, resp)
+}
+
 // GetListLayouts godoc
 // @Security ApiKeyAuth
 // @ID get_list_layouts
@@ -117,7 +174,7 @@ func (h *HandlerV2) GetListLayouts(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) UpdateLayout(c *gin.Context) {
 
-	var input object_builder_service.UpdateLayoutRequest
+	var input object_builder_service.LayoutRequest
 
 	err := c.ShouldBindJSON(&input)
 	if err != nil {
@@ -171,6 +228,60 @@ func (h *HandlerV2) UpdateLayout(c *gin.Context) {
 	resp, err := services.GetBuilderServiceByType(nodeType).Layout().Update(
 		context.Background(),
 		&input,
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.OK, resp)
+}
+
+func (h *HandlerV2) DeleteLayout(c *gin.Context) {
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err := errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	var resourceEnvironmentId string
+	var nodeType string
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	resourceEnvironmentId = resource.ResourceEnvironmentId
+	nodeType = resource.NodeType
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		nodeType,
+	)
+
+	resp, err := services.GetBuilderServiceByType(nodeType).Layout().RemoveLayout(
+		context.Background(),
+		&object_builder_service.LayoutPrimaryKey{
+			Id:        c.Param("id"),
+			ProjectId: resourceEnvironmentId,
+		},
 	)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())

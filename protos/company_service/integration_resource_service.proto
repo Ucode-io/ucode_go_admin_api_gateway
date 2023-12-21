@@ -1,0 +1,32 @@
+syntax="proto3";
+
+package company_service;
+option go_package = "genproto/company_service";
+
+service IntegrationResourceService {
+    rpc CreateIntegrationResource(CreateIntegrationResourceRequest) returns (IntegrationResource) {}
+    rpc GetByUsername(GetByUsernameRequest) returns (GetByUsernameResponse) {}
+}
+
+message IntegrationResource {
+    string id = 1;
+    string token = 2;
+    string project_id = 3;
+    string environment_id = 4;
+    string username = 5;
+}
+
+message CreateIntegrationResourceRequest {
+    string token = 1;
+    string project_id = 2;
+    string environment_id = 3;
+    string username = 4;   
+}
+
+message GetByUsernameRequest {
+    string username = 1;
+}
+
+message GetByUsernameResponse {
+    repeated IntegrationResource integration_resources = 1;
+}

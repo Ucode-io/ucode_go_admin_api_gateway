@@ -23,6 +23,7 @@ enum ResourceType {
     CLICKHOUSE = 2;
     POSTGRESQL = 3;
     REST = 4;
+    GITHUB = 5;
 }
 
 enum SettingType {
