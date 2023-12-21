@@ -50,7 +50,7 @@ func main() {
 	// auth connection
 	authSrvc, err := services.NewAuthGrpcClient(ctx, baseConf)
 	if err != nil {
-		log.Error("[ucode] error while establishing auth grpc conn", logger.Error(err))
+		log.Error("[ucode] error while establishing auth grpc conn-", logger.Error(err))
 		return
 	}
 
