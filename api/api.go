@@ -739,12 +739,12 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 
 		v2Files := v2Version.Group("/files")
 		{
-			v2Files.POST("/files", h.V2.UploadToFolder)
-			v2Files.GET("/files/:id", h.V2.GetSingleFile)
-			v2Files.PUT("/files/:id/upload", h.V2.UpdateFile)
-			v2Files.DELETE("/files", h.V2.DeleteFiles)
-			v2Files.DELETE("/files/:id/upload", h.V2.DeleteFile)
-			v2Files.GET("/files", h.V2.GetAllFiles)
+			v2Files.POST("", h.V2.UploadToFolder)
+			v2Files.GET("/:id", h.V2.GetSingleFile)
+			v2Files.PUT("/:id/upload", h.V2.UpdateFile)
+			v2Files.DELETE("", h.V2.DeleteFiles)
+			v2Files.DELETE("/:id/upload", h.V2.DeleteFile)
+			v2Files.GET("", h.V2.GetAllFiles)
 		}
 	}
 
