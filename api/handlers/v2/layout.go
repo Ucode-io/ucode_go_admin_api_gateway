@@ -39,7 +39,7 @@ func (h *HandlerV2) GetSingleLayout(c *gin.Context) {
 		c.Request.Context(),
 		&pb.GetResourceEnvironmentReq{
 			EnvironmentId: environmentId.(string),
-			ProjectId: projectId.(string),
+			ProjectId:     projectId.(string),
 		},
 	)
 	if err != nil {
@@ -57,7 +57,7 @@ func (h *HandlerV2) GetSingleLayout(c *gin.Context) {
 		context.Background(),
 		&object_builder_service.GetSingleLayoutRequest{
 			ProjectId: resourceEnvironment.GetProjectId(),
-			MenuId: menuId,
+			MenuId:    menuId,
 			TableSlug: tableSlug,
 		},
 	)
@@ -228,6 +228,60 @@ func (h *HandlerV2) UpdateLayout(c *gin.Context) {
 	resp, err := services.GetBuilderServiceByType(nodeType).Layout().Update(
 		context.Background(),
 		&input,
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.OK, resp)
+}
+
+func (h *HandlerV2) DeleteLayout(c *gin.Context) {
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err := errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	var resourceEnvironmentId string
+	var nodeType string
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	resourceEnvironmentId = resource.ResourceEnvironmentId
+	nodeType = resource.NodeType
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		nodeType,
+	)
+
+	resp, err := services.GetBuilderServiceByType(nodeType).Layout().RemoveLayout(
+		context.Background(),
+		&object_builder_service.LayoutPrimaryKey{
+			Id:        c.Param("id"),
+			ProjectId: resourceEnvironmentId,
+		},
 	)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())

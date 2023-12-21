@@ -11,7 +11,8 @@ service LayoutService {
     rpc CreateAll(CreateLayoutRequest) returns (GetListLayoutResponse) {}
     rpc Update(LayoutRequest) returns (google.protobuf.Empty) {}
     rpc GetAll(GetListLayoutRequest) returns (GetListLayoutResponse) {}
-    rpc GetSingleLayout(GetSingleLayoutRequest) returns (LayoutRequest) {}
+    rpc GetSingleLayout(GetSingleLayoutRequest) returns (LayoutResponse) {}
+    rpc RemoveLayout(LayoutPrimaryKey) returns (google.protobuf.Empty) {}
 }
 
 message GetSingleLayoutRequest {
@@ -19,6 +20,7 @@ message GetSingleLayoutRequest {
     string table_id = 2;
     string menu_id = 3;
     string table_slug = 4;
+    string role_id = 5;
 }
 
 message LayoutRequest {

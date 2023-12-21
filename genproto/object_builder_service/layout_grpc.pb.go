@@ -26,7 +26,8 @@ type LayoutServiceClient interface {
 	CreateAll(ctx context.Context, in *CreateLayoutRequest, opts ...grpc.CallOption) (*GetListLayoutResponse, error)
 	Update(ctx context.Context, in *LayoutRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetAll(ctx context.Context, in *GetListLayoutRequest, opts ...grpc.CallOption) (*GetListLayoutResponse, error)
-	GetSingleLayout(ctx context.Context, in *GetSingleLayoutRequest, opts ...grpc.CallOption) (*LayoutRequest, error)
+	GetSingleLayout(ctx context.Context, in *GetSingleLayoutRequest, opts ...grpc.CallOption) (*LayoutResponse, error)
+	RemoveLayout(ctx context.Context, in *LayoutPrimaryKey, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type layoutServiceClient struct {
@@ -64,9 +65,18 @@ func (c *layoutServiceClient) GetAll(ctx context.Context, in *GetListLayoutReque
 	return out, nil
 }
 
-func (c *layoutServiceClient) GetSingleLayout(ctx context.Context, in *GetSingleLayoutRequest, opts ...grpc.CallOption) (*LayoutRequest, error) {
-	out := new(LayoutRequest)
+func (c *layoutServiceClient) GetSingleLayout(ctx context.Context, in *GetSingleLayoutRequest, opts ...grpc.CallOption) (*LayoutResponse, error) {
+	out := new(LayoutResponse)
 	err := c.cc.Invoke(ctx, "/object_builder_service.LayoutService/GetSingleLayout", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *layoutServiceClient) RemoveLayout(ctx context.Context, in *LayoutPrimaryKey, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/object_builder_service.LayoutService/RemoveLayout", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +90,8 @@ type LayoutServiceServer interface {
 	CreateAll(context.Context, *CreateLayoutRequest) (*GetListLayoutResponse, error)
 	Update(context.Context, *LayoutRequest) (*emptypb.Empty, error)
 	GetAll(context.Context, *GetListLayoutRequest) (*GetListLayoutResponse, error)
-	GetSingleLayout(context.Context, *GetSingleLayoutRequest) (*LayoutRequest, error)
+	GetSingleLayout(context.Context, *GetSingleLayoutRequest) (*LayoutResponse, error)
+	RemoveLayout(context.Context, *LayoutPrimaryKey) (*emptypb.Empty, error)
 	mustEmbedUnimplementedLayoutServiceServer()
 }
 
@@ -97,8 +108,11 @@ func (UnimplementedLayoutServiceServer) Update(context.Context, *LayoutRequest) 
 func (UnimplementedLayoutServiceServer) GetAll(context.Context, *GetListLayoutRequest) (*GetListLayoutResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAll not implemented")
 }
-func (UnimplementedLayoutServiceServer) GetSingleLayout(context.Context, *GetSingleLayoutRequest) (*LayoutRequest, error) {
+func (UnimplementedLayoutServiceServer) GetSingleLayout(context.Context, *GetSingleLayoutRequest) (*LayoutResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetSingleLayout not implemented")
+}
+func (UnimplementedLayoutServiceServer) RemoveLayout(context.Context, *LayoutPrimaryKey) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RemoveLayout not implemented")
 }
 func (UnimplementedLayoutServiceServer) mustEmbedUnimplementedLayoutServiceServer() {}
 
@@ -185,6 +199,24 @@ func _LayoutService_GetSingleLayout_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _LayoutService_RemoveLayout_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LayoutPrimaryKey)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LayoutServiceServer).RemoveLayout(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/object_builder_service.LayoutService/RemoveLayout",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LayoutServiceServer).RemoveLayout(ctx, req.(*LayoutPrimaryKey))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // LayoutService_ServiceDesc is the grpc.ServiceDesc for LayoutService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -207,6 +239,10 @@ var LayoutService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetSingleLayout",
 			Handler:    _LayoutService_GetSingleLayout_Handler,
+		},
+		{
+			MethodName: "RemoveLayout",
+			Handler:    _LayoutService_RemoveLayout_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
