@@ -36,12 +36,13 @@ func (h *HandlerV2) GetSingleLayout(c *gin.Context) {
 		return
 	}
 	fmt.Println("\n\n\n ~~~~~~~~~~~~~~~~> Layout test #2")
-	var nodeType string
-	resourceEnvironment, err := h.companyServices.Resource().GetResourceEnvironment(
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
-		&pb.GetResourceEnvironmentReq{
-			EnvironmentId: environmentId.(string),
+		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
 	)
 	if err != nil {
@@ -52,13 +53,13 @@ func (h *HandlerV2) GetSingleLayout(c *gin.Context) {
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
 		projectId.(string),
-		resourceEnvironment.NodeType,
+		resource.NodeType,
 	)
 	fmt.Println("\n\n\n ~~~~~~~~~~~~~~~~> Layout test #4")
-	resp, err := services.GetBuilderServiceByType(nodeType).Layout().GetSingleLayout(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).Layout().GetSingleLayout(
 		context.Background(),
 		&object_builder_service.GetSingleLayoutRequest{
-			ProjectId: resourceEnvironment.GetProjectId(),
+			ProjectId: resource.ResourceEnvironmentId,
 			MenuId:    menuId,
 			TableSlug: tableSlug,
 		},
