@@ -500,11 +500,14 @@ func (h *HandlerV1) GetSingleSlim(c *gin.Context) {
 		return
 	}
 
-	jsonData, _ := resp.GetData().MarshalJSON()
-	err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
-	if err != nil {
-		h.log.Error("Error while setting redis", logger.Error(err))
+	if resp.IsCached {
+		jsonData, _ := resp.GetData().MarshalJSON()
+		err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
+		if err != nil {
+			h.log.Error("Error while setting redis", logger.Error(err))
+		}
 	}
+
 	statusHttp.CustomMessage = resp.GetCustomMessage()
 	h.handleResponse(c, statusHttp, resp)
 }
