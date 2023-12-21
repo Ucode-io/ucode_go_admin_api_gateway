@@ -770,8 +770,13 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 	if objectRequest.Data["guid"] != nil {
 		id = objectRequest.Data["guid"].(string)
 	} else {
-		h.handleResponse(c, status_http.BadRequest, "guid is required")
-		return
+		objectRequest.Data["guid"] = c.Param("id")
+		id = c.Param("id")
+
+		if id == "" {
+			h.handleResponse(c, status_http.BadRequest, "guid is required")
+			return
+		}
 	}
 
 	projectId, ok := c.Get("project_id")
