@@ -54,7 +54,7 @@ func (h *HandlerV2) GetSingleLayout(c *gin.Context) {
 		projectId.(string),
 		resourceEnvironment.NodeType,
 	)
-	fmt.Println("\n\n\n ~~~~~~~~~~~~~~~~> Layout test #4")
+	fmt.Println("\n\n\n ~~~~~~~~~~~~~~~~> Layout test #4", services.GetBuilderServiceByType("LOW").Layout())
 	resp, err := services.GetBuilderServiceByType(nodeType).Layout().GetSingleLayout(
 		context.Background(),
 		&object_builder_service.GetSingleLayoutRequest{
