@@ -2,7 +2,6 @@ package postgres
 
 import (
 	"context"
-	"fmt"
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/storage"
 
@@ -15,14 +14,17 @@ type Store struct {
 }
 
 func NewPostgres(ctx context.Context, cfg config.Config) (storage.StorageI, error) {
-	config, err := pgxpool.ParseConfig(fmt.Sprintf(
-		"postgres://%s:%s@%s:%d/%s?sslmode=disable",
-		cfg.Postgres.Username,
-		cfg.Postgres.Password,
-		cfg.Postgres.Host,
-		cfg.Postgres.Port,
-		cfg.Postgres.Database,
-	))
+	// config, err := pgxpool.ParseConfig(
+	// 	fmt.Sprintf(
+	// 		"postgres://%s:%s@%s:%d/%s?sslmode=disable",
+	// 		cfg.Postgres.Username,
+	// 		cfg.Postgres.Password,
+	// 		cfg.Postgres.Host,
+	// 		cfg.Postgres.Port,
+	// 		cfg.Postgres.Database,
+	// 	))
+
+	config, err := pgxpool.ParseConfig("")
 	if err != nil {
 		return nil, err
 	}

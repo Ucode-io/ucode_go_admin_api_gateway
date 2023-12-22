@@ -10,6 +10,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
 	authPb "ucode/ucode_go_api_gateway/genproto/auth_service"
+	"ucode/ucode_go_api_gateway/genproto/company_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 
@@ -69,18 +70,47 @@ func (h *HandlerV1) CreateObject(c *gin.Context) {
 		return
 	}
 
-	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId.(string),
-			EnvironmentId: environmentId.(string),
-			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+	var resource *pb.ServiceResourceModel
+	resourceBody, ok := c.Get("resource")
+	if resourceBody != "" && ok {
+		var resourceList *company_service.GetResourceByEnvIDResponse
+		err = json.Unmarshal([]byte(resourceBody.(string)), &resourceList)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		for _, resourceObject := range resourceList.ServiceResources {
+			if resourceObject.Title == pb.ServiceType_name[1] {
+				resource = &pb.ServiceResourceModel{
+					Id:                    resourceObject.Id,
+					ServiceType:           resourceObject.ServiceType,
+					ProjectId:             resourceObject.ProjectId,
+					Title:                 resourceObject.Title,
+					ResourceId:            resourceObject.ResourceId,
+					ResourceEnvironmentId: resourceObject.ResourceEnvironmentId,
+					EnvironmentId:         resourceObject.EnvironmentId,
+					ResourceType:          resourceObject.ResourceType,
+					NodeType:              resourceObject.NodeType,
+				}
+				break
+			}
+		}
+	} else {
+		resource, err = h.companyServices.ServiceResource().GetSingle(
+			c.Request.Context(),
+			&pb.GetSingleServiceResourceReq{
+				ProjectId:     projectId.(string),
+				EnvironmentId: environmentId.(string),
+				ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
+
 	objectRequest.Data["company_service_project_id"] = resource.GetProjectId()
 	objectRequest.Data["company_service_environment_id"] = resource.GetEnvironmentId()
 
@@ -190,9 +220,10 @@ func (h *HandlerV1) CreateObject(c *gin.Context) {
 		resp, err = service.Create(
 			context.Background(),
 			&obs.CommonMessage{
-				TableSlug: c.Param("table_slug"),
-				Data:      structData,
-				ProjectId: resource.ResourceEnvironmentId,
+				TableSlug:      c.Param("table_slug"),
+				Data:           structData,
+				ProjectId:      resource.ResourceEnvironmentId,
+				BlockedBuilder: cast.ToBool(c.DefaultQuery("block_builder", "false")),
 			},
 		)
 		// this logic for custom error message, object builder service may be return 400, 404, 500
@@ -567,17 +598,45 @@ func (h *HandlerV1) UpdateObject(c *gin.Context) {
 		return
 	}
 
-	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId.(string),
-			EnvironmentId: environmentId.(string),
-			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+	var resource *pb.ServiceResourceModel
+	resourceBody, ok := c.Get("resource")
+	if ok {
+		var resourceList *company_service.GetResourceByEnvIDResponse
+		err = json.Unmarshal([]byte(resourceBody.(string)), &resourceList)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		for _, resourceObject := range resourceList.ServiceResources {
+			if resourceObject.Title == pb.ServiceType_name[1] {
+				resource = &pb.ServiceResourceModel{
+					Id:                    resourceObject.Id,
+					ServiceType:           resourceObject.ServiceType,
+					ProjectId:             resourceObject.ProjectId,
+					Title:                 resourceObject.Title,
+					ResourceId:            resourceObject.ResourceId,
+					ResourceEnvironmentId: resourceObject.ResourceEnvironmentId,
+					EnvironmentId:         resourceObject.EnvironmentId,
+					ResourceType:          resourceObject.ResourceType,
+					NodeType:              resourceObject.NodeType,
+				}
+				break
+			}
+		}
+	} else {
+		resource, err = h.companyServices.ServiceResource().GetSingle(
+			c.Request.Context(),
+			&pb.GetSingleServiceResourceReq{
+				ProjectId:     projectId.(string),
+				EnvironmentId: environmentId.(string),
+				ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	services, err := h.GetProjectSrvc(
@@ -670,9 +729,10 @@ func (h *HandlerV1) UpdateObject(c *gin.Context) {
 		resp, err = service.Update(
 			context.Background(),
 			&obs.CommonMessage{
-				TableSlug: c.Param("table_slug"),
-				Data:      structData,
-				ProjectId: resource.ResourceEnvironmentId,
+				TableSlug:      c.Param("table_slug"),
+				Data:           structData,
+				ProjectId:      resource.ResourceEnvironmentId,
+				BlockedBuilder: cast.ToBool(c.DefaultQuery("block_builder", "false")),
 			},
 		)
 		if err != nil {
@@ -2017,17 +2077,45 @@ func (h *HandlerV1) MultipleUpdateObject(c *gin.Context) {
 		return
 	}
 
-	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId.(string),
-			EnvironmentId: environmentId.(string),
-			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+	var resource *pb.ServiceResourceModel
+	resourceBody, ok := c.Get("resource")
+	if ok {
+		var resourceList *company_service.GetResourceByEnvIDResponse
+		err = json.Unmarshal([]byte(resourceBody.(string)), &resourceList)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		for _, resourceObject := range resourceList.ServiceResources {
+			if resourceObject.Title == pb.ServiceType_name[1] {
+				resource = &pb.ServiceResourceModel{
+					Id:                    resourceObject.Id,
+					ServiceType:           resourceObject.ServiceType,
+					ProjectId:             resourceObject.ProjectId,
+					Title:                 resourceObject.Title,
+					ResourceId:            resourceObject.ResourceId,
+					ResourceEnvironmentId: resourceObject.ResourceEnvironmentId,
+					EnvironmentId:         resourceObject.EnvironmentId,
+					ResourceType:          resourceObject.ResourceType,
+					NodeType:              resourceObject.NodeType,
+				}
+				break
+			}
+		}
+	} else {
+		resource, err = h.companyServices.ServiceResource().GetSingle(
+			c.Request.Context(),
+			&pb.GetSingleServiceResourceReq{
+				ProjectId:     projectId.(string),
+				EnvironmentId: environmentId.(string),
+				ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	services, err := h.GetProjectSrvc(
@@ -2102,9 +2190,10 @@ func (h *HandlerV1) MultipleUpdateObject(c *gin.Context) {
 		resp, err = service.MultipleUpdate(
 			context.Background(),
 			&obs.CommonMessage{
-				TableSlug: c.Param("table_slug"),
-				Data:      structData,
-				ProjectId: resource.ResourceEnvironmentId,
+				TableSlug:      c.Param("table_slug"),
+				Data:           structData,
+				ProjectId:      resource.ResourceEnvironmentId,
+				BlockedBuilder: cast.ToBool(c.DefaultQuery("block_builder", "false")),
 			},
 		)
 

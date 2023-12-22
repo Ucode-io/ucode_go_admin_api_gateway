@@ -60,6 +60,12 @@ message ProjectConfig {
     string OBJECT_BUILDER_SERVICE_HOST = 22;
     string OBJECT_BUILDER_SERVICE_LOW_HOST = 23;
     string QUERY_GRPC_PORT = 24;
+    string QUERY_SERVICE_HOST = 25;
+    string SCENARIO_GRPC_PORT = 26;
+    string SCENARIO_HTTP_PORT = 27;
+    string SCENARIO_SERVICE_HOST = 28;
+    string SMS_GRPC_PORT = 29;
+    string SMS_SERVICE_HOST = 30;
     string TEMPLATE_GRPC_PORT = 31;
     string TEMPLATE_SERVICE_HOST = 32;
     string VERSIONING_GRPC_PORT = 33;

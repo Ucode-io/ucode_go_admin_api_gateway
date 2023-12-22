@@ -41,6 +41,7 @@ message CommonMessage {
     string custom_message = 5;
     bool is_cached = 6;
     bool blocked_login_table = 7;
+    bool blocked_builder = 8;
 }
 message ManyToManyMessage {
     string table_from = 1;

@@ -13,11 +13,11 @@ import (
 func TestProjectCreate(t *testing.T) {
 
 	conf := config.Config{}
-	conf.Postgres.Host = "161.35.26.178"
-	conf.Postgres.Port = 30032
-	conf.Postgres.Username = "admin_api_gateway"
-	conf.Postgres.Database = "admin_api_gateway"
-	conf.Postgres.Password = "aoM0zohB"
+	// conf.Postgres.Host = "161.35.26.178"
+	// conf.Postgres.Port = 30032
+	// conf.Postgres.Username = "admin_api_gateway"
+	// conf.Postgres.Database = "admin_api_gateway"
+	// conf.Postgres.Password = "aoM0zohB"
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
@@ -48,11 +48,11 @@ func TestProjectCreate(t *testing.T) {
 func TestGetProjectList(t *testing.T) {
 
 	conf := config.Config{}
-	conf.Postgres.Host = "161.35.26.178"
-	conf.Postgres.Port = 30032
-	conf.Postgres.Username = "admin_api_gateway"
-	conf.Postgres.Database = "admin_api_gateway"
-	conf.Postgres.Password = "aoM0zohB"
+	// conf.Postgres.Host = "161.35.26.178"
+	// conf.Postgres.Port = 30032
+	// conf.Postgres.Username = "admin_api_gateway"
+	// conf.Postgres.Database = "admin_api_gateway"
+	// conf.Postgres.Password = "aoM0zohB"
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
@@ -75,11 +75,11 @@ func TestGetProjectList(t *testing.T) {
 
 func TestDelete(t *testing.T) {
 	conf := config.Config{}
-	conf.Postgres.Host = "161.35.26.178"
-	conf.Postgres.Port = 30032
-	conf.Postgres.Username = "admin_api_gateway"
-	conf.Postgres.Database = "admin_api_gateway"
-	conf.Postgres.Password = "aoM0zohB"
+	// conf.Postgres.Host = "161.35.26.178"
+	// conf.Postgres.Port = 30032
+	// conf.Postgres.Username = "admin_api_gateway"
+	// conf.Postgres.Database = "admin_api_gateway"
+	// conf.Postgres.Password = "aoM0zohB"
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()

@@ -199,7 +199,7 @@ func (h *HandlerV1) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 			}
 
 			if resource.Resource == nil {
-				resource, err := h.companyServices.Resource().GetResourceByEnvID(
+				resource, err = h.companyServices.Resource().GetResourceByEnvID(
 					c.Request.Context(),
 					&company_service.GetResourceByEnvIDRequest{
 						EnvId: apikeys.GetEnvironmentId(),
@@ -229,11 +229,18 @@ func (h *HandlerV1) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 				return
 			}
 
+			resourceBody, err := json.Marshal(resource)
+			if err != nil {
+				h.handleResponse(c, status_http.BadRequest, "cant get auth info")
+				return
+			}
+
 			// fmt.Println("\n\n >>>> api key ", apikeys, "\n\n")
 			c.Set("auth", models.AuthData{Type: "API-KEY", Data: data})
 			c.Set("resource_id", resource.GetResource().GetId())
 			c.Set("environment_id", apikeys.GetEnvironmentId())
 			c.Set("project_id", apikeys.GetProjectId())
+			c.Set("resource", string(resourceBody))
 
 			// fmt.Println(">>>>>>>>>>>>>>>apikeysTime:", time.Since(apikeysTime))
 		default:
