@@ -3,6 +3,7 @@ package v1
 import (
 	"context"
 	"errors"
+	"fmt"
 	"ucode/ucode_go_api_gateway/api/models"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
@@ -151,6 +152,7 @@ func (h *HandlerV1) ExcelToDb(c *gin.Context) {
 
 	data, err := helper.ConvertMapToStruct(excelRequest.Data)
 	if err != nil {
+		fmt.Println("Error in convert")
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
@@ -177,6 +179,7 @@ func (h *HandlerV1) ExcelToDb(c *gin.Context) {
 			},
 		)
 		if err != nil {
+			fmt.Println("Error in excel to db")
 			h.handleResponse(c, status_http.InvalidArgument, err.Error())
 			return
 		}
