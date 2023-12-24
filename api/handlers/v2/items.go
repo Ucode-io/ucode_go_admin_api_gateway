@@ -153,6 +153,7 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 				Data:              structData,
 				ProjectId:         resource.ResourceEnvironmentId,
 				BlockedLoginTable: cast.ToBool(c.DefaultQuery("blocked_login_table", "false")),
+				BlockedBuilder:    cast.ToBool(c.DefaultQuery("block_builder", "false")),
 			},
 		)
 		// this logic for custom error message, object builder service may be return 400, 404, 500
@@ -910,9 +911,10 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 		resp, err = services.PostgresBuilderService().ObjectBuilder().Update(
 			context.Background(),
 			&obs.CommonMessage{
-				TableSlug: c.Param("collection"),
-				Data:      structData,
-				ProjectId: resource.ResourceEnvironmentId,
+				TableSlug:      c.Param("collection"),
+				Data:           structData,
+				ProjectId:      resource.ResourceEnvironmentId,
+				BlockedBuilder: cast.ToBool(c.DefaultQuery("block_builder", "false")),
 			},
 		)
 		if err != nil {

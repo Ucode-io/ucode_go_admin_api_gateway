@@ -220,11 +220,11 @@ func (h *HandlerV1) CreateObject(c *gin.Context) {
 		resp, err = service.Create(
 			context.Background(),
 			&obs.CommonMessage{
-				TableSlug:      c.Param("table_slug"),
-				Data:           structData,
-				ProjectId:      resource.ResourceEnvironmentId,
-				BlockedBuilder: cast.ToBool(c.DefaultQuery("block_builder", "false")),
-			},
+				TableSlug:         c.Param("table_slug"),
+				Data:              structData,
+				ProjectId:         resource.ResourceEnvironmentId,
+				BlockedLoginTable: cast.ToBool(c.DefaultQuery("blocked_login_table", "false")),
+				BlockedBuilder:    cast.ToBool(c.DefaultQuery("block_builder", "false"))},
 		)
 		// this logic for custom error message, object builder service may be return 400, 404, 500
 		if err != nil {
