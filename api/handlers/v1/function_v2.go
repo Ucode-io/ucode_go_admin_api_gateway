@@ -779,8 +779,6 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 		invokeFunction models.InvokeFunctionRequest
 	)
 
-	fmt.Println("\n\n\n TEst #1")
-
 	bodyReq, err := io.ReadAll(c.Request.Body)
 	if err != nil {
 		h.log.Error("cant parse body or an empty body received", logger.Any("req", c.Request))
@@ -803,46 +801,34 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
-	fmt.Println("\n\n\n TEst #2", projectId, environmentId)
 
-	var (
-		resourceKey = fmt.Sprintf("%s-%s", projectId.(string), environmentId.(string))
-		resource    = &pb.ServiceResourceModel{}
-	)
+	var resource *pb.ServiceResourceModel
+	resourceBody, ok := c.Get("resource")
+	if resourceBody != "" && ok {
+		var resourceList *company_service.GetResourceByEnvIDResponse
+		err = json.Unmarshal([]byte(resourceBody.(string)), &resourceList)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 
-	// resourceTime := time.Now()
-	var singleResourceWaitKey = config.CACHE_WAIT + "-single-resource"
-	_, singleResourceOk := h.cache.Get(singleResourceWaitKey)
-	if singleResourceOk {
-		ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
-		defer cancel()
-
-		for {
-			singleResourceBody, ok := h.cache.Get(resourceKey)
-			if ok {
-				err = json.Unmarshal(singleResourceBody, &resource)
-				if err != nil {
-					h.log.Error("Error while unmarshal resource redis", logger.Error(err))
-					return
+		for _, resourceObject := range resourceList.ServiceResources {
+			if resourceObject.Title == pb.ServiceType_name[1] {
+				resource = &pb.ServiceResourceModel{
+					Id:                    resourceObject.Id,
+					ServiceType:           resourceObject.ServiceType,
+					ProjectId:             resourceObject.ProjectId,
+					Title:                 resourceObject.Title,
+					ResourceId:            resourceObject.ResourceId,
+					ResourceEnvironmentId: resourceObject.ResourceEnvironmentId,
+					EnvironmentId:         resourceObject.EnvironmentId,
+					ResourceType:          resourceObject.ResourceType,
+					NodeType:              resourceObject.NodeType,
 				}
-			}
-
-			if resource.ResourceEnvironmentId != "" {
 				break
 			}
-
-			if ctx.Err() == context.DeadlineExceeded {
-				break
-			}
-
-			time.Sleep(config.REDIS_SLEEP)
 		}
 	} else {
-		h.cache.Add(singleResourceWaitKey, []byte(singleResourceWaitKey), config.REDIS_KEY_TIMEOUT)
-	}
-	fmt.Println("\n\n\n TEst #3")
-
-	if resource.ResourceEnvironmentId == "" {
 		resource, err = h.companyServices.ServiceResource().GetSingle(
 			c.Request.Context(),
 			&pb.GetSingleServiceResourceReq{
@@ -855,17 +841,7 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
-
-		body, err := json.Marshal(resource)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
-		h.cache.Add(resourceKey, body, config.REDIS_TIMEOUT)
 	}
-	// fmt.Println(">>>>>>>>>>>>>>>resourceTime:", time.Since(resourceTime))
-	fmt.Println("\n\n\n TEst #4")
 	authInfoAny, ok := c.Get("auth")
 	if !ok {
 		h.handleResponse(c, status_http.InvalidArgument, "cant get auth info")
@@ -879,8 +855,8 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 	requestData.Params = c.Request.URL.Query()
 	requestData.Body = bodyReq
 	keyParams := c.Request.URL.Query()
-	var ettProductPath = []string{"easy-to-travel-get-products-agent-swagger", "b693cc12-8551-475f-91d5-4913c1739df4"}
 
+	var ettProductPath = []string{"easy-to-travel-get-products-agent-swagger", "b693cc12-8551-475f-91d5-4913c1739df4"}
 	if helper.Contains(ettProductPath, c.Param("function-id")) {
 		if len(keyParams.Get("startTime")) > 0 {
 			keyParams.Del("startTime")
@@ -893,7 +869,6 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 
 	var key = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("ett-%s-%s-%s", c.Request.Header.Get("Prev_path"), keyParams.Encode(), resource.ResourceEnvironmentId)))
 	_, ok = h.cache.Get(config.CACHE_WAIT)
-	fmt.Println("\n\n\n TEst #5")
 	if c.Request.Method == "GET" && resource.ProjectId == "1acd7a8f-a038-4e07-91cb-b689c368d855" {
 		if ok {
 
@@ -948,10 +923,9 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 			h.cache.Add(config.CACHE_WAIT, []byte(config.CACHE_WAIT), 20*time.Second)
 		}
 	}
-	fmt.Println("\n\n\n TEst #5.1")
+
 	var function = &fc.Function{}
 	if util.IsValidUUID(c.Param("function-id")) {
-		fmt.Println("\n\n\n TEst #5.2")
 		services, err := h.GetProjectSrvc(
 			c.Request.Context(),
 			projectId.(string),
@@ -961,7 +935,6 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
-		fmt.Println("\n\n\n TEst #5.3")
 		function, err = services.FunctionService().FunctionService().GetSingle(
 			context.Background(),
 			&fc.FunctionPrimaryKey{
@@ -973,17 +946,11 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
-		fmt.Println("\n\n\n TEst #5.4")
 	} else {
-		fmt.Println("\n\n\n TEst #5.5")
 		function.Path = c.Param("function-id")
 	}
-	// getSingleFunctionTime := time.Now()
-
-	// fmt.Println(">>>>>>>>>>>>>>>getSingleFunctionTime:", time.Since(getSingleFunctionTime))
 
 	// doRequestTime := time.Now()
-	fmt.Println("\n\n\n TEst #6")
 	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+function.Path, "POST", models.FunctionRunV2{
 		Auth:        models.AuthData{},
 		RequestData: requestData,
@@ -1004,8 +971,8 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, errStr)
 		return
 	}
-	// fmt.Println(">>>>>>>>>>>>>>>doRequestTime:", time.Since(doRequestTime))
-	fmt.Println("\n\n\n TEst #7 1")
+
+	// fmt.Println(">>>>>>>>>>>>>>>doRequestTime:", time.Since(doRequestTime), timeId.String())
 	if isOwnData, ok := resp.Attributes["is_own_data"].(bool); ok {
 		if isOwnData {
 			if err == nil && c.Request.Method == "GET" && resource.ProjectId == "1acd7a8f-a038-4e07-91cb-b689c368d855" {
@@ -1036,15 +1003,10 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 				}
 			}
 
-			// DoRequestCount++
-			// fmt.Println("::::::::::::::::::::::::::::::::::::::::::::::::::::::::", DoRequestCount)
-
 			c.JSON(200, resp.Data)
 			return
 		}
 	}
-	fmt.Println("\n\n\n TEst #8")
+
 	h.handleResponse(c, status_http.OK, resp)
 }
-
-// var DoRequestCount int

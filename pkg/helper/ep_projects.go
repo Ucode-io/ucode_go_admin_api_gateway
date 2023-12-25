@@ -33,7 +33,7 @@ func EnterPriceProjectsGrpcSvcs(ctx context.Context, compSrvc services.CompanySe
 			// v.OBJECT_BUILDER_SERVICE_HOST = "localhost"
 
 			// v.REDIS_HOST = "localhost"
-			// v.REDIS_PORT = ":6379"
+			// v.REDIS_PORT = "6379"
 			// v.REDIS_PASSWORD = ""
 			// num = 0
 

@@ -10,6 +10,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
+	"ucode/ucode_go_api_gateway/genproto/company_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/caching"
@@ -316,51 +317,33 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 		return
 	}
 
-	var (
-		resourceKey = fmt.Sprintf("%s-%s", projectId.(string), environmentId.(string))
-		resource    = &pb.ServiceResourceModel{}
-	)
-
-	waitResourceMap := waitSlimResourceMap.ReadFromMap(resourceKey)
-	if waitResourceMap.Timeout != nil {
-		if waitResourceMap.Timeout.Err() == context.DeadlineExceeded {
-			waitSlimResourceMap.DeleteKey(resourceKey)
-			waitResourceMap = waitSlimResourceMap.ReadFromMap(resourceKey)
+	var resource *pb.ServiceResourceModel
+	resourceBody, ok := c.Get("resource")
+	if resourceBody != "" && ok {
+		var resourceList *company_service.GetResourceByEnvIDResponse
+		err = json.Unmarshal([]byte(resourceBody.(string)), &resourceList)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
 		}
-	}
 
-	if waitResourceMap.Value != config.CACHE_WAIT {
-		ctx, _ := context.WithTimeout(context.Background(), config.REDIS_TIMEOUT)
-		waitSlimResourceMap.AddKey(resourceKey, caching.WaitKey{Value: config.CACHE_WAIT, Timeout: ctx})
-	}
-
-	if waitResourceMap.Value == config.CACHE_WAIT {
-		ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
-		defer cancel()
-
-		for {
-			waitResourceMap := waitSlimResourceMap.ReadFromMap(resourceKey)
-			if len(waitResourceMap.Body) > 0 {
-				err = json.Unmarshal(waitResourceMap.Body, &resource)
-				if err != nil {
-					h.log.Error("Error while unmarshal resource redis", logger.Error(err))
-					return
+		for _, resourceObject := range resourceList.ServiceResources {
+			if resourceObject.Title == pb.ServiceType_name[1] {
+				resource = &pb.ServiceResourceModel{
+					Id:                    resourceObject.Id,
+					ServiceType:           resourceObject.ServiceType,
+					ProjectId:             resourceObject.ProjectId,
+					Title:                 resourceObject.Title,
+					ResourceId:            resourceObject.ResourceId,
+					ResourceEnvironmentId: resourceObject.ResourceEnvironmentId,
+					EnvironmentId:         resourceObject.EnvironmentId,
+					ResourceType:          resourceObject.ResourceType,
+					NodeType:              resourceObject.NodeType,
 				}
-			}
-
-			if resource.ResourceEnvironmentId != "" {
 				break
 			}
-
-			if ctx.Err() == context.DeadlineExceeded {
-				break
-			}
-
-			time.Sleep(config.REDIS_SLEEP)
 		}
-	}
-
-	if resource.ResourceEnvironmentId == "" {
+	} else {
 		resource, err = h.companyServices.ServiceResource().GetSingle(
 			c.Request.Context(),
 			&pb.GetSingleServiceResourceReq{
@@ -373,14 +356,6 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
-
-		body, err := json.Marshal(resource)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
-		waitSlimResourceMap.WriteBody(resourceKey, body)
 	}
 
 	services, err := h.GetProjectSrvc(
@@ -400,31 +375,20 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 	}
 	defer conn.Close()
 
-	var slimKey = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId)))
+	var slimKey = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("slim-%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId)))
 	if cast.ToBool(c.Query("is_wait_cached")) {
-		waitSlimMap := waitSlimResourceMap.ReadFromMap(slimKey)
-		if waitSlimMap.Timeout != nil {
-			if waitSlimMap.Timeout.Err() == context.DeadlineExceeded {
-				waitSlimResourceMap.DeleteKey(slimKey)
-				waitSlimMap = waitSlimResourceMap.ReadFromMap(slimKey)
-			}
-		}
+		var slimWaitKey = config.CACHE_WAIT + "-slim"
+		_, slimOK := h.cache.Get(slimWaitKey)
 
-		if waitSlimMap.Value != config.CACHE_WAIT {
-			ctx, _ := context.WithTimeout(context.Background(), 15*time.Second)
-			waitSlimResourceMap.AddKey(slimKey, caching.WaitKey{Value: config.CACHE_WAIT, Timeout: ctx})
-		}
-
-		if waitSlimMap.Value == config.CACHE_WAIT {
+		if slimOK {
 			ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
 			defer cancel()
 
 			for {
-				waitSlimMap := waitSlimResourceMap.ReadFromMap(slimKey)
-
-				if len(waitSlimMap.Body) > 0 {
+				slimBody, ok := h.cache.Get(slimKey)
+				if ok {
 					m := make(map[string]interface{})
-					err = json.Unmarshal(waitSlimMap.Body, &m)
+					err = json.Unmarshal(slimBody, &m)
 					if err != nil {
 						h.handleResponse(c, status_http.GRPCError, err.Error())
 						return
@@ -440,6 +404,8 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 
 				time.Sleep(config.REDIS_SLEEP)
 			}
+		} else {
+			h.cache.Add(slimWaitKey, []byte(slimWaitKey), config.REDIS_KEY_TIMEOUT)
 		}
 	} else {
 		redisResp, err := h.redis.Get(context.Background(), slimKey, projectId.(string), resource.NodeType)
@@ -479,11 +445,10 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 	}
 
 	if err == nil {
+		jsonData, _ := resp.GetData().MarshalJSON()
 		if cast.ToBool(c.Query("is_wait_cached")) {
-			jsonData, _ := resp.GetData().MarshalJSON()
-			waitSlimResourceMap.WriteBody(slimKey, jsonData)
+			h.cache.Add(slimKey, jsonData, config.REDIS_TIMEOUT)
 		} else if resp.IsCached {
-			jsonData, _ := resp.GetData().MarshalJSON()
 			err = h.redis.SetX(context.Background(), slimKey, string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
 			if err != nil {
 				h.log.Error("Error while setting redis", logger.Error(err))
