@@ -801,6 +801,7 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 		c.Set("resource_id", c.GetHeader("resource_id"))
 		c.Set("environment_id", c.GetHeader("environment_id"))
 		c.Set("project_id", c.GetHeader("project_id"))
+		c.Set("resource", c.GetHeader("resource"))
 	}
 
 	projectId, ok := c.Get("project_id")

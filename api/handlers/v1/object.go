@@ -3127,12 +3127,14 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 		return
 	}
 
+	// GetBuilderServiceByTypeTime := time.Now()
 	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
 	if err != nil {
 		h.handleResponse(c, status_http.InternalServerError, err)
 		return
 	}
 	defer conn.Close()
+	// fmt.Println("::::::::::::::::::GetBuilderServiceByTypeTime:", time.Since(GetBuilderServiceByTypeTime))
 
 	var (
 		object    models.CommonMessage
