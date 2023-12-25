@@ -3259,14 +3259,18 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 				}
 			}
 
-			lookupsQuery = append(lookupsQuery, map[string]interface{}{
-				"$lookup": map[string]interface{}{
-					"from":         fromSlug,
-					"foreignField": lookupMap["from_field"],
-					"localField":   lookupMap["to_field"],
-					"as":           lookupMap["as"],
-				},
-			})
+			lookupQuery := map[string]interface{}{
+				"from":         fromSlug,
+				"foreignField": lookupMap["from_field"],
+				"localField":   lookupMap["to_field"],
+				"as":           lookupMap["as"],
+			}
+
+			if len(cast.ToSlice(lookupMap["pipeline"])) > 0 {
+				lookupQuery["pipeline"] = cast.ToSlice(lookupMap["pipeline"])
+			}
+
+			lookupsQuery = append(lookupsQuery, map[string]interface{}{"$lookup": lookupQuery})
 		}
 		object.Data["lookups"] = lookupsQuery
 	}
