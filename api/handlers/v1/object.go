@@ -3076,20 +3076,33 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 		return
 	}
 
-	var (
-		resourceKey = fmt.Sprintf("%s-%s", projectId.(string), environmentId.(string))
-		resource    = &pb.ServiceResourceModel{}
-	)
-	singleResourceBody, ok := h.cache.Get(resourceKey)
-	if ok {
-		err = json.Unmarshal(singleResourceBody, &resource)
+	var resource *pb.ServiceResourceModel
+	resourceBody, ok := c.Get("resource")
+	if resourceBody != "" && ok {
+		var resourceList *company_service.GetResourceByEnvIDResponse
+		err = json.Unmarshal([]byte(resourceBody.(string)), &resourceList)
 		if err != nil {
-			h.log.Error("Error while unmarshal resource redis", logger.Error(err))
+			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
-	}
 
-	if resource.ResourceEnvironmentId == "" {
+		for _, resourceObject := range resourceList.ServiceResources {
+			if resourceObject.Title == pb.ServiceType_name[1] {
+				resource = &pb.ServiceResourceModel{
+					Id:                    resourceObject.Id,
+					ServiceType:           resourceObject.ServiceType,
+					ProjectId:             resourceObject.ProjectId,
+					Title:                 resourceObject.Title,
+					ResourceId:            resourceObject.ResourceId,
+					ResourceEnvironmentId: resourceObject.ResourceEnvironmentId,
+					EnvironmentId:         resourceObject.EnvironmentId,
+					ResourceType:          resourceObject.ResourceType,
+					NodeType:              resourceObject.NodeType,
+				}
+				break
+			}
+		}
+	} else {
 		resource, err = h.companyServices.ServiceResource().GetSingle(
 			c.Request.Context(),
 			&pb.GetSingleServiceResourceReq{
@@ -3102,15 +3115,6 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
-
-		go func() {
-			body, err := json.Marshal(resource)
-			if err != nil {
-				h.handleResponse(c, status_http.GRPCError, err.Error())
-				return
-			}
-			h.cache.Add(resourceKey, body, config.REDIS_TIMEOUT)
-		}()
 	}
 
 	services, err := h.GetProjectSrvc(
