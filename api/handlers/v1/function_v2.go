@@ -789,6 +789,20 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 		h.log.Error("cant parse body or an empty body received", logger.Any("req", c.Request))
 	}
 
+	if cast.ToBool(c.GetHeader("/v1/functions/")) {
+		var authData = models.AuthData{}
+		err = json.Unmarshal([]byte(c.GetHeader("auth")), &authData)
+		if err != nil {
+			h.handleResponse(c, status_http.BadRequest, "cant get auth info")
+			return
+		}
+
+		c.Set("auth", authData)
+		c.Set("resource_id", c.GetHeader("resource_id"))
+		c.Set("environment_id", c.GetHeader("environment_id"))
+		c.Set("project_id", c.GetHeader("project_id"))
+	}
+
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")

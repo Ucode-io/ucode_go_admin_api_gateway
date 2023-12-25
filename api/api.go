@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"errors"
+	"strings"
 	"ucode/ucode_go_api_gateway/api/docs"
 	"ucode/ucode_go_api_gateway/api/handlers"
 	"ucode/ucode_go_api_gateway/config"
@@ -553,6 +554,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 	function := v2Admin.Group("/functions")
 	{
 		function.Any("/:function-id/run", h.V1.FunctionRun)
+		r.Any("v1/functions/:function-id/run", h.V1.FunctionRun)
 	}
 
 	{
@@ -834,6 +836,9 @@ func RedirectUrl(c *gin.Context, h *handlers.Handler) (*gin.Context, error) {
 	}
 
 	c.Request.URL.Path = pathM
+	if strings.Contains(pathM, "/v1/functions/") {
+		c.Request.Header.Add("/v1/functions/", cast.ToString(true))
+	}
 
 	c.Request.Header.Add("resource_id", cast.ToString(c.Value("resource_id")))
 	c.Request.Header.Add("environment_id", cast.ToString(c.Value("environment_id")))
