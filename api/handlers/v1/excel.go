@@ -179,7 +179,7 @@ func (h *HandlerV1) ExcelToDb(c *gin.Context) {
 			},
 		)
 		if err != nil {
-			fmt.Println("Error in excel to db")
+			fmt.Println("Error in excel to db->", err.Error())
 			h.handleResponse(c, status_http.InvalidArgument, err.Error())
 			return
 		}
