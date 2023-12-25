@@ -3140,13 +3140,39 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 	)
 
 	if len(cast.ToSlice(objectRequest.Data["group_selects"])) <= 0 || len(cast.ToSlice(objectRequest.Data["projects"])) <= 0 {
-		var fieldKey = fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), projectId.(string), environmentId.(string))
-		fieldBody, ok := h.cache.Get(fieldKey)
-		if ok {
-			err = json.Unmarshal(fieldBody, &fieldResp)
-			if err != nil {
-				h.log.Error("Error while unmarshal resource redis", logger.Error(err))
-				return
+		var (
+			fieldKey     = fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), projectId.(string), environmentId.(string))
+			fieldKeyWait = config.CACHE_WAIT + "-field"
+		)
+
+		_, fieldOK := h.cache.Get(fieldKeyWait)
+		if !fieldOK {
+			h.cache.Add(fieldKeyWait, []byte(fieldKeyWait), config.REDIS_KEY_TIMEOUT)
+		}
+
+		if fieldOK {
+			ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
+			defer cancel()
+			for {
+				fieldBody, ok := h.cache.Get(fieldKey)
+				if ok {
+					err = json.Unmarshal(fieldBody, &fieldResp)
+					if err != nil {
+						h.handleResponse(c, status_http.BadRequest, "cant get auth info")
+						c.Abort()
+						return
+					}
+				}
+
+				if len(fieldResp.Fields) >= 0 {
+					break
+				}
+
+				if ctx.Err() == context.DeadlineExceeded {
+					break
+				}
+
+				time.Sleep(config.REDIS_SLEEP)
 			}
 		}
 
@@ -3332,18 +3358,39 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 		return
 	}
 
-	var key = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("aggregate-%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId)))
-	functionBody, ok := h.cache.Get(key)
-	if ok {
-		m := make(map[string]interface{})
-		err = json.Unmarshal(functionBody, &m)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
+	var (
+		key              = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("aggregate-%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId)))
+		aggregateWaitKey = config.CACHE_WAIT + "-aggregate"
+	)
+	_, aggregateOk := h.cache.Get(aggregateWaitKey)
+	if !aggregateOk {
+		h.cache.Add(aggregateWaitKey, []byte(aggregateWaitKey), 20*time.Second)
+	}
+
+	if aggregateOk {
+		ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
+		defer cancel()
+
+		for {
+			aggregateBody, ok := h.cache.Get(key)
+			if ok {
+				m := make(map[string]interface{})
+				err = json.Unmarshal(aggregateBody, &m)
+				if err != nil {
+					h.handleResponse(c, status_http.GRPCError, err.Error())
+					return
+				}
+				resp := map[string]interface{}{"data": m}
+				h.handleResponse(c, status_http.OK, resp)
+				return
+			}
+
+			if ctx.Err() == context.DeadlineExceeded {
+				break
+			}
+
+			time.Sleep(config.REDIS_SLEEP)
 		}
-		resp := map[string]interface{}{"data": m}
-		h.handleResponse(c, status_http.OK, resp)
-		return
 	}
 
 	resp, err = service.GetGroupByField(

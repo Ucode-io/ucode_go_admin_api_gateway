@@ -379,6 +379,9 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 	if cast.ToBool(c.Query("is_wait_cached")) {
 		var slimWaitKey = config.CACHE_WAIT + "-slim"
 		_, slimOK := h.cache.Get(slimWaitKey)
+		if !slimOK {
+			h.cache.Add(slimWaitKey, []byte(slimWaitKey), 15*time.Second)
+		}
 
 		if slimOK {
 			ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
@@ -404,8 +407,6 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 
 				time.Sleep(config.REDIS_SLEEP)
 			}
-		} else {
-			h.cache.Add(slimWaitKey, []byte(slimWaitKey), config.REDIS_KEY_TIMEOUT)
 		}
 	} else {
 		redisResp, err := h.redis.Get(context.Background(), slimKey, projectId.(string), resource.NodeType)
@@ -447,7 +448,7 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 	if err == nil {
 		jsonData, _ := resp.GetData().MarshalJSON()
 		if cast.ToBool(c.Query("is_wait_cached")) {
-			h.cache.Add(slimKey, jsonData, config.REDIS_TIMEOUT)
+			h.cache.Add(slimKey, jsonData, 15*time.Second)
 		} else if resp.IsCached {
 			err = h.redis.SetX(context.Background(), slimKey, string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
 			if err != nil {

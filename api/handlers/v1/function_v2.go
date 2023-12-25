@@ -1001,7 +1001,6 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 
 			if helper.Contains(ettProductPath, c.Param("function-id")) {
 				data, err := easy_to_travel.EasyToTravelAgentApiGetProduct(requestData.Params, resp.Data)
-				time.Sleep(time.Millisecond * 50)
 				if err != nil {
 					fmt.Println("Error while EasyToTravelAgentApiGetProduct function:", err.Error())
 					result, _ := helper.InterfaceToMap(data)
