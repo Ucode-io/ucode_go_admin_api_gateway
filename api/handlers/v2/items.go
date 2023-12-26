@@ -1135,18 +1135,20 @@ func (h *HandlerV2) DeleteItem(c *gin.Context) {
 		statusHttp                  = status_http.GrpcStatusToHTTP["NoContent"]
 	)
 
-	err := c.ShouldBindJSON(&objectRequest)
-	if err != nil {
-		h.handleResponse(c, status_http.BadRequest, err.Error())
-		return
-	}
+	objectRequest.Data = make(map[string]interface{})
 
+	// err := c.ShouldBindJSON(&objectRequest)
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.BadRequest, err.Error())
+	// 	return
+	// }
+
+	fmt.Println("\n\n --- TEST LOG #1 --- ", c.Param("id"))
 	objectID := c.Param("id")
 	if !util.IsValidUUID(objectID) {
 		h.handleResponse(c, status_http.InvalidArgument, "item id is an invalid uuid")
 		return
 	}
-	fmt.Println("\n\n --- TEST LOG #1 --- ")
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -1155,7 +1157,7 @@ func (h *HandlerV2) DeleteItem(c *gin.Context) {
 	fmt.Println("\n\n --- TEST LOG #2 --- ")
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
+		err := errors.New("error getting environment id | not valid")
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
