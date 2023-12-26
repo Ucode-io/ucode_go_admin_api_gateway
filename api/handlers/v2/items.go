@@ -1146,20 +1146,20 @@ func (h *HandlerV2) DeleteItem(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, "item id is an invalid uuid")
 		return
 	}
-
+	fmt.Println("\n\n --- TEST LOG #1 --- ")
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
-
+	fmt.Println("\n\n --- TEST LOG #2 --- ")
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		err = errors.New("error getting environment id | not valid")
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
-
+	fmt.Println("\n\n --- TEST LOG #3 --- ", projectId, environmentId)
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
@@ -1168,6 +1168,11 @@ func (h *HandlerV2) DeleteItem(c *gin.Context) {
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+	fmt.Println("\n\n --- TEST LOG #4 --- ")
 	objectRequest.Data["id"] = objectID
 	objectRequest.Data["company_service_project_id"] = projectId.(string)
 	objectRequest.Data["company_service_environment_id"] = environmentId.(string)
@@ -1181,14 +1186,14 @@ func (h *HandlerV2) DeleteItem(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-
+	fmt.Println("\n\n --- TEST LOG #5 --- ")
 	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
 	if err != nil {
 		h.handleResponse(c, status_http.InternalServerError, err)
 		return
 	}
 	defer conn.Close()
-
+	fmt.Println("\n\n --- TEST LOG #5 --- ")
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
