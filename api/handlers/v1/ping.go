@@ -6,7 +6,6 @@ import (
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
-	"ucode/ucode_go_api_gateway/pkg/logger"
 
 	"ucode/ucode_go_api_gateway/api/status_http"
 
@@ -53,7 +52,6 @@ func (h *HandlerV1) Ping(c *gin.Context) {
 	}
 
 	fmt.Println("Connected to company service")
-
 
 	_, err = h.authService.User().GetUserProjects(context.Background(), &auth_service.UserPrimaryKey{
 		Id: "",
