@@ -268,7 +268,7 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 	}
 
 	queryMap := make(map[string]interface{})
-	fmt.Println("\n\n\n --- SLIM TEST #1 --- ")
+	fmt.Println("\n\n\n --- SLIM TEST #1 --- ", queryData)
 	err := json.Unmarshal([]byte(queryData), &queryMap)
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
