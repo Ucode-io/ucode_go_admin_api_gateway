@@ -493,6 +493,10 @@ func (h *HandlerV2) GetSingleFile(c *gin.Context) {
 func (h *HandlerV2) UpdateFile(c *gin.Context) {
 	var file models.UpdateFileRequest
 
+	if c.Param("id") != "" {
+		file.Id = c.Param("id")
+	}
+
 	err := c.ShouldBindJSON(&file)
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
