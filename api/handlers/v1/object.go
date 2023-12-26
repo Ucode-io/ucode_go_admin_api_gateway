@@ -3076,20 +3076,33 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 		return
 	}
 
-	var (
-		resourceKey = fmt.Sprintf("%s-%s", projectId.(string), environmentId.(string))
-		resource    = &pb.ServiceResourceModel{}
-	)
-	singleResourceBody, ok := h.cache.Get(resourceKey)
-	if ok {
-		err = json.Unmarshal(singleResourceBody, &resource)
+	var resource *pb.ServiceResourceModel
+	resourceBody, ok := c.Get("resource")
+	if resourceBody != "" && ok {
+		var resourceList *company_service.GetResourceByEnvIDResponse
+		err = json.Unmarshal([]byte(resourceBody.(string)), &resourceList)
 		if err != nil {
-			h.log.Error("Error while unmarshal resource redis", logger.Error(err))
+			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
-	}
 
-	if resource.ResourceEnvironmentId == "" {
+		for _, resourceObject := range resourceList.ServiceResources {
+			if resourceObject.Title == pb.ServiceType_name[1] {
+				resource = &pb.ServiceResourceModel{
+					Id:                    resourceObject.Id,
+					ServiceType:           resourceObject.ServiceType,
+					ProjectId:             resourceObject.ProjectId,
+					Title:                 resourceObject.Title,
+					ResourceId:            resourceObject.ResourceId,
+					ResourceEnvironmentId: resourceObject.ResourceEnvironmentId,
+					EnvironmentId:         resourceObject.EnvironmentId,
+					ResourceType:          resourceObject.ResourceType,
+					NodeType:              resourceObject.NodeType,
+				}
+				break
+			}
+		}
+	} else {
 		resource, err = h.companyServices.ServiceResource().GetSingle(
 			c.Request.Context(),
 			&pb.GetSingleServiceResourceReq{
@@ -3102,15 +3115,6 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
-
-		go func() {
-			body, err := json.Marshal(resource)
-			if err != nil {
-				h.handleResponse(c, status_http.GRPCError, err.Error())
-				return
-			}
-			h.cache.Add(resourceKey, body, config.REDIS_TIMEOUT)
-		}()
 	}
 
 	services, err := h.GetProjectSrvc(
@@ -3123,12 +3127,14 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 		return
 	}
 
+	// GetBuilderServiceByTypeTime := time.Now()
 	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
 	if err != nil {
 		h.handleResponse(c, status_http.InternalServerError, err)
 		return
 	}
 	defer conn.Close()
+	// fmt.Println("::::::::::::::::::GetBuilderServiceByTypeTime:", time.Since(GetBuilderServiceByTypeTime))
 
 	var (
 		object    models.CommonMessage
@@ -3136,13 +3142,39 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 	)
 
 	if len(cast.ToSlice(objectRequest.Data["group_selects"])) <= 0 || len(cast.ToSlice(objectRequest.Data["projects"])) <= 0 {
-		var fieldKey = fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), projectId.(string), environmentId.(string))
-		fieldBody, ok := h.cache.Get(fieldKey)
-		if ok {
-			err = json.Unmarshal(fieldBody, &fieldResp)
-			if err != nil {
-				h.log.Error("Error while unmarshal resource redis", logger.Error(err))
-				return
+		var (
+			fieldKey     = fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), projectId.(string), environmentId.(string))
+			fieldKeyWait = config.CACHE_WAIT + "-field"
+		)
+
+		_, fieldOK := h.cache.Get(fieldKeyWait)
+		if !fieldOK {
+			h.cache.Add(fieldKeyWait, []byte(fieldKeyWait), config.REDIS_KEY_TIMEOUT)
+		}
+
+		if fieldOK {
+			ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
+			defer cancel()
+			for {
+				fieldBody, ok := h.cache.Get(fieldKey)
+				if ok {
+					err = json.Unmarshal(fieldBody, &fieldResp)
+					if err != nil {
+						h.handleResponse(c, status_http.BadRequest, "cant get auth info")
+						c.Abort()
+						return
+					}
+				}
+
+				if len(fieldResp.Fields) >= 0 {
+					break
+				}
+
+				if ctx.Err() == context.DeadlineExceeded {
+					break
+				}
+
+				time.Sleep(config.REDIS_SLEEP)
 			}
 		}
 
@@ -3259,14 +3291,18 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 				}
 			}
 
-			lookupsQuery = append(lookupsQuery, map[string]interface{}{
-				"$lookup": map[string]interface{}{
-					"from":         fromSlug,
-					"foreignField": lookupMap["from_field"],
-					"localField":   lookupMap["to_field"],
-					"as":           lookupMap["as"],
-				},
-			})
+			lookupQuery := map[string]interface{}{
+				"from":         fromSlug,
+				"foreignField": lookupMap["from_field"],
+				"localField":   lookupMap["to_field"],
+				"as":           lookupMap["as"],
+			}
+
+			if len(cast.ToSlice(lookupMap["pipeline"])) > 0 {
+				lookupQuery["pipeline"] = cast.ToSlice(lookupMap["pipeline"])
+			}
+
+			lookupsQuery = append(lookupsQuery, map[string]interface{}{"$lookup": lookupQuery})
 		}
 		object.Data["lookups"] = lookupsQuery
 	}
@@ -3324,18 +3360,39 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 		return
 	}
 
-	var key = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("aggregate-%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId)))
-	functionBody, ok := h.cache.Get(key)
-	if ok {
-		m := make(map[string]interface{})
-		err = json.Unmarshal(functionBody, &m)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
+	var (
+		key              = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("aggregate-%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId)))
+		aggregateWaitKey = config.CACHE_WAIT + "-aggregate"
+	)
+	_, aggregateOk := h.cache.Get(aggregateWaitKey)
+	if !aggregateOk {
+		h.cache.Add(aggregateWaitKey, []byte(aggregateWaitKey), 20*time.Second)
+	}
+
+	if aggregateOk {
+		ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
+		defer cancel()
+
+		for {
+			aggregateBody, ok := h.cache.Get(key)
+			if ok {
+				m := make(map[string]interface{})
+				err = json.Unmarshal(aggregateBody, &m)
+				if err != nil {
+					h.handleResponse(c, status_http.GRPCError, err.Error())
+					return
+				}
+				resp := map[string]interface{}{"data": m}
+				h.handleResponse(c, status_http.OK, resp)
+				return
+			}
+
+			if ctx.Err() == context.DeadlineExceeded {
+				break
+			}
+
+			time.Sleep(config.REDIS_SLEEP)
 		}
-		resp := map[string]interface{}{"data": m}
-		h.handleResponse(c, status_http.OK, resp)
-		return
 	}
 
 	resp, err = service.GetGroupByField(

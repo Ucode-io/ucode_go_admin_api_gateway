@@ -3,7 +3,7 @@ package api
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
+	"strings"
 	"ucode/ucode_go_api_gateway/api/docs"
 	"ucode/ucode_go_api_gateway/api/handlers"
 	"ucode/ucode_go_api_gateway/config"
@@ -554,6 +554,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 	function := v2Admin.Group("/functions")
 	{
 		function.Any("/:function-id/run", h.V1.FunctionRun)
+		r.Any("v1/functions/:function-id/run", h.V1.FunctionRun)
+		function.Any("/:function-id/invoke", h.V1.FunctionRun)
 	}
 
 	{
@@ -666,7 +668,9 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 			v2Items.POST("/:collection", h.V2.CreateItem)
 			v2Items.POST("/:collection/multiple-insert", h.V2.CreateItems)
 			v2Items.PUT("/:collection", h.V2.UpdateItem)
+			v2Items.PUT("/:collection/:id", h.V2.UpdateItem)
 			v2Items.PATCH("/:collection", h.V2.MultipleUpdateItems)
+			v2Items.PATCH("/:collection/:id", h.V2.UpdateItem)
 			v2Items.DELETE("/:collection", h.V2.DeleteItems)
 			v2Items.DELETE("/:collection/:id", h.V2.DeleteItem)
 
@@ -710,18 +714,24 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 		}
 
 		// fields
-		v2Version.GET("/fields/:collection", h.V2.GetAllFields)
-		v2Version.POST("/fields/:collection", h.V2.CreateField)
-		v2Version.PUT("/fields/:collection", h.V2.UpdateField)
-		v2Version.DELETE("/fields/:collection/:id", h.V2.DeleteField)
+		v2Fields := v2Version.Group("/fields")
+		{
+			v2Fields.GET("/:collection", h.V2.GetAllFields)
+			v2Fields.POST("/:collection", h.V2.CreateField)
+			v2Fields.PUT("/:collection", h.V2.UpdateField)
+			v2Fields.DELETE("/:collection/:id", h.V2.DeleteField)
+		}
 
 		// relations
-		v2Version.GET("/relations/:collection/:id", h.V2.GetByIdRelation)
-		v2Version.GET("/relations/:collection", h.V2.GetAllRelations)
-		v2Version.POST("/relations/:collection", h.V2.CreateRelation)
-		v2Version.PUT("/relations/:collection", h.V2.UpdateRelation)
-		v2Version.DELETE("/relations/:collection/:id", h.V2.DeleteRelation)
-		v2Version.GET("/relations/:collection/cascading", h.V2.GetRelationCascading)
+		v2Relations := v2Version.Group("/relations")
+		{
+			v2Relations.GET("/:collection/:id", h.V2.GetByIdRelation)
+			v2Relations.GET("/:collection", h.V2.GetAllRelations)
+			v2Relations.POST("/:collection", h.V2.CreateRelation)
+			v2Relations.PUT("/:collection", h.V2.UpdateRelation)
+			v2Relations.DELETE("/:collection/:id", h.V2.DeleteRelation)
+			v2Relations.GET("/:collection/cascading", h.V2.GetRelationCascading)
+		}
 
 		// utils
 		v2Utils := v2Version.Group("/utils")
@@ -730,6 +740,16 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 			v2Utils.POST("/export/:collection/html-to-pdf", h.V2.ConvertHtmlToPdf)
 			v2Utils.POST("/export/:collection/template-to-html", h.V2.ConvertTemplateToHtml)
 			v2Utils.POST("/export/:collection", h.V2.ExportData)
+		}
+
+		v2Files := v2Version.Group("/files")
+		{
+			v2Files.POST("", h.V2.UploadToFolder)
+			v2Files.GET("/:id", h.V2.GetSingleFile)
+			v2Files.PUT("/:id/upload", h.V2.UpdateFile)
+			v2Files.DELETE("", h.V2.DeleteFiles)
+			v2Files.DELETE("/:id/upload", h.V2.DeleteFile)
+			v2Files.GET("", h.V2.GetAllFiles)
 		}
 	}
 
@@ -788,24 +808,19 @@ func MaxAllowed(n int) gin.HandlerFunc {
 }
 
 func proxyMiddleware(r *gin.Engine, h *handlers.Handler) gin.HandlerFunc {
-	fmt.Println("\n\n ForTest #1")
 	return func(c *gin.Context) {
 		var (
 			err error
 		)
 		c, err = RedirectUrl(c, h)
-		fmt.Println("\n\n ForTest #12")
 		if err == nil {
-			fmt.Println("\n\n ForTest #13")
 			r.HandleContext(c)
 		}
-		fmt.Println("\n\n ForTest #14")
 		c.Next()
 	}
 }
 
 func RedirectUrl(c *gin.Context, h *handlers.Handler) (*gin.Context, error) {
-	fmt.Println("\n\n ForTest #2")
 	path := c.Request.URL.Path
 	projectId, ok := c.Get("project_id")
 	if !ok {
@@ -817,9 +832,7 @@ func RedirectUrl(c *gin.Context, h *handlers.Handler) (*gin.Context, error) {
 		return c, errors.New("something went wrong")
 	}
 
-	fmt.Println("\n\n ForTest #3")
 	c.Request.Header.Add("prev_path", path)
-	fmt.Println("\n\n ForTest #4")
 	data := helper.MatchingData{
 		ProjectId: projectId.(string),
 		EnvId:     envId.(string),
@@ -827,39 +840,36 @@ func RedirectUrl(c *gin.Context, h *handlers.Handler) (*gin.Context, error) {
 	}
 
 	// companyRedirectGetListTime := time.Now()
-	fmt.Println("\n\n ForTest #5")
 	res, err := h.V1.CompanyRedirectGetList(data, h.GetCompanyService(c))
-	fmt.Println("\n\n ForTest #6")
 	if err != nil {
 		return c, errors.New("cant change")
 	}
-	fmt.Println("\n\n ForTest #7")
 	// fmt.Println(">>>>>>>>>>>>>>>CompanyRedirectGetList:", time.Since(companyRedirectGetListTime))
 
 	pathM, err := helper.FindUrlTo(res, data)
 	if err != nil {
 		return c, errors.New("cant change")
 	}
-	fmt.Println("\n\n ForTest #8")
 	if path == pathM {
 		return c, errors.New("identical path")
 	}
 
 	c.Request.URL.Path = pathM
-	fmt.Println("\n\n ForTest #9")
+	if strings.Contains(pathM, "/v1/functions/") {
+		c.Request.Header.Add("/v1/functions/", cast.ToString(true))
+	}
 
 	c.Request.Header.Add("resource_id", cast.ToString(c.Value("resource_id")))
 	c.Request.Header.Add("environment_id", cast.ToString(c.Value("environment_id")))
 	c.Request.Header.Add("project_id", cast.ToString(c.Value("project_id")))
+	c.Request.Header.Add("resource", cast.ToString(c.Value("resource")))
 	c.Request.Header.Add("redirect", cast.ToString(true))
 
 	auth, err := json.Marshal(c.Value("auth"))
 	if err != nil {
 		return c, errors.New("something went wrong")
 	}
-	fmt.Println("\n\n ForTest #10")
 	c.Request.Header.Add("auth", string(auth))
-	fmt.Println("\n\n ForTest #11")
 	return c, nil
 }
 

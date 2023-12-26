@@ -36,7 +36,7 @@ func (h *HandlerV2) AuthMiddleware() gin.HandlerFunc {
 		)
 
 		bearerToken := c.GetHeader("Authorization")
-		fmt.Println("\n\n\n ~~~> token ", bearerToken)
+		// fmt.Println("\n\n\n ~~~> token ", bearerToken)
 		strArr := strings.Split(bearerToken, " ")
 
 		if len(strArr) < 1 && (strArr[0] != "Bearer" && strArr[0] != "API-KEY") {

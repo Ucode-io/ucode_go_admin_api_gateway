@@ -3,7 +3,6 @@ package v2
 import (
 	"context"
 	"errors"
-	"fmt"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
@@ -16,13 +15,11 @@ import (
 func (h *HandlerV2) GetSingleLayout(c *gin.Context) {
 	tableSlug := c.Param("collection")
 	menuId := c.Param("menu_id")
-	fmt.Println("\n\n\n ~~~~~~~~~~~~~~~~> Layout test #1", menuId, tableSlug)
 
 	if tableSlug == "" && menuId == "" {
 		h.handleResponse(c, status_http.BadRequest, "table-slug or table-id is required")
 		return
 	}
-	fmt.Println("\n\n\n ~~~~~~~~~~~~~~~~> Layout test #1", menuId, tableSlug)
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -35,7 +32,6 @@ func (h *HandlerV2) GetSingleLayout(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
-	fmt.Println("\n\n\n ~~~~~~~~~~~~~~~~> Layout test #2")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
@@ -49,7 +45,6 @@ func (h *HandlerV2) GetSingleLayout(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	fmt.Println("\n\n\n ~~~~~~~~~~~~~~~~> Layout test #3")
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
 		projectId.(string),
@@ -58,7 +53,6 @@ func (h *HandlerV2) GetSingleLayout(c *gin.Context) {
 
 	authInfo, _ := h.GetAuthInfo(c)
 
-	fmt.Println("\n\n\n ~~~~~~~~~~~~~~~~> Layout test #4")
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Layout().GetSingleLayout(
 		context.Background(),
 		&object_builder_service.GetSingleLayoutRequest{
@@ -68,12 +62,10 @@ func (h *HandlerV2) GetSingleLayout(c *gin.Context) {
 			RoleId:    authInfo.RoleId,
 		},
 	)
-	fmt.Println("\n\n\n ~~~~~~~~~~~~~~~~> Layout test #4.1")
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	fmt.Println("\n\n\n ~~~~~~~~~~~~~~~~> Layout test #5")
 	h.handleResponse(c, status_http.OK, resp)
 }
 

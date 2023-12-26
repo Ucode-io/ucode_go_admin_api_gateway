@@ -131,8 +131,6 @@ func (h *HandlerV1) GetTableFolderByID(c *gin.Context) {
 		return
 	}
 
-	resourceId, resourceIdOk := c.Get("resource_id")
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -148,38 +146,21 @@ func (h *HandlerV1) GetTableFolderByID(c *gin.Context) {
 
 	var resourceEnvironmentId string
 	var nodeType string
-	if !resourceIdOk {
-		resource, err := h.companyServices.ServiceResource().GetSingle(
-			c.Request.Context(),
-			&pb.GetSingleServiceResourceReq{
-				ProjectId:     projectId.(string),
-				EnvironmentId: environmentId.(string),
-				ServiceType:   pb.ServiceType_BUILDER_SERVICE,
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
-		resourceEnvironmentId = resource.ResourceEnvironmentId
-		nodeType = resource.NodeType
-	} else {
-		resourceEnvironment, err := h.companyServices.Resource().GetResourceEnvironment(
-			c.Request.Context(),
-			&pb.GetResourceEnvironmentReq{
-				EnvironmentId: environmentId.(string),
-				ResourceId:    resourceId.(string),
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
-		resourceEnvironmentId = resourceEnvironment.GetId()
-		nodeType = resourceEnvironment.GetNodeType()
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
 	}
+
+	resourceEnvironmentId = resource.ResourceEnvironmentId
+	nodeType = resource.NodeType
 
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
@@ -228,8 +209,6 @@ func (h *HandlerV1) GetAllTableFolders(c *gin.Context) {
 		return
 	}
 
-	resourceId, resourceIdOk := c.Get("resource_id")
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -243,38 +222,21 @@ func (h *HandlerV1) GetAllTableFolders(c *gin.Context) {
 		return
 	}
 
-	if !resourceIdOk {
-		resource, err := h.companyServices.ServiceResource().GetSingle(
-			c.Request.Context(),
-			&pb.GetSingleServiceResourceReq{
-				ProjectId:     projectId.(string),
-				EnvironmentId: environmentId.(string),
-				ServiceType:   pb.ServiceType_BUILDER_SERVICE,
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
-		resourceEnvironmentId = resource.ResourceEnvironmentId
-		nodeType = resource.NodeType
-	} else {
-		resourceEnvironment, err := h.companyServices.Resource().GetResourceEnvironment(
-			c.Request.Context(),
-			&pb.GetResourceEnvironmentReq{
-				EnvironmentId: environmentId.(string),
-				ResourceId:    resourceId.(string),
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
-		resourceEnvironmentId = resourceEnvironment.GetId()
-		nodeType = resourceEnvironment.GetNodeType()
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
 	}
+
+	resourceEnvironmentId = resource.ResourceEnvironmentId
+	nodeType = resource.NodeType
 
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
@@ -321,8 +283,6 @@ func (h *HandlerV1) UpdateTableFolder(c *gin.Context) {
 		return
 	}
 
-	resourceId, resourceIdOk := c.Get("resource_id")
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -336,38 +296,21 @@ func (h *HandlerV1) UpdateTableFolder(c *gin.Context) {
 		return
 	}
 
-	if !resourceIdOk {
-		resource, err := h.companyServices.ServiceResource().GetSingle(
-			c.Request.Context(),
-			&pb.GetSingleServiceResourceReq{
-				ProjectId:     projectId.(string),
-				EnvironmentId: environmentId.(string),
-				ServiceType:   pb.ServiceType_BUILDER_SERVICE,
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
-		resourceEnvironmentId = resource.ResourceEnvironmentId
-		nodeType = resource.NodeType
-	} else {
-		resourceEnvironment, err := h.companyServices.Resource().GetResourceEnvironment(
-			c.Request.Context(),
-			&pb.GetResourceEnvironmentReq{
-				EnvironmentId: environmentId.(string),
-				ResourceId:    resourceId.(string),
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
-		resourceEnvironmentId = resourceEnvironment.GetId()
-		nodeType = resourceEnvironment.GetNodeType()
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
 	}
+
+	resourceEnvironmentId = resource.ResourceEnvironmentId
+	nodeType = resource.NodeType
 
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
@@ -412,8 +355,6 @@ func (h *HandlerV1) DeleteTableFolder(c *gin.Context) {
 		return
 	}
 
-	resourceId, resourceIdOk := c.Get("resource_id")
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -427,38 +368,21 @@ func (h *HandlerV1) DeleteTableFolder(c *gin.Context) {
 		return
 	}
 
-	if !resourceIdOk {
-		resource, err := h.companyServices.ServiceResource().GetSingle(
-			c.Request.Context(),
-			&pb.GetSingleServiceResourceReq{
-				ProjectId:     projectId.(string),
-				EnvironmentId: environmentId.(string),
-				ServiceType:   pb.ServiceType_BUILDER_SERVICE,
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
-		resourceEnvironmentId = resource.ResourceEnvironmentId
-		nodeType = resource.NodeType
-	} else {
-		resourceEnvironment, err := h.companyServices.Resource().GetResourceEnvironment(
-			c.Request.Context(),
-			&pb.GetResourceEnvironmentReq{
-				EnvironmentId: environmentId.(string),
-				ResourceId:    resourceId.(string),
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
-		resourceEnvironmentId = resourceEnvironment.GetId()
-		nodeType = resourceEnvironment.GetNodeType()
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
 	}
+
+	resourceEnvironmentId = resource.ResourceEnvironmentId
+	nodeType = resource.NodeType
 
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
