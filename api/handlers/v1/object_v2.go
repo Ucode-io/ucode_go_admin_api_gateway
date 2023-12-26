@@ -459,6 +459,7 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 		}
 	}
 
+	fmt.Println("SLIM TEST 8->", resp)
 	statusHttp.CustomMessage = resp.GetCustomMessage()
 	h.handleResponse(c, statusHttp, resp)
 }
