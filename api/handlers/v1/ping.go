@@ -6,6 +6,7 @@ import (
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
+	"ucode/ucode_go_api_gateway/pkg/logger"
 
 	"ucode/ucode_go_api_gateway/api/status_http"
 
@@ -39,7 +40,6 @@ func (h *HandlerV1) Ping(c *gin.Context) {
 		return
 	}
 
-
 	_, err = h.companyServices.Company().GetListWithProjects(
 		context.Background(),
 		&company_service.GetListWithProjectsRequest{
@@ -51,7 +51,9 @@ func (h *HandlerV1) Ping(c *gin.Context) {
 		h.handleResponse(c, status_http.InternalServerError, err.Error())
 		return
 	}
-	
+
+	fmt.Println("Connected to company service")
+
 
 	_, err = h.authService.User().GetUserProjects(context.Background(), &auth_service.UserPrimaryKey{
 		Id: "",
@@ -60,7 +62,9 @@ func (h *HandlerV1) Ping(c *gin.Context) {
 		h.handleResponse(c, status_http.InternalServerError, err.Error())
 		return
 	}
-	
+
+	fmt.Println("Connected to auth service")
+
 	h.handleResponse(c, status_http.OK, "pong")
 }
 
