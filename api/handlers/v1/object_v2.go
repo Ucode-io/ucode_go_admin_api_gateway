@@ -437,6 +437,7 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 		},
 	)
 	if err != nil {
+		fmt.Println("Hello World from err", err)
 		statusHttp = status_http.GrpcStatusToHTTP["Internal"]
 		stat, ok := status.FromError(err)
 		if ok {
@@ -448,12 +449,14 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 	}
 
 	if err == nil {
+		fmt.Println("Hello World from err", err)
 		jsonData, _ := resp.GetData().MarshalJSON()
 		if cast.ToBool(c.Query("is_wait_cached")) {
 			h.cache.Add(slimKey, jsonData, 15*time.Second)
 		} else if resp.IsCached {
 			err = h.redis.SetX(context.Background(), slimKey, string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
 			if err != nil {
+				fmt.Println("Hello World from err", err)
 				h.log.Error("Error while setting redis", logger.Error(err))
 			}
 		}
