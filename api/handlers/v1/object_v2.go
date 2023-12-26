@@ -427,8 +427,6 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 			h.log.Error("Error while getting redis while get list ", logger.Error(err))
 		}
 	}
-	fmt.Println("\n\n\n --- SLIM TEST #7 --- ")
-	fmt.Println("Struct data->", structData)
 	resp, err := service.GetListSlimV2(
 		context.Background(),
 		&obs.CommonMessage{
@@ -438,7 +436,6 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		fmt.Println("Hello World from err", err.Error())
 		statusHttp = status_http.GrpcStatusToHTTP["Internal"]
 		stat, ok := status.FromError(err)
 		if ok {
@@ -450,7 +447,6 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 	}
 
 	if err == nil {
-		fmt.Println("Hello World from err 1", err.Error())
 		jsonData, _ := resp.GetData().MarshalJSON()
 		if cast.ToBool(c.Query("is_wait_cached")) {
 			h.cache.Add(slimKey, jsonData, 15*time.Second)
@@ -463,7 +459,6 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 		}
 	}
 
-	fmt.Println("SLIM TEST 8->", resp)
 	statusHttp.CustomMessage = resp.GetCustomMessage()
 	h.handleResponse(c, statusHttp, resp)
 }
