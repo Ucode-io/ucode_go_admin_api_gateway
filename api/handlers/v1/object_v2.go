@@ -268,12 +268,13 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 	}
 
 	queryMap := make(map[string]interface{})
+	fmt.Println("\n\n\n --- SLIM TEST #1 --- ")
 	err := json.Unmarshal([]byte(queryData), &queryMap)
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
-
+	fmt.Println("\n\n\n --- SLIM TEST #2 --- ")
 	offset, err := h.getOffsetParam(c)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
