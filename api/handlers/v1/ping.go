@@ -49,7 +49,7 @@ func (h *HandlerV1) Ping(c *gin.Context) {
 			return
 		}
 
-		fmt.Println("Connected to company service")
+		fmt.Println("Ping to Company Service")
 	} else if service == "company_service" {
 		_, err := h.authService.User().GetUserProjects(context.Background(), &auth_service.UserPrimaryKey{
 			Id: "",
@@ -59,7 +59,7 @@ func (h *HandlerV1) Ping(c *gin.Context) {
 			return
 		}
 
-		fmt.Println("Connected to auth service")
+		fmt.Println("Ping To Auth Service")
 	} else if service == "object_builder_service" || service == "function_service" {
 
 		projectId := c.Query("project_id")
@@ -90,17 +90,12 @@ func (h *HandlerV1) Ping(c *gin.Context) {
 				return
 			}
 
-			_, err = services.GetBuilderServiceByType(resource.NodeType).Field().GetAll(
+			_, err = services.GetBuilderServiceByType(resource.NodeType).Function().GetList(
 				context.Background(),
-				&obs.GetAllFieldsRequest{
-					Limit:            int32(limit),
-					Offset:           int32(offset),
-					Search:           c.DefaultQuery("search", ""),
-					TableId:          c.DefaultQuery("table_id", ""),
-					TableSlug:        c.DefaultQuery("table_slug", ""),
-					WithManyRelation: true,
-					WithOneRelation:  false,
-					ProjectId:        resource.ResourceEnvironmentId,
+				&obs.GetAllFunctionsRequest{
+					Search:    c.DefaultQuery("search", ""),
+					Limit:     int32(limit),
+					ProjectId: resource.ResourceEnvironmentId,
 				},
 			)
 			if err != nil {
@@ -108,7 +103,7 @@ func (h *HandlerV1) Ping(c *gin.Context) {
 				return
 			}
 
-			fmt.Println("Connected to object builder service")
+			fmt.Println("Ping to Object Builder Service")
 		} else if service == "function_service" {
 			resource, err := h.companyServices.ServiceResource().GetSingle(
 				c.Request.Context(),
@@ -161,7 +156,7 @@ func (h *HandlerV1) Ping(c *gin.Context) {
 				return
 			}
 
-			fmt.Println("Connected to function service")
+			fmt.Println("Ping to Function Service")
 		}
 	}
 
