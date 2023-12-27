@@ -163,9 +163,6 @@ func (h *HandlerV1) Ping(c *gin.Context) {
 
 			fmt.Println("Connected to function service")
 		}
-	} else {
-		h.handleResponse(c, status_http.InvalidArgument, "wrong service name passed")
-		return
 	}
 
 	h.handleResponse(c, status_http.OK, "pong")
