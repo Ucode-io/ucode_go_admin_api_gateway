@@ -359,7 +359,7 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 			return
 		}
 	}
-	fmt.Println("\n\n\n --- SLIM TEST #4 --- ", resource.ResourceEnvironmentId)
+	fmt.Println("\n\n\n --- SLIM TEST #4 --- ", projectId, resource.ResourceEnvironmentId)
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
 		projectId.(string),
