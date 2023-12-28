@@ -623,6 +623,8 @@ definitions:
     properties:
       environment_id:
         type: string
+      integration_resource:
+        $ref: '#/definitions/company_service.IntegrationResource'
       name:
         type: string
       project_id:
@@ -736,6 +738,8 @@ definitions:
   company_service.CreateResourceRes:
     properties:
       company_id:
+        type: string
+      id:
         type: string
       node_type:
         type: string
@@ -933,6 +937,19 @@ definitions:
           $ref: '#/definitions/company_service.VariableResource'
         type: array
     type: object
+  company_service.IntegrationResource:
+    properties:
+      environment_id:
+        type: string
+      id:
+        type: string
+      project_id:
+        type: string
+      token:
+        type: string
+      username:
+        type: string
+    type: object
   company_service.Language:
     properties:
       id:
@@ -1101,6 +1118,7 @@ definitions:
     - 2
     - 3
     - 4
+    - 5
     type: integer
     x-enum-varnames:
     - ResourceType_NOT_DECIDED
@@ -1108,6 +1126,7 @@ definitions:
     - ResourceType_CLICKHOUSE
     - ResourceType_POSTGRESQL
     - ResourceType_REST
+    - ResourceType_GITHUB
   company_service.ResourceWithoutPassword:
     properties:
       credentials:
@@ -2757,6 +2776,8 @@ definitions:
         type: string
       project_id:
         type: string
+      source_url:
+        type: string
       ssh_url:
         type: string
       type:
@@ -3024,6 +3045,8 @@ definitions:
     type: object
   object_builder_service.CommonMessage:
     properties:
+      blocked_builder:
+        type: boolean
       blocked_login_table:
         type: boolean
       custom_message:
@@ -3984,8 +4007,12 @@ definitions:
         type: boolean
       label:
         type: string
+      menu_id:
+        type: string
       order:
         type: integer
+      project_id:
+        type: string
       summary_fields:
         items:
           $ref: '#/definitions/object_builder_service.FieldForSection'
@@ -4014,6 +4041,8 @@ definitions:
       is_visible_section:
         type: boolean
       label:
+        type: string
+      menu_id:
         type: string
       order:
         type: integer
@@ -4770,7 +4799,7 @@ definitions:
     type: object
   object_builder_service.UpdateLayoutRequest:
     properties:
-      layouts:
+      layout:
         items:
           $ref: '#/definitions/object_builder_service.LayoutRequest'
         type: array
@@ -6054,7 +6083,7 @@ definitions:
   structpb.Value:
     properties:
       kind:
-        description: "The kind of value.\n\nTypes that are assignable to Kind:\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue"
+        description: "The kind of value.\n\nTypes that are assignable to Kind:\n\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue"
     type: object
   template_service.CreateFolderNoteReq:
     properties:
@@ -7364,6 +7393,19 @@ paths:
       - application/json
       description: this returns "pong" messsage to show service is working
       operationId: ping
+      parameters:
+      - description: service
+        in: query
+        name: service
+        type: string
+      - description: environment_id
+        in: query
+        name: environment_id
+        type: string
+      - description: project_id
+        in: query
+        name: project_id
+        type: string
       produces:
       - application/json
       responses:
@@ -14174,6 +14216,9 @@ paths:
         name: search
         type: string
       - in: query
+        name: table_id
+        type: string
+      - in: query
         name: type
         type: string
       produces:
@@ -15048,6 +15093,9 @@ paths:
         type: string
       - in: query
         name: search
+        type: string
+      - in: query
+        name: table_id
         type: string
       - in: query
         name: type
@@ -22495,67 +22543,6 @@ paths:
       summary: Upload
       tags:
       - file
-  /v1/upload-file/{collection}/{id}:
-    post:
-      consumes:
-      - multipart/form-data
-      description: Upload file
-      operationId: v2_upload_file
-      parameters:
-      - description: file
-        in: formData
-        name: file
-        required: true
-        type: file
-      - description: collection
-        in: path
-        name: collection
-        required: true
-        type: string
-      - description: id
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: tags
-        in: query
-        name: tags
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Path
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/v2.Path'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Upload file
-      tags:
-      - file
   /v1/upload-file/{table_slug}/{object_id}:
     post:
       consumes:
@@ -25683,6 +25670,285 @@ paths:
       summary: Get all fields with details
       tags:
       - V2_Field
+  /v2/files:
+    delete:
+      consumes:
+      - application/json
+      description: Delete files
+      operationId: v2_delete_files
+      parameters:
+      - description: DeleteFilesRequestBody
+        in: body
+        name: file
+        required: true
+        schema:
+          $ref: '#/definitions/models.FileDeleteRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete files
+      tags:
+      - V2Files
+    get:
+      consumes:
+      - application/json
+      description: Get file list
+      operationId: v2_get_file_list
+      parameters:
+      - in: query
+        name: folder_name
+        type: string
+      - in: query
+        name: project_id
+        type: string
+      - in: query
+        name: search
+        type: string
+      - in: query
+        name: sort
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: FileBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.GetAllFilesRequest'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get file list
+      tags:
+      - V2Files
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload Folder
+      operationId: v2_create_file
+      parameters:
+      - description: file
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: folder_name
+        in: query
+        name: folder_name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Path
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/v2.Path'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Upload Folder
+      tags:
+      - V2Files
+  /v2/files/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get single variable
+      operationId: v2_get_file_by_id
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: FileBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.File'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get single variable
+      tags:
+      - V2Files
+  /v2/files/{id}/upload:
+    delete:
+      consumes:
+      - application/json
+      description: Delete file
+      operationId: v2_delete_file
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete file
+      tags:
+      - V2Files
+    put:
+      consumes:
+      - application/json
+      description: Update file
+      operationId: v2_update_file
+      parameters:
+      - description: UpdateFileRequestBody
+        in: body
+        name: variable
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateFileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: File data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.File'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update file
+      tags:
+      - V2Files
   /v2/files/import:
     post:
       consumes:
@@ -27525,6 +27791,67 @@ paths:
       summary: V2 Get table by id
       tags:
       - V2Table
+  /v2/upload-file/{collection}/{id}:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload file
+      operationId: v2_upload_file
+      parameters:
+      - description: file
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: tags
+        in: query
+        name: tags
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Path
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/v2.Path'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Upload file
+      tags:
+      - file
   /v2/user/{id}/menu-settings:
     get:
       consumes:

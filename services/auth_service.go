@@ -16,6 +16,7 @@ type AuthServiceI interface {
 	Permission() auth_service.PermissionServiceClient
 	User() auth_service.UserServiceClient
 	Email() auth_service.EmailOtpServiceClient
+	AuthPing() auth_service.AuthPingServiceClient
 	ApiKey() auth_service.ApiKeysClient
 }
 
@@ -28,6 +29,7 @@ type authServiceClient struct {
 	userService           auth_service.UserServiceClient
 	sessionServiceAuth    auth_service.SessionServiceClient
 	emailServie           auth_service.EmailOtpServiceClient
+	authPingService       auth_service.AuthPingServiceClient
 	apiKeyService         auth_service.ApiKeysClient
 }
 
@@ -52,6 +54,7 @@ func NewAuthServiceClient(ctx context.Context, cfg config.BaseConfig) (AuthServi
 		integrationService:    auth_service.NewIntegrationServiceClient(connAuthService),
 		emailServie:           auth_service.NewEmailOtpServiceClient(connAuthService),
 		apiKeyService:         auth_service.NewApiKeysClient(connAuthService),
+		authPingService:       auth_service.NewAuthPingServiceClient(connAuthService),
 	}, nil
 }
 
@@ -82,3 +85,8 @@ func (g *authServiceClient) Email() auth_service.EmailOtpServiceClient {
 func (g *authServiceClient) ApiKey() auth_service.ApiKeysClient {
 	return g.apiKeyService
 }
+
+func (g *authServiceClient) AuthPing() auth_service.AuthPingServiceClient {
+	return g.authPingService
+}
+

@@ -44,9 +44,8 @@ func (h *HandlerV1) Ping(c *gin.Context) {
 		}
 		fmt.Println("Ping to Company Service")
 	} else if service == "auth_service" {
-		_, err := h.authService.User().GetUserProjects(context.Background(), &auth_service.UserPrimaryKey{
-			Id: "",
-		})
+
+		_, err := h.authService.AuthPing().Ping(context.Background(), &auth_service.PingRequest{})
 		if err != nil {
 			h.handleResponse(c, status_http.InternalServerError, err.Error())
 			return
