@@ -36,21 +36,14 @@ func (h *HandlerV1) Ping(c *gin.Context) {
 	limit := 10
 	offset := 0
 
-	if service == "auth_service" {
-		_, err := h.companyServices.Company().GetListWithProjects(
-			context.Background(),
-			&pb.GetListWithProjectsRequest{
-				Limit:  int32(limit),
-				Offset: int32(offset),
-			},
-		)
+	if service == "company_service" {
+		_, err := h.companyServices.CompanyPing().Ping(context.Background(), &pb.PingRequest{})
 		if err != nil {
 			h.handleResponse(c, status_http.InternalServerError, err.Error())
 			return
 		}
-
 		fmt.Println("Ping to Company Service")
-	} else if service == "company_service" {
+	} else if service == "auth_service" {
 		_, err := h.authService.User().GetUserProjects(context.Background(), &auth_service.UserPrimaryKey{
 			Id: "",
 		})

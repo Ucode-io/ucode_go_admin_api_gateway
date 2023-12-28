@@ -1,0 +1,15 @@
+syntax="proto3";
+
+package auth_service;
+option go_package="genproto/auth_service";
+import "google/protobuf/empty.proto";
+
+
+
+service AuthPingService {
+    rpc Ping (google.protobuf.Empty) returns (PingResponse) {}
+}
+
+message PingResponse {
+    string message = 1;
+}

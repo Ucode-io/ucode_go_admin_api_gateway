@@ -16,6 +16,7 @@ type CompanyServiceI interface {
 	Resource() company_service.ResourceServiceClient
 	ServiceResource() company_service.MicroserviceResourceClient
 	Redirect() company_service.RedirectUrlServiceClient
+	CompanyPing() company_service.CompanyPingServiceClient
 }
 
 type companyServiceClient struct {
@@ -25,6 +26,7 @@ type companyServiceClient struct {
 	resourceService    company_service.ResourceServiceClient
 	serviceResource    company_service.MicroserviceResourceClient
 	redirectService    company_service.RedirectUrlServiceClient
+	companyPingService company_service.CompanyPingServiceClient
 }
 
 func NewCompanyServiceClient(ctx context.Context, cfg config.BaseConfig) (CompanyServiceI, error) {
@@ -45,6 +47,7 @@ func NewCompanyServiceClient(ctx context.Context, cfg config.BaseConfig) (Compan
 		resourceService:    company_service.NewResourceServiceClient(connCompanyService),
 		serviceResource:    company_service.NewMicroserviceResourceClient(connCompanyService),
 		redirectService:    company_service.NewRedirectUrlServiceClient(connCompanyService),
+		companyPingService: company_service.NewCompanyPingServiceClient(connCompanyService),
 	}, nil
 }
 
@@ -71,3 +74,8 @@ func (g *companyServiceClient) ServiceResource() company_service.MicroserviceRes
 func (g *companyServiceClient) Redirect() company_service.RedirectUrlServiceClient {
 	return g.redirectService
 }
+
+func (g *companyServiceClient) CompanyPing() company_service.CompanyPingServiceClient {
+	return g.companyPingService
+}
+
