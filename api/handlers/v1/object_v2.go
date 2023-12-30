@@ -378,55 +378,58 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 	defer conn.Close()
 	fmt.Println("\n\n\n --- SLIM TEST #6 --- ")
 	var slimKey = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("slim-%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId)))
-	if cast.ToBool(c.Query("is_wait_cached")) {
-		var slimWaitKey = config.CACHE_WAIT + "-slim"
-		_, slimOK := h.cache.Get(slimWaitKey)
-		if !slimOK {
-			h.cache.Add(slimWaitKey, []byte(slimWaitKey), 15*time.Second)
-		}
+	if !cast.ToBool(c.Query("block_cached")) {
+		if cast.ToBool(c.Query("is_wait_cached")) {
+			var slimWaitKey = config.CACHE_WAIT + "-slim"
+			_, slimOK := h.cache.Get(slimWaitKey)
+			if !slimOK {
+				h.cache.Add(slimWaitKey, []byte(slimWaitKey), 15*time.Second)
+			}
 
-		if slimOK {
-			ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
-			defer cancel()
+			if slimOK {
+				ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
+				defer cancel()
 
-			for {
-				slimBody, ok := h.cache.Get(slimKey)
-				if ok {
-					m := make(map[string]interface{})
-					err = json.Unmarshal(slimBody, &m)
-					if err != nil {
-						h.handleResponse(c, status_http.GRPCError, err.Error())
+				for {
+					slimBody, ok := h.cache.Get(slimKey)
+					if ok {
+						m := make(map[string]interface{})
+						err = json.Unmarshal(slimBody, &m)
+						if err != nil {
+							h.handleResponse(c, status_http.GRPCError, err.Error())
+							return
+						}
+
+						h.handleResponse(c, status_http.OK, map[string]interface{}{"data": m})
 						return
 					}
 
-					h.handleResponse(c, status_http.OK, map[string]interface{}{"data": m})
-					return
-				}
+					if ctx.Err() == context.DeadlineExceeded {
+						break
+					}
 
-				if ctx.Err() == context.DeadlineExceeded {
-					break
+					time.Sleep(config.REDIS_SLEEP)
 				}
-
-				time.Sleep(config.REDIS_SLEEP)
-			}
-		}
-	} else {
-		redisResp, err := h.redis.Get(context.Background(), slimKey, projectId.(string), resource.NodeType)
-		if err == nil {
-			resp := make(map[string]interface{})
-			m := make(map[string]interface{})
-			err = json.Unmarshal([]byte(redisResp), &m)
-			if err != nil {
-				h.log.Error("Error while unmarshal redis", logger.Error(err))
-			} else {
-				resp["data"] = m
-				h.handleResponse(c, status_http.OK, resp)
-				return
 			}
 		} else {
-			h.log.Error("Error while getting redis while get list ", logger.Error(err))
+			redisResp, err := h.redis.Get(context.Background(), slimKey, projectId.(string), resource.NodeType)
+			if err == nil {
+				resp := make(map[string]interface{})
+				m := make(map[string]interface{})
+				err = json.Unmarshal([]byte(redisResp), &m)
+				if err != nil {
+					h.log.Error("Error while unmarshal redis", logger.Error(err))
+				} else {
+					resp["data"] = m
+					h.handleResponse(c, status_http.OK, resp)
+					return
+				}
+			} else {
+				h.log.Error("Error while getting redis while get list ", logger.Error(err))
+			}
 		}
 	}
+
 	resp, err := service.GetListSlimV2(
 		context.Background(),
 		&obs.CommonMessage{
@@ -446,7 +449,7 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 		return
 	}
 
-	if err == nil {
+	if err == nil && !cast.ToBool(c.Query("block_cached")) {
 		jsonData, _ := resp.GetData().MarshalJSON()
 		if cast.ToBool(c.Query("is_wait_cached")) {
 			h.cache.Add(slimKey, jsonData, 15*time.Second)

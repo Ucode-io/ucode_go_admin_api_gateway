@@ -3134,7 +3134,6 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 		return
 	}
 	defer conn.Close()
-	// fmt.Println("::::::::::::::::::GetBuilderServiceByTypeTime:", time.Since(GetBuilderServiceByTypeTime))
 
 	var (
 		object    models.CommonMessage
@@ -3364,34 +3363,36 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 		key              = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("aggregate-%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId)))
 		aggregateWaitKey = config.CACHE_WAIT + "-aggregate"
 	)
-	_, aggregateOk := h.cache.Get(aggregateWaitKey)
-	if !aggregateOk {
-		h.cache.Add(aggregateWaitKey, []byte(aggregateWaitKey), 20*time.Second)
-	}
+	if !cast.ToBool(c.Query("block_cached")) {
+		_, aggregateOk := h.cache.Get(aggregateWaitKey)
+		if !aggregateOk {
+			h.cache.Add(aggregateWaitKey, []byte(aggregateWaitKey), 20*time.Second)
+		}
 
-	if aggregateOk {
-		ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
-		defer cancel()
+		if aggregateOk {
+			ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
+			defer cancel()
 
-		for {
-			aggregateBody, ok := h.cache.Get(key)
-			if ok {
-				m := make(map[string]interface{})
-				err = json.Unmarshal(aggregateBody, &m)
-				if err != nil {
-					h.handleResponse(c, status_http.GRPCError, err.Error())
+			for {
+				aggregateBody, ok := h.cache.Get(key)
+				if ok {
+					m := make(map[string]interface{})
+					err = json.Unmarshal(aggregateBody, &m)
+					if err != nil {
+						h.handleResponse(c, status_http.GRPCError, err.Error())
+						return
+					}
+					resp := map[string]interface{}{"data": m}
+					h.handleResponse(c, status_http.OK, resp)
 					return
 				}
-				resp := map[string]interface{}{"data": m}
-				h.handleResponse(c, status_http.OK, resp)
-				return
-			}
 
-			if ctx.Err() == context.DeadlineExceeded {
-				break
-			}
+				if ctx.Err() == context.DeadlineExceeded {
+					break
+				}
 
-			time.Sleep(config.REDIS_SLEEP)
+				time.Sleep(config.REDIS_SLEEP)
+			}
 		}
 	}
 
@@ -3408,10 +3409,12 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 		return
 	}
 
-	go func() {
-		jsonData, _ := json.Marshal(resp.Data)
-		h.cache.Add(key, []byte(jsonData), 20*time.Second)
-	}()
+	if !cast.ToBool(c.Query("block_cached")) {
+		go func() {
+			jsonData, _ := json.Marshal(resp.Data)
+			h.cache.Add(key, []byte(jsonData), 20*time.Second)
+		}()
+	}
 
 	h.handleResponse(c, status_http.OK, resp)
 }
