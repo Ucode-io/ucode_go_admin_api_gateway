@@ -3127,7 +3127,6 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 		return
 	}
 
-	// GetBuilderServiceByTypeTime := time.Now()
 	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
 	if err != nil {
 		h.handleResponse(c, status_http.InternalServerError, err)
@@ -3263,6 +3262,13 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 			groupQuery[field.Slug] = map[string]interface{}{"$first": "$" + field.Slug}
 		}
 	}
+
+	if _, ok := objectRequest.Data["group_query"]; ok {
+		var groupQueryRequest = cast.ToStringMap(objectRequest.Data["group_query"])
+		for key, value := range groupQueryRequest {
+			groupQuery[key] = value
+		}
+	}
 	object.Data["query"] = map[string]interface{}{"$group": groupQuery}
 
 	if _, ok := objectRequest.Data["lookups"]; ok {
@@ -3306,7 +3312,7 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 		object.Data["lookups"] = lookupsQuery
 	}
 
-	var projectQuery = map[string]interface{}{"guid": 1}
+	var projectQuery = map[string]interface{}{"_id": 0, "guid": 1}
 	if _, ok := objectRequest.Data["projects"]; ok {
 		var projects = cast.ToStringSlice(objectRequest.Data["projects"])
 		for _, value := range projects {
