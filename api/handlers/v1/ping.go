@@ -146,7 +146,7 @@ func (h *HandlerV1) Ping(c *gin.Context) {
 		}
 
 		fmt.Println("Ping to Function Service")
-	} else if service == "conver_template_service" {
+	} else if service == "convert_template_service" {
 
 		resource, err := h.companyServices.ServiceResource().GetSingle(
 			c.Request.Context(),
@@ -171,6 +171,7 @@ func (h *HandlerV1) Ping(c *gin.Context) {
 			return
 		}
 
+		fmt.Println("Called Convert Template Service")
 		_, err = services.ConvertTemplateService().PingTemplateService().Ping(context.Background(), &convert_template.PingRequest{})
 		if err != nil {
 			h.handleResponse(c, status_http.InternalServerError, err.Error())
