@@ -7,6 +7,7 @@ import (
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
+	"ucode/ucode_go_api_gateway/genproto/convert_template"
 	fc "ucode/ucode_go_api_gateway/genproto/new_function_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 
@@ -31,6 +32,8 @@ func (h *HandlerV1) Ping(c *gin.Context) {
 	fmt.Println("config.PingRequest: ", config.CountReq)
 
 	service := c.Query("service")
+	projectId := c.Query("project_id")
+	environmentId := c.Query("environment_id")
 	fmt.Println("SERVICENAME: ", service)
 
 	limit := 10
@@ -52,104 +55,129 @@ func (h *HandlerV1) Ping(c *gin.Context) {
 		}
 
 		fmt.Println("Ping To Auth Service")
-	} else if service == "object_builder_service" || service == "function_service" {
-
-		projectId := c.Query("project_id")
-
-		environmentId := c.Query("environment_id")
-
-		if service == "object_builder_service" {
-			resource, err := h.companyServices.ServiceResource().GetSingle(
-				c.Request.Context(),
-				&pb.GetSingleServiceResourceReq{
-					ProjectId:     projectId,
-					EnvironmentId: environmentId,
-					ServiceType:   pb.ServiceType_BUILDER_SERVICE,
-				},
-			)
-			if err != nil {
-				h.handleResponse(c, status_http.GRPCError, err.Error())
-				return
-			}
-
-			services, err := h.GetProjectSrvc(
-				c.Request.Context(),
-				projectId,
-				resource.NodeType,
-			)
-			if err != nil {
-				h.handleResponse(c, status_http.GRPCError, err.Error())
-				return
-			}
-
-			_, err = services.GetBuilderServiceByType(resource.NodeType).Function().GetList(
-				context.Background(),
-				&obs.GetAllFunctionsRequest{
-					Search:    c.DefaultQuery("search", ""),
-					Limit:     int32(limit),
-					ProjectId: resource.ResourceEnvironmentId,
-				},
-			)
-			if err != nil {
-				h.handleResponse(c, status_http.GRPCError, err.Error())
-				return
-			}
-
-			fmt.Println("Ping to Object Builder Service")
-		} else if service == "function_service" {
-			resource, err := h.companyServices.ServiceResource().GetSingle(
-				c.Request.Context(),
-				&pb.GetSingleServiceResourceReq{
-					ProjectId:     projectId,
-					EnvironmentId: environmentId,
-					ServiceType:   pb.ServiceType_FUNCTION_SERVICE,
-				},
-			)
-			if err != nil {
-				h.handleResponse(c, status_http.GRPCError, err.Error())
-				return
-			}
-
-			environment, err := h.companyServices.Environment().GetById(
-				context.Background(),
-				&pb.EnvironmentPrimaryKey{
-					Id: environmentId,
-				},
-			)
-			if err != nil {
-				err = errors.New("error getting resource environment id")
-				h.handleResponse(c, status_http.GRPCError, err.Error())
-				return
-			}
-
-			services, err := h.GetProjectSrvc(
-				c.Request.Context(),
-				projectId,
-				resource.NodeType,
-			)
-			if err != nil {
-				h.handleResponse(c, status_http.GRPCError, err.Error())
-				return
-			}
-
-			_, err = services.FunctionService().FunctionService().GetList(
-				context.Background(),
-				&fc.GetAllFunctionsRequest{
-					Search:        c.DefaultQuery("search", ""),
-					Limit:         int32(limit),
-					Offset:        int32(offset),
-					ProjectId:     resource.ResourceEnvironmentId,
-					EnvironmentId: environment.GetId(),
-					Type:          FUNCTION,
-				},
-			)
-			if err != nil {
-				h.handleResponse(c, status_http.GRPCError, err.Error())
-				return
-			}
-
-			fmt.Println("Ping to Function Service")
+	} else if service == "object_builder_service" {
+		resource, err := h.companyServices.ServiceResource().GetSingle(
+			c.Request.Context(),
+			&pb.GetSingleServiceResourceReq{
+				ProjectId:     projectId,
+				EnvironmentId: environmentId,
+				ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
 		}
+
+		services, err := h.GetProjectSrvc(
+			c.Request.Context(),
+			projectId,
+			resource.NodeType,
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		_, err = services.GetBuilderServiceByType(resource.NodeType).Function().GetList(
+			context.Background(),
+			&obs.GetAllFunctionsRequest{
+				Search:    c.DefaultQuery("search", ""),
+				Limit:     int32(limit),
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		fmt.Println("Ping to Object Builder Service")
+	} else if service == "function_service" {
+		resource, err := h.companyServices.ServiceResource().GetSingle(
+			c.Request.Context(),
+			&pb.GetSingleServiceResourceReq{
+				ProjectId:     projectId,
+				EnvironmentId: environmentId,
+				ServiceType:   pb.ServiceType_FUNCTION_SERVICE,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		environment, err := h.companyServices.Environment().GetById(
+			context.Background(),
+			&pb.EnvironmentPrimaryKey{
+				Id: environmentId,
+			},
+		)
+		if err != nil {
+			err = errors.New("error getting resource environment id")
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		services, err := h.GetProjectSrvc(
+			c.Request.Context(),
+			projectId,
+			resource.NodeType,
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		_, err = services.FunctionService().FunctionService().GetList(
+			context.Background(),
+			&fc.GetAllFunctionsRequest{
+				Search:        c.DefaultQuery("search", ""),
+				Limit:         int32(limit),
+				Offset:        int32(offset),
+				ProjectId:     resource.ResourceEnvironmentId,
+				EnvironmentId: environment.GetId(),
+				Type:          FUNCTION,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		fmt.Println("Ping to Function Service")
+	} else if service == "conver_template_service" {
+
+		resource, err := h.companyServices.ServiceResource().GetSingle(
+			c.Request.Context(),
+			&pb.GetSingleServiceResourceReq{
+				ProjectId:     projectId,
+				EnvironmentId: environmentId,
+				ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		services, err := h.GetProjectSrvc(
+			c.Request.Context(),
+			projectId,
+			resource.NodeType,
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		_, err = services.ConvertTemplateService().PingTemplateService().Ping(context.Background(), &convert_template.PingRequest{})
+		if err != nil {
+			h.handleResponse(c, status_http.InternalServerError, err.Error())
+			return
+		}
+
+		fmt.Println("Ping To Convert Template Service")
 	}
 
 	h.handleResponse(c, status_http.OK, "pong")

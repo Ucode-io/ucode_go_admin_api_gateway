@@ -11,10 +11,12 @@ import (
 
 type ConvertTemplateServiceI interface {
 	ConvertTemplateService() convert_template.ConvertTemplateServiceClient
+	PingTemplateService()            convert_template.ConvertPingServiceClient
 }
 
 type convertTemplateServiceClient struct {
 	convertTemplateService convert_template.ConvertTemplateServiceClient
+	pingTemplateService    convert_template.ConvertPingServiceClient
 }
 
 func NewConvertTemplateServiceClient(ctx context.Context, cfg config.Config) (ConvertTemplateServiceI, error) {
@@ -31,9 +33,14 @@ func NewConvertTemplateServiceClient(ctx context.Context, cfg config.Config) (Co
 
 	return &convertTemplateServiceClient{
 		convertTemplateService: convert_template.NewConvertTemplateServiceClient(connConvertTemplateService),
+		pingTemplateService:    convert_template.NewConvertPingServiceClient(connConvertTemplateService),
 	}, nil
 }
 
 func (g *convertTemplateServiceClient) ConvertTemplateService() convert_template.ConvertTemplateServiceClient {
 	return g.convertTemplateService
+}
+
+func (g *convertTemplateServiceClient) PingTemplateService() convert_template.ConvertPingServiceClient {
+	return g.pingTemplateService
 }
