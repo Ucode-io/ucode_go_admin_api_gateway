@@ -1,0 +1,42 @@
+syntax="proto3";
+
+package object_builder_service;
+option go_package="genproto/object_builder_service";
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/struct.proto";
+
+
+service VersionHistoryService {
+    rpc GatAll(GetAllRquest) returns (ListVersionHistory) {}
+    rpc UsedForEnv(UsedForEnvRequest) returns (google.protobuf.Empty) {}
+    rpc Migrate(ListVersionHistory) returns (google.protobuf.Empty) {}
+}
+
+message GetAllRquest {
+    string project_id = 1;
+    int32 limit = 2;
+    int32 offset = 3;
+    string type = 4;
+    string env_id = 5;
+}
+
+message VersionHistory {
+    string id = 1;
+    string action_source = 2;
+    string action_type = 3;
+    google.protobuf.Struct previus = 4;
+    google.protobuf.Struct current = 5;
+    bool is_used = 6;
+}
+
+message ListVersionHistory {
+    repeated VersionHistory histories = 1;
+    string project_id = 2;
+}
+
+message UsedForEnvRequest {
+    repeated string ids = 1;
+    string env_id = 2;
+    string project_id = 3;
+}

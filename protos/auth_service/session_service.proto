@@ -270,6 +270,8 @@ message RecordPermission {
     string settings = 11;
     string share_modal = 12;
     string view_create = 13;
+    string pdf_action = 14;
+    string add_field = 15;
 }
 
 message GlobalPermission {

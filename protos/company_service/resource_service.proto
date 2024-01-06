@@ -8,7 +8,6 @@ import "projects_service.proto";
 import "integration_resource_service.proto";
 
 service ResourceService {
-
     rpc AddResource(AddResourceRequest) returns (AddResourceResponse) {}
     rpc ConfigureResource(ConfigureResourceRequest) returns (ConfigureResourceResponse) {}
     rpc RemoveResource(RemoveResourceRequest) returns (EmptyProto) {}

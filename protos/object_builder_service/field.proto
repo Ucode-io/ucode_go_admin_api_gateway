@@ -38,6 +38,7 @@ message CreateFieldRequest {
     bool enable_multilanguage = 19;
     bool hide_multilanguage = 20;
     string minio_folder = 21;
+    string env_id = 22;
 }
 
 message CreateFieldsRequest {
@@ -82,6 +83,7 @@ message Field {
     bool enable_multilanguage = 22;
     bool hide_multilanguage = 23;
     string minio_folder = 24;
+    string env_id = 25;
 }
 
 message GetAllFieldsResponse {
@@ -106,6 +108,7 @@ message GetAllFieldsRequest {
 message FieldPrimaryKey {
     string id = 1;
     string project_id = 2;
+    string env_id = 3;
 }
 
 message GetAllFieldsForItemsRequest {

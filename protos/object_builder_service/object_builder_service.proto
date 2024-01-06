@@ -40,3 +40,4 @@ import "report_setting_service.proto";
 import "items.proto";
 import "file.proto";
 import "request_analytic.proto";
+import "version_history.proto";

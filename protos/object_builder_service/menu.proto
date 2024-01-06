@@ -124,6 +124,7 @@ message CreateMenuRequest {
     google.protobuf.Struct attributes = 10;
     string wiki_id = 11;
     bool is_visible = 12;
+    string env_id = 13;
 }
 
 message Menu {
@@ -142,6 +143,7 @@ message Menu {
     string wiki_id = 13;
     bool is_visible = 14;
     bool is_static = 15;
+    google.protobuf.Struct data = 16;
 }
 
 message MenuForGetAll {
@@ -172,6 +174,7 @@ message MenuPrimaryKey {
     string id = 1;
     string project_id = 2;
     string user_id = 3;
+    string env_id = 4;
 }
 
 message GetAllMenusRequest {

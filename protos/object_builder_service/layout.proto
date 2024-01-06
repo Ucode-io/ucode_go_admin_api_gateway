@@ -38,6 +38,7 @@ message LayoutRequest {
     google.protobuf.Struct attributes = 12;
     string menu_id = 13;
     string project_id = 14;
+    string env_id = 15;
 }
 
 message LayoutResponse {
@@ -206,6 +207,7 @@ message RelationForGetAll2 {
 
 message CreateLayoutRequest {
     string project_id = 1;
+    string env_id = 2;
 }
 
 message UpdateLayoutRequest {
@@ -217,6 +219,7 @@ message UpdateLayoutRequest {
 message LayoutPrimaryKey {
     string id = 1;
     string project_id = 2;
+    string env_id = 3;
 }
 
 message GetListLayoutRequest {

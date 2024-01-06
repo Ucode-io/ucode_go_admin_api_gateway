@@ -3,9 +3,12 @@ syntax="proto3";
 package company_service;
 option go_package = "genproto/company_service";
 
+import "company.proto";
+
 service IntegrationResourceService {
     rpc CreateIntegrationResource(CreateIntegrationResourceRequest) returns (IntegrationResource) {}
     rpc GetByUsername(GetByUsernameRequest) returns (GetByUsernameResponse) {}
+    rpc GetIntegrationResourceList(GetListIntegrationResourceRequest) returns (GetListIntegrationResourceResponse) {}
 }
 
 message IntegrationResource {
@@ -14,6 +17,7 @@ message IntegrationResource {
     string project_id = 3;
     string environment_id = 4;
     string username = 5;
+    string name = 6;
 }
 
 message CreateIntegrationResourceRequest {
@@ -21,6 +25,7 @@ message CreateIntegrationResourceRequest {
     string project_id = 2;
     string environment_id = 3;
     string username = 4;   
+    string name = 5;
 }
 
 message GetByUsernameRequest {
@@ -28,5 +33,15 @@ message GetByUsernameRequest {
 }
 
 message GetByUsernameResponse {
+    repeated IntegrationResource integration_resources = 1;
+}
+
+message GetListIntegrationResourceRequest {
+    string project_id = 1;
+    string environment_id = 2;
+    ResourceType type = 3;
+}
+
+message GetListIntegrationResourceResponse {
     repeated IntegrationResource integration_resources = 1;
 }

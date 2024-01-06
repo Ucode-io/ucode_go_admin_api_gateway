@@ -83,6 +83,7 @@ message CreateTableRequest {
     bool soft_delete = 21;
     bool order_by = 22;
     google.protobuf.Struct attributes = 23;
+    string env_id = 24;
 }
 
 message IncrementID {
@@ -130,6 +131,7 @@ message UpdateTableRequest {
     bool is_login_table = 19;
     google.protobuf.Struct attributes = 20;
     bool order_by = 21;
+    string env_id = 22;
 }
 
 message Table {
@@ -176,6 +178,7 @@ message TablePrimaryKey {
     string author_id = 4;
     string commit_type = 5;
     string name = 6;
+    string env_id = 7;
 }
 
 message GetAllTablesRequest {
