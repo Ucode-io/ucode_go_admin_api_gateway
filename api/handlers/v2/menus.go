@@ -190,7 +190,7 @@ func (h *HandlerV2) GetMenuByID(c *gin.Context) {
 
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
-		resource.ResourceEnvironmentId,
+		projectId.(string),
 		resource.NodeType,
 	)
 	if err != nil {
