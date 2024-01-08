@@ -190,8 +190,8 @@ func (h *HandlerV2) GetMenuByID(c *gin.Context) {
 
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
-		"7214baf7-74da-4fd2-a116-6477a9528c83",
-		"LOW",
+		resource.ResourceEnvironmentId,
+		resource.NodeType,
 	)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
@@ -200,7 +200,7 @@ func (h *HandlerV2) GetMenuByID(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.GetBuilderServiceByType("LOW").Menu().GetByID(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).Menu().GetByID(
 			context.Background(),
 			&obs.MenuPrimaryKey{
 				Id:        menuID,
