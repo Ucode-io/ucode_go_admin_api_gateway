@@ -49,7 +49,7 @@ func DoRequest(url string, method string, body interface{}) (responseModel model
 
 	err = json.Unmarshal(respByte, &responseModel)
 	if err != nil {
-		fmt.Println("error in Unmarshal() : ", err.Error(), body)
+		fmt.Println("error in Unmarshal() : ", err.Error(), body, "respByte",string(respByte))
 	}
 	// fmt.Println("responseModel", responseModel)
 
