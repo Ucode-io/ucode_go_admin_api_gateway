@@ -20,6 +20,7 @@ const (
 func DoRequest(url string, method string, body interface{}) (responseModel models.InvokeFunctionResponse, err error) {
 	data, err := json.Marshal(&body)
 	if err != nil {
+		fmt.Println("error in Marshal() : ", err.Error(), body)
 		return
 	}
 	client := &http.Client{
@@ -28,23 +29,27 @@ func DoRequest(url string, method string, body interface{}) (responseModel model
 
 	req, err := http.NewRequest(method, url, bytes.NewBuffer(data))
 	if err != nil {
+		fmt.Println("error in NewRequest() : ", err.Error(), body)
 		return
 	}
 
 	resp, err := client.Do(req)
 	if err != nil {
+		fmt.Println("error in Do() : ", err.Error(), body)
 		return
 	}
 	defer resp.Body.Close()
 
 	respByte, err := io.ReadAll(resp.Body)
 	if err != nil {
+		fmt.Println("error in ReadAll() : ", err.Error(), body)
 		return
 	}
 	// fmt.Println("\n\ncheck do::", string(respByte))
 
 	err = json.Unmarshal(respByte, &responseModel)
 	if err != nil {
+		fmt.Println("error in Unmarshal() : ", err.Error(), body)
 	}
 	// fmt.Println("responseModel", responseModel)
 
