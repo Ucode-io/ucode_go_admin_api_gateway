@@ -296,6 +296,8 @@ definitions:
     type: object
   auth_service.RecordPermission:
     properties:
+      add_field:
+        type: string
       automation:
         type: string
       client_type_id:
@@ -305,6 +307,8 @@ definitions:
       id:
         type: string
       language_btn:
+        type: string
+      pdf_action:
         type: string
       read:
         type: string
@@ -942,6 +946,8 @@ definitions:
       environment_id:
         type: string
       id:
+        type: string
+      name:
         type: string
       project_id:
         type: string
@@ -2754,6 +2760,8 @@ definitions:
     type: object
   new_function_service.Function:
     properties:
+      branch:
+        type: string
       description:
         type: string
       environment_id:
@@ -3123,6 +3131,8 @@ definitions:
         type: integer
       disable:
         type: boolean
+      env_id:
+        type: string
       event_path:
         type: string
       icon:
@@ -3188,6 +3198,8 @@ definitions:
         type: string
       enable_multilanguage:
         type: boolean
+      env_id:
+        type: string
       hide_multilanguage:
         type: boolean
       id:
@@ -3323,6 +3335,8 @@ definitions:
         type: array
       editable:
         type: boolean
+      env_id:
+        type: string
       function_path:
         type: string
       group_fields:
@@ -3429,6 +3443,8 @@ definitions:
         type: string
       disable_dates:
         $ref: '#/definitions/object_builder_service.DisableDates'
+      env_id:
+        type: string
       group_fields:
         items:
           type: string
@@ -3626,6 +3642,8 @@ definitions:
         type: string
       enable_multilanguage:
         type: boolean
+      env_id:
+        type: string
       hide_multilanguage:
         type: boolean
       id:
@@ -3995,6 +4013,8 @@ definitions:
     properties:
       attributes:
         $ref: '#/definitions/structpb.Struct'
+      env_id:
+        type: string
       icon:
         type: string
       id:
@@ -4090,6 +4110,8 @@ definitions:
   object_builder_service.Menu:
     properties:
       attributes:
+        $ref: '#/definitions/structpb.Struct'
+      data:
         $ref: '#/definitions/structpb.Struct'
       icon:
         type: string
@@ -4359,6 +4381,8 @@ definitions:
     type: object
   object_builder_service.RecordPermission:
     properties:
+      add_field:
+        type: string
       automation:
         type: string
       client_type_id:
@@ -4368,6 +4392,8 @@ definitions:
       guid:
         type: string
       language_btn:
+        type: string
+      pdf_action:
         type: string
       read:
         type: string
@@ -4996,6 +5022,8 @@ definitions:
         type: array
       editable:
         type: boolean
+      env_id:
+        type: string
       function_path:
         type: string
       group_fields:
@@ -5230,6 +5258,8 @@ definitions:
         type: string
       disable_dates:
         $ref: '#/definitions/object_builder_service.DisableDates'
+      env_id:
+        type: string
       function_path:
         type: string
       group_fields:
@@ -12020,8 +12050,7 @@ paths:
       description: Get environment list
       operationId: get_environment_list
       parameters:
-      - collectionFormat: csv
-        in: query
+      - in: query
         items:
           type: string
         name: ids
@@ -14070,8 +14099,7 @@ paths:
       description: Get global project environment list
       operationId: get_global_project_environment_list
       parameters:
-      - collectionFormat: csv
-        in: query
+      - in: query
         items:
           type: string
         name: ids
@@ -26920,6 +26948,59 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get item by id
+      tags:
+      - Items
+  /v2/items/{collection}/aggregation:
+    post:
+      consumes:
+      - application/json
+      description: Get List Aggregation
+      operationId: get_list_aggregation
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: GetListAggregation
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/models.CommonMessage'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ObjectBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.CommonMessage'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get List Aggregation
       tags:
       - Items
   /v2/items/{collection}/multiple-insert:

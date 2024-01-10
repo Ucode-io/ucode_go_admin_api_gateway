@@ -1748,13 +1748,13 @@ func (h *HandlerV2) AppendManyToMany(c *gin.Context) {
 // GetListAggregation godoc
 // @Security ApiKeyAuth
 // @ID get_list_aggregation
-// @Router /v2/get-list/aggregation/{table_slug} [POST]
+// @Router /v2/items/{collection}/aggregation [POST]
 // @Summary Get List Aggregation
 // @Description Get List Aggregation
 // @Tags Items
 // @Accept json
 // @Produce json
-// @Param table_slug path string true "table_slug"
+// @Param collection path string true "collection"
 // @Param object body models.CommonMessage true "GetListAggregation"
 // @Success 200 {object} status_http.Response{data=models.CommonMessage} "ObjectBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -1822,7 +1822,7 @@ func (h *HandlerV2) GetListAggregation(c *gin.Context) {
 	resp, err := service.GetListAggregation(
 		context.Background(),
 		&obs.CommonMessage{
-			TableSlug: c.Param("table_slug"),
+			TableSlug: c.Param("collection"),
 			Data:      structData,
 			ProjectId: resource.ResourceEnvironmentId,
 		},

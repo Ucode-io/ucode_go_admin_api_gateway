@@ -9256,7 +9256,6 @@
                         "items": {
                             "type": "string"
                         },
-                        "collectionFormat": "csv",
                         "name": "ids",
                         "in": "query"
                     },
@@ -12982,7 +12981,6 @@
                         "items": {
                             "type": "string"
                         },
-                        "collectionFormat": "csv",
                         "name": "ids",
                         "in": "query"
                     },
@@ -36188,6 +36186,101 @@
                 }
             }
         },
+        "/v2/items/{collection}/aggregation": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get List Aggregation",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Items"
+                ],
+                "summary": "Get List Aggregation",
+                "operationId": "get_list_aggregation",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "collection",
+                        "name": "collection",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "GetListAggregation",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CommonMessage"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ObjectBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.CommonMessage"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v2/items/{collection}/multiple-insert": {
             "post": {
                 "security": [
@@ -41556,6 +41649,9 @@
         "auth_service.RecordPermission": {
             "type": "object",
             "properties": {
+                "add_field": {
+                    "type": "string"
+                },
                 "automation": {
                     "type": "string"
                 },
@@ -41569,6 +41665,9 @@
                     "type": "string"
                 },
                 "language_btn": {
+                    "type": "string"
+                },
+                "pdf_action": {
                     "type": "string"
                 },
                 "read": {
@@ -42546,6 +42645,9 @@
                     "type": "string"
                 },
                 "id": {
+                    "type": "string"
+                },
+                "name": {
                     "type": "string"
                 },
                 "project_id": {
@@ -45296,6 +45398,9 @@
         "new_function_service.Function": {
             "type": "object",
             "properties": {
+                "branch": {
+                    "type": "string"
+                },
                 "description": {
                     "type": "string"
                 },
@@ -45860,6 +45965,9 @@
                 "disable": {
                     "type": "boolean"
                 },
+                "env_id": {
+                    "type": "string"
+                },
                 "event_path": {
                     "type": "string"
                 },
@@ -45958,6 +46066,9 @@
                 },
                 "enable_multilanguage": {
                     "type": "boolean"
+                },
+                "env_id": {
+                    "type": "string"
                 },
                 "hide_multilanguage": {
                     "type": "boolean"
@@ -46164,6 +46275,9 @@
                 "editable": {
                     "type": "boolean"
                 },
+                "env_id": {
+                    "type": "string"
+                },
                 "function_path": {
                     "type": "string"
                 },
@@ -46323,6 +46437,9 @@
                 },
                 "disable_dates": {
                     "$ref": "#/definitions/object_builder_service.DisableDates"
+                },
+                "env_id": {
+                    "type": "string"
                 },
                 "group_fields": {
                     "type": "array",
@@ -46624,6 +46741,9 @@
                 },
                 "enable_multilanguage": {
                     "type": "boolean"
+                },
+                "env_id": {
+                    "type": "string"
                 },
                 "hide_multilanguage": {
                     "type": "boolean"
@@ -47193,6 +47313,9 @@
                 "attributes": {
                     "$ref": "#/definitions/structpb.Struct"
                 },
+                "env_id": {
+                    "type": "string"
+                },
                 "icon": {
                     "type": "string"
                 },
@@ -47337,6 +47460,9 @@
             "type": "object",
             "properties": {
                 "attributes": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
+                "data": {
                     "$ref": "#/definitions/structpb.Struct"
                 },
                 "icon": {
@@ -47748,6 +47874,9 @@
         "object_builder_service.RecordPermission": {
             "type": "object",
             "properties": {
+                "add_field": {
+                    "type": "string"
+                },
                 "automation": {
                     "type": "string"
                 },
@@ -47761,6 +47890,9 @@
                     "type": "string"
                 },
                 "language_btn": {
+                    "type": "string"
+                },
+                "pdf_action": {
                     "type": "string"
                 },
                 "read": {
@@ -48719,6 +48851,9 @@
                 "editable": {
                     "type": "boolean"
                 },
+                "env_id": {
+                    "type": "string"
+                },
                 "function_path": {
                     "type": "string"
                 },
@@ -49074,6 +49209,9 @@
                 },
                 "disable_dates": {
                     "$ref": "#/definitions/object_builder_service.DisableDates"
+                },
+                "env_id": {
+                    "type": "string"
                 },
                 "function_path": {
                     "type": "string"
