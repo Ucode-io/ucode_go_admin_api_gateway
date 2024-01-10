@@ -751,6 +751,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 			v2Files.DELETE("/:id/upload", h.V2.DeleteFile)
 			v2Files.GET("", h.V2.GetAllFiles)
 		}
+
+		v2Version.POST("/get-list/aggregation/:table_slug", h.V2.GetListAggregation)
 	}
 
 	r.Any("/api/*any", h.V1.AuthMiddleware(cfg), proxyMiddleware(r, &h), h.V1.Proxy)
