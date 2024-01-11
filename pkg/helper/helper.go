@@ -2,6 +2,8 @@ package helper
 
 import (
 	"encoding/json"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -211,4 +213,22 @@ func InterfaceToMap(data interface{}) (map[string]interface{}, error) {
 	}
 
 	return result, nil
+}
+
+func ListFiles(folderPath string) ([]string, error) {
+	var files []string
+	err := filepath.Walk(folderPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() {
+			relativePath, err := filepath.Rel(folderPath, path)
+			if err != nil {
+				return err
+			}
+			files = append(files, strings.ReplaceAll(relativePath, "\\", "/"))
+		}
+		return nil
+	})
+	return files, err
 }

@@ -151,6 +151,8 @@ type BaseConfig struct {
 
 	GithubClientId     string
 	GithubClientSecret string
+	ProjectUrl         string
+	WebhookSecret      string
 }
 
 func BaseLoad() BaseConfig {
@@ -189,7 +191,7 @@ func BaseLoad() BaseConfig {
 	config.DefaultOffset = cast.ToString(GetOrReturnDefaultValue("DEFAULT_OFFSET", "0"))
 	config.DefaultLimit = "100"
 
-	config.GitlabIntegrationToken = cast.ToString(GetOrReturnDefaultValue("GITLAB_TOKEN", "glpat-aPL4syqxcHdqWyhxVTMP"))
+	config.GitlabIntegrationToken = "glpat-FuqpXyGQRq2u_Ac1gTRv"
 	config.GitlabIntegrationURL = cast.ToString(GetOrReturnDefaultValue("GITLAB_URL", "https://gitlab.udevs.io"))
 	config.GitlabGroupId = cast.ToInt(GetOrReturnDefaultValue("GITLAB_GROUP_ID", 0))
 	config.GitlabProjectId = cast.ToInt(GetOrReturnDefaultValue("GITLAB_PROJECT_ID", 0))
@@ -202,6 +204,8 @@ func BaseLoad() BaseConfig {
 
 	config.GithubClientId = "74aa24ccaf78694dee84"
 	config.GithubClientSecret = "ef8a8ffc20b5e36eb3dcd3f4ac889af13f64bfd5"
+	config.ProjectUrl = "https://api.admin.u-code.io"
+	config.WebhookSecret = "$hereshouldbewebkhooksecret$"
 
 	return config
 }

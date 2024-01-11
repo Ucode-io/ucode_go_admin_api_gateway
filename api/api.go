@@ -43,6 +43,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 
 	r.GET("/menu/wiki_folder", h.V1.GetWikiFolder)
 
+	r.POST("webhook/handle", h.V2.HandleWebhook)
+
 	global := r.Group("/v1/global")
 	global.Use(h.V1.GlobalAuthMiddleware(cfg))
 	{
@@ -755,6 +757,11 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 		v2Github := v2Version.Group("/github")
 		{
 			v2Github.POST("/login", h.V2.GithubLogin)
+		}
+
+		v2Webhook := v2Version.Group("/webhook")
+		{
+			v2Webhook.POST("/create", h.V2.CreateWebhook)
 		}
 
 	}
