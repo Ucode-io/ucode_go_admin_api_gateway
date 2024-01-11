@@ -148,6 +148,9 @@ type BaseConfig struct {
 	PlatformType                  string
 
 	UcodeNamespace string
+
+	GithubClientId     string
+	GithubClientSecret string
 }
 
 func BaseLoad() BaseConfig {
@@ -196,6 +199,9 @@ func BaseLoad() BaseConfig {
 	config.PathToClone = cast.ToString(GetOrReturnDefaultValue("CLONE_PATH", "./app"))
 
 	config.UcodeNamespace = "u-code"
+
+	config.GithubClientId = "74aa24ccaf78694dee84"
+	config.GithubClientSecret = "ef8a8ffc20b5e36eb3dcd3f4ac889af13f64bfd5"
 
 	return config
 }

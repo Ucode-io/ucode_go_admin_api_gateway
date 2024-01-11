@@ -751,6 +751,12 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 			v2Files.DELETE("/:id/upload", h.V2.DeleteFile)
 			v2Files.GET("", h.V2.GetAllFiles)
 		}
+
+		v2Github := v2Version.Group("/github")
+		{
+			v2Github.POST("/login", h.V2.GithubLogin)
+		}
+
 	}
 
 	r.Any("/api/*any", h.V1.AuthMiddleware(cfg), proxyMiddleware(r, &h), h.V1.Proxy)

@@ -28,6 +28,7 @@ service SessionService {
     rpc V2LoginWithOption(V2LoginWithOptionRequest) returns (V2LoginWithOptionsResponse) {}
     rpc ForgotPassword(ForgotPasswordRequest) returns (ForgotPasswordResponse) {}
     rpc V2ResetPassword(V2ResetPasswordRequest) returns (User) {}
+    rpc V2RefreshTokenForEnv(RefreshTokenRequest) returns (V2LoginResponse) {}
 }
 
 message V2ResetPasswordRequest {

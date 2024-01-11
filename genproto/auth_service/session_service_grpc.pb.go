@@ -42,6 +42,7 @@ type SessionServiceClient interface {
 	V2LoginWithOption(ctx context.Context, in *V2LoginWithOptionRequest, opts ...grpc.CallOption) (*V2LoginWithOptionsResponse, error)
 	ForgotPassword(ctx context.Context, in *ForgotPasswordRequest, opts ...grpc.CallOption) (*ForgotPasswordResponse, error)
 	V2ResetPassword(ctx context.Context, in *V2ResetPasswordRequest, opts ...grpc.CallOption) (*User, error)
+	V2RefreshTokenForEnv(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*V2LoginResponse, error)
 }
 
 type sessionServiceClient struct {
@@ -223,6 +224,15 @@ func (c *sessionServiceClient) V2ResetPassword(ctx context.Context, in *V2ResetP
 	return out, nil
 }
 
+func (c *sessionServiceClient) V2RefreshTokenForEnv(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*V2LoginResponse, error) {
+	out := new(V2LoginResponse)
+	err := c.cc.Invoke(ctx, "/auth_service.SessionService/V2RefreshTokenForEnv", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // SessionServiceServer is the server API for SessionService service.
 // All implementations must embed UnimplementedSessionServiceServer
 // for forward compatibility
@@ -246,6 +256,7 @@ type SessionServiceServer interface {
 	V2LoginWithOption(context.Context, *V2LoginWithOptionRequest) (*V2LoginWithOptionsResponse, error)
 	ForgotPassword(context.Context, *ForgotPasswordRequest) (*ForgotPasswordResponse, error)
 	V2ResetPassword(context.Context, *V2ResetPasswordRequest) (*User, error)
+	V2RefreshTokenForEnv(context.Context, *RefreshTokenRequest) (*V2LoginResponse, error)
 	mustEmbedUnimplementedSessionServiceServer()
 }
 
@@ -309,6 +320,9 @@ func (UnimplementedSessionServiceServer) ForgotPassword(context.Context, *Forgot
 }
 func (UnimplementedSessionServiceServer) V2ResetPassword(context.Context, *V2ResetPasswordRequest) (*User, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method V2ResetPassword not implemented")
+}
+func (UnimplementedSessionServiceServer) V2RefreshTokenForEnv(context.Context, *RefreshTokenRequest) (*V2LoginResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method V2RefreshTokenForEnv not implemented")
 }
 func (UnimplementedSessionServiceServer) mustEmbedUnimplementedSessionServiceServer() {}
 
@@ -665,6 +679,24 @@ func _SessionService_V2ResetPassword_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _SessionService_V2RefreshTokenForEnv_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RefreshTokenRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SessionServiceServer).V2RefreshTokenForEnv(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/auth_service.SessionService/V2RefreshTokenForEnv",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SessionServiceServer).V2RefreshTokenForEnv(ctx, req.(*RefreshTokenRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // SessionService_ServiceDesc is the grpc.ServiceDesc for SessionService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -747,6 +779,10 @@ var SessionService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "V2ResetPassword",
 			Handler:    _SessionService_V2ResetPassword_Handler,
+		},
+		{
+			MethodName: "V2RefreshTokenForEnv",
+			Handler:    _SessionService_V2RefreshTokenForEnv_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

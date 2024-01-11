@@ -4938,7 +4938,7 @@ var file_session_service_proto_rawDesc = []byte{
 	0x1d, 0x0a, 0x0a, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x5f, 0x61, 0x74, 0x18, 0x05, 0x20,
 	0x01, 0x28, 0x09, 0x52, 0x09, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x41, 0x74, 0x12, 0x1d,
 	0x0a, 0x0a, 0x75, 0x70, 0x64, 0x61, 0x74, 0x65, 0x64, 0x5f, 0x61, 0x74, 0x18, 0x06, 0x20, 0x01,
-	0x28, 0x09, 0x52, 0x09, 0x75, 0x70, 0x64, 0x61, 0x74, 0x65, 0x64, 0x41, 0x74, 0x32, 0xd0, 0x0d,
+	0x28, 0x09, 0x52, 0x09, 0x75, 0x70, 0x64, 0x61, 0x74, 0x65, 0x64, 0x41, 0x74, 0x32, 0xac, 0x0e,
 	0x0a, 0x0e, 0x53, 0x65, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65,
 	0x12, 0x42, 0x0a, 0x05, 0x4c, 0x6f, 0x67, 0x69, 0x6e, 0x12, 0x1a, 0x2e, 0x61, 0x75, 0x74, 0x68,
 	0x5f, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2e, 0x4c, 0x6f, 0x67, 0x69, 0x6e, 0x52, 0x65,
@@ -5048,9 +5048,14 @@ var file_session_service_proto_rawDesc = []byte{
 	0x69, 0x63, 0x65, 0x2e, 0x56, 0x32, 0x52, 0x65, 0x73, 0x65, 0x74, 0x50, 0x61, 0x73, 0x73, 0x77,
 	0x6f, 0x72, 0x64, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x12, 0x2e, 0x61, 0x75, 0x74,
 	0x68, 0x5f, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x22, 0x00,
-	0x42, 0x17, 0x5a, 0x15, 0x67, 0x65, 0x6e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x61, 0x75, 0x74,
-	0x68, 0x5f, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f,
-	0x33,
+	0x12, 0x5a, 0x0a, 0x14, 0x56, 0x32, 0x52, 0x65, 0x66, 0x72, 0x65, 0x73, 0x68, 0x54, 0x6f, 0x6b,
+	0x65, 0x6e, 0x46, 0x6f, 0x72, 0x45, 0x6e, 0x76, 0x12, 0x21, 0x2e, 0x61, 0x75, 0x74, 0x68, 0x5f,
+	0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2e, 0x52, 0x65, 0x66, 0x72, 0x65, 0x73, 0x68, 0x54,
+	0x6f, 0x6b, 0x65, 0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1d, 0x2e, 0x61, 0x75,
+	0x74, 0x68, 0x5f, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2e, 0x56, 0x32, 0x4c, 0x6f, 0x67,
+	0x69, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x42, 0x17, 0x5a, 0x15,
+	0x67, 0x65, 0x6e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x61, 0x75, 0x74, 0x68, 0x5f, 0x73, 0x65,
+	0x72, 0x76, 0x69, 0x63, 0x65, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -5214,27 +5219,29 @@ var file_session_service_proto_depIdxs = []int32{
 	32, // 84: auth_service.SessionService.V2LoginWithOption:input_type -> auth_service.V2LoginWithOptionRequest
 	1,  // 85: auth_service.SessionService.ForgotPassword:input_type -> auth_service.ForgotPasswordRequest
 	0,  // 86: auth_service.SessionService.V2ResetPassword:input_type -> auth_service.V2ResetPasswordRequest
-	10, // 87: auth_service.SessionService.Login:output_type -> auth_service.LoginResponse
-	57, // 88: auth_service.SessionService.Logout:output_type -> google.protobuf.Empty
-	13, // 89: auth_service.SessionService.RefreshToken:output_type -> auth_service.RefreshTokenResponse
-	17, // 90: auth_service.SessionService.HasAccess:output_type -> auth_service.HasAccessResponse
-	19, // 91: auth_service.SessionService.HasAccessSuperAdmin:output_type -> auth_service.HasAccessSuperAdminRes
-	29, // 92: auth_service.SessionService.V2Login:output_type -> auth_service.V2LoginResponse
-	33, // 93: auth_service.SessionService.V2LoginSuperAdmin:output_type -> auth_service.V2LoginSuperAdminRes
-	17, // 94: auth_service.SessionService.V2HasAccess:output_type -> auth_service.HasAccessResponse
-	8,  // 95: auth_service.SessionService.V2HasAccessUser:output_type -> auth_service.V2HasAccessUserRes
-	29, // 96: auth_service.SessionService.V2RefreshToken:output_type -> auth_service.V2LoginResponse
-	15, // 97: auth_service.SessionService.V2RefreshTokenSuperAdmin:output_type -> auth_service.V2RefreshTokenSuperAdminResponse
-	29, // 98: auth_service.SessionService.SessionAndTokenGenerator:output_type -> auth_service.V2LoginResponse
-	57, // 99: auth_service.SessionService.UpdateSessionsByRoleId:output_type -> google.protobuf.Empty
-	42, // 100: auth_service.SessionService.MultiCompanyLogin:output_type -> auth_service.MultiCompanyLoginResponse
-	41, // 101: auth_service.SessionService.V2MultiCompanyLogin:output_type -> auth_service.V2MultiCompanyLoginRes
-	6,  // 102: auth_service.SessionService.V2MultiCompanyOneLogin:output_type -> auth_service.V2MultiCompanyOneLoginRes
-	30, // 103: auth_service.SessionService.V2LoginWithOption:output_type -> auth_service.V2LoginWithOptionsResponse
-	2,  // 104: auth_service.SessionService.ForgotPassword:output_type -> auth_service.ForgotPasswordResponse
-	51, // 105: auth_service.SessionService.V2ResetPassword:output_type -> auth_service.User
-	87, // [87:106] is the sub-list for method output_type
-	68, // [68:87] is the sub-list for method input_type
+	12, // 87: auth_service.SessionService.V2RefreshTokenForEnv:input_type -> auth_service.RefreshTokenRequest
+	10, // 88: auth_service.SessionService.Login:output_type -> auth_service.LoginResponse
+	57, // 89: auth_service.SessionService.Logout:output_type -> google.protobuf.Empty
+	13, // 90: auth_service.SessionService.RefreshToken:output_type -> auth_service.RefreshTokenResponse
+	17, // 91: auth_service.SessionService.HasAccess:output_type -> auth_service.HasAccessResponse
+	19, // 92: auth_service.SessionService.HasAccessSuperAdmin:output_type -> auth_service.HasAccessSuperAdminRes
+	29, // 93: auth_service.SessionService.V2Login:output_type -> auth_service.V2LoginResponse
+	33, // 94: auth_service.SessionService.V2LoginSuperAdmin:output_type -> auth_service.V2LoginSuperAdminRes
+	17, // 95: auth_service.SessionService.V2HasAccess:output_type -> auth_service.HasAccessResponse
+	8,  // 96: auth_service.SessionService.V2HasAccessUser:output_type -> auth_service.V2HasAccessUserRes
+	29, // 97: auth_service.SessionService.V2RefreshToken:output_type -> auth_service.V2LoginResponse
+	15, // 98: auth_service.SessionService.V2RefreshTokenSuperAdmin:output_type -> auth_service.V2RefreshTokenSuperAdminResponse
+	29, // 99: auth_service.SessionService.SessionAndTokenGenerator:output_type -> auth_service.V2LoginResponse
+	57, // 100: auth_service.SessionService.UpdateSessionsByRoleId:output_type -> google.protobuf.Empty
+	42, // 101: auth_service.SessionService.MultiCompanyLogin:output_type -> auth_service.MultiCompanyLoginResponse
+	41, // 102: auth_service.SessionService.V2MultiCompanyLogin:output_type -> auth_service.V2MultiCompanyLoginRes
+	6,  // 103: auth_service.SessionService.V2MultiCompanyOneLogin:output_type -> auth_service.V2MultiCompanyOneLoginRes
+	30, // 104: auth_service.SessionService.V2LoginWithOption:output_type -> auth_service.V2LoginWithOptionsResponse
+	2,  // 105: auth_service.SessionService.ForgotPassword:output_type -> auth_service.ForgotPasswordResponse
+	51, // 106: auth_service.SessionService.V2ResetPassword:output_type -> auth_service.User
+	29, // 107: auth_service.SessionService.V2RefreshTokenForEnv:output_type -> auth_service.V2LoginResponse
+	88, // [88:108] is the sub-list for method output_type
+	68, // [68:88] is the sub-list for method input_type
 	68, // [68:68] is the sub-list for extension type_name
 	68, // [68:68] is the sub-list for extension extendee
 	0,  // [0:68] is the sub-list for field type_name
