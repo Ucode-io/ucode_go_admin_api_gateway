@@ -673,7 +673,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 			v2Items.PATCH("/:collection/:id", h.V2.UpdateItem)
 			v2Items.DELETE("/:collection", h.V2.DeleteItems)
 			v2Items.DELETE("/:collection/:id", h.V2.DeleteItem)
-
+			v2Items.POST("/:collection/aggregation", h.V2.GetListAggregation)
 			v2Items.PUT("/many-to-many", h.V2.AppendManyToMany)
 			v2Items.DELETE("/many-to-many", h.V2.DeleteManyToMany)
 		}
