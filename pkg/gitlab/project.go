@@ -166,6 +166,7 @@ func AddFilesToRepo(gitlabToken string, path string, gitlabRepoId int, branch st
 
 	files, err := helper.ListFiles(localFolderPath)
 	if err != nil {
+		fmt.Println("Just error listing files")
 		return errors.New("error listing files")
 	}
 
