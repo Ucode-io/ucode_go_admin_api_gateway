@@ -128,13 +128,6 @@ func (h *HandlerV2) HandleWebhook(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
 	var (
 		repository = cast.ToStringMap(payload["repository"])
 		owner      = cast.ToStringMap(repository["owner"])
@@ -175,6 +168,16 @@ func (h *HandlerV2) HandleWebhook(c *gin.Context) {
 				EnvironmentId: resource.EnvironmentId,
 				ServiceType:   pb.ServiceType_FUNCTION_SERVICE,
 			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		services, err := h.GetProjectSrvc(
+			c.Request.Context(),
+			r.GetProjectId(),
+			r.NodeType,
 		)
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
