@@ -17,6 +17,12 @@ import (
 	"github.com/google/uuid"
 )
 
+func (h *HandlerV1) TestForTimeLimit(c *gin.Context) {
+	time.Sleep(70 * time.Second)
+	h.handleResponse(c, status_http.OK, "OK")
+	return 
+}
+
 // SendCode godoc
 // @ID sendCode
 // @Router /send-code [POST]
