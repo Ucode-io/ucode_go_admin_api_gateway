@@ -161,8 +161,8 @@ func ImportFromGithub(cfg ImportData) (response ImportResponse, err error) {
 }
 
 func AddFilesToRepo(gitlabToken string, path string, gitlabRepoId int, branch string) error {
-	//localFolderPath := "/go/src/gitlab.udevs.io/ucode/ucode_go_admin_api_gateway/github_integration"
-	localFolderPath := "github_integration"
+	localFolderPath := "/go/src/gitlab.udevs.io/ucode/ucode_go_admin_api_gateway/github_integration"
+	//localFolderPath := "github_integration"
 
 	files, err := helper.ListFiles(localFolderPath)
 	if err != nil {
@@ -206,8 +206,8 @@ func AddFilesToRepo(gitlabToken string, path string, gitlabRepoId int, branch st
 }
 
 func AddCiFile(gitlabToken, path string, gitlabRepoId int, branch string) error {
-	//localFolderPath := "/go/src/gitlab.udevs.io/ucode/ucode_go_admin_api_gateway/github_integration"
-	localFolderPath := "github_integration"
+	localFolderPath := "/go/src/gitlab.udevs.io/ucode/ucode_go_admin_api_gateway/github_integration"
+	//localFolderPath := "github_integration"
 	filePath := fmt.Sprintf("%v/.gitlab-ci.yml", localFolderPath)
 
 	fileContent, err := os.ReadFile(filePath)
