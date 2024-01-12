@@ -204,7 +204,7 @@ func BaseLoad() BaseConfig {
 
 	config.GithubClientId = "15341ff840e53dcafc95"
 	config.GithubClientSecret = "e8ba10e6e3bda39cd4fd6875212f9d884a505ab7"
-	config.ProjectUrl = "https://api.admin.u-code.io"
+	config.ProjectUrl = "https://6cd8-94-232-24-122.ngrok-free.app"
 	config.WebhookSecret = "$hereshouldbewebkhooksecret$"
 
 	return config
