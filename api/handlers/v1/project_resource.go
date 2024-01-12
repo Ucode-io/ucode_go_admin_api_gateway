@@ -149,6 +149,22 @@ func (h *HandlerV1) GetListProjectResourceList(c *gin.Context) {
 		request.Type = pb.ResourceType(pb.ResourceType_value[c.DefaultQuery("type", "")])
 	}
 
+	if c.Query("type") == "GITHUB" {
+		resp, err := h.companyServices.IntegrationResource().GetIntegrationResourceList(
+			context.Background(),
+			&pb.GetListIntegrationResourceRequest{
+				ProjectId:     projectId.(string),
+				EnvironmentId: environmentId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+		h.handleResponse(c, status_http.OK, resp)
+		return
+	}
+
 	resp, err := h.companyServices.Resource().GetProjectResourceList(
 		context.Background(),
 		request,
