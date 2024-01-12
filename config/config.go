@@ -202,8 +202,8 @@ func BaseLoad() BaseConfig {
 
 	config.UcodeNamespace = "u-code"
 
-	config.GithubClientId = "74aa24ccaf78694dee84"
-	config.GithubClientSecret = "ef8a8ffc20b5e36eb3dcd3f4ac889af13f64bfd5"
+	config.GithubClientId = "15341ff840e53dcafc95"
+	config.GithubClientSecret = "e8ba10e6e3bda39cd4fd6875212f9d884a505ab7"
 	config.ProjectUrl = "https://api.admin.u-code.io"
 	config.WebhookSecret = "$hereshouldbewebkhooksecret$"
 
