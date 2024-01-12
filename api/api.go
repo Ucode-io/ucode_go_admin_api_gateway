@@ -33,6 +33,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 	r.Any("/x-api/*any", h.V1.RedirectAuthMiddleware(cfg), proxyMiddleware(r, &h), h.V1.Proxy)
 
 	r.POST("/send-code", h.V1.SendCode)
+	r.POST("/test-for-time-limit", h.V1.TestForTimeLimit)
 	r.POST("/verify/:sms_id/:otp", h.V1.Verify)
 	r.POST("/register-otp/:table_slug", h.V1.RegisterOtp)
 	r.POST("/send-message", h.V1.SendMessageToEmail)
