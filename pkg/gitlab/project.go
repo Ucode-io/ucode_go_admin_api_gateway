@@ -169,6 +169,8 @@ func AddFilesToRepo(gitlabToken string, path string, gitlabRepoId int, branch st
 		return errors.New("error listing files")
 	}
 
+	fmt.Println("FILES->", files)
+
 	var actions []map[string]interface{}
 
 	for _, file := range files {
