@@ -98,6 +98,7 @@ func (h *HandlerV2) CreateWebhook(c *gin.Context) {
 		FunctionType:  createWebhookRequest.FunctionType,
 		GithubToken:   createWebhookRequest.GithubToken,
 		ProjectUrl:    h.baseConf.ProjectUrl,
+		Name:          createWebhookRequest.Name,
 	})
 	if err != nil {
 		h.handleResponse(c, status_http.InternalServerError, err.Error())
@@ -143,6 +144,7 @@ func (h *HandlerV2) HandleWebhook(c *gin.Context) {
 		frameworkType     = cast.ToString(config["framework_type"])
 		functionType      = cast.ToString(config["type"])
 		branch            = cast.ToString(config["branch"])
+		name              = cast.ToString(config["name"])
 		branchFronWebhook = cast.ToString(payload["ref"])
 	)
 
@@ -205,7 +207,7 @@ func (h *HandlerV2) HandleWebhook(c *gin.Context) {
 					context.Background(),
 					&fc.CreateFunctionRequest{
 						Path:           fmt.Sprintf("%s_%s", repoName, uuid.New()),
-						Name:           repoName,
+						Name:           name,
 						Description:    repoDescription,
 						ProjectId:      r.ResourceEnvironmentId,
 						EnvironmentId:  resource.EnvironmentId,
@@ -233,7 +235,7 @@ func (h *HandlerV2) HandleWebhook(c *gin.Context) {
 					context.Background(),
 					&fc.CreateFunctionRequest{
 						Path:           fmt.Sprintf("%s_%s", repoName, uuid.New()),
-						Name:           repoName,
+						Name:           name,
 						Description:    repoDescription,
 						ProjectId:      r.ResourceEnvironmentId,
 						EnvironmentId:  resource.EnvironmentId,

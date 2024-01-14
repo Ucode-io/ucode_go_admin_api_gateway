@@ -16,6 +16,7 @@ type CreateWebhookRequest struct {
 	Branch        string `json:"branch"`
 	FunctionType  string `json:"type"`
 	ProjectUrl    string `json:"project_url"`
+	Name          string `json:"name"`
 }
 
 type WebhookPayload struct {
