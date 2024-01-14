@@ -467,6 +467,11 @@ func (h *HandlerV2) pipelineStatus(services services.ServiceManagerI, function *
 				return err
 			}
 
+			err = gitlab.DeleteRepository(h.baseConf.GitlabIntegrationToken, repoId)
+			if err != nil {
+				return err
+			}
+
 			return nil
 		}
 

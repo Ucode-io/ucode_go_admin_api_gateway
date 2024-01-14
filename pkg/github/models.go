@@ -33,4 +33,5 @@ type Config struct {
 	FrameworkType string `json:"framework_type"`
 	Branch        string `json:"branch"`
 	FunctionType  string `json:"type"`
+	Name          string `json:"name"`
 }
