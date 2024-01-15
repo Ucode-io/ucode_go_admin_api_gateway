@@ -129,8 +129,16 @@ func (h *HandlerV1) CreateNewFunction(c *gin.Context) {
 		return
 	}
 	// fmt.Println("test before clone")
-	var sshURL = resp.Message["ssh_url_to_repo"].(string)
-	err = gitlab.CloneForkToPath(sshURL, h.baseConf)
+	// var sshURL = resp.Message["ssh_url_to_repo"].(string)
+	// err = gitlab.CloneForkToPath(sshURL, h.cfg)
+	// // fmt.Println("clone err::", err)
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.InvalidArgument, err.Error())
+	// 	return
+	// }
+	// fmt.Println("test before clone")
+	//var sshURL = resp.Message["ssh_url_to_repo"].(string)
+	//err = gitlab.CloneForkToPath(sshURL, h.cfg)
 	// fmt.Println("clone err::", err)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
@@ -139,11 +147,11 @@ func (h *HandlerV1) CreateNewFunction(c *gin.Context) {
 	uuid, _ := uuid.NewRandom()
 	// fmt.Println("test after clone")
 	// fmt.Println("uuid::", uuid.String())
-	password, err := code_server.CreateCodeServer(projectName+"-"+function.Path, h.baseConf, uuid.String())
-	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
-		return
-	}
+	// password, err := code_server.CreateCodeServer(projectName+"-"+function.Path, h.cfg, uuid.String())
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.InvalidArgument, err.Error())
+	// 	return
+	// }
 	var url = "https://" + uuid.String() + ".u-code.io"
 
 	response, err := services.FunctionService().FunctionService().Create(
@@ -156,9 +164,9 @@ func (h *HandlerV1) CreateNewFunction(c *gin.Context) {
 			EnvironmentId:    environmentId.(string),
 			FunctionFolderId: function.FunctionFolderId,
 			Url:              url,
-			Password:         password,
-			SshUrl:           sshURL,
-			Type:             FUNCTION,
+			//Password:         password,
+			//SshUrl:           sshURL,
+			Type: FUNCTION,
 		},
 	)
 
