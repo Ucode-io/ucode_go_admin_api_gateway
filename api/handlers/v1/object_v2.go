@@ -275,7 +275,7 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
-	fmt.Println("\n\n\n --- SLIM TEST #2 --- ")
+	// fmt.Println("\n\n\n --- SLIM TEST #2 --- ")
 	offset, err := h.getOffsetParam(c)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
@@ -300,13 +300,13 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 	objectRequest.Data["user_id_from_token"] = tokenInfo.GetUserId()
 	objectRequest.Data["role_id_from_token"] = tokenInfo.GetRoleId()
 	objectRequest.Data["client_type_id_from_token"] = tokenInfo.GetClientTypeId()
-	fmt.Println("\n\n\n --- SLIM TEST #2.1 --- ")
+	// fmt.Println("\n\n\n --- SLIM TEST #2.1 --- ")
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
-	fmt.Println("\n\n\n --- SLIM TEST #2.2 --- ")
+	// fmt.Println("\n\n\n --- SLIM TEST #2.2 --- ")
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -319,7 +319,7 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
-	fmt.Println("\n\n\n --- SLIM TEST #3 --- ")
+	// fmt.Println("\n\n\n --- SLIM TEST #3 --- ")
 	var resource *pb.ServiceResourceModel
 	resourceBody, ok := c.Get("resource")
 	if resourceBody != "" && ok {
@@ -360,7 +360,7 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 			return
 		}
 	}
-	fmt.Println("\n\n\n --- SLIM TEST #4 --- ", projectId, resource.ResourceEnvironmentId)
+	fmt.Println("\n --- SLIM TEST #4 --- ", projectId, "resource env id", resource.ResourceEnvironmentId)
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
 		projectId.(string),
@@ -370,7 +370,7 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	fmt.Println("\n\n\n --- SLIM TEST #5 --- ")
+	// fmt.Println("\n\n\n --- SLIM TEST #5 --- ")
 	// service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
 	// if err != nil {
 	// 	h.handleResponse(c, status_http.InternalServerError, err)
