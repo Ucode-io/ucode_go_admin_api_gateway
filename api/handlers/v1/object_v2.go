@@ -111,13 +111,13 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 		return
 	}
 
-	// service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.InternalServerError, err)
-	// 	return
-	// }
-	// defer conn.Close()
-	service := services.BuilderService().ObjectBuilder()
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err)
+		return
+	}
+	defer conn.Close()
+	// service := services.BuilderService().ObjectBuilder()
 
 	if viewId, ok := objectRequest.Data["builder_service_view_id"].(string); ok {
 		if util.IsValidUUID(viewId) {
@@ -377,6 +377,7 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 	// 	return
 	// }
 	// defer conn.Close()
+
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 
 	fmt.Println("\n\n\n --- SLIM TEST #6 --- ")
