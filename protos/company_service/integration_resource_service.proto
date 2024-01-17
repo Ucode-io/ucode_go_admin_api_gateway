@@ -3,12 +3,16 @@ syntax="proto3";
 package company_service;
 option go_package = "genproto/company_service";
 
+import "google/protobuf/empty.proto";
 import "company.proto";
 
 service IntegrationResourceService {
     rpc CreateIntegrationResource(CreateIntegrationResourceRequest) returns (IntegrationResource) {}
+    rpc GetById(IntegrationResourcePrimaryKey) returns (IntegrationResource) {}
     rpc GetByUsername(GetByUsernameRequest) returns (GetByUsernameResponse) {}
     rpc GetIntegrationResourceList(GetListIntegrationResourceRequest) returns (GetListIntegrationResourceResponse) {}
+    rpc UpdateIntegrationResource(UpdateIntegrationResourceRequest) returns (google.protobuf.Empty) {}
+    rpc DeleteIntegrationResource(IntegrationResourcePrimaryKey) returns (google.protobuf.Empty) {}
 }
 
 message IntegrationResource {
@@ -18,6 +22,7 @@ message IntegrationResource {
     string environment_id = 4;
     string username = 5;
     string name = 6;
+    string type = 7;
 }
 
 message CreateIntegrationResourceRequest {
@@ -28,8 +33,17 @@ message CreateIntegrationResourceRequest {
     string name = 5;
 }
 
+message UpdateIntegrationResourceRequest {
+    string id = 1;
+    string name = 2;
+}
+
 message GetByUsernameRequest {
     string username = 1;
+}
+
+message IntegrationResourcePrimaryKey {
+    string id = 1;
 }
 
 message GetByUsernameResponse {

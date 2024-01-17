@@ -27,7 +27,7 @@ message VersionHistory {
     string action_type = 3;
     google.protobuf.Struct previus = 4;
     google.protobuf.Struct current = 5;
-    bool is_used = 6;
+    map<string, bool> is_used = 6;
 }
 
 message ListVersionHistory {

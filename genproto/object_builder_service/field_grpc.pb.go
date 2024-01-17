@@ -27,6 +27,7 @@ type FieldServiceClient interface {
 	GetAll(ctx context.Context, in *GetAllFieldsRequest, opts ...grpc.CallOption) (*GetAllFieldsResponse, error)
 	GetAllForItems(ctx context.Context, in *GetAllFieldsForItemsRequest, opts ...grpc.CallOption) (*AllFields, error)
 	Update(ctx context.Context, in *Field, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	UpdateSearch(ctx context.Context, in *SearchUpdateRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	Delete(ctx context.Context, in *FieldPrimaryKey, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
@@ -74,6 +75,15 @@ func (c *fieldServiceClient) Update(ctx context.Context, in *Field, opts ...grpc
 	return out, nil
 }
 
+func (c *fieldServiceClient) UpdateSearch(ctx context.Context, in *SearchUpdateRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/object_builder_service.FieldService/UpdateSearch", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *fieldServiceClient) Delete(ctx context.Context, in *FieldPrimaryKey, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, "/object_builder_service.FieldService/Delete", in, out, opts...)
@@ -91,6 +101,7 @@ type FieldServiceServer interface {
 	GetAll(context.Context, *GetAllFieldsRequest) (*GetAllFieldsResponse, error)
 	GetAllForItems(context.Context, *GetAllFieldsForItemsRequest) (*AllFields, error)
 	Update(context.Context, *Field) (*emptypb.Empty, error)
+	UpdateSearch(context.Context, *SearchUpdateRequest) (*emptypb.Empty, error)
 	Delete(context.Context, *FieldPrimaryKey) (*emptypb.Empty, error)
 	mustEmbedUnimplementedFieldServiceServer()
 }
@@ -110,6 +121,9 @@ func (UnimplementedFieldServiceServer) GetAllForItems(context.Context, *GetAllFi
 }
 func (UnimplementedFieldServiceServer) Update(context.Context, *Field) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
+}
+func (UnimplementedFieldServiceServer) UpdateSearch(context.Context, *SearchUpdateRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateSearch not implemented")
 }
 func (UnimplementedFieldServiceServer) Delete(context.Context, *FieldPrimaryKey) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
@@ -199,6 +213,24 @@ func _FieldService_Update_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _FieldService_UpdateSearch_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SearchUpdateRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FieldServiceServer).UpdateSearch(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/object_builder_service.FieldService/UpdateSearch",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FieldServiceServer).UpdateSearch(ctx, req.(*SearchUpdateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _FieldService_Delete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(FieldPrimaryKey)
 	if err := dec(in); err != nil {
@@ -239,6 +271,10 @@ var FieldService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Update",
 			Handler:    _FieldService_Update_Handler,
+		},
+		{
+			MethodName: "UpdateSearch",
+			Handler:    _FieldService_UpdateSearch_Handler,
 		},
 		{
 			MethodName: "Delete",

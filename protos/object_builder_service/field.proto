@@ -12,6 +12,7 @@ service FieldService {
     rpc GetAll(GetAllFieldsRequest) returns (GetAllFieldsResponse) {}
     rpc GetAllForItems(GetAllFieldsForItemsRequest) returns (AllFields) {}
     rpc Update(Field) returns (google.protobuf.Empty) {}
+    rpc UpdateSearch(SearchUpdateRequest) returns (google.protobuf.Empty) {}
     rpc Delete(FieldPrimaryKey) returns (google.protobuf.Empty) {}
 }
 
@@ -84,6 +85,18 @@ message Field {
     bool hide_multilanguage = 23;
     string minio_folder = 24;
     string env_id = 25;
+    bool is_search = 26;
+}
+
+message SearchUpdate {
+    string id = 1;
+    bool is_search = 2;
+}
+
+message SearchUpdateRequest {
+    string project_id = 1;
+    string table_slug = 2;
+    repeated SearchUpdate fields = 3;
 }
 
 message GetAllFieldsResponse {

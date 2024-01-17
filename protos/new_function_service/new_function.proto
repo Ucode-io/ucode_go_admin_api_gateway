@@ -40,6 +40,7 @@ message CreateFunctionRequest {
     string repo_id = 20;
     string error_message = 21;
     string job_name = 22;
+    string resource = 23;
 }
 
 message Function {
@@ -63,6 +64,7 @@ message Function {
     string repo_id = 19;
     string error_message = 20;
     string job_name = 21;
+    string resource = 22;
 }
 
 message GetAllFunctionsRequest {
