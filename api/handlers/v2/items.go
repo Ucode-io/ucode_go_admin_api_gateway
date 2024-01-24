@@ -469,13 +469,14 @@ func (h *HandlerV2) GetSingleItem(c *gin.Context) {
 		return
 	}
 
-	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
-	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
-	defer conn.Close()
+	// service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.InternalServerError, err)
+	// 	return
+	// }
+	// defer conn.Close()
 
+	service := services.BuilderService().ObjectBuilder()
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = service.GetSingle(
