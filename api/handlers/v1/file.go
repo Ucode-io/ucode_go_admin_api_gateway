@@ -98,13 +98,13 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 		return
 	}
 	defer object.Close()
+
 	minioClient, err := minio.New(h.baseConf.MinioEndpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(h.baseConf.MinioAccessKeyID, h.baseConf.MinioSecretAccessKey, ""),
 		Secure: h.baseConf.MinioProtocol,
 	})
 	h.log.Info("info", logger.String("MinioEndpoint: ", h.baseConf.MinioEndpoint), logger.String("access_key: ",
 		h.baseConf.MinioAccessKeyID), logger.String("access_secret: ", h.baseConf.MinioSecretAccessKey))
-
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
@@ -128,6 +128,9 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 	}
 
 	fmt.Println("TEST 1")
+
+	fmt.Println("ResourceEnvironmentId", resource.ResourceEnvironmentId)
+	fmt.Println("FolderName", folder_name)
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).File().Create(context.Background(), &obs.CreateFileRequest{
 		Id:               fName.String(),
