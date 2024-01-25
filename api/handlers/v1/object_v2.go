@@ -375,17 +375,17 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 	}
 	// fmt.Println("\n\n\n --- SLIM TEST #5 --- ")
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
-	defer cancel()
+	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
+	// defer cancel()
 
-	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
-	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
-	defer conn.Close()
+	// service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.InternalServerError, err)
+	// 	return
+	// }
+	// defer conn.Close()
 
-	// service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
+	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 
 	fmt.Println("\n\n\n --- SLIM TEST #6 --- ")
 	var slimKey = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("slim-%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId)))
