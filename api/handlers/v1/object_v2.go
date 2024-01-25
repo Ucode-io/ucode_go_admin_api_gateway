@@ -111,13 +111,16 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 		return
 	}
 
-	// service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.InternalServerError, err)
-	// 	return
-	// }
-	// defer conn.Close()
-	service := services.BuilderService().ObjectBuilder()
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	defer cancel()
+
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err)
+		return
+	}
+	defer conn.Close()
+	// service := services.BuilderService().ObjectBuilder()
 
 	if viewId, ok := objectRequest.Data["builder_service_view_id"].(string); ok {
 		if util.IsValidUUID(viewId) {
@@ -371,14 +374,18 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 		return
 	}
 	// fmt.Println("\n\n\n --- SLIM TEST #5 --- ")
-	// service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.InternalServerError, err)
-	// 	return
-	// }
-	// defer conn.Close()
 
-	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	defer cancel()
+
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err)
+		return
+	}
+	defer conn.Close()
+
+	// service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 
 	fmt.Println("\n\n\n --- SLIM TEST #6 --- ")
 	var slimKey = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("slim-%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId)))

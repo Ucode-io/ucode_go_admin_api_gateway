@@ -79,6 +79,9 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 		return
 	}
 
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	defer cancel()
+
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
 		resource.GetProjectId(),
@@ -137,7 +140,7 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 		}
 	}
 
-	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
 	if err != nil {
 		h.handleResponse(c, status_http.InternalServerError, err)
 		return
@@ -275,7 +278,10 @@ func (h *HandlerV2) CreateItems(c *gin.Context) {
 		return
 	}
 
-	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	defer cancel()
+
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
 	if err != nil {
 		h.handleResponse(c, status_http.InternalServerError, err)
 		return
@@ -469,14 +475,17 @@ func (h *HandlerV2) GetSingleItem(c *gin.Context) {
 		return
 	}
 
-	// service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.InternalServerError, err)
-	// 	return
-	// }
-	// defer conn.Close()
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	defer cancel()
 
-	service := services.BuilderService().ObjectBuilder()
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err)
+		return
+	}
+	defer conn.Close()
+
+	// service := services.BuilderService().ObjectBuilder()
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = service.GetSingle(
@@ -607,7 +616,10 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 		return
 	}
 
-	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	defer cancel()
+
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
 	if err != nil {
 		h.handleResponse(c, status_http.InternalServerError, err)
 		return
@@ -817,7 +829,10 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 		return
 	}
 
-	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	defer cancel()
+
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
 	if err != nil {
 		h.handleResponse(c, status_http.InternalServerError, err)
 		return
@@ -1015,7 +1030,10 @@ func (h *HandlerV2) MultipleUpdateItems(c *gin.Context) {
 		return
 	}
 
-	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	defer cancel()
+
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
 	if err != nil {
 		h.handleResponse(c, status_http.InternalServerError, err)
 		return
@@ -1189,8 +1207,12 @@ func (h *HandlerV2) DeleteItem(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	defer cancel()
+
 	fmt.Println("\n\n --- TEST LOG #5 --- ")
-	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
 	if err != nil {
 		h.handleResponse(c, status_http.InternalServerError, err)
 		return
@@ -1361,7 +1383,10 @@ func (h *HandlerV2) DeleteItems(c *gin.Context) {
 		return
 	}
 
-	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	defer cancel()
+
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
 	if err != nil {
 		h.handleResponse(c, status_http.InternalServerError, err)
 		return
@@ -1510,6 +1535,9 @@ func (h *HandlerV2) DeleteManyToMany(c *gin.Context) {
 		return
 	}
 
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	defer cancel()
+
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
 		resource.GetProjectId(),
@@ -1520,7 +1548,7 @@ func (h *HandlerV2) DeleteManyToMany(c *gin.Context) {
 		return
 	}
 
-	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
 	if err != nil {
 		h.handleResponse(c, status_http.InternalServerError, err)
 		return
@@ -1664,7 +1692,10 @@ func (h *HandlerV2) AppendManyToMany(c *gin.Context) {
 		return
 	}
 
-	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	defer cancel()
+
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
 	if err != nil {
 		h.handleResponse(c, status_http.InternalServerError, err)
 		return
@@ -1813,7 +1844,10 @@ func (h *HandlerV2) GetListAggregation(c *gin.Context) {
 		return
 	}
 
-	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	defer cancel()
+
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
 	if err != nil {
 		h.handleResponse(c, status_http.InternalServerError, err)
 		return
