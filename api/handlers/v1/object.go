@@ -367,7 +367,7 @@ func (h *HandlerV1) GetSingle(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
 	defer cancel()
 
 	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
@@ -486,7 +486,7 @@ func (h *HandlerV1) GetSingleSlim(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
 	defer cancel()
 
 	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
@@ -872,7 +872,7 @@ func (h *HandlerV1) DeleteObject(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
 	defer cancel()
 
 	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
@@ -1465,7 +1465,7 @@ func (h *HandlerV1) GetListInExcel(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
 	defer cancel()
 
 	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
@@ -1578,7 +1578,7 @@ func (h *HandlerV1) DeleteManyToMany(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
 	defer cancel()
 
 	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
@@ -1725,7 +1725,7 @@ func (h *HandlerV1) AppendManyToMany(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
 	defer cancel()
 
 	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
@@ -1873,7 +1873,7 @@ func (h *HandlerV1) UpsertObject(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
 	defer cancel()
 
 	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
@@ -2119,6 +2119,9 @@ func (h *HandlerV1) MultipleUpdateObject(c *gin.Context) {
 		}
 	}
 
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
+	defer cancel()
+
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
 		projectId.(string),
@@ -2129,7 +2132,7 @@ func (h *HandlerV1) MultipleUpdateObject(c *gin.Context) {
 		return
 	}
 
-	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
 	if err != nil {
 		h.handleResponse(c, status_http.InternalServerError, err)
 		return
@@ -2314,7 +2317,7 @@ func (h *HandlerV1) GetFinancialAnalytics(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
 	defer cancel()
 
 	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
@@ -2502,7 +2505,7 @@ func (h *HandlerV1) GetListGroupBy(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
 	defer cancel()
 
 	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
@@ -2658,6 +2661,9 @@ func (h *HandlerV1) GetGroupByField(c *gin.Context) {
 		return
 	}
 
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
+	defer cancel()
+
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
 		projectId.(string),
@@ -2668,7 +2674,7 @@ func (h *HandlerV1) GetGroupByField(c *gin.Context) {
 		return
 	}
 
-	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
 	if err != nil {
 		h.handleResponse(c, status_http.InternalServerError, err)
 		return
@@ -2793,7 +2799,7 @@ func (h *HandlerV1) DeleteManyObject(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
 	defer cancel()
 
 	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
@@ -2961,7 +2967,7 @@ func (h *HandlerV1) GetListWithOutRelation(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
 	defer cancel()
 
 	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)

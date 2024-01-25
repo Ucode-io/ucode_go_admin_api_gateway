@@ -111,7 +111,7 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
 	defer cancel()
 
 	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
@@ -375,7 +375,7 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 	}
 	// fmt.Println("\n\n\n --- SLIM TEST #5 --- ")
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
 	defer cancel()
 
 	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
