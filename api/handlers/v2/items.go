@@ -475,7 +475,7 @@ func (h *HandlerV2) GetSingleItem(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(10))
 	defer cancel()
 
 	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
