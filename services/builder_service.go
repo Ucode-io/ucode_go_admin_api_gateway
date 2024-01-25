@@ -64,14 +64,14 @@ func NewBuilderServiceClient(ctx context.Context, cfg config.Config) (BuilderSer
 	}
 
 	factory := func() (*grpc.ClientConn, error) {
-		conn, err := grpc.Dial(
-			cfg.ObjectBuilderServiceHost+cfg.ObjectBuilderGRPCPort,
-			grpc.WithTransportCredentials(insecure.NewCredentials()),
-			grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(52428800), grpc.MaxCallSendMsgSize(52428800)))
-		if err != nil {
-			return nil, err
-		}
-		return conn, err
+		// conn, err := grpc.Dial(
+		// 	cfg.ObjectBuilderServiceHost+cfg.ObjectBuilderGRPCPort,
+		// 	grpc.WithTransportCredentials(insecure.NewCredentials()),
+		// 	grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(52428800), grpc.MaxCallSendMsgSize(52428800)))
+		// if err != nil {
+		// 	return nil, err
+		// }
+		return connObjectBuilderService, err
 	}
 
 	objectbuilderServicePool, err := grpcpool.New(factory, 12, 18, time.Second*3)
