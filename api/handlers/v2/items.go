@@ -476,6 +476,7 @@ func (h *HandlerV2) GetSingleItem(c *gin.Context) {
 	}
 	defer conn.Close()
 
+	// service := services.BuilderService().ObjectBuilder()
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = service.GetSingle(

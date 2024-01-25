@@ -91,7 +91,7 @@ func main() {
 
 	mapProjectConfs[baseConf.UcodeNamespace] = uConf
 
-	fmt.Println("\n\n ~~~> project configs ", mapProjectConfs)
+	fmt.Println("\n\n ~~> project configs ", mapProjectConfs)
 
 	newRedis := redis.NewRedis(mapProjectConfs)
 

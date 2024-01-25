@@ -3217,7 +3217,11 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 			search      = cast.ToStringMap(objectRequest.Data["search"])
 		)
 		for key, value := range search {
-			searchQuery[key] = map[string]interface{}{"$regex": value, "$options": "i"}
+			if cast.ToString(value) == "" {
+				searchQuery[key] = value
+			} else {
+				searchQuery[key] = map[string]interface{}{"$regex": value, "$options": "i"}
+			}
 		}
 		object.Data["second_match"] = searchQuery
 	}
