@@ -111,10 +111,10 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
-	defer cancel()
+	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
+	// defer cancel()
 
-	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(context.Background())
 	if err != nil {
 		h.handleResponse(c, status_http.InternalServerError, err)
 		return
