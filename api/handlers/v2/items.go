@@ -475,17 +475,17 @@ func (h *HandlerV2) GetSingleItem(c *gin.Context) {
 		return
 	}
 
-	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(10))
-	// defer cancel()
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(10))
+	defer cancel()
 
-	// service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.InternalServerError, err)
-	// 	return
-	// }
-	// defer conn.Close()
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err)
+		return
+	}
+	defer conn.Close()
 
-	service := services.BuilderService().ObjectBuilder()
+	// service := services.BuilderService().ObjectBuilder()
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = service.GetSingle(
