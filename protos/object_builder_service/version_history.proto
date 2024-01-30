@@ -43,6 +43,7 @@ message CreateVersionHistoryRequest {
     string date = 7;
     string user_info = 8;
     string request = 9;
+    string project_id = 10;
 }
 
 message ListVersionHistory {
