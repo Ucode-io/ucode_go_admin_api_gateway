@@ -320,7 +320,7 @@ func (h *HandlerV2) GetAllFields(c *gin.Context) {
 func (h *HandlerV2) UpdateField(c *gin.Context) {
 	var (
 		fieldRequest models.Field
-		resp         *emptypb.Empty
+		resp         *obs.Field
 	)
 
 	err := c.ShouldBindJSON(&fieldRequest)
@@ -465,6 +465,19 @@ func (h *HandlerV2) UpdateField(c *gin.Context) {
 	field.ProjectId = resource.ResourceEnvironmentId
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
+
+		_, err = services.GetBuilderServiceByType(resource.NodeType).Field().GetByID(
+			context.Background(),
+			&obs.FieldPrimaryKey{
+				Id:        field.Id,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Field().Update(
 			context.Background(),
 			&field,
@@ -613,6 +626,18 @@ func (h *HandlerV2) DeleteField(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
+		_, err = services.GetBuilderServiceByType(resource.NodeType).Field().GetByID(
+			context.Background(),
+			&obs.FieldPrimaryKey{
+				Id:        fieldID,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Field().Delete(
 			context.Background(),
 			&obs.FieldPrimaryKey{
@@ -620,7 +645,6 @@ func (h *HandlerV2) DeleteField(c *gin.Context) {
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
-
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return

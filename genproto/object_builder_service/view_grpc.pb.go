@@ -26,7 +26,7 @@ type ViewServiceClient interface {
 	Create(ctx context.Context, in *CreateViewRequest, opts ...grpc.CallOption) (*View, error)
 	GetList(ctx context.Context, in *GetAllViewsRequest, opts ...grpc.CallOption) (*GetAllViewsResponse, error)
 	GetSingle(ctx context.Context, in *ViewPrimaryKey, opts ...grpc.CallOption) (*View, error)
-	Update(ctx context.Context, in *View, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	Update(ctx context.Context, in *View, opts ...grpc.CallOption) (*View, error)
 	Delete(ctx context.Context, in *ViewPrimaryKey, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	ConvertHtmlToPdf(ctx context.Context, in *HtmlBody, opts ...grpc.CallOption) (*PdfBody, error)
 	ConvertTemplateToHtml(ctx context.Context, in *HtmlBody, opts ...grpc.CallOption) (*HtmlBody, error)
@@ -68,8 +68,8 @@ func (c *viewServiceClient) GetSingle(ctx context.Context, in *ViewPrimaryKey, o
 	return out, nil
 }
 
-func (c *viewServiceClient) Update(ctx context.Context, in *View, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
+func (c *viewServiceClient) Update(ctx context.Context, in *View, opts ...grpc.CallOption) (*View, error) {
+	out := new(View)
 	err := c.cc.Invoke(ctx, "/object_builder_service.ViewService/Update", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -120,7 +120,7 @@ type ViewServiceServer interface {
 	Create(context.Context, *CreateViewRequest) (*View, error)
 	GetList(context.Context, *GetAllViewsRequest) (*GetAllViewsResponse, error)
 	GetSingle(context.Context, *ViewPrimaryKey) (*View, error)
-	Update(context.Context, *View) (*emptypb.Empty, error)
+	Update(context.Context, *View) (*View, error)
 	Delete(context.Context, *ViewPrimaryKey) (*emptypb.Empty, error)
 	ConvertHtmlToPdf(context.Context, *HtmlBody) (*PdfBody, error)
 	ConvertTemplateToHtml(context.Context, *HtmlBody) (*HtmlBody, error)
@@ -141,7 +141,7 @@ func (UnimplementedViewServiceServer) GetList(context.Context, *GetAllViewsReque
 func (UnimplementedViewServiceServer) GetSingle(context.Context, *ViewPrimaryKey) (*View, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetSingle not implemented")
 }
-func (UnimplementedViewServiceServer) Update(context.Context, *View) (*emptypb.Empty, error) {
+func (UnimplementedViewServiceServer) Update(context.Context, *View) (*View, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
 }
 func (UnimplementedViewServiceServer) Delete(context.Context, *ViewPrimaryKey) (*emptypb.Empty, error) {

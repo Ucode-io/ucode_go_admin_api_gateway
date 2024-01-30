@@ -378,7 +378,7 @@ func (h *HandlerV2) GetAllCollections(c *gin.Context) {
 func (h *HandlerV2) UpdateCollection(c *gin.Context) {
 	var (
 		table models.UpdateTableRequest
-		resp  *emptypb.Empty
+		resp  *obs.Table
 	)
 
 	err := c.ShouldBindJSON(&table)

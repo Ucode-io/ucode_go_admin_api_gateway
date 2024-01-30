@@ -223,8 +223,26 @@ func (h *HandlerV2) UpdateLayout(c *gin.Context) {
 		projectId.(string),
 		nodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	input.ProjectId = resourceEnvironmentId
+	_, err = services.GetBuilderServiceByType(nodeType).Layout().GetSingleLayout(
+		context.Background(),
+		&object_builder_service.GetSingleLayoutRequest{
+			ProjectId: input.ProjectId,
+			TableId:   input.TableId,
+			MenuId:    input.MenuId,
+			TableSlug: input.TableId,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
 	resp, err := services.GetBuilderServiceByType(nodeType).Layout().Update(
 		context.Background(),
 		&input,
@@ -275,6 +293,10 @@ func (h *HandlerV2) DeleteLayout(c *gin.Context) {
 		projectId.(string),
 		nodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(nodeType).Layout().RemoveLayout(
 		context.Background(),

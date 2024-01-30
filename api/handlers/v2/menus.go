@@ -356,7 +356,7 @@ func (h *HandlerV2) GetAllMenus(c *gin.Context) {
 func (h *HandlerV2) UpdateMenu(c *gin.Context) {
 	var (
 		menu models.Menu
-		resp *emptypb.Empty
+		resp *obs.Menu
 	)
 
 	err := c.ShouldBindJSON(&menu)
@@ -413,6 +413,18 @@ func (h *HandlerV2) UpdateMenu(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
+		_, err = services.GetBuilderServiceByType(resource.NodeType).Menu().GetByID(
+			context.Background(),
+			&obs.MenuPrimaryKey{
+				Id:        menu.Id,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Menu().Update(
 			context.Background(),
 			&obs.Menu{
@@ -431,7 +443,6 @@ func (h *HandlerV2) UpdateMenu(c *gin.Context) {
 				WikiId:          menu.WikiId,
 			},
 		)
-
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return

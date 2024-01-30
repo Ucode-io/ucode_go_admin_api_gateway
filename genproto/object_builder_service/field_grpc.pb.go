@@ -24,9 +24,10 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type FieldServiceClient interface {
 	Create(ctx context.Context, in *CreateFieldRequest, opts ...grpc.CallOption) (*Field, error)
+	GetByID(ctx context.Context, in *FieldPrimaryKey, opts ...grpc.CallOption) (*Field, error)
 	GetAll(ctx context.Context, in *GetAllFieldsRequest, opts ...grpc.CallOption) (*GetAllFieldsResponse, error)
 	GetAllForItems(ctx context.Context, in *GetAllFieldsForItemsRequest, opts ...grpc.CallOption) (*AllFields, error)
-	Update(ctx context.Context, in *Field, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	Update(ctx context.Context, in *Field, opts ...grpc.CallOption) (*Field, error)
 	UpdateSearch(ctx context.Context, in *SearchUpdateRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	Delete(ctx context.Context, in *FieldPrimaryKey, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
@@ -42,6 +43,15 @@ func NewFieldServiceClient(cc grpc.ClientConnInterface) FieldServiceClient {
 func (c *fieldServiceClient) Create(ctx context.Context, in *CreateFieldRequest, opts ...grpc.CallOption) (*Field, error) {
 	out := new(Field)
 	err := c.cc.Invoke(ctx, "/object_builder_service.FieldService/Create", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *fieldServiceClient) GetByID(ctx context.Context, in *FieldPrimaryKey, opts ...grpc.CallOption) (*Field, error) {
+	out := new(Field)
+	err := c.cc.Invoke(ctx, "/object_builder_service.FieldService/GetByID", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -66,8 +76,8 @@ func (c *fieldServiceClient) GetAllForItems(ctx context.Context, in *GetAllField
 	return out, nil
 }
 
-func (c *fieldServiceClient) Update(ctx context.Context, in *Field, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
+func (c *fieldServiceClient) Update(ctx context.Context, in *Field, opts ...grpc.CallOption) (*Field, error) {
+	out := new(Field)
 	err := c.cc.Invoke(ctx, "/object_builder_service.FieldService/Update", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -98,9 +108,10 @@ func (c *fieldServiceClient) Delete(ctx context.Context, in *FieldPrimaryKey, op
 // for forward compatibility
 type FieldServiceServer interface {
 	Create(context.Context, *CreateFieldRequest) (*Field, error)
+	GetByID(context.Context, *FieldPrimaryKey) (*Field, error)
 	GetAll(context.Context, *GetAllFieldsRequest) (*GetAllFieldsResponse, error)
 	GetAllForItems(context.Context, *GetAllFieldsForItemsRequest) (*AllFields, error)
-	Update(context.Context, *Field) (*emptypb.Empty, error)
+	Update(context.Context, *Field) (*Field, error)
 	UpdateSearch(context.Context, *SearchUpdateRequest) (*emptypb.Empty, error)
 	Delete(context.Context, *FieldPrimaryKey) (*emptypb.Empty, error)
 	mustEmbedUnimplementedFieldServiceServer()
@@ -113,13 +124,16 @@ type UnimplementedFieldServiceServer struct {
 func (UnimplementedFieldServiceServer) Create(context.Context, *CreateFieldRequest) (*Field, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
 }
+func (UnimplementedFieldServiceServer) GetByID(context.Context, *FieldPrimaryKey) (*Field, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetByID not implemented")
+}
 func (UnimplementedFieldServiceServer) GetAll(context.Context, *GetAllFieldsRequest) (*GetAllFieldsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAll not implemented")
 }
 func (UnimplementedFieldServiceServer) GetAllForItems(context.Context, *GetAllFieldsForItemsRequest) (*AllFields, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAllForItems not implemented")
 }
-func (UnimplementedFieldServiceServer) Update(context.Context, *Field) (*emptypb.Empty, error) {
+func (UnimplementedFieldServiceServer) Update(context.Context, *Field) (*Field, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
 }
 func (UnimplementedFieldServiceServer) UpdateSearch(context.Context, *SearchUpdateRequest) (*emptypb.Empty, error) {
@@ -155,6 +169,24 @@ func _FieldService_Create_Handler(srv interface{}, ctx context.Context, dec func
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(FieldServiceServer).Create(ctx, req.(*CreateFieldRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FieldService_GetByID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FieldPrimaryKey)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FieldServiceServer).GetByID(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/object_builder_service.FieldService/GetByID",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FieldServiceServer).GetByID(ctx, req.(*FieldPrimaryKey))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -259,6 +291,10 @@ var FieldService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Create",
 			Handler:    _FieldService_Create_Handler,
+		},
+		{
+			MethodName: "GetByID",
+			Handler:    _FieldService_GetByID_Handler,
 		},
 		{
 			MethodName: "GetAll",

@@ -26,7 +26,7 @@ type RelationServiceClient interface {
 	Create(ctx context.Context, in *CreateRelationRequest, opts ...grpc.CallOption) (*CreateRelationRequest, error)
 	GetAll(ctx context.Context, in *GetAllRelationsRequest, opts ...grpc.CallOption) (*GetAllRelationsResponse, error)
 	GetByID(ctx context.Context, in *RelationPrimaryKey, opts ...grpc.CallOption) (*RelationForGetAll, error)
-	Update(ctx context.Context, in *UpdateRelationRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	Update(ctx context.Context, in *UpdateRelationRequest, opts ...grpc.CallOption) (*RelationForGetAll, error)
 	Delete(ctx context.Context, in *RelationPrimaryKey, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
@@ -65,8 +65,8 @@ func (c *relationServiceClient) GetByID(ctx context.Context, in *RelationPrimary
 	return out, nil
 }
 
-func (c *relationServiceClient) Update(ctx context.Context, in *UpdateRelationRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
+func (c *relationServiceClient) Update(ctx context.Context, in *UpdateRelationRequest, opts ...grpc.CallOption) (*RelationForGetAll, error) {
+	out := new(RelationForGetAll)
 	err := c.cc.Invoke(ctx, "/object_builder_service.RelationService/Update", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -90,7 +90,7 @@ type RelationServiceServer interface {
 	Create(context.Context, *CreateRelationRequest) (*CreateRelationRequest, error)
 	GetAll(context.Context, *GetAllRelationsRequest) (*GetAllRelationsResponse, error)
 	GetByID(context.Context, *RelationPrimaryKey) (*RelationForGetAll, error)
-	Update(context.Context, *UpdateRelationRequest) (*emptypb.Empty, error)
+	Update(context.Context, *UpdateRelationRequest) (*RelationForGetAll, error)
 	Delete(context.Context, *RelationPrimaryKey) (*emptypb.Empty, error)
 	mustEmbedUnimplementedRelationServiceServer()
 }
@@ -108,7 +108,7 @@ func (UnimplementedRelationServiceServer) GetAll(context.Context, *GetAllRelatio
 func (UnimplementedRelationServiceServer) GetByID(context.Context, *RelationPrimaryKey) (*RelationForGetAll, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetByID not implemented")
 }
-func (UnimplementedRelationServiceServer) Update(context.Context, *UpdateRelationRequest) (*emptypb.Empty, error) {
+func (UnimplementedRelationServiceServer) Update(context.Context, *UpdateRelationRequest) (*RelationForGetAll, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
 }
 func (UnimplementedRelationServiceServer) Delete(context.Context, *RelationPrimaryKey) (*emptypb.Empty, error) {

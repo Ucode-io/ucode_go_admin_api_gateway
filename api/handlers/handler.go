@@ -5,6 +5,7 @@ import (
 	"strconv"
 	v1 "ucode/ucode_go_api_gateway/api/handlers/v1"
 	v2 "ucode/ucode_go_api_gateway/api/handlers/v2"
+	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/pkg/caching"
@@ -133,4 +134,8 @@ func (h *Handler) getLimitParam(c *gin.Context) (limit int, err error) {
 func (h *Handler) getPageParam(c *gin.Context) (page int, err error) {
 	pageStr := c.DefaultQuery("page", "1")
 	return strconv.Atoi(pageStr)
+}
+
+func (h *Handler) versionHistory(c *gin.Context, req *models.CreateVersionHistoryRequest) error {
+	return nil
 }

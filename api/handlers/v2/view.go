@@ -209,7 +209,7 @@ func (h *HandlerV2) GetSingleView(c *gin.Context) {
 func (h *HandlerV2) UpdateView(c *gin.Context) {
 	var (
 		view obs.View
-		resp *emptypb.Empty
+		resp *obs.View
 	)
 
 	err := c.ShouldBindJSON(&view)
@@ -258,11 +258,22 @@ func (h *HandlerV2) UpdateView(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
+		_, err = services.GetBuilderServiceByType(resource.NodeType).View().GetSingle(
+			context.Background(),
+			&obs.ViewPrimaryKey{
+				Id:        view.Id,
+				ProjectId: view.ProjectId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).View().Update(
 			context.Background(),
 			&view,
 		)
-
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
@@ -345,6 +356,18 @@ func (h *HandlerV2) DeleteView(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
+		_, err = services.GetBuilderServiceByType(resource.NodeType).View().GetSingle(
+			context.Background(),
+			&obs.ViewPrimaryKey{
+				Id:        viewID,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).View().Delete(
 			context.Background(),
 			&obs.ViewPrimaryKey{
@@ -352,7 +375,6 @@ func (h *HandlerV2) DeleteView(c *gin.Context) {
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
-
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return

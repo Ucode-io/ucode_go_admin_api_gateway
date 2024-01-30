@@ -9,7 +9,7 @@ import "section.proto";
 
 service LayoutService {
     rpc CreateAll(CreateLayoutRequest) returns (GetListLayoutResponse) {}
-    rpc Update(LayoutRequest) returns (google.protobuf.Empty) {}
+    rpc Update(LayoutRequest) returns (LayoutResponse) {}
     rpc GetAll(GetListLayoutRequest) returns (GetListLayoutResponse) {}
     rpc GetSingleLayout(GetSingleLayoutRequest) returns (LayoutResponse) {}
     rpc RemoveLayout(LayoutPrimaryKey) returns (google.protobuf.Empty) {}

@@ -394,7 +394,7 @@ func (h *HandlerV2) GetAllRelations(c *gin.Context) {
 func (h *HandlerV2) UpdateRelation(c *gin.Context) {
 	var (
 		relation obs.UpdateRelationRequest
-		resp     *emptypb.Empty
+		resp     *obs.RelationForGetAll
 	)
 
 	err := c.ShouldBindJSON(&relation)
@@ -442,11 +442,22 @@ func (h *HandlerV2) UpdateRelation(c *gin.Context) {
 	relation.ProjectId = resource.ResourceEnvironmentId
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
+		_, err := services.GetBuilderServiceByType(resource.NodeType).Relation().GetByID(
+			context.Background(),
+			&obs.RelationPrimaryKey{
+				Id:        relation.Id,
+				ProjectId: relation.ProjectId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Relation().Update(
 			context.Background(),
 			&relation,
 		)
-
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
@@ -529,6 +540,18 @@ func (h *HandlerV2) DeleteRelation(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
+		_, err := services.GetBuilderServiceByType(resource.NodeType).Relation().GetByID(
+			context.Background(),
+			&obs.RelationPrimaryKey{
+				Id:        relationID,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Relation().Delete(
 			context.Background(),
 			&obs.RelationPrimaryKey{

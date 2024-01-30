@@ -8,9 +8,9 @@ import "google/protobuf/struct.proto";
 
 
 service VersionHistoryService {
+    rpc Create(CreateVersionHistoryRequest) returns (google.protobuf.Empty) {}
     rpc GatAll(GetAllRquest) returns (ListVersionHistory) {}
-    rpc UsedForEnv(UsedForEnvRequest) returns (google.protobuf.Empty) {}
-    rpc Migrate(ListVersionHistory) returns (google.protobuf.Empty) {}
+    rpc Update(UsedForEnvRequest) returns (google.protobuf.Empty) {}
 }
 
 message GetAllRquest {
@@ -25,9 +25,24 @@ message VersionHistory {
     string id = 1;
     string action_source = 2;
     string action_type = 3;
-    google.protobuf.Struct previus = 4;
-    google.protobuf.Struct current = 5;
-    map<string, bool> is_used = 6;
+    string previus = 4;
+    string current = 5;
+    map<string, bool> used_envrironments = 6;
+    string date = 7;
+    UserInfo user_info = 8;
+    string request = 9;
+}
+
+message CreateVersionHistoryRequest {
+    string id = 1;
+    string action_source = 2;
+    string action_type = 3;
+    string previus = 4;
+    string current = 5;
+    map<string, bool> used_envrironments = 6;
+    string date = 7;
+    string user_info = 8;
+    string request = 9;
 }
 
 message ListVersionHistory {
@@ -39,4 +54,9 @@ message UsedForEnvRequest {
     repeated string ids = 1;
     string env_id = 2;
     string project_id = 3;
+}
+
+message UserInfo {
+    string id = 1;
+    string name = 2;
 }

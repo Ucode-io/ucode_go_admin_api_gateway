@@ -395,7 +395,7 @@ func (h *HandlerV1) UpdateTable(c *gin.Context) {
 	var (
 		table models.UpdateTableRequest
 		//resourceEnvironment *company_service.ResourceEnvironment
-		resp                  *emptypb.Empty
+		resp                  *obs.Table
 		resourceEnvironmentId string
 		resourceType          pb.ResourceType
 		nodeType              string
@@ -462,6 +462,18 @@ func (h *HandlerV1) UpdateTable(c *gin.Context) {
 	table.ProjectId = resourceEnvironmentId
 	switch resourceType {
 	case pb.ResourceType_MONGODB:
+		_, err = services.GetBuilderServiceByType(nodeType).Table().GetByID(
+			context.Background(),
+			&obs.TablePrimaryKey{
+				Id:        table.Id,
+				ProjectId: table.ProjectId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
 		resp, err = services.GetBuilderServiceByType(nodeType).Table().Update(
 			context.Background(),
 			&obs.UpdateTableRequest{
@@ -490,7 +502,6 @@ func (h *HandlerV1) UpdateTable(c *gin.Context) {
 				OrderBy:      table.OrderBy,
 			},
 		)
-
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
@@ -625,6 +636,18 @@ func (h *HandlerV1) DeleteTable(c *gin.Context) {
 
 	switch resourceType {
 	case pb.ResourceType_MONGODB:
+		_, err = services.GetBuilderServiceByType(nodeType).Table().GetByID(
+			context.Background(),
+			&obs.TablePrimaryKey{
+				Id:        tableID,
+				ProjectId: resourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
 		resp, err = services.GetBuilderServiceByType(nodeType).Table().Delete(
 			context.Background(),
 			&obs.TablePrimaryKey{
