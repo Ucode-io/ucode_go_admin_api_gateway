@@ -141,11 +141,10 @@ type (
 	}
 )
 
-func GetSlimV2(service obs.ObjectBuilderServiceClient, request map[string]interface{}, tableSlug, resourceEnvironmentId string) (GetListClientApiResponse, error) {
-
+func GetSlimV2(service obs.ObjectBuilderServiceClient, request map[string]interface{}, tableSlug, resourceEnvironmentId string) (GetListClientApiData, error) {
 	structData, err := helper.ConvertMapToStruct(request)
 	if err != nil {
-		return GetListClientApiResponse{}, err
+		return GetListClientApiData{}, err
 	}
 
 	resp, err := service.GetListSlimV2(
@@ -157,18 +156,18 @@ func GetSlimV2(service obs.ObjectBuilderServiceClient, request map[string]interf
 		},
 	)
 	if err != nil {
-		return GetListClientApiResponse{}, err
+		return GetListClientApiData{}, err
 	}
 
 	respByte, err := json.Marshal(resp)
 	if err != nil {
-		return GetListClientApiResponse{}, err
+		return GetListClientApiData{}, err
 	}
 
-	var respData GetListClientApiResponse
+	var respData GetListClientApiData
 	err = json.Unmarshal(respByte, &respData)
 	if err != nil {
-		return GetListClientApiResponse{}, err
+		return GetListClientApiData{}, err
 	}
 
 	return respData, nil
