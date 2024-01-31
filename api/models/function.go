@@ -32,9 +32,10 @@ type InvokeFunctionRequest struct {
 }
 
 type InvokeFunctionResponse struct {
-	Status     string                 `json:"status"`
-	Data       map[string]interface{} `json:"data"`
-	Attributes map[string]interface{} `json:"attributes"`
+	Status      string                 `json:"status"`
+	Data        map[string]interface{} `json:"data"`
+	Attributes  map[string]interface{} `json:"attributes"`
+	ServerError string                 `json:"server_error"`
 }
 
 type GetListClientApiResp struct {
