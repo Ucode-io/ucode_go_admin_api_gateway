@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"sync"
 	"time"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/config"
@@ -20,11 +19,6 @@ import (
 )
 
 func (h *HandlerV1) EasyToTravelFunctionRun(c *gin.Context, requestData models.HttpRequest, faasSettings easy_to_travel.FaasSetting) (map[string]interface{}, error) {
-
-	var mu sync.Mutex
-	mu.Lock()
-	defer mu.Unlock()
-
 	var (
 		faasPaths = faasSettings.Paths
 		params    = c.Request.URL.Query()
@@ -115,7 +109,6 @@ func (h *HandlerV1) EasyToTravelFunctionRun(c *gin.Context, requestData models.H
 		resp     models.InvokeFunctionResponse
 	)
 
-	fmt.Println("faasSettings.Function:", faasSettings.Function)
 	if faasSettings.Function != nil {
 		fmt.Println("~~~~~~~~~~~~~~>>> function id:", c.Param("function-id"))
 		requestBody, err := json.Marshal(models.FunctionRunV2{
