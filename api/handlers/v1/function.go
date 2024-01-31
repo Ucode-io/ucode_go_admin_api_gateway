@@ -494,6 +494,7 @@ func (h *HandlerV1) InvokeFunction(c *gin.Context) {
 			"user_id":        authInfo.GetUserId(),
 			"project_id":     projectId,
 			"environment_id": environmentId,
+			"action":         "HTTP",
 		},
 	})
 	if err != nil {
