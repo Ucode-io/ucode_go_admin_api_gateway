@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"sync"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
@@ -19,6 +20,7 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
+	"ucode/ucode_go_api_gateway/services"
 
 	"ucode/ucode_go_api_gateway/api/status_http"
 
@@ -224,7 +226,7 @@ func (h *HandlerV1) GetNewFunctionByID(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("\n URL function by id path >>", functionID, "\n")
+	fmt.Println("\n URL function by id path >>", functionID)
 	function, err := services.FunctionService().FunctionService().GetSingle(
 		context.Background(),
 		&fc.FunctionPrimaryKey{
@@ -868,14 +870,31 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 	requestData.Body = bodyReq
 	var (
 		prevPath     = c.Request.Header.Get("Prev_path")
-		faasSettings = map[string]interface{}{}
+		faasSettings easy_to_travel.FaasSetting
 		faasPaths    []string
 	)
 
 	for key, valueObject := range easy_to_travel.AgentApiPath {
 		if strings.Contains(prevPath, key) {
-			faasSettings = cast.ToStringMap(valueObject)
-			faasPaths = cast.ToStringSlice(faasSettings["paths"])
+			var (
+				mu    = sync.Mutex{}
+				value = cast.ToStringMap(valueObject)
+			)
+
+			mu.Lock()
+			faasSettings = easy_to_travel.FaasSetting{
+				Paths:        cast.ToStringSlice(value["paths"]),
+				IsCache:      cast.ToBool(value["is_cache"]),
+				Continue:     cast.ToBool(value["continue"]),
+				DeleteParams: cast.ToStringSlice(value["delete_params"]),
+			}
+
+			if function, ok := value["function"].(func(services.ServiceManagerI, []byte) string); ok {
+				faasSettings.Function = function
+			}
+			faasPaths = faasSettings.Paths
+			mu.Unlock()
+
 			break
 		}
 	}
@@ -883,10 +902,11 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 	fmt.Println("resource.ResourceEnvironmentId:", resource.ResourceEnvironmentId)
 
 	if helper.ContainsLike(faasPaths, c.Param("function-id")) {
-		faasSettings["app_id"] = authInfo.Data["app_id"]
-		faasSettings["node_type"] = resource.NodeType
-		faasSettings["project_id"] = projectId.(string)
-		faasSettings["resource_environment_id"] = resource.ResourceEnvironmentId
+		faasSettings.AppId = cast.ToString(authInfo.Data["app_id"])
+		faasSettings.NodeType = resource.NodeType
+		faasSettings.ProjectId = projectId.(string)
+		faasSettings.ResourceEnvironmentId = resource.ResourceEnvironmentId
+
 		resp, err := h.EasyToTravelFunctionRun(c, requestData, faasSettings)
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())

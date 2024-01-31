@@ -7,36 +7,50 @@ import (
 	"net/url"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
+	"ucode/ucode_go_api_gateway/services"
 )
 
 var AgentApiPath = map[string]interface{}{
 	"/api/v1/agent/airport": map[string]interface{}{
-		"paths":         []string{"easy-to-travel-get-airports", "5c72a398-7c33-4c89-8a54-a639e6e8f6d5"},
-		"is_cache":      true,
-		"function_name": nil,
+		"paths":    []string{"easy-to-travel-get-airports", "5c72a398-7c33-4c89-8a54-a639e6e8f6d5"},
+		"is_cache": true,
+		"function": nil,
 	},
 	"/api/v1/agent/features": map[string]interface{}{
-		"paths":         []string{"easy-to-travel-get-features", "95bdcf6b-60e7-43ee-8c59-d57258cdc866"},
-		"is_cache":      true,
-		"function_name": AgentApiGetFeatures,
+		"paths":    []string{"easy-to-travel-get-features", "95bdcf6b-60e7-43ee-8c59-d57258cdc866"},
+		"is_cache": true,
+		"function": AgentApiGetFeatures,
 	},
 	"/api/v1/agent/products": map[string]interface{}{
 		"paths":         []string{"easy-to-travel-get-products-agent-swagger", "b693cc12-8551-475f-91d5-4913c1739df4"},
 		"is_cache":      true,
-		"function_name": nil,
+		"function":      nil,
 		"delete_params": []string{"startTime", "endTime"},
 		"continue":      true,
 	},
 	"/api/v1/agent/contracts": map[string]interface{}{
-		"paths":         []string{"easy-to-travel-get-agent-contracts", "eccfbf65-9d5d-470b-adeb-5b8254aafbca"},
-		"is_cache":      true,
-		"function_name": nil,
+		"paths":    []string{"easy-to-travel-get-agent-contracts", "eccfbf65-9d5d-470b-adeb-5b8254aafbca"},
+		"is_cache": true,
+		"function": nil,
 	},
 	"/api/v1/agent/order": map[string]interface{}{
-		"paths":         []string{"easy-to-travel-order-with-contractid", "c15fa3bf-600b-46d3-8f87-963f5d980619"},
-		"is_cache":      false,
-		"function_name": nil,
+		"paths":    []string{"easy-to-travel-order-with-contractid", "c15fa3bf-600b-46d3-8f87-963f5d980619"},
+		"is_cache": false,
+		"function": nil,
 	},
+}
+
+type FaasSetting struct {
+	AppId                 string   `json:"app_id"`
+	NodeType              string   `json:"node_type"`
+	ProjectId             string   `json:"project_id"`
+	IsCache               bool     `json:"is_cache"`
+	Paths                 []string `json:"paths"`
+	DeleteParams          []string `json:"delete_params"`
+	Continue              bool     `json:"continue"`
+	ResourceEnvironmentId string   `json:"resource_environment_id"`
+
+	Function func(services.ServiceManagerI, []byte) string `json:"function"`
 }
 
 // Request structures

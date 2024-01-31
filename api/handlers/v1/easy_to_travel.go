@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"sync"
 	"time"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/config"
@@ -14,38 +15,36 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
-	"ucode/ucode_go_api_gateway/services"
 
 	"github.com/gin-gonic/gin"
-	"github.com/spf13/cast"
 )
 
-func (h *HandlerV1) EasyToTravelFunctionRun(c *gin.Context, requestData models.HttpRequest, faasSettings map[string]interface{}) (map[string]interface{}, error) {
+func (h *HandlerV1) EasyToTravelFunctionRun(c *gin.Context, requestData models.HttpRequest, faasSettings easy_to_travel.FaasSetting) (map[string]interface{}, error) {
+
+	var mu sync.Mutex
+	mu.Lock()
+	defer mu.Unlock()
 
 	var (
-		isCache   bool
-		faasPaths = cast.ToStringSlice(faasSettings["paths"])
+		faasPaths = faasSettings.Paths
 		params    = c.Request.URL.Query()
 
 		invokeFunction        models.InvokeFunctionRequest
-		appId                 = cast.ToString(faasSettings["app_id"])
-		nodeType              = cast.ToString(faasSettings["node_type"])
-		projectId             = cast.ToString(faasSettings["project_id"])
-		resourceEnvironmentId = cast.ToString(faasSettings["resource_environment_id"])
+		appId                 = faasSettings.AppId
+		nodeType              = faasSettings.NodeType
+		projectId             = faasSettings.ProjectId
+		resourceEnvironmentId = faasSettings.ResourceEnvironmentId
 	)
-	if faasSettings != nil {
-		isCache = cast.ToBool(faasSettings["is_cache"])
-	}
 
 	if helper.Contains(faasPaths, c.Param("function-id")) {
-		for _, param := range cast.ToStringSlice(faasSettings["delete_params"]) {
+		for _, param := range faasSettings.DeleteParams {
 			params.Del(param)
 		}
 	}
 
 	var key = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("ett-%s-%s-%s", c.Request.Header.Get("Prev_path"), params.Encode(), resourceEnvironmentId)))
 	_, exists := h.cache.Get(config.CACHE_WAIT)
-	if isCache {
+	if faasSettings.IsCache {
 		if exists {
 			ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
 			defer cancel()
@@ -64,7 +63,7 @@ func (h *HandlerV1) EasyToTravelFunctionRun(c *gin.Context, requestData models.H
 						return resp, nil
 					}
 
-					if cast.ToBool(faasSettings["continue"]) {
+					if faasSettings.Continue {
 						var filters = map[string]interface{}{}
 						for key, val := range c.Request.URL.Query() {
 							if len(val) > 0 {
@@ -115,36 +114,36 @@ func (h *HandlerV1) EasyToTravelFunctionRun(c *gin.Context, requestData models.H
 		function = &fc.Function{}
 		resp     models.InvokeFunctionResponse
 	)
-	if faasSettings["function_name"] != nil {
-		if customFunction, ok := faasSettings["function_name"].(func(services.ServiceManagerI, []byte) string); ok {
-			fmt.Println("~~~~~~~~~~~~~~>>> function id:", c.Param("function-id"))
-			requestBody, err := json.Marshal(models.FunctionRunV2{
-				Auth:        models.AuthData{},
-				RequestData: requestData,
-				Data: map[string]interface{}{
-					"object_ids":              invokeFunction.ObjectIDs,
-					"attributes":              invokeFunction.Attributes,
-					"app_id":                  appId,
-					"node_type":               nodeType,
-					"resource_environment_id": resourceEnvironmentId,
-				},
-			})
-			if err != nil {
-				h.log.Error("Error while json marshal fn:", logger.Any("err", err))
-				return nil, err
-			}
 
-			respByte := customFunction(srvs, requestBody)
-			if err != nil {
-				h.log.Error("Error while easytotravel fn:", logger.Any("err", err))
-				return nil, err
-			}
+	fmt.Println("faasSettings.Function:", faasSettings.Function)
+	if faasSettings.Function != nil {
+		fmt.Println("~~~~~~~~~~~~~~>>> function id:", c.Param("function-id"))
+		requestBody, err := json.Marshal(models.FunctionRunV2{
+			Auth:        models.AuthData{},
+			RequestData: requestData,
+			Data: map[string]interface{}{
+				"object_ids":              invokeFunction.ObjectIDs,
+				"attributes":              invokeFunction.Attributes,
+				"app_id":                  appId,
+				"node_type":               nodeType,
+				"resource_environment_id": resourceEnvironmentId,
+			},
+		})
+		if err != nil {
+			h.log.Error("Error while json marshal fn:", logger.Any("err", err))
+			return nil, err
+		}
 
-			err = json.Unmarshal([]byte(respByte), &resp)
-			if err != nil {
-				fmt.Println("\n\ncustomFunction::", c.Param("function-id"), string(respByte))
-				return nil, err
-			}
+		respByte := faasSettings.Function(srvs, requestBody)
+		if err != nil {
+			h.log.Error("Error while easytotravel fn:", logger.Any("err", err))
+			return nil, err
+		}
+
+		err = json.Unmarshal([]byte(respByte), &resp)
+		if err != nil {
+			fmt.Println("\n\ncustomFunction::", c.Param("function-id"), string(respByte))
+			return nil, err
 		}
 	} else {
 		if util.IsValidUUID(c.Param("function-id")) {
@@ -190,7 +189,7 @@ func (h *HandlerV1) EasyToTravelFunctionRun(c *gin.Context, requestData models.H
 
 	if isOwnData, ok := resp.Attributes["is_own_data"].(bool); ok {
 		if isOwnData {
-			if err == nil && isCache {
+			if err == nil && faasSettings.IsCache {
 				jsonData, _ := json.Marshal(resp.Data)
 				h.cache.Add(key, []byte(jsonData), 20*time.Second)
 			}
@@ -199,7 +198,7 @@ func (h *HandlerV1) EasyToTravelFunctionRun(c *gin.Context, requestData models.H
 				return resp.Data, nil
 			}
 
-			if cast.ToBool(faasSettings["continue"]) {
+			if faasSettings.Continue {
 				var filters = map[string]interface{}{}
 				for key, val := range c.Request.URL.Query() {
 					if len(val) > 0 {
