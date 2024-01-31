@@ -880,7 +880,7 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 		}
 	}
 
-	// fmt.Println("resource.ResourceEnvironmentId:", resource.ResourceEnvironmentId)
+	fmt.Println("resource.ResourceEnvironmentId:", resource.ResourceEnvironmentId)
 
 	if helper.ContainsLike(faasPaths, c.Param("function-id")) {
 		faasSettings["app_id"] = authInfo.Data["app_id"]

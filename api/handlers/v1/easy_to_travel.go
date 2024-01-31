@@ -64,7 +64,7 @@ func (h *HandlerV1) EasyToTravelFunctionRun(c *gin.Context, requestData models.H
 						return resp, nil
 					}
 
-					if helper.Contains(faasPaths, c.Param("function-id")) && faasSettings["function_name"] != nil {
+					if cast.ToBool(faasSettings["continue"]) {
 						var filters = map[string]interface{}{}
 						for key, val := range c.Request.URL.Query() {
 							if len(val) > 0 {
@@ -178,8 +178,6 @@ func (h *HandlerV1) EasyToTravelFunctionRun(c *gin.Context, requestData models.H
 		}
 	}
 
-	fmt.Println("resp:", resp)
-
 	if resp.Status == "error" {
 		var errStr = resp.Status
 		if resp.Data != nil && resp.Data["message"] != nil {
@@ -201,7 +199,7 @@ func (h *HandlerV1) EasyToTravelFunctionRun(c *gin.Context, requestData models.H
 				return resp.Data, nil
 			}
 
-			if helper.ContainsLike(faasPaths, c.Param("function-id")) && faasSettings["function_name"] != nil {
+			if cast.ToBool(faasSettings["continue"]) {
 				var filters = map[string]interface{}{}
 				for key, val := range c.Request.URL.Query() {
 					if len(val) > 0 {

@@ -25,6 +25,7 @@ var AgentApiPath = map[string]interface{}{
 		"is_cache":      true,
 		"function_name": nil,
 		"delete_params": []string{"startTime", "endTime"},
+		"continue":      true,
 	},
 	"/api/v1/agent/contracts": map[string]interface{}{
 		"paths":         []string{"easy-to-travel-get-agent-contracts", "eccfbf65-9d5d-470b-adeb-5b8254aafbca"},
