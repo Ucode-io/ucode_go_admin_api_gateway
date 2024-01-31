@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"net/http"
 	"strings"
 	"time"
 	"ucode/ucode_go_api_gateway/api/models"
@@ -857,6 +856,7 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 			return
 		}
 	}
+
 	authInfoAny, ok := c.Get("auth")
 	if !ok {
 		h.handleResponse(c, status_http.InvalidArgument, "cant get auth info")
@@ -869,74 +869,33 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 	requestData.Path = c.Request.URL.Path
 	requestData.Params = c.Request.URL.Query()
 	requestData.Body = bodyReq
-	keyParams := c.Request.URL.Query()
+	var (
+		prevPath     = c.Request.Header.Get("Prev_path")
+		faasSettings = map[string]interface{}{}
+		faasPaths    []string
+	)
 
-	var ettProductPath = []string{"easy-to-travel-get-products-agent-swagger", "b693cc12-8551-475f-91d5-4913c1739df4"}
-	if helper.Contains(ettProductPath, c.Param("function-id")) {
-		if len(keyParams.Get("startTime")) > 0 {
-			keyParams.Del("startTime")
-		}
-
-		if len(keyParams.Get("endTime")) > 0 {
-			keyParams.Del("endTime")
+	for key, valueObject := range easy_to_travel.AgentApiPath {
+		if strings.Contains(prevPath, key) {
+			faasSettings = cast.ToStringMap(valueObject)
+			faasPaths = cast.ToStringSlice(faasSettings["paths"])
+			break
 		}
 	}
 
-	var key = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("ett-%s-%s-%s", c.Request.Header.Get("Prev_path"), keyParams.Encode(), resource.ResourceEnvironmentId)))
-	_, ok = h.cache.Get(config.CACHE_WAIT)
-	if c.Request.Method == "GET" && resource.ProjectId == "1acd7a8f-a038-4e07-91cb-b689c368d855" {
-		if ok {
-
-			redisDataTime := time.Now()
-
-			ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
-			defer cancel()
-
-			for {
-				functionBody, ok := h.cache.Get(key)
-				if ok {
-					m := make(map[string]interface{})
-					err = json.Unmarshal(functionBody, &m)
-					if err != nil {
-						h.handleResponse(c, status_http.GRPCError, err.Error())
-						return
-					}
-
-					if _, ok := m["code"]; ok {
-						c.JSON(cast.ToInt(m["code"]), m)
-						return
-					}
-
-					if helper.Contains(ettProductPath, c.Param("function-id")) {
-						data, err := easy_to_travel.AgentApiGetProduct(requestData.Params, m)
-						if err != nil {
-							fmt.Println("Error while EasyToTravelAgentApiGetProduct function:", err.Error())
-							result, _ := helper.InterfaceToMap(data)
-							c.JSON(cast.ToInt(result["code"]), result)
-							return
-						}
-
-						m, err = helper.InterfaceToMap(data)
-						if err != nil {
-							c.JSON(http.StatusInternalServerError, m)
-							return
-						}
-					}
-
-					c.JSON(cast.ToInt(m["code"]), m)
-					fmt.Print("\n\n ~~>> ett redis return response ", time.Since(redisDataTime), "\n\n")
-					return
-				}
-
-				if ctx.Err() == context.DeadlineExceeded {
-					break
-				}
-
-				time.Sleep(config.REDIS_SLEEP)
-			}
-		} else {
-			h.cache.Add(config.CACHE_WAIT, []byte(config.CACHE_WAIT), 20*time.Second)
+	if helper.Contains(faasPaths, c.Param("function-id")) {
+		faasSettings["app_id"] = authInfo.Data["app_id"]
+		faasSettings["node_type"] = resource.NodeType
+		faasSettings["project_id"] = projectId.(string)
+		faasSettings["resource_environment_id"] = resource.ResourceEnvironmentId
+		resp, err := h.EasyToTravelFunctionRun(c, requestData, faasSettings)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
 		}
+
+		c.JSON(cast.ToInt(resp["code"]), resp)
+		return
 	}
 
 	var function = &fc.Function{}
@@ -965,7 +924,6 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 		function.Path = c.Param("function-id")
 	}
 
-	// doRequestTime := time.Now()
 	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+function.Path, "POST", models.FunctionRunV2{
 		Auth:        models.AuthData{},
 		RequestData: requestData,
@@ -987,34 +945,11 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 		return
 	}
 
-	// fmt.Println(">>>>>>>>>>>>>>>doRequestTime:", time.Since(doRequestTime), timeId.String())
 	if isOwnData, ok := resp.Attributes["is_own_data"].(bool); ok {
 		if isOwnData {
-			if err == nil && c.Request.Method == "GET" && resource.ProjectId == "1acd7a8f-a038-4e07-91cb-b689c368d855" {
-				jsonData, _ := json.Marshal(resp.Data)
-				h.cache.Add(key, []byte(jsonData), 20*time.Second)
-			}
-
 			if _, ok := resp.Data["code"]; ok {
 				c.JSON(cast.ToInt(resp.Data["code"]), resp.Data)
 				return
-			}
-
-			if helper.Contains(ettProductPath, c.Param("function-id")) {
-				data, err := easy_to_travel.AgentApiGetProduct(requestData.Params, resp.Data)
-				if err != nil {
-					fmt.Println("Error while EasyToTravelAgentApiGetProduct function:", err.Error())
-					result, _ := helper.InterfaceToMap(data)
-					c.JSON(cast.ToInt(result["code"]), result)
-					return
-				}
-
-				resp.Data, err = helper.InterfaceToMap(data)
-				if err != nil {
-					fmt.Println("Error while InterfaceToMap function:", err.Error())
-					c.JSON(http.StatusInternalServerError, resp.Data)
-					return
-				}
 			}
 
 			c.JSON(200, resp.Data)
@@ -1023,4 +958,177 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 	}
 
 	h.handleResponse(c, status_http.OK, resp)
+}
+
+func (h *HandlerV1) EasyToTravelFunctionRun(c *gin.Context, requestData models.HttpRequest, faasSettings map[string]interface{}) (map[string]interface{}, error) {
+
+	var (
+		isCache   bool
+		faasPaths = cast.ToStringSlice(faasSettings["paths"])
+		params    = c.Request.URL.Query()
+
+		invokeFunction        models.InvokeFunctionRequest
+		appId                 = cast.ToString(faasSettings["app_id"])
+		nodeType              = cast.ToString(faasSettings["node_type"])
+		projectId             = cast.ToString(faasSettings["project_id"])
+		resourceEnvironmentId = cast.ToString(faasSettings["resource_environment_id"])
+	)
+	if faasSettings != nil {
+		isCache = cast.ToBool(faasSettings["is_cache"])
+	}
+
+	if helper.Contains(faasPaths, c.Param("function-id")) {
+		for _, param := range cast.ToStringSlice(faasSettings["delete_params"]) {
+			params.Del(param)
+		}
+	}
+
+	var key = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("ett-%s-%s-%s", c.Request.Header.Get("Prev_path"), params.Encode(), resourceEnvironmentId)))
+	_, exists := h.cache.Get(config.CACHE_WAIT)
+	if isCache {
+		if exists {
+			ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
+			defer cancel()
+
+			for {
+				functionBody, ok := h.cache.Get(key)
+				if ok {
+					resp := make(map[string]interface{})
+					err := json.Unmarshal(functionBody, &resp)
+					if err != nil {
+						h.log.Error("Error while json unmarshal", logger.Any("err", err))
+						return nil, err
+					}
+
+					if _, ok := resp["code"]; ok {
+						return resp, nil
+					}
+
+					if helper.Contains(faasPaths, c.Param("function-id")) {
+						var filters = map[string]interface{}{}
+						for key, val := range c.Request.URL.Query() {
+							if len(val) > 0 {
+								filters[key] = val[0]
+							}
+						}
+						resp["filters"] = filters
+
+						data, err := easy_to_travel.AgentApiGetProduct(resp)
+						if err != nil {
+							h.log.Error("Error while EasyToTravelAgentApiGetProduct function:", logger.Any("err", err))
+							result, _ := helper.InterfaceToMap(data)
+							return result, nil
+						}
+
+						resp, err = helper.InterfaceToMap(data)
+						if err != nil {
+							h.log.Error("Error while InterfaceToMap:", logger.Any("err", err))
+							return nil, err
+						}
+					}
+
+					return resp, nil
+				}
+
+				if ctx.Err() == context.DeadlineExceeded {
+					break
+				}
+
+				time.Sleep(config.REDIS_SLEEP)
+			}
+		} else {
+			h.cache.Add(config.CACHE_WAIT, []byte(config.CACHE_WAIT), 20*time.Second)
+		}
+	}
+
+	var function = &fc.Function{}
+	if util.IsValidUUID(c.Param("function-id")) {
+		services, err := h.GetProjectSrvc(
+			c.Request.Context(),
+			projectId,
+			nodeType,
+		)
+		if err != nil {
+			h.log.Error("Error while GetProjectSrvc", logger.Any("err", err))
+			return nil, err
+		}
+		function, err = services.FunctionService().FunctionService().GetSingle(
+			context.Background(),
+			&fc.FunctionPrimaryKey{
+				Id:        c.Param("function-id"),
+				ProjectId: resourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.log.Error("Error while function service GetSingle:", logger.Any("err", err))
+			return nil, err
+		}
+	} else {
+		function.Path = c.Param("function-id")
+	}
+
+	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+function.Path, "POST", models.FunctionRunV2{
+		Auth:        models.AuthData{},
+		RequestData: requestData,
+		Data: map[string]interface{}{
+			"object_ids": invokeFunction.ObjectIDs,
+			"attributes": invokeFunction.Attributes,
+			"app_id":     appId,
+		},
+	})
+
+	if err != nil {
+		h.log.Error("Error while function DoRequest:", logger.Any("err", err))
+		return nil, err
+	} else if resp.Status == "error" {
+		var errStr = resp.Status
+		if resp.Data != nil && resp.Data["message"] != nil {
+			errStr = resp.Data["message"].(string)
+		}
+
+		h.log.Error("Error while function DoRequest errStr:", logger.Any("err", err))
+		return nil, errors.New(errStr)
+	}
+
+	if isOwnData, ok := resp.Attributes["is_own_data"].(bool); ok {
+		if isOwnData {
+			if err == nil && isCache {
+				jsonData, _ := json.Marshal(resp.Data)
+				h.cache.Add(key, []byte(jsonData), 20*time.Second)
+			}
+
+			if _, ok := resp.Data["code"]; ok {
+				return resp.Data, nil
+			}
+
+			if helper.ContainsLike(faasPaths, c.Param("function-id")) {
+				if faasSettings["function_name"] != nil {
+					var filters = map[string]interface{}{}
+					for key, val := range c.Request.URL.Query() {
+						if len(val) > 0 {
+							filters[key] = val[0]
+						}
+					}
+					resp.Data["filters"] = filters
+
+					data, err := easy_to_travel.AgentApiGetProduct(resp.Data)
+					if err != nil {
+						fmt.Println("Error while EasyToTravelAgentApiGetProduct function:", err.Error())
+						result, _ := helper.InterfaceToMap(data)
+						return result, nil
+					}
+
+					resp.Data, err = helper.InterfaceToMap(data)
+					if err != nil {
+						h.log.Error("Error while InterfaceToMap function:", logger.Any("err", err))
+						return nil, err
+					}
+				}
+			}
+
+			return resp.Data, nil
+		}
+	}
+
+	return resp.Data, nil
 }

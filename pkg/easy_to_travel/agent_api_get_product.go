@@ -2,7 +2,6 @@ package easy_to_travel
 
 import (
 	"errors"
-	"net/url"
 	"strings"
 	"time"
 
@@ -13,7 +12,7 @@ import (
 	"github.com/spf13/cast"
 )
 
-func AgentApiGetProduct(params url.Values, data map[string]interface{}) (interface{}, error) {
+func AgentApiGetProduct(data map[string]interface{}) (interface{}, error) {
 
 	var (
 		errorResponse struct {
@@ -33,8 +32,8 @@ func AgentApiGetProduct(params url.Values, data map[string]interface{}) (interfa
 		limit  = 20
 		total  int
 
-		startTime = params.Get("startTime")
-		endTime   = params.Get("endTime")
+		startTime = cast.ToString(cast.ToStringMap(data["filters"])["startTime"])
+		endTime   = cast.ToString(cast.ToStringMap(data["filters"])["endTime"])
 
 		startTimeType time.Time
 		endTimeType   time.Time
@@ -67,8 +66,6 @@ func AgentApiGetProduct(params url.Values, data map[string]interface{}) (interfa
 				errorResponse.Message = "Bad request."
 				return errorResponse, err
 			}
-
-			// startTimeType = startTimeType.Add(time.Hour * time.Duration(airportUTC))
 
 			if util.TruncateToStartOfDay(time.Now()).After(startTimeType) {
 				expireDate = true

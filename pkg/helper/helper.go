@@ -198,6 +198,15 @@ func Contains(s []string, e string) bool {
 	return false
 }
 
+func ContainsLike(s []string, e string) bool {
+	for _, a := range s {
+		if strings.Contains(a, e) {
+			return true
+		}
+	}
+	return false
+}
+
 // InterfaceToMap converts an interface{} to a map[string]interface{}
 func InterfaceToMap(data interface{}) (map[string]interface{}, error) {
 	result := make(map[string]interface{})
