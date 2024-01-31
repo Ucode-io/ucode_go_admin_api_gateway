@@ -883,7 +883,7 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 		}
 	}
 
-	if helper.Contains(faasPaths, c.Param("function-id")) {
+	if helper.ContainsLike(faasPaths, c.Param("function-id")) {
 		faasSettings["app_id"] = authInfo.Data["app_id"]
 		faasSettings["node_type"] = resource.NodeType
 		faasSettings["project_id"] = projectId.(string)
@@ -1004,7 +1004,7 @@ func (h *HandlerV1) EasyToTravelFunctionRun(c *gin.Context, requestData models.H
 						return resp, nil
 					}
 
-					if helper.Contains(faasPaths, c.Param("function-id")) {
+					if helper.Contains(faasPaths, c.Param("function-id")) && faasSettings["function_name"] != nil {
 						var filters = map[string]interface{}{}
 						for key, val := range c.Request.URL.Query() {
 							if len(val) > 0 {
@@ -1101,28 +1101,26 @@ func (h *HandlerV1) EasyToTravelFunctionRun(c *gin.Context, requestData models.H
 				return resp.Data, nil
 			}
 
-			if helper.ContainsLike(faasPaths, c.Param("function-id")) {
-				if faasSettings["function_name"] != nil {
-					var filters = map[string]interface{}{}
-					for key, val := range c.Request.URL.Query() {
-						if len(val) > 0 {
-							filters[key] = val[0]
-						}
+			if helper.ContainsLike(faasPaths, c.Param("function-id")) && faasSettings["function_name"] != nil {
+				var filters = map[string]interface{}{}
+				for key, val := range c.Request.URL.Query() {
+					if len(val) > 0 {
+						filters[key] = val[0]
 					}
-					resp.Data["filters"] = filters
+				}
+				resp.Data["filters"] = filters
 
-					data, err := easy_to_travel.AgentApiGetProduct(resp.Data)
-					if err != nil {
-						fmt.Println("Error while EasyToTravelAgentApiGetProduct function:", err.Error())
-						result, _ := helper.InterfaceToMap(data)
-						return result, nil
-					}
+				data, err := easy_to_travel.AgentApiGetProduct(resp.Data)
+				if err != nil {
+					fmt.Println("Error while EasyToTravelAgentApiGetProduct function:", err.Error())
+					result, _ := helper.InterfaceToMap(data)
+					return result, nil
+				}
 
-					resp.Data, err = helper.InterfaceToMap(data)
-					if err != nil {
-						h.log.Error("Error while InterfaceToMap function:", logger.Any("err", err))
-						return nil, err
-					}
+				resp.Data, err = helper.InterfaceToMap(data)
+				if err != nil {
+					h.log.Error("Error while InterfaceToMap function:", logger.Any("err", err))
+					return nil, err
 				}
 			}
 
