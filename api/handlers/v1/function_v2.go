@@ -908,7 +908,7 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 					}
 
 					if helper.Contains(ettProductPath, c.Param("function-id")) {
-						data, err := easy_to_travel.EasyToTravelAgentApiGetProduct(requestData.Params, m)
+						data, err := easy_to_travel.AgentApiGetProduct(requestData.Params, m)
 						if err != nil {
 							fmt.Println("Error while EasyToTravelAgentApiGetProduct function:", err.Error())
 							result, _ := helper.InterfaceToMap(data)
@@ -1001,7 +1001,7 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 			}
 
 			if helper.Contains(ettProductPath, c.Param("function-id")) {
-				data, err := easy_to_travel.EasyToTravelAgentApiGetProduct(requestData.Params, resp.Data)
+				data, err := easy_to_travel.AgentApiGetProduct(requestData.Params, resp.Data)
 				if err != nil {
 					fmt.Println("Error while EasyToTravelAgentApiGetProduct function:", err.Error())
 					result, _ := helper.InterfaceToMap(data)

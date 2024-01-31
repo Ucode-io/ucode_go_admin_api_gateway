@@ -13,7 +13,7 @@ import (
 	"github.com/spf13/cast"
 )
 
-func EasyToTravelAgentApiGetProduct(params url.Values, data map[string]interface{}) (interface{}, error) {
+func AgentApiGetProduct(params url.Values, data map[string]interface{}) (interface{}, error) {
 
 	var (
 		errorResponse struct {
