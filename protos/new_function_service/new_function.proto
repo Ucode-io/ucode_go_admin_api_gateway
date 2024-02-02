@@ -41,6 +41,7 @@ message CreateFunctionRequest {
     string error_message = 21;
     string job_name = 22;
     string resource = 23;
+    string provided_name =  24;
 }
 
 message Function {
@@ -65,6 +66,7 @@ message Function {
     string error_message = 20;
     string job_name = 21;
     string resource = 22;
+    string provided_name =  23;
 }
 
 message GetAllFunctionsRequest {

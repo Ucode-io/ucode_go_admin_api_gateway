@@ -18,6 +18,7 @@ type AuthServiceI interface {
 	Email() auth_service.EmailOtpServiceClient
 	AuthPing() auth_service.AuthPingServiceClient
 	ApiKey() auth_service.ApiKeysClient
+	ApiKeyUsage() auth_service.ApiKeyUsageServiceClient
 }
 
 type authServiceClient struct {
@@ -31,6 +32,7 @@ type authServiceClient struct {
 	emailServie           auth_service.EmailOtpServiceClient
 	authPingService       auth_service.AuthPingServiceClient
 	apiKeyService         auth_service.ApiKeysClient
+	apiKeyUsageService    auth_service.ApiKeyUsageServiceClient
 }
 
 func NewAuthServiceClient(ctx context.Context, cfg config.BaseConfig) (AuthServiceI, error) {
@@ -55,6 +57,7 @@ func NewAuthServiceClient(ctx context.Context, cfg config.BaseConfig) (AuthServi
 		emailServie:           auth_service.NewEmailOtpServiceClient(connAuthService),
 		apiKeyService:         auth_service.NewApiKeysClient(connAuthService),
 		authPingService:       auth_service.NewAuthPingServiceClient(connAuthService),
+		apiKeyUsageService:    auth_service.NewApiKeyUsageServiceClient(connAuthService),
 	}, nil
 }
 
@@ -90,3 +93,6 @@ func (g *authServiceClient) AuthPing() auth_service.AuthPingServiceClient {
 	return g.authPingService
 }
 
+func (g *authServiceClient) ApiKeyUsage() auth_service.ApiKeyUsageServiceClient {
+	return g.apiKeyUsageService
+}
