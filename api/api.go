@@ -765,7 +765,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 		{
 			v2Webhook.POST("/create", h.V2.CreateWebhook)
 		}
-
 	}
 
 	r.Any("/api/*any", h.V1.AuthMiddleware(cfg), proxyMiddleware(r, &h), h.V1.Proxy)

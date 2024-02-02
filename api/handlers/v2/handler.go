@@ -2,14 +2,21 @@ package v2
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
+	"log"
 	"strconv"
+	"time"
+	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
+	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/services"
 	"ucode/ucode_go_api_gateway/storage"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type HandlerV2 struct {
@@ -106,4 +113,58 @@ func (h *HandlerV2) getLimitParam(c *gin.Context) (limit int, err error) {
 func (h *HandlerV2) getPageParam(c *gin.Context) (page int, err error) {
 	pageStr := c.DefaultQuery("page", "1")
 	return strconv.Atoi(pageStr)
+}
+
+func (h *HandlerV2) versionHistory(c *gin.Context, req *models.CreateVersionHistoryRequest) error {
+	var (
+		current  = map[string]interface{}{"data": req.Current}
+		previous = map[string]interface{}{"data": req.Previous}
+		request  = map[string]interface{}{"data": req.Request}
+		response = map[string]interface{}{"data": req.Response}
+	)
+
+	if req.Current == nil {
+		current["data"] = make(map[string]interface{})
+	}
+	if req.Previous == nil {
+		previous["data"] = make(map[string]interface{})
+	}
+	if req.Request == nil {
+		request["data"] = make(map[string]interface{})
+	}
+	if req.Response == nil {
+		response["data"] = make(map[string]interface{})
+	}
+
+	_, err := req.Services.GetBuilderServiceByType(req.NodeType).VersionHistory().Create(
+		c.Request.Context(),
+		&object_builder_service.CreateVersionHistoryRequest{
+			Id:                uuid.NewString(),
+			ProjectId:         req.ProjectId,
+			ActionSource:      req.ActionSource,
+			ActionType:        req.ActionType,
+			Previus:           fromMapToString(previous),
+			Current:           fromMapToString(current),
+			UsedEnvrironments: req.UsedEnvironments,
+			Date:              time.Now().Format("2006-01-02 15:04:05"),
+			UserInfo:          req.UserInfo,
+			Request:           fromMapToString(request),
+			Response:          "Test response",
+		},
+	)
+	if err != nil {
+		fmt.Println("=======================================================")
+		log.Println(err)
+		fmt.Println("=======================================================")
+		return err
+	}
+	return nil
+}
+
+func fromMapToString(req map[string]interface{}) string {
+	reqString, err := json.Marshal(req)
+	if err != nil {
+		return ""
+	}
+	return string(reqString)
 }

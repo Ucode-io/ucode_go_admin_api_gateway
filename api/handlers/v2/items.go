@@ -45,6 +45,7 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 		resp                        *obs.CommonMessage
 		beforeActions, afterActions []*obs.CustomEvent
 		statusHttp                  = status_http.GrpcStatusToHTTP["Created"]
+		//logReq                      = models.CreateVersionHistoryRequest{}
 	)
 
 	err := c.ShouldBindJSON(&objectRequest)
@@ -65,6 +66,8 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
+
+	//userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),

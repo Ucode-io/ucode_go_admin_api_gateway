@@ -19,6 +19,11 @@ message GetAllRquest {
     int32 offset = 3;
     string type = 4;
     string env_id = 5;
+    string from_time = 6;
+    string to_time = 7;
+    string user_info = 8;
+    string api_key = 9;
+    bool order_by = 10;
 }
 
 message VersionHistory {
@@ -29,8 +34,10 @@ message VersionHistory {
     string current = 5;
     map<string, bool> used_envrironments = 6;
     string date = 7;
-    UserInfo user_info = 8;
+    string user_info = 8;
     string request = 9;
+    string response = 10;
+    string api_key = 11;
 }
 
 message CreateVersionHistoryRequest {
@@ -44,6 +51,8 @@ message CreateVersionHistoryRequest {
     string user_info = 8;
     string request = 9;
     string project_id = 10;
+    string response = 11;
+    string api_key = 12;
 }
 
 message ListVersionHistory {

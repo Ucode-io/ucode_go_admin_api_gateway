@@ -12,6 +12,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/spf13/cast"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/structpb"
 )
@@ -369,6 +370,8 @@ func (h *HandlerV2) UpdateField(c *gin.Context) {
 		return
 	}
 
+	userId, _ := c.Get("user_id")
+
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
@@ -418,55 +421,13 @@ func (h *HandlerV2) UpdateField(c *gin.Context) {
 				}
 			}
 		}
-	} else {
-		// do nothing
-		// field.EnableMultilanguage = true
-		// languaegs, err := h.companyServices.Project().GetById(context.Background(), &pb.GetProjectByIdRequest{
-		// 	ProjectId: resource.GetProjectId(),
-		// })
-		// if err != nil {
-		// 	h.handleResponse(c, status_http.GRPCError, err.Error())
-		// 	return
-		// }
-		// for _, value := range languaegs.GetLanguage() {
-		// 	if fieldRequest.Slug != fieldRequest.Slug[:len(fieldRequest.Slug)-3]+"_"+value.GetShortName() {
-		// 		fmt.Println("field slug: ", fieldRequest.Slug)
-		// 		fmt.Println("get short name:::", value.GetShortName())
-		// 		fmt.Println("match field slug:",  fieldRequest.Slug[:len(fieldRequest.Slug)-3]+"_"+value.GetShortName())
-		// 		go func(arg *pb.Language, project_id string) {
-		// 			// id, _ := uuid.NewRandom()
-		// 			// _, err := services.GetBuilderServiceByType(resource.NodeType).Field().Create(context.Background(), &obs.CreateFieldRequest{
-		// 			// 	Id:                  id.String(),
-		// 			// 	Default:             fieldRequest.Default,
-		// 			// 	Type:                fieldRequest.Type,
-		// 			// 	Index:               fieldRequest.Index,
-		// 			// 	Label:               fieldRequest.Label,
-		// 			// 	Slug:                fieldRequest.Slug[:len(fieldRequest.Slug)-3] + "_" + arg.ShortName,
-		// 			// 	TableId:             fieldRequest.TableID,
-		// 			// 	Attributes:          attributes,
-		// 			// 	IsVisible:           fieldRequest.IsVisible,
-		// 			// 	AutofillTable:       fieldRequest.AutoFillTable,
-		// 			// 	AutofillField:       fieldRequest.AutoFillField,
-		// 			// 	RelationField:       fieldRequest.RelationField,
-		// 			// 	Automatic:           fieldRequest.Automatic,
-		// 			// 	ShowLabel:           fieldRequest.ShowLabel,
-		// 			// 	Unique:              fieldRequest.Unique,
-		// 			// 	ProjectId:           project_id,
-		// 			// 	EnableMultilanguage: true,
-		// 			// })
-		// 			// if err != nil {
-		// 			// 	h.handleResponse(c, status_http.GRPCError, err.Error())
-		// 			// 	return
-		// 			// }
-		// 		}(value, resource.ResourceEnvironmentId)
-		// }
 	}
 
 	field.ProjectId = resource.ResourceEnvironmentId
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 
-		_, err = services.GetBuilderServiceByType(resource.NodeType).Field().GetByID(
+		oldField, err := services.GetBuilderServiceByType(resource.NodeType).Field().GetByID(
 			context.Background(),
 			&obs.FieldPrimaryKey{
 				Id:        field.Id,
@@ -482,11 +443,25 @@ func (h *HandlerV2) UpdateField(c *gin.Context) {
 			context.Background(),
 			&field,
 		)
-
+		versionHistoryReq := &models.CreateVersionHistoryRequest{
+			Services:     services,
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: "FIELD",
+			ActionType:   "UPDATE",
+			Previous:     oldField,
+			Current:      resp,
+			UserInfo:     userId.(string),
+			UsedEnvironments: map[string]bool{
+				environmentId.(string): true,
+			},
+		}
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
+
+		h.versionHistory(c, versionHistoryReq)
 	case pb.ResourceType_POSTGRESQL:
 		resp, err = services.PostgresBuilderService().Field().Update(
 			context.Background(),
@@ -601,6 +576,8 @@ func (h *HandlerV2) DeleteField(c *gin.Context) {
 		return
 	}
 
+	userId, _ := c.Get("user_id")
+
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
@@ -624,20 +601,37 @@ func (h *HandlerV2) DeleteField(c *gin.Context) {
 		return
 	}
 
+	var (
+		oldField = &obs.Field{}
+		logReq   = &models.CreateVersionHistoryRequest{
+			Services:     services,
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: "FIELD",
+			ActionType:   "DELETE",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo: cast.ToString(userId),
+		}
+	)
+
+	oldField, err = services.GetBuilderServiceByType(resource.NodeType).Field().GetByID(
+		context.Background(),
+		&obs.FieldPrimaryKey{
+			Id:        fieldID,
+			ProjectId: resource.ResourceEnvironmentId,
+		},
+	)
+	if err != nil {
+		logReq.Response = err.Error()
+		go h.versionHistory(c, logReq)
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		_, err = services.GetBuilderServiceByType(resource.NodeType).Field().GetByID(
-			context.Background(),
-			&obs.FieldPrimaryKey{
-				Id:        fieldID,
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Field().Delete(
 			context.Background(),
 			&obs.FieldPrimaryKey{
@@ -646,6 +640,8 @@ func (h *HandlerV2) DeleteField(c *gin.Context) {
 			},
 		)
 		if err != nil {
+			logReq.Response = err.Error()
+			go h.versionHistory(c, logReq)
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
@@ -664,6 +660,8 @@ func (h *HandlerV2) DeleteField(c *gin.Context) {
 		}
 	}
 
+	logReq.Previous = oldField
+	go h.versionHistory(c, logReq)
 	h.handleResponse(c, status_http.NoContent, resp)
 }
 

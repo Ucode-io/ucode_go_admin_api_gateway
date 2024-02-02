@@ -2,14 +2,11 @@ package handlers
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 	v1 "ucode/ucode_go_api_gateway/api/handlers/v1"
 	v2 "ucode/ucode_go_api_gateway/api/handlers/v2"
-	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
-	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/caching"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/services"
@@ -136,31 +133,4 @@ func (h *Handler) getLimitParam(c *gin.Context) (limit int, err error) {
 func (h *Handler) getPageParam(c *gin.Context) (page int, err error) {
 	pageStr := c.DefaultQuery("page", "1")
 	return strconv.Atoi(pageStr)
-}
-
-func (h *Handler) versionHistory(c *gin.Context, req *models.CreateVersionHistoryRequest) error {
-	var (
-		previous = fmt.Sprintf("%v", req.Previous)
-		current  = fmt.Sprintf("%v", req.Current)
-		request  = fmt.Sprintf("%v", req.Request)
-	)
-
-	_, err := req.Services.GetBuilderServiceByType(req.NodeType).VersionHistory().Create(
-		c.Request.Context(),
-		&object_builder_service.CreateVersionHistoryRequest{
-			ProjectId:         req.ProjectId,
-			ActionSource:      req.ActionSource,
-			ActionType:        req.ActionType,
-			Previus:           previous,
-			Current:           current,
-			UsedEnvrironments: req.UsedEnvironments,
-			Date:              req.Date,
-			UserInfo:          req.UserInfo,
-			Request:           request,
-		},
-	)
-	if err != nil {
-		return err
-	}
-	return nil
 }

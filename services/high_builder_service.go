@@ -78,5 +78,6 @@ func NewHighBuilderServiceClient(ctx context.Context, cfg config.Config) (Builde
 		fileService:               object_builder_service.NewFileServiceClient(connObjectBuilderService),
 		objectBuilderConnPool:     objectbuilderServicePool,
 		itemsService:              object_builder_service.NewItemsServiceClient(connObjectBuilderService),
+		versionHistoryService:     object_builder_service.NewVersionHistoryServiceClient(connObjectBuilderService),
 	}, nil
 }

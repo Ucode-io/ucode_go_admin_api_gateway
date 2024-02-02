@@ -118,7 +118,7 @@ func NewBuilderServiceClient(ctx context.Context, cfg config.Config) (BuilderSer
 		fileService:               object_builder_service.NewFileServiceClient(connObjectBuilderService),
 		objectBuilderConnPool:     objectbuilderServicePool,
 		itemsService:              object_builder_service.NewItemsServiceClient(connObjectBuilderService),
-		versionHistory:            object_builder_service.NewVersionHistoryServiceClient(connObjectBuilderService),
+		versionHistoryService:     object_builder_service.NewVersionHistoryServiceClient(connObjectBuilderService),
 	}, nil
 }
 
@@ -159,7 +159,7 @@ type builderServiceClient struct {
 	fileService               object_builder_service.FileServiceClient
 	objectBuilderConnPool     *grpcpool.Pool
 	itemsService              object_builder_service.ItemsServiceClient
-	versionHistory            object_builder_service.VersionHistoryServiceClient
+	versionHistoryService     object_builder_service.VersionHistoryServiceClient
 }
 
 func (g *builderServiceClient) ObjectBuilderConnPool(ctx context.Context) (object_builder_service.ObjectBuilderServiceClient, *grpcpool.ClientConn, error) {
@@ -311,5 +311,5 @@ func (g *builderServiceClient) ItemsService() object_builder_service.ItemsServic
 }
 
 func (g *builderServiceClient) VersionHistory() object_builder_service.VersionHistoryServiceClient {
-	return g.versionHistory
+	return g.versionHistoryService
 }
