@@ -137,7 +137,7 @@ func (h *HandlerV2) versionHistory(c *gin.Context, req *models.CreateVersionHist
 	}
 
 	_, err := req.Services.GetBuilderServiceByType(req.NodeType).VersionHistory().Create(
-		c.Request.Context(),
+		context.Background(),
 		&object_builder_service.CreateVersionHistoryRequest{
 			Id:                uuid.NewString(),
 			ProjectId:         req.ProjectId,
@@ -149,7 +149,8 @@ func (h *HandlerV2) versionHistory(c *gin.Context, req *models.CreateVersionHist
 			Date:              time.Now().Format("2006-01-02 15:04:05"),
 			UserInfo:          req.UserInfo,
 			Request:           fromMapToString(request),
-			Response:          "Test response",
+			Response:          fromMapToString(response),
+			ApiKey:            req.ApiKey,
 		},
 	)
 	if err != nil {

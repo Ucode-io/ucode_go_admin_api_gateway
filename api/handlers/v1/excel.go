@@ -13,6 +13,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/status_http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/cast"
 )
 
 // ExcelReader godoc
@@ -114,7 +115,10 @@ func (h *HandlerV1) ExcelReader(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) ExcelToDb(c *gin.Context) {
-	var excelRequest models.ExcelToDbRequest
+	var (
+		excelRequest models.ExcelToDbRequest
+		resp         = models.ExcelToDbResponse{Message: "Success"}
+	)
 
 	err := c.ShouldBindJSON(&excelRequest)
 	if err != nil {
@@ -134,6 +138,8 @@ func (h *HandlerV1) ExcelToDb(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
+
+	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
@@ -167,6 +173,31 @@ func (h *HandlerV1) ExcelToDb(c *gin.Context) {
 		return
 	}
 
+	var (
+		logReq = &models.CreateVersionHistoryRequest{
+			Services:     services,
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: c.Request.URL.String(),
+			ActionType:   "CREATE",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo: cast.ToString(userId),
+			Request:  &data,
+		}
+	)
+
+	defer func() {
+		if err != nil {
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else {
+			h.handleResponse(c, status_http.Created, resp)
+		}
+		go h.versionHistory(c, logReq)
+	}()
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		_, err = services.GetBuilderServiceByType(resource.NodeType).Excel().ExcelToDb(
@@ -179,8 +210,6 @@ func (h *HandlerV1) ExcelToDb(c *gin.Context) {
 			},
 		)
 		if err != nil {
-			fmt.Println("Error in excel to db->", err.Error())
-			h.handleResponse(c, status_http.InvalidArgument, err.Error())
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
@@ -194,13 +223,8 @@ func (h *HandlerV1) ExcelToDb(c *gin.Context) {
 			},
 		)
 		if err != nil {
-			h.handleResponse(c, status_http.InvalidArgument, err.Error())
 			return
 		}
 
 	}
-
-	h.handleResponse(c, status_http.Created, models.ExcelToDbResponse{
-		Message: "Success!",
-	})
 }

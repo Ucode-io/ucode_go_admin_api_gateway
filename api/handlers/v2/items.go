@@ -67,7 +67,7 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 		return
 	}
 
-	//userId, _ := c.Get("user_id")
+	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
@@ -150,6 +150,19 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 	}
 	defer conn.Close()
 
+	logReq := &models.CreateVersionHistoryRequest{
+		Services:     services,
+		NodeType:     resource.NodeType,
+		ProjectId:    resource.ResourceEnvironmentId,
+		ActionSource: c.Request.URL.String(),
+		ActionType:   "CREATE",
+		UsedEnvironments: map[string]bool{
+			cast.ToString(environmentId): true,
+		},
+		UserInfo: cast.ToString(userId),
+		Request:  structData,
+	}
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = service.Create(
@@ -164,6 +177,7 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 		)
 		// this logic for custom error message, object builder service may be return 400, 404, 500
 		if err != nil {
+			logReq.Response = err.Error()
 			statusHttp = status_http.GrpcStatusToHTTP["Internal"]
 			stat, ok := status.FromError(err)
 			if ok {
@@ -173,6 +187,8 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 			h.handleResponse(c, statusHttp, err.Error())
 			return
 		}
+		logReq.Response = resp
+		go h.versionHistory(c, logReq)
 	case pb.ResourceType_POSTGRESQL:
 		resp, err = services.PostgresBuilderService().ObjectBuilder().Create(
 			context.Background(),
@@ -258,6 +274,8 @@ func (h *HandlerV2) CreateItems(c *gin.Context) {
 		return
 	}
 
+	userId, _ := c.Get("user_id")
+
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
@@ -327,6 +345,23 @@ func (h *HandlerV2) CreateItems(c *gin.Context) {
 		}
 	}
 
+	logReq := &models.CreateVersionHistoryRequest{
+		Services:     services,
+		NodeType:     resource.NodeType,
+		ProjectId:    resource.ResourceEnvironmentId,
+		ActionSource: c.Request.URL.String(),
+		ActionType:   "CREATE",
+		UsedEnvironments: map[string]bool{
+			cast.ToString(environmentId): true,
+		},
+		UserInfo: cast.ToString(userId),
+		Request:  structData,
+	}
+
+	defer func() {
+		go h.versionHistory(c, logReq)
+	}()
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = service.Create(
@@ -339,6 +374,7 @@ func (h *HandlerV2) CreateItems(c *gin.Context) {
 		)
 		// this logic for custom error message, object builder service may be return 400, 404, 500
 		if err != nil {
+			logReq.Response = err.Error()
 			statusHttp = status_http.GrpcStatusToHTTP["Internal"]
 			stat, ok := status.FromError(err)
 			if ok {
@@ -348,6 +384,7 @@ func (h *HandlerV2) CreateItems(c *gin.Context) {
 			h.handleResponse(c, statusHttp, err.Error())
 			return
 		}
+		logReq.Response = resp
 	case pb.ResourceType_POSTGRESQL:
 		resp, err = services.PostgresBuilderService().ObjectBuilder().Create(
 			context.Background(),
@@ -808,6 +845,8 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
+
+	//userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),

@@ -55,6 +55,7 @@ var (
 func (h *HandlerV1) CreateNewFunction(c *gin.Context) {
 	var (
 		function models.CreateFunctionRequest
+		response = &fc.Function{}
 		//resourceEnvironment *obs.ResourceEnvironment
 	)
 	err := c.ShouldBindJSON(&function)
@@ -75,6 +76,8 @@ func (h *HandlerV1) CreateNewFunction(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
+
+	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
@@ -146,9 +149,8 @@ func (h *HandlerV1) CreateNewFunction(c *gin.Context) {
 	// }
 	var url = "https://" + uuid.String() + ".u-code.io"
 
-	response, err := services.FunctionService().FunctionService().Create(
-		context.Background(),
-		&fc.CreateFunctionRequest{
+	var (
+		createFunction = &fc.CreateFunctionRequest{
 			Path:             functionPath,
 			Name:             function.Name,
 			Description:      function.Description,
@@ -159,15 +161,40 @@ func (h *HandlerV1) CreateNewFunction(c *gin.Context) {
 			//Password:         password,
 			//SshUrl: sshURL,
 			Type: FUNCTION,
-		},
+		}
+		logReq = &models.CreateVersionHistoryRequest{
+			Services:     services,
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: c.Request.URL.String(),
+			ActionType:   "CREATE",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo: cast.ToString(userId),
+			Request:  createFunction,
+		}
+	)
+
+	defer func() {
+		if err != nil {
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else {
+			logReq.Response = response
+			h.handleResponse(c, status_http.Created, response)
+		}
+		go h.versionHistory(c, logReq)
+	}()
+
+	response, err = services.FunctionService().FunctionService().Create(
+		context.Background(),
+		createFunction,
 	)
 
 	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-
-	h.handleResponse(c, status_http.Created, response)
 }
 
 // GetNewFunctionByID godoc

@@ -17,7 +17,9 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/google/uuid"
+	"github.com/spf13/cast"
 )
 
 // CreateQueryRequest godoc
@@ -37,6 +39,7 @@ func (h *HandlerV1) CreateQueryRequest(c *gin.Context) {
 	var (
 		//resourceEnvironment *obs.ResourceEnvironment
 		query tmp.CreateQueryReq
+		res   *tmp.Query
 	)
 
 	err := c.ShouldBindJSON(&query)
@@ -63,6 +66,8 @@ func (h *HandlerV1) CreateQueryRequest(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
+
+	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
@@ -109,16 +114,39 @@ func (h *HandlerV1) CreateQueryRequest(c *gin.Context) {
 		ProjectId:  query.GetProjectId(),
 	}
 
-	res, err := services.QueryService().Query().CreateQuery(
+	var (
+		logReq = &models.CreateVersionHistoryRequest{
+			Services:     services,
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: c.Request.URL.String(),
+			ActionType:   "CREATE",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo: cast.ToString(userId),
+			Request:  &query,
+		}
+	)
+
+	defer func() {
+		if err != nil {
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else {
+			logReq.Response = &res
+			h.handleResponse(c, status_http.Created, res)
+		}
+		go h.versionHistory(c, logReq)
+	}()
+
+	res, err = services.QueryService().Query().CreateQuery(
 		context.Background(),
 		&query,
 	)
 	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-
-	h.handleResponse(c, status_http.Created, res)
 }
 
 // GetSingleQueryRequest godoc
@@ -242,10 +270,9 @@ func (h *HandlerV1) GetSingleQueryRequest(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) UpdateQueryRequest(c *gin.Context) {
-	fmt.Println(":123 update request")
 	var (
-		//resourceEnvironment *obs.ResourceEnvironment
 		query tmp.UpdateQueryReq
+		res   *tmp.Query
 	)
 
 	err := c.ShouldBindJSON(&query)
@@ -253,8 +280,6 @@ func (h *HandlerV1) UpdateQueryRequest(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
-
-	fmt.Println("\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~>", query)
 
 	authInfo, err := h.adminAuthInfo(c)
 	if err != nil {
@@ -274,6 +299,8 @@ func (h *HandlerV1) UpdateQueryRequest(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
+
+	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
@@ -319,18 +346,39 @@ func (h *HandlerV1) UpdateQueryRequest(c *gin.Context) {
 		ProjectId:  query.GetProjectId(),
 	}
 
-	fmt.Println("\n\n:~~~> update query ", query)
-	res, err := services.QueryService().Query().UpdateQuery(
+	var (
+		logReq = &models.CreateVersionHistoryRequest{
+			Services:     services,
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: c.Request.URL.String(),
+			ActionType:   "UPDATE",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo: cast.ToString(userId),
+			Request:  &query,
+		}
+	)
+
+	defer func() {
+		if err != nil {
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else {
+			logReq.Response = res
+			h.handleResponse(c, status_http.OK, res)
+		}
+		go h.versionHistory(c, logReq)
+	}()
+
+	res, err = services.QueryService().Query().UpdateQuery(
 		context.Background(),
 		&query,
 	)
-
 	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-
-	h.handleResponse(c, status_http.OK, res)
 }
 
 // DeleteQueryRequest godoc
@@ -348,7 +396,7 @@ func (h *HandlerV1) UpdateQueryRequest(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) DeleteQueryRequest(c *gin.Context) {
 	var (
-	//resourceEnvironment *obs.ResourceEnvironment
+		res = &empty.Empty{}
 	)
 	queryId := c.Param("query-id")
 	if !util.IsValidUUID(queryId) {
@@ -368,6 +416,8 @@ func (h *HandlerV1) DeleteQueryRequest(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
+
+	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
@@ -392,7 +442,31 @@ func (h *HandlerV1) DeleteQueryRequest(c *gin.Context) {
 		return
 	}
 
-	res, err := services.QueryService().Query().DeleteQuery(
+	var (
+		logReq = &models.CreateVersionHistoryRequest{
+			Services:     services,
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: c.Request.URL.String(),
+			ActionType:   "DELETE",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo: cast.ToString(userId),
+		}
+	)
+
+	defer func() {
+		if err != nil {
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else {
+			h.handleResponse(c, status_http.NoContent, res)
+		}
+		go h.versionHistory(c, logReq)
+	}()
+
+	res, err = services.QueryService().Query().DeleteQuery(
 		context.Background(),
 		&tmp.DeleteQueryReq{
 			Id:         queryId,
@@ -401,13 +475,9 @@ func (h *HandlerV1) DeleteQueryRequest(c *gin.Context) {
 			VersionId:  uuid.NewString(),
 		},
 	)
-
 	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-
-	h.handleResponse(c, status_http.NoContent, res)
 }
 
 // GetListQueryRequest godoc

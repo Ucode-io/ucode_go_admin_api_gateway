@@ -3,12 +3,14 @@ package v1
 import (
 	"context"
 	"errors"
+	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/cast"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -50,6 +52,8 @@ func (h *HandlerV1) CreateCustomErrorMessage(c *gin.Context) {
 		return
 	}
 
+	userId, _ := c.Get("user_id")
+
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
@@ -73,6 +77,32 @@ func (h *HandlerV1) CreateCustomErrorMessage(c *gin.Context) {
 		return
 	}
 
+	var (
+		logReq = &models.CreateVersionHistoryRequest{
+			Services:     services,
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: c.Request.URL.String(),
+			ActionType:   "CREATE",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo: cast.ToString(userId),
+			Request:  &customErrorMessages,
+		}
+	)
+
+	defer func() {
+		if err != nil {
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else {
+			logReq.Response = resp
+			h.handleResponse(c, status_http.Created, resp)
+		}
+		go h.versionHistory(c, logReq)
+	}()
+
 	customErrorMessages.ProjectId = resource.ResourceEnvironmentId
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
@@ -80,9 +110,7 @@ func (h *HandlerV1) CreateCustomErrorMessage(c *gin.Context) {
 			context.Background(),
 			&customErrorMessages,
 		)
-
 		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
@@ -90,14 +118,11 @@ func (h *HandlerV1) CreateCustomErrorMessage(c *gin.Context) {
 			context.Background(),
 			&customErrorMessages,
 		)
-
 		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 
 	}
-	h.handleResponse(c, status_http.OK, resp)
 }
 
 // GetByIdCustomErrorMessage godoc
@@ -321,6 +346,8 @@ func (h *HandlerV1) UpdateCustomErrorMessage(c *gin.Context) {
 		return
 	}
 
+	userId, _ := c.Get("user_id")
+
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
@@ -344,6 +371,31 @@ func (h *HandlerV1) UpdateCustomErrorMessage(c *gin.Context) {
 		return
 	}
 
+	var (
+		logReq = &models.CreateVersionHistoryRequest{
+			Services:     services,
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: c.Request.URL.String(),
+			ActionType:   "UPDATE",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo: cast.ToString(userId),
+			Request:  &customErrorMessages,
+		}
+	)
+
+	defer func() {
+		if err != nil {
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else {
+			h.handleResponse(c, status_http.OK, resp)
+		}
+		go h.versionHistory(c, logReq)
+	}()
+
 	customErrorMessages.ProjectId = resource.ResourceEnvironmentId
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
@@ -351,9 +403,7 @@ func (h *HandlerV1) UpdateCustomErrorMessage(c *gin.Context) {
 			context.Background(),
 			&customErrorMessages,
 		)
-
 		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
@@ -361,14 +411,11 @@ func (h *HandlerV1) UpdateCustomErrorMessage(c *gin.Context) {
 			context.Background(),
 			&customErrorMessages,
 		)
-
 		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 
 	}
-	h.handleResponse(c, status_http.OK, resp)
 }
 
 // DeleteCustomErrorMessage godoc
@@ -406,6 +453,8 @@ func (h *HandlerV1) DeleteCustomErrorMessage(c *gin.Context) {
 		return
 	}
 
+	userId, _ := c.Get("user_id")
+
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
@@ -429,6 +478,30 @@ func (h *HandlerV1) DeleteCustomErrorMessage(c *gin.Context) {
 		return
 	}
 
+	var (
+		logReq = &models.CreateVersionHistoryRequest{
+			Services:     services,
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: c.Request.URL.String(),
+			ActionType:   "DELETE",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo: cast.ToString(userId),
+		}
+	)
+
+	defer func() {
+		if err != nil {
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else {
+			h.handleResponse(c, status_http.NoContent, resp)
+		}
+		go h.versionHistory(c, logReq)
+	}()
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).CustomErrorMessage().Delete(
@@ -438,9 +511,7 @@ func (h *HandlerV1) DeleteCustomErrorMessage(c *gin.Context) {
 				ProjectId: resource.GetResourceEnvironmentId(),
 			},
 		)
-
 		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
@@ -451,12 +522,9 @@ func (h *HandlerV1) DeleteCustomErrorMessage(c *gin.Context) {
 				ProjectId: resource.GetResourceEnvironmentId(),
 			},
 		)
-
 		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 
 	}
-	h.handleResponse(c, status_http.OK, resp)
 }

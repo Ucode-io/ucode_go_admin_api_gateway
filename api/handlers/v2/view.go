@@ -3,12 +3,14 @@ package v2
 import (
 	"context"
 	"errors"
+	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/cast"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -51,6 +53,8 @@ func (h *HandlerV2) CreateView(c *gin.Context) {
 		return
 	}
 
+	userId, _ := c.Get("user_id")
+
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
@@ -74,6 +78,32 @@ func (h *HandlerV2) CreateView(c *gin.Context) {
 		return
 	}
 
+	var (
+		logReq = &models.CreateVersionHistoryRequest{
+			Services:     services,
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: "VIEW",
+			ActionType:   "CREATE",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo: cast.ToString(userId),
+			Request:  &view,
+		}
+	)
+
+	defer func() {
+		if err != nil {
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else {
+			logReq.Response = resp
+			h.handleResponse(c, status_http.Created, resp)
+		}
+		go h.versionHistory(c, logReq)
+	}()
+
 	view.ProjectId = resource.ResourceEnvironmentId
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
@@ -81,9 +111,7 @@ func (h *HandlerV2) CreateView(c *gin.Context) {
 			context.Background(),
 			&view,
 		)
-
 		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
@@ -91,14 +119,10 @@ func (h *HandlerV2) CreateView(c *gin.Context) {
 			context.Background(),
 			&view,
 		)
-
 		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 	}
-
-	h.handleResponse(c, status_http.Created, resp)
 }
 
 // GetSingleView godoc
@@ -231,6 +255,8 @@ func (h *HandlerV2) UpdateView(c *gin.Context) {
 		return
 	}
 
+	userId, ok := c.Get("user_id")
+
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
@@ -254,28 +280,54 @@ func (h *HandlerV2) UpdateView(c *gin.Context) {
 		return
 	}
 
-	view.ProjectId = resource.ResourceEnvironmentId
+	var (
+		oldView = &obs.View{}
+		logReq  = &models.CreateVersionHistoryRequest{
+			Services:     services,
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: "VIEW",
+			ActionType:   "UPDATE",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo: cast.ToString(userId),
+			Request:  &view,
+		}
+	)
 
+	defer func() {
+		logReq.Previous = oldView
+		if err != nil {
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else {
+			logReq.Response = resp
+			logReq.Current = resp
+			h.handleResponse(c, status_http.OK, resp)
+		}
+		go h.versionHistory(c, logReq)
+	}()
+
+	oldView, err = services.GetBuilderServiceByType(resource.NodeType).View().GetSingle(
+		context.Background(),
+		&obs.ViewPrimaryKey{
+			Id:        view.Id,
+			ProjectId: view.ProjectId,
+		},
+	)
+	if err != nil {
+		return
+	}
+
+	view.ProjectId = resource.ResourceEnvironmentId
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		_, err = services.GetBuilderServiceByType(resource.NodeType).View().GetSingle(
-			context.Background(),
-			&obs.ViewPrimaryKey{
-				Id:        view.Id,
-				ProjectId: view.ProjectId,
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).View().Update(
 			context.Background(),
 			&view,
 		)
 		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
@@ -283,14 +335,10 @@ func (h *HandlerV2) UpdateView(c *gin.Context) {
 			context.Background(),
 			&view,
 		)
-
 		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 	}
-
-	h.handleResponse(c, status_http.OK, resp)
 }
 
 // DeleteView godoc
@@ -331,6 +379,8 @@ func (h *HandlerV2) DeleteView(c *gin.Context) {
 		return
 	}
 
+	userId, _ := c.Get("user_id")
+
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
@@ -354,20 +404,45 @@ func (h *HandlerV2) DeleteView(c *gin.Context) {
 		return
 	}
 
+	var (
+		oldView = &obs.View{}
+		logReq  = &models.CreateVersionHistoryRequest{
+			Services:     services,
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: "VIEW",
+			ActionType:   "DELETE",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo: cast.ToString(userId),
+		}
+	)
+
+	defer func() {
+		logReq.Previous = oldView
+		if err != nil {
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else {
+			h.handleResponse(c, status_http.NoContent, resp)
+		}
+		go h.versionHistory(c, logReq)
+	}()
+
+	oldView, err = services.GetBuilderServiceByType(resource.NodeType).View().GetSingle(
+		context.Background(),
+		&obs.ViewPrimaryKey{
+			Id:        viewID,
+			ProjectId: resource.ResourceEnvironmentId,
+		},
+	)
+	if err != nil {
+		return
+	}
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		_, err = services.GetBuilderServiceByType(resource.NodeType).View().GetSingle(
-			context.Background(),
-			&obs.ViewPrimaryKey{
-				Id:        viewID,
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).View().Delete(
 			context.Background(),
 			&obs.ViewPrimaryKey{
@@ -376,7 +451,6 @@ func (h *HandlerV2) DeleteView(c *gin.Context) {
 			},
 		)
 		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
@@ -387,14 +461,10 @@ func (h *HandlerV2) DeleteView(c *gin.Context) {
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
-
 		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 	}
-
-	h.handleResponse(c, status_http.NoContent, resp)
 }
 
 // GetAllViews godoc
