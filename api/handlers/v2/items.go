@@ -806,6 +806,8 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 		resp, singleObject          *obs.CommonMessage
 		beforeActions, afterActions []*obs.CustomEvent
 		statusHttp                  = status_http.GrpcStatusToHTTP["Ok"]
+		actionErr                   error
+		functionName                string
 	)
 
 	err := c.ShouldBindJSON(&objectRequest)
@@ -846,7 +848,7 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 		return
 	}
 
-	//userId, _ := c.Get("user_id")
+	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
@@ -950,6 +952,36 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 			return
 		}
 	}
+
+	var (
+		logReq = &models.CreateVersionHistoryRequest{
+			Services:     services,
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: c.Request.URL.String(),
+			ActionType:   "UPDATE",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo: cast.ToString(userId),
+			Request:  &structData,
+		}
+	)
+
+	defer func() {
+		if err != nil {
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else if actionErr != nil {
+			logReq.Response = actionErr.Error() + " in " + functionName
+			h.handleResponse(c, status_http.InvalidArgument, actionErr.Error()+" in "+functionName)
+		} else {
+			logReq.Response = resp
+			h.handleResponse(c, status_http.NoContent, resp)
+		}
+		go h.versionHistory(c, logReq)
+	}()
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = service.Update(
@@ -967,7 +999,6 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 				statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
 				statusHttp.CustomMessage = stat.Message()
 			}
-			h.handleResponse(c, statusHttp, err.Error())
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
@@ -981,13 +1012,12 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 			},
 		)
 		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 
 	}
 	if len(afterActions) > 0 {
-		functionName, err := DoInvokeFuntion(
+		functionName, actionErr = DoInvokeFuntion(
 			DoInvokeFuntionStruct{
 				CustomEvents:           afterActions,
 				IDs:                    []string{id},
@@ -1001,12 +1031,10 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 			h, // handler
 		)
 		if err != nil {
-			h.handleResponse(c, status_http.InvalidArgument, err.Error()+" in "+functionName)
 			return
 		}
 	}
 	statusHttp.CustomMessage = resp.GetCustomMessage()
-	h.handleResponse(c, status_http.OK, resp)
 }
 
 // MultipleUpdateItems godoc
@@ -1028,6 +1056,8 @@ func (h *HandlerV2) MultipleUpdateItems(c *gin.Context) {
 		objectRequest               models.MultipleUpdateItems
 		beforeActions, afterActions []*obs.CustomEvent
 		statusHttp                  = status_http.GrpcStatusToHTTP["Created"]
+		actionErr                   error
+		functionName                string
 	)
 
 	err := c.ShouldBindJSON(&objectRequest)
@@ -1048,6 +1078,8 @@ func (h *HandlerV2) MultipleUpdateItems(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
+
+	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
@@ -1114,7 +1146,38 @@ func (h *HandlerV2) MultipleUpdateItems(c *gin.Context) {
 			return
 		}
 	}
+
+	var (
+		logReq = &models.CreateVersionHistoryRequest{
+			Services:     services,
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: c.Request.URL.String(),
+			ActionType:   "UPDATE",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo: cast.ToString(userId),
+			Request:  &structData,
+		}
+	)
+
 	var resp *obs.CommonMessage
+
+	defer func() {
+		if err != nil {
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else if actionErr != nil {
+			logReq.Response = actionErr.Error() + " in " + functionName
+			h.handleResponse(c, status_http.InvalidArgument, actionErr.Error()+" in "+functionName)
+		} else {
+			logReq.Response = resp
+			h.handleResponse(c, status_http.NoContent, resp)
+		}
+		go h.versionHistory(c, logReq)
+	}()
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = service.MultipleUpdate(
@@ -1133,7 +1196,6 @@ func (h *HandlerV2) MultipleUpdateItems(c *gin.Context) {
 				statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
 				statusHttp.CustomMessage = stat.Message()
 			}
-			h.handleResponse(c, statusHttp, err.Error())
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
@@ -1147,13 +1209,12 @@ func (h *HandlerV2) MultipleUpdateItems(c *gin.Context) {
 		)
 
 		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 	}
 
 	if len(afterActions) > 0 {
-		functionName, err := DoInvokeFuntion(
+		functionName, actionErr = DoInvokeFuntion(
 			DoInvokeFuntionStruct{
 				CustomEvents: afterActions,
 				IDs:          objectRequest.Ids,
@@ -1166,12 +1227,10 @@ func (h *HandlerV2) MultipleUpdateItems(c *gin.Context) {
 			h, // handler
 		)
 		if err != nil {
-			h.handleResponse(c, status_http.InvalidArgument, err.Error()+" in "+functionName)
 			return
 		}
 	}
 	statusHttp.CustomMessage = resp.GetCustomMessage()
-	h.handleResponse(c, status_http.Created, resp)
 }
 
 // DeleteItem godoc
@@ -1194,17 +1253,12 @@ func (h *HandlerV2) DeleteItem(c *gin.Context) {
 		resp                        *obs.CommonMessage
 		beforeActions, afterActions []*obs.CustomEvent
 		statusHttp                  = status_http.GrpcStatusToHTTP["NoContent"]
+		actionErr                   error
+		functionName                string
 	)
 
 	objectRequest.Data = make(map[string]interface{})
 
-	// err := c.ShouldBindJSON(&objectRequest)
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.BadRequest, err.Error())
-	// 	return
-	// }
-
-	fmt.Println("\n\n --- TEST LOG #1 --- ", c.Param("id"))
 	objectID := c.Param("id")
 	if !util.IsValidUUID(objectID) {
 		h.handleResponse(c, status_http.InvalidArgument, "item id is an invalid uuid")
@@ -1215,14 +1269,16 @@ func (h *HandlerV2) DeleteItem(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
-	fmt.Println("\n\n --- TEST LOG #2 --- ")
+
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		err := errors.New("error getting environment id | not valid")
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
-	fmt.Println("\n\n --- TEST LOG #3 --- ", projectId, environmentId)
+
+	userId, _ := c.Get("user_id")
+
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
@@ -1235,7 +1291,7 @@ func (h *HandlerV2) DeleteItem(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	fmt.Println("\n\n --- TEST LOG #4 --- ")
+
 	objectRequest.Data["id"] = objectID
 	objectRequest.Data["company_service_project_id"] = projectId.(string)
 	objectRequest.Data["company_service_environment_id"] = environmentId.(string)
@@ -1253,14 +1309,13 @@ func (h *HandlerV2) DeleteItem(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
 	defer cancel()
 
-	fmt.Println("\n\n --- TEST LOG #5 --- ")
 	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
 	if err != nil {
 		h.handleResponse(c, status_http.InternalServerError, err)
 		return
 	}
 	defer conn.Close()
-	fmt.Println("\n\n --- TEST LOG #5 --- ")
+
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
@@ -1297,6 +1352,35 @@ func (h *HandlerV2) DeleteItem(c *gin.Context) {
 			return
 		}
 	}
+
+	var (
+		logReq = &models.CreateVersionHistoryRequest{
+			Services:     services,
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: c.Request.URL.String(),
+			ActionType:   "DELETE",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo: cast.ToString(userId),
+		}
+	)
+
+	defer func() {
+		if err != nil {
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else if actionErr != nil {
+			logReq.Response = actionErr.Error() + " in " + functionName
+			h.handleResponse(c, status_http.InvalidArgument, actionErr.Error()+" in "+functionName)
+		} else {
+			logReq.Response = resp
+			h.handleResponse(c, status_http.NoContent, resp)
+		}
+		go h.versionHistory(c, logReq)
+	}()
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = service.Delete(
@@ -1314,7 +1398,6 @@ func (h *HandlerV2) DeleteItem(c *gin.Context) {
 				statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
 				statusHttp.CustomMessage = stat.Message()
 			}
-			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
@@ -1328,14 +1411,13 @@ func (h *HandlerV2) DeleteItem(c *gin.Context) {
 		)
 
 		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 
 	}
 
 	if len(afterActions) > 0 {
-		functionName, err := DoInvokeFuntion(
+		functionName, actionErr = DoInvokeFuntion(
 			DoInvokeFuntionStruct{
 				CustomEvents: afterActions,
 				IDs:          []string{objectID},
@@ -1348,13 +1430,11 @@ func (h *HandlerV2) DeleteItem(c *gin.Context) {
 			h, // handler
 		)
 		if err != nil {
-			h.handleResponse(c, status_http.InvalidArgument, err.Error()+" in "+functionName)
 			return
 		}
 	}
 
 	statusHttp.CustomMessage = resp.GetCustomMessage()
-	h.handleResponse(c, statusHttp, resp)
 }
 
 // DeleteManyObject godoc
@@ -1378,6 +1458,8 @@ func (h *HandlerV2) DeleteItems(c *gin.Context) {
 		beforeActions, afterActions []*obs.CustomEvent
 		statusHttp                  = status_http.GrpcStatusToHTTP["NoContent"]
 		data                        = make(map[string]interface{})
+		actionErr                   error
+		functionName                string
 	)
 
 	err := c.ShouldBindJSON(&objectRequest)
@@ -1402,6 +1484,8 @@ func (h *HandlerV2) DeleteItems(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
+
+	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
@@ -1465,6 +1549,36 @@ func (h *HandlerV2) DeleteItems(c *gin.Context) {
 			return
 		}
 	}
+
+	var (
+		logReq = &models.CreateVersionHistoryRequest{
+			Services:     services,
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: c.Request.URL.String(),
+			ActionType:   "DELETE",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo: cast.ToString(userId),
+			Request:  &structData,
+		}
+	)
+
+	defer func() {
+		if err != nil {
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else if actionErr != nil {
+			logReq.Response = actionErr.Error() + " in " + functionName
+			h.handleResponse(c, status_http.InvalidArgument, actionErr.Error()+" in "+functionName)
+		} else {
+			logReq.Response = resp
+			h.handleResponse(c, status_http.NoContent, resp)
+		}
+		go h.versionHistory(c, logReq)
+	}()
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = service.DeleteMany(
@@ -1504,7 +1618,7 @@ func (h *HandlerV2) DeleteItems(c *gin.Context) {
 	}
 
 	if len(afterActions) > 0 {
-		functionName, err := DoInvokeFuntion(
+		functionName, actionErr = DoInvokeFuntion(
 			DoInvokeFuntionStruct{
 				CustomEvents: afterActions,
 				IDs:          objectRequest.Ids,
@@ -1516,13 +1630,11 @@ func (h *HandlerV2) DeleteItems(c *gin.Context) {
 			h, // handler
 		)
 		if err != nil {
-			h.handleResponse(c, status_http.InvalidArgument, err.Error()+" in "+functionName)
 			return
 		}
 	}
 
 	statusHttp.CustomMessage = resp.GetCustomMessage()
-	h.handleResponse(c, statusHttp, resp)
 }
 
 // DeleteManyToMany godoc
@@ -1544,6 +1656,8 @@ func (h *HandlerV2) DeleteManyToMany(c *gin.Context) {
 		resp                        *obs.CommonMessage
 		beforeActions, afterActions []*obs.CustomEvent
 		statusHttp                  = status_http.GrpcStatusToHTTP["NoContent"]
+		actionErr                   error
+		functionName                string
 	)
 
 	err := c.ShouldBindJSON(&m2mMessage)
@@ -1563,6 +1677,8 @@ func (h *HandlerV2) DeleteManyToMany(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
+
+	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
@@ -1622,6 +1738,36 @@ func (h *HandlerV2) DeleteManyToMany(c *gin.Context) {
 			return
 		}
 	}
+
+	var (
+		logReq = &models.CreateVersionHistoryRequest{
+			Services:     services,
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: c.Request.URL.String(),
+			ActionType:   "DELETE",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo: cast.ToString(userId),
+			Request:  &m2mMessage,
+		}
+	)
+
+	defer func() {
+		if err != nil {
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else if actionErr != nil {
+			logReq.Response = actionErr.Error() + " in " + functionName
+			h.handleResponse(c, status_http.InvalidArgument, actionErr.Error()+" in "+functionName)
+		} else {
+			logReq.Response = resp
+			h.handleResponse(c, status_http.NoContent, resp)
+		}
+		go h.versionHistory(c, logReq)
+	}()
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = service.ManyToManyDelete(
@@ -1636,7 +1782,6 @@ func (h *HandlerV2) DeleteManyToMany(c *gin.Context) {
 				statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
 				statusHttp.CustomMessage = stat.Message()
 			}
-			h.handleResponse(c, statusHttp, err.Error())
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
@@ -1646,13 +1791,12 @@ func (h *HandlerV2) DeleteManyToMany(c *gin.Context) {
 		)
 
 		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 	}
 
 	if len(afterActions) > 0 {
-		functionName, err := DoInvokeFuntion(
+		functionName, actionErr = DoInvokeFuntion(
 			DoInvokeFuntionStruct{
 				CustomEvents: afterActions,
 				IDs:          []string{m2mMessage.IdFrom},
@@ -1664,12 +1808,10 @@ func (h *HandlerV2) DeleteManyToMany(c *gin.Context) {
 			h, // handler
 		)
 		if err != nil {
-			h.handleResponse(c, status_http.InvalidArgument, err.Error()+" in "+functionName)
 			return
 		}
 	}
 	statusHttp.CustomMessage = resp.GetCustomMessage()
-	h.handleResponse(c, status_http.NoContent, resp)
 }
 
 // AppendManyToMany godoc
@@ -1691,6 +1833,8 @@ func (h *HandlerV2) AppendManyToMany(c *gin.Context) {
 		resp                        *obs.CommonMessage
 		beforeActions, afterActions []*obs.CustomEvent
 		statusHttp                  = status_http.GrpcStatusToHTTP["Ok"]
+		actionErr                   error
+		functionName                string
 	)
 
 	err := c.ShouldBindJSON(&m2mMessage)
@@ -1710,6 +1854,8 @@ func (h *HandlerV2) AppendManyToMany(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
+
+	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
@@ -1769,13 +1915,42 @@ func (h *HandlerV2) AppendManyToMany(c *gin.Context) {
 			return
 		}
 	}
+
+	var (
+		logReq = &models.CreateVersionHistoryRequest{
+			Services:     services,
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: c.Request.URL.String(),
+			ActionType:   "UPDATE",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo: cast.ToString(userId),
+			Request:  &m2mMessage,
+		}
+	)
+
+	defer func() {
+		if err != nil {
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else if actionErr != nil {
+			logReq.Response = actionErr.Error() + " in " + functionName
+			h.handleResponse(c, status_http.InvalidArgument, actionErr.Error()+" in "+functionName)
+		} else {
+			logReq.Response = resp
+			h.handleResponse(c, status_http.NoContent, resp)
+		}
+		go h.versionHistory(c, logReq)
+	}()
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = service.ManyToManyAppend(
 			context.Background(),
 			&m2mMessage,
 		)
-
 		if err != nil {
 			statusHttp = status_http.GrpcStatusToHTTP["Internal"]
 			stat, ok := status.FromError(err)
@@ -1783,7 +1958,6 @@ func (h *HandlerV2) AppendManyToMany(c *gin.Context) {
 				statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
 				statusHttp.CustomMessage = stat.Message()
 			}
-			h.handleResponse(c, statusHttp, err.Error())
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
@@ -1791,15 +1965,13 @@ func (h *HandlerV2) AppendManyToMany(c *gin.Context) {
 			context.Background(),
 			&m2mMessage,
 		)
-
 		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 	}
 
 	if len(afterActions) > 0 {
-		functionName, err := DoInvokeFuntion(
+		functionName, actionErr = DoInvokeFuntion(
 			DoInvokeFuntionStruct{
 				CustomEvents: afterActions,
 				IDs:          []string{m2mMessage.IdFrom},
@@ -1811,12 +1983,10 @@ func (h *HandlerV2) AppendManyToMany(c *gin.Context) {
 			h, // handler
 		)
 		if err != nil {
-			h.handleResponse(c, status_http.InvalidArgument, err.Error()+" in "+functionName)
 			return
 		}
 	}
 	statusHttp.CustomMessage = resp.GetCustomMessage()
-	h.handleResponse(c, statusHttp, resp)
 }
 
 // GetListAggregation godoc
