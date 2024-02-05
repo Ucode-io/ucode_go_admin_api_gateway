@@ -474,6 +474,11 @@ func (h *HandlerV1) GetSingleSlim(c *gin.Context) {
 			h.handleResponse(c, status_http.TooManyRequests, err.Error())
 			return
 		}
+
+		go func() {
+			_, _ = h.authService.ApiKeyUsage().Create(c.Request.Context(),
+				&pba.ApiKeyUsage{ApiKey: apiKey, RequestCount: 1})
+		}()
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
@@ -543,16 +548,6 @@ func (h *HandlerV1) GetSingleSlim(c *gin.Context) {
 		h.handleResponse(c, statusHttp, err.Error())
 		return
 	}
-
-	go func() {
-		if apiKey != "" {
-			_, _ = h.authService.ApiKeyUsage().Create(c.Request.Context(),
-				&pba.ApiKeyUsage{
-					ApiKey:       apiKey,
-					RequestCount: 1,
-				})
-		}
-	}()
 
 	if resp.IsCached {
 		jsonData, _ := resp.GetData().MarshalJSON()
@@ -1353,6 +1348,11 @@ func (h *HandlerV1) GetListSlim(c *gin.Context) {
 			h.handleResponse(c, status_http.TooManyRequests, err.Error())
 			return
 		}
+
+		go func() {
+			_, _ = h.authService.ApiKeyUsage().Create(c.Request.Context(),
+				&pba.ApiKeyUsage{ApiKey: apiKey, RequestCount: 1})
+		}()
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
@@ -1419,16 +1419,6 @@ func (h *HandlerV1) GetListSlim(c *gin.Context) {
 		h.handleResponse(c, statusHttp, err.Error())
 		return
 	}
-
-	go func() {
-		if apiKey != "" {
-			_, _ = h.authService.ApiKeyUsage().Create(c.Request.Context(),
-				&pba.ApiKeyUsage{
-					ApiKey:       apiKey,
-					RequestCount: 1,
-				})
-		}
-	}()
 
 	if err == nil {
 		if resp.IsCached {

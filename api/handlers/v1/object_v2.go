@@ -333,6 +333,11 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 			h.handleResponse(c, status_http.TooManyRequests, err.Error())
 			return
 		}
+
+		go func() {
+			_, _ = h.authService.ApiKeyUsage().Create(c.Request.Context(),
+				&pba.ApiKeyUsage{ApiKey: apiKey, RequestCount: 1})
+		}()
 	}
 
 	// fmt.Println("\n\n\n --- SLIM TEST #3 --- ")
@@ -472,16 +477,6 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 		h.handleResponse(c, statusHttp, err.Error())
 		return
 	}
-
-	go func() {
-		if apiKey != "" {
-			_, err = h.authService.ApiKeyUsage().Create(c.Request.Context(),
-				&pba.ApiKeyUsage{
-					ApiKey:       apiKey,
-					RequestCount: 1,
-				})
-		}
-	}()
 
 	if err == nil && !cast.ToBool(c.Query("block_cached")) {
 		jsonData, _ := resp.GetData().MarshalJSON()
