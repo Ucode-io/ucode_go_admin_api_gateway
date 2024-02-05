@@ -154,6 +154,7 @@ func (h *HandlerV1) versionHistory(c *gin.Context, req *models.CreateVersionHist
 			Request:           fromMapToString(request),
 			Response:          fromMapToString(response),
 			ApiKey:            req.ApiKey,
+			Type:              req.Type,
 		},
 	)
 	if err != nil {

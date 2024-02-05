@@ -26,6 +26,7 @@ type VersionHistoryServiceClient interface {
 	Create(ctx context.Context, in *CreateVersionHistoryRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GatAll(ctx context.Context, in *GetAllRquest, opts ...grpc.CallOption) (*ListVersionHistory, error)
 	Update(ctx context.Context, in *UsedForEnvRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	GetByID(ctx context.Context, in *VersionHistoryPrimaryKey, opts ...grpc.CallOption) (*VersionHistory, error)
 }
 
 type versionHistoryServiceClient struct {
@@ -63,6 +64,15 @@ func (c *versionHistoryServiceClient) Update(ctx context.Context, in *UsedForEnv
 	return out, nil
 }
 
+func (c *versionHistoryServiceClient) GetByID(ctx context.Context, in *VersionHistoryPrimaryKey, opts ...grpc.CallOption) (*VersionHistory, error) {
+	out := new(VersionHistory)
+	err := c.cc.Invoke(ctx, "/object_builder_service.VersionHistoryService/GetByID", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // VersionHistoryServiceServer is the server API for VersionHistoryService service.
 // All implementations must embed UnimplementedVersionHistoryServiceServer
 // for forward compatibility
@@ -70,6 +80,7 @@ type VersionHistoryServiceServer interface {
 	Create(context.Context, *CreateVersionHistoryRequest) (*emptypb.Empty, error)
 	GatAll(context.Context, *GetAllRquest) (*ListVersionHistory, error)
 	Update(context.Context, *UsedForEnvRequest) (*emptypb.Empty, error)
+	GetByID(context.Context, *VersionHistoryPrimaryKey) (*VersionHistory, error)
 	mustEmbedUnimplementedVersionHistoryServiceServer()
 }
 
@@ -85,6 +96,9 @@ func (UnimplementedVersionHistoryServiceServer) GatAll(context.Context, *GetAllR
 }
 func (UnimplementedVersionHistoryServiceServer) Update(context.Context, *UsedForEnvRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
+}
+func (UnimplementedVersionHistoryServiceServer) GetByID(context.Context, *VersionHistoryPrimaryKey) (*VersionHistory, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetByID not implemented")
 }
 func (UnimplementedVersionHistoryServiceServer) mustEmbedUnimplementedVersionHistoryServiceServer() {}
 
@@ -153,6 +167,24 @@ func _VersionHistoryService_Update_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _VersionHistoryService_GetByID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(VersionHistoryPrimaryKey)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(VersionHistoryServiceServer).GetByID(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/object_builder_service.VersionHistoryService/GetByID",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(VersionHistoryServiceServer).GetByID(ctx, req.(*VersionHistoryPrimaryKey))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // VersionHistoryService_ServiceDesc is the grpc.ServiceDesc for VersionHistoryService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -171,6 +203,10 @@ var VersionHistoryService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Update",
 			Handler:    _VersionHistoryService_Update_Handler,
+		},
+		{
+			MethodName: "GetByID",
+			Handler:    _VersionHistoryService_GetByID_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

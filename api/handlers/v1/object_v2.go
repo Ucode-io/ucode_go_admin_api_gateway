@@ -390,6 +390,7 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 			UserInfo: cast.ToString(userId),
 			Request:  &structData,
 			ApiKey:   apiKey,
+			Type:     "GLOBAL",
 		}
 	)
 

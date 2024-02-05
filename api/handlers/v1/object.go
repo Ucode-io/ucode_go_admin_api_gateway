@@ -514,6 +514,7 @@ func (h *HandlerV1) GetSingleSlim(c *gin.Context) {
 			UserInfo: cast.ToString(userId),
 			Request:  &structData,
 			ApiKey:   apiKey,
+			Type:     "GLOBAL",
 		}
 	)
 
@@ -1394,6 +1395,7 @@ func (h *HandlerV1) GetListSlim(c *gin.Context) {
 			UserInfo: cast.ToString(userId),
 			Request:  &structData,
 			ApiKey:   apiKey,
+			Type:     "GLOBAL",
 		}
 	)
 
