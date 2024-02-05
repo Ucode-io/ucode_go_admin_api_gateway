@@ -20,6 +20,7 @@ type AuthServiceManagerI interface {
 	Company() auth_service.CompanyServiceClient
 	ApiKey() auth_service.ApiKeysClient
 	AuthPing() auth_service.AuthPingServiceClient
+	ApiKeyUsage() auth_service.ApiKeyUsageServiceClient
 }
 
 type authGrpcClients struct {
@@ -34,6 +35,7 @@ type authGrpcClients struct {
 	authCompanyService    auth_service.CompanyServiceClient
 	apikeyService         auth_service.ApiKeysClient
 	authPingService       auth_service.AuthPingServiceClient
+	apiKeyUsageService    auth_service.ApiKeyUsageServiceClient
 }
 
 func NewAuthGrpcClient(ctx context.Context, cfg config.BaseConfig) (AuthServiceManagerI, error) {
@@ -59,6 +61,7 @@ func NewAuthGrpcClient(ctx context.Context, cfg config.BaseConfig) (AuthServiceM
 		authCompanyService:    auth_service.NewCompanyServiceClient(connAuthService),
 		apikeyService:         auth_service.NewApiKeysClient(connAuthService),
 		authPingService:       auth_service.NewAuthPingServiceClient(connAuthService),
+		apiKeyUsageService:    auth_service.NewApiKeyUsageServiceClient(connAuthService),
 	}, nil
 }
 
@@ -96,4 +99,8 @@ func (g *authGrpcClients) ApiKey() auth_service.ApiKeysClient {
 
 func (g *authGrpcClients) AuthPing() auth_service.AuthPingServiceClient {
 	return g.authPingService
+}
+
+func (g *authGrpcClients) ApiKeyUsage() auth_service.ApiKeyUsageServiceClient {
+	return g.apiKeyUsageService
 }

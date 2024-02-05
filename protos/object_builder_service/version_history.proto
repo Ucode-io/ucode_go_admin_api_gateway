@@ -11,6 +11,7 @@ service VersionHistoryService {
     rpc GatAll(GetAllRquest) returns (ListVersionHistory) {}
     rpc UsedForEnv(UsedForEnvRequest) returns (google.protobuf.Empty) {}
     rpc Migrate(ListVersionHistory) returns (google.protobuf.Empty) {}
+    rpc Down(ListVersionHistory) returns (google.protobuf.Empty) {}
 }
 
 message GetAllRquest {

@@ -10,7 +10,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
-	"ucode/ucode_go_api_gateway/genproto/company_service"
+	pba "ucode/ucode_go_api_gateway/genproto/auth_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/caching"
@@ -322,11 +322,29 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
+
+	apiKey := c.GetHeader("X-API-KEY")
+	if apiKey != "" {
+		apiKeyLimit, err := h.authService.ApiKeyUsage().CheckLimit(
+			c.Request.Context(),
+			&pba.CheckLimitRequest{ApiKey: apiKey},
+		)
+		if err != nil || apiKeyLimit.IsLimitReached {
+			h.handleResponse(c, status_http.TooManyRequests, err.Error())
+			return
+		}
+
+		go func() {
+			_, _ = h.authService.ApiKeyUsage().Create(c.Request.Context(),
+				&pba.ApiKeyUsage{ApiKey: apiKey, RequestCount: 1})
+		}()
+	}
+
 	// fmt.Println("\n\n\n --- SLIM TEST #3 --- ")
 	var resource *pb.ServiceResourceModel
 	resourceBody, ok := c.Get("resource")
 	if resourceBody != "" && ok {
-		var resourceList *company_service.GetResourceByEnvIDResponse
+		var resourceList *pb.GetResourceByEnvIDResponse
 		err = json.Unmarshal([]byte(resourceBody.(string)), &resourceList)
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())

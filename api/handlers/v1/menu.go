@@ -252,12 +252,6 @@ func (h *HandlerV1) GetAllMenus(c *gin.Context) {
 		return
 	}
 
-	limit, err := h.getLimitParam(c)
-	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
-		return
-	}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -284,7 +278,7 @@ func (h *HandlerV1) GetAllMenus(c *gin.Context) {
 		return
 	}
 	authInfo, _ := h.GetAuthInfo(c)
-	limit = 100
+	limit := 100
 
 	if resource.NodeType == config.ENTER_PRICE_TYPE {
 		fmt.Println("\n\n enter price project id ", projectId.(string))
@@ -436,7 +430,7 @@ func (h *HandlerV1) UpdateMenu(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Menu().Update(
+		resp, _ = services.PostgresBuilderService().Menu().Update(
 			context.Background(),
 			&obs.Menu{
 				Id:              menu.Id,
@@ -533,7 +527,7 @@ func (h *HandlerV1) DeleteMenu(c *gin.Context) {
 		}
 
 		if oldMenu.Type == "WIKI" {
-			_, err = services.TemplateService().Note().DeleteNote(
+			_, _ = services.TemplateService().Note().DeleteNote(
 				context.Background(),
 				&tmp.DeleteNoteReq{
 					Id:         oldMenu.WikiId,
@@ -826,7 +820,7 @@ func (h *HandlerV1) GetAllMenuSettings(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.GetBuilderServiceByType(resource.NodeType).Menu().GetAllMenuSettings(
+		resp, _ = services.GetBuilderServiceByType(resource.NodeType).Menu().GetAllMenuSettings(
 			context.Background(),
 			&obs.GetAllMenuSettingsRequest{
 				Limit:     int32(limit),
@@ -835,7 +829,7 @@ func (h *HandlerV1) GetAllMenuSettings(c *gin.Context) {
 			},
 		)
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Menu().GetAllMenuSettings(
+		resp, _ = services.PostgresBuilderService().Menu().GetAllMenuSettings(
 			context.Background(),
 			&obs.GetAllMenuSettingsRequest{
 				Limit:     int32(limit),
@@ -1026,7 +1020,7 @@ func (h *HandlerV1) UpdateMenuSettings(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Menu().UpdateMenuSettings(
+		resp, _ = services.PostgresBuilderService().Menu().UpdateMenuSettings(
 			context.Background(),
 			&menu,
 		)
@@ -1522,7 +1516,7 @@ func (h *HandlerV1) UpdateMenuTemplate(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Menu().UpdateMenuTemplate(
+		resp, _ = services.PostgresBuilderService().Menu().UpdateMenuTemplate(
 			context.Background(),
 			&menu,
 		)
@@ -1647,12 +1641,6 @@ func (h *HandlerV1) GetWikiFolder(c *gin.Context) {
 		return
 	}
 
-	limit, err := h.getLimitParam(c)
-	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
-		return
-	}
-
 	projectId := c.DefaultQuery("project_id", "")
 	if !util.IsValidUUID(projectId) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -1678,9 +1666,9 @@ func (h *HandlerV1) GetWikiFolder(c *gin.Context) {
 		return
 	}
 	// authInfo, _ := h.GetAuthInfo(c)
-	limit = 100
+	limit := 100
 
-	services, err := h.GetProjectSrvc(
+	services, _ := h.GetProjectSrvc(
 		c.Request.Context(),
 		projectId,
 		resource.NodeType,
@@ -1688,7 +1676,7 @@ func (h *HandlerV1) GetWikiFolder(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.GetBuilderServiceByType(resource.NodeType).Menu().GetWikiFolder(
+		resp, _ = services.GetBuilderServiceByType(resource.NodeType).Menu().GetWikiFolder(
 			context.Background(),
 			&obs.GetWikiFolderRequest{
 				ProjectId: resource.ResourceEnvironmentId,
@@ -1697,7 +1685,7 @@ func (h *HandlerV1) GetWikiFolder(c *gin.Context) {
 			},
 		)
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Menu().GetAll(
+		resp, _ = services.PostgresBuilderService().Menu().GetAll(
 			context.Background(),
 			&obs.GetAllMenusRequest{
 				Limit:     int32(limit),

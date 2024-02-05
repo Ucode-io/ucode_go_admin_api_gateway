@@ -9,8 +9,8 @@ import (
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
-	authPb "ucode/ucode_go_api_gateway/genproto/auth_service"
-	"ucode/ucode_go_api_gateway/genproto/company_service"
+	pba "ucode/ucode_go_api_gateway/genproto/auth_service"
+
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 
@@ -73,7 +73,7 @@ func (h *HandlerV1) CreateObject(c *gin.Context) {
 	var resource *pb.ServiceResourceModel
 	resourceBody, ok := c.Get("resource")
 	if resourceBody != "" && ok {
-		var resourceList *company_service.GetResourceByEnvIDResponse
+		var resourceList *pb.GetResourceByEnvIDResponse
 		err = json.Unmarshal([]byte(resourceBody.(string)), &resourceList)
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
@@ -463,6 +463,24 @@ func (h *HandlerV1) GetSingleSlim(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
+
+	apiKey := c.GetHeader("X-API-KEY")
+	if apiKey != "" {
+		apiKeyLimit, err := h.authService.ApiKeyUsage().CheckLimit(
+			c.Request.Context(),
+			&pba.CheckLimitRequest{ApiKey: apiKey},
+		)
+		if err != nil || apiKeyLimit.IsLimitReached {
+			h.handleResponse(c, status_http.TooManyRequests, err.Error())
+			return
+		}
+
+		go func() {
+			_, _ = h.authService.ApiKeyUsage().Create(c.Request.Context(),
+				&pba.ApiKeyUsage{ApiKey: apiKey, RequestCount: 1})
+		}()
+	}
+
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
@@ -601,7 +619,7 @@ func (h *HandlerV1) UpdateObject(c *gin.Context) {
 	var resource *pb.ServiceResourceModel
 	resourceBody, ok := c.Get("resource")
 	if ok {
-		var resourceList *company_service.GetResourceByEnvIDResponse
+		var resourceList *pb.GetResourceByEnvIDResponse
 		err = json.Unmarshal([]byte(resourceBody.(string)), &resourceList)
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
@@ -770,7 +788,7 @@ func (h *HandlerV1) UpdateObject(c *gin.Context) {
 
 		_, err = h.authService.Session().UpdateSessionsByRoleId(
 			context.Background(),
-			&authPb.UpdateSessionByRoleIdRequest{
+			&pba.UpdateSessionByRoleIdRequest{
 				RoleId:    objectRequest.Data["role_id"].(string),
 				IsChanged: true,
 			},
@@ -850,7 +868,7 @@ func (h *HandlerV1) DeleteObject(c *gin.Context) {
 		return
 	}
 
-	resource, err := h.companyServices.ServiceResource().GetSingle(
+	resource, _ := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -1316,6 +1334,25 @@ func (h *HandlerV1) GetListSlim(c *gin.Context) {
 		err = errors.New("error getting environment id | not valid")
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
+	}
+
+	// auth, ok := c.Get("auth")
+
+	apiKey := c.GetHeader("X-API-KEY")
+	if apiKey != "" {
+		apiKeyLimit, err := h.authService.ApiKeyUsage().CheckLimit(
+			c.Request.Context(),
+			&pba.CheckLimitRequest{ApiKey: apiKey},
+		)
+		if err != nil || apiKeyLimit.IsLimitReached {
+			h.handleResponse(c, status_http.TooManyRequests, err.Error())
+			return
+		}
+
+		go func() {
+			_, _ = h.authService.ApiKeyUsage().Create(c.Request.Context(),
+				&pba.ApiKeyUsage{ApiKey: apiKey, RequestCount: 1})
+		}()
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
@@ -2007,7 +2044,7 @@ func (h *HandlerV1) UpsertObject(c *gin.Context) {
 		}
 		_, err = h.authService.Session().UpdateSessionsByRoleId(
 			context.Background(),
-			&authPb.UpdateSessionByRoleIdRequest{
+			&pba.UpdateSessionByRoleIdRequest{
 				RoleId:    objectRequest.Data["role_id"].(string),
 				IsChanged: true,
 			},
@@ -2081,7 +2118,7 @@ func (h *HandlerV1) MultipleUpdateObject(c *gin.Context) {
 	var resource *pb.ServiceResourceModel
 	resourceBody, ok := c.Get("resource")
 	if ok {
-		var resourceList *company_service.GetResourceByEnvIDResponse
+		var resourceList *pb.GetResourceByEnvIDResponse
 		err = json.Unmarshal([]byte(resourceBody.(string)), &resourceList)
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
@@ -2759,10 +2796,6 @@ func (h *HandlerV1) DeleteManyObject(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
-	if len(objectRequest.Ids) < 0 {
-		h.handleResponse(c, status_http.BadRequest, "ids is required and must be an array of strings")
-		return
-	}
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -2777,7 +2810,7 @@ func (h *HandlerV1) DeleteManyObject(c *gin.Context) {
 		return
 	}
 
-	resource, err := h.companyServices.ServiceResource().GetSingle(
+	resource, _ := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -3086,7 +3119,7 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 	var resource *pb.ServiceResourceModel
 	resourceBody, ok := c.Get("resource")
 	if resourceBody != "" && ok {
-		var resourceList *company_service.GetResourceByEnvIDResponse
+		var resourceList *pb.GetResourceByEnvIDResponse
 		err = json.Unmarshal([]byte(resourceBody.(string)), &resourceList)
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
