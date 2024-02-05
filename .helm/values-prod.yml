@@ -143,9 +143,6 @@ ingress:
         - host: "api.admin.u-code.io"
           path: /
           servicePort: 8080
-        - host: "api.easyto.travel"
-          path: /
-          servicePort: 8080
         - host: "dev-test.api.easyto.travel"
           path: /
           servicePort: 8080
@@ -153,9 +150,6 @@ ingress:
         - secretName: api-admin-tls
           hosts:
             - "api.admin.u-code.io"
-        - secretName: easyto-travel-tls
-          hosts:
-            - "api.easyto.travel"
         - secretName: dev-test-api-tls
           hosts:
             - "dev-test.api.easyto.travel"
@@ -177,9 +171,6 @@ ingress:
           path: /swagger
           servicePort: 8080
         - host: "dev-test.api.easyto.travel"
-          path: /swagger
-          servicePort: 8080
-        - host: "api.easyto.travel"
           path: /swagger
           servicePort: 8080
       tls:
