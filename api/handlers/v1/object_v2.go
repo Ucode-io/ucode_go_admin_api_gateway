@@ -322,7 +322,11 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
-	// fmt.Println("\n\n\n --- SLIM TEST #3 --- ")
+
+	userId, _ := c.Get("user_id")
+
+	apiKey := c.GetHeader("X-API-KEY")
+
 	var resource *pb.ServiceResourceModel
 	resourceBody, ok := c.Get("resource")
 	if resourceBody != "" && ok {
@@ -363,7 +367,6 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 			return
 		}
 	}
-	fmt.Println("\n --- SLIM TEST #4 --- ", projectId, "resource env id", resource.ResourceEnvironmentId)
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
 		projectId.(string),
@@ -373,21 +376,25 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	// fmt.Println("\n\n\n --- SLIM TEST #5 --- ")
 
-	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
-	// defer cancel()
-
-	// service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.InternalServerError, err)
-	// 	return
-	// }
-	// defer conn.Close()
+	var (
+		logReq = &models.CreateVersionHistoryRequest{
+			Services:     services,
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: c.Request.URL.String(),
+			ActionType:   "GET",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo: cast.ToString(userId),
+			Request:  &structData,
+			ApiKey:   apiKey,
+		}
+	)
 
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 
-	fmt.Println("\n\n\n --- SLIM TEST #6 --- ")
 	var slimKey = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("slim-%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId)))
 	if !cast.ToBool(c.Query("block_cached")) {
 		if cast.ToBool(c.Query("is_wait_cached")) {
@@ -433,6 +440,8 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 				} else {
 					resp["data"] = m
 					h.handleResponse(c, status_http.OK, resp)
+					logReq.Response = m
+					go h.versionHistory(c, logReq)
 					return
 				}
 			} else {
@@ -456,9 +465,14 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 			statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
 			statusHttp.CustomMessage = stat.Message()
 		}
+		logReq.Response = err.Error()
+		go h.versionHistory(c, logReq)
 		h.handleResponse(c, statusHttp, err.Error())
 		return
 	}
+
+	logReq.Response = resp
+	go h.versionHistory(c, logReq)
 
 	if err == nil && !cast.ToBool(c.Query("block_cached")) {
 		jsonData, _ := resp.GetData().MarshalJSON()
@@ -467,7 +481,6 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 		} else if resp.IsCached {
 			err = h.redis.SetX(context.Background(), slimKey, string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
 			if err != nil {
-				fmt.Println("Hello World from err", err)
 				h.log.Error("Error while setting redis", logger.Error(err))
 			}
 		}

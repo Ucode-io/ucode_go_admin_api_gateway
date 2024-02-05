@@ -1346,6 +1346,10 @@ func (h *HandlerV1) GetListSlim(c *gin.Context) {
 		return
 	}
 
+	userId, _ := c.Get("user_id")
+
+	apiKey := c.GetHeader("X-API-KEY")
+
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
@@ -1377,6 +1381,22 @@ func (h *HandlerV1) GetListSlim(c *gin.Context) {
 	// defer conn.Close()
 	service := services.BuilderService().ObjectBuilder()
 
+	var (
+		logReq = &models.CreateVersionHistoryRequest{
+			Services:     services,
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: c.Request.URL.String(),
+			ActionType:   "GET",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo: cast.ToString(userId),
+			Request:  &structData,
+			ApiKey:   apiKey,
+		}
+	)
+
 	redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
 	if err == nil {
 		resp := make(map[string]interface{})
@@ -1387,6 +1407,8 @@ func (h *HandlerV1) GetListSlim(c *gin.Context) {
 		} else {
 			resp["data"] = m
 			h.handleResponse(c, status_http.OK, resp)
+			logReq.Response = m
+			go h.versionHistory(c, logReq)
 			return
 		}
 	} else {
@@ -1407,9 +1429,14 @@ func (h *HandlerV1) GetListSlim(c *gin.Context) {
 			statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
 			statusHttp.CustomMessage = stat.Message()
 		}
+		logReq.Response = err.Error()
+		go h.versionHistory(c, logReq)
 		h.handleResponse(c, statusHttp, err.Error())
 		return
 	}
+
+	logReq.Response = resp
+	go h.versionHistory(c, logReq)
 
 	if err == nil {
 		if resp.IsCached {
