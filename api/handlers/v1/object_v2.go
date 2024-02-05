@@ -387,10 +387,11 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
-			UserInfo: cast.ToString(userId),
-			Request:  &structData,
-			ApiKey:   apiKey,
-			Type:     "GLOBAL",
+			UserInfo:  cast.ToString(userId),
+			Request:   &structData,
+			ApiKey:    apiKey,
+			Type:      "API_KEY",
+			TableSlug: c.Param("table_slug"),
 		}
 	)
 

@@ -111,8 +111,9 @@ func (h *HandlerV1) CreateNewCustomEvent(c *gin.Context) {
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
-			UserInfo: cast.ToString(userId),
-			Request:  createCustomEvent,
+			UserInfo:  cast.ToString(userId),
+			Request:   createCustomEvent,
+			TableSlug: customevent.TableSlug,
 		}
 	)
 
@@ -370,8 +371,9 @@ func (h *HandlerV1) UpdateNewCustomEvent(c *gin.Context) {
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
-			UserInfo: cast.ToString(userId),
-			Request:  updateCustomEvent,
+			UserInfo:  cast.ToString(userId),
+			Request:   updateCustomEvent,
+			TableSlug: customevent.TableSlug,
 		}
 	)
 

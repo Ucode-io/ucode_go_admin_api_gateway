@@ -89,6 +89,7 @@ func (h *HandlerV1) CreateCustomErrorMessage(c *gin.Context) {
 			},
 			UserInfo: cast.ToString(userId),
 			Request:  &customErrorMessages,
+			TableSlug: "CUSTOM_ERROR",
 		}
 	)
 
@@ -383,6 +384,7 @@ func (h *HandlerV1) UpdateCustomErrorMessage(c *gin.Context) {
 			},
 			UserInfo: cast.ToString(userId),
 			Request:  &customErrorMessages,
+			TableSlug: "CUSTOM_ERROR",
 		}
 	)
 
@@ -488,7 +490,8 @@ func (h *HandlerV1) DeleteCustomErrorMessage(c *gin.Context) {
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
-			UserInfo: cast.ToString(userId),
+			UserInfo:  cast.ToString(userId),
+			TableSlug: "CUSTOM_ERROR",
 		}
 	)
 

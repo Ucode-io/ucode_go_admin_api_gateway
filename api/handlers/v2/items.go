@@ -159,8 +159,9 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 		UsedEnvironments: map[string]bool{
 			cast.ToString(environmentId): true,
 		},
-		UserInfo: cast.ToString(userId),
-		Request:  structData,
+		UserInfo:  cast.ToString(userId),
+		Request:   structData,
+		TableSlug: c.Param("collection"),
 	}
 
 	switch resource.ResourceType {
@@ -354,8 +355,9 @@ func (h *HandlerV2) CreateItems(c *gin.Context) {
 		UsedEnvironments: map[string]bool{
 			cast.ToString(environmentId): true,
 		},
-		UserInfo: cast.ToString(userId),
-		Request:  structData,
+		UserInfo:  cast.ToString(userId),
+		Request:   structData,
+		TableSlug: c.Param("collection"),
 	}
 
 	defer func() {
@@ -963,8 +965,9 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
-			UserInfo: cast.ToString(userId),
-			Request:  &structData,
+			UserInfo:  cast.ToString(userId),
+			Request:   &structData,
+			TableSlug: c.Param("collection"),
 		}
 	)
 
@@ -1157,8 +1160,9 @@ func (h *HandlerV2) MultipleUpdateItems(c *gin.Context) {
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
-			UserInfo: cast.ToString(userId),
-			Request:  &structData,
+			UserInfo:  cast.ToString(userId),
+			Request:   &structData,
+			TableSlug: c.Param("collection"),
 		}
 	)
 
@@ -1363,7 +1367,8 @@ func (h *HandlerV2) DeleteItem(c *gin.Context) {
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
-			UserInfo: cast.ToString(userId),
+			UserInfo:  cast.ToString(userId),
+			TableSlug: c.Param("collection"),
 		}
 	)
 
@@ -1560,8 +1565,9 @@ func (h *HandlerV2) DeleteItems(c *gin.Context) {
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
-			UserInfo: cast.ToString(userId),
-			Request:  &structData,
+			UserInfo:  cast.ToString(userId),
+			Request:   &structData,
+			TableSlug: c.Param("collection"),
 		}
 	)
 
@@ -1749,8 +1755,9 @@ func (h *HandlerV2) DeleteManyToMany(c *gin.Context) {
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
-			UserInfo: cast.ToString(userId),
-			Request:  &m2mMessage,
+			UserInfo:  cast.ToString(userId),
+			Request:   &m2mMessage,
+			TableSlug: c.Param("collection"),
 		}
 	)
 
@@ -1926,8 +1933,9 @@ func (h *HandlerV2) AppendManyToMany(c *gin.Context) {
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
-			UserInfo: cast.ToString(userId),
-			Request:  &m2mMessage,
+			UserInfo:  cast.ToString(userId),
+			Request:   &m2mMessage,
+			TableSlug: c.Param("collection"),
 		}
 	)
 

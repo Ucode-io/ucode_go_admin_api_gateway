@@ -89,8 +89,9 @@ func (h *HandlerV1) CreateRedirectUrl(c *gin.Context) {
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
-			UserInfo: cast.ToString(userId),
-			Request:  &data,
+			UserInfo:  cast.ToString(userId),
+			Request:   &data,
+			TableSlug: "REDIRECT",
 		}
 	)
 
@@ -249,8 +250,9 @@ func (h *HandlerV1) UpdateRedirectUrl(c *gin.Context) {
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
-			UserInfo: cast.ToString(userId),
-			Request:  &data,
+			UserInfo:  cast.ToString(userId),
+			Request:   &data,
+			TableSlug: "REDIRECT",
 		}
 	)
 
@@ -346,7 +348,8 @@ func (h *HandlerV1) DeleteRedirectUrl(c *gin.Context) {
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
-			UserInfo: cast.ToString(userId),
+			UserInfo:  cast.ToString(userId),
+			TableSlug: "REDIRECT",
 		}
 	)
 

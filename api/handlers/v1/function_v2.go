@@ -172,8 +172,9 @@ func (h *HandlerV1) CreateNewFunction(c *gin.Context) {
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
-			UserInfo: cast.ToString(userId),
-			Request:  createFunction,
+			UserInfo:  cast.ToString(userId),
+			Request:   createFunction,
+			TableSlug: "FUNCTION",
 		}
 	)
 
@@ -486,8 +487,9 @@ func (h *HandlerV1) UpdateNewFunction(c *gin.Context) {
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
-			UserInfo: cast.ToString(userId),
-			Request:  &updateFunction,
+			UserInfo:  cast.ToString(userId),
+			Request:   &updateFunction,
+			TableSlug: "FUNCTION",
 		}
 	)
 
@@ -613,7 +615,8 @@ func (h *HandlerV1) DeleteNewFunction(c *gin.Context) {
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
-			UserInfo: cast.ToString(userId),
+			UserInfo:  cast.ToString(userId),
+			TableSlug: "FUNCTION",
 		}
 	)
 

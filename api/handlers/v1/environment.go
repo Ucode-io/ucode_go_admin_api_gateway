@@ -86,8 +86,9 @@ func (h *HandlerV1) CreateEnvironment(c *gin.Context) {
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
-			UserInfo: cast.ToString(userId),
-			Request:  &environmentRequest,
+			UserInfo:  cast.ToString(userId),
+			Request:   &environmentRequest,
+			TableSlug: "ENVIRONMENT",
 		}
 	)
 
@@ -235,8 +236,9 @@ func (h *HandlerV1) UpdateEnvironment(c *gin.Context) {
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
-			UserInfo: cast.ToString(userId),
-			Request:  &updateEnvironment,
+			UserInfo:  cast.ToString(userId),
+			Request:   &updateEnvironment,
+			TableSlug: "ENVIRONMENT",
 		}
 	)
 
@@ -334,7 +336,8 @@ func (h *HandlerV1) DeleteEnvironment(c *gin.Context) {
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
-			UserInfo: cast.ToString(userId),
+			UserInfo:  cast.ToString(userId),
+			TableSlug: "ENVIRONMENT",
 		}
 	)
 

@@ -115,8 +115,9 @@ func (h *HandlerV2) CreateMenu(c *gin.Context) {
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
-			UserInfo: cast.ToString(userId),
-			Request:  &menuRequest,
+			UserInfo:  cast.ToString(userId),
+			Request:   &menuRequest,
+			TableSlug: "",
 		}
 	)
 
@@ -453,8 +454,9 @@ func (h *HandlerV2) UpdateMenu(c *gin.Context) {
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
-			UserInfo: cast.ToString(userId),
-			Request:  &requestMenu,
+			UserInfo:  cast.ToString(userId),
+			Request:   &requestMenu,
+			TableSlug: "",
 		}
 	)
 
@@ -575,7 +577,8 @@ func (h *HandlerV2) DeleteMenu(c *gin.Context) {
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
-			UserInfo: cast.ToString(userId),
+			UserInfo:  cast.ToString(userId),
+			TableSlug: "",
 		}
 	)
 

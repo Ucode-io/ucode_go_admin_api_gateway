@@ -122,7 +122,8 @@ func (h *HandlerV2) CreateField(c *gin.Context) {
 		UsedEnvironments: map[string]bool{
 			cast.ToString(environmentId): true,
 		},
-		UserInfo: cast.ToString(userId),
+		UserInfo:  cast.ToString(userId),
+		TableSlug: c.Param("collection"),
 	}
 
 	switch resource.ResourceType {
@@ -454,7 +455,8 @@ func (h *HandlerV2) UpdateField(c *gin.Context) {
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
-			UserInfo: cast.ToString(userId),
+			UserInfo:  cast.ToString(userId),
+			TableSlug: c.Param("collection"),
 		}
 	)
 
@@ -642,7 +644,8 @@ func (h *HandlerV2) DeleteField(c *gin.Context) {
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
-			UserInfo: cast.ToString(userId),
+			UserInfo:  cast.ToString(userId),
+			TableSlug: c.Param("collection"),
 		}
 	)
 

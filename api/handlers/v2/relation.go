@@ -261,8 +261,9 @@ func (h *HandlerV2) CreateRelation(c *gin.Context) {
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
-			UserInfo: cast.ToString(userId),
-			Request:  &relation,
+			UserInfo:  cast.ToString(userId),
+			Request:   &relation,
+			TableSlug: relation.TableFrom,
 		}
 	)
 
@@ -477,8 +478,9 @@ func (h *HandlerV2) UpdateRelation(c *gin.Context) {
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
-			UserInfo: cast.ToString(userId),
-			Request:  &relation,
+			UserInfo:  cast.ToString(userId),
+			Request:   &relation,
+			TableSlug: oldRelation.RelationTableSlug,
 		}
 	)
 
@@ -601,7 +603,8 @@ func (h *HandlerV2) DeleteRelation(c *gin.Context) {
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
-			UserInfo: cast.ToString(userId),
+			UserInfo:  cast.ToString(userId),
+			TableSlug: oldRelation.RelationTableSlug,
 		}
 	)
 

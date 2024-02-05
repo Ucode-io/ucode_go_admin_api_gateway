@@ -487,7 +487,8 @@ func (h *HandlerV1) DeleteCustomEvent(c *gin.Context) {
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
-			UserInfo: cast.ToString(userId),
+			UserInfo:  cast.ToString(userId),
+			TableSlug: "",
 		}
 	)
 

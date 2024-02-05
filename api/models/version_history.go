@@ -19,6 +19,7 @@ type CreateVersionHistoryRequest struct {
 	Response         interface{}     `json:"response"`
 	ApiKey           string          `json:"api_key"`
 	Type             string          `json:"type"`
+	TableSlug        string          `json:"table_slug"`
 }
 
 type MigrateUp struct {

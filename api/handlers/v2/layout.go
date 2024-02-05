@@ -250,8 +250,9 @@ func (h *HandlerV2) UpdateLayout(c *gin.Context) {
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
-			UserInfo: cast.ToString(userId),
-			Request:  &input,
+			UserInfo:  cast.ToString(userId),
+			Request:   &input,
+			TableSlug: "",
 		}
 	)
 
@@ -348,7 +349,8 @@ func (h *HandlerV2) DeleteLayout(c *gin.Context) {
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
-			UserInfo: cast.ToString(userId),
+			UserInfo:  cast.ToString(userId),
+			TableSlug: "",
 		}
 	)
 

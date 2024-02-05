@@ -511,10 +511,11 @@ func (h *HandlerV1) GetSingleSlim(c *gin.Context) {
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
-			UserInfo: cast.ToString(userId),
-			Request:  &structData,
-			ApiKey:   apiKey,
-			Type:     "GLOBAL",
+			UserInfo:  cast.ToString(userId),
+			Request:   &structData,
+			ApiKey:    apiKey,
+			Type:      "API_KEY",
+			TableSlug: c.Param("table_slug"),
 		}
 	)
 
@@ -1392,10 +1393,11 @@ func (h *HandlerV1) GetListSlim(c *gin.Context) {
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
-			UserInfo: cast.ToString(userId),
-			Request:  &structData,
-			ApiKey:   apiKey,
-			Type:     "GLOBAL",
+			UserInfo:  cast.ToString(userId),
+			Request:   &structData,
+			ApiKey:    apiKey,
+			Type:      "API_KEY",
+			TableSlug: c.Param("table_slug"),
 		}
 	)
 

@@ -88,8 +88,9 @@ func (h *HandlerV2) CreateView(c *gin.Context) {
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
-			UserInfo: cast.ToString(userId),
-			Request:  &view,
+			UserInfo:  cast.ToString(userId),
+			Request:   &view,
+			TableSlug: view.TableSlug,
 		}
 	)
 
@@ -291,8 +292,9 @@ func (h *HandlerV2) UpdateView(c *gin.Context) {
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
-			UserInfo: cast.ToString(userId),
-			Request:  &view,
+			UserInfo:  cast.ToString(userId),
+			Request:   &view,
+			TableSlug: view.TableSlug,
 		}
 	)
 
@@ -415,7 +417,8 @@ func (h *HandlerV2) DeleteView(c *gin.Context) {
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
-			UserInfo: cast.ToString(userId),
+			UserInfo:  cast.ToString(userId),
+			TableSlug: c.Param("collection"),
 		}
 	)
 

@@ -124,8 +124,9 @@ func (h *HandlerV1) CreateQueryRequest(c *gin.Context) {
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
-			UserInfo: cast.ToString(userId),
-			Request:  &query,
+			UserInfo:  cast.ToString(userId),
+			Request:   &query,
+			TableSlug: "QUERY",
 		}
 	)
 
@@ -356,8 +357,9 @@ func (h *HandlerV1) UpdateQueryRequest(c *gin.Context) {
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
-			UserInfo: cast.ToString(userId),
-			Request:  &query,
+			UserInfo:  cast.ToString(userId),
+			Request:   &query,
+			TableSlug: "QUERY",
 		}
 	)
 
@@ -452,7 +454,8 @@ func (h *HandlerV1) DeleteQueryRequest(c *gin.Context) {
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
-			UserInfo: cast.ToString(userId),
+			UserInfo:  cast.ToString(userId),
+			TableSlug: "QUERY",
 		}
 	)
 
