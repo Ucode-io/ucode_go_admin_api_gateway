@@ -11,6 +11,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -23,8 +24,11 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type IntegrationResourceServiceClient interface {
 	CreateIntegrationResource(ctx context.Context, in *CreateIntegrationResourceRequest, opts ...grpc.CallOption) (*IntegrationResource, error)
+	GetById(ctx context.Context, in *IntegrationResourcePrimaryKey, opts ...grpc.CallOption) (*IntegrationResource, error)
 	GetByUsername(ctx context.Context, in *GetByUsernameRequest, opts ...grpc.CallOption) (*GetByUsernameResponse, error)
 	GetIntegrationResourceList(ctx context.Context, in *GetListIntegrationResourceRequest, opts ...grpc.CallOption) (*GetListIntegrationResourceResponse, error)
+	UpdateIntegrationResource(ctx context.Context, in *UpdateIntegrationResourceRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	DeleteIntegrationResource(ctx context.Context, in *IntegrationResourcePrimaryKey, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type integrationResourceServiceClient struct {
@@ -38,6 +42,15 @@ func NewIntegrationResourceServiceClient(cc grpc.ClientConnInterface) Integratio
 func (c *integrationResourceServiceClient) CreateIntegrationResource(ctx context.Context, in *CreateIntegrationResourceRequest, opts ...grpc.CallOption) (*IntegrationResource, error) {
 	out := new(IntegrationResource)
 	err := c.cc.Invoke(ctx, "/company_service.IntegrationResourceService/CreateIntegrationResource", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *integrationResourceServiceClient) GetById(ctx context.Context, in *IntegrationResourcePrimaryKey, opts ...grpc.CallOption) (*IntegrationResource, error) {
+	out := new(IntegrationResource)
+	err := c.cc.Invoke(ctx, "/company_service.IntegrationResourceService/GetById", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -62,13 +75,34 @@ func (c *integrationResourceServiceClient) GetIntegrationResourceList(ctx contex
 	return out, nil
 }
 
+func (c *integrationResourceServiceClient) UpdateIntegrationResource(ctx context.Context, in *UpdateIntegrationResourceRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/company_service.IntegrationResourceService/UpdateIntegrationResource", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *integrationResourceServiceClient) DeleteIntegrationResource(ctx context.Context, in *IntegrationResourcePrimaryKey, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/company_service.IntegrationResourceService/DeleteIntegrationResource", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // IntegrationResourceServiceServer is the server API for IntegrationResourceService service.
 // All implementations must embed UnimplementedIntegrationResourceServiceServer
 // for forward compatibility
 type IntegrationResourceServiceServer interface {
 	CreateIntegrationResource(context.Context, *CreateIntegrationResourceRequest) (*IntegrationResource, error)
+	GetById(context.Context, *IntegrationResourcePrimaryKey) (*IntegrationResource, error)
 	GetByUsername(context.Context, *GetByUsernameRequest) (*GetByUsernameResponse, error)
 	GetIntegrationResourceList(context.Context, *GetListIntegrationResourceRequest) (*GetListIntegrationResourceResponse, error)
+	UpdateIntegrationResource(context.Context, *UpdateIntegrationResourceRequest) (*emptypb.Empty, error)
+	DeleteIntegrationResource(context.Context, *IntegrationResourcePrimaryKey) (*emptypb.Empty, error)
 	mustEmbedUnimplementedIntegrationResourceServiceServer()
 }
 
@@ -79,11 +113,20 @@ type UnimplementedIntegrationResourceServiceServer struct {
 func (UnimplementedIntegrationResourceServiceServer) CreateIntegrationResource(context.Context, *CreateIntegrationResourceRequest) (*IntegrationResource, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateIntegrationResource not implemented")
 }
+func (UnimplementedIntegrationResourceServiceServer) GetById(context.Context, *IntegrationResourcePrimaryKey) (*IntegrationResource, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetById not implemented")
+}
 func (UnimplementedIntegrationResourceServiceServer) GetByUsername(context.Context, *GetByUsernameRequest) (*GetByUsernameResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetByUsername not implemented")
 }
 func (UnimplementedIntegrationResourceServiceServer) GetIntegrationResourceList(context.Context, *GetListIntegrationResourceRequest) (*GetListIntegrationResourceResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetIntegrationResourceList not implemented")
+}
+func (UnimplementedIntegrationResourceServiceServer) UpdateIntegrationResource(context.Context, *UpdateIntegrationResourceRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateIntegrationResource not implemented")
+}
+func (UnimplementedIntegrationResourceServiceServer) DeleteIntegrationResource(context.Context, *IntegrationResourcePrimaryKey) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteIntegrationResource not implemented")
 }
 func (UnimplementedIntegrationResourceServiceServer) mustEmbedUnimplementedIntegrationResourceServiceServer() {
 }
@@ -113,6 +156,24 @@ func _IntegrationResourceService_CreateIntegrationResource_Handler(srv interface
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(IntegrationResourceServiceServer).CreateIntegrationResource(ctx, req.(*CreateIntegrationResourceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _IntegrationResourceService_GetById_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(IntegrationResourcePrimaryKey)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IntegrationResourceServiceServer).GetById(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/company_service.IntegrationResourceService/GetById",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IntegrationResourceServiceServer).GetById(ctx, req.(*IntegrationResourcePrimaryKey))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -153,6 +214,42 @@ func _IntegrationResourceService_GetIntegrationResourceList_Handler(srv interfac
 	return interceptor(ctx, in, info, handler)
 }
 
+func _IntegrationResourceService_UpdateIntegrationResource_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateIntegrationResourceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IntegrationResourceServiceServer).UpdateIntegrationResource(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/company_service.IntegrationResourceService/UpdateIntegrationResource",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IntegrationResourceServiceServer).UpdateIntegrationResource(ctx, req.(*UpdateIntegrationResourceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _IntegrationResourceService_DeleteIntegrationResource_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(IntegrationResourcePrimaryKey)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IntegrationResourceServiceServer).DeleteIntegrationResource(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/company_service.IntegrationResourceService/DeleteIntegrationResource",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IntegrationResourceServiceServer).DeleteIntegrationResource(ctx, req.(*IntegrationResourcePrimaryKey))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // IntegrationResourceService_ServiceDesc is the grpc.ServiceDesc for IntegrationResourceService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -165,12 +262,24 @@ var IntegrationResourceService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _IntegrationResourceService_CreateIntegrationResource_Handler,
 		},
 		{
+			MethodName: "GetById",
+			Handler:    _IntegrationResourceService_GetById_Handler,
+		},
+		{
 			MethodName: "GetByUsername",
 			Handler:    _IntegrationResourceService_GetByUsername_Handler,
 		},
 		{
 			MethodName: "GetIntegrationResourceList",
 			Handler:    _IntegrationResourceService_GetIntegrationResourceList_Handler,
+		},
+		{
+			MethodName: "UpdateIntegrationResource",
+			Handler:    _IntegrationResourceService_UpdateIntegrationResource_Handler,
+		},
+		{
+			MethodName: "DeleteIntegrationResource",
+			Handler:    _IntegrationResourceService_DeleteIntegrationResource_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

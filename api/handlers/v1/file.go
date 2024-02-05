@@ -43,7 +43,7 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 		return
 	}
 
-	folder_name := c.DefaultQuery("folder_name", "")
+	folder_name := c.DefaultQuery("folder_name", "Media")
 
 	err := c.ShouldBind(&file)
 	if err != nil {
@@ -98,13 +98,13 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 		return
 	}
 	defer object.Close()
+
 	minioClient, err := minio.New(h.baseConf.MinioEndpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(h.baseConf.MinioAccessKeyID, h.baseConf.MinioSecretAccessKey, ""),
 		Secure: h.baseConf.MinioProtocol,
 	})
 	h.log.Info("info", logger.String("MinioEndpoint: ", h.baseConf.MinioEndpoint), logger.String("access_key: ",
 		h.baseConf.MinioAccessKeyID), logger.String("access_secret: ", h.baseConf.MinioSecretAccessKey))
-
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
@@ -127,8 +127,6 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("TEST 1")
-
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).File().Create(context.Background(), &obs.CreateFileRequest{
 		Id:               fName.String(),
 		Title:            title,
@@ -139,8 +137,6 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 		FileSize:         file.File.Size,
 		ProjectId:        resource.ResourceEnvironmentId,
 	})
-
-	fmt.Println("TEST 2")
 
 	// err = os.Remove(dst + "/" + file.File.Filename)
 	// if err != nil {

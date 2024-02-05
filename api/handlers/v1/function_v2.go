@@ -2,16 +2,13 @@ package v1
 
 import (
 	"context"
-	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
-	"net/http"
 	"strings"
-	"time"
+	"sync"
 	"ucode/ucode_go_api_gateway/api/models"
-	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
@@ -23,6 +20,7 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
+	"ucode/ucode_go_api_gateway/services"
 
 	"ucode/ucode_go_api_gateway/api/status_http"
 
@@ -118,7 +116,7 @@ func (h *HandlerV1) CreateNewFunction(c *gin.Context) {
 	projectName = strings.ToLower(projectName)
 	var functionPath = projectName + "-" + function.Path
 
-	resp, err := gitlab.CreateProjectFork(functionPath, gitlab.IntegrationData{
+	_, err = gitlab.CreateProjectFork(functionPath, gitlab.IntegrationData{
 		GitlabIntegrationUrl:   h.baseConf.GitlabIntegrationURL,
 		GitlabIntegrationToken: h.baseConf.GitlabIntegrationToken,
 		GitlabGroupId:          h.baseConf.GitlabGroupId,
@@ -129,8 +127,8 @@ func (h *HandlerV1) CreateNewFunction(c *gin.Context) {
 		return
 	}
 	// fmt.Println("test before clone")
-	var sshURL = resp.Message["ssh_url_to_repo"].(string)
-	err = gitlab.CloneForkToPath(sshURL, h.baseConf)
+	// var sshURL = resp.Message["ssh_url_to_repo"].(string)
+	// err = gitlab.CloneForkToPath(sshURL, h.baseConf)
 	// fmt.Println("clone err::", err)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
@@ -139,11 +137,11 @@ func (h *HandlerV1) CreateNewFunction(c *gin.Context) {
 	uuid, _ := uuid.NewRandom()
 	// fmt.Println("test after clone")
 	// fmt.Println("uuid::", uuid.String())
-	password, err := code_server.CreateCodeServer(projectName+"-"+function.Path, h.baseConf, uuid.String())
-	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
-		return
-	}
+	// password, err := code_server.CreateCodeServer(projectName+"-"+function.Path, h.baseConf, uuid.String())
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.InvalidArgument, err.Error())
+	// 	return
+	// }
 	var url = "https://" + uuid.String() + ".u-code.io"
 
 	response, err := services.FunctionService().FunctionService().Create(
@@ -156,9 +154,9 @@ func (h *HandlerV1) CreateNewFunction(c *gin.Context) {
 			EnvironmentId:    environmentId.(string),
 			FunctionFolderId: function.FunctionFolderId,
 			Url:              url,
-			Password:         password,
-			SshUrl:           sshURL,
-			Type:             FUNCTION,
+			//Password:         password,
+			//SshUrl: sshURL,
+			Type: FUNCTION,
 		},
 	)
 
@@ -228,7 +226,7 @@ func (h *HandlerV1) GetNewFunctionByID(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("\n URL function by id path >>", functionID, "\n")
+	fmt.Println("\n URL function by id path >>", functionID)
 	function, err := services.FunctionService().FunctionService().GetSingle(
 		context.Background(),
 		&fc.FunctionPrimaryKey{
@@ -857,6 +855,7 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 			return
 		}
 	}
+
 	authInfoAny, ok := c.Get("auth")
 	if !ok {
 		h.handleResponse(c, status_http.InvalidArgument, "cant get auth info")
@@ -869,74 +868,53 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 	requestData.Path = c.Request.URL.Path
 	requestData.Params = c.Request.URL.Query()
 	requestData.Body = bodyReq
-	keyParams := c.Request.URL.Query()
+	var (
+		prevPath     = c.Request.Header.Get("Prev_path")
+		faasSettings easy_to_travel.FaasSetting
+		faasPaths    []string
+	)
 
-	var ettProductPath = []string{"easy-to-travel-get-products-agent-swagger", "b693cc12-8551-475f-91d5-4913c1739df4"}
-	if helper.Contains(ettProductPath, c.Param("function-id")) {
-		if len(keyParams.Get("startTime")) > 0 {
-			keyParams.Del("startTime")
-		}
+	for key, valueObject := range easy_to_travel.AgentApiPath {
+		if strings.Contains(prevPath, key) {
+			var (
+				mu    = sync.Mutex{}
+				value = cast.ToStringMap(valueObject)
+			)
 
-		if len(keyParams.Get("endTime")) > 0 {
-			keyParams.Del("endTime")
+			mu.Lock()
+			faasSettings = easy_to_travel.FaasSetting{
+				Paths:        cast.ToStringSlice(value["paths"]),
+				IsCache:      cast.ToBool(value["is_cache"]),
+				Continue:     cast.ToBool(value["continue"]),
+				DeleteParams: cast.ToStringSlice(value["delete_params"]),
+			}
+
+			if function, ok := value["function"].(func(services.ServiceManagerI, []byte) string); ok {
+				faasSettings.Function = function
+			}
+			faasPaths = faasSettings.Paths
+			mu.Unlock()
+
+			break
 		}
 	}
 
-	var key = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("ett-%s-%s-%s", c.Request.Header.Get("Prev_path"), keyParams.Encode(), resource.ResourceEnvironmentId)))
-	_, ok = h.cache.Get(config.CACHE_WAIT)
-	if c.Request.Method == "GET" && resource.ProjectId == "1acd7a8f-a038-4e07-91cb-b689c368d855" {
-		if ok {
+	fmt.Println("resource.ResourceEnvironmentId:", resource.ResourceEnvironmentId)
 
-			redisDataTime := time.Now()
+	if helper.ContainsLike(faasPaths, c.Param("function-id")) {
+		faasSettings.AppId = cast.ToString(authInfo.Data["app_id"])
+		faasSettings.NodeType = resource.NodeType
+		faasSettings.ProjectId = projectId.(string)
+		faasSettings.ResourceEnvironmentId = resource.ResourceEnvironmentId
 
-			ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
-			defer cancel()
-
-			for {
-				functionBody, ok := h.cache.Get(key)
-				if ok {
-					m := make(map[string]interface{})
-					err = json.Unmarshal(functionBody, &m)
-					if err != nil {
-						h.handleResponse(c, status_http.GRPCError, err.Error())
-						return
-					}
-
-					if _, ok := m["code"]; ok {
-						c.JSON(cast.ToInt(m["code"]), m)
-						return
-					}
-
-					if helper.Contains(ettProductPath, c.Param("function-id")) {
-						data, err := easy_to_travel.EasyToTravelAgentApiGetProduct(requestData.Params, m)
-						if err != nil {
-							fmt.Println("Error while EasyToTravelAgentApiGetProduct function:", err.Error())
-							result, _ := helper.InterfaceToMap(data)
-							c.JSON(cast.ToInt(result["code"]), result)
-							return
-						}
-
-						m, err = helper.InterfaceToMap(data)
-						if err != nil {
-							c.JSON(http.StatusInternalServerError, m)
-							return
-						}
-					}
-
-					c.JSON(cast.ToInt(m["code"]), m)
-					fmt.Print("\n\n ~~>> ett redis return response ", time.Since(redisDataTime), "\n\n")
-					return
-				}
-
-				if ctx.Err() == context.DeadlineExceeded {
-					break
-				}
-
-				time.Sleep(config.REDIS_SLEEP)
-			}
-		} else {
-			h.cache.Add(config.CACHE_WAIT, []byte(config.CACHE_WAIT), 20*time.Second)
+		resp, err := h.EasyToTravelFunctionRun(c, requestData, faasSettings)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
 		}
+
+		c.JSON(cast.ToInt(resp["code"]), resp)
+		return
 	}
 
 	var function = &fc.Function{}
@@ -965,7 +943,6 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 		function.Path = c.Param("function-id")
 	}
 
-	// doRequestTime := time.Now()
 	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+function.Path, "POST", models.FunctionRunV2{
 		Auth:        models.AuthData{},
 		RequestData: requestData,
@@ -987,34 +964,11 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 		return
 	}
 
-	// fmt.Println(">>>>>>>>>>>>>>>doRequestTime:", time.Since(doRequestTime), timeId.String())
 	if isOwnData, ok := resp.Attributes["is_own_data"].(bool); ok {
 		if isOwnData {
-			if err == nil && c.Request.Method == "GET" && resource.ProjectId == "1acd7a8f-a038-4e07-91cb-b689c368d855" {
-				jsonData, _ := json.Marshal(resp.Data)
-				h.cache.Add(key, []byte(jsonData), 20*time.Second)
-			}
-
 			if _, ok := resp.Data["code"]; ok {
 				c.JSON(cast.ToInt(resp.Data["code"]), resp.Data)
 				return
-			}
-
-			if helper.Contains(ettProductPath, c.Param("function-id")) {
-				data, err := easy_to_travel.EasyToTravelAgentApiGetProduct(requestData.Params, resp.Data)
-				if err != nil {
-					fmt.Println("Error while EasyToTravelAgentApiGetProduct function:", err.Error())
-					result, _ := helper.InterfaceToMap(data)
-					c.JSON(cast.ToInt(result["code"]), result)
-					return
-				}
-
-				resp.Data, err = helper.InterfaceToMap(data)
-				if err != nil {
-					fmt.Println("Error while InterfaceToMap function:", err.Error())
-					c.JSON(http.StatusInternalServerError, resp.Data)
-					return
-				}
 			}
 
 			c.JSON(200, resp.Data)

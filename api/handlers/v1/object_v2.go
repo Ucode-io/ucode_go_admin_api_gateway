@@ -10,7 +10,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
-	"ucode/ucode_go_api_gateway/genproto/company_service"
+	pba "ucode/ucode_go_api_gateway/genproto/auth_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/caching"
@@ -111,12 +111,16 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 		return
 	}
 
+	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
+	// defer cancel()
+
 	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
 	if err != nil {
 		h.handleResponse(c, status_http.InternalServerError, err)
 		return
 	}
 	defer conn.Close()
+	// service := services.BuilderService().ObjectBuilder()
 
 	if viewId, ok := objectRequest.Data["builder_service_view_id"].(string); ok {
 		if util.IsValidUUID(viewId) {
@@ -274,7 +278,7 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
-	fmt.Println("\n\n\n --- SLIM TEST #2 --- ")
+	// fmt.Println("\n\n\n --- SLIM TEST #2 --- ")
 	offset, err := h.getOffsetParam(c)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
@@ -299,13 +303,13 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 	objectRequest.Data["user_id_from_token"] = tokenInfo.GetUserId()
 	objectRequest.Data["role_id_from_token"] = tokenInfo.GetRoleId()
 	objectRequest.Data["client_type_id_from_token"] = tokenInfo.GetClientTypeId()
-	fmt.Println("\n\n\n --- SLIM TEST #2.1 --- ")
+	// fmt.Println("\n\n\n --- SLIM TEST #2.1 --- ")
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
-	fmt.Println("\n\n\n --- SLIM TEST #2.2 --- ")
+	// fmt.Println("\n\n\n --- SLIM TEST #2.2 --- ")
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -318,11 +322,29 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
-	fmt.Println("\n\n\n --- SLIM TEST #3 --- ")
+
+	apiKey := c.GetHeader("X-API-KEY")
+	if apiKey != "" {
+		apiKeyLimit, err := h.authService.ApiKeyUsage().CheckLimit(
+			c.Request.Context(),
+			&pba.CheckLimitRequest{ApiKey: apiKey},
+		)
+		if err != nil || apiKeyLimit.IsLimitReached {
+			h.handleResponse(c, status_http.TooManyRequests, err.Error())
+			return
+		}
+
+		go func() {
+			_, _ = h.authService.ApiKeyUsage().Create(c.Request.Context(),
+				&pba.ApiKeyUsage{ApiKey: apiKey, RequestCount: 1})
+		}()
+	}
+
+	// fmt.Println("\n\n\n --- SLIM TEST #3 --- ")
 	var resource *pb.ServiceResourceModel
 	resourceBody, ok := c.Get("resource")
 	if resourceBody != "" && ok {
-		var resourceList *company_service.GetResourceByEnvIDResponse
+		var resourceList *pb.GetResourceByEnvIDResponse
 		err = json.Unmarshal([]byte(resourceBody.(string)), &resourceList)
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
@@ -359,7 +381,7 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 			return
 		}
 	}
-	fmt.Println("\n\n\n --- SLIM TEST #4 --- ", projectId, resource.ResourceEnvironmentId)
+	fmt.Println("\n --- SLIM TEST #4 --- ", projectId, "resource env id", resource.ResourceEnvironmentId)
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
 		projectId.(string),
@@ -369,13 +391,20 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	fmt.Println("\n\n\n --- SLIM TEST #5 --- ")
-	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
-	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
-	defer conn.Close()
+	// fmt.Println("\n\n\n --- SLIM TEST #5 --- ")
+
+	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
+	// defer cancel()
+
+	// service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.InternalServerError, err)
+	// 	return
+	// }
+	// defer conn.Close()
+
+	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
+
 	fmt.Println("\n\n\n --- SLIM TEST #6 --- ")
 	var slimKey = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("slim-%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId)))
 	if !cast.ToBool(c.Query("block_cached")) {

@@ -198,6 +198,7 @@ func (h *HandlerV2) GetMenuByID(c *gin.Context) {
 		return
 	}
 
+	fmt.Println("\n\n\n\n MENU-GETBYID TEST #1 \n\n")
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Menu().GetByID(
@@ -224,6 +225,8 @@ func (h *HandlerV2) GetMenuByID(c *gin.Context) {
 			return
 		}
 	}
+
+	fmt.Println("\n\n\n\n MENU-GETBYID TEST #2 \n\n", resp)
 
 	h.handleResponse(c, status_http.OK, resp)
 }

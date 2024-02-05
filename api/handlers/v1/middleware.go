@@ -379,7 +379,6 @@ func (h *HandlerV1) GlobalAuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc 
 				c.Abort()
 				return
 			}
-
 		default:
 			err := errors.New("error invalid authorization method")
 			h.log.Error("--AuthMiddleware--", logger.Error(err))

@@ -9,8 +9,8 @@ import (
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
-	authPb "ucode/ucode_go_api_gateway/genproto/auth_service"
-	"ucode/ucode_go_api_gateway/genproto/company_service"
+	pba "ucode/ucode_go_api_gateway/genproto/auth_service"
+
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 
@@ -73,7 +73,7 @@ func (h *HandlerV1) CreateObject(c *gin.Context) {
 	var resource *pb.ServiceResourceModel
 	resourceBody, ok := c.Get("resource")
 	if resourceBody != "" && ok {
-		var resourceList *company_service.GetResourceByEnvIDResponse
+		var resourceList *pb.GetResourceByEnvIDResponse
 		err = json.Unmarshal([]byte(resourceBody.(string)), &resourceList)
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
@@ -367,7 +367,7 @@ func (h *HandlerV1) GetSingle(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
 	defer cancel()
 
 	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
@@ -463,6 +463,24 @@ func (h *HandlerV1) GetSingleSlim(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
+
+	apiKey := c.GetHeader("X-API-KEY")
+	if apiKey != "" {
+		apiKeyLimit, err := h.authService.ApiKeyUsage().CheckLimit(
+			c.Request.Context(),
+			&pba.CheckLimitRequest{ApiKey: apiKey},
+		)
+		if err != nil || apiKeyLimit.IsLimitReached {
+			h.handleResponse(c, status_http.TooManyRequests, err.Error())
+			return
+		}
+
+		go func() {
+			_, _ = h.authService.ApiKeyUsage().Create(c.Request.Context(),
+				&pba.ApiKeyUsage{ApiKey: apiKey, RequestCount: 1})
+		}()
+	}
+
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
@@ -486,7 +504,7 @@ func (h *HandlerV1) GetSingleSlim(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
 	defer cancel()
 
 	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
@@ -601,7 +619,7 @@ func (h *HandlerV1) UpdateObject(c *gin.Context) {
 	var resource *pb.ServiceResourceModel
 	resourceBody, ok := c.Get("resource")
 	if ok {
-		var resourceList *company_service.GetResourceByEnvIDResponse
+		var resourceList *pb.GetResourceByEnvIDResponse
 		err = json.Unmarshal([]byte(resourceBody.(string)), &resourceList)
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
@@ -770,7 +788,7 @@ func (h *HandlerV1) UpdateObject(c *gin.Context) {
 
 		_, err = h.authService.Session().UpdateSessionsByRoleId(
 			context.Background(),
-			&authPb.UpdateSessionByRoleIdRequest{
+			&pba.UpdateSessionByRoleIdRequest{
 				RoleId:    objectRequest.Data["role_id"].(string),
 				IsChanged: true,
 			},
@@ -850,7 +868,7 @@ func (h *HandlerV1) DeleteObject(c *gin.Context) {
 		return
 	}
 
-	resource, err := h.companyServices.ServiceResource().GetSingle(
+	resource, _ := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -872,7 +890,7 @@ func (h *HandlerV1) DeleteObject(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
 	defer cancel()
 
 	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
@@ -1318,6 +1336,25 @@ func (h *HandlerV1) GetListSlim(c *gin.Context) {
 		return
 	}
 
+	// auth, ok := c.Get("auth")
+
+	apiKey := c.GetHeader("X-API-KEY")
+	if apiKey != "" {
+		apiKeyLimit, err := h.authService.ApiKeyUsage().CheckLimit(
+			c.Request.Context(),
+			&pba.CheckLimitRequest{ApiKey: apiKey},
+		)
+		if err != nil || apiKeyLimit.IsLimitReached {
+			h.handleResponse(c, status_http.TooManyRequests, err.Error())
+			return
+		}
+
+		go func() {
+			_, _ = h.authService.ApiKeyUsage().Create(c.Request.Context(),
+				&pba.ApiKeyUsage{ApiKey: apiKey, RequestCount: 1})
+		}()
+	}
+
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
@@ -1341,12 +1378,13 @@ func (h *HandlerV1) GetListSlim(c *gin.Context) {
 		return
 	}
 
-	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
-	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
-	defer conn.Close()
+	// service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.InternalServerError, err)
+	// 	return
+	// }
+	// defer conn.Close()
+	service := services.BuilderService().ObjectBuilder()
 
 	redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
 	if err == nil {
@@ -1464,7 +1502,7 @@ func (h *HandlerV1) GetListInExcel(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
 	defer cancel()
 
 	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
@@ -1577,7 +1615,7 @@ func (h *HandlerV1) DeleteManyToMany(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
 	defer cancel()
 
 	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
@@ -1724,7 +1762,7 @@ func (h *HandlerV1) AppendManyToMany(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
 	defer cancel()
 
 	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
@@ -1872,7 +1910,7 @@ func (h *HandlerV1) UpsertObject(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
 	defer cancel()
 
 	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
@@ -2006,7 +2044,7 @@ func (h *HandlerV1) UpsertObject(c *gin.Context) {
 		}
 		_, err = h.authService.Session().UpdateSessionsByRoleId(
 			context.Background(),
-			&authPb.UpdateSessionByRoleIdRequest{
+			&pba.UpdateSessionByRoleIdRequest{
 				RoleId:    objectRequest.Data["role_id"].(string),
 				IsChanged: true,
 			},
@@ -2080,7 +2118,7 @@ func (h *HandlerV1) MultipleUpdateObject(c *gin.Context) {
 	var resource *pb.ServiceResourceModel
 	resourceBody, ok := c.Get("resource")
 	if ok {
-		var resourceList *company_service.GetResourceByEnvIDResponse
+		var resourceList *pb.GetResourceByEnvIDResponse
 		err = json.Unmarshal([]byte(resourceBody.(string)), &resourceList)
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
@@ -2118,6 +2156,9 @@ func (h *HandlerV1) MultipleUpdateObject(c *gin.Context) {
 		}
 	}
 
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
+	defer cancel()
+
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
 		projectId.(string),
@@ -2128,7 +2169,7 @@ func (h *HandlerV1) MultipleUpdateObject(c *gin.Context) {
 		return
 	}
 
-	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
 	if err != nil {
 		h.handleResponse(c, status_http.InternalServerError, err)
 		return
@@ -2313,7 +2354,7 @@ func (h *HandlerV1) GetFinancialAnalytics(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
 	defer cancel()
 
 	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
@@ -2501,7 +2542,7 @@ func (h *HandlerV1) GetListGroupBy(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
 	defer cancel()
 
 	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
@@ -2657,6 +2698,9 @@ func (h *HandlerV1) GetGroupByField(c *gin.Context) {
 		return
 	}
 
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
+	defer cancel()
+
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
 		projectId.(string),
@@ -2667,7 +2711,7 @@ func (h *HandlerV1) GetGroupByField(c *gin.Context) {
 		return
 	}
 
-	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
 	if err != nil {
 		h.handleResponse(c, status_http.InternalServerError, err)
 		return
@@ -2752,10 +2796,6 @@ func (h *HandlerV1) DeleteManyObject(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
-	if len(objectRequest.Ids) < 0 {
-		h.handleResponse(c, status_http.BadRequest, "ids is required and must be an array of strings")
-		return
-	}
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -2770,7 +2810,7 @@ func (h *HandlerV1) DeleteManyObject(c *gin.Context) {
 		return
 	}
 
-	resource, err := h.companyServices.ServiceResource().GetSingle(
+	resource, _ := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -2792,7 +2832,7 @@ func (h *HandlerV1) DeleteManyObject(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
 	defer cancel()
 
 	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
@@ -2960,7 +3000,7 @@ func (h *HandlerV1) GetListWithOutRelation(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(2))
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
 	defer cancel()
 
 	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
@@ -3079,7 +3119,7 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 	var resource *pb.ServiceResourceModel
 	resourceBody, ok := c.Get("resource")
 	if resourceBody != "" && ok {
-		var resourceList *company_service.GetResourceByEnvIDResponse
+		var resourceList *pb.GetResourceByEnvIDResponse
 		err = json.Unmarshal([]byte(resourceBody.(string)), &resourceList)
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
@@ -3216,7 +3256,11 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 			search      = cast.ToStringMap(objectRequest.Data["search"])
 		)
 		for key, value := range search {
-			searchQuery[key] = map[string]interface{}{"$regex": value, "$options": "i"}
+			if cast.ToString(value) == "" {
+				searchQuery[key] = value
+			} else {
+				searchQuery[key] = map[string]interface{}{"$regex": value, "$options": "i"}
+			}
 		}
 		object.Data["second_match"] = searchQuery
 	}
