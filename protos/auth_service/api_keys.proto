@@ -39,8 +39,6 @@ message CreateReq {
   string role_id = 3;
   string environment_id = 4;
   string client_type_id = 5;
-  int32 rps_limit = 6;
-  int32 monthly_request_limit = 7;
 }
 
 message CreateRes {
@@ -55,8 +53,6 @@ message CreateRes {
   string environment_id = 9;
   string project_id = 10;
   string client_type_id = 11;
-  int32 rps_limit = 12;
-  int32 monthly_request_limit = 13;
 }
 
 message UpdateReq {
@@ -66,8 +62,6 @@ message UpdateReq {
   string role_id = 4;
   string project_id = 5;
   string client_type_id = 6;
-  int32 rps_limit = 7;
-  int32 monthly_request_limit = 8;
 }
 
 message UpdateRes {
@@ -90,9 +84,6 @@ message GetRes {
   string environment_id = 9;
   string project_id = 10;
   string client_type_id = 11;
-  int32 rps_limit = 12;
-  int32 monthly_request_limit = 13;
-  int32 used_count = 14;
 }
 
 message GetListReq {
@@ -103,8 +94,6 @@ message GetListReq {
   string search = 5;
   string role_id = 6;
   string client_type_id = 7;
-  int32 rps_limit = 8;
-  int32 monthly_request_limit = 9;
 }
 
 message GetListRes {

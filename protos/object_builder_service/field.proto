@@ -96,7 +96,6 @@ message SearchUpdate {
 message SearchUpdateRequest {
     string project_id = 1;
     repeated SearchUpdate fields = 2;
-    string table_slug = 3;
 }
 
 message GetAllFieldsResponse {

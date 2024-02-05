@@ -26,7 +26,6 @@ type VersionHistoryServiceClient interface {
 	GatAll(ctx context.Context, in *GetAllRquest, opts ...grpc.CallOption) (*ListVersionHistory, error)
 	UsedForEnv(ctx context.Context, in *UsedForEnvRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	Migrate(ctx context.Context, in *ListVersionHistory, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	Down(ctx context.Context, in *ListVersionHistory, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type versionHistoryServiceClient struct {
@@ -64,15 +63,6 @@ func (c *versionHistoryServiceClient) Migrate(ctx context.Context, in *ListVersi
 	return out, nil
 }
 
-func (c *versionHistoryServiceClient) Down(ctx context.Context, in *ListVersionHistory, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/object_builder_service.VersionHistoryService/Down", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // VersionHistoryServiceServer is the server API for VersionHistoryService service.
 // All implementations must embed UnimplementedVersionHistoryServiceServer
 // for forward compatibility
@@ -80,7 +70,6 @@ type VersionHistoryServiceServer interface {
 	GatAll(context.Context, *GetAllRquest) (*ListVersionHistory, error)
 	UsedForEnv(context.Context, *UsedForEnvRequest) (*emptypb.Empty, error)
 	Migrate(context.Context, *ListVersionHistory) (*emptypb.Empty, error)
-	Down(context.Context, *ListVersionHistory) (*emptypb.Empty, error)
 	mustEmbedUnimplementedVersionHistoryServiceServer()
 }
 
@@ -96,9 +85,6 @@ func (UnimplementedVersionHistoryServiceServer) UsedForEnv(context.Context, *Use
 }
 func (UnimplementedVersionHistoryServiceServer) Migrate(context.Context, *ListVersionHistory) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Migrate not implemented")
-}
-func (UnimplementedVersionHistoryServiceServer) Down(context.Context, *ListVersionHistory) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Down not implemented")
 }
 func (UnimplementedVersionHistoryServiceServer) mustEmbedUnimplementedVersionHistoryServiceServer() {}
 
@@ -167,24 +153,6 @@ func _VersionHistoryService_Migrate_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
-func _VersionHistoryService_Down_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListVersionHistory)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(VersionHistoryServiceServer).Down(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/object_builder_service.VersionHistoryService/Down",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(VersionHistoryServiceServer).Down(ctx, req.(*ListVersionHistory))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // VersionHistoryService_ServiceDesc is the grpc.ServiceDesc for VersionHistoryService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -203,10 +171,6 @@ var VersionHistoryService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Migrate",
 			Handler:    _VersionHistoryService_Migrate_Handler,
-		},
-		{
-			MethodName: "Down",
-			Handler:    _VersionHistoryService_Down_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -143,8 +143,7 @@ message Menu {
     string wiki_id = 13;
     bool is_visible = 14;
     bool is_static = 15;
-    string env_id = 16;
-    google.protobuf.Struct data = 17;
+    google.protobuf.Struct data = 16;
 }
 
 message MenuForGetAll {
