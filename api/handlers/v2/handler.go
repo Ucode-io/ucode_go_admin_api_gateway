@@ -10,6 +10,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
+	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/services"
@@ -121,6 +122,7 @@ func (h *HandlerV2) versionHistory(c *gin.Context, req *models.CreateVersionHist
 		previous = map[string]interface{}{"data": req.Previous}
 		request  = map[string]interface{}{"data": req.Request}
 		response = map[string]interface{}{"data": req.Response}
+		user     = ""
 	)
 
 	if req.Current == nil {
@@ -136,7 +138,21 @@ func (h *HandlerV2) versionHistory(c *gin.Context, req *models.CreateVersionHist
 		response["data"] = make(map[string]interface{})
 	}
 
-	_, err := req.Services.GetBuilderServiceByType(req.NodeType).VersionHistory().Create(
+	info, err := h.authService.User().GetUserByID(
+		context.Background(),
+		&auth_service.UserPrimaryKey{
+			Id: req.UserInfo,
+		},
+	)
+	if err == nil {
+		if info.Login != "" {
+			user = info.Login
+		} else {
+			user = info.Phone
+		}
+	}
+
+	_, err = req.Services.GetBuilderServiceByType(req.NodeType).VersionHistory().Create(
 		context.Background(),
 		&object_builder_service.CreateVersionHistoryRequest{
 			Id:                uuid.NewString(),
@@ -146,11 +162,13 @@ func (h *HandlerV2) versionHistory(c *gin.Context, req *models.CreateVersionHist
 			Previus:           fromMapToString(previous),
 			Current:           fromMapToString(current),
 			UsedEnvrironments: req.UsedEnvironments,
-			Date:              time.Now().Format("2006-01-02 15:04:05"),
-			UserInfo:          req.UserInfo,
+			Date:              time.Now().Format("2006-01-02T15:04:05.000Z"),
+			UserInfo:          user,
 			Request:           fromMapToString(request),
 			Response:          fromMapToString(response),
 			ApiKey:            req.ApiKey,
+			Type:              req.Type,
+			TableSlug:         req.TableSlug,
 		},
 	)
 	if err != nil {

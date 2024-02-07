@@ -246,13 +246,13 @@ func (h *HandlerV2) UpdateLayout(c *gin.Context) {
 			NodeType:     resource.NodeType,
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: "LAYOUT",
-			ActionType:   "UPDATE",
+			ActionType:   "UPDATE LAYOUT",
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
 			UserInfo:  cast.ToString(userId),
 			Request:   &input,
-			TableSlug: "",
+			TableSlug: c.Param("collection"),
 		}
 	)
 
@@ -345,12 +345,12 @@ func (h *HandlerV2) DeleteLayout(c *gin.Context) {
 			NodeType:     resource.NodeType,
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: "LAYOUT",
-			ActionType:   "DELETE",
+			ActionType:   "DELETE LAYOUT",
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
 			UserInfo:  cast.ToString(userId),
-			TableSlug: "",
+			TableSlug: c.Param("collection"),
 		}
 	)
 

@@ -257,13 +257,13 @@ func (h *HandlerV2) CreateRelation(c *gin.Context) {
 			NodeType:     resource.NodeType,
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: "RELATION",
-			ActionType:   "CREATE",
+			ActionType:   "CREATE RELATION",
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
 			UserInfo:  cast.ToString(userId),
 			Request:   &relation,
-			TableSlug: relation.TableFrom,
+			TableSlug: c.Param("collection"),
 		}
 	)
 
@@ -276,6 +276,7 @@ func (h *HandlerV2) CreateRelation(c *gin.Context) {
 			logReq.Current = resp
 			h.handleResponse(c, status_http.Created, resp)
 		}
+		go h.versionHistory(c, logReq)
 	}()
 
 	relation.ProjectId = resource.ResourceEnvironmentId
@@ -474,13 +475,13 @@ func (h *HandlerV2) UpdateRelation(c *gin.Context) {
 			NodeType:     resource.NodeType,
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: "RELATION",
-			ActionType:   "UPDATE",
+			ActionType:   "UPDATE RELATION",
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
 			UserInfo:  cast.ToString(userId),
 			Request:   &relation,
-			TableSlug: oldRelation.RelationTableSlug,
+			TableSlug: c.Param("collection"),
 		}
 	)
 
@@ -599,12 +600,12 @@ func (h *HandlerV2) DeleteRelation(c *gin.Context) {
 			NodeType:     resource.NodeType,
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: "RELATION",
-			ActionType:   "DELETE",
+			ActionType:   "DELETE RELATION",
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
 			UserInfo:  cast.ToString(userId),
-			TableSlug: oldRelation.RelationTableSlug,
+			TableSlug: c.Param("collection"),
 		}
 	)
 

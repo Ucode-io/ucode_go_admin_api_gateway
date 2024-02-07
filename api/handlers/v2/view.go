@@ -84,13 +84,13 @@ func (h *HandlerV2) CreateView(c *gin.Context) {
 			NodeType:     resource.NodeType,
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: "VIEW",
-			ActionType:   "CREATE",
+			ActionType:   "CREATE VIEW",
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
 			UserInfo:  cast.ToString(userId),
 			Request:   &view,
-			TableSlug: view.TableSlug,
+			TableSlug: c.Param("collection"),
 		}
 	)
 
@@ -288,13 +288,13 @@ func (h *HandlerV2) UpdateView(c *gin.Context) {
 			NodeType:     resource.NodeType,
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: "VIEW",
-			ActionType:   "UPDATE",
+			ActionType:   "UPDATE VIEW",
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
 			UserInfo:  cast.ToString(userId),
 			Request:   &view,
-			TableSlug: view.TableSlug,
+			TableSlug: c.Param("collection"),
 		}
 	)
 
@@ -413,7 +413,7 @@ func (h *HandlerV2) DeleteView(c *gin.Context) {
 			NodeType:     resource.NodeType,
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: "VIEW",
-			ActionType:   "DELETE",
+			ActionType:   "DELETE VIEW",
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},

@@ -118,7 +118,7 @@ func (h *HandlerV2) CreateField(c *gin.Context) {
 		NodeType:     resource.NodeType,
 		ProjectId:    resource.ResourceEnvironmentId,
 		ActionSource: "FIELD",
-		ActionType:   "CREATE",
+		ActionType:   "CREATE FIELD",
 		UsedEnvironments: map[string]bool{
 			cast.ToString(environmentId): true,
 		},
@@ -451,7 +451,7 @@ func (h *HandlerV2) UpdateField(c *gin.Context) {
 			NodeType:     resource.NodeType,
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: "FIELD",
-			ActionType:   "UPDATE",
+			ActionType:   "UPDATE FIELD",
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
@@ -640,7 +640,7 @@ func (h *HandlerV2) DeleteField(c *gin.Context) {
 			NodeType:     resource.NodeType,
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: "FIELD",
-			ActionType:   "DELETE",
+			ActionType:   "DELETE FIELD",
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
