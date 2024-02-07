@@ -11,7 +11,7 @@ service ViewService {
     rpc Create(CreateViewRequest) returns (View) {}
     rpc GetList(GetAllViewsRequest) returns (GetAllViewsResponse) {}
     rpc GetSingle(ViewPrimaryKey) returns (View) {}
-    rpc Update(View) returns (google.protobuf.Empty) {}
+    rpc Update(View) returns (View) {}
     rpc Delete(ViewPrimaryKey) returns (google.protobuf.Empty) {}
     rpc ConvertHtmlToPdf(HtmlBody) returns (PdfBody) {}
     rpc ConvertTemplateToHtml(HtmlBody) returns (HtmlBody) {}
@@ -59,6 +59,7 @@ message CreateViewRequest {
     string name_uz = 30;
     string name_en = 31;
     string env_id = 32;
+    string id = 33;
 }
 
 message QuickFilter {

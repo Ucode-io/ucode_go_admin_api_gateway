@@ -11,7 +11,7 @@ service MenuService {
     rpc Create(CreateMenuRequest) returns (Menu) {}
     rpc GetByID(MenuPrimaryKey) returns (Menu) {}
     rpc GetAll(GetAllMenusRequest) returns (GetAllMenusResponse) {}
-    rpc Update(Menu) returns (google.protobuf.Empty) {}
+    rpc Update(Menu) returns (Menu) {}
     rpc Delete(MenuPrimaryKey) returns (google.protobuf.Empty) {}
     rpc UpdateMenuOrder(UpdateMenuOrderRequest) returns (google.protobuf.Empty) {}
 
@@ -125,6 +125,7 @@ message CreateMenuRequest {
     string wiki_id = 11;
     bool is_visible = 12;
     string env_id = 13;
+    string id = 14;
 }
 
 message Menu {
@@ -144,6 +145,7 @@ message Menu {
     bool is_visible = 14;
     bool is_static = 15;
     google.protobuf.Struct data = 16;
+    string env_id = 17;
 }
 
 message MenuForGetAll {

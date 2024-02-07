@@ -24,7 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type LayoutServiceClient interface {
 	CreateAll(ctx context.Context, in *CreateLayoutRequest, opts ...grpc.CallOption) (*GetListLayoutResponse, error)
-	Update(ctx context.Context, in *LayoutRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	Update(ctx context.Context, in *LayoutRequest, opts ...grpc.CallOption) (*LayoutResponse, error)
 	GetAll(ctx context.Context, in *GetListLayoutRequest, opts ...grpc.CallOption) (*GetListLayoutResponse, error)
 	GetSingleLayout(ctx context.Context, in *GetSingleLayoutRequest, opts ...grpc.CallOption) (*LayoutResponse, error)
 	RemoveLayout(ctx context.Context, in *LayoutPrimaryKey, opts ...grpc.CallOption) (*emptypb.Empty, error)
@@ -47,8 +47,8 @@ func (c *layoutServiceClient) CreateAll(ctx context.Context, in *CreateLayoutReq
 	return out, nil
 }
 
-func (c *layoutServiceClient) Update(ctx context.Context, in *LayoutRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
+func (c *layoutServiceClient) Update(ctx context.Context, in *LayoutRequest, opts ...grpc.CallOption) (*LayoutResponse, error) {
+	out := new(LayoutResponse)
 	err := c.cc.Invoke(ctx, "/object_builder_service.LayoutService/Update", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -88,7 +88,7 @@ func (c *layoutServiceClient) RemoveLayout(ctx context.Context, in *LayoutPrimar
 // for forward compatibility
 type LayoutServiceServer interface {
 	CreateAll(context.Context, *CreateLayoutRequest) (*GetListLayoutResponse, error)
-	Update(context.Context, *LayoutRequest) (*emptypb.Empty, error)
+	Update(context.Context, *LayoutRequest) (*LayoutResponse, error)
 	GetAll(context.Context, *GetListLayoutRequest) (*GetListLayoutResponse, error)
 	GetSingleLayout(context.Context, *GetSingleLayoutRequest) (*LayoutResponse, error)
 	RemoveLayout(context.Context, *LayoutPrimaryKey) (*emptypb.Empty, error)
@@ -102,7 +102,7 @@ type UnimplementedLayoutServiceServer struct {
 func (UnimplementedLayoutServiceServer) CreateAll(context.Context, *CreateLayoutRequest) (*GetListLayoutResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateAll not implemented")
 }
-func (UnimplementedLayoutServiceServer) Update(context.Context, *LayoutRequest) (*emptypb.Empty, error) {
+func (UnimplementedLayoutServiceServer) Update(context.Context, *LayoutRequest) (*LayoutResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
 }
 func (UnimplementedLayoutServiceServer) GetAll(context.Context, *GetListLayoutRequest) (*GetListLayoutResponse, error) {

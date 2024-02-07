@@ -13,7 +13,7 @@ service TableService {
     rpc Create(CreateTableRequest) returns (CreateTableResponse) {}
     rpc GetByID(TablePrimaryKey) returns (Table) {}
     rpc GetAll(GetAllTablesRequest) returns (GetAllTablesResponse) {}
-    rpc Update(UpdateTableRequest) returns (google.protobuf.Empty) {}
+    rpc Update(UpdateTableRequest) returns (Table) {}
     rpc Delete(TablePrimaryKey) returns (google.protobuf.Empty) {}
 
     rpc GetListTableHistory(GetTableHistoryRequest) returns (GetTableHistoryResponse) {}
@@ -84,6 +84,7 @@ message CreateTableRequest {
     bool order_by = 22;
     google.protobuf.Struct attributes = 23;
     string env_id = 24;
+    string id = 25;
 }
 
 message IncrementID {
