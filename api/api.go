@@ -766,10 +766,15 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 			v2Webhook.POST("/create", h.V2.CreateWebhook)
 		}
 
-		v2VersionHistory := v2Version.Group("version-history")
+		v2Version := v2Version.Group("/version")
 		{
-			v2VersionHistory.POST("", h.V2.GetAllVersionHistory)
+			// v2Version.POST("/migrate", h.V2.MigrateHistory)
+			// v2Version.POST("/down", h.V2.DownHistory)
+			v2Version.GET("/history/:environment_id", h.V2.GetAllVersionHistory)
+			// v2Version.PUT("/history/:environment_id", h.V2.UpdateVersionHistory)
+			// v2Version.GET("/history/:environment_id/:id", h.V2.GetVersionHistoryByID)
 		}
+
 	}
 
 	r.Any("/api/*any", h.V1.AuthMiddleware(cfg), proxyMiddleware(r, &h), h.V1.Proxy)
