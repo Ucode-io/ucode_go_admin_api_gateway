@@ -14,6 +14,7 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/cast"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -70,6 +71,8 @@ func (h *HandlerV1) CreateTable(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
+
+	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
@@ -142,15 +145,40 @@ func (h *HandlerV1) CreateTable(c *gin.Context) {
 
 	table.ProjectId = resourceEnvironmentId
 
+	var (
+		logReq = &models.CreateVersionHistoryRequest{
+			Services:     services,
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: "TABLE",
+			ActionType:   "CREATE TABLE",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo:  cast.ToString(userId),
+			Request:   &table,
+			TableSlug: tableRequest.Slug,
+		}
+	)
+
+	defer func() {
+		if err != nil {
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else {
+			logReq.Response = resp
+			h.handleResponse(c, status_http.Created, resp)
+		}
+		go h.versionHistory(c, logReq)
+	}()
+
 	switch resourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(nodeType).Table().Create(
 			context.Background(),
 			&table,
 		)
-
 		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
@@ -158,14 +186,10 @@ func (h *HandlerV1) CreateTable(c *gin.Context) {
 			context.Background(),
 			&table,
 		)
-
 		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 	}
-
-	h.handleResponse(c, status_http.Created, resp)
 }
 
 // GetTableByID godoc
@@ -395,7 +419,7 @@ func (h *HandlerV1) UpdateTable(c *gin.Context) {
 	var (
 		table models.UpdateTableRequest
 		//resourceEnvironment *company_service.ResourceEnvironment
-		resp                  *emptypb.Empty
+		resp                  *obs.Table
 		resourceEnvironmentId string
 		resourceType          pb.ResourceType
 		nodeType              string
@@ -430,6 +454,8 @@ func (h *HandlerV1) UpdateTable(c *gin.Context) {
 		return
 	}
 
+	userId, _ := c.Get("user_id")
+
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
@@ -460,78 +486,91 @@ func (h *HandlerV1) UpdateTable(c *gin.Context) {
 	)
 
 	table.ProjectId = resourceEnvironmentId
+
+	var (
+		oldTable    = &obs.Table{}
+		updateTable = &obs.UpdateTableRequest{
+			Id:                table.Id,
+			Description:       table.Description,
+			Label:             table.Label,
+			Slug:              table.Slug,
+			ShowInMenu:        table.ShowInMenu,
+			Icon:              table.Icon,
+			SubtitleFieldSlug: table.SubtitleFieldSlug,
+			IsVisible:         table.IsVisible,
+			IsOwnTable:        table.IsOwnTable,
+			IncrementId: &obs.IncrementID{
+				WithIncrementId: table.IncrementId.WithIncrementID,
+				DigitNumber:     table.IncrementId.DigitNumber,
+				Prefix:          table.IncrementId.Prefix,
+			},
+			ProjectId:    table.ProjectId,
+			FolderId:     table.FolderId,
+			AuthorId:     table.AuthorId,
+			CommitType:   table.CommitType,
+			Name:         table.Name,
+			IsCached:     table.IsCached,
+			IsLoginTable: table.IsLoginTable,
+			Attributes:   structData,
+			OrderBy:      table.OrderBy,
+		}
+		logReq = &models.CreateVersionHistoryRequest{
+			Services:     services,
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: "TABLE",
+			ActionType:   "UPDATE TABLE",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo:  cast.ToString(userId),
+			Request:   &updateTable,
+			TableSlug: table.Slug,
+		}
+	)
+
+	defer func() {
+		logReq.Previous = oldTable
+		if err != nil {
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else {
+			logReq.Response = resp
+			logReq.Current = resp
+			h.handleResponse(c, status_http.OK, resp)
+		}
+		go h.versionHistory(c, logReq)
+	}()
+
+	oldTable, err = services.GetBuilderServiceByType(nodeType).Table().GetByID(
+		context.Background(),
+		&obs.TablePrimaryKey{
+			Id:        table.Id,
+			ProjectId: table.ProjectId,
+		},
+	)
+	if err != nil {
+		return
+	}
+
 	switch resourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(nodeType).Table().Update(
 			context.Background(),
-			&obs.UpdateTableRequest{
-				Id:                table.Id,
-				Description:       table.Description,
-				Label:             table.Label,
-				Slug:              table.Slug,
-				ShowInMenu:        table.ShowInMenu,
-				Icon:              table.Icon,
-				SubtitleFieldSlug: table.SubtitleFieldSlug,
-				IsVisible:         table.IsVisible,
-				IsOwnTable:        table.IsOwnTable,
-				IncrementId: &obs.IncrementID{
-					WithIncrementId: table.IncrementId.WithIncrementID,
-					DigitNumber:     table.IncrementId.DigitNumber,
-					Prefix:          table.IncrementId.Prefix,
-				},
-				ProjectId:    table.ProjectId,
-				FolderId:     table.FolderId,
-				AuthorId:     table.AuthorId,
-				CommitType:   table.CommitType,
-				Name:         table.Name,
-				IsCached:     table.IsCached,
-				IsLoginTable: table.IsLoginTable,
-				Attributes:   structData,
-				OrderBy:      table.OrderBy,
-			},
+			updateTable,
 		)
-
 		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
-
 	case pb.ResourceType_POSTGRESQL:
 		resp, err = services.PostgresBuilderService().Table().Update(
 			context.Background(),
-			&obs.UpdateTableRequest{
-				Id:                table.Id,
-				Description:       table.Description,
-				Slug:              table.Slug,
-				ShowInMenu:        table.ShowInMenu,
-				Icon:              table.Icon,
-				SubtitleFieldSlug: table.SubtitleFieldSlug,
-				IsVisible:         table.IsVisible,
-				IsOwnTable:        table.IsOwnTable,
-				IncrementId: &obs.IncrementID{
-					WithIncrementId: table.IncrementId.WithIncrementID,
-					DigitNumber:     table.IncrementId.DigitNumber,
-					Prefix:          table.IncrementId.Prefix,
-				},
-				ProjectId:    table.ProjectId,
-				FolderId:     table.FolderId,
-				AuthorId:     table.AuthorId,
-				CommitType:   table.CommitType,
-				Name:         table.Name,
-				IsCached:     table.IsCached,
-				IsLoginTable: table.IsLoginTable,
-				Attributes:   structData,
-				OrderBy:      table.OrderBy,
-			},
+			updateTable,
 		)
-
 		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 	}
-
-	h.handleResponse(c, status_http.OK, resp)
 }
 
 // DeleteTable godoc
@@ -582,6 +621,21 @@ func (h *HandlerV1) DeleteTable(c *gin.Context) {
 		return
 	}
 
+	userId, _ := c.Get("user_id")
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
 	if !resourceIdOk {
 		resource, err := h.companyServices.ServiceResource().GetSingle(
 			c.Request.Context(),
@@ -623,6 +677,46 @@ func (h *HandlerV1) DeleteTable(c *gin.Context) {
 		nodeType,
 	)
 
+	var (
+		oldTable = &obs.Table{}
+		logReq   = &models.CreateVersionHistoryRequest{
+			Services:     services,
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: "TABLE",
+			ActionType:   "DELETE TABLE",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo:  cast.ToString(userId),
+			TableSlug: "",
+		}
+	)
+
+	defer func() {
+		logReq.Previous = oldTable
+		if err != nil {
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else {
+			logReq.Response = resp
+			logReq.Current = resp
+			h.handleResponse(c, status_http.NoContent, resp)
+		}
+		go h.versionHistory(c, logReq)
+	}()
+
+	oldTable, err = services.GetBuilderServiceByType(nodeType).Table().GetByID(
+		context.Background(),
+		&obs.TablePrimaryKey{
+			Id:        tableID,
+			ProjectId: resourceEnvironmentId,
+		},
+	)
+	if err != nil {
+		return
+	}
+
 	switch resourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(nodeType).Table().Delete(
@@ -635,9 +729,7 @@ func (h *HandlerV1) DeleteTable(c *gin.Context) {
 				CommitType: config.COMMIT_TYPE_TABLE,
 			},
 		)
-
 		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
@@ -649,12 +741,10 @@ func (h *HandlerV1) DeleteTable(c *gin.Context) {
 			},
 		)
 		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 
 	}
-	h.handleResponse(c, status_http.NoContent, resp)
 }
 
 // GetTableHistories godoc

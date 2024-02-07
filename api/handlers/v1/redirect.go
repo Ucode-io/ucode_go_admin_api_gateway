@@ -3,11 +3,14 @@ package v1
 import (
 	"context"
 	"errors"
+	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/spf13/cast"
 )
 
 // CreateRedirectUrl godoc
@@ -26,7 +29,7 @@ import (
 func (h *HandlerV1) CreateRedirectUrl(c *gin.Context) {
 	var (
 		data pb.RedirectUrl
-		//resourceEnvironment *obs.ResourceEnvironment
+		res  = &pb.RedirectUrl{}
 	)
 
 	err := c.ShouldBindJSON(&data)
@@ -34,13 +37,6 @@ func (h *HandlerV1) CreateRedirectUrl(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
-
-	// namespace := c.GetString("namespace")
-	// services, err := h.GetService(namespace)
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.Forbidden, err)
-	// 	return
-	// }
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -54,20 +50,69 @@ func (h *HandlerV1) CreateRedirectUrl(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
-	data.ProjectId = projectId.(string)
-	data.EnvId = environmentId.(string)
 
-	res, err := h.companyServices.Redirect().Create(
-		context.Background(),
-		&data,
+	userId, _ := c.Get("user_id")
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
 	)
-
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, status_http.Created, res)
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	data.ProjectId = projectId.(string)
+	data.EnvId = environmentId.(string)
+
+	var (
+		logReq = &models.CreateVersionHistoryRequest{
+			Services:     services,
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: c.Request.URL.String(),
+			ActionType:   "CREATE",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo:  cast.ToString(userId),
+			Request:   &data,
+			TableSlug: "REDIRECT",
+		}
+	)
+
+	defer func() {
+		if err != nil {
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else {
+			logReq.Response = res
+			h.handleResponse(c, status_http.Created, res)
+		}
+		go h.versionHistory(c, logReq)
+	}()
+
+	res, err = h.companyServices.Redirect().Create(
+		context.Background(),
+		&data,
+	)
+	if err != nil {
+		return
+	}
 }
 
 // GetSingleRedirectUrl godoc
@@ -144,8 +189,8 @@ func (h *HandlerV1) GetSingleRedirectUrl(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) UpdateRedirectUrl(c *gin.Context) {
 	var (
-		//resourceEnvironment *obs.ResourceEnvironment
 		data pb.RedirectUrl
+		res  = &pb.RedirectUrl{}
 	)
 
 	err := c.ShouldBindJSON(&data)
@@ -153,13 +198,6 @@ func (h *HandlerV1) UpdateRedirectUrl(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
-
-	// namespace := c.GetString("namespace")
-	// services, err := h.GetService(namespace)
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.Forbidden, err)
-	// 	return
-	// }
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -174,20 +212,68 @@ func (h *HandlerV1) UpdateRedirectUrl(c *gin.Context) {
 		return
 	}
 
-	data.ProjectId = projectId.(string)
-	data.EnvId = environmentId.(string)
+	userId, _ := c.Get("user_id")
 
-	res, err := h.companyServices.Redirect().Update(
-		context.Background(),
-		&data,
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
 	)
-
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, status_http.OK, res)
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	data.ProjectId = projectId.(string)
+	data.EnvId = environmentId.(string)
+
+	var (
+		logReq = &models.CreateVersionHistoryRequest{
+			Services:     services,
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: c.Request.URL.String(),
+			ActionType:   "UPDATE",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo:  cast.ToString(userId),
+			Request:   &data,
+			TableSlug: "REDIRECT",
+		}
+	)
+
+	defer func() {
+		if err != nil {
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else {
+			logReq.Response = res
+			h.handleResponse(c, status_http.OK, res)
+		}
+		go h.versionHistory(c, logReq)
+	}()
+
+	res, err = h.companyServices.Redirect().Update(
+		context.Background(),
+		&data,
+	)
+	if err != nil {
+		return
+	}
 }
 
 // DeleteRedirectUrl godoc
@@ -205,7 +291,7 @@ func (h *HandlerV1) UpdateRedirectUrl(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) DeleteRedirectUrl(c *gin.Context) {
 	var (
-	//resourceEnvironment *obs.ResourceEnvironment
+		res = &empty.Empty{}
 	)
 	id := c.Param("redirect-url-id")
 
@@ -213,13 +299,6 @@ func (h *HandlerV1) DeleteRedirectUrl(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, "view id is an invalid uuid")
 		return
 	}
-
-	// namespace := c.GetString("namespace")
-	// services, err := h.GetService(namespace)
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.Forbidden, err)
-	// 	return
-	// }
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -234,7 +313,57 @@ func (h *HandlerV1) DeleteRedirectUrl(c *gin.Context) {
 		return
 	}
 
-	res, err := h.companyServices.Redirect().Delete(
+	userId, _ := c.Get("user_id")
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	var (
+		logReq = &models.CreateVersionHistoryRequest{
+			Services:     services,
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: c.Request.URL.String(),
+			ActionType:   "DELETE",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo:  cast.ToString(userId),
+			TableSlug: "REDIRECT",
+		}
+	)
+
+	defer func() {
+		if err != nil {
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else {
+			h.handleResponse(c, status_http.NoContent, res)
+		}
+		go h.versionHistory(c, logReq)
+	}()
+
+	res, err = h.companyServices.Redirect().Delete(
 		context.Background(),
 		&pb.DeleteRedirectUrlReq{
 			Id: id,
@@ -242,11 +371,8 @@ func (h *HandlerV1) DeleteRedirectUrl(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-
-	h.handleResponse(c, status_http.NoContent, res)
 }
 
 // GetListRedirectUrl godoc

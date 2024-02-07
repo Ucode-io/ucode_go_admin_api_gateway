@@ -12,7 +12,9 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/google/uuid"
+	"github.com/spf13/cast"
 )
 
 // CreateNewCustomEvent godoc
@@ -29,7 +31,10 @@ import (
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) CreateNewCustomEvent(c *gin.Context) {
-	var customevent models.CreateCustomEventRequest
+	var (
+		customevent models.CreateCustomEventRequest
+		resp        = &fc.CustomEvent{}
+	)
 
 	err := c.ShouldBindJSON(&customevent)
 	if err != nil {
@@ -49,6 +54,8 @@ func (h *HandlerV1) CreateNewCustomEvent(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
+
+	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
@@ -81,9 +88,8 @@ func (h *HandlerV1) CreateNewCustomEvent(c *gin.Context) {
 
 	commitID, _ := uuid.NewRandom()
 
-	resp, err := services.FunctionService().CustomEventService().Create(
-		context.Background(),
-		&fc.CreateCustomEventRequest{
+	var (
+		createCustomEvent = &fc.CreateCustomEventRequest{
 			TableSlug:  customevent.TableSlug,
 			EventPath:  customevent.EventPath,
 			Label:      customevent.Label,
@@ -95,15 +101,40 @@ func (h *HandlerV1) CreateNewCustomEvent(c *gin.Context) {
 			Attributes: structData,
 			ProjectId:  resource.ResourceEnvironmentId, //added resource id
 			CommitId:   commitID.String(),
-		},
+		}
+		logReq = &models.CreateVersionHistoryRequest{
+			Services:     services,
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: c.Request.URL.String(),
+			ActionType:   "CREATE",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo:  cast.ToString(userId),
+			Request:   createCustomEvent,
+			TableSlug: customevent.TableSlug,
+		}
+	)
+
+	defer func() {
+		if err != nil {
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else {
+			h.handleResponse(c, status_http.Created, resp)
+		}
+		go h.versionHistory(c, logReq)
+	}()
+
+	resp, err = services.FunctionService().CustomEventService().Create(
+		context.Background(),
+		createCustomEvent,
 	)
 
 	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-
-	h.handleResponse(c, status_http.Created, resp)
 }
 
 // GetNewCustomEventByID godoc
@@ -262,7 +293,10 @@ func (h *HandlerV1) GetAllNewCustomEvents(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) UpdateNewCustomEvent(c *gin.Context) {
-	var customevent models.CustomEvent
+	var (
+		customevent models.CustomEvent
+		resp        = &empty.Empty{}
+	)
 
 	err := c.ShouldBindJSON(&customevent)
 	if err != nil {
@@ -282,6 +316,8 @@ func (h *HandlerV1) UpdateNewCustomEvent(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
+
+	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
@@ -312,9 +348,8 @@ func (h *HandlerV1) UpdateNewCustomEvent(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.FunctionService().CustomEventService().Update(
-		context.Background(),
-		&fc.CustomEvent{
+	var (
+		updateCustomEvent = &fc.CustomEvent{
 			Id:         customevent.Id,
 			TableSlug:  customevent.TableSlug,
 			EventPath:  customevent.EventPath,
@@ -326,15 +361,39 @@ func (h *HandlerV1) UpdateNewCustomEvent(c *gin.Context) {
 			Method:     customevent.Method,
 			Attributes: structData,
 			ProjectId:  resource.ResourceEnvironmentId,
-		},
+		}
+		logReq = &models.CreateVersionHistoryRequest{
+			Services:     services,
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: c.Request.URL.String(),
+			ActionType:   "UPDATE",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo:  cast.ToString(userId),
+			Request:   updateCustomEvent,
+			TableSlug: customevent.TableSlug,
+		}
 	)
 
+	defer func() {
+		if err != nil {
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else {
+			h.handleResponse(c, status_http.OK, resp)
+		}
+		go h.versionHistory(c, logReq)
+	}()
+
+	resp, err = services.FunctionService().CustomEventService().Update(
+		context.Background(),
+		updateCustomEvent,
+	)
 	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-
-	h.handleResponse(c, status_http.OK, resp)
 }
 
 // DeleteNewCustomEvent godoc
@@ -353,6 +412,8 @@ func (h *HandlerV1) UpdateNewCustomEvent(c *gin.Context) {
 func (h *HandlerV1) DeleteNewCustomEvent(c *gin.Context) {
 	customeventID := c.Param("custom_event_id")
 
+	resp := &empty.Empty{}
+
 	if !util.IsValidUUID(customeventID) {
 		h.handleResponse(c, status_http.InvalidArgument, "Customevent id is an invalid uuid")
 		return
@@ -370,6 +431,8 @@ func (h *HandlerV1) DeleteNewCustomEvent(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
+
+	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
@@ -394,18 +457,38 @@ func (h *HandlerV1) DeleteNewCustomEvent(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.FunctionService().CustomEventService().Delete(
+	var (
+		logReq = &models.CreateVersionHistoryRequest{
+			Services:     services,
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: c.Request.URL.String(),
+			ActionType:   "DELETE",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo: cast.ToString(userId),
+		}
+	)
+
+	defer func() {
+		if err != nil {
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else {
+			h.handleResponse(c, status_http.NoContent, resp)
+		}
+		go h.versionHistory(c, logReq)
+	}()
+
+	resp, err = services.FunctionService().CustomEventService().Delete(
 		context.Background(),
 		&fc.CustomEventPrimaryKey{
 			Id:        customeventID,
 			ProjectId: resource.ResourceEnvironmentId,
 		},
 	)
-
 	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-
-	h.handleResponse(c, status_http.NoContent, resp)
 }

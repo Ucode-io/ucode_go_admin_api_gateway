@@ -317,7 +317,7 @@ func (h *HandlerV1) GetAllFields(c *gin.Context) {
 func (h *HandlerV1) UpdateField(c *gin.Context) {
 	var (
 		fieldRequest models.Field
-		resp         *emptypb.Empty
+		resp         *obs.Field
 	)
 
 	err := c.ShouldBindJSON(&fieldRequest)

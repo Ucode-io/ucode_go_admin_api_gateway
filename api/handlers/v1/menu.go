@@ -349,7 +349,7 @@ func (h *HandlerV1) GetAllMenus(c *gin.Context) {
 func (h *HandlerV1) UpdateMenu(c *gin.Context) {
 	var (
 		menu models.Menu
-		resp *emptypb.Empty
+		resp *obs.Menu
 	)
 
 	err := c.ShouldBindJSON(&menu)

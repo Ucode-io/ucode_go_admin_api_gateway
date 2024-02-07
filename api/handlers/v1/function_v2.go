@@ -25,6 +25,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/status_http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/google/uuid"
 	"github.com/spf13/cast"
 )
@@ -53,6 +54,7 @@ var (
 func (h *HandlerV1) CreateNewFunction(c *gin.Context) {
 	var (
 		function models.CreateFunctionRequest
+		response = &fc.Function{}
 		//resourceEnvironment *obs.ResourceEnvironment
 	)
 	err := c.ShouldBindJSON(&function)
@@ -73,6 +75,8 @@ func (h *HandlerV1) CreateNewFunction(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
+
+	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
@@ -144,9 +148,8 @@ func (h *HandlerV1) CreateNewFunction(c *gin.Context) {
 	// }
 	var url = "https://" + uuid.String() + ".u-code.io"
 
-	response, err := services.FunctionService().FunctionService().Create(
-		context.Background(),
-		&fc.CreateFunctionRequest{
+	var (
+		createFunction = &fc.CreateFunctionRequest{
 			Path:             functionPath,
 			Name:             function.Name,
 			Description:      function.Description,
@@ -157,15 +160,41 @@ func (h *HandlerV1) CreateNewFunction(c *gin.Context) {
 			//Password:         password,
 			//SshUrl: sshURL,
 			Type: FUNCTION,
-		},
+		}
+		logReq = &models.CreateVersionHistoryRequest{
+			Services:     services,
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: c.Request.URL.String(),
+			ActionType:   "CREATE",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo:  cast.ToString(userId),
+			Request:   createFunction,
+			TableSlug: "FUNCTION",
+		}
+	)
+
+	defer func() {
+		if err != nil {
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else {
+			logReq.Response = response
+			h.handleResponse(c, status_http.Created, response)
+		}
+		go h.versionHistory(c, logReq)
+	}()
+
+	response, err = services.FunctionService().FunctionService().Create(
+		context.Background(),
+		createFunction,
 	)
 
 	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-
-	h.handleResponse(c, status_http.Created, response)
 }
 
 // GetNewFunctionByID godoc
@@ -384,7 +413,10 @@ func (h *HandlerV1) GetAllNewFunctions(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) UpdateNewFunction(c *gin.Context) {
-	var function models.Function
+	var (
+		function models.Function
+		resp     = &empty.Empty{}
+	)
 
 	//var resourceEnvironment *obs.ResourceEnvironment
 	err := c.ShouldBindJSON(&function)
@@ -405,6 +437,8 @@ func (h *HandlerV1) UpdateNewFunction(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
+
+	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
@@ -432,9 +466,8 @@ func (h *HandlerV1) UpdateNewFunction(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.FunctionService().FunctionService().Update(
-		context.Background(),
-		&fc.Function{
+	var (
+		updateFunction = &fc.Function{
 			Id:               function.ID,
 			Description:      function.Description,
 			Name:             function.Name,
@@ -442,15 +475,39 @@ func (h *HandlerV1) UpdateNewFunction(c *gin.Context) {
 			EnvironmentId:    environment.GetId(),
 			ProjectId:        resource.ResourceEnvironmentId,
 			FunctionFolderId: function.FuncitonFolderId,
-		},
+		}
+		logReq = &models.CreateVersionHistoryRequest{
+			Services:     services,
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: c.Request.URL.String(),
+			ActionType:   "UPDATE",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo:  cast.ToString(userId),
+			Request:   &updateFunction,
+			TableSlug: "FUNCTION",
+		}
 	)
 
+	defer func() {
+		if err != nil {
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else {
+			h.handleResponse(c, status_http.OK, resp)
+		}
+		go h.versionHistory(c, logReq)
+	}()
+
+	resp, err = services.FunctionService().FunctionService().Update(
+		context.Background(),
+		updateFunction,
+	)
 	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-
-	h.handleResponse(c, status_http.OK, resp)
 }
 
 // DeleteNewFunction godoc
@@ -487,6 +544,8 @@ func (h *HandlerV1) DeleteNewFunction(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
+
+	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
@@ -543,31 +602,31 @@ func (h *HandlerV1) DeleteNewFunction(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	//if util.IsValidUUID(resourceId.(string)) {
-	//	resourceEnvironment, err = h.companyServices.Resource().GetResourceEnvironment(
-	//		c.Request.Context(),
-	//		&obs.GetResourceEnvironmentReq{
-	//			EnvironmentId: environmentId.(string),
-	//			ResourceId:    resourceId.(string),
-	//		},
-	//	)
-	//	if err != nil {
-	//		h.handleResponse(c, status_http.GRPCError, err.Error())
-	//		return
-	//	}
-	//} else {
-	//	resourceEnvironment, err = h.companyServices.Resource().GetDefaultResourceEnvironment(
-	//		c.Request.Context(),
-	//		&obs.GetDefaultResourceEnvironmentReq{
-	//			EnvironmentId: environmentId.(string),
-	//			ProjectId:     environment.GetId(),
-	//		},
-	//	)
-	//	if err != nil {
-	//		h.handleResponse(c, status_http.GRPCError, err.Error())
-	//		return
-	//	}
-	//}
+
+	var (
+		logReq = &models.CreateVersionHistoryRequest{
+			Services:     services,
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: c.Request.URL.String(),
+			ActionType:   "DELETE",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo:  cast.ToString(userId),
+			TableSlug: "FUNCTION",
+		}
+	)
+
+	defer func() {
+		if err != nil {
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else {
+			h.handleResponse(c, status_http.NoContent, resp)
+		}
+		go h.versionHistory(c, logReq)
+	}()
 
 	_, err = services.FunctionService().FunctionService().Delete(
 		context.Background(),
@@ -576,13 +635,9 @@ func (h *HandlerV1) DeleteNewFunction(c *gin.Context) {
 			ProjectId: resource.ResourceEnvironmentId,
 		},
 	)
-
 	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-
-	h.handleResponse(c, status_http.NoContent, resp)
 }
 
 // GetAllNewFunctionsForApp godoc

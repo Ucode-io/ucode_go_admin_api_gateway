@@ -14,7 +14,9 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
+	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/google/uuid"
+	"github.com/spf13/cast"
 
 	"ucode/ucode_go_api_gateway/api/status_http"
 
@@ -41,7 +43,7 @@ const (
 func (h *HandlerV1) CreateMicroFrontEnd(c *gin.Context) {
 	var (
 		function models.CreateFunctionRequest
-		//resourceEnvironment *obs.ResourceEnvironment
+		response *fc.Function
 	)
 	err := c.ShouldBindJSON(&function)
 	if err != nil {
@@ -66,6 +68,8 @@ func (h *HandlerV1) CreateMicroFrontEnd(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
+
+	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
@@ -197,13 +201,9 @@ func (h *HandlerV1) CreateMicroFrontEnd(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
-	// fmt.Println("response [resPipeline]", resPipeline)
 
-	//h.handleResponse(c, status_http.OK, resPipeline)
-	//return
-	response, err := services.FunctionService().FunctionService().Create(
-		context.Background(),
-		&fc.CreateFunctionRequest{
+	var (
+		createFunction = &fc.CreateFunctionRequest{
 			Path:             functionPath,
 			Name:             function.Name,
 			Description:      function.Description,
@@ -213,15 +213,39 @@ func (h *HandlerV1) CreateMicroFrontEnd(c *gin.Context) {
 			Type:             MICROFE,
 			Url:              repoHost,
 			FrameworkType:    function.FrameworkType,
-		},
+		}
+		logReq = &models.CreateVersionHistoryRequest{
+			Services:     services,
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: c.Request.URL.String(),
+			ActionType:   "CREATE",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo: cast.ToString(userId),
+			Request:  createFunction,
+		}
 	)
 
+	defer func() {
+		if err != nil {
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else {
+			logReq.Response = response
+			h.handleResponse(c, status_http.OK, response)
+		}
+		go h.versionHistory(c, logReq)
+	}()
+
+	response, err = services.FunctionService().FunctionService().Create(
+		context.Background(),
+		createFunction,
+	)
 	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-
-	h.handleResponse(c, status_http.Created, response)
 }
 
 // GetMicroFrontEndByID godoc
@@ -393,7 +417,10 @@ func (h *HandlerV1) GetAllMicroFrontEnd(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) UpdateMicroFrontEnd(c *gin.Context) {
-	var function models.Function
+	var (
+		function models.Function
+		resp     *empty.Empty
+	)
 
 	//var resourceEnvironment *obs.ResourceEnvironment
 	err := c.ShouldBindJSON(&function)
@@ -414,6 +441,8 @@ func (h *HandlerV1) UpdateMicroFrontEnd(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
+
+	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
@@ -438,9 +467,8 @@ func (h *HandlerV1) UpdateMicroFrontEnd(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.FunctionService().FunctionService().Update(
-		context.Background(),
-		&fc.Function{
+	var (
+		updateFunction = &fc.Function{
 			Id:               function.ID,
 			Description:      function.Description,
 			Name:             function.Name,
@@ -448,15 +476,38 @@ func (h *HandlerV1) UpdateMicroFrontEnd(c *gin.Context) {
 			ProjectId:        resource.ResourceEnvironmentId,
 			FunctionFolderId: function.FuncitonFolderId,
 			Type:             MICROFE,
-		},
+		}
+		logReq = &models.CreateVersionHistoryRequest{
+			Services:     services,
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: c.Request.URL.String(),
+			ActionType:   "UPDATE",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo: cast.ToString(userId),
+			Request:  updateFunction,
+		}
 	)
 
+	defer func() {
+		if err != nil {
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else {
+			h.handleResponse(c, status_http.OK, resp)
+		}
+		go h.versionHistory(c, logReq)
+	}()
+
+	resp, err = services.FunctionService().FunctionService().Update(
+		context.Background(),
+		updateFunction,
+	)
 	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-
-	h.handleResponse(c, status_http.OK, resp)
 }
 
 // DeleteMicroFrontEnd godoc
@@ -474,7 +525,7 @@ func (h *HandlerV1) UpdateMicroFrontEnd(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) DeleteMicroFrontEnd(c *gin.Context) {
 	functionID := c.Param("micro-frontend-id")
-	//var resourceEnvironment *obs.ResourceEnvironment
+	var deleteResp *empty.Empty
 
 	if !util.IsValidUUID(functionID) {
 		h.handleResponse(c, status_http.InvalidArgument, "micro frontend id is an invalid uuid")
@@ -493,6 +544,8 @@ func (h *HandlerV1) DeleteMicroFrontEnd(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
+
+	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
@@ -550,18 +603,38 @@ func (h *HandlerV1) DeleteMicroFrontEnd(c *gin.Context) {
 		return
 	}
 
-	_, err = services.FunctionService().FunctionService().Delete(
+	var (
+		logReq = &models.CreateVersionHistoryRequest{
+			Services:     services,
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: c.Request.URL.String(),
+			ActionType:   "DELETE",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo: cast.ToString(userId),
+		}
+	)
+
+	defer func() {
+		if err != nil {
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else {
+			h.handleResponse(c, status_http.OK, deleteResp)
+		}
+		go h.versionHistory(c, logReq)
+	}()
+
+	deleteResp, err = services.FunctionService().FunctionService().Delete(
 		context.Background(),
 		&fc.FunctionPrimaryKey{
 			Id:        functionID,
 			ProjectId: resource.ResourceEnvironmentId,
 		},
 	)
-
 	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-
-	h.handleResponse(c, status_http.NoContent, resp)
 }

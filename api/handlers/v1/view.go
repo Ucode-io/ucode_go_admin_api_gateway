@@ -209,7 +209,7 @@ func (h *HandlerV1) GetSingleView(c *gin.Context) {
 func (h *HandlerV1) UpdateView(c *gin.Context) {
 	var (
 		view obs.View
-		resp *emptypb.Empty
+		resp *obs.View
 	)
 
 	err := c.ShouldBindJSON(&view)

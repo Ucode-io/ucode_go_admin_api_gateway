@@ -5,11 +5,15 @@ import (
 	"errors"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
+
 	"ucode/ucode_go_api_gateway/pkg/util"
 
+	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/spf13/cast"
 )
 
 func (h *HandlerV2) GetSingleLayout(c *gin.Context) {
@@ -174,7 +178,10 @@ func (h *HandlerV2) GetListLayouts(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) UpdateLayout(c *gin.Context) {
 
-	var input object_builder_service.LayoutRequest
+	var (
+		input object_builder_service.LayoutRequest
+		resp  *object_builder_service.LayoutResponse
+	)
 
 	err := c.ShouldBindJSON(&input)
 	if err != nil {
@@ -200,6 +207,8 @@ func (h *HandlerV2) UpdateLayout(c *gin.Context) {
 		return
 	}
 
+	userId, _ := c.Get("user_id")
+
 	var resourceEnvironmentId string
 	var nodeType string
 	resource, err := h.companyServices.ServiceResource().GetSingle(
@@ -223,21 +232,69 @@ func (h *HandlerV2) UpdateLayout(c *gin.Context) {
 		projectId.(string),
 		nodeType,
 	)
-
-	input.ProjectId = resourceEnvironmentId
-	resp, err := services.GetBuilderServiceByType(nodeType).Layout().Update(
-		context.Background(),
-		&input,
-	)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, status_http.OK, resp)
+	input.ProjectId = resourceEnvironmentId
+
+	var (
+		oldLayout = &object_builder_service.LayoutResponse{}
+		logReq    = &models.CreateVersionHistoryRequest{
+			Services:     services,
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: "LAYOUT",
+			ActionType:   "UPDATE LAYOUT",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo:  cast.ToString(userId),
+			Request:   &input,
+			TableSlug: c.Param("collection"),
+		}
+	)
+
+	defer func() {
+		logReq.Previous = oldLayout
+		if err != nil {
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else {
+			logReq.Response = resp
+			h.handleResponse(c, status_http.OK, resp)
+		}
+		go h.versionHistory(c, logReq)
+	}()
+
+	oldLayout, err = services.GetBuilderServiceByType(nodeType).Layout().GetSingleLayout(
+		context.Background(),
+		&object_builder_service.GetSingleLayoutRequest{
+			ProjectId: input.ProjectId,
+			TableId:   input.TableId,
+			MenuId:    input.MenuId,
+			TableSlug: input.TableId,
+		},
+	)
+	if err != nil {
+		return
+	}
+
+	resp, err = services.GetBuilderServiceByType(nodeType).Layout().Update(
+		context.Background(),
+		&input,
+	)
+	if err != nil {
+		return
+	}
 }
 
 func (h *HandlerV2) DeleteLayout(c *gin.Context) {
+
+	var (
+		resp = &empty.Empty{}
+	)
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -252,6 +309,8 @@ func (h *HandlerV2) DeleteLayout(c *gin.Context) {
 		return
 	}
 
+	userId, _ := c.Get("user_id")
+
 	var resourceEnvironmentId string
 	var nodeType string
 	resource, err := h.companyServices.ServiceResource().GetSingle(
@@ -275,8 +334,38 @@ func (h *HandlerV2) DeleteLayout(c *gin.Context) {
 		projectId.(string),
 		nodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
-	resp, err := services.GetBuilderServiceByType(nodeType).Layout().RemoveLayout(
+	var (
+		logReq = &models.CreateVersionHistoryRequest{
+			Services:     services,
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: "LAYOUT",
+			ActionType:   "DELETE LAYOUT",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo:  cast.ToString(userId),
+			TableSlug: c.Param("collection"),
+		}
+	)
+
+	defer func() {
+		if err != nil {
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else {
+			logReq.Response = resp
+			h.handleResponse(c, status_http.OK, resp)
+		}
+		go h.versionHistory(c, logReq)
+	}()
+
+	resp, err = services.GetBuilderServiceByType(nodeType).Layout().RemoveLayout(
 		context.Background(),
 		&object_builder_service.LayoutPrimaryKey{
 			Id:        c.Param("id"),
@@ -284,9 +373,6 @@ func (h *HandlerV2) DeleteLayout(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-
-	h.handleResponse(c, status_http.OK, resp)
 }

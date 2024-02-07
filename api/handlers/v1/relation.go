@@ -221,7 +221,7 @@ func (h *HandlerV1) GetAllRelations(c *gin.Context) {
 func (h *HandlerV1) UpdateRelation(c *gin.Context) {
 	var (
 		relation obs.UpdateRelationRequest
-		resp     *emptypb.Empty
+		resp     *obs.RelationForGetAll
 	)
 
 	err := c.ShouldBindJSON(&relation)

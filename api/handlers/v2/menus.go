@@ -16,6 +16,7 @@ import (
 	"ucode/ucode_go_api_gateway/services"
 
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/cast"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -67,6 +68,8 @@ func (h *HandlerV2) CreateMenu(c *gin.Context) {
 		return
 	}
 
+	userId, _ := c.Get("user_id")
+
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
@@ -90,52 +93,64 @@ func (h *HandlerV2) CreateMenu(c *gin.Context) {
 		return
 	}
 
+	var (
+		menuRequest = &obs.CreateMenuRequest{
+			Label:           menu.Label,
+			Icon:            menu.Icon,
+			TableId:         menu.TableId,
+			LayoutId:        menu.LayoutId,
+			ParentId:        menu.ParentId,
+			Type:            menu.Type,
+			ProjectId:       resource.ResourceEnvironmentId,
+			MicrofrontendId: menu.MicrofrontendId,
+			WebpageId:       menu.WebpageId,
+			Attributes:      attributes,
+		}
+		logReq = &models.CreateVersionHistoryRequest{
+			Services:     services,
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: "MENU",
+			ActionType:   "CREATE MENU",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo:  cast.ToString(userId),
+			Request:   &menuRequest,
+			TableSlug: "Menu",
+		}
+	)
+
+	defer func() {
+		if err != nil {
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else {
+			logReq.Response = resp
+			logReq.Current = resp
+			h.handleResponse(c, status_http.Created, resp)
+		}
+		go h.versionHistory(c, logReq)
+	}()
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Menu().Create(
 			context.Background(),
-			&obs.CreateMenuRequest{
-				Label:           menu.Label,
-				Icon:            menu.Icon,
-				TableId:         menu.TableId,
-				LayoutId:        menu.LayoutId,
-				ParentId:        menu.ParentId,
-				Type:            menu.Type,
-				ProjectId:       resource.ResourceEnvironmentId,
-				MicrofrontendId: menu.MicrofrontendId,
-				WebpageId:       menu.WebpageId,
-				Attributes:      attributes,
-			},
+			menuRequest,
 		)
-
 		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
 		resp, err = services.PostgresBuilderService().Menu().Create(
 			context.Background(),
-			&obs.CreateMenuRequest{
-				Label:           menu.Label,
-				Icon:            menu.Icon,
-				TableId:         menu.TableId,
-				LayoutId:        menu.LayoutId,
-				ParentId:        menu.ParentId,
-				Type:            menu.Type,
-				ProjectId:       resource.ResourceEnvironmentId,
-				MicrofrontendId: menu.MicrofrontendId,
-				WebpageId:       menu.WebpageId,
-				Attributes:      attributes,
-			},
+			menuRequest,
 		)
-
 		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 	}
-
-	h.handleResponse(c, status_http.Created, resp)
 }
 
 // GetMenuByID godoc
@@ -359,7 +374,7 @@ func (h *HandlerV2) GetAllMenus(c *gin.Context) {
 func (h *HandlerV2) UpdateMenu(c *gin.Context) {
 	var (
 		menu models.Menu
-		resp *emptypb.Empty
+		resp *obs.Menu
 	)
 
 	err := c.ShouldBindJSON(&menu)
@@ -391,6 +406,8 @@ func (h *HandlerV2) UpdateMenu(c *gin.Context) {
 		return
 	}
 
+	userId, _ := c.Get("user_id")
+
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
@@ -414,51 +431,80 @@ func (h *HandlerV2) UpdateMenu(c *gin.Context) {
 		return
 	}
 
+	var (
+		requestMenu = &obs.Menu{
+			Id:              menu.Id,
+			Icon:            menu.Icon,
+			TableId:         menu.TableId,
+			LayoutId:        menu.LayoutId,
+			Label:           menu.Label,
+			ParentId:        menu.ParentId,
+			Type:            menu.Type,
+			ProjectId:       resource.ResourceEnvironmentId,
+			MicrofrontendId: menu.MicrofrontendId,
+			WebpageId:       menu.WebpageId,
+			Attributes:      attributes,
+			IsVisible:       menu.IsVisible,
+			WikiId:          menu.WikiId,
+		}
+		oldMenu = &obs.Menu{}
+		logReq  = &models.CreateVersionHistoryRequest{
+			Services:     services,
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: "MENU",
+			ActionType:   "UPDATE MENU",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo:  cast.ToString(userId),
+			Request:   &requestMenu,
+			TableSlug: "Menu",
+		}
+	)
+
+	defer func() {
+		logReq.Previous = oldMenu
+		if err != nil {
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else {
+			logReq.Response = resp
+			logReq.Current = resp
+			h.handleResponse(c, status_http.OK, resp)
+		}
+		go h.versionHistory(c, logReq)
+	}()
+
+	oldMenu, err = services.GetBuilderServiceByType(resource.NodeType).Menu().GetByID(
+		context.Background(),
+		&obs.MenuPrimaryKey{
+			Id:        menu.Id,
+			ProjectId: resource.ResourceEnvironmentId,
+		},
+	)
+	if err != nil {
+		return
+	}
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Menu().Update(
 			context.Background(),
-			&obs.Menu{
-				Id:              menu.Id,
-				Icon:            menu.Icon,
-				TableId:         menu.TableId,
-				LayoutId:        menu.LayoutId,
-				Label:           menu.Label,
-				ParentId:        menu.ParentId,
-				Type:            menu.Type,
-				ProjectId:       resource.ResourceEnvironmentId,
-				MicrofrontendId: menu.MicrofrontendId,
-				WebpageId:       menu.WebpageId,
-				Attributes:      attributes,
-				IsVisible:       menu.IsVisible,
-				WikiId:          menu.WikiId,
-			},
+			requestMenu,
 		)
-
 		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
 		resp, err = services.PostgresBuilderService().Menu().Update(
 			context.Background(),
-			&obs.Menu{
-				Id:              menu.Id,
-				Icon:            menu.Icon,
-				TableId:         menu.TableId,
-				LayoutId:        menu.LayoutId,
-				Label:           menu.Label,
-				ParentId:        menu.ParentId,
-				Type:            menu.Type,
-				ProjectId:       resource.ResourceEnvironmentId,
-				MicrofrontendId: menu.MicrofrontendId,
-				WebpageId:       menu.WebpageId,
-				Attributes:      attributes,
-			},
+			requestMenu,
 		)
+		if err != nil {
+			return
+		}
 	}
-
-	h.handleResponse(c, status_http.OK, resp)
 }
 
 // DeleteMenu godoc
@@ -498,6 +544,8 @@ func (h *HandlerV2) DeleteMenu(c *gin.Context) {
 		return
 	}
 
+	userId, _ := c.Get("user_id")
+
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
@@ -521,21 +569,46 @@ func (h *HandlerV2) DeleteMenu(c *gin.Context) {
 		return
 	}
 
+	var (
+		oldMenu = &obs.Menu{}
+		logReq  = &models.CreateVersionHistoryRequest{
+			Services:     services,
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: "MENU",
+			ActionType:   "DELETE MENU",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo:  cast.ToString(userId),
+			TableSlug: "Menu",
+		}
+	)
+
+	defer func() {
+		logReq.Previous = oldMenu
+		if err != nil {
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else {
+			h.handleResponse(c, status_http.NoContent, resp)
+		}
+		go h.versionHistory(c, logReq)
+	}()
+
+	oldMenu, err = services.GetBuilderServiceByType(resource.NodeType).Menu().GetByID(
+		context.Background(),
+		&obs.MenuPrimaryKey{
+			Id:        menuID,
+			ProjectId: resource.ResourceEnvironmentId,
+		},
+	)
+	if err != nil {
+		return
+	}
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-
-		oldMenu, err := services.GetBuilderServiceByType(resource.NodeType).Menu().GetByID(
-			context.Background(),
-			&obs.MenuPrimaryKey{
-				Id:        menuID,
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
 		if oldMenu.Type == "WIKI" {
 			_, err = services.TemplateService().Note().DeleteNote(
 				context.Background(),
@@ -547,7 +620,7 @@ func (h *HandlerV2) DeleteMenu(c *gin.Context) {
 				},
 			)
 		}
-
+		err = nil
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Menu().Delete(
 			context.Background(),
 			&obs.MenuPrimaryKey{
@@ -555,9 +628,7 @@ func (h *HandlerV2) DeleteMenu(c *gin.Context) {
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
-
 		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
@@ -568,15 +639,10 @@ func (h *HandlerV2) DeleteMenu(c *gin.Context) {
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
-
 		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
-
 	}
-
-	h.handleResponse(c, status_http.NoContent, resp)
 }
 
 // UpdateMenuOrder godoc

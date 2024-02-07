@@ -12,6 +12,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/spf13/cast"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/structpb"
 )
@@ -62,6 +63,8 @@ func (h *HandlerV2) CreateField(c *gin.Context) {
 		return
 	}
 
+	userId, _ := c.Get("user_id")
+
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
@@ -110,6 +113,19 @@ func (h *HandlerV2) CreateField(c *gin.Context) {
 		fields = append(fields, SetTitlePrefix(fieldRequest, "", resource.ResourceEnvironmentId, attributes, false, false))
 	}
 
+	logReq := &models.CreateVersionHistoryRequest{
+		Services:     services,
+		NodeType:     resource.NodeType,
+		ProjectId:    resource.ResourceEnvironmentId,
+		ActionSource: "FIELD",
+		ActionType:   "CREATE FIELD",
+		UsedEnvironments: map[string]bool{
+			cast.ToString(environmentId): true,
+		},
+		UserInfo:  cast.ToString(userId),
+		TableSlug: c.Param("collection"),
+	}
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		for _, field := range fields {
@@ -118,9 +134,15 @@ func (h *HandlerV2) CreateField(c *gin.Context) {
 				field,
 			)
 			if err != nil {
+				logReq.Request = field
+				logReq.Response = err.Error()
+				go h.versionHistory(c, logReq)
 				h.handleResponse(c, status_http.GRPCError, err.Error())
 				return
 			}
+			logReq.Request = field
+			logReq.Response = resp
+			go h.versionHistory(c, logReq)
 		}
 	case pb.ResourceType_POSTGRESQL:
 		for _, field := range fields {
@@ -129,7 +151,6 @@ func (h *HandlerV2) CreateField(c *gin.Context) {
 				field,
 			)
 			if err != nil {
-				h.handleResponse(c, status_http.GRPCError, err.Error())
 				return
 			}
 		}
@@ -320,7 +341,8 @@ func (h *HandlerV2) GetAllFields(c *gin.Context) {
 func (h *HandlerV2) UpdateField(c *gin.Context) {
 	var (
 		fieldRequest models.Field
-		resp         *emptypb.Empty
+		resp         *obs.Field
+		deferErr     error
 	)
 
 	err := c.ShouldBindJSON(&fieldRequest)
@@ -368,6 +390,8 @@ func (h *HandlerV2) UpdateField(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
+
+	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
@@ -418,70 +442,65 @@ func (h *HandlerV2) UpdateField(c *gin.Context) {
 				}
 			}
 		}
-	} else {
-		// do nothing
-		// field.EnableMultilanguage = true
-		// languaegs, err := h.companyServices.Project().GetById(context.Background(), &pb.GetProjectByIdRequest{
-		// 	ProjectId: resource.GetProjectId(),
-		// })
-		// if err != nil {
-		// 	h.handleResponse(c, status_http.GRPCError, err.Error())
-		// 	return
-		// }
-		// for _, value := range languaegs.GetLanguage() {
-		// 	if fieldRequest.Slug != fieldRequest.Slug[:len(fieldRequest.Slug)-3]+"_"+value.GetShortName() {
-		// 		fmt.Println("field slug: ", fieldRequest.Slug)
-		// 		fmt.Println("get short name:::", value.GetShortName())
-		// 		fmt.Println("match field slug:",  fieldRequest.Slug[:len(fieldRequest.Slug)-3]+"_"+value.GetShortName())
-		// 		go func(arg *pb.Language, project_id string) {
-		// 			// id, _ := uuid.NewRandom()
-		// 			// _, err := services.GetBuilderServiceByType(resource.NodeType).Field().Create(context.Background(), &obs.CreateFieldRequest{
-		// 			// 	Id:                  id.String(),
-		// 			// 	Default:             fieldRequest.Default,
-		// 			// 	Type:                fieldRequest.Type,
-		// 			// 	Index:               fieldRequest.Index,
-		// 			// 	Label:               fieldRequest.Label,
-		// 			// 	Slug:                fieldRequest.Slug[:len(fieldRequest.Slug)-3] + "_" + arg.ShortName,
-		// 			// 	TableId:             fieldRequest.TableID,
-		// 			// 	Attributes:          attributes,
-		// 			// 	IsVisible:           fieldRequest.IsVisible,
-		// 			// 	AutofillTable:       fieldRequest.AutoFillTable,
-		// 			// 	AutofillField:       fieldRequest.AutoFillField,
-		// 			// 	RelationField:       fieldRequest.RelationField,
-		// 			// 	Automatic:           fieldRequest.Automatic,
-		// 			// 	ShowLabel:           fieldRequest.ShowLabel,
-		// 			// 	Unique:              fieldRequest.Unique,
-		// 			// 	ProjectId:           project_id,
-		// 			// 	EnableMultilanguage: true,
-		// 			// })
-		// 			// if err != nil {
-		// 			// 	h.handleResponse(c, status_http.GRPCError, err.Error())
-		// 			// 	return
-		// 			// }
-		// 		}(value, resource.ResourceEnvironmentId)
-		// }
+	}
+
+	var (
+		oldField = &obs.Field{}
+		logReq   = &models.CreateVersionHistoryRequest{
+			Services:     services,
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: "FIELD",
+			ActionType:   "UPDATE FIELD",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo:  cast.ToString(userId),
+			TableSlug: c.Param("collection"),
+		}
+	)
+
+	defer func() {
+		logReq.Request = &field
+		logReq.Previous = oldField
+		if deferErr != nil {
+			logReq.Response = deferErr.Error()
+			h.handleResponse(c, status_http.GRPCError, deferErr.Error())
+		} else {
+			logReq.Response = resp
+			logReq.Current = resp
+			h.handleResponse(c, status_http.OK, resp)
+		}
+		go h.versionHistory(c, logReq)
+	}()
+
+	oldField, deferErr = services.GetBuilderServiceByType(resource.NodeType).Field().GetByID(
+		context.Background(),
+		&obs.FieldPrimaryKey{
+			Id:        field.Id,
+			ProjectId: resource.ResourceEnvironmentId,
+		},
+	)
+	if deferErr != nil {
+		return
 	}
 
 	field.ProjectId = resource.ResourceEnvironmentId
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.GetBuilderServiceByType(resource.NodeType).Field().Update(
+		resp, deferErr = services.GetBuilderServiceByType(resource.NodeType).Field().Update(
 			context.Background(),
 			&field,
 		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
+		if deferErr != nil {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Field().Update(
+		resp, deferErr = services.PostgresBuilderService().Field().Update(
 			context.Background(),
 			&field,
 		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
+		if deferErr != nil {
 			return
 		}
 	}
@@ -567,7 +586,8 @@ func (h *HandlerV2) UpdateSearch(c *gin.Context) {
 func (h *HandlerV2) DeleteField(c *gin.Context) {
 	fieldID := c.Param("id")
 	var (
-		resp *emptypb.Empty
+		resp     *emptypb.Empty
+		deferErr error
 	)
 
 	if !util.IsValidUUID(fieldID) {
@@ -587,6 +607,8 @@ func (h *HandlerV2) DeleteField(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
+
+	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
@@ -611,36 +633,69 @@ func (h *HandlerV2) DeleteField(c *gin.Context) {
 		return
 	}
 
+	var (
+		oldField = &obs.Field{}
+		logReq   = &models.CreateVersionHistoryRequest{
+			Services:     services,
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: "FIELD",
+			ActionType:   "DELETE FIELD",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo:  cast.ToString(userId),
+			TableSlug: c.Param("collection"),
+		}
+	)
+
+	defer func() {
+		if deferErr != nil {
+			logReq.Previous = oldField
+			logReq.Response = deferErr.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else {
+			logReq.Previous = oldField
+			h.handleResponse(c, status_http.NoContent, resp)
+		}
+		go h.versionHistory(c, logReq)
+	}()
+
+	oldField, deferErr = services.GetBuilderServiceByType(resource.NodeType).Field().GetByID(
+		context.Background(),
+		&obs.FieldPrimaryKey{
+			Id:        fieldID,
+			ProjectId: resource.ResourceEnvironmentId,
+		},
+	)
+	if deferErr != nil {
+		return
+	}
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.GetBuilderServiceByType(resource.NodeType).Field().Delete(
+		resp, deferErr = services.GetBuilderServiceByType(resource.NodeType).Field().Delete(
 			context.Background(),
 			&obs.FieldPrimaryKey{
 				Id:        fieldID,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
+		if deferErr != nil {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Field().Delete(
+		resp, deferErr = services.PostgresBuilderService().Field().Delete(
 			context.Background(),
 			&obs.FieldPrimaryKey{
 				Id:        fieldID,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
+		if deferErr != nil {
 			return
 		}
 	}
-
-	h.handleResponse(c, status_http.NoContent, resp)
 }
 
 // GetAllFieldsWithDetails godoc

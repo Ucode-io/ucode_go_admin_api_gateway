@@ -464,22 +464,9 @@ func (h *HandlerV1) GetSingleSlim(c *gin.Context) {
 		return
 	}
 
-	apiKey := c.GetHeader("X-API-KEY")
-	if apiKey != "" {
-		apiKeyLimit, err := h.authService.ApiKeyUsage().CheckLimit(
-			c.Request.Context(),
-			&pba.CheckLimitRequest{ApiKey: apiKey},
-		)
-		if err != nil || apiKeyLimit.IsLimitReached {
-			h.handleResponse(c, status_http.TooManyRequests, err.Error())
-			return
-		}
+	userId, _ := c.Get("user_id")
 
-		go func() {
-			_, _ = h.authService.ApiKeyUsage().Create(c.Request.Context(),
-				&pba.ApiKeyUsage{ApiKey: apiKey, RequestCount: 1})
-		}()
-	}
+	apiKey := c.GetHeader("X-API-KEY")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
@@ -514,6 +501,24 @@ func (h *HandlerV1) GetSingleSlim(c *gin.Context) {
 	}
 	defer conn.Close()
 
+	var (
+		logReq = &models.CreateVersionHistoryRequest{
+			Services:     services,
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: c.Request.URL.String(),
+			ActionType:   "GET",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo:  cast.ToString(userId),
+			Request:   &structData,
+			ApiKey:    apiKey,
+			Type:      "API_KEY",
+			TableSlug: c.Param("table_slug"),
+		}
+	)
+
 	redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
 	if err == nil {
 		resp := make(map[string]interface{})
@@ -524,6 +529,8 @@ func (h *HandlerV1) GetSingleSlim(c *gin.Context) {
 		} else {
 			resp["data"] = m
 			h.handleResponse(c, status_http.OK, resp)
+			logReq.Response = m
+			go h.versionHistory(c, logReq)
 			return
 		}
 	} else {
@@ -545,9 +552,14 @@ func (h *HandlerV1) GetSingleSlim(c *gin.Context) {
 			statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
 			statusHttp.CustomMessage = stat.Message()
 		}
+		logReq.Response = err.Error()
+		go h.versionHistory(c, logReq)
 		h.handleResponse(c, statusHttp, err.Error())
 		return
 	}
+
+	logReq.Response = resp
+	go h.versionHistory(c, logReq)
 
 	if resp.IsCached {
 		jsonData, _ := resp.GetData().MarshalJSON()
@@ -1336,24 +1348,9 @@ func (h *HandlerV1) GetListSlim(c *gin.Context) {
 		return
 	}
 
-	// auth, ok := c.Get("auth")
+	userId, _ := c.Get("user_id")
 
 	apiKey := c.GetHeader("X-API-KEY")
-	if apiKey != "" {
-		apiKeyLimit, err := h.authService.ApiKeyUsage().CheckLimit(
-			c.Request.Context(),
-			&pba.CheckLimitRequest{ApiKey: apiKey},
-		)
-		if err != nil || apiKeyLimit.IsLimitReached {
-			h.handleResponse(c, status_http.TooManyRequests, err.Error())
-			return
-		}
-
-		go func() {
-			_, _ = h.authService.ApiKeyUsage().Create(c.Request.Context(),
-				&pba.ApiKeyUsage{ApiKey: apiKey, RequestCount: 1})
-		}()
-	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
@@ -1386,6 +1383,24 @@ func (h *HandlerV1) GetListSlim(c *gin.Context) {
 	// defer conn.Close()
 	service := services.BuilderService().ObjectBuilder()
 
+	var (
+		logReq = &models.CreateVersionHistoryRequest{
+			Services:     services,
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: c.Request.URL.String(),
+			ActionType:   "GET",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo:  cast.ToString(userId),
+			Request:   &structData,
+			ApiKey:    apiKey,
+			Type:      "API_KEY",
+			TableSlug: c.Param("table_slug"),
+		}
+	)
+
 	redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
 	if err == nil {
 		resp := make(map[string]interface{})
@@ -1396,6 +1411,8 @@ func (h *HandlerV1) GetListSlim(c *gin.Context) {
 		} else {
 			resp["data"] = m
 			h.handleResponse(c, status_http.OK, resp)
+			logReq.Response = m
+			go h.versionHistory(c, logReq)
 			return
 		}
 	} else {
@@ -1416,9 +1433,14 @@ func (h *HandlerV1) GetListSlim(c *gin.Context) {
 			statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
 			statusHttp.CustomMessage = stat.Message()
 		}
+		logReq.Response = err.Error()
+		go h.versionHistory(c, logReq)
 		h.handleResponse(c, statusHttp, err.Error())
 		return
 	}
+
+	logReq.Response = resp
+	go h.versionHistory(c, logReq)
 
 	if err == nil {
 		if resp.IsCached {
