@@ -152,7 +152,7 @@ func (h *HandlerV2) versionHistory(c *gin.Context, req *models.CreateVersionHist
 		}
 	}
 
-	_, err = req.Services.HighBuilderService().VersionHistory().Create(
+	_, err = req.Services.GetBuilderServiceByType(req.NodeType).VersionHistory().Create(
 		context.Background(),
 		&object_builder_service.CreateVersionHistoryRequest{
 			Id:                uuid.NewString(),
