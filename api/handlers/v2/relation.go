@@ -498,16 +498,16 @@ func (h *HandlerV2) UpdateRelation(c *gin.Context) {
 		go h.versionHistory(c, logReq)
 	}()
 
-	oldRelation, err = services.GetBuilderServiceByType(resource.NodeType).Relation().GetByID(
-		context.Background(),
-		&obs.RelationPrimaryKey{
-			Id:        relation.Id,
-			ProjectId: relation.ProjectId,
-		},
-	)
-	if err != nil {
-		return
-	}
+	// oldRelation, err = services.GetBuilderServiceByType(resource.NodeType).Relation().GetByID(
+	// 	context.Background(),
+	// 	&obs.RelationPrimaryKey{
+	// 		Id:        relation.Id,
+	// 		ProjectId: relation.ProjectId,
+	// 	},
+	// )
+	// if err != nil {
+	// 	return
+	// }
 
 	relation.ProjectId = resource.ResourceEnvironmentId
 	switch resource.ResourceType {
