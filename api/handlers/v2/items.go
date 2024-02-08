@@ -155,7 +155,7 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 		NodeType:     resource.NodeType,
 		ProjectId:    resource.ResourceEnvironmentId,
 		ActionSource: c.Request.URL.String(),
-		ActionType:   "CREATE",
+		ActionType:   "CREATE ITEM",
 		UsedEnvironments: map[string]bool{
 			cast.ToString(environmentId): true,
 		},
@@ -351,7 +351,7 @@ func (h *HandlerV2) CreateItems(c *gin.Context) {
 		NodeType:     resource.NodeType,
 		ProjectId:    resource.ResourceEnvironmentId,
 		ActionSource: c.Request.URL.String(),
-		ActionType:   "CREATE",
+		ActionType:   "CREATE ITEM",
 		UsedEnvironments: map[string]bool{
 			cast.ToString(environmentId): true,
 		},
@@ -961,7 +961,7 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 			NodeType:     resource.NodeType,
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: c.Request.URL.String(),
-			ActionType:   "UPDATE",
+			ActionType:   "UPDATE ITEM",
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
@@ -1156,7 +1156,7 @@ func (h *HandlerV2) MultipleUpdateItems(c *gin.Context) {
 			NodeType:     resource.NodeType,
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: c.Request.URL.String(),
-			ActionType:   "UPDATE",
+			ActionType:   "UPDATE ITEM",
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
@@ -1363,7 +1363,7 @@ func (h *HandlerV2) DeleteItem(c *gin.Context) {
 			NodeType:     resource.NodeType,
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: c.Request.URL.String(),
-			ActionType:   "DELETE",
+			ActionType:   "DELETE ITEM",
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
@@ -1561,7 +1561,7 @@ func (h *HandlerV2) DeleteItems(c *gin.Context) {
 			NodeType:     resource.NodeType,
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: c.Request.URL.String(),
-			ActionType:   "DELETE",
+			ActionType:   "DELETE ITEM",
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
@@ -1751,7 +1751,7 @@ func (h *HandlerV2) DeleteManyToMany(c *gin.Context) {
 			NodeType:     resource.NodeType,
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: c.Request.URL.String(),
-			ActionType:   "DELETE",
+			ActionType:   "DELETE ITEM",
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
@@ -1929,7 +1929,7 @@ func (h *HandlerV2) AppendManyToMany(c *gin.Context) {
 			NodeType:     resource.NodeType,
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: c.Request.URL.String(),
-			ActionType:   "UPDATE",
+			ActionType:   "UPDATE ITEM",
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
