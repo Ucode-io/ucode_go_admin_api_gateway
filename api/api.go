@@ -772,7 +772,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 			// v2Version.POST("/down", h.V2.DownHistory)
 			v2Version.GET("/history/:environment_id", h.V2.GetAllVersionHistory)
 			// v2Version.PUT("/history/:environment_id", h.V2.UpdateVersionHistory)
-			// v2Version.GET("/history/:environment_id/:id", h.V2.GetVersionHistoryByID)
+			v2Version.GET("/history/:environment_id/:id", h.V2.GetVersionHistoryByID)
 		}
 
 	}

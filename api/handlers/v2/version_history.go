@@ -14,6 +14,80 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// GetByUDVersionHistory godoc
+// @Security ApiKeyAuth
+// @ID get_version_history_by_id
+// @Router /v2/version/history/{environment_id}/{id} [GET]
+// @Summary Get single version history
+// @Description Get single version history
+// @Tags VersionHistory
+// @Accept json
+// @Produce json
+// @Param id path string true "id"
+// @Success 200 {object} status_http.Response{data=obs.VersionHistory} "VersionHistoryBody"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *HandlerV2) GetVersionHistoryByID(c *gin.Context) {
+	id := c.Param("id")
+	var (
+		resp *obs.VersionHistory
+	)
+
+	if !util.IsValidUUID(id) {
+		h.handleResponse(c, status_http.InvalidArgument, "version history id is an invalid uuid")
+		return
+	}
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = services.BuilderService().VersionHistory().GetByID(
+			context.Background(),
+			&obs.VersionHistoryPrimaryKey{
+				Id:        id,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	}
+
+	h.handleResponse(c, status_http.OK, resp)
+}
+
 func (h *HandlerV2) GetAllVersionHistory(c *gin.Context) {
 
 	var (
