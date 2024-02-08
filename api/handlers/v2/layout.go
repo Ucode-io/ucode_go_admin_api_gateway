@@ -268,18 +268,18 @@ func (h *HandlerV2) UpdateLayout(c *gin.Context) {
 		go h.versionHistory(c, logReq)
 	}()
 
-	oldLayout, err = services.GetBuilderServiceByType(nodeType).Layout().GetSingleLayout(
-		context.Background(),
-		&object_builder_service.GetSingleLayoutRequest{
-			ProjectId: input.ProjectId,
-			TableId:   input.TableId,
-			MenuId:    input.MenuId,
-			TableSlug: input.TableId,
-		},
-	)
-	if err != nil {
-		return
-	}
+	// oldLayout, err = services.GetBuilderServiceByType(nodeType).Layout().GetSingleLayout(
+	// 	context.Background(),
+	// 	&object_builder_service.GetSingleLayoutRequest{
+	// 		ProjectId: input.ProjectId,
+	// 		TableId:   input.TableId,
+	// 		MenuId:    input.MenuId,
+	// 		TableSlug: input.TableId,
+	// 	},
+	// )
+	// if err != nil {
+	// 	return
+	// }
 
 	resp, err = services.GetBuilderServiceByType(nodeType).Layout().Update(
 		context.Background(),

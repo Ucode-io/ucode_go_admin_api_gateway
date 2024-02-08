@@ -661,16 +661,16 @@ func (h *HandlerV2) DeleteField(c *gin.Context) {
 		go h.versionHistory(c, logReq)
 	}()
 
-	// oldField, deferErr = services.GetBuilderServiceByType(resource.NodeType).Field().GetByID(
-	// 	context.Background(),
-	// 	&obs.FieldPrimaryKey{
-	// 		Id:        fieldID,
-	// 		ProjectId: resource.ResourceEnvironmentId,
-	// 	},
-	// )
-	// if deferErr != nil {
-	// 	return
-	// }
+	oldField, deferErr = services.GetBuilderServiceByType(resource.NodeType).Field().GetByID(
+		context.Background(),
+		&obs.FieldPrimaryKey{
+			Id:        fieldID,
+			ProjectId: resource.ResourceEnvironmentId,
+		},
+	)
+	if deferErr != nil {
+		return
+	}
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
