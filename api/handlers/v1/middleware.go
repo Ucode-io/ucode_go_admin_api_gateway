@@ -77,6 +77,7 @@ func (h *HandlerV1) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 			c.Set("resource_id", resourceId)
 			c.Set("environment_id", environmentId)
 			c.Set("project_id", projectId)
+			c.Set("user_id", res.UserId)
 
 		case "API-KEY":
 			app_id := c.GetHeader("X-API-KEY")
