@@ -14,6 +14,7 @@ import (
 	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/caching"
 	"ucode/ucode_go_api_gateway/pkg/logger"
+	"ucode/ucode_go_api_gateway/pkg/util"
 	"ucode/ucode_go_api_gateway/services"
 	"ucode/ucode_go_api_gateway/storage"
 
@@ -141,21 +142,23 @@ func (h *HandlerV1) versionHistory(c *gin.Context, req *models.CreateVersionHist
 		response["data"] = make(map[string]interface{})
 	}
 
-	info, err := h.authService.User().GetUserByID(
-		context.Background(),
-		&auth_service.UserPrimaryKey{
-			Id: req.UserInfo,
-		},
-	)
-	if err == nil {
-		if info.Login != "" {
-			user = info.Login
-		} else {
-			user = info.Phone
+	if util.IsValidUUID(req.UserInfo) {
+		info, err := h.authService.User().GetUserByID(
+			context.Background(),
+			&auth_service.UserPrimaryKey{
+				Id: req.UserInfo,
+			},
+		)
+		if err == nil {
+			if info.Login != "" {
+				user = info.Login
+			} else {
+				user = info.Phone
+			}
 		}
 	}
 
-	_, err = req.Services.GetBuilderServiceByType(req.NodeType).VersionHistory().Create(
+	_, err := req.Services.GetBuilderServiceByType(req.NodeType).VersionHistory().Create(
 		context.Background(),
 		&object_builder_service.CreateVersionHistoryRequest{
 			Id:                uuid.NewString(),
