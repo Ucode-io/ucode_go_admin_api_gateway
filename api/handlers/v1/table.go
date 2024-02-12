@@ -182,6 +182,18 @@ func (h *HandlerV1) CreateTable(c *gin.Context) {
 		if err != nil {
 			return
 		}
+
+		newTable, err := services.GetBuilderServiceByType(nodeType).Table().GetByID(
+			context.Background(),
+			&obs.TablePrimaryKey{
+				Id:        table.Id,
+				ProjectId: table.ProjectId,
+			},
+		)
+		if err != nil {
+			return
+		}
+		logReq.Current = newTable
 	case pb.ResourceType_POSTGRESQL:
 		resp, err = services.PostgresBuilderService().Table().Create(
 			context.Background(),
