@@ -156,6 +156,7 @@ func (h *HandlerV1) CreateTable(c *gin.Context) {
 				cast.ToString(environmentId): true,
 			},
 			UserInfo:  cast.ToString(userId),
+			Current:   &table,
 			Request:   &table,
 			TableSlug: tableRequest.Slug,
 		}
