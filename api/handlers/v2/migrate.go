@@ -1,11 +1,7 @@
 package v2
 
 import (
-	"context"
-	"encoding/json"
 	"errors"
-	"fmt"
-	"log"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
@@ -13,7 +9,6 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
-	"github.com/spf13/cast"
 )
 
 type FieldWrapper struct {
@@ -27,7 +22,6 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
-	fmt.Println("Req->", req)
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -55,7 +49,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
+	_, err = h.GetProjectSrvc(
 		c.Request.Context(),
 		resource.GetProjectId(),
 		resource.NodeType,
@@ -65,34 +59,11 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 		return
 	}
 
-	for _, v := range req {
-		fmt.Printf("Heeeey - > %+v", v)
-		if v.ActionSource == "FIELD" {
-			fmt.Println("Hello World from field")
-			var wrapper FieldWrapper
-			err := json.Unmarshal([]byte(cast.ToString(v.Previous)), &wrapper)
-			if err != nil {
-				log.Println(err)
-				return
-			}
+	// for _, v := range req {
+	// var (
+	// 	actionSource = v.ActionSource
+	// 	actionType = strings.Split(v.ActionType, " ")[0]
+	// )
 
-			fmt.Println("I am coming  here")
-			fmt.Println("Hey->", v.ActionType)
-
-			if v.ActionType == "DELETE" {
-				fmt.Println("hello world from delete")
-				_, err := services.GetBuilderServiceByType(resource.NodeType).Field().Delete(
-					context.Background(),
-					&obs.FieldPrimaryKey{
-						Id:        wrapper.Data.Id,
-						ProjectId: resource.ResourceEnvironmentId,
-					},
-				)
-				if err != nil {
-					h.handleResponse(c, status_http.GRPCError, err.Error())
-					return
-				}
-			}
-		}
-	}
+	// }
 }
