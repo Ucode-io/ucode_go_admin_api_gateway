@@ -11,7 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type FieldWrapper struct {
+type DataFieldWrapper struct {
 	Data *obs.CreateFieldRequest
 }
 
@@ -62,7 +62,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 	// for _, v := range req {
 	// var (
 	// 	actionSource = v.ActionSource
-	// 	actionType = strings.Split(v.ActionType, " ")[0]
+	// 	actionType   = strings.Split(v.ActionType, " ")[0]
 	// )
 
 	// }
