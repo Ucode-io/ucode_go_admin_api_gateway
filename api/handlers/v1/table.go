@@ -182,17 +182,17 @@ func (h *HandlerV1) CreateTable(c *gin.Context) {
 			return
 		}
 
-		table, err := services.GetBuilderServiceByType(nodeType).Table().GetByID(
-			context.Background(),
-			&obs.TablePrimaryKey{
-				Id:        resp.Id,
-				ProjectId: resourceEnvironmentId,
-			},
-		)
-		if err != nil {
-			return
-		}
-		logReq.Current = table
+		// table, err := services.GetBuilderServiceByType(nodeType).Table().GetByID(
+		// 	context.Background(),
+		// 	&obs.TablePrimaryKey{
+		// 		Id:        resp.Id,
+		// 		ProjectId: resourceEnvironmentId,
+		// 	},
+		// )
+		// if err != nil {
+		// 	return
+		// }
+		// logReq.Current = table
 	case pb.ResourceType_POSTGRESQL:
 		resp, err = services.PostgresBuilderService().Table().Create(
 			context.Background(),
