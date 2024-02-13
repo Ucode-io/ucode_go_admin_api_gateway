@@ -25,7 +25,7 @@ type CreateVersionHistoryRequest struct {
 type MigrateUp struct {
 	ActionSource     string          `json:"action_source"`
 	ActionType       string          `json:"action_type"`
-	Previous         interface{}     `json:"previous"`
+	Previous         interface{}     `json:"previus"`
 	Current          interface{}     `json:"current"`
 	UsedEnvironments map[string]bool `json:"used_envrironments"`
 	Date             string          `json:"date"`

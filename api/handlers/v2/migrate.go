@@ -1,10 +1,475 @@
+// package v2
+
+// import (
+// 	"context"
+// 	"encoding/json"
+// 	"errors"
+// 	"log"
+// 	"strings"
+// 	"ucode/ucode_go_api_gateway/api/models"
+// 	"ucode/ucode_go_api_gateway/api/status_http"
+// 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
+// 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
+// 	"ucode/ucode_go_api_gateway/pkg/util"
+
+// 	"github.com/gin-gonic/gin"
+// 	"github.com/spf13/cast"
+// )
+
+// type DataTableWrapper1 struct {
+// 	Data *obs.CreateTableRequest
+// }
+
+// type DataTableWrapper2 struct {
+// 	Data *obs.UpdateTableRequest
+// }
+
+// type DataFieldWrapper1 struct {
+// 	Data *obs.CreateFieldRequest
+// }
+
+// type DataFieldWrapper2 struct {
+// 	Data *obs.Field
+// }
+
+// type DataViewWrapper1 struct {
+// 	Data *obs.CreateViewRequest
+// }
+
+// type DataViewWrapper2 struct {
+// 	Data *obs.View
+// }
+
+// type DataMenuCreateWrapper struct {
+// 	Data *obs.CreateMenuRequest
+// }
+
+// type DataMenuUpdateWrapper struct {
+// 	Data *obs.Menu
+// }
+
+// type DataRelationCreateWrapper struct {
+// 	Data *obs.CreateRelationRequest
+// }
+
+// type DataRelationUpdateWrapper struct {
+// 	Data *obs.UpdateRelationRequest
+// }
+
+// func (h *HandlerV2) MigrateUp(c *gin.Context) {
+// 	req := []*models.MigrateUp{}
+
+// 	if err := c.ShouldBindJSON(&req); err != nil {
+// 		h.handleResponse(c, status_http.BadRequest, err.Error())
+// 		return
+// 	}
+
+// 	projectId, ok := c.Get("project_id")
+// 	if !ok || !util.IsValidUUID(projectId.(string)) {
+// 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+// 		return
+// 	}
+
+// 	environmentId, ok := c.Get("environment_id")
+// 	if !ok || !util.IsValidUUID(environmentId.(string)) {
+// 		err := errors.New("error getting environment id | not valid")
+// 		h.handleResponse(c, status_http.BadRequest, err)
+// 		return
+// 	}
+
+// 	userId, _ := c.Get("user_id")
+
+// 	resource, err := h.companyServices.ServiceResource().GetSingle(
+// 		c.Request.Context(),
+// 		&pb.GetSingleServiceResourceReq{
+// 			ProjectId:     projectId.(string),
+// 			EnvironmentId: environmentId.(string),
+// 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+// 		},
+// 	)
+// 	if err != nil {
+// 		h.handleResponse(c, status_http.GRPCError, err.Error())
+// 		return
+// 	}
+
+// 	services, err := h.GetProjectSrvc(
+// 		c.Request.Context(),
+// 		resource.GetProjectId(),
+// 		resource.NodeType,
+// 	)
+// 	if err != nil {
+// 		h.handleResponse(c, status_http.GRPCError, err.Error())
+// 		return
+// 	}
+
+// 	for _, v := range req {
+// 		var (
+// 			actionSource          = v.ActionSource
+// 			actionType            = strings.Split(v.ActionType, " ")[0]
+// 			nodeType              = resource.NodeType
+// 			resourceEnvironmentId = resource.ResourceEnvironmentId
+
+// 			logReq = &models.CreateVersionHistoryRequest{
+// 				Services:     services,
+// 				NodeType:     nodeType,
+// 				ProjectId:    resourceEnvironmentId,
+// 				ActionSource: v.ActionSource,
+// 				ActionType:   v.ActionType,
+// 				UsedEnvironments: map[string]bool{
+// 					cast.ToString(environmentId): true,
+// 				},
+// 				UserInfo: cast.ToString(userId),
+// 			}
+// 		)
+
+// 		switch actionSource {
+// 		case "TABLE":
+// 			defer func() {
+// 				go h.versionHistory(c, logReq)
+// 			}()
+
+// 			var (
+// 				previous DataTableWrapper2
+// 				request  DataTableWrapper1
+// 				response DataTableWrapper1
+// 			)
+
+// 			err = json.Unmarshal([]byte(cast.ToString(v.Request)), &request)
+// 			if err != nil {
+// 				log.Println(err)
+// 				continue
+// 			}
+
+// 			err = json.Unmarshal([]byte(cast.ToString(v.Response)), &response)
+// 			if err != nil {
+// 				log.Println(err)
+// 				continue
+// 			}
+
+// 			logReq.Request = request.Data
+// 			logReq.TableSlug = request.Data.Slug
+
+// 			switch actionType {
+// 			case "CREATE":
+// 				request.Data.Id = response.Data.Id
+// 				request.Data.ProjectId = resource.ResourceEnvironmentId
+// 				request.Data.EnvId = environmentId.(string)
+
+// 				createTable, err := services.GetBuilderServiceByType(nodeType).Table().Create(
+// 					context.Background(),
+// 					request.Data,
+// 				)
+// 				if err != nil {
+// 					logReq.Response = err.Error()
+// 					log.Println(err)
+// 				}
+// 				logReq.Response = createTable
+// 			case "UPDATE":
+// 				updateTable, err := services.GetBuilderServiceByType(nodeType).Table().Update(
+// 					context.Background(),
+// 					previous.Data,
+// 				)
+// 				if err != nil {
+// 					logReq.Response = err.Error()
+// 					log.Println(err)
+// 				}
+// 				logReq.Current = updateTable
+// 				logReq.Response = updateTable
+// 			}
+// 		case "FIELD":
+// 			defer func() {
+// 				go h.versionHistory(c, logReq)
+// 			}()
+
+// 			var (
+// 				request  DataFieldWrapper1
+// 				response DataFieldWrapper2
+// 			)
+
+// 			err = json.Unmarshal([]byte(cast.ToString(v.Request)), &request)
+// 			if err != nil {
+// 				log.Println(err)
+// 				continue
+// 			}
+
+// 			err = json.Unmarshal([]byte(cast.ToString(v.Response)), &response)
+// 			if err != nil {
+// 				log.Println(err)
+// 				continue
+// 			}
+
+// 			logReq.TableSlug = request.Data.TableId
+
+// 			switch actionType {
+// 			case "CREATE":
+// 				createField, err := services.GetBuilderServiceByType(nodeType).Field().Create(
+// 					context.Background(),
+// 					request.Data,
+// 				)
+// 				if err != nil {
+// 					logReq.Request = request.Data
+// 					logReq.Response = err.Error()
+// 					log.Println(err)
+// 				}
+// 				logReq.Request = request.Data
+// 				logReq.Response = createField
+// 				logReq.Current = createField
+// 			case "UPDATE":
+// 				oldField, err := services.GetBuilderServiceByType(resource.NodeType).Field().GetByID(
+// 					context.Background(),
+// 					&obs.FieldPrimaryKey{
+// 						Id:        response.Data.Id,
+// 						ProjectId: resource.ResourceEnvironmentId,
+// 					},
+// 				)
+// 				if err != nil {
+// 					logReq.Response = err.Error()
+// 					log.Println(err)
+// 				}
+
+// 				logReq.Request = response.Data
+// 				logReq.Previous = oldField
+
+// 				updateField, err := services.GetBuilderServiceByType(nodeType).Field().Update(
+// 					context.Background(),
+// 					response.Data,
+// 				)
+// 				if err != nil {
+// 					logReq.Response = err.Error()
+// 					log.Println(err)
+// 				}
+// 				logReq.Response = updateField
+// 				logReq.Current = updateField
+// 			case "DELETE":
+// 				oldField, err := services.GetBuilderServiceByType(resource.NodeType).Field().GetByID(
+// 					context.Background(),
+// 					&obs.FieldPrimaryKey{
+// 						Id:        response.Data.Id,
+// 						ProjectId: resource.ResourceEnvironmentId,
+// 					},
+// 				)
+// 				if err != nil {
+// 					logReq.Response = err.Error()
+// 					log.Println(err)
+// 				}
+
+// 				logReq.Previous = oldField
+
+// 				_, err = services.GetBuilderServiceByType(nodeType).Field().Delete(
+// 					context.Background(),
+// 					&obs.FieldPrimaryKey{Id: response.Data.Id},
+// 				)
+// 				if err != nil {
+// 					logReq.Response = err.Error()
+// 					log.Println(err)
+// 				}
+// 			}
+// 		case "VIEW":
+// 			defer func() {
+// 				go h.versionHistory(c, logReq)
+// 			}()
+
+// 			var (
+// 				request DataViewWrapper1
+// 				current DataViewWrapper2
+// 			)
+
+// 			err = json.Unmarshal([]byte(cast.ToString(v.Current)), &current)
+// 			if err != nil {
+// 				log.Println(err)
+// 				continue
+// 			}
+
+// 			logReq.TableSlug = request.Data.TableSlug
+
+// 			switch actionSource {
+// 			case "CREATE":
+// 				createView, err := services.GetBuilderServiceByType(nodeType).View().Create(
+// 					context.Background(),
+// 					request.Data,
+// 				)
+// 				if err != nil {
+// 					logReq.Response = err.Error()
+// 					log.Println(err)
+// 				}
+// 				logReq.Response = createView
+// 			case "UPDATE":
+// 				resp, err := services.GetBuilderServiceByType(resource.NodeType).View().Update(
+// 					context.Background(),
+// 					current.Data,
+// 				)
+// 				if err != nil {
+// 					logReq.Response = err.Error()
+// 					log.Println(err)
+// 				}
+// 				logReq.Current = resp
+// 			case "DELETE":
+// 				_, err = services.GetBuilderServiceByType(resource.NodeType).View().Delete(
+// 					context.Background(),
+// 					&obs.ViewPrimaryKey{
+// 						Id:        current.Data.Id,
+// 						ProjectId: resource.ResourceEnvironmentId,
+// 					},
+// 				)
+// 				if err != nil {
+// 					logReq.Response = err.Error()
+// 					log.Println(err)
+// 				}
+// 			}
+// 		case "MENU":
+// 			defer func() {
+// 				go h.versionHistory(c, logReq)
+// 			}()
+
+// 			var (
+// 				previous DataMenuUpdateWrapper
+// 				request  DataMenuCreateWrapper
+// 				response DataMenuCreateWrapper
+// 			)
+
+// 			err := json.Unmarshal([]byte(cast.ToString(v.Previous)), &previous)
+// 			if err != nil {
+// 				log.Println(err)
+// 				return
+// 			}
+
+// 			err = json.Unmarshal([]byte(cast.ToString(v.Request)), &request)
+// 			if err != nil {
+// 				log.Println(err)
+// 				return
+// 			}
+
+// 			err = json.Unmarshal([]byte(cast.ToString(v.Response)), &response)
+// 			if err != nil {
+// 				log.Println(err)
+// 				return
+// 			}
+
+// 			logReq.Request = request.Data
+// 			// logReq.TableSlug = request.Data.Slug
+
+// 			switch actionType {
+// 			case "CREATE":
+// 				request.Data.Id = response.Data.Id
+
+// 				createMenu, err := services.GetBuilderServiceByType(nodeType).Menu().Create(
+// 					context.Background(),
+// 					request.Data,
+// 				)
+// 				if err != nil {
+// 					logReq.Response = err.Error()
+// 					log.Println(err)
+// 					return
+// 				}
+// 				logReq.Response = createMenu
+// 			case "UPDATE":
+// 				updatemenu, err := services.GetBuilderServiceByType(nodeType).Menu().Update(
+// 					context.Background(),
+// 					previous.Data,
+// 				)
+// 				if err != nil {
+// 					logReq.Response = err.Error()
+// 					log.Println(err)
+// 					return
+// 				}
+// 				logReq.Response = updatemenu
+// 			case "DELETE":
+// 				deleteMenu, err := services.GetBuilderServiceByType(nodeType).Menu().Delete(
+// 					context.Background(),
+// 					&obs.MenuPrimaryKey{
+// 						Id:        previous.Data.Id,
+// 						ProjectId: resource.ResourceEnvironmentId,
+// 					},
+// 				)
+// 				if err != nil {
+// 					logReq.Response = err.Error()
+// 					log.Println(err)
+// 					return
+// 				}
+// 				logReq.Response = deleteMenu
+// 			}
+// 		case "RELATION":
+// 			defer func() {
+// 				go h.versionHistory(c, logReq)
+// 			}()
+
+// 			var (
+// 				previous DataRelationUpdateWrapper
+// 				request  DataRelationCreateWrapper
+// 				response DataMenuCreateWrapper
+// 			)
+
+// 			err := json.Unmarshal([]byte(cast.ToString(v.Previous)), &previous)
+// 			if err != nil {
+// 				log.Println(err)
+// 				return
+// 			}
+
+// 			err = json.Unmarshal([]byte(cast.ToString(v.Request)), &request)
+// 			if err != nil {
+// 				log.Println(err)
+// 				return
+// 			}
+
+// 			err = json.Unmarshal([]byte(cast.ToString(v.Response)), &response)
+// 			if err != nil {
+// 				log.Println(err)
+// 				return
+// 			}
+
+// 			logReq.Request = request.Data
+// 			// logReq.TableSlug = request.Data.Slug
+
+// 			switch actionType {
+// 			case "CREATE":
+// 				request.Data.Id = response.Data.Id
+
+// 				createRelation, err := services.GetBuilderServiceByType(nodeType).Relation().Create(
+// 					context.Background(),
+// 					request.Data,
+// 				)
+// 				if err != nil {
+// 					logReq.Response = err.Error()
+// 					log.Println(err)
+// 					return
+// 				}
+// 				logReq.Response = createRelation
+// 			case "UPDATE":
+// 				updateRelation, err := services.GetBuilderServiceByType(nodeType).Relation().Update(
+// 					context.Background(),
+// 					previous.Data,
+// 				)
+// 				if err != nil {
+// 					logReq.Response = err.Error()
+// 					log.Println(err)
+// 					return
+// 				}
+// 				logReq.Response = updateRelation
+// 			case "DELETE":
+// 				deleteRelation, err := services.GetBuilderServiceByType(nodeType).Relation().Delete(
+// 					context.Background(),
+// 					&obs.RelationPrimaryKey{
+// 						Id:        previous.Data.Id,
+// 						ProjectId: resource.ResourceEnvironmentId,
+// 					},
+// 				)
+// 				if err != nil {
+// 					logReq.Response = err.Error()
+// 					log.Println(err)
+// 					return
+// 				}
+// 				logReq.Response = deleteRelation
+// 			}
+// 		}
+// 	}
+// }
+
 package v2
 
 import (
 	"context"
 	"encoding/json"
 	"errors"
-	"log"
 	"strings"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -16,50 +481,38 @@ import (
 	"github.com/spf13/cast"
 )
 
-type DataTableWrapper1 struct {
+type DataTableWrapper struct {
 	Data *obs.CreateTableRequest
 }
 
-type DataTableWrapper2 struct {
+type DataUpdateTableWrapper struct {
 	Data *obs.UpdateTableRequest
 }
 
-type DataFieldWrapper1 struct {
+type DataCreateFieldWrapper struct {
 	Data *obs.CreateFieldRequest
 }
 
-type DataFieldWrapper2 struct {
+type DataFieldWrapper struct {
 	Data *obs.Field
 }
 
-type DataViewWrapper1 struct {
-	Data *obs.CreateViewRequest
-}
-
-type DataViewWrapper2 struct {
-	Data *obs.View
-}
-
-type DataMenuCreateWrapper struct {
-	Data *obs.CreateMenuRequest
-}
-
-type DataMenuUpdateWrapper struct {
-	Data *obs.Menu
-}
-
-type DataRelationCreateWrapper struct {
+type DataCreateRelationWrapper struct {
 	Data *obs.CreateRelationRequest
 }
 
-type DataRelationUpdateWrapper struct {
-	Data *obs.UpdateRelationRequest
+type DataCreateMenuWrapper struct {
+	Data *obs.CreateMenuRequest
+}
+
+type DataUpdateMenuWrapper struct {
+	Data *obs.Menu
 }
 
 func (h *HandlerV2) MigrateUp(c *gin.Context) {
-	req := []*models.MigrateUp{}
+	migrateRequest := []*models.MigrateUp{}
 
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := c.ShouldBindJSON(&migrateRequest); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -102,17 +555,17 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 		return
 	}
 
-	for _, v := range req {
+	for _, v := range migrateRequest {
 		var (
-			actionSource          = v.ActionSource
-			actionType            = strings.Split(v.ActionType, " ")[0]
-			nodeType              = resource.NodeType
-			resourceEnvironmentId = resource.ResourceEnvironmentId
+			actionSource  = v.ActionSource
+			actionType    = strings.Split(v.ActionType, " ")[0]
+			nodeType      = resource.NodeType
+			resourceEnvId = resource.ResourceEnvironmentId
 
 			logReq = &models.CreateVersionHistoryRequest{
 				Services:     services,
 				NodeType:     nodeType,
-				ProjectId:    resourceEnvironmentId,
+				ProjectId:    resourceEnvId,
 				ActionSource: v.ActionSource,
 				ActionType:   v.ActionType,
 				UsedEnvironments: map[string]bool{
@@ -122,343 +575,269 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 			}
 		)
 
-		switch actionSource {
-		case "TABLE":
+		if actionSource == "TABLE" {
 			defer func() {
 				go h.versionHistory(c, logReq)
 			}()
 
 			var (
-				previous DataTableWrapper2
-				request  DataTableWrapper1
-				response DataTableWrapper1
+				previous      DataTableWrapper
+				current       DataTableWrapper
+				currentUpdate DataUpdateTableWrapper
 			)
 
-			err = json.Unmarshal([]byte(cast.ToString(v.Request)), &request)
+			err := json.Unmarshal([]byte(cast.ToString(v.Current)), &current)
 			if err != nil {
-				log.Println(err)
 				continue
 			}
 
-			err = json.Unmarshal([]byte(cast.ToString(v.Response)), &response)
+			err = json.Unmarshal([]byte(cast.ToString(v.Previous)), &previous)
 			if err != nil {
-				log.Println(err)
 				continue
 			}
 
-			logReq.Request = request.Data
-			logReq.TableSlug = request.Data.Slug
+			err = json.Unmarshal([]byte(cast.ToString(v.Current)), &currentUpdate)
+			if err != nil {
+				continue
+			}
+
+			current.Data.ProjectId = resourceEnvId
+			current.Data.EnvId = cast.ToString(environmentId)
+			currentUpdate.Data.ProjectId = resourceEnvId
+			currentUpdate.Data.EnvId = cast.ToString(environmentId)
+			logReq.Request = current.Data
+			logReq.TableSlug = current.Data.Slug
 
 			switch actionType {
 			case "CREATE":
-				request.Data.Id = response.Data.Id
-				request.Data.ProjectId = resource.ResourceEnvironmentId
-				request.Data.EnvId = environmentId.(string)
-
-				createTable, err := services.GetBuilderServiceByType(nodeType).Table().Create(
-					context.Background(),
-					request.Data,
-				)
-				if err != nil {
-					logReq.Response = err.Error()
-					log.Println(err)
-				}
-				logReq.Response = createTable
-			case "UPDATE":
-				updateTable, err := services.GetBuilderServiceByType(nodeType).Table().Update(
-					context.Background(),
-					previous.Data,
-				)
-				if err != nil {
-					logReq.Response = err.Error()
-					log.Println(err)
-				}
-				logReq.Current = updateTable
-				logReq.Response = updateTable
-			}
-		case "FIELD":
-			defer func() {
-				go h.versionHistory(c, logReq)
-			}()
-
-			var (
-				request  DataFieldWrapper1
-				response DataFieldWrapper2
-			)
-
-			err = json.Unmarshal([]byte(cast.ToString(v.Request)), &request)
-			if err != nil {
-				log.Println(err)
-				continue
-			}
-
-			err = json.Unmarshal([]byte(cast.ToString(v.Response)), &response)
-			if err != nil {
-				log.Println(err)
-				continue
-			}
-
-			logReq.TableSlug = request.Data.TableId
-
-			switch actionType {
-			case "CREATE":
-				createField, err := services.GetBuilderServiceByType(nodeType).Field().Create(
-					context.Background(),
-					request.Data,
-				)
-				if err != nil {
-					logReq.Request = request.Data
-					logReq.Response = err.Error()
-					log.Println(err)
-				}
-				logReq.Request = request.Data
-				logReq.Response = createField
-				logReq.Current = createField
-			case "UPDATE":
-				oldField, err := services.GetBuilderServiceByType(resource.NodeType).Field().GetByID(
-					context.Background(),
-					&obs.FieldPrimaryKey{
-						Id:        response.Data.Id,
-						ProjectId: resource.ResourceEnvironmentId,
-					},
-				)
-				if err != nil {
-					logReq.Response = err.Error()
-					log.Println(err)
-				}
-
-				logReq.Request = response.Data
-				logReq.Previous = oldField
-
-				updateField, err := services.GetBuilderServiceByType(nodeType).Field().Update(
-					context.Background(),
-					response.Data,
-				)
-				if err != nil {
-					logReq.Response = err.Error()
-					log.Println(err)
-				}
-				logReq.Response = updateField
-				logReq.Current = updateField
-			case "DELETE":
-				oldField, err := services.GetBuilderServiceByType(resource.NodeType).Field().GetByID(
-					context.Background(),
-					&obs.FieldPrimaryKey{
-						Id:        response.Data.Id,
-						ProjectId: resource.ResourceEnvironmentId,
-					},
-				)
-				if err != nil {
-					logReq.Response = err.Error()
-					log.Println(err)
-				}
-
-				logReq.Previous = oldField
-
-				_, err = services.GetBuilderServiceByType(nodeType).Field().Delete(
-					context.Background(),
-					&obs.FieldPrimaryKey{Id: response.Data.Id},
-				)
-				if err != nil {
-					logReq.Response = err.Error()
-					log.Println(err)
-				}
-			}
-		case "VIEW":
-			defer func() {
-				go h.versionHistory(c, logReq)
-			}()
-
-			var (
-				request DataViewWrapper1
-				current DataViewWrapper2
-			)
-
-			err = json.Unmarshal([]byte(cast.ToString(v.Current)), &current)
-			if err != nil {
-				log.Println(err)
-				continue
-			}
-
-			logReq.TableSlug = request.Data.TableSlug
-
-			switch actionSource {
-			case "CREATE":
-				createView, err := services.GetBuilderServiceByType(nodeType).View().Create(
-					context.Background(),
-					request.Data,
-				)
-				if err != nil {
-					logReq.Response = err.Error()
-					log.Println(err)
-				}
-				logReq.Response = createView
-			case "UPDATE":
-				resp, err := services.GetBuilderServiceByType(resource.NodeType).View().Update(
+				_, err = services.GetBuilderServiceByType(nodeType).Table().Create(
 					context.Background(),
 					current.Data,
 				)
 				if err != nil {
 					logReq.Response = err.Error()
-					log.Println(err)
+					continue
 				}
-				logReq.Current = resp
-			case "DELETE":
-				_, err = services.GetBuilderServiceByType(resource.NodeType).View().Delete(
-					context.Background(),
-					&obs.ViewPrimaryKey{
-						Id:        current.Data.Id,
-						ProjectId: resource.ResourceEnvironmentId,
-					},
-				)
-				if err != nil {
-					logReq.Response = err.Error()
-					log.Println(err)
-				}
-			}
-		case "MENU":
-			defer func() {
-				go h.versionHistory(c, logReq)
-			}()
-
-			var (
-				previous DataMenuUpdateWrapper
-				request  DataMenuCreateWrapper
-				response DataMenuCreateWrapper
-			)
-
-			err := json.Unmarshal([]byte(cast.ToString(v.Previous)), &previous)
-			if err != nil {
-				log.Println(err)
-				return
-			}
-
-			err = json.Unmarshal([]byte(cast.ToString(v.Request)), &request)
-			if err != nil {
-				log.Println(err)
-				return
-			}
-
-			err = json.Unmarshal([]byte(cast.ToString(v.Response)), &response)
-			if err != nil {
-				log.Println(err)
-				return
-			}
-
-			logReq.Request = request.Data
-			// logReq.TableSlug = request.Data.Slug
-
-			switch actionType {
-			case "CREATE":
-				request.Data.Id = response.Data.Id
-
-				createMenu, err := services.GetBuilderServiceByType(nodeType).Menu().Create(
-					context.Background(),
-					request.Data,
-				)
-				if err != nil {
-					logReq.Response = err.Error()
-					log.Println(err)
-					return
-				}
-				logReq.Response = createMenu
+				logReq.Current = current.Data
+				logReq.Response = current.Data
 			case "UPDATE":
-				updatemenu, err := services.GetBuilderServiceByType(nodeType).Menu().Update(
+				logReq.Previous = previous.Data
+
+				_, err = services.GetBuilderServiceByType(nodeType).Table().Update(
 					context.Background(),
-					previous.Data,
+					currentUpdate.Data,
 				)
 				if err != nil {
 					logReq.Response = err.Error()
-					log.Println(err)
-					return
+					continue
 				}
-				logReq.Response = updatemenu
-			case "DELETE":
-				deleteMenu, err := services.GetBuilderServiceByType(nodeType).Menu().Delete(
-					context.Background(),
-					&obs.MenuPrimaryKey{
-						Id:        previous.Data.Id,
-						ProjectId: resource.ResourceEnvironmentId,
-					},
-				)
-				if err != nil {
-					logReq.Response = err.Error()
-					log.Println(err)
-					return
-				}
-				logReq.Response = deleteMenu
+				logReq.Current = current.Data
+				logReq.Response = current.Data
 			}
-		case "RELATION":
+		} else if actionSource == "FIELD" {
 			defer func() {
 				go h.versionHistory(c, logReq)
 			}()
 
 			var (
-				previous DataRelationUpdateWrapper
-				request  DataRelationCreateWrapper
-				response DataMenuCreateWrapper
+				current       DataCreateFieldWrapper
+				previous      DataFieldWrapper
+				currentUpdate DataFieldWrapper
 			)
 
-			err := json.Unmarshal([]byte(cast.ToString(v.Previous)), &previous)
+			err := json.Unmarshal([]byte(cast.ToString(v.Current)), &current)
 			if err != nil {
-				log.Println(err)
-				return
+				continue
 			}
 
-			err = json.Unmarshal([]byte(cast.ToString(v.Request)), &request)
+			err = json.Unmarshal([]byte(cast.ToString(v.Previous)), &previous)
 			if err != nil {
-				log.Println(err)
-				return
+				continue
+			}
+
+			err = json.Unmarshal([]byte(cast.ToString(v.Current)), &currentUpdate)
+			if err != nil {
+				continue
+			}
+
+			current.Data.ProjectId = resourceEnvId
+			current.Data.EnvId = cast.ToString(environmentId)
+			currentUpdate.Data.ProjectId = resourceEnvId
+			currentUpdate.Data.EnvId = cast.ToString(environmentId)
+			previous.Data.ProjectId = resourceEnvId
+			previous.Data.EnvId = cast.ToString(environmentId)
+			logReq.TableSlug = current.Data.TableId
+
+			switch actionType {
+			case "CREATE":
+				createField, err := services.GetBuilderServiceByType(nodeType).Field().Create(
+					context.Background(),
+					current.Data,
+				)
+				if err != nil {
+					logReq.Response = err.Error()
+					continue
+				}
+				logReq.Request = current.Data
+				logReq.Current = current.Data
+				logReq.Response = createField
+			case "UPDATE":
+				logReq.Previous = previous.Data
+
+				updateField, err := services.GetBuilderServiceByType(nodeType).Field().Update(
+					context.Background(),
+					currentUpdate.Data,
+				)
+				if err != nil {
+					logReq.Response = err.Error()
+					continue
+				}
+				logReq.Request = currentUpdate.Data
+				logReq.Current = updateField
+				logReq.Response = updateField
+			case "DELETE":
+				logReq.Previous = previous.Data
+				_, err := services.GetBuilderServiceByType(nodeType).Field().Delete(
+					context.Background(),
+					&obs.FieldPrimaryKey{
+						Id:        previous.Data.Id,
+						ProjectId: resourceEnvId,
+						EnvId:     cast.ToString(environmentId),
+					},
+				)
+				if err != nil {
+					logReq.Response = err.Error()
+					continue
+				}
+			}
+		} else if actionSource == "RELATION" {
+			defer func() {
+				go h.versionHistory(c, logReq)
+			}()
+
+			var (
+				request  DataCreateRelationWrapper
+				response DataCreateRelationWrapper
+			)
+
+			err := json.Unmarshal([]byte(cast.ToString(v.Request)), &request)
+			if err != nil {
+				continue
 			}
 
 			err = json.Unmarshal([]byte(cast.ToString(v.Response)), &response)
 			if err != nil {
-				log.Println(err)
-				return
+				continue
 			}
 
-			logReq.Request = request.Data
-			// logReq.TableSlug = request.Data.Slug
+			request.Data.ProjectId = resourceEnvId
+			request.Data.EnvId = cast.ToString(environmentId)
+			response.Data.ProjectId = resourceEnvId
+			response.Data.EnvId = cast.ToString(environmentId)
+			logReq.TableSlug = request.Data.RelationTableSlug
 
 			switch actionType {
 			case "CREATE":
-				request.Data.Id = response.Data.Id
-
 				createRelation, err := services.GetBuilderServiceByType(nodeType).Relation().Create(
 					context.Background(),
 					request.Data,
 				)
 				if err != nil {
 					logReq.Response = err.Error()
-					log.Println(err)
-					return
+					continue
 				}
+				logReq.Request = request.Data
+				logReq.Current = createRelation
 				logReq.Response = createRelation
-			case "UPDATE":
-				updateRelation, err := services.GetBuilderServiceByType(nodeType).Relation().Update(
-					context.Background(),
-					previous.Data,
-				)
-				if err != nil {
-					logReq.Response = err.Error()
-					log.Println(err)
-					return
-				}
-				logReq.Response = updateRelation
 			case "DELETE":
-				deleteRelation, err := services.GetBuilderServiceByType(nodeType).Relation().Delete(
+				logReq.Previous = response.Data
+				_, err := services.GetBuilderServiceByType(nodeType).Field().Delete(
 					context.Background(),
-					&obs.RelationPrimaryKey{
-						Id:        previous.Data.Id,
-						ProjectId: resource.ResourceEnvironmentId,
+					&obs.FieldPrimaryKey{
+						Id:        response.Data.Id,
+						ProjectId: resourceEnvId,
+						EnvId:     cast.ToString(environmentId),
 					},
 				)
 				if err != nil {
 					logReq.Response = err.Error()
-					log.Println(err)
+					continue
+				}
+			}
+		} else if actionSource == "MENU" {
+			defer func() {
+				go h.versionHistory(c, logReq)
+			}()
+
+			var (
+				request  DataCreateMenuWrapper
+				previous DataCreateMenuWrapper
+				current  DataUpdateMenuWrapper
+			)
+
+			err := json.Unmarshal([]byte(cast.ToString(v.Request)), &request)
+			if err != nil {
+				continue
+			}
+
+			err = json.Unmarshal([]byte(cast.ToString(v.Previous)), &previous)
+			if err != nil {
+				continue
+			}
+
+			err = json.Unmarshal([]byte(cast.ToString(v.Request)), &current)
+			if err != nil {
+				continue
+			}
+
+			request.Data.ProjectId = resourceEnvId
+			request.Data.EnvId = cast.ToString(environmentId)
+			previous.Data.ProjectId = resourceEnvId
+			previous.Data.EnvId = cast.ToString(environmentId)
+			current.Data.ProjectId = resourceEnvId
+			current.Data.EnvId = cast.ToString(environmentId)
+			logReq.TableSlug = "Menu"
+
+			switch actionType {
+			case "CREATE":
+				createMenu, err := services.GetBuilderServiceByType(nodeType).Menu().Create(
+					context.Background(),
+					request.Data,
+				)
+				if err != nil {
+					logReq.Response = err.Error()
+					continue
+				}
+				logReq.Request = request.Data
+				logReq.Current = createMenu
+				logReq.Response = createMenu
+			case "UPDATE":
+				logReq.Previous = previous.Data
+				updatemenu, err := services.GetBuilderServiceByType(nodeType).Menu().Update(
+					context.Background(),
+					current.Data,
+				)
+				if err != nil {
+					logReq.Response = err.Error()
 					return
 				}
-				logReq.Response = deleteRelation
+				logReq.Request = current.Data
+				logReq.Current = updatemenu
+				logReq.Response = updatemenu
+			case "DELETE":
+				logReq.Previous = previous.Data
+				_, err = services.GetBuilderServiceByType(nodeType).Menu().Delete(
+					context.Background(),
+					&obs.MenuPrimaryKey{
+						Id:        previous.Data.Id,
+						ProjectId: resourceEnvId,
+						EnvId:     cast.ToString(environmentId),
+					},
+				)
+				if err != nil {
+					logReq.Response = err.Error()
+					continue
+				}
 			}
 		}
 	}
