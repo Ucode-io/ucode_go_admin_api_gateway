@@ -27245,7 +27245,7 @@ paths:
       consumes:
       - application/json
       description: Update menu
-      operationId: update_menu
+      operationId: update_menus_v2
       parameters:
       - description: UpdateMenuRequestBody
         in: body
@@ -27541,6 +27541,52 @@ paths:
       summary: Get relation by id
       tags:
       - V2_Relation
+  /v2/relations/{collection}/{relation_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete Relation
+      operationId: delete_relations_v2
+      parameters:
+      - description: relation_id
+        in: path
+        name: relation_id
+        required: true
+        type: string
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      - ApiKeyAuth: []
+      summary: Delete Relation
+      tags:
+      - Relation
   /v2/relations/{collection}/cascading:
     get:
       consumes:
