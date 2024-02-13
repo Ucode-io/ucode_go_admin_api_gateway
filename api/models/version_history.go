@@ -31,4 +31,8 @@ type MigrateUp struct {
 	Date             string          `json:"date"`
 	UserInfo         string          `json:"user_info"`
 	Request          interface{}     `json:"request"`
+	Response         interface{}     `json:"response"`
+	ApiKey           string          `json:"api_key"`
+	Type             string          `json:"type"`
+	TableSlug        string          `json:"table_slug"`
 }
