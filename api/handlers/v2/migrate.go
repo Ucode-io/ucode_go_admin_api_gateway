@@ -36,6 +36,14 @@ type DataViewWrapper1 struct {
 	Data *obs.CreateViewRequest
 }
 
+type DataMenuCreateWrapper struct {
+	Data *obs.CreateMenuRequest
+}
+
+type DataMenuUpdateWrapper struct {
+	Data *obs.Menu
+}
+
 func (h *HandlerV2) MigrateUp(c *gin.Context) {
 	req := []*models.MigrateUp{}
 
@@ -237,7 +245,63 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 
 			}
 		case "MENU":
+			defer func() {
+				go h.versionHistory(c, logReq)
+			}()
 
+			var (
+				previous DataMenuUpdateWrapper
+				request  DataMenuCreateWrapper
+				response DataMenuCreateWrapper
+			)
+
+			err := json.Unmarshal([]byte(cast.ToString(v.Previous)), &previous)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+
+			err = json.Unmarshal([]byte(cast.ToString(v.Request)), &request)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+
+			err = json.Unmarshal([]byte(cast.ToString(v.Response)), &response)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+
+			logReq.Request = request.Data
+			// logReq.TableSlug = request.Data.Slug
+
+			switch actionType {
+			case "CREATE":
+				request.Data.Id = response.Data.Id
+
+				createMenu, err := services.GetBuilderServiceByType(nodeType).Menu().Create(
+					context.Background(),
+					request.Data,
+				)
+				if err != nil {
+					logReq.Response = err.Error()
+					log.Println(err)
+					return
+				}
+				logReq.Response = createMenu
+			case "UPDATE":
+				updatemenu, err := services.GetBuilderServiceByType(nodeType).Menu().Update(
+					context.Background(),
+					previous.Data,
+				)
+				if err != nil {
+					logReq.Response = err.Error()
+					log.Println(err)
+					return
+				}
+				logReq.Response = updatemenu
+			}
 		}
 	}
 }
