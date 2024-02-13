@@ -118,6 +118,7 @@ func (h *HandlerV2) getPageParam(c *gin.Context) (page int, err error) {
 }
 
 func (h *HandlerV2) versionHistory(c *gin.Context, req *models.CreateVersionHistoryRequest) error {
+	fmt.Println("VERSION HISTORY=======================================================")
 	var (
 		current  = map[string]interface{}{"data": req.Current}
 		previous = map[string]interface{}{"data": req.Previous}
