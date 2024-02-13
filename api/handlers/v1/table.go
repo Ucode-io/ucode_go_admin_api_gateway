@@ -166,7 +166,9 @@ func (h *HandlerV1) CreateTable(c *gin.Context) {
 			logReq.Response = err.Error()
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 		} else {
-			logReq.Response = resp
+			table.Id = resp.Id
+			logReq.Current = &table
+			logReq.Response = &table
 			h.handleResponse(c, status_http.Created, resp)
 		}
 		go h.versionHistory(c, logReq)
@@ -181,18 +183,6 @@ func (h *HandlerV1) CreateTable(c *gin.Context) {
 		if err != nil {
 			return
 		}
-
-		// table, err := services.GetBuilderServiceByType(nodeType).Table().GetByID(
-		// 	context.Background(),
-		// 	&obs.TablePrimaryKey{
-		// 		Id:        resp.Id,
-		// 		ProjectId: resourceEnvironmentId,
-		// 	},
-		// )
-		// if err != nil {
-		// 	return
-		// }
-		// logReq.Current = table
 	case pb.ResourceType_POSTGRESQL:
 		resp, err = services.PostgresBuilderService().Table().Create(
 			context.Background(),
