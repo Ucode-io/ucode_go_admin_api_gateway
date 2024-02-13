@@ -360,7 +360,7 @@ func (h *HandlerV2) GetAllMenus(c *gin.Context) {
 
 // UpdateMenu godoc
 // @Security ApiKeyAuth
-// @ID update_menu
+// @ID update_menus_v2
 // @Router /v2/menus [PUT]
 // @Summary Update menu
 // @Description Update menu

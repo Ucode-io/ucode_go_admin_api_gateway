@@ -3,6 +3,7 @@ package v2
 import (
 	"context"
 	"errors"
+	"fmt"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
@@ -455,6 +456,7 @@ func (h *HandlerV2) UpdateRelation(c *gin.Context) {
 		},
 	)
 	if err != nil {
+		fmt.Println("error getting resource", err)
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
@@ -465,6 +467,7 @@ func (h *HandlerV2) UpdateRelation(c *gin.Context) {
 		resource.NodeType,
 	)
 	if err != nil {
+		fmt.Println("error getting project service", err)
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
@@ -499,6 +502,8 @@ func (h *HandlerV2) UpdateRelation(c *gin.Context) {
 		go h.versionHistory(c, logReq)
 	}()
 
+	relation.ProjectId = resource.ResourceEnvironmentId
+
 	oldRelation, err = services.GetBuilderServiceByType(resource.NodeType).Relation().GetByID(
 		context.Background(),
 		&obs.RelationPrimaryKey{
@@ -510,7 +515,6 @@ func (h *HandlerV2) UpdateRelation(c *gin.Context) {
 		return
 	}
 
-	relation.ProjectId = resource.ResourceEnvironmentId
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Relation().Update(
@@ -533,8 +537,8 @@ func (h *HandlerV2) UpdateRelation(c *gin.Context) {
 
 // DeleteRelation godoc
 // @Security ApiKeyAuth
-// @ID delete_relation
-// @Router /v1/relation/{relation_id} [DELETE]
+// @ID delete_relations_v2
+// @Router /v2/relations/{collection}/{relation_id} [DELETE]
 // @Security ApiKeyAuth
 // @Summary Delete Relation
 // @Description Delete Relation
@@ -542,6 +546,7 @@ func (h *HandlerV2) UpdateRelation(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param relation_id path string true "relation_id"
+// @Param collection path string true "collection"
 // @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"

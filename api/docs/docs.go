@@ -36654,7 +36654,7 @@ const docTemplate = `{
                     "Menu"
                 ],
                 "summary": "Update menu",
-                "operationId": "update_menu",
+                "operationId": "update_menus_v2",
                 "parameters": [
                     {
                         "description": "UpdateMenuRequestBody",
@@ -37223,6 +37223,87 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v2/relations/{collection}/{relation_id}": {
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Delete Relation",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Relation"
+                ],
+                "summary": "Delete Relation",
+                "operationId": "delete_relations_v2",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "relation_id",
+                        "name": "relation_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "collection",
+                        "name": "collection",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
                     "400": {
                         "description": "Invalid Argument",
                         "schema": {

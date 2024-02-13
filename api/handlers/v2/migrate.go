@@ -48,6 +48,14 @@ type DataMenuUpdateWrapper struct {
 	Data *obs.Menu
 }
 
+type DataRelationCreateWrapper struct {
+	Data *obs.CreateRelationRequest
+}
+
+type DataRelationUpdateWrapper struct {
+	Data *obs.UpdateRelationRequest
+}
+
 func (h *HandlerV2) MigrateUp(c *gin.Context) {
 	req := []*models.MigrateUp{}
 
@@ -365,6 +373,92 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 					return
 				}
 				logReq.Response = updatemenu
+			case "DELETE":
+				deleteMenu, err := services.GetBuilderServiceByType(nodeType).Menu().Delete(
+					context.Background(),
+					&obs.MenuPrimaryKey{
+						Id:        previous.Data.Id,
+						ProjectId: resource.ResourceEnvironmentId,
+					},
+				)
+				if err != nil {
+					logReq.Response = err.Error()
+					log.Println(err)
+					return
+				}
+				logReq.Response = deleteMenu
+			}
+		case "RELATION":
+			defer func() {
+				go h.versionHistory(c, logReq)
+			}()
+
+			var (
+				previous DataRelationUpdateWrapper
+				request  DataRelationCreateWrapper
+				response DataMenuCreateWrapper
+			)
+
+			err := json.Unmarshal([]byte(cast.ToString(v.Previous)), &previous)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+
+			err = json.Unmarshal([]byte(cast.ToString(v.Request)), &request)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+
+			err = json.Unmarshal([]byte(cast.ToString(v.Response)), &response)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+
+			logReq.Request = request.Data
+			// logReq.TableSlug = request.Data.Slug
+
+			switch actionType {
+			case "CREATE":
+				request.Data.Id = response.Data.Id
+
+				createRelation, err := services.GetBuilderServiceByType(nodeType).Relation().Create(
+					context.Background(),
+					request.Data,
+				)
+				if err != nil {
+					logReq.Response = err.Error()
+					log.Println(err)
+					return
+				}
+				logReq.Response = createRelation
+			case "UPDATE":
+				updateRelation, err := services.GetBuilderServiceByType(nodeType).Relation().Update(
+					context.Background(),
+					previous.Data,
+				)
+				if err != nil {
+					logReq.Response = err.Error()
+					log.Println(err)
+					return
+				}
+				logReq.Response = updateRelation
+			case "DELETE":
+				deleteRelation, err := services.GetBuilderServiceByType(nodeType).Relation().Delete(
+					context.Background(),
+					&obs.RelationPrimaryKey{
+						Id:        previous.Data.Id,
+						ProjectId: resource.ResourceEnvironmentId,
+					},
+				)
+				if err != nil {
+					logReq.Response = err.Error()
+					log.Println(err)
+					return
+				}
+				logReq.Response = deleteRelation
 			}
 		}
 	}
