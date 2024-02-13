@@ -32,6 +32,10 @@ type DataFieldWrapper2 struct {
 	Data *obs.Field
 }
 
+type DataViewWrapper struct {
+	Data *obs.View
+}
+
 func (h *HandlerV2) MigrateUp(c *gin.Context) {
 	req := []*models.MigrateUp{}
 
@@ -212,15 +216,43 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				go h.versionHistory(c, logReq)
 			}()
 
-			switch actionSource
-			createView, err := services.GetBuilderServiceByType(nodeType).View().Create(
-				context.Background(),
-				&view,
+			var (
+				previous DataViewWrapper
 			)
+
+			err = json.Unmarshal([]byte(cast.ToString(v.Previous)), &previous)
 			if err != nil {
-				logReq.Response = err.Error()
 				log.Println(err)
 				return
+			}
+
+			switch actionSource {
+			case "CREATE":
+				createView, err := services.GetBuilderServiceByType(nodeType).View().Create(
+					context.Background(),
+					&view,
+				)
+				if err != nil {
+					logReq.Response = err.Error()
+					log.Println(err)
+					return
+				}
+			case "UPDATE":
+				
+			case "DELETE":
+				logReq.Previous = previous.Data
+				_, err := services.GetBuilderServiceByType(resource.NodeType).View().Delete(
+					context.Background(),
+					&obs.ViewPrimaryKey{
+						Id:        previous.Data.Id,
+						ProjectId: resource.ResourceEnvironmentId,
+					},
+				)
+				if err != nil {
+					logReq.Response = err.Error()
+					log.Println(err)
+					return
+				}
 			}
 		}
 	}
