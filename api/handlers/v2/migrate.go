@@ -32,6 +32,10 @@ type DataFieldWrapper2 struct {
 	Data *obs.Field
 }
 
+type DataViewWrapper1 struct {
+	Data *obs.CreateViewRequest
+}
+
 func (h *HandlerV2) MigrateUp(c *gin.Context) {
 	req := []*models.MigrateUp{}
 
@@ -98,7 +102,8 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 			}
 		)
 
-		if actionSource == "TABLE" {
+		switch actionSource {
+		case "TABLE":
 			defer func() {
 				go h.versionHistory(c, logReq)
 			}()
@@ -156,7 +161,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				}
 				logReq.Response = updateTable
 			}
-		} else if actionSource == "FIELD" {
+		case "FIELD":
 			defer func() {
 				go h.versionHistory(c, logReq)
 			}()
@@ -207,21 +212,32 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				}
 				logReq.Previous = current1.Data
 			}
-		} else if actionSource == "VIEW" {
+		case "VIEW":
 			defer func() {
 				go h.versionHistory(c, logReq)
 			}()
 
-			switch actionSource
-			createView, err := services.GetBuilderServiceByType(nodeType).View().Create(
-				context.Background(),
-				&view,
+			var (
+				request DataViewWrapper1
 			)
-			if err != nil {
-				logReq.Response = err.Error()
-				log.Println(err)
-				return
+
+			switch actionSource {
+			case "CREATE":
+
+				createView, err := services.GetBuilderServiceByType(nodeType).View().Create(
+					context.Background(),
+					request.Data,
+				)
+				if err != nil {
+					logReq.Response = err.Error()
+					log.Println(err)
+					return
+				}
+				logReq.Response = createView
+
 			}
+		case "MENU":
+
 		}
 	}
 }
