@@ -129,19 +129,19 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 			err := json.Unmarshal([]byte(cast.ToString(v.Previous)), &previous)
 			if err != nil {
 				log.Println(err)
-				return
+				continue
 			}
 
 			err = json.Unmarshal([]byte(cast.ToString(v.Request)), &request)
 			if err != nil {
 				log.Println(err)
-				return
+				continue
 			}
 
 			err = json.Unmarshal([]byte(cast.ToString(v.Response)), &response)
 			if err != nil {
 				log.Println(err)
-				return
+				continue
 			}
 
 			logReq.Request = request.Data
@@ -158,7 +158,6 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				if err != nil {
 					logReq.Response = err.Error()
 					log.Println(err)
-					return
 				}
 				logReq.Response = createTable
 			case "UPDATE":
@@ -169,8 +168,8 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				if err != nil {
 					logReq.Response = err.Error()
 					log.Println(err)
-					return
 				}
+				logReq.Current = updateTable
 				logReq.Response = updateTable
 			}
 		case "FIELD":
@@ -179,50 +178,87 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 			}()
 
 			var (
-				current1 DataFieldWrapper1
-				current2 DataFieldWrapper2
+				request  DataFieldWrapper1
+				response DataFieldWrapper2
 			)
 
-			err = json.Unmarshal([]byte(cast.ToString(v.Current)), &current1)
+			err = json.Unmarshal([]byte(cast.ToString(v.Request)), &request)
 			if err != nil {
 				log.Println(err)
-				return
+				continue
 			}
+
+			err = json.Unmarshal([]byte(cast.ToString(v.Response)), &response)
+			if err != nil {
+				log.Println(err)
+				continue
+			}
+
+			logReq.TableSlug = request.Data.TableId
 
 			switch actionType {
 			case "CREATE":
 				createField, err := services.GetBuilderServiceByType(nodeType).Field().Create(
 					context.Background(),
-					current1.Data,
+					request.Data,
+				)
+				if err != nil {
+					logReq.Request = request.Data
+					logReq.Response = err.Error()
+					log.Println(err)
+				}
+				logReq.Request = request.Data
+				logReq.Response = createField
+				logReq.Current = createField
+			case "UPDATE":
+				oldField, err := services.GetBuilderServiceByType(resource.NodeType).Field().GetByID(
+					context.Background(),
+					&obs.FieldPrimaryKey{
+						Id:        response.Data.Id,
+						ProjectId: resource.ResourceEnvironmentId,
+					},
 				)
 				if err != nil {
 					logReq.Response = err.Error()
 					log.Println(err)
-					return
 				}
-				logReq.Response = createField
-			case "UPDATE":
+
+				logReq.Request = response.Data
+				logReq.Previous = oldField
+
 				updateField, err := services.GetBuilderServiceByType(nodeType).Field().Update(
 					context.Background(),
-					current2.Data,
+					response.Data,
 				)
 				if err != nil {
 					logReq.Response = err.Error()
 					log.Println(err)
-					return
 				}
 				logReq.Response = updateField
+				logReq.Current = updateField
 			case "DELETE":
-				_, err := services.GetBuilderServiceByType(nodeType).Field().Delete(
+				oldField, err := services.GetBuilderServiceByType(resource.NodeType).Field().GetByID(
 					context.Background(),
-					&obs.FieldPrimaryKey{Id: current1.Data.Id},
+					&obs.FieldPrimaryKey{
+						Id:        response.Data.Id,
+						ProjectId: resource.ResourceEnvironmentId,
+					},
 				)
 				if err != nil {
 					logReq.Response = err.Error()
 					log.Println(err)
-					return
 				}
-				logReq.Previous = current1.Data
+
+				logReq.Previous = oldField
+
+				_, err = services.GetBuilderServiceByType(nodeType).Field().Delete(
+					context.Background(),
+					&obs.FieldPrimaryKey{Id: response.Data.Id},
+				)
+				if err != nil {
+					logReq.Response = err.Error()
+					log.Println(err)
+				}
 			}
 		case "VIEW":
 			defer func() {
@@ -237,8 +273,10 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 			err = json.Unmarshal([]byte(cast.ToString(v.Current)), &current)
 			if err != nil {
 				log.Println(err)
-				return
+				continue
 			}
+
+			logReq.TableSlug = request.Data.TableSlug
 
 			switch actionSource {
 			case "CREATE":
@@ -249,7 +287,6 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				if err != nil {
 					logReq.Response = err.Error()
 					log.Println(err)
-					return
 				}
 				logReq.Response = createView
 			case "UPDATE":
@@ -260,7 +297,6 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				if err != nil {
 					logReq.Response = err.Error()
 					log.Println(err)
-					return
 				}
 				logReq.Current = resp
 			case "DELETE":
@@ -272,7 +308,8 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 					},
 				)
 				if err != nil {
-					return
+					logReq.Response = err.Error()
+					log.Println(err)
 				}
 			}
 		case "MENU":
