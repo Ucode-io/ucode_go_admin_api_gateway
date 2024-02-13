@@ -126,12 +126,6 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				response DataTableWrapper1
 			)
 
-			err := json.Unmarshal([]byte(cast.ToString(v.Previous)), &previous)
-			if err != nil {
-				log.Println(err)
-				continue
-			}
-
 			err = json.Unmarshal([]byte(cast.ToString(v.Request)), &request)
 			if err != nil {
 				log.Println(err)
@@ -150,6 +144,8 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 			switch actionType {
 			case "CREATE":
 				request.Data.Id = response.Data.Id
+				request.Data.ProjectId = resource.ResourceEnvironmentId
+				request.Data.EnvId = environmentId.(string)
 
 				createTable, err := services.GetBuilderServiceByType(nodeType).Table().Create(
 					context.Background(),
