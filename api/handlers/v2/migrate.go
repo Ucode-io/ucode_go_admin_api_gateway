@@ -32,8 +32,20 @@ type DataFieldWrapper2 struct {
 	Data *obs.Field
 }
 
-type DataViewWrapper struct {
+type DataViewWrapper1 struct {
+	Data *obs.CreateViewRequest
+}
+
+type DataViewWrapper2 struct {
 	Data *obs.View
+}
+
+type DataMenuCreateWrapper struct {
+	Data *obs.CreateMenuRequest
+}
+
+type DataMenuUpdateWrapper struct {
+	Data *obs.Menu
 }
 
 func (h *HandlerV2) MigrateUp(c *gin.Context) {
@@ -102,7 +114,8 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 			}
 		)
 
-		if actionSource == "TABLE" {
+		switch actionSource {
+		case "TABLE":
 			defer func() {
 				go h.versionHistory(c, logReq)
 			}()
@@ -160,7 +173,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				}
 				logReq.Response = updateTable
 			}
-		} else if actionSource == "FIELD" {
+		case "FIELD":
 			defer func() {
 				go h.versionHistory(c, logReq)
 			}()
@@ -211,16 +224,17 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				}
 				logReq.Previous = current1.Data
 			}
-		} else if actionSource == "VIEW" {
+		case "VIEW":
 			defer func() {
 				go h.versionHistory(c, logReq)
 			}()
 
 			var (
-				previous DataViewWrapper
+				request DataViewWrapper1
+				current DataViewWrapper2
 			)
 
-			err = json.Unmarshal([]byte(cast.ToString(v.Previous)), &previous)
+			err = json.Unmarshal([]byte(cast.ToString(v.Current)), &current)
 			if err != nil {
 				log.Println(err)
 				return
@@ -230,29 +244,94 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 			case "CREATE":
 				createView, err := services.GetBuilderServiceByType(nodeType).View().Create(
 					context.Background(),
-					&view,
+					request.Data,
 				)
 				if err != nil {
 					logReq.Response = err.Error()
 					log.Println(err)
 					return
 				}
+				logReq.Response = createView
 			case "UPDATE":
-				
+				resp, err := services.GetBuilderServiceByType(resource.NodeType).View().Update(
+					context.Background(),
+					current.Data,
+				)
+				if err != nil {
+					logReq.Response = err.Error()
+					log.Println(err)
+					return
+				}
+				logReq.Current = resp
 			case "DELETE":
-				logReq.Previous = previous.Data
-				_, err := services.GetBuilderServiceByType(resource.NodeType).View().Delete(
+				_, err = services.GetBuilderServiceByType(resource.NodeType).View().Delete(
 					context.Background(),
 					&obs.ViewPrimaryKey{
-						Id:        previous.Data.Id,
+						Id:        current.Data.Id,
 						ProjectId: resource.ResourceEnvironmentId,
 					},
 				)
 				if err != nil {
+					return
+				}
+			}
+		case "MENU":
+			defer func() {
+				go h.versionHistory(c, logReq)
+			}()
+
+			var (
+				previous DataMenuUpdateWrapper
+				request  DataMenuCreateWrapper
+				response DataMenuCreateWrapper
+			)
+
+			err := json.Unmarshal([]byte(cast.ToString(v.Previous)), &previous)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+
+			err = json.Unmarshal([]byte(cast.ToString(v.Request)), &request)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+
+			err = json.Unmarshal([]byte(cast.ToString(v.Response)), &response)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+
+			logReq.Request = request.Data
+			// logReq.TableSlug = request.Data.Slug
+
+			switch actionType {
+			case "CREATE":
+				request.Data.Id = response.Data.Id
+
+				createMenu, err := services.GetBuilderServiceByType(nodeType).Menu().Create(
+					context.Background(),
+					request.Data,
+				)
+				if err != nil {
 					logReq.Response = err.Error()
 					log.Println(err)
 					return
 				}
+				logReq.Response = createMenu
+			case "UPDATE":
+				updatemenu, err := services.GetBuilderServiceByType(nodeType).Menu().Update(
+					context.Background(),
+					previous.Data,
+				)
+				if err != nil {
+					logReq.Response = err.Error()
+					log.Println(err)
+					return
+				}
+				logReq.Response = updatemenu
 			}
 		}
 	}

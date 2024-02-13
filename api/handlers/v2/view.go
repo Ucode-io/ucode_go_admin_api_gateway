@@ -256,7 +256,7 @@ func (h *HandlerV2) UpdateView(c *gin.Context) {
 		return
 	}
 
-	userId, ok := c.Get("user_id")
+	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),

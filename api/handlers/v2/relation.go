@@ -406,14 +406,15 @@ func (h *HandlerV2) GetAllRelations(c *gin.Context) {
 
 // UpdateRelation godoc
 // @Security ApiKeyAuth
-// @ID update_relation
-// @Router /v1/relation [PUT]
+// @ID update_relations_v2
+// @Router /v2/relations/:collection [PUT]
 // @Security ApiKeyAuth
 // @Summary Update relation
 // @Description Update relation
 // @Tags Relation
 // @Accept json
 // @Produce json
+// @Param collection path string true "collection"
 // @Param relation body obs.UpdateRelationRequest  true "UpdateRelationRequestBody"
 // @Success 200 {object} status_http.Response{data=string} "Relation data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -498,16 +499,16 @@ func (h *HandlerV2) UpdateRelation(c *gin.Context) {
 		go h.versionHistory(c, logReq)
 	}()
 
-	// oldRelation, err = services.GetBuilderServiceByType(resource.NodeType).Relation().GetByID(
-	// 	context.Background(),
-	// 	&obs.RelationPrimaryKey{
-	// 		Id:        relation.Id,
-	// 		ProjectId: relation.ProjectId,
-	// 	},
-	// )
-	// if err != nil {
-	// 	return
-	// }
+	oldRelation, err = services.GetBuilderServiceByType(resource.NodeType).Relation().GetByID(
+		context.Background(),
+		&obs.RelationPrimaryKey{
+			Id:        relation.Id,
+			ProjectId: relation.ProjectId,
+		},
+	)
+	if err != nil {
+		return
+	}
 
 	relation.ProjectId = resource.ResourceEnvironmentId
 	switch resource.ResourceType {
