@@ -142,6 +142,7 @@ func (h *HandlerV2) CreateField(c *gin.Context) {
 			}
 			logReq.Request = field
 			logReq.Response = resp
+			logReq.Current = resp
 			go h.versionHistory(c, logReq)
 		}
 	case pb.ResourceType_POSTGRESQL:

@@ -24,6 +24,14 @@ type DataTableWrapper2 struct {
 	Data *obs.UpdateTableRequest
 }
 
+type DataFieldWrapper1 struct {
+	Data *obs.CreateFieldRequest
+}
+
+type DataFieldWrapper2 struct {
+	Data *obs.Field
+}
+
 func (h *HandlerV2) MigrateUp(c *gin.Context) {
 	req := []*models.MigrateUp{}
 
@@ -147,6 +155,72 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 					return
 				}
 				logReq.Response = updateTable
+			}
+		} else if actionSource == "FIELD" {
+			defer func() {
+				go h.versionHistory(c, logReq)
+			}()
+
+			var (
+				current1 DataFieldWrapper1
+				current2 DataFieldWrapper2
+			)
+
+			err = json.Unmarshal([]byte(cast.ToString(v.Current)), &current1)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+
+			switch actionType {
+			case "CREATE":
+				createField, err := services.GetBuilderServiceByType(nodeType).Field().Create(
+					context.Background(),
+					current1.Data,
+				)
+				if err != nil {
+					logReq.Response = err.Error()
+					log.Println(err)
+					return
+				}
+				logReq.Response = createField
+			case "UPDATE":
+				updateField, err := services.GetBuilderServiceByType(nodeType).Field().Update(
+					context.Background(),
+					current2.Data,
+				)
+				if err != nil {
+					logReq.Response = err.Error()
+					log.Println(err)
+					return
+				}
+				logReq.Response = updateField
+			case "DELETE":
+				_, err := services.GetBuilderServiceByType(nodeType).Field().Delete(
+					context.Background(),
+					&obs.FieldPrimaryKey{Id: current1.Data.Id},
+				)
+				if err != nil {
+					logReq.Response = err.Error()
+					log.Println(err)
+					return
+				}
+				logReq.Previous = current1.Data
+			}
+		} else if actionSource == "VIEW" {
+			defer func() {
+				go h.versionHistory(c, logReq)
+			}()
+
+			switch actionSource
+			createView, err := services.GetBuilderServiceByType(nodeType).View().Create(
+				context.Background(),
+				&view,
+			)
+			if err != nil {
+				logReq.Response = err.Error()
+				log.Println(err)
+				return
 			}
 		}
 	}
