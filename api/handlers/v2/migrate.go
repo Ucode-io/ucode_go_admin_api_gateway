@@ -399,7 +399,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				)
 				if err != nil {
 					logReq.Response = err.Error()
-					return
+					continue
 				}
 				logReq.Request = current.Data
 				logReq.Current = updatemenu
@@ -477,7 +477,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				)
 				if err != nil {
 					logReq.Response = err.Error()
-					return
+					continue
 				}
 				logReq.Request = current.Data
 				logReq.Current = updateView
@@ -542,7 +542,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				)
 				if err != nil {
 					logReq.Response = err.Error()
-					return
+					continue
 				}
 				logReq.Request = current.Data
 				logReq.Current = updateLayout
