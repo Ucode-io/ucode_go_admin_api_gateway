@@ -1,0 +1,192 @@
+{
+    "table_from": "navoiy",
+    "auto_filters": [
+        {
+            "field_from": "",
+            "field_to": ""
+        }
+    ],
+    "action_relations": [],
+    "attributes": {
+        "label_en": "ok",
+        "label_to_en": "ok",
+        "table_editable": false
+    },
+    "table_to": "bmw",
+    "type": "Many2One",
+    "view_fields": [
+        "34efe937-e9dc-46e9-9e58-808504c33806"
+    ],
+    "filtersList": [
+        {
+            "attributes": {
+                "field_permission": {
+                    "edit_permission": true,
+                    "field_id": "737efbc3-55f5-4433-9d9b-f557feee4fcb",
+                    "guid": "ec7a053c-ca43-4ac9-8271-6576f6f7693f",
+                    "label": "Name",
+                    "role_id": "47dbe288-2cc0-49ae-bafe-07ed82347ae6",
+                    "table_slug": "bmw",
+                    "view_permission": true
+                },
+                "format": "SINGLE_LINE",
+                "formula": "undefined + undefined",
+                "label": "",
+                "label_en": "Name",
+                "math": {
+                    "label": "plus",
+                    "value": "+"
+                },
+                "options": []
+            },
+            "autofill_field": "",
+            "autofill_table": "",
+            "automatic": false,
+            "commit_id": "",
+            "default": "",
+            "enable_multilanguage": false,
+            "hide_multilanguage": false,
+            "id": "737efbc3-55f5-4433-9d9b-f557feee4fcb",
+            "index": "string",
+            "is_search": true,
+            "is_system": false,
+            "is_visible": false,
+            "label": "Name",
+            "minio_folder": "",
+            "relation_field": "",
+            "required": false,
+            "show_label": true,
+            "slug": "Name",
+            "table_id": "6bd735e1-bfb6-43af-b147-178f2b56abaf",
+            "type": "SINGLE_LINE",
+            "unique": false
+        },
+        {
+            "attributes": {
+                "field_permission": {
+                    "edit_permission": true,
+                    "field_id": "34efe937-e9dc-46e9-9e58-808504c33806",
+                    "guid": "a5d188fa-f166-4225-86fa-e6168294161d",
+                    "label": "Age",
+                    "role_id": "47dbe288-2cc0-49ae-bafe-07ed82347ae6",
+                    "table_slug": "bmw",
+                    "view_permission": true
+                },
+                "format": "NUMBER",
+                "formula": "undefined undefined undefined",
+                "label": "",
+                "label_en": "Age",
+                "options": []
+            },
+            "autofill_field": "",
+            "autofill_table": "",
+            "automatic": false,
+            "commit_id": "",
+            "default": "",
+            "enable_multilanguage": false,
+            "hide_multilanguage": false,
+            "id": "34efe937-e9dc-46e9-9e58-808504c33806",
+            "index": "string",
+            "is_search": true,
+            "is_system": false,
+            "is_visible": false,
+            "label": "Age",
+            "minio_folder": "",
+            "relation_field": "",
+            "required": false,
+            "show_label": true,
+            "slug": "Age",
+            "table_id": "6bd735e1-bfb6-43af-b147-178f2b56abaf",
+            "type": "NUMBER",
+            "unique": false
+        }
+    ],
+    "columnsList": [
+        {
+            "attributes": {
+                "field_permission": {
+                    "edit_permission": true,
+                    "field_id": "737efbc3-55f5-4433-9d9b-f557feee4fcb",
+                    "guid": "ec7a053c-ca43-4ac9-8271-6576f6f7693f",
+                    "label": "Name",
+                    "role_id": "47dbe288-2cc0-49ae-bafe-07ed82347ae6",
+                    "table_slug": "bmw",
+                    "view_permission": true
+                },
+                "format": "SINGLE_LINE",
+                "formula": "undefined + undefined",
+                "label": "",
+                "label_en": "Name",
+                "math": {
+                    "label": "plus",
+                    "value": "+"
+                },
+                "options": []
+            },
+            "autofill_field": "",
+            "autofill_table": "",
+            "automatic": false,
+            "commit_id": "",
+            "default": "",
+            "enable_multilanguage": false,
+            "hide_multilanguage": false,
+            "id": "737efbc3-55f5-4433-9d9b-f557feee4fcb",
+            "index": "string",
+            "is_search": true,
+            "is_system": false,
+            "is_visible": false,
+            "label": "Name",
+            "minio_folder": "",
+            "relation_field": "",
+            "required": false,
+            "show_label": true,
+            "slug": "Name",
+            "table_id": "6bd735e1-bfb6-43af-b147-178f2b56abaf",
+            "type": "SINGLE_LINE",
+            "unique": false
+        },
+        {
+            "attributes": {
+                "field_permission": {
+                    "edit_permission": true,
+                    "field_id": "34efe937-e9dc-46e9-9e58-808504c33806",
+                    "guid": "a5d188fa-f166-4225-86fa-e6168294161d",
+                    "label": "Age",
+                    "role_id": "47dbe288-2cc0-49ae-bafe-07ed82347ae6",
+                    "table_slug": "bmw",
+                    "view_permission": true
+                },
+                "format": "NUMBER",
+                "formula": "undefined undefined undefined",
+                "label": "",
+                "label_en": "Age",
+                "options": []
+            },
+            "autofill_field": "",
+            "autofill_table": "",
+            "automatic": false,
+            "commit_id": "",
+            "default": "",
+            "enable_multilanguage": false,
+            "hide_multilanguage": false,
+            "id": "34efe937-e9dc-46e9-9e58-808504c33806",
+            "index": "string",
+            "is_search": true,
+            "is_system": false,
+            "is_visible": false,
+            "label": "Age",
+            "minio_folder": "",
+            "relation_field": "",
+            "required": false,
+            "show_label": true,
+            "slug": "Age",
+            "table_id": "6bd735e1-bfb6-43af-b147-178f2b56abaf",
+            "type": "NUMBER",
+            "unique": false
+        }
+    ],
+    "relation_table_slug": "bmw",
+    "quick_filters": [],
+    "default_values": [],
+    "label": "ok"
+}

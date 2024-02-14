@@ -189,14 +189,15 @@ func (h *HandlerV2) GetByIdRelation(c *gin.Context) {
 }
 
 // CreateRelation godoc
-// @ID create_relation
-// @Router /v1/relation [POST]
+// @ID create_relations_V2
+// @Router /v2/relations/{collection} [POST]
 // @Security ApiKeyAuth
 // @Summary Create relation
 // @Description Create relation
 // @Tags Relation
 // @Accept json
 // @Produce json
+// @Param collection path string true "collection"
 // @Param table body obs.CreateRelationRequest true "CreateRelationRequestBody"
 // @Success 201 {object} status_http.Response{data=string} "Relation data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"

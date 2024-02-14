@@ -27241,6 +27241,53 @@ paths:
       tags:
       - language
   /v2/menus:
+    post:
+      consumes:
+      - application/json
+      description: Create menu
+      operationId: create_menus_v2
+      parameters:
+      - description: MenuRequest
+        in: body
+        name: menu
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateMenuRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Menu data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Menu'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create menu
+      tags:
+      - Menu
     put:
       consumes:
       - application/json
@@ -27496,6 +27543,59 @@ paths:
       - ApiKeyAuth: []
       - ApiKeyAuth: []
       summary: Update relation
+      tags:
+      - Relation
+  /v2/relations/{collection}:
+    post:
+      consumes:
+      - application/json
+      description: Create relation
+      operationId: create_relations_V2
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: CreateRelationRequestBody
+        in: body
+        name: table
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.CreateRelationRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Relation data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create relation
       tags:
       - Relation
   /v2/relations/{collection}/{id}:

@@ -22,8 +22,8 @@ import (
 
 // CreateMenu godoc
 // @Security ApiKeyAuth
-// @ID create_menu
-// @Router /v1/menu [POST]
+// @ID create_menus_v2
+// @Router /v2/menus [POST]
 // @Summary Create menu
 // @Description Create menu
 // @Tags Menu
@@ -582,6 +582,7 @@ func (h *HandlerV2) DeleteMenu(c *gin.Context) {
 			},
 			UserInfo:  cast.ToString(userId),
 			TableSlug: "Menu",
+			Request:   menuID,
 		}
 	)
 
