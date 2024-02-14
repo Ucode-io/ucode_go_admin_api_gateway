@@ -407,3 +407,132 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 
 	h.handleResponse(c, status_http.OK, ids)
 }
+
+func (h *HandlerV2) MigrateDown(c *gin.Context) {
+	var (
+		ids []string
+		req models.MigrateUpRequest
+	)
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	migrateRequest := req.Data
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err := errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	userId, _ := c.Get("user_id")
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		resource.GetProjectId(),
+		resource.NodeType,
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	for _, v := range migrateRequest {
+		var (
+			actionSource  = v.ActionSource
+			actionType    = strings.Split(v.ActionType, " ")[0]
+			nodeType      = resource.NodeType
+			resourceEnvId = resource.ResourceEnvironmentId
+
+			logReq = &models.CreateVersionHistoryRequest{
+				Services:     services,
+				NodeType:     nodeType,
+				ProjectId:    resourceEnvId,
+				ActionSource: v.ActionSource,
+				ActionType:   v.ActionType,
+				UsedEnvironments: map[string]bool{
+					cast.ToString(environmentId): true,
+				},
+				UserInfo: cast.ToString(userId),
+			}
+		)
+
+		if actionSource == "TABLE" {
+			defer func() {
+				go h.versionHistory(c, logReq)
+			}()
+
+			var (
+				previous DataUpdateTableWrapper
+				current  DataTableWrapper
+			)
+
+			err := json.Unmarshal([]byte(cast.ToString(v.Current)), &current)
+			if err != nil {
+				continue
+			}
+
+			err = json.Unmarshal([]byte(cast.ToString(v.Previous)), &previous)
+			if err != nil {
+				continue
+			}
+
+			current.Data.ProjectId = resourceEnvId
+			current.Data.EnvId = cast.ToString(environmentId)
+			logReq.Request = current.Data
+			logReq.TableSlug = current.Data.Slug
+
+			switch actionType {
+			case "CREATE":
+				_, err := services.GetBuilderServiceByType(nodeType).Table().Delete(
+					context.Background(),
+					&obs.TablePrimaryKey{
+						Id:        current.Data.Id,
+						ProjectId: resourceEnvId,
+						EnvId:     cast.ToString(environmentId),
+					},
+				)
+				if err != nil {
+					logReq.Response = err.Error()
+					continue
+				}
+				logReq.Previous = current.Data
+				ids = append(ids, v.Id)
+			case "UPDATE":
+				_, err = services.GetBuilderServiceByType(nodeType).Table().Update(
+					context.Background(),
+					previous.Data,
+				)
+				if err != nil {
+					logReq.Response = err.Error()
+					continue
+				}
+				ids = append(ids, v.Id)
+			}
+		}
+	}
+
+	h.handleResponse(c, status_http.OK, ids)
+}
