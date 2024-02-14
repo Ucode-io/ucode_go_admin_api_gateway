@@ -23,6 +23,7 @@ import (
 // @Tags VersionHistory
 // @Accept json
 // @Produce json
+// @Param environment_id path string true "environment_id"
 // @Param id path string true "id"
 // @Success 200 {object} status_http.Response{data=obs.VersionHistory} "VersionHistoryBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -88,6 +89,20 @@ func (h *HandlerV2) GetVersionHistoryByID(c *gin.Context) {
 	h.handleResponse(c, status_http.OK, resp)
 }
 
+// GetAllVersionHistory godoc
+// @Security ApiKeyAuth
+// @ID get_all_version_history
+// @Router /v2/version/history/{environment_id} [GET]
+// @Summary Get version history list
+// @Description Get version history list
+// @Tags VersionHistory
+// @Accept json
+// @Produce json
+// @Param environment_id path string true "environment_id"
+// @Param filters query obs.GetAllRquest true "filters"
+// @Success 200 {object} status_http.Response{data=obs.ListVersionHistory} "ViewBody"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) GetAllVersionHistory(c *gin.Context) {
 
 	var (
@@ -216,4 +231,90 @@ func (h *HandlerV2) GetAllVersionHistory(c *gin.Context) {
 	}
 
 	h.handleResponse(c, status_http.OK, resp)
+}
+
+// UpdateListVersionHistory godoc
+// @Security ApiKeyAuth
+// @ID update_version_history
+// @Router /v2/version/history/{environment_id} [PUT]
+// @Summary Update version history
+// @Description Update version history
+// @Tags VersionHistory
+// @Accept json
+// @Produce json
+// @Param environment_id path string true "environment_id"
+// @Param view body obs.UsedForEnvRequest true "UpdateViewRequestBody"
+// @Success 200 {object} status_http.Response{data=obs.UsedForEnvRequest} "UsedForEnvRequest data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *HandlerV2) UpdateVersionHistory(c *gin.Context) {
+	var (
+		view obs.UsedForEnvRequest
+	)
+
+	err := c.ShouldBindJSON(&view)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId := c.Param("environment_id")
+	if !util.IsValidUUID(environmentId) {
+		err := errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId,
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	view.ProjectId = resource.ResourceEnvironmentId
+
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		_, err = services.GetBuilderServiceByType(resource.NodeType).VersionHistory().Update(
+			context.Background(),
+			&view,
+		)
+
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+		// resp, err = services.PostgresBuilderService().View().Update(
+		// 	context.Background(),
+		// 	&view,
+		// )
+
+		// if err != nil {
+		// 	h.handleResponse(c, status_http.GRPCError, err.Error())
+		// 	return
+		// }
+	}
+
+	h.handleResponse(c, status_http.OK, nil)
 }

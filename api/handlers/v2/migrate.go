@@ -43,13 +43,32 @@ type DataUpdateMenuWrapper struct {
 	Data *obs.Menu
 }
 
+// MigrateUp godoc
+// @Security ApiKeyAuth
+// @ID migrate_up
+// @Router /v2/version/history/migrate/up [POST]
+// @Summary Migrate up
+// @Description Migrate up
+// @Tags VersionHistory
+// @Accept json
+// @Produce json
+// @Param environment_id path string false "environment_id"
+// @Param migrate body models.MigrateUpRequest true "MigrateUpRequest"
+// @Success 200 {object} status_http.Response{data=models.MigrateUpResponse} "Upbody"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) MigrateUp(c *gin.Context) {
-	migrateRequest := []*models.MigrateUp{}
+	var (
+		ids []string
+		req models.MigrateUpRequest
+	)
 
-	if err := c.ShouldBindJSON(&migrateRequest); err != nil {
+	if err := c.ShouldBindJSON(&req); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
+
+	migrateRequest := req.Data
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -154,6 +173,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				}
 				logReq.Current = current.Data
 				logReq.Response = current.Data
+				ids = append(ids, v.Id)
 			case "UPDATE":
 				logReq.Previous = previous.Data
 
@@ -167,6 +187,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				}
 				logReq.Current = current.Data
 				logReq.Response = current.Data
+				ids = append(ids, v.Id)
 			}
 		} else if actionSource == "FIELD" {
 			defer func() {
@@ -215,6 +236,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				logReq.Request = current.Data
 				logReq.Current = current.Data
 				logReq.Response = createField
+				ids = append(ids, v.Id)
 			case "UPDATE":
 				logReq.Previous = previous.Data
 
@@ -229,6 +251,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				logReq.Request = currentUpdate.Data
 				logReq.Current = updateField
 				logReq.Response = updateField
+				ids = append(ids, v.Id)
 			case "DELETE":
 				logReq.Previous = previous.Data
 				_, err := services.GetBuilderServiceByType(nodeType).Field().Delete(
@@ -243,6 +266,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 					logReq.Response = err.Error()
 					continue
 				}
+				ids = append(ids, v.Id)
 			}
 		} else if actionSource == "RELATION" {
 			defer func() {
@@ -283,6 +307,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				logReq.Request = request.Data
 				logReq.Current = createRelation
 				logReq.Response = createRelation
+				ids = append(ids, v.Id)
 			case "DELETE":
 				logReq.Previous = response.Data
 				_, err := services.GetBuilderServiceByType(nodeType).Field().Delete(
@@ -297,6 +322,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 					logReq.Response = err.Error()
 					continue
 				}
+				ids = append(ids, v.Id)
 			}
 		} else if actionSource == "MENU" {
 			defer func() {
@@ -345,6 +371,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				logReq.Request = request.Data
 				logReq.Current = createMenu
 				logReq.Response = createMenu
+				ids = append(ids, v.Id)
 			case "UPDATE":
 				logReq.Previous = previous.Data
 				updatemenu, err := services.GetBuilderServiceByType(nodeType).Menu().Update(
@@ -358,6 +385,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				logReq.Request = current.Data
 				logReq.Current = updatemenu
 				logReq.Response = updatemenu
+				ids = append(ids, v.Id)
 			case "DELETE":
 				logReq.Previous = previous.Data
 				_, err = services.GetBuilderServiceByType(nodeType).Menu().Delete(
@@ -372,7 +400,10 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 					logReq.Response = err.Error()
 					continue
 				}
+				ids = append(ids, v.Id)
 			}
 		}
 	}
+
+	h.handleResponse(c, status_http.OK, ids)
 }

@@ -2441,6 +2441,47 @@ definitions:
       subdomain:
         type: string
     type: object
+  models.MigrateUp:
+    properties:
+      action_source:
+        type: string
+      action_type:
+        type: string
+      api_key:
+        type: string
+      current: {}
+      date:
+        type: string
+      id:
+        type: string
+      previus: {}
+      request: {}
+      response: {}
+      table_slug:
+        type: string
+      type:
+        type: string
+      used_envrironments:
+        additionalProperties:
+          type: boolean
+        type: object
+      user_info:
+        type: string
+    type: object
+  models.MigrateUpRequest:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/models.MigrateUp'
+        type: array
+    type: object
+  models.MigrateUpResponse:
+    properties:
+      ids:
+        items:
+          type: string
+        type: array
+    type: object
   models.MultipleInsertItems:
     properties:
       items:
@@ -4099,6 +4140,17 @@ definitions:
       type:
         type: string
     type: object
+  object_builder_service.ListVersionHistory:
+    properties:
+      count:
+        type: integer
+      histories:
+        items:
+          $ref: '#/definitions/object_builder_service.VersionHistory'
+        type: array
+      project_id:
+        type: string
+    type: object
   object_builder_service.ManyToManyMessage:
     properties:
       id_from:
@@ -5185,6 +5237,17 @@ definitions:
         items:
           $ref: '#/definitions/object_builder_service.ViewRelationReq'
         type: array
+    type: object
+  object_builder_service.UsedForEnvRequest:
+    properties:
+      env_id:
+        type: string
+      ids:
+        items:
+          type: string
+        type: array
+      project_id:
+        type: string
     type: object
   object_builder_service.V2LoginResponse:
     properties:
@@ -28549,6 +28612,135 @@ paths:
       summary: Convert html to pdf
       tags:
       - Utils
+  /v2/version/history/{environment_id}:
+    get:
+      consumes:
+      - application/json
+      description: Get version history list
+      operationId: get_all_version_history
+      parameters:
+      - description: environment_id
+        in: path
+        name: environment_id
+        required: true
+        type: string
+      - in: query
+        name: api_key
+        type: string
+      - in: query
+        name: env_id
+        type: string
+      - in: query
+        name: from_date
+        type: string
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: offset
+        type: integer
+      - in: query
+        name: order_by
+        type: boolean
+      - in: query
+        name: project_id
+        type: string
+      - in: query
+        name: to_date
+        type: string
+      - in: query
+        name: type
+        type: string
+      - in: query
+        name: user_info
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ViewBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.ListVersionHistory'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get version history list
+      tags:
+      - VersionHistory
+    put:
+      consumes:
+      - application/json
+      description: Update version history
+      operationId: update_version_history
+      parameters:
+      - description: environment_id
+        in: path
+        name: environment_id
+        required: true
+        type: string
+      - description: UpdateViewRequestBody
+        in: body
+        name: view
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.UsedForEnvRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: UsedForEnvRequest data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.UsedForEnvRequest'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update version history
+      tags:
+      - VersionHistory
   /v2/version/history/{environment_id}/{id}:
     get:
       consumes:
@@ -28556,6 +28748,11 @@ paths:
       description: Get single version history
       operationId: get_version_history_by_id
       parameters:
+      - description: environment_id
+        in: path
+        name: environment_id
+        required: true
+        type: string
       - description: id
         in: path
         name: id
@@ -28594,6 +28791,58 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get single version history
+      tags:
+      - VersionHistory
+  /v2/version/history/migrate/up:
+    post:
+      consumes:
+      - application/json
+      description: Migrate up
+      operationId: migrate_up
+      parameters:
+      - description: environment_id
+        in: path
+        name: environment_id
+        type: string
+      - description: MigrateUpRequest
+        in: body
+        name: migrate
+        required: true
+        schema:
+          $ref: '#/definitions/models.MigrateUpRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Upbody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.MigrateUpResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Migrate up
       tags:
       - VersionHistory
   /v2/views/{collection}:
