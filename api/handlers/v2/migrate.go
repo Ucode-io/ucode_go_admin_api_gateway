@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strings"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -46,21 +47,22 @@ type DataUpdateMenuWrapper struct {
 // MigrateUp godoc
 // @Security ApiKeyAuth
 // @ID migrate_up
-// @Router /v2/version/history/migrate/up [POST]
+// @Router /v2/version/history/migrate/up/{environment_id} [POST]
 // @Summary Migrate up
 // @Description Migrate up
 // @Tags VersionHistory
 // @Accept json
 // @Produce json
-// @Param environment_id path string false "environment_id"
+// @Param environment_id path string true "environment_id"
 // @Param migrate body models.MigrateUpRequest true "MigrateUpRequest"
 // @Success 200 {object} status_http.Response{data=models.MigrateUpResponse} "Upbody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) MigrateUp(c *gin.Context) {
 	var (
-		ids []string
-		req models.MigrateUpRequest
+		resp models.MigrateUpResponse
+		req  models.MigrateUpRequest
+		ids  []string
 	)
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -76,8 +78,8 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 		return
 	}
 
-	environmentId, ok := c.Get("environment_id")
-	if !ok || !util.IsValidUUID(environmentId.(string)) {
+	environmentId := c.Param("environment_id")
+	if !ok || !util.IsValidUUID(environmentId) {
 		err := errors.New("error getting environment id | not valid")
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
@@ -89,7 +91,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
-			EnvironmentId: environmentId.(string),
+			EnvironmentId: environmentId,
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
 	)
@@ -139,7 +141,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				currentUpdate DataUpdateTableWrapper
 			)
 
-			err := json.Unmarshal([]byte(cast.ToString(v.Current)), &current)
+			err := json.Unmarshal([]byte(cast.ToString(v.Request)), &current)
 			if err != nil {
 				continue
 			}
@@ -163,11 +165,13 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 
 			switch actionType {
 			case "CREATE":
+				fmt.Println("HERE AGAIN")
 				_, err = services.GetBuilderServiceByType(nodeType).Table().Create(
 					context.Background(),
 					current.Data,
 				)
 				if err != nil {
+					fmt.Println("CREATE TABLE ERROR: ", err)
 					logReq.Response = err.Error()
 					continue
 				}
@@ -405,5 +409,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 		}
 	}
 
-	h.handleResponse(c, status_http.OK, ids)
+	resp.Ids = ids
+
+	h.handleResponse(c, status_http.OK, resp)
 }

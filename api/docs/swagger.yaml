@@ -28793,7 +28793,7 @@ paths:
       summary: Get single version history
       tags:
       - VersionHistory
-  /v2/version/history/migrate/up:
+  /v2/version/history/migrate/up/{environment_id}:
     post:
       consumes:
       - application/json
@@ -28803,6 +28803,7 @@ paths:
       - description: environment_id
         in: path
         name: environment_id
+        required: true
         type: string
       - description: MigrateUpRequest
         in: body
