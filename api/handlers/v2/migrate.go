@@ -538,6 +538,234 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 				}
 				ids = append(ids, v.Id)
 			}
+		} else if actionSource == "FIELD" {
+			defer func() {
+				go h.versionHistory(c, logReq)
+			}()
+
+			var (
+				current        DataCreateFieldWrapper
+				previous       DataFieldWrapper
+				createPrevious DataCreateFieldWrapper
+				currentUpdate  DataFieldWrapper
+			)
+
+			err := json.Unmarshal([]byte(cast.ToString(v.Current)), &current)
+			if err != nil {
+				continue
+			}
+
+			err = json.Unmarshal([]byte(cast.ToString(v.Previous)), &previous)
+			if err != nil {
+				continue
+			}
+
+			err = json.Unmarshal([]byte(cast.ToString(v.Current)), &currentUpdate)
+			if err != nil {
+				continue
+			}
+
+			current.Data.ProjectId = resourceEnvId
+			current.Data.EnvId = cast.ToString(environmentId)
+			currentUpdate.Data.ProjectId = resourceEnvId
+			currentUpdate.Data.EnvId = cast.ToString(environmentId)
+			previous.Data.ProjectId = resourceEnvId
+			previous.Data.EnvId = cast.ToString(environmentId)
+			logReq.TableSlug = current.Data.TableId
+
+			switch actionType {
+			case "CREATE":
+				createField, err := services.GetBuilderServiceByType(nodeType).Field().Delete(
+					context.Background(),
+					&obs.FieldPrimaryKey{
+						ProjectId: current.Data.ProjectId,
+						EnvId:     current.Data.EnvId,
+						Id:        current.Data.Id,
+					},
+				)
+				if err != nil {
+					logReq.Response = err.Error()
+					continue
+				}
+				logReq.Request = current.Data
+				logReq.Current = current.Data
+				logReq.Response = createField
+				ids = append(ids, v.Id)
+			case "UPDATE":
+				logReq.Previous = previous.Data
+
+				updateField, err := services.GetBuilderServiceByType(nodeType).Field().Update(
+					context.Background(),
+					previous.Data,
+				)
+				if err != nil {
+					logReq.Response = err.Error()
+					continue
+				}
+				logReq.Request = currentUpdate.Data
+				logReq.Current = updateField
+				logReq.Response = updateField
+				ids = append(ids, v.Id)
+			case "DELETE":
+				logReq.Previous = previous.Data
+				_, err := services.GetBuilderServiceByType(nodeType).Field().Create(
+					context.Background(),
+					createPrevious.Data,
+				)
+				if err != nil {
+					logReq.Response = err.Error()
+					continue
+				}
+				ids = append(ids, v.Id)
+			}
+		} else if actionSource == "RELATION" {
+			defer func() {
+				go h.versionHistory(c, logReq)
+			}()
+
+			var (
+				request  DataCreateRelationWrapper
+				response DataCreateRelationWrapper
+				previous DataCreateRelationWrapper
+			)
+
+			err := json.Unmarshal([]byte(cast.ToString(v.Request)), &request)
+			if err != nil {
+				continue
+			}
+
+			err = json.Unmarshal([]byte(cast.ToString(v.Response)), &response)
+			if err != nil {
+				continue
+			}
+
+			err = json.Unmarshal([]byte(cast.ToString(v.Previous)), &previous)
+			if err != nil {
+				continue
+			}
+
+			request.Data.ProjectId = resourceEnvId
+			request.Data.EnvId = cast.ToString(environmentId)
+			response.Data.ProjectId = resourceEnvId
+			response.Data.EnvId = cast.ToString(environmentId)
+			previous.Data.ProjectId = resourceEnvId
+			previous.Data.EnvId = cast.ToString(environmentId)
+			logReq.TableSlug = request.Data.RelationTableSlug
+
+			switch actionType {
+			case "CREATE":
+				logReq.Previous = response.Data
+				_, err := services.GetBuilderServiceByType(nodeType).Field().Delete(
+					context.Background(),
+					&obs.FieldPrimaryKey{
+						Id:        response.Data.Id,
+						ProjectId: resourceEnvId,
+						EnvId:     cast.ToString(environmentId),
+					},
+				)
+				if err != nil {
+					logReq.Response = err.Error()
+					continue
+				}
+				ids = append(ids, v.Id)
+			case "DELETE":
+				createRelation, err := services.GetBuilderServiceByType(nodeType).Relation().Create(
+					context.Background(),
+					previous.Data,
+				)
+				if err != nil {
+					logReq.Response = err.Error()
+					continue
+				}
+				logReq.Request = request.Data
+				logReq.Current = createRelation
+				logReq.Response = createRelation
+				ids = append(ids, v.Id)
+			}
+		} else if actionSource == "MENU" {
+			defer func() {
+				go h.versionHistory(c, logReq)
+			}()
+
+			var (
+				request        DataCreateMenuWrapper
+				previous       DataCreateMenuWrapper
+				previousUpdate DataUpdateMenuWrapper
+				current        DataUpdateMenuWrapper
+			)
+
+			err := json.Unmarshal([]byte(cast.ToString(v.Request)), &request)
+			if err != nil {
+				continue
+			}
+
+			err = json.Unmarshal([]byte(cast.ToString(v.Previous)), &previous)
+			if err != nil {
+				continue
+			}
+
+			err = json.Unmarshal([]byte(cast.ToString(v.Request)), &current)
+			if err != nil {
+				continue
+			}
+
+			err = json.Unmarshal([]byte(cast.ToString(v.Previous)), &previous)
+			if err != nil {
+				continue
+			}
+
+			request.Data.ProjectId = resourceEnvId
+			request.Data.EnvId = cast.ToString(environmentId)
+			previous.Data.ProjectId = resourceEnvId
+			previous.Data.EnvId = cast.ToString(environmentId)
+			current.Data.ProjectId = resourceEnvId
+			current.Data.EnvId = cast.ToString(environmentId)
+			logReq.TableSlug = "Menu"
+
+			switch actionType {
+			case "CREATE":
+				logReq.Previous = previous.Data
+				_, err = services.GetBuilderServiceByType(nodeType).Menu().Delete(
+					context.Background(),
+					&obs.MenuPrimaryKey{
+						Id:        previous.Data.Id,
+						ProjectId: resourceEnvId,
+						EnvId:     cast.ToString(environmentId),
+					},
+				)
+				if err != nil {
+					logReq.Response = err.Error()
+					continue
+				}
+				ids = append(ids, v.Id)
+			case "UPDATE":
+				logReq.Previous = previous.Data
+				updatemenu, err := services.GetBuilderServiceByType(nodeType).Menu().Update(
+					context.Background(),
+					previousUpdate.Data,
+				)
+				if err != nil {
+					logReq.Response = err.Error()
+					return
+				}
+				logReq.Request = current.Data
+				logReq.Current = updatemenu
+				logReq.Response = updatemenu
+				ids = append(ids, v.Id)
+			case "DELETE":
+				createMenu, err := services.GetBuilderServiceByType(nodeType).Menu().Create(
+					context.Background(),
+					request.Data,
+				)
+				if err != nil {
+					logReq.Response = err.Error()
+					continue
+				}
+				logReq.Request = request.Data
+				logReq.Current = createMenu
+				logReq.Response = createMenu
+				ids = append(ids, v.Id)
+			}
 		}
 	}
 
