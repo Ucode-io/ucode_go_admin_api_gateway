@@ -108,6 +108,7 @@ func (h *HandlerV2) GetAllVersionHistory(c *gin.Context) {
 	var (
 		resp             *obs.ListVersionHistory
 		fromDate, toDate string
+		orderby          bool
 	)
 	offset, err := h.getOffsetParam(c)
 	if err != nil {
@@ -163,29 +164,13 @@ func (h *HandlerV2) GetAllVersionHistory(c *gin.Context) {
 		return
 	}
 
-	currentEnvironmentId, ok := c.Get("environment_id")
-	if !ok || !util.IsValidUUID(currentEnvironmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
-		return
-	}
-
-	// envId := ""
-	// queryEnvId := ""
-	// if strings.ToUpper(c.Param("type")) == "DOWN" {
-	// 	envId = currentEnvironmentId.(string)
-	// } else {
-	// 	envId = environmentId
-	// 	queryEnvId = currentEnvironmentId.(string)
-	// }
-
 	fmt.Println("\n\n\n history env", environmentId, projectId)
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
-			EnvironmentId: currentEnvironmentId.(string),
+			EnvironmentId: environmentId,
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
 	)
@@ -194,19 +179,25 @@ func (h *HandlerV2) GetAllVersionHistory(c *gin.Context) {
 		return
 	}
 
+	tip := strings.ToUpper(c.Query("type"))
+	if tip == "UP" {
+		orderby = true
+	}
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).VersionHistory().GatAll(
 			context.Background(),
 			&obs.GetAllRquest{
-				Type:      strings.ToUpper(c.Query("type")),
+				Type:      tip,
 				ProjectId: resource.ResourceEnvironmentId,
-				EnvId:     currentEnvironmentId.(string),
+				EnvId:     environmentId,
 				ApiKey:    apiKey,
 				Offset:    int32(offset),
 				Limit:     int32(limit),
 				FromDate:  fromDate,
 				ToDate:    toDate,
+				OrderBy:   orderby,
 			},
 		)
 		fmt.Println("\n\n\n\n ~~~~~~> ENV_ID ", c.DefaultQuery("env_id", ""), resp)

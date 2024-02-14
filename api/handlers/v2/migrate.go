@@ -44,6 +44,14 @@ type DataUpdateMenuWrapper struct {
 	Data *obs.Menu
 }
 
+type DataCreateViewWrapper struct {
+	Data *obs.CreateViewRequest
+}
+
+type DataUpdateViewWrapper struct {
+	Data *obs.View
+}
+
 // MigrateUp godoc
 // @Security ApiKeyAuth
 // @ID migrate_up
@@ -70,6 +78,13 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 		return
 	}
 
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
 	migrateRequest := req.Data
 
 	projectId, ok := c.Get("project_id")
@@ -78,12 +93,14 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 		return
 	}
 
-	environmentId := c.Param("environment_id")
-	if !ok || !util.IsValidUUID(environmentId) {
-		err := errors.New("error getting environment id | not valid")
+	currentEnvironmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(currentEnvironmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
+
+	environmentId := currentEnvironmentId.(string)
 
 	userId, _ := c.Get("user_id")
 
@@ -94,16 +111,6 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 			EnvironmentId: environmentId,
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		resource.GetProjectId(),
-		resource.NodeType,
 	)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
@@ -395,6 +402,84 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				_, err = services.GetBuilderServiceByType(nodeType).Menu().Delete(
 					context.Background(),
 					&obs.MenuPrimaryKey{
+						Id:        previous.Data.Id,
+						ProjectId: resourceEnvId,
+						EnvId:     cast.ToString(environmentId),
+					},
+				)
+				if err != nil {
+					logReq.Response = err.Error()
+					continue
+				}
+				ids = append(ids, v.Id)
+			}
+		} else if actionSource == "VIEW" {
+			defer func() {
+				go h.versionHistory(c, logReq)
+			}()
+
+			var (
+				request  DataCreateViewWrapper
+				previous DataCreateViewWrapper
+				current  DataUpdateViewWrapper
+			)
+
+			err := json.Unmarshal([]byte(cast.ToString(v.Request)), &request)
+			if err != nil {
+				continue
+			}
+
+			err = json.Unmarshal([]byte(cast.ToString(v.Previous)), &previous)
+			if err != nil {
+				continue
+			}
+
+			err = json.Unmarshal([]byte(cast.ToString(v.Request)), &current)
+			if err != nil {
+				continue
+			}
+
+			request.Data.ProjectId = resourceEnvId
+			request.Data.EnvId = cast.ToString(environmentId)
+			previous.Data.ProjectId = resourceEnvId
+			previous.Data.EnvId = cast.ToString(environmentId)
+			current.Data.ProjectId = resourceEnvId
+			current.Data.EnvId = cast.ToString(environmentId)
+			logReq.TableSlug = "View"
+
+			switch actionType {
+			case "CREATE":
+				createView, err := services.GetBuilderServiceByType(nodeType).View().Create(
+					context.Background(),
+					request.Data,
+				)
+				if err != nil {
+					logReq.Response = err.Error()
+					continue
+				}
+				logReq.Request = request.Data
+				logReq.Current = createView
+				logReq.Response = createView
+				ids = append(ids, v.Id)
+			case "UPDATE":
+				logReq.Previous = previous.Data
+				updateView, err := services.GetBuilderServiceByType(nodeType).View().Update(
+					context.Background(),
+					current.Data,
+				)
+				if err != nil {
+					logReq.Response = err.Error()
+					return
+				}
+				logReq.Request = current.Data
+				logReq.Current = updateView
+				logReq.Response = updateView
+				ids = append(ids, v.Id)
+			case "DELETE":
+				logReq.Previous = previous.Data
+				_, err = services.GetBuilderServiceByType(nodeType).View().Delete(
+					context.Background(),
+					&obs.ViewPrimaryKey{
 						Id:        previous.Data.Id,
 						ProjectId: resourceEnvId,
 						EnvId:     cast.ToString(environmentId),
