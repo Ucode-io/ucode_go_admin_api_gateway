@@ -773,8 +773,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 			v2Version.GET("/history/:environment_id", h.V2.GetAllVersionHistory)
 			v2Version.PUT("/history/:environment_id", h.V2.UpdateVersionHistory)
 			v2Version.GET("/history/:environment_id/:id", h.V2.GetVersionHistoryByID)
-			v2Version.POST("/history/migrate/up", h.V2.MigrateUp)
-			v2Version.POST("/history/migrate/down", h.V2.MigrateDown)
+			v2Version.POST("/history/migrate/down/:environment_id", h.V2.MigrateDown)
+			v2Version.POST("/history/migrate/up/:environment_id", h.V2.MigrateUp)
 		}
 
 	}

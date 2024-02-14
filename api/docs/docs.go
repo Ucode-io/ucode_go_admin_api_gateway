@@ -38985,7 +38985,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v2/version/history/migrate/up": {
+        "/v2/version/history/migrate/up/{environment_id}": {
             "post": {
                 "security": [
                     {
@@ -39009,7 +39009,8 @@ const docTemplate = `{
                         "type": "string",
                         "description": "environment_id",
                         "name": "environment_id",
-                        "in": "path"
+                        "in": "path",
+                        "required": true
                     },
                     {
                         "description": "MigrateUpRequest",
