@@ -25017,6 +25017,104 @@ paths:
       summary: Get excel writer
       tags:
       - Collections
+  /v2/collections/{collection}/layout:
+    put:
+      consumes:
+      - application/json
+      description: Update layouts
+      operationId: update_layout_v2
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: LayoutRequest
+        in: body
+        name: layout
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.LayoutRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Layout data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.LayoutResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update layouts
+      tags:
+      - Layout
+  /v2/collections/{collection}/layout/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete layouts
+      operationId: delete_layout_v2
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete layout
+      tags:
+      - Layout
   /v2/company/project/resource:
     get:
       consumes:

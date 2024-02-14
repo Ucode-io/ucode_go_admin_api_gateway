@@ -311,18 +311,19 @@ func (h *HandlerV2) UpdateView(c *gin.Context) {
 		go h.versionHistory(c, logReq)
 	}()
 
-	// oldView, err = services.GetBuilderServiceByType(resource.NodeType).View().GetSingle(
-	// 	context.Background(),
-	// 	&obs.ViewPrimaryKey{
-	// 		Id:        view.Id,
-	// 		ProjectId: view.ProjectId,
-	// 	},
-	// )
-	// if err != nil {
-	// 	return
-	// }
-
 	view.ProjectId = resource.ResourceEnvironmentId
+
+	oldView, err = services.GetBuilderServiceByType(resource.NodeType).View().GetSingle(
+		context.Background(),
+		&obs.ViewPrimaryKey{
+			Id:        view.Id,
+			ProjectId: view.ProjectId,
+		},
+	)
+	if err != nil {
+		return
+	}
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).View().Update(

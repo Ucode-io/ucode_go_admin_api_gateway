@@ -165,15 +165,16 @@ func (h *HandlerV2) GetListLayouts(c *gin.Context) {
 
 // UpdateLayout godoc
 // @Security ApiKeyAuth
-// @ID update_layout
-// @Router /v1/layout [PUT]
+// @ID update_layout_v2
+// @Router /v2/collections/{collection}/layout [PUT]
 // @Summary Update layouts
 // @Description Update layouts
 // @Tags Layout
 // @Accept json
 // @Produce json
-// @Param table body object_builder_service.UpdateLayoutRequest true "UpdateLayoutRequest"
-// @Success 200 {object} status_http.Response{data=string} "Layout data"
+// @Param collection path string true "collection"
+// @Param layout body object_builder_service.LayoutRequest true "LayoutRequest"
+// @Success 200 {object} status_http.Response{data=object_builder_service.LayoutResponse} "Layout data"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) UpdateLayout(c *gin.Context) {
@@ -263,33 +264,48 @@ func (h *HandlerV2) UpdateLayout(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 		} else {
 			logReq.Response = resp
+			logReq.Current = resp
 			h.handleResponse(c, status_http.OK, resp)
 		}
 		go h.versionHistory(c, logReq)
 	}()
 
-	// oldLayout, err = services.GetBuilderServiceByType(nodeType).Layout().GetSingleLayout(
-	// 	context.Background(),
-	// 	&object_builder_service.GetSingleLayoutRequest{
-	// 		ProjectId: input.ProjectId,
-	// 		TableId:   input.TableId,
-	// 		MenuId:    input.MenuId,
-	// 		TableSlug: input.TableId,
-	// 	},
-	// )
-	// if err != nil {
-	// 	return
-	// }
+	oldLayout, err = services.GetBuilderServiceByType(nodeType).Layout().GetSingleLayout(
+		context.Background(),
+		&object_builder_service.GetSingleLayoutRequest{
+			ProjectId: input.ProjectId,
+			TableId:   input.TableId,
+			MenuId:    input.MenuId,
+		},
+	)
+	if err != nil {
+		return
+	}
 
 	resp, err = services.GetBuilderServiceByType(nodeType).Layout().Update(
 		context.Background(),
 		&input,
 	)
+
 	if err != nil {
 		return
 	}
 }
 
+// DeleteLayout godoc
+// @Security ApiKeyAuth
+// @ID delete_layout_v2
+// @Router /v2/collections/{collection}/layout/{id} [DELETE]
+// @Summary Delete layout
+// @Description Delete layouts
+// @Tags Layout
+// @Accept json
+// @Produce json
+// @Param collection path string true "collection"
+// @Param id path string true "id"
+// @Success 204
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) DeleteLayout(c *gin.Context) {
 
 	var (

@@ -52,6 +52,14 @@ type DataUpdateViewWrapper struct {
 	Data *obs.View
 }
 
+type DataCreateLayoutWrapper struct {
+	Data *obs.CreateLayoutRequest
+}
+
+type DataUpdateLayoutWrapper struct {
+	Data *obs.LayoutRequest
+}
+
 // MigrateUp godoc
 // @Security ApiKeyAuth
 // @ID migrate_up
@@ -480,6 +488,71 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				_, err = services.GetBuilderServiceByType(nodeType).View().Delete(
 					context.Background(),
 					&obs.ViewPrimaryKey{
+						Id:        previous.Data.Id,
+						ProjectId: resourceEnvId,
+						EnvId:     cast.ToString(environmentId),
+					},
+				)
+				if err != nil {
+					logReq.Response = err.Error()
+					continue
+				}
+				ids = append(ids, v.Id)
+			}
+		} else if actionSource == "LAYOUT" {
+			defer func() {
+				go h.versionHistory(c, logReq)
+			}()
+
+			var (
+				request  DataCreateLayoutWrapper
+				previous DataUpdateLayoutWrapper
+				current  DataUpdateLayoutWrapper
+			)
+
+			err := json.Unmarshal([]byte(cast.ToString(v.Request)), &request)
+			if err != nil {
+				continue
+			}
+
+			err = json.Unmarshal([]byte(cast.ToString(v.Previous)), &previous)
+			if err != nil {
+				continue
+			}
+
+			err = json.Unmarshal([]byte(cast.ToString(v.Request)), &current)
+			if err != nil {
+				continue
+			}
+
+			request.Data.ProjectId = resourceEnvId
+			request.Data.EnvId = cast.ToString(environmentId)
+			previous.Data.ProjectId = resourceEnvId
+			previous.Data.EnvId = cast.ToString(environmentId)
+			current.Data.ProjectId = resourceEnvId
+			current.Data.EnvId = cast.ToString(environmentId)
+			logReq.TableSlug = "View"
+
+			switch actionType {
+			case "UPDATE":
+				logReq.Previous = previous.Data
+				updateLayout, err := services.GetBuilderServiceByType(nodeType).Layout().Update(
+					context.Background(),
+					current.Data,
+				)
+				if err != nil {
+					logReq.Response = err.Error()
+					return
+				}
+				logReq.Request = current.Data
+				logReq.Current = updateLayout
+				logReq.Response = updateLayout
+				ids = append(ids, v.Id)
+			case "DELETE":
+				logReq.Previous = previous.Data
+				_, err = services.GetBuilderServiceByType(nodeType).Layout().RemoveLayout(
+					context.Background(),
+					&obs.LayoutPrimaryKey{
 						Id:        previous.Data.Id,
 						ProjectId: resourceEnvId,
 						EnvId:     cast.ToString(environmentId),
