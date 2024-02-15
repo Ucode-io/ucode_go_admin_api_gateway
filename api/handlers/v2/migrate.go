@@ -744,8 +744,9 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 			}()
 
 			var (
-				current  DataCreateFieldWrapper
-				previous DataFieldWrapper
+				current        DataCreateFieldWrapper
+				previous       DataFieldWrapper
+				createPrevious DataCreateFieldWrapper
 			)
 
 			if cast.ToString(v.Current) != "" {
@@ -764,6 +765,15 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 				}
 				previous.Data.ProjectId = resourceEnvId
 				previous.Data.EnvId = environmentId
+			}
+
+			if cast.ToString(v.Previous) != "" {
+				err = json.Unmarshal([]byte(cast.ToString(v.Previous)), &createPrevious)
+				if err != nil {
+					continue
+				}
+				createPrevious.Data.ProjectId = resourceEnvId
+				createPrevious.Data.EnvId = environmentId
 			}
 
 			switch actionType {
@@ -802,13 +812,13 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 				logReq.ActionType = "CREATE FIELD"
 				createField, err := services.GetBuilderServiceByType(nodeType).Field().Create(
 					context.Background(),
-					current.Data,
+					createPrevious.Data,
 				)
 				if err != nil {
 					logReq.Response = err.Error()
 					continue
 				}
-				logReq.Request = current.Data
+				logReq.Request = createPrevious.Data
 				logReq.Response = createField
 				logReq.Current = createField
 				ids = append(ids, v.Id)
