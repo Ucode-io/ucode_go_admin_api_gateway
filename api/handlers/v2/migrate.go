@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
@@ -650,27 +651,32 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 			}()
 
 			var (
-				previous DataUpdateTableWrapper
 				current  DataTableWrapper
+				previous DataUpdateTableWrapper
 			)
 
-			err := json.Unmarshal([]byte(cast.ToString(v.Current)), &current)
-			if err != nil {
-				continue
+			if cast.ToString(v.Current) != "" {
+				err = json.Unmarshal([]byte(cast.ToString(v.Current)), &current)
+				if err != nil {
+					continue
+				}
+				current.Data.ProjectId = resourceEnvId
+				current.Data.EnvId = environmentId
 			}
 
-			err = json.Unmarshal([]byte(cast.ToString(v.Previous)), &previous)
-			if err != nil {
-				continue
+			if cast.ToString(v.Previous) != "" {
+				err = json.Unmarshal([]byte(cast.ToString(v.Previous)), &previous)
+				if err != nil {
+					continue
+				}
+				previous.Data.ProjectId = resourceEnvId
+				previous.Data.EnvId = environmentId
 			}
-
-			current.Data.ProjectId = resourceEnvId
-			current.Data.EnvId = cast.ToString(environmentId)
-			logReq.Request = current.Data
-			logReq.TableSlug = current.Data.Slug
 
 			switch actionType {
 			case "CREATE":
+				logReq.ActionType = "DELETE TABLE"
+				logReq.Previous = current.Data
 				_, err := services.GetBuilderServiceByType(nodeType).Table().Delete(
 					context.Background(),
 					&obs.TablePrimaryKey{
@@ -683,10 +689,13 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 					logReq.Response = err.Error()
 					continue
 				}
-				logReq.Previous = current.Data
 				ids = append(ids, v.Id)
 			case "UPDATE":
-				_, err = services.GetBuilderServiceByType(nodeType).Table().Update(
+				previous.Data.CommitType = "TABLE"
+				previous.Data.Name = fmt.Sprintf("Auto Created Commit Create table - %s", time.Now().Format(time.RFC1123))
+				logReq.Request = previous.Data
+				logReq.Previous = current.Data
+				updateTable, err := services.GetBuilderServiceByType(nodeType).Table().Update(
 					context.Background(),
 					previous.Data,
 				)
@@ -694,7 +703,25 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 					logReq.Response = err.Error()
 					continue
 				}
+
+				logReq.Current = updateTable
+				logReq.Response = updateTable
 				ids = append(ids, v.Id)
+			case "DELETE":
+				logReq.ActionType = "CREATE TABLE"
+				current.Data.CommitType = "TABLE"
+				current.Data.Name = fmt.Sprintf("Auto Created Commit Create table - %s", time.Now().Format(time.RFC1123))
+				createTable, err := services.GetBuilderServiceByType(nodeType).Table().Create(
+					context.Background(),
+					current.Data,
+				)
+				if err != nil {
+					logReq.Response = err.Error()
+					continue
+				}
+				logReq.Request = current.Data
+				logReq.Response = createTable
+				logReq.Current = createTable
 			}
 		} else if actionSource == "FIELD" {
 			defer func() {
@@ -856,7 +883,6 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 			if cast.ToString(v.Current) != "" {
 				err = json.Unmarshal([]byte(cast.ToString(v.Current)), &current)
 				if err != nil {
-					fmt.Println("Unamrshal error 1")
 					continue
 				}
 				current.Data.ProjectId = resourceEnvId
@@ -866,7 +892,6 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 			if cast.ToString(v.Previous) != "" {
 				err = json.Unmarshal([]byte(cast.ToString(v.Previous)), &previous)
 				if err != nil {
-					fmt.Println("Unamrshal error 2")
 					continue
 				}
 				previous.Data.ProjectId = resourceEnvId
@@ -876,7 +901,6 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 			if cast.ToString(v.Previous) != "" {
 				err = json.Unmarshal([]byte(cast.ToString(v.Previous)), &createRequest)
 				if err != nil {
-					fmt.Println("Unamrshal error 3")
 					continue
 				}
 				createRequest.Data.ProjectId = resourceEnvId
@@ -886,7 +910,6 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 			if cast.ToString(v.Request) != "" {
 				err = json.Unmarshal([]byte(cast.ToString(v.Request)), &request)
 				if err != nil {
-					fmt.Println("Unamrshal error 4")
 					continue
 				}
 				request.Data.ProjectId = resourceEnvId
@@ -896,7 +919,6 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 			if cast.ToString(v.Response) != "" {
 				err = json.Unmarshal([]byte(cast.ToString(v.Response)), &response)
 				if err != nil {
-					fmt.Println("Unamrshal error 5")
 					continue
 				}
 				response.Data.ProjectId = resourceEnvId
