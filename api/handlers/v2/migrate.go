@@ -846,47 +846,71 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 			}()
 
 			var (
-				request        DataCreateMenuWrapper
-				previous       DataCreateMenuWrapper
-				previousUpdate DataUpdateMenuWrapper
-				current        DataUpdateMenuWrapper
+				current       DataUpdateMenuWrapper
+				previous      DataUpdateMenuWrapper
+				createRequest DataCreateMenuWrapper
+				request       DataUpdateMenuWrapper
+				response      DataUpdateMenuWrapper
 			)
 
-			err := json.Unmarshal([]byte(cast.ToString(v.Request)), &request)
-			if err != nil {
-				continue
+			if cast.ToString(v.Current) != "" {
+				err = json.Unmarshal([]byte(cast.ToString(v.Current)), &current)
+				if err != nil {
+					fmt.Println("Unamrshal error 1")
+					continue
+				}
+				current.Data.ProjectId = resourceEnvId
+				current.Data.EnvId = environmentId
 			}
 
-			err = json.Unmarshal([]byte(cast.ToString(v.Previous)), &previous)
-			if err != nil {
-				continue
+			if cast.ToString(v.Previous) != "" {
+				err = json.Unmarshal([]byte(cast.ToString(v.Previous)), &previous)
+				if err != nil {
+					fmt.Println("Unamrshal error 2")
+					continue
+				}
+				previous.Data.ProjectId = resourceEnvId
+				previous.Data.EnvId = environmentId
 			}
 
-			err = json.Unmarshal([]byte(cast.ToString(v.Request)), &current)
-			if err != nil {
-				continue
+			if cast.ToString(v.Previous) != "" {
+				err = json.Unmarshal([]byte(cast.ToString(v.Previous)), &createRequest)
+				if err != nil {
+					fmt.Println("Unamrshal error 3")
+					continue
+				}
+				createRequest.Data.ProjectId = resourceEnvId
+				createRequest.Data.EnvId = environmentId
 			}
 
-			err = json.Unmarshal([]byte(cast.ToString(v.Previous)), &previous)
-			if err != nil {
-				continue
+			if cast.ToString(v.Request) != "" {
+				err = json.Unmarshal([]byte(cast.ToString(v.Request)), &request)
+				if err != nil {
+					fmt.Println("Unamrshal error 4")
+					continue
+				}
+				request.Data.ProjectId = resourceEnvId
+				request.Data.EnvId = environmentId
 			}
 
-			request.Data.ProjectId = resourceEnvId
-			request.Data.EnvId = cast.ToString(environmentId)
-			previous.Data.ProjectId = resourceEnvId
-			previous.Data.EnvId = cast.ToString(environmentId)
-			current.Data.ProjectId = resourceEnvId
-			current.Data.EnvId = cast.ToString(environmentId)
-			logReq.TableSlug = "Menu"
+			if cast.ToString(v.Response) != "" {
+				err = json.Unmarshal([]byte(cast.ToString(v.Response)), &response)
+				if err != nil {
+					fmt.Println("Unamrshal error 5")
+					continue
+				}
+				response.Data.ProjectId = resourceEnvId
+				response.Data.EnvId = environmentId
+			}
 
 			switch actionType {
 			case "CREATE":
-				logReq.Previous = previous.Data
+				logReq.ActionType = "DELETE MENU"
+				logReq.Previous = current.Data
 				_, err = services.GetBuilderServiceByType(nodeType).Menu().Delete(
 					context.Background(),
 					&obs.MenuPrimaryKey{
-						Id:        previous.Data.Id,
+						Id:        current.Data.Id,
 						ProjectId: resourceEnvId,
 						EnvId:     cast.ToString(environmentId),
 					},
@@ -897,31 +921,32 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 				}
 				ids = append(ids, v.Id)
 			case "UPDATE":
-				logReq.Previous = previous.Data
-				updatemenu, err := services.GetBuilderServiceByType(nodeType).Menu().Update(
+				logReq.Request = previous.Data
+				logReq.Previous = current.Data
+				updateMenu, err := services.GetBuilderServiceByType(nodeType).Menu().Update(
 					context.Background(),
-					previousUpdate.Data,
+					previous.Data,
 				)
 				if err != nil {
 					logReq.Response = err.Error()
 					return
 				}
-				logReq.Request = current.Data
-				logReq.Current = updatemenu
-				logReq.Response = updatemenu
+				logReq.Current = updateMenu
+				logReq.Response = updateMenu
 				ids = append(ids, v.Id)
 			case "DELETE":
+				logReq.ActionType = "CREATE MENU"
 				createMenu, err := services.GetBuilderServiceByType(nodeType).Menu().Create(
 					context.Background(),
-					request.Data,
+					createRequest.Data,
 				)
 				if err != nil {
 					logReq.Response = err.Error()
 					continue
 				}
-				logReq.Request = request.Data
-				logReq.Current = createMenu
+				logReq.Request = createRequest.Data
 				logReq.Response = createMenu
+				logReq.Current = createMenu
 				ids = append(ids, v.Id)
 			}
 		}
