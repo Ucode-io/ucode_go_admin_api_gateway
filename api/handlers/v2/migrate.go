@@ -655,8 +655,9 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 			}()
 
 			var (
-				current  DataTableWrapper
-				previous DataUpdateTableWrapper
+				current        DataTableWrapper
+				previous       DataUpdateTableWrapper
+				createPrevious DataTableWrapper
 			)
 
 			if cast.ToString(v.Current) != "" {
@@ -675,6 +676,15 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 				}
 				previous.Data.ProjectId = resourceEnvId
 				previous.Data.EnvId = environmentId
+			}
+
+			if cast.ToString(v.Previous) != "" {
+				err = json.Unmarshal([]byte(cast.ToString(v.Previous)), &createPrevious)
+				if err != nil {
+					continue
+				}
+				createPrevious.Data.ProjectId = resourceEnvId
+				createPrevious.Data.EnvId = environmentId
 			}
 
 			switch actionType {
@@ -713,11 +723,11 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 				ids = append(ids, v.Id)
 			case "DELETE":
 				logReq.ActionType = "CREATE TABLE"
-				current.Data.CommitType = "TABLE"
-				current.Data.Name = fmt.Sprintf("Auto Created Commit Create table - %s", time.Now().Format(time.RFC1123))
+				createPrevious.Data.CommitType = "TABLE"
+				createPrevious.Data.Name = fmt.Sprintf("Auto Created Commit Create table - %s", time.Now().Format(time.RFC1123))
 				createTable, err := services.GetBuilderServiceByType(nodeType).Table().Create(
 					context.Background(),
-					current.Data,
+					createPrevious.Data,
 				)
 				if err != nil {
 					logReq.Response = err.Error()
