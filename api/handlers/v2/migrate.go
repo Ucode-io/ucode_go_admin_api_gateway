@@ -61,6 +61,10 @@ type DataUpdateLayoutWrapper struct {
 	Data *obs.LayoutRequest
 }
 
+type DataUpdateRelationWrapper struct {
+	Data *obs.UpdateRelationRequest
+}
+
 // MigrateUp godoc
 // @Security ApiKeyAuth
 // @ID migrate_up
@@ -803,6 +807,87 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 			defer func() {
 				go h.versionHistory(c, logReq)
 			}()
+
+			var (
+				current        DataCreateRelationWrapper
+				previous       DataCreateRelationWrapper
+				updatePrevious DataUpdateRelationWrapper
+			)
+
+			if cast.ToString(v.Current) != "" {
+				err = json.Unmarshal([]byte(cast.ToString(v.Current)), &current)
+				if err != nil {
+					continue
+				}
+				current.Data.ProjectId = resourceEnvId
+				current.Data.EnvId = environmentId
+			}
+
+			if cast.ToString(v.Previous) != "" {
+				err = json.Unmarshal([]byte(cast.ToString(v.Previous)), &previous)
+				if err != nil {
+					continue
+				}
+				previous.Data.ProjectId = resourceEnvId
+				previous.Data.EnvId = environmentId
+			}
+
+			if cast.ToString(v.Previous) != "" {
+				err = json.Unmarshal([]byte(cast.ToString(v.Previous)), &updatePrevious)
+				if err != nil {
+					continue
+				}
+				updatePrevious.Data.ProjectId = resourceEnvId
+				updatePrevious.Data.EnvId = environmentId
+			}
+
+			switch actionSource {
+			case "CREATE":
+				logReq.ActionType = "DELETE RELATION"
+				logReq.Previous = current.Data
+				_, err := services.GetBuilderServiceByType(nodeType).Relation().Delete(
+					context.Background(),
+					&obs.RelationPrimaryKey{
+						Id:        current.Data.Id,
+						ProjectId: resourceEnvId,
+						EnvId:     cast.ToString(environmentId),
+					},
+				)
+				if err != nil {
+					logReq.Response = err.Error()
+					continue
+				}
+				ids = append(ids, v.Id)
+			case "UPDATE":
+				logReq.Request = previous.Data
+				logReq.Previous = current.Data
+				updateRelation, err := services.GetBuilderServiceByType(nodeType).Relation().Update(
+					context.Background(),
+					updatePrevious.Data,
+				)
+				if err != nil {
+					logReq.Response = err.Error()
+					continue
+				}
+				logReq.Request = updateRelation
+				logReq.Response = updateRelation
+				logReq.Current = updateRelation
+				ids = append(ids, v.Id)
+			case "DELETE":
+				logReq.ActionType = "CREATE RELATION"
+				createRelation, err := services.GetBuilderServiceByType(nodeType).Relation().Create(
+					context.Background(),
+					previous.Data,
+				)
+				if err != nil {
+					logReq.Response = err.Error()
+					continue
+				}
+				logReq.Request = previous.Data
+				logReq.Response = createRelation
+				logReq.Current = createRelation
+				ids = append(ids, v.Id)
+			}
 		} else if actionSource == "MENU" {
 			defer func() {
 				go h.versionHistory(c, logReq)
