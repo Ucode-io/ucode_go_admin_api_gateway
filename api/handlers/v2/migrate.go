@@ -803,66 +803,6 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 			defer func() {
 				go h.versionHistory(c, logReq)
 			}()
-
-			var (
-				request  DataCreateRelationWrapper
-				response DataCreateRelationWrapper
-				previous DataCreateRelationWrapper
-			)
-
-			err := json.Unmarshal([]byte(cast.ToString(v.Request)), &request)
-			if err != nil {
-				continue
-			}
-
-			err = json.Unmarshal([]byte(cast.ToString(v.Response)), &response)
-			if err != nil {
-				continue
-			}
-
-			err = json.Unmarshal([]byte(cast.ToString(v.Previous)), &previous)
-			if err != nil {
-				continue
-			}
-
-			request.Data.ProjectId = resourceEnvId
-			request.Data.EnvId = cast.ToString(environmentId)
-			response.Data.ProjectId = resourceEnvId
-			response.Data.EnvId = cast.ToString(environmentId)
-			previous.Data.ProjectId = resourceEnvId
-			previous.Data.EnvId = cast.ToString(environmentId)
-			logReq.TableSlug = request.Data.RelationTableSlug
-
-			switch actionType {
-			case "CREATE":
-				logReq.Previous = response.Data
-				_, err := services.GetBuilderServiceByType(nodeType).Field().Delete(
-					context.Background(),
-					&obs.FieldPrimaryKey{
-						Id:        response.Data.Id,
-						ProjectId: resourceEnvId,
-						EnvId:     cast.ToString(environmentId),
-					},
-				)
-				if err != nil {
-					logReq.Response = err.Error()
-					continue
-				}
-				ids = append(ids, v.Id)
-			case "DELETE":
-				createRelation, err := services.GetBuilderServiceByType(nodeType).Relation().Create(
-					context.Background(),
-					previous.Data,
-				)
-				if err != nil {
-					logReq.Response = err.Error()
-					continue
-				}
-				logReq.Request = request.Data
-				logReq.Current = createRelation
-				logReq.Response = createRelation
-				ids = append(ids, v.Id)
-			}
 		} else if actionSource == "MENU" {
 			defer func() {
 				go h.versionHistory(c, logReq)
@@ -1044,7 +984,7 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 				)
 				if err != nil {
 					logReq.Response = err.Error()
-					return 
+					return
 				}
 				logReq.Request = createPrevious.Data
 				logReq.Response = createView
