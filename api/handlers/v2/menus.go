@@ -112,9 +112,9 @@ func (h *HandlerV2) CreateMenu(c *gin.Context) {
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: "MENU",
 			ActionType:   "CREATE MENU",
-			UsedEnvironments: map[string]bool{
-				cast.ToString(environmentId): true,
-			},
+			// UsedEnvironments: map[string]bool{
+			// 	cast.ToString(environmentId): true,
+			// },
 			UserInfo:  cast.ToString(userId),
 			Request:   &menuRequest,
 			TableSlug: "Menu",
@@ -454,9 +454,9 @@ func (h *HandlerV2) UpdateMenu(c *gin.Context) {
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: "MENU",
 			ActionType:   "UPDATE MENU",
-			UsedEnvironments: map[string]bool{
-				cast.ToString(environmentId): true,
-			},
+			// UsedEnvironments: map[string]bool{
+			// 	cast.ToString(environmentId): true,
+			// },
 			UserInfo:  cast.ToString(userId),
 			Request:   &requestMenu,
 			TableSlug: "Menu",
@@ -577,9 +577,9 @@ func (h *HandlerV2) DeleteMenu(c *gin.Context) {
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: "MENU",
 			ActionType:   "DELETE MENU",
-			UsedEnvironments: map[string]bool{
-				cast.ToString(environmentId): true,
-			},
+			// UsedEnvironments: map[string]bool{
+			// 	cast.ToString(environmentId): true,
+			// },
 			UserInfo:  cast.ToString(userId),
 			TableSlug: "Menu",
 			Request:   menuID,

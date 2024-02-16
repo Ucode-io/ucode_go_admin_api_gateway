@@ -152,9 +152,9 @@ func (h *HandlerV1) CreateTable(c *gin.Context) {
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: "TABLE",
 			ActionType:   "CREATE TABLE",
-			UsedEnvironments: map[string]bool{
-				cast.ToString(environmentId): true,
-			},
+			// UsedEnvironments: map[string]bool{
+			// 	cast.ToString(environmentId): true,
+			// },
 			UserInfo:  cast.ToString(userId),
 			Request:   &table,
 			TableSlug: tableRequest.Slug,
@@ -522,9 +522,9 @@ func (h *HandlerV1) UpdateTable(c *gin.Context) {
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: "TABLE",
 			ActionType:   "UPDATE TABLE",
-			UsedEnvironments: map[string]bool{
-				cast.ToString(environmentId): true,
-			},
+			// UsedEnvironments: map[string]bool{
+			// 	cast.ToString(environmentId): true,
+			// },
 			UserInfo:  cast.ToString(userId),
 			Request:   &updateTable,
 			TableSlug: table.Slug,
@@ -687,9 +687,9 @@ func (h *HandlerV1) DeleteTable(c *gin.Context) {
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: "TABLE",
 			ActionType:   "DELETE TABLE",
-			UsedEnvironments: map[string]bool{
-				cast.ToString(environmentId): true,
-			},
+			// UsedEnvironments: map[string]bool{
+			// 	cast.ToString(environmentId): true,
+			// },
 			UserInfo:  cast.ToString(userId),
 			TableSlug: tableID,
 		}
