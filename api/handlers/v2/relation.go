@@ -11,6 +11,7 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/spf13/cast"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
@@ -253,6 +254,8 @@ func (h *HandlerV2) CreateRelation(c *gin.Context) {
 		return
 	}
 
+	relation.RelationFieldId = uuid.NewString()
+	relation.RelationToFieldId = uuid.NewString()
 	var (
 		logReq = &models.CreateVersionHistoryRequest{
 			Services:     services,
@@ -282,6 +285,7 @@ func (h *HandlerV2) CreateRelation(c *gin.Context) {
 	}()
 
 	relation.ProjectId = resource.ResourceEnvironmentId
+	relation.EnvId = resource.EnvironmentId
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Relation().Create(
@@ -291,6 +295,8 @@ func (h *HandlerV2) CreateRelation(c *gin.Context) {
 		if err != nil {
 			return
 		}
+		relation.Id = resp.Id
+		logReq.Request = &relation
 	case pb.ResourceType_POSTGRESQL:
 		resp, err = services.PostgresBuilderService().Relation().Create(
 			context.Background(),

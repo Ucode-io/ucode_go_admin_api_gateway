@@ -14,6 +14,7 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/spf13/cast"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
@@ -141,6 +142,9 @@ func (h *HandlerV1) CreateTable(c *gin.Context) {
 		CommitType: config.COMMIT_TYPE_TABLE,
 		OrderBy:    tableRequest.OrderBy,
 		Attributes: attributes,
+		EnvId:      environmentId.(string),
+		ViewId:     uuid.NewString(),
+		LayoutId:   uuid.NewString(),
 	}
 
 	table.ProjectId = resourceEnvironmentId
