@@ -56,6 +56,8 @@ message CreateRelationRequest {
     google.protobuf.Struct attributes = 35;
     string id = 36;
     string env_id = 37;
+    string relation_field_id = 38;
+    string relation_to_field_id = 39;
 }
 
 message AutoFilter {
