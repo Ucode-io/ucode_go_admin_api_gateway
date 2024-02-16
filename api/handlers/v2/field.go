@@ -119,9 +119,9 @@ func (h *HandlerV2) CreateField(c *gin.Context) {
 		ProjectId:    resource.ResourceEnvironmentId,
 		ActionSource: "FIELD",
 		ActionType:   "CREATE FIELD",
-		UsedEnvironments: map[string]bool{
-			cast.ToString(environmentId): true,
-		},
+		// UsedEnvironments: map[string]bool{
+		// 	cast.ToString(environmentId): true,
+		// },
 		UserInfo:  cast.ToString(userId),
 		TableSlug: c.Param("collection"),
 	}
@@ -453,9 +453,9 @@ func (h *HandlerV2) UpdateField(c *gin.Context) {
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: "FIELD",
 			ActionType:   "UPDATE FIELD",
-			UsedEnvironments: map[string]bool{
-				cast.ToString(environmentId): true,
-			},
+			// UsedEnvironments: map[string]bool{
+			// 	cast.ToString(environmentId): true,
+			// },
 			UserInfo:  cast.ToString(userId),
 			TableSlug: c.Param("collection"),
 		}
@@ -487,6 +487,8 @@ func (h *HandlerV2) UpdateField(c *gin.Context) {
 	}
 
 	field.ProjectId = resource.ResourceEnvironmentId
+	field.EnvId = resource.EnvironmentId
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, deferErr = services.GetBuilderServiceByType(resource.NodeType).Field().Update(
@@ -642,9 +644,9 @@ func (h *HandlerV2) DeleteField(c *gin.Context) {
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: "FIELD",
 			ActionType:   "DELETE FIELD",
-			UsedEnvironments: map[string]bool{
-				cast.ToString(environmentId): true,
-			},
+			// UsedEnvironments: map[string]bool{
+			// 	cast.ToString(environmentId): true,
+			// },
 			UserInfo:  cast.ToString(userId),
 			TableSlug: c.Param("collection"),
 		}
@@ -657,6 +659,7 @@ func (h *HandlerV2) DeleteField(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 		} else {
 			logReq.Previous = oldField
+			logReq.Response = resp
 			h.handleResponse(c, status_http.NoContent, resp)
 		}
 		go h.versionHistory(c, logReq)

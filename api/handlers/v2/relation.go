@@ -11,6 +11,7 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/spf13/cast"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
@@ -253,6 +254,9 @@ func (h *HandlerV2) CreateRelation(c *gin.Context) {
 		return
 	}
 
+	relation.RelationFieldId = uuid.NewString()
+	relation.RelationToFieldId = uuid.NewString()
+
 	var (
 		logReq = &models.CreateVersionHistoryRequest{
 			Services:     services,
@@ -260,9 +264,9 @@ func (h *HandlerV2) CreateRelation(c *gin.Context) {
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: "RELATION",
 			ActionType:   "CREATE RELATION",
-			UsedEnvironments: map[string]bool{
-				cast.ToString(environmentId): true,
-			},
+			// UsedEnvironments: map[string]bool{
+			// 	cast.ToString(environmentId): true,
+			// },
 			UserInfo:  cast.ToString(userId),
 			Request:   &relation,
 			TableSlug: c.Param("collection"),
@@ -481,9 +485,9 @@ func (h *HandlerV2) UpdateRelation(c *gin.Context) {
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: "RELATION",
 			ActionType:   "UPDATE RELATION",
-			UsedEnvironments: map[string]bool{
-				cast.ToString(environmentId): true,
-			},
+			// UsedEnvironments: map[string]bool{
+			// 	cast.ToString(environmentId): true,
+			// },
 			UserInfo:  cast.ToString(userId),
 			Request:   &relation,
 			TableSlug: c.Param("collection"),
@@ -608,9 +612,9 @@ func (h *HandlerV2) DeleteRelation(c *gin.Context) {
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: "RELATION",
 			ActionType:   "DELETE RELATION",
-			UsedEnvironments: map[string]bool{
-				cast.ToString(environmentId): true,
-			},
+			// UsedEnvironments: map[string]bool{
+			// 	cast.ToString(environmentId): true,
+			// },
 			UserInfo:  cast.ToString(userId),
 			TableSlug: c.Param("collection"),
 		}

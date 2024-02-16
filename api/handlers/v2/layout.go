@@ -13,6 +13,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/google/uuid"
 	"github.com/spf13/cast"
 )
 
@@ -240,6 +241,10 @@ func (h *HandlerV2) UpdateLayout(c *gin.Context) {
 
 	input.ProjectId = resourceEnvironmentId
 
+	if input.Id == "" {
+		input.Id = uuid.NewString()
+	}
+
 	var (
 		oldLayout = &object_builder_service.LayoutResponse{}
 		logReq    = &models.CreateVersionHistoryRequest{
@@ -248,9 +253,9 @@ func (h *HandlerV2) UpdateLayout(c *gin.Context) {
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: "LAYOUT",
 			ActionType:   "UPDATE LAYOUT",
-			UsedEnvironments: map[string]bool{
-				cast.ToString(environmentId): true,
-			},
+			// UsedEnvironments: map[string]bool{
+			// 	cast.ToString(environmentId): true,
+			// },
 			UserInfo:  cast.ToString(userId),
 			Request:   &input,
 			TableSlug: c.Param("collection"),

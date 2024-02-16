@@ -85,9 +85,9 @@ func (h *HandlerV2) CreateView(c *gin.Context) {
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: "VIEW",
 			ActionType:   "CREATE VIEW",
-			UsedEnvironments: map[string]bool{
-				cast.ToString(environmentId): true,
-			},
+			// UsedEnvironments: map[string]bool{
+			// 	cast.ToString(environmentId): true,
+			// },
 			UserInfo:  cast.ToString(userId),
 			Request:   &view,
 			TableSlug: c.Param("collection"),
@@ -99,6 +99,7 @@ func (h *HandlerV2) CreateView(c *gin.Context) {
 			logReq.Response = err.Error()
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 		} else {
+			logReq.Current = resp
 			logReq.Response = resp
 			h.handleResponse(c, status_http.Created, resp)
 		}
@@ -106,6 +107,7 @@ func (h *HandlerV2) CreateView(c *gin.Context) {
 	}()
 
 	view.ProjectId = resource.ResourceEnvironmentId
+	view.EnvId = resource.EnvironmentId
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).View().Create(
@@ -289,9 +291,9 @@ func (h *HandlerV2) UpdateView(c *gin.Context) {
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: "VIEW",
 			ActionType:   "UPDATE VIEW",
-			UsedEnvironments: map[string]bool{
-				cast.ToString(environmentId): true,
-			},
+			// UsedEnvironments: map[string]bool{
+			// 	cast.ToString(environmentId): true,
+			// },
 			UserInfo:  cast.ToString(userId),
 			Request:   &view,
 			TableSlug: c.Param("collection"),
@@ -415,9 +417,9 @@ func (h *HandlerV2) DeleteView(c *gin.Context) {
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: "VIEW",
 			ActionType:   "DELETE VIEW",
-			UsedEnvironments: map[string]bool{
-				cast.ToString(environmentId): true,
-			},
+			// UsedEnvironments: map[string]bool{
+			// 	cast.ToString(environmentId): true,
+			// },
 			UserInfo:  cast.ToString(userId),
 			TableSlug: c.Param("collection"),
 		}

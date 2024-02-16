@@ -14,6 +14,7 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/spf13/cast"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
@@ -96,6 +97,10 @@ func (h *HandlerV1) CreateTable(c *gin.Context) {
 		projectId.(string),
 		nodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	var fields []*obs.CreateFieldsRequest
 	for _, field := range tableRequest.Fields {
@@ -141,6 +146,9 @@ func (h *HandlerV1) CreateTable(c *gin.Context) {
 		CommitType: config.COMMIT_TYPE_TABLE,
 		OrderBy:    tableRequest.OrderBy,
 		Attributes: attributes,
+		EnvId:      environmentId.(string),
+		ViewId:     uuid.NewString(),
+		LayoutId:   uuid.NewString(),
 	}
 
 	table.ProjectId = resourceEnvironmentId
@@ -152,9 +160,9 @@ func (h *HandlerV1) CreateTable(c *gin.Context) {
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: "TABLE",
 			ActionType:   "CREATE TABLE",
-			UsedEnvironments: map[string]bool{
-				cast.ToString(environmentId): true,
-			},
+			// UsedEnvironments: map[string]bool{
+			// 	cast.ToString(environmentId): true,
+			// },
 			UserInfo:  cast.ToString(userId),
 			Request:   &table,
 			TableSlug: tableRequest.Slug,
@@ -687,9 +695,9 @@ func (h *HandlerV1) DeleteTable(c *gin.Context) {
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: "TABLE",
 			ActionType:   "DELETE TABLE",
-			UsedEnvironments: map[string]bool{
-				cast.ToString(environmentId): true,
-			},
+			// UsedEnvironments: map[string]bool{
+			// 	cast.ToString(environmentId): true,
+			// },
 			UserInfo:  cast.ToString(userId),
 			TableSlug: tableID,
 		}
