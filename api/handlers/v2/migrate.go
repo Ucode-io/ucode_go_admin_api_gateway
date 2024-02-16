@@ -589,6 +589,13 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 		return
 	}
 
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
 	migrateRequest := req.Data
 
 	projectId, ok := c.Get("project_id")
@@ -597,12 +604,14 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 		return
 	}
 
-	environmentId := c.Param("environment_id")
-	if !ok || !util.IsValidUUID(environmentId) {
-		err := errors.New("error getting environment id | not valid")
+	currentEnvironmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(currentEnvironmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
+
+	environmentId := currentEnvironmentId.(string)
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
@@ -611,16 +620,6 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 			EnvironmentId: environmentId,
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		resource.GetProjectId(),
-		resource.NodeType,
 	)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
