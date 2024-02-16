@@ -99,6 +99,7 @@ func (h *HandlerV2) CreateView(c *gin.Context) {
 			logReq.Response = err.Error()
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 		} else {
+			logReq.Current = resp
 			logReq.Response = resp
 			h.handleResponse(c, status_http.Created, resp)
 		}
@@ -106,6 +107,7 @@ func (h *HandlerV2) CreateView(c *gin.Context) {
 	}()
 
 	view.ProjectId = resource.ResourceEnvironmentId
+	view.EnvId = resource.EnvironmentId
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).View().Create(
@@ -311,19 +313,19 @@ func (h *HandlerV2) UpdateView(c *gin.Context) {
 		go h.versionHistory(c, logReq)
 	}()
 
-	view.ProjectId = resource.ResourceEnvironmentId
-
 	oldView, err = services.GetBuilderServiceByType(resource.NodeType).View().GetSingle(
 		context.Background(),
 		&obs.ViewPrimaryKey{
 			Id:        view.Id,
-			ProjectId: view.ProjectId,
+			ProjectId: resource.ResourceEnvironmentId,
 		},
 	)
 	if err != nil {
 		return
 	}
 
+	view.ProjectId = resource.ResourceEnvironmentId
+	view.EnvId = resource.EnvironmentId
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).View().Update(

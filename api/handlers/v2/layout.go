@@ -354,7 +354,8 @@ func (h *HandlerV2) DeleteLayout(c *gin.Context) {
 	}
 
 	var (
-		logReq = &models.CreateVersionHistoryRequest{
+		oldLayout = &object_builder_service.LayoutResponse{}
+		logReq    = &models.CreateVersionHistoryRequest{
 			Services:     services,
 			NodeType:     resource.NodeType,
 			ProjectId:    resource.ResourceEnvironmentId,
@@ -369,6 +370,7 @@ func (h *HandlerV2) DeleteLayout(c *gin.Context) {
 	)
 
 	defer func() {
+		logReq.Previous = oldLayout
 		if err != nil {
 			logReq.Response = err.Error()
 			h.handleResponse(c, status_http.GRPCError, err.Error())
@@ -379,11 +381,23 @@ func (h *HandlerV2) DeleteLayout(c *gin.Context) {
 		go h.versionHistory(c, logReq)
 	}()
 
+	oldLayout, err = services.GetBuilderServiceByType(nodeType).Layout().GetByID(
+		context.Background(),
+		&object_builder_service.LayoutPrimaryKey{
+			Id:        c.Param("id"),
+			ProjectId: resourceEnvironmentId,
+		},
+	)
+	if err != nil {
+		return
+	}
+
 	resp, err = services.GetBuilderServiceByType(nodeType).Layout().RemoveLayout(
 		context.Background(),
 		&object_builder_service.LayoutPrimaryKey{
 			Id:        c.Param("id"),
 			ProjectId: resourceEnvironmentId,
+			EnvId:     environmentId.(string),
 		},
 	)
 	if err != nil {

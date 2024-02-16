@@ -503,19 +503,19 @@ func (h *HandlerV2) UpdateRelation(c *gin.Context) {
 		go h.versionHistory(c, logReq)
 	}()
 
-	relation.ProjectId = resource.ResourceEnvironmentId
-
 	oldRelation, err = services.GetBuilderServiceByType(resource.NodeType).Relation().GetByID(
 		context.Background(),
 		&obs.RelationPrimaryKey{
 			Id:        relation.Id,
-			ProjectId: relation.ProjectId,
+			ProjectId: resource.ResourceEnvironmentId,
 		},
 	)
 	if err != nil {
 		return
 	}
 
+	relation.ProjectId = resource.ResourceEnvironmentId
+	relation.EnvId = resource.EnvironmentId
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Relation().Update(
