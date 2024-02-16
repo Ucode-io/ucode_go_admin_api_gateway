@@ -9,8 +9,10 @@ import (
 	"time"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
+	"ucode/ucode_go_api_gateway/config"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
+	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
@@ -143,12 +145,14 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				ProjectId:    resourceEnvId,
 				ActionSource: v.ActionSource,
 				ActionType:   v.ActionType,
-				UsedEnvironments: map[string]bool{
-					cast.ToString(environmentId): true,
-				},
+				// UsedEnvironments: map[string]bool{
+				// 	cast.ToString(environmentId): true,
+				// },
 				UserInfo: cast.ToString(userId),
 			}
 		)
+
+		fmt.Println("=================", actionSource, actionType)
 
 		if actionSource == "TABLE" {
 			defer func() {
@@ -185,14 +189,13 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 
 			switch actionType {
 			case "CREATE":
-				fmt.Println("HERE AGAIN")
 				_, err = services.GetBuilderServiceByType(nodeType).Table().Create(
 					context.Background(),
 					current.Data,
 				)
 				if err != nil {
-					fmt.Println("CREATE TABLE ERROR: ", err)
 					logReq.Response = err.Error()
+					h.log.Error("!!!MigrationUp--->Error while creating table", logger.Error(err))
 					continue
 				}
 				logReq.Current = current.Data
@@ -207,10 +210,30 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				)
 				if err != nil {
 					logReq.Response = err.Error()
+					h.log.Error("!!!MigrationUp--->Error while updating table", logger.Error(err))
 					continue
 				}
 				logReq.Current = current.Data
 				logReq.Response = current.Data
+				ids = append(ids, v.Id)
+			case "DELETE":
+				logReq.Previous = previous.Data
+				_, err := services.GetBuilderServiceByType(nodeType).Table().Delete(
+					context.Background(),
+					&obs.TablePrimaryKey{
+						Id:        previous.Data.Id,
+						ProjectId: resourceEnvId,
+						// AuthorId:   authInfo.GetUserId(),
+						Name:       fmt.Sprintf("Auto Created Commit Delete table - %s", time.Now().Format(time.RFC1123)),
+						CommitType: config.COMMIT_TYPE_TABLE,
+						EnvId:      cast.ToString(environmentId),
+					},
+				)
+				if err != nil {
+					logReq.Response = err.Error()
+					h.log.Error("!!!MigrationUp--->Error while deleting table", logger.Error(err))
+					continue
+				}
 				ids = append(ids, v.Id)
 			}
 		} else if actionSource == "FIELD" {
@@ -222,9 +245,15 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				current       DataCreateFieldWrapper
 				previous      DataFieldWrapper
 				currentUpdate DataFieldWrapper
+				request       DataCreateFieldWrapper
 			)
 
-			err := json.Unmarshal([]byte(cast.ToString(v.Current)), &current)
+			err := json.Unmarshal([]byte(cast.ToString(v.Request)), &request)
+			if err != nil {
+				continue
+			}
+
+			err = json.Unmarshal([]byte(cast.ToString(v.Current)), &current)
 			if err != nil {
 				continue
 			}
@@ -246,15 +275,18 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 			previous.Data.ProjectId = resourceEnvId
 			previous.Data.EnvId = cast.ToString(environmentId)
 			logReq.TableSlug = current.Data.TableId
+			request.Data.ProjectId = resourceEnvId
+			request.Data.EnvId = cast.ToString(environmentId)
 
 			switch actionType {
 			case "CREATE":
 				createField, err := services.GetBuilderServiceByType(nodeType).Field().Create(
 					context.Background(),
-					current.Data,
+					request.Data,
 				)
 				if err != nil {
 					logReq.Response = err.Error()
+					h.log.Error("!!!MigrationUp--->Error while creating field", logger.Error(err))
 					continue
 				}
 				logReq.Request = current.Data
@@ -270,6 +302,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				)
 				if err != nil {
 					logReq.Response = err.Error()
+					h.log.Error("!!!MigrationUp--->Error while updating field", logger.Error(err))
 					continue
 				}
 				logReq.Request = currentUpdate.Data
@@ -288,6 +321,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				)
 				if err != nil {
 					logReq.Response = err.Error()
+					h.log.Error("!!!MigrationUp--->Error while deleting field", logger.Error(err))
 					continue
 				}
 				ids = append(ids, v.Id)
@@ -300,23 +334,33 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 			var (
 				request  DataCreateRelationWrapper
 				response DataCreateRelationWrapper
+				current  DataUpdateRelationWrapper
+				previous DataCreateRelationWrapper
 			)
 
 			err := json.Unmarshal([]byte(cast.ToString(v.Request)), &request)
 			if err != nil {
+				fmt.Println("error in request", err)
 				continue
 			}
 
-			err = json.Unmarshal([]byte(cast.ToString(v.Response)), &response)
+			err = json.Unmarshal([]byte(cast.ToString(v.Previous)), &previous)
 			if err != nil {
+				fmt.Println("error in previous", err)
+				continue
+			}
+
+			err = json.Unmarshal([]byte(cast.ToString(v.Request)), &current)
+			if err != nil {
+				fmt.Println("error in current", err)
 				continue
 			}
 
 			request.Data.ProjectId = resourceEnvId
 			request.Data.EnvId = cast.ToString(environmentId)
-			response.Data.ProjectId = resourceEnvId
-			response.Data.EnvId = cast.ToString(environmentId)
 			logReq.TableSlug = request.Data.RelationTableSlug
+			current.Data.ProjectId = resourceEnvId
+			current.Data.EnvId = cast.ToString(environmentId)
 
 			switch actionType {
 			case "CREATE":
@@ -326,11 +370,28 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				)
 				if err != nil {
 					logReq.Response = err.Error()
+					h.log.Error("!!!MigrationUp--->Error while creating relation", logger.Error(err))
 					continue
 				}
 				logReq.Request = request.Data
 				logReq.Current = createRelation
 				logReq.Response = createRelation
+				ids = append(ids, v.Id)
+			case "UPDATE":
+				fmt.Printf("inside update relation %v\n", current.Data)
+				logReq.Previous = previous.Data
+				updateRelation, err := services.GetBuilderServiceByType(nodeType).Relation().Update(
+					context.Background(),
+					current.Data,
+				)
+				if err != nil {
+					logReq.Response = err.Error()
+					h.log.Error("!!!MigrationUp--->Error while updating relation", logger.Error(err))
+					continue
+				}
+				logReq.Request = current.Data
+				logReq.Current = updateRelation
+				logReq.Response = updateRelation
 				ids = append(ids, v.Id)
 			case "DELETE":
 				logReq.Previous = response.Data
@@ -344,6 +405,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				)
 				if err != nil {
 					logReq.Response = err.Error()
+					h.log.Error("!!!MigrationUp--->Error while deleting relation", logger.Error(err))
 					continue
 				}
 				ids = append(ids, v.Id)
@@ -369,7 +431,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				continue
 			}
 
-			err = json.Unmarshal([]byte(cast.ToString(v.Request)), &current)
+			err = json.Unmarshal([]byte(cast.ToString(v.Current)), &current)
 			if err != nil {
 				continue
 			}
@@ -380,6 +442,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 			previous.Data.EnvId = cast.ToString(environmentId)
 			current.Data.ProjectId = resourceEnvId
 			current.Data.EnvId = cast.ToString(environmentId)
+			request.Data.Id = current.Data.Id
 			logReq.TableSlug = "Menu"
 
 			switch actionType {
@@ -390,6 +453,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				)
 				if err != nil {
 					logReq.Response = err.Error()
+					h.log.Error("!!!MigrationUp--->Error while creating menu", logger.Error(err))
 					continue
 				}
 				logReq.Request = request.Data
@@ -404,6 +468,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				)
 				if err != nil {
 					logReq.Response = err.Error()
+					h.log.Error("!!!MigrationUp--->Error while updating menu", logger.Error(err))
 					continue
 				}
 				logReq.Request = current.Data
@@ -422,6 +487,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				)
 				if err != nil {
 					logReq.Response = err.Error()
+					h.log.Error("!!!MigrationUp--->Error while deleting menu", logger.Error(err))
 					continue
 				}
 				ids = append(ids, v.Id)
@@ -462,12 +528,14 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 
 			switch actionType {
 			case "CREATE":
+				request.Data.Id = current.Data.Id
 				createView, err := services.GetBuilderServiceByType(nodeType).View().Create(
 					context.Background(),
 					request.Data,
 				)
 				if err != nil {
 					logReq.Response = err.Error()
+					h.log.Error("!!!MigrationUp--->Error while creating view", logger.Error(err))
 					continue
 				}
 				logReq.Request = request.Data
@@ -482,6 +550,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				)
 				if err != nil {
 					logReq.Response = err.Error()
+					h.log.Error("!!!MigrationUp--->Error while updating view", logger.Error(err))
 					continue
 				}
 				logReq.Request = current.Data
@@ -500,6 +569,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				)
 				if err != nil {
 					logReq.Response = err.Error()
+					h.log.Error("!!!MigrationUp--->Error while deleting view", logger.Error(err))
 					continue
 				}
 				ids = append(ids, v.Id)
@@ -510,15 +580,9 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 			}()
 
 			var (
-				request  DataCreateLayoutWrapper
 				previous DataUpdateLayoutWrapper
 				current  DataUpdateLayoutWrapper
 			)
-
-			err := json.Unmarshal([]byte(cast.ToString(v.Request)), &request)
-			if err != nil {
-				continue
-			}
 
 			err = json.Unmarshal([]byte(cast.ToString(v.Previous)), &previous)
 			if err != nil {
@@ -530,13 +594,11 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				continue
 			}
 
-			request.Data.ProjectId = resourceEnvId
-			request.Data.EnvId = cast.ToString(environmentId)
 			previous.Data.ProjectId = resourceEnvId
 			previous.Data.EnvId = cast.ToString(environmentId)
 			current.Data.ProjectId = resourceEnvId
 			current.Data.EnvId = cast.ToString(environmentId)
-			logReq.TableSlug = "View"
+			logReq.TableSlug = "Layout"
 
 			switch actionType {
 			case "UPDATE":
@@ -546,6 +608,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 					current.Data,
 				)
 				if err != nil {
+					h.log.Error("!!!MigrationUp--->Error while updating layout", logger.Error(err))
 					logReq.Response = err.Error()
 					continue
 				}
@@ -564,6 +627,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 					},
 				)
 				if err != nil {
+					h.log.Error("!!!MigrationUp--->Error while deleting layout", logger.Error(err))
 					logReq.Response = err.Error()
 					continue
 				}
