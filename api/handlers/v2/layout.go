@@ -264,18 +264,16 @@ func (h *HandlerV2) UpdateLayout(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 		} else {
 			logReq.Response = resp
-			logReq.Current = resp
 			h.handleResponse(c, status_http.OK, resp)
 		}
 		go h.versionHistory(c, logReq)
 	}()
 
-	oldLayout, err = services.GetBuilderServiceByType(nodeType).Layout().GetSingleLayout(
+	oldLayout, err = services.GetBuilderServiceByType(resource.NodeType).Layout().GetByID(
 		context.Background(),
-		&object_builder_service.GetSingleLayoutRequest{
-			ProjectId: input.ProjectId,
-			TableId:   input.TableId,
-			MenuId:    input.MenuId,
+		&object_builder_service.LayoutPrimaryKey{
+			Id:        input.Id,
+			ProjectId: resourceEnvironmentId,
 		},
 	)
 	if err != nil {

@@ -13,6 +13,7 @@ service LayoutService {
     rpc GetAll(GetListLayoutRequest) returns (GetListLayoutResponse) {}
     rpc GetSingleLayout(GetSingleLayoutRequest) returns (LayoutResponse) {}
     rpc RemoveLayout(LayoutPrimaryKey) returns (google.protobuf.Empty) {}
+    rpc GetByID(LayoutPrimaryKey) returns (LayoutResponse) {}
 }
 
 message GetSingleLayoutRequest {
