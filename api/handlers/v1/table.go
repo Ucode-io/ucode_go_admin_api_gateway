@@ -97,6 +97,10 @@ func (h *HandlerV1) CreateTable(c *gin.Context) {
 		projectId.(string),
 		nodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	var fields []*obs.CreateFieldsRequest
 	for _, field := range tableRequest.Fields {

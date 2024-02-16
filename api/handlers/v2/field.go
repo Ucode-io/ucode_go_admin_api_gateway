@@ -487,6 +487,8 @@ func (h *HandlerV2) UpdateField(c *gin.Context) {
 	}
 
 	field.ProjectId = resource.ResourceEnvironmentId
+	field.EnvId = resource.EnvironmentId
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, deferErr = services.GetBuilderServiceByType(resource.NodeType).Field().Update(
@@ -657,6 +659,7 @@ func (h *HandlerV2) DeleteField(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 		} else {
 			logReq.Previous = oldField
+			logReq.Response = resp
 			h.handleResponse(c, status_http.NoContent, resp)
 		}
 		go h.versionHistory(c, logReq)
