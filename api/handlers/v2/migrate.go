@@ -824,6 +824,7 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 				}
 				ids = append(ids, v.Id)
 			case "UPDATE":
+				updatePrevious.Data.Id = current.Data.Id
 				_, err := services.GetBuilderServiceByType(nodeType).Relation().Update(
 					context.Background(),
 					updatePrevious.Data,
