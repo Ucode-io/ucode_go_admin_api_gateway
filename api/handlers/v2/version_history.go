@@ -164,6 +164,13 @@ func (h *HandlerV2) GetAllVersionHistory(c *gin.Context) {
 		return
 	}
 
+	currEnvironmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(currEnvironmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
 	fmt.Println("\n\n\n history env", environmentId, projectId)
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
@@ -191,7 +198,7 @@ func (h *HandlerV2) GetAllVersionHistory(c *gin.Context) {
 			&obs.GetAllRquest{
 				Type:      tip,
 				ProjectId: resource.ResourceEnvironmentId,
-				EnvId:     environmentId,
+				EnvId:     currEnvironmentId.(string),
 				ApiKey:    apiKey,
 				Offset:    int32(offset),
 				Limit:     int32(limit),
