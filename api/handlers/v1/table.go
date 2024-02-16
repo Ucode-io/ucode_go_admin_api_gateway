@@ -691,7 +691,7 @@ func (h *HandlerV1) DeleteTable(c *gin.Context) {
 				cast.ToString(environmentId): true,
 			},
 			UserInfo:  cast.ToString(userId),
-			TableSlug: "",
+			TableSlug: tableID,
 		}
 	)
 

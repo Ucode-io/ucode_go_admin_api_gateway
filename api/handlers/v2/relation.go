@@ -3,6 +3,7 @@ package v2
 import (
 	"context"
 	"errors"
+	"fmt"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
@@ -188,14 +189,15 @@ func (h *HandlerV2) GetByIdRelation(c *gin.Context) {
 }
 
 // CreateRelation godoc
-// @ID create_relation
-// @Router /v1/relation [POST]
+// @ID create_relations_V2
+// @Router /v2/relations/{collection} [POST]
 // @Security ApiKeyAuth
 // @Summary Create relation
 // @Description Create relation
 // @Tags Relation
 // @Accept json
 // @Produce json
+// @Param collection path string true "collection"
 // @Param table body obs.CreateRelationRequest true "CreateRelationRequestBody"
 // @Success 201 {object} status_http.Response{data=string} "Relation data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -406,14 +408,15 @@ func (h *HandlerV2) GetAllRelations(c *gin.Context) {
 
 // UpdateRelation godoc
 // @Security ApiKeyAuth
-// @ID update_relation
-// @Router /v1/relation [PUT]
+// @ID update_relations_v2
+// @Router /v2/relations/:collection [PUT]
 // @Security ApiKeyAuth
 // @Summary Update relation
 // @Description Update relation
 // @Tags Relation
 // @Accept json
 // @Produce json
+// @Param collection path string true "collection"
 // @Param relation body obs.UpdateRelationRequest  true "UpdateRelationRequestBody"
 // @Success 200 {object} status_http.Response{data=string} "Relation data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -454,6 +457,7 @@ func (h *HandlerV2) UpdateRelation(c *gin.Context) {
 		},
 	)
 	if err != nil {
+		fmt.Println("error getting resource", err)
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
@@ -464,6 +468,7 @@ func (h *HandlerV2) UpdateRelation(c *gin.Context) {
 		resource.NodeType,
 	)
 	if err != nil {
+		fmt.Println("error getting project service", err)
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
@@ -498,18 +503,19 @@ func (h *HandlerV2) UpdateRelation(c *gin.Context) {
 		go h.versionHistory(c, logReq)
 	}()
 
-	// oldRelation, err = services.GetBuilderServiceByType(resource.NodeType).Relation().GetByID(
-	// 	context.Background(),
-	// 	&obs.RelationPrimaryKey{
-	// 		Id:        relation.Id,
-	// 		ProjectId: relation.ProjectId,
-	// 	},
-	// )
-	// if err != nil {
-	// 	return
-	// }
-
 	relation.ProjectId = resource.ResourceEnvironmentId
+
+	oldRelation, err = services.GetBuilderServiceByType(resource.NodeType).Relation().GetByID(
+		context.Background(),
+		&obs.RelationPrimaryKey{
+			Id:        relation.Id,
+			ProjectId: relation.ProjectId,
+		},
+	)
+	if err != nil {
+		return
+	}
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Relation().Update(
@@ -532,8 +538,8 @@ func (h *HandlerV2) UpdateRelation(c *gin.Context) {
 
 // DeleteRelation godoc
 // @Security ApiKeyAuth
-// @ID delete_relation
-// @Router /v1/relation/{relation_id} [DELETE]
+// @ID delete_relations_v2
+// @Router /v2/relations/{collection}/{relation_id} [DELETE]
 // @Security ApiKeyAuth
 // @Summary Delete Relation
 // @Description Delete Relation
@@ -541,6 +547,7 @@ func (h *HandlerV2) UpdateRelation(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param relation_id path string true "relation_id"
+// @Param collection path string true "collection"
 // @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"

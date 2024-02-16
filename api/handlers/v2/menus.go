@@ -22,8 +22,8 @@ import (
 
 // CreateMenu godoc
 // @Security ApiKeyAuth
-// @ID create_menu
-// @Router /v1/menu [POST]
+// @ID create_menus_v2
+// @Router /v2/menus [POST]
 // @Summary Create menu
 // @Description Create menu
 // @Tags Menu
@@ -360,8 +360,8 @@ func (h *HandlerV2) GetAllMenus(c *gin.Context) {
 
 // UpdateMenu godoc
 // @Security ApiKeyAuth
-// @ID update_menu
-// @Router /v1/menu [PUT]
+// @ID update_menus_v2
+// @Router /v2/menus [PUT]
 // @Summary Update menu
 // @Description Update menu
 // @Tags Menu
@@ -509,8 +509,8 @@ func (h *HandlerV2) UpdateMenu(c *gin.Context) {
 
 // DeleteMenu godoc
 // @Security ApiKeyAuth
-// @ID delete_menu
-// @Router /v1/menu/{menu_id} [DELETE]
+// @ID delete_menus_v2
+// @Router /v2/menus/{menu_id} [DELETE]
 // @Summary Delete menu
 // @Description Delete menu
 // @Tags Menu
@@ -582,6 +582,7 @@ func (h *HandlerV2) DeleteMenu(c *gin.Context) {
 			},
 			UserInfo:  cast.ToString(userId),
 			TableSlug: "Menu",
+			Request:   menuID,
 		}
 	)
 

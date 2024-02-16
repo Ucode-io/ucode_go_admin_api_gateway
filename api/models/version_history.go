@@ -23,12 +23,25 @@ type CreateVersionHistoryRequest struct {
 }
 
 type MigrateUp struct {
+	Id               string          `json:"id"`
 	ActionSource     string          `json:"action_source"`
 	ActionType       string          `json:"action_type"`
-	Previous         interface{}     `json:"previous"`
+	Previous         interface{}     `json:"previus"`
 	Current          interface{}     `json:"current"`
 	UsedEnvironments map[string]bool `json:"used_envrironments"`
 	Date             string          `json:"date"`
 	UserInfo         string          `json:"user_info"`
 	Request          interface{}     `json:"request"`
+	Response         interface{}     `json:"response"`
+	ApiKey           string          `json:"api_key"`
+	Type             string          `json:"type"`
+	TableSlug        string          `json:"table_slug"`
+}
+
+type MigrateUpRequest struct {
+	Data []*MigrateUp `json:"data"`
+}
+
+type MigrateUpResponse struct {
+	Ids []string `json:"ids"`
 }

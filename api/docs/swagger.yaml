@@ -953,6 +953,8 @@ definitions:
         type: string
       token:
         type: string
+      type:
+        type: string
       username:
         type: string
     type: object
@@ -2378,6 +2380,8 @@ definitions:
       data:
         additionalProperties: true
         type: object
+      server_error:
+        type: string
       status:
         type: string
     type: object
@@ -2436,6 +2440,47 @@ definitions:
         type: string
       subdomain:
         type: string
+    type: object
+  models.MigrateUp:
+    properties:
+      action_source:
+        type: string
+      action_type:
+        type: string
+      api_key:
+        type: string
+      current: {}
+      date:
+        type: string
+      id:
+        type: string
+      previus: {}
+      request: {}
+      response: {}
+      table_slug:
+        type: string
+      type:
+        type: string
+      used_envrironments:
+        additionalProperties:
+          type: boolean
+        type: object
+      user_info:
+        type: string
+    type: object
+  models.MigrateUpRequest:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/models.MigrateUp'
+        type: array
+    type: object
+  models.MigrateUpResponse:
+    properties:
+      ids:
+        items:
+          type: string
+        type: array
     type: object
   models.MultipleInsertItems:
     properties:
@@ -2766,6 +2811,8 @@ definitions:
         type: string
       environment_id:
         type: string
+      error_message:
+        type: string
       framework_type:
         type: string
       function_folder_id:
@@ -2776,13 +2823,23 @@ definitions:
         type: string
       id:
         type: string
+      job_name:
+        type: string
       name:
         type: string
       password:
         type: string
       path:
         type: string
+      pipeline_status:
+        type: string
       project_id:
+        type: string
+      provided_name:
+        type: string
+      repo_id:
+        type: string
+      resource:
         type: string
       source_url:
         type: string
@@ -3449,6 +3506,8 @@ definitions:
         items:
           type: string
         type: array
+      id:
+        type: string
       is_editable:
         type: boolean
       main_field:
@@ -3650,6 +3709,8 @@ definitions:
         type: string
       index:
         type: string
+      is_search:
+        type: boolean
       is_system:
         type: boolean
       is_visible:
@@ -4079,6 +4140,17 @@ definitions:
       type:
         type: string
     type: object
+  object_builder_service.ListVersionHistory:
+    properties:
+      count:
+        type: integer
+      histories:
+        items:
+          $ref: '#/definitions/object_builder_service.VersionHistory'
+        type: array
+      project_id:
+        type: string
+    type: object
   object_builder_service.ManyToManyMessage:
     properties:
       id_from:
@@ -4113,6 +4185,8 @@ definitions:
         $ref: '#/definitions/structpb.Struct'
       data:
         $ref: '#/definitions/structpb.Struct'
+      env_id:
+        type: string
       icon:
         type: string
       id:
@@ -5164,6 +5238,17 @@ definitions:
           $ref: '#/definitions/object_builder_service.ViewRelationReq'
         type: array
     type: object
+  object_builder_service.UsedForEnvRequest:
+    properties:
+      env_id:
+        type: string
+      ids:
+        items:
+          type: string
+        type: array
+      project_id:
+        type: string
+    type: object
   object_builder_service.V2LoginResponse:
     properties:
       addational_table:
@@ -5236,6 +5321,37 @@ definitions:
       type:
         type: string
       view_field_slug:
+        type: string
+    type: object
+  object_builder_service.VersionHistory:
+    properties:
+      action_source:
+        type: string
+      action_type:
+        type: string
+      api_key:
+        type: string
+      current:
+        type: string
+      date:
+        type: string
+      id:
+        type: string
+      previus:
+        type: string
+      request:
+        type: string
+      response:
+        type: string
+      table_slug:
+        type: string
+      type:
+        type: string
+      used_envrironments:
+        additionalProperties:
+          type: boolean
+        type: object
+      user_info:
         type: string
     type: object
   object_builder_service.View:
@@ -12050,7 +12166,8 @@ paths:
       description: Get environment list
       operationId: get_environment_list
       parameters:
-      - in: query
+      - collectionFormat: csv
+        in: query
         items:
           type: string
         name: ids
@@ -14099,7 +14216,8 @@ paths:
       description: Get global project environment list
       operationId: get_global_project_environment_list
       parameters:
-      - in: query
+      - collectionFormat: csv
+        in: query
         items:
           type: string
         name: ids
@@ -24899,6 +25017,104 @@ paths:
       summary: Get excel writer
       tags:
       - Collections
+  /v2/collections/{collection}/layout:
+    put:
+      consumes:
+      - application/json
+      description: Update layouts
+      operationId: update_layout_v2
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: LayoutRequest
+        in: body
+        name: layout
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.LayoutRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Layout data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.LayoutResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update layouts
+      tags:
+      - Layout
+  /v2/collections/{collection}/layout/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete layouts
+      operationId: delete_layout_v2
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete layout
+      tags:
+      - Layout
   /v2/company/project/resource:
     get:
       consumes:
@@ -27185,6 +27401,141 @@ paths:
       summary: Language json
       tags:
       - language
+  /v2/menus:
+    post:
+      consumes:
+      - application/json
+      description: Create menu
+      operationId: create_menus_v2
+      parameters:
+      - description: MenuRequest
+        in: body
+        name: menu
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateMenuRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Menu data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Menu'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create menu
+      tags:
+      - Menu
+    put:
+      consumes:
+      - application/json
+      description: Update menu
+      operationId: update_menus_v2
+      parameters:
+      - description: UpdateMenuRequestBody
+        in: body
+        name: menu
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.Menu'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: App data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.Menu'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update menu
+      tags:
+      - Menu
+  /v2/menus/{menu_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete menu
+      operationId: delete_menus_v2
+      parameters:
+      - description: menu_id
+        in: path
+        name: menu_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete menu
+      tags:
+      - Menu
   /v2/object-slim/get-list/{table_slug}:
     get:
       consumes:
@@ -27301,6 +27652,113 @@ paths:
       summary: Get all objects version 2
       tags:
       - Object
+  /v2/relations/:collection:
+    put:
+      consumes:
+      - application/json
+      description: Update relation
+      operationId: update_relations_v2
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: UpdateRelationRequestBody
+        in: body
+        name: relation
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.UpdateRelationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Relation data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      - ApiKeyAuth: []
+      summary: Update relation
+      tags:
+      - Relation
+  /v2/relations/{collection}:
+    post:
+      consumes:
+      - application/json
+      description: Create relation
+      operationId: create_relations_V2
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: CreateRelationRequestBody
+        in: body
+        name: table
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.CreateRelationRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Relation data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create relation
+      tags:
+      - Relation
   /v2/relations/{collection}/{id}:
     get:
       consumes:
@@ -27344,6 +27802,52 @@ paths:
       summary: Get relation by id
       tags:
       - V2_Relation
+  /v2/relations/{collection}/{relation_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete Relation
+      operationId: delete_relations_v2
+      parameters:
+      - description: relation_id
+        in: path
+        name: relation_id
+        required: true
+        type: string
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      - ApiKeyAuth: []
+      summary: Delete Relation
+      tags:
+      - Relation
   /v2/relations/{collection}/cascading:
     get:
       consumes:
@@ -28206,6 +28710,240 @@ paths:
       summary: Convert html to pdf
       tags:
       - Utils
+  /v2/version/history/{environment_id}:
+    get:
+      consumes:
+      - application/json
+      description: Get version history list
+      operationId: get_all_version_history
+      parameters:
+      - description: environment_id
+        in: path
+        name: environment_id
+        required: true
+        type: string
+      - in: query
+        name: api_key
+        type: string
+      - in: query
+        name: env_id
+        type: string
+      - in: query
+        name: from_date
+        type: string
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: offset
+        type: integer
+      - in: query
+        name: order_by
+        type: boolean
+      - in: query
+        name: project_id
+        type: string
+      - in: query
+        name: to_date
+        type: string
+      - in: query
+        name: type
+        type: string
+      - in: query
+        name: user_info
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ViewBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.ListVersionHistory'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get version history list
+      tags:
+      - VersionHistory
+    put:
+      consumes:
+      - application/json
+      description: Update version history
+      operationId: update_version_history
+      parameters:
+      - description: environment_id
+        in: path
+        name: environment_id
+        required: true
+        type: string
+      - description: UpdateViewRequestBody
+        in: body
+        name: view
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.UsedForEnvRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: UsedForEnvRequest data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.UsedForEnvRequest'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update version history
+      tags:
+      - VersionHistory
+  /v2/version/history/{environment_id}/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get single version history
+      operationId: get_version_history_by_id
+      parameters:
+      - description: environment_id
+        in: path
+        name: environment_id
+        required: true
+        type: string
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: VersionHistoryBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.VersionHistory'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get single version history
+      tags:
+      - VersionHistory
+  /v2/version/history/migrate/up/{environment_id}:
+    post:
+      consumes:
+      - application/json
+      description: Migrate up
+      operationId: migrate_up
+      parameters:
+      - description: environment_id
+        in: path
+        name: environment_id
+        required: true
+        type: string
+      - description: MigrateUpRequest
+        in: body
+        name: migrate
+        required: true
+        schema:
+          $ref: '#/definitions/models.MigrateUpRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Upbody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.MigrateUpResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Migrate up
+      tags:
+      - VersionHistory
   /v2/views/{collection}:
     get:
       consumes:
