@@ -746,6 +746,15 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 				if err != nil {
 					continue
 				}
+
+				services.GetBuilderServiceByType(nodeType).View().Delete(
+					context.Background(),
+					&obs.ViewPrimaryKey{
+						TableSlug: current.Data.Slug,
+						ProjectId: resourceEnvId,
+						EnvId:     cast.ToString(environmentId),
+					},
+				)
 				ids = append(ids, v.Id)
 			case "UPDATE":
 				previous.Data.CommitType = "TABLE"
