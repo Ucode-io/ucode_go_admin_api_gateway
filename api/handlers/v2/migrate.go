@@ -39,6 +39,10 @@ type DataCreateRelationWrapper struct {
 	Data *obs.CreateRelationRequest
 }
 
+type DataRelationWrapper struct {
+	Data *obs.RelationForGetAll
+}
+
 type DataCreateMenuWrapper struct {
 	Data *obs.CreateMenuRequest
 }
@@ -848,38 +852,23 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 				ids = append(ids, v.Id)
 			}
 		} else if actionSource == "RELATION" {
-
 			var (
-				current        DataCreateRelationWrapper
-				previous       DataCreateRelationWrapper
-				updatePrevious DataUpdateRelationWrapper
+				current  DataRelationWrapper
+				previous DataRelationWrapper
 			)
 
 			if cast.ToString(v.Current) != "" {
-				err = json.Unmarshal([]byte(cast.ToString(v.Current)), &current)
+				err := json.Unmarshal([]byte(cast.ToString(v.Request)), &current)
 				if err != nil {
 					continue
 				}
-				current.Data.ProjectId = resourceEnvId
-				current.Data.EnvId = environmentId
 			}
 
 			if cast.ToString(v.Previous) != "" {
-				err = json.Unmarshal([]byte(cast.ToString(v.Previous)), &previous)
+				err := json.Unmarshal([]byte(cast.ToString(v.Request)), &previous)
 				if err != nil {
 					continue
 				}
-				previous.Data.ProjectId = resourceEnvId
-				previous.Data.EnvId = environmentId
-			}
-
-			if cast.ToString(v.Previous) != "" {
-				err = json.Unmarshal([]byte(cast.ToString(v.Previous)), &updatePrevious)
-				if err != nil {
-					continue
-				}
-				updatePrevious.Data.ProjectId = resourceEnvId
-				updatePrevious.Data.EnvId = environmentId
 			}
 
 			switch actionType {
@@ -897,19 +886,108 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 				}
 				ids = append(ids, v.Id)
 			case "UPDATE":
-				updatePrevious.Data.Id = current.Data.Id
+				var (
+					updateRelation = &obs.UpdateRelationRequest{
+						Id:                     previous.Data.Id,
+						TableFrom:              previous.Data.TableFrom.Slug,
+						TableTo:                previous.Data.TableTo.Slug,
+						Type:                   previous.Data.Type,
+						AutoFilters:            previous.Data.AutoFilters,
+						Summaries:              previous.Data.Summaries,
+						Editable:               previous.Data.Editable,
+						IsEditable:             previous.Data.IsEditable,
+						Title:                  previous.Data.Title,
+						Columns:                previous.Data.Columns,
+						QuickFilters:           previous.Data.QuickFilters,
+						GroupFields:            previous.Data.GroupFields,
+						RelationTableSlug:      previous.Data.RelationTableSlug,
+						ViewType:               previous.Data.ViewType,
+						DynamicTables:          previous.Data.DynamicTables,
+						RelationFieldSlug:      previous.Data.RelationFieldSlug,
+						DefaultValues:          previous.Data.DefaultValues,
+						IsUserIdDefault:        previous.Data.IsUserIdDefault,
+						Cascadings:             previous.Data.Cascadings,
+						ObjectIdFromJwt:        previous.Data.ObjectIdFromJwt,
+						CascadingTreeTableSlug: previous.Data.CascadingTreeFieldSlug,
+						CascadingTreeFieldSlug: previous.Data.CascadingTreeFieldSlug,
+						ActionRelations:        previous.Data.ActionRelations,
+						DefaultLimit:           previous.Data.DefaultLimit,
+						MultipleInsert:         previous.Data.MultipleInsert,
+						UpdatedFields:          previous.Data.UpdatedFields,
+						MultipleInsertField:    previous.Data.MultipleInsertField,
+						ProjectId:              resourceEnvId,
+						Creatable:              previous.Data.Creatable,
+						DefaultEditable:        previous.Data.DefaultEditable,
+						FunctionPath:           previous.Data.FunctionPath,
+						RelationButtons:        previous.Data.RelationButtons,
+						Attributes:             previous.Data.Attributes,
+						EnvId:                  environmentId,
+					}
+					viewFields = []string{}
+				)
+
+				for _, v := range previous.Data.ViewFields {
+					viewFields = append(viewFields, v.Id)
+				}
+
+				updateRelation.ViewFields = viewFields
+
 				_, err := services.GetBuilderServiceByType(nodeType).Relation().Update(
 					context.Background(),
-					updatePrevious.Data,
+					updateRelation,
 				)
 				if err != nil {
 					continue
 				}
 				ids = append(ids, v.Id)
 			case "DELETE":
+				var (
+					createRelation = &obs.CreateRelationRequest{
+						Id:                     previous.Data.Id,
+						TableFrom:              previous.Data.TableFrom.Slug,
+						TableTo:                previous.Data.TableTo.Slug,
+						Type:                   previous.Data.Type,
+						AutoFilters:            previous.Data.AutoFilters,
+						Summaries:              previous.Data.Summaries,
+						Editable:               previous.Data.Editable,
+						IsEditable:             previous.Data.IsEditable,
+						Title:                  previous.Data.Title,
+						Columns:                previous.Data.Columns,
+						QuickFilters:           previous.Data.QuickFilters,
+						GroupFields:            previous.Data.GroupFields,
+						RelationTableSlug:      previous.Data.RelationTableSlug,
+						ViewType:               previous.Data.ViewType,
+						DynamicTables:          previous.Data.DynamicTables,
+						RelationFieldSlug:      previous.Data.RelationFieldSlug,
+						DefaultValues:          previous.Data.DefaultValues,
+						IsUserIdDefault:        previous.Data.IsUserIdDefault,
+						Cascadings:             previous.Data.Cascadings,
+						ObjectIdFromJwt:        previous.Data.ObjectIdFromJwt,
+						CascadingTreeTableSlug: previous.Data.CascadingTreeFieldSlug,
+						CascadingTreeFieldSlug: previous.Data.CascadingTreeFieldSlug,
+						ActionRelations:        previous.Data.ActionRelations,
+						DefaultLimit:           previous.Data.DefaultLimit,
+						MultipleInsert:         previous.Data.MultipleInsert,
+						UpdatedFields:          previous.Data.UpdatedFields,
+						MultipleInsertField:    previous.Data.MultipleInsertField,
+						ProjectId:              resourceEnvId,
+						Creatable:              previous.Data.Creatable,
+						DefaultEditable:        previous.Data.DefaultEditable,
+						FunctionPath:           previous.Data.FunctionPath,
+						RelationButtons:        previous.Data.RelationButtons,
+						Attributes:             previous.Data.Attributes,
+						EnvId:                  environmentId,
+					}
+					viewFields = []string{}
+				)
+				for _, v := range previous.Data.ViewFields {
+					viewFields = append(viewFields, v.Id)
+				}
+				createRelation.ViewFields = viewFields
+
 				_, err := services.GetBuilderServiceByType(nodeType).Relation().Create(
 					context.Background(),
-					previous.Data,
+					createRelation,
 				)
 				if err != nil {
 					continue
