@@ -856,16 +856,8 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 			}
 		} else if actionSource == "RELATION" {
 			var (
-				current  DataRelationWrapper
 				previous DataRelationWrapper
 			)
-
-			if cast.ToString(v.Current) != "" {
-				err := json.Unmarshal([]byte(cast.ToString(v.Current)), &current)
-				if err != nil {
-					continue
-				}
-			}
 
 			if cast.ToString(v.Previous) != "" {
 				err := json.Unmarshal([]byte(cast.ToString(v.Previous)), &previous)
@@ -876,6 +868,17 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 
 			switch actionType {
 			case "CREATE":
+				var (
+					current DataCreateRelationWrapper
+				)
+
+				if cast.ToString(v.Current) != "" {
+					err := json.Unmarshal([]byte(cast.ToString(v.Current)), &current)
+					if err != nil {
+						continue
+					}
+				}
+
 				_, err := services.GetBuilderServiceByType(nodeType).Relation().Delete(
 					context.Background(),
 					&obs.RelationPrimaryKey{
