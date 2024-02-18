@@ -115,17 +115,11 @@ func (h *Handler) handleResponse(c *gin.Context, status status_http.Status, data
 }
 
 func (h *Handler) getOffsetParam(c *gin.Context) (offset int, err error) {
-	// if h.projectConf.DefaultOffset != "" {
-	// 	h.projectConf.DefaultOffset = h.baseConf.DefaultOffset
-	// }
 	offsetStr := c.DefaultQuery("offset", h.baseConf.DefaultOffset)
 	return strconv.Atoi(offsetStr)
 }
 
 func (h *Handler) getLimitParam(c *gin.Context) (limit int, err error) {
-	// if h.projectConf.DefaultLimit != "" {
-	// 	h.projectConf.DefaultLimit = h.baseConf.DefaultLimit
-	// }
 	limitStr := c.DefaultQuery("limit", h.baseConf.DefaultLimit)
 	return strconv.Atoi(limitStr)
 }
