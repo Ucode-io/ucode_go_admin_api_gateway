@@ -657,13 +657,6 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
 	migrateRequest := req.Data
 
 	projectId, ok := c.Get("project_id")
@@ -674,7 +667,7 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 
 	currentEnvironmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(currentEnvironmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
+		err := errors.New("error getting environment id | not valid")
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
@@ -688,6 +681,16 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 			EnvironmentId: environmentId,
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
 	)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
@@ -858,14 +861,14 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 			)
 
 			if cast.ToString(v.Current) != "" {
-				err := json.Unmarshal([]byte(cast.ToString(v.Request)), &current)
+				err := json.Unmarshal([]byte(cast.ToString(v.Current)), &current)
 				if err != nil {
 					continue
 				}
 			}
 
 			if cast.ToString(v.Previous) != "" {
-				err := json.Unmarshal([]byte(cast.ToString(v.Request)), &previous)
+				err := json.Unmarshal([]byte(cast.ToString(v.Previous)), &previous)
 				if err != nil {
 					continue
 				}
