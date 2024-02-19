@@ -274,16 +274,13 @@ func (h *HandlerV2) UpdateLayout(c *gin.Context) {
 		go h.versionHistory(c, logReq)
 	}()
 
-	oldLayout, err = services.GetBuilderServiceByType(resource.NodeType).Layout().GetByID(
+	oldLayout, _ = services.GetBuilderServiceByType(resource.NodeType).Layout().GetByID(
 		context.Background(),
 		&object_builder_service.LayoutPrimaryKey{
 			Id:        input.Id,
 			ProjectId: resourceEnvironmentId,
 		},
 	)
-	if err != nil {
-		return
-	}
 
 	resp, err = services.GetBuilderServiceByType(nodeType).Layout().Update(
 		context.Background(),
