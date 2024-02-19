@@ -1065,7 +1065,7 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 					previous.Data,
 				)
 				if err != nil {
-					return
+					continue
 				}
 				ids = append(ids, v.Id)
 			case "DELETE":
@@ -1133,7 +1133,7 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 					previous.Data,
 				)
 				if err != nil {
-					return
+					continue
 				}
 				ids = append(ids, v.Id)
 			case "DELETE":
@@ -1142,7 +1142,7 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 					createPrevious.Data,
 				)
 				if err != nil {
-					return
+					continue
 				}
 				ids = append(ids, v.Id)
 			}
@@ -1167,7 +1167,7 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 					previous.Data,
 				)
 				if err != nil {
-					return
+					continue
 				}
 				ids = append(ids, v.Id)
 			}
