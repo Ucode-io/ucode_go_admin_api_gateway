@@ -1006,7 +1006,6 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 				current       DataUpdateMenuWrapper
 				previous      DataUpdateMenuWrapper
 				createRequest DataCreateMenuWrapper
-				request       DataUpdateMenuWrapper
 				response      DataUpdateMenuWrapper
 			)
 
@@ -1035,15 +1034,6 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 				}
 				createRequest.Data.ProjectId = resourceEnvId
 				createRequest.Data.EnvId = environmentId
-			}
-
-			if cast.ToString(v.Request) != "" {
-				err = json.Unmarshal([]byte(cast.ToString(v.Request)), &request)
-				if err != nil {
-					continue
-				}
-				request.Data.ProjectId = resourceEnvId
-				request.Data.EnvId = environmentId
 			}
 
 			if cast.ToString(v.Response) != "" {
