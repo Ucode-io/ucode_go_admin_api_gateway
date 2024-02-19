@@ -582,7 +582,6 @@ func (h *HandlerV2) DeleteMenu(c *gin.Context) {
 			// },
 			UserInfo:  cast.ToString(userId),
 			TableSlug: "Menu",
-			Request:   menuID,
 		}
 	)
 
