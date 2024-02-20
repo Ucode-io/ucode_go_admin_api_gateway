@@ -114,13 +114,13 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
 	// defer cancel()
 
-	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
-	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
-	defer conn.Close()
-	// service := services.BuilderService().ObjectBuilder()
+	// service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.InternalServerError, err)
+	// 	return
+	// }
+	// defer conn.Close()
+	service := services.BuilderService().ObjectBuilder()
 
 	if viewId, ok := objectRequest.Data["builder_service_view_id"].(string); ok {
 		if util.IsValidUUID(viewId) {
