@@ -156,8 +156,6 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 			}
 		)
 
-		fmt.Println("=================", actionSource, actionType)
-
 		if actionSource == "TABLE" {
 			defer func() {
 				go h.versionHistory(c, logReq)
