@@ -26,6 +26,7 @@ type VersionServiceClient interface {
 	Create(ctx context.Context, in *CreateVersionRequest, opts ...grpc.CallOption) (*Version, error)
 	GetList(ctx context.Context, in *GetVersionListRequest, opts ...grpc.CallOption) (*GetVersionListResponse, error)
 	Update(ctx context.Context, in *Version, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	CreateMany(ctx context.Context, in *CreateManyVersionRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type versionServiceClient struct {
@@ -63,6 +64,15 @@ func (c *versionServiceClient) Update(ctx context.Context, in *Version, opts ...
 	return out, nil
 }
 
+func (c *versionServiceClient) CreateMany(ctx context.Context, in *CreateManyVersionRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/object_builder_service.VersionService/CreateMany", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // VersionServiceServer is the server API for VersionService service.
 // All implementations must embed UnimplementedVersionServiceServer
 // for forward compatibility
@@ -70,6 +80,7 @@ type VersionServiceServer interface {
 	Create(context.Context, *CreateVersionRequest) (*Version, error)
 	GetList(context.Context, *GetVersionListRequest) (*GetVersionListResponse, error)
 	Update(context.Context, *Version) (*emptypb.Empty, error)
+	CreateMany(context.Context, *CreateManyVersionRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedVersionServiceServer()
 }
 
@@ -85,6 +96,9 @@ func (UnimplementedVersionServiceServer) GetList(context.Context, *GetVersionLis
 }
 func (UnimplementedVersionServiceServer) Update(context.Context, *Version) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
+}
+func (UnimplementedVersionServiceServer) CreateMany(context.Context, *CreateManyVersionRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateMany not implemented")
 }
 func (UnimplementedVersionServiceServer) mustEmbedUnimplementedVersionServiceServer() {}
 
@@ -153,6 +167,24 @@ func _VersionService_Update_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _VersionService_CreateMany_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateManyVersionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(VersionServiceServer).CreateMany(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/object_builder_service.VersionService/CreateMany",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(VersionServiceServer).CreateMany(ctx, req.(*CreateManyVersionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // VersionService_ServiceDesc is the grpc.ServiceDesc for VersionService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -171,6 +203,10 @@ var VersionService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Update",
 			Handler:    _VersionService_Update_Handler,
+		},
+		{
+			MethodName: "CreateMany",
+			Handler:    _VersionService_CreateMany_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

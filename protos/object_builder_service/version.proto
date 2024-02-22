@@ -10,12 +10,14 @@ service VersionService {
     rpc Create(CreateVersionRequest) returns (Version) {}
     rpc GetList(GetVersionListRequest) returns (GetVersionListResponse) {}
     rpc Update(Version) returns (google.protobuf.Empty) {}
+    rpc CreateMany(CreateManyVersionRequest) returns (google.protobuf.Empty) {}
 }
 
 message GetVersionListRequest {
     string project_id = 1;
     int32 limit = 2;
     int32 offset = 3;
+    string version_id = 4;
 }
 
 message Version {
@@ -40,4 +42,13 @@ message GetVersionListResponse {
     repeated Version versions = 1;
     int32 count = 2;
     string project_id = 3;
+}
+
+message CreateManyVersionRequest {
+    repeated Version versions = 1;
+    string project_id = 2;
+}
+
+message CreateManyVersionResponse {
+    repeated Version versions = 1;
 }

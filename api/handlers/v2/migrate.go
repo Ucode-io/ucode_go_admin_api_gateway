@@ -149,10 +149,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				ProjectId:    resourceEnvId,
 				ActionSource: v.ActionSource,
 				ActionType:   v.ActionType,
-				// UsedEnvironments: map[string]bool{
-				// 	cast.ToString(environmentId): true,
-				// },
-				UserInfo: cast.ToString(userId),
+				UserInfo:     cast.ToString(userId),
 			}
 		)
 
@@ -1175,4 +1172,102 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 	resp.Ids = ids
 
 	h.handleResponse(c, status_http.OK, resp)
+}
+
+func (h *HandlerV2) PublishVersion(c *gin.Context) {
+	var (
+		push models.PublishVersionRequest
+	)
+
+	if err := c.ShouldBindJSON(&push); err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "environment id is an invalid uuid")
+		return
+	}
+
+	currentResource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	currentNodeType := currentResource.NodeType
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		currentResource.NodeType,
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	publishedResource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: push.PublishedEnvironmentID,
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	publishedtNodeType := publishedResource.NodeType
+
+	publishedServices, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		publishedResource.NodeType,
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	versions, err := services.GetBuilderServiceByType(currentNodeType).Version().GetList(
+		c.Request.Context(),
+		&obs.GetVersionListRequest{
+			ProjectId: currentResource.ResourceEnvironmentId,
+			VersionId: push.PublishedVersionID,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	_, err = publishedServices.GetBuilderServiceByType(publishedtNodeType).Version().CreateMany(
+		c.Request.Context(),
+		&obs.CreateManyVersionRequest{
+			Versions:  versions.Versions,
+			ProjectId: publishedResource.ResourceEnvironmentId,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
 }

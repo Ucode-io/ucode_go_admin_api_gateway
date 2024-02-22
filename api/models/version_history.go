@@ -45,3 +45,8 @@ type MigrateUpRequest struct {
 type MigrateUpResponse struct {
 	Ids []string `json:"ids"`
 }
+
+type PublishVersionRequest struct {
+	PublishedEnvironmentID string `json:"to_environment_id"`
+	PublishedVersionID     string `json:"published_version_id"`
+}
