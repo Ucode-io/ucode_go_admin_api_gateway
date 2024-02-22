@@ -441,7 +441,6 @@ func (h *HandlerV1) DynamicReportHelper(requestData NewRequestBody, services ser
 					if rowRelationOneTableSlug == request.RelationTableSlug {
 						rowRelationTableSlug = cast.ToString(rowRelationTableMap["slug"])
 						rowInsideRelationTableSlug = cast.ToString(rowRelationTableMap["inside_relation_table_slug"])
-						rowInsideRelationTableFields = cast.ToSlice(rowRelationTableMap["table_field_settings"])
 						break
 					}
 				}

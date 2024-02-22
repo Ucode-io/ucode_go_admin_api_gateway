@@ -3420,9 +3420,13 @@ definitions:
         type: array
       relation_buttons:
         type: boolean
+      relation_field_id:
+        type: string
       relation_field_slug:
         type: string
       relation_table_slug:
+        type: string
+      relation_to_field_id:
         type: string
       summaries:
         items:
@@ -3475,6 +3479,21 @@ definitions:
         type: string
       view_field_slug:
         type: string
+    type: object
+  object_builder_service.CreateVersionRequest:
+    properties:
+      description:
+        type: string
+      id:
+        type: string
+      is_current:
+        type: boolean
+      name:
+        type: string
+      project_id:
+        type: string
+      version_number:
+        type: integer
     type: object
   object_builder_service.CreateViewRequest:
     properties:
@@ -3986,6 +4005,17 @@ definitions:
       items:
         items:
           $ref: '#/definitions/object_builder_service.TableHistory'
+        type: array
+    type: object
+  object_builder_service.GetVersionListResponse:
+    properties:
+      count:
+        type: integer
+      project_id:
+        type: string
+      versions:
+        items:
+          $ref: '#/definitions/object_builder_service.Version'
         type: array
     type: object
   object_builder_service.GlobalPermission:
@@ -5322,6 +5352,21 @@ definitions:
         type: string
       view_field_slug:
         type: string
+    type: object
+  object_builder_service.Version:
+    properties:
+      description:
+        type: string
+      id:
+        type: string
+      is_current:
+        type: boolean
+      name:
+        type: string
+      project_id:
+        type: string
+      version_number:
+        type: integer
     type: object
   object_builder_service.VersionHistory:
     properties:
@@ -28710,6 +28755,151 @@ paths:
       summary: Convert html to pdf
       tags:
       - Utils
+  /v2/version:
+    get:
+      consumes:
+      - application/json
+      description: Get version list
+      operationId: get_version_list
+      parameters:
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: offset
+        type: integer
+      - in: query
+        name: project_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: VersionList
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.GetVersionListResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get version list
+      tags:
+      - Version
+    post:
+      consumes:
+      - application/json
+      description: Create version
+      operationId: create_version
+      parameters:
+      - description: CreateVersionRequest
+        in: body
+        name: version
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.CreateVersionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Version data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.Version'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create version
+      tags:
+      - Version
+    put:
+      consumes:
+      - application/json
+      description: Update version
+      operationId: update_version
+      parameters:
+      - description: Version
+        in: body
+        name: version
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.Version'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: UpdateVersionRequest
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.Version'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update version
+      tags:
+      - Version
   /v2/version/history/{environment_id}:
     get:
       consumes:

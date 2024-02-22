@@ -14,9 +14,6 @@ func (h *HandlerV1) RemoveService(namespace string) error {
 
 func (h *HandlerV1) IsServiceExists(namespace string) bool {
 	_, err := h.services.Get(namespace)
-	if err != nil {
-		return false
-	}
 
-	return true
+	return err == nil
 }

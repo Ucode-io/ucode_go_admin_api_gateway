@@ -714,6 +714,10 @@ func (h *HandlerV1) GetSingleNoteWithoutToken(c *gin.Context) {
 		projectId,
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	res, err := services.TemplateService().Note().GetSingleNote(
 		context.Background(),

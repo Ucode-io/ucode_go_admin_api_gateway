@@ -26,10 +26,8 @@ type HandlerV2 struct {
 	projectConfs    map[string]config.Config
 	log             logger.LoggerI
 	services        services.ServiceNodesI
-	storage         storage.StorageI
 	companyServices services.CompanyServiceI
 	authService     services.AuthServiceManagerI
-	apikeyService   services.AuthServiceManagerI
 	redis           storage.RedisStorageI
 }
 
@@ -110,11 +108,6 @@ func (h *HandlerV2) getOffsetParam(c *gin.Context) (offset int, err error) {
 func (h *HandlerV2) getLimitParam(c *gin.Context) (limit int, err error) {
 	limitStr := c.DefaultQuery("limit", h.baseConf.DefaultLimit)
 	return strconv.Atoi(limitStr)
-}
-
-func (h *HandlerV2) getPageParam(c *gin.Context) (page int, err error) {
-	pageStr := c.DefaultQuery("page", "1")
-	return strconv.Atoi(pageStr)
 }
 
 func (h *HandlerV2) versionHistory(c *gin.Context, req *models.CreateVersionHistoryRequest) error {
