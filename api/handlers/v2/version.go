@@ -169,8 +169,6 @@ func (h *HandlerV2) GetVersionList(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("\n\n\n history env", environmentId, projectId)
-
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
@@ -334,7 +332,6 @@ func (h *HandlerV2) PublishVersion(c *gin.Context) {
 		upOrDown   bool //up = true, down = false
 		versionIDs []string
 	)
-	fmt.Println("HERE AGAIN")
 
 	if err := c.ShouldBindJSON(&push); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
@@ -380,11 +377,7 @@ func (h *HandlerV2) PublishVersion(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("HERE AGAIN2")
-
 	if environmentId.(string) != push.EnvId {
-		fmt.Println("HERE AGAIN3")
-
 		publishedResource, err := h.companyServices.ServiceResource().GetSingle(
 			c.Request.Context(),
 			&pb.GetSingleServiceResourceReq{
@@ -410,7 +403,6 @@ func (h *HandlerV2) PublishVersion(c *gin.Context) {
 			return
 		}
 
-		fmt.Println("HERE AGAIN4")
 		publishedEnvLiveVersion, _ := publishedServices.GetBuilderServiceByType(publishedNodeType).Version().GetSingle(
 			c.Request.Context(),
 			&obs.VersionPrimaryKey{
@@ -428,10 +420,6 @@ func (h *HandlerV2) PublishVersion(c *gin.Context) {
 			upOrDown = true
 		}
 
-		fmt.Println("HERE AGAIN5")
-		fmt.Println("FROMDATE", fromDate)
-		fmt.Println("TODATE", toDate)
-
 		versions, err := services.GetBuilderServiceByType(currentNodeType).Version().GetList(
 			c.Request.Context(),
 			&obs.GetVersionListRequest{
@@ -445,16 +433,9 @@ func (h *HandlerV2) PublishVersion(c *gin.Context) {
 			return
 		}
 
-		fmt.Printf("VERSIONS: %v\n", versions.Versions)
-
-		fmt.Println("HERE AGAIN6")
-
 		for _, version := range versions.Versions {
 			versionIDs = append(versionIDs, version.Id)
 		}
-
-		fmt.Println("CuurentResourceID", currentResource.ResourceEnvironmentId)
-		fmt.Println("PublishedResourceID", publishedResource.ResourceEnvironmentId)
 
 		_, _ = publishedServices.GetBuilderServiceByType(publishedNodeType).Version().CreateMany(
 			c.Request.Context(),
@@ -481,7 +462,6 @@ func (h *HandlerV2) PublishVersion(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
-		fmt.Printf("ACTIVITY LOGS: %v\n", activityLogs)
 
 		if upOrDown {
 			err = h.MigrateUpByVersion(c, publishedServices, activityLogs, publishedResource.ResourceEnvironmentId, publishedNodeType, userId.(string))
