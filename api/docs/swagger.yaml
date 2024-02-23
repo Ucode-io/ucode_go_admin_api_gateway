@@ -4469,6 +4469,13 @@ definitions:
           $ref: '#/definitions/object_builder_service.TableFieldSetting'
         type: array
     type: object
+  object_builder_service.PublishVersionRequest:
+    properties:
+      env_id:
+        type: string
+      version:
+        $ref: '#/definitions/object_builder_service.Version'
+    type: object
   object_builder_service.QuickFilter:
     properties:
       default_value:
@@ -5355,6 +5362,8 @@ definitions:
     type: object
   object_builder_service.Version:
     properties:
+      created_at:
+        type: string
       description:
         type: string
       id:
@@ -5397,6 +5406,8 @@ definitions:
           type: boolean
         type: object
       user_info:
+        type: string
+      version_id:
         type: string
     type: object
   object_builder_service.View:
@@ -28763,13 +28774,25 @@ paths:
       operationId: get_version_list
       parameters:
       - in: query
+        name: from_date
+        type: string
+      - in: query
         name: limit
         type: integer
+      - in: query
+        name: live
+        type: boolean
       - in: query
         name: offset
         type: integer
       - in: query
         name: project_id
+        type: string
+      - in: query
+        name: to_date
+        type: string
+      - in: query
+        name: version_id
         type: string
       produces:
       - application/json
@@ -28942,6 +28965,12 @@ paths:
       - in: query
         name: user_info
         type: string
+      - collectionFormat: csv
+        in: query
+        items:
+          type: string
+        name: version_ids
+        type: array
       produces:
       - application/json
       responses:
@@ -29134,6 +29163,54 @@ paths:
       summary: Migrate up
       tags:
       - VersionHistory
+  /v2/version/publish:
+    post:
+      consumes:
+      - application/json
+      description: Publish version
+      operationId: publish_version
+      parameters:
+      - description: Publish
+        in: body
+        name: publish
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.PublishVersionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: UpdateVersionRequest
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.Version'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Publish version
+      tags:
+      - Version
   /v2/views/{collection}:
     get:
       consumes:

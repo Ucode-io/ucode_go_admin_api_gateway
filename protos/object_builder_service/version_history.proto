@@ -24,6 +24,7 @@ message GetAllRquest {
     string user_info = 8;
     string api_key = 9;
     bool order_by = 10;
+    repeated string version_ids = 11;
 }
 
 message VersionHistory {
@@ -40,6 +41,7 @@ message VersionHistory {
     string api_key = 11;
     string type = 12;
     string table_slug = 13;
+    string version_id = 14;
 }
 
 message CreateVersionHistoryRequest {
@@ -57,6 +59,7 @@ message CreateVersionHistoryRequest {
     string api_key = 12;
     string type = 13;
     string table_slug = 14;
+    string version_id = 15;
 }
 
 message ListVersionHistory {

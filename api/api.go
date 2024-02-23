@@ -771,6 +771,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 			v2Version.POST("", h.V2.CreateVersion)
 			v2Version.PUT("", h.V2.UpdateVersion)
 			v2Version.GET("", h.V2.GetVersionList)
+			v2Version.POST("/publish", h.V2.PublishVersion)
 			v2Version.GET("/history/:environment_id", h.V2.GetAllVersionHistory)
 			v2Version.PUT("/history/:environment_id", h.V2.UpdateVersionHistory)
 			v2Version.GET("/history/:environment_id/:id", h.V2.GetVersionHistoryByID)

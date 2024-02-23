@@ -166,6 +166,7 @@ func (h *HandlerV2) versionHistory(c *gin.Context, req *models.CreateVersionHist
 			ApiKey:            req.ApiKey,
 			Type:              req.Type,
 			TableSlug:         req.TableSlug,
+			VersionId:         req.VersionId,
 		},
 	)
 	if err != nil {

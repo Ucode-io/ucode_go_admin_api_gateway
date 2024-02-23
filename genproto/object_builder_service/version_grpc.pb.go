@@ -27,6 +27,8 @@ type VersionServiceClient interface {
 	GetList(ctx context.Context, in *GetVersionListRequest, opts ...grpc.CallOption) (*GetVersionListResponse, error)
 	Update(ctx context.Context, in *Version, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	CreateMany(ctx context.Context, in *CreateManyVersionRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	GetSingle(ctx context.Context, in *VersionPrimaryKey, opts ...grpc.CallOption) (*Version, error)
+	UpdateLive(ctx context.Context, in *VersionPrimaryKey, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type versionServiceClient struct {
@@ -73,6 +75,24 @@ func (c *versionServiceClient) CreateMany(ctx context.Context, in *CreateManyVer
 	return out, nil
 }
 
+func (c *versionServiceClient) GetSingle(ctx context.Context, in *VersionPrimaryKey, opts ...grpc.CallOption) (*Version, error) {
+	out := new(Version)
+	err := c.cc.Invoke(ctx, "/object_builder_service.VersionService/GetSingle", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *versionServiceClient) UpdateLive(ctx context.Context, in *VersionPrimaryKey, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/object_builder_service.VersionService/UpdateLive", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // VersionServiceServer is the server API for VersionService service.
 // All implementations must embed UnimplementedVersionServiceServer
 // for forward compatibility
@@ -81,6 +101,8 @@ type VersionServiceServer interface {
 	GetList(context.Context, *GetVersionListRequest) (*GetVersionListResponse, error)
 	Update(context.Context, *Version) (*emptypb.Empty, error)
 	CreateMany(context.Context, *CreateManyVersionRequest) (*emptypb.Empty, error)
+	GetSingle(context.Context, *VersionPrimaryKey) (*Version, error)
+	UpdateLive(context.Context, *VersionPrimaryKey) (*emptypb.Empty, error)
 	mustEmbedUnimplementedVersionServiceServer()
 }
 
@@ -99,6 +121,12 @@ func (UnimplementedVersionServiceServer) Update(context.Context, *Version) (*emp
 }
 func (UnimplementedVersionServiceServer) CreateMany(context.Context, *CreateManyVersionRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateMany not implemented")
+}
+func (UnimplementedVersionServiceServer) GetSingle(context.Context, *VersionPrimaryKey) (*Version, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetSingle not implemented")
+}
+func (UnimplementedVersionServiceServer) UpdateLive(context.Context, *VersionPrimaryKey) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateLive not implemented")
 }
 func (UnimplementedVersionServiceServer) mustEmbedUnimplementedVersionServiceServer() {}
 
@@ -185,6 +213,42 @@ func _VersionService_CreateMany_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _VersionService_GetSingle_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(VersionPrimaryKey)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(VersionServiceServer).GetSingle(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/object_builder_service.VersionService/GetSingle",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(VersionServiceServer).GetSingle(ctx, req.(*VersionPrimaryKey))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _VersionService_UpdateLive_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(VersionPrimaryKey)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(VersionServiceServer).UpdateLive(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/object_builder_service.VersionService/UpdateLive",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(VersionServiceServer).UpdateLive(ctx, req.(*VersionPrimaryKey))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // VersionService_ServiceDesc is the grpc.ServiceDesc for VersionService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -207,6 +271,14 @@ var VersionService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateMany",
 			Handler:    _VersionService_CreateMany_Handler,
+		},
+		{
+			MethodName: "GetSingle",
+			Handler:    _VersionService_GetSingle_Handler,
+		},
+		{
+			MethodName: "UpdateLive",
+			Handler:    _VersionService_UpdateLive_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

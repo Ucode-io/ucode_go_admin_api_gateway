@@ -52,7 +52,7 @@ func (h *HandlerV2) CreateVersion(c *gin.Context) {
 		return
 	}
 
-	userId, _ := c.Get("user_id")
+	// userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
@@ -77,30 +77,30 @@ func (h *HandlerV2) CreateVersion(c *gin.Context) {
 		return
 	}
 
-	var (
-		logReq = &models.CreateVersionHistoryRequest{
-			Services:     services,
-			NodeType:     resource.NodeType,
-			ProjectId:    resource.ResourceEnvironmentId,
-			ActionSource: "VERSION",
-			ActionType:   "CREATE VERSION",
-			UserInfo:     cast.ToString(userId),
-			Request:      &version,
-			TableSlug:    "version",
-		}
-	)
+	// var (
+	// 	logReq = &models.CreateVersionHistoryRequest{
+	// 		Services:     services,
+	// 		NodeType:     resource.NodeType,
+	// 		ProjectId:    resource.ResourceEnvironmentId,
+	// 		ActionSource: "VERSION",
+	// 		ActionType:   "CREATE VERSION",
+	// 		UserInfo:     cast.ToString(userId),
+	// 		Request:      &version,
+	// 		TableSlug:    "version",
+	// 	}
+	// )
 
-	defer func() {
-		if err != nil {
-			logReq.Response = err.Error()
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-		} else {
-			logReq.Current = resp
-			logReq.Response = resp
-			h.handleResponse(c, status_http.Created, resp)
-		}
-		go h.versionHistory(c, logReq)
-	}()
+	// defer func() {
+	// 	if err != nil {
+	// 		logReq.Response = err.Error()
+	// 		h.handleResponse(c, status_http.GRPCError, err.Error())
+	// 	} else {
+	// 		logReq.Current = resp
+	// 		logReq.Response = resp
+	// 		h.handleResponse(c, status_http.Created, resp)
+	// 	}
+	// 	go h.versionHistory(c, logReq)
+	// }()
 
 	version.ProjectId = resource.ResourceEnvironmentId
 	switch resource.ResourceType {
@@ -115,6 +115,8 @@ func (h *HandlerV2) CreateVersion(c *gin.Context) {
 	case pb.ResourceType_POSTGRESQL:
 
 	}
+
+	h.handleResponse(c, status_http.Created, resp)
 }
 
 // GeVersionList godoc
@@ -309,4 +311,282 @@ func (h *HandlerV2) UpdateVersion(c *gin.Context) {
 	}
 
 	h.handleResponse(c, status_http.OK, nil)
+}
+
+// PublishVersion godoc
+// @Security ApiKeyAuth
+// @ID publish_version
+// @Router /v2/version/publish [POST]
+// @Summary Publish version
+// @Description Publish version
+// @Tags Version
+// @Accept json
+// @Produce json
+// @Param publish body obs.PublishVersionRequest true "Publish"
+// @Success 200 {object} status_http.Response{data=obs.Version} "UpdateVersionRequest"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *HandlerV2) PublishVersion(c *gin.Context) {
+	var (
+		push       obs.PublishVersionRequest
+		fromDate   string
+		toDate     string
+		upOrDown   bool //up = true, down = false
+		versionIDs []string
+	)
+	fmt.Println("HERE AGAIN")
+
+	if err := c.ShouldBindJSON(&push); err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "environment id is an invalid uuid")
+		return
+	}
+
+	userId, _ := c.Get("user_id")
+
+	currentResource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	currentNodeType := currentResource.NodeType
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		currentResource.NodeType,
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	fmt.Println("HERE AGAIN2")
+
+	if environmentId.(string) != push.EnvId {
+		fmt.Println("HERE AGAIN3")
+
+		publishedResource, err := h.companyServices.ServiceResource().GetSingle(
+			c.Request.Context(),
+			&pb.GetSingleServiceResourceReq{
+				ProjectId:     projectId.(string),
+				EnvironmentId: push.EnvId,
+				ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		publishedNodeType := publishedResource.NodeType
+
+		publishedServices, err := h.GetProjectSrvc(
+			c.Request.Context(),
+			projectId.(string),
+			publishedResource.NodeType,
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		fmt.Println("HERE AGAIN4")
+		publishedEnvLiveVersion, _ := publishedServices.GetBuilderServiceByType(publishedNodeType).Version().GetSingle(
+			c.Request.Context(),
+			&obs.VersionPrimaryKey{
+				ProjectId: publishedResource.ResourceEnvironmentId,
+				Live:      true,
+			},
+		)
+
+		if publishedEnvLiveVersion.GetCreatedAt() > push.GetVersion().GetCreatedAt() {
+			fromDate = push.GetVersion().GetCreatedAt()
+			toDate = publishedEnvLiveVersion.GetCreatedAt()
+		} else {
+			fromDate = publishedEnvLiveVersion.GetCreatedAt()
+			toDate = push.GetVersion().GetCreatedAt()
+			upOrDown = true
+		}
+
+		fmt.Println("HERE AGAIN5")
+		fmt.Println("FROMDATE", fromDate)
+		fmt.Println("TODATE", toDate)
+
+		versions, err := services.GetBuilderServiceByType(currentNodeType).Version().GetList(
+			c.Request.Context(),
+			&obs.GetVersionListRequest{
+				ProjectId: currentResource.ResourceEnvironmentId,
+				FromDate:  fromDate,
+				ToDate:    toDate,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		fmt.Printf("VERSIONS: %v\n", versions.Versions)
+
+		fmt.Println("HERE AGAIN6")
+
+		for _, version := range versions.Versions {
+			versionIDs = append(versionIDs, version.Id)
+		}
+
+		fmt.Println("CuurentResourceID", currentResource.ResourceEnvironmentId)
+		fmt.Println("PublishedResourceID", publishedResource.ResourceEnvironmentId)
+
+		_, _ = publishedServices.GetBuilderServiceByType(publishedNodeType).Version().CreateMany(
+			c.Request.Context(),
+			&obs.CreateManyVersionRequest{
+				Versions:  versions.Versions,
+				ProjectId: publishedResource.ResourceEnvironmentId,
+			},
+		)
+		// if err != nil {
+		// 	h.handleResponse(c, status_http.GRPCError, err.Error())
+		// 	return
+		// }
+
+		activityLogs, err := services.GetBuilderServiceByType(currentNodeType).VersionHistory().GatAll(
+			c.Request.Context(),
+			&obs.GetAllRquest{
+				ProjectId:  currentResource.ResourceEnvironmentId,
+				VersionIds: versionIDs,
+				OrderBy:    upOrDown,
+				Type:       "UP",
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+		fmt.Printf("ACTIVITY LOGS: %v\n", activityLogs)
+
+		if upOrDown {
+			err = h.MigrateUpByVersion(c, publishedServices, activityLogs, publishedResource.ResourceEnvironmentId, publishedNodeType, userId.(string))
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+		} else {
+			err = h.MigrateDownByVersion(c, publishedServices, activityLogs, publishedResource.ResourceEnvironmentId, publishedNodeType, userId.(string))
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+		}
+
+		_, err = publishedServices.GetBuilderServiceByType(publishedNodeType).Version().UpdateLive(
+			c.Request.Context(),
+			&obs.VersionPrimaryKey{
+				ProjectId: publishedResource.ResourceEnvironmentId,
+				Id:        push.GetVersion().GetId(),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+	} else {
+		publishedEnvLiveVersion, err := services.GetBuilderServiceByType(currentNodeType).Version().GetSingle(
+			c.Request.Context(),
+			&obs.VersionPrimaryKey{
+				ProjectId: currentResource.ResourceEnvironmentId,
+				Live:      true,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		if publishedEnvLiveVersion.CreatedAt > push.Version.CreatedAt {
+			fromDate = push.Version.CreatedAt
+			toDate = publishedEnvLiveVersion.CreatedAt
+		} else {
+			fromDate = publishedEnvLiveVersion.CreatedAt
+			toDate = push.Version.CreatedAt
+			upOrDown = true
+		}
+
+		versions, err := services.GetBuilderServiceByType(currentNodeType).Version().GetList(
+			c.Request.Context(),
+			&obs.GetVersionListRequest{
+				ProjectId: currentResource.ResourceEnvironmentId,
+				FromDate:  fromDate,
+				ToDate:    toDate,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		for _, version := range versions.Versions {
+			versionIDs = append(versionIDs, version.Id)
+		}
+
+		activityLogs, err := services.GetBuilderServiceByType(currentNodeType).VersionHistory().GatAll(
+			c.Request.Context(),
+			&obs.GetAllRquest{
+				ProjectId:  currentResource.ResourceEnvironmentId,
+				VersionIds: versionIDs,
+				OrderBy:    upOrDown,
+				Type:       "DOWN",
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		if upOrDown {
+			err = h.MigrateUpByVersion(c, services, activityLogs, currentResource.ResourceEnvironmentId, currentNodeType, userId.(string))
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+		} else {
+			err = h.MigrateDownByVersion(c, services, activityLogs, currentResource.ResourceEnvironmentId, currentNodeType, userId.(string))
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+		}
+
+		_, err = services.GetBuilderServiceByType(currentNodeType).Version().UpdateLive(
+			c.Request.Context(),
+			&obs.VersionPrimaryKey{
+				ProjectId: currentResource.ResourceEnvironmentId,
+				Id:        push.GetVersion().GetId(),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+	}
 }

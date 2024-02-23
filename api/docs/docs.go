@@ -39179,8 +39179,18 @@ const docTemplate = `{
                 "operationId": "get_version_list",
                 "parameters": [
                     {
+                        "type": "string",
+                        "name": "from_date",
+                        "in": "query"
+                    },
+                    {
                         "type": "integer",
                         "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "name": "live",
                         "in": "query"
                     },
                     {
@@ -39191,6 +39201,16 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "name": "project_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "to_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "version_id",
                         "in": "query"
                     }
                 ],
@@ -39595,6 +39615,15 @@ const docTemplate = `{
                         "type": "string",
                         "name": "user_info",
                         "in": "query"
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "csv",
+                        "name": "version_ids",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -39804,6 +39833,94 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v2/version/publish": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Publish version",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Version"
+                ],
+                "summary": "Publish version",
+                "operationId": "publish_version",
+                "parameters": [
+                    {
+                        "description": "Publish",
+                        "name": "publish",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/object_builder_service.PublishVersionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "UpdateVersionRequest",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/object_builder_service.Version"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "allOf": [
                                 {
@@ -49395,6 +49512,17 @@ const docTemplate = `{
                 }
             }
         },
+        "object_builder_service.PublishVersionRequest": {
+            "type": "object",
+            "properties": {
+                "env_id": {
+                    "type": "string"
+                },
+                "version": {
+                    "$ref": "#/definitions/object_builder_service.Version"
+                }
+            }
+        },
         "object_builder_service.QuickFilter": {
             "type": "object",
             "properties": {
@@ -50746,6 +50874,9 @@ const docTemplate = `{
         "object_builder_service.Version": {
             "type": "object",
             "properties": {
+                "created_at": {
+                    "type": "string"
+                },
                 "description": {
                     "type": "string"
                 },
@@ -50809,6 +50940,9 @@ const docTemplate = `{
                     }
                 },
                 "user_info": {
+                    "type": "string"
+                },
+                "version_id": {
                     "type": "string"
                 }
             }
