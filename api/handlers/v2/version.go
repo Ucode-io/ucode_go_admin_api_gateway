@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
+	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
@@ -52,7 +53,7 @@ func (h *HandlerV2) CreateVersion(c *gin.Context) {
 		return
 	}
 
-	// userId, _ := c.Get("user_id")
+	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
@@ -75,6 +76,20 @@ func (h *HandlerV2) CreateVersion(c *gin.Context) {
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
+	}
+
+	info, err := h.authService.User().GetUserByID(
+		context.Background(),
+		&auth_service.UserPrimaryKey{
+			Id: userId.(string),
+		},
+	)
+	if err == nil {
+		if info.Login != "" {
+			version.UserInfo = info.Login
+		} else {
+			version.UserInfo = info.Phone
+		}
 	}
 
 	// var (
@@ -110,6 +125,7 @@ func (h *HandlerV2) CreateVersion(c *gin.Context) {
 			&version,
 		)
 		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
