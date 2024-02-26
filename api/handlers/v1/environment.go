@@ -4,7 +4,6 @@ import (
 	"errors"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
-	obs "ucode/ucode_go_api_gateway/genproto/company_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
@@ -22,14 +21,14 @@ import (
 // @Tags Environment
 // @Accept json
 // @Produce json
-// @Param environment body obs.CreateEnvironmentRequest true "CreateEnvironmentRequestBody"
-// @Success 201 {object} status_http.Response{data=obs.Environment} "Environment data"
+// @Param environment body pb.CreateEnvironmentRequest true "CreateEnvironmentRequestBody"
+// @Success 201 {object} status_http.Response{data=pb.Environment} "Environment data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) CreateEnvironment(c *gin.Context) {
 	var (
-		environmentRequest obs.CreateEnvironmentRequest
-		resp               = &obs.Environment{}
+		environmentRequest pb.CreateEnvironmentRequest
+		resp               = &pb.Environment{}
 	)
 
 	err := c.ShouldBindJSON(&environmentRequest)
@@ -123,7 +122,7 @@ func (h *HandlerV1) CreateEnvironment(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param environment_id path string true "environment_id"
-// @Success 200 {object} status_http.Response{data=obs.Environment} "EnvironmentBody"
+// @Success 200 {object} status_http.Response{data=pb.Environment} "EnvironmentBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetSingleEnvironment(c *gin.Context) {
@@ -136,7 +135,7 @@ func (h *HandlerV1) GetSingleEnvironment(c *gin.Context) {
 
 	resp, err := h.companyServices.Environment().GetById(
 		c.Request.Context(),
-		&obs.EnvironmentPrimaryKey{
+		&pb.EnvironmentPrimaryKey{
 			Id: environmentID,
 		},
 	)
@@ -159,7 +158,7 @@ func (h *HandlerV1) GetSingleEnvironment(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param environment body models.Environment true "UpdateEnvironmentRequestBody"
-// @Success 200 {object} status_http.Response{data=obs.Environment} "Environment data"
+// @Success 200 {object} status_http.Response{data=pb.Environment} "Environment data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) UpdateEnvironment(c *gin.Context) {
@@ -219,7 +218,7 @@ func (h *HandlerV1) UpdateEnvironment(c *gin.Context) {
 	}
 
 	var (
-		updateEnvironment = &obs.Environment{
+		updateEnvironment = &pb.Environment{
 			Id:           environment.Id,
 			ProjectId:    environment.ProjectId,
 			Name:         environment.Name,
@@ -353,7 +352,7 @@ func (h *HandlerV1) DeleteEnvironment(c *gin.Context) {
 
 	resp, err = h.companyServices.Environment().Delete(
 		c.Request.Context(),
-		&obs.EnvironmentPrimaryKey{Id: environmentID},
+		&pb.EnvironmentPrimaryKey{Id: environmentID},
 	)
 	if err != nil {
 		return
@@ -369,8 +368,8 @@ func (h *HandlerV1) DeleteEnvironment(c *gin.Context) {
 // @Tags Environment
 // @Accept json
 // @Produce json
-// @Param filters query obs.GetEnvironmentListRequest true "filters"
-// @Success 200 {object} status_http.Response{data=obs.GetEnvironmentListResponse} "EnvironmentBody"
+// @Param filters query pb.GetEnvironmentListRequest true "filters"
+// @Success 200 {object} status_http.Response{data=pb.GetEnvironmentListResponse} "EnvironmentBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetAllEnvironments(c *gin.Context) {
@@ -389,7 +388,7 @@ func (h *HandlerV1) GetAllEnvironments(c *gin.Context) {
 
 	resp, err := h.companyServices.Environment().GetList(
 		c.Request.Context(),
-		&obs.GetEnvironmentListRequest{
+		&pb.GetEnvironmentListRequest{
 			Offset:    int32(offset),
 			Limit:     int32(limit),
 			Search:    c.DefaultQuery("search", ""),

@@ -64,7 +64,6 @@ func (h *HandlerV1) GetTablePermission(c *gin.Context) {
 		}
 
 		resourceEnvironmentId = resource.ResourceEnvironmentId
-		resourceEnvironmentId = resource.ResourceEnvironmentId
 		nodeType = resource.NodeType
 	} else {
 		resourceEnvironment, err := h.companyServices.Resource().GetResourceEnvironment(
@@ -90,6 +89,10 @@ func (h *HandlerV1) GetTablePermission(c *gin.Context) {
 		projectId.(string),
 		nodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	switch resourceType {
 	case pb.ResourceType_MONGODB:
@@ -211,6 +214,10 @@ func (h *HandlerV1) UpdateTablePermission(c *gin.Context) {
 		projectId.(string),
 		nodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	tablePermission.ProjectId = resourceEnvironmentId
 	switch resourceType {

@@ -5,7 +5,6 @@ import (
 	"errors"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
-	"ucode/ucode_go_api_gateway/genproto/company_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/genproto/new_function_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
@@ -81,7 +80,7 @@ func (h *HandlerV1) BindLoginMicroFrontToProject(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) UpdateLoginMicroFrontProject(c *gin.Context) {
-	var req company_service.ProjectLoginMicroFrontend
+	var req pb.ProjectLoginMicroFrontend
 
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
@@ -126,7 +125,7 @@ func (h *HandlerV1) GetLoginMicroFrontBySubdomain(c *gin.Context) {
 
 	resp, err := h.companyServices.Project().GetProjectLoginMicroFront(
 		context.Background(),
-		&company_service.GetProjectLoginMicroFrontRequest{
+		&pb.GetProjectLoginMicroFrontRequest{
 			Subdomain: subdomain,
 		},
 	)
@@ -158,6 +157,10 @@ func (h *HandlerV1) GetLoginMicroFrontBySubdomain(c *gin.Context) {
 		resp.ProjectId,
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	function, err := services.FunctionService().FunctionService().GetSingle(context.Background(), &new_function_service.FunctionPrimaryKey{
 		Id:        resp.MicrofrontId,

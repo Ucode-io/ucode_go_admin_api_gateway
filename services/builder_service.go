@@ -49,6 +49,7 @@ type BuilderServiceI interface {
 	ItemsService() object_builder_service.ItemsServiceClient
 	File() object_builder_service.FileServiceClient
 	VersionHistory() object_builder_service.VersionHistoryServiceClient
+	Version() object_builder_service.VersionServiceClient
 	// added to managing load
 	ObjectBuilderConnPool(ctx context.Context) (object_builder_service.ObjectBuilderServiceClient, *grpcpool.ClientConn, error)
 }
@@ -119,6 +120,7 @@ func NewBuilderServiceClient(ctx context.Context, cfg config.Config) (BuilderSer
 		objectBuilderConnPool:     objectbuilderServicePool,
 		itemsService:              object_builder_service.NewItemsServiceClient(connObjectBuilderService),
 		versionHistoryService:     object_builder_service.NewVersionHistoryServiceClient(connObjectBuilderService),
+		versionService:            object_builder_service.NewVersionServiceClient(connObjectBuilderService),
 	}, nil
 }
 
@@ -160,6 +162,7 @@ type builderServiceClient struct {
 	objectBuilderConnPool     *grpcpool.Pool
 	itemsService              object_builder_service.ItemsServiceClient
 	versionHistoryService     object_builder_service.VersionHistoryServiceClient
+	versionService            object_builder_service.VersionServiceClient
 }
 
 func (g *builderServiceClient) ObjectBuilderConnPool(ctx context.Context) (object_builder_service.ObjectBuilderServiceClient, *grpcpool.ClientConn, error) {
@@ -312,4 +315,8 @@ func (g *builderServiceClient) ItemsService() object_builder_service.ItemsServic
 
 func (g *builderServiceClient) VersionHistory() object_builder_service.VersionHistoryServiceClient {
 	return g.versionHistoryService
+}
+
+func (g *builderServiceClient) Version() object_builder_service.VersionServiceClient {
+	return g.versionService
 }

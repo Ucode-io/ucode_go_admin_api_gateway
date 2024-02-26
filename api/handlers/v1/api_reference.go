@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"time"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
@@ -154,21 +153,6 @@ func (h *HandlerV1) GetApiReferenceByID(c *gin.Context) {
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
-	}
-
-	if _, err := uuid.Parse(version_id); err != nil {
-		// If version_id is not a valid uuid, then we need to get the active version
-		// activeVersion, err := services.VersioningService().Release().GetCurrentActive(
-		// 	c.Request.Context(),
-		// 	&vcs.GetCurrentReleaseRequest{
-		// 		EnvironmentId: environmentId.(string),
-		// 	},
-		// )
-		// if err != nil {
-		// 	h.handleResponse(c, status_http.GRPCError, err.Error())
-		// 	return
-		// }
-		// version_id = activeVersion.GetVersionId()
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
@@ -773,8 +757,6 @@ func (h *HandlerV1) InsertManyVersionForApiReference(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
-
-	log.Printf("API->body: %+v", body)
 
 	environmentID, ok := c.Get("environment_id")
 	if !ok {

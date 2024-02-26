@@ -27,10 +27,8 @@ type HandlerV1 struct {
 	projectConfs    map[string]config.Config
 	log             logger.LoggerI
 	services        services.ServiceNodesI
-	storage         storage.StorageI
 	companyServices services.CompanyServiceI
 	authService     services.AuthServiceManagerI
-	apikeyService   services.AuthServiceManagerI
 	redis           storage.RedisStorageI
 	cache           *caching.ExpiringLRUCache
 }

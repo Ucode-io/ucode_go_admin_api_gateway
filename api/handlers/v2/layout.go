@@ -55,6 +55,10 @@ func (h *HandlerV2) GetSingleLayout(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	authInfo, _ := h.GetAuthInfo(c)
 
@@ -144,6 +148,10 @@ func (h *HandlerV2) GetListLayouts(c *gin.Context) {
 		projectId.(string),
 		nodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(nodeType).Layout().GetAll(
 		context.Background(),

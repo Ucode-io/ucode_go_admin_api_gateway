@@ -215,13 +215,7 @@ func (h *HandlerV1) GetAllApps(c *gin.Context) {
 		return
 	}
 
-	limit, err := h.getLimitParam(c)
-	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
-		return
-	}
-
-	limit = 100
+	limit := 100
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -273,6 +267,10 @@ func (h *HandlerV1) GetAllApps(c *gin.Context) {
 				RoleId:    authInfo.GetRoleId(),
 			},
 		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	case pb.ResourceType_POSTGRESQL:
 		resp, err = services.PostgresBuilderService().App().GetAll(
 			context.Background(),
@@ -284,6 +282,10 @@ func (h *HandlerV1) GetAllApps(c *gin.Context) {
 				RoleId:    authInfo.GetRoleId(),
 			},
 		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	h.handleResponse(c, status_http.OK, resp)

@@ -5,7 +5,6 @@ import (
 	"errors"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
-	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
@@ -48,6 +47,10 @@ func (h *HandlerV1) GetGlobalCompanyProjectList(c *gin.Context) {
 			CompanyId: c.DefaultQuery("company_id", ""),
 		},
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	h.handleResponse(c, status_http.OK, resp)
 }
@@ -61,8 +64,8 @@ func (h *HandlerV1) GetGlobalCompanyProjectList(c *gin.Context) {
 // @Tags Global Project
 // @Accept json
 // @Produce json
-// @Param filters query pb.GetEnvironmentListRequest true "filters"
-// @Success 200 {object} status_http.Response{data=pb.GetEnvironmentListResponse} "EnvironmentBody"
+// @Param filters query company_service.GetEnvironmentListRequest true "filters"
+// @Success 200 {object} status_http.Response{data=company_service.GetEnvironmentListResponse} "EnvironmentBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetGlobalProjectEnvironments(c *gin.Context) {
@@ -81,7 +84,7 @@ func (h *HandlerV1) GetGlobalProjectEnvironments(c *gin.Context) {
 
 	resp, err := h.companyServices.Environment().GetList(
 		c.Request.Context(),
-		&pb.GetEnvironmentListRequest{
+		&company_service.GetEnvironmentListRequest{
 			Offset:    int32(offset),
 			Limit:     int32(limit),
 			Search:    c.DefaultQuery("search", ""),
@@ -133,10 +136,10 @@ func (h *HandlerV1) GetGlobalProjectTemplate(c *gin.Context) {
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		&company_service.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
-			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+			ServiceType:   company_service.ServiceType_BUILDER_SERVICE,
 		},
 	)
 	if err != nil {
@@ -158,7 +161,7 @@ func (h *HandlerV1) GetGlobalProjectTemplate(c *gin.Context) {
 	}
 
 	switch resource.ResourceType {
-	case pb.ResourceType_MONGODB:
+	case company_service.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Menu().GetAll(
 			context.Background(),
 			&obs.GetAllMenusRequest{
@@ -171,7 +174,11 @@ func (h *HandlerV1) GetGlobalProjectTemplate(c *gin.Context) {
 				ForTemplate: true,
 			},
 		)
-	case pb.ResourceType_POSTGRESQL:
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	case company_service.ResourceType_POSTGRESQL:
 		resp, err = services.PostgresBuilderService().Menu().GetAll(
 			context.Background(),
 			&obs.GetAllMenusRequest{
@@ -183,6 +190,10 @@ func (h *HandlerV1) GetGlobalProjectTemplate(c *gin.Context) {
 				RoleId:    authInfo.GetRoleId(),
 			},
 		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 	h.handleResponse(c, status_http.OK, resp)
 }

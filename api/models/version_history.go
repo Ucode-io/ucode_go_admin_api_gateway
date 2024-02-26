@@ -20,6 +20,7 @@ type CreateVersionHistoryRequest struct {
 	ApiKey           string          `json:"api_key"`
 	Type             string          `json:"type"`
 	TableSlug        string          `json:"table_slug"`
+	VersionId        string          `json:"version_id"`
 }
 
 type MigrateUp struct {
@@ -36,6 +37,7 @@ type MigrateUp struct {
 	ApiKey           string          `json:"api_key"`
 	Type             string          `json:"type"`
 	TableSlug        string          `json:"table_slug"`
+	VersionId        string          `json:"version_id"`
 }
 
 type MigrateUpRequest struct {
@@ -44,4 +46,9 @@ type MigrateUpRequest struct {
 
 type MigrateUpResponse struct {
 	Ids []string `json:"ids"`
+}
+
+type PublishVersionRequest struct {
+	PublishedEnvironmentID string `json:"to_environment_id"`
+	PublishedVersionID     string `json:"published_version_id"`
 }

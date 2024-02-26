@@ -11,7 +11,6 @@ import (
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
-	"ucode/ucode_go_api_gateway/pkg/caching"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 
 	"ucode/ucode_go_api_gateway/api/models"
@@ -24,10 +23,6 @@ import (
 // 	SUPERADMIN_HOST string = "test.admin.u-code.io"
 // 	CLIENT_HOST     string = "test.app.u-code.io"
 // )
-
-var (
-	waitApiResourceMap = caching.NewConcurrentMap()
-)
 
 func (h *HandlerV1) NodeMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -310,7 +305,6 @@ func (h *HandlerV1) ResEnvMiddleware() gin.HandlerFunc {
 
 		environmentIDVal, ok := c.Get("environment_id")
 		if !ok {
-			err = errors.New("error getting environment id")
 			h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
 			return
 		}

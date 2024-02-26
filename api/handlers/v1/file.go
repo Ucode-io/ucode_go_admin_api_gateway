@@ -137,6 +137,10 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 		FileSize:         file.File.Size,
 		ProjectId:        resource.ResourceEnvironmentId,
 	})
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	// err = os.Remove(dst + "/" + file.File.Filename)
 	// if err != nil {
@@ -198,6 +202,10 @@ func (h *HandlerV1) GetSingleFile(c *gin.Context) {
 		projectId.(string),
 		resourse.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(resourse.NodeType).File().GetSingle(
 		context.Background(),
