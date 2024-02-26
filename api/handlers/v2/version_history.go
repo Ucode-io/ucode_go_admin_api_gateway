@@ -188,7 +188,7 @@ func (h *HandlerV2) GetAllVersionHistory(c *gin.Context) {
 
 	tip := strings.ToUpper(c.Query("type"))
 	if tip == "UP" {
-		orderby = true
+		orderby = false
 	}
 
 	switch resource.ResourceType {
