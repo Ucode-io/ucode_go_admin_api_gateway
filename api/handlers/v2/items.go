@@ -1472,10 +1472,6 @@ func (h *HandlerV2) DeleteItems(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
-	if len(objectRequest.Ids) < 0 {
-		h.handleResponse(c, status_http.BadRequest, "ids is required and must be an array of strings")
-		return
-	}
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -1500,6 +1496,11 @@ func (h *HandlerV2) DeleteItems(c *gin.Context) {
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
 	data["company_service_project_id"] = projectId.(string)
 	data["company_service_environment_id"] = environmentId.(string)
 	data["ids"] = objectRequest.Ids

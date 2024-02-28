@@ -5,7 +5,6 @@ import (
 	"errors"
 	"ucode/ucode_go_api_gateway/api/models"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
-	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
@@ -24,7 +23,7 @@ import (
 // @Accept json
 // @Produce json
 // @Param table body models.CreateTableFolderRequest true "CreateTableFolderRequest"
-// @Success 201 {object} status_http.Response{data=object_builder_service.TableFolder} "Table data"
+// @Success 201 {object} status_http.Response{data=obs.TableFolder} "Table data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) CreateTableFolder(c *gin.Context) {
@@ -93,10 +92,14 @@ func (h *HandlerV1) CreateTableFolder(c *gin.Context) {
 		projectId.(string),
 		nodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(nodeType).TableFolder().Create(
 		context.Background(),
-		&object_builder_service.TableFolderRequest{
+		&obs.TableFolderRequest{
 			Title:     tableFolder.Title,
 			ParentId:  tableFolder.ParentdId,
 			ProjectId: resourceEnvironmentId,
@@ -104,6 +107,10 @@ func (h *HandlerV1) CreateTableFolder(c *gin.Context) {
 			AppId:     tableFolder.AppId,
 		},
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	h.handleResponse(c, status_http.OK, resp)
 
@@ -119,7 +126,7 @@ func (h *HandlerV1) CreateTableFolder(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path string true "id"
-// @Success 200 {object} status_http.Response{data=object_builder_service.TableFolder} "TableBody"
+// @Success 200 {object} status_http.Response{data=obs.TableFolder} "TableBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetTableFolderByID(c *gin.Context) {
@@ -167,14 +174,22 @@ func (h *HandlerV1) GetTableFolderByID(c *gin.Context) {
 		projectId.(string),
 		nodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(nodeType).TableFolder().GetByID(
 		context.Background(),
-		&object_builder_service.TableFolderPrimaryKey{
+		&obs.TableFolderPrimaryKey{
 			Id:        Id,
 			ProjectId: resourceEnvironmentId,
 		},
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	h.handleResponse(c, status_http.OK, resp)
 }
@@ -189,7 +204,7 @@ func (h *HandlerV1) GetTableFolderByID(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param filters query models.GetAllTableFoldersRequest true "filters"
-// @Success 200 {object} status_http.Response{data=object_builder_service.GetAllTablesResponse} "TableBody"
+// @Success 200 {object} status_http.Response{data=obs.GetAllTablesResponse} "TableBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetAllTableFolders(c *gin.Context) {
@@ -243,16 +258,24 @@ func (h *HandlerV1) GetAllTableFolders(c *gin.Context) {
 		projectId.(string),
 		nodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(nodeType).TableFolder().GetAll(
 		context.Background(),
-		&object_builder_service.GetAllTableFoldersRequest{
+		&obs.GetAllTableFoldersRequest{
 			Offset:    int32(offset),
 			Limit:     int32(limit),
 			ProjectId: resourceEnvironmentId,
 			AppId:     c.Query("app_id"),
 		},
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	h.handleResponse(c, status_http.OK, resp)
 }
@@ -266,13 +289,13 @@ func (h *HandlerV1) GetAllTableFolders(c *gin.Context) {
 // @Tags Table
 // @Accept json
 // @Produce json
-// @Param table body object_builder_service.TableFolder  true "TableFolder"
-// @Success 200 {object} status_http.Response{data=object_builder_service.TableFolder} "Table data"
+// @Param table body obs.TableFolder  true "TableFolder"
+// @Success 200 {object} status_http.Response{data=obs.TableFolder} "Table data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) UpdateTableFolder(c *gin.Context) {
 	var (
-		tableFolder           object_builder_service.TableFolder
+		tableFolder           obs.TableFolder
 		resourceEnvironmentId string
 		nodeType              string
 	)
@@ -317,10 +340,14 @@ func (h *HandlerV1) UpdateTableFolder(c *gin.Context) {
 		projectId.(string),
 		nodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(nodeType).TableFolder().Update(
 		context.Background(),
-		&object_builder_service.TableFolder{
+		&obs.TableFolder{
 			Title:     tableFolder.Title,
 			ParentId:  tableFolder.ParentId,
 			ProjectId: resourceEnvironmentId,
@@ -329,6 +356,10 @@ func (h *HandlerV1) UpdateTableFolder(c *gin.Context) {
 			AppId:     tableFolder.AppId,
 		},
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	h.handleResponse(c, status_http.OK, resp)
 }
@@ -389,6 +420,10 @@ func (h *HandlerV1) DeleteTableFolder(c *gin.Context) {
 		projectId.(string),
 		nodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(nodeType).TableFolder().Delete(
 		context.Background(),

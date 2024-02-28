@@ -52,8 +52,6 @@ func (h *HandlerV1) GeneratePayzeLink(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok {
-		err = errors.New("error getting environment id")
-
 		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
@@ -122,7 +120,6 @@ func (h *HandlerV1) PayzeSaveCard(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok {
-		err = errors.New("error getting environment id")
 		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}

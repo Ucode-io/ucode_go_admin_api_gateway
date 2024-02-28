@@ -33,6 +33,10 @@ message Version {
     int32 version_number = 5;
     string project_id = 6;
     string created_at = 7;
+<<<<<<< HEAD
+=======
+    string user_info = 8;
+>>>>>>> 1336d7777ef8d2d213ed5596b65e14162bfed4a0
 }
 
 message CreateVersionRequest {
@@ -42,6 +46,10 @@ message CreateVersionRequest {
     bool is_current = 4;
     int32 version_number = 5;
     string project_id = 6;
+<<<<<<< HEAD
+=======
+    string user_info = 7;
+>>>>>>> 1336d7777ef8d2d213ed5596b65e14162bfed4a0
 }
 
 message GetVersionListResponse {

@@ -229,12 +229,6 @@ func (h *HandlerV2) GetAllFields(c *gin.Context) {
 		return
 	}
 
-	limit, err := h.getLimitParam(c)
-	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
-		return
-	}
-
 	var withManyRelation, withOneRelation = false, false
 	if c.Query("with_many_relation") == "true" {
 		withManyRelation = true
@@ -280,7 +274,7 @@ func (h *HandlerV2) GetAllFields(c *gin.Context) {
 		return
 	}
 
-	limit = 100
+	limit := 100
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Field().GetAll(

@@ -12,7 +12,6 @@ import (
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
-	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
@@ -261,7 +260,7 @@ func (h *HandlerV2) UploadFile(c *gin.Context) {
 
 	_, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().Create(
 		context.Background(),
-		&object_builder_service.CommonMessage{
+		&obs.CommonMessage{
 			TableSlug: "file",
 			Data:      structData,
 			ProjectId: resource.ResourceEnvironmentId,
@@ -398,6 +397,10 @@ func (h *HandlerV2) UploadToFolder(c *gin.Context) {
 		FileSize:         file.File.Size,
 		ProjectId:        resource.ResourceEnvironmentId,
 	})
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	fmt.Println("TEST 2")
 
@@ -461,6 +464,10 @@ func (h *HandlerV2) GetSingleFile(c *gin.Context) {
 		projectId.(string),
 		resourse.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.GetBuilderServiceByType(resourse.NodeType).File().GetSingle(
 		context.Background(),

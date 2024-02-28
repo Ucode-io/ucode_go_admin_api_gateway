@@ -213,7 +213,6 @@ func (h *HandlerV2) GetMenuByID(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("\n\n\n\n MENU-GETBYID TEST #1 \n\n")
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Menu().GetByID(
@@ -270,12 +269,6 @@ func (h *HandlerV2) GetAllMenus(c *gin.Context) {
 		return
 	}
 
-	limit, err := h.getLimitParam(c)
-	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
-		return
-	}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -302,7 +295,7 @@ func (h *HandlerV2) GetAllMenus(c *gin.Context) {
 		return
 	}
 	authInfo, _ := h.GetAuthInfo(c)
-	limit = 100
+	limit := 100
 
 	if resource.NodeType == config.ENTER_PRICE_TYPE {
 		fmt.Println("\n\n enter price project id ", projectId.(string))
@@ -904,6 +897,10 @@ func (h *HandlerV2) GetAllMenuSettings(c *gin.Context) {
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	case pb.ResourceType_POSTGRESQL:
 		resp, err = services.PostgresBuilderService().Menu().GetAllMenuSettings(
 			context.Background(),
@@ -913,6 +910,10 @@ func (h *HandlerV2) GetAllMenuSettings(c *gin.Context) {
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 	h.handleResponse(c, status_http.OK, resp)
 }
@@ -1100,6 +1101,10 @@ func (h *HandlerV2) UpdateMenuSettings(c *gin.Context) {
 			context.Background(),
 			&menu,
 		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	h.handleResponse(c, status_http.OK, resp)
@@ -1596,6 +1601,10 @@ func (h *HandlerV2) UpdateMenuTemplate(c *gin.Context) {
 			context.Background(),
 			&menu,
 		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	h.handleResponse(c, status_http.OK, resp)
@@ -1717,12 +1726,6 @@ func (h *HandlerV2) GetWikiFolder(c *gin.Context) {
 		return
 	}
 
-	limit, err := h.getLimitParam(c)
-	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
-		return
-	}
-
 	projectId := c.DefaultQuery("project_id", "")
 	if !util.IsValidUUID(projectId) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -1748,13 +1751,17 @@ func (h *HandlerV2) GetWikiFolder(c *gin.Context) {
 		return
 	}
 	// authInfo, _ := h.GetAuthInfo(c)
-	limit = 100
+	limit := 100
 
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
 		projectId,
 		resource.NodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
@@ -1766,6 +1773,10 @@ func (h *HandlerV2) GetWikiFolder(c *gin.Context) {
 				IsVisible: true,
 			},
 		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	case pb.ResourceType_POSTGRESQL:
 		resp, err = services.PostgresBuilderService().Menu().GetAll(
 			context.Background(),
@@ -1777,6 +1788,10 @@ func (h *HandlerV2) GetWikiFolder(c *gin.Context) {
 				ParentId:  c.DefaultQuery("parent_id", ""),
 			},
 		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 	h.handleResponse(c, status_http.OK, resp)
 }

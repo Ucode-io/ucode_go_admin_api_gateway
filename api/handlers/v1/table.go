@@ -265,6 +265,10 @@ func (h *HandlerV1) GetTableByID(c *gin.Context) {
 		projectId.(string),
 		nodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	switch resourceType {
 	case pb.ResourceType_MONGODB:
@@ -372,6 +376,10 @@ func (h *HandlerV1) GetAllTables(c *gin.Context) {
 		projectId.(string),
 		nodeType,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	switch resourceType {
 	case pb.ResourceType_MONGODB:

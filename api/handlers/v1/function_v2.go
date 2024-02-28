@@ -10,10 +10,8 @@ import (
 	"sync"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
-	"ucode/ucode_go_api_gateway/genproto/company_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	fc "ucode/ucode_go_api_gateway/genproto/new_function_service"
-	"ucode/ucode_go_api_gateway/pkg/caching"
 	"ucode/ucode_go_api_gateway/pkg/code_server"
 	"ucode/ucode_go_api_gateway/pkg/easy_to_travel"
 	"ucode/ucode_go_api_gateway/pkg/gitlab"
@@ -32,10 +30,6 @@ import (
 
 const (
 	FUNCTION = "FUNCTION"
-)
-
-var (
-	waitFunctionResourceMap = caching.NewConcurrentMap()
 )
 
 // CreateNewFunction godoc
@@ -101,14 +95,14 @@ func (h *HandlerV1) CreateNewFunction(c *gin.Context) {
 		return
 	}
 
-	environment, err := h.companyServices.Environment().GetById(context.Background(), &company_service.EnvironmentPrimaryKey{
+	environment, err := h.companyServices.Environment().GetById(context.Background(), &pb.EnvironmentPrimaryKey{
 		Id: environmentId.(string),
 	})
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	project, err := h.companyServices.Project().GetById(context.Background(), &company_service.GetProjectByIdRequest{
+	project, _ := h.companyServices.Project().GetById(context.Background(), &pb.GetProjectByIdRequest{
 		ProjectId: environment.GetProjectId(),
 	})
 	if project.GetTitle() == "" {
@@ -360,7 +354,7 @@ func (h *HandlerV1) GetAllNewFunctions(c *gin.Context) {
 
 	environment, err := h.companyServices.Environment().GetById(
 		context.Background(),
-		&company_service.EnvironmentPrimaryKey{
+		&pb.EnvironmentPrimaryKey{
 			Id: environmentId.(string),
 		},
 	)
@@ -452,7 +446,7 @@ func (h *HandlerV1) UpdateNewFunction(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	environment, err := h.companyServices.Environment().GetById(context.Background(), &company_service.EnvironmentPrimaryKey{
+	environment, _ := h.companyServices.Environment().GetById(context.Background(), &pb.EnvironmentPrimaryKey{
 		Id: environmentId.(string),
 	})
 
@@ -873,7 +867,7 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 	var resource *pb.ServiceResourceModel
 	resourceBody, ok := c.Get("resource")
 	if resourceBody != "" && ok {
-		var resourceList *company_service.GetResourceByEnvIDResponse
+		var resourceList *pb.GetResourceByEnvIDResponse
 		err = json.Unmarshal([]byte(resourceBody.(string)), &resourceList)
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())

@@ -150,21 +150,3 @@ func (h *HandlerV2) adminHasAccess(c *gin.Context) (*auth_service.HasAccessSuper
 
 	return resp, true
 }
-
-func (h *HandlerV2) adminAuthInfo(c *gin.Context) (result *auth_service.HasAccessSuperAdminRes, err error) {
-	data, ok := c.Get("Auth_Admin")
-
-	if !ok {
-		h.handleResponse(c, status_http.Forbidden, "token error: wrong format")
-		c.Abort()
-		return nil, errors.New("token error: wrong format")
-	}
-	accessResponse, ok := data.(*auth_service.HasAccessSuperAdminRes)
-	if !ok {
-		h.handleResponse(c, status_http.Forbidden, "token error: wrong format")
-		c.Abort()
-		return nil, errors.New("token error: wrong format")
-	}
-
-	return accessResponse, nil
-}

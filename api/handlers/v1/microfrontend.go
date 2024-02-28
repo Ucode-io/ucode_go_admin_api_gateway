@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"strings"
 	"ucode/ucode_go_api_gateway/api/models"
-	"ucode/ucode_go_api_gateway/genproto/company_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	fc "ucode/ucode_go_api_gateway/genproto/new_function_service"
 	"ucode/ucode_go_api_gateway/pkg/code_server"
@@ -94,14 +93,14 @@ func (h *HandlerV1) CreateMicroFrontEnd(c *gin.Context) {
 		return
 	}
 
-	environment, err := h.companyServices.Environment().GetById(context.Background(), &company_service.EnvironmentPrimaryKey{
+	environment, err := h.companyServices.Environment().GetById(context.Background(), &pb.EnvironmentPrimaryKey{
 		Id: environmentId.(string),
 	})
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	project, err := h.companyServices.Project().GetById(context.Background(), &company_service.GetProjectByIdRequest{
+	project, err := h.companyServices.Project().GetById(context.Background(), &pb.GetProjectByIdRequest{
 		ProjectId: environment.GetProjectId(),
 	})
 	if project.GetTitle() == "" {

@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"strconv"
 	"time"
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -1177,8 +1176,6 @@ func (h *HandlerV1) InsertManyVersionForWebPageService(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
-
-	log.Printf("API->body: %+v", body)
 
 	if !util.IsValidUUID(body.GetEnvironmentId()) {
 		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is invalid uuid").Error())
