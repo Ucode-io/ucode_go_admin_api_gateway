@@ -43669,6 +43669,9 @@ const docTemplate = `{
                 "project_id": {
                     "type": "string"
                 },
+                "settings": {
+                    "$ref": "#/definitions/company_service.Settings"
+                },
                 "type": {
                     "$ref": "#/definitions/company_service.ResourceType"
                 },
@@ -43913,6 +43916,9 @@ const docTemplate = `{
         "company_service.Environment": {
             "type": "object",
             "properties": {
+                "access_type": {
+                    "type": "string"
+                },
                 "data": {
                     "$ref": "#/definitions/structpb.Struct"
                 },
@@ -43936,6 +43942,9 @@ const docTemplate = `{
         "company_service.EnvironmentWithResources": {
             "type": "object",
             "properties": {
+                "access_type": {
+                    "type": "string"
+                },
                 "data": {
                     "$ref": "#/definitions/structpb.Struct"
                 },
@@ -44271,6 +44280,9 @@ const docTemplate = `{
                 "project_id": {
                     "type": "string"
                 },
+                "settings": {
+                    "$ref": "#/definitions/company_service.Settings"
+                },
                 "type": {
                     "type": "string"
                 },
@@ -44406,7 +44418,9 @@ const docTemplate = `{
                 2,
                 3,
                 4,
-                5
+                5,
+                6,
+                7
             ],
             "x-enum-varnames": [
                 "ResourceType_NOT_DECIDED",
@@ -44414,7 +44428,9 @@ const docTemplate = `{
                 "ResourceType_CLICKHOUSE",
                 "ResourceType_POSTGRESQL",
                 "ResourceType_REST",
-                "ResourceType_GITHUB"
+                "ResourceType_GITHUB",
+                "ResourceType_SMS",
+                "ResourceType_SMTP"
             ]
         },
         "company_service.ResourceWithoutPassword": {
@@ -44508,6 +44524,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "company_service.SMTPCredentials": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
                     "type": "string"
                 }
             }
@@ -44614,6 +44641,37 @@ const docTemplate = `{
                 },
                 "data": {
                     "$ref": "#/definitions/structpb.Struct"
+                }
+            }
+        },
+        "company_service.Settings": {
+            "type": "object",
+            "properties": {
+                "sms": {
+                    "$ref": "#/definitions/company_service.SmsCredentials"
+                },
+                "smtp": {
+                    "$ref": "#/definitions/company_service.SMTPCredentials"
+                }
+            }
+        },
+        "company_service.SmsCredentials": {
+            "type": "object",
+            "properties": {
+                "default_otp": {
+                    "type": "string"
+                },
+                "login": {
+                    "type": "string"
+                },
+                "number_of_otp": {
+                    "type": "integer"
+                },
+                "originator": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
                 }
             }
         },
@@ -46453,6 +46511,9 @@ const docTemplate = `{
                 },
                 "user_info": {
                     "type": "string"
+                },
+                "version_id": {
+                    "type": "string"
                 }
             }
         },
@@ -48015,6 +48076,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                },
+                "user_info": {
                     "type": "string"
                 },
                 "version_number": {
@@ -50892,6 +50956,9 @@ const docTemplate = `{
                 "project_id": {
                     "type": "string"
                 },
+                "user_info": {
+                    "type": "string"
+                },
                 "version_number": {
                     "type": "integer"
                 }
@@ -50941,6 +51008,9 @@ const docTemplate = `{
                 },
                 "user_info": {
                     "type": "string"
+                },
+                "version": {
+                    "$ref": "#/definitions/object_builder_service.Version"
                 },
                 "version_id": {
                     "type": "string"

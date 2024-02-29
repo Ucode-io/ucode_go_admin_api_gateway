@@ -128,10 +128,6 @@ func (h *HandlerV1) EasyToTravelFunctionRun(c *gin.Context, requestData models.H
 		}
 
 		respByte := faasSettings.Function(srvs, requestBody)
-		if err != nil {
-			h.log.Error("Error while easytotravel fn:", logger.Any("err", err))
-			return nil, err
-		}
 
 		err = json.Unmarshal([]byte(respByte), &resp)
 		if err != nil {

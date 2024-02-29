@@ -933,11 +933,6 @@ func (h *HandlerV1) DeleteObject(c *gin.Context) {
 		return
 	}
 
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
 	fromOfs := c.Query("from-ofs")
 	if fromOfs != "true" {
 		beforeActions, afterActions, err = GetListCustomEvents(c.Param("table_slug"), "", "DELETE", c, h)
@@ -1472,13 +1467,11 @@ func (h *HandlerV1) GetListSlim(c *gin.Context) {
 	logReq.Response = resp
 	go h.versionHistory(c, logReq)
 
-	if err == nil {
-		if resp.IsCached {
-			jsonData, _ := resp.GetData().MarshalJSON()
-			err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
-			if err != nil {
-				h.log.Error("Error while setting redis", logger.Error(err))
-			}
+	if resp.IsCached {
+		jsonData, _ := resp.GetData().MarshalJSON()
+		err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
+		if err != nil {
+			h.log.Error("Error while setting redis", logger.Error(err))
 		}
 	}
 	statusHttp.CustomMessage = resp.GetCustomMessage()
@@ -2032,11 +2025,6 @@ func (h *HandlerV1) UpsertObject(c *gin.Context) {
 			// 		Data:      mapToStruct,
 			// 	},
 			// )
-
-			if err != nil {
-				h.handleResponse(c, status_http.GRPCError, err.Error())
-				return
-			}
 
 			objectRequest.Data[key[1:]+"_id"] = id
 		}
@@ -2640,9 +2628,7 @@ func (h *HandlerV1) GetListGroupBy(c *gin.Context) {
 		delete(object.Data, "limit")
 
 		response := cast.ToSlice(tableResp.Data.AsMap()["response"])
-		for _, selectObj := range selectedGuid {
-			response = append(response, selectObj)
-		}
+		response = append(response, selectedGuid...)
 
 		structData, err = helper.ConvertMapToStruct(object.Data)
 		if err != nil {
@@ -2665,13 +2651,9 @@ func (h *HandlerV1) GetListGroupBy(c *gin.Context) {
 			return
 		}
 
-		response = []interface{}{}
-		response = cast.ToSlice(selectedTableResp.Data.AsMap()["response"])
 		count += cast.ToInt(selectedTableResp.Data.AsMap()["count"])
 
-		for _, obj := range cast.ToSlice(tableResp.Data.AsMap()["response"]) {
-			response = append(response, obj)
-		}
+		response = append(response, cast.ToSlice(tableResp.Data.AsMap()["response"])...)
 
 		h.handleResponse(c, status_http.OK, struct {
 			TableSlug string                 `json:"table_slug"`
