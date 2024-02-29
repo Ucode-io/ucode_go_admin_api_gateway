@@ -338,13 +338,6 @@ func (h *HandlerV1) GetListQueryRequestFolder(c *gin.Context) {
 	//resourceEnvironment *obs.ResourceEnvironment
 	)
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
 	//authInfo, err := h.GetAuthInfo(c)
 	//if err != nil {
 	//	h.handleResponse(c, status_http.Forbidden, err.Error())
@@ -366,7 +359,7 @@ func (h *HandlerV1) GetListQueryRequestFolder(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
+		err := errors.New("error getting environment id | not valid")
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
@@ -378,6 +371,16 @@ func (h *HandlerV1) GetListQueryRequestFolder(c *gin.Context) {
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_QUERY_SERVICE,
 		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
 	)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
