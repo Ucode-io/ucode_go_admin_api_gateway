@@ -113,7 +113,7 @@ func (h *HandlerV1) ConfigureProjectResource(c *gin.Context) {
 		return
 	}
 
-	if &company.ServiceType == nil || company.ServiceType == company_service.ServiceType_NOT_SPECIFIED {
+	if company.ServiceType == company_service.ServiceType_NOT_SPECIFIED {
 		switch company.ResourceType {
 		case company_service.ResourceType_MONGODB:
 			company.ServiceType = company_service.ServiceType_BUILDER_SERVICE

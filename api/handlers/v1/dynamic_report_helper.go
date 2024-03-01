@@ -331,10 +331,8 @@ func (h *HandlerV1) DynamicReportHelper(requestData NewRequestBody, services ser
 				}
 			}
 
-			if rowProjectMapInterface != nil && rowSortMapInterface != nil {
-				rowsQuery["project"] = rowProjectMapInterface
-				rowsQuery["sort"] = rowSortMapInterface
-			}
+			rowsQuery["project"] = rowProjectMapInterface
+			rowsQuery["sort"] = rowSortMapInterface
 			rowsQuery["lookups"] = rowLookupMapInterface
 		} else if rowRelationTablesExists {
 			if len(rowMatchValues) > 0 {
@@ -423,10 +421,8 @@ func (h *HandlerV1) DynamicReportHelper(requestData NewRequestBody, services ser
 				}
 			}
 
-			if rowRelationProjectMapInterface != nil && rowRelationSortMapInterface != nil {
-				rowsInsideRelationQuery["project"] = rowRelationProjectMapInterface
-				rowsInsideRelationQuery["sort"] = rowRelationSortMapInterface
-			}
+			rowsInsideRelationQuery["project"] = rowRelationProjectMapInterface
+			rowsInsideRelationQuery["sort"] = rowRelationSortMapInterface
 			rowsInsideRelationQuery["lookups"] = rowLookupMapInterface
 		} else if rowRelationNestedExists {
 			for _, rowRelation := range rowsRelation {
@@ -494,10 +490,8 @@ func (h *HandlerV1) DynamicReportHelper(requestData NewRequestBody, services ser
 				}
 			}
 
-			if rowRelationNestedProjectMapInterface != nil && rowRelationNestedSortMapInterface != nil {
-				rowsRelationNestedQuery["project"] = rowRelationNestedProjectMapInterface
-				rowsRelationNestedQuery["sort"] = rowRelationNestedSortMapInterface
-			}
+			rowsRelationNestedQuery["project"] = rowRelationNestedProjectMapInterface
+			rowsRelationNestedQuery["sort"] = rowRelationNestedSortMapInterface
 		}
 	}
 
@@ -532,10 +526,8 @@ func (h *HandlerV1) DynamicReportHelper(requestData NewRequestBody, services ser
 				}
 			}
 
-			if columnProjectMapInterface != nil && columnSortMapInterface != nil {
-				columnsQuery["project"] = columnProjectMapInterface
-				columnsQuery["sort"] = columnSortMapInterface
-			}
+			columnsQuery["project"] = columnProjectMapInterface
+			columnsQuery["sort"] = columnSortMapInterface
 		}
 	}
 

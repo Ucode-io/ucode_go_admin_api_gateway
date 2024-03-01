@@ -392,12 +392,6 @@ func (h *HandlerV1) DeleteFunctionFolder(c *gin.Context) {
 		return
 	}
 
-	if err != nil {
-		err = errors.New("error getting resource environment id")
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
 	resp, err := services.FunctionService().FunctionFolderService().Delete(
 		context.Background(),
 		&fc.FunctionFolderPrimaryKey{

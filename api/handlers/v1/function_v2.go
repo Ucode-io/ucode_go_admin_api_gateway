@@ -698,11 +698,6 @@ func (h *HandlerV1) GetAllNewFunctionsForApp(c *gin.Context) {
 		return
 	}
 
-	if err != nil {
-		err = errors.New("error getting resource environment id")
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
 	resp, err := services.FunctionService().FunctionService().GetList(
 		context.Background(),
 		&fc.GetAllFunctionsRequest{

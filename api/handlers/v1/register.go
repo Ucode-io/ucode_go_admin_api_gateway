@@ -153,10 +153,6 @@ func (h *HandlerV1) SendCode(c *gin.Context) {
 			ExpiresAt: expire.String()[:19],
 		},
 	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
 
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())

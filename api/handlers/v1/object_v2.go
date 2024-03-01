@@ -486,7 +486,7 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 	logReq.Response = resp
 	go h.versionHistory(c, logReq)
 
-	if err == nil && !cast.ToBool(c.Query("block_cached")) {
+	if !cast.ToBool(c.Query("block_cached")) {
 		jsonData, _ := resp.GetData().MarshalJSON()
 		if cast.ToBool(c.Query("is_wait_cached")) {
 			h.cache.Add(slimKey, jsonData, 15*time.Second)

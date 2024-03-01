@@ -39,10 +39,6 @@ func (h *HandlerV1) CreateFunction(c *gin.Context) {
 	}
 
 	// structData, err := helper.ConvertMapToStruct(function.Body)
-	if err != nil {
-		h.handleResponse(c, status_http.BadRequest, err.Error())
-		return
-	}
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
