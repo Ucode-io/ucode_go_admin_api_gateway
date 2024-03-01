@@ -83,6 +83,7 @@ message ProjectResource {
     string id = 5;
     repeated VariableResource variables = 6;
     Settings settings = 7;
+    int32 resource_type = 8; 
 }
 
 message ListProjectResource {

@@ -44280,6 +44280,9 @@ const docTemplate = `{
                 "project_id": {
                     "type": "string"
                 },
+                "resource_type": {
+                    "type": "integer"
+                },
                 "settings": {
                     "$ref": "#/definitions/company_service.Settings"
                 },
