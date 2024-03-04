@@ -6829,6 +6829,16 @@ definitions:
       username:
         type: string
     type: object
+  v1.BucketRequest:
+    properties:
+      bucket_name:
+        type: string
+    type: object
+  v1.BucketResponse:
+    properties:
+      size:
+        type: number
+    type: object
   v1.Path:
     properties:
       filename:
@@ -16082,6 +16092,55 @@ paths:
       summary: Delete menu
       tags:
       - Menu
+  /v1/minio/bucket-size:
+    post:
+      consumes:
+      - application/json
+      description: Provide a bucket name, retrieve the total size of all files in
+        the bucket in megabytes
+      operationId: bucket_size
+      parameters:
+      - description: BucketSizeRequestBody
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/v1.BucketRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Path
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/v1.BucketResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Bucket size
+      tags:
+      - Minio
   /v1/note:
     get:
       consumes:
