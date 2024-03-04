@@ -66,6 +66,9 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 		v1.GET("/menu-settings/:id", h.V1.GetMenuSettingByID)
 		v1.DELETE("/menu-settings/:id", h.V1.DeleteMenuSettings)
 
+		// MINIO
+		v1.POST("/bucket", h.HandlerV1.BucketSize)
+
 		v1.POST("/menu-template", h.V1.CreateMenuTemplate)
 		v1.PUT("/menu-template", h.V1.UpdateMenuTemplate)
 		v1.GET("/menu-template", h.V1.GetAllMenuTemplates)
