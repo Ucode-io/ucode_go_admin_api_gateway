@@ -130,7 +130,6 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 						h.log.Error("Error while unmarshal redis", logger.Error(err))
 					} else {
 						resp["data"] = m
-						fmt.Println(":~>>>> response handled from redis")
 						h.handleResponse(c, status_http.OK, resp)
 						return
 					}
@@ -267,13 +266,11 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 	}
 
 	queryMap := make(map[string]interface{})
-	fmt.Println("\n\n\n --- SLIM TEST #1 --- ", queryData)
 	err := json.Unmarshal([]byte(queryData), &queryMap)
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
-	// fmt.Println("\n\n\n --- SLIM TEST #2 --- ")
 	offset, err := h.getOffsetParam(c)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
@@ -298,13 +295,11 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 	objectRequest.Data["user_id_from_token"] = tokenInfo.GetUserId()
 	objectRequest.Data["role_id_from_token"] = tokenInfo.GetRoleId()
 	objectRequest.Data["client_type_id_from_token"] = tokenInfo.GetClientTypeId()
-	// fmt.Println("\n\n\n --- SLIM TEST #2.1 --- ")
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
-	// fmt.Println("\n\n\n --- SLIM TEST #2.2 --- ")
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")

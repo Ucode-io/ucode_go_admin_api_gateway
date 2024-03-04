@@ -1596,7 +1596,6 @@ func (h *HandlerV2) DeleteItems(c *gin.Context) {
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
-		// fmt.Println("err:", err)
 		if err != nil {
 			statusHttp = status_http.GrpcStatusToHTTP["Internal"]
 			stat, ok := status.FromError(err)

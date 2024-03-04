@@ -340,19 +340,19 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 
 			err := json.Unmarshal([]byte(cast.ToString(v.Request)), &request)
 			if err != nil {
-				fmt.Println("error in request", err)
+				h.log.Error("error in request", logger.Error(err))
 				continue
 			}
 
 			err = json.Unmarshal([]byte(cast.ToString(v.Previous)), &previous)
 			if err != nil {
-				fmt.Println("error in previous", err)
+				h.log.Error("error in previous", logger.Error(err))
 				continue
 			}
 
 			err = json.Unmarshal([]byte(cast.ToString(v.Request)), &current)
 			if err != nil {
-				fmt.Println("error in current", err)
+				h.log.Error("error in current", logger.Error(err))
 				continue
 			}
 
@@ -378,7 +378,6 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				logReq.Response = createRelation
 				ids = append(ids, v.Id)
 			case "UPDATE":
-				fmt.Printf("inside update relation %v\n", current.Data)
 				logReq.Previous = previous.Data
 				updateRelation, err := services.GetBuilderServiceByType(nodeType).Relation().Update(
 					context.Background(),
@@ -1401,19 +1400,19 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 
 			err := json.Unmarshal([]byte(cast.ToString(v.Request)), &request)
 			if err != nil {
-				fmt.Println("error in request", err)
+				h.log.Error("!!!MigrationUp--->Error while unmarshalling request", logger.Error(err))
 				continue
 			}
 
 			err = json.Unmarshal([]byte(cast.ToString(v.Previous)), &previous)
 			if err != nil {
-				fmt.Println("error in previous", err)
+				h.log.Error("!!!MigrationUp--->Error while unmarshalling previous", logger.Error(err))
 				continue
 			}
 
 			err = json.Unmarshal([]byte(cast.ToString(v.Request)), &current)
 			if err != nil {
-				fmt.Println("error in current", err)
+				h.log.Error("!!!MigrationUp--->Error while unmarshalling current", logger.Error(err))
 				continue
 			}
 
@@ -1439,7 +1438,6 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 				logReq.Response = createRelation
 				ids = append(ids, v.Id)
 			case "UPDATE":
-				fmt.Printf("inside update relation %v\n", current.Data)
 				logReq.Previous = previous.Data
 				updateRelation, err := services.GetBuilderServiceByType(nodeType).Relation().Update(
 					context.Background(),

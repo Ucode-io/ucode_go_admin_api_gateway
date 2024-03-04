@@ -26,8 +26,6 @@ func NewVersioningServiceClient(ctx context.Context, cfg config.Config) (Version
 		cfg.VersioningServiceHost+cfg.VersioningGRPCPort,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
-	// fmt.Println("version host::", cfg.VersioningServiceHost)
-	// fmt.Println("version port::", cfg.VersioningGRPCPort)
 	if err != nil {
 		return nil, err
 	}

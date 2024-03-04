@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"time"
 	"ucode/ucode_go_api_gateway/api"
 	"ucode/ucode_go_api_gateway/api/handlers"
@@ -90,8 +89,6 @@ func main() {
 	}
 
 	mapProjectConfs[baseConf.UcodeNamespace] = uConf
-
-	fmt.Println("\n\n ~~> project configs ", mapProjectConfs)
 
 	newRedis := redis.NewRedis(mapProjectConfs)
 

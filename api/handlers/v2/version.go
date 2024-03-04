@@ -3,7 +3,6 @@ package v2
 import (
 	"context"
 	"errors"
-	"fmt"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
@@ -208,7 +207,6 @@ func (h *HandlerV2) GetVersionList(c *gin.Context) {
 				Limit:     int32(limit),
 			},
 		)
-		fmt.Println("\n\n\n\n ~~~~~~> ENV_ID ", c.DefaultQuery("env_id", ""), resp)
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return

@@ -66,7 +66,7 @@ func (h *HandlerV1) BucketSize(c *gin.Context) {
 
 	for object := range objectCh {
 		if object.Err != nil {
-			h.handleResponse(c, status_http.InternalServerError, err.Error())
+			h.log.Error("Error listing objects")
 			return
 		}
 		totalSize += object.Size

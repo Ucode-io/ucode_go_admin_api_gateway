@@ -597,7 +597,6 @@ func (h *HandlerV1) QueryRun(c *gin.Context) {
 	}
 
 	tokenInfo, err := h.GetAuthAdminInfo(c)
-	fmt.Println(":::::::", tokenInfo, err)
 	if err != nil {
 		h.handleResponse(c, status_http.Forbidden, err.Error())
 		return

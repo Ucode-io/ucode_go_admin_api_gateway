@@ -3,7 +3,6 @@ package v1
 import (
 	"context"
 	"errors"
-	"fmt"
 	"math"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -33,7 +32,6 @@ func (h *HandlerV1) GetLanguageJson(c *gin.Context) {
 		resp          *obs.CommonMessage
 		statusHttp    = status_http.GrpcStatusToHTTP["Ok"]
 		object        = make(map[string]interface{})
-		languages     = make(map[string]interface{})
 	)
 	tokenInfo, err := h.GetAuthInfo(c)
 	if err != nil {
@@ -106,12 +104,11 @@ func (h *HandlerV1) GetLanguageJson(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	languages, err = helper.ConvertStructToResponse(resp.GetData())
+	_, err = helper.ConvertStructToResponse(resp.GetData())
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	fmt.Print("\n\n::::::::::::::LANGUAGES:::::::::\n\n", languages, "\n\n")
 	statusHttp.CustomMessage = resp.GetCustomMessage()
 	h.handleResponse(c, statusHttp, resp)
 }

@@ -3,7 +3,6 @@ package v1
 import (
 	"context"
 	"errors"
-	"fmt"
 	"strconv"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
@@ -83,7 +82,7 @@ func (h *HandlerV1) GetEventLogs(c *gin.Context) {
 		})
 
 	if err != nil {
-		fmt.Println("Error while get event logs, err: ", err)
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 	h.handleResponse(c, status_http.OK, res)

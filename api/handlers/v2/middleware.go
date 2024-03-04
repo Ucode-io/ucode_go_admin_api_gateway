@@ -2,7 +2,6 @@ package v2
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"strings"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
@@ -36,7 +35,6 @@ func (h *HandlerV2) AuthMiddleware() gin.HandlerFunc {
 		)
 
 		bearerToken := c.GetHeader("Authorization")
-		// fmt.Println("\n\n\n ~~~> token ", bearerToken)
 		strArr := strings.Split(bearerToken, " ")
 
 		if len(strArr) < 1 && (strArr[0] != "Bearer" && strArr[0] != "API-KEY") {
@@ -115,7 +113,6 @@ func (h *HandlerV2) AuthMiddleware() gin.HandlerFunc {
 				return
 			}
 
-			// fmt.Println("\n\n >>>> api key ", apikeys, "\n\n")
 			c.Set("resource_id", resource.GetResource().GetId())
 			c.Set("environment_id", apikeys.GetEnvironmentId())
 			c.Set("project_id", apikeys.GetProjectId())
@@ -192,7 +189,6 @@ func (h *HandlerV2) GlobalAuthMiddleware() gin.HandlerFunc {
 			h.handleResponse(c, status_http.BadRequest, err.Error())
 			c.Abort()
 		}
-		fmt.Println("\n\nquery", c.Request.URL.Query(), c.Query("environment-id"), c.Query("project-id"))
 		c.Set("resource_id", c.Query("resource-id"))
 		c.Set("environment_id", c.Query("environment-id"))
 		c.Set("project_id", c.Query("project-id"))

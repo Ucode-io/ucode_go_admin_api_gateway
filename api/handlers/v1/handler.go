@@ -3,8 +3,6 @@ package v1
 import (
 	"context"
 	"encoding/json"
-	"fmt"
-	"log"
 	"strconv"
 	"time"
 	"ucode/ucode_go_api_gateway/api/models"
@@ -66,25 +64,8 @@ func (h *HandlerV1) GetProjectSrvc(c context.Context, projectId string, nodeType
 
 func (h *HandlerV1) handleResponse(c *gin.Context, status status_http.Status, data interface{}) {
 	switch code := status.Code; {
-	// case code < 300:
-	// 	h.log.Info(
-	// 		"response",
-	// 		logger.Int("code", status.Code),
-	// 		logger.String("status", status.Status),
-	// 		logger.Any("description", status.Description),
-	// 		// logger.Any("data", data),
-	// 	)
 	case code < 400:
-		// h.log.Warn(
-		// 	"response",
-		// 	logger.Int("code", status.Code),
-		// 	logger.String("status", status.Status),
-		// 	logger.Any("description", status.Description),
-		// 	logger.Any("data", data),
-		// 	logger.Any("custom_message", status.CustomMessage),
-		// )
 	default:
-		// fmt.Println(customMessage)
 		h.log.Error(
 			"response",
 			logger.Int("code", status.Code),
@@ -176,9 +157,7 @@ func (h *HandlerV1) versionHistory(c *gin.Context, req *models.CreateVersionHist
 		},
 	)
 	if err != nil {
-		fmt.Println("=======================================================")
-		log.Println(err)
-		fmt.Println("=======================================================")
+		h.log.Error("Error while create version history", logger.Any("err", err))
 		return err
 	}
 	return nil

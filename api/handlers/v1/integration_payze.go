@@ -28,8 +28,6 @@ import (
 func (h *HandlerV1) GeneratePayzeLink(c *gin.Context) {
 	var payze integration_service_v2.PayzeLinkRequest
 
-	// fmt.Println("GeneratePayzeLink")
-
 	err := c.ShouldBindJSON(&payze)
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())

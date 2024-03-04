@@ -10,7 +10,6 @@ import (
 	fc "ucode/ucode_go_api_gateway/genproto/new_function_service"
 	"ucode/ucode_go_api_gateway/pkg/code_server"
 	"ucode/ucode_go_api_gateway/pkg/gitlab"
-	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/golang/protobuf/ptypes/empty"
@@ -166,10 +165,6 @@ func (h *HandlerV1) CreateMicroFrontEnd(c *gin.Context) {
 
 	id, _ := uuid.NewRandom()
 	repoHost := fmt.Sprintf("%s-%s", id.String(), h.baseConf.GitlabHostMicroFE)
-	h.log.Info("CreateMicroFrontEnd [ci/cd]",
-		logger.Any("host", repoHost),
-		logger.Any("repo_name", functionPath),
-	)
 
 	data := make([]map[string]interface{}, 0)
 	host := make(map[string]interface{})

@@ -110,7 +110,6 @@ func (h *HandlerV1) EasyToTravelFunctionRun(c *gin.Context, requestData models.H
 	)
 
 	if faasSettings.Function != nil {
-		fmt.Println("~~~~~~~~~~~~~~>>> function id:", c.Param("function-id"))
 		requestBody, err := json.Marshal(models.FunctionRunV2{
 			Auth:        models.AuthData{},
 			RequestData: requestData,
@@ -131,7 +130,6 @@ func (h *HandlerV1) EasyToTravelFunctionRun(c *gin.Context, requestData models.H
 
 		err = json.Unmarshal([]byte(respByte), &resp)
 		if err != nil {
-			fmt.Println("\n\ncustomFunction::", c.Param("function-id"), string(respByte))
 			return nil, err
 		}
 	} else {
@@ -198,7 +196,6 @@ func (h *HandlerV1) EasyToTravelFunctionRun(c *gin.Context, requestData models.H
 
 				data, err := easy_to_travel.AgentApiGetProduct(resp.Data)
 				if err != nil {
-					fmt.Println("Error while EasyToTravelAgentApiGetProduct function:", err.Error())
 					result, _ := helper.InterfaceToMap(data)
 					return result, nil
 				}

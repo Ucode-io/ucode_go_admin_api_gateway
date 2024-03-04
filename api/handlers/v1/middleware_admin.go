@@ -3,7 +3,6 @@ package v1
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"strings"
 	"ucode/ucode_go_api_gateway/api/models"
@@ -25,7 +24,6 @@ func (h *HandlerV1) AdminAuthMiddleware() gin.HandlerFunc {
 			var authData = models.AuthData{}
 			err := json.Unmarshal([]byte(c.GetHeader("auth")), &authData)
 			if err != nil {
-				fmt.Println(err)
 				h.handleResponse(c, status_http.BadRequest, "cant get auth info")
 				c.Abort()
 				return

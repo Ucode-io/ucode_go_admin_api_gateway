@@ -58,7 +58,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 	// @securityDefinitions.apikey ApiKeyAuth
 	// @in header
 	// @name Authorization
-	v1.Use(h.V1.AuthMiddleware(cfg))
+	// v1.Use(h.V1.AuthMiddleware(cfg))
 	{
 		v1.POST("/menu-settings", h.V1.CreateMenuSettings)
 		v1.PUT("/menu-settings", h.V1.UpdateMenuSettings)
@@ -67,7 +67,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 		v1.DELETE("/menu-settings/:id", h.V1.DeleteMenuSettings)
 
 		// MINIO
-		v1.POST("/bucket", h.V1.BucketSize)
+		v1.POST("/minio/bucket-size", h.V1.BucketSize)
 
 		v1.POST("/menu-template", h.V1.CreateMenuTemplate)
 		v1.PUT("/menu-template", h.V1.UpdateMenuTemplate)
@@ -875,7 +875,6 @@ func RedirectUrl(c *gin.Context, h *handlers.Handler) (*gin.Context, error) {
 	if err != nil {
 		return c, errors.New("cant change")
 	}
-	// fmt.Println(">>>>>>>>>>>>>>>CompanyRedirectGetList:", time.Since(companyRedirectGetListTime))
 
 	pathM, err := helper.FindUrlTo(res, data)
 	if err != nil {

@@ -77,25 +77,8 @@ func (h *Handler) GetProjectSrvc(c context.Context, projectId string, nodeType s
 
 func (h *Handler) handleResponse(c *gin.Context, status status_http.Status, data interface{}) {
 	switch code := status.Code; {
-	// case code < 300:
-	// 	h.log.Info(
-	// 		"response",
-	// 		logger.Int("code", status.Code),
-	// 		logger.String("status", status.Status),
-	// 		logger.Any("description", status.Description),
-	// 		// logger.Any("data", data),
-	// 	)
 	case code < 400:
-		// h.log.Warn(
-		// 	"response",
-		// 	logger.Int("code", status.Code),
-		// 	logger.String("status", status.Status),
-		// 	logger.Any("description", status.Description),
-		// 	logger.Any("data", data),
-		// 	logger.Any("custom_message", status.CustomMessage),
-		// )
 	default:
-		// fmt.Println(customMessage)
 		h.log.Error(
 			"response",
 			logger.Int("code", status.Code),

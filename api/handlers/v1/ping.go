@@ -3,7 +3,6 @@ package v1
 import (
 	"context"
 	"errors"
-	"fmt"
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
@@ -29,12 +28,10 @@ import (
 // @Success 200 {object} status_http.Response{data=string} "Response data"
 // @Failure 500 {object} status_http.Response{}
 func (h *HandlerV1) Ping(c *gin.Context) {
-	fmt.Println("config.PingRequest: ", config.CountReq)
 
 	service := c.Query("service")
 	projectId := c.Query("project_id")
 	environmentId := c.Query("environment_id")
-	fmt.Println("SERVICENAME: ", service)
 
 	limit := 10
 	offset := 0
@@ -45,7 +42,6 @@ func (h *HandlerV1) Ping(c *gin.Context) {
 			h.handleResponse(c, status_http.InternalServerError, err.Error())
 			return
 		}
-		fmt.Println("Ping to Company Service")
 	} else if service == "auth_service" {
 
 		_, err := h.authService.AuthPing().Ping(context.Background(), &auth_service.PingRequest{})
@@ -54,7 +50,6 @@ func (h *HandlerV1) Ping(c *gin.Context) {
 			return
 		}
 
-		fmt.Println("Ping To Auth Service")
 	} else if service == "object_builder_service" {
 		resource, err := h.companyServices.ServiceResource().GetSingle(
 			c.Request.Context(),
@@ -92,7 +87,6 @@ func (h *HandlerV1) Ping(c *gin.Context) {
 			return
 		}
 
-		fmt.Println("Ping to Object Builder Service")
 	} else if service == "function_service" {
 		resource, err := h.companyServices.ServiceResource().GetSingle(
 			c.Request.Context(),
@@ -145,7 +139,6 @@ func (h *HandlerV1) Ping(c *gin.Context) {
 			return
 		}
 
-		fmt.Println("Ping to Function Service")
 	} else if service == "convert_template_service" {
 
 		resource, err := h.companyServices.ServiceResource().GetSingle(
@@ -171,14 +164,11 @@ func (h *HandlerV1) Ping(c *gin.Context) {
 			return
 		}
 
-		fmt.Println("Called Convert Template Service")
 		_, err = services.ConvertTemplateService().PingTemplateService().Ping(context.Background(), &convert_template.PingRequest{})
 		if err != nil {
 			h.handleResponse(c, status_http.InternalServerError, err.Error())
 			return
 		}
-
-		fmt.Println("Ping To Convert Template Service")
 	}
 
 	h.handleResponse(c, status_http.OK, "pong")

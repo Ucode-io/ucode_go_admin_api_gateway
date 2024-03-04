@@ -2,7 +2,6 @@ package testing
 
 import (
 	"context"
-	"fmt"
 	"testing"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 )
@@ -14,7 +13,7 @@ func TestProjectCreate(t *testing.T) {
 		CompanyId:    "7cf0cec4-0753-415c-a026-d658a7cd3fb6",
 	}
 
-	resp, err := projectClient.Create(
+	_, _ = projectClient.Create(
 		context.Background(),
 		&company_service.CreateProjectRequest{
 			Title:        project.Title,
@@ -23,18 +22,13 @@ func TestProjectCreate(t *testing.T) {
 		},
 	)
 
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	fmt.Println("response :", resp)
 }
 
 func TestGetProjectById(t *testing.T) {
 	companyID := "7cf0cec4-0753-415c-a026-d658a7cd3fb6"
 	projectID := "255496e5-924e-48e5-bbfc-9228914bd407"
 
-	resp, err := projectClient.GetById(
+	_, err := projectClient.GetById(
 		context.Background(),
 		&company_service.GetProjectByIdRequest{
 			ProjectId: projectID,
@@ -46,12 +40,11 @@ func TestGetProjectById(t *testing.T) {
 		t.Error("Error occured while getting company by ID : ", err.Error())
 	}
 
-	fmt.Println("Response : ", resp)
 }
 
 func TestGetProjectList(t *testing.T) {
 
-	resp, err := projectClient.GetList(
+	_, err := projectClient.GetList(
 		context.Background(),
 		&company_service.GetProjectListRequest{
 			Limit:     2,
@@ -64,14 +57,11 @@ func TestGetProjectList(t *testing.T) {
 	if err != nil {
 		t.Error("Error occured while getting company list : ", err.Error())
 	}
-
-	fmt.Println("Response :", resp)
-
 }
 
 func TestUpdateProject(t *testing.T) {
 
-	resp, err := projectClient.Update(
+	_, err := projectClient.Update(
 		context.Background(),
 		&company_service.Project{
 			CompanyId:    "7cf0cec4-0753-415c-a026-d658a7cd3fb6",
@@ -85,7 +75,6 @@ func TestUpdateProject(t *testing.T) {
 		t.Error("Error occured while updating company :", err.Error())
 	}
 
-	fmt.Println("Response :", resp)
 }
 
 func TestDeleteProject(t *testing.T) {

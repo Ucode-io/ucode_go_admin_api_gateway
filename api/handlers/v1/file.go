@@ -10,7 +10,6 @@ import (
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
-	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
@@ -94,7 +93,7 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 	file.File.Filename = fmt.Sprintf("%s_%s", fName.String(), file.File.Filename)
 	object, err := file.File.Open()
 	if err != nil {
-		fmt.Println(err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 	defer object.Close()
@@ -103,8 +102,7 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 		Creds:  credentials.NewStaticV4(h.baseConf.MinioAccessKeyID, h.baseConf.MinioSecretAccessKey, ""),
 		Secure: h.baseConf.MinioProtocol,
 	})
-	h.log.Info("info", logger.String("MinioEndpoint: ", h.baseConf.MinioEndpoint), logger.String("access_key: ",
-		h.baseConf.MinioAccessKeyID), logger.String("access_secret: ", h.baseConf.MinioSecretAccessKey))
+
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return

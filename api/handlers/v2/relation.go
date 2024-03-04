@@ -3,7 +3,6 @@ package v2
 import (
 	"context"
 	"errors"
-	"fmt"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
@@ -463,7 +462,6 @@ func (h *HandlerV2) UpdateRelation(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		fmt.Println("error getting resource", err)
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
@@ -474,7 +472,6 @@ func (h *HandlerV2) UpdateRelation(c *gin.Context) {
 		resource.NodeType,
 	)
 	if err != nil {
-		fmt.Println("error getting project service", err)
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}

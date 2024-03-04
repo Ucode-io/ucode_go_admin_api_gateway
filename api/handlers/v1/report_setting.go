@@ -3,7 +3,6 @@ package v1
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
 	"ucode/ucode_go_api_gateway/api/models"
@@ -636,7 +635,6 @@ func (h *HandlerV1) GetListPivotTemplate(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	fmt.Println("test 12")
 
 	h.handleResponse(c, status_http.OK, resp)
 }

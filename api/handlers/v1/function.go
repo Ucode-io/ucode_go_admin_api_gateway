@@ -3,7 +3,6 @@ package v1
 import (
 	"context"
 	"errors"
-	"fmt"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
@@ -481,7 +480,6 @@ func (h *HandlerV1) InvokeFunction(c *gin.Context) {
 	}
 	authInfo, _ := h.GetAuthInfo(c)
 
-	// fmt.Println(function.Path)
 	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+function.Path, "POST", models.NewInvokeFunctionRequest{
 		Data: map[string]interface{}{
 			"object_ids":     invokeFunction.ObjectIDs,
@@ -494,11 +492,9 @@ func (h *HandlerV1) InvokeFunction(c *gin.Context) {
 		},
 	})
 	if err != nil {
-		fmt.Println("error in do request >>1", err)
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	} else if resp.Status == "error" {
-		fmt.Println("error in response status >>2", err)
 		var errStr = resp.Status
 		if resp.Data != nil && resp.Data["message"] != nil {
 			errStr = resp.Data["message"].(string)
@@ -506,7 +502,6 @@ func (h *HandlerV1) InvokeFunction(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, errStr)
 		return
 	}
-	fmt.Println("test ~>>> 3")
 	if c.Query("form_input") != "true" && c.Query("use_no_limit") != "true" {
 		_, err = services.GetBuilderServiceByType(resource.NodeType).CustomEvent().UpdateByFunctionId(
 			context.Background(),
@@ -522,6 +517,5 @@ func (h *HandlerV1) InvokeFunction(c *gin.Context) {
 			return
 		}
 	}
-	fmt.Println("test ~>>> 4")
 	h.handleResponse(c, status_http.Created, resp)
 }

@@ -422,9 +422,6 @@ func (h *HandlerV1) UpdateField(c *gin.Context) {
 	// }
 	// for _, value := range languaegs.GetLanguage() {
 	// 	if fieldRequest.Slug != fieldRequest.Slug[:len(fieldRequest.Slug)-3]+"_"+value.GetShortName() {
-	// 		fmt.Println("field slug: ", fieldRequest.Slug)
-	// 		fmt.Println("get short name:::", value.GetShortName())
-	// 		fmt.Println("match field slug:",  fieldRequest.Slug[:len(fieldRequest.Slug)-3]+"_"+value.GetShortName())
 	// 		go func(arg *pb.Language, project_id string) {
 	// 			// id, _ := uuid.NewRandom()
 	// 			// _, err := services.GetBuilderServiceByType(resource.NodeType).Field().Create(context.Background(), &obs.CreateFieldRequest{

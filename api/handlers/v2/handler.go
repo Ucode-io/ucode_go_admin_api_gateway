@@ -3,7 +3,6 @@ package v2
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"strconv"
 	"time"
@@ -63,25 +62,8 @@ func (h *HandlerV2) GetProjectSrvc(c context.Context, projectId string, nodeType
 
 func (h *HandlerV2) handleResponse(c *gin.Context, status status_http.Status, data interface{}) {
 	switch code := status.Code; {
-	// case code < 300:
-	// 	h.log.Info(
-	// 		"response",
-	// 		logger.Int("code", status.Code),
-	// 		logger.String("status", status.Status),
-	// 		logger.Any("description", status.Description),
-	// 		// logger.Any("data", data),
-	// 	)
 	case code < 400:
-		// h.log.Warn(
-		// 	"response",
-		// 	logger.Int("code", status.Code),
-		// 	logger.String("status", status.Status),
-		// 	logger.Any("description", status.Description),
-		// 	logger.Any("data", data),
-		// 	logger.Any("custom_message", status.CustomMessage),
-		// )
 	default:
-		// fmt.Println(customMessage)
 		h.log.Error(
 			"response",
 			logger.Int("code", status.Code),
@@ -111,7 +93,6 @@ func (h *HandlerV2) getLimitParam(c *gin.Context) (limit int, err error) {
 }
 
 func (h *HandlerV2) versionHistory(c *gin.Context, req *models.CreateVersionHistoryRequest) error {
-	fmt.Println("VERSION HISTORY=======================================================")
 	var (
 		current  = map[string]interface{}{"data": req.Current}
 		previous = map[string]interface{}{"data": req.Previous}
@@ -170,9 +151,7 @@ func (h *HandlerV2) versionHistory(c *gin.Context, req *models.CreateVersionHist
 		},
 	)
 	if err != nil {
-		fmt.Println("=======================================================")
 		log.Println(err)
-		fmt.Println("=======================================================")
 		return err
 	}
 	return nil

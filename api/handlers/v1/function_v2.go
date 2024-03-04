@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"strings"
 	"sync"
@@ -124,17 +123,13 @@ func (h *HandlerV1) CreateNewFunction(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
-	// fmt.Println("test before clone")
 	// var sshURL = resp.Message["ssh_url_to_repo"].(string)
 	// err = gitlab.CloneForkToPath(sshURL, h.baseConf)
-	// fmt.Println("clone err::", err)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
 	uuid, _ := uuid.NewRandom()
-	// fmt.Println("test after clone")
-	// fmt.Println("uuid::", uuid.String())
 	// password, err := code_server.CreateCodeServer(projectName+"-"+function.Path, h.baseConf, uuid.String())
 	// if err != nil {
 	// 	h.handleResponse(c, status_http.InvalidArgument, err.Error())
@@ -249,7 +244,6 @@ func (h *HandlerV1) GetNewFunctionByID(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("\n URL function by id path >>", functionID)
 	function, err := services.FunctionService().FunctionService().GetSingle(
 		context.Background(),
 		&fc.FunctionPrimaryKey{
@@ -264,13 +258,11 @@ func (h *HandlerV1) GetNewFunctionByID(c *gin.Context) {
 
 	if function.Url == "" {
 		err = gitlab.CloneForkToPath(function.GetSshUrl(), h.baseConf)
-		fmt.Println("clone err::", err)
 		if err != nil {
 			h.handleResponse(c, status_http.InvalidArgument, err.Error())
 			return
 		}
 		uuid, _ := uuid.NewRandom()
-		// fmt.Println("uuid::", uuid.String())
 		password, err := code_server.CreateCodeServer(function.Path, h.baseConf, uuid.String())
 		if err != nil {
 			h.handleResponse(c, status_http.InvalidArgument, err.Error())
@@ -786,11 +778,9 @@ func (h *HandlerV1) InvokeFunctionByPath(c *gin.Context) {
 		Data: invokeFunction.Data,
 	})
 	if err != nil {
-		// fmt.Println("error in do request", err)
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	} else if resp.Status == "error" {
-		// fmt.Println("error in response status", err)
 		var errStr = resp.Status
 		if resp.Data != nil && resp.Data["message"] != nil {
 			errStr = resp.Data["message"].(string)
@@ -942,8 +932,6 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 			break
 		}
 	}
-
-	fmt.Println("resource.ResourceEnvironmentId:", resource.ResourceEnvironmentId)
 
 	if helper.ContainsLike(faasPaths, c.Param("function-id")) {
 		faasSettings.AppId = cast.ToString(authInfo.Data["app_id"])

@@ -177,7 +177,6 @@ func (h *HandlerV1) CreateObject(c *gin.Context) {
 			objectRequest.Data[key[1:]+"_id"] = id
 		}
 	}
-	//fmt.Println("TIME_MANAGEMENT_LOGGING:::Create child objects", time.Since(start))
 
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
 
@@ -194,7 +193,6 @@ func (h *HandlerV1) CreateObject(c *gin.Context) {
 			return
 		}
 	}
-	//fmt.Println("TIME_MANAGEMENT_LOGGING:::GetListCustomEvents", time.Since(start))
 	//start = time.Now()
 	if len(beforeActions) > 0 {
 		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
@@ -212,7 +210,6 @@ func (h *HandlerV1) CreateObject(c *gin.Context) {
 			return
 		}
 	}
-	// fmt.Println("TIME_MANAGEMENT_LOGGING:::DoInvokeFuntion", time.Since(start))
 
 	//start = time.Now()
 	switch resource.ResourceType {
@@ -253,7 +250,6 @@ func (h *HandlerV1) CreateObject(c *gin.Context) {
 
 	}
 
-	//fmt.Println("TIME_MANAGEMENT_LOGGING:::Create", time.Since(start))
 	if data, ok := resp.Data.AsMap()["data"].(map[string]interface{}); ok {
 		objectRequest.Data = data
 		if _, ok = data["guid"].(string); ok {
@@ -261,7 +257,6 @@ func (h *HandlerV1) CreateObject(c *gin.Context) {
 		}
 	}
 	//start = time.Now()
-	//fmt.Println("after action:::", afterActions)
 	if len(afterActions) > 0 {
 		functionName, err := DoInvokeFuntion(
 			DoInvokeFuntionStruct{
@@ -279,7 +274,6 @@ func (h *HandlerV1) CreateObject(c *gin.Context) {
 			return
 		}
 	}
-	//fmt.Println("TIME_MANAGEMENT_LOGGING:::DoInvokeFuntion", time.Since(start))
 	statusHttp.CustomMessage = resp.GetCustomMessage()
 	h.handleResponse(c, statusHttp, resp)
 }
@@ -967,7 +961,6 @@ func (h *HandlerV1) DeleteObject(c *gin.Context) {
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
-		// fmt.Println("err:", err)
 		if err != nil {
 			statusHttp = status_http.GrpcStatusToHTTP["Internal"]
 			stat, ok := status.FromError(err)
@@ -1110,7 +1103,6 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 	defer conn.Close()
 
 	fromOfs := c.Query("from-ofs")
-	// fmt.Println("from-ofs::", fromOfs)
 	if fromOfs != "true" {
 		beforeActions, afterActions, err = GetListCustomEvents(c.Param("table_slug"), "", "GETLIST", c, h)
 		if err != nil {
@@ -2304,7 +2296,6 @@ func (h *HandlerV1) MultipleUpdateObject(c *gin.Context) {
 		}
 	}
 
-	fmt.Println("After functions:", afterActions)
 	if len(afterActions) > 0 {
 		functionName, err := DoInvokeFuntion(
 			DoInvokeFuntionStruct{
@@ -2483,7 +2474,6 @@ func (h *HandlerV1) GetListGroupBy(c *gin.Context) {
 	relationTableSlug = util.PluralizeWord(relationSlug)
 	// if relationSlug[len(relationSlug)-1] != 's' {
 	// 	relationTableSlug = relationSlug + "s"
-	// 	fmt.Println(relationTableSlug)
 	// }
 
 	object.Data = map[string]interface{}{
@@ -2597,7 +2587,6 @@ func (h *HandlerV1) GetListGroupBy(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
-	fmt.Println("projectId: ", resource.ResourceEnvironmentId)
 	tableResp, err := service.GetGroupByField(
 		context.Background(),
 		&obs.CommonMessage{
@@ -2636,7 +2625,6 @@ func (h *HandlerV1) GetListGroupBy(c *gin.Context) {
 			return
 		}
 
-		fmt.Println("projectId 22: ", resource.ResourceEnvironmentId)
 		selectedTableResp, err := service.GetGroupByField(
 			context.Background(),
 			&obs.CommonMessage{
@@ -2916,7 +2904,6 @@ func (h *HandlerV1) DeleteManyObject(c *gin.Context) {
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
-		// fmt.Println("err:", err)
 		if err != nil {
 			statusHttp = status_http.GrpcStatusToHTTP["Internal"]
 			stat, ok := status.FromError(err)
@@ -3043,8 +3030,6 @@ func (h *HandlerV1) GetListWithOutRelation(c *gin.Context) {
 		return
 	}
 	defer conn.Close()
-
-	fmt.Println("\n Resource env id", resource.ResourceEnvironmentId)
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:

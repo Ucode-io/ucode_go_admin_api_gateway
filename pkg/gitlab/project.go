@@ -23,7 +23,6 @@ func CreateProjectFork(projectName string, data IntegrationData) (response model
 
 	projectId := data.GitlabProjectId
 	strProjectId := strconv.Itoa(projectId)
-	// fmt.Println("config::::::", data.GitlabIntegrationUrl, data.GitlabIntegrationToken)
 
 	resp, err := DoRequest(data.GitlabIntegrationUrl+"/api/v4/projects/"+strProjectId+"/fork", data.GitlabIntegrationToken, "POST", models.CreateProject{
 		NamespaceID:          data.GitlabGroupId,
@@ -33,8 +32,6 @@ func CreateProjectFork(projectName string, data IntegrationData) (response model
 		DefaultBranch:        "master",
 		Visibility:           "private",
 	})
-
-	// fmt.Println("res:::::::::::", resp)
 
 	if resp.Code >= 400 {
 		return models.GitlabIntegrationResponse{}, errors.New(status_http.BadRequest.Description)
@@ -64,7 +61,6 @@ func UpdateProject(cfg IntegrationData, data map[string]interface{}) (response m
 
 	projectId := cfg.GitlabProjectId
 	strProjectId := strconv.Itoa(projectId)
-	// fmt.Println("config::::::", cfg.GitlabIntegrationUrl, cfg.GitlabIntegrationToken)
 
 	resp, err := DoRequest(cfg.GitlabIntegrationUrl+"/api/v4/projects/"+strProjectId, cfg.GitlabIntegrationToken, "PUT", data)
 
@@ -82,7 +78,6 @@ func CreateProjectVariable(cfg IntegrationData, data map[string]interface{}) (re
 
 	projectId := cfg.GitlabProjectId
 	strProjectId := strconv.Itoa(projectId)
-	// fmt.Println("config::::::", cfg.GitlabIntegrationUrl, cfg.GitlabIntegrationToken)
 
 	resp, err := DoRequest(cfg.GitlabIntegrationUrl+"/api/v4/projects/"+strProjectId+"/variables", cfg.GitlabIntegrationToken, "POST", data)
 
@@ -166,11 +161,8 @@ func AddFilesToRepo(gitlabToken string, path string, gitlabRepoId int, branch st
 
 	files, err := helper.ListFiles(localFolderPath)
 	if err != nil {
-		fmt.Println("Just error listing files")
 		return errors.New("error listing files")
 	}
-
-	fmt.Println("FILES->", files)
 
 	var actions []map[string]interface{}
 

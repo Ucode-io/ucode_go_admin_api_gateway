@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -231,14 +230,12 @@ func (h *HandlerV1) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 				return
 			}
 
-			// fmt.Println("\n\n >>>> api key ", apikeys, "\n\n")
 			c.Set("auth", models.AuthData{Type: "API-KEY", Data: data})
 			c.Set("resource_id", resource.GetResource().GetId())
 			c.Set("environment_id", apikeys.GetEnvironmentId())
 			c.Set("project_id", apikeys.GetProjectId())
 			c.Set("resource", string(resourceBody))
 
-			// fmt.Println(">>>>>>>>>>>>>>>apikeysTime:", time.Since(apikeysTime))
 		default:
 			if !strings.Contains(c.Request.URL.Path, "api") {
 				err := errors.New("error invalid authorization method")
@@ -380,7 +377,6 @@ func (h *HandlerV1) GlobalAuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc 
 			h.handleResponse(c, status_http.BadRequest, err.Error())
 			c.Abort()
 		}
-		fmt.Println("\n\nquery", c.Request.URL.Query(), c.Query("environment-id"), c.Query("project-id"))
 		c.Set("resource_id", c.Query("resource-id"))
 		c.Set("environment_id", c.Query("environment-id"))
 		c.Set("project_id", c.Query("project-id"))
@@ -399,13 +395,10 @@ func (h *HandlerV1) RedirectAuthMiddleware(cfg config.BaseConfig) gin.HandlerFun
 			res = &auth_service.V2HasAccessUserRes{}
 			//platformType = c.GetHeader("Platform-Type")
 		)
-		fmt.Println("\n\n\n ~~~~~~~> RedirectAuthMiddleware #1")
 		app_id := c.DefaultQuery("x-api-key", "")
 		if app_id == "" {
-			fmt.Println("\n\n\n ~~~~~~~> RedirectAuthMiddleware #1.1")
 			err := errors.New("error invalid api-key method")
 			h.log.Error("--AuthMiddleware--", logger.Error(err))
-			fmt.Println("\n\n\n ~~~~~~~> RedirectAuthMiddleware #1.2")
 			c.JSON(401, struct {
 				Code    int    `json:"code"`
 				Message string `json:"message"`
@@ -413,11 +406,9 @@ func (h *HandlerV1) RedirectAuthMiddleware(cfg config.BaseConfig) gin.HandlerFun
 				Code:    401,
 				Message: "The request requires an user authentication.",
 			})
-			fmt.Println("\n\n\n ~~~~~~~> RedirectAuthMiddleware #1.3")
 			c.Abort()
 			return
 		}
-		fmt.Println("\n\n\n ~~~~~~~> RedirectAuthMiddleware #1.4")
 		var (
 			appIdKey, resourceAppIdKey = app_id, app_id + "resource"
 
@@ -432,7 +423,6 @@ func (h *HandlerV1) RedirectAuthMiddleware(cfg config.BaseConfig) gin.HandlerFun
 		if !appIdOk {
 			h.cache.Add(appWaitkey, []byte(appWaitkey), config.REDIS_KEY_TIMEOUT)
 		}
-		fmt.Println("\n\n\n ~~~~~~~> RedirectAuthMiddleware #2")
 		if appIdOk {
 			ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
 			defer cancel()
@@ -460,7 +450,6 @@ func (h *HandlerV1) RedirectAuthMiddleware(cfg config.BaseConfig) gin.HandlerFun
 				time.Sleep(config.REDIS_SLEEP)
 			}
 		}
-		fmt.Println("\n\n\n ~~~~~~~> RedirectAuthMiddleware #3")
 		if apikeys.AppId == "" {
 			apikeys, err = h.authService.ApiKey().GetEnvID(
 				c.Request.Context(),
@@ -491,7 +480,6 @@ func (h *HandlerV1) RedirectAuthMiddleware(cfg config.BaseConfig) gin.HandlerFun
 		if !resourceOk {
 			h.cache.Add(resourceWaitKey, []byte(resourceWaitKey), config.REDIS_KEY_TIMEOUT)
 		}
-		fmt.Println("\n\n\n ~~~~~~~> RedirectAuthMiddleware #4")
 
 		if resourceOk {
 			ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
@@ -519,7 +507,6 @@ func (h *HandlerV1) RedirectAuthMiddleware(cfg config.BaseConfig) gin.HandlerFun
 				time.Sleep(config.REDIS_SLEEP)
 			}
 		}
-		fmt.Println("\n\n\n ~~~~~~~> RedirectAuthMiddleware #5")
 		if resource.Resource == nil {
 			resource, err := h.companyServices.Resource().GetResourceByEnvID(
 				c.Request.Context(),
@@ -542,7 +529,6 @@ func (h *HandlerV1) RedirectAuthMiddleware(cfg config.BaseConfig) gin.HandlerFun
 				h.cache.Add(resourceAppIdKey, resourceBody, config.REDIS_TIMEOUT)
 			}()
 		}
-		fmt.Println("\n\n\n ~~~~~~~> RedirectAuthMiddleware #6")
 		data := make(map[string]interface{})
 		err = json.Unmarshal(apiJson, &data)
 		if err != nil {
@@ -551,7 +537,6 @@ func (h *HandlerV1) RedirectAuthMiddleware(cfg config.BaseConfig) gin.HandlerFun
 			return
 		}
 
-		// fmt.Println("\n\n >>>> api key ", apikeys, "\n\n")
 		c.Set("auth", models.AuthData{Type: "API-KEY", Data: data})
 		c.Set("resource_id", resource.GetResource().GetId())
 		c.Set("environment_id", apikeys.GetEnvironmentId())

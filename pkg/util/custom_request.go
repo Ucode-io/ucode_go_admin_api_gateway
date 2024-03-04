@@ -46,7 +46,6 @@ func DoRequest(url string, method string, body interface{}) (responseModel model
 	if err != nil {
 		fmt.Println("\n\nerror::", url, string(respByte))
 	}
-	// fmt.Println("responseModel", responseModel)
 
 	return
 }
@@ -59,7 +58,6 @@ func DoXMLRequest(url string, method string, body interface{}) (responseModel mo
 	}
 
 	data = []byte(Header + string(data))
-	fmt.Println("Data :", string(data))
 
 	client := &http.Client{
 		Timeout: time.Duration(30 * time.Second),

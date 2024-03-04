@@ -64,13 +64,12 @@ func TestGetProjectList(t *testing.T) {
 
 	defer pg.CloseDB()
 
-	res, err := pg.Project().GetList(ctx, &project_service.GetAllProjectsRequest{})
+	_, err = pg.Project().GetList(ctx, &project_service.GetAllProjectsRequest{})
 	if err != nil {
 		t.Log(err)
 		t.FailNow()
 	}
 
-	fmt.Println(res.Count)
 }
 
 func TestDelete(t *testing.T) {
@@ -91,11 +90,10 @@ func TestDelete(t *testing.T) {
 
 	defer pg.CloseDB()
 
-	name, rows, err := pg.Project().Delete(ctx, &project_service.ProjectPrimaryKey{Id: "71fda691-82db-4eda-a07f-187cdc34007f"})
+	_, _, err = pg.Project().Delete(ctx, &project_service.ProjectPrimaryKey{Id: "71fda691-82db-4eda-a07f-187cdc34007f"})
 	if err != nil {
 		t.Log(err)
 		t.FailNow()
 	}
 
-	fmt.Println(name, rows)
 }

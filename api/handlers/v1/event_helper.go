@@ -181,8 +181,6 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *HandlerV1
 		data["environment_id"] = environmentId
 		invokeFunction.Data = data
 
-		// h.log.Info("function path: ", logger.Any("", customEvent.Functions[0].Path))
-
 		resp, err := util.DoRequest("https://ofs.u-code.io/function/"+customEvent.GetFunctions()[0].Path, "POST", invokeFunction)
 		if err != nil {
 			return customEvent.GetFunctions()[0].Name, err

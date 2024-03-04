@@ -3,7 +3,6 @@ package v2
 import (
 	"context"
 	"errors"
-	"fmt"
 	"strings"
 	"time"
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -171,8 +170,6 @@ func (h *HandlerV2) GetAllVersionHistory(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("\n\n\n history env", environmentId, projectId)
-
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
@@ -207,7 +204,6 @@ func (h *HandlerV2) GetAllVersionHistory(c *gin.Context) {
 				OrderBy:   orderby,
 			},
 		)
-		fmt.Println("\n\n\n\n ~~~~~~> ENV_ID ", c.DefaultQuery("env_id", ""), resp)
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return

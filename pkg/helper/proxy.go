@@ -14,7 +14,6 @@ type MatchingData struct {
 func FindUrlTo(res *company_service.GetListRedirectUrlRes, data MatchingData) (string, error) {
 
 	// start := time.Now()
-	//fmt.Println("RES::::::::::::::::::::::", res)
 
 	for _, v := range res.GetRedirectUrls() {
 		m := make(map[string]string)
@@ -42,12 +41,10 @@ func FindUrlTo(res *company_service.GetListRedirectUrlRes, data MatchingData) (s
 			for i, el := range m {
 				to = strings.Replace(to, i, el, 1)
 			}
-			// fmt.Println("to::::::::::::::::::", to)
 			return to, nil
 		}
 	}
 
-	// fmt.Println("time in FindUrlTo::::::", time.Since(start).Milliseconds())
 	return data.Path, nil
 }
 

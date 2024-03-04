@@ -3,11 +3,9 @@ package v2
 import (
 	"context"
 	"errors"
-	"fmt"
 	"reflect"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
-	"ucode/ucode_go_api_gateway/config"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	tmp "ucode/ucode_go_api_gateway/genproto/template_service"
@@ -240,8 +238,6 @@ func (h *HandlerV2) GetMenuByID(c *gin.Context) {
 		}
 	}
 
-	fmt.Println("\n\n\n\n MENU-GETBYID TEST #2 \n\n", resp)
-
 	h.handleResponse(c, status_http.OK, resp)
 }
 
@@ -296,10 +292,6 @@ func (h *HandlerV2) GetAllMenus(c *gin.Context) {
 	}
 	authInfo, _ := h.GetAuthInfo(c)
 	limit := 100
-
-	if resource.NodeType == config.ENTER_PRICE_TYPE {
-		fmt.Println("\n\n enter price project id ", projectId.(string))
-	}
 
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),

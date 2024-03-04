@@ -19,7 +19,6 @@ import (
 	"github.com/minio/minio-go/v7/pkg/credentials"
 
 	"ucode/ucode_go_api_gateway/pkg/helper"
-	"ucode/ucode_go_api_gateway/pkg/logger"
 
 	"github.com/gin-gonic/gin"
 
@@ -73,8 +72,6 @@ func (h *HandlerV1) Upload(c *gin.Context) {
 		Creds:  credentials.NewStaticV4(h.baseConf.MinioAccessKeyID, h.baseConf.MinioSecretAccessKey, ""),
 		Secure: h.baseConf.MinioProtocol,
 	})
-	h.log.Info("info", logger.String("MinioEndpoint: ", h.baseConf.MinioEndpoint), logger.String("access_key: ",
-		h.baseConf.MinioAccessKeyID), logger.String("access_secret: ", h.baseConf.MinioSecretAccessKey))
 
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
@@ -160,8 +157,6 @@ func (h *HandlerV1) UploadFile(c *gin.Context) {
 		Creds:  credentials.NewStaticV4(h.baseConf.MinioAccessKeyID, h.baseConf.MinioSecretAccessKey, ""),
 		Secure: h.baseConf.MinioProtocol,
 	})
-	h.log.Info("info", logger.String("access_key: ",
-		h.baseConf.MinioAccessKeyID), logger.String("access_secret: ", h.baseConf.MinioSecretAccessKey))
 
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
@@ -323,9 +318,6 @@ func (h *HandlerV1) UploadTemplate(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
-
-	fmt.Println("\nProject ID:", projectId)
-	fmt.Println("\nEnvironment ID:", environmentId)
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),

@@ -2,7 +2,6 @@ package v2
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
@@ -36,9 +35,6 @@ func (h *HandlerV2) hasAccess(c *gin.Context) (*auth_service.V2HasAccessUserRes,
 	)
 	if err != nil {
 		errr := status.Error(codes.PermissionDenied, "Permission denied")
-		fmt.Println("\n\n Admin errr 3th", errr)
-		fmt.Println("\n\n Admin errr 3th invoked ", errr.Error())
-		fmt.Println("\n\n Auth err 2th ", err.Error())
 		if errr.Error() == err.Error() {
 			h.log.Error("---ERR->HasAccess->Permission--->", logger.Error(err))
 			h.handleResponse(c, status_http.BadRequest, err.Error())
@@ -73,8 +69,6 @@ func (h *HandlerV2) GetAuthInfo(c *gin.Context) (result *auth_service.V2HasAcces
 		return nil, errors.New("token error: wrong format")
 	}
 
-	// fmt.Println(":::::accessResponse", accessResponse)
-
 	return accessResponse, nil
 }
 
@@ -92,8 +86,6 @@ func (h *HandlerV2) GetAuthAdminInfo(c *gin.Context) (result *auth_service.HasAc
 		c.Abort()
 		return nil, errors.New("token error: wrong format")
 	}
-
-	// fmt.Println(":::::accessResponse", accessResponse)
 
 	return accessResponse, nil
 }

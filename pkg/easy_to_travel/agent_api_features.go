@@ -2,7 +2,6 @@ package easy_to_travel
 
 import (
 	"encoding/json"
-	"fmt"
 	"strconv"
 	"sync"
 	"ucode/ucode_go_api_gateway/pkg/helper"
@@ -71,8 +70,6 @@ func AgentApiGetFeatures(services services.ServiceManagerI, req []byte) string {
 		wg                       sync.WaitGroup
 		globalErr                error
 	)
-
-	fmt.Println("!!!!resourceEnvironmentId:", resourceEnvironmentId)
 
 	if v, ok := request.RequestData.Params["offset"]; ok {
 		offset, err = strconv.Atoi(v[0])

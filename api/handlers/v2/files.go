@@ -19,7 +19,6 @@ import (
 	"github.com/minio/minio-go/v7/pkg/credentials"
 
 	"ucode/ucode_go_api_gateway/pkg/helper"
-	"ucode/ucode_go_api_gateway/pkg/logger"
 
 	"github.com/gin-gonic/gin"
 
@@ -73,8 +72,6 @@ func (h *HandlerV2) Upload(c *gin.Context) {
 		Creds:  credentials.NewStaticV4(h.baseConf.MinioAccessKeyID, h.baseConf.MinioSecretAccessKey, ""),
 		Secure: h.baseConf.MinioProtocol,
 	})
-	h.log.Info("info", logger.String("MinioEndpoint: ", h.baseConf.MinioEndpoint), logger.String("access_key: ",
-		h.baseConf.MinioAccessKeyID), logger.String("access_secret: ", h.baseConf.MinioSecretAccessKey))
 
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
@@ -161,8 +158,6 @@ func (h *HandlerV2) UploadFile(c *gin.Context) {
 		Creds:  credentials.NewStaticV4(h.baseConf.MinioAccessKeyID, h.baseConf.MinioSecretAccessKey, ""),
 		Secure: h.baseConf.MinioProtocol,
 	})
-	h.log.Info("info", logger.String("access_key: ",
-		h.baseConf.MinioAccessKeyID), logger.String("access_secret: ", h.baseConf.MinioSecretAccessKey))
 
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
@@ -352,7 +347,7 @@ func (h *HandlerV2) UploadToFolder(c *gin.Context) {
 	file.File.Filename = fmt.Sprintf("%s_%s", fName.String(), file.File.Filename)
 	object, err := file.File.Open()
 	if err != nil {
-		fmt.Println(err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 	defer object.Close()
@@ -360,8 +355,6 @@ func (h *HandlerV2) UploadToFolder(c *gin.Context) {
 		Creds:  credentials.NewStaticV4(h.baseConf.MinioAccessKeyID, h.baseConf.MinioSecretAccessKey, ""),
 		Secure: h.baseConf.MinioProtocol,
 	})
-	h.log.Info("info", logger.String("MinioEndpoint: ", h.baseConf.MinioEndpoint), logger.String("access_key: ",
-		h.baseConf.MinioAccessKeyID), logger.String("access_secret: ", h.baseConf.MinioSecretAccessKey))
 
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
@@ -385,8 +378,6 @@ func (h *HandlerV2) UploadToFolder(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("TEST 1")
-
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).File().Create(context.Background(), &obs.CreateFileRequest{
 		Id:               fName.String(),
 		Title:            title,
@@ -401,8 +392,6 @@ func (h *HandlerV2) UploadToFolder(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-
-	fmt.Println("TEST 2")
 
 	// err = os.Remove(dst + "/" + file.File.Filename)
 	// if err != nil {
