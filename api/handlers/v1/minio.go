@@ -43,10 +43,10 @@ func (h *HandlerV1) BucketSize(c *gin.Context) {
 
 	var (
 		bucketName    = bucket.Name
-		minioEndpoint = h.cfg.MinioEndpoint
-		minioAccess   = h.cfg.MinioAccessKeyID
-		minioSecret   = h.cfg.MinioSecretAccessKey
-		useSSL        = h.cfg.MinioProtocol
+		minioEndpoint = h.baseConf.MinioEndpoint
+		minioAccess   = h.baseConf.MinioAccessKeyID
+		minioSecret   = h.baseConf.MinioSecretAccessKey
+		useSSL        = h.baseConf.MinioProtocol
 
 		totalSize int64
 	)
