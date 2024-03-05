@@ -200,8 +200,8 @@ func AddFilesToRepo(gitlabToken string, path string, gitlabRepoId int, branch st
 	return nil
 }
 
-func AddCiFile(gitlabToken, path string, gitlabRepoId int, branch string) error {
-	localFolderPath := "/go/src/gitlab.udevs.io/ucode/ucode_go_admin_api_gateway/github_integration"
+func AddCiFile(gitlabToken, path string, gitlabRepoId int, branch, localFolderPath string) error {
+	// localFolderPath := "/go/src/gitlab.udevs.io/ucode/ucode_go_admin_api_gateway/github_integration"
 	//localFolderPath := "github_integration"
 	filePath := fmt.Sprintf("%v/.gitlab-ci.yml", localFolderPath)
 

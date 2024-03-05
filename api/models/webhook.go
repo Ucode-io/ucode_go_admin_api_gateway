@@ -7,7 +7,8 @@ type CreateWebhook struct {
 	FrameworkType string `json:"framework_type"`
 	GithubToken   string `json:"github_token"`
 	FunctionType  string `json:"type"`
-	Name          string `json:"name"`
+	Resource      string `json:"resource_id"`
+	Name          string `json:"provided_name"`
 }
 
 type GithubLogin struct {

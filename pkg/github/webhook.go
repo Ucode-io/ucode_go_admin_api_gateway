@@ -69,6 +69,7 @@ func CreateWebhook(cfg CreateWebhookRequest) error {
 			FrameworkType: cfg.FrameworkType,
 			Branch:        cfg.Branch,
 			FunctionType:  cfg.FunctionType,
+			Resource:      cfg.Resource,
 			Name:          cfg.Name,
 		},
 	}
