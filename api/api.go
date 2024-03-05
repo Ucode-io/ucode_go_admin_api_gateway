@@ -628,7 +628,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 	}
 
 	v2Version := r.Group("/v2")
-	// v2Version.Use(h.V2.AuthMiddleware())
+	v2Version.Use(h.V2.AuthMiddleware())
 	{
 		// collections group
 		v2Collection := v2Version.Group("/collections")
