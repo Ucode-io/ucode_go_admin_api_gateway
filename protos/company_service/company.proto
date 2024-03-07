@@ -24,6 +24,8 @@ enum ResourceType {
     POSTGRESQL = 3;
     REST = 4;
     GITHUB = 5;
+    SMS = 6;
+    SMTP = 7;
 }
 
 enum SettingType {

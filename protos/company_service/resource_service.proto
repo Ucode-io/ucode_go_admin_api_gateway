@@ -66,6 +66,7 @@ message AddResourceToProjectRequest {
     ResourceType type = 4;
     repeated VariableResource variables = 5;
     IntegrationResource integration_resource = 6;
+    Settings settings = 7;
 }
 
 message GetProjectResourceListRequest {
@@ -81,6 +82,8 @@ message ProjectResource {
     string type = 4;
     string id = 5;
     repeated VariableResource variables = 6;
+    Settings settings = 7;
+    int32 resource_type = 8; 
 }
 
 message ListProjectResource {
@@ -322,4 +325,22 @@ message ResourceEnvironmentWithPassword {
     string version_id = 10;
     string node_type = 11;
     string resource_environment_id = 12;
+}
+
+message Settings {
+    SmsCredentials sms = 1;
+    SMTPCredentials smtp = 2;
+}
+
+message SmsCredentials {
+    string originator = 1;
+    string login = 2;
+    string password = 3;
+    string default_otp = 4;
+    int32 number_of_otp = 5;
+}
+
+message SMTPCredentials {
+    string email = 1;
+    string password = 2;
 }
