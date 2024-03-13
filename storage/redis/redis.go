@@ -43,3 +43,10 @@ func (s Storage) Get(ctx context.Context, key string, projectId string, nodeType
 	}
 	return s.pool[projectId].Get(ctx, key).Result()
 }
+
+func (s Storage) Del(ctx context.Context, keys string, projectId string, nodeType string) error {
+	if nodeType != config.ENTER_PRICE_TYPE {
+		projectId = config.BaseLoad().UcodeNamespace
+	}
+	return s.pool[projectId].Del(ctx, keys).Err()
+}
