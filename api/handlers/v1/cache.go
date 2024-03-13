@@ -9,6 +9,19 @@ import (
 	"github.com/go-redis/redis/v8"
 )
 
+// Cache godoc
+// @Security ApiKeyAuth
+// @ID Cache
+// @Router /v1/cache [POST]
+// @Summary Cache
+// @Description Cache
+// @Tags Cache
+// @Accept json
+// @Produce json
+// @Param cache body models.Cache true "Cache body"
+// @Success 200 {object} status_http.Response{data=string} "Response body"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) Cache(c *gin.Context) {
 
 	var request models.Cache
