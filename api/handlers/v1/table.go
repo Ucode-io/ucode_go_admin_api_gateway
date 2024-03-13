@@ -531,6 +531,7 @@ func (h *HandlerV1) UpdateTable(c *gin.Context) {
 			IsLoginTable: table.IsLoginTable,
 			Attributes:   structData,
 			OrderBy:      table.OrderBy,
+			SoftDelete:   table.SoftDelete,
 		}
 		logReq = &models.CreateVersionHistoryRequest{
 			Services:     services,
