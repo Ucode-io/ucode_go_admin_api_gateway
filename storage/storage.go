@@ -26,4 +26,6 @@ type ProjectRepoI interface {
 type RedisStorageI interface {
 	SetX(ctx context.Context, key string, value string, duration time.Duration, projectId string, nodeType string) error
 	Get(ctx context.Context, key string, projectId string, nodeType string) (string, error)
+	Del(ctx context.Context, key string, projectId string, nodeType string) error
+	Set(ctx context.Context, key string, value interface{}, duration time.Duration, projectId string, nodeType string) error
 }

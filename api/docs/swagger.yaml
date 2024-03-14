@@ -1664,6 +1664,26 @@ definitions:
           $ref: '#/definitions/models.ValueSetting'
         type: array
     type: object
+  models.CacheRequest:
+    properties:
+      key:
+        type: string
+      method:
+        type: string
+      nodeType:
+        type: string
+      projectId:
+        type: string
+      value:
+        additionalProperties: true
+        type: object
+    type: object
+  models.CacheResponse:
+    properties:
+      value:
+        additionalProperties: true
+        type: object
+    type: object
   models.Category:
     properties:
       attributes:
@@ -2750,6 +2770,8 @@ definitions:
         type: boolean
       slug:
         type: string
+      soft_delete:
+        type: boolean
       subtitle_field_slug:
         type: string
     type: object
@@ -9548,6 +9570,54 @@ paths:
       summary: Get single booked appointment
       tags:
       - Appointment
+  /v1/cache:
+    post:
+      consumes:
+      - application/json
+      description: Cache
+      operationId: Cache
+      parameters:
+      - description: Cache body
+        in: body
+        name: cache
+        required: true
+        schema:
+          $ref: '#/definitions/models.CacheRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.CacheResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Cache
+      tags:
+      - Cache
   /v1/cashbox_transaction:
     post:
       consumes:

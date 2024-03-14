@@ -241,6 +241,9 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 		v1.POST("/invoke_function", h.V1.InvokeFunction)
 		v1.POST("/invoke_function/:function-path", h.V1.InvokeFunctionByPath)
 
+		//cache
+		v1.POST("/cache", h.V1.Cache)
+
 		// Excel Reader
 		v1.GET("/excel/:excel_id", h.V1.ExcelReader)
 		v1.POST("/excel/excel_to_db/:excel_id", h.V1.ExcelToDb)
