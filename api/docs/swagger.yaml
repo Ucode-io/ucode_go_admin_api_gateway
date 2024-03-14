@@ -1664,7 +1664,7 @@ definitions:
           $ref: '#/definitions/models.ValueSetting'
         type: array
     type: object
-  models.Cache:
+  models.CacheRequest:
     properties:
       key:
         type: string
@@ -1675,7 +1675,14 @@ definitions:
       projectId:
         type: string
       value:
-        type: string
+        additionalProperties: true
+        type: object
+    type: object
+  models.CacheResponse:
+    properties:
+      value:
+        additionalProperties: true
+        type: object
     type: object
   models.Category:
     properties:
@@ -9575,7 +9582,7 @@ paths:
         name: cache
         required: true
         schema:
-          $ref: '#/definitions/models.Cache'
+          $ref: '#/definitions/models.CacheRequest'
       produces:
       - application/json
       responses:
@@ -9586,7 +9593,7 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  type: string
+                  $ref: '#/definitions/models.CacheResponse'
               type: object
         "400":
           description: Bad Request

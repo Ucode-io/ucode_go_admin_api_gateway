@@ -4301,7 +4301,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.Cache"
+                            "$ref": "#/definitions/models.CacheRequest"
                         }
                     }
                 ],
@@ -4317,7 +4317,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "string"
+                                            "$ref": "#/definitions/models.CacheResponse"
                                         }
                                     }
                                 }
@@ -45408,7 +45408,7 @@ const docTemplate = `{
                 }
             }
         },
-        "models.Cache": {
+        "models.CacheRequest": {
             "type": "object",
             "properties": {
                 "key": {
@@ -45424,7 +45424,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "value": {
-                    "type": "string"
+                    "type": "object",
+                    "additionalProperties": true
+                }
+            }
+        },
+        "models.CacheResponse": {
+            "type": "object",
+            "properties": {
+                "value": {
+                    "type": "object",
+                    "additionalProperties": true
                 }
             }
         },
@@ -53861,8 +53871,6 @@ var SwaggerInfo = &swag.Spec{
 	Description:      "",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
-	LeftDelim:        "{{",
-	RightDelim:       "}}",
 }
 
 func init() {

@@ -50,3 +50,10 @@ func (s Storage) Del(ctx context.Context, keys string, projectId string, nodeTyp
 	}
 	return s.pool[projectId].Del(ctx, keys).Err()
 }
+
+func (s Storage) Set(ctx context.Context, key string, value interface{}, duration time.Duration, projectId string, nodeType string) error {
+	if nodeType != config.ENTER_PRICE_TYPE {
+		projectId = config.BaseLoad().UcodeNamespace
+	}
+	return s.pool[projectId].Set(ctx, key, value, duration).Err()
+}

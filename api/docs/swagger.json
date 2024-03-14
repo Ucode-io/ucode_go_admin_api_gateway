@@ -4289,7 +4289,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.Cache"
+                            "$ref": "#/definitions/models.CacheRequest"
                         }
                     }
                 ],
@@ -4305,7 +4305,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "string"
+                                            "$ref": "#/definitions/models.CacheResponse"
                                         }
                                     }
                                 }
@@ -45396,7 +45396,7 @@
                 }
             }
         },
-        "models.Cache": {
+        "models.CacheRequest": {
             "type": "object",
             "properties": {
                 "key": {
@@ -45412,7 +45412,17 @@
                     "type": "string"
                 },
                 "value": {
-                    "type": "string"
+                    "type": "object",
+                    "additionalProperties": true
+                }
+            }
+        },
+        "models.CacheResponse": {
+            "type": "object",
+            "properties": {
+                "value": {
+                    "type": "object",
+                    "additionalProperties": true
                 }
             }
         },
