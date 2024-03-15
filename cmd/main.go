@@ -102,7 +102,7 @@ func main() {
 
 	r.Use(gin.Logger(), gin.Recovery())
 
-	limiter := util.NewApiKeyRateLimiter(newRedis, 100, 100)
+	limiter := util.NewApiKeyRateLimiter(newRedis, config.RATE_LIMITER_RPS_LIMIT, config.RATE_LIMITER_RPS_LIMIT)
 
 	h := handlers.NewHandler(baseConf, mapProjectConfs, log, projectServiceNodes, compSrvc, authSrvc, newRedis, cache, limiter)
 

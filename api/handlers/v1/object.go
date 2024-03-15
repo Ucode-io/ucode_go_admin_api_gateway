@@ -462,19 +462,24 @@ func (h *HandlerV1) GetSingleSlim(c *gin.Context) {
 
 	apiKey := c.GetHeader("X-API-KEY")
 	if apiKey != "" {
-		apiKeyLimit, err := h.authService.ApiKeyUsage().CheckLimit(
-			c.Request.Context(),
-			&pba.CheckLimitRequest{ApiKey: apiKey},
-		)
-		if err != nil || apiKeyLimit.IsLimitReached {
-			h.handleResponse(c, status_http.TooManyRequests, err.Error())
-			return
+		canRequest, exists := h.cache.GetValue(apiKey + "slim")
+		if !exists {
+			apiKeyLimit, err := h.authService.ApiKeyUsage().CheckLimit(
+				c.Request.Context(),
+				&pba.CheckLimitRequest{ApiKey: apiKey},
+			)
+			if err != nil || apiKeyLimit.IsLimitReached {
+				h.handleResponse(c, status_http.TooManyRequests, err.Error())
+				return
+			}
+
+			h.cache.AddKey(apiKey+"slim", true, time.Minute)
 		}
 
-		go func() {
-			_, _ = h.authService.ApiKeyUsage().Create(c.Request.Context(),
-				&pba.ApiKeyUsage{ApiKey: apiKey, RequestCount: 1})
-		}()
+		if !canRequest {
+			h.handleResponse(c, status_http.TooManyRequests, "Monthly limit reached")
+			return
+		}
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
@@ -1354,19 +1359,24 @@ func (h *HandlerV1) GetListSlim(c *gin.Context) {
 
 	apiKey := c.GetHeader("X-API-KEY")
 	if apiKey != "" {
-		apiKeyLimit, err := h.authService.ApiKeyUsage().CheckLimit(
-			c.Request.Context(),
-			&pba.CheckLimitRequest{ApiKey: apiKey},
-		)
-		if err != nil || apiKeyLimit.IsLimitReached {
-			h.handleResponse(c, status_http.TooManyRequests, err.Error())
-			return
+		canRequest, exists := h.cache.GetValue(apiKey + "slim")
+		if !exists {
+			apiKeyLimit, err := h.authService.ApiKeyUsage().CheckLimit(
+				c.Request.Context(),
+				&pba.CheckLimitRequest{ApiKey: apiKey},
+			)
+			if err != nil || apiKeyLimit.IsLimitReached {
+				h.handleResponse(c, status_http.TooManyRequests, err.Error())
+				return
+			}
+
+			h.cache.AddKey(apiKey+"slim", true, time.Minute)
 		}
 
-		go func() {
-			_, _ = h.authService.ApiKeyUsage().Create(c.Request.Context(),
-				&pba.ApiKeyUsage{ApiKey: apiKey, RequestCount: 1})
-		}()
+		if !canRequest {
+			h.handleResponse(c, status_http.TooManyRequests, "Monthly limit reached")
+			return
+		}
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
