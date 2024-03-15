@@ -191,7 +191,7 @@ func BaseLoad() BaseConfig {
 	config.DefaultOffset = cast.ToString(GetOrReturnDefaultValue("DEFAULT_OFFSET", "0"))
 	config.DefaultLimit = "100"
 
-	config.GitlabIntegrationToken = "glpat-XXKT7Jq88GujqWHqkDgs"
+	config.GitlabIntegrationToken = cast.ToString(GetOrReturnDefaultValue("GITLAB_ACCESS_TOKEN", ""))
 	config.GitlabIntegrationURL = cast.ToString(GetOrReturnDefaultValue("GITLAB_URL", ""))
 	config.GitlabGroupId = cast.ToInt(GetOrReturnDefaultValue("GITLAB_GROUP_ID", 0))
 	config.GitlabProjectId = cast.ToInt(GetOrReturnDefaultValue("GITLAB_PROJECT_ID", 0))
