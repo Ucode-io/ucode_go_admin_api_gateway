@@ -461,26 +461,26 @@ func (h *HandlerV1) GetSingleSlim(c *gin.Context) {
 	userId, _ := c.Get("user_id")
 
 	apiKey := c.GetHeader("X-API-KEY")
-	if apiKey != "" {
-		canRequest, exists := h.cache.GetValue(apiKey + "slim")
-		if !exists {
-			apiKeyLimit, err := h.authService.ApiKeyUsage().CheckLimit(
-				c.Request.Context(),
-				&pba.CheckLimitRequest{ApiKey: apiKey},
-			)
-			if err != nil || apiKeyLimit.IsLimitReached {
-				h.handleResponse(c, status_http.TooManyRequests, err.Error())
-				return
-			}
+	// if apiKey != "" {
+	// 	canRequest, exists := h.cache.GetValue(apiKey + "slim")
+	// 	if !exists {
+	// 		apiKeyLimit, err := h.authService.ApiKeyUsage().CheckLimit(
+	// 			c.Request.Context(),
+	// 			&pba.CheckLimitRequest{ApiKey: apiKey},
+	// 		)
+	// 		if err != nil || apiKeyLimit.IsLimitReached {
+	// 			h.handleResponse(c, status_http.TooManyRequests, err.Error())
+	// 			return
+	// 		}
 
-			h.cache.AddKey(apiKey+"slim", true, time.Minute)
-		}
+	// 		h.cache.AddKey(apiKey+"slim", true, time.Minute)
+	// 	}
 
-		if !canRequest {
-			h.handleResponse(c, status_http.TooManyRequests, "Monthly limit reached")
-			return
-		}
-	}
+	// 	if !canRequest {
+	// 		h.handleResponse(c, status_http.TooManyRequests, "Monthly limit reached")
+	// 		return
+	// 	}
+	// }
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
@@ -1358,26 +1358,26 @@ func (h *HandlerV1) GetListSlim(c *gin.Context) {
 	userId, _ := c.Get("user_id")
 
 	apiKey := c.GetHeader("X-API-KEY")
-	if apiKey != "" {
-		canRequest, exists := h.cache.GetValue(apiKey + "slim")
-		if !exists {
-			apiKeyLimit, err := h.authService.ApiKeyUsage().CheckLimit(
-				c.Request.Context(),
-				&pba.CheckLimitRequest{ApiKey: apiKey},
-			)
-			if err != nil || apiKeyLimit.IsLimitReached {
-				h.handleResponse(c, status_http.TooManyRequests, err.Error())
-				return
-			}
+	// if apiKey != "" {
+	// 	canRequest, exists := h.cache.GetValue(apiKey + "slim")
+	// 	if !exists {
+	// 		apiKeyLimit, err := h.authService.ApiKeyUsage().CheckLimit(
+	// 			c.Request.Context(),
+	// 			&pba.CheckLimitRequest{ApiKey: apiKey},
+	// 		)
+	// 		if err != nil || apiKeyLimit.IsLimitReached {
+	// 			h.handleResponse(c, status_http.TooManyRequests, err.Error())
+	// 			return
+	// 		}
 
-			h.cache.AddKey(apiKey+"slim", true, time.Minute)
-		}
+	// 		h.cache.AddKey(apiKey+"slim", true, time.Minute)
+	// 	}
 
-		if !canRequest {
-			h.handleResponse(c, status_http.TooManyRequests, "Monthly limit reached")
-			return
-		}
-	}
+	// 	if !canRequest {
+	// 		h.handleResponse(c, status_http.TooManyRequests, "Monthly limit reached")
+	// 		return
+	// 	}
+	// }
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),

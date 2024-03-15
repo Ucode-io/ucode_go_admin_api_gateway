@@ -10,7 +10,6 @@ import (
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
-	pba "ucode/ucode_go_api_gateway/genproto/auth_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
@@ -316,26 +315,26 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 	userId, _ := c.Get("user_id")
 
 	apiKey := c.GetHeader("X-API-KEY")
-	if apiKey != "" {
-		canRequest, exists := h.cache.GetValue(apiKey + "slim")
-		if !exists {
-			apiKeyLimit, err := h.authService.ApiKeyUsage().CheckLimit(
-				c.Request.Context(),
-				&pba.CheckLimitRequest{ApiKey: apiKey},
-			)
-			if err != nil || apiKeyLimit.IsLimitReached {
-				h.handleResponse(c, status_http.TooManyRequests, err.Error())
-				return
-			}
+	// if apiKey != "" {
+	// 	canRequest, exists := h.cache.GetValue(apiKey + "slim")
+	// 	if !exists {
+	// 		apiKeyLimit, err := h.authService.ApiKeyUsage().CheckLimit(
+	// 			c.Request.Context(),
+	// 			&pba.CheckLimitRequest{ApiKey: apiKey},
+	// 		)
+	// 		if err != nil || apiKeyLimit.IsLimitReached {
+	// 			h.handleResponse(c, status_http.TooManyRequests, err.Error())
+	// 			return
+	// 		}
 
-			h.cache.AddKey(apiKey+"slim", true, time.Minute)
-		}
+	// 		h.cache.AddKey(apiKey+"slim", true, time.Minute)
+	// 	}
 
-		if !canRequest {
-			h.handleResponse(c, status_http.TooManyRequests, "Monthly limit reached")
-			return
-		}
-	}
+	// 	if !canRequest {
+	// 		h.handleResponse(c, status_http.TooManyRequests, "Monthly limit reached")
+	// 		return
+	// 	}
+	// }
 
 	var resource *pb.ServiceResourceModel
 	resourceBody, ok := c.Get("resource")
