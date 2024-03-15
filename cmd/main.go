@@ -10,6 +10,7 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/crons"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/logger"
+	"ucode/ucode_go_api_gateway/pkg/util"
 	"ucode/ucode_go_api_gateway/services"
 	"ucode/ucode_go_api_gateway/storage/redis"
 
@@ -101,7 +102,9 @@ func main() {
 
 	r.Use(gin.Logger(), gin.Recovery())
 
-	h := handlers.NewHandler(baseConf, mapProjectConfs, log, projectServiceNodes, compSrvc, authSrvc, newRedis, cache)
+	limiter := util.NewApiKeyRateLimiter(newRedis, 100, 100)
+
+	h := handlers.NewHandler(baseConf, mapProjectConfs, log, projectServiceNodes, compSrvc, authSrvc, newRedis, cache, limiter)
 
 	api.SetUpAPI(r, h, baseConf)
 	cronjobs := crons.ExecuteCron()

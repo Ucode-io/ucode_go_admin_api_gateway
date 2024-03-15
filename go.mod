@@ -23,7 +23,6 @@ require (
 )
 
 require (
-	github.com/JGLTechnologies/gin-rate-limit v1.5.4
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/golang/protobuf v1.5.3
@@ -31,8 +30,8 @@ require (
 	github.com/jackc/pgx/v4 v4.17.2
 	github.com/pkg/errors v0.9.1
 	github.com/processout/grpc-go-pool v1.2.1
-	github.com/redis/go-redis/v9 v9.5.1
 	github.com/saidamir98/udevs_pkg v0.0.0-20220413125729-5342e90c08a3
+	golang.org/x/time v0.5.0
 )
 
 require (

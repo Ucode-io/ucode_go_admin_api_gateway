@@ -28,9 +28,10 @@ type HandlerV2 struct {
 	companyServices services.CompanyServiceI
 	authService     services.AuthServiceManagerI
 	redis           storage.RedisStorageI
+	rateLimiter     *util.ApiKeyRateLimiter
 }
 
-func NewHandlerV2(baseConf config.BaseConfig, projectConfs map[string]config.Config, log logger.LoggerI, svcs services.ServiceNodesI, cmpServ services.CompanyServiceI, authService services.AuthServiceManagerI, redis storage.RedisStorageI) HandlerV2 {
+func NewHandlerV2(baseConf config.BaseConfig, projectConfs map[string]config.Config, log logger.LoggerI, svcs services.ServiceNodesI, cmpServ services.CompanyServiceI, authService services.AuthServiceManagerI, redis storage.RedisStorageI, limiter *util.ApiKeyRateLimiter) HandlerV2 {
 	return HandlerV2{
 		baseConf:        baseConf,
 		projectConfs:    projectConfs,
@@ -39,6 +40,7 @@ func NewHandlerV2(baseConf config.BaseConfig, projectConfs map[string]config.Con
 		companyServices: cmpServ,
 		authService:     authService,
 		redis:           redis,
+		rateLimiter:     limiter,
 	}
 }
 

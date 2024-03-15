@@ -115,8 +115,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 		v1.POST("/object/:table_slug", h.V1.CreateObject)
 		v1.GET("/object/:table_slug/:object_id", h.V1.GetSingle)
 		v1.POST("/object/get-list/:table_slug", h.V1.GetList)
-		v1.GET("/object-slim/:table_slug/:object_id", h.V1.GetSingleSlim)
-		v1.GET("/object-slim/get-list/:table_slug", h.V1.GetListSlim)
 		v1.PUT("/object/:table_slug", h.V1.UpdateObject)
 		v1.DELETE("/object/:table_slug/:object_id", h.V1.DeleteObject)
 		v1.DELETE("/object/:table_slug", h.V1.DeleteManyObject)
@@ -367,10 +365,22 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 		v2.GET("/language-json", h.V1.GetLanguageJson)
 
 		v2.POST("/object/get-list/:table_slug", h.V1.GetListV2)
-		v2.GET("/object-slim/get-list/:table_slug", h.V1.GetListSlimV2)
 
 	}
 	r.POST("/template-note/share-get", h.V1.GetObjectToken)
+
+	v1Slim := r.Group("/v1")
+	v1Slim.Use(h.V1.SlimAuthMiddleware(cfg))
+	{
+		v1Slim.GET("/object-slim/:table_slug/:object_id", h.V1.GetSingleSlim)
+		v1.GET("/object-slim/get-list/:table_slug", h.V1.GetListSlim)
+	}
+
+	v2Slim := r.Group("/v2")
+	v2Slim.Use(h.V1.SlimAuthMiddleware(cfg))
+	{
+		v2Slim.GET("/object-slim/get-list/:table_slug", h.V1.GetListSlimV2)
+	}
 
 	v1Admin := r.Group("/v1")
 	v1Admin.Use(h.V1.AdminAuthMiddleware())
@@ -904,14 +914,4 @@ func RedirectUrl(c *gin.Context, h *handlers.Handler) (*gin.Context, error) {
 	}
 	c.Request.Header.Add("auth", string(auth))
 	return c, nil
-}
-
-func testAuthMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Set("environment_id", "063dad1e-4596-483a-86a38-14f9b99922c3")
-		u := c.Request.URL.Query()
-		u.Set("project-id", "d6042238-0f60-4f30-8c1a-af78883f1d52")
-		c.Request.URL.RawQuery = u.Encode()
-		c.Next()
-	}
 }

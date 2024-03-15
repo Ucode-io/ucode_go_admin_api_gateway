@@ -39,6 +39,7 @@ const (
 	REDIS_KEY_TIMEOUT  = 280 * time.Second
 	REDIS_WAIT_TIMEOUT = 1 * time.Second
 	REDIS_SLEEP        = 100 * time.Millisecond
+	LIMITER_RANGE      = 100
 
 	TIME_LAYOUT = "15:04"
 )
