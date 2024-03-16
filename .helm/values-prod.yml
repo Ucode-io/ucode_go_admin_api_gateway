@@ -138,21 +138,16 @@ ingress:
         nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
         kubernetes.io/ingress.class: nginx
         cert-manager.io/cluster-issuer: letsencrypt-prod
+        acme.cert-manager.io/http01-edit-in-place: "true"
       type: web
       hosts:
         - host: "api.admin.u-code.io"
-          path: /
-          servicePort: 8080
-        - host: "dev-test.api.easyto.travel"
           path: /
           servicePort: 8080
       tls:
         - secretName: api-admin-tls
           hosts:
             - "api.admin.u-code.io"
-        - secretName: dev-test-api-tls
-          hosts:
-            - "dev-test.api.easyto.travel"
     - annotations:
         # type of authentication
         nginx.ingress.kubernetes.io/auth-type: basic
@@ -165,21 +160,16 @@ ingress:
         nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
         kubernetes.io/ingress.class: nginx
         cert-manager.io/cluster-issuer: letsencrypt-prod
+        acme.cert-manager.io/http01-edit-in-place: "true"
       type: auth
       hosts:
         - host: "api.admin.u-code.io"
-          path: /swagger
-          servicePort: 8080
-        - host: "dev-test.api.easyto.travel"
           path: /swagger
           servicePort: 8080
       tls:
         - secretName: admin-api-swagger-tls
           hosts:
             - "api.admin.u-code.io"
-        - secretName: dev-admin-api-swagger-tls
-          hosts:
-            - "dev-test.api.easyto.travel"
 
 # resources:
 #    limits:
