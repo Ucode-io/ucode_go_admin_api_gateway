@@ -145,6 +145,8 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 
 	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
 	if err != nil {
+		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
+		h.log.Info("ConnectionPool", logger.Any("CONNECTION", conn))
 		h.handleResponse(c, status_http.InternalServerError, err)
 		return
 	}
@@ -305,6 +307,8 @@ func (h *HandlerV2) CreateItems(c *gin.Context) {
 
 	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
 	if err != nil {
+		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
+		h.log.Info("ConnectionPool", logger.Any("CONNECTION", conn))
 		h.handleResponse(c, status_http.InternalServerError, err)
 		return
 	}
@@ -522,6 +526,8 @@ func (h *HandlerV2) GetSingleItem(c *gin.Context) {
 
 	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
 	if err != nil {
+		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
+		h.log.Info("ConnectionPool", logger.Any("CONNECTION", conn))
 		h.handleResponse(c, status_http.InternalServerError, err)
 		return
 	}
@@ -663,6 +669,8 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 
 	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
 	if err != nil {
+		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
+		h.log.Info("ConnectionPool", logger.Any("CONNECTION", conn))
 		h.handleResponse(c, status_http.InternalServerError, err)
 		return
 	}
@@ -880,6 +888,8 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 
 	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
 	if err != nil {
+		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
+		h.log.Info("ConnectionPool", logger.Any("CONNECTION", conn))
 		h.handleResponse(c, status_http.InternalServerError, err)
 		return
 	}
@@ -1112,6 +1122,8 @@ func (h *HandlerV2) MultipleUpdateItems(c *gin.Context) {
 
 	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
 	if err != nil {
+		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
+		h.log.Info("ConnectionPool", logger.Any("CONNECTION", conn))
 		h.handleResponse(c, status_http.InternalServerError, err)
 		return
 	}
@@ -1315,6 +1327,8 @@ func (h *HandlerV2) DeleteItem(c *gin.Context) {
 
 	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
 	if err != nil {
+		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
+		h.log.Info("ConnectionPool", logger.Any("CONNECTION", conn))
 		h.handleResponse(c, status_http.InternalServerError, err)
 		return
 	}
@@ -1520,6 +1534,8 @@ func (h *HandlerV2) DeleteItems(c *gin.Context) {
 
 	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
 	if err != nil {
+		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
+		h.log.Info("ConnectionPool", logger.Any("CONNECTION", conn))
 		h.handleResponse(c, status_http.InternalServerError, err)
 		return
 	}
@@ -1714,6 +1730,8 @@ func (h *HandlerV2) DeleteManyToMany(c *gin.Context) {
 
 	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
 	if err != nil {
+		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
+		h.log.Info("ConnectionPool", logger.Any("CONNECTION", conn))
 		h.handleResponse(c, status_http.InternalServerError, err)
 		return
 	}
@@ -1892,6 +1910,8 @@ func (h *HandlerV2) AppendManyToMany(c *gin.Context) {
 
 	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
 	if err != nil {
+		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
+		h.log.Info("ConnectionPool", logger.Any("CONNECTION", conn))
 		h.handleResponse(c, status_http.InternalServerError, err)
 		return
 	}
@@ -2069,6 +2089,8 @@ func (h *HandlerV2) GetListAggregation(c *gin.Context) {
 
 	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
 	if err != nil {
+		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
+		h.log.Info("ConnectionPool", logger.Any("CONNECTION", conn))
 		h.handleResponse(c, status_http.InternalServerError, err)
 		return
 	}
