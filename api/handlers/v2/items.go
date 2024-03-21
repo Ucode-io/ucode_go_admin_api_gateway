@@ -2042,6 +2042,12 @@ func (h *HandlerV2) GetListAggregation(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 	}
 
+	key, err := json.Marshal(reqBody.Data)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
 	structData, err := helper.ConvertMapToStruct(reqBody.Data)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
@@ -2096,6 +2102,22 @@ func (h *HandlerV2) GetListAggregation(c *gin.Context) {
 	}
 	defer conn.Close()
 
+	if reqBody.IsCached {
+		redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("collection"), string(key), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
+		if err == nil {
+			resp := make(map[string]interface{})
+			m := make(map[string]interface{})
+			err = json.Unmarshal([]byte(redisResp), &m)
+			if err != nil {
+				h.log.Error("Error while unmarshal redis in items aggregation", logger.Error(err))
+			} else {
+				resp["data"] = m
+				h.handleResponse(c, status_http.OK, resp)
+				return
+			}
+		}
+	}
+
 	resp, err := service.GetListAggregation(
 		context.Background(),
 		&obs.CommonMessage{
@@ -2107,6 +2129,14 @@ func (h *HandlerV2) GetListAggregation(c *gin.Context) {
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
+	}
+
+	if reqBody.IsCached {
+		jsonData, _ := resp.GetData().MarshalJSON()
+		err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("collection"), string(key), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
+		if err != nil {
+			h.log.Error("Error while setting redis in items aggregation", logger.Error(err))
+		}
 	}
 
 	h.handleResponse(c, status_http.OK, resp)
