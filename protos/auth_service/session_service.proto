@@ -205,6 +205,8 @@ message HasAccessSuperAdminRes {
     string updated_at = 11;
     repeated TableBody tables = 12;
     string env_id = 13;
+    string client_type_id = 14;
+    string role_id = 15;
 }
 
 message TableBody {

@@ -43787,6 +43787,9 @@ const docTemplate = `{
         "company_service.AddResourceRequest": {
             "type": "object",
             "properties": {
+                "client_type_id": {
+                    "type": "string"
+                },
                 "company_id": {
                     "type": "string"
                 },
@@ -43810,6 +43813,9 @@ const docTemplate = `{
                 },
                 "resource_type": {
                     "$ref": "#/definitions/company_service.ResourceType"
+                },
+                "role_id": {
+                    "type": "string"
                 },
                 "service_type": {
                     "$ref": "#/definitions/company_service.ServiceType"
@@ -43954,6 +43960,12 @@ const docTemplate = `{
         "company_service.CreateEnvironmentRequest": {
             "type": "object",
             "properties": {
+                "client_type_id": {
+                    "type": "string"
+                },
+                "company_id": {
+                    "type": "string"
+                },
                 "description": {
                     "type": "string"
                 },
@@ -43964,6 +43976,12 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                },
+                "role_id": {
+                    "type": "string"
+                },
+                "user_id": {
                     "type": "string"
                 }
             }
@@ -43991,6 +44009,9 @@ const docTemplate = `{
         "company_service.CreateResourceReq": {
             "type": "object",
             "properties": {
+                "client_type_id": {
+                    "type": "string"
+                },
                 "company_id": {
                     "type": "string"
                 },
@@ -44005,6 +44026,9 @@ const docTemplate = `{
                 },
                 "resource": {
                     "$ref": "#/definitions/company_service.Resource"
+                },
+                "role_id": {
+                    "type": "string"
                 },
                 "user_id": {
                     "type": "string"
@@ -45508,6 +45532,9 @@ const docTemplate = `{
                 "data": {
                     "type": "object",
                     "additionalProperties": true
+                },
+                "is_cached": {
+                    "type": "boolean"
                 }
             }
         },

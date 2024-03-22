@@ -43775,6 +43775,9 @@
         "company_service.AddResourceRequest": {
             "type": "object",
             "properties": {
+                "client_type_id": {
+                    "type": "string"
+                },
                 "company_id": {
                     "type": "string"
                 },
@@ -43798,6 +43801,9 @@
                 },
                 "resource_type": {
                     "$ref": "#/definitions/company_service.ResourceType"
+                },
+                "role_id": {
+                    "type": "string"
                 },
                 "service_type": {
                     "$ref": "#/definitions/company_service.ServiceType"
@@ -43942,6 +43948,12 @@
         "company_service.CreateEnvironmentRequest": {
             "type": "object",
             "properties": {
+                "client_type_id": {
+                    "type": "string"
+                },
+                "company_id": {
+                    "type": "string"
+                },
                 "description": {
                     "type": "string"
                 },
@@ -43952,6 +43964,12 @@
                     "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                },
+                "role_id": {
+                    "type": "string"
+                },
+                "user_id": {
                     "type": "string"
                 }
             }
@@ -43979,6 +43997,9 @@
         "company_service.CreateResourceReq": {
             "type": "object",
             "properties": {
+                "client_type_id": {
+                    "type": "string"
+                },
                 "company_id": {
                     "type": "string"
                 },
@@ -43993,6 +44014,9 @@
                 },
                 "resource": {
                     "$ref": "#/definitions/company_service.Resource"
+                },
+                "role_id": {
+                    "type": "string"
                 },
                 "user_id": {
                     "type": "string"
@@ -45496,6 +45520,9 @@
                 "data": {
                     "type": "object",
                     "additionalProperties": true
+                },
+                "is_cached": {
+                    "type": "boolean"
                 }
             }
         },

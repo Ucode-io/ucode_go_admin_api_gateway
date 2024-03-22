@@ -37,6 +37,12 @@ func (h *HandlerV1) CreateEnvironment(c *gin.Context) {
 		return
 	}
 
+	tokenInfo, err := h.GetAuthAdminInfo(c)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err.Error())
+		return
+	}
+
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -101,6 +107,10 @@ func (h *HandlerV1) CreateEnvironment(c *gin.Context) {
 		}
 		go h.versionHistory(c, logReq)
 	}()
+
+	environmentRequest.RoleId = tokenInfo.GetRoleId()
+	environmentRequest.UserId = tokenInfo.GetUserId()
+	environmentRequest.ClientTypeId = tokenInfo.GetClientTypeId()
 
 	resp, err = h.companyServices.Environment().Create(
 		c.Request.Context(),

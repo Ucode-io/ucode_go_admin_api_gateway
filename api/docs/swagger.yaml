@@ -595,6 +595,8 @@ definitions:
     type: object
   company_service.AddResourceRequest:
     properties:
+      client_type_id:
+        type: string
       company_id:
         type: string
       credentials:
@@ -611,6 +613,8 @@ definitions:
         type: string
       resource_type:
         $ref: '#/definitions/company_service.ResourceType'
+      role_id:
+        type: string
       service_type:
         $ref: '#/definitions/company_service.ServiceType'
       title:
@@ -704,6 +708,10 @@ definitions:
     type: object
   company_service.CreateEnvironmentRequest:
     properties:
+      client_type_id:
+        type: string
+      company_id:
+        type: string
       description:
         type: string
       display_color:
@@ -711,6 +719,10 @@ definitions:
       name:
         type: string
       project_id:
+        type: string
+      role_id:
+        type: string
+      user_id:
         type: string
     type: object
   company_service.CreateProjectRequest:
@@ -728,6 +740,8 @@ definitions:
     type: object
   company_service.CreateResourceReq:
     properties:
+      client_type_id:
+        type: string
       company_id:
         type: string
       environment_id:
@@ -738,6 +752,8 @@ definitions:
         type: string
       resource:
         $ref: '#/definitions/company_service.Resource'
+      role_id:
+        type: string
       user_id:
         type: string
     type: object
@@ -1731,6 +1747,8 @@ definitions:
       data:
         additionalProperties: true
         type: object
+      is_cached:
+        type: boolean
     type: object
   models.CompanyCreateRequest:
     properties:

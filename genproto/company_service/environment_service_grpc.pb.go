@@ -27,6 +27,7 @@ type EnvironmentServiceClient interface {
 	GetById(ctx context.Context, in *EnvironmentPrimaryKey, opts ...grpc.CallOption) (*Environment, error)
 	Update(ctx context.Context, in *Environment, opts ...grpc.CallOption) (*Environment, error)
 	Delete(ctx context.Context, in *EnvironmentPrimaryKey, opts ...grpc.CallOption) (*Empty, error)
+	CreateV2(ctx context.Context, in *CreateEnvironmentRequest, opts ...grpc.CallOption) (*Environment, error)
 }
 
 type environmentServiceClient struct {
@@ -82,6 +83,15 @@ func (c *environmentServiceClient) Delete(ctx context.Context, in *EnvironmentPr
 	return out, nil
 }
 
+func (c *environmentServiceClient) CreateV2(ctx context.Context, in *CreateEnvironmentRequest, opts ...grpc.CallOption) (*Environment, error) {
+	out := new(Environment)
+	err := c.cc.Invoke(ctx, "/company_service.EnvironmentService/CreateV2", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // EnvironmentServiceServer is the server API for EnvironmentService service.
 // All implementations must embed UnimplementedEnvironmentServiceServer
 // for forward compatibility
@@ -91,6 +101,7 @@ type EnvironmentServiceServer interface {
 	GetById(context.Context, *EnvironmentPrimaryKey) (*Environment, error)
 	Update(context.Context, *Environment) (*Environment, error)
 	Delete(context.Context, *EnvironmentPrimaryKey) (*Empty, error)
+	CreateV2(context.Context, *CreateEnvironmentRequest) (*Environment, error)
 	mustEmbedUnimplementedEnvironmentServiceServer()
 }
 
@@ -112,6 +123,9 @@ func (UnimplementedEnvironmentServiceServer) Update(context.Context, *Environmen
 }
 func (UnimplementedEnvironmentServiceServer) Delete(context.Context, *EnvironmentPrimaryKey) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
+}
+func (UnimplementedEnvironmentServiceServer) CreateV2(context.Context, *CreateEnvironmentRequest) (*Environment, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateV2 not implemented")
 }
 func (UnimplementedEnvironmentServiceServer) mustEmbedUnimplementedEnvironmentServiceServer() {}
 
@@ -216,6 +230,24 @@ func _EnvironmentService_Delete_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _EnvironmentService_CreateV2_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateEnvironmentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EnvironmentServiceServer).CreateV2(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/company_service.EnvironmentService/CreateV2",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EnvironmentServiceServer).CreateV2(ctx, req.(*CreateEnvironmentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // EnvironmentService_ServiceDesc is the grpc.ServiceDesc for EnvironmentService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -242,6 +274,10 @@ var EnvironmentService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Delete",
 			Handler:    _EnvironmentService_Delete_Handler,
+		},
+		{
+			MethodName: "CreateV2",
+			Handler:    _EnvironmentService_CreateV2_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
