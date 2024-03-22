@@ -112,7 +112,7 @@ func (h *HandlerV1) CreateEnvironment(c *gin.Context) {
 	environmentRequest.UserId = tokenInfo.GetUserId()
 	environmentRequest.ClientTypeId = tokenInfo.GetClientTypeId()
 
-	resp, err = h.companyServices.Environment().Create(
+	resp, err = h.companyServices.Environment().CreateV2(
 		c.Request.Context(),
 		&environmentRequest,
 	)
