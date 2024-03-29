@@ -4,8 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
@@ -24,7 +26,7 @@ import (
 // )
 
 var (
-	ApiKeys = map[string]int{}
+	ApiKeys sync.Map
 )
 
 func (h *HandlerV1) NodeMiddleware() gin.HandlerFunc {
@@ -329,8 +331,13 @@ func (h *HandlerV1) SlimAuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 				c.AbortWithError(http.StatusTooManyRequests, errors.New("RPS limit is exceeded"))
 				return
 			} else {
-				if ApiKeys[app_id] == config.LIMITER_RANGE {
-					ApiKeys[app_id] = 0
+				fmt.Printf("----------%+v\n", &ApiKeys)
+				value, loaded := ApiKeys.LoadOrStore(app_id, 0)
+				count := value.(int)
+				fmt.Println("COUNT,LOADED:", count, loaded)
+
+				if count == config.LIMITER_RANGE {
+					ApiKeys.Store(app_id, 0)
 					go func() {
 						_, err := h.authService.ApiKeyUsage().Upsert(context.Background(), &auth_service.ApiKeyUsage{
 							ApiKey:       app_id,
@@ -340,9 +347,9 @@ func (h *HandlerV1) SlimAuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 							h.log.Error("--SlimAuthMiddleware--UpsertApiKeyUsage", logger.Error(err))
 						}
 					}()
+				} else {
+					ApiKeys.Store(app_id, count+1)
 				}
-
-				ApiKeys[app_id]++
 			}
 
 			var (
