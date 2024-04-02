@@ -82,6 +82,13 @@ func (h *HandlerV1) Cache(c *gin.Context) {
 			return
 		}
 		res["value"] = "Successfully deleted"
+	} else if request.Method == "DELMANY" {
+		err := h.redis.DelMany(c, request.Keys, projectId, h.baseConf.UcodeNamespace)
+		if err != nil {
+			h.handleResponse(c, status_http.InternalServerError, err.Error())
+			return
+		}
+		res["value"] = "Successfully deleted"
 	} else {
 		h.handleResponse(c, status_http.BadRequest, errors.New("invalid method").Error())
 		return

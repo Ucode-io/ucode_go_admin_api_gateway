@@ -45426,6 +45426,12 @@
                 "key": {
                     "type": "string"
                 },
+                "keys": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "method": {
                     "type": "string"
                 },

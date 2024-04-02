@@ -1684,6 +1684,10 @@ definitions:
     properties:
       key:
         type: string
+      keys:
+        items:
+          type: string
+        type: array
       method:
         type: string
       nodeType:
