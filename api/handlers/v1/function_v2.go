@@ -909,7 +909,7 @@ func (h *HandlerV1) InvokeFunctionByPath(c *gin.Context) {
 	}
 
 	var isCacheCondition = projectId == "f539f64b-961e-4c6c-8534-140091f7f27b" &&
-		c.Param("function-path") == "test-refund-order-item"
+		c.Param("function-path") == "logistika-get-cargo-list"
 
 	if isCacheCondition {
 		h.cache.Add(config.CACHE_WAIT+key, []byte(config.CACHE_WAIT), saveTime)
