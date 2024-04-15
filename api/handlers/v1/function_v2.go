@@ -2,13 +2,18 @@ package v1
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"strings"
 	"sync"
+	"time"
 	"ucode/ucode_go_api_gateway/api/models"
+	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
+	"ucode/ucode_go_api_gateway/genproto/company_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	fc "ucode/ucode_go_api_gateway/genproto/new_function_service"
 	"ucode/ucode_go_api_gateway/pkg/code_server"
@@ -844,11 +849,11 @@ func (h *HandlerV1) InvokeFunctionByPath(c *gin.Context) {
 		return
 	}
 
-	var (
-		logId                 = uuid.New().String()
-		invokeFunctionBody, _ = json.Marshal(invokeFunction)
-	)
-	fmt.Println("Request --- invoke path:", h.baseConf.OfsHost+"/function/"+c.Param("function-path"), apiKeys.GetData()[0].GetAppId(), "body:", helper.RemoveSpaceJson(string(invokeFunctionBody)), logId)
+	// var (
+	// 	logId                 = uuid.New().String()
+	// 	invokeFunctionBody, _ = json.Marshal(invokeFunction)
+	// )
+	//fmt.Println("Request --- invoke path:", h.baseConf.OfsHost+"/function/"+c.Param("function-path"), apiKeys.GetData()[0].GetAppId(), "body:", helper.RemoveSpaceJson(string(invokeFunctionBody)), logId)
 
 	authInfo, _ := h.GetAuthInfo(c)
 	invokeFunction.Data["user_id"] = authInfo.GetUserId()
@@ -922,9 +927,9 @@ func (h *HandlerV1) InvokeFunctionByPath(c *gin.Context) {
 		h.cache.Add(key, []byte(jsonData), saveTime)
 	}
 
-	faasLogBody, _ := json.Marshal(resp.Server)
-	fmt.Println("Response:", helper.RemoveSpaceJson(string(faasLogBody)), logId)
-	resp.Server = nil
+	// faasLogBody, _ := json.Marshal(resp.Server)
+	// fmt.Println("Response:", helper.RemoveSpaceJson(string(faasLogBody)), logId)
+	// resp.Server = nil
 
 	if resp.Status == "error" {
 		// fmt.Println("error in response status", err)
