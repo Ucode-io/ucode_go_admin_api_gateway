@@ -2,18 +2,13 @@ package v1
 
 import (
 	"context"
-	"encoding/base64"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"strings"
 	"sync"
-	"time"
 	"ucode/ucode_go_api_gateway/api/models"
-	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
-	"ucode/ucode_go_api_gateway/genproto/company_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	fc "ucode/ucode_go_api_gateway/genproto/new_function_service"
 	"ucode/ucode_go_api_gateway/pkg/code_server"
@@ -749,190 +744,43 @@ func (h *HandlerV1) InvokeFunctionByPath(c *gin.Context) {
 		return
 	}
 
-	var (
-		resource     *pb.ServiceResourceModel
-		resourceBody = c.GetHeader("resource")
-	)
-	if resourceBody != "" {
-		var resourceList *company_service.GetResourceByEnvIDResponse
-		err = json.Unmarshal([]byte(resourceBody), &resourceList)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
-		for _, resourceObject := range resourceList.ServiceResources {
-			if resourceObject.Title == pb.ServiceType_name[1] {
-				resource = &pb.ServiceResourceModel{
-					Id:                    resourceObject.Id,
-					ServiceType:           resourceObject.ServiceType,
-					ProjectId:             resourceObject.ProjectId,
-					Title:                 resourceObject.Title,
-					ResourceId:            resourceObject.ResourceId,
-					ResourceEnvironmentId: resourceObject.ResourceEnvironmentId,
-					EnvironmentId:         resourceObject.EnvironmentId,
-					ResourceType:          resourceObject.ResourceType,
-					NodeType:              resourceObject.NodeType,
-				}
-				break
-			}
-		}
-	} else {
-		resource, err = h.companyServices.ServiceResource().GetSingle(
-			c.Request.Context(),
-			&pb.GetSingleServiceResourceReq{
-				ProjectId:     projectId.(string),
-				EnvironmentId: environmentId.(string),
-				ServiceType:   pb.ServiceType_FUNCTION_SERVICE,
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-	}
-
-	var (
-		appIdKey = "invoke_api_list"
-		apiKeys  = &auth_service.GetListRes{}
-	)
-	_, apiKeyOK := h.cache.Get(config.CACHE_WAIT + appIdKey)
-	if !apiKeyOK {
-		h.cache.Add(config.CACHE_WAIT+appIdKey, []byte(config.CACHE_WAIT+appIdKey), config.REDIS_TIMEOUT)
-	}
-
-	if apiKeyOK {
-		ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
-		defer cancel()
-
-		for {
-			appIdBody, ok := h.cache.Get(appIdKey)
-			if ok {
-				err = json.Unmarshal(appIdBody, &apiKeys)
-				if err != nil {
-					h.handleResponse(c, status_http.BadRequest, "cant get auth info")
-					c.Abort()
-					return
-				}
-			}
-
-			if len(apiKeys.Data) > 0 {
-				break
-			}
-
-			if ctx.Err() == context.DeadlineExceeded {
-				break
-			}
-			time.Sleep(config.REDIS_SLEEP)
-		}
-	} else {
-		apiKeys, err = h.authService.ApiKey().GetList(context.Background(), &auth_service.GetListReq{
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
-			ProjectId:     resource.ProjectId,
-		})
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
-		apiJson, err := json.Marshal(apiKeys)
-		if err != nil {
-			h.handleResponse(c, status_http.BadRequest, "cant get auth info")
-			c.Abort()
-			return
-		}
-		h.cache.Add(appIdKey, apiJson, config.REDIS_TIMEOUT)
+			ServiceType:   pb.ServiceType_FUNCTION_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
 	}
 
+	apiKeys, err := h.authService.ApiKey().GetList(context.Background(), &auth_service.GetListReq{
+		EnvironmentId: environmentId.(string),
+		ProjectId:     resource.ProjectId,
+	})
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 	if len(apiKeys.Data) < 1 {
 		h.handleResponse(c, status_http.InvalidArgument, "Api key not found")
 		return
 	}
-
-	// var (
-	// 	logId                 = uuid.New().String()
-	// 	invokeFunctionBody, _ = json.Marshal(invokeFunction)
-	// )
-	//fmt.Println("Request --- invoke path:", h.baseConf.OfsHost+"/function/"+c.Param("function-path"), apiKeys.GetData()[0].GetAppId(), "body:", helper.RemoveSpaceJson(string(invokeFunctionBody)), logId)
-
 	authInfo, _ := h.GetAuthInfo(c)
 	invokeFunction.Data["user_id"] = authInfo.GetUserId()
 	invokeFunction.Data["project_id"] = authInfo.GetProjectId()
 	invokeFunction.Data["environment_id"] = authInfo.GetEnvId()
 	invokeFunction.Data["app_id"] = apiKeys.GetData()[0].GetAppId()
-
-	var key = base64.StdEncoding.EncodeToString([]byte(
-		fmt.Sprintf(
-			"invoke-function-%s-%s-%s-%s",
-			c.Request.Header.Get("Prev_path"),
-			c.Request.URL.Query(),
-			environmentId,
-			apiKeys.GetData()[0].GetAppId(),
-		)))
-	ctxWaitTime := time.Second * 10
-	saveTime := time.Second * 20
-
-	_, exists := h.cache.Get(config.CACHE_WAIT + key)
-	if exists {
-		ctx, cancel := context.WithTimeout(context.Background(), ctxWaitTime)
-		defer cancel()
-
-		for {
-			functionBody, ok := h.cache.Get(key)
-			if ok {
-				var response models.InvokeFunctionResponse
-				err := json.Unmarshal(functionBody, &response)
-				if err != nil {
-					h.log.Error("Error while json unmarshal", logger.Any("err", err))
-					h.handleResponse(c, status_http.InvalidArgument, err.Error())
-					return
-				}
-
-				if response.Attributes["status"] == "error" {
-					var errStr = response.Status
-					if response.Data != nil && response.Data["message"] != nil {
-						errStr = response.Data["message"].(string)
-					}
-					h.handleResponse(c, status_http.InvalidArgument, errStr)
-					return
-				}
-
-				h.handleResponse(c, status_http.Created, response)
-				return
-			}
-
-			if ctx.Err() == context.DeadlineExceeded {
-				break
-			}
-			time.Sleep(config.REDIS_SLEEP)
-		}
-	}
-
-	var isCacheCondition = projectId == "f539f64b-961e-4c6c-8534-140091f7f27b" &&
-		c.Param("function-path") == "logistika-get-cargo-list"
-
-	if isCacheCondition {
-		h.cache.Add(config.CACHE_WAIT+key, []byte(config.CACHE_WAIT), saveTime)
-	}
-
-	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+c.Param("function-path"), "POST", models.NewInvokeFunctionRequest{Data: invokeFunction.Data})
+	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+c.Param("function-path"), "POST", models.NewInvokeFunctionRequest{
+		Data: invokeFunction.Data,
+	})
 	if err != nil {
-		// fmt.Println("error in do request", err)
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
-	}
-
-	if isCacheCondition {
-		jsonData, _ := json.Marshal(resp)
-		h.cache.Add(key, []byte(jsonData), saveTime)
-	}
-
-	// faasLogBody, _ := json.Marshal(resp.Server)
-	// fmt.Println("Response:", helper.RemoveSpaceJson(string(faasLogBody)), logId)
-	// resp.Server = nil
-
-	if resp.Status == "error" {
-		// fmt.Println("error in response status", err)
+	} else if resp.Status == "error" {
 		var errStr = resp.Status
 		if resp.Data != nil && resp.Data["message"] != nil {
 			errStr = resp.Data["message"].(string)
