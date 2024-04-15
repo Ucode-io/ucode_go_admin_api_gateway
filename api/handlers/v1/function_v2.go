@@ -915,7 +915,7 @@ func (h *HandlerV1) InvokeFunctionByPath(c *gin.Context) {
 		h.cache.Add(config.CACHE_WAIT+key, []byte(config.CACHE_WAIT), saveTime)
 	}
 
-	resp, err := util.DoRequest(h.baseConf.OfsHost+"/function/"+c.Param("function-path"), "POST", models.NewInvokeFunctionRequest{Data: invokeFunction.Data})
+	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+c.Param("function-path"), "POST", models.NewInvokeFunctionRequest{Data: invokeFunction.Data})
 	if err != nil {
 		// fmt.Println("error in do request", err)
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())

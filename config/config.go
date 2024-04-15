@@ -153,7 +153,7 @@ type BaseConfig struct {
 	GithubClientSecret string
 	ProjectUrl         string
 	WebhookSecret      string
-	OfsHost string
+	//OfsHost string
 }
 
 func BaseLoad() BaseConfig {
