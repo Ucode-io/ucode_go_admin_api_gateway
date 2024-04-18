@@ -3,7 +3,6 @@ package v2
 import (
 	"context"
 	"errors"
-	"fmt"
 	"strings"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -451,7 +450,6 @@ func (h *HandlerV2) UpdateField(c *gin.Context) {
 				h.handleResponse(c, status_http.GRPCError, err.Error())
 				return
 			}
-			fmt.Println("allfields >> ", allFields)
 			languages, err := h.companyServices.Project().GetById(context.Background(), &pb.GetProjectByIdRequest{
 				ProjectId: resource.GetProjectId(),
 			})
@@ -464,9 +462,7 @@ func (h *HandlerV2) UpdateField(c *gin.Context) {
 				for _, value := range languages.GetLanguage() {
 					langs = append(langs, value.ShortName)
 				}
-				fmt.Println("this is langs >>> ", langs)
 				newFields := SeparateMultilangField(allFields, langs, resource.ResourceEnvironmentId, field)
-				fmt.Println("this is result for create new field for >>>> ", newFields)
 				for _, field := range newFields {
 					_, err = services.GetBuilderServiceByType(resource.NodeType).Field().Create(
 						context.Background(),
