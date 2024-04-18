@@ -3,6 +3,8 @@ package v2
 import (
 	"context"
 	"errors"
+	"fmt"
+	"strings"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
@@ -439,6 +441,46 @@ func (h *HandlerV2) UpdateField(c *gin.Context) {
 		}
 	}
 
+	if fieldRequest.EnableMultilanguage {
+		if fieldRequest.Type == "SINGLE_LINE" || fieldRequest.Type == "MULTI_LINE" {
+			allFields, err := services.GetBuilderServiceByType(resource.NodeType).Field().GetAll(context.Background(), &obs.GetAllFieldsRequest{
+				TableId:   fieldRequest.TableID,
+				ProjectId: resource.ResourceEnvironmentId,
+			})
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+			fmt.Println("allfields >> ", allFields)
+			languages, err := h.companyServices.Project().GetById(context.Background(), &pb.GetProjectByIdRequest{
+				ProjectId: resource.GetProjectId(),
+			})
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+			var langs []string
+			if len(languages.GetLanguage()) > 1 {
+				for _, value := range languages.GetLanguage() {
+					langs = append(langs, value.ShortName)
+				}
+				fmt.Println("this is langs >>> ", langs)
+				newFields := SeparateMultilangField(allFields, langs, resource.ResourceEnvironmentId, field)
+				fmt.Println("this is result for create new field for >>>> ", newFields)
+				for _, field := range newFields {
+					_, err = services.GetBuilderServiceByType(resource.NodeType).Field().Create(
+						context.Background(),
+						field,
+					)
+					if err != nil {
+						h.handleResponse(c, status_http.GRPCError, err.Error())
+						return
+					}
+				}
+			}
+		}
+	}
+
 	var (
 		oldField = &obs.Field{}
 		logReq   = &models.CreateVersionHistoryRequest{
@@ -801,4 +843,77 @@ func (h *HandlerV2) GetAllFieldsWithDetails(c *gin.Context) {
 	}
 
 	h.handleResponse(c, status_http.OK, resp)
+}
+
+func SeparateMultilangField(req *obs.GetAllFieldsResponse, langs []string, project_id string, reqField obs.Field) []*obs.CreateFieldRequest {
+	var (
+		multilangFields []*obs.Field
+		response        []*obs.CreateFieldRequest
+		newField        *obs.Field
+		newFieldSlug    []string
+		splitted        []string
+	)
+	for _, field := range req.Fields {
+		if field.EnableMultilanguage {
+			spliteed := strings.Split(field.Slug, "_")
+			newFieldSlug = strings.Split(reqField.Slug, "_")
+			if spliteed[0] == newFieldSlug[0] {
+				newField = field
+				multilangFields = append(multilangFields, field)
+			}
+		}
+	}
+
+	for _, lang := range langs {
+		found := false
+		for _, field := range multilangFields {
+			splitted = strings.Split(field.Slug, "_")
+			if splitted[len(splitted)-1] == lang {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			id, _ := uuid.NewRandom()
+			newStruct := obs.CreateFieldRequest{
+				Id:                  id.String(),
+				Default:             newField.Default,
+				Type:                newField.Type,
+				Index:               newField.Index,
+				Label:               newField.Label,
+				Slug:                newFieldSlug[0] + "_" + lang,
+				TableId:             req.Fields[0].TableId,
+				Attributes:          newField.Attributes,
+				IsVisible:           newField.IsVisible,
+				RelationField:       newField.RelationField,
+				Automatic:           newField.Automatic,
+				ShowLabel:           newField.ShowLabel,
+				Unique:              newField.Unique,
+				ProjectId:           project_id,
+				EnableMultilanguage: true,
+				HideMultilanguage:   false,
+			}
+			response = append(response, &obs.CreateFieldRequest{
+				Id:                  newField.Id,
+				Default:             newField.Default,
+				Type:                newField.Type,
+				Index:               newField.Index,
+				Label:               newField.Label,
+				Slug:                newStruct.Slug,
+				TableId:             req.Fields[0].TableId,
+				Attributes:          newField.Attributes,
+				IsVisible:           newField.IsVisible,
+				RelationField:       newField.RelationField,
+				Automatic:           newField.Automatic,
+				ShowLabel:           newField.ShowLabel,
+				Unique:              newField.Unique,
+				ProjectId:           project_id,
+				EnableMultilanguage: true,
+				HideMultilanguage:   false,
+			})
+		}
+	}
+
+	return response
 }
