@@ -3,6 +3,7 @@ package v2
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -464,6 +465,7 @@ func (h *HandlerV2) UpdateField(c *gin.Context) {
 				}
 				newFields := SeparateMultilangField(allFields, langs, resource.ResourceEnvironmentId, field)
 				for _, field := range newFields {
+					fmt.Println("THIS IS FIELD - >> ", field)
 					_, err = services.GetBuilderServiceByType(resource.NodeType).Field().Create(
 						context.Background(),
 						field,
@@ -851,6 +853,7 @@ func SeparateMultilangField(req *obs.GetAllFieldsResponse, langs []string, proje
 	)
 	for _, field := range req.Fields {
 		if field.EnableMultilanguage {
+			fmt.Println("counr for 1212 \n", strings.Split(field.Slug, "_"))
 			spliteed := strings.Split(field.Slug, "_")
 			newFieldSlug = strings.Split(reqField.Slug, "_")
 			if spliteed[0] == newFieldSlug[0] {
@@ -871,9 +874,8 @@ func SeparateMultilangField(req *obs.GetAllFieldsResponse, langs []string, proje
 		}
 
 		if !found {
-			id, _ := uuid.NewRandom()
+			fmt.Println("NOT FOUND FIELD lang >>> ")
 			newStruct := obs.CreateFieldRequest{
-				Id:                  id.String(),
 				Default:             newField.Default,
 				Type:                newField.Type,
 				Index:               newField.Index,
@@ -891,7 +893,6 @@ func SeparateMultilangField(req *obs.GetAllFieldsResponse, langs []string, proje
 				HideMultilanguage:   false,
 			}
 			response = append(response, &obs.CreateFieldRequest{
-				Id:                  newField.Id,
 				Default:             newField.Default,
 				Type:                newField.Type,
 				Index:               newField.Index,
