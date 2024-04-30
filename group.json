@@ -1,0 +1,78 @@
+{
+    "data": {
+        "lookups": [
+            {
+                "$lookup": {
+                    "as": "terminal_data",
+                    "foreignField": "guid",
+                    "from": "terminals",
+                    "localField": "terminal_id"
+                }
+            },
+            {
+                "$lookup": {
+                    "as": "service_time_data",
+                    "foreignField": "product_id",
+                    "from": "service_times",
+                    "localField": "guid"
+                }
+            }
+        ],
+        "match": {
+            "$match": {}
+        },
+        "project": {
+            "$project": {
+                "guid": 1,
+                "service_times": {
+                    "$map": {
+                        "as": "service_time",
+                        "in": {
+                            "closing_hour": "$$service_time.closing_hour",
+                            "day": "$$service_time.day",
+                            "opening_hour": "$$service_time.opening_hour"
+                        },
+                        "input": "$service_time_data"
+                    }
+                }
+            }
+        },
+        "query": {
+            "$group": {
+                "_id": "$guid",
+                "address": {
+                    "$first": "$address"
+                },
+                "city_id": {
+                    "$first": "$city_id"
+                },
+                "guid": {
+                    "$first": "$guid"
+                },
+                "product_inc_id": {
+                    "$first": "$product_inc_id"
+                },
+                "terminal_id": {
+                    "$first": "$terminal_id"
+                },
+                "terminal_type": {
+                    "$first": "$terminal_type"
+                },
+                "title": {
+                    "$first": "$title"
+                }
+            }
+        },
+        "second_match": {
+            "title": {
+                "$options": "i",
+                "$regex": "pre"
+            }
+        },
+        "sort": {
+            "$sort": {
+                "title": 1
+            }
+        }
+    }
+}

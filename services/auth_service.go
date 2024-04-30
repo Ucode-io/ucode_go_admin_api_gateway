@@ -16,7 +16,9 @@ type AuthServiceI interface {
 	Permission() auth_service.PermissionServiceClient
 	User() auth_service.UserServiceClient
 	Email() auth_service.EmailOtpServiceClient
+	AuthPing() auth_service.AuthPingServiceClient
 	ApiKey() auth_service.ApiKeysClient
+	ApiKeyUsage() auth_service.ApiKeyUsageServiceClient
 }
 
 type authServiceClient struct {
@@ -28,10 +30,12 @@ type authServiceClient struct {
 	userService           auth_service.UserServiceClient
 	sessionServiceAuth    auth_service.SessionServiceClient
 	emailServie           auth_service.EmailOtpServiceClient
+	authPingService       auth_service.AuthPingServiceClient
 	apiKeyService         auth_service.ApiKeysClient
+	apiKeyUsageService    auth_service.ApiKeyUsageServiceClient
 }
 
-func NewAuthServiceClient(ctx context.Context, cfg config.Config) (AuthServiceI, error) {
+func NewAuthServiceClient(ctx context.Context, cfg config.BaseConfig) (AuthServiceI, error) {
 
 	connAuthService, err := grpc.DialContext(
 		ctx,
@@ -52,6 +56,8 @@ func NewAuthServiceClient(ctx context.Context, cfg config.Config) (AuthServiceI,
 		integrationService:    auth_service.NewIntegrationServiceClient(connAuthService),
 		emailServie:           auth_service.NewEmailOtpServiceClient(connAuthService),
 		apiKeyService:         auth_service.NewApiKeysClient(connAuthService),
+		authPingService:       auth_service.NewAuthPingServiceClient(connAuthService),
+		apiKeyUsageService:    auth_service.NewApiKeyUsageServiceClient(connAuthService),
 	}, nil
 }
 
@@ -81,4 +87,12 @@ func (g *authServiceClient) Email() auth_service.EmailOtpServiceClient {
 
 func (g *authServiceClient) ApiKey() auth_service.ApiKeysClient {
 	return g.apiKeyService
+}
+
+func (g *authServiceClient) AuthPing() auth_service.AuthPingServiceClient {
+	return g.authPingService
+}
+
+func (g *authServiceClient) ApiKeyUsage() auth_service.ApiKeyUsageServiceClient {
+	return g.apiKeyUsageService
 }

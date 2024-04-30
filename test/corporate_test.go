@@ -31,6 +31,4 @@ func TestMain(m *testing.M) {
 	// run downstream
 	//branchChannel := make(chan interface{})
 
-	//fmt.Println(branchClient, branchChannel)
-
 }

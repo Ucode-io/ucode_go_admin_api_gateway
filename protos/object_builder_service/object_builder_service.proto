@@ -28,7 +28,7 @@ import "queryies.proto";
 import "web_pages.proto";
 import "cascading.proto";
 import "builder_project.proto";
-import "ping_service.proto";
+import "object_builder_ping_service.proto";
 import "table_helpers.proto";
 import "fields_and_relations.proto";
 import "setting.proto";
@@ -42,4 +42,10 @@ import "file.proto";
 =======
 import "items.proto";
 import "file.proto";
+<<<<<<< HEAD
 >>>>>>> c119d96af4d6aa93c2cb14057e1125fa3eec2f81
+=======
+import "request_analytic.proto";
+import "version_history.proto";
+import "version.proto";
+>>>>>>> 209b45c5a2a64c0904b18349235aa0a8787dd4e6

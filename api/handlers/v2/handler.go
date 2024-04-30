@@ -1,0 +1,168 @@
+package v2
+
+import (
+	"context"
+	"encoding/json"
+	"log"
+	"strconv"
+	"time"
+	"ucode/ucode_go_api_gateway/api/models"
+	"ucode/ucode_go_api_gateway/api/status_http"
+	"ucode/ucode_go_api_gateway/config"
+	"ucode/ucode_go_api_gateway/genproto/auth_service"
+	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
+	"ucode/ucode_go_api_gateway/pkg/logger"
+	"ucode/ucode_go_api_gateway/pkg/util"
+	"ucode/ucode_go_api_gateway/services"
+	"ucode/ucode_go_api_gateway/storage"
+
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
+)
+
+type HandlerV2 struct {
+	baseConf        config.BaseConfig
+	projectConfs    map[string]config.Config
+	log             logger.LoggerI
+	services        services.ServiceNodesI
+	companyServices services.CompanyServiceI
+	authService     services.AuthServiceManagerI
+	redis           storage.RedisStorageI
+	rateLimiter     *util.ApiKeyRateLimiter
+}
+
+func NewHandlerV2(baseConf config.BaseConfig, projectConfs map[string]config.Config, log logger.LoggerI, svcs services.ServiceNodesI, cmpServ services.CompanyServiceI, authService services.AuthServiceManagerI, redis storage.RedisStorageI, limiter *util.ApiKeyRateLimiter) HandlerV2 {
+	return HandlerV2{
+		baseConf:        baseConf,
+		projectConfs:    projectConfs,
+		log:             log,
+		services:        svcs,
+		companyServices: cmpServ,
+		authService:     authService,
+		redis:           redis,
+		rateLimiter:     limiter,
+	}
+}
+
+func (h *HandlerV2) GetProjectSrvc(c context.Context, projectId string, nodeType string) (services.ServiceManagerI, error) {
+	if nodeType == config.ENTER_PRICE_TYPE {
+		srvc, err := h.services.Get(projectId)
+		if err != nil {
+			return nil, err
+		}
+
+		return srvc, nil
+	} else {
+		srvc, err := h.services.Get(h.baseConf.UcodeNamespace)
+		if err != nil {
+			return nil, err
+		}
+
+		return srvc, nil
+	}
+}
+
+func (h *HandlerV2) handleResponse(c *gin.Context, status status_http.Status, data interface{}) {
+	switch code := status.Code; {
+	case code < 400:
+	default:
+		h.log.Error(
+			"response",
+			logger.Int("code", status.Code),
+			logger.String("status", status.Status),
+			logger.Any("description", status.Description),
+			logger.Any("data", data),
+			logger.Any("custom_message", status.CustomMessage),
+		)
+	}
+
+	c.JSON(status.Code, status_http.Response{
+		Status:        status.Status,
+		Description:   status.Description,
+		Data:          data,
+		CustomMessage: status.CustomMessage,
+	})
+}
+
+func (h *HandlerV2) getOffsetParam(c *gin.Context) (offset int, err error) {
+	offsetStr := c.DefaultQuery("offset", h.baseConf.DefaultOffset)
+	return strconv.Atoi(offsetStr)
+}
+
+func (h *HandlerV2) getLimitParam(c *gin.Context) (limit int, err error) {
+	limitStr := c.DefaultQuery("limit", h.baseConf.DefaultLimit)
+	return strconv.Atoi(limitStr)
+}
+
+func (h *HandlerV2) versionHistory(c *gin.Context, req *models.CreateVersionHistoryRequest) error {
+	var (
+		current  = map[string]interface{}{"data": req.Current}
+		previous = map[string]interface{}{"data": req.Previous}
+		request  = map[string]interface{}{"data": req.Request}
+		response = map[string]interface{}{"data": req.Response}
+		user     = ""
+	)
+
+	if req.Current == nil {
+		current["data"] = make(map[string]interface{})
+	}
+	if req.Previous == nil {
+		previous["data"] = make(map[string]interface{})
+	}
+	if req.Request == nil {
+		request["data"] = make(map[string]interface{})
+	}
+	if req.Response == nil {
+		response["data"] = make(map[string]interface{})
+	}
+
+	if util.IsValidUUID(req.UserInfo) {
+		info, err := h.authService.User().GetUserByID(
+			context.Background(),
+			&auth_service.UserPrimaryKey{
+				Id: req.UserInfo,
+			},
+		)
+		if err == nil {
+			if info.Login != "" {
+				user = info.Login
+			} else {
+				user = info.Phone
+			}
+		}
+	}
+
+	_, err := req.Services.GetBuilderServiceByType(req.NodeType).VersionHistory().Create(
+		context.Background(),
+		&object_builder_service.CreateVersionHistoryRequest{
+			Id:                uuid.NewString(),
+			ProjectId:         req.ProjectId,
+			ActionSource:      req.ActionSource,
+			ActionType:        req.ActionType,
+			Previus:           fromMapToString(previous),
+			Current:           fromMapToString(current),
+			UsedEnvrironments: req.UsedEnvironments,
+			Date:              time.Now().Format("2006-01-02T15:04:05.000Z"),
+			UserInfo:          user,
+			Request:           fromMapToString(request),
+			Response:          fromMapToString(response),
+			ApiKey:            req.ApiKey,
+			Type:              req.Type,
+			TableSlug:         req.TableSlug,
+			VersionId:         req.VersionId,
+		},
+	)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	return nil
+}
+
+func fromMapToString(req map[string]interface{}) string {
+	reqString, err := json.Marshal(req)
+	if err != nil {
+		return ""
+	}
+	return string(reqString)
+}

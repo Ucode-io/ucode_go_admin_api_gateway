@@ -2,7 +2,6 @@ package testing
 
 import (
 	"context"
-	"fmt"
 	"testing"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
@@ -15,7 +14,7 @@ func TestCompanyCreate(t *testing.T) {
 		Description: "Description",
 	}
 
-	resp, err := companyClient.Create(
+	_, _ = companyClient.Create(
 		context.Background(),
 		&company_service.CreateCompanyRequest{
 			Title:       company.Name,
@@ -24,17 +23,12 @@ func TestCompanyCreate(t *testing.T) {
 		},
 	)
 
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	fmt.Println("response :", resp)
 }
 
 func TestCompanyGetByID(t *testing.T) {
 	companyID := "51753b96-2f2d-4bdd-aba0-2c3d005aebf6"
 
-	resp, err := companyClient.GetById(
+	_, err := companyClient.GetById(
 		context.Background(),
 		&company_service.GetCompanyByIdRequest{
 			Id: companyID,
@@ -45,12 +39,11 @@ func TestCompanyGetByID(t *testing.T) {
 		t.Error("Error occured while getting company by ID : ", err.Error())
 	}
 
-	fmt.Println("Response : ", resp)
 }
 
 func TestCompanyList(t *testing.T) {
 
-	resp, err := companyClient.GetList(
+	_, err := companyClient.GetList(
 		context.Background(),
 		&company_service.GetCompanyListRequest{
 			Limit:  2,
@@ -63,13 +56,11 @@ func TestCompanyList(t *testing.T) {
 		t.Error("Error occured while getting company list : ", err.Error())
 	}
 
-	fmt.Println("Response :", resp)
-
 }
 
 func TestUpdateCompany(t *testing.T) {
 
-	resp, err := companyClient.Update(
+	_, err := companyClient.Update(
 		context.Background(),
 		&company_service.Company{
 			Id:          "7cf0cec4-0753-415c-a026-d658a7cd3fb6",
@@ -83,7 +74,6 @@ func TestUpdateCompany(t *testing.T) {
 		t.Error("Error occured while updating company :", err.Error())
 	}
 
-	fmt.Println("Response :", resp)
 }
 
 func TestDeleteCompany(t *testing.T) {

@@ -5,6 +5,7 @@ option go_package="genproto/company_service";
 
 import "company.proto";
 import "google/protobuf/struct.proto";
+import "google/protobuf/empty.proto";
 
 service ProjectService {
     rpc Create(CreateProjectRequest) returns (CreateProjectResponse) {}
@@ -20,6 +21,64 @@ service ProjectService {
     rpc CreateProjectLoginMicroFront(ProjectLoginMicroFrontend) returns (ProjectLoginMicroFrontend) {};
     rpc GetProjectLoginMicroFront(GetProjectLoginMicroFrontRequest) returns (ProjectLoginMicroFrontend) {};
     rpc UpdateProjectLoginMicroFront(ProjectLoginMicroFrontend) returns (ProjectLoginMicroFrontend) {};
+
+    rpc UpdateProjectConfig (ProjectConfig) returns (ProjectConfig) {};
+    rpc GetPorjectConfigByProjectId (GetPorjectConfigByProjectIdRequest) returns (ProjectConfig) {};
+    rpc GetProjectConfigList (google.protobuf.Empty) returns (ListPorjectConfig) {};
+}
+
+message GetPorjectConfigByProjectIdRequest {
+    string project_id = 1;
+}
+
+message ListPorjectConfig {
+    repeated ProjectConfig configs = 1;
+}
+
+message ProjectConfig {
+    string id = 1;
+    string project_id = 2;
+    string CONVERT_TEMPLATE_GRPC_PORT = 3;
+    string CONVERT_TEMPLATE_SERVICE_HOST = 4;
+    string HTTP_PORT = 5;
+    string HTTP_SCHEME = 6;
+    string SERVICE_HOST = 7;
+    string ANALYTICS_GRPC_PORT = 8;
+    string ANALYTICS_SERVICE_HOST = 9;
+    string API_REF_GRPC_PORT = 10;
+    string API_REF_SERVICE_HOST = 11;
+    string CHAT_GRPC_PORT = 12;
+    string CHAT_SERVICE_HOST = 13;
+    string FUNCTION_GRPC_PORT = 14;
+    string FUNCTION_SERVICE_HOST = 15;
+    string NOTIFICATION_GRPC_PORT = 16;
+    string NOTIFICATION_SERVICE_HOST = 17;
+    string OBJECT_BUILDER_GRPC_PORT = 18;
+    string OBJECT_BUILDER_HIGH_GRPC_PORT = 19;
+    string OBJECT_BUILDER_LOW_GRPC_PORT = 20;
+    string OBJECT_BUILDER_SERVICE_HIGHT_HOST = 21;
+    string OBJECT_BUILDER_SERVICE_HOST = 22;
+    string OBJECT_BUILDER_SERVICE_LOW_HOST = 23;
+    string QUERY_GRPC_PORT = 24;
+    string QUERY_SERVICE_HOST = 25;
+    string SCENARIO_GRPC_PORT = 26;
+    string SCENARIO_HTTP_PORT = 27;
+    string SCENARIO_SERVICE_HOST = 28;
+    string SMS_GRPC_PORT = 29;
+    string SMS_SERVICE_HOST = 30;
+    string TEMPLATE_GRPC_PORT = 31;
+    string TEMPLATE_SERVICE_HOST = 32;
+    string VERSIONING_GRPC_PORT = 33;
+    string VERSIONING_SERVICE_HOST = 34;
+    string MONGO_HOST = 35;
+    string MONGO_PORT = 36;
+    string COMPANY_SERVICE_MONGO_USER = 37;
+    string COMPANY_SERVICE_MONGO_PASSWORD = 38;
+    google.protobuf.Struct others = 39;
+    string REDIS_HOST = 40;
+    string REDIS_PORT = 41;
+    string REDIS_DATABASE = 42;
+    string REDIS_PASSWORD = 43;
 }
 
 message ProjectLoginMicroFrontend {
@@ -92,11 +151,13 @@ message GetProjectsByCompanyIdRes {
 
 message GetProjectsRequest {
     string k8s_namespace = 1;
+    string node_type = 2;
 }
 
 message AutoConnectByProjectIdRequest {
     string k8s_namespace = 1;
     string project_id = 2;
+    string node_type = 3;
 }
 
 message GetProjectsResponse {
@@ -129,6 +190,7 @@ message ResourceWithoutPassword {
         bool is_configured = 5;
         string id = 6;
         bool default = 7;
+        string node_type = 8;
     }
 
     ResourceType resource_type = 1;
@@ -137,6 +199,7 @@ message ResourceWithoutPassword {
     string project_id = 4;
     string title = 5;
     repeated Environment environments = 6;
+    string node_type = 7;
 }
 
 message Project {
@@ -199,6 +262,9 @@ message AddResourceRequest {
     string company_id = 8;
     string user_id = 9;
     bool is_default = 10;
+    string node_type = 11;
+    string client_type_id = 12;
+    string role_id = 13;
 }
 
 message ConfigureResourceRequest {
@@ -269,6 +335,7 @@ message GetResourceWithPathResponse {
 
 message GetResourceManyRequest {
     repeated GetProjectsResponse id = 1;
+    string node_type = 2;
 }
 
 message AutoConnectByProjectIdResponse {
@@ -285,6 +352,7 @@ message AutoConnectByProjectIdResponse {
         Credentials credentials = 3;
         string id = 4;
         string project_id = 5;
+        string node_type = 6;
     }
     ResourceEnvironment res = 1;
 }
@@ -308,6 +376,7 @@ message GetResourceManyWithPathResponse {
         string resource_id = 8;
         string environment_id = 9;
         string version_id = 10;
+        string node_type = 11;
     }
     repeated ResourceEnvironment res = 1;
 }

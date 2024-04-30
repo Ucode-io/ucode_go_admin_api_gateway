@@ -4,7 +4,6 @@ package new_function_service;
 option go_package="genproto/new_function_service";
 
 import "google/protobuf/empty.proto";
-import "google/protobuf/struct.proto";
 
 
 service FunctionServiceV2 {
@@ -31,11 +30,19 @@ message CreateFunctionRequest {
     string password = 11;
     string ssh_url = 12;
     string type = 13;
+    string framework_type = 16;
     string gitlab_id = 14;
     string gitlab_group_id = 15;
+    string source_url = 17;
+    string pipeline_status = 18;
+    string branch = 19;
+    string repo_id = 20;
+    string error_message = 21;
+    string job_name = 22;
+    string resource = 23;
+    string provided_name = 24;
 }
 
-// if you change this message you must be change Microfrontend message in object_builder_service's menu.proto
 message Function {
     string id = 1;
     string path = 2;
@@ -50,6 +57,15 @@ message Function {
     string type = 12;
     string gitlab_id = 13;
     string gitlab_group_id = 14;
+    string framework_type = 15;
+    string source_url = 16;
+    string pipeline_status = 17;
+    string branch = 18;
+    string repo_id = 19;
+    string error_message = 20;
+    string job_name = 21;
+    string resource = 22;
+    string provided_name = 23;
 }
 
 message GetAllFunctionsRequest {
@@ -70,6 +86,8 @@ message FunctionPrimaryKey {
     string id = 1;
     string project_id = 2;
     string path = 3;
+    string source_url = 4;
+    string branch = 5;
 }
 
 message UpdateManyUrlAndPassword {

@@ -23,6 +23,7 @@ message ServiceResourceModel {
   string resource_id = 7;
   string environment_id = 8;
   ResourceType resource_type = 9;
+  string node_type = 10;
 }
 
 message GetListServiceResourceReq {

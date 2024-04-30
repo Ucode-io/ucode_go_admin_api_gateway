@@ -2,9 +2,12 @@ package services
 
 import (
 	"context"
+	"fmt"
+	"time"
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
 
+	grpcpool "github.com/processout/grpc-go-pool"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -43,11 +46,15 @@ type BuilderServiceI interface {
 	Menu() object_builder_service.MenuServiceClient
 	CustomErrorMessage() object_builder_service.CustomErrorMessageServiceClient
 	ReportSetting() object_builder_service.ReportSettingServiceClient
+	ItemsService() object_builder_service.ItemsServiceClient
 	File() object_builder_service.FileServiceClient
+	VersionHistory() object_builder_service.VersionHistoryServiceClient
+	Version() object_builder_service.VersionServiceClient
+	// added to managing load
+	ObjectBuilderConnPool(ctx context.Context) (object_builder_service.ObjectBuilderServiceClient, *grpcpool.ClientConn, error)
 }
 
 func NewBuilderServiceClient(ctx context.Context, cfg config.Config) (BuilderServiceI, error) {
-
 	connObjectBuilderService, err := grpc.DialContext(
 		ctx,
 		cfg.ObjectBuilderServiceHost+cfg.ObjectBuilderGRPCPort,
@@ -55,6 +62,23 @@ func NewBuilderServiceClient(ctx context.Context, cfg config.Config) (BuilderSer
 		grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(52428800), grpc.MaxCallSendMsgSize(52428800)),
 	)
 	if err != nil {
+		return nil, err
+	}
+
+	factory := func() (*grpc.ClientConn, error) {
+		conn, err := grpc.Dial(
+			cfg.ObjectBuilderServiceHost+cfg.ObjectBuilderGRPCPort,
+			grpc.WithTransportCredentials(insecure.NewCredentials()),
+			grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(52428800), grpc.MaxCallSendMsgSize(52428800)))
+		if err != nil {
+			return nil, err
+		}
+		return conn, err
+	}
+
+	objectbuilderServicePool, err := grpcpool.New(factory, 12, 18, time.Second*3)
+	if err != nil {
+		fmt.Printf("\n\n\n\n\n Failed to create gRPC pool: %v\n", err)
 		return nil, err
 	}
 
@@ -93,6 +117,10 @@ func NewBuilderServiceClient(ctx context.Context, cfg config.Config) (BuilderSer
 		customErrorMessageService: object_builder_service.NewCustomErrorMessageServiceClient(connObjectBuilderService),
 		reportSettingService:      object_builder_service.NewReportSettingServiceClient(connObjectBuilderService),
 		fileService:               object_builder_service.NewFileServiceClient(connObjectBuilderService),
+		objectBuilderConnPool:     objectbuilderServicePool,
+		itemsService:              object_builder_service.NewItemsServiceClient(connObjectBuilderService),
+		versionHistoryService:     object_builder_service.NewVersionHistoryServiceClient(connObjectBuilderService),
+		versionService:            object_builder_service.NewVersionServiceClient(connObjectBuilderService),
 	}, nil
 }
 
@@ -131,6 +159,20 @@ type builderServiceClient struct {
 	customErrorMessageService object_builder_service.CustomErrorMessageServiceClient
 	reportSettingService      object_builder_service.ReportSettingServiceClient
 	fileService               object_builder_service.FileServiceClient
+	objectBuilderConnPool     *grpcpool.Pool
+	itemsService              object_builder_service.ItemsServiceClient
+	versionHistoryService     object_builder_service.VersionHistoryServiceClient
+	versionService            object_builder_service.VersionServiceClient
+}
+
+func (g *builderServiceClient) ObjectBuilderConnPool(ctx context.Context) (object_builder_service.ObjectBuilderServiceClient, *grpcpool.ClientConn, error) {
+	conn, err := g.objectBuilderConnPool.Get(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+	service := object_builder_service.NewObjectBuilderServiceClient(conn)
+
+	return service, conn, nil
 }
 
 func (g *builderServiceClient) Table() object_builder_service.TableServiceClient {
@@ -265,4 +307,16 @@ func (g *builderServiceClient) ReportSetting() object_builder_service.ReportSett
 
 func (g *builderServiceClient) File() object_builder_service.FileServiceClient {
 	return g.fileService
+}
+
+func (g *builderServiceClient) ItemsService() object_builder_service.ItemsServiceClient {
+	return g.itemsService
+}
+
+func (g *builderServiceClient) VersionHistory() object_builder_service.VersionHistoryServiceClient {
+	return g.versionHistoryService
+}
+
+func (g *builderServiceClient) Version() object_builder_service.VersionServiceClient {
+	return g.versionService
 }

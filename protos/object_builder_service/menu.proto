@@ -5,13 +5,12 @@ option go_package="genproto/object_builder_service";
 
 import "google/protobuf/empty.proto";
 import "google/protobuf/struct.proto";
-import "permission.proto";
 
 service MenuService {
     rpc Create(CreateMenuRequest) returns (Menu) {}
     rpc GetByID(MenuPrimaryKey) returns (Menu) {}
     rpc GetAll(GetAllMenusRequest) returns (GetAllMenusResponse) {}
-    rpc Update(Menu) returns (google.protobuf.Empty) {}
+    rpc Update(Menu) returns (Menu) {}
     rpc Delete(MenuPrimaryKey) returns (google.protobuf.Empty) {}
     rpc UpdateMenuOrder(UpdateMenuOrderRequest) returns (google.protobuf.Empty) {}
 
@@ -124,6 +123,8 @@ message CreateMenuRequest {
     google.protobuf.Struct attributes = 10;
     string wiki_id = 11;
     bool is_visible = 12;
+    string env_id = 13;
+    string id = 14;
 }
 
 message Menu {
@@ -141,6 +142,9 @@ message Menu {
     google.protobuf.Struct attributes = 12;
     string wiki_id = 13;
     bool is_visible = 14;
+    bool is_static = 15;
+    google.protobuf.Struct data = 16;
+    string env_id = 17;
 }
 
 message MenuForGetAll {
@@ -159,6 +163,7 @@ message MenuForGetAll {
     string report_setting_id = 13;
     string pivot_template_id = 15;
     string wiki_id = 16;
+    bool is_static = 17;
 }
 
 message GetAllMenusResponse {
@@ -170,6 +175,7 @@ message MenuPrimaryKey {
     string id = 1;
     string project_id = 2;
     string user_id = 3;
+    string env_id = 4;
 }
 
 message GetAllMenusRequest {
@@ -181,6 +187,7 @@ message GetAllMenusRequest {
     string parent_id = 6;
     string type = 7;
     bool for_template = 8;
+    string table_id = 9;
 }
 
 message UpdateMenuOrderRequest {

@@ -12,6 +12,7 @@ service EnvironmentService {
     rpc GetById(EnvironmentPrimaryKey) returns (Environment) {}
     rpc Update(Environment) returns (Environment) {}
     rpc Delete(EnvironmentPrimaryKey) returns (Empty) {}
+    rpc CreateV2(CreateEnvironmentRequest) returns (Environment) {}
 }
 
 message CreateEnvironmentRequest {
@@ -19,6 +20,10 @@ message CreateEnvironmentRequest {
     string name = 2;
     string display_color = 3;
     string description = 4;
+    string company_id = 5;
+    string client_type_id = 6;
+    string role_id = 7;
+    string user_id = 8;
 }
 
 message GetEnvironmentListRequest {

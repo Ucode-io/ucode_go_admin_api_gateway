@@ -16,18 +16,22 @@ type CompanyServiceI interface {
 	Resource() company_service.ResourceServiceClient
 	ServiceResource() company_service.MicroserviceResourceClient
 	Redirect() company_service.RedirectUrlServiceClient
+	CompanyPing() company_service.CompanyPingServiceClient
+	IntegrationResource() company_service.IntegrationResourceServiceClient
 }
 
 type companyServiceClient struct {
-	companyService     company_service.CompanyServiceClient
-	projectService     company_service.ProjectServiceClient
-	environmentService company_service.EnvironmentServiceClient
-	resourceService    company_service.ResourceServiceClient
-	serviceResource    company_service.MicroserviceResourceClient
-	redirectService    company_service.RedirectUrlServiceClient
+	companyService             company_service.CompanyServiceClient
+	projectService             company_service.ProjectServiceClient
+	environmentService         company_service.EnvironmentServiceClient
+	resourceService            company_service.ResourceServiceClient
+	serviceResource            company_service.MicroserviceResourceClient
+	redirectService            company_service.RedirectUrlServiceClient
+	companyPingService         company_service.CompanyPingServiceClient
+	integrationResourceService company_service.IntegrationResourceServiceClient
 }
 
-func NewCompanyServiceClient(ctx context.Context, cfg config.Config) (CompanyServiceI, error) {
+func NewCompanyServiceClient(ctx context.Context, cfg config.BaseConfig) (CompanyServiceI, error) {
 
 	connCompanyService, err := grpc.DialContext(
 		ctx,
@@ -39,12 +43,14 @@ func NewCompanyServiceClient(ctx context.Context, cfg config.Config) (CompanySer
 	}
 
 	return &companyServiceClient{
-		companyService:     company_service.NewCompanyServiceClient(connCompanyService),
-		projectService:     company_service.NewProjectServiceClient(connCompanyService),
-		environmentService: company_service.NewEnvironmentServiceClient(connCompanyService),
-		resourceService:    company_service.NewResourceServiceClient(connCompanyService),
-		serviceResource:    company_service.NewMicroserviceResourceClient(connCompanyService),
-		redirectService:    company_service.NewRedirectUrlServiceClient(connCompanyService),
+		companyService:             company_service.NewCompanyServiceClient(connCompanyService),
+		projectService:             company_service.NewProjectServiceClient(connCompanyService),
+		environmentService:         company_service.NewEnvironmentServiceClient(connCompanyService),
+		resourceService:            company_service.NewResourceServiceClient(connCompanyService),
+		serviceResource:            company_service.NewMicroserviceResourceClient(connCompanyService),
+		redirectService:            company_service.NewRedirectUrlServiceClient(connCompanyService),
+		companyPingService:         company_service.NewCompanyPingServiceClient(connCompanyService),
+		integrationResourceService: company_service.NewIntegrationResourceServiceClient(connCompanyService),
 	}, nil
 }
 
@@ -70,4 +76,12 @@ func (g *companyServiceClient) ServiceResource() company_service.MicroserviceRes
 
 func (g *companyServiceClient) Redirect() company_service.RedirectUrlServiceClient {
 	return g.redirectService
+}
+
+func (g *companyServiceClient) CompanyPing() company_service.CompanyPingServiceClient {
+	return g.companyPingService
+}
+
+func (g *companyServiceClient) IntegrationResource() company_service.IntegrationResourceServiceClient {
+	return g.integrationResourceService
 }

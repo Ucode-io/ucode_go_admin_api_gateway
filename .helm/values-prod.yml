@@ -2,13 +2,13 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 global:
-  replicaCount: 1
+  replicaCount: 2
   environment: {}
   # list of key: value
   # GLOBAL1: value
 labels:
   app: ucode-go-admin-api-gateway
-replicaCount: 1
+replicaCount: 2
 
 image:
   registry: gitlab.udevs.io:5050
@@ -138,21 +138,16 @@ ingress:
         nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
         kubernetes.io/ingress.class: nginx
         cert-manager.io/cluster-issuer: letsencrypt-prod
+        acme.cert-manager.io/http01-edit-in-place: "true"
       type: web
       hosts:
         - host: "api.admin.u-code.io"
-          path: /
-          servicePort: 8080
-        - host: "api.easyto.travel"
           path: /
           servicePort: 8080
       tls:
         - secretName: api-admin-tls
           hosts:
             - "api.admin.u-code.io"
-        - secretName: easyto-travel-tls
-          hosts:
-            - "api.easyto.travel"
     - annotations:
         # type of authentication
         nginx.ingress.kubernetes.io/auth-type: basic
@@ -165,13 +160,14 @@ ingress:
         nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
         kubernetes.io/ingress.class: nginx
         cert-manager.io/cluster-issuer: letsencrypt-prod
+        acme.cert-manager.io/http01-edit-in-place: "true"
       type: auth
       hosts:
         - host: "api.admin.u-code.io"
           path: /swagger
           servicePort: 8080
       tls:
-        - secretName: admin-api-tls
+        - secretName: admin-api-swagger-tls
           hosts:
             - "api.admin.u-code.io"
 
@@ -199,7 +195,7 @@ affinity:
     requiredDuringSchedulingIgnoredDuringExecution:
       nodeSelectorTerms:
         - matchExpressions:
-            - key: kubernetes.io/ucode-prod
+            - key: workload
               operator: In
               values:
-                - "true"
+                - "ucode-prod"

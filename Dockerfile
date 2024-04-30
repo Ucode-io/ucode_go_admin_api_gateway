@@ -14,6 +14,6 @@ RUN export CGO_ENABLED=0 && \
     make build && \
     mv ./bin/ucode_go_admin_api_gateway /
 
-FROM gitlab.udevs.io:5050/docker/docker:ucode
-COPY --from=builder ucode_go_admin_api_gateway .
+# FROM gitlab.udevs.io:5050/docker/docker:ucode
+# COPY --from=builder ucode_go_admin_api_gateway .
 ENTRYPOINT ["/ucode_go_admin_api_gateway"]

@@ -39,4 +39,5 @@ type UpdateTableRequest struct {
 	IsLoginTable      bool                   `json:"is_login_table"`
 	Attributes        map[string]interface{} `json:"attributes"`
 	OrderBy           bool                   `json:"order_by"`
+	SoftDelete        bool                   `json:"soft_delete"`
 }

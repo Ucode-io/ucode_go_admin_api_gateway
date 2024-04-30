@@ -23,6 +23,9 @@ enum ResourceType {
     CLICKHOUSE = 2;
     POSTGRESQL = 3;
     REST = 4;
+    GITHUB = 5;
+    SMS = 6;
+    SMTP = 7;
 }
 
 enum SettingType {
@@ -46,6 +49,7 @@ message Resource {
     bool is_configured = 5;
     string vault_path = 6;
     string project_id = 7;
+    string node_type = 8;
 }
 
 message Environment {
@@ -55,7 +59,7 @@ message Environment {
     string display_color = 4;
     string description = 5;
     google.protobuf.Struct data = 6;
-
+    string access_type = 7;
 }
 
 message EnvironmentWithResources {
@@ -71,6 +75,7 @@ message EnvironmentWithResources {
     string description = 5;
     Resources resources = 6;
     google.protobuf.Struct data = 7;
+    string access_type = 8;
 }
 
 message NewResource {
@@ -94,6 +99,8 @@ message ResourceEnvironment {
     string username = 11;
     string database = 12;
     bool default = 13;
+    string node_type = 14;
+    string access_type = 15;
 }
 
 message Empty {

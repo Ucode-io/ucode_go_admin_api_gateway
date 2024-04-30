@@ -23,7 +23,7 @@ func DoRequest(url string, method string, body interface{}) (responseModel model
 		return
 	}
 	client := &http.Client{
-		Timeout: time.Duration(30 * time.Second),
+		// Timeout: time.Duration(30 * time.Second),
 	}
 
 	req, err := http.NewRequest(method, url, bytes.NewBuffer(data))
@@ -41,12 +41,11 @@ func DoRequest(url string, method string, body interface{}) (responseModel model
 	if err != nil {
 		return
 	}
-	fmt.Println("\n\ncheck do::", string(respByte))
 
 	err = json.Unmarshal(respByte, &responseModel)
 	if err != nil {
+		fmt.Println("\n\nerror::", url, string(respByte))
 	}
-	fmt.Println("responseModel", responseModel)
 
 	return
 }
@@ -59,7 +58,6 @@ func DoXMLRequest(url string, method string, body interface{}) (responseModel mo
 	}
 
 	data = []byte(Header + string(data))
-	fmt.Println("Data :", string(data))
 
 	client := &http.Client{
 		Timeout: time.Duration(30 * time.Second),

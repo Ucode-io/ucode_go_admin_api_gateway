@@ -13,7 +13,7 @@ service TableService {
     rpc Create(CreateTableRequest) returns (CreateTableResponse) {}
     rpc GetByID(TablePrimaryKey) returns (Table) {}
     rpc GetAll(GetAllTablesRequest) returns (GetAllTablesResponse) {}
-    rpc Update(UpdateTableRequest) returns (google.protobuf.Empty) {}
+    rpc Update(UpdateTableRequest) returns (Table) {}
     rpc Delete(TablePrimaryKey) returns (google.protobuf.Empty) {}
 
     rpc GetListTableHistory(GetTableHistoryRequest) returns (GetTableHistoryResponse) {}
@@ -83,6 +83,10 @@ message CreateTableRequest {
     bool soft_delete = 21;
     bool order_by = 22;
     google.protobuf.Struct attributes = 23;
+    string env_id = 24;
+    string id = 25;
+    string view_id = 26;
+    string layout_id = 27;
 }
 
 message IncrementID {
@@ -130,6 +134,7 @@ message UpdateTableRequest {
     bool is_login_table = 19;
     google.protobuf.Struct attributes = 20;
     bool order_by = 21;
+    string env_id = 22;
 }
 
 message Table {
@@ -176,6 +181,7 @@ message TablePrimaryKey {
     string author_id = 4;
     string commit_type = 5;
     string name = 6;
+    string env_id = 7;
 }
 
 message GetAllTablesRequest {

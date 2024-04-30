@@ -9,12 +9,13 @@ import "google/protobuf/struct.proto";
 
 service FieldService {
     rpc Create(CreateFieldRequest) returns (Field) {}
+    rpc GetByID(FieldPrimaryKey) returns (Field) {}
     rpc GetAll(GetAllFieldsRequest) returns (GetAllFieldsResponse) {}
     rpc GetAllForItems(GetAllFieldsForItemsRequest) returns (AllFields) {}
-    rpc Update(Field) returns (google.protobuf.Empty) {}
+    rpc Update(Field) returns (Field) {}
+    rpc UpdateSearch(SearchUpdateRequest) returns (google.protobuf.Empty) {}
     rpc Delete(FieldPrimaryKey) returns (google.protobuf.Empty) {}
 }
-
 
 message CreateFieldRequest {
     string default = 1;
@@ -38,6 +39,7 @@ message CreateFieldRequest {
     bool enable_multilanguage = 19;
     bool hide_multilanguage = 20;
     string minio_folder = 21;
+    string env_id = 22;
 }
 
 message CreateFieldsRequest {
@@ -82,6 +84,19 @@ message Field {
     bool enable_multilanguage = 22;
     bool hide_multilanguage = 23;
     string minio_folder = 24;
+    string env_id = 25;
+    bool is_search = 26;
+}
+
+message SearchUpdate {
+    string id = 1;
+    bool is_search = 2;
+}
+
+message SearchUpdateRequest {
+    string project_id = 1;
+    string table_slug = 2;
+    repeated SearchUpdate fields = 3;
 }
 
 message GetAllFieldsResponse {
@@ -106,6 +121,7 @@ message GetAllFieldsRequest {
 message FieldPrimaryKey {
     string id = 1;
     string project_id = 2;
+    string env_id = 3;
 }
 
 message GetAllFieldsForItemsRequest {

@@ -296,6 +296,8 @@ definitions:
     type: object
   auth_service.RecordPermission:
     properties:
+      add_field:
+        type: string
       automation:
         type: string
       client_type_id:
@@ -305,6 +307,8 @@ definitions:
       id:
         type: string
       language_btn:
+        type: string
+      pdf_action:
         type: string
       read:
         type: string
@@ -591,6 +595,8 @@ definitions:
     type: object
   company_service.AddResourceRequest:
     properties:
+      client_type_id:
+        type: string
       company_id:
         type: string
       credentials:
@@ -601,10 +607,14 @@ definitions:
         type: boolean
       is_default:
         type: boolean
+      node_type:
+        type: string
       project_id:
         type: string
       resource_type:
         $ref: '#/definitions/company_service.ResourceType'
+      role_id:
+        type: string
       service_type:
         $ref: '#/definitions/company_service.ServiceType'
       title:
@@ -621,10 +631,14 @@ definitions:
     properties:
       environment_id:
         type: string
+      integration_resource:
+        $ref: '#/definitions/company_service.IntegrationResource'
       name:
         type: string
       project_id:
         type: string
+      settings:
+        $ref: '#/definitions/company_service.Settings'
       type:
         $ref: '#/definitions/company_service.ResourceType'
       variables:
@@ -694,6 +708,10 @@ definitions:
     type: object
   company_service.CreateEnvironmentRequest:
     properties:
+      client_type_id:
+        type: string
+      company_id:
+        type: string
       description:
         type: string
       display_color:
@@ -701,6 +719,10 @@ definitions:
       name:
         type: string
       project_id:
+        type: string
+      role_id:
+        type: string
+      user_id:
         type: string
     type: object
   company_service.CreateProjectRequest:
@@ -718,20 +740,30 @@ definitions:
     type: object
   company_service.CreateResourceReq:
     properties:
+      client_type_id:
+        type: string
       company_id:
         type: string
       environment_id:
+        type: string
+      node_type:
         type: string
       project_id:
         type: string
       resource:
         $ref: '#/definitions/company_service.Resource'
+      role_id:
+        type: string
       user_id:
         type: string
     type: object
   company_service.CreateResourceRes:
     properties:
       company_id:
+        type: string
+      id:
+        type: string
+      node_type:
         type: string
       project_id:
         type: string
@@ -778,6 +810,8 @@ definitions:
     type: object
   company_service.Environment:
     properties:
+      access_type:
+        type: string
       data:
         $ref: '#/definitions/structpb.Struct'
       description:
@@ -793,6 +827,8 @@ definitions:
     type: object
   company_service.EnvironmentWithResources:
     properties:
+      access_type:
+        type: string
       data:
         $ref: '#/definitions/structpb.Struct'
       description:
@@ -927,6 +963,23 @@ definitions:
           $ref: '#/definitions/company_service.VariableResource'
         type: array
     type: object
+  company_service.IntegrationResource:
+    properties:
+      environment_id:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      project_id:
+        type: string
+      token:
+        type: string
+      type:
+        type: string
+      username:
+        type: string
+    type: object
   company_service.Language:
     properties:
       id:
@@ -993,6 +1046,10 @@ definitions:
         type: string
       project_id:
         type: string
+      resource_type:
+        type: integer
+      settings:
+        $ref: '#/definitions/company_service.Settings'
       type:
         type: string
       variables:
@@ -1064,6 +1121,8 @@ definitions:
         type: string
       is_configured:
         type: boolean
+      node_type:
+        type: string
       project_id:
         type: string
       resource_type:
@@ -1093,6 +1152,9 @@ definitions:
     - 2
     - 3
     - 4
+    - 5
+    - 6
+    - 7
     type: integer
     x-enum-varnames:
     - ResourceType_NOT_DECIDED
@@ -1100,6 +1162,9 @@ definitions:
     - ResourceType_CLICKHOUSE
     - ResourceType_POSTGRESQL
     - ResourceType_REST
+    - ResourceType_GITHUB
+    - ResourceType_SMS
+    - ResourceType_SMTP
   company_service.ResourceWithoutPassword:
     properties:
       credentials:
@@ -1109,6 +1174,8 @@ definitions:
           $ref: '#/definitions/company_service.ResourceWithoutPassword_Environment'
         type: array
       id:
+        type: string
+      node_type:
         type: string
       project_id:
         type: string
@@ -1142,7 +1209,16 @@ definitions:
         type: boolean
       name:
         type: string
+      node_type:
+        type: string
       resource_environment_id:
+        type: string
+    type: object
+  company_service.SMTPCredentials:
+    properties:
+      email:
+        type: string
+      password:
         type: string
     type: object
   company_service.ServiceResourceModel:
@@ -1152,6 +1228,8 @@ definitions:
       environment_id:
         type: string
       id:
+        type: string
+      node_type:
         type: string
       project_id:
         type: string
@@ -1217,6 +1295,26 @@ definitions:
       data:
         $ref: '#/definitions/structpb.Struct'
     type: object
+  company_service.Settings:
+    properties:
+      sms:
+        $ref: '#/definitions/company_service.SmsCredentials'
+      smtp:
+        $ref: '#/definitions/company_service.SMTPCredentials'
+    type: object
+  company_service.SmsCredentials:
+    properties:
+      default_otp:
+        type: string
+      login:
+        type: string
+      number_of_otp:
+        type: integer
+      originator:
+        type: string
+      password:
+        type: string
+    type: object
   company_service.Timezone:
     properties:
       id:
@@ -1245,6 +1343,8 @@ definitions:
         type: string
       is_configured:
         type: boolean
+      node_type:
+        type: string
       project_id:
         type: string
       resource_type:
@@ -1298,35 +1398,21 @@ definitions:
     type: object
   config.Config:
     properties:
-      adminHost:
-        type: string
       adminHostForCodeServer:
         type: string
       analyticsGRPCPort:
         type: string
       analyticsServiceHost:
         type: string
-      apiHost:
-        type: string
       apiReferenceServiceHost:
         type: string
       apiReferenceServicePort:
-        type: string
-      appHost:
-        type: string
-      authGRPCPort:
-        type: string
-      authServiceHost:
         type: string
       chatServiceGrpcHost:
         type: string
       chatServiceGrpcPort:
         type: string
       client_HOST:
-        type: string
-      companyServiceHost:
-        type: string
-      companyServicePort:
         type: string
       convertTemplateServiceGrpcHost:
         type: string
@@ -1339,9 +1425,6 @@ definitions:
       defaultLimit:
         type: string
       defaultOffset:
-        type: string
-      environment:
-        description: debug, test, release
         type: string
       functionServiceHost:
         type: string
@@ -1369,31 +1452,21 @@ definitions:
         type: integer
       gitlabProjectIdMicroFE:
         type: integer
-      helmInstallFunction:
-        type: string
       helmInstallMicroFE:
         type: string
       helmRepoAddFMicroFE:
         type: string
-      helmRepoAddFunction:
-        type: string
-      helmRepoUpdateFunction:
-        type: string
       helmRepoUpdateMicroFE:
-        type: string
-      helmUninstallFunction:
         type: string
       helmUninstallMicroFE:
         type: string
-      httpport:
+      highObjectBuilderGRPCPort:
         type: string
-      httpscheme:
+      highObjectBuilderServiceHost:
         type: string
       integrationGRPCPort:
         type: string
       integrationServiceHost:
-        type: string
-      localhost:
         type: string
       minioAccessKeyID:
         type: string
@@ -1413,27 +1486,12 @@ definitions:
         type: string
       pathToClone:
         type: string
-      pathToCloneMicroFE:
-        type: string
       platformType:
         type: string
       posGRPCPort:
         type: string
       posServiceHost:
         type: string
-      postgres:
-        properties:
-          database:
-            type: string
-          host:
-            type: string
-          password:
-            type: string
-          port:
-            type: integer
-          username:
-            type: string
-        type: object
       postgresBuilderServiceHost:
         type: string
       postgresBuilderServicePort:
@@ -1448,10 +1506,6 @@ definitions:
         type: string
       secretKey:
         type: string
-      serviceHost:
-        type: string
-      serviceName:
-        type: string
       smsGRPCPort:
         type: string
       smsServiceHost:
@@ -1463,8 +1517,6 @@ definitions:
       templateServiceHost:
         type: string
       ucodeNamespace:
-        type: string
-      version:
         type: string
       versioningGRPCPort:
         type: string
@@ -1478,13 +1530,6 @@ definitions:
   empty.Empty:
     type: object
   emptypb.Empty:
-    type: object
-  handlers.Path:
-    properties:
-      filename:
-        type: string
-      hash:
-        type: string
     type: object
   integration_service_v2.PayzeLinkRequest:
     properties:
@@ -1635,6 +1680,30 @@ definitions:
           $ref: '#/definitions/models.ValueSetting'
         type: array
     type: object
+  models.CacheRequest:
+    properties:
+      key:
+        type: string
+      keys:
+        items:
+          type: string
+        type: array
+      method:
+        type: string
+      nodeType:
+        type: string
+      projectId:
+        type: string
+      value:
+        additionalProperties: true
+        type: object
+    type: object
+  models.CacheResponse:
+    properties:
+      value:
+        additionalProperties: true
+        type: object
+    type: object
   models.Category:
     properties:
       attributes:
@@ -1682,6 +1751,8 @@ definitions:
       data:
         additionalProperties: true
         type: object
+      is_cached:
+        type: boolean
     type: object
   models.CompanyCreateRequest:
     properties:
@@ -1818,6 +1889,8 @@ definitions:
         type: boolean
       label:
         type: string
+      minio_folder:
+        type: string
       relation_field:
         type: string
       required:
@@ -1850,6 +1923,8 @@ definitions:
         type: boolean
       label:
         type: string
+      minio_folder:
+        type: string
       required:
         type: boolean
       slug:
@@ -1878,6 +1953,8 @@ definitions:
   models.CreateFunctionRequest:
     properties:
       description:
+        type: string
+      framework_type:
         type: string
       function_folder_id:
         type: string
@@ -1967,8 +2044,6 @@ definitions:
     type: object
   models.CreateTableRequest:
     properties:
-      app_id:
-        type: string
       attributes:
         additionalProperties: true
         type: object
@@ -1985,19 +2060,18 @@ definitions:
       icon:
         type: string
       increment_id:
-        $ref: '#/definitions/models.IncrementId'
+        allOf:
+        - $ref: '#/definitions/models.IncrementId'
+        description: AppID              string                                       `json:"app_id"`
       label:
         type: string
       layouts:
+        description: Sections           []*object_builder_service.Section            `json:"sections"`
         items:
           $ref: '#/definitions/object_builder_service.LayoutRequest'
         type: array
       order_by:
         type: boolean
-      sections:
-        items:
-          $ref: '#/definitions/object_builder_service.Section'
-        type: array
       show_in_menu:
         type: boolean
       slug:
@@ -2215,6 +2289,8 @@ definitions:
         type: boolean
       label:
         type: string
+      minio_folder:
+        type: string
       relation_field:
         type: string
       relation_id:
@@ -2387,6 +2463,8 @@ definitions:
       data:
         additionalProperties: true
         type: object
+      server_error:
+        type: string
       status:
         type: string
     type: object
@@ -2412,6 +2490,8 @@ definitions:
         type: string
       id:
         type: string
+      is_visible:
+        type: boolean
       label:
         type: string
       layout_id:
@@ -2425,6 +2505,8 @@ definitions:
       type:
         type: string
       webpage_id:
+        type: string
+      wiki_id:
         type: string
     type: object
   models.MicrofrontForLoginPage:
@@ -2441,6 +2523,67 @@ definitions:
         type: string
       subdomain:
         type: string
+    type: object
+  models.MigrateUp:
+    properties:
+      action_source:
+        type: string
+      action_type:
+        type: string
+      api_key:
+        type: string
+      current: {}
+      date:
+        type: string
+      id:
+        type: string
+      previus: {}
+      request: {}
+      response: {}
+      table_slug:
+        type: string
+      type:
+        type: string
+      used_envrironments:
+        additionalProperties:
+          type: boolean
+        type: object
+      user_info:
+        type: string
+      version_id:
+        type: string
+    type: object
+  models.MigrateUpRequest:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/models.MigrateUp'
+        type: array
+    type: object
+  models.MigrateUpResponse:
+    properties:
+      ids:
+        items:
+          type: string
+        type: array
+    type: object
+  models.MultipleInsertItems:
+    properties:
+      items:
+        items:
+          additionalProperties: true
+          type: object
+        type: array
+    type: object
+  models.MultipleUpdateItems:
+    properties:
+      data:
+        additionalProperties: true
+        type: object
+      ids:
+        items:
+          type: string
+        type: array
     type: object
   models.Panel:
     properties:
@@ -2649,6 +2792,8 @@ definitions:
         type: boolean
       slug:
         type: string
+      soft_delete:
+        type: boolean
       subtitle_field_slug:
         type: string
     type: object
@@ -2747,9 +2892,15 @@ definitions:
     type: object
   new_function_service.Function:
     properties:
+      branch:
+        type: string
       description:
         type: string
       environment_id:
+        type: string
+      error_message:
+        type: string
+      framework_type:
         type: string
       function_folder_id:
         type: string
@@ -2759,13 +2910,25 @@ definitions:
         type: string
       id:
         type: string
+      job_name:
+        type: string
       name:
         type: string
       password:
         type: string
       path:
         type: string
+      pipeline_status:
+        type: string
       project_id:
+        type: string
+      provided_name:
+        type: string
+      repo_id:
+        type: string
+      resource:
+        type: string
+      source_url:
         type: string
       ssh_url:
         type: string
@@ -3034,6 +3197,10 @@ definitions:
     type: object
   object_builder_service.CommonMessage:
     properties:
+      blocked_builder:
+        type: boolean
+      blocked_login_table:
+        type: boolean
       custom_message:
         type: string
       data:
@@ -3108,6 +3275,8 @@ definitions:
         type: integer
       disable:
         type: boolean
+      env_id:
+        type: string
       event_path:
         type: string
       icon:
@@ -3173,6 +3342,8 @@ definitions:
         type: string
       enable_multilanguage:
         type: boolean
+      env_id:
+        type: string
       hide_multilanguage:
         type: boolean
       id:
@@ -3308,12 +3479,16 @@ definitions:
         type: array
       editable:
         type: boolean
+      env_id:
+        type: string
       function_path:
         type: string
       group_fields:
         items:
           type: string
         type: array
+      id:
+        type: string
       is_editable:
         type: boolean
       is_user_id_default:
@@ -3332,9 +3507,13 @@ definitions:
         type: array
       relation_buttons:
         type: boolean
+      relation_field_id:
+        type: string
       relation_field_slug:
         type: string
       relation_table_slug:
+        type: string
+      relation_to_field_id:
         type: string
       summaries:
         items:
@@ -3388,6 +3567,23 @@ definitions:
       view_field_slug:
         type: string
     type: object
+  object_builder_service.CreateVersionRequest:
+    properties:
+      description:
+        type: string
+      id:
+        type: string
+      is_current:
+        type: boolean
+      name:
+        type: string
+      project_id:
+        type: string
+      user_info:
+        type: string
+      version_number:
+        type: integer
+    type: object
   object_builder_service.CreateViewRequest:
     properties:
       app_id:
@@ -3412,10 +3608,14 @@ definitions:
         type: string
       disable_dates:
         $ref: '#/definitions/object_builder_service.DisableDates'
+      env_id:
+        type: string
       group_fields:
         items:
           type: string
         type: array
+      id:
+        type: string
       is_editable:
         type: boolean
       main_field:
@@ -3609,12 +3809,16 @@ definitions:
         type: string
       enable_multilanguage:
         type: boolean
+      env_id:
+        type: string
       hide_multilanguage:
         type: boolean
       id:
         type: string
       index:
         type: string
+      is_search:
+        type: boolean
       is_system:
         type: boolean
       is_visible:
@@ -3654,6 +3858,8 @@ definitions:
         type: string
       id:
         type: string
+      is_visible_layout:
+        type: boolean
       order:
         type: integer
       relation_type:
@@ -3676,6 +3882,8 @@ definitions:
       index:
         type: string
       is_editable:
+        type: boolean
+      is_visible_layout:
         type: boolean
       label:
         type: string
@@ -3751,6 +3959,11 @@ definitions:
         items:
           $ref: '#/definitions/object_builder_service.MenuTemplate'
         type: array
+    type: object
+  object_builder_service.GenerateDynamicBarcodeResponse:
+    properties:
+      barcode:
+        type: string
     type: object
   object_builder_service.GetAllAppsResponse:
     properties:
@@ -3883,6 +4096,17 @@ definitions:
           $ref: '#/definitions/object_builder_service.TableHistory'
         type: array
     type: object
+  object_builder_service.GetVersionListResponse:
+    properties:
+      count:
+        type: integer
+      project_id:
+        type: string
+      versions:
+        items:
+          $ref: '#/definitions/object_builder_service.Version'
+        type: array
+    type: object
   object_builder_service.GlobalPermission:
     properties:
       api_keys_button:
@@ -3969,6 +4193,8 @@ definitions:
     properties:
       attributes:
         $ref: '#/definitions/structpb.Struct'
+      env_id:
+        type: string
       icon:
         type: string
       id:
@@ -3981,8 +4207,12 @@ definitions:
         type: boolean
       label:
         type: string
+      menu_id:
+        type: string
       order:
         type: integer
+      project_id:
+        type: string
       summary_fields:
         items:
           $ref: '#/definitions/object_builder_service.FieldForSection'
@@ -4012,6 +4242,8 @@ definitions:
         type: boolean
       label:
         type: string
+      menu_id:
+        type: string
       order:
         type: integer
       summary_fields:
@@ -4025,6 +4257,17 @@ definitions:
           $ref: '#/definitions/object_builder_service.TabResponse'
         type: array
       type:
+        type: string
+    type: object
+  object_builder_service.ListVersionHistory:
+    properties:
+      count:
+        type: integer
+      histories:
+        items:
+          $ref: '#/definitions/object_builder_service.VersionHistory'
+        type: array
+      project_id:
         type: string
     type: object
   object_builder_service.ManyToManyMessage:
@@ -4059,10 +4302,16 @@ definitions:
     properties:
       attributes:
         $ref: '#/definitions/structpb.Struct'
+      data:
+        $ref: '#/definitions/structpb.Struct'
+      env_id:
+        type: string
       icon:
         type: string
       id:
         type: string
+      is_static:
+        type: boolean
       is_visible:
         type: boolean
       label:
@@ -4096,6 +4345,8 @@ definitions:
         type: string
       id:
         type: string
+      is_static:
+        type: boolean
       label:
         type: string
       layout_id:
@@ -4307,6 +4558,13 @@ definitions:
           $ref: '#/definitions/object_builder_service.TableFieldSetting'
         type: array
     type: object
+  object_builder_service.PublishVersionRequest:
+    properties:
+      env_id:
+        type: string
+      version:
+        $ref: '#/definitions/object_builder_service.Version'
+    type: object
   object_builder_service.QuickFilter:
     properties:
       default_value:
@@ -4323,6 +4581,8 @@ definitions:
     type: object
   object_builder_service.RecordPermission:
     properties:
+      add_field:
+        type: string
       automation:
         type: string
       client_type_id:
@@ -4332,6 +4592,8 @@ definitions:
       guid:
         type: string
       language_btn:
+        type: string
+      pdf_action:
         type: string
       read:
         type: string
@@ -4763,7 +5025,7 @@ definitions:
     type: object
   object_builder_service.UpdateLayoutRequest:
     properties:
-      layouts:
+      layout:
         items:
           $ref: '#/definitions/object_builder_service.LayoutRequest'
         type: array
@@ -4960,6 +5222,8 @@ definitions:
         type: array
       editable:
         type: boolean
+      env_id:
+        type: string
       function_path:
         type: string
       group_fields:
@@ -5100,6 +5364,17 @@ definitions:
           $ref: '#/definitions/object_builder_service.ViewRelationReq'
         type: array
     type: object
+  object_builder_service.UsedForEnvRequest:
+    properties:
+      env_id:
+        type: string
+      ids:
+        items:
+          type: string
+        type: array
+      project_id:
+        type: string
+    type: object
   object_builder_service.V2LoginResponse:
     properties:
       addational_table:
@@ -5174,6 +5449,60 @@ definitions:
       view_field_slug:
         type: string
     type: object
+  object_builder_service.Version:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      is_current:
+        type: boolean
+      name:
+        type: string
+      project_id:
+        type: string
+      user_info:
+        type: string
+      version_number:
+        type: integer
+    type: object
+  object_builder_service.VersionHistory:
+    properties:
+      action_source:
+        type: string
+      action_type:
+        type: string
+      api_key:
+        type: string
+      current:
+        type: string
+      date:
+        type: string
+      id:
+        type: string
+      previus:
+        type: string
+      request:
+        type: string
+      response:
+        type: string
+      table_slug:
+        type: string
+      type:
+        type: string
+      used_envrironments:
+        additionalProperties:
+          type: boolean
+        type: object
+      user_info:
+        type: string
+      version:
+        $ref: '#/definitions/object_builder_service.Version'
+      version_id:
+        type: string
+    type: object
   object_builder_service.View:
     properties:
       app_id:
@@ -5194,6 +5523,8 @@ definitions:
         type: string
       disable_dates:
         $ref: '#/definitions/object_builder_service.DisableDates'
+      env_id:
+        type: string
       function_path:
         type: string
       group_fields:
@@ -6047,7 +6378,7 @@ definitions:
   structpb.Value:
     properties:
       kind:
-        description: "The kind of value.\n\nTypes that are assignable to Kind:\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue"
+        description: "The kind of value.\n\nTypes that are assignable to Kind:\n\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue"
     type: object
   template_service.CreateFolderNoteReq:
     properties:
@@ -6540,6 +6871,30 @@ definitions:
       user_id:
         type: string
       username:
+        type: string
+    type: object
+  v1.BucketRequest:
+    properties:
+      bucket_name:
+        type: string
+    type: object
+  v1.BucketResponse:
+    properties:
+      size:
+        type: number
+    type: object
+  v1.Path:
+    properties:
+      filename:
+        type: string
+      hash:
+        type: string
+    type: object
+  v2.Path:
+    properties:
+      filename:
+        type: string
+      hash:
         type: string
     type: object
   versioning_service.ApiCreateReleaseRequest:
@@ -7343,6 +7698,19 @@ paths:
       - application/json
       description: this returns "pong" messsage to show service is working
       operationId: ping
+      parameters:
+      - description: service
+        in: query
+        name: service
+        type: string
+      - description: environment_id
+        in: query
+        name: environment_id
+        type: string
+      - description: project_id
+        in: query
+        name: project_id
+        type: string
       produces:
       - application/json
       responses:
@@ -9224,6 +9592,54 @@ paths:
       summary: Get single booked appointment
       tags:
       - Appointment
+  /v1/cache:
+    post:
+      consumes:
+      - application/json
+      description: Cache
+      operationId: Cache
+      parameters:
+      - description: Cache body
+        in: body
+        name: cache
+        required: true
+        schema:
+          $ref: '#/definitions/models.CacheRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.CacheResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Cache
+      tags:
+      - Cache
   /v1/cashbox_transaction:
     post:
       consumes:
@@ -13225,7 +13641,7 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/handlers.Path'
+                  $ref: '#/definitions/v1.Path'
               type: object
         "400":
           description: Bad Request
@@ -14153,6 +14569,9 @@ paths:
         name: search
         type: string
       - in: query
+        name: table_id
+        type: string
+      - in: query
         name: type
         type: string
       produces:
@@ -15029,6 +15448,9 @@ paths:
         name: search
         type: string
       - in: query
+        name: table_id
+        type: string
+      - in: query
         name: type
         type: string
       produces:
@@ -15762,6 +16184,55 @@ paths:
       summary: Delete menu
       tags:
       - Menu
+  /v1/minio/bucket-size:
+    post:
+      consumes:
+      - application/json
+      description: Provide a bucket name, retrieve the total size of all files in
+        the bucket in megabytes
+      operationId: bucket_size
+      parameters:
+      - description: BucketSizeRequestBody
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/v1.BucketRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Path
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/v1.BucketResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Bucket size
+      tags:
+      - Minio
   /v1/note:
     get:
       consumes:
@@ -17327,6 +17798,71 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get Group By Field Object
+      tags:
+      - Object
+  /v1/object/get-list-aggregate/{table_slug}:
+    post:
+      consumes:
+      - application/json
+      description: Get List Aggregate
+      operationId: get_list_aggregate
+      parameters:
+      - description: table_slug
+        in: path
+        name: table_slug
+        required: true
+        type: string
+      - description: limit
+        in: query
+        name: limit
+        type: string
+      - description: offset
+        in: query
+        name: offset
+        type: string
+      - description: sort_type
+        in: query
+        name: sort_type
+        type: string
+      - description: GetGroupByFieldObjectRequestBody
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/models.CommonMessage'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ObjectBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.CommonMessage'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get List Aggregate
       tags:
       - Object
   /v1/object/get-list-group-by/{table_slug}/{column_table_slug}:
@@ -22384,7 +22920,7 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/handlers.Path'
+                  $ref: '#/definitions/v1.Path'
               type: object
         "400":
           description: Bad Request
@@ -22445,7 +22981,7 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/handlers.Path'
+                  $ref: '#/definitions/v1.Path'
               type: object
         "400":
           description: Bad Request
@@ -22496,7 +23032,7 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/handlers.Path'
+                  $ref: '#/definitions/v1.Path'
               type: object
         "400":
           description: Bad Request
@@ -23862,6 +24398,979 @@ paths:
       summary: Insert Many webpageV2
       tags:
       - WebPage
+  /v2/collections:
+    get:
+      consumes:
+      - application/json
+      description: Get all collections
+      operationId: get_all_collections
+      parameters:
+      - in: query
+        name: folder_id
+        type: string
+      - in: query
+        name: is_login_table
+        type: boolean
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: offset
+        type: integer
+      - in: query
+        name: project-id
+        type: string
+      - in: query
+        name: search
+        type: string
+      - in: query
+        name: version_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: CollectionBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.GetAllTablesResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all collections
+      tags:
+      - Collections
+    post:
+      consumes:
+      - application/json
+      description: Create collection
+      operationId: create_collection
+      parameters:
+      - description: CreateCollectionRequestBody
+        in: body
+        name: table
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateTableRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Collection data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.Table'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create collection
+      tags:
+      - Collections
+    put:
+      consumes:
+      - application/json
+      description: Update collection
+      operationId: update_collection
+      parameters:
+      - description: UpdateCollectionRequestBody
+        in: body
+        name: collection
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateTableRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Collection data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.Table'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update collection
+      tags:
+      - Collections
+  /v2/collections/{collection}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete Collection
+      operationId: delete_collection
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete Collection
+      tags:
+      - Collections
+    get:
+      consumes:
+      - application/json
+      description: Get single collection
+      operationId: get_single_collection
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: CollectionBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.CreateTableResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get single collection
+      tags:
+      - Collections
+  /v2/collections/{collection}/automation:
+    get:
+      consumes:
+      - application/json
+      description: Get all automation
+      operationId: get_all_automation
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - in: query
+        name: method
+        type: string
+      - in: query
+        name: project_id
+        type: string
+      - in: query
+        name: role_id
+        type: string
+      - in: query
+        name: table_slug
+        type: string
+      - in: query
+        name: version_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: AutomationBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all automation
+      tags:
+      - Collections
+    post:
+      consumes:
+      - application/json
+      description: Create Automation
+      operationId: create_automation
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: AutomationRequestBody
+        in: body
+        name: Automation
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.CreateCustomEventRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Automation data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create Automation
+      tags:
+      - Collections
+    put:
+      consumes:
+      - application/json
+      description: Update automation
+      operationId: update_automation
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: UpdateAutomationRequestBody
+        in: body
+        name: Customevent
+        required: true
+        schema:
+          $ref: '#/definitions/models.CustomEvent'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Automation data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update Automation
+      tags:
+      - Collections
+  /v2/collections/{collection}/automation/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete Automation
+      operationId: delete_automation
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete Automation
+      tags:
+      - Collections
+    get:
+      consumes:
+      - application/json
+      description: Get Automation by id
+      operationId: get_automatio_by_id
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: AutomationBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Automation by id
+      tags:
+      - Collections
+  /v2/collections/{collection}/error_messages:
+    get:
+      consumes:
+      - application/json
+      description: Get all error messages
+      operationId: get_all_error_message
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - in: query
+        name: project_id
+        type: string
+      - in: query
+        name: table_id
+        type: string
+      - in: query
+        name: table_slug
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ErrorMessageBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all error messages
+      tags:
+      - Collections
+    post:
+      consumes:
+      - application/json
+      description: Create error message
+      operationId: create_error_message
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: CreateCustomErrorMessageBody
+        in: body
+        name: table
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.CreateCustomErrorMessage'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Custom Error Message data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create error message
+      tags:
+      - Collections
+    put:
+      consumes:
+      - application/json
+      description: Update error message
+      operationId: update_error_message
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: UpdateErrorMessageBody
+        in: body
+        name: table
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.CustomErrorMessage'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Error Message data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update error message
+      tags:
+      - Collections
+  /v2/collections/{collection}/error_messages/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete error message
+      operationId: delete_error_message
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete error message
+      tags:
+      - Collections
+    get:
+      consumes:
+      - application/json
+      description: Error message by id
+      operationId: Get_by_id_error_message
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Error Message data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Error message by id
+      tags:
+      - Collections
+  /v2/collections/{collection}/import/{id}:
+    post:
+      consumes:
+      - application/json
+      description: Post excel writer
+      operationId: import_data
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: type
+        in: query
+        name: type
+        type: string
+      - description: ImportDataRequest
+        in: body
+        name: table
+        required: true
+        schema:
+          $ref: '#/definitions/models.ExcelToDbRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ExcelToDbResponse
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ExcelToDbResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Post excel writer
+      tags:
+      - Collections
+  /v2/collections/{collection}/import/fields/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get excel writer
+      operationId: excel_fields
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: id
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ExcelReadResponse
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.ExcelReadResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get excel writer
+      tags:
+      - Collections
+  /v2/collections/{collection}/layout:
+    put:
+      consumes:
+      - application/json
+      description: Update layouts
+      operationId: update_layout_v2
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: LayoutRequest
+        in: body
+        name: layout
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.LayoutRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Layout data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.LayoutResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update layouts
+      tags:
+      - Layout
+  /v2/collections/{collection}/layout/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete layouts
+      operationId: delete_layout_v2
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete layout
+      tags:
+      - Layout
   /v2/company/project/resource:
     get:
       consumes:
@@ -24380,6 +25889,617 @@ paths:
       summary: Get CustomEvent by id
       tags:
       - NewCustomEvent
+  /v2/fields/{collection}:
+    get:
+      consumes:
+      - application/json
+      description: Get all fields
+      operationId: v2_get_all_fields
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: offset
+        type: integer
+      - in: query
+        name: project_id
+        type: string
+      - in: query
+        name: role_id
+        type: string
+      - in: query
+        name: search
+        type: string
+      - in: query
+        name: table_id
+        type: string
+      - in: query
+        name: table_slug
+        type: string
+      - in: query
+        name: version_id
+        type: string
+      - in: query
+        name: with_many_relation
+        type: boolean
+      - in: query
+        name: with_one_relation
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: FieldBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.GetAllFieldsResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all fields
+      tags:
+      - V2_Field
+    post:
+      consumes:
+      - application/json
+      description: Create field
+      operationId: v2_create_field
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: CreateFieldRequestBody
+        in: body
+        name: table
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateFieldRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Field data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Field'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create field
+      tags:
+      - V2_Field
+    put:
+      consumes:
+      - application/json
+      description: Update field
+      operationId: v2_update_field
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: UpdateFieldRequestBody
+        in: body
+        name: relation
+        required: true
+        schema:
+          $ref: '#/definitions/models.Field'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Field data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Field'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update field
+      tags:
+      - V2_Field
+  /v2/fields/{collection}/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete Field
+      operationId: v2_delete_field
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete Field
+      tags:
+      - V2_Field
+  /v2/fields/{collection}/details:
+    get:
+      consumes:
+      - application/json
+      description: Get all fields with details
+      operationId: v2_get_all_fields_with_details
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: with_relations
+        in: query
+        name: with_relations
+        type: string
+      - description: language_setting
+        in: query
+        name: language_setting
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: FieldBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.CommonMessage'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all fields with details
+      tags:
+      - V2_Field
+  /v2/files:
+    delete:
+      consumes:
+      - application/json
+      description: Delete files
+      operationId: v2_delete_files
+      parameters:
+      - description: DeleteFilesRequestBody
+        in: body
+        name: file
+        required: true
+        schema:
+          $ref: '#/definitions/models.FileDeleteRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete files
+      tags:
+      - V2Files
+    get:
+      consumes:
+      - application/json
+      description: Get file list
+      operationId: v2_get_file_list
+      parameters:
+      - in: query
+        name: folder_name
+        type: string
+      - in: query
+        name: project_id
+        type: string
+      - in: query
+        name: search
+        type: string
+      - in: query
+        name: sort
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: FileBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.GetAllFilesRequest'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get file list
+      tags:
+      - V2Files
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload Folder
+      operationId: v2_create_file
+      parameters:
+      - description: file
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: folder_name
+        in: query
+        name: folder_name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Path
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/v2.Path'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Upload Folder
+      tags:
+      - V2Files
+  /v2/files/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get single variable
+      operationId: v2_get_file_by_id
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: FileBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.File'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get single variable
+      tags:
+      - V2Files
+  /v2/files/{id}/upload:
+    delete:
+      consumes:
+      - application/json
+      description: Delete file
+      operationId: v2_delete_file
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete file
+      tags:
+      - V2Files
+    put:
+      consumes:
+      - application/json
+      description: Update file
+      operationId: v2_update_file
+      parameters:
+      - description: UpdateFileRequestBody
+        in: body
+        name: variable
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateFileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: File data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.File'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update file
+      tags:
+      - V2Files
+  /v2/files/import:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload
+      operationId: v2_upload_image
+      parameters:
+      - description: from-chat
+        in: query
+        name: from-chat
+        type: string
+      - description: file
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Path
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/v2.Path'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Upload
+      tags:
+      - file
   /v2/function:
     get:
       consumes:
@@ -24950,6 +27070,552 @@ paths:
       summary: Get Micro Frontend By Id
       tags:
       - Functions
+  /v2/items/{collection}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete many itmes
+      operationId: delete_items
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: DeleteManyItemRequestBody
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/models.Ids'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete many itmes
+      tags:
+      - Items
+    get:
+      consumes:
+      - application/json
+      description: Get all items
+      operationId: get_list_items
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: language_setting
+        in: query
+        name: language_setting
+        type: string
+      - description: data
+        in: query
+        name: data
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ObjectBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.CommonMessage'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all items
+      tags:
+      - Items
+    patch:
+      consumes:
+      - application/json
+      description: Multiple Update items
+      operationId: multiple_update_items
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: MultipleItemsRequesUpdatetBody
+        in: body
+        name: items
+        required: true
+        schema:
+          $ref: '#/definitions/models.MultipleUpdateItems'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Items data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.CommonMessage'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Multiple Update items
+      tags:
+      - Items
+    post:
+      consumes:
+      - application/json
+      description: Create item
+      operationId: create_item
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: CreateItemsRequestBody
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/models.CommonMessage'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Object data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.CommonMessage'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create item
+      tags:
+      - Items
+    put:
+      consumes:
+      - application/json
+      description: Update item
+      operationId: update_item
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: UpdateItemRequestBody
+        in: body
+        name: item
+        required: true
+        schema:
+          $ref: '#/definitions/models.CommonMessage'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Item data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.CommonMessage'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update item
+      tags:
+      - Items
+  /v2/items/{collection}/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete item
+      operationId: delete_item
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete item
+      tags:
+      - Items
+    get:
+      consumes:
+      - application/json
+      description: Get item by id
+      operationId: get_item_by_id
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ObjectBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.CommonMessage'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get item by id
+      tags:
+      - Items
+  /v2/items/{collection}/aggregation:
+    post:
+      consumes:
+      - application/json
+      description: Get List Aggregation
+      operationId: get_list_aggregation
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: GetListAggregation
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/models.CommonMessage'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ObjectBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.CommonMessage'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get List Aggregation
+      tags:
+      - Items
+  /v2/items/{collection}/multiple-insert:
+    post:
+      consumes:
+      - application/json
+      description: Create items
+      operationId: create_items
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: CreateItemsRequestBody
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/models.MultipleInsertItems'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Object data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.CommonMessage'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create items
+      tags:
+      - Items
+  /v2/items/many-to-many:
+    delete:
+      consumes:
+      - application/json
+      description: Delete Many2Many items
+      operationId: v2_delete_many2many
+      parameters:
+      - description: DeleteManyToManyBody
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.ManyToManyMessage'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete Many2Many items
+      tags:
+      - Items
+    put:
+      consumes:
+      - application/json
+      description: Append many-to-many items
+      operationId: v2_append_many2many
+      parameters:
+      - description: UpdateMany2ManyRequestBody
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.ManyToManyMessage'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Object data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Append many-to-many items
+      tags:
+      - Items
   /v2/language-json:
     get:
       consumes:
@@ -24991,6 +27657,141 @@ paths:
       summary: Language json
       tags:
       - language
+  /v2/menus:
+    post:
+      consumes:
+      - application/json
+      description: Create menu
+      operationId: create_menus_v2
+      parameters:
+      - description: MenuRequest
+        in: body
+        name: menu
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateMenuRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Menu data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Menu'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create menu
+      tags:
+      - Menu
+    put:
+      consumes:
+      - application/json
+      description: Update menu
+      operationId: update_menus_v2
+      parameters:
+      - description: UpdateMenuRequestBody
+        in: body
+        name: menu
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.Menu'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: App data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.Menu'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update menu
+      tags:
+      - Menu
+  /v2/menus/{menu_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete menu
+      operationId: delete_menus_v2
+      parameters:
+      - description: menu_id
+        in: path
+        name: menu_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete menu
+      tags:
+      - Menu
   /v2/object-slim/get-list/{table_slug}:
     get:
       consumes:
@@ -25107,6 +27908,250 @@ paths:
       summary: Get all objects version 2
       tags:
       - Object
+  /v2/relations/:collection:
+    put:
+      consumes:
+      - application/json
+      description: Update relation
+      operationId: update_relations_v2
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: UpdateRelationRequestBody
+        in: body
+        name: relation
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.UpdateRelationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Relation data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      - ApiKeyAuth: []
+      summary: Update relation
+      tags:
+      - Relation
+  /v2/relations/{collection}:
+    post:
+      consumes:
+      - application/json
+      description: Create relation
+      operationId: create_relations_V2
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: CreateRelationRequestBody
+        in: body
+        name: table
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.CreateRelationRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Relation data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create relation
+      tags:
+      - Relation
+  /v2/relations/{collection}/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get relation by id
+      operationId: v2_get_by_id_relation
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get relation by id
+      tags:
+      - V2_Relation
+  /v2/relations/{collection}/{relation_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete Relation
+      operationId: delete_relations_v2
+      parameters:
+      - description: relation_id
+        in: path
+        name: relation_id
+        required: true
+        type: string
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      - ApiKeyAuth: []
+      summary: Delete Relation
+      tags:
+      - Relation
+  /v2/relations/{collection}/cascading:
+    get:
+      consumes:
+      - application/json
+      description: Get relation cascading
+      operationId: get_relation_cascading
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: CascadingBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      - ApiKeyAuth: []
+      summary: Get relation cascading
+      tags:
+      - V2_Relation
   /v2/table:
     get:
       consumes:
@@ -25587,6 +28632,1092 @@ paths:
       summary: V2 Get table by id
       tags:
       - V2Table
+  /v2/upload-file/{collection}/{id}:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload file
+      operationId: v2_upload_file
+      parameters:
+      - description: file
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: tags
+        in: query
+        name: tags
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Path
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/v2.Path'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Upload file
+      tags:
+      - file
+  /v2/user/{id}/menu-settings:
+    get:
+      consumes:
+      - application/json
+      description: Get menu settings by user-id
+      operationId: get_menu_settings_by_user_id
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: template_id
+        in: query
+        name: template_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: MenuSettingsBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.MenuSettings'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get menu settings by user-id
+      tags:
+      - V2_User
+  /v2/utils/{collection}/template-to-html:
+    post:
+      consumes:
+      - application/json
+      description: Convert template to html
+      operationId: v2_convert_template_to_html
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: TemplateBody
+        in: body
+        name: view
+        required: true
+        schema:
+          $ref: '#/definitions/models.HtmlBody'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: HtmlBody data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.HtmlBody'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Convert template to html
+      tags:
+      - Utils
+  /v2/utils/barcode/{collection}/{type}:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        Get new barcode for items
+        type must be one of following: ["barcode", "codabar"]
+      operationId: generate_barcode_for_items
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: type
+        in: path
+        name: type
+        required: true
+        type: string
+      - description: field_id
+        in: query
+        name: field_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Barcode
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.GenerateDynamicBarcodeResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: get barcode
+      tags:
+      - Utils
+  /v2/utils/export/{collection}:
+    post:
+      consumes:
+      - application/json
+      description: export data to file
+      operationId: export_data
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: query
+        in: query
+        name: query
+        type: string
+      - description: GetListObjectRequestBody
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/models.CommonMessage'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ObjectBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.CommonMessage'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: export data to file
+      tags:
+      - Utils
+  /v2/utils/export/{collection}/html-to-pdf:
+    post:
+      consumes:
+      - application/json
+      description: Convert html to pdf
+      operationId: v2_convert_html_to_pdf
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: HtmlBody
+        in: body
+        name: view
+        required: true
+        schema:
+          $ref: '#/definitions/models.HtmlBody'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: PdfBody data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.PdfBody'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Convert html to pdf
+      tags:
+      - Utils
+  /v2/version:
+    get:
+      consumes:
+      - application/json
+      description: Get version list
+      operationId: get_version_list
+      parameters:
+      - in: query
+        name: from_date
+        type: string
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: live
+        type: boolean
+      - in: query
+        name: offset
+        type: integer
+      - in: query
+        name: project_id
+        type: string
+      - in: query
+        name: to_date
+        type: string
+      - in: query
+        name: version_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: VersionList
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.GetVersionListResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get version list
+      tags:
+      - Version
+    post:
+      consumes:
+      - application/json
+      description: Create version
+      operationId: create_version
+      parameters:
+      - description: CreateVersionRequest
+        in: body
+        name: version
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.CreateVersionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Version data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.Version'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create version
+      tags:
+      - Version
+    put:
+      consumes:
+      - application/json
+      description: Update version
+      operationId: update_version
+      parameters:
+      - description: Version
+        in: body
+        name: version
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.Version'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: UpdateVersionRequest
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.Version'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update version
+      tags:
+      - Version
+  /v2/version/history/{environment_id}:
+    get:
+      consumes:
+      - application/json
+      description: Get version history list
+      operationId: get_all_version_history
+      parameters:
+      - description: environment_id
+        in: path
+        name: environment_id
+        required: true
+        type: string
+      - in: query
+        name: api_key
+        type: string
+      - in: query
+        name: env_id
+        type: string
+      - in: query
+        name: from_date
+        type: string
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: offset
+        type: integer
+      - in: query
+        name: order_by
+        type: boolean
+      - in: query
+        name: project_id
+        type: string
+      - in: query
+        name: to_date
+        type: string
+      - in: query
+        name: type
+        type: string
+      - in: query
+        name: user_info
+        type: string
+      - collectionFormat: csv
+        in: query
+        items:
+          type: string
+        name: version_ids
+        type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ViewBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.ListVersionHistory'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get version history list
+      tags:
+      - VersionHistory
+    put:
+      consumes:
+      - application/json
+      description: Update version history
+      operationId: update_version_history
+      parameters:
+      - description: environment_id
+        in: path
+        name: environment_id
+        required: true
+        type: string
+      - description: UpdateViewRequestBody
+        in: body
+        name: view
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.UsedForEnvRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: UsedForEnvRequest data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.UsedForEnvRequest'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update version history
+      tags:
+      - VersionHistory
+  /v2/version/history/{environment_id}/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get single version history
+      operationId: get_version_history_by_id
+      parameters:
+      - description: environment_id
+        in: path
+        name: environment_id
+        required: true
+        type: string
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: VersionHistoryBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.VersionHistory'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get single version history
+      tags:
+      - VersionHistory
+  /v2/version/history/migrate/up/{environment_id}:
+    post:
+      consumes:
+      - application/json
+      description: Migrate up
+      operationId: migrate_up
+      parameters:
+      - description: environment_id
+        in: path
+        name: environment_id
+        required: true
+        type: string
+      - description: MigrateUpRequest
+        in: body
+        name: migrate
+        required: true
+        schema:
+          $ref: '#/definitions/models.MigrateUpRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Upbody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.MigrateUpResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Migrate up
+      tags:
+      - VersionHistory
+  /v2/version/publish:
+    post:
+      consumes:
+      - application/json
+      description: Publish version
+      operationId: publish_version
+      parameters:
+      - description: Publish
+        in: body
+        name: publish
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.PublishVersionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: UpdateVersionRequest
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.Version'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Publish version
+      tags:
+      - Version
+  /v2/views/{collection}:
+    get:
+      consumes:
+      - application/json
+      description: Get view list
+      operationId: v2_get_view_list
+      parameters:
+      - in: query
+        name: app_id
+        type: string
+      - in: query
+        name: project_id
+        type: string
+      - in: query
+        name: role_id
+        type: string
+      - in: query
+        name: table_slug
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ViewBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.GetAllViewsResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get view list
+      tags:
+      - V2_View
+    post:
+      consumes:
+      - application/json
+      description: Create view
+      operationId: v2_create_view
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: CreateViewRequestBody
+        in: body
+        name: view
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.CreateViewRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: View data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.View'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create view
+      tags:
+      - V2_View
+    put:
+      consumes:
+      - application/json
+      description: Update view
+      operationId: v2_update_view
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: UpdateViewRequestBody
+        in: body
+        name: view
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.View'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: View data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.View'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update view
+      tags:
+      - V2_View
+  /v2/views/{collection}/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete view
+      operationId: v2_delete_view
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete view
+      tags:
+      - V2_View
+    get:
+      consumes:
+      - application/json
+      description: Get single view
+      operationId: v2_get_view_by_id
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ViewBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.View'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get single view
+      tags:
+      - V2_View
+  /v2/views/{collection}/update-order:
+    put:
+      consumes:
+      - application/json
+      description: Update view order
+      operationId: v2_update_view_order
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: UpdateViewOrderRequestBody
+        in: body
+        name: view
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.UpdateViewOrderRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: View data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update view order
+      tags:
+      - V2_View
   /v3/bot:
     get:
       consumes:

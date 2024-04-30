@@ -7,8 +7,7 @@ import (
 
 type ServiceManagerI interface {
 	BuilderService() BuilderServiceI
-	AuthService() AuthServiceI
-	CompanyService() CompanyServiceI
+	HighBuilderService() BuilderServiceI
 	AnalyticsService() AnalyticsServiceI
 	ApiReferenceService() ApiReferenceServiceI
 	SmsService() SmsServiceI
@@ -24,12 +23,12 @@ type ServiceManagerI interface {
 	NotificationService() NotificationServiceI
 	PostgresBuilderService() PostgresBuilderServiceI
 	ConvertTemplateService() ConvertTemplateServiceI
+	GetBuilderServiceByType(nodeType string) BuilderServiceI
 }
 
 type grpcClients struct {
 	builderService           BuilderServiceI
-	authService              AuthServiceI
-	companyService           CompanyServiceI
+	highBuilderService       BuilderServiceI
 	analyticsService         AnalyticsServiceI
 	apiReferenceService      ApiReferenceServiceI
 	smsService               SmsServiceI
@@ -53,15 +52,12 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 		return nil, err
 	}
 
-	authServiceClient, err := NewAuthServiceClient(ctx, cfg)
+	highBuilderServiceClient, err := NewHighBuilderServiceClient(ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
+
 	chatServiceClient, err := NewChatServiceClient(ctx, cfg)
-	if err != nil {
-		return nil, err
-	}
-	companyServiceClient, err := NewCompanyServiceClient(ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -137,11 +133,10 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 	return grpcClients{
 		apiReferenceService:      apiReferenceClient,
 		analyticsService:         analyticsServiceClient,
-		authService:              authServiceClient,
 		builderService:           builderServiceClient,
+		highBuilderService:       highBuilderServiceClient,
 		posService:               posServiceClient,
 		smsService:               smsServiceClient,
-		companyService:           companyServiceClient,
 		functionService:          functionServiceClient,
 		templateService:          templateServiceClient,
 		versioningService:        versioningServiceClient,
@@ -156,19 +151,27 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 	}, nil
 }
 
+func (g grpcClients) GetBuilderServiceByType(nodeType string) BuilderServiceI {
+	switch nodeType {
+	case config.LOW_NODE_TYPE:
+		return g.builderService
+	case config.HIGH_NODE_TYPE:
+		return g.highBuilderService
+	}
+
+	return g.builderService
+}
+
 func (g grpcClients) BuilderService() BuilderServiceI {
 	return g.builderService
 }
+
+func (g grpcClients) HighBuilderService() BuilderServiceI {
+	return g.highBuilderService
+}
+
 func (g grpcClients) ChatService() ChatServiceI {
 	return g.chatService
-}
-
-func (g grpcClients) AuthService() AuthServiceI {
-	return g.authService
-}
-
-func (g grpcClients) CompanyService() CompanyServiceI {
-	return g.companyService
 }
 
 func (g grpcClients) AnalyticsService() AnalyticsServiceI {

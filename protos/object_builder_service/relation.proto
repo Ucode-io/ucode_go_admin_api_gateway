@@ -13,7 +13,8 @@ import "google/protobuf/struct.proto";
 service RelationService {
     rpc Create(CreateRelationRequest) returns (CreateRelationRequest) {}
     rpc GetAll(GetAllRelationsRequest) returns (GetAllRelationsResponse) {}
-    rpc Update(UpdateRelationRequest) returns (google.protobuf.Empty) {}
+    rpc GetByID(RelationPrimaryKey) returns (RelationForGetAll) {}
+    rpc Update(UpdateRelationRequest) returns (RelationForGetAll) {}
     rpc Delete(RelationPrimaryKey) returns (google.protobuf.Empty) {}
 }
 
@@ -53,6 +54,10 @@ message CreateRelationRequest {
     string function_path = 33;
     bool relation_buttons = 34;
     google.protobuf.Struct attributes = 35;
+    string id = 36;
+    string env_id = 37;
+    string relation_field_id = 38;
+    string relation_to_field_id = 39;
 }
 
 message AutoFilter {
@@ -102,6 +107,7 @@ message UpdateRelationRequest {
     string function_path = 34;
     bool relation_buttons = 35;
     google.protobuf.Struct attributes = 36;
+    string env_id = 37;
 }
 
 
@@ -162,6 +168,7 @@ message GetAllRelationsRequest {
 message RelationPrimaryKey {
     string id = 1;
     string project_id = 2;
+    string env_id = 3;
 }
 
 message Summary {

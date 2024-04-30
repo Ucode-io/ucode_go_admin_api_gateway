@@ -19,6 +19,8 @@ type AuthServiceManagerI interface {
 	Email() auth_service.EmailOtpServiceClient
 	Company() auth_service.CompanyServiceClient
 	ApiKey() auth_service.ApiKeysClient
+	AuthPing() auth_service.AuthPingServiceClient
+	ApiKeyUsage() auth_service.ApiKeyUsageServiceClient
 }
 
 type authGrpcClients struct {
@@ -32,9 +34,11 @@ type authGrpcClients struct {
 	emailServie           auth_service.EmailOtpServiceClient
 	authCompanyService    auth_service.CompanyServiceClient
 	apikeyService         auth_service.ApiKeysClient
+	authPingService       auth_service.AuthPingServiceClient
+	apiKeyUsageService    auth_service.ApiKeyUsageServiceClient
 }
 
-func NewAuthGrpcClient(ctx context.Context, cfg config.Config) (AuthServiceManagerI, error) {
+func NewAuthGrpcClient(ctx context.Context, cfg config.BaseConfig) (AuthServiceManagerI, error) {
 
 	connAuthService, err := grpc.DialContext(
 		ctx,
@@ -56,6 +60,8 @@ func NewAuthGrpcClient(ctx context.Context, cfg config.Config) (AuthServiceManag
 		emailServie:           auth_service.NewEmailOtpServiceClient(connAuthService),
 		authCompanyService:    auth_service.NewCompanyServiceClient(connAuthService),
 		apikeyService:         auth_service.NewApiKeysClient(connAuthService),
+		authPingService:       auth_service.NewAuthPingServiceClient(connAuthService),
+		apiKeyUsageService:    auth_service.NewApiKeyUsageServiceClient(connAuthService),
 	}, nil
 }
 
@@ -89,4 +95,12 @@ func (g *authGrpcClients) Company() auth_service.CompanyServiceClient {
 
 func (g *authGrpcClients) ApiKey() auth_service.ApiKeysClient {
 	return g.apikeyService
+}
+
+func (g *authGrpcClients) AuthPing() auth_service.AuthPingServiceClient {
+	return g.authPingService
+}
+
+func (g *authGrpcClients) ApiKeyUsage() auth_service.ApiKeyUsageServiceClient {
+	return g.apiKeyUsageService
 }
