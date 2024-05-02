@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"fmt"
 	"ucode/ucode_go_api_gateway/config"
 )
 
@@ -152,10 +153,13 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 }
 
 func (g grpcClients) GetBuilderServiceByType(nodeType string) BuilderServiceI {
+	fmt.Println("NODDDDDDDD TYYYYPP->", nodeType)
 	switch nodeType {
 	case config.LOW_NODE_TYPE:
+		fmt.Println("LOW BUILDER SERVICE->", g.builderService)
 		return g.builderService
 	case config.HIGH_NODE_TYPE:
+		fmt.Println("HIGH BUILDER SERVICE->", g.highBuilderService)
 		return g.highBuilderService
 	}
 
