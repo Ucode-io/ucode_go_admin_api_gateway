@@ -115,7 +115,7 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 	// 	return
 	// }
 	// defer conn.Close()
-	service := services.BuilderService().ObjectBuilder()
+	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 
 	if viewId, ok := objectRequest.Data["builder_service_view_id"].(string); ok {
 		if util.IsValidUUID(viewId) {
