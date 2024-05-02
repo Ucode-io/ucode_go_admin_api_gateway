@@ -3,6 +3,7 @@ package v2
 import (
 	"context"
 	"errors"
+	"fmt"
 	"reflect"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -118,6 +119,8 @@ func (h *HandlerV2) CreateMenu(c *gin.Context) {
 			TableSlug: "Menu",
 		}
 	)
+
+	fmt.Println("NODE TYPE->", resource.NodeType)
 
 	defer func() {
 		if err != nil {
