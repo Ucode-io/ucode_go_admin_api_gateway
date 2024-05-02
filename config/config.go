@@ -148,7 +148,7 @@ type BaseConfig struct {
 	PlatformType                  string
 
 	UcodeNamespace string
-
+ 
 	GithubClientId     string
 	GithubClientSecret string
 	ProjectUrl         string
