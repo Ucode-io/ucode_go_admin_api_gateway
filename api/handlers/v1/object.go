@@ -1113,10 +1113,12 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	fmt.Println("\n\n>>>>>>>>> test #3")
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+	fmt.Println("\n\n>>>>>>>>> test #4")
 
 	fromOfs := c.Query("from-ofs")
 	if fromOfs != "true" {
