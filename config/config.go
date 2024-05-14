@@ -93,6 +93,9 @@ type Config struct {
 	PostgresBuilderServiceHost string
 	PostgresBuilderServicePort string
 
+	GoObjectBuilderServiceHost string
+	GoObjectBuilderGRPCPort    string
+
 	GetRequestRedisHost     string
 	GetRequestRedisPort     string
 	GetRequestRedisDatabase int
@@ -133,6 +136,9 @@ type BaseConfig struct {
 
 	DefaultOffset string
 	DefaultLimit  string
+
+	GoObjectBuilderServiceHost string
+	GoObjectBuilderGRPCPort    string
 
 	CLIENT_HOST                   string
 	SUPERADMIN_HOST               string
@@ -188,6 +194,9 @@ func BaseLoad() BaseConfig {
 	config.GitlabGroupIdMicroFE = cast.ToInt(GetOrReturnDefaultValue("GITLAB_GROUP_ID_MICROFE", 0))
 	config.GitlabProjectIdMicroFE = cast.ToInt(GetOrReturnDefaultValue("GITLAB_PROJECT_ID_MICROFE", 0))
 	config.GitlabHostMicroFE = cast.ToString(GetOrReturnDefaultValue("GITLAB_HOST_MICROFE", ""))
+
+	config.GoObjectBuilderServiceHost = cast.ToString(GetOrReturnDefaultValue("GO_OBJECT_BUILDER_SERVICE_HOST", "localhost"))
+	config.GoObjectBuilderGRPCPort = cast.ToString(GetOrReturnDefaultValue("GO_OBJECT_BUILDER_GRPC_PORT", ":7107"))
 
 	config.DefaultOffset = cast.ToString(GetOrReturnDefaultValue("DEFAULT_OFFSET", "0"))
 	config.DefaultLimit = "100"
@@ -254,6 +263,9 @@ func Load() Config {
 
 	config.FunctionServiceHost = cast.ToString(GetOrReturnDefaultValue("FUNCTION_SERVICE_HOST", ""))
 	config.FunctionServicePort = cast.ToString(GetOrReturnDefaultValue("FUNCTION_GRPC_PORT", ""))
+
+	config.GoObjectBuilderServiceHost = cast.ToString(GetOrReturnDefaultValue("GO_OBJECT_BUILDER_SERVICE_HOST", "localhost"))
+	config.GoObjectBuilderGRPCPort = cast.ToString(GetOrReturnDefaultValue("GO_OBJECT_BUILDER_GRPC_PORT", ":7107"))
 
 	config.QueryServiceHost = cast.ToString(GetOrReturnDefaultValue("QUERY_SERVICE_HOST", ""))
 	config.QueryServicePort = cast.ToString(GetOrReturnDefaultValue("QUERY_GRPC_PORT", ""))

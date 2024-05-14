@@ -24,6 +24,7 @@ type ServiceManagerI interface {
 	PostgresBuilderService() PostgresBuilderServiceI
 	ConvertTemplateService() ConvertTemplateServiceI
 	GetBuilderServiceByType(nodeType string) BuilderServiceI
+	GoObjectBuilderService() GoBuilderServiceI
 }
 
 type grpcClients struct {
@@ -44,6 +45,7 @@ type grpcClients struct {
 	notificationService      NotificationServiceI
 	postgresBuilderService   PostgresBuilderServiceI
 	convertTemplateService   ConvertTemplateServiceI
+	goObjectBuilderService   GoBuilderServiceI
 }
 
 func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, error) {
@@ -130,6 +132,11 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 		return nil, err
 	}
 
+	goObjectBuilderServiceClient, err := NewGoBuilderServiceClient(ctx, cfg)
+	if err != nil {
+		return nil, err
+	}
+
 	return grpcClients{
 		apiReferenceService:      apiReferenceClient,
 		analyticsService:         analyticsServiceClient,
@@ -148,6 +155,7 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 		notificationService:      notificationServiceClient,
 		postgresBuilderService:   postgresBuilderServiceClient,
 		convertTemplateService:   convertTemplateServiceClient,
+		goObjectBuilderService:   goObjectBuilderServiceClient,
 	}, nil
 }
 
@@ -164,6 +172,10 @@ func (g grpcClients) GetBuilderServiceByType(nodeType string) BuilderServiceI {
 
 func (g grpcClients) BuilderService() BuilderServiceI {
 	return g.builderService
+}
+
+func (g grpcClients) GoObjectBuilderService() GoBuilderServiceI {
+	return g.goObjectBuilderService
 }
 
 func (g grpcClients) HighBuilderService() BuilderServiceI {

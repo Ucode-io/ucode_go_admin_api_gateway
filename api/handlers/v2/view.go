@@ -6,12 +6,13 @@ import (
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
+	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
+	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cast"
-	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 // CreateView godoc
@@ -31,7 +32,6 @@ import (
 func (h *HandlerV2) CreateView(c *gin.Context) {
 	var (
 		view obs.CreateViewRequest
-		resp *obs.View
 	)
 
 	err := c.ShouldBindJSON(&view)
@@ -94,7 +94,14 @@ func (h *HandlerV2) CreateView(c *gin.Context) {
 		}
 	)
 
-	defer func() {
+	view.ProjectId = resource.ResourceEnvironmentId
+	view.EnvId = resource.EnvironmentId
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).View().Create(
+			context.Background(),
+			&view,
+		)
 		if err != nil {
 			logReq.Response = err.Error()
 			h.handleResponse(c, status_http.GRPCError, err.Error())
@@ -104,27 +111,23 @@ func (h *HandlerV2) CreateView(c *gin.Context) {
 			h.handleResponse(c, status_http.Created, resp)
 		}
 		go h.versionHistory(c, logReq)
-	}()
-
-	view.ProjectId = resource.ResourceEnvironmentId
-	view.EnvId = resource.EnvironmentId
-	switch resource.ResourceType {
-	case pb.ResourceType_MONGODB:
-		resp, err = services.GetBuilderServiceByType(resource.NodeType).View().Create(
-			context.Background(),
-			&view,
-		)
-		if err != nil {
-			return
-		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().View().Create(
-			context.Background(),
-			&view,
-		)
+		newReq := nb.CreateViewRequest{}
+		err = helper.MarshalToStruct(&view, &newReq)
 		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
+
+		resp, err := services.GoObjectBuilderService().View().Create(
+			context.Background(),
+			&newReq,
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+		h.handleResponse(c, status_http.Created, resp)
 	}
 }
 
@@ -144,9 +147,6 @@ func (h *HandlerV2) CreateView(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) GetSingleView(c *gin.Context) {
 	viewID := c.Param("id")
-	var (
-		resp *obs.View
-	)
 
 	if !util.IsValidUUID(viewID) {
 		h.handleResponse(c, status_http.InvalidArgument, "view id is an invalid uuid")
@@ -191,7 +191,7 @@ func (h *HandlerV2) GetSingleView(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.GetBuilderServiceByType(resource.NodeType).View().GetSingle(
+		resp, err := services.BuilderService().View().GetSingle(
 			context.Background(),
 			&obs.ViewPrimaryKey{
 				Id:        viewID,
@@ -202,10 +202,11 @@ func (h *HandlerV2) GetSingleView(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
+		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().View().GetSingle(
+		resp, err := services.GoObjectBuilderService().View().GetSingle(
 			context.Background(),
-			&obs.ViewPrimaryKey{
+			&nb.ViewPrimaryKey{
 				Id:        viewID,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -214,9 +215,8 @@ func (h *HandlerV2) GetSingleView(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
+		h.handleResponse(c, status_http.OK, resp)
 	}
-
-	h.handleResponse(c, status_http.OK, resp)
 }
 
 // UpdateView godoc
@@ -328,21 +328,48 @@ func (h *HandlerV2) UpdateView(c *gin.Context) {
 	view.EnvId = resource.EnvironmentId
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.GetBuilderServiceByType(resource.NodeType).View().Update(
+		oldView, err = services.GetBuilderServiceByType(resource.NodeType).View().GetSingle(
+			context.Background(),
+			&obs.ViewPrimaryKey{
+				Id:        view.Id,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+		logReq.Previous = oldView
+
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).View().Update(
 			context.Background(),
 			&view,
 		)
 		if err != nil {
 			return
+		} else {
+			logReq.Response = resp
+			logReq.Current = resp
+			h.handleResponse(c, status_http.OK, resp)
 		}
+		go h.versionHistory(c, logReq)
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().View().Update(
-			context.Background(),
-			&view,
-		)
+		newReq := nb.View{}
+		err = helper.MarshalToStruct(&view, &newReq)
 		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
+
+		resp, err := services.GoObjectBuilderService().View().Update(
+			context.Background(),
+			&newReq,
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+		h.handleResponse(c, status_http.OK, resp)
 	}
 }
 
@@ -362,9 +389,6 @@ func (h *HandlerV2) UpdateView(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) DeleteView(c *gin.Context) {
 	viewID := c.Param("id")
-	var (
-		resp *emptypb.Empty
-	)
 
 	if !util.IsValidUUID(viewID) {
 		h.handleResponse(c, status_http.InvalidArgument, "view id is an invalid uuid")
@@ -425,51 +449,47 @@ func (h *HandlerV2) DeleteView(c *gin.Context) {
 		}
 	)
 
-	defer func() {
-		logReq.Previous = oldView
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		oldView, err = services.GetBuilderServiceByType(resource.NodeType).View().GetSingle(
+			context.Background(),
+			&obs.ViewPrimaryKey{
+				Id:        viewID,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
 		if err != nil {
 			logReq.Response = err.Error()
 			h.handleResponse(c, status_http.GRPCError, err.Error())
-		} else {
+			return
+		}
+
+		logReq.Previous = oldView
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).View().Delete(
+			context.Background(),
+			&obs.ViewPrimaryKey{
+				Id:        viewID,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
 			h.handleResponse(c, status_http.NoContent, resp)
+			return
 		}
 		go h.versionHistory(c, logReq)
-	}()
-
-	oldView, err = services.GetBuilderServiceByType(resource.NodeType).View().GetSingle(
-		context.Background(),
-		&obs.ViewPrimaryKey{
-			Id:        viewID,
-			ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
-	if err != nil {
-		return
-	}
-
-	switch resource.ResourceType {
-	case pb.ResourceType_MONGODB:
-		resp, err = services.GetBuilderServiceByType(resource.NodeType).View().Delete(
-			context.Background(),
-			&obs.ViewPrimaryKey{
-				Id:        viewID,
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-		if err != nil {
-			return
-		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().View().Delete(
+		resp, err := services.GoObjectBuilderService().View().Delete(
 			context.Background(),
-			&obs.ViewPrimaryKey{
+			&nb.ViewPrimaryKey{
 				Id:        viewID,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
 		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
+		h.handleResponse(c, status_http.NoContent, resp)
 	}
 }
 
@@ -488,10 +508,7 @@ func (h *HandlerV2) DeleteView(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) GetAllViews(c *gin.Context) {
 
-	var (
-		resp   *obs.GetAllViewsResponse
-		roleId string
-	)
+	var roleId string
 
 	if c.Param("collection") == "" {
 		h.handleResponse(c, status_http.BadRequest, "collection is required")
@@ -541,7 +558,7 @@ func (h *HandlerV2) GetAllViews(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.GetBuilderServiceByType(resource.NodeType).View().GetList(
+		resp, err := services.BuilderService().View().GetList(
 			context.Background(),
 			&obs.GetAllViewsRequest{
 				TableSlug: c.Param("collection"),
@@ -554,23 +571,22 @@ func (h *HandlerV2) GetAllViews(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
+		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().View().GetList(
+		resp, err := services.GoObjectBuilderService().View().GetList(
 			context.Background(),
-			&obs.GetAllViewsRequest{
+			&nb.GetAllViewsRequest{
 				TableSlug: c.Param("collection"),
 				ProjectId: resource.ResourceEnvironmentId,
 				RoleId:    roleId,
 			},
 		)
-
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
+		h.handleResponse(c, status_http.OK, resp)
 	}
-
-	h.handleResponse(c, status_http.OK, resp)
 }
 
 // UpdateViewOrder godoc
@@ -590,7 +606,6 @@ func (h *HandlerV2) GetAllViews(c *gin.Context) {
 func (h *HandlerV2) UpdateViewOrder(c *gin.Context) {
 	var (
 		view obs.UpdateViewOrderRequest
-		resp *emptypb.Empty
 	)
 
 	err := c.ShouldBindJSON(&view)
@@ -636,9 +651,10 @@ func (h *HandlerV2) UpdateViewOrder(c *gin.Context) {
 		return
 	}
 
+	view.ProjectId = resource.ResourceEnvironmentId
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.GetBuilderServiceByType(resource.NodeType).View().UpdateViewOrder(
+		resp, err := services.BuilderService().View().UpdateViewOrder(
 			context.Background(),
 			&view,
 		)
@@ -647,17 +663,23 @@ func (h *HandlerV2) UpdateViewOrder(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
+		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().View().UpdateViewOrder(
-			context.Background(),
-			&view,
-		)
-
+		newReq := nb.UpdateViewOrderRequest{}
+		err = helper.MarshalToStruct(&view, &newReq)
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
-	}
 
-	h.handleResponse(c, status_http.OK, resp)
+		resp, err := services.GoObjectBuilderService().View().UpdateViewOrder(
+			context.Background(),
+			&newReq,
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+		h.handleResponse(c, status_http.OK, resp)
+	}
 }

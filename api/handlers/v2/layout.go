@@ -4,8 +4,10 @@ import (
 	"context"
 	"errors"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
+	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
 
+	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"ucode/ucode_go_api_gateway/api/models"
@@ -18,10 +20,10 @@ import (
 )
 
 func (h *HandlerV2) GetSingleLayout(c *gin.Context) {
-	tableSlug := c.Param("collection")
+	collection := c.Param("collection")
 	menuId := c.Param("menu_id")
 
-	if tableSlug == "" && menuId == "" {
+	if collection == "" && menuId == "" {
 		h.handleResponse(c, status_http.BadRequest, "table-slug or table-id is required")
 		return
 	}
@@ -62,20 +64,38 @@ func (h *HandlerV2) GetSingleLayout(c *gin.Context) {
 
 	authInfo, _ := h.GetAuthInfo(c)
 
-	resp, err := services.GetBuilderServiceByType(resource.NodeType).Layout().GetSingleLayout(
-		context.Background(),
-		&object_builder_service.GetSingleLayoutRequest{
-			ProjectId: resource.ResourceEnvironmentId,
-			MenuId:    menuId,
-			TableSlug: tableSlug,
-			RoleId:    authInfo.RoleId,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err := services.BuilderService().Layout().GetSingleLayout(
+			context.Background(),
+			&object_builder_service.GetSingleLayoutRequest{
+				TableSlug: collection,
+				ProjectId: resource.ResourceEnvironmentId,
+				MenuId:    menuId,
+				RoleId:    authInfo.GetRoleId(),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+		h.handleResponse(c, status_http.OK, resp)
+	case pb.ResourceType_POSTGRESQL:
+		resp, err := services.GoObjectBuilderService().Layout().GetSingleLayout(
+			context.Background(),
+			&nb.GetSingleLayoutRequest{
+				TableSlug: collection,
+				ProjectId: resource.ResourceEnvironmentId,
+				MenuId:    menuId,
+				RoleId:    authInfo.GetRoleId(),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+		h.handleResponse(c, status_http.OK, resp)
 	}
-	h.handleResponse(c, status_http.OK, resp)
 }
 
 // GetListLayouts godoc
@@ -153,23 +173,45 @@ func (h *HandlerV2) GetListLayouts(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.GetBuilderServiceByType(nodeType).Layout().GetAll(
-		context.Background(),
-		&object_builder_service.GetListLayoutRequest{
-			TableSlug:       tableSlug,
-			TableId:         tableId,
-			ProjectId:       resourceEnvironmentId,
-			IsDefualt:       isDefault,
-			RoleId:          authInfo.GetRoleId(),
-			LanguageSetting: languageSettings,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		h.log.Info("HERE WE GOOOOOO OKAY")
 
-	h.handleResponse(c, status_http.OK, resp)
+		resp, err := services.BuilderService().Layout().GetAll(
+			context.Background(),
+			&object_builder_service.GetListLayoutRequest{
+				TableSlug:       tableSlug,
+				ProjectId:       resourceEnvironmentId,
+				IsDefualt:       isDefault,
+				RoleId:          authInfo.GetRoleId(),
+				LanguageSetting: languageSettings,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+		h.handleResponse(c, status_http.OK, resp)
+
+	case pb.ResourceType_POSTGRESQL:
+		h.log.Info("HERE WE GOOOOOO OKAY, POSTGRES")
+		resp, err := services.GoObjectBuilderService().Layout().GetAll(
+			context.Background(),
+			&nb.GetListLayoutRequest{
+				TableSlug:       tableSlug,
+				ProjectId:       resourceEnvironmentId,
+				IsDefault:       isDefault,
+				RoleId:          authInfo.GetRoleId(),
+				LanguageSetting: languageSettings,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+		h.handleResponse(c, status_http.OK, resp)
+
+	}
 }
 
 // UpdateLayout godoc
@@ -254,8 +296,7 @@ func (h *HandlerV2) UpdateLayout(c *gin.Context) {
 	}
 
 	var (
-		oldLayout = &object_builder_service.LayoutResponse{}
-		logReq    = &models.CreateVersionHistoryRequest{
+		logReq = &models.CreateVersionHistoryRequest{
 			Services:     services,
 			NodeType:     resource.NodeType,
 			ProjectId:    resource.ResourceEnvironmentId,
@@ -270,8 +311,13 @@ func (h *HandlerV2) UpdateLayout(c *gin.Context) {
 		}
 	)
 
-	defer func() {
-		logReq.Previous = oldLayout
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = services.BuilderService().Layout().Update(
+			context.Background(),
+			&input,
+		)
+		logReq.Previous = &input
 		if err != nil {
 			logReq.Response = err.Error()
 			h.handleResponse(c, status_http.GRPCError, err.Error())
@@ -280,22 +326,37 @@ func (h *HandlerV2) UpdateLayout(c *gin.Context) {
 			h.handleResponse(c, status_http.OK, resp)
 		}
 		go h.versionHistory(c, logReq)
-	}()
+		h.handleResponse(c, status_http.OK, resp)
+		return
+	case pb.ResourceType_POSTGRESQL:
+		newInput := nb.LayoutRequest{}
+		err = helper.MarshalToStruct(&input, &newInput)
+		if err != nil {
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+		resp2, err := services.GoObjectBuilderService().Layout().Update(
+			context.Background(),
+			&newInput,
+		)
+		if err != nil {
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, resp2)
+			return
+		}
 
-	oldLayout, _ = services.GetBuilderServiceByType(resource.NodeType).Layout().GetByID(
-		context.Background(),
-		&object_builder_service.LayoutPrimaryKey{
-			Id:        input.Id,
-			ProjectId: resourceEnvironmentId,
-		},
-	)
+		err = helper.MarshalToStruct(resp2, &resp)
+		if err != nil {
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 
-	resp, err = services.GetBuilderServiceByType(nodeType).Layout().Update(
-		context.Background(),
-		&input,
-	)
+		logReq.Response = resp
+		go h.versionHistory(c, logReq)
 
-	if err != nil {
+		h.handleResponse(c, status_http.OK, resp)
 		return
 	}
 }
@@ -391,26 +452,40 @@ func (h *HandlerV2) DeleteLayout(c *gin.Context) {
 		go h.versionHistory(c, logReq)
 	}()
 
-	oldLayout, err = services.GetBuilderServiceByType(nodeType).Layout().GetByID(
-		context.Background(),
-		&object_builder_service.LayoutPrimaryKey{
-			Id:        c.Param("id"),
-			ProjectId: resourceEnvironmentId,
-		},
-	)
-	if err != nil {
-		return
-	}
-
-	resp, err = services.GetBuilderServiceByType(nodeType).Layout().RemoveLayout(
-		context.Background(),
-		&object_builder_service.LayoutPrimaryKey{
-			Id:        c.Param("id"),
-			ProjectId: resourceEnvironmentId,
-			EnvId:     environmentId.(string),
-		},
-	)
-	if err != nil {
-		return
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		oldLayout, err = services.GetBuilderServiceByType(nodeType).Layout().GetByID(
+			context.Background(),
+			&object_builder_service.LayoutPrimaryKey{
+				Id:        c.Param("id"),
+				ProjectId: resourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			return
+		}
+		resp, err = services.GetBuilderServiceByType(nodeType).Layout().RemoveLayout(
+			context.Background(),
+			&object_builder_service.LayoutPrimaryKey{
+				Id:        c.Param("id"),
+				ProjectId: resourceEnvironmentId,
+				EnvId:     environmentId.(string),
+			},
+		)
+		if err != nil {
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+		_, err = services.GoObjectBuilderService().Layout().RemoveLayout(
+			context.Background(),
+			&nb.LayoutPrimaryKey{
+				Id:        c.Param("id"),
+				ProjectId: resourceEnvironmentId,
+				EnvId:     environmentId.(string),
+			},
+		)
+		if err != nil {
+			return
+		}
 	}
 }

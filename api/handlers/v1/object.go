@@ -10,6 +10,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
 	pba "ucode/ucode_go_api_gateway/genproto/auth_service"
+	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
@@ -1246,9 +1247,9 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 				return
 			}
 		case pb.ResourceType_POSTGRESQL:
-			resp, err = services.PostgresBuilderService().ObjectBuilder().GetList(
+			resp, err := services.GoObjectBuilderService().ObjectBuilder().GetAll(
 				context.Background(),
-				&obs.CommonMessage{
+				&nb.CommonMessage{
 					TableSlug: c.Param("table_slug"),
 					Data:      structData,
 					ProjectId: resource.ResourceEnvironmentId,
@@ -1259,6 +1260,9 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 				h.handleResponse(c, status_http.GRPCError, err.Error())
 				return
 			}
+			statusHttp.CustomMessage = resp.GetCustomMessage()
+			h.handleResponse(c, statusHttp, resp)
+			return
 		}
 	}
 
@@ -1511,7 +1515,6 @@ func (h *HandlerV1) GetListSlim(c *gin.Context) {
 func (h *HandlerV1) GetListInExcel(c *gin.Context) {
 	var (
 		objectRequest models.CommonMessage
-		resp          *obs.CommonMessage
 		statusHttp    = status_http.GrpcStatusToHTTP["Ok"]
 	)
 
@@ -1577,7 +1580,7 @@ func (h *HandlerV1) GetListInExcel(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = service.GetListInExcel(
+		resp, err := service.GetListInExcel(
 			context.Background(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("table_slug"),
@@ -1596,10 +1599,13 @@ func (h *HandlerV1) GetListInExcel(c *gin.Context) {
 			h.handleResponse(c, statusHttp, err.Error())
 			return
 		}
+
+		statusHttp.CustomMessage = resp.GetCustomMessage()
+		h.handleResponse(c, statusHttp, resp)
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().ObjectBuilder().GetListInExcel(
+		resp, err := services.GoObjectBuilderService().ObjectBuilder().GetListInExcel(
 			context.Background(),
-			&obs.CommonMessage{
+			&nb.CommonMessage{
 				TableSlug: c.Param("table_slug"),
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
@@ -1610,10 +1616,10 @@ func (h *HandlerV1) GetListInExcel(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
+		statusHttp.CustomMessage = resp.GetCustomMessage()
+		h.handleResponse(c, statusHttp, resp)
 	}
 
-	statusHttp.CustomMessage = resp.GetCustomMessage()
-	h.handleResponse(c, statusHttp, resp)
 }
 
 // DeleteManyToMany godoc
