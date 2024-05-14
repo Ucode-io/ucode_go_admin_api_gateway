@@ -47,6 +47,12 @@ type Config struct {
 	VersioningServiceHost string
 	VersioningGRPCPort    string
 
+	AuthServiceHost string
+	AuthGRPCPort    string
+
+	CompanyServiceHost string
+	CompanyServicePort string
+
 	IntegrationServiceHost string
 	IntegrationGRPCPort    string
 
@@ -154,7 +160,7 @@ type BaseConfig struct {
 	PlatformType                  string
 
 	UcodeNamespace string
- 
+
 	GithubClientId     string
 	GithubClientSecret string
 	ProjectUrl         string
@@ -199,7 +205,7 @@ func BaseLoad() BaseConfig {
 	config.GoObjectBuilderGRPCPort = cast.ToString(GetOrReturnDefaultValue("GO_OBJECT_BUILDER_GRPC_PORT", ":7107"))
 
 	config.DefaultOffset = cast.ToString(GetOrReturnDefaultValue("DEFAULT_OFFSET", "0"))
-	config.DefaultLimit = "100" 
+	config.DefaultLimit = "100"
 
 	config.GitlabIntegrationToken = cast.ToString(GetOrReturnDefaultValue("GITLAB_ACCESS_TOKEN", ""))
 	config.GitlabIntegrationURL = cast.ToString(GetOrReturnDefaultValue("GITLAB_URL", ""))
@@ -233,6 +239,12 @@ func Load() Config {
 
 	config.ObjectBuilderServiceHost = cast.ToString(GetOrReturnDefaultValue("OBJECT_BUILDER_SERVICE_LOW_HOST", ""))
 	config.ObjectBuilderGRPCPort = cast.ToString(GetOrReturnDefaultValue("OBJECT_BUILDER_LOW_GRPC_PORT", ""))
+
+	config.AuthServiceHost = cast.ToString(GetOrReturnDefaultValue("AUTH_SERVICE_HOST", ""))
+	config.AuthGRPCPort = cast.ToString(GetOrReturnDefaultValue("AUTH_GRPC_PORT", ""))
+
+	config.CompanyServiceHost = cast.ToString(GetOrReturnDefaultValue("COMPANY_SERVICE_HOST", ""))
+	config.CompanyServicePort = cast.ToString(GetOrReturnDefaultValue("COMPANY_GRPC_PORT", ""))
 
 	config.HighObjectBuilderServiceHost = cast.ToString(GetOrReturnDefaultValue("OBJECT_BUILDER_SERVICE_HIGHT_HOST", ""))
 	config.HighObjectBuilderGRPCPort = cast.ToString(GetOrReturnDefaultValue("OBJECT_BUILDER_HIGH_GRPC_PORT", ""))

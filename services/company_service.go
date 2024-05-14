@@ -31,7 +31,7 @@ type companyServiceClient struct {
 	integrationResourceService company_service.IntegrationResourceServiceClient
 }
 
-func NewCompanyServiceClient(ctx context.Context, cfg config.BaseConfig) (CompanyServiceI, error) {
+func NewCompanyServiceClient(ctx context.Context, cfg config.Config) (CompanyServiceI, error) {
 
 	connCompanyService, err := grpc.DialContext(
 		ctx,
