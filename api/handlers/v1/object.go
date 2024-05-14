@@ -1253,6 +1253,10 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 				return
 			}
 		case pb.ResourceType_POSTGRESQL:
+
+			fmt.Println("HELELEOOEL")
+			fmt.Println(resource.ResourceEnvironmentId)
+
 			resp, err := services.GoObjectBuilderService().ObjectBuilder().GetAll(
 				context.Background(),
 				&nb.CommonMessage{
