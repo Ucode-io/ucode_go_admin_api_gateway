@@ -154,7 +154,7 @@ type BaseConfig struct {
 	PlatformType                  string
 
 	UcodeNamespace string
-
+ 
 	GithubClientId     string
 	GithubClientSecret string
 	ProjectUrl         string
@@ -199,7 +199,7 @@ func BaseLoad() BaseConfig {
 	config.GoObjectBuilderGRPCPort = cast.ToString(GetOrReturnDefaultValue("GO_OBJECT_BUILDER_GRPC_PORT", ":7107"))
 
 	config.DefaultOffset = cast.ToString(GetOrReturnDefaultValue("DEFAULT_OFFSET", "0"))
-	config.DefaultLimit = "100"
+	config.DefaultLimit = "100" 
 
 	config.GitlabIntegrationToken = cast.ToString(GetOrReturnDefaultValue("GITLAB_ACCESS_TOKEN", ""))
 	config.GitlabIntegrationURL = cast.ToString(GetOrReturnDefaultValue("GITLAB_URL", ""))

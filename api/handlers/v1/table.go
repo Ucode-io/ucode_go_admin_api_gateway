@@ -47,6 +47,10 @@ func (h *HandlerV1) CreateTable(c *gin.Context) {
 		return
 	}
 
+	if tableRequest.Attributes == nil {
+		tableRequest.Attributes = make(map[string]interface{})
+	}
+
 	attributes, err := helper.ConvertMapToStruct(tableRequest.Attributes)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())

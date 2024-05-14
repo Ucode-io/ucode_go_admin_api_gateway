@@ -3,6 +3,7 @@ package v2
 import (
 	"context"
 	"errors"
+	"fmt"
 	"reflect"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -124,6 +125,8 @@ func (h *HandlerV2) CreateMenu(c *gin.Context) {
 			context.Background(),
 			menuRequest,
 		)
+		fmt.Println("NODE TYPE->", resource.NodeType)
+
 		if err != nil {
 			logReq.Response = err.Error()
 			h.handleResponse(c, status_http.GRPCError, err.Error())
