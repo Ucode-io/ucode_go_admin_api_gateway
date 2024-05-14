@@ -1118,15 +1118,6 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 		return
 	}
 
-	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
-	if err != nil {
-		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
-		h.log.Info("ConnectionPool", logger.Any("CONNECTION", conn))
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
-	defer conn.Close()
-
 	fromOfs := c.Query("from-ofs")
 	if fromOfs != "true" {
 		beforeActions, afterActions, err = GetListCustomEvents(c.Param("table_slug"), "", "GETLIST", c, h)
@@ -1171,6 +1162,15 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 				// 		return
 				// 	}
 				// }
+
+				service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
+				if err != nil {
+					h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
+					h.log.Info("ConnectionPool", logger.Any("CONNECTION", conn))
+					h.handleResponse(c, status_http.InternalServerError, err)
+					return
+				}
+				defer conn.Close()
 
 				resp, err = service.GroupByColumns(
 					context.Background(),
@@ -1228,6 +1228,15 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 					return
 				}
 			}
+
+			service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
+			if err != nil {
+				h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
+				h.log.Info("ConnectionPool", logger.Any("CONNECTION", conn))
+				h.handleResponse(c, status_http.InternalServerError, err)
+				return
+			}
+			defer conn.Close()
 
 			resp, err = service.GetList(
 				context.Background(),
