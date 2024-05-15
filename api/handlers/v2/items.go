@@ -46,7 +46,6 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 		resp                        *obs.CommonMessage
 		beforeActions, afterActions []*obs.CustomEvent
 		statusHttp                  = status_http.GrpcStatusToHTTP["Created"]
-		//logReq                      = models.CreateVersionHistoryRequest{}
 	)
 
 	err := c.ShouldBindJSON(&objectRequest)
@@ -83,12 +82,9 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
-	defer cancel()
-
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
-		resource.GetProjectId(),
+		projectId.(string),
 		resource.NodeType,
 	)
 	if err != nil {
@@ -133,7 +129,6 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 			TableSlug:    c.Param("collection"),
 			ObjectData:   objectRequest.Data,
 			Method:       "CREATE",
-			ActionType:   "BEFORE",
 		},
 			c,
 			h,
@@ -143,15 +138,6 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 			return
 		}
 	}
-
-	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
-	if err != nil {
-		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
-		h.log.Info("ConnectionPool", logger.Any("CONNECTION", conn))
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
-	defer conn.Close()
 
 	logReq := &models.CreateVersionHistoryRequest{
 		Services:     services,
@@ -163,31 +149,30 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 			cast.ToString(environmentId): true,
 		},
 		UserInfo:  cast.ToString(userId),
-		Request:   structData,
+		Request:   &structData,
 		TableSlug: c.Param("collection"),
 	}
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = service.Create(
+		resp, err = services.BuilderService().ObjectBuilder().Create(
 			context.Background(),
 			&obs.CommonMessage{
-				TableSlug:         c.Param("collection"),
-				Data:              structData,
-				ProjectId:         resource.ResourceEnvironmentId,
-				BlockedLoginTable: cast.ToBool(c.DefaultQuery("blocked_login_table", "false")),
-				BlockedBuilder:    cast.ToBool(c.DefaultQuery("block_builder", "false")),
+				TableSlug: c.Param("collection"),
+				Data:      structData,
+				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
 		// this logic for custom error message, object builder service may be return 400, 404, 500
 		if err != nil {
-			logReq.Response = err.Error()
 			statusHttp = status_http.GrpcStatusToHTTP["Internal"]
 			stat, ok := status.FromError(err)
 			if ok {
 				statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
 				statusHttp.CustomMessage = stat.Message()
 			}
+			logReq.Response = err.Error()
+			go h.versionHistory(c, logReq)
 			h.handleResponse(c, statusHttp, err.Error())
 			return
 		}
@@ -211,7 +196,6 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 		if err != nil {
 			return
 		}
-
 	}
 
 	if data, ok := resp.Data.AsMap()["data"].(map[string]interface{}); ok {
@@ -228,7 +212,6 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 				TableSlug:    c.Param("collection"),
 				ObjectData:   objectRequest.Data,
 				Method:       "CREATE",
-				ActionType:   "AFTER",
 			},
 			c, // gin context,
 			h, // handler
