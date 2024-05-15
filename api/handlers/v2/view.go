@@ -372,7 +372,6 @@ func (h *HandlerV2) UpdateView(c *gin.Context) {
 		h.handleResponse(c, status_http.OK, resp)
 	}
 }
-
 // DeleteView godoc
 // @Security ApiKeyAuth
 // @ID v2_delete_view
