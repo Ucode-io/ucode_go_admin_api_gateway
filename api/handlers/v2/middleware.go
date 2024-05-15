@@ -23,7 +23,7 @@ func (h *HandlerV2) NodeMiddleware() gin.HandlerFunc {
 
 		c.Set("namespace", h.baseConf.UcodeNamespace)
 		c.Next()
-	}
+	} 
 }
 
 func (h *HandlerV2) AuthMiddleware() gin.HandlerFunc {
