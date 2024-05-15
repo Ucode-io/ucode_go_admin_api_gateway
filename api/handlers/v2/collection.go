@@ -9,6 +9,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
+	"ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
@@ -266,9 +267,6 @@ func (h *HandlerV2) GetSingleCollection(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) GetAllCollections(c *gin.Context) {
-	var (
-		resp *obs.GetAllTablesResponse
-	)
 	offset, err := h.getOffsetParam(c)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
@@ -309,7 +307,7 @@ func (h *HandlerV2) GetAllCollections(c *gin.Context) {
 
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
-		resource.GetProjectId(),
+		projectId.(string),
 		resource.NodeType,
 	)
 	if err != nil {
@@ -325,7 +323,7 @@ func (h *HandlerV2) GetAllCollections(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.GetBuilderServiceByType(resource.NodeType).Table().GetAll(
+		resp, err := services.BuilderService().Table().GetAll(
 			context.Background(),
 			&obs.GetAllTablesRequest{
 				Limit:        int32(limit),
@@ -341,10 +339,12 @@ func (h *HandlerV2) GetAllCollections(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
+
+		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Table().GetAll(
+		resp, err := services.GoObjectBuilderService().Table().GetAll(
 			context.Background(),
-			&obs.GetAllTablesRequest{
+			&new_object_builder_service.GetAllTablesRequest{
 				Limit:        int32(limit),
 				Offset:       int32(offset),
 				Search:       c.DefaultQuery("search", ""),
@@ -357,9 +357,9 @@ func (h *HandlerV2) GetAllCollections(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
-	}
 
-	h.handleResponse(c, status_http.OK, resp)
+		h.handleResponse(c, status_http.OK, resp)
+	}
 }
 
 // UpdateCollection godoc
