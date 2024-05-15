@@ -897,7 +897,7 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		singleObject, err = service.GetSingle(
+		singleObject, err = service.GetSingleSlim(
 			context.Background(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("collection"),
