@@ -236,7 +236,6 @@ func (h *HandlerV2) GetSingleView(c *gin.Context) {
 func (h *HandlerV2) UpdateView(c *gin.Context) {
 	var (
 		view obs.View
-		resp *obs.View
 	)
 
 	err := c.ShouldBindJSON(&view)
@@ -300,30 +299,6 @@ func (h *HandlerV2) UpdateView(c *gin.Context) {
 		}
 	)
 
-	defer func() {
-		logReq.Previous = oldView
-		if err != nil {
-			logReq.Response = err.Error()
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-		} else {
-			logReq.Response = resp
-			logReq.Current = resp
-			h.handleResponse(c, status_http.OK, resp)
-		}
-		go h.versionHistory(c, logReq)
-	}()
-
-	oldView, err = services.GetBuilderServiceByType(resource.NodeType).View().GetSingle(
-		context.Background(),
-		&obs.ViewPrimaryKey{
-			Id:        view.Id,
-			ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
-	if err != nil {
-		return
-	}
-
 	view.ProjectId = resource.ResourceEnvironmentId
 	view.EnvId = resource.EnvironmentId
 	switch resource.ResourceType {
@@ -372,6 +347,7 @@ func (h *HandlerV2) UpdateView(c *gin.Context) {
 		h.handleResponse(c, status_http.OK, resp)
 	}
 }
+
 // DeleteView godoc
 // @Security ApiKeyAuth
 // @ID v2_delete_view
