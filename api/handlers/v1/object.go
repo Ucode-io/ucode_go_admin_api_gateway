@@ -1120,14 +1120,15 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 	}
 	fmt.Println("\n\n>>>>>>>>> test #4")
 
-	fromOfs := c.Query("from-ofs")
-	if fromOfs != "true" {
-		beforeActions, afterActions, err = GetListCustomEvents(c.Param("table_slug"), "", "GETLIST", c, h)
-		if err != nil {
-			h.handleResponse(c, status_http.InvalidArgument, err.Error())
-			return
-		}
-	}
+	// fromOfs := c.Query("from-ofs")
+	// if fromOfs != "true" {
+	// 	fmt.Println("here > >> ")
+	// 	beforeActions, afterActions, err = GetListCustomEvents(c.Param("table_slug"), "", "GETLIST", c, h)
+	// 	if err != nil {
+	// 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+	// 		return
+	// 	}
+	// }
 
 	go func() {
 		if len(beforeActions) > 0 {
