@@ -194,7 +194,6 @@ func (h *HandlerV2) GetListLayouts(c *gin.Context) {
 		h.handleResponse(c, status_http.OK, resp)
 
 	case pb.ResourceType_POSTGRESQL:
-		h.log.Info("HERE WE GOOOOOO OKAY, POSTGRES")
 		resp, err := services.GoObjectBuilderService().Layout().GetAll(
 			context.Background(),
 			&nb.GetListLayoutRequest{
