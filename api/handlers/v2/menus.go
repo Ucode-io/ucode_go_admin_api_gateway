@@ -147,7 +147,7 @@ func (h *HandlerV2) CreateMenu(c *gin.Context) {
 			context.Background(),
 			&newReq,
 		)
-		if err != nil {
+		if err != nil { 
 			logReq.Response = err.Error()
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 		} else {
