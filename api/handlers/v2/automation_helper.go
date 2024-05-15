@@ -98,19 +98,7 @@ func GetListCustomEvents(tableSlug, roleId, method string, c *gin.Context, h *Ha
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		res, err = services.PostgresBuilderService().CustomEvent().GetList(
-			context.Background(),
-			&obs.GetCustomEventsListRequest{
-				TableSlug: tableSlug,
-				Method:    method,
-				RoleId:    roleId,
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-
-		if err != nil {
-			return
-		}
+		return
 	}
 
 	if res != nil {
