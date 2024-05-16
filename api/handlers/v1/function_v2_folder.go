@@ -234,22 +234,27 @@ func (h *HandlerV1) GetAllFunctionFolder(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.FunctionService().FunctionFolderService().GetList(
-		context.Background(),
-		&fc.GetAllFunctionFoldersRequest{
-			Search:    c.DefaultQuery("search", ""),
-			Limit:     int32(limit),
-			Offset:    int32(offset),
-			Type:      typeFolder,
-			ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err := services.FunctionService().FunctionFolderService().GetList(
+			context.Background(),
+			&fc.GetAllFunctionFoldersRequest{
+				Search:    c.DefaultQuery("search", ""),
+				Limit:     int32(limit),
+				Offset:    int32(offset),
+				Type:      typeFolder,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 
-	h.handleResponse(c, status_http.OK, resp)
+		h.handleResponse(c, status_http.OK, resp)
+	case pb.ResourceType_POSTGRESQL:
+		h.handleResponse(c, status_http.OK, fc.GetAllFunctionFoldersResponse{})
+	}
 }
 
 // UpdateFunctionFolder godoc
