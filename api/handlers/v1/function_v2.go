@@ -731,22 +731,42 @@ func (h *HandlerV1) GetAllNewFunctionsForApp(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.FunctionService().FunctionService().GetList(
-		context.Background(),
-		&fc.GetAllFunctionsRequest{
-			Search:    c.DefaultQuery("search", ""),
-			Limit:     int32(limit),
-			Offset:    int32(offset),
-			ProjectId: resource.ResourceEnvironmentId,
-			Type:      FUNCTION,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err := services.FunctionService().FunctionService().GetList(
+			context.Background(),
+			&fc.GetAllFunctionsRequest{
+				Search:    c.DefaultQuery("search", ""),
+				Limit:     int32(limit),
+				Offset:    int32(offset),
+				ProjectId: resource.ResourceEnvironmentId,
+				Type:      FUNCTION,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 
-	h.handleResponse(c, status_http.OK, resp)
+		h.handleResponse(c, status_http.OK, resp)
+	case pb.ResourceType_POSTGRESQL:
+		resp, err := services.GoObjectBuilderService().Function().GetList(
+			context.Background(),
+			&nb.GetAllFunctionsRequest{
+				Search:    c.DefaultQuery("search", ""),
+				Limit:     int32(limit),
+				Offset:    int32(offset),
+				ProjectId: resource.ResourceEnvironmentId,
+				Type:      FUNCTION,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		h.handleResponse(c, status_http.OK, resp)
+	}
 }
 
 // InvokeFunctionByPath godoc
