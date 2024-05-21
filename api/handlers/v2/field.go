@@ -551,7 +551,6 @@ func (h *HandlerV2) UpdateField(c *gin.Context) {
 
 		h.handleResponse(c, status_http.Created, resp)
 	case pb.ResourceType_POSTGRESQL:
-		fmt.Println("6 >>>>> hello")
 		newReq := nb.Field{}
 
 		err = helper.MarshalToStruct(&field, &newReq)
@@ -640,16 +639,37 @@ func (h *HandlerV2) UpdateSearch(c *gin.Context) {
 
 	searchRequest.ProjectId = resource.ResourceEnvironmentId
 	searchRequest.TableSlug = c.Param("collection")
-	resp, err := services.GetBuilderServiceByType(resource.NodeType).Field().UpdateSearch(
-		context.Background(),
-		&searchRequest,
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).Field().UpdateSearch(
+			context.Background(),
+			&searchRequest,
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 
-	h.handleResponse(c, status_http.OK, resp)
+		h.handleResponse(c, status_http.Created, resp)
+	case pb.ResourceType_POSTGRESQL:
+		newReq := nb.SearchUpdateRequest{}
+
+		err = helper.MarshalToStruct(&searchRequest, &newReq)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+		resp, err := services.GoObjectBuilderService().Field().UpdateSearch(
+			context.Background(),
+			&newReq,
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		h.handleResponse(c, status_http.Created, resp)
+	}
 }
 
 // DeleteField godoc
