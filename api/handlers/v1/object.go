@@ -10,6 +10,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
 	pba "ucode/ucode_go_api_gateway/genproto/auth_service"
+	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
@@ -1069,6 +1070,11 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 	}
 	objectRequest.Data["language_setting"] = c.DefaultQuery("language_setting", "")
 
+	if c.Param("table_slug") == "orders" {
+		fmt.Println("\n\n role_id ~~~>>> ", objectRequest.Data["role_id_from_token"])
+		fmt.Println("\n\n")
+	}
+
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
@@ -1096,6 +1102,7 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
 	)
+	fmt.Println("\n\n>>>>>>>>> test #2")
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -1106,28 +1113,22 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
+	fmt.Println("\n\n>>>>>>>>> test #3")
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+	fmt.Println("\n\n>>>>>>>>> test #4")
 
-	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
-	if err != nil {
-		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
-		h.log.Info("ConnectionPool", logger.Any("CONNECTION", conn))
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
-	defer conn.Close()
-
-	fromOfs := c.Query("from-ofs")
-	if fromOfs != "true" {
-		beforeActions, afterActions, err = GetListCustomEvents(c.Param("table_slug"), "", "GETLIST", c, h)
-		if err != nil {
-			h.handleResponse(c, status_http.InvalidArgument, err.Error())
-			return
-		}
-	}
+	// fromOfs := c.Query("from-ofs")
+	// if fromOfs != "true" {
+	// 	fmt.Println("here > >> ")
+	// 	beforeActions, afterActions, err = GetListCustomEvents(c.Param("table_slug"), "", "GETLIST", c, h)
+	// 	if err != nil {
+	// 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+	// 		return
+	// 	}
+	// }
 
 	go func() {
 		if len(beforeActions) > 0 {
@@ -1151,19 +1152,28 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 		if util.IsValidUUID(viewId) {
 			switch resource.ResourceType {
 			case pb.ResourceType_MONGODB:
-				redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
-				if err == nil {
-					resp := make(map[string]interface{})
-					m := make(map[string]interface{})
-					err = json.Unmarshal([]byte(redisResp), &m)
-					if err != nil {
-						h.log.Error("Error while unmarshal redis", logger.Error(err))
-					} else {
-						resp["data"] = m
-						h.handleResponse(c, status_http.OK, resp)
-						return
-					}
+				// redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
+				// if err == nil {
+				// 	resp := make(map[string]interface{})
+				// 	m := make(map[string]interface{})
+				// 	err = json.Unmarshal([]byte(redisResp), &m)
+				// 	if err != nil {
+				// 		h.log.Error("Error while unmarshal redis", logger.Error(err))
+				// 	} else {
+				// 		resp["data"] = m
+				// 		h.handleResponse(c, status_http.OK, resp)
+				// 		return
+				// 	}
+				// }
+
+				service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
+				if err != nil {
+					h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
+					h.log.Info("ConnectionPool", logger.Any("CONNECTION", conn))
+					h.handleResponse(c, status_http.InternalServerError, err)
+					return
 				}
+				defer conn.Close()
 
 				resp, err = service.GroupByColumns(
 					context.Background(),
@@ -1175,13 +1185,13 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 				)
 
 				if err == nil {
-					if resp.IsCached {
-						jsonData, _ := resp.GetData().MarshalJSON()
-						err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
-						if err != nil {
-							h.log.Error("Error while setting redis", logger.Error(err))
-						}
-					}
+					// if resp.IsCached {
+					// 	jsonData, _ := resp.GetData().MarshalJSON()
+					// 	err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
+					// 	if err != nil {
+					// 		h.log.Error("Error while setting redis", logger.Error(err))
+					// 	}
+					// }
 				}
 
 				if err != nil {
@@ -1189,6 +1199,9 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 					return
 				}
 			case pb.ResourceType_POSTGRESQL:
+
+				fmt.Println("why u there")
+
 				resp, err = services.PostgresBuilderService().ObjectBuilder().GroupByColumns(
 					context.Background(),
 					&obs.CommonMessage{
@@ -1222,6 +1235,15 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 				}
 			}
 
+			service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
+			if err != nil {
+				h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
+				h.log.Info("ConnectionPool", logger.Any("CONNECTION", conn))
+				h.handleResponse(c, status_http.InternalServerError, err)
+				return
+			}
+			defer conn.Close()
+
 			resp, err = service.GetList(
 				context.Background(),
 				&obs.CommonMessage{
@@ -1246,9 +1268,13 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 				return
 			}
 		case pb.ResourceType_POSTGRESQL:
-			resp, err = services.PostgresBuilderService().ObjectBuilder().GetList(
+
+			fmt.Println("HELELEOOEL")
+			fmt.Println(resource.ResourceEnvironmentId)
+
+			resp, err := services.GoObjectBuilderService().ObjectBuilder().GetAll(
 				context.Background(),
-				&obs.CommonMessage{
+				&nb.CommonMessage{
 					TableSlug: c.Param("table_slug"),
 					Data:      structData,
 					ProjectId: resource.ResourceEnvironmentId,
@@ -1259,6 +1285,9 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 				h.handleResponse(c, status_http.GRPCError, err.Error())
 				return
 			}
+			statusHttp.CustomMessage = resp.GetCustomMessage()
+			h.handleResponse(c, statusHttp, resp)
+			return
 		}
 	}
 
@@ -1349,6 +1378,23 @@ func (h *HandlerV1) GetListSlim(c *gin.Context) {
 	objectRequest.Data["user_id_from_token"] = tokenInfo.GetUserId()
 	objectRequest.Data["role_id_from_token"] = tokenInfo.GetRoleId()
 	objectRequest.Data["client_type_id_from_token"] = tokenInfo.GetClientTypeId()
+	if withRelation, ok := objectRequest.Data["with_relations"]; ok {
+		if withRelation.(bool) {
+			var (
+				client, role string
+			)
+			if clientTypeId, ok := c.Get("client_type_id"); ok {
+				client = clientTypeId.(string)
+			}
+			if roleId, ok := c.Get("role_id"); ok {
+				role = roleId.(string)
+			}
+			if client != "" && role != "" {
+				objectRequest.Data["client_type_id"] = client
+				objectRequest.Data["role_id"] = role
+			}
+		}
+	}
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
@@ -1511,7 +1557,6 @@ func (h *HandlerV1) GetListSlim(c *gin.Context) {
 func (h *HandlerV1) GetListInExcel(c *gin.Context) {
 	var (
 		objectRequest models.CommonMessage
-		resp          *obs.CommonMessage
 		statusHttp    = status_http.GrpcStatusToHTTP["Ok"]
 	)
 
@@ -1577,7 +1622,7 @@ func (h *HandlerV1) GetListInExcel(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = service.GetListInExcel(
+		resp, err := service.GetListInExcel(
 			context.Background(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("table_slug"),
@@ -1596,10 +1641,13 @@ func (h *HandlerV1) GetListInExcel(c *gin.Context) {
 			h.handleResponse(c, statusHttp, err.Error())
 			return
 		}
+
+		statusHttp.CustomMessage = resp.GetCustomMessage()
+		h.handleResponse(c, statusHttp, resp)
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().ObjectBuilder().GetListInExcel(
+		resp, err := services.GoObjectBuilderService().ObjectBuilder().GetListInExcel(
 			context.Background(),
-			&obs.CommonMessage{
+			&nb.CommonMessage{
 				TableSlug: c.Param("table_slug"),
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
@@ -1610,10 +1658,10 @@ func (h *HandlerV1) GetListInExcel(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
+		statusHttp.CustomMessage = resp.GetCustomMessage()
+		h.handleResponse(c, statusHttp, resp)
 	}
 
-	statusHttp.CustomMessage = resp.GetCustomMessage()
-	h.handleResponse(c, statusHttp, resp)
 }
 
 // DeleteManyToMany godoc

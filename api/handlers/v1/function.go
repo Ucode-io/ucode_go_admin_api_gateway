@@ -7,6 +7,7 @@ import (
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/genproto/new_function_service"
+	"ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
@@ -223,21 +224,38 @@ func (h *HandlerV1) GetAllFunctions(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.GetBuilderServiceByType(resource.NodeType).Function().GetList(
-		context.Background(),
-		&obs.GetAllFunctionsRequest{
-			Search:    c.DefaultQuery("search", ""),
-			Limit:     int32(limit),
-			ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).Function().GetList(
+			context.Background(),
+			&obs.GetAllFunctionsRequest{
+				Search:    c.DefaultQuery("search", ""),
+				Limit:     int32(limit),
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+		h.handleResponse(c, status_http.OK, resp)
+	case pb.ResourceType_POSTGRESQL:
+		resp, err := services.GoObjectBuilderService().Function().GetList(
+			context.Background(),
+			&new_object_builder_service.GetAllFunctionsRequest{
+				Search:    c.DefaultQuery("search", ""),
+				Limit:     int32(limit),
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		h.handleResponse(c, status_http.OK, resp)
 	}
-
-	h.handleResponse(c, status_http.OK, resp)
 }
 
 // UpdateFunction godoc

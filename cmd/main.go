@@ -46,6 +46,7 @@ func main() {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+	uConf := config.Load()
 
 	// auth connection
 	authSrvc, err := services.NewAuthGrpcClient(ctx, baseConf)
@@ -55,7 +56,7 @@ func main() {
 	}
 
 	// company connection
-	compSrvc, err := services.NewCompanyServiceClient(ctx, baseConf)
+	compSrvc, err := services.NewCompanyServiceClient(ctx, uConf)
 	if err != nil {
 		log.Error("[ucode] error while establishing company grpc conn", logger.Error(err))
 		return
@@ -63,7 +64,6 @@ func main() {
 
 	serviceNodes := services.NewServiceNodes()
 	// u-code grpc services
-	uConf := config.Load()
 	grpcSvcs, err := services.NewGrpcClients(ctx, uConf)
 	if err != nil {
 		log.Error("Error adding grpc client with base config. NewGrpcClients", logger.Error(err))

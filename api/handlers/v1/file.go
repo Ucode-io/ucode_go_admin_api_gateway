@@ -9,6 +9,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
+	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
@@ -125,18 +126,47 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.GetBuilderServiceByType(resource.NodeType).File().Create(context.Background(), &obs.CreateFileRequest{
-		Id:               fName.String(),
-		Title:            title,
-		Storage:          folder_name,
-		FileNameDisk:     file.File.Filename,
-		FileNameDownload: title,
-		Link:             resource.ResourceEnvironmentId + "/" + folder_name + "/" + file.File.Filename,
-		FileSize:         file.File.Size,
-		ProjectId:        resource.ResourceEnvironmentId,
-	})
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).File().Create(context.Background(), &obs.CreateFileRequest{
+			Id:               fName.String(),
+			Title:            title,
+			Storage:          folder_name,
+			FileNameDisk:     file.File.Filename,
+			FileNameDownload: title,
+			Link:             resource.ResourceEnvironmentId + "/" + folder_name + "/" + file.File.Filename,
+			FileSize:         file.File.Size,
+			ProjectId:        resource.ResourceEnvironmentId,
+		})
+		fmt.Println("not okay")
+		if err != nil {
+			h.handleResponse(c, status_http.BadRequest, err.Error())
+			return
+		}
+
+		h.handleResponse(c, status_http.Created, resp)
+		return
+	case pb.ResourceType_POSTGRESQL:
+
+		fmt.Println("Ok 66")
+		resp, err := services.GoObjectBuilderService().File().Create(context.Background(), &nb.CreateFileRequest{
+			Id:               fName.String(),
+			Title:            title,
+			Storage:          folder_name,
+			FileNameDisk:     file.File.Filename,
+			FileNameDownload: title,
+			Link:             resource.ResourceEnvironmentId + "/" + folder_name + "/" + file.File.Filename,
+			FileSize:         file.File.Size,
+			ProjectId:        resource.ResourceEnvironmentId,
+		})
+
+		fmt.Println("Ok 77")
+		if err != nil {
+			h.handleResponse(c, status_http.BadRequest, err.Error())
+			return
+		}
+
+		h.handleResponse(c, status_http.Created, resp)
 		return
 	}
 
@@ -145,7 +175,6 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 	// 	h.log.Error("cant remove file")
 	// }
 
-	h.handleResponse(c, status_http.Created, resp)
 }
 
 // GetSingleFile godoc

@@ -70,6 +70,16 @@ podAnnotations:
     {{ $key }}: {{ $value }}
     {{- end }}
     {{ end -}}
+    {{- with secret "secret/data/k8s/ucode-test/minio" -}}
+    {{- range $key, $value := .Data.data }}
+    {{ $key }}: {{ $value }}
+    {{- end }}
+    {{ end -}}
+    {{- with secret "secret/data/k8s/ucode-test/openfaas" -}}
+    {{- range $key, $value := .Data.data }}
+    {{ $key }}: {{ $value }}
+    {{- end }}
+    {{ end -}}
 
 podLabels:
   app: ucode-go-admin-api-gateway
@@ -142,10 +152,10 @@ ingress:
         - host: "admin-api.ucode.run"
           path: /
           servicePort: 8080
-      tls:
-        - secretName: ucode-star
-          hosts:
-            - "admin-api.ucode.run"
+      # tls:
+      #   - secretName: ucode-star
+      #     hosts:
+      #       - "admin-api.ucode.run"
     - annotations:
         # type of authentication
         nginx.ingress.kubernetes.io/auth-type: basic
@@ -162,10 +172,10 @@ ingress:
         - host: "admin-api.ucode.run"
           path: /swagger
           servicePort: 8080
-      tls:
-        - secretName: ucode-star
-          hosts:
-            - "admin-api.ucode.run"
+      # tls:
+      #   - secretName: ucode-star
+      #     hosts:
+      #       - "admin-api.ucode.run"
 
 # resources:
 #    limits:

@@ -11,6 +11,7 @@ import (
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	fc "ucode/ucode_go_api_gateway/genproto/new_function_service"
+	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/code_server"
 	"ucode/ucode_go_api_gateway/pkg/easy_to_travel"
 	"ucode/ucode_go_api_gateway/pkg/gitlab"
@@ -165,7 +166,13 @@ func (h *HandlerV1) CreateNewFunction(c *gin.Context) {
 		}
 	)
 
-	defer func() {
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		response, err = services.FunctionService().FunctionService().Create(
+			context.Background(),
+			createFunction,
+		)
+
 		if err != nil {
 			logReq.Response = err.Error()
 			h.handleResponse(c, status_http.GRPCError, err.Error())
@@ -174,15 +181,27 @@ func (h *HandlerV1) CreateNewFunction(c *gin.Context) {
 			h.handleResponse(c, status_http.Created, response)
 		}
 		go h.versionHistory(c, logReq)
-	}()
+	case pb.ResourceType_POSTGRESQL:
 
-	response, err = services.FunctionService().FunctionService().Create(
-		context.Background(),
-		createFunction,
-	)
+		newCreateFunction := &nb.CreateFunctionRequest{}
 
-	if err != nil {
-		return
+		err = helper.MarshalToStruct(createFunction, &newCreateFunction)
+		if err != nil {
+			return
+		}
+
+		response, err := services.GoObjectBuilderService().Function().Create(
+			context.Background(),
+			newCreateFunction,
+		)
+		if err != nil {
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else {
+			logReq.Response = response
+			h.handleResponse(c, status_http.Created, response)
+		}
+		go h.versionHistory(c, logReq)
 	}
 }
 
@@ -366,23 +385,45 @@ func (h *HandlerV1) GetAllNewFunctions(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.FunctionService().FunctionService().GetList(
-		context.Background(),
-		&fc.GetAllFunctionsRequest{
-			Search:        c.DefaultQuery("search", ""),
-			Limit:         int32(limit),
-			Offset:        int32(offset),
-			ProjectId:     resource.ResourceEnvironmentId,
-			EnvironmentId: environment.GetId(),
-			Type:          FUNCTION,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+
+		resp, err := services.FunctionService().FunctionService().GetList(
+			context.Background(),
+			&fc.GetAllFunctionsRequest{
+				Search:        c.DefaultQuery("search", ""),
+				Limit:         int32(limit),
+				Offset:        int32(offset),
+				ProjectId:     resource.ResourceEnvironmentId,
+				EnvironmentId: environment.GetId(),
+				Type:          FUNCTION,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		h.handleResponse(c, status_http.OK, resp)
+	case pb.ResourceType_POSTGRESQL:
+		resp, err := services.GoObjectBuilderService().Function().GetList(
+			context.Background(),
+			&nb.GetAllFunctionsRequest{
+				Search:    c.DefaultQuery("search", ""),
+				Limit:     int32(limit),
+				Offset:    int32(offset),
+				ProjectId: resource.ResourceEnvironmentId,
+				Type:      FUNCTION,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		h.handleResponse(c, status_http.OK, resp)
 	}
 
-	h.handleResponse(c, status_http.OK, resp)
 }
 
 // UpdateNewFunction godoc
@@ -690,22 +731,42 @@ func (h *HandlerV1) GetAllNewFunctionsForApp(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.FunctionService().FunctionService().GetList(
-		context.Background(),
-		&fc.GetAllFunctionsRequest{
-			Search:    c.DefaultQuery("search", ""),
-			Limit:     int32(limit),
-			Offset:    int32(offset),
-			ProjectId: resource.ResourceEnvironmentId,
-			Type:      FUNCTION,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err := services.FunctionService().FunctionService().GetList(
+			context.Background(),
+			&fc.GetAllFunctionsRequest{
+				Search:    c.DefaultQuery("search", ""),
+				Limit:     int32(limit),
+				Offset:    int32(offset),
+				ProjectId: resource.ResourceEnvironmentId,
+				Type:      FUNCTION,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 
-	h.handleResponse(c, status_http.OK, resp)
+		h.handleResponse(c, status_http.OK, resp)
+	case pb.ResourceType_POSTGRESQL:
+		resp, err := services.GoObjectBuilderService().Function().GetList(
+			context.Background(),
+			&nb.GetAllFunctionsRequest{
+				Search:    c.DefaultQuery("search", ""),
+				Limit:     int32(limit),
+				Offset:    int32(offset),
+				ProjectId: resource.ResourceEnvironmentId,
+				Type:      FUNCTION,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		h.handleResponse(c, status_http.OK, resp)
+	}
 }
 
 // InvokeFunctionByPath godoc

@@ -8,6 +8,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/models"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	fc "ucode/ucode_go_api_gateway/genproto/new_function_service"
+	"ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/code_server"
 	"ucode/ucode_go_api_gateway/pkg/gitlab"
 	"ucode/ucode_go_api_gateway/pkg/util"
@@ -379,22 +380,42 @@ func (h *HandlerV1) GetAllMicroFrontEnd(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.FunctionService().FunctionService().GetList(
-		context.Background(),
-		&fc.GetAllFunctionsRequest{
-			Search:    c.DefaultQuery("search", ""),
-			Limit:     int32(limit),
-			Offset:    int32(offset),
-			ProjectId: resource.ResourceEnvironmentId,
-			Type:      MICROFE,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err := services.FunctionService().FunctionService().GetList(
+			context.Background(),
+			&fc.GetAllFunctionsRequest{
+				Search:    c.DefaultQuery("search", ""),
+				Limit:     int32(limit),
+				Offset:    int32(offset),
+				ProjectId: resource.ResourceEnvironmentId,
+				Type:      MICROFE,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 
-	h.handleResponse(c, status_http.OK, resp)
+		h.handleResponse(c, status_http.OK, resp)
+	case pb.ResourceType_POSTGRESQL:
+		resp, err := services.GoObjectBuilderService().Function().GetList(
+			context.Background(),
+			&new_object_builder_service.GetAllFunctionsRequest{
+				Search:    c.DefaultQuery("search", ""),
+				Limit:     int32(limit),
+				Offset:    int32(offset),
+				ProjectId: resource.ResourceEnvironmentId,
+				Type:      MICROFE,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		h.handleResponse(c, status_http.OK, resp)
+	}
 }
 
 // UpdateMicroFrontEnd godoc

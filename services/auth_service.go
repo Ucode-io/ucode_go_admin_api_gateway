@@ -35,7 +35,7 @@ type authServiceClient struct {
 	apiKeyUsageService    auth_service.ApiKeyUsageServiceClient
 }
 
-func NewAuthServiceClient(ctx context.Context, cfg config.BaseConfig) (AuthServiceI, error) {
+func NewAuthServiceClient(ctx context.Context, cfg config.Config) (AuthServiceI, error) {
 
 	connAuthService, err := grpc.DialContext(
 		ctx,

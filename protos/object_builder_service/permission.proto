@@ -17,12 +17,18 @@ service PermissionService {
     rpc GetViewRelationPermissions (GetActionPermissionRequest) returns (CommonMessage) {}
     rpc GetListWithRoleAppTablePermissions(GetListWithRoleAppTablePermissionsRequest) returns (GetListWithRoleAppTablePermissionsResponse) {}
     rpc UpdateRoleAppTablePermissions(UpdateRoleAppTablePermissionsRequest) returns (google.protobuf.Empty) {}
+    rpc CreateDefaultPermission(CreateDefaultPermissionRequest) returns (google.protobuf.Empty) {}
     rpc GetAllMenuPermissions(GetAllMenuPermissionsRequest) returns (GetAllMenuPermissionsResponse) {}
     rpc UpdateMenuPermissions(UpdateMenuPermissionsRequest) returns (google.protobuf.Empty) {}
     rpc UpdatePermissionsByTableSlug(UpdatePermissionsRequest) returns (google.protobuf.Empty) {}
     rpc GetPermissionsByTableSlug(GetPermissionsByTableSlugRequest) returns (GetPermissionsByTableSlugResponse) {}
     rpc GetGlobalPermissionByRoleId(GetGlobalPermissionsByRoleIdRequest) returns (GlobalPermission) {}
     rpc GetTablePermission(GetTablePermissionRequest) returns (GetTablePermissionResponse) {}
+}
+
+message CreateDefaultPermissionRequest {
+    string project_id = 1;
+    string role_id = 2;
 }
 
 message GetGlobalPermissionsByRoleIdRequest {

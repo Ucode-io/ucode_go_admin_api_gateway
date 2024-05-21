@@ -47,6 +47,12 @@ type Config struct {
 	VersioningServiceHost string
 	VersioningGRPCPort    string
 
+	AuthServiceHost string
+	AuthGRPCPort    string
+
+	CompanyServiceHost string
+	CompanyServicePort string
+
 	IntegrationServiceHost string
 	IntegrationGRPCPort    string
 
@@ -93,6 +99,9 @@ type Config struct {
 	PostgresBuilderServiceHost string
 	PostgresBuilderServicePort string
 
+	GoObjectBuilderServiceHost string
+	GoObjectBuilderGRPCPort    string
+
 	GetRequestRedisHost     string
 	GetRequestRedisPort     string
 	GetRequestRedisDatabase int
@@ -133,6 +142,9 @@ type BaseConfig struct {
 
 	DefaultOffset string
 	DefaultLimit  string
+
+	GoObjectBuilderServiceHost string
+	GoObjectBuilderGRPCPort    string
 
 	CLIENT_HOST                   string
 	SUPERADMIN_HOST               string
@@ -189,6 +201,9 @@ func BaseLoad() BaseConfig {
 	config.GitlabProjectIdMicroFE = cast.ToInt(GetOrReturnDefaultValue("GITLAB_PROJECT_ID_MICROFE", 0))
 	config.GitlabHostMicroFE = cast.ToString(GetOrReturnDefaultValue("GITLAB_HOST_MICROFE", ""))
 
+	config.GoObjectBuilderServiceHost = cast.ToString(GetOrReturnDefaultValue("GO_OBJECT_BUILDER_SERVICE_HOST", "localhost"))
+	config.GoObjectBuilderGRPCPort = cast.ToString(GetOrReturnDefaultValue("GO_OBJECT_BUILDER_GRPC_PORT", ":7107"))
+
 	config.DefaultOffset = cast.ToString(GetOrReturnDefaultValue("DEFAULT_OFFSET", "0"))
 	config.DefaultLimit = "100"
 
@@ -225,6 +240,12 @@ func Load() Config {
 	config.ObjectBuilderServiceHost = cast.ToString(GetOrReturnDefaultValue("OBJECT_BUILDER_SERVICE_LOW_HOST", ""))
 	config.ObjectBuilderGRPCPort = cast.ToString(GetOrReturnDefaultValue("OBJECT_BUILDER_LOW_GRPC_PORT", ""))
 
+	config.AuthServiceHost = cast.ToString(GetOrReturnDefaultValue("AUTH_SERVICE_HOST", ""))
+	config.AuthGRPCPort = cast.ToString(GetOrReturnDefaultValue("AUTH_GRPC_PORT", ""))
+
+	config.CompanyServiceHost = cast.ToString(GetOrReturnDefaultValue("COMPANY_SERVICE_HOST", ""))
+	config.CompanyServicePort = cast.ToString(GetOrReturnDefaultValue("COMPANY_GRPC_PORT", ""))
+
 	config.HighObjectBuilderServiceHost = cast.ToString(GetOrReturnDefaultValue("OBJECT_BUILDER_SERVICE_HIGHT_HOST", ""))
 	config.HighObjectBuilderGRPCPort = cast.ToString(GetOrReturnDefaultValue("OBJECT_BUILDER_HIGH_GRPC_PORT", ""))
 
@@ -254,6 +275,9 @@ func Load() Config {
 
 	config.FunctionServiceHost = cast.ToString(GetOrReturnDefaultValue("FUNCTION_SERVICE_HOST", ""))
 	config.FunctionServicePort = cast.ToString(GetOrReturnDefaultValue("FUNCTION_GRPC_PORT", ""))
+
+	config.GoObjectBuilderServiceHost = cast.ToString(GetOrReturnDefaultValue("GO_OBJECT_BUILDER_SERVICE_HOST", "localhost"))
+	config.GoObjectBuilderGRPCPort = cast.ToString(GetOrReturnDefaultValue("GO_OBJECT_BUILDER_GRPC_PORT", ":7107"))
 
 	config.QueryServiceHost = cast.ToString(GetOrReturnDefaultValue("QUERY_SERVICE_HOST", ""))
 	config.QueryServicePort = cast.ToString(GetOrReturnDefaultValue("QUERY_GRPC_PORT", ""))

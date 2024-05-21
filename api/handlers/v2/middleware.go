@@ -116,6 +116,8 @@ func (h *HandlerV2) AuthMiddleware() gin.HandlerFunc {
 			c.Set("resource_id", resource.GetResource().GetId())
 			c.Set("environment_id", apikeys.GetEnvironmentId())
 			c.Set("project_id", apikeys.GetProjectId())
+			c.Set("client_type_id", apikeys.GetClientTypeId())
+			c.Set("role_id", apikeys.GetRoleId())
 		default:
 			if !strings.Contains(c.Request.URL.Path, "api") {
 				err := errors.New("error invalid authorization method")
