@@ -218,7 +218,7 @@ func (h *HandlerV2) GetMenuByID(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err := services.BuilderService().Menu().GetByID(
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).Menu().GetByID(
 			context.Background(),
 			&obs.MenuPrimaryKey{
 				Id:        menuID,
@@ -682,7 +682,7 @@ func (h *HandlerV2) UpdateMenuOrder(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().Menu().UpdateMenuOrder(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).Menu().UpdateMenuOrder(
 			context.Background(),
 			&obs.UpdateMenuOrderRequest{
 				Menus:     menus.GetMenus(),

@@ -66,7 +66,7 @@ func (h *HandlerV2) GetSingleLayout(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err := services.BuilderService().Layout().GetSingleLayout(
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).Layout().GetSingleLayout(
 			context.Background(),
 			&object_builder_service.GetSingleLayoutRequest{
 				TableSlug: collection,
@@ -175,9 +175,7 @@ func (h *HandlerV2) GetListLayouts(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		h.log.Info("HERE WE GOOOOOO OKAY")
-
-		resp, err := services.BuilderService().Layout().GetAll(
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).Layout().GetAll(
 			context.Background(),
 			&object_builder_service.GetListLayoutRequest{
 				TableSlug:       tableSlug,
@@ -312,7 +310,7 @@ func (h *HandlerV2) UpdateLayout(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().Layout().Update(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).Layout().Update(
 			context.Background(),
 			&input,
 		)

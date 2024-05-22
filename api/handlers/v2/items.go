@@ -156,7 +156,7 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().ObjectBuilder().Create(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().Create(
 			context.Background(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("collection"),
@@ -343,7 +343,7 @@ func (h *HandlerV2) CreateItems(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().ObjectBuilder().Create(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().Create(
 			context.Background(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("collection"),
@@ -486,7 +486,7 @@ func (h *HandlerV2) GetSingleItem(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err := services.BuilderService().ObjectBuilder().GetSingle(
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().GetSingle(
 			context.Background(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("collection"),
@@ -832,7 +832,7 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		singleObject, err = services.BuilderService().ObjectBuilder().GetSingle(
+		singleObject, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().GetSingle(
 			context.Background(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("collection"),
@@ -920,7 +920,7 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().ObjectBuilder().Update(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().Update(
 			context.Background(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("collection"),
@@ -1311,7 +1311,7 @@ func (h *HandlerV2) DeleteItem(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().ObjectBuilder().Delete(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().Delete(
 			context.Background(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("collection"),
