@@ -147,7 +147,7 @@ func (h *HandlerV2) CreateMenu(c *gin.Context) {
 			context.Background(),
 			&newReq,
 		)
-		if err != nil { 
+		if err != nil {
 			logReq.Response = err.Error()
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 		} else {
@@ -296,7 +296,7 @@ func (h *HandlerV2) GetAllMenus(c *gin.Context) {
 	authInfo, _ := h.GetAuthInfo(c)
 	limit := 100
 
-	fmt.Println("RESOURCE->", resource)
+	fmt.Printf("Resource %v -> %v", projectId, resource)
 
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
@@ -307,11 +307,10 @@ func (h *HandlerV2) GetAllMenus(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	fmt.Println("SERVICES->", services)
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		fmt.Println("IAM HERE---------")
+		fmt.Println("IAM HERE---------", projectId)
 		resp, err := services.BuilderService().Menu().GetAll(
 			context.Background(),
 			&obs.GetAllMenusRequest{
@@ -328,6 +327,7 @@ func (h *HandlerV2) GetAllMenus(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
+		fmt.Printf("Resp %v->%v\n", projectId, resp)
 		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().Menu().GetAll(
