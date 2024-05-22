@@ -770,6 +770,8 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 		resp, singleObject          *obs.CommonMessage
 		beforeActions, afterActions []*obs.CustomEvent
 		statusHttp                  = status_http.GrpcStatusToHTTP["Ok"]
+		actionErr                   error
+		functionName                string
 	)
 
 	err := c.ShouldBindJSON(&objectRequest)
@@ -788,8 +790,13 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 	if objectRequest.Data["guid"] != nil {
 		id = objectRequest.Data["guid"].(string)
 	} else {
-		h.handleResponse(c, status_http.BadRequest, "guid is required")
-		return
+		objectRequest.Data["guid"] = c.Param("id")
+		id = c.Param("id")
+
+		if id == "" {
+			h.handleResponse(c, status_http.BadRequest, "guid is required")
+			return
+		}
 	}
 
 	projectId, ok := c.Get("project_id")
@@ -830,9 +837,21 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 		return
 	}
 
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
+	defer cancel()
+
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
+	if err != nil {
+		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
+		h.log.Info("ConnectionPool", logger.Any("CONNECTION", conn))
+		h.handleResponse(c, status_http.InternalServerError, err)
+		return
+	}
+	defer conn.Close()
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		singleObject, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().GetSingle(
+		singleObject, err = service.GetSingleSlim(
 			context.Background(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("collection"),
@@ -855,9 +874,9 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		single, err := services.GoObjectBuilderService().Items().GetSingle(
+		singleObject, err = services.PostgresBuilderService().ObjectBuilder().GetSingle(
 			context.Background(),
-			&nb.CommonMessage{
+			&obs.CommonMessage{
 				TableSlug: c.Param("collection"),
 				Data: &structpb.Struct{
 					Fields: map[string]*structpb.Value{
@@ -872,11 +891,6 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 			return
 		}
 
-		err = helper.MarshalToStruct(single, &singleObject)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
 	}
 
 	fromOfs := c.Query("from-ofs")
@@ -894,6 +908,7 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 			TableSlug:    c.Param("collection"),
 			ObjectData:   objectRequest.Data,
 			Method:       "UPDATE",
+			ActionType:   "BEFORE",
 		},
 			c,
 			h,
@@ -904,23 +919,39 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 		}
 	}
 
-	logReq := &models.CreateVersionHistoryRequest{
-		Services:     services,
-		NodeType:     resource.NodeType,
-		ProjectId:    resource.ResourceEnvironmentId,
-		ActionSource: c.Request.URL.String(),
-		ActionType:   "UPDATE ITEM",
-		UsedEnvironments: map[string]bool{
-			cast.ToString(environmentId): true,
-		},
-		UserInfo:  cast.ToString(userId),
-		Request:   structData,
-		TableSlug: c.Param("collection"),
-	}
+	var (
+		logReq = &models.CreateVersionHistoryRequest{
+			Services:     services,
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: c.Request.URL.String(),
+			ActionType:   "UPDATE ITEM",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo:  cast.ToString(userId),
+			Request:   &structData,
+			TableSlug: c.Param("collection"),
+		}
+	)
+
+	defer func() {
+		if err != nil {
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else if actionErr != nil {
+			logReq.Response = actionErr.Error() + " in " + functionName
+			h.handleResponse(c, status_http.InvalidArgument, actionErr.Error()+" in "+functionName)
+		} else {
+			logReq.Response = resp
+			h.handleResponse(c, status_http.NoContent, resp)
+		}
+		go h.versionHistory(c, logReq)
+	}()
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().Update(
+		resp, err = service.Update(
 			context.Background(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("collection"),
@@ -935,35 +966,25 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 				statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
 				statusHttp.CustomMessage = stat.Message()
 			}
-			logReq.Response = err.Error()
-			go h.versionHistory(c, logReq)
-			h.handleResponse(c, statusHttp, err.Error())
 			return
 		}
-		logReq.Response = resp
-		go h.versionHistory(c, logReq)
 	case pb.ResourceType_POSTGRESQL:
-		body, err := services.GoObjectBuilderService().Items().Update(
+		resp, err = services.PostgresBuilderService().ObjectBuilder().Update(
 			context.Background(),
-			&nb.CommonMessage{
-				TableSlug: c.Param("collection"),
-				Data:      structData,
-				ProjectId: resource.ResourceEnvironmentId,
+			&obs.CommonMessage{
+				TableSlug:      c.Param("collection"),
+				Data:           structData,
+				ProjectId:      resource.ResourceEnvironmentId,
+				BlockedBuilder: cast.ToBool(c.DefaultQuery("block_builder", "false")),
 			},
 		)
 		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 
-		err = helper.MarshalToStruct(body, &resp)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
 	}
 	if len(afterActions) > 0 {
-		functionName, err := DoInvokeFuntion(
+		functionName, actionErr = DoInvokeFuntion(
 			DoInvokeFuntionStruct{
 				CustomEvents:           afterActions,
 				IDs:                    []string{id},
@@ -971,17 +992,16 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 				ObjectData:             objectRequest.Data,
 				Method:                 "UPDATE",
 				ObjectDataBeforeUpdate: singleObject.Data.AsMap(),
+				ActionType:             "AFTER",
 			},
 			c, // gin context,
 			h, // handler
 		)
 		if err != nil {
-			h.handleResponse(c, status_http.InvalidArgument, err.Error()+" in "+functionName)
 			return
 		}
 	}
 	statusHttp.CustomMessage = resp.GetCustomMessage()
-	h.handleResponse(c, status_http.OK, resp)
 }
 
 // MultipleUpdateItems godoc
