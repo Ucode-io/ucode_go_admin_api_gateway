@@ -296,8 +296,6 @@ func (h *HandlerV2) GetAllMenus(c *gin.Context) {
 	authInfo, _ := h.GetAuthInfo(c)
 	limit := 100
 
-	fmt.Printf("Resource %v -> %v", projectId, resource)
-
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
 		projectId.(string),
@@ -310,8 +308,7 @@ func (h *HandlerV2) GetAllMenus(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		fmt.Println("IAM HERE---------", projectId)
-		resp, err := services.BuilderService().Menu().GetAll(
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).Menu().GetAll(
 			context.Background(),
 			&obs.GetAllMenusRequest{
 				Limit:     int32(limit),
