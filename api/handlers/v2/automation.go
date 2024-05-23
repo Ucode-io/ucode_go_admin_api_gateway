@@ -256,7 +256,7 @@ func (h *HandlerV2) GetAllAutomation(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		_, err = services.GetBuilderServiceByType(resource.NodeType).CustomEvent().GetList(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).CustomEvent().GetList(
 			context.Background(),
 			&obs.GetCustomEventsListRequest{
 				TableSlug: c.DefaultQuery("table_slug", ""),
