@@ -271,14 +271,14 @@ func (h *HandlerV2) GetAllAutomation(c *gin.Context) {
 		}
 		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
-		_, err = services.PostgresBuilderService().CustomEvent().GetList(
-			context.Background(),
-			&obs.GetCustomEventsListRequest{
-				TableSlug: c.DefaultQuery("table_slug", ""),
-				RoleId:    authInfo.GetRoleId(),
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
+		// _, err = services.PostgresBuilderService().CustomEvent().GetList(
+		// 	context.Background(),
+		// 	&obs.GetCustomEventsListRequest{
+		// 		TableSlug: c.DefaultQuery("table_slug", ""),
+		// 		RoleId:    authInfo.GetRoleId(),
+		// 		ProjectId: resource.ResourceEnvironmentId,
+		// 	},
+		// )
 
 		// if err != nil {
 		// 	h.handleResponse(c, status_http.GRPCError, err.Error())
