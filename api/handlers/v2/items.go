@@ -837,21 +837,9 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
-	defer cancel()
-
-	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
-	if err != nil {
-		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
-		h.log.Info("ConnectionPool", logger.Any("CONNECTION", conn))
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
-	defer conn.Close()
-
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		singleObject, err = service.GetSingleSlim(
+		singleObject, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().GetSingleSlim(
 			context.Background(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("collection"),
@@ -874,9 +862,9 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		singleObject, err = services.PostgresBuilderService().ObjectBuilder().GetSingle(
+		single, err := services.GoObjectBuilderService().Items().GetSingle(
 			context.Background(),
-			&obs.CommonMessage{
+			&nb.CommonMessage{
 				TableSlug: c.Param("collection"),
 				Data: &structpb.Struct{
 					Fields: map[string]*structpb.Value{
@@ -890,7 +878,12 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
-
+		
+		err = helper.MarshalToStruct(single, &singleObject)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	fromOfs := c.Query("from-ofs")
@@ -951,7 +944,7 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = service.Update(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().Update(
 			context.Background(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("collection"),
@@ -969,9 +962,9 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().ObjectBuilder().Update(
+		body, err := services.GoObjectBuilderService().Items().Update(
 			context.Background(),
-			&obs.CommonMessage{
+			&nb.CommonMessage{
 				TableSlug:      c.Param("collection"),
 				Data:           structData,
 				ProjectId:      resource.ResourceEnvironmentId,
@@ -982,6 +975,11 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 			return
 		}
 
+		err = helper.MarshalToStruct(body, &resp)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 	if len(afterActions) > 0 {
 		functionName, actionErr = DoInvokeFuntion(
