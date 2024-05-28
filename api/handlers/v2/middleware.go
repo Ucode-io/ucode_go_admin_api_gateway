@@ -2,6 +2,7 @@ package v2
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
@@ -36,6 +37,7 @@ func (h *HandlerV2) AuthMiddleware() gin.HandlerFunc {
 
 		bearerToken := c.GetHeader("Authorization")
 		strArr := strings.Split(bearerToken, " ")
+		fmt.Println("wwwwwwww>>>>>>>>>>>: ",bearerToken)
 
 		if len(strArr) < 1 && (strArr[0] != "Bearer" && strArr[0] != "API-KEY") {
 			h.log.Error("---ERR->Unexpected token format")
@@ -119,12 +121,16 @@ func (h *HandlerV2) AuthMiddleware() gin.HandlerFunc {
 			c.Set("client_type_id", apikeys.GetClientTypeId())
 			c.Set("role_id", apikeys.GetRoleId())
 		default:
+			fmt.Println("salomat>>>>>>>>>>>>>>>>>>")
 			if !strings.Contains(c.Request.URL.Path, "api") {
+				fmt.Println("adsfffff:      ",c.Request.URL.Path)
 				err := errors.New("error invalid authorization method")
 				h.log.Error("--AuthMiddleware--", logger.Error(err))
 				h.handleResponse(c, status_http.BadRequest, err.Error())
 				c.Abort()
 			} else {
+				fmt.Println("Bulyabtimi>>>>>>>>>>>>>>>>>>")
+
 				err := errors.New("error invalid authorization method")
 				h.log.Error("--AuthMiddleware--", logger.Error(err))
 				c.JSON(401, struct {
