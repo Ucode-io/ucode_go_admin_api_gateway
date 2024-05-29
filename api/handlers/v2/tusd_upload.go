@@ -52,7 +52,8 @@ func (h *HandlerV2) MovieUpload() *tusd.Handler {
 	s3Store.UseIn(composer)
 
 	handler, err := tusd.NewHandler(tusd.Config{
-		BasePath:                h.baseConf.HTTPBaseURL + "/v2/files/upload-file/",
+		// BasePath:                "http://localhost:8000/v2/upload-file/",
+		BasePath:                h.baseConf.HTTPBaseURL + "/v2/upload-file/",
 		StoreComposer:           composer,
 		NotifyCompleteUploads:   true,
 		NotifyUploadProgress:    true,
