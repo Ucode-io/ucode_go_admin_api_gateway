@@ -2,7 +2,6 @@ package services
 
 import (
 	"context"
-	"fmt"
 	"ucode/ucode_go_api_gateway/config"
 )
 
@@ -182,7 +181,6 @@ func (g grpcClients) GetBuilderServiceByType(nodeType string) BuilderServiceI {
 		return g.highBuilderService
 	}
 
-	fmt.Println("!!!Warning get default low type object builder service")
 	return g.builderService
 }
 

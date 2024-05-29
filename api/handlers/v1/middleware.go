@@ -332,9 +332,8 @@ func (h *HandlerV1) SlimAuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 				return
 			} else {
 				fmt.Printf("----------%+v\n", &ApiKeys)
-				value, loaded := ApiKeys.LoadOrStore(app_id, 0)
+				value, _ := ApiKeys.LoadOrStore(app_id, 0)
 				count := value.(int)
-				fmt.Println("COUNT,LOADED:", count, loaded)
 
 				if count == config.LIMITER_RANGE {
 					ApiKeys.Store(app_id, 0)

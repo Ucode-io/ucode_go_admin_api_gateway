@@ -125,7 +125,6 @@ func (h *HandlerV2) CreateMenu(c *gin.Context) {
 			context.Background(),
 			menuRequest,
 		)
-		fmt.Println("NODE TYPE->", resource.NodeType)
 
 		if err != nil {
 			logReq.Response = err.Error()
