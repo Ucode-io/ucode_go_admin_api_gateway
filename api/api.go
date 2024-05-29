@@ -815,6 +815,7 @@ func customCORSMiddleware() gin.HandlerFunc {
 		// c.Header("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, Origin, Cache-Control, X-Requested-With, Resource-Id, Environment-Id, Platform-Type, X-API-KEY, Project-Id")
 		c.Header("Access-Control-Max-Age", "3600")
 		c.Header("Access-Control-Allow-Methods", "*")
+		c.Header("Access-Control-Allow-Headers", "*")
 
 		if c.Request.Method == "OPTIONS" {
 			c.AbortWithStatus(204)
