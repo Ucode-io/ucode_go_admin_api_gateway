@@ -156,12 +156,12 @@ func (h *HandlerV2) GetAllVersionHistory(c *gin.Context) {
 		return
 	}
 
-	environmentId := c.Param("environment_id")
-	if !util.IsValidUUID(environmentId) {
-		err := errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
-		return
-	}
+	// environmentId := c.Param("environment_id")
+	// if !util.IsValidUUID(environmentId) {
+	// 	err := errors.New("error getting environment id | not valid")
+	// 	h.handleResponse(c, status_http.BadRequest, err)
+	// 	return
+	// }
 
 	currEnvironmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(currEnvironmentId.(string)) {
@@ -174,7 +174,7 @@ func (h *HandlerV2) GetAllVersionHistory(c *gin.Context) {
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
-			EnvironmentId: environmentId,
+			EnvironmentId: currEnvironmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
 	)

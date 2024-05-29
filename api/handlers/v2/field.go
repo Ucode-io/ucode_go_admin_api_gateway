@@ -292,7 +292,7 @@ func (h *HandlerV2) GetAllFields(c *gin.Context) {
 	limit := 100
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err := services.BuilderService().Field().GetAll(
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).Field().GetAll(
 			context.Background(),
 			&obs.GetAllFieldsRequest{
 				Limit:            int32(limit),
