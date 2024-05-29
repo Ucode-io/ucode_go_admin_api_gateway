@@ -3,7 +3,6 @@ package v2
 import (
 	"context"
 	"errors"
-	"fmt"
 	"strings"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -292,7 +291,7 @@ func (h *HandlerV2) GetAllFields(c *gin.Context) {
 	limit := 100
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err := services.BuilderService().Field().GetAll(
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).Field().GetAll(
 			context.Background(),
 			&obs.GetAllFieldsRequest{
 				Limit:            int32(limit),
@@ -351,7 +350,6 @@ func (h *HandlerV2) GetAllFields(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) UpdateField(c *gin.Context) {
-	fmt.Println("0 >>>>> hello")
 	var (
 		fieldRequest models.Field
 	)
@@ -362,15 +360,11 @@ func (h *HandlerV2) UpdateField(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("1 >>>>> hello")
-
 	attributes, err := helper.ConvertMapToStruct(fieldRequest.Attributes)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
-
-	fmt.Println("2 >>>>> hello")
 
 	var field = obs.Field{
 		Id:                  fieldRequest.ID,
@@ -406,8 +400,6 @@ func (h *HandlerV2) UpdateField(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("3 >>>>> hello")
-
 	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
@@ -423,8 +415,6 @@ func (h *HandlerV2) UpdateField(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("4 >>>>> hello")
-
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
 		resource.GetProjectId(),
@@ -434,8 +424,6 @@ func (h *HandlerV2) UpdateField(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-
-	fmt.Println("5 >>>>> hello")
 
 	// if !fieldRequest.EnableMultilanguage {
 	// 	field.EnableMultilanguage = false

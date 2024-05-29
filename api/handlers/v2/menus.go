@@ -125,7 +125,6 @@ func (h *HandlerV2) CreateMenu(c *gin.Context) {
 			context.Background(),
 			menuRequest,
 		)
-		fmt.Println("NODE TYPE->", resource.NodeType)
 
 		if err != nil {
 			logReq.Response = err.Error()
@@ -147,7 +146,7 @@ func (h *HandlerV2) CreateMenu(c *gin.Context) {
 			context.Background(),
 			&newReq,
 		)
-		if err != nil { 
+		if err != nil {
 			logReq.Response = err.Error()
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 		} else {
@@ -218,7 +217,7 @@ func (h *HandlerV2) GetMenuByID(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err := services.BuilderService().Menu().GetByID(
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).Menu().GetByID(
 			context.Background(),
 			&obs.MenuPrimaryKey{
 				Id:        menuID,
@@ -308,7 +307,7 @@ func (h *HandlerV2) GetAllMenus(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err := services.BuilderService().Menu().GetAll(
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).Menu().GetAll(
 			context.Background(),
 			&obs.GetAllMenusRequest{
 				Limit:     int32(limit),
@@ -324,6 +323,7 @@ func (h *HandlerV2) GetAllMenus(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
+		fmt.Printf("Resp %v->%v\n", projectId, resp)
 		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().Menu().GetAll(
@@ -681,7 +681,7 @@ func (h *HandlerV2) UpdateMenuOrder(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().Menu().UpdateMenuOrder(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).Menu().UpdateMenuOrder(
 			context.Background(),
 			&obs.UpdateMenuOrderRequest{
 				Menus:     menus.GetMenus(),

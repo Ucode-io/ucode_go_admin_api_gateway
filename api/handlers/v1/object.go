@@ -1070,11 +1070,6 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 	}
 	objectRequest.Data["language_setting"] = c.DefaultQuery("language_setting", "")
 
-	if c.Param("table_slug") == "orders" {
-		fmt.Println("\n\n role_id ~~~>>> ", objectRequest.Data["role_id_from_token"])
-		fmt.Println("\n\n")
-	}
-
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
@@ -1102,7 +1097,6 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
 	)
-	fmt.Println("\n\n>>>>>>>>> test #2")
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -1113,12 +1107,10 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 		projectId.(string),
 		resource.NodeType,
 	)
-	fmt.Println("\n\n>>>>>>>>> test #3")
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	fmt.Println("\n\n>>>>>>>>> test #4")
 
 	// fromOfs := c.Query("from-ofs")
 	// if fromOfs != "true" {
@@ -1200,8 +1192,6 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 				}
 			case pb.ResourceType_POSTGRESQL:
 
-				fmt.Println("why u there")
-
 				resp, err = services.PostgresBuilderService().ObjectBuilder().GroupByColumns(
 					context.Background(),
 					&obs.CommonMessage{
@@ -1268,9 +1258,6 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 				return
 			}
 		case pb.ResourceType_POSTGRESQL:
-
-			fmt.Println("HELELEOOEL")
-			fmt.Println(resource.ResourceEnvironmentId)
 
 			resp, err := services.GoObjectBuilderService().ObjectBuilder().GetAll(
 				context.Background(),

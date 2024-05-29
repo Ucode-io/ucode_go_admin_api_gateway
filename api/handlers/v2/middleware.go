@@ -17,13 +17,13 @@ import (
 // 	SUPERADMIN_HOST string = "test.admin.u-code.io"
 // 	CLIENT_HOST     string = "test.app.u-code.io"
 // )
-
+ 
 func (h *HandlerV2) NodeMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		c.Set("namespace", h.baseConf.UcodeNamespace)
 		c.Next()
-	}
+	} 
 }
 
 func (h *HandlerV2) AuthMiddleware() gin.HandlerFunc {

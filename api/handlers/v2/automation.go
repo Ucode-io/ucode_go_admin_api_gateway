@@ -3,7 +3,6 @@ package v2
 import (
 	"context"
 	"errors"
-	"fmt"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
@@ -240,7 +239,6 @@ func (h *HandlerV2) GetAllAutomation(c *gin.Context) {
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
 	)
-	fmt.Println("here coming >>>>>> ", resource.ResourceType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -258,7 +256,7 @@ func (h *HandlerV2) GetAllAutomation(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		_, err = services.GetBuilderServiceByType(resource.NodeType).CustomEvent().GetList(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).CustomEvent().GetList(
 			context.Background(),
 			&obs.GetCustomEventsListRequest{
 				TableSlug: c.DefaultQuery("table_slug", ""),
@@ -266,29 +264,28 @@ func (h *HandlerV2) GetAllAutomation(c *gin.Context) {
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
-		fmt.Println(resp)
 
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
+		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
-		_, err = services.PostgresBuilderService().CustomEvent().GetList(
-			context.Background(),
-			&obs.GetCustomEventsListRequest{
-				TableSlug: c.DefaultQuery("table_slug", ""),
-				RoleId:    authInfo.GetRoleId(),
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
+		// _, err = services.PostgresBuilderService().CustomEvent().GetList(
+		// 	context.Background(),
+		// 	&obs.GetCustomEventsListRequest{
+		// 		TableSlug: c.DefaultQuery("table_slug", ""),
+		// 		RoleId:    authInfo.GetRoleId(),
+		// 		ProjectId: resource.ResourceEnvironmentId,
+		// 	},
+		// )
 
 		// if err != nil {
 		// 	h.handleResponse(c, status_http.GRPCError, err.Error())
 		// 	return
 		// }
+		h.handleResponse(c, status_http.OK, obs.GetCustomEventsListResponse{})
 	}
-
-	h.handleResponse(c, status_http.OK, obs.GetCustomEventsListResponse{})
 }
 
 // UpdateAutomation godoc

@@ -3,8 +3,6 @@ package v1
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
-	"time"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 
@@ -26,11 +24,6 @@ import (
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) Cache(c *gin.Context) {
-	t := time.Now()
-	defer func() {
-		fmt.Println("Time taken: ", time.Since(t))
-	}()
-
 	var request models.CacheRequest
 
 	err := c.ShouldBindJSON(&request)

@@ -191,7 +191,7 @@ func (h *HandlerV2) GetSingleView(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err := services.BuilderService().View().GetSingle(
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).View().GetSingle(
 			context.Background(),
 			&obs.ViewPrimaryKey{
 				Id:        viewID,
@@ -533,7 +533,7 @@ func (h *HandlerV2) GetAllViews(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err := services.BuilderService().View().GetList(
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).View().GetList(
 			context.Background(),
 			&obs.GetAllViewsRequest{
 				TableSlug: c.Param("collection"),
@@ -629,7 +629,7 @@ func (h *HandlerV2) UpdateViewOrder(c *gin.Context) {
 	view.ProjectId = resource.ResourceEnvironmentId
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err := services.BuilderService().View().UpdateViewOrder(
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).View().UpdateViewOrder(
 			context.Background(),
 			&view,
 		)
