@@ -37,19 +37,8 @@ import "layout.proto";
 import "menu.proto";
 import "custom_error_message.proto";
 import "report_setting_service.proto";
-<<<<<<< HEAD
-import "file.proto";
-=======
 import "items.proto";
 import "file.proto";
-<<<<<<< HEAD
->>>>>>> c119d96af4d6aa93c2cb14057e1125fa3eec2f81
-=======
 import "request_analytic.proto";
 import "version_history.proto";
 import "version.proto";
-<<<<<<< HEAD
->>>>>>> 9277e11655f9dda1655e6ca0343bfe853f426bb1
-=======
->>>>>>> 209b45c5a2a64c0904b18349235aa0a8787dd4e6
->>>>>>> 4a9ef13afc501bf6e7c7422db8a8a2150e95e4be

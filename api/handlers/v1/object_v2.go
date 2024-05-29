@@ -160,9 +160,9 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 					return
 				}
 			case pb.ResourceType_POSTGRESQL:
-				resp, err = services.PostgresBuilderService().ObjectBuilder().GroupByColumns(
+				resp, err := services.GoObjectBuilderService().ObjectBuilder().GetGroupByField(
 					context.Background(),
-					&obs.CommonMessage{
+					&nb.CommonMessage{
 						TableSlug: c.Param("table_slug"),
 						Data:      structData,
 						ProjectId: resource.ResourceEnvironmentId,
@@ -173,6 +173,10 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 					h.handleResponse(c, status_http.GRPCError, err.Error())
 					return
 				}
+
+				statusHttp.CustomMessage = resp.GetCustomMessage()
+				h.handleResponse(c, statusHttp, resp)
+				return
 			}
 		}
 	} else {

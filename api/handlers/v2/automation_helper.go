@@ -3,6 +3,7 @@ package v2
 import (
 	"context"
 	"errors"
+	"fmt"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
@@ -190,15 +191,41 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *HandlerV2
 		data["action_type"] = request.ActionType
 		invokeFunction.Data = data
 
-		resp, err := util.DoRequest("https://ofs.u-code.io/function/"+customEvent.GetFunctions()[0].Path, "POST", invokeFunction)
-		if err != nil {
-			return customEvent.GetFunctions()[0].Name, err
-		} else if resp.Status == "error" {
-			var errStr = resp.Status
-			if resp.Data != nil && resp.Data["message"] != nil {
-				errStr = resp.Data["message"].(string)
+		if customEvent.GetFunctions()[0].RequestType == "" || customEvent.GetFunctions()[0].RequestType == "ASYNC" {
+
+			fmt.Println(request.TableSlug)
+			fmt.Println("IT'S ASYNC FUNCTION")
+
+			resp, err := util.DoRequest("https://ofs.u-code.io/function/"+customEvent.GetFunctions()[0].Path, "POST", invokeFunction)
+			if err != nil {
+				return customEvent.GetFunctions()[0].Name, err
+			} else if resp.Status == "error" {
+				var errStr = resp.Status
+				if resp.Data != nil && resp.Data["message"] != nil {
+					errStr = resp.Data["message"].(string)
+				}
+				return customEvent.GetFunctions()[0].Name, errors.New(errStr)
 			}
-			return customEvent.GetFunctions()[0].Name, errors.New(errStr)
+		} else if customEvent.GetFunctions()[0].RequestType == "SYNC" {
+
+			fmt.Println(request.TableSlug)
+			fmt.Println("IT'S SYNC FUNCTION")
+
+			go func() {
+				resp, err := util.DoRequest("https://ofs.u-code.io/function/"+customEvent.GetFunctions()[0].Path, "POST", invokeFunction)
+				if err != nil {
+					fmt.Println(err)
+					return
+				} else if resp.Status == "error" {
+					var errStr = resp.Status
+					if resp.Data != nil && resp.Data["message"] != nil {
+						errStr = resp.Data["message"].(string)
+					}
+
+					fmt.Println(errStr)
+					return
+				}
+			}()
 		}
 	}
 	return
