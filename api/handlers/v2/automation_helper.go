@@ -191,6 +191,9 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *HandlerV2
 		data["action_type"] = request.ActionType
 		invokeFunction.Data = data
 
+		fmt.Println("THEN IT COMES EMPTY")
+		fmt.Println(customEvent.GetFunctions()[0].RequestType)
+
 		if customEvent.GetFunctions()[0].RequestType == "" || customEvent.GetFunctions()[0].RequestType == "ASYNC" {
 
 			fmt.Println(request.TableSlug)

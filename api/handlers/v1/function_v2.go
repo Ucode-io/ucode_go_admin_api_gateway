@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"strings"
 	"sync"
@@ -110,6 +111,7 @@ func (h *HandlerV1) CreateNewFunction(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
+	fmt.Println("UNTIL HERE OK")
 	projectName := strings.ReplaceAll(strings.TrimSpace(project.Title), " ", "-")
 	projectName = strings.ToLower(projectName)
 	var functionPath = projectName + "-" + function.Path
@@ -126,10 +128,6 @@ func (h *HandlerV1) CreateNewFunction(c *gin.Context) {
 	}
 	// var sshURL = resp.Message["ssh_url_to_repo"].(string)
 	// err = gitlab.CloneForkToPath(sshURL, h.baseConf)
-	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
-		return
-	}
 	uuid, _ := uuid.NewRandom()
 	// password, err := code_server.CreateCodeServer(projectName+"-"+function.Path, h.baseConf, uuid.String())
 	// if err != nil {
