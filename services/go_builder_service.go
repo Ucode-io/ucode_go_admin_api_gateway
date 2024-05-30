@@ -22,6 +22,7 @@ type GoBuilderServiceI interface {
 	File() nb.FileServiceClient
 	Excel() nb.ExcelServiceClient
 	Function() nb.FunctionServiceV2Client
+	CustomEvent() nb.CustomEventServiceClient
 }
 
 type goBuilderServiceClient struct {
@@ -37,6 +38,7 @@ type goBuilderServiceClient struct {
 	fileService          nb.FileServiceClient
 	excelService         nb.ExcelServiceClient
 	functionService      nb.FunctionServiceV2Client
+	customEventService   nb.CustomEventServiceClient
 	// goObjectBuilderConnPool *grpcpool.Pool
 }
 
@@ -45,6 +47,7 @@ func NewGoBuilderServiceClient(ctx context.Context, cfg config.Config) (GoBuilde
 	connGoBuilderService, err := grpc.DialContext(
 		ctx,
 		cfg.GoObjectBuilderServiceHost+cfg.GoObjectBuilderGRPCPort,
+		// "localhost:7107",
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 
@@ -65,6 +68,7 @@ func NewGoBuilderServiceClient(ctx context.Context, cfg config.Config) (GoBuilde
 		fileService:          nb.NewFileServiceClient(connGoBuilderService),
 		excelService:         nb.NewExcelServiceClient(connGoBuilderService),
 		functionService:      nb.NewFunctionServiceV2Client(connGoBuilderService),
+		customEventService:   nb.NewCustomEventServiceClient(connGoBuilderService),
 	}, nil
 }
 
@@ -114,6 +118,10 @@ func (g *goBuilderServiceClient) Excel() nb.ExcelServiceClient {
 
 func (g *goBuilderServiceClient) Function() nb.FunctionServiceV2Client {
 	return g.functionService
+}
+
+func (g *goBuilderServiceClient) CustomEvent() nb.CustomEventServiceClient {
+	return g.customEventService
 }
 
 // func (g *goBuilderServiceClient) GoObjectBuilderConnPool(ctx context.Context) (nb.ObjectBuilderServiceClient, *grpcpool.ClientConn, error) {
