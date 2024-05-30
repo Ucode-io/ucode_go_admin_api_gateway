@@ -12,7 +12,7 @@ func CreatePipeline(cfg IntegrationData, data map[string]interface{}) (response 
 	projectId := cfg.GitlabProjectId
 	strProjectId := strconv.Itoa(projectId)
 
-	resp, err := DoRequest(cfg.GitlabIntegrationUrl+"/api/v4/projects/"+strProjectId+"/pipeline", cfg.GitlabIntegrationToken+"&"+"ref=master", "POST", data)
+	resp, err := DoRequest(cfg.GitlabIntegrationUrl+"/api/v4/projects/"+strProjectId+"/pipeline", cfg.GitlabIntegrationToken+"&"+"ref=staging", "POST", data)
 
 	if resp.Code >= 400 {
 		return models.GitlabIntegrationResponse{}, errors.New(status_http.BadRequest.Description)
