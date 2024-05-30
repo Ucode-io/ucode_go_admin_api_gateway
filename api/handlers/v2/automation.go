@@ -6,6 +6,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
+	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
@@ -97,10 +98,17 @@ func (h *HandlerV2) CreateAutomation(c *gin.Context) {
 				ProjectId:  resource.ResourceEnvironmentId, //added resource id
 			},
 		)
+
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		h.handleResponse(c, status_http.Created, resp)
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.GetBuilderServiceByType(resource.NodeType).CustomEvent().Create(
+		resp, err := services.GoObjectBuilderService().CustomEvent().Create(
 			context.Background(),
-			&obs.CreateCustomEventRequest{
+			&nb.CreateCustomEventRequest{
 				TableSlug:  customevent.TableSlug,
 				EventPath:  customevent.EventPath,
 				Label:      customevent.Label,
@@ -113,14 +121,15 @@ func (h *HandlerV2) CreateAutomation(c *gin.Context) {
 				ProjectId:  resource.ResourceEnvironmentId, //added resource id
 			},
 		)
+
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		h.handleResponse(c, status_http.Created, resp)
 	}
 
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
-	h.handleResponse(c, status_http.Created, resp)
 }
 
 // GetByIdAutomation godoc
@@ -181,19 +190,37 @@ func (h *HandlerV2) GetByIdAutomation(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.GetBuilderServiceByType(resource.NodeType).CustomEvent().GetSingle(
-		context.Background(),
-		&obs.CustomEventPrimaryKey{
-			Id:        customeventID,
-			ProjectId: resource.EnvironmentId,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).CustomEvent().GetSingle(
+			context.Background(),
+			&obs.CustomEventPrimaryKey{
+				Id:        customeventID,
+				ProjectId: resource.EnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		h.handleResponse(c, status_http.OK, resp)
+	case pb.ResourceType_POSTGRESQL:
+		resp, err := services.GoObjectBuilderService().CustomEvent().GetSingle(
+			context.Background(),
+			&nb.CustomEventPrimaryKey{
+				Id:        customeventID,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		h.handleResponse(c, status_http.OK, resp)
 	}
 
-	h.handleResponse(c, status_http.OK, resp)
 }
 
 // GetAllAutomation godoc
@@ -269,22 +296,23 @@ func (h *HandlerV2) GetAllAutomation(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
+
 		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
-		// _, err = services.PostgresBuilderService().CustomEvent().GetList(
-		// 	context.Background(),
-		// 	&obs.GetCustomEventsListRequest{
-		// 		TableSlug: c.DefaultQuery("table_slug", ""),
-		// 		RoleId:    authInfo.GetRoleId(),
-		// 		ProjectId: resource.ResourceEnvironmentId,
-		// 	},
-		// )
+		resp, err := services.GoObjectBuilderService().CustomEvent().GetList(
+			context.Background(),
+			&nb.GetCustomEventsListRequest{
+				TableSlug: c.DefaultQuery("table_slug", ""),
+				RoleId:    authInfo.GetRoleId(),
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 
-		// if err != nil {
-		// 	h.handleResponse(c, status_http.GRPCError, err.Error())
-		// 	return
-		// }
-		h.handleResponse(c, status_http.OK, obs.GetCustomEventsListResponse{})
+		h.handleResponse(c, status_http.OK, resp)
 	}
 }
 
@@ -352,29 +380,56 @@ func (h *HandlerV2) UpdateAutomation(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.GetBuilderServiceByType(resource.NodeType).CustomEvent().Update(
-		context.Background(),
-		&obs.CustomEvent{
-			Id:         customevent.Id,
-			TableSlug:  customevent.TableSlug,
-			EventPath:  customevent.EventPath,
-			Label:      customevent.Label,
-			Icon:       customevent.Icon,
-			Url:        customevent.Url,
-			Disable:    customevent.Disable,
-			ActionType: customevent.ActionType,
-			Method:     customevent.Method,
-			Attributes: structData,
-			ProjectId:  resource.ResourceEnvironmentId,
-		},
-	)
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).CustomEvent().Update(
+			context.Background(),
+			&obs.CustomEvent{
+				Id:         customevent.Id,
+				TableSlug:  customevent.TableSlug,
+				EventPath:  customevent.EventPath,
+				Label:      customevent.Label,
+				Icon:       customevent.Icon,
+				Url:        customevent.Url,
+				Disable:    customevent.Disable,
+				ActionType: customevent.ActionType,
+				Method:     customevent.Method,
+				Attributes: structData,
+				ProjectId:  resource.ResourceEnvironmentId,
+			},
+		)
 
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		h.handleResponse(c, status_http.OK, resp)
+	case pb.ResourceType_POSTGRESQL:
+		resp, err := services.GoObjectBuilderService().CustomEvent().Update(
+			context.Background(),
+			&nb.CustomEvent{
+				Id:         customevent.Id,
+				TableSlug:  customevent.TableSlug,
+				EventPath:  customevent.EventPath,
+				Label:      customevent.Label,
+				Icon:       customevent.Icon,
+				Url:        customevent.Url,
+				Disable:    customevent.Disable,
+				ActionType: customevent.ActionType,
+				Method:     customevent.Method,
+				Attributes: structData,
+				ProjectId:  resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		h.handleResponse(c, status_http.OK, resp)
 	}
 
-	h.handleResponse(c, status_http.OK, resp)
 }
 
 // DeleteAutomation godoc
@@ -435,18 +490,34 @@ func (h *HandlerV2) DeleteAutomation(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.GetBuilderServiceByType(resource.NodeType).CustomEvent().Delete(
-		context.Background(),
-		&obs.CustomEventPrimaryKey{
-			Id:        customeventID,
-			ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).CustomEvent().Delete(
+			context.Background(),
+			&obs.CustomEventPrimaryKey{
+				Id:        customeventID,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+		h.handleResponse(c, status_http.NoContent, resp)
+	case pb.ResourceType_POSTGRESQL:
+		resp, err := services.GoObjectBuilderService().CustomEvent().Delete(
+			context.Background(),
+			&nb.CustomEventPrimaryKey{
+				Id:        customeventID,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		h.handleResponse(c, status_http.NoContent, resp)
 	}
-
-	h.handleResponse(c, status_http.NoContent, resp)
 }
