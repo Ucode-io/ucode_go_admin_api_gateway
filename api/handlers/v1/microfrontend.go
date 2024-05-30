@@ -160,6 +160,7 @@ func (h *HandlerV1) CreateMicroFrontEnd(c *gin.Context) {
 		"ci_config_path": ".gitlab-ci.yml",
 	})
 	if err != nil {
+		fmt.Println("Err->", err)
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
@@ -180,6 +181,7 @@ func (h *HandlerV1) CreateMicroFrontEnd(c *gin.Context) {
 		GitlabGroupId:          h.baseConf.GitlabGroupIdMicroFE,
 	}, host)
 	if err != nil {
+		fmt.Println("Project varialble->", err)
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
@@ -193,6 +195,7 @@ func (h *HandlerV1) CreateMicroFrontEnd(c *gin.Context) {
 		"variables": data,
 	})
 	if err != nil {
+		fmt.Println("Pipeline->", err)
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
@@ -239,6 +242,7 @@ func (h *HandlerV1) CreateMicroFrontEnd(c *gin.Context) {
 		createFunction,
 	)
 	if err != nil {
+		fmt.Println("Create err->", err)
 		return
 	}
 }
