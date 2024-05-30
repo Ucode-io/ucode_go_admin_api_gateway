@@ -34,7 +34,7 @@ func CreateProjectFork(projectName string, data IntegrationData) (response model
 	})
 
 	fmt.Println("HERE IN CreateProjectFork>>>>")
-	fmt.Println(err)
+	fmt.Println(resp)
 
 	if resp.Code >= 400 {
 		return models.GitlabIntegrationResponse{}, errors.New(status_http.BadRequest.Description)
