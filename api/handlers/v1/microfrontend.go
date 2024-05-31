@@ -11,6 +11,7 @@ import (
 	"ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/code_server"
 	"ucode/ucode_go_api_gateway/pkg/gitlab"
+	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/golang/protobuf/ptypes/empty"
@@ -160,13 +161,16 @@ func (h *HandlerV1) CreateMicroFrontEnd(c *gin.Context) {
 		"ci_config_path": ".gitlab-ci.yml",
 	})
 	if err != nil {
-		fmt.Println("Err->", err)
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
 
 	id, _ := uuid.NewRandom()
 	repoHost := fmt.Sprintf("%s-%s", id.String(), h.baseConf.GitlabHostMicroFE)
+	h.log.Info("CreateMicroFrontEnd [ci/cd]",
+		logger.Any("host", repoHost),
+		logger.Any("repo_name", functionPath),
+	)
 
 	data := make([]map[string]interface{}, 0)
 	host := make(map[string]interface{})
@@ -181,7 +185,6 @@ func (h *HandlerV1) CreateMicroFrontEnd(c *gin.Context) {
 		GitlabGroupId:          h.baseConf.GitlabGroupIdMicroFE,
 	}, host)
 	if err != nil {
-		fmt.Println("Project varialble->", err)
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
@@ -195,7 +198,6 @@ func (h *HandlerV1) CreateMicroFrontEnd(c *gin.Context) {
 		"variables": data,
 	})
 	if err != nil {
-		fmt.Println("Pipeline->", err)
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
@@ -242,7 +244,6 @@ func (h *HandlerV1) CreateMicroFrontEnd(c *gin.Context) {
 		createFunction,
 	)
 	if err != nil {
-		fmt.Println("Create err->", err)
 		return
 	}
 }
