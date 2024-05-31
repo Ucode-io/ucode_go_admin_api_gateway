@@ -877,7 +877,7 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
-		
+
 		err = helper.MarshalToStruct(single, &singleObject)
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
@@ -1279,11 +1279,6 @@ func (h *HandlerV2) DeleteItem(c *gin.Context) {
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
-		return
-	}
-
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 

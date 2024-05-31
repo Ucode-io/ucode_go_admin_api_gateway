@@ -12,6 +12,7 @@ import (
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
+	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
@@ -121,6 +122,8 @@ func GetListCustomEvents(tableSlug, roleId, method string, c *gin.Context, h *Ha
 		if err != nil {
 			return
 		}
+
+		fmt.Println(string(body))
 
 		if err = json.Unmarshal(body, &res); err != nil {
 			return
@@ -239,7 +242,7 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *HandlerV2
 			go func(customEvent *obs.CustomEvent) {
 				resp, err := util.DoRequest("https://ofs.u-code.io/function/"+customEvent.GetFunctions()[0].Path, "POST", invokeFunction)
 				if err != nil {
-					fmt.Println(err)
+					h.log.Error("ERROR FROM OFS", logger.Any("err", err.Error()))
 					return
 				} else if resp.Status == "error" {
 					var errStr = resp.Status
@@ -247,7 +250,7 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *HandlerV2
 						errStr = resp.Data["message"].(string)
 					}
 
-					fmt.Println(errStr)
+					h.log.Error("ERROR FROM OFS", logger.Any("err", errStr))
 					return
 				}
 			}(customEvent)
