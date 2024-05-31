@@ -2,12 +2,14 @@ package v2
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
+	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
@@ -28,7 +30,9 @@ type DoInvokeFuntionStruct struct {
 func GetListCustomEvents(tableSlug, roleId, method string, c *gin.Context, h *HandlerV2) (beforeEvents, afterEvents []*obs.CustomEvent, err error) {
 
 	var (
-		res *obs.GetCustomEventsListResponse
+		res   *obs.GetCustomEventsListResponse
+		gores *nb.GetCustomEventsListResponse
+		body  []byte
 	)
 
 	namespace := c.GetString("namespace")
@@ -99,7 +103,28 @@ func GetListCustomEvents(tableSlug, roleId, method string, c *gin.Context, h *Ha
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		return
+		gores, err = services.GoObjectBuilderService().CustomEvent().GetList(
+			context.Background(),
+			&nb.GetCustomEventsListRequest{
+				TableSlug: tableSlug,
+				Method:    method,
+				RoleId:    roleId,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+
+		if err != nil {
+			return
+		}
+
+		body, err = json.Marshal(gores)
+		if err != nil {
+			return
+		}
+
+		if err = json.Unmarshal(body, &res); err != nil {
+			return
+		}
 	}
 
 	if res != nil {
@@ -191,9 +216,6 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *HandlerV2
 		data["action_type"] = request.ActionType
 		invokeFunction.Data = data
 
-		fmt.Println("THEN IT COMES EMPTY")
-		fmt.Println(customEvent.GetFunctions()[0].RequestType)
-
 		if customEvent.GetFunctions()[0].RequestType == "" || customEvent.GetFunctions()[0].RequestType == "ASYNC" {
 
 			fmt.Println(request.TableSlug)
@@ -214,7 +236,7 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *HandlerV2
 			fmt.Println(request.TableSlug)
 			fmt.Println("IT'S SYNC FUNCTION")
 
-			go func() {
+			go func(customEvent *obs.CustomEvent) {
 				resp, err := util.DoRequest("https://ofs.u-code.io/function/"+customEvent.GetFunctions()[0].Path, "POST", invokeFunction)
 				if err != nil {
 					fmt.Println(err)
@@ -228,7 +250,7 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *HandlerV2
 					fmt.Println(errStr)
 					return
 				}
-			}()
+			}(customEvent)
 		}
 	}
 	return
