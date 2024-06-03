@@ -1299,7 +1299,7 @@ func (h *HandlerV2) CreateMenuTemplate(c *gin.Context) {
 func (h *HandlerV2) GetAllMenuTemplates(c *gin.Context) {
 	offset, err := h.getOffsetParam(c)
 	var (
-		resp *obs.GatAllMenuTemplateResponse
+		resp *obs.GatAllMenuTemplateResponse = &obs.GatAllMenuTemplateResponse{}
 	)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
@@ -1363,9 +1363,9 @@ func (h *HandlerV2) GetAllMenuTemplates(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Menu().GetAllMenuTemplate(
+		_, err = services.GoObjectBuilderService().Menu().GetAllMenuTemplate(
 			context.Background(),
-			&obs.GetAllMenuSettingsRequest{
+			&nb.GetAllMenuSettingsRequest{
 				Limit:     int32(limit),
 				Offset:    int32(offset),
 				ProjectId: resource.ResourceEnvironmentId,
