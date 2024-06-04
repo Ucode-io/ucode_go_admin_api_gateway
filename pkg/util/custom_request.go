@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"encoding/xml"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -44,7 +43,6 @@ func DoRequest(url string, method string, body interface{}) (responseModel model
 
 	err = json.Unmarshal(respByte, &responseModel)
 	if err != nil {
-		fmt.Println("\n\nerror::", url, string(respByte))
 	}
 
 	return
@@ -72,14 +70,12 @@ func DoXMLRequest(url string, method string, body interface{}) (responseModel mo
 
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println("error in Do() : ", err)
 		return
 	}
 	defer resp.Body.Close()
 
 	respByte, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Println("error in ReadAll() : ", err)
 		return
 	}
 
