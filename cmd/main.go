@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"time"
 	"ucode/ucode_go_api_gateway/api"
 	"ucode/ucode_go_api_gateway/api/handlers"
@@ -21,11 +20,6 @@ import (
 func main() {
 
 	baseConf := config.BaseLoad()
-
-	fmt.Println("HERE MY CFG MINIO")
-	fmt.Println(baseConf.MinioEndpoint)
-	fmt.Println(baseConf.MinioAccessKeyID)
-	fmt.Println(baseConf.MinioSecretAccessKey)
 
 	var loggerLevel = new(string)
 	*loggerLevel = logger.LevelDebug
