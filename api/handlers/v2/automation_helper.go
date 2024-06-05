@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
+	"log"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
@@ -248,6 +248,7 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *HandlerV2
 					var errStr = resp.Status
 					if resp.Data != nil && resp.Data["message"] != nil {
 						errStr = resp.Data["message"].(string)
+						log.Fatal(errStr)
 					}
 
 					h.log.Error("ERROR FROM OFS", logger.Any("err", errStr))

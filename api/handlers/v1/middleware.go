@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"strings"
 	"sync"
@@ -331,7 +330,6 @@ func (h *HandlerV1) SlimAuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 				c.AbortWithError(http.StatusTooManyRequests, errors.New("RPS limit is exceeded"))
 				return
 			} else {
-				fmt.Printf("----------%+v\n", &ApiKeys)
 				value, _ := ApiKeys.LoadOrStore(app_id, 0)
 				count := value.(int)
 

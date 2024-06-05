@@ -53,6 +53,7 @@ type grpcClients struct {
 }
 
 func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, error) {
+	//cf, _ := json.Marshal(cfg)
 	builderServiceClient, err := NewBuilderServiceClient(ctx, cfg)
 	if err != nil {
 		return nil, err
@@ -71,6 +72,7 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 	if err != nil {
 		return nil, err
 	}
+
 	companyServiceClient, err := NewCompanyServiceClient(ctx, cfg)
 	if err != nil {
 		return nil, err
@@ -129,7 +131,6 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 	if err != nil {
 		return nil, err
 	}
-
 	notificationServiceClient, err := NewNotificationServiceClient(ctx, cfg)
 	if err != nil {
 		return nil, err

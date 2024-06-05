@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"errors"
+	"net/http"
 	"strings"
 	"ucode/ucode_go_api_gateway/api/docs"
 	"ucode/ucode_go_api_gateway/api/handlers"
@@ -29,6 +30,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 
 	r.GET("/ping", h.V1.Ping)
 	// r.GET("/config", h.GetConfig)
+	r.Any("/v2/upload-file/*any", gin.WrapH(http.StripPrefix("/v2/upload-file/", h.V2.MovieUpload())))
 
 	r.Any("/x-api/*any", h.V1.RedirectAuthMiddleware(cfg), proxyMiddleware(r, &h), h.V1.Proxy)
 
@@ -809,9 +811,11 @@ func customCORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Credentials", "true")
-		c.Header("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, PATCH, DELETE")
-		c.Header("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, Origin, Cache-Control, X-Requested-With, Resource-Id, Environment-Id, Platform-Type, X-API-KEY, Project-Id")
+		// c.Header("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, PATCH, DELETE")
+		// c.Header("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, Origin, Cache-Control, X-Requested-With, Resource-Id, Environment-Id, Platform-Type, X-API-KEY, Project-Id")
 		c.Header("Access-Control-Max-Age", "3600")
+		c.Header("Access-Control-Allow-Methods", "*")
+		c.Header("Access-Control-Allow-Headers", "*")
 
 		if c.Request.Method == "OPTIONS" {
 			c.AbortWithStatus(204)
