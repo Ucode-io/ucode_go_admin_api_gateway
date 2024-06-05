@@ -138,7 +138,6 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 			FileSize:         file.File.Size,
 			ProjectId:        resource.ResourceEnvironmentId,
 		})
-		fmt.Println("not okay")
 		if err != nil {
 			h.handleResponse(c, status_http.BadRequest, err.Error())
 			return
@@ -148,7 +147,6 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 		return
 	case pb.ResourceType_POSTGRESQL:
 
-		fmt.Println("Ok 66")
 		resp, err := services.GoObjectBuilderService().File().Create(context.Background(), &nb.CreateFileRequest{
 			Id:               fName.String(),
 			Title:            title,
@@ -160,7 +158,6 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 			ProjectId:        resource.ResourceEnvironmentId,
 		})
 
-		fmt.Println("Ok 77")
 		if err != nil {
 			h.handleResponse(c, status_http.BadRequest, err.Error())
 			return

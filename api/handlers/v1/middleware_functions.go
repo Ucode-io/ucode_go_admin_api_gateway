@@ -42,7 +42,6 @@ func (h *HandlerV1) hasAccess(c *gin.Context) (*auth_service.V2HasAccessUserRes,
 		},
 	)
 	if err != nil {
-		fmt.Println(err)
 		errr := status.Error(codes.PermissionDenied, "Permission denied")
 		if errr.Error() == err.Error() {
 			h.log.Error("---ERR->HasAccess->Permission--->", logger.Error(err))

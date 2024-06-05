@@ -2,8 +2,6 @@ package services
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
 	"ucode/ucode_go_api_gateway/config"
 )
 
@@ -55,38 +53,30 @@ type grpcClients struct {
 }
 
 func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, error) {
-	fmt.Println("Conf->", cfg)
-	cf, _ := json.Marshal(cfg)
-	fmt.Println("CONFIG",string(cf))
+	//cf, _ := json.Marshal(cfg)
 	builderServiceClient, err := NewBuilderServiceClient(ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("buider")
 
 	highBuilderServiceClient, err := NewHighBuilderServiceClient(ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("high")
 
 	authServiceClient, err := NewAuthServiceClient(ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("auth")
 	chatServiceClient, err := NewChatServiceClient(ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("chat")
 
-	
 	companyServiceClient, err := NewCompanyServiceClient(ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("COMPSny service")
 
 	analyticsServiceClient, err := NewAnalyticsServiceClient(ctx, cfg)
 	if err != nil {
@@ -117,7 +107,6 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 		return nil, err
 	}
 
- 
 	queryServiceClient, err := NewQueryServiceClient(ctx, cfg)
 	if err != nil {
 		return nil, err
@@ -142,7 +131,6 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 	if err != nil {
 		return nil, err
 	}
-fmt.Println("webpage")
 	notificationServiceClient, err := NewNotificationServiceClient(ctx, cfg)
 	if err != nil {
 		return nil, err
@@ -194,7 +182,6 @@ func (g grpcClients) GetBuilderServiceByType(nodeType string) BuilderServiceI {
 		return g.highBuilderService
 	}
 
-	fmt.Println("!!!Warning get default low type object builder service")
 	return g.builderService
 }
 

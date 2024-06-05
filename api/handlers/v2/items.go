@@ -118,7 +118,6 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 	if fromOfs != "true" {
 		beforeActions, afterActions, err = GetListCustomEvents(c.Param("collection"), "", "CREATE", c, h)
 		if err != nil {
-			fmt.Println("I am here")
 			h.handleResponse(c, status_http.InvalidArgument, err.Error())
 			//return
 		}

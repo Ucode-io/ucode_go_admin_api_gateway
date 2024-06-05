@@ -3,7 +3,7 @@ package v2
 import (
 	"context"
 	"errors"
-	"fmt"
+	"log"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
@@ -207,15 +207,14 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *HandlerV2
 			go func() {
 				resp, err := util.DoRequest("https://ofs.u-code.io/function/"+customEvent.GetFunctions()[0].Path, "POST", invokeFunction)
 				if err != nil {
-					fmt.Println(err)
 					return
 				} else if resp.Status == "error" {
 					var errStr = resp.Status
 					if resp.Data != nil && resp.Data["message"] != nil {
 						errStr = resp.Data["message"].(string)
+						log.Fatal(errStr)
 					}
 
-					fmt.Println(errStr)
 					return
 				}
 			}()
