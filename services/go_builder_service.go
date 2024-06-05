@@ -22,6 +22,7 @@ type GoBuilderServiceI interface {
 	File() nb.FileServiceClient
 	Excel() nb.ExcelServiceClient
 	Function() nb.FunctionServiceV2Client
+	Version() nb.VersionServiceClient
 }
 
 type goBuilderServiceClient struct {
@@ -37,6 +38,7 @@ type goBuilderServiceClient struct {
 	fileService          nb.FileServiceClient
 	excelService         nb.ExcelServiceClient
 	functionService      nb.FunctionServiceV2Client
+	versionService       nb.VersionServiceClient
 	// goObjectBuilderConnPool *grpcpool.Pool
 }
 
@@ -65,6 +67,7 @@ func NewGoBuilderServiceClient(ctx context.Context, cfg config.Config) (GoBuilde
 		fileService:          nb.NewFileServiceClient(connGoBuilderService),
 		excelService:         nb.NewExcelServiceClient(connGoBuilderService),
 		functionService:      nb.NewFunctionServiceV2Client(connGoBuilderService),
+		versionService:       nb.NewVersionServiceClient(connGoBuilderService),
 	}, nil
 }
 
@@ -114,6 +117,10 @@ func (g *goBuilderServiceClient) Excel() nb.ExcelServiceClient {
 
 func (g *goBuilderServiceClient) Function() nb.FunctionServiceV2Client {
 	return g.functionService
+}
+
+func (g *goBuilderServiceClient) Version() nb.VersionServiceClient {
+	return g.versionService
 }
 
 // func (g *goBuilderServiceClient) GoObjectBuilderConnPool(ctx context.Context) (nb.ObjectBuilderServiceClient, *grpcpool.ClientConn, error) {
