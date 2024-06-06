@@ -126,6 +126,7 @@ func (h *HandlerV2) AuthMiddleware() gin.HandlerFunc {
 				h.handleResponse(c, status_http.BadRequest, err.Error())
 				c.Abort()
 			} else {
+
 				err := errors.New("error invalid authorization method")
 				h.log.Error("--AuthMiddleware--", logger.Error(err))
 				c.JSON(401, struct {

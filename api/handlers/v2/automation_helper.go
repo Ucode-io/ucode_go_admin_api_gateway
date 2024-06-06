@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
+	"log"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
@@ -123,8 +123,6 @@ func GetListCustomEvents(tableSlug, roleId, method string, c *gin.Context, h *Ha
 			return
 		}
 
-		fmt.Println(string(body))
-
 		if err = json.Unmarshal(body, &res); err != nil {
 			return
 		}
@@ -221,9 +219,6 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *HandlerV2
 
 		if customEvent.GetFunctions()[0].RequestType == "" || customEvent.GetFunctions()[0].RequestType == "ASYNC" {
 
-			fmt.Println(request.TableSlug)
-			fmt.Println("IT'S ASYNC FUNCTION")
-
 			resp, err := util.DoRequest("https://ofs.u-code.io/function/"+customEvent.GetFunctions()[0].Path, "POST", invokeFunction)
 			if err != nil {
 				return customEvent.GetFunctions()[0].Name, err
@@ -236,9 +231,6 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *HandlerV2
 			}
 		} else if customEvent.GetFunctions()[0].RequestType == "SYNC" {
 
-			fmt.Println(request.TableSlug)
-			fmt.Println("IT'S SYNC FUNCTION")
-
 			go func(customEvent *obs.CustomEvent) {
 				resp, err := util.DoRequest("https://ofs.u-code.io/function/"+customEvent.GetFunctions()[0].Path, "POST", invokeFunction)
 				if err != nil {
@@ -248,6 +240,7 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *HandlerV2
 					var errStr = resp.Status
 					if resp.Data != nil && resp.Data["message"] != nil {
 						errStr = resp.Data["message"].(string)
+						log.Fatal(errStr)
 					}
 
 					h.log.Error("ERROR FROM OFS", logger.Any("err", errStr))
