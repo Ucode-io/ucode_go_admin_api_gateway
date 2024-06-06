@@ -1408,11 +1408,19 @@ definitions:
         type: string
       apiReferenceServicePort:
         type: string
+      authGRPCPort:
+        type: string
+      authServiceHost:
+        type: string
       chatServiceGrpcHost:
         type: string
       chatServiceGrpcPort:
         type: string
       client_HOST:
+        type: string
+      companyServiceHost:
+        type: string
+      companyServicePort:
         type: string
       convertTemplateServiceGrpcHost:
         type: string
@@ -1452,6 +1460,10 @@ definitions:
         type: integer
       gitlabProjectIdMicroFE:
         type: integer
+      goObjectBuilderGRPCPort:
+        type: string
+      goObjectBuilderServiceHost:
+        type: string
       helmInstallMicroFE:
         type: string
       helmRepoAddFMicroFE:
@@ -2925,6 +2937,8 @@ definitions:
       provided_name:
         type: string
       repo_id:
+        type: string
+      request_type:
         type: string
       resource:
         type: string
@@ -28632,6 +28646,59 @@ paths:
       summary: V2 Get table by id
       tags:
       - V2Table
+  /v2/update-with/{collection}:
+    put:
+      consumes:
+      - application/json
+      description: UpdateWith Params
+      operationId: update_with_params
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: UpdateWithParamsBody
+        in: body
+        name: item
+        required: true
+        schema:
+          $ref: '#/definitions/models.CommonMessage'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Object data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.CommonMessage'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: UpdateWith Params
+      tags:
+      - Object
   /v2/upload-file/{collection}/{id}:
     post:
       consumes:

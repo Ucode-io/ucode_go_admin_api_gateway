@@ -42,10 +42,10 @@ import (
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) CreateItem(c *gin.Context) {
 	var (
-		objectRequest               models.CommonMessage
-		resp                        *obs.CommonMessage
-		beforeActions, afterActions []*obs.CustomEvent
-		statusHttp                  = status_http.GrpcStatusToHTTP["Created"]
+		objectRequest models.CommonMessage
+		resp          *obs.CommonMessage
+		// beforeActions, afterActions []*obs.CustomEvent
+		statusHttp = status_http.GrpcStatusToHTTP["Created"]
 	)
 
 	err := c.ShouldBindJSON(&objectRequest)
@@ -114,30 +114,30 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
-	fromOfs := c.Query("from-ofs")
-	if fromOfs != "true" {
-		beforeActions, afterActions, err = GetListCustomEvents(c.Param("collection"), "", "CREATE", c, h)
-		if err != nil {
-			h.handleResponse(c, status_http.InvalidArgument, err.Error())
-			//return
-		}
-	}
-	if len(beforeActions) > 0 {
-		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
-			CustomEvents: beforeActions,
-			IDs:          []string{id},
-			TableSlug:    c.Param("collection"),
-			ObjectData:   objectRequest.Data,
-			Method:       "CREATE",
-		},
-			c,
-			h,
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.InvalidArgument, err.Error()+" in "+functionName)
-			return
-		}
-	}
+	// fromOfs := c.Query("from-ofs")
+	// if fromOfs != "true" {
+	// 	beforeActions, afterActions, err = GetListCustomEvents(c.Param("collection"), "", "CREATE", c, h)
+	// 	if err != nil {
+	// 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+	// 		//return
+	// 	}
+	// }
+	// if len(beforeActions) > 0 {
+	// 	functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
+	// 		CustomEvents: beforeActions,
+	// 		IDs:          []string{id},
+	// 		TableSlug:    c.Param("collection"),
+	// 		ObjectData:   objectRequest.Data,
+	// 		Method:       "CREATE",
+	// 	},
+	// 		c,
+	// 		h,
+	// 	)
+	// 	if err != nil {
+	// 		h.handleResponse(c, status_http.InvalidArgument, err.Error()+" in "+functionName)
+	// 		return
+	// 	}
+	// }
 
 	logReq := &models.CreateVersionHistoryRequest{
 		Services:     services,
@@ -204,23 +204,23 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 			id = data["guid"].(string)
 		}
 	}
-	if len(afterActions) > 0 {
-		functionName, err := DoInvokeFuntion(
-			DoInvokeFuntionStruct{
-				CustomEvents: afterActions,
-				IDs:          []string{id},
-				TableSlug:    c.Param("collection"),
-				ObjectData:   objectRequest.Data,
-				Method:       "CREATE",
-			},
-			c, // gin context,
-			h, // handler
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.InvalidArgument, err.Error()+" in "+functionName)
-			return
-		}
-	}
+	// if len(afterActions) > 0 {
+	// 	functionName, err := DoInvokeFuntion(
+	// 		DoInvokeFuntionStruct{
+	// 			CustomEvents: afterActions,
+	// 			IDs:          []string{id},
+	// 			TableSlug:    c.Param("collection"),
+	// 			ObjectData:   objectRequest.Data,
+	// 			Method:       "CREATE",
+	// 		},
+	// 		c, // gin context,
+	// 		h, // handler
+	// 	)
+	// 	if err != nil {
+	// 		h.handleResponse(c, status_http.InvalidArgument, err.Error()+" in "+functionName)
+	// 		return
+	// 	}
+	// }
 	statusHttp.CustomMessage = resp.GetCustomMessage()
 	h.handleResponse(c, statusHttp, resp)
 }

@@ -38744,6 +38744,101 @@ const docTemplate = `{
                 }
             }
         },
+        "/v2/update-with/{collection}": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "UpdateWith Params",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Object"
+                ],
+                "summary": "UpdateWith Params",
+                "operationId": "update_with_params",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "collection",
+                        "name": "collection",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "UpdateWithParamsBody",
+                        "name": "item",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CommonMessage"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Object data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.CommonMessage"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v2/upload-file/{collection}/{id}": {
             "post": {
                 "security": [
@@ -45020,6 +45115,12 @@ const docTemplate = `{
                 "apiReferenceServicePort": {
                     "type": "string"
                 },
+                "authGRPCPort": {
+                    "type": "string"
+                },
+                "authServiceHost": {
+                    "type": "string"
+                },
                 "chatServiceGrpcHost": {
                     "type": "string"
                 },
@@ -45027,6 +45128,12 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "client_HOST": {
+                    "type": "string"
+                },
+                "companyServiceHost": {
+                    "type": "string"
+                },
+                "companyServicePort": {
                     "type": "string"
                 },
                 "convertTemplateServiceGrpcHost": {
@@ -45085,6 +45192,12 @@ const docTemplate = `{
                 },
                 "gitlabProjectIdMicroFE": {
                     "type": "integer"
+                },
+                "goObjectBuilderGRPCPort": {
+                    "type": "string"
+                },
+                "goObjectBuilderServiceHost": {
+                    "type": "string"
                 },
                 "helmInstallMicroFE": {
                     "type": "string"
@@ -47325,6 +47438,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "repo_id": {
+                    "type": "string"
+                },
+                "request_type": {
                     "type": "string"
                 },
                 "resource": {

@@ -575,3 +575,88 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 	}
 
 }
+
+// UpdateWithParams godoc
+// @Security ApiKeyAuth
+// @ID update_with_params
+// @Router /v2/update-with/{collection} [PUT]
+// @Summary UpdateWith Params
+// @Description UpdateWith Params
+// @Tags Object
+// @Accept json
+// @Produce json
+// @Param collection path string true "collection"
+// @Param item body models.CommonMessage true "UpdateWithParamsBody"
+// @Success 200 {object} status_http.Response{data=models.CommonMessage} "Object data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *HandlerV1) UpdateWithParams(c *gin.Context) {
+
+	var (
+		objectRequest models.CommonMessage
+	)
+
+	err := c.ShouldBindJSON(&objectRequest)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
+
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		resource.GetProjectId(),
+		resource.NodeType,
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	body, err := services.GoObjectBuilderService().ObjectBuilder().UpdateWithParams(
+		context.Background(),
+		&nb.CommonMessage{
+			TableSlug: c.Param("collection"),
+			Data:      structData,
+			ProjectId: resource.ResourceEnvironmentId,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.OK, body)
+}
