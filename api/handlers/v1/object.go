@@ -1070,6 +1070,9 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 	}
 	objectRequest.Data["language_setting"] = c.DefaultQuery("language_setting", "")
 
+	if c.Param("table_slug") == "orders" {
+	}
+
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
@@ -1114,7 +1117,6 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 
 	// fromOfs := c.Query("from-ofs")
 	// if fromOfs != "true" {
-	// 	fmt.Println("here > >> ")
 	// 	beforeActions, afterActions, err = GetListCustomEvents(c.Param("table_slug"), "", "GETLIST", c, h)
 	// 	if err != nil {
 	// 		h.handleResponse(c, status_http.InvalidArgument, err.Error())

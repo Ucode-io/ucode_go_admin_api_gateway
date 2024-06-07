@@ -177,6 +177,7 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 			return
 		}
 		logReq.Response = resp
+		logReq.ResourceType = 1
 		go h.versionHistory(c, logReq)
 	case pb.ResourceType_POSTGRESQL:
 		body, err := services.GoObjectBuilderService().Items().Create(
@@ -196,6 +197,8 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 		if err != nil {
 			return
 		}
+
+		logReq.ResourceType = 3
 	}
 
 	if data, ok := resp.Data.AsMap()["data"].(map[string]interface{}); ok {
@@ -877,7 +880,7 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
-		
+
 		err = helper.MarshalToStruct(single, &singleObject)
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())

@@ -22,21 +22,25 @@ type GoBuilderServiceI interface {
 	File() nb.FileServiceClient
 	Excel() nb.ExcelServiceClient
 	Function() nb.FunctionServiceV2Client
+	Version() nb.VersionServiceClient
+	VersionHistory() nb.VersionHistoryServiceClient
 }
 
 type goBuilderServiceClient struct {
-	tableService         nb.TableServiceClient
-	menuService          nb.MenuServiceClient
-	viewService          nb.ViewServiceClient
-	objectBuilderService nb.ObjectBuilderServiceClient
-	fieldService         nb.FieldServiceClient
-	sectionService       nb.SectionServiceClient
-	layoutService        nb.LayoutServiceClient
-	itemsService         nb.ItemsServiceClient
-	relationService      nb.RelationServiceClient
-	fileService          nb.FileServiceClient
-	excelService         nb.ExcelServiceClient
-	functionService      nb.FunctionServiceV2Client
+	tableService          nb.TableServiceClient
+	menuService           nb.MenuServiceClient
+	viewService           nb.ViewServiceClient
+	objectBuilderService  nb.ObjectBuilderServiceClient
+	fieldService          nb.FieldServiceClient
+	sectionService        nb.SectionServiceClient
+	layoutService         nb.LayoutServiceClient
+	itemsService          nb.ItemsServiceClient
+	relationService       nb.RelationServiceClient
+	fileService           nb.FileServiceClient
+	excelService          nb.ExcelServiceClient
+	functionService       nb.FunctionServiceV2Client
+	versionService        nb.VersionServiceClient
+	versionHistoryService nb.VersionHistoryServiceClient
 	// goObjectBuilderConnPool *grpcpool.Pool
 }
 
@@ -53,18 +57,20 @@ func NewGoBuilderServiceClient(ctx context.Context, cfg config.Config) (GoBuilde
 	}
 
 	return &goBuilderServiceClient{
-		tableService:         nb.NewTableServiceClient(connGoBuilderService),
-		menuService:          nb.NewMenuServiceClient(connGoBuilderService),
-		viewService:          nb.NewViewServiceClient(connGoBuilderService),
-		objectBuilderService: nb.NewObjectBuilderServiceClient(connGoBuilderService),
-		fieldService:         nb.NewFieldServiceClient(connGoBuilderService),
-		sectionService:       nb.NewSectionServiceClient(connGoBuilderService),
-		layoutService:        nb.NewLayoutServiceClient(connGoBuilderService),
-		itemsService:         nb.NewItemsServiceClient(connGoBuilderService),
-		relationService:      nb.NewRelationServiceClient(connGoBuilderService),
-		fileService:          nb.NewFileServiceClient(connGoBuilderService),
-		excelService:         nb.NewExcelServiceClient(connGoBuilderService),
-		functionService:      nb.NewFunctionServiceV2Client(connGoBuilderService),
+		tableService:          nb.NewTableServiceClient(connGoBuilderService),
+		menuService:           nb.NewMenuServiceClient(connGoBuilderService),
+		viewService:           nb.NewViewServiceClient(connGoBuilderService),
+		objectBuilderService:  nb.NewObjectBuilderServiceClient(connGoBuilderService),
+		fieldService:          nb.NewFieldServiceClient(connGoBuilderService),
+		sectionService:        nb.NewSectionServiceClient(connGoBuilderService),
+		layoutService:         nb.NewLayoutServiceClient(connGoBuilderService),
+		itemsService:          nb.NewItemsServiceClient(connGoBuilderService),
+		relationService:       nb.NewRelationServiceClient(connGoBuilderService),
+		fileService:           nb.NewFileServiceClient(connGoBuilderService),
+		excelService:          nb.NewExcelServiceClient(connGoBuilderService),
+		functionService:       nb.NewFunctionServiceV2Client(connGoBuilderService),
+		versionService:        nb.NewVersionServiceClient(connGoBuilderService),
+		versionHistoryService: nb.NewVersionHistoryServiceClient(connGoBuilderService),
 	}, nil
 }
 
@@ -114,6 +120,14 @@ func (g *goBuilderServiceClient) Excel() nb.ExcelServiceClient {
 
 func (g *goBuilderServiceClient) Function() nb.FunctionServiceV2Client {
 	return g.functionService
+}
+
+func (g *goBuilderServiceClient) Version() nb.VersionServiceClient {
+	return g.versionService
+}
+
+func (g *goBuilderServiceClient) VersionHistory() nb.VersionHistoryServiceClient {
+	return g.versionHistoryService
 }
 
 // func (g *goBuilderServiceClient) GoObjectBuilderConnPool(ctx context.Context) (nb.ObjectBuilderServiceClient, *grpcpool.ClientConn, error) {

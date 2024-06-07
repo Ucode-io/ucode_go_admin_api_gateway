@@ -10,6 +10,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
+	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
@@ -132,30 +133,61 @@ func (h *HandlerV2) versionHistory(c *gin.Context, req *models.CreateVersionHist
 		}
 	}
 
-	_, err := req.Services.GetBuilderServiceByType(req.NodeType).VersionHistory().Create(
-		context.Background(),
-		&object_builder_service.CreateVersionHistoryRequest{
-			Id:                uuid.NewString(),
-			ProjectId:         req.ProjectId,
-			ActionSource:      req.ActionSource,
-			ActionType:        req.ActionType,
-			Previus:           fromMapToString(previous),
-			Current:           fromMapToString(current),
-			UsedEnvrironments: req.UsedEnvironments,
-			Date:              time.Now().Format("2006-01-02T15:04:05.000Z"),
-			UserInfo:          user,
-			Request:           fromMapToString(request),
-			Response:          fromMapToString(response),
-			ApiKey:            req.ApiKey,
-			Type:              req.Type,
-			TableSlug:         req.TableSlug,
-			VersionId:         req.VersionId,
-		},
-	)
-	if err != nil {
-		log.Println(err)
-		return err
+	switch req.ResourceType {
+	case 1:
+
+		_, err := req.Services.GetBuilderServiceByType(req.NodeType).VersionHistory().Create(
+			c,
+			&object_builder_service.CreateVersionHistoryRequest{
+				Id:                uuid.NewString(),
+				ProjectId:         req.ProjectId,
+				ActionSource:      req.ActionSource,
+				ActionType:        req.ActionType,
+				Previus:           fromMapToString(previous),
+				Current:           fromMapToString(current),
+				UsedEnvrironments: req.UsedEnvironments,
+				Date:              time.Now().Format("2006-01-02T15:04:05.000Z"),
+				UserInfo:          user,
+				Request:           fromMapToString(request),
+				Response:          fromMapToString(response),
+				ApiKey:            req.ApiKey,
+				Type:              req.Type,
+				TableSlug:         req.TableSlug,
+				VersionId:         req.VersionId,
+			},
+		)
+		if err != nil {
+			log.Println(err)
+			return err
+		}
+	case 3:
+
+		_, err := req.Services.GoObjectBuilderService().VersionHistory().Create(
+			c,
+			&nb.CreateVersionHistoryRequest{
+				Id:                uuid.NewString(),
+				ProjectId:         req.ProjectId,
+				ActionSource:      req.ActionSource,
+				ActionType:        req.ActionType,
+				Previus:           fromMapToString(previous),
+				Current:           fromMapToString(current),
+				UsedEnvrironments: req.UsedEnvironments,
+				Date:              time.Now().Format("2006-01-02T15:04:05.000Z"),
+				UserInfo:          user,
+				Request:           fromMapToString(request),
+				Response:          fromMapToString(response),
+				ApiKey:            req.ApiKey,
+				Type:              req.Type,
+				TableSlug:         req.TableSlug,
+				VersionId:         req.VersionId,
+			},
+		)
+		if err != nil {
+			log.Println(err)
+			return err
+		}
 	}
+
 	return nil
 }
 

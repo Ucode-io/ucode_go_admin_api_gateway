@@ -17,13 +17,13 @@ import (
 // 	SUPERADMIN_HOST string = "test.admin.u-code.io"
 // 	CLIENT_HOST     string = "test.app.u-code.io"
 // )
- 
+
 func (h *HandlerV2) NodeMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		c.Set("namespace", h.baseConf.UcodeNamespace)
 		c.Next()
-	} 
+	}
 }
 
 func (h *HandlerV2) AuthMiddleware() gin.HandlerFunc {
@@ -125,6 +125,7 @@ func (h *HandlerV2) AuthMiddleware() gin.HandlerFunc {
 				h.handleResponse(c, status_http.BadRequest, err.Error())
 				c.Abort()
 			} else {
+
 				err := errors.New("error invalid authorization method")
 				h.log.Error("--AuthMiddleware--", logger.Error(err))
 				c.JSON(401, struct {
