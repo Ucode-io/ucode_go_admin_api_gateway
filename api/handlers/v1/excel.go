@@ -83,10 +83,11 @@ func (h *HandlerV1) ExcelReader(c *gin.Context) {
 			h.handleResponse(c, status_http.InvalidArgument, err.Error())
 			return
 		}
+		h.handleResponse(c, status_http.OK, res)
 	case pb.ResourceType_POSTGRESQL:
-		res, err = services.PostgresBuilderService().Excel().ExcelRead(
+		resp, err := services.GoObjectBuilderService().Excel().ExcelRead(
 			context.Background(),
-			&object_builder_service.ExcelReadRequest{
+			&nb.ExcelReadRequest{
 				Id:        excelId,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -95,9 +96,9 @@ func (h *HandlerV1) ExcelReader(c *gin.Context) {
 			h.handleResponse(c, status_http.InvalidArgument, err.Error())
 			return
 		}
+		h.handleResponse(c, status_http.OK, resp)
 	}
 
-	h.handleResponse(c, status_http.OK, res)
 }
 
 // ExcelToDb godoc
