@@ -425,6 +425,7 @@ func (h *HandlerV2) PublishVersion(c *gin.Context) {
 	}
 
 	currentNodeType := currentResource.NodeType
+	currentResourceType := currentResource.ResourceType
 
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
@@ -451,6 +452,7 @@ func (h *HandlerV2) PublishVersion(c *gin.Context) {
 		}
 
 		publishedNodeType := publishedResource.NodeType
+		resourceType := publishedResource.ResourceType
 
 		publishedServices, err := h.GetProjectSrvc(
 			c.Request.Context(),
@@ -529,7 +531,7 @@ func (h *HandlerV2) PublishVersion(c *gin.Context) {
 				return
 			}
 		} else {
-			err = h.MigrateDownByVersion(c, publishedServices, activityLogs, publishedResource.ResourceEnvironmentId, publishedNodeType, userId.(string))
+			err = h.MigrateDownByVersion(c, publishedServices, activityLogs, publishedResource.ResourceEnvironmentId, publishedNodeType, userId.(string), resourceType)
 			if err != nil {
 				h.handleResponse(c, status_http.GRPCError, err.Error())
 				return
@@ -608,7 +610,7 @@ func (h *HandlerV2) PublishVersion(c *gin.Context) {
 				return
 			}
 		} else {
-			err = h.MigrateDownByVersion(c, services, activityLogs, currentResource.ResourceEnvironmentId, currentNodeType, userId.(string))
+			err = h.MigrateDownByVersion(c, services, activityLogs, currentResource.ResourceEnvironmentId, currentNodeType, userId.(string), currentResourceType)
 			if err != nil {
 				h.handleResponse(c, status_http.GRPCError, err.Error())
 				return
