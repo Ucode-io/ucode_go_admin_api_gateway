@@ -23,6 +23,7 @@ type GoBuilderServiceI interface {
 	Excel() nb.ExcelServiceClient
 	Function() nb.FunctionServiceV2Client
 	CustomEvent() nb.CustomEventServiceClient
+	Permission() nb.PermissionServiceClient
 }
 
 type goBuilderServiceClient struct {
@@ -39,6 +40,7 @@ type goBuilderServiceClient struct {
 	excelService         nb.ExcelServiceClient
 	functionService      nb.FunctionServiceV2Client
 	customEventService   nb.CustomEventServiceClient
+	permissionService    nb.PermissionServiceClient
 	// goObjectBuilderConnPool *grpcpool.Pool
 }
 
@@ -69,6 +71,7 @@ func NewGoBuilderServiceClient(ctx context.Context, cfg config.Config) (GoBuilde
 		excelService:         nb.NewExcelServiceClient(connGoBuilderService),
 		functionService:      nb.NewFunctionServiceV2Client(connGoBuilderService),
 		customEventService:   nb.NewCustomEventServiceClient(connGoBuilderService),
+		permissionService:    nb.NewPermissionServiceClient(connGoBuilderService),
 	}, nil
 }
 
@@ -122,6 +125,10 @@ func (g *goBuilderServiceClient) Function() nb.FunctionServiceV2Client {
 
 func (g *goBuilderServiceClient) CustomEvent() nb.CustomEventServiceClient {
 	return g.customEventService
+}
+
+func (g *goBuilderServiceClient) Permission() nb.PermissionServiceClient {
+	return g.permissionService
 }
 
 // func (g *goBuilderServiceClient) GoObjectBuilderConnPool(ctx context.Context) (nb.ObjectBuilderServiceClient, *grpcpool.ClientConn, error) {
