@@ -1194,7 +1194,6 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 				}
 			case pb.ResourceType_POSTGRESQL:
 
-
 				resp, err = services.PostgresBuilderService().ObjectBuilder().GroupByColumns(
 					context.Background(),
 					&obs.CommonMessage{

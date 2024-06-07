@@ -43,6 +43,7 @@ func DoRequest(url string, method string, body interface{}) (responseModel model
 
 	err = json.Unmarshal(respByte, &responseModel)
 	if err != nil {
+		return
 	}
 
 	return

@@ -24,10 +24,6 @@ import (
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) Cache(c *gin.Context) {
-	//t := time.Now()
-	defer func() {
-	}()
-
 	var request models.CacheRequest
 
 	err := c.ShouldBindJSON(&request)
