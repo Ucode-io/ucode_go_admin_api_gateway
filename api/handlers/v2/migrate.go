@@ -11,6 +11,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
+	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
@@ -24,52 +25,103 @@ type DataTableWrapper struct {
 	Data *obs.CreateTableRequest
 }
 
+type DataTableWrapperPsql struct {
+	Data *nb.CreateTableRequest
+}
+
 type DataUpdateTableWrapper struct {
 	Data *obs.UpdateTableRequest
+}
+
+type DataUpdateTableWrapperPsql struct {
+	Data *nb.UpdateTableRequest
 }
 
 type DataCreateFieldWrapper struct {
 	Data *obs.CreateFieldRequest
 }
 
+type DataCreateFieldWrapperPsql struct {
+	Data *nb.CreateFieldRequest
+}
+
 type DataFieldWrapper struct {
 	Data *obs.Field
+}
+
+type DataFieldWrapperPsql struct {
+	Data *nb.Field
 }
 
 type DataCreateRelationWrapper struct {
 	Data *obs.CreateRelationRequest
 }
 
+type DataCreateRelationWrapperPsql struct {
+	Data *nb.CreateRelationRequest
+}
+
 type DataRelationWrapper struct {
 	Data *obs.RelationForGetAll
+}
+
+type DataRelationWrapperPsql struct {
+	Data *nb.RelationForGetAll
 }
 
 type DataCreateMenuWrapper struct {
 	Data *obs.CreateMenuRequest
 }
 
+type DataCreateMenuWrapperPsql struct {
+	Data *nb.CreateMenuRequest
+}
+
 type DataUpdateMenuWrapper struct {
 	Data *obs.Menu
 }
 
+type DataUpdateMenuWrapperPsql struct {
+	Data *nb.Menu
+}
 type DataCreateViewWrapper struct {
 	Data *obs.CreateViewRequest
+}
+
+type DataCreateViewWrapperPsql struct {
+	Data *nb.CreateViewRequest
 }
 
 type DataUpdateViewWrapper struct {
 	Data *obs.View
 }
 
+type DataUpdateViewWrapperPsql struct {
+	Data *nb.View
+}
+
 type DataCreateLayoutWrapper struct {
 	Data *obs.CreateLayoutRequest
+}
+
+type DataCreateLayoutWrapperPsql struct {
+	Data *nb.CreateLayoutRequest
 }
 
 type DataUpdateLayoutWrapper struct {
 	Data *obs.LayoutRequest
 }
 
+type DataUpdateLayoutWrapperPsql struct {
+	Data *nb.LayoutRequest
+}
+
 type DataUpdateRelationWrapper struct {
 	Data *obs.UpdateRelationRequest
+}
+
+type DataUpdateRelationWrapperPsql struct {
+	Data *nb.UpdateRelationRequest
 }
 
 // MigrateUp godoc
@@ -1700,7 +1752,7 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 	return nil
 }
 
-func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.ServiceManagerI, lists *obs.ListVersionHistory, environmentId, nodeType, userId string) error {
+func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.ServiceManagerI, lists *obs.ListVersionHistory, environmentId, nodeType, userId string, resourceType pb.ResourceType) error {
 	var (
 		ids  []string
 		resp models.MigrateUpResponse
@@ -1734,9 +1786,12 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 
 		if actionSource == "TABLE" {
 			var (
-				current        DataTableWrapper
-				previous       DataUpdateTableWrapper
-				createPrevious DataTableWrapper
+				current            DataTableWrapper
+				currentPsql        DataTableWrapperPsql
+				previous           DataUpdateTableWrapper
+				previousPsql       DataUpdateTableWrapperPsql
+				createPrevious     DataTableWrapper
+				createPreviousPsql DataTableWrapperPsql
 			)
 
 			if cast.ToString(v.Current) != "" {
@@ -1746,6 +1801,14 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 				}
 				current.Data.ProjectId = resourceEnvId
 				current.Data.EnvId = environmentId
+
+				err = json.Unmarshal([]byte(cast.ToString(v.Current)), &currentPsql)
+				if err != nil {
+					continue
+				}
+
+				currentPsql.Data.ProjectId = resourceEnvId
+				currentPsql.Data.EnvId = environmentId
 			}
 
 			if cast.ToString(v.Previous) != "" {
@@ -1755,6 +1818,14 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 				}
 				previous.Data.ProjectId = resourceEnvId
 				previous.Data.EnvId = environmentId
+
+				err = json.Unmarshal([]byte(cast.ToString(v.Previous)), &previousPsql)
+				if err != nil {
+					continue
+				}
+
+				previousPsql.Data.ProjectId = resourceEnvId
+				previousPsql.Data.EnvId = environmentId
 			}
 
 			if cast.ToString(v.Previous) != "" {
@@ -1764,60 +1835,125 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 				}
 				createPrevious.Data.ProjectId = resourceEnvId
 				createPrevious.Data.EnvId = environmentId
+
+				err = json.Unmarshal([]byte(cast.ToString(v.Previous)), &createPreviousPsql)
+				if err != nil {
+					continue
+				}
+
+				createPreviousPsql.Data.ProjectId = resourceEnvId
+				createPreviousPsql.Data.EnvId = environmentId
 			}
 
 			switch actionType {
 			case "CREATE":
-				_, err := services.GetBuilderServiceByType(nodeType).Table().Delete(
-					context.Background(),
-					&obs.TablePrimaryKey{
-						Id:        current.Data.Id,
-						ProjectId: resourceEnvId,
-						EnvId:     cast.ToString(environmentId),
-					},
-				)
-				if err != nil {
-					continue
-				}
+				switch resourceType {
+				case pb.ResourceType_MONGODB:
+					_, err := services.GetBuilderServiceByType(nodeType).Table().Delete(
+						context.Background(),
+						&obs.TablePrimaryKey{
+							Id:        current.Data.Id,
+							ProjectId: resourceEnvId,
+							EnvId:     cast.ToString(environmentId),
+						},
+					)
+					if err != nil {
+						continue
+					}
 
-				services.GetBuilderServiceByType(nodeType).View().Delete(
-					context.Background(),
-					&obs.ViewPrimaryKey{
-						TableSlug: current.Data.Slug,
-						ProjectId: resourceEnvId,
-						EnvId:     cast.ToString(environmentId),
-					},
-				)
-				ids = append(ids, v.Id)
+					services.GetBuilderServiceByType(nodeType).View().Delete(
+						context.Background(),
+						&obs.ViewPrimaryKey{
+							TableSlug: current.Data.Slug,
+							ProjectId: resourceEnvId,
+							EnvId:     cast.ToString(environmentId),
+						},
+					)
+					ids = append(ids, v.Id)
+				case pb.ResourceType_POSTGRESQL:
+					_, err := services.GoObjectBuilderService().Table().Delete(
+						context.Background(),
+						&nb.TablePrimaryKey{
+							Id:        currentPsql.Data.Id,
+							ProjectId: resourceEnvId,
+							EnvId:     cast.ToString(environmentId),
+						},
+					)
+					if err != nil {
+						continue
+					}
+
+					services.GoObjectBuilderService().View().Delete(
+						context.Background(),
+						&nb.ViewPrimaryKey{
+							TableSlug: currentPsql.Data.Slug,
+							ProjectId: resourceEnvId,
+							EnvId:     cast.ToString(environmentId),
+						},
+					)
+					ids = append(ids, v.Id)
+				}
 			case "UPDATE":
-				previous.Data.CommitType = "TABLE"
-				previous.Data.Name = fmt.Sprintf("Auto Created Commit Create table - %s", time.Now().Format(time.RFC1123))
-				_, err := services.GetBuilderServiceByType(nodeType).Table().Update(
-					context.Background(),
-					previous.Data,
-				)
-				if err != nil {
-					continue
-				}
+				switch resourceType {
+				case pb.ResourceType_MONGODB:
+					previous.Data.CommitType = "TABLE"
+					previous.Data.Name = fmt.Sprintf("Auto Created Commit Create table - %s", time.Now().Format(time.RFC1123))
+					_, err := services.GetBuilderServiceByType(nodeType).Table().Update(
+						context.Background(),
+						previous.Data,
+					)
+					if err != nil {
+						continue
+					}
 
-				ids = append(ids, v.Id)
-			case "DELETE":
-				createPrevious.Data.CommitType = "TABLE"
-				createPrevious.Data.Name = fmt.Sprintf("Auto Created Commit Create table - %s", time.Now().Format(time.RFC1123))
-				_, err := services.GetBuilderServiceByType(nodeType).Table().Create(
-					context.Background(),
-					createPrevious.Data,
-				)
-				if err != nil {
-					continue
+					ids = append(ids, v.Id)
+				case pb.ResourceType_POSTGRESQL:
+					previousPsql.Data.CommitType = "TABLE"
+					previousPsql.Data.Name = fmt.Sprintf("Auto Created Commit Create table - %s", time.Now().Format(time.RFC1123))
+					_, err := services.GoObjectBuilderService().Table().Update(
+						context.Background(),
+						previousPsql.Data,
+					)
+					if err != nil {
+						continue
+					}
+
+					ids = append(ids, v.Id)
 				}
-				ids = append(ids, v.Id)
+			case "DELETE":
+				switch resourceType {
+				case pb.ResourceType_MONGODB:
+					createPrevious.Data.CommitType = "TABLE"
+					createPrevious.Data.Name = fmt.Sprintf("Auto Created Commit Create table - %s", time.Now().Format(time.RFC1123))
+					_, err := services.GetBuilderServiceByType(nodeType).Table().Create(
+						context.Background(),
+						createPrevious.Data,
+					)
+					if err != nil {
+						continue
+					}
+					ids = append(ids, v.Id)
+				case pb.ResourceType_POSTGRESQL:
+					createPreviousPsql.Data.CommitType = "TABLE"
+					createPreviousPsql.Data.Name = fmt.Sprintf("Auto Created Commit Create table - %s", time.Now().Format(time.RFC1123))
+					_, err := services.GoObjectBuilderService().Table().Create(
+						context.Background(),
+						createPreviousPsql.Data,
+					)
+					if err != nil {
+						continue
+					}
+					ids = append(ids, v.Id)
+				}
 			}
 		} else if actionSource == "FIELD" {
 			var (
-				current        DataCreateFieldWrapper
-				previous       DataFieldWrapper
-				createPrevious DataCreateFieldWrapper
+				current            DataCreateFieldWrapper
+				currentPsql        DataCreateFieldWrapperPsql
+				previous           DataFieldWrapper
+				previousPsql       DataFieldWrapperPsql
+				createPrevious     DataCreateFieldWrapper
+				createPreviousPsql DataCreateFieldWrapperPsql
 			)
 
 			if cast.ToString(v.Current) != "" {
@@ -1827,6 +1963,13 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 				}
 				current.Data.ProjectId = resourceEnvId
 				current.Data.EnvId = environmentId
+
+				err = json.Unmarshal([]byte(cast.ToString(v.Current)), &currentPsql)
+				if err != nil {
+					continue
+				}
+				currentPsql.Data.ProjectId = resourceEnvId
+				currentPsql.Data.EnvId = environmentId
 			}
 
 			if cast.ToString(v.Previous) != "" {
@@ -1836,6 +1979,13 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 				}
 				previous.Data.ProjectId = resourceEnvId
 				previous.Data.EnvId = environmentId
+
+				err = json.Unmarshal([]byte(cast.ToString(v.Previous)), &previousPsql)
+				if err != nil {
+					continue
+				}
+				previousPsql.Data.ProjectId = resourceEnvId
+				previousPsql.Data.EnvId = environmentId
 			}
 
 			if cast.ToString(v.Previous) != "" {
@@ -1845,44 +1995,92 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 				}
 				createPrevious.Data.ProjectId = resourceEnvId
 				createPrevious.Data.EnvId = environmentId
+
+				err = json.Unmarshal([]byte(cast.ToString(v.Previous)), &createPreviousPsql)
+				if err != nil {
+					continue
+				}
+				createPreviousPsql.Data.ProjectId = resourceEnvId
+				createPreviousPsql.Data.EnvId = environmentId
 			}
 
 			switch actionType {
 			case "CREATE":
-				_, err := services.GetBuilderServiceByType(nodeType).Field().Delete(
-					context.Background(),
-					&obs.FieldPrimaryKey{
-						ProjectId: current.Data.ProjectId,
-						EnvId:     current.Data.EnvId,
-						Id:        current.Data.Id,
-					},
-				)
-				if err != nil {
-					continue
+				switch resourceType {
+				case pb.ResourceType_MONGODB:
+					_, err := services.GetBuilderServiceByType(nodeType).Field().Delete(
+						context.Background(),
+						&obs.FieldPrimaryKey{
+							ProjectId: current.Data.ProjectId,
+							EnvId:     current.Data.EnvId,
+							Id:        current.Data.Id,
+						},
+					)
+					if err != nil {
+						continue
+					}
+					ids = append(ids, v.Id)
+				case pb.ResourceType_POSTGRESQL:
+					_, err := services.GoObjectBuilderService().Field().Delete(
+						context.Background(),
+						&nb.FieldPrimaryKey{
+							ProjectId: currentPsql.Data.ProjectId,
+							EnvId:     currentPsql.Data.EnvId,
+							Id:        currentPsql.Data.Id,
+						},
+					)
+					if err != nil {
+						continue
+					}
+					ids = append(ids, v.Id)
 				}
-				ids = append(ids, v.Id)
 			case "UPDATE":
-				_, err := services.GetBuilderServiceByType(nodeType).Field().Update(
-					context.Background(),
-					previous.Data,
-				)
-				if err != nil {
-					continue
+				switch resourceType {
+				case pb.ResourceType_MONGODB:
+					_, err := services.GetBuilderServiceByType(nodeType).Field().Update(
+						context.Background(),
+						previous.Data,
+					)
+					if err != nil {
+						continue
+					}
+					ids = append(ids, v.Id)
+				case pb.ResourceType_POSTGRESQL:
+					_, err := services.GoObjectBuilderService().Field().Update(
+						context.Background(),
+						previousPsql.Data,
+					)
+					if err != nil {
+						continue
+					}
+					ids = append(ids, v.Id)
 				}
-				ids = append(ids, v.Id)
 			case "DELETE":
-				_, err := services.GetBuilderServiceByType(nodeType).Field().Create(
-					context.Background(),
-					createPrevious.Data,
-				)
-				if err != nil {
-					continue
+				switch resourceType {
+				case pb.ResourceType_MONGODB:
+					_, err := services.GetBuilderServiceByType(nodeType).Field().Create(
+						context.Background(),
+						createPrevious.Data,
+					)
+					if err != nil {
+						continue
+					}
+					ids = append(ids, v.Id)
+				case pb.ResourceType_POSTGRESQL:
+					_, err := services.GoObjectBuilderService().Field().Create(
+						context.Background(),
+						createPreviousPsql.Data,
+					)
+					if err != nil {
+						continue
+					}
+					ids = append(ids, v.Id)
 				}
-				ids = append(ids, v.Id)
 			}
 		} else if actionSource == "RELATION" {
 			var (
-				previous DataRelationWrapper
+				previous     DataRelationWrapper
+				previousPsql DataRelationWrapperPsql
 			)
 
 			if cast.ToString(v.Previous) != "" {
@@ -1890,149 +2088,299 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 				if err != nil {
 					continue
 				}
+
+				err = json.Unmarshal([]byte(cast.ToString(v.Previous)), &previousPsql)
+				if err != nil {
+					continue
+				}
 			}
 
 			switch actionType {
 			case "CREATE":
-				var (
-					current DataCreateRelationWrapper
-				)
+				switch resourceType {
+				case pb.ResourceType_MONGODB:
+					var (
+						current DataCreateRelationWrapper
+					)
 
-				if cast.ToString(v.Current) != "" {
-					err := json.Unmarshal([]byte(cast.ToString(v.Current)), &current)
+					if cast.ToString(v.Current) != "" {
+						err := json.Unmarshal([]byte(cast.ToString(v.Current)), &current)
+						if err != nil {
+							continue
+						}
+					}
+
+					_, err := services.GetBuilderServiceByType(nodeType).Relation().Delete(
+						context.Background(),
+						&obs.RelationPrimaryKey{
+							Id:        current.Data.Id,
+							ProjectId: resourceEnvId,
+							EnvId:     cast.ToString(environmentId),
+						},
+					)
 					if err != nil {
 						continue
 					}
-				}
+					ids = append(ids, v.Id)
+				case pb.ResourceType_POSTGRESQL:
+					var (
+						currentPsql DataCreateRelationWrapperPsql
+					)
 
-				_, err := services.GetBuilderServiceByType(nodeType).Relation().Delete(
-					context.Background(),
-					&obs.RelationPrimaryKey{
-						Id:        current.Data.Id,
-						ProjectId: resourceEnvId,
-						EnvId:     cast.ToString(environmentId),
-					},
-				)
-				if err != nil {
-					continue
+					if cast.ToString(v.Current) != "" {
+						err := json.Unmarshal([]byte(cast.ToString(v.Current)), &currentPsql)
+						if err != nil {
+							continue
+						}
+					}
+
+					_, err := services.GoObjectBuilderService().Relation().Delete(
+						context.Background(),
+						&nb.RelationPrimaryKey{
+							Id:        currentPsql.Data.Id,
+							ProjectId: resourceEnvId,
+							EnvId:     cast.ToString(environmentId),
+						},
+					)
+					if err != nil {
+						continue
+					}
+					ids = append(ids, v.Id)
 				}
-				ids = append(ids, v.Id)
 			case "UPDATE":
-				var (
-					updateRelation = &obs.UpdateRelationRequest{
-						Id:                     previous.Data.Id,
-						TableFrom:              previous.Data.TableFrom.Slug,
-						TableTo:                previous.Data.TableTo.Slug,
-						Type:                   previous.Data.Type,
-						AutoFilters:            previous.Data.AutoFilters,
-						Summaries:              previous.Data.Summaries,
-						Editable:               previous.Data.Editable,
-						IsEditable:             previous.Data.IsEditable,
-						Title:                  previous.Data.Title,
-						Columns:                previous.Data.Columns,
-						QuickFilters:           previous.Data.QuickFilters,
-						GroupFields:            previous.Data.GroupFields,
-						RelationTableSlug:      previous.Data.RelationTableSlug,
-						ViewType:               previous.Data.ViewType,
-						DynamicTables:          previous.Data.DynamicTables,
-						RelationFieldSlug:      previous.Data.RelationFieldSlug,
-						DefaultValues:          previous.Data.DefaultValues,
-						IsUserIdDefault:        previous.Data.IsUserIdDefault,
-						Cascadings:             previous.Data.Cascadings,
-						ObjectIdFromJwt:        previous.Data.ObjectIdFromJwt,
-						CascadingTreeTableSlug: previous.Data.CascadingTreeFieldSlug,
-						CascadingTreeFieldSlug: previous.Data.CascadingTreeFieldSlug,
-						ActionRelations:        previous.Data.ActionRelations,
-						DefaultLimit:           previous.Data.DefaultLimit,
-						MultipleInsert:         previous.Data.MultipleInsert,
-						UpdatedFields:          previous.Data.UpdatedFields,
-						MultipleInsertField:    previous.Data.MultipleInsertField,
-						ProjectId:              resourceEnvId,
-						Creatable:              previous.Data.Creatable,
-						DefaultEditable:        previous.Data.DefaultEditable,
-						FunctionPath:           previous.Data.FunctionPath,
-						RelationButtons:        previous.Data.RelationButtons,
-						Attributes:             previous.Data.Attributes,
-						EnvId:                  environmentId,
+				switch resourceType {
+				case pb.ResourceType_MONGODB:
+					var (
+						updateRelation = &obs.UpdateRelationRequest{
+							Id:                     previous.Data.Id,
+							TableFrom:              previous.Data.TableFrom.Slug,
+							TableTo:                previous.Data.TableTo.Slug,
+							Type:                   previous.Data.Type,
+							AutoFilters:            previous.Data.AutoFilters,
+							Summaries:              previous.Data.Summaries,
+							Editable:               previous.Data.Editable,
+							IsEditable:             previous.Data.IsEditable,
+							Title:                  previous.Data.Title,
+							Columns:                previous.Data.Columns,
+							QuickFilters:           previous.Data.QuickFilters,
+							GroupFields:            previous.Data.GroupFields,
+							RelationTableSlug:      previous.Data.RelationTableSlug,
+							ViewType:               previous.Data.ViewType,
+							DynamicTables:          previous.Data.DynamicTables,
+							RelationFieldSlug:      previous.Data.RelationFieldSlug,
+							DefaultValues:          previous.Data.DefaultValues,
+							IsUserIdDefault:        previous.Data.IsUserIdDefault,
+							Cascadings:             previous.Data.Cascadings,
+							ObjectIdFromJwt:        previous.Data.ObjectIdFromJwt,
+							CascadingTreeTableSlug: previous.Data.CascadingTreeFieldSlug,
+							CascadingTreeFieldSlug: previous.Data.CascadingTreeFieldSlug,
+							ActionRelations:        previous.Data.ActionRelations,
+							DefaultLimit:           previous.Data.DefaultLimit,
+							MultipleInsert:         previous.Data.MultipleInsert,
+							UpdatedFields:          previous.Data.UpdatedFields,
+							MultipleInsertField:    previous.Data.MultipleInsertField,
+							ProjectId:              resourceEnvId,
+							Creatable:              previous.Data.Creatable,
+							DefaultEditable:        previous.Data.DefaultEditable,
+							FunctionPath:           previous.Data.FunctionPath,
+							RelationButtons:        previous.Data.RelationButtons,
+							Attributes:             previous.Data.Attributes,
+							EnvId:                  environmentId,
+						}
+						viewFields = []string{}
+					)
+
+					for _, v := range previous.Data.ViewFields {
+						viewFields = append(viewFields, v.Id)
 					}
-					viewFields = []string{}
-				)
 
-				for _, v := range previous.Data.ViewFields {
-					viewFields = append(viewFields, v.Id)
+					updateRelation.ViewFields = viewFields
+
+					_, err := services.GetBuilderServiceByType(nodeType).Relation().Update(
+						context.Background(),
+						updateRelation,
+					)
+					if err != nil {
+						continue
+					}
+					ids = append(ids, v.Id)
+				case pb.ResourceType_POSTGRESQL:
+					var (
+						updateRelationPsql = &nb.UpdateRelationRequest{
+							Id:                     previousPsql.Data.Id,
+							TableFrom:              previousPsql.Data.TableFrom.Slug,
+							TableTo:                previousPsql.Data.TableTo.Slug,
+							Type:                   previousPsql.Data.Type,
+							AutoFilters:            previousPsql.Data.AutoFilters,
+							Summaries:              previousPsql.Data.Summaries,
+							Editable:               previousPsql.Data.Editable,
+							IsEditable:             previousPsql.Data.IsEditable,
+							Title:                  previousPsql.Data.Title,
+							Columns:                previousPsql.Data.Columns,
+							QuickFilters:           previousPsql.Data.QuickFilters,
+							GroupFields:            previousPsql.Data.GroupFields,
+							RelationTableSlug:      previousPsql.Data.RelationTableSlug,
+							ViewType:               previousPsql.Data.ViewType,
+							DynamicTables:          previousPsql.Data.DynamicTables,
+							RelationFieldSlug:      previousPsql.Data.RelationFieldSlug,
+							DefaultValues:          previousPsql.Data.DefaultValues,
+							IsUserIdDefault:        previousPsql.Data.IsUserIdDefault,
+							Cascadings:             previousPsql.Data.Cascadings,
+							ObjectIdFromJwt:        previousPsql.Data.ObjectIdFromJwt,
+							CascadingTreeTableSlug: previousPsql.Data.CascadingTreeFieldSlug,
+							CascadingTreeFieldSlug: previousPsql.Data.CascadingTreeFieldSlug,
+							ActionRelations:        previousPsql.Data.ActionRelations,
+							DefaultLimit:           previousPsql.Data.DefaultLimit,
+							MultipleInsert:         previousPsql.Data.MultipleInsert,
+							UpdatedFields:          previousPsql.Data.UpdatedFields,
+							MultipleInsertField:    previousPsql.Data.MultipleInsertField,
+							ProjectId:              resourceEnvId,
+							Creatable:              previousPsql.Data.Creatable,
+							DefaultEditable:        previousPsql.Data.DefaultEditable,
+							FunctionPath:           previousPsql.Data.FunctionPath,
+							RelationButtons:        previousPsql.Data.RelationButtons,
+							Attributes:             previousPsql.Data.Attributes,
+							EnvId:                  environmentId,
+						}
+						viewFields = []string{}
+					)
+
+					for _, v := range previousPsql.Data.ViewFields {
+						viewFields = append(viewFields, v.Id)
+					}
+
+					updateRelationPsql.ViewFields = viewFields
+
+					_, err := services.GoObjectBuilderService().Relation().Update(
+						context.Background(),
+						updateRelationPsql,
+					)
+					if err != nil {
+						continue
+					}
+					ids = append(ids, v.Id)
 				}
-
-				updateRelation.ViewFields = viewFields
-
-				_, err := services.GetBuilderServiceByType(nodeType).Relation().Update(
-					context.Background(),
-					updateRelation,
-				)
-				if err != nil {
-					continue
-				}
-				ids = append(ids, v.Id)
 			case "DELETE":
-				var (
-					createRelation = &obs.CreateRelationRequest{
-						Id:                     previous.Data.Id,
-						TableFrom:              previous.Data.TableFrom.Slug,
-						TableTo:                previous.Data.TableTo.Slug,
-						Type:                   previous.Data.Type,
-						AutoFilters:            previous.Data.AutoFilters,
-						Summaries:              previous.Data.Summaries,
-						Editable:               previous.Data.Editable,
-						IsEditable:             previous.Data.IsEditable,
-						Title:                  previous.Data.Title,
-						Columns:                previous.Data.Columns,
-						QuickFilters:           previous.Data.QuickFilters,
-						GroupFields:            previous.Data.GroupFields,
-						RelationTableSlug:      previous.Data.RelationTableSlug,
-						ViewType:               previous.Data.ViewType,
-						DynamicTables:          previous.Data.DynamicTables,
-						RelationFieldSlug:      previous.Data.RelationFieldSlug,
-						DefaultValues:          previous.Data.DefaultValues,
-						IsUserIdDefault:        previous.Data.IsUserIdDefault,
-						Cascadings:             previous.Data.Cascadings,
-						ObjectIdFromJwt:        previous.Data.ObjectIdFromJwt,
-						CascadingTreeTableSlug: previous.Data.CascadingTreeFieldSlug,
-						CascadingTreeFieldSlug: previous.Data.CascadingTreeFieldSlug,
-						ActionRelations:        previous.Data.ActionRelations,
-						DefaultLimit:           previous.Data.DefaultLimit,
-						MultipleInsert:         previous.Data.MultipleInsert,
-						UpdatedFields:          previous.Data.UpdatedFields,
-						MultipleInsertField:    previous.Data.MultipleInsertField,
-						ProjectId:              resourceEnvId,
-						Creatable:              previous.Data.Creatable,
-						DefaultEditable:        previous.Data.DefaultEditable,
-						FunctionPath:           previous.Data.FunctionPath,
-						RelationButtons:        previous.Data.RelationButtons,
-						Attributes:             previous.Data.Attributes,
-						EnvId:                  environmentId,
+				switch resourceType {
+				case pb.ResourceType_MONGODB:
+					var (
+						createRelation = &obs.CreateRelationRequest{
+							Id:                     previous.Data.Id,
+							TableFrom:              previous.Data.TableFrom.Slug,
+							TableTo:                previous.Data.TableTo.Slug,
+							Type:                   previous.Data.Type,
+							AutoFilters:            previous.Data.AutoFilters,
+							Summaries:              previous.Data.Summaries,
+							Editable:               previous.Data.Editable,
+							IsEditable:             previous.Data.IsEditable,
+							Title:                  previous.Data.Title,
+							Columns:                previous.Data.Columns,
+							QuickFilters:           previous.Data.QuickFilters,
+							GroupFields:            previous.Data.GroupFields,
+							RelationTableSlug:      previous.Data.RelationTableSlug,
+							ViewType:               previous.Data.ViewType,
+							DynamicTables:          previous.Data.DynamicTables,
+							RelationFieldSlug:      previous.Data.RelationFieldSlug,
+							DefaultValues:          previous.Data.DefaultValues,
+							IsUserIdDefault:        previous.Data.IsUserIdDefault,
+							Cascadings:             previous.Data.Cascadings,
+							ObjectIdFromJwt:        previous.Data.ObjectIdFromJwt,
+							CascadingTreeTableSlug: previous.Data.CascadingTreeFieldSlug,
+							CascadingTreeFieldSlug: previous.Data.CascadingTreeFieldSlug,
+							ActionRelations:        previous.Data.ActionRelations,
+							DefaultLimit:           previous.Data.DefaultLimit,
+							MultipleInsert:         previous.Data.MultipleInsert,
+							UpdatedFields:          previous.Data.UpdatedFields,
+							MultipleInsertField:    previous.Data.MultipleInsertField,
+							ProjectId:              resourceEnvId,
+							Creatable:              previous.Data.Creatable,
+							DefaultEditable:        previous.Data.DefaultEditable,
+							FunctionPath:           previous.Data.FunctionPath,
+							RelationButtons:        previous.Data.RelationButtons,
+							Attributes:             previous.Data.Attributes,
+							EnvId:                  environmentId,
+						}
+						viewFields = []string{}
+					)
+					for _, v := range previous.Data.ViewFields {
+						viewFields = append(viewFields, v.Id)
 					}
-					viewFields = []string{}
-				)
-				for _, v := range previous.Data.ViewFields {
-					viewFields = append(viewFields, v.Id)
-				}
-				createRelation.ViewFields = viewFields
+					createRelation.ViewFields = viewFields
 
-				_, err := services.GetBuilderServiceByType(nodeType).Relation().Create(
-					context.Background(),
-					createRelation,
-				)
-				if err != nil {
-					continue
+					_, err := services.GetBuilderServiceByType(nodeType).Relation().Create(
+						context.Background(),
+						createRelation,
+					)
+					if err != nil {
+						continue
+					}
+					ids = append(ids, v.Id)
+				case pb.ResourceType_POSTGRESQL:
+					var (
+						createRelationPsql = &nb.CreateRelationRequest{
+							Id:                     previousPsql.Data.Id,
+							TableFrom:              previousPsql.Data.TableFrom.Slug,
+							TableTo:                previousPsql.Data.TableTo.Slug,
+							Type:                   previousPsql.Data.Type,
+							AutoFilters:            previousPsql.Data.AutoFilters,
+							Summaries:              previousPsql.Data.Summaries,
+							Editable:               previousPsql.Data.Editable,
+							IsEditable:             previousPsql.Data.IsEditable,
+							Title:                  previousPsql.Data.Title,
+							Columns:                previousPsql.Data.Columns,
+							QuickFilters:           previousPsql.Data.QuickFilters,
+							GroupFields:            previousPsql.Data.GroupFields,
+							RelationTableSlug:      previousPsql.Data.RelationTableSlug,
+							ViewType:               previousPsql.Data.ViewType,
+							DynamicTables:          previousPsql.Data.DynamicTables,
+							RelationFieldSlug:      previousPsql.Data.RelationFieldSlug,
+							DefaultValues:          previousPsql.Data.DefaultValues,
+							IsUserIdDefault:        previousPsql.Data.IsUserIdDefault,
+							Cascadings:             previousPsql.Data.Cascadings,
+							ObjectIdFromJwt:        previousPsql.Data.ObjectIdFromJwt,
+							CascadingTreeTableSlug: previousPsql.Data.CascadingTreeFieldSlug,
+							CascadingTreeFieldSlug: previousPsql.Data.CascadingTreeFieldSlug,
+							ActionRelations:        previousPsql.Data.ActionRelations,
+							DefaultLimit:           previousPsql.Data.DefaultLimit,
+							MultipleInsert:         previousPsql.Data.MultipleInsert,
+							UpdatedFields:          previousPsql.Data.UpdatedFields,
+							MultipleInsertField:    previousPsql.Data.MultipleInsertField,
+							ProjectId:              resourceEnvId,
+							Creatable:              previousPsql.Data.Creatable,
+							DefaultEditable:        previousPsql.Data.DefaultEditable,
+							FunctionPath:           previousPsql.Data.FunctionPath,
+							RelationButtons:        previousPsql.Data.RelationButtons,
+							Attributes:             previousPsql.Data.Attributes,
+							EnvId:                  environmentId,
+						}
+						viewFields = []string{}
+					)
+					for _, v := range previousPsql.Data.ViewFields {
+						viewFields = append(viewFields, v.Id)
+					}
+					createRelationPsql.ViewFields = viewFields
+
+					_, err := services.GoObjectBuilderService().Relation().Create(
+						context.Background(),
+						createRelationPsql,
+					)
+					if err != nil {
+						continue
+					}
+					ids = append(ids, v.Id)
 				}
-				ids = append(ids, v.Id)
 			}
 		} else if actionSource == "MENU" {
 
 			var (
-				current       DataUpdateMenuWrapper
-				previous      DataUpdateMenuWrapper
-				createRequest DataCreateMenuWrapper
-				response      DataUpdateMenuWrapper
+				current           DataUpdateMenuWrapper
+				currentPsql       DataUpdateMenuWrapperPsql
+				previous          DataUpdateMenuWrapper
+				previousPsql      DataUpdateMenuWrapperPsql
+				createRequest     DataCreateMenuWrapper
+				createRequestPsql DataCreateMenuWrapperPsql
+				response          DataUpdateMenuWrapper
+				responsePsql      DataUpdateMenuWrapperPsql
 			)
 
 			if cast.ToString(v.Current) != "" {
@@ -2042,6 +2390,13 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 				}
 				current.Data.ProjectId = resourceEnvId
 				current.Data.EnvId = environmentId
+
+				err = json.Unmarshal([]byte(cast.ToString(v.Current)), &currentPsql)
+				if err != nil {
+					continue
+				}
+				currentPsql.Data.ProjectId = resourceEnvId
+				currentPsql.Data.EnvId = environmentId
 			}
 
 			if cast.ToString(v.Previous) != "" {
@@ -2051,6 +2406,13 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 				}
 				previous.Data.ProjectId = resourceEnvId
 				previous.Data.EnvId = environmentId
+
+				err = json.Unmarshal([]byte(cast.ToString(v.Previous)), &previousPsql)
+				if err != nil {
+					continue
+				}
+				previousPsql.Data.ProjectId = resourceEnvId
+				previousPsql.Data.EnvId = environmentId
 			}
 
 			if cast.ToString(v.Previous) != "" {
@@ -2060,6 +2422,13 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 				}
 				createRequest.Data.ProjectId = resourceEnvId
 				createRequest.Data.EnvId = environmentId
+
+				err = json.Unmarshal([]byte(cast.ToString(v.Previous)), &createRequestPsql)
+				if err != nil {
+					continue
+				}
+				createRequestPsql.Data.ProjectId = resourceEnvId
+				createRequestPsql.Data.EnvId = environmentId
 			}
 
 			if cast.ToString(v.Response) != "" {
@@ -2069,47 +2438,97 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 				}
 				response.Data.ProjectId = resourceEnvId
 				response.Data.EnvId = environmentId
+
+				err = json.Unmarshal([]byte(cast.ToString(v.Response)), &responsePsql)
+				if err != nil {
+					continue
+				}
+				responsePsql.Data.ProjectId = resourceEnvId
+				responsePsql.Data.EnvId = environmentId
 			}
 
 			switch actionType {
 			case "CREATE":
-				_, err = services.GetBuilderServiceByType(nodeType).Menu().Delete(
-					context.Background(),
-					&obs.MenuPrimaryKey{
-						Id:        current.Data.Id,
-						ProjectId: resourceEnvId,
-						EnvId:     cast.ToString(environmentId),
-					},
-				)
-				if err != nil {
-					continue
+				switch resourceType {
+				case pb.ResourceType_MONGODB:
+					_, err = services.GetBuilderServiceByType(nodeType).Menu().Delete(
+						context.Background(),
+						&obs.MenuPrimaryKey{
+							Id:        current.Data.Id,
+							ProjectId: resourceEnvId,
+							EnvId:     cast.ToString(environmentId),
+						},
+					)
+					if err != nil {
+						continue
+					}
+					ids = append(ids, v.Id)
+				case pb.ResourceType_POSTGRESQL:
+					_, err = services.GoObjectBuilderService().Menu().Delete(
+						context.Background(),
+						&nb.MenuPrimaryKey{
+							Id:        currentPsql.Data.Id,
+							ProjectId: resourceEnvId,
+							EnvId:     cast.ToString(environmentId),
+						},
+					)
+					if err != nil {
+						continue
+					}
+					ids = append(ids, v.Id)
 				}
-				ids = append(ids, v.Id)
 			case "UPDATE":
-				_, err := services.GetBuilderServiceByType(nodeType).Menu().Update(
-					context.Background(),
-					previous.Data,
-				)
-				if err != nil {
-					continue
+				switch resourceType {
+				case pb.ResourceType_MONGODB:
+					_, err := services.GetBuilderServiceByType(nodeType).Menu().Update(
+						context.Background(),
+						previous.Data,
+					)
+					if err != nil {
+						continue
+					}
+					ids = append(ids, v.Id)
+				case pb.ResourceType_POSTGRESQL:
+					_, err := services.GoObjectBuilderService().Menu().Update(
+						context.Background(),
+						previousPsql.Data,
+					)
+					if err != nil {
+						continue
+					}
+					ids = append(ids, v.Id)
 				}
-				ids = append(ids, v.Id)
 			case "DELETE":
-				_, err := services.GetBuilderServiceByType(nodeType).Menu().Create(
-					context.Background(),
-					createRequest.Data,
-				)
-				if err != nil {
-					continue
+				switch resourceType {
+				case pb.ResourceType_MONGODB:
+					_, err := services.GetBuilderServiceByType(nodeType).Menu().Create(
+						context.Background(),
+						createRequest.Data,
+					)
+					if err != nil {
+						continue
+					}
+					ids = append(ids, v.Id)
+				case pb.ResourceType_POSTGRESQL:
+					_, err := services.GoObjectBuilderService().Menu().Create(
+						context.Background(),
+						createRequestPsql.Data,
+					)
+					if err != nil {
+						continue
+					}
+					ids = append(ids, v.Id)
 				}
-				ids = append(ids, v.Id)
 			}
 		} else if actionSource == "VIEW" {
 
 			var (
-				current        DataCreateViewWrapper
-				previous       DataUpdateViewWrapper
-				createPrevious DataCreateViewWrapper
+				current            DataCreateViewWrapper
+				currentPsql        DataCreateViewWrapperPsql
+				previous           DataUpdateViewWrapper
+				previousPsql       DataUpdateViewWrapperPsql
+				createPrevious     DataCreateViewWrapper
+				createPreviousPsql DataCreateViewWrapperPsql
 			)
 
 			if cast.ToString(v.Current) != "" {
@@ -2119,6 +2538,13 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 				}
 				current.Data.ProjectId = resourceEnvId
 				current.Data.EnvId = environmentId
+
+				err = json.Unmarshal([]byte(cast.ToString(v.Current)), &currentPsql)
+				if err != nil {
+					continue
+				}
+				currentPsql.Data.ProjectId = resourceEnvId
+				currentPsql.Data.EnvId = environmentId
 			}
 
 			if cast.ToString(v.Current) != "" {
@@ -2128,6 +2554,13 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 				}
 				previous.Data.ProjectId = resourceEnvId
 				previous.Data.EnvId = environmentId
+
+				err = json.Unmarshal([]byte(cast.ToString(v.Previous)), &previousPsql)
+				if err != nil {
+					continue
+				}
+				previousPsql.Data.ProjectId = resourceEnvId
+				previousPsql.Data.EnvId = environmentId
 			}
 
 			if cast.ToString(v.Previous) != "" {
@@ -2137,44 +2570,92 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 				}
 				createPrevious.Data.ProjectId = resourceEnvId
 				createPrevious.Data.EnvId = environmentId
+
+				err = json.Unmarshal([]byte(cast.ToString(v.Previous)), &createPreviousPsql)
+				if err != nil {
+					continue
+				}
+				createPreviousPsql.Data.ProjectId = resourceEnvId
+				createPreviousPsql.Data.EnvId = environmentId
 			}
 
 			switch actionType {
 			case "CREATE":
-				_, err := services.GetBuilderServiceByType(nodeType).View().Delete(
-					context.Background(),
-					&obs.ViewPrimaryKey{
-						Id:        current.Data.Id,
-						ProjectId: resourceEnvId,
-						EnvId:     environmentId,
-					},
-				)
-				if err != nil {
-					continue
+				switch resourceType {
+				case pb.ResourceType_MONGODB:
+					_, err := services.GetBuilderServiceByType(nodeType).View().Delete(
+						context.Background(),
+						&obs.ViewPrimaryKey{
+							Id:        current.Data.Id,
+							ProjectId: resourceEnvId,
+							EnvId:     environmentId,
+						},
+					)
+					if err != nil {
+						continue
+					}
+					ids = append(ids, v.Id)
+				case pb.ResourceType_POSTGRESQL:
+					_, err := services.GoObjectBuilderService().View().Delete(
+						context.Background(),
+						&nb.ViewPrimaryKey{
+							Id:        currentPsql.Data.Id,
+							ProjectId: resourceEnvId,
+							EnvId:     environmentId,
+						},
+					)
+					if err != nil {
+						continue
+					}
+					ids = append(ids, v.Id)
 				}
-				ids = append(ids, v.Id)
 			case "UPDATE":
-				_, err := services.GetBuilderServiceByType(nodeType).View().Update(
-					context.Background(),
-					previous.Data,
-				)
-				if err != nil {
-					continue
+				switch resourceType {
+				case pb.ResourceType_MONGODB:
+					_, err := services.GetBuilderServiceByType(nodeType).View().Update(
+						context.Background(),
+						previous.Data,
+					)
+					if err != nil {
+						continue
+					}
+					ids = append(ids, v.Id)
+				case pb.ResourceType_POSTGRESQL:
+					_, err := services.GoObjectBuilderService().View().Update(
+						context.Background(),
+						previousPsql.Data,
+					)
+					if err != nil {
+						continue
+					}
+					ids = append(ids, v.Id)
 				}
-				ids = append(ids, v.Id)
 			case "DELETE":
-				_, err := services.GetBuilderServiceByType(nodeType).View().Create(
-					context.Background(),
-					createPrevious.Data,
-				)
-				if err != nil {
-					continue
+				switch resourceType {
+				case pb.ResourceType_MONGODB:
+					_, err := services.GetBuilderServiceByType(nodeType).View().Create(
+						context.Background(),
+						createPrevious.Data,
+					)
+					if err != nil {
+						continue
+					}
+					ids = append(ids, v.Id)
+				case pb.ResourceType_POSTGRESQL:
+					_, err := services.GoObjectBuilderService().View().Create(
+						context.Background(),
+						createPreviousPsql.Data,
+					)
+					if err != nil {
+						continue
+					}
+					ids = append(ids, v.Id)
 				}
-				ids = append(ids, v.Id)
 			}
 		} else if actionSource == "LAYOUT" {
 			var (
-				previous DataUpdateLayoutWrapper
+				previous     DataUpdateLayoutWrapper
+				previousPsql DataUpdateLayoutWrapperPsql
 			)
 
 			if cast.ToString(v.Previous) != "" {
@@ -2184,18 +2665,37 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 				}
 				previous.Data.ProjectId = resourceEnvId
 				previous.Data.EnvId = environmentId
+
+				err = json.Unmarshal([]byte(cast.ToString(v.Previous)), &previousPsql)
+				if err != nil {
+					continue
+				}
+				previousPsql.Data.ProjectId = resourceEnvId
+				previousPsql.Data.EnvId = environmentId
 			}
 
 			switch actionType {
 			case "DELETE", "UPDATE":
-				_, err := services.GetBuilderServiceByType(nodeType).Layout().Update(
-					context.Background(),
-					previous.Data,
-				)
-				if err != nil {
-					continue
+				switch resourceType {
+				case pb.ResourceType_MONGODB:
+					_, err := services.GetBuilderServiceByType(nodeType).Layout().Update(
+						context.Background(),
+						previous.Data,
+					)
+					if err != nil {
+						continue
+					}
+					ids = append(ids, v.Id)
+				case pb.ResourceType_POSTGRESQL:
+					_, err := services.GoObjectBuilderService().Layout().Update(
+						context.Background(),
+						previousPsql.Data,
+					)
+					if err != nil {
+						continue
+					}
+					ids = append(ids, v.Id)
 				}
-				ids = append(ids, v.Id)
 			}
 		}
 	}
