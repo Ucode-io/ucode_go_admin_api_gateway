@@ -7,6 +7,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
+	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
@@ -26,7 +27,8 @@ type DoInvokeFuntionStruct struct {
 func GetListCustomEvents(tableSlug, roleId, method string, c *gin.Context, h *HandlerV1) (beforeEvents, afterEvents []*obs.CustomEvent, err error) {
 
 	var (
-		res *obs.GetCustomEventsListResponse
+		res   *obs.GetCustomEventsListResponse
+		goRes *nb.GetCustomEventsListResponse
 	)
 
 	projectId, ok := c.Get("project_id")
@@ -81,9 +83,10 @@ func GetListCustomEvents(tableSlug, roleId, method string, c *gin.Context, h *Ha
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		res, err = services.PostgresBuilderService().CustomEvent().GetList(
+
+		goRes, err = services.GoObjectBuilderService().CustomEvent().GetList(
 			context.Background(),
-			&obs.GetCustomEventsListRequest{
+			&nb.GetCustomEventsListRequest{
 				TableSlug: tableSlug,
 				Method:    method,
 				RoleId:    roleId,
@@ -92,6 +95,10 @@ func GetListCustomEvents(tableSlug, roleId, method string, c *gin.Context, h *Ha
 		)
 
 		if err != nil {
+			return
+		}
+
+		if err = helper.MarshalToStruct(goRes, &res); err != nil {
 			return
 		}
 	}

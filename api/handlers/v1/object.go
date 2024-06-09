@@ -2991,9 +2991,9 @@ func (h *HandlerV1) DeleteManyObject(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().ObjectBuilder().DeleteMany(
+		goResp, err := services.GoObjectBuilderService().Items().DeleteMany(
 			context.Background(),
-			&obs.CommonMessage{
+			&nb.CommonMessage{
 				TableSlug: c.Param("table_slug"),
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
@@ -3005,6 +3005,16 @@ func (h *HandlerV1) DeleteManyObject(c *gin.Context) {
 			return
 		}
 
+		body, err := json.Marshal(goResp)
+		if err != nil {
+			h.handleResponse(c, status_http.BadRequest, err.Error())
+			return
+		}
+
+		if err := json.Unmarshal(body, &resp); err != nil {
+			h.handleResponse(c, status_http.BadRequest, err.Error())
+			return
+		}
 	}
 
 	if len(afterActions) > 0 {
