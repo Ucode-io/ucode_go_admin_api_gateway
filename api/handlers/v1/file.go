@@ -581,20 +581,41 @@ func (h *HandlerV1) GetAllFiles(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.GetBuilderServiceByType(resource.NodeType).File().GetList(
-		context.Background(),
-		&obs.GetAllFilesRequest{
-			Search:     c.DefaultQuery("search", ""),
-			Sort:       c.DefaultQuery("sort", ""),
-			ProjectId:  resource.ResourceEnvironmentId,
-			FolderName: c.DefaultQuery("folder_name", ""),
-		},
-	)
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).File().GetList(
+			context.Background(),
+			&obs.GetAllFilesRequest{
+				Search:     c.DefaultQuery("search", ""),
+				Sort:       c.DefaultQuery("sort", ""),
+				ProjectId:  resource.ResourceEnvironmentId,
+				FolderName: c.DefaultQuery("folder_name", ""),
+			},
+		)
 
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		h.handleResponse(c, status_http.OK, resp)
+	case pb.ResourceType_POSTGRESQL:
+		resp, err := services.GoObjectBuilderService().File().GetList(
+			context.Background(),
+			&nb.GetAllFilesRequest{
+				Search:     c.DefaultQuery("search", ""),
+				Sort:       c.DefaultQuery("sort", ""),
+				ProjectId:  resource.ResourceEnvironmentId,
+				FolderName: c.DefaultQuery("folder_name", ""),
+			},
+		)
+
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		h.handleResponse(c, status_http.OK, resp)
+
 	}
-
-	h.handleResponse(c, status_http.OK, resp)
 }
