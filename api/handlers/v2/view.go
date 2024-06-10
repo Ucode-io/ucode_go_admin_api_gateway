@@ -111,6 +111,7 @@ func (h *HandlerV2) CreateView(c *gin.Context) {
 			h.handleResponse(c, status_http.Created, resp)
 		}
 		go h.versionHistory(c, logReq)
+		h.handleResponse(c, status_http.Created, resp)
 	case pb.ResourceType_POSTGRESQL:
 		newReq := nb.CreateViewRequest{}
 		err = helper.MarshalToStruct(&view, &newReq)
@@ -124,9 +125,14 @@ func (h *HandlerV2) CreateView(c *gin.Context) {
 			&newReq,
 		)
 		if err != nil {
+			logReq.Response = err.Error()
 			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
+		} else {
+			logReq.Current = resp
+			logReq.Response = resp
+			h.handleResponse(c, status_http.Created, resp)
 		}
+		go h.versionHistoryGo(c, logReq)
 		h.handleResponse(c, status_http.Created, resp)
 	}
 }
@@ -328,7 +334,23 @@ func (h *HandlerV2) UpdateView(c *gin.Context) {
 			h.handleResponse(c, status_http.OK, resp)
 		}
 		go h.versionHistory(c, logReq)
+		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
+
+		oldView, err := services.GoObjectBuilderService().View().GetSingle(
+			context.Background(),
+			&nb.ViewPrimaryKey{
+				Id:        view.Id,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		logReq.Previous = oldView
+
 		newReq := nb.View{}
 		err = helper.MarshalToStruct(&view, &newReq)
 		if err != nil {
@@ -341,9 +363,13 @@ func (h *HandlerV2) UpdateView(c *gin.Context) {
 			&newReq,
 		)
 		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
+		} else {
+			logReq.Response = resp
+			logReq.Current = resp
+			h.handleResponse(c, status_http.OK, resp)
 		}
+		go h.versionHistoryGo(c, logReq)
 		h.handleResponse(c, status_http.OK, resp)
 	}
 }
@@ -452,7 +478,23 @@ func (h *HandlerV2) DeleteView(c *gin.Context) {
 			return
 		}
 		go h.versionHistory(c, logReq)
+		h.handleResponse(c, status_http.NoContent, resp)
 	case pb.ResourceType_POSTGRESQL:
+
+		oldView, err := services.GoObjectBuilderService().View().GetSingle(
+			context.Background(),
+			&nb.ViewPrimaryKey{
+				Id:        viewID,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		logReq.Previous = oldView
+
 		resp, err := services.GoObjectBuilderService().View().Delete(
 			context.Background(),
 			&nb.ViewPrimaryKey{
@@ -464,6 +506,7 @@ func (h *HandlerV2) DeleteView(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
+		go h.versionHistoryGo(c, logReq)
 		h.handleResponse(c, status_http.NoContent, resp)
 	}
 }
