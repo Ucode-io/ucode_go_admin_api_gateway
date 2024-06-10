@@ -31,9 +31,6 @@ import (
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) GetVersionHistoryByID(c *gin.Context) {
 	id := c.Param("id")
-	var (
-		resp *obs.VersionHistory
-	)
 
 	if !util.IsValidUUID(id) {
 		h.handleResponse(c, status_http.InvalidArgument, "version history id is an invalid uuid")

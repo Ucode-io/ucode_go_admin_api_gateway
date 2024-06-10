@@ -50,8 +50,8 @@ func NewGoBuilderServiceClient(ctx context.Context, cfg config.Config) (GoBuilde
 
 	connGoBuilderService, err := grpc.DialContext(
 		ctx,
-		// cfg.GoObjectBuilderServiceHost+cfg.GoObjectBuilderGRPCPort,
-		"localhost:7107",
+		cfg.GoObjectBuilderServiceHost+cfg.GoObjectBuilderGRPCPort,
+		// "localhost:7107",
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 
