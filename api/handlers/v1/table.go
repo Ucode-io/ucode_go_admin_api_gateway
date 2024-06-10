@@ -211,7 +211,7 @@ func (h *HandlerV1) CreateTable(c *gin.Context) {
 			logReq.Response = &table
 			h.handleResponse(c, status_http.Created, resp)
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistoryGo(c, logReq)
 	}
 }
 
@@ -626,7 +626,7 @@ func (h *HandlerV1) UpdateTable(c *gin.Context) {
 			logReq.Current = resp
 			h.handleResponse(c, status_http.OK, resp)
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistoryGo(c, logReq)
 	}
 }
 
@@ -818,7 +818,7 @@ func (h *HandlerV1) DeleteTable(c *gin.Context) {
 			logReq.Current = resp
 			h.handleResponse(c, status_http.NoContent, resp)
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistoryGo(c, logReq)
 	}
 }
 
