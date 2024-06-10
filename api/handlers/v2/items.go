@@ -195,7 +195,7 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 				statusHttp.CustomMessage = stat.Message()
 			}
 			logReq.Response = err.Error()
-			defer func() { go h.versionHistory(c, logReq) }()
+			defer func() { go h.versionHistoryGo(c, logReq) }()
 			h.handleResponse(c, statusHttp, err.Error())
 			return
 		}
@@ -206,7 +206,7 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 		}
 
 		logReq.Response = resp
-		defer func() { go h.versionHistory(c, logReq) }()
+		defer func() { go h.versionHistoryGo(c, logReq) }()
 	}
 
 	if data, ok := resp.Data.AsMap()["data"].(map[string]interface{}); ok {
