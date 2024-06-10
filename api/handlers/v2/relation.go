@@ -537,10 +537,10 @@ func (h *HandlerV2) UpdateRelation(c *gin.Context) {
 		} else {
 			logReq.Response = resp
 			logReq.Current = resp
+			h.handleResponse(c, status_http.OK, resp)
 		}
 
 		go h.versionHistory(c, logReq)
-		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
 
 		goOldRelation, err := services.GoObjectBuilderService().Relation().GetByID(
@@ -565,9 +565,9 @@ func (h *HandlerV2) UpdateRelation(c *gin.Context) {
 		} else {
 			logReq.Response = goResp
 			logReq.Current = goResp
+			h.handleResponse(c, status_http.OK, goResp)
 		}
 		go h.versionHistoryGo(c, logReq)
-		h.handleResponse(c, status_http.OK, goResp)
 	}
 }
 
