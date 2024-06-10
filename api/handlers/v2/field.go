@@ -166,9 +166,16 @@ func (h *HandlerV2) CreateField(c *gin.Context) {
 				&newReq,
 			)
 			if err != nil {
+				logReq.Request = field
+				logReq.Response = err.Error()
+				go h.versionHistory(c, logReq)
 				h.handleResponse(c, status_http.GRPCError, err.Error())
 				return
 			}
+			logReq.Request = field
+			logReq.Response = resp
+			logReq.Current = resp
+			go h.versionHistoryGo(c, logReq)
 		}
 
 		h.handleResponse(c, status_http.Created, resp)
@@ -572,7 +579,7 @@ func (h *HandlerV2) UpdateField(c *gin.Context) {
 			logReq.Current = resp
 			h.handleResponse(c, status_http.OK, resp)
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistoryGo(c, logReq)
 
 		h.handleResponse(c, status_http.Created, resp)
 	}
@@ -797,7 +804,7 @@ func (h *HandlerV2) DeleteField(c *gin.Context) {
 			logReq.Response = resp
 			h.handleResponse(c, status_http.NoContent, resp)
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistoryGo(c, logReq)
 
 		h.handleResponse(c, status_http.NoContent, resp)
 	}
