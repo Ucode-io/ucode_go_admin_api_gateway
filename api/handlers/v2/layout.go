@@ -351,7 +351,7 @@ func (h *HandlerV2) UpdateLayout(c *gin.Context) {
 		}
 
 		logReq.Response = resp
-		go h.versionHistory(c, logReq)
+		go h.versionHistoryGo(c, logReq)
 
 		h.handleResponse(c, status_http.OK, resp)
 		return
@@ -446,7 +446,12 @@ func (h *HandlerV2) DeleteLayout(c *gin.Context) {
 			logReq.Response = resp
 			h.handleResponse(c, status_http.OK, resp)
 		}
-		go h.versionHistory(c, logReq)
+		switch resource.ResourceType {
+		case pb.ResourceType_MONGODB:
+			go h.versionHistory(c, logReq)
+		case pb.ResourceType_POSTGRESQL:
+			go h.versionHistoryGo(c, logReq)
+		}
 	}()
 
 	switch resource.ResourceType {
@@ -473,7 +478,7 @@ func (h *HandlerV2) DeleteLayout(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		_, err = services.GoObjectBuilderService().Layout().RemoveLayout(
+		resp, err = services.GoObjectBuilderService().Layout().RemoveLayout(
 			context.Background(),
 			&nb.LayoutPrimaryKey{
 				Id:        c.Param("id"),
