@@ -559,6 +559,8 @@ func (h *HandlerV2) UpdateRelation(c *gin.Context) {
 			return
 		}
 
+		goRelation.ProjectId = resource.ResourceEnvironmentId
+
 		goResp, err := services.GoObjectBuilderService().Relation().Update(
 			context.Background(),
 			&goRelation,
