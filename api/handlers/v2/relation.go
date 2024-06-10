@@ -291,9 +291,9 @@ func (h *HandlerV2) CreateRelation(c *gin.Context) {
 		} else {
 			logReq.Response = resp
 			logReq.Current = resp
+			h.handleResponse(c, status_http.Created, resp)
 		}
 		go h.versionHistory(c, logReq)
-		h.handleResponse(c, status_http.Created, resp)
 	case pb.ResourceType_POSTGRESQL:
 		err = helper.MarshalToStruct(&relation, &goRelation)
 		if err != nil {
@@ -311,9 +311,9 @@ func (h *HandlerV2) CreateRelation(c *gin.Context) {
 		} else {
 			logReq.Response = resp
 			logReq.Current = resp
+			h.handleResponse(c, status_http.Created, resp)
 		}
 		go h.versionHistoryGo(c, logReq)
-		h.handleResponse(c, status_http.Created, resp)
 	}
 }
 
