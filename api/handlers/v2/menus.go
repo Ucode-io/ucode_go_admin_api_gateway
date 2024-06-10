@@ -153,7 +153,7 @@ func (h *HandlerV2) CreateMenu(c *gin.Context) {
 			logReq.Response = pgResp
 			logReq.Current = pgResp
 			h.handleResponse(c, status_http.Created, pgResp)
-			// go h.versionHistory(c, logReq)
+			go h.versionHistoryGo(c, logReq)
 		}
 	}
 }
@@ -490,9 +490,14 @@ func (h *HandlerV2) UpdateMenu(c *gin.Context) {
 			newReq,
 		)
 		if err != nil {
-			return
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else {
+			logReq.Response = resp
+			logReq.Current = resp
+			h.handleResponse(c, status_http.OK, resp)
 		}
-		h.handleResponse(c, status_http.OK, resp)
+		go h.versionHistoryGo(c, logReq)
 	}
 }
 
@@ -511,9 +516,6 @@ func (h *HandlerV2) UpdateMenu(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) DeleteMenu(c *gin.Context) {
 	menuID := c.Param("id")
-	var (
-		resp *emptypb.Empty
-	)
 
 	if !util.IsValidUUID(menuID) {
 		h.handleResponse(c, status_http.InvalidArgument, "menu id is an invalid uuid")
@@ -586,7 +588,7 @@ func (h *HandlerV2) DeleteMenu(c *gin.Context) {
 			return
 		}
 
-		resp, err = services.BuilderService().Menu().Delete(
+		resp, err := services.BuilderService().Menu().Delete(
 			context.Background(),
 			&obs.MenuPrimaryKey{
 				Id:        menuID,
@@ -605,16 +607,31 @@ func (h *HandlerV2) DeleteMenu(c *gin.Context) {
 
 		h.handleResponse(c, status_http.NoContent, resp)
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.GoObjectBuilderService().Menu().Delete(
+
+		oldMenu, err := services.GoObjectBuilderService().Menu().GetByID(context.Background(), &nb.MenuPrimaryKey{
+			Id:        menuID,
+			ProjectId: resource.ResourceEnvironmentId,
+		})
+		if err != nil {
+			return
+		}
+
+		resp, err := services.GoObjectBuilderService().Menu().Delete(
 			context.Background(),
 			&nb.MenuPrimaryKey{
 				Id:        menuID,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
+		logReq.Previous = oldMenu
 		if err != nil {
-			return
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else {
+			h.handleResponse(c, status_http.NoContent, resp)
 		}
+		go h.versionHistoryGo(c, logReq)
+
 		h.handleResponse(c, status_http.NoContent, resp)
 	}
 }
