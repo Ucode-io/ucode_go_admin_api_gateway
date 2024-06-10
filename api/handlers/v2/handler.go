@@ -227,7 +227,7 @@ func (h *HandlerV2) versionHistoryGo(c *gin.Context, req *models.CreateVersionHi
 		},
 	)
 	if err != nil {
-		log.Println(err)
+		log.Println("ERROR FROM VERSION CREATE >>>>>", err)
 		return err
 	}
 	return nil
