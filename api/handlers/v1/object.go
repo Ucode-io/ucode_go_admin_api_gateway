@@ -1069,6 +1069,7 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 		objectRequest.Data["client_type_id_from_token"] = tokenInfo.GetClientTypeId()
 	}
 	objectRequest.Data["language_setting"] = c.DefaultQuery("language_setting", "")
+	objectRequest.Data["with_relations"] = true
 
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
 	if err != nil {
