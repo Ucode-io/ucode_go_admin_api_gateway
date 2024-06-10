@@ -507,15 +507,7 @@ func (h *HandlerV2) UpdateRelation(c *gin.Context) {
 	)
 
 	defer func() {
-		logReq.Previous = oldRelation
-		if err != nil {
-			logReq.Response = err.Error()
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-		} else {
-			logReq.Response = resp
-			logReq.Current = resp
-		}
-		go h.versionHistory(c, logReq)
+
 	}()
 
 	relation.ProjectId = resource.ResourceEnvironmentId
@@ -538,9 +530,16 @@ func (h *HandlerV2) UpdateRelation(c *gin.Context) {
 			context.Background(),
 			&relation,
 		)
+		logReq.Previous = oldRelation
 		if err != nil {
-			return
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else {
+			logReq.Response = resp
+			logReq.Current = resp
 		}
+
+		go h.versionHistory(c, logReq)
 		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
 
@@ -555,27 +554,19 @@ func (h *HandlerV2) UpdateRelation(c *gin.Context) {
 			return
 		}
 
-		err = helper.MarshalToStruct(&goOldRelation, &oldRelation)
-		if err != nil {
-			return
-		}
-
-		err = helper.MarshalToStruct(&relation, &goRelation)
-		if err != nil {
-			return
-		}
 		goResp, err := services.GoObjectBuilderService().Relation().Update(
 			context.Background(),
 			&goRelation,
 		)
+		logReq.Previous = goOldRelation
 		if err != nil {
-			return
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else {
+			logReq.Response = goResp
+			logReq.Current = goResp
 		}
-
-		err = helper.MarshalToStruct(&goResp, &resp)
-		if err != nil {
-			return
-		}
+		go h.versionHistoryGo(c, logReq)
 		h.handleResponse(c, status_http.OK, goResp)
 	}
 }
