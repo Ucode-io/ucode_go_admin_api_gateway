@@ -3,6 +3,7 @@ package v2
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -73,7 +74,7 @@ func (h *HandlerV2) GetVersionHistoryByID(c *gin.Context) {
 	}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().VersionHistory().GetByID(
+		resp, err := services.BuilderService().VersionHistory().GetByID(
 			context.Background(),
 			&obs.VersionHistoryPrimaryKey{
 				Id:        id,
@@ -84,9 +85,24 @@ func (h *HandlerV2) GetVersionHistoryByID(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
+
+		h.handleResponse(c, status_http.OK, resp)
+	case pb.ResourceType_POSTGRESQL:
+		resp, err := services.GoObjectBuilderService().VersionHistory().GetByID(
+			context.Background(),
+			&nb.VersionHistoryPrimaryKey{
+				Id:        id,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		h.handleResponse(c, status_http.OK, resp)
 	}
 
-	h.handleResponse(c, status_http.OK, resp)
 }
 
 // GetAllVersionHistory godoc
@@ -131,6 +147,9 @@ func (h *HandlerV2) GetAllVersionHistory(c *gin.Context) {
 		}
 
 		fromDate = formatFromDate.Format("2006-01-02")
+
+		fmt.Println(c.Query("from_date"))
+		fmt.Println(fromDate)
 	}
 
 	if c.Query("to_date") != "" {
