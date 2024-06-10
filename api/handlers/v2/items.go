@@ -939,7 +939,22 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 	)
 
 	defer func() {
-
+		if err != nil {
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else if actionErr != nil {
+			logReq.Response = actionErr.Error() + " in " + functionName
+			h.handleResponse(c, status_http.InvalidArgument, actionErr.Error()+" in "+functionName)
+		} else {
+			logReq.Response = resp
+			h.handleResponse(c, status_http.NoContent, resp)
+		}
+		switch resource.ResourceType {
+		case pb.ResourceType_MONGODB:
+			go h.versionHistory(c, logReq)
+		case pb.ResourceType_POSTGRESQL:
+			go h.versionHistoryGo(c, logReq)
+		}
 	}()
 
 	switch resource.ResourceType {
@@ -959,16 +974,8 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 				statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
 				statusHttp.CustomMessage = stat.Message()
 			}
+			return
 		}
-		statusHttp.CustomMessage = resp.GetCustomMessage()
-		if err != nil {
-			logReq.Response = err.Error()
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-		} else {
-			logReq.Response = resp
-		}
-
-		go h.versionHistory(c, logReq)
 	case pb.ResourceType_POSTGRESQL:
 		body, err := services.GoObjectBuilderService().Items().Update(
 			context.Background(),
@@ -979,15 +986,9 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 				BlockedBuilder: cast.ToBool(c.DefaultQuery("block_builder", "false")),
 			},
 		)
-		statusHttp.CustomMessage = body.GetCustomMessage()
 		if err != nil {
-			logReq.Response = err.Error()
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-		} else {
-			logReq.Response = body
+			return
 		}
-
-		go h.versionHistoryGo(c, logReq)
 
 		err = helper.MarshalToStruct(body, &resp)
 		if err != nil {
@@ -1013,8 +1014,7 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 			return
 		}
 	}
-
-	h.handleResponse(c, status_http.NoContent, resp)
+	statusHttp.CustomMessage = resp.GetCustomMessage()
 }
 
 // MultipleUpdateItems godoc
@@ -1381,7 +1381,7 @@ func (h *HandlerV2) DeleteItem(c *gin.Context) {
 			go h.versionHistoryGo(c, logReq)
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
-		ș
+		}
 		logReq.Response = resp
 		go h.versionHistoryGo(c, logReq)
 
