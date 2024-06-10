@@ -188,7 +188,15 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 			},
 		)
 		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
+			statusHttp = status_http.GrpcStatusToHTTP["Internal"]
+			stat, ok := status.FromError(err)
+			if ok {
+				statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
+				statusHttp.CustomMessage = stat.Message()
+			}
+			logReq.Response = err.Error()
+			go h.versionHistoryGo(c, logReq)
+			h.handleResponse(c, statusHttp, err.Error())
 			return
 		}
 
@@ -196,6 +204,9 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 		if err != nil {
 			return
 		}
+
+		logReq.Response = resp
+		go h.versionHistoryGo(c, logReq)
 	}
 
 	if data, ok := resp.Data.AsMap()["data"].(map[string]interface{}); ok {
@@ -928,17 +939,7 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 	)
 
 	defer func() {
-		if err != nil {
-			logReq.Response = err.Error()
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-		} else if actionErr != nil {
-			logReq.Response = actionErr.Error() + " in " + functionName
-			h.handleResponse(c, status_http.InvalidArgument, actionErr.Error()+" in "+functionName)
-		} else {
-			logReq.Response = resp
-			h.handleResponse(c, status_http.NoContent, resp)
-		}
-		go h.versionHistory(c, logReq)
+
 	}()
 
 	switch resource.ResourceType {
@@ -958,8 +959,16 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 				statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
 				statusHttp.CustomMessage = stat.Message()
 			}
-			return
 		}
+		statusHttp.CustomMessage = resp.GetCustomMessage()
+		if err != nil {
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else {
+			logReq.Response = resp
+		}
+
+		go h.versionHistory(c, logReq)
 	case pb.ResourceType_POSTGRESQL:
 		body, err := services.GoObjectBuilderService().Items().Update(
 			context.Background(),
@@ -970,9 +979,15 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 				BlockedBuilder: cast.ToBool(c.DefaultQuery("block_builder", "false")),
 			},
 		)
+		statusHttp.CustomMessage = body.GetCustomMessage()
 		if err != nil {
-			return
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else {
+			logReq.Response = body
 		}
+
+		go h.versionHistoryGo(c, logReq)
 
 		err = helper.MarshalToStruct(body, &resp)
 		if err != nil {
@@ -998,7 +1013,8 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 			return
 		}
 	}
-	statusHttp.CustomMessage = resp.GetCustomMessage()
+
+	h.handleResponse(c, status_http.NoContent, resp)
 }
 
 // MultipleUpdateItems godoc
@@ -1354,11 +1370,20 @@ func (h *HandlerV2) DeleteItem(c *gin.Context) {
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
-
 		if err != nil {
+			statusHttp = status_http.GrpcStatusToHTTP["Internal"]
+			stat, ok := status.FromError(err)
+			if ok {
+				statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
+				statusHttp.CustomMessage = stat.Message()
+			}
+			logReq.Response = err.Error()
+			go h.versionHistoryGo(c, logReq)
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
-		}
+		ș
+		logReq.Response = resp
+		go h.versionHistoryGo(c, logReq)
 
 		err = helper.MarshalToStruct(new, &resp)
 		if err != nil {
