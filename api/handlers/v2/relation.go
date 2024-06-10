@@ -554,6 +554,11 @@ func (h *HandlerV2) UpdateRelation(c *gin.Context) {
 			return
 		}
 
+		if err = helper.MarshalToStruct(&relation, &goRelation); err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
 		goResp, err := services.GoObjectBuilderService().Relation().Update(
 			context.Background(),
 			&goRelation,
