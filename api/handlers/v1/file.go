@@ -208,7 +208,7 @@ func (h *HandlerV1) GetSingleFile(c *gin.Context) {
 		return
 	}
 
-	resourse, err := h.companyServices.ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -224,26 +224,47 @@ func (h *HandlerV1) GetSingleFile(c *gin.Context) {
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
 		projectId.(string),
-		resourse.NodeType,
+		resource.NodeType,
 	)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	resp, err := services.GetBuilderServiceByType(resourse.NodeType).File().GetSingle(
-		context.Background(),
-		&obs.FilePrimaryKey{
-			Id:        fileID,
-			ProjectId: resourse.ResourceEnvironmentId,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).File().GetSingle(
+			context.Background(),
+			&obs.FilePrimaryKey{
+				ProjectId: resource.ResourceEnvironmentId,
+				Id:        fileID,
+			},
+		)
+
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		h.handleResponse(c, status_http.OK, resp)
+	case pb.ResourceType_POSTGRESQL:
+		resp, err := services.GoObjectBuilderService().File().GetSingle(
+			context.Background(),
+			&nb.FilePrimaryKey{
+				ProjectId: resource.ResourceEnvironmentId,
+				Id:        fileID,
+			},
+		)
+
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		h.handleResponse(c, status_http.OK, resp)
+
 	}
 
-	h.handleResponse(c, status_http.OK, resp)
 }
 
 // UpdateFile godoc
@@ -304,24 +325,43 @@ func (h *HandlerV1) UpdateFile(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.GetBuilderServiceByType(resource.NodeType).File().Update(
-		context.Background(),
-		&obs.File{
-			Id:               file.Id,
-			Title:            file.Title,
-			Description:      file.Description,
-			Tags:             file.Tags,
-			FileNameDownload: file.FileNameDownload,
-			ProjectId:        resource.ResourceEnvironmentId,
-		},
-	)
-
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).File().Update(
+			context.Background(),
+			&obs.File{
+				Id:               file.Id,
+				Title:            file.Title,
+				Description:      file.Description,
+				Tags:             file.Tags,
+				FileNameDownload: file.FileNameDownload,
+				ProjectId:        resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+		h.handleResponse(c, status_http.OK, resp)
+	case pb.ResourceType_POSTGRESQL:
+		resp, err := services.GoObjectBuilderService().File().Update(
+			context.Background(),
+			&nb.File{
+				Id:               file.Id,
+				Title:            file.Title,
+				Description:      file.Description,
+				Tags:             file.Tags,
+				FileNameDownload: file.FileNameDownload,
+				ProjectId:        resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+		h.handleResponse(c, status_http.OK, resp)
 	}
 
-	h.handleResponse(c, status_http.OK, resp)
 }
 
 // DeleteFile godoc
@@ -407,20 +447,37 @@ func (h *HandlerV1) DeleteFile(c *gin.Context) {
 		log.Println(err)
 	}
 
-	resp, err := services.GetBuilderServiceByType(resource.NodeType).File().Delete(
-		context.Background(),
-		&obs.FileDeleteRequest{
-			Ids:       delete_request,
-			ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).File().Delete(
+			context.Background(),
+			&obs.FileDeleteRequest{
+				Ids:       delete_request,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+		h.handleResponse(c, status_http.NoContent, resp)
+	case pb.ResourceType_POSTGRESQL:
+		resp, err := services.GoObjectBuilderService().File().Delete(
+			context.Background(),
+			&nb.FileDeleteRequest{
+				Ids:       delete_request,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		h.handleResponse(c, status_http.NoContent, resp)
 	}
 
-	h.handleResponse(c, status_http.NoContent, resp)
 }
 
 // DeleteFiles godoc
@@ -514,20 +571,36 @@ func (h *HandlerV1) DeleteFiles(c *gin.Context) {
 		}
 	}
 
-	resp, err := services.GetBuilderServiceByType(resource.NodeType).File().Delete(
-		context.Background(),
-		&obs.FileDeleteRequest{
-			Ids:       delete_request,
-			ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).File().Delete(
+			context.Background(),
+			&obs.FileDeleteRequest{
+				Ids:       delete_request,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+		h.handleResponse(c, status_http.NoContent, resp)
+	case pb.ResourceType_POSTGRESQL:
+		resp, err := services.GoObjectBuilderService().File().Delete(
+			context.Background(),
+			&nb.FileDeleteRequest{
+				Ids:       delete_request,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		h.handleResponse(c, status_http.NoContent, resp)
 	}
-
-	h.handleResponse(c, status_http.NoContent, resp)
 }
 
 // GetAllFiles godoc
