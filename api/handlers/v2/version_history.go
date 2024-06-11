@@ -3,10 +3,12 @@ package v2
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
+	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
@@ -29,9 +31,6 @@ import (
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) GetVersionHistoryByID(c *gin.Context) {
 	id := c.Param("id")
-	var (
-		resp *obs.VersionHistory
-	)
 
 	if !util.IsValidUUID(id) {
 		h.handleResponse(c, status_http.InvalidArgument, "version history id is an invalid uuid")
@@ -72,7 +71,7 @@ func (h *HandlerV2) GetVersionHistoryByID(c *gin.Context) {
 	}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().VersionHistory().GetByID(
+		resp, err := services.BuilderService().VersionHistory().GetByID(
 			context.Background(),
 			&obs.VersionHistoryPrimaryKey{
 				Id:        id,
@@ -83,9 +82,24 @@ func (h *HandlerV2) GetVersionHistoryByID(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
+
+		h.handleResponse(c, status_http.OK, resp)
+	case pb.ResourceType_POSTGRESQL:
+		resp, err := services.GoObjectBuilderService().VersionHistory().GetByID(
+			context.Background(),
+			&nb.VersionHistoryPrimaryKey{
+				Id:        id,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		h.handleResponse(c, status_http.OK, resp)
 	}
 
-	h.handleResponse(c, status_http.OK, resp)
 }
 
 // GetAllVersionHistory godoc
@@ -105,7 +119,6 @@ func (h *HandlerV2) GetVersionHistoryByID(c *gin.Context) {
 func (h *HandlerV2) GetAllVersionHistory(c *gin.Context) {
 
 	var (
-		resp             *obs.ListVersionHistory
 		fromDate, toDate string
 		orderby          bool
 	)
@@ -131,6 +144,9 @@ func (h *HandlerV2) GetAllVersionHistory(c *gin.Context) {
 		}
 
 		fromDate = formatFromDate.Format("2006-01-02")
+
+		fmt.Println(c.Query("from_date"))
+		fmt.Println(fromDate)
 	}
 
 	if c.Query("to_date") != "" {
@@ -190,7 +206,7 @@ func (h *HandlerV2) GetAllVersionHistory(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.GetBuilderServiceByType(resource.NodeType).VersionHistory().GatAll(
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).VersionHistory().GatAll(
 			context.Background(),
 			&obs.GetAllRquest{
 				Type:      tip,
@@ -208,23 +224,32 @@ func (h *HandlerV2) GetAllVersionHistory(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
-	case pb.ResourceType_POSTGRESQL:
-		// resp, err = services.PostgresBuilderService().View().GetList(
-		// 	context.Background(),
-		// 	&obs.GetAllViewsRequest{
-		// 		TableSlug: c.Param("collection"),
-		// 		ProjectId: resource.ResourceEnvironmentId,
-		// 		RoleId:    roleId,
-		// 	},
-		// )
 
-		// if err != nil {
-		// 	h.handleResponse(c, status_http.GRPCError, err.Error())
-		// 	return
-		// }
+		h.handleResponse(c, status_http.OK, resp)
+	case pb.ResourceType_POSTGRESQL:
+		resp, err := services.GoObjectBuilderService().VersionHistory().GatAll(
+			context.Background(),
+			&nb.GetAllRquest{
+				Type:      tip,
+				ProjectId: resource.ResourceEnvironmentId,
+				EnvId:     currEnvironmentId.(string),
+				ApiKey:    apiKey,
+				Offset:    int32(offset),
+				Limit:     int32(limit),
+				FromDate:  fromDate,
+				ToDate:    toDate,
+				OrderBy:   orderby,
+			},
+		)
+
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		h.handleResponse(c, status_http.OK, resp)
 	}
 
-	h.handleResponse(c, status_http.OK, resp)
 }
 
 // UpdateListVersionHistory godoc
