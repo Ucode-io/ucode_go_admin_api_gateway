@@ -169,9 +169,9 @@ func BaseLoad() BaseConfig {
 	config.Environment = cast.ToString(GetOrReturnDefaultValue("ENVIRONMENT", DebugMode))
 	config.Version = cast.ToString(GetOrReturnDefaultValue("VERSION", "1.0"))
 
-	config.ServiceHost = cast.ToString(GetOrReturnDefaultValue("SERVICE_HOST", ""))
-	config.HTTPPort = cast.ToString(GetOrReturnDefaultValue("HTTP_PORT", ""))
-	config.HTTPScheme = cast.ToString(GetOrReturnDefaultValue("HTTP_SCHEME", ""))
+	config.ServiceHost = cast.ToString(GetOrReturnDefaultValue("SERVICE_HOST", "localhost"))
+	config.HTTPPort = cast.ToString(GetOrReturnDefaultValue("HTTP_PORT", ":8080"))
+	// config.HTTPScheme = cast.ToString(GetOrReturnDefaultValue("HTTP_SCHEME", ""))
 
 	config.AuthServiceHost = cast.ToString(GetOrReturnDefaultValue("AUTH_SERVICE_HOST", ""))
 	config.AuthGRPCPort = cast.ToString(GetOrReturnDefaultValue("AUTH_GRPC_PORT", ""))

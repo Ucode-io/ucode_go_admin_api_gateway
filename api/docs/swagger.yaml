@@ -25885,6 +25885,53 @@ paths:
       summary: Get CustomEvent by id
       tags:
       - NewCustomEvent
+  /v2/erd:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload erd
+      operationId: erd_upload
+      parameters:
+      - description: file
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Path
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/v2.Path'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Upload erd
+      tags:
+      - V2Files
   /v2/fields/{collection}:
     get:
       consumes:
