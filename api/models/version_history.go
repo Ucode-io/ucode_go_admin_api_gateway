@@ -21,6 +21,7 @@ type CreateVersionHistoryRequest struct {
 	Type             string          `json:"type"`
 	TableSlug        string          `json:"table_slug"`
 	VersionId        string          `json:"version_id"`
+	ResourceType     int
 }
 
 type MigrateUp struct {

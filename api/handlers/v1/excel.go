@@ -98,7 +98,6 @@ func (h *HandlerV1) ExcelReader(c *gin.Context) {
 		}
 		h.handleResponse(c, status_http.OK, res)
 	}
-
 }
 
 // ExcelToDb godoc
