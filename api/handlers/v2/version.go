@@ -525,7 +525,7 @@ func (h *HandlerV2) PublishVersion(c *gin.Context) {
 		}
 
 		if upOrDown {
-			err = h.MigrateUpByVersion(c, publishedServices, activityLogs, publishedResource.ResourceEnvironmentId, publishedNodeType, userId.(string))
+			err = h.MigrateUpByVersion(c, publishedServices, activityLogs, publishedResource.ResourceEnvironmentId, publishedNodeType, userId.(string), resourceType)
 			if err != nil {
 				h.handleResponse(c, status_http.GRPCError, err.Error())
 				return
@@ -604,7 +604,7 @@ func (h *HandlerV2) PublishVersion(c *gin.Context) {
 		}
 
 		if upOrDown {
-			err = h.MigrateUpByVersion(c, services, activityLogs, currentResource.ResourceEnvironmentId, currentNodeType, userId.(string))
+			err = h.MigrateUpByVersion(c, services, activityLogs, currentResource.ResourceEnvironmentId, currentNodeType, userId.(string), currentResourceType)
 			if err != nil {
 				h.handleResponse(c, status_http.GRPCError, err.Error())
 				return
