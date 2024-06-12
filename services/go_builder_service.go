@@ -24,6 +24,7 @@ type GoBuilderServiceI interface {
 	Function() nb.FunctionServiceV2Client
 	CustomEvent() nb.CustomEventServiceClient
 	Permission() nb.PermissionServiceClient
+	Version() nb.VersionServiceClient
 	VersionHistory() nb.VersionHistoryServiceClient
 }
 
@@ -42,6 +43,7 @@ type goBuilderServiceClient struct {
 	functionService       nb.FunctionServiceV2Client
 	customEventService    nb.CustomEventServiceClient
 	permissionService     nb.PermissionServiceClient
+	versionService        nb.VersionServiceClient
 	versionHistoryService nb.VersionHistoryServiceClient
 	// goObjectBuilderConnPool *grpcpool.Pool
 }
@@ -50,8 +52,8 @@ func NewGoBuilderServiceClient(ctx context.Context, cfg config.Config) (GoBuilde
 
 	connGoBuilderService, err := grpc.DialContext(
 		ctx,
-		cfg.GoObjectBuilderServiceHost+cfg.GoObjectBuilderGRPCPort,
-		// "localhost:7107",
+		// cfg.GoObjectBuilderServiceHost+cfg.GoObjectBuilderGRPCPort,
+		"go-object-builder-service:80",
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 
@@ -74,6 +76,7 @@ func NewGoBuilderServiceClient(ctx context.Context, cfg config.Config) (GoBuilde
 		functionService:       nb.NewFunctionServiceV2Client(connGoBuilderService),
 		customEventService:    nb.NewCustomEventServiceClient(connGoBuilderService),
 		permissionService:     nb.NewPermissionServiceClient(connGoBuilderService),
+		versionService:        nb.NewVersionServiceClient(connGoBuilderService),
 		versionHistoryService: nb.NewVersionHistoryServiceClient(connGoBuilderService),
 	}, nil
 }
@@ -132,6 +135,10 @@ func (g *goBuilderServiceClient) CustomEvent() nb.CustomEventServiceClient {
 
 func (g *goBuilderServiceClient) Permission() nb.PermissionServiceClient {
 	return g.permissionService
+}
+
+func (g *goBuilderServiceClient) Version() nb.VersionServiceClient {
+	return g.versionService
 }
 
 func (g *goBuilderServiceClient) VersionHistory() nb.VersionHistoryServiceClient {

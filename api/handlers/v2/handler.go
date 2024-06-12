@@ -157,6 +157,7 @@ func (h *HandlerV2) versionHistory(c *gin.Context, req *models.CreateVersionHist
 		log.Println(err)
 		return err
 	}
+
 	return nil
 }
 

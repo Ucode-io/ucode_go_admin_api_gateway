@@ -7,6 +7,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
+	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
@@ -30,7 +31,6 @@ import (
 func (h *HandlerV2) CreateVersion(c *gin.Context) {
 	var (
 		version obs.CreateVersionRequest
-		resp    *obs.Version
 	)
 
 	err := c.ShouldBindJSON(&version)
@@ -119,6 +119,8 @@ func (h *HandlerV2) CreateVersion(c *gin.Context) {
 	version.ProjectId = resource.ResourceEnvironmentId
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
+		var resp *obs.Version
+
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Version().Create(
 			context.Background(),
 			&version,
@@ -127,11 +129,27 @@ func (h *HandlerV2) CreateVersion(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
+		h.handleResponse(c, status_http.Created, resp)
 	case pb.ResourceType_POSTGRESQL:
+		var resp *nb.Version
+		resp, err = services.GoObjectBuilderService().Version().Create(
+			context.Background(),
+			&nb.CreateVersionRequest{
+				Name:          version.Name,
+				Description:   version.Description,
+				IsCurrent:     version.IsCurrent,
+				UserInfo:      version.UserInfo,
+				VersionNumber: version.VersionNumber,
+				ProjectId:     version.ProjectId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 
+		h.handleResponse(c, status_http.Created, resp)
 	}
-
-	h.handleResponse(c, status_http.Created, resp)
 }
 
 // GeVersionList godoc
@@ -211,11 +229,22 @@ func (h *HandlerV2) GetVersionList(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
+		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
-
+		resp, err := services.GoObjectBuilderService().Version().GetList(
+			context.Background(),
+			&nb.GetVersionListRequest{
+				ProjectId: resource.ResourceEnvironmentId,
+				Offset:    int32(offset),
+				Limit:     int32(limit),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+		h.handleResponse(c, status_http.OK, resp)
 	}
-
-	h.handleResponse(c, status_http.OK, resp)
 }
 
 // UpdateVersion godoc
@@ -319,7 +348,23 @@ func (h *HandlerV2) UpdateVersion(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
+		_, err = services.GoObjectBuilderService().Version().Update(
+			context.Background(),
+			&nb.Version{
+				Id:            version.Id,
+				Name:          version.Name,
+				Description:   version.Description,
+				IsCurrent:     version.IsCurrent,
+				UserInfo:      version.UserInfo,
+				VersionNumber: version.VersionNumber,
+				ProjectId:     version.ProjectId,
+			},
+		)
 
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	h.handleResponse(c, status_http.OK, nil)
@@ -380,6 +425,7 @@ func (h *HandlerV2) PublishVersion(c *gin.Context) {
 	}
 
 	currentNodeType := currentResource.NodeType
+	currentResourceType := currentResource.ResourceType
 
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
@@ -406,6 +452,7 @@ func (h *HandlerV2) PublishVersion(c *gin.Context) {
 		}
 
 		publishedNodeType := publishedResource.NodeType
+		resourceType := publishedResource.ResourceType
 
 		publishedServices, err := h.GetProjectSrvc(
 			c.Request.Context(),
@@ -478,13 +525,13 @@ func (h *HandlerV2) PublishVersion(c *gin.Context) {
 		}
 
 		if upOrDown {
-			err = h.MigrateUpByVersion(c, publishedServices, activityLogs, publishedResource.ResourceEnvironmentId, publishedNodeType, userId.(string))
+			err = h.MigrateUpByVersion(c, publishedServices, activityLogs, publishedResource.ResourceEnvironmentId, publishedNodeType, userId.(string), resourceType)
 			if err != nil {
 				h.handleResponse(c, status_http.GRPCError, err.Error())
 				return
 			}
 		} else {
-			err = h.MigrateDownByVersion(c, publishedServices, activityLogs, publishedResource.ResourceEnvironmentId, publishedNodeType, userId.(string))
+			err = h.MigrateDownByVersion(c, publishedServices, activityLogs, publishedResource.ResourceEnvironmentId, publishedNodeType, userId.(string), resourceType)
 			if err != nil {
 				h.handleResponse(c, status_http.GRPCError, err.Error())
 				return
@@ -557,13 +604,13 @@ func (h *HandlerV2) PublishVersion(c *gin.Context) {
 		}
 
 		if upOrDown {
-			err = h.MigrateUpByVersion(c, services, activityLogs, currentResource.ResourceEnvironmentId, currentNodeType, userId.(string))
+			err = h.MigrateUpByVersion(c, services, activityLogs, currentResource.ResourceEnvironmentId, currentNodeType, userId.(string), currentResourceType)
 			if err != nil {
 				h.handleResponse(c, status_http.GRPCError, err.Error())
 				return
 			}
 		} else {
-			err = h.MigrateDownByVersion(c, services, activityLogs, currentResource.ResourceEnvironmentId, currentNodeType, userId.(string))
+			err = h.MigrateDownByVersion(c, services, activityLogs, currentResource.ResourceEnvironmentId, currentNodeType, userId.(string), currentResourceType)
 			if err != nil {
 				h.handleResponse(c, status_http.GRPCError, err.Error())
 				return
