@@ -140,11 +140,13 @@ func (h *HandlerV1) UploadFile(c *gin.Context) {
 	var (
 		file File
 	)
+	
 	err := c.ShouldBind(&file)
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
+	
 
 	fileNameForObjectBuilder := file.File.Filename
 
