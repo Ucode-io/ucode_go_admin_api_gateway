@@ -23,7 +23,7 @@ import (
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) UploadERD(c *gin.Context) {
-	// just in case. custom erd reader might panic
+	//! just in case. custom erd reader might panic
 	defer func() {
 		if err := recover(); err != nil {
 			h.handleResponse(c, status_http.InternalServerError, " erd upload paniced")
@@ -43,16 +43,20 @@ func (h *HandlerV2) UploadERD(c *gin.Context) {
 	file.File.Filename = strings.ReplaceAll(file.File.Filename, " ", "")
 	dir, _ := os.Getwd()
 
-	// Create a new file in the uploads directory
+	//* Create a new file in the uploads directory
 	dst, err := os.Create(dir + "/" + file.File.Filename)
 	if err != nil {
 		h.handleResponse(c, status_http.InternalServerError, err.Error())
 		return
 	}
-	defer dst.Close()
+
 	defer func() {
-		err := os.Remove(dir + "/" + file.File.Filename)
-		if err != nil {
+		if err := dst.Close(); err != nil {
+			h.handleResponse(c, status_http.InternalServerError, err.Error())
+			return
+		}
+
+		if err := os.Remove(dir + "/" + file.File.Filename); err != nil {
 			h.handleResponse(c, status_http.InternalServerError, err.Error())
 			return
 		}
