@@ -9,6 +9,7 @@ import (
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
+	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
@@ -384,11 +385,46 @@ func (h *HandlerV2) UpdateVersion(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) PublishVersion(c *gin.Context) {
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "environment id is an invalid uuid")
+		return
+	}
+
+	currentResource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	switch currentResource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		h.PublishVersionMongo(c)
+	case pb.ResourceType_POSTGRESQL:
+		h.PublishVersionPostgres(c)
+	}
+}
+
+func (h *HandlerV2) PublishVersionMongo(c *gin.Context) {
 	var (
 		push       obs.PublishVersionRequest
 		fromDate   string
 		toDate     string
-		upOrDown   bool //up = true, down = false
+		upOrDown   bool
 		versionIDs []string
 	)
 
@@ -630,4 +666,264 @@ func (h *HandlerV2) PublishVersion(c *gin.Context) {
 		}
 
 	}
+}
+
+func (h *HandlerV2) PublishVersionPostgres(c *gin.Context) {
+	var (
+		push       nb.PublishVersionRequest
+		fromDate   string
+		toDate     string
+		upOrDown   bool
+		versionIDs []string
+	)
+
+	if err := c.ShouldBindJSON(&push); err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "environment id is an invalid uuid")
+		return
+	}
+
+	userId, _ := c.Get("user_id")
+
+	currentResource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	currentNodeType := currentResource.NodeType
+	currentResourceType := currentResource.ResourceType
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		currentResource.NodeType,
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	if environmentId.(string) != push.EnvId {
+		publishedResource, err := h.companyServices.ServiceResource().GetSingle(
+			c.Request.Context(),
+			&pb.GetSingleServiceResourceReq{
+				ProjectId:     projectId.(string),
+				EnvironmentId: push.EnvId,
+				ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		publishedNodeType := publishedResource.NodeType
+		resourceType := publishedResource.ResourceType
+
+		publishedServices, err := h.GetProjectSrvc(
+			c.Request.Context(),
+			projectId.(string),
+			publishedResource.NodeType,
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		publishedEnvLiveVersion, _ := publishedServices.GoObjectBuilderService().Version().GetSingle(
+			c.Request.Context(),
+			&nb.VersionPrimaryKey{
+				ProjectId: publishedResource.ResourceEnvironmentId,
+				Live:      true,
+			},
+		)
+
+		if publishedEnvLiveVersion.GetCreatedAt() > push.GetVersion().GetCreatedAt() {
+			fromDate = push.GetVersion().GetCreatedAt()
+			toDate = publishedEnvLiveVersion.GetCreatedAt()
+		} else {
+			fromDate = publishedEnvLiveVersion.GetCreatedAt()
+			toDate = push.GetVersion().GetCreatedAt()
+			upOrDown = true
+		}
+
+		versions, err := services.GoObjectBuilderService().Version().GetList(
+			c.Request.Context(),
+			&nb.GetVersionListRequest{
+				ProjectId: currentResource.ResourceEnvironmentId,
+				FromDate:  fromDate,
+				ToDate:    toDate,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		for _, version := range versions.Versions {
+			versionIDs = append(versionIDs, version.Id)
+		}
+
+		_, _ = publishedServices.GoObjectBuilderService().Version().CreateMany(
+			c.Request.Context(),
+			&nb.CreateManyVersionRequest{
+				Versions:  versions.Versions,
+				ProjectId: publishedResource.ResourceEnvironmentId,
+			},
+		)
+
+		activityLogs, err := services.GoObjectBuilderService().VersionHistory().GatAll(
+			c.Request.Context(),
+			&nb.GetAllRquest{
+				ProjectId:  currentResource.ResourceEnvironmentId,
+				VersionIds: versionIDs,
+				OrderBy:    upOrDown,
+				Type:       "UP",
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		activityLogsM := &obs.ListVersionHistory{}
+
+		err = helper.MarshalToStruct(&activityLogs, &activityLogsM)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		if upOrDown {
+			err = h.MigrateUpByVersion(c, publishedServices, activityLogsM, publishedResource.ResourceEnvironmentId, publishedNodeType, userId.(string), resourceType)
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+		} else {
+			err = h.MigrateDownByVersion(c, publishedServices, activityLogsM, publishedResource.ResourceEnvironmentId, publishedNodeType, userId.(string), resourceType)
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+		}
+
+		_, err = publishedServices.GoObjectBuilderService().Version().UpdateLive(
+			c.Request.Context(),
+			&nb.VersionPrimaryKey{
+				ProjectId: publishedResource.ResourceEnvironmentId,
+				Id:        push.GetVersion().GetId(),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		publishedEnvLiveVersion, err := services.GoObjectBuilderService().Version().GetSingle(
+			c.Request.Context(),
+			&nb.VersionPrimaryKey{
+				ProjectId: currentResource.ResourceEnvironmentId,
+				Live:      true,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		if publishedEnvLiveVersion.CreatedAt > push.Version.CreatedAt {
+			fromDate = push.Version.CreatedAt
+			toDate = publishedEnvLiveVersion.CreatedAt
+		} else {
+			fromDate = publishedEnvLiveVersion.CreatedAt
+			toDate = push.Version.CreatedAt
+			upOrDown = true
+		}
+
+		versions, err := services.GoObjectBuilderService().Version().GetList(
+			c.Request.Context(),
+			&nb.GetVersionListRequest{
+				ProjectId: currentResource.ResourceEnvironmentId,
+				FromDate:  fromDate,
+				ToDate:    toDate,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		for _, version := range versions.Versions {
+			versionIDs = append(versionIDs, version.Id)
+		}
+
+		activityLogs, err := services.GoObjectBuilderService().VersionHistory().GatAll(
+			c.Request.Context(),
+			&nb.GetAllRquest{
+				ProjectId:  currentResource.ResourceEnvironmentId,
+				VersionIds: versionIDs,
+				OrderBy:    upOrDown,
+				Type:       "DOWN",
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		activityLogsM := &obs.ListVersionHistory{}
+
+		err = helper.MarshalToStruct(&activityLogs, &activityLogsM)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		if upOrDown {
+			err = h.MigrateUpByVersion(c, services, activityLogsM, currentResource.ResourceEnvironmentId, currentNodeType, userId.(string), currentResourceType)
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+		} else {
+			err = h.MigrateDownByVersion(c, services, activityLogsM, currentResource.ResourceEnvironmentId, currentNodeType, userId.(string), currentResourceType)
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+		}
+
+		_, err = services.GoObjectBuilderService().Version().UpdateLive(
+			c.Request.Context(),
+			&nb.VersionPrimaryKey{
+				ProjectId: currentResource.ResourceEnvironmentId,
+				Id:        push.GetVersion().GetId(),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	}
+
 }
