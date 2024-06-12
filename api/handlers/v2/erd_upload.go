@@ -64,8 +64,8 @@ func (h *HandlerV2) UploadERD(c *gin.Context) {
 
 	bearerToken := c.GetHeader("Authorization")
 
-	err = sdk.Reader(dst, bearerToken)
-	if err != nil {
+	
+	if err := sdk.Reader(dst, bearerToken);err != nil {
 		h.handleResponse(c, status_http.InternalServerError, err.Error())
 		return
 	}
