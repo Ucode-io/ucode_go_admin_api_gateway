@@ -12,6 +12,7 @@ import (
 	"ucode/ucode_go_api_gateway/config"
 	pba "ucode/ucode_go_api_gateway/genproto/auth_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
+	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/logger"
@@ -115,7 +116,7 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 	// 	return
 	// }
 	// defer conn.Close()
-	service := services.BuilderService().ObjectBuilder()
+	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 
 	if viewId, ok := objectRequest.Data["builder_service_view_id"].(string); ok {
 		if util.IsValidUUID(viewId) {
@@ -159,9 +160,9 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 					return
 				}
 			case pb.ResourceType_POSTGRESQL:
-				resp, err = services.PostgresBuilderService().ObjectBuilder().GroupByColumns(
+				resp, err := services.GoObjectBuilderService().ObjectBuilder().GetGroupByField(
 					context.Background(),
-					&obs.CommonMessage{
+					&nb.CommonMessage{
 						TableSlug: c.Param("table_slug"),
 						Data:      structData,
 						ProjectId: resource.ResourceEnvironmentId,
@@ -172,6 +173,10 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 					h.handleResponse(c, status_http.GRPCError, err.Error())
 					return
 				}
+
+				statusHttp.CustomMessage = resp.GetCustomMessage()
+				h.handleResponse(c, statusHttp, resp)
+				return
 			}
 		}
 	} else {
@@ -218,19 +223,44 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 				return
 			}
 		case pb.ResourceType_POSTGRESQL:
-			resp, err = services.PostgresBuilderService().ObjectBuilder().GetList2(
+			// redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
+			// if err == nil {
+			// 	resp := make(map[string]interface{})
+			// 	m := make(map[string]interface{})
+			// 	err = json.Unmarshal([]byte(redisResp), &m)
+			// 	if err != nil {
+			// 		h.log.Error("Error while unmarshal redis", logger.Error(err))
+			// 	} else {
+			// 		resp["data"] = m
+			// 		h.handleResponse(c, status_http.OK, resp)
+			// 		return
+			// 	}
+			// }
+
+			resp, err := services.GoObjectBuilderService().ObjectBuilder().GetList2(
 				context.Background(),
-				&obs.CommonMessage{
+				&nb.CommonMessage{
 					TableSlug: c.Param("table_slug"),
 					Data:      structData,
 					ProjectId: resource.ResourceEnvironmentId,
 				},
 			)
 
+			// if err == nil {
+			// 	jsonData, _ := resp.GetData().MarshalJSON()
+			// 	err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
+			// 	if err != nil {
+			// 		h.log.Error("Error while setting redis", logger.Error(err))
+			// 	}
+			// }
+
 			if err != nil {
 				h.handleResponse(c, status_http.GRPCError, err.Error())
 				return
 			}
+			statusHttp.CustomMessage = resp.GetCustomMessage()
+			h.handleResponse(c, statusHttp, resp)
+			return
 		}
 	}
 
@@ -407,99 +437,226 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 		}
 	)
 
-	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
 
-	var slimKey = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("slim-%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId)))
-	if !cast.ToBool(c.Query("block_cached")) {
-		if cast.ToBool(c.Query("is_wait_cached")) {
-			var slimWaitKey = config.CACHE_WAIT + "-slim"
-			_, slimOK := h.cache.Get(slimWaitKey)
-			if !slimOK {
-				h.cache.Add(slimWaitKey, []byte(slimWaitKey), 15*time.Second)
-			}
+		service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 
-			if slimOK {
-				ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
-				defer cancel()
+		var slimKey = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("slim-%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId)))
+		if !cast.ToBool(c.Query("block_cached")) {
+			if cast.ToBool(c.Query("is_wait_cached")) {
+				var slimWaitKey = config.CACHE_WAIT + "-slim"
+				_, slimOK := h.cache.Get(slimWaitKey)
+				if !slimOK {
+					h.cache.Add(slimWaitKey, []byte(slimWaitKey), 15*time.Second)
+				}
 
-				for {
-					slimBody, ok := h.cache.Get(slimKey)
-					if ok {
-						m := make(map[string]interface{})
-						err = json.Unmarshal(slimBody, &m)
-						if err != nil {
-							h.handleResponse(c, status_http.GRPCError, err.Error())
+				if slimOK {
+					ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
+					defer cancel()
+
+					for {
+						slimBody, ok := h.cache.Get(slimKey)
+						if ok {
+							m := make(map[string]interface{})
+							err = json.Unmarshal(slimBody, &m)
+							if err != nil {
+								h.handleResponse(c, status_http.GRPCError, err.Error())
+								return
+							}
+
+							h.handleResponse(c, status_http.OK, map[string]interface{}{"data": m})
 							return
 						}
 
-						h.handleResponse(c, status_http.OK, map[string]interface{}{"data": m})
-						return
-					}
+						if ctx.Err() == context.DeadlineExceeded {
+							break
+						}
 
-					if ctx.Err() == context.DeadlineExceeded {
-						break
+						time.Sleep(config.REDIS_SLEEP)
 					}
-
-					time.Sleep(config.REDIS_SLEEP)
-				}
-			}
-		} else {
-			redisResp, err := h.redis.Get(context.Background(), slimKey, projectId.(string), resource.NodeType)
-			if err == nil {
-				resp := make(map[string]interface{})
-				m := make(map[string]interface{})
-				err = json.Unmarshal([]byte(redisResp), &m)
-				if err != nil {
-					h.log.Error("Error while unmarshal redis", logger.Error(err))
-				} else {
-					resp["data"] = m
-					h.handleResponse(c, status_http.OK, resp)
-					logReq.Response = m
-					go h.versionHistory(c, logReq)
-					return
 				}
 			} else {
-				h.log.Error("Error while getting redis while get list ", logger.Error(err))
+				redisResp, err := h.redis.Get(context.Background(), slimKey, projectId.(string), resource.NodeType)
+				if err == nil {
+					resp := make(map[string]interface{})
+					m := make(map[string]interface{})
+					err = json.Unmarshal([]byte(redisResp), &m)
+					if err != nil {
+						h.log.Error("Error while unmarshal redis", logger.Error(err))
+					} else {
+						resp["data"] = m
+						h.handleResponse(c, status_http.OK, resp)
+						logReq.Response = m
+						go h.versionHistory(c, logReq)
+						return
+					}
+				} else {
+					h.log.Error("Error while getting redis while get list ", logger.Error(err))
+				}
 			}
 		}
+
+		resp, err := service.GetListSlimV2(
+			context.Background(),
+			&obs.CommonMessage{
+				TableSlug: c.Param("table_slug"),
+				Data:      structData,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			statusHttp = status_http.GrpcStatusToHTTP["Internal"]
+			stat, ok := status.FromError(err)
+			if ok {
+				statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
+				statusHttp.CustomMessage = stat.Message()
+			}
+			logReq.Response = err.Error()
+			go h.versionHistory(c, logReq)
+			h.handleResponse(c, statusHttp, err.Error())
+			return
+		}
+
+		logReq.Response = resp
+		go h.versionHistory(c, logReq)
+
+		if !cast.ToBool(c.Query("block_cached")) {
+			jsonData, _ := resp.GetData().MarshalJSON()
+			if cast.ToBool(c.Query("is_wait_cached")) {
+				h.cache.Add(slimKey, jsonData, 15*time.Second)
+			} else if resp.IsCached {
+				err = h.redis.SetX(context.Background(), slimKey, string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
+				if err != nil {
+					h.log.Error("Error while setting redis", logger.Error(err))
+				}
+			}
+		}
+
+		statusHttp.CustomMessage = resp.GetCustomMessage()
+		h.handleResponse(c, statusHttp, resp)
+	case pb.ResourceType_POSTGRESQL:
+		resp, err := services.GoObjectBuilderService().ObjectBuilder().GetListSlim(context.Background(),
+			&nb.CommonMessage{
+				TableSlug: c.Param("table_slug"),
+				Data:      structData,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+
+		if err != nil {
+			statusHttp = status_http.GrpcStatusToHTTP["Internal"]
+			stat, ok := status.FromError(err)
+			if ok {
+				statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
+				statusHttp.CustomMessage = stat.Message()
+			}
+			logReq.Response = err.Error()
+			go h.versionHistory(c, logReq)
+			h.handleResponse(c, statusHttp, err.Error())
+			return
+		}
+
+		logReq.Response = resp
+		go h.versionHistory(c, logReq)
+
+		// if err == nil {
+		// 	if resp.IsCached {
+		// 		jsonData, _ := resp.GetData().MarshalJSON()
+		// 		err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second)
+		// 		if err != nil {
+		// 			h.log.Error("Error while setting redis", logger.Error(err))
+		// 		}
+		// 	}
+		// }
+
+		statusHttp.CustomMessage = resp.GetCustomMessage()
+		h.handleResponse(c, statusHttp, resp)
 	}
 
-	resp, err := service.GetListSlimV2(
+}
+
+// UpdateWithParams godoc
+// @Security ApiKeyAuth
+// @ID update_with_params
+// @Router /v2/update-with/{collection} [PUT]
+// @Summary UpdateWith Params
+// @Description UpdateWith Params
+// @Tags Object
+// @Accept json
+// @Produce json
+// @Param collection path string true "collection"
+// @Param item body models.CommonMessage true "UpdateWithParamsBody"
+// @Success 200 {object} status_http.Response{data=models.CommonMessage} "Object data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *HandlerV1) UpdateWithParams(c *gin.Context) {
+
+	var (
+		objectRequest models.CommonMessage
+	)
+
+	err := c.ShouldBindJSON(&objectRequest)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
+
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		resource.GetProjectId(),
+		resource.NodeType,
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	body, err := services.GoObjectBuilderService().ObjectBuilder().UpdateWithParams(
 		context.Background(),
-		&obs.CommonMessage{
-			TableSlug: c.Param("table_slug"),
+		&nb.CommonMessage{
+			TableSlug: c.Param("collection"),
 			Data:      structData,
 			ProjectId: resource.ResourceEnvironmentId,
 		},
 	)
 	if err != nil {
-		statusHttp = status_http.GrpcStatusToHTTP["Internal"]
-		stat, ok := status.FromError(err)
-		if ok {
-			statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
-			statusHttp.CustomMessage = stat.Message()
-		}
-		logReq.Response = err.Error()
-		go h.versionHistory(c, logReq)
-		h.handleResponse(c, statusHttp, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	logReq.Response = resp
-	go h.versionHistory(c, logReq)
-
-	if !cast.ToBool(c.Query("block_cached")) {
-		jsonData, _ := resp.GetData().MarshalJSON()
-		if cast.ToBool(c.Query("is_wait_cached")) {
-			h.cache.Add(slimKey, jsonData, 15*time.Second)
-		} else if resp.IsCached {
-			err = h.redis.SetX(context.Background(), slimKey, string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
-			if err != nil {
-				h.log.Error("Error while setting redis", logger.Error(err))
-			}
-		}
-	}
-
-	statusHttp.CustomMessage = resp.GetCustomMessage()
-	h.handleResponse(c, statusHttp, resp)
+	h.handleResponse(c, status_http.OK, body)
 }

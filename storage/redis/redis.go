@@ -57,3 +57,11 @@ func (s Storage) Set(ctx context.Context, key string, value interface{}, duratio
 	}
 	return s.pool[projectId].Set(ctx, key, value, duration).Err()
 }
+
+func (s Storage) DelMany(ctx context.Context, keys []string, projectId string, nodeType string) error {
+	if nodeType != config.ENTER_PRICE_TYPE {
+		projectId = config.BaseLoad().UcodeNamespace
+	}
+
+	return s.pool[projectId].Del(ctx, keys...).Err()
+}

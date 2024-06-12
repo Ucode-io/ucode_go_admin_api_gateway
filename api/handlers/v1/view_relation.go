@@ -5,6 +5,7 @@ import (
 	"errors"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
+	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
@@ -71,10 +72,9 @@ func (h *HandlerV1) GetViewRelation(c *gin.Context) {
 		return
 	}
 
-	var resp *obs.GetViewRelationResponse
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.GetBuilderServiceByType(resource.NodeType).Section().GetViewRelation(
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).Section().GetViewRelation(
 			context.Background(),
 			&obs.GetAllSectionsRequest{
 				TableId:   c.Query("table_id"),
@@ -87,23 +87,25 @@ func (h *HandlerV1) GetViewRelation(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
-	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Section().GetViewRelation(
-			context.Background(),
-			&obs.GetAllSectionsRequest{
-				TableId:   c.Query("table_id"),
-				TableSlug: c.Query("table_slug"),
-				RoleId:    tokenInfo.GetRoleId(),
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-	}
 
-	h.handleResponse(c, status_http.OK, resp)
+		h.handleResponse(c, status_http.OK, resp)
+	case pb.ResourceType_POSTGRESQL:
+		resp, err := services.GoObjectBuilderService().Section().GetViewRelation(
+			context.Background(),
+			&nb.GetAllSectionsRequest{
+				TableId:   c.Query("table_id"),
+				TableSlug: c.Query("table_slug"),
+				RoleId:    tokenInfo.GetRoleId(),
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		h.handleResponse(c, status_http.OK, resp)
+	}
 }
 
 // UpsertViewRelations godoc

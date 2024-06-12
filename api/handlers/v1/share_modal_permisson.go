@@ -5,7 +5,9 @@ import (
 	"errors"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
+	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
+	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
@@ -110,10 +112,12 @@ func (h *HandlerV1) GetTablePermission(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
+
+		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Permission().GetPermissionsByTableSlug(
+		resp, err := services.GoObjectBuilderService().Permission().GetPermissionsByTableSlug(
 			context.Background(),
-			&obs.GetPermissionsByTableSlugRequest{
+			&nb.GetPermissionsByTableSlugRequest{
 				ProjectId:     resourceEnvironmentId,
 				CurrentRoleId: authInfo.GetRoleId(),
 				RoleId:        c.DefaultQuery("role_id", ""),
@@ -125,9 +129,10 @@ func (h *HandlerV1) GetTablePermission(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
+
+		h.handleResponse(c, status_http.OK, resp)
 	}
 
-	h.handleResponse(c, status_http.OK, resp)
 }
 
 // UpdateTablePermission godoc
@@ -232,17 +237,28 @@ func (h *HandlerV1) UpdateTablePermission(c *gin.Context) {
 			return
 		}
 
+		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Permission().UpdatePermissionsByTableSlug(
+
+		newTablePermission := &nb.UpdatePermissionsRequest{}
+
+		err = helper.MarshalToStruct(&tablePermission, &newTablePermission)
+		if err != nil {
+			h.handleResponse(c, status_http.BadRequest, err.Error())
+			return
+		}
+
+		resp, err := services.GoObjectBuilderService().Permission().UpdatePermissionsByTableSlug(
 			context.Background(),
-			&tablePermission,
+			newTablePermission,
 		)
 
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
+
+		h.handleResponse(c, status_http.OK, resp)
 	}
 
-	h.handleResponse(c, status_http.OK, resp)
 }

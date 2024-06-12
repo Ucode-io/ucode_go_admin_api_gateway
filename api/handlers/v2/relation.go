@@ -6,7 +6,9 @@ import (
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
+	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
+	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
@@ -171,10 +173,12 @@ func (h *HandlerV2) GetByIdRelation(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
+
+		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Relation().GetByID(
+		resp, err := services.GoObjectBuilderService().Relation().GetByID(
 			context.Background(),
-			&obs.RelationPrimaryKey{
+			&nb.RelationPrimaryKey{
 				Id:        relationId,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -183,9 +187,10 @@ func (h *HandlerV2) GetByIdRelation(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
+
+		h.handleResponse(c, status_http.OK, resp)
 	}
 
-	h.handleResponse(c, status_http.OK, resp)
 }
 
 // CreateRelation godoc
@@ -204,9 +209,9 @@ func (h *HandlerV2) GetByIdRelation(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) CreateRelation(c *gin.Context) {
 	var (
-		relation obs.CreateRelationRequest
-		resp     *obs.CreateRelationRequest
-		err      error
+		relation   obs.CreateRelationRequest
+		err        error
+		goRelation nb.CreateRelationRequest
 	)
 
 	err = c.ShouldBindJSON(&relation)
@@ -271,39 +276,44 @@ func (h *HandlerV2) CreateRelation(c *gin.Context) {
 		}
 	)
 
-	defer func() {
+	relation.ProjectId = resource.ResourceEnvironmentId
+	relation.EnvId = resource.EnvironmentId
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).Relation().Create(
+			context.Background(),
+			&relation,
+		)
+		relation.Id = resp.Id
+		logReq.Request = &relation
 		if err != nil {
 			logReq.Response = err.Error()
-			h.handleResponse(c, status_http.GRPCError, err.Error())
 		} else {
 			logReq.Response = resp
 			logReq.Current = resp
 			h.handleResponse(c, status_http.Created, resp)
 		}
 		go h.versionHistory(c, logReq)
-	}()
-
-	relation.ProjectId = resource.ResourceEnvironmentId
-	relation.EnvId = resource.EnvironmentId
-	switch resource.ResourceType {
-	case pb.ResourceType_MONGODB:
-		resp, err = services.GetBuilderServiceByType(resource.NodeType).Relation().Create(
-			context.Background(),
-			&relation,
-		)
-		if err != nil {
-			return
-		}
-		relation.Id = resp.Id
-		logReq.Request = &relation
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Relation().Create(
-			context.Background(),
-			&relation,
-		)
+		err = helper.MarshalToStruct(&relation, &goRelation)
 		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
+		resp, err := services.GoObjectBuilderService().Relation().Create(
+			context.Background(),
+			&goRelation,
+		)
+		relation.Id = resp.Id
+		logReq.Request = &goRelation
+		if err != nil {
+			logReq.Response = err.Error()
+		} else {
+			logReq.Response = resp
+			logReq.Current = resp
+			h.handleResponse(c, status_http.Created, resp)
+		}
+		go h.versionHistoryGo(c, logReq)
 	}
 }
 
@@ -390,13 +400,15 @@ func (h *HandlerV2) GetAllRelations(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
+
+		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Relation().GetAll(
+		resp, err := services.GoObjectBuilderService().Relation().GetAll(
 			context.Background(),
-			&obs.GetAllRelationsRequest{
+			&nb.GetAllRelationsRequest{
 				Limit:     int32(limit),
 				Offset:    int32(offset),
-				TableSlug: c.DefaultQuery("table_slug", ""),
+				TableSlug: c.Param("collection"),
 				TableId:   c.DefaultQuery("table_id", ""),
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -406,9 +418,9 @@ func (h *HandlerV2) GetAllRelations(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
-	}
 
-	h.handleResponse(c, status_http.OK, resp)
+		h.handleResponse(c, status_http.OK, resp)
+	}
 }
 
 // UpdateRelation godoc
@@ -428,8 +440,9 @@ func (h *HandlerV2) GetAllRelations(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) UpdateRelation(c *gin.Context) {
 	var (
-		relation obs.UpdateRelationRequest
-		resp     *obs.RelationForGetAll
+		relation   obs.UpdateRelationRequest
+		resp       *obs.RelationForGetAll
+		goRelation nb.UpdateRelationRequest
 	)
 
 	err := c.ShouldBindJSON(&relation)
@@ -494,6 +507,29 @@ func (h *HandlerV2) UpdateRelation(c *gin.Context) {
 	)
 
 	defer func() {
+
+	}()
+
+	relation.ProjectId = resource.ResourceEnvironmentId
+	relation.EnvId = resource.EnvironmentId
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+
+		oldRelation, err = services.GetBuilderServiceByType(resource.NodeType).Relation().GetByID(
+			context.Background(),
+			&obs.RelationPrimaryKey{
+				Id:        relation.Id,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			return
+		}
+
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).Relation().Update(
+			context.Background(),
+			&relation,
+		)
 		logReq.Previous = oldRelation
 		if err != nil {
 			logReq.Response = err.Error()
@@ -503,39 +539,42 @@ func (h *HandlerV2) UpdateRelation(c *gin.Context) {
 			logReq.Current = resp
 			h.handleResponse(c, status_http.OK, resp)
 		}
+
 		go h.versionHistory(c, logReq)
-	}()
-
-	oldRelation, err = services.GetBuilderServiceByType(resource.NodeType).Relation().GetByID(
-		context.Background(),
-		&obs.RelationPrimaryKey{
-			Id:        relation.Id,
-			ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
-	if err != nil {
-		return
-	}
-
-	relation.ProjectId = resource.ResourceEnvironmentId
-	relation.EnvId = resource.EnvironmentId
-	switch resource.ResourceType {
-	case pb.ResourceType_MONGODB:
-		resp, err = services.GetBuilderServiceByType(resource.NodeType).Relation().Update(
-			context.Background(),
-			&relation,
-		)
-		if err != nil {
-			return
-		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Relation().Update(
+
+		goOldRelation, err := services.GoObjectBuilderService().Relation().GetByID(
 			context.Background(),
-			&relation,
+			&nb.RelationPrimaryKey{
+				Id:        relation.Id,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
 		)
 		if err != nil {
 			return
 		}
+
+		if err = helper.MarshalToStruct(&relation, &goRelation); err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		goRelation.ProjectId = resource.ResourceEnvironmentId
+
+		goResp, err := services.GoObjectBuilderService().Relation().Update(
+			context.Background(),
+			&goRelation,
+		)
+		logReq.Previous = goOldRelation
+		if err != nil {
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else {
+			logReq.Response = goResp
+			logReq.Current = goResp
+			h.handleResponse(c, status_http.OK, goResp)
+		}
+		go h.versionHistoryGo(c, logReq)
 	}
 }
 
@@ -604,8 +643,7 @@ func (h *HandlerV2) DeleteRelation(c *gin.Context) {
 	}
 
 	var (
-		oldRelation = &obs.RelationForGetAll{}
-		logReq      = &models.CreateVersionHistoryRequest{
+		logReq = &models.CreateVersionHistoryRequest{
 			Services:     services,
 			NodeType:     resource.NodeType,
 			ProjectId:    resource.ResourceEnvironmentId,
@@ -619,27 +657,16 @@ func (h *HandlerV2) DeleteRelation(c *gin.Context) {
 		}
 	)
 
-	defer func() {
-		logReq.Previous = oldRelation
-		if err != nil {
-			logReq.Response = err.Error()
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-		} else {
-			h.handleResponse(c, status_http.NoContent, resp)
-		}
-		go h.versionHistory(c, logReq)
-	}()
-
-	oldRelation, err = services.GetBuilderServiceByType(resource.NodeType).Relation().GetByID(
-		context.Background(),
-		&obs.RelationPrimaryKey{
-			Id:        relationID,
-			ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
-	if err != nil {
-		return
-	}
+	// oldRelation, err = services.GetBuilderServiceByType(resource.NodeType).Relation().GetByID(
+	// 	context.Background(),
+	// 	&obs.RelationPrimaryKey{
+	// 		Id:        relationID,
+	// 		ProjectId: resource.ResourceEnvironmentId,
+	// 	},
+	// )
+	// if err != nil {
+	// 	return
+	// }
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
@@ -651,19 +678,27 @@ func (h *HandlerV2) DeleteRelation(c *gin.Context) {
 			},
 		)
 		if err != nil {
-			return
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else {
+			h.handleResponse(c, status_http.NoContent, resp)
 		}
+		go h.versionHistory(c, logReq)
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Relation().Delete(
+		resp, err = services.GoObjectBuilderService().Relation().Delete(
 			context.Background(),
-			&obs.RelationPrimaryKey{
+			&nb.RelationPrimaryKey{
 				Id:        relationID,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
 		if err != nil {
-			return
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else {
+			h.handleResponse(c, status_http.NoContent, resp)
 		}
+		go h.versionHistoryGo(c, logReq)
 	}
 }
 

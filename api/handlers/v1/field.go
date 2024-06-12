@@ -6,6 +6,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
+	"ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
@@ -271,10 +272,12 @@ func (h *HandlerV1) GetAllFields(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
+
+		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Field().GetAll(
+		resp, err := services.GoObjectBuilderService().Field().GetAll(
 			context.Background(),
-			&obs.GetAllFieldsRequest{
+			&new_object_builder_service.GetAllFieldsRequest{
 				Limit:            int32(limit),
 				Offset:           int32(offset),
 				Search:           c.DefaultQuery("search", ""),
@@ -290,9 +293,10 @@ func (h *HandlerV1) GetAllFields(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
-	}
 
-	h.handleResponse(c, status_http.OK, resp)
+		h.handleResponse(c, status_http.OK, resp)
+
+	}
 }
 
 // UpdateField godoc

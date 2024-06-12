@@ -50,6 +50,13 @@ func (h *HandlerV2) UploadERD(c *gin.Context) {
 		return
 	}
 	defer dst.Close()
+	defer func() {
+		err := os.Remove(dir + "/" + file.File.Filename)
+		if err != nil {
+			h.handleResponse(c, status_http.InternalServerError, err.Error())
+			return
+		}
+	}()
 
 	bearerToken := c.GetHeader("Authorization")
 

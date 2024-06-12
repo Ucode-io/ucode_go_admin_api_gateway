@@ -3,12 +3,13 @@ package v2
 import (
 	"context"
 	"errors"
+	"fmt"
 	"reflect"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
+	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
-	tmp "ucode/ucode_go_api_gateway/genproto/template_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
 	"ucode/ucode_go_api_gateway/services"
@@ -34,7 +35,6 @@ import (
 func (h *HandlerV2) CreateMenu(c *gin.Context) {
 	var (
 		menu models.CreateMenuRequest
-		resp *obs.Menu
 	)
 
 	err := c.ShouldBindJSON(&menu)
@@ -119,7 +119,13 @@ func (h *HandlerV2) CreateMenu(c *gin.Context) {
 		}
 	)
 
-	defer func() {
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).Menu().Create(
+			context.Background(),
+			menuRequest,
+		)
+
 		if err != nil {
 			logReq.Response = err.Error()
 			h.handleResponse(c, status_http.GRPCError, err.Error())
@@ -127,26 +133,27 @@ func (h *HandlerV2) CreateMenu(c *gin.Context) {
 			logReq.Response = resp
 			logReq.Current = resp
 			h.handleResponse(c, status_http.Created, resp)
-		}
-		go h.versionHistory(c, logReq)
-	}()
-
-	switch resource.ResourceType {
-	case pb.ResourceType_MONGODB:
-		resp, err = services.GetBuilderServiceByType(resource.NodeType).Menu().Create(
-			context.Background(),
-			menuRequest,
-		)
-		if err != nil {
-			return
+			go h.versionHistory(c, logReq)
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Menu().Create(
+		newReq := nb.CreateMenuRequest{}
+		err := helper.MarshalToStruct(&menuRequest, &newReq)
+		if err != nil {
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		}
+		pgResp, err := services.GoObjectBuilderService().Menu().Create(
 			context.Background(),
-			menuRequest,
+			&newReq,
 		)
 		if err != nil {
-			return
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else {
+			logReq.Response = pgResp
+			logReq.Current = pgResp
+			h.handleResponse(c, status_http.Created, pgResp)
+			go h.versionHistoryGo(c, logReq)
 		}
 	}
 }
@@ -166,9 +173,6 @@ func (h *HandlerV2) CreateMenu(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) GetMenuByID(c *gin.Context) {
 	menuID := c.Param("id")
-	var (
-		resp *obs.Menu
-	)
 
 	if !util.IsValidUUID(menuID) {
 		h.handleResponse(c, status_http.InvalidArgument, "menu id is an invalid uuid")
@@ -213,7 +217,7 @@ func (h *HandlerV2) GetMenuByID(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.GetBuilderServiceByType(resource.NodeType).Menu().GetByID(
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).Menu().GetByID(
 			context.Background(),
 			&obs.MenuPrimaryKey{
 				Id:        menuID,
@@ -224,10 +228,11 @@ func (h *HandlerV2) GetMenuByID(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
+		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Menu().GetByID(
+		pgResp, err := services.GoObjectBuilderService().Menu().GetByID(
 			context.Background(),
-			&obs.MenuPrimaryKey{
+			&nb.MenuPrimaryKey{
 				Id:        menuID,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -236,9 +241,8 @@ func (h *HandlerV2) GetMenuByID(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
+		h.handleResponse(c, status_http.OK, pgResp)
 	}
-
-	h.handleResponse(c, status_http.OK, resp)
 }
 
 // GetAllMenus godoc
@@ -257,9 +261,7 @@ func (h *HandlerV2) GetMenuByID(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) GetAllMenus(c *gin.Context) {
 	offset, err := h.getOffsetParam(c)
-	var (
-		resp *obs.GetAllMenusResponse
-	)
+
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
@@ -305,8 +307,7 @@ func (h *HandlerV2) GetAllMenus(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-
-		resp, err = services.GetBuilderServiceByType(resource.NodeType).Menu().GetAll(
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).Menu().GetAll(
 			context.Background(),
 			&obs.GetAllMenusRequest{
 				Limit:     int32(limit),
@@ -322,25 +323,27 @@ func (h *HandlerV2) GetAllMenus(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
-
+		fmt.Printf("Resp %v->%v\n", projectId, resp)
+		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Menu().GetAll(
+		resp, err := services.GoObjectBuilderService().Menu().GetAll(
 			context.Background(),
-			&obs.GetAllMenusRequest{
+			&nb.GetAllMenusRequest{
 				Limit:     int32(limit),
 				Offset:    int32(offset),
 				Search:    c.DefaultQuery("search", ""),
 				ProjectId: resource.ResourceEnvironmentId,
 				ParentId:  c.DefaultQuery("parent_id", ""),
 				RoleId:    authInfo.GetRoleId(),
+				TableId:   c.DefaultQuery("table_id", ""),
 			},
 		)
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
+		h.handleResponse(c, status_http.OK, resp)
 	}
-	h.handleResponse(c, status_http.OK, resp)
 }
 
 // UpdateMenu godoc
@@ -432,8 +435,7 @@ func (h *HandlerV2) UpdateMenu(c *gin.Context) {
 			IsVisible:       menu.IsVisible,
 			WikiId:          menu.WikiId,
 		}
-		oldMenu = &obs.Menu{}
-		logReq  = &models.CreateVersionHistoryRequest{
+		logReq = &models.CreateVersionHistoryRequest{
 			Services:     services,
 			NodeType:     resource.NodeType,
 			ProjectId:    resource.ResourceEnvironmentId,
@@ -448,8 +450,24 @@ func (h *HandlerV2) UpdateMenu(c *gin.Context) {
 		}
 	)
 
-	defer func() {
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		oldMenu, err := services.GetBuilderServiceByType(resource.NodeType).Menu().GetByID(
+			context.Background(),
+			&obs.MenuPrimaryKey{
+				Id:        menu.Id,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			return
+		}
+
 		logReq.Previous = oldMenu
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).Menu().Update(
+			context.Background(),
+			requestMenu,
+		)
 		if err != nil {
 			logReq.Response = err.Error()
 			h.handleResponse(c, status_http.GRPCError, err.Error())
@@ -459,36 +477,27 @@ func (h *HandlerV2) UpdateMenu(c *gin.Context) {
 			h.handleResponse(c, status_http.OK, resp)
 		}
 		go h.versionHistory(c, logReq)
-	}()
-
-	oldMenu, err = services.GetBuilderServiceByType(resource.NodeType).Menu().GetByID(
-		context.Background(),
-		&obs.MenuPrimaryKey{
-			Id:        menu.Id,
-			ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
-	if err != nil {
-		return
-	}
-
-	switch resource.ResourceType {
-	case pb.ResourceType_MONGODB:
-		resp, err = services.GetBuilderServiceByType(resource.NodeType).Menu().Update(
-			context.Background(),
-			requestMenu,
-		)
-		if err != nil {
-			return
-		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Menu().Update(
-			context.Background(),
-			requestMenu,
-		)
+		newReq := &nb.Menu{}
+		err = helper.MarshalToStruct(&requestMenu, &newReq)
 		if err != nil {
+			h.handleResponse(c, status_http.InternalServerError, err.Error())
 			return
 		}
+
+		resp, err := services.GoObjectBuilderService().Menu().Update(
+			context.Background(),
+			newReq,
+		)
+		if err != nil {
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else {
+			logReq.Response = resp
+			logReq.Current = resp
+			h.handleResponse(c, status_http.OK, resp)
+		}
+		go h.versionHistoryGo(c, logReq)
 	}
 }
 
@@ -507,9 +516,6 @@ func (h *HandlerV2) UpdateMenu(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) DeleteMenu(c *gin.Context) {
 	menuID := c.Param("id")
-	var (
-		resp *emptypb.Empty
-	)
 
 	if !util.IsValidUUID(menuID) {
 		h.handleResponse(c, status_http.InvalidArgument, "menu id is an invalid uuid")
@@ -555,8 +561,7 @@ func (h *HandlerV2) DeleteMenu(c *gin.Context) {
 	}
 
 	var (
-		oldMenu = &obs.Menu{}
-		logReq  = &models.CreateVersionHistoryRequest{
+		logReq = &models.CreateVersionHistoryRequest{
 			Services:     services,
 			NodeType:     resource.NodeType,
 			ProjectId:    resource.ResourceEnvironmentId,
@@ -570,7 +575,27 @@ func (h *HandlerV2) DeleteMenu(c *gin.Context) {
 		}
 	)
 
-	defer func() {
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		oldMenu, err := services.GetBuilderServiceByType(resource.NodeType).Menu().GetByID(
+			context.Background(),
+			&obs.MenuPrimaryKey{
+				Id:        menuID,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			return
+		}
+
+		resp, err := services.BuilderService().Menu().Delete(
+			context.Background(),
+			&obs.MenuPrimaryKey{
+				Id:        menuID,
+				ProjectId: resource.ResourceEnvironmentId,
+				EnvId:     resource.EnvironmentId,
+			},
+		)
 		logReq.Previous = oldMenu
 		if err != nil {
 			logReq.Response = err.Error()
@@ -579,54 +604,35 @@ func (h *HandlerV2) DeleteMenu(c *gin.Context) {
 			h.handleResponse(c, status_http.NoContent, resp)
 		}
 		go h.versionHistory(c, logReq)
-	}()
 
-	oldMenu, err = services.GetBuilderServiceByType(resource.NodeType).Menu().GetByID(
-		context.Background(),
-		&obs.MenuPrimaryKey{
+		h.handleResponse(c, status_http.NoContent, resp)
+	case pb.ResourceType_POSTGRESQL:
+
+		oldMenu, err := services.GoObjectBuilderService().Menu().GetByID(context.Background(), &nb.MenuPrimaryKey{
 			Id:        menuID,
 			ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
-	if err != nil {
-		return
-	}
+		})
+		if err != nil {
+			return
+		}
 
-	switch resource.ResourceType {
-	case pb.ResourceType_MONGODB:
-		if oldMenu.Type == "WIKI" {
-			_, err = services.TemplateService().Note().DeleteNote(
-				context.Background(),
-				&tmp.DeleteNoteReq{
-					Id:         oldMenu.WikiId,
-					ProjectId:  projectId.(string),
-					ResourceId: resource.ResourceEnvironmentId,
-					VersionId:  "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
-				},
-			)
-		}
-		err = nil
-		resp, err = services.GetBuilderServiceByType(resource.NodeType).Menu().Delete(
+		resp, err := services.GoObjectBuilderService().Menu().Delete(
 			context.Background(),
-			&obs.MenuPrimaryKey{
+			&nb.MenuPrimaryKey{
 				Id:        menuID,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
+		logReq.Previous = oldMenu
 		if err != nil {
-			return
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else {
+			h.handleResponse(c, status_http.NoContent, resp)
 		}
-	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Menu().Delete(
-			context.Background(),
-			&obs.MenuPrimaryKey{
-				Id:        menuID,
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-		if err != nil {
-			return
-		}
+		go h.versionHistoryGo(c, logReq)
+
+		h.handleResponse(c, status_http.NoContent, resp)
 	}
 }
 
@@ -705,14 +711,20 @@ func (h *HandlerV2) UpdateMenuOrder(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Menu().UpdateMenuOrder(
+		pgMenus := nb.UpdateMenuOrderRequest{}
+		err = helper.MarshalToStruct(&menus, &pgMenus)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		resp, err = services.GoObjectBuilderService().Menu().UpdateMenuOrder(
 			context.Background(),
-			&obs.UpdateMenuOrderRequest{
-				Menus:     menus.GetMenus(),
+			&nb.UpdateMenuOrderRequest{
+				Menus:     pgMenus.GetMenus(),
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
-
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
@@ -1303,7 +1315,7 @@ func (h *HandlerV2) CreateMenuTemplate(c *gin.Context) {
 func (h *HandlerV2) GetAllMenuTemplates(c *gin.Context) {
 	offset, err := h.getOffsetParam(c)
 	var (
-		resp *obs.GatAllMenuTemplateResponse
+		resp *obs.GatAllMenuTemplateResponse = &obs.GatAllMenuTemplateResponse{}
 	)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
@@ -1367,9 +1379,9 @@ func (h *HandlerV2) GetAllMenuTemplates(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Menu().GetAllMenuTemplate(
+		_, err = services.GoObjectBuilderService().Menu().GetAllMenuTemplate(
 			context.Background(),
-			&obs.GetAllMenuSettingsRequest{
+			&nb.GetAllMenuSettingsRequest{
 				Limit:     int32(limit),
 				Offset:    int32(offset),
 				ProjectId: resource.ResourceEnvironmentId,

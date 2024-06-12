@@ -9,6 +9,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
+	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
@@ -125,18 +126,44 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.GetBuilderServiceByType(resource.NodeType).File().Create(context.Background(), &obs.CreateFileRequest{
-		Id:               fName.String(),
-		Title:            title,
-		Storage:          folder_name,
-		FileNameDisk:     file.File.Filename,
-		FileNameDownload: title,
-		Link:             resource.ResourceEnvironmentId + "/" + folder_name + "/" + file.File.Filename,
-		FileSize:         file.File.Size,
-		ProjectId:        resource.ResourceEnvironmentId,
-	})
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).File().Create(context.Background(), &obs.CreateFileRequest{
+			Id:               fName.String(),
+			Title:            title,
+			Storage:          folder_name,
+			FileNameDisk:     file.File.Filename,
+			FileNameDownload: title,
+			Link:             resource.ResourceEnvironmentId + "/" + folder_name + "/" + file.File.Filename,
+			FileSize:         file.File.Size,
+			ProjectId:        resource.ResourceEnvironmentId,
+		})
+		if err != nil {
+			h.handleResponse(c, status_http.BadRequest, err.Error())
+			return
+		}
+
+		h.handleResponse(c, status_http.Created, resp)
+		return
+	case pb.ResourceType_POSTGRESQL:
+
+		resp, err := services.GoObjectBuilderService().File().Create(context.Background(), &nb.CreateFileRequest{
+			Id:               fName.String(),
+			Title:            title,
+			Storage:          folder_name,
+			FileNameDisk:     file.File.Filename,
+			FileNameDownload: title,
+			Link:             resource.ResourceEnvironmentId + "/" + folder_name + "/" + file.File.Filename,
+			FileSize:         file.File.Size,
+			ProjectId:        resource.ResourceEnvironmentId,
+		})
+
+		if err != nil {
+			h.handleResponse(c, status_http.BadRequest, err.Error())
+			return
+		}
+
+		h.handleResponse(c, status_http.Created, resp)
 		return
 	}
 
@@ -145,7 +172,6 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 	// 	h.log.Error("cant remove file")
 	// }
 
-	h.handleResponse(c, status_http.Created, resp)
 }
 
 // GetSingleFile godoc
@@ -182,7 +208,7 @@ func (h *HandlerV1) GetSingleFile(c *gin.Context) {
 		return
 	}
 
-	resourse, err := h.companyServices.ServiceResource().GetSingle(
+	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -198,26 +224,47 @@ func (h *HandlerV1) GetSingleFile(c *gin.Context) {
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
 		projectId.(string),
-		resourse.NodeType,
+		resource.NodeType,
 	)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	resp, err := services.GetBuilderServiceByType(resourse.NodeType).File().GetSingle(
-		context.Background(),
-		&obs.FilePrimaryKey{
-			Id:        fileID,
-			ProjectId: resourse.ResourceEnvironmentId,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).File().GetSingle(
+			context.Background(),
+			&obs.FilePrimaryKey{
+				ProjectId: resource.ResourceEnvironmentId,
+				Id:        fileID,
+			},
+		)
+
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		h.handleResponse(c, status_http.OK, resp)
+	case pb.ResourceType_POSTGRESQL:
+		resp, err := services.GoObjectBuilderService().File().GetSingle(
+			context.Background(),
+			&nb.FilePrimaryKey{
+				ProjectId: resource.ResourceEnvironmentId,
+				Id:        fileID,
+			},
+		)
+
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		h.handleResponse(c, status_http.OK, resp)
+
 	}
 
-	h.handleResponse(c, status_http.OK, resp)
 }
 
 // UpdateFile godoc
@@ -278,24 +325,43 @@ func (h *HandlerV1) UpdateFile(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.GetBuilderServiceByType(resource.NodeType).File().Update(
-		context.Background(),
-		&obs.File{
-			Id:               file.Id,
-			Title:            file.Title,
-			Description:      file.Description,
-			Tags:             file.Tags,
-			FileNameDownload: file.FileNameDownload,
-			ProjectId:        resource.ResourceEnvironmentId,
-		},
-	)
-
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).File().Update(
+			context.Background(),
+			&obs.File{
+				Id:               file.Id,
+				Title:            file.Title,
+				Description:      file.Description,
+				Tags:             file.Tags,
+				FileNameDownload: file.FileNameDownload,
+				ProjectId:        resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+		h.handleResponse(c, status_http.OK, resp)
+	case pb.ResourceType_POSTGRESQL:
+		resp, err := services.GoObjectBuilderService().File().Update(
+			context.Background(),
+			&nb.File{
+				Id:               file.Id,
+				Title:            file.Title,
+				Description:      file.Description,
+				Tags:             file.Tags,
+				FileNameDownload: file.FileNameDownload,
+				ProjectId:        resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+		h.handleResponse(c, status_http.OK, resp)
 	}
 
-	h.handleResponse(c, status_http.OK, resp)
 }
 
 // DeleteFile godoc
@@ -381,20 +447,37 @@ func (h *HandlerV1) DeleteFile(c *gin.Context) {
 		log.Println(err)
 	}
 
-	resp, err := services.GetBuilderServiceByType(resource.NodeType).File().Delete(
-		context.Background(),
-		&obs.FileDeleteRequest{
-			Ids:       delete_request,
-			ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).File().Delete(
+			context.Background(),
+			&obs.FileDeleteRequest{
+				Ids:       delete_request,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+		h.handleResponse(c, status_http.NoContent, resp)
+	case pb.ResourceType_POSTGRESQL:
+		resp, err := services.GoObjectBuilderService().File().Delete(
+			context.Background(),
+			&nb.FileDeleteRequest{
+				Ids:       delete_request,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		h.handleResponse(c, status_http.NoContent, resp)
 	}
 
-	h.handleResponse(c, status_http.NoContent, resp)
 }
 
 // DeleteFiles godoc
@@ -488,20 +571,36 @@ func (h *HandlerV1) DeleteFiles(c *gin.Context) {
 		}
 	}
 
-	resp, err := services.GetBuilderServiceByType(resource.NodeType).File().Delete(
-		context.Background(),
-		&obs.FileDeleteRequest{
-			Ids:       delete_request,
-			ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).File().Delete(
+			context.Background(),
+			&obs.FileDeleteRequest{
+				Ids:       delete_request,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+		h.handleResponse(c, status_http.NoContent, resp)
+	case pb.ResourceType_POSTGRESQL:
+		resp, err := services.GoObjectBuilderService().File().Delete(
+			context.Background(),
+			&nb.FileDeleteRequest{
+				Ids:       delete_request,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		h.handleResponse(c, status_http.NoContent, resp)
 	}
-
-	h.handleResponse(c, status_http.NoContent, resp)
 }
 
 // GetAllFiles godoc
@@ -555,20 +654,41 @@ func (h *HandlerV1) GetAllFiles(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.GetBuilderServiceByType(resource.NodeType).File().GetList(
-		context.Background(),
-		&obs.GetAllFilesRequest{
-			Search:     c.DefaultQuery("search", ""),
-			Sort:       c.DefaultQuery("sort", ""),
-			ProjectId:  resource.ResourceEnvironmentId,
-			FolderName: c.DefaultQuery("folder_name", ""),
-		},
-	)
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).File().GetList(
+			context.Background(),
+			&obs.GetAllFilesRequest{
+				Search:     c.DefaultQuery("search", ""),
+				Sort:       c.DefaultQuery("sort", ""),
+				ProjectId:  resource.ResourceEnvironmentId,
+				FolderName: c.DefaultQuery("folder_name", ""),
+			},
+		)
 
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		h.handleResponse(c, status_http.OK, resp)
+	case pb.ResourceType_POSTGRESQL:
+		resp, err := services.GoObjectBuilderService().File().GetList(
+			context.Background(),
+			&nb.GetAllFilesRequest{
+				Search:     c.DefaultQuery("search", ""),
+				Sort:       c.DefaultQuery("sort", ""),
+				ProjectId:  resource.ResourceEnvironmentId,
+				FolderName: c.DefaultQuery("folder_name", ""),
+			},
+		)
+
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		h.handleResponse(c, status_http.OK, resp)
+
 	}
-
-	h.handleResponse(c, status_http.OK, resp)
 }

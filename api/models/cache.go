@@ -6,6 +6,7 @@ type CacheRequest struct {
 	Value     map[string]interface{} `json:"value"`
 	NodeType  string
 	Method    string
+	Keys      []string
 }
 
 type CacheResponse struct {

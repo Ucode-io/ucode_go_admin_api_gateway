@@ -3,12 +3,14 @@ package v1
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"strconv"
 	"time"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
+	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/caching"
 	"ucode/ucode_go_api_gateway/pkg/logger"
@@ -171,4 +173,69 @@ func fromMapToString(req map[string]interface{}) string {
 		return ""
 	}
 	return string(reqString)
+}
+
+func (h *HandlerV1) versionHistoryGo(c *gin.Context, req *models.CreateVersionHistoryRequest) error {
+	var (
+		current  = map[string]interface{}{"data": req.Current}
+		previous = map[string]interface{}{"data": req.Previous}
+		request  = map[string]interface{}{"data": req.Request}
+		response = map[string]interface{}{"data": req.Response}
+		user     = ""
+	)
+
+	if req.Current == nil {
+		current["data"] = make(map[string]interface{})
+	}
+	if req.Previous == nil {
+		previous["data"] = make(map[string]interface{})
+	}
+	if req.Request == nil {
+		request["data"] = make(map[string]interface{})
+	}
+	if req.Response == nil {
+		response["data"] = make(map[string]interface{})
+	}
+
+	if util.IsValidUUID(req.UserInfo) {
+		info, err := h.authService.User().GetUserByID(
+			context.Background(),
+			&auth_service.UserPrimaryKey{
+				Id: req.UserInfo,
+			},
+		)
+		if err == nil {
+			if info.Login != "" {
+				user = info.Login
+			} else {
+				user = info.Phone
+			}
+		}
+	}
+
+	_, err := req.Services.GoObjectBuilderService().VersionHistory().Create(
+		c,
+		&nb.CreateVersionHistoryRequest{
+			Id:                uuid.NewString(),
+			ProjectId:         req.ProjectId,
+			ActionSource:      req.ActionSource,
+			ActionType:        req.ActionType,
+			Previus:           fromMapToString(previous),
+			Current:           fromMapToString(current),
+			UsedEnvrironments: req.UsedEnvironments,
+			Date:              time.Now().Format("2006-01-02T15:04:05.000Z"),
+			UserInfo:          user,
+			Request:           fromMapToString(request),
+			Response:          fromMapToString(response),
+			ApiKey:            req.ApiKey,
+			Type:              req.Type,
+			TableSlug:         req.TableSlug,
+			VersionId:         req.VersionId,
+		},
+	)
+	if err != nil {
+		log.Println("ERROR FROM VERSION CREATE >>>>>", err)
+		return err
+	}
+	return nil
 }

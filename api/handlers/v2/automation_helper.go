@@ -2,13 +2,17 @@ package v2
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"log"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
+	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
+	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
@@ -27,8 +31,24 @@ type DoInvokeFuntionStruct struct {
 func GetListCustomEvents(tableSlug, roleId, method string, c *gin.Context, h *HandlerV2) (beforeEvents, afterEvents []*obs.CustomEvent, err error) {
 
 	var (
-		res *obs.GetCustomEventsListResponse
+		res   *obs.GetCustomEventsListResponse
+		gores *nb.GetCustomEventsListResponse
+		body  []byte
 	)
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	//resourceId, ok := c.Get("resource_id")
+	//if !ok {
+	//	err = errors.New("error getting resource id")
+	//	h.handleResponse(c, status_http.BadRequest, err.Error())
+	//	return
+	//}
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -56,19 +76,21 @@ func GetListCustomEvents(tableSlug, roleId, method string, c *gin.Context, h *Ha
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		resource.GetProjectId(),
-		resource.NodeType,
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
+	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+	//	context.Background(),
+	//	&company_service.GetResEnvByResIdEnvIdRequest{
+	//		EnvironmentId: environmentId.(string),
+	//		ResourceId:    resourceId.(string),
+	//	},
+	//)
+	//if err != nil {
+	//	err = errors.New("error getting resource environment id")
+	//	h.handleResponse(c, status_http.GRPCError, err.Error())
+	//	return
+	//}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		res, err = services.GetBuilderServiceByType(resource.NodeType).CustomEvent().GetList(
+		res, err = services.BuilderService().CustomEvent().GetList(
 			context.Background(),
 			&obs.GetCustomEventsListRequest{
 				TableSlug: tableSlug,
@@ -82,9 +104,9 @@ func GetListCustomEvents(tableSlug, roleId, method string, c *gin.Context, h *Ha
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		res, err = services.PostgresBuilderService().CustomEvent().GetList(
+		gores, err = services.GoObjectBuilderService().CustomEvent().GetList(
 			context.Background(),
-			&obs.GetCustomEventsListRequest{
+			&nb.GetCustomEventsListRequest{
 				TableSlug: tableSlug,
 				Method:    method,
 				RoleId:    roleId,
@@ -93,6 +115,15 @@ func GetListCustomEvents(tableSlug, roleId, method string, c *gin.Context, h *Ha
 		)
 
 		if err != nil {
+			return
+		}
+
+		body, err = json.Marshal(gores)
+		if err != nil {
+			return
+		}
+
+		if err = json.Unmarshal(body, &res); err != nil {
 			return
 		}
 	}
@@ -186,15 +217,36 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *HandlerV2
 		data["action_type"] = request.ActionType
 		invokeFunction.Data = data
 
-		resp, err := util.DoRequest("https://ofs.u-code.io/function/"+customEvent.GetFunctions()[0].Path, "POST", invokeFunction)
-		if err != nil {
-			return customEvent.GetFunctions()[0].Name, err
-		} else if resp.Status == "error" {
-			var errStr = resp.Status
-			if resp.Data != nil && resp.Data["message"] != nil {
-				errStr = resp.Data["message"].(string)
+		if customEvent.GetFunctions()[0].RequestType == "" || customEvent.GetFunctions()[0].RequestType == "ASYNC" {
+
+			resp, err := util.DoRequest("https://ofs.u-code.io/function/"+customEvent.GetFunctions()[0].Path, "POST", invokeFunction)
+			if err != nil {
+				return customEvent.GetFunctions()[0].Name, err
+			} else if resp.Status == "error" {
+				var errStr = resp.Status
+				if resp.Data != nil && resp.Data["message"] != nil {
+					errStr = resp.Data["message"].(string)
+				}
+				return customEvent.GetFunctions()[0].Name, errors.New(errStr)
 			}
-			return customEvent.GetFunctions()[0].Name, errors.New(errStr)
+		} else if customEvent.GetFunctions()[0].RequestType == "SYNC" {
+
+			go func(customEvent *obs.CustomEvent) {
+				resp, err := util.DoRequest("https://ofs.u-code.io/function/"+customEvent.GetFunctions()[0].Path, "POST", invokeFunction)
+				if err != nil {
+					h.log.Error("ERROR FROM OFS", logger.Any("err", err.Error()))
+					return
+				} else if resp.Status == "error" {
+					var errStr = resp.Status
+					if resp.Data != nil && resp.Data["message"] != nil {
+						errStr = resp.Data["message"].(string)
+						log.Fatal(errStr)
+					}
+
+					h.log.Error("ERROR FROM OFS", logger.Any("err", errStr))
+					return
+				}
+			}(customEvent)
 		}
 	}
 	return

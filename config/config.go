@@ -47,6 +47,12 @@ type Config struct {
 	VersioningServiceHost string
 	VersioningGRPCPort    string
 
+	AuthServiceHost string
+	AuthGRPCPort    string
+
+	CompanyServiceHost string
+	CompanyServicePort string
+
 	IntegrationServiceHost string
 	IntegrationGRPCPort    string
 
@@ -93,6 +99,9 @@ type Config struct {
 	PostgresBuilderServiceHost string
 	PostgresBuilderServicePort string
 
+	GoObjectBuilderServiceHost string
+	GoObjectBuilderGRPCPort    string
+
 	GetRequestRedisHost     string
 	GetRequestRedisPort     string
 	GetRequestRedisDatabase int
@@ -105,6 +114,8 @@ type Config struct {
 	GitlabGroupIdMicroFE   int
 	GitlabProjectIdMicroFE int
 	GitlabHostMicroFE      string
+
+	ServiceLink string
 }
 
 type BaseConfig struct {
@@ -112,6 +123,7 @@ type BaseConfig struct {
 	Environment string
 	Version     string
 
+	HTTPBaseURL string
 	ServiceHost string
 	HTTPPort    string
 	HTTPScheme  string
@@ -134,6 +146,9 @@ type BaseConfig struct {
 	DefaultOffset string
 	DefaultLimit  string
 
+	GoObjectBuilderServiceHost string
+	GoObjectBuilderGRPCPort    string
+
 	CLIENT_HOST                   string
 	SUPERADMIN_HOST               string
 	GitlabIntegrationToken        string
@@ -153,6 +168,7 @@ type BaseConfig struct {
 	GithubClientSecret string
 	ProjectUrl         string
 	WebhookSecret      string
+	//OfsHost string
 }
 
 func BaseLoad() BaseConfig {
@@ -169,8 +185,9 @@ func BaseLoad() BaseConfig {
 	config.Environment = cast.ToString(GetOrReturnDefaultValue("ENVIRONMENT", DebugMode))
 	config.Version = cast.ToString(GetOrReturnDefaultValue("VERSION", "1.0"))
 
+	config.HTTPBaseURL = cast.ToString(GetOrReturnDefaultValue("HTTP_BASE_URL", "https://admin-api.ucode.run"))
 	config.ServiceHost = cast.ToString(GetOrReturnDefaultValue("SERVICE_HOST", "localhost"))
-	config.HTTPPort = cast.ToString(GetOrReturnDefaultValue("HTTP_PORT", ":8080"))
+	config.HTTPPort = cast.ToString(GetOrReturnDefaultValue("HTTP_PORT", ":8000:8080"))
 	// config.HTTPScheme = cast.ToString(GetOrReturnDefaultValue("HTTP_SCHEME", ""))
 
 	config.AuthServiceHost = cast.ToString(GetOrReturnDefaultValue("AUTH_SERVICE_HOST", ""))
@@ -184,18 +201,21 @@ func BaseLoad() BaseConfig {
 	config.MinioEndpoint = cast.ToString(GetOrReturnDefaultValue("MINIO_ENDPOINT", ""))
 	config.MinioProtocol = cast.ToBool(GetOrReturnDefaultValue("MINIO_PROTOCOL", true))
 
-	config.GitlabGroupIdMicroFE = cast.ToInt(GetOrReturnDefaultValue("GITLAB_GROUP_ID_MICROFE", 0))
+	config.GitlabGroupIdMicroFE = cast.ToInt(GetOrReturnDefaultValue("GITLAB_GROUP_ID_MICROFE", 2604))
 	config.GitlabProjectIdMicroFE = cast.ToInt(GetOrReturnDefaultValue("GITLAB_PROJECT_ID_MICROFE", 0))
-	config.GitlabHostMicroFE = cast.ToString(GetOrReturnDefaultValue("GITLAB_HOST_MICROFE", ""))
+	config.GitlabHostMicroFE = cast.ToString(GetOrReturnDefaultValue("GITLAB_HOST_MICROFE", "test-page.ucode.run"))
+
+	config.GoObjectBuilderServiceHost = cast.ToString(GetOrReturnDefaultValue("GO_OBJECT_BUILDER_SERVICE_GRPC_HOST", ""))
+	config.GoObjectBuilderGRPCPort = cast.ToString(GetOrReturnDefaultValue("GO_OBJECT_BUILDER_SERVICE_GRPC_PORT", ""))
 
 	config.DefaultOffset = cast.ToString(GetOrReturnDefaultValue("DEFAULT_OFFSET", "0"))
 	config.DefaultLimit = "100"
 
-	config.GitlabIntegrationToken = cast.ToString(GetOrReturnDefaultValue("GITLAB_ACCESS_TOKEN", ""))
-	config.GitlabIntegrationURL = cast.ToString(GetOrReturnDefaultValue("GITLAB_URL", ""))
-	config.GitlabGroupId = cast.ToInt(GetOrReturnDefaultValue("GITLAB_GROUP_ID", 0))
-	config.GitlabProjectId = cast.ToInt(GetOrReturnDefaultValue("GITLAB_PROJECT_ID", 0))
-	config.GitlabProjectIdMicroFEReact = cast.ToInt(GetOrReturnDefaultValue("GITLAB_PROJECT_ID_MICROFEReact", 0))
+	config.GitlabIntegrationToken = cast.ToString(GetOrReturnDefaultValue("GITLAB_ACCESS_TOKEN", "glpat-3o5LFtq9wE-UzzPF8osd"))
+	config.GitlabIntegrationURL = cast.ToString(GetOrReturnDefaultValue("GITLAB_URL", "https://gitlab.udevs.io"))
+	config.GitlabGroupId = cast.ToInt(GetOrReturnDefaultValue("GITLAB_GROUP_ID", 2008))
+	config.GitlabProjectId = cast.ToInt(GetOrReturnDefaultValue("GITLAB_PROJECT_ID", 1467))
+	config.GitlabProjectIdMicroFEReact = cast.ToInt(GetOrReturnDefaultValue("GITLAB_PROJECT_ID_MICROFEReact", 1993))
 	config.GitlabProjectIdMicroFEAngular = cast.ToInt(GetOrReturnDefaultValue("GITLAB_PROJECT_ID_MICROFEAngular", 0))
 	config.GitlabProjectIdMicroFEVue = cast.ToInt(GetOrReturnDefaultValue("GITLAB_PROJECT_ID_MICROFEVue", 0))
 	config.PathToClone = cast.ToString(GetOrReturnDefaultValue("CLONE_PATH", "./app"))
@@ -219,62 +239,74 @@ func Load() Config {
 	config.DefaultLimit = "100"
 
 	config.CorporateServiceHost = cast.ToString(GetOrReturnDefaultValue("CORPORATE_SERVICE_HOST", ""))
-	config.CorporateGRPCPort = cast.ToString(GetOrReturnDefaultValue("CORPORATE_GRPC_PORT", ""))
+	config.CorporateGRPCPort = cast.ToString(GetOrReturnDefaultValue("CORPORATE_GRPC_PORT", ":2025"))
 
 	config.ObjectBuilderServiceHost = cast.ToString(GetOrReturnDefaultValue("OBJECT_BUILDER_SERVICE_LOW_HOST", ""))
 	config.ObjectBuilderGRPCPort = cast.ToString(GetOrReturnDefaultValue("OBJECT_BUILDER_LOW_GRPC_PORT", ""))
+
+	config.AuthServiceHost = cast.ToString(GetOrReturnDefaultValue("AUTH_SERVICE_HOST", ""))
+	config.AuthGRPCPort = cast.ToString(GetOrReturnDefaultValue("AUTH_GRPC_PORT", ""))
+	config.ScenarioGRPCPort = ":5001"
+
+	config.CompanyServiceHost = cast.ToString(GetOrReturnDefaultValue("COMPANY_SERVICE_HOST", ""))
+	config.CompanyServicePort = cast.ToString(GetOrReturnDefaultValue("COMPANY_GRPC_PORT", ""))
 
 	config.HighObjectBuilderServiceHost = cast.ToString(GetOrReturnDefaultValue("OBJECT_BUILDER_SERVICE_HIGHT_HOST", ""))
 	config.HighObjectBuilderGRPCPort = cast.ToString(GetOrReturnDefaultValue("OBJECT_BUILDER_HIGH_GRPC_PORT", ""))
 
 	config.TemplateServiceHost = cast.ToString(GetOrReturnDefaultValue("TEMPLATE_SERVICE_HOST", ""))
-	config.TemplateGRPCPort = cast.ToString(GetOrReturnDefaultValue("TEMPLATE_GRPC_PORT", ""))
+	config.TemplateGRPCPort = cast.ToString(GetOrReturnDefaultValue("TEMPLATE_GRPC_PORT", ":2012"))
 
 	config.IntegrationServiceHost = cast.ToString(GetOrReturnDefaultValue("INTEGRATION_SERVICE_HOST", ""))
-	config.IntegrationGRPCPort = cast.ToString(GetOrReturnDefaultValue("INTEGRATION_GRPC_PORT", ""))
+	config.IntegrationGRPCPort = cast.ToString(GetOrReturnDefaultValue("INTEGRATION_GRPC_PORT", ":4001"))
 
 	config.PosServiceHost = cast.ToString(GetOrReturnDefaultValue("POS_SERVICE_HOST", ""))
-	config.PosGRPCPort = cast.ToString(GetOrReturnDefaultValue("POS_SERVICE_GRPC_PORT", ""))
+	config.PosGRPCPort = cast.ToString(GetOrReturnDefaultValue("POS_SERVICE_GRPC_PORT", ":2011"))
 
 	config.AnalyticsServiceHost = cast.ToString(GetOrReturnDefaultValue("ANALYTICS_SERVICE_HOST", ""))
-	config.AnalyticsGRPCPort = cast.ToString(GetOrReturnDefaultValue("ANALYTICS_GRPC_PORT", ""))
+	config.AnalyticsGRPCPort = cast.ToString(GetOrReturnDefaultValue("ANALYTICS_GRPC_PORT", ":2010"))
 
 	config.SmsServiceHost = cast.ToString(GetOrReturnDefaultValue("SMS_SERVICE_HOST", ""))
-	config.SmsGRPCPort = cast.ToString(GetOrReturnDefaultValue("SMS_GRPC_PORT", ""))
+	config.SmsGRPCPort = cast.ToString(GetOrReturnDefaultValue("SMS_GRPC_PORT", ":2008"))
 
 	config.VersioningServiceHost = cast.ToString(GetOrReturnDefaultValue("VERSIONING_SERVICE_HOST", ""))
-	config.VersioningGRPCPort = cast.ToString(GetOrReturnDefaultValue("VERSIONING_GRPC_PORT", ""))
+	config.VersioningGRPCPort = cast.ToString(GetOrReturnDefaultValue("VERSIONING_GRPC_PORT", ":2009"))
 
 	config.ApiReferenceServiceHost = cast.ToString(GetOrReturnDefaultValue("API_REF_SERVICE_HOST", ""))
-	config.ApiReferenceServicePort = cast.ToString(GetOrReturnDefaultValue("API_REF_GRPC_PORT", ""))
+	config.ApiReferenceServicePort = cast.ToString(GetOrReturnDefaultValue("API_REF_GRPC_PORT", ":2007"))
 
 	config.ConvertTemplateServiceGrpcHost = cast.ToString(GetOrReturnDefaultValue("CONVERT_TEMPLATE_SERVICE_HOST", ""))
-	config.ConvertTemplateServiceGrpcPort = cast.ToString(GetOrReturnDefaultValue("CONVERT_TEMPLATE_GRPC_PORT", ""))
+	config.ConvertTemplateServiceGrpcPort = cast.ToString(GetOrReturnDefaultValue("CONVERT_TEMPLATE_GRPC_PORT", ":2006"))
 
 	config.FunctionServiceHost = cast.ToString(GetOrReturnDefaultValue("FUNCTION_SERVICE_HOST", ""))
-	config.FunctionServicePort = cast.ToString(GetOrReturnDefaultValue("FUNCTION_GRPC_PORT", ""))
+	config.FunctionServicePort = cast.ToString(GetOrReturnDefaultValue("FUNCTION_GRPC_PORT", ":2005"))
+
+	config.GoObjectBuilderServiceHost = cast.ToString(GetOrReturnDefaultValue("GO_OBJECT_BUILDER_SERVICE_HOST", ""))
+	config.GoObjectBuilderGRPCPort = cast.ToString(GetOrReturnDefaultValue("GO_OBJECT_BUILDER_GRPC_PORT", ":7107"))
 
 	config.QueryServiceHost = cast.ToString(GetOrReturnDefaultValue("QUERY_SERVICE_HOST", ""))
-	config.QueryServicePort = cast.ToString(GetOrReturnDefaultValue("QUERY_GRPC_PORT", ""))
+	config.QueryServicePort = cast.ToString(GetOrReturnDefaultValue("QUERY_GRPC_PORT", ":3001"))
 	config.WebPageServiceHost = cast.ToString(GetOrReturnDefaultValue("WEB_PAGE_SERVICE_HOST", ""))
-	config.WebPageServicePort = cast.ToString(GetOrReturnDefaultValue("WEB_PAGE_GRPC_PORT", ""))
+	config.WebPageServicePort = cast.ToString(GetOrReturnDefaultValue("WEB_PAGE_GRPC_PORT", ":2004"))
 
 	config.UcodeNamespace = "cp-region-type-id"
 	config.SecretKey = ""
 
 	config.ChatServiceGrpcHost = cast.ToString(GetOrReturnDefaultValue("CHAT_SERVICE_HOST", ""))
-	config.ChatServiceGrpcPort = cast.ToString(GetOrReturnDefaultValue("CHAT_GRPC_PORT", ""))
+	config.ChatServiceGrpcPort = cast.ToString(GetOrReturnDefaultValue("CHAT_GRPC_PORT", ":2112"))
 
 	config.NotificationServiceHost = cast.ToString(GetOrReturnDefaultValue("NOTIFICATION_SERVICE_HOST", ""))
-	config.NotificationGRPCPort = cast.ToString(GetOrReturnDefaultValue("NOTIFICATION_GRPC_PORT", ""))
+	config.NotificationGRPCPort = cast.ToString(GetOrReturnDefaultValue("NOTIFICATION_GRPC_PORT", ":2001"))
 
 	config.PostgresBuilderServiceHost = cast.ToString(GetOrReturnDefaultValue("NODE_POSTGRES_SERVICE_HOST", ""))
-	config.PostgresBuilderServicePort = cast.ToString(GetOrReturnDefaultValue("NODE_POSTGRES_SERVICE_PORT", ""))
+	config.PostgresBuilderServicePort = cast.ToString(GetOrReturnDefaultValue("NODE_POSTGRES_SERVICE_PORT", ":2002"))
 
 	config.GetRequestRedisHost = cast.ToString(GetOrReturnDefaultValue("GET_REQUEST_REDIS_HOST", ""))
 	config.GetRequestRedisPort = cast.ToString(GetOrReturnDefaultValue("GET_REQUEST_REDIS_PORT", ""))
 	config.GetRequestRedisDatabase = cast.ToInt(GetOrReturnDefaultValue("GET_REQUEST_REDIS_DATABASE", 0))
 	config.GetRequestRedisPassword = cast.ToString(GetOrReturnDefaultValue("GET_REQUEST_REDIS_PASSWORD", ""))
+
+	config.ServiceLink = ""
 
 	return config
 }

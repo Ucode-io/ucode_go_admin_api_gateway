@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
+	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
@@ -29,9 +30,6 @@ import (
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) GetMenuSettingByUserID(c *gin.Context) {
 	ID := c.Param("id")
-	var (
-		resp *obs.MenuSettings
-	)
 	if !util.IsValidUUID(ID) {
 		h.handleResponse(c, status_http.InvalidArgument, "menu id is an invalid uuid")
 		return
@@ -83,7 +81,7 @@ func (h *HandlerV2) GetMenuSettingByUserID(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.GetBuilderServiceByType(resource.NodeType).Menu().GetByIDMenuSettings(
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).Menu().GetByIDMenuSettings(
 			context.Background(),
 			&obs.MenuSettingPrimaryKey{
 				Id:         ID,
@@ -96,10 +94,20 @@ func (h *HandlerV2) GetMenuSettingByUserID(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
+
+		if IsEmptyStruct(resp.MenuTemplate) {
+			resp.MenuTemplate, err = helper.GetMenuTemplateById(templateId, services)
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+			resp.MenuTemplateId = templateId
+		}
+		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Menu().GetByIDMenuSettings(
+		pgResp, err := services.GoObjectBuilderService().Menu().GetByIDMenuSettings(
 			context.Background(),
-			&obs.MenuSettingPrimaryKey{
+			&nb.MenuSettingPrimaryKey{
 				Id:         ID,
 				ProjectId:  resource.ResourceEnvironmentId,
 				TemplateId: templateId,
@@ -110,17 +118,18 @@ func (h *HandlerV2) GetMenuSettingByUserID(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
-	}
-	if IsEmptyStruct(resp.MenuTemplate) {
-		resp.MenuTemplate, err = helper.GetMenuTemplateById(templateId, h.companyServices)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
+
+		if IsEmptyStruct(pgResp.MenuTemplate) {
+			pgResp.MenuTemplate, err = helper.PgGetMenuTemplateById(templateId, services)
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+			pgResp.MenuTemplateId = templateId
 		}
-		resp.MenuTemplateId = templateId
+		h.handleResponse(c, status_http.OK, pgResp)
 	}
 
-	h.handleResponse(c, status_http.OK, resp)
 }
 
 func IsEmptyStruct(s interface{}) bool {

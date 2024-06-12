@@ -5,6 +5,7 @@ import (
 	"errors"
 	"ucode/ucode_go_api_gateway/api/models"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
+	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
@@ -82,10 +83,11 @@ func (h *HandlerV1) ExcelReader(c *gin.Context) {
 			h.handleResponse(c, status_http.InvalidArgument, err.Error())
 			return
 		}
+		h.handleResponse(c, status_http.OK, res)
 	case pb.ResourceType_POSTGRESQL:
-		res, err = services.PostgresBuilderService().Excel().ExcelRead(
+		res, err := services.GoObjectBuilderService().Excel().ExcelRead(
 			context.Background(),
-			&object_builder_service.ExcelReadRequest{
+			&nb.ExcelReadRequest{
 				Id:        excelId,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -94,9 +96,8 @@ func (h *HandlerV1) ExcelReader(c *gin.Context) {
 			h.handleResponse(c, status_http.InvalidArgument, err.Error())
 			return
 		}
+		h.handleResponse(c, status_http.OK, res)
 	}
-
-	h.handleResponse(c, status_http.OK, res)
 }
 
 // ExcelToDb godoc
@@ -211,9 +212,9 @@ func (h *HandlerV1) ExcelToDb(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		_, err = services.PostgresBuilderService().Excel().ExcelToDb(
+		_, err = services.GoObjectBuilderService().Excel().ExcelToDb(
 			context.Background(),
-			&object_builder_service.ExcelToDbRequest{
+			&nb.ExcelToDbRequest{
 				Id:        c.Param("excel_id"),
 				TableSlug: excelRequest.TableSlug,
 				Data:      data,
@@ -223,6 +224,5 @@ func (h *HandlerV1) ExcelToDb(c *gin.Context) {
 		if err != nil {
 			return
 		}
-
 	}
 }

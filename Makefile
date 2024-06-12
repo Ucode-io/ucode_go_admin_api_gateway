@@ -15,7 +15,8 @@ update-proto-module:
 
 copy-proto-module:
 	rm -rf ${CURRENT_DIR}/protos
-	rsync -rv --exclude=.git ${CURRENT_DIR}/ucode_protos/* ${CURRENT_DIR}/protos
+	mkdir ${CURRENT_DIR}/protos
+	cp -R ucode_protos/*_service* ${CURRENT_DIR}/protos
 
 gen-proto-module:
 	./scripts/gen_proto.sh ${CURRENT_DIR}
