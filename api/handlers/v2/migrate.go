@@ -1226,7 +1226,7 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 	h.handleResponse(c, status_http.OK, resp)
 }
 
-func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.ServiceManagerI, lists *obs.ListVersionHistory, environmentId, nodeType, userId string) error {
+func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.ServiceManagerI, lists *obs.ListVersionHistory, environmentId, nodeType, userId string, resourceType pb.ResourceType) error {
 	var (
 		resp models.MigrateUpResponse
 		ids  []string
@@ -1272,12 +1272,20 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 			}()
 
 			var (
-				previous      DataTableWrapper
-				current       DataTableWrapper
-				currentUpdate DataUpdateTableWrapper
+				previous          DataTableWrapper
+				previousPsql      DataTableWrapperPsql
+				current           DataTableWrapper
+				currentPsql       DataTableWrapperPsql
+				currentUpdate     DataUpdateTableWrapper
+				currentUpdatePsql DataUpdateTableWrapperPsql
 			)
 
 			err := json.Unmarshal([]byte(cast.ToString(v.Request)), &current)
+			if err != nil {
+				continue
+			}
+
+			err = json.Unmarshal([]byte(cast.ToString(v.Request)), &currentPsql)
 			if err != nil {
 				continue
 			}
@@ -1287,65 +1295,133 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 				continue
 			}
 
+			err = json.Unmarshal([]byte(cast.ToString(v.Previous)), &previousPsql)
+			if err != nil {
+				continue
+			}
+
 			err = json.Unmarshal([]byte(cast.ToString(v.Current)), &currentUpdate)
+			if err != nil {
+				continue
+			}
+
+			err = json.Unmarshal([]byte(cast.ToString(v.Current)), &currentUpdatePsql)
 			if err != nil {
 				continue
 			}
 
 			current.Data.ProjectId = resourceEnvId
 			current.Data.EnvId = cast.ToString(environmentId)
+
+			currentPsql.Data.ProjectId = resourceEnvId
+			currentPsql.Data.EnvId = cast.ToString(environmentId)
+
 			currentUpdate.Data.ProjectId = resourceEnvId
 			currentUpdate.Data.EnvId = cast.ToString(environmentId)
+
+			currentUpdatePsql.Data.ProjectId = resourceEnvId
+			currentUpdatePsql.Data.EnvId = cast.ToString(environmentId)
+
 			logReq.Request = current.Data
 			logReq.TableSlug = current.Data.Slug
 
 			switch actionType {
 			case "CREATE":
-				_, err = services.GetBuilderServiceByType(nodeType).Table().Create(
-					context.Background(),
-					current.Data,
-				)
-				if err != nil {
-					logReq.Response = err.Error()
-					h.log.Error("!!!MigrationUp--->Error while creating table", logger.Error(err))
-					continue
+				switch resourceType {
+				case pb.ResourceType_MONGODB:
+					_, err = services.GetBuilderServiceByType(nodeType).Table().Create(
+						context.Background(),
+						current.Data,
+					)
+					if err != nil {
+						logReq.Response = err.Error()
+						h.log.Error("!!!MigrationUp--->Error while creating table", logger.Error(err))
+						continue
+					}
+
+				case pb.ResourceType_POSTGRESQL:
+					_, err = services.GoObjectBuilderService().Table().Create(
+						context.Background(),
+						currentPsql.Data,
+					)
+					if err != nil {
+						logReq.Response = err.Error()
+						h.log.Error("!!!MigrationUp--->Error while creating table", logger.Error(err))
+						continue
+					}
 				}
+
 				logReq.Current = current.Data
 				logReq.Response = current.Data
 				ids = append(ids, v.Id)
 			case "UPDATE":
 				logReq.Previous = previous.Data
 
-				_, err = services.GetBuilderServiceByType(nodeType).Table().Update(
-					context.Background(),
-					currentUpdate.Data,
-				)
-				if err != nil {
-					logReq.Response = err.Error()
-					h.log.Error("!!!MigrationUp--->Error while updating table", logger.Error(err))
-					continue
+				switch resourceType {
+				case pb.ResourceType_MONGODB:
+					_, err = services.GetBuilderServiceByType(nodeType).Table().Update(
+						context.Background(),
+						currentUpdate.Data,
+					)
+					if err != nil {
+						logReq.Response = err.Error()
+						h.log.Error("!!!MigrationUp--->Error while updating table", logger.Error(err))
+						continue
+					}
+				case pb.ResourceType_POSTGRESQL:
+					_, err = services.GoObjectBuilderService().Table().Update(
+						context.Background(),
+						currentUpdatePsql.Data,
+					)
+					if err != nil {
+						logReq.Response = err.Error()
+						h.log.Error("!!!MigrationUp--->Error while updating table", logger.Error(err))
+						continue
+					}
 				}
+
 				logReq.Current = current.Data
 				logReq.Response = current.Data
 				ids = append(ids, v.Id)
 			case "DELETE":
 				logReq.Previous = previous.Data
-				_, err := services.GetBuilderServiceByType(nodeType).Table().Delete(
-					context.Background(),
-					&obs.TablePrimaryKey{
-						Id:        previous.Data.Id,
-						ProjectId: resourceEnvId,
-						// AuthorId:   authInfo.GetUserId(),
-						Name:       fmt.Sprintf("Auto Created Commit Delete table - %s", time.Now().Format(time.RFC1123)),
-						CommitType: config.COMMIT_TYPE_TABLE,
-						EnvId:      cast.ToString(environmentId),
-					},
-				)
-				if err != nil {
-					logReq.Response = err.Error()
-					h.log.Error("!!!MigrationUp--->Error while deleting table", logger.Error(err))
-					continue
+
+				switch resourceType {
+				case pb.ResourceType_MONGODB:
+					_, err := services.GetBuilderServiceByType(nodeType).Table().Delete(
+						context.Background(),
+						&obs.TablePrimaryKey{
+							Id:        previous.Data.Id,
+							ProjectId: resourceEnvId,
+							// AuthorId:   authInfo.GetUserId(),
+							Name:       fmt.Sprintf("Auto Created Commit Delete table - %s", time.Now().Format(time.RFC1123)),
+							CommitType: config.COMMIT_TYPE_TABLE,
+							EnvId:      cast.ToString(environmentId),
+						},
+					)
+					if err != nil {
+						logReq.Response = err.Error()
+						h.log.Error("!!!MigrationUp--->Error while deleting table", logger.Error(err))
+						continue
+					}
+				case pb.ResourceType_POSTGRESQL:
+					_, err := services.GoObjectBuilderService().Table().Delete(
+						context.Background(),
+						&nb.TablePrimaryKey{
+							Id:         previous.Data.Id,
+							ProjectId:  resourceEnvId,
+							Name:       fmt.Sprintf("Auto Created Commit Delete table - %s", time.Now().Format(time.RFC1123)),
+							CommitType: config.COMMIT_TYPE_TABLE,
+							EnvId:      cast.ToString(environmentId),
+						},
+					)
+					if err != nil {
+						logReq.Response = err.Error()
+						h.log.Error("!!!MigrationUp--->Error while deleting table", logger.Error(err))
+						continue
+					}
 				}
+
 				ids = append(ids, v.Id)
 			}
 		} else if actionSource == "FIELD" {
@@ -1354,13 +1430,20 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 			}()
 
 			var (
-				current       DataCreateFieldWrapper
-				previous      DataFieldWrapper
-				currentUpdate DataFieldWrapper
-				request       DataCreateFieldWrapper
+				current           DataCreateFieldWrapper
+				previous          DataFieldWrapper
+				currentUpdate     DataFieldWrapper
+				currentUpdatePsql DataFieldWrapperPsql
+				request           DataCreateFieldWrapper
+				requestPsql       DataCreateFieldWrapperPsql
 			)
 
 			err := json.Unmarshal([]byte(cast.ToString(v.Request)), &request)
+			if err != nil {
+				continue
+			}
+
+			err = json.Unmarshal([]byte(cast.ToString(v.Request)), &requestPsql)
 			if err != nil {
 				continue
 			}
@@ -1392,50 +1475,104 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 
 			switch actionType {
 			case "CREATE":
-				createField, err := services.GetBuilderServiceByType(nodeType).Field().Create(
-					context.Background(),
-					request.Data,
-				)
-				if err != nil {
-					logReq.Response = err.Error()
-					h.log.Error("!!!MigrationUp--->Error while creating field", logger.Error(err))
-					continue
+				switch resourceType {
+				case pb.ResourceType_MONGODB:
+					createField, err := services.GetBuilderServiceByType(nodeType).Field().Create(
+						context.Background(),
+						request.Data,
+					)
+					if err != nil {
+						logReq.Response = err.Error()
+						h.log.Error("!!!MigrationUp--->Error while creating field", logger.Error(err))
+						continue
+					}
+					logReq.Response = createField
+				case pb.ResourceType_POSTGRESQL:
+					createField, err := services.GoObjectBuilderService().Field().Create(
+						context.Background(),
+						requestPsql.Data,
+					)
+					if err != nil {
+						logReq.Response = err.Error()
+						h.log.Error("!!!MigrationUp--->Error while creating field", logger.Error(err))
+						continue
+					}
+					logReq.Response = createField
 				}
+
 				logReq.Request = current.Data
 				logReq.Current = current.Data
-				logReq.Response = createField
+
 				ids = append(ids, v.Id)
 			case "UPDATE":
 				logReq.Previous = previous.Data
 
-				updateField, err := services.GetBuilderServiceByType(nodeType).Field().Update(
-					context.Background(),
-					currentUpdate.Data,
-				)
-				if err != nil {
-					logReq.Response = err.Error()
-					h.log.Error("!!!MigrationUp--->Error while updating field", logger.Error(err))
-					continue
+				switch resourceType {
+				case pb.ResourceType_MONGODB:
+					updateField, err := services.GetBuilderServiceByType(nodeType).Field().Update(
+						context.Background(),
+						currentUpdate.Data,
+					)
+					if err != nil {
+						logReq.Response = err.Error()
+						h.log.Error("!!!MigrationUp--->Error while updating field", logger.Error(err))
+						continue
+					}
+
+					logReq.Current = updateField
+					logReq.Response = updateField
+					logReq.Request = currentUpdate.Data
+				case pb.ResourceType_POSTGRESQL:
+					updateField, err := services.GoObjectBuilderService().Field().Update(
+						context.Background(),
+						currentUpdatePsql.Data,
+					)
+					if err != nil {
+						logReq.Response = err.Error()
+						h.log.Error("!!!MigrationUp--->Error while updating field", logger.Error(err))
+						continue
+					}
+
+					logReq.Current = updateField
+					logReq.Response = updateField
+					logReq.Request = currentUpdatePsql.Data
 				}
-				logReq.Request = currentUpdate.Data
-				logReq.Current = updateField
-				logReq.Response = updateField
+
 				ids = append(ids, v.Id)
 			case "DELETE":
 				logReq.Previous = previous.Data
-				_, err := services.GetBuilderServiceByType(nodeType).Field().Delete(
-					context.Background(),
-					&obs.FieldPrimaryKey{
-						Id:        previous.Data.Id,
-						ProjectId: resourceEnvId,
-						EnvId:     cast.ToString(environmentId),
-					},
-				)
-				if err != nil {
-					logReq.Response = err.Error()
-					h.log.Error("!!!MigrationUp--->Error while deleting field", logger.Error(err))
-					continue
+
+				switch resourceType {
+				case pb.ResourceType_MONGODB:
+					_, err := services.GetBuilderServiceByType(nodeType).Field().Delete(
+						context.Background(),
+						&obs.FieldPrimaryKey{
+							Id:        previous.Data.Id,
+							ProjectId: resourceEnvId,
+							EnvId:     cast.ToString(environmentId),
+						},
+					)
+					if err != nil {
+						logReq.Response = err.Error()
+						h.log.Error("!!!MigrationUp--->Error while deleting field", logger.Error(err))
+						continue
+					}
+				case pb.ResourceType_POSTGRESQL:
+					_, err := services.GoObjectBuilderService().Field().Delete(
+						context.Background(),
+						&nb.FieldPrimaryKey{
+							Id:        previous.Data.Id,
+							ProjectId: resourceEnvId,
+							EnvId:     cast.ToString(environmentId),
+						},
+					)
+					if err != nil {
+						logReq.Response = err.Error()
+						h.log.Error("!!!MigrationUp--->Error while deleting field", logger.Error(err))
+						continue
+					}
 				}
+
 				ids = append(ids, v.Id)
 			}
 		} else if actionSource == "RELATION" {
@@ -1444,13 +1581,21 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 			}()
 
 			var (
-				request  DataCreateRelationWrapper
-				response DataCreateRelationWrapper
-				current  DataUpdateRelationWrapper
-				previous DataCreateRelationWrapper
+				request     DataCreateRelationWrapper
+				requestPsql DataCreateRelationWrapperPsql
+				response    DataCreateRelationWrapper
+				current     DataUpdateRelationWrapper
+				currentPsql DataUpdateRelationWrapperPsql
+				previous    DataCreateRelationWrapper
 			)
 
 			err := json.Unmarshal([]byte(cast.ToString(v.Request)), &request)
+			if err != nil {
+				h.log.Error("!!!MigrationUp--->Error while unmarshalling request", logger.Error(err))
+				continue
+			}
+
+			err = json.Unmarshal([]byte(cast.ToString(v.Request)), &requestPsql)
 			if err != nil {
 				h.log.Error("!!!MigrationUp--->Error while unmarshalling request", logger.Error(err))
 				continue
@@ -1468,57 +1613,129 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 				continue
 			}
 
+			err = json.Unmarshal([]byte(cast.ToString(v.Request)), &currentPsql)
+			if err != nil {
+				h.log.Error("!!!MigrationUp--->Error while unmarshalling current", logger.Error(err))
+				continue
+			}
+
 			request.Data.ProjectId = resourceEnvId
 			request.Data.EnvId = cast.ToString(environmentId)
+
+			requestPsql.Data.ProjectId = resourceEnvId
+			requestPsql.Data.EnvId = cast.ToString(environmentId)
+
 			logReq.TableSlug = request.Data.RelationTableSlug
+
 			current.Data.ProjectId = resourceEnvId
 			current.Data.EnvId = cast.ToString(environmentId)
 
+			currentPsql.Data.ProjectId = resourceEnvId
+			currentPsql.Data.EnvId = cast.ToString(environmentId)
+
 			switch actionType {
 			case "CREATE":
-				createRelation, err := services.GetBuilderServiceByType(nodeType).Relation().Create(
-					context.Background(),
-					request.Data,
-				)
-				if err != nil {
-					logReq.Response = err.Error()
-					h.log.Error("!!!MigrationUp--->Error while creating relation", logger.Error(err))
-					continue
+				switch resourceType {
+				case pb.ResourceType_MONGODB:
+					createRelation, err := services.GetBuilderServiceByType(nodeType).Relation().Create(
+						context.Background(),
+						request.Data,
+					)
+					if err != nil {
+						logReq.Response = err.Error()
+						h.log.Error("!!!MigrationUp--->Error while creating relation", logger.Error(err))
+						continue
+					}
+
+					logReq.Current = createRelation
+					logReq.Response = createRelation
+				case pb.ResourceType_POSTGRESQL:
+					createRelation, err := services.GoObjectBuilderService().Relation().Create(
+						context.Background(),
+						requestPsql.Data,
+					)
+					if err != nil {
+						logReq.Response = err.Error()
+						h.log.Error("!!!MigrationUp--->Error while creating relation", logger.Error(err))
+						continue
+					}
+
+					logReq.Current = createRelation
+					logReq.Response = createRelation
 				}
+
 				logReq.Request = request.Data
-				logReq.Current = createRelation
-				logReq.Response = createRelation
+
 				ids = append(ids, v.Id)
 			case "UPDATE":
 				logReq.Previous = previous.Data
-				updateRelation, err := services.GetBuilderServiceByType(nodeType).Relation().Update(
-					context.Background(),
-					current.Data,
-				)
-				if err != nil {
-					logReq.Response = err.Error()
-					h.log.Error("!!!MigrationUp--->Error while updating relation", logger.Error(err))
-					continue
+
+				switch resourceType {
+				case pb.ResourceType_MONGODB:
+					updateRelation, err := services.GetBuilderServiceByType(nodeType).Relation().Update(
+						context.Background(),
+						current.Data,
+					)
+					if err != nil {
+						logReq.Response = err.Error()
+						h.log.Error("!!!MigrationUp--->Error while updating relation", logger.Error(err))
+						continue
+					}
+
+					logReq.Current = updateRelation
+					logReq.Response = updateRelation
+				case pb.ResourceType_POSTGRESQL:
+					updateRelation, err := services.GoObjectBuilderService().Relation().Update(
+						context.Background(),
+						currentPsql.Data,
+					)
+					if err != nil {
+						logReq.Response = err.Error()
+						h.log.Error("!!!MigrationUp--->Error while updating relation", logger.Error(err))
+						continue
+					}
+
+					logReq.Current = updateRelation
+					logReq.Response = updateRelation
 				}
+
 				logReq.Request = current.Data
-				logReq.Current = updateRelation
-				logReq.Response = updateRelation
+
 				ids = append(ids, v.Id)
 			case "DELETE":
 				logReq.Previous = response.Data
-				_, err := services.GetBuilderServiceByType(nodeType).Field().Delete(
-					context.Background(),
-					&obs.FieldPrimaryKey{
-						Id:        response.Data.Id,
-						ProjectId: resourceEnvId,
-						EnvId:     cast.ToString(environmentId),
-					},
-				)
-				if err != nil {
-					logReq.Response = err.Error()
-					h.log.Error("!!!MigrationUp--->Error while deleting relation", logger.Error(err))
-					continue
+
+				switch resourceType {
+				case pb.ResourceType_MONGODB:
+					_, err := services.GetBuilderServiceByType(nodeType).Field().Delete(
+						context.Background(),
+						&obs.FieldPrimaryKey{
+							Id:        response.Data.Id,
+							ProjectId: resourceEnvId,
+							EnvId:     cast.ToString(environmentId),
+						},
+					)
+					if err != nil {
+						logReq.Response = err.Error()
+						h.log.Error("!!!MigrationUp--->Error while deleting relation", logger.Error(err))
+						continue
+					}
+				case pb.ResourceType_POSTGRESQL:
+					_, err := services.GoObjectBuilderService().Field().Delete(
+						context.Background(),
+						&nb.FieldPrimaryKey{
+							Id:        response.Data.Id,
+							ProjectId: resourceEnvId,
+							EnvId:     cast.ToString(environmentId),
+						},
+					)
+					if err != nil {
+						logReq.Response = err.Error()
+						h.log.Error("!!!MigrationUp--->Error while deleting relation", logger.Error(err))
+						continue
+					}
 				}
+
 				ids = append(ids, v.Id)
 			}
 		} else if actionSource == "MENU" {
@@ -1527,12 +1744,19 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 			}()
 
 			var (
-				request  DataCreateMenuWrapper
-				previous DataCreateMenuWrapper
-				current  DataUpdateMenuWrapper
+				request     DataCreateMenuWrapper
+				requestPsql DataCreateMenuWrapperPsql
+				previous    DataCreateMenuWrapper
+				current     DataUpdateMenuWrapper
+				currentPsql DataUpdateMenuWrapperPsql
 			)
 
 			err := json.Unmarshal([]byte(cast.ToString(v.Request)), &request)
+			if err != nil {
+				continue
+			}
+
+			err = json.Unmarshal([]byte(cast.ToString(v.Request)), &requestPsql)
 			if err != nil {
 				continue
 			}
@@ -1547,8 +1771,14 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 				continue
 			}
 
+			err = json.Unmarshal([]byte(cast.ToString(v.Current)), &currentPsql)
+			if err != nil {
+				continue
+			}
+
 			request.Data.ProjectId = resourceEnvId
 			request.Data.EnvId = cast.ToString(environmentId)
+
 			previous.Data.ProjectId = resourceEnvId
 			previous.Data.EnvId = cast.ToString(environmentId)
 			current.Data.ProjectId = resourceEnvId
@@ -1558,49 +1788,102 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 
 			switch actionType {
 			case "CREATE":
-				createMenu, err := services.GetBuilderServiceByType(nodeType).Menu().Create(
-					context.Background(),
-					request.Data,
-				)
-				if err != nil {
-					logReq.Response = err.Error()
-					h.log.Error("!!!MigrationUp--->Error while creating menu", logger.Error(err))
-					continue
+				switch resourceType {
+				case pb.ResourceType_MONGODB:
+					createMenu, err := services.GetBuilderServiceByType(nodeType).Menu().Create(
+						context.Background(),
+						request.Data,
+					)
+					if err != nil {
+						logReq.Response = err.Error()
+						h.log.Error("!!!MigrationUp--->Error while creating menu", logger.Error(err))
+						continue
+					}
+
+					logReq.Current = createMenu
+					logReq.Response = createMenu
+				case pb.ResourceType_POSTGRESQL:
+					createMenu, err := services.GoObjectBuilderService().Menu().Create(
+						context.Background(),
+						requestPsql.Data,
+					)
+					if err != nil {
+						logReq.Response = err.Error()
+						h.log.Error("!!!MigrationUp--->Error while creating menu", logger.Error(err))
+						continue
+					}
+
+					logReq.Current = createMenu
+					logReq.Response = createMenu
 				}
+
 				logReq.Request = request.Data
-				logReq.Current = createMenu
-				logReq.Response = createMenu
 				ids = append(ids, v.Id)
 			case "UPDATE":
 				logReq.Previous = previous.Data
-				updatemenu, err := services.GetBuilderServiceByType(nodeType).Menu().Update(
-					context.Background(),
-					current.Data,
-				)
-				if err != nil {
-					logReq.Response = err.Error()
-					h.log.Error("!!!MigrationUp--->Error while updating menu", logger.Error(err))
-					continue
+				switch resourceType {
+				case pb.ResourceType_MONGODB:
+					updatemenu, err := services.GetBuilderServiceByType(nodeType).Menu().Update(
+						context.Background(),
+						current.Data,
+					)
+					if err != nil {
+						logReq.Response = err.Error()
+						h.log.Error("!!!MigrationUp--->Error while updating menu", logger.Error(err))
+						continue
+					}
+					logReq.Current = updatemenu
+					logReq.Response = updatemenu
+				case pb.ResourceType_POSTGRESQL:
+					updatemenu, err := services.GoObjectBuilderService().Menu().Update(
+						context.Background(),
+						currentPsql.Data,
+					)
+					if err != nil {
+						logReq.Response = err.Error()
+						h.log.Error("!!!MigrationUp--->Error while updating menu", logger.Error(err))
+						continue
+					}
+					logReq.Current = updatemenu
+					logReq.Response = updatemenu
 				}
+
 				logReq.Request = current.Data
-				logReq.Current = updatemenu
-				logReq.Response = updatemenu
 				ids = append(ids, v.Id)
 			case "DELETE":
 				logReq.Previous = previous.Data
-				_, err = services.GetBuilderServiceByType(nodeType).Menu().Delete(
-					context.Background(),
-					&obs.MenuPrimaryKey{
-						Id:        previous.Data.Id,
-						ProjectId: resourceEnvId,
-						EnvId:     cast.ToString(environmentId),
-					},
-				)
-				if err != nil {
-					logReq.Response = err.Error()
-					h.log.Error("!!!MigrationUp--->Error while deleting menu", logger.Error(err))
-					continue
+
+				switch resourceType {
+				case pb.ResourceType_MONGODB:
+					_, err = services.GetBuilderServiceByType(nodeType).Menu().Delete(
+						context.Background(),
+						&obs.MenuPrimaryKey{
+							Id:        previous.Data.Id,
+							ProjectId: resourceEnvId,
+							EnvId:     cast.ToString(environmentId),
+						},
+					)
+					if err != nil {
+						logReq.Response = err.Error()
+						h.log.Error("!!!MigrationUp--->Error while deleting menu", logger.Error(err))
+						continue
+					}
+				case pb.ResourceType_POSTGRESQL:
+					_, err = services.GoObjectBuilderService().Menu().Delete(
+						context.Background(),
+						&nb.MenuPrimaryKey{
+							Id:        previous.Data.Id,
+							ProjectId: resourceEnvId,
+							EnvId:     cast.ToString(environmentId),
+						},
+					)
+					if err != nil {
+						logReq.Response = err.Error()
+						h.log.Error("!!!MigrationUp--->Error while deleting menu", logger.Error(err))
+						continue
+					}
 				}
+
 				ids = append(ids, v.Id)
 			}
 		} else if actionSource == "VIEW" {
@@ -1609,12 +1892,19 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 			}()
 
 			var (
-				request  DataCreateViewWrapper
-				previous DataCreateViewWrapper
-				current  DataUpdateViewWrapper
+				request     DataCreateViewWrapper
+				requestPsql DataCreateViewWrapperPsql
+				previous    DataCreateViewWrapper
+				current     DataUpdateViewWrapper
+				currentPsql DataUpdateViewWrapperPsql
 			)
 
 			err := json.Unmarshal([]byte(cast.ToString(v.Request)), &request)
+			if err != nil {
+				continue
+			}
+
+			err = json.Unmarshal([]byte(cast.ToString(v.Request)), &requestPsql)
 			if err != nil {
 				continue
 			}
@@ -1629,6 +1919,11 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 				continue
 			}
 
+			err = json.Unmarshal([]byte(cast.ToString(v.Request)), &currentPsql)
+			if err != nil {
+				continue
+			}
+
 			request.Data.ProjectId = resourceEnvId
 			request.Data.EnvId = cast.ToString(environmentId)
 			previous.Data.ProjectId = resourceEnvId
@@ -1639,50 +1934,111 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 
 			switch actionType {
 			case "CREATE":
-				request.Data.Id = current.Data.Id
-				createView, err := services.GetBuilderServiceByType(nodeType).View().Create(
-					context.Background(),
-					request.Data,
-				)
-				if err != nil {
-					logReq.Response = err.Error()
-					h.log.Error("!!!MigrationUp--->Error while creating view", logger.Error(err))
-					continue
+
+				switch resourceType {
+				case pb.ResourceType_MONGODB:
+					request.Data.Id = current.Data.Id
+
+					createView, err := services.GetBuilderServiceByType(nodeType).View().Create(
+						context.Background(),
+						request.Data,
+					)
+					if err != nil {
+						logReq.Response = err.Error()
+						h.log.Error("!!!MigrationUp--->Error while creating view", logger.Error(err))
+						continue
+					}
+
+					logReq.Current = createView
+					logReq.Response = createView
+					logReq.Request = request.Data
+				case pb.ResourceType_POSTGRESQL:
+					requestPsql.Data.Id = current.Data.Id
+
+					createView, err := services.GoObjectBuilderService().View().Create(
+						context.Background(),
+						requestPsql.Data,
+					)
+					if err != nil {
+						logReq.Response = err.Error()
+						h.log.Error("!!!MigrationUp--->Error while creating view", logger.Error(err))
+						continue
+					}
+
+					logReq.Current = createView
+					logReq.Response = createView
+					logReq.Request = requestPsql.Data
 				}
-				logReq.Request = request.Data
-				logReq.Current = createView
-				logReq.Response = createView
+
 				ids = append(ids, v.Id)
 			case "UPDATE":
 				logReq.Previous = previous.Data
-				updateView, err := services.GetBuilderServiceByType(nodeType).View().Update(
-					context.Background(),
-					current.Data,
-				)
-				if err != nil {
-					logReq.Response = err.Error()
-					h.log.Error("!!!MigrationUp--->Error while updating view", logger.Error(err))
-					continue
+				switch resourceType {
+				case pb.ResourceType_MONGODB:
+					updateView, err := services.GetBuilderServiceByType(nodeType).View().Update(
+						context.Background(),
+						current.Data,
+					)
+					if err != nil {
+						logReq.Response = err.Error()
+						h.log.Error("!!!MigrationUp--->Error while updating view", logger.Error(err))
+						continue
+					}
+
+					logReq.Current = updateView
+					logReq.Response = updateView
+				case pb.ResourceType_POSTGRESQL:
+					updateView, err := services.GoObjectBuilderService().View().Update(
+						context.Background(),
+						currentPsql.Data,
+					)
+					if err != nil {
+						logReq.Response = err.Error()
+						h.log.Error("!!!MigrationUp--->Error while updating view", logger.Error(err))
+						continue
+					}
+
+					logReq.Current = updateView
+					logReq.Response = updateView
 				}
+
 				logReq.Request = current.Data
-				logReq.Current = updateView
-				logReq.Response = updateView
+
 				ids = append(ids, v.Id)
 			case "DELETE":
 				logReq.Previous = previous.Data
-				_, err = services.GetBuilderServiceByType(nodeType).View().Delete(
-					context.Background(),
-					&obs.ViewPrimaryKey{
-						Id:        previous.Data.Id,
-						ProjectId: resourceEnvId,
-						EnvId:     cast.ToString(environmentId),
-					},
-				)
-				if err != nil {
-					logReq.Response = err.Error()
-					h.log.Error("!!!MigrationUp--->Error while deleting view", logger.Error(err))
-					continue
+
+				switch resourceType {
+				case pb.ResourceType_MONGODB:
+					_, err = services.GetBuilderServiceByType(nodeType).View().Delete(
+						context.Background(),
+						&obs.ViewPrimaryKey{
+							Id:        previous.Data.Id,
+							ProjectId: resourceEnvId,
+							EnvId:     cast.ToString(environmentId),
+						},
+					)
+					if err != nil {
+						logReq.Response = err.Error()
+						h.log.Error("!!!MigrationUp--->Error while deleting view", logger.Error(err))
+						continue
+					}
+				case pb.ResourceType_POSTGRESQL:
+					_, err = services.GoObjectBuilderService().View().Delete(
+						context.Background(),
+						&nb.ViewPrimaryKey{
+							Id:        previous.Data.Id,
+							ProjectId: resourceEnvId,
+							EnvId:     cast.ToString(environmentId),
+						},
+					)
+					if err != nil {
+						logReq.Response = err.Error()
+						h.log.Error("!!!MigrationUp--->Error while deleting view", logger.Error(err))
+						continue
+					}
 				}
+
 				ids = append(ids, v.Id)
 			}
 		} else if actionSource == "LAYOUT" {
@@ -1691,8 +2047,9 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 			}()
 
 			var (
-				previous DataUpdateLayoutWrapper
-				current  DataUpdateLayoutWrapper
+				previous    DataUpdateLayoutWrapper
+				current     DataUpdateLayoutWrapper
+				currentPsql DataUpdateLayoutWrapperPsql
 			)
 
 			err := json.Unmarshal([]byte(cast.ToString(v.Previous)), &previous)
@@ -1705,43 +2062,90 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 				continue
 			}
 
+			err = json.Unmarshal([]byte(cast.ToString(v.Request)), &currentPsql)
+			if err != nil {
+				continue
+			}
+
 			previous.Data.ProjectId = resourceEnvId
 			previous.Data.EnvId = cast.ToString(environmentId)
 			current.Data.ProjectId = resourceEnvId
 			current.Data.EnvId = cast.ToString(environmentId)
+			currentPsql.Data.ProjectId = resourceEnvId
+			currentPsql.Data.EnvId = cast.ToString(environmentId)
 			logReq.TableSlug = "Layout"
 
 			switch actionType {
 			case "UPDATE":
-				logReq.Previous = previous.Data
-				updateLayout, err := services.GetBuilderServiceByType(nodeType).Layout().Update(
-					context.Background(),
-					current.Data,
-				)
-				if err != nil {
-					h.log.Error("!!!MigrationUp--->Error while updating layout", logger.Error(err))
-					logReq.Response = err.Error()
-					continue
+
+				switch resourceType {
+				case pb.ResourceType_MONGODB:
+					updateLayout, err := services.GetBuilderServiceByType(nodeType).Layout().Update(
+						context.Background(),
+						current.Data,
+					)
+					if err != nil {
+						h.log.Error("!!!MigrationUp--->Error while updating layout", logger.Error(err))
+						logReq.Response = err.Error()
+						continue
+					}
+
+					logReq.Current = updateLayout
+					logReq.Response = updateLayout
+					logReq.Request = current.Data
+				case pb.ResourceType_POSTGRESQL:
+					updateLayout, err := services.GoObjectBuilderService().Layout().Update(
+						context.Background(),
+						currentPsql.Data,
+					)
+					if err != nil {
+						h.log.Error("!!!MigrationUp--->Error while updating layout", logger.Error(err))
+						logReq.Response = err.Error()
+						continue
+					}
+
+					logReq.Current = updateLayout
+					logReq.Response = updateLayout
+					logReq.Request = currentPsql.Data
 				}
-				logReq.Request = current.Data
-				logReq.Current = updateLayout
-				logReq.Response = updateLayout
+
+				logReq.Previous = previous.Data
+
 				ids = append(ids, v.Id)
 			case "DELETE":
 				logReq.Previous = previous.Data
-				_, err = services.GetBuilderServiceByType(nodeType).Layout().RemoveLayout(
-					context.Background(),
-					&obs.LayoutPrimaryKey{
-						Id:        previous.Data.Id,
-						ProjectId: resourceEnvId,
-						EnvId:     cast.ToString(environmentId),
-					},
-				)
-				if err != nil {
-					h.log.Error("!!!MigrationUp--->Error while deleting layout", logger.Error(err))
-					logReq.Response = err.Error()
-					continue
+
+				switch resourceType {
+				case pb.ResourceType_MONGODB:
+					_, err = services.GetBuilderServiceByType(nodeType).Layout().RemoveLayout(
+						context.Background(),
+						&obs.LayoutPrimaryKey{
+							Id:        previous.Data.Id,
+							ProjectId: resourceEnvId,
+							EnvId:     cast.ToString(environmentId),
+						},
+					)
+					if err != nil {
+						h.log.Error("!!!MigrationUp--->Error while deleting layout", logger.Error(err))
+						logReq.Response = err.Error()
+						continue
+					}
+				case pb.ResourceType_POSTGRESQL:
+					_, err = services.GoObjectBuilderService().Layout().RemoveLayout(
+						context.Background(),
+						&nb.LayoutPrimaryKey{
+							Id:        previous.Data.Id,
+							ProjectId: resourceEnvId,
+							EnvId:     cast.ToString(environmentId),
+						},
+					)
+					if err != nil {
+						h.log.Error("!!!MigrationUp--->Error while deleting layout", logger.Error(err))
+						logReq.Response = err.Error()
+						continue
+					}
 				}
+
 				ids = append(ids, v.Id)
 			}
 		}
