@@ -1135,10 +1135,10 @@ func (h *HandlerV1) WayllPayment(c *gin.Context) {
 
 	invokeFunction := models.CommonMessage{}
 
+	invokeFunction.Data = make(map[string]interface{})
+
 	invokeFunction.Data = map[string]interface{}{
-		"data": map[string]interface{}{
-			"data": wayll.Data,
-		},
+		"data": wayll,
 	}
 
 	authInfo, _ := h.GetAuthInfo(c)
