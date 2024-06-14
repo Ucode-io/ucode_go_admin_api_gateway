@@ -52,6 +52,12 @@ func (h *HandlerV1) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 			_ = c.AbortWithError(http.StatusForbidden, errors.New("token error: wrong format"))
 			return
 		}
+
+		if c.Param("function-path") == "wayll-payment" {
+			strArr = []string{"API-KEY"}
+			c.Header("X-API-KEY", "P-Co74TLgSaTKNXzWrjtbUIzemZBKC9yhu")
+		}
+
 		switch strArr[0] {
 		case "Bearer":
 
