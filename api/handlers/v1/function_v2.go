@@ -828,9 +828,6 @@ func (h *HandlerV1) InvokeFunctionByPath(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, "Api key not found")
 		return
 	}
-	invokeFunction.Data = map[string]interface{}{
-		"data": invokeFunction,
-	}
 	authInfo, _ := h.GetAuthInfo(c)
 	invokeFunction.Data["user_id"] = authInfo.GetUserId()
 	invokeFunction.Data["project_id"] = authInfo.GetProjectId()
