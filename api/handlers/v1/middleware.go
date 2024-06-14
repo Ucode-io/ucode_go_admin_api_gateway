@@ -45,6 +45,8 @@ func (h *HandlerV1) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 		)
 
 		bearerToken := c.GetHeader("Authorization")
+		app_id := c.GetHeader("X-API-KEY")
+
 		strArr := strings.Split(bearerToken, " ")
 
 		if len(strArr) < 1 && (strArr[0] != "Bearer" && strArr[0] != "API-KEY") {
@@ -55,7 +57,7 @@ func (h *HandlerV1) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 
 		if c.Param("function-path") == "wayll-payment" {
 			strArr = []string{"API-KEY"}
-			c.Header("X-API-KEY", "P-Co74TLgSaTKNXzWrjtbUIzemZBKC9yhu")
+			app_id = "P-Co74TLgSaTKNXzWrjtbUIzemZBKC9yhu"
 		}
 
 		switch strArr[0] {
@@ -85,8 +87,6 @@ func (h *HandlerV1) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 			c.Set("user_id", res.UserId)
 
 		case "API-KEY":
-			app_id := c.GetHeader("X-API-KEY")
-
 			if app_id == "" {
 				err := errors.New("error invalid api-key method")
 				h.log.Error("--AuthMiddleware--", logger.Error(err))
