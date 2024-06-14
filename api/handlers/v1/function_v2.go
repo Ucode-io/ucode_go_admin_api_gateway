@@ -828,11 +828,15 @@ func (h *HandlerV1) InvokeFunctionByPath(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, "Api key not found")
 		return
 	}
+	invokeFunction.Data = map[string]interface{}{
+		"data": invokeFunction,
+	}
 	authInfo, _ := h.GetAuthInfo(c)
 	invokeFunction.Data["user_id"] = authInfo.GetUserId()
 	invokeFunction.Data["project_id"] = authInfo.GetProjectId()
 	invokeFunction.Data["environment_id"] = authInfo.GetEnvId()
 	invokeFunction.Data["app_id"] = apiKeys.GetData()[0].GetAppId()
+
 	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+c.Param("function-path"), "POST", models.NewInvokeFunctionRequest{
 		Data: invokeFunction.Data,
 	})
@@ -1068,4 +1072,95 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 	}
 
 	h.handleResponse(c, status_http.OK, resp)
+}
+
+// InvokeFunctionByPath godoc
+// @ID wayll-payment
+// @Router /v1/wayll-payment [POST]
+// @Summary Invoke Function By Path
+// @Description Invoke Function By Path
+// @Tags Function
+// @Accept json
+// @Produce json
+// @Param InvokeFunctionByPathRequest body models.Wayll true "InvokeFunctionByPathRequest"
+// @Success 201 {object} status_http.Response{data=models.InvokeFunctionRequest} "Function data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *HandlerV1) WayllPayment(c *gin.Context) {
+	var wayll models.Wayll
+	err := c.ShouldBindJSON(&wayll)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_FUNCTION_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	apiKeys, err := h.authService.ApiKey().GetList(context.Background(), &auth_service.GetListReq{
+		EnvironmentId: environmentId.(string),
+		ProjectId:     resource.ProjectId,
+	})
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+	if len(apiKeys.Data) < 1 {
+		h.handleResponse(c, status_http.InvalidArgument, "Api key not found")
+		return
+	}
+
+	invokeFunction := models.CommonMessage{}
+
+	invokeFunction.Data = map[string]interface{}{
+		"data": map[string]interface{}{
+			"data": wayll.Data,
+		},
+	}
+
+	authInfo, _ := h.GetAuthInfo(c)
+	invokeFunction.Data["user_id"] = authInfo.GetUserId()
+	invokeFunction.Data["project_id"] = authInfo.GetProjectId()
+	invokeFunction.Data["environment_id"] = authInfo.GetEnvId()
+	invokeFunction.Data["app_id"] = apiKeys.GetData()[0].GetAppId()
+
+	resp, err := util.DoRequest("https://ofs.u-code.io/function/wayll-payment", "POST", models.NewInvokeFunctionRequest{
+		Data: invokeFunction.Data,
+	})
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	} else if resp.Status == "error" {
+		var errStr = resp.Status
+		if resp.Data != nil && resp.Data["message"] != nil {
+			errStr = resp.Data["message"].(string)
+		}
+		h.handleResponse(c, status_http.InvalidArgument, errStr)
+		return
+	}
+
+	h.handleResponse(c, status_http.Created, resp)
 }
