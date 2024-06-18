@@ -821,6 +821,8 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 		}
 	}
 
+	h.log.Info("HERE OUR ID >>>>>", logger.Any("id", id))
+
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
