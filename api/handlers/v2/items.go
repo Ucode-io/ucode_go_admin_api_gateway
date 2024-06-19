@@ -155,14 +155,26 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().Create(
-			context.Background(),
-			&obs.CommonMessage{
-				TableSlug: c.Param("collection"),
-				Data:      structData,
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
+		if resource.ResourceEnvironmentId == "e6c95e62-f1fb-4556-aa12-e512a14ecd52" {
+			resp, err = services.GetBuilderServiceByType(resource.NodeType).ItemsService().Create(
+				context.Background(),
+				&obs.CommonMessage{
+					TableSlug: c.Param("collection"),
+					Data:      structData,
+					ProjectId: resource.ResourceEnvironmentId,
+				},
+			)
+		} else {
+			resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().Create(
+				context.Background(),
+				&obs.CommonMessage{
+					TableSlug: c.Param("collection"),
+					Data:      structData,
+					ProjectId: resource.ResourceEnvironmentId,
+				},
+			)
+		}
+
 		// this logic for custom error message, object builder service may be return 400, 404, 500
 		if err != nil {
 			statusHttp = status_http.GrpcStatusToHTTP["Internal"]
@@ -808,6 +820,8 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 			return
 		}
 	}
+
+	h.log.Info("HERE OUR ID >>>>>", logger.Any("id", id))
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {

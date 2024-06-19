@@ -60,6 +60,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 	// @securityDefinitions.apikey ApiKeyAuth
 	// @in header
 	// @name Authorization
+
 	v1.Use(h.V1.AuthMiddleware(cfg))
 	{
 		v1.POST("/menu-settings", h.V1.CreateMenuSettings)
@@ -240,6 +241,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 
 		v1.POST("/invoke_function", h.V1.InvokeFunction)
 		v1.POST("/invoke_function/:function-path", h.V1.InvokeFunctionByPath)
+		v1.POST("/wayll-payment", h.V1.WayllPayment)
 
 		//cache
 		v1.POST("/cache", h.V1.Cache)

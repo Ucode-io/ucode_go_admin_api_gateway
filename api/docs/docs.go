@@ -29582,6 +29582,89 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/wayll-payment": {
+            "post": {
+                "description": "Invoke Function By Path",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Function"
+                ],
+                "summary": "Invoke Function By Path",
+                "operationId": "wayll-payment",
+                "parameters": [
+                    {
+                        "description": "InvokeFunctionByPathRequest",
+                        "name": "InvokeFunctionByPathRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Wayll"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Function data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.InvokeFunctionRequest"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v1/webpage-app": {
             "get": {
                 "security": [
@@ -45280,6 +45363,9 @@ const docTemplate = `{
                 "secretKey": {
                     "type": "string"
                 },
+                "serviceLink": {
+                    "type": "string"
+                },
                 "smsGRPCPort": {
                     "type": "string"
                 },
@@ -47310,6 +47396,30 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/auth_service.Object"
                     }
+                }
+            }
+        },
+        "models.Wayll": {
+            "type": "object",
+            "properties": {
+                "bindingId": {
+                    "type": "string"
+                },
+                "data": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "operationState": {
+                    "type": "string"
+                },
+                "operationType": {
+                    "type": "string"
+                },
+                "orderId": {
+                    "type": "string"
+                },
+                "orderNumber": {
+                    "type": "string"
                 }
             }
         },

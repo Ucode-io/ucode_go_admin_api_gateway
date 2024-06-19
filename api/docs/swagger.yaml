@@ -1518,6 +1518,8 @@ definitions:
         type: string
       secretKey:
         type: string
+      serviceLink:
+        type: string
       smsGRPCPort:
         type: string
       smsServiceHost:
@@ -2853,6 +2855,22 @@ definitions:
         items:
           $ref: '#/definitions/auth_service.Object'
         type: array
+    type: object
+  models.Wayll:
+    properties:
+      bindingId:
+        type: string
+      data:
+        additionalProperties: true
+        type: object
+      operationState:
+        type: string
+      operationType:
+        type: string
+      orderId:
+        type: string
+      orderNumber:
+        type: string
     type: object
   models.WebPage:
     properties:
@@ -23559,6 +23577,52 @@ paths:
       summary: Upsert view relation
       tags:
       - ViewRelation
+  /v1/wayll-payment:
+    post:
+      consumes:
+      - application/json
+      description: Invoke Function By Path
+      operationId: wayll-payment
+      parameters:
+      - description: InvokeFunctionByPathRequest
+        in: body
+        name: InvokeFunctionByPathRequest
+        required: true
+        schema:
+          $ref: '#/definitions/models.Wayll'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Function data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.InvokeFunctionRequest'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Invoke Function By Path
+      tags:
+      - Function
   /v1/webpage-app:
     get:
       consumes:
