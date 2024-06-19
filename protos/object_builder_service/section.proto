@@ -86,6 +86,7 @@ message RelationForSection {
     string function_path = 24;
     bool relation_buttons = 25;
     google.protobuf.Struct attributes = 26;
+    int32 relation_index = 27;
 }
 
 message ActionRelationForSection {
