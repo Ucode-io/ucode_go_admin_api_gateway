@@ -106,6 +106,10 @@ func (h *HandlerV1) CreateMicroFrontEnd(c *gin.Context) {
 	project, err := h.companyServices.Project().GetById(context.Background(), &pb.GetProjectByIdRequest{
 		ProjectId: environment.GetProjectId(),
 	})
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 	if project.GetTitle() == "" {
 		err = errors.New("error project name is required")
 		h.handleResponse(c, status_http.BadRequest, err.Error())
