@@ -372,6 +372,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 
 		v2.POST("/erd", h.V2.UploadERD)
 
+		
 	}
 	r.POST("/template-note/share-get", h.V1.GetObjectToken)
 
