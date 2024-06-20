@@ -1,4 +1,4 @@
-FROM golang:1.17 as builder
+FROM golang:1.21.0 as builder
 
 # 
 RUN mkdir -p $GOPATH/src/gitlab.udevs.io/ucode/ucode_go_admin_api_gateway 
