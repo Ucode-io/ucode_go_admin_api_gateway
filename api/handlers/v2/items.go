@@ -2114,3 +2114,107 @@ func (h *HandlerV2) GetListAggregation(c *gin.Context) {
 
 	h.handleResponse(c, status_http.OK, resp)
 }
+
+func (h *HandlerV2) UpdateRowOrder(c *gin.Context) {
+
+	var (
+		objectRequest models.CommonMessage
+	)
+
+	err := c.ShouldBindJSON(&objectRequest)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	var (
+		objects = cast.ToSlice(objectRequest.Data["objects"])
+		limit   = cast.ToInt(objectRequest.Data["limit"])
+		offset  = cast.ToInt(objectRequest.Data["offset"])
+		num     = limit * offset
+	)
+
+	delete(objectRequest.Data, "limit")
+	delete(objectRequest.Data, "offset")
+
+	for i, o := range objects {
+		obj := cast.ToStringMap(o)
+
+		obj["order_row"] = i + num
+
+		o = obj
+	}
+
+	objectRequest.Data["objects"] = objects
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
+	defer cancel()
+
+	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
+	if err != nil {
+		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
+		h.log.Info("ConnectionPool", logger.Any("CONNECTION", conn))
+		h.handleResponse(c, status_http.InternalServerError, err)
+		return
+	}
+	defer conn.Close()
+
+	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		_, err = service.MultipleUpdate(
+			context.Background(),
+			&obs.CommonMessage{
+				TableSlug:      c.Param("table_slug"),
+				Data:           structData,
+				ProjectId:      resource.ResourceEnvironmentId,
+				BlockedBuilder: cast.ToBool(c.DefaultQuery("block_builder", "false")),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.InternalServerError, err.Error())
+			return
+		}
+	}
+}

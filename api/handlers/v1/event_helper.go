@@ -3,6 +3,7 @@ package v1
 import (
 	"context"
 	"errors"
+	"log"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
@@ -10,6 +11,7 @@ import (
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
+	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
@@ -188,15 +190,36 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *HandlerV1
 		data["environment_id"] = environmentId
 		invokeFunction.Data = data
 
-		resp, err := util.DoRequest("https://ofs.u-code.io/function/"+customEvent.GetFunctions()[0].Path, "POST", invokeFunction)
-		if err != nil {
-			return customEvent.GetFunctions()[0].Name, err
-		} else if resp.Status == "error" {
-			var errStr = resp.Status
-			if resp.Data != nil && resp.Data["message"] != nil {
-				errStr = resp.Data["message"].(string)
+		if customEvent.GetFunctions()[0].RequestType == "" || customEvent.GetFunctions()[0].RequestType == "ASYNC" {
+
+			resp, err := util.DoRequest("https://ofs.u-code.io/function/"+customEvent.GetFunctions()[0].Path, "POST", invokeFunction)
+			if err != nil {
+				return customEvent.GetFunctions()[0].Name, err
+			} else if resp.Status == "error" {
+				var errStr = resp.Status
+				if resp.Data != nil && resp.Data["message"] != nil {
+					errStr = resp.Data["message"].(string)
+				}
+				return customEvent.GetFunctions()[0].Name, errors.New(errStr)
 			}
-			return customEvent.GetFunctions()[0].Name, errors.New(errStr)
+		} else if customEvent.GetFunctions()[0].RequestType == "SYNC" {
+
+			go func(customEvent *obs.CustomEvent) {
+				resp, err := util.DoRequest("https://ofs.u-code.io/function/"+customEvent.GetFunctions()[0].Path, "POST", invokeFunction)
+				if err != nil {
+					h.log.Error("ERROR FROM OFS", logger.Any("err", err.Error()))
+					return
+				} else if resp.Status == "error" {
+					var errStr = resp.Status
+					if resp.Data != nil && resp.Data["message"] != nil {
+						errStr = resp.Data["message"].(string)
+						log.Fatal(errStr)
+					}
+
+					h.log.Error("ERROR FROM OFS", logger.Any("err", errStr))
+					return
+				}
+			}(customEvent)
 		}
 		// _, err = services.GetBuilderServiceByType(resource.NodeType).CustomEvent().UpdateByFunctionId(context.Background(), &obs.UpdateByFunctionIdRequest{
 		// 	FunctionId: customEvent.Functions[0].Id,
