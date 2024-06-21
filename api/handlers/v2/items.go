@@ -155,7 +155,7 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		if resource.ResourceEnvironmentId == "e6c95e62-f1fb-4556-aa12-e512a14ecd52" {
+		if resource.ResourceEnvironmentId == "e6c95e62-f1fb-4556-aa12-e512a14ecd52" || resource.ResourceEnvironmentId == "3bf18b7b-4c9f-4166-b20f-cbb430ea03bc" {
 			resp, err = services.GetBuilderServiceByType(resource.NodeType).ItemsService().Create(
 				context.Background(),
 				&obs.CommonMessage{
