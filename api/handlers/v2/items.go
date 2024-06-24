@@ -2115,6 +2115,20 @@ func (h *HandlerV2) GetListAggregation(c *gin.Context) {
 	h.handleResponse(c, status_http.OK, resp)
 }
 
+// UpdateRowOrder godoc
+// @Security ApiKeyAuth
+// @ID update_row_order
+// @Router /v2/update-row/{collection} [PUT]
+// @Summary Update Row Order
+// @Description Update Row Order
+// @Tags Items
+// @Accept json
+// @Produce json
+// @Param collection path string true "collection"
+// @Param object body models.CommonMessage true "GetListAggregation"
+// @Success 200 {object} status_http.Response{data=models.CommonMessage} "ObjectBody"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) UpdateRowOrder(c *gin.Context) {
 
 	var (

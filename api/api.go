@@ -701,6 +701,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 			v2Items.POST("/:collection/aggregation", h.V2.GetListAggregation)
 			v2Items.PUT("/many-to-many", h.V2.AppendManyToMany)
 			v2Items.DELETE("/many-to-many", h.V2.DeleteManyToMany)
+			v2Items.PUT("/update-row/:collection", h.V2.UpdateRowOrder)
 		}
 
 		// menu group
