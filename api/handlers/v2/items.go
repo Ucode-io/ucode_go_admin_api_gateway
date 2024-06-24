@@ -2220,7 +2220,7 @@ func (h *HandlerV2) UpdateRowOrder(c *gin.Context) {
 		_, err = service.MultipleUpdate(
 			context.Background(),
 			&obs.CommonMessage{
-				TableSlug:      c.Param("table_slug"),
+				TableSlug:      c.Param("collection"),
 				Data:           structData,
 				ProjectId:      resource.ResourceEnvironmentId,
 				BlockedBuilder: cast.ToBool(c.DefaultQuery("block_builder", "false")),
