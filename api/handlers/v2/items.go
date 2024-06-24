@@ -155,7 +155,7 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		if resource.ResourceEnvironmentId == "e6c95e62-f1fb-4556-aa12-e512a14ecd52" || resource.ResourceEnvironmentId == "3bf18b7b-4c9f-4166-b20f-cbb430ea03bc" {
+		if resource.ResourceEnvironmentId == "e6c95e62-f1fb-4556-aa12-e512a14ecd52" {
 			resp, err = services.GetBuilderServiceByType(resource.NodeType).ItemsService().Create(
 				context.Background(),
 				&obs.CommonMessage{
@@ -2154,7 +2154,7 @@ func (h *HandlerV2) UpdateRowOrder(c *gin.Context) {
 	for i, o := range objects {
 		obj := cast.ToStringMap(o)
 
-		obj["order_row"] = i + num
+		obj["row_order"] = i + num
 
 		o = obj
 	}
@@ -2215,15 +2215,22 @@ func (h *HandlerV2) UpdateRowOrder(c *gin.Context) {
 		return
 	}
 
+	body, _ := json.Marshal(objectRequest.Data)
+
+	fmt.Println("HERERE BODY >>>>")
+	fmt.Println(string(body))
+
+	fmt.Println("TABLE SLUG >>>", c.Param("collection"))
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		_, err = service.MultipleUpdate(
 			context.Background(),
 			&obs.CommonMessage{
-				TableSlug:      c.Param("collection"),
-				Data:           structData,
-				ProjectId:      resource.ResourceEnvironmentId,
-				BlockedBuilder: cast.ToBool(c.DefaultQuery("block_builder", "false")),
+				TableSlug: c.Param("collection"),
+				Data:      structData,
+				ProjectId: resource.ResourceEnvironmentId,
+				// BlockedBuilder: cast.ToBool(c.DefaultQuery("block_builder", "false")),
 			},
 		)
 		if err != nil {
