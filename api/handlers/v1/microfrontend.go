@@ -8,7 +8,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/models"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	fc "ucode/ucode_go_api_gateway/genproto/new_function_service"
-	"ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
+	// "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/code_server"
 	"ucode/ucode_go_api_gateway/pkg/gitlab"
@@ -106,6 +106,10 @@ func (h *HandlerV1) CreateMicroFrontEnd(c *gin.Context) {
 	project, err := h.companyServices.Project().GetById(context.Background(), &pb.GetProjectByIdRequest{
 		ProjectId: environment.GetProjectId(),
 	})
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 	if project.GetTitle() == "" {
 		err = errors.New("error project name is required")
 		h.handleResponse(c, status_http.BadRequest, err.Error())
@@ -433,7 +437,7 @@ func (h *HandlerV1) GetAllMicroFrontEnd(c *gin.Context) {
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().Function().GetList(
 			context.Background(),
-			&new_object_builder_service.GetAllFunctionsRequest{
+			&nb.GetAllFunctionsRequest{
 				Search:    c.DefaultQuery("search", ""),
 				Limit:     int32(limit),
 				Offset:    int32(offset),
