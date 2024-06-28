@@ -210,7 +210,13 @@ func (h *HandlerV1) VerifyEmail(c *gin.Context) {
 		return
 	}
 	convertedToAuthPb := helper.ConvertPbToAnotherPb(body.Data)
-	res, err := h.authService.Session().SessionAndTokenGenerator(
+	service, conn, err := h.authService.Session(c)
+	if err != nil {
+		h.handleResponse(c, status_http.BadEnvironment, err.Error())
+		return
+	}
+	defer conn.Close()
+	res, err := service.SessionAndTokenGenerator(
 		context.Background(),
 		&pbAuth.SessionAndTokenRequest{
 			LoginData: convertedToAuthPb,
@@ -312,7 +318,13 @@ func (h *HandlerV1) RegisterEmailOtp(c *gin.Context) {
 	}
 
 	convertedToAuthPb := helper.ConvertPbToAnotherPb(resp)
-	res, err := h.authService.Session().SessionAndTokenGenerator(
+	service, conn, err := h.authService.Session(c)
+	if err != nil {
+		h.handleResponse(c, status_http.BadEnvironment, err.Error())
+		return
+	}
+	defer conn.Close()
+	res, err := service.SessionAndTokenGenerator(
 		context.Background(),
 		&pbAuth.SessionAndTokenRequest{
 			LoginData: convertedToAuthPb,

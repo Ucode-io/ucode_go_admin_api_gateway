@@ -822,7 +822,14 @@ func (h *HandlerV1) UpdateObject(c *gin.Context) {
 			return
 		}
 
-		_, err = h.authService.Session().UpdateSessionsByRoleId(
+		service, conn, err := h.authService.Session(c)
+		if err != nil {
+			h.handleResponse(c, status_http.BadEnvironment, err.Error())
+			return
+		}
+		defer conn.Close()
+
+		_, err = service.UpdateSessionsByRoleId(
 			context.Background(),
 			&pba.UpdateSessionByRoleIdRequest{
 				RoleId:    objectRequest.Data["role_id"].(string),
@@ -2144,7 +2151,15 @@ func (h *HandlerV1) UpsertObject(c *gin.Context) {
 			h.handleResponse(c, status_http.BadRequest, err.Error())
 			return
 		}
-		_, err = h.authService.Session().UpdateSessionsByRoleId(
+
+		service, conn, err := h.authService.Session(c)
+		if err != nil {
+			h.handleResponse(c, status_http.BadEnvironment, err.Error())
+			return
+		}
+		defer conn.Close()
+
+		_, err = service.UpdateSessionsByRoleId(
 			context.Background(),
 			&pba.UpdateSessionByRoleIdRequest{
 				RoleId:    objectRequest.Data["role_id"].(string),

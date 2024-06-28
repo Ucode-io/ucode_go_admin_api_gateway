@@ -124,7 +124,13 @@ func (h *HandlerV2) adminHasAccess(c *gin.Context) (*auth_service.HasAccessSuper
 		return nil, false
 	}
 	accessToken := strArr[1]
-	resp, err := h.authService.Session().HasAccessSuperAdmin(
+	service, conn, err := h.authService.Session(c)
+	if err != nil {
+		h.handleResponse(c, status_http.BadEnvironment, err.Error())
+		return nil, false
+	}
+	defer conn.Close()
+	resp, err := service.HasAccessSuperAdmin(
 		c.Request.Context(),
 		&auth_service.HasAccessSuperAdminReq{
 			AccessToken: accessToken,

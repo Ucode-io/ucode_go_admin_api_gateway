@@ -51,7 +51,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 	global := r.Group("/v1/global")
 	global.Use(h.V1.GlobalAuthMiddleware(cfg))
 	{
-		global.GET("/projects", h.V1.GetGlobalCompanyProjectList)
+		// global.GET("/projects", h.V1.GetGlobalCompanyProjectList)
 		global.GET("/environment", h.V1.GetGlobalProjectEnvironments)
 		global.GET("/template", h.V1.GetGlobalProjectTemplate)
 	}
@@ -374,7 +374,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 
 		v2.POST("/erd", h.V2.UploadERD)
 
-		
 	}
 	r.POST("/template-note/share-get", h.V1.GetObjectToken)
 
@@ -438,7 +437,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 		// environment service
 		v1Admin.POST("/environment", h.V1.CreateEnvironment)
 		v1Admin.GET("/environment/:environment_id", h.V1.GetSingleEnvironment)
-		v1Admin.GET("/environment", h.V1.GetAllEnvironments)
+		// v1Admin.GET("/environment", h.V1.GetAllEnvironments)
 		v1Admin.PUT("/environment", h.V1.UpdateEnvironment)
 		v1Admin.DELETE("/environment/:environment_id", h.V1.DeleteEnvironment)
 

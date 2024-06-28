@@ -2,16 +2,19 @@ package services
 
 import (
 	"context"
+	"fmt"
+	"time"
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 
+	grpcpool "github.com/processout/grpc-go-pool"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
 type AuthServiceI interface {
 	Client() auth_service.ClientServiceClient
-	Session() auth_service.SessionServiceClient
+	Session(ctx context.Context) (auth_service.SessionServiceClient, *grpcpool.ClientConn, error)
 	Integration() auth_service.IntegrationServiceClient
 	Permission() auth_service.PermissionServiceClient
 	User() auth_service.UserServiceClient
@@ -23,7 +26,7 @@ type AuthServiceI interface {
 
 type authServiceClient struct {
 	clientService         auth_service.ClientServiceClient
-	sessionService        auth_service.SessionServiceClient
+	sessionService        *grpcpool.Pool
 	integrationService    auth_service.IntegrationServiceClient
 	clientServiceAuth     auth_service.ClientServiceClient
 	permissionServiceAuth auth_service.PermissionServiceClient
@@ -46,9 +49,26 @@ func NewAuthServiceClient(ctx context.Context, cfg config.Config) (AuthServiceI,
 		return nil, err
 	}
 
+	factory := func() (*grpc.ClientConn, error) {
+		conn, err := grpc.Dial(
+			cfg.AuthServiceHost+cfg.AuthGRPCPort,
+			grpc.WithTransportCredentials(insecure.NewCredentials()),
+			grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(52428800), grpc.MaxCallSendMsgSize(52428800)))
+		if err != nil {
+			return nil, err
+		}
+		return conn, err
+	}
+
+	sessionServicePool, err := grpcpool.New(factory, 12, 18, time.Second*3)
+	if err != nil {
+		fmt.Printf("\n\n\n\n\n Failed to create gRPC pool: %v\n", err)
+		return nil, err
+	}
+
 	return &authServiceClient{
 		clientService:         auth_service.NewClientServiceClient(connAuthService),
-		sessionService:        auth_service.NewSessionServiceClient(connAuthService),
+		sessionService:        sessionServicePool,
 		clientServiceAuth:     auth_service.NewClientServiceClient(connAuthService),
 		permissionServiceAuth: auth_service.NewPermissionServiceClient(connAuthService),
 		userService:           auth_service.NewUserServiceClient(connAuthService),
@@ -65,8 +85,14 @@ func (g *authServiceClient) Client() auth_service.ClientServiceClient {
 	return g.clientService
 }
 
-func (g *authServiceClient) Session() auth_service.SessionServiceClient {
-	return g.sessionService
+func (g *authServiceClient) Session(ctx context.Context) (auth_service.SessionServiceClient, *grpcpool.ClientConn, error) {
+	conn, err := g.sessionService.Get(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+	service := auth_service.NewSessionServiceClient(conn)
+
+	return service, conn, nil
 }
 
 func (g *authServiceClient) Permission() auth_service.PermissionServiceClient {

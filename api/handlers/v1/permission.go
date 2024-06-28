@@ -97,7 +97,15 @@ func (h *HandlerV1) UpsertPermissionsByAppId(c *gin.Context) {
 		err := errors.New("role id must be have in update permission")
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 	}
-	_, err = h.authService.Session().UpdateSessionsByRoleId(context.Background(), &authPb.UpdateSessionByRoleIdRequest{
+
+	service, conn, err := h.authService.Session(c)
+	if err != nil {
+		h.handleResponse(c, status_http.BadEnvironment, err.Error())
+		return
+	}
+	defer conn.Close()
+
+	_, err = service.UpdateSessionsByRoleId(context.Background(), &authPb.UpdateSessionByRoleIdRequest{
 		RoleId:    objectRequest.Data["role_id"].(string),
 		IsChanged: true,
 	})
