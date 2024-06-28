@@ -651,6 +651,9 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 	v2Version := r.Group("/v2")
 	v2Version.Use(h.V2.AuthMiddleware())
 	{
+
+		v2Version.POST("/send-to-gpt", h.V2.SendToGpt)
+
 		// collections group
 		v2Collection := v2Version.Group("/collections")
 		{

@@ -1,0 +1,153 @@
+package v2
+
+import (
+	"encoding/json"
+	"errors"
+	"fmt"
+	"ucode/ucode_go_api_gateway/api/models"
+	"ucode/ucode_go_api_gateway/api/status_http"
+	pb "ucode/ucode_go_api_gateway/genproto/company_service"
+	"ucode/ucode_go_api_gateway/pkg/util"
+
+	"github.com/gin-gonic/gin"
+	"github.com/spf13/cast"
+
+	"ucode/ucode_go_api_gateway/pkg/gpt"
+)
+
+// SendToGpt godoc
+// @Security ApiKeyAuth
+// @ID send_to_gpt
+// @Router /v2/send-to-gpt [POST]
+// @Summary Send To Gpt
+// @Description Send To Gpt
+// @Tags GPT
+// @Accept json
+// @Produce json
+// @Param object body models.SendToGptRequest true "SendToGptRequestBody"
+// @Success 201 {object} status_http.Response{data=string} "Success"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *HandlerV2) SendToGpt(c *gin.Context) {
+	var (
+		reqBody models.SendToGptRequest
+		logReq  = &models.CreateVersionHistoryRequest{}
+	)
+
+	err := c.ShouldBindJSON(&reqBody)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	// HERE SHOULD BE GET CHAT HISTORY FROM BUILDER SERVICE
+
+	// resp.Message => append my new req
+
+	respMessages := []models.Message{}
+
+	userId, _ := c.Get("user_id")
+
+	respMessages = append(respMessages, models.Message{
+		Role:    "user",
+		Content: reqBody.Promt,
+	})
+
+	toolCalls, err := gpt.SendReqToGPT(respMessages)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	for _, toolCall := range toolCalls {
+		var (
+			functionCall = toolCall.Function
+			functionName = functionCall.Name
+			arguments    map[string]interface{}
+		)
+
+		err = json.Unmarshal([]byte(functionCall.Arguments), &arguments)
+		if err != nil {
+			fmt.Println("Error parsing function arguments:", err)
+			continue
+		}
+
+		switch functionName {
+		case "create_menu":
+			logReq, err = gpt.CreateMenu(&models.CreateMenuAI{
+				Label:    cast.ToString(arguments["name"]),
+				UserId:   userId.(string),
+				Resource: resource,
+				Service:  services,
+			})
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+		case "create_table":
+
+			logReq, err = gpt.CreateTable(&models.CreateTableAI{
+				Label:         cast.ToString(arguments["name"]),
+				TableSlug:     cast.ToString(arguments["table_slug"]),
+				EnvironmentId: resource.EnvironmentId,
+				UserId:        userId.(string),
+				Resource:      resource,
+				Service:       services,
+			})
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+
+		default:
+
+			h.handleResponse(c, status_http.BadRequest, "Unknown function: "+functionName)
+			return
+		}
+
+		switch resource.ResourceType {
+		case pb.ResourceType_MONGODB:
+			go h.versionHistory(c, logReq)
+		case pb.ResourceType_POSTGRESQL:
+			go h.versionHistoryGo(c, logReq)
+		}
+	}
+
+	h.handleResponse(c, status_http.OK, "Success")
+}

@@ -116,6 +116,8 @@ type Config struct {
 	GitlabHostMicroFE      string
 
 	ServiceLink string
+
+	OpenAIApiKey string
 }
 
 type BaseConfig struct {
@@ -306,6 +308,8 @@ func Load() Config {
 	config.GetRequestRedisPassword = cast.ToString(GetOrReturnDefaultValue("GET_REQUEST_REDIS_PASSWORD", ""))
 
 	config.ServiceLink = ""
+
+	config.OpenAIApiKey = cast.ToString(GetOrReturnDefaultValue("OPENAI_API_KEY", "sk-proj-a2ma7TfGU0msgfY9GDsST3BlbkFJljmuOgGattnpsfQCnJ2C"))
 
 	return config
 }
