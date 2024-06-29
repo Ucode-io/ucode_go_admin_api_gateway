@@ -32,6 +32,7 @@ type TableServiceClient interface {
 	GetTableHistoryById(ctx context.Context, in *TableHistoryPrimaryKey, opts ...grpc.CallOption) (*Table, error)
 	RevertTableHistory(ctx context.Context, in *RevertTableHistoryRequest, opts ...grpc.CallOption) (*TableHistory, error)
 	InsertVersionsToCommit(ctx context.Context, in *InsertVersionsToCommitRequest, opts ...grpc.CallOption) (*TableHistory, error)
+	GetIdByLabel(ctx context.Context, in *GetIdByLabelReq, opts ...grpc.CallOption) (*GetIdByLabelResp, error)
 }
 
 type tableServiceClient struct {
@@ -123,6 +124,15 @@ func (c *tableServiceClient) InsertVersionsToCommit(ctx context.Context, in *Ins
 	return out, nil
 }
 
+func (c *tableServiceClient) GetIdByLabel(ctx context.Context, in *GetIdByLabelReq, opts ...grpc.CallOption) (*GetIdByLabelResp, error) {
+	out := new(GetIdByLabelResp)
+	err := c.cc.Invoke(ctx, "/object_builder_service.TableService/GetIdByLabel", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TableServiceServer is the server API for TableService service.
 // All implementations must embed UnimplementedTableServiceServer
 // for forward compatibility
@@ -136,6 +146,7 @@ type TableServiceServer interface {
 	GetTableHistoryById(context.Context, *TableHistoryPrimaryKey) (*Table, error)
 	RevertTableHistory(context.Context, *RevertTableHistoryRequest) (*TableHistory, error)
 	InsertVersionsToCommit(context.Context, *InsertVersionsToCommitRequest) (*TableHistory, error)
+	GetIdByLabel(context.Context, *GetIdByLabelReq) (*GetIdByLabelResp, error)
 	mustEmbedUnimplementedTableServiceServer()
 }
 
@@ -169,6 +180,9 @@ func (UnimplementedTableServiceServer) RevertTableHistory(context.Context, *Reve
 }
 func (UnimplementedTableServiceServer) InsertVersionsToCommit(context.Context, *InsertVersionsToCommitRequest) (*TableHistory, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method InsertVersionsToCommit not implemented")
+}
+func (UnimplementedTableServiceServer) GetIdByLabel(context.Context, *GetIdByLabelReq) (*GetIdByLabelResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetIdByLabel not implemented")
 }
 func (UnimplementedTableServiceServer) mustEmbedUnimplementedTableServiceServer() {}
 
@@ -345,6 +359,24 @@ func _TableService_InsertVersionsToCommit_Handler(srv interface{}, ctx context.C
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TableService_GetIdByLabel_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetIdByLabelReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TableServiceServer).GetIdByLabel(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/object_builder_service.TableService/GetIdByLabel",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TableServiceServer).GetIdByLabel(ctx, req.(*GetIdByLabelReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TableService_ServiceDesc is the grpc.ServiceDesc for TableService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -387,6 +419,10 @@ var TableService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "InsertVersionsToCommit",
 			Handler:    _TableService_InsertVersionsToCommit_Handler,
+		},
+		{
+			MethodName: "GetIdByLabel",
+			Handler:    _TableService_GetIdByLabel_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

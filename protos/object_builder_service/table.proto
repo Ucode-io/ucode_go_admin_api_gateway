@@ -20,6 +20,8 @@ service TableService {
     rpc GetTableHistoryById(TableHistoryPrimaryKey) returns (Table) {}
     rpc RevertTableHistory(RevertTableHistoryRequest) returns (TableHistory) {}
     rpc InsertVersionsToCommit(InsertVersionsToCommitRequest) returns (TableHistory) {}
+
+    rpc GetIdByLabel(GetIdByLabelReq) returns (GetIdByLabelResp) {}
 }
 
 message InsertVersionsToCommitRequest {
@@ -203,4 +205,13 @@ message Permission {
     string guid = 5;
     bool is_public = 6;
     bool is_have_condition = 7;
+}
+
+message GetIdByLabelReq {
+    string label = 1;
+    string project_id = 2;
+}
+
+message GetIdByLabelResp {
+    repeated string ids = 1;
 }

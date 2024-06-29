@@ -120,6 +120,29 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 				h.handleResponse(c, status_http.GRPCError, err.Error())
 				return
 			}
+		case "delete_menu":
+			logReq, err = gpt.DeleteMenu(&models.DeleteMenuAI{
+				Label:    cast.ToString(arguments["name"]),
+				UserId:   cast.ToString(userId),
+				Resource: resource,
+				Service:  services,
+			})
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+		case "update_menu":
+			logReq, err = gpt.UpdateMenu(&models.UpdateMenuAI{
+				OldLabel: cast.ToString(arguments["old_name"]),
+				NewLabel: cast.ToString(arguments["new_name"]),
+				UserId:   cast.ToString(userId),
+				Resource: resource,
+				Service:  services,
+			})
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
 		case "create_table":
 
 			logReq, err = gpt.CreateTable(&models.CreateTableAI{

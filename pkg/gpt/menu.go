@@ -81,3 +81,83 @@ func CreateMenu(reqBody *models.CreateMenuAI) (*models.CreateVersionHistoryReque
 
 	return logReq, nil
 }
+
+func DeleteMenu(reqBody *models.DeleteMenuAI) (*models.CreateVersionHistoryRequest, error) {
+	logReq := &models.CreateVersionHistoryRequest{
+		Services:     reqBody.Service,
+		NodeType:     reqBody.Resource.NodeType,
+		ProjectId:    reqBody.Resource.ResourceEnvironmentId,
+		ActionSource: "MENU",
+		ActionType:   "DELETE MENU",
+		UserInfo:     cast.ToString(reqBody.UserId),
+		TableSlug:    "Menu",
+	}
+	menus, err := reqBody.Service.GetBuilderServiceByType(reqBody.Resource.NodeType).Menu().GetByLabel(
+		context.Background(),
+		&obs.MenuPrimaryKey{Label: reqBody.Label, ProjectId: reqBody.Resource.ResourceEnvironmentId},
+	)
+	if err != nil {
+		return &models.CreateVersionHistoryRequest{}, err
+	}
+
+	request := []string{}
+	for _, menu := range menus.Menus {
+		request = append(request, menu.Label)
+
+		_, err := reqBody.Service.GetBuilderServiceByType(reqBody.Resource.NodeType).Menu().Delete(
+			context.Background(),
+			&obs.MenuPrimaryKey{
+				ProjectId: reqBody.Resource.ResourceEnvironmentId,
+				Id:        menu.Id,
+			},
+		)
+		if err != nil {
+			return &models.CreateVersionHistoryRequest{}, err
+		}
+	}
+	logReq.Request = request
+
+	return logReq, nil
+}
+
+func UpdateMenu(reqBody *models.UpdateMenuAI) (*models.CreateVersionHistoryRequest, error) {
+	logReq := &models.CreateVersionHistoryRequest{
+		Services:     reqBody.Service,
+		NodeType:     reqBody.Resource.NodeType,
+		ProjectId:    reqBody.Resource.ResourceEnvironmentId,
+		ActionSource: "MENU",
+		ActionType:   "UPDATE MENU",
+		UserInfo:     cast.ToString(reqBody.UserId),
+		TableSlug:    "Menu",
+	}
+	menus, err := reqBody.Service.GetBuilderServiceByType(reqBody.Resource.NodeType).Menu().GetByLabel(
+		context.Background(),
+		&obs.MenuPrimaryKey{Label: reqBody.OldLabel, ProjectId: reqBody.Resource.ResourceEnvironmentId},
+	)
+	if err != nil {
+		return &models.CreateVersionHistoryRequest{}, err
+	}
+
+	for _, menu := range menus.Menus {
+		_, err := reqBody.Service.GetBuilderServiceByType(reqBody.Resource.NodeType).Menu().Update(
+			context.Background(),
+			&obs.Menu{
+				ProjectId:       reqBody.Resource.ResourceEnvironmentId,
+				Label:           reqBody.NewLabel,
+				Id:              menu.Id,
+				Icon:            menu.Icon,
+				TableId:         menu.TableId,
+				LayoutId:        menu.LayoutId,
+				ParentId:        menu.ParentId,
+				Type:            menu.Type,
+				MicrofrontendId: menu.MicrofrontendId,
+				IsStatic:        menu.IsStatic,
+			},
+		)
+		if err != nil {
+			return &models.CreateVersionHistoryRequest{}, err
+		}
+	}
+
+	return logReq, nil
+}

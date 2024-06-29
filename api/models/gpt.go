@@ -79,6 +79,21 @@ type CreateMenuAI struct {
 	Service  services.ServiceManagerI
 }
 
+type DeleteMenuAI struct {
+	Label    string
+	UserId   string
+	Resource *pb.ServiceResourceModel
+	Service  services.ServiceManagerI
+}
+
+type UpdateMenuAI struct {
+	NewLabel string
+	OldLabel string
+	UserId   string
+	Resource *pb.ServiceResourceModel
+	Service  services.ServiceManagerI
+}
+
 type CreateTableAI struct {
 	Label         string
 	UserId        string

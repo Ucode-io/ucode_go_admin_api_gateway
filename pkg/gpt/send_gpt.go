@@ -94,5 +94,41 @@ func GetDefaultFunctions() []models.Tool {
 				},
 			},
 		},
+		{
+			Type: "function",
+			Function: models.FunctionDescription{
+				Name:        "delete_menu",
+				Description: "Delete menu with given name",
+				Parameters: map[string]interface{}{
+					"type": "object",
+					"properties": map[string]interface{}{
+						"name": map[string]interface{}{
+							"type":        "string",
+							"description": "The name of the menu",
+						},
+					},
+				},
+			},
+		},
+		{
+			Type: "function",
+			Function: models.FunctionDescription{
+				Name:        "update_menu",
+				Description: "Update menu with given name",
+				Parameters: map[string]interface{}{
+					"type": "object",
+					"properties": map[string]interface{}{
+						"old_name": map[string]interface{}{
+							"type":        "string",
+							"description": "The old name of the menu",
+						},
+						"new_name": map[string]interface{}{
+							"type":        "string",
+							"description": "The new name of the menu",
+						},
+					},
+				},
+			},
+		},
 	}
 }
