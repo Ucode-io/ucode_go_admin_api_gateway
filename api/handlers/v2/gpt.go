@@ -31,7 +31,7 @@ import (
 func (h *HandlerV2) SendToGpt(c *gin.Context) {
 	var (
 		reqBody models.SendToGptRequest
-		logReq  = &models.CreateVersionHistoryRequest{}
+		logReq  *models.CreateVersionHistoryRequest
 	)
 
 	err := c.ShouldBindJSON(&reqBody)
@@ -134,6 +134,18 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 				h.handleResponse(c, status_http.GRPCError, err.Error())
 				return
 			}
+		case "update_table":
+
+			fmt.Println("UPDATE TABLE >>>>>>>")
+			fmt.Println(cast.ToString(arguments["old_name"]))
+			fmt.Println(cast.ToString(arguments["new_name"]))
+
+			_, err = gpt.UpdateTable(&models.UpdateTableAI{
+				OldLabel: cast.ToString(arguments["old_name"]),
+				NewLabel: cast.ToString(arguments["new_name"]),
+				Resource: resource,
+				Service:  services,
+			})
 
 		default:
 
@@ -141,12 +153,15 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 			return
 		}
 
-		switch resource.ResourceType {
-		case pb.ResourceType_MONGODB:
-			go h.versionHistory(c, logReq)
-		case pb.ResourceType_POSTGRESQL:
-			go h.versionHistoryGo(c, logReq)
+		if logReq != nil {
+			switch resource.ResourceType {
+			case pb.ResourceType_MONGODB:
+				go h.versionHistory(c, logReq)
+			case pb.ResourceType_POSTGRESQL:
+				go h.versionHistoryGo(c, logReq)
+			}
 		}
+
 	}
 
 	h.handleResponse(c, status_http.OK, "Success")

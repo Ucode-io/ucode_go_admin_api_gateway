@@ -30,7 +30,7 @@ func CreateTable(reqBody *models.CreateTableAI) (*models.CreateVersionHistoryReq
 		services   = reqBody.Service
 		tableMongo = &obs.CreateTableRequest{
 			Label:      reqBody.Label,
-			Slug:       reqBody.Label,
+			Slug:       reqBody.TableSlug,
 			ShowInMenu: true,
 			Name:       fmt.Sprintf("Auto Created Commit Create table - %s", time.Now().Format(time.RFC1123)),
 			CommitType: config.COMMIT_TYPE_TABLE,
@@ -43,7 +43,7 @@ func CreateTable(reqBody *models.CreateTableAI) (*models.CreateVersionHistoryReq
 		}
 		tablePsql = &nb.CreateTableRequest{
 			Label:      reqBody.Label,
-			Slug:       reqBody.Label,
+			Slug:       reqBody.TableSlug,
 			ShowInMenu: true,
 			Name:       fmt.Sprintf("Auto Created Commit Create table - %s", time.Now().Format(time.RFC1123)),
 			CommitType: config.COMMIT_TYPE_TABLE,
@@ -96,4 +96,49 @@ func CreateTable(reqBody *models.CreateTableAI) (*models.CreateVersionHistoryReq
 	}
 
 	return logReq, nil
+}
+
+func UpdateTable(req *models.UpdateTableAI) (*models.CreateVersionHistoryRequest, error) {
+
+	resource := req.Resource
+	services := req.Service
+
+	attributes, err := helper.ConvertMapToStruct(map[string]interface{}{
+		"label":    "",
+		"label_en": req.NewLabel,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		_, err := services.GetBuilderServiceByType(resource.NodeType).Table().UpdateLabel(
+			context.Background(),
+			&obs.UpdateLabelReq{
+				ProjectId:  resource.ResourceEnvironmentId,
+				OldLabel:   req.OldLabel,
+				NewLabel:   req.NewLabel,
+				Attributes: attributes,
+			},
+		)
+		if err != nil {
+			return nil, err
+		}
+	case pb.ResourceType_POSTGRESQL:
+		_, err := services.GoObjectBuilderService().Table().UpdateLabel(
+			context.Background(),
+			&nb.UpdateLabelReq{
+				ProjectId:  resource.ResourceEnvironmentId,
+				OldLabel:   req.OldLabel,
+				NewLabel:   req.NewLabel,
+				Attributes: attributes,
+			},
+		)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return nil, nil
 }

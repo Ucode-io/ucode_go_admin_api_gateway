@@ -20,6 +20,8 @@ service TableService {
     rpc GetTableHistoryById(TableHistoryPrimaryKey) returns (Table) {}
     rpc RevertTableHistory(RevertTableHistoryRequest) returns (TableHistory) {}
     rpc InsertVersionsToCommit(InsertVersionsToCommitRequest) returns (TableHistory) {}
+
+    rpc UpdateLabel(UpdateLabelReq) returns (google.protobuf.Empty) {}
 }
 
 message InsertVersionsToCommitRequest {
@@ -204,4 +206,11 @@ message Permission {
     string guid = 5;
     bool is_public = 6;
     bool is_have_condition = 7;
+}
+
+message UpdateLabelReq {
+    string new_label = 1;
+    string old_label = 2;
+    string project_id = 3;
+    google.protobuf.Struct attributes = 4;
 }

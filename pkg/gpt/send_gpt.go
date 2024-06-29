@@ -88,7 +88,27 @@ func GetDefaultFunctions() []models.Tool {
 						},
 						"table_slug": map[string]interface{}{
 							"type":        "string",
-							"description": "The slug of the table",
+							"description": "A slug generated from the name by translating it to English and converting it to lowercase. Spaces and special characters should be replaced with underscores.",
+						},
+					},
+				},
+			},
+		},
+		{
+			Type: "function",
+			Function: models.FunctionDescription{
+				Name:        "update_table",
+				Description: "Update table with given name",
+				Parameters: map[string]interface{}{
+					"type": "object",
+					"properties": map[string]interface{}{
+						"old_name": map[string]interface{}{
+							"type":        "string",
+							"description": "The current name of the table that needs to be updated",
+						},
+						"new_name": map[string]interface{}{
+							"type":        "string",
+							"description": "The new name to be assigned to the table",
 						},
 					},
 				},

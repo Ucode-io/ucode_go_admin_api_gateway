@@ -3,6 +3,7 @@ package models
 import (
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/services"
+	"ucode/ucode_go_api_gateway/storage"
 )
 
 type SendToGptRequest struct {
@@ -77,12 +78,23 @@ type CreateMenuAI struct {
 	UserId   string
 	Resource *pb.ServiceResourceModel
 	Service  services.ServiceManagerI
+	Redis    storage.RedisStorageI
+	Promt    string
 }
 
 type CreateTableAI struct {
 	Label         string
 	UserId        string
 	TableSlug     string
+	EnvironmentId string
+	Resource      *pb.ServiceResourceModel
+	Service       services.ServiceManagerI
+}
+
+type UpdateTableAI struct {
+	NewLabel      string
+	OldLabel      string
+	UserId        string
 	EnvironmentId string
 	Resource      *pb.ServiceResourceModel
 	Service       services.ServiceManagerI

@@ -79,5 +79,33 @@ func CreateMenu(reqBody *models.CreateMenuAI) (*models.CreateVersionHistoryReque
 		}
 	}
 
+	// projectId := reqBody.Resource.ResourceEnvironmentId
+
+	// redisResp, err := reqBody.Redis.Get(context.Background(), projectId, projectId, reqBody.Resource.NodeType)
+	// if err == nil {
+
+	// 	m := []models.Message{}
+	// 	err = json.Unmarshal([]byte(redisResp), &m)
+	// 	if err != nil {
+	// 		return logReq, err
+	// 	} else {
+	// 		m = append(m, models.Message{
+	// 			Content: fmt.Sprintf("menu %s created with %s id", reqBody.Label, menuId),
+	// 			Role:    "client",
+	// 		})
+	// 	}
+
+	// 	m = append(m, models.Message{
+	// 		Role:    "user",
+	// 		Content: reqBody.Promt,
+	// 	})
+
+	// 	m = append(m, models.Message{
+	// 		Role:    "system",
+	// 		Content: menuId,
+	// 	})
+
+	// }
+
 	return logReq, nil
 }
