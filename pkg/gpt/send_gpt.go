@@ -90,6 +90,10 @@ func GetDefaultFunctions() []models.Tool {
 							"type":        "string",
 							"description": "A slug generated from the name by translating it to English and converting it to lowercase. Spaces and special characters should be replaced with underscores.",
 						},
+						"menu": map[string]interface{}{
+							"type":        "string",
+							"description": "The name of the menu if menu doesn't exsist then return c57eedc3-a954-4262-a0af-376c65b5a284",
+						},
 					},
 				},
 			},
@@ -109,6 +113,42 @@ func GetDefaultFunctions() []models.Tool {
 						"new_name": map[string]interface{}{
 							"type":        "string",
 							"description": "The new name to be assigned to the table",
+						},
+					},
+				},
+			},
+		},
+		{
+			Type: "function",
+			Function: models.FunctionDescription{
+				Name:        "delete_menu",
+				Description: "Delete menu with given name",
+				Parameters: map[string]interface{}{
+					"type": "object",
+					"properties": map[string]interface{}{
+						"name": map[string]interface{}{
+							"type":        "string",
+							"description": "The name of the menu",
+						},
+					},
+				},
+			},
+		},
+		{
+			Type: "function",
+			Function: models.FunctionDescription{
+				Name:        "update_menu",
+				Description: "Update menu with given name",
+				Parameters: map[string]interface{}{
+					"type": "object",
+					"properties": map[string]interface{}{
+						"old_name": map[string]interface{}{
+							"type":        "string",
+							"description": "The old name of the menu",
+						},
+						"new_name": map[string]interface{}{
+							"type":        "string",
+							"description": "The new name of the menu",
 						},
 					},
 				},

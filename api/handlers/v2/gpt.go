@@ -7,12 +7,11 @@ import (
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
+	"ucode/ucode_go_api_gateway/pkg/gpt"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cast"
-
-	"ucode/ucode_go_api_gateway/pkg/gpt"
 )
 
 // SendToGpt godoc
@@ -31,7 +30,7 @@ import (
 func (h *HandlerV2) SendToGpt(c *gin.Context) {
 	var (
 		reqBody models.SendToGptRequest
-		logReq  *models.CreateVersionHistoryRequest
+		logReq  []models.CreateVersionHistoryRequest
 	)
 
 	err := c.ShouldBindJSON(&reqBody)
@@ -110,9 +109,32 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 
 		switch functionName {
 		case "create_menu":
-			logReq, err = gpt.CreateMenu(&models.CreateMenuAI{
+			_, err = gpt.CreateMenu(&models.CreateMenuAI{
 				Label:    cast.ToString(arguments["name"]),
 				UserId:   userId.(string),
+				Resource: resource,
+				Service:  services,
+			})
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+		case "delete_menu":
+			logReq, err = gpt.DeleteMenu(&models.DeleteMenuAI{
+				Label:    cast.ToString(arguments["name"]),
+				UserId:   cast.ToString(userId),
+				Resource: resource,
+				Service:  services,
+			})
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+		case "update_menu":
+			logReq, err = gpt.UpdateMenu(&models.UpdateMenuAI{
+				OldLabel: cast.ToString(arguments["old_name"]),
+				NewLabel: cast.ToString(arguments["new_name"]),
+				UserId:   cast.ToString(userId),
 				Resource: resource,
 				Service:  services,
 			})
@@ -125,6 +147,7 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 			logReq, err = gpt.CreateTable(&models.CreateTableAI{
 				Label:         cast.ToString(arguments["name"]),
 				TableSlug:     cast.ToString(arguments["table_slug"]),
+				Menu:          cast.ToString(arguments["menu"]),
 				EnvironmentId: resource.EnvironmentId,
 				UserId:        userId.(string),
 				Resource:      resource,
@@ -136,11 +159,7 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 			}
 		case "update_table":
 
-			fmt.Println("UPDATE TABLE >>>>>>>")
-			fmt.Println(cast.ToString(arguments["old_name"]))
-			fmt.Println(cast.ToString(arguments["new_name"]))
-
-			_, err = gpt.UpdateTable(&models.UpdateTableAI{
+			logReq, err = gpt.UpdateTable(&models.UpdateTableAI{
 				OldLabel: cast.ToString(arguments["old_name"]),
 				NewLabel: cast.ToString(arguments["new_name"]),
 				Resource: resource,
@@ -153,15 +172,14 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 			return
 		}
 
-		if logReq != nil {
+		for _, log := range logReq {
 			switch resource.ResourceType {
 			case pb.ResourceType_MONGODB:
-				go h.versionHistory(c, logReq)
+				go h.versionHistory(c, &log)
 			case pb.ResourceType_POSTGRESQL:
-				go h.versionHistoryGo(c, logReq)
+				go h.versionHistoryGo(c, &log)
 			}
 		}
-
 	}
 
 	h.handleResponse(c, status_http.OK, "Success")

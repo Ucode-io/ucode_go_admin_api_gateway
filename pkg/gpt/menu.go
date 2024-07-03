@@ -11,7 +11,7 @@ import (
 	"github.com/spf13/cast"
 )
 
-func CreateMenu(reqBody *models.CreateMenuAI) (*models.CreateVersionHistoryRequest, error) {
+func CreateMenu(reqBody *models.CreateMenuAI) ([]models.CreateVersionHistoryRequest, error) {
 
 	attributes, err := helper.ConvertMapToStruct(map[string]interface{}{
 		"label":    "",
@@ -22,6 +22,7 @@ func CreateMenu(reqBody *models.CreateMenuAI) (*models.CreateVersionHistoryReque
 	}
 
 	var (
+		respLogReq   = []models.CreateVersionHistoryRequest{}
 		mongoRequest = &obs.CreateMenuRequest{
 			Label:      reqBody.Label,
 			ParentId:   "c57eedc3-a954-4262-a0af-376c65b5a284",
@@ -36,7 +37,7 @@ func CreateMenu(reqBody *models.CreateMenuAI) (*models.CreateVersionHistoryReque
 			ProjectId:  reqBody.Resource.ResourceEnvironmentId,
 			Attributes: attributes,
 		}
-		logReq = &models.CreateVersionHistoryRequest{
+		logReq = models.CreateVersionHistoryRequest{
 			Services:     reqBody.Service,
 			NodeType:     reqBody.Resource.NodeType,
 			ProjectId:    reqBody.Resource.ResourceEnvironmentId,
@@ -58,10 +59,12 @@ func CreateMenu(reqBody *models.CreateMenuAI) (*models.CreateVersionHistoryReque
 
 		if err != nil {
 			logReq.Response = err.Error()
-			return nil, err
+			respLogReq = append(respLogReq, logReq)
+			return respLogReq, err
 		} else {
 			logReq.Response = resp
 			logReq.Current = resp
+			respLogReq = append(respLogReq, logReq)
 		}
 
 	case pb.ResourceType_POSTGRESQL:
@@ -72,40 +75,109 @@ func CreateMenu(reqBody *models.CreateMenuAI) (*models.CreateVersionHistoryReque
 
 		if err != nil {
 			logReq.Response = err.Error()
+			respLogReq = append(respLogReq, logReq)
 			return nil, err
 		} else {
 			logReq.Response = resp
 			logReq.Current = resp
+			respLogReq = append(respLogReq, logReq)
 		}
 	}
 
-	// projectId := reqBody.Resource.ResourceEnvironmentId
+	return respLogReq, nil
+}
 
-	// redisResp, err := reqBody.Redis.Get(context.Background(), projectId, projectId, reqBody.Resource.NodeType)
-	// if err == nil {
+func DeleteMenu(reqBody *models.DeleteMenuAI) ([]models.CreateVersionHistoryRequest, error) {
+	var (
+		respLogReq = []models.CreateVersionHistoryRequest{}
+		logReq     = models.CreateVersionHistoryRequest{
+			Services:     reqBody.Service,
+			NodeType:     reqBody.Resource.NodeType,
+			ProjectId:    reqBody.Resource.ResourceEnvironmentId,
+			ActionSource: "MENU",
+			ActionType:   "DELETE MENU",
+			UserInfo:     cast.ToString(reqBody.UserId),
+			TableSlug:    "Menu",
+		}
+	)
 
-	// 	m := []models.Message{}
-	// 	err = json.Unmarshal([]byte(redisResp), &m)
-	// 	if err != nil {
-	// 		return logReq, err
-	// 	} else {
-	// 		m = append(m, models.Message{
-	// 			Content: fmt.Sprintf("menu %s created with %s id", reqBody.Label, menuId),
-	// 			Role:    "client",
-	// 		})
-	// 	}
+	menus, err := reqBody.Service.GetBuilderServiceByType(reqBody.Resource.NodeType).Menu().GetByLabel(
+		context.Background(),
+		&obs.MenuPrimaryKey{Label: reqBody.Label, ProjectId: reqBody.Resource.ResourceEnvironmentId},
+	)
+	if err != nil {
+		return respLogReq, err
+	}
 
-	// 	m = append(m, models.Message{
-	// 		Role:    "user",
-	// 		Content: reqBody.Promt,
-	// 	})
+	for _, menu := range menus.Menus {
 
-	// 	m = append(m, models.Message{
-	// 		Role:    "system",
-	// 		Content: menuId,
-	// 	})
+		_, err := reqBody.Service.GetBuilderServiceByType(reqBody.Resource.NodeType).Menu().Delete(
+			context.Background(),
+			&obs.MenuPrimaryKey{
+				ProjectId: reqBody.Resource.ResourceEnvironmentId,
+				Id:        menu.Id,
+			},
+		)
+		if err != nil {
+			logReq.Response = err.Error()
+			respLogReq = append(respLogReq, logReq)
+			return respLogReq, err
+		}
 
-	// }
+		respLogReq = append(respLogReq, logReq)
+	}
 
-	return logReq, nil
+	return respLogReq, nil
+}
+
+func UpdateMenu(reqBody *models.UpdateMenuAI) ([]models.CreateVersionHistoryRequest, error) {
+	var (
+		respLogReq = []models.CreateVersionHistoryRequest{}
+		logReq     = models.CreateVersionHistoryRequest{
+			Services:     reqBody.Service,
+			NodeType:     reqBody.Resource.NodeType,
+			ProjectId:    reqBody.Resource.ResourceEnvironmentId,
+			ActionSource: "MENU",
+			ActionType:   "UPDATE MENU",
+			UserInfo:     cast.ToString(reqBody.UserId),
+			TableSlug:    "Menu",
+		}
+	)
+
+	menus, err := reqBody.Service.GetBuilderServiceByType(reqBody.Resource.NodeType).Menu().GetByLabel(
+		context.Background(),
+		&obs.MenuPrimaryKey{Label: reqBody.OldLabel, ProjectId: reqBody.Resource.ResourceEnvironmentId},
+	)
+	if err != nil {
+		return respLogReq, err
+	}
+
+	for _, menu := range menus.Menus {
+		resp, err := reqBody.Service.GetBuilderServiceByType(reqBody.Resource.NodeType).Menu().Update(
+			context.Background(),
+			&obs.Menu{
+				ProjectId:       reqBody.Resource.ResourceEnvironmentId,
+				Label:           reqBody.NewLabel,
+				Id:              menu.Id,
+				Icon:            menu.Icon,
+				TableId:         menu.TableId,
+				LayoutId:        menu.LayoutId,
+				ParentId:        menu.ParentId,
+				Type:            menu.Type,
+				MicrofrontendId: menu.MicrofrontendId,
+				IsStatic:        menu.IsStatic,
+			},
+		)
+		if err != nil {
+			logReq.Response = err.Error()
+			respLogReq = append(respLogReq, logReq)
+			return respLogReq, err
+		} else {
+			logReq.Response = resp
+			logReq.Current = resp
+			respLogReq = append(respLogReq, logReq)
+		}
+	}
+
+	return respLogReq, nil
 }

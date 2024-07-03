@@ -82,11 +82,27 @@ type CreateMenuAI struct {
 	Promt    string
 }
 
+type DeleteMenuAI struct {
+	Label    string
+	UserId   string
+	Resource *pb.ServiceResourceModel
+	Service  services.ServiceManagerI
+}
+
+type UpdateMenuAI struct {
+	NewLabel string
+	OldLabel string
+	UserId   string
+	Resource *pb.ServiceResourceModel
+	Service  services.ServiceManagerI
+}
+
 type CreateTableAI struct {
 	Label         string
 	UserId        string
 	TableSlug     string
 	EnvironmentId string
+	Menu          string
 	Resource      *pb.ServiceResourceModel
 	Service       services.ServiceManagerI
 }

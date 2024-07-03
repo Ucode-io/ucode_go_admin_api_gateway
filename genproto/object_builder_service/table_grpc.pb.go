@@ -32,7 +32,7 @@ type TableServiceClient interface {
 	GetTableHistoryById(ctx context.Context, in *TableHistoryPrimaryKey, opts ...grpc.CallOption) (*Table, error)
 	RevertTableHistory(ctx context.Context, in *RevertTableHistoryRequest, opts ...grpc.CallOption) (*TableHistory, error)
 	InsertVersionsToCommit(ctx context.Context, in *InsertVersionsToCommitRequest, opts ...grpc.CallOption) (*TableHistory, error)
-	UpdateLabel(ctx context.Context, in *UpdateLabelReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	GetTablesByLabel(ctx context.Context, in *GetTablesByLabelReq, opts ...grpc.CallOption) (*GetAllTablesResponse, error)
 }
 
 type tableServiceClient struct {
@@ -124,9 +124,9 @@ func (c *tableServiceClient) InsertVersionsToCommit(ctx context.Context, in *Ins
 	return out, nil
 }
 
-func (c *tableServiceClient) UpdateLabel(ctx context.Context, in *UpdateLabelReq, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/object_builder_service.TableService/UpdateLabel", in, out, opts...)
+func (c *tableServiceClient) GetTablesByLabel(ctx context.Context, in *GetTablesByLabelReq, opts ...grpc.CallOption) (*GetAllTablesResponse, error) {
+	out := new(GetAllTablesResponse)
+	err := c.cc.Invoke(ctx, "/object_builder_service.TableService/GetTablesByLabel", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -146,7 +146,7 @@ type TableServiceServer interface {
 	GetTableHistoryById(context.Context, *TableHistoryPrimaryKey) (*Table, error)
 	RevertTableHistory(context.Context, *RevertTableHistoryRequest) (*TableHistory, error)
 	InsertVersionsToCommit(context.Context, *InsertVersionsToCommitRequest) (*TableHistory, error)
-	UpdateLabel(context.Context, *UpdateLabelReq) (*emptypb.Empty, error)
+	GetTablesByLabel(context.Context, *GetTablesByLabelReq) (*GetAllTablesResponse, error)
 	mustEmbedUnimplementedTableServiceServer()
 }
 
@@ -181,8 +181,8 @@ func (UnimplementedTableServiceServer) RevertTableHistory(context.Context, *Reve
 func (UnimplementedTableServiceServer) InsertVersionsToCommit(context.Context, *InsertVersionsToCommitRequest) (*TableHistory, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method InsertVersionsToCommit not implemented")
 }
-func (UnimplementedTableServiceServer) UpdateLabel(context.Context, *UpdateLabelReq) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdateLabel not implemented")
+func (UnimplementedTableServiceServer) GetTablesByLabel(context.Context, *GetTablesByLabelReq) (*GetAllTablesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTablesByLabel not implemented")
 }
 func (UnimplementedTableServiceServer) mustEmbedUnimplementedTableServiceServer() {}
 
@@ -359,20 +359,20 @@ func _TableService_InsertVersionsToCommit_Handler(srv interface{}, ctx context.C
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TableService_UpdateLabel_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateLabelReq)
+func _TableService_GetTablesByLabel_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTablesByLabelReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TableServiceServer).UpdateLabel(ctx, in)
+		return srv.(TableServiceServer).GetTablesByLabel(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/object_builder_service.TableService/UpdateLabel",
+		FullMethod: "/object_builder_service.TableService/GetTablesByLabel",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TableServiceServer).UpdateLabel(ctx, req.(*UpdateLabelReq))
+		return srv.(TableServiceServer).GetTablesByLabel(ctx, req.(*GetTablesByLabelReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -421,8 +421,8 @@ var TableService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _TableService_InsertVersionsToCommit_Handler,
 		},
 		{
-			MethodName: "UpdateLabel",
-			Handler:    _TableService_UpdateLabel_Handler,
+			MethodName: "GetTablesByLabel",
+			Handler:    _TableService_GetTablesByLabel_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
