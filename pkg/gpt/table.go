@@ -233,6 +233,7 @@ func UpdateTable(req *models.UpdateTableAI) ([]models.CreateVersionHistoryReques
 				return respLogReq, err
 			}
 
+			updateTable.ProjectId = resource.ResourceEnvironmentId
 			updateTable.Attributes = attributes
 
 			logReq.Request = &updateTable
@@ -250,6 +251,56 @@ func UpdateTable(req *models.UpdateTableAI) ([]models.CreateVersionHistoryReques
 				logReq.Current = resp
 				respLogReq = append(respLogReq, logReq)
 			}
+		}
+
+		menus, err := services.GetBuilderServiceByType(resource.NodeType).Menu().GetByLabel(
+			context.Background(),
+			&obs.MenuPrimaryKey{Label: req.OldLabel, ProjectId: resource.ResourceEnvironmentId},
+		)
+		if err != nil {
+			return respLogReq, err
+		}
+
+		for _, menu := range menus.Menus {
+			var (
+				updateMenu = &obs.Menu{
+					ProjectId:       resource.ResourceEnvironmentId,
+					Label:           req.NewLabel,
+					Id:              menu.Id,
+					Icon:            menu.Icon,
+					TableId:         menu.TableId,
+					LayoutId:        menu.LayoutId,
+					ParentId:        menu.ParentId,
+					Type:            menu.Type,
+					MicrofrontendId: menu.MicrofrontendId,
+					IsStatic:        menu.IsStatic,
+				}
+				logReq = models.CreateVersionHistoryRequest{
+					Services:     services,
+					NodeType:     resource.NodeType,
+					ProjectId:    resource.ResourceEnvironmentId,
+					ActionSource: "MENU",
+					ActionType:   "UPDATE MENU",
+					UserInfo:     cast.ToString(req.UserId),
+					TableSlug:    "Menu",
+					Request:      updateMenu,
+				}
+			)
+
+			resp, err := services.GetBuilderServiceByType(resource.NodeType).Menu().Update(
+				context.Background(),
+				updateMenu,
+			)
+			if err != nil {
+				logReq.Response = err.Error()
+				respLogReq = append(respLogReq, logReq)
+				return respLogReq, err
+			} else {
+				logReq.Response = resp
+				logReq.Current = resp
+				respLogReq = append(respLogReq, logReq)
+			}
+
 		}
 
 	case pb.ResourceType_POSTGRESQL:

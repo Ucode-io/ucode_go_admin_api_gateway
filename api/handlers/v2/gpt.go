@@ -144,6 +144,11 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 			}
 		case "create_table":
 
+			_, ok := arguments["menu"]
+			if !ok {
+				arguments["menu"] = "c57eedc3-a954-4262-a0af-376c65b5a284"
+			}
+
 			logReq, err = gpt.CreateTable(&models.CreateTableAI{
 				Label:         cast.ToString(arguments["name"]),
 				TableSlug:     cast.ToString(arguments["table_slug"]),

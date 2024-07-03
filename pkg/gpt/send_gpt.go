@@ -92,7 +92,7 @@ func GetDefaultFunctions() []models.Tool {
 						},
 						"menu": map[string]interface{}{
 							"type":        "string",
-							"description": "The name of the menu if menu doesn't exsist then return c57eedc3-a954-4262-a0af-376c65b5a284",
+							"description": "The name of the menu. If the menu doesn't exist or nil, return 'c57eedc3-a954-4262-a0af-376c65b5a284'.",
 						},
 					},
 				},
