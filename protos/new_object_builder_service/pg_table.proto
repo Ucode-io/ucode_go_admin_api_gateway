@@ -21,7 +21,7 @@ service TableService {
     rpc RevertTableHistory(RevertTableHistoryRequest) returns (TableHistory) {}
     rpc InsertVersionsToCommit(InsertVersionsToCommitRequest) returns (TableHistory) {}
 
-    rpc GetIdByLabel(GetIdByLabelReq) returns (GetIdByLabelResp) {}
+    rpc GetTablesByLabel(GetTablesByLabelReq) returns (GetAllTablesResponse) {}
 }
 
 message InsertVersionsToCommitRequest {
@@ -208,11 +208,7 @@ message Permission {
     bool is_have_condition = 7;
 }
 
-message GetIdByLabelReq {
+message GetTablesByLabelReq {
     string label = 1;
     string project_id = 2;
-}
-
-message GetIdByLabelResp {
-    repeated string ids = 1;
 }

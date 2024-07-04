@@ -277,6 +277,9 @@ message RecordPermission {
     string view_create = 13;
     string pdf_action = 14;
     string add_field = 15;
+    string add_filter = 16;
+    string header = 17;
+    string field_filter = 18;
 }
 
 message GlobalPermission {
