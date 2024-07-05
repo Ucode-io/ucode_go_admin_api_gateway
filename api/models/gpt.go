@@ -25,6 +25,14 @@ type OpenAIResponse struct {
 	Choices           []Choice    `json:"choices"`
 	Usage             Usage       `json:"usage"`
 	SystemFingerprint interface{} `json:"system_fingerprint"`
+	Error             ErrorAI     `json:"error"`
+}
+
+type ErrorAI struct {
+	Message string `json:"message"`
+	Type    string `json:"type"`
+	Param   string `json:"param"`
+	Code    string `json:"code"`
 }
 
 type Usage struct {
@@ -114,4 +122,32 @@ type UpdateTableAI struct {
 	EnvironmentId string
 	Resource      *pb.ServiceResourceModel
 	Service       services.ServiceManagerI
+}
+
+type CreateFieldAI struct {
+	Label    string
+	Slug     string
+	Type     string
+	Table    string
+	UserId   string
+	Resource *pb.ServiceResourceModel
+	Service  services.ServiceManagerI
+}
+
+type UpdateFieldAI struct {
+	OldLabel string
+	NewLabel string
+	NewType  string
+	Table    string
+	UserId   string
+	Resource *pb.ServiceResourceModel
+	Service  services.ServiceManagerI
+}
+
+type DeleteFieldAI struct {
+	Label    string
+	Table    string
+	UserId   string
+	Resource *pb.ServiceResourceModel
+	Service  services.ServiceManagerI
 }

@@ -65,10 +65,6 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 		return
 	}
 
-	// HERE SHOULD BE GET CHAT HISTORY FROM BUILDER SERVICE
-
-	// resp.Message => append my new req
-
 	respMessages := []models.Message{}
 
 	userId, _ := c.Get("user_id")
@@ -119,7 +115,7 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 				h.handleResponse(c, status_http.GRPCError, err.Error())
 				return
 			}
-		case "delete_menu":
+		case "delete_menu", "delete_table":
 			logReq, err = gpt.DeleteMenu(&models.DeleteMenuAI{
 				Label:    cast.ToString(arguments["name"]),
 				UserId:   cast.ToString(userId),
@@ -170,6 +166,54 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 				Resource: resource,
 				Service:  services,
 			})
+		case "create_field":
+
+			if cast.ToString(arguments["table"]) != "" {
+				logReq, err = gpt.CreateField(&models.CreateFieldAI{
+					Label:    cast.ToString(arguments["label"]),
+					Slug:     cast.ToString(arguments["slug"]),
+					Type:     cast.ToString(arguments["type"]),
+					Table:    cast.ToString(arguments["table"]),
+					UserId:   userId.(string),
+					Resource: resource,
+					Service:  services,
+				})
+				if err != nil {
+					h.handleResponse(c, status_http.GRPCError, err.Error())
+					return
+				}
+			} else {
+				h.handleResponse(c, status_http.BadRequest, "Table not found please give table's label")
+			}
+
+		case "update_field":
+
+			logReq, err = gpt.UpdateField(&models.UpdateFieldAI{
+				NewLabel: cast.ToString(arguments["new_label"]),
+				OldLabel: cast.ToString(arguments["old_label"]),
+				NewType:  cast.ToString(arguments["new_type"]),
+				Table:    cast.ToString(arguments["table"]),
+				UserId:   userId.(string),
+				Resource: resource,
+				Service:  services,
+			})
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+		case "delete_field":
+
+			logReq, err = gpt.DeleteField(&models.DeleteFieldAI{
+				Label:    cast.ToString(arguments["label"]),
+				Table:    cast.ToString(arguments["table"]),
+				UserId:   userId.(string),
+				Resource: resource,
+				Service:  services,
+			})
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
 
 		default:
 

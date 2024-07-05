@@ -141,6 +141,9 @@ message RoleWithAppTablePermissions {
             string pdf_action = 6;
             string add_field = 7;
             string delete_all = 8;
+            string add_filter = 9;
+            string header = 10;
+            string field_filter = 11;
         }
 
         string label = 1;

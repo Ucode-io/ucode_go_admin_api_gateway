@@ -53,6 +53,10 @@ func SendReqToGPT(req []models.Message) ([]models.ToolCall, error) {
 		return nil, err
 	}
 
+	if response.Error.Message != "" {
+		return nil, fmt.Errorf("not full information given")
+	}
+
 	return response.Choices[0].Message.ToolCalls, nil
 }
 
@@ -92,7 +96,7 @@ func GetDefaultFunctions() []models.Tool {
 						},
 						"menu": map[string]interface{}{
 							"type":        "string",
-							"description": "The name of the menu. If the menu doesn't exist or nil, return 'c57eedc3-a954-4262-a0af-376c65b5a284'.",
+							"description": "The name of the menu",
 						},
 					},
 				},
@@ -154,5 +158,146 @@ func GetDefaultFunctions() []models.Tool {
 				},
 			},
 		},
+		{
+			Type: "function",
+			Function: models.FunctionDescription{
+				Name:        "delete_table",
+				Description: "Delete table with given name",
+				Parameters: map[string]interface{}{
+					"type": "object",
+					"properties": map[string]interface{}{
+						"name": map[string]interface{}{
+							"type":        "string",
+							"description": "The name of the table",
+						},
+					},
+				},
+			},
+		},
+		{
+			Type: "function",
+			Function: models.FunctionDescription{
+				Name:        "create_field",
+				Description: "Create a field with the given name or create many fields",
+				Parameters: map[string]interface{}{
+					"type": "object",
+					"properties": map[string]interface{}{
+						"label": map[string]interface{}{
+							"type":        "string",
+							"description": "The label of the field",
+						},
+						"slug": map[string]interface{}{
+							"type":        "string",
+							"description": "The slug of the field, derived from the label",
+							"transform":   "translate to English, lowercase, replace spaces with underscores",
+						},
+						"type": map[string]interface{}{
+							"type":        "string",
+							"description": "The type of the field",
+							"enum": []string{"EMAIL", "PHOTO", "TIME", "MULTISELECT", "RANDOM_NUMBERS", "FILE",
+								"INCREMENT_NUMBER", "PHONE", "DATE_TIME", "FLOAT_NOLIMIT",
+								"MULTI_IMAGE", "DATE_TIME_WITHOUT_TIME_ZONE", "MULTI_LINE", "CHECKBOX",
+								"SWITCH", "FORMULA_FRONTEND", "NUMBER", "FLOAT", "FORMULA",
+								"SINGLE_LINE", "PASSWORD", "CODABAR", "INTERNATIONAL_PHONE",
+								"UUID", "INCREMENT_ID", "DATE", "MAP",
+							},
+							"inference": "based on label and description default return SINGLE_LINE",
+						},
+						"table": map[string]interface{}{
+							"type":        "string",
+							"description": "The name of the table",
+						},
+					},
+				},
+			},
+		},
+		{
+			Type: "function",
+			Function: models.FunctionDescription{
+				Name:        "update_field",
+				Description: "Update field with given parameters",
+				Parameters: map[string]interface{}{
+					"type": "object",
+					"properties": map[string]interface{}{
+						"old_label": map[string]interface{}{
+							"type":        "string",
+							"description": "The old label of the field",
+						},
+						"new_label": map[string]interface{}{
+							"type":        "string",
+							"description": "The new label of the field",
+						},
+						"new_type": map[string]interface{}{
+							"type":        "string",
+							"description": "The new type of the field",
+							"enum": []string{"EMAIL", "PHOTO", "TIME", "MULTISELECT", "RANDOM_NUMBERS", "FILE",
+								"INCREMENT_NUMBER", "PHONE", "DATE_TIME", "FLOAT_NOLIMIT",
+								"MULTI_IMAGE", "DATE_TIME_WITHOUT_TIME_ZONE", "MULTI_LINE", "CHECKBOX",
+								"SWITCH", "FORMULA_FRONTEND", "NUMBER", "FLOAT", "FORMULA",
+								"SINGLE_LINE", "PASSWORD", "CODABAR", "INTERNATIONAL_PHONE",
+								"UUID", "INCREMENT_ID", "DATE", "MAP",
+							},
+						},
+						"table": map[string]interface{}{
+							"type":        "string",
+							"description": "The table the field belongs to",
+						},
+					},
+				},
+			},
+		},
+		{
+			Type: "function",
+			Function: models.FunctionDescription{
+				Name:        "delete_field",
+				Description: "Delete field with given parameters",
+				Parameters: map[string]interface{}{
+					"type": "object",
+					"properties": map[string]interface{}{
+						"label": map[string]interface{}{
+							"type":        "string",
+							"description": "The label of the field",
+						},
+						"table": map[string]interface{}{
+							"type":        "string",
+							"description": "The table the field belongs to",
+						},
+					},
+				},
+			},
+		},
+		// {
+		// 	Type: "function",
+		// 	Function: models.FunctionDescription{
+		// 		Name:        "create_relation",
+		// 		Description: "Create relation with given parameters",
+		// 		Parameters: map[string]interface{}{
+		// 			"type": "object",
+		// 			"properties": map[string]interface{}{
+		// 				"table_from": map[string]interface{}{
+		// 					"type":        "string",
+		// 					"description": "The label of the table from",
+		// 				},
+		// 				"table_to": map[string]interface{}{
+		// 					"type":        "string",
+		// 					"description": "The label of the table to",
+		// 				},
+		// 				"relation_type": map[string]interface{}{
+		// 					"type":        "string",
+		// 					"description": "The relation type",
+		// 					"enum":        []string{"Many2One", "Many2Many", "Many2Recursive"},
+		// 				},
+		// 				"view_field": map[string]interface{}{
+		// 					"type":        "string",
+		// 					"description": "The label of the field in table_to",
+		// 				},
+		// 				"view_type": map[string]interface{}{
+		// 					"type":        "string",
+		// 					"description": "When relation_type is Many2Many return Input or Table looking for description. Default Input",
+		// 				},
+		// 			},
+		// 		},
+		// 	},
+		// },
 	}
 }

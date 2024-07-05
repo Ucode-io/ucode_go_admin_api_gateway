@@ -210,6 +210,9 @@ func UpdateTable(req *models.UpdateTableAI) ([]models.CreateVersionHistoryReques
 			ProjectId: resource.ResourceEnvironmentId,
 			Label:     req.OldLabel,
 		})
+		if err != nil {
+			return nil, err
+		}
 
 		for _, table := range tables.Tables {
 
@@ -300,7 +303,6 @@ func UpdateTable(req *models.UpdateTableAI) ([]models.CreateVersionHistoryReques
 				logReq.Current = resp
 				respLogReq = append(respLogReq, logReq)
 			}
-
 		}
 
 	case pb.ResourceType_POSTGRESQL:
@@ -331,6 +333,7 @@ func UpdateTable(req *models.UpdateTableAI) ([]models.CreateVersionHistoryReques
 				return respLogReq, err
 			}
 
+			updateTable.ProjectId = resource.ResourceEnvironmentId
 			updateTable.Attributes = attributes
 
 			logReq.Request = &updateTable
