@@ -214,6 +214,15 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 				h.handleResponse(c, status_http.GRPCError, err.Error())
 				return
 			}
+		case "create_relation":
+
+			fmt.Println("CREATE RELATION >>>>>>")
+
+			fmt.Println(arguments["table_from"])
+			fmt.Println(arguments["table_to"])
+			fmt.Println(arguments["relation_type"])
+			fmt.Println(arguments["view_field"])
+			fmt.Println(arguments["view_type"])
 
 		default:
 

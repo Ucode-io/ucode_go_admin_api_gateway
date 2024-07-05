@@ -15,7 +15,7 @@ func SendReqToGPT(req []models.Message) ([]models.ToolCall, error) {
 	cfg := config.Load()
 
 	requestBody := models.OpenAIRequest{
-		Model:        "gpt-3.5-turbo",
+		Model:        "gpt-4o",
 		Messages:     req,
 		Functions:    GetDefaultFunctions(),
 		FunctionCall: "auto",
@@ -284,7 +284,7 @@ func GetDefaultFunctions() []models.Tool {
 		// 				},
 		// 				"relation_type": map[string]interface{}{
 		// 					"type":        "string",
-		// 					"description": "The relation type",
+		// 					"description": "The relation type default Many2One",
 		// 					"enum":        []string{"Many2One", "Many2Many", "Many2Recursive"},
 		// 				},
 		// 				"view_field": map[string]interface{}{
