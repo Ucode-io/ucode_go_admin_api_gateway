@@ -284,16 +284,46 @@ func GetDefaultFunctions() []models.Tool {
 						},
 						"relation_type": map[string]interface{}{
 							"type":        "string",
-							"description": "The relation type default Many2One",
-							"enum":        []string{"Many2One", "Many2Many", "Many2Recursive"},
+							"description": "The relation type default Many2One. If table_to and table_from is equal return Recursive",
+							"enum":        []string{"Many2One", "Many2Many", "Recursive"},
 						},
 						"view_field": map[string]interface{}{
-							"type":        "string",
-							"description": "The label of the field in table_to",
+							"type":        "array",
+							"description": "The label of view field",
+							"items": map[string]interface{}{
+								"type": "string",
+							},
 						},
 						"view_type": map[string]interface{}{
 							"type":        "string",
-							"description": "When relation_type is Many2Many return Input or Table looking for description. Default Input",
+							"description": "When relation_type is Many2Many return INPUT or TABLE looking for description. Default INPUT",
+							"enum":        []string{"INPUT", "TABLE"},
+						},
+					},
+				},
+			},
+		},
+		{
+			Type: "function",
+			Function: models.FunctionDescription{
+				Name:        "delete_relation",
+				Description: "Delete relation with given parameters",
+				Parameters: map[string]interface{}{
+					"type": "object",
+					"properties": map[string]interface{}{
+						"table_from": map[string]interface{}{
+							"type":        "string",
+							"description": "The label of the table from",
+						},
+						"table_to": map[string]interface{}{
+							"type":        "string",
+							"description": "The label of the table to",
+						},
+						"relation_type": map[string]interface{}{
+							"type":        "string",
+							"description": "The type of relation",
+							"enum":        []string{"Many2One", "Many2Many", "Recursive"},
+							"default":     "",
 						},
 					},
 				},

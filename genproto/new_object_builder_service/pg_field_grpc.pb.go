@@ -31,6 +31,7 @@ type FieldServiceClient interface {
 	UpdateSearch(ctx context.Context, in *SearchUpdateRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	Delete(ctx context.Context, in *FieldPrimaryKey, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetAllByLabel(ctx context.Context, in *GetAllByLabelReq, opts ...grpc.CallOption) (*GetAllFieldsResponse, error)
+	GetIdsByLabel(ctx context.Context, in *GetIdsByLabelReq, opts ...grpc.CallOption) (*GetIdsByLabelResponse, error)
 }
 
 type fieldServiceClient struct {
@@ -113,6 +114,15 @@ func (c *fieldServiceClient) GetAllByLabel(ctx context.Context, in *GetAllByLabe
 	return out, nil
 }
 
+func (c *fieldServiceClient) GetIdsByLabel(ctx context.Context, in *GetIdsByLabelReq, opts ...grpc.CallOption) (*GetIdsByLabelResponse, error) {
+	out := new(GetIdsByLabelResponse)
+	err := c.cc.Invoke(ctx, "/new_object_builder_service.FieldService/GetIdsByLabel", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // FieldServiceServer is the server API for FieldService service.
 // All implementations must embed UnimplementedFieldServiceServer
 // for forward compatibility
@@ -125,6 +135,7 @@ type FieldServiceServer interface {
 	UpdateSearch(context.Context, *SearchUpdateRequest) (*emptypb.Empty, error)
 	Delete(context.Context, *FieldPrimaryKey) (*emptypb.Empty, error)
 	GetAllByLabel(context.Context, *GetAllByLabelReq) (*GetAllFieldsResponse, error)
+	GetIdsByLabel(context.Context, *GetIdsByLabelReq) (*GetIdsByLabelResponse, error)
 	mustEmbedUnimplementedFieldServiceServer()
 }
 
@@ -155,6 +166,9 @@ func (UnimplementedFieldServiceServer) Delete(context.Context, *FieldPrimaryKey)
 }
 func (UnimplementedFieldServiceServer) GetAllByLabel(context.Context, *GetAllByLabelReq) (*GetAllFieldsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAllByLabel not implemented")
+}
+func (UnimplementedFieldServiceServer) GetIdsByLabel(context.Context, *GetIdsByLabelReq) (*GetIdsByLabelResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetIdsByLabel not implemented")
 }
 func (UnimplementedFieldServiceServer) mustEmbedUnimplementedFieldServiceServer() {}
 
@@ -313,6 +327,24 @@ func _FieldService_GetAllByLabel_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _FieldService_GetIdsByLabel_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetIdsByLabelReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FieldServiceServer).GetIdsByLabel(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/new_object_builder_service.FieldService/GetIdsByLabel",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FieldServiceServer).GetIdsByLabel(ctx, req.(*GetIdsByLabelReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // FieldService_ServiceDesc is the grpc.ServiceDesc for FieldService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -351,6 +383,10 @@ var FieldService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetAllByLabel",
 			Handler:    _FieldService_GetAllByLabel_Handler,
+		},
+		{
+			MethodName: "GetIdsByLabel",
+			Handler:    _FieldService_GetIdsByLabel_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

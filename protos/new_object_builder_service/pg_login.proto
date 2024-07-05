@@ -132,8 +132,13 @@ message RecordPermission {
     string pdf_action = 14;
     string add_field = 15;
     string add_filter = 16;
-    string header = 17;
-    string field_filter = 18;
+    string field_filter = 17;
+    string fix_column = 18;
+    string tab_group = 19;
+    string columns = 20;
+    string group = 21;
+    string excel_menu = 22;
+    string search_button = 23;
 }
 
 message TableClientType {

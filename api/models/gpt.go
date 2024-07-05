@@ -151,3 +151,23 @@ type DeleteFieldAI struct {
 	Resource *pb.ServiceResourceModel
 	Service  services.ServiceManagerI
 }
+
+type CreateRelationAI struct {
+	TableFrom    string
+	TableTo      string
+	RelationType string
+	ViewField    []string
+	ViewType     string
+	UserId       string
+	Resource     *pb.ServiceResourceModel
+	Service      services.ServiceManagerI
+}
+
+type DeleteRelationAI struct {
+	TableFrom    string
+	TableTo      string
+	RelationType string
+	UserId       string
+	Resource     *pb.ServiceResourceModel
+	Service      services.ServiceManagerI
+}

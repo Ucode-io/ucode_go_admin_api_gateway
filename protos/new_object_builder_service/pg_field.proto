@@ -17,6 +17,7 @@ service FieldService {
     rpc Delete(FieldPrimaryKey) returns (google.protobuf.Empty) {}
 
     rpc GetAllByLabel(GetAllByLabelReq) returns (GetAllFieldsResponse) {}
+    rpc GetIdsByLabel(GetIdsByLabelReq) returns (GetIdsByLabelResponse) {}
 }
 
 message CreateFieldRequest {
@@ -144,5 +145,15 @@ message AllFields {
 message GetAllByLabelReq {
     string project_id = 1;
     string field_label = 2;
+    string table_id = 3;
+}
+
+message GetIdsByLabelResponse {
+    repeated string ids = 1;
+}
+
+message GetIdsByLabelReq {
+    string project_id = 1;
+    repeated string field_label = 2;
     string table_id = 3;
 }

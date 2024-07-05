@@ -216,13 +216,26 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 			}
 		case "create_relation":
 
-			fmt.Println("CREATE RELATION >>>>>>")
+			logReq, err = gpt.CreateRelation(&models.CreateRelationAI{
+				TableFrom:    cast.ToString(arguments["table_from"]),
+				TableTo:      cast.ToString(arguments["table_to"]),
+				RelationType: cast.ToString(arguments["relation_type"]),
+				ViewField:    cast.ToStringSlice(arguments["view_field"]),
+				ViewType:     cast.ToString(arguments["view_type"]),
+				UserId:       userId.(string),
+				Resource:     resource,
+				Service:      services,
+			})
+		case "delete_relation":
 
-			fmt.Println(arguments["table_from"])
-			fmt.Println(arguments["table_to"])
-			fmt.Println(arguments["relation_type"])
-			fmt.Println(arguments["view_field"])
-			fmt.Println(arguments["view_type"])
+			logReq, err = gpt.DeleteRelation(&models.DeleteRelationAI{
+				TableFrom:    cast.ToString(arguments["table_from"]),
+				TableTo:      cast.ToString(arguments["table_to"]),
+				RelationType: cast.ToString(arguments["relation_type"]),
+				UserId:       userId.(string),
+				Resource:     resource,
+				Service:      services,
+			})
 
 		default:
 
