@@ -15,7 +15,7 @@ func SendReqToGPT(req []models.Message) ([]models.ToolCall, error) {
 	cfg := config.Load()
 
 	requestBody := models.OpenAIRequest{
-		Model:        "gpt-4o",
+		Model:        "gpt-3.5-turbo",
 		Messages:     req,
 		Functions:    GetDefaultFunctions(),
 		FunctionCall: "auto",
@@ -266,38 +266,38 @@ func GetDefaultFunctions() []models.Tool {
 				},
 			},
 		},
-		// {
-		// 	Type: "function",
-		// 	Function: models.FunctionDescription{
-		// 		Name:        "create_relation",
-		// 		Description: "Create relation with given parameters",
-		// 		Parameters: map[string]interface{}{
-		// 			"type": "object",
-		// 			"properties": map[string]interface{}{
-		// 				"table_from": map[string]interface{}{
-		// 					"type":        "string",
-		// 					"description": "The label of the table from",
-		// 				},
-		// 				"table_to": map[string]interface{}{
-		// 					"type":        "string",
-		// 					"description": "The label of the table to",
-		// 				},
-		// 				"relation_type": map[string]interface{}{
-		// 					"type":        "string",
-		// 					"description": "The relation type default Many2One",
-		// 					"enum":        []string{"Many2One", "Many2Many", "Many2Recursive"},
-		// 				},
-		// 				"view_field": map[string]interface{}{
-		// 					"type":        "string",
-		// 					"description": "The label of the field in table_to",
-		// 				},
-		// 				"view_type": map[string]interface{}{
-		// 					"type":        "string",
-		// 					"description": "When relation_type is Many2Many return Input or Table looking for description. Default Input",
-		// 				},
-		// 			},
-		// 		},
-		// 	},
-		// },
+		{
+			Type: "function",
+			Function: models.FunctionDescription{
+				Name:        "create_relation",
+				Description: "Create relation with given parameters",
+				Parameters: map[string]interface{}{
+					"type": "object",
+					"properties": map[string]interface{}{
+						"table_from": map[string]interface{}{
+							"type":        "string",
+							"description": "The label of the table from",
+						},
+						"table_to": map[string]interface{}{
+							"type":        "string",
+							"description": "The label of the table to",
+						},
+						"relation_type": map[string]interface{}{
+							"type":        "string",
+							"description": "The relation type default Many2One",
+							"enum":        []string{"Many2One", "Many2Many", "Many2Recursive"},
+						},
+						"view_field": map[string]interface{}{
+							"type":        "string",
+							"description": "The label of the field in table_to",
+						},
+						"view_type": map[string]interface{}{
+							"type":        "string",
+							"description": "When relation_type is Many2Many return Input or Table looking for description. Default Input",
+						},
+					},
+				},
+			},
+		},
 	}
 }
