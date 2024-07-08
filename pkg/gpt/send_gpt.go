@@ -329,5 +329,122 @@ func GetDefaultFunctions() []models.Tool {
 				},
 			},
 		},
+		{
+			Type: "function",
+			Function: models.FunctionDescription{
+				Name:        "create_row",
+				Description: "Create row or item with given arguments",
+				Parameters: map[string]interface{}{
+					"type": "object",
+					"properties": map[string]interface{}{
+						"table": map[string]interface{}{
+							"type":        "string",
+							"description": "The label of the table",
+						},
+						"arguments": map[string]interface{}{
+							"type":        "array",
+							"description": "The argument to create row or item, An array of arguments used to create the row or item. Date strings will be dynamically converted to RFC3339 format.",
+							"items": map[string]interface{}{
+								"type": "string",
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			Type: "function",
+			Function: models.FunctionDescription{
+				Name:        "generate_row",
+				Description: "Create row or item with given arguments",
+				Parameters: map[string]interface{}{
+					"type": "object",
+					"properties": map[string]interface{}{
+						"table": map[string]interface{}{
+							"type":        "string",
+							"description": "The label of the table",
+						},
+						"count": map[string]interface{}{
+							"type":        "string",
+							"description": "The count of rows which should generate",
+						},
+					},
+				},
+			},
+		},
+		{
+			Type: "function",
+			Function: models.FunctionDescription{
+				Name:        "generate_values",
+				Description: "Generate values for given columns",
+				Parameters: map[string]interface{}{
+					"type": "object",
+					"properties": map[string]interface{}{
+						"arguments": map[string]interface{}{
+							"type":        "array",
+							"description": "Array of object which generated",
+							"items": map[string]interface{}{
+								"type":        "object",
+								"description": "Object which generated",
+								"properties": map[string]interface{}{
+									"key": map[string]interface{}{
+										"type":        "string",
+										"description": "this column given in promt",
+									},
+									"value": map[string]interface{}{
+										"type":        "string",
+										"description": "generate by yourself value based on key or column",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			Type: "function",
+			Function: models.FunctionDescription{
+				Name:        "update_item",
+				Description: "Update item for given table",
+				Parameters: map[string]interface{}{
+					"type": "object",
+					"properties": map[string]interface{}{
+						"old_data": map[string]interface{}{
+							"type":        "string",
+							"description": "Old data of object",
+						},
+						"new_data": map[string]interface{}{
+							"type":        "string",
+							"description": "New data of object",
+						},
+						"table": map[string]interface{}{
+							"type":        "string",
+							"description": "The label of the table",
+						},
+					},
+				},
+			},
+		},
+		{
+			Type: "function",
+			Function: models.FunctionDescription{
+				Name:        "delete_item",
+				Description: "Delete item for given table",
+				Parameters: map[string]interface{}{
+					"type": "object",
+					"properties": map[string]interface{}{
+						"old_data": map[string]interface{}{
+							"type":        "string",
+							"description": "Old data of object",
+						},
+						"table": map[string]interface{}{
+							"type":        "string",
+							"description": "The label of the table",
+						},
+					},
+				},
+			},
+		},
 	}
 }

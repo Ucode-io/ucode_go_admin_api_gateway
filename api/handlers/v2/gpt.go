@@ -236,6 +236,44 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 				Resource:     resource,
 				Service:      services,
 			})
+		case "create_row":
+
+			logReq, err = gpt.CreateItems(&models.CreateItemsAI{
+				Table:     cast.ToString(arguments["table"]),
+				Arguments: cast.ToStringSlice(arguments["arguments"]),
+				UserId:    userId.(string),
+				Resource:  resource,
+				Service:   services,
+			})
+		case "generate_row":
+
+			logReq, err = gpt.GenerateItems(&models.GenerateItemsAI{
+				Table:    cast.ToString(arguments["table"]),
+				Count:    cast.ToInt(arguments["count"]),
+				UserId:   userId.(string),
+				Resource: resource,
+				Service:  services,
+			})
+
+		case "update_item":
+
+			logReq, err = gpt.UpdateItems(&models.UpdateItemsAI{
+				Table:     cast.ToString(arguments["table"]),
+				OldColumn: arguments["old_data"],
+				NewColumn: arguments["new_data"],
+				UserId:    userId.(string),
+				Resource:  resource,
+				Service:   services,
+			})
+		case "delete_item":
+
+			logReq, err = gpt.DeleteItems(&models.UpdateItemsAI{
+				Table:     cast.ToString(arguments["table"]),
+				OldColumn: arguments["old_data"],
+				UserId:    userId.(string),
+				Resource:  resource,
+				Service:   services,
+			})
 
 		default:
 

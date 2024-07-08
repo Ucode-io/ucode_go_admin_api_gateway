@@ -171,3 +171,28 @@ type DeleteRelationAI struct {
 	Resource     *pb.ServiceResourceModel
 	Service      services.ServiceManagerI
 }
+
+type CreateItemsAI struct {
+	Arguments []string
+	Table     string
+	UserId    string
+	Resource  *pb.ServiceResourceModel
+	Service   services.ServiceManagerI
+}
+
+type GenerateItemsAI struct {
+	Table    string
+	Count    int
+	UserId   string
+	Resource *pb.ServiceResourceModel
+	Service  services.ServiceManagerI
+}
+
+type UpdateItemsAI struct {
+	OldColumn interface{}
+	NewColumn interface{}
+	Table     string
+	UserId    string
+	Resource  *pb.ServiceResourceModel
+	Service   services.ServiceManagerI
+}
