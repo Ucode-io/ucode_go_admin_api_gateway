@@ -18,6 +18,7 @@ service FieldService {
 
     rpc GetAllByLabel(GetAllByLabelReq) returns (GetAllFieldsResponse) {}
     rpc GetIdsByLabel(GetIdsByLabelReq) returns (GetIdsByLabelResponse) {}
+   
 }
 
 message CreateFieldRequest {
@@ -157,3 +158,4 @@ message GetIdsByLabelReq {
     repeated string field_label = 2;
     string table_id = 3;
 }
+

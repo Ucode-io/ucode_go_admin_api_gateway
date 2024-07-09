@@ -33,6 +33,7 @@ type TableServiceClient interface {
 	RevertTableHistory(ctx context.Context, in *RevertTableHistoryRequest, opts ...grpc.CallOption) (*TableHistory, error)
 	InsertVersionsToCommit(ctx context.Context, in *InsertVersionsToCommitRequest, opts ...grpc.CallOption) (*TableHistory, error)
 	GetTablesByLabel(ctx context.Context, in *GetTablesByLabelReq, opts ...grpc.CallOption) (*GetAllTablesResponse, error)
+	GetFieldsByTable(ctx context.Context, in *GetFieldsByTableReq, opts ...grpc.CallOption) (*GetFieldsByTableRes, error)
 }
 
 type tableServiceClient struct {
@@ -133,6 +134,15 @@ func (c *tableServiceClient) GetTablesByLabel(ctx context.Context, in *GetTables
 	return out, nil
 }
 
+func (c *tableServiceClient) GetFieldsByTable(ctx context.Context, in *GetFieldsByTableReq, opts ...grpc.CallOption) (*GetFieldsByTableRes, error) {
+	out := new(GetFieldsByTableRes)
+	err := c.cc.Invoke(ctx, "/object_builder_service.TableService/GetFieldsByTable", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TableServiceServer is the server API for TableService service.
 // All implementations must embed UnimplementedTableServiceServer
 // for forward compatibility
@@ -147,6 +157,7 @@ type TableServiceServer interface {
 	RevertTableHistory(context.Context, *RevertTableHistoryRequest) (*TableHistory, error)
 	InsertVersionsToCommit(context.Context, *InsertVersionsToCommitRequest) (*TableHistory, error)
 	GetTablesByLabel(context.Context, *GetTablesByLabelReq) (*GetAllTablesResponse, error)
+	GetFieldsByTable(context.Context, *GetFieldsByTableReq) (*GetFieldsByTableRes, error)
 	mustEmbedUnimplementedTableServiceServer()
 }
 
@@ -183,6 +194,9 @@ func (UnimplementedTableServiceServer) InsertVersionsToCommit(context.Context, *
 }
 func (UnimplementedTableServiceServer) GetTablesByLabel(context.Context, *GetTablesByLabelReq) (*GetAllTablesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTablesByLabel not implemented")
+}
+func (UnimplementedTableServiceServer) GetFieldsByTable(context.Context, *GetFieldsByTableReq) (*GetFieldsByTableRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetFieldsByTable not implemented")
 }
 func (UnimplementedTableServiceServer) mustEmbedUnimplementedTableServiceServer() {}
 
@@ -377,6 +391,24 @@ func _TableService_GetTablesByLabel_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TableService_GetFieldsByTable_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetFieldsByTableReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TableServiceServer).GetFieldsByTable(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/object_builder_service.TableService/GetFieldsByTable",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TableServiceServer).GetFieldsByTable(ctx, req.(*GetFieldsByTableReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TableService_ServiceDesc is the grpc.ServiceDesc for TableService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -423,6 +455,10 @@ var TableService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetTablesByLabel",
 			Handler:    _TableService_GetTablesByLabel_Handler,
+		},
+		{
+			MethodName: "GetFieldsByTable",
+			Handler:    _TableService_GetFieldsByTable_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

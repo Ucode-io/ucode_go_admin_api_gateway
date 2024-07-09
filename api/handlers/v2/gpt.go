@@ -111,10 +111,6 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 				Resource: resource,
 				Service:  services,
 			})
-			if err != nil {
-				h.handleResponse(c, status_http.GRPCError, err.Error())
-				return
-			}
 		case "delete_menu", "delete_table":
 			logReq, err = gpt.DeleteMenu(&models.DeleteMenuAI{
 				Label:    cast.ToString(arguments["name"]),
@@ -122,10 +118,6 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 				Resource: resource,
 				Service:  services,
 			})
-			if err != nil {
-				h.handleResponse(c, status_http.GRPCError, err.Error())
-				return
-			}
 		case "update_menu":
 			logReq, err = gpt.UpdateMenu(&models.UpdateMenuAI{
 				OldLabel: cast.ToString(arguments["old_name"]),
@@ -134,10 +126,6 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 				Resource: resource,
 				Service:  services,
 			})
-			if err != nil {
-				h.handleResponse(c, status_http.GRPCError, err.Error())
-				return
-			}
 		case "create_table":
 
 			_, ok := arguments["menu"]
@@ -154,10 +142,6 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 				Resource:      resource,
 				Service:       services,
 			})
-			if err != nil {
-				h.handleResponse(c, status_http.GRPCError, err.Error())
-				return
-			}
 		case "update_table":
 
 			logReq, err = gpt.UpdateTable(&models.UpdateTableAI{
@@ -178,10 +162,6 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 					Resource: resource,
 					Service:  services,
 				})
-				if err != nil {
-					h.handleResponse(c, status_http.GRPCError, err.Error())
-					return
-				}
 			} else {
 				h.handleResponse(c, status_http.BadRequest, "Table not found please give table's label")
 			}
@@ -197,10 +177,6 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 				Resource: resource,
 				Service:  services,
 			})
-			if err != nil {
-				h.handleResponse(c, status_http.GRPCError, err.Error())
-				return
-			}
 		case "delete_field":
 
 			logReq, err = gpt.DeleteField(&models.DeleteFieldAI{
@@ -210,10 +186,6 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 				Resource: resource,
 				Service:  services,
 			})
-			if err != nil {
-				h.handleResponse(c, status_http.GRPCError, err.Error())
-				return
-			}
 		case "create_relation":
 
 			logReq, err = gpt.CreateRelation(&models.CreateRelationAI{
@@ -274,6 +246,16 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 				Resource:  resource,
 				Service:   services,
 			})
+		case "login_table":
+
+			logReq, err = gpt.LoginTable(&models.LoginTableAI{
+				Table:    cast.ToString(arguments["table"]),
+				Login:    cast.ToString(arguments["login"]),
+				Password: cast.ToString(arguments["password"]),
+				UserId:   userId.(string),
+				Resource: resource,
+				Service:  services,
+			})
 
 		default:
 
@@ -289,6 +271,11 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 				go h.versionHistoryGo(c, &log)
 			}
 		}
+	}
+
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
 	}
 
 	h.handleResponse(c, status_http.OK, "Success")

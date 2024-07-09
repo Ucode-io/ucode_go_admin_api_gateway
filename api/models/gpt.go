@@ -196,3 +196,12 @@ type UpdateItemsAI struct {
 	Resource  *pb.ServiceResourceModel
 	Service   services.ServiceManagerI
 }
+
+type LoginTableAI struct {
+	Table    string
+	Login    string
+	Password string
+	UserId   string
+	Resource *pb.ServiceResourceModel
+	Service  services.ServiceManagerI
+}

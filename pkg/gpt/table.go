@@ -356,3 +356,95 @@ func UpdateTable(req *models.UpdateTableAI) ([]models.CreateVersionHistoryReques
 
 	return respLogReq, nil
 }
+
+func LoginTable(req *models.LoginTableAI) ([]models.CreateVersionHistoryRequest, error) {
+
+	var (
+		resource    = req.Resource
+		services    = req.Service
+		respLogReq  = []models.CreateVersionHistoryRequest{}
+		updateTable = &obs.UpdateTableRequest{}
+	)
+
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+
+		fields, err := services.GetBuilderServiceByType(resource.NodeType).Table().GetFieldsByTable(
+			context.Background(),
+			&obs.GetFieldsByTableReq{
+				TableLabel: req.Table,
+				ProjectId:  resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			return respLogReq, err
+		}
+
+		authInfo := make(map[string]interface{})
+
+		for _, field := range fields.Fields {
+			if field.Slug == "client_type_id" {
+				authInfo["client_type_id"] = "client_type_id"
+			} else if field.Slug == "role_id" {
+				authInfo["role_id"] = "role_id"
+			} else if field.Label == req.Login {
+				authInfo["login"] = field.Slug
+			} else if field.Label == req.Password {
+				authInfo["password"] = field.Slug
+			}
+		}
+
+		_, ok := authInfo["client_type_id"]
+		if !ok {
+			return respLogReq, fmt.Errorf("Your table doesn't have relation with client_type")
+		}
+
+		_, ok = authInfo["role_id"]
+		if !ok {
+			return respLogReq, fmt.Errorf("Your table doesn't have relation with role")
+		}
+
+		authInfo["login_strategy"] = []string{"login"}
+
+		table := fields.Table
+
+		atrb, err := helper.ConvertStructToResponse(fields.Table.Attributes)
+		if err != nil {
+			return respLogReq, err
+		}
+
+		atrb["auth_info"] = authInfo
+
+		table.Attributes, err = helper.ConvertMapToStruct(atrb)
+		if err != nil {
+			return respLogReq, err
+		}
+
+		table.IsLoginTable = true
+
+		err = helper.MarshalToStruct(table, &updateTable)
+		if err != nil {
+			return respLogReq, err
+		}
+
+		updateTable.ProjectId = resource.ResourceEnvironmentId
+
+		_, err = services.GetBuilderServiceByType(resource.NodeType).Table().Update(
+			context.Background(),
+			updateTable,
+		)
+		if err != nil {
+			// logReq.Response = err.Error()
+			// respLogReq = append(respLogReq, logReq)
+			return respLogReq, err
+		} else {
+			// logReq.Response = resp
+			// logReq.Current = resp
+			// respLogReq = append(respLogReq, logReq)
+		}
+
+	case pb.ResourceType_POSTGRESQL:
+	}
+
+	return nil, nil
+}

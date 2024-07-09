@@ -446,5 +446,29 @@ func GetDefaultFunctions() []models.Tool {
 				},
 			},
 		},
+		{
+			Type: "function",
+			Function: models.FunctionDescription{
+				Name:        "login_table",
+				Description: "Change to Login table with given Table label",
+				Parameters: map[string]interface{}{
+					"type": "object",
+					"properties": map[string]interface{}{
+						"table": map[string]interface{}{
+							"type":        "string",
+							"description": "The label of the table",
+						},
+						"login": map[string]interface{}{
+							"type":        "string",
+							"description": "The login label of login table",
+						},
+						"password": map[string]interface{}{
+							"type":        "string",
+							"description": "The password label of login table",
+						},
+					},
+				},
+			},
+		},
 	}
 }
