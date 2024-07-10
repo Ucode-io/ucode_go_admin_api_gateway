@@ -15,7 +15,7 @@ func SendReqToGPT(req []models.Message) ([]models.ToolCall, error) {
 	cfg := config.Load()
 
 	requestBody := models.OpenAIRequest{
-		Model:        "ft:gpt-3.5-turbo-0125:personal:ucode-project:9ikoCNoY",
+		Model:        "gpt-3.5-turbo-0125",
 		Messages:     req,
 		Functions:    GetDefaultFunctions(),
 		FunctionCall: "auto",
