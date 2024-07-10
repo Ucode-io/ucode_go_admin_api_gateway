@@ -774,6 +774,16 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 			v2Utils.POST("/export/:collection", h.V2.ExportData)
 		}
 
+		// folder groups
+		v2FolderGroups := v2Version.Group("folder-group")
+		{
+			v2FolderGroups.POST("", h.V2.CreateFolderGroup)
+			v2FolderGroups.GET("/:id", h.V2.GetFolderGroupById)
+			v2FolderGroups.GET("", h.V2.GetAllFolderGroups)
+			v2FolderGroups.PUT("", h.V2.UpdateFolderGroup)
+			v2FolderGroups.DELETE("/:id", h.V2.DeleteFolderGroup)
+		}
+
 		v2Files := v2Version.Group("/files")
 		{
 			v2Files.POST("", h.V2.UploadToFolder)

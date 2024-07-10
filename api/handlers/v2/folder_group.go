@@ -1,0 +1,339 @@
+package v2
+
+import (
+	"context"
+	"errors"
+	"ucode/ucode_go_api_gateway/api/status_http"
+	pb "ucode/ucode_go_api_gateway/genproto/company_service"
+	"ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
+	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
+	"ucode/ucode_go_api_gateway/pkg/util"
+
+	"github.com/gin-gonic/gin"
+)
+
+func (h *HandlerV2) CreateFolderGroup(c *gin.Context) {
+	var (
+		folderGroup new_object_builder_service.CreateFolderGroupRequest
+	)
+
+	err := c.ShouldBindJSON(&folderGroup)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	//userId, _ := c.Get("user_id")
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		h.handleResponse(c, status_http.InternalServerError, "For Mongo Coming soon")
+	case pb.ResourceType_POSTGRESQL:
+		resp, err := services.GoObjectBuilderService().FolderGroup().Create(
+			context.Background(),
+			&new_object_builder_service.CreateFolderGroupRequest{
+				TableId:   folderGroup.TableId,
+				Name:      folderGroup.Name,
+				Comment:   folderGroup.Comment,
+				Code:      folderGroup.Code,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+		h.handleResponse(c, status_http.Created, resp)
+	}
+}
+
+func (h *HandlerV2) GetFolderGroupById(c *gin.Context) {
+	folderGroupId := c.Param("id")
+
+	if !util.IsValidUUID(folderGroupId) {
+		h.handleResponse(c, status_http.InvalidArgument, "folder group id is an invalid uuid")
+		return
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err := errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		h.handleResponse(c, status_http.InternalServerError, "For Mongo Coming soon")
+	case pb.ResourceType_POSTGRESQL:
+		pgResp, err := services.GoObjectBuilderService().FolderGroup().GetByID(
+			context.Background(),
+			&nb.FolderGroupPrimaryKey{
+				Id:        folderGroupId,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+		h.handleResponse(c, status_http.OK, pgResp)
+	}
+}
+
+func (h *HandlerV2) GetAllFolderGroups(c *gin.Context) {
+	offset, err := h.getOffsetParam(c)
+
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	limit := 100
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		h.handleResponse(c, status_http.InternalServerError, "For Mongo Coming soon")
+	case pb.ResourceType_POSTGRESQL:
+		resp, err := services.GoObjectBuilderService().FolderGroup().GetAll(
+			context.Background(),
+			&nb.GetAllFolderGroupRequest{
+				Limit:     int32(limit),
+				Offset:    int32(offset),
+				ProjectId: resource.ResourceEnvironmentId,
+				TableId:   c.DefaultQuery("table_id", ""),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+		h.handleResponse(c, status_http.OK, resp)
+	}
+}
+
+func (h *HandlerV2) UpdateFolderGroup(c *gin.Context) {
+	updateFolderGroupRequest := nb.UpdateFolderGroupRequest{}
+
+	err := c.ShouldBindJSON(&updateFolderGroupRequest)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	updateFolderGroupRequest.ProjectId = resource.ResourceEnvironmentId
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		h.handleResponse(c, status_http.InternalServerError, "For Mongo coming soon")
+	case pb.ResourceType_POSTGRESQL:
+		resp, err := services.GoObjectBuilderService().FolderGroup().Update(
+			context.Background(),
+			&updateFolderGroupRequest,
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.InternalServerError, err.Error())
+			return
+		}
+		h.handleResponse(c, status_http.OK, resp)
+	}
+}
+
+func (h *HandlerV2) DeleteFolderGroup(c *gin.Context) {
+	folderGroupId := c.Param("id")
+
+	if !util.IsValidUUID(folderGroupId) {
+		h.handleResponse(c, status_http.InvalidArgument, "folder group id is an invalid uuid")
+		return
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err := errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		h.handleResponse(c, status_http.InternalServerError, "For Mongo coming soon")
+	case pb.ResourceType_POSTGRESQL:
+		resp, err := services.GoObjectBuilderService().FolderGroup().Delete(
+			context.Background(),
+			&nb.FolderGroupPrimaryKey{
+				Id:        folderGroupId,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.InternalServerError, err.Error())
+			return
+		}
+		h.handleResponse(c, status_http.NoContent, resp)
+	}
+}

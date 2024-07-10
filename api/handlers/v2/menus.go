@@ -3,7 +3,6 @@ package v2
 import (
 	"context"
 	"errors"
-	"fmt"
 	"reflect"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -323,7 +322,6 @@ func (h *HandlerV2) GetAllMenus(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
-		fmt.Printf("Resp %v->%v\n", projectId, resp)
 		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().Menu().GetAll(
