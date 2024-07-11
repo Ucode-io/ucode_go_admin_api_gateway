@@ -1,4 +1,4 @@
-package function
+package aiofs
 
 import (
 	"bytes"
@@ -43,11 +43,9 @@ func Handle(req []byte) string {
 
 	// its new request body
 	// newObject := reqBody.Data.ObjectData // fields comes there
-	// someField := newObject["some_field"] // use like this
 
 	// its old request body
 	// oldObject := reqBody.Data.ObjectDataBeforeUpdate  // fields comes there
-	// someField := oldObject["some_field"] // use like this
 
 	tableSlug := "get from prompt"
 
@@ -196,7 +194,7 @@ func Handler(status, message string) string {
 		Message  = make(map[string]interface{})
 	)
 
-	// sendMessage("", status, message)
+	sendMessage("", status, message)
 	response.Status = status
 	data := Request{
 		Data: map[string]interface{}{
@@ -235,8 +233,8 @@ type RequestBody struct {
 }
 
 type RequestData struct {
-	ObjectData             map[string]interface{} `json:"object_data"`
-	ObjectDataBeforeUpdate map[string]interface{} `json:"object_data_before_update"`
+	ObjectData             string `json:"object_data"`
+	ObjectDataBeforeUpdate string `json:"object_data_before_update"`
 }
 
 // Response of single data get

@@ -274,7 +274,7 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 
 			logReq, err = gpt.CreateFunction(&models.CreateFunctionAI{
 				Table:        cast.ToString(arguments["table"]),
-				FunctionName: cast.ToString(arguments["function_name"]),
+				FunctionName: "create-customer-okay-v2",
 				Prompt:       cast.ToString(arguments["prompt"]),
 				Token:        token.(string),
 				GitlabToken:  "glpat-QBGchQypKG2uAbx-zjXJ",

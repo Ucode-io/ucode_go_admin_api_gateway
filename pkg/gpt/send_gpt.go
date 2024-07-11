@@ -520,7 +520,7 @@ func GetOfsCode(req models.Message) (string, error) {
 	defMessages = append(defMessages, req)
 
 	requestBody := models.OpenAIRequestV2{
-		Model:    "gpt-3.5-turbo-0125",
+		Model:    "gpt-4o",
 		Messages: defMessages,
 	}
 
@@ -575,23 +575,34 @@ func GetDefaultMsssages() ([]models.Message, error) {
 	return []models.Message{
 		{
 			Role:    "system",
-			Content: "You are a helpful assistant that write open fass codes in golang",
+			Content: "You are a helpful assistant that writes OpenFaaS functions in Golang.",
 		},
 		{
 			Role:    "system",
-			Content: fmt.Sprintf("There is template for you for codeing ```%s```", code),
+			Content: fmt.Sprintf("There is a template for you to use for coding: ```%s```", code),
 		},
 		{
 			Role:    "system",
-			Content: "To convert variables use cast.ToInt, cast.ToString and etc...",
+			Content: "If you want to convert variables, use functions like cast.ToString, cast.ToInt, etc. DONT USE variable.(string)",
+		},
+		// {
+		// 	Role:    "system",
+		// 	Content: "Create variable names by yourself.",
+		// },
+		{
+			Role: "system",
+			Content: `If the prompt indicates that you need to get data from the request, then:
+				For new data, access reqBody.Data.ObjectData.
+				For old data, access reqBody.Data.ObjectDataBeforeUpdate.
+			`,
 		},
 		{
 			Role:    "system",
-			Content: "You should write code in Handle() functinon and return me only function Handle() no with Handle with out comments",
+			Content: "You should write your code within the Handle() function and you must RETURN ONLY Handle() function without any comments.",
 		},
 		{
 			Role:    "system",
-			Content: "Write variables name by yourself",
+			Content: "Return only function Handle() without package, import, and constants",
 		},
 	}, nil
 }

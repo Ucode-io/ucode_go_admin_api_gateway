@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 	"ucode/ucode_go_api_gateway/api/models"
+	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
@@ -76,6 +77,21 @@ func CreateFunction(req *models.CreateFunctionAI) ([]models.CreateVersionHistory
 		return respLogReq, err
 	}
 
+	apiKeys, err := services.AuthService().ApiKey().GetList(context.Background(), &auth_service.GetListReq{
+		EnvironmentId: req.EnvironmentId,
+		ProjectId:     resource.ProjectId,
+	})
+	if err != nil {
+		return respLogReq, err
+	}
+
+	var appId string
+	if len(apiKeys.Data) > 0 {
+		appId = apiKeys.Data[0].AppId
+	} else {
+		return respLogReq, err
+	}
+
 	code, err := GetOfsCode(models.Message{
 		Role:    "user",
 		Content: req.Prompt,
@@ -86,6 +102,9 @@ func CreateFunction(req *models.CreateFunctionAI) ([]models.CreateVersionHistory
 
 	code = strings.ReplaceAll(code, "```", "")
 	code = strings.ReplaceAll(code, "go", "")
+	code = strings.ReplaceAll(code, "lang", "")
+
+	fmt.Println(code)
 
 	if err := os.Chdir(curDir + "/template"); err != nil {
 		return respLogReq, err
@@ -101,7 +120,7 @@ func CreateFunction(req *models.CreateFunctionAI) ([]models.CreateVersionHistory
 		return respLogReq, err
 	}
 
-	newCode := fmt.Sprintf(string(temp), code, "%s", "%s", "%s")
+	newCode := fmt.Sprintf(string(temp), appId, code, "%s", "%s", "%s")
 
 	if err := os.Chdir(curDir + "/" + funcPath + "/" + funcPath); err != nil {
 		return respLogReq, err
@@ -191,6 +210,10 @@ func CreateFunction(req *models.CreateFunctionAI) ([]models.CreateVersionHistory
 		return respLogReq, err
 	}
 
+	fmt.Println("CUSTOME EVENT >>>>>>>>>>")
+	fmt.Println(req.ActionType)
+	fmt.Println(req.Method)
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 
@@ -207,10 +230,10 @@ func CreateFunction(req *models.CreateFunctionAI) ([]models.CreateVersionHistory
 		_, err = services.GetBuilderServiceByType(resource.NodeType).CustomEvent().Create(
 			context.Background(),
 			&obs.CreateCustomEventRequest{
-				TableSlug:  table.Slug,
-				EventPath:  funcId,
-				Label:      funcPath,
 				Icon:       "arrows-up-down-left-right.svg",
+				Label:      funcPath,
+				EventPath:  funcId,
+				TableSlug:  table.Slug,
 				ActionType: req.ActionType,
 				Method:     req.Method,
 				ProjectId:  resource.ResourceEnvironmentId,
@@ -235,10 +258,10 @@ func CreateFunction(req *models.CreateFunctionAI) ([]models.CreateVersionHistory
 		_, err = services.GoObjectBuilderService().CustomEvent().Create(
 			context.Background(),
 			&nb.CreateCustomEventRequest{
-				TableSlug:  table.Slug,
-				EventPath:  funcId,
-				Label:      funcPath,
 				Icon:       "arrows-up-down-left-right.svg",
+				Label:      funcPath,
+				EventPath:  funcId,
+				TableSlug:  table.Slug,
 				ActionType: req.ActionType,
 				Method:     req.Method,
 				ProjectId:  resource.ResourceEnvironmentId,

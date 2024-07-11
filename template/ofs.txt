@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	apiKey = ""
+	apiKey = "%s"
 
 	createURL    = "https://api.admin.u-code.io/v1/object/"
 	createMethod = "POST"
@@ -72,7 +72,7 @@ func Handler(status, message string) string {
 		Message  = make(map[string]interface{})
 	)
 
-	sendMessage("", status, message)
+	// sendMessage("", status, message)
 	response.Status = status
 	data := Request{
 		Data: map[string]interface{}{
@@ -105,8 +105,13 @@ type Response struct {
 }
 
 type RequestBody struct {
-	ObjectIDs []string               `json:"object_ids"`
-	Data      map[string]interface{} `json:"data"`
+	ObjectIDs []string    `json:"object_ids"`
+	Data      RequestData `json:"data"`
+}
+
+type RequestData struct {
+	ObjectData             map[string]interface{} `json:"object_data"`
+	ObjectDataBeforeUpdate map[string]interface{} `json:"object_data_before_update"`
 }
 
 type ClientApiResponse struct {

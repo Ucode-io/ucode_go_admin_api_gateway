@@ -212,14 +212,15 @@ type LoginTableAI struct {
 }
 
 type CreateFunctionAI struct {
-	Table        string
-	Prompt       string
-	FunctionName string
-	UserId       string
-	Token        string
-	GitlabToken  string
-	ActionType   string
-	Method       string
-	Resource     *pb.ServiceResourceModel
-	Service      services.ServiceManagerI
+	Table         string
+	Prompt        string
+	FunctionName  string
+	UserId        string
+	Token         string
+	GitlabToken   string
+	ActionType    string
+	Method        string
+	EnvironmentId string
+	Resource      *pb.ServiceResourceModel
+	Service       services.ServiceManagerI
 }
