@@ -72,6 +72,7 @@ func (h *HandlerV2) AuthMiddleware() gin.HandlerFunc {
 			c.Set("project_id", projectId)
 			c.Set("user_id", userId)
 			c.Set("role_id", res.RoleId)
+			c.Set("token", strArr[1])
 
 		case "API-KEY":
 			app_id := c.GetHeader("X-API-KEY")

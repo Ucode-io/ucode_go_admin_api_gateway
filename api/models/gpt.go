@@ -17,6 +17,11 @@ type OpenAIRequest struct {
 	FunctionCall string    `json:"tool_choice"`
 }
 
+type OpenAIRequestV2 struct {
+	Model    string    `json:"model"`
+	Messages []Message `json:"messages"`
+}
+
 type OpenAIResponse struct {
 	ID                string      `json:"id"`
 	Object            string      `json:"object"`
@@ -204,4 +209,17 @@ type LoginTableAI struct {
 	UserId   string
 	Resource *pb.ServiceResourceModel
 	Service  services.ServiceManagerI
+}
+
+type CreateFunctionAI struct {
+	Table        string
+	Prompt       string
+	FunctionName string
+	UserId       string
+	Token        string
+	GitlabToken  string
+	ActionType   string
+	Method       string
+	Resource     *pb.ServiceResourceModel
+	Service      services.ServiceManagerI
 }
