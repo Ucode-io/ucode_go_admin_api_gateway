@@ -26,6 +26,7 @@ type GoBuilderServiceI interface {
 	Permission() nb.PermissionServiceClient
 	Version() nb.VersionServiceClient
 	VersionHistory() nb.VersionHistoryServiceClient
+	FolderGroup() nb.FolderGroupServiceClient
 }
 
 type goBuilderServiceClient struct {
@@ -45,6 +46,7 @@ type goBuilderServiceClient struct {
 	permissionService     nb.PermissionServiceClient
 	versionService        nb.VersionServiceClient
 	versionHistoryService nb.VersionHistoryServiceClient
+	folderGroupService    nb.FolderGroupServiceClient
 	// goObjectBuilderConnPool *grpcpool.Pool
 }
 
@@ -79,6 +81,7 @@ func NewGoBuilderServiceClient(ctx context.Context, cfg config.Config) (GoBuilde
 		permissionService:     nb.NewPermissionServiceClient(connGoBuilderService),
 		versionService:        nb.NewVersionServiceClient(connGoBuilderService),
 		versionHistoryService: nb.NewVersionHistoryServiceClient(connGoBuilderService),
+		folderGroupService:    nb.NewFolderGroupServiceClient(connGoBuilderService),
 	}, nil
 }
 
@@ -144,6 +147,10 @@ func (g *goBuilderServiceClient) Version() nb.VersionServiceClient {
 
 func (g *goBuilderServiceClient) VersionHistory() nb.VersionHistoryServiceClient {
 	return g.versionHistoryService
+}
+
+func (g *goBuilderServiceClient) FolderGroup() nb.FolderGroupServiceClient {
+	return g.folderGroupService
 }
 
 // func (g *goBuilderServiceClient) GoObjectBuilderConnPool(ctx context.Context) (nb.ObjectBuilderServiceClient, *grpcpool.ClientConn, error) {
