@@ -103,6 +103,8 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 			continue
 		}
 
+		fmt.Println(functionName)
+
 		switch functionName {
 		case "create_menu":
 			_, err = gpt.CreateMenu(&models.CreateMenuAI{
@@ -255,6 +257,32 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 				UserId:   userId.(string),
 				Resource: resource,
 				Service:  services,
+			})
+		case "create_ofs":
+
+			fmt.Println("CREATE FUNCTION >>>>>>")
+
+			fmt.Println(arguments["table"])
+			fmt.Println(arguments["prompt"])
+			fmt.Println(arguments["function_name"])
+			fmt.Println(arguments["function_type"])
+			fmt.Println(arguments["request_type"])
+
+			token, _ := c.Get("token")
+
+			// token = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGllbnRfcGxhdGZvcm1faWQiOiIiLCJjbGllbnRfdHlwZV9pZCI6IjdlM2IwYTNlLWQwOTItNGQ1Ni04NTRhLTdmNjM5NDAyNDUyOCIsImRhdGEiOiJhZGRpdGlvbmFsIGpzb24gZGF0YSIsImV4cCI6MTcyMDY3NzM2NywiaWF0IjoxNzIwNTkwOTY3LCJpZCI6ImM3ZDM3NTNhLTJjODctNDk2ZC05MzUzLTc2Zjc1OGJkZWQ4NyIsImlwIjoiYWRkaXRpb25hbCBqc29uIGRhdGEiLCJsb2dpbl90YWJsZV9zbHVnIjoidXNlciIsInByb2plY3RfaWQiOiIwMmVlZDM4NC04MmZmLTQ0OTYtYjVhYS0zMGY3N2ExNmZiODUiLCJyb2xlX2lkIjoiYjA4MDI2OGYtNjMzZC00NDM1LThiZWYtMWQwZDI5ZDhlY2VkIiwidGFibGVzIjpbXSwidXNlcl9pZCI6IjljNzYzODYxLWM2ZWQtNDc1MC1iODRlLWVmZmE3ZGI4ZGQ4MCJ9.lPQ4TLhD-pDW2tJH1KjVw1G7OrLZyGQwCnQwjfvIx_g`
+
+			logReq, err = gpt.CreateFunction(&models.CreateFunctionAI{
+				Table:        cast.ToString(arguments["table"]),
+				FunctionName: cast.ToString(arguments["function_name"]),
+				Prompt:       cast.ToString(arguments["prompt"]),
+				Token:        token.(string),
+				GitlabToken:  "glpat-QBGchQypKG2uAbx-zjXJ",
+				ActionType:   cast.ToString(arguments["function_type"]),
+				Method:       cast.ToString(arguments["request_type"]),
+				UserId:       userId.(string),
+				Resource:     resource,
+				Service:      services,
 			})
 
 		default:

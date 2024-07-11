@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/config"
 )
@@ -470,5 +471,146 @@ func GetDefaultFunctions() []models.Tool {
 				},
 			},
 		},
+		{
+			Type: "function",
+			Function: models.FunctionDescription{
+				Name:        "create_ofs",
+				Description: "Create a function and generate code based on provided specifications",
+				Parameters: map[string]interface{}{
+					"type": "object",
+					"properties": map[string]interface{}{
+						"table": map[string]interface{}{
+							"type":        "string",
+							"description": "The name of the table to be created or manipulated",
+						},
+						"prompt": map[string]interface{}{
+							"type":        "string",
+							"description": "A detailed description of what the function should do",
+						},
+						"function_name": map[string]interface{}{
+							"type":        "string",
+							"description": "A generated name for the function based on the prompt, with spaces replaced by dashes, write simple function name not long",
+						},
+						"function_type": map[string]interface{}{
+							"type":        "string",
+							"description": "Function type",
+							"enum":        []string{"CREATE", "UPDATE", "DELETE"},
+						},
+						"request_type": map[string]interface{}{
+							"type":        "string",
+							"description": "Request type",
+							"enum":        []string{"after", "before"},
+						},
+					},
+				},
+			},
+		},
 	}
+}
+
+func GetOfsCode(req models.Message) (string, error) {
+
+	cfg := config.Load()
+
+	defMessages, err := GetDefaultMsssages()
+	if err != nil {
+		return "", err
+	}
+
+	defMessages = append(defMessages, req)
+
+	requestBody := models.OpenAIRequestV2{
+		Model:    "gpt-3.5-turbo-0125",
+		Messages: defMessages,
+	}
+
+	jsonData, err := json.Marshal(requestBody)
+	if err != nil {
+		return "", err
+	}
+
+	reqBody, err := http.NewRequest("POST", "https://api.openai.com/v1/chat/completions", bytes.NewBuffer(jsonData))
+	if err != nil {
+		fmt.Println(err)
+		return "", err
+	}
+
+	reqBody.Header.Set("Content-Type", "application/json")
+	reqBody.Header.Set("Authorization", "Bearer "+cfg.OpenAIApiKey)
+
+	client := &http.Client{}
+	resp, err := client.Do(reqBody)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	fmt.Println(string(body))
+
+	var response models.OpenAIResponse
+	err = json.Unmarshal(body, &response)
+	if err != nil {
+		return "", err
+	}
+
+	if response.Error.Message != "" {
+		return "", fmt.Errorf("not full information given")
+	}
+
+	return response.Choices[0].Message.Content, nil
+}
+
+func GetDefaultMsssages() ([]models.Message, error) {
+
+	code, err := GetTemplateCode()
+	if err != nil {
+		return nil, err
+	}
+
+	return []models.Message{
+		{
+			Role:    "system",
+			Content: "You are a helpful assistant that write open fass codes in golang",
+		},
+		{
+			Role:    "system",
+			Content: fmt.Sprintf("There is template for you for codeing ```%s```", code),
+		},
+		{
+			Role:    "system",
+			Content: "To convert variables use cast.ToInt, cast.ToString and etc...",
+		},
+		{
+			Role:    "system",
+			Content: "You should write code in Handle() functinon and return me only function Handle() no with Handle with out comments",
+		},
+		{
+			Role:    "system",
+			Content: "Write variables name by yourself",
+		},
+	}, nil
+}
+
+func GetTemplateCode() (string, error) {
+
+	curDir, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+
+	if err := os.Chdir(curDir + "/pkg/gpt/"); err != nil {
+		return "", err
+	}
+
+	data, err := os.ReadFile("ofs.txt")
+	if err != nil {
+		return "", err
+	}
+
+	return string(data), nil
 }

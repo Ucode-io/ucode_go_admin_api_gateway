@@ -213,7 +213,7 @@ func AddCiFile(gitlabToken, path string, gitlabRepoId int, branch, localFolderPa
 		return errors.New("failed to read file")
 	}
 
-	commitURL := fmt.Sprintf("%s/projects/%v/repository/commits", "https://gitlab.udevs.io/api/v4", gitlabRepoId)
+	commitURL := fmt.Sprintf("https://gitlab.udevs.io/api/v4/projects/%v/repository/commits", gitlabRepoId)
 	commitPayload := map[string]interface{}{
 		"branch":         branch,
 		"commit_message": "Added ci file",
