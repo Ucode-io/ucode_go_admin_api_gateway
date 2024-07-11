@@ -229,6 +229,9 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *HandlerV2
 				}
 				return customEvent.GetFunctions()[0].Name, errors.New(errStr)
 			}
+
+			h.log.Info("----FUNCTION--->>>>", logger.Any("mes", resp.Data["message"]))
+
 		} else if customEvent.GetFunctions()[0].RequestType == "SYNC" {
 
 			go func(customEvent *obs.CustomEvent) {
