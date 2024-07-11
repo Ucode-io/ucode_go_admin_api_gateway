@@ -42,7 +42,7 @@ func Handle(req []byte) string {
 	}
 
 	// its new request body
-	// newObject := reqBody.Data.ObjectData // fields comes there
+	// newObject := reqBody.Data.ObjectData.Response // fields comes there
 	// someField := newObject["some_field"] // use like this
 
 	// its old request body
@@ -236,7 +236,11 @@ type RequestBody struct {
 
 type RequestData struct {
 	ObjectData             map[string]interface{} `json:"object_data"`
-	ObjectDataBeforeUpdate map[string]interface{} `json:"object_data_before_update"`
+	ObjectDataBeforeUpdate BeforeResp `json:"object_data_before_update"`
+}
+
+type BeforeResp struct {
+	Response map[string]interface{} `json:"response"`
 }
 
 // Response of single data get

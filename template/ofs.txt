@@ -111,7 +111,11 @@ type RequestBody struct {
 
 type RequestData struct {
 	ObjectData             map[string]interface{} `json:"object_data"`
-	ObjectDataBeforeUpdate map[string]interface{} `json:"object_data_before_update"`
+	ObjectDataBeforeUpdate BeforeResp `json:"object_data_before_update"`
+}
+
+type BeforeResp struct {
+	Response map[string]interface{} `json:"response"`
 }
 
 type ClientApiResponse struct {
