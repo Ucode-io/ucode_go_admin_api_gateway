@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
@@ -30,7 +31,6 @@ import (
 func (h *HandlerV2) SendToGpt(c *gin.Context) {
 	var (
 		reqBody models.SendToGptRequest
-		logReq  []models.CreateVersionHistoryRequest
 	)
 
 	err := c.ShouldBindJSON(&reqBody)
@@ -90,11 +90,14 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 		return
 	}
 
+	messages := []string{}
+
 	for _, toolCall := range toolCalls {
 		var (
 			functionCall = toolCall.Function
 			functionName = functionCall.Name
 			arguments    map[string]interface{}
+			logReq       []models.CreateVersionHistoryRequest
 		)
 
 		err = json.Unmarshal([]byte(functionCall.Arguments), &arguments)
@@ -105,14 +108,26 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 
 		fmt.Println(functionName)
 
+		msg := ""
+
 		switch functionName {
 		case "create_menu":
+
+			fmt.Println("CREATE MENU >>>>>")
+
 			_, err = gpt.CreateMenu(&models.CreateMenuAI{
 				Label:    cast.ToString(arguments["name"]),
 				UserId:   userId.(string),
 				Resource: resource,
 				Service:  services,
 			})
+
+			if err == nil {
+				msg = "Menu created Successfully"
+			} else {
+				msg = fmt.Sprintf("Error while create menu: %s", err.Error())
+			}
+
 		case "delete_menu", "delete_table":
 			logReq, err = gpt.DeleteMenu(&models.DeleteMenuAI{
 				Label:    cast.ToString(arguments["name"]),
@@ -120,6 +135,21 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 				Resource: resource,
 				Service:  services,
 			})
+
+			if err == nil {
+				if functionName == "delete_menu" {
+					msg = "Menu deleted Successfully"
+				} else {
+					msg = "Table deleted Successfully"
+				}
+			} else {
+				if functionName == "delete_menu" {
+					msg = fmt.Sprintf("Error while delete menu: %s", err.Error())
+				} else {
+					msg = fmt.Sprintf("Error while delete table: %s", err.Error())
+				}
+			}
+
 		case "update_menu":
 			logReq, err = gpt.UpdateMenu(&models.UpdateMenuAI{
 				OldLabel: cast.ToString(arguments["old_name"]),
@@ -128,6 +158,13 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 				Resource: resource,
 				Service:  services,
 			})
+
+			if err == nil {
+				msg = "Menu updated Successfully"
+			} else {
+				msg = fmt.Sprintf("Error while update menu: %s", err.Error())
+			}
+
 		case "create_table":
 
 			_, ok := arguments["menu"]
@@ -144,6 +181,13 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 				Resource:      resource,
 				Service:       services,
 			})
+
+			if err == nil {
+				msg = "Table created Successfully"
+			} else {
+				msg = fmt.Sprintf("Error while create table: %s", err.Error())
+			}
+
 		case "update_table":
 
 			logReq, err = gpt.UpdateTable(&models.UpdateTableAI{
@@ -152,6 +196,13 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 				Resource: resource,
 				Service:  services,
 			})
+
+			if err == nil {
+				msg = "Table updated Successfully"
+			} else {
+				msg = fmt.Sprintf("Error while update table: %s", err.Error())
+			}
+
 		case "create_field":
 
 			if cast.ToString(arguments["table"]) != "" {
@@ -164,8 +215,13 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 					Resource: resource,
 					Service:  services,
 				})
+				if err == nil {
+					msg = "Field created Successfully"
+				} else {
+					msg = fmt.Sprintf("Error while create field: %s", err.Error())
+				}
 			} else {
-				h.handleResponse(c, status_http.BadRequest, "Table not found please give table's label")
+				msg = fmt.Sprintf("Table not found please give table's label")
 			}
 
 		case "update_field":
@@ -179,6 +235,11 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 				Resource: resource,
 				Service:  services,
 			})
+			if err == nil {
+				msg = "Field updated Successfully"
+			} else {
+				msg = fmt.Sprintf("Error while update field: %s", err.Error())
+			}
 		case "delete_field":
 
 			logReq, err = gpt.DeleteField(&models.DeleteFieldAI{
@@ -188,6 +249,11 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 				Resource: resource,
 				Service:  services,
 			})
+			if err == nil {
+				msg = "Field deleted Successfully"
+			} else {
+				msg = fmt.Sprintf("Error while delete field: %s", err.Error())
+			}
 		case "create_relation":
 
 			logReq, err = gpt.CreateRelation(&models.CreateRelationAI{
@@ -200,6 +266,11 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 				Resource:     resource,
 				Service:      services,
 			})
+			if err == nil {
+				msg = "Relation created Successfully"
+			} else {
+				msg = fmt.Sprintf("Error while create relation: %s", err.Error())
+			}
 		case "delete_relation":
 
 			logReq, err = gpt.DeleteRelation(&models.DeleteRelationAI{
@@ -210,6 +281,11 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 				Resource:     resource,
 				Service:      services,
 			})
+			if err == nil {
+				msg = "Relation deleted Successfully"
+			} else {
+				msg = fmt.Sprintf("Error while delete relation: %s", err.Error())
+			}
 		case "create_row":
 
 			logReq, err = gpt.CreateItems(&models.CreateItemsAI{
@@ -219,6 +295,11 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 				Resource:  resource,
 				Service:   services,
 			})
+			if err == nil {
+				msg = "Item created Successfully"
+			} else {
+				msg = fmt.Sprintf("Error while create item: %s", err.Error())
+			}
 		case "generate_row":
 
 			logReq, err = gpt.GenerateItems(&models.GenerateItemsAI{
@@ -228,6 +309,11 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 				Resource: resource,
 				Service:  services,
 			})
+			if err == nil {
+				msg = "Items created Successfully"
+			} else {
+				msg = fmt.Sprintf("Error while create items: %s", err.Error())
+			}
 
 		case "update_item":
 
@@ -239,6 +325,11 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 				Resource:  resource,
 				Service:   services,
 			})
+			if err == nil {
+				msg = "Item updated Successfully"
+			} else {
+				msg = fmt.Sprintf("Error while update item: %s", err.Error())
+			}
 		case "delete_item":
 
 			logReq, err = gpt.DeleteItems(&models.UpdateItemsAI{
@@ -248,6 +339,11 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 				Resource:  resource,
 				Service:   services,
 			})
+			if err == nil {
+				msg = "Item deleted Successfully"
+			} else {
+				msg = fmt.Sprintf("Error while delete item: %s", err.Error())
+			}
 		case "login_table":
 
 			logReq, err = gpt.LoginTable(&models.LoginTableAI{
@@ -258,23 +354,17 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 				Resource: resource,
 				Service:  services,
 			})
+			if err == nil {
+				msg = "Table updated to login table Successfully"
+			} else {
+				msg = fmt.Sprintf("Error while update table to login table: %s", err.Error())
+			}
 		case "create_ofs":
-
-			fmt.Println("CREATE FUNCTION >>>>>>")
-
-			fmt.Println(arguments["table"])
-			fmt.Println(arguments["prompt"])
-			fmt.Println(arguments["function_name"])
-			fmt.Println(arguments["function_type"])
-			fmt.Println(arguments["request_type"])
-
 			token, _ := c.Get("token")
-
-			// token = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGllbnRfcGxhdGZvcm1faWQiOiIiLCJjbGllbnRfdHlwZV9pZCI6IjdlM2IwYTNlLWQwOTItNGQ1Ni04NTRhLTdmNjM5NDAyNDUyOCIsImRhdGEiOiJhZGRpdGlvbmFsIGpzb24gZGF0YSIsImV4cCI6MTcyMDY3NzM2NywiaWF0IjoxNzIwNTkwOTY3LCJpZCI6ImM3ZDM3NTNhLTJjODctNDk2ZC05MzUzLTc2Zjc1OGJkZWQ4NyIsImlwIjoiYWRkaXRpb25hbCBqc29uIGRhdGEiLCJsb2dpbl90YWJsZV9zbHVnIjoidXNlciIsInByb2plY3RfaWQiOiIwMmVlZDM4NC04MmZmLTQ0OTYtYjVhYS0zMGY3N2ExNmZiODUiLCJyb2xlX2lkIjoiYjA4MDI2OGYtNjMzZC00NDM1LThiZWYtMWQwZDI5ZDhlY2VkIiwidGFibGVzIjpbXSwidXNlcl9pZCI6IjljNzYzODYxLWM2ZWQtNDc1MC1iODRlLWVmZmE3ZGI4ZGQ4MCJ9.lPQ4TLhD-pDW2tJH1KjVw1G7OrLZyGQwCnQwjfvIx_g`
 
 			logReq, err = gpt.CreateFunction(&models.CreateFunctionAI{
 				Table:        cast.ToString(arguments["table"]),
-				FunctionName: "create-customer-okay-v2",
+				FunctionName: "create-customer-ai-super",
 				Prompt:       cast.ToString(arguments["prompt"]),
 				Token:        token.(string),
 				GitlabToken:  "glpat-QBGchQypKG2uAbx-zjXJ",
@@ -284,6 +374,11 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 				Resource:     resource,
 				Service:      services,
 			})
+			if err == nil {
+				msg = "Function created and added to table Successfully"
+			} else {
+				msg = fmt.Sprintf("Error while create function: %s", err.Error())
+			}
 
 		default:
 
@@ -299,12 +394,11 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 				go h.versionHistoryGo(c, &log)
 			}
 		}
+
+		messages = append(messages, msg)
 	}
 
-	if err != nil {
-		h.handleResponse(c, status_http.BadRequest, err.Error())
-		return
-	}
+	msg := strings.Join(messages, ", ")
 
-	h.handleResponse(c, status_http.OK, "Success")
+	h.handleResponse(c, status_http.OK, msg)
 }

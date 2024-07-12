@@ -16,7 +16,7 @@ func SendReqToGPT(req []models.Message) ([]models.ToolCall, error) {
 	cfg := config.Load()
 
 	requestBody := models.OpenAIRequest{
-		Model:        "gpt-3.5-turbo-0125",
+		Model:        "gpt-4o",
 		Messages:     req,
 		Functions:    GetDefaultFunctions(),
 		FunctionCall: "auto",
@@ -583,12 +583,12 @@ func GetDefaultMsssages() ([]models.Message, error) {
 		},
 		{
 			Role:    "system",
-			Content: "If you want to convert variables, use functions like cast.ToString, cast.ToInt, etc. DONT USE variable.(string)",
+			Content: `If you want to convert variables, use package like "github.com/spf13/cast"  (cast.ToString, cast.ToInt, etc). DONT USE variable.(string)`,
 		},
-		// {
-		// 	Role:    "system",
-		// 	Content: "Create variable names by yourself.",
-		// },
+		{
+			Role:    "system",
+			Content: `Always use "github.com/google/uuid" to generate guid in create`,
+		},
 		{
 			Role: "system",
 			Content: `If the prompt indicates that you need to get data from the request, then:

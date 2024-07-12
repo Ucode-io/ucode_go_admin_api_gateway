@@ -100,10 +100,10 @@ func GenerateItems(req *models.GenerateItemsAI) ([]models.CreateVersionHistoryRe
 	}
 
 	respMessages := []models.Message{
-		// {
-		// 	Role:    "system",
-		// 	Content: "Function generate_values which generate data for table n times. Use this function n times to create more data. Note: n gives in prompt",
-		// },
+		{
+			Role:    "system",
+			Content: "Function generate_values which generate data for table n times. Use this function n times to create more data. Note: n gives in prompt",
+		},
 		{
 			Role:    "user",
 			Content: prompt,
@@ -199,6 +199,7 @@ func UpdateItems(req *models.UpdateItemsAI) ([]models.CreateVersionHistoryReques
 			},
 		)
 		if err != nil {
+			fmt.Println(">>>>>>>>>>>>>>", err)
 			return respLogReq, err
 		}
 	case pb.ResourceType_POSTGRESQL:
