@@ -258,6 +258,8 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 				h.handleResponse(c, status_http.GRPCError, err.Error())
 				return
 			}
+
+			resp.ProjectId = cast.ToString(projectId)
 			statusHttp.CustomMessage = resp.GetCustomMessage()
 			h.handleResponse(c, statusHttp, resp)
 			return
