@@ -73,7 +73,7 @@ func (h *HandlerV2) CreateFolderGroup(c *gin.Context) {
 				Comment:   folderGroup.Comment,
 				Code:      folderGroup.Code,
 				ProjectId: resource.ResourceEnvironmentId,
-				// ParentId:  folderGroup.ParentId,
+				ParentId:  folderGroup.ParentId,
 			},
 		)
 		if err != nil {
