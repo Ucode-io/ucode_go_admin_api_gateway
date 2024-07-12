@@ -961,7 +961,7 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 			h.handleResponse(c, status_http.InvalidArgument, actionErr.Error()+" in "+functionName)
 		} else {
 			logReq.Response = resp
-			h.handleResponse(c, status_http.NoContent, resp)
+			h.handleResponse(c, status_http.OK, resp)
 		}
 		switch resource.ResourceType {
 		case pb.ResourceType_MONGODB:
