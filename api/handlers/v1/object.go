@@ -2369,9 +2369,9 @@ func (h *HandlerV1) MultipleUpdateObject(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = service.MultipleUpdate(
+		goResp, err := services.GoObjectBuilderService().Items().MultipleUpdate(
 			context.Background(),
-			&obs.CommonMessage{
+			&nb.CommonMessage{
 				TableSlug: c.Param("table_slug"),
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
@@ -2380,6 +2380,12 @@ func (h *HandlerV1) MultipleUpdateObject(c *gin.Context) {
 
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		err = helper.MarshalToStruct(goResp, &resp)
+		if err != nil {
+			h.handleResponse(c, status_http.BadRequest, err.Error())
 			return
 		}
 	}
