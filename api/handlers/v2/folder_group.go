@@ -149,11 +149,18 @@ func (h *HandlerV2) GetFolderGroupById(c *gin.Context) {
 
 func (h *HandlerV2) GetAllFolderGroups(c *gin.Context) {
 	offset, err := h.getOffsetParam(c)
-
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
+
+	limit, err := h.getLimitParam(c)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
+	parentId := c.DefaultQuery("parent_id", "")
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -181,8 +188,6 @@ func (h *HandlerV2) GetAllFolderGroups(c *gin.Context) {
 		return
 	}
 
-	limit := 100
-
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
 		projectId.(string),
@@ -204,6 +209,7 @@ func (h *HandlerV2) GetAllFolderGroups(c *gin.Context) {
 				Offset:    int32(offset),
 				ProjectId: resource.ResourceEnvironmentId,
 				TableId:   c.DefaultQuery("table_id", ""),
+				ParentId:  parentId,
 			},
 		)
 		if err != nil {
