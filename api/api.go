@@ -52,7 +52,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 	global.Use(h.V1.GlobalAuthMiddleware(cfg))
 	{
 		// global.GET("/projects", h.V1.GetGlobalCompanyProjectList)
-		global.GET("/environment", h.V1.GetGlobalProjectEnvironments)
+		// global.GET("/environment", h.V1.GetGlobalProjectEnvironments)
 		global.GET("/template", h.V1.GetGlobalProjectTemplate)
 	}
 
