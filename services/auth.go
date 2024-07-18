@@ -2,7 +2,6 @@ package services
 
 import (
 	"context"
-	"fmt"
 	"time"
 	"ucode/ucode_go_api_gateway/config"
 
@@ -65,7 +64,6 @@ func NewAuthGrpcClient(ctx context.Context, cfg config.BaseConfig) (AuthServiceM
 
 	sessionServicePool, err := grpcpool.New(factory, 12, 18, time.Second*3)
 	if err != nil {
-		fmt.Printf("\n\n\n\n\n Failed to create gRPC pool: %v\n", err)
 		return nil, err
 	}
 

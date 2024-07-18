@@ -2,7 +2,6 @@ package services
 
 import (
 	"context"
-	"fmt"
 	"time"
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
@@ -78,7 +77,6 @@ func NewBuilderServiceClient(ctx context.Context, cfg config.Config) (BuilderSer
 
 	objectbuilderServicePool, err := grpcpool.New(factory, 12, 18, time.Second*3)
 	if err != nil {
-		fmt.Printf("\n\n\n\n\n Failed to create gRPC pool: %v\n", err)
 		return nil, err
 	}
 

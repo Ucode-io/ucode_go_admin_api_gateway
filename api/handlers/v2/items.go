@@ -2216,13 +2216,6 @@ func (h *HandlerV2) UpdateRowOrder(c *gin.Context) {
 		return
 	}
 
-	body, _ := json.Marshal(objectRequest.Data)
-
-	fmt.Println("HERERE BODY >>>>")
-	fmt.Println(string(body))
-
-	fmt.Println("TABLE SLUG >>>", c.Param("collection"))
-
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		_, err = service.MultipleUpdate(

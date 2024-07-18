@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"strings"
 	"sync"
@@ -111,7 +110,6 @@ func (h *HandlerV1) CreateNewFunction(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
-	fmt.Println("UNTIL HERE OK")
 	projectName := strings.ReplaceAll(strings.TrimSpace(project.Title), " ", "-")
 	projectName = strings.ToLower(projectName)
 	var functionPath = projectName + "-" + function.Path

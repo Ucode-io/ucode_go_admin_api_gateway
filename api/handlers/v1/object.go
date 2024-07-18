@@ -567,7 +567,6 @@ func (h *HandlerV1) GetSingleSlim(c *gin.Context) {
 			ProjectId: resource.ResourceEnvironmentId,
 		},
 	)
-	fmt.Println("Resp->", resp)
 	if err != nil {
 		statusHttp = status_http.GrpcStatusToHTTP["Internal"]
 		stat, ok := status.FromError(err)
