@@ -127,6 +127,36 @@ func (h *HandlerV2) CreateField(c *gin.Context) {
 		TableSlug: c.Param("collection"),
 	}
 
+	if fieldRequest.IsAlt && len(fields) == 1 {
+
+		atr, err := helper.ConvertMapToStruct(map[string]interface{}{
+			"label":    fields[0].Label + " Alt",
+			"label_en": fields[0].Label + " Alt",
+		})
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		fields = append(fields, &obs.CreateFieldRequest{
+			Default:             "",
+			Type:                "SINGLE_LINE",
+			Index:               "string",
+			Label:               fields[0].Label + " Alt",
+			Slug:                fields[0].Slug + "_alt",
+			TableId:             fields[0].TableId,
+			Attributes:          atr,
+			IsVisible:           true,
+			AutofillTable:       "",
+			AutofillField:       "",
+			Unique:              false,
+			Automatic:           false,
+			ProjectId:           resource.ResourceEnvironmentId,
+			ShowLabel:           true,
+			EnableMultilanguage: false,
+		})
+	}
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		for _, field := range fields {
