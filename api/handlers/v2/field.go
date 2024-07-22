@@ -540,7 +540,57 @@ func (h *HandlerV2) UpdateField(c *gin.Context) {
 			UserInfo:  cast.ToString(userId),
 			TableSlug: c.Param("collection"),
 		}
+		newField   = &obs.Field{}
+		newFieldPb = &nb.Field{}
 	)
+
+	if fieldRequest.IsAlt {
+
+		atr, err := helper.ConvertMapToStruct(map[string]interface{}{
+			"label":    field.Label + " Alt",
+			"label_en": field.Label + " Alt",
+		})
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		newField = &obs.Field{
+			Default:             "",
+			Type:                "SINGLE_LINE",
+			Index:               "string",
+			Label:               field.Label + " Alt",
+			Slug:                field.Slug + "_alt",
+			TableId:             field.TableId,
+			Attributes:          atr,
+			IsVisible:           true,
+			AutofillTable:       "",
+			AutofillField:       "",
+			Unique:              false,
+			Automatic:           false,
+			ProjectId:           resource.ResourceEnvironmentId,
+			ShowLabel:           true,
+			EnableMultilanguage: false,
+		}
+
+		newFieldPb = &nb.Field{
+			Default:             "",
+			Type:                "SINGLE_LINE",
+			Index:               "string",
+			Label:               field.Label + " Alt",
+			Slug:                field.Slug + "_alt",
+			TableId:             field.TableId,
+			Attributes:          atr,
+			IsVisible:           true,
+			AutofillTable:       "",
+			AutofillField:       "",
+			Unique:              false,
+			Automatic:           false,
+			ProjectId:           resource.ResourceEnvironmentId,
+			ShowLabel:           true,
+			EnableMultilanguage: false,
+		}
+	}
 
 	field.ProjectId = resource.ResourceEnvironmentId
 	field.EnvId = resource.EnvironmentId
@@ -573,6 +623,15 @@ func (h *HandlerV2) UpdateField(c *gin.Context) {
 			h.handleResponse(c, status_http.OK, resp)
 		}
 		go h.versionHistory(c, logReq)
+
+		_, err := services.GetBuilderServiceByType(resource.NodeType).Field().Update(
+			context.Background(),
+			newField,
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 
 		h.handleResponse(c, status_http.Created, resp)
 	case pb.ResourceType_POSTGRESQL:
@@ -610,6 +669,15 @@ func (h *HandlerV2) UpdateField(c *gin.Context) {
 			h.handleResponse(c, status_http.OK, resp)
 		}
 		go h.versionHistoryGo(c, logReq)
+
+		_, err := services.GoObjectBuilderService().Field().Update(
+			context.Background(),
+			newFieldPb,
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 
 		h.handleResponse(c, status_http.Created, resp)
 	}

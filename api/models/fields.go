@@ -22,6 +22,7 @@ type Field struct {
 	ShowLabel           bool                   `json:"show_label"`
 	EnableMultilanguage bool                   `json:"enable_multilanguage"`
 	MinioFolder         string                 `json:"minio_folder"`
+	IsAlt               bool                   `json:"is_alt"`
 }
 
 type CreateFieldsRequest struct {
