@@ -1020,16 +1020,37 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
-		function, err = services.FunctionService().FunctionService().GetSingle(
-			context.Background(),
-			&fc.FunctionPrimaryKey{
-				Id:        c.Param("function-id"),
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
+		switch resource.ResourceType {
+		case pb.ResourceType_MONGODB:
+			function, err = services.FunctionService().FunctionService().GetSingle(
+				context.Background(),
+				&fc.FunctionPrimaryKey{
+					Id:        c.Param("function-id"),
+					ProjectId: resource.ResourceEnvironmentId,
+				},
+			)
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+		case pb.ResourceType_POSTGRESQL:
+			resp, err := services.GoObjectBuilderService().Function().GetSingle(
+				context.Background(),
+				&nb.FunctionPrimaryKey{
+					Id:        c.Param("function-id"),
+					ProjectId: resource.ResourceEnvironmentId,
+				},
+			)
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+
+			err = helper.MarshalToStruct(resp, &function)
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
 		}
 	} else {
 		function.Path = c.Param("function-id")
