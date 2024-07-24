@@ -6,6 +6,7 @@ import (
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
 
+	gRPCClientLb "github.com/golanguzb70/grpc-client-lb"
 	grpcpool "github.com/processout/grpc-go-pool"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -65,7 +66,7 @@ func NewBuilderServiceClient(ctx context.Context, cfg config.Config) (BuilderSer
 	}
 
 	factory := func() (*grpc.ClientConn, error) {
-		conn, err := grpc.Dial(
+		conn, err := grpc.NewClient(
 			cfg.ObjectBuilderServiceHost+cfg.ObjectBuilderGRPCPort,
 			grpc.WithTransportCredentials(insecure.NewCredentials()),
 			grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(52428800), grpc.MaxCallSendMsgSize(52428800)))
@@ -76,6 +77,11 @@ func NewBuilderServiceClient(ctx context.Context, cfg config.Config) (BuilderSer
 	}
 
 	objectbuilderServicePool, err := grpcpool.New(factory, 12, 18, time.Second*3)
+	if err != nil {
+		return nil, err
+	}
+
+	grpcClientLB, err := gRPCClientLb.NewGrpcClientLB(factory, 8)
 	if err != nil {
 		return nil, err
 	}
@@ -115,10 +121,12 @@ func NewBuilderServiceClient(ctx context.Context, cfg config.Config) (BuilderSer
 		customErrorMessageService: object_builder_service.NewCustomErrorMessageServiceClient(connObjectBuilderService),
 		reportSettingService:      object_builder_service.NewReportSettingServiceClient(connObjectBuilderService),
 		fileService:               object_builder_service.NewFileServiceClient(connObjectBuilderService),
-		objectBuilderConnPool:     objectbuilderServicePool,
 		itemsService:              object_builder_service.NewItemsServiceClient(connObjectBuilderService),
 		versionHistoryService:     object_builder_service.NewVersionHistoryServiceClient(connObjectBuilderService),
 		versionService:            object_builder_service.NewVersionServiceClient(connObjectBuilderService),
+		objectBuilderConnPool:     objectbuilderServicePool,
+		conn:                      connObjectBuilderService,
+		clientLb:                  grpcClientLB,
 	}, nil
 }
 
@@ -157,20 +165,23 @@ type builderServiceClient struct {
 	customErrorMessageService object_builder_service.CustomErrorMessageServiceClient
 	reportSettingService      object_builder_service.ReportSettingServiceClient
 	fileService               object_builder_service.FileServiceClient
-	objectBuilderConnPool     *grpcpool.Pool
 	itemsService              object_builder_service.ItemsServiceClient
 	versionHistoryService     object_builder_service.VersionHistoryServiceClient
 	versionService            object_builder_service.VersionServiceClient
+	objectBuilderConnPool     *grpcpool.Pool
+	conn                      *grpc.ClientConn
+	clientLb                  gRPCClientLb.GrpcClientLB
 }
 
 func (g *builderServiceClient) ObjectBuilderConnPool(ctx context.Context) (object_builder_service.ObjectBuilderServiceClient, *grpcpool.ClientConn, error) {
-	conn, err := g.objectBuilderConnPool.Get(ctx)
-	if err != nil {
-		return nil, nil, err
-	}
-	service := object_builder_service.NewObjectBuilderServiceClient(conn)
+	conn := &grpcpool.ClientConn{}
+	service := object_builder_service.NewObjectBuilderServiceClient(g.clientLb.Get())
 
 	return service, conn, nil
+}
+
+func (g *builderServiceClient) ConnPool() *grpcpool.Pool {
+	return g.objectBuilderConnPool
 }
 
 func (g *builderServiceClient) Table() object_builder_service.TableServiceClient {
