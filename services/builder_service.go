@@ -81,7 +81,7 @@ func NewBuilderServiceClient(ctx context.Context, cfg config.Config) (BuilderSer
 		return nil, err
 	}
 
-	grpcClientLB, err := gRPCClientLb.NewGrpcClientLB(factory, 8)
+	grpcClientLB, err := gRPCClientLb.NewGrpcClientLB(factory, 6)
 	if err != nil {
 		return nil, err
 	}
