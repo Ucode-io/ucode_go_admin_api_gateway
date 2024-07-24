@@ -2,7 +2,6 @@ package services
 
 import (
 	"context"
-	"time"
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
 
@@ -50,8 +49,6 @@ type BuilderServiceI interface {
 	File() object_builder_service.FileServiceClient
 	VersionHistory() object_builder_service.VersionHistoryServiceClient
 	Version() object_builder_service.VersionServiceClient
-	// added to managing load
-	ObjectBuilderConnPool(ctx context.Context) (object_builder_service.ObjectBuilderServiceClient, *grpcpool.ClientConn, error)
 }
 
 func NewBuilderServiceClient(ctx context.Context, cfg config.Config) (BuilderServiceI, error) {
@@ -74,11 +71,6 @@ func NewBuilderServiceClient(ctx context.Context, cfg config.Config) (BuilderSer
 			return nil, err
 		}
 		return conn, err
-	}
-
-	objectbuilderServicePool, err := grpcpool.New(factory, 12, 18, time.Second*3)
-	if err != nil {
-		return nil, err
 	}
 
 	grpcClientLB, err := gRPCClientLb.NewGrpcClientLB(factory, 6)
@@ -124,8 +116,6 @@ func NewBuilderServiceClient(ctx context.Context, cfg config.Config) (BuilderSer
 		itemsService:              object_builder_service.NewItemsServiceClient(connObjectBuilderService),
 		versionHistoryService:     object_builder_service.NewVersionHistoryServiceClient(connObjectBuilderService),
 		versionService:            object_builder_service.NewVersionServiceClient(connObjectBuilderService),
-		objectBuilderConnPool:     objectbuilderServicePool,
-		conn:                      connObjectBuilderService,
 		clientLb:                  grpcClientLB,
 	}, nil
 }
@@ -173,13 +163,6 @@ type builderServiceClient struct {
 	clientLb                  gRPCClientLb.GrpcClientLB
 }
 
-func (g *builderServiceClient) ObjectBuilderConnPool(ctx context.Context) (object_builder_service.ObjectBuilderServiceClient, *grpcpool.ClientConn, error) {
-	conn := &grpcpool.ClientConn{}
-	service := object_builder_service.NewObjectBuilderServiceClient(g.clientLb.Get())
-
-	return service, conn, nil
-}
-
 func (g *builderServiceClient) ConnPool() *grpcpool.Pool {
 	return g.objectBuilderConnPool
 }
@@ -197,7 +180,7 @@ func (g *builderServiceClient) Field() object_builder_service.FieldServiceClient
 }
 
 func (g *builderServiceClient) ObjectBuilder() object_builder_service.ObjectBuilderServiceClient {
-	return g.objectBuilderService
+	return object_builder_service.NewObjectBuilderServiceClient(g.clientLb.Get())
 }
 
 func (g *builderServiceClient) Section() object_builder_service.SectionServiceClient {
