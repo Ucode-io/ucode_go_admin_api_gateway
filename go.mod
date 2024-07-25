@@ -20,8 +20,8 @@ require (
 	github.com/swaggo/swag v1.8.9
 	go.uber.org/zap v1.23.0
 	golang.org/x/tools v0.23.0 // indirect
-	google.golang.org/grpc v1.57.0
-	google.golang.org/protobuf v1.31.0
+	google.golang.org/grpc v1.64.0
+	google.golang.org/protobuf v1.33.0
 )
 
 require (
@@ -30,7 +30,8 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-git/go-git/v5 v5.12.0
 	github.com/go-redis/redis/v8 v8.11.5
-	github.com/golang/protobuf v1.5.3
+	github.com/golang/protobuf v1.5.4
+	github.com/golanguzb70/grpc-client-lb v1.0.0
 	github.com/hashicorp/golang-lru v1.0.2
 	github.com/jackc/pgx/v4 v4.17.2
 	github.com/pkg/errors v0.9.1
@@ -102,7 +103,7 @@ require (
 	golang.org/x/sync v0.7.0 // indirect
 	golang.org/x/sys v0.22.0 // indirect
 	golang.org/x/text v0.16.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20230807174057-1744710a1577 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240318140521-94a12d6c2237 // indirect
 	gopkg.in/ini.v1 v1.66.6 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

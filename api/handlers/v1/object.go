@@ -125,14 +125,7 @@ func (h *HandlerV1) CreateObject(c *gin.Context) {
 		return
 	}
 
-	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
-	if err != nil {
-		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
-		h.log.Info("ConnectionPool", logger.Any("CONNECTION", conn))
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
-	defer conn.Close()
+	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 
 	var id string
 	uid, _ := uuid.NewRandom()
@@ -364,17 +357,10 @@ func (h *HandlerV1) GetSingle(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
-	defer cancel()
+	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
+	// defer cancel()
 
-	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
-	if err != nil {
-		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
-		h.log.Info("ConnectionPool", logger.Any("CONNECTION", conn))
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
-	defer conn.Close()
+	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
@@ -511,17 +497,10 @@ func (h *HandlerV1) GetSingleSlim(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
-	defer cancel()
+	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
+	// defer cancel()
 
-	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
-	if err != nil {
-		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
-		h.log.Info("ConnectionPool", logger.Any("CONNECTION", conn))
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
-	defer conn.Close()
+	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 
 	var (
 		logReq = &models.CreateVersionHistoryRequest{
@@ -702,14 +681,7 @@ func (h *HandlerV1) UpdateObject(c *gin.Context) {
 		return
 	}
 
-	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
-	if err != nil {
-		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
-		h.log.Info("ConnectionPool", logger.Any("CONNECTION", conn))
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
-	defer conn.Close()
+	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 
 	fromOfs := c.Query("from-ofs")
 
@@ -934,17 +906,10 @@ func (h *HandlerV1) DeleteObject(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
-	defer cancel()
+	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
+	// defer cancel()
 
-	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
-	if err != nil {
-		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
-		h.log.Info("ConnectionPool", logger.Any("CONNECTION", conn))
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
-	defer conn.Close()
+	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
 	if err != nil {
@@ -1168,15 +1133,7 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 				// 		return
 				// 	}
 				// }
-
-				service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
-				if err != nil {
-					h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
-					h.log.Info("ConnectionPool", logger.Any("CONNECTION", conn))
-					h.handleResponse(c, status_http.InternalServerError, err)
-					return
-				}
-				defer conn.Close()
+				service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 
 				resp, err = service.GroupByColumns(
 					context.Background(),
@@ -1236,14 +1193,12 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 				}
 			}
 
-			service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
+			service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 			if err != nil {
 				h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
-				h.log.Info("ConnectionPool", logger.Any("CONNECTION", conn))
 				h.handleResponse(c, status_http.InternalServerError, err)
 				return
 			}
-			defer conn.Close()
 
 			resp, err = service.GetList(
 				context.Background(),
@@ -1606,17 +1561,9 @@ func (h *HandlerV1) GetListInExcel(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
-	defer cancel()
-
-	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
-	if err != nil {
-		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
-		h.log.Info("ConnectionPool", logger.Any("CONNECTION", conn))
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
-	defer conn.Close()
+	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
+	// defer cancel()
+	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
@@ -1724,17 +1671,10 @@ func (h *HandlerV1) DeleteManyToMany(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
-	defer cancel()
+	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
+	// defer cancel()
 
-	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
-	if err != nil {
-		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
-		h.log.Info("ConnectionPool", logger.Any("CONNECTION", conn))
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
-	defer conn.Close()
+	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 
 	m2mMessage.ProjectId = resource.ResourceEnvironmentId
 	fromOfs := c.Query("from-ofs")
@@ -1873,17 +1813,10 @@ func (h *HandlerV1) AppendManyToMany(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
-	defer cancel()
+	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
+	// defer cancel()
 
-	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
-	if err != nil {
-		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
-		h.log.Info("ConnectionPool", logger.Any("CONNECTION", conn))
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
-	defer conn.Close()
+	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 
 	m2mMessage.ProjectId = resource.ResourceEnvironmentId
 	fromOfs := c.Query("from-ofs")
@@ -2023,17 +1956,10 @@ func (h *HandlerV1) UpsertObject(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
-	defer cancel()
+	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
+	// defer cancel()
 
-	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
-	if err != nil {
-		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
-		h.log.Info("ConnectionPool", logger.Any("CONNECTION", conn))
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
-	defer conn.Close()
+	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 
 	objects := objectRequest.Data["objects"].([]interface{})
 	editedObjects := make([]interface{}, 0, len(objects))
@@ -2274,8 +2200,8 @@ func (h *HandlerV1) MultipleUpdateObject(c *gin.Context) {
 		}
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
-	defer cancel()
+	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
+	// defer cancel()
 
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
@@ -2287,14 +2213,7 @@ func (h *HandlerV1) MultipleUpdateObject(c *gin.Context) {
 		return
 	}
 
-	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
-	if err != nil {
-		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
-		h.log.Info("ConnectionPool", logger.Any("CONNECTION", conn))
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
-	defer conn.Close()
+	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 
 	objects := objectRequest.Data["objects"].([]interface{})
 	editedObjects := make([]map[string]interface{}, 0, len(objects))
@@ -2479,17 +2398,9 @@ func (h *HandlerV1) GetFinancialAnalytics(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
-	defer cancel()
-
-	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
-	if err != nil {
-		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
-		h.log.Info("ConnectionPool", logger.Any("CONNECTION", conn))
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
-	defer conn.Close()
+	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
+	// defer cancel()
+	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 
 	//tokenInfo := h.GetAuthInfo
 	objectRequest.Data["tables"] = authInfo.GetTables()
@@ -2668,17 +2579,10 @@ func (h *HandlerV1) GetListGroupBy(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
-	defer cancel()
+	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
+	// defer cancel()
 
-	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
-	if err != nil {
-		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
-		h.log.Info("ConnectionPool", logger.Any("CONNECTION", conn))
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
-	defer conn.Close()
+	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 
 	structData, err := helper.ConvertMapToStruct(object.Data)
 	if err != nil {
@@ -2818,8 +2722,8 @@ func (h *HandlerV1) GetGroupByField(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
-	defer cancel()
+	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
+	// defer cancel()
 
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
@@ -2831,14 +2735,7 @@ func (h *HandlerV1) GetGroupByField(c *gin.Context) {
 		return
 	}
 
-	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
-	if err != nil {
-		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
-		h.log.Info("ConnectionPool", logger.Any("CONNECTION", conn))
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
-	defer conn.Close()
+	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
 	if err != nil {
@@ -2954,17 +2851,10 @@ func (h *HandlerV1) DeleteManyObject(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
-	defer cancel()
+	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
+	// defer cancel()
 
-	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
-	if err != nil {
-		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
-		h.log.Info("ConnectionPool", logger.Any("CONNECTION", conn))
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
-	defer conn.Close()
+	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 
 	structData, err := helper.ConvertMapToStruct(data)
 	if err != nil {
@@ -3133,17 +3023,10 @@ func (h *HandlerV1) GetListWithOutRelation(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
-	defer cancel()
+	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
+	// defer cancel()
 
-	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(ctx)
-	if err != nil {
-		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
-		h.log.Info("ConnectionPool", logger.Any("CONNECTION", conn))
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
-	defer conn.Close()
+	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
@@ -3300,14 +3183,7 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 		return
 	}
 
-	service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
-	if err != nil {
-		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
-		h.log.Info("ConnectionPool", logger.Any("CONNECTION", conn))
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
-	defer conn.Close()
+	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 
 	var (
 		object    models.CommonMessage
