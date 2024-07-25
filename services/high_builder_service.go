@@ -2,11 +2,10 @@ package services
 
 import (
 	"context"
-	"time"
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
 
-	grpcpool "github.com/processout/grpc-go-pool"
+	gRPCClientLb "github.com/golanguzb70/grpc-client-lb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -34,7 +33,7 @@ func NewHighBuilderServiceClient(ctx context.Context, cfg config.Config) (Builde
 		return conn, err
 	}
 
-	objectbuilderServicePool, err := grpcpool.New(factory, 9, 9, time.Second)
+	grpcClientLB, err := gRPCClientLb.NewGrpcClientLB(factory, 6)
 	if err != nil {
 		return nil, err
 	}
@@ -74,8 +73,8 @@ func NewHighBuilderServiceClient(ctx context.Context, cfg config.Config) (Builde
 		customErrorMessageService: object_builder_service.NewCustomErrorMessageServiceClient(connObjectBuilderService),
 		reportSettingService:      object_builder_service.NewReportSettingServiceClient(connObjectBuilderService),
 		fileService:               object_builder_service.NewFileServiceClient(connObjectBuilderService),
-		objectBuilderConnPool:     objectbuilderServicePool,
 		itemsService:              object_builder_service.NewItemsServiceClient(connObjectBuilderService),
 		versionHistoryService:     object_builder_service.NewVersionHistoryServiceClient(connObjectBuilderService),
+		clientLb:                  grpcClientLB,
 	}, nil
 }
