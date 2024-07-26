@@ -1194,11 +1194,6 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 			}
 
 			service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
-			if err != nil {
-				h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
-				h.handleResponse(c, status_http.InternalServerError, err)
-				return
-			}
 
 			resp, err = service.GetList(
 				context.Background(),
