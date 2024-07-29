@@ -65,6 +65,14 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 	}
 	objectRequest.Data["language_setting"] = c.DefaultQuery("language_setting", "")
 
+	if _, ok := objectRequest.Data["limit"]; ok {
+		if cast.ToInt(objectRequest.Data["limit"]) > 100 {
+			objectRequest.Data["limit"] = 100
+		}
+	} else {
+		objectRequest.Data["limit"] = 100
+	}
+
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
