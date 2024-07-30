@@ -130,6 +130,10 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 		if util.IsValidUUID(viewId) {
 			switch resource.ResourceType {
 			case pb.ResourceType_MONGODB:
+				if resource.ResourceEnvironmentId == "49ae6c46-5397-4975-b238-320617f0190c" { // starex
+					h.handleResponse(c, statusHttp, pb.Empty{})
+					return
+				}
 				redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
 				if err == nil {
 					resp := make(map[string]interface{})
