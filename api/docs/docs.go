@@ -39,7 +39,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/config.Config"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_config.Config"
                                         }
                                     }
                                 }
@@ -10785,7 +10785,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.Field"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_models.Field"
                         }
                     }
                 ],
@@ -10801,7 +10801,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.Field"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_models.Field"
                                         }
                                     }
                                 }
@@ -10887,7 +10887,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.Field"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_models.Field"
                                         }
                                     }
                                 }
@@ -11489,6 +11489,94 @@ const docTemplate = `{
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/v1.Path"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/files/word-template": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Word template",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Files"
+                ],
+                "summary": "Word template",
+                "operationId": "word_template",
+                "parameters": [
+                    {
+                        "description": "WordTemplateRequestBody",
+                        "name": "variable",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CommonMessage"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "File data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.CommonMessage"
                                         }
                                     }
                                 }
@@ -34143,7 +34231,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.Field"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_models.Field"
                         }
                     }
                 ],
@@ -34159,7 +34247,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.Field"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_models.Field"
                                         }
                                     }
                                 }
@@ -34252,7 +34340,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.Field"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_models.Field"
                                         }
                                     }
                                 }
@@ -38041,6 +38129,94 @@ const docTemplate = `{
                 }
             }
         },
+        "/v2/send-to-gpt": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Send To Gpt",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "GPT"
+                ],
+                "summary": "Send To Gpt",
+                "operationId": "send_to_gpt",
+                "parameters": [
+                    {
+                        "description": "SendToGptRequestBody",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SendToGptRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Success",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v2/table": {
             "get": {
                 "security": [
@@ -38873,6 +39049,101 @@ const docTemplate = `{
                 "responses": {
                     "204": {
                         "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v2/update-row/{collection}": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update Row Order",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Items"
+                ],
+                "summary": "Update Row Order",
+                "operationId": "update_row_order",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "collection",
+                        "name": "collection",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "GetListAggregation",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CommonMessage"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ObjectBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.CommonMessage"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -43597,13 +43868,31 @@ const docTemplate = `{
                 "add_field": {
                     "type": "string"
                 },
+                "add_filter": {
+                    "type": "string"
+                },
                 "automation": {
                     "type": "string"
                 },
                 "client_type_id": {
                     "type": "string"
                 },
+                "columns": {
+                    "type": "string"
+                },
                 "delete": {
+                    "type": "string"
+                },
+                "excel_menu": {
+                    "type": "string"
+                },
+                "field_filter": {
+                    "type": "string"
+                },
+                "fix_column": {
+                    "type": "string"
+                },
+                "group": {
                     "type": "string"
                 },
                 "id": {
@@ -43621,10 +43910,16 @@ const docTemplate = `{
                 "role_id": {
                     "type": "string"
                 },
+                "search_button": {
+                    "type": "string"
+                },
                 "settings": {
                     "type": "string"
                 },
                 "share_modal": {
+                    "type": "string"
+                },
+                "tab_group": {
                     "type": "string"
                 },
                 "table_slug": {
@@ -45266,224 +45561,6 @@ const docTemplate = `{
                 }
             }
         },
-        "config.Config": {
-            "type": "object",
-            "properties": {
-                "adminHostForCodeServer": {
-                    "type": "string"
-                },
-                "analyticsGRPCPort": {
-                    "type": "string"
-                },
-                "analyticsServiceHost": {
-                    "type": "string"
-                },
-                "apiReferenceServiceHost": {
-                    "type": "string"
-                },
-                "apiReferenceServicePort": {
-                    "type": "string"
-                },
-                "authGRPCPort": {
-                    "type": "string"
-                },
-                "authServiceHost": {
-                    "type": "string"
-                },
-                "chatServiceGrpcHost": {
-                    "type": "string"
-                },
-                "chatServiceGrpcPort": {
-                    "type": "string"
-                },
-                "client_HOST": {
-                    "type": "string"
-                },
-                "companyServiceHost": {
-                    "type": "string"
-                },
-                "companyServicePort": {
-                    "type": "string"
-                },
-                "convertTemplateServiceGrpcHost": {
-                    "type": "string"
-                },
-                "convertTemplateServiceGrpcPort": {
-                    "type": "string"
-                },
-                "corporateGRPCPort": {
-                    "type": "string"
-                },
-                "corporateServiceHost": {
-                    "type": "string"
-                },
-                "defaultLimit": {
-                    "type": "string"
-                },
-                "defaultOffset": {
-                    "type": "string"
-                },
-                "functionServiceHost": {
-                    "type": "string"
-                },
-                "functionServicePort": {
-                    "type": "string"
-                },
-                "getRequestRedisDatabase": {
-                    "type": "integer"
-                },
-                "getRequestRedisHost": {
-                    "type": "string"
-                },
-                "getRequestRedisPassword": {
-                    "type": "string"
-                },
-                "getRequestRedisPort": {
-                    "type": "string"
-                },
-                "gitlabGroupId": {
-                    "type": "integer"
-                },
-                "gitlabGroupIdMicroFE": {
-                    "type": "integer"
-                },
-                "gitlabHostMicroFE": {
-                    "type": "string"
-                },
-                "gitlabIntegrationToken": {
-                    "type": "string"
-                },
-                "gitlabIntegrationURL": {
-                    "type": "string"
-                },
-                "gitlabProjectId": {
-                    "type": "integer"
-                },
-                "gitlabProjectIdMicroFE": {
-                    "type": "integer"
-                },
-                "goObjectBuilderGRPCPort": {
-                    "type": "string"
-                },
-                "goObjectBuilderServiceHost": {
-                    "type": "string"
-                },
-                "helmInstallMicroFE": {
-                    "type": "string"
-                },
-                "helmRepoAddFMicroFE": {
-                    "type": "string"
-                },
-                "helmRepoUpdateMicroFE": {
-                    "type": "string"
-                },
-                "helmUninstallMicroFE": {
-                    "type": "string"
-                },
-                "highObjectBuilderGRPCPort": {
-                    "type": "string"
-                },
-                "highObjectBuilderServiceHost": {
-                    "type": "string"
-                },
-                "integrationGRPCPort": {
-                    "type": "string"
-                },
-                "integrationServiceHost": {
-                    "type": "string"
-                },
-                "minioAccessKeyID": {
-                    "type": "string"
-                },
-                "minioEndpoint": {
-                    "type": "string"
-                },
-                "minioProtocol": {
-                    "type": "boolean"
-                },
-                "minioSecretAccessKey": {
-                    "type": "string"
-                },
-                "notificationGRPCPort": {
-                    "type": "string"
-                },
-                "notificationServiceHost": {
-                    "type": "string"
-                },
-                "objectBuilderGRPCPort": {
-                    "type": "string"
-                },
-                "objectBuilderServiceHost": {
-                    "type": "string"
-                },
-                "pathToClone": {
-                    "type": "string"
-                },
-                "platformType": {
-                    "type": "string"
-                },
-                "posGRPCPort": {
-                    "type": "string"
-                },
-                "posServiceHost": {
-                    "type": "string"
-                },
-                "postgresBuilderServiceHost": {
-                    "type": "string"
-                },
-                "postgresBuilderServicePort": {
-                    "type": "string"
-                },
-                "queryServiceHost": {
-                    "type": "string"
-                },
-                "queryServicePort": {
-                    "type": "string"
-                },
-                "scenarioGRPCPort": {
-                    "type": "string"
-                },
-                "scenarioServiceHost": {
-                    "type": "string"
-                },
-                "secretKey": {
-                    "type": "string"
-                },
-                "serviceLink": {
-                    "type": "string"
-                },
-                "smsGRPCPort": {
-                    "type": "string"
-                },
-                "smsServiceHost": {
-                    "type": "string"
-                },
-                "superadmin_HOST": {
-                    "type": "string"
-                },
-                "templateGRPCPort": {
-                    "type": "string"
-                },
-                "templateServiceHost": {
-                    "type": "string"
-                },
-                "ucodeNamespace": {
-                    "type": "string"
-                },
-                "versioningGRPCPort": {
-                    "type": "string"
-                },
-                "versioningServiceHost": {
-                    "type": "string"
-                },
-                "webPageServiceHost": {
-                    "type": "string"
-                },
-                "webPageServicePort": {
-                    "type": "string"
-                }
-            }
-        },
         "empty.Empty": {
             "type": "object"
         },
@@ -46607,69 +46684,6 @@ const docTemplate = `{
                 }
             }
         },
-        "models.Field": {
-            "type": "object",
-            "properties": {
-                "attributes": {
-                    "type": "object",
-                    "additionalProperties": true
-                },
-                "autofill_field": {
-                    "type": "string"
-                },
-                "autofill_table": {
-                    "type": "string"
-                },
-                "automatic": {
-                    "type": "boolean"
-                },
-                "default": {
-                    "type": "string"
-                },
-                "enable_multilanguage": {
-                    "type": "boolean"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "index": {
-                    "type": "string"
-                },
-                "is_visible": {
-                    "type": "boolean"
-                },
-                "label": {
-                    "type": "string"
-                },
-                "minio_folder": {
-                    "type": "string"
-                },
-                "relation_field": {
-                    "type": "string"
-                },
-                "relation_id": {
-                    "type": "string"
-                },
-                "required": {
-                    "type": "boolean"
-                },
-                "show_label": {
-                    "type": "boolean"
-                },
-                "slug": {
-                    "type": "string"
-                },
-                "table_id": {
-                    "type": "string"
-                },
-                "type": {
-                    "type": "string"
-                },
-                "unique": {
-                    "type": "boolean"
-                }
-            }
-        },
         "models.FileDelete": {
             "type": "object",
             "properties": {
@@ -46809,7 +46823,7 @@ const docTemplate = `{
                 "fields": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/models.Field"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_models.Field"
                     }
                 }
             }
@@ -47237,6 +47251,14 @@ const docTemplate = `{
                 }
             }
         },
+        "models.SendToGptRequest": {
+            "type": "object",
+            "properties": {
+                "promt": {
+                    "type": "string"
+                }
+            }
+        },
         "models.Sms": {
             "type": "object",
             "properties": {
@@ -47490,10 +47512,6 @@ const docTemplate = `{
             "properties": {
                 "bindingId": {
                     "type": "string"
-                },
-                "data": {
-                    "type": "object",
-                    "additionalProperties": true
                 },
                 "operationState": {
                     "type": "string"
@@ -48287,6 +48305,9 @@ const docTemplate = `{
                 "index": {
                     "type": "string"
                 },
+                "is_alt": {
+                    "type": "boolean"
+                },
                 "is_visible": {
                     "type": "boolean"
                 },
@@ -48996,6 +49017,9 @@ const docTemplate = `{
                 },
                 "index": {
                     "type": "string"
+                },
+                "is_alt": {
+                    "type": "boolean"
                 },
                 "is_search": {
                     "type": "boolean"
@@ -50171,13 +50195,31 @@ const docTemplate = `{
                 "add_field": {
                     "type": "string"
                 },
+                "add_filter": {
+                    "type": "string"
+                },
                 "automation": {
                     "type": "string"
                 },
                 "client_type_id": {
                     "type": "string"
                 },
+                "columns": {
+                    "type": "string"
+                },
                 "delete": {
+                    "type": "string"
+                },
+                "excel_menu": {
+                    "type": "string"
+                },
+                "field_filter": {
+                    "type": "string"
+                },
+                "fix_column": {
+                    "type": "string"
+                },
+                "group": {
                     "type": "string"
                 },
                 "guid": {
@@ -50195,10 +50237,16 @@ const docTemplate = `{
                 "role_id": {
                     "type": "string"
                 },
+                "search_button": {
+                    "type": "string"
+                },
                 "settings": {
                     "type": "string"
                 },
                 "share_modal": {
+                    "type": "string"
+                },
+                "tab_group": {
                     "type": "string"
                 },
                 "table_slug": {
@@ -53672,6 +53720,290 @@ const docTemplate = `{
                 }
             }
         },
+        "ucode_ucode_go_api_gateway_api_models.Field": {
+            "type": "object",
+            "properties": {
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "autofill_field": {
+                    "type": "string"
+                },
+                "autofill_table": {
+                    "type": "string"
+                },
+                "automatic": {
+                    "type": "boolean"
+                },
+                "default": {
+                    "type": "string"
+                },
+                "enable_multilanguage": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "index": {
+                    "type": "string"
+                },
+                "is_visible": {
+                    "type": "boolean"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "minio_folder": {
+                    "type": "string"
+                },
+                "relation_field": {
+                    "type": "string"
+                },
+                "relation_id": {
+                    "type": "string"
+                },
+                "required": {
+                    "type": "boolean"
+                },
+                "show_label": {
+                    "type": "boolean"
+                },
+                "slug": {
+                    "type": "string"
+                },
+                "table_id": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "unique": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_config.Config": {
+            "type": "object",
+            "properties": {
+                "adminHostForCodeServer": {
+                    "type": "string"
+                },
+                "analyticsGRPCPort": {
+                    "type": "string"
+                },
+                "analyticsServiceHost": {
+                    "type": "string"
+                },
+                "apiReferenceServiceHost": {
+                    "type": "string"
+                },
+                "apiReferenceServicePort": {
+                    "type": "string"
+                },
+                "authGRPCPort": {
+                    "type": "string"
+                },
+                "authServiceHost": {
+                    "type": "string"
+                },
+                "chatServiceGrpcHost": {
+                    "type": "string"
+                },
+                "chatServiceGrpcPort": {
+                    "type": "string"
+                },
+                "client_HOST": {
+                    "type": "string"
+                },
+                "companyServiceHost": {
+                    "type": "string"
+                },
+                "companyServicePort": {
+                    "type": "string"
+                },
+                "convertTemplateServiceGrpcHost": {
+                    "type": "string"
+                },
+                "convertTemplateServiceGrpcPort": {
+                    "type": "string"
+                },
+                "corporateGRPCPort": {
+                    "type": "string"
+                },
+                "corporateServiceHost": {
+                    "type": "string"
+                },
+                "defaultLimit": {
+                    "type": "string"
+                },
+                "defaultOffset": {
+                    "type": "string"
+                },
+                "functionServiceHost": {
+                    "type": "string"
+                },
+                "functionServicePort": {
+                    "type": "string"
+                },
+                "getRequestRedisDatabase": {
+                    "type": "integer"
+                },
+                "getRequestRedisHost": {
+                    "type": "string"
+                },
+                "getRequestRedisPassword": {
+                    "type": "string"
+                },
+                "getRequestRedisPort": {
+                    "type": "string"
+                },
+                "gitlabGroupId": {
+                    "type": "integer"
+                },
+                "gitlabGroupIdMicroFE": {
+                    "type": "integer"
+                },
+                "gitlabHostMicroFE": {
+                    "type": "string"
+                },
+                "gitlabIntegrationToken": {
+                    "type": "string"
+                },
+                "gitlabIntegrationURL": {
+                    "type": "string"
+                },
+                "gitlabProjectId": {
+                    "type": "integer"
+                },
+                "gitlabProjectIdMicroFE": {
+                    "type": "integer"
+                },
+                "goObjectBuilderGRPCPort": {
+                    "type": "string"
+                },
+                "goObjectBuilderServiceHost": {
+                    "type": "string"
+                },
+                "helmInstallMicroFE": {
+                    "type": "string"
+                },
+                "helmRepoAddFMicroFE": {
+                    "type": "string"
+                },
+                "helmRepoUpdateMicroFE": {
+                    "type": "string"
+                },
+                "helmUninstallMicroFE": {
+                    "type": "string"
+                },
+                "highObjectBuilderGRPCPort": {
+                    "type": "string"
+                },
+                "highObjectBuilderServiceHost": {
+                    "type": "string"
+                },
+                "integrationGRPCPort": {
+                    "type": "string"
+                },
+                "integrationServiceHost": {
+                    "type": "string"
+                },
+                "minioAccessKeyID": {
+                    "type": "string"
+                },
+                "minioEndpoint": {
+                    "type": "string"
+                },
+                "minioProtocol": {
+                    "type": "boolean"
+                },
+                "minioSecretAccessKey": {
+                    "type": "string"
+                },
+                "notificationGRPCPort": {
+                    "type": "string"
+                },
+                "notificationServiceHost": {
+                    "type": "string"
+                },
+                "objectBuilderGRPCPort": {
+                    "type": "string"
+                },
+                "objectBuilderServiceHost": {
+                    "type": "string"
+                },
+                "openAIApiKey": {
+                    "type": "string"
+                },
+                "pathToClone": {
+                    "type": "string"
+                },
+                "platformType": {
+                    "type": "string"
+                },
+                "posGRPCPort": {
+                    "type": "string"
+                },
+                "posServiceHost": {
+                    "type": "string"
+                },
+                "postgresBuilderServiceHost": {
+                    "type": "string"
+                },
+                "postgresBuilderServicePort": {
+                    "type": "string"
+                },
+                "queryServiceHost": {
+                    "type": "string"
+                },
+                "queryServicePort": {
+                    "type": "string"
+                },
+                "scenarioGRPCPort": {
+                    "type": "string"
+                },
+                "scenarioServiceHost": {
+                    "type": "string"
+                },
+                "secretKey": {
+                    "type": "string"
+                },
+                "serviceLink": {
+                    "type": "string"
+                },
+                "smsGRPCPort": {
+                    "type": "string"
+                },
+                "smsServiceHost": {
+                    "type": "string"
+                },
+                "superadmin_HOST": {
+                    "type": "string"
+                },
+                "templateGRPCPort": {
+                    "type": "string"
+                },
+                "templateServiceHost": {
+                    "type": "string"
+                },
+                "ucodeNamespace": {
+                    "type": "string"
+                },
+                "versioningGRPCPort": {
+                    "type": "string"
+                },
+                "versioningServiceHost": {
+                    "type": "string"
+                },
+                "webPageServiceHost": {
+                    "type": "string"
+                },
+                "webPageServicePort": {
+                    "type": "string"
+                }
+            }
+        },
         "v1.BucketRequest": {
             "type": "object",
             "properties": {
@@ -54215,8 +54547,6 @@ var SwaggerInfo = &swag.Spec{
 	Description:      "",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
-	// LeftDelim:        "{{",
-	// RightDelim:       "}}",
 }
 
 func init() {

@@ -298,11 +298,23 @@ definitions:
     properties:
       add_field:
         type: string
+      add_filter:
+        type: string
       automation:
         type: string
       client_type_id:
         type: string
+      columns:
+        type: string
       delete:
+        type: string
+      excel_menu:
+        type: string
+      field_filter:
+        type: string
+      fix_column:
+        type: string
+      group:
         type: string
       id:
         type: string
@@ -314,9 +326,13 @@ definitions:
         type: string
       role_id:
         type: string
+      search_button:
+        type: string
       settings:
         type: string
       share_modal:
+        type: string
+      tab_group:
         type: string
       table_slug:
         type: string
@@ -1396,151 +1412,6 @@ definitions:
       value:
         type: string
     type: object
-  config.Config:
-    properties:
-      adminHostForCodeServer:
-        type: string
-      analyticsGRPCPort:
-        type: string
-      analyticsServiceHost:
-        type: string
-      apiReferenceServiceHost:
-        type: string
-      apiReferenceServicePort:
-        type: string
-      authGRPCPort:
-        type: string
-      authServiceHost:
-        type: string
-      chatServiceGrpcHost:
-        type: string
-      chatServiceGrpcPort:
-        type: string
-      client_HOST:
-        type: string
-      companyServiceHost:
-        type: string
-      companyServicePort:
-        type: string
-      convertTemplateServiceGrpcHost:
-        type: string
-      convertTemplateServiceGrpcPort:
-        type: string
-      corporateGRPCPort:
-        type: string
-      corporateServiceHost:
-        type: string
-      defaultLimit:
-        type: string
-      defaultOffset:
-        type: string
-      functionServiceHost:
-        type: string
-      functionServicePort:
-        type: string
-      getRequestRedisDatabase:
-        type: integer
-      getRequestRedisHost:
-        type: string
-      getRequestRedisPassword:
-        type: string
-      getRequestRedisPort:
-        type: string
-      gitlabGroupId:
-        type: integer
-      gitlabGroupIdMicroFE:
-        type: integer
-      gitlabHostMicroFE:
-        type: string
-      gitlabIntegrationToken:
-        type: string
-      gitlabIntegrationURL:
-        type: string
-      gitlabProjectId:
-        type: integer
-      gitlabProjectIdMicroFE:
-        type: integer
-      goObjectBuilderGRPCPort:
-        type: string
-      goObjectBuilderServiceHost:
-        type: string
-      helmInstallMicroFE:
-        type: string
-      helmRepoAddFMicroFE:
-        type: string
-      helmRepoUpdateMicroFE:
-        type: string
-      helmUninstallMicroFE:
-        type: string
-      highObjectBuilderGRPCPort:
-        type: string
-      highObjectBuilderServiceHost:
-        type: string
-      integrationGRPCPort:
-        type: string
-      integrationServiceHost:
-        type: string
-      minioAccessKeyID:
-        type: string
-      minioEndpoint:
-        type: string
-      minioProtocol:
-        type: boolean
-      minioSecretAccessKey:
-        type: string
-      notificationGRPCPort:
-        type: string
-      notificationServiceHost:
-        type: string
-      objectBuilderGRPCPort:
-        type: string
-      objectBuilderServiceHost:
-        type: string
-      pathToClone:
-        type: string
-      platformType:
-        type: string
-      posGRPCPort:
-        type: string
-      posServiceHost:
-        type: string
-      postgresBuilderServiceHost:
-        type: string
-      postgresBuilderServicePort:
-        type: string
-      queryServiceHost:
-        type: string
-      queryServicePort:
-        type: string
-      scenarioGRPCPort:
-        type: string
-      scenarioServiceHost:
-        type: string
-      secretKey:
-        type: string
-      serviceLink:
-        type: string
-      smsGRPCPort:
-        type: string
-      smsServiceHost:
-        type: string
-      superadmin_HOST:
-        type: string
-      templateGRPCPort:
-        type: string
-      templateServiceHost:
-        type: string
-      ucodeNamespace:
-        type: string
-      versioningGRPCPort:
-        type: string
-      versioningServiceHost:
-        type: string
-      webPageServiceHost:
-        type: string
-      webPageServicePort:
-        type: string
-    type: object
   empty.Empty:
     type: object
   emptypb.Empty:
@@ -2280,48 +2151,6 @@ definitions:
       message:
         type: string
     type: object
-  models.Field:
-    properties:
-      attributes:
-        additionalProperties: true
-        type: object
-      autofill_field:
-        type: string
-      autofill_table:
-        type: string
-      automatic:
-        type: boolean
-      default:
-        type: string
-      enable_multilanguage:
-        type: boolean
-      id:
-        type: string
-      index:
-        type: string
-      is_visible:
-        type: boolean
-      label:
-        type: string
-      minio_folder:
-        type: string
-      relation_field:
-        type: string
-      relation_id:
-        type: string
-      required:
-        type: boolean
-      show_label:
-        type: boolean
-      slug:
-        type: string
-      table_id:
-        type: string
-      type:
-        type: string
-      unique:
-        type: boolean
-    type: object
   models.FileDelete:
     properties:
       object_id:
@@ -2412,7 +2241,7 @@ definitions:
         type: object
       fields:
         items:
-          $ref: '#/definitions/models.Field'
+          $ref: '#/definitions/ucode_ucode_go_api_gateway_api_models.Field'
         type: array
     type: object
   models.GetAllPanelsResponse:
@@ -2694,6 +2523,11 @@ definitions:
       sms_id:
         type: string
     type: object
+  models.SendToGptRequest:
+    properties:
+      promt:
+        type: string
+    type: object
   models.Sms:
     properties:
       client_type:
@@ -2860,9 +2694,6 @@ definitions:
     properties:
       bindingId:
         type: string
-      data:
-        additionalProperties: true
-        type: object
       operationState:
         type: string
       operationType:
@@ -3382,6 +3213,8 @@ definitions:
         type: string
       index:
         type: string
+      is_alt:
+        type: boolean
       is_visible:
         type: boolean
       label:
@@ -3849,6 +3682,8 @@ definitions:
         type: string
       index:
         type: string
+      is_alt:
+        type: boolean
       is_search:
         type: boolean
       is_system:
@@ -4615,11 +4450,23 @@ definitions:
     properties:
       add_field:
         type: string
+      add_filter:
+        type: string
       automation:
         type: string
       client_type_id:
         type: string
+      columns:
+        type: string
       delete:
+        type: string
+      excel_menu:
+        type: string
+      field_filter:
+        type: string
+      fix_column:
+        type: string
+      group:
         type: string
       guid:
         type: string
@@ -4631,9 +4478,13 @@ definitions:
         type: string
       role_id:
         type: string
+      search_button:
+        type: string
       settings:
         type: string
       share_modal:
+        type: string
+      tab_group:
         type: string
       table_slug:
         type: string
@@ -6905,6 +6756,195 @@ definitions:
       username:
         type: string
     type: object
+  ucode_ucode_go_api_gateway_api_models.Field:
+    properties:
+      attributes:
+        additionalProperties: true
+        type: object
+      autofill_field:
+        type: string
+      autofill_table:
+        type: string
+      automatic:
+        type: boolean
+      default:
+        type: string
+      enable_multilanguage:
+        type: boolean
+      id:
+        type: string
+      index:
+        type: string
+      is_visible:
+        type: boolean
+      label:
+        type: string
+      minio_folder:
+        type: string
+      relation_field:
+        type: string
+      relation_id:
+        type: string
+      required:
+        type: boolean
+      show_label:
+        type: boolean
+      slug:
+        type: string
+      table_id:
+        type: string
+      type:
+        type: string
+      unique:
+        type: boolean
+    type: object
+  ucode_ucode_go_api_gateway_config.Config:
+    properties:
+      adminHostForCodeServer:
+        type: string
+      analyticsGRPCPort:
+        type: string
+      analyticsServiceHost:
+        type: string
+      apiReferenceServiceHost:
+        type: string
+      apiReferenceServicePort:
+        type: string
+      authGRPCPort:
+        type: string
+      authServiceHost:
+        type: string
+      chatServiceGrpcHost:
+        type: string
+      chatServiceGrpcPort:
+        type: string
+      client_HOST:
+        type: string
+      companyServiceHost:
+        type: string
+      companyServicePort:
+        type: string
+      convertTemplateServiceGrpcHost:
+        type: string
+      convertTemplateServiceGrpcPort:
+        type: string
+      corporateGRPCPort:
+        type: string
+      corporateServiceHost:
+        type: string
+      defaultLimit:
+        type: string
+      defaultOffset:
+        type: string
+      functionServiceHost:
+        type: string
+      functionServicePort:
+        type: string
+      getRequestRedisDatabase:
+        type: integer
+      getRequestRedisHost:
+        type: string
+      getRequestRedisPassword:
+        type: string
+      getRequestRedisPort:
+        type: string
+      gitlabGroupId:
+        type: integer
+      gitlabGroupIdMicroFE:
+        type: integer
+      gitlabHostMicroFE:
+        type: string
+      gitlabIntegrationToken:
+        type: string
+      gitlabIntegrationURL:
+        type: string
+      gitlabProjectId:
+        type: integer
+      gitlabProjectIdMicroFE:
+        type: integer
+      goObjectBuilderGRPCPort:
+        type: string
+      goObjectBuilderServiceHost:
+        type: string
+      helmInstallMicroFE:
+        type: string
+      helmRepoAddFMicroFE:
+        type: string
+      helmRepoUpdateMicroFE:
+        type: string
+      helmUninstallMicroFE:
+        type: string
+      highObjectBuilderGRPCPort:
+        type: string
+      highObjectBuilderServiceHost:
+        type: string
+      integrationGRPCPort:
+        type: string
+      integrationServiceHost:
+        type: string
+      minioAccessKeyID:
+        type: string
+      minioEndpoint:
+        type: string
+      minioProtocol:
+        type: boolean
+      minioSecretAccessKey:
+        type: string
+      notificationGRPCPort:
+        type: string
+      notificationServiceHost:
+        type: string
+      objectBuilderGRPCPort:
+        type: string
+      objectBuilderServiceHost:
+        type: string
+      openAIApiKey:
+        type: string
+      pathToClone:
+        type: string
+      platformType:
+        type: string
+      posGRPCPort:
+        type: string
+      posServiceHost:
+        type: string
+      postgresBuilderServiceHost:
+        type: string
+      postgresBuilderServicePort:
+        type: string
+      queryServiceHost:
+        type: string
+      queryServicePort:
+        type: string
+      scenarioGRPCPort:
+        type: string
+      scenarioServiceHost:
+        type: string
+      secretKey:
+        type: string
+      serviceLink:
+        type: string
+      smsGRPCPort:
+        type: string
+      smsServiceHost:
+        type: string
+      superadmin_HOST:
+        type: string
+      templateGRPCPort:
+        type: string
+      templateServiceHost:
+        type: string
+      ucodeNamespace:
+        type: string
+      versioningGRPCPort:
+        type: string
+      versioningServiceHost:
+        type: string
+      webPageServiceHost:
+        type: string
+      webPageServicePort:
+        type: string
+    type: object
   v1.BucketRequest:
     properties:
       bucket_name:
@@ -7267,7 +7307,7 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/config.Config'
+                  $ref: '#/definitions/ucode_ucode_go_api_gateway_config.Config'
               type: object
         "400":
           description: Bad Request
@@ -13207,7 +13247,7 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/models.Field'
+                  $ref: '#/definitions/ucode_ucode_go_api_gateway_api_models.Field'
               type: object
         "400":
           description: Bad Request
@@ -13243,7 +13283,7 @@ paths:
         name: relation
         required: true
         schema:
-          $ref: '#/definitions/models.Field'
+          $ref: '#/definitions/ucode_ucode_go_api_gateway_api_models.Field'
       produces:
       - application/json
       responses:
@@ -13254,7 +13294,7 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/models.Field'
+                  $ref: '#/definitions/ucode_ucode_go_api_gateway_api_models.Field'
               type: object
         "400":
           description: Bad Request
@@ -13696,6 +13736,54 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Upload Folder
+      tags:
+      - Files
+  /v1/files/word-template:
+    post:
+      consumes:
+      - application/json
+      description: Word template
+      operationId: word_template
+      parameters:
+      - description: WordTemplateRequestBody
+        in: body
+        name: variable
+        required: true
+        schema:
+          $ref: '#/definitions/models.CommonMessage'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: File data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.CommonMessage'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Word template
       tags:
       - Files
   /v1/function:
@@ -26118,7 +26206,7 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/models.Field'
+                  $ref: '#/definitions/ucode_ucode_go_api_gateway_api_models.Field'
               type: object
         "400":
           description: Bad Request
@@ -26159,7 +26247,7 @@ paths:
         name: relation
         required: true
         schema:
-          $ref: '#/definitions/models.Field'
+          $ref: '#/definitions/ucode_ucode_go_api_gateway_api_models.Field'
       produces:
       - application/json
       responses:
@@ -26170,7 +26258,7 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/models.Field'
+                  $ref: '#/definitions/ucode_ucode_go_api_gateway_api_models.Field'
               type: object
         "400":
           description: Bad Request
@@ -28277,6 +28365,54 @@ paths:
       summary: Get relation cascading
       tags:
       - V2_Relation
+  /v2/send-to-gpt:
+    post:
+      consumes:
+      - application/json
+      description: Send To Gpt
+      operationId: send_to_gpt
+      parameters:
+      - description: SendToGptRequestBody
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/models.SendToGptRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Success
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Send To Gpt
+      tags:
+      - GPT
   /v2/table:
     get:
       consumes:
@@ -28757,6 +28893,59 @@ paths:
       summary: V2 Get table by id
       tags:
       - V2Table
+  /v2/update-row/{collection}:
+    put:
+      consumes:
+      - application/json
+      description: Update Row Order
+      operationId: update_row_order
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: GetListAggregation
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/models.CommonMessage'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ObjectBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.CommonMessage'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update Row Order
+      tags:
+      - Items
   /v2/update-with/{collection}:
     put:
       consumes:
