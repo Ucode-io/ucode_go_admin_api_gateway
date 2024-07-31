@@ -497,7 +497,7 @@ func (h *HandlerV2) GetListDocxTemplate(c *gin.Context) {
 	res, err := services.TemplateService().DocxTemplate().GetListDocxTemplate(
 		context.Background(),
 		&tmp.GetListDocxTemplateReq{
-			ProjectId:  projectId.(string),
+			ProjectId:  resource.ResourceEnvironmentId,
 			ResourceId: resource.ResourceEnvironmentId,
 			VersionId:  "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
 			TableSlug:  c.DefaultQuery("table-slug", ""),
