@@ -36,7 +36,7 @@ message UpdateDocxTemplateReq {
     string id = 1;
     string project_id = 2;
     string title = 3;
-    string folder_id = 4;
+    string table_slug = 4;
     repeated Table tables = 5;
     string version_id = 6;
     string resource_id = 7;
@@ -52,7 +52,7 @@ message GetSingleDocxTemplateReq {
 
 message GetListDocxTemplateReq {
     string project_id = 1;
-    string folder_id = 2;
+    string table_slug = 2;
     int32 limit = 3;
     int32 offset = 4;
     string version_id = 5;
@@ -77,7 +77,7 @@ message CreateDocxTemplateReq {
     }
     string project_id = 1;
     string title = 2;
-    string folder_id = 3;
+    string table_slug = 3;
     repeated Table tables = 4;
     string version_id = 5;
     string resource_id = 6;
@@ -98,7 +98,7 @@ message DocxTemplate {
     string id = 1;
     string project_id = 2;
     string title = 3;
-    string folder_id = 4;
+    string table_slug = 4;
     repeated Table tables = 5;
     string version_id = 6;
     string file_url = 7;

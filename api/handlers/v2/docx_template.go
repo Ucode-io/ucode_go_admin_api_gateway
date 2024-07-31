@@ -437,7 +437,7 @@ func (h *HandlerV2) DeleteDocxTemplate(c *gin.Context) {
 // @Tags Template
 // @Accept json
 // @Produce json
-// @Param folder-id query string true "folder-id"
+// @Param table-slug query string true "table-slug"
 // @Param limit query string false "limit"
 // @Param offset query string false "offset"
 // @Success 200 {object} status_http.Response{data=tmp.GetListDocxTemplateRes} "DocxTemplateBody"
@@ -498,7 +498,7 @@ func (h *HandlerV2) GetListDocxTemplate(c *gin.Context) {
 			ProjectId:  projectId.(string),
 			ResourceId: resource.ResourceEnvironmentId,
 			VersionId:  "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
-			FolderId:   c.DefaultQuery("folder-id", ""),
+			TableSlug:  c.DefaultQuery("table-slug", ""),
 			Limit:      int32(limit),
 			Offset:     int32(offset),
 		},
