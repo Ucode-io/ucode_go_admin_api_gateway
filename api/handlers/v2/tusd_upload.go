@@ -11,6 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	tusd "github.com/tus/tusd/pkg/handler"
 	"github.com/tus/tusd/pkg/s3store"
+	_ "ucode/ucode_go_api_gateway/api/status_http"
 )
 
 // UploadFile godoc
@@ -77,4 +78,3 @@ func (h *HandlerV2) eventHandler(handler *tusd.Handler, s string) {
 		}
 	}()
 }
-

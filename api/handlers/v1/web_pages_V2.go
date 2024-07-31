@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strconv"
 	"time"
+	_ "ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"

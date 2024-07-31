@@ -3,13 +3,13 @@ package v1
 import (
 	"context"
 	"errors"
-	"ucode/ucode_go_api_gateway/api/models"
-	"ucode/ucode_go_api_gateway/api/status_http"
-	pb "ucode/ucode_go_api_gateway/genproto/company_service"
-	"ucode/ucode_go_api_gateway/pkg/util"
-
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cast"
+	"ucode/ucode_go_api_gateway/api/models"
+	"ucode/ucode_go_api_gateway/api/status_http"
+	_ "ucode/ucode_go_api_gateway/genproto/company_service"
+	pb "ucode/ucode_go_api_gateway/genproto/company_service"
+	"ucode/ucode_go_api_gateway/pkg/util"
 )
 
 // AddResourceToProject godoc
