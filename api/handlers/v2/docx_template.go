@@ -200,7 +200,7 @@ func (h *HandlerV2) GetSingleDocxTemplate(c *gin.Context) {
 		&tmp.GetSingleDocxTemplateReq{
 			Id:         docxTemplateId,
 			ProjectId:  projectId.(string),
-			ResourceId: resource.ResourceEnvironmentId,
+			ResourceId: resource.ResourceId,
 			VersionId:  "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
 		},
 	)
@@ -415,7 +415,7 @@ func (h *HandlerV2) DeleteDocxTemplate(c *gin.Context) {
 		&tmp.DeleteDocxTemplateReq{
 			Id:         docxTemplateId,
 			ProjectId:  projectId.(string),
-			ResourceId: resource.ResourceEnvironmentId,
+			ResourceId: resource.ResourceId,
 			VersionId:  "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
 		},
 	)
