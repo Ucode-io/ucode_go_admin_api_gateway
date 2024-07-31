@@ -4,10 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
-	"github.com/minio/minio-go/v7"
-	"github.com/minio/minio-go/v7/pkg/credentials"
 	"io"
 	"log"
 	"net/http"
@@ -18,6 +14,11 @@ import (
 	tmp "ucode/ucode_go_api_gateway/genproto/template_service"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
+
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
+	"github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
 )
 
 // CreateDocxTemplate godoc
@@ -498,7 +499,7 @@ func (h *HandlerV2) GetListDocxTemplate(c *gin.Context) {
 		context.Background(),
 		&tmp.GetListDocxTemplateReq{
 			ProjectId:  resource.ResourceEnvironmentId,
-			ResourceId: resource.ResourceId,
+			ResourceId: resource.ResourceEnvironmentId,
 			VersionId:  "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
 			TableSlug:  c.DefaultQuery("table-slug", ""),
 			Limit:      int32(limit),
