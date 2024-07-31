@@ -492,6 +492,8 @@ func (h *HandlerV2) GetListDocxTemplate(c *gin.Context) {
 		return
 	}
 
+	fmt.Println("resource.ResourceEnvironmentId docx", resource.ResourceEnvironmentId, resource)
+
 	res, err := services.TemplateService().DocxTemplate().GetListDocxTemplate(
 		context.Background(),
 		&tmp.GetListDocxTemplateReq{
