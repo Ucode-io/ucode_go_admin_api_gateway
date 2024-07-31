@@ -3,11 +3,20 @@ package v2
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
+	"github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
+	"io"
+	"log"
+	"net/http"
+	"os"
 	"strconv"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	tmp "ucode/ucode_go_api_gateway/genproto/template_service"
+	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
 )
 
@@ -224,6 +233,71 @@ func (h *HandlerV2) UpdateDocxTemplate(c *gin.Context) {
 	docxTemplate.ProjectId = projectId.(string)
 	docxTemplate.ResourceId = resource.ResourceEnvironmentId
 	docxTemplate.VersionId = "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88"
+
+	url := "http://37.27.196.85:8084/cache/files/data/C7xTx2EUiG55llVrRdOIrWNsdfsd5zQ0mCaTY_3451/output.docx/Example%20Document%20Title.docx?md5=SZ0U0Ef1YUF8GqloFLzLfw&expires=1722436016&shardkey=C7xTx2EUiG55llVrRdOIrWNsdfsd5zQ0mCaTY&filename=Example%20Document%20Title.docx"
+	docxTemplate.FileUrl = url
+
+	{
+		client := &http.Client{}
+
+		req, err := http.NewRequest("GET", docxTemplate.FileUrl, nil)
+		if err != nil {
+			h.handleResponse(c, status_http.BadRequest, err.Error())
+			return
+		}
+
+		req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36")
+
+		resp, err := client.Do(req)
+		if err != nil {
+			h.handleResponse(c, status_http.BadRequest, err.Error())
+			return
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusOK {
+			log.Fatalf("Failed to download file: status code %d", resp.StatusCode)
+		}
+
+		fileName := uuid.New().String() + ".docx"
+
+		out, err := os.Create(fileName)
+		if err != nil {
+			h.handleResponse(c, status_http.BadRequest, err.Error())
+			return
+		}
+		defer out.Close()
+
+		if _, err = io.Copy(out, resp.Body); err != nil {
+			log.Fatalf("Failed to write to file: %v", err)
+		}
+
+		fmt.Println("file name in docx", fileName)
+
+		minioClient, err := minio.New(h.baseConf.MinioEndpoint, &minio.Options{
+			Creds:  credentials.NewStaticV4(h.baseConf.MinioAccessKeyID, h.baseConf.MinioSecretAccessKey, ""),
+			Secure: h.baseConf.MinioProtocol,
+		})
+		if err != nil {
+			h.handleResponse(c, status_http.BadRequest, err.Error())
+			return
+		}
+
+		defaultBucket := "docs"
+		dst, _ := os.Getwd()
+
+		if _, err = minioClient.FPutObject(context.Background(), defaultBucket, fileName, dst+"/"+fileName, minio.PutObjectOptions{}); err != nil {
+			err = os.Remove(dst + "/" + fileName)
+			h.handleResponse(c, status_http.BadRequest, err.Error())
+			return
+		}
+
+		if err = os.Remove(dst + "/" + fileName); err != nil {
+			h.log.Error("Error removing file", logger.Error(err))
+		}
+
+		docxTemplate.FileUrl = h.baseConf.MinioEndpoint + "/" + defaultBucket + "/" + fileName
+	}
 
 	res, err := services.TemplateService().DocxTemplate().UpdateDocxTemplate(
 		context.Background(),
