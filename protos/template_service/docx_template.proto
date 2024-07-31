@@ -40,6 +40,7 @@ message UpdateDocxTemplateReq {
     repeated Table tables = 5;
     string version_id = 6;
     string resource_id = 7;
+    string file_url = 8;
 }
 
 message GetSingleDocxTemplateReq {
@@ -80,6 +81,7 @@ message CreateDocxTemplateReq {
     repeated Table tables = 4;
     string version_id = 5;
     string resource_id = 6;
+    string file_url = 7;
 }
 
 message DocxTemplate {
@@ -99,4 +101,5 @@ message DocxTemplate {
     string folder_id = 4;
     repeated Table tables = 5;
     string version_id = 6;
+    string file_url = 7;
 }
