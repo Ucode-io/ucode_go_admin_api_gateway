@@ -34000,8 +34000,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "folder-id",
-                        "name": "folder-id",
+                        "description": "table-slug",
+                        "name": "table-slug",
                         "in": "query",
                         "required": true
                     },
@@ -53727,13 +53727,13 @@ const docTemplate = `{
                 "file_url": {
                     "type": "string"
                 },
-                "folder_id": {
-                    "type": "string"
-                },
                 "project_id": {
                     "type": "string"
                 },
                 "resource_id": {
+                    "type": "string"
+                },
+                "table_slug": {
                     "type": "string"
                 },
                 "tables": {
@@ -54006,13 +54006,13 @@ const docTemplate = `{
                 "file_url": {
                     "type": "string"
                 },
-                "folder_id": {
-                    "type": "string"
-                },
                 "id": {
                     "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                },
+                "table_slug": {
                     "type": "string"
                 },
                 "tables": {
@@ -54349,9 +54349,6 @@ const docTemplate = `{
                 "file_url": {
                     "type": "string"
                 },
-                "folder_id": {
-                    "type": "string"
-                },
                 "id": {
                     "type": "string"
                 },
@@ -54359,6 +54356,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "resource_id": {
+                    "type": "string"
+                },
+                "table_slug": {
                     "type": "string"
                 },
                 "tables": {

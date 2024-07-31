@@ -6487,11 +6487,11 @@ definitions:
     properties:
       file_url:
         type: string
-      folder_id:
-        type: string
       project_id:
         type: string
       resource_id:
+        type: string
+      table_slug:
         type: string
       tables:
         items:
@@ -6669,11 +6669,11 @@ definitions:
     properties:
       file_url:
         type: string
-      folder_id:
-        type: string
       id:
         type: string
       project_id:
+        type: string
+      table_slug:
         type: string
       tables:
         items:
@@ -6891,13 +6891,13 @@ definitions:
     properties:
       file_url:
         type: string
-      folder_id:
-        type: string
       id:
         type: string
       project_id:
         type: string
       resource_id:
+        type: string
+      table_slug:
         type: string
       tables:
         items:
@@ -26197,9 +26197,9 @@ paths:
       description: Get List docx template
       operationId: get_list_docx_template
       parameters:
-      - description: folder-id
+      - description: table-slug
         in: query
-        name: folder-id
+        name: table-slug
         required: true
         type: string
       - description: limit

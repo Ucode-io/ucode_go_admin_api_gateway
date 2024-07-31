@@ -33989,8 +33989,8 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "folder-id",
-                        "name": "folder-id",
+                        "description": "table-slug",
+                        "name": "table-slug",
                         "in": "query",
                         "required": true
                     },
@@ -53716,13 +53716,13 @@
                 "file_url": {
                     "type": "string"
                 },
-                "folder_id": {
-                    "type": "string"
-                },
                 "project_id": {
                     "type": "string"
                 },
                 "resource_id": {
+                    "type": "string"
+                },
+                "table_slug": {
                     "type": "string"
                 },
                 "tables": {
@@ -53995,13 +53995,13 @@
                 "file_url": {
                     "type": "string"
                 },
-                "folder_id": {
-                    "type": "string"
-                },
                 "id": {
                     "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                },
+                "table_slug": {
                     "type": "string"
                 },
                 "tables": {
@@ -54338,9 +54338,6 @@
                 "file_url": {
                     "type": "string"
                 },
-                "folder_id": {
-                    "type": "string"
-                },
                 "id": {
                     "type": "string"
                 },
@@ -54348,6 +54345,9 @@
                     "type": "string"
                 },
                 "resource_id": {
+                    "type": "string"
+                },
+                "table_slug": {
                     "type": "string"
                 },
                 "tables": {
