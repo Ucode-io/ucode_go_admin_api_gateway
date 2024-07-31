@@ -53724,6 +53724,9 @@ const docTemplate = `{
         "ucode_ucode_go_api_gateway_genproto_template_service.CreateDocxTemplateReq": {
             "type": "object",
             "properties": {
+                "file_url": {
+                    "type": "string"
+                },
                 "folder_id": {
                     "type": "string"
                 },
@@ -54000,6 +54003,9 @@ const docTemplate = `{
         "ucode_ucode_go_api_gateway_genproto_template_service.DocxTemplate": {
             "type": "object",
             "properties": {
+                "file_url": {
+                    "type": "string"
+                },
                 "folder_id": {
                     "type": "string"
                 },
@@ -54340,6 +54346,9 @@ const docTemplate = `{
         "ucode_ucode_go_api_gateway_genproto_template_service.UpdateDocxTemplateReq": {
             "type": "object",
             "properties": {
+                "file_url": {
+                    "type": "string"
+                },
                 "folder_id": {
                     "type": "string"
                 },

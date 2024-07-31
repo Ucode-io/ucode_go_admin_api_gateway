@@ -6485,6 +6485,8 @@ definitions:
     type: object
   ucode_ucode_go_api_gateway_genproto_template_service.CreateDocxTemplateReq:
     properties:
+      file_url:
+        type: string
       folder_id:
         type: string
       project_id:
@@ -6665,6 +6667,8 @@ definitions:
     type: object
   ucode_ucode_go_api_gateway_genproto_template_service.DocxTemplate:
     properties:
+      file_url:
+        type: string
       folder_id:
         type: string
       id:
@@ -6885,6 +6889,8 @@ definitions:
     type: object
   ucode_ucode_go_api_gateway_genproto_template_service.UpdateDocxTemplateReq:
     properties:
+      file_url:
+        type: string
       folder_id:
         type: string
       id:
