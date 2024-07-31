@@ -355,6 +355,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 		v1.DELETE("/files", h.V1.DeleteFiles)
 		v1.DELETE("/files/:id", h.V1.DeleteFile)
 		v1.GET("/files", h.V1.GetAllFiles)
+		v1.POST("/files/word-template", h.V1.WordTemplate)
 	}
 	v2 := r.Group("/v2")
 	v2.Use(h.V1.AuthMiddleware(cfg))

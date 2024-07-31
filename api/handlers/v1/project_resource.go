@@ -22,7 +22,7 @@ import (
 // @Accept json
 // @Produce json
 // @Param data body pb.AddResourceToProjectRequest true "AddResourceToProjectRequest"
-// @Success 200 {object} status_http.Response{data=company_service.ProjectResource} "Company data"
+// @Success 200 {object} status_http.Response{data=pb.ProjectResource} "Company data"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) AddResourceToProject(c *gin.Context) {
@@ -123,8 +123,8 @@ func (h *HandlerV1) AddResourceToProject(c *gin.Context) {
 // @Tags Project resource
 // @Accept json
 // @Produce json
-// @Param Company body company_service.ProjectResource  true "ProjectResource"
-// @Success 200 {object} status_http.Response{data=company_service.Empty} "Company data"
+// @Param Company body pb.ProjectResource  true "ProjectResource"
+// @Success 200 {object} status_http.Response{data=pb.Empty} "Company data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) UpdateProjectResource(c *gin.Context) {
@@ -224,7 +224,7 @@ func (h *HandlerV1) UpdateProjectResource(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param type query string false "type"
-// @Success 200 {object} status_http.Response{data=company_service.ListProjectResource} "Company data"
+// @Success 200 {object} status_http.Response{data=pb.ListProjectResource} "Company data"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetListProjectResourceList(c *gin.Context) {

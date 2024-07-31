@@ -26,8 +26,8 @@ import (
 // @Tags ApiReference
 // @Accept json
 // @Produce json
-// @Param api_reference body models.CreateApiReferenceModel true "CreateApiReferenceRequestBody"
-// @Success 201 {object} status_http.Response{data=models.ApiReference} "Api Reference data"
+// @Param api_reference body ars.CreateApiReferenceRequest true "CreateApiReferenceRequestBody"
+// @Success 201 {object} status_http.Response{data=ars.ApiReference} "Api Reference data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) CreateApiReference(c *gin.Context) {
@@ -228,7 +228,7 @@ func (h *HandlerV1) GetApiReferenceByID(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param filters query ars.GetListApiReferenceRequest true "filters"
-// @Success 200 {object} status_http.Response{data=models.GetAllApiReferenceResponse} "ApiReferencesBody"
+// @Success 200 {object} status_http.Response{data=ars.GetListApiReferenceResponse} "ApiReferencesBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetAllApiReferences(c *gin.Context) {
@@ -312,8 +312,8 @@ func (h *HandlerV1) GetAllApiReferences(c *gin.Context) {
 // @Tags ApiReference
 // @Accept json
 // @Produce json
-// @Param api_reference body models.ApiReference  true "UpdateApiReferenceRequestBody"
-// @Success 200 {object} status_http.Response{data=models.ApiReference} "Api Reference data"
+// @Param api_reference body ars.ApiReference  true "UpdateApiReferenceRequestBody"
+// @Success 200 {object} status_http.Response{data=ars.ApiReference} "Api Reference data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) UpdateApiReference(c *gin.Context) {
