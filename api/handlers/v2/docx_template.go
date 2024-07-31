@@ -86,20 +86,54 @@ func (h *HandlerV2) CreateDocxTemplate(c *gin.Context) {
 
 	{
 		fileName := uuid.New().String() + ".docx"
-		f, err := os.Create(fileName)
-		if err != nil {
-			h.handleResponse(c, status_http.BadRequest, err.Error())
-			return
-		}
+		if docxTemplate.FileUrl != "" {
+			client := &http.Client{}
 
-		if _, err = f.WriteString(""); err != nil {
-			h.handleResponse(c, status_http.BadRequest, err.Error())
-			return
-		}
+			req, err := http.NewRequest("GET", docxTemplate.FileUrl, nil)
+			if err != nil {
+				h.handleResponse(c, status_http.BadRequest, err.Error())
+				return
+			}
 
-		if err = f.Close(); err != nil {
-			h.handleResponse(c, status_http.BadRequest, err.Error())
-			return
+			req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36")
+
+			resp, err := client.Do(req)
+			if err != nil {
+				h.handleResponse(c, status_http.BadRequest, err.Error())
+				return
+			}
+			defer resp.Body.Close()
+
+			if resp.StatusCode != http.StatusOK {
+				log.Fatalf("Failed to download file: status code %d", resp.StatusCode)
+			}
+
+			out, err := os.Create(fileName)
+			if err != nil {
+				h.handleResponse(c, status_http.BadRequest, err.Error())
+				return
+			}
+			defer out.Close()
+
+			if _, err = io.Copy(out, resp.Body); err != nil {
+				log.Fatalf("Failed to write to file: %v", err)
+			}
+		} else {
+			f, err := os.Create(fileName)
+			if err != nil {
+				h.handleResponse(c, status_http.BadRequest, err.Error())
+				return
+			}
+
+			if _, err = f.WriteString(""); err != nil {
+				h.handleResponse(c, status_http.BadRequest, err.Error())
+				return
+			}
+
+			if err = f.Close(); err != nil {
+				h.handleResponse(c, status_http.BadRequest, err.Error())
+				return
+			}
 		}
 
 		minioClient, err := minio.New(h.baseConf.MinioEndpoint, &minio.Options{
