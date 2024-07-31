@@ -81,8 +81,50 @@ func (h *HandlerV2) CreateDocxTemplate(c *gin.Context) {
 
 	docxTemplate.ProjectId = projectId.(string)
 	docxTemplate.ResourceId = resource.ResourceEnvironmentId
-
 	docxTemplate.VersionId = "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88"
+
+	{
+		fileName := uuid.New().String() + ".docx"
+		f, err := os.Create(fileName)
+		if err != nil {
+			h.handleResponse(c, status_http.BadRequest, err.Error())
+			return
+		}
+
+		if _, err = f.WriteString(""); err != nil {
+			h.handleResponse(c, status_http.BadRequest, err.Error())
+			return
+		}
+
+		if err = f.Close(); err != nil {
+			h.handleResponse(c, status_http.BadRequest, err.Error())
+			return
+		}
+
+		minioClient, err := minio.New(h.baseConf.MinioEndpoint, &minio.Options{
+			Creds:  credentials.NewStaticV4(h.baseConf.MinioAccessKeyID, h.baseConf.MinioSecretAccessKey, ""),
+			Secure: h.baseConf.MinioProtocol,
+		})
+		if err != nil {
+			h.handleResponse(c, status_http.BadRequest, err.Error())
+			return
+		}
+
+		defaultBucket := "docs"
+		dst, _ := os.Getwd()
+
+		if _, err = minioClient.FPutObject(context.Background(), defaultBucket, fileName, dst+"/"+fileName, minio.PutObjectOptions{}); err != nil {
+			err = os.Remove(dst + "/" + fileName)
+			h.handleResponse(c, status_http.BadRequest, err.Error())
+			return
+		}
+
+		if err = os.Remove(dst + "/" + fileName); err != nil {
+			h.log.Error("Error removing file", logger.Error(err))
+		}
+
+		docxTemplate.FileUrl = h.baseConf.MinioEndpoint + "/" + defaultBucket + "/" + fileName
+	}
 
 	res, err := services.TemplateService().DocxTemplate().CreateDocxTemplate(
 		context.Background(),
