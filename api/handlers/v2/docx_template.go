@@ -8,7 +8,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"net/url"
 	"os"
 	"strconv"
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -603,19 +602,21 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 		return
 	}
 
-	reqURL, err := url.Parse(config.NodeDocxConvertToPdfServiceUrl)
+	req, err := http.NewRequest(http.MethodPost, config.NodeDocxConvertToPdfServiceUrl, nil)
 	if err != nil {
 		h.log.Error("error in 1 docx gen", logger.Error(err))
 		h.handleResponse(c, status_http.InternalServerError, err.Error())
 		return
 	}
 
-	query := reqURL.Query()
+	query := req.URL.Query()
 	query.Set("link", link)
-	reqURL.RawQuery = query.Encode()
+	req.URL.RawQuery = query.Encode()
+
+	client := http.Client{}
 
 	// Send a GET request to the Express.js service
-	resp, err := http.Get(reqURL.String())
+	resp, err := client.Do(req)
 	if err != nil {
 		h.log.Error("error in 2 docx gen", logger.Error(err))
 		h.handleResponse(c, status_http.InternalServerError, err.Error())
