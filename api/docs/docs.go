@@ -48529,6 +48529,9 @@ const docTemplate = `{
                 "project_id": {
                     "type": "string"
                 },
+                "resource_id": {
+                    "type": "string"
+                },
                 "table_slug": {
                     "type": "string"
                 },
@@ -48547,6 +48550,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                },
+                "resource_id": {
                     "type": "string"
                 },
                 "table_slug": {

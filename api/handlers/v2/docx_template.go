@@ -70,6 +70,8 @@ func (h *HandlerV2) CreateDocxTemplate(c *gin.Context) {
 		return
 	}
 
+	docxTemplate.ResourceId = resource.GetResourceEnvironmentId()
+
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
 		projectId.(string),
@@ -231,8 +233,9 @@ func (h *HandlerV2) GetSingleDocxTemplate(c *gin.Context) {
 	res, err := services.GoObjectBuilderService().DocxTemplate().GetByID(
 		context.Background(),
 		&nb.DocxTemplatePrimaryKey{
-			Id:        docxTemplateId,
-			ProjectId: projectId.(string),
+			Id:         docxTemplateId,
+			ProjectId:  projectId.(string),
+			ResourceId: resource.GetResourceEnvironmentId(),
 		},
 	)
 
@@ -292,6 +295,8 @@ func (h *HandlerV2) UpdateDocxTemplate(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	docxTemplate.ResourceId = resource.GetResourceEnvironmentId()
 
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
@@ -441,8 +446,9 @@ func (h *HandlerV2) DeleteDocxTemplate(c *gin.Context) {
 	res, err := services.GoObjectBuilderService().DocxTemplate().Delete(
 		context.Background(),
 		&nb.DocxTemplatePrimaryKey{
-			Id:        docxTemplateId,
-			ProjectId: projectId.(string),
+			Id:         docxTemplateId,
+			ProjectId:  projectId.(string),
+			ResourceId: resource.GetResourceEnvironmentId(),
 		},
 	)
 
@@ -523,10 +529,11 @@ func (h *HandlerV2) GetListDocxTemplate(c *gin.Context) {
 	res, err := services.GoObjectBuilderService().DocxTemplate().GetAll(
 		context.Background(),
 		&nb.GetAllDocxTemplateRequest{
-			ProjectId: projectId.(string),
-			TableSlug: c.DefaultQuery("table-slug", ""),
-			Limit:     int32(limit),
-			Offset:    int32(offset),
+			ProjectId:  projectId.(string),
+			TableSlug:  c.DefaultQuery("table-slug", ""),
+			Limit:      int32(limit),
+			Offset:     int32(offset),
+			ResourceId: resource.GetResourceEnvironmentId(),
 		},
 	)
 
