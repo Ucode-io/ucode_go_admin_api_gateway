@@ -604,6 +604,7 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 
 	reqURL, err := url.Parse(config.NodeDocxConvertToPdfServiceUrl)
 	if err != nil {
+		h.log.Error("error in 1 docx gen", logger.Error(err))
 		h.handleResponse(c, status_http.InternalServerError, err.Error())
 		return
 	}
@@ -615,6 +616,7 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 	// Send a GET request to the Express.js service
 	resp, err := http.Get(reqURL.String())
 	if err != nil {
+		h.log.Error("error in 2 docx gen", logger.Error(err))
 		h.handleResponse(c, status_http.InternalServerError, err.Error())
 		return
 	}
@@ -622,6 +624,7 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 
 	// Check for errors in the service response
 	if resp.StatusCode != http.StatusOK {
+		h.log.Error("error in 3 docx gen", logger.Error(err))
 		h.handleResponse(c, status_http.InternalServerError, err)
 		return
 	}
