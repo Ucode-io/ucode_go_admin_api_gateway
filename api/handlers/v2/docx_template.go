@@ -2,6 +2,7 @@ package v2
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -624,7 +625,8 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 
 	// Check for errors in the service response
 	if resp.StatusCode != http.StatusOK {
-		h.log.Error("error in 3 docx gen", logger.Error(err))
+		js, _ := json.Marshal(resp.Body)
+		h.log.Error("error in 3 docx gen", logger.Error(err), logger.Any("resp", string(js)))
 		h.handleResponse(c, status_http.InternalServerError, err)
 		return
 	}
