@@ -26334,6 +26334,53 @@ paths:
       summary: Get single docx template
       tags:
       - Template
+  /v2/docx-template/convert/pdf:
+    get:
+      consumes:
+      - application/json
+      description: Generate PDF from docx template
+      operationId: generate_docx_to_pdf
+      parameters:
+      - description: link
+        in: query
+        name: link
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            allOf:
+            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Generate PDF from docx template
+      tags:
+      - Template
   /v2/erd:
     post:
       consumes:

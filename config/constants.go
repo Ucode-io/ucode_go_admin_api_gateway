@@ -52,3 +52,5 @@ var (
 		"codabar": 1,
 	}
 )
+
+var NodeDocxConvertToPdfServiceUrl = "https://crowe-doc-generator.u-code.io/generate-doc"

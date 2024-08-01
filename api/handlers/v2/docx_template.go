@@ -7,9 +7,11 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"strconv"
 	"ucode/ucode_go_api_gateway/api/status_http"
+	"ucode/ucode_go_api_gateway/config"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/logger"
@@ -543,4 +545,86 @@ func (h *HandlerV2) GetListDocxTemplate(c *gin.Context) {
 	}
 
 	h.handleResponse(c, status_http.OK, res)
+}
+
+// GenerateDocxToPdf godoc
+// @Security ApiKeyAuth
+// @ID generate_docx_to_pdf
+// @Router /v2/docx-template/convert/pdf [GET]
+// @Summary Generate PDF from docx template
+// @Description Generate PDF from docx template
+// @Tags Template
+// @Accept json
+// @Produce json
+// @Param link query string true "link"
+// @Success 200 {object} status_http.Response{data=string} "Success"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
+	link := c.Query("link")
+	if link == "" {
+		h.handleResponse(c, status_http.InvalidArgument, "link is required")
+		return
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err := errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_TEMPLATE_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	if _, err = h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	); err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	reqURL, err := url.Parse(config.NodeDocxConvertToPdfServiceUrl)
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err.Error())
+		return
+	}
+
+	query := reqURL.Query()
+	query.Set("link", link)
+	reqURL.RawQuery = query.Encode()
+
+	// Send a GET request to the Express.js service
+	resp, err := http.Get(reqURL.String())
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err.Error())
+		return
+	}
+	defer resp.Body.Close()
+
+	// Check for errors in the service response
+	if resp.StatusCode != http.StatusOK {
+		h.handleResponse(c, status_http.InternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, resp.Body)
 }
