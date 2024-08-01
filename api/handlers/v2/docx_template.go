@@ -626,7 +626,7 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 	// Check for errors in the service response
 	if resp.StatusCode != http.StatusOK {
 		js, _ := json.Marshal(resp.Body)
-		h.log.Error("error in 3 docx gen", logger.Error(err), logger.Any("resp", string(js)))
+		h.log.Error("error in 3 docx gen", logger.Error(err), logger.Int("resp status", resp.StatusCode), logger.Any("resp", string(js)))
 		h.handleResponse(c, status_http.InternalServerError, err)
 		return
 	}
