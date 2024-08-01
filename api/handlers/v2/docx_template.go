@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
-	tmp "ucode/ucode_go_api_gateway/genproto/template_service"
+	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
@@ -30,13 +30,13 @@ import (
 // @Tags Template
 // @Accept json
 // @Produce json
-// @Param template body tmp.CreateDocxTemplateReq true "CreateDocxTemplateReq"
-// @Success 201 {object} status_http.Response{data=tmp.DocxTemplate} "DocxTemplate data"
+// @Param template body nb.CreateDocxTemplateRequest true "CreateDocxTemplateReq"
+// @Success 201 {object} status_http.Response{data=nb.DocxTemplate} "DocxTemplate data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) CreateDocxTemplate(c *gin.Context) {
 	var (
-		docxTemplate tmp.CreateDocxTemplateReq
+		docxTemplate nb.CreateDocxTemplateRequest
 	)
 
 	if err := c.ShouldBindJSON(&docxTemplate); err != nil {
@@ -81,8 +81,6 @@ func (h *HandlerV2) CreateDocxTemplate(c *gin.Context) {
 	}
 
 	docxTemplate.ProjectId = projectId.(string)
-	docxTemplate.ResourceId = resource.ResourceEnvironmentId
-	docxTemplate.VersionId = "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88"
 
 	{
 		fileName := uuid.New().String() + ".docx"
@@ -161,7 +159,7 @@ func (h *HandlerV2) CreateDocxTemplate(c *gin.Context) {
 		docxTemplate.FileUrl = h.baseConf.MinioEndpoint + "/" + defaultBucket + "/" + fileName
 	}
 
-	res, err := services.TemplateService().DocxTemplate().CreateDocxTemplate(
+	res, err := services.GoObjectBuilderService().DocxTemplate().Create(
 		context.Background(),
 		&docxTemplate,
 	)
@@ -184,7 +182,7 @@ func (h *HandlerV2) CreateDocxTemplate(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param docx-template-id path string true "docx-template-id"
-// @Success 200 {object} status_http.Response{data=tmp.DocxTemplate} "DocxTemplateBody"
+// @Success 200 {object} status_http.Response{data=nb.DocxTemplate} "DocxTemplateBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) GetSingleDocxTemplate(c *gin.Context) {
@@ -230,13 +228,11 @@ func (h *HandlerV2) GetSingleDocxTemplate(c *gin.Context) {
 		return
 	}
 
-	res, err := services.TemplateService().DocxTemplate().GetSingleDocxTemplate(
+	res, err := services.GoObjectBuilderService().DocxTemplate().GetByID(
 		context.Background(),
-		&tmp.GetSingleDocxTemplateReq{
-			Id:         docxTemplateId,
-			ProjectId:  projectId.(string),
-			ResourceId: resource.ResourceEnvironmentId,
-			VersionId:  "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
+		&nb.DocxTemplatePrimaryKey{
+			Id:        docxTemplateId,
+			ProjectId: projectId.(string),
 		},
 	)
 
@@ -257,13 +253,13 @@ func (h *HandlerV2) GetSingleDocxTemplate(c *gin.Context) {
 // @Tags Template
 // @Accept json
 // @Produce json
-// @Param docx_template body tmp.UpdateDocxTemplateReq true "UpdateDocxTemplateReqBody"
-// @Success 200 {object} status_http.Response{data=tmp.DocxTemplate} "DocxTemplate data"
+// @Param docx_template body nb.DocxTemplate true "UpdateDocxTemplateReqBody"
+// @Success 200 {object} status_http.Response{data=nb.DocxTemplate} "DocxTemplate data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) UpdateDocxTemplate(c *gin.Context) {
 	var (
-		docxTemplate tmp.UpdateDocxTemplateReq
+		docxTemplate nb.DocxTemplate
 	)
 
 	if err := c.ShouldBindJSON(&docxTemplate); err != nil {
@@ -308,75 +304,72 @@ func (h *HandlerV2) UpdateDocxTemplate(c *gin.Context) {
 	}
 
 	docxTemplate.ProjectId = projectId.(string)
-	docxTemplate.ResourceId = resource.ResourceEnvironmentId
-	docxTemplate.VersionId = "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88"
-
-	url := "http://37.27.196.85:8084/cache/files/data/C7xTx2EUiG55llVrRdOIrWNsdfsd5zQ0mCaTY_3451/output.docx/Example%20Document%20Title.docx?md5=SZ0U0Ef1YUF8GqloFLzLfw&expires=1722436016&shardkey=C7xTx2EUiG55llVrRdOIrWNsdfsd5zQ0mCaTY&filename=Example%20Document%20Title.docx"
-	docxTemplate.FileUrl = url
 
 	{
-		client := &http.Client{}
+		if docxTemplate.FileUrl != "" {
+			client := &http.Client{}
 
-		req, err := http.NewRequest("GET", docxTemplate.FileUrl, nil)
-		if err != nil {
-			h.handleResponse(c, status_http.BadRequest, err.Error())
-			return
+			req, err := http.NewRequest("GET", docxTemplate.FileUrl, nil)
+			if err != nil {
+				h.handleResponse(c, status_http.BadRequest, err.Error())
+				return
+			}
+
+			req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36")
+
+			resp, err := client.Do(req)
+			if err != nil {
+				h.handleResponse(c, status_http.BadRequest, err.Error())
+				return
+			}
+			defer resp.Body.Close()
+
+			if resp.StatusCode != http.StatusOK {
+				log.Fatalf("Failed to download file: status code %d", resp.StatusCode)
+			}
+
+			fileName := uuid.New().String() + ".docx"
+
+			out, err := os.Create(fileName)
+			if err != nil {
+				h.handleResponse(c, status_http.BadRequest, err.Error())
+				return
+			}
+			defer out.Close()
+
+			if _, err = io.Copy(out, resp.Body); err != nil {
+				log.Fatalf("Failed to write to file: %v", err)
+			}
+
+			fmt.Println("file name in docx", fileName)
+
+			minioClient, err := minio.New(h.baseConf.MinioEndpoint, &minio.Options{
+				Creds:  credentials.NewStaticV4(h.baseConf.MinioAccessKeyID, h.baseConf.MinioSecretAccessKey, ""),
+				Secure: h.baseConf.MinioProtocol,
+			})
+			if err != nil {
+				h.handleResponse(c, status_http.BadRequest, err.Error())
+				return
+			}
+
+			defaultBucket := "docs"
+			dst, _ := os.Getwd()
+
+			if _, err = minioClient.FPutObject(context.Background(), defaultBucket, fileName, dst+"/"+fileName, minio.PutObjectOptions{}); err != nil {
+				err = os.Remove(dst + "/" + fileName)
+				h.handleResponse(c, status_http.BadRequest, err.Error())
+				return
+			}
+
+			if err = os.Remove(dst + "/" + fileName); err != nil {
+				h.log.Error("Error removing file", logger.Error(err))
+			}
+
+			docxTemplate.FileUrl = h.baseConf.MinioEndpoint + "/" + defaultBucket + "/" + fileName
 		}
-
-		req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36")
-
-		resp, err := client.Do(req)
-		if err != nil {
-			h.handleResponse(c, status_http.BadRequest, err.Error())
-			return
-		}
-		defer resp.Body.Close()
-
-		if resp.StatusCode != http.StatusOK {
-			log.Fatalf("Failed to download file: status code %d", resp.StatusCode)
-		}
-
-		fileName := uuid.New().String() + ".docx"
-
-		out, err := os.Create(fileName)
-		if err != nil {
-			h.handleResponse(c, status_http.BadRequest, err.Error())
-			return
-		}
-		defer out.Close()
-
-		if _, err = io.Copy(out, resp.Body); err != nil {
-			log.Fatalf("Failed to write to file: %v", err)
-		}
-
-		fmt.Println("file name in docx", fileName)
-
-		minioClient, err := minio.New(h.baseConf.MinioEndpoint, &minio.Options{
-			Creds:  credentials.NewStaticV4(h.baseConf.MinioAccessKeyID, h.baseConf.MinioSecretAccessKey, ""),
-			Secure: h.baseConf.MinioProtocol,
-		})
-		if err != nil {
-			h.handleResponse(c, status_http.BadRequest, err.Error())
-			return
-		}
-
-		defaultBucket := "docs"
-		dst, _ := os.Getwd()
-
-		if _, err = minioClient.FPutObject(context.Background(), defaultBucket, fileName, dst+"/"+fileName, minio.PutObjectOptions{}); err != nil {
-			err = os.Remove(dst + "/" + fileName)
-			h.handleResponse(c, status_http.BadRequest, err.Error())
-			return
-		}
-
-		if err = os.Remove(dst + "/" + fileName); err != nil {
-			h.log.Error("Error removing file", logger.Error(err))
-		}
-
-		docxTemplate.FileUrl = h.baseConf.MinioEndpoint + "/" + defaultBucket + "/" + fileName
 	}
 
-	res, err := services.TemplateService().DocxTemplate().UpdateDocxTemplate(
+	res, err := services.GoObjectBuilderService().DocxTemplate().Update(
 		context.Background(),
 		&docxTemplate,
 	)
@@ -445,13 +438,11 @@ func (h *HandlerV2) DeleteDocxTemplate(c *gin.Context) {
 		return
 	}
 
-	res, err := services.TemplateService().DocxTemplate().DeleteDocxTemplate(
+	res, err := services.GoObjectBuilderService().DocxTemplate().Delete(
 		context.Background(),
-		&tmp.DeleteDocxTemplateReq{
-			Id:         docxTemplateId,
-			ProjectId:  projectId.(string),
-			ResourceId: resource.ResourceEnvironmentId,
-			VersionId:  "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
+		&nb.DocxTemplatePrimaryKey{
+			Id:        docxTemplateId,
+			ProjectId: projectId.(string),
 		},
 	)
 
@@ -475,7 +466,7 @@ func (h *HandlerV2) DeleteDocxTemplate(c *gin.Context) {
 // @Param table-slug query string true "table-slug"
 // @Param limit query string false "limit"
 // @Param offset query string false "offset"
-// @Success 200 {object} status_http.Response{data=tmp.GetListDocxTemplateRes} "DocxTemplateBody"
+// @Success 200 {object} status_http.Response{data=nb.GetAllDocxTemplateResponse} "DocxTemplateBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) GetListDocxTemplate(c *gin.Context) {
@@ -529,15 +520,13 @@ func (h *HandlerV2) GetListDocxTemplate(c *gin.Context) {
 
 	fmt.Println("resource.ResourceEnvironmentId docx", resource.ResourceEnvironmentId, resource)
 
-	res, err := services.TemplateService().DocxTemplate().GetListDocxTemplate(
+	res, err := services.GoObjectBuilderService().DocxTemplate().GetAll(
 		context.Background(),
-		&tmp.GetListDocxTemplateReq{
-			ProjectId:  resource.ResourceEnvironmentId,
-			ResourceId: resource.ResourceEnvironmentId,
-			VersionId:  "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
-			TableSlug:  c.DefaultQuery("table-slug", ""),
-			Limit:      int32(limit),
-			Offset:     int32(offset),
+		&nb.GetAllDocxTemplateRequest{
+			ProjectId: projectId.(string),
+			TableSlug: c.DefaultQuery("table-slug", ""),
+			Limit:     int32(limit),
+			Offset:    int32(offset),
 		},
 	)
 

@@ -34030,7 +34030,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.GetListDocxTemplateRes"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_new_object_builder_service.GetAllDocxTemplateResponse"
                                         }
                                     }
                                 }
@@ -34100,7 +34100,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.UpdateDocxTemplateReq"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_new_object_builder_service.DocxTemplate"
                         }
                     }
                 ],
@@ -34116,7 +34116,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.DocxTemplate"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_new_object_builder_service.DocxTemplate"
                                         }
                                     }
                                 }
@@ -34186,7 +34186,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.CreateDocxTemplateReq"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_new_object_builder_service.CreateDocxTemplateRequest"
                         }
                     }
                 ],
@@ -34202,7 +34202,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.DocxTemplate"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_new_object_builder_service.DocxTemplate"
                                         }
                                     }
                                 }
@@ -34288,7 +34288,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.DocxTemplate"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_new_object_builder_service.DocxTemplate"
                                         }
                                     }
                                 }
@@ -48520,6 +48520,57 @@ const docTemplate = `{
                 }
             }
         },
+        "ucode_ucode_go_api_gateway_genproto_new_object_builder_service.CreateDocxTemplateRequest": {
+            "type": "object",
+            "properties": {
+                "file_url": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "table_slug": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_new_object_builder_service.DocxTemplate": {
+            "type": "object",
+            "properties": {
+                "file_url": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "table_slug": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_new_object_builder_service.GetAllDocxTemplateResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "docx_templates": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_new_object_builder_service.DocxTemplate"
+                    }
+                }
+            }
+        },
         "ucode_ucode_go_api_gateway_genproto_notification_service.CreateNotificationManyUserRequest": {
             "type": "object",
             "properties": {
@@ -53721,66 +53772,6 @@ const docTemplate = `{
                 }
             }
         },
-        "ucode_ucode_go_api_gateway_genproto_template_service.CreateDocxTemplateReq": {
-            "type": "object",
-            "properties": {
-                "file_url": {
-                    "type": "string"
-                },
-                "project_id": {
-                    "type": "string"
-                },
-                "resource_id": {
-                    "type": "string"
-                },
-                "table_slug": {
-                    "type": "string"
-                },
-                "tables": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.CreateDocxTemplateReq_Table"
-                    }
-                },
-                "title": {
-                    "type": "string"
-                },
-                "version_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "ucode_ucode_go_api_gateway_genproto_template_service.CreateDocxTemplateReq_Table": {
-            "type": "object",
-            "properties": {
-                "filter": {
-                    "type": "string"
-                },
-                "object_id": {
-                    "type": "string"
-                },
-                "relations": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.CreateDocxTemplateReq_Table_Relation"
-                    }
-                },
-                "table_id": {
-                    "type": "string"
-                },
-                "type": {
-                    "type": "string"
-                }
-            }
-        },
-        "ucode_ucode_go_api_gateway_genproto_template_service.CreateDocxTemplateReq_Table_Relation": {
-            "type": "object",
-            "properties": {
-                "relation_id": {
-                    "type": "string"
-                }
-            }
-        },
         "ucode_ucode_go_api_gateway_genproto_template_service.CreateFolderNoteReq": {
             "type": "object",
             "properties": {
@@ -54000,66 +53991,6 @@ const docTemplate = `{
                 }
             }
         },
-        "ucode_ucode_go_api_gateway_genproto_template_service.DocxTemplate": {
-            "type": "object",
-            "properties": {
-                "file_url": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "project_id": {
-                    "type": "string"
-                },
-                "table_slug": {
-                    "type": "string"
-                },
-                "tables": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.DocxTemplate_Table"
-                    }
-                },
-                "title": {
-                    "type": "string"
-                },
-                "version_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "ucode_ucode_go_api_gateway_genproto_template_service.DocxTemplate_Table": {
-            "type": "object",
-            "properties": {
-                "filter": {
-                    "type": "string"
-                },
-                "object_id": {
-                    "type": "string"
-                },
-                "relations": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.DocxTemplate_Table_Relation"
-                    }
-                },
-                "table_id": {
-                    "type": "string"
-                },
-                "type": {
-                    "type": "string"
-                }
-            }
-        },
-        "ucode_ucode_go_api_gateway_genproto_template_service.DocxTemplate_Table_Relation": {
-            "type": "object",
-            "properties": {
-                "relation_id": {
-                    "type": "string"
-                }
-            }
-        },
         "ucode_ucode_go_api_gateway_genproto_template_service.Folder": {
             "type": "object",
             "properties": {
@@ -54103,20 +54034,6 @@ const docTemplate = `{
                 },
                 "version_id": {
                     "type": "string"
-                }
-            }
-        },
-        "ucode_ucode_go_api_gateway_genproto_template_service.GetListDocxTemplateRes": {
-            "type": "object",
-            "properties": {
-                "count": {
-                    "type": "integer"
-                },
-                "docx_templates": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.DocxTemplate"
-                    }
                 }
             }
         },
@@ -54336,69 +54253,6 @@ const docTemplate = `{
             }
         },
         "ucode_ucode_go_api_gateway_genproto_template_service.Template_Table_Relation": {
-            "type": "object",
-            "properties": {
-                "relation_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "ucode_ucode_go_api_gateway_genproto_template_service.UpdateDocxTemplateReq": {
-            "type": "object",
-            "properties": {
-                "file_url": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "project_id": {
-                    "type": "string"
-                },
-                "resource_id": {
-                    "type": "string"
-                },
-                "table_slug": {
-                    "type": "string"
-                },
-                "tables": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.UpdateDocxTemplateReq_Table"
-                    }
-                },
-                "title": {
-                    "type": "string"
-                },
-                "version_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "ucode_ucode_go_api_gateway_genproto_template_service.UpdateDocxTemplateReq_Table": {
-            "type": "object",
-            "properties": {
-                "filter": {
-                    "type": "string"
-                },
-                "object_id": {
-                    "type": "string"
-                },
-                "relations": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.UpdateDocxTemplateReq_Table_Relation"
-                    }
-                },
-                "table_id": {
-                    "type": "string"
-                },
-                "type": {
-                    "type": "string"
-                }
-            }
-        },
-        "ucode_ucode_go_api_gateway_genproto_template_service.UpdateDocxTemplateReq_Table_Relation": {
             "type": "object",
             "properties": {
                 "relation_id": {

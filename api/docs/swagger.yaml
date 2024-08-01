@@ -3078,6 +3078,39 @@ definitions:
       url:
         type: string
     type: object
+  ucode_ucode_go_api_gateway_genproto_new_object_builder_service.CreateDocxTemplateRequest:
+    properties:
+      file_url:
+        type: string
+      project_id:
+        type: string
+      table_slug:
+        type: string
+      title:
+        type: string
+    type: object
+  ucode_ucode_go_api_gateway_genproto_new_object_builder_service.DocxTemplate:
+    properties:
+      file_url:
+        type: string
+      id:
+        type: string
+      project_id:
+        type: string
+      table_slug:
+        type: string
+      title:
+        type: string
+    type: object
+  ucode_ucode_go_api_gateway_genproto_new_object_builder_service.GetAllDocxTemplateResponse:
+    properties:
+      count:
+        type: integer
+      docx_templates:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_new_object_builder_service.DocxTemplate'
+        type: array
+    type: object
   ucode_ucode_go_api_gateway_genproto_notification_service.CreateNotificationManyUserRequest:
     properties:
       category_id:
@@ -6483,45 +6516,6 @@ definitions:
       version_id:
         type: string
     type: object
-  ucode_ucode_go_api_gateway_genproto_template_service.CreateDocxTemplateReq:
-    properties:
-      file_url:
-        type: string
-      project_id:
-        type: string
-      resource_id:
-        type: string
-      table_slug:
-        type: string
-      tables:
-        items:
-          $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.CreateDocxTemplateReq_Table'
-        type: array
-      title:
-        type: string
-      version_id:
-        type: string
-    type: object
-  ucode_ucode_go_api_gateway_genproto_template_service.CreateDocxTemplateReq_Table:
-    properties:
-      filter:
-        type: string
-      object_id:
-        type: string
-      relations:
-        items:
-          $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.CreateDocxTemplateReq_Table_Relation'
-        type: array
-      table_id:
-        type: string
-      type:
-        type: string
-    type: object
-  ucode_ucode_go_api_gateway_genproto_template_service.CreateDocxTemplateReq_Table_Relation:
-    properties:
-      relation_id:
-        type: string
-    type: object
   ucode_ucode_go_api_gateway_genproto_template_service.CreateFolderNoteReq:
     properties:
       commit_id:
@@ -6665,45 +6659,6 @@ definitions:
       username:
         type: string
     type: object
-  ucode_ucode_go_api_gateway_genproto_template_service.DocxTemplate:
-    properties:
-      file_url:
-        type: string
-      id:
-        type: string
-      project_id:
-        type: string
-      table_slug:
-        type: string
-      tables:
-        items:
-          $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.DocxTemplate_Table'
-        type: array
-      title:
-        type: string
-      version_id:
-        type: string
-    type: object
-  ucode_ucode_go_api_gateway_genproto_template_service.DocxTemplate_Table:
-    properties:
-      filter:
-        type: string
-      object_id:
-        type: string
-      relations:
-        items:
-          $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.DocxTemplate_Table_Relation'
-        type: array
-      table_id:
-        type: string
-      type:
-        type: string
-    type: object
-  ucode_ucode_go_api_gateway_genproto_template_service.DocxTemplate_Table_Relation:
-    properties:
-      relation_id:
-        type: string
-    type: object
   ucode_ucode_go_api_gateway_genproto_template_service.Folder:
     properties:
       commit_id:
@@ -6733,15 +6688,6 @@ definitions:
         type: string
       version_id:
         type: string
-    type: object
-  ucode_ucode_go_api_gateway_genproto_template_service.GetListDocxTemplateRes:
-    properties:
-      count:
-        type: integer
-      docx_templates:
-        items:
-          $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.DocxTemplate'
-        type: array
     type: object
   ucode_ucode_go_api_gateway_genproto_template_service.GetListFolderNoteRes:
     properties:
@@ -6883,47 +6829,6 @@ definitions:
         type: string
     type: object
   ucode_ucode_go_api_gateway_genproto_template_service.Template_Table_Relation:
-    properties:
-      relation_id:
-        type: string
-    type: object
-  ucode_ucode_go_api_gateway_genproto_template_service.UpdateDocxTemplateReq:
-    properties:
-      file_url:
-        type: string
-      id:
-        type: string
-      project_id:
-        type: string
-      resource_id:
-        type: string
-      table_slug:
-        type: string
-      tables:
-        items:
-          $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.UpdateDocxTemplateReq_Table'
-        type: array
-      title:
-        type: string
-      version_id:
-        type: string
-    type: object
-  ucode_ucode_go_api_gateway_genproto_template_service.UpdateDocxTemplateReq_Table:
-    properties:
-      filter:
-        type: string
-      object_id:
-        type: string
-      relations:
-        items:
-          $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.UpdateDocxTemplateReq_Table_Relation'
-        type: array
-      table_id:
-        type: string
-      type:
-        type: string
-    type: object
-  ucode_ucode_go_api_gateway_genproto_template_service.UpdateDocxTemplateReq_Table_Relation:
     properties:
       relation_id:
         type: string
@@ -26220,7 +26125,7 @@ paths:
             - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.GetListDocxTemplateRes'
+                  $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_new_object_builder_service.GetAllDocxTemplateResponse'
               type: object
         "400":
           description: Invalid Argument
@@ -26256,7 +26161,7 @@ paths:
         name: template
         required: true
         schema:
-          $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.CreateDocxTemplateReq'
+          $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_new_object_builder_service.CreateDocxTemplateRequest'
       produces:
       - application/json
       responses:
@@ -26267,7 +26172,7 @@ paths:
             - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.DocxTemplate'
+                  $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_new_object_builder_service.DocxTemplate'
               type: object
         "400":
           description: Bad Request
@@ -26303,7 +26208,7 @@ paths:
         name: docx_template
         required: true
         schema:
-          $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.UpdateDocxTemplateReq'
+          $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_new_object_builder_service.DocxTemplate'
       produces:
       - application/json
       responses:
@@ -26314,7 +26219,7 @@ paths:
             - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.DocxTemplate'
+                  $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_new_object_builder_service.DocxTemplate'
               type: object
         "400":
           description: Bad Request
@@ -26400,7 +26305,7 @@ paths:
             - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.DocxTemplate'
+                  $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_new_object_builder_service.DocxTemplate'
               type: object
         "400":
           description: Invalid Argument

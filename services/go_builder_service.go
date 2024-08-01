@@ -28,6 +28,7 @@ type GoBuilderServiceI interface {
 	VersionHistory() nb.VersionHistoryServiceClient
 	FolderGroup() nb.FolderGroupServiceClient
 	CSV() nb.CSVServiceClient
+	DocxTemplate() nb.DocxTemplateServiceClient
 }
 
 type goBuilderServiceClient struct {
@@ -49,6 +50,7 @@ type goBuilderServiceClient struct {
 	versionHistoryService nb.VersionHistoryServiceClient
 	folderGroupService    nb.FolderGroupServiceClient
 	csvService            nb.CSVServiceClient
+	docxTemplateService   nb.DocxTemplateServiceClient
 	// goObjectBuilderConnPool *grpcpool.Pool
 }
 
@@ -85,6 +87,7 @@ func NewGoBuilderServiceClient(ctx context.Context, cfg config.Config) (GoBuilde
 		versionHistoryService: nb.NewVersionHistoryServiceClient(connGoBuilderService),
 		folderGroupService:    nb.NewFolderGroupServiceClient(connGoBuilderService),
 		csvService:            nb.NewCSVServiceClient(connGoBuilderService),
+		docxTemplateService:   nb.NewDocxTemplateServiceClient(connGoBuilderService),
 	}, nil
 }
 
@@ -158,6 +161,10 @@ func (g *goBuilderServiceClient) FolderGroup() nb.FolderGroupServiceClient {
 
 func (g *goBuilderServiceClient) CSV() nb.CSVServiceClient {
 	return g.csvService
+}
+
+func (g *goBuilderServiceClient) DocxTemplate() nb.DocxTemplateServiceClient {
+	return g.docxTemplateService
 }
 
 // func (g *goBuilderServiceClient) GoObjectBuilderConnPool(ctx context.Context) (nb.ObjectBuilderServiceClient, *grpcpool.ClientConn, error) {
