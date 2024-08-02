@@ -604,7 +604,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 		v2Admin.POST("/copy-project", h.V1.CopyProjectTemplate)
 
 		functions := v2Admin.Group("functions")
-		{
+		{ 
 			functions.POST("/micro-frontend", h.V1.CreateMicroFrontEnd)
 			functions.GET("/micro-frontend/:micro-frontend-id", h.V1.GetMicroFrontEndByID)
 			functions.GET("/micro-frontend", h.V1.GetAllMicroFrontEnd)

@@ -70,7 +70,7 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 			objectRequest.Data["limit"] = 100
 		}
 	} else {
-		objectRequest.Data["limit"] = 100
+		objectRequest.Data["limit"] = 20
 	}
 
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)

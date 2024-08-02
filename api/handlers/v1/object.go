@@ -1044,7 +1044,12 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 	objectRequest.Data["language_setting"] = c.DefaultQuery("language_setting", "")
 	objectRequest.Data["with_relations"] = true
 
-	if c.Param("table_slug") == "orders" {
+	if _, ok := objectRequest.Data["limit"]; ok {
+		if cast.ToInt(objectRequest.Data["limit"]) > 100 {
+			objectRequest.Data["limit"] = 100
+		}
+	} else {
+		objectRequest.Data["limit"] = 20
 	}
 
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
