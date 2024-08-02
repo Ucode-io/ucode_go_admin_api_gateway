@@ -1045,11 +1045,11 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 	objectRequest.Data["with_relations"] = true
 
 	if _, ok := objectRequest.Data["limit"]; ok {
-		if cast.ToInt(objectRequest.Data["limit"]) > 100 {
-			objectRequest.Data["limit"] = 100
+		if cast.ToInt(objectRequest.Data["limit"]) > 20 {
+			objectRequest.Data["limit"] = 10
 		}
 	} else {
-		objectRequest.Data["limit"] = 20
+		objectRequest.Data["limit"] = 10
 	}
 
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
