@@ -9,6 +9,7 @@ import (
 	"ucode/ucode_go_api_gateway/genproto/new_function_service"
 	"ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
+	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -467,16 +468,38 @@ func (h *HandlerV1) InvokeFunction(c *gin.Context) {
 		return
 	}
 
-	function, err := services.FunctionService().FunctionService().GetSingle(
-		context.Background(),
-		&new_function_service.FunctionPrimaryKey{
-			Id:        invokeFunction.FunctionID,
-			ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+	function := &new_function_service.Function{}
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		function, err = services.FunctionService().FunctionService().GetSingle(
+			context.Background(),
+			&new_function_service.FunctionPrimaryKey{
+				Id:        invokeFunction.FunctionID,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+		newFunction, err := services.GoObjectBuilderService().Function().GetSingle(
+			context.Background(),
+			&new_object_builder_service.FunctionPrimaryKey{
+				Id:        invokeFunction.FunctionID,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		err = helper.MarshalToStruct(newFunction, &function)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	apiKeys, err := h.authService.ApiKey().GetList(context.Background(), &auth_service.GetListReq{
@@ -521,18 +544,35 @@ func (h *HandlerV1) InvokeFunction(c *gin.Context) {
 		return
 	}
 	if c.Query("form_input") != "true" && c.Query("use_no_limit") != "true" {
-		_, err = services.GetBuilderServiceByType(resource.NodeType).CustomEvent().UpdateByFunctionId(
-			context.Background(),
-			&obs.UpdateByFunctionIdRequest{
-				FunctionId: invokeFunction.FunctionID,
-				ObjectIds:  invokeFunction.ObjectIDs,
-				FieldSlug:  function.Path + "_disable",
-				ProjectId:  resource.ResourceEnvironmentId,
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
+		switch resource.ResourceType {
+		case pb.ResourceType_MONGODB:
+			_, err = services.GetBuilderServiceByType(resource.NodeType).CustomEvent().UpdateByFunctionId(
+				context.Background(),
+				&obs.UpdateByFunctionIdRequest{
+					FunctionId: invokeFunction.FunctionID,
+					ObjectIds:  invokeFunction.ObjectIDs,
+					FieldSlug:  function.Path + "_disable",
+					ProjectId:  resource.ResourceEnvironmentId,
+				},
+			)
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+		case pb.ResourceType_POSTGRESQL:
+			_, err = services.GoObjectBuilderService().CustomEvent().UpdateByFunctionId(
+				context.Background(),
+				&new_object_builder_service.UpdateByFunctionIdRequest{
+					FunctionId: invokeFunction.FunctionID,
+					ObjectIds:  invokeFunction.ObjectIDs,
+					FieldSlug:  function.Path + "_disable",
+					ProjectId:  resource.ResourceEnvironmentId,
+				},
+			)
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
 		}
 	}
 	h.handleResponse(c, status_http.Created, resp)

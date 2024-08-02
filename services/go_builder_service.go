@@ -58,7 +58,7 @@ func NewGoBuilderServiceClient(ctx context.Context, cfg config.Config) (GoBuilde
 		"go-object-builder-service:80",
 		// "localhost:7107",
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
-	) 
+	)
 
 	if err != nil {
 		return nil, err
