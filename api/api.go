@@ -438,7 +438,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 		// environment service
 		v1Admin.POST("/environment", h.V1.CreateEnvironment)
 		v1Admin.GET("/environment/:environment_id", h.V1.GetSingleEnvironment)
-		// v1Admin.GET("/environment", h.V1.GetAllEnvironments)
+		v1Admin.GET("/environment", h.V1.GetAllEnvironments)
 		v1Admin.PUT("/environment", h.V1.UpdateEnvironment)
 		v1Admin.DELETE("/environment/:environment_id", h.V1.DeleteEnvironment)
 
@@ -604,7 +604,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 		v2Admin.POST("/copy-project", h.V1.CopyProjectTemplate)
 
 		functions := v2Admin.Group("functions")
-		{ 
+		{
 			functions.POST("/micro-frontend", h.V1.CreateMicroFrontEnd)
 			functions.GET("/micro-frontend/:micro-frontend-id", h.V1.GetMicroFrontEndByID)
 			functions.GET("/micro-frontend", h.V1.GetAllMicroFrontEnd)
