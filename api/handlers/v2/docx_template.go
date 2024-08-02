@@ -615,7 +615,6 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 
 	client := http.Client{}
 
-	// Send a GET request to the Express.js service
 	resp, err := client.Do(req)
 	if err != nil {
 		h.log.Error("error in 2 docx gen", logger.Error(err))
@@ -624,7 +623,6 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 	}
 	defer resp.Body.Close()
 
-	// Check for errors in the service response
 	if resp.StatusCode != http.StatusOK {
 		js, _ := json.Marshal(resp.Body)
 		h.log.Error("error in 3 docx gen", logger.Error(err), logger.Int("resp status", resp.StatusCode), logger.Any("resp", string(js)))
@@ -632,5 +630,14 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, resp.Body)
+	c.Header("Content-Disposition", "attachment; filename=file.pdf")
+	c.Header("Content-Type", resp.Header.Get("Content-Type"))
+
+	_, err = io.Copy(c.Writer, resp.Body)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Failed to send file")
+		return
+	}
+
+	c.Status(http.StatusOK)
 }
