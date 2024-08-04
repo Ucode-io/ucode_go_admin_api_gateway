@@ -34274,6 +34274,15 @@ const docTemplate = `{
                         "name": "link",
                         "in": "query",
                         "required": true
+                    },
+                    {
+                        "description": "Variables",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_models.DocxTemplateVariables"
+                        }
                     }
                 ],
                 "responses": {
@@ -45165,6 +45174,15 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_api_models.DocxTemplateVariables": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "object",
+                    "additionalProperties": true
                 }
             }
         },

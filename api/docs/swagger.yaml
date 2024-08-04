@@ -818,6 +818,12 @@ definitions:
       name:
         type: string
     type: object
+  ucode_ucode_go_api_gateway_api_models.DocxTemplateVariables:
+    properties:
+      data:
+        additionalProperties: true
+        type: object
+    type: object
   ucode_ucode_go_api_gateway_api_models.Email:
     properties:
       client_type:
@@ -26346,6 +26352,12 @@ paths:
         name: link
         required: true
         type: string
+      - description: Variables
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/ucode_ucode_go_api_gateway_api_models.DocxTemplateVariables'
       produces:
       - application/json
       responses:
