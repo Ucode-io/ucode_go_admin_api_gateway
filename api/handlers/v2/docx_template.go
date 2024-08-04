@@ -1,6 +1,7 @@
 package v2
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -10,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
@@ -557,6 +559,7 @@ func (h *HandlerV2) GetListDocxTemplate(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param link query string true "link"
+// @Param request body models.DocxTemplateVariables true "Variables"
 // @Success 200 {object} status_http.Response{data=string} "Success"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -564,6 +567,15 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 	link := c.Query("link")
 	if link == "" {
 		h.handleResponse(c, status_http.InvalidArgument, "link is required")
+		return
+	}
+
+	request := models.DocxTemplateVariables{
+		Data: make(map[string]interface{}),
+	}
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		h.handleResponse(c, status_http.BadRequest, "invalid body data")
 		return
 	}
 
@@ -602,7 +614,9 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 		return
 	}
 
-	req, err := http.NewRequest(http.MethodPost, config.NodeDocxConvertToPdfServiceUrl, nil)
+	js, _ := json.Marshal(request.Data)
+
+	req, err := http.NewRequest(http.MethodPost, config.NodeDocxConvertToPdfServiceUrl, bytes.NewBuffer(js))
 	if err != nil {
 		h.log.Error("error in 1 docx gen", logger.Error(err))
 		h.handleResponse(c, status_http.InternalServerError, err.Error())
