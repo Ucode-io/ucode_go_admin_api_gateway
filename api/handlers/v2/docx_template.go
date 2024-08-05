@@ -616,7 +616,7 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 		return
 	}
 
-	js, _ := json.Marshal(request.Data)
+	js, _ := json.Marshal(request)
 
 	req, err := http.NewRequest(http.MethodPost, config.NodeDocxConvertToPdfServiceUrl, bytes.NewBuffer(js))
 	if err != nil {
