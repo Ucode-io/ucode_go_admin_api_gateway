@@ -631,6 +631,9 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 	query.Set("link", link)
 	req.URL.RawQuery = query.Encode()
 
+	js, _ = io.ReadAll(req.Body)
+	fmt.Println("req aaa", string(js))
+
 	client := http.Client{}
 
 	resp, err := client.Do(req)
