@@ -408,7 +408,7 @@ func (h *HandlerV2) GetAllRelations(c *gin.Context) {
 			&nb.GetAllRelationsRequest{
 				Limit:     int32(limit),
 				Offset:    int32(offset),
-				TableSlug: c.Param("collection"),
+				TableSlug: c.DefaultQuery("table_slug", ""),
 				TableId:   c.DefaultQuery("table_id", ""),
 				ProjectId: resource.ResourceEnvironmentId,
 			},
