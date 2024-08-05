@@ -1,7 +1,6 @@
 package v2
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -616,11 +615,9 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 		return
 	}
 
-	js, _ := json.Marshal(request)
+	js, _ := json.Marshal(request.Data)
 
-	fmt.Println("this is docx request body 2", string(js))
-
-	req, err := http.NewRequest(http.MethodPost, config.NodeDocxConvertToPdfServiceUrl, bytes.NewBuffer(js))
+	req, err := http.NewRequest(http.MethodPost, config.NodeDocxConvertToPdfServiceUrl, nil)
 	if err != nil {
 		h.log.Error("error in 1 docx gen", logger.Error(err))
 		h.handleResponse(c, status_http.InternalServerError, err.Error())
@@ -629,10 +626,8 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 
 	query := req.URL.Query()
 	query.Set("link", link)
+	query.Set("data", string(js))
 	req.URL.RawQuery = query.Encode()
-
-	js, _ = io.ReadAll(req.Body)
-	fmt.Println("req aaa", string(js))
 
 	client := http.Client{}
 
