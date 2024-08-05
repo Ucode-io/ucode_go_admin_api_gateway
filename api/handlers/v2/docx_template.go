@@ -579,6 +579,8 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 		return
 	}
 
+	fmt.Println("this is docx request body", request.Data)
+
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
