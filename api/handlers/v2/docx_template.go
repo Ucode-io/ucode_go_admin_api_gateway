@@ -618,6 +618,8 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 
 	js, _ := json.Marshal(request)
 
+	fmt.Println("this is docx request body 2", string(js))
+
 	req, err := http.NewRequest(http.MethodPost, config.NodeDocxConvertToPdfServiceUrl, bytes.NewBuffer(js))
 	if err != nil {
 		h.log.Error("error in 1 docx gen", logger.Error(err))
