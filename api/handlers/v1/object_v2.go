@@ -66,8 +66,8 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 	objectRequest.Data["language_setting"] = c.DefaultQuery("language_setting", "")
 
 	if _, ok := objectRequest.Data["limit"]; ok {
-		if cast.ToInt(objectRequest.Data["limit"]) > 20 {
-			objectRequest.Data["limit"] = 20
+		if cast.ToInt(objectRequest.Data["limit"]) > 40 {
+			objectRequest.Data["limit"] = 40
 		}
 	} else {
 		objectRequest.Data["limit"] = 10
