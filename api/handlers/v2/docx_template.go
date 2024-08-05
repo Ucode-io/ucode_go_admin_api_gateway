@@ -552,7 +552,7 @@ func (h *HandlerV2) GetListDocxTemplate(c *gin.Context) {
 // GenerateDocxToPdf godoc
 // @Security ApiKeyAuth
 // @ID generate_docx_to_pdf
-// @Router /v2/docx-template/convert/pdf [GET]
+// @Router /v2/docx-template/convert/pdf [POST]
 // @Summary Generate PDF from docx template
 // @Description Generate PDF from docx template
 // @Tags Template

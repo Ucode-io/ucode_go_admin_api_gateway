@@ -34249,7 +34249,7 @@ const docTemplate = `{
             }
         },
         "/v2/docx-template/convert/pdf": {
-            "get": {
+            "post": {
                 "security": [
                     {
                         "ApiKeyAuth": []

@@ -26341,7 +26341,7 @@ paths:
       tags:
       - Template
   /v2/docx-template/convert/pdf:
-    get:
+    post:
       consumes:
       - application/json
       description: Generate PDF from docx template

@@ -621,7 +621,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 		v2Admin.PUT("/docx-template", h.V2.UpdateDocxTemplate)
 		v2Admin.DELETE("/docx-template/:docx-template-id", h.V2.DeleteDocxTemplate)
 		v2Admin.GET("/docx-template", h.V2.GetListDocxTemplate)
-		v2Admin.GET("/docx-template/convert/pdf", h.V2.GenerateDocxToPdf)
+		v2Admin.POST("/docx-template/convert/pdf", h.V2.GenerateDocxToPdf)
 	}
 
 	// v3 for ucode version 2
