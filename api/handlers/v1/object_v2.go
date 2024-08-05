@@ -65,20 +65,6 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 	}
 	objectRequest.Data["language_setting"] = c.DefaultQuery("language_setting", "")
 
-	if _, ok := objectRequest.Data["limit"]; ok {
-		if cast.ToInt(objectRequest.Data["limit"]) > 40 {
-			objectRequest.Data["limit"] = 40
-		}
-	} else {
-		objectRequest.Data["limit"] = 10
-	}
-
-	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
-	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
-		return
-	}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -89,6 +75,22 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		err = errors.New("error getting environment id | not valid")
 		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	if _, ok := objectRequest.Data["limit"]; ok {
+		if cast.ToInt(objectRequest.Data["limit"]) > 40 {
+			objectRequest.Data["limit"] = 40
+		}
+	} else {
+		if projectId != "0f111e78-3a93-4bec-945a-2a77e0e0a82d" {
+			objectRequest.Data["limit"] = 10
+		}
+	}
+
+	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
 
