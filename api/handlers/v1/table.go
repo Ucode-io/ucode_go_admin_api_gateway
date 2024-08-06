@@ -340,11 +340,7 @@ func (h *HandlerV1) GetAllTables(c *gin.Context) {
 		return
 	}
 
-	limit, err := h.getLimitParam(c)
-	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
-		return
-	}
+	limit := 100
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
