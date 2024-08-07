@@ -356,6 +356,7 @@ func (h *HandlerV2) UpdateDocxTemplate(c *gin.Context) {
 				Secure: h.baseConf.MinioProtocol,
 			})
 			if err != nil {
+				h.log.Error("error in minio client", logger.Error(err))
 				h.handleResponse(c, status_http.BadRequest, err.Error())
 				return
 			}
@@ -383,6 +384,7 @@ func (h *HandlerV2) UpdateDocxTemplate(c *gin.Context) {
 	)
 
 	if err != nil {
+		h.log.Error("error in update docx template", logger.Error(err))
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
