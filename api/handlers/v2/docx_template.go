@@ -639,6 +639,40 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 
 	fmt.Println("fmt relations list in docx", res.GetRelations())
 
+	var (
+		tableIDs    = make([]string, 0)
+		tableSlugs  = make([]string, 0)
+		tableIDsMap = make(map[string]string)
+	)
+
+	for _, relation := range res.GetRelations() {
+
+		if relation.GetTableTo().GetSlug() != request.TableSlug {
+			tableIDs = append(tableIDs, relation.GetTableTo().GetId())
+			tableSlugs = append(tableSlugs, relation.GetTableTo().GetSlug())
+			tableIDsMap[relation.GetTableTo().GetId()] = relation.GetTableTo().GetSlug()
+		} else if relation.GetTableFrom().GetSlug() != request.TableSlug {
+			tableIDs = append(tableIDs, relation.GetTableFrom().GetId())
+			tableSlugs = append(tableSlugs, relation.GetTableFrom().GetSlug())
+			tableIDsMap[relation.GetTableTo().GetId()] = relation.GetTableTo().GetSlug()
+		}
+
+	}
+
+	for _, tableSlug := range tableSlugs {
+		objectsResp, err := services.GoObjectBuilderService().ObjectBuilder().GetList2(c.Request.Context(), &nb.CommonMessage{
+			TableSlug: tableSlug,
+			ProjectId: resource.GetResourceEnvironmentId(),
+		})
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		js, _ := json.Marshal(objectsResp)
+		fmt.Println("data objects docx", objectsResp.GetData(), "\nnew and", string(js))
+	}
+
 	js, _ := json.Marshal(request.Data)
 
 	req, err := http.NewRequest(http.MethodPost, config.NodeDocxConvertToPdfServiceUrl, nil)
