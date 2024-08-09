@@ -42,3 +42,9 @@ type MultipleUpdateItems struct {
 type MultipleInsertItems struct {
 	Items []map[string]interface{} `json:"items"`
 }
+
+type ObjectsResponse struct {
+	Data struct {
+		Response []map[string]interface{} `json:"response"`
+	} `json:"data"`
+}

@@ -669,8 +669,18 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 			return
 		}
 
+		var objResp = models.ObjectsResponse{}
+
 		js, _ := json.Marshal(objectsResp)
-		fmt.Println("data objects docx", objectsResp.GetData(), "\nnew and", string(js))
+
+		if err := json.Unmarshal(js, &objResp); err != nil {
+			h.handleResponse(c, status_http.InternalServerError, err.Error())
+			return
+		}
+
+		js, _ = json.Marshal(objResp)
+
+		fmt.Println("data objects docx", string(js), "\n new", objResp)
 	}
 
 	js, _ := json.Marshal(request.Data)
