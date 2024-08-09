@@ -660,7 +660,7 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 	}
 
 	for _, tableSlug := range tableSlugs {
-		objectsResp, err := services.GoObjectBuilderService().ObjectBuilder().GetList2(c.Request.Context(), &nb.CommonMessage{
+		objectsResp, err := services.GoObjectBuilderService().ObjectBuilder().GetListForDocx(c.Request.Context(), &nb.CommonMessage{
 			TableSlug: tableSlug,
 			ProjectId: resource.GetResourceEnvironmentId(),
 		})
@@ -673,7 +673,7 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 
 		js, _ := json.Marshal(objectsResp)
 
-		if err := json.Unmarshal(js, &objResp); err != nil {
+		if err = json.Unmarshal(js, &objResp); err != nil {
 			h.handleResponse(c, status_http.InternalServerError, err.Error())
 			return
 		}
