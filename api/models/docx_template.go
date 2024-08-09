@@ -1,5 +1,7 @@
 package models
 
 type DocxTemplateVariables struct {
-	Data map[string]interface{} `json:"data"`
+	ID        string                 `json:"id"`
+	TableSlug string                 `json:"table_slug"`
+	Data      map[string]interface{} `json:"data"`
 }

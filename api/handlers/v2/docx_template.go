@@ -580,7 +580,15 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("this is docx request body", request.Data)
+	if request.ID == "" {
+		request.ID = "b7b78d50-b4cc-465d-a082-c2fad4958b48"
+	}
+
+	if request.TableSlug == "" {
+		request.TableSlug = "customer"
+	}
+
+	fmt.Println("this is docx request body", request)
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -608,14 +616,28 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 		return
 	}
 
-	if _, err = h.GetProjectSrvc(
+	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
 		projectId.(string),
 		resource.NodeType,
-	); err != nil {
+	)
+	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	res, err := services.GoObjectBuilderService().Relation().GetAll(c.Request.Context(), &nb.GetAllRelationsRequest{
+		TableSlug: request.TableSlug,
+		Limit:     100,
+		Offset:    0,
+		ProjectId: projectId.(string),
+	})
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	fmt.Println("fmt relations list in docx", res.GetRelations())
 
 	js, _ := json.Marshal(request.Data)
 
