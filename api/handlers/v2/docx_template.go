@@ -659,31 +659,29 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 
 	}
 
-	for _, tableSlug := range tableSlugs {
-		objectsResp, err := services.GoObjectBuilderService().ObjectBuilder().GetListForDocx(c.Request.Context(), &nb.CommonMessage{
-			TableSlug: tableSlug,
-			ProjectId: resource.GetResourceEnvironmentId(),
-		})
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
-		var objResp = models.ObjectsResponse{}
-
-		js, _ := json.Marshal(objectsResp)
-
-		if err = json.Unmarshal(js, &objResp); err != nil {
-			h.handleResponse(c, status_http.InternalServerError, err.Error())
-			return
-		}
-
-		js, _ = json.Marshal(objResp)
-
-		fmt.Println("data objects docx", string(js), "\n new", objResp)
+	objectsResp, err := services.GoObjectBuilderService().ObjectBuilder().GetListForDocx(c.Request.Context(), &nb.CommonForDocxMessage{
+		TableSlugs: tableSlugs,
+		ProjectId:  resource.GetResourceEnvironmentId(),
+	})
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
 	}
 
-	js, _ := json.Marshal(request.Data)
+	var objResp = models.ObjectsResponse{}
+
+	js, _ := json.Marshal(objectsResp)
+
+	if err = json.Unmarshal(js, &objResp); err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err.Error())
+		return
+	}
+
+	js, _ = json.Marshal(objResp)
+
+	fmt.Println("data objects docx", string(js), "\n new", objResp)
+
+	js, _ = json.Marshal(request.Data)
 
 	req, err := http.NewRequest(http.MethodPost, config.NodeDocxConvertToPdfServiceUrl, nil)
 	if err != nil {
