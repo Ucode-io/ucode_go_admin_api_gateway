@@ -630,7 +630,7 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 		TableSlug: request.TableSlug,
 		Limit:     100,
 		Offset:    0,
-		ProjectId: projectId.(string),
+		ProjectId: resource.ResourceEnvironmentId,
 	})
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
