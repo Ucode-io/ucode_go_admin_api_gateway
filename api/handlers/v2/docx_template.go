@@ -662,6 +662,7 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 	objectsResp, err := services.GoObjectBuilderService().ObjectBuilder().GetListForDocx(c.Request.Context(), &nb.CommonForDocxMessage{
 		TableSlugs: tableSlugs,
 		ProjectId:  resource.GetResourceEnvironmentId(),
+		TableSlug:  request.TableSlug,
 	})
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
