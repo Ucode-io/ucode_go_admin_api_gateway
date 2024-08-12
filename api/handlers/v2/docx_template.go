@@ -687,22 +687,9 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 		return
 	}
 
-	js, _ = json.Marshal(objResp)
+	jsRelations, _ := json.Marshal(objResp)
 
 	fmt.Println("data objects docx", string(js), "\n new", objResp)
-
-	var objResp2 = models.ObjectsResponse{}
-
-	js, _ = json.Marshal(objectsResp.Data)
-
-	if err = json.Unmarshal(js, &objResp2.Data); err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err.Error())
-		return
-	}
-
-	js, _ = json.Marshal(objResp2)
-	fmt.Println("alll ", string(js))
-	fmt.Println("data objects docx", objResp2)
 
 	js, _ = json.Marshal(request.Data)
 
@@ -716,6 +703,7 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 	query := req.URL.Query()
 	query.Set("link", link)
 	query.Set("data", string(js))
+	query.Set("relations", string(jsRelations))
 	req.URL.RawQuery = query.Encode()
 
 	client := http.Client{}
