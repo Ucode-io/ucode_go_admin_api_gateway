@@ -15,6 +15,7 @@ import (
 	"ucode/ucode_go_api_gateway/config"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
+	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
@@ -656,13 +657,19 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 			tableSlugs = append(tableSlugs, relation.GetTableFrom().GetSlug())
 			tableIDsMap[relation.GetTableTo().GetId()] = relation.GetTableTo().GetSlug()
 		}
+	}
 
+	structData, err := helper.ConvertMapToStruct(map[string]interface{}{fmt.Sprintf("%s_id", request.TableSlug): request.ID})
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
 	}
 
 	objectsResp, err := services.GoObjectBuilderService().ObjectBuilder().GetListForDocx(c.Request.Context(), &nb.CommonForDocxMessage{
 		TableSlugs: tableSlugs,
 		ProjectId:  resource.GetResourceEnvironmentId(),
 		TableSlug:  request.TableSlug,
+		Data:       structData,
 	})
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
