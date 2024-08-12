@@ -693,9 +693,9 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 
 	var objResp2 = models.ObjectsResponse{}
 
-	js, _ = json.Marshal(objectsResp)
+	js, _ = json.Marshal(objectsResp.Data)
 
-	if err = json.Unmarshal(js, &objResp2); err != nil {
+	if err = json.Unmarshal(js, &objResp2.Data); err != nil {
 		h.handleResponse(c, status_http.InternalServerError, err.Error())
 		return
 	}
