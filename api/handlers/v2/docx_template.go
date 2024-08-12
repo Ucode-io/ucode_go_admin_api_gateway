@@ -676,7 +676,9 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 		return
 	}
 
-	var objResp = make(map[string]interface{})
+	var objResp = map[string]interface{}{
+		"data": map[string]interface{}{},
+	}
 
 	js, _ := json.Marshal(objectsResp)
 
@@ -688,6 +690,19 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 	js, _ = json.Marshal(objResp)
 
 	fmt.Println("data objects docx", string(js), "\n new", objResp)
+
+	var objResp2 = models.ObjectsResponse{}
+
+	js, _ = json.Marshal(objectsResp)
+
+	if err = json.Unmarshal(js, &objResp2); err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err.Error())
+		return
+	}
+
+	js, _ = json.Marshal(objResp2)
+	fmt.Println("alll ", string(js))
+	fmt.Println("data objects docx", objResp2)
 
 	js, _ = json.Marshal(request.Data)
 

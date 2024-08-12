@@ -44,7 +44,5 @@ type MultipleInsertItems struct {
 }
 
 type ObjectsResponse struct {
-	Data struct {
-		Response []map[string]interface{} `json:"response"`
-	} `json:"data"`
+	Data struct{} `json:"data"`
 }
