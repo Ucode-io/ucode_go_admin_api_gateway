@@ -676,7 +676,7 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 		return
 	}
 
-	var objResp = models.ObjectsResponse{}
+	var objResp = make(map[string]interface{})
 
 	js, _ := json.Marshal(objectsResp)
 
