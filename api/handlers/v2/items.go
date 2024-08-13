@@ -644,11 +644,6 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 	// defer cancel()
 
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
-	if err != nil {
-		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
 
 	if viewId, ok := objectRequest["builder_service_view_id"].(string); ok {
 		if util.IsValidUUID(viewId) {
@@ -1101,11 +1096,6 @@ func (h *HandlerV2) MultipleUpdateItems(c *gin.Context) {
 	// defer cancel()
 
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
-	if err != nil {
-		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
 
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
 
@@ -1503,11 +1493,6 @@ func (h *HandlerV2) DeleteItems(c *gin.Context) {
 	// defer cancel()
 
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
-	if err != nil {
-		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
 
 	structData, err := helper.ConvertMapToStruct(data)
 	if err != nil {
@@ -1697,11 +1682,6 @@ func (h *HandlerV2) DeleteManyToMany(c *gin.Context) {
 	}
 
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
-	if err != nil {
-		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
 
 	m2mMessage.ProjectId = resource.ResourceEnvironmentId
 	fromOfs := c.Query("from-ofs")
@@ -1875,11 +1855,6 @@ func (h *HandlerV2) AppendManyToMany(c *gin.Context) {
 	// defer cancel()
 
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
-	if err != nil {
-		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
 
 	m2mMessage.ProjectId = resource.ResourceEnvironmentId
 	fromOfs := c.Query("from-ofs")
@@ -2058,11 +2033,6 @@ func (h *HandlerV2) GetListAggregation(c *gin.Context) {
 	// defer cancel()
 
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
-	if err != nil {
-		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
 
 	if reqBody.IsCached {
 		redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("collection"), string(key), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
@@ -2190,11 +2160,6 @@ func (h *HandlerV2) UpdateRowOrder(c *gin.Context) {
 	// defer cancel()
 
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
-	if err != nil {
-		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
 
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
 	if err != nil {

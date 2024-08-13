@@ -1,8 +1,6 @@
 module ucode/ucode_go_api_gateway
 
-go 1.21.0
-
-toolchain go1.22.4
+go 1.21.6
 
 require (
 	github.com/gin-gonic/gin v1.9.0

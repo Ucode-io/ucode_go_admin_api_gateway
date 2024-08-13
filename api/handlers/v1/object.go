@@ -126,11 +126,6 @@ func (h *HandlerV1) CreateObject(c *gin.Context) {
 	}
 
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
-	if err != nil {
-		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
 
 	var id string
 	uid, _ := uuid.NewRandom()
@@ -366,11 +361,6 @@ func (h *HandlerV1) GetSingle(c *gin.Context) {
 	// defer cancel()
 
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
-	if err != nil {
-		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
@@ -511,11 +501,6 @@ func (h *HandlerV1) GetSingleSlim(c *gin.Context) {
 	// defer cancel()
 
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
-	if err != nil {
-		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
 
 	var (
 		logReq = &models.CreateVersionHistoryRequest{
@@ -696,11 +681,6 @@ func (h *HandlerV1) UpdateObject(c *gin.Context) {
 	}
 
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
-	if err != nil {
-		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
 
 	fromOfs := c.Query("from-ofs")
 
@@ -929,11 +909,6 @@ func (h *HandlerV1) DeleteObject(c *gin.Context) {
 	// defer cancel()
 
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
-	if err != nil {
-		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
 
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
 	if err != nil {
@@ -1219,11 +1194,6 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 			}
 
 			service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
-			if err != nil {
-				h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
-				h.handleResponse(c, status_http.InternalServerError, err)
-				return
-			}
 
 			resp, err = service.GetList(
 				context.Background(),
@@ -1234,6 +1204,7 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 				},
 			)
 
+			fmt.Println("RESPONSE", resp.IsCached)
 			if err == nil {
 				if resp.IsCached {
 					jsonData, _ := resp.GetData().MarshalJSON()
@@ -1590,11 +1561,6 @@ func (h *HandlerV1) GetListInExcel(c *gin.Context) {
 	// defer cancel()
 
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
-	if err != nil {
-		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
@@ -1706,11 +1672,6 @@ func (h *HandlerV1) DeleteManyToMany(c *gin.Context) {
 	// defer cancel()
 
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
-	if err != nil {
-		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
 
 	m2mMessage.ProjectId = resource.ResourceEnvironmentId
 	fromOfs := c.Query("from-ofs")
@@ -1853,11 +1814,6 @@ func (h *HandlerV1) AppendManyToMany(c *gin.Context) {
 	// defer cancel()
 
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
-	if err != nil {
-		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
 
 	m2mMessage.ProjectId = resource.ResourceEnvironmentId
 	fromOfs := c.Query("from-ofs")
@@ -2001,11 +1957,6 @@ func (h *HandlerV1) UpsertObject(c *gin.Context) {
 	// defer cancel()
 
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
-	if err != nil {
-		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
 
 	objects := objectRequest.Data["objects"].([]interface{})
 	editedObjects := make([]interface{}, 0, len(objects))
@@ -2260,11 +2211,6 @@ func (h *HandlerV1) MultipleUpdateObject(c *gin.Context) {
 	}
 
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
-	if err != nil {
-		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
 
 	objects := objectRequest.Data["objects"].([]interface{})
 	editedObjects := make([]map[string]interface{}, 0, len(objects))
@@ -2447,11 +2393,6 @@ func (h *HandlerV1) GetFinancialAnalytics(c *gin.Context) {
 	// defer cancel()
 
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
-	if err != nil {
-		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
 
 	//tokenInfo := h.GetAuthInfo
 	objectRequest.Data["tables"] = authInfo.GetTables()
@@ -2634,11 +2575,6 @@ func (h *HandlerV1) GetListGroupBy(c *gin.Context) {
 	// defer cancel()
 
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
-	if err != nil {
-		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
 
 	structData, err := helper.ConvertMapToStruct(object.Data)
 	if err != nil {
@@ -2792,11 +2728,6 @@ func (h *HandlerV1) GetGroupByField(c *gin.Context) {
 	}
 
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
-	if err != nil {
-		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
 
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
 	if err != nil {
@@ -2916,11 +2847,6 @@ func (h *HandlerV1) DeleteManyObject(c *gin.Context) {
 	// defer cancel()
 
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
-	if err != nil {
-		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
 
 	structData, err := helper.ConvertMapToStruct(data)
 	if err != nil {
@@ -3093,11 +3019,6 @@ func (h *HandlerV1) GetListWithOutRelation(c *gin.Context) {
 	// defer cancel()
 
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
-	if err != nil {
-		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
@@ -3255,11 +3176,6 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 	}
 
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
-	if err != nil {
-		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
-		h.handleResponse(c, status_http.InternalServerError, err)
-		return
-	}
 
 	var (
 		object    models.CommonMessage
