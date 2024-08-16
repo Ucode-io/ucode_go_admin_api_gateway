@@ -32,6 +32,7 @@ type ObjectBuilderServiceClient interface {
 	GetGroupByField(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*CommonMessage, error)
 	UpdateWithParams(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*CommonMessage, error)
 	TestApi(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*CommonMessage, error)
+	GetListForDocx(ctx context.Context, in *CommonForDocxMessage, opts ...grpc.CallOption) (*CommonMessage, error)
 }
 
 type objectBuilderServiceClient struct {
@@ -132,6 +133,15 @@ func (c *objectBuilderServiceClient) TestApi(ctx context.Context, in *CommonMess
 	return out, nil
 }
 
+func (c *objectBuilderServiceClient) GetListForDocx(ctx context.Context, in *CommonForDocxMessage, opts ...grpc.CallOption) (*CommonMessage, error) {
+	out := new(CommonMessage)
+	err := c.cc.Invoke(ctx, "/new_object_builder_service.ObjectBuilderService/GetListForDocx", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ObjectBuilderServiceServer is the server API for ObjectBuilderService service.
 // All implementations must embed UnimplementedObjectBuilderServiceServer
 // for forward compatibility
@@ -146,6 +156,7 @@ type ObjectBuilderServiceServer interface {
 	GetGroupByField(context.Context, *CommonMessage) (*CommonMessage, error)
 	UpdateWithParams(context.Context, *CommonMessage) (*CommonMessage, error)
 	TestApi(context.Context, *CommonMessage) (*CommonMessage, error)
+	GetListForDocx(context.Context, *CommonForDocxMessage) (*CommonMessage, error)
 	mustEmbedUnimplementedObjectBuilderServiceServer()
 }
 
@@ -182,6 +193,9 @@ func (UnimplementedObjectBuilderServiceServer) UpdateWithParams(context.Context,
 }
 func (UnimplementedObjectBuilderServiceServer) TestApi(context.Context, *CommonMessage) (*CommonMessage, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method TestApi not implemented")
+}
+func (UnimplementedObjectBuilderServiceServer) GetListForDocx(context.Context, *CommonForDocxMessage) (*CommonMessage, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetListForDocx not implemented")
 }
 func (UnimplementedObjectBuilderServiceServer) mustEmbedUnimplementedObjectBuilderServiceServer() {}
 
@@ -376,6 +390,24 @@ func _ObjectBuilderService_TestApi_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ObjectBuilderService_GetListForDocx_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CommonForDocxMessage)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ObjectBuilderServiceServer).GetListForDocx(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/new_object_builder_service.ObjectBuilderService/GetListForDocx",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ObjectBuilderServiceServer).GetListForDocx(ctx, req.(*CommonForDocxMessage))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ObjectBuilderService_ServiceDesc is the grpc.ServiceDesc for ObjectBuilderService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -422,6 +454,10 @@ var ObjectBuilderService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "TestApi",
 			Handler:    _ObjectBuilderService_TestApi_Handler,
+		},
+		{
+			MethodName: "GetListForDocx",
+			Handler:    _ObjectBuilderService_GetListForDocx_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
