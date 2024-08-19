@@ -1,12 +1,14 @@
 package v2
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"log"
+	"mime/multipart"
 	"net/http"
 	"os"
 	"strconv"
@@ -88,122 +90,110 @@ func (h *HandlerV2) CreateDocxTemplate(c *gin.Context) {
 
 	docxTemplate.ProjectId = projectId.(string)
 
-	fmt.Println("docx template boyd log", docxTemplate)
+	fileUUID := uuid.New().String()
+	docxFileName := fileUUID + ".docx"
+	pdfFileName := fileUUID + ".pdf"
 
-	{
-		fileUUID := uuid.New().String()
-		docxFileName := fileUUID + ".docx"
-		pdfFileName := fileUUID + ".pdf"
+	if docxTemplate.FileUrl != "" {
+		client := &http.Client{}
 
-		if docxTemplate.FileUrl != "" {
-			client := &http.Client{}
-
-			req, err := http.NewRequest("GET", docxTemplate.FileUrl, nil)
-			if err != nil {
-				fmt.Println("docx -1 err", err.Error())
-				h.handleResponse(c, status_http.BadRequest, err.Error())
-				return
-			}
-
-			req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36")
-
-			resp, err := client.Do(req)
-			if err != nil {
-				fmt.Println("docx 0 err", err.Error())
-				h.handleResponse(c, status_http.BadRequest, err.Error())
-				return
-			}
-			defer resp.Body.Close()
-
-			if resp.StatusCode != http.StatusOK {
-				log.Fatalf("Failed to download file: status code %d", resp.StatusCode)
-			}
-
-			out, err := os.Create(docxFileName)
-			if err != nil {
-				fmt.Println("docx 1 err", err.Error())
-				h.handleResponse(c, status_http.BadRequest, err.Error())
-				return
-			}
-			defer out.Close()
-
-			if _, err = io.Copy(out, resp.Body); err != nil {
-				fmt.Println("docx 2 err", err.Error())
-				log.Fatalf("Failed to write to file: %v", err)
-			}
-
-			fmt.Println("GOINTG TO docx convert docx to pdf", config.ConvertDocxToPdfUrl+h.baseConf.ConvertDocxToPdfSecret)
-			// convert docx to pdf with https://www.convertapi.com
-			req, err = http.NewRequest("POST", config.ConvertDocxToPdfUrl+h.baseConf.ConvertDocxToPdfSecret, out)
-			if err != nil {
-				fmt.Println("pdf 1 err", err.Error())
-				h.handleResponse(c, status_http.BadRequest, err.Error())
-				return
-			}
-
-			req.Header.Add("Content-Type", "application/docx")
-
-			resp, err = client.Do(req)
-			if err != nil {
-				fmt.Println("pdf 2 err", err.Error())
-				h.handleResponse(c, status_http.BadRequest, err.Error())
-				return
-			}
-			defer resp.Body.Close()
-
-			if resp.StatusCode != http.StatusOK {
-				js, _ := io.ReadAll(resp.Body)
-				h.log.Info("response from convert to pdf", logger.Any("response", string(js)))
-				h.log.Error(fmt.Sprintf("Failed to convert docx to pdf: status code %d", resp.StatusCode))
-				h.handleResponse(c, status_http.BadRequest, "Failed to convert docx to pdf")
-				return
-			}
-
-			pdfOut, err := os.Create(pdfFileName)
-			if err != nil {
-				fmt.Println("pdf 3 err", err.Error())
-				h.handleResponse(c, status_http.BadRequest, err.Error())
-				return
-			}
-
-			fmt.Println("almost docx conver finished")
-
-			if _, err = io.Copy(pdfOut, resp.Body); err != nil {
-				log.Fatalf("Failed to write to file: %v", err)
-			}
-		} else {
-			f, err := os.Create(docxFileName)
-			if err != nil {
-				h.handleResponse(c, status_http.BadRequest, err.Error())
-				return
-			}
-
-			if _, err = f.WriteString(""); err != nil {
-				h.handleResponse(c, status_http.BadRequest, err.Error())
-				return
-			}
-
-			if err = f.Close(); err != nil {
-				h.handleResponse(c, status_http.BadRequest, err.Error())
-				return
-			}
-
-			f2, err := os.Create(pdfFileName)
-			if err != nil {
-				h.handleResponse(c, status_http.BadRequest, err.Error())
-				return
-			}
-
-			if _, err = f2.WriteString(""); err != nil {
-				h.handleResponse(c, status_http.BadRequest, err.Error())
-				return
-			}
-
-			if err = f2.Close(); err != nil {
-				h.handleResponse(c, status_http.BadRequest, err.Error())
-				return
-			}
+		req, err := http.NewRequest("GET", docxTemplate.FileUrl, nil)
+		if err != nil {
+			fmt.Println("docx -1 err", err.Error())
+			h.handleResponse(c, status_http.BadRequest, err.Error())
+			return
 		}
+
+		req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36")
+
+		resp, err := client.Do(req)
+		if err != nil {
+			fmt.Println("docx 0 err", err.Error())
+			h.handleResponse(c, status_http.BadRequest, err.Error())
+			return
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusOK {
+			log.Fatalf("Failed to download file: status code %d", resp.StatusCode)
+		}
+
+		out, err := os.Create(docxFileName)
+		if err != nil {
+			fmt.Println("docx 1 err", err.Error())
+			h.handleResponse(c, status_http.BadRequest, err.Error())
+			return
+		}
+		defer out.Close()
+
+		if _, err = io.Copy(out, resp.Body); err != nil {
+			fmt.Println("docx 2 err", err.Error())
+			log.Fatalf("Failed to write to file: %v", err)
+		}
+
+		body := &bytes.Buffer{}
+		writer := multipart.NewWriter(body)
+
+		file, err := os.Open(docxFileName)
+		if err != nil {
+			fmt.Println("Error opening DOCX file:", err)
+			return
+		}
+		defer file.Close()
+
+		part, err := writer.CreateFormFile("File", docxFileName)
+		if err != nil {
+			fmt.Println("Error creating form file:", err)
+			return
+		}
+		if _, err = io.Copy(part, file); err != nil {
+			fmt.Println("Error copying file to form field:", err)
+			return
+		}
+
+		if err = writer.Close(); err != nil {
+			fmt.Println("Error closing writer:", err)
+			return
+		}
+
+		req, err = http.NewRequest("POST", config.ConvertDocxToPdfUrl+h.baseConf.ConvertDocxToPdfSecret, body)
+		if err != nil {
+			fmt.Println("pdf 1 err", err.Error())
+			h.handleResponse(c, status_http.BadRequest, err.Error())
+			return
+		}
+
+		req.Header.Add("Content-Type", writer.FormDataContentType())
+
+		resp, err = client.Do(req)
+		if err != nil {
+			fmt.Println("pdf 2 err", err.Error())
+			h.handleResponse(c, status_http.BadRequest, err.Error())
+			return
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusOK {
+			js, _ := io.ReadAll(resp.Body)
+			h.log.Info("response from convert to pdf", logger.Any("response", string(js)))
+			h.log.Error(fmt.Sprintf("Failed to convert docx to pdf: status code %d", resp.StatusCode))
+			h.handleResponse(c, status_http.BadRequest, "Failed to convert docx to pdf")
+			return
+		}
+
+		pdfOut, err := os.Create(pdfFileName)
+		if err != nil {
+			fmt.Println("pdf 3 err", err.Error())
+			h.handleResponse(c, status_http.BadRequest, err.Error())
+			return
+		}
+		defer pdfOut.Close()
+
+		if _, err = io.Copy(pdfOut, resp.Body); err != nil {
+			log.Fatalf("Failed to write to file: %v", err)
+		}
+
+		dst, _ := os.Getwd()
 
 		minioClient, err := minio.New(h.baseConf.MinioEndpoint, &minio.Options{
 			Creds:  credentials.NewStaticV4(h.baseConf.MinioAccessKeyID, h.baseConf.MinioSecretAccessKey, ""),
@@ -215,9 +205,7 @@ func (h *HandlerV2) CreateDocxTemplate(c *gin.Context) {
 		}
 
 		defaultBucket := "docs"
-		dst, _ := os.Getwd()
 
-		// docx file
 		if _, err = minioClient.FPutObject(context.Background(), defaultBucket, docxFileName, dst+"/"+docxFileName, minio.PutObjectOptions{}); err != nil {
 			err = os.Remove(dst + "/" + docxFileName)
 			h.handleResponse(c, status_http.BadRequest, err.Error())
@@ -228,9 +216,6 @@ func (h *HandlerV2) CreateDocxTemplate(c *gin.Context) {
 			h.log.Error("Error removing file", logger.Error(err))
 		}
 
-		fmt.Println("docx file uploaded")
-
-		// pdf file
 		if _, err = minioClient.FPutObject(context.Background(), defaultBucket, pdfFileName, dst+"/"+pdfFileName, minio.PutObjectOptions{}); err != nil {
 			err = os.Remove(dst + "/" + pdfFileName)
 			h.handleResponse(c, status_http.BadRequest, err.Error())
@@ -240,8 +225,6 @@ func (h *HandlerV2) CreateDocxTemplate(c *gin.Context) {
 		if err = os.Remove(dst + "/" + pdfFileName); err != nil {
 			h.log.Error("Error removing file", logger.Error(err))
 		}
-
-		fmt.Println("docx pdf file uploaded")
 
 		docxTemplate.FileUrl = h.baseConf.MinioEndpoint + "/" + defaultBucket + "/" + docxFileName
 		docxTemplate.PdfUrl = h.baseConf.MinioEndpoint + "/" + defaultBucket + "/" + pdfFileName
