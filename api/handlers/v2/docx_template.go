@@ -98,6 +98,7 @@ func (h *HandlerV2) CreateDocxTemplate(c *gin.Context) {
 
 			req, err := http.NewRequest("GET", docxTemplate.FileUrl, nil)
 			if err != nil {
+				fmt.Println("docx -1 err", err.Error())
 				h.handleResponse(c, status_http.BadRequest, err.Error())
 				return
 			}
@@ -106,6 +107,7 @@ func (h *HandlerV2) CreateDocxTemplate(c *gin.Context) {
 
 			resp, err := client.Do(req)
 			if err != nil {
+				fmt.Println("docx 0 err", err.Error())
 				h.handleResponse(c, status_http.BadRequest, err.Error())
 				return
 			}
@@ -117,12 +119,14 @@ func (h *HandlerV2) CreateDocxTemplate(c *gin.Context) {
 
 			out, err := os.Create(docxFileName)
 			if err != nil {
+				fmt.Println("docx 1 err", err.Error())
 				h.handleResponse(c, status_http.BadRequest, err.Error())
 				return
 			}
 			defer out.Close()
 
 			if _, err = io.Copy(out, resp.Body); err != nil {
+				fmt.Println("docx 2 err", err.Error())
 				log.Fatalf("Failed to write to file: %v", err)
 			}
 
@@ -130,6 +134,7 @@ func (h *HandlerV2) CreateDocxTemplate(c *gin.Context) {
 			// convert docx to pdf with https://www.convertapi.com
 			req, err = http.NewRequest("POST", config.ConvertDocxToPdfUrl+h.baseConf.ConvertDocxToPdfSecret, out)
 			if err != nil {
+				fmt.Println("pdf 1 err", err.Error())
 				h.handleResponse(c, status_http.BadRequest, err.Error())
 				return
 			}
@@ -138,6 +143,7 @@ func (h *HandlerV2) CreateDocxTemplate(c *gin.Context) {
 
 			resp, err = client.Do(req)
 			if err != nil {
+				fmt.Println("pdf 2 err", err.Error())
 				h.handleResponse(c, status_http.BadRequest, err.Error())
 				return
 			}
@@ -149,6 +155,7 @@ func (h *HandlerV2) CreateDocxTemplate(c *gin.Context) {
 
 			pdfOut, err := os.Create(pdfFileName)
 			if err != nil {
+				fmt.Println("pdf 3 err", err.Error())
 				h.handleResponse(c, status_http.BadRequest, err.Error())
 				return
 			}
