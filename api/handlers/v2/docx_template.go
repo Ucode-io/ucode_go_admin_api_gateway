@@ -141,7 +141,7 @@ func (h *HandlerV2) CreateDocxTemplate(c *gin.Context) {
 				return
 			}
 
-			req.Header.Set("Content-Type", "application/json")
+			req.Header.Add("Content-Type", "application/octet-stream")
 
 			resp, err = client.Do(req)
 			if err != nil {
