@@ -132,7 +132,7 @@ func (h *HandlerV2) CreateDocxTemplate(c *gin.Context) {
 				log.Fatalf("Failed to write to file: %v", err)
 			}
 
-			fmt.Println("GOINTG TO docx convert docx to pdf")
+			fmt.Println("GOINTG TO docx convert docx to pdf", config.ConvertDocxToPdfUrl+h.baseConf.ConvertDocxToPdfSecret)
 			// convert docx to pdf with https://www.convertapi.com
 			req, err = http.NewRequest("POST", config.ConvertDocxToPdfUrl+h.baseConf.ConvertDocxToPdfSecret, out)
 			if err != nil {
@@ -152,7 +152,11 @@ func (h *HandlerV2) CreateDocxTemplate(c *gin.Context) {
 			defer resp.Body.Close()
 
 			if resp.StatusCode != http.StatusOK {
-				log.Fatalf("Failed to convert docx to pdf: status code %d", resp.StatusCode)
+				js, _ := io.ReadAll(resp.Body)
+				h.log.Info("response from convert to pdf", logger.Any("response", string(js)))
+				h.log.Error(fmt.Sprintf("Failed to convert docx to pdf: status code %d", resp.StatusCode))
+				h.handleResponse(c, status_http.BadRequest, "Failed to convert docx to pdf")
+				return
 			}
 
 			pdfOut, err := os.Create(pdfFileName)
