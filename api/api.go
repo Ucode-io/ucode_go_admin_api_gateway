@@ -573,7 +573,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 		v1Admin.PUT("/redirect-url/re-order", h.V1.UpdateRedirectUrlOrder)
 	}
 	v2Admin := r.Group("/v2")
-	v2Admin.Use(h.V1.AdminAuthMiddleware())
+	//v2Admin.Use(h.V1.AdminAuthMiddleware())
 	v2Admin.POST("/table-folder", h.V1.CreateTableFolder)
 	v2Admin.PUT("/table-folder", h.V1.UpdateTableFolder)
 	v2Admin.GET("/table-folder", h.V1.GetAllTableFolders)

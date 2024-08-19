@@ -164,7 +164,7 @@ func (h *HandlerV2) CreateDocxTemplate(c *gin.Context) {
 		}
 
 		convertResp, err := http.Post(
-			fmt.Sprintf("https://v2.convertapi.com/convert/docx/to/pdf?Secret=%s", h.baseConf.ConvertDocxToPdfSecret),
+			config.ConvertDocxToPdfUrl+h.baseConf.ConvertDocxToPdfSecret,
 			"application/json",
 			bytes.NewBuffer(payloadBytes),
 		)
@@ -181,6 +181,50 @@ func (h *HandlerV2) CreateDocxTemplate(c *gin.Context) {
 		}
 
 		fmt.Println("convertApiResponse", convertApiResponse)
+
+		pdfUrl := ""
+		if len(convertApiResponse.Files) > 0 {
+			pdfUrl = convertApiResponse.Files[0].Url
+		}
+
+		req, err = http.NewRequest("GET", pdfUrl, nil)
+		if err != nil {
+			fmt.Println("pdf 01 err", err.Error())
+			h.handleResponse(c, status_http.BadRequest, err.Error())
+			return
+		}
+
+		req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36")
+
+		resp, err = client.Do(req)
+		if err != nil {
+			fmt.Println("pdf 02 err", err.Error())
+			h.handleResponse(c, status_http.BadRequest, err.Error())
+			return
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusOK {
+			log.Fatalf("Failed to download file: status code %d", resp.StatusCode)
+			return
+		}
+
+		pdfOut, err := os.Create(pdfFileName)
+		if err != nil {
+			fmt.Println("pdf 1 err", err.Error())
+			h.handleResponse(c, status_http.BadRequest, err.Error())
+			return
+		}
+
+		if _, err = io.Copy(pdfOut, resp.Body); err != nil {
+			fmt.Println("pdf 2 err", err.Error())
+			log.Fatalf("Failed to write to file: %v", err)
+		}
+
+		if err = pdfOut.Close(); err != nil {
+			fmt.Println("pdf 3 err", err.Error())
+			log.Fatalf("Failed to close file: %v", err)
+		}
 
 		minioClient, err := minio.New(h.baseConf.MinioEndpoint, &minio.Options{
 			Creds:  credentials.NewStaticV4(h.baseConf.MinioAccessKeyID, h.baseConf.MinioSecretAccessKey, ""),
@@ -203,22 +247,18 @@ func (h *HandlerV2) CreateDocxTemplate(c *gin.Context) {
 			h.log.Error("Error removing file", logger.Error(err))
 		}
 
-		//if _, err = minioClient.FPutObject(context.Background(), defaultBucket, pdfFileName, dst+"/"+pdfFileName, minio.PutObjectOptions{}); err != nil {
-		//	err = os.Remove(dst + "/" + pdfFileName)
-		//	h.handleResponse(c, status_http.BadRequest, err.Error())
-		//	return
-		//}
+		if _, err = minioClient.FPutObject(context.Background(), defaultBucket, pdfFileName, dst+"/"+pdfFileName, minio.PutObjectOptions{}); err != nil {
+			err = os.Remove(dst + "/" + pdfFileName)
+			h.handleResponse(c, status_http.BadRequest, err.Error())
+			return
+		}
 
 		if err = os.Remove(dst + "/" + pdfFileName); err != nil {
 			h.log.Error("Error removing file", logger.Error(err))
 		}
 
 		docxTemplate.FileUrl = h.baseConf.MinioEndpoint + "/" + defaultBucket + "/" + docxFileName
-		if len(convertApiResponse.Files) > 0 {
-			docxTemplate.PdfUrl = convertApiResponse.Files[0].Url
-		} else {
-			fmt.Println("error of convert docx to pdf")
-		}
+		docxTemplate.PdfUrl = h.baseConf.MinioEndpoint + "/" + defaultBucket + "/" + pdfFileName
 	}
 
 	res, err := services.GoObjectBuilderService().DocxTemplate().Create(
