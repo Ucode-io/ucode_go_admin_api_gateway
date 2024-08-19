@@ -88,6 +88,8 @@ func (h *HandlerV2) CreateDocxTemplate(c *gin.Context) {
 
 	docxTemplate.ProjectId = projectId.(string)
 
+	fmt.Println("docx template boyd log", docxTemplate)
+
 	{
 		fileUUID := uuid.New().String()
 		docxFileName := fileUUID + ".docx"
