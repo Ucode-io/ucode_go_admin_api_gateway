@@ -2832,6 +2832,8 @@ definitions:
         type: string
       password:
         type: string
+      service_type:
+        type: string
     type: object
   ucode_ucode_go_api_gateway_genproto_company_service.Timezone:
     properties:

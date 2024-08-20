@@ -48227,6 +48227,9 @@
                 },
                 "password": {
                     "type": "string"
+                },
+                "service_type": {
+                    "type": "string"
                 }
             }
         },

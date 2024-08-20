@@ -48238,6 +48238,9 @@ const docTemplate = `{
                 },
                 "password": {
                     "type": "string"
+                },
+                "service_type": {
+                    "type": "string"
                 }
             }
         },
