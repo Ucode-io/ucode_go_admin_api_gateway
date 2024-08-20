@@ -823,6 +823,10 @@ definitions:
       data:
         additionalProperties: true
         type: object
+      id:
+        type: string
+      table_slug:
+        type: string
     type: object
   ucode_ucode_go_api_gateway_api_models.Email:
     properties:
@@ -2726,8 +2730,12 @@ definitions:
     type: object
   ucode_ucode_go_api_gateway_genproto_company_service.SMTPCredentials:
     properties:
+      default_otp:
+        type: string
       email:
         type: string
+      number_of_otp:
+        type: integer
       password:
         type: string
     type: object
@@ -3088,6 +3096,8 @@ definitions:
     properties:
       file_url:
         type: string
+      pdf_url:
+        type: string
       project_id:
         type: string
       resource_id:
@@ -3102,6 +3112,8 @@ definitions:
       file_url:
         type: string
       id:
+        type: string
+      pdf_url:
         type: string
       project_id:
         type: string

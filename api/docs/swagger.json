@@ -45172,6 +45172,12 @@
                 "data": {
                     "type": "object",
                     "additionalProperties": true
+                },
+                "id": {
+                    "type": "string"
+                },
+                "table_slug": {
+                    "type": "string"
                 }
             }
         },
@@ -48074,8 +48080,14 @@
         "ucode_ucode_go_api_gateway_genproto_company_service.SMTPCredentials": {
             "type": "object",
             "properties": {
+                "default_otp": {
+                    "type": "string"
+                },
                 "email": {
                     "type": "string"
+                },
+                "number_of_otp": {
+                    "type": "integer"
                 },
                 "password": {
                     "type": "string"
@@ -48619,6 +48631,9 @@
                 "file_url": {
                     "type": "string"
                 },
+                "pdf_url": {
+                    "type": "string"
+                },
                 "project_id": {
                     "type": "string"
                 },
@@ -48640,6 +48655,9 @@
                     "type": "string"
                 },
                 "id": {
+                    "type": "string"
+                },
+                "pdf_url": {
                     "type": "string"
                 },
                 "project_id": {

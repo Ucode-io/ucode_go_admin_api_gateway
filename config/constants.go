@@ -53,4 +53,7 @@ var (
 	}
 )
 
-var NodeDocxConvertToPdfServiceUrl = "https://crowe-doc-generator.u-code.io/generate-doc"
+var (
+	NodeDocxConvertToPdfServiceUrl = "https://crowe-doc-generator.u-code.io/generate-doc"
+	ConvertDocxToPdfUrl            = "https://v2.convertapi.com/convert/docx/to/pdf?Secret="
+)

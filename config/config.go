@@ -171,6 +171,7 @@ type BaseConfig struct {
 	ProjectUrl         string
 	WebhookSecret      string
 	//OfsHost string
+	ConvertDocxToPdfSecret string
 }
 
 func BaseLoad() BaseConfig {
@@ -228,6 +229,8 @@ func BaseLoad() BaseConfig {
 	config.GithubClientSecret = ""
 	config.ProjectUrl = ""
 	config.WebhookSecret = ""
+
+	config.ConvertDocxToPdfSecret = cast.ToString(GetOrReturnDefaultValue("CONVERT_DOCX_TO_PDF_SECRET", "WbWxRNhIMSKBafuk"))
 
 	return config
 }
