@@ -331,7 +331,7 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 	}
 
 	if limit > 40 {
-		limit = 10
+		limit = 20
 	}
 
 	queryMap["limit"] = limit
