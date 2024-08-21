@@ -1347,9 +1347,10 @@ func (h *HandlerV1) GetListSlim(c *gin.Context) {
 		return
 	}
 
-	//if _, ok := queryMap["limit"]; !ok {
-	//	queryMap["limit"] = 10
-	//}
+	if limit > 40 {
+		limit = 10
+	}
+
 	queryMap["limit"] = limit
 	queryMap["offset"] = offset
 
