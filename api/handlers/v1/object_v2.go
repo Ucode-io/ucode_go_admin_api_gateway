@@ -77,13 +77,15 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 		return
 	}
 
-	if _, ok := objectRequest.Data["limit"]; ok {
-		if cast.ToInt(objectRequest.Data["limit"]) > 40 {
-			objectRequest.Data["limit"] = 40
-		}
-	} else {
-		if projectId != "0f111e78-3a93-4bec-945a-2a77e0e0a82d" {
-			objectRequest.Data["limit"] = 10
+	if objectRequest.Data["view_type"] != "CALENDAR" {
+		if _, ok := objectRequest.Data["limit"]; ok {
+			if cast.ToInt(objectRequest.Data["limit"]) > 40 {
+				objectRequest.Data["limit"] = 40
+			}
+		} else {
+			if projectId != "0f111e78-3a93-4bec-945a-2a77e0e0a82d" {
+				objectRequest.Data["limit"] = 10
+			}
 		}
 	}
 
