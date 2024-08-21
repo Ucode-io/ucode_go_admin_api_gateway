@@ -329,6 +329,11 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
+
+	if limit > 40 {
+		limit = 10
+	}
+
 	queryMap["limit"] = limit
 	queryMap["offset"] = offset
 
