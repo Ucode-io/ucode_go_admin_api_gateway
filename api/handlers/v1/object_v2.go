@@ -334,7 +334,7 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
-	}
+	} 
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
