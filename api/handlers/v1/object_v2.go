@@ -330,8 +330,25 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 		return
 	}
 
-	if limit > 40 {
-		limit = 20
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	if projectId == "42ab0799-deff-4f8c-bf3f-64bf9665d304" {
+		limit = 100
+	} else {
+		if limit > 40 {
+			limit = 20
+		}
 	}
 
 	queryMap["limit"] = limit
@@ -350,18 +367,6 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
-		return
-	}
-	projectId, ok := c.Get("project_id")
-	if !ok || !util.IsValidUUID(projectId.(string)) {
-		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
-		return
-	}
-
-	environmentId, ok := c.Get("environment_id")
-	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
 
