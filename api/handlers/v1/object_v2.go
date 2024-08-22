@@ -330,6 +330,14 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 		return
 	}
 
+	if limit > 40 {
+		limit = 20
+	}
+
+	queryMap["limit"] = limit
+	queryMap["offset"] = offset
+
+	objectRequest.Data = queryMap
 	tokenInfo, err := h.GetAuthInfo(c)
 	if err != nil {
 		h.handleResponse(c, status_http.Forbidden, err.Error())
@@ -339,7 +347,11 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 	objectRequest.Data["user_id_from_token"] = tokenInfo.GetUserId()
 	objectRequest.Data["role_id_from_token"] = tokenInfo.GetRoleId()
 	objectRequest.Data["client_type_id_from_token"] = tokenInfo.GetClientTypeId()
-
+	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -350,23 +362,6 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		err = errors.New("error getting environment id | not valid")
 		h.handleResponse(c, status_http.BadRequest, err)
-		return
-	}
-
-	if projectId == "42ab0799-deff-4f8c-bf3f-64bf9665d304" {
-
-		queryMap["limit"] = limit
-		queryMap["offset"] = offset
-
-		objectRequest.Data = queryMap
-	} else {
-		if limit > 40 {
-			limit = 20
-		}
-	}
-	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
-	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
 
