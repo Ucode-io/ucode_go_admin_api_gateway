@@ -18,7 +18,6 @@ import (
 	"ucode/ucode_go_api_gateway/config"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
-	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
@@ -768,11 +767,6 @@ func (h *HandlerV2) GetListDocxTemplate(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
-	var (
-		respNew    *obs.CommonMessage
-		statusHttp = status_http.GrpcStatusToHTTP["Ok"]
-	)
-
 	link := c.Query("link")
 	if link == "" {
 		h.handleResponse(c, status_http.InvalidArgument, "link is required")
@@ -847,10 +841,24 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 
 	fmt.Println("fmt relations list in docx", res.GetRelations(), "table slug", request.TableSlug)
 
+	objectRequest := models.CommonMessage{
+		Data: map[string]interface{}{
+			"limit":  10,
+			"offset": 0,
+		},
+	}
+
+	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
 	respV2, err := services.GoObjectBuilderService().ObjectBuilder().GetList2(
 		context.Background(),
 		&nb.CommonMessage{
 			TableSlug: request.TableSlug,
+			Data:      structData,
 			ProjectId: resource.ResourceEnvironmentId,
 		},
 	)
@@ -859,16 +867,14 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	statusHttp.CustomMessage = respV2.GetCustomMessage()
 
-	js, _ := json.Marshal(respV2)
-	fmt.Println("i am just resp", string(js))
+	fmt.Println("resp daata", respV2.Data)
 
-	if err = json.Unmarshal(js, &respNew); err != nil {
-		h.log.Error("error in unmarshal resp to respNew", logger.Error(err))
+	mapV2, err := helper.ConvertStructToMap(respV2.Data)
+	if err != nil {
+		h.log.Error("error converting struct to map resp to respNew", logger.Error(err))
 	}
-
-	fmt.Println("resp new for docx", respNew)
+	fmt.Println("resp new for docx", mapV2)
 
 	var (
 		tableIDs    = make([]string, 0)
@@ -889,7 +895,7 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 		}
 	}
 
-	structData, err := helper.ConvertMapToStruct(map[string]interface{}{fmt.Sprintf("%s_id", request.TableSlug): request.ID})
+	structData, err = helper.ConvertMapToStruct(map[string]interface{}{fmt.Sprintf("%s_id", request.TableSlug): request.ID})
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
@@ -910,7 +916,7 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 		"data": map[string]interface{}{},
 	}
 
-	js, _ = json.Marshal(objectsResp)
+	js, _ := json.Marshal(objectsResp)
 
 	if err = json.Unmarshal(js, &objResp); err != nil {
 		h.handleResponse(c, status_http.InternalServerError, err.Error())
