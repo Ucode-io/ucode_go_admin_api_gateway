@@ -13,7 +13,6 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"time"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
@@ -770,9 +769,8 @@ func (h *HandlerV2) GetListDocxTemplate(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 	var (
-		objectRequest models.CommonMessage
-		respNew       *obs.CommonMessage
-		statusHttp    = status_http.GrpcStatusToHTTP["Ok"]
+		respNew    *obs.CommonMessage
+		statusHttp = status_http.GrpcStatusToHTTP["Ok"]
 	)
 
 	link := c.Query("link")
@@ -847,168 +845,27 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("fmt relations list in docx", res.GetRelations())
+	fmt.Println("fmt relations list in docx", res.GetRelations(), "table slug", request.TableSlug)
 
-	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
+	respV2, err := services.GoObjectBuilderService().ObjectBuilder().GetList2(
+		context.Background(),
+		&nb.CommonMessage{
+			TableSlug: request.TableSlug,
+			ProjectId: resource.ResourceEnvironmentId,
+		},
+	)
+
 	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+	statusHttp.CustomMessage = respV2.GetCustomMessage()
 
-	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
+	js, _ := json.Marshal(respV2)
+	fmt.Println("i am just resp", string(js))
 
-	if viewId, ok := objectRequest.Data["builder_service_view_id"].(string); ok {
-		if util.IsValidUUID(viewId) {
-			switch resource.ResourceType {
-			case pb.ResourceType_MONGODB:
-				redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
-				if err == nil {
-					resp := make(map[string]interface{})
-					m := make(map[string]interface{})
-					err = json.Unmarshal([]byte(redisResp), &m)
-					if err != nil {
-						h.log.Error("Error while unmarshal redis", logger.Error(err))
-					} else {
-						resp["data"] = m
-						h.handleResponse(c, status_http.OK, resp)
-						return
-					}
-				}
-
-				respNew, err = service.GroupByColumns(
-					context.Background(),
-					&obs.CommonMessage{
-						TableSlug: c.Param("table_slug"),
-						Data:      structData,
-						ProjectId: resource.ResourceEnvironmentId,
-					},
-				)
-
-				if err == nil {
-					if respNew.IsCached {
-						jsonData, _ := respNew.GetData().MarshalJSON()
-						err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
-						if err != nil {
-							h.log.Error("Error while setting redis", logger.Error(err))
-						}
-					}
-				}
-
-				if err != nil {
-					h.handleResponse(c, status_http.GRPCError, err.Error())
-					return
-				}
-			case pb.ResourceType_POSTGRESQL:
-				resp, err := services.GoObjectBuilderService().ObjectBuilder().GetGroupByField(
-					context.Background(),
-					&nb.CommonMessage{
-						TableSlug: c.Param("table_slug"),
-						Data:      structData,
-						ProjectId: resource.ResourceEnvironmentId,
-					},
-				)
-
-				if err != nil {
-					h.handleResponse(c, status_http.GRPCError, err.Error())
-					return
-				}
-
-				statusHttp.CustomMessage = resp.GetCustomMessage()
-				//h.handleResponse(c, statusHttp, resp)
-				//return
-			}
-		}
-	} else {
-		switch resource.ResourceType {
-		case pb.ResourceType_MONGODB:
-			redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
-			if err == nil {
-				resp := make(map[string]interface{})
-				m := make(map[string]interface{})
-				err = json.Unmarshal([]byte(redisResp), &m)
-				if err != nil {
-					h.log.Error("Error while unmarshal redis", logger.Error(err))
-				} else {
-					resp["data"] = m
-					if _, ok := objectRequest.Data["load_test"].(bool); ok {
-						config.CountReq += 1
-					}
-					h.handleResponse(c, status_http.OK, resp)
-					return
-				}
-			}
-
-			respNew, err = service.GetList2(
-				context.Background(),
-				&obs.CommonMessage{
-					TableSlug: c.Param("table_slug"),
-					Data:      structData,
-					ProjectId: resource.ResourceEnvironmentId,
-				},
-			)
-
-			if err == nil {
-				if respNew.IsCached {
-					jsonData, _ := respNew.GetData().MarshalJSON()
-					err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
-					if err != nil {
-						h.log.Error("Error while setting redis", logger.Error(err))
-					}
-				}
-			}
-
-			if err != nil {
-				h.handleResponse(c, status_http.GRPCError, err.Error())
-				return
-			}
-		case pb.ResourceType_POSTGRESQL:
-			// redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
-			// if err == nil {
-			// 	resp := make(map[string]interface{})
-			// 	m := make(map[string]interface{})
-			// 	err = json.Unmarshal([]byte(redisResp), &m)
-			// 	if err != nil {
-			// 		h.log.Error("Error while unmarshal redis", logger.Error(err))
-			// 	} else {
-			// 		resp["data"] = m
-			// 		h.handleResponse(c, status_http.OK, resp)
-			// 		return
-			// 	}
-			// }
-
-			resp, err := services.GoObjectBuilderService().ObjectBuilder().GetList2(
-				context.Background(),
-				&nb.CommonMessage{
-					TableSlug: c.Param("table_slug"),
-					Data:      structData,
-					ProjectId: resource.ResourceEnvironmentId,
-				},
-			)
-
-			// if err == nil {
-			// 	jsonData, _ := resp.GetData().MarshalJSON()
-			// 	err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
-			// 	if err != nil {
-			// 		h.log.Error("Error while setting redis", logger.Error(err))
-			// 	}
-			// }
-
-			if err != nil {
-				h.handleResponse(c, status_http.GRPCError, err.Error())
-				return
-			}
-			statusHttp.CustomMessage = resp.GetCustomMessage()
-
-			// unmarshal resp to respNew
-			js, _ := json.Marshal(resp)
-			fmt.Println("i am just resp", string(js))
-
-			if err = json.Unmarshal(js, &respNew); err != nil {
-				h.log.Error("error in unmarshal resp to respNew", logger.Error(err))
-			}
-			//h.handleResponse(c, statusHttp, respNew)
-			//return
-		}
+	if err = json.Unmarshal(js, &respNew); err != nil {
+		h.log.Error("error in unmarshal resp to respNew", logger.Error(err))
 	}
 
 	fmt.Println("resp new for docx", respNew)
@@ -1032,7 +889,7 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 		}
 	}
 
-	structData, err = helper.ConvertMapToStruct(map[string]interface{}{fmt.Sprintf("%s_id", request.TableSlug): request.ID})
+	structData, err := helper.ConvertMapToStruct(map[string]interface{}{fmt.Sprintf("%s_id", request.TableSlug): request.ID})
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
@@ -1053,7 +910,7 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 		"data": map[string]interface{}{},
 	}
 
-	js, _ := json.Marshal(objectsResp)
+	js, _ = json.Marshal(objectsResp)
 
 	if err = json.Unmarshal(js, &objResp); err != nil {
 		h.handleResponse(c, status_http.InternalServerError, err.Error())
