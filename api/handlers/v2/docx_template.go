@@ -843,8 +843,8 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 
 	objectRequest := models.CommonMessage{
 		Data: map[string]interface{}{
-			"limit":  10,
-			"offset": 0,
+			"limit":                                 10,
+			fmt.Sprintf("%s_id", request.TableSlug): request.ID,
 		},
 	}
 
