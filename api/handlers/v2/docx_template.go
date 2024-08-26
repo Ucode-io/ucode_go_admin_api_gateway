@@ -976,7 +976,7 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 			// 	}
 			// }
 
-			respNew, err = services.GoObjectBuilderService().ObjectBuilder().GetList2(
+			resp, err := services.GoObjectBuilderService().ObjectBuilder().GetList2(
 				context.Background(),
 				&nb.CommonMessage{
 					TableSlug: c.Param("table_slug"),
@@ -997,7 +997,15 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 				h.handleResponse(c, status_http.GRPCError, err.Error())
 				return
 			}
-			statusHttp.CustomMessage = respNew.GetCustomMessage()
+			statusHttp.CustomMessage = resp.GetCustomMessage()
+
+			// unmarshal resp to respNew
+			js, _ := json.Marshal(resp)
+			fmt.Println("i am just resp", string(js))
+
+			if err = json.Unmarshal(js, &respNew); err != nil {
+				h.log.Error("error in unmarshal resp to respNew", logger.Error(err))
+			}
 			//h.handleResponse(c, statusHttp, respNew)
 			//return
 		}
