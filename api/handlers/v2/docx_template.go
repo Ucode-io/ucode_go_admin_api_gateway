@@ -854,7 +854,7 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 		return
 	}
 
-	respV2, err := services.GoObjectBuilderService().ObjectBuilder().GetList2(
+	respV2, err := services.GoObjectBuilderService().ObjectBuilder().GetAll(
 		context.Background(),
 		&nb.CommonMessage{
 			TableSlug: request.TableSlug,
