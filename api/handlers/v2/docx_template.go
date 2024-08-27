@@ -868,13 +868,13 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("resp daata", respV2.Data)
-
 	mapV2, err := helper.ConvertStructToMap(respV2.Data)
 	if err != nil {
 		h.log.Error("error converting struct to map resp to respNew", logger.Error(err))
 	}
-	fmt.Println("resp new for docx", mapV2)
+
+	jsM, _ := json.Marshal(mapV2)
+	fmt.Println("resp new for docx", string(jsM))
 
 	var (
 		tableIDs    = make([]string, 0)
