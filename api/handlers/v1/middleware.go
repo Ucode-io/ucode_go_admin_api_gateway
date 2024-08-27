@@ -520,8 +520,6 @@ func (h *HandlerV1) SlimAuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 
 		}
 		c.Set("Auth", res)
-		// c.Set("namespace", h.cfg.UcodeNamespace)
-
 		c.Next()
 	}
 }

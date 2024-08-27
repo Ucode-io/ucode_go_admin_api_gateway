@@ -3,7 +3,6 @@ package v1
 import (
 	"context"
 	"errors"
-	"log"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
@@ -213,10 +212,11 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *HandlerV1
 					var errStr = resp.Status
 					if resp.Data != nil && resp.Data["message"] != nil {
 						errStr = resp.Data["message"].(string)
-						log.Fatal(errStr)
+						h.log.Error("ERROR FROM OFS", logger.Any("err", errStr))
+						return
 					}
 
-					h.log.Error("ERROR FROM OFS", logger.Any("err", errStr))
+					h.log.Error("ERROR FROM OFS "+customEvent.GetFunctions()[0].Path, logger.Any("err", errStr))
 					return
 				}
 			}(customEvent)
