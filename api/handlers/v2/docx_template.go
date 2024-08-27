@@ -854,6 +854,10 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 		return
 	}
 
+	jsS, _ := json.Marshal(structData)
+
+	fmt.Println("fmt.pl ", string(jsS))
+
 	respV2, err := services.GoObjectBuilderService().ObjectBuilder().GetAll(
 		context.Background(),
 		&nb.CommonMessage{
