@@ -500,8 +500,6 @@ func (h *HandlerV1) GetSingleSlim(c *gin.Context) {
 	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
 	// defer cancel()
 
-	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
-
 	var (
 		logReq = &models.CreateVersionHistoryRequest{
 			Services:     services,
@@ -520,58 +518,116 @@ func (h *HandlerV1) GetSingleSlim(c *gin.Context) {
 		}
 	)
 
-	redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
-	if err == nil {
-		resp := make(map[string]interface{})
-		m := make(map[string]interface{})
-		err = json.Unmarshal([]byte(redisResp), &m)
-		if err != nil {
-			h.log.Error("Error while unmarshal redis", logger.Error(err))
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
+
+		redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
+		if err == nil {
+			resp := make(map[string]interface{})
+			m := make(map[string]interface{})
+			err = json.Unmarshal([]byte(redisResp), &m)
+			if err != nil {
+				h.log.Error("Error while unmarshal redis", logger.Error(err))
+			} else {
+				resp["data"] = m
+				h.handleResponse(c, status_http.OK, resp)
+				logReq.Response = m
+				go h.versionHistory(c, logReq)
+				return
+			}
 		} else {
-			resp["data"] = m
-			h.handleResponse(c, status_http.OK, resp)
-			logReq.Response = m
+			h.log.Error("Error while getting redis", logger.Error(err))
+		}
+
+		resp, err := service.GetSingleSlim(
+			context.Background(),
+			&obs.CommonMessage{
+				TableSlug: c.Param("table_slug"),
+				Data:      structData,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			statusHttp = status_http.GrpcStatusToHTTP["Internal"]
+			stat, ok := status.FromError(err)
+			if ok {
+				statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
+				statusHttp.CustomMessage = stat.Message()
+			}
+			logReq.Response = err.Error()
 			go h.versionHistory(c, logReq)
+			h.handleResponse(c, statusHttp, err.Error())
 			return
 		}
-	} else {
-		h.log.Error("Error while getting redis", logger.Error(err))
-	}
 
-	resp, err := service.GetSingleSlim(
-		context.Background(),
-		&obs.CommonMessage{
-			TableSlug: c.Param("table_slug"),
-			Data:      structData,
-			ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
-	if err != nil {
-		statusHttp = status_http.GrpcStatusToHTTP["Internal"]
-		stat, ok := status.FromError(err)
-		if ok {
-			statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
-			statusHttp.CustomMessage = stat.Message()
-		}
-		logReq.Response = err.Error()
+		logReq.Response = resp
 		go h.versionHistory(c, logReq)
-		h.handleResponse(c, statusHttp, err.Error())
-		return
-	}
 
-	logReq.Response = resp
-	go h.versionHistory(c, logReq)
-
-	if resp.IsCached {
-		jsonData, _ := resp.GetData().MarshalJSON()
-		err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
-		if err != nil {
-			h.log.Error("Error while setting redis", logger.Error(err))
+		if resp.IsCached {
+			jsonData, _ := resp.GetData().MarshalJSON()
+			err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
+			if err != nil {
+				h.log.Error("Error while setting redis", logger.Error(err))
+			}
 		}
-	}
 
-	statusHttp.CustomMessage = resp.GetCustomMessage()
-	h.handleResponse(c, statusHttp, resp)
+		statusHttp.CustomMessage = resp.GetCustomMessage()
+		h.handleResponse(c, statusHttp, resp)
+	case pb.ResourceType_POSTGRESQL:
+		redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
+		if err == nil {
+			resp := make(map[string]interface{})
+			m := make(map[string]interface{})
+			err = json.Unmarshal([]byte(redisResp), &m)
+			if err != nil {
+				h.log.Error("Error while unmarshal redis", logger.Error(err))
+			} else {
+				resp["data"] = m
+				h.handleResponse(c, status_http.OK, resp)
+				logReq.Response = m
+				go h.versionHistory(c, logReq)
+				return
+			}
+		} else {
+			h.log.Error("Error while getting redis", logger.Error(err))
+		}
+
+		resp, err := services.GoObjectBuilderService().ObjectBuilder().GetSingleSlim(context.Background(),
+			&nb.CommonMessage{
+				TableSlug: c.Param("table_slug"),
+				Data:      structData,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+
+		if err != nil {
+			statusHttp = status_http.GrpcStatusToHTTP["Internal"]
+			stat, ok := status.FromError(err)
+			if ok {
+				statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
+				statusHttp.CustomMessage = stat.Message()
+			}
+			logReq.Response = err.Error()
+			go h.versionHistoryGo(c, logReq)
+			h.handleResponse(c, statusHttp, err.Error())
+			return
+		}
+
+		logReq.Response = resp
+		go h.versionHistoryGo(c, logReq)
+
+		if resp.IsCached {
+			jsonData, _ := resp.GetData().MarshalJSON()
+			err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
+			if err != nil {
+				h.log.Error("Error while setting redis", logger.Error(err))
+			}
+		}
+
+		statusHttp.CustomMessage = resp.GetCustomMessage()
+		h.handleResponse(c, statusHttp, resp)
+	}
 }
 
 // UpdateObject godoc

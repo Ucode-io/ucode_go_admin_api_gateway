@@ -341,9 +341,12 @@ message SmsCredentials {
     string password = 3;
     string default_otp = 4;
     int32 number_of_otp = 5;
+    string service_type = 6;
 }
 
 message SMTPCredentials {
     string email = 1;
     string password = 2;
+    int32 number_of_otp = 3;
+    string default_otp = 4;
 }

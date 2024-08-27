@@ -45183,6 +45183,12 @@ const docTemplate = `{
                 "data": {
                     "type": "object",
                     "additionalProperties": true
+                },
+                "id": {
+                    "type": "string"
+                },
+                "table_slug": {
+                    "type": "string"
                 }
             }
         },
@@ -48085,8 +48091,14 @@ const docTemplate = `{
         "ucode_ucode_go_api_gateway_genproto_company_service.SMTPCredentials": {
             "type": "object",
             "properties": {
+                "default_otp": {
+                    "type": "string"
+                },
                 "email": {
                     "type": "string"
+                },
+                "number_of_otp": {
+                    "type": "integer"
                 },
                 "password": {
                     "type": "string"
@@ -48225,6 +48237,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "password": {
+                    "type": "string"
+                },
+                "service_type": {
                     "type": "string"
                 }
             }
@@ -48630,6 +48645,9 @@ const docTemplate = `{
                 "file_url": {
                     "type": "string"
                 },
+                "pdf_url": {
+                    "type": "string"
+                },
                 "project_id": {
                     "type": "string"
                 },
@@ -48651,6 +48669,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
+                    "type": "string"
+                },
+                "pdf_url": {
                     "type": "string"
                 },
                 "project_id": {
