@@ -505,7 +505,7 @@ func (h *HandlerV1) UpdateTable(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
+	services, _ := h.GetProjectSrvc(
 		c.Request.Context(),
 		projectId.(string),
 		nodeType,
@@ -723,7 +723,7 @@ func (h *HandlerV1) DeleteTable(c *gin.Context) {
 		nodeType = resourceEnvironment.GetNodeType()
 	}
 
-	services, err := h.GetProjectSrvc(
+	services, _ := h.GetProjectSrvc(
 		c.Request.Context(),
 		projectId.(string),
 		nodeType,

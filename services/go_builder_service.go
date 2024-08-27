@@ -40,7 +40,7 @@ type goBuilderServiceClient struct {
 	itemsService          nb.ItemsServiceClient
 	relationService       nb.RelationServiceClient
 	fileService           nb.FileServiceClient
-	excelService          nb.ExcelServiceClient
+	excelService          nb.ExcelServiceClient 
 	functionService       nb.FunctionServiceV2Client
 	customEventService    nb.CustomEventServiceClient
 	permissionService     nb.PermissionServiceClient
