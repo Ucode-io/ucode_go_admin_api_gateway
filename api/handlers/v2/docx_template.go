@@ -841,6 +841,12 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 
 	fmt.Println("fmt relations list in docx", res.GetRelations(), "table slug", request.TableSlug)
 
+	var (
+		tableIDs    = make([]string, 0)
+		tableSlugs  = make([]string, 0)
+		tableIDsMap = make(map[string]string)
+	)
+
 	objectRequest := models.CommonMessage{
 		Data: map[string]interface{}{
 			"limit":                                 10,
@@ -854,38 +860,6 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 		return
 	}
 
-	jsS, _ := json.Marshal(structData)
-
-	fmt.Println("fmt.pl ", string(jsS))
-
-	respV2, err := services.GoObjectBuilderService().ObjectBuilder().GetAll(
-		context.Background(),
-		&nb.CommonMessage{
-			TableSlug: request.TableSlug,
-			Data:      structData,
-			ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
-
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
-	mapV2, err := helper.ConvertStructToMap(respV2.Data)
-	if err != nil {
-		h.log.Error("error converting struct to map resp to respNew", logger.Error(err))
-	}
-
-	jsM, _ := json.Marshal(mapV2)
-	fmt.Println("resp new for docx", string(jsM))
-
-	var (
-		tableIDs    = make([]string, 0)
-		tableSlugs  = make([]string, 0)
-		tableIDsMap = make(map[string]string)
-	)
-
 	for _, relation := range res.GetRelations() {
 
 		if relation.GetTableTo().GetSlug() != request.TableSlug {
@@ -896,6 +870,27 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 			tableIDs = append(tableIDs, relation.GetTableFrom().GetId())
 			tableSlugs = append(tableSlugs, relation.GetTableFrom().GetSlug())
 			tableIDsMap[relation.GetTableTo().GetId()] = relation.GetTableTo().GetSlug()
+
+			respV2, err := services.GoObjectBuilderService().ObjectBuilder().GetAll(
+				context.Background(),
+				&nb.CommonMessage{
+					TableSlug: relation.GetTableFrom().GetSlug(),
+					Data:      structData,
+					ProjectId: resource.ResourceEnvironmentId,
+				},
+			)
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+
+			mapV2, err := helper.ConvertStructToMap(respV2.Data)
+			if err != nil {
+				h.log.Error("error converting struct to map resp to respNew", logger.Error(err))
+			}
+
+			jsM, _ := json.Marshal(mapV2)
+			fmt.Println("resp new for docx", string(jsM))
 		}
 	}
 
