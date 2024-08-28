@@ -1084,6 +1084,8 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 		} else {
 			objectRequest.Data["limit"] = 10
 		}
+	} else {
+		objectRequest.Data["limit"] = 50
 	}
 
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
