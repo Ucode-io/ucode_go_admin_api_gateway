@@ -3094,6 +3094,25 @@ definitions:
       url:
         type: string
     type: object
+  ucode_ucode_go_api_gateway_genproto_new_object_builder_service.CommonMessage:
+    properties:
+      blocked_builder:
+        type: boolean
+      blocked_login_table:
+        type: boolean
+      custom_message:
+        type: string
+      data:
+        $ref: '#/definitions/structpb.Struct'
+      is_cached:
+        type: boolean
+      project_id:
+        type: string
+      table_slug:
+        type: string
+      version_id:
+        type: string
+    type: object
   ucode_ucode_go_api_gateway_genproto_new_object_builder_service.CreateDocxTemplateRequest:
     properties:
       file_url:
@@ -26405,6 +26424,53 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Generate PDF from docx template
+      tags:
+      - Template
+  /v2/docx-template/fields/list:
+    get:
+      consumes:
+      - application/json
+      description: Get All fields docx template
+      operationId: get_all_fields_docx_template
+      parameters:
+      - description: table-slug
+        in: query
+        name: table-slug
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: DocxTemplateBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_new_object_builder_service.CommonMessage'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get All fields docx template
       tags:
       - Template
   /v2/erd:

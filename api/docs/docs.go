@@ -34343,6 +34343,92 @@ const docTemplate = `{
                 }
             }
         },
+        "/v2/docx-template/fields/list": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get All fields docx template",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Template"
+                ],
+                "summary": "Get All fields docx template",
+                "operationId": "get_all_fields_docx_template",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "table-slug",
+                        "name": "table-slug",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "DocxTemplateBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_new_object_builder_service.CommonMessage"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v2/docx-template/{docx-template-id}": {
             "get": {
                 "security": [
@@ -48639,6 +48725,35 @@ const docTemplate = `{
                 }
             }
         },
+        "ucode_ucode_go_api_gateway_genproto_new_object_builder_service.CommonMessage": {
+            "type": "object",
+            "properties": {
+                "blocked_builder": {
+                    "type": "boolean"
+                },
+                "blocked_login_table": {
+                    "type": "boolean"
+                },
+                "custom_message": {
+                    "type": "string"
+                },
+                "data": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
+                "is_cached": {
+                    "type": "boolean"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "table_slug": {
+                    "type": "string"
+                },
+                "version_id": {
+                    "type": "string"
+                }
+            }
+        },
         "ucode_ucode_go_api_gateway_genproto_new_object_builder_service.CreateDocxTemplateRequest": {
             "type": "object",
             "properties": {
@@ -55165,6 +55280,8 @@ var SwaggerInfo = &swag.Spec{
 	Description:      "",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
+	LeftDelim:        "{{",
+	RightDelim:       "}}",
 }
 
 func init() {
