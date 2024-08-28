@@ -939,7 +939,7 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 
 	query := req.URL.Query()
 	query.Set("link", link)
-	//query.Set("data", string(js))
+	query.Set("data", string(jsM))
 	//query.Set("relations", string(jsRelations))
 	req.URL.RawQuery = query.Encode()
 
