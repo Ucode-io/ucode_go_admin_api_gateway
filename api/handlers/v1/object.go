@@ -2229,7 +2229,12 @@ func (h *HandlerV1) MultipleUpdateObject(c *gin.Context) {
 
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 
-	objects := objectRequest.Data["objects"].([]interface{})
+	objects, ok := objectRequest.Data["objects"].([]interface{})
+	if !ok {
+		err = errors.New("objects is not an array")
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 	editedObjects := make([]map[string]interface{}, 0, len(objects))
 	var objectIds = make([]string, 0, len(objects))
 	for _, object := range objects {
