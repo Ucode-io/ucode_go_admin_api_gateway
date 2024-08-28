@@ -31,6 +31,7 @@ const (
 	ObjectBuilderService_GetSingleSlim_FullMethodName             = "/new_object_builder_service.ObjectBuilderService/GetSingleSlim"
 	ObjectBuilderService_TestApi_FullMethodName                   = "/new_object_builder_service.ObjectBuilderService/TestApi"
 	ObjectBuilderService_GetListForDocx_FullMethodName            = "/new_object_builder_service.ObjectBuilderService/GetListForDocx"
+	ObjectBuilderService_GetAllForDocx_FullMethodName             = "/new_object_builder_service.ObjectBuilderService/GetAllForDocx"
 )
 
 // ObjectBuilderServiceClient is the client API for ObjectBuilderService service.
@@ -49,6 +50,7 @@ type ObjectBuilderServiceClient interface {
 	GetSingleSlim(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*CommonMessage, error)
 	TestApi(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*CommonMessage, error)
 	GetListForDocx(ctx context.Context, in *CommonForDocxMessage, opts ...grpc.CallOption) (*CommonMessage, error)
+	GetAllForDocx(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*CommonMessage, error)
 }
 
 type objectBuilderServiceClient struct {
@@ -167,6 +169,15 @@ func (c *objectBuilderServiceClient) GetListForDocx(ctx context.Context, in *Com
 	return out, nil
 }
 
+func (c *objectBuilderServiceClient) GetAllForDocx(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*CommonMessage, error) {
+	out := new(CommonMessage)
+	err := c.cc.Invoke(ctx, ObjectBuilderService_GetAllForDocx_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ObjectBuilderServiceServer is the server API for ObjectBuilderService service.
 // All implementations must embed UnimplementedObjectBuilderServiceServer
 // for forward compatibility
@@ -183,6 +194,7 @@ type ObjectBuilderServiceServer interface {
 	GetSingleSlim(context.Context, *CommonMessage) (*CommonMessage, error)
 	TestApi(context.Context, *CommonMessage) (*CommonMessage, error)
 	GetListForDocx(context.Context, *CommonForDocxMessage) (*CommonMessage, error)
+	GetAllForDocx(context.Context, *CommonMessage) (*CommonMessage, error)
 	mustEmbedUnimplementedObjectBuilderServiceServer()
 }
 
@@ -225,6 +237,9 @@ func (UnimplementedObjectBuilderServiceServer) TestApi(context.Context, *CommonM
 }
 func (UnimplementedObjectBuilderServiceServer) GetListForDocx(context.Context, *CommonForDocxMessage) (*CommonMessage, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetListForDocx not implemented")
+}
+func (UnimplementedObjectBuilderServiceServer) GetAllForDocx(context.Context, *CommonMessage) (*CommonMessage, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAllForDocx not implemented")
 }
 func (UnimplementedObjectBuilderServiceServer) mustEmbedUnimplementedObjectBuilderServiceServer() {}
 
@@ -455,6 +470,24 @@ func _ObjectBuilderService_GetListForDocx_Handler(srv interface{}, ctx context.C
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ObjectBuilderService_GetAllForDocx_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CommonMessage)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ObjectBuilderServiceServer).GetAllForDocx(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ObjectBuilderService_GetAllForDocx_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ObjectBuilderServiceServer).GetAllForDocx(ctx, req.(*CommonMessage))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ObjectBuilderService_ServiceDesc is the grpc.ServiceDesc for ObjectBuilderService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -509,6 +542,10 @@ var ObjectBuilderService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetListForDocx",
 			Handler:    _ObjectBuilderService_GetListForDocx_Handler,
+		},
+		{
+			MethodName: "GetAllForDocx",
+			Handler:    _ObjectBuilderService_GetAllForDocx_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

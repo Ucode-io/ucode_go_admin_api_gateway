@@ -847,19 +847,6 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 		tableIDsMap = make(map[string]string)
 	)
 
-	objectRequest := models.CommonMessage{
-		Data: map[string]interface{}{
-			"limit":                                 10,
-			fmt.Sprintf("%s_id", request.TableSlug): request.ID,
-		},
-	}
-
-	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
-	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
-		return
-	}
-
 	for _, relation := range res.GetRelations() {
 
 		if relation.GetTableTo().GetSlug() != request.TableSlug {
@@ -870,29 +857,43 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 			tableIDs = append(tableIDs, relation.GetTableFrom().GetId())
 			tableSlugs = append(tableSlugs, relation.GetTableFrom().GetSlug())
 			tableIDsMap[relation.GetTableTo().GetId()] = relation.GetTableTo().GetSlug()
-
-			respV2, err := services.GoObjectBuilderService().ObjectBuilder().GetAll(
-				context.Background(),
-				&nb.CommonMessage{
-					TableSlug: relation.GetTableFrom().GetSlug(),
-					Data:      structData,
-					ProjectId: resource.ResourceEnvironmentId,
-				},
-			)
-			if err != nil {
-				h.handleResponse(c, status_http.GRPCError, err.Error())
-				return
-			}
-
-			mapV2, err := helper.ConvertStructToMap(respV2.Data)
-			if err != nil {
-				h.log.Error("error converting struct to map resp to respNew", logger.Error(err))
-			}
-
-			jsM, _ := json.Marshal(mapV2)
-			fmt.Println("resp new for docx", string(jsM))
 		}
 	}
+
+	objectRequest := models.CommonMessage{
+		Data: map[string]interface{}{
+			"limit":                                 10,
+			fmt.Sprintf("%s_id", request.TableSlug): request.ID,
+			"table_slugs":                           tableSlugs,
+		},
+	}
+
+	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
+	respV2, err := services.GoObjectBuilderService().ObjectBuilder().GetAllForDocx(
+		context.Background(),
+		&nb.CommonMessage{
+			TableSlug: request.TableSlug,
+			Data:      structData,
+			ProjectId: resource.ResourceEnvironmentId,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	mapV2, err := helper.ConvertStructToMap(respV2.Data)
+	if err != nil {
+		h.log.Error("error converting struct to map resp to respNew", logger.Error(err))
+	}
+
+	jsM, _ := json.Marshal(mapV2)
+	fmt.Println("resp new for docx", string(jsM))
 
 	structData, err = helper.ConvertMapToStruct(map[string]interface{}{fmt.Sprintf("%s_id", request.TableSlug): request.ID})
 	if err != nil {
