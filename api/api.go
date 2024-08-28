@@ -439,7 +439,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 		// environment service
 		v1Admin.POST("/environment", h.V1.CreateEnvironment)
 		v1Admin.GET("/environment/:environment_id", h.V1.GetSingleEnvironment)
-		// v1Admin.GET("/environment", h.V1.GetAllEnvironments)
+		v1Admin.GET("/environment", h.V1.GetAllEnvironments)
 		v1Admin.PUT("/environment", h.V1.UpdateEnvironment)
 		v1Admin.DELETE("/environment/:environment_id", h.V1.DeleteEnvironment)
 
