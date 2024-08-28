@@ -865,6 +865,7 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 			"limit":                                 10,
 			fmt.Sprintf("%s_id", request.TableSlug): request.ID,
 			"table_slugs":                           tableSlugs,
+			"with_relations":                        true,
 		},
 	}
 
