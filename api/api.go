@@ -767,6 +767,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 			v2Fields.PUT("/:collection", h.V2.UpdateField)
 			v2Fields.PUT("/:collection/update-search", h.V2.UpdateSearch)
 			v2Fields.DELETE("/:collection/:id", h.V2.DeleteField)
+			v2Fields.GET("/:collection/with-relations", h.V2.FieldsWithPermissions)
 		}
 
 		// relations
