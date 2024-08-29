@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
@@ -782,15 +783,15 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 		return
 	}
 
-	if request.ID == "" {
-		request.ID = "b7b78d50-b4cc-465d-a082-c2fad4958b48"
+	additionalFields := make(map[string]interface{})
+
+	for key, value := range request.Data {
+		if strings.Contains(key, "_id") {
+			additionalFields[key] = value
+		}
 	}
 
-	if request.TableSlug == "" {
-		request.TableSlug = "customer"
-	}
-
-	fmt.Println("this is docx request body", request)
+	fmt.Println("this is docx request body", request, "this is", additionalFields)
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -842,9 +843,8 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 	fmt.Println("fmt relations list in docx", res.GetRelations(), "table slug", request.TableSlug)
 
 	var (
-		tableIDs    = make([]string, 0)
-		tableSlugs  = make([]string, 0)
-		tableIDsMap = make(map[string]string)
+		tableIDs   = make([]string, 0)
+		tableSlugs = make([]string, 0)
 	)
 
 	for _, relation := range res.GetRelations() {
@@ -852,11 +852,9 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 		if relation.GetTableTo().GetSlug() != request.TableSlug {
 			tableIDs = append(tableIDs, relation.GetTableTo().GetId())
 			tableSlugs = append(tableSlugs, relation.GetTableTo().GetSlug())
-			tableIDsMap[relation.GetTableTo().GetId()] = relation.GetTableTo().GetSlug()
 		} else if relation.GetTableFrom().GetSlug() != request.TableSlug {
 			tableIDs = append(tableIDs, relation.GetTableFrom().GetId())
 			tableSlugs = append(tableSlugs, relation.GetTableFrom().GetSlug())
-			tableIDsMap[relation.GetTableTo().GetId()] = relation.GetTableTo().GetSlug()
 		}
 	}
 
@@ -866,6 +864,7 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 			fmt.Sprintf("%s_id", request.TableSlug): request.ID,
 			"table_slugs":                           tableSlugs,
 			"with_relations":                        true,
+			"additional_fields":                     additionalFields,
 		},
 	}
 
