@@ -241,3 +241,18 @@ func ListFiles(folderPath string) ([]string, error) {
 	})
 	return files, err
 }
+
+func ConvertStructToMap(s *structpb.Struct) (map[string]interface{}, error) {
+
+	newMap := make(map[string]interface{})
+
+	body, err := json.Marshal(s)
+	if err != nil {
+		return map[string]interface{}{}, err
+	}
+	if err := json.Unmarshal(body, &newMap); err != nil {
+		return map[string]interface{}{}, err
+	}
+
+	return newMap, nil
+}
