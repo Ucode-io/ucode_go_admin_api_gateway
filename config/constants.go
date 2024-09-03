@@ -1,6 +1,9 @@
 package config
 
-import "time"
+import (
+	"math/rand"
+	"time"
+)
 
 const (
 	COMMIT_TYPE_APP                      = "APP"
@@ -56,4 +59,6 @@ var (
 var (
 	NodeDocxConvertToPdfServiceUrl = "https://crowe-doc-generator.u-code.io/generate-doc"
 	ConvertDocxToPdfUrl            = "https://v2.convertapi.com/convert/docx/to/pdf?Secret="
+	secretKeys                     = []string{"secret_WQc40yJ2wbcbtI6J", "secret_4y6SXNIXFZwths6R"}
+	ConvertDocxToPdfSecret         = secretKeys[rand.Intn(len(secretKeys))]
 )
