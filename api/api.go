@@ -613,6 +613,17 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 		}
 	}
 
+	{
+		// docx-template v2
+		v2Admin.POST("/docx-template", h.V2.CreateDocxTemplate)
+		v2Admin.GET("/docx-template/:docx-template-id", h.V2.GetSingleDocxTemplate)
+		v2Admin.PUT("/docx-template", h.V2.UpdateDocxTemplate)
+		v2Admin.DELETE("/docx-template/:docx-template-id", h.V2.DeleteDocxTemplate)
+		v2Admin.GET("/docx-template", h.V2.GetListDocxTemplate)
+		v2Admin.POST("/docx-template/convert/pdf", h.V2.GenerateDocxToPdf)
+		v2Admin.GET("/docx-template/fields/list", h.V2.GetAllFieldsDocxTemplate)
+	}
+
 	// v3 for ucode version 2
 	v3 := r.Group("/v3")
 	v3.Use(h.V1.AdminAuthMiddleware())

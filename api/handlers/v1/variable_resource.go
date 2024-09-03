@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"ucode/ucode_go_api_gateway/api/status_http"
+	_ "ucode/ucode_go_api_gateway/genproto/company_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 

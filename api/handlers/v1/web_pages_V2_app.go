@@ -3,6 +3,7 @@ package v1
 import (
 	"context"
 	"errors"
+	_ "ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	tmp "ucode/ucode_go_api_gateway/genproto/web_page_service"

@@ -171,6 +171,7 @@ type BaseConfig struct {
 	ProjectUrl         string
 	WebhookSecret      string
 	//OfsHost string
+	ConvertDocxToPdfSecret string
 }
 
 func BaseLoad() BaseConfig {
@@ -196,7 +197,7 @@ func BaseLoad() BaseConfig {
 	config.AuthGRPCPort = cast.ToString(GetOrReturnDefaultValue("AUTH_GRPC_PORT", ""))
 
 	config.CompanyServiceHost = cast.ToString(GetOrReturnDefaultValue("COMPANY_SERVICE_HOST", ""))
-	config.CompanyServicePort = cast.ToString(GetOrReturnDefaultValue("COMPANY_GRPC_PORT", "")) 
+	config.CompanyServicePort = cast.ToString(GetOrReturnDefaultValue("COMPANY_GRPC_PORT", ""))
 
 	config.MinioAccessKeyID = cast.ToString(GetOrReturnDefaultValue("MINIO_ACCESS_KEY", ""))
 	config.MinioSecretAccessKey = cast.ToString(GetOrReturnDefaultValue("MINIO_SECRET_KEY", ""))
@@ -228,6 +229,8 @@ func BaseLoad() BaseConfig {
 	config.GithubClientSecret = ""
 	config.ProjectUrl = ""
 	config.WebhookSecret = ""
+
+	config.ConvertDocxToPdfSecret = cast.ToString(GetOrReturnDefaultValue("CONVERT_DOCX_TO_PDF_SECRET", "WbWxRNhIMSKBafuk"))
 
 	return config
 }
