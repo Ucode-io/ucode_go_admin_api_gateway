@@ -27,7 +27,6 @@ require (
 require (
 	github.com/aws/aws-sdk-go v1.45.1
 	github.com/baxromumarov/ucode-sdk v0.0.3
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-git/go-git/v5 v5.12.0
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/golang/protobuf v1.5.4

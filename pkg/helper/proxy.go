@@ -12,9 +12,6 @@ type MatchingData struct {
 }
 
 func FindUrlTo(res *company_service.GetListRedirectUrlRes, data MatchingData) (string, error) {
-
-	// start := time.Now()
-
 	for _, v := range res.GetRedirectUrls() {
 		m := make(map[string]string)
 		from := strings.Split(v.From, "/")
@@ -47,7 +44,3 @@ func FindUrlTo(res *company_service.GetListRedirectUrlRes, data MatchingData) (s
 
 	return data.Path, nil
 }
-
-// something/{id}/{id} regex ^something/([^/]+)$
-// get-list/{id}
-// something/abcdfg/abcdfg
