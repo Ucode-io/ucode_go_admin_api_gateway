@@ -10,7 +10,6 @@ import (
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
-	pba "ucode/ucode_go_api_gateway/genproto/auth_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
@@ -65,12 +64,6 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 	}
 	objectRequest.Data["language_setting"] = c.DefaultQuery("language_setting", "")
 
-	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
-	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
-		return
-	}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -81,6 +74,24 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		err = errors.New("error getting environment id | not valid")
 		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	if objectRequest.Data["view_type"] != "CALENDAR" {
+		if _, ok := objectRequest.Data["limit"]; ok {
+			if cast.ToInt(objectRequest.Data["limit"]) > 40 {
+				objectRequest.Data["limit"] = 40
+			}
+		} else {
+			if projectId != "0f111e78-3a93-4bec-945a-2a77e0e0a82d" {
+				objectRequest.Data["limit"] = 10
+			}
+		}
+	}
+
+	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
 
@@ -122,6 +133,10 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 		if util.IsValidUUID(viewId) {
 			switch resource.ResourceType {
 			case pb.ResourceType_MONGODB:
+				if resource.ResourceEnvironmentId == "49ae6c46-5397-4975-b238-320617f0190c" { // starex
+					h.handleResponse(c, statusHttp, pb.Empty{})
+					return
+				}
 				redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
 				if err == nil {
 					resp := make(map[string]interface{})
@@ -258,6 +273,8 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 				h.handleResponse(c, status_http.GRPCError, err.Error())
 				return
 			}
+
+			resp.ProjectId = cast.ToString(projectId)
 			statusHttp.CustomMessage = resp.GetCustomMessage()
 			h.handleResponse(c, statusHttp, resp)
 			return
@@ -312,6 +329,28 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	} 
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	if projectId == "42ab0799-deff-4f8c-bf3f-64bf9665d304" {
+		limit = 100
+	} else {
+		if limit > 40 {
+			limit = 20
+		}
+	}
+
 	queryMap["limit"] = limit
 	queryMap["offset"] = offset
 
@@ -330,44 +369,10 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
-	projectId, ok := c.Get("project_id")
-	if !ok || !util.IsValidUUID(projectId.(string)) {
-		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
-		return
-	}
-
-	environmentId, ok := c.Get("environment_id")
-	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
-		return
-	}
 
 	userId, _ := c.Get("user_id")
 
 	apiKey := c.GetHeader("X-API-KEY")
-	if apiKey != "" {
-		canRequest, exists := h.cache.GetValue(apiKey + "slim")
-		if !exists {
-			apiKeyLimit, err := h.authService.ApiKeyUsage().CheckLimit(
-				c.Request.Context(),
-				&pba.CheckLimitRequest{ApiKey: apiKey},
-			)
-			if err != nil || apiKeyLimit.IsLimitReached {
-				h.handleResponse(c, status_http.TooManyRequests, err.Error())
-				return
-			}
-
-			canRequest = !apiKeyLimit.IsLimitReached
-
-			h.cache.AddKey(apiKey+"slim", true, time.Minute)
-		}
-
-		if !canRequest {
-			h.handleResponse(c, status_http.TooManyRequests, "Monthly limit reached")
-			return
-		}
-	}
 
 	var resource *pb.ServiceResourceModel
 	resourceBody, ok := c.Get("resource")

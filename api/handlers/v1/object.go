@@ -452,27 +452,6 @@ func (h *HandlerV1) GetSingleSlim(c *gin.Context) {
 	userId, _ := c.Get("user_id")
 
 	apiKey := c.GetHeader("X-API-KEY")
-	if apiKey != "" {
-		canRequest, exists := h.cache.GetValue(apiKey + "slim")
-		if !exists {
-			apiKeyLimit, err := h.authService.ApiKeyUsage().CheckLimit(
-				c.Request.Context(),
-				&pba.CheckLimitRequest{ApiKey: apiKey},
-			)
-			if err != nil || apiKeyLimit.IsLimitReached {
-				h.handleResponse(c, status_http.TooManyRequests, err.Error())
-				return
-			}
-
-			canRequest = !apiKeyLimit.IsLimitReached
-			h.cache.AddKey(apiKey+"slim", true, time.Minute)
-		}
-
-		if !canRequest {
-			h.handleResponse(c, status_http.TooManyRequests, "Monthly limit reached")
-			return
-		}
-	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
@@ -496,9 +475,6 @@ func (h *HandlerV1) GetSingleSlim(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-
-	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
-	// defer cancel()
 
 	var (
 		logReq = &models.CreateVersionHistoryRequest{
@@ -628,6 +604,7 @@ func (h *HandlerV1) GetSingleSlim(c *gin.Context) {
 		statusHttp.CustomMessage = resp.GetCustomMessage()
 		h.handleResponse(c, statusHttp, resp)
 	}
+
 }
 
 // UpdateObject godoc
@@ -1099,7 +1076,16 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 	objectRequest.Data["language_setting"] = c.DefaultQuery("language_setting", "")
 	objectRequest.Data["with_relations"] = true
 
-	if c.Param("table_slug") == "orders" {
+	if objectRequest.Data["view_type"] != "CALENDAR" {
+		if _, ok := objectRequest.Data["limit"]; ok {
+			if cast.ToInt(objectRequest.Data["limit"]) > 20 {
+				objectRequest.Data["limit"] = 10
+			}
+		} else {
+			objectRequest.Data["limit"] = 10
+		}
+	} else {
+		objectRequest.Data["limit"] = 50
 	}
 
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
@@ -1188,7 +1174,6 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 				// 		return
 				// 	}
 				// }
-
 				service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 
 				resp, err = service.GroupByColumns(
@@ -1367,9 +1352,10 @@ func (h *HandlerV1) GetListSlim(c *gin.Context) {
 		return
 	}
 
-	//if _, ok := queryMap["limit"]; !ok {
-	//	queryMap["limit"] = 10
-	//}
+	if limit > 40 {
+		limit = 20
+	}
+
 	queryMap["limit"] = limit
 	queryMap["offset"] = offset
 
@@ -1422,27 +1408,6 @@ func (h *HandlerV1) GetListSlim(c *gin.Context) {
 	userId, _ := c.Get("user_id")
 
 	apiKey := c.GetHeader("X-API-KEY")
-	if apiKey != "" {
-		canRequest, exists := h.cache.GetValue(apiKey + "slim")
-		if !exists {
-			apiKeyLimit, err := h.authService.ApiKeyUsage().CheckLimit(
-				c.Request.Context(),
-				&pba.CheckLimitRequest{ApiKey: apiKey},
-			)
-			if err != nil || apiKeyLimit.IsLimitReached {
-				h.handleResponse(c, status_http.TooManyRequests, err.Error())
-				return
-			}
-
-			canRequest = !apiKeyLimit.IsLimitReached
-			h.cache.AddKey(apiKey+"slim", true, time.Minute)
-		}
-
-		if !canRequest {
-			h.handleResponse(c, status_http.TooManyRequests, "Monthly limit reached")
-			return
-		}
-	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
@@ -1615,7 +1580,6 @@ func (h *HandlerV1) GetListInExcel(c *gin.Context) {
 
 	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
 	// defer cancel()
-
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 
 	switch resource.ResourceType {
@@ -2268,7 +2232,12 @@ func (h *HandlerV1) MultipleUpdateObject(c *gin.Context) {
 
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 
-	objects := objectRequest.Data["objects"].([]interface{})
+	objects, ok := objectRequest.Data["objects"].([]interface{})
+	if !ok {
+		err = errors.New("objects is not an array")
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 	editedObjects := make([]map[string]interface{}, 0, len(objects))
 	var objectIds = make([]string, 0, len(objects))
 	for _, object := range objects {
@@ -2341,9 +2310,9 @@ func (h *HandlerV1) MultipleUpdateObject(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = service.MultipleUpdate(
+		goResp, err := services.GoObjectBuilderService().Items().MultipleUpdate(
 			context.Background(),
-			&obs.CommonMessage{
+			&nb.CommonMessage{
 				TableSlug: c.Param("table_slug"),
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
@@ -2352,6 +2321,12 @@ func (h *HandlerV1) MultipleUpdateObject(c *gin.Context) {
 
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		err = helper.MarshalToStruct(goResp, &resp)
+		if err != nil {
+			h.handleResponse(c, status_http.BadRequest, err.Error())
 			return
 		}
 	}
@@ -2447,7 +2422,6 @@ func (h *HandlerV1) GetFinancialAnalytics(c *gin.Context) {
 
 	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
 	// defer cancel()
-
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 
 	//tokenInfo := h.GetAuthInfo

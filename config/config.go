@@ -212,7 +212,7 @@ func BaseLoad() BaseConfig {
 	config.GoObjectBuilderGRPCPort = cast.ToString(GetOrReturnDefaultValue("GO_OBJECT_BUILDER_SERVICE_GRPC_PORT", ":7107"))
 
 	config.DefaultOffset = cast.ToString(GetOrReturnDefaultValue("DEFAULT_OFFSET", "0"))
-	config.DefaultLimit = "100"
+	config.DefaultLimit = "60"
 
 	config.GitlabIntegrationToken = cast.ToString(GetOrReturnDefaultValue("GITLAB_ACCESS_TOKEN", "glpat-3o5LFtq9wE-UzzPF8osd"))
 	config.GitlabIntegrationURL = cast.ToString(GetOrReturnDefaultValue("GITLAB_URL", "https://gitlab.udevs.io"))
@@ -229,6 +229,8 @@ func BaseLoad() BaseConfig {
 	config.GithubClientSecret = ""
 	config.ProjectUrl = ""
 	config.WebhookSecret = ""
+
+	config.ConvertDocxToPdfSecret = cast.ToString(GetOrReturnDefaultValue("CONVERT_DOCX_TO_PDF_SECRET", "WbWxRNhIMSKBafuk"))
 
 	return config
 }

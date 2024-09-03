@@ -296,7 +296,7 @@ func (h *HandlerV1) GetListReportSetting(c *gin.Context) {
 // @Tags Report-Setting
 // @Accept json
 // @Produce json
-// @Param relation body object_builder_service.UpsertAppReportSettingRequest  true "UpsertAppReportSettingRequestBody"
+// @Param relation body obs.UpsertAppReportSettingRequest  true "UpsertAppReportSettingRequestBody"
 // @Success 200 {object} status_http.Response{data=models.AppReportSetting} "AppReportSetting data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -443,8 +443,8 @@ func (h *HandlerV1) DeleteReportSetting(c *gin.Context) {
 // @Tags Dynamic-Report
 // @Accept json
 // @Produce json
-// @Param relation body object_builder_service.SavePivotTemplateRequest true "SavePivotTemplateRequestBody"
-// @Success 200 {object} status_http.Response{data=object_builder_service.PivotTemplateSetting} "Field data"
+// @Param relation body obs.SavePivotTemplateRequest true "SavePivotTemplateRequestBody"
+// @Success 200 {object} status_http.Response{data=obs.PivotTemplateSetting} "Field data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) SavePivotTemplate(c *gin.Context) {
@@ -516,7 +516,7 @@ func (h *HandlerV1) SavePivotTemplate(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path string true "id"
-// @Success 200 {object} status_http.Response{data=object_builder_service.PivotTemplateSetting} "PivotTemplateSetting data"
+// @Success 200 {object} status_http.Response{data=obs.PivotTemplateSetting} "PivotTemplateSetting data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetByIdPivotTemplate(c *gin.Context) {
@@ -583,7 +583,7 @@ func (h *HandlerV1) GetByIdPivotTemplate(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param status query string false "status" Enums(SAVED,HISTORY)
-// @Success 200 {object} status_http.Response{data=object_builder_service.GetListPivotTemplateResponse} "GetListPivotTemplateResponse data"
+// @Success 200 {object} status_http.Response{data=obs.GetListPivotTemplateResponse} "GetListPivotTemplateResponse data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetListPivotTemplate(c *gin.Context) {
@@ -649,8 +649,8 @@ func (h *HandlerV1) GetListPivotTemplate(c *gin.Context) {
 // @Tags Dynamic-Report
 // @Accept json
 // @Produce json
-// @Param relation body object_builder_service.PivotTemplateSetting true "UpsertPivotTemplateRequestBody"
-// @Success 200 {object} status_http.Response{data=object_builder_service.PivotTemplateSetting} "Field data"
+// @Param relation body obs.PivotTemplateSetting true "UpsertPivotTemplateRequestBody"
+// @Success 200 {object} status_http.Response{data=obs.PivotTemplateSetting} "Field data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) UpsertPivotTemplate(c *gin.Context) {

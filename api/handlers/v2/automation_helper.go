@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"log"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
@@ -235,7 +234,6 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *HandlerV2
 			h.log.Info("----FUNCTION--->>>>", logger.Any("mes", resp.Data["message"]))
 
 		} else if customEvent.GetFunctions()[0].RequestType == "SYNC" {
-
 			go func(customEvent *obs.CustomEvent) {
 				resp, err := util.DoRequest("https://ofs.u-code.io/function/"+customEvent.GetFunctions()[0].Path, "POST", invokeFunction)
 				if err != nil {
@@ -245,7 +243,8 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *HandlerV2
 					var errStr = resp.Status
 					if resp.Data != nil && resp.Data["message"] != nil {
 						errStr = resp.Data["message"].(string)
-						log.Fatal(errStr)
+						h.log.Error("ERROR FROM OFS"+customEvent.GetFunctions()[0].Path, logger.Any("err", errStr))
+						return
 					}
 
 					h.log.Error("ERROR FROM OFS", logger.Any("err", errStr))

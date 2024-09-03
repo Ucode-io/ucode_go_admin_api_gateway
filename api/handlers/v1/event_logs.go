@@ -22,7 +22,7 @@ import (
 // @Tags Event
 // @Accept json
 // @Produce json
-// @Param filters query models.GetEventLogsListRequest true "filters"
+// @Param filters query obs.GetEventLogsListRequest true "filters"
 // @Success 200 {object} status_http.Response{data=obs.GetEventLogListsResponse} "EventLogsBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"

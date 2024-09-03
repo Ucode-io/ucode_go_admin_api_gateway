@@ -76,8 +76,8 @@ func (h *HandlerV1) BindLoginMicroFrontToProject(c *gin.Context) {
 // @Tags Project login microfront
 // @Accept json
 // @Produce json
-// @Param Company body company_service.ProjectLoginMicroFrontend  true "ProjectLoginMicroFrontend"
-// @Success 200 {object} status_http.Response{data=company_service.ProjectLoginMicroFrontend} "Company data"
+// @Param Company body pb.ProjectLoginMicroFrontend  true "ProjectLoginMicroFrontend"
+// @Success 200 {object} status_http.Response{data=pb.ProjectLoginMicroFrontend} "Company data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) UpdateLoginMicroFrontProject(c *gin.Context) {

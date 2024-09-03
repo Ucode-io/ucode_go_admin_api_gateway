@@ -52,7 +52,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 	global.Use(h.V1.GlobalAuthMiddleware(cfg))
 	{
 		// global.GET("/projects", h.V1.GetGlobalCompanyProjectList)
-		global.GET("/environment", h.V1.GetGlobalProjectEnvironments)
+		// global.GET("/environment", h.V1.GetGlobalProjectEnvironments)
 		global.GET("/template", h.V1.GetGlobalProjectTemplate)
 	}
 
@@ -356,7 +356,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 		v1.DELETE("/files/:id", h.V1.DeleteFile)
 		v1.GET("/files", h.V1.GetAllFiles)
 		v1.POST("/files/word-template", h.V1.WordTemplate)
-
 	}
 	v2 := r.Group("/v2")
 	v2.Use(h.V1.AuthMiddleware(cfg))

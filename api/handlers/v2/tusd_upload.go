@@ -44,7 +44,7 @@ func (h *HandlerV2) MovieUpload() *tusd.Handler {
 
 	sess, err := session.NewSession(s3Config)
 	if err != nil {
-		h.log.Fatal("error while starting movie upload handler")
+		h.log.Error("error while starting movie upload handler")
 	}
 
 	s3Store := s3store.New(ResourceEnvironmentId, s3.New(sess))
@@ -63,7 +63,7 @@ func (h *HandlerV2) MovieUpload() *tusd.Handler {
 	})
 
 	if err != nil {
-		h.log.Fatal("err while tusd new handler")
+		h.log.Error("err while tusd new handler")
 	}
 
 	go h.eventHandler(handler, "handler")

@@ -381,7 +381,7 @@ func (h *HandlerV1) GetOpenCashboxInfo(c *gin.Context) {
 // @Tags Cashbox
 // @Accept json
 // @Produce json
-// @Param app body models.CreateCashboxTransactionRequest true "CreateTransactionBody"
+// @Param app body ps.CreateCashboxTransactionRequest true "CreateTransactionBody"
 // @Success 201
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"

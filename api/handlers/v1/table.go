@@ -341,11 +341,7 @@ func (h *HandlerV1) GetAllTables(c *gin.Context) {
 		return
 	}
 
-	limit, err := h.getLimitParam(c)
-	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
-		return
-	}
+	limit := 100
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -510,7 +506,7 @@ func (h *HandlerV1) UpdateTable(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
+	services, _ := h.GetProjectSrvc(
 		c.Request.Context(),
 		projectId.(string),
 		nodeType,
@@ -728,7 +724,7 @@ func (h *HandlerV1) DeleteTable(c *gin.Context) {
 		nodeType = resourceEnvironment.GetNodeType()
 	}
 
-	services, err := h.GetProjectSrvc(
+	services, _ := h.GetProjectSrvc(
 		c.Request.Context(),
 		projectId.(string),
 		nodeType,
@@ -833,7 +829,7 @@ func (h *HandlerV1) DeleteTable(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param table_id path string true "table_id"
-// @Success 200 {object} status_http.Response{data=object_builder_service.GetTableHistoryResponse} "TableBody"
+// @Success 200 {object} status_http.Response{data=obs.GetTableHistoryResponse} "TableBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetListTableHistory(c *gin.Context) {
@@ -902,7 +898,7 @@ func (h *HandlerV1) GetListTableHistory(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path string true "id"
-// @Success 200 {object} status_http.Response{data=object_builder_service.Table} "TableBody"
+// @Success 200 {object} status_http.Response{data=obs.Table} "TableBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetTableHistoryById(c *gin.Context) {
@@ -972,7 +968,7 @@ func (h *HandlerV1) GetTableHistoryById(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param table body models.RevertHistoryRequest  true "UpdateTableRequestBody"
-// @Success 200 {object} status_http.Response{data=object_builder_service.TableHistory} "TableBody"
+// @Success 200 {object} status_http.Response{data=obs.TableHistory} "TableBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) RevertTableHistory(c *gin.Context) {
@@ -1057,7 +1053,7 @@ func (h *HandlerV1) RevertTableHistory(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param table body models.InsertVersionsToCommitRequest  true "UpdateTableRequestBody"
-// @Success 200 {object} status_http.Response{data=object_builder_service.TableHistory} "TableBody"
+// @Success 200 {object} status_http.Response{data=obs.TableHistory} "TableBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) InsetrVersionsIdsToTableHistory(c *gin.Context) {

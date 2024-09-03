@@ -127,6 +127,36 @@ func (h *HandlerV2) CreateField(c *gin.Context) {
 		TableSlug: c.Param("collection"),
 	}
 
+	if fieldRequest.IsAlt && len(fields) == 1 {
+
+		atr, err := helper.ConvertMapToStruct(map[string]interface{}{
+			"label":    fields[0].Label + " Alt",
+			"label_en": fields[0].Label + " Alt",
+		})
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		fields = append(fields, &obs.CreateFieldRequest{
+			Default:             "",
+			Type:                "SINGLE_LINE",
+			Index:               "string",
+			Label:               fields[0].Label + " Alt",
+			Slug:                fields[0].Slug + "_alt",
+			TableId:             fields[0].TableId,
+			Attributes:          atr,
+			IsVisible:           true,
+			AutofillTable:       "",
+			AutofillField:       "",
+			Unique:              false,
+			Automatic:           false,
+			ProjectId:           resource.ResourceEnvironmentId,
+			ShowLabel:           true,
+			EnableMultilanguage: false,
+		})
+	}
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		for _, field := range fields {
@@ -510,7 +540,57 @@ func (h *HandlerV2) UpdateField(c *gin.Context) {
 			UserInfo:  cast.ToString(userId),
 			TableSlug: c.Param("collection"),
 		}
+		// newField   = &obs.Field{}
+		// newFieldPb = &nb.Field{}
 	)
+
+	// if fieldRequest.IsAlt {
+
+	// atr, err := helper.ConvertMapToStruct(map[string]interface{}{
+	// 	"label":    field.Label + " Alt",
+	// 	"label_en": field.Label + " Alt",
+	// })
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.GRPCError, err.Error())
+	// 	return
+	// }
+
+	// newField = &obs.Field{
+	// 	Default:             "",
+	// 	Type:                "SINGLE_LINE",
+	// 	Index:               "string",
+	// 	Label:               field.Label + " Alt",
+	// 	Slug:                field.Slug + "_alt",
+	// 	TableId:             field.TableId,
+	// 	Attributes:          atr,
+	// 	IsVisible:           true,
+	// 	AutofillTable:       "",
+	// 	AutofillField:       "",
+	// 	Unique:              false,
+	// 	Automatic:           false,
+	// 	ProjectId:           resource.ResourceEnvironmentId,
+	// 	ShowLabel:           true,
+	// 	EnableMultilanguage: false,
+	// }
+
+	// newFieldPb = &nb.Field{
+	// 	Default:             "",
+	// 	Type:                "SINGLE_LINE",
+	// 	Index:               "string",
+	// 	Label:               field.Label + " Alt",
+	// 	Slug:                field.Slug + "_alt",
+	// 	TableId:             field.TableId,
+	// 	Attributes:          atr,
+	// 	IsVisible:           true,
+	// 	AutofillTable:       "",
+	// 	AutofillField:       "",
+	// 	Unique:              false,
+	// 	Automatic:           false,
+	// 	ProjectId:           resource.ResourceEnvironmentId,
+	// 	ShowLabel:           true,
+	// 	EnableMultilanguage: false,
+	// }
+	// }
 
 	field.ProjectId = resource.ResourceEnvironmentId
 	field.EnvId = resource.EnvironmentId
@@ -544,7 +624,16 @@ func (h *HandlerV2) UpdateField(c *gin.Context) {
 		}
 		go h.versionHistory(c, logReq)
 
-		h.handleResponse(c, status_http.Created, resp)
+		// _, err := services.GetBuilderServiceByType(resource.NodeType).Field().Update(
+		// 	context.Background(),
+		// 	newField,
+		// )
+		// if err != nil {
+		// 	h.handleResponse(c, status_http.GRPCError, err.Error())
+		// 	return
+		// }
+
+		// h.handleResponse(c, status_http.Created, resp)
 	case pb.ResourceType_POSTGRESQL:
 		newReq := nb.Field{}
 
@@ -581,7 +670,16 @@ func (h *HandlerV2) UpdateField(c *gin.Context) {
 		}
 		go h.versionHistoryGo(c, logReq)
 
-		h.handleResponse(c, status_http.Created, resp)
+		// _, err := services.GoObjectBuilderService().Field().Update(
+		// 	context.Background(),
+		// 	newFieldPb,
+		// )
+		// if err != nil {
+		// 	h.handleResponse(c, status_http.GRPCError, err.Error())
+		// 	return
+		// }
+
+		// h.handleResponse(c, status_http.Created, resp)
 	}
 }
 

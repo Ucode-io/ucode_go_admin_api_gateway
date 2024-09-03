@@ -33,7 +33,7 @@ func NewHighBuilderServiceClient(ctx context.Context, cfg config.Config) (Builde
 		return conn, err
 	}
 
-	grpcClientLB, err := gRPCClientLb.NewGrpcClientLB(factory, 6)
+	grpcClientLB, err := gRPCClientLb.NewGrpcClientLB(factory, 12)
 	if err != nil {
 		return nil, err
 	}

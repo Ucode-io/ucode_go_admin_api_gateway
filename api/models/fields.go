@@ -22,6 +22,7 @@ type Field struct {
 	ShowLabel           bool                   `json:"show_label"`
 	EnableMultilanguage bool                   `json:"enable_multilanguage"`
 	MinioFolder         string                 `json:"minio_folder"`
+	IsAlt               bool                   `json:"is_alt"`
 }
 
 type CreateFieldsRequest struct {
@@ -58,6 +59,7 @@ type CreateFieldRequest struct {
 	ShowLabel           bool                   `json:"show_label"`
 	EnableMultilanguage bool                   `json:"enable_multilanguage"`
 	MinioFolder         string                 `json:"minio_folder"`
+	IsAlt               bool                   `json:"is_alt"`
 }
 
 type GetAllFieldsResponse struct {
@@ -72,15 +74,15 @@ type VariablesForCustomErrorMessage struct {
 }
 
 type CreateTableRequest struct {
-	Label              string                                       `json:"label"`
-	Description        string                                       `json:"description"`
-	Slug               string                                       `json:"slug"`
-	Fields             []CreateFieldsRequest                        `json:"fields"`
-	ShowInMeny         bool                                         `json:"show_in_menu"`
-	Icon               string                                       `json:"icon"`
-	SubtitleFieldSlug  string                                       `json:"subtitle_field_slug"`
+	Label             string                `json:"label"`
+	Description       string                `json:"description"`
+	Slug              string                `json:"slug"`
+	Fields            []CreateFieldsRequest `json:"fields"`
+	ShowInMeny        bool                  `json:"show_in_menu"`
+	Icon              string                `json:"icon"`
+	SubtitleFieldSlug string                `json:"subtitle_field_slug"`
 	// Sections           []*object_builder_service.Section            `json:"sections"`
-	Layouts            []*object_builder_service.LayoutRequest      `json:"layouts"`
+	Layouts []*object_builder_service.LayoutRequest `json:"layouts"`
 	// AppID              string                                       `json:"app_id"`
 	IncrementID        IncrementId                                  `json:"increment_id"`
 	CustomErrorMessage []*object_builder_service.CustomErrorMessage `json:"custom_error_messages"`

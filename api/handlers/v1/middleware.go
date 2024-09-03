@@ -330,30 +330,30 @@ func (h *HandlerV1) SlimAuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 				return
 			}
 
-			lmtr := h.rateLimiter.GetLimiter(app_id)
-			if !lmtr.Allow() {
-				h.log.Error("--AuthMiddleware--", logger.Error(errors.New("RPS limit is exceeded")))
-				c.AbortWithError(http.StatusTooManyRequests, errors.New("RPS limit is exceeded"))
-				return
-			} else {
-				value, _ := ApiKeys.LoadOrStore(app_id, 0)
-				count := value.(int)
+			// lmtr := h.rateLimiter.GetLimiter(app_id)
+			// if !lmtr.Allow() {
+			// 	h.log.Error("--AuthMiddleware--", logger.Error(errors.New("RPS limit is exceeded")))
+			// 	c.AbortWithError(http.StatusTooManyRequests, errors.New("RPS limit is exceeded"))
+			// 	return
+			// } else {
+			// 	value, _ := ApiKeys.LoadOrStore(app_id, 0)
+			// 	count := value.(int)
 
-				if count == config.LIMITER_RANGE {
-					ApiKeys.Store(app_id, 0)
-					go func() {
-						_, err := h.authService.ApiKeyUsage().Upsert(context.Background(), &auth_service.ApiKeyUsage{
-							ApiKey:       app_id,
-							RequestCount: config.LIMITER_RANGE,
-						})
-						if err != nil {
-							h.log.Error("--SlimAuthMiddleware--UpsertApiKeyUsage", logger.Error(err))
-						}
-					}()
-				} else {
-					ApiKeys.Store(app_id, count+1)
-				}
-			}
+			// 	if count == config.LIMITER_RANGE {
+			// 		ApiKeys.Store(app_id, 0)
+			// 		go func() {
+			// 			_, err := h.authService.ApiKeyUsage().Upsert(context.Background(), &auth_service.ApiKeyUsage{
+			// 				ApiKey:       app_id,
+			// 				RequestCount: config.LIMITER_RANGE,
+			// 			})
+			// 			if err != nil {
+			// 				h.log.Error("--SlimAuthMiddleware--UpsertApiKeyUsage", logger.Error(err))
+			// 			}
+			// 		}()
+			// 	} else {
+			// 		ApiKeys.Store(app_id, count+1)
+			// 	}
+			// }
 
 			var (
 				appIdKey, resourceAppIdKey = app_id, app_id + "resource"
@@ -520,8 +520,6 @@ func (h *HandlerV1) SlimAuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 
 		}
 		c.Set("Auth", res)
-		// c.Set("namespace", h.cfg.UcodeNamespace)
-
 		c.Next()
 	}
 }

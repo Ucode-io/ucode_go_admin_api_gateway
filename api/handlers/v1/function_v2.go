@@ -259,33 +259,63 @@ func (h *HandlerV1) GetNewFunctionByID(c *gin.Context) {
 		return
 	}
 
-	function, err := services.FunctionService().FunctionService().GetSingle(
-		context.Background(),
-		&fc.FunctionPrimaryKey{
-			Id:        functionID,
-			ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+	var function = &fc.Function{}
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		function, err = services.FunctionService().FunctionService().GetSingle(
+			context.Background(),
+			&fc.FunctionPrimaryKey{
+				Id:        functionID,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		if function.Url == "" {
+			err = gitlab.CloneForkToPath(function.GetSshUrl(), h.baseConf)
+			if err != nil {
+				h.handleResponse(c, status_http.InvalidArgument, err.Error())
+				return
+			}
+			uuid, _ := uuid.NewRandom()
+			password, err := code_server.CreateCodeServer(function.Path, h.baseConf, uuid.String())
+			if err != nil {
+				h.handleResponse(c, status_http.InvalidArgument, err.Error())
+				return
+			}
+			function.Url = "https://" + uuid.String() + ".u-code.io"
+			function.Password = password
+		}
+
+		function.ProjectId = resource.ResourceEnvironmentId
+		_, err = services.FunctionService().FunctionService().Update(context.Background(), function)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+		resp, err := services.GoObjectBuilderService().Function().GetSingle(
+			context.Background(),
+			&nb.FunctionPrimaryKey{
+				Id:        functionID,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		err = helper.MarshalToStruct(resp, &function)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 
-	if function.Url == "" {
-		err = gitlab.CloneForkToPath(function.GetSshUrl(), h.baseConf)
-		if err != nil {
-			h.handleResponse(c, status_http.InvalidArgument, err.Error())
-			return
-		}
-		uuid, _ := uuid.NewRandom()
-		password, err := code_server.CreateCodeServer(function.Path, h.baseConf, uuid.String())
-		if err != nil {
-			h.handleResponse(c, status_http.InvalidArgument, err.Error())
-			return
-		}
-		function.Url = "https://" + uuid.String() + ".u-code.io"
-		function.Password = password
-	}
 	// var status int
 	// for {
 	// 	status, err = util.DoRequestCheckCodeServer(function.Url+"/?folder=/functions/"+function.Path, "GET", nil)
@@ -293,13 +323,6 @@ func (h *HandlerV1) GetNewFunctionByID(c *gin.Context) {
 	// 		break
 	// 	}
 	// }
-
-	function.ProjectId = resource.ResourceEnvironmentId
-	_, err = services.FunctionService().FunctionService().Update(context.Background(), function)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
 
 	h.handleResponse(c, status_http.OK, function)
 }
@@ -1018,16 +1041,37 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
-		function, err = services.FunctionService().FunctionService().GetSingle(
-			context.Background(),
-			&fc.FunctionPrimaryKey{
-				Id:        c.Param("function-id"),
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
+		switch resource.ResourceType {
+		case pb.ResourceType_MONGODB:
+			function, err = services.FunctionService().FunctionService().GetSingle(
+				context.Background(),
+				&fc.FunctionPrimaryKey{
+					Id:        c.Param("function-id"),
+					ProjectId: resource.ResourceEnvironmentId,
+				},
+			)
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+		case pb.ResourceType_POSTGRESQL:
+			resp, err := services.GoObjectBuilderService().Function().GetSingle(
+				context.Background(),
+				&nb.FunctionPrimaryKey{
+					Id:        c.Param("function-id"),
+					ProjectId: resource.ResourceEnvironmentId,
+				},
+			)
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+
+			err = helper.MarshalToStruct(resp, &function)
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
 		}
 	} else {
 		function.Path = c.Param("function-id")

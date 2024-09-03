@@ -6,11 +6,14 @@ type CommonMessage struct {
 }
 
 type Wayll struct {
-	OrderID        string `json:"orderId"`
-	BindingID      string `json:"bindingId"`
-	OrderNumber    string `json:"orderNumber"`
-	OperationType  string `json:"operationType"`
-	OperationState string `json:"operationState"`
+	OrderID             string `json:"orderId"`
+	BindingID           string `json:"bindingId"`
+	OrderNumber         string `json:"orderNumber"`
+	OperationType       string `json:"operationType"`
+	OperationState      string `json:"operationState"`
+	OperationId         string `json:"operationId"`
+	MerchantOperationId string `json:"merchantOperationId"`
+	Rrn                 string `json:"rrn"`
 }
 
 type HtmlBody struct {

@@ -1,7 +1,6 @@
 package testing
 
 import (
-	"log"
 	"os"
 	"testing"
 	"ucode/ucode_go_api_gateway/config"
@@ -18,17 +17,7 @@ var (
 )
 
 func TestMain(m *testing.M) {
-	var err error
 	cfg = config.Load()
-
-	// connCompanyService, err = grpc.Dial(
-	// 	cfg.CompanyServiceHost+cfg.CompanyServicePort,
-	// 	grpc.WithTransportCredentials(insecure.NewCredentials()),
-	// )
-
-	if err != nil {
-		log.Fatalf("did not connect to server %s", err)
-	}
 
 	companyClient = company_service.NewCompanyServiceClient(connCompanyService)
 	projectClient = company_service.NewProjectServiceClient(connCompanyService)
