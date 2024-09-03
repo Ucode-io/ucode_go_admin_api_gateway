@@ -165,7 +165,7 @@ func (h *HandlerV2) CreateDocxTemplate(c *gin.Context) {
 		}
 
 		convertResp, err := http.Post(
-			config.ConvertDocxToPdfUrl+h.baseConf.ConvertDocxToPdfSecret,
+			config.ConvertDocxToPdfUrl+config.ConvertDocxToPdfSecret,
 			"application/json",
 			bytes.NewBuffer(payloadBytes),
 		)
@@ -484,7 +484,7 @@ func (h *HandlerV2) UpdateDocxTemplate(c *gin.Context) {
 		}
 
 		convertResp, err := http.Post(
-			config.ConvertDocxToPdfUrl+h.baseConf.ConvertDocxToPdfSecret,
+			config.ConvertDocxToPdfUrl+config.ConvertDocxToPdfSecret,
 			"application/json",
 			bytes.NewBuffer(payloadBytes),
 		)
