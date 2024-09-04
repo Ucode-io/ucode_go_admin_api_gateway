@@ -14,6 +14,7 @@ type TemplateServiceI interface {
 	Note() tmp.NoteFolderServiceClient
 	Share() tmp.ShareServiceClient
 	UserPermission() tmp.UserPermissionServiceClient
+	DocxTemplate() tmp.DocxTemplateServiceClient
 }
 
 type templateServiceClient struct {
@@ -21,6 +22,7 @@ type templateServiceClient struct {
 	noteService     tmp.NoteFolderServiceClient
 	shareService    tmp.ShareServiceClient
 	userPermission  tmp.UserPermissionServiceClient
+	docxTemplate    tmp.DocxTemplateServiceClient
 }
 
 func NewTemplateServiceClient(ctx context.Context, cfg config.Config) (TemplateServiceI, error) {
@@ -39,6 +41,7 @@ func NewTemplateServiceClient(ctx context.Context, cfg config.Config) (TemplateS
 		noteService:     tmp.NewNoteFolderServiceClient(connTemplateService),
 		shareService:    tmp.NewShareServiceClient(connTemplateService),
 		userPermission:  tmp.NewUserPermissionServiceClient(connTemplateService),
+		docxTemplate:    tmp.NewDocxTemplateServiceClient(connTemplateService),
 	}, nil
 }
 
@@ -56,4 +59,8 @@ func (g *templateServiceClient) Share() tmp.ShareServiceClient {
 
 func (g *templateServiceClient) UserPermission() tmp.UserPermissionServiceClient {
 	return g.userPermission
+}
+
+func (g *templateServiceClient) DocxTemplate() tmp.DocxTemplateServiceClient {
+	return g.docxTemplate
 }

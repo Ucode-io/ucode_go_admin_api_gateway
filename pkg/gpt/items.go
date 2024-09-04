@@ -94,8 +94,6 @@ func GenerateItems(req *models.GenerateItemsAI) ([]models.CreateVersionHistoryRe
 
 		tableSlug = field.TableSlug
 
-		fmt.Println(prompt)
-
 	case pb.ResourceType_POSTGRESQL:
 	}
 
@@ -115,8 +113,6 @@ func GenerateItems(req *models.GenerateItemsAI) ([]models.CreateVersionHistoryRe
 		return respLogReq, err
 	}
 
-	fmt.Println(len(toolCalls))
-
 	for _, toolCall := range toolCalls {
 		var (
 			functionCall = toolCall.Function
@@ -126,11 +122,8 @@ func GenerateItems(req *models.GenerateItemsAI) ([]models.CreateVersionHistoryRe
 
 		err = json.Unmarshal([]byte(functionCall.Arguments), &arguments)
 		if err != nil {
-			fmt.Println("Error parsing function arguments:", err)
 			continue
 		}
-
-		fmt.Println(functionName)
 
 		if functionName == "generate_values" {
 
@@ -199,7 +192,6 @@ func UpdateItems(req *models.UpdateItemsAI) ([]models.CreateVersionHistoryReques
 			},
 		)
 		if err != nil {
-			fmt.Println(">>>>>>>>>>>>>>", err)
 			return respLogReq, err
 		}
 	case pb.ResourceType_POSTGRESQL:

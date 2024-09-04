@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"time"
+	_ "ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
 	ars "ucode/ucode_go_api_gateway/genproto/api_reference_service"

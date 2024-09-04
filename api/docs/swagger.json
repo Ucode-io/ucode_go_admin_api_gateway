@@ -9344,7 +9344,6 @@
                         "items": {
                             "type": "string"
                         },
-                        "collectionFormat": "csv",
                         "name": "ids",
                         "in": "query"
                     },
@@ -13163,7 +13162,6 @@
                         "items": {
                             "type": "string"
                         },
-                        "collectionFormat": "csv",
                         "name": "ids",
                         "in": "query"
                     },
@@ -34618,7 +34616,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/api_handlers_v2.Path"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_handlers_v2.Path"
                                         }
                                     }
                                 }
@@ -37595,6 +37593,101 @@
                 }
             }
         },
+        "/v2/items/{collection}/upsert-many": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Upsert Many items",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Items"
+                ],
+                "summary": "Upsert Many items",
+                "operationId": "upsert_many_items",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "collection",
+                        "name": "collection",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "UpsertManyItemsRequestBody",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_models.CommonMessage"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Object data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_models.CommonMessage"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v2/items/{collection}/{id}": {
             "get": {
                 "security": [
@@ -39939,7 +40032,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/api_handlers_v2.Path"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_handlers_v2.Path"
                                         }
                                     }
                                 }
@@ -40931,7 +41024,6 @@
                         "items": {
                             "type": "string"
                         },
-                        "collectionFormat": "csv",
                         "name": "version_ids",
                         "in": "query"
                     }
@@ -44278,6 +44370,38 @@
         "emptypb.Empty": {
             "type": "object"
         },
+        "github_com_golang_protobuf_ptypes_struct.Struct": {
+            "type": "object",
+            "properties": {
+                "fields": {
+                    "description": "Unordered map of dynamically typed values.",
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Value"
+                    }
+                }
+            }
+        },
+        "google_golang_org_protobuf_types_known_structpb.Struct": {
+            "type": "object",
+            "properties": {
+                "fields": {
+                    "description": "Unordered map of dynamically typed values.",
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Value"
+                    }
+                }
+            }
+        },
+        "google_golang_org_protobuf_types_known_structpb.Value": {
+            "type": "object",
+            "properties": {
+                "kind": {
+                    "description": "The kind of value.\n\nTypes that are assignable to Kind:\n\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue"
+                }
+            }
+        },
         "postgres_object_builder_service.GetAllTablesResponse": {
             "type": "object",
             "properties": {
@@ -44344,23 +44468,41 @@
                 }
             }
         },
-        "structpb.Struct": {
+        "ucode_ucode_go_api_gateway_api_handlers_v1.BucketRequest": {
             "type": "object",
             "properties": {
-                "fields": {
-                    "description": "Unordered map of dynamically typed values.",
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/structpb.Value"
-                    }
+                "bucket_name": {
+                    "type": "string"
                 }
             }
         },
-        "structpb.Value": {
+        "ucode_ucode_go_api_gateway_api_handlers_v1.BucketResponse": {
             "type": "object",
             "properties": {
-                "kind": {
-                    "description": "The kind of value.\n\nTypes that are assignable to Kind:\n\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue"
+                "size": {
+                    "type": "number"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_api_handlers_v1.Path": {
+            "type": "object",
+            "properties": {
+                "filename": {
+                    "type": "string"
+                },
+                "hash": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_api_handlers_v2.Path": {
+            "type": "object",
+            "properties": {
+                "filename": {
+                    "type": "string"
+                },
+                "hash": {
+                    "type": "string"
                 }
             }
         },
@@ -44575,7 +44717,7 @@
                     "type": "string"
                 },
                 "routes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "sub_domain": {
                     "type": "string"
@@ -45002,7 +45144,7 @@
                     "type": "string"
                 },
                 "components": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "folder_id": {
                     "type": "string"
@@ -45935,7 +46077,7 @@
                     "type": "string"
                 },
                 "routes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "sub_domain": {
                     "type": "string"
@@ -46074,7 +46216,7 @@
                     "type": "string"
                 },
                 "components": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "folder_id": {
                     "type": "string"
@@ -46231,7 +46373,7 @@
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "authentification": {
                     "type": "boolean"
@@ -46339,7 +46481,7 @@
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "authentification": {
                     "type": "boolean"
@@ -46865,7 +47007,7 @@
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "icon": {
                     "type": "string"
@@ -46978,7 +47120,7 @@
             "type": "object",
             "properties": {
                 "addational_table": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "app_permissions": {
                     "type": "array",
@@ -47032,7 +47174,7 @@
                     "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.User"
                 },
                 "user_data": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "user_found": {
                     "type": "boolean"
@@ -47536,7 +47678,7 @@
                     "type": "string"
                 },
                 "data": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "description": {
                     "type": "string"
@@ -47562,7 +47704,7 @@
                     "type": "string"
                 },
                 "data": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "description": {
                     "type": "string"
@@ -48265,7 +48407,7 @@
                     "type": "integer"
                 },
                 "data": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 }
             }
         },
@@ -48493,7 +48635,7 @@
                     "type": "string"
                 },
                 "data": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "deleted_at": {
                     "type": "string"
@@ -48546,7 +48688,7 @@
                     "type": "string"
                 },
                 "data": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "deleted_at": {
                     "type": "string"
@@ -48584,7 +48726,7 @@
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "commit_guid": {
                     "type": "string"
@@ -48711,7 +48853,7 @@
                     "type": "string"
                 },
                 "data": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "is_cached": {
                     "type": "boolean"
@@ -49200,7 +49342,7 @@
                     "type": "string"
                 },
                 "data": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "is_cached": {
                     "type": "boolean"
@@ -49296,7 +49438,7 @@
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "commit_guid": {
                     "type": "string"
@@ -49389,7 +49531,7 @@
             "type": "object",
             "properties": {
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "autofill_field": {
                     "type": "string"
@@ -49567,7 +49709,7 @@
                     }
                 },
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "auto_filters": {
                     "type": "array",
@@ -49786,7 +49928,7 @@
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "calendar_from_slug": {
                     "type": "string"
@@ -50102,7 +50244,7 @@
             "type": "object",
             "properties": {
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "autofill_field": {
                     "type": "string"
@@ -50188,7 +50330,7 @@
             "type": "object",
             "properties": {
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "column": {
                     "type": "integer"
@@ -50217,7 +50359,7 @@
             "type": "object",
             "properties": {
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "column": {
                     "type": "integer"
@@ -50714,7 +50856,7 @@
             "type": "object",
             "properties": {
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "env_id": {
                     "type": "string"
@@ -50770,7 +50912,7 @@
             "type": "object",
             "properties": {
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "icon": {
                     "type": "string"
@@ -50880,10 +51022,10 @@
             "type": "object",
             "properties": {
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "data": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "env_id": {
                     "type": "string"
@@ -50936,10 +51078,10 @@
             "type": "object",
             "properties": {
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "data": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "icon": {
                     "type": "string"
@@ -50989,10 +51131,10 @@
             "type": "object",
             "properties": {
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "data": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "icon": {
                     "type": "string"
@@ -51389,7 +51531,7 @@
                     }
                 },
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "columns": {
                     "type": "array",
@@ -51431,7 +51573,7 @@
                     "type": "string"
                 },
                 "permission": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "quick_filters": {
                     "type": "array",
@@ -51547,7 +51689,7 @@
             "type": "object",
             "properties": {
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "column": {
                     "type": "string"
@@ -51579,7 +51721,7 @@
             "type": "object",
             "properties": {
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "column": {
                     "type": "string"
@@ -51622,7 +51764,7 @@
             "type": "object",
             "properties": {
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "field_name": {
                     "type": "string"
@@ -51636,7 +51778,7 @@
             "type": "object",
             "properties": {
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "icon": {
                     "type": "string"
@@ -51671,7 +51813,7 @@
             "type": "object",
             "properties": {
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "icon": {
                     "type": "string"
@@ -51709,7 +51851,7 @@
             "type": "object",
             "properties": {
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "author_id": {
                     "type": "string"
@@ -51777,7 +51919,7 @@
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "icon": {
                     "type": "string"
@@ -51817,7 +51959,7 @@
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "checked": {
                     "type": "boolean"
@@ -51945,7 +52087,7 @@
             "type": "object",
             "properties": {
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "date_field_slug": {
                     "type": "string"
@@ -52256,7 +52398,7 @@
                     }
                 },
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "auto_filters": {
                     "type": "array",
@@ -52546,7 +52688,7 @@
             "type": "object",
             "properties": {
                 "addational_table": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "app_permissions": {
                     "type": "array",
@@ -52576,7 +52718,7 @@
                     "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.Role"
                 },
                 "user_data": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "user_found": {
                     "type": "boolean"
@@ -52744,7 +52886,7 @@
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "calendar_from_slug": {
                     "type": "string"
@@ -53198,7 +53340,7 @@
             "type": "object",
             "properties": {
                 "body": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "commit_id": {
                     "type": "string"
@@ -53385,7 +53527,7 @@
                     "type": "string"
                 },
                 "request": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "resource_id": {
                     "type": "string"
@@ -53402,7 +53544,7 @@
             "type": "object",
             "properties": {
                 "body": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "commit_id": {
                     "type": "string"
@@ -53518,7 +53660,7 @@
             "type": "object",
             "properties": {
                 "body": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "commit_id": {
                     "type": "string"
@@ -53763,7 +53905,7 @@
                 "condition_action": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/structpb.Struct"
+                        "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                     }
                 },
                 "connect_info": {
@@ -53782,7 +53924,7 @@
                     "type": "string"
                 },
                 "request_info": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "slug": {
                     "type": "string"
@@ -53799,7 +53941,7 @@
             "type": "object",
             "properties": {
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "category_id": {
                     "type": "string"
@@ -53856,7 +53998,7 @@
                 "condition_action": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/structpb.Struct"
+                        "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                     }
                 },
                 "connect_info": {
@@ -53881,7 +54023,7 @@
                     "type": "string"
                 },
                 "request_info": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "slug": {
                     "type": "string"
@@ -53893,7 +54035,7 @@
                     "type": "string"
                 },
                 "ui_component": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 }
             }
         },
@@ -53978,7 +54120,7 @@
             "type": "object",
             "properties": {
                 "response": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 }
             }
         },
@@ -54064,7 +54206,7 @@
                     "type": "string"
                 },
                 "json": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "project_id": {
                     "type": "string"
@@ -54361,7 +54503,7 @@
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "role": {
                     "type": "string"
@@ -54409,7 +54551,7 @@
                     "type": "string"
                 },
                 "json": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "project_id": {
                     "type": "string"
@@ -54561,7 +54703,7 @@
                     "type": "string"
                 },
                 "json": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "project_id": {
                     "type": "string"
@@ -54979,7 +55121,7 @@
             "type": "object",
             "properties": {
                 "Routes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "environment_id": {
                     "type": "string"
@@ -55222,7 +55364,7 @@
                     "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_web_page_service.CommitInfo"
                 },
                 "components": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "environment_id": {
                     "type": "string"

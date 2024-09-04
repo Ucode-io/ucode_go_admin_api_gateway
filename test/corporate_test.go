@@ -1,7 +1,6 @@
 package test
 
 import (
-	"log"
 	"testing"
 	"ucode/ucode_go_api_gateway/config"
 
@@ -15,14 +14,10 @@ func TestMain(m *testing.M) {
 
 	// Set up a connection to the server
 
-	connCorporateService, err := grpc.Dial(
+	connCorporateService, _ := grpc.Dial(
 		cfg.CorporateServiceHost+cfg.CorporateGRPCPort,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
-
-	if err != nil {
-		log.Fatalf("did not connect to server %s", err)
-	}
 
 	defer connCorporateService.Close()
 

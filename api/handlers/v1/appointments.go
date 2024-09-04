@@ -2,6 +2,7 @@ package v1
 
 import (
 	"context"
+	_ "ucode/ucode_go_api_gateway/api/models"
 	ps "ucode/ucode_go_api_gateway/genproto/pos_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 

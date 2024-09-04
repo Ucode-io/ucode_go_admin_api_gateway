@@ -557,13 +557,13 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 				statusHttp.CustomMessage = stat.Message()
 			}
 			logReq.Response = err.Error()
-			go h.versionHistory(c, logReq)
+			go h.versionHistoryGo(c, logReq)
 			h.handleResponse(c, statusHttp, err.Error())
 			return
 		}
 
 		logReq.Response = resp
-		go h.versionHistory(c, logReq)
+		go h.versionHistoryGo(c, logReq)
 
 		// if err == nil {
 		// 	if resp.IsCached {
