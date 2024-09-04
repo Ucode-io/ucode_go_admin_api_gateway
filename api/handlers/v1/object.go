@@ -1245,7 +1245,6 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 				},
 			)
 
-			fmt.Println("RESPONSE", resp.IsCached)
 			if err == nil {
 				if resp.IsCached {
 					jsonData, _ := resp.GetData().MarshalJSON()
