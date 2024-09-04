@@ -2,6 +2,8 @@ package v2
 
 import (
 	"context"
+	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
@@ -10,18 +12,13 @@ import (
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
-
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
-	"encoding/base64"
-	"encoding/json"
-
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/spf13/cast"
-
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/structpb"
 )
@@ -2187,4 +2184,126 @@ func (h *HandlerV2) UpdateRowOrder(c *gin.Context) {
 			return
 		}
 	}
+}
+
+// UpsertManyItems godoc
+// @Security ApiKeyAuth
+// @ID upsert_many_items
+// @Router /v2/items/{collection}/upsert-many [POST]
+// @Summary Upsert Many items
+// @Description Upsert Many items
+// @Tags Items
+// @Accept json
+// @Produce json
+// @Param collection path string true "collection"
+// @Param object body models.CommonMessage true "UpsertManyItemsRequestBody"
+// @Success 201 {object} status_http.Response{data=models.CommonMessage} "Object data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *HandlerV2) UpsertMany(c *gin.Context) {
+	var (
+		objectRequest models.CommonMessage
+		statusHttp    = status_http.GrpcStatusToHTTP["NoContent"]
+		actionErr     error
+		functionName  string
+	)
+
+	if err := c.ShouldBindJSON(&objectRequest); err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err := errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	userId, _ := c.Get("user_id")
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		resource.GetProjectId(),
+		resource.NodeType,
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
+	var (
+		logReq = &models.CreateVersionHistoryRequest{
+			Services:     services,
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: c.Request.URL.String(),
+			ActionType:   "UPDATE MANY ITEM",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo:  cast.ToString(userId),
+			Request:   &structData,
+			TableSlug: c.Param("collection"),
+		}
+	)
+
+	var resp *obs.CommonMessage
+
+	defer func() {
+		if err != nil {
+			logReq.Response = err.Error()
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+		} else if actionErr != nil {
+			logReq.Response = actionErr.Error() + " in " + functionName
+			h.handleResponse(c, status_http.InvalidArgument, actionErr.Error()+" in "+functionName)
+		} else {
+			logReq.Response = resp
+			h.handleResponse(c, status_http.NoContent, resp)
+		}
+		go h.versionHistory(c, logReq)
+	}()
+
+	switch resource.ResourceType {
+	case pb.ResourceType_POSTGRESQL:
+		_, err = services.GoObjectBuilderService().Items().UpsertMany(
+			context.Background(),
+			&nb.CommonMessage{
+				TableSlug: c.Param("collection"),
+				Data:      structData,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+
+		if err != nil {
+			return
+		}
+	}
+
+	statusHttp.CustomMessage = resp.GetCustomMessage()
 }
