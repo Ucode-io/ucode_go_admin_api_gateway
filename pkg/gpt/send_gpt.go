@@ -29,7 +29,6 @@ func SendReqToGPT(req []models.Message) ([]models.ToolCall, error) {
 
 	reqBody, err := http.NewRequest("POST", "https://api.openai.com/v1/chat/completions", bytes.NewBuffer(jsonData))
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 
@@ -531,7 +530,6 @@ func GetOfsCode(req models.Message) (string, error) {
 
 	reqBody, err := http.NewRequest("POST", "https://api.openai.com/v1/chat/completions", bytes.NewBuffer(jsonData))
 	if err != nil {
-		fmt.Println(err)
 		return "", err
 	}
 
@@ -549,8 +547,6 @@ func GetOfsCode(req models.Message) (string, error) {
 	if err != nil {
 		return "", err
 	}
-
-	fmt.Println(string(body))
 
 	var response models.OpenAIResponse
 	err = json.Unmarshal(body, &response)

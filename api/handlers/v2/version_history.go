@@ -3,7 +3,6 @@ package v2
 import (
 	"context"
 	"errors"
-	"fmt"
 	"strings"
 	"time"
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -144,9 +143,6 @@ func (h *HandlerV2) GetAllVersionHistory(c *gin.Context) {
 		}
 
 		fromDate = formatFromDate.Format("2006-01-02")
-
-		fmt.Println(c.Query("from_date"))
-		fmt.Println(fromDate)
 	}
 
 	if c.Query("to_date") != "" {

@@ -104,8 +104,6 @@ func CreateFunction(req *models.CreateFunctionAI) ([]models.CreateVersionHistory
 	code = strings.ReplaceAll(code, "go", "")
 	code = strings.ReplaceAll(code, "lang", "")
 
-	fmt.Println(code)
-
 	if err := os.Chdir(curDir + "/template"); err != nil {
 		return respLogReq, err
 	}
@@ -210,10 +208,6 @@ func CreateFunction(req *models.CreateFunctionAI) ([]models.CreateVersionHistory
 		return respLogReq, err
 	}
 
-	fmt.Println("CUSTOME EVENT >>>>>>>>>>")
-	fmt.Println(req.ActionType)
-	fmt.Println(req.Method)
-
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 
@@ -284,8 +278,6 @@ func CreateOfs(name, token string) (string, string, error) {
 			"type": "FUNCTION",
 			"path": "%s"
 		}`, name, name, name))
-
-	fmt.Println(string(body))
 
 	client := &http.Client{
 		Timeout: time.Duration(10 * time.Second),

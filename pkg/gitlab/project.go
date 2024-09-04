@@ -33,9 +33,6 @@ func CreateProjectFork(projectName string, data IntegrationData) (response model
 		Visibility:           "private",
 	})
 
-	fmt.Println("HERE IN CreateProjectFork>>>>")
-	fmt.Println(resp)
-
 	if resp.Code >= 400 {
 		return models.GitlabIntegrationResponse{}, errors.New(status_http.BadRequest.Description)
 	} else if resp.Code >= 500 {

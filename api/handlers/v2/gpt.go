@@ -102,18 +102,13 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 
 		err = json.Unmarshal([]byte(functionCall.Arguments), &arguments)
 		if err != nil {
-			fmt.Println("Error parsing function arguments:", err)
 			continue
 		}
-
-		fmt.Println(functionName)
 
 		msg := ""
 
 		switch functionName {
 		case "create_menu":
-
-			fmt.Println("CREATE MENU >>>>>")
 
 			_, err = gpt.CreateMenu(&models.CreateMenuAI{
 				Label:    cast.ToString(arguments["name"]),

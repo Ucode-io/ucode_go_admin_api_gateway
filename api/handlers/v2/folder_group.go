@@ -73,7 +73,7 @@ func (h *HandlerV2) CreateFolderGroup(c *gin.Context) {
 				Comment:   folderGroup.Comment,
 				Code:      folderGroup.Code,
 				ProjectId: resource.ResourceEnvironmentId,
-				// ParentId:  folderGroup.ParentId,
+				ParentId:  folderGroup.ParentId,
 			},
 		)
 		if err != nil {
@@ -160,6 +160,8 @@ func (h *HandlerV2) GetAllFolderGroups(c *gin.Context) {
 		return
 	}
 
+	parentId := c.DefaultQuery("parent_id", "")
+
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -207,6 +209,7 @@ func (h *HandlerV2) GetAllFolderGroups(c *gin.Context) {
 				Offset:    int32(offset),
 				ProjectId: resource.ResourceEnvironmentId,
 				TableId:   c.DefaultQuery("table_id", ""),
+				ParentId:  parentId,
 			},
 		)
 		if err != nil {

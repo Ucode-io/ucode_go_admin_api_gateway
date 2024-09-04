@@ -664,6 +664,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 	v2Version.Use(h.V2.AuthMiddleware())
 	{
 
+		v2Version.POST("/csv/:table_slug/download", h.V2.GetListInCSV)
+
 		v2Version.POST("/send-to-gpt", h.V2.SendToGpt)
 
 		// collections group
@@ -709,6 +711,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 			v2Items.GET("/:collection/:id", h.V2.GetSingleItem)
 			v2Items.POST("/:collection", h.V2.CreateItem)
 			v2Items.POST("/:collection/multiple-insert", h.V2.CreateItems)
+			v2Items.POST("/:collection/upsert-many", h.V2.UpsertMany)
 			v2Items.PUT("/:collection", h.V2.UpdateItem)
 			v2Items.PUT("/:collection/:id", h.V2.UpdateItem)
 			v2Items.PATCH("/:collection", h.V2.MultipleUpdateItems)
@@ -764,6 +767,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 			v2Fields.PUT("/:collection", h.V2.UpdateField)
 			v2Fields.PUT("/:collection/update-search", h.V2.UpdateSearch)
 			v2Fields.DELETE("/:collection/:id", h.V2.DeleteField)
+			v2Fields.GET("/:collection/with-relations", h.V2.FieldsWithPermissions)
 		}
 
 		// relations

@@ -174,6 +174,27 @@ definitions:
     type: object
   emptypb.Empty:
     type: object
+  github_com_golang_protobuf_ptypes_struct.Struct:
+    properties:
+      fields:
+        additionalProperties:
+          $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Value'
+        description: Unordered map of dynamically typed values.
+        type: object
+    type: object
+  google_golang_org_protobuf_types_known_structpb.Struct:
+    properties:
+      fields:
+        additionalProperties:
+          $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Value'
+        description: Unordered map of dynamically typed values.
+        type: object
+    type: object
+  google_golang_org_protobuf_types_known_structpb.Value:
+    properties:
+      kind:
+        description: "The kind of value.\n\nTypes that are assignable to Kind:\n\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue"
+    type: object
   postgres_object_builder_service.GetAllTablesResponse:
     properties:
       count:
@@ -217,18 +238,29 @@ definitions:
       subtitle_field_slug:
         type: string
     type: object
-  structpb.Struct:
+  ucode_ucode_go_api_gateway_api_handlers_v1.BucketRequest:
     properties:
-      fields:
-        additionalProperties:
-          $ref: '#/definitions/structpb.Value'
-        description: Unordered map of dynamically typed values.
-        type: object
+      bucket_name:
+        type: string
     type: object
-  structpb.Value:
+  ucode_ucode_go_api_gateway_api_handlers_v1.BucketResponse:
     properties:
-      kind:
-        description: "The kind of value.\n\nTypes that are assignable to Kind:\n\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue"
+      size:
+        type: number
+    type: object
+  ucode_ucode_go_api_gateway_api_handlers_v1.Path:
+    properties:
+      filename:
+        type: string
+      hash:
+        type: string
+    type: object
+  ucode_ucode_go_api_gateway_api_handlers_v2.Path:
+    properties:
+      filename:
+        type: string
+      hash:
+        type: string
     type: object
   ucode_ucode_go_api_gateway_api_models.AppReportSetting:
     properties:
@@ -369,7 +401,7 @@ definitions:
       project_id:
         type: string
       routes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
       sub_domain:
         type: string
     type: object
@@ -649,7 +681,7 @@ definitions:
       app_id:
         type: string
       components:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
       folder_id:
         type: string
       icon:
@@ -1263,7 +1295,7 @@ definitions:
       project_id:
         type: string
       routes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
       sub_domain:
         type: string
     type: object
@@ -1354,7 +1386,7 @@ definitions:
       app_id:
         type: string
       components:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
       folder_id:
         type: string
       icon:
@@ -1457,7 +1489,7 @@ definitions:
       additional_url:
         type: string
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       authentification:
         type: boolean
       category_id:
@@ -1528,7 +1560,7 @@ definitions:
       additional_url:
         type: string
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       authentification:
         type: boolean
       category_id:
@@ -1874,7 +1906,7 @@ definitions:
   ucode_ucode_go_api_gateway_genproto_auth_service.Table:
     properties:
       data:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       icon:
         type: string
       label:
@@ -1948,7 +1980,7 @@ definitions:
   ucode_ucode_go_api_gateway_genproto_auth_service.V2LoginResponse:
     properties:
       addational_table:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       app_permissions:
         items:
           $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.RecordPermission'
@@ -1984,7 +2016,7 @@ definitions:
       user:
         $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.User'
       user_data:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       user_found:
         type: boolean
       user_id:
@@ -2313,7 +2345,7 @@ definitions:
       access_type:
         type: string
       data:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       description:
         type: string
       display_color:
@@ -2330,7 +2362,7 @@ definitions:
       access_type:
         type: string
       data:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       description:
         type: string
       display_color:
@@ -2797,7 +2829,7 @@ definitions:
       count:
         type: integer
       data:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
     type: object
   ucode_ucode_go_api_gateway_genproto_company_service.Settings:
     properties:
@@ -2945,7 +2977,7 @@ definitions:
       currency:
         type: string
       data:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       deleted_at:
         type: string
       id:
@@ -2980,7 +3012,7 @@ definitions:
       currency:
         type: string
       data:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       deleted_at:
         type: string
       id:
@@ -3005,7 +3037,7 @@ definitions:
       action_type:
         type: string
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       commit_guid:
         type: string
       commit_id:
@@ -3089,7 +3121,7 @@ definitions:
       custom_message:
         type: string
       data:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       is_cached:
         type: boolean
       project_id:
@@ -3407,7 +3439,7 @@ definitions:
       custom_message:
         type: string
       data:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       is_cached:
         type: boolean
       project_id:
@@ -3471,7 +3503,7 @@ definitions:
       action_type:
         type: string
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       commit_guid:
         type: string
       commit_id:
@@ -3532,7 +3564,7 @@ definitions:
   ucode_ucode_go_api_gateway_genproto_object_builder_service.CreateFieldRequest:
     properties:
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       autofill_field:
         type: string
       autofill_table:
@@ -3649,7 +3681,7 @@ definitions:
           $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.ActionRelation'
         type: array
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       auto_filters:
         items:
           $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.AutoFilter'
@@ -3794,7 +3826,7 @@ definitions:
       app_id:
         type: string
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       calendar_from_slug:
         type: string
       calendar_to_slug:
@@ -4001,7 +4033,7 @@ definitions:
   ucode_ucode_go_api_gateway_genproto_object_builder_service.Field:
     properties:
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       autofill_field:
         type: string
       autofill_table:
@@ -4058,7 +4090,7 @@ definitions:
   ucode_ucode_go_api_gateway_genproto_object_builder_service.FieldForSection:
     properties:
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       column:
         type: integer
       field_name:
@@ -4077,7 +4109,7 @@ definitions:
   ucode_ucode_go_api_gateway_genproto_object_builder_service.FieldResponse:
     properties:
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       column:
         type: integer
       default:
@@ -4399,7 +4431,7 @@ definitions:
   ucode_ucode_go_api_gateway_genproto_object_builder_service.LayoutRequest:
     properties:
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       env_id:
         type: string
       icon:
@@ -4436,7 +4468,7 @@ definitions:
   ucode_ucode_go_api_gateway_genproto_object_builder_service.LayoutResponse:
     properties:
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       icon:
         type: string
       id:
@@ -4508,9 +4540,9 @@ definitions:
   ucode_ucode_go_api_gateway_genproto_object_builder_service.Menu:
     properties:
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       data:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       env_id:
         type: string
       icon:
@@ -4545,9 +4577,9 @@ definitions:
   ucode_ucode_go_api_gateway_genproto_object_builder_service.MenuForGetAll:
     properties:
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       data:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       icon:
         type: string
       id:
@@ -4580,9 +4612,9 @@ definitions:
   ucode_ucode_go_api_gateway_genproto_object_builder_service.MenuRequest:
     properties:
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       data:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       icon:
         type: string
       id:
@@ -4842,7 +4874,7 @@ definitions:
           $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.ActionRelationForSection'
         type: array
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       columns:
         items:
           type: string
@@ -4870,7 +4902,7 @@ definitions:
       multiple_insert_field:
         type: string
       permission:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       quick_filters:
         items:
           $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.QuickFilterForSection'
@@ -4946,7 +4978,7 @@ definitions:
   ucode_ucode_go_api_gateway_genproto_object_builder_service.Section:
     properties:
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       column:
         type: string
       fields:
@@ -4967,7 +4999,7 @@ definitions:
   ucode_ucode_go_api_gateway_genproto_object_builder_service.SectionResponse:
     properties:
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       column:
         type: string
       fields:
@@ -4995,7 +5027,7 @@ definitions:
   ucode_ucode_go_api_gateway_genproto_object_builder_service.SummaryInSection:
     properties:
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       field_name:
         type: string
       formula_name:
@@ -5004,7 +5036,7 @@ definitions:
   ucode_ucode_go_api_gateway_genproto_object_builder_service.TabRequest:
     properties:
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       icon:
         type: string
       id:
@@ -5027,7 +5059,7 @@ definitions:
   ucode_ucode_go_api_gateway_genproto_object_builder_service.TabResponse:
     properties:
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       icon:
         type: string
       id:
@@ -5052,7 +5084,7 @@ definitions:
   ucode_ucode_go_api_gateway_genproto_object_builder_service.Table:
     properties:
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       author_id:
         type: string
       commit_info:
@@ -5097,7 +5129,7 @@ definitions:
   ucode_ucode_go_api_gateway_genproto_object_builder_service.TableClientType:
     properties:
       data:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       icon:
         type: string
       label:
@@ -5123,7 +5155,7 @@ definitions:
       aggregate_formula:
         type: string
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       checked:
         type: boolean
       field_id:
@@ -5207,7 +5239,7 @@ definitions:
   ucode_ucode_go_api_gateway_genproto_object_builder_service.TableSetting:
     properties:
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       date_field_slug:
         type: string
       fields_length:
@@ -5410,7 +5442,7 @@ definitions:
           $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.ActionRelation'
         type: array
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       auto_filters:
         items:
           $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.AutoFilter'
@@ -5601,7 +5633,7 @@ definitions:
   ucode_ucode_go_api_gateway_genproto_object_builder_service.V2LoginResponse:
     properties:
       addational_table:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       app_permissions:
         items:
           $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.RecordPermission'
@@ -5621,7 +5653,7 @@ definitions:
       role:
         $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.Role'
       user_data:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       user_found:
         type: boolean
       user_id:
@@ -5731,7 +5763,7 @@ definitions:
       app_id:
         type: string
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       calendar_from_slug:
         type: string
       calendar_to_slug:
@@ -6027,7 +6059,7 @@ definitions:
   ucode_ucode_go_api_gateway_genproto_query_service.CreateQueryReq:
     properties:
       body:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       commit_id:
         type: string
       commit_info:
@@ -6149,7 +6181,7 @@ definitions:
       query_id:
         type: string
       request:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       resource_id:
         type: string
       response:
@@ -6160,7 +6192,7 @@ definitions:
   ucode_ucode_go_api_gateway_genproto_query_service.Query:
     properties:
       body:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       commit_id:
         type: string
       commit_info:
@@ -6236,7 +6268,7 @@ definitions:
   ucode_ucode_go_api_gateway_genproto_query_service.UpdateQueryReq:
     properties:
       body:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       commit_id:
         type: string
       commit_info:
@@ -6396,7 +6428,7 @@ definitions:
         type: string
       condition_action:
         items:
-          $ref: '#/definitions/structpb.Struct'
+          $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
         type: array
       connect_info:
         $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_scenario_service.ConnectInfo'
@@ -6409,7 +6441,7 @@ definitions:
       parent_id:
         type: string
       request_info:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       slug:
         type: string
       title:
@@ -6420,7 +6452,7 @@ definitions:
   ucode_ucode_go_api_gateway_genproto_scenario_service.DAG:
     properties:
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       category_id:
         type: string
       commit_id:
@@ -6457,7 +6489,7 @@ definitions:
         type: string
       condition_action:
         items:
-          $ref: '#/definitions/structpb.Struct'
+          $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
         type: array
       connect_info:
         $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_scenario_service.ConnectInfo'
@@ -6474,7 +6506,7 @@ definitions:
       parent_id:
         type: string
       request_info:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       slug:
         type: string
       title:
@@ -6482,7 +6514,7 @@ definitions:
       type:
         type: string
       ui_component:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
     type: object
   ucode_ucode_go_api_gateway_genproto_scenario_service.GetDAGRequest:
     properties:
@@ -6537,7 +6569,7 @@ definitions:
   ucode_ucode_go_api_gateway_genproto_scenario_service.RunScenarioResponse:
     properties:
       response:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
     type: object
   ucode_ucode_go_api_gateway_genproto_scenario_service.VersionInfo:
     properties:
@@ -6593,7 +6625,7 @@ definitions:
       folder_id:
         type: string
       json:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       project_id:
         type: string
       resource_id:
@@ -6786,7 +6818,7 @@ definitions:
   ucode_ucode_go_api_gateway_genproto_template_service.GetObjectTokenRes:
     properties:
       data:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       role:
         type: string
     type: object
@@ -6817,7 +6849,7 @@ definitions:
       id:
         type: string
       json:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       project_id:
         type: string
       title:
@@ -6916,7 +6948,7 @@ definitions:
       id:
         type: string
       json:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       project_id:
         type: string
       resource_id:
@@ -7190,7 +7222,7 @@ definitions:
   ucode_ucode_go_api_gateway_genproto_web_page_service.App:
     properties:
       Routes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       environment_id:
         type: string
       id:
@@ -7348,7 +7380,7 @@ definitions:
       commit_info:
         $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_web_page_service.CommitInfo'
       components:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       environment_id:
         type: string
       folder_id:
@@ -12525,8 +12557,7 @@ paths:
       description: Get environment list
       operationId: get_environment_list
       parameters:
-      - collectionFormat: csv
-        in: query
+      - in: query
         items:
           type: string
         name: ids
@@ -14626,8 +14657,7 @@ paths:
       description: Get global project environment list
       operationId: get_global_project_environment_list
       parameters:
-      - collectionFormat: csv
-        in: query
+      - in: query
         items:
           type: string
         name: ids
@@ -26495,7 +26525,7 @@ paths:
             - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/api_handlers_v2.Path'
+                  $ref: '#/definitions/ucode_ucode_go_api_gateway_api_handlers_v2.Path'
               type: object
         "400":
           description: Bad Request
@@ -28159,6 +28189,59 @@ paths:
       summary: Create items
       tags:
       - Items
+  /v2/items/{collection}/upsert-many:
+    post:
+      consumes:
+      - application/json
+      description: Upsert Many items
+      operationId: upsert_many_items
+      parameters:
+      - description: collection
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: UpsertManyItemsRequestBody
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/ucode_ucode_go_api_gateway_api_models.CommonMessage'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Object data
+          schema:
+            allOf:
+            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/ucode_ucode_go_api_gateway_api_models.CommonMessage'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Upsert Many items
+      tags:
+      - Items
   /v2/items/many-to-many:
     delete:
       consumes:
@@ -29453,7 +29536,7 @@ paths:
             - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/api_handlers_v2.Path'
+                  $ref: '#/definitions/ucode_ucode_go_api_gateway_api_handlers_v2.Path'
               type: object
         "400":
           description: Bad Request
@@ -29950,8 +30033,7 @@ paths:
       - in: query
         name: user_info
         type: string
-      - collectionFormat: csv
-        in: query
+      - in: query
         items:
           type: string
         name: version_ids
