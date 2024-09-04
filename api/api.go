@@ -711,6 +711,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 			v2Items.GET("/:collection/:id", h.V2.GetSingleItem)
 			v2Items.POST("/:collection", h.V2.CreateItem)
 			v2Items.POST("/:collection/multiple-insert", h.V2.CreateItems)
+			v2Items.POST("/:collection/upsert-many", h.V2.UpsertMany)
 			v2Items.PUT("/:collection", h.V2.UpdateItem)
 			v2Items.PUT("/:collection/:id", h.V2.UpdateItem)
 			v2Items.PATCH("/:collection", h.V2.MultipleUpdateItems)
