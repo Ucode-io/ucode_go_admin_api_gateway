@@ -8,6 +8,7 @@ import (
 	"strings"
 	"sync"
 	"ucode/ucode_go_api_gateway/api/models"
+	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	fc "ucode/ucode_go_api_gateway/genproto/new_function_service"
@@ -19,8 +20,6 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
 	"ucode/ucode_go_api_gateway/services"
-
-	"ucode/ucode_go_api_gateway/api/status_http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang/protobuf/ptypes/empty"
@@ -197,7 +196,7 @@ func (h *HandlerV1) CreateNewFunction(c *gin.Context) {
 			logReq.Response = response
 			h.handleResponse(c, status_http.Created, response)
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistoryGo(c, logReq)
 	}
 }
 
