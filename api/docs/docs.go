@@ -5975,6 +5975,180 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/company/airbyte": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "GetList Airbyte",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Company Resource"
+                ],
+                "summary": "GetList Airbyte",
+                "operationId": "get_list_airbyte",
+                "parameters": [
+                    {
+                        "description": "GetListAirbyteRequest",
+                        "name": "Airbyte",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.GetListAirbyteRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Airbyte data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.GetListAirbyteResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/company/airbyte/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "GetById Airbyte",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Company Resource"
+                ],
+                "summary": "GetById Airbyte",
+                "operationId": "get_by_id_airbyte",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Airbyte data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.Airbyte"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v1/company/project/configure-resource": {
             "post": {
                 "security": [
@@ -16378,7 +16552,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api_handlers_v1.BucketRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_handlers_v1.BucketRequest"
                         }
                     }
                 ],
@@ -16394,7 +16568,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/api_handlers_v1.BucketResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_handlers_v1.BucketResponse"
                                         }
                                     }
                                 }
@@ -35316,7 +35490,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/api_handlers_v2.Path"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_handlers_v2.Path"
                                         }
                                     }
                                 }
@@ -35479,7 +35653,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/api_handlers_v2.Path"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_handlers_v2.Path"
                                         }
                                     }
                                 }
@@ -47096,6 +47270,9 @@ const docTemplate = `{
                 "expires_at": {
                     "type": "string"
                 },
+                "hash_type": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -47432,6 +47609,56 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.VariableResource"
                     }
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.Airbyte": {
+            "type": "object",
+            "properties": {
+                "connection_id": {
+                    "type": "string"
+                },
+                "connection_name": {
+                    "type": "string"
+                },
+                "database": {
+                    "type": "string"
+                },
+                "destination_id": {
+                    "type": "string"
+                },
+                "environment_id": {
+                    "type": "string"
+                },
+                "host": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "port": {
+                    "type": "integer"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "resource_id": {
+                    "type": "string"
+                },
+                "schedule_time": {
+                    "type": "integer"
+                },
+                "source_id": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                },
+                "workspace_id": {
+                    "type": "string"
                 }
             }
         },
@@ -47785,6 +48012,37 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.EnvironmentWithResources"
                     }
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.GetListAirbyteRequest": {
+            "type": "object",
+            "properties": {
+                "environment_id": {
+                    "type": "string"
+                },
+                "limit": {
+                    "type": "integer"
+                },
+                "offset": {
+                    "type": "integer"
+                },
+                "project_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.GetListAirbyteResponse": {
+            "type": "object",
+            "properties": {
+                "airbytes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.Airbyte"
+                    }
+                },
+                "count": {
+                    "type": "integer"
                 }
             }
         },
