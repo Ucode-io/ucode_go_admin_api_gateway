@@ -428,6 +428,10 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 		v1Admin.GET("/company/project/resource-default", h.V1.GetServiceResources)
 		v1Admin.PUT("/company/project/resource-default", h.V1.SetDefaultResource)
 
+		// airbyte
+		v1Admin.GET("/company/airbyte/:id", h.V1.GetByIdAirbyte)
+		v1Admin.POST("/company/airbyte", h.V1.GetListAirbyte)
+
 		// variable
 		v1Admin.POST("/company/project/resource-variable", h.V1.AddDataToVariableResource)
 		v1Admin.PUT("/company/project/resource-variable", h.V1.UpdateVariableResource)

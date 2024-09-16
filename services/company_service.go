@@ -18,6 +18,7 @@ type CompanyServiceI interface {
 	Redirect() company_service.RedirectUrlServiceClient
 	CompanyPing() company_service.CompanyPingServiceClient
 	IntegrationResource() company_service.IntegrationResourceServiceClient
+	AirByte() company_service.AirbyteServiceClient
 }
 
 type companyServiceClient struct {
@@ -29,6 +30,7 @@ type companyServiceClient struct {
 	redirectService            company_service.RedirectUrlServiceClient
 	companyPingService         company_service.CompanyPingServiceClient
 	integrationResourceService company_service.IntegrationResourceServiceClient
+	airbyteService             company_service.AirbyteServiceClient
 }
 
 func NewCompanyServiceClient(ctx context.Context, cfg config.Config) (CompanyServiceI, error) {
@@ -51,6 +53,7 @@ func NewCompanyServiceClient(ctx context.Context, cfg config.Config) (CompanySer
 		redirectService:            company_service.NewRedirectUrlServiceClient(connCompanyService),
 		companyPingService:         company_service.NewCompanyPingServiceClient(connCompanyService),
 		integrationResourceService: company_service.NewIntegrationResourceServiceClient(connCompanyService),
+		airbyteService:             company_service.NewAirbyteServiceClient(connCompanyService),
 	}, nil
 }
 
@@ -84,4 +87,8 @@ func (g *companyServiceClient) CompanyPing() company_service.CompanyPingServiceC
 
 func (g *companyServiceClient) IntegrationResource() company_service.IntegrationResourceServiceClient {
 	return g.integrationResourceService
+}
+
+func (g *companyServiceClient) AirByte() company_service.AirbyteServiceClient {
+	return g.airbyteService
 }

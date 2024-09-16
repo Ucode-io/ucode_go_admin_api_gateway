@@ -3,10 +3,9 @@ package v1
 import (
 	"context"
 	"errors"
+	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
-
-	"ucode/ucode_go_api_gateway/api/status_http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -443,4 +442,61 @@ func (h *HandlerV1) SetDefaultResource(c *gin.Context) {
 	}
 
 	h.handleResponse(c, status_http.OK, res)
+}
+
+// GetByIdAirbyte godoc
+// @Security ApiKeyAuth
+// @ID get_by_id_airbyte
+// @Router /v1/company/airbyte/{id} [GET]
+// @Summary GetById Airbyte
+// @Description GetById Airbyte
+// @Tags Company Resource
+// @Accept json
+// @Produce json
+// @Param id path string true "id"
+// @Success 201 {object} status_http.Response{data=company_service.Airbyte} "Airbyte data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *HandlerV1) GetByIdAirbyte(c *gin.Context) {
+	resp, err := h.companyServices.AirByte().GetById(
+		c.Request.Context(),
+		&company_service.GetAirbyteByIdRequest{Id: c.Param("id")},
+	)
+
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.OK, resp)
+}
+
+// GetListAirbyte godoc
+// @Security ApiKeyAuth
+// @ID get_list_airbyte
+// @Router /v1/company/airbyte [POST]
+// @Summary GetList Airbyte
+// @Description GetList Airbyte
+// @Tags Company Resource
+// @Accept json
+// @Produce json
+// @Param Airbyte body company_service.GetListAirbyteRequest true "GetListAirbyteRequest"
+// @Success 201 {object} status_http.Response{data=company_service.GetListAirbyteResponse} "Airbyte data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *HandlerV1) GetListAirbyte(c *gin.Context) {
+	var airbyte company_service.GetListAirbyteRequest
+
+	if err := c.ShouldBindJSON(&airbyte); err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	resp, err := h.companyServices.AirByte().GetList(c.Request.Context(), &airbyte)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.OK, resp)
 }
