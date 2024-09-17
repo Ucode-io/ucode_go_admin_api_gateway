@@ -95,7 +95,7 @@ func (h *HandlerV2) getLimitParam(c *gin.Context) (limit int, err error) {
 	return strconv.Atoi(limitStr)
 }
 
-func (h *HandlerV2) versionHistory(c *gin.Context, req *models.CreateVersionHistoryRequest) error {
+func (h *HandlerV2) versionHistory(req *models.CreateVersionHistoryRequest) error {
 	var (
 		current  = map[string]interface{}{"data": req.Current}
 		previous = map[string]interface{}{"data": req.Previous}
@@ -134,7 +134,7 @@ func (h *HandlerV2) versionHistory(c *gin.Context, req *models.CreateVersionHist
 	}
 
 	_, err := req.Services.GetBuilderServiceByType(req.NodeType).VersionHistory().Create(
-		c,
+		context.Background(),
 		&object_builder_service.CreateVersionHistoryRequest{
 			Id:                uuid.NewString(),
 			ProjectId:         req.ProjectId,

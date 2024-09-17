@@ -8,6 +8,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/models"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	fc "ucode/ucode_go_api_gateway/genproto/new_function_service"
+
 	// "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/code_server"
@@ -251,7 +252,7 @@ func (h *HandlerV1) CreateMicroFrontEnd(c *gin.Context) {
 			logReq.Response = response
 			h.handleResponse(c, status_http.OK, response)
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 	case pb.ResourceType_POSTGRESQL:
 
 		newCreateFunc := &nb.CreateFunctionRequest{}
@@ -274,7 +275,7 @@ func (h *HandlerV1) CreateMicroFrontEnd(c *gin.Context) {
 			logReq.Response = response
 			h.handleResponse(c, status_http.OK, response)
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 	}
 
 }
@@ -549,7 +550,7 @@ func (h *HandlerV1) UpdateMicroFrontEnd(c *gin.Context) {
 		} else {
 			h.handleResponse(c, status_http.OK, resp)
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 	}()
 
 	resp, err = services.FunctionService().FunctionService().Update(
@@ -675,7 +676,7 @@ func (h *HandlerV1) DeleteMicroFrontEnd(c *gin.Context) {
 		} else {
 			h.handleResponse(c, status_http.OK, deleteResp)
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 	}()
 
 	deleteResp, err = services.FunctionService().FunctionService().Delete(

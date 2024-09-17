@@ -114,7 +114,7 @@ func (h *HandlerV2) CreateDocxTemplate(c *gin.Context) {
 		defer resp.Body.Close()
 
 		if resp.StatusCode != http.StatusOK {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
+			h.handleResponse(c, status_http.GRPCError, "error getting docx")
 			return
 		}
 
@@ -198,7 +198,7 @@ func (h *HandlerV2) CreateDocxTemplate(c *gin.Context) {
 		defer resp.Body.Close()
 
 		if resp.StatusCode != http.StatusOK {
-			h.handleResponse(c, status_http.BadRequest, err.Error())
+			h.handleResponse(c, status_http.BadRequest, "error getting pdf")
 			return
 		}
 
@@ -425,7 +425,7 @@ func (h *HandlerV2) UpdateDocxTemplate(c *gin.Context) {
 		defer resp.Body.Close()
 
 		if resp.StatusCode != http.StatusOK {
-			h.handleResponse(c, status_http.BadRequest, err.Error())
+			h.handleResponse(c, status_http.BadRequest, "error getting docx")
 			return
 		}
 
@@ -510,7 +510,7 @@ func (h *HandlerV2) UpdateDocxTemplate(c *gin.Context) {
 		defer resp.Body.Close()
 
 		if resp.StatusCode != http.StatusOK {
-			h.handleResponse(c, status_http.BadRequest, err.Error())
+			h.handleResponse(c, status_http.BadRequest, "error getting pdf")
 			return
 		}
 
@@ -821,17 +821,14 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 	}
 
 	var (
-		tableIDs   = make([]string, 0)
 		tableSlugs = make([]string, 0)
 	)
 
 	for _, relation := range res.GetRelations() {
 
 		if relation.GetTableTo().GetSlug() != request.TableSlug {
-			tableIDs = append(tableIDs, relation.GetTableTo().GetId())
 			tableSlugs = append(tableSlugs, relation.GetTableTo().GetSlug())
 		} else if relation.GetTableFrom().GetSlug() != request.TableSlug {
-			tableIDs = append(tableIDs, relation.GetTableFrom().GetId())
 			tableSlugs = append(tableSlugs, relation.GetTableFrom().GetSlug())
 		}
 	}
@@ -871,39 +868,6 @@ func (h *HandlerV2) GenerateDocxToPdf(c *gin.Context) {
 	}
 
 	jsM, _ := json.Marshal(mapV2)
-
-	//structData, err = helper.ConvertMapToStruct(map[string]interface{}{fmt.Sprintf("%s_id", request.TableSlug): request.ID})
-	//if err != nil {
-	//	h.handleResponse(c, status_http.InvalidArgument, err.Error())
-	//	return
-	//}
-	//
-	//objectsResp, err := services.GoObjectBuilderService().ObjectBuilder().GetListForDocx(c.Request.Context(), &nb.CommonForDocxMessage{
-	//	TableSlugs: tableSlugs,
-	//	ProjectId:  resource.GetResourceEnvironmentId(),
-	//	TableSlug:  request.TableSlug,
-	//	Data:       structData,
-	//})
-	//if err != nil {
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
-	//
-	//var objResp = map[string]interface{}{
-	//	"data": map[string]interface{}{},
-	//}
-	//
-	//js, _ := json.Marshal(objectsResp)
-	//
-	//if err = json.Unmarshal(js, &objResp); err != nil {
-	//	h.handleResponse(c, status_http.InternalServerError, err.Error())
-	//	return
-	//}
-	//
-	//jsRelations, _ := json.Marshal(objResp)
-	//
-
-	//js, _ = json.Marshal(request.Data)
 
 	req, err := http.NewRequest(http.MethodPost, config.NodeDocxConvertToPdfServiceUrl, nil)
 	if err != nil {

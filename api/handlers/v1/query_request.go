@@ -138,7 +138,7 @@ func (h *HandlerV1) CreateQueryRequest(c *gin.Context) {
 			logReq.Response = &res
 			h.handleResponse(c, status_http.Created, res)
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 	}()
 
 	res, err = services.QueryService().Query().CreateQuery(
@@ -371,7 +371,7 @@ func (h *HandlerV1) UpdateQueryRequest(c *gin.Context) {
 			logReq.Response = res
 			h.handleResponse(c, status_http.OK, res)
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 	}()
 
 	res, err = services.QueryService().Query().UpdateQuery(
@@ -466,7 +466,7 @@ func (h *HandlerV1) DeleteQueryRequest(c *gin.Context) {
 		} else {
 			h.handleResponse(c, status_http.NoContent, res)
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 	}()
 
 	res, err = services.QueryService().Query().DeleteQuery(

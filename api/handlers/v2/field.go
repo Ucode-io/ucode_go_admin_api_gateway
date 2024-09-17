@@ -3,7 +3,6 @@ package v2
 import (
 	"context"
 	"errors"
-	"strings"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
@@ -167,14 +166,14 @@ func (h *HandlerV2) CreateField(c *gin.Context) {
 			if err != nil {
 				logReq.Request = field
 				logReq.Response = err.Error()
-				go h.versionHistory(c, logReq)
+				go h.versionHistory(logReq)
 				h.handleResponse(c, status_http.GRPCError, err.Error())
 				return
 			}
 			logReq.Request = field
 			logReq.Response = resp
 			logReq.Current = resp
-			go h.versionHistory(c, logReq)
+			go h.versionHistory(logReq)
 		}
 
 		h.handleResponse(c, status_http.Created, resp)
@@ -198,7 +197,7 @@ func (h *HandlerV2) CreateField(c *gin.Context) {
 			if err != nil {
 				logReq.Request = field
 				logReq.Response = err.Error()
-				go h.versionHistory(c, logReq)
+				go h.versionHistory(logReq)
 				h.handleResponse(c, status_http.GRPCError, err.Error())
 				return
 			}
@@ -622,7 +621,7 @@ func (h *HandlerV2) UpdateField(c *gin.Context) {
 			logReq.Current = resp
 			h.handleResponse(c, status_http.OK, resp)
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 
 		// _, err := services.GetBuilderServiceByType(resource.NodeType).Field().Update(
 		// 	context.Background(),
@@ -870,7 +869,7 @@ func (h *HandlerV2) DeleteField(c *gin.Context) {
 			logReq.Response = resp
 			h.handleResponse(c, status_http.NoContent, resp)
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 
 		h.handleResponse(c, status_http.NoContent, resp)
 	case pb.ResourceType_POSTGRESQL:
@@ -1014,76 +1013,6 @@ func (h *HandlerV2) GetAllFieldsWithDetails(c *gin.Context) {
 	}
 
 	h.handleResponse(c, status_http.OK, resp)
-}
-
-func SeparateMultilangField(req *obs.GetAllFieldsResponse, langs []string, project_id string, reqField obs.Field) []*obs.CreateFieldRequest {
-	var (
-		multilangFields []*obs.Field
-		response        []*obs.CreateFieldRequest
-		newField        *obs.Field
-		newFieldSlug    []string
-		splitted        []string
-	)
-	for _, field := range req.Fields {
-		if field.EnableMultilanguage {
-			spliteed := strings.Split(field.Slug, "_")
-			newFieldSlug = strings.Split(reqField.Slug, "_")
-			if spliteed[0] == newFieldSlug[0] {
-				newField = field
-				multilangFields = append(multilangFields, field)
-			}
-		}
-	}
-
-	for _, lang := range langs {
-		found := false
-		for _, field := range multilangFields {
-			splitted = strings.Split(field.Slug, "_")
-			if splitted[len(splitted)-1] == lang {
-				found = true
-				break
-			}
-		}
-
-		if !found {
-			newStruct := obs.CreateFieldRequest{
-				Default:             newField.Default,
-				Type:                newField.Type,
-				Index:               newField.Index,
-				Label:               newField.Label,
-				Slug:                newFieldSlug[0] + "_" + lang,
-				TableId:             req.Fields[0].TableId,
-				Attributes:          newField.Attributes,
-				IsVisible:           newField.IsVisible,
-				RelationField:       newField.RelationField,
-				Automatic:           newField.Automatic,
-				ShowLabel:           newField.ShowLabel,
-				Unique:              newField.Unique,
-				ProjectId:           project_id,
-				EnableMultilanguage: true,
-				HideMultilanguage:   false,
-			}
-			response = append(response, &obs.CreateFieldRequest{
-				Default:             newField.Default,
-				Type:                newField.Type,
-				Index:               newField.Index,
-				Label:               newField.Label,
-				Slug:                newStruct.Slug,
-				TableId:             req.Fields[0].TableId,
-				Attributes:          newField.Attributes,
-				IsVisible:           newField.IsVisible,
-				RelationField:       newField.RelationField,
-				Automatic:           newField.Automatic,
-				ShowLabel:           newField.ShowLabel,
-				Unique:              newField.Unique,
-				ProjectId:           project_id,
-				EnableMultilanguage: true,
-				HideMultilanguage:   false,
-			})
-		}
-	}
-	//
-	return response
 }
 
 func (h *HandlerV2) FieldsWithPermissions(c *gin.Context) {

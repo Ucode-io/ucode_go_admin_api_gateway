@@ -5,7 +5,6 @@ import (
 	"errors"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
-	"ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
@@ -14,7 +13,7 @@ import (
 
 func (h *HandlerV2) CreateFolderGroup(c *gin.Context) {
 	var (
-		folderGroup new_object_builder_service.CreateFolderGroupRequest
+		folderGroup nb.CreateFolderGroupRequest
 	)
 
 	err := c.ShouldBindJSON(&folderGroup)
@@ -67,7 +66,7 @@ func (h *HandlerV2) CreateFolderGroup(c *gin.Context) {
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().FolderGroup().Create(
 			context.Background(),
-			&new_object_builder_service.CreateFolderGroupRequest{
+			&nb.CreateFolderGroupRequest{
 				TableId:   folderGroup.TableId,
 				Name:      folderGroup.Name,
 				Comment:   folderGroup.Comment,

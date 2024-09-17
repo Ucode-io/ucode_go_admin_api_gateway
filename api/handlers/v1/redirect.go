@@ -103,7 +103,7 @@ func (h *HandlerV1) CreateRedirectUrl(c *gin.Context) {
 			logReq.Response = res
 			h.handleResponse(c, status_http.Created, res)
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 	}()
 
 	res, err = h.companyServices.Redirect().Create(
@@ -264,7 +264,7 @@ func (h *HandlerV1) UpdateRedirectUrl(c *gin.Context) {
 			logReq.Response = res
 			h.handleResponse(c, status_http.OK, res)
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 	}()
 
 	res, err = h.companyServices.Redirect().Update(
@@ -360,7 +360,7 @@ func (h *HandlerV1) DeleteRedirectUrl(c *gin.Context) {
 		} else {
 			h.handleResponse(c, status_http.NoContent, res)
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 	}()
 
 	res, err = h.companyServices.Redirect().Delete(

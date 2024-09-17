@@ -105,7 +105,7 @@ func (h *HandlerV1) CreateEnvironment(c *gin.Context) {
 			logReq.Request = resp
 			h.handleResponse(c, status_http.Created, resp)
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 	}()
 
 	environmentRequest.RoleId = tokenInfo.GetRoleId()
@@ -259,7 +259,7 @@ func (h *HandlerV1) UpdateEnvironment(c *gin.Context) {
 			logReq.Response = resp
 			h.handleResponse(c, status_http.OK, resp)
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 	}()
 
 	resp, err = h.companyServices.Environment().Update(
@@ -357,7 +357,7 @@ func (h *HandlerV1) DeleteEnvironment(c *gin.Context) {
 		} else {
 			h.handleResponse(c, status_http.NoContent, resp)
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 	}()
 
 	resp, err = h.companyServices.Environment().Delete(

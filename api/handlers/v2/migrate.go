@@ -208,7 +208,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 
 		if actionSource == "TABLE" {
 			defer func() {
-				go h.versionHistory(c, logReq)
+				go h.versionHistory(logReq)
 			}()
 
 			var (
@@ -252,7 +252,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				}
 				logReq.Current = current.Data
 				logReq.Response = current.Data
-				ids = append(ids, v.Id)
+				//ids = append(ids, v.Id)
 			case "UPDATE":
 				logReq.Previous = previous.Data
 
@@ -267,7 +267,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				}
 				logReq.Current = current.Data
 				logReq.Response = current.Data
-				ids = append(ids, v.Id)
+				//ids = append(ids, v.Id)
 			case "DELETE":
 				logReq.Previous = previous.Data
 				_, err := services.GetBuilderServiceByType(nodeType).Table().Delete(
@@ -286,11 +286,11 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 					h.log.Error("!!!MigrationUp--->Error while deleting table", logger.Error(err))
 					continue
 				}
-				ids = append(ids, v.Id)
+				//ids = append(ids, v.Id)
 			}
 		} else if actionSource == "FIELD" {
 			defer func() {
-				go h.versionHistory(c, logReq)
+				go h.versionHistory(logReq)
 			}()
 
 			var (
@@ -344,7 +344,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				logReq.Request = current.Data
 				logReq.Current = current.Data
 				logReq.Response = createField
-				ids = append(ids, v.Id)
+				//ids = append(ids, v.Id)
 			case "UPDATE":
 				logReq.Previous = previous.Data
 
@@ -360,7 +360,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				logReq.Request = currentUpdate.Data
 				logReq.Current = updateField
 				logReq.Response = updateField
-				ids = append(ids, v.Id)
+				//ids = append(ids, v.Id)
 			case "DELETE":
 				logReq.Previous = previous.Data
 				_, err := services.GetBuilderServiceByType(nodeType).Field().Delete(
@@ -376,11 +376,11 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 					h.log.Error("!!!MigrationUp--->Error while deleting field", logger.Error(err))
 					continue
 				}
-				ids = append(ids, v.Id)
+				//ids = append(ids, v.Id)
 			}
 		} else if actionSource == "RELATION" {
 			defer func() {
-				go h.versionHistory(c, logReq)
+				go h.versionHistory(logReq)
 			}()
 
 			var (
@@ -428,7 +428,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				logReq.Request = request.Data
 				logReq.Current = createRelation
 				logReq.Response = createRelation
-				ids = append(ids, v.Id)
+				//ids = append(ids, v.Id)
 			case "UPDATE":
 				logReq.Previous = previous.Data
 				updateRelation, err := services.GetBuilderServiceByType(nodeType).Relation().Update(
@@ -443,7 +443,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				logReq.Request = current.Data
 				logReq.Current = updateRelation
 				logReq.Response = updateRelation
-				ids = append(ids, v.Id)
+				//ids = append(ids, v.Id)
 			case "DELETE":
 				logReq.Previous = response.Data
 				_, err := services.GetBuilderServiceByType(nodeType).Field().Delete(
@@ -459,11 +459,11 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 					h.log.Error("!!!MigrationUp--->Error while deleting relation", logger.Error(err))
 					continue
 				}
-				ids = append(ids, v.Id)
+				//ids = append(ids, v.Id)
 			}
 		} else if actionSource == "MENU" {
 			defer func() {
-				go h.versionHistory(c, logReq)
+				go h.versionHistory(logReq)
 			}()
 
 			var (
@@ -510,7 +510,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				logReq.Request = request.Data
 				logReq.Current = createMenu
 				logReq.Response = createMenu
-				ids = append(ids, v.Id)
+				//ids = append(ids, v.Id)
 			case "UPDATE":
 				logReq.Previous = previous.Data
 				updatemenu, err := services.GetBuilderServiceByType(nodeType).Menu().Update(
@@ -525,7 +525,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				logReq.Request = current.Data
 				logReq.Current = updatemenu
 				logReq.Response = updatemenu
-				ids = append(ids, v.Id)
+				//ids = append(ids, v.Id)
 			case "DELETE":
 				logReq.Previous = previous.Data
 				_, err = services.GetBuilderServiceByType(nodeType).Menu().Delete(
@@ -541,11 +541,11 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 					h.log.Error("!!!MigrationUp--->Error while deleting menu", logger.Error(err))
 					continue
 				}
-				ids = append(ids, v.Id)
+				//ids = append(ids, v.Id)
 			}
 		} else if actionSource == "VIEW" {
 			defer func() {
-				go h.versionHistory(c, logReq)
+				go h.versionHistory(logReq)
 			}()
 
 			var (
@@ -592,7 +592,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				logReq.Request = request.Data
 				logReq.Current = createView
 				logReq.Response = createView
-				ids = append(ids, v.Id)
+				//ids = append(ids, v.Id)
 			case "UPDATE":
 				logReq.Previous = previous.Data
 				updateView, err := services.GetBuilderServiceByType(nodeType).View().Update(
@@ -607,7 +607,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				logReq.Request = current.Data
 				logReq.Current = updateView
 				logReq.Response = updateView
-				ids = append(ids, v.Id)
+				//ids = append(ids, v.Id)
 			case "DELETE":
 				logReq.Previous = previous.Data
 				_, err = services.GetBuilderServiceByType(nodeType).View().Delete(
@@ -623,11 +623,11 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 					h.log.Error("!!!MigrationUp--->Error while deleting view", logger.Error(err))
 					continue
 				}
-				ids = append(ids, v.Id)
+				//ids = append(ids, v.Id)
 			}
 		} else if actionSource == "LAYOUT" {
 			defer func() {
-				go h.versionHistory(c, logReq)
+				go h.versionHistory(logReq)
 			}()
 
 			var (
@@ -666,7 +666,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				logReq.Request = current.Data
 				logReq.Current = updateLayout
 				logReq.Response = updateLayout
-				ids = append(ids, v.Id)
+				//ids = append(ids, v.Id)
 			case "DELETE":
 				logReq.Previous = previous.Data
 				_, err = services.GetBuilderServiceByType(nodeType).Layout().RemoveLayout(
@@ -682,7 +682,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 					logReq.Response = err.Error()
 					continue
 				}
-				ids = append(ids, v.Id)
+				//ids = append(ids, v.Id)
 			}
 		}
 	}
@@ -809,7 +809,7 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 						EnvId:     cast.ToString(environmentId),
 					},
 				)
-				ids = append(ids, v.Id)
+				//ids = append(ids, v.Id)
 			case "UPDATE":
 				previous.Data.CommitType = "TABLE"
 				previous.Data.Name = fmt.Sprintf("Auto Created Commit Create table - %s", time.Now().Format(time.RFC1123))
@@ -821,7 +821,7 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 					continue
 				}
 
-				ids = append(ids, v.Id)
+				//ids = append(ids, v.Id)
 			case "DELETE":
 				createPrevious.Data.CommitType = "TABLE"
 				createPrevious.Data.Name = fmt.Sprintf("Auto Created Commit Create table - %s", time.Now().Format(time.RFC1123))
@@ -832,7 +832,7 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 				if err != nil {
 					continue
 				}
-				ids = append(ids, v.Id)
+				//ids = append(ids, v.Id)
 			}
 		} else if actionSource == "FIELD" {
 			var (
@@ -881,7 +881,7 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 				if err != nil {
 					continue
 				}
-				ids = append(ids, v.Id)
+				//ids = append(ids, v.Id)
 			case "UPDATE":
 				_, err := services.GetBuilderServiceByType(nodeType).Field().Update(
 					context.Background(),
@@ -890,7 +890,7 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 				if err != nil {
 					continue
 				}
-				ids = append(ids, v.Id)
+				//ids = append(ids, v.Id)
 			case "DELETE":
 				_, err := services.GetBuilderServiceByType(nodeType).Field().Create(
 					context.Background(),
@@ -899,7 +899,7 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 				if err != nil {
 					continue
 				}
-				ids = append(ids, v.Id)
+				//ids = append(ids, v.Id)
 			}
 		} else if actionSource == "RELATION" {
 			var (
@@ -937,7 +937,7 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 				if err != nil {
 					continue
 				}
-				ids = append(ids, v.Id)
+				//ids = append(ids, v.Id)
 			case "UPDATE":
 				var (
 					updateRelation = &obs.UpdateRelationRequest{
@@ -992,7 +992,7 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 				if err != nil {
 					continue
 				}
-				ids = append(ids, v.Id)
+				//ids = append(ids, v.Id)
 			case "DELETE":
 				var (
 					createRelation = &obs.CreateRelationRequest{
@@ -1045,7 +1045,7 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 				if err != nil {
 					continue
 				}
-				ids = append(ids, v.Id)
+				//ids = append(ids, v.Id)
 			}
 		} else if actionSource == "MENU" {
 
@@ -1105,7 +1105,7 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 				if err != nil {
 					continue
 				}
-				ids = append(ids, v.Id)
+				//ids = append(ids, v.Id)
 			case "UPDATE":
 				_, err := services.GetBuilderServiceByType(nodeType).Menu().Update(
 					context.Background(),
@@ -1114,7 +1114,7 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 				if err != nil {
 					continue
 				}
-				ids = append(ids, v.Id)
+				//ids = append(ids, v.Id)
 			case "DELETE":
 				_, err := services.GetBuilderServiceByType(nodeType).Menu().Create(
 					context.Background(),
@@ -1123,7 +1123,7 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 				if err != nil {
 					continue
 				}
-				ids = append(ids, v.Id)
+				//ids = append(ids, v.Id)
 			}
 		} else if actionSource == "VIEW" {
 
@@ -1173,7 +1173,7 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 				if err != nil {
 					continue
 				}
-				ids = append(ids, v.Id)
+				//ids = append(ids, v.Id)
 			case "UPDATE":
 				_, err := services.GetBuilderServiceByType(nodeType).View().Update(
 					context.Background(),
@@ -1182,7 +1182,7 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 				if err != nil {
 					continue
 				}
-				ids = append(ids, v.Id)
+				//ids = append(ids, v.Id)
 			case "DELETE":
 				_, err := services.GetBuilderServiceByType(nodeType).View().Create(
 					context.Background(),
@@ -1191,7 +1191,7 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 				if err != nil {
 					continue
 				}
-				ids = append(ids, v.Id)
+				//ids = append(ids, v.Id)
 			}
 		} else if actionSource == "LAYOUT" {
 			var (
@@ -1216,7 +1216,7 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 				if err != nil {
 					continue
 				}
-				ids = append(ids, v.Id)
+				//ids = append(ids, v.Id)
 			}
 		}
 	}
@@ -1227,10 +1227,10 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 }
 
 func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.ServiceManagerI, lists *obs.ListVersionHistory, environmentId, nodeType, userId string, resourceType pb.ResourceType) error {
-	var (
-		resp models.MigrateUpResponse
-		ids  []string
-	)
+	// var (
+	// 	resp models.MigrateUpResponse
+	// 	ids  []string
+	// )
 
 	listData, err := json.Marshal(lists.Histories)
 	if err != nil {
@@ -1268,7 +1268,7 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 
 		if actionSource == "TABLE" {
 			defer func() {
-				go h.versionHistory(c, logReq)
+				go h.versionHistory(logReq)
 			}()
 
 			var (
@@ -1353,7 +1353,7 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 
 				logReq.Current = current.Data
 				logReq.Response = current.Data
-				ids = append(ids, v.Id)
+				//ids = append(ids, v.Id)
 			case "UPDATE":
 				logReq.Previous = previous.Data
 
@@ -1382,7 +1382,7 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 
 				logReq.Current = current.Data
 				logReq.Response = current.Data
-				ids = append(ids, v.Id)
+				//ids = append(ids, v.Id)
 			case "DELETE":
 				logReq.Previous = previous.Data
 
@@ -1422,11 +1422,11 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 					}
 				}
 
-				ids = append(ids, v.Id)
+				//ids = append(ids, v.Id)
 			}
 		} else if actionSource == "FIELD" {
 			defer func() {
-				go h.versionHistory(c, logReq)
+				go h.versionHistory(logReq)
 			}()
 
 			var (
@@ -1503,7 +1503,7 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 				logReq.Request = current.Data
 				logReq.Current = current.Data
 
-				ids = append(ids, v.Id)
+				//ids = append(ids, v.Id)
 			case "UPDATE":
 				logReq.Previous = previous.Data
 
@@ -1538,7 +1538,7 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 					logReq.Request = currentUpdatePsql.Data
 				}
 
-				ids = append(ids, v.Id)
+				//ids = append(ids, v.Id)
 			case "DELETE":
 				logReq.Previous = previous.Data
 
@@ -1573,11 +1573,11 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 					}
 				}
 
-				ids = append(ids, v.Id)
+				//ids = append(ids, v.Id)
 			}
 		} else if actionSource == "RELATION" {
 			defer func() {
-				go h.versionHistory(c, logReq)
+				go h.versionHistory(logReq)
 			}()
 
 			var (
@@ -1666,7 +1666,7 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 
 				logReq.Request = request.Data
 
-				ids = append(ids, v.Id)
+				//ids = append(ids, v.Id)
 			case "UPDATE":
 				logReq.Previous = previous.Data
 
@@ -1701,7 +1701,7 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 
 				logReq.Request = current.Data
 
-				ids = append(ids, v.Id)
+				//ids = append(ids, v.Id)
 			case "DELETE":
 				logReq.Previous = response.Data
 
@@ -1736,11 +1736,11 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 					}
 				}
 
-				ids = append(ids, v.Id)
+				//ids = append(ids, v.Id)
 			}
 		} else if actionSource == "MENU" {
 			defer func() {
-				go h.versionHistory(c, logReq)
+				go h.versionHistory(logReq)
 			}()
 
 			var (
@@ -1818,7 +1818,7 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 				}
 
 				logReq.Request = request.Data
-				ids = append(ids, v.Id)
+				//ids = append(ids, v.Id)
 			case "UPDATE":
 				logReq.Previous = previous.Data
 				switch resourceType {
@@ -1849,7 +1849,7 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 				}
 
 				logReq.Request = current.Data
-				ids = append(ids, v.Id)
+				//ids = append(ids, v.Id)
 			case "DELETE":
 				logReq.Previous = previous.Data
 
@@ -1884,11 +1884,11 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 					}
 				}
 
-				ids = append(ids, v.Id)
+				//ids = append(ids, v.Id)
 			}
 		} else if actionSource == "VIEW" {
 			defer func() {
-				go h.versionHistory(c, logReq)
+				go h.versionHistory(logReq)
 			}()
 
 			var (
@@ -1970,7 +1970,7 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 					logReq.Request = requestPsql.Data
 				}
 
-				ids = append(ids, v.Id)
+				//ids = append(ids, v.Id)
 			case "UPDATE":
 				logReq.Previous = previous.Data
 				switch resourceType {
@@ -2004,7 +2004,7 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 
 				logReq.Request = current.Data
 
-				ids = append(ids, v.Id)
+				//ids = append(ids, v.Id)
 			case "DELETE":
 				logReq.Previous = previous.Data
 
@@ -2039,11 +2039,11 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 					}
 				}
 
-				ids = append(ids, v.Id)
+				//ids = append(ids, v.Id)
 			}
 		} else if actionSource == "LAYOUT" {
 			defer func() {
-				go h.versionHistory(c, logReq)
+				go h.versionHistory(logReq)
 			}()
 
 			var (
@@ -2111,7 +2111,7 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 
 				logReq.Previous = previous.Data
 
-				ids = append(ids, v.Id)
+				//ids = append(ids, v.Id)
 			case "DELETE":
 				logReq.Previous = previous.Data
 
@@ -2146,21 +2146,21 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 					}
 				}
 
-				ids = append(ids, v.Id)
+				//ids = append(ids, v.Id)
 			}
 		}
 	}
 
-	resp.Ids = ids
+	// resp.Ids = ids
 
 	return nil
 }
 
 func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.ServiceManagerI, lists *obs.ListVersionHistory, environmentId, nodeType, userId string, resourceType pb.ResourceType) error {
 	var (
-		ids  []string
-		resp models.MigrateUpResponse
-		err  error
+		// ids []string
+		// resp models.MigrateUpResponse
+		err error
 	)
 
 	listData, err := json.Marshal(lists.Histories)
@@ -2273,7 +2273,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 							EnvId:     cast.ToString(environmentId),
 						},
 					)
-					ids = append(ids, v.Id)
+					// //ids = append(ids, v.Id)
 				case pb.ResourceType_POSTGRESQL:
 					_, err := services.GoObjectBuilderService().Table().Delete(
 						context.Background(),
@@ -2295,7 +2295,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 							EnvId:     cast.ToString(environmentId),
 						},
 					)
-					ids = append(ids, v.Id)
+					//ids = append(ids, v.Id)
 				}
 			case "UPDATE":
 				switch resourceType {
@@ -2310,7 +2310,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 						continue
 					}
 
-					ids = append(ids, v.Id)
+					//ids = append(ids, v.Id)
 				case pb.ResourceType_POSTGRESQL:
 					previousPsql.Data.CommitType = "TABLE"
 					previousPsql.Data.Name = fmt.Sprintf("Auto Created Commit Create table - %s", time.Now().Format(time.RFC1123))
@@ -2322,7 +2322,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 						continue
 					}
 
-					ids = append(ids, v.Id)
+					//ids = append(ids, v.Id)
 				}
 			case "DELETE":
 				switch resourceType {
@@ -2336,7 +2336,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					if err != nil {
 						continue
 					}
-					ids = append(ids, v.Id)
+					//ids = append(ids, v.Id)
 				case pb.ResourceType_POSTGRESQL:
 					createPreviousPsql.Data.CommitType = "TABLE"
 					createPreviousPsql.Data.Name = fmt.Sprintf("Auto Created Commit Create table - %s", time.Now().Format(time.RFC1123))
@@ -2347,7 +2347,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					if err != nil {
 						continue
 					}
-					ids = append(ids, v.Id)
+					//ids = append(ids, v.Id)
 				}
 			}
 		} else if actionSource == "FIELD" {
@@ -2423,7 +2423,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					if err != nil {
 						continue
 					}
-					ids = append(ids, v.Id)
+					//ids = append(ids, v.Id)
 				case pb.ResourceType_POSTGRESQL:
 					_, err := services.GoObjectBuilderService().Field().Delete(
 						context.Background(),
@@ -2436,7 +2436,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					if err != nil {
 						continue
 					}
-					ids = append(ids, v.Id)
+					//ids = append(ids, v.Id)
 				}
 			case "UPDATE":
 				switch resourceType {
@@ -2448,7 +2448,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					if err != nil {
 						continue
 					}
-					ids = append(ids, v.Id)
+					//ids = append(ids, v.Id)
 				case pb.ResourceType_POSTGRESQL:
 					_, err := services.GoObjectBuilderService().Field().Update(
 						context.Background(),
@@ -2457,7 +2457,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					if err != nil {
 						continue
 					}
-					ids = append(ids, v.Id)
+					//ids = append(ids, v.Id)
 				}
 			case "DELETE":
 				switch resourceType {
@@ -2469,7 +2469,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					if err != nil {
 						continue
 					}
-					ids = append(ids, v.Id)
+					//ids = append(ids, v.Id)
 				case pb.ResourceType_POSTGRESQL:
 					_, err := services.GoObjectBuilderService().Field().Create(
 						context.Background(),
@@ -2478,7 +2478,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					if err != nil {
 						continue
 					}
-					ids = append(ids, v.Id)
+					//ids = append(ids, v.Id)
 				}
 			}
 		} else if actionSource == "RELATION" {
@@ -2525,7 +2525,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					if err != nil {
 						continue
 					}
-					ids = append(ids, v.Id)
+					//ids = append(ids, v.Id)
 				case pb.ResourceType_POSTGRESQL:
 					var (
 						currentPsql DataCreateRelationWrapperPsql
@@ -2549,7 +2549,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					if err != nil {
 						continue
 					}
-					ids = append(ids, v.Id)
+					//ids = append(ids, v.Id)
 				}
 			case "UPDATE":
 				switch resourceType {
@@ -2607,7 +2607,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					if err != nil {
 						continue
 					}
-					ids = append(ids, v.Id)
+					//ids = append(ids, v.Id)
 				case pb.ResourceType_POSTGRESQL:
 					var (
 						updateRelationPsql = &nb.UpdateRelationRequest{
@@ -2662,7 +2662,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					if err != nil {
 						continue
 					}
-					ids = append(ids, v.Id)
+					//ids = append(ids, v.Id)
 				}
 			case "DELETE":
 				switch resourceType {
@@ -2718,7 +2718,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					if err != nil {
 						continue
 					}
-					ids = append(ids, v.Id)
+					//ids = append(ids, v.Id)
 				case pb.ResourceType_POSTGRESQL:
 					var (
 						createRelationPsql = &nb.CreateRelationRequest{
@@ -2771,7 +2771,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					if err != nil {
 						continue
 					}
-					ids = append(ids, v.Id)
+					//ids = append(ids, v.Id)
 				}
 			}
 		} else if actionSource == "MENU" {
@@ -2866,7 +2866,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					if err != nil {
 						continue
 					}
-					ids = append(ids, v.Id)
+					//ids = append(ids, v.Id)
 				case pb.ResourceType_POSTGRESQL:
 					_, err = services.GoObjectBuilderService().Menu().Delete(
 						context.Background(),
@@ -2879,7 +2879,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					if err != nil {
 						continue
 					}
-					ids = append(ids, v.Id)
+					//ids = append(ids, v.Id)
 				}
 			case "UPDATE":
 				switch resourceType {
@@ -2891,7 +2891,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					if err != nil {
 						continue
 					}
-					ids = append(ids, v.Id)
+					//ids = append(ids, v.Id)
 				case pb.ResourceType_POSTGRESQL:
 					_, err := services.GoObjectBuilderService().Menu().Update(
 						context.Background(),
@@ -2900,7 +2900,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					if err != nil {
 						continue
 					}
-					ids = append(ids, v.Id)
+					//ids = append(ids, v.Id)
 				}
 			case "DELETE":
 				switch resourceType {
@@ -2912,7 +2912,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					if err != nil {
 						continue
 					}
-					ids = append(ids, v.Id)
+					//ids = append(ids, v.Id)
 				case pb.ResourceType_POSTGRESQL:
 					_, err := services.GoObjectBuilderService().Menu().Create(
 						context.Background(),
@@ -2921,7 +2921,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					if err != nil {
 						continue
 					}
-					ids = append(ids, v.Id)
+					//ids = append(ids, v.Id)
 				}
 			}
 		} else if actionSource == "VIEW" {
@@ -2998,7 +2998,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					if err != nil {
 						continue
 					}
-					ids = append(ids, v.Id)
+					//ids = append(ids, v.Id)
 				case pb.ResourceType_POSTGRESQL:
 					_, err := services.GoObjectBuilderService().View().Delete(
 						context.Background(),
@@ -3011,7 +3011,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					if err != nil {
 						continue
 					}
-					ids = append(ids, v.Id)
+					//ids = append(ids, v.Id)
 				}
 			case "UPDATE":
 				switch resourceType {
@@ -3023,7 +3023,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					if err != nil {
 						continue
 					}
-					ids = append(ids, v.Id)
+					//ids = append(ids, v.Id)
 				case pb.ResourceType_POSTGRESQL:
 					_, err := services.GoObjectBuilderService().View().Update(
 						context.Background(),
@@ -3032,7 +3032,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					if err != nil {
 						continue
 					}
-					ids = append(ids, v.Id)
+					//ids = append(ids, v.Id)
 				}
 			case "DELETE":
 				switch resourceType {
@@ -3044,7 +3044,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					if err != nil {
 						continue
 					}
-					ids = append(ids, v.Id)
+					//ids = append(ids, v.Id)
 				case pb.ResourceType_POSTGRESQL:
 					_, err := services.GoObjectBuilderService().View().Create(
 						context.Background(),
@@ -3053,7 +3053,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					if err != nil {
 						continue
 					}
-					ids = append(ids, v.Id)
+					//ids = append(ids, v.Id)
 				}
 			}
 		} else if actionSource == "LAYOUT" {
@@ -3089,7 +3089,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					if err != nil {
 						continue
 					}
-					ids = append(ids, v.Id)
+					//ids = append(ids, v.Id)
 				case pb.ResourceType_POSTGRESQL:
 					_, err := services.GoObjectBuilderService().Layout().Update(
 						context.Background(),
@@ -3098,13 +3098,13 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					if err != nil {
 						continue
 					}
-					ids = append(ids, v.Id)
+					//ids = append(ids, v.Id)
 				}
 			}
 		}
 	}
 
-	resp.Ids = ids
+	// resp.Ids = ids
 
 	return nil
 }

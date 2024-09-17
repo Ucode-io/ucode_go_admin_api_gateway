@@ -293,7 +293,7 @@ func (h *HandlerV2) CreateRelation(c *gin.Context) {
 			logReq.Current = resp
 			h.handleResponse(c, status_http.Created, resp)
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 	case pb.ResourceType_POSTGRESQL:
 		err = helper.MarshalToStruct(&relation, &goRelation)
 		if err != nil {
@@ -540,7 +540,7 @@ func (h *HandlerV2) UpdateRelation(c *gin.Context) {
 			h.handleResponse(c, status_http.OK, resp)
 		}
 
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 	case pb.ResourceType_POSTGRESQL:
 
 		goOldRelation, err := services.GoObjectBuilderService().Relation().GetByID(
@@ -683,7 +683,7 @@ func (h *HandlerV2) DeleteRelation(c *gin.Context) {
 		} else {
 			h.handleResponse(c, status_http.NoContent, resp)
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 	case pb.ResourceType_POSTGRESQL:
 		resp, err = services.GoObjectBuilderService().Relation().Delete(
 			context.Background(),
