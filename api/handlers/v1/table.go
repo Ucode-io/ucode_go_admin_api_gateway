@@ -10,7 +10,6 @@ import (
 	"ucode/ucode_go_api_gateway/config"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
-	_ "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
@@ -188,7 +187,7 @@ func (h *HandlerV1) CreateTable(c *gin.Context) {
 			logReq.Response = &table
 			h.handleResponse(c, status_http.Created, resp)
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 	case pb.ResourceType_POSTGRESQL:
 
 		newReq := nb.CreateTableRequest{}
@@ -585,7 +584,7 @@ func (h *HandlerV1) UpdateTable(c *gin.Context) {
 			h.handleResponse(c, status_http.OK, resp)
 		}
 
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 
 	case pb.ResourceType_POSTGRESQL:
 
@@ -782,7 +781,7 @@ func (h *HandlerV1) DeleteTable(c *gin.Context) {
 			logReq.Current = resp
 			h.handleResponse(c, status_http.NoContent, resp)
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 
 	case pb.ResourceType_POSTGRESQL:
 

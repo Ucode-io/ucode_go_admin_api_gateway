@@ -322,7 +322,7 @@ func (h *HandlerV2) UpdateLayout(c *gin.Context) {
 			logReq.Response = resp
 			h.handleResponse(c, status_http.OK, resp)
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 		h.handleResponse(c, status_http.OK, resp)
 		return
 	case pb.ResourceType_POSTGRESQL:
@@ -448,7 +448,7 @@ func (h *HandlerV2) DeleteLayout(c *gin.Context) {
 		}
 		switch resource.ResourceType {
 		case pb.ResourceType_MONGODB:
-			go h.versionHistory(c, logReq)
+			go h.versionHistory(logReq)
 		case pb.ResourceType_POSTGRESQL:
 			go h.versionHistoryGo(c, logReq)
 		}

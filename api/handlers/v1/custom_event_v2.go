@@ -124,7 +124,7 @@ func (h *HandlerV1) CreateNewCustomEvent(c *gin.Context) {
 		} else {
 			h.handleResponse(c, status_http.Created, resp)
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 	}()
 
 	resp, err = services.FunctionService().CustomEventService().Create(
@@ -384,7 +384,7 @@ func (h *HandlerV1) UpdateNewCustomEvent(c *gin.Context) {
 		} else {
 			h.handleResponse(c, status_http.OK, resp)
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 	}()
 
 	resp, err = services.FunctionService().CustomEventService().Update(
@@ -478,7 +478,7 @@ func (h *HandlerV1) DeleteNewCustomEvent(c *gin.Context) {
 		} else {
 			h.handleResponse(c, status_http.NoContent, resp)
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 	}()
 
 	resp, err = services.FunctionService().CustomEventService().Delete(

@@ -509,7 +509,7 @@ func (h *HandlerV1) GetSingleSlim(c *gin.Context) {
 				resp["data"] = m
 				h.handleResponse(c, status_http.OK, resp)
 				logReq.Response = m
-				go h.versionHistory(c, logReq)
+				go h.versionHistory(logReq)
 				return
 			}
 		} else {
@@ -532,13 +532,13 @@ func (h *HandlerV1) GetSingleSlim(c *gin.Context) {
 				statusHttp.CustomMessage = stat.Message()
 			}
 			logReq.Response = err.Error()
-			go h.versionHistory(c, logReq)
+			go h.versionHistory(logReq)
 			h.handleResponse(c, statusHttp, err.Error())
 			return
 		}
 
 		logReq.Response = resp
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 
 		if resp.IsCached {
 			jsonData, _ := resp.GetData().MarshalJSON()
@@ -562,7 +562,7 @@ func (h *HandlerV1) GetSingleSlim(c *gin.Context) {
 				resp["data"] = m
 				h.handleResponse(c, status_http.OK, resp)
 				logReq.Response = m
-				go h.versionHistory(c, logReq)
+				go h.versionHistory(logReq)
 				return
 			}
 		} else {
@@ -1468,7 +1468,7 @@ func (h *HandlerV1) GetListSlim(c *gin.Context) {
 			resp["data"] = m
 			h.handleResponse(c, status_http.OK, resp)
 			logReq.Response = m
-			go h.versionHistory(c, logReq)
+			go h.versionHistory(logReq)
 			return
 		}
 	} else {
@@ -1490,13 +1490,13 @@ func (h *HandlerV1) GetListSlim(c *gin.Context) {
 			statusHttp.CustomMessage = stat.Message()
 		}
 		logReq.Response = err.Error()
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 		h.handleResponse(c, statusHttp, err.Error())
 		return
 	}
 
 	logReq.Response = resp
-	go h.versionHistory(c, logReq)
+	go h.versionHistory(logReq)
 
 	if resp.IsCached {
 		jsonData, _ := resp.GetData().MarshalJSON()

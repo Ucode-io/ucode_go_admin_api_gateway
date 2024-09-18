@@ -114,7 +114,7 @@ func (h *HandlerV2) CreateVersion(c *gin.Context) {
 	// 		logReq.Response = resp
 	// 		h.handleResponse(c, status_http.Created, resp)
 	// 	}
-	// 	go h.versionHistory(c, logReq)
+	// 	go h.versionHistory( logReq)
 	// }()
 
 	version.ProjectId = resource.ResourceEnvironmentId
@@ -332,7 +332,7 @@ func (h *HandlerV2) UpdateVersion(c *gin.Context) {
 			logReq.Current = resp
 			// h.handleResponse(c, status_http.OK, resp)
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 	}()
 
 	version.ProjectId = resource.ResourceEnvironmentId

@@ -110,7 +110,7 @@ func (h *HandlerV2) CreateView(c *gin.Context) {
 			logReq.Response = resp
 			h.handleResponse(c, status_http.Created, resp)
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 		h.handleResponse(c, status_http.Created, resp)
 	case pb.ResourceType_POSTGRESQL:
 		newReq := nb.CreateViewRequest{}
@@ -333,7 +333,7 @@ func (h *HandlerV2) UpdateView(c *gin.Context) {
 			logReq.Current = resp
 			h.handleResponse(c, status_http.OK, resp)
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
 
@@ -477,7 +477,7 @@ func (h *HandlerV2) DeleteView(c *gin.Context) {
 			h.handleResponse(c, status_http.NoContent, resp)
 			return
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 		h.handleResponse(c, status_http.NoContent, resp)
 	case pb.ResourceType_POSTGRESQL:
 

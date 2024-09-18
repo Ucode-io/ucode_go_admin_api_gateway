@@ -3,14 +3,14 @@ package v1
 import (
 	"context"
 	"errors"
-	"github.com/gin-gonic/gin"
+
 	"ucode/ucode_go_api_gateway/api/models"
-	_ "ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
-	_ "ucode/ucode_go_api_gateway/genproto/company_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/genproto/new_function_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
+
+	"github.com/gin-gonic/gin"
 )
 
 // BindLoginMicroFrontToProject godoc

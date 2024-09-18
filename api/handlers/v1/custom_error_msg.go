@@ -101,7 +101,7 @@ func (h *HandlerV1) CreateCustomErrorMessage(c *gin.Context) {
 			logReq.Response = resp
 			h.handleResponse(c, status_http.Created, resp)
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 	}()
 
 	customErrorMessages.ProjectId = resource.ResourceEnvironmentId
@@ -395,7 +395,7 @@ func (h *HandlerV1) UpdateCustomErrorMessage(c *gin.Context) {
 		} else {
 			h.handleResponse(c, status_http.OK, resp)
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 	}()
 
 	customErrorMessages.ProjectId = resource.ResourceEnvironmentId
@@ -502,7 +502,7 @@ func (h *HandlerV1) DeleteCustomErrorMessage(c *gin.Context) {
 		} else {
 			h.handleResponse(c, status_http.NoContent, resp)
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 	}()
 
 	switch resource.ResourceType {

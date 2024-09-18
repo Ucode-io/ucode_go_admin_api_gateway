@@ -132,7 +132,7 @@ func (h *HandlerV2) CreateMenu(c *gin.Context) {
 			logReq.Response = resp
 			logReq.Current = resp
 			h.handleResponse(c, status_http.Created, resp)
-			go h.versionHistory(c, logReq)
+			go h.versionHistory(logReq)
 		}
 	case pb.ResourceType_POSTGRESQL:
 		newReq := nb.CreateMenuRequest{}
@@ -474,7 +474,7 @@ func (h *HandlerV2) UpdateMenu(c *gin.Context) {
 			logReq.Current = resp
 			h.handleResponse(c, status_http.OK, resp)
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 	case pb.ResourceType_POSTGRESQL:
 		newReq := &nb.Menu{}
 		err = helper.MarshalToStruct(&requestMenu, &newReq)
@@ -601,7 +601,7 @@ func (h *HandlerV2) DeleteMenu(c *gin.Context) {
 		} else {
 			h.handleResponse(c, status_http.NoContent, resp)
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 
 		h.handleResponse(c, status_http.NoContent, resp)
 	case pb.ResourceType_POSTGRESQL:

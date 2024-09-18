@@ -181,12 +181,12 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 				statusHttp.CustomMessage = stat.Message()
 			}
 			logReq.Response = err.Error()
-			defer func() { go h.versionHistory(c, logReq) }()
+			defer func() { go h.versionHistory(logReq) }()
 			h.handleResponse(c, statusHttp, err.Error())
 			return
 		}
 		logReq.Response = resp
-		defer func() { go h.versionHistory(c, logReq) }()
+		defer func() { go h.versionHistory(logReq) }()
 	case pb.ResourceType_POSTGRESQL:
 		body, err := services.GoObjectBuilderService().Items().Create(
 			context.Background(),
@@ -379,12 +379,12 @@ func (h *HandlerV2) CreateItems(c *gin.Context) {
 				statusHttp.CustomMessage = stat.Message()
 			}
 			logReq.Response = err.Error()
-			go h.versionHistory(c, logReq)
+			go h.versionHistory(logReq)
 			h.handleResponse(c, statusHttp, err.Error())
 			return
 		}
 		logReq.Response = resp
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 	case pb.ResourceType_POSTGRESQL:
 		resp, err = services.PostgresBuilderService().ObjectBuilder().Create(
 			context.Background(),
@@ -637,9 +637,6 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 		return
 	}
 
-	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
-	// defer cancel()
-
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 
 	if viewId, ok := objectRequest["builder_service_view_id"].(string); ok {
@@ -702,8 +699,6 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 	} else {
 		switch resource.ResourceType {
 		case pb.ResourceType_MONGODB:
-			// start := time.Now()
-
 			redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("collection"), structData.String(), resource.ResourceEnvironmentId))), resource.ProjectId, resource.NodeType)
 			if err == nil {
 				resp := make(map[string]interface{})
@@ -784,6 +779,7 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 		statusHttp                  = status_http.GrpcStatusToHTTP["Ok"]
 		actionErr                   error
 		functionName                string
+		id                          string
 	)
 
 	err := c.ShouldBindJSON(&objectRequest)
@@ -798,7 +794,6 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
-	var id string
 	if objectRequest.Data["guid"] != nil {
 		id = objectRequest.Data["guid"].(string)
 	} else {
@@ -810,8 +805,6 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 			return
 		}
 	}
-
-	h.log.Info("HERE OUR ID >>>>>", logger.Any("id", id))
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -955,7 +948,7 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 		}
 		switch resource.ResourceType {
 		case pb.ResourceType_MONGODB:
-			go h.versionHistory(c, logReq)
+			go h.versionHistory(logReq)
 		case pb.ResourceType_POSTGRESQL:
 			go h.versionHistoryGo(c, logReq)
 		}
@@ -966,9 +959,11 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().Update(
 			context.Background(),
 			&obs.CommonMessage{
-				TableSlug: c.Param("collection"),
-				Data:      structData,
-				ProjectId: resource.ResourceEnvironmentId,
+				TableSlug:        c.Param("collection"),
+				Data:             structData,
+				ProjectId:        resource.ResourceEnvironmentId,
+				EnvId:            resource.EnvironmentId,
+				CompanyProjectId: resource.ProjectId,
 			},
 		)
 		if err != nil {
@@ -1158,7 +1153,7 @@ func (h *HandlerV2) MultipleUpdateItems(c *gin.Context) {
 			logReq.Response = resp
 			h.handleResponse(c, status_http.NoContent, resp)
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 	}()
 
 	switch resource.ResourceType {
@@ -1355,12 +1350,12 @@ func (h *HandlerV2) DeleteItem(c *gin.Context) {
 				statusHttp.CustomMessage = stat.Message()
 			}
 			logReq.Response = err.Error()
-			go h.versionHistory(c, logReq)
+			go h.versionHistory(logReq)
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 		logReq.Response = resp
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 	case pb.ResourceType_POSTGRESQL:
 		new, err := services.GoObjectBuilderService().Items().Delete(
 			context.Background(),
@@ -1553,7 +1548,7 @@ func (h *HandlerV2) DeleteItems(c *gin.Context) {
 			logReq.Response = resp
 			h.handleResponse(c, status_http.NoContent, resp)
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 	}()
 
 	switch resource.ResourceType {
@@ -1742,7 +1737,7 @@ func (h *HandlerV2) DeleteManyToMany(c *gin.Context) {
 			logReq.Response = resp
 			h.handleResponse(c, status_http.NoContent, resp)
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 	}()
 
 	switch resource.ResourceType {
@@ -1917,7 +1912,7 @@ func (h *HandlerV2) AppendManyToMany(c *gin.Context) {
 			logReq.Response = resp
 			h.handleResponse(c, status_http.NoContent, resp)
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 	}()
 
 	switch resource.ResourceType {
@@ -2203,7 +2198,6 @@ func (h *HandlerV2) UpdateRowOrder(c *gin.Context) {
 func (h *HandlerV2) UpsertMany(c *gin.Context) {
 	var (
 		objectRequest models.CommonMessage
-		statusHttp    = status_http.GrpcStatusToHTTP["NoContent"]
 		actionErr     error
 		functionName  string
 	)
@@ -2286,7 +2280,7 @@ func (h *HandlerV2) UpsertMany(c *gin.Context) {
 			logReq.Response = resp
 			h.handleResponse(c, status_http.NoContent, resp)
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 	}()
 
 	switch resource.ResourceType {
@@ -2304,6 +2298,4 @@ func (h *HandlerV2) UpsertMany(c *gin.Context) {
 			return
 		}
 	}
-
-	statusHttp.CustomMessage = resp.GetCustomMessage()
 }

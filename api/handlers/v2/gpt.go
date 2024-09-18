@@ -216,7 +216,7 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 					msg = fmt.Sprintf("Error while create field: %s", err.Error())
 				}
 			} else {
-				msg = fmt.Sprintf("Table not found please give table's label")
+				msg = "Table not found please give table's label"
 			}
 
 		case "update_field":
@@ -384,7 +384,7 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 		for _, log := range logReq {
 			switch resource.ResourceType {
 			case pb.ResourceType_MONGODB:
-				go h.versionHistory(c, &log)
+				go h.versionHistory(&log)
 			case pb.ResourceType_POSTGRESQL:
 				go h.versionHistoryGo(c, &log)
 			}

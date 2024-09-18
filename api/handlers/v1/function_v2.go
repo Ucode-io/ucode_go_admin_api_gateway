@@ -175,7 +175,7 @@ func (h *HandlerV1) CreateNewFunction(c *gin.Context) {
 			logReq.Response = response
 			h.handleResponse(c, status_http.Created, response)
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 	case pb.ResourceType_POSTGRESQL:
 
 		newCreateFunction := &nb.CreateFunctionRequest{}
@@ -543,7 +543,7 @@ func (h *HandlerV1) UpdateNewFunction(c *gin.Context) {
 		} else {
 			h.handleResponse(c, status_http.OK, resp)
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 	}()
 
 	resp, err = services.FunctionService().FunctionService().Update(
@@ -670,7 +670,7 @@ func (h *HandlerV1) DeleteNewFunction(c *gin.Context) {
 		} else {
 			h.handleResponse(c, status_http.NoContent, resp)
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 	}()
 
 	_, err = services.FunctionService().FunctionService().Delete(

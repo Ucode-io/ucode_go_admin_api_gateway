@@ -3,13 +3,13 @@ package v1
 import (
 	"context"
 	"errors"
-	"github.com/gin-gonic/gin"
-	"github.com/spf13/cast"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
-	_ "ucode/ucode_go_api_gateway/genproto/company_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
+
+	"github.com/gin-gonic/gin"
+	"github.com/spf13/cast"
 )
 
 // AddResourceToProject godoc
@@ -102,7 +102,7 @@ func (h *HandlerV1) AddResourceToProject(c *gin.Context) {
 			logReq.Response = resp
 			h.handleResponse(c, status_http.OK, resp)
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 	}()
 
 	resp, err = h.companyServices.Resource().AddResourceToProject(
@@ -202,7 +202,7 @@ func (h *HandlerV1) UpdateProjectResource(c *gin.Context) {
 		} else {
 			h.handleResponse(c, status_http.OK, resp)
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 	}()
 
 	resp, err = h.companyServices.Resource().UpdateProjectResource(
@@ -410,7 +410,7 @@ func (h *HandlerV1) DeleteProjectResource(c *gin.Context) {
 		} else {
 			h.handleResponse(c, status_http.NoContent, resp)
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 	}()
 
 	resp, err = h.companyServices.Resource().DeleteProjectResource(

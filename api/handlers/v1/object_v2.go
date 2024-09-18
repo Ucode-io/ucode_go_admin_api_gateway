@@ -334,7 +334,7 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
-	} 
+	}
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
@@ -493,7 +493,7 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 						resp["data"] = m
 						h.handleResponse(c, status_http.OK, resp)
 						logReq.Response = m
-						go h.versionHistory(c, logReq)
+						go h.versionHistory(logReq)
 						return
 					}
 				} else {
@@ -518,13 +518,13 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 				statusHttp.CustomMessage = stat.Message()
 			}
 			logReq.Response = err.Error()
-			go h.versionHistory(c, logReq)
+			go h.versionHistory(logReq)
 			h.handleResponse(c, statusHttp, err.Error())
 			return
 		}
 
 		logReq.Response = resp
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 
 		if !cast.ToBool(c.Query("block_cached")) {
 			jsonData, _ := resp.GetData().MarshalJSON()
