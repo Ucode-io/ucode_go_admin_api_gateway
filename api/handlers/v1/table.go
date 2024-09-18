@@ -566,6 +566,7 @@ func (h *HandlerV1) UpdateTable(c *gin.Context) {
 			},
 		)
 		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 

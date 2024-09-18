@@ -3,6 +3,7 @@ package v1
 import (
 	"context"
 	"errors"
+	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
@@ -480,19 +481,19 @@ func (h *HandlerV1) GetByIdAirbyte(c *gin.Context) {
 // @Tags Company Resource
 // @Accept json
 // @Produce json
-// @Param Airbyte body company_service.GetListAirbyteRequest true "GetListAirbyteRequest"
+// @Param Airbyte body models.AirByteRequest true "GetListAirbyteRequest"
 // @Success 201 {object} status_http.Response{data=company_service.GetListAirbyteResponse} "Airbyte data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetListAirbyte(c *gin.Context) {
-	var airbyte company_service.GetListAirbyteRequest
+	var airbyte models.AirByteRequest
 
 	if err := c.ShouldBindJSON(&airbyte); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
-	resp, err := h.companyServices.AirByte().GetList(c.Request.Context(), &airbyte)
+	resp, err := h.companyServices.AirByte().GetList(c.Request.Context(), &airbyte.Data)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
