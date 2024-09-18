@@ -637,9 +637,6 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 		return
 	}
 
-	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
-	// defer cancel()
-
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 
 	if viewId, ok := objectRequest["builder_service_view_id"].(string); ok {
@@ -702,8 +699,6 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 	} else {
 		switch resource.ResourceType {
 		case pb.ResourceType_MONGODB:
-			// start := time.Now()
-
 			redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("collection"), structData.String(), resource.ResourceEnvironmentId))), resource.ProjectId, resource.NodeType)
 			if err == nil {
 				resp := make(map[string]interface{})
@@ -784,6 +779,7 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 		statusHttp                  = status_http.GrpcStatusToHTTP["Ok"]
 		actionErr                   error
 		functionName                string
+		id                          string
 	)
 
 	err := c.ShouldBindJSON(&objectRequest)
@@ -798,7 +794,6 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
-	var id string
 	if objectRequest.Data["guid"] != nil {
 		id = objectRequest.Data["guid"].(string)
 	} else {
@@ -810,8 +805,6 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 			return
 		}
 	}
-
-	h.log.Info("HERE OUR ID >>>>>", logger.Any("id", id))
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -966,9 +959,11 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().Update(
 			context.Background(),
 			&obs.CommonMessage{
-				TableSlug: c.Param("collection"),
-				Data:      structData,
-				ProjectId: resource.ResourceEnvironmentId,
+				TableSlug:        c.Param("collection"),
+				Data:             structData,
+				ProjectId:        resource.ResourceEnvironmentId,
+				EnvId:            resource.EnvironmentId,
+				CompanyProjectId: resource.ProjectId,
 			},
 		)
 		if err != nil {

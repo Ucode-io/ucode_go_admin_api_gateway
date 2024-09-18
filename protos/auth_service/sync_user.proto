@@ -45,6 +45,7 @@ message UpdateSyncUserRequest {
     string password = 8;
     string guid = 9;
     string project_id = 10;
+    string env_id = 11;
 }
 
 message SyncUserResponse {
