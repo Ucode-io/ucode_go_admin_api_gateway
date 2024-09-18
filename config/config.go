@@ -230,8 +230,6 @@ func BaseLoad() BaseConfig {
 	config.ProjectUrl = ""
 	config.WebhookSecret = ""
 
-	config.ConvertDocxToPdfSecret = cast.ToString(GetOrReturnDefaultValue("CONVERT_DOCX_TO_PDF_SECRET", "WbWxRNhIMSKBafuk"))
-
 	return config
 }
 
