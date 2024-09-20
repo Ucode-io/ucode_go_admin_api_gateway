@@ -347,7 +347,7 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 		limit = 100
 	} else {
 		if limit > 40 {
-			limit = 20
+			limit = 40
 		}
 	}
 
