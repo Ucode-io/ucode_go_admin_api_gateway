@@ -360,6 +360,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 	v2 := r.Group("/v2")
 	v2.Use(h.V1.AuthMiddleware(cfg))
 	{
+		// sleep api
+		v2.GET("/sleep-api", h.V1.SleepApi)
 		// custom event
 		v2.POST("/custom-event", h.V1.CreateNewCustomEvent)
 		v2.GET("/custom-event/:custom_event_id", h.V1.GetNewCustomEventByID)
