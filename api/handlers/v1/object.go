@@ -2,6 +2,8 @@ package v1
 
 import (
 	"context"
+	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -10,22 +12,16 @@ import (
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
 	pba "ucode/ucode_go_api_gateway/genproto/auth_service"
-	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
-
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
+	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
-
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
-	"encoding/base64"
-	"encoding/json"
-
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/spf13/cast"
-
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/structpb"
 )
@@ -1078,8 +1074,8 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 
 	if objectRequest.Data["view_type"] != "CALENDAR" {
 		if _, ok := objectRequest.Data["limit"]; ok {
-			if cast.ToInt(objectRequest.Data["limit"]) > 20 {
-				objectRequest.Data["limit"] = 10
+			if cast.ToInt(objectRequest.Data["limit"]) > 40 {
+				objectRequest.Data["limit"] = 40
 			}
 		} else {
 			objectRequest.Data["limit"] = 10
