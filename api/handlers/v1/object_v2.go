@@ -77,13 +77,21 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 		return
 	}
 
+	projectIDs := []string{"0f111e78-3a93-4bec-945a-2a77e0e0a82d", "25d16930-b1a9-4ae5-ab01-b79cc993f06e"}
 	if objectRequest.Data["view_type"] != "CALENDAR" {
 		if _, ok := objectRequest.Data["limit"]; ok {
 			if cast.ToInt(objectRequest.Data["limit"]) > 40 {
 				objectRequest.Data["limit"] = 40
 			}
 		} else {
-			if projectId != "0f111e78-3a93-4bec-945a-2a77e0e0a82d" {
+			found := false
+			for _, id := range projectIDs {
+				if projectId == id {
+					found = true
+					break
+				}
+			}
+			if !found {
 				objectRequest.Data["limit"] = 10
 			}
 		}
