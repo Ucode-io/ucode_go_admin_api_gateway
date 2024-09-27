@@ -83,7 +83,7 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 				objectRequest.Data["limit"] = 40
 			}
 		} else {
-			if projectId != "0f111e78-3a93-4bec-945a-2a77e0e0a82d" {
+			if projectId != "0f111e78-3a93-4bec-945a-2a77e0e0a82d" && projectId != "25d16930-b1a9-4ae5-ab01-b79cc993f06e" {
 				objectRequest.Data["limit"] = 10
 			}
 		}
