@@ -216,8 +216,6 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *HandlerV2
 		data["action_type"] = request.ActionType
 		invokeFunction.Data = data
 
-		h.log.Info("---OBJECT DATA BEFOR---->>>>", logger.Any("req", data["object_data_before_update"]))
-
 		if customEvent.GetFunctions()[0].RequestType == "" || customEvent.GetFunctions()[0].RequestType == "ASYNC" {
 
 			resp, err := util.DoRequest("https://ofs.u-code.io/function/"+customEvent.GetFunctions()[0].Path, "POST", invokeFunction)

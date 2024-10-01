@@ -304,7 +304,7 @@ func (h *HandlerV2) CreateRelation(c *gin.Context) {
 			context.Background(),
 			&goRelation,
 		)
-		relation.Id = resp.Id
+		relation.Id = resp.GetId()
 		logReq.Request = &goRelation
 		if err != nil {
 			logReq.Response = err.Error()

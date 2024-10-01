@@ -784,10 +784,12 @@ func (h *HandlerV1) UpdateObject(c *gin.Context) {
 		resp, err = service.Update(
 			context.Background(),
 			&obs.CommonMessage{
-				TableSlug:      c.Param("table_slug"),
-				Data:           structData,
-				ProjectId:      resource.ResourceEnvironmentId,
-				BlockedBuilder: cast.ToBool(c.DefaultQuery("block_builder", "false")),
+				TableSlug:        c.Param("table_slug"),
+				Data:             structData,
+				ProjectId:        resource.ResourceEnvironmentId,
+				BlockedBuilder:   cast.ToBool(c.DefaultQuery("block_builder", "false")),
+				EnvId:            resource.EnvironmentId,
+				CompanyProjectId: resource.ProjectId,
 			},
 		)
 		if err != nil {
