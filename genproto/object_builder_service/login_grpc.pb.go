@@ -8,7 +8,6 @@ package object_builder_service
 
 import (
 	context "context"
-	empty "github.com/golang/protobuf/ptypes/empty"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -30,7 +29,7 @@ type LoginServiceClient interface {
 	GetUserUpdatedPermission(ctx context.Context, in *GetUserUpdatedPermissionRequest, opts ...grpc.CallOption) (*V2LoginResponse, error)
 	LoginDataByUserId(ctx context.Context, in *LoginDataReq, opts ...grpc.CallOption) (*LoginDataRes, error)
 	GetConnetionOptions(ctx context.Context, in *GetConnetionOptionsRequest, opts ...grpc.CallOption) (*GetConnectionOptionsResponse, error)
-	UpdateUserPassword(ctx context.Context, in *UpdateUserPasswordRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	UpdateUserPassword(ctx context.Context, in *UpdateUserPasswordRequest, opts ...grpc.CallOption) (*LoginDataRes, error)
 }
 
 type loginServiceClient struct {
@@ -104,8 +103,8 @@ func (c *loginServiceClient) GetConnetionOptions(ctx context.Context, in *GetCon
 	return out, nil
 }
 
-func (c *loginServiceClient) UpdateUserPassword(ctx context.Context, in *UpdateUserPasswordRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
-	out := new(empty.Empty)
+func (c *loginServiceClient) UpdateUserPassword(ctx context.Context, in *UpdateUserPasswordRequest, opts ...grpc.CallOption) (*LoginDataRes, error) {
+	out := new(LoginDataRes)
 	err := c.cc.Invoke(ctx, "/object_builder_service.LoginService/UpdateUserPassword", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -124,7 +123,7 @@ type LoginServiceServer interface {
 	GetUserUpdatedPermission(context.Context, *GetUserUpdatedPermissionRequest) (*V2LoginResponse, error)
 	LoginDataByUserId(context.Context, *LoginDataReq) (*LoginDataRes, error)
 	GetConnetionOptions(context.Context, *GetConnetionOptionsRequest) (*GetConnectionOptionsResponse, error)
-	UpdateUserPassword(context.Context, *UpdateUserPasswordRequest) (*empty.Empty, error)
+	UpdateUserPassword(context.Context, *UpdateUserPasswordRequest) (*LoginDataRes, error)
 	mustEmbedUnimplementedLoginServiceServer()
 }
 
@@ -153,7 +152,7 @@ func (UnimplementedLoginServiceServer) LoginDataByUserId(context.Context, *Login
 func (UnimplementedLoginServiceServer) GetConnetionOptions(context.Context, *GetConnetionOptionsRequest) (*GetConnectionOptionsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetConnetionOptions not implemented")
 }
-func (UnimplementedLoginServiceServer) UpdateUserPassword(context.Context, *UpdateUserPasswordRequest) (*empty.Empty, error) {
+func (UnimplementedLoginServiceServer) UpdateUserPassword(context.Context, *UpdateUserPasswordRequest) (*LoginDataRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateUserPassword not implemented")
 }
 func (UnimplementedLoginServiceServer) mustEmbedUnimplementedLoginServiceServer() {}

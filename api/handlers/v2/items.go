@@ -979,10 +979,12 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 		body, err := services.GoObjectBuilderService().Items().Update(
 			context.Background(),
 			&nb.CommonMessage{
-				TableSlug:      c.Param("collection"),
-				Data:           structData,
-				ProjectId:      resource.ResourceEnvironmentId,
-				BlockedBuilder: cast.ToBool(c.DefaultQuery("block_builder", "false")),
+				TableSlug:        c.Param("collection"),
+				Data:             structData,
+				ProjectId:        resource.ResourceEnvironmentId,
+				BlockedBuilder:   cast.ToBool(c.DefaultQuery("block_builder", "false")),
+				EnvId:            resource.EnvironmentId,
+				CompanyProjectId: resource.ProjectId,
 			},
 		)
 		if err != nil {
