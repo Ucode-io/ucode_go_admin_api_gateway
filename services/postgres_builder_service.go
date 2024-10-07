@@ -87,7 +87,6 @@ type postgresBuilderServiceClient struct {
 	permissionService         object_builder_service.PermissionServiceClient
 	customEventService        object_builder_service.CustomEventServiceClient
 	barcodeService            object_builder_service.BarcodeServiceClient
-	objectBuilderServiceAuth  object_builder_service.ObjectBuilderServiceClient
 	loginService              object_builder_service.LoginServiceClient
 	cascadingService          object_builder_service.CascadingServiceClient
 	tableHelpersService       object_builder_service.TableHelpersServiceClient
