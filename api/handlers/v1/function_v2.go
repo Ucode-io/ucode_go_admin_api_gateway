@@ -849,7 +849,11 @@ func (h *HandlerV1) InvokeFunctionByPath(c *gin.Context) {
 		return
 	}
 	authInfo, _ := h.GetAuthInfo(c)
-	invokeFunction.Data["user_id"] = authInfo.GetUserId()
+
+	if projectId != "342fba37-fc7d-4b6f-b02f-57b21beb0218" { //starex
+		invokeFunction.Data["user_id"] = authInfo.GetUserId()
+	}
+
 	invokeFunction.Data["project_id"] = authInfo.GetProjectId()
 	invokeFunction.Data["environment_id"] = authInfo.GetEnvId()
 	invokeFunction.Data["app_id"] = apiKeys.GetData()[0].GetAppId()
