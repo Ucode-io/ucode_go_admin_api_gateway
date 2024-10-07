@@ -804,8 +804,7 @@ func (h *HandlerV1) GetAllNewFunctionsForApp(c *gin.Context) {
 func (h *HandlerV1) InvokeFunctionByPath(c *gin.Context) {
 	var invokeFunction models.CommonMessage
 
-	err := c.ShouldBindJSON(&invokeFunction)
-	if err != nil {
+	if err := c.ShouldBindJSON(&invokeFunction); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -818,7 +817,7 @@ func (h *HandlerV1) InvokeFunctionByPath(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
+		err := errors.New("error getting environment id | not valid")
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}

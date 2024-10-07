@@ -15,6 +15,7 @@ import (
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/logger"
+	"ucode/ucode_go_api_gateway/pkg/security"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
@@ -314,11 +315,20 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 		objectRequest models.CommonMessage
 		queryData     string
 		statusHttp    = status_http.GrpcStatusToHTTP["Ok"]
+		hashed        bool
 	)
 
 	queryParams := c.Request.URL.Query()
 	if ok := queryParams.Has("data"); ok {
 		queryData = queryParams.Get("data")
+	}
+
+	if ok := queryParams.Has("data"); ok {
+		hashData, err := security.Decrypt(queryParams.Get("data"), h.baseConf.SecretKey)
+		if err == nil {
+			queryData = hashData
+			hashed = true
+		}
 	}
 
 	queryMap := make(map[string]interface{})
@@ -546,6 +556,17 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 		}
 
 		statusHttp.CustomMessage = resp.GetCustomMessage()
+
+		if hashed {
+			hash, err := security.Encrypt(resp, h.baseConf.SecretKey)
+			if err != nil {
+				h.handleResponse(c, status_http.InternalServerError, err.Error())
+				return
+			}
+
+			h.handleResponse(c, statusHttp, hash)
+			return
+		}
 		h.handleResponse(c, statusHttp, resp)
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().ObjectBuilder().GetListSlim(context.Background(),

@@ -17,6 +17,7 @@ import (
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/logger"
+	"ucode/ucode_go_api_gateway/pkg/security"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
@@ -414,14 +415,21 @@ func (h *HandlerV1) GetSingleSlim(c *gin.Context) {
 	var (
 		object     models.CommonMessage
 		statusHttp = status_http.GrpcStatusToHTTP["Ok"]
+		hashed     bool
 	)
 
 	object.Data = make(map[string]interface{})
 
 	objectID := c.Param("object_id")
 	if !util.IsValidUUID(objectID) {
-		h.handleResponse(c, status_http.InvalidArgument, "object_id is an invalid uuid")
-		return
+		hashData, err := security.Decrypt(c.Param("object_id"), h.baseConf.SecretKey)
+		if err == nil {
+			objectID = hashData
+			hashed = true
+		} else {
+			h.handleResponse(c, status_http.InvalidArgument, "object_id is an invalid uuid")
+			return
+		}
 	}
 
 	object.Data["id"] = objectID
@@ -545,6 +553,15 @@ func (h *HandlerV1) GetSingleSlim(c *gin.Context) {
 		}
 
 		statusHttp.CustomMessage = resp.GetCustomMessage()
+		if hashed {
+			response, err := security.Encrypt(resp, h.baseConf.SecretKey)
+			if err != nil {
+				h.handleResponse(c, status_http.InternalServerError, err.Error())
+				return
+			}
+			h.handleResponse(c, statusHttp, response)
+			return
+		}
 		h.handleResponse(c, statusHttp, resp)
 	case pb.ResourceType_POSTGRESQL:
 		redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
