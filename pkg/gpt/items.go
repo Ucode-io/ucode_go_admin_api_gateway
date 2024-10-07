@@ -15,12 +15,12 @@ import (
 	"github.com/spf13/cast"
 )
 
-func CreateItems(req *models.CreateItemsAI) ([]models.CreateVersionHistoryRequest, error) {
+func CreateItems(req *models.CreateItemsAI) ([]*models.CreateVersionHistoryRequest, error) {
 
 	var (
 		resource   = req.Resource
 		services   = req.Service
-		respLogReq = []models.CreateVersionHistoryRequest{}
+		respLogReq = []*models.CreateVersionHistoryRequest{}
 	)
 
 	switch resource.ResourceType {
@@ -67,12 +67,12 @@ func CreateItems(req *models.CreateItemsAI) ([]models.CreateVersionHistoryReques
 	return respLogReq, nil
 }
 
-func GenerateItems(req *models.GenerateItemsAI) ([]models.CreateVersionHistoryRequest, error) {
+func GenerateItems(req *models.GenerateItemsAI) ([]*models.CreateVersionHistoryRequest, error) {
 
 	var (
 		resource   = req.Resource
 		services   = req.Service
-		respLogReq = []models.CreateVersionHistoryRequest{}
+		respLogReq = []*models.CreateVersionHistoryRequest{}
 		prompt     string
 		tableSlug  string
 	)
@@ -164,12 +164,12 @@ func GenerateItems(req *models.GenerateItemsAI) ([]models.CreateVersionHistoryRe
 	return nil, nil
 }
 
-func UpdateItems(req *models.UpdateItemsAI) ([]models.CreateVersionHistoryRequest, error) {
+func UpdateItems(req *models.UpdateItemsAI) ([]*models.CreateVersionHistoryRequest, error) {
 
 	var (
 		resource   = req.Resource
 		services   = req.Service
-		respLogReq = []models.CreateVersionHistoryRequest{}
+		respLogReq = []*models.CreateVersionHistoryRequest{}
 	)
 
 	data, err := helper.ConvertMapToStruct(map[string]interface{}{
@@ -200,12 +200,12 @@ func UpdateItems(req *models.UpdateItemsAI) ([]models.CreateVersionHistoryReques
 	return respLogReq, nil
 }
 
-func DeleteItems(req *models.UpdateItemsAI) ([]models.CreateVersionHistoryRequest, error) {
+func DeleteItems(req *models.UpdateItemsAI) ([]*models.CreateVersionHistoryRequest, error) {
 
 	var (
 		resource   = req.Resource
 		services   = req.Service
-		respLogReq = []models.CreateVersionHistoryRequest{}
+		respLogReq = []*models.CreateVersionHistoryRequest{}
 	)
 
 	data, err := helper.ConvertMapToStruct(map[string]interface{}{

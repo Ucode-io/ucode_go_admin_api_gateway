@@ -155,9 +155,8 @@ func (h *HandlerV1) adminHasAccess(c *gin.Context) (*auth_service.HasAccessSuper
 		c.Request.Context(),
 		&auth_service.HasAccessSuperAdminReq{
 			AccessToken: accessToken,
-			// ClientPlatformId: "3f6320a6-b6ed-4f5f-ad90-14a154c95ed3",
-			Path:   helper.GetURLWithTableSlug(c),
-			Method: c.Request.Method,
+			Path:        helper.GetURLWithTableSlug(c),
+			Method:      c.Request.Method,
 		},
 	)
 	if err != nil {

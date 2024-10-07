@@ -22,12 +22,12 @@ import (
 	ghttp "github.com/go-git/go-git/v5/plumbing/transport/http"
 )
 
-func CreateFunction(req *models.CreateFunctionAI) ([]models.CreateVersionHistoryRequest, error) {
+func CreateFunction(req *models.CreateFunctionAI) ([]*models.CreateVersionHistoryRequest, error) {
 
 	var (
 		resource   = req.Resource
 		services   = req.Service
-		respLogReq = []models.CreateVersionHistoryRequest{}
+		respLogReq = []*models.CreateVersionHistoryRequest{}
 	)
 
 	funcPath, funcId, err := CreateOfs(req.FunctionName, req.Token)

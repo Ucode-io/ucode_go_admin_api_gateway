@@ -97,7 +97,7 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 			functionCall = toolCall.Function
 			functionName = functionCall.Name
 			arguments    map[string]interface{}
-			logReq       []models.CreateVersionHistoryRequest
+			logReq       []*models.CreateVersionHistoryRequest
 		)
 
 		err = json.Unmarshal([]byte(functionCall.Arguments), &arguments)
@@ -161,9 +161,7 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 			}
 
 		case "create_table":
-
-			_, ok := arguments["menu"]
-			if !ok {
+			if _, ok := arguments["menu"]; !ok {
 				arguments["menu"] = "c57eedc3-a954-4262-a0af-376c65b5a284"
 			}
 
@@ -184,7 +182,6 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 			}
 
 		case "update_table":
-
 			logReq, err = gpt.UpdateTable(&models.UpdateTableAI{
 				OldLabel: cast.ToString(arguments["old_name"]),
 				NewLabel: cast.ToString(arguments["new_name"]),
@@ -384,9 +381,9 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 		for _, log := range logReq {
 			switch resource.ResourceType {
 			case pb.ResourceType_MONGODB:
-				go h.versionHistory(&log)
+				go h.versionHistory(log)
 			case pb.ResourceType_POSTGRESQL:
-				go h.versionHistoryGo(c, &log)
+				go h.versionHistoryGo(c, log)
 			}
 		}
 
