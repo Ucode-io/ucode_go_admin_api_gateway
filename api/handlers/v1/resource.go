@@ -260,7 +260,6 @@ func (h *HandlerV1) UpdateResource(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetResourceList(c *gin.Context) {
-
 	limit, err := h.getLimitParam(c)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
@@ -273,17 +272,28 @@ func (h *HandlerV1) GetResourceList(c *gin.Context) {
 		return
 	}
 
+	projectId, ok := c.Get("project_id")
+	if !ok {
+		h.handleResponse(c, status_http.InvalidArgument, errors.New("project_id is required"))
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		h.handleResponse(c, status_http.InvalidArgument, errors.New("environment_id is required"))
+		return
+	}
+
 	resp, err := h.companyServices.Resource().GetResourceList(
 		context.Background(),
 		&company_service.GetResourceListRequest{
 			Limit:         int32(limit),
 			Offset:        int32(offset),
 			Search:        c.DefaultQuery("search", ""),
-			ProjectId:     c.DefaultQuery("project_id", ""),
-			EnvironmentId: c.DefaultQuery("environment_id", ""),
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
 		},
 	)
-
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return

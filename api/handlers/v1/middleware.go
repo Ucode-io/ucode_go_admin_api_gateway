@@ -30,7 +30,6 @@ var (
 
 func (h *HandlerV1) NodeMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-
 		c.Set(h.baseConf.UcodeNamespace, h.baseConf.UcodeNamespace)
 		c.Next()
 	}
@@ -41,7 +40,6 @@ func (h *HandlerV1) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 		var (
 			res = &auth_service.V2HasAccessUserRes{}
 			ok  bool
-			//platformType = c.GetHeader("Platform-Type")
 		)
 
 		bearerToken := c.GetHeader("Authorization")
@@ -62,7 +60,6 @@ func (h *HandlerV1) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 
 		switch strArr[0] {
 		case "Bearer":
-
 			res, ok = h.hasAccess(c)
 			if !ok {
 				h.log.Error("---ERR->AuthMiddleware->hasNotAccess-->")
@@ -85,7 +82,6 @@ func (h *HandlerV1) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 			c.Set("environment_id", environmentId)
 			c.Set("project_id", projectId)
 			c.Set("user_id", res.UserId)
-
 		case "API-KEY":
 			if app_id == "" {
 				err := errors.New("error invalid api-key method")
@@ -244,7 +240,6 @@ func (h *HandlerV1) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 			c.Set("environment_id", apikeys.GetEnvironmentId())
 			c.Set("project_id", apikeys.GetProjectId())
 			c.Set("resource", string(resourceBody))
-
 		default:
 			if !strings.Contains(c.Request.URL.Path, "api") {
 				err := errors.New("error invalid authorization method")
@@ -266,7 +261,6 @@ func (h *HandlerV1) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 
 		}
 		c.Set("Auth", res)
-		// c.Set("namespace", h.cfg.UcodeNamespace)
 
 		c.Next()
 	}
@@ -289,7 +283,6 @@ func (h *HandlerV1) SlimAuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 		}
 		switch strArr[0] {
 		case "Bearer":
-
 			res, ok = h.hasAccess(c)
 			if !ok {
 				h.log.Error("---ERR->AuthMiddleware->hasNotAccess-->")
@@ -330,31 +323,6 @@ func (h *HandlerV1) SlimAuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 				return
 			}
 
-			// lmtr := h.rateLimiter.GetLimiter(app_id)
-			// if !lmtr.Allow() {
-			// 	h.log.Error("--AuthMiddleware--", logger.Error(errors.New("RPS limit is exceeded")))
-			// 	c.AbortWithError(http.StatusTooManyRequests, errors.New("RPS limit is exceeded"))
-			// 	return
-			// } else {
-			// 	value, _ := ApiKeys.LoadOrStore(app_id, 0)
-			// 	count := value.(int)
-
-			// 	if count == config.LIMITER_RANGE {
-			// 		ApiKeys.Store(app_id, 0)
-			// 		go func() {
-			// 			_, err := h.authService.ApiKeyUsage().Upsert(context.Background(), &auth_service.ApiKeyUsage{
-			// 				ApiKey:       app_id,
-			// 				RequestCount: config.LIMITER_RANGE,
-			// 			})
-			// 			if err != nil {
-			// 				h.log.Error("--SlimAuthMiddleware--UpsertApiKeyUsage", logger.Error(err))
-			// 			}
-			// 		}()
-			// 	} else {
-			// 		ApiKeys.Store(app_id, count+1)
-			// 	}
-			// }
-
 			var (
 				appIdKey, resourceAppIdKey = app_id, app_id + "resource"
 
@@ -498,7 +466,6 @@ func (h *HandlerV1) SlimAuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 			c.Set("environment_id", apikeys.GetEnvironmentId())
 			c.Set("project_id", apikeys.GetProjectId())
 			c.Set("resource", string(resourceBody))
-
 		default:
 			if !strings.Contains(c.Request.URL.Path, "api") {
 				err := errors.New("error invalid authorization method")
