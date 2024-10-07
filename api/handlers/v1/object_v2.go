@@ -315,17 +315,18 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 		queryData     string
 		statusHttp    = status_http.GrpcStatusToHTTP["Ok"]
 	)
+
 	queryParams := c.Request.URL.Query()
 	if ok := queryParams.Has("data"); ok {
 		queryData = queryParams.Get("data")
 	}
 
 	queryMap := make(map[string]interface{})
-	err := json.Unmarshal([]byte(queryData), &queryMap)
-	if err != nil {
+	if err := json.Unmarshal([]byte(queryData), &queryMap); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
+
 	offset, err := h.getOffsetParam(c)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
@@ -368,6 +369,7 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 		h.handleResponse(c, status_http.Forbidden, err.Error())
 		return
 	}
+
 	objectRequest.Data["tables"] = tokenInfo.GetTables()
 	objectRequest.Data["user_id_from_token"] = tokenInfo.GetUserId()
 	objectRequest.Data["role_id_from_token"] = tokenInfo.GetRoleId()
@@ -379,7 +381,6 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 	}
 
 	userId, _ := c.Get("user_id")
-
 	apiKey := c.GetHeader("X-API-KEY")
 
 	var resource *pb.ServiceResourceModel
@@ -452,9 +453,7 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-
 		service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
-
 		var slimKey = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("slim-%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId)))
 		if !cast.ToBool(c.Query("block_cached")) {
 			if cast.ToBool(c.Query("is_wait_cached")) {

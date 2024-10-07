@@ -20,8 +20,6 @@ import (
 
 func (h *HandlerV1) hasAccess(c *gin.Context) (*auth_service.V2HasAccessUserRes, bool) {
 	bearerToken := c.GetHeader("Authorization")
-	// projectId := c.DefaultQuery("project_id", "")
-
 	strArr := strings.Split(bearerToken, " ")
 
 	if len(strArr) != 2 || strArr[0] != "Bearer" {
