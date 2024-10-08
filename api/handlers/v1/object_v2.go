@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -326,7 +327,7 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 	if ok := queryParams.Has("data"); ok {
 		hashData, err := security.Decrypt(queryParams.Get("data"), h.baseConf.SecretKey)
 		if err == nil {
-			queryData = hashData
+			queryData = strings.TrimSpace(hashData)
 			hashed = true
 		}
 	}
