@@ -11,6 +11,8 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/helper"
 
 	"github.com/gin-gonic/gin"
+	"github.com/opentracing-contrib/go-gin/ginhttp"
+	"github.com/opentracing/opentracing-go"
 	"github.com/spf13/cast"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
@@ -18,13 +20,15 @@ import (
 
 // SetUpAPI @description This is an api gateway
 // @termsOfService https://udevs.io
-func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
+func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer opentracing.Tracer) {
 	docs.SwaggerInfo.Title = cfg.ServiceName
 	docs.SwaggerInfo.Version = cfg.Version
 	// docs.SwaggerInfo.Host = cfg.ServiceHost + cfg.HTTPPort
 	docs.SwaggerInfo.Schemes = []string{cfg.HTTPScheme}
 
 	r.Use(customCORSMiddleware())
+	r.Use(ginhttp.Middleware(tracer))
+
 	// r.Use(MaxAllowed(5000))
 	// r.Use(h.NodeMiddleware())
 

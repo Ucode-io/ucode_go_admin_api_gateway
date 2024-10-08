@@ -165,6 +165,7 @@ type BaseConfig struct {
 	PlatformType                  string
 
 	UcodeNamespace string
+	JaegerHostPort string
 
 	GithubClientId     string
 	GithubClientSecret string
@@ -184,7 +185,7 @@ func BaseLoad() BaseConfig {
 
 	config := BaseConfig{}
 
-	config.ServiceName = cast.ToString(GetOrReturnDefaultValue("SERVICE_NAME", "ucode/ucode_go_api_gateway"))
+	config.ServiceName = cast.ToString(GetOrReturnDefaultValue("SERVICE_NAME", "ucode_go_api_gateway"))
 	config.Environment = cast.ToString(GetOrReturnDefaultValue("ENVIRONMENT", DebugMode))
 	config.Version = cast.ToString(GetOrReturnDefaultValue("VERSION", "1.0"))
 
@@ -225,6 +226,7 @@ func BaseLoad() BaseConfig {
 
 	config.UcodeNamespace = "u-code"
 	config.SecretKey = cast.ToString(GetOrReturnDefaultValue("SECRET_KEY", ""))
+	config.JaegerHostPort = cast.ToString(GetOrReturnDefaultValue("JAEGER_URL", ""))
 
 	config.GithubClientId = ""
 	config.GithubClientSecret = ""
