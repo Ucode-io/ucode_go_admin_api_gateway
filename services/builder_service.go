@@ -159,7 +159,6 @@ type builderServiceClient struct {
 	versionHistoryService     object_builder_service.VersionHistoryServiceClient
 	versionService            object_builder_service.VersionServiceClient
 	objectBuilderConnPool     *grpcpool.Pool
-	conn                      *grpc.ClientConn
 	clientLb                  gRPCClientLb.GrpcClientLB
 }
 

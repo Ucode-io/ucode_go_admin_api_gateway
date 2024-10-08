@@ -2,9 +2,6 @@ package gpt
 
 import (
 	"context"
-	"math/rand"
-	"strconv"
-	"time"
 	"ucode/ucode_go_api_gateway/api/models"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
@@ -16,12 +13,12 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
-func CreateField(req *models.CreateFieldAI) ([]models.CreateVersionHistoryRequest, error) {
+func CreateField(req *models.CreateFieldAI) ([]*models.CreateVersionHistoryRequest, error) {
 
 	var (
 		resource   = req.Resource
 		services   = req.Service
-		respLogReq = []models.CreateVersionHistoryRequest{}
+		respLogReq = []*models.CreateVersionHistoryRequest{}
 		attributes = &structpb.Struct{}
 		err        error
 	)
@@ -77,13 +74,12 @@ func CreateField(req *models.CreateFieldAI) ([]models.CreateVersionHistoryReques
 			if err != nil {
 				logReq.Request = field
 				logReq.Response = err.Error()
-				respLogReq = append(respLogReq, logReq)
 				return respLogReq, err
 			}
 			logReq.Request = field
 			logReq.Response = resp
 			logReq.Current = resp
-			respLogReq = append(respLogReq, logReq)
+			respLogReq = append(respLogReq, &logReq)
 		}
 
 	case pb.ResourceType_POSTGRESQL:
@@ -127,25 +123,25 @@ func CreateField(req *models.CreateFieldAI) ([]models.CreateVersionHistoryReques
 			if err != nil {
 				logReq.Request = field
 				logReq.Response = err.Error()
-				respLogReq = append(respLogReq, logReq)
+				respLogReq = append(respLogReq, &logReq)
 				return respLogReq, err
 			}
 			logReq.Request = field
 			logReq.Response = resp
 			logReq.Current = resp
-			respLogReq = append(respLogReq, logReq)
+			respLogReq = append(respLogReq, &logReq)
 		}
 	}
 
 	return respLogReq, nil
 }
 
-func UpdateField(req *models.UpdateFieldAI) ([]models.CreateVersionHistoryRequest, error) {
+func UpdateField(req *models.UpdateFieldAI) ([]*models.CreateVersionHistoryRequest, error) {
 
 	var (
 		resource   = req.Resource
 		services   = req.Service
-		respLogReq = []models.CreateVersionHistoryRequest{}
+		respLogReq = []*models.CreateVersionHistoryRequest{}
 	)
 
 	// attributes, err := helper.ConvertMapToStruct(map[string]interface{}{
@@ -201,7 +197,7 @@ func UpdateField(req *models.UpdateFieldAI) ([]models.CreateVersionHistoryReques
 
 				field.ProjectId = resource.ResourceEnvironmentId
 
-				_, err = services.GetBuilderServiceByType(resource.NodeType).Field().Update(
+				_, _ = services.GetBuilderServiceByType(resource.NodeType).Field().Update(
 					context.Background(),
 					field,
 				)
@@ -248,7 +244,7 @@ func UpdateField(req *models.UpdateFieldAI) ([]models.CreateVersionHistoryReques
 
 				field.ProjectId = resource.ResourceEnvironmentId
 
-				_, err = services.GoObjectBuilderService().Field().Update(
+				_, _ = services.GoObjectBuilderService().Field().Update(
 					context.Background(),
 					field,
 				)
@@ -260,12 +256,12 @@ func UpdateField(req *models.UpdateFieldAI) ([]models.CreateVersionHistoryReques
 	return nil, nil
 }
 
-func DeleteField(req *models.DeleteFieldAI) ([]models.CreateVersionHistoryRequest, error) {
+func DeleteField(req *models.DeleteFieldAI) ([]*models.CreateVersionHistoryRequest, error) {
 
 	var (
 		resource   = req.Resource
 		services   = req.Service
-		respLogReq = []models.CreateVersionHistoryRequest{}
+		respLogReq = []*models.CreateVersionHistoryRequest{}
 	)
 
 	switch resource.ResourceType {
@@ -293,7 +289,7 @@ func DeleteField(req *models.DeleteFieldAI) ([]models.CreateVersionHistoryReques
 
 				field.ProjectId = resource.ResourceEnvironmentId
 
-				_, err = services.GetBuilderServiceByType(resource.NodeType).Field().Delete(
+				_, _ = services.GetBuilderServiceByType(resource.NodeType).Field().Delete(
 					context.Background(),
 					&obs.FieldPrimaryKey{
 						Id:        field.Id,
@@ -326,7 +322,7 @@ func DeleteField(req *models.DeleteFieldAI) ([]models.CreateVersionHistoryReques
 
 				field.ProjectId = resource.ResourceEnvironmentId
 
-				_, err = services.GoObjectBuilderService().Field().Delete(
+				_, _ = services.GoObjectBuilderService().Field().Delete(
 					context.Background(),
 					&nb.FieldPrimaryKey{
 						Id:        field.Id,
@@ -338,10 +334,4 @@ func DeleteField(req *models.DeleteFieldAI) ([]models.CreateVersionHistoryReques
 	}
 
 	return respLogReq, nil
-}
-
-func generateID() string {
-	now := time.Now().UnixNano()
-	random := rand.Int63()
-	return strconv.FormatInt(now, 36) + strconv.FormatInt(random, 36)
 }

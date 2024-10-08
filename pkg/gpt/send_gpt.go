@@ -12,7 +12,6 @@ import (
 )
 
 func SendReqToGPT(req []models.Message) ([]models.ToolCall, error) {
-
 	cfg := config.Load()
 
 	requestBody := models.OpenAIRequest{

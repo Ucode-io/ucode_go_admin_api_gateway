@@ -8,12 +8,11 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/helper"
 )
 
-func CreateRelation(req *models.CreateRelationAI) ([]models.CreateVersionHistoryRequest, error) {
-
+func CreateRelation(req *models.CreateRelationAI) ([]*models.CreateVersionHistoryRequest, error) {
 	var (
 		resource   = req.Resource
 		services   = req.Service
-		respLogReq = []models.CreateVersionHistoryRequest{}
+		respLogReq = []*models.CreateVersionHistoryRequest{}
 	)
 
 	attributes, err := helper.ConvertMapToStruct(map[string]interface{}{
@@ -92,12 +91,12 @@ func CreateRelation(req *models.CreateRelationAI) ([]models.CreateVersionHistory
 	return nil, nil
 }
 
-func DeleteRelation(req *models.DeleteRelationAI) ([]models.CreateVersionHistoryRequest, error) {
+func DeleteRelation(req *models.DeleteRelationAI) ([]*models.CreateVersionHistoryRequest, error) {
 
 	var (
 		resource   = req.Resource
 		services   = req.Service
-		respLogReq = []models.CreateVersionHistoryRequest{}
+		respLogReq = []*models.CreateVersionHistoryRequest{}
 	)
 
 	switch resource.ResourceType {
@@ -124,6 +123,9 @@ func DeleteRelation(req *models.DeleteRelationAI) ([]models.CreateVersionHistory
 			TableTo:   tablesTo.Tables[0].Slug,
 			Type:      req.RelationType,
 		})
+		if err != nil {
+			return respLogReq, err
+		}
 
 		for _, id := range relation.Ids {
 			_, err := services.GetBuilderServiceByType(resource.NodeType).Relation().Delete(context.Background(), &obs.RelationPrimaryKey{

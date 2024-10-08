@@ -224,6 +224,7 @@ func BaseLoad() BaseConfig {
 	config.PathToClone = cast.ToString(GetOrReturnDefaultValue("CLONE_PATH", "./app"))
 
 	config.UcodeNamespace = "u-code"
+	config.SecretKey = cast.ToString(GetOrReturnDefaultValue("SECRET_KEY", ""))
 
 	config.GithubClientId = ""
 	config.GithubClientSecret = ""
@@ -293,7 +294,7 @@ func Load() Config {
 	config.WebPageServicePort = cast.ToString(GetOrReturnDefaultValue("WEB_PAGE_GRPC_PORT", ":2004"))
 
 	config.UcodeNamespace = "cp-region-type-id"
-	config.SecretKey = ""
+	config.SecretKey = cast.ToString(GetOrReturnDefaultValue("SECRET_KEY", ""))
 
 	config.ChatServiceGrpcHost = cast.ToString(GetOrReturnDefaultValue("CHAT_SERVICE_HOST", ""))
 	config.ChatServiceGrpcPort = cast.ToString(GetOrReturnDefaultValue("CHAT_GRPC_PORT", ":2112"))

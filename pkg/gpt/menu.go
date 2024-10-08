@@ -11,7 +11,7 @@ import (
 	"github.com/spf13/cast"
 )
 
-func CreateMenu(reqBody *models.CreateMenuAI) ([]models.CreateVersionHistoryRequest, error) {
+func CreateMenu(reqBody *models.CreateMenuAI) ([]*models.CreateVersionHistoryRequest, error) {
 
 	attributes, err := helper.ConvertMapToStruct(map[string]interface{}{
 		"label":    "",
@@ -22,7 +22,7 @@ func CreateMenu(reqBody *models.CreateMenuAI) ([]models.CreateVersionHistoryRequ
 	}
 
 	var (
-		respLogReq   = []models.CreateVersionHistoryRequest{}
+		respLogReq   = []*models.CreateVersionHistoryRequest{}
 		mongoRequest = &obs.CreateMenuRequest{
 			Label:      reqBody.Label,
 			ParentId:   "c57eedc3-a954-4262-a0af-376c65b5a284",
@@ -59,12 +59,12 @@ func CreateMenu(reqBody *models.CreateMenuAI) ([]models.CreateVersionHistoryRequ
 
 		if err != nil {
 			logReq.Response = err.Error()
-			respLogReq = append(respLogReq, logReq)
+			respLogReq = append(respLogReq, &logReq)
 			return respLogReq, err
 		} else {
 			logReq.Response = resp
 			logReq.Current = resp
-			respLogReq = append(respLogReq, logReq)
+			respLogReq = append(respLogReq, &logReq)
 		}
 
 	case pb.ResourceType_POSTGRESQL:
@@ -75,21 +75,20 @@ func CreateMenu(reqBody *models.CreateMenuAI) ([]models.CreateVersionHistoryRequ
 
 		if err != nil {
 			logReq.Response = err.Error()
-			respLogReq = append(respLogReq, logReq)
 			return nil, err
 		} else {
 			logReq.Response = resp
 			logReq.Current = resp
-			respLogReq = append(respLogReq, logReq)
+			respLogReq = append(respLogReq, &logReq)
 		}
 	}
 
 	return respLogReq, nil
 }
 
-func DeleteMenu(reqBody *models.DeleteMenuAI) ([]models.CreateVersionHistoryRequest, error) {
+func DeleteMenu(reqBody *models.DeleteMenuAI) ([]*models.CreateVersionHistoryRequest, error) {
 	var (
-		respLogReq = []models.CreateVersionHistoryRequest{}
+		respLogReq = []*models.CreateVersionHistoryRequest{}
 		logReq     = models.CreateVersionHistoryRequest{
 			Services:     reqBody.Service,
 			NodeType:     reqBody.Resource.NodeType,
@@ -120,19 +119,19 @@ func DeleteMenu(reqBody *models.DeleteMenuAI) ([]models.CreateVersionHistoryRequ
 		)
 		if err != nil {
 			logReq.Response = err.Error()
-			respLogReq = append(respLogReq, logReq)
+			respLogReq = append(respLogReq, &logReq)
 			return respLogReq, err
 		}
 
-		respLogReq = append(respLogReq, logReq)
+		respLogReq = append(respLogReq, &logReq)
 	}
 
 	return respLogReq, nil
 }
 
-func UpdateMenu(reqBody *models.UpdateMenuAI) ([]models.CreateVersionHistoryRequest, error) {
+func UpdateMenu(reqBody *models.UpdateMenuAI) ([]*models.CreateVersionHistoryRequest, error) {
 	var (
-		respLogReq = []models.CreateVersionHistoryRequest{}
+		respLogReq = []*models.CreateVersionHistoryRequest{}
 		logReq     = models.CreateVersionHistoryRequest{
 			Services:     reqBody.Service,
 			NodeType:     reqBody.Resource.NodeType,
@@ -170,12 +169,11 @@ func UpdateMenu(reqBody *models.UpdateMenuAI) ([]models.CreateVersionHistoryRequ
 		)
 		if err != nil {
 			logReq.Response = err.Error()
-			respLogReq = append(respLogReq, logReq)
 			return respLogReq, err
 		} else {
 			logReq.Response = resp
 			logReq.Current = resp
-			respLogReq = append(respLogReq, logReq)
+			respLogReq = append(respLogReq, &logReq)
 		}
 	}
 

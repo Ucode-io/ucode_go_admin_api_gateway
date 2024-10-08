@@ -15,7 +15,7 @@ import (
 	"github.com/spf13/cast"
 )
 
-func CreateTable(reqBody *models.CreateTableAI) ([]models.CreateVersionHistoryRequest, error) {
+func CreateTable(reqBody *models.CreateTableAI) ([]*models.CreateVersionHistoryRequest, error) {
 
 	attributes, err := helper.ConvertMapToStruct(map[string]interface{}{
 		"label":    "",
@@ -26,7 +26,7 @@ func CreateTable(reqBody *models.CreateTableAI) ([]models.CreateVersionHistoryRe
 	}
 
 	var (
-		respLogReq = []models.CreateVersionHistoryRequest{}
+		respLogReq = []*models.CreateVersionHistoryRequest{}
 		resource   = reqBody.Resource
 		services   = reqBody.Service
 		tableMongo = &obs.CreateTableRequest{
@@ -75,13 +75,13 @@ func CreateTable(reqBody *models.CreateTableAI) ([]models.CreateVersionHistoryRe
 		)
 		if err != nil {
 			logReq.Response = err.Error()
-			respLogReq = append(respLogReq, logReq)
+			respLogReq = append(respLogReq, &logReq)
 			return respLogReq, err
 		} else {
 			tableMongo.Id = resp.Id
 			logReq.Current = &tableMongo
 			logReq.Response = &tableMongo
-			respLogReq = append(respLogReq, logReq)
+			respLogReq = append(respLogReq, &logReq)
 		}
 
 		if reqBody.Menu != "c57eedc3-a954-4262-a0af-376c65b5a284" {
@@ -122,12 +122,11 @@ func CreateTable(reqBody *models.CreateTableAI) ([]models.CreateVersionHistoryRe
 
 				if err != nil {
 					logReq.Response = err.Error()
-					respLogReq = append(respLogReq, logReq)
 					return nil, err
 				} else {
 					logReq.Response = resp
 					logReq.Current = resp
-					respLogReq = append(respLogReq, logReq)
+					respLogReq = append(respLogReq, &logReq)
 				}
 			}
 		} else {
@@ -159,12 +158,11 @@ func CreateTable(reqBody *models.CreateTableAI) ([]models.CreateVersionHistoryRe
 
 			if err != nil {
 				logReq.Response = err.Error()
-				respLogReq = append(respLogReq, logReq)
 				return nil, err
 			} else {
 				logReq.Response = resp
 				logReq.Current = resp
-				respLogReq = append(respLogReq, logReq)
+				respLogReq = append(respLogReq, &logReq)
 			}
 		}
 
@@ -175,25 +173,24 @@ func CreateTable(reqBody *models.CreateTableAI) ([]models.CreateVersionHistoryRe
 		)
 		if err != nil {
 			logReq.Response = err.Error()
-			respLogReq = append(respLogReq, logReq)
+			respLogReq = append(respLogReq, &logReq)
 			return respLogReq, err
 		} else {
 			tablePsql.Id = resp.Id
 			logReq.Current = &tablePsql
 			logReq.Response = &tablePsql
-			respLogReq = append(respLogReq, logReq)
+			respLogReq = append(respLogReq, &logReq)
 		}
 	}
 
 	return respLogReq, nil
 }
 
-func UpdateTable(req *models.UpdateTableAI) ([]models.CreateVersionHistoryRequest, error) {
-
+func UpdateTable(req *models.UpdateTableAI) ([]*models.CreateVersionHistoryRequest, error) {
 	var (
 		resource   = req.Resource
 		services   = req.Service
-		respLogReq = []models.CreateVersionHistoryRequest{}
+		respLogReq = []*models.CreateVersionHistoryRequest{}
 	)
 
 	attributes, err := helper.ConvertMapToStruct(map[string]interface{}{
@@ -247,12 +244,11 @@ func UpdateTable(req *models.UpdateTableAI) ([]models.CreateVersionHistoryReques
 			)
 			if err != nil {
 				logReq.Response = err.Error()
-				respLogReq = append(respLogReq, logReq)
 				return respLogReq, err
 			} else {
 				logReq.Response = resp
 				logReq.Current = resp
-				respLogReq = append(respLogReq, logReq)
+				respLogReq = append(respLogReq, &logReq)
 			}
 		}
 
@@ -296,21 +292,22 @@ func UpdateTable(req *models.UpdateTableAI) ([]models.CreateVersionHistoryReques
 			)
 			if err != nil {
 				logReq.Response = err.Error()
-				respLogReq = append(respLogReq, logReq)
 				return respLogReq, err
 			} else {
 				logReq.Response = resp
 				logReq.Current = resp
-				respLogReq = append(respLogReq, logReq)
+				respLogReq = append(respLogReq, &logReq)
 			}
 		}
 
 	case pb.ResourceType_POSTGRESQL:
-
 		tables, err := services.GoObjectBuilderService().Table().GetTablesByLabel(context.Background(), &nb.GetTablesByLabelReq{
 			ProjectId: resource.ResourceEnvironmentId,
 			Label:     req.OldLabel,
 		})
+		if err != nil {
+			return nil, err
+		}
 
 		for _, table := range tables.Tables {
 			var (
@@ -344,12 +341,11 @@ func UpdateTable(req *models.UpdateTableAI) ([]models.CreateVersionHistoryReques
 			)
 			if err != nil {
 				logReq.Response = err.Error()
-				respLogReq = append(respLogReq, logReq)
 				return respLogReq, err
 			} else {
 				logReq.Response = resp
 				logReq.Current = resp
-				respLogReq = append(respLogReq, logReq)
+				respLogReq = append(respLogReq, &logReq)
 			}
 		}
 	}
@@ -357,12 +353,12 @@ func UpdateTable(req *models.UpdateTableAI) ([]models.CreateVersionHistoryReques
 	return respLogReq, nil
 }
 
-func LoginTable(req *models.LoginTableAI) ([]models.CreateVersionHistoryRequest, error) {
+func LoginTable(req *models.LoginTableAI) ([]*models.CreateVersionHistoryRequest, error) {
 
 	var (
 		resource    = req.Resource
 		services    = req.Service
-		respLogReq  = []models.CreateVersionHistoryRequest{}
+		respLogReq  = []*models.CreateVersionHistoryRequest{}
 		updateTable = &obs.UpdateTableRequest{}
 	)
 
@@ -396,12 +392,12 @@ func LoginTable(req *models.LoginTableAI) ([]models.CreateVersionHistoryRequest,
 
 		_, ok := authInfo["client_type_id"]
 		if !ok {
-			return respLogReq, fmt.Errorf("Your table doesn't have relation with client_type")
+			return respLogReq, fmt.Errorf("your table doesn't have relation with client_type")
 		}
 
 		_, ok = authInfo["role_id"]
 		if !ok {
-			return respLogReq, fmt.Errorf("Your table doesn't have relation with role")
+			return respLogReq, fmt.Errorf("your table doesn't have relation with role")
 		}
 
 		authInfo["login_strategy"] = []string{"login"}

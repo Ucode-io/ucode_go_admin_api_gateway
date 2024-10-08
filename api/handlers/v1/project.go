@@ -57,7 +57,6 @@ func (h *HandlerV1) GetCompanyProjectById(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetCompanyProjectList(c *gin.Context) {
-
 	limit, err := h.getLimitParam(c)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
@@ -69,15 +68,16 @@ func (h *HandlerV1) GetCompanyProjectList(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
+
 	authInfo, _ := h.GetAuthAdminInfo(c)
 	userProjects, err := h.authService.User().GetUserProjects(context.Background(), &auth_service.UserPrimaryKey{
 		Id: authInfo.GetUserId(),
 	})
-
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
 	var projectIds []string
 	for _, userProject := range userProjects.GetCompanies() {
 		if userProject.GetId() == c.DefaultQuery("company_id", "") {
@@ -94,11 +94,14 @@ func (h *HandlerV1) GetCompanyProjectList(c *gin.Context) {
 			CompanyId: c.DefaultQuery("company_id", ""),
 		},
 	)
+
 	projectsMap := make(map[string]*company_service.Project)
 	for _, project := range resp.GetProjects() {
 		projectsMap[project.GetProjectId()] = project
 	}
+
 	var availableProjects = make([]*company_service.Project, 0, len(projectIds))
+
 	for _, id := range projectIds {
 		if val, ok := projectsMap[id]; ok {
 			availableProjects = append(availableProjects, val)
