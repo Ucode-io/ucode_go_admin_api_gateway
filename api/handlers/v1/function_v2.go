@@ -849,7 +849,7 @@ func (h *HandlerV1) InvokeFunctionByPath(c *gin.Context) {
 	}
 	authInfo, _ := h.GetAuthInfo(c)
 
-	invokeFunction.Data["user_id"] = authInfo.GetUserIdAuth()
+	invokeFunction.Data["user_id"] = authInfo.GetUserId()
 	invokeFunction.Data["project_id"] = authInfo.GetProjectId()
 	invokeFunction.Data["environment_id"] = authInfo.GetEnvId()
 	invokeFunction.Data["app_id"] = apiKeys.GetData()[0].GetAppId()

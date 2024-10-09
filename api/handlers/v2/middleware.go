@@ -60,7 +60,7 @@ func (h *HandlerV2) AuthMiddleware() gin.HandlerFunc {
 				environmentId = res.EnvId
 			}
 			if res.UserId != "" {
-				userId = res.UserIdAuth
+				userId = res.UserId
 			}
 
 			c.Set("resource_id", resourceId)

@@ -81,7 +81,7 @@ func (h *HandlerV1) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 			c.Set("resource_id", resourceId)
 			c.Set("environment_id", environmentId)
 			c.Set("project_id", projectId)
-			c.Set("user_id", res.UserIdAuth)
+			c.Set("user_id", res.UserId)
 		case "API-KEY":
 			if app_id == "" {
 				err := errors.New("error invalid api-key method")
@@ -304,7 +304,7 @@ func (h *HandlerV1) SlimAuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 			c.Set("resource_id", resourceId)
 			c.Set("environment_id", environmentId)
 			c.Set("project_id", projectId)
-			c.Set("user_id", res.UserIdAuth)
+			c.Set("user_id", res.UserId)
 
 		case "API-KEY":
 			app_id := c.GetHeader("X-API-KEY")
