@@ -188,7 +188,7 @@ func (h *HandlerV1) CreateObject(c *gin.Context) {
 	}
 	//start = time.Now()
 	if len(beforeActions) > 0 {
-		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
+		functionName, _, err := DoInvokeFuntion(DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			IDs:          []string{id},
 			TableSlug:    c.Param("table_slug"),
@@ -251,7 +251,7 @@ func (h *HandlerV1) CreateObject(c *gin.Context) {
 	}
 	//start = time.Now()
 	if len(afterActions) > 0 {
-		functionName, err := DoInvokeFuntion(
+		functionName, _, err := DoInvokeFuntion(
 			DoInvokeFuntionStruct{
 				CustomEvents: afterActions,
 				IDs:          []string{id},
@@ -781,7 +781,7 @@ func (h *HandlerV1) UpdateObject(c *gin.Context) {
 		}
 	}
 	if len(beforeActions) > 0 {
-		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
+		functionName, _, err := DoInvokeFuntion(DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			IDs:          []string{id},
 			TableSlug:    c.Param("table_slug"),
@@ -862,7 +862,7 @@ func (h *HandlerV1) UpdateObject(c *gin.Context) {
 		}
 	}
 	if len(afterActions) > 0 {
-		functionName, err := DoInvokeFuntion(
+		functionName, _, err := DoInvokeFuntion(
 			DoInvokeFuntionStruct{
 				CustomEvents:           afterActions,
 				IDs:                    []string{id},
@@ -973,7 +973,7 @@ func (h *HandlerV1) DeleteObject(c *gin.Context) {
 		}
 	}
 	if len(beforeActions) > 0 {
-		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
+		functionName, _, err := DoInvokeFuntion(DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			IDs:          []string{objectID},
 			TableSlug:    c.Param("table_slug"),
@@ -1026,7 +1026,7 @@ func (h *HandlerV1) DeleteObject(c *gin.Context) {
 	}
 
 	if len(afterActions) > 0 {
-		functionName, err := DoInvokeFuntion(
+		functionName, _, err := DoInvokeFuntion(
 			DoInvokeFuntionStruct{
 				CustomEvents: afterActions,
 				IDs:          []string{objectID},
@@ -1064,10 +1064,10 @@ func (h *HandlerV1) DeleteObject(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetList(c *gin.Context) {
 	var (
-		objectRequest               models.CommonMessage
-		resp                        *obs.CommonMessage
-		beforeActions, afterActions []*obs.CustomEvent
-		statusHttp                  = status_http.GrpcStatusToHTTP["Ok"]
+		objectRequest models.CommonMessage
+		resp          *obs.CommonMessage
+		beforeActions []*obs.CustomEvent
+		statusHttp    = status_http.GrpcStatusToHTTP["Ok"]
 	)
 
 	err := c.ShouldBindJSON(&objectRequest)
@@ -1145,52 +1145,39 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 		return
 	}
 
-	// fromOfs := c.Query("from-ofs")
-	// if fromOfs != "true" {
-	// 	beforeActions, afterActions, err = GetListCustomEvents(c.Param("table_slug"), "", "GETLIST", c, h)
-	// 	if err != nil {
-	// 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
-	// 		return
-	// 	}
-	// }
-
-	go func() {
-		if len(beforeActions) > 0 {
-			functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
-				CustomEvents: beforeActions,
-				TableSlug:    c.Param("table_slug"),
-				ObjectData:   objectRequest.Data,
-				Method:       "GETLIST",
-			},
-				c,
-				h,
-			)
-			if err != nil {
-				h.handleResponse(c, status_http.InvalidArgument, err.Error()+" in "+functionName)
-				return
-			}
+	fromOfs := c.Query("from-ofs")
+	if fromOfs != "true" {
+		beforeActions, _, err = GetListCustomEvents(c.Param("table_slug"), "", "GETLIST", c, h)
+		if err != nil {
+			h.handleResponse(c, status_http.InvalidArgument, err.Error())
+			return
 		}
-	}()
+	}
+	if len(beforeActions) > 0 {
+		functionName, resp, err := DoInvokeFuntion(DoInvokeFuntionStruct{
+			CustomEvents: beforeActions,
+			TableSlug:    c.Param("table_slug"),
+			ObjectData:   objectRequest.Data,
+			Method:       "GETLIST",
+			ActionType:   "BEFORE",
+		},
+			c,
+			h,
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.InvalidArgument, err.Error()+" in "+functionName)
+			return
+		}
+
+		h.handleResponse(c, statusHttp, map[string]interface{}{"data": resp})
+		return
+	}
 
 	if viewId, ok := objectRequest.Data["builder_service_view_id"].(string); ok {
 		if util.IsValidUUID(viewId) {
 			switch resource.ResourceType {
 			case pb.ResourceType_MONGODB:
-				// redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
-				// if err == nil {
-				// 	resp := make(map[string]interface{})
-				// 	m := make(map[string]interface{})
-				// 	err = json.Unmarshal([]byte(redisResp), &m)
-				// 	if err != nil {
-				// 		h.log.Error("Error while unmarshal redis", logger.Error(err))
-				// 	} else {
-				// 		resp["data"] = m
-				// 		h.handleResponse(c, status_http.OK, resp)
-				// 		return
-				// 	}
-				// }
 				service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
-
 				resp, err = service.GroupByColumns(
 					context.Background(),
 					&obs.CommonMessage{
@@ -1199,23 +1186,11 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 						ProjectId: resource.ResourceEnvironmentId,
 					},
 				)
-
-				if err == nil {
-					// if resp.IsCached {
-					// 	jsonData, _ := resp.GetData().MarshalJSON()
-					// 	err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
-					// 	if err != nil {
-					// 		h.log.Error("Error while setting redis", logger.Error(err))
-					// 	}
-					// }
-				}
-
 				if err != nil {
 					h.handleResponse(c, status_http.GRPCError, err.Error())
 					return
 				}
 			case pb.ResourceType_POSTGRESQL:
-
 				resp, err = services.PostgresBuilderService().ObjectBuilder().GroupByColumns(
 					context.Background(),
 					&obs.CommonMessage{
@@ -1224,7 +1199,6 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 						ProjectId: resource.ResourceEnvironmentId,
 					},
 				)
-
 				if err != nil {
 					h.handleResponse(c, status_http.GRPCError, err.Error())
 					return
@@ -1234,7 +1208,6 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 	} else {
 		switch resource.ResourceType {
 		case pb.ResourceType_MONGODB:
-
 			redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
 			if err == nil {
 				resp := make(map[string]interface{})
@@ -1248,9 +1221,7 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 					return
 				}
 			}
-
 			service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
-
 			resp, err = service.GetList(
 				context.Background(),
 				&obs.CommonMessage{
@@ -1259,7 +1230,6 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 					ProjectId: resource.ResourceEnvironmentId,
 				},
 			)
-
 			if err == nil {
 				if resp.IsCached {
 					jsonData, _ := resp.GetData().MarshalJSON()
@@ -1269,13 +1239,11 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 					}
 				}
 			}
-
 			if err != nil {
 				h.handleResponse(c, status_http.GRPCError, err.Error())
 				return
 			}
 		case pb.ResourceType_POSTGRESQL:
-
 			resp, err := services.GoObjectBuilderService().ObjectBuilder().GetAll(
 				context.Background(),
 				&nb.CommonMessage{
@@ -1284,7 +1252,6 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 					ProjectId: resource.ResourceEnvironmentId,
 				},
 			)
-
 			if err != nil {
 				h.handleResponse(c, status_http.GRPCError, err.Error())
 				return
@@ -1294,26 +1261,6 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 			return
 		}
 	}
-
-	go func() {
-		if len(afterActions) > 0 {
-			functionName, err := DoInvokeFuntion(
-				DoInvokeFuntionStruct{
-					CustomEvents:           afterActions,
-					TableSlug:              c.Param("table_slug"),
-					ObjectData:             objectRequest.Data,
-					Method:                 "GETLIST",
-					ObjectDataBeforeUpdate: resp.Data.AsMap(),
-				},
-				c, // gin context,
-				h, // handler
-			)
-			if err != nil {
-				h.handleResponse(c, status_http.InvalidArgument, err.Error()+" in "+functionName)
-				return
-			}
-		}
-	}()
 
 	statusHttp.CustomMessage = resp.GetCustomMessage()
 	h.handleResponse(c, statusHttp, resp)
@@ -1717,7 +1664,7 @@ func (h *HandlerV1) DeleteManyToMany(c *gin.Context) {
 		}
 	}
 	if len(beforeActions) > 0 {
-		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
+		functionName, _, err := DoInvokeFuntion(DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			IDs:          []string{m2mMessage.IdFrom},
 			TableSlug:    m2mMessage.TableTo,
@@ -1762,7 +1709,7 @@ func (h *HandlerV1) DeleteManyToMany(c *gin.Context) {
 	}
 
 	if len(afterActions) > 0 {
-		functionName, err := DoInvokeFuntion(
+		functionName, _, err := DoInvokeFuntion(
 			DoInvokeFuntionStruct{
 				CustomEvents: afterActions,
 				IDs:          []string{m2mMessage.IdFrom},
@@ -1859,7 +1806,7 @@ func (h *HandlerV1) AppendManyToMany(c *gin.Context) {
 		}
 	}
 	if len(beforeActions) > 0 {
-		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
+		functionName, _, err := DoInvokeFuntion(DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			IDs:          []string{m2mMessage.IdFrom},
 			TableSlug:    m2mMessage.TableTo,
@@ -1904,7 +1851,7 @@ func (h *HandlerV1) AppendManyToMany(c *gin.Context) {
 	}
 
 	if len(afterActions) > 0 {
-		functionName, err := DoInvokeFuntion(
+		functionName, _, err := DoInvokeFuntion(
 			DoInvokeFuntionStruct{
 				CustomEvents: afterActions,
 				IDs:          []string{m2mMessage.IdFrom},
@@ -2015,7 +1962,7 @@ func (h *HandlerV1) UpsertObject(c *gin.Context) {
 		}
 	}
 	if len(beforeActions) > 0 {
-		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
+		functionName, _, err := DoInvokeFuntion(DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			IDs:          []string{},
 			TableSlug:    c.Param("table_slug"),
@@ -2130,7 +2077,7 @@ func (h *HandlerV1) UpsertObject(c *gin.Context) {
 		}
 	}
 	if len(afterActions) > 0 {
-		functionName, err := DoInvokeFuntion(
+		functionName, _, err := DoInvokeFuntion(
 			DoInvokeFuntionStruct{
 				CustomEvents: afterActions,
 				IDs:          objectIds,
@@ -2285,7 +2232,7 @@ func (h *HandlerV1) MultipleUpdateObject(c *gin.Context) {
 		}
 	}
 	if len(beforeActions) > 0 {
-		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
+		functionName, _, err := DoInvokeFuntion(DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			IDs:          objectIds,
 			TableSlug:    c.Param("table_slug"),
@@ -2346,7 +2293,7 @@ func (h *HandlerV1) MultipleUpdateObject(c *gin.Context) {
 	}
 
 	if len(afterActions) > 0 {
-		functionName, err := DoInvokeFuntion(
+		functionName, _, err := DoInvokeFuntion(
 			DoInvokeFuntionStruct{
 				CustomEvents: afterActions,
 				IDs:          objectIds,
@@ -2887,9 +2834,6 @@ func (h *HandlerV1) DeleteManyObject(c *gin.Context) {
 		return
 	}
 
-	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
-	// defer cancel()
-
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 
 	structData, err := helper.ConvertMapToStruct(data)
@@ -2907,7 +2851,7 @@ func (h *HandlerV1) DeleteManyObject(c *gin.Context) {
 		}
 	}
 	if len(beforeActions) > 0 {
-		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
+		functionName, _, err := DoInvokeFuntion(DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			IDs:          objectRequest.Ids,
 			TableSlug:    c.Param("table_slug"),
@@ -2970,7 +2914,7 @@ func (h *HandlerV1) DeleteManyObject(c *gin.Context) {
 	}
 
 	if len(afterActions) > 0 {
-		functionName, err := DoInvokeFuntion(
+		functionName, _, err := DoInvokeFuntion(
 			DoInvokeFuntionStruct{
 				CustomEvents: afterActions,
 				IDs:          objectRequest.Ids,
