@@ -210,14 +210,13 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *HandlerV2
 		data["object_data_before_update"] = request.ObjectDataBeforeUpdate
 		data["method"] = request.Method
 		data["app_id"] = appId
-		data["user_id"] = authInfo.GetUserId()
+		data["user_id"] = authInfo.GetUserIdAuth()
 		data["project_id"] = projectId
 		data["environment_id"] = environmentId
 		data["action_type"] = request.ActionType
 		invokeFunction.Data = data
 
 		if customEvent.GetFunctions()[0].RequestType == "" || customEvent.GetFunctions()[0].RequestType == "ASYNC" {
-
 			resp, err := util.DoRequest("https://ofs.u-code.io/function/"+customEvent.GetFunctions()[0].Path, "POST", invokeFunction)
 			if err != nil {
 				return customEvent.GetFunctions()[0].Name, err
