@@ -85,12 +85,9 @@ func (h *HandlerV2) CreateView(c *gin.Context) {
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: "VIEW",
 			ActionType:   "CREATE VIEW",
-			// UsedEnvironments: map[string]bool{
-			// 	cast.ToString(environmentId): true,
-			// },
-			UserInfo:  cast.ToString(userId),
-			Request:   &view,
-			TableSlug: c.Param("collection"),
+			UserInfo:     cast.ToString(userId),
+			Request:      &view,
+			TableSlug:    c.Param("collection"),
 		}
 	)
 

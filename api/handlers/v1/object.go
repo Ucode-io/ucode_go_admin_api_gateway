@@ -454,7 +454,6 @@ func (h *HandlerV1) GetSingleSlim(c *gin.Context) {
 	}
 
 	userId, _ := c.Get("user_id")
-
 	apiKey := c.GetHeader("X-API-KEY")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
@@ -1367,7 +1366,6 @@ func (h *HandlerV1) GetListSlim(c *gin.Context) {
 	}
 
 	userId, _ := c.Get("user_id")
-
 	apiKey := c.GetHeader("X-API-KEY")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
