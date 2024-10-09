@@ -663,13 +663,11 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 		v3.GET("/bot", h.V1.GetBotTokenList)
 		v3.PUT("/bot", h.V1.UpdateBotToken)
 		v3.DELETE("/bot/:id", h.V1.DeleteBotToken)
-
 	}
 
 	v2Version := r.Group("/v2")
 	v2Version.Use(h.V2.AuthMiddleware())
 	{
-
 		v2Version.POST("/csv/:table_slug/download", h.V2.GetListInCSV)
 
 		v2Version.POST("/send-to-gpt", h.V2.SendToGpt)
@@ -838,7 +836,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig) {
 			v2Version.POST("/history/migrate/up/:environment_id", h.V2.MigrateUp)
 			v2Version.POST("/history/migrate/down/:environment_id", h.V2.MigrateDown)
 		}
-
 	}
 
 	r.Any("/api/*any", h.V1.AuthMiddleware(cfg), proxyMiddleware(r, &h), h.V1.Proxy)

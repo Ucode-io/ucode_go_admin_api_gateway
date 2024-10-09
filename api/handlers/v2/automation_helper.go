@@ -28,7 +28,6 @@ type DoInvokeFuntionStruct struct {
 }
 
 func GetListCustomEvents(tableSlug, roleId, method string, c *gin.Context, h *HandlerV2) (beforeEvents, afterEvents []*obs.CustomEvent, err error) {
-
 	var (
 		res   *obs.GetCustomEventsListResponse
 		gores *nb.GetCustomEventsListResponse
@@ -41,13 +40,6 @@ func GetListCustomEvents(tableSlug, roleId, method string, c *gin.Context, h *Ha
 		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
-
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -75,18 +67,6 @@ func GetListCustomEvents(tableSlug, roleId, method string, c *gin.Context, h *Ha
 		return
 	}
 
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		res, err = services.BuilderService().CustomEvent().GetList(
@@ -143,14 +123,6 @@ func GetListCustomEvents(tableSlug, roleId, method string, c *gin.Context, h *Ha
 }
 
 func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *HandlerV2) (functionName string, err error) {
-
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")

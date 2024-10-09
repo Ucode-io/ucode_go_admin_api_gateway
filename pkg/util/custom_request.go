@@ -21,9 +21,7 @@ func DoRequest(url string, method string, body interface{}) (responseModel model
 	if err != nil {
 		return
 	}
-	client := &http.Client{
-		// Timeout: time.Duration(30 * time.Second),
-	}
+	client := &http.Client{}
 
 	req, err := http.NewRequest(method, url, bytes.NewBuffer(data))
 	if err != nil {
