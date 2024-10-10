@@ -75,6 +75,7 @@ podAnnotations:
     {{ $key }}: {{ $value }}
     {{- end }}
     {{ end -}}
+    
 podLabels:
   app: ucode-go-admin-api-gateway
 
