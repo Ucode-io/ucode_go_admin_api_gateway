@@ -43,19 +43,21 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 	var (
 		objectRequest models.CommonMessage
 		resp          *obs.CommonMessage
+		beforeActions []*obs.CustomEvent
 		statusHttp    = status_http.GrpcStatusToHTTP["Ok"]
 	)
 
-	err := c.ShouldBindJSON(&objectRequest)
-	if err != nil {
+	if err := c.ShouldBindJSON(&objectRequest); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
+
 	tokenInfo, err := h.GetAuthInfo(c)
 	if err != nil {
 		h.handleResponse(c, status_http.Forbidden, err.Error())
 		return
 	}
+
 	if tokenInfo != nil {
 		if tokenInfo.Tables != nil {
 			objectRequest.Data["tables"] = tokenInfo.GetTables()
@@ -79,23 +81,21 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 		return
 	}
 
-	projectIDs := []string{"0f111e78-3a93-4bec-945a-2a77e0e0a82d", "25d16930-b1a9-4ae5-ab01-b79cc993f06e"}
+	var projectIDs = map[string]bool{
+		"0f111e78-3a93-4bec-945a-2a77e0e0a82d": true, // wayll
+		"25d16930-b1a9-4ae5-ab01-b79cc993f06e": true, // dasyor
+	}
+
 	if objectRequest.Data["view_type"] != "CALENDAR" {
 		if _, ok := objectRequest.Data["limit"]; ok {
 			if cast.ToInt(objectRequest.Data["limit"]) > 40 {
 				objectRequest.Data["limit"] = 40
 			}
 		} else {
-			found := false
-			for _, id := range projectIDs {
-				if projectId == id {
-					found = true
-					break
-				}
-			}
-			if !found {
+			if !projectIDs[projectId.(string)] {
 				objectRequest.Data["limit"] = 10
 			}
+
 		}
 	}
 
@@ -128,15 +128,34 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 		return
 	}
 
-	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
-	// defer cancel()
+	fromOfs := c.Query("from-ofs")
+	if fromOfs != "true" {
+		beforeActions, _, err = GetListCustomEvents(c.Param("table_slug"), "", "GETLIST", c, h)
+		if err != nil {
+			h.handleResponse(c, status_http.InvalidArgument, err.Error())
+			return
+		}
+	}
+	if len(beforeActions) > 0 {
+		functionName, resp, err := DoInvokeFuntion(DoInvokeFuntionStruct{
+			CustomEvents: beforeActions,
+			TableSlug:    c.Param("table_slug"),
+			ObjectData:   objectRequest.Data,
+			Method:       "GETLIST",
+			ActionType:   "BEFORE",
+		},
+			c,
+			h,
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.InvalidArgument, err.Error()+" in "+functionName)
+			return
+		}
 
-	// service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.InternalServerError, err)
-	// 	return
-	// }
-	// defer conn.Close()
+		h.handleResponse(c, statusHttp, map[string]interface{}{"data": resp})
+		return
+	}
+
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 
 	if viewId, ok := objectRequest.Data["builder_service_view_id"].(string); ok {

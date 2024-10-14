@@ -15,6 +15,9 @@ import (
 	"ucode/ucode_go_api_gateway/storage/redis"
 
 	"github.com/gin-gonic/gin"
+	"github.com/opentracing/opentracing-go"
+	"github.com/uber/jaeger-client-go"
+	jaeger_config "github.com/uber/jaeger-client-go/config"
 )
 
 func main() {
@@ -36,6 +39,18 @@ func main() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
+	jaegerCfg := &jaeger_config.Configuration{
+		ServiceName: baseConf.ServiceName,
+		Sampler: &jaeger_config.SamplerConfig{
+			Type:  "const",
+			Param: 1,
+		},
+		Reporter: &jaeger_config.ReporterConfig{
+			LogSpans:           false,
+			LocalAgentHostPort: baseConf.JaegerHostPort,
+		},
+	}
+
 	log := logger.NewLogger("ucode/ucode_go_api_gateway", *loggerLevel)
 	defer func() {
 		err := logger.Cleanup(log)
@@ -43,6 +58,13 @@ func main() {
 			return
 		}
 	}()
+
+	tracer, closer, err := jaegerCfg.NewTracer(jaeger_config.Logger(jaeger.StdLogger))
+	if err != nil {
+		log.Error("ERROR: cannot init Jaeger", logger.Error(err))
+	}
+	defer closer.Close()
+	opentracing.SetGlobalTracer(tracer)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -106,7 +128,7 @@ func main() {
 
 	h := handlers.NewHandler(baseConf, mapProjectConfs, log, projectServiceNodes, compSrvc, authSrvc, newRedis, cache, limiter)
 
-	api.SetUpAPI(r, h, baseConf)
+	api.SetUpAPI(r, h, baseConf, tracer)
 	cronjobs := crons.ExecuteCron()
 	for _, cronjob := range cronjobs {
 		go func(ctx context.Context, cronjob crons.Cronjob) {

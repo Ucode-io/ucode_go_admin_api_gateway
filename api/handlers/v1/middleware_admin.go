@@ -34,16 +34,13 @@ func (h *HandlerV1) AdminAuthMiddleware() gin.HandlerFunc {
 			c.Set("environment_id", c.GetHeader("environment_id"))
 			c.Set("project_id", c.GetHeader("project_id"))
 		} else {
-
 			var (
-				res = &auth_service.HasAccessSuperAdminRes{}
-				ok  bool
+				ok          bool
+				res         = &auth_service.HasAccessSuperAdminRes{}
+				data        = make(map[string]interface{})
+				bearerToken = c.GetHeader("Authorization")
+				strArr      = strings.Split(bearerToken, " ")
 			)
-
-			data := make(map[string]interface{})
-
-			bearerToken := c.GetHeader("Authorization")
-			strArr := strings.Split(bearerToken, " ")
 
 			if len(strArr) < 1 && (strArr[0] != "Bearer" && strArr[0] != "API-KEY") {
 				h.log.Error("---ERR->Unexpected token format")
@@ -131,7 +128,6 @@ func (h *HandlerV1) AdminAuthMiddleware() gin.HandlerFunc {
 			}
 
 			c.Set("Auth_Admin", res)
-			// c.Set("namespace", h.cfg.UcodeNamespace)
 		}
 
 		c.Next()

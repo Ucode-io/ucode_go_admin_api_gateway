@@ -4,6 +4,7 @@ import (
 	"context"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
+	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"ucode/ucode_go_api_gateway/api/status_http"
 
@@ -25,13 +26,17 @@ import (
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetCompanyProjectById(c *gin.Context) {
-	projectId := c.Param("project_id")
+	projectId, ok := c.Get("project_id")
+	if !ok && !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.BadRequest, "project id is required")
+		return
+	}
 
 	resp, err := h.companyServices.Project().GetById(
 		context.Background(),
 		&company_service.GetProjectByIdRequest{
-			ProjectId: projectId,
-			CompanyId: c.DefaultQuery("company_id", ""),
+			ProjectId: projectId.(string),
+			CompanyId: c.Query("company_id"),
 		},
 	)
 

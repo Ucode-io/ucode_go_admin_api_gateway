@@ -30,7 +30,9 @@ import (
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) SendToGpt(c *gin.Context) {
 	var (
-		reqBody models.SendToGptRequest
+		reqBody      models.SendToGptRequest
+		respMessages = []models.Message{}
+		messages     = []string{}
 	)
 
 	err := c.ShouldBindJSON(&reqBody)
@@ -65,8 +67,6 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 		return
 	}
 
-	respMessages := []models.Message{}
-
 	userId, _ := c.Get("user_id")
 
 	respMessages = append(respMessages, models.Message{
@@ -90,14 +90,13 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 		return
 	}
 
-	messages := []string{}
-
 	for _, toolCall := range toolCalls {
 		var (
 			functionCall = toolCall.Function
 			functionName = functionCall.Name
 			arguments    map[string]interface{}
 			logReq       []*models.CreateVersionHistoryRequest
+			msg          string
 		)
 
 		err = json.Unmarshal([]byte(functionCall.Arguments), &arguments)
@@ -105,11 +104,8 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 			continue
 		}
 
-		msg := ""
-
 		switch functionName {
 		case "create_menu":
-
 			_, err = gpt.CreateMenu(&models.CreateMenuAI{
 				Label:    cast.ToString(arguments["name"]),
 				UserId:   userId.(string),
@@ -144,7 +140,6 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 					msg = fmt.Sprintf("Error while delete table: %s", err.Error())
 				}
 			}
-
 		case "update_menu":
 			logReq, err = gpt.UpdateMenu(&models.UpdateMenuAI{
 				OldLabel: cast.ToString(arguments["old_name"]),
@@ -159,7 +154,6 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 			} else {
 				msg = fmt.Sprintf("Error while update menu: %s", err.Error())
 			}
-
 		case "create_table":
 			if _, ok := arguments["menu"]; !ok {
 				arguments["menu"] = "c57eedc3-a954-4262-a0af-376c65b5a284"
@@ -180,7 +174,6 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 			} else {
 				msg = fmt.Sprintf("Error while create table: %s", err.Error())
 			}
-
 		case "update_table":
 			logReq, err = gpt.UpdateTable(&models.UpdateTableAI{
 				OldLabel: cast.ToString(arguments["old_name"]),
@@ -194,9 +187,7 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 			} else {
 				msg = fmt.Sprintf("Error while update table: %s", err.Error())
 			}
-
 		case "create_field":
-
 			if cast.ToString(arguments["table"]) != "" {
 				logReq, err = gpt.CreateField(&models.CreateFieldAI{
 					Label:    cast.ToString(arguments["label"]),
@@ -215,9 +206,7 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 			} else {
 				msg = "Table not found please give table's label"
 			}
-
 		case "update_field":
-
 			logReq, err = gpt.UpdateField(&models.UpdateFieldAI{
 				NewLabel: cast.ToString(arguments["new_label"]),
 				OldLabel: cast.ToString(arguments["old_label"]),
@@ -233,7 +222,6 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 				msg = fmt.Sprintf("Error while update field: %s", err.Error())
 			}
 		case "delete_field":
-
 			logReq, err = gpt.DeleteField(&models.DeleteFieldAI{
 				Label:    cast.ToString(arguments["label"]),
 				Table:    cast.ToString(arguments["table"]),
@@ -247,7 +235,6 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 				msg = fmt.Sprintf("Error while delete field: %s", err.Error())
 			}
 		case "create_relation":
-
 			logReq, err = gpt.CreateRelation(&models.CreateRelationAI{
 				TableFrom:    cast.ToString(arguments["table_from"]),
 				TableTo:      cast.ToString(arguments["table_to"]),
@@ -264,7 +251,6 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 				msg = fmt.Sprintf("Error while create relation: %s", err.Error())
 			}
 		case "delete_relation":
-
 			logReq, err = gpt.DeleteRelation(&models.DeleteRelationAI{
 				TableFrom:    cast.ToString(arguments["table_from"]),
 				TableTo:      cast.ToString(arguments["table_to"]),
@@ -279,7 +265,6 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 				msg = fmt.Sprintf("Error while delete relation: %s", err.Error())
 			}
 		case "create_row":
-
 			logReq, err = gpt.CreateItems(&models.CreateItemsAI{
 				Table:     cast.ToString(arguments["table"]),
 				Arguments: cast.ToStringSlice(arguments["arguments"]),
@@ -293,7 +278,6 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 				msg = fmt.Sprintf("Error while create item: %s", err.Error())
 			}
 		case "generate_row":
-
 			logReq, err = gpt.GenerateItems(&models.GenerateItemsAI{
 				Table:    cast.ToString(arguments["table"]),
 				Count:    cast.ToInt(arguments["count"]),
@@ -306,9 +290,7 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 			} else {
 				msg = fmt.Sprintf("Error while create items: %s", err.Error())
 			}
-
 		case "update_item":
-
 			logReq, err = gpt.UpdateItems(&models.UpdateItemsAI{
 				Table:     cast.ToString(arguments["table"]),
 				OldColumn: arguments["old_data"],
@@ -323,7 +305,6 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 				msg = fmt.Sprintf("Error while update item: %s", err.Error())
 			}
 		case "delete_item":
-
 			logReq, err = gpt.DeleteItems(&models.UpdateItemsAI{
 				Table:     cast.ToString(arguments["table"]),
 				OldColumn: arguments["old_data"],
@@ -337,7 +318,6 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 				msg = fmt.Sprintf("Error while delete item: %s", err.Error())
 			}
 		case "login_table":
-
 			logReq, err = gpt.LoginTable(&models.LoginTableAI{
 				Table:    cast.ToString(arguments["table"]),
 				Login:    cast.ToString(arguments["login"]),
@@ -371,9 +351,7 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 			} else {
 				msg = fmt.Sprintf("Error while create function: %s", err.Error())
 			}
-
 		default:
-
 			h.handleResponse(c, status_http.BadRequest, "Unknown function: "+functionName)
 			return
 		}

@@ -29,13 +29,11 @@ func (h *HandlerV2) NodeMiddleware() gin.HandlerFunc {
 func (h *HandlerV2) AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
-			res = &auth_service.V2HasAccessUserRes{}
-			ok  bool
-			//platformType = c.GetHeader("Platform-Type")
+			res         = &auth_service.V2HasAccessUserRes{}
+			ok          bool
+			bearerToken = c.GetHeader("Authorization")
+			strArr      = strings.Split(bearerToken, " ")
 		)
-
-		bearerToken := c.GetHeader("Authorization")
-		strArr := strings.Split(bearerToken, " ")
 
 		if len(strArr) < 1 && (strArr[0] != "Bearer" && strArr[0] != "API-KEY") {
 			h.log.Error("---ERR->Unexpected token format")
@@ -44,14 +42,12 @@ func (h *HandlerV2) AuthMiddleware() gin.HandlerFunc {
 		}
 		switch strArr[0] {
 		case "Bearer":
-			//if platformType != cfg.PlatformType {
 			res, ok = h.hasAccess(c)
 			if !ok {
 				h.log.Error("---ERR->AuthMiddleware->hasNotAccess-->")
 				c.Abort()
 				return
 			}
-			//}
 			resourceId := c.GetHeader("Resource-Id")
 			environmentId := c.GetHeader("Environment-Id")
 			projectId := c.Query("Project-Id")
@@ -64,7 +60,7 @@ func (h *HandlerV2) AuthMiddleware() gin.HandlerFunc {
 				environmentId = res.EnvId
 			}
 			if res.UserId != "" {
-				userId = res.UserId
+				userId = res.UserIdAuth
 			}
 
 			c.Set("resource_id", resourceId)
@@ -73,7 +69,6 @@ func (h *HandlerV2) AuthMiddleware() gin.HandlerFunc {
 			c.Set("user_id", userId)
 			c.Set("role_id", res.RoleId)
 			c.Set("token", strArr[1])
-
 		case "API-KEY":
 			app_id := c.GetHeader("X-API-KEY")
 
@@ -91,8 +86,7 @@ func (h *HandlerV2) AuthMiddleware() gin.HandlerFunc {
 				return
 			}
 
-			apikeys, err := h.authService.ApiKey().GetEnvID(
-				c.Request.Context(),
+			apikeys, err := h.authService.ApiKey().GetEnvID(c.Request.Context(),
 				&auth_service.GetReq{
 					Id: app_id,
 				},

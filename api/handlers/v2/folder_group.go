@@ -35,8 +35,6 @@ func (h *HandlerV2) CreateFolderGroup(c *gin.Context) {
 		return
 	}
 
-	//userId, _ := c.Get("user_id")
-
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{

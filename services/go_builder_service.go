@@ -5,6 +5,9 @@ import (
 	"ucode/ucode_go_api_gateway/config"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 
+	otgrpc "github.com/opentracing-contrib/go-grpc"
+	"github.com/opentracing/opentracing-go"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -59,9 +62,11 @@ func NewGoBuilderServiceClient(ctx context.Context, cfg config.Config) (GoBuilde
 	connGoBuilderService, err := grpc.DialContext(
 		ctx,
 		cfg.GoObjectBuilderServiceHost+cfg.GoObjectBuilderGRPCPort,
-		// "go-object-builder-service:80",
-		// "localhost:7107",
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithUnaryInterceptor(
+			otgrpc.OpenTracingClientInterceptor(opentracing.GlobalTracer())),
+		grpc.WithStreamInterceptor(
+			otgrpc.OpenTracingStreamClientInterceptor(opentracing.GlobalTracer())),
 	)
 
 	if err != nil {

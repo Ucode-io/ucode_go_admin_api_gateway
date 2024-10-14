@@ -22,11 +22,11 @@ type DoInvokeFuntionStruct struct {
 	TableSlug              string
 	ObjectData             map[string]interface{}
 	Method                 string
+	ActionType             string
 	ObjectDataBeforeUpdate map[string]interface{}
 }
 
 func GetListCustomEvents(tableSlug, roleId, method string, c *gin.Context, h *HandlerV1) (beforeEvents, afterEvents []*obs.CustomEvent, err error) {
-
 	var (
 		res   *obs.GetCustomEventsListResponse
 		goRes *nb.GetCustomEventsListResponse
@@ -119,14 +119,7 @@ func GetListCustomEvents(tableSlug, roleId, method string, c *gin.Context, h *Ha
 	return
 }
 
-func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *HandlerV1) (functionName string, err error) {
-	// namespace := c.GetString("namespace")
-	// services, err := h.GetService(namespace)
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.Forbidden, err)
-	// 	return
-	// }
-
+func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *HandlerV1) (functionName string, data map[string]interface{}, err error) {
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -162,6 +155,7 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *HandlerV1
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
 	var appId string
 	if len(apiKeys.Data) > 0 {
 		appId = apiKeys.Data[0].AppId
@@ -170,13 +164,15 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *HandlerV1
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
 	authInfo, _ := h.GetAuthInfo(c)
+
 	for _, customEvent := range request.CustomEvents {
 		//this is new invoke function request for befor and after actions
 		var invokeFunction models.NewInvokeFunctionRequest
 		data, err := helper.ConvertStructToResponse(customEvent.Attributes)
 		if err != nil {
-			return customEvent.GetFunctions()[0].Name, err
+			return customEvent.GetFunctions()[0].Name, nil, err
 		}
 		data["object_ids"] = request.IDs
 		data["table_slug"] = request.TableSlug
@@ -190,19 +186,18 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *HandlerV1
 		invokeFunction.Data = data
 
 		if customEvent.GetFunctions()[0].RequestType == "" || customEvent.GetFunctions()[0].RequestType == "ASYNC" {
-
 			resp, err := util.DoRequest("https://ofs.u-code.io/function/"+customEvent.GetFunctions()[0].Path, "POST", invokeFunction)
 			if err != nil {
-				return customEvent.GetFunctions()[0].Name, err
+				return customEvent.GetFunctions()[0].Name, nil, err
 			} else if resp.Status == "error" {
 				var errStr = resp.Status
 				if resp.Data != nil && resp.Data["message"] != nil {
 					errStr = resp.Data["message"].(string)
 				}
-				return customEvent.GetFunctions()[0].Name, errors.New(errStr)
+				return customEvent.GetFunctions()[0].Name, nil, errors.New(errStr)
 			}
+			return customEvent.GetFunctions()[0].Name, resp.Data, nil
 		} else if customEvent.GetFunctions()[0].RequestType == "SYNC" {
-
 			go func(customEvent *obs.CustomEvent) {
 				resp, err := util.DoRequest("https://ofs.u-code.io/function/"+customEvent.GetFunctions()[0].Path, "POST", invokeFunction)
 				if err != nil {
@@ -221,15 +216,7 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *HandlerV1
 				}
 			}(customEvent)
 		}
-		// _, err = services.GetBuilderServiceByType(resource.NodeType).CustomEvent().UpdateByFunctionId(context.Background(), &obs.UpdateByFunctionIdRequest{
-		// 	FunctionId: customEvent.Functions[0].Id,
-		// 	ObjectIds:  request.IDs,
-		// 	FieldSlug:  customEvent.Functions[0].Path + "_disable",
-		// 	ProjectId:  resourceEnvironment.GetId(),
-		// })
-		// if err != nil {
-		// 	return customEvent.Functions[0].Name, err
-		// }
+
 	}
 	return
 }
