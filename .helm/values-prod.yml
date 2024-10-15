@@ -160,7 +160,7 @@ ingress:
         nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
         nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
         kubernetes.io/ingress.class: nginx
-        cert-manager.io/cluster-issuer: letsencrypt-prod
+        # cert-manager.io/cluster-issuer: letsencrypt-prod
       type: auth
       hosts:
         - host: "api.admin.u-code.io"
