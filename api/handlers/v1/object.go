@@ -1489,10 +1489,24 @@ func (h *HandlerV1) GetListInExcel(c *gin.Context) {
 		statusHttp    = status_http.GrpcStatusToHTTP["Ok"]
 	)
 
-	err := c.ShouldBindJSON(&objectRequest)
+	if err := c.ShouldBindJSON(&objectRequest); err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	tokenInfo, err := h.GetAuthInfo(c)
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
+	}
+
+	if tokenInfo != nil {
+		if tokenInfo.Tables != nil {
+			objectRequest.Data["tables"] = tokenInfo.GetTables()
+		}
+		objectRequest.Data["user_id_from_token"] = tokenInfo.GetUserId()
+		objectRequest.Data["role_id_from_token"] = tokenInfo.GetRoleId()
+		objectRequest.Data["client_type_id_from_token"] = tokenInfo.GetClientTypeId()
 	}
 
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
@@ -1537,8 +1551,6 @@ func (h *HandlerV1) GetListInExcel(c *gin.Context) {
 		return
 	}
 
-	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
-	// defer cancel()
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 
 	switch resource.ResourceType {
