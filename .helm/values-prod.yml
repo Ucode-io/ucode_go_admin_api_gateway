@@ -143,22 +143,12 @@ ingress:
         nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
         nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
         kubernetes.io/ingress.class: nginx
-        cert-manager.io/cluster-issuer: letsencrypt-prod
+        # cert-manager.io/cluster-issuer: letsencrypt-prod
       type: web
       hosts:
         - host: "api.admin.u-code.io"
           path: /
           servicePort: 8080
-        - host: "api.easyto.travel"
-          path: /
-          servicePort: 8080
-      tls:
-        - secretName: api-admin-tls
-          hosts:
-            - "api.admin.u-code.io"
-        - secretName: easyto-travel-tls
-          hosts:
-            - "api.easyto.travel"
     - annotations:
         # type of authentication
         nginx.ingress.kubernetes.io/auth-type: basic
@@ -176,10 +166,6 @@ ingress:
         - host: "api.admin.u-code.io"
           path: /swagger
           servicePort: 8080
-      tls:
-        - secretName: admin-api-tls
-          hosts:
-            - "api.admin.u-code.io"
 
 resources:
    limits:
