@@ -119,7 +119,108 @@ func GetListCustomEvents(tableSlug, roleId, method string, c *gin.Context, h *Ha
 	return
 }
 
-func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *HandlerV1) (functionName string, data map[string]interface{}, err error) {
+func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *HandlerV1) (functionName string, err error) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	apiKeys, err := h.authService.ApiKey().GetList(context.Background(), &auth_service.GetListReq{
+		EnvironmentId: environmentId.(string),
+		ProjectId:     resource.ProjectId,
+	})
+	if err != nil {
+		err = errors.New("error getting api keys by environment id")
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	var appId string
+	if len(apiKeys.Data) > 0 {
+		appId = apiKeys.Data[0].AppId
+	} else {
+		err = errors.New("error no app id for this environment")
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	authInfo, _ := h.GetAuthInfo(c)
+
+	for _, customEvent := range request.CustomEvents {
+		//this is new invoke function request for befor and after actions
+		var invokeFunction models.NewInvokeFunctionRequest
+		data, err := helper.ConvertStructToResponse(customEvent.Attributes)
+		if err != nil {
+			return customEvent.GetFunctions()[0].Name, err
+		}
+		data["object_ids"] = request.IDs
+		data["table_slug"] = request.TableSlug
+		data["object_data"] = request.ObjectData
+		data["object_data_before_update"] = request.ObjectDataBeforeUpdate
+		data["method"] = request.Method
+		data["app_id"] = appId
+		data["user_id"] = authInfo.GetUserId()
+		data["project_id"] = projectId
+		data["environment_id"] = environmentId
+		invokeFunction.Data = data
+
+		if customEvent.GetFunctions()[0].RequestType == "" || customEvent.GetFunctions()[0].RequestType == "ASYNC" {
+			resp, err := util.DoRequest("https://ofs.u-code.io/function/"+customEvent.GetFunctions()[0].Path, "POST", invokeFunction)
+			if err != nil {
+				return customEvent.GetFunctions()[0].Name, err
+			} else if resp.Status == "error" {
+				var errStr = resp.Status
+				if resp.Data != nil && resp.Data["message"] != nil {
+					errStr = resp.Data["message"].(string)
+				}
+				return customEvent.GetFunctions()[0].Name, errors.New(errStr)
+			}
+		} else if customEvent.GetFunctions()[0].RequestType == "SYNC" {
+			go func(customEvent *obs.CustomEvent) {
+				resp, err := util.DoRequest("https://ofs.u-code.io/function/"+customEvent.GetFunctions()[0].Path, "POST", invokeFunction)
+				if err != nil {
+					h.log.Error("ERROR FROM OFS", logger.Any("err", err.Error()))
+					return
+				} else if resp.Status == "error" {
+					var errStr = resp.Status
+					if resp.Data != nil && resp.Data["message"] != nil {
+						errStr = resp.Data["message"].(string)
+						h.log.Error("ERROR FROM OFS", logger.Any("err", errStr))
+						return
+					}
+
+					h.log.Error("ERROR FROM OFS "+customEvent.GetFunctions()[0].Path, logger.Any("err", errStr))
+					return
+				}
+			}(customEvent)
+		}
+
+	}
+	return
+}
+
+func DoInvokeFuntionForGetList(request DoInvokeFuntionStruct, c *gin.Context, h *HandlerV1) (functionName string, data map[string]interface{}, err error) {
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")

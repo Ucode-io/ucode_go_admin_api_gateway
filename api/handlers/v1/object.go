@@ -188,7 +188,7 @@ func (h *HandlerV1) CreateObject(c *gin.Context) {
 	}
 	//start = time.Now()
 	if len(beforeActions) > 0 {
-		functionName, _, err := DoInvokeFuntion(DoInvokeFuntionStruct{
+		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			IDs:          []string{id},
 			TableSlug:    c.Param("table_slug"),
@@ -251,7 +251,7 @@ func (h *HandlerV1) CreateObject(c *gin.Context) {
 	}
 	//start = time.Now()
 	if len(afterActions) > 0 {
-		functionName, _, err := DoInvokeFuntion(
+		functionName, err := DoInvokeFuntion(
 			DoInvokeFuntionStruct{
 				CustomEvents: afterActions,
 				IDs:          []string{id},
@@ -780,7 +780,7 @@ func (h *HandlerV1) UpdateObject(c *gin.Context) {
 		}
 	}
 	if len(beforeActions) > 0 {
-		functionName, _, err := DoInvokeFuntion(DoInvokeFuntionStruct{
+		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			IDs:          []string{id},
 			TableSlug:    c.Param("table_slug"),
@@ -861,7 +861,7 @@ func (h *HandlerV1) UpdateObject(c *gin.Context) {
 		}
 	}
 	if len(afterActions) > 0 {
-		functionName, _, err := DoInvokeFuntion(
+		functionName, err := DoInvokeFuntion(
 			DoInvokeFuntionStruct{
 				CustomEvents:           afterActions,
 				IDs:                    []string{id},
@@ -952,9 +952,6 @@ func (h *HandlerV1) DeleteObject(c *gin.Context) {
 		return
 	}
 
-	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
-	// defer cancel()
-
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
@@ -972,7 +969,7 @@ func (h *HandlerV1) DeleteObject(c *gin.Context) {
 		}
 	}
 	if len(beforeActions) > 0 {
-		functionName, _, err := DoInvokeFuntion(DoInvokeFuntionStruct{
+		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			IDs:          []string{objectID},
 			TableSlug:    c.Param("table_slug"),
@@ -1025,7 +1022,7 @@ func (h *HandlerV1) DeleteObject(c *gin.Context) {
 	}
 
 	if len(afterActions) > 0 {
-		functionName, _, err := DoInvokeFuntion(
+		functionName, err := DoInvokeFuntion(
 			DoInvokeFuntionStruct{
 				CustomEvents: afterActions,
 				IDs:          []string{objectID},
@@ -1153,7 +1150,7 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 		}
 	}
 	if len(beforeActions) > 0 {
-		functionName, resp, err := DoInvokeFuntion(DoInvokeFuntionStruct{
+		functionName, resp, err := DoInvokeFuntionForGetList(DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			TableSlug:    c.Param("table_slug"),
 			ObjectData:   objectRequest.Data,
@@ -1674,7 +1671,7 @@ func (h *HandlerV1) DeleteManyToMany(c *gin.Context) {
 		}
 	}
 	if len(beforeActions) > 0 {
-		functionName, _, err := DoInvokeFuntion(DoInvokeFuntionStruct{
+		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			IDs:          []string{m2mMessage.IdFrom},
 			TableSlug:    m2mMessage.TableTo,
@@ -1719,7 +1716,7 @@ func (h *HandlerV1) DeleteManyToMany(c *gin.Context) {
 	}
 
 	if len(afterActions) > 0 {
-		functionName, _, err := DoInvokeFuntion(
+		functionName, err := DoInvokeFuntion(
 			DoInvokeFuntionStruct{
 				CustomEvents: afterActions,
 				IDs:          []string{m2mMessage.IdFrom},
@@ -1816,7 +1813,7 @@ func (h *HandlerV1) AppendManyToMany(c *gin.Context) {
 		}
 	}
 	if len(beforeActions) > 0 {
-		functionName, _, err := DoInvokeFuntion(DoInvokeFuntionStruct{
+		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			IDs:          []string{m2mMessage.IdFrom},
 			TableSlug:    m2mMessage.TableTo,
@@ -1861,7 +1858,7 @@ func (h *HandlerV1) AppendManyToMany(c *gin.Context) {
 	}
 
 	if len(afterActions) > 0 {
-		functionName, _, err := DoInvokeFuntion(
+		functionName, err := DoInvokeFuntion(
 			DoInvokeFuntionStruct{
 				CustomEvents: afterActions,
 				IDs:          []string{m2mMessage.IdFrom},
@@ -1972,7 +1969,7 @@ func (h *HandlerV1) UpsertObject(c *gin.Context) {
 		}
 	}
 	if len(beforeActions) > 0 {
-		functionName, _, err := DoInvokeFuntion(DoInvokeFuntionStruct{
+		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			IDs:          []string{},
 			TableSlug:    c.Param("table_slug"),
@@ -2087,7 +2084,7 @@ func (h *HandlerV1) UpsertObject(c *gin.Context) {
 		}
 	}
 	if len(afterActions) > 0 {
-		functionName, _, err := DoInvokeFuntion(
+		functionName, err := DoInvokeFuntion(
 			DoInvokeFuntionStruct{
 				CustomEvents: afterActions,
 				IDs:          objectIds,
@@ -2242,7 +2239,7 @@ func (h *HandlerV1) MultipleUpdateObject(c *gin.Context) {
 		}
 	}
 	if len(beforeActions) > 0 {
-		functionName, _, err := DoInvokeFuntion(DoInvokeFuntionStruct{
+		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			IDs:          objectIds,
 			TableSlug:    c.Param("table_slug"),
@@ -2303,7 +2300,7 @@ func (h *HandlerV1) MultipleUpdateObject(c *gin.Context) {
 	}
 
 	if len(afterActions) > 0 {
-		functionName, _, err := DoInvokeFuntion(
+		functionName, err := DoInvokeFuntion(
 			DoInvokeFuntionStruct{
 				CustomEvents: afterActions,
 				IDs:          objectIds,
@@ -2861,7 +2858,7 @@ func (h *HandlerV1) DeleteManyObject(c *gin.Context) {
 		}
 	}
 	if len(beforeActions) > 0 {
-		functionName, _, err := DoInvokeFuntion(DoInvokeFuntionStruct{
+		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			IDs:          objectRequest.Ids,
 			TableSlug:    c.Param("table_slug"),
@@ -2924,7 +2921,7 @@ func (h *HandlerV1) DeleteManyObject(c *gin.Context) {
 	}
 
 	if len(afterActions) > 0 {
-		functionName, _, err := DoInvokeFuntion(
+		functionName, err := DoInvokeFuntion(
 			DoInvokeFuntionStruct{
 				CustomEvents: afterActions,
 				IDs:          objectRequest.Ids,
