@@ -1,6 +1,8 @@
 module ucode/ucode_go_api_gateway
 
-go 1.21.6
+go 1.22
+
+toolchain go1.23.2
 
 require (
 	github.com/gin-gonic/gin v1.9.0
@@ -9,11 +11,11 @@ require (
 	github.com/go-playground/validator/v10 v10.11.2 // indirect
 	github.com/goccy/go-json v0.10.0 // indirect
 	github.com/google/uuid v1.6.0
-	github.com/joho/godotenv v1.4.0
+	github.com/joho/godotenv v1.5.1
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/minio/minio-go/v7 v7.0.42
 	github.com/pelletier/go-toml/v2 v2.0.6 // indirect
-	github.com/spf13/cast v1.5.0
+	github.com/spf13/cast v1.7.0
 	github.com/swaggo/gin-swagger v1.2.0
 	github.com/swaggo/swag v1.8.9
 	go.uber.org/zap v1.23.0
@@ -29,8 +31,10 @@ require (
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/golang/protobuf v1.5.4
 	github.com/golanguzb70/grpc-client-lb v1.0.0
+	github.com/golanguzb70/ucode-sdk v1.4.0
 	github.com/hashicorp/golang-lru v1.0.2
 	github.com/jackc/pgx/v4 v4.17.2
+	github.com/manveru/faker v0.0.0-20171103152722-9fbc68a78c4d
 	github.com/opentracing-contrib/go-gin v0.0.0-20230313182354-1499e56cc906
 	github.com/opentracing-contrib/go-grpc v0.0.0-20240724223109-9dec25a38fa8
 	github.com/opentracing/opentracing-go v1.2.0
@@ -82,6 +86,7 @@ require (
 	github.com/klauspost/cpuid/v2 v2.2.4 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
+	github.com/manveru/gobdd v0.0.0-20131210092515-f1a17fdd710b // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/minio/md5-simd v1.1.2 // indirect
 	github.com/minio/sha256-simd v1.0.0 // indirect
@@ -92,6 +97,7 @@ require (
 	github.com/sergi/go-diff v1.3.2-0.20230802210424-5b0b94c5c0d3 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/skeema/knownhosts v1.2.2 // indirect
+	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/uber/jaeger-lib v2.4.1+incompatible // indirect
 	github.com/ugorji/go/codec v1.2.10 // indirect
