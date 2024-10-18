@@ -14,9 +14,14 @@ import (
 )
 
 const (
-	appId          = "P-bgh4cmZxaWTXWscpH6sUa9gGlsuvKyZO"
-	BaseUrl        = "https://api.admin.u-code.io"
-	BaseUrlAuth    = "https://api.auth.u-code.io"
+	appId       = "P-bgh4cmZxaWTXWscpH6sUa9gGlsuvKyZO"
+	appIdPg     = "P-1cDW9ISg1ko1rSvffoSg1m0gJRHl7vgh"
+	BaseUrl     = "https://api.admin.u-code.io"
+	BaseUrlAuth = "https://api.auth.u-code.io"
+
+	BaseUrlAuthStaging = "https://auth-api.ucode.run"
+	BaseUrlStaging     = "https://admin-api.ucode.run"
+
 	requestTimeout = time.Second * 5
 
 	ProjectId     = "f05fdd8d-f949-4999-9593-5686ac272993"
@@ -31,8 +36,9 @@ const (
 )
 
 var (
-	UcodeApi = sdk.New(&sdk.Config{BaseURL: BaseUrl, RequestTimeout: requestTimeout, AppId: appId})
-	fakeData *faker.Faker
+	UcodeApi      = sdk.New(&sdk.Config{BaseURL: BaseUrl, RequestTimeout: requestTimeout, AppId: appId})
+	UcodeApiForPg = sdk.New(&sdk.Config{BaseURL: BaseUrlStaging, RequestTimeout: requestTimeout, AppId: appIdPg})
+	fakeData      *faker.Faker
 )
 
 func TestMain(m *testing.M) {
