@@ -14,17 +14,26 @@ import (
 
 var (
 	UploadUrl     = "https://api.admin.u-code.io/v1/files/folder_upload?folder_name=Media"
-	GenerateFile2 = "/tests/main_test.go"
+	GenerateFile2 = "/main_test.go"
 )
 
 func TestFileUpload(t *testing.T) {
 	currentDir, err := os.Getwd()
 	assert.NoError(t, err)
 
-	uploadResp2, err := UploadFile(UploadUrl, currentDir+GenerateFile2, UcodeApi.Config().AppId)
+	uploadResp, err := UploadFile(UploadUrl, currentDir+GenerateFile2, UcodeApi.Config().AppId)
 	assert.NoError(t, err)
-	assert.NotEmpty(t, uploadResp2.Data.ID)
+	assert.NotEmpty(t, uploadResp)
 
+	_, err = UcodeApi.DoRequest(BaseUrl+"/v1/files/"+uploadResp.Data.ID, http.MethodDelete, map[string]interface{}{},
+		map[string]string{
+			"Resource-Id":    ResourceId,
+			"Environment-Id": EnvironmentId,
+			"X-API-KEY":      UcodeApi.Config().AppId,
+			"Authorization":  "API-KEY",
+		},
+	)
+	assert.NoError(t, err)
 }
 
 func DoRequestV2(url string, method string, body bytes.Buffer, appId string, writer *multipart.Writer) ([]byte, error) {
