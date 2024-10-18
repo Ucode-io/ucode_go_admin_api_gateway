@@ -31,8 +31,16 @@ const (
 	RoleId        = "d1523cf2-c684-4c14-b021-413011ffb375"
 	Email         = "abdulbositkabilov@gmail.com"
 
+	ProjectIdPg     = "8e83e7d6-954e-4c13-bb85-2119c245dcea"
+	ResourceIdPg    = "835206e8-f971-41f0-838b-54ae6c53ca97"
+	EnvironmentIdPg = "7ab0af4a-6ae2-417f-a8f0-e45315ab0b60"
+	ClientTypeIdPg  = "fd941777-68e2-4a4f-acd1-a664cceaa4ea"
+	RoleIdPg        = "dda0320f-999f-4018-b172-70d4b2bd6792"
+
 	EmployeeClientTypeId = "8a69fc80-6316-4f84-8914-3e7ebae03dc7"
 	EmployeeRoleId       = "b64ac7b7-9ec9-42e0-b720-1267ca1e42f7"
+	EmployeeClientTypeIdPg = "61f967dd-cd9f-496e-99b4-cd32177baba2"
+	EmployeeRoleIdPg       = "ed239299-a987-4fa0-b0ef-9b7d69081d93"
 )
 
 var (
@@ -149,8 +157,8 @@ var ExcelReqPg = map[string]interface{}{
 			"c29bf7a6-9235-4632-a8cf-02e8c52bc800",
 			"c2c2e208-cebc-43bc-ac8a-7626939c695f",
 		},
-		"language":    "en",
-		"search":      "",
+		"language": "en",
+		"search":   "",
 		"view_fields": []string{
 			"single_line_field",
 			"multi_line_field",
@@ -162,7 +170,6 @@ var ExcelReqPg = map[string]interface{}{
 		},
 	},
 }
-
 
 func Login() (string, error) {
 	var (
