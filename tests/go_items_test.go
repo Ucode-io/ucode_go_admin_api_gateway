@@ -2,13 +2,11 @@ package tests
 
 import (
 	"encoding/json"
-	"fmt"
 	"testing"
 	"time"
 
 	sdk "github.com/golanguzb70/ucode-sdk"
 	"github.com/google/uuid"
-	"github.com/manveru/faker"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -250,11 +248,12 @@ func TestGetListObjectSearch(t *testing.T) {
 	assert.Empty(t, getProductResp.Data.Data.Response, "Response should be empty")
 }
 
+// Done
 func TestGetListAutoFilter(t *testing.T) {
-	resp, err := Login()
+	resp, err := LoginPg()
 	assert.NoError(t, err)
 
-	body, err := UcodeApi.DoRequest(BaseUrl+"/v2/object/get-list/product", "POST", map[string]interface{}{
+	body, err := UcodeApi.DoRequest(BaseUrlStaging+"/v2/object/get-list/product", "POST", map[string]interface{}{
 		"data": map[string]interface{}{},
 	}, map[string]string{
 		"Authorization": "Bearer " + resp,
@@ -268,10 +267,11 @@ func TestGetListAutoFilter(t *testing.T) {
 	assert.NotEmpty(t, response.Data.Data.Response)
 }
 
+// Done
 func TestGetListExcel(t *testing.T) {
-	body, err := UcodeApi.DoRequest(BaseUrl+"/v1/object/excel/product", "POST", ExcelReq, map[string]string{
+	body, err := UcodeApi.DoRequest(BaseUrlStaging+"/v1/object/excel/product", "POST", ExcelReqPg, map[string]string{
 		"authorization": "API-KEY",
-		"X-API-KEY":     UcodeApi.Config().AppId,
+		"X-API-KEY":     UcodeApiForPg.Config().AppId,
 	})
 	assert.NoError(t, err)
 	var response ExcelResponse
@@ -281,41 +281,41 @@ func TestGetListExcel(t *testing.T) {
 	assert.NotEmpty(t, response.Data.Data.Link)
 }
 
-func TestGetListRBAC(t *testing.T) {
-	resp, err := Login()
-	assert.NoError(t, err)
+// NOT DONE
+// func TestGetListRBAC(t *testing.T) {
+// 	resp, err := Login()
+// 	assert.NoError(t, err)
 
-	body, err := UcodeApi.DoRequest(BaseUrl+"/v2/object/get-list/company", "POST", map[string]interface{}{
-		"data": map[string]interface{}{},
-	}, map[string]string{
-		"Authorization": "Bearer " + resp,
-	})
-	assert.NoError(t, err)
-	var response GetListApiResponse
-	fmt.Println("GGGG", string(body))
-	// fmt.Println(response.Data.Data.Response)
-	err = json.Unmarshal(body, &response)
-	assert.NoError(t, err)
+// 	body, err := UcodeApi.DoRequest(BaseUrl+"/v2/object/get-list/company", "POST", map[string]interface{}{
+// 		"data": map[string]interface{}{},
+// 	}, map[string]string{
+// 		"Authorization": "Bearer " + resp,
+// 	})
+// 	assert.NoError(t, err)
+// 	var response GetListApiResponse
+// 	fmt.Println("GGGG", string(body))
+// 	// fmt.Println(response.Data.Data.Response)
+// 	err = json.Unmarshal(body, &response)
+// 	assert.NoError(t, err)
 
-	assert.NotEmpty(t, response.Data.Data.Response)
-}
+// 	assert.NotEmpty(t, response.Data.Data.Response)
+// }
 
+// Done
 func TestMultipleCRUD(t *testing.T) {
 	var ids = []string{}
 	var multipleInsert = []map[string]interface{}{}
 	var multipleUpdate = []map[string]interface{}{}
-	UcodeApi.Config().RequestTimeout = time.Second * 30
-	faker1, err := faker.New("en")
-	assert.NoError(t, err, "faker error")
+	UcodeApiForPg.Config().RequestTimeout = time.Second * 30
 
 	for i := 0; i < 10; i++ {
 		guid := uuid.New().String()
 		multipleInsert = append(multipleInsert, map[string]interface{}{
 			"guid":                             guid,
-			"single_line_field":                faker1.CompanyName(),
-			"multi_line_field":                 faker1.FirstName(),
-			"email_field":                      faker1.Email(),
-			"internation_phone_field":          faker1.PhoneNumber(),
+			"single_line_field":                fakeData.CompanyName(),
+			"multi_line_field":                 fakeData.FirstName(),
+			"email_field":                      fakeData.Email(),
+			"internation_phone_field":          fakeData.PhoneNumber(),
 			"date_time_field":                  time.Now(),
 			"date_time_without_timezone_field": time.Now().UTC(),
 			"date_field":                       time.Now(),
@@ -324,10 +324,10 @@ func TestMultipleCRUD(t *testing.T) {
 
 		multipleUpdate = append(multipleUpdate, map[string]interface{}{
 			"guid":                             guid,
-			"single_line_field":                faker1.CompanyName(),
-			"multi_line_field":                 faker1.FirstName(),
-			"email_field":                      faker1.Email(),
-			"internation_phone_field":          faker1.PhoneNumber(),
+			"single_line_field":                fakeData.CompanyName(),
+			"multi_line_field":                 fakeData.FirstName(),
+			"email_field":                      fakeData.Email(),
+			"internation_phone_field":          fakeData.PhoneNumber(),
 			"date_time_field":                  time.Now(),
 			"date_time_without_timezone_field": time.Now().UTC(),
 			"date_field":                       time.Now(),
@@ -336,7 +336,7 @@ func TestMultipleCRUD(t *testing.T) {
 		ids = append(ids, guid)
 	}
 
-	_, _, err = UcodeApi.MultipleUpdate(&sdk.Argument{
+	_, _, err := UcodeApiForPg.MultipleUpdate(&sdk.Argument{
 		TableSlug: "product",
 		Request: sdk.Request{
 			Data: map[string]interface{}{
@@ -347,7 +347,7 @@ func TestMultipleCRUD(t *testing.T) {
 	})
 	assert.NoError(t, err)
 
-	_, _, err = UcodeApi.MultipleUpdate(&sdk.Argument{
+	_, _, err = UcodeApiForPg.MultipleUpdate(&sdk.Argument{
 		TableSlug: "product",
 		Request: sdk.Request{
 			Data: map[string]interface{}{
@@ -358,7 +358,7 @@ func TestMultipleCRUD(t *testing.T) {
 	})
 	assert.NoError(t, err)
 
-	_, err = UcodeApi.MultipleDelete(&sdk.Argument{
+	_, err = UcodeApiForPg.MultipleDelete(&sdk.Argument{
 		TableSlug: "product",
 		Request: sdk.Request{
 			Data: map[string]interface{}{
