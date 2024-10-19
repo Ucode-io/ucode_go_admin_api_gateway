@@ -2,10 +2,18 @@ include:
   - .gitlab/ci/*.gitlab-ci.yml
 
 stages:
+  - test
   - build
   - deploy
   - rollback
 
+test-staging:
+  image: golang:1.20 
+  stage: test
+  script:
+  - go test ./...
+  only:
+    - staging 
 
 build-dev:
   stage: build
