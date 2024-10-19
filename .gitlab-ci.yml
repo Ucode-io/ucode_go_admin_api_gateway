@@ -11,6 +11,7 @@ test-staging:
   image: golang:1.20 
   stage: test
   script:
+  - go mod tidy && go mod vendor
   - go test ./...
   only:
     - staging 
