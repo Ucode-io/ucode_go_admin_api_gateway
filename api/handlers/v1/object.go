@@ -1283,6 +1283,7 @@ func (h *HandlerV1) GetListSlim(c *gin.Context) {
 		objectRequest models.CommonMessage
 		queryData     string
 		statusHttp    = status_http.GrpcStatusToHTTP["Ok"]
+		hashed        bool
 	)
 
 	queryParams := c.Request.URL.Query()
@@ -1290,9 +1291,16 @@ func (h *HandlerV1) GetListSlim(c *gin.Context) {
 		queryData = queryParams.Get("data")
 	}
 
+	if ok := queryParams.Has("data"); ok {
+		hashData, err := security.Decrypt(queryParams.Get("data"), h.baseConf.SecretKey)
+		if err == nil {
+			queryData = strings.TrimSpace(hashData)
+			hashed = true
+		}
+	}
+
 	queryMap := make(map[string]interface{})
-	err := json.Unmarshal([]byte(queryData), &queryMap)
-	if err != nil {
+	if err := json.Unmarshal([]byte(queryData), &queryMap); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -1304,46 +1312,6 @@ func (h *HandlerV1) GetListSlim(c *gin.Context) {
 	}
 
 	limit, err := h.getLimitParam(c)
-	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
-		return
-	}
-
-	if limit > 40 {
-		limit = 20
-	}
-
-	queryMap["limit"] = limit
-	queryMap["offset"] = offset
-
-	objectRequest.Data = queryMap
-	tokenInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err.Error())
-		return
-	}
-	objectRequest.Data["tables"] = tokenInfo.GetTables()
-	objectRequest.Data["user_id_from_token"] = tokenInfo.GetUserId()
-	objectRequest.Data["role_id_from_token"] = tokenInfo.GetRoleId()
-	objectRequest.Data["client_type_id_from_token"] = tokenInfo.GetClientTypeId()
-	if withRelation, ok := objectRequest.Data["with_relations"]; ok {
-		if withRelation.(bool) {
-			var (
-				client, role string
-			)
-			if clientTypeId, ok := c.Get("client_type_id"); ok {
-				client = clientTypeId.(string)
-			}
-			if roleId, ok := c.Get("role_id"); ok {
-				role = roleId.(string)
-			}
-			if client != "" && role != "" {
-				objectRequest.Data["client_type_id"] = client
-				objectRequest.Data["role_id"] = role
-			}
-		}
-	}
-	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
@@ -1362,22 +1330,77 @@ func (h *HandlerV1) GetListSlim(c *gin.Context) {
 		return
 	}
 
-	userId, _ := c.Get("user_id")
-	apiKey := c.GetHeader("X-API-KEY")
+	if projectId == "42ab0799-deff-4f8c-bf3f-64bf9665d304" {
+		limit = 100
+	} else {
+		if limit > 40 {
+			limit = 40
+		}
+	}
 
-	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId.(string),
-			EnvironmentId: environmentId.(string),
-			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
-		},
-	)
+	queryMap["limit"] = limit
+	queryMap["offset"] = offset
+
+	objectRequest.Data = queryMap
+	tokenInfo, err := h.GetAuthInfo(c)
 	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.Forbidden, err.Error())
 		return
 	}
 
+	objectRequest.Data["tables"] = tokenInfo.GetTables()
+	objectRequest.Data["user_id_from_token"] = tokenInfo.GetUserId()
+	objectRequest.Data["role_id_from_token"] = tokenInfo.GetRoleId()
+	objectRequest.Data["client_type_id_from_token"] = tokenInfo.GetClientTypeId()
+	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
+	userId, _ := c.Get("user_id")
+	apiKey := c.GetHeader("X-API-KEY")
+
+	var resource *pb.ServiceResourceModel
+	resourceBody, ok := c.Get("resource")
+	if resourceBody != "" && ok {
+		var resourceList *pb.GetResourceByEnvIDResponse
+		err = json.Unmarshal([]byte(resourceBody.(string)), &resourceList)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		for _, resourceObject := range resourceList.ServiceResources {
+			if resourceObject.Title == pb.ServiceType_name[1] {
+				resource = &pb.ServiceResourceModel{
+					Id:                    resourceObject.Id,
+					ServiceType:           resourceObject.ServiceType,
+					ProjectId:             resourceObject.ProjectId,
+					Title:                 resourceObject.Title,
+					ResourceId:            resourceObject.ResourceId,
+					ResourceEnvironmentId: resourceObject.ResourceEnvironmentId,
+					EnvironmentId:         resourceObject.EnvironmentId,
+					ResourceType:          resourceObject.ResourceType,
+					NodeType:              resourceObject.NodeType,
+				}
+				break
+			}
+		}
+	} else {
+		resource, err = h.companyServices.ServiceResource().GetSingle(
+			c.Request.Context(),
+			&pb.GetSingleServiceResourceReq{
+				ProjectId:     projectId.(string),
+				EnvironmentId: environmentId.(string),
+				ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	}
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
 		projectId.(string),
@@ -1387,14 +1410,6 @@ func (h *HandlerV1) GetListSlim(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-
-	// service, conn, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilderConnPool(c.Request.Context())
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.InternalServerError, err)
-	// 	return
-	// }
-	// defer conn.Close()
-	service := services.BuilderService().ObjectBuilder()
 
 	var (
 		logReq = &models.CreateVersionHistoryRequest{
@@ -1414,56 +1429,151 @@ func (h *HandlerV1) GetListSlim(c *gin.Context) {
 		}
 	)
 
-	redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
-	if err == nil {
-		resp := make(map[string]interface{})
-		m := make(map[string]interface{})
-		err = json.Unmarshal([]byte(redisResp), &m)
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
+		var slimKey = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("slim-%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId)))
+		if !cast.ToBool(c.Query("block_cached")) {
+			if cast.ToBool(c.Query("is_wait_cached")) {
+				var slimWaitKey = config.CACHE_WAIT + "-slim"
+				_, slimOK := h.cache.Get(slimWaitKey)
+				if !slimOK {
+					h.cache.Add(slimWaitKey, []byte(slimWaitKey), 15*time.Second)
+				}
+
+				if slimOK {
+					ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
+					defer cancel()
+
+					for {
+						slimBody, ok := h.cache.Get(slimKey)
+						if ok {
+							m := make(map[string]interface{})
+							err = json.Unmarshal(slimBody, &m)
+							if err != nil {
+								h.handleResponse(c, status_http.GRPCError, err.Error())
+								return
+							}
+
+							h.handleResponse(c, status_http.OK, map[string]interface{}{"data": m})
+							return
+						}
+
+						if ctx.Err() == context.DeadlineExceeded {
+							break
+						}
+
+						time.Sleep(config.REDIS_SLEEP)
+					}
+				}
+			} else {
+				redisResp, err := h.redis.Get(context.Background(), slimKey, projectId.(string), resource.NodeType)
+				if err == nil {
+					resp := make(map[string]interface{})
+					m := make(map[string]interface{})
+					err = json.Unmarshal([]byte(redisResp), &m)
+					if err != nil {
+						h.log.Error("Error while unmarshal redis", logger.Error(err))
+					} else {
+						resp["data"] = m
+						h.handleResponse(c, status_http.OK, resp)
+						logReq.Response = m
+						go h.versionHistory(logReq)
+						return
+					}
+				} else {
+					h.log.Error("Error while getting redis while get list ", logger.Error(err))
+				}
+			}
+		}
+
+		resp, err := service.GetListSlimV2(
+			context.Background(),
+			&obs.CommonMessage{
+				TableSlug: c.Param("table_slug"),
+				Data:      structData,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
 		if err != nil {
-			h.log.Error("Error while unmarshal redis", logger.Error(err))
-		} else {
-			resp["data"] = m
-			h.handleResponse(c, status_http.OK, resp)
-			logReq.Response = m
+			statusHttp = status_http.GrpcStatusToHTTP["Internal"]
+			stat, ok := status.FromError(err)
+			if ok {
+				statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
+				statusHttp.CustomMessage = stat.Message()
+			}
+			logReq.Response = err.Error()
 			go h.versionHistory(logReq)
+			h.handleResponse(c, statusHttp, err.Error())
 			return
 		}
-	} else {
-		h.log.Error("Error while getting redis while get list ", logger.Error(err))
-	}
-	resp, err := service.GetListSlim(
-		context.Background(),
-		&obs.CommonMessage{
-			TableSlug: c.Param("table_slug"),
-			Data:      structData,
-			ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
-	if err != nil {
-		statusHttp = status_http.GrpcStatusToHTTP["Internal"]
-		stat, ok := status.FromError(err)
-		if ok {
-			statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
-			statusHttp.CustomMessage = stat.Message()
-		}
-		logReq.Response = err.Error()
+
+		logReq.Response = resp
 		go h.versionHistory(logReq)
-		h.handleResponse(c, statusHttp, err.Error())
-		return
-	}
 
-	logReq.Response = resp
-	go h.versionHistory(logReq)
-
-	if resp.IsCached {
-		jsonData, _ := resp.GetData().MarshalJSON()
-		err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
-		if err != nil {
-			h.log.Error("Error while setting redis", logger.Error(err))
+		if !cast.ToBool(c.Query("block_cached")) {
+			jsonData, _ := resp.GetData().MarshalJSON()
+			if cast.ToBool(c.Query("is_wait_cached")) {
+				h.cache.Add(slimKey, jsonData, 15*time.Second)
+			} else if resp.IsCached {
+				err = h.redis.SetX(context.Background(), slimKey, string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
+				if err != nil {
+					h.log.Error("Error while setting redis", logger.Error(err))
+				}
+			}
 		}
+
+		statusHttp.CustomMessage = resp.GetCustomMessage()
+
+		if hashed {
+			hash, err := security.Encrypt(resp, h.baseConf.SecretKey)
+			if err != nil {
+				h.handleResponse(c, status_http.InternalServerError, err.Error())
+				return
+			}
+
+			h.handleResponse(c, statusHttp, hash)
+			return
+		}
+		h.handleResponse(c, statusHttp, resp)
+	case pb.ResourceType_POSTGRESQL:
+		resp, err := services.GoObjectBuilderService().ObjectBuilder().GetListSlim(context.Background(),
+			&nb.CommonMessage{
+				TableSlug: c.Param("table_slug"),
+				Data:      structData,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+
+		if err != nil {
+			statusHttp = status_http.GrpcStatusToHTTP["Internal"]
+			stat, ok := status.FromError(err)
+			if ok {
+				statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
+				statusHttp.CustomMessage = stat.Message()
+			}
+			logReq.Response = err.Error()
+			go h.versionHistoryGo(c, logReq)
+			h.handleResponse(c, statusHttp, err.Error())
+			return
+		}
+
+		logReq.Response = resp
+		go h.versionHistoryGo(c, logReq)
+
+		// if err == nil {
+		// 	if resp.IsCached {
+		// 		jsonData, _ := resp.GetData().MarshalJSON()
+		// 		err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second)
+		// 		if err != nil {
+		// 			h.log.Error("Error while setting redis", logger.Error(err))
+		// 		}
+		// 	}
+		// }
+
+		statusHttp.CustomMessage = resp.GetCustomMessage()
+		h.handleResponse(c, statusHttp, resp)
 	}
-	statusHttp.CustomMessage = resp.GetCustomMessage()
-	h.handleResponse(c, statusHttp, resp)
 }
 
 // GetListInExcel godoc
