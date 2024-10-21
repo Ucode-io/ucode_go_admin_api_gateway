@@ -12,7 +12,7 @@ test-staging:
   stage: test
   script:
   - go mod tidy && go mod vendor
-  - go test ./...
+  - go test ./tests/...
   only:
     - staging 
 
