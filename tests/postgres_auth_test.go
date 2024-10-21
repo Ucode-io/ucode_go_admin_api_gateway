@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestEmailRegister(t *testing.T) {
+func TestEmailRegisterPg(t *testing.T) {
 	body, err := UcodeApiForPg.DoRequest(BaseUrlAuthStaging+"/v2/register?project-id="+ProjectIdPg, "POST",
 		map[string]interface{}{
 			"data": map[string]interface{}{"type": "email", "client_type_id": ClientTypeIdPg, "role_id": RoleIdPg, "email": Email, "name": fakeData.Name()},
@@ -60,7 +60,7 @@ func TestEmailRegister(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestPhoneRegister(t *testing.T) {
+func TestPhoneRegisterPg(t *testing.T) {
 	var phone = "+998946236953"
 
 	body, err := UcodeApiForPg.DoRequest(BaseUrlAuthStaging+"/v2/register?project-id="+ProjectIdPg, "POST",
@@ -113,7 +113,7 @@ func TestPhoneRegister(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestLoginRegister(t *testing.T) {
+func TestLoginRegisterPg(t *testing.T) {
 	var (
 		guid  = uuid.New().String()
 		login = "test_login123"
