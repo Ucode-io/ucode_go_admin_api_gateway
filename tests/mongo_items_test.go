@@ -2,7 +2,6 @@ package tests
 
 import (
 	"encoding/json"
-	"fmt"
 	"testing"
 	"time"
 
@@ -332,8 +331,7 @@ func TestGetListRBAC(t *testing.T) {
 	})
 	assert.NoError(t, err)
 	var response GetListApiResponse
-	fmt.Println("GGGG", string(body))
-	// fmt.Println(response.Data.Data.Response)
+
 	err = json.Unmarshal(body, &response)
 	assert.NoError(t, err)
 

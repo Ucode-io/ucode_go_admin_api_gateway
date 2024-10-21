@@ -181,7 +181,7 @@ func Login() (string, error) {
 			"project_id":      "f05fdd8d-f949-4999-9593-5686ac272993",
 			"environment_id":  "e8b82a93-b87f-4103-abc4-b5a017f540a4",
 			"client_type":     "8a69fc80-6316-4f84-8914-3e7ebae03dc7",
-			"tables":          []map[string]string{{"object_id": "ae0183d4-860a-409c-b54c-2818d6b690f7", "table_slug": "Bosit"}},
+			"tables":          []map[string]string{{"object_id": "64d1288f-f55c-421e-9286-476cfe5f9896", "table_slug": "company"}},
 			"environment_ids": []string{"e8b82a93-b87f-4103-abc4-b5a017f540a4"},
 		}
 	)
@@ -204,8 +204,8 @@ func LoginPg() (string, error) {
 	var (
 		url  = "https://auth-api.ucode.run/v2/login?project-id=8e83e7d6-954e-4c13-bb85-2119c245dcea"
 		body = map[string]interface{}{
-			"username":        "test_for_test",
-			"password":        "test_for_test",
+			"username":        "bosit_test_001",
+			"password":        "bosit_test_001",
 			"company_id":      "1ada9292-c76a-453d-a323-559538baa0ee",
 			"project_id":      "8e83e7d6-954e-4c13-bb85-2119c245dcea",
 			"environment_id":  "7ab0af4a-6ae2-417f-a8f0-e45315ab0b60",
