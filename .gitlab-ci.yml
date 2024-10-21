@@ -2,10 +2,19 @@ include:
   - .gitlab/ci/*.gitlab-ci.yml
 
 stages:
+  - test
   - build
   - deploy
   - rollback
 
+test-staging:
+  image: golang:1.22
+  stage: test
+  script:
+  - go mod tidy && go mod vendor
+  - go test ./...
+  only:
+    - staging 
 
 build-dev:
   stage: build
@@ -33,33 +42,6 @@ build-prod:
     DOCKERFILE: Dockerfile
   only:
     - master
-
-# migrate-staging:
-#   stage: migrate
-#   extends: .migrate_template
-#   variables:
-#     PATH_MIGRATION: migrations/postgres
-#     POSTGRES_LINK: $UCODE_ADMIN_API_TESTDB
-#   only:
-#     - staging
-
-# migrate-prod:
-#   stage: migrate
-#   extends: .migrate_template
-#   variables:
-#     PATH_MIGRATION: migrations/postgres
-#     POSTGRES_LINK: $UCODE_ADMIN_API_PRODDB
-#   only:
-#     - master
-
-# migrate-demo:
-#   stage: migrate
-#   extends: .migrate_template
-#   variables:
-#     PATH_MIGRATION: migrations/postgres
-#     POSTGRES_LINK: $UCODE_ADMIN_API_DEMODB
-#   only:
-#     - staging
 
 deploy-staging:
   stage: deploy

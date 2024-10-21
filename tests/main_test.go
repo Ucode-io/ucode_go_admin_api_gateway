@@ -60,7 +60,7 @@ func TestMain(m *testing.M) {
 			"Authorization":  "API-KEY",
 		},
 	)
-	if err != nil {
+	if err == nil {
 		log.Fatal(err)
 	}
 
