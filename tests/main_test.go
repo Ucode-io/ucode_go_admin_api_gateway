@@ -52,7 +52,7 @@ func TestMain(m *testing.M) {
 			"Authorization":  "API-KEY",
 		},
 	)
-	if err != nil {
+	if err == nil {
 		log.Fatal(err)
 	}
 
@@ -149,8 +149,8 @@ var ExcelReqPg = map[string]interface{}{
 			"c29bf7a6-9235-4632-a8cf-02e8c52bc800",
 			"c2c2e208-cebc-43bc-ac8a-7626939c695f",
 		},
-		"language":    "en",
-		"search":      "",
+		"language": "en",
+		"search":   "",
 		"view_fields": []string{
 			"single_line_field",
 			"multi_line_field",
@@ -162,7 +162,6 @@ var ExcelReqPg = map[string]interface{}{
 		},
 	},
 }
-
 
 func Login() (string, error) {
 	var (
