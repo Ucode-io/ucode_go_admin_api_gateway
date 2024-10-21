@@ -37,8 +37,8 @@ const (
 	ClientTypeIdPg  = "fd941777-68e2-4a4f-acd1-a664cceaa4ea"
 	RoleIdPg        = "dda0320f-999f-4018-b172-70d4b2bd6792"
 
-	EmployeeClientTypeId = "8a69fc80-6316-4f84-8914-3e7ebae03dc7"
-	EmployeeRoleId       = "b64ac7b7-9ec9-42e0-b720-1267ca1e42f7"
+	EmployeeClientTypeId   = "8a69fc80-6316-4f84-8914-3e7ebae03dc7"
+	EmployeeRoleId         = "b64ac7b7-9ec9-42e0-b720-1267ca1e42f7"
 	EmployeeClientTypeIdPg = "61f967dd-cd9f-496e-99b4-cd32177baba2"
 	EmployeeRoleIdPg       = "ed239299-a987-4fa0-b0ef-9b7d69081d93"
 )
@@ -60,7 +60,7 @@ func TestMain(m *testing.M) {
 			"Authorization":  "API-KEY",
 		},
 	)
-	if err == nil {
+	if err != nil {
 		log.Fatal(err)
 	}
 
