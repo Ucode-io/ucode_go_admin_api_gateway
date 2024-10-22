@@ -105,6 +105,14 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 
 	objectRequest.Data["guid"] = id
 
+	address, ok := objectRequest.Data["reciever_address"].(string)
+	if ok && address != "" {
+		h.log.Debug("reciever_address started", logger.String("address", address))
+		defer func() {
+			h.log.Debug("reciever_address done", logger.String("address", address))
+		}()
+	}
+
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
 
 	if err != nil {
