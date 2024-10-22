@@ -78,7 +78,7 @@ func GetListCustomEvents(tableSlug, roleId, method string, c *gin.Context, h *Ha
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		res, err = services.BuilderService().CustomEvent().GetList(
+		res, err = services.GetBuilderServiceByType(resource.NodeType).CustomEvent().GetList(
 			ctx,
 			&obs.GetCustomEventsListRequest{
 				TableSlug: tableSlug,
