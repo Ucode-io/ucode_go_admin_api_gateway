@@ -138,7 +138,6 @@ func (h *HandlerV1) CreateObject(c *gin.Context) {
 	objectRequest.Data["guid"] = id
 
 	// THIS for loop is written to create child objects (right now it is used in the case of One2One relation)
-	//start = time.Now()
 	for key, value := range objectRequest.Data {
 		if key[0] == '$' {
 
@@ -172,12 +171,11 @@ func (h *HandlerV1) CreateObject(c *gin.Context) {
 	}
 
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
-
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
-	//start = time.Now()
+
 	fromOfs := c.Query("from-ofs")
 	if fromOfs != "true" {
 		beforeActions, afterActions, err = GetListCustomEvents(c.Param("table_slug"), "", "CREATE", c, h)
@@ -186,7 +184,7 @@ func (h *HandlerV1) CreateObject(c *gin.Context) {
 			return
 		}
 	}
-	//start = time.Now()
+
 	if len(beforeActions) > 0 {
 		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
@@ -204,7 +202,6 @@ func (h *HandlerV1) CreateObject(c *gin.Context) {
 		}
 	}
 
-	//start = time.Now()
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = service.Create(
@@ -228,19 +225,7 @@ func (h *HandlerV1) CreateObject(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().ObjectBuilder().Create(
-			context.Background(),
-			&obs.CommonMessage{
-				TableSlug: c.Param("table_slug"),
-				Data:      structData,
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
+		// Does Not Implemented
 	}
 
 	if data, ok := resp.Data.AsMap()["data"].(map[string]interface{}); ok {
@@ -249,7 +234,7 @@ func (h *HandlerV1) CreateObject(c *gin.Context) {
 			id = data["guid"].(string)
 		}
 	}
-	//start = time.Now()
+
 	if len(afterActions) > 0 {
 		functionName, err := DoInvokeFuntion(
 			DoInvokeFuntionStruct{
@@ -331,6 +316,7 @@ func (h *HandlerV1) GetSingle(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
+
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
@@ -353,9 +339,6 @@ func (h *HandlerV1) GetSingle(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-
-	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
-	// defer cancel()
 
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 
@@ -380,18 +363,7 @@ func (h *HandlerV1) GetSingle(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().ObjectBuilder().GetSingle(
-			context.Background(),
-			&obs.CommonMessage{
-				TableSlug: c.Param("table_slug"),
-				Data:      structData,
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
+		// Does Not Implemented
 	}
 	statusHttp.CustomMessage = resp.GetCustomMessage()
 	h.handleResponse(c, statusHttp, resp)
@@ -500,7 +472,6 @@ func (h *HandlerV1) GetSingleSlim(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
-
 		redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
 		if err == nil {
 			resp := make(map[string]interface{})
@@ -761,24 +732,10 @@ func (h *HandlerV1) UpdateObject(c *gin.Context) {
 				return
 			}
 		case pb.ResourceType_POSTGRESQL:
-			singleObject, err = services.PostgresBuilderService().ObjectBuilder().GetSingle(
-				context.Background(),
-				&obs.CommonMessage{
-					TableSlug: c.Param("table_slug"),
-					Data: &structpb.Struct{
-						Fields: map[string]*structpb.Value{
-							"id": structpb.NewStringValue(id),
-						},
-					},
-					ProjectId: resource.ResourceEnvironmentId,
-				},
-			)
-			if err != nil {
-				h.handleResponse(c, status_http.GRPCError, err.Error())
-				return
-			}
+			// Does Not Implemented
 		}
 	}
+
 	if len(beforeActions) > 0 {
 		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
@@ -819,19 +776,7 @@ func (h *HandlerV1) UpdateObject(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().ObjectBuilder().Update(
-			context.Background(),
-			&obs.CommonMessage{
-				TableSlug: c.Param("table_slug"),
-				Data:      structData,
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
+		// Does Not Implemented
 	}
 
 	if c.Param("table_slug") == "record_permission" {
@@ -1005,20 +950,7 @@ func (h *HandlerV1) DeleteObject(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().ObjectBuilder().Delete(
-			context.Background(),
-			&obs.CommonMessage{
-				TableSlug: c.Param("table_slug"),
-				Data:      structData,
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
+		// Does Not Implemented
 	}
 
 	if len(afterActions) > 0 {
@@ -1187,18 +1119,7 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 					return
 				}
 			case pb.ResourceType_POSTGRESQL:
-				resp, err = services.PostgresBuilderService().ObjectBuilder().GroupByColumns(
-					context.Background(),
-					&obs.CommonMessage{
-						TableSlug: c.Param("table_slug"),
-						Data:      structData,
-						ProjectId: resource.ResourceEnvironmentId,
-					},
-				)
-				if err != nil {
-					h.handleResponse(c, status_http.GRPCError, err.Error())
-					return
-				}
+				// Does Not Implemented
 			}
 		}
 	} else {
@@ -1814,15 +1735,7 @@ func (h *HandlerV1) DeleteManyToMany(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().ObjectBuilder().ManyToManyDelete(
-			context.Background(),
-			&m2mMessage,
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
+		// Does Not Implemented
 	}
 
 	if len(afterActions) > 0 {
@@ -1956,15 +1869,7 @@ func (h *HandlerV1) AppendManyToMany(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().ObjectBuilder().ManyToManyAppend(
-			context.Background(),
-			&m2mMessage,
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
+		// Does Not Implemented
 	}
 
 	if len(afterActions) > 0 {
@@ -2150,20 +2055,7 @@ func (h *HandlerV1) UpsertObject(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().ObjectBuilder().Batch(
-			context.Background(),
-			&obs.BatchRequest{
-				TableSlug:     c.Param("table_slug"),
-				Data:          structData,
-				UpdatedFields: objectRequest.UpdatedFields,
-				ProjectId:     resource.ResourceEnvironmentId,
-			},
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
+		// Does Not Implemented
 	}
 
 	if c.Param("table_slug") == "record_permission" {
@@ -3167,19 +3059,7 @@ func (h *HandlerV1) GetListWithOutRelation(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().ObjectBuilder().GetListWithOutRelations(
-			context.Background(),
-			&obs.CommonMessage{
-				TableSlug: c.Param("table_slug"),
-				Data:      structData,
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
+		// Does Not Implemented
 	}
 
 	statusHttp.CustomMessage = resp.GetCustomMessage()

@@ -115,14 +115,7 @@ func (h *HandlerV1) CreateCustomErrorMessage(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().CustomErrorMessage().Create(
-			context.Background(),
-			&customErrorMessages,
-		)
-		if err != nil {
-			return
-		}
-
+		// Does Not Implemented
 	}
 }
 
@@ -199,19 +192,7 @@ func (h *HandlerV1) GetByIdCustomErrorMessage(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().CustomErrorMessage().GetById(
-			context.Background(),
-			&obs.CustomErrorMessagePK{
-				Id:        c.Param("id"),
-				ProjectId: resource.GetResourceEnvironmentId(),
-			},
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
+		// Does Not Implemented
 	}
 	h.handleResponse(c, status_http.OK, resp)
 }
@@ -291,19 +272,7 @@ func (h *HandlerV1) GetAllCustomErrorMessage(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().CustomErrorMessage().GetList(
-			context.Background(),
-			&obs.GetCustomErrorMessageListRequest{
-				TableId:   c.Query("table_id"),
-				TableSlug: c.Query("table_slug"),
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
+		// Does Not Implemented
 	}
 
 	h.handleResponse(c, status_http.OK, resp)
@@ -409,14 +378,7 @@ func (h *HandlerV1) UpdateCustomErrorMessage(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().CustomErrorMessage().Update(
-			context.Background(),
-			&customErrorMessages,
-		)
-		if err != nil {
-			return
-		}
-
+		// Does Not Implemented
 	}
 }
 
@@ -518,16 +480,6 @@ func (h *HandlerV1) DeleteCustomErrorMessage(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().CustomErrorMessage().Delete(
-			context.Background(),
-			&obs.CustomErrorMessagePK{
-				Id:        c.Param("id"),
-				ProjectId: resource.GetResourceEnvironmentId(),
-			},
-		)
-		if err != nil {
-			return
-		}
-
+		// Does Not Implemented
 	}
 }

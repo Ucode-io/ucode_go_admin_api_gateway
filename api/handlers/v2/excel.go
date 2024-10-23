@@ -82,17 +82,7 @@ func (h *HandlerV2) ExcelReader(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		res, err = services.PostgresBuilderService().Excel().ExcelRead(
-			context.Background(),
-			&object_builder_service.ExcelReadRequest{
-				Id:        excelId,
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.InvalidArgument, err.Error())
-			return
-		}
+		// Does Not Implemented
 	}
 
 	h.handleResponse(c, status_http.OK, res)
@@ -184,20 +174,7 @@ func (h *HandlerV2) ImportData(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		_, err = services.PostgresBuilderService().Excel().ExcelToDb(
-			context.Background(),
-			&object_builder_service.ExcelToDbRequest{
-				Id:        c.Param("id"),
-				TableSlug: excelRequest.TableSlug,
-				Data:      data,
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.InvalidArgument, err.Error())
-			return
-		}
-
+		// Does Not Implemented
 	}
 
 	h.handleResponse(c, status_http.Created, models.ExcelToDbResponse{

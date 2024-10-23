@@ -29,11 +29,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	r.Use(customCORSMiddleware())
 	r.Use(ginhttp.Middleware(tracer))
 
-	// r.Use(MaxAllowed(5000))
-	// r.Use(h.NodeMiddleware())
-
 	r.GET("/ping", h.V1.Ping)
-	// r.GET("/config", h.GetConfig)
 	r.Any("/v2/upload-file/*any", gin.WrapH(http.StripPrefix("/v2/upload-file/", h.V2.MovieUpload())))
 
 	r.Any("/x-api/*any", h.V1.RedirectAuthMiddleware(cfg), proxyMiddleware(r, &h), h.V1.Proxy)
@@ -55,8 +51,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	global := r.Group("/v1/global")
 	global.Use(h.V1.GlobalAuthMiddleware(cfg))
 	{
-		// global.GET("/projects", h.V1.GetGlobalCompanyProjectList)
-		// global.GET("/environment", h.V1.GetGlobalProjectEnvironments)
 		global.GET("/template", h.V1.GetGlobalProjectTemplate)
 	}
 
@@ -64,7 +58,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	// @securityDefinitions.apikey ApiKeyAuth
 	// @in header
 	// @name Authorization
-
 	v1.Use(h.V1.AuthMiddleware(cfg))
 	{
 		v1.POST("/menu-settings", h.V1.CreateMenuSettings)
@@ -517,25 +510,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1Admin.PUT("/scenario/:id/select-versions", h.V1.SelectVersionsScenario)
 		v1Admin.POST("/scenario/revert", h.V1.RevertScenario)
 
-		// query_service
-		v1Admin.POST("/query-folder", h.V1.CreateQueryRequestFolder)
-		v1Admin.PUT("/query-folder", h.V1.UpdateQueryRequestFolder)
-		v1Admin.GET("/query-folder", h.V1.GetListQueryRequestFolder)
-		v1Admin.GET("/query-folder/:query-folder-id", h.V1.GetSingleQueryRequestFolder)
-		v1Admin.DELETE("/query-folder/:query-folder-id", h.V1.DeleteQueryRequestFolder)
-
-		v1Admin.POST("/query-request", h.V1.CreateQueryRequest)
-		v1Admin.PUT("/query-request", h.V1.UpdateQueryRequest)
-		v1Admin.GET("/query-request", h.V1.GetListQueryRequest)
-		v1Admin.GET("/query-request/:query-id", h.V1.GetSingleQueryRequest)
-		v1Admin.DELETE("/query-request/:query-id", h.V1.DeleteQueryRequest)
-		v1Admin.POST("/query-request/select-versions/:query-id", h.V1.InsertManyVersionForQueryService)
-		v1Admin.POST("/query-request/run", h.V1.QueryRun)
-		v1Admin.GET("/query-request/:query-id/history", h.V1.GetQueryHistory)
-		v1Admin.POST("/query-request/:query-id/revert", h.V1.RevertQuery)
-		v1Admin.GET("/query-request/:query-id/log", h.V1.GetListQueryLog)
-		v1Admin.GET("/query-request/:query-id/log/:log-id", h.V1.GetSingleQueryLog)
-
 		// web page service
 		v1Admin.POST("/webpage-folder", h.V1.CreateWebPageFolder)
 		v1Admin.PUT("/webpage-folder", h.V1.UpdateWebPageFolder)
@@ -638,19 +612,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	v3 := r.Group("/v3")
 	v3.Use(h.V1.AdminAuthMiddleware())
 	{
-		// query folder
-		v3.POST("/query_folder", h.V1.CreateQueryFolder)
-		v3.GET("/query_folder/:guid", h.V1.GetQueryFolderByID)
-		v3.GET("/query_folder", h.V1.GetQueryFolderList)
-		v3.PUT("/query_folder/:guid", h.V1.UpdateQueryFolder)
-		v3.DELETE("/query_folder/:guid", h.V1.DeleteQueryFolder)
 
-		// // query
-		v3.POST("/query", h.V1.CreateQuery)
-		v3.GET("/query/:guid", h.V1.GetQueryByID)
-		v3.GET("/query", h.V1.GetQueryList)
-		v3.PUT("/query/:guid", h.V1.UpdateQuery)
-		v3.DELETE("/query/:guid", h.V1.DeleteQuery)
 		// // web pages
 		v3.POST("/web_pages", h.V1.CreateWebPage)
 		v3.GET("/web_pages/:guid", h.V1.GetWebPagesById)

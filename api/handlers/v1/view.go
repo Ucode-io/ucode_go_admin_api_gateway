@@ -3,7 +3,6 @@ package v1
 import (
 	"context"
 	"errors"
-	"log"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
@@ -80,7 +79,7 @@ func (h *HandlerV1) CreateView(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).View().Create(
-			context.Background(),
+			c.Request.Context(),
 			&view,
 		)
 
@@ -89,15 +88,7 @@ func (h *HandlerV1) CreateView(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().View().Create(
-			context.Background(),
-			&view,
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
+		// Does Not Implemented
 	}
 
 	h.handleResponse(c, status_http.Created, resp)
@@ -166,7 +157,7 @@ func (h *HandlerV1) GetSingleView(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).View().GetSingle(
-			context.Background(),
+			c.Request.Context(),
 			&obs.ViewPrimaryKey{
 				Id:        viewID,
 				ProjectId: resource.ResourceEnvironmentId,
@@ -177,17 +168,7 @@ func (h *HandlerV1) GetSingleView(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().View().GetSingle(
-			context.Background(),
-			&obs.ViewPrimaryKey{
-				Id:        viewID,
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
+		// Does Not Implemented
 	}
 
 	h.handleResponse(c, status_http.OK, resp)
@@ -259,7 +240,7 @@ func (h *HandlerV1) UpdateView(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).View().Update(
-			context.Background(),
+			c.Request.Context(),
 			&view,
 		)
 
@@ -268,15 +249,7 @@ func (h *HandlerV1) UpdateView(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().View().Update(
-			context.Background(),
-			&view,
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
+		// Does Not Implemented
 	}
 
 	h.handleResponse(c, status_http.OK, resp)
@@ -296,9 +269,9 @@ func (h *HandlerV1) UpdateView(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) DeleteView(c *gin.Context) {
-	viewID := c.Param("view_id")
 	var (
-		resp *emptypb.Empty
+		viewID = c.Param("view_id")
+		resp   *emptypb.Empty
 	)
 
 	if !util.IsValidUUID(viewID) {
@@ -357,18 +330,7 @@ func (h *HandlerV1) DeleteView(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().View().Delete(
-			context.Background(),
-			&obs.ViewPrimaryKey{
-				Id:        viewID,
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
+		// Does Not Implemented
 	}
 
 	h.handleResponse(c, status_http.NoContent, resp)
@@ -388,10 +350,7 @@ func (h *HandlerV1) DeleteView(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetViewList(c *gin.Context) {
-
-	var (
-		resp *obs.GetAllViewsResponse
-	)
+	var resp *obs.GetAllViewsResponse
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -444,18 +403,7 @@ func (h *HandlerV1) GetViewList(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().View().GetList(
-			context.Background(),
-			&obs.GetAllViewsRequest{
-				TableSlug: c.Query("table_slug"),
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
+		// Does Not Implemented
 	}
 
 	h.handleResponse(c, status_http.OK, resp)
@@ -530,7 +478,6 @@ func (h *HandlerV1) ConvertHtmlToPdf(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		log.Println("\n\nConvertHtmlToPdf---->")
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).View().ConvertHtmlToPdf(
 			c.Request.Context(),
 			&obs.HtmlBody{
@@ -545,20 +492,7 @@ func (h *HandlerV1) ConvertHtmlToPdf(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		log.Println("\n\nConvertHtmlToPdf---->")
-		resp, err = services.GetBuilderServiceByType(resource.NodeType).View().ConvertHtmlToPdf(
-			c.Request.Context(),
-			&obs.HtmlBody{
-				Data:      structData,
-				Html:      html.Html,
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
+		// Does Not Implemented
 	}
 
 	h.handleResponse(c, status_http.Created, resp)
@@ -634,7 +568,6 @@ func (h *HandlerV1) ConvertTemplateToHtml(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).View().ConvertTemplateToHtml(
 			context.Background(),
 			&obs.HtmlBody{
@@ -649,20 +582,7 @@ func (h *HandlerV1) ConvertTemplateToHtml(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-
-		resp, err = services.GetBuilderServiceByType(resource.NodeType).View().ConvertTemplateToHtml(
-			context.Background(),
-			&obs.HtmlBody{
-				Data:      structData,
-				Html:      html.Html,
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
+		// Does Not Implemented
 	}
 
 	h.handleResponse(c, status_http.Created, resp)
@@ -742,15 +662,7 @@ func (h *HandlerV1) UpdateViewOrder(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().View().UpdateViewOrder(
-			context.Background(),
-			&view,
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
+		// Does Not Implemented
 	}
 
 	h.handleResponse(c, status_http.OK, resp)

@@ -111,26 +111,7 @@ func (h *HandlerV1) CreateMenu(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Menu().Create(
-			context.Background(),
-			&obs.CreateMenuRequest{
-				Label:           menu.Label,
-				Icon:            menu.Icon,
-				TableId:         menu.TableId,
-				LayoutId:        menu.LayoutId,
-				ParentId:        menu.ParentId,
-				Type:            menu.Type,
-				ProjectId:       resource.ResourceEnvironmentId,
-				MicrofrontendId: menu.MicrofrontendId,
-				WebpageId:       menu.WebpageId,
-				Attributes:      attributes,
-			},
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
+		// Does Not Implemented
 	}
 
 	h.handleResponse(c, status_http.Created, resp)
@@ -210,17 +191,7 @@ func (h *HandlerV1) GetMenuByID(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Menu().GetByID(
-			context.Background(),
-			&obs.MenuPrimaryKey{
-				Id:        menuID,
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
+		// Does Not Implemented
 	}
 
 	h.handleResponse(c, status_http.OK, resp)
@@ -308,21 +279,7 @@ func (h *HandlerV1) GetAllMenus(c *gin.Context) {
 		}
 
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Menu().GetAll(
-			context.Background(),
-			&obs.GetAllMenusRequest{
-				Limit:     int32(limit),
-				Offset:    int32(offset),
-				Search:    c.DefaultQuery("search", ""),
-				ProjectId: resource.ResourceEnvironmentId,
-				ParentId:  c.DefaultQuery("parent_id", ""),
-				RoleId:    authInfo.GetRoleId(),
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
+		// Does Not Implemented
 	}
 	h.handleResponse(c, status_http.OK, resp)
 }
@@ -424,22 +381,7 @@ func (h *HandlerV1) UpdateMenu(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, _ = services.PostgresBuilderService().Menu().Update(
-			context.Background(),
-			&obs.Menu{
-				Id:              menu.Id,
-				Icon:            menu.Icon,
-				TableId:         menu.TableId,
-				LayoutId:        menu.LayoutId,
-				Label:           menu.Label,
-				ParentId:        menu.ParentId,
-				Type:            menu.Type,
-				ProjectId:       resource.ResourceEnvironmentId,
-				MicrofrontendId: menu.MicrofrontendId,
-				WebpageId:       menu.WebpageId,
-				Attributes:      attributes,
-			},
-		)
+		// Does Not Implemented
 	}
 
 	h.handleResponse(c, status_http.OK, resp)
@@ -545,19 +487,7 @@ func (h *HandlerV1) DeleteMenu(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Menu().Delete(
-			context.Background(),
-			&obs.MenuPrimaryKey{
-				Id:        menuID,
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
+		// Does Not Implemented
 	}
 
 	h.handleResponse(c, status_http.NoContent, resp)
@@ -638,18 +568,7 @@ func (h *HandlerV1) UpdateMenuOrder(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Menu().UpdateMenuOrder(
-			context.Background(),
-			&obs.UpdateMenuOrderRequest{
-				Menus:     menus.GetMenus(),
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
+		// Does Not Implemented
 	}
 
 	h.handleResponse(c, status_http.NoContent, resp)
@@ -732,15 +651,7 @@ func (h *HandlerV1) CreateMenuSettings(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Menu().CreateMenuSettings(
-			context.Background(),
-			&menu,
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
+		// Does Not Implemented
 	}
 
 	h.handleResponse(c, status_http.Created, resp)
@@ -823,14 +734,7 @@ func (h *HandlerV1) GetAllMenuSettings(c *gin.Context) {
 			},
 		)
 	case pb.ResourceType_POSTGRESQL:
-		resp, _ = services.PostgresBuilderService().Menu().GetAllMenuSettings(
-			context.Background(),
-			&obs.GetAllMenuSettingsRequest{
-				Limit:     int32(limit),
-				Offset:    int32(offset),
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
+		// Does Not Implemented
 	}
 	h.handleResponse(c, status_http.OK, resp)
 }
@@ -911,17 +815,7 @@ func (h *HandlerV1) GetMenuSettingByID(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Menu().GetByIDMenuSettings(
-			context.Background(),
-			&obs.MenuSettingPrimaryKey{
-				Id:        ID,
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
+		// Does Not Implemented
 	}
 	if IsEmptyStruct2(resp.MenuTemplate) {
 		resp.MenuTemplate, err = h.GetMenuTemplateById(template_id, services)
@@ -1014,10 +908,7 @@ func (h *HandlerV1) UpdateMenuSettings(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, _ = services.PostgresBuilderService().Menu().UpdateMenuSettings(
-			context.Background(),
-			&menu,
-		)
+		// Does Not Implemented
 	}
 
 	h.handleResponse(c, status_http.OK, resp)
@@ -1098,19 +989,7 @@ func (h *HandlerV1) DeleteMenuSettings(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Menu().DeleteMenuSettings(
-			context.Background(),
-			&obs.MenuSettingPrimaryKey{
-				Id:        ID,
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
+		// Does Not Implemented
 	}
 
 	h.handleResponse(c, status_http.NoContent, resp)
@@ -1193,15 +1072,7 @@ func (h *HandlerV1) CreateMenuTemplate(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Menu().CreateMenuTemplate(
-			context.Background(),
-			&menu,
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
+		// Does Not Implemented
 	}
 
 	h.handleResponse(c, status_http.Created, resp)
@@ -1288,24 +1159,15 @@ func (h *HandlerV1) GetAllMenuTemplates(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Menu().GetAllMenuTemplate(
-			context.Background(),
-			&obs.GetAllMenuSettingsRequest{
-				Limit:     int32(limit),
-				Offset:    int32(offset),
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
+		// Does Not Implemented
 	}
+
 	globalMenus, err := h.companyServices.Company().GetAllMenuTemplate(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
 	for _, value := range globalMenus.GetMenuTemplates() {
 		resp.MenuTemplates = append(resp.MenuTemplates, &obs.MenuTemplate{
 			Id:               value.GetId(),
@@ -1316,6 +1178,7 @@ func (h *HandlerV1) GetAllMenuTemplates(c *gin.Context) {
 			Title:            value.GetTitle(),
 		})
 	}
+
 	resp.Count += int32(len(globalMenus.GetMenuTemplates()))
 	h.handleResponse(c, status_http.OK, resp)
 }
@@ -1334,8 +1197,8 @@ func (h *HandlerV1) GetAllMenuTemplates(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetMenuTemplateByID(c *gin.Context) {
-	ID := c.Param("id")
 	var (
+		ID   = c.Param("id")
 		resp *obs.MenuTemplate
 	)
 
@@ -1394,17 +1257,7 @@ func (h *HandlerV1) GetMenuTemplateByID(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Menu().GetByIDMenuTemplate(
-			context.Background(),
-			&obs.MenuSettingPrimaryKey{
-				Id:        ID,
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
+		// Does Not Implemented
 	}
 
 	if resp == (&obs.MenuTemplate{}) {
@@ -1510,10 +1363,7 @@ func (h *HandlerV1) UpdateMenuTemplate(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, _ = services.PostgresBuilderService().Menu().UpdateMenuTemplate(
-			context.Background(),
-			&menu,
-		)
+		// Does Not Implemented
 	}
 
 	h.handleResponse(c, status_http.OK, resp)
@@ -1533,8 +1383,8 @@ func (h *HandlerV1) UpdateMenuTemplate(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) DeleteMenuTemplate(c *gin.Context) {
-	ID := c.Param("id")
 	var (
+		ID   = c.Param("id")
 		resp *emptypb.Empty
 	)
 
@@ -1594,19 +1444,7 @@ func (h *HandlerV1) DeleteMenuTemplate(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Menu().DeleteMenuTemplate(
-			context.Background(),
-			&obs.MenuSettingPrimaryKey{
-				Id:        ID,
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
+		// Does Not Implemented
 	}
 
 	h.handleResponse(c, status_http.NoContent, resp)
@@ -1625,15 +1463,7 @@ func (h *HandlerV1) DeleteMenuTemplate(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetWikiFolder(c *gin.Context) {
-
-	offset, err := h.getOffsetParam(c)
-	var (
-		resp *obs.GetAllMenusResponse
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
-		return
-	}
+	var resp *obs.GetAllMenusResponse
 
 	projectId := c.DefaultQuery("project_id", "")
 	if !util.IsValidUUID(projectId) {
@@ -1659,8 +1489,6 @@ func (h *HandlerV1) GetWikiFolder(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	// authInfo, _ := h.GetAuthInfo(c)
-	limit := 100
 
 	services, _ := h.GetProjectSrvc(
 		c.Request.Context(),
@@ -1679,16 +1507,7 @@ func (h *HandlerV1) GetWikiFolder(c *gin.Context) {
 			},
 		)
 	case pb.ResourceType_POSTGRESQL:
-		resp, _ = services.PostgresBuilderService().Menu().GetAll(
-			context.Background(),
-			&obs.GetAllMenusRequest{
-				Limit:     int32(limit),
-				Offset:    int32(offset),
-				Search:    c.DefaultQuery("search", ""),
-				ProjectId: resource.ResourceEnvironmentId,
-				ParentId:  c.DefaultQuery("parent_id", ""),
-			},
-		)
+		// Does Not Implemented
 	}
 	h.handleResponse(c, status_http.OK, resp)
 }

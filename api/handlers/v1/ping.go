@@ -174,15 +174,6 @@ func (h *HandlerV1) Ping(c *gin.Context) {
 	h.handleResponse(c, status_http.OK, "pong")
 }
 
-// GetConfig godoc
-// @ID get_config
-// @Router /config [GET]
-// @Summary get config data on the debug mode
-// @Description show service config data when the service environment set to debug mode
-// @Accept json
-// @Produce json
-// @Success 200 {object} status_http.Response{data=config.Config} "Response data"
-// @Failure 400 {object} status_http.Response{}
 func (h *HandlerV1) GetConfig(c *gin.Context) {
 	switch h.baseConf.Environment {
 	case config.DebugMode:

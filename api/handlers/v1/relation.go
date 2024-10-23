@@ -86,15 +86,7 @@ func (h *HandlerV1) CreateRelation(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Relation().Create(
-			context.Background(),
-			&relation,
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
+		// Does Not Implemented
 	}
 
 	h.handleResponse(c, status_http.Created, resp)
@@ -184,21 +176,7 @@ func (h *HandlerV1) GetAllRelations(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Relation().GetAll(
-			context.Background(),
-			&obs.GetAllRelationsRequest{
-				Limit:     int32(limit),
-				Offset:    int32(offset),
-				TableSlug: c.DefaultQuery("table_slug", ""),
-				TableId:   c.DefaultQuery("table_id", ""),
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
+		// Does Not Implemented
 	}
 
 	h.handleResponse(c, status_http.OK, resp)
@@ -279,15 +257,7 @@ func (h *HandlerV1) UpdateRelation(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Relation().Update(
-			context.Background(),
-			&relation,
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
+		// Does Not Implemented
 	}
 
 	h.handleResponse(c, status_http.OK, resp)
@@ -368,18 +338,7 @@ func (h *HandlerV1) DeleteRelation(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Relation().Delete(
-			context.Background(),
-			&obs.RelationPrimaryKey{
-				Id:        relationID,
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
+		// Does Not Implemented
 	}
 	h.handleResponse(c, status_http.NoContent, resp)
 }
@@ -399,9 +358,7 @@ func (h *HandlerV1) DeleteRelation(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetRelationCascaders(c *gin.Context) {
-	var (
-		resp *obs.CommonMessage
-	)
+	var resp *obs.CommonMessage
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -454,18 +411,7 @@ func (h *HandlerV1) GetRelationCascaders(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Cascading().GetCascadings(
-			context.Background(),
-			&obs.GetCascadingRequest{
-				TableSlug: c.Param("table_slug"),
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
+		// Does Not Implemented
 	}
 
 	h.handleResponse(c, status_http.OK, resp)

@@ -26,11 +26,7 @@ import (
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetAllSections(c *gin.Context) {
-
-	//tokenInfo := h.GetAuthInfo
-	var (
-		resp *obs.GetAllSectionsResponse
-	)
+	var resp *obs.GetAllSectionsResponse
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
@@ -76,22 +72,7 @@ func (h *HandlerV1) GetAllSections(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		// resp, err = services.GetBuilderServiceByType(resource.NodeType).Section().GetAll(
-		// 	context.Background(),
-		// 	&obs.GetAllSectionsRequest{
-		// 		TableId:   c.Query("table_id"),
-		// 		TableSlug: c.Query("table_slug"),
-		// 		RoleId:    authInfo.GetRoleId(),
-		// 		ProjectId: resource.ResourceEnvironmentId,
-		// 	},
-		// )
-
-		// if err != nil {
-		// 	h.handleResponse(c, status_http.GRPCError, err.Error())
-		// 	return
-		// }
-	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Section().GetAll(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).Section().GetAll(
 			context.Background(),
 			&obs.GetAllSectionsRequest{
 				TableId:   c.Query("table_id"),
@@ -105,6 +86,8 @@ func (h *HandlerV1) GetAllSections(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
+	case pb.ResourceType_POSTGRESQL:
+		// Does Not Implemented
 	}
 
 	h.handleResponse(c, status_http.OK, resp)
@@ -175,17 +158,7 @@ func (h *HandlerV1) UpdateSection(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		// resp, err = services.GetBuilderServiceByType(resource.NodeType).Section().Update(
-		// 	context.Background(),
-		// 	&sections,
-		// )
-
-		// if err != nil {
-		// 	h.handleResponse(c, status_http.GRPCError, err.Error())
-		// 	return
-		// }
-	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Section().Update(
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).Section().Update(
 			context.Background(),
 			&sections,
 		)
@@ -194,6 +167,8 @@ func (h *HandlerV1) UpdateSection(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
+	case pb.ResourceType_POSTGRESQL:
+		// Does Not Implemented
 
 	}
 
