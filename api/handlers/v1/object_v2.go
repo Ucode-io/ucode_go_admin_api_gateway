@@ -137,7 +137,7 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 		}
 	}
 	if len(beforeActions) > 0 {
-		functionName, resp, err := DoInvokeFuntion(DoInvokeFuntionStruct{
+		functionName, resp, err := DoInvokeFuntionForGetList(DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			TableSlug:    c.Param("table_slug"),
 			ObjectData:   objectRequest.Data,

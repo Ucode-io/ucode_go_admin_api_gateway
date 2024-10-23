@@ -463,7 +463,6 @@ func (h *HandlerV1) UpdateNewFunction(c *gin.Context) {
 		resp     = &empty.Empty{}
 	)
 
-	//var resourceEnvironment *obs.ResourceEnvironment
 	err := c.ShouldBindJSON(&function)
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())

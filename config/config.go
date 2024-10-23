@@ -9,7 +9,6 @@ import (
 )
 
 const (
-	// DebugMode indicates service mode is debug.
 	DebugMode = "debug"
 	// TestMode indicates service mode is test.
 	TestMode = "test"

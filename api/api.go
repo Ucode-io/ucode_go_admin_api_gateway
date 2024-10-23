@@ -517,7 +517,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1Admin.PUT("/scenario/:id/select-versions", h.V1.SelectVersionsScenario)
 		v1Admin.POST("/scenario/revert", h.V1.RevertScenario)
 
-		// query service
+		// query_service
 		v1Admin.POST("/query-folder", h.V1.CreateQueryRequestFolder)
 		v1Admin.PUT("/query-folder", h.V1.UpdateQueryRequestFolder)
 		v1Admin.GET("/query-folder", h.V1.GetListQueryRequestFolder)
