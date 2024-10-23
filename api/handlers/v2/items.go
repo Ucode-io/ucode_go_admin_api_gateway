@@ -131,7 +131,6 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 		}
 	}
 
-	h.log.Debug("reciever_address in process After  fromOfs != true", logger.String("address", address))
 	if len(beforeActions) > 0 {
 		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
@@ -148,8 +147,6 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 			return
 		}
 	}
-
-	h.log.Debug("reciever_address in process After(before) invoke function", logger.String("address", address))
 
 	logReq := &models.CreateVersionHistoryRequest{
 		Services:     services,
@@ -233,8 +230,6 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 		defer func() { go h.versionHistoryGo(c, logReq) }()
 	}
 
-	h.log.Debug("reciever_address in process After Create ", logger.String("address", address))
-
 	if data, ok := resp.Data.AsMap()["data"].(map[string]interface{}); ok {
 		objectRequest.Data = data
 		if _, ok = data["guid"].(string); ok {
@@ -258,8 +253,6 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 			return
 		}
 	}
-
-	h.log.Debug("reciever_address in process After invoke function ", logger.String("address", address))
 
 	statusHttp.CustomMessage = resp.GetCustomMessage()
 	h.handleResponse(c, statusHttp, resp)
