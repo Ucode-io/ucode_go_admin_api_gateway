@@ -3,9 +3,11 @@ package v2
 import (
 	"context"
 	"errors"
+	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
+	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
@@ -145,6 +147,8 @@ func (h *HandlerV2) GetFolderGroupById(c *gin.Context) {
 }
 
 func (h *HandlerV2) GetAllFolderGroups(c *gin.Context) {
+	var objectRequest models.CommonMessage
+
 	offset, err := h.getOffsetParam(c)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
@@ -185,6 +189,22 @@ func (h *HandlerV2) GetAllFolderGroups(c *gin.Context) {
 		return
 	}
 
+	tokenInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err.Error())
+		return
+	}
+
+	if tokenInfo != nil {
+		objectRequest.Data = make(map[string]interface{})
+		if tokenInfo.Tables != nil {
+			objectRequest.Data["tables"] = tokenInfo.GetTables()
+		}
+		objectRequest.Data["user_id_from_token"] = tokenInfo.GetUserId()
+		objectRequest.Data["role_id_from_token"] = tokenInfo.GetRoleId()
+		objectRequest.Data["client_type_id_from_token"] = tokenInfo.GetClientTypeId()
+	}
+
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
 		projectId.(string),
@@ -192,6 +212,12 @@ func (h *HandlerV2) GetAllFolderGroups(c *gin.Context) {
 	)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
 
@@ -207,6 +233,7 @@ func (h *HandlerV2) GetAllFolderGroups(c *gin.Context) {
 				ProjectId: resource.ResourceEnvironmentId,
 				TableId:   c.DefaultQuery("table_id", ""),
 				ParentId:  parentId,
+				Data:      structData,
 			},
 		)
 		if err != nil {
