@@ -179,21 +179,7 @@ func (h *HandlerV1) GetGlobalProjectTemplate(c *gin.Context) {
 			return
 		}
 	case company_service.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Menu().GetAll(
-			context.Background(),
-			&obs.GetAllMenusRequest{
-				Limit:     int32(limit),
-				Offset:    int32(offset),
-				Search:    c.DefaultQuery("search", ""),
-				ProjectId: resource.ResourceEnvironmentId,
-				ParentId:  c.DefaultQuery("parent_id", ""),
-				RoleId:    authInfo.GetRoleId(),
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
+		// Does Not Implemented
 	}
 	h.handleResponse(c, status_http.OK, resp)
 }

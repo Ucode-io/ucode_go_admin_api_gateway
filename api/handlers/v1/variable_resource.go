@@ -20,11 +20,9 @@ import (
 // @Accept json
 // @Produce json
 // @Param data body pb.CreateVariableResourceRequest true "CreateVariableResourceRequest"
-// @Success 200 {object} status_http.Response{data=company_service.VariableResource} "Company data"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) AddDataToVariableResource(c *gin.Context) {
-
 	var request = &pb.CreateVariableResourceRequest{}
 
 	err := c.ShouldBindJSON(&request)
@@ -70,8 +68,8 @@ func (h *HandlerV1) AddDataToVariableResource(c *gin.Context) {
 // @Tags Variable resource
 // @Accept json
 // @Produce json
-// @Param Company body company_service.UpdateVariableResourceRequest  true "VariableResource"
-// @Success 200 {object} status_http.Response{data=company_service.Empty} "Company data"
+// @Param Company body pb.UpdateVariableResourceRequest  true "VariableResource"
+// @Success 200 {object} status_http.Response{data=pb.Empty} "Company data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) UpdateVariableResource(c *gin.Context) {
@@ -122,7 +120,7 @@ func (h *HandlerV1) UpdateVariableResource(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param project-resource-id path string true "project-resource-id"
-// @Success 200 {object} status_http.Response{data=company_service.GetVariableResourceListResponse} "Company data"
+// @Success 200 {object} status_http.Response{data=pb.GetVariableResourceListResponse} "Company data"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetListVariableResource(c *gin.Context) {

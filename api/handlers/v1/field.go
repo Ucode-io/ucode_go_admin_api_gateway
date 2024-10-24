@@ -123,16 +123,7 @@ func (h *HandlerV1) CreateField(c *gin.Context) {
 			}
 		}
 	case pb.ResourceType_POSTGRESQL:
-		for _, field := range fields {
-			resp, err = services.PostgresBuilderService().Field().Create(
-				context.Background(),
-				field,
-			)
-			if err != nil {
-				h.handleResponse(c, status_http.GRPCError, err.Error())
-				return
-			}
-		}
+		// Does Not Implemented
 	}
 	h.handleResponse(c, status_http.Created, resp)
 }
@@ -414,46 +405,6 @@ func (h *HandlerV1) UpdateField(c *gin.Context) {
 			}
 		}
 	}
-	// } else {
-	// do nothing
-	// field.EnableMultilanguage = true
-	// languaegs, err := h.companyServices.Project().GetById(context.Background(), &pb.GetProjectByIdRequest{
-	// 	ProjectId: resource.GetProjectId(),
-	// })
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.GRPCError, err.Error())
-	// 	return
-	// }
-	// for _, value := range languaegs.GetLanguage() {
-	// 	if fieldRequest.Slug != fieldRequest.Slug[:len(fieldRequest.Slug)-3]+"_"+value.GetShortName() {
-	// 		go func(arg *pb.Language, project_id string) {
-	// 			// id, _ := uuid.NewRandom()
-	// 			// _, err := services.GetBuilderServiceByType(resource.NodeType).Field().Create(context.Background(), &obs.CreateFieldRequest{
-	// 			// 	Id:                  id.String(),
-	// 			// 	Default:             fieldRequest.Default,
-	// 			// 	Type:                fieldRequest.Type,
-	// 			// 	Index:               fieldRequest.Index,
-	// 			// 	Label:               fieldRequest.Label,
-	// 			// 	Slug:                fieldRequest.Slug[:len(fieldRequest.Slug)-3] + "_" + arg.ShortName,
-	// 			// 	TableId:             fieldRequest.TableID,
-	// 			// 	Attributes:          attributes,
-	// 			// 	IsVisible:           fieldRequest.IsVisible,
-	// 			// 	AutofillTable:       fieldRequest.AutoFillTable,
-	// 			// 	AutofillField:       fieldRequest.AutoFillField,
-	// 			// 	RelationField:       fieldRequest.RelationField,
-	// 			// 	Automatic:           fieldRequest.Automatic,
-	// 			// 	ShowLabel:           fieldRequest.ShowLabel,
-	// 			// 	Unique:              fieldRequest.Unique,
-	// 			// 	ProjectId:           project_id,
-	// 			// 	EnableMultilanguage: true,
-	// 			// })
-	// 			// if err != nil {
-	// 			// 	h.handleResponse(c, status_http.GRPCError, err.Error())
-	// 			// 	return
-	// 			// }
-	// 		}(value, resource.ResourceEnvironmentId)
-	// }
-	// }
 
 	field.ProjectId = resource.ResourceEnvironmentId
 	switch resource.ResourceType {
@@ -468,15 +419,7 @@ func (h *HandlerV1) UpdateField(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Field().Update(
-			context.Background(),
-			&field,
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
+		// Does Not Implemented
 	}
 
 	h.handleResponse(c, status_http.OK, resp)
@@ -557,18 +500,7 @@ func (h *HandlerV1) DeleteField(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Field().Delete(
-			context.Background(),
-			&obs.FieldPrimaryKey{
-				Id:        fieldID,
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
+		// Does Not Implemented
 	}
 
 	h.handleResponse(c, status_http.NoContent, resp)

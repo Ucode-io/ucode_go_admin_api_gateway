@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"time"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -72,10 +71,6 @@ func GetListCustomEvents(tableSlug, roleId, method string, c *gin.Context, h *Ha
 		return
 	}
 
-	projectIdStr, _ := projectId.(string)
-
-	fmt.Println("after get RESOURCE " + projectIdStr)
-
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		res, err = services.GetBuilderServiceByType(resource.NodeType).CustomEvent().GetList(
@@ -115,7 +110,6 @@ func GetListCustomEvents(tableSlug, roleId, method string, c *gin.Context, h *Ha
 			return
 		}
 	}
-	fmt.Println("after switch resource.ResourceType " + projectIdStr)
 
 	if res != nil {
 		for _, customEvent := range res.CustomEvents {

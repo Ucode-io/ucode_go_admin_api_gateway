@@ -84,7 +84,6 @@ func GetListCustomEvents(tableSlug, roleId, method string, c *gin.Context, h *Ha
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-
 		goRes, err = services.GoObjectBuilderService().CustomEvent().GetList(
 			context.Background(),
 			&nb.GetCustomEventsListRequest{

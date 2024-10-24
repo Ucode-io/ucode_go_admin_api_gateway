@@ -281,19 +281,7 @@ func (h *HandlerV1) GetAllCustomEvents(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().CustomEvent().GetList(
-			context.Background(),
-			&obs.GetCustomEventsListRequest{
-				TableSlug: c.DefaultQuery("table_slug", ""),
-				RoleId:    authInfo.GetRoleId(),
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
+		// Does Not Implemented
 	}
 
 	h.handleResponse(c, status_http.OK, resp)

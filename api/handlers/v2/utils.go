@@ -395,19 +395,7 @@ func (h *HandlerV2) ExportData(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().ObjectBuilder().GetListInExcel(
-			context.Background(),
-			&obs.CommonMessage{
-				TableSlug: c.Param("collection"),
-				Data:      structData,
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
+		// Does Not Implemented
 	}
 
 	statusHttp.CustomMessage = resp.GetCustomMessage()

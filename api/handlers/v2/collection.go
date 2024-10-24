@@ -152,15 +152,7 @@ func (h *HandlerV2) CreateCollection(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Table().Create(
-			context.Background(),
-			&table,
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
+		// Does Not Implemented
 	}
 
 	h.handleResponse(c, status_http.Created, resp)
@@ -236,19 +228,7 @@ func (h *HandlerV2) GetSingleCollection(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Table().GetByID(
-			context.Background(),
-			&obs.TablePrimaryKey{
-				Id:        tableID,
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
+		// Does Not Implemented
 	}
 	h.handleResponse(c, status_http.OK, resp)
 }
@@ -323,7 +303,7 @@ func (h *HandlerV2) GetAllCollections(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err := services.BuilderService().Table().GetAll(
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).Table().GetAll(
 			context.Background(),
 			&obs.GetAllTablesRequest{
 				Limit:        int32(limit),
@@ -334,7 +314,6 @@ func (h *HandlerV2) GetAllCollections(c *gin.Context) {
 				IsLoginTable: isLoginTable,
 			},
 		)
-
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
@@ -476,38 +455,7 @@ func (h *HandlerV2) UpdateCollection(c *gin.Context) {
 		}
 
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Table().Update(
-			context.Background(),
-			&obs.UpdateTableRequest{
-				Id:                table.Id,
-				Description:       table.Description,
-				Slug:              table.Slug,
-				ShowInMenu:        table.ShowInMenu,
-				Icon:              table.Icon,
-				SubtitleFieldSlug: table.SubtitleFieldSlug,
-				IsVisible:         table.IsVisible,
-				IsOwnTable:        table.IsOwnTable,
-				IncrementId: &obs.IncrementID{
-					WithIncrementId: table.IncrementId.WithIncrementID,
-					DigitNumber:     table.IncrementId.DigitNumber,
-					Prefix:          table.IncrementId.Prefix,
-				},
-				ProjectId:    table.ProjectId,
-				FolderId:     table.FolderId,
-				AuthorId:     table.AuthorId,
-				CommitType:   table.CommitType,
-				Name:         table.Name,
-				IsCached:     table.IsCached,
-				IsLoginTable: table.IsLoginTable,
-				Attributes:   structData,
-				OrderBy:      table.OrderBy,
-			},
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
+		// Does Not Implemented
 	}
 
 	h.handleResponse(c, status_http.OK, resp)
@@ -596,18 +544,7 @@ func (h *HandlerV2) DeleteCollection(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Table().Delete(
-			context.Background(),
-			&obs.TablePrimaryKey{
-				Id:        tableID,
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
+		// Does Not Implemented
 	}
 	h.handleResponse(c, status_http.NoContent, resp)
 }

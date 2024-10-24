@@ -77,8 +77,8 @@ func (h *HandlerV1) CreateWebPage(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.BuilderService().WebPage().Create(
-		context.Background(),
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).WebPage().Create(
+		c.Request.Context(),
 		&obs.CreateWebPageRequest{
 			Title:      webPage.Title,
 			Components: components,
@@ -108,29 +108,54 @@ func (h *HandlerV1) CreateWebPage(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetWebPagesById(c *gin.Context) {
-
 	resourceId, ok := c.Get("resource_id")
-	if !ok {
-		err := errors.New("error getting resource id")
-		h.handleResponse(c, status_http.BadRequest, err.Error())
+	if !ok || !util.IsValidUUID(resourceId.(string)) {
+		h.handleResponse(c, status_http.BadRequest, "error getting resource id")
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
+		return
+	}
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
 	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	resp, err := services.BuilderService().WebPage().GetById(
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).WebPage().GetById(
 		context.Background(),
 		&obs.WebPageId{
 			Id:        c.Param("guid"),
 			ProjectId: resourceId.(string),
 		},
 	)
-
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -201,7 +226,7 @@ func (h *HandlerV1) GetWebPagesList(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.BuilderService().WebPage().GetAll(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).WebPage().GetAll(
 		context.Background(),
 		&obs.GetAllWebPagesRequest{
 			Limit:     int32(limit),
@@ -209,7 +234,6 @@ func (h *HandlerV1) GetWebPagesList(c *gin.Context) {
 			ProjectId: resource.ResourceEnvironmentId,
 		},
 	)
-
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -284,7 +308,7 @@ func (h *HandlerV1) UpdateWebPage(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.BuilderService().WebPage().Update(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).WebPage().Update(
 		context.Background(),
 		&obs.WebPage{
 			Id:         guid,
@@ -323,25 +347,46 @@ func (h *HandlerV1) DeleteWebPage(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
+		return
+	}
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
 	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	resourceId, ok := c.Get("resource_id")
-	if !ok {
-		err := errors.New("error getting resource id")
-		h.handleResponse(c, status_http.BadRequest, err.Error())
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	resp, err := services.BuilderService().WebPage().Delete(
+	resp, err := services.GetBuilderServiceByType(resource.NodeType).WebPage().Delete(
 		context.Background(),
 		&obs.WebPageId{
 			Id:        webPageId,
-			ProjectId: resourceId.(string),
+			ProjectId: resource.ResourceEnvironmentId,
 		},
 	)
 

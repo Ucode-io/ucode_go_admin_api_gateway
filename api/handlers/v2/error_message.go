@@ -87,16 +87,7 @@ func (h *HandlerV2) CreateErrorMessage(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().CustomErrorMessage().Create(
-			context.Background(),
-			&customErrorMessages,
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
+		// Does Not Implemented
 	}
 	h.handleResponse(c, status_http.OK, resp)
 }
@@ -175,19 +166,7 @@ func (h *HandlerV2) GetByIdErrorMessage(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().CustomErrorMessage().GetById(
-			context.Background(),
-			&obs.CustomErrorMessagePK{
-				Id:        c.Param("id"),
-				ProjectId: resource.GetResourceEnvironmentId(),
-			},
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
+		// Does Not Implemented
 	}
 	h.handleResponse(c, status_http.OK, resp)
 }
@@ -267,18 +246,7 @@ func (h *HandlerV2) GetAllErrorMessage(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().CustomErrorMessage().GetList(
-			context.Background(),
-			&obs.GetCustomErrorMessageListRequest{
-				TableSlug: c.Param("collection"),
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
+		// Does Not Implemented
 	}
 
 	h.handleResponse(c, status_http.OK, resp)
@@ -359,16 +327,7 @@ func (h *HandlerV2) UpdateErrorMessage(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().CustomErrorMessage().Update(
-			context.Background(),
-			&customErrorMessages,
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
+		// Does Not Implemented
 	}
 	h.handleResponse(c, status_http.OK, resp)
 }
@@ -447,19 +406,7 @@ func (h *HandlerV2) DeleteErrorMessage(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().CustomErrorMessage().Delete(
-			context.Background(),
-			&obs.CustomErrorMessagePK{
-				Id:        c.Param("id"),
-				ProjectId: resource.GetResourceEnvironmentId(),
-			},
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
+		// Does Not Implemented
 	}
 	h.handleResponse(c, status_http.OK, resp)
 }

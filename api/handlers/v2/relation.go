@@ -32,9 +32,7 @@ import (
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) GetRelationCascading(c *gin.Context) {
-	var (
-		resp *obs.CommonMessage
-	)
+	var resp *obs.CommonMessage
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -87,18 +85,7 @@ func (h *HandlerV2) GetRelationCascading(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Cascading().GetCascadings(
-			context.Background(),
-			&obs.GetCascadingRequest{
-				TableSlug: c.Param("collection"),
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
+		// Does Not Implemented
 	}
 
 	h.handleResponse(c, status_http.OK, resp)
@@ -717,9 +704,7 @@ func (h *HandlerV2) DeleteRelation(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) GetRelationCascaders(c *gin.Context) {
-	var (
-		resp *obs.CommonMessage
-	)
+	var resp *obs.CommonMessage
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -772,18 +757,7 @@ func (h *HandlerV2) GetRelationCascaders(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Cascading().GetCascadings(
-			context.Background(),
-			&obs.GetCascadingRequest{
-				TableSlug: c.Param("table_slug"),
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
+		// Does Not Implemented
 	}
 
 	h.handleResponse(c, status_http.OK, resp)

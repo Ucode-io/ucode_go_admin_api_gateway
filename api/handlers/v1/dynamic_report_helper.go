@@ -98,10 +98,8 @@ type NewRequestBody struct {
 }
 
 func (h *HandlerV1) DynamicReportHelper(requestData NewRequestBody, services services.ServiceManagerI, resourceEnvironmentId string, nodeType string) (Response, error) {
-
 	var (
-		response Response
-		// requestData    NewRequestBody
+		response       Response
 		request        GetListClientApiResponse
 		errorMessage   = make(map[string]interface{})
 		successMessage = make(map[string]interface{})
@@ -751,7 +749,7 @@ func (h *HandlerV1) DynamicReportHelper(requestData NewRequestBody, services ser
 		return response, err
 	}
 
-	responseBuilderReport, err := services.BuilderService().ObjectBuilder().GetGroupReportTables(context.Background(), &obs.CommonMessage{
+	responseBuilderReport, err := services.GetBuilderServiceByType(nodeType).ObjectBuilder().GetGroupReportTables(context.Background(), &obs.CommonMessage{
 		TableSlug: mainTableSlug,
 		Data:      structData,
 		ProjectId: resourceEnvironmentId,

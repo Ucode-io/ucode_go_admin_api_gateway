@@ -461,71 +461,6 @@ func (h *HandlerV2) UpdateField(c *gin.Context) {
 		return
 	}
 
-	// if !fieldRequest.EnableMultilanguage {
-	// 	field.EnableMultilanguage = false
-	// 	fields, err := services.GetBuilderServiceByType(resource.NodeType).Field().GetAll(context.Background(), &obs.GetAllFieldsRequest{
-	// 		TableId:   fieldRequest.TableID,
-	// 		ProjectId: resource.ResourceEnvironmentId,
-	// 	})
-	// 	if err != nil {
-	// 		h.handleResponse(c, status_http.GRPCError, err.Error())
-	// 		return
-	// 	}
-	// 	for _, value := range fields.GetFields() {
-	// 		if len(value.GetSlug()) > 3 && len(fieldRequest.Slug) > 3 && (value.GetType() == "SINGLE_LINE" || value.GetType() == "MULTI_LINE") {
-	// 			if fieldRequest.Slug[:len(fieldRequest.Slug)-3] == value.GetSlug()[:len(value.GetSlug())-3] && fieldRequest.Slug != value.GetSlug() {
-	// 				go func(arg *obs.Field) {
-	// 					_, err := services.GetBuilderServiceByType(resource.NodeType).Field().Delete(context.Background(), &obs.FieldPrimaryKey{
-	// 						Id:        arg.GetId(),
-	// 						ProjectId: resource.GetResourceEnvironmentId(),
-	// 					})
-	// 					if err != nil {
-	// 						h.handleResponse(c, status_http.GRPCError, err.Error())
-	// 						return
-	// 					}
-	// 				}(value)
-	// 			}
-	// 		}
-	// 	}
-	// }
-
-	// if fieldRequest.EnableMultilanguage {
-	// 	if fieldRequest.Type == "SINGLE_LINE" || fieldRequest.Type == "MULTI_LINE" {
-	// 		allFields, err := services.GetBuilderServiceByType(resource.NodeType).Field().GetAll(context.Background(), &obs.GetAllFieldsRequest{
-	// 			TableId:   fieldRequest.TableID,
-	// 			ProjectId: resource.ResourceEnvironmentId,
-	// 		})
-	// 		if err != nil {
-	// 			h.handleResponse(c, status_http.GRPCError, err.Error())
-	// 			return
-	// 		}
-	// 		languages, err := h.companyServices.Project().GetById(context.Background(), &pb.GetProjectByIdRequest{
-	// 			ProjectId: resource.GetProjectId(),
-	// 		})
-	// 		if err != nil {
-	// 			h.handleResponse(c, status_http.GRPCError, err.Error())
-	// 			return
-	// 		}
-	// 		var langs []string
-	// 		if len(languages.GetLanguage()) > 1 {
-	// 			for _, value := range languages.GetLanguage() {
-	// 				langs = append(langs, value.ShortName)
-	// 			}
-	// 			newFields := SeparateMultilangField(allFields, langs, resource.ResourceEnvironmentId, field)
-	// 			for _, field := range newFields {
-	// 				_, err = services.GetBuilderServiceByType(resource.NodeType).Field().Create(
-	// 					context.Background(),
-	// 					field,
-	// 				)
-	// 				if err != nil {
-	// 					h.handleResponse(c, status_http.GRPCError, err.Error())
-	// 					return
-	// 				}
-	// 			}
-	// 		}
-	// 	}
-	// }
-
 	var (
 		logReq = &models.CreateVersionHistoryRequest{
 			Services:     services,
@@ -533,63 +468,10 @@ func (h *HandlerV2) UpdateField(c *gin.Context) {
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: "FIELD",
 			ActionType:   "UPDATE FIELD",
-			// UsedEnvironments: map[string]bool{
-			// 	cast.ToString(environmentId): true,
-			// },
-			UserInfo:  cast.ToString(userId),
-			TableSlug: c.Param("collection"),
+			UserInfo:     cast.ToString(userId),
+			TableSlug:    c.Param("collection"),
 		}
-		// newField   = &obs.Field{}
-		// newFieldPb = &nb.Field{}
 	)
-
-	// if fieldRequest.IsAlt {
-
-	// atr, err := helper.ConvertMapToStruct(map[string]interface{}{
-	// 	"label":    field.Label + " Alt",
-	// 	"label_en": field.Label + " Alt",
-	// })
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.GRPCError, err.Error())
-	// 	return
-	// }
-
-	// newField = &obs.Field{
-	// 	Default:             "",
-	// 	Type:                "SINGLE_LINE",
-	// 	Index:               "string",
-	// 	Label:               field.Label + " Alt",
-	// 	Slug:                field.Slug + "_alt",
-	// 	TableId:             field.TableId,
-	// 	Attributes:          atr,
-	// 	IsVisible:           true,
-	// 	AutofillTable:       "",
-	// 	AutofillField:       "",
-	// 	Unique:              false,
-	// 	Automatic:           false,
-	// 	ProjectId:           resource.ResourceEnvironmentId,
-	// 	ShowLabel:           true,
-	// 	EnableMultilanguage: false,
-	// }
-
-	// newFieldPb = &nb.Field{
-	// 	Default:             "",
-	// 	Type:                "SINGLE_LINE",
-	// 	Index:               "string",
-	// 	Label:               field.Label + " Alt",
-	// 	Slug:                field.Slug + "_alt",
-	// 	TableId:             field.TableId,
-	// 	Attributes:          atr,
-	// 	IsVisible:           true,
-	// 	AutofillTable:       "",
-	// 	AutofillField:       "",
-	// 	Unique:              false,
-	// 	Automatic:           false,
-	// 	ProjectId:           resource.ResourceEnvironmentId,
-	// 	ShowLabel:           true,
-	// 	EnableMultilanguage: false,
-	// }
-	// }
 
 	field.ProjectId = resource.ResourceEnvironmentId
 	field.EnvId = resource.EnvironmentId
@@ -623,16 +505,6 @@ func (h *HandlerV2) UpdateField(c *gin.Context) {
 		}
 		go h.versionHistory(logReq)
 
-		// _, err := services.GetBuilderServiceByType(resource.NodeType).Field().Update(
-		// 	context.Background(),
-		// 	newField,
-		// )
-		// if err != nil {
-		// 	h.handleResponse(c, status_http.GRPCError, err.Error())
-		// 	return
-		// }
-
-		// h.handleResponse(c, status_http.Created, resp)
 	case pb.ResourceType_POSTGRESQL:
 		newReq := nb.Field{}
 
@@ -669,16 +541,6 @@ func (h *HandlerV2) UpdateField(c *gin.Context) {
 		}
 		go h.versionHistoryGo(c, logReq)
 
-		// _, err := services.GoObjectBuilderService().Field().Update(
-		// 	context.Background(),
-		// 	newFieldPb,
-		// )
-		// if err != nil {
-		// 	h.handleResponse(c, status_http.GRPCError, err.Error())
-		// 	return
-		// }
-
-		// h.handleResponse(c, status_http.Created, resp)
 	}
 }
 
@@ -831,11 +693,8 @@ func (h *HandlerV2) DeleteField(c *gin.Context) {
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: "FIELD",
 			ActionType:   "DELETE FIELD",
-			// UsedEnvironments: map[string]bool{
-			// 	cast.ToString(environmentId): true,
-			// },
-			UserInfo:  cast.ToString(userId),
-			TableSlug: c.Param("collection"),
+			UserInfo:     cast.ToString(userId),
+			TableSlug:    c.Param("collection"),
 		}
 	)
 
@@ -995,21 +854,7 @@ func (h *HandlerV2) GetAllFieldsWithDetails(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Field().GetAllForItems(
-			context.Background(),
-			&obs.GetAllFieldsForItemsRequest{
-				Collection:       c.Param("collection"),
-				ProjectId:        resource.ResourceEnvironmentId,
-				LanguageSettings: c.DefaultQuery("language_setting", ""),
-				WithRelations:    withRelations,
-				RoleId:           roleId,
-			},
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
+		// Does Not Implemented
 	}
 
 	h.handleResponse(c, status_http.OK, resp)

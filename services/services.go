@@ -18,12 +18,10 @@ type ServiceManagerI interface {
 	TemplateService() TemplateServiceI
 	VersioningService() VersioningServiceI
 	ScenarioService() ScenarioServiceI
-	QueryService() QueryServiceI
 	IntegrationPayzeService() IntegrationServicePayzeI
 	WebPageService() WebPageServiceI
 	ChatService() ChatServiceI
 	NotificationService() NotificationServiceI
-	PostgresBuilderService() PostgresBuilderServiceI
 	ConvertTemplateService() ConvertTemplateServiceI
 	GetBuilderServiceByType(nodeType string) BuilderServiceI
 	GoObjectBuilderService() GoBuilderServiceI
@@ -42,18 +40,15 @@ type grpcClients struct {
 	templateService          TemplateServiceI
 	versioningService        VersioningServiceI
 	scenarioService          ScenarioServiceI
-	queryService             QueryServiceI
 	integrationPayzeServiceI IntegrationServicePayzeI
 	webPageService           WebPageServiceI
 	chatService              ChatServiceI
 	notificationService      NotificationServiceI
-	postgresBuilderService   PostgresBuilderServiceI
 	convertTemplateService   ConvertTemplateServiceI
 	goObjectBuilderService   GoBuilderServiceI
 }
 
 func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, error) {
-	//cf, _ := json.Marshal(cfg)
 	builderServiceClient, err := NewBuilderServiceClient(ctx, cfg)
 	if err != nil {
 		return nil, err
@@ -107,11 +102,6 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 		return nil, err
 	}
 
-	queryServiceClient, err := NewQueryServiceClient(ctx, cfg)
-	if err != nil {
-		return nil, err
-	}
-
 	versioningServiceClient, err := NewVersioningServiceClient(ctx, cfg)
 	if err != nil {
 		return nil, err
@@ -131,11 +121,8 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 	if err != nil {
 		return nil, err
 	}
+
 	notificationServiceClient, err := NewNotificationServiceClient(ctx, cfg)
-	if err != nil {
-		return nil, err
-	}
-	postgresBuilderServiceClient, err := NewPostgrespostgresBuilderServiceClient(ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -163,12 +150,10 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 		templateService:          templateServiceClient,
 		versioningService:        versioningServiceClient,
 		scenarioService:          scenarioServiceClient,
-		queryService:             queryServiceClient,
 		integrationPayzeServiceI: integrationPayzeServiceClient,
 		webPageService:           webPageServiceClient,
 		chatService:              chatServiceClient,
 		notificationService:      notificationServiceClient,
-		postgresBuilderService:   postgresBuilderServiceClient,
 		convertTemplateService:   convertTemplateServiceClient,
 		goObjectBuilderService:   goObjectBuilderServiceClient,
 	}, nil
@@ -240,10 +225,6 @@ func (g grpcClients) ScenarioService() ScenarioServiceI {
 	return g.scenarioService
 }
 
-func (g grpcClients) QueryService() QueryServiceI {
-	return g.queryService
-}
-
 func (g grpcClients) IntegrationPayzeService() IntegrationServicePayzeI {
 	return g.integrationPayzeServiceI
 }
@@ -254,10 +235,6 @@ func (g grpcClients) WebPageService() WebPageServiceI {
 
 func (g grpcClients) NotificationService() NotificationServiceI {
 	return g.notificationService
-}
-
-func (g grpcClients) PostgresBuilderService() PostgresBuilderServiceI {
-	return g.postgresBuilderService
 }
 
 func (g grpcClients) ConvertTemplateService() ConvertTemplateServiceI {

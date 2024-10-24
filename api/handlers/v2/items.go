@@ -127,11 +127,9 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 		beforeActions, afterActions, err = GetListCustomEvents(c.Param("collection"), "", "CREATE", c, h)
 		if err != nil {
 			h.handleResponse(c, status_http.InvalidArgument, err.Error())
-			//return
 		}
 	}
 
-	h.log.Debug("reciever_address in process After  fromOfs != true", logger.String("address", address))
 	if len(beforeActions) > 0 {
 		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
@@ -148,8 +146,6 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 			return
 		}
 	}
-
-	h.log.Debug("reciever_address in process After(before) invoke function", logger.String("address", address))
 
 	logReq := &models.CreateVersionHistoryRequest{
 		Services:     services,
@@ -233,8 +229,6 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 		defer func() { go h.versionHistoryGo(c, logReq) }()
 	}
 
-	h.log.Debug("reciever_address in process After Create ", logger.String("address", address))
-
 	if data, ok := resp.Data.AsMap()["data"].(map[string]interface{}); ok {
 		objectRequest.Data = data
 		if _, ok = data["guid"].(string); ok {
@@ -258,8 +252,6 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 			return
 		}
 	}
-
-	h.log.Debug("reciever_address in process After invoke function ", logger.String("address", address))
 
 	statusHttp.CustomMessage = resp.GetCustomMessage()
 	h.handleResponse(c, statusHttp, resp)
@@ -406,19 +398,9 @@ func (h *HandlerV2) CreateItems(c *gin.Context) {
 		logReq.Response = resp
 		go h.versionHistory(logReq)
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().ObjectBuilder().Create(
-			context.Background(),
-			&obs.CommonMessage{
-				TableSlug: c.Param("collection"),
-				Data:      structData,
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
+		// Does Not Implemented
 	}
+
 	var items []interface{}
 	if itemsFromResp, ok := resp.Data.AsMap()["items"].([]interface{}); ok {
 		items = itemsFromResp
@@ -701,19 +683,7 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 					return
 				}
 			case pb.ResourceType_POSTGRESQL:
-				resp, err = services.PostgresBuilderService().ObjectBuilder().GroupByColumns(
-					context.Background(),
-					&obs.CommonMessage{
-						TableSlug: c.Param("collection"),
-						Data:      structData,
-						ProjectId: resource.ResourceEnvironmentId,
-					},
-				)
-
-				if err != nil {
-					h.handleResponse(c, status_http.GRPCError, err.Error())
-					return
-				}
+				// Does Not Implemented
 			}
 		}
 	} else {
@@ -757,19 +727,7 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 				return
 			}
 		case pb.ResourceType_POSTGRESQL:
-			resp, err = services.PostgresBuilderService().ObjectBuilder().GetList(
-				context.Background(),
-				&obs.CommonMessage{
-					TableSlug: c.Param("collection"),
-					Data:      structData,
-					ProjectId: resource.ResourceEnvironmentId,
-				},
-			)
-
-			if err != nil {
-				h.handleResponse(c, status_http.GRPCError, err.Error())
-				return
-			}
+			// Does Not Implemented
 		}
 	}
 
@@ -1594,20 +1552,7 @@ func (h *HandlerV2) DeleteItems(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().ObjectBuilder().DeleteMany(
-			context.Background(),
-			&obs.CommonMessage{
-				TableSlug: c.Param("collection"),
-				Data:      structData,
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
+		// Does Not Implemented
 	}
 
 	if len(afterActions) > 0 {
@@ -1779,14 +1724,7 @@ func (h *HandlerV2) DeleteManyToMany(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().ObjectBuilder().ManyToManyDelete(
-			context.Background(),
-			&m2mMessage,
-		)
-
-		if err != nil {
-			return
-		}
+		// Does Not Implemented
 	}
 
 	if len(afterActions) > 0 {
@@ -1953,13 +1891,7 @@ func (h *HandlerV2) AppendManyToMany(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().ObjectBuilder().ManyToManyAppend(
-			context.Background(),
-			&m2mMessage,
-		)
-		if err != nil {
-			return
-		}
+		// Does Not Implemented
 	}
 
 	if len(afterActions) > 0 {

@@ -70,7 +70,7 @@ func (h *HandlerV2) GetVersionHistoryByID(c *gin.Context) {
 	}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err := services.BuilderService().VersionHistory().GetByID(
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).VersionHistory().GetByID(
 			context.Background(),
 			&obs.VersionHistoryPrimaryKey{
 				Id:        id,

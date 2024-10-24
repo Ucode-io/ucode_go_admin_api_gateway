@@ -87,15 +87,7 @@ func (h *HandlerV1) CreateApp(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().App().Create(
-			context.Background(),
-			&app,
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
+		// Does Not Implemented
 	}
 
 	h.handleResponse(c, status_http.Created, resp)
@@ -175,17 +167,7 @@ func (h *HandlerV1) GetAppByID(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().App().GetByID(
-			context.Background(),
-			&obs.AppPrimaryKey{
-				Id:        appID,
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
+		// Does Not Implemented
 	}
 
 	h.handleResponse(c, status_http.OK, resp)
@@ -272,20 +254,7 @@ func (h *HandlerV1) GetAllApps(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().App().GetAll(
-			context.Background(),
-			&obs.GetAllAppsRequest{
-				Limit:     int32(limit),
-				Offset:    int32(offset),
-				Search:    c.DefaultQuery("search", ""),
-				ProjectId: resource.ResourceEnvironmentId,
-				RoleId:    authInfo.GetRoleId(),
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
+		// Does Not Implemented
 	}
 
 	h.handleResponse(c, status_http.OK, resp)
@@ -365,15 +334,7 @@ func (h *HandlerV1) UpdateApp(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().App().Update(
-			context.Background(),
-			&app,
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
+		// Does Not Implemented
 	}
 
 	h.handleResponse(c, status_http.OK, resp)
@@ -454,19 +415,7 @@ func (h *HandlerV1) DeleteApp(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().App().Delete(
-			context.Background(),
-			&obs.AppPrimaryKey{
-				Id:        appID,
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
+		// Does Not Implemented
 	}
 
 	h.handleResponse(c, status_http.NoContent, resp)
