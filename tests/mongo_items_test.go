@@ -15,7 +15,7 @@ func TestCRUD(t *testing.T) {
 	guid := uuid.New().String()
 	faker1, err := faker.New("en")
 	assert.NoError(t, err, "faker error")
-
+	
 	_, _, err = UcodeApi.CreateObject(&sdk.Argument{
 		TableSlug: "product",
 		Request: sdk.Request{
