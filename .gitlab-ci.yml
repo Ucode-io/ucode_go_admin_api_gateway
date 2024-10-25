@@ -15,6 +15,15 @@ test-staging:
   - go test ./tests/...
   only:
     - staging 
+  
+test-prod:
+  image: golang:1.22
+  stage: test
+  script:
+  - go mod tidy && go mod vendor
+  - go test ./tests/...
+  only:
+    - master 
 
 build-dev:
   stage: build
