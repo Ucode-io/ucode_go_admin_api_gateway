@@ -11,12 +11,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Done
 func TestCRUD(t *testing.T) {
 	guid := uuid.New().String()
 	faker1, err := faker.New("en")
 	assert.NoError(t, err, "faker error")
-	
-	_, _, err = UcodeApi.CreateObject(&sdk.Argument{
+
+	_, _, err = UcodeApiForStaging.CreateObject(&sdk.Argument{
 		TableSlug: "product",
 		Request: sdk.Request{
 			Data: map[string]interface{}{
@@ -33,7 +34,7 @@ func TestCRUD(t *testing.T) {
 	})
 	assert.NoError(t, err)
 
-	_, _, err = UcodeApi.UpdateObject(&sdk.Argument{
+	_, _, err = UcodeApiForStaging.UpdateObject(&sdk.Argument{
 		TableSlug: "product",
 		Request: sdk.Request{
 			Data: map[string]interface{}{
@@ -45,7 +46,7 @@ func TestCRUD(t *testing.T) {
 	})
 	assert.NoError(t, err)
 
-	slimResponse, _, err := UcodeApi.GetSingleSlim(&sdk.Argument{
+	slimResponse, _, err := UcodeApiForStaging.GetSingleSlim(&sdk.Argument{
 		TableSlug: "product",
 		Request: sdk.Request{
 			Data: map[string]interface{}{
@@ -58,7 +59,7 @@ func TestCRUD(t *testing.T) {
 
 	assert.NotEmpty(t, slimResponse.Data.Data.Response, "item response should not be empty")
 
-	itemResponse, _, err := UcodeApi.GetSingle(&sdk.Argument{
+	itemResponse, _, err := UcodeApiForStaging.GetSingle(&sdk.Argument{
 		TableSlug: "product",
 		Request: sdk.Request{
 			Data: map[string]interface{}{
@@ -70,7 +71,7 @@ func TestCRUD(t *testing.T) {
 
 	assert.NotEmpty(t, itemResponse.Data.Data.Response, "item response should not be empty")
 
-	_, err = UcodeApi.Delete(&sdk.Argument{
+	_, err = UcodeApiForStaging.Delete(&sdk.Argument{
 		TableSlug: "product",
 		Request: sdk.Request{
 			Data: map[string]interface{}{
@@ -81,9 +82,10 @@ func TestCRUD(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+// Done
 func TestGetListSlim(t *testing.T) {
 	getProductReq := sdk.Request{Data: map[string]interface{}{}}
-	getProductResp, _, err := UcodeApi.GetListSlim(&sdk.ArgumentWithPegination{
+	getProductResp, _, err := UcodeApiForStaging.GetListSlim(&sdk.ArgumentWithPegination{
 		TableSlug: "product",
 		Request:   getProductReq,
 		Limit:     10,
@@ -94,9 +96,10 @@ func TestGetListSlim(t *testing.T) {
 	assert.NotEmpty(t, getProductResp.Data.Data.Response, "response not equal to limit")
 }
 
+// Done
 func TestGetListSlimPagination(t *testing.T) {
 	getProductReq := sdk.Request{Data: map[string]interface{}{}}
-	getProductResp, _, err := UcodeApi.GetListSlim(&sdk.ArgumentWithPegination{
+	getProductResp, _, err := UcodeApiForStaging.GetListSlim(&sdk.ArgumentWithPegination{
 		TableSlug: "product",
 		Request:   getProductReq,
 		Limit:     5,
@@ -118,11 +121,12 @@ func TestGetListSlimPagination(t *testing.T) {
 	assert.Empty(t, getProductResp.Data.Data.Response, "response should be emtpy")
 }
 
+// Done
 func TestGetListSlimWithRelation(t *testing.T) {
 	getProductReq := sdk.Request{
 		Data: map[string]interface{}{"with_relations": true},
 	}
-	getProductResp, _, err := UcodeApi.GetListSlim(&sdk.ArgumentWithPegination{
+	getProductResp, _, err := UcodeApiForStaging.GetListSlim(&sdk.ArgumentWithPegination{
 		TableSlug:   "product",
 		Request:     getProductReq,
 		Limit:       10,
@@ -134,6 +138,7 @@ func TestGetListSlimWithRelation(t *testing.T) {
 	assert.NotEmpty(t, getProductResp.Data.Data.Response, "wrong response")
 }
 
+// Done
 func TestGetListSlimWithDate(t *testing.T) { // $lt and $gte
 	getProductReq := sdk.Request{
 		Data: map[string]interface{}{
@@ -142,7 +147,7 @@ func TestGetListSlimWithDate(t *testing.T) { // $lt and $gte
 			}},
 	}
 
-	getProductResp, _, err := UcodeApi.GetListSlim(&sdk.ArgumentWithPegination{
+	getProductResp, _, err := UcodeApiForStaging.GetListSlim(&sdk.ArgumentWithPegination{
 		TableSlug: "product",
 		Request:   getProductReq,
 		Limit:     10,
@@ -172,15 +177,16 @@ func TestGetListSlimWithDate(t *testing.T) { // $lt and $gte
 	assert.NotEmpty(t, getProductResp.Data.Data.Response, err)
 }
 
+// Done
 func TestGetListSlimWithEq(t *testing.T) { // $eq
 	getProductReq := sdk.Request{
 		Data: map[string]interface{}{
 			"increment_id_field": map[string]interface{}{
-				"$eq": "T-000000020",
+				"$eq": "T-000000021",
 			}},
 	}
 
-	getProductResp, _, err := UcodeApi.GetListSlim(&sdk.ArgumentWithPegination{
+	getProductResp, _, err := UcodeApiForStaging.GetListSlim(&sdk.ArgumentWithPegination{
 		TableSlug:   "product",
 		Request:     getProductReq,
 		Limit:       10,
@@ -192,15 +198,16 @@ func TestGetListSlimWithEq(t *testing.T) { // $eq
 	assert.NotEmpty(t, getProductResp.Data.Data.Response, err)
 }
 
+// Done
 func TestGetListSlimWithIn(t *testing.T) { // $in
 	getProductReq := sdk.Request{
 		Data: map[string]interface{}{
 			"increment_id_field": map[string]interface{}{
-				"$in": []string{"T-000000020", "T-000000019", "T-000000018"},
+				"$in": []string{"T-000000022", "T-000000023", "T-000000024"},
 			}},
 	}
 
-	getProductResp, _, err := UcodeApi.GetListSlim(&sdk.ArgumentWithPegination{
+	getProductResp, _, err := UcodeApiForStaging.GetListSlim(&sdk.ArgumentWithPegination{
 		TableSlug:   "product",
 		Request:     getProductReq,
 		Limit:       10,
@@ -212,12 +219,13 @@ func TestGetListSlimWithIn(t *testing.T) { // $in
 	assert.NotEmpty(t, getProductResp.Data.Data.Response, err)
 }
 
+// Done
 func TestGetListSlimWithBoolean(t *testing.T) {
 	getProductReq := sdk.Request{
 		Data: map[string]interface{}{
 			"switch_field": false},
 	}
-	getProductResp, _, err := UcodeApi.GetListSlim(&sdk.ArgumentWithPegination{
+	getProductResp, _, err := UcodeApiForStaging.GetListSlim(&sdk.ArgumentWithPegination{
 		TableSlug:   "product",
 		Request:     getProductReq,
 		Limit:       10,
@@ -229,11 +237,12 @@ func TestGetListSlimWithBoolean(t *testing.T) {
 	assert.NotEmpty(t, getProductResp.Data.Data.Response, "Switch Does not work")
 }
 
+// Done
 func TestGetListObject(t *testing.T) {
 	getProductReq := sdk.Request{
 		Data: map[string]interface{}{},
 	}
-	getProductResp, _, err := UcodeApi.GetList(&sdk.ArgumentWithPegination{
+	getProductResp, _, err := UcodeApiForStaging.GetList(&sdk.ArgumentWithPegination{
 		TableSlug:   "product",
 		Request:     getProductReq,
 		Limit:       10,
@@ -244,6 +253,7 @@ func TestGetListObject(t *testing.T) {
 	assert.NotEmpty(t, getProductResp.Data.Data.Response, "Switch Does not work")
 }
 
+// Done
 func TestGetListObjectSearch(t *testing.T) {
 	getProductReq := sdk.Request{
 		Data: map[string]interface{}{
@@ -251,7 +261,7 @@ func TestGetListObjectSearch(t *testing.T) {
 			"view_fields": []string{"internation_phone_field"},
 		},
 	}
-	getProductResp, _, err := UcodeApi.GetList(&sdk.ArgumentWithPegination{
+	getProductResp, _, err := UcodeApiForStaging.GetList(&sdk.ArgumentWithPegination{
 		TableSlug:   "product",
 		Request:     getProductReq,
 		Limit:       10,
@@ -277,9 +287,10 @@ func TestGetListObjectSearch(t *testing.T) {
 	assert.Empty(t, getProductResp.Data.Data.Response, "Response should be empty")
 }
 
+// Done
 func TestGetAggregation(t *testing.T) {
 	getProductReq := sdk.Request{Data: map[string]interface{}{"pipelines": []map[string]interface{}{{"$group": map[string]interface{}{"_id": "$single_line_field"}}}}}
-	getProductResp, _, err := UcodeApi.GetListAggregation(&sdk.Argument{
+	getProductResp, _, err := UcodeApiForStaging.GetListAggregation(&sdk.Argument{
 		TableSlug:   "product",
 		Request:     getProductReq,
 		DisableFaas: true,
@@ -289,11 +300,12 @@ func TestGetAggregation(t *testing.T) {
 	assert.NotEmpty(t, getProductResp.Data.Data.Data, "Switch Does not work")
 }
 
+// Done
 func TestGetListAutoFilter(t *testing.T) {
 	resp, err := Login()
 	assert.NoError(t, err)
 
-	body, err := UcodeApi.DoRequest(BaseUrl+"/v2/object/get-list/product", "POST", map[string]interface{}{
+	body, err := UcodeApiForStaging.DoRequest(BaseUrlStaging+"/v2/object/get-list/product", "POST", map[string]interface{}{
 		"data": map[string]interface{}{},
 	}, map[string]string{
 		"Authorization": "Bearer " + resp,
@@ -307,10 +319,11 @@ func TestGetListAutoFilter(t *testing.T) {
 	assert.NotEmpty(t, response.Data.Data.Response)
 }
 
+// Done
 func TestGetListExcel(t *testing.T) {
-	body, err := UcodeApi.DoRequest(BaseUrl+"/v1/object/excel/product", "POST", ExcelReq, map[string]string{
+	body, err := UcodeApi.DoRequest(BaseUrlStaging+"/v1/object/excel/product", "POST", ExcelReq, map[string]string{
 		"authorization": "API-KEY",
-		"X-API-KEY":     UcodeApi.Config().AppId,
+		"X-API-KEY":     UcodeApiForStaging.Config().AppId,
 	})
 	assert.NoError(t, err)
 	var response ExcelResponse
@@ -320,11 +333,12 @@ func TestGetListExcel(t *testing.T) {
 	assert.NotEmpty(t, response.Data.Data.Link)
 }
 
+// Done
 func TestGetListRBAC(t *testing.T) {
 	resp, err := Login()
 	assert.NoError(t, err)
 
-	body, err := UcodeApi.DoRequest(BaseUrl+"/v2/object/get-list/company", "POST", map[string]interface{}{
+	body, err := UcodeApi.DoRequest(BaseUrlStaging+"/v2/object/get-list/company", "POST", map[string]interface{}{
 		"data": map[string]interface{}{},
 	}, map[string]string{
 		"Authorization": "Bearer " + resp,
@@ -338,11 +352,12 @@ func TestGetListRBAC(t *testing.T) {
 	assert.NotEmpty(t, response.Data.Data.Response)
 }
 
+// Done
 func TestMultipleCRUD(t *testing.T) {
 	var ids = []string{}
 	var multipleInsert = []map[string]interface{}{}
 	var multipleUpdate = []map[string]interface{}{}
-	UcodeApi.Config().RequestTimeout = time.Second * 30
+	UcodeApiForStaging.Config().RequestTimeout = time.Second * 30
 	faker1, err := faker.New("en")
 	assert.NoError(t, err, "faker error")
 
@@ -374,7 +389,7 @@ func TestMultipleCRUD(t *testing.T) {
 		ids = append(ids, guid)
 	}
 
-	_, _, err = UcodeApi.MultipleUpdate(&sdk.Argument{
+	_, _, err = UcodeApiForStaging.MultipleUpdate(&sdk.Argument{
 		TableSlug: "product",
 		Request: sdk.Request{
 			Data: map[string]interface{}{
@@ -385,7 +400,7 @@ func TestMultipleCRUD(t *testing.T) {
 	})
 	assert.NoError(t, err)
 
-	_, _, err = UcodeApi.MultipleUpdate(&sdk.Argument{
+	_, _, err = UcodeApiForStaging.MultipleUpdate(&sdk.Argument{
 		TableSlug: "product",
 		Request: sdk.Request{
 			Data: map[string]interface{}{
@@ -396,7 +411,7 @@ func TestMultipleCRUD(t *testing.T) {
 	})
 	assert.NoError(t, err)
 
-	_, err = UcodeApi.MultipleDelete(&sdk.Argument{
+	_, err = UcodeApiForStaging.MultipleDelete(&sdk.Argument{
 		TableSlug: "product",
 		Request: sdk.Request{
 			Data: map[string]interface{}{
