@@ -14,39 +14,52 @@ import (
 )
 
 const (
+	// Base Creds
+	BaseUrlAuthStaging = "https://auth-api.ucode.run"
+	BaseUrlStaging     = "https://admin-api.ucode.run"
+	requestTimeout     = time.Second * 5
+	Email              = "abdulbositkabilov@gmail.com"
+
+	// Mongo Creds Prod
 	appId       = "P-bgh4cmZxaWTXWscpH6sUa9gGlsuvKyZO"
-	appIdPg     = "P-1cDW9ISg1ko1rSvffoSg1m0gJRHl7vgh"
 	BaseUrl     = "https://api.admin.u-code.io"
 	BaseUrlAuth = "https://api.auth.u-code.io"
 
-	BaseUrlAuthStaging = "https://auth-api.ucode.run"
-	BaseUrlStaging     = "https://admin-api.ucode.run"
+	ProjectId            = "f05fdd8d-f949-4999-9593-5686ac272993"
+	ResourceId           = "b74a3b18-6531-45fc-8e05-0b9709af8faa"
+	EnvironmentId        = "e8b82a93-b87f-4103-abc4-b5a017f540a4"
+	ClientTypeId         = "ce3e630f-5399-4557-94f5-f142b411ed6b"
+	RoleId               = "d1523cf2-c684-4c14-b021-413011ffb375"
+	EmployeeClientTypeId = "8a69fc80-6316-4f84-8914-3e7ebae03dc7"
+	EmployeeRoleId       = "b64ac7b7-9ec9-42e0-b720-1267ca1e42f7"
 
-	requestTimeout = time.Second * 5
+	// Mongo Staging Creds
+	appIdStaging              = "P-5LYaWn6pNhTUHfD9fEgXFgonn3sDBaLz"
+	ProjectIdMongo            = "462baeca-37b0-4355-addc-b8ae5d26995d"
+	ResourceIdMongo           = "05df5e41-1066-474e-8435-3781e0841603"
+	EnvironmentIdMongo        = "ad41c493-8697-4f23-979a-341722465748"
+	ClientTypeIdMongo         = "038569f5-4dfc-44e6-bee1-6f390aa8195d"
+	RoleIdMongo               = "75228002-988e-4418-b10e-656c01c4cc68"
+	EmployeeClientTypeIdMongo = "91b36ca9-7576-403c-9f57-db1cc0c3e1ce"
+	EmployeeRoleIdMongo       = "58e45143-f11e-4d8d-84d5-90b6435ab564"
 
-	ProjectId     = "f05fdd8d-f949-4999-9593-5686ac272993"
-	ResourceId    = "b74a3b18-6531-45fc-8e05-0b9709af8faa"
-	EnvironmentId = "e8b82a93-b87f-4103-abc4-b5a017f540a4"
-	ClientTypeId  = "ce3e630f-5399-4557-94f5-f142b411ed6b"
-	RoleId        = "d1523cf2-c684-4c14-b021-413011ffb375"
-	Email         = "abdulbositkabilov@gmail.com"
-
+	// Postgres Staging Creds
+	appIdPg         = "P-1cDW9ISg1ko1rSvffoSg1m0gJRHl7vgh"
 	ProjectIdPg     = "8e83e7d6-954e-4c13-bb85-2119c245dcea"
 	ResourceIdPg    = "835206e8-f971-41f0-838b-54ae6c53ca97"
 	EnvironmentIdPg = "7ab0af4a-6ae2-417f-a8f0-e45315ab0b60"
 	ClientTypeIdPg  = "fd941777-68e2-4a4f-acd1-a664cceaa4ea"
 	RoleIdPg        = "dda0320f-999f-4018-b172-70d4b2bd6792"
 
-	EmployeeClientTypeId   = "8a69fc80-6316-4f84-8914-3e7ebae03dc7"
-	EmployeeRoleId         = "b64ac7b7-9ec9-42e0-b720-1267ca1e42f7"
 	EmployeeClientTypeIdPg = "61f967dd-cd9f-496e-99b4-cd32177baba2"
 	EmployeeRoleIdPg       = "ed239299-a987-4fa0-b0ef-9b7d69081d93"
 )
 
 var (
-	UcodeApi      = sdk.New(&sdk.Config{BaseURL: BaseUrl, RequestTimeout: requestTimeout, AppId: appId})
-	UcodeApiForPg = sdk.New(&sdk.Config{BaseURL: BaseUrlStaging, RequestTimeout: requestTimeout, AppId: appIdPg})
-	fakeData      *faker.Faker
+	UcodeApi           = sdk.New(&sdk.Config{BaseURL: BaseUrl, RequestTimeout: requestTimeout, AppId: appId})
+	UcodeApiForPg      = sdk.New(&sdk.Config{BaseURL: BaseUrlStaging, RequestTimeout: requestTimeout, AppId: appIdPg})
+	UcodeApiForStaging = sdk.New(&sdk.Config{BaseURL: BaseUrlStaging, RequestTimeout: requestTimeout, AppId: appIdStaging})
+	fakeData           *faker.Faker
 )
 
 func TestMain(m *testing.M) {
@@ -95,28 +108,27 @@ var TableReq = map[string]interface{}{
 var ExcelReq = map[string]interface{}{
 	"data": map[string]interface{}{
 		"field_ids": []string{
-			"a716bc3e-611d-413e-b849-2e97e19bf603",
-			"2e6cec61-9031-4e98-b8d2-f733c6c19698",
-			"6ebc4072-0d5d-4471-b99c-2fb5a34b30cf",
-			"c1a4e368-0090-4f69-b20b-76b9e35b37d1",
-			"67005876-7525-4551-96f1-915cd2001690",
-			"43dcdaac-c702-47c2-85cb-37a383db9bd7",
-			"23bb85e8-e2cf-49e1-bc61-2bfe19ead38e",
-			"4ca321b1-bc2f-4632-a055-e6a3aec9063c",
-			"45612137-f89e-4541-931d-94bc43331f52",
-			"fed689ba-477a-4961-bb93-30c89a6105e9",
-			"15d6334d-567c-44c7-bd82-fe38a57b8b8b",
-			"a7e61d62-10d1-4562-ade1-a27268861941",
-			"0770eaa1-c5f0-4e5f-bd78-84e9f151984b",
-			"68baa102-9cb2-4b0d-8a9c-5ef139bd183e",
-			"0e84701c-d50d-4e27-bd61-a8104282f740",
-			"287920d5-cbe3-4d7f-be50-0e30e85c2ac0",
-			"a8201d2b-1b98-410e-94e9-d7dd8bd377a5",
-			"d1152882-be4f-47a0-b69f-35829cca6b27",
-			"9b155bb9-bd92-4408-84ad-b6e298a0df0f",
-			"ea152b67-fd58-4251-af17-111db27c634b",
-			"f91e5834-26bb-4d58-8eca-6f5f8c332255",
-			"3168c528-9954-4e62-8fd9-2821489177ed",
+			"fd33c3ed-9326-4f76-9c43-706689369738",
+			"e4eec7bd-0748-4543-b7b3-ad7559173e83",
+			"8cea34f5-432b-4530-96fa-954b5d015ef2",
+			"51a6ffe5-99b4-417e-8ff5-57961a82f427",
+			"22645a76-fd31-4a1d-8f49-bb2310ef5ec5",
+			"e6262d69-5b55-4d3b-994c-80260cd039a0",
+			"4fa0f7b3-b12e-4728-b2c0-ce56b625b02f",
+			"76979418-a57f-4d57-aa95-b07a3513fca3",
+			"b6dcf877-fb2c-470a-8b4d-7730d174da63",
+			"814bcbb1-c086-4267-8641-4dc1425791e8",
+			"3b23ec04-9c3f-4f04-9345-57c198ac8b11",
+			"341f6ab9-fd2f-4279-b2d8-161867c3c354",
+			"deafef96-8371-483e-a43e-a65f180c563f",
+			"7fb671e5-7e9e-475d-a184-0a7b97442064",
+			"984f5ea9-df64-48bc-8a57-9d067e4a1b0d",
+			"2f11a4ce-d421-402d-8ed0-6be5d8fa6be9",
+			"a378b474-3726-4bc5-8388-1b1cd5ac0d29",
+			"076101e1-c7af-452a-a812-4770941a223b",
+			"5e119b85-2e4a-4bf8-ab28-45d40163ea7f",
+			"2f6620af-aac3-4d2b-98c7-55826a920da9",
+			"266e6249-cbf4-4eb1-8d8f-e7a6c55092d8",
 		},
 		"language": "en",
 		"search":   "",
@@ -173,20 +185,20 @@ var ExcelReqPg = map[string]interface{}{
 
 func Login() (string, error) {
 	var (
-		url  = "https://api.auth.u-code.io/v2/login?project-id=f05fdd8d-f949-4999-9593-5686ac272993"
+		url  = "https://auth-api.ucode.run/v2/login?project-id=462baeca-37b0-4355-addc-b8ae5d26995d"
 		body = map[string]interface{}{
-			"username":        "bosit001",
-			"password":        "bosit001",
-			"company_id":      "af1f4f6e-1c33-4e9e-99e7-12c0d6ff4bd1",
-			"project_id":      "f05fdd8d-f949-4999-9593-5686ac272993",
-			"environment_id":  "e8b82a93-b87f-4103-abc4-b5a017f540a4",
-			"client_type":     "8a69fc80-6316-4f84-8914-3e7ebae03dc7",
-			"tables":          []map[string]string{{"object_id": "64d1288f-f55c-421e-9286-476cfe5f9896", "table_slug": "company"}},
-			"environment_ids": []string{"e8b82a93-b87f-4103-abc4-b5a017f540a4"},
+			"username":        "bosit_test_002",
+			"password":        "bosit_test_002",
+			"company_id":      "d324e78a-e57b-4951-b83b-910e02521012",
+			"project_id":      "462baeca-37b0-4355-addc-b8ae5d26995d",
+			"environment_id":  "ad41c493-8697-4f23-979a-341722465748",
+			"client_type":     "91b36ca9-7576-403c-9f57-db1cc0c3e1ce",
+			"tables":          []map[string]string{{"object_id": "aa6243da-4966-4cca-994e-85893a1df97c", "table_slug": "company"}},
+			"environment_ids": []string{"ad41c493-8697-4f23-979a-341722465748"},
 		}
 	)
 
-	bodyBytes, err := UcodeApi.DoRequest(url, "POST", body, map[string]string{})
+	bodyBytes, err := UcodeApiForStaging.DoRequest(url, "POST", body, map[string]string{})
 	if err != nil {
 		return "", err
 	}
@@ -215,7 +227,7 @@ func LoginPg() (string, error) {
 		}
 	)
 
-	bodyBytes, err := UcodeApi.DoRequest(url, "POST", body, map[string]string{})
+	bodyBytes, err := UcodeApiForPg.DoRequest(url, "POST", body, map[string]string{})
 	if err != nil {
 		return "", err
 	}

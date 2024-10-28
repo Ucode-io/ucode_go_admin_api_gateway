@@ -7,14 +7,15 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var FaaSNameForMongo = "integrationtestmongo-earth"
+var FaaSNameForMongo = "wellplayed-earth"
 
+// Done
 func TestOpenFaaS(t *testing.T) {
 	_, err := UcodeApi.DoRequest(BaseUrl+"/v1/invoke_function/"+FaaSNameForMongo, http.MethodPost, map[string]interface{}{},
 		map[string]string{
-			"Resource-Id":    ResourceId,
-			"Environment-Id": EnvironmentId,
-			"X-API-KEY":      UcodeApi.Config().AppId,
+			"Resource-Id":    ResourceIdMongo,
+			"Environment-Id": EnvironmentIdMongo,
+			"X-API-KEY":      UcodeApiForStaging.Config().AppId,
 			"Authorization":  "API-KEY",
 		},
 	)

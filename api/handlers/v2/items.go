@@ -48,8 +48,7 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), time.Second*15)
 	defer cancel()
 
-	err := c.ShouldBindJSON(&objectRequest)
-	if err != nil {
+	if err := c.ShouldBindJSON(&objectRequest); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -62,8 +61,7 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
@@ -82,11 +80,7 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -107,14 +101,6 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 	}
 
 	objectRequest.Data["guid"] = id
-
-	address, ok := objectRequest.Data["reciever_address"].(string)
-	if ok && address != "" {
-		h.log.Debug("reciever_address started", logger.String("address", address))
-		defer func() {
-			h.log.Debug("reciever_address done", logger.String("address", address))
-		}()
-	}
 
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
 
@@ -163,25 +149,14 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		if resource.ResourceEnvironmentId == "e6c95e62-f1fb-4556-aa12-e512a14ecd52" {
-			resp, err = services.GetBuilderServiceByType(resource.NodeType).ItemsService().Create(
-				ctx,
-				&obs.CommonMessage{
-					TableSlug: c.Param("collection"),
-					Data:      structData,
-					ProjectId: resource.ResourceEnvironmentId,
-				},
-			)
-		} else {
-			resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().Create(
-				ctx,
-				&obs.CommonMessage{
-					TableSlug: c.Param("collection"),
-					Data:      structData,
-					ProjectId: resource.ResourceEnvironmentId,
-				},
-			)
-		}
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().Create(
+			ctx,
+			&obs.CommonMessage{
+				TableSlug: c.Param("collection"),
+				Data:      structData,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
 
 		// this logic for custom error message, object builder service may be return 400, 404, 500
 		if err != nil {
@@ -200,7 +175,7 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 		defer func() { go h.versionHistory(logReq) }()
 	case pb.ResourceType_POSTGRESQL:
 		body, err := services.GoObjectBuilderService().Items().Create(
-			context.Background(),
+			ctx,
 			&nb.CommonMessage{
 				TableSlug: c.Param("collection"),
 				Data:      structData,
@@ -220,8 +195,7 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 			return
 		}
 
-		err = helper.MarshalToStruct(body, &resp)
-		if err != nil {
+		if err = helper.MarshalToStruct(body, &resp); err != nil {
 			return
 		}
 
@@ -235,6 +209,7 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 			id = data["guid"].(string)
 		}
 	}
+
 	if len(afterActions) > 0 {
 		functionName, err := DoInvokeFuntion(
 			DoInvokeFuntionStruct{

@@ -54,7 +54,6 @@ type goBuilderServiceClient struct {
 	folderGroupService    nb.FolderGroupServiceClient
 	csvService            nb.CSVServiceClient
 	docxTemplateService   nb.DocxTemplateServiceClient
-	// goObjectBuilderConnPool *grpcpool.Pool
 }
 
 func NewGoBuilderServiceClient(ctx context.Context, cfg config.Config) (GoBuilderServiceI, error) {
