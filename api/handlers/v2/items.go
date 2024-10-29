@@ -1427,6 +1427,7 @@ func (h *HandlerV2) DeleteItems(c *gin.Context) {
 	data["company_service_project_id"] = projectId.(string)
 	data["company_service_environment_id"] = environmentId.(string)
 	data["ids"] = objectRequest.Ids
+	data["query"] = objectRequest.Query
 
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
