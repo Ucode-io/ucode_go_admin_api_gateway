@@ -34,7 +34,8 @@ type UpsertCommonMessage struct {
 }
 
 type Ids struct {
-	Ids []string `json:"ids"`
+	Ids   []string               `json:"ids"`
+	Query map[string]interface{} `json:"query"`
 }
 
 type MultipleUpdateItems struct {
