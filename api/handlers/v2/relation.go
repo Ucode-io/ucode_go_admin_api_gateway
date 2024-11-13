@@ -254,12 +254,9 @@ func (h *HandlerV2) CreateRelation(c *gin.Context) {
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: "RELATION",
 			ActionType:   "CREATE RELATION",
-			// UsedEnvironments: map[string]bool{
-			// 	cast.ToString(environmentId): true,
-			// },
-			UserInfo:  cast.ToString(userId),
-			Request:   &relation,
-			TableSlug: c.Param("collection"),
+			UserInfo:     cast.ToString(userId),
+			Request:      &relation,
+			TableSlug:    c.Param("collection"),
 		}
 	)
 
