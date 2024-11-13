@@ -48,6 +48,7 @@ type ObjectBuilderServiceClient interface {
 	GetListWithOutRelations(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*CommonMessage, error)
 	GetListAggregation(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*CommonMessage, error)
 	GetListRelationTabInExcel(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*CommonMessage, error)
+	UpsertMany(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*CommonMessage, error)
 }
 
 type objectBuilderServiceClient struct {
@@ -292,6 +293,15 @@ func (c *objectBuilderServiceClient) GetListRelationTabInExcel(ctx context.Conte
 	return out, nil
 }
 
+func (c *objectBuilderServiceClient) UpsertMany(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*CommonMessage, error) {
+	out := new(CommonMessage)
+	err := c.cc.Invoke(ctx, "/object_builder_service.ObjectBuilderService/UpsertMany", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ObjectBuilderServiceServer is the server API for ObjectBuilderService service.
 // All implementations must embed UnimplementedObjectBuilderServiceServer
 // for forward compatibility
@@ -322,6 +332,7 @@ type ObjectBuilderServiceServer interface {
 	GetListWithOutRelations(context.Context, *CommonMessage) (*CommonMessage, error)
 	GetListAggregation(context.Context, *CommonMessage) (*CommonMessage, error)
 	GetListRelationTabInExcel(context.Context, *CommonMessage) (*CommonMessage, error)
+	UpsertMany(context.Context, *CommonMessage) (*CommonMessage, error)
 	mustEmbedUnimplementedObjectBuilderServiceServer()
 }
 
@@ -406,6 +417,9 @@ func (UnimplementedObjectBuilderServiceServer) GetListAggregation(context.Contex
 }
 func (UnimplementedObjectBuilderServiceServer) GetListRelationTabInExcel(context.Context, *CommonMessage) (*CommonMessage, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetListRelationTabInExcel not implemented")
+}
+func (UnimplementedObjectBuilderServiceServer) UpsertMany(context.Context, *CommonMessage) (*CommonMessage, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpsertMany not implemented")
 }
 func (UnimplementedObjectBuilderServiceServer) mustEmbedUnimplementedObjectBuilderServiceServer() {}
 
@@ -888,6 +902,24 @@ func _ObjectBuilderService_GetListRelationTabInExcel_Handler(srv interface{}, ct
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ObjectBuilderService_UpsertMany_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CommonMessage)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ObjectBuilderServiceServer).UpsertMany(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/object_builder_service.ObjectBuilderService/UpsertMany",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ObjectBuilderServiceServer).UpsertMany(ctx, req.(*CommonMessage))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ObjectBuilderService_ServiceDesc is the grpc.ServiceDesc for ObjectBuilderService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -998,6 +1030,10 @@ var ObjectBuilderService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetListRelationTabInExcel",
 			Handler:    _ObjectBuilderService_GetListRelationTabInExcel_Handler,
+		},
+		{
+			MethodName: "UpsertMany",
+			Handler:    _ObjectBuilderService_UpsertMany_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
