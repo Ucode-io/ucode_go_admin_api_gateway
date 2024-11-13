@@ -338,19 +338,35 @@ func (h *HandlerV1) GetMicroFrontEndByID(c *gin.Context) {
 		return
 	}
 
-	function, err := services.FunctionService().FunctionService().GetSingle(
-		context.Background(),
-		&fc.FunctionPrimaryKey{
-			Id:        functionID,
-			ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		function, err := services.FunctionService().FunctionService().GetSingle(
+			context.Background(),
+			&fc.FunctionPrimaryKey{
+				Id:        functionID,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 
-	h.handleResponse(c, status_http.OK, function)
+		h.handleResponse(c, status_http.OK, function)
+	case pb.ResourceType_POSTGRESQL:
+		function, err := services.GoObjectBuilderService().Function().GetSingle(c.Request.Context(),
+			&nb.FunctionPrimaryKey{
+				Id:        functionID,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.InvalidArgument, err.Error())
+			return
+		}
+
+		h.handleResponse(c, status_http.OK, function)
+	}
 }
 
 // GetAllMicroFrontEnd godoc

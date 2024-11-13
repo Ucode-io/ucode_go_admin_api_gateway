@@ -2187,13 +2187,10 @@ func (h *HandlerV2) UpsertMany(c *gin.Context) {
 			NodeType:     resource.NodeType,
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: c.Request.URL.String(),
-			ActionType:   "UPDATE MANY ITEM",
-			UsedEnvironments: map[string]bool{
-				cast.ToString(environmentId): true,
-			},
-			UserInfo:  cast.ToString(userId),
-			Request:   &structData,
-			TableSlug: c.Param("collection"),
+			ActionType:   "UPSERT MANY ITEM",
+			UserInfo:     cast.ToString(userId),
+			Request:      &structData,
+			TableSlug:    c.Param("collection"),
 		}
 	)
 
@@ -2208,23 +2205,39 @@ func (h *HandlerV2) UpsertMany(c *gin.Context) {
 			h.handleResponse(c, status_http.InvalidArgument, actionErr.Error()+" in "+functionName)
 		} else {
 			logReq.Response = resp
-			h.handleResponse(c, status_http.NoContent, resp)
+			h.handleResponse(c, status_http.OK, resp)
 		}
-		go h.versionHistory(logReq)
+		switch resource.ResourceType {
+		case pb.ResourceType_MONGODB:
+			go h.versionHistory(logReq)
+		case pb.ResourceType_POSTGRESQL:
+			go h.versionHistoryGo(c, logReq)
+		}
 	}()
 
+	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
+
 	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = service.UpsertMany(c.Request.Context(), &obs.CommonMessage{
+			TableSlug: c.Param("collection"),
+			Data:      structData,
+			ProjectId: resource.ResourceEnvironmentId,
+		})
+		if err != nil {
+			h.handleResponse(c, status_http.InvalidArgument, err.Error())
+			return
+		}
 	case pb.ResourceType_POSTGRESQL:
-		_, err = services.GoObjectBuilderService().Items().UpsertMany(
-			context.Background(),
+		_, err = services.GoObjectBuilderService().Items().UpsertMany(c.Request.Context(),
 			&nb.CommonMessage{
 				TableSlug: c.Param("collection"),
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
-
 		if err != nil {
+			h.handleResponse(c, status_http.InvalidArgument, err.Error())
 			return
 		}
 	}
