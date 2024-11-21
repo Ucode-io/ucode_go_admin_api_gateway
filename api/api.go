@@ -799,7 +799,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		}
 	}
 
-	r.GET("v2/github/login", h.V2.GithubLogin)
+	r.GET("/v2/github/login", h.V2.GithubLogin)
 
 	r.Any("/api/*any", h.V1.AuthMiddleware(cfg), proxyMiddleware(r, &h), h.V1.Proxy)
 
