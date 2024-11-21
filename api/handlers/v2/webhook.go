@@ -25,22 +25,16 @@ import (
 )
 
 func (h *HandlerV2) GithubLogin(c *gin.Context) {
+	fmt.Println("HERER REQUESTED")
 	var (
-		githubLoginRequest models.GithubLogin
-
+		code                  = c.Param("code")
 		accessTokenUrl string = "https://github.com/login/oauth/access_token"
 	)
-
-	err := c.ShouldBindJSON(&githubLoginRequest)
-	if err != nil {
-		h.handleResponse(c, status_http.BadRequest, err.Error())
-		return
-	}
 
 	param := map[string]interface{}{
 		"client_id":     h.baseConf.GithubClientId,
 		"client_secret": h.baseConf.GithubClientSecret,
-		"code":          githubLoginRequest.Code,
+		"code":          code,
 	}
 
 	result, err := gitlab.MakeRequest("POST", accessTokenUrl, "", param)

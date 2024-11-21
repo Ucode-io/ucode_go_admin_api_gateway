@@ -780,11 +780,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			v2Files.GET("", h.V2.GetAllFiles)
 		}
 
-		v2Github := v2Version.Group("/github")
-		{
-			v2Github.POST("/login", h.V2.GithubLogin)
-		}
-
 		v2Webhook := v2Version.Group("/webhook")
 		{
 			v2Webhook.POST("/create", h.V2.CreateWebhook)
@@ -804,9 +799,9 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		}
 	}
 
-	r.Any("/api/*any", h.V1.AuthMiddleware(cfg), proxyMiddleware(r, &h), h.V1.Proxy)
+	r.GET("v2/github/login", h.V2.GithubLogin)
 
-	// r.Any("/x-api/*any", h.V1.RedirectAuthMiddleware(cfg), proxyMiddleware(r, &h), h.V1.Proxy)
+	r.Any("/api/*any", h.V1.AuthMiddleware(cfg), proxyMiddleware(r, &h), h.V1.Proxy)
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
