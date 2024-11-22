@@ -6,7 +6,6 @@ import (
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
-	"ucode/ucode_go_api_gateway/genproto/convert_template"
 	fc "ucode/ucode_go_api_gateway/genproto/new_function_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 
@@ -139,36 +138,6 @@ func (h *HandlerV1) Ping(c *gin.Context) {
 			return
 		}
 
-	} else if service == "convert_template_service" {
-
-		resource, err := h.companyServices.ServiceResource().GetSingle(
-			c.Request.Context(),
-			&pb.GetSingleServiceResourceReq{
-				ProjectId:     projectId,
-				EnvironmentId: environmentId,
-				ServiceType:   pb.ServiceType_BUILDER_SERVICE,
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
-		services, err := h.GetProjectSrvc(
-			c.Request.Context(),
-			projectId,
-			resource.NodeType,
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
-		_, err = services.ConvertTemplateService().PingTemplateService().Ping(context.Background(), &convert_template.PingRequest{})
-		if err != nil {
-			h.handleResponse(c, status_http.InternalServerError, err.Error())
-			return
-		}
 	}
 
 	h.handleResponse(c, status_http.OK, "pong")

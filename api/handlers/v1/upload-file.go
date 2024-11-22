@@ -8,10 +8,8 @@ import (
 	"os"
 	"strings"
 	"time"
-	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
-	"ucode/ucode_go_api_gateway/genproto/convert_template"
 	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
@@ -140,13 +138,12 @@ func (h *HandlerV1) UploadFile(c *gin.Context) {
 	var (
 		file File
 	)
-	
+
 	err := c.ShouldBind(&file)
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
-	
 
 	fileNameForObjectBuilder := file.File.Filename
 
@@ -271,90 +268,4 @@ func (h *HandlerV1) UploadFile(c *gin.Context) {
 		Filename: file.File.Filename,
 		Hash:     fName.String(),
 	})
-}
-
-// Upload godoc
-// @ID upload_template
-// @Security ApiKeyAuth
-// @Router /v1/upload-template/{template_name} [POST]
-// @Summary Upload Template
-// @Description Upload Template
-// @Tags file
-// @Produce json
-// @Param template_name path string true "template_name"
-// @Param object body models.CommonMessage true "UploadTemplateBody"
-// @Success 200 {object} status_http.Response{data=Path} "Path"
-// @Response 400 {object} status_http.Response{data=string} "Bad Request"
-// @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *HandlerV1) UploadTemplate(c *gin.Context) {
-	var (
-		objectRequest models.CommonMessage
-	)
-
-	err := c.ShouldBindJSON(&objectRequest)
-	if err != nil {
-		h.handleResponse(c, status_http.BadRequest, err.Error())
-		return
-	}
-
-	if len(c.Param("template_name")) <= 0 {
-		h.handleResponse(c, status_http.BadRequest, "required template name")
-		return
-	}
-
-	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
-	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
-		return
-	}
-
-	projectId, ok := c.Get("project_id")
-	if !ok || !util.IsValidUUID(projectId.(string)) {
-		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
-		return
-	}
-
-	environmentId, ok := c.Get("environment_id")
-	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
-		return
-	}
-
-	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId.(string),
-			EnvironmentId: environmentId.(string),
-			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
-	resp, err := services.ConvertTemplateService().ConvertTemplateService().WkHtmlToPdf(
-		context.Background(),
-		&convert_template.WkHtmlToPdfRequest{
-			TemplateName: c.Param("template_name"),
-			Data:         structData,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
-	h.handleResponse(c, status_http.Created, resp)
 }

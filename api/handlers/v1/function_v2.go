@@ -6,7 +6,7 @@ import (
 	"errors"
 	"io"
 	"strings"
-	"sync"
+
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
@@ -14,12 +14,10 @@ import (
 	fc "ucode/ucode_go_api_gateway/genproto/new_function_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/code_server"
-	"ucode/ucode_go_api_gateway/pkg/easy_to_travel"
 	"ucode/ucode_go_api_gateway/pkg/gitlab"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
-	"ucode/ucode_go_api_gateway/services"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang/protobuf/ptypes/empty"
@@ -981,52 +979,6 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 	requestData.Path = c.Request.URL.Path
 	requestData.Params = c.Request.URL.Query()
 	requestData.Body = bodyReq
-	var (
-		prevPath     = c.Request.Header.Get("Prev_path")
-		faasSettings easy_to_travel.FaasSetting
-		faasPaths    []string
-	)
-
-	for key, valueObject := range easy_to_travel.AgentApiPath {
-		if strings.Contains(prevPath, key) {
-			var (
-				mu    = sync.Mutex{}
-				value = cast.ToStringMap(valueObject)
-			)
-
-			mu.Lock()
-			faasSettings = easy_to_travel.FaasSetting{
-				Paths:        cast.ToStringSlice(value["paths"]),
-				IsCache:      cast.ToBool(value["is_cache"]),
-				Continue:     cast.ToBool(value["continue"]),
-				DeleteParams: cast.ToStringSlice(value["delete_params"]),
-			}
-
-			if function, ok := value["function"].(func(services.ServiceManagerI, []byte) string); ok {
-				faasSettings.Function = function
-			}
-			faasPaths = faasSettings.Paths
-			mu.Unlock()
-
-			break
-		}
-	}
-
-	if helper.ContainsLike(faasPaths, c.Param("function-id")) {
-		faasSettings.AppId = cast.ToString(authInfo.Data["app_id"])
-		faasSettings.NodeType = resource.NodeType
-		faasSettings.ProjectId = projectId.(string)
-		faasSettings.ResourceEnvironmentId = resource.ResourceEnvironmentId
-
-		resp, err := h.EasyToTravelFunctionRun(c, requestData, faasSettings)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
-		c.JSON(cast.ToInt(resp["code"]), resp)
-		return
-	}
 
 	var function = &fc.Function{}
 	if util.IsValidUUID(c.Param("function-id")) {
