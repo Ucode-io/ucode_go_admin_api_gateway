@@ -6,7 +6,6 @@ import (
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
-	"ucode/ucode_go_api_gateway/genproto/new_function_service"
 	"ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
@@ -468,12 +467,12 @@ func (h *HandlerV1) InvokeFunction(c *gin.Context) {
 		return
 	}
 
-	function := &new_function_service.Function{}
+	function := &obs.Function{}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		function, err = services.FunctionService().FunctionService().GetSingle(
-			context.Background(),
-			&new_function_service.FunctionPrimaryKey{
+		function, err = services.GetBuilderServiceByType(resource.NodeType).Function().GetSingle(
+			c.Request.Context(),
+			&obs.FunctionPrimaryKey{
 				Id:        invokeFunction.FunctionID,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -530,6 +529,7 @@ func (h *HandlerV1) InvokeFunction(c *gin.Context) {
 			"project_id":     projectId,
 			"environment_id": environmentId,
 			"action_type":    "HTTP",
+			"table_slug":     invokeFunction.TableSlug,
 		},
 	})
 	if err != nil {
