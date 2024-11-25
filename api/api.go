@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"strings"
+
 	"ucode/ucode_go_api_gateway/api/docs"
 	"ucode/ucode_go_api_gateway/api/handlers"
 	"ucode/ucode_go_api_gateway/config"
@@ -183,7 +184,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		// Excel Reader
 		v1.GET("/excel/:excel_id", h.V1.ExcelReader)
 		v1.POST("/excel/excel_to_db/:excel_id", h.V1.ExcelToDb)
-
 		v1.POST("/export-to-json", h.V1.ExportToJSON)
 		v1.POST("import-from-json", h.V1.ImportFromJSON)
 
@@ -411,8 +411,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	v3 := r.Group("/v3")
 	v3.Use(h.V1.AdminAuthMiddleware())
 	{
-
-		// // web pages
+		// web pages
 		v3.POST("/web_pages", h.V1.CreateWebPage)
 		v3.GET("/web_pages/:guid", h.V1.GetWebPagesById)
 		v3.GET("/web_pages", h.V1.GetWebPagesList)
@@ -430,7 +429,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		// collections group
 		v2Collection := v2Version.Group("/collections")
 		{
-
 			// error messages
 			v2Collection.GET("/:collection/error_messages", h.V2.GetAllErrorMessage)
 			v2Collection.POST("/:collection/error_messages", h.V2.CreateErrorMessage)
@@ -610,35 +608,6 @@ func customCORSMiddleware() gin.HandlerFunc {
 			c.AbortWithStatus(204)
 			return
 		}
-
-		c.Next()
-	}
-}
-
-func MaxAllowed(n int) gin.HandlerFunc {
-	var countReq int64
-	sem := make(chan struct{}, n)
-	acquire := func() {
-		sem <- struct{}{}
-		countReq++
-	}
-
-	release := func() {
-		select {
-		case <-sem:
-		default:
-		}
-		countReq--
-	}
-
-	return func(c *gin.Context) {
-		go func() {
-			acquire()       // before request
-			defer release() // after request
-
-			c.Set("sem", sem)
-			c.Set("count_request", countReq)
-		}()
 
 		c.Next()
 	}

@@ -718,11 +718,8 @@ func (h *HandlerV1) DeleteTable(c *gin.Context) {
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: "TABLE",
 			ActionType:   "DELETE TABLE",
-			// UsedEnvironments: map[string]bool{
-			// 	cast.ToString(environmentId): true,
-			// },
-			UserInfo:  cast.ToString(userId),
-			TableSlug: tableID,
+			UserInfo:     cast.ToString(userId),
+			TableSlug:    tableID,
 		}
 	)
 

@@ -2469,11 +2469,7 @@ func (h *HandlerV1) GetListGroupBy(c *gin.Context) {
 
 	relationSlug := c.Param("column_table_slug")
 	selectedGuid := cast.ToSlice(object.Data["additional_values"])
-	relationTableSlug := relationSlug
-	relationTableSlug = util.PluralizeWord(relationSlug)
-	// if relationSlug[len(relationSlug)-1] != 's' {
-	// 	relationTableSlug = relationSlug + "s"
-	// }
+	relationTableSlug := util.PluralizeWord(relationSlug)
 
 	object.Data = map[string]interface{}{
 		"match": map[string]interface{}{

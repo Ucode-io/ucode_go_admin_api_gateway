@@ -286,19 +286,16 @@ func (h *HandlerV2) UpdateView(c *gin.Context) {
 	}
 
 	var (
-		oldView = &obs.View{}
+		oldView *obs.View
 		logReq  = &models.CreateVersionHistoryRequest{
 			Services:     services,
 			NodeType:     resource.NodeType,
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: "VIEW",
 			ActionType:   "UPDATE VIEW",
-			// UsedEnvironments: map[string]bool{
-			// 	cast.ToString(environmentId): true,
-			// },
-			UserInfo:  cast.ToString(userId),
-			Request:   &view,
-			TableSlug: c.Param("collection"),
+			UserInfo:     cast.ToString(userId),
+			Request:      &view,
+			TableSlug:    c.Param("collection"),
 		}
 	)
 

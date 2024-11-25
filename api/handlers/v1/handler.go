@@ -99,11 +99,6 @@ func (h *HandlerV1) getLimitParam(c *gin.Context) (limit int, err error) {
 	return strconv.Atoi(limitStr)
 }
 
-func (h *HandlerV1) getPageParam(c *gin.Context) (page int, err error) {
-	pageStr := c.DefaultQuery("page", "1")
-	return strconv.Atoi(pageStr)
-}
-
 func (h *HandlerV1) versionHistory(req *models.CreateVersionHistoryRequest) error {
 	var (
 		current  = map[string]interface{}{"data": req.Current}

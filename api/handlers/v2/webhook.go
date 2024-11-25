@@ -221,7 +221,7 @@ func (h *HandlerV2) HandleWebhook(c *gin.Context) {
 					return
 				}
 			} else {
-				services.FunctionService().FunctionService().Update(
+				_, _ = services.FunctionService().FunctionService().Update(
 					context.Background(),
 					&new_function_service.Function{
 						Id:             function.Id,

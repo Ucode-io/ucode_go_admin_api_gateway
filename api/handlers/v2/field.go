@@ -181,7 +181,6 @@ func (h *HandlerV2) CreateField(c *gin.Context) {
 		resp := &nb.Field{}
 
 		for _, field := range fields {
-
 			newReq := nb.CreateFieldRequest{}
 
 			err = helper.MarshalToStruct(&field, &newReq)
@@ -477,7 +476,6 @@ func (h *HandlerV2) UpdateField(c *gin.Context) {
 	field.EnvId = resource.EnvironmentId
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-
 		oldField, deferErr := services.GetBuilderServiceByType(resource.NodeType).Field().GetByID(
 			context.Background(),
 			&obs.FieldPrimaryKey{
@@ -545,7 +543,6 @@ func (h *HandlerV2) UpdateField(c *gin.Context) {
 }
 
 func (h *HandlerV2) UpdateSearch(c *gin.Context) {
-
 	var (
 		searchRequest obs.SearchUpdateRequest
 	)
@@ -700,7 +697,6 @@ func (h *HandlerV2) DeleteField(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-
 		oldField, err := services.GetBuilderServiceByType(resource.NodeType).Field().GetByID(
 			context.Background(),
 			&obs.FieldPrimaryKey{
@@ -732,7 +728,6 @@ func (h *HandlerV2) DeleteField(c *gin.Context) {
 
 		h.handleResponse(c, status_http.NoContent, resp)
 	case pb.ResourceType_POSTGRESQL:
-
 		oldField, err := services.GoObjectBuilderService().Field().GetByID(
 			context.Background(),
 			&nb.FieldPrimaryKey{
