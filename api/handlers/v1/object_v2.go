@@ -268,37 +268,13 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 				return
 			}
 		case pb.ResourceType_POSTGRESQL:
-			// redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
-			// if err == nil {
-			// 	resp := make(map[string]interface{})
-			// 	m := make(map[string]interface{})
-			// 	err = json.Unmarshal([]byte(redisResp), &m)
-			// 	if err != nil {
-			// 		h.log.Error("Error while unmarshal redis", logger.Error(err))
-			// 	} else {
-			// 		resp["data"] = m
-			// 		h.handleResponse(c, status_http.OK, resp)
-			// 		return
-			// 	}
-			// }
-
-			resp, err := services.GoObjectBuilderService().ObjectBuilder().GetList2(
-				context.Background(),
+			resp, err := services.GoObjectBuilderService().ObjectBuilder().GetList2(c.Request.Context(),
 				&nb.CommonMessage{
 					TableSlug: c.Param("table_slug"),
 					Data:      structData,
 					ProjectId: resource.ResourceEnvironmentId,
 				},
 			)
-
-			// if err == nil {
-			// 	jsonData, _ := resp.GetData().MarshalJSON()
-			// 	err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
-			// 	if err != nil {
-			// 		h.log.Error("Error while setting redis", logger.Error(err))
-			// 	}
-			// }
-
 			if err != nil {
 				h.handleResponse(c, status_http.GRPCError, err.Error())
 				return
