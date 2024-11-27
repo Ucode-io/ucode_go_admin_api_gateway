@@ -5,7 +5,7 @@ import (
 	"errors"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
-	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
+	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
@@ -68,7 +68,7 @@ func (h *HandlerV2) GetSingleLayout(c *gin.Context) {
 	case pb.ResourceType_MONGODB:
 		resp, err := services.GetBuilderServiceByType(resource.NodeType).Layout().GetSingleLayout(
 			context.Background(),
-			&object_builder_service.GetSingleLayoutRequest{
+			&obs.GetSingleLayoutRequest{
 				TableSlug: collection,
 				ProjectId: resource.ResourceEnvironmentId,
 				MenuId:    menuId,
@@ -110,7 +110,7 @@ func (h *HandlerV2) GetSingleLayout(c *gin.Context) {
 // @Param table-id query string false "table-id"
 // @Param table-slug query string false "table-slug"
 // @Param language_setting query string false "language_setting"
-// @Success 200 {object} status_http.Response{data=object_builder_service.GetListLayoutResponse} "TableBody"
+// @Success 200 {object} status_http.Response{data=obs.GetListLayoutResponse} "TableBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) GetListLayouts(c *gin.Context) {
@@ -177,7 +177,7 @@ func (h *HandlerV2) GetListLayouts(c *gin.Context) {
 	case pb.ResourceType_MONGODB:
 		resp, err := services.GetBuilderServiceByType(resource.NodeType).Layout().GetAll(
 			context.Background(),
-			&object_builder_service.GetListLayoutRequest{
+			&obs.GetListLayoutRequest{
 				TableSlug:       tableSlug,
 				ProjectId:       resourceEnvironmentId,
 				IsDefualt:       isDefault,
@@ -221,15 +221,15 @@ func (h *HandlerV2) GetListLayouts(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param collection path string true "collection"
-// @Param layout body object_builder_service.LayoutRequest true "LayoutRequest"
-// @Success 200 {object} status_http.Response{data=object_builder_service.LayoutResponse} "Layout data"
+// @Param layout body obs.LayoutRequest true "LayoutRequest"
+// @Success 200 {object} status_http.Response{data=obs.LayoutResponse} "Layout data"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) UpdateLayout(c *gin.Context) {
 
 	var (
-		input object_builder_service.LayoutRequest
-		resp  *object_builder_service.LayoutResponse
+		input obs.LayoutRequest
+		resp  *obs.LayoutResponse
 	)
 
 	err := c.ShouldBindJSON(&input)
@@ -422,7 +422,7 @@ func (h *HandlerV2) DeleteLayout(c *gin.Context) {
 	}
 
 	var (
-		oldLayout = &object_builder_service.LayoutResponse{}
+		oldLayout = &obs.LayoutResponse{}
 		logReq    = &models.CreateVersionHistoryRequest{
 			Services:     services,
 			NodeType:     resource.NodeType,
@@ -458,7 +458,7 @@ func (h *HandlerV2) DeleteLayout(c *gin.Context) {
 	case pb.ResourceType_MONGODB:
 		oldLayout, err = services.GetBuilderServiceByType(nodeType).Layout().GetByID(
 			context.Background(),
-			&object_builder_service.LayoutPrimaryKey{
+			&obs.LayoutPrimaryKey{
 				Id:        c.Param("id"),
 				ProjectId: resourceEnvironmentId,
 			},
@@ -468,7 +468,7 @@ func (h *HandlerV2) DeleteLayout(c *gin.Context) {
 		}
 		resp, err = services.GetBuilderServiceByType(nodeType).Layout().RemoveLayout(
 			context.Background(),
-			&object_builder_service.LayoutPrimaryKey{
+			&obs.LayoutPrimaryKey{
 				Id:        c.Param("id"),
 				ProjectId: resourceEnvironmentId,
 				EnvId:     environmentId.(string),

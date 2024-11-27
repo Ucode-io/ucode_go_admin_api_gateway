@@ -3,7 +3,6 @@ package api
 import (
 	"encoding/json"
 	"errors"
-	"net/http"
 	"strings"
 
 	"ucode/ucode_go_api_gateway/api/docs"
@@ -20,7 +19,7 @@ import (
 )
 
 // SetUpAPI @description This is an api gateway
-// @termsOfService https://udevs.io
+// @termsOfService https://u-code.io/
 func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer opentracing.Tracer) {
 	docs.SwaggerInfo.Title = cfg.ServiceName
 	docs.SwaggerInfo.Version = cfg.Version
@@ -30,7 +29,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	r.Use(ginhttp.Middleware(tracer))
 
 	r.GET("/ping", h.V1.Ping)
-	r.Any("/v2/upload-file/*any", gin.WrapH(http.StripPrefix("/v2/upload-file/", h.V2.MovieUpload())))
 
 	r.Any("/x-api/*any", h.V1.RedirectAuthMiddleware(cfg), proxyMiddleware(r, &h), h.V1.Proxy)
 
@@ -158,13 +156,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1.GET("/event-log", h.V1.GetEventLogs)
 		v1.GET("/event-log/:event_log_id", h.V1.GetEventLogById)
 
-		// custom event
-		v1.POST("/custom-event", h.V1.CreateCustomEvent)
-		v1.GET("/custom-event/:custom_event_id", h.V1.GetCustomEventByID)
-		v1.GET("/custom-event", h.V1.GetAllCustomEvents)
-		v1.PUT("/custom-event", h.V1.UpdateCustomEvent)
-		v1.DELETE("/custom-event/:custom_event_id", h.V1.DeleteCustomEvent)
-
 		// function
 		v1.POST("/function", h.V1.CreateFunction)
 		v1.GET("/function/:function_id", h.V1.GetFunctionByID)
@@ -248,12 +239,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	v2 := r.Group("/v2")
 	v2.Use(h.V1.AuthMiddleware(cfg))
 	{
-		// custom event
-		v2.POST("/custom-event", h.V1.CreateNewCustomEvent)
-		v2.GET("/custom-event/:custom_event_id", h.V1.GetNewCustomEventByID)
-		v2.GET("/custom-event", h.V1.GetAllNewCustomEvents)
-		v2.PUT("/custom-event", h.V1.UpdateNewCustomEvent)
-		v2.DELETE("/custom-event/:custom_event_id", h.V1.DeleteNewCustomEvent)
 
 		v2.GET("/language-json", h.V1.GetLanguageJson)
 
@@ -597,8 +582,6 @@ func customCORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Credentials", "true")
-		// c.Header("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, PATCH, DELETE")
-		// c.Header("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, Origin, Cache-Control, X-Requested-With, Resource-Id, Environment-Id, Platform-Type, X-API-KEY, Project-Id")
 		c.Header("Access-Control-Max-Age", "3600")
 		c.Header("Access-Control-Allow-Methods", "*")
 		c.Header("Access-Control-Allow-Headers", "*")
@@ -614,9 +597,8 @@ func customCORSMiddleware() gin.HandlerFunc {
 
 func proxyMiddleware(r *gin.Engine, h *handlers.Handler) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var (
-			err error
-		)
+		var err error
+
 		c, err = RedirectUrl(c, h)
 		if err == nil {
 			r.HandleContext(c)
@@ -626,7 +608,8 @@ func proxyMiddleware(r *gin.Engine, h *handlers.Handler) gin.HandlerFunc {
 }
 
 func RedirectUrl(c *gin.Context, h *handlers.Handler) (*gin.Context, error) {
-	path := c.Request.URL.Path
+	var path = c.Request.URL.Path
+
 	projectId, ok := c.Get("project_id")
 	if !ok {
 		return c, errors.New("something went wrong")
@@ -638,13 +621,12 @@ func RedirectUrl(c *gin.Context, h *handlers.Handler) (*gin.Context, error) {
 	}
 
 	c.Request.Header.Add("prev_path", path)
-	data := helper.MatchingData{
+	var data = helper.MatchingData{
 		ProjectId: projectId.(string),
 		EnvId:     envId.(string),
 		Path:      path,
 	}
 
-	// companyRedirectGetListTime := time.Now()
 	res, err := h.V1.CompanyRedirectGetList(data, h.GetCompanyService(c))
 	if err != nil {
 		return c, errors.New("cant change")
@@ -673,6 +655,8 @@ func RedirectUrl(c *gin.Context, h *handlers.Handler) (*gin.Context, error) {
 	if err != nil {
 		return c, errors.New("something went wrong")
 	}
+
 	c.Request.Header.Add("auth", string(auth))
+
 	return c, nil
 }

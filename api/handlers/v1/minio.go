@@ -32,9 +32,7 @@ type BucketResponse struct {
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) BucketSize(c *gin.Context) {
-	var (
-		bucket BucketRequest
-	)
+	var bucket BucketRequest
 
 	if err := c.ShouldBind(&bucket); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())

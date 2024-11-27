@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strings"
 	"ucode/ucode_go_api_gateway/api/models"
-	"ucode/ucode_go_api_gateway/genproto/auth_service"
+	auth "ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 
@@ -36,7 +36,7 @@ func (h *HandlerV1) AdminAuthMiddleware() gin.HandlerFunc {
 		} else {
 			var (
 				ok          bool
-				res         = &auth_service.HasAccessSuperAdminRes{}
+				res         = &auth.HasAccessSuperAdminRes{}
 				data        = make(map[string]interface{})
 				bearerToken = c.GetHeader("Authorization")
 				strArr      = strings.Split(bearerToken, " ")
@@ -93,7 +93,7 @@ func (h *HandlerV1) AdminAuthMiddleware() gin.HandlerFunc {
 				appId := c.GetHeader("X-API-KEY")
 				apiKey, err := h.authService.ApiKey().GetEnvID(
 					c.Request.Context(),
-					&auth_service.GetReq{
+					&auth.GetReq{
 						Id: appId,
 					},
 				)
@@ -134,7 +134,7 @@ func (h *HandlerV1) AdminAuthMiddleware() gin.HandlerFunc {
 	}
 }
 
-func (h *HandlerV1) adminHasAccess(c *gin.Context) (*auth_service.HasAccessSuperAdminRes, bool) {
+func (h *HandlerV1) adminHasAccess(c *gin.Context) (*auth.HasAccessSuperAdminRes, bool) {
 	bearerToken := c.GetHeader("Authorization")
 	strArr := strings.Split(bearerToken, " ")
 	if len(strArr) != 2 || strArr[0] != "Bearer" {
@@ -149,7 +149,7 @@ func (h *HandlerV1) adminHasAccess(c *gin.Context) (*auth_service.HasAccessSuper
 	defer conn.Close()
 	resp, err := service.HasAccessSuperAdmin(
 		c.Request.Context(),
-		&auth_service.HasAccessSuperAdminReq{
+		&auth.HasAccessSuperAdminReq{
 			AccessToken: accessToken,
 			Path:        helper.GetURLWithTableSlug(c),
 			Method:      c.Request.Method,
@@ -173,7 +173,7 @@ func (h *HandlerV1) adminHasAccess(c *gin.Context) (*auth_service.HasAccessSuper
 	return resp, true
 }
 
-func (h *HandlerV1) adminAuthInfo(c *gin.Context) (result *auth_service.HasAccessSuperAdminRes, err error) {
+func (h *HandlerV1) adminAuthInfo(c *gin.Context) (result *auth.HasAccessSuperAdminRes, err error) {
 	data, ok := c.Get("Auth_Admin")
 
 	if !ok {
@@ -181,7 +181,7 @@ func (h *HandlerV1) adminAuthInfo(c *gin.Context) (result *auth_service.HasAcces
 		c.Abort()
 		return nil, errors.New("token error: wrong format")
 	}
-	accessResponse, ok := data.(*auth_service.HasAccessSuperAdminRes)
+	accessResponse, ok := data.(*auth.HasAccessSuperAdminRes)
 	if !ok {
 		h.handleResponse(c, status_http.Forbidden, "token error: wrong format")
 		c.Abort()
