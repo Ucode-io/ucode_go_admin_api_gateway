@@ -6,7 +6,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
-	"ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
+	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
@@ -243,7 +243,7 @@ func (h *HandlerV1) GetAllFunctions(c *gin.Context) {
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().Function().GetList(
 			context.Background(),
-			&new_object_builder_service.GetAllFunctionsRequest{
+			&nb.GetAllFunctionsRequest{
 				Search:    c.DefaultQuery("search", ""),
 				Limit:     int32(limit),
 				ProjectId: resource.ResourceEnvironmentId,
@@ -484,7 +484,7 @@ func (h *HandlerV1) InvokeFunction(c *gin.Context) {
 	case pb.ResourceType_POSTGRESQL:
 		newFunction, err := services.GoObjectBuilderService().Function().GetSingle(
 			context.Background(),
-			&new_object_builder_service.FunctionPrimaryKey{
+			&nb.FunctionPrimaryKey{
 				Id:        invokeFunction.FunctionID,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -562,7 +562,7 @@ func (h *HandlerV1) InvokeFunction(c *gin.Context) {
 		case pb.ResourceType_POSTGRESQL:
 			_, err = services.GoObjectBuilderService().CustomEvent().UpdateByFunctionId(
 				context.Background(),
-				&new_object_builder_service.UpdateByFunctionIdRequest{
+				&nb.UpdateByFunctionIdRequest{
 					FunctionId: invokeFunction.FunctionID,
 					ObjectIds:  invokeFunction.ObjectIDs,
 					FieldSlug:  function.Path + "_disable",

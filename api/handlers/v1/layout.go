@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
-	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
+	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -59,7 +59,7 @@ func (h *HandlerV1) GetSingleLayout(c *gin.Context) {
 
 	resp, err := services.GetBuilderServiceByType(nodeType).Layout().GetSingleLayout(
 		context.Background(),
-		&object_builder_service.GetSingleLayoutRequest{
+		&obs.GetSingleLayoutRequest{
 			ProjectId: resourceEnvironment.GetProjectId(),
 			MenuId:    menuId,
 			TableId:   tableId,
@@ -85,7 +85,7 @@ func (h *HandlerV1) GetSingleLayout(c *gin.Context) {
 // @Param table-id query string false "table-id"
 // @Param table-slug query string false "table-slug"
 // @Param language_setting query string false "language_setting"
-// @Success 200 {object} status_http.Response{data=object_builder_service.GetListLayoutResponse} "TableBody"
+// @Success 200 {object} status_http.Response{data=obs.GetListLayoutResponse} "TableBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetListLayouts(c *gin.Context) {
@@ -167,7 +167,7 @@ func (h *HandlerV1) GetListLayouts(c *gin.Context) {
 
 	resp, err := services.GetBuilderServiceByType(nodeType).Layout().GetAll(
 		context.Background(),
-		&object_builder_service.GetListLayoutRequest{
+		&obs.GetListLayoutRequest{
 			TableSlug:       tableSlug,
 			TableId:         tableId,
 			ProjectId:       resourceEnvironmentId,
@@ -193,13 +193,13 @@ func (h *HandlerV1) GetListLayouts(c *gin.Context) {
 // @Tags Layout
 // @Accept json
 // @Produce json
-// @Param table body object_builder_service.UpdateLayoutRequest true "UpdateLayoutRequest"
+// @Param table body obs.UpdateLayoutRequest true "UpdateLayoutRequest"
 // @Success 200 {object} status_http.Response{data=string} "Layout data"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) UpdateLayout(c *gin.Context) {
 
-	var input object_builder_service.LayoutRequest
+	var input obs.LayoutRequest
 
 	err := c.ShouldBindJSON(&input)
 	if err != nil {

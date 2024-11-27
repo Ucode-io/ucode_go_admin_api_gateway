@@ -4,7 +4,7 @@ import (
 	"errors"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
-	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
+	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
@@ -19,12 +19,12 @@ import (
 // @Tags ExportToJSON
 // @Accept json
 // @Produce json
-// @Param export_to_json body object_builder_service.ExportToJSONRequest true "ExportToJSONRequestBody"
-// @Success 201 {object} status_http.Response{data=object_builder_service.ExportToJSONReponse} "Link"
+// @Param export_to_json body obs.ExportToJSONRequest true "ExportToJSONRequestBody"
+// @Success 201 {object} status_http.Response{data=obs.ExportToJSONReponse} "Link"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) ExportToJSON(c *gin.Context) {
-	var body object_builder_service.ExportToJSONRequest
+	var body obs.ExportToJSONRequest
 
 	err := c.ShouldBindJSON(&body)
 	if err != nil {
@@ -88,12 +88,12 @@ func (h *HandlerV1) ExportToJSON(c *gin.Context) {
 // @Tags ExportToJSON
 // @Accept json
 // @Produce json
-// @Param export_to_json body object_builder_service.ImportFromJSONRequest true "ImportFromJSONRequestBody"
+// @Param export_to_json body obs.ImportFromJSONRequest true "ImportFromJSONRequestBody"
 // @Success 201 {object} status_http.Response{data=string} "Response"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) ImportFromJSON(c *gin.Context) {
-	var body object_builder_service.ImportFromJSONRequest
+	var body obs.ImportFromJSONRequest
 
 	err := c.ShouldBindJSON(&body)
 	if err != nil {

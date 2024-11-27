@@ -6,7 +6,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
-	"ucode/ucode_go_api_gateway/genproto/company_service"
+	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -22,7 +22,7 @@ import (
 // @Accept json
 // @Produce json
 // @Param Company body models.CompanyCreateRequest true "CompanyCreateRequest"
-// @Success 201 {object} status_http.Response{data=company_service.Company} "Company data"
+// @Success 201 {object} status_http.Response{data=pb.Company} "Company data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) CreateCompany(c *gin.Context) {
@@ -34,7 +34,7 @@ func (h *HandlerV1) CreateCompany(c *gin.Context) {
 		return
 	}
 	authInfo, _ := h.GetAuthInfo(c)
-	companyPKey, err := h.companyServices.Company().Create(context.Background(), &company_service.CreateCompanyRequest{
+	companyPKey, err := h.companyServices.Company().Create(context.Background(), &pb.CreateCompanyRequest{
 		Title:       company.Name,
 		Logo:        "",
 		Description: "",
@@ -45,7 +45,7 @@ func (h *HandlerV1) CreateCompany(c *gin.Context) {
 		return
 	}
 
-	project, err := h.companyServices.Project().Create(context.Background(), &company_service.CreateProjectRequest{
+	project, err := h.companyServices.Project().Create(context.Background(), &pb.CreateProjectRequest{
 		CompanyId:    companyPKey.GetId(),
 		K8SNamespace: "cp-region-type-id",
 		Title:        company.Name,
@@ -57,7 +57,7 @@ func (h *HandlerV1) CreateCompany(c *gin.Context) {
 
 	_, err = h.companyServices.Environment().Create(
 		context.Background(),
-		&company_service.CreateEnvironmentRequest{
+		&pb.CreateEnvironmentRequest{
 			ProjectId:    project.GetProjectId(),
 			Name:         "Production",
 			DisplayColor: "#00FF00",
@@ -80,7 +80,7 @@ func (h *HandlerV1) CreateCompany(c *gin.Context) {
 		return
 	}
 
-	h.handleResponse(c, status_http.Created, &company_service.Company{
+	h.handleResponse(c, status_http.Created, &pb.Company{
 		Id:      companyPKey.GetId(),
 		Name:    company.Name,
 		OwnerId: authInfo.GetUserId(),
@@ -97,14 +97,14 @@ func (h *HandlerV1) CreateCompany(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param company_id path string true "company_id"
-// @Success 200 {object} status_http.Response{data=company_service.GetCompanyByIdResponse} "Company data"
+// @Success 200 {object} status_http.Response{data=pb.GetCompanyByIdResponse} "Company data"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetCompanyByID(c *gin.Context) {
 	companyId := c.Param("company_id")
 	resp, err := h.companyServices.Company().GetById(
 		context.Background(),
-		&company_service.GetCompanyByIdRequest{
+		&pb.GetCompanyByIdRequest{
 			Id: companyId,
 		},
 	)
@@ -126,8 +126,8 @@ func (h *HandlerV1) GetCompanyByID(c *gin.Context) {
 // @Tags Company
 // @Accept json
 // @Produce json
-// @Param filters query company_service.GetProjectListRequest true "filters"
-// @Success 200 {object} status_http.Response{data=company_service.GetComanyListResponse} "Company data"
+// @Param filters query pb.GetProjectListRequest true "filters"
+// @Success 200 {object} status_http.Response{data=pb.GetComanyListResponse} "Company data"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetCompanyList(c *gin.Context) {
@@ -140,12 +140,12 @@ func (h *HandlerV1) GetCompanyList(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	companies := make([]*company_service.Company, 0, len(userProjects.GetCompanies()))
+	companies := make([]*pb.Company, 0, len(userProjects.GetCompanies()))
 	for _, company := range userProjects.GetCompanies() {
 
 		companyFromService, err := h.companyServices.Company().GetById(
 			context.Background(),
-			&company_service.GetCompanyByIdRequest{
+			&pb.GetCompanyByIdRequest{
 				Id: company.GetId(),
 			},
 		)
@@ -155,7 +155,7 @@ func (h *HandlerV1) GetCompanyList(c *gin.Context) {
 		}
 		companies = append(companies, companyFromService.Company)
 	}
-	resp := &company_service.GetComanyListResponse{
+	resp := &pb.GetComanyListResponse{
 		Count:     int32(len(companies)),
 		Companies: companies,
 	}
@@ -172,8 +172,8 @@ func (h *HandlerV1) GetCompanyList(c *gin.Context) {
 // @Tags Company
 // WithProjects@Accept json
 // @Produce json
-// @Param filters query company_service.GetListWithProjectsRequest true "filters"
-// @Success 200 {object} status_http.Response{data=company_service.GetListWithProjectsResponse} "Company datWithProjectsa"
+// @Param filters query pb.GetListWithProjectsRequest true "filters"
+// @Success 200 {object} status_http.Response{data=pb.GetListWithProjectsResponse} "Company datWithProjectsa"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetCompanyListWithProjects(c *gin.Context) {
@@ -192,7 +192,7 @@ func (h *HandlerV1) GetCompanyListWithProjects(c *gin.Context) {
 
 	resp, err := h.companyServices.Company().GetListWithProjects(
 		context.Background(),
-		&company_service.GetListWithProjectsRequest{
+		&pb.GetListWithProjectsRequest{
 			Limit:    int32(limit),
 			Offset:   int32(offset),
 			Search:   c.DefaultQuery("search", ""),
@@ -219,7 +219,7 @@ func (h *HandlerV1) GetCompanyListWithProjects(c *gin.Context) {
 // @Produce json
 // @Param company_id path string true "company_id"
 // @Param Company body models.CompanyCreateRequest  true "CompanyCreateRequest"
-// @Success 200 {object} status_http.Response{data=company_service.Company} "Company data"
+// @Success 200 {object} status_http.Response{data=pb.Company} "Company data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) UpdateCompany(c *gin.Context) {
@@ -253,7 +253,7 @@ func (h *HandlerV1) UpdateCompany(c *gin.Context) {
 
 	resp, err := h.companyServices.Company().Update(
 		context.Background(),
-		&company_service.Company{
+		&pb.Company{
 			Id:          companyId,
 			Name:        company.Name,
 			Logo:        company.Logo,
@@ -296,7 +296,7 @@ func (h *HandlerV1) DeleteCompany(c *gin.Context) {
 
 	resp, err := h.companyServices.Company().Delete(
 		context.Background(),
-		&company_service.DeleteCompanyRequest{
+		&pb.DeleteCompanyRequest{
 			Id: companyId,
 		},
 	)
@@ -318,12 +318,12 @@ func (h *HandlerV1) DeleteCompany(c *gin.Context) {
 // @Tags Company Project
 // @Accept json
 // @Produce json
-// @Param Project body company_service.CreateProjectRequest true "CompanyProjectCreateRequest"
+// @Param Project body pb.CreateProjectRequest true "CompanyProjectCreateRequest"
 // @Success 201 {object} status_http.Response{data=models.CompanyProjectCreateResponse} "Project data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) CreateCompanyProject(c *gin.Context) {
-	var project company_service.CreateProjectRequest
+	var project pb.CreateProjectRequest
 
 	err := c.ShouldBindJSON(&project)
 	if err != nil {
@@ -333,7 +333,7 @@ func (h *HandlerV1) CreateCompanyProject(c *gin.Context) {
 
 	resp, err := h.companyServices.Project().Create(
 		context.Background(),
-		&company_service.CreateProjectRequest{
+		&pb.CreateProjectRequest{
 			Title:        project.Title,
 			K8SNamespace: project.K8SNamespace,
 			CompanyId:    project.CompanyId,
@@ -366,7 +366,7 @@ func (h *HandlerV1) CreateCompanyProject(c *gin.Context) {
 
 	_, err = h.companyServices.Environment().Create(
 		c.Request.Context(),
-		&company_service.CreateEnvironmentRequest{
+		&pb.CreateEnvironmentRequest{
 			ProjectId:    resp.ProjectId,
 			Name:         "Production",
 			DisplayColor: "#00FF00",

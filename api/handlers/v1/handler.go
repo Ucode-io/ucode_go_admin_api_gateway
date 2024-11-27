@@ -10,9 +10,9 @@ import (
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
-	"ucode/ucode_go_api_gateway/genproto/auth_service"
+	auth "ucode/ucode_go_api_gateway/genproto/auth_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
-	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
+	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/caching"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
@@ -124,7 +124,7 @@ func (h *HandlerV1) versionHistory(req *models.CreateVersionHistoryRequest) erro
 	if util.IsValidUUID(req.UserInfo) {
 		info, err := h.authService.User().GetUserByID(
 			context.Background(),
-			&auth_service.UserPrimaryKey{
+			&auth.UserPrimaryKey{
 				Id: req.UserInfo,
 			},
 		)
@@ -139,7 +139,7 @@ func (h *HandlerV1) versionHistory(req *models.CreateVersionHistoryRequest) erro
 
 	_, err := req.Services.GetBuilderServiceByType(req.NodeType).VersionHistory().Create(
 		context.Background(),
-		&object_builder_service.CreateVersionHistoryRequest{
+		&obs.CreateVersionHistoryRequest{
 			Id:                uuid.NewString(),
 			ProjectId:         req.ProjectId,
 			ActionSource:      req.ActionSource,
@@ -196,7 +196,7 @@ func (h *HandlerV1) versionHistoryGo(c *gin.Context, req *models.CreateVersionHi
 	if util.IsValidUUID(req.UserInfo) {
 		info, err := h.authService.User().GetUserByID(
 			context.Background(),
-			&auth_service.UserPrimaryKey{
+			&auth.UserPrimaryKey{
 				Id: req.UserInfo,
 			},
 		)

@@ -11,7 +11,7 @@ import (
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
-	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
+	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
 	"ucode/ucode_go_api_gateway/services"
@@ -135,7 +135,7 @@ func (h *HandlerV2) versionHistory(req *models.CreateVersionHistoryRequest) erro
 
 	_, err := req.Services.GetBuilderServiceByType(req.NodeType).VersionHistory().Create(
 		context.Background(),
-		&object_builder_service.CreateVersionHistoryRequest{
+		&obs.CreateVersionHistoryRequest{
 			Id:                uuid.NewString(),
 			ProjectId:         req.ProjectId,
 			ActionSource:      req.ActionSource,

@@ -9,7 +9,6 @@ import (
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	fc "ucode/ucode_go_api_gateway/genproto/new_function_service"
 
-	// "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/code_server"
 	"ucode/ucode_go_api_gateway/pkg/gitlab"

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"strings"
 	"ucode/ucode_go_api_gateway/api/status_http"
-	"ucode/ucode_go_api_gateway/genproto/auth_service"
+	auth "ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 
@@ -13,9 +13,11 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (h *HandlerV1) hasAccess(c *gin.Context) (*auth_service.V2HasAccessUserRes, bool) {
-	bearerToken := c.GetHeader("Authorization")
-	strArr := strings.Split(bearerToken, " ")
+func (h *HandlerV1) hasAccess(c *gin.Context) (*auth.V2HasAccessUserRes, bool) {
+	var (
+		bearerToken = c.GetHeader("Authorization")
+		strArr      = strings.Split(bearerToken, " ")
+	)
 
 	if len(strArr) != 2 || strArr[0] != "Bearer" {
 		h.log.Error("---ERR->HasAccess->Unexpected token format")
@@ -30,8 +32,7 @@ func (h *HandlerV1) hasAccess(c *gin.Context) (*auth_service.V2HasAccessUserRes,
 	}
 	defer conn.Close()
 	resp, err := service.V2HasAccessUser(
-		c.Request.Context(),
-		&auth_service.V2HasAccessUserReq{
+		c.Request.Context(), &auth.V2HasAccessUserReq{
 			AccessToken:   accessToken,
 			Path:          helper.GetURLWithTableSlug(c),
 			Method:        c.Request.Method,
@@ -66,7 +67,7 @@ func (h *HandlerV1) hasAccess(c *gin.Context) (*auth_service.V2HasAccessUserRes,
 	return resp, true
 }
 
-func (h *HandlerV1) GetAuthInfo(c *gin.Context) (result *auth_service.V2HasAccessUserRes, err error) {
+func (h *HandlerV1) GetAuthInfo(c *gin.Context) (result *auth.V2HasAccessUserRes, err error) {
 	data, ok := c.Get("Auth")
 	if !ok {
 		h.handleResponse(c, status_http.Forbidden, "token error: wrong format")
@@ -74,7 +75,7 @@ func (h *HandlerV1) GetAuthInfo(c *gin.Context) (result *auth_service.V2HasAcces
 		return nil, errors.New("token error: wrong format")
 	}
 
-	accessResponse, ok := data.(*auth_service.V2HasAccessUserRes)
+	accessResponse, ok := data.(*auth.V2HasAccessUserRes)
 	if !ok {
 		h.handleResponse(c, status_http.Forbidden, "token error: wrong format")
 		c.Abort()
@@ -84,7 +85,7 @@ func (h *HandlerV1) GetAuthInfo(c *gin.Context) (result *auth_service.V2HasAcces
 	return accessResponse, nil
 }
 
-func (h *HandlerV1) GetAuthAdminInfo(c *gin.Context) (result *auth_service.HasAccessSuperAdminRes, err error) {
+func (h *HandlerV1) GetAuthAdminInfo(c *gin.Context) (result *auth.HasAccessSuperAdminRes, err error) {
 	data, ok := c.Get("Auth_Admin")
 	if !ok {
 		h.handleResponse(c, status_http.Forbidden, "token error: wrong format")
@@ -92,7 +93,7 @@ func (h *HandlerV1) GetAuthAdminInfo(c *gin.Context) (result *auth_service.HasAc
 		return nil, errors.New("token error: wrong format")
 	}
 
-	accessResponse, ok := data.(*auth_service.HasAccessSuperAdminRes)
+	accessResponse, ok := data.(*auth.HasAccessSuperAdminRes)
 	if !ok {
 		h.handleResponse(c, status_http.Forbidden, "token error: wrong format")
 		c.Abort()
