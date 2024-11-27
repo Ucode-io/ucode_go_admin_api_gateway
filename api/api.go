@@ -34,10 +34,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 	r.Any("/x-api/*any", h.V1.RedirectAuthMiddleware(cfg), proxyMiddleware(r, &h), h.V1.Proxy)
 
-	r.POST("/send-code", h.V1.SendCode)
-	r.POST("/test-for-time-limit", h.V1.TestForTimeLimit)
-	r.POST("/verify/:sms_id/:otp", h.V1.Verify)
-	r.POST("/register-otp/:table_slug", h.V1.RegisterOtp)
 	r.GET("/v1/login-microfront", h.V1.GetLoginMicroFrontBySubdomain)
 
 	r.GET("/menu/wiki_folder", h.V1.GetWikiFolder)
@@ -282,7 +278,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	v1Admin := r.Group("/v1")
 	v1Admin.Use(h.V1.AdminAuthMiddleware())
 	{
-
 		// login microfront
 		v1Admin.POST("/login-microfront", h.V1.BindLoginMicroFrontToProject)
 		v1Admin.PUT("/login-microfront", h.V1.UpdateLoginMicroFrontProject)
@@ -293,14 +288,17 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1Admin.GET("/company", h.V1.GetCompanyList)
 		v1Admin.PUT("company/:company_id", h.V1.UpdateCompany)
 		v1Admin.DELETE("/company/:company_id", h.V1.DeleteCompany)
+
 		// project service
 		v1Admin.POST("/company-project", h.V1.CreateCompanyProject)
 		v1Admin.GET("/company-project", h.V1.GetCompanyProjectList)
 		v1Admin.GET("/company-project/:project_id", h.V1.GetCompanyProjectById)
 		v1Admin.PUT("/company-project/:project_id", h.V1.UpdateCompanyProject)
 		v1Admin.DELETE("/company-project/:project_id", h.V1.DeleteCompanyProject)
+
 		// project settings
 		v1Admin.GET("/project/setting", h.V1.GetAllSettings)
+
 		// project resource
 		v1Admin.POST("/company/project/resource", h.V1.AddProjectResource)
 		v1Admin.POST("/company/project/create-resource", h.V1.CreateProjectResource)
@@ -341,11 +339,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1Admin.PUT("/function-folder", h.V1.UpdateFunctionFolder)
 		v1Admin.DELETE("/function-folder/:function_folder_id", h.V1.DeleteFunctionFolder)
 
-		v1Admin.GET("/table-history/list/:table_id", h.V1.GetListTableHistory)
-		v1Admin.GET("/table-history/:id", h.V1.GetTableHistoryById)
-		v1Admin.PUT("/table-history/revert", h.V1.RevertTableHistory)
-		v1Admin.PUT("/table-history", h.V1.InsetrVersionsIdsToTableHistory)
-
 		v1Admin.POST("/redirect-url", h.V1.CreateRedirectUrl)
 		v1Admin.PUT("/redirect-url", h.V1.UpdateRedirectUrl)
 		v1Admin.GET("/redirect-url", h.V1.GetListRedirectUrl)
@@ -377,13 +370,14 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v2Admin.DELETE("/function/:function_id", h.V1.DeleteNewFunction)
 
 		// project resource /rest
-		v2Admin.POST("/company/project/resource", h.V1.AddResourceToProject)
-		v2Admin.PUT("/company/project/resource", h.V1.UpdateProjectResource)
-		v2Admin.GET("/company/project/resource", h.V1.GetListProjectResourceList)
-		v2Admin.GET("/company/project/resource/:id", h.V1.GetSingleProjectResource)
-		v2Admin.DELETE("/company/project/resource/:id", h.V1.DeleteProjectResource)
-
-		v2Admin.POST("/copy-project", h.V1.CopyProjectTemplate)
+		projectResource := v2Admin.Group("/company/project/resource")
+		{
+			projectResource.POST("", h.V1.AddResourceToProject)
+			projectResource.PUT("", h.V1.UpdateProjectResource)
+			projectResource.GET("", h.V1.GetListProjectResourceList)
+			projectResource.GET("/:id", h.V1.GetSingleProjectResource)
+			projectResource.DELETE("/:id", h.V1.DeleteProjectResource)
+		}
 
 		functions := v2Admin.Group("functions")
 		{
@@ -410,7 +404,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	v2Version.Use(h.V2.AuthMiddleware())
 	{
 		v2Version.POST("/csv/:table_slug/download", h.V2.GetListInCSV)
-
 		v2Version.POST("/send-to-gpt", h.V2.SendToGpt)
 
 		// collections group
