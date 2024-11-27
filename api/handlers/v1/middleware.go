@@ -53,11 +53,6 @@ func (h *HandlerV1) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 			return
 		}
 
-		if c.Request.URL.Path == "/v1/wayll-payment" {
-			strArr = []string{"API-KEY"}
-			app_id = "P-Co74TLgSaTKNXzWrjtbUIzemZBKC9yhu"
-		}
-
 		switch strArr[0] {
 		case "Bearer":
 			res, ok = h.hasAccess(c)
