@@ -406,18 +406,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v2Admin.GET("/docx-template/fields/list", h.V2.GetAllFieldsDocxTemplate)
 	}
 
-	// v3 for ucode version 2
-	v3 := r.Group("/v3")
-	v3.Use(h.V1.AdminAuthMiddleware())
-	{
-		// web pages
-		v3.POST("/web_pages", h.V1.CreateWebPage)
-		v3.GET("/web_pages/:guid", h.V1.GetWebPagesById)
-		v3.GET("/web_pages", h.V1.GetWebPagesList)
-		v3.PUT("/web_pages/:guid", h.V1.UpdateWebPage)
-		v3.DELETE("/web_pages/:guid", h.V1.DeleteWebPage)
-	}
-
 	v2Version := r.Group("/v2")
 	v2Version.Use(h.V2.AuthMiddleware())
 	{
