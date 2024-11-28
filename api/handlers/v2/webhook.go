@@ -25,7 +25,37 @@ import (
 	"github.com/spf13/cast"
 )
 
-func (h *HandlerV2) GitHubGetRepos(c *gin.Context) {
+func (h *HandlerV2) GithubGetBranches(c *gin.Context) {
+	var (
+		username = c.Query("username")
+		repoName = c.Query("repo")
+		token    = c.Query("token")
+
+		url      = fmt.Sprintf("https://api.github.com/repos/%s/%s/branches", username, repoName)
+		response models.GithubBranch
+	)
+
+	result, err := gitlab.MakeRequestV1("GET", url, token, map[string]interface{}{})
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err.Error())
+		return
+	}
+
+	resultByte, err := json.Marshal(result)
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err.Error())
+		return
+	}
+
+	if err := json.Unmarshal(resultByte, &response); err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.OK, response)
+}
+
+func (h *HandlerV2) GithubGetRepos(c *gin.Context) {
 	var (
 		username = c.Query("username")
 		token    = c.Query("token")
@@ -55,7 +85,7 @@ func (h *HandlerV2) GitHubGetRepos(c *gin.Context) {
 
 func (h *HandlerV2) GithubGetUser(c *gin.Context) {
 	var (
-		token      = c.Query("token")
+		token      = c.Query("")
 		getUserUrl = "https://api.github.com/user"
 		response   models.GithubUser
 	)
@@ -63,6 +93,11 @@ func (h *HandlerV2) GithubGetUser(c *gin.Context) {
 	result, err := gitlab.MakeRequest("GET", getUserUrl, token, map[string]interface{}{})
 	if err != nil {
 		h.handleResponse(c, status_http.InternalServerError, err.Error())
+		return
+	}
+
+	if cast.ToInt(result["status"]) == 401 {
+		h.handleResponse(c, status_http.BadRequest, "can not find username token wrong format")
 		return
 	}
 

@@ -66,3 +66,9 @@ type GithubRepo []struct {
 	FullName string `json:"full_name"`
 	Private  bool   `json:"private"`
 }
+
+type GithubBranch []struct {
+	Name          string `json:"name"`
+	Protected     bool   `json:"protected"`
+	ProtectionURL string `json:"protection_url"`
+}
