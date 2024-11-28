@@ -178,8 +178,9 @@ func MakeRequest(method, url, token string, payload map[string]interface{}) (map
 	return result, nil
 }
 
-func MakeRequestV1(method, url, token string, payload map[string]interface{}) ([]map[string]interface{}, error) {
-	reqBody := new(bytes.Buffer)
+func MakeRequestV1(method, url, token string, payload map[string]interface{}) ([]byte, error) {
+	var reqBody = new(bytes.Buffer)
+
 	if payload != nil {
 		json.NewEncoder(reqBody).Encode(payload)
 	}
@@ -206,11 +207,5 @@ func MakeRequestV1(method, url, token string, payload map[string]interface{}) ([
 		return nil, err
 	}
 
-	var result []map[string]interface{}
-	err = json.Unmarshal(respBody, &result)
-	if err != nil {
-		return nil, err
-	}
-
-	return result, nil
+	return respBody, nil
 }

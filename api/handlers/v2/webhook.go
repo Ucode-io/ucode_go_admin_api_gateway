@@ -35,13 +35,7 @@ func (h *HandlerV2) GithubGetBranches(c *gin.Context) {
 		response models.GithubBranch
 	)
 
-	result, err := gitlab.MakeRequestV1("GET", url, token, map[string]interface{}{})
-	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err.Error())
-		return
-	}
-
-	resultByte, err := json.Marshal(result)
+	resultByte, err := gitlab.MakeRequestV1("GET", url, token, map[string]interface{}{})
 	if err != nil {
 		h.handleResponse(c, status_http.InternalServerError, err.Error())
 		return
@@ -63,13 +57,7 @@ func (h *HandlerV2) GithubGetRepos(c *gin.Context) {
 		response = models.GithubRepo{}
 	)
 
-	result, err := gitlab.MakeRequestV1("GET", url, token, map[string]any{})
-	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err.Error())
-		return
-	}
-
-	resultByte, err := json.Marshal(result)
+	resultByte, err := gitlab.MakeRequestV1("GET", url, token, map[string]any{})
 	if err != nil {
 		h.handleResponse(c, status_http.InternalServerError, err.Error())
 		return
@@ -90,18 +78,7 @@ func (h *HandlerV2) GithubGetUser(c *gin.Context) {
 		response   models.GithubUser
 	)
 
-	result, err := gitlab.MakeRequest("GET", getUserUrl, token, map[string]interface{}{})
-	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err.Error())
-		return
-	}
-
-	if cast.ToInt(result["status"]) == 401 {
-		h.handleResponse(c, status_http.BadRequest, "can not find username token wrong format")
-		return
-	}
-
-	resultByte, err := json.Marshal(result)
+	resultByte, err := gitlab.MakeRequestV1("GET", getUserUrl, token, map[string]interface{}{})
 	if err != nil {
 		h.handleResponse(c, status_http.InternalServerError, err.Error())
 		return
@@ -109,6 +86,11 @@ func (h *HandlerV2) GithubGetUser(c *gin.Context) {
 
 	if err := json.Unmarshal(resultByte, &response); err != nil {
 		h.handleResponse(c, status_http.InternalServerError, err.Error())
+		return
+	}
+
+	if response.Status == "401" {
+		h.handleResponse(c, status_http.BadRequest, "can not find username wrong token format")
 		return
 	}
 

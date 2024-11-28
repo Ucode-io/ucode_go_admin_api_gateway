@@ -31,6 +31,7 @@ type Job struct {
 }
 
 type GithubUser struct {
+	Status            string      `json:"status"`
 	Login             string      `json:"login"`
 	ID                int         `json:"id"`
 	NodeID            string      `json:"node_id"`

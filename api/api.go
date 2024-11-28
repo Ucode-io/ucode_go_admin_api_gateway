@@ -558,7 +558,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		github.GET("/repos", h.V2.GithubGetRepos)
 		github.GET("/branches", h.V2.GithubGetBranches)
 	}
-	//
+
 	r.Any("/api/*any", h.V1.AuthMiddleware(cfg), proxyMiddleware(r, &h), h.V1.Proxy)
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
