@@ -63,7 +63,7 @@ func (h *HandlerV2) GithubGetRepos(c *gin.Context) {
 		response = models.GithubRepo{}
 	)
 
-	result, err := gitlab.MakeRequest("GET", url, token, map[string]any{})
+	result, err := gitlab.MakeRequestV1("GET", url, token, map[string]any{})
 	if err != nil {
 		h.handleResponse(c, status_http.InternalServerError, err.Error())
 		return
