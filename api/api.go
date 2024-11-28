@@ -551,7 +551,12 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		}
 	}
 
-	r.GET("/v2/github/login", h.V2.GithubLogin)
+	github := r.Group("/github")
+	{
+		github.GET("/login", h.V2.GithubLogin)
+		github.GET("/user", h.V2.GithubGetUser)
+		github.GET("/repo", h.V2.GitHubGetRepos)
+	}
 
 	r.Any("/api/*any", h.V1.AuthMiddleware(cfg), proxyMiddleware(r, &h), h.V1.Proxy)
 

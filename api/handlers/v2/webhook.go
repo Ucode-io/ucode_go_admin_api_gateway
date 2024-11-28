@@ -25,6 +25,61 @@ import (
 	"github.com/spf13/cast"
 )
 
+func (h *HandlerV2) GitHubGetRepos(c *gin.Context) {
+	var (
+		username = c.Query("username")
+		token    = c.Query("token")
+		url      = fmt.Sprintf("https://api.github.com/users/%s/repos", username)
+		response = models.GithubRepo{}
+	)
+
+	result, err := gitlab.MakeRequest("GET", url, token, map[string]any{})
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err.Error())
+		return
+	}
+
+	resultByte, err := json.Marshal(result)
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err.Error())
+		return
+	}
+
+	if err := json.Unmarshal(resultByte, &response); err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.OK, response)
+}
+
+func (h *HandlerV2) GithubGetUser(c *gin.Context) {
+	var (
+		token      = c.Query("token")
+		getUserUrl = "https://api.github.com/user"
+		response   models.GithubUser
+	)
+
+	result, err := gitlab.MakeRequest("GET", getUserUrl, token, map[string]interface{}{})
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err.Error())
+		return
+	}
+
+	resultByte, err := json.Marshal(result)
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err.Error())
+		return
+	}
+
+	if err := json.Unmarshal(resultByte, &response); err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.OK, response)
+}
+
 func (h *HandlerV2) GithubLogin(c *gin.Context) {
 	var (
 		code                  = c.Query("code")
