@@ -85,7 +85,7 @@ func (h *HandlerV2) GithubGetRepos(c *gin.Context) {
 
 func (h *HandlerV2) GithubGetUser(c *gin.Context) {
 	var (
-		token      = c.Query("")
+		token      = c.Query("token")
 		getUserUrl = "https://api.github.com/user"
 		response   models.GithubUser
 	)
