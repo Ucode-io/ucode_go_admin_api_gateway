@@ -26,7 +26,6 @@ import (
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) AddResourceToProject(c *gin.Context) {
-
 	var (
 		request = &pb.AddResourceToProjectRequest{}
 		resp    = &pb.ProjectResource{}
@@ -228,8 +227,7 @@ func (h *HandlerV1) UpdateProjectResource(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetListProjectResourceList(c *gin.Context) {
-
-	request := &pb.GetProjectResourceListRequest{}
+	var request = &pb.GetProjectResourceListRequest{}
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -251,24 +249,8 @@ func (h *HandlerV1) GetListProjectResourceList(c *gin.Context) {
 		request.Type = pb.ResourceType(pb.ResourceType_value[c.DefaultQuery("type", "")])
 	}
 
-	if c.Query("type") == "GITHUB" {
-		resp, err := h.companyServices.IntegrationResource().GetIntegrationResourceList(
-			context.Background(),
-			&pb.GetListIntegrationResourceRequest{
-				ProjectId:     projectId.(string),
-				EnvironmentId: environmentId.(string),
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-		h.handleResponse(c, status_http.OK, resp)
-		return
-	}
-
 	resp, err := h.companyServices.Resource().GetProjectResourceList(
-		context.Background(),
+		c.Request.Context(),
 		request,
 	)
 
