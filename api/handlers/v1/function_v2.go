@@ -121,14 +121,7 @@ func (h *HandlerV1) CreateNewFunction(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
-	// var sshURL = resp.Message["ssh_url_to_repo"].(string)
-	// err = gitlab.CloneForkToPath(sshURL, h.baseConf)
 	uuid, _ := uuid.NewRandom()
-	// password, err := code_server.CreateCodeServer(projectName+"-"+function.Path, h.baseConf, uuid.String())
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.InvalidArgument, err.Error())
-	// 	return
-	// }
 	var url = "https://" + uuid.String() + ".u-code.io"
 
 	var (

@@ -1,7 +1,7 @@
 package models
 
 type CreateWebhook struct {
-	Username      string `json:"username" binding:"required"`
+	Username      string `json:"username"`
 	RepoName      string `json:"repo_name" binding:"required"`
 	Branch        string `json:"branch"`
 	FrameworkType string `json:"framework_type"`

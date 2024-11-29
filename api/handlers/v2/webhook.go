@@ -18,6 +18,8 @@ import (
 	fn "ucode/ucode_go_api_gateway/genproto/new_function_service"
 	"ucode/ucode_go_api_gateway/pkg/github"
 	"ucode/ucode_go_api_gateway/pkg/gitlab"
+	"ucode/ucode_go_api_gateway/pkg/logger"
+	"ucode/ucode_go_api_gateway/pkg/util"
 	"ucode/ucode_go_api_gateway/services"
 
 	"github.com/gin-gonic/gin"
@@ -124,15 +126,37 @@ func (h *HandlerV2) GithubLogin(c *gin.Context) {
 }
 
 func (h *HandlerV2) CreateWebhook(c *gin.Context) {
-	var (
-		createWebhookRequest models.CreateWebhook
-	)
+	var createWebhookRequest models.CreateWebhook
 
-	err := c.ShouldBindJSON(&createWebhookRequest)
-	if err != nil {
+	if err := c.ShouldBindJSON(&createWebhookRequest); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
+		return
+	}
+
+	githubResource, err := h.companyServices.Resource().GetSingleProjectResouece(c.Request.Context(), &pb.PrimaryKeyProjectResource{
+		Id:            createWebhookRequest.Resource,
+		EnvironmentId: environmentId.(string),
+		ProjectId:     projectId.(string),
+	})
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	createWebhookRequest.Username = githubResource.GetSettings().Github.Username
+	createWebhookRequest.GithubToken = githubResource.GetSettings().Github.Token
 
 	if createWebhookRequest.RepoName == "" || createWebhookRequest.Username == "" {
 		h.handleResponse(c, status_http.BadRequest, "Username or RepoName is empty")
@@ -149,6 +173,7 @@ func (h *HandlerV2) CreateWebhook(c *gin.Context) {
 		h.handleResponse(c, status_http.InternalServerError, err.Error())
 		return
 	}
+
 	if exists {
 		h.handleResponse(c, status_http.OK, nil)
 		return
@@ -189,6 +214,8 @@ func (h *HandlerV2) HandleWebhook(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, "Failed to unmarshal JSON inside handle webhook")
 		return
 	}
+
+	h.log.Info("From Webhook", logger.Any("data", payload))
 
 	if !(verifySignature(c.GetHeader("X-Hub-Signature"), body, []byte(h.baseConf.WebhookSecret))) {
 		h.handleResponse(c, status_http.BadRequest, "Failed to verify signature")

@@ -33,6 +33,8 @@ func ListWebhooks(cfg ListWebhookRequest) (bool, error) {
 		return false, err
 	}
 
+	fmt.Println(string(body))
+
 	var webhooks []interface{}
 	if err := json.Unmarshal(body, &webhooks); err != nil {
 		return false, err
@@ -63,14 +65,10 @@ func CreateWebhook(cfg CreateWebhookRequest) error {
 		Active: true,
 		Events: []string{"push"},
 		Config: Config{
-			URL:           fmt.Sprintf("%v/webhook/handle", cfg.ProjectUrl),
-			ContentType:   "json",
-			Secret:        cfg.WebhookSecret,
-			FrameworkType: cfg.FrameworkType,
-			Branch:        cfg.Branch,
-			FunctionType:  cfg.FunctionType,
-			Resource:      cfg.Resource,
-			Name:          cfg.Name,
+			URL:         fmt.Sprintf("%v/webhook/handle", cfg.ProjectUrl),
+			ContentType: "json",
+			Secret:      cfg.WebhookSecret,
+			Name:        cfg.Name,
 		},
 	}
 
