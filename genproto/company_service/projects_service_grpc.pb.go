@@ -38,6 +38,8 @@ type ProjectServiceClient interface {
 	UpdateProjectConfig(ctx context.Context, in *ProjectConfig, opts ...grpc.CallOption) (*ProjectConfig, error)
 	GetPorjectConfigByProjectId(ctx context.Context, in *GetPorjectConfigByProjectIdRequest, opts ...grpc.CallOption) (*ProjectConfig, error)
 	GetProjectConfigList(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*ListPorjectConfig, error)
+	UpsertRecord(ctx context.Context, in *Record, opts ...grpc.CallOption) (*EmptyProto, error)
+	ListRecord(ctx context.Context, in *ListRecordRequest, opts ...grpc.CallOption) (*EmptyProto, error)
 }
 
 type projectServiceClient struct {
@@ -183,6 +185,24 @@ func (c *projectServiceClient) GetProjectConfigList(ctx context.Context, in *emp
 	return out, nil
 }
 
+func (c *projectServiceClient) UpsertRecord(ctx context.Context, in *Record, opts ...grpc.CallOption) (*EmptyProto, error) {
+	out := new(EmptyProto)
+	err := c.cc.Invoke(ctx, "/company_service.ProjectService/UpsertRecord", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *projectServiceClient) ListRecord(ctx context.Context, in *ListRecordRequest, opts ...grpc.CallOption) (*EmptyProto, error) {
+	out := new(EmptyProto)
+	err := c.cc.Invoke(ctx, "/company_service.ProjectService/ListRecord", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ProjectServiceServer is the server API for ProjectService service.
 // All implementations must embed UnimplementedProjectServiceServer
 // for forward compatibility
@@ -202,6 +222,8 @@ type ProjectServiceServer interface {
 	UpdateProjectConfig(context.Context, *ProjectConfig) (*ProjectConfig, error)
 	GetPorjectConfigByProjectId(context.Context, *GetPorjectConfigByProjectIdRequest) (*ProjectConfig, error)
 	GetProjectConfigList(context.Context, *empty.Empty) (*ListPorjectConfig, error)
+	UpsertRecord(context.Context, *Record) (*EmptyProto, error)
+	ListRecord(context.Context, *ListRecordRequest) (*EmptyProto, error)
 	mustEmbedUnimplementedProjectServiceServer()
 }
 
@@ -253,6 +275,12 @@ func (UnimplementedProjectServiceServer) GetPorjectConfigByProjectId(context.Con
 }
 func (UnimplementedProjectServiceServer) GetProjectConfigList(context.Context, *empty.Empty) (*ListPorjectConfig, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetProjectConfigList not implemented")
+}
+func (UnimplementedProjectServiceServer) UpsertRecord(context.Context, *Record) (*EmptyProto, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpsertRecord not implemented")
+}
+func (UnimplementedProjectServiceServer) ListRecord(context.Context, *ListRecordRequest) (*EmptyProto, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListRecord not implemented")
 }
 func (UnimplementedProjectServiceServer) mustEmbedUnimplementedProjectServiceServer() {}
 
@@ -537,6 +565,42 @@ func _ProjectService_GetProjectConfigList_Handler(srv interface{}, ctx context.C
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ProjectService_UpsertRecord_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Record)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProjectServiceServer).UpsertRecord(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/company_service.ProjectService/UpsertRecord",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProjectServiceServer).UpsertRecord(ctx, req.(*Record))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProjectService_ListRecord_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListRecordRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProjectServiceServer).ListRecord(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/company_service.ProjectService/ListRecord",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProjectServiceServer).ListRecord(ctx, req.(*ListRecordRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ProjectService_ServiceDesc is the grpc.ServiceDesc for ProjectService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -603,6 +667,14 @@ var ProjectService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetProjectConfigList",
 			Handler:    _ProjectService_GetProjectConfigList_Handler,
+		},
+		{
+			MethodName: "UpsertRecord",
+			Handler:    _ProjectService_UpsertRecord_Handler,
+		},
+		{
+			MethodName: "ListRecord",
+			Handler:    _ProjectService_ListRecord_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

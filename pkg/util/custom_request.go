@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"time"
 
@@ -73,7 +72,7 @@ func DoXMLRequest(url string, method string, body interface{}) (responseModel mo
 	}
 	defer resp.Body.Close()
 
-	respByte, err := ioutil.ReadAll(resp.Body)
+	respByte, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return
 	}

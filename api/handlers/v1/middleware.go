@@ -9,8 +9,8 @@ import (
 	"sync"
 	"time"
 	"ucode/ucode_go_api_gateway/config"
-	"ucode/ucode_go_api_gateway/genproto/auth_service"
-	"ucode/ucode_go_api_gateway/genproto/company_service"
+	auth "ucode/ucode_go_api_gateway/genproto/auth_service"
+	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 
 	"ucode/ucode_go_api_gateway/api/models"
@@ -18,11 +18,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
-
-// const (
-// 	SUPERADMIN_HOST string = "test.admin.u-code.io"
-// 	CLIENT_HOST     string = "test.app.u-code.io"
-// )
 
 var (
 	ApiKeys sync.Map
@@ -38,7 +33,7 @@ func (h *HandlerV1) NodeMiddleware() gin.HandlerFunc {
 func (h *HandlerV1) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
-			res = &auth_service.V2HasAccessUserRes{}
+			res = &auth.V2HasAccessUserRes{}
 			ok  bool
 		)
 
@@ -51,11 +46,6 @@ func (h *HandlerV1) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 			h.log.Error("---ERR->Unexpected token format")
 			_ = c.AbortWithError(http.StatusForbidden, errors.New("token error: wrong format"))
 			return
-		}
-
-		if c.Request.URL.Path == "/v1/wayll-payment" {
-			strArr = []string{"API-KEY"}
-			app_id = "P-Co74TLgSaTKNXzWrjtbUIzemZBKC9yhu"
 		}
 
 		switch strArr[0] {
@@ -102,8 +92,8 @@ func (h *HandlerV1) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 
 				err      error
 				apiJson  []byte
-				apikeys  = &auth_service.GetRes{}
-				resource = &company_service.GetResourceByEnvIDResponse{}
+				apikeys  = &auth.GetRes{}
+				resource = &pb.GetResourceByEnvIDResponse{}
 			)
 
 			var appWaitkey = config.CACHE_WAIT + "-appID"
@@ -143,7 +133,7 @@ func (h *HandlerV1) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 			if apikeys.AppId == "" {
 				apikeys, err = h.authService.ApiKey().GetEnvID(
 					c.Request.Context(),
-					&auth_service.GetReq{
+					&auth.GetReq{
 						Id: app_id,
 					},
 				)
@@ -201,7 +191,7 @@ func (h *HandlerV1) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 			if resource.Resource == nil {
 				resource, err = h.companyServices.Resource().GetResourceByEnvID(
 					c.Request.Context(),
-					&company_service.GetResourceByEnvIDRequest{
+					&pb.GetResourceByEnvIDRequest{
 						EnvId: apikeys.GetEnvironmentId(),
 					},
 				)
@@ -269,7 +259,7 @@ func (h *HandlerV1) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 func (h *HandlerV1) SlimAuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
-			res = &auth_service.V2HasAccessUserRes{}
+			res = &auth.V2HasAccessUserRes{}
 			ok  bool
 		)
 
@@ -327,8 +317,8 @@ func (h *HandlerV1) SlimAuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 
 				err      error
 				apiJson  []byte
-				apikeys  = &auth_service.GetRes{}
-				resource = &company_service.GetResourceByEnvIDResponse{}
+				apikeys  = &auth.GetRes{}
+				resource = &pb.GetResourceByEnvIDResponse{}
 			)
 
 			var appWaitkey = config.CACHE_WAIT + "-appID"
@@ -368,7 +358,7 @@ func (h *HandlerV1) SlimAuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 			if apikeys.AppId == "" {
 				apikeys, err = h.authService.ApiKey().GetEnvID(
 					c.Request.Context(),
-					&auth_service.GetReq{
+					&auth.GetReq{
 						Id: app_id,
 					},
 				)
@@ -426,7 +416,7 @@ func (h *HandlerV1) SlimAuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 			if resource.Resource == nil {
 				resource, err = h.companyServices.Resource().GetResourceByEnvID(
 					c.Request.Context(),
-					&company_service.GetResourceByEnvIDRequest{
+					&pb.GetResourceByEnvIDRequest{
 						EnvId: apikeys.GetEnvironmentId(),
 					},
 				)
@@ -542,7 +532,7 @@ func (h *HandlerV1) ResEnvMiddleware() gin.HandlerFunc {
 
 		resourceEnvironment, err := h.companyServices.Resource().GetResourceEnvironment(
 			c.Request.Context(),
-			&company_service.GetResourceEnvironmentReq{
+			&pb.GetResourceEnvironmentReq{
 				EnvironmentId: environmentID,
 				ResourceId:    resourceID,
 			},
@@ -563,7 +553,7 @@ func (h *HandlerV1) GlobalAuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc 
 	return func(c *gin.Context) {
 
 		var (
-			res = &auth_service.V2HasAccessUserRes{}
+			res = &auth.V2HasAccessUserRes{}
 			ok  bool
 		)
 
@@ -589,7 +579,7 @@ func (h *HandlerV1) GlobalAuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc 
 			app_id := c.GetHeader("X-API-KEY")
 			_, err := h.authService.ApiKey().GetEnvID(
 				c.Request.Context(),
-				&auth_service.GetReq{
+				&auth.GetReq{
 					Id: app_id,
 				},
 			)
@@ -619,7 +609,7 @@ func (h *HandlerV1) GlobalAuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc 
 func (h *HandlerV1) RedirectAuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
-			res = &auth_service.V2HasAccessUserRes{}
+			res = &auth.V2HasAccessUserRes{}
 			//platformType = c.GetHeader("Platform-Type")
 		)
 		app_id := c.DefaultQuery("x-api-key", "")
@@ -641,8 +631,8 @@ func (h *HandlerV1) RedirectAuthMiddleware(cfg config.BaseConfig) gin.HandlerFun
 
 			err      error
 			apiJson  []byte
-			apikeys  = &auth_service.GetRes{}
-			resource = &company_service.GetResourceByEnvIDResponse{}
+			apikeys  = &auth.GetRes{}
+			resource = &pb.GetResourceByEnvIDResponse{}
 		)
 
 		var appWaitkey = config.CACHE_WAIT + "-appID"
@@ -680,7 +670,7 @@ func (h *HandlerV1) RedirectAuthMiddleware(cfg config.BaseConfig) gin.HandlerFun
 		if apikeys.AppId == "" {
 			apikeys, err = h.authService.ApiKey().GetEnvID(
 				c.Request.Context(),
-				&auth_service.GetReq{
+				&auth.GetReq{
 					Id: app_id,
 				},
 			)
@@ -737,7 +727,7 @@ func (h *HandlerV1) RedirectAuthMiddleware(cfg config.BaseConfig) gin.HandlerFun
 		if resource.Resource == nil {
 			resource, err := h.companyServices.Resource().GetResourceByEnvID(
 				c.Request.Context(),
-				&company_service.GetResourceByEnvIDRequest{
+				&pb.GetResourceByEnvIDRequest{
 					EnvId: apikeys.GetEnvironmentId(),
 				},
 			)

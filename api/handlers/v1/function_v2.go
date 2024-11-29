@@ -6,7 +6,7 @@ import (
 	"errors"
 	"io"
 	"strings"
-	"sync"
+
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
@@ -14,12 +14,10 @@ import (
 	fc "ucode/ucode_go_api_gateway/genproto/new_function_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/code_server"
-	"ucode/ucode_go_api_gateway/pkg/easy_to_travel"
 	"ucode/ucode_go_api_gateway/pkg/gitlab"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
-	"ucode/ucode_go_api_gateway/services"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang/protobuf/ptypes/empty"
@@ -981,52 +979,6 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 	requestData.Path = c.Request.URL.Path
 	requestData.Params = c.Request.URL.Query()
 	requestData.Body = bodyReq
-	var (
-		prevPath     = c.Request.Header.Get("Prev_path")
-		faasSettings easy_to_travel.FaasSetting
-		faasPaths    []string
-	)
-
-	for key, valueObject := range easy_to_travel.AgentApiPath {
-		if strings.Contains(prevPath, key) {
-			var (
-				mu    = sync.Mutex{}
-				value = cast.ToStringMap(valueObject)
-			)
-
-			mu.Lock()
-			faasSettings = easy_to_travel.FaasSetting{
-				Paths:        cast.ToStringSlice(value["paths"]),
-				IsCache:      cast.ToBool(value["is_cache"]),
-				Continue:     cast.ToBool(value["continue"]),
-				DeleteParams: cast.ToStringSlice(value["delete_params"]),
-			}
-
-			if function, ok := value["function"].(func(services.ServiceManagerI, []byte) string); ok {
-				faasSettings.Function = function
-			}
-			faasPaths = faasSettings.Paths
-			mu.Unlock()
-
-			break
-		}
-	}
-
-	if helper.ContainsLike(faasPaths, c.Param("function-id")) {
-		faasSettings.AppId = cast.ToString(authInfo.Data["app_id"])
-		faasSettings.NodeType = resource.NodeType
-		faasSettings.ProjectId = projectId.(string)
-		faasSettings.ResourceEnvironmentId = resource.ResourceEnvironmentId
-
-		resp, err := h.EasyToTravelFunctionRun(c, requestData, faasSettings)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
-		c.JSON(cast.ToInt(resp["code"]), resp)
-		return
-	}
 
 	var function = &fc.Function{}
 	if util.IsValidUUID(c.Param("function-id")) {
@@ -1109,95 +1061,4 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 	}
 
 	h.handleResponse(c, status_http.OK, resp)
-}
-
-// InvokeFunctionByPath godoc
-// @ID wayll-payment
-// @Router /v1/wayll-payment [POST]
-// @Summary Invoke Function By Path
-// @Description Invoke Function By Path
-// @Tags Function
-// @Accept json
-// @Produce json
-// @Param InvokeFunctionByPathRequest body models.Wayll true "InvokeFunctionByPathRequest"
-// @Success 201 {object} status_http.Response{data=models.InvokeFunctionRequest} "Function data"
-// @Response 400 {object} status_http.Response{data=string} "Bad Request"
-// @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *HandlerV1) WayllPayment(c *gin.Context) {
-	var wayll models.Wayll
-	err := c.ShouldBindJSON(&wayll)
-	if err != nil {
-		h.handleResponse(c, status_http.BadRequest, err.Error())
-		return
-	}
-
-	projectId, ok := c.Get("project_id")
-	if !ok || !util.IsValidUUID(projectId.(string)) {
-		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
-		return
-	}
-
-	environmentId, ok := c.Get("environment_id")
-	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
-		return
-	}
-
-	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId.(string),
-			EnvironmentId: environmentId.(string),
-			ServiceType:   pb.ServiceType_FUNCTION_SERVICE,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
-	apiKeys, err := h.authService.ApiKey().GetList(context.Background(), &auth_service.GetListReq{
-		EnvironmentId: environmentId.(string),
-		ProjectId:     resource.ProjectId,
-	})
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-	if len(apiKeys.Data) < 1 {
-		h.handleResponse(c, status_http.InvalidArgument, "Api key not found")
-		return
-	}
-
-	invokeFunction := models.CommonMessage{}
-
-	invokeFunction.Data = make(map[string]interface{})
-
-	invokeFunction.Data = map[string]interface{}{
-		"data": wayll,
-	}
-
-	authInfo, _ := h.GetAuthInfo(c)
-	invokeFunction.Data["user_id"] = authInfo.GetUserId()
-	invokeFunction.Data["project_id"] = authInfo.GetProjectId()
-	invokeFunction.Data["environment_id"] = authInfo.GetEnvId()
-	invokeFunction.Data["app_id"] = apiKeys.GetData()[0].GetAppId()
-
-	resp, err := util.DoRequest("https://ofs.u-code.io/function/wayll-payment", "POST", models.NewInvokeFunctionRequest{
-		Data: invokeFunction.Data,
-	})
-	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
-		return
-	} else if resp.Status == "error" {
-		var errStr = resp.Status
-		if resp.Data != nil && resp.Data["message"] != nil {
-			errStr = resp.Data["message"].(string)
-		}
-		h.handleResponse(c, status_http.InvalidArgument, errStr)
-		return
-	}
-
-	h.handleResponse(c, status_http.Created, resp)
 }

@@ -227,8 +227,8 @@ func BaseLoad() BaseConfig {
 	config.SecretKey = cast.ToString(GetOrReturnDefaultValue("SECRET_KEY", ""))
 	config.JaegerHostPort = cast.ToString(GetOrReturnDefaultValue("JAEGER_URL", ""))
 
-	config.GithubClientId = ""
-	config.GithubClientSecret = ""
+	config.GithubClientId = cast.ToString(GetOrReturnDefaultValue("GITHUB_CLIENT_ID", "Ov23liaLeqZ4ihyU3CWQ"))
+	config.GithubClientSecret = cast.ToString(GetOrReturnDefaultValue("GITHUB_CLIENT_SECRET", "cd5e802aa567432f8a053660dca5698678dfbe23"))
 	config.ProjectUrl = ""
 	config.WebhookSecret = ""
 

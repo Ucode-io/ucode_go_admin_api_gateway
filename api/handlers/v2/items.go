@@ -2044,8 +2044,6 @@ func (h *HandlerV2) UpdateRowOrder(c *gin.Context) {
 		obj := cast.ToStringMap(o)
 
 		obj["row_order"] = i + num
-
-		o = obj
 	}
 
 	objectRequest.Data["objects"] = objects

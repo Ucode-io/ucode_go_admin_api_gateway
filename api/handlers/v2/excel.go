@@ -5,7 +5,7 @@ import (
 	"errors"
 	"ucode/ucode_go_api_gateway/api/models"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
-	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
+	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
@@ -25,7 +25,7 @@ import (
 // @Produce json
 // @Param collection path string true "collection"
 // @Param id query string true "id"
-// @Success 200 {object} status_http.Response{data=object_builder_service.ExcelReadResponse} "ExcelReadResponse"
+// @Success 200 {object} status_http.Response{data=obs.ExcelReadResponse} "ExcelReadResponse"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) ExcelReader(c *gin.Context) {
@@ -66,13 +66,13 @@ func (h *HandlerV2) ExcelReader(c *gin.Context) {
 		return
 	}
 
-	var res *object_builder_service.ExcelReadResponse
+	var res *obs.ExcelReadResponse
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		res, err = services.GetBuilderServiceByType(resource.NodeType).Excel().ExcelRead(
 			context.Background(),
-			&object_builder_service.ExcelReadRequest{
+			&obs.ExcelReadRequest{
 				Id:        excelId,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -162,7 +162,7 @@ func (h *HandlerV2) ImportData(c *gin.Context) {
 	case pb.ResourceType_MONGODB:
 		_, err = services.GetBuilderServiceByType(resource.NodeType).Excel().ExcelToDb(
 			context.Background(),
-			&object_builder_service.ExcelToDbRequest{
+			&obs.ExcelToDbRequest{
 				Id:        c.Param("id"),
 				TableSlug: excelRequest.TableSlug,
 				Data:      data,

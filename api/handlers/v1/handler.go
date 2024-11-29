@@ -10,9 +10,9 @@ import (
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
-	"ucode/ucode_go_api_gateway/genproto/auth_service"
+	auth "ucode/ucode_go_api_gateway/genproto/auth_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
-	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
+	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/caching"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
@@ -99,11 +99,6 @@ func (h *HandlerV1) getLimitParam(c *gin.Context) (limit int, err error) {
 	return strconv.Atoi(limitStr)
 }
 
-func (h *HandlerV1) getPageParam(c *gin.Context) (page int, err error) {
-	pageStr := c.DefaultQuery("page", "1")
-	return strconv.Atoi(pageStr)
-}
-
 func (h *HandlerV1) versionHistory(req *models.CreateVersionHistoryRequest) error {
 	var (
 		current  = map[string]interface{}{"data": req.Current}
@@ -129,7 +124,7 @@ func (h *HandlerV1) versionHistory(req *models.CreateVersionHistoryRequest) erro
 	if util.IsValidUUID(req.UserInfo) {
 		info, err := h.authService.User().GetUserByID(
 			context.Background(),
-			&auth_service.UserPrimaryKey{
+			&auth.UserPrimaryKey{
 				Id: req.UserInfo,
 			},
 		)
@@ -144,7 +139,7 @@ func (h *HandlerV1) versionHistory(req *models.CreateVersionHistoryRequest) erro
 
 	_, err := req.Services.GetBuilderServiceByType(req.NodeType).VersionHistory().Create(
 		context.Background(),
-		&object_builder_service.CreateVersionHistoryRequest{
+		&obs.CreateVersionHistoryRequest{
 			Id:                uuid.NewString(),
 			ProjectId:         req.ProjectId,
 			ActionSource:      req.ActionSource,
@@ -201,7 +196,7 @@ func (h *HandlerV1) versionHistoryGo(c *gin.Context, req *models.CreateVersionHi
 	if util.IsValidUUID(req.UserInfo) {
 		info, err := h.authService.User().GetUserByID(
 			context.Background(),
-			&auth_service.UserPrimaryKey{
+			&auth.UserPrimaryKey{
 				Id: req.UserInfo,
 			},
 		)

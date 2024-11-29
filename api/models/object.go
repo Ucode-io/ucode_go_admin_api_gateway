@@ -5,17 +5,6 @@ type CommonMessage struct {
 	IsCached bool                   `json:"is_cached"`
 }
 
-type Wayll struct {
-	OrderID             string `json:"orderId"`
-	BindingID           string `json:"bindingId"`
-	OrderNumber         string `json:"orderNumber"`
-	OperationType       string `json:"operationType"`
-	OperationState      string `json:"operationState"`
-	OperationId         string `json:"operationId"`
-	MerchantOperationId string `json:"merchantOperationId"`
-	Rrn                 string `json:"rrn"`
-}
-
 type HtmlBody struct {
 	Data map[string]interface{} `json:"data"`
 	Html string                 `json:"html"`

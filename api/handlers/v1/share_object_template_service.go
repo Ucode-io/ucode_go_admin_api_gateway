@@ -26,7 +26,6 @@ import (
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) CreateUserTemplate(c *gin.Context) {
 	var (
-		//resourceEnvironment *obs.ResourceEnvironment
 		user tmp.CreateUserPermissionReq
 	)
 

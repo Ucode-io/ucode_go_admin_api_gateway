@@ -30,6 +30,7 @@ type ApiKeysClient interface {
 	GenerateApiToken(ctx context.Context, in *GenerateApiTokenReq, opts ...grpc.CallOption) (*GenerateApiTokenRes, error)
 	RefreshApiToken(ctx context.Context, in *RefreshApiTokenReq, opts ...grpc.CallOption) (*RefreshApiTokenRes, error)
 	GetEnvID(ctx context.Context, in *GetReq, opts ...grpc.CallOption) (*GetRes, error)
+	ListClientToken(ctx context.Context, in *ListClientTokenRequest, opts ...grpc.CallOption) (*ListClientTokenResponse, error)
 }
 
 type apiKeysClient struct {
@@ -112,6 +113,15 @@ func (c *apiKeysClient) GetEnvID(ctx context.Context, in *GetReq, opts ...grpc.C
 	return out, nil
 }
 
+func (c *apiKeysClient) ListClientToken(ctx context.Context, in *ListClientTokenRequest, opts ...grpc.CallOption) (*ListClientTokenResponse, error) {
+	out := new(ListClientTokenResponse)
+	err := c.cc.Invoke(ctx, "/auth_service.ApiKeys/ListClientToken", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ApiKeysServer is the server API for ApiKeys service.
 // All implementations must embed UnimplementedApiKeysServer
 // for forward compatibility
@@ -124,6 +134,7 @@ type ApiKeysServer interface {
 	GenerateApiToken(context.Context, *GenerateApiTokenReq) (*GenerateApiTokenRes, error)
 	RefreshApiToken(context.Context, *RefreshApiTokenReq) (*RefreshApiTokenRes, error)
 	GetEnvID(context.Context, *GetReq) (*GetRes, error)
+	ListClientToken(context.Context, *ListClientTokenRequest) (*ListClientTokenResponse, error)
 	mustEmbedUnimplementedApiKeysServer()
 }
 
@@ -154,6 +165,9 @@ func (UnimplementedApiKeysServer) RefreshApiToken(context.Context, *RefreshApiTo
 }
 func (UnimplementedApiKeysServer) GetEnvID(context.Context, *GetReq) (*GetRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetEnvID not implemented")
+}
+func (UnimplementedApiKeysServer) ListClientToken(context.Context, *ListClientTokenRequest) (*ListClientTokenResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListClientToken not implemented")
 }
 func (UnimplementedApiKeysServer) mustEmbedUnimplementedApiKeysServer() {}
 
@@ -312,6 +326,24 @@ func _ApiKeys_GetEnvID_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ApiKeys_ListClientToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListClientTokenRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ApiKeysServer).ListClientToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/auth_service.ApiKeys/ListClientToken",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ApiKeysServer).ListClientToken(ctx, req.(*ListClientTokenRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ApiKeys_ServiceDesc is the grpc.ServiceDesc for ApiKeys service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -350,6 +382,10 @@ var ApiKeys_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetEnvID",
 			Handler:    _ApiKeys_GetEnvID_Handler,
+		},
+		{
+			MethodName: "ListClientToken",
+			Handler:    _ApiKeys_ListClientToken_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -3,8 +3,8 @@ package api
 import (
 	"encoding/json"
 	"errors"
-	"net/http"
 	"strings"
+
 	"ucode/ucode_go_api_gateway/api/docs"
 	"ucode/ucode_go_api_gateway/api/handlers"
 	"ucode/ucode_go_api_gateway/config"
@@ -19,30 +19,20 @@ import (
 )
 
 // SetUpAPI @description This is an api gateway
-// @termsOfService https://udevs.io
+// @termsOfService https://u-code.io/
 func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer opentracing.Tracer) {
 	docs.SwaggerInfo.Title = cfg.ServiceName
 	docs.SwaggerInfo.Version = cfg.Version
-	// docs.SwaggerInfo.Host = cfg.ServiceHost + cfg.HTTPPort
 	docs.SwaggerInfo.Schemes = []string{cfg.HTTPScheme}
 
 	r.Use(customCORSMiddleware())
 	r.Use(ginhttp.Middleware(tracer))
 
 	r.GET("/ping", h.V1.Ping)
-	r.Any("/v2/upload-file/*any", gin.WrapH(http.StripPrefix("/v2/upload-file/", h.V2.MovieUpload())))
 
 	r.Any("/x-api/*any", h.V1.RedirectAuthMiddleware(cfg), proxyMiddleware(r, &h), h.V1.Proxy)
 
-	r.POST("/send-code", h.V1.SendCode)
-	r.POST("/test-for-time-limit", h.V1.TestForTimeLimit)
-	r.POST("/verify/:sms_id/:otp", h.V1.Verify)
-	r.POST("/register-otp/:table_slug", h.V1.RegisterOtp)
-	r.POST("/send-message", h.V1.SendMessageToEmail)
-	r.POST("/verify-email/:sms_id/:otp", h.V1.VerifyEmail)
-	r.POST("/register-email-otp/:table_slug", h.V1.RegisterEmailOtp)
 	r.GET("/v1/login-microfront", h.V1.GetLoginMicroFrontBySubdomain)
-	r.GET("/v3/note/:note-id", h.V1.GetSingleNoteWithoutToken)
 
 	r.GET("/menu/wiki_folder", h.V1.GetWikiFolder)
 
@@ -76,7 +66,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1.DELETE("/menu-template/:id", h.V1.DeleteMenuTemplate)
 
 		v1.POST("/upload", h.V1.Upload)
-		v1.POST("/upload-template/:template_name", h.V1.UploadTemplate)
 		v1.POST("/upload-file/:table_slug/:object_id", h.V1.UploadFile)
 
 		// OBJECT_BUILDER_SERVICE
@@ -89,12 +78,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 		v1.PUT("/table", h.V1.UpdateTable)
 		v1.DELETE("/table/:table_id", h.V1.DeleteTable)
-		//field
-		v1.POST("/field", h.V1.CreateField)
-		v1.GET("/field", h.V1.GetAllFields)
-		v1.PUT("/field", h.V1.UpdateField)
-		v1.DELETE("/field/:field_id", h.V1.DeleteField)
-		v1.POST("/fields-relations", h.V1.CreateFieldsAndRelations)
 
 		//relation
 		v1.POST("/relation", h.V1.CreateRelation)
@@ -146,57 +129,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1.DELETE("/view/:view_id", h.V1.DeleteView)
 		v1.PUT("/update-view-order", h.V1.UpdateViewOrder)
 
-		//anaytics dashboard
-		v1.POST("/analytics/dashboard", h.V1.CreateDashboard)
-		v1.GET("/analytics/dashboard/:dashboard_id", h.V1.GetSingleDashboard)
-		v1.GET("/analytics/dashboard", h.V1.GetAllDashboards)
-		v1.PUT("/analytics/dashboard", h.V1.UpdateDashboard)
-		v1.DELETE("/analytics/dashboard/:dashboard_id", h.V1.DeleteDashboard)
-
-		//anaytics variable
-		v1.POST("/analytics/variable", h.V1.CreateVariable)
-		v1.GET("/analytics/variable/:variable_id", h.V1.GetSingleVariable)
-		v1.GET("/analytics/variable", h.V1.GetAllVariables)
-		v1.PUT("/analytics/variable", h.V1.UpdateVariable)
-		v1.DELETE("/analytics/variable/:variable_id", h.V1.DeleteVariable)
-
-		//anaytics panel
-		v1.POST("/analytics/panel/updateCoordinates", h.V1.UpdateCoordinates)
-		v1.POST("/analytics/panel", h.V1.CreatePanel)
-		v1.GET("/analytics/panel/:panel_id", h.V1.GetSinglePanel)
-		v1.GET("/analytics/panel", h.V1.GetAllPanels)
-		v1.PUT("/analytics/panel", h.V1.UpdatePanel)
-		v1.DELETE("/analytics/panel/:panel_id", h.V1.DeletePanel)
-
-		//app
-		v1.POST("/app", h.V1.CreateApp)
-		v1.GET("/app/:app_id", h.V1.GetAppByID)
-		v1.GET("/app", h.V1.GetAllApps)
-		v1.PUT("/app", h.V1.UpdateApp)
-		v1.DELETE("/app/:app_id", h.V1.DeleteApp)
-
-		// POS_SERVICE
-
-		//appointments
-		v1.GET("/offline_appointment", h.V1.GetAllOfflineAppointments)
-		v1.GET("/booked_appointment", h.V1.GetAllBookedAppointments)
-
-		v1.GET("/offline_appointment/:offline_appointment_id", h.V1.GetSingleOfflineAppointment)
-		v1.GET("/booked_appointment/:booked_appointment_id", h.V1.GetSingleBookedAppointment)
-
-		v1.PUT("/payment_status/:appointment_id", h.V1.UpdateAppointmentPaymentStatus)
-
-		// cashbox
-		v1.GET("/close-cashbox", h.V1.GetCloseCashboxInfo)
-		v1.GET("/open-cashbox", h.V1.GetOpenCashboxInfo)
-
-		// ANALYTICS_SERVICE
-		// CASHBOX TRANSACTION
-		v1.POST("/cashbox_transaction", h.V1.CashboxTransaction)
-		// query
-		v1.POST("/query", h.V1.GetQueryRows)
-
-		// html-template
 		//view
 		v1.POST("/html-template", h.V1.CreateHtmlTemplate)
 		v1.GET("/html-template/:html_template_id", h.V1.GetSingleHtmlTemplate)
@@ -220,13 +152,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1.GET("/event-log", h.V1.GetEventLogs)
 		v1.GET("/event-log/:event_log_id", h.V1.GetEventLogById)
 
-		// custom event
-		v1.POST("/custom-event", h.V1.CreateCustomEvent)
-		v1.GET("/custom-event/:custom_event_id", h.V1.GetCustomEventByID)
-		v1.GET("/custom-event", h.V1.GetAllCustomEvents)
-		v1.PUT("/custom-event", h.V1.UpdateCustomEvent)
-		v1.DELETE("/custom-event/:custom_event_id", h.V1.DeleteCustomEvent)
-
 		// function
 		v1.POST("/function", h.V1.CreateFunction)
 		v1.GET("/function/:function_id", h.V1.GetFunctionByID)
@@ -238,7 +163,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 		v1.POST("/invoke_function", h.V1.InvokeFunction)
 		v1.POST("/invoke_function/:function-path", h.V1.InvokeFunctionByPath)
-		v1.POST("/wayll-payment", h.V1.WayllPayment)
 
 		//cache
 		v1.POST("/cache", h.V1.Cache)
@@ -246,14 +170,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		// Excel Reader
 		v1.GET("/excel/:excel_id", h.V1.ExcelReader)
 		v1.POST("/excel/excel_to_db/:excel_id", h.V1.ExcelToDb)
-
-		v1.GET("/barcode-generator/:table_slug", h.V1.GetNewGeneratedBarCode)
-		v1.GET("/code-generator/:table_slug/:field_id", h.V1.GetNewGeneratedCode)
-
-		// Integration with AlfaLab
-		// v1.POST("/alfalab/directions", h.V1.CreateDirections)
-		// v1.GET("/alfalab/referral", h.V1.GetReferral)
-
 		v1.POST("/export-to-json", h.V1.ExportToJSON)
 		v1.POST("import-from-json", h.V1.ImportFromJSON)
 
@@ -279,31 +195,12 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1.POST("/html-to-pdf", h.V1.ConvertHtmlToPdf)
 		v1.POST("/template-to-html", h.V1.ConvertTemplateToHtml)
 
-		// note
-		v1.POST("/note-folder", h.V1.CreateNoteFolder)
-		v1.GET("/note-folder/:note-folder-id", h.V1.GetSingleNoteFolder)
-		v1.PUT("/note-folder", h.V1.UpdateNoteFolder)
-		v1.DELETE("/note-folder/:note-folder-id", h.V1.DeleteNoteFolder)
-		v1.GET("/note-folder", h.V1.GetListNoteFolder)
-		v1.GET("/note-folder/commits/:note-folder-id", h.V1.GetNoteFolderCommits)
-		v1.POST("/note", h.V1.CreateNote)
-		v1.GET("/note/:note-id", h.V1.GetSingleNote)
-		v1.PUT("/note", h.V1.UpdateNote)
-		v1.DELETE("/note/:note-id", h.V1.DeleteNote)
-		v1.GET("/note", h.V1.GetListNote)
-		v1.GET("/note/commits/:note-id", h.V1.GetNoteCommits)
 		v1.POST("/template-note/users", h.V1.CreateUserTemplate)
 		v1.GET("/template-note/users", h.V1.GetListUserTemplate)
 		v1.PUT("/template-note/users", h.V1.UpdateUserTemplate)
 		v1.DELETE("/template-note/users/:user-permission-id", h.V1.DeleteUserTemplate)
 		v1.POST("/template-note/share", h.V1.CreateSharingToken)
 		v1.PUT("/template-note/share", h.V1.UpdateSharingToken)
-
-		// api-reference
-		v1.GET("/api-reference", h.V1.GetAllApiReferences)
-		v1.GET("/api-reference/:api_reference_id", h.V1.GetApiReferenceByID)
-		v1.GET("/category/:category_id", h.V1.GetApiCategoryByID)
-		v1.GET("/category", h.V1.GetAllCategories)
 
 		v1.GET("/layout", h.V1.GetListLayouts)
 		v1.PUT("/layout", h.V1.UpdateLayout)
@@ -327,25 +224,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1.GET("/table-permission", h.V1.GetTablePermission)
 		v1.PUT("/table-permission", h.V1.UpdateTablePermission)
 
-		//report setting
-		v1.GET("/get-report-setting/:id", h.V1.GetByIdReportSetting)
-		v1.GET("/get-report-setting", h.V1.GetListReportSetting)
-		v1.PUT("/upsert-report-setting", h.V1.UpsertReportSetting)
-		v1.DELETE("/delete-report-setting/:id", h.V1.DeleteReportSetting)
-
-		//dynamic-report
-		v1.POST("/dynamic-report", h.V1.DynamicReport)
-		// v1.GET("/export/dynamic-report/excel/:id", h.V1.ExportDynamicReportExcel) //TODO: should copy from parfume
-
-		//dynamic-report template
-		v1.POST("/save-pivot-template", h.V1.SavePivotTemplate)
-		v1.GET("/get-pivot-template-setting/:id", h.V1.GetByIdPivotTemplate)
-		v1.GET("/get-pivot-template-setting", h.V1.GetListPivotTemplate)
-		v1.PUT("/upsert-pivot-template", h.V1.UpsertPivotTemplate)
-		v1.DELETE("/remove-pivot-template/:id", h.V1.RemovePivotTemplate)
-
-		v1.GET("/dynamic-report-formula", h.V1.DynamicReportFormula)
-
 		v1.POST("/files/folder_upload", h.V1.UploadToFolder)
 		v1.GET("/files/:id", h.V1.GetSingleFile)
 		v1.PUT("/files", h.V1.UpdateFile)
@@ -357,14 +235,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	v2 := r.Group("/v2")
 	v2.Use(h.V1.AuthMiddleware(cfg))
 	{
-		// sleep api
-		v2.GET("/sleep-api", h.V1.SleepApi)
-		// custom event
-		v2.POST("/custom-event", h.V1.CreateNewCustomEvent)
-		v2.GET("/custom-event/:custom_event_id", h.V1.GetNewCustomEventByID)
-		v2.GET("/custom-event", h.V1.GetAllNewCustomEvents)
-		v2.PUT("/custom-event", h.V1.UpdateNewCustomEvent)
-		v2.DELETE("/custom-event/:custom_event_id", h.V1.DeleteNewCustomEvent)
 
 		v2.GET("/language-json", h.V1.GetLanguageJson)
 
@@ -393,7 +263,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	v1Admin := r.Group("/v1")
 	v1Admin.Use(h.V1.AdminAuthMiddleware())
 	{
-
 		// login microfront
 		v1Admin.POST("/login-microfront", h.V1.BindLoginMicroFrontToProject)
 		v1Admin.PUT("/login-microfront", h.V1.UpdateLoginMicroFrontProject)
@@ -404,14 +273,17 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1Admin.GET("/company", h.V1.GetCompanyList)
 		v1Admin.PUT("company/:company_id", h.V1.UpdateCompany)
 		v1Admin.DELETE("/company/:company_id", h.V1.DeleteCompany)
+
 		// project service
 		v1Admin.POST("/company-project", h.V1.CreateCompanyProject)
 		v1Admin.GET("/company-project", h.V1.GetCompanyProjectList)
 		v1Admin.GET("/company-project/:project_id", h.V1.GetCompanyProjectById)
 		v1Admin.PUT("/company-project/:project_id", h.V1.UpdateCompanyProject)
 		v1Admin.DELETE("/company-project/:project_id", h.V1.DeleteCompanyProject)
+
 		// project settings
 		v1Admin.GET("/project/setting", h.V1.GetAllSettings)
+
 		// project resource
 		v1Admin.POST("/company/project/resource", h.V1.AddProjectResource)
 		v1Admin.POST("/company/project/create-resource", h.V1.CreateProjectResource)
@@ -445,108 +317,12 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1Admin.PUT("/environment", h.V1.UpdateEnvironment)
 		v1Admin.DELETE("/environment/:environment_id", h.V1.DeleteEnvironment)
 
-		// release service
-		v1Admin.POST("/release", h.V1.CreateRelease)
-		v1Admin.GET("/release/:project_id/:version_id", h.V1.GetReleaseByID)
-		v1Admin.GET("/release/:project_id", h.V1.GetAllReleases)
-		v1Admin.PUT("/release/:version_id", h.V1.UpdateRelease)
-		v1Admin.DELETE("/release/:project_id/:version_id", h.V1.DeleteRelease)
-		v1Admin.POST("/release/current", h.V1.SetCurrentRelease)
-		v1Admin.GET("/release/current/:project_id", h.V1.GetCurrentRelease)
-
-		// commit service
-		v1Admin.POST("/commit", h.V1.CreateCommit)
-		v1Admin.GET("/commit/:id", h.V1.GetCommitByID)
-		v1Admin.GET("/commit", h.V1.GetAllCommits)
-
-		// integration service
-		v1Admin.POST("/generate-payze-link", h.V1.GeneratePayzeLink)
-		v1Admin.POST("/payze-save-card", h.V1.PayzeSaveCard)
-
-		//api-reference service
-		v1Admin.POST("/api-reference", h.V1.CreateApiReference)
-		v1Admin.PUT("/api-reference", h.V1.UpdateApiReference)
-		// v1Admin.GET("/api-reference/:api_reference_id", h.V1.GetApiReferenceByID)
-		// v1Admin.GET("/api-reference", h.V1.GetAllApiReferences)
-		v1Admin.DELETE("/api-reference/:project_id/:api_reference_id", h.V1.DeleteApiReference)
-		v1Admin.GET("/api-reference/history/:project_id/:api_reference_id", h.V1.GetApiReferenceChanges)
-		v1Admin.POST("/api-reference/revert/:api_reference_id", h.V1.RevertApiReference)
-		v1Admin.POST("/api-reference/select-versions/:api_reference_id", h.V1.InsertManyVersionForApiReference)
-
-		v1Admin.POST("/category", h.V1.CreateCategory)
-		v1Admin.PUT("/category", h.V1.UpdateCategory)
-		// v1Admin.GET("/category/:category_id", h.V1.GetApiCategoryByID)
-		// v1Admin.GET("/category", h.V1.GetAllCategories)
-		v1Admin.DELETE("/category/:category_id", h.V1.DeleteCategory)
-
 		// function folder
 		v1Admin.POST("/function-folder", h.V1.CreateFunctionFolder)
 		v1Admin.GET("/function-folder/:function_ifolder_d", h.V1.GetFunctionFolderById)
 		v1Admin.GET("/function-folder", h.V1.GetAllFunctionFolder)
 		v1Admin.PUT("/function-folder", h.V1.UpdateFunctionFolder)
 		v1Admin.DELETE("/function-folder/:function_folder_id", h.V1.DeleteFunctionFolder)
-
-		// scenario service
-		v1Admin.POST("/scenario/dag", h.V1.CreateDAG)
-		v1Admin.GET("/scenario/dag/:id", h.V1.GetDAG)
-		v1Admin.GET("/scenario/dag", h.V1.GetAllDAG)
-		v1Admin.PUT("/scenario/dag", h.V1.UpdateDAG)
-		v1Admin.DELETE("/scenario/dag/:id", h.V1.DeleteDAG)
-
-		v1Admin.POST("/scenario/dag-step", h.V1.CreateDagStep)
-		v1Admin.GET("/scenario/dag-step/:id", h.V1.GetDagStep)
-		v1Admin.GET("/scenario/dag-step", h.V1.GetAllDagStep)
-		v1Admin.PUT("/scenario/dag-step", h.V1.UpdateDagStep)
-		v1Admin.DELETE("/scenario/dag-step/:id", h.V1.DeleteDAG)
-
-		v1Admin.POST("/scenario/category", h.V1.CreateCategoryScenario)
-		v1Admin.GET("/scenario/category/:id", h.V1.GetCategoryScenario)
-		v1Admin.GET("/scenario/category", h.V1.GetListCategoryScenario)
-
-		v1Admin.POST("/scenario/run", h.V1.RunScenario)
-		v1Admin.POST("/scenario", h.V1.CreateFullScenario)
-		v1Admin.PUT("/scenario", h.V1.UpdateFullScenario) //--- update means also create but with new commit
-		v1Admin.GET("/scenario/:id/history", h.V1.GetScenarioHistory)
-		v1Admin.PUT("/scenario/:id/select-versions", h.V1.SelectVersionsScenario)
-		v1Admin.POST("/scenario/revert", h.V1.RevertScenario)
-
-		// web page service
-		v1Admin.POST("/webpage-folder", h.V1.CreateWebPageFolder)
-		v1Admin.PUT("/webpage-folder", h.V1.UpdateWebPageFolder)
-		v1Admin.GET("/webpage-folder", h.V1.GetListWebPageFolder)
-		v1Admin.GET("/webpage-folder/:webpage-folder-id", h.V1.GetSingleWebPageFolder)
-		v1Admin.DELETE("/webpage-folder/:webpage-folder-id", h.V1.DeleteWebPageFolder)
-
-		v1Admin.POST("/webpage-app", h.V1.CreateWebPageApp)
-		v1Admin.PUT("/webpage-app", h.V1.UpdateWebPageApp)
-		v1Admin.GET("/webpage-app", h.V1.GetListWebPageApp)
-		v1Admin.GET("/webpage-app/:webpage-app-id", h.V1.GetSingleWebPageApp)
-		v1Admin.DELETE("/webpage-app/:webpage-app-id", h.V1.DeleteWebPageApp)
-
-		v1Admin.POST("/webpageV2", h.V1.CreateWebPageV2)
-		v1Admin.PUT("/webpageV2", h.V1.UpdateWebPageV2)
-		v1Admin.GET("/webpageV2", h.V1.GetListWebPageV2)
-		v1Admin.GET("/webpageV2/:webpage-id", h.V1.GetSingleWebPageV2)
-		v1Admin.DELETE("/webpageV2/:webpage-id", h.V1.DeleteWebPageV2)
-		v1Admin.POST("/webpageV2/select-versions/:webpage-id", h.V1.InsertManyVersionForWebPageService)
-		v1Admin.GET("/webpageV2/:webpage-id/history", h.V1.GetWebPageHistory)
-		v1Admin.POST("/webpageV2/:webpage-id/revert", h.V1.RevertWebPage)
-
-		// notification service
-		v1Admin.POST("/notification/user-fcmtoken", h.V1.CreateUserFCMToken)
-		v1Admin.POST("/notification", h.V1.CreateNotificationUsers)
-		v1Admin.GET("/notification", h.V1.GetAllNotifications)
-		v1Admin.GET("/notification/:id", h.V1.GetNotificationById)
-		v1Admin.GET("/notification/category", h.V1.GetListCategoryNotification)
-		v1Admin.POST("/notification/category", h.V1.CreateCategoryNotification)
-		v1Admin.GET("/notification/category/:id", h.V1.GetCategoryNotification)
-		v1Admin.PUT("/notification/category", h.V1.UpdateCategoryNotification)
-		v1Admin.DELETE("/notification/category/:id", h.V1.DeleteCategoryNotification)
-
-		v1Admin.GET("/table-history/list/:table_id", h.V1.GetListTableHistory)
-		v1Admin.GET("/table-history/:id", h.V1.GetTableHistoryById)
-		v1Admin.PUT("/table-history/revert", h.V1.RevertTableHistory)
-		v1Admin.PUT("/table-history", h.V1.InsetrVersionsIdsToTableHistory)
 
 		v1Admin.POST("/redirect-url", h.V1.CreateRedirectUrl)
 		v1Admin.PUT("/redirect-url", h.V1.UpdateRedirectUrl)
@@ -579,13 +355,14 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v2Admin.DELETE("/function/:function_id", h.V1.DeleteNewFunction)
 
 		// project resource /rest
-		v2Admin.POST("/company/project/resource", h.V1.AddResourceToProject)
-		v2Admin.PUT("/company/project/resource", h.V1.UpdateProjectResource)
-		v2Admin.GET("/company/project/resource", h.V1.GetListProjectResourceList)
-		v2Admin.GET("/company/project/resource/:id", h.V1.GetSingleProjectResource)
-		v2Admin.DELETE("/company/project/resource/:id", h.V1.DeleteProjectResource)
-
-		v2Admin.POST("/copy-project", h.V1.CopyProjectTemplate)
+		projectResource := v2Admin.Group("/company/project/resource")
+		{
+			projectResource.POST("", h.V1.AddResourceToProject)
+			projectResource.PUT("", h.V1.UpdateProjectResource)
+			projectResource.GET("", h.V1.GetListProjectResourceList)
+			projectResource.GET("/:id", h.V1.GetSingleProjectResource)
+			projectResource.DELETE("/:id", h.V1.DeleteProjectResource)
+		}
 
 		functions := v2Admin.Group("functions")
 		{
@@ -608,40 +385,15 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v2Admin.GET("/docx-template/fields/list", h.V2.GetAllFieldsDocxTemplate)
 	}
 
-	// v3 for ucode version 2
-	v3 := r.Group("/v3")
-	v3.Use(h.V1.AdminAuthMiddleware())
-	{
-
-		// // web pages
-		v3.POST("/web_pages", h.V1.CreateWebPage)
-		v3.GET("/web_pages/:guid", h.V1.GetWebPagesById)
-		v3.GET("/web_pages", h.V1.GetWebPagesList)
-		v3.PUT("/web_pages/:guid", h.V1.UpdateWebPage)
-		v3.DELETE("/web_pages/:guid", h.V1.DeleteWebPage)
-
-		v3.POST("/chat", h.V1.CreatChat)
-		v3.GET("/chat", h.V1.GetChatList)
-		v3.GET("/chat/:id", h.V1.GetChatByChatID)
-
-		v3.POST("/bot", h.V1.CreateBot)
-		v3.GET("/bot/:id", h.V1.GetBotTokenByBotID)
-		v3.GET("/bot", h.V1.GetBotTokenList)
-		v3.PUT("/bot", h.V1.UpdateBotToken)
-		v3.DELETE("/bot/:id", h.V1.DeleteBotToken)
-	}
-
 	v2Version := r.Group("/v2")
 	v2Version.Use(h.V2.AuthMiddleware())
 	{
 		v2Version.POST("/csv/:table_slug/download", h.V2.GetListInCSV)
-
 		v2Version.POST("/send-to-gpt", h.V2.SendToGpt)
 
 		// collections group
 		v2Collection := v2Version.Group("/collections")
 		{
-
 			// error messages
 			v2Collection.GET("/:collection/error_messages", h.V2.GetAllErrorMessage)
 			v2Collection.POST("/:collection/error_messages", h.V2.CreateErrorMessage)
@@ -780,11 +532,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			v2Files.GET("", h.V2.GetAllFiles)
 		}
 
-		v2Github := v2Version.Group("/github")
-		{
-			v2Github.POST("/login", h.V2.GithubLogin)
-		}
-
 		v2Webhook := v2Version.Group("/webhook")
 		{
 			v2Webhook.POST("/create", h.V2.CreateWebhook)
@@ -804,9 +551,15 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		}
 	}
 
-	r.Any("/api/*any", h.V1.AuthMiddleware(cfg), proxyMiddleware(r, &h), h.V1.Proxy)
+	github := r.Group("/github")
+	{
+		github.GET("/login", h.V2.GithubLogin)
+		github.GET("/user", h.V2.GithubGetUser)
+		github.GET("/repos", h.V2.GithubGetRepos)
+		github.GET("/branches", h.V2.GithubGetBranches)
+	}
 
-	// r.Any("/x-api/*any", h.V1.RedirectAuthMiddleware(cfg), proxyMiddleware(r, &h), h.V1.Proxy)
+	r.Any("/api/*any", h.V1.AuthMiddleware(cfg), proxyMiddleware(r, &h), h.V1.Proxy)
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
@@ -816,8 +569,6 @@ func customCORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Credentials", "true")
-		// c.Header("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, PATCH, DELETE")
-		// c.Header("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, Origin, Cache-Control, X-Requested-With, Resource-Id, Environment-Id, Platform-Type, X-API-KEY, Project-Id")
 		c.Header("Access-Control-Max-Age", "3600")
 		c.Header("Access-Control-Allow-Methods", "*")
 		c.Header("Access-Control-Allow-Headers", "*")
@@ -831,40 +582,10 @@ func customCORSMiddleware() gin.HandlerFunc {
 	}
 }
 
-func MaxAllowed(n int) gin.HandlerFunc {
-	var countReq int64
-	sem := make(chan struct{}, n)
-	acquire := func() {
-		sem <- struct{}{}
-		countReq++
-	}
-
-	release := func() {
-		select {
-		case <-sem:
-		default:
-		}
-		countReq--
-	}
-
-	return func(c *gin.Context) {
-		go func() {
-			acquire()       // before request
-			defer release() // after request
-
-			c.Set("sem", sem)
-			c.Set("count_request", countReq)
-		}()
-
-		c.Next()
-	}
-}
-
 func proxyMiddleware(r *gin.Engine, h *handlers.Handler) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var (
-			err error
-		)
+		var err error
+
 		c, err = RedirectUrl(c, h)
 		if err == nil {
 			r.HandleContext(c)
@@ -874,7 +595,8 @@ func proxyMiddleware(r *gin.Engine, h *handlers.Handler) gin.HandlerFunc {
 }
 
 func RedirectUrl(c *gin.Context, h *handlers.Handler) (*gin.Context, error) {
-	path := c.Request.URL.Path
+	var path = c.Request.URL.Path
+
 	projectId, ok := c.Get("project_id")
 	if !ok {
 		return c, errors.New("something went wrong")
@@ -886,13 +608,12 @@ func RedirectUrl(c *gin.Context, h *handlers.Handler) (*gin.Context, error) {
 	}
 
 	c.Request.Header.Add("prev_path", path)
-	data := helper.MatchingData{
+	var data = helper.MatchingData{
 		ProjectId: projectId.(string),
 		EnvId:     envId.(string),
 		Path:      path,
 	}
 
-	// companyRedirectGetListTime := time.Now()
 	res, err := h.V1.CompanyRedirectGetList(data, h.GetCompanyService(c))
 	if err != nil {
 		return c, errors.New("cant change")
@@ -921,6 +642,8 @@ func RedirectUrl(c *gin.Context, h *handlers.Handler) (*gin.Context, error) {
 	if err != nil {
 		return c, errors.New("something went wrong")
 	}
+
 	c.Request.Header.Add("auth", string(auth))
+
 	return c, nil
 }

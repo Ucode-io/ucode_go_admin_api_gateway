@@ -801,7 +801,7 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 					continue
 				}
 
-				services.GetBuilderServiceByType(nodeType).View().Delete(
+				_, _ = services.GetBuilderServiceByType(nodeType).View().Delete(
 					context.Background(),
 					&obs.ViewPrimaryKey{
 						TableSlug: current.Data.Slug,
@@ -2265,7 +2265,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 						continue
 					}
 
-					services.GetBuilderServiceByType(nodeType).View().Delete(
+					_, _ = services.GetBuilderServiceByType(nodeType).View().Delete(
 						context.Background(),
 						&obs.ViewPrimaryKey{
 							TableSlug: current.Data.Slug,
@@ -2287,7 +2287,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 						continue
 					}
 
-					services.GoObjectBuilderService().View().Delete(
+					_, _ = services.GoObjectBuilderService().View().Delete(
 						context.Background(),
 						&nb.ViewPrimaryKey{
 							TableSlug: currentPsql.Data.Slug,

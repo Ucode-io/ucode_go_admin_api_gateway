@@ -25,7 +25,6 @@ require (
 )
 
 require (
-	github.com/aws/aws-sdk-go v1.45.1
 	github.com/baxromumarov/ucode-sdk v0.0.3
 	github.com/go-git/go-git/v5 v5.12.0
 	github.com/go-redis/redis/v8 v8.11.5
@@ -39,9 +38,7 @@ require (
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/pkg/errors v0.9.1
 	github.com/processout/grpc-go-pool v1.2.1
-	github.com/saidamir98/udevs_pkg v0.0.0-20220413125729-5342e90c08a3
 	github.com/stretchr/testify v1.9.0
-	github.com/tus/tusd v1.13.0
 	github.com/uber/jaeger-client-go v2.30.0+incompatible
 	golang.org/x/time v0.5.0
 )
@@ -51,7 +48,6 @@ require (
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/Microsoft/go-winio v0.6.1 // indirect
 	github.com/ProtonMail/go-crypto v1.0.0 // indirect
-	github.com/bmizerany/pat v0.0.0-20170815010413-6226ea591a40 // indirect
 	github.com/bytedance/sonic v1.8.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
@@ -71,7 +67,6 @@ require (
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
-	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect

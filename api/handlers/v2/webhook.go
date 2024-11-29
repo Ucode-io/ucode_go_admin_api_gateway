@@ -11,10 +11,11 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
-	"ucode/ucode_go_api_gateway/genproto/company_service"
-	"ucode/ucode_go_api_gateway/genproto/new_function_service"
+	pb "ucode/ucode_go_api_gateway/genproto/company_service"
+	fn "ucode/ucode_go_api_gateway/genproto/new_function_service"
 	"ucode/ucode_go_api_gateway/pkg/github"
 	"ucode/ucode_go_api_gateway/pkg/gitlab"
 	"ucode/ucode_go_api_gateway/services"
@@ -24,23 +25,88 @@ import (
 	"github.com/spf13/cast"
 )
 
-func (h *HandlerV2) GithubLogin(c *gin.Context) {
+func (h *HandlerV2) GithubGetBranches(c *gin.Context) {
 	var (
-		githubLoginRequest models.GithubLogin
+		username = c.Query("username")
+		repoName = c.Query("repo")
+		token    = c.Query("token")
 
-		accessTokenUrl string = "https://github.com/login/oauth/access_token"
+		url      = fmt.Sprintf("https://api.github.com/repos/%s/%s/branches", username, repoName)
+		response models.GithubBranch
 	)
 
-	err := c.ShouldBindJSON(&githubLoginRequest)
+	resultByte, err := gitlab.MakeRequestV1("GET", url, token, map[string]interface{}{})
 	if err != nil {
-		h.handleResponse(c, status_http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.InternalServerError, err.Error())
 		return
 	}
+
+	if err := json.Unmarshal(resultByte, &response); err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.OK, response)
+}
+
+func (h *HandlerV2) GithubGetRepos(c *gin.Context) {
+	var (
+		username = c.Query("username")
+		token    = c.Query("token")
+		url      = fmt.Sprintf("https://api.github.com/users/%s/repos", username)
+		response = models.GithubRepo{}
+	)
+
+	resultByte, err := gitlab.MakeRequestV1("GET", url, token, map[string]any{})
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err.Error())
+		return
+	}
+
+	if err := json.Unmarshal(resultByte, &response); err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.OK, response)
+}
+
+func (h *HandlerV2) GithubGetUser(c *gin.Context) {
+	var (
+		token      = c.Query("token")
+		getUserUrl = "https://api.github.com/user"
+		response   models.GithubUser
+	)
+
+	resultByte, err := gitlab.MakeRequestV1("GET", getUserUrl, token, map[string]interface{}{})
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err.Error())
+		return
+	}
+
+	if err := json.Unmarshal(resultByte, &response); err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err.Error())
+		return
+	}
+
+	if response.Status == "401" {
+		h.handleResponse(c, status_http.BadRequest, "can not find username wrong token format")
+		return
+	}
+
+	h.handleResponse(c, status_http.OK, response)
+}
+
+func (h *HandlerV2) GithubLogin(c *gin.Context) {
+	var (
+		code                  = c.Query("code")
+		accessTokenUrl string = "https://github.com/login/oauth/access_token"
+	)
 
 	param := map[string]interface{}{
 		"client_id":     h.baseConf.GithubClientId,
 		"client_secret": h.baseConf.GithubClientSecret,
-		"code":          githubLoginRequest.Code,
+		"code":          code,
 	}
 
 	result, err := gitlab.MakeRequest("POST", accessTokenUrl, "", param)
@@ -156,7 +222,7 @@ func (h *HandlerV2) HandleWebhook(c *gin.Context) {
 
 	resources, err := h.companyServices.IntegrationResource().GetByUsername(
 		c.Request.Context(),
-		&company_service.GetByUsernameRequest{Username: username},
+		&pb.GetByUsernameRequest{Username: username},
 	)
 	if err != nil {
 		h.handleResponse(c, status_http.InternalServerError, err.Error())
@@ -166,10 +232,10 @@ func (h *HandlerV2) HandleWebhook(c *gin.Context) {
 	for _, r := range resources.IntegrationResources {
 		resource, err := h.companyServices.ServiceResource().GetSingle(
 			c.Request.Context(),
-			&company_service.GetSingleServiceResourceReq{
+			&pb.GetSingleServiceResourceReq{
 				ProjectId:     r.ProjectId,
 				EnvironmentId: r.EnvironmentId,
-				ServiceType:   company_service.ServiceType_FUNCTION_SERVICE,
+				ServiceType:   pb.ServiceType_FUNCTION_SERVICE,
 			},
 		)
 		if err != nil {
@@ -189,7 +255,7 @@ func (h *HandlerV2) HandleWebhook(c *gin.Context) {
 
 		function, functionErr := services.FunctionService().FunctionService().GetSingle(
 			c.Request.Context(),
-			&new_function_service.FunctionPrimaryKey{
+			&fn.FunctionPrimaryKey{
 				ProjectId: resource.ResourceEnvironmentId,
 				SourceUrl: htmlUrl,
 				Branch:    branch,
@@ -205,7 +271,7 @@ func (h *HandlerV2) HandleWebhook(c *gin.Context) {
 			if functionErr != nil {
 				function, err = services.FunctionService().FunctionService().Create(
 					context.Background(),
-					&new_function_service.CreateFunctionRequest{
+					&fn.CreateFunctionRequest{
 						Path:           repoName,
 						Name:           name,
 						Description:    repoDescription,
@@ -224,9 +290,9 @@ func (h *HandlerV2) HandleWebhook(c *gin.Context) {
 					return
 				}
 			} else {
-				services.FunctionService().FunctionService().Update(
+				_, _ = services.FunctionService().FunctionService().Update(
 					context.Background(),
-					&new_function_service.Function{
+					&fn.Function{
 						Id:             function.Id,
 						Path:           function.Path,
 						Name:           function.Name,
@@ -251,7 +317,7 @@ func (h *HandlerV2) HandleWebhook(c *gin.Context) {
 			if functionErr != nil {
 				function, err = services.FunctionService().FunctionService().Create(
 					context.Background(),
-					&new_function_service.CreateFunctionRequest{
+					&fn.CreateFunctionRequest{
 						Path:           fmt.Sprintf("%s_%s", repoName, uuid.New()),
 						Name:           repoName,
 						Description:    repoDescription,
@@ -274,7 +340,7 @@ func (h *HandlerV2) HandleWebhook(c *gin.Context) {
 			} else {
 				services.FunctionService().FunctionService().Update(
 					context.Background(),
-					&new_function_service.Function{
+					&fn.Function{
 						Id:             function.Id,
 						Path:           function.Path,
 						Name:           function.Name,
@@ -304,7 +370,7 @@ func (h *HandlerV2) HandleWebhook(c *gin.Context) {
 	}
 }
 
-func (h *HandlerV2) deployOpenfaas(services services.ServiceManagerI, githubToken, repoId string, function *new_function_service.Function) (gitlab.ImportResponse, error) {
+func (h *HandlerV2) deployOpenfaas(services services.ServiceManagerI, githubToken, repoId string, function *fn.Function) (gitlab.ImportResponse, error) {
 	importResponse, err := gitlab.ImportFromGithub(gitlab.ImportData{
 		PersonalAccessToken: githubToken,
 		RepoId:              repoId,
@@ -331,7 +397,7 @@ func (h *HandlerV2) deployOpenfaas(services services.ServiceManagerI, githubToke
 		if err != nil {
 			services.FunctionService().FunctionService().Update(
 				context.Background(),
-				&new_function_service.Function{
+				&fn.Function{
 					Id:             function.Id,
 					Path:           function.Path,
 					Name:           function.Name,
@@ -365,7 +431,7 @@ func (h *HandlerV2) deployOpenfaas(services services.ServiceManagerI, githubToke
 
 			services.FunctionService().FunctionService().Update(
 				context.Background(),
-				&new_function_service.Function{
+				&fn.Function{
 					Id:               function.Id,
 					Path:             function.Path,
 					Name:             function.Name,
@@ -396,7 +462,7 @@ func (h *HandlerV2) deployOpenfaas(services services.ServiceManagerI, githubToke
 
 		services.FunctionService().FunctionService().Update(
 			context.Background(),
-			&new_function_service.Function{
+			&fn.Function{
 				Id:               function.Id,
 				Path:             function.Path,
 				Name:             function.Name,
@@ -428,7 +494,7 @@ func (h *HandlerV2) deployOpenfaas(services services.ServiceManagerI, githubToke
 	}
 }
 
-func (h *HandlerV2) deployMicrofrontend(githubToken, repoId string, function *new_function_service.Function) (gitlab.ImportResponse, error) {
+func (h *HandlerV2) deployMicrofrontend(githubToken, repoId string, function *fn.Function) (gitlab.ImportResponse, error) {
 	importResponse, err := gitlab.ImportFromGithub(gitlab.ImportData{
 		PersonalAccessToken: githubToken,
 		RepoId:              repoId,
@@ -476,7 +542,7 @@ func (h *HandlerV2) deployMicrofrontend(githubToken, repoId string, function *ne
 	return importResponse, nil
 }
 
-func (h *HandlerV2) pipelineStatus(services services.ServiceManagerI, function *new_function_service.Function, repoId int) error {
+func (h *HandlerV2) pipelineStatus(services services.ServiceManagerI, function *fn.Function, repoId int) error {
 	time.Sleep(10 * time.Second)
 	err := gitlab.AddCiFile(h.baseConf.GitlabIntegrationToken, h.baseConf.PathToClone, repoId, function.Branch, "github_integration")
 	if err != nil {
@@ -506,7 +572,7 @@ func (h *HandlerV2) pipelineStatus(services services.ServiceManagerI, function *
 
 			services.FunctionService().FunctionService().Update(
 				context.Background(),
-				&new_function_service.Function{
+				&fn.Function{
 					Id:               function.Id,
 					Path:             function.Path,
 					Name:             function.Name,
@@ -537,7 +603,7 @@ func (h *HandlerV2) pipelineStatus(services services.ServiceManagerI, function *
 
 		_, err = services.FunctionService().FunctionService().Update(
 			context.Background(),
-			&new_function_service.Function{
+			&fn.Function{
 				Id:               function.Id,
 				Path:             function.Path,
 				Name:             function.Name,

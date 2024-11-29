@@ -54,9 +54,7 @@ var (
 		"barcode": 1,
 		"codabar": 1,
 	}
-)
 
-var (
 	NodeDocxConvertToPdfServiceUrl = "https://crowe-doc-generator.u-code.io/generate-doc"
 	ConvertDocxToPdfUrl            = "https://v2.convertapi.com/convert/docx/to/pdf?Secret="
 	secretKeys                     = []string{"secret_WQc40yJ2wbcbtI6J", "secret_4y6SXNIXFZwths6R"}
