@@ -2125,6 +2125,9 @@ func (h *HandlerV1) MultipleUpdateObject(c *gin.Context) {
 		objectRequest               models.CommonMessage
 		beforeActions, afterActions []*obs.CustomEvent
 		statusHttp                  = status_http.GrpcStatusToHTTP["Created"]
+		resource                    *pb.ServiceResourceModel
+		resourceList                *pb.GetResourceByEnvIDResponse
+		resp                        *obs.CommonMessage
 	)
 
 	err := c.ShouldBindJSON(&objectRequest)
@@ -2146,10 +2149,7 @@ func (h *HandlerV1) MultipleUpdateObject(c *gin.Context) {
 		return
 	}
 
-	var resource *pb.ServiceResourceModel
-	resourceBody, ok := c.Get("resource")
-	if ok {
-		var resourceList *pb.GetResourceByEnvIDResponse
+	if resourceBody, ok := c.Get("resource"); ok {
 		err = json.Unmarshal([]byte(resourceBody.(string)), &resourceList)
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
@@ -2173,8 +2173,7 @@ func (h *HandlerV1) MultipleUpdateObject(c *gin.Context) {
 			}
 		}
 	} else {
-		resource, err = h.companyServices.ServiceResource().GetSingle(
-			c.Request.Context(),
+		resource, err = h.companyServices.ServiceResource().GetSingle(c.Request.Context(),
 			&pb.GetSingleServiceResourceReq{
 				ProjectId:     projectId.(string),
 				EnvironmentId: environmentId.(string),
@@ -2187,14 +2186,7 @@ func (h *HandlerV1) MultipleUpdateObject(c *gin.Context) {
 		}
 	}
 
-	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
-	// defer cancel()
-
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -2208,24 +2200,25 @@ func (h *HandlerV1) MultipleUpdateObject(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
 	editedObjects := make([]map[string]interface{}, 0, len(objects))
-	var objectIds = make([]string, 0, len(objects))
+	objectIds := make([]string, 0, len(objects))
+
 	for _, object := range objects {
 		newObjects := object.(map[string]interface{})
-		_, ok := newObjects["guid"].(string)
-		if !ok {
 
-			id, _ := uuid.NewRandom()
-			newObjects["guid"] = id.String()
+		if _, ok := newObjects["guid"].(string); !ok {
+			newObjects["guid"] = uuid.NewString()
 			newObjects["is_new"] = true
-
 		}
 		newObjects["company_service_project_id"] = resource.GetProjectId()
+		newObjects["company_service_environment_id"] = resource.GetEnvironmentId()
+
 		objectIds = append(objectIds, newObjects["guid"].(string))
 		editedObjects = append(editedObjects, newObjects)
 	}
-	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
 
+	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
@@ -2241,38 +2234,35 @@ func (h *HandlerV1) MultipleUpdateObject(c *gin.Context) {
 		}
 	}
 	if len(beforeActions) > 0 {
-		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
+		invokeRequest := DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			IDs:          objectIds,
 			TableSlug:    c.Param("table_slug"),
 			ObjectData:   objectRequest.Data,
 			Method:       "MULTIPLE_UPDATE",
-		},
-			c,
-			h,
-		)
+		}
+		functionName, err := DoInvokeFuntion(invokeRequest, c, h)
 		if err != nil {
 			h.handleResponse(c, status_http.InvalidArgument, err.Error()+" in "+functionName)
 			return
 		}
 	}
-	var resp *obs.CommonMessage
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = service.MultipleUpdate(
-			context.Background(),
+		resp, err = service.MultipleUpdate(c.Request.Context(),
 			&obs.CommonMessage{
-				TableSlug:      c.Param("table_slug"),
-				Data:           structData,
-				ProjectId:      resource.ResourceEnvironmentId,
-				BlockedBuilder: cast.ToBool(c.DefaultQuery("block_builder", "false")),
+				TableSlug:        c.Param("table_slug"),
+				Data:             structData,
+				ProjectId:        resource.ResourceEnvironmentId,
+				BlockedBuilder:   cast.ToBool(c.DefaultQuery("block_builder", "false")),
+				EnvId:            resource.EnvironmentId,
+				CompanyProjectId: resource.ProjectId,
 			},
 		)
-
 		if err != nil {
 			statusHttp = status_http.GrpcStatusToHTTP["Internal"]
-			stat, ok := status.FromError(err)
-			if ok {
+			if stat, ok := status.FromError(err); ok {
 				statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
 				statusHttp.CustomMessage = stat.Message()
 			}
@@ -2280,12 +2270,13 @@ func (h *HandlerV1) MultipleUpdateObject(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		goResp, err := services.GoObjectBuilderService().Items().MultipleUpdate(
-			context.Background(),
+		goResp, err := services.GoObjectBuilderService().Items().MultipleUpdate(c.Request.Context(),
 			&nb.CommonMessage{
-				TableSlug: c.Param("table_slug"),
-				Data:      structData,
-				ProjectId: resource.ResourceEnvironmentId,
+				TableSlug:        c.Param("table_slug"),
+				Data:             structData,
+				ProjectId:        resource.ResourceEnvironmentId,
+				EnvId:            resource.EnvironmentId,
+				CompanyProjectId: resource.ProjectId,
 			},
 		)
 
@@ -2302,17 +2293,14 @@ func (h *HandlerV1) MultipleUpdateObject(c *gin.Context) {
 	}
 
 	if len(afterActions) > 0 {
-		functionName, err := DoInvokeFuntion(
-			DoInvokeFuntionStruct{
-				CustomEvents: afterActions,
-				IDs:          objectIds,
-				TableSlug:    c.Param("table_slug"),
-				ObjectData:   objectRequest.Data,
-				Method:       "MULTIPLE_UPDATE",
-			},
-			c, // gin context
-			h, // handler
-		)
+		invokeRequest := DoInvokeFuntionStruct{
+			CustomEvents: afterActions,
+			IDs:          objectIds,
+			TableSlug:    c.Param("table_slug"),
+			ObjectData:   objectRequest.Data,
+			Method:       "MULTIPLE_UPDATE",
+		}
+		functionName, err := DoInvokeFuntion(invokeRequest, c, h)
 		if err != nil {
 			h.handleResponse(c, status_http.InvalidArgument, err.Error()+" in "+functionName)
 			return
