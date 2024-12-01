@@ -951,7 +951,6 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 		}
 	}
 	if len(afterActions) > 0 {
-		// h.log.Info("---ObjectBefore--->>", logger.Any("body", singleObject.Data.AsMap()))
 		functionName, actionErr = DoInvokeFuntion(
 			DoInvokeFuntionStruct{
 				CustomEvents:           afterActions,

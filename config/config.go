@@ -166,11 +166,10 @@ type BaseConfig struct {
 	UcodeNamespace string
 	JaegerHostPort string
 
-	GithubClientId     string
-	GithubClientSecret string
-	ProjectUrl         string
-	WebhookSecret      string
-	//OfsHost string
+	GithubClientId         string
+	GithubClientSecret     string
+	ProjectUrl             string
+	WebhookSecret          string
 	ConvertDocxToPdfSecret string
 }
 
@@ -229,8 +228,8 @@ func BaseLoad() BaseConfig {
 
 	config.GithubClientId = cast.ToString(GetOrReturnDefaultValue("GITHUB_CLIENT_ID", "Ov23liaLeqZ4ihyU3CWQ"))
 	config.GithubClientSecret = cast.ToString(GetOrReturnDefaultValue("GITHUB_CLIENT_SECRET", "cd5e802aa567432f8a053660dca5698678dfbe23"))
-	config.ProjectUrl = ""
-	config.WebhookSecret = ""
+	config.ProjectUrl = "https://admin-api.ucode.run"
+	config.WebhookSecret = "X8kJnsNHD9f4nRQfjs72YLSfPqxjG+PWRjxN3KBuDhE="
 
 	return config
 }
