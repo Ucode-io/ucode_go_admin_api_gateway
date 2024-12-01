@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"errors"
+	"net/http"
 	"strings"
 
 	"ucode/ucode_go_api_gateway/api/docs"
@@ -29,6 +30,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	r.Use(ginhttp.Middleware(tracer))
 
 	r.GET("/ping", h.V1.Ping)
+	r.Any("/v2/upload-file/*any", gin.WrapH(http.StripPrefix("/v2/upload-file/", h.V2.MovieUpload())))
 
 	r.Any("/x-api/*any", h.V1.RedirectAuthMiddleware(cfg), proxyMiddleware(r, &h), h.V1.Proxy)
 
