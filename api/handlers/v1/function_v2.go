@@ -46,7 +46,6 @@ func (h *HandlerV1) CreateNewFunction(c *gin.Context) {
 	var (
 		function models.CreateFunctionRequest
 		response = &fc.Function{}
-		//resourceEnvironment *obs.ResourceEnvironment
 	)
 	err := c.ShouldBindJSON(&function)
 	if err != nil {
@@ -69,8 +68,7 @@ func (h *HandlerV1) CreateNewFunction(c *gin.Context) {
 
 	userId, _ := c.Get("user_id")
 
-	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
+	resource, err := h.companyServices.ServiceResource().GetSingle(c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
@@ -82,26 +80,24 @@ func (h *HandlerV1) CreateNewFunction(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	environment, err := h.companyServices.Environment().GetById(context.Background(), &pb.EnvironmentPrimaryKey{
-		Id: environmentId.(string),
-	})
+	environment, err := h.companyServices.Environment().GetById(c.Request.Context(),
+		&pb.EnvironmentPrimaryKey{
+			Id: environmentId.(string),
+		})
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	project, _ := h.companyServices.Project().GetById(context.Background(), &pb.GetProjectByIdRequest{
-		ProjectId: environment.GetProjectId(),
-	})
+	project, _ := h.companyServices.Project().GetById(c.Request.Context(),
+		&pb.GetProjectByIdRequest{
+			ProjectId: environment.GetProjectId(),
+		})
 	if project.GetTitle() == "" {
 		err = errors.New("error project name is required")
 		h.handleResponse(c, status_http.BadRequest, err.Error())
@@ -133,9 +129,7 @@ func (h *HandlerV1) CreateNewFunction(c *gin.Context) {
 			EnvironmentId:    environmentId.(string),
 			FunctionFolderId: function.FunctionFolderId,
 			Url:              url,
-			//Password:         password,
-			//SshUrl: sshURL,
-			Type: FUNCTION,
+			Type:             FUNCTION,
 		}
 		logReq = &models.CreateVersionHistoryRequest{
 			Services:     services,
@@ -143,19 +137,16 @@ func (h *HandlerV1) CreateNewFunction(c *gin.Context) {
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: c.Request.URL.String(),
 			ActionType:   "CREATE",
-			UsedEnvironments: map[string]bool{
-				cast.ToString(environmentId): true,
-			},
-			UserInfo:  cast.ToString(userId),
-			Request:   createFunction,
-			TableSlug: "FUNCTION",
+			UserInfo:     cast.ToString(userId),
+			Request:      createFunction,
+			TableSlug:    "FUNCTION",
 		}
 	)
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		response, err = services.FunctionService().FunctionService().Create(
-			context.Background(),
+			c.Request.Context(),
 			createFunction,
 		)
 
@@ -168,7 +159,6 @@ func (h *HandlerV1) CreateNewFunction(c *gin.Context) {
 		}
 		go h.versionHistory(logReq)
 	case pb.ResourceType_POSTGRESQL:
-
 		newCreateFunction := &nb.CreateFunctionRequest{}
 
 		err = helper.MarshalToStruct(createFunction, &newCreateFunction)
@@ -177,7 +167,7 @@ func (h *HandlerV1) CreateNewFunction(c *gin.Context) {
 		}
 
 		response, err := services.GoObjectBuilderService().Function().Create(
-			context.Background(),
+			c.Request.Context(),
 			newCreateFunction,
 		)
 		if err != nil {

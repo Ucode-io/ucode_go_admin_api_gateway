@@ -20,7 +20,6 @@ import (
 
 func CreateProjectFork(projectName string, data IntegrationData) (response models.GitlabIntegrationResponse, err error) {
 	// create repo in given group by existing project in gitlab
-
 	projectId := data.GitlabProjectId
 	strProjectId := strconv.Itoa(projectId)
 
@@ -43,8 +42,7 @@ func CreateProjectFork(projectName string, data IntegrationData) (response model
 }
 
 func DeleteForkedProject(repoName string, cfg config.BaseConfig) (response models.GitlabIntegrationResponse, err error) {
-
-	resp, err := DoRequest(cfg.GitlabIntegrationURL+"/api/v4/projects/ucode_functions_group%2"+"F"+repoName, cfg.GitlabIntegrationToken, "DELETE", nil)
+	resp, _ := DoRequest(cfg.GitlabIntegrationURL+"/api/v4/projects/ucode_functions_group%2"+"F"+repoName, cfg.GitlabIntegrationToken, "DELETE", nil)
 	if resp.Code >= 400 {
 		return models.GitlabIntegrationResponse{}, errors.New(status_http.BadRequest.Description)
 	} else if resp.Code >= 500 {
@@ -58,7 +56,6 @@ func DeleteForkedProject(repoName string, cfg config.BaseConfig) (response model
 
 func UpdateProject(cfg IntegrationData, data map[string]interface{}) (response models.GitlabIntegrationResponse, err error) {
 	// create repo in given group by existing project in gitlab
-
 	projectId := cfg.GitlabProjectId
 	strProjectId := strconv.Itoa(projectId)
 
@@ -75,7 +72,6 @@ func UpdateProject(cfg IntegrationData, data map[string]interface{}) (response m
 
 func CreateProjectVariable(cfg IntegrationData, data map[string]interface{}) (response models.GitlabIntegrationResponse, err error) {
 	// create repo in given group by existing project in gitlab
-
 	projectId := cfg.GitlabProjectId
 	strProjectId := strconv.Itoa(projectId)
 
@@ -91,7 +87,6 @@ func CreateProjectVariable(cfg IntegrationData, data map[string]interface{}) (re
 }
 
 func CreateProjectVariableV2(cfg IntegrationData, data interface{}) (response models.GitlabIntegrationResponse, err error) {
-
 	url := fmt.Sprintf("%s/api/v4/projects/%d/variables", cfg.GitlabIntegrationUrl, cfg.GitlabProjectId)
 
 	ctx, finish := context.WithTimeout(context.Background(), 10*time.Second)
@@ -157,7 +152,6 @@ func ImportFromGithub(cfg ImportData) (response ImportResponse, err error) {
 
 func AddFilesToRepo(gitlabToken string, path string, gitlabRepoId int, branch string) error {
 	localFolderPath := "/go/src/gitlab.udevs.io/ucode/ucode_go_admin_api_gateway/github_integration"
-	//localFolderPath := "github_integration"
 
 	files, err := helper.ListFiles(localFolderPath)
 	if err != nil {
@@ -201,8 +195,6 @@ func AddFilesToRepo(gitlabToken string, path string, gitlabRepoId int, branch st
 }
 
 func AddCiFile(gitlabToken, path string, gitlabRepoId int, branch, localFolderPath string) error {
-	// localFolderPath := "/go/src/gitlab.udevs.io/ucode/ucode_go_admin_api_gateway/github_integration"
-	//localFolderPath := "github_integration"
 	filePath := fmt.Sprintf("%v/.gitlab-ci.yml", localFolderPath)
 
 	fileContent, err := os.ReadFile(filePath)
