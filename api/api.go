@@ -561,6 +561,11 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		github.GET("/branches", h.V2.GithubGetBranches)
 	}
 
+	proxyApi := r.Group("/v2")
+	{
+		proxyApi.POST("/invoke_function/:function-path", h.V2.InvokeFunctionByPath)
+	}
+
 	r.Any("/api/*any", h.V1.AuthMiddleware(cfg), proxyMiddleware(r, &h), h.V1.Proxy)
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

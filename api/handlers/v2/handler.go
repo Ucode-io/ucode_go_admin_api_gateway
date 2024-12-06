@@ -1,9 +1,13 @@
 package v2
 
 import (
+	"bufio"
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
+	"net/http"
+	"net/url"
 	"strconv"
 	"time"
 	"ucode/ucode_go_api_gateway/api/models"
@@ -232,4 +236,38 @@ func (h *HandlerV2) versionHistoryGo(c *gin.Context, req *models.CreateVersionHi
 		return err
 	}
 	return nil
+}
+
+func (h *HandlerV2) MakeProxy(c *gin.Context, proxyUrl, path string) (err error) {
+	req := c.Request
+
+	proxy, err := url.Parse(proxyUrl)
+	if err != nil {
+		h.log.Error("error in parse addr: %v", logger.Error(err))
+		c.String(http.StatusInternalServerError, "error")
+		return
+	}
+
+	req.URL.Scheme = proxy.Scheme
+	req.URL.Host = proxy.Host
+	req.URL.Path = path
+	transport := http.DefaultTransport
+
+	resp, err := transport.RoundTrip(req)
+	if err != nil {
+		fmt.Println(err)
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
+	for k, vv := range resp.Header {
+		for _, v := range vv {
+			c.Header(k, v)
+		}
+	}
+	defer resp.Body.Close()
+
+	c.Status(resp.StatusCode)
+	_, _ = bufio.NewReader(resp.Body).WriteTo(c.Writer)
+	return
 }
