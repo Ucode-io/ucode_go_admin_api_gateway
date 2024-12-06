@@ -33,8 +33,6 @@ func ListWebhooks(cfg ListWebhookRequest) (bool, error) {
 		return false, err
 	}
 
-	fmt.Println(string(body))
-
 	var webhooks []interface{}
 	if err := json.Unmarshal(body, &webhooks); err != nil {
 		return false, err
