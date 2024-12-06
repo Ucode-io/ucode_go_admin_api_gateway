@@ -3,6 +3,7 @@ package v1
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"strings"
 
@@ -105,6 +106,8 @@ func (h *HandlerV1) CreateNewFunction(c *gin.Context) {
 	projectName := strings.ReplaceAll(strings.TrimSpace(project.Title), " ", "-")
 	projectName = strings.ToLower(projectName)
 	var functionPath = projectName + "-" + function.Path
+	fmt.Println("GitlabProjectId", h.baseConf.GitlabProjectId)
+	fmt.Println("GitlabGroupId", h.baseConf.GitlabGroupId)
 
 	_, err = gitlab.CreateProjectFork(functionPath, gitlab.IntegrationData{
 		GitlabIntegrationUrl:   h.baseConf.GitlabIntegrationURL,
