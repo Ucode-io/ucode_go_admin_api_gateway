@@ -41,6 +41,7 @@ push-image:
 
 swag-init:
 	swag init -g api/api.go -o api/docs --parseDependency
+	
 run:
 	go run cmd/main.go
 
