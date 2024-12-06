@@ -135,6 +135,12 @@ type BaseConfig struct {
 	CompanyServiceHost string
 	CompanyServicePort string
 
+	GoObjectBuilderServiceHost string
+	GoObjectBuilderGRPCPort    string
+
+	GoFunctionServiceHost     string
+	GoFunctionServiceHTTPPort string
+
 	MinioEndpoint        string
 	MinioAccessKeyID     string
 	MinioSecretAccessKey string
@@ -146,9 +152,6 @@ type BaseConfig struct {
 
 	DefaultOffset string
 	DefaultLimit  string
-
-	GoObjectBuilderServiceHost string
-	GoObjectBuilderGRPCPort    string
 
 	CLIENT_HOST                   string
 	SUPERADMIN_HOST               string
@@ -206,6 +209,9 @@ func BaseLoad() BaseConfig {
 	config.GitlabGroupIdMicroFE = cast.ToInt(GetOrReturnDefaultValue("GITLAB_GROUP_ID_MICROFE", 2604))
 	config.GitlabProjectIdMicroFE = cast.ToInt(GetOrReturnDefaultValue("GITLAB_PROJECT_ID_MICROFE", 0))
 	config.GitlabHostMicroFE = cast.ToString(GetOrReturnDefaultValue("GITLAB_HOST_MICROFE", "test-page.u-code.io"))
+
+	config.GoFunctionServiceHost = cast.ToString(GetOrReturnDefaultValue("GO_FUNCTION_SERVICE_HOST", "http://localhost"))
+	config.GoFunctionServiceHTTPPort = cast.ToString(GetOrReturnDefaultValue("GO_FUNCTION_SERVICE_HTTP_PORT", ":7090"))
 
 	config.GoObjectBuilderServiceHost = cast.ToString(GetOrReturnDefaultValue("GO_OBJECT_BUILDER_SERVICE_GRPC_HOST", "localhost"))
 	config.GoObjectBuilderGRPCPort = cast.ToString(GetOrReturnDefaultValue("GO_OBJECT_BUILDER_SERVICE_GRPC_PORT", ":7107"))

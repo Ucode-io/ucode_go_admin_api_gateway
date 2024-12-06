@@ -28,7 +28,6 @@ import (
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) CreateFunctionFolder(c *gin.Context) {
 	var functionFolder fc.CreateFunctionFolderRequest
-	//var resourceEnvironment *obs.ResourceEnvironment
 	err := c.ShouldBindJSON(&functionFolder)
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
@@ -108,7 +107,6 @@ func (h *HandlerV1) CreateFunctionFolder(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetFunctionFolderById(c *gin.Context) {
 	functionFolderID := c.Param("function_folder_id")
-	//var resourceEnvironment *obs.ResourceEnvironment
 
 	if !util.IsValidUUID(functionFolderID) {
 		h.handleResponse(c, status_http.InvalidArgument, "function id is an invalid uuid")
@@ -272,7 +270,6 @@ func (h *HandlerV1) GetAllFunctionFolder(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) UpdateFunctionFolder(c *gin.Context) {
 	var functionFolder models.FunctionFolder
-	//var resourceEnvironment *obs.ResourceEnvironment
 
 	err := c.ShouldBindJSON(&functionFolder)
 	if err != nil {
@@ -354,7 +351,6 @@ func (h *HandlerV1) UpdateFunctionFolder(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) DeleteFunctionFolder(c *gin.Context) {
 	functionFolderID := c.Param("function_folder_id")
-	//var resourceEnvironment *obs.ResourceEnvironment
 
 	if !util.IsValidUUID(functionFolderID) {
 		h.handleResponse(c, status_http.InvalidArgument, "function folder id is an invalid uuid")
