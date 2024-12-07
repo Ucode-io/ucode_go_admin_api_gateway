@@ -12,6 +12,7 @@ import (
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	fc "ucode/ucode_go_api_gateway/genproto/new_function_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
+	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/code_server"
 	"ucode/ucode_go_api_gateway/pkg/gitlab"
 	"ucode/ucode_go_api_gateway/pkg/helper"
@@ -44,10 +45,10 @@ const (
 func (h *HandlerV1) CreateNewFunction(c *gin.Context) {
 	var (
 		function models.CreateFunctionRequest
-		response = &fc.Function{}
+		response = &obs.Function{}
 	)
-	err := c.ShouldBindJSON(&function)
-	if err != nil {
+
+	if err := c.ShouldBindJSON(&function); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -60,8 +61,7 @@ func (h *HandlerV1) CreateNewFunction(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
@@ -93,15 +93,22 @@ func (h *HandlerV1) CreateNewFunction(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	project, _ := h.companyServices.Project().GetById(c.Request.Context(),
+
+	project, err := h.companyServices.Project().GetById(c.Request.Context(),
 		&pb.GetProjectByIdRequest{
 			ProjectId: environment.GetProjectId(),
-		})
-	if project.GetTitle() == "" {
-		err = errors.New("error project name is required")
-		h.handleResponse(c, status_http.BadRequest, err.Error())
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	if project.GetTitle() == "" {
+		h.handleResponse(c, status_http.BadRequest, "error project name is required")
+		return
+	}
+
 	projectName := strings.ReplaceAll(strings.TrimSpace(project.Title), " ", "-")
 	projectName = strings.ToLower(projectName)
 	var functionPath = projectName + "-" + function.Path
@@ -116,11 +123,12 @@ func (h *HandlerV1) CreateNewFunction(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
-	uuid, _ := uuid.NewRandom()
-	var url = "https://" + uuid.String() + ".u-code.io"
 
 	var (
-		createFunction = &fc.CreateFunctionRequest{
+		uuid, _ = uuid.NewRandom()
+		url     = "https://" + uuid.String() + ".u-code.io"
+
+		createFunction = &obs.CreateFunctionRequest{
 			Path:             functionPath,
 			Name:             function.Name,
 			Description:      function.Description,
@@ -128,8 +136,9 @@ func (h *HandlerV1) CreateNewFunction(c *gin.Context) {
 			EnvironmentId:    environmentId.(string),
 			FunctionFolderId: function.FunctionFolderId,
 			Url:              url,
-			Type:             FUNCTION,
+			Type:             function.Type,
 		}
+
 		logReq = &models.CreateVersionHistoryRequest{
 			Services:     services,
 			NodeType:     resource.NodeType,
@@ -144,11 +153,9 @@ func (h *HandlerV1) CreateNewFunction(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		response, err = services.FunctionService().FunctionService().Create(
-			c.Request.Context(),
-			createFunction,
+		response, err = services.GetBuilderServiceByType(resource.NodeType).Function().Create(
+			c.Request.Context(), createFunction,
 		)
-
 		if err != nil {
 			logReq.Response = err.Error()
 			h.handleResponse(c, status_http.GRPCError, err.Error())
@@ -160,14 +167,13 @@ func (h *HandlerV1) CreateNewFunction(c *gin.Context) {
 	case pb.ResourceType_POSTGRESQL:
 		newCreateFunction := &nb.CreateFunctionRequest{}
 
-		err = helper.MarshalToStruct(createFunction, &newCreateFunction)
-		if err != nil {
+		if err = helper.MarshalToStruct(createFunction, &newCreateFunction); err != nil {
+			h.handleResponse(c, status_http.InternalServerError, err.Error())
 			return
 		}
 
 		response, err := services.GoObjectBuilderService().Function().Create(
-			c.Request.Context(),
-			newCreateFunction,
+			c.Request.Context(), newCreateFunction,
 		)
 		if err != nil {
 			logReq.Response = err.Error()
@@ -237,12 +243,12 @@ func (h *HandlerV1) GetNewFunctionByID(c *gin.Context) {
 		return
 	}
 
-	var function = &fc.Function{}
+	var function = &obs.Function{}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		function, err = services.FunctionService().FunctionService().GetSingle(
+		function, err = services.GetBuilderServiceByType(resource.NodeType).Function().GetSingle(
 			c.Request.Context(),
-			&fc.FunctionPrimaryKey{
+			&obs.FunctionPrimaryKey{
 				Id:        functionID,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -253,8 +259,8 @@ func (h *HandlerV1) GetNewFunctionByID(c *gin.Context) {
 		}
 
 		if function.Url == "" {
-			err = gitlab.CloneForkToPath(function.GetSshUrl(), h.baseConf)
-			if err != nil {
+
+			if err = gitlab.CloneForkToPath(function.GetSshUrl(), h.baseConf); err != nil {
 				h.handleResponse(c, status_http.InvalidArgument, err.Error())
 				return
 			}
@@ -269,7 +275,7 @@ func (h *HandlerV1) GetNewFunctionByID(c *gin.Context) {
 		}
 
 		function.ProjectId = resource.ResourceEnvironmentId
-		_, err = services.FunctionService().FunctionService().Update(c.Request.Context(), function)
+		_, err = services.GetBuilderServiceByType(resource.NodeType).Function().Update(c.Request.Context(), function)
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
@@ -287,20 +293,11 @@ func (h *HandlerV1) GetNewFunctionByID(c *gin.Context) {
 			return
 		}
 
-		err = helper.MarshalToStruct(resp, &function)
-		if err != nil {
+		if err = helper.MarshalToStruct(resp, &function); err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 	}
-
-	// var status int
-	// for {
-	// 	status, err = util.DoRequestCheckCodeServer(function.Url+"/?folder=/functions/"+function.Path, "GET", nil)
-	// 	if status == 200 {
-	// 		break
-	// 	}
-	// }
 
 	h.handleResponse(c, status_http.OK, function)
 }
@@ -321,8 +318,6 @@ func (h *HandlerV1) GetNewFunctionByID(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetAllNewFunctions(c *gin.Context) {
-
-	//var resourceEnvironment *obs.ResourceEnvironment
 	limit, err := h.getLimitParam(c)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
@@ -342,8 +337,7 @@ func (h *HandlerV1) GetAllNewFunctions(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
@@ -372,11 +366,7 @@ func (h *HandlerV1) GetAllNewFunctions(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -384,10 +374,9 @@ func (h *HandlerV1) GetAllNewFunctions(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-
-		resp, err := services.FunctionService().FunctionService().GetList(
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).Function().GetList(
 			c.Request.Context(),
-			&fc.GetAllFunctionsRequest{
+			&obs.GetAllFunctionsRequest{
 				Search:        c.DefaultQuery("search", ""),
 				Limit:         int32(limit),
 				Offset:        int32(offset),
@@ -442,8 +431,7 @@ func (h *HandlerV1) UpdateNewFunction(c *gin.Context) {
 		resp     = &empty.Empty{}
 	)
 
-	err := c.ShouldBindJSON(&function)
-	if err != nil {
+	if err := c.ShouldBindJSON(&function); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -456,8 +444,7 @@ func (h *HandlerV1) UpdateNewFunction(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
@@ -475,22 +462,25 @@ func (h *HandlerV1) UpdateNewFunction(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	environment, _ := h.companyServices.Environment().GetById(c.Request.Context(), &pb.EnvironmentPrimaryKey{
-		Id: environmentId.(string),
-	})
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
+	environment, err := h.companyServices.Environment().GetById(
+		c.Request.Context(), &pb.EnvironmentPrimaryKey{
+			Id: environmentId.(string),
+		},
 	)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
 	var (
-		updateFunction = &fc.Function{
+		updateFunction = &obs.Function{
 			Id:               function.ID,
 			Description:      function.Description,
 			Name:             function.Name,
@@ -499,18 +489,16 @@ func (h *HandlerV1) UpdateNewFunction(c *gin.Context) {
 			ProjectId:        resource.ResourceEnvironmentId,
 			FunctionFolderId: function.FuncitonFolderId,
 		}
+
 		logReq = &models.CreateVersionHistoryRequest{
 			Services:     services,
 			NodeType:     resource.NodeType,
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: c.Request.URL.String(),
 			ActionType:   "UPDATE",
-			UsedEnvironments: map[string]bool{
-				cast.ToString(environmentId): true,
-			},
-			UserInfo:  cast.ToString(userId),
-			Request:   &updateFunction,
-			TableSlug: "FUNCTION",
+			UserInfo:     cast.ToString(userId),
+			Request:      &updateFunction,
+			TableSlug:    "FUNCTION",
 		}
 	)
 
@@ -524,11 +512,11 @@ func (h *HandlerV1) UpdateNewFunction(c *gin.Context) {
 		go h.versionHistory(logReq)
 	}()
 
-	resp, err = services.FunctionService().FunctionService().Update(
-		c.Request.Context(),
-		updateFunction,
+	resp, err = services.GetBuilderServiceByType(resource.NodeType).Function().Update(
+		c.Request.Context(), updateFunction,
 	)
 	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 }
@@ -548,7 +536,6 @@ func (h *HandlerV1) UpdateNewFunction(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) DeleteNewFunction(c *gin.Context) {
 	functionID := c.Param("function_id")
-	//var resourceEnvironment *obs.ResourceEnvironment
 
 	if !util.IsValidUUID(functionID) {
 		h.handleResponse(c, status_http.InvalidArgument, "function id is an invalid uuid")
@@ -563,8 +550,7 @@ func (h *HandlerV1) DeleteNewFunction(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err := errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
@@ -605,6 +591,7 @@ func (h *HandlerV1) DeleteNewFunction(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
 	// delete code server
 	err = code_server.DeleteCodeServerByPath(resp.Path, h.baseConf)
 	if err != nil {
@@ -633,11 +620,8 @@ func (h *HandlerV1) DeleteNewFunction(c *gin.Context) {
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: c.Request.URL.String(),
 			ActionType:   "DELETE",
-			UsedEnvironments: map[string]bool{
-				cast.ToString(environmentId): true,
-			},
-			UserInfo:  cast.ToString(userId),
-			TableSlug: "FUNCTION",
+			UserInfo:     cast.ToString(userId),
+			TableSlug:    "FUNCTION",
 		}
 	)
 
@@ -651,14 +635,15 @@ func (h *HandlerV1) DeleteNewFunction(c *gin.Context) {
 		go h.versionHistory(logReq)
 	}()
 
-	_, err = services.FunctionService().FunctionService().Delete(
+	_, err = services.GetBuilderServiceByType(resource.NodeType).Function().Delete(
 		c.Request.Context(),
-		&fc.FunctionPrimaryKey{
+		&obs.FunctionPrimaryKey{
 			Id:        functionID,
 			ProjectId: resource.ResourceEnvironmentId,
 		},
 	)
 	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 }
@@ -698,14 +683,12 @@ func (h *HandlerV1) GetAllNewFunctionsForApp(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_FUNCTION_SERVICE,
@@ -716,11 +699,7 @@ func (h *HandlerV1) GetAllNewFunctionsForApp(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -728,9 +707,8 @@ func (h *HandlerV1) GetAllNewFunctionsForApp(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err := services.FunctionService().FunctionService().GetList(
-			c.Request.Context(),
-			&fc.GetAllFunctionsRequest{
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).Function().GetList(
+			c.Request.Context(), &obs.GetAllFunctionsRequest{
 				Search:    c.DefaultQuery("search", ""),
 				Limit:     int32(limit),
 				Offset:    int32(offset),

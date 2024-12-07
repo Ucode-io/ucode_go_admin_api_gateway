@@ -12,6 +12,7 @@ type Function struct {
 	Name             string `json:"name"`
 	Description      string `json:"description"`
 	FuncitonFolderId string `json:"function_folder_id"`
+	Type             string `json:"type"`
 }
 
 type CreateFunctionRequest struct {
@@ -23,6 +24,7 @@ type CreateFunctionRequest struct {
 	VersionId        string `json:"-"`
 	FunctionFolderId string `json:"function_folder_id"`
 	FrameworkType    string `json:"framework_type"`
+	Type             string `json:"type"`
 }
 
 type InvokeFunctionRequest struct {
