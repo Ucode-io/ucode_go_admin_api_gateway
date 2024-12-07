@@ -4,15 +4,17 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"net/http"
 	"time"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
+	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
-	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
@@ -173,11 +175,15 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *HandlerV2
 	}
 	authInfo, _ := h.GetAuthInfo(c)
 	for _, customEvent := range request.CustomEvents {
-		//this is new invoke function request for befor and after actions
+		var (
+			path        = customEvent.GetFunctions()[0].GetPath()
+			name        = customEvent.GetFunctions()[0].GetName()
+			requestType = customEvent.GetFunctions()[0].GetRequestType()
+		)
 		var invokeFunction models.NewInvokeFunctionRequest
 		data, err := helper.ConvertStructToResponse(customEvent.Attributes)
 		if err != nil {
-			return customEvent.GetFunctions()[0].Name, err
+			return name, err
 		}
 
 		data["object_ids"] = request.IDs
@@ -192,39 +198,52 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *HandlerV2
 		data["action_type"] = request.ActionType
 		invokeFunction.Data = data
 
-		if customEvent.GetFunctions()[0].RequestType == "" || customEvent.GetFunctions()[0].RequestType == "ASYNC" {
-			resp, err := util.DoRequest("https://ofs.u-code.io/function/"+customEvent.GetFunctions()[0].Path, "POST", invokeFunction)
-			if err != nil {
-				return customEvent.GetFunctions()[0].Name, err
-			} else if resp.Status == "error" {
-				var errStr = resp.Status
-				if resp.Data != nil && resp.Data["message"] != nil {
-					errStr = resp.Data["message"].(string)
-				}
-				return customEvent.GetFunctions()[0].Name, errors.New(errStr)
-			}
-
-			h.log.Info("----FUNCTION--->>>>", logger.Any("mes", resp.Data["message"]))
-
-		} else if customEvent.GetFunctions()[0].RequestType == "SYNC" {
+		if requestType == "" || requestType == "ASYNC" {
+			return funcHandlers[customEvent.Functions[0].Type](path, name, invokeFunction)
+		} else if requestType == "SYNC" {
 			go func(customEvent *obs.CustomEvent) {
-				resp, err := util.DoRequest("https://ofs.u-code.io/function/"+customEvent.GetFunctions()[0].Path, "POST", invokeFunction)
-				if err != nil {
-					h.log.Error("ERROR FROM OFS", logger.Any("err", err.Error()))
-					return
-				} else if resp.Status == "error" {
-					var errStr = resp.Status
-					if resp.Data != nil && resp.Data["message"] != nil {
-						errStr = resp.Data["message"].(string)
-						h.log.Error("ERROR FROM OFS"+customEvent.GetFunctions()[0].Path, logger.Any("err", errStr))
-						return
-					}
-
-					h.log.Error("ERROR FROM OFS", logger.Any("err", errStr))
-					return
-				}
+				funcHandlers[customEvent.Functions[0].Type](path, name, invokeFunction)
 			}(customEvent)
 		}
 	}
 	return
+}
+
+type handlerFunc func(string, string, models.NewInvokeFunctionRequest) (string, error)
+
+var funcHandlers = map[string]handlerFunc{
+	"FUNCTION": ExecOpenFaaS,
+	"KNATIVE":  ExecKnative,
+}
+
+func ExecOpenFaaS(path, name string, req models.NewInvokeFunctionRequest) (string, error) {
+	url := fmt.Sprintf("%s%s", config.OpenFaaSBaseUrl, path)
+	resp, err := util.DoRequest(url, http.MethodPost, req)
+	if err != nil {
+		return name, err
+	} else if resp.Status == "error" {
+		var errStr = resp.Status
+		if resp.Data != nil && resp.Data["message"] != nil {
+			errStr = resp.Data["message"].(string)
+		}
+		return name, errors.New(errStr)
+	}
+
+	return "", nil
+}
+
+func ExecKnative(path, name string, req models.NewInvokeFunctionRequest) (string, error) {
+	url := fmt.Sprintf("http://%s.%s", path, config.KnativeBaseUrl)
+	resp, err := util.DoRequest(url, http.MethodPost, req)
+	if err != nil {
+		return name, err
+	} else if resp.Status == "error" {
+		var errStr = resp.Status
+		if resp.Data != nil && resp.Data["message"] != nil {
+			errStr = resp.Data["message"].(string)
+		}
+		return name, errors.New(errStr)
+	}
+
+	return "", nil
 }
