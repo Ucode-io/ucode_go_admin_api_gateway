@@ -49,6 +49,10 @@ const (
 
 	OpenFaaSBaseUrl = "https://ofs.u-code.io/function/"
 	KnativeBaseUrl  = "knative-fn.u-code.io"
+
+	// CustomEventTypes
+	BEFORE = "before"
+	AFTER  = "after"
 )
 
 var (

@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"strings"
 	"time"
 	"ucode/ucode_go_api_gateway/api/models"
@@ -47,10 +48,10 @@ func (h *HandlerV1) CreateObject(c *gin.Context) {
 		resp                        *obs.CommonMessage
 		beforeActions, afterActions []*obs.CustomEvent
 		statusHttp                  = status_http.GrpcStatusToHTTP["Created"]
+		err                         error
 	)
 
-	err := c.ShouldBindJSON(&objectRequest)
-	if err != nil {
+	if err = c.ShouldBindJSON(&objectRequest); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -63,8 +64,7 @@ func (h *HandlerV1) CreateObject(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
@@ -72,8 +72,8 @@ func (h *HandlerV1) CreateObject(c *gin.Context) {
 	resourceBody, ok := c.Get("resource")
 	if resourceBody != "" && ok {
 		var resourceList *pb.GetResourceByEnvIDResponse
-		err = json.Unmarshal([]byte(resourceBody.(string)), &resourceList)
-		if err != nil {
+
+		if err = json.Unmarshal([]byte(resourceBody.(string)), &resourceList); err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
@@ -112,11 +112,7 @@ func (h *HandlerV1) CreateObject(c *gin.Context) {
 	objectRequest.Data["company_service_project_id"] = resource.GetProjectId()
 	objectRequest.Data["company_service_environment_id"] = resource.GetEnvironmentId()
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -125,8 +121,7 @@ func (h *HandlerV1) CreateObject(c *gin.Context) {
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 
 	var id string
-	uid, _ := uuid.NewRandom()
-	id = uid.String()
+	id = uuid.New().String()
 
 	guid, ok := objectRequest.Data["guid"]
 	if ok {
@@ -140,10 +135,11 @@ func (h *HandlerV1) CreateObject(c *gin.Context) {
 	// THIS for loop is written to create child objects (right now it is used in the case of One2One relation)
 	for key, value := range objectRequest.Data {
 		if key[0] == '$' {
+			var (
+				interfaceToMap = value.(map[string]interface{})
+				id             = uuid.New()
+			)
 
-			interfaceToMap := value.(map[string]interface{})
-
-			id, _ := uuid.NewRandom()
 			interfaceToMap["guid"] = id
 
 			mapToStruct, err := helper.ConvertMapToStruct(interfaceToMap)
@@ -153,7 +149,7 @@ func (h *HandlerV1) CreateObject(c *gin.Context) {
 			}
 
 			_, err = service.Create(
-				context.Background(),
+				c.Request.Context(),
 				&obs.CommonMessage{
 					TableSlug: key[1:],
 					Data:      mapToStruct,
@@ -178,7 +174,15 @@ func (h *HandlerV1) CreateObject(c *gin.Context) {
 
 	fromOfs := c.Query("from-ofs")
 	if fromOfs != "true" {
-		beforeActions, afterActions, err = GetListCustomEvents(c.Param("table_slug"), "", "CREATE", c, h)
+		beforeActions, afterActions, err = GetListCustomEvents(models.GetListCustomEventsStruct{
+			TableSlug: c.Param("table_slug"),
+			RoleId:    "",
+			Method:    "CREATE",
+			Resource:  resource,
+		},
+			c,
+			h,
+		)
 		if err != nil {
 			h.handleResponse(c, status_http.InvalidArgument, err.Error())
 			return
@@ -186,15 +190,16 @@ func (h *HandlerV1) CreateObject(c *gin.Context) {
 	}
 
 	if len(beforeActions) > 0 {
-		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
+		functionName, err := DoInvokeFuntion(models.DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			IDs:          []string{id},
 			TableSlug:    c.Param("table_slug"),
 			ObjectData:   objectRequest.Data,
 			Method:       "CREATE",
+			Resource:     resource,
 		},
-			c,
-			h,
+			c, // gin context,
+			h, // handler
 		)
 		if err != nil {
 			h.handleResponse(c, status_http.InvalidArgument, err.Error()+" in "+functionName)
@@ -205,7 +210,7 @@ func (h *HandlerV1) CreateObject(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = service.Create(
-			context.Background(),
+			c.Request.Context(),
 			&obs.CommonMessage{
 				TableSlug:         c.Param("table_slug"),
 				Data:              structData,
@@ -226,6 +231,8 @@ func (h *HandlerV1) CreateObject(c *gin.Context) {
 		}
 	case pb.ResourceType_POSTGRESQL:
 		// Does Not Implemented
+		h.handleResponse(c, status_http.BadRequest, "does not implemented")
+		return
 	}
 
 	if data, ok := resp.Data.AsMap()["data"].(map[string]interface{}); ok {
@@ -236,14 +243,14 @@ func (h *HandlerV1) CreateObject(c *gin.Context) {
 	}
 
 	if len(afterActions) > 0 {
-		functionName, err := DoInvokeFuntion(
-			DoInvokeFuntionStruct{
-				CustomEvents: afterActions,
-				IDs:          []string{id},
-				TableSlug:    c.Param("table_slug"),
-				ObjectData:   objectRequest.Data,
-				Method:       "CREATE",
-			},
+		functionName, err := DoInvokeFuntion(models.DoInvokeFuntionStruct{
+			CustomEvents: afterActions,
+			IDs:          []string{id},
+			TableSlug:    c.Param("table_slug"),
+			ObjectData:   objectRequest.Data,
+			Method:       "CREATE",
+			Resource:     resource,
+		},
 			c, // gin context,
 			h, // handler
 		)
@@ -252,6 +259,7 @@ func (h *HandlerV1) CreateObject(c *gin.Context) {
 			return
 		}
 	}
+
 	statusHttp.CustomMessage = resp.GetCustomMessage()
 	h.handleResponse(c, statusHttp, resp)
 }
@@ -312,14 +320,12 @@ func (h *HandlerV1) GetSingle(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -330,11 +336,7 @@ func (h *HandlerV1) GetSingle(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -345,7 +347,7 @@ func (h *HandlerV1) GetSingle(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = service.GetSingle(
-			context.Background(),
+			c.Request.Context(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("table_slug"),
 				Data:      structData,
@@ -364,7 +366,10 @@ func (h *HandlerV1) GetSingle(c *gin.Context) {
 		}
 	case pb.ResourceType_POSTGRESQL:
 		// Does Not Implemented
+		h.handleResponse(c, status_http.BadEnvironment, "does not implemented")
+		return
 	}
+
 	statusHttp.CustomMessage = resp.GetCustomMessage()
 	h.handleResponse(c, statusHttp, resp)
 }
@@ -420,8 +425,7 @@ func (h *HandlerV1) GetSingleSlim(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
@@ -441,11 +445,7 @@ func (h *HandlerV1) GetSingleSlim(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -458,14 +458,11 @@ func (h *HandlerV1) GetSingleSlim(c *gin.Context) {
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: c.Request.URL.String(),
 			ActionType:   "GET",
-			UsedEnvironments: map[string]bool{
-				cast.ToString(environmentId): true,
-			},
-			UserInfo:  cast.ToString(userId),
-			Request:   &structData,
-			ApiKey:    apiKey,
-			Type:      "API_KEY",
-			TableSlug: c.Param("table_slug"),
+			UserInfo:     cast.ToString(userId),
+			Request:      &structData,
+			ApiKey:       apiKey,
+			Type:         "API_KEY",
+			TableSlug:    c.Param("table_slug"),
 		}
 	)
 
@@ -474,10 +471,12 @@ func (h *HandlerV1) GetSingleSlim(c *gin.Context) {
 		service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 		redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
 		if err == nil {
-			resp := make(map[string]interface{})
-			m := make(map[string]interface{})
-			err = json.Unmarshal([]byte(redisResp), &m)
-			if err != nil {
+			var (
+				resp = make(map[string]interface{})
+				m    = make(map[string]interface{})
+			)
+
+			if err = json.Unmarshal([]byte(redisResp), &m); err != nil {
 				h.log.Error("Error while unmarshal redis", logger.Error(err))
 			} else {
 				resp["data"] = m
@@ -491,7 +490,7 @@ func (h *HandlerV1) GetSingleSlim(c *gin.Context) {
 		}
 
 		resp, err := service.GetSingleSlim(
-			context.Background(),
+			c.Request.Context(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("table_slug"),
 				Data:      structData,
@@ -536,10 +535,12 @@ func (h *HandlerV1) GetSingleSlim(c *gin.Context) {
 	case pb.ResourceType_POSTGRESQL:
 		redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
 		if err == nil {
-			resp := make(map[string]interface{})
-			m := make(map[string]interface{})
-			err = json.Unmarshal([]byte(redisResp), &m)
-			if err != nil {
+			var (
+				resp = make(map[string]interface{})
+				m    = make(map[string]interface{})
+			)
+
+			if err = json.Unmarshal([]byte(redisResp), &m); err != nil {
 				h.log.Error("Error while unmarshal redis", logger.Error(err))
 			} else {
 				resp["data"] = m
@@ -552,8 +553,8 @@ func (h *HandlerV1) GetSingleSlim(c *gin.Context) {
 			h.log.Error("Error while getting redis", logger.Error(err))
 		}
 
-		resp, err := services.GoObjectBuilderService().ObjectBuilder().GetSingleSlim(context.Background(),
-			&nb.CommonMessage{
+		resp, err := services.GoObjectBuilderService().ObjectBuilder().GetSingleSlim(
+			c.Request.Context(), &nb.CommonMessage{
 				TableSlug: c.Param("table_slug"),
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
@@ -612,18 +613,17 @@ func (h *HandlerV1) UpdateObject(c *gin.Context) {
 		statusHttp                  = status_http.GrpcStatusToHTTP["Ok"]
 	)
 
-	err := c.ShouldBindJSON(&objectRequest)
-	if err != nil {
+	if err := c.ShouldBindJSON(&objectRequest); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
-
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
+
 	var id string
 	if objectRequest.Data["guid"] != nil {
 		id = objectRequest.Data["guid"].(string)
@@ -640,8 +640,7 @@ func (h *HandlerV1) UpdateObject(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
@@ -649,8 +648,8 @@ func (h *HandlerV1) UpdateObject(c *gin.Context) {
 	resourceBody, ok := c.Get("resource")
 	if ok {
 		var resourceList *pb.GetResourceByEnvIDResponse
-		err = json.Unmarshal([]byte(resourceBody.(string)), &resourceList)
-		if err != nil {
+
+		if err = json.Unmarshal([]byte(resourceBody.(string)), &resourceList); err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
@@ -673,8 +672,7 @@ func (h *HandlerV1) UpdateObject(c *gin.Context) {
 		}
 	} else {
 		resource, err = h.companyServices.ServiceResource().GetSingle(
-			c.Request.Context(),
-			&pb.GetSingleServiceResourceReq{
+			c.Request.Context(), &pb.GetSingleServiceResourceReq{
 				ProjectId:     projectId.(string),
 				EnvironmentId: environmentId.(string),
 				ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -686,11 +684,7 @@ func (h *HandlerV1) UpdateObject(c *gin.Context) {
 		}
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -699,9 +693,16 @@ func (h *HandlerV1) UpdateObject(c *gin.Context) {
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 
 	fromOfs := c.Query("from-ofs")
-
 	if fromOfs != "true" {
-		beforeActions, afterActions, err = GetListCustomEvents(c.Param("table_slug"), "", "UPDATE", c, h)
+		beforeActions, afterActions, err = GetListCustomEvents(models.GetListCustomEventsStruct{
+			TableSlug: c.Param("table_slug"),
+			RoleId:    "",
+			Method:    "UPDATE",
+			Resource:  resource,
+		},
+			c,
+			h,
+		)
 		if err != nil {
 			h.handleResponse(c, status_http.InvalidArgument, err.Error())
 			return
@@ -710,14 +711,10 @@ func (h *HandlerV1) UpdateObject(c *gin.Context) {
 		switch resource.ResourceType {
 		case pb.ResourceType_MONGODB:
 			singleObject, err = service.GetSingle(
-				context.Background(),
+				c.Request.Context(),
 				&obs.CommonMessage{
 					TableSlug: c.Param("table_slug"),
-					Data: &structpb.Struct{
-						Fields: map[string]*structpb.Value{
-							"id": structpb.NewStringValue(id),
-						},
-					},
+					Data:      &structpb.Struct{Fields: map[string]*structpb.Value{"id": structpb.NewStringValue(id)}},
 					ProjectId: resource.ResourceEnvironmentId,
 				},
 			)
@@ -733,16 +730,19 @@ func (h *HandlerV1) UpdateObject(c *gin.Context) {
 			}
 		case pb.ResourceType_POSTGRESQL:
 			// Does Not Implemented
+			h.handleResponse(c, status_http.BadEnvironment, "does not implemented")
+			return
 		}
 	}
 
 	if len(beforeActions) > 0 {
-		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
+		functionName, err := DoInvokeFuntion(models.DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			IDs:          []string{id},
 			TableSlug:    c.Param("table_slug"),
 			ObjectData:   objectRequest.Data,
 			Method:       "UPDATE",
+			Resource:     resource,
 		},
 			c,
 			h,
@@ -752,11 +752,11 @@ func (h *HandlerV1) UpdateObject(c *gin.Context) {
 			return
 		}
 	}
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = service.Update(
-			context.Background(),
-			&obs.CommonMessage{
+			c.Request.Context(), &obs.CommonMessage{
 				TableSlug:        c.Param("table_slug"),
 				Data:             structData,
 				ProjectId:        resource.ResourceEnvironmentId,
@@ -777,12 +777,13 @@ func (h *HandlerV1) UpdateObject(c *gin.Context) {
 		}
 	case pb.ResourceType_POSTGRESQL:
 		// Does Not Implemented
+		h.handleResponse(c, status_http.BadRequest, "does not implemented")
+		return
 	}
 
 	if c.Param("table_slug") == "record_permission" {
 		if objectRequest.Data["role_id"] == nil {
-			err := errors.New("role id must be have in update permission")
-			h.handleResponse(c, status_http.BadRequest, err.Error())
+			h.handleResponse(c, status_http.BadRequest, "role id must be have in update permission")
 			return
 		}
 
@@ -794,7 +795,7 @@ func (h *HandlerV1) UpdateObject(c *gin.Context) {
 		defer conn.Close()
 
 		_, err = service.UpdateSessionsByRoleId(
-			context.Background(),
+			c.Request.Context(),
 			&pba.UpdateSessionByRoleIdRequest{
 				RoleId:    objectRequest.Data["role_id"].(string),
 				IsChanged: true,
@@ -805,16 +806,17 @@ func (h *HandlerV1) UpdateObject(c *gin.Context) {
 			return
 		}
 	}
+
 	if len(afterActions) > 0 {
-		functionName, err := DoInvokeFuntion(
-			DoInvokeFuntionStruct{
-				CustomEvents:           afterActions,
-				IDs:                    []string{id},
-				TableSlug:              c.Param("table_slug"),
-				ObjectData:             objectRequest.Data,
-				Method:                 "UPDATE",
-				ObjectDataBeforeUpdate: singleObject.Data.AsMap(),
-			},
+		functionName, err := DoInvokeFuntion(models.DoInvokeFuntionStruct{
+			CustomEvents:           afterActions,
+			IDs:                    []string{id},
+			TableSlug:              c.Param("table_slug"),
+			ObjectData:             objectRequest.Data,
+			Method:                 "UPDATE",
+			ObjectDataBeforeUpdate: singleObject.Data.AsMap(),
+			Resource:               resource,
+		},
 			c, // gin context,
 			h, // handler
 		)
@@ -823,6 +825,7 @@ func (h *HandlerV1) UpdateObject(c *gin.Context) {
 			return
 		}
 	}
+
 	statusHttp.CustomMessage = resp.GetCustomMessage()
 	h.handleResponse(c, status_http.OK, resp)
 }
@@ -850,8 +853,7 @@ func (h *HandlerV1) DeleteObject(c *gin.Context) {
 		statusHttp                  = status_http.GrpcStatusToHTTP["NoContent"]
 	)
 
-	err := c.ShouldBindJSON(&objectRequest)
-	if err != nil {
+	if err := c.ShouldBindJSON(&objectRequest); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -870,28 +872,23 @@ func (h *HandlerV1) DeleteObject(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	resource, _ := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
 	)
+
 	objectRequest.Data["id"] = objectID
 	objectRequest.Data["company_service_project_id"] = projectId.(string)
 	objectRequest.Data["company_service_environment_id"] = environmentId.(string)
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -907,19 +904,29 @@ func (h *HandlerV1) DeleteObject(c *gin.Context) {
 
 	fromOfs := c.Query("from-ofs")
 	if fromOfs != "true" {
-		beforeActions, afterActions, err = GetListCustomEvents(c.Param("table_slug"), "", "DELETE", c, h)
+		beforeActions, afterActions, err = GetListCustomEvents(models.GetListCustomEventsStruct{
+			TableSlug: c.Param("table_slug"),
+			RoleId:    "",
+			Method:    http.MethodDelete,
+			Resource:  resource,
+		},
+			c,
+			h,
+		)
 		if err != nil {
 			h.handleResponse(c, status_http.InvalidArgument, err.Error())
 			return
 		}
 	}
+
 	if len(beforeActions) > 0 {
-		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
+		functionName, err := DoInvokeFuntion(models.DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			IDs:          []string{objectID},
 			TableSlug:    c.Param("table_slug"),
 			ObjectData:   objectRequest.Data,
 			Method:       "DELETE",
+			Resource:     resource,
 		},
 			c,
 			h,
@@ -929,10 +936,11 @@ func (h *HandlerV1) DeleteObject(c *gin.Context) {
 			return
 		}
 	}
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = service.Delete(
-			context.Background(),
+			c.Request.Context(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("table_slug"),
 				Data:      structData,
@@ -951,17 +959,19 @@ func (h *HandlerV1) DeleteObject(c *gin.Context) {
 		}
 	case pb.ResourceType_POSTGRESQL:
 		// Does Not Implemented
+		h.handleResponse(c, status_http.BadRequest, "does not implemented")
+		return
 	}
 
 	if len(afterActions) > 0 {
-		functionName, err := DoInvokeFuntion(
-			DoInvokeFuntionStruct{
-				CustomEvents: afterActions,
-				IDs:          []string{objectID},
-				TableSlug:    c.Param("table_slug"),
-				ObjectData:   objectRequest.Data,
-				Method:       "DELETE",
-			},
+		functionName, err := DoInvokeFuntion(models.DoInvokeFuntionStruct{
+			CustomEvents: afterActions,
+			IDs:          []string{objectID},
+			TableSlug:    c.Param("table_slug"),
+			ObjectData:   objectRequest.Data,
+			Method:       "DELETE",
+			Resource:     resource,
+		},
 			c, // gin context,
 			h, // handler
 		)
@@ -998,16 +1008,17 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 		statusHttp    = status_http.GrpcStatusToHTTP["Ok"]
 	)
 
-	err := c.ShouldBindJSON(&objectRequest)
-	if err != nil {
+	if err := c.ShouldBindJSON(&objectRequest); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
+
 	tokenInfo, err := h.GetAuthInfo(c)
 	if err != nil {
 		h.handleResponse(c, status_http.Forbidden, err.Error())
 		return
 	}
+
 	if tokenInfo != nil {
 		if tokenInfo.Tables != nil {
 			objectRequest.Data["tables"] = tokenInfo.GetTables()
@@ -1016,6 +1027,7 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 		objectRequest.Data["role_id_from_token"] = tokenInfo.GetRoleId()
 		objectRequest.Data["client_type_id_from_token"] = tokenInfo.GetClientTypeId()
 	}
+
 	objectRequest.Data["language_setting"] = c.DefaultQuery("language_setting", "")
 	objectRequest.Data["with_relations"] = true
 
@@ -1045,14 +1057,12 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -1063,11 +1073,7 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -1075,19 +1081,29 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 
 	fromOfs := c.Query("from-ofs")
 	if fromOfs != "true" {
-		beforeActions, _, err = GetListCustomEvents(c.Param("table_slug"), "", "GETLIST", c, h)
+		beforeActions, _, err = GetListCustomEvents(models.GetListCustomEventsStruct{
+			TableSlug: c.Param("table_slug"),
+			RoleId:    "",
+			Method:    "GETLIST",
+			Resource:  resource,
+		},
+			c,
+			h,
+		)
 		if err != nil {
 			h.handleResponse(c, status_http.InvalidArgument, err.Error())
 			return
 		}
 	}
+
 	if len(beforeActions) > 0 {
-		functionName, resp, err := DoInvokeFuntionForGetList(DoInvokeFuntionStruct{
+		functionName, resp, err := DoInvokeFuntionForGetList(models.DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			TableSlug:    c.Param("table_slug"),
 			ObjectData:   objectRequest.Data,
 			Method:       "GETLIST",
 			ActionType:   "BEFORE",
+			Resource:     resource,
 		},
 			c,
 			h,
@@ -1107,7 +1123,7 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 			case pb.ResourceType_MONGODB:
 				service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 				resp, err = service.GroupByColumns(
-					context.Background(),
+					c.Request.Context(),
 					&obs.CommonMessage{
 						TableSlug: c.Param("table_slug"),
 						Data:      structData,
@@ -1120,6 +1136,8 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 				}
 			case pb.ResourceType_POSTGRESQL:
 				// Does Not Implemented
+				h.handleResponse(c, status_http.BadRequest, "does not implemented")
+				return
 			}
 		}
 	} else {
@@ -1127,10 +1145,12 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 		case pb.ResourceType_MONGODB:
 			redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
 			if err == nil {
-				resp := make(map[string]interface{})
-				m := make(map[string]interface{})
-				err = json.Unmarshal([]byte(redisResp), &m)
-				if err != nil {
+				var (
+					resp = make(map[string]interface{})
+					m    = make(map[string]interface{})
+				)
+
+				if err = json.Unmarshal([]byte(redisResp), &m); err != nil {
 					h.log.Error("Error while unmarshal redis", logger.Error(err))
 				} else {
 					resp["data"] = m
@@ -1140,7 +1160,7 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 			}
 			service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 			resp, err = service.GetList(
-				context.Background(),
+				c.Request.Context(),
 				&obs.CommonMessage{
 					TableSlug: c.Param("table_slug"),
 					Data:      structData,
@@ -1162,13 +1182,14 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 			}
 		case pb.ResourceType_POSTGRESQL:
 			resp, err := services.GoObjectBuilderService().ObjectBuilder().GetAll(
-				context.Background(),
+				c.Request.Context(),
 				&nb.CommonMessage{
 					TableSlug: c.Param("table_slug"),
 					Data:      structData,
 					ProjectId: resource.ResourceEnvironmentId,
 				},
 			)
+
 			if err != nil {
 				h.handleResponse(c, status_http.GRPCError, err.Error())
 				return
@@ -1246,12 +1267,11 @@ func (h *HandlerV1) GetListSlim(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
-	if projectId == "42ab0799-deff-4f8c-bf3f-64bf9665d304" {
+	if projectId == "42ab0799-deff-4f8c-bf3f-64bf9665d304" { // rizoTaxi
 		limit = 100
 	} else {
 		if limit > 40 {
@@ -1286,8 +1306,8 @@ func (h *HandlerV1) GetListSlim(c *gin.Context) {
 	resourceBody, ok := c.Get("resource")
 	if resourceBody != "" && ok {
 		var resourceList *pb.GetResourceByEnvIDResponse
-		err = json.Unmarshal([]byte(resourceBody.(string)), &resourceList)
-		if err != nil {
+
+		if err = json.Unmarshal([]byte(resourceBody.(string)), &resourceList); err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
@@ -1310,8 +1330,7 @@ func (h *HandlerV1) GetListSlim(c *gin.Context) {
 		}
 	} else {
 		resource, err = h.companyServices.ServiceResource().GetSingle(
-			c.Request.Context(),
-			&pb.GetSingleServiceResourceReq{
+			c.Request.Context(), &pb.GetSingleServiceResourceReq{
 				ProjectId:     projectId.(string),
 				EnvironmentId: environmentId.(string),
 				ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -1338,15 +1357,12 @@ func (h *HandlerV1) GetListSlim(c *gin.Context) {
 			NodeType:     resource.NodeType,
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: c.Request.URL.String(),
-			ActionType:   "GET",
-			UsedEnvironments: map[string]bool{
-				cast.ToString(environmentId): true,
-			},
-			UserInfo:  cast.ToString(userId),
-			Request:   &structData,
-			ApiKey:    apiKey,
-			Type:      "API_KEY",
-			TableSlug: c.Param("table_slug"),
+			ActionType:   http.MethodGet,
+			UserInfo:     cast.ToString(userId),
+			Request:      &structData,
+			ApiKey:       apiKey,
+			Type:         "API_KEY",
+			TableSlug:    c.Param("table_slug"),
 		}
 	)
 
@@ -1409,7 +1425,7 @@ func (h *HandlerV1) GetListSlim(c *gin.Context) {
 		}
 
 		resp, err := service.GetListSlimV2(
-			context.Background(),
+			c.Request.Context(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("table_slug"),
 				Data:      structData,
@@ -1458,8 +1474,8 @@ func (h *HandlerV1) GetListSlim(c *gin.Context) {
 		}
 		h.handleResponse(c, statusHttp, resp)
 	case pb.ResourceType_POSTGRESQL:
-		resp, err := services.GoObjectBuilderService().ObjectBuilder().GetListSlim(context.Background(),
-			&nb.CommonMessage{
+		resp, err := services.GoObjectBuilderService().ObjectBuilder().GetListSlim(
+			c.Request.Context(), &nb.CommonMessage{
 				TableSlug: c.Param("table_slug"),
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
@@ -1481,16 +1497,6 @@ func (h *HandlerV1) GetListSlim(c *gin.Context) {
 
 		logReq.Response = resp
 		go h.versionHistoryGo(c, logReq)
-
-		// if err == nil {
-		// 	if resp.IsCached {
-		// 		jsonData, _ := resp.GetData().MarshalJSON()
-		// 		err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second)
-		// 		if err != nil {
-		// 			h.log.Error("Error while setting redis", logger.Error(err))
-		// 		}
-		// 	}
-		// }
 
 		statusHttp.CustomMessage = resp.GetCustomMessage()
 		h.handleResponse(c, statusHttp, resp)
@@ -1557,8 +1563,7 @@ func (h *HandlerV1) GetListInExcel(c *gin.Context) {
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -1569,11 +1574,7 @@ func (h *HandlerV1) GetListInExcel(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -1584,7 +1585,7 @@ func (h *HandlerV1) GetListInExcel(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err := service.GetListInExcel(
-			context.Background(),
+			c.Request.Context(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("table_slug"),
 				Data:      structData,
@@ -1607,7 +1608,7 @@ func (h *HandlerV1) GetListInExcel(c *gin.Context) {
 		h.handleResponse(c, statusHttp, resp)
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().ObjectBuilder().GetListInExcel(
-			context.Background(),
+			c.Request.Context(),
 			&nb.CommonMessage{
 				TableSlug: c.Param("table_slug"),
 				Data:      structData,
@@ -1646,8 +1647,7 @@ func (h *HandlerV1) DeleteManyToMany(c *gin.Context) {
 		statusHttp                  = status_http.GrpcStatusToHTTP["NoContent"]
 	)
 
-	err := c.ShouldBindJSON(&m2mMessage)
-	if err != nil {
+	if err := c.ShouldBindJSON(&m2mMessage); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 	}
 
@@ -1659,14 +1659,12 @@ func (h *HandlerV1) DeleteManyToMany(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -1677,37 +1675,40 @@ func (h *HandlerV1) DeleteManyToMany(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-
-	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
-	// defer cancel()
 
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 
 	m2mMessage.ProjectId = resource.ResourceEnvironmentId
 	fromOfs := c.Query("from-ofs")
 	if fromOfs != "true" {
-		beforeActions, afterActions, err = GetListCustomEvents(c.Param("table_slug"), "", "DELETE_MANY2MANY", c, h)
+		beforeActions, afterActions, err = GetListCustomEvents(models.GetListCustomEventsStruct{
+			TableSlug: c.Param("table_slug"),
+			RoleId:    "",
+			Method:    "DELETE_MANY2MANY",
+			Resource:  resource,
+		},
+			c,
+			h,
+		)
 		if err != nil {
 			h.handleResponse(c, status_http.InvalidArgument, err.Error())
 			return
 		}
 	}
+
 	if len(beforeActions) > 0 {
-		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
+		functionName, err := DoInvokeFuntion(models.DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			IDs:          []string{m2mMessage.IdFrom},
 			TableSlug:    m2mMessage.TableTo,
 			ObjectData:   map[string]interface{}{"id_to": m2mMessage.IdTo, "table_to": m2mMessage.TableFrom},
 			Method:       "DELETE_MANY2MANY",
+			Resource:     resource,
 		},
 			c,
 			h,
@@ -1720,10 +1721,8 @@ func (h *HandlerV1) DeleteManyToMany(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = service.ManyToManyDelete(
-			context.Background(),
-			&m2mMessage,
+			c.Request.Context(), &m2mMessage,
 		)
-
 		if err != nil {
 			statusHttp = status_http.GrpcStatusToHTTP["Internal"]
 			stat, ok := status.FromError(err)
@@ -1736,17 +1735,19 @@ func (h *HandlerV1) DeleteManyToMany(c *gin.Context) {
 		}
 	case pb.ResourceType_POSTGRESQL:
 		// Does Not Implemented
+		h.handleResponse(c, status_http.BadRequest, "does not implemented")
+		return
 	}
 
 	if len(afterActions) > 0 {
-		functionName, err := DoInvokeFuntion(
-			DoInvokeFuntionStruct{
-				CustomEvents: afterActions,
-				IDs:          []string{m2mMessage.IdFrom},
-				TableSlug:    c.Param("table_slug"),
-				ObjectData:   map[string]interface{}{"id_to": m2mMessage.IdTo, "table_from": m2mMessage.TableTo},
-				Method:       "DELETE_MANY2MANY",
-			},
+		functionName, err := DoInvokeFuntion(models.DoInvokeFuntionStruct{
+			CustomEvents: afterActions,
+			IDs:          []string{m2mMessage.IdFrom},
+			TableSlug:    c.Param("table_slug"),
+			ObjectData:   map[string]interface{}{"id_to": m2mMessage.IdTo, "table_from": m2mMessage.TableTo},
+			Method:       "DELETE_MANY2MANY",
+			Resource:     resource,
+		},
 			c, // gin context,
 			h, // handler
 		)
@@ -1780,8 +1781,7 @@ func (h *HandlerV1) AppendManyToMany(c *gin.Context) {
 		statusHttp                  = status_http.GrpcStatusToHTTP["Ok"]
 	)
 
-	err := c.ShouldBindJSON(&m2mMessage)
-	if err != nil {
+	if err := c.ShouldBindJSON(&m2mMessage); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 	}
 
@@ -1793,14 +1793,12 @@ func (h *HandlerV1) AppendManyToMany(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -1811,37 +1809,40 @@ func (h *HandlerV1) AppendManyToMany(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-
-	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
-	// defer cancel()
 
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 
 	m2mMessage.ProjectId = resource.ResourceEnvironmentId
 	fromOfs := c.Query("from-ofs")
 	if fromOfs != "true" {
-		beforeActions, afterActions, err = GetListCustomEvents(c.Param("table_slug"), "", "APPEND_MANY2MANY", c, h)
+		beforeActions, afterActions, err = GetListCustomEvents(models.GetListCustomEventsStruct{
+			TableSlug: c.Param("table_slug"),
+			RoleId:    "",
+			Method:    "APPEND_MANY2MANY",
+			Resource:  resource,
+		},
+			c,
+			h,
+		)
 		if err != nil {
 			h.handleResponse(c, status_http.InvalidArgument, err.Error())
 			return
 		}
 	}
+
 	if len(beforeActions) > 0 {
-		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
+		functionName, err := DoInvokeFuntion(models.DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			IDs:          []string{m2mMessage.IdFrom},
 			TableSlug:    m2mMessage.TableTo,
 			ObjectData:   map[string]interface{}{"id_to": m2mMessage.IdTo, "table_from": m2mMessage.TableFrom},
 			Method:       "APPEND_MANY2MANY",
+			Resource:     resource,
 		},
 			c,
 			h,
@@ -1854,10 +1855,8 @@ func (h *HandlerV1) AppendManyToMany(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = service.ManyToManyAppend(
-			context.Background(),
-			&m2mMessage,
+			c.Request.Context(), &m2mMessage,
 		)
-
 		if err != nil {
 			statusHttp = status_http.GrpcStatusToHTTP["Internal"]
 			stat, ok := status.FromError(err)
@@ -1870,17 +1869,19 @@ func (h *HandlerV1) AppendManyToMany(c *gin.Context) {
 		}
 	case pb.ResourceType_POSTGRESQL:
 		// Does Not Implemented
+		h.handleResponse(c, status_http.BadRequest, "does not implemented")
+		return
 	}
 
 	if len(afterActions) > 0 {
-		functionName, err := DoInvokeFuntion(
-			DoInvokeFuntionStruct{
-				CustomEvents: afterActions,
-				IDs:          []string{m2mMessage.IdFrom},
-				TableSlug:    m2mMessage.TableTo,
-				ObjectData:   map[string]interface{}{"id_to": m2mMessage.IdTo, "table_from": m2mMessage.TableFrom},
-				Method:       "APPEND_MANY2MANY",
-			},
+		functionName, err := DoInvokeFuntion(models.DoInvokeFuntionStruct{
+			CustomEvents: afterActions,
+			IDs:          []string{m2mMessage.IdFrom},
+			TableSlug:    m2mMessage.TableTo,
+			ObjectData:   map[string]interface{}{"id_to": m2mMessage.IdTo, "table_from": m2mMessage.TableFrom},
+			Method:       "APPEND_MANY2MANY",
+			Resource:     resource,
+		},
 			c, // gin context,
 			h, // handler
 		)
@@ -1889,6 +1890,7 @@ func (h *HandlerV1) AppendManyToMany(c *gin.Context) {
 			return
 		}
 	}
+
 	statusHttp.CustomMessage = resp.GetCustomMessage()
 	h.handleResponse(c, statusHttp, resp)
 }
@@ -1914,8 +1916,7 @@ func (h *HandlerV1) UpsertObject(c *gin.Context) {
 		statusHttp                  = status_http.GrpcStatusToHTTP["Created"]
 	)
 
-	err := c.ShouldBindJSON(&objectRequest)
-	if err != nil {
+	if err := c.ShouldBindJSON(&objectRequest); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -1928,14 +1929,12 @@ func (h *HandlerV1) UpsertObject(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -1946,18 +1945,11 @@ func (h *HandlerV1) UpsertObject(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-
-	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
-	// defer cancel()
 
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 
@@ -1974,22 +1966,32 @@ func (h *HandlerV1) UpsertObject(c *gin.Context) {
 		objectIds = append(objectIds, newObject["guid"].(string))
 		editedObjects = append(editedObjects, newObject)
 	}
+
 	objectRequest.Data["objects"] = editedObjects
 	fromOfs := c.Query("from-ofs")
 	if fromOfs != "true" {
-		beforeActions, afterActions, err = GetListCustomEvents(c.Param("table_slug"), "", "MULTIPLE_UPDATE", c, h)
+		beforeActions, afterActions, err = GetListCustomEvents(models.GetListCustomEventsStruct{
+			TableSlug: c.Param("table_slug"),
+			RoleId:    "",
+			Method:    "MULTIPLE_UPDATE",
+			Resource:  resource,
+		},
+			c,
+			h,
+		)
 		if err != nil {
 			h.handleResponse(c, status_http.InvalidArgument, err.Error())
 			return
 		}
 	}
 	if len(beforeActions) > 0 {
-		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
+		functionName, err := DoInvokeFuntion(models.DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			IDs:          []string{},
 			TableSlug:    c.Param("table_slug"),
 			ObjectData:   objectRequest.Data,
 			Method:       "MULTIPLE_UPDATE",
+			Resource:     resource,
 		},
 			c,
 			h,
@@ -2014,13 +2016,6 @@ func (h *HandlerV1) UpsertObject(c *gin.Context) {
 				h.handleResponse(c, status_http.InvalidArgument, err.Error())
 				return
 			}
-			// _, err = services.GetBuilderServiceByType(resource.NodeType)..ObjectBuilde().Create(
-			// 	context.Background(),
-			// 	&obs.CommonMessage{
-			// 		TableSlug: key[1:],
-			// 		Data:      mapToStruct,
-			// 	},
-			// )
 
 			objectRequest.Data[key[1:]+"_id"] = id
 		}
@@ -2035,8 +2030,7 @@ func (h *HandlerV1) UpsertObject(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = service.Batch(
-			context.Background(),
-			&obs.BatchRequest{
+			c.Request.Context(), &obs.BatchRequest{
 				TableSlug:     c.Param("table_slug"),
 				Data:          structData,
 				UpdatedFields: objectRequest.UpdatedFields,
@@ -2056,6 +2050,8 @@ func (h *HandlerV1) UpsertObject(c *gin.Context) {
 		}
 	case pb.ResourceType_POSTGRESQL:
 		// Does Not Implemented
+		h.handleResponse(c, status_http.BadRequest, "does not implemented")
+		return
 	}
 
 	if c.Param("table_slug") == "record_permission" {
@@ -2074,7 +2070,7 @@ func (h *HandlerV1) UpsertObject(c *gin.Context) {
 		defer conn.Close()
 
 		_, err = service.UpdateSessionsByRoleId(
-			context.Background(),
+			c.Request.Context(),
 			&pba.UpdateSessionByRoleIdRequest{
 				RoleId:    objectRequest.Data["role_id"].(string),
 				IsChanged: true,
@@ -2085,15 +2081,16 @@ func (h *HandlerV1) UpsertObject(c *gin.Context) {
 			return
 		}
 	}
+
 	if len(afterActions) > 0 {
-		functionName, err := DoInvokeFuntion(
-			DoInvokeFuntionStruct{
-				CustomEvents: afterActions,
-				IDs:          objectIds,
-				TableSlug:    c.Param("table_slug"),
-				ObjectData:   objectRequest.Data,
-				Method:       "MULTIPLE_UPDATE",
-			},
+		functionName, err := DoInvokeFuntion(models.DoInvokeFuntionStruct{
+			CustomEvents: afterActions,
+			IDs:          objectIds,
+			TableSlug:    c.Param("table_slug"),
+			ObjectData:   objectRequest.Data,
+			Method:       "MULTIPLE_UPDATE",
+			Resource:     resource,
+		},
 			c, // gin context
 			h, // handler
 		)
@@ -2102,6 +2099,7 @@ func (h *HandlerV1) UpsertObject(c *gin.Context) {
 			return
 		}
 	}
+
 	statusHttp.CustomMessage = resp.GetCustomMessage()
 	h.handleResponse(c, status_http.Created, resp)
 }
@@ -2128,10 +2126,10 @@ func (h *HandlerV1) MultipleUpdateObject(c *gin.Context) {
 		resource                    *pb.ServiceResourceModel
 		resourceList                *pb.GetResourceByEnvIDResponse
 		resp                        *obs.CommonMessage
+		err                         error
 	)
 
-	err := c.ShouldBindJSON(&objectRequest)
-	if err != nil {
+	if err = c.ShouldBindJSON(&objectRequest); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -2144,14 +2142,12 @@ func (h *HandlerV1) MultipleUpdateObject(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	if resourceBody, ok := c.Get("resource"); ok {
-		err = json.Unmarshal([]byte(resourceBody.(string)), &resourceList)
-		if err != nil {
+		if err = json.Unmarshal([]byte(resourceBody.(string)), &resourceList); err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
@@ -2211,6 +2207,7 @@ func (h *HandlerV1) MultipleUpdateObject(c *gin.Context) {
 			newObjects["guid"] = uuid.NewString()
 			newObjects["is_new"] = true
 		}
+
 		newObjects["company_service_project_id"] = resource.GetProjectId()
 		newObjects["company_service_environment_id"] = resource.GetEnvironmentId()
 
@@ -2227,21 +2224,30 @@ func (h *HandlerV1) MultipleUpdateObject(c *gin.Context) {
 
 	fromOfs := c.Query("from-ofs")
 	if fromOfs != "true" {
-		beforeActions, afterActions, err = GetListCustomEvents(c.Param("table_slug"), "", "MULTIPLE_UPDATE", c, h)
+		beforeActions, afterActions, err = GetListCustomEvents(models.GetListCustomEventsStruct{
+			TableSlug: c.Param("table_slug"),
+			RoleId:    "",
+			Method:    "MULTIPLE_UPDATE",
+			Resource:  resource,
+		},
+			c,
+			h,
+		)
 		if err != nil {
 			h.handleResponse(c, status_http.InvalidArgument, err.Error())
 			return
 		}
 	}
+
 	if len(beforeActions) > 0 {
-		invokeRequest := DoInvokeFuntionStruct{
+		functionName, err := DoInvokeFuntion(models.DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			IDs:          objectIds,
 			TableSlug:    c.Param("table_slug"),
 			ObjectData:   objectRequest.Data,
 			Method:       "MULTIPLE_UPDATE",
-		}
-		functionName, err := DoInvokeFuntion(invokeRequest, c, h)
+			Resource:     resource,
+		}, c, h)
 		if err != nil {
 			h.handleResponse(c, status_http.InvalidArgument, err.Error()+" in "+functionName)
 			return
@@ -2250,8 +2256,8 @@ func (h *HandlerV1) MultipleUpdateObject(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = service.MultipleUpdate(c.Request.Context(),
-			&obs.CommonMessage{
+		resp, err = service.MultipleUpdate(
+			c.Request.Context(), &obs.CommonMessage{
 				TableSlug:        c.Param("table_slug"),
 				Data:             structData,
 				ProjectId:        resource.ResourceEnvironmentId,
@@ -2270,8 +2276,8 @@ func (h *HandlerV1) MultipleUpdateObject(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		goResp, err := services.GoObjectBuilderService().Items().MultipleUpdate(c.Request.Context(),
-			&nb.CommonMessage{
+		goResp, err := services.GoObjectBuilderService().Items().MultipleUpdate(
+			c.Request.Context(), &nb.CommonMessage{
 				TableSlug:        c.Param("table_slug"),
 				Data:             structData,
 				ProjectId:        resource.ResourceEnvironmentId,
@@ -2285,27 +2291,30 @@ func (h *HandlerV1) MultipleUpdateObject(c *gin.Context) {
 			return
 		}
 
-		err = helper.MarshalToStruct(goResp, &resp)
-		if err != nil {
+		if err = helper.MarshalToStruct(goResp, &resp); err != nil {
 			h.handleResponse(c, status_http.BadRequest, err.Error())
 			return
 		}
 	}
 
 	if len(afterActions) > 0 {
-		invokeRequest := DoInvokeFuntionStruct{
+		functionName, err := DoInvokeFuntion(models.DoInvokeFuntionStruct{
 			CustomEvents: afterActions,
 			IDs:          objectIds,
 			TableSlug:    c.Param("table_slug"),
 			ObjectData:   objectRequest.Data,
 			Method:       "MULTIPLE_UPDATE",
-		}
-		functionName, err := DoInvokeFuntion(invokeRequest, c, h)
+			Resource:     resource,
+		},
+			c,
+			h,
+		)
 		if err != nil {
 			h.handleResponse(c, status_http.InvalidArgument, err.Error()+" in "+functionName)
 			return
 		}
 	}
+
 	statusHttp.CustomMessage = resp.GetCustomMessage()
 	h.handleResponse(c, status_http.Created, resp)
 }
@@ -2330,8 +2339,7 @@ func (h *HandlerV1) GetFinancialAnalytics(c *gin.Context) {
 		statusHttp    = status_http.GrpcStatusToHTTP["Ok"]
 	)
 
-	err := c.ShouldBindJSON(&objectRequest)
-	if err != nil {
+	if err := c.ShouldBindJSON(&objectRequest); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -2350,14 +2358,12 @@ func (h *HandlerV1) GetFinancialAnalytics(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -2368,25 +2374,19 @@ func (h *HandlerV1) GetFinancialAnalytics(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
-	// defer cancel()
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 
-	//tokenInfo := h.GetAuthInfo
 	objectRequest.Data["tables"] = authInfo.GetTables()
 	objectRequest.Data["user_id_from_token"] = authInfo.GetUserId()
 	objectRequest.Data["role_id_from_token"] = authInfo.GetRoleId()
 	objectRequest.Data["client_type_id_from_token"] = authInfo.GetClientTypeId()
+
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
@@ -2394,8 +2394,7 @@ func (h *HandlerV1) GetFinancialAnalytics(c *gin.Context) {
 	}
 
 	resp, err := service.GetFinancialAnalytics(
-		context.Background(),
-		&obs.CommonMessage{
+		c.Request.Context(), &obs.CommonMessage{
 			TableSlug: c.Param("table_slug"),
 			Data:      structData,
 			ProjectId: resource.ResourceEnvironmentId,
@@ -2436,11 +2435,9 @@ func (h *HandlerV1) GetFinancialAnalytics(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetListGroupBy(c *gin.Context) {
-
 	var object models.CommonMessage
 
-	err := c.ShouldBindJSON(&object)
-	if err != nil {
+	if err := c.ShouldBindJSON(&object); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -2455,9 +2452,11 @@ func (h *HandlerV1) GetListGroupBy(c *gin.Context) {
 		return
 	}
 
-	relationSlug := c.Param("column_table_slug")
-	selectedGuid := cast.ToSlice(object.Data["additional_values"])
-	relationTableSlug := util.PluralizeWord(relationSlug)
+	var (
+		relationSlug      = c.Param("column_table_slug")
+		selectedGuid      = cast.ToSlice(object.Data["additional_values"])
+		relationTableSlug = util.PluralizeWord(relationSlug)
+	)
 
 	object.Data = map[string]interface{}{
 		"match": map[string]interface{}{
@@ -2527,14 +2526,12 @@ func (h *HandlerV1) GetListGroupBy(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -2545,18 +2542,11 @@ func (h *HandlerV1) GetListGroupBy(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-
-	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
-	// defer cancel()
 
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 
@@ -2565,8 +2555,9 @@ func (h *HandlerV1) GetListGroupBy(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
+
 	tableResp, err := service.GetGroupByField(
-		context.Background(),
+		c.Request.Context(),
 		&obs.CommonMessage{
 			TableSlug: c.Param("table_slug"),
 			Data:      structData,
@@ -2604,8 +2595,7 @@ func (h *HandlerV1) GetListGroupBy(c *gin.Context) {
 		}
 
 		selectedTableResp, err := service.GetGroupByField(
-			context.Background(),
-			&obs.CommonMessage{
+			c.Request.Context(), &obs.CommonMessage{
 				TableSlug: c.Param("table_slug"),
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
@@ -2666,8 +2656,7 @@ func (h *HandlerV1) GetGroupByField(c *gin.Context) {
 		resp          *obs.CommonMessage
 	)
 
-	err := c.ShouldBindJSON(&objectRequest)
-	if err != nil {
+	if err := c.ShouldBindJSON(&objectRequest); err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
@@ -2680,14 +2669,12 @@ func (h *HandlerV1) GetGroupByField(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -2698,14 +2685,7 @@ func (h *HandlerV1) GetGroupByField(c *gin.Context) {
 		return
 	}
 
-	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
-	// defer cancel()
-
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -2721,14 +2701,14 @@ func (h *HandlerV1) GetGroupByField(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		// start := time.Now()
-
 		redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("group-%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
 		if err == nil {
-			resp := make(map[string]interface{})
-			m := make(map[string]interface{})
-			err = json.Unmarshal([]byte(redisResp), &m)
-			if err != nil {
+			var (
+				resp = make(map[string]interface{})
+				m    = make(map[string]interface{})
+			)
+
+			if err = json.Unmarshal([]byte(redisResp), &m); err != nil {
 				h.log.Error("Error while unmarshal redis", logger.Error(err))
 			} else {
 				resp["data"] = m
@@ -2738,7 +2718,7 @@ func (h *HandlerV1) GetGroupByField(c *gin.Context) {
 		}
 
 		resp, err = service.GetGroupByField(
-			context.Background(),
+			c.Request.Context(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("table_slug"),
 				Data:      structData,
@@ -2786,8 +2766,7 @@ func (h *HandlerV1) DeleteManyObject(c *gin.Context) {
 		data                        = make(map[string]interface{})
 	)
 
-	err := c.ShouldBindJSON(&objectRequest)
-	if err != nil {
+	if err := c.ShouldBindJSON(&objectRequest); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -2800,28 +2779,23 @@ func (h *HandlerV1) DeleteManyObject(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	resource, _ := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
 	)
+
 	data["company_service_project_id"] = projectId.(string)
 	data["company_service_environment_id"] = environmentId.(string)
 	data["ids"] = objectRequest.Ids
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -2837,19 +2811,29 @@ func (h *HandlerV1) DeleteManyObject(c *gin.Context) {
 
 	fromOfs := c.Query("from-ofs")
 	if fromOfs != "true" {
-		beforeActions, afterActions, err = GetListCustomEvents(c.Param("table_slug"), "", "DELETE_MANY", c, h)
+		beforeActions, afterActions, err = GetListCustomEvents(models.GetListCustomEventsStruct{
+			TableSlug: c.Param("table_slug"),
+			RoleId:    "",
+			Method:    "DELETE_MANY",
+			Resource:  resource,
+		},
+			c,
+			h,
+		)
 		if err != nil {
 			h.handleResponse(c, status_http.InvalidArgument, err.Error())
 			return
 		}
 	}
+
 	if len(beforeActions) > 0 {
-		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
+		functionName, err := DoInvokeFuntion(models.DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			IDs:          objectRequest.Ids,
 			TableSlug:    c.Param("table_slug"),
 			ObjectData:   data,
 			Method:       "DELETE_MANY",
+			Resource:     resource,
 		},
 			c,
 			h,
@@ -2862,7 +2846,7 @@ func (h *HandlerV1) DeleteManyObject(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = service.DeleteMany(
-			context.Background(),
+			c.Request.Context(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("table_slug"),
 				Data:      structData,
@@ -2881,7 +2865,7 @@ func (h *HandlerV1) DeleteManyObject(c *gin.Context) {
 		}
 	case pb.ResourceType_POSTGRESQL:
 		goResp, err := services.GoObjectBuilderService().Items().DeleteMany(
-			context.Background(),
+			c.Request.Context(),
 			&nb.CommonMessage{
 				TableSlug: c.Param("table_slug"),
 				Data:      structData,
@@ -2907,14 +2891,14 @@ func (h *HandlerV1) DeleteManyObject(c *gin.Context) {
 	}
 
 	if len(afterActions) > 0 {
-		functionName, err := DoInvokeFuntion(
-			DoInvokeFuntionStruct{
-				CustomEvents: afterActions,
-				IDs:          objectRequest.Ids,
-				TableSlug:    c.Param("table_slug"),
-				ObjectData:   data,
-				Method:       "DELETE_MANY",
-			},
+		functionName, err := DoInvokeFuntion(models.DoInvokeFuntionStruct{
+			CustomEvents: afterActions,
+			IDs:          objectRequest.Ids,
+			TableSlug:    c.Param("table_slug"),
+			ObjectData:   data,
+			Method:       "DELETE_MANY",
+			Resource:     resource,
+		},
 			c, // gin context,
 			h, // handler
 		)
@@ -2949,8 +2933,7 @@ func (h *HandlerV1) GetListWithOutRelation(c *gin.Context) {
 		statusHttp    = status_http.GrpcStatusToHTTP["Ok"]
 	)
 
-	err := c.ShouldBindJSON(&objectRequest)
-	if err != nil {
+	if err := c.ShouldBindJSON(&objectRequest); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -2968,14 +2951,12 @@ func (h *HandlerV1) GetListWithOutRelation(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -2986,25 +2967,16 @@ func (h *HandlerV1) GetListWithOutRelation(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
-	// defer cancel()
-
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		// start := time.Now()
-
 		redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
 		if err == nil {
 			resp := make(map[string]interface{})
@@ -3020,7 +2992,7 @@ func (h *HandlerV1) GetListWithOutRelation(c *gin.Context) {
 		}
 
 		resp, err = service.GetListWithOutRelations(
-			context.Background(),
+			c.Request.Context(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("table_slug"),
 				Data:      structData,
@@ -3044,6 +3016,8 @@ func (h *HandlerV1) GetListWithOutRelation(c *gin.Context) {
 		}
 	case pb.ResourceType_POSTGRESQL:
 		// Does Not Implemented
+		h.handleResponse(c, status_http.BadRequest, "does not implemented")
+		return
 	}
 
 	statusHttp.CustomMessage = resp.GetCustomMessage()
@@ -3068,14 +3042,13 @@ func (h *HandlerV1) GetListWithOutRelation(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetListAggregate(c *gin.Context) {
-
 	var (
 		objectRequest models.CommonMessage
 		resp          *obs.CommonMessage
+		err           error
 	)
 
-	err := c.ShouldBindJSON(&objectRequest)
-	if err != nil {
+	if err = c.ShouldBindJSON(&objectRequest); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -3088,8 +3061,7 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
@@ -3134,11 +3106,7 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 		}
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -3163,7 +3131,7 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 		}
 
 		if fieldOK {
-			ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
+			ctx, cancel := context.WithTimeout(c.Request.Context(), config.REDIS_WAIT_TIMEOUT)
 			defer cancel()
 			for {
 				fieldBody, ok := h.cache.Get(fieldKey)
@@ -3189,7 +3157,7 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 		}
 
 		if len(fieldResp.Fields) <= 0 {
-			fieldResp, err = services.GetBuilderServiceByType(resource.NodeType).Field().GetAll(context.Background(), &obs.GetAllFieldsRequest{
+			fieldResp, err = services.GetBuilderServiceByType(resource.NodeType).Field().GetAll(c.Request.Context(), &obs.GetAllFieldsRequest{
 				TableSlug: c.Param("table_slug"),
 				ProjectId: resource.ResourceEnvironmentId,
 			})
@@ -3227,6 +3195,7 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 			searchQuery = map[string]interface{}{}
 			search      = cast.ToStringMap(objectRequest.Data["search"])
 		)
+
 		for key, value := range search {
 			if cast.ToString(value) == "" {
 				searchQuery[key] = value
@@ -3385,6 +3354,7 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 		key              = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("aggregate-%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId)))
 		aggregateWaitKey = config.CACHE_WAIT + "-aggregate"
 	)
+
 	if !cast.ToBool(c.Query("block_cached")) {
 		_, aggregateOk := h.cache.Get(aggregateWaitKey)
 		if !aggregateOk {
@@ -3392,7 +3362,7 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 		}
 
 		if aggregateOk {
-			ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
+			ctx, cancel := context.WithTimeout(c.Request.Context(), config.REDIS_WAIT_TIMEOUT)
 			defer cancel()
 
 			for {
@@ -3419,7 +3389,7 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 	}
 
 	resp, err = service.GetGroupByField(
-		context.Background(),
+		c.Request.Context(),
 		&obs.CommonMessage{
 			TableSlug: c.Param("table_slug"),
 			Data:      structData,

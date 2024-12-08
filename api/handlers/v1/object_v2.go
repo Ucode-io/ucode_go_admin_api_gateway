@@ -4,8 +4,8 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
-	"errors"
 	"fmt"
+	"net/http"
 	"strings"
 	"time"
 	"ucode/ucode_go_api_gateway/api/models"
@@ -66,6 +66,7 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 		objectRequest.Data["role_id_from_token"] = tokenInfo.GetRoleId()
 		objectRequest.Data["client_type_id_from_token"] = tokenInfo.GetClientTypeId()
 	}
+
 	objectRequest.Data["language_setting"] = c.DefaultQuery("language_setting", "")
 
 	projectId, ok := c.Get("project_id")
@@ -76,8 +77,7 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
@@ -119,11 +119,7 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -131,19 +127,29 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 
 	fromOfs := c.Query("from-ofs")
 	if fromOfs != "true" {
-		beforeActions, _, err = GetListCustomEvents(c.Param("table_slug"), "", "GETLIST", c, h)
+		beforeActions, _, err = GetListCustomEvents(models.GetListCustomEventsStruct{
+			TableSlug: c.Param("table_slug"),
+			RoleId:    "",
+			Method:    "GETLIST",
+			Resource:  resource,
+		},
+			c,
+			h,
+		)
 		if err != nil {
 			h.handleResponse(c, status_http.InvalidArgument, err.Error())
 			return
 		}
 	}
+
 	if len(beforeActions) > 0 {
-		functionName, resp, err := DoInvokeFuntionForGetList(DoInvokeFuntionStruct{
+		functionName, resp, err := DoInvokeFuntionForGetList(models.DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			TableSlug:    c.Param("table_slug"),
 			ObjectData:   objectRequest.Data,
 			Method:       "GETLIST",
 			ActionType:   "BEFORE",
+			Resource:     resource,
 		},
 			c,
 			h,
@@ -167,7 +173,8 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 					h.handleResponse(c, statusHttp, pb.Empty{})
 					return
 				}
-				redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
+
+				redisResp, err := h.redis.Get(c.Request.Context(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
 				if err == nil {
 					resp := make(map[string]interface{})
 					m := make(map[string]interface{})
@@ -182,7 +189,7 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 				}
 
 				resp, err = service.GroupByColumns(
-					context.Background(),
+					c.Request.Context(),
 					&obs.CommonMessage{
 						TableSlug: c.Param("table_slug"),
 						Data:      structData,
@@ -206,7 +213,7 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 				}
 			case pb.ResourceType_POSTGRESQL:
 				resp, err := services.GoObjectBuilderService().ObjectBuilder().GetGroupByField(
-					context.Background(),
+					c.Request.Context(),
 					&nb.CommonMessage{
 						TableSlug: c.Param("table_slug"),
 						Data:      structData,
@@ -227,7 +234,7 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 	} else {
 		switch resource.ResourceType {
 		case pb.ResourceType_MONGODB:
-			redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
+			redisResp, err := h.redis.Get(c.Request.Context(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
 			if err == nil {
 				resp := make(map[string]interface{})
 				m := make(map[string]interface{})
@@ -245,7 +252,7 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 			}
 
 			resp, err = service.GetList2(
-				context.Background(),
+				c.Request.Context(),
 				&obs.CommonMessage{
 					TableSlug: c.Param("table_slug"),
 					Data:      structData,
@@ -268,8 +275,8 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 				return
 			}
 		case pb.ResourceType_POSTGRESQL:
-			resp, err := services.GoObjectBuilderService().ObjectBuilder().GetList2(c.Request.Context(),
-				&nb.CommonMessage{
+			resp, err := services.GoObjectBuilderService().ObjectBuilder().GetList2(
+				c.Request.Context(), &nb.CommonMessage{
 					TableSlug: c.Param("table_slug"),
 					Data:      structData,
 					ProjectId: resource.ResourceEnvironmentId,
@@ -354,12 +361,11 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
-	if projectId == "42ab0799-deff-4f8c-bf3f-64bf9665d304" {
+	if projectId == "42ab0799-deff-4f8c-bf3f-64bf9665d304" { // rizo taxi
 		limit = 100
 	} else {
 		if limit > 40 {
@@ -418,8 +424,7 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 		}
 	} else {
 		resource, err = h.companyServices.ServiceResource().GetSingle(
-			c.Request.Context(),
-			&pb.GetSingleServiceResourceReq{
+			c.Request.Context(), &pb.GetSingleServiceResourceReq{
 				ProjectId:     projectId.(string),
 				EnvironmentId: environmentId.(string),
 				ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -430,11 +435,8 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 			return
 		}
 	}
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -446,15 +448,12 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 			NodeType:     resource.NodeType,
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: c.Request.URL.String(),
-			ActionType:   "GET",
-			UsedEnvironments: map[string]bool{
-				cast.ToString(environmentId): true,
-			},
-			UserInfo:  cast.ToString(userId),
-			Request:   &structData,
-			ApiKey:    apiKey,
-			Type:      "API_KEY",
-			TableSlug: c.Param("table_slug"),
+			ActionType:   http.MethodGet,
+			UserInfo:     cast.ToString(userId),
+			Request:      &structData,
+			ApiKey:       apiKey,
+			Type:         "API_KEY",
+			TableSlug:    c.Param("table_slug"),
 		}
 	)
 
@@ -471,7 +470,7 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 				}
 
 				if slimOK {
-					ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
+					ctx, cancel := context.WithTimeout(c.Request.Context(), config.REDIS_WAIT_TIMEOUT)
 					defer cancel()
 
 					for {
@@ -496,7 +495,7 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 					}
 				}
 			} else {
-				redisResp, err := h.redis.Get(context.Background(), slimKey, projectId.(string), resource.NodeType)
+				redisResp, err := h.redis.Get(c.Request.Context(), slimKey, projectId.(string), resource.NodeType)
 				if err == nil {
 					resp := make(map[string]interface{})
 					m := make(map[string]interface{})
@@ -517,7 +516,7 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 		}
 
 		resp, err := service.GetListSlimV2(
-			context.Background(),
+			c.Request.Context(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("table_slug"),
 				Data:      structData,
@@ -566,8 +565,8 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 		}
 		h.handleResponse(c, statusHttp, resp)
 	case pb.ResourceType_POSTGRESQL:
-		resp, err := services.GoObjectBuilderService().ObjectBuilder().GetListSlim(context.Background(),
-			&nb.CommonMessage{
+		resp, err := services.GoObjectBuilderService().ObjectBuilder().GetListSlim(
+			c.Request.Context(), &nb.CommonMessage{
 				TableSlug: c.Param("table_slug"),
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
@@ -611,19 +610,14 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) UpdateWithParams(c *gin.Context) {
+	var objectRequest models.CommonMessage
 
-	var (
-		objectRequest models.CommonMessage
-	)
-
-	err := c.ShouldBindJSON(&objectRequest)
-	if err != nil {
+	if err := c.ShouldBindJSON(&objectRequest); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
-
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
@@ -637,8 +631,7 @@ func (h *HandlerV1) UpdateWithParams(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
@@ -655,19 +648,14 @@ func (h *HandlerV1) UpdateWithParams(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		resource.GetProjectId(),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), resource.GetProjectId(), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
 	body, err := services.GoObjectBuilderService().ObjectBuilder().UpdateWithParams(
-		context.Background(),
-		&nb.CommonMessage{
+		c.Request.Context(), &nb.CommonMessage{
 			TableSlug: c.Param("collection"),
 			Data:      structData,
 			ProjectId: resource.ResourceEnvironmentId,
