@@ -38,8 +38,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 	r.GET("/menu/wiki_folder", h.V1.GetWikiFolder)
 
-	r.POST("webhook/handle", h.V2.HandleWebhook)
-
 	global := r.Group("/v1/global")
 	global.Use(h.V1.GlobalAuthMiddleware(cfg))
 	{
@@ -534,11 +532,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			v2Files.GET("", h.V2.GetAllFiles)
 		}
 
-		v2Webhook := v2Version.Group("/webhook")
-		{
-			v2Webhook.POST("/create", h.V2.CreateWebhook)
-		}
-
 		v2Version := v2Version.Group("/version")
 		{
 			v2Version.POST("", h.V2.CreateVersion)
@@ -564,6 +557,13 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	proxyApi := r.Group("/v2")
 	{
 		proxyApi.POST("/invoke_function/:function-path", h.V2.InvokeFunctionByPath)
+
+		v2Webhook := proxyApi.Group("/webhook")
+		{
+			v2Webhook.POST("/create", h.V2.CreateWebhook)
+			v2Webhook.POST("/handle", h.V2.HandleWebhook)
+
+		}
 	}
 
 	r.Any("/api/*any", h.V1.AuthMiddleware(cfg), proxyMiddleware(r, &h), h.V1.Proxy)
