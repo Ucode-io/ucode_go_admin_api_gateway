@@ -130,7 +130,10 @@ func DoInvokeFuntion(request models.DoInvokeFuntionStruct, c *gin.Context, h *Ha
 		invokeFunction.Data = data
 
 		if requestType == "" || requestType == "ASYNC" {
-			return function.FuncHandlers[customEvent.Functions[0].Type](path, name, invokeFunction)
+			functionName, err = function.FuncHandlers[customEvent.Functions[0].Type](path, name, invokeFunction)
+			if err != nil {
+				return functionName, err
+			}
 		} else if requestType == "SYNC" {
 			go func(customEvent *obs.CustomEvent) {
 				function.FuncHandlers[customEvent.Functions[0].Type](path, name, invokeFunction)
