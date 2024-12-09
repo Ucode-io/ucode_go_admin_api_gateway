@@ -3,7 +3,9 @@ package models
 import (
 	"net/http"
 	"net/url"
+	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/genproto/new_function_service"
+	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
 )
 
 type Function struct {
@@ -98,4 +100,22 @@ type MicrofrontForLoginPage struct {
 	EnvironmentId string                         `json:"environment_id"`
 	MicrofrontId  string                         `json:"microfront_id"`
 	Subdomain     string                         `json:"subdomain"`
+}
+
+type DoInvokeFuntionStruct struct {
+	CustomEvents           []*object_builder_service.CustomEvent
+	IDs                    []string
+	TableSlug              string
+	ObjectData             map[string]interface{}
+	Method                 string
+	ActionType             string
+	ObjectDataBeforeUpdate map[string]interface{}
+	Resource               *pb.ServiceResourceModel
+}
+
+type GetListCustomEventsStruct struct {
+	TableSlug string
+	RoleId    string
+	Method    string
+	Resource  *pb.ServiceResourceModel
 }
