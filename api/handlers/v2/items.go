@@ -68,8 +68,7 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -108,21 +107,32 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
+
 	fromOfs := c.Query("from-ofs")
 	if fromOfs != "true" {
-		beforeActions, afterActions, err = GetListCustomEvents(c.Param("collection"), "", "CREATE", c, h)
+		beforeActions, afterActions, err = GetListCustomEvents(models.GetListCustomEventsStruct{
+			TableSlug: c.Param("collection"),
+			RoleId:    "",
+			Method:    "CREATE",
+			Resource:  resource,
+		},
+			c,
+			h,
+		)
 		if err != nil {
 			h.handleResponse(c, status_http.InvalidArgument, err.Error())
+			return
 		}
 	}
 
 	if len(beforeActions) > 0 {
-		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
+		functionName, err := DoInvokeFuntion(models.DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			IDs:          []string{id},
 			TableSlug:    c.Param("collection"),
 			ObjectData:   objectRequest.Data,
 			Method:       "CREATE",
+			Resource:     resource,
 		},
 			c,
 			h,
@@ -139,19 +149,15 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 		ProjectId:    resource.ResourceEnvironmentId,
 		ActionSource: c.Request.URL.String(),
 		ActionType:   "CREATE ITEM",
-		UsedEnvironments: map[string]bool{
-			cast.ToString(environmentId): true,
-		},
-		UserInfo:  cast.ToString(userId),
-		Request:   &structData,
-		TableSlug: c.Param("collection"),
+		UserInfo:     cast.ToString(userId),
+		Request:      &structData,
+		TableSlug:    c.Param("collection"),
 	}
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().Create(
-			ctx,
-			&obs.CommonMessage{
+			ctx, &obs.CommonMessage{
 				TableSlug: c.Param("collection"),
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
@@ -175,8 +181,7 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 		defer func() { go h.versionHistory(logReq) }()
 	case pb.ResourceType_POSTGRESQL:
 		body, err := services.GoObjectBuilderService().Items().Create(
-			ctx,
-			&nb.CommonMessage{
+			ctx, &nb.CommonMessage{
 				TableSlug: c.Param("collection"),
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
@@ -211,14 +216,14 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 	}
 
 	if len(afterActions) > 0 {
-		functionName, err := DoInvokeFuntion(
-			DoInvokeFuntionStruct{
-				CustomEvents: afterActions,
-				IDs:          []string{id},
-				TableSlug:    c.Param("collection"),
-				ObjectData:   objectRequest.Data,
-				Method:       "CREATE",
-			},
+		functionName, err := DoInvokeFuntion(models.DoInvokeFuntionStruct{
+			CustomEvents: afterActions,
+			IDs:          []string{id},
+			TableSlug:    c.Param("collection"),
+			ObjectData:   objectRequest.Data,
+			Method:       "CREATE",
+			Resource:     resource,
+		},
 			c, // gin context,
 			h, // handler
 		)
@@ -254,8 +259,7 @@ func (h *HandlerV2) CreateItems(c *gin.Context) {
 		statusHttp                  = status_http.GrpcStatusToHTTP["Created"]
 	)
 
-	err := c.ShouldBindJSON(&objectRequest)
-	if err != nil {
+	if err := c.ShouldBindJSON(&objectRequest); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -268,16 +272,14 @@ func (h *HandlerV2) CreateItems(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -288,11 +290,7 @@ func (h *HandlerV2) CreateItems(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		resource.GetProjectId(),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), resource.GetProjectId(), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -304,25 +302,35 @@ func (h *HandlerV2) CreateItems(c *gin.Context) {
 	request["items"] = objectRequest
 
 	structData, err := helper.ConvertMapToStruct(request)
-
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
+
 	fromOfs := c.Query("from-ofs")
 	if fromOfs != "true" {
-		beforeActions, afterActions, err = GetListCustomEvents(c.Param("collection"), "", "CREATE_MANY", c, h)
+		beforeActions, afterActions, err = GetListCustomEvents(models.GetListCustomEventsStruct{
+			TableSlug: c.Param("collection"),
+			RoleId:    "",
+			Method:    "CREATE_MANY",
+			Resource:  resource,
+		},
+			c,
+			h,
+		)
 		if err != nil {
 			h.handleResponse(c, status_http.InvalidArgument, err.Error())
 			return
 		}
 	}
+
 	if len(beforeActions) > 0 {
-		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
+		functionName, err := DoInvokeFuntion(models.DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			TableSlug:    c.Param("collection"),
 			ObjectData:   request,
 			Method:       "CREATE_MANY",
+			Resource:     resource,
 		},
 			c,
 			h,
@@ -339,12 +347,9 @@ func (h *HandlerV2) CreateItems(c *gin.Context) {
 		ProjectId:    resource.ResourceEnvironmentId,
 		ActionSource: c.Request.URL.String(),
 		ActionType:   "CREATE ITEM",
-		UsedEnvironments: map[string]bool{
-			cast.ToString(environmentId): true,
-		},
-		UserInfo:  cast.ToString(userId),
-		Request:   structData,
-		TableSlug: c.Param("collection"),
+		UserInfo:     cast.ToString(userId),
+		Request:      structData,
+		TableSlug:    c.Param("collection"),
 	}
 
 	switch resource.ResourceType {
@@ -374,6 +379,8 @@ func (h *HandlerV2) CreateItems(c *gin.Context) {
 		go h.versionHistory(logReq)
 	case pb.ResourceType_POSTGRESQL:
 		// Does Not Implemented
+		h.handleResponse(c, status_http.BadRequest, "does not implemented")
+		return
 	}
 
 	var items []interface{}
@@ -389,14 +396,14 @@ func (h *HandlerV2) CreateItems(c *gin.Context) {
 		}
 	}
 	if len(afterActions) > 0 {
-		functionName, err := DoInvokeFuntion(
-			DoInvokeFuntionStruct{
-				CustomEvents: afterActions,
-				IDs:          ids,
-				TableSlug:    c.Param("collection"),
-				ObjectData:   request,
-				Method:       "CREATE_MANY",
-			},
+		functionName, err := DoInvokeFuntion(models.DoInvokeFuntionStruct{
+			CustomEvents: afterActions,
+			IDs:          ids,
+			TableSlug:    c.Param("collection"),
+			ObjectData:   request,
+			Method:       "CREATE_MANY",
+			Resource:     resource,
+		},
 			c, // gin context,
 			h, // handler
 		)
@@ -453,13 +460,12 @@ func (h *HandlerV2) GetSingleItem(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
+
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -470,11 +476,7 @@ func (h *HandlerV2) GetSingleItem(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		resource.GetProjectId(),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), resource.GetProjectId(), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -483,7 +485,7 @@ func (h *HandlerV2) GetSingleItem(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().GetSingle(
-			context.Background(),
+			c.Request.Context(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("collection"),
 				Data:      structData,
@@ -505,8 +507,7 @@ func (h *HandlerV2) GetSingleItem(c *gin.Context) {
 		h.handleResponse(c, statusHttp, resp)
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().Items().GetSingle(
-			context.Background(),
-			&nb.CommonMessage{
+			c.Request.Context(), &nb.CommonMessage{
 				TableSlug: c.Param("collection"),
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
@@ -539,9 +540,10 @@ func (h *HandlerV2) GetSingleItem(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) GetAllItems(c *gin.Context) {
 	var (
-		resp       *obs.CommonMessage
-		statusHttp = status_http.GrpcStatusToHTTP["Ok"]
-		queryData  string
+		resp          *obs.CommonMessage
+		statusHttp    = status_http.GrpcStatusToHTTP["Ok"]
+		queryData     string
+		objectRequest = make(map[string]interface{})
 	)
 
 	queryParams := c.Request.URL.Query()
@@ -551,17 +553,17 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 		queryData = "{}"
 	}
 
-	objectRequest := make(map[string]interface{})
-	err := json.Unmarshal([]byte(queryData), &objectRequest)
-	if err != nil {
+	if err := json.Unmarshal([]byte(queryData), &objectRequest); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
+
 	tokenInfo, err := h.GetAuthInfo(c)
 	if err != nil {
 		h.handleResponse(c, status_http.Forbidden, err.Error())
 		return
 	}
+
 	if tokenInfo != nil {
 		if tokenInfo.Tables != nil {
 			objectRequest["tables"] = tokenInfo.GetTables()
@@ -570,6 +572,7 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 		objectRequest["role_id_from_token"] = tokenInfo.GetRoleId()
 		objectRequest["client_type_id_from_token"] = tokenInfo.GetClientTypeId()
 	}
+
 	objectRequest["language_setting"] = c.DefaultQuery("language_setting", "")
 
 	structData, err := helper.ConvertMapToStruct(objectRequest)
@@ -586,14 +589,12 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -604,11 +605,7 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		resource.GetProjectId(),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), resource.GetProjectId(), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -620,7 +617,7 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 		if util.IsValidUUID(viewId) {
 			switch resource.ResourceType {
 			case pb.ResourceType_MONGODB:
-				redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("collection"), structData.String(), resource.ResourceEnvironmentId))), resource.ProjectId, resource.NodeType)
+				redisResp, err := h.redis.Get(c.Request.Context(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("collection"), structData.String(), resource.ResourceEnvironmentId))), resource.ProjectId, resource.NodeType)
 				if err == nil {
 					resp := make(map[string]interface{})
 					m := make(map[string]interface{})
@@ -635,7 +632,7 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 				}
 
 				resp, err = service.GroupByColumns(
-					context.Background(),
+					c.Request.Context(),
 					&obs.CommonMessage{
 						TableSlug: c.Param("collection"),
 						Data:      structData,
@@ -659,6 +656,8 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 				}
 			case pb.ResourceType_POSTGRESQL:
 				// Does Not Implemented
+				h.handleResponse(c, status_http.BadRequest, "does not implemented")
+				return
 			}
 		}
 	} else {
@@ -666,10 +665,12 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 		case pb.ResourceType_MONGODB:
 			redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("collection"), structData.String(), resource.ResourceEnvironmentId))), resource.ProjectId, resource.NodeType)
 			if err == nil {
-				resp := make(map[string]interface{})
-				m := make(map[string]interface{})
-				err = json.Unmarshal([]byte(redisResp), &m)
-				if err != nil {
+				var (
+					resp = make(map[string]interface{})
+					m    = make(map[string]interface{})
+				)
+
+				if err = json.Unmarshal([]byte(redisResp), &m); err != nil {
 					h.log.Error("Error while unmarshal redis", logger.Error(err))
 				} else {
 					resp["data"] = m
@@ -679,7 +680,7 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 			}
 
 			resp, err = services.GetBuilderServiceByType(resource.NodeType).ItemsService().GetList(
-				context.Background(),
+				c.Request.Context(),
 				&obs.CommonMessage{
 					TableSlug: c.Param("collection"),
 					Data:      structData,
@@ -703,6 +704,8 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 			}
 		case pb.ResourceType_POSTGRESQL:
 			// Does Not Implemented
+			h.handleResponse(c, status_http.BadRequest, "does not implemented")
+			return
 		}
 	}
 
@@ -735,8 +738,7 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 		id                          string
 	)
 
-	err := c.ShouldBindJSON(&objectRequest)
-	if err != nil {
+	if err := c.ShouldBindJSON(&objectRequest); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -767,16 +769,14 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -787,11 +787,7 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		resource.GetProjectId(),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), resource.GetProjectId(), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -800,14 +796,10 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		singleObject, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().GetSingleSlim(
-			context.Background(),
+			c.Request.Context(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("collection"),
-				Data: &structpb.Struct{
-					Fields: map[string]*structpb.Value{
-						"id": structpb.NewStringValue(id),
-					},
-				},
+				Data:      &structpb.Struct{Fields: map[string]*structpb.Value{"id": structpb.NewStringValue(id)}},
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
@@ -823,14 +815,9 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 		}
 	case pb.ResourceType_POSTGRESQL:
 		single, err := services.GoObjectBuilderService().Items().GetSingle(
-			context.Background(),
-			&nb.CommonMessage{
+			c.Request.Context(), &nb.CommonMessage{
 				TableSlug: c.Param("collection"),
-				Data: &structpb.Struct{
-					Fields: map[string]*structpb.Value{
-						"id": structpb.NewStringValue(id),
-					},
-				},
+				Data:      &structpb.Struct{Fields: map[string]*structpb.Value{"id": structpb.NewStringValue(id)}},
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
@@ -839,8 +826,7 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 			return
 		}
 
-		err = helper.MarshalToStruct(single, &singleObject)
-		if err != nil {
+		if err = helper.MarshalToStruct(single, &singleObject); err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
@@ -848,20 +834,30 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 
 	fromOfs := c.Query("from-ofs")
 	if fromOfs != "true" {
-		beforeActions, afterActions, err = GetListCustomEvents(c.Param("collection"), "", "UPDATE", c, h)
+		beforeActions, afterActions, err = GetListCustomEvents(models.GetListCustomEventsStruct{
+			TableSlug: c.Param("collection"),
+			RoleId:    "",
+			Method:    "UPDATE",
+			Resource:  resource,
+		},
+			c,
+			h,
+		)
 		if err != nil {
 			h.handleResponse(c, status_http.InvalidArgument, err.Error())
 			return
 		}
 	}
+
 	if len(beforeActions) > 0 {
-		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
+		functionName, err := DoInvokeFuntion(models.DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			IDs:          []string{id},
 			TableSlug:    c.Param("collection"),
 			ObjectData:   objectRequest.Data,
 			Method:       "UPDATE",
 			ActionType:   "BEFORE",
+			Resource:     resource,
 		},
 			c,
 			h,
@@ -879,12 +875,9 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: c.Request.URL.String(),
 			ActionType:   "UPDATE ITEM",
-			UsedEnvironments: map[string]bool{
-				cast.ToString(environmentId): true,
-			},
-			UserInfo:  cast.ToString(userId),
-			Request:   &structData,
-			TableSlug: c.Param("collection"),
+			UserInfo:     cast.ToString(userId),
+			Request:      &structData,
+			TableSlug:    c.Param("collection"),
 		}
 	)
 
@@ -899,6 +892,7 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 			logReq.Response = resp
 			h.handleResponse(c, status_http.OK, resp)
 		}
+
 		switch resource.ResourceType {
 		case pb.ResourceType_MONGODB:
 			go h.versionHistory(logReq)
@@ -910,8 +904,7 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().Update(
-			context.Background(),
-			&obs.CommonMessage{
+			c.Request.Context(), &obs.CommonMessage{
 				TableSlug:        c.Param("collection"),
 				Data:             structData,
 				ProjectId:        resource.ResourceEnvironmentId,
@@ -930,8 +923,7 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 		}
 	case pb.ResourceType_POSTGRESQL:
 		body, err := services.GoObjectBuilderService().Items().Update(
-			context.Background(),
-			&nb.CommonMessage{
+			c.Request.Context(), &nb.CommonMessage{
 				TableSlug:        c.Param("collection"),
 				Data:             structData,
 				ProjectId:        resource.ResourceEnvironmentId,
@@ -941,30 +933,32 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 			},
 		)
 		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 
-		err = helper.MarshalToStruct(body, &resp)
-		if err != nil {
+		if err = helper.MarshalToStruct(body, &resp); err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 	}
+
 	if len(afterActions) > 0 {
-		functionName, actionErr = DoInvokeFuntion(
-			DoInvokeFuntionStruct{
-				CustomEvents:           afterActions,
-				IDs:                    []string{id},
-				TableSlug:              c.Param("collection"),
-				ObjectData:             objectRequest.Data,
-				Method:                 "UPDATE",
-				ObjectDataBeforeUpdate: singleObject.Data.AsMap(),
-				ActionType:             "AFTER",
-			},
+		functionName, actionErr = DoInvokeFuntion(models.DoInvokeFuntionStruct{
+			CustomEvents:           afterActions,
+			IDs:                    []string{id},
+			TableSlug:              c.Param("collection"),
+			ObjectData:             objectRequest.Data,
+			Method:                 "UPDATE",
+			ObjectDataBeforeUpdate: singleObject.Data.AsMap(),
+			ActionType:             "AFTER",
+			Resource:               resource,
+		},
 			c, // gin context,
 			h, // handler
 		)
 		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error()+" in "+functionName)
 			return
 		}
 	}
@@ -994,8 +988,7 @@ func (h *HandlerV2) MultipleUpdateItems(c *gin.Context) {
 		functionName                string
 	)
 
-	err := c.ShouldBindJSON(&objectRequest)
-	if err != nil {
+	if err := c.ShouldBindJSON(&objectRequest); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -1008,16 +1001,14 @@ func (h *HandlerV2) MultipleUpdateItems(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -1028,20 +1019,9 @@ func (h *HandlerV2) MultipleUpdateItems(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		resource.GetProjectId(),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), resource.GetProjectId(), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
-	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
-	if err != nil {
-		h.log.Info("Error while getting "+resource.NodeType+" object builder service", logger.Error(err))
-		h.handleResponse(c, status_http.InternalServerError, err)
 		return
 	}
 
@@ -1054,20 +1034,29 @@ func (h *HandlerV2) MultipleUpdateItems(c *gin.Context) {
 
 	fromOfs := c.Query("from-ofs")
 	if fromOfs != "true" {
-		beforeActions, afterActions, err = GetListCustomEvents(c.Param("collection"), "", "MULTIPLE_UPDATE", c, h)
+		beforeActions, afterActions, err = GetListCustomEvents(models.GetListCustomEventsStruct{
+			TableSlug: c.Param("collection"),
+			RoleId:    "",
+			Method:    "MULTIPLE_UPDATE",
+			Resource:  resource,
+		},
+			c,
+			h,
+		)
 		if err != nil {
 			h.handleResponse(c, status_http.InvalidArgument, err.Error())
 			return
 		}
 	}
 	if len(beforeActions) > 0 {
-		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
+		functionName, err := DoInvokeFuntion(models.DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			IDs:          objectRequest.Ids,
 			TableSlug:    c.Param("collection"),
 			ObjectData:   objectRequest.Data,
 			Method:       "MULTIPLE_UPDATE",
 			ActionType:   "BEFORE",
+			Resource:     resource,
 		},
 			c,
 			h,
@@ -1085,12 +1074,9 @@ func (h *HandlerV2) MultipleUpdateItems(c *gin.Context) {
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: c.Request.URL.String(),
 			ActionType:   "UPDATE ITEM",
-			UsedEnvironments: map[string]bool{
-				cast.ToString(environmentId): true,
-			},
-			UserInfo:  cast.ToString(userId),
-			Request:   &structData,
-			TableSlug: c.Param("collection"),
+			UserInfo:     cast.ToString(userId),
+			Request:      &structData,
+			TableSlug:    c.Param("collection"),
 		}
 	)
 
@@ -1107,14 +1093,18 @@ func (h *HandlerV2) MultipleUpdateItems(c *gin.Context) {
 			logReq.Response = resp
 			h.handleResponse(c, status_http.NoContent, resp)
 		}
-		go h.versionHistory(logReq)
+		switch resource.ResourceType {
+		case pb.ResourceType_MONGODB:
+			go h.versionHistory(logReq)
+		case pb.ResourceType_POSTGRESQL:
+			go h.versionHistoryGo(c, logReq)
+		}
 	}()
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = service.MultipleUpdate(
-			context.Background(),
-			&obs.CommonMessage{
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().MultipleUpdate(
+			c.Request.Context(), &obs.CommonMessage{
 				TableSlug: c.Param("collection"),
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
@@ -1131,9 +1121,8 @@ func (h *HandlerV2) MultipleUpdateItems(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = service.MultipleUpdate(
-			context.Background(),
-			&obs.CommonMessage{
+		body, err := services.GoObjectBuilderService().Items().MultipleUpdate(
+			c.Request.Context(), &nb.CommonMessage{
 				TableSlug: c.Param("collection"),
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
@@ -1141,24 +1130,31 @@ func (h *HandlerV2) MultipleUpdateItems(c *gin.Context) {
 		)
 
 		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		if err = helper.MarshalToStruct(body, &resp); err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 	}
 
 	if len(afterActions) > 0 {
-		functionName, actionErr = DoInvokeFuntion(
-			DoInvokeFuntionStruct{
-				CustomEvents: afterActions,
-				IDs:          objectRequest.Ids,
-				TableSlug:    c.Param("collection"),
-				ObjectData:   objectRequest.Data,
-				Method:       "MULTIPLE_UPDATE",
-				ActionType:   "AFTER",
-			},
+		functionName, actionErr = DoInvokeFuntion(models.DoInvokeFuntionStruct{
+			CustomEvents: afterActions,
+			IDs:          objectRequest.Ids,
+			TableSlug:    c.Param("collection"),
+			ObjectData:   objectRequest.Data,
+			Method:       "MULTIPLE_UPDATE",
+			ActionType:   "AFTER",
+			Resource:     resource,
+		},
 			c, // gin context
 			h, // handler
 		)
 		if err != nil {
+			h.handleResponse(c, status_http.InternalServerError, err.Error()+" in "+functionName)
 			return
 		}
 	}
@@ -1187,8 +1183,7 @@ func (h *HandlerV2) DeleteItem(c *gin.Context) {
 		statusHttp                  = status_http.GrpcStatusToHTTP["NoContent"]
 	)
 
-	err := c.ShouldBindJSON(&objectRequest)
-	if err != nil {
+	if err := c.ShouldBindJSON(&objectRequest); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -1207,16 +1202,14 @@ func (h *HandlerV2) DeleteItem(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -1227,11 +1220,7 @@ func (h *HandlerV2) DeleteItem(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		resource.GetProjectId(),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), resource.GetProjectId(), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -1249,19 +1238,29 @@ func (h *HandlerV2) DeleteItem(c *gin.Context) {
 
 	fromOfs := c.Query("from-ofs")
 	if fromOfs != "true" {
-		beforeActions, afterActions, err = GetListCustomEvents(c.Param("collection"), "", "DELETE", c, h)
+		beforeActions, afterActions, err = GetListCustomEvents(models.GetListCustomEventsStruct{
+			TableSlug: c.Param("collection"),
+			RoleId:    "",
+			Method:    "DELETE",
+			Resource:  resource,
+		},
+			c,
+			h,
+		)
 		if err != nil {
 			h.handleResponse(c, status_http.InvalidArgument, err.Error())
 			return
 		}
 	}
+
 	if len(beforeActions) > 0 {
-		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
+		functionName, err := DoInvokeFuntion(models.DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			IDs:          []string{objectID},
 			TableSlug:    c.Param("collection"),
 			ObjectData:   objectRequest.Data,
 			Method:       "DELETE",
+			Resource:     resource,
 		},
 			c,
 			h,
@@ -1289,8 +1288,7 @@ func (h *HandlerV2) DeleteItem(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().Delete(
-			context.Background(),
-			&obs.CommonMessage{
+			c.Request.Context(), &obs.CommonMessage{
 				TableSlug: c.Param("collection"),
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
@@ -1312,13 +1310,13 @@ func (h *HandlerV2) DeleteItem(c *gin.Context) {
 		go h.versionHistory(logReq)
 	case pb.ResourceType_POSTGRESQL:
 		new, err := services.GoObjectBuilderService().Items().Delete(
-			context.Background(),
-			&nb.CommonMessage{
+			c.Request.Context(), &nb.CommonMessage{
 				TableSlug: c.Param("collection"),
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
+
 		if err != nil {
 			statusHttp = status_http.GrpcStatusToHTTP["Internal"]
 			stat, ok := status.FromError(err)
@@ -1343,14 +1341,14 @@ func (h *HandlerV2) DeleteItem(c *gin.Context) {
 	}
 
 	if len(afterActions) > 0 {
-		functionName, err := DoInvokeFuntion(
-			DoInvokeFuntionStruct{
-				CustomEvents: afterActions,
-				IDs:          []string{objectID},
-				TableSlug:    c.Param("collection"),
-				ObjectData:   objectRequest.Data,
-				Method:       "DELETE",
-			},
+		functionName, err := DoInvokeFuntion(models.DoInvokeFuntionStruct{
+			CustomEvents: afterActions,
+			IDs:          []string{objectID},
+			TableSlug:    c.Param("collection"),
+			ObjectData:   objectRequest.Data,
+			Method:       "DELETE",
+			Resource:     resource,
+		},
 			c, // gin context,
 			h, // handler
 		)
@@ -1389,8 +1387,7 @@ func (h *HandlerV2) DeleteItems(c *gin.Context) {
 		functionName                string
 	)
 
-	err := c.ShouldBindJSON(&objectRequest)
-	if err != nil {
+	if err := c.ShouldBindJSON(&objectRequest); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -1403,16 +1400,14 @@ func (h *HandlerV2) DeleteItems(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -1428,11 +1423,7 @@ func (h *HandlerV2) DeleteItems(c *gin.Context) {
 	data["ids"] = objectRequest.Ids
 	data["query"] = objectRequest.Query
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		resource.GetProjectId(),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), resource.GetProjectId(), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -1453,19 +1444,29 @@ func (h *HandlerV2) DeleteItems(c *gin.Context) {
 
 	fromOfs := c.Query("from-ofs")
 	if fromOfs != "true" {
-		beforeActions, afterActions, err = GetListCustomEvents(c.Param("collection"), "", "DELETE_MANY", c, h)
+		beforeActions, afterActions, err = GetListCustomEvents(models.GetListCustomEventsStruct{
+			TableSlug: c.Param("collection"),
+			RoleId:    "",
+			Method:    "DELETE_MANY",
+			Resource:  resource,
+		},
+			c,
+			h,
+		)
 		if err != nil {
 			h.handleResponse(c, status_http.InvalidArgument, err.Error())
 			return
 		}
 	}
+
 	if len(beforeActions) > 0 {
-		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
+		functionName, err := DoInvokeFuntion(models.DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			IDs:          objectRequest.Ids,
 			TableSlug:    c.Param("collection"),
 			ObjectData:   data,
 			Method:       "DELETE_MANY",
+			Resource:     resource,
 		},
 			c,
 			h,
@@ -1503,14 +1504,18 @@ func (h *HandlerV2) DeleteItems(c *gin.Context) {
 			logReq.Response = resp
 			h.handleResponse(c, status_http.NoContent, resp)
 		}
-		go h.versionHistory(logReq)
+		switch resource.ResourceType {
+		case pb.ResourceType_MONGODB:
+			go h.versionHistory(logReq)
+		case pb.ResourceType_POSTGRESQL:
+			go h.versionHistoryGo(c, logReq)
+		}
 	}()
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = service.DeleteMany(
-			context.Background(),
-			&obs.CommonMessage{
+			c.Request.Context(), &obs.CommonMessage{
 				TableSlug: c.Param("collection"),
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
@@ -1528,21 +1533,24 @@ func (h *HandlerV2) DeleteItems(c *gin.Context) {
 		}
 	case pb.ResourceType_POSTGRESQL:
 		// Does Not Implemented
+		h.handleResponse(c, status_http.BadRequest, "does not implemented")
+		return
 	}
 
 	if len(afterActions) > 0 {
-		functionName, actionErr = DoInvokeFuntion(
-			DoInvokeFuntionStruct{
-				CustomEvents: afterActions,
-				IDs:          objectRequest.Ids,
-				TableSlug:    c.Param("collection"),
-				ObjectData:   data,
-				Method:       "DELETE_MANY",
-			},
+		functionName, actionErr = DoInvokeFuntion(models.DoInvokeFuntionStruct{
+			CustomEvents: afterActions,
+			IDs:          objectRequest.Ids,
+			TableSlug:    c.Param("collection"),
+			ObjectData:   data,
+			Method:       "DELETE_MANY",
+			Resource:     resource,
+		},
 			c, // gin context,
 			h, // handler
 		)
 		if err != nil {
+			h.handleResponse(c, status_http.InternalServerError, err.Error()+" in "+functionName)
 			return
 		}
 	}
@@ -1573,8 +1581,7 @@ func (h *HandlerV2) DeleteManyToMany(c *gin.Context) {
 		functionName                string
 	)
 
-	err := c.ShouldBindJSON(&m2mMessage)
-	if err != nil {
+	if err := c.ShouldBindJSON(&m2mMessage); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 	}
 
@@ -1586,16 +1593,14 @@ func (h *HandlerV2) DeleteManyToMany(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -1606,14 +1611,7 @@ func (h *HandlerV2) DeleteManyToMany(c *gin.Context) {
 		return
 	}
 
-	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(4))
-	// defer cancel()
-
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		resource.GetProjectId(),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), resource.GetProjectId(), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -1629,19 +1627,29 @@ func (h *HandlerV2) DeleteManyToMany(c *gin.Context) {
 	m2mMessage.ProjectId = resource.ResourceEnvironmentId
 	fromOfs := c.Query("from-ofs")
 	if fromOfs != "true" {
-		beforeActions, afterActions, err = GetListCustomEvents(m2mMessage.TableFrom, "", "DELETE_MANY2MANY", c, h)
+		beforeActions, afterActions, err = GetListCustomEvents(models.GetListCustomEventsStruct{
+			TableSlug: m2mMessage.TableFrom,
+			RoleId:    "",
+			Method:    "DELETE_MANY2MANY",
+			Resource:  resource,
+		},
+			c,
+			h,
+		)
 		if err != nil {
 			h.handleResponse(c, status_http.InvalidArgument, err.Error())
 			return
 		}
 	}
+
 	if len(beforeActions) > 0 {
-		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
+		functionName, err := DoInvokeFuntion(models.DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			IDs:          []string{m2mMessage.IdFrom},
 			TableSlug:    m2mMessage.TableFrom,
 			ObjectData:   map[string]interface{}{"id_to": m2mMessage.IdTo, "table_to": m2mMessage.TableTo},
 			Method:       "DELETE_MANY2MANY",
+			Resource:     resource,
 		},
 			c,
 			h,
@@ -1679,16 +1687,20 @@ func (h *HandlerV2) DeleteManyToMany(c *gin.Context) {
 			logReq.Response = resp
 			h.handleResponse(c, status_http.NoContent, resp)
 		}
-		go h.versionHistory(logReq)
+		switch resource.ResourceType {
+		case pb.ResourceType_MONGODB:
+			go h.versionHistory(logReq)
+		case pb.ResourceType_POSTGRESQL:
+			go h.versionHistoryGo(c, logReq)
+		}
+
 	}()
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = service.ManyToManyDelete(
-			context.Background(),
-			&m2mMessage,
+			c.Request.Context(), &m2mMessage,
 		)
-
 		if err != nil {
 			statusHttp = status_http.GrpcStatusToHTTP["Internal"]
 			stat, ok := status.FromError(err)
@@ -1700,24 +1712,28 @@ func (h *HandlerV2) DeleteManyToMany(c *gin.Context) {
 		}
 	case pb.ResourceType_POSTGRESQL:
 		// Does Not Implemented
+		h.handleResponse(c, status_http.BadRequest, "does not implemented")
+		return
 	}
 
 	if len(afterActions) > 0 {
-		functionName, actionErr = DoInvokeFuntion(
-			DoInvokeFuntionStruct{
-				CustomEvents: afterActions,
-				IDs:          []string{m2mMessage.IdFrom},
-				TableSlug:    m2mMessage.TableFrom,
-				ObjectData:   map[string]interface{}{"id_to": m2mMessage.IdTo, "table_from": m2mMessage.TableTo},
-				Method:       "DELETE_MANY2MANY",
-			},
+		functionName, actionErr = DoInvokeFuntion(models.DoInvokeFuntionStruct{
+			CustomEvents: afterActions,
+			IDs:          []string{m2mMessage.IdFrom},
+			TableSlug:    m2mMessage.TableFrom,
+			ObjectData:   map[string]interface{}{"id_to": m2mMessage.IdTo, "table_from": m2mMessage.TableTo},
+			Method:       "DELETE_MANY2MANY",
+			Resource:     resource,
+		},
 			c, // gin context,
 			h, // handler
 		)
 		if err != nil {
+			h.handleResponse(c, status_http.InternalServerError, err.Error()+" in "+functionName)
 			return
 		}
 	}
+
 	statusHttp.CustomMessage = resp.GetCustomMessage()
 }
 
@@ -1744,8 +1760,7 @@ func (h *HandlerV2) AppendManyToMany(c *gin.Context) {
 		functionName                string
 	)
 
-	err := c.ShouldBindJSON(&m2mMessage)
-	if err != nil {
+	if err := c.ShouldBindJSON(&m2mMessage); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 	}
 
@@ -1757,16 +1772,14 @@ func (h *HandlerV2) AppendManyToMany(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -1777,11 +1790,7 @@ func (h *HandlerV2) AppendManyToMany(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		resource.GetProjectId(),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), resource.GetProjectId(), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -1797,19 +1806,29 @@ func (h *HandlerV2) AppendManyToMany(c *gin.Context) {
 	m2mMessage.ProjectId = resource.ResourceEnvironmentId
 	fromOfs := c.Query("from-ofs")
 	if fromOfs != "true" {
-		beforeActions, afterActions, err = GetListCustomEvents(m2mMessage.TableFrom, "", "APPEND_MANY2MANY", c, h)
+		beforeActions, afterActions, err = GetListCustomEvents(models.GetListCustomEventsStruct{
+			TableSlug: m2mMessage.TableFrom,
+			RoleId:    "",
+			Method:    "APPEND_MANY2MANY",
+			Resource:  resource,
+		},
+			c,
+			h,
+		)
 		if err != nil {
 			h.handleResponse(c, status_http.InvalidArgument, err.Error())
 			return
 		}
 	}
+
 	if len(beforeActions) > 0 {
-		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
+		functionName, err := DoInvokeFuntion(models.DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			IDs:          []string{m2mMessage.IdFrom},
 			TableSlug:    m2mMessage.TableFrom,
 			ObjectData:   map[string]interface{}{"id_to": m2mMessage.IdTo, "table_to": m2mMessage.TableTo},
 			Method:       "APPEND_MANY2MANY",
+			Resource:     resource,
 		},
 			c,
 			h,
@@ -1853,8 +1872,7 @@ func (h *HandlerV2) AppendManyToMany(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = service.ManyToManyAppend(
-			context.Background(),
-			&m2mMessage,
+			c.Request.Context(), &m2mMessage,
 		)
 		if err != nil {
 			statusHttp = status_http.GrpcStatusToHTTP["Internal"]
@@ -1867,21 +1885,24 @@ func (h *HandlerV2) AppendManyToMany(c *gin.Context) {
 		}
 	case pb.ResourceType_POSTGRESQL:
 		// Does Not Implemented
+		h.handleResponse(c, status_http.BadRequest, "does not implemented")
+		return
 	}
 
 	if len(afterActions) > 0 {
-		functionName, actionErr = DoInvokeFuntion(
-			DoInvokeFuntionStruct{
-				CustomEvents: afterActions,
-				IDs:          []string{m2mMessage.IdFrom},
-				TableSlug:    m2mMessage.TableFrom,
-				ObjectData:   map[string]interface{}{"id_to": m2mMessage.IdTo, "table_to": m2mMessage.TableTo},
-				Method:       "APPEND_MANY2MANY",
-			},
+		functionName, actionErr = DoInvokeFuntion(models.DoInvokeFuntionStruct{
+			CustomEvents: afterActions,
+			IDs:          []string{m2mMessage.IdFrom},
+			TableSlug:    m2mMessage.TableFrom,
+			ObjectData:   map[string]interface{}{"id_to": m2mMessage.IdTo, "table_to": m2mMessage.TableTo},
+			Method:       "APPEND_MANY2MANY",
+			Resource:     resource,
+		},
 			c, // gin context,
 			h, // handler
 		)
 		if err != nil {
+			h.handleResponse(c, status_http.InternalServerError, err.Error()+" in "+functionName)
 			return
 		}
 	}
@@ -1903,13 +1924,9 @@ func (h *HandlerV2) AppendManyToMany(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) GetListAggregation(c *gin.Context) {
+	var reqBody models.CommonMessage
 
-	var (
-		reqBody models.CommonMessage
-	)
-
-	err := c.ShouldBindJSON(&reqBody)
-	if err != nil {
+	if err := c.ShouldBindJSON(&reqBody); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 	}
 
@@ -1933,14 +1950,12 @@ func (h *HandlerV2) GetListAggregation(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -1951,11 +1966,7 @@ func (h *HandlerV2) GetListAggregation(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -1966,10 +1977,12 @@ func (h *HandlerV2) GetListAggregation(c *gin.Context) {
 	if reqBody.IsCached {
 		redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("collection"), string(key), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
 		if err == nil {
-			resp := make(map[string]interface{})
-			m := make(map[string]interface{})
-			err = json.Unmarshal([]byte(redisResp), &m)
-			if err != nil {
+			var (
+				resp = make(map[string]interface{})
+				m    = make(map[string]interface{})
+			)
+
+			if err = json.Unmarshal([]byte(redisResp), &m); err != nil {
 				h.log.Error("Error while unmarshal redis in items aggregation", logger.Error(err))
 			} else {
 				resp["data"] = m
@@ -1980,8 +1993,7 @@ func (h *HandlerV2) GetListAggregation(c *gin.Context) {
 	}
 
 	resp, err := service.GetListAggregation(
-		context.Background(),
-		&obs.CommonMessage{
+		c.Request.Context(), &obs.CommonMessage{
 			TableSlug: c.Param("collection"),
 			Data:      structData,
 			ProjectId: resource.ResourceEnvironmentId,
@@ -1994,7 +2006,7 @@ func (h *HandlerV2) GetListAggregation(c *gin.Context) {
 
 	if reqBody.IsCached {
 		jsonData, _ := resp.GetData().MarshalJSON()
-		err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("collection"), string(key), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
+		err = h.redis.SetX(c.Request.Context(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("collection"), string(key), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
 		if err != nil {
 			h.log.Error("Error while setting redis in items aggregation", logger.Error(err))
 		}
@@ -2018,13 +2030,9 @@ func (h *HandlerV2) GetListAggregation(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) UpdateRowOrder(c *gin.Context) {
+	var objectRequest models.CommonMessage
 
-	var (
-		objectRequest models.CommonMessage
-	)
-
-	err := c.ShouldBindJSON(&objectRequest)
-	if err != nil {
+	if err := c.ShouldBindJSON(&objectRequest); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -2055,14 +2063,12 @@ func (h *HandlerV2) UpdateRowOrder(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -2073,15 +2079,12 @@ func (h *HandlerV2) UpdateRowOrder(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
@@ -2093,12 +2096,10 @@ func (h *HandlerV2) UpdateRowOrder(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		_, err = service.MultipleUpdate(
-			context.Background(),
-			&obs.CommonMessage{
+			c.Request.Context(), &obs.CommonMessage{
 				TableSlug: c.Param("collection"),
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
-				// BlockedBuilder: cast.ToBool(c.DefaultQuery("block_builder", "false")),
 			},
 		)
 		if err != nil {

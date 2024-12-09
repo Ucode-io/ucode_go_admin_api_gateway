@@ -33,14 +33,12 @@ func (h *HandlerV1) NodeMiddleware() gin.HandlerFunc {
 func (h *HandlerV1) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
-			res = &auth.V2HasAccessUserRes{}
-			ok  bool
+			res         = &auth.V2HasAccessUserRes{}
+			ok          bool
+			bearerToken = c.GetHeader("Authorization")
+			app_id      = c.GetHeader("X-API-KEY")
+			strArr      = strings.Split(bearerToken, " ")
 		)
-
-		bearerToken := c.GetHeader("Authorization")
-		app_id := c.GetHeader("X-API-KEY")
-
-		strArr := strings.Split(bearerToken, " ")
 
 		if len(strArr) < 1 && (strArr[0] != "Bearer" && strArr[0] != "API-KEY") {
 			h.log.Error("---ERR->Unexpected token format")
@@ -57,9 +55,11 @@ func (h *HandlerV1) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 				return
 			}
 
-			resourceId := c.GetHeader("Resource-Id")
-			environmentId := c.GetHeader("Environment-Id")
-			projectId := c.Query("project-id")
+			var (
+				resourceId    = c.GetHeader("Resource-Id")
+				environmentId = c.GetHeader("Environment-Id")
+				projectId     = c.Query("project-id")
+			)
 
 			if res.ProjectId != "" {
 				projectId = res.ProjectId
@@ -74,15 +74,8 @@ func (h *HandlerV1) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 			c.Set("user_id", res.UserIdAuth)
 		case "API-KEY":
 			if app_id == "" {
-				err := errors.New("error invalid api-key method")
-				h.log.Error("--AuthMiddleware--", logger.Error(err))
-				c.JSON(401, struct {
-					Code    int    `json:"code"`
-					Message string `json:"message"`
-				}{
-					Code:    401,
-					Message: "The request requires an user authentication.",
-				})
+				h.log.Error("--AuthMiddleware--", logger.Any("error", "invalid api-key method"))
+				h.handleResponse(c, status_http.Unauthorized, "The request requires an user authentication.")
 				c.Abort()
 				return
 			}
@@ -103,7 +96,7 @@ func (h *HandlerV1) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 			}
 
 			if appIdOk {
-				ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
+				ctx, cancel := context.WithTimeout(c.Request.Context(), config.REDIS_WAIT_TIMEOUT)
 				defer cancel()
 
 				for {
@@ -132,10 +125,7 @@ func (h *HandlerV1) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 
 			if apikeys.AppId == "" {
 				apikeys, err = h.authService.ApiKey().GetEnvID(
-					c.Request.Context(),
-					&auth.GetReq{
-						Id: app_id,
-					},
+					c.Request.Context(), &auth.GetReq{Id: app_id},
 				)
 				if err != nil {
 					h.handleResponse(c, status_http.BadRequest, err.Error())
@@ -162,14 +152,13 @@ func (h *HandlerV1) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 			}
 
 			if resourceOk {
-				ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
+				ctx, cancel := context.WithTimeout(c.Request.Context(), config.REDIS_WAIT_TIMEOUT)
 				defer cancel()
 
 				for {
 					resourceBody, ok := h.cache.Get(resourceAppIdKey)
 					if ok {
-						err = json.Unmarshal(resourceBody, &resource)
-						if err != nil {
+						if err = json.Unmarshal(resourceBody, &resource); err != nil {
 							h.handleResponse(c, status_http.BadRequest, "cant get auth info")
 							c.Abort()
 							return
@@ -212,8 +201,8 @@ func (h *HandlerV1) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 			}
 
 			data := make(map[string]interface{})
-			err = json.Unmarshal(apiJson, &data)
-			if err != nil {
+
+			if err = json.Unmarshal(apiJson, &data); err != nil {
 				h.handleResponse(c, status_http.BadRequest, "cant get auth info")
 				c.Abort()
 				return
@@ -237,15 +226,8 @@ func (h *HandlerV1) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 				h.handleResponse(c, status_http.BadRequest, err.Error())
 				c.Abort()
 			} else {
-				err := errors.New("error invalid authorization method")
-				h.log.Error("--AuthMiddleware--", logger.Error(err))
-				c.JSON(401, struct {
-					Code    int    `json:"code"`
-					Message string `json:"message"`
-				}{
-					Code:    401,
-					Message: "The request requires an user authentication.",
-				})
+				h.log.Error("--AuthMiddleware--", logger.Any("error", "invalid authorization method"))
+				h.handleResponse(c, status_http.Unauthorized, "The request requires an user authentication.")
 				c.Abort()
 			}
 
