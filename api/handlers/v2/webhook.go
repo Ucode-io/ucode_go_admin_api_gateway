@@ -1,113 +1,23 @@
 package v2
 
 import (
-	"encoding/json"
-	"fmt"
-	"net/http"
-
-	"ucode/ucode_go_api_gateway/api/models"
-	"ucode/ucode_go_api_gateway/api/status_http"
-	"ucode/ucode_go_api_gateway/pkg/gitlab"
-
 	"github.com/gin-gonic/gin"
 )
 
 func (h *HandlerV2) GithubGetBranches(c *gin.Context) {
-	var (
-		username = c.Query("username")
-		repoName = c.Query("repo")
-		token    = c.Query("token")
-
-		url      = fmt.Sprintf("https://api.github.com/repos/%s/%s/branches", username, repoName)
-		response models.GithubBranch
-	)
-
-	resultByte, err := gitlab.MakeRequestV1(http.MethodGet, url, token, map[string]interface{}{})
-	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err.Error())
-		return
-	}
-
-	if err := json.Unmarshal(resultByte, &response); err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err.Error())
-		return
-	}
-
-	h.handleResponse(c, status_http.OK, response)
+	_ = h.MakeProxy(c, h.baseConf.GoFunctionServiceHost+h.baseConf.GoFunctionServiceHTTPPort, c.Request.URL.Path)
 }
 
 func (h *HandlerV2) GithubGetRepos(c *gin.Context) {
-	var (
-		username = c.Query("username")
-		token    = c.Query("token")
-		url      = fmt.Sprintf("https://api.github.com/users/%s/repos", username)
-		response = models.GithubRepo{}
-	)
-
-	resultByte, err := gitlab.MakeRequestV1(http.MethodGet, url, token, map[string]any{})
-	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err.Error())
-		return
-	}
-
-	if err := json.Unmarshal(resultByte, &response); err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err.Error())
-		return
-	}
-
-	h.handleResponse(c, status_http.OK, response)
+	_ = h.MakeProxy(c, h.baseConf.GoFunctionServiceHost+h.baseConf.GoFunctionServiceHTTPPort, c.Request.URL.Path)
 }
 
 func (h *HandlerV2) GithubGetUser(c *gin.Context) {
-	var (
-		token      = c.Query("token")
-		getUserUrl = "https://api.github.com/user"
-		response   models.GithubUser
-	)
-
-	resultByte, err := gitlab.MakeRequestV1(http.MethodGet, getUserUrl, token, map[string]interface{}{})
-	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err.Error())
-		return
-	}
-
-	if err := json.Unmarshal(resultByte, &response); err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err.Error())
-		return
-	}
-
-	if response.Status == fmt.Sprintf("%d", http.StatusUnauthorized) {
-		h.handleResponse(c, status_http.BadRequest, "can not find username wrong token format")
-		return
-	}
-
-	h.handleResponse(c, status_http.OK, response)
+	_ = h.MakeProxy(c, h.baseConf.GoFunctionServiceHost+h.baseConf.GoFunctionServiceHTTPPort, c.Request.URL.Path)
 }
 
 func (h *HandlerV2) GithubLogin(c *gin.Context) {
-	var (
-		code                  = c.Query("code")
-		accessTokenUrl string = "https://github.com/login/oauth/access_token"
-	)
-
-	param := map[string]interface{}{
-		"client_id":     h.baseConf.GithubClientId,
-		"client_secret": h.baseConf.GithubClientSecret,
-		"code":          code,
-	}
-
-	result, err := gitlab.MakeRequest(http.MethodPost, accessTokenUrl, "", param)
-	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err.Error())
-		return
-	}
-
-	if _, ok := result["error"]; ok {
-		h.handleResponse(c, status_http.InvalidArgument, result["error_description"])
-		return
-	}
-
-	h.handleResponse(c, status_http.OK, result)
+	_ = h.MakeProxy(c, h.baseConf.GoFunctionServiceHost+h.baseConf.GoFunctionServiceHTTPPort, c.Request.URL.Path)
 }
 
 func (h *HandlerV2) CreateWebhook(c *gin.Context) {
