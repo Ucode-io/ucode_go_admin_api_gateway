@@ -731,6 +731,7 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 	var (
 		objectRequest               models.CommonMessage
 		resp, singleObject          *obs.CommonMessage
+		body                        *nb.CommonMessage
 		beforeActions, afterActions []*obs.CustomEvent
 		statusHttp                  = status_http.GrpcStatusToHTTP["Ok"]
 		actionErr                   error
@@ -922,7 +923,7 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		body, err := services.GoObjectBuilderService().Items().Update(
+		body, err = services.GoObjectBuilderService().Items().Update(
 			c.Request.Context(), &nb.CommonMessage{
 				TableSlug:        c.Param("collection"),
 				Data:             structData,
