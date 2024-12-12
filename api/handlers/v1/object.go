@@ -410,6 +410,7 @@ func (h *HandlerV1) GetSingleSlim(c *gin.Context) {
 	}
 
 	object.Data["id"] = objectID
+	object.Data["with_relations"] = c.DefaultQuery("with_relations", "false")
 
 	structData, err := helper.ConvertMapToStruct(object.Data)
 	if err != nil {
