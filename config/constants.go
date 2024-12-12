@@ -62,8 +62,12 @@ var (
 		"codabar": 1,
 	}
 
-	NodeDocxConvertToPdfServiceUrl = "https://crowe-doc-generator.u-code.io/generate-doc"
-	ConvertDocxToPdfUrl            = "https://v2.convertapi.com/convert/docx/to/pdf?Secret="
-	secretKeys                     = []string{"secret_WQc40yJ2wbcbtI6J", "secret_4y6SXNIXFZwths6R"}
-	ConvertDocxToPdfSecret         = secretKeys[rand.Intn(len(secretKeys))]
+	RelationFieldTypes = map[string]bool{
+		"LOOKUP":  true,
+		"LOOKUPS": true,
+	}
+
+	ConvertDocxToPdfUrl    = "https://v2.convertapi.com/convert/docx/to/pdf?Secret="
+	secretKeys             = []string{"secret_WQc40yJ2wbcbtI6J", "secret_4y6SXNIXFZwths6R"}
+	ConvertDocxToPdfSecret = secretKeys[rand.Intn(len(secretKeys))]
 )

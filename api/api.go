@@ -381,7 +381,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v2Admin.PUT("/docx-template", h.V2.UpdateDocxTemplate)
 		v2Admin.DELETE("/docx-template/:docx-template-id", h.V2.DeleteDocxTemplate)
 		v2Admin.GET("/docx-template", h.V2.GetListDocxTemplate)
-		v2Admin.POST("/docx-template/convert/pdf", h.V2.GenerateDocxToPdf)
 		v2Admin.GET("/docx-template/fields/list", h.V2.GetAllFieldsDocxTemplate)
 	}
 

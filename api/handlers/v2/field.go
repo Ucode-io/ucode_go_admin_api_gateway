@@ -1,10 +1,10 @@
 package v2
 
 import (
-	"context"
 	"errors"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
+	"ucode/ucode_go_api_gateway/config"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
@@ -90,7 +90,7 @@ func (h *HandlerV2) CreateField(c *gin.Context) {
 
 	if fieldRequest.EnableMultilanguage {
 		if fieldRequest.Type == "SINGLE_LINE" || fieldRequest.Type == "MULTI_LINE" {
-			languages, err := h.companyServices.Project().GetById(context.Background(), &pb.GetProjectByIdRequest{
+			languages, err := h.companyServices.Project().GetById(c.Request.Context(), &pb.GetProjectByIdRequest{
 				ProjectId: resource.GetProjectId(),
 			})
 			if err != nil {
@@ -160,7 +160,7 @@ func (h *HandlerV2) CreateField(c *gin.Context) {
 	case pb.ResourceType_MONGODB:
 		for _, field := range fields {
 			resp, err = services.GetBuilderServiceByType(resource.NodeType).Field().Create(
-				context.Background(),
+				c.Request.Context(),
 				field,
 			)
 			if err != nil {
@@ -190,7 +190,7 @@ func (h *HandlerV2) CreateField(c *gin.Context) {
 			}
 
 			resp, err = services.GoObjectBuilderService().Field().Create(
-				context.Background(),
+				c.Request.Context(),
 				&newReq,
 			)
 			if err != nil {
@@ -327,7 +327,7 @@ func (h *HandlerV2) GetAllFields(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err := services.GetBuilderServiceByType(resource.NodeType).Field().GetAll(
-			context.Background(),
+			c.Request.Context(),
 			&obs.GetAllFieldsRequest{
 				Limit:            int32(limit),
 				Offset:           int32(offset),
@@ -348,7 +348,7 @@ func (h *HandlerV2) GetAllFields(c *gin.Context) {
 		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().Field().GetAll(
-			context.Background(),
+			c.Request.Context(),
 			&nb.GetAllFieldsRequest{
 				Limit:            int32(limit),
 				Offset:           int32(offset),
@@ -477,7 +477,7 @@ func (h *HandlerV2) UpdateField(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		oldField, deferErr := services.GetBuilderServiceByType(resource.NodeType).Field().GetByID(
-			context.Background(),
+			c.Request.Context(),
 			&obs.FieldPrimaryKey{
 				Id:        field.Id,
 				ProjectId: resource.ResourceEnvironmentId,
@@ -488,7 +488,7 @@ func (h *HandlerV2) UpdateField(c *gin.Context) {
 		}
 
 		resp, deferErr := services.GetBuilderServiceByType(resource.NodeType).Field().Update(
-			context.Background(),
+			c.Request.Context(),
 			&field,
 		)
 		logReq.Request = &field
@@ -513,7 +513,7 @@ func (h *HandlerV2) UpdateField(c *gin.Context) {
 		}
 
 		oldField, deferErr := services.GoObjectBuilderService().Field().GetByID(
-			context.Background(),
+			c.Request.Context(),
 			&nb.FieldPrimaryKey{
 				Id:        field.Id,
 				ProjectId: resource.ResourceEnvironmentId,
@@ -524,7 +524,7 @@ func (h *HandlerV2) UpdateField(c *gin.Context) {
 		}
 
 		resp, deferErr := services.GoObjectBuilderService().Field().Update(
-			context.Background(),
+			c.Request.Context(),
 			&newReq,
 		)
 		logReq.Request = &field
@@ -593,7 +593,7 @@ func (h *HandlerV2) UpdateSearch(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err := services.GetBuilderServiceByType(resource.NodeType).Field().UpdateSearch(
-			context.Background(),
+			c.Request.Context(),
 			&searchRequest,
 		)
 		if err != nil {
@@ -611,7 +611,7 @@ func (h *HandlerV2) UpdateSearch(c *gin.Context) {
 			return
 		}
 		resp, err := services.GoObjectBuilderService().Field().UpdateSearch(
-			context.Background(),
+			c.Request.Context(),
 			&newReq,
 		)
 		if err != nil {
@@ -698,18 +698,24 @@ func (h *HandlerV2) DeleteField(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		oldField, err := services.GetBuilderServiceByType(resource.NodeType).Field().GetByID(
-			context.Background(),
+			c.Request.Context(),
 			&obs.FieldPrimaryKey{
 				Id:        fieldID,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
 		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		if config.RelationFieldTypes[oldField.GetType()] {
+			h.handleResponse(c, status_http.GRPCError, "relation field cannot be deleted")
 			return
 		}
 
 		resp, err := services.GetBuilderServiceByType(resource.NodeType).Field().Delete(
-			context.Background(),
+			c.Request.Context(),
 			&obs.FieldPrimaryKey{
 				Id:        fieldID,
 				ProjectId: resource.ResourceEnvironmentId,
@@ -729,18 +735,24 @@ func (h *HandlerV2) DeleteField(c *gin.Context) {
 		h.handleResponse(c, status_http.NoContent, resp)
 	case pb.ResourceType_POSTGRESQL:
 		oldField, err := services.GoObjectBuilderService().Field().GetByID(
-			context.Background(),
+			c.Request.Context(),
 			&nb.FieldPrimaryKey{
 				Id:        fieldID,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
 		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		if config.RelationFieldTypes[oldField.GetType()] {
+			h.handleResponse(c, status_http.GRPCError, "relation field cannot be deleted")
 			return
 		}
 
 		resp, err := services.GoObjectBuilderService().Field().Delete(
-			context.Background(),
+			c.Request.Context(),
 			&nb.FieldPrimaryKey{
 				Id:        fieldID,
 				ProjectId: resource.ResourceEnvironmentId,
@@ -759,7 +771,6 @@ func (h *HandlerV2) DeleteField(c *gin.Context) {
 
 		h.handleResponse(c, status_http.NoContent, resp)
 	}
-
 }
 
 // GetAllFieldsWithDetails godoc
@@ -834,7 +845,7 @@ func (h *HandlerV2) GetAllFieldsWithDetails(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Field().GetAllForItems(
-			context.Background(),
+			c.Request.Context(),
 			&obs.GetAllFieldsForItemsRequest{
 				Collection:       c.Param("collection"),
 				ProjectId:        resource.ResourceEnvironmentId,
@@ -893,7 +904,7 @@ func (h *HandlerV2) FieldsWithPermissions(c *gin.Context) {
 	}
 
 	resp, err := services.GoObjectBuilderService().Field().FieldsWithRelations(
-		context.Background(),
+		c.Request.Context(),
 		&nb.FieldsWithRelationRequest{
 			ProjectId: resource.ResourceEnvironmentId,
 			TableSlug: c.Param("collection"),

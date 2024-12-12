@@ -1017,8 +1017,6 @@ github.com/golang/snappy v0.0.3/go.mod h1:/XxbfmMg8lxefKM7IXC3fBNl/7bRcc72aCRzEW
 github.com/golang/snappy v0.0.4/go.mod h1:/XxbfmMg8lxefKM7IXC3fBNl/7bRcc72aCRzEWrmP2Q=
 github.com/golanguzb70/grpc-client-lb v1.0.0 h1:BQSi+QDKO7Z2LDIbXGiBi27/5Cplb0miwwCl1k+hhP0=
 github.com/golanguzb70/grpc-client-lb v1.0.0/go.mod h1:fXqK498Abzk13K3HzFgdPIhSim3AbN3s9Y0rzyczbcs=
-github.com/golanguzb70/ucode-sdk v1.4.0 h1:yY65PPehs/8fKNRgyRYZM1Bf0sKd0YTANGVDkkxKFw8=
-github.com/golanguzb70/ucode-sdk v1.4.0/go.mod h1:ErR3ZUWk3wOgIjFUdOqjO7kYPZHpWkb4OFoDwlIlm68=
 github.com/google/btree v0.0.0-20180813153112-4030bb1f1f0c/go.mod h1:lNA+9X1NB3Zf8V7Ke586lFgjr2dZNuvo3lPJSGZ5JPQ=
 github.com/google/btree v1.0.0/go.mod h1:lNA+9X1NB3Zf8V7Ke586lFgjr2dZNuvo3lPJSGZ5JPQ=
 github.com/google/flatbuffers v2.0.8+incompatible/go.mod h1:1AeVuKshWv4vARoZatz6mlQ0JxURH0Kv5+zNeJKJCa8=
@@ -1328,6 +1326,8 @@ github.com/uber/jaeger-client-go v2.30.0+incompatible/go.mod h1:WVhlPFC8FDjOFMMW
 github.com/uber/jaeger-lib v2.4.0+incompatible/go.mod h1:ComeNDZlWwrWnDv8aPp0Ba6+uUTzImX/AauajbLI56U=
 github.com/uber/jaeger-lib v2.4.1+incompatible h1:td4jdvLcExb4cBISKIpHuGoVXh+dVKhn2Um6rjCsSsg=
 github.com/uber/jaeger-lib v2.4.1+incompatible/go.mod h1:ComeNDZlWwrWnDv8aPp0Ba6+uUTzImX/AauajbLI56U=
+github.com/ucode-io/ucode_sdk v1.0.1 h1:08ube86Gka2FdGtqDDZnKhp9fffCUhqDyL60Aap82Ig=
+github.com/ucode-io/ucode_sdk v1.0.1/go.mod h1:G9V7eKHOZjQmSVSinEFNCeryKYr3N2ZBkQ2CuClldeo=
 github.com/ugorji/go v1.1.4/go.mod h1:uQMGLiO92mf5W77hV/PUCpI3pbzQx3CRekS0kk+RGrc=
 github.com/ugorji/go v1.1.5-pre/go.mod h1:FwP/aQVg39TXzItUBMwnWp9T9gPQnXw4Poh4/oBQZ/0=
 github.com/ugorji/go v1.1.7/go.mod h1:kZn38zHttfInRq0xu/PH0az30d+z6vm202qpg1oXVMw=
