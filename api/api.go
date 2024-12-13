@@ -155,6 +155,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		// function
 		v1.POST("/function", h.V1.CreateFunction)
 		v1.GET("/function/:function_id", h.V1.GetFunctionByID)
+		v1.GET("/function", h.V1.GetAllNewFunctionsForApp)
 		v1.PUT("/function", h.V1.UpdateFunction)
 		v1.DELETE("/function/:function_id", h.V1.DeleteFunction)
 
