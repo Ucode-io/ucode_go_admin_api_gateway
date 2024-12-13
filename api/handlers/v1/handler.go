@@ -1,9 +1,12 @@
 package v1
 
 import (
+	"bufio"
 	"context"
 	"encoding/json"
 	"log"
+	"net/http"
+	"net/url"
 	"strconv"
 	"time"
 
@@ -234,4 +237,37 @@ func (h *HandlerV1) versionHistoryGo(c *gin.Context, req *models.CreateVersionHi
 		return err
 	}
 	return nil
+}
+
+func (h *HandlerV1) MakeProxy(c *gin.Context, proxyUrl, path string) (err error) {
+	req := c.Request
+
+	proxy, err := url.Parse(proxyUrl)
+	if err != nil {
+		h.log.Error("error in parse addr: %v", logger.Error(err))
+		c.String(http.StatusInternalServerError, "error")
+		return
+	}
+
+	req.URL.Scheme = proxy.Scheme
+	req.URL.Host = proxy.Host
+	req.URL.Path = path
+	transport := http.DefaultTransport
+
+	resp, err := transport.RoundTrip(req)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
+	for k, vv := range resp.Header {
+		for _, v := range vv {
+			c.Header(k, v)
+		}
+	}
+	defer resp.Body.Close()
+
+	c.Status(resp.StatusCode)
+	_, _ = bufio.NewReader(resp.Body).WriteTo(c.Writer)
+	return
 }

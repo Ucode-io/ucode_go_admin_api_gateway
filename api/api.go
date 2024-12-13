@@ -155,7 +155,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		// function
 		v1.POST("/function", h.V1.CreateFunction)
 		v1.GET("/function/:function_id", h.V1.GetFunctionByID)
-		v1.GET("/function", h.V1.GetAllNewFunctionsForApp)
 		v1.PUT("/function", h.V1.UpdateFunction)
 		v1.DELETE("/function/:function_id", h.V1.DeleteFunction)
 
@@ -347,13 +346,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	}
 
 	{
-		// function
-		v2Admin.POST("/function", h.V1.CreateNewFunction)
-		v2Admin.GET("/function/:function_id", h.V1.GetNewFunctionByID)
-		v2Admin.GET("/function", h.V1.GetAllNewFunctions)
-		v2Admin.PUT("/function", h.V1.UpdateNewFunction)
-		v2Admin.DELETE("/function/:function_id", h.V1.DeleteNewFunction)
-
 		// project resource /rest
 		projectResource := v2Admin.Group("/company/project/resource")
 		{
@@ -554,6 +546,17 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	}
 
 	proxyApi := r.Group("/v2")
+
+	proxyFunction := proxyApi.Group("/function")
+	{
+		proxyFunction.POST("", h.V1.CreateNewFunction)
+		proxyFunction.GET("/:function_id", h.V1.GetNewFunctionByID)
+		proxyFunction.GET("", h.V1.GetAllNewFunctions)
+		proxyFunction.PUT("", h.V1.UpdateNewFunction)
+		proxyFunction.DELETE("/:function_id", h.V1.DeleteNewFunction)
+
+	}
+
 	{
 		proxyApi.POST("/invoke_function/:function-path", h.V2.InvokeFunctionByPath)
 

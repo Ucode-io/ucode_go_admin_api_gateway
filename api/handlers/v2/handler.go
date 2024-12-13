@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"net/url"
@@ -255,7 +254,6 @@ func (h *HandlerV2) MakeProxy(c *gin.Context, proxyUrl, path string) (err error)
 
 	resp, err := transport.RoundTrip(req)
 	if err != nil {
-		fmt.Println(err)
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
