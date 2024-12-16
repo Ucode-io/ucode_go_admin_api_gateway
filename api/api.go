@@ -38,8 +38,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 	r.GET("/menu/wiki_folder", h.V1.GetWikiFolder)
 
-	r.POST("webhook/handle", h.V2.HandleWebhook)
-
 	global := r.Group("/v1/global")
 	global.Use(h.V1.GlobalAuthMiddleware(cfg))
 	{
@@ -349,13 +347,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	}
 
 	{
-		// function
-		v2Admin.POST("/function", h.V1.CreateNewFunction)
-		v2Admin.GET("/function/:function_id", h.V1.GetNewFunctionByID)
-		v2Admin.GET("/function", h.V1.GetAllNewFunctions)
-		v2Admin.PUT("/function", h.V1.UpdateNewFunction)
-		v2Admin.DELETE("/function/:function_id", h.V1.DeleteNewFunction)
-
 		// project resource /rest
 		projectResource := v2Admin.Group("/company/project/resource")
 		{
@@ -383,7 +374,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v2Admin.PUT("/docx-template", h.V2.UpdateDocxTemplate)
 		v2Admin.DELETE("/docx-template/:docx-template-id", h.V2.DeleteDocxTemplate)
 		v2Admin.GET("/docx-template", h.V2.GetListDocxTemplate)
-		v2Admin.POST("/docx-template/convert/pdf", h.V2.GenerateDocxToPdf)
 		v2Admin.GET("/docx-template/fields/list", h.V2.GetAllFieldsDocxTemplate)
 	}
 
@@ -534,11 +524,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			v2Files.GET("", h.V2.GetAllFiles)
 		}
 
-		v2Webhook := v2Version.Group("/webhook")
-		{
-			v2Webhook.POST("/create", h.V2.CreateWebhook)
-		}
-
 		v2Version := v2Version.Group("/version")
 		{
 			v2Version.POST("", h.V2.CreateVersion)
@@ -562,8 +547,26 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	}
 
 	proxyApi := r.Group("/v2")
+
+	proxyFunction := proxyApi.Group("/function")
+	{
+		proxyFunction.POST("", h.V1.CreateNewFunction)
+		proxyFunction.GET("/:function_id", h.V1.GetNewFunctionByID)
+		proxyFunction.GET("", h.V1.GetAllNewFunctions)
+		proxyFunction.PUT("", h.V1.UpdateNewFunction)
+		proxyFunction.DELETE("/:function_id", h.V1.DeleteNewFunction)
+
+	}
+
 	{
 		proxyApi.POST("/invoke_function/:function-path", h.V2.InvokeFunctionByPath)
+
+		v2Webhook := proxyApi.Group("/webhook")
+		{
+			v2Webhook.POST("/create", h.V2.CreateWebhook)
+			v2Webhook.POST("/handle", h.V2.HandleWebhook)
+
+		}
 	}
 
 	r.Any("/api/*any", h.V1.AuthMiddleware(cfg), proxyMiddleware(r, &h), h.V1.Proxy)

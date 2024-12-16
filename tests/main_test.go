@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	sdk "github.com/golanguzb70/ucode-sdk"
 	"github.com/manveru/faker"
 	"github.com/spf13/cast"
+	sdk "github.com/ucode-io/ucode_sdk"
 )
 
 const (
@@ -58,14 +58,20 @@ const (
 var (
 	UcodeApi           = sdk.New(&sdk.Config{BaseURL: BaseUrl, RequestTimeout: requestTimeout, AppId: appId})
 	UcodeApiForPg      = sdk.New(&sdk.Config{BaseURL: BaseUrlStaging, RequestTimeout: requestTimeout, AppId: appIdPg})
-	UcodeApiForStaging = sdk.New(&sdk.Config{BaseURL: BaseUrlStaging, RequestTimeout: requestTimeout, AppId: appIdStaging})
-	fakeData           *faker.Faker
+	UcodeApiForStaging = sdk.New(&sdk.Config{
+		BaseURL:        BaseUrlStaging,
+		RequestTimeout: requestTimeout,
+		AppId:          appIdPg,
+		ProjectId:      ProjectIdPg,
+		BaseAuthUrl:    BaseUrlAuthStaging,
+	})
+	fakeData *faker.Faker
 )
 
 func TestMain(m *testing.M) {
 	fakeData, _ = faker.New("en")
 
-	body, err := UcodeApi.DoRequest(BaseUrl+"/v1/table", http.MethodPost, TableReq,
+	body, err := UcodeApiForStaging.DoRequest(BaseUrl+"/v1/table", http.MethodPost, TableReq,
 		map[string]string{
 			"Resource-Id":    ResourceId,
 			"Environment-Id": EnvironmentId,
@@ -80,7 +86,7 @@ func TestMain(m *testing.M) {
 	bodyAsMap := cast.ToStringMap(string(body))
 	tableId := cast.ToString(cast.ToStringMap(bodyAsMap["data"])["id"])
 
-	_, err = UcodeApi.DoRequest(BaseUrl+"/v1/table/"+tableId, http.MethodDelete, map[string]interface{}{},
+	_, err = UcodeApiForStaging.DoRequest(BaseUrl+"/v1/table/"+tableId, http.MethodDelete, map[string]interface{}{},
 		map[string]string{
 			"Resource-Id":    ResourceId,
 			"Environment-Id": EnvironmentId,
@@ -185,8 +191,7 @@ var ExcelReqPg = map[string]interface{}{
 
 func Login() (string, error) {
 	var (
-		url  = "https://auth-api.ucode.run/v2/login?project-id=462baeca-37b0-4355-addc-b8ae5d26995d"
-		body = map[string]interface{}{
+		body = map[string]any{
 			"username":        "bosit_test_002",
 			"password":        "bosit_test_002",
 			"company_id":      "d324e78a-e57b-4951-b83b-910e02521012",
@@ -198,18 +203,12 @@ func Login() (string, error) {
 		}
 	)
 
-	bodyBytes, err := UcodeApiForStaging.DoRequest(url, "POST", body, map[string]string{})
+	loginResp, _, err := UcodeApiForStaging.Auth().Login(body).Headers(map[string]string{}).Exec()
 	if err != nil {
 		return "", err
 	}
 
-	var response LoginResponse
-
-	if err := json.Unmarshal(bodyBytes, &response); err != nil {
-		return "", err
-	}
-
-	return response.Data.Token.AccessToken, nil
+	return loginResp.Data.Token.AccessToken, nil
 }
 
 func LoginPg() (string, error) {

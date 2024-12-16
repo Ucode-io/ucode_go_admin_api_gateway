@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"context"
 	"errors"
 	"ucode/ucode_go_api_gateway/api/models"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
@@ -73,8 +72,7 @@ func (h *HandlerV1) ExcelReader(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		res, err = services.GetBuilderServiceByType(resource.NodeType).Excel().ExcelRead(
-			context.Background(),
-			&obs.ExcelReadRequest{
+			c.Request.Context(), &obs.ExcelReadRequest{
 				Id:        excelId,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -86,8 +84,7 @@ func (h *HandlerV1) ExcelReader(c *gin.Context) {
 		h.handleResponse(c, status_http.OK, res)
 	case pb.ResourceType_POSTGRESQL:
 		res, err := services.GoObjectBuilderService().Excel().ExcelRead(
-			context.Background(),
-			&nb.ExcelReadRequest{
+			c.Request.Context(), &nb.ExcelReadRequest{
 				Id:        excelId,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -179,11 +176,8 @@ func (h *HandlerV1) ExcelToDb(c *gin.Context) {
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: c.Request.URL.String(),
 			ActionType:   "CREATE",
-			UsedEnvironments: map[string]bool{
-				cast.ToString(environmentId): true,
-			},
-			UserInfo: cast.ToString(userId),
-			Request:  &data,
+			UserInfo:     cast.ToString(userId),
+			Request:      &data,
 		}
 	)
 
@@ -200,7 +194,7 @@ func (h *HandlerV1) ExcelToDb(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		_, err = services.GetBuilderServiceByType(resource.NodeType).Excel().ExcelToDb(
-			context.Background(),
+			c.Request.Context(),
 			&obs.ExcelToDbRequest{
 				Id:        c.Param("excel_id"),
 				TableSlug: excelRequest.TableSlug,
@@ -213,7 +207,7 @@ func (h *HandlerV1) ExcelToDb(c *gin.Context) {
 		}
 	case pb.ResourceType_POSTGRESQL:
 		_, err = services.GoObjectBuilderService().Excel().ExcelToDb(
-			context.Background(),
+			c.Request.Context(),
 			&nb.ExcelToDbRequest{
 				Id:        c.Param("excel_id"),
 				TableSlug: excelRequest.TableSlug,

@@ -23,7 +23,7 @@ func CreateProjectFork(projectName string, data IntegrationData) (response model
 	projectId := data.GitlabProjectId
 	strProjectId := strconv.Itoa(projectId)
 
-	resp, err := DoRequest(data.GitlabIntegrationUrl+"/api/v4/projects/"+strProjectId+"/fork", data.GitlabIntegrationToken, "POST", models.CreateProject{
+	resp, err := DoRequest(data.GitlabIntegrationUrl+"/api/v4/projects/"+strProjectId+"/fork", data.GitlabIntegrationToken, http.MethodPost, models.CreateProject{
 		NamespaceID:          data.GitlabGroupId,
 		Name:                 projectName,
 		Path:                 projectName,
@@ -42,7 +42,7 @@ func CreateProjectFork(projectName string, data IntegrationData) (response model
 }
 
 func DeleteForkedProject(repoName string, cfg config.BaseConfig) (response models.GitlabIntegrationResponse, err error) {
-	resp, _ := DoRequest(cfg.GitlabIntegrationURL+"/api/v4/projects/ucode_functions_group%2"+"F"+repoName, cfg.GitlabIntegrationToken, "DELETE", nil)
+	resp, _ := DoRequest(cfg.GitlabIntegrationURL+"/api/v4/projects/ucode_functions_group%2"+"F"+repoName, cfg.GitlabIntegrationToken, http.MethodDelete, nil)
 	if resp.Code >= 400 {
 		return models.GitlabIntegrationResponse{}, errors.New(status_http.BadRequest.Description)
 	} else if resp.Code >= 500 {
@@ -75,7 +75,7 @@ func CreateProjectVariable(cfg IntegrationData, data map[string]interface{}) (re
 	projectId := cfg.GitlabProjectId
 	strProjectId := strconv.Itoa(projectId)
 
-	resp, err := DoRequest(cfg.GitlabIntegrationUrl+"/api/v4/projects/"+strProjectId+"/variables", cfg.GitlabIntegrationToken, "POST", data)
+	resp, err := DoRequest(cfg.GitlabIntegrationUrl+"/api/v4/projects/"+strProjectId+"/variables", cfg.GitlabIntegrationToken, http.MethodPost, data)
 
 	if resp.Code >= 400 {
 		return models.GitlabIntegrationResponse{}, errors.New(status_http.BadRequest.Description)
@@ -98,7 +98,7 @@ func CreateProjectVariableV2(cfg IntegrationData, data interface{}) (response mo
 	}
 
 	resp, err := DoRequestV2(ctx, RequestForm{
-		Method: "POST",
+		Method: http.MethodPost,
 		RawUrl: url,
 		Headers: map[string]string{
 			"PRIVATE-TOKEN": cfg.GitlabIntegrationToken,
@@ -122,7 +122,7 @@ func ImportFromGithub(cfg ImportData) (response ImportResponse, err error) {
 	}
 
 	gitlabUrl := "https://gitlab.udevs.io/api/v4/import/github"
-	req, err := http.NewRequest("POST", gitlabUrl, bytes.NewBuffer(gitlabBodyJSON))
+	req, err := http.NewRequest(http.MethodPost, gitlabUrl, bytes.NewBuffer(gitlabBodyJSON))
 	if err != nil {
 		return ImportResponse{}, errors.New("failed to create request")
 	}
@@ -186,7 +186,7 @@ func AddFilesToRepo(gitlabToken string, path string, gitlabRepoId int, branch st
 		"actions":        actions,
 	}
 
-	_, err = MakeGitLabRequest("POST", commitURL, commitPayload, gitlabToken)
+	_, err = MakeGitLabRequest(http.MethodPost, commitURL, commitPayload, gitlabToken)
 	if err != nil {
 		return errors.New("failed to make GitLab request")
 	}
@@ -215,7 +215,7 @@ func AddCiFile(gitlabToken, path string, gitlabRepoId int, branch, localFolderPa
 		},
 	}
 
-	_, err = MakeGitLabRequest("POST", commitURL, commitPayload, gitlabToken)
+	_, err = MakeGitLabRequest(http.MethodPost, commitURL, commitPayload, gitlabToken)
 	if err != nil {
 		return errors.New("failed to make GitLab request")
 	}
@@ -263,7 +263,7 @@ func GetLatestPipeline(token, branchName string, projectID int) (*Pipeline, erro
 func DeleteRepository(token string, projectID int) error {
 	apiURL := fmt.Sprintf("%s/projects/%v", "https://gitlab.udevs.io/api/v4", projectID)
 
-	req, err := http.NewRequest("DELETE", apiURL, nil)
+	req, err := http.NewRequest(http.MethodDelete, apiURL, nil)
 	if err != nil {
 		return err
 	}
