@@ -6,53 +6,58 @@ import (
 )
 
 const (
-	COMMIT_TYPE_APP                      = "APP"
-	COMMIT_TYPE_TABLE                    = "TABLE"
-	COMMIT_TYPE_FIELD                    = "FIELD"
-	COMMIT_TYPE_RELATION                 = "RELATION"
-	COMMIT_TYPE_SECTION                  = "SECTION"
-	COMMIT_TYPE_VIEW                     = "VIEW"
-	COMMIT_TYPE_VIEW_RELATION            = "VIEW_RELATION"
-	COMMIT_TYPE_CLIENT_PLATFORM          = "CLIENT_PLATFORM"
-	COMMIT_TYPE_CLIENT_TYPE              = "CLIENT_TYPE"
-	COMMIT_TYPE_ROLE                     = "ROLE"
-	COMMIT_TYPE_TEST_LOGIN               = "TEST_LOGIN"
-	COMMIT_TYPE_CONNECTION               = "CONNECTION"
-	COMMIT_TYPE_AUTOMATIC_FILTER         = "AUTOMATIC_FILTER"
-	COMMIT_TYPE_CUSTOM_EVENT             = "CUSTOM_EVENT"
-	COMMIT_TYPE_RECORD_PERMISSION        = "RECORD_PERMISSION"
-	COMMIT_TYPE_ACTION_PERMISSION        = "ACTION_PERMISSION"
-	COMMIT_TYPE_FIELD_PERMISSION         = "FIELD_PERMISSION"
-	COMMIT_TYPE_VIEW_PERMISSION          = "VIEW_PERMISSION"
-	COMMIT_TYPE_VIEW_RELATION_PERMISSION = "VIEW_RELATION_PERMISSION"
-	COMMIT_TYPE_DASHBOARD                = "DASHBOARD"
-	COMMIT_TYPE_VARIABLE                 = "VARIABLE"
-	COMMIT_TYPE_PANEL                    = "PANEL"
-	COMMIT_TYPE_FUNCTION                 = "FUNCTION"
-	COMMIT_TYPE_SCENARIO                 = "SCENARIO"
-	LOW_NODE_TYPE                        = "LOW"
-	HIGH_NODE_TYPE                       = "HIGH"
-	ENTER_PRICE_TYPE                     = "ENTER_PRICE"
-	CACHE_WAIT                           = "WAIT"
+	COMMIT_TYPE_APP                      string = "APP"
+	COMMIT_TYPE_TABLE                    string = "TABLE"
+	COMMIT_TYPE_FIELD                    string = "FIELD"
+	COMMIT_TYPE_RELATION                 string = "RELATION"
+	COMMIT_TYPE_SECTION                  string = "SECTION"
+	COMMIT_TYPE_VIEW                     string = "VIEW"
+	COMMIT_TYPE_VIEW_RELATION            string = "VIEW_RELATION"
+	COMMIT_TYPE_CLIENT_PLATFORM          string = "CLIENT_PLATFORM"
+	COMMIT_TYPE_CLIENT_TYPE              string = "CLIENT_TYPE"
+	COMMIT_TYPE_ROLE                     string = "ROLE"
+	COMMIT_TYPE_TEST_LOGIN               string = "TEST_LOGIN"
+	COMMIT_TYPE_CONNECTION               string = "CONNECTION"
+	COMMIT_TYPE_AUTOMATIC_FILTER         string = "AUTOMATIC_FILTER"
+	COMMIT_TYPE_CUSTOM_EVENT             string = "CUSTOM_EVENT"
+	COMMIT_TYPE_RECORD_PERMISSION        string = "RECORD_PERMISSION"
+	COMMIT_TYPE_ACTION_PERMISSION        string = "ACTION_PERMISSION"
+	COMMIT_TYPE_FIELD_PERMISSION         string = "FIELD_PERMISSION"
+	COMMIT_TYPE_VIEW_PERMISSION          string = "VIEW_PERMISSION"
+	COMMIT_TYPE_VIEW_RELATION_PERMISSION string = "VIEW_RELATION_PERMISSION"
+	COMMIT_TYPE_DASHBOARD                string = "DASHBOARD"
+	COMMIT_TYPE_VARIABLE                 string = "VARIABLE"
+	COMMIT_TYPE_PANEL                    string = "PANEL"
+	COMMIT_TYPE_FUNCTION                 string = "FUNCTION"
+	COMMIT_TYPE_SCENARIO                 string = "SCENARIO"
+	LOW_NODE_TYPE                        string = "LOW"
+	HIGH_NODE_TYPE                       string = "HIGH"
+	ENTER_PRICE_TYPE                     string = "ENTER_PRICE"
+	CACHE_WAIT                           string = "WAIT"
 )
 
 const (
-	LRU_CACHE_SIZE         = 10000
-	REDIS_TIMEOUT          = 5 * time.Minute
-	REDIS_KEY_TIMEOUT      = 280 * time.Second
-	REDIS_WAIT_TIMEOUT     = 1 * time.Second
-	REDIS_SLEEP            = 100 * time.Millisecond
-	LIMITER_RANGE          = 100
-	RATE_LIMITER_RPS_LIMIT = 100
+	LRU_CACHE_SIZE                       = 10000
+	LIMITER_RANGE                        = 100
+	RATE_LIMITER_RPS_LIMIT               = 100
+	REDIS_TIMEOUT          time.Duration = 5 * time.Minute
+	REDIS_KEY_TIMEOUT      time.Duration = 280 * time.Second
+	REDIS_WAIT_TIMEOUT     time.Duration = 1 * time.Second
+	REDIS_SLEEP            time.Duration = 100 * time.Millisecond
 
-	TIME_LAYOUT = "15:04"
+	TIME_LAYOUT string = "15:04"
 
-	OpenFaaSBaseUrl = "https://ofs.u-code.io/function/"
-	KnativeBaseUrl  = "knative-fn.u-code.io"
+	// FaasBaseurl
+	OpenFaaSBaseUrl string = "https://ofs.u-code.io/function/"
+	KnativeBaseUrl  string = "knative-fn.u-code.io"
+
+	// Function Types
+	FUNCTION string = "FUNCTION"
+	KNATIVE  string = "KNATIVE"
 
 	// CustomEventTypes
-	BEFORE = "before"
-	AFTER  = "after"
+	BEFORE string = "before"
+	AFTER  string = "after"
 )
 
 var (
