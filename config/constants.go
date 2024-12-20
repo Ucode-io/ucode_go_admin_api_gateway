@@ -58,6 +58,8 @@ const (
 	// CustomEventTypes
 	BEFORE string = "before"
 	AFTER  string = "after"
+
+	PublicStatus = "unapproved"
 )
 
 var (

@@ -459,7 +459,29 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
+		service := services.GetBuilderServiceByType(resource.NodeType)
+
+		accessType, ok := c.Get("access")
+		if ok && cast.ToString(accessType) == config.PublicStatus {
+			permission, err := service.Permission().GetTablePermission(
+				c.Request.Context(),
+				&obs.GetTablePermissionRequest{
+					TableSlug:             c.Param("table_slug"),
+					ResourceEnvironmentId: resource.ResourceEnvironmentId,
+					Method:                "read",
+				},
+			)
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+
+			if !permission.IsHavePermission {
+				h.handleResponse(c, status_http.Forbidden, "table is not public")
+				return
+			}
+		}
+
 		var slimKey = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("slim-%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId)))
 		if !cast.ToBool(c.Query("block_cached")) {
 			if cast.ToBool(c.Query("is_wait_cached")) {
@@ -515,7 +537,7 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 			}
 		}
 
-		resp, err := service.GetListSlimV2(
+		resp, err := service.ObjectBuilder().GetListSlimV2(
 			c.Request.Context(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("table_slug"),
