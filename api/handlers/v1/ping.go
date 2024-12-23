@@ -1,8 +1,6 @@
 package v1
 
 import (
-	"context"
-	"errors"
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
@@ -27,23 +25,22 @@ import (
 // @Success 200 {object} status_http.Response{data=string} "Response data"
 // @Failure 500 {object} status_http.Response{}
 func (h *HandlerV1) Ping(c *gin.Context) {
-
-	service := c.Query("service")
-	projectId := c.Query("project_id")
-	environmentId := c.Query("environment_id")
-
-	limit := 10
-	offset := 0
+	var (
+		service       = c.Query("service")
+		projectId     = c.Query("project_id")
+		environmentId = c.Query("environment_id")
+		limit         = 10
+		offset        = 0
+	)
 
 	if service == "company_service" {
-		_, err := h.companyServices.CompanyPing().Ping(context.Background(), &pb.PingRequest{})
+		_, err := h.companyServices.CompanyPing().Ping(c.Request.Context(), &pb.PingRequest{})
 		if err != nil {
 			h.handleResponse(c, status_http.InternalServerError, err.Error())
 			return
 		}
 	} else if service == "auth_service" {
-
-		_, err := h.authService.AuthPing().Ping(context.Background(), &auth_service.PingRequest{})
+		_, err := h.authService.AuthPing().Ping(c.Request.Context(), &auth_service.PingRequest{})
 		if err != nil {
 			h.handleResponse(c, status_http.InternalServerError, err.Error())
 			return
@@ -51,8 +48,7 @@ func (h *HandlerV1) Ping(c *gin.Context) {
 
 	} else if service == "object_builder_service" {
 		resource, err := h.companyServices.ServiceResource().GetSingle(
-			c.Request.Context(),
-			&pb.GetSingleServiceResourceReq{
+			c.Request.Context(), &pb.GetSingleServiceResourceReq{
 				ProjectId:     projectId,
 				EnvironmentId: environmentId,
 				ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -63,19 +59,14 @@ func (h *HandlerV1) Ping(c *gin.Context) {
 			return
 		}
 
-		services, err := h.GetProjectSrvc(
-			c.Request.Context(),
-			projectId,
-			resource.NodeType,
-		)
+		services, err := h.GetProjectSrvc(c.Request.Context(), projectId, resource.NodeType)
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 
 		_, err = services.GetBuilderServiceByType(resource.NodeType).Function().GetList(
-			context.Background(),
-			&obs.GetAllFunctionsRequest{
+			c.Request.Context(), &obs.GetAllFunctionsRequest{
 				Search:    c.DefaultQuery("search", ""),
 				Limit:     int32(limit),
 				ProjectId: resource.ResourceEnvironmentId,
@@ -88,8 +79,7 @@ func (h *HandlerV1) Ping(c *gin.Context) {
 
 	} else if service == "function_service" {
 		resource, err := h.companyServices.ServiceResource().GetSingle(
-			c.Request.Context(),
-			&pb.GetSingleServiceResourceReq{
+			c.Request.Context(), &pb.GetSingleServiceResourceReq{
 				ProjectId:     projectId,
 				EnvironmentId: environmentId,
 				ServiceType:   pb.ServiceType_FUNCTION_SERVICE,
@@ -101,36 +91,29 @@ func (h *HandlerV1) Ping(c *gin.Context) {
 		}
 
 		environment, err := h.companyServices.Environment().GetById(
-			context.Background(),
-			&pb.EnvironmentPrimaryKey{
+			c.Request.Context(), &pb.EnvironmentPrimaryKey{
 				Id: environmentId,
 			},
 		)
 		if err != nil {
-			err = errors.New("error getting resource environment id")
-			h.handleResponse(c, status_http.GRPCError, err.Error())
+			h.handleResponse(c, status_http.GRPCError, "error getting resource environment id")
 			return
 		}
 
-		services, err := h.GetProjectSrvc(
-			c.Request.Context(),
-			projectId,
-			resource.NodeType,
-		)
+		services, err := h.GetProjectSrvc(c.Request.Context(), projectId, resource.NodeType)
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 
 		_, err = services.FunctionService().FunctionService().GetList(
-			context.Background(),
-			&fc.GetAllFunctionsRequest{
+			c.Request.Context(), &fc.GetAllFunctionsRequest{
 				Search:        c.DefaultQuery("search", ""),
 				Limit:         int32(limit),
 				Offset:        int32(offset),
 				ProjectId:     resource.ResourceEnvironmentId,
 				EnvironmentId: environment.GetId(),
-				Type:          FUNCTION,
+				Type:          config.FUNCTION,
 			},
 		)
 		if err != nil {

@@ -2,14 +2,15 @@ package v1
 
 import (
 	"encoding/json"
-	"errors"
+	"fmt"
 	"io"
+	"net/http"
 
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
+	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
-	fc "ucode/ucode_go_api_gateway/genproto/new_function_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
@@ -18,10 +19,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cast"
-)
-
-const (
-	FUNCTION = "FUNCTION"
 )
 
 // CreateNewFunction godoc
@@ -141,14 +138,12 @@ func (h *HandlerV1) InvokeFunctionByPath(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err := errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_FUNCTION_SERVICE,
@@ -171,16 +166,18 @@ func (h *HandlerV1) InvokeFunctionByPath(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, "Api key not found")
 		return
 	}
-	authInfo, _ := h.GetAuthInfo(c)
 
+	authInfo, _ := h.GetAuthInfo(c)
 	invokeFunction.Data["user_id"] = authInfo.GetUserId()
 	invokeFunction.Data["project_id"] = authInfo.GetProjectId()
 	invokeFunction.Data["environment_id"] = authInfo.GetEnvId()
 	invokeFunction.Data["app_id"] = apiKeys.GetData()[0].GetAppId()
 
-	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+c.Param("function-path"), "POST", models.NewInvokeFunctionRequest{
-		Data: invokeFunction.Data,
-	})
+	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+c.Param("function-path"), http.MethodPost,
+		models.NewInvokeFunctionRequest{
+			Data: invokeFunction.Data,
+		},
+	)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
@@ -218,11 +215,13 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 	bodyReq, err := io.ReadAll(c.Request.Body)
 	if err != nil {
 		h.log.Error("cant parse body or an empty body received", logger.Any("req", c.Request))
+		return
 	}
 
-	_ = json.Unmarshal(bodyReq, &invokeFunction)
+	err = json.Unmarshal(bodyReq, &invokeFunction)
 	if err != nil {
 		h.log.Error("cant parse body or an empty body received", logger.Any("req", c.Request))
+		return
 	}
 
 	if cast.ToBool(c.GetHeader("/v1/functions/")) {
@@ -248,8 +247,7 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
@@ -257,8 +255,8 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 	resourceBody, ok := c.Get("resource")
 	if resourceBody != "" && ok {
 		var resourceList *pb.GetResourceByEnvIDResponse
-		err = json.Unmarshal([]byte(resourceBody.(string)), &resourceList)
-		if err != nil {
+
+		if err = json.Unmarshal([]byte(resourceBody.(string)), &resourceList); err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
@@ -281,8 +279,7 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 		}
 	} else {
 		resource, err = h.companyServices.ServiceResource().GetSingle(
-			c.Request.Context(),
-			&pb.GetSingleServiceResourceReq{
+			c.Request.Context(), &pb.GetSingleServiceResourceReq{
 				ProjectId:     projectId.(string),
 				EnvironmentId: environmentId.(string),
 				ServiceType:   pb.ServiceType_FUNCTION_SERVICE,
@@ -307,22 +304,19 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 	requestData.Params = c.Request.URL.Query()
 	requestData.Body = bodyReq
 
-	var function = &fc.Function{}
+	var functionResponse = &obs.Function{}
+
 	if util.IsValidUUID(c.Param("function-id")) {
-		services, err := h.GetProjectSrvc(
-			c.Request.Context(),
-			projectId.(string),
-			resource.NodeType,
-		)
+		services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
+
 		switch resource.ResourceType {
 		case pb.ResourceType_MONGODB:
-			function, err = services.FunctionService().FunctionService().GetSingle(
-				c.Request.Context(),
-				&fc.FunctionPrimaryKey{
+			functionResponse, err = services.GetBuilderServiceByType(resource.NodeType).Function().GetSingle(
+				c.Request.Context(), &obs.FunctionPrimaryKey{
 					Id:        c.Param("function-id"),
 					ProjectId: resource.ResourceEnvironmentId,
 				},
@@ -333,8 +327,7 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 			}
 		case pb.ResourceType_POSTGRESQL:
 			resp, err := services.GoObjectBuilderService().Function().GetSingle(
-				c.Request.Context(),
-				&nb.FunctionPrimaryKey{
+				c.Request.Context(), &nb.FunctionPrimaryKey{
 					Id:        c.Param("function-id"),
 					ProjectId: resource.ResourceEnvironmentId,
 				},
@@ -344,35 +337,64 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 				return
 			}
 
-			err = helper.MarshalToStruct(resp, &function)
-			if err != nil {
+			if err = helper.MarshalToStruct(resp, &functionResponse); err != nil {
 				h.handleResponse(c, status_http.GRPCError, err.Error())
 				return
 			}
 		}
 	} else {
-		function.Path = c.Param("function-id")
+		functionResponse.Path = c.Param("function-id")
 	}
 
-	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+function.Path, "POST", models.FunctionRunV2{
-		Auth:        models.AuthData{},
-		RequestData: requestData,
-		Data: map[string]interface{}{
-			"object_ids": invokeFunction.ObjectIDs,
-			"attributes": invokeFunction.Attributes,
-			"app_id":     authInfo.Data["app_id"],
-		},
-	})
-	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
-		return
-	} else if resp.Status == "error" {
-		var errStr = resp.Status
-		if resp.Data != nil && resp.Data["message"] != nil {
-			errStr = resp.Data["message"].(string)
+	var resp = models.InvokeFunctionResponse{}
+
+	switch functionResponse.Type {
+	case config.FUNCTION:
+		resp, err = util.DoRequest(config.OpenFaaSBaseUrl+functionResponse.GetPath(), http.MethodPost,
+			models.FunctionRunV2{
+				Auth:        models.AuthData{},
+				RequestData: requestData,
+				Data: map[string]any{
+					"object_ids": invokeFunction.ObjectIDs,
+					"attributes": invokeFunction.Attributes,
+					"app_id":     authInfo.Data["app_id"],
+				},
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.InvalidArgument, err.Error())
+			return
+		} else if resp.Status == "error" {
+			var errStr = resp.Status
+			if resp.Data != nil && resp.Data["message"] != nil {
+				errStr = resp.Data["message"].(string)
+			}
+			h.handleResponse(c, status_http.InvalidArgument, errStr)
+			return
 		}
-		h.handleResponse(c, status_http.InvalidArgument, errStr)
-		return
+	case config.KNATIVE:
+		resp, err = util.DoRequest(fmt.Sprintf("http://%s.%s", functionResponse.GetPath(), config.KnativeBaseUrl), http.MethodPost,
+			models.FunctionRunV2{
+				Auth:        models.AuthData{},
+				RequestData: requestData,
+				Data: map[string]any{
+					"object_ids": invokeFunction.ObjectIDs,
+					"attributes": invokeFunction.Attributes,
+					"app_id":     authInfo.Data["app_id"],
+				},
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.InvalidArgument, err.Error())
+			return
+		} else if resp.Status == "error" {
+			var errStr = resp.Status
+			if resp.Data != nil && resp.Data["message"] != nil {
+				errStr = resp.Data["message"].(string)
+			}
+			h.handleResponse(c, status_http.InvalidArgument, errStr)
+			return
+		}
 	}
 
 	if isOwnData, ok := resp.Attributes["is_own_data"].(bool); ok {
@@ -382,7 +404,7 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 				return
 			}
 
-			c.JSON(200, resp.Data)
+			c.JSON(http.StatusOK, resp.Data)
 			return
 		}
 	}
@@ -411,6 +433,7 @@ func (h *HandlerV1) GetAllNewFunctionsForApp(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
+
 	offset, err := h.getOffsetParam(c)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
@@ -455,7 +478,7 @@ func (h *HandlerV1) GetAllNewFunctionsForApp(c *gin.Context) {
 				Limit:     int32(limit),
 				Offset:    int32(offset),
 				ProjectId: resource.ResourceEnvironmentId,
-				Type:      FUNCTION,
+				Type:      config.FUNCTION,
 			},
 		)
 		if err != nil {
@@ -466,13 +489,12 @@ func (h *HandlerV1) GetAllNewFunctionsForApp(c *gin.Context) {
 		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().Function().GetList(
-			c.Request.Context(),
-			&nb.GetAllFunctionsRequest{
+			c.Request.Context(), &nb.GetAllFunctionsRequest{
 				Search:    c.DefaultQuery("search", ""),
 				Limit:     int32(limit),
 				Offset:    int32(offset),
 				ProjectId: resource.ResourceEnvironmentId,
-				Type:      FUNCTION,
+				Type:      config.FUNCTION,
 			},
 		)
 		if err != nil {

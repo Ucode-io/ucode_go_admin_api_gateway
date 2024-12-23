@@ -1,8 +1,6 @@
 package v1
 
 import (
-	"context"
-	"errors"
 	"fmt"
 	"time"
 	"ucode/ucode_go_api_gateway/api/models"
@@ -70,16 +68,14 @@ func (h *HandlerV1) CreateTable(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -94,11 +90,7 @@ func (h *HandlerV1) CreateTable(c *gin.Context) {
 	resourceType = resource.ResourceType
 	nodeType = resource.NodeType
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		nodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), nodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -162,19 +154,16 @@ func (h *HandlerV1) CreateTable(c *gin.Context) {
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: "TABLE",
 			ActionType:   "CREATE TABLE",
-			// UsedEnvironments: map[string]bool{
-			// 	cast.ToString(environmentId): true,
-			// },
-			UserInfo:  cast.ToString(userId),
-			Request:   &table,
-			TableSlug: tableRequest.Slug,
+			UserInfo:     cast.ToString(userId),
+			Request:      &table,
+			TableSlug:    tableRequest.Slug,
 		}
 	)
 
 	switch resourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err := services.GetBuilderServiceByType(nodeType).Table().Create(
-			context.Background(),
+			c.Request.Context(),
 			&table,
 		)
 		if err != nil {
@@ -188,17 +177,15 @@ func (h *HandlerV1) CreateTable(c *gin.Context) {
 		}
 		go h.versionHistory(logReq)
 	case pb.ResourceType_POSTGRESQL:
-
 		newReq := nb.CreateTableRequest{}
 
-		err = helper.MarshalToStruct(&table, &newReq)
-		if err != nil {
+		if err = helper.MarshalToStruct(&table, &newReq); err != nil {
 			logReq.Response = err.Error()
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 		}
 
 		resp, err := services.GoObjectBuilderService().Table().Create(
-			context.Background(),
+			c.Request.Context(),
 			&newReq,
 		)
 		if err != nil {
@@ -244,14 +231,12 @@ func (h *HandlerV1) GetTableByID(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -266,11 +251,7 @@ func (h *HandlerV1) GetTableByID(c *gin.Context) {
 	resourceType = resource.ResourceType
 	nodeType = resource.NodeType
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		nodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), nodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -279,7 +260,7 @@ func (h *HandlerV1) GetTableByID(c *gin.Context) {
 	switch resourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err := services.GetBuilderServiceByType(nodeType).Table().GetByID(
-			context.Background(),
+			c.Request.Context(),
 			&obs.TablePrimaryKey{
 				Id:        tableID,
 				ProjectId: resourceEnvironmentId,
@@ -293,8 +274,7 @@ func (h *HandlerV1) GetTableByID(c *gin.Context) {
 		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().Table().GetByID(
-			context.Background(),
-			&nb.TablePrimaryKey{
+			c.Request.Context(), &nb.TablePrimaryKey{
 				Id:        tableID,
 				ProjectId: resourceEnvironmentId,
 			},
@@ -304,6 +284,7 @@ func (h *HandlerV1) GetTableByID(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
+
 		h.handleResponse(c, status_http.OK, resp)
 	}
 }
@@ -344,14 +325,12 @@ func (h *HandlerV1) GetAllTables(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -372,11 +351,7 @@ func (h *HandlerV1) GetAllTables(c *gin.Context) {
 		isLoginTable = true
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		nodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), nodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -385,8 +360,7 @@ func (h *HandlerV1) GetAllTables(c *gin.Context) {
 	switch resourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err := services.GetBuilderServiceByType(nodeType).Table().GetAll(
-			context.Background(),
-			&obs.GetAllTablesRequest{
+			c.Request.Context(), &obs.GetAllTablesRequest{
 				Limit:        int32(limit),
 				Offset:       int32(offset),
 				Search:       c.DefaultQuery("search", ""),
@@ -404,8 +378,7 @@ func (h *HandlerV1) GetAllTables(c *gin.Context) {
 		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().Table().GetAll(
-			context.Background(),
-			&nb.GetAllTablesRequest{
+			c.Request.Context(), &nb.GetAllTablesRequest{
 				Limit:        int32(limit),
 				Offset:       int32(offset),
 				Search:       c.DefaultQuery("search", ""),
@@ -467,16 +440,14 @@ func (h *HandlerV1) UpdateTable(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -497,7 +468,11 @@ func (h *HandlerV1) UpdateTable(c *gin.Context) {
 		return
 	}
 
-	services, _ := h.GetProjectSrvc(c.Request.Context(), projectId.(string), nodeType)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), nodeType)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	table.ProjectId = resourceEnvironmentId
 
@@ -528,6 +503,7 @@ func (h *HandlerV1) UpdateTable(c *gin.Context) {
 			OrderBy:      table.OrderBy,
 			SoftDelete:   table.SoftDelete,
 		}
+
 		logReq = &models.CreateVersionHistoryRequest{
 			Services:     services,
 			NodeType:     resource.NodeType,
@@ -543,8 +519,7 @@ func (h *HandlerV1) UpdateTable(c *gin.Context) {
 	switch resourceType {
 	case pb.ResourceType_MONGODB:
 		oldTable, err := services.GetBuilderServiceByType(nodeType).Table().GetByID(
-			context.Background(),
-			&obs.TablePrimaryKey{
+			c.Request.Context(), &obs.TablePrimaryKey{
 				Id:        table.Id,
 				ProjectId: table.ProjectId,
 			},
@@ -555,8 +530,7 @@ func (h *HandlerV1) UpdateTable(c *gin.Context) {
 		}
 
 		resp, err := services.GetBuilderServiceByType(nodeType).Table().Update(
-			context.Background(),
-			updateTable,
+			c.Request.Context(), updateTable,
 		)
 
 		logReq.Previous = oldTable
@@ -572,8 +546,7 @@ func (h *HandlerV1) UpdateTable(c *gin.Context) {
 		go h.versionHistory(logReq)
 	case pb.ResourceType_POSTGRESQL:
 		oldTable, err := services.GoObjectBuilderService().Table().GetByID(
-			context.Background(),
-			&nb.TablePrimaryKey{
+			c.Request.Context(), &nb.TablePrimaryKey{
 				Id:        table.Id,
 				ProjectId: table.ProjectId,
 			},
@@ -592,7 +565,9 @@ func (h *HandlerV1) UpdateTable(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 		}
 
-		resp, err := services.GoObjectBuilderService().Table().Update(context.Background(), &newTable)
+		resp, err := services.GoObjectBuilderService().Table().Update(
+			c.Request.Context(), &newTable,
+		)
 
 		logReq.Previous = oldTable
 		if err != nil {
@@ -649,16 +624,14 @@ func (h *HandlerV1) DeleteTable(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -704,11 +677,11 @@ func (h *HandlerV1) DeleteTable(c *gin.Context) {
 		nodeType = resourceEnvironment.GetNodeType()
 	}
 
-	services, _ := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		nodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), nodeType)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	var (
 		oldTable = &obs.Table{}
@@ -725,21 +698,19 @@ func (h *HandlerV1) DeleteTable(c *gin.Context) {
 
 	switch resourceType {
 	case pb.ResourceType_MONGODB:
-
 		oldTable, err = services.GetBuilderServiceByType(nodeType).Table().GetByID(
-			context.Background(),
-			&obs.TablePrimaryKey{
+			c.Request.Context(), &obs.TablePrimaryKey{
 				Id:        tableID,
 				ProjectId: resourceEnvironmentId,
 			},
 		)
 		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 
 		resp, err := services.GetBuilderServiceByType(nodeType).Table().Delete(
-			context.Background(),
-			&obs.TablePrimaryKey{
+			c.Request.Context(), &obs.TablePrimaryKey{
 				Id:         tableID,
 				ProjectId:  resourceEnvironmentId,
 				AuthorId:   authInfo.GetUserId(),
@@ -761,10 +732,8 @@ func (h *HandlerV1) DeleteTable(c *gin.Context) {
 		go h.versionHistory(logReq)
 
 	case pb.ResourceType_POSTGRESQL:
-
 		oldTable, err := services.GoObjectBuilderService().Table().GetByID(
-			context.Background(),
-			&nb.TablePrimaryKey{
+			c.Request.Context(), &nb.TablePrimaryKey{
 				Id:        tableID,
 				ProjectId: resourceEnvironmentId,
 			},
@@ -776,8 +745,7 @@ func (h *HandlerV1) DeleteTable(c *gin.Context) {
 		}
 
 		resp, err := services.GoObjectBuilderService().Table().Delete(
-			context.Background(),
-			&nb.TablePrimaryKey{
+			c.Request.Context(), &nb.TablePrimaryKey{
 				Id:        tableID,
 				ProjectId: resourceEnvironmentId,
 			},
@@ -817,8 +785,7 @@ func (h *HandlerV1) GetTableDetails(c *gin.Context) {
 		statusHttp    = status_http.GrpcStatusToHTTP["Ok"]
 	)
 
-	err := c.ShouldBindJSON(&objectRequest)
-	if err != nil {
+	if err := c.ShouldBindJSON(&objectRequest); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -851,8 +818,7 @@ func (h *HandlerV1) GetTableDetails(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
@@ -869,11 +835,7 @@ func (h *HandlerV1) GetTableDetails(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -882,8 +844,7 @@ func (h *HandlerV1) GetTableDetails(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().GetTableDetails(
-			context.Background(),
-			&obs.CommonMessage{
+			c.Request.Context(), &obs.CommonMessage{
 				TableSlug: c.Param("table_slug"),
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
@@ -898,8 +859,7 @@ func (h *HandlerV1) GetTableDetails(c *gin.Context) {
 		h.handleResponse(c, statusHttp, resp)
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().ObjectBuilder().GetTableDetails(
-			context.Background(),
-			&nb.CommonMessage{
+			c.Request.Context(), &nb.CommonMessage{
 				TableSlug: c.Param("table_slug"),
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
