@@ -558,6 +558,13 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 	}
 
+	proxyGrafana := proxyApi.Group("/grafana")
+	{
+		proxyGrafana.POST("/loki", h.V2.GetGrafanaFunctionLogs)
+		proxyGrafana.GET("/function", h.V2.GetGrafanaFunctionList)
+
+	}
+
 	{
 		proxyApi.POST("/invoke_function/:function-path", h.V2.InvokeFunctionByPath)
 
