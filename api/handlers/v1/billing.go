@@ -153,7 +153,7 @@ func (h *HandlerV1) UpdateFare(c *gin.Context) {
 func (h *HandlerV1) DeleteFare(c *gin.Context) {
 	var id = c.Param("id")
 
-	if util.IsValidUUID(id) {
+	if !util.IsValidUUID(id) {
 		h.handleResponse(c, status_http.BadRequest, "invalid id")
 		return
 	}
@@ -252,7 +252,7 @@ func (h *HandlerV1) GetAllFareItem(c *gin.Context) {
 func (h *HandlerV1) GetFareItem(c *gin.Context) {
 	var id = c.Param("id")
 
-	if util.IsValidUUID(id) {
+	if !util.IsValidUUID(id) {
 		h.handleResponse(c, status_http.BadRequest, "invalid id")
 		return
 	}
@@ -312,7 +312,7 @@ func (h *HandlerV1) UpdateFareItem(c *gin.Context) {
 func (h *HandlerV1) DeleteFareItem(c *gin.Context) {
 	var id = c.Param("id")
 
-	if util.IsValidUUID(id) {
+	if !util.IsValidUUID(id) {
 		h.handleResponse(c, status_http.BadRequest, "invalid id")
 		return
 	}

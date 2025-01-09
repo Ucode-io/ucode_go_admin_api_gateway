@@ -130,7 +130,7 @@ message CreateTransactionRequest {
     string creator_type = 7;
     string currency_id = 8;
     string acceptor_id = 9;
-    string transaction_fare_id = 10;
+    string fare_id = 10;
 }
 
 message ListTransactionsResponse {

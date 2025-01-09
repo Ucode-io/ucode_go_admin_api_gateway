@@ -28900,13 +28900,13 @@ const docTemplate = `{
                 "currency_id": {
                     "type": "string"
                 },
+                "fare_id": {
+                    "type": "string"
+                },
                 "payment_status": {
                     "type": "string"
                 },
                 "project_id": {
-                    "type": "string"
-                },
-                "transaction_fare_id": {
                     "type": "string"
                 },
                 "transaction_type": {
@@ -33598,6 +33598,8 @@ var SwaggerInfo = &swag.Spec{
 	Description:      "",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
+	LeftDelim:        "{{",
+	RightDelim:       "}}",
 }
 
 func init() {
