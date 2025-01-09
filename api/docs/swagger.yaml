@@ -87,21 +87,6 @@ definitions:
       company_id:
         type: string
     type: object
-  ucode_ucode_go_api_gateway_api_models.CopyProjectTemplateRequest:
-    properties:
-      from_env_id:
-        type: string
-      from_project_id:
-        type: string
-      menus:
-        items:
-          $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.MenuRequest'
-        type: array
-      to_env_id:
-        type: string
-      to_project_id:
-        type: string
-    type: object
   ucode_ucode_go_api_gateway_api_models.CreateFieldRequest:
     properties:
       attributes:
@@ -192,6 +177,8 @@ definitions:
       name:
         type: string
       path:
+        type: string
+      type:
         type: string
     type: object
   ucode_ucode_go_api_gateway_api_models.CreateMenuRequest:
@@ -285,14 +272,6 @@ definitions:
       subtitle_field_slug:
         type: string
     type: object
-  ucode_ucode_go_api_gateway_api_models.CreateWebPageRequest:
-    properties:
-      components:
-        additionalProperties: true
-        type: object
-      title:
-        type: string
-    type: object
   ucode_ucode_go_api_gateway_api_models.CustomEvent:
     properties:
       action_type:
@@ -319,16 +298,6 @@ definitions:
       table_slug:
         type: string
       url:
-        type: string
-    type: object
-  ucode_ucode_go_api_gateway_api_models.DocxTemplateVariables:
-    properties:
-      data:
-        additionalProperties: true
-        type: object
-      id:
-        type: string
-      table_slug:
         type: string
     type: object
   ucode_ucode_go_api_gateway_api_models.Environment:
@@ -430,6 +399,8 @@ definitions:
         type: string
       path:
         type: string
+      type:
+        type: string
     type: object
   ucode_ucode_go_api_gateway_api_models.FunctionFolder:
     properties:
@@ -453,6 +424,17 @@ definitions:
         items:
           $ref: '#/definitions/ucode_ucode_go_api_gateway_api_models.Field'
         type: array
+    type: object
+  ucode_ucode_go_api_gateway_api_models.GetGrafanaFunctionLogRequest:
+    properties:
+      from:
+        type: string
+      function:
+        type: string
+      namespace:
+        type: string
+      to:
+        type: string
     type: object
   ucode_ucode_go_api_gateway_api_models.HtmlBody:
     properties:
@@ -481,19 +463,10 @@ definitions:
       with_increment_id:
         type: boolean
     type: object
-  ucode_ucode_go_api_gateway_api_models.InsertVersionsToCommitRequest:
-    properties:
-      id:
-        type: string
-      version_ids:
-        items:
-          type: string
-        type: array
-    type: object
   ucode_ucode_go_api_gateway_api_models.InvokeFunctionRequest:
     properties:
       attributes:
-        additionalProperties: true
+        additionalProperties: {}
         type: object
       function_id:
         type: string
@@ -507,10 +480,10 @@ definitions:
   ucode_ucode_go_api_gateway_api_models.InvokeFunctionResponse:
     properties:
       attributes:
-        additionalProperties: true
+        additionalProperties: {}
         type: object
       data:
-        additionalProperties: true
+        additionalProperties: {}
         type: object
       server_error:
         type: string
@@ -621,45 +594,9 @@ definitions:
           type: string
         type: array
     type: object
-  ucode_ucode_go_api_gateway_api_models.QueryFolder:
-    properties:
-      guid:
-        type: string
-      project_id:
-        type: string
-      title:
-        type: string
-    type: object
-  ucode_ucode_go_api_gateway_api_models.RegisterOtp:
-    properties:
-      data:
-        additionalProperties: true
-        type: object
-    type: object
-  ucode_ucode_go_api_gateway_api_models.RevertHistoryRequest:
-    properties:
-      id:
-        type: string
-    type: object
-  ucode_ucode_go_api_gateway_api_models.SendCodeResponse:
-    properties:
-      data:
-        $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.V2LoginResponse'
-      sms_id:
-        type: string
-    type: object
   ucode_ucode_go_api_gateway_api_models.SendToGptRequest:
     properties:
       promt:
-        type: string
-    type: object
-  ucode_ucode_go_api_gateway_api_models.Sms:
-    properties:
-      client_type:
-        type: string
-      recipient:
-        type: string
-      text:
         type: string
     type: object
   ucode_ucode_go_api_gateway_api_models.UpdateFileRequest:
@@ -731,25 +668,6 @@ definitions:
           type: string
         type: array
     type: object
-  ucode_ucode_go_api_gateway_api_models.Verify:
-    properties:
-      data:
-        $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.V2LoginResponse'
-      tables:
-        items:
-          $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.Object'
-        type: array
-    type: object
-  ucode_ucode_go_api_gateway_api_models.WebPage:
-    properties:
-      components:
-        additionalProperties: true
-        type: object
-      guid:
-        type: string
-      title:
-        type: string
-    type: object
   ucode_ucode_go_api_gateway_api_status_http.Response:
     properties:
       custom_message: {}
@@ -757,319 +675,6 @@ definitions:
       description:
         type: string
       status:
-        type: string
-    type: object
-  ucode_ucode_go_api_gateway_genproto_auth_service.ClientPlatform:
-    properties:
-      id:
-        type: string
-      name:
-        type: string
-      project_id:
-        type: string
-      subdomain:
-        type: string
-    type: object
-  ucode_ucode_go_api_gateway_genproto_auth_service.ClientType:
-    properties:
-      confirm_by:
-        $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.ConfirmStrategies'
-      default_page:
-        type: string
-      id:
-        type: string
-      name:
-        type: string
-      project_id:
-        type: string
-      self_recover:
-        type: boolean
-      self_register:
-        type: boolean
-      tables:
-        items:
-          $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.Table'
-        type: array
-    type: object
-  ucode_ucode_go_api_gateway_genproto_auth_service.ConfirmStrategies:
-    enum:
-    - 0
-    - 1
-    - 2
-    type: integer
-    x-enum-varnames:
-    - ConfirmStrategies_UNDECIDED
-    - ConfirmStrategies_PHONE
-    - ConfirmStrategies_EMAIL
-  ucode_ucode_go_api_gateway_genproto_auth_service.GlobalPermission:
-    properties:
-      api_keys_button:
-        type: boolean
-      chat:
-        type: boolean
-      environment_button:
-        type: boolean
-      environments_button:
-        type: boolean
-      id:
-        type: string
-      menu_button:
-        type: boolean
-      menu_setting_button:
-        type: boolean
-      profile_settings_button:
-        type: boolean
-      project_button:
-        type: boolean
-      project_settings_button:
-        type: boolean
-      projects_button:
-        type: boolean
-      redirects_button:
-        type: boolean
-      settings_button:
-        type: boolean
-      sms_button:
-        type: boolean
-      version_button:
-        type: boolean
-    type: object
-  ucode_ucode_go_api_gateway_genproto_auth_service.Language:
-    properties:
-      id:
-        type: string
-      name:
-        type: string
-      native_name:
-        type: string
-      short_name:
-        type: string
-    type: object
-  ucode_ucode_go_api_gateway_genproto_auth_service.Object:
-    properties:
-      object_id:
-        type: string
-      table_slug:
-        type: string
-    type: object
-  ucode_ucode_go_api_gateway_genproto_auth_service.RecordPermission:
-    properties:
-      add_field:
-        type: string
-      add_filter:
-        type: string
-      automation:
-        type: string
-      client_type_id:
-        type: string
-      columns:
-        type: string
-      delete:
-        type: string
-      excel_menu:
-        type: string
-      field_filter:
-        type: string
-      fix_column:
-        type: string
-      group:
-        type: string
-      id:
-        type: string
-      language_btn:
-        type: string
-      pdf_action:
-        type: string
-      read:
-        type: string
-      role_id:
-        type: string
-      search_button:
-        type: string
-      settings:
-        type: string
-      share_modal:
-        type: string
-      tab_group:
-        type: string
-      table_slug:
-        type: string
-      update:
-        type: string
-      view_create:
-        type: string
-      write:
-        type: string
-    type: object
-  ucode_ucode_go_api_gateway_genproto_auth_service.Role:
-    properties:
-      client_platform_id:
-        type: string
-      client_type_id:
-        type: string
-      id:
-        type: string
-      name:
-        type: string
-      project_id:
-        type: string
-    type: object
-  ucode_ucode_go_api_gateway_genproto_auth_service.Session:
-    properties:
-      client_id:
-        type: string
-      client_platform_id:
-        type: string
-      client_type_id:
-        type: string
-      created_at:
-        type: string
-      data:
-        type: string
-      env_id:
-        type: string
-      expires_at:
-        type: string
-      id:
-        type: string
-      integration_id:
-        type: string
-      ip:
-        type: string
-      is_changed:
-        type: boolean
-      project_id:
-        type: string
-      role_id:
-        type: string
-      updated_at:
-        type: string
-      user_id:
-        type: string
-      user_id_auth:
-        type: string
-    type: object
-  ucode_ucode_go_api_gateway_genproto_auth_service.Table:
-    properties:
-      data:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
-      icon:
-        type: string
-      label:
-        type: string
-      slug:
-        type: string
-      view_label:
-        type: string
-      view_slug:
-        type: string
-    type: object
-  ucode_ucode_go_api_gateway_genproto_auth_service.Timezone:
-    properties:
-      id:
-        type: string
-      name:
-        type: string
-      text:
-        type: string
-    type: object
-  ucode_ucode_go_api_gateway_genproto_auth_service.Token:
-    properties:
-      access_token:
-        type: string
-      created_at:
-        type: string
-      expires_at:
-        type: string
-      refresh_in_seconds:
-        type: integer
-      refresh_token:
-        type: string
-      updated_at:
-        type: string
-    type: object
-  ucode_ucode_go_api_gateway_genproto_auth_service.User:
-    properties:
-      active:
-        type: integer
-      client_platform_id:
-        type: string
-      client_type_id:
-        type: string
-      company_id:
-        type: string
-      email:
-        type: string
-      expires_at:
-        type: string
-      hash_type:
-        type: string
-      id:
-        type: string
-      language:
-        $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.Language'
-      login:
-        type: string
-      name:
-        type: string
-      password:
-        type: string
-      phone:
-        type: string
-      photo_url:
-        type: string
-      project_id:
-        type: string
-      role_id:
-        type: string
-      timezone:
-        $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.Timezone'
-    type: object
-  ucode_ucode_go_api_gateway_genproto_auth_service.V2LoginResponse:
-    properties:
-      addational_table:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
-      app_permissions:
-        items:
-          $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.RecordPermission'
-        type: array
-      client_platform:
-        $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.ClientPlatform'
-      client_type:
-        $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.ClientType'
-      environment_id:
-        type: string
-      global_permission:
-        $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.GlobalPermission'
-      login_table_slug:
-        type: string
-      permissions:
-        items:
-          $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.RecordPermission'
-        type: array
-      resource_id:
-        type: string
-      role:
-        $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.Role'
-      sessions:
-        items:
-          $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.Session'
-        type: array
-      tables:
-        items:
-          $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.Object'
-        type: array
-      token:
-        $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.Token'
-      user:
-        $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.User'
-      user_data:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
-      user_found:
-        type: boolean
-      user_id:
-        type: string
-      user_id_auth:
         type: string
     type: object
   ucode_ucode_go_api_gateway_genproto_company_service.AddResourceRequest:
@@ -1237,6 +842,25 @@ definitions:
       user_id:
         type: string
     type: object
+  ucode_ucode_go_api_gateway_genproto_company_service.CreateFareRequest:
+    properties:
+      currency:
+        type: string
+      description:
+        type: string
+      disactivate_day:
+        type: integer
+      fare_item_prices:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.FareItemPrice'
+        type: array
+      name:
+        type: string
+      price:
+        type: number
+      trial_days:
+        type: integer
+    type: object
   ucode_ucode_go_api_gateway_genproto_company_service.CreateProjectRequest:
     properties:
       company_id:
@@ -1364,6 +988,46 @@ definitions:
         items:
           $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.Resource'
         type: array
+    type: object
+  ucode_ucode_go_api_gateway_genproto_company_service.Fare:
+    properties:
+      created_at:
+        type: string
+      currency:
+        type: string
+      description:
+        type: string
+      disactivate_day:
+        type: integer
+      fare_item_prices:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.FareItemPrice'
+        type: array
+      id:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+      trial_days:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  ucode_ucode_go_api_gateway_genproto_company_service.FareItemPrice:
+    properties:
+      fare_id:
+        type: string
+      fare_item_id:
+        type: string
+      id:
+        type: string
+      over_limit_price:
+        type: number
+      price:
+        type: number
+      value:
+        type: string
     type: object
   ucode_ucode_go_api_gateway_genproto_company_service.GetComanyListResponse:
     properties:
@@ -1494,6 +1158,13 @@ definitions:
         items:
           $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.VariableResource'
         type: array
+    type: object
+  ucode_ucode_go_api_gateway_genproto_company_service.Github:
+    properties:
+      token:
+        type: string
+      username:
+        type: string
     type: object
   ucode_ucode_go_api_gateway_genproto_company_service.IntegrationResource:
     properties:
@@ -1833,6 +1504,8 @@ definitions:
     type: object
   ucode_ucode_go_api_gateway_genproto_company_service.Settings:
     properties:
+      github:
+        $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.Github'
       sms:
         $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.SmsCredentials'
       smtp:
@@ -2079,38 +1752,6 @@ definitions:
       table_slug:
         type: string
     type: object
-  ucode_ucode_go_api_gateway_genproto_object_builder_service.ClientPlatform:
-    properties:
-      guid:
-        type: string
-      name:
-        type: string
-      project_id:
-        type: string
-      subdomain:
-        type: string
-    type: object
-  ucode_ucode_go_api_gateway_genproto_object_builder_service.ClientType:
-    properties:
-      confirm_by:
-        $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.ConfirmStrategies'
-      default_page:
-        type: string
-      guid:
-        type: string
-      name:
-        type: string
-      project_id:
-        type: string
-      self_recover:
-        type: boolean
-      self_register:
-        type: boolean
-      tables:
-        items:
-          $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.TableClientType'
-        type: array
-    type: object
   ucode_ucode_go_api_gateway_genproto_object_builder_service.CommitInfo:
     properties:
       commit_type:
@@ -2126,29 +1767,6 @@ definitions:
           type: string
         type: array
     type: object
-  ucode_ucode_go_api_gateway_genproto_object_builder_service.CommonMessage:
-    properties:
-      blocked_builder:
-        type: boolean
-      blocked_login_table:
-        type: boolean
-      company_project_id:
-        type: string
-      custom_message:
-        type: string
-      data:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
-      env_id:
-        type: string
-      is_cached:
-        type: boolean
-      project_id:
-        type: string
-      table_slug:
-        type: string
-      version_id:
-        type: string
-    type: object
   ucode_ucode_go_api_gateway_genproto_object_builder_service.Condition:
     properties:
       match_fields:
@@ -2156,16 +1774,6 @@ definitions:
           $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.MatchField'
         type: array
     type: object
-  ucode_ucode_go_api_gateway_genproto_object_builder_service.ConfirmStrategies:
-    enum:
-    - 0
-    - 1
-    - 2
-    type: integer
-    x-enum-varnames:
-    - ConfirmStrategies_UNDECIDED
-    - ConfirmStrategies_PHONE
-    - ConfirmStrategies_EMAIL
   ucode_ucode_go_api_gateway_genproto_object_builder_service.CreateCustomErrorMessage:
     properties:
       action_type:
@@ -2865,13 +2473,6 @@ definitions:
       selected_user_permission:
         $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.UpdatePermissionsRequest'
     type: object
-  ucode_ucode_go_api_gateway_genproto_object_builder_service.GetTableHistoryResponse:
-    properties:
-      items:
-        items:
-          $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.TableHistory'
-        type: array
-    type: object
   ucode_ucode_go_api_gateway_genproto_object_builder_service.GetVersionListResponse:
     properties:
       count:
@@ -2882,39 +2483,6 @@ definitions:
         items:
           $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.Version'
         type: array
-    type: object
-  ucode_ucode_go_api_gateway_genproto_object_builder_service.GlobalPermission:
-    properties:
-      api_keys_button:
-        type: boolean
-      chat:
-        type: boolean
-      environment_button:
-        type: boolean
-      environments_button:
-        type: boolean
-      id:
-        type: string
-      menu_button:
-        type: boolean
-      menu_setting_button:
-        type: boolean
-      profile_settings_button:
-        type: boolean
-      project_button:
-        type: boolean
-      project_settings_button:
-        type: boolean
-      projects_button:
-        type: boolean
-      redirects_button:
-        type: boolean
-      settings_button:
-        type: boolean
-      sms_button:
-        type: boolean
-      version_button:
-        type: boolean
     type: object
   ucode_ucode_go_api_gateway_genproto_object_builder_service.HtmlTemplate:
     properties:
@@ -3146,37 +2714,6 @@ definitions:
       wiki_id:
         type: string
     type: object
-  ucode_ucode_go_api_gateway_genproto_object_builder_service.MenuRequest:
-    properties:
-      attributes:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
-      data:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
-      icon:
-        type: string
-      id:
-        type: string
-      label:
-        type: string
-      layout_id:
-        type: string
-      microfrontend_id:
-        type: string
-      parent_id:
-        type: string
-      pivot_template_id:
-        type: string
-      project_id:
-        type: string
-      report_setting_id:
-        type: string
-      table_id:
-        type: string
-      type:
-        type: string
-      webpage_id:
-        type: string
-    type: object
   ucode_ucode_go_api_gateway_genproto_object_builder_service.MenuSettings:
     properties:
       icon_size:
@@ -3231,7 +2768,25 @@ definitions:
     type: object
   ucode_ucode_go_api_gateway_genproto_object_builder_service.Permission:
     properties:
+      add_field:
+        type: string
+      add_filter:
+        type: string
+      automation:
+        type: string
+      columns:
+        type: string
       delete:
+        type: string
+      delete_all:
+        type: string
+      excel_menu:
+        type: string
+      field_filter:
+        type: string
+      fix_column:
+        type: string
+      group:
         type: string
       guid:
         type: string
@@ -3239,9 +2794,23 @@ definitions:
         type: boolean
       is_public:
         type: boolean
+      language_btn:
+        type: string
+      pdf_action:
+        type: string
       read:
         type: string
+      search_button:
+        type: string
+      settings:
+        type: string
+      share_modal:
+        type: string
+      tab_group:
+        type: string
       update:
+        type: string
+      view_create:
         type: string
       write:
         type: string
@@ -3265,55 +2834,6 @@ definitions:
       default_value:
         type: string
       field_id:
-        type: string
-    type: object
-  ucode_ucode_go_api_gateway_genproto_object_builder_service.RecordPermission:
-    properties:
-      add_field:
-        type: string
-      add_filter:
-        type: string
-      automation:
-        type: string
-      client_type_id:
-        type: string
-      columns:
-        type: string
-      delete:
-        type: string
-      excel_menu:
-        type: string
-      field_filter:
-        type: string
-      fix_column:
-        type: string
-      group:
-        type: string
-      guid:
-        type: string
-      language_btn:
-        type: string
-      pdf_action:
-        type: string
-      read:
-        type: string
-      role_id:
-        type: string
-      search_button:
-        type: string
-      settings:
-        type: string
-      share_modal:
-        type: string
-      tab_group:
-        type: string
-      table_slug:
-        type: string
-      update:
-        type: string
-      view_create:
-        type: string
-      write:
         type: string
     type: object
   ucode_ucode_go_api_gateway_genproto_object_builder_service.RelationForSection:
@@ -3383,19 +2903,6 @@ definitions:
           $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.Field'
         type: array
       view_type:
-        type: string
-    type: object
-  ucode_ucode_go_api_gateway_genproto_object_builder_service.Role:
-    properties:
-      client_platform_id:
-        type: string
-      client_type_id:
-        type: string
-      guid:
-        type: string
-      name:
-        type: string
-      project_id:
         type: string
     type: object
   ucode_ucode_go_api_gateway_genproto_object_builder_service.Section:
@@ -3551,21 +3058,6 @@ definitions:
       subtitle_field_slug:
         type: string
     type: object
-  ucode_ucode_go_api_gateway_genproto_object_builder_service.TableClientType:
-    properties:
-      data:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
-      icon:
-        type: string
-      label:
-        type: string
-      slug:
-        type: string
-      view_label:
-        type: string
-      view_slug:
-        type: string
-    type: object
   ucode_ucode_go_api_gateway_genproto_object_builder_service.TableFolder:
     properties:
       app_id:
@@ -3603,23 +3095,6 @@ definitions:
         type: string
       subtitle_field_slug:
         type: string
-    type: object
-  ucode_ucode_go_api_gateway_genproto_object_builder_service.TableHistory:
-    properties:
-      author_id:
-        type: string
-      commit_type:
-        type: string
-      created_at:
-        type: string
-      id:
-        type: string
-      name:
-        type: string
-      version_ids:
-        items:
-          type: string
-        type: array
     type: object
   ucode_ucode_go_api_gateway_genproto_object_builder_service.UpdateLayoutRequest:
     properties:
@@ -3918,37 +3393,6 @@ definitions:
           type: string
         type: array
       project_id:
-        type: string
-    type: object
-  ucode_ucode_go_api_gateway_genproto_object_builder_service.V2LoginResponse:
-    properties:
-      addational_table:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
-      app_permissions:
-        items:
-          $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.RecordPermission'
-        type: array
-      client_platform:
-        $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.ClientPlatform'
-      client_type:
-        $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.ClientType'
-      global_permission:
-        $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.GlobalPermission'
-      login_table_slug:
-        type: string
-      permissions:
-        items:
-          $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.RecordPermission'
-        type: array
-      role:
-        $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.Role'
-      user_data:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
-      user_found:
-        type: boolean
-      user_id:
-        type: string
-      user_id_auth:
         type: string
     type: object
   ucode_ucode_go_api_gateway_genproto_object_builder_service.Version:
@@ -4591,103 +4035,6 @@ paths:
           schema:
             $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
       summary: returns "pong" message
-  /register-otp/{table_slug}:
-    post:
-      consumes:
-      - application/json
-      description: RegisterOtp
-      operationId: registerOtp
-      parameters:
-      - description: register_body
-        in: body
-        name: registerBody
-        required: true
-        schema:
-          $ref: '#/definitions/ucode_ucode_go_api_gateway_api_models.RegisterOtp'
-      - description: table_slug
-        in: path
-        name: table_slug
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: User data
-          schema:
-            allOf:
-            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.V2LoginResponse'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: RegisterOtp
-      tags:
-      - register
-  /send-code:
-    post:
-      consumes:
-      - application/json
-      description: SendCode
-      operationId: sendCode
-      parameters:
-      - description: SendCode
-        in: body
-        name: login
-        required: true
-        schema:
-          $ref: '#/definitions/ucode_ucode_go_api_gateway_api_models.Sms'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: User data
-          schema:
-            allOf:
-            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/ucode_ucode_go_api_gateway_api_models.SendCodeResponse'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: SendCode
-      tags:
-      - register
   /template-note/share-get:
     post:
       consumes:
@@ -7447,6 +6794,243 @@ paths:
       summary: export to json
       tags:
       - ExportToJSON
+  /v1/fare:
+    get:
+      consumes:
+      - application/json
+      description: List fares
+      operationId: list-fares
+      parameters:
+      - description: limit
+        in: query
+        name: limit
+        type: string
+      - description: offset
+        in: query
+        name: offset
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Fares data
+          schema:
+            allOf:
+            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.Fare'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: List fares
+      tags:
+      - Billing
+    post:
+      consumes:
+      - application/json
+      description: Create fare
+      operationId: create-fare
+      parameters:
+      - description: FareCreateRequest
+        in: body
+        name: billing
+        required: true
+        schema:
+          $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.CreateFareRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Fare data
+          schema:
+            allOf:
+            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.Fare'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create fare
+      tags:
+      - Billing
+    put:
+      consumes:
+      - application/json
+      description: Update fare
+      operationId: update-fare
+      parameters:
+      - description: Fare
+        in: body
+        name: billing
+        required: true
+        schema:
+          $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.Fare'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Fare data
+          schema:
+            allOf:
+            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.Fare'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update fare
+      tags:
+      - Billing
+  /v1/fare/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete fare
+      operationId: delete-fare
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Fare deleted
+          schema:
+            allOf:
+            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete fare
+      tags:
+      - Billing
+    get:
+      consumes:
+      - application/json
+      description: Get fare
+      operationId: get-fare
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Fare data
+          schema:
+            allOf:
+            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.Fare'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get fare
+      tags:
+      - Billing
   /v1/field-permission/{role_id}/{table_slug}:
     get:
       consumes:
@@ -7834,13 +7418,22 @@ paths:
       operationId: get_all_functions
       parameters:
       - in: query
+        name: environment_id
+        type: string
+      - in: query
         name: limit
+        type: integer
+      - in: query
+        name: offset
         type: integer
       - in: query
         name: project_id
         type: string
       - in: query
         name: search
+        type: string
+      - in: query
+        name: type
         type: string
       produces:
       - application/json
@@ -8955,59 +8548,6 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Invoke Function
-      tags:
-      - Function
-  /v1/invoke_function/{function-path}:
-    post:
-      consumes:
-      - application/json
-      description: Invoke Function By Path
-      operationId: invoke_function_by_path
-      parameters:
-      - description: function-path
-        in: path
-        name: function-path
-        required: true
-        type: string
-      - description: InvokeFunctionByPathRequest
-        in: body
-        name: InvokeFunctionByPathRequest
-        required: true
-        schema:
-          $ref: '#/definitions/ucode_ucode_go_api_gateway_api_models.CommonMessage'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Function data
-          schema:
-            allOf:
-            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/ucode_ucode_go_api_gateway_api_models.InvokeFunctionRequest'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Invoke Function By Path
       tags:
       - Function
   /v1/layout:
@@ -11993,196 +11533,6 @@ paths:
       summary: Get table details
       tags:
       - Object
-  /v1/table-history:
-    put:
-      consumes:
-      - application/json
-      description: Get table history by id
-      operationId: insert into table history
-      parameters:
-      - description: UpdateTableRequestBody
-        in: body
-        name: table
-        required: true
-        schema:
-          $ref: '#/definitions/ucode_ucode_go_api_gateway_api_models.InsertVersionsToCommitRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: TableBody
-          schema:
-            allOf:
-            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.TableHistory'
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get table history by id
-      tags:
-      - Table
-  /v1/table-history/{id}:
-    get:
-      consumes:
-      - application/json
-      description: Get table history by id
-      operationId: get_table_history_by_id
-      parameters:
-      - description: id
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: TableBody
-          schema:
-            allOf:
-            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.Table'
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get table history by id
-      tags:
-      - Table
-  /v1/table-history/list/{table_id}:
-    get:
-      consumes:
-      - application/json
-      description: Get table histories
-      operationId: get_table_histories
-      parameters:
-      - description: table_id
-        in: path
-        name: table_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: TableBody
-          schema:
-            allOf:
-            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.GetTableHistoryResponse'
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get table histories
-      tags:
-      - Table
-  /v1/table-history/revert:
-    put:
-      consumes:
-      - application/json
-      description: Get table history by id
-      operationId: revert_table_history
-      parameters:
-      - description: UpdateTableRequestBody
-        in: body
-        name: table
-        required: true
-        schema:
-          $ref: '#/definitions/ucode_ucode_go_api_gateway_api_models.RevertHistoryRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: TableBody
-          schema:
-            allOf:
-            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.TableHistory'
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get table history by id
-      tags:
-      - Table
   /v1/table-permission:
     get:
       consumes:
@@ -15096,54 +14446,6 @@ paths:
       summary: Get single variable resource
       tags:
       - Project resource
-  /v2/copy-project:
-    post:
-      consumes:
-      - application/json
-      description: CopyProjectTemplate
-      operationId: copy_project
-      parameters:
-      - description: CopyFromProjectRequestMessage
-        in: body
-        name: event
-        required: true
-        schema:
-          $ref: '#/definitions/ucode_ucode_go_api_gateway_api_models.CopyProjectTemplateRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Event data
-          schema:
-            allOf:
-            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.CommonMessage'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: CopyProjectTemplate
-      tags:
-      - ProjectTemplate
   /v2/docx-template:
     get:
       consumes:
@@ -15377,59 +14679,6 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get single docx template
-      tags:
-      - Template
-  /v2/docx-template/convert/pdf:
-    post:
-      consumes:
-      - application/json
-      description: Generate PDF from docx template
-      operationId: generate_docx_to_pdf
-      parameters:
-      - description: link
-        in: query
-        name: link
-        required: true
-        type: string
-      - description: Variables
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/ucode_ucode_go_api_gateway_api_models.DocxTemplateVariables'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Success
-          schema:
-            allOf:
-            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Generate PDF from docx template
       tags:
       - Template
   /v2/docx-template/fields/list:
@@ -16707,6 +15956,164 @@ paths:
       summary: Get Micro Frontend By Id
       tags:
       - Functions
+  /v2/grafana/function:
+    post:
+      consumes:
+      - application/json
+      description: Grafana Function List
+      operationId: grafana_function_list
+      parameters:
+      - description: namespace
+        in: query
+        name: namespace
+        required: true
+        type: string
+      - description: start
+        in: query
+        name: start
+        required: true
+        type: string
+      - description: end
+        in: query
+        name: end
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            allOf:
+            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Grafana Function List
+      tags:
+      - Grafana
+  /v2/grafana/loki:
+    post:
+      consumes:
+      - application/json
+      description: Grafana Function Logs
+      operationId: grafana_function_logs
+      parameters:
+      - description: GetGrafanaFunctionLogRequest
+        in: body
+        name: Grafana
+        required: true
+        schema:
+          $ref: '#/definitions/ucode_ucode_go_api_gateway_api_models.GetGrafanaFunctionLogRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            allOf:
+            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Grafana Function Logs
+      tags:
+      - Grafana
+  /v2/invoke_function/{function-path}:
+    post:
+      consumes:
+      - application/json
+      description: Invoke Function By Path
+      operationId: invoke_function_by_path
+      parameters:
+      - description: function-path
+        in: path
+        name: function-path
+        required: true
+        type: string
+      - description: InvokeFunctionByPathRequest
+        in: body
+        name: InvokeFunctionByPathRequest
+        required: true
+        schema:
+          $ref: '#/definitions/ucode_ucode_go_api_gateway_api_models.CommonMessage'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Function data
+          schema:
+            allOf:
+            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/ucode_ucode_go_api_gateway_api_models.InvokeFunctionRequest'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Invoke Function By Path
+      tags:
+      - Function
   /v2/items/{collection}:
     delete:
       consumes:
@@ -19316,298 +18723,6 @@ paths:
       summary: Update view order
       tags:
       - V2_View
-  /v3/web_pages:
-    get:
-      consumes:
-      - application/json
-      description: Get Web Page List
-      operationId: get_web_page_list
-      parameters:
-      - in: query
-        name: limit
-        type: integer
-      - in: query
-        name: offset
-        type: integer
-      - in: query
-        name: project_id
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: WebPageBody
-          schema:
-            allOf:
-            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/ucode_ucode_go_api_gateway_api_models.GetAllFieldsResponse'
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get Web Page List
-      tags:
-      - Web Page
-    post:
-      consumes:
-      - application/json
-      description: Create Web Page
-      operationId: create_web_page
-      parameters:
-      - description: CreateWebPageRequest
-        in: body
-        name: table
-        required: true
-        schema:
-          $ref: '#/definitions/ucode_ucode_go_api_gateway_api_models.CreateWebPageRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: QueryFolder data
-          schema:
-            allOf:
-            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/ucode_ucode_go_api_gateway_api_models.QueryFolder'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Create Web Page
-      tags:
-      - Web Page
-  /v3/web_pages/{guid}:
-    delete:
-      consumes:
-      - application/json
-      description: Delete Web Page
-      operationId: delete_web_page
-      parameters:
-      - description: guid
-        in: path
-        name: guid
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Delete Query Folder
-      tags:
-      - Web Page
-    get:
-      consumes:
-      - application/json
-      description: Get Web Page By Id
-      operationId: get_web_page_by_id
-      parameters:
-      - description: guid
-        in: path
-        name: guid
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: FieldBody
-          schema:
-            allOf:
-            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/ucode_ucode_go_api_gateway_api_models.GetAllFieldsResponse'
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get Web Page By Id
-      tags:
-      - Web Page
-    put:
-      consumes:
-      - application/json
-      description: Update Web Page
-      operationId: update_web_page
-      parameters:
-      - description: guid
-        in: path
-        name: guid
-        required: true
-        type: string
-      - description: UpdateWebPageRequestBody
-        in: body
-        name: web_page
-        required: true
-        schema:
-          $ref: '#/definitions/ucode_ucode_go_api_gateway_api_models.CreateWebPageRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: WebPage data
-          schema:
-            allOf:
-            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/ucode_ucode_go_api_gateway_api_models.WebPage'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Update Web Page
-      tags:
-      - Web Page
-  /verify/{sms_id}/{otp}:
-    post:
-      consumes:
-      - application/json
-      description: Verify
-      operationId: verify
-      parameters:
-      - description: sms_id
-        in: path
-        name: sms_id
-        required: true
-        type: string
-      - description: otp
-        in: path
-        name: otp
-        required: true
-        type: string
-      - description: verify_body
-        in: body
-        name: verifyBody
-        required: true
-        schema:
-          $ref: '#/definitions/ucode_ucode_go_api_gateway_api_models.Verify'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: User data
-          schema:
-            allOf:
-            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.V2LoginResponse'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: Verify
-      tags:
-      - register
 securityDefinitions:
   ApiKeyAuth:
     in: header

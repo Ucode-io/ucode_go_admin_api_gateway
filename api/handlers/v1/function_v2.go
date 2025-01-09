@@ -11,6 +11,7 @@ import (
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
+	_ "ucode/ucode_go_api_gateway/genproto/new_function_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
@@ -31,7 +32,7 @@ import (
 // @Accept json
 // @Produce json
 // @Param Function body models.CreateFunctionRequest true "CreateFunctionRequestBody"
-// @Success 201 {object} status_http.Response{data=fc.Function} "Function data"
+// @Success 201 {object} status_http.Response{data=new_function_service.Function} "Function data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) CreateNewFunction(c *gin.Context) {
@@ -48,7 +49,7 @@ func (h *HandlerV1) CreateNewFunction(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param function_id path string true "function_id"
-// @Success 200 {object} status_http.Response{data=fc.Function} "FunctionBody"
+// @Success 200 {object} status_http.Response{data=new_function_service.Function} "FunctionBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetNewFunctionByID(c *gin.Context) {
@@ -112,7 +113,7 @@ func (h *HandlerV1) DeleteNewFunction(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param function-path path string true "function-path"
 // @ID invoke_function_by_path
-// @Router /v1/invoke_function/{function-path} [POST]
+// @Router /v2/invoke_function/{function-path} [POST]
 // @Summary Invoke Function By Path
 // @Description Invoke Function By Path
 // @Tags Function

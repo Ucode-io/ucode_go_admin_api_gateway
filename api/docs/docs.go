@@ -199,179 +199,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/register-otp/{table_slug}": {
-            "post": {
-                "description": "RegisterOtp",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "register"
-                ],
-                "summary": "RegisterOtp",
-                "operationId": "registerOtp",
-                "parameters": [
-                    {
-                        "description": "register_body",
-                        "name": "registerBody",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_models.RegisterOtp"
-                        }
-                    },
-                    {
-                        "type": "string",
-                        "description": "table_slug",
-                        "name": "table_slug",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "User data",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.V2LoginResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "/send-code": {
-            "post": {
-                "description": "SendCode",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "register"
-                ],
-                "summary": "SendCode",
-                "operationId": "sendCode",
-                "parameters": [
-                    {
-                        "description": "SendCode",
-                        "name": "login",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_models.Sms"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "User data",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_models.SendCodeResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
         "/template-note/share-get": {
             "post": {
                 "description": "Get single object template",
@@ -5401,6 +5228,439 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/fare": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "List fares",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Billing"
+                ],
+                "summary": "List fares",
+                "operationId": "list-fares",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "limit",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "offset",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Fares data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.Fare"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update fare",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Billing"
+                ],
+                "summary": "Update fare",
+                "operationId": "update-fare",
+                "parameters": [
+                    {
+                        "description": "Fare",
+                        "name": "billing",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.Fare"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Fare data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.Fare"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Create fare",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Billing"
+                ],
+                "summary": "Create fare",
+                "operationId": "create-fare",
+                "parameters": [
+                    {
+                        "description": "FareCreateRequest",
+                        "name": "billing",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.CreateFareRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Fare data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.Fare"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/fare/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get fare",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Billing"
+                ],
+                "summary": "Get fare",
+                "operationId": "get-fare",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Fare data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.Fare"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Delete fare",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Billing"
+                ],
+                "summary": "Delete fare",
+                "operationId": "delete-fare",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Fare deleted",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v1/field-permission/{role_id}/{table_slug}": {
             "get": {
                 "security": [
@@ -6107,8 +6367,18 @@ const docTemplate = `{
                 "operationId": "get_all_functions",
                 "parameters": [
                     {
+                        "type": "string",
+                        "name": "environment_id",
+                        "in": "query"
+                    },
+                    {
                         "type": "integer",
                         "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "offset",
                         "in": "query"
                     },
                     {
@@ -6119,6 +6389,11 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "type",
                         "in": "query"
                     }
                 ],
@@ -8079,101 +8354,6 @@ const docTemplate = `{
                         "required": true,
                         "schema": {
                             "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_models.InvokeFunctionRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Function data",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_models.InvokeFunctionRequest"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "/v1/invoke_function/{function-path}": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Invoke Function By Path",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Function"
-                ],
-                "summary": "Invoke Function By Path",
-                "operationId": "invoke_function_by_path",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "function-path",
-                        "name": "function-path",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "InvokeFunctionByPathRequest",
-                        "name": "InvokeFunctionByPathRequest",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_models.CommonMessage"
                         }
                     }
                 ],
@@ -13605,354 +13785,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/table-history": {
-            "put": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Get table history by id",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Table"
-                ],
-                "summary": "Get table history by id",
-                "operationId": "insert into table history",
-                "parameters": [
-                    {
-                        "description": "UpdateTableRequestBody",
-                        "name": "table",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_models.InsertVersionsToCommitRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "TableBody",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.TableHistory"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "/v1/table-history/list/{table_id}": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Get table histories",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Table"
-                ],
-                "summary": "Get table histories",
-                "operationId": "get_table_histories",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "table_id",
-                        "name": "table_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "TableBody",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.GetTableHistoryResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "/v1/table-history/revert": {
-            "put": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Get table history by id",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Table"
-                ],
-                "summary": "Get table history by id",
-                "operationId": "revert_table_history",
-                "parameters": [
-                    {
-                        "description": "UpdateTableRequestBody",
-                        "name": "table",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_models.RevertHistoryRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "TableBody",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.TableHistory"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "/v1/table-history/{id}": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Get table history by id",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Table"
-                ],
-                "summary": "Get table history by id",
-                "operationId": "get_table_history_by_id",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "TableBody",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.Table"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
         "/v1/table-permission": {
             "get": {
                 "security": [
@@ -19216,94 +19048,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/v2/copy-project": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "CopyProjectTemplate",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "ProjectTemplate"
-                ],
-                "summary": "CopyProjectTemplate",
-                "operationId": "copy_project",
-                "parameters": [
-                    {
-                        "description": "CopyFromProjectRequestMessage",
-                        "name": "event",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_models.CopyProjectTemplateRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Event data",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.CommonMessage"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
         "/v2/docx-template": {
             "get": {
                 "security": [
@@ -19537,101 +19281,6 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "/v2/docx-template/convert/pdf": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Generate PDF from docx template",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Template"
-                ],
-                "summary": "Generate PDF from docx template",
-                "operationId": "generate_docx_to_pdf",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "link",
-                        "name": "link",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "description": "Variables",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_models.DocxTemplateVariables"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid Argument",
                         "schema": {
                             "allOf": [
                                 {
@@ -22078,6 +21727,289 @@ const docTemplate = `{
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_models.InvokeFunctionResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v2/grafana/function": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Grafana Function List",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Grafana"
+                ],
+                "summary": "Grafana Function List",
+                "operationId": "grafana_function_list",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "namespace",
+                        "name": "namespace",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "start",
+                        "name": "start",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "end",
+                        "name": "end",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v2/grafana/loki": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Grafana Function Logs",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Grafana"
+                ],
+                "summary": "Grafana Function Logs",
+                "operationId": "grafana_function_logs",
+                "parameters": [
+                    {
+                        "description": "GetGrafanaFunctionLogRequest",
+                        "name": "Grafana",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_models.GetGrafanaFunctionLogRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v2/invoke_function/{function-path}": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Invoke Function By Path",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Function"
+                ],
+                "summary": "Invoke Function By Path",
+                "operationId": "invoke_function_by_path",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "function-path",
+                        "name": "function-path",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "InvokeFunctionByPathRequest",
+                        "name": "InvokeFunctionByPathRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_models.CommonMessage"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Function data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_models.InvokeFunctionRequest"
                                         }
                                     }
                                 }
@@ -26797,531 +26729,6 @@ const docTemplate = `{
                     }
                 }
             }
-        },
-        "/v3/web_pages": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Get Web Page List",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Web Page"
-                ],
-                "summary": "Get Web Page List",
-                "operationId": "get_web_page_list",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "name": "limit",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "name": "offset",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "project_id",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "WebPageBody",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_models.GetAllFieldsResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            },
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Create Web Page",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Web Page"
-                ],
-                "summary": "Create Web Page",
-                "operationId": "create_web_page",
-                "parameters": [
-                    {
-                        "description": "CreateWebPageRequest",
-                        "name": "table",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_models.CreateWebPageRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "QueryFolder data",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_models.QueryFolder"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "/v3/web_pages/{guid}": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Get Web Page By Id",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Web Page"
-                ],
-                "summary": "Get Web Page By Id",
-                "operationId": "get_web_page_by_id",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "guid",
-                        "name": "guid",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "FieldBody",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_models.GetAllFieldsResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            },
-            "put": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Update Web Page",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Web Page"
-                ],
-                "summary": "Update Web Page",
-                "operationId": "update_web_page",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "guid",
-                        "name": "guid",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "UpdateWebPageRequestBody",
-                        "name": "web_page",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_models.CreateWebPageRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "WebPage data",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_models.WebPage"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Delete Web Page",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Web Page"
-                ],
-                "summary": "Delete Query Folder",
-                "operationId": "delete_web_page",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "guid",
-                        "name": "guid",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "/verify/{sms_id}/{otp}": {
-            "post": {
-                "description": "Verify",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "register"
-                ],
-                "summary": "Verify",
-                "operationId": "verify",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "sms_id",
-                        "name": "sms_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "otp",
-                        "name": "otp",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "verify_body",
-                        "name": "verifyBody",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_models.Verify"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "User data",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.V2LoginResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
         }
     },
     "definitions": {
@@ -27461,29 +26868,6 @@ const docTemplate = `{
                 }
             }
         },
-        "ucode_ucode_go_api_gateway_api_models.CopyProjectTemplateRequest": {
-            "type": "object",
-            "properties": {
-                "from_env_id": {
-                    "type": "string"
-                },
-                "from_project_id": {
-                    "type": "string"
-                },
-                "menus": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.MenuRequest"
-                    }
-                },
-                "to_env_id": {
-                    "type": "string"
-                },
-                "to_project_id": {
-                    "type": "string"
-                }
-            }
-        },
         "ucode_ucode_go_api_gateway_api_models.CreateFieldRequest": {
             "type": "object",
             "properties": {
@@ -27619,6 +27003,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "path": {
+                    "type": "string"
+                },
+                "type": {
                     "type": "string"
                 }
             }
@@ -27762,18 +27149,6 @@ const docTemplate = `{
                 }
             }
         },
-        "ucode_ucode_go_api_gateway_api_models.CreateWebPageRequest": {
-            "type": "object",
-            "properties": {
-                "components": {
-                    "type": "object",
-                    "additionalProperties": true
-                },
-                "title": {
-                    "type": "string"
-                }
-            }
-        },
         "ucode_ucode_go_api_gateway_api_models.CustomEvent": {
             "type": "object",
             "properties": {
@@ -27812,21 +27187,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "url": {
-                    "type": "string"
-                }
-            }
-        },
-        "ucode_ucode_go_api_gateway_api_models.DocxTemplateVariables": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "type": "object",
-                    "additionalProperties": true
-                },
-                "id": {
-                    "type": "string"
-                },
-                "table_slug": {
                     "type": "string"
                 }
             }
@@ -27980,6 +27340,9 @@ const docTemplate = `{
                 },
                 "path": {
                     "type": "string"
+                },
+                "type": {
+                    "type": "string"
                 }
             }
         },
@@ -28015,6 +27378,23 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/ucode_ucode_go_api_gateway_api_models.Field"
                     }
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_api_models.GetGrafanaFunctionLogRequest": {
+            "type": "object",
+            "properties": {
+                "from": {
+                    "type": "string"
+                },
+                "function": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "type": "string"
+                },
+                "to": {
+                    "type": "string"
                 }
             }
         },
@@ -28059,26 +27439,12 @@ const docTemplate = `{
                 }
             }
         },
-        "ucode_ucode_go_api_gateway_api_models.InsertVersionsToCommitRequest": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "version_ids": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            }
-        },
         "ucode_ucode_go_api_gateway_api_models.InvokeFunctionRequest": {
             "type": "object",
             "properties": {
                 "attributes": {
                     "type": "object",
-                    "additionalProperties": true
+                    "additionalProperties": {}
                 },
                 "function_id": {
                     "type": "string"
@@ -28099,11 +27465,11 @@ const docTemplate = `{
             "properties": {
                 "attributes": {
                     "type": "object",
-                    "additionalProperties": true
+                    "additionalProperties": {}
                 },
                 "data": {
                     "type": "object",
-                    "additionalProperties": true
+                    "additionalProperties": {}
                 },
                 "server_error": {
                     "type": "string"
@@ -28269,66 +27635,10 @@ const docTemplate = `{
                 }
             }
         },
-        "ucode_ucode_go_api_gateway_api_models.QueryFolder": {
-            "type": "object",
-            "properties": {
-                "guid": {
-                    "type": "string"
-                },
-                "project_id": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                }
-            }
-        },
-        "ucode_ucode_go_api_gateway_api_models.RegisterOtp": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "type": "object",
-                    "additionalProperties": true
-                }
-            }
-        },
-        "ucode_ucode_go_api_gateway_api_models.RevertHistoryRequest": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string"
-                }
-            }
-        },
-        "ucode_ucode_go_api_gateway_api_models.SendCodeResponse": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.V2LoginResponse"
-                },
-                "sms_id": {
-                    "type": "string"
-                }
-            }
-        },
         "ucode_ucode_go_api_gateway_api_models.SendToGptRequest": {
             "type": "object",
             "properties": {
                 "promt": {
-                    "type": "string"
-                }
-            }
-        },
-        "ucode_ucode_go_api_gateway_api_models.Sms": {
-            "type": "object",
-            "properties": {
-                "client_type": {
-                    "type": "string"
-                },
-                "recipient": {
-                    "type": "string"
-                },
-                "text": {
                     "type": "string"
                 }
             }
@@ -28437,35 +27747,6 @@ const docTemplate = `{
                 }
             }
         },
-        "ucode_ucode_go_api_gateway_api_models.Verify": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.V2LoginResponse"
-                },
-                "tables": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.Object"
-                    }
-                }
-            }
-        },
-        "ucode_ucode_go_api_gateway_api_models.WebPage": {
-            "type": "object",
-            "properties": {
-                "components": {
-                    "type": "object",
-                    "additionalProperties": true
-                },
-                "guid": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                }
-            }
-        },
         "ucode_ucode_go_api_gateway_api_status_http.Response": {
             "type": "object",
             "properties": {
@@ -28475,480 +27756,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "status": {
-                    "type": "string"
-                }
-            }
-        },
-        "ucode_ucode_go_api_gateway_genproto_auth_service.ClientPlatform": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "project_id": {
-                    "type": "string"
-                },
-                "subdomain": {
-                    "type": "string"
-                }
-            }
-        },
-        "ucode_ucode_go_api_gateway_genproto_auth_service.ClientType": {
-            "type": "object",
-            "properties": {
-                "confirm_by": {
-                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.ConfirmStrategies"
-                },
-                "default_page": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "project_id": {
-                    "type": "string"
-                },
-                "self_recover": {
-                    "type": "boolean"
-                },
-                "self_register": {
-                    "type": "boolean"
-                },
-                "tables": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.Table"
-                    }
-                }
-            }
-        },
-        "ucode_ucode_go_api_gateway_genproto_auth_service.ConfirmStrategies": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2
-            ],
-            "x-enum-varnames": [
-                "ConfirmStrategies_UNDECIDED",
-                "ConfirmStrategies_PHONE",
-                "ConfirmStrategies_EMAIL"
-            ]
-        },
-        "ucode_ucode_go_api_gateway_genproto_auth_service.GlobalPermission": {
-            "type": "object",
-            "properties": {
-                "api_keys_button": {
-                    "type": "boolean"
-                },
-                "chat": {
-                    "type": "boolean"
-                },
-                "environment_button": {
-                    "type": "boolean"
-                },
-                "environments_button": {
-                    "type": "boolean"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "menu_button": {
-                    "type": "boolean"
-                },
-                "menu_setting_button": {
-                    "type": "boolean"
-                },
-                "profile_settings_button": {
-                    "type": "boolean"
-                },
-                "project_button": {
-                    "type": "boolean"
-                },
-                "project_settings_button": {
-                    "type": "boolean"
-                },
-                "projects_button": {
-                    "type": "boolean"
-                },
-                "redirects_button": {
-                    "type": "boolean"
-                },
-                "settings_button": {
-                    "type": "boolean"
-                },
-                "sms_button": {
-                    "type": "boolean"
-                },
-                "version_button": {
-                    "type": "boolean"
-                }
-            }
-        },
-        "ucode_ucode_go_api_gateway_genproto_auth_service.Language": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "native_name": {
-                    "type": "string"
-                },
-                "short_name": {
-                    "type": "string"
-                }
-            }
-        },
-        "ucode_ucode_go_api_gateway_genproto_auth_service.Object": {
-            "type": "object",
-            "properties": {
-                "object_id": {
-                    "type": "string"
-                },
-                "table_slug": {
-                    "type": "string"
-                }
-            }
-        },
-        "ucode_ucode_go_api_gateway_genproto_auth_service.RecordPermission": {
-            "type": "object",
-            "properties": {
-                "add_field": {
-                    "type": "string"
-                },
-                "add_filter": {
-                    "type": "string"
-                },
-                "automation": {
-                    "type": "string"
-                },
-                "client_type_id": {
-                    "type": "string"
-                },
-                "columns": {
-                    "type": "string"
-                },
-                "delete": {
-                    "type": "string"
-                },
-                "excel_menu": {
-                    "type": "string"
-                },
-                "field_filter": {
-                    "type": "string"
-                },
-                "fix_column": {
-                    "type": "string"
-                },
-                "group": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "language_btn": {
-                    "type": "string"
-                },
-                "pdf_action": {
-                    "type": "string"
-                },
-                "read": {
-                    "type": "string"
-                },
-                "role_id": {
-                    "type": "string"
-                },
-                "search_button": {
-                    "type": "string"
-                },
-                "settings": {
-                    "type": "string"
-                },
-                "share_modal": {
-                    "type": "string"
-                },
-                "tab_group": {
-                    "type": "string"
-                },
-                "table_slug": {
-                    "type": "string"
-                },
-                "update": {
-                    "type": "string"
-                },
-                "view_create": {
-                    "type": "string"
-                },
-                "write": {
-                    "type": "string"
-                }
-            }
-        },
-        "ucode_ucode_go_api_gateway_genproto_auth_service.Role": {
-            "type": "object",
-            "properties": {
-                "client_platform_id": {
-                    "type": "string"
-                },
-                "client_type_id": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "project_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "ucode_ucode_go_api_gateway_genproto_auth_service.Session": {
-            "type": "object",
-            "properties": {
-                "client_id": {
-                    "type": "string"
-                },
-                "client_platform_id": {
-                    "type": "string"
-                },
-                "client_type_id": {
-                    "type": "string"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "data": {
-                    "type": "string"
-                },
-                "env_id": {
-                    "type": "string"
-                },
-                "expires_at": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "integration_id": {
-                    "type": "string"
-                },
-                "ip": {
-                    "type": "string"
-                },
-                "is_changed": {
-                    "type": "boolean"
-                },
-                "project_id": {
-                    "type": "string"
-                },
-                "role_id": {
-                    "type": "string"
-                },
-                "updated_at": {
-                    "type": "string"
-                },
-                "user_id": {
-                    "type": "string"
-                },
-                "user_id_auth": {
-                    "type": "string"
-                }
-            }
-        },
-        "ucode_ucode_go_api_gateway_genproto_auth_service.Table": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
-                },
-                "icon": {
-                    "type": "string"
-                },
-                "label": {
-                    "type": "string"
-                },
-                "slug": {
-                    "type": "string"
-                },
-                "view_label": {
-                    "type": "string"
-                },
-                "view_slug": {
-                    "type": "string"
-                }
-            }
-        },
-        "ucode_ucode_go_api_gateway_genproto_auth_service.Timezone": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "text": {
-                    "type": "string"
-                }
-            }
-        },
-        "ucode_ucode_go_api_gateway_genproto_auth_service.Token": {
-            "type": "object",
-            "properties": {
-                "access_token": {
-                    "type": "string"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "expires_at": {
-                    "type": "string"
-                },
-                "refresh_in_seconds": {
-                    "type": "integer"
-                },
-                "refresh_token": {
-                    "type": "string"
-                },
-                "updated_at": {
-                    "type": "string"
-                }
-            }
-        },
-        "ucode_ucode_go_api_gateway_genproto_auth_service.User": {
-            "type": "object",
-            "properties": {
-                "active": {
-                    "type": "integer"
-                },
-                "client_platform_id": {
-                    "type": "string"
-                },
-                "client_type_id": {
-                    "type": "string"
-                },
-                "company_id": {
-                    "type": "string"
-                },
-                "email": {
-                    "type": "string"
-                },
-                "expires_at": {
-                    "type": "string"
-                },
-                "hash_type": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "language": {
-                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.Language"
-                },
-                "login": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                },
-                "phone": {
-                    "type": "string"
-                },
-                "photo_url": {
-                    "type": "string"
-                },
-                "project_id": {
-                    "type": "string"
-                },
-                "role_id": {
-                    "type": "string"
-                },
-                "timezone": {
-                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.Timezone"
-                }
-            }
-        },
-        "ucode_ucode_go_api_gateway_genproto_auth_service.V2LoginResponse": {
-            "type": "object",
-            "properties": {
-                "addational_table": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
-                },
-                "app_permissions": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.RecordPermission"
-                    }
-                },
-                "client_platform": {
-                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.ClientPlatform"
-                },
-                "client_type": {
-                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.ClientType"
-                },
-                "environment_id": {
-                    "type": "string"
-                },
-                "global_permission": {
-                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.GlobalPermission"
-                },
-                "login_table_slug": {
-                    "type": "string"
-                },
-                "permissions": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.RecordPermission"
-                    }
-                },
-                "resource_id": {
-                    "type": "string"
-                },
-                "role": {
-                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.Role"
-                },
-                "sessions": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.Session"
-                    }
-                },
-                "tables": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.Object"
-                    }
-                },
-                "token": {
-                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.Token"
-                },
-                "user": {
-                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.User"
-                },
-                "user_data": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
-                },
-                "user_found": {
-                    "type": "boolean"
-                },
-                "user_id": {
-                    "type": "string"
-                },
-                "user_id_auth": {
                     "type": "string"
                 }
             }
@@ -29205,6 +28012,35 @@ const docTemplate = `{
                 }
             }
         },
+        "ucode_ucode_go_api_gateway_genproto_company_service.CreateFareRequest": {
+            "type": "object",
+            "properties": {
+                "currency": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "disactivate_day": {
+                    "type": "integer"
+                },
+                "fare_item_prices": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.FareItemPrice"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "trial_days": {
+                    "type": "integer"
+                }
+            }
+        },
         "ucode_ucode_go_api_gateway_genproto_company_service.CreateProjectRequest": {
             "type": "object",
             "properties": {
@@ -29398,6 +28234,67 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.Resource"
                     }
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.Fare": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "currency": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "disactivate_day": {
+                    "type": "integer"
+                },
+                "fare_item_prices": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.FareItemPrice"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "trial_days": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.FareItemPrice": {
+            "type": "object",
+            "properties": {
+                "fare_id": {
+                    "type": "string"
+                },
+                "fare_item_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "over_limit_price": {
+                    "type": "number"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "value": {
+                    "type": "string"
                 }
             }
         },
@@ -29600,6 +28497,17 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.VariableResource"
                     }
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.Github": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
                 }
             }
         },
@@ -30106,6 +29014,9 @@ const docTemplate = `{
         "ucode_ucode_go_api_gateway_genproto_company_service.Settings": {
             "type": "object",
             "properties": {
+                "github": {
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.Github"
+                },
                 "sms": {
                     "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.SmsCredentials"
                 },
@@ -30484,55 +29395,6 @@ const docTemplate = `{
                 }
             }
         },
-        "ucode_ucode_go_api_gateway_genproto_object_builder_service.ClientPlatform": {
-            "type": "object",
-            "properties": {
-                "guid": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "project_id": {
-                    "type": "string"
-                },
-                "subdomain": {
-                    "type": "string"
-                }
-            }
-        },
-        "ucode_ucode_go_api_gateway_genproto_object_builder_service.ClientType": {
-            "type": "object",
-            "properties": {
-                "confirm_by": {
-                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.ConfirmStrategies"
-                },
-                "default_page": {
-                    "type": "string"
-                },
-                "guid": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "project_id": {
-                    "type": "string"
-                },
-                "self_recover": {
-                    "type": "boolean"
-                },
-                "self_register": {
-                    "type": "boolean"
-                },
-                "tables": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.TableClientType"
-                    }
-                }
-            }
-        },
         "ucode_ucode_go_api_gateway_genproto_object_builder_service.CommitInfo": {
             "type": "object",
             "properties": {
@@ -30556,41 +29418,6 @@ const docTemplate = `{
                 }
             }
         },
-        "ucode_ucode_go_api_gateway_genproto_object_builder_service.CommonMessage": {
-            "type": "object",
-            "properties": {
-                "blocked_builder": {
-                    "type": "boolean"
-                },
-                "blocked_login_table": {
-                    "type": "boolean"
-                },
-                "company_project_id": {
-                    "type": "string"
-                },
-                "custom_message": {
-                    "type": "string"
-                },
-                "data": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
-                },
-                "env_id": {
-                    "type": "string"
-                },
-                "is_cached": {
-                    "type": "boolean"
-                },
-                "project_id": {
-                    "type": "string"
-                },
-                "table_slug": {
-                    "type": "string"
-                },
-                "version_id": {
-                    "type": "string"
-                }
-            }
-        },
         "ucode_ucode_go_api_gateway_genproto_object_builder_service.Condition": {
             "type": "object",
             "properties": {
@@ -30601,19 +29428,6 @@ const docTemplate = `{
                     }
                 }
             }
-        },
-        "ucode_ucode_go_api_gateway_genproto_object_builder_service.ConfirmStrategies": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2
-            ],
-            "x-enum-varnames": [
-                "ConfirmStrategies_UNDECIDED",
-                "ConfirmStrategies_PHONE",
-                "ConfirmStrategies_EMAIL"
-            ]
         },
         "ucode_ucode_go_api_gateway_genproto_object_builder_service.CreateCustomErrorMessage": {
             "type": "object",
@@ -31682,17 +30496,6 @@ const docTemplate = `{
                 }
             }
         },
-        "ucode_ucode_go_api_gateway_genproto_object_builder_service.GetTableHistoryResponse": {
-            "type": "object",
-            "properties": {
-                "items": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.TableHistory"
-                    }
-                }
-            }
-        },
         "ucode_ucode_go_api_gateway_genproto_object_builder_service.GetVersionListResponse": {
             "type": "object",
             "properties": {
@@ -31707,56 +30510,6 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.Version"
                     }
-                }
-            }
-        },
-        "ucode_ucode_go_api_gateway_genproto_object_builder_service.GlobalPermission": {
-            "type": "object",
-            "properties": {
-                "api_keys_button": {
-                    "type": "boolean"
-                },
-                "chat": {
-                    "type": "boolean"
-                },
-                "environment_button": {
-                    "type": "boolean"
-                },
-                "environments_button": {
-                    "type": "boolean"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "menu_button": {
-                    "type": "boolean"
-                },
-                "menu_setting_button": {
-                    "type": "boolean"
-                },
-                "profile_settings_button": {
-                    "type": "boolean"
-                },
-                "project_button": {
-                    "type": "boolean"
-                },
-                "project_settings_button": {
-                    "type": "boolean"
-                },
-                "projects_button": {
-                    "type": "boolean"
-                },
-                "redirects_button": {
-                    "type": "boolean"
-                },
-                "settings_button": {
-                    "type": "boolean"
-                },
-                "sms_button": {
-                    "type": "boolean"
-                },
-                "version_button": {
-                    "type": "boolean"
                 }
             }
         },
@@ -32111,53 +30864,6 @@ const docTemplate = `{
                 }
             }
         },
-        "ucode_ucode_go_api_gateway_genproto_object_builder_service.MenuRequest": {
-            "type": "object",
-            "properties": {
-                "attributes": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
-                },
-                "data": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
-                },
-                "icon": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "label": {
-                    "type": "string"
-                },
-                "layout_id": {
-                    "type": "string"
-                },
-                "microfrontend_id": {
-                    "type": "string"
-                },
-                "parent_id": {
-                    "type": "string"
-                },
-                "pivot_template_id": {
-                    "type": "string"
-                },
-                "project_id": {
-                    "type": "string"
-                },
-                "report_setting_id": {
-                    "type": "string"
-                },
-                "table_id": {
-                    "type": "string"
-                },
-                "type": {
-                    "type": "string"
-                },
-                "webpage_id": {
-                    "type": "string"
-                }
-            }
-        },
         "ucode_ucode_go_api_gateway_genproto_object_builder_service.MenuSettings": {
             "type": "object",
             "properties": {
@@ -32241,7 +30947,34 @@ const docTemplate = `{
         "ucode_ucode_go_api_gateway_genproto_object_builder_service.Permission": {
             "type": "object",
             "properties": {
+                "add_field": {
+                    "type": "string"
+                },
+                "add_filter": {
+                    "type": "string"
+                },
+                "automation": {
+                    "type": "string"
+                },
+                "columns": {
+                    "type": "string"
+                },
                 "delete": {
+                    "type": "string"
+                },
+                "delete_all": {
+                    "type": "string"
+                },
+                "excel_menu": {
+                    "type": "string"
+                },
+                "field_filter": {
+                    "type": "string"
+                },
+                "fix_column": {
+                    "type": "string"
+                },
+                "group": {
                     "type": "string"
                 },
                 "guid": {
@@ -32253,10 +30986,31 @@ const docTemplate = `{
                 "is_public": {
                     "type": "boolean"
                 },
+                "language_btn": {
+                    "type": "string"
+                },
+                "pdf_action": {
+                    "type": "string"
+                },
                 "read": {
                     "type": "string"
                 },
+                "search_button": {
+                    "type": "string"
+                },
+                "settings": {
+                    "type": "string"
+                },
+                "share_modal": {
+                    "type": "string"
+                },
+                "tab_group": {
+                    "type": "string"
+                },
                 "update": {
+                    "type": "string"
+                },
+                "view_create": {
                     "type": "string"
                 },
                 "write": {
@@ -32293,80 +31047,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "field_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "ucode_ucode_go_api_gateway_genproto_object_builder_service.RecordPermission": {
-            "type": "object",
-            "properties": {
-                "add_field": {
-                    "type": "string"
-                },
-                "add_filter": {
-                    "type": "string"
-                },
-                "automation": {
-                    "type": "string"
-                },
-                "client_type_id": {
-                    "type": "string"
-                },
-                "columns": {
-                    "type": "string"
-                },
-                "delete": {
-                    "type": "string"
-                },
-                "excel_menu": {
-                    "type": "string"
-                },
-                "field_filter": {
-                    "type": "string"
-                },
-                "fix_column": {
-                    "type": "string"
-                },
-                "group": {
-                    "type": "string"
-                },
-                "guid": {
-                    "type": "string"
-                },
-                "language_btn": {
-                    "type": "string"
-                },
-                "pdf_action": {
-                    "type": "string"
-                },
-                "read": {
-                    "type": "string"
-                },
-                "role_id": {
-                    "type": "string"
-                },
-                "search_button": {
-                    "type": "string"
-                },
-                "settings": {
-                    "type": "string"
-                },
-                "share_modal": {
-                    "type": "string"
-                },
-                "tab_group": {
-                    "type": "string"
-                },
-                "table_slug": {
-                    "type": "string"
-                },
-                "update": {
-                    "type": "string"
-                },
-                "view_create": {
-                    "type": "string"
-                },
-                "write": {
                     "type": "string"
                 }
             }
@@ -32471,26 +31151,6 @@ const docTemplate = `{
                     }
                 },
                 "view_type": {
-                    "type": "string"
-                }
-            }
-        },
-        "ucode_ucode_go_api_gateway_genproto_object_builder_service.Role": {
-            "type": "object",
-            "properties": {
-                "client_platform_id": {
-                    "type": "string"
-                },
-                "client_type_id": {
-                    "type": "string"
-                },
-                "guid": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "project_id": {
                     "type": "string"
                 }
             }
@@ -32728,29 +31388,6 @@ const docTemplate = `{
                 }
             }
         },
-        "ucode_ucode_go_api_gateway_genproto_object_builder_service.TableClientType": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
-                },
-                "icon": {
-                    "type": "string"
-                },
-                "label": {
-                    "type": "string"
-                },
-                "slug": {
-                    "type": "string"
-                },
-                "view_label": {
-                    "type": "string"
-                },
-                "view_slug": {
-                    "type": "string"
-                }
-            }
-        },
         "ucode_ucode_go_api_gateway_genproto_object_builder_service.TableFolder": {
             "type": "object",
             "properties": {
@@ -32806,32 +31443,6 @@ const docTemplate = `{
                 },
                 "subtitle_field_slug": {
                     "type": "string"
-                }
-            }
-        },
-        "ucode_ucode_go_api_gateway_genproto_object_builder_service.TableHistory": {
-            "type": "object",
-            "properties": {
-                "author_id": {
-                    "type": "string"
-                },
-                "commit_type": {
-                    "type": "string"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "version_ids": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
                 }
             }
         },
@@ -33287,53 +31898,6 @@ const docTemplate = `{
                     }
                 },
                 "project_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "ucode_ucode_go_api_gateway_genproto_object_builder_service.V2LoginResponse": {
-            "type": "object",
-            "properties": {
-                "addational_table": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
-                },
-                "app_permissions": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.RecordPermission"
-                    }
-                },
-                "client_platform": {
-                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.ClientPlatform"
-                },
-                "client_type": {
-                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.ClientType"
-                },
-                "global_permission": {
-                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.GlobalPermission"
-                },
-                "login_table_slug": {
-                    "type": "string"
-                },
-                "permissions": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.RecordPermission"
-                    }
-                },
-                "role": {
-                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.Role"
-                },
-                "user_data": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
-                },
-                "user_found": {
-                    "type": "boolean"
-                },
-                "user_id": {
-                    "type": "string"
-                },
-                "user_id_auth": {
                     "type": "string"
                 }
             }
