@@ -231,6 +231,15 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1.DELETE("/files/:id", h.V1.DeleteFile)
 		v1.GET("/files", h.V1.GetAllFiles)
 		v1.POST("/files/word-template", h.V1.WordTemplate)
+
+		fare := v1.Group("/fare")
+		{
+			fare.POST("", h.V1.CreateFare)
+			fare.GET("", h.V1.GetAllFares)
+			fare.GET("/:id", h.V1.GetFare)
+			fare.PUT("", h.V1.UpdateFare)
+			fare.DELETE("/:id", h.V1.DeleteFare)
+		}
 	}
 	v2 := r.Group("/v2")
 	v2.Use(h.V1.AuthMiddleware(cfg))

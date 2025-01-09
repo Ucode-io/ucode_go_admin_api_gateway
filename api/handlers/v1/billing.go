@@ -1,4 +1,4 @@
-package v2
+package v1
 
 import (
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -21,7 +21,7 @@ import (
 // @Success 201 {object} status_http.Response{data=pb.Fare} "Fare data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *HandlerV2) CreateFare(c *gin.Context) {
+func (h *HandlerV1) CreateFare(c *gin.Context) {
 	var request pb.CreateFareRequest
 
 	if err := c.ShouldBindJSON(&request); err != nil {
@@ -52,7 +52,7 @@ func (h *HandlerV2) CreateFare(c *gin.Context) {
 // @Success 201 {object} status_http.Response{data=pb.Fare} "Fares data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *HandlerV2) ListFares(c *gin.Context) {
+func (h *HandlerV1) GetAllFares(c *gin.Context) {
 	offset, err := h.getOffsetParam(c)
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
@@ -90,7 +90,7 @@ func (h *HandlerV2) ListFares(c *gin.Context) {
 // @Success 201 {object} status_http.Response{data=pb.Fare} "Fare data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *HandlerV2) GetFare(c *gin.Context) {
+func (h *HandlerV1) GetFare(c *gin.Context) {
 	var id = c.Param("id")
 
 	if util.IsValidUUID(id) {
@@ -120,7 +120,7 @@ func (h *HandlerV2) GetFare(c *gin.Context) {
 // @Success 201 {object} status_http.Response{data=pb.Fare} "Fare data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *HandlerV2) UpdateFare(c *gin.Context) {
+func (h *HandlerV1) UpdateFare(c *gin.Context) {
 	var request pb.Fare
 
 	if err := c.ShouldBindJSON(&request); err != nil {
@@ -150,7 +150,7 @@ func (h *HandlerV2) UpdateFare(c *gin.Context) {
 // @Success 201 {object} status_http.Response{data=string} "Fare deleted"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *HandlerV2) DeleteFare(c *gin.Context) {
+func (h *HandlerV1) DeleteFare(c *gin.Context) {
 	var id = c.Param("id")
 
 	if util.IsValidUUID(id) {
