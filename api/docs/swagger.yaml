@@ -15367,7 +15367,7 @@ paths:
             - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/ucode_ucode_go_api_gateway_api_models.Field'
+                  $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.Field'
               type: object
         "400":
           description: Bad Request
