@@ -850,6 +850,8 @@ definitions:
         type: string
       parent_id:
         type: string
+      type:
+        type: string
     type: object
   ucode_ucode_go_api_gateway_genproto_company_service.CreateFareRequest:
     properties:
@@ -1055,6 +1057,8 @@ definitions:
       name:
         type: string
       parent_id:
+        type: string
+      type:
         type: string
     type: object
   ucode_ucode_go_api_gateway_genproto_company_service.FareItemPrice:

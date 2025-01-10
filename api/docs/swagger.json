@@ -28764,6 +28764,9 @@
                 },
                 "parent_id": {
                     "type": "string"
+                },
+                "type": {
+                    "type": "string"
                 }
             }
         },
@@ -29078,6 +29081,9 @@
                     "type": "string"
                 },
                 "parent_id": {
+                    "type": "string"
+                },
+                "type": {
                     "type": "string"
                 }
             }

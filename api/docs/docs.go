@@ -28776,6 +28776,9 @@ const docTemplate = `{
                 },
                 "parent_id": {
                     "type": "string"
+                },
+                "type": {
+                    "type": "string"
                 }
             }
         },
@@ -29090,6 +29093,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "parent_id": {
+                    "type": "string"
+                },
+                "type": {
                     "type": "string"
                 }
             }

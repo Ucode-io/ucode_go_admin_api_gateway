@@ -47,6 +47,7 @@ message FareItem {
     string name = 2;
     string parent_id = 3;
     string info = 4;
+    string type = 5; 
 }
 
 // FareItemPrice
@@ -112,6 +113,7 @@ message CreateFareItemRequest {
     string name = 1;
     string parent_id = 2;
     string info = 3;
+    string type = 4;
 }
 
 message ListFareItemsResponse {
