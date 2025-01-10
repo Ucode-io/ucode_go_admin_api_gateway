@@ -231,7 +231,33 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1.DELETE("/files/:id", h.V1.DeleteFile)
 		v1.GET("/files", h.V1.GetAllFiles)
 		v1.POST("/files/word-template", h.V1.WordTemplate)
+
+		fare := v1.Group("/fare")
+		{
+			fare.POST("", h.V1.CreateFare)
+			fare.GET("", h.V1.GetAllFares)
+			fare.GET("/:id", h.V1.GetFare)
+			fare.PUT("", h.V1.UpdateFare)
+			fare.DELETE("/:id", h.V1.DeleteFare)
+
+			fareItem := fare.Group("/item")
+			{
+				fareItem.POST("", h.V1.CreateFareItem)
+				fareItem.GET("", h.V1.GetAllFareItem)
+				fareItem.GET("/:id", h.V1.GetFareItem)
+				fareItem.PUT("", h.V1.UpdateFareItem)
+				fareItem.DELETE("/:id", h.V1.DeleteFareItem)
+			}
+		}
+		transaction := v1.Group("/transaction")
+		{
+			transaction.POST("", h.V1.CreateTransaction)
+			transaction.GET("", h.V1.GetAllTransactions)
+			transaction.GET("/:id", h.V1.GetTransaction)
+			transaction.PUT("", h.V1.UpdateTransaction)
+		}
 	}
+
 	v2 := r.Group("/v2")
 	v2.Use(h.V1.AuthMiddleware(cfg))
 	{
@@ -555,6 +581,13 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		proxyFunction.GET("", h.V1.GetAllNewFunctions)
 		proxyFunction.PUT("", h.V1.UpdateNewFunction)
 		proxyFunction.DELETE("/:function_id", h.V1.DeleteNewFunction)
+
+	}
+
+	proxyGrafana := proxyApi.Group("/grafana")
+	{
+		proxyGrafana.POST("/loki", h.V2.GetGrafanaFunctionLogs)
+		proxyGrafana.GET("/function", h.V2.GetGrafanaFunctionList)
 
 	}
 
