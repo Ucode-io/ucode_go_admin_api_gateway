@@ -29402,6 +29402,9 @@ const docTemplate = `{
                 "currency": {
                     "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.Currency"
                 },
+                "fare_id": {
+                    "type": "string"
+                },
                 "k8s_namespace": {
                     "type": "string"
                 },

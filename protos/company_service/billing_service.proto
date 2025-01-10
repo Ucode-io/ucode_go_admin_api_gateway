@@ -25,6 +25,19 @@ service BillingService {
     rpc GetTransaction(PrimaryKey) returns (Transaction);
     rpc ListTransactions(ListRequest) returns (ListTransactionsResponse);
     rpc UpdateTransaction(Transaction) returns (Transaction);
+
+    // Compare
+    rpc CompareFunction(CompareFunctionRequest) returns (CompareFunctionResponse);
+}
+
+message CompareFunctionRequest {
+    string fare_id = 1;
+    string type = 2;
+    int32 count = 3;
+}
+
+message CompareFunctionResponse {
+    bool has_access = 1;
 }
 
 // Fare
