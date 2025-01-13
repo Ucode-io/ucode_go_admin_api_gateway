@@ -357,6 +357,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1Admin.DELETE("/redirect-url/:redirect-url-id", h.V1.DeleteRedirectUrl)
 		v1Admin.PUT("/redirect-url/re-order", h.V1.UpdateRedirectUrlOrder)
 	}
+
 	v2Admin := r.Group("/v2")
 	v2Admin.Use(h.V1.AdminAuthMiddleware())
 	v2Admin.POST("/table-folder", h.V1.CreateTableFolder)
@@ -502,23 +503,23 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		// fields
 		v2Fields := v2Version.Group("/fields")
 		{
-			v2Fields.GET("/:collection", h.V2.GetAllFields)
 			v2Fields.POST("/:collection", h.V2.CreateField)
+			v2Fields.GET("/:collection", h.V2.GetAllFields)
+			v2Fields.GET("/:collection/with-relations", h.V2.FieldsWithPermissions)
 			v2Fields.PUT("/:collection", h.V2.UpdateField)
 			v2Fields.PUT("/:collection/update-search", h.V2.UpdateSearch)
 			v2Fields.DELETE("/:collection/:id", h.V2.DeleteField)
-			v2Fields.GET("/:collection/with-relations", h.V2.FieldsWithPermissions)
 		}
 
 		// relations
 		v2Relations := v2Version.Group("/relations")
 		{
+			v2Relations.POST("/:collection", h.V2.CreateRelation)
 			v2Relations.GET("/:collection/:id", h.V2.GetByIdRelation)
 			v2Relations.GET("/:collection", h.V2.GetAllRelations)
-			v2Relations.POST("/:collection", h.V2.CreateRelation)
+			v2Relations.GET("/:collection/cascading", h.V2.GetRelationCascading)
 			v2Relations.PUT("/:collection", h.V2.UpdateRelation)
 			v2Relations.DELETE("/:collection/:id", h.V2.DeleteRelation)
-			v2Relations.GET("/:collection/cascading", h.V2.GetRelationCascading)
 		}
 
 		// utils

@@ -850,6 +850,8 @@ definitions:
         type: string
       parent_id:
         type: string
+      type:
+        type: string
     type: object
   ucode_ucode_go_api_gateway_genproto_company_service.CreateFareRequest:
     properties:
@@ -1056,6 +1058,8 @@ definitions:
         type: string
       parent_id:
         type: string
+      type:
+        type: string
     type: object
   ucode_ucode_go_api_gateway_genproto_company_service.FareItemPrice:
     properties:
@@ -1252,6 +1256,8 @@ definitions:
         type: string
       currency:
         $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.Currency'
+      fare_id:
+        type: string
       k8s_namespace:
         type: string
       language:
@@ -15367,7 +15373,7 @@ paths:
             - $ref: '#/definitions/ucode_ucode_go_api_gateway_api_status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/ucode_ucode_go_api_gateway_api_models.Field'
+                  $ref: '#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.Field'
               type: object
         "400":
           description: Bad Request
