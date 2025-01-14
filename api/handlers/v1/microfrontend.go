@@ -4,10 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-const (
-	MICROFE = "MICRO_FRONTEND"
-)
-
 // CreateMicroFrontEnd godoc
 // @Security ApiKeyAuth
 // @ID create_micro_frontend
