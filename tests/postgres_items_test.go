@@ -191,7 +191,6 @@ package tests
 // // 		Page:        1,
 // // 		DisableFaas: true,
 // // 	})
-// // 	fmt.Println("ERROR", err)
 // // 	assert.NoError(t, err)
 
 // // 	assert.NotEmpty(t, getProductResp.Data.Data.Response, "Switch Does not work")
@@ -283,8 +282,6 @@ package tests
 // // 	})
 // // 	assert.NoError(t, err)
 // // 	var response GetListApiResponse
-// // 	fmt.Println("GGGG", string(body))
-// // 	// fmt.Println(response.Data.Data.Response)
 // // 	err = json.Unmarshal(body, &response)
 // // 	assert.NoError(t, err)
 
