@@ -26,13 +26,15 @@ const (
 	BillingService_UpdateFare_FullMethodName        = "/company_service.BillingService/UpdateFare"
 	BillingService_DeleteFare_FullMethodName        = "/company_service.BillingService/DeleteFare"
 	BillingService_CreateFareItem_FullMethodName    = "/company_service.BillingService/CreateFareItem"
+	BillingService_GetFareItem_FullMethodName       = "/company_service.BillingService/GetFareItem"
 	BillingService_ListFareItems_FullMethodName     = "/company_service.BillingService/ListFareItems"
 	BillingService_UpdateFareItem_FullMethodName    = "/company_service.BillingService/UpdateFareItem"
 	BillingService_DeleteFareItem_FullMethodName    = "/company_service.BillingService/DeleteFareItem"
 	BillingService_CreateTransaction_FullMethodName = "/company_service.BillingService/CreateTransaction"
 	BillingService_GetTransaction_FullMethodName    = "/company_service.BillingService/GetTransaction"
 	BillingService_ListTransactions_FullMethodName  = "/company_service.BillingService/ListTransactions"
-	BillingService_DeleteTransaction_FullMethodName = "/company_service.BillingService/DeleteTransaction"
+	BillingService_UpdateTransaction_FullMethodName = "/company_service.BillingService/UpdateTransaction"
+	BillingService_CompareFunction_FullMethodName   = "/company_service.BillingService/CompareFunction"
 )
 
 // BillingServiceClient is the client API for BillingService service.
@@ -47,6 +49,7 @@ type BillingServiceClient interface {
 	DeleteFare(ctx context.Context, in *PrimaryKey, opts ...grpc.CallOption) (*empty.Empty, error)
 	// Fare Item Methods
 	CreateFareItem(ctx context.Context, in *CreateFareItemRequest, opts ...grpc.CallOption) (*FareItem, error)
+	GetFareItem(ctx context.Context, in *PrimaryKey, opts ...grpc.CallOption) (*FareItem, error)
 	ListFareItems(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListFareItemsResponse, error)
 	UpdateFareItem(ctx context.Context, in *FareItem, opts ...grpc.CallOption) (*FareItem, error)
 	DeleteFareItem(ctx context.Context, in *PrimaryKey, opts ...grpc.CallOption) (*empty.Empty, error)
@@ -54,7 +57,9 @@ type BillingServiceClient interface {
 	CreateTransaction(ctx context.Context, in *CreateTransactionRequest, opts ...grpc.CallOption) (*Transaction, error)
 	GetTransaction(ctx context.Context, in *PrimaryKey, opts ...grpc.CallOption) (*Transaction, error)
 	ListTransactions(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListTransactionsResponse, error)
-	DeleteTransaction(ctx context.Context, in *PrimaryKey, opts ...grpc.CallOption) (*empty.Empty, error)
+	UpdateTransaction(ctx context.Context, in *Transaction, opts ...grpc.CallOption) (*Transaction, error)
+	// Compare
+	CompareFunction(ctx context.Context, in *CompareFunctionRequest, opts ...grpc.CallOption) (*CompareFunctionResponse, error)
 }
 
 type billingServiceClient struct {
@@ -125,6 +130,16 @@ func (c *billingServiceClient) CreateFareItem(ctx context.Context, in *CreateFar
 	return out, nil
 }
 
+func (c *billingServiceClient) GetFareItem(ctx context.Context, in *PrimaryKey, opts ...grpc.CallOption) (*FareItem, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(FareItem)
+	err := c.cc.Invoke(ctx, BillingService_GetFareItem_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *billingServiceClient) ListFareItems(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListFareItemsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ListFareItemsResponse)
@@ -185,10 +200,20 @@ func (c *billingServiceClient) ListTransactions(ctx context.Context, in *ListReq
 	return out, nil
 }
 
-func (c *billingServiceClient) DeleteTransaction(ctx context.Context, in *PrimaryKey, opts ...grpc.CallOption) (*empty.Empty, error) {
+func (c *billingServiceClient) UpdateTransaction(ctx context.Context, in *Transaction, opts ...grpc.CallOption) (*Transaction, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(empty.Empty)
-	err := c.cc.Invoke(ctx, BillingService_DeleteTransaction_FullMethodName, in, out, cOpts...)
+	out := new(Transaction)
+	err := c.cc.Invoke(ctx, BillingService_UpdateTransaction_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *billingServiceClient) CompareFunction(ctx context.Context, in *CompareFunctionRequest, opts ...grpc.CallOption) (*CompareFunctionResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CompareFunctionResponse)
+	err := c.cc.Invoke(ctx, BillingService_CompareFunction_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -207,6 +232,7 @@ type BillingServiceServer interface {
 	DeleteFare(context.Context, *PrimaryKey) (*empty.Empty, error)
 	// Fare Item Methods
 	CreateFareItem(context.Context, *CreateFareItemRequest) (*FareItem, error)
+	GetFareItem(context.Context, *PrimaryKey) (*FareItem, error)
 	ListFareItems(context.Context, *ListRequest) (*ListFareItemsResponse, error)
 	UpdateFareItem(context.Context, *FareItem) (*FareItem, error)
 	DeleteFareItem(context.Context, *PrimaryKey) (*empty.Empty, error)
@@ -214,7 +240,9 @@ type BillingServiceServer interface {
 	CreateTransaction(context.Context, *CreateTransactionRequest) (*Transaction, error)
 	GetTransaction(context.Context, *PrimaryKey) (*Transaction, error)
 	ListTransactions(context.Context, *ListRequest) (*ListTransactionsResponse, error)
-	DeleteTransaction(context.Context, *PrimaryKey) (*empty.Empty, error)
+	UpdateTransaction(context.Context, *Transaction) (*Transaction, error)
+	// Compare
+	CompareFunction(context.Context, *CompareFunctionRequest) (*CompareFunctionResponse, error)
 	mustEmbedUnimplementedBillingServiceServer()
 }
 
@@ -243,6 +271,9 @@ func (UnimplementedBillingServiceServer) DeleteFare(context.Context, *PrimaryKey
 func (UnimplementedBillingServiceServer) CreateFareItem(context.Context, *CreateFareItemRequest) (*FareItem, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateFareItem not implemented")
 }
+func (UnimplementedBillingServiceServer) GetFareItem(context.Context, *PrimaryKey) (*FareItem, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetFareItem not implemented")
+}
 func (UnimplementedBillingServiceServer) ListFareItems(context.Context, *ListRequest) (*ListFareItemsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListFareItems not implemented")
 }
@@ -261,8 +292,11 @@ func (UnimplementedBillingServiceServer) GetTransaction(context.Context, *Primar
 func (UnimplementedBillingServiceServer) ListTransactions(context.Context, *ListRequest) (*ListTransactionsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListTransactions not implemented")
 }
-func (UnimplementedBillingServiceServer) DeleteTransaction(context.Context, *PrimaryKey) (*empty.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteTransaction not implemented")
+func (UnimplementedBillingServiceServer) UpdateTransaction(context.Context, *Transaction) (*Transaction, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateTransaction not implemented")
+}
+func (UnimplementedBillingServiceServer) CompareFunction(context.Context, *CompareFunctionRequest) (*CompareFunctionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CompareFunction not implemented")
 }
 func (UnimplementedBillingServiceServer) mustEmbedUnimplementedBillingServiceServer() {}
 func (UnimplementedBillingServiceServer) testEmbeddedByValue()                        {}
@@ -393,6 +427,24 @@ func _BillingService_CreateFareItem_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _BillingService_GetFareItem_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PrimaryKey)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BillingServiceServer).GetFareItem(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BillingService_GetFareItem_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BillingServiceServer).GetFareItem(ctx, req.(*PrimaryKey))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _BillingService_ListFareItems_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ListRequest)
 	if err := dec(in); err != nil {
@@ -501,20 +553,38 @@ func _BillingService_ListTransactions_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
-func _BillingService_DeleteTransaction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(PrimaryKey)
+func _BillingService_UpdateTransaction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Transaction)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(BillingServiceServer).DeleteTransaction(ctx, in)
+		return srv.(BillingServiceServer).UpdateTransaction(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: BillingService_DeleteTransaction_FullMethodName,
+		FullMethod: BillingService_UpdateTransaction_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BillingServiceServer).DeleteTransaction(ctx, req.(*PrimaryKey))
+		return srv.(BillingServiceServer).UpdateTransaction(ctx, req.(*Transaction))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BillingService_CompareFunction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CompareFunctionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BillingServiceServer).CompareFunction(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BillingService_CompareFunction_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BillingServiceServer).CompareFunction(ctx, req.(*CompareFunctionRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -551,6 +621,10 @@ var BillingService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _BillingService_CreateFareItem_Handler,
 		},
 		{
+			MethodName: "GetFareItem",
+			Handler:    _BillingService_GetFareItem_Handler,
+		},
+		{
 			MethodName: "ListFareItems",
 			Handler:    _BillingService_ListFareItems_Handler,
 		},
@@ -575,8 +649,12 @@ var BillingService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _BillingService_ListTransactions_Handler,
 		},
 		{
-			MethodName: "DeleteTransaction",
-			Handler:    _BillingService_DeleteTransaction_Handler,
+			MethodName: "UpdateTransaction",
+			Handler:    _BillingService_UpdateTransaction_Handler,
+		},
+		{
+			MethodName: "CompareFunction",
+			Handler:    _BillingService_CompareFunction_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -1,8 +1,6 @@
 package v2
 
 import (
-	"context"
-	"errors"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
@@ -42,14 +40,12 @@ func (h *HandlerV2) GetRelationCascading(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err := errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -60,11 +56,7 @@ func (h *HandlerV2) GetRelationCascading(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -73,8 +65,7 @@ func (h *HandlerV2) GetRelationCascading(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Cascading().GetCascadings(
-			context.Background(),
-			&obs.GetCascadingRequest{
+			c.Request.Context(), &obs.GetCascadingRequest{
 				TableSlug: c.Param("collection"),
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -119,14 +110,12 @@ func (h *HandlerV2) GetByIdRelation(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err := errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -137,11 +126,7 @@ func (h *HandlerV2) GetByIdRelation(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -150,8 +135,7 @@ func (h *HandlerV2) GetByIdRelation(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Relation().GetByID(
-			context.Background(),
-			&obs.RelationPrimaryKey{
+			c.Request.Context(), &obs.RelationPrimaryKey{
 				Id:        relationId,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -164,8 +148,7 @@ func (h *HandlerV2) GetByIdRelation(c *gin.Context) {
 		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().Relation().GetByID(
-			context.Background(),
-			&nb.RelationPrimaryKey{
+			c.Request.Context(), &nb.RelationPrimaryKey{
 				Id:        relationId,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -201,8 +184,7 @@ func (h *HandlerV2) CreateRelation(c *gin.Context) {
 		goRelation nb.CreateRelationRequest
 	)
 
-	err = c.ShouldBindJSON(&relation)
-	if err != nil {
+	if err = c.ShouldBindJSON(&relation); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -215,16 +197,14 @@ func (h *HandlerV2) CreateRelation(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -235,11 +215,7 @@ func (h *HandlerV2) CreateRelation(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -265,8 +241,7 @@ func (h *HandlerV2) CreateRelation(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err := services.GetBuilderServiceByType(resource.NodeType).Relation().Create(
-			context.Background(),
-			&relation,
+			c.Request.Context(), &relation,
 		)
 		relation.Id = resp.Id
 		logReq.Request = &relation
@@ -279,14 +254,12 @@ func (h *HandlerV2) CreateRelation(c *gin.Context) {
 		}
 		go h.versionHistory(logReq)
 	case pb.ResourceType_POSTGRESQL:
-		err = helper.MarshalToStruct(&relation, &goRelation)
-		if err != nil {
+		if err = helper.MarshalToStruct(&relation, &goRelation); err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 		resp, err := services.GoObjectBuilderService().Relation().Create(
-			context.Background(),
-			&goRelation,
+			c.Request.Context(), &goRelation,
 		)
 		relation.Id = resp.GetId()
 		logReq.Request = &goRelation
@@ -316,9 +289,8 @@ func (h *HandlerV2) CreateRelation(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) GetAllRelations(c *gin.Context) {
-	var (
-		resp *obs.GetAllRelationsResponse
-	)
+	var resp *obs.GetAllRelationsResponse
+
 	offset, err := h.getOffsetParam(c)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
@@ -339,14 +311,12 @@ func (h *HandlerV2) GetAllRelations(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -357,11 +327,7 @@ func (h *HandlerV2) GetAllRelations(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -370,8 +336,7 @@ func (h *HandlerV2) GetAllRelations(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Relation().GetAll(
-			context.Background(),
-			&obs.GetAllRelationsRequest{
+			c.Request.Context(), &obs.GetAllRelationsRequest{
 				Limit:     int32(limit),
 				Offset:    int32(offset),
 				TableSlug: c.DefaultQuery("table_slug", ""),
@@ -388,8 +353,7 @@ func (h *HandlerV2) GetAllRelations(c *gin.Context) {
 		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().Relation().GetAll(
-			context.Background(),
-			&nb.GetAllRelationsRequest{
+			c.Request.Context(), &nb.GetAllRelationsRequest{
 				Limit:     int32(limit),
 				Offset:    int32(offset),
 				TableSlug: c.DefaultQuery("table_slug", ""),
@@ -429,8 +393,7 @@ func (h *HandlerV2) UpdateRelation(c *gin.Context) {
 		goRelation nb.UpdateRelationRequest
 	)
 
-	err := c.ShouldBindJSON(&relation)
-	if err != nil {
+	if err := c.ShouldBindJSON(&relation); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -443,16 +406,14 @@ func (h *HandlerV2) UpdateRelation(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -463,11 +424,7 @@ func (h *HandlerV2) UpdateRelation(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -481,37 +438,29 @@ func (h *HandlerV2) UpdateRelation(c *gin.Context) {
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: "RELATION",
 			ActionType:   "UPDATE RELATION",
-			// UsedEnvironments: map[string]bool{
-			// 	cast.ToString(environmentId): true,
-			// },
-			UserInfo:  cast.ToString(userId),
-			Request:   &relation,
-			TableSlug: c.Param("collection"),
+			UserInfo:     cast.ToString(userId),
+			Request:      &relation,
+			TableSlug:    c.Param("collection"),
 		}
 	)
-
-	defer func() {
-
-	}()
 
 	relation.ProjectId = resource.ResourceEnvironmentId
 	relation.EnvId = resource.EnvironmentId
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-
 		oldRelation, err = services.GetBuilderServiceByType(resource.NodeType).Relation().GetByID(
-			context.Background(),
-			&obs.RelationPrimaryKey{
+			c.Request.Context(), &obs.RelationPrimaryKey{
 				Id:        relation.Id,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
 		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Relation().Update(
-			context.Background(),
+			c.Request.Context(),
 			&relation,
 		)
 		logReq.Previous = oldRelation
@@ -526,15 +475,14 @@ func (h *HandlerV2) UpdateRelation(c *gin.Context) {
 
 		go h.versionHistory(logReq)
 	case pb.ResourceType_POSTGRESQL:
-
 		goOldRelation, err := services.GoObjectBuilderService().Relation().GetByID(
-			context.Background(),
-			&nb.RelationPrimaryKey{
+			c.Request.Context(), &nb.RelationPrimaryKey{
 				Id:        relation.Id,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
 		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 
@@ -546,7 +494,7 @@ func (h *HandlerV2) UpdateRelation(c *gin.Context) {
 		goRelation.ProjectId = resource.ResourceEnvironmentId
 
 		goResp, err := services.GoObjectBuilderService().Relation().Update(
-			context.Background(),
+			c.Request.Context(),
 			&goRelation,
 		)
 		logReq.Previous = goOldRelation
@@ -579,9 +527,9 @@ func (h *HandlerV2) UpdateRelation(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) DeleteRelation(c *gin.Context) {
 	var (
-		resp *emptypb.Empty
+		resp       *emptypb.Empty
+		relationID = c.Param("id")
 	)
-	relationID := c.Param("id")
 
 	if !util.IsValidUUID(relationID) {
 		h.handleResponse(c, status_http.InvalidArgument, "relation id is an invalid uuid")
@@ -596,16 +544,14 @@ func (h *HandlerV2) DeleteRelation(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err := errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -616,11 +562,7 @@ func (h *HandlerV2) DeleteRelation(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -633,30 +575,15 @@ func (h *HandlerV2) DeleteRelation(c *gin.Context) {
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: "RELATION",
 			ActionType:   "DELETE RELATION",
-			// UsedEnvironments: map[string]bool{
-			// 	cast.ToString(environmentId): true,
-			// },
-			UserInfo:  cast.ToString(userId),
-			TableSlug: c.Param("collection"),
+			UserInfo:     cast.ToString(userId),
+			TableSlug:    c.Param("collection"),
 		}
 	)
-
-	// oldRelation, err = services.GetBuilderServiceByType(resource.NodeType).Relation().GetByID(
-	// 	context.Background(),
-	// 	&obs.RelationPrimaryKey{
-	// 		Id:        relationID,
-	// 		ProjectId: resource.ResourceEnvironmentId,
-	// 	},
-	// )
-	// if err != nil {
-	// 	return
-	// }
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Relation().Delete(
-			context.Background(),
-			&obs.RelationPrimaryKey{
+			c.Request.Context(), &obs.RelationPrimaryKey{
 				Id:        relationID,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -670,8 +597,7 @@ func (h *HandlerV2) DeleteRelation(c *gin.Context) {
 		go h.versionHistory(logReq)
 	case pb.ResourceType_POSTGRESQL:
 		resp, err = services.GoObjectBuilderService().Relation().Delete(
-			context.Background(),
-			&nb.RelationPrimaryKey{
+			c.Request.Context(), &nb.RelationPrimaryKey{
 				Id:        relationID,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -711,14 +637,12 @@ func (h *HandlerV2) GetRelationCascaders(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err := errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -729,11 +653,7 @@ func (h *HandlerV2) GetRelationCascaders(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -742,8 +662,7 @@ func (h *HandlerV2) GetRelationCascaders(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Cascading().GetCascadings(
-			context.Background(),
-			&obs.GetCascadingRequest{
+			c.Request.Context(), &obs.GetCascadingRequest{
 				TableSlug: c.Param("table_slug"),
 				ProjectId: resource.ResourceEnvironmentId,
 			},

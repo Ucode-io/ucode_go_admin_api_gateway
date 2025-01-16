@@ -147,6 +147,17 @@ definitions:
       user_id:
         type: string
     type: object
+  company_service.CreateFareItemRequest:
+    properties:
+      info:
+        type: string
+      name:
+        type: string
+      parent_id:
+        type: string
+      type:
+        type: string
+    type: object
   company_service.CreateFareRequest:
     properties:
       currency:
@@ -212,6 +223,29 @@ definitions:
         $ref: '#/definitions/company_service.ResourceType'
       service_type:
         $ref: '#/definitions/company_service.ServiceType'
+    type: object
+  company_service.CreateTransactionRequest:
+    properties:
+      acceptor_id:
+        type: string
+      amount:
+        type: number
+      comment:
+        type: string
+      creator_id:
+        type: string
+      creator_type:
+        type: string
+      currency_id:
+        type: string
+      fare_id:
+        type: string
+      payment_status:
+        type: string
+      project_id:
+        type: string
+      transaction_type:
+        type: string
     type: object
   company_service.CreateVariableResourceRequest:
     properties:
@@ -319,10 +353,25 @@ definitions:
       updated_at:
         type: string
     type: object
+  company_service.FareItem:
+    properties:
+      id:
+        type: string
+      info:
+        type: string
+      name:
+        type: string
+      parent_id:
+        type: string
+      type:
+        type: string
+    type: object
   company_service.FareItemPrice:
     properties:
       fare_id:
         type: string
+      fare_item:
+        $ref: '#/definitions/company_service.FareItem'
       fare_item_id:
         type: string
       id:
@@ -494,6 +543,8 @@ definitions:
         type: string
       currency:
         $ref: '#/definitions/company_service.Currency'
+      fare_id:
+        type: string
       k8s_namespace:
         type: string
       language:
@@ -809,6 +860,35 @@ definitions:
       name:
         type: string
       text:
+        type: string
+    type: object
+  company_service.Transaction:
+    properties:
+      accepted_at:
+        type: string
+      acceptor_id:
+        type: string
+      amount:
+        type: number
+      comment:
+        type: string
+      created_at:
+        type: string
+      creator_id:
+        type: string
+      creator_type:
+        type: string
+      currency_id:
+        type: string
+      fare_id:
+        type: string
+      id:
+        type: string
+      payment_status:
+        type: string
+      project_id:
+        type: string
+      transaction_type:
         type: string
     type: object
   company_service.UpdateOrderRedirectUrlReq:
@@ -6700,7 +6780,7 @@ paths:
       produces:
       - application/json
       responses:
-        "201":
+        "200":
           description: Fares data
           schema:
             allOf:
@@ -6794,7 +6874,7 @@ paths:
       produces:
       - application/json
       responses:
-        "201":
+        "200":
           description: Fare data
           schema:
             allOf:
@@ -6841,15 +6921,8 @@ paths:
       produces:
       - application/json
       responses:
-        "201":
-          description: Fare deleted
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
+        "204":
+          description: No Content
         "400":
           description: Bad Request
           schema:
@@ -6887,7 +6960,7 @@ paths:
       produces:
       - application/json
       responses:
-        "201":
+        "200":
           description: Fare data
           schema:
             allOf:
@@ -6917,6 +6990,236 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get fare
+      tags:
+      - Billing
+  /v1/fare/item:
+    get:
+      consumes:
+      - application/json
+      description: List fare items
+      operationId: list-fare-items
+      parameters:
+      - description: limit
+        in: query
+        name: limit
+        type: string
+      - description: offset
+        in: query
+        name: offset
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: FareItems data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.FareItem'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: List fare items
+      tags:
+      - Billing
+    post:
+      consumes:
+      - application/json
+      description: Create fare item
+      operationId: create-fare-item
+      parameters:
+      - description: FareItemCreateRequest
+        in: body
+        name: billing
+        required: true
+        schema:
+          $ref: '#/definitions/company_service.CreateFareItemRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: FareItem data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.FareItem'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create fare item
+      tags:
+      - Billing
+    put:
+      consumes:
+      - application/json
+      description: Update fare item
+      operationId: update-fare-item
+      parameters:
+      - description: FareItem
+        in: body
+        name: FareItem
+        required: true
+        schema:
+          $ref: '#/definitions/company_service.FareItem'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: FareItem data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.FareItem'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update fare item
+      tags:
+      - Billing
+  /v1/fare/item/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete fare item
+      operationId: delete-fare-item
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete fare item
+      tags:
+      - Billing
+    get:
+      consumes:
+      - application/json
+      description: Get fare item
+      operationId: get-fare-item
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: FareItem data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.FareItem'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get fare item
       tags:
       - Billing
   /v1/field-permission/{role_id}/{table_slug}:
@@ -11959,6 +12262,197 @@ paths:
       summary: Get Commits template
       tags:
       - Template
+  /v1/transaction:
+    get:
+      consumes:
+      - application/json
+      description: List transactions
+      operationId: list-transactions
+      parameters:
+      - description: limit
+        in: query
+        name: limit
+        type: string
+      - description: offset
+        in: query
+        name: offset
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Transactions data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.Transaction'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: List transactions
+      tags:
+      - Billing
+    post:
+      consumes:
+      - application/json
+      description: Create transaction
+      operationId: create-transaction
+      parameters:
+      - description: TransactionCreateRequest
+        in: body
+        name: transaction
+        required: true
+        schema:
+          $ref: '#/definitions/company_service.CreateTransactionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Transaction data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.Transaction'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create transaction
+      tags:
+      - Billing
+    put:
+      consumes:
+      - application/json
+      description: Update transaction
+      operationId: update-transaction
+      parameters:
+      - description: Transaction
+        in: body
+        name: transaction
+        required: true
+        schema:
+          $ref: '#/definitions/company_service.Transaction'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Transaction data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.Transaction'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update transaction
+      tags:
+      - Billing
+  /v1/transaction/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get transaction
+      operationId: get-transaction
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Transaction data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.Transaction'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get transaction
+      tags:
+      - Billing
   /v1/update-view-order:
     put:
       consumes:
@@ -14150,7 +14644,7 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/ucode_ucode_go_api_gateway_api_models.Field'
+                  $ref: '#/definitions/object_builder_service.Field'
               type: object
         "400":
           description: Bad Request

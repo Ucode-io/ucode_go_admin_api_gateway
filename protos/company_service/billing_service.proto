@@ -15,6 +15,7 @@ service BillingService {
 
     // Fare Item Methods
     rpc CreateFareItem(CreateFareItemRequest) returns (FareItem);
+    rpc GetFareItem(PrimaryKey) returns (FareItem);
     rpc ListFareItems(ListRequest) returns (ListFareItemsResponse);
     rpc UpdateFareItem(FareItem) returns (FareItem);
     rpc DeleteFareItem(PrimaryKey) returns (google.protobuf.Empty);
@@ -23,26 +24,20 @@ service BillingService {
     rpc CreateTransaction(CreateTransactionRequest) returns (Transaction);
     rpc GetTransaction(PrimaryKey) returns (Transaction);
     rpc ListTransactions(ListRequest) returns (ListTransactionsResponse);
-    rpc DeleteTransaction(PrimaryKey) returns (google.protobuf.Empty);
+    rpc UpdateTransaction(Transaction) returns (Transaction);
+
+    // Compare
+    rpc CompareFunction(CompareFunctionRequest) returns (CompareFunctionResponse);
 }
 
-
-// Enums
-enum PaymentStatus {
-    PENDING = 0;
-    COMPLETED = 1;
-    FAILED = 2;
+message CompareFunctionRequest {
+    string fare_id = 1;
+    string type = 2;
+    int32 count = 3;
 }
 
-enum TransactionType {
-    DEPOSIT = 0;
-    WITHDRAWAL = 1;
-    REFUND = 2;
-}
-
-enum CreatorType {
-    USER = 0;
-    SYSTEM = 1;
+message CompareFunctionResponse {
+    bool has_access = 1;
 }
 
 // Fare
@@ -65,6 +60,7 @@ message FareItem {
     string name = 2;
     string parent_id = 3;
     string info = 4;
+    string type = 5; 
 }
 
 // FareItemPrice
@@ -75,6 +71,7 @@ message FareItemPrice {
     string value = 4;
     double price = 5;
     double over_limit_price = 6;
+    FareItem fare_item = 7;
 }
 
 // Transaction
@@ -83,10 +80,10 @@ message Transaction {
     string project_id = 2;
     string creator_id = 3;
     string comment = 4;
-    PaymentStatus payment_status = 5;
+    string payment_status = 5;
     double amount = 6;
-    TransactionType transaction_type = 7;
-    CreatorType creator_type = 8;
+    string transaction_type = 7;
+    string creator_type = 8;
     string currency_id = 9;
     string acceptor_id = 10;
     string fare_id = 11;
@@ -115,6 +112,7 @@ message ListRequest {
     int32 limit = 1;
     int32 offset = 2;
     string search = 3;
+    string project_id = 4;
 }
 
 message ListFareResponse {
@@ -128,6 +126,7 @@ message CreateFareItemRequest {
     string name = 1;
     string parent_id = 2;
     string info = 3;
+    string type = 4;
 }
 
 message ListFareItemsResponse {
@@ -140,13 +139,13 @@ message CreateTransactionRequest {
     string project_id = 1;
     string creator_id = 2;
     string comment = 3;
-    PaymentStatus payment_status = 4;
+    string payment_status = 4;
     double amount = 5;
-    TransactionType transaction_type = 6;
-    CreatorType creator_type = 7;
+    string transaction_type = 6;
+    string creator_type = 7;
     string currency_id = 8;
     string acceptor_id = 9;
-    string transaction_fare_id = 10;
+    string fare_id = 10;
 }
 
 message ListTransactionsResponse {

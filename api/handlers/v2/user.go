@@ -1,8 +1,6 @@
 package v2
 
 import (
-	"context"
-	"errors"
 	"reflect"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
@@ -45,14 +43,12 @@ func (h *HandlerV2) GetMenuSettingByUserID(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err := errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -63,11 +59,7 @@ func (h *HandlerV2) GetMenuSettingByUserID(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -82,7 +74,7 @@ func (h *HandlerV2) GetMenuSettingByUserID(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err := services.GetBuilderServiceByType(resource.NodeType).Menu().GetByIDMenuSettings(
-			context.Background(),
+			c.Request.Context(),
 			&obs.MenuSettingPrimaryKey{
 				Id:         ID,
 				ProjectId:  resource.ResourceEnvironmentId,
@@ -106,8 +98,7 @@ func (h *HandlerV2) GetMenuSettingByUserID(c *gin.Context) {
 		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
 		pgResp, err := services.GoObjectBuilderService().Menu().GetByIDMenuSettings(
-			context.Background(),
-			&nb.MenuSettingPrimaryKey{
+			c.Request.Context(), &nb.MenuSettingPrimaryKey{
 				Id:         ID,
 				ProjectId:  resource.ResourceEnvironmentId,
 				TemplateId: templateId,

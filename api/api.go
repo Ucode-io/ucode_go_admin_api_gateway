@@ -239,8 +239,25 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			fare.GET("/:id", h.V1.GetFare)
 			fare.PUT("", h.V1.UpdateFare)
 			fare.DELETE("/:id", h.V1.DeleteFare)
+
+			fareItem := fare.Group("/item")
+			{
+				fareItem.POST("", h.V1.CreateFareItem)
+				fareItem.GET("", h.V1.GetAllFareItem)
+				fareItem.GET("/:id", h.V1.GetFareItem)
+				fareItem.PUT("", h.V1.UpdateFareItem)
+				fareItem.DELETE("/:id", h.V1.DeleteFareItem)
+			}
+		}
+		transaction := v1.Group("/transaction")
+		{
+			transaction.POST("", h.V1.CreateTransaction)
+			transaction.GET("", h.V1.GetAllTransactions)
+			transaction.GET("/:id", h.V1.GetTransaction)
+			transaction.PUT("", h.V1.UpdateTransaction)
 		}
 	}
+
 	v2 := r.Group("/v2")
 	v2.Use(h.V1.AuthMiddleware(cfg))
 	{
@@ -340,6 +357,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1Admin.DELETE("/redirect-url/:redirect-url-id", h.V1.DeleteRedirectUrl)
 		v1Admin.PUT("/redirect-url/re-order", h.V1.UpdateRedirectUrlOrder)
 	}
+
 	v2Admin := r.Group("/v2")
 	v2Admin.Use(h.V1.AdminAuthMiddleware())
 	v2Admin.POST("/table-folder", h.V1.CreateTableFolder)
@@ -364,15 +382,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			projectResource.GET("", h.V1.GetListProjectResourceList)
 			projectResource.GET("/:id", h.V1.GetSingleProjectResource)
 			projectResource.DELETE("/:id", h.V1.DeleteProjectResource)
-		}
-
-		functions := v2Admin.Group("functions")
-		{
-			functions.POST("/micro-frontend", h.V1.CreateMicroFrontEnd)
-			functions.GET("/micro-frontend/:micro-frontend-id", h.V1.GetMicroFrontEndByID)
-			functions.GET("/micro-frontend", h.V1.GetAllMicroFrontEnd)
-			functions.PUT("/micro-frontend", h.V1.UpdateMicroFrontEnd)
-			functions.DELETE("/micro-frontend/:micro-frontend-id", h.V1.DeleteMicroFrontEnd)
 		}
 	}
 
@@ -485,23 +494,23 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		// fields
 		v2Fields := v2Version.Group("/fields")
 		{
-			v2Fields.GET("/:collection", h.V2.GetAllFields)
 			v2Fields.POST("/:collection", h.V2.CreateField)
+			v2Fields.GET("/:collection", h.V2.GetAllFields)
+			v2Fields.GET("/:collection/with-relations", h.V2.FieldsWithPermissions)
 			v2Fields.PUT("/:collection", h.V2.UpdateField)
 			v2Fields.PUT("/:collection/update-search", h.V2.UpdateSearch)
 			v2Fields.DELETE("/:collection/:id", h.V2.DeleteField)
-			v2Fields.GET("/:collection/with-relations", h.V2.FieldsWithPermissions)
 		}
 
 		// relations
 		v2Relations := v2Version.Group("/relations")
 		{
+			v2Relations.POST("/:collection", h.V2.CreateRelation)
 			v2Relations.GET("/:collection/:id", h.V2.GetByIdRelation)
 			v2Relations.GET("/:collection", h.V2.GetAllRelations)
-			v2Relations.POST("/:collection", h.V2.CreateRelation)
+			v2Relations.GET("/:collection/cascading", h.V2.GetRelationCascading)
 			v2Relations.PUT("/:collection", h.V2.UpdateRelation)
 			v2Relations.DELETE("/:collection/:id", h.V2.DeleteRelation)
-			v2Relations.GET("/:collection/cascading", h.V2.GetRelationCascading)
 		}
 
 		// utils
@@ -567,11 +576,19 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 	}
 
+	proxyFunctions := proxyApi.Group("functions")
+	{
+		proxyFunctions.POST("/micro-frontend", h.V1.CreateMicroFrontEnd)
+		proxyFunctions.GET("/micro-frontend/:micro-frontend-id", h.V1.GetMicroFrontEndByID)
+		proxyFunctions.GET("/micro-frontend", h.V1.GetAllMicroFrontEnd)
+		proxyFunctions.PUT("/micro-frontend", h.V1.UpdateMicroFrontEnd)
+		proxyFunctions.DELETE("/micro-frontend/:micro-frontend-id", h.V1.DeleteMicroFrontEnd)
+	}
+
 	proxyGrafana := proxyApi.Group("/grafana")
 	{
 		proxyGrafana.POST("/loki", h.V2.GetGrafanaFunctionLogs)
 		proxyGrafana.GET("/function", h.V2.GetGrafanaFunctionList)
-
 	}
 
 	{
