@@ -1158,7 +1158,7 @@ func (h *HandlerV2) DeleteMenuSettings(c *gin.Context) {
 // CreateMenuTemplate godoc
 // @Security ApiKeyAuth
 // @ID create_menu_template
-// @Router /v1/menu-template [POST]
+// @Router /v2/menu-template [POST]
 // @Summary Create menu template
 // @Description Create menu template
 // @Tags Menu template
@@ -1239,7 +1239,7 @@ func (h *HandlerV2) CreateMenuTemplate(c *gin.Context) {
 // GetAllMenuTemplate godoc
 // @Security ApiKeyAuth
 // @ID get_all_menu_template
-// @Router /v1/menu-template [GET]
+// @Router /v2/menu-template [GET]
 // @Summary Get all menu template
 // @Description Get all menu template
 // @Tags Menu template
@@ -1352,7 +1352,7 @@ func (h *HandlerV2) GetAllMenuTemplates(c *gin.Context) {
 // GetMenuTemplateByID godoc
 // @Security ApiKeyAuth
 // @ID get_menu_template_by_id
-// @Router /v1/menu-template/{id} [GET]
+// @Router /v2/menu-template/{id} [GET]
 // @Summary Get menu template by id
 // @Description Get menu template by id
 // @Tags Menu template
@@ -1458,7 +1458,7 @@ func (h *HandlerV2) GetMenuTemplateById(id string, services services.ServiceMana
 // UpdateMenuTemplate godoc
 // @Security ApiKeyAuth
 // @ID update_menu_template
-// @Router /v1/menu-template [PUT]
+// @Router /v2/menu-template [PUT]
 // @Summary Update menu template
 // @Description Update menu template
 // @Tags Menu template
@@ -1538,7 +1538,7 @@ func (h *HandlerV2) UpdateMenuTemplate(c *gin.Context) {
 // DeleteMenuTemplate godoc
 // @Security ApiKeyAuth
 // @ID delete_menu_template
-// @Router /v1/menu-template/{id} [DELETE]
+// @Router /v2/menu-template/{id} [DELETE]
 // @Summary Delete menu template
 // @Description Delete menu template
 // @Tags Menu template

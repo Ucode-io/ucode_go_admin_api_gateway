@@ -304,7 +304,7 @@ func (h *HandlerV2) CreateRelation(c *gin.Context) {
 // GetAllRelations godoc
 // @Security ApiKeyAuth
 // @ID get_all_relations
-// @Router /v1/relation [GET]
+// @Router /v2/relation [GET]
 // @Security ApiKeyAuth
 // @Summary Get all relations
 // @Description Get all relations
@@ -689,7 +689,7 @@ func (h *HandlerV2) DeleteRelation(c *gin.Context) {
 // GetRelationCascaders godoc
 // @Security ApiKeyAuth
 // @ID get_relation_cascaders
-// @Router /v1/get-relation-cascading/{table_slug} [GET]
+// @Router /v2/get-relation-cascading/{table_slug} [GET]
 // @Security ApiKeyAuth
 // @Summary Get all relations
 // @Description Get all relations

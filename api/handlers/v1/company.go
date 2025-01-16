@@ -117,19 +117,6 @@ func (h *HandlerV1) GetCompanyByID(c *gin.Context) {
 	h.handleResponse(c, status_http.OK, resp)
 }
 
-// GetCompanyList godoc
-// @Security ApiKeyAuth
-// @ID get_company_list
-// @Router /v1/company [GET]
-// @Summary Get all companies
-// @Description Get all companies
-// @Tags Company
-// @Accept json
-// @Produce json
-// @Param filters query pb.GetProjectListRequest true "filters"
-// @Success 200 {object} status_http.Response{data=pb.GetComanyListResponse} "Company data"
-// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetCompanyList(c *gin.Context) {
 
 	userProjects, err := h.authService.User().GetUserProjects(context.Background(), &auth_service.UserPrimaryKey{
@@ -163,19 +150,6 @@ func (h *HandlerV1) GetCompanyList(c *gin.Context) {
 	h.handleResponse(c, status_http.OK, resp)
 }
 
-// GetCompanyListWithProjects godoc
-// @Security ApiKeyAuth
-// @ID get_company_list
-// @Router /v1/company [GET]
-// @Summary Get all companies
-// @Description Get all companies
-// @Tags Company
-// WithProjects@Accept json
-// @Produce json
-// @Param filters query pb.GetListWithProjectsRequest true "filters"
-// @Success 200 {object} status_http.Response{data=pb.GetListWithProjectsResponse} "Company datWithProjectsa"
-// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetCompanyListWithProjects(c *gin.Context) {
 
 	limit, err := h.getLimitParam(c)

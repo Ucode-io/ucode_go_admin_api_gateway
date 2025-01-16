@@ -10,7 +10,7 @@ import (
 // InvokeFunctionByPath godoc
 // @Security ApiKeyAuth
 // @Param function-path path string true "function-path"
-// @ID invoke_function_by_path
+// @ID v2_invoke_function_by_path
 // @Router /v2/invoke_function/{function-path} [POST]
 // @Summary Invoke Function By Path
 // @Description Invoke Function By Path
