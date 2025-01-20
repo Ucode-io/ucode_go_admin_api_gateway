@@ -2,7 +2,6 @@ package models
 
 import (
 	"google.golang.org/protobuf/types/known/structpb"
-	tmp "ucode/ucode_go_api_gateway/genproto/web_page_service"
 )
 
 type CreateFolderReqModel struct {
@@ -36,11 +35,10 @@ type UpdateWebPageReqModel struct {
 }
 
 type RevertWebPageReqModel struct {
-	VersionId   string          `json:"version_id,omitempty"`
-	Id          string          `json:"id,omitempty"`
-	OldCommitId string          `json:"old_commit_id,omitempty"`
-	ProjectId   string          `json:"project_id,omitempty"`
-	CommitInfo  *tmp.CommitInfo `json:"commit_info,omitempty"`
+	VersionId   string `json:"version_id,omitempty"`
+	Id          string `json:"id,omitempty"`
+	OldCommitId string `json:"old_commit_id,omitempty"`
+	ProjectId   string `json:"project_id,omitempty"`
 }
 
 type ManyVersionsModel struct {

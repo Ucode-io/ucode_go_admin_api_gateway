@@ -34,29 +34,14 @@ type Config struct {
 	TemplateServiceHost string
 	TemplateGRPCPort    string
 
-	PosServiceHost string
-	PosGRPCPort    string
-
-	AnalyticsServiceHost string
-	AnalyticsGRPCPort    string
-
 	SmsServiceHost string
 	SmsGRPCPort    string
-
-	VersioningServiceHost string
-	VersioningGRPCPort    string
 
 	AuthServiceHost string
 	AuthGRPCPort    string
 
 	CompanyServiceHost string
 	CompanyServicePort string
-
-	IntegrationServiceHost string
-	IntegrationGRPCPort    string
-
-	ApiReferenceServiceHost string
-	ApiReferenceServicePort string
 
 	ChatServiceGrpcHost string
 	ChatServiceGrpcPort string
@@ -94,9 +79,6 @@ type Config struct {
 
 	NotificationServiceHost string
 	NotificationGRPCPort    string
-
-	PostgresBuilderServiceHost string
-	PostgresBuilderServicePort string
 
 	GoObjectBuilderServiceHost string
 	GoObjectBuilderGRPCPort    string
@@ -254,23 +236,8 @@ func Load() Config {
 	config.TemplateServiceHost = cast.ToString(GetOrReturnDefaultValue("TEMPLATE_SERVICE_HOST", ""))
 	config.TemplateGRPCPort = cast.ToString(GetOrReturnDefaultValue("TEMPLATE_GRPC_PORT", ":2012"))
 
-	config.IntegrationServiceHost = cast.ToString(GetOrReturnDefaultValue("INTEGRATION_SERVICE_HOST", ""))
-	config.IntegrationGRPCPort = cast.ToString(GetOrReturnDefaultValue("INTEGRATION_GRPC_PORT", ":4001"))
-
-	config.PosServiceHost = cast.ToString(GetOrReturnDefaultValue("POS_SERVICE_HOST", ""))
-	config.PosGRPCPort = cast.ToString(GetOrReturnDefaultValue("POS_SERVICE_GRPC_PORT", ":2011"))
-
-	config.AnalyticsServiceHost = cast.ToString(GetOrReturnDefaultValue("ANALYTICS_SERVICE_HOST", ""))
-	config.AnalyticsGRPCPort = cast.ToString(GetOrReturnDefaultValue("ANALYTICS_GRPC_PORT", ":2010"))
-
 	config.SmsServiceHost = cast.ToString(GetOrReturnDefaultValue("SMS_SERVICE_HOST", ""))
 	config.SmsGRPCPort = cast.ToString(GetOrReturnDefaultValue("SMS_GRPC_PORT", ":2008"))
-
-	config.VersioningServiceHost = cast.ToString(GetOrReturnDefaultValue("VERSIONING_SERVICE_HOST", ""))
-	config.VersioningGRPCPort = cast.ToString(GetOrReturnDefaultValue("VERSIONING_GRPC_PORT", ":2009"))
-
-	config.ApiReferenceServiceHost = cast.ToString(GetOrReturnDefaultValue("API_REF_SERVICE_HOST", ""))
-	config.ApiReferenceServicePort = cast.ToString(GetOrReturnDefaultValue("API_REF_GRPC_PORT", ":2007"))
 
 	config.ConvertTemplateServiceGrpcHost = cast.ToString(GetOrReturnDefaultValue("CONVERT_TEMPLATE_SERVICE_HOST", ""))
 	config.ConvertTemplateServiceGrpcPort = cast.ToString(GetOrReturnDefaultValue("CONVERT_TEMPLATE_GRPC_PORT", ":2006"))
@@ -293,9 +260,6 @@ func Load() Config {
 	config.ChatServiceGrpcPort = cast.ToString(GetOrReturnDefaultValue("CHAT_GRPC_PORT", ":2112"))
 	config.NotificationServiceHost = cast.ToString(GetOrReturnDefaultValue("NOTIFICATION_SERVICE_HOST", ""))
 	config.NotificationGRPCPort = cast.ToString(GetOrReturnDefaultValue("NOTIFICATION_GRPC_PORT", ":2001"))
-
-	config.PostgresBuilderServiceHost = cast.ToString(GetOrReturnDefaultValue("NODE_POSTGRES_SERVICE_HOST", ""))
-	config.PostgresBuilderServicePort = cast.ToString(GetOrReturnDefaultValue("NODE_POSTGRES_SERVICE_PORT", ":2002"))
 
 	config.GetRequestRedisHost = cast.ToString(GetOrReturnDefaultValue("GET_REQUEST_REDIS_HOST", ""))
 	config.GetRequestRedisPort = cast.ToString(GetOrReturnDefaultValue("GET_REQUEST_REDIS_PORT", ""))
