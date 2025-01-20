@@ -153,18 +153,12 @@ type BaseConfig struct {
 	DefaultOffset string
 	DefaultLimit  string
 
-	CLIENT_HOST                   string
-	SUPERADMIN_HOST               string
-	GitlabIntegrationToken        string
-	GitlabIntegrationURL          string
-	GitlabGroupId                 int
-	GitlabProjectId               int
-	GitlabProjectIdMicroFEReact   int
-	GitlabProjectIdMicroFEAngular int
-	GitlabProjectIdMicroFEVue     int
-	PathToClone                   string
-	SecretKey                     string
-	PlatformType                  string
+	CLIENT_HOST     string
+	SUPERADMIN_HOST string
+
+	PathToClone  string
+	SecretKey    string
+	PlatformType string
 
 	UcodeNamespace string
 	JaegerHostPort string
@@ -219,13 +213,6 @@ func BaseLoad() BaseConfig {
 	config.DefaultOffset = cast.ToString(GetOrReturnDefaultValue("DEFAULT_OFFSET", "0"))
 	config.DefaultLimit = "60"
 
-	config.GitlabIntegrationURL = cast.ToString(GetOrReturnDefaultValue("GITLAB_URL", "https://gitlab.udevs.io"))
-	config.GitlabIntegrationToken = cast.ToString(GetOrReturnDefaultValue("GITLAB_ACCESS_TOKEN", "glpat-dmsZBpMm-zxkUep9wMxr"))
-	config.GitlabGroupId = cast.ToInt(GetOrReturnDefaultValue("GITLAB_GROUP_ID", 5466))
-	config.GitlabProjectId = cast.ToInt(GetOrReturnDefaultValue("GITLAB_PROJECT_ID", 4622))
-	config.GitlabProjectIdMicroFEReact = cast.ToInt(GetOrReturnDefaultValue("GITLAB_PROJECT_ID_MICROFEReact", 1993))
-	config.GitlabProjectIdMicroFEAngular = cast.ToInt(GetOrReturnDefaultValue("GITLAB_PROJECT_ID_MICROFEAngular", 0))
-	config.GitlabProjectIdMicroFEVue = cast.ToInt(GetOrReturnDefaultValue("GITLAB_PROJECT_ID_MICROFEVue", 0))
 	config.PathToClone = cast.ToString(GetOrReturnDefaultValue("CLONE_PATH", "./app"))
 
 	config.UcodeNamespace = "u-code"

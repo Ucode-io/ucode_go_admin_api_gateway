@@ -34,14 +34,13 @@ import (
 func (h *HandlerV2) CreateMenu(c *gin.Context) {
 	var menu models.CreateMenuRequest
 
-	err := c.ShouldBindJSON(&menu)
-	if err != nil {
+	if err := c.ShouldBindJSON(&menu); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
 	if menu.Attributes == nil {
-		menu.Attributes = make(map[string]interface{})
+		menu.Attributes = make(map[string]any)
 	}
 
 	attributes, err := helper.ConvertMapToStruct(menu.Attributes)
@@ -58,16 +57,14 @@ func (h *HandlerV2) CreateMenu(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -78,11 +75,7 @@ func (h *HandlerV2) CreateMenu(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -116,10 +109,8 @@ func (h *HandlerV2) CreateMenu(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err := services.GetBuilderServiceByType(resource.NodeType).Menu().Create(
-			context.Background(),
-			menuRequest,
+			c.Request.Context(), menuRequest,
 		)
-
 		if err != nil {
 			logReq.Response = err.Error()
 			h.handleResponse(c, status_http.GRPCError, err.Error())
@@ -129,16 +120,17 @@ func (h *HandlerV2) CreateMenu(c *gin.Context) {
 			h.handleResponse(c, status_http.Created, resp)
 			go h.versionHistory(logReq)
 		}
+
 	case pb.ResourceType_POSTGRESQL:
-		newReq := nb.CreateMenuRequest{}
-		err := helper.MarshalToStruct(&menuRequest, &newReq)
-		if err != nil {
+		var newReq = nb.CreateMenuRequest{}
+
+		if err := helper.MarshalToStruct(&menuRequest, &newReq); err != nil {
 			logReq.Response = err.Error()
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 		}
+
 		pgResp, err := services.GoObjectBuilderService().Menu().Create(
-			context.Background(),
-			&newReq,
+			c.Request.Context(), &newReq,
 		)
 		if err != nil {
 			logReq.Response = err.Error()
@@ -166,7 +158,7 @@ func (h *HandlerV2) CreateMenu(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) GetMenuByID(c *gin.Context) {
-	menuID := c.Param("id")
+	var menuID = c.Param("id")
 
 	if !util.IsValidUUID(menuID) {
 		h.handleResponse(c, status_http.InvalidArgument, "menu id is an invalid uuid")
@@ -181,14 +173,12 @@ func (h *HandlerV2) GetMenuByID(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err := errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -199,11 +189,7 @@ func (h *HandlerV2) GetMenuByID(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -212,8 +198,7 @@ func (h *HandlerV2) GetMenuByID(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err := services.GetBuilderServiceByType(resource.NodeType).Menu().GetByID(
-			context.Background(),
-			&obs.MenuPrimaryKey{
+			c.Request.Context(), &obs.MenuPrimaryKey{
 				Id:        menuID,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -225,8 +210,7 @@ func (h *HandlerV2) GetMenuByID(c *gin.Context) {
 		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
 		pgResp, err := services.GoObjectBuilderService().Menu().GetByID(
-			context.Background(),
-			&nb.MenuPrimaryKey{
+			c.Request.Context(), &nb.MenuPrimaryKey{
 				Id:        menuID,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -255,7 +239,6 @@ func (h *HandlerV2) GetMenuByID(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) GetAllMenus(c *gin.Context) {
 	offset, err := h.getOffsetParam(c)
-
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
@@ -269,14 +252,12 @@ func (h *HandlerV2) GetAllMenus(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.InvalidArgument, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -286,14 +267,11 @@ func (h *HandlerV2) GetAllMenus(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
 	authInfo, _ := h.GetAuthInfo(c)
 	limit := 100
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -302,8 +280,7 @@ func (h *HandlerV2) GetAllMenus(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err := services.GetBuilderServiceByType(resource.NodeType).Menu().GetAll(
-			context.Background(),
-			&obs.GetAllMenusRequest{
+			c.Request.Context(), &obs.GetAllMenusRequest{
 				Limit:     int32(limit),
 				Offset:    int32(offset),
 				Search:    c.DefaultQuery("search", ""),
@@ -320,8 +297,7 @@ func (h *HandlerV2) GetAllMenus(c *gin.Context) {
 		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().Menu().GetAll(
-			context.Background(),
-			&nb.GetAllMenusRequest{
+			c.Request.Context(), &nb.GetAllMenusRequest{
 				Limit:     int32(limit),
 				Offset:    int32(offset),
 				Search:    c.DefaultQuery("search", ""),
@@ -358,8 +334,7 @@ func (h *HandlerV2) UpdateMenu(c *gin.Context) {
 		resp *obs.Menu
 	)
 
-	err := c.ShouldBindJSON(&menu)
-	if err != nil {
+	if err := c.ShouldBindJSON(&menu); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -382,16 +357,14 @@ func (h *HandlerV2) UpdateMenu(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.InvalidArgument, "error getting environment id | not valid")
 		return
 	}
 
 	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -402,11 +375,7 @@ func (h *HandlerV2) UpdateMenu(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -428,26 +397,23 @@ func (h *HandlerV2) UpdateMenu(c *gin.Context) {
 			IsVisible:       menu.IsVisible,
 			WikiId:          menu.WikiId,
 		}
+
 		logReq = &models.CreateVersionHistoryRequest{
 			Services:     services,
 			NodeType:     resource.NodeType,
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: "MENU",
 			ActionType:   "UPDATE MENU",
-			// UsedEnvironments: map[string]bool{
-			// 	cast.ToString(environmentId): true,
-			// },
-			UserInfo:  cast.ToString(userId),
-			Request:   &requestMenu,
-			TableSlug: "Menu",
+			UserInfo:     cast.ToString(userId),
+			Request:      &requestMenu,
+			TableSlug:    "Menu",
 		}
 	)
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		oldMenu, err := services.GetBuilderServiceByType(resource.NodeType).Menu().GetByID(
-			context.Background(),
-			&obs.MenuPrimaryKey{
+			c.Request.Context(), &obs.MenuPrimaryKey{
 				Id:        menu.Id,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -458,8 +424,7 @@ func (h *HandlerV2) UpdateMenu(c *gin.Context) {
 
 		logReq.Previous = oldMenu
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Menu().Update(
-			context.Background(),
-			requestMenu,
+			c.Request.Context(), requestMenu,
 		)
 		if err != nil {
 			logReq.Response = err.Error()
@@ -471,16 +436,15 @@ func (h *HandlerV2) UpdateMenu(c *gin.Context) {
 		}
 		go h.versionHistory(logReq)
 	case pb.ResourceType_POSTGRESQL:
-		newReq := &nb.Menu{}
-		err = helper.MarshalToStruct(&requestMenu, &newReq)
-		if err != nil {
+		var newReq = &nb.Menu{}
+
+		if err = helper.MarshalToStruct(&requestMenu, &newReq); err != nil {
 			h.handleResponse(c, status_http.InternalServerError, err.Error())
 			return
 		}
 
 		resp, err := services.GoObjectBuilderService().Menu().Update(
-			context.Background(),
-			newReq,
+			c.Request.Context(), newReq,
 		)
 		if err != nil {
 			logReq.Response = err.Error()
@@ -523,16 +487,14 @@ func (h *HandlerV2) DeleteMenu(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err := errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.InvalidArgument, "error getting environment id | not valid")
 		return
 	}
 
 	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -543,11 +505,7 @@ func (h *HandlerV2) DeleteMenu(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -560,19 +518,15 @@ func (h *HandlerV2) DeleteMenu(c *gin.Context) {
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: "MENU",
 			ActionType:   "DELETE MENU",
-			// UsedEnvironments: map[string]bool{
-			// 	cast.ToString(environmentId): true,
-			// },
-			UserInfo:  cast.ToString(userId),
-			TableSlug: "Menu",
+			UserInfo:     cast.ToString(userId),
+			TableSlug:    "Menu",
 		}
 	)
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		oldMenu, err := services.GetBuilderServiceByType(resource.NodeType).Menu().GetByID(
-			context.Background(),
-			&obs.MenuPrimaryKey{
+			c.Request.Context(), &obs.MenuPrimaryKey{
 				Id:        menuID,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -582,8 +536,7 @@ func (h *HandlerV2) DeleteMenu(c *gin.Context) {
 		}
 
 		resp, err := services.GetBuilderServiceByType(resource.NodeType).Menu().Delete(
-			context.Background(),
-			&obs.MenuPrimaryKey{
+			c.Request.Context(), &obs.MenuPrimaryKey{
 				Id:        menuID,
 				ProjectId: resource.ResourceEnvironmentId,
 				EnvId:     resource.EnvironmentId,
@@ -600,7 +553,6 @@ func (h *HandlerV2) DeleteMenu(c *gin.Context) {
 
 		h.handleResponse(c, status_http.NoContent, resp)
 	case pb.ResourceType_POSTGRESQL:
-
 		oldMenu, err := services.GoObjectBuilderService().Menu().GetByID(context.Background(), &nb.MenuPrimaryKey{
 			Id:        menuID,
 			ProjectId: resource.ResourceEnvironmentId,
@@ -610,8 +562,7 @@ func (h *HandlerV2) DeleteMenu(c *gin.Context) {
 		}
 
 		resp, err := services.GoObjectBuilderService().Menu().Delete(
-			context.Background(),
-			&nb.MenuPrimaryKey{
+			c.Request.Context(), &nb.MenuPrimaryKey{
 				Id:        menuID,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -647,8 +598,8 @@ func (h *HandlerV2) UpdateMenuOrder(c *gin.Context) {
 		resp  *emptypb.Empty
 		menus obs.UpdateMenuOrderRequest
 	)
-	err := c.ShouldBindJSON(&menus)
-	if err != nil {
+
+	if err := c.ShouldBindJSON(&menus); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -661,14 +612,12 @@ func (h *HandlerV2) UpdateMenuOrder(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -679,11 +628,7 @@ func (h *HandlerV2) UpdateMenuOrder(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -692,8 +637,7 @@ func (h *HandlerV2) UpdateMenuOrder(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Menu().UpdateMenuOrder(
-			context.Background(),
-			&obs.UpdateMenuOrderRequest{
+			c.Request.Context(), &obs.UpdateMenuOrderRequest{
 				Menus:     menus.GetMenus(),
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -704,16 +648,15 @@ func (h *HandlerV2) UpdateMenuOrder(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		pgMenus := nb.UpdateMenuOrderRequest{}
-		err = helper.MarshalToStruct(&menus, &pgMenus)
-		if err != nil {
+		var pgMenus = nb.UpdateMenuOrderRequest{}
+
+		if err = helper.MarshalToStruct(&menus, &pgMenus); err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 
 		resp, err = services.GoObjectBuilderService().Menu().UpdateMenuOrder(
-			context.Background(),
-			&nb.UpdateMenuOrderRequest{
+			c.Request.Context(), &nb.UpdateMenuOrderRequest{
 				Menus:     pgMenus.GetMenus(),
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -748,8 +691,7 @@ func (h *HandlerV2) CreateMenuSettings(c *gin.Context) {
 		resp *obs.MenuSettings
 	)
 
-	err := c.ShouldBindJSON(&menu)
-	if err != nil {
+	if err := c.ShouldBindJSON(&menu); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -762,14 +704,12 @@ func (h *HandlerV2) CreateMenuSettings(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.InvalidArgument, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -780,11 +720,7 @@ func (h *HandlerV2) CreateMenuSettings(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -795,8 +731,7 @@ func (h *HandlerV2) CreateMenuSettings(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Menu().CreateMenuSettings(
-			context.Background(),
-			&menu,
+			c.Request.Context(), &menu,
 		)
 
 		if err != nil {
@@ -825,10 +760,9 @@ func (h *HandlerV2) CreateMenuSettings(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) GetAllMenuSettings(c *gin.Context) {
+	var resp *obs.GetAllMenuSettingsResponse
+
 	offset, err := h.getOffsetParam(c)
-	var (
-		resp *obs.GetAllMenuSettingsResponse
-	)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
@@ -848,14 +782,12 @@ func (h *HandlerV2) GetAllMenuSettings(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.InvalidArgument, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -866,11 +798,7 @@ func (h *HandlerV2) GetAllMenuSettings(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -879,8 +807,7 @@ func (h *HandlerV2) GetAllMenuSettings(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Menu().GetAllMenuSettings(
-			context.Background(),
-			&obs.GetAllMenuSettingsRequest{
+			c.Request.Context(), &obs.GetAllMenuSettingsRequest{
 				Limit:     int32(limit),
 				Offset:    int32(offset),
 				ProjectId: resource.ResourceEnvironmentId,
@@ -893,6 +820,7 @@ func (h *HandlerV2) GetAllMenuSettings(c *gin.Context) {
 	case pb.ResourceType_POSTGRESQL:
 		// Does Not Implemented
 	}
+
 	h.handleResponse(c, status_http.OK, resp)
 }
 
@@ -911,15 +839,16 @@ func (h *HandlerV2) GetAllMenuSettings(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) GetMenuSettingByID(c *gin.Context) {
-	ID := c.Param("id")
 	var (
-		resp *obs.MenuSettings
+		ID          = c.Param("id")
+		template_id = c.Query("template_id")
+		resp        *obs.MenuSettings
 	)
+
 	if !util.IsValidUUID(ID) {
 		h.handleResponse(c, status_http.InvalidArgument, "menu id is an invalid uuid")
 		return
 	}
-	template_id := c.Query("template_id")
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -929,14 +858,12 @@ func (h *HandlerV2) GetMenuSettingByID(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err := errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -947,11 +874,7 @@ func (h *HandlerV2) GetMenuSettingByID(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -960,8 +883,7 @@ func (h *HandlerV2) GetMenuSettingByID(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Menu().GetByIDMenuSettings(
-			context.Background(),
-			&obs.MenuSettingPrimaryKey{
+			c.Request.Context(), &obs.MenuSettingPrimaryKey{
 				Id:         ID,
 				ProjectId:  resource.ResourceEnvironmentId,
 				TemplateId: template_id,
@@ -985,10 +907,6 @@ func (h *HandlerV2) GetMenuSettingByID(c *gin.Context) {
 	}
 
 	h.handleResponse(c, status_http.OK, resp)
-}
-
-func IsEmptyStruct2(s interface{}) bool {
-	return reflect.DeepEqual(s, reflect.Zero(reflect.TypeOf(s)).Interface())
 }
 
 // UpdateMenuSettings godoc
@@ -1158,7 +1076,7 @@ func (h *HandlerV2) DeleteMenuSettings(c *gin.Context) {
 // CreateMenuTemplate godoc
 // @Security ApiKeyAuth
 // @ID create_menu_template
-// @Router /v1/menu-template [POST]
+// @Router /v2/menu-template [POST]
 // @Summary Create menu template
 // @Description Create menu template
 // @Tags Menu template
@@ -1239,7 +1157,7 @@ func (h *HandlerV2) CreateMenuTemplate(c *gin.Context) {
 // GetAllMenuTemplate godoc
 // @Security ApiKeyAuth
 // @ID get_all_menu_template
-// @Router /v1/menu-template [GET]
+// @Router /v2/menu-template [GET]
 // @Summary Get all menu template
 // @Description Get all menu template
 // @Tags Menu template
@@ -1352,7 +1270,7 @@ func (h *HandlerV2) GetAllMenuTemplates(c *gin.Context) {
 // GetMenuTemplateByID godoc
 // @Security ApiKeyAuth
 // @ID get_menu_template_by_id
-// @Router /v1/menu-template/{id} [GET]
+// @Router /v2/menu-template/{id} [GET]
 // @Summary Get menu template by id
 // @Description Get menu template by id
 // @Tags Menu template
@@ -1458,7 +1376,7 @@ func (h *HandlerV2) GetMenuTemplateById(id string, services services.ServiceMana
 // UpdateMenuTemplate godoc
 // @Security ApiKeyAuth
 // @ID update_menu_template
-// @Router /v1/menu-template [PUT]
+// @Router /v2/menu-template [PUT]
 // @Summary Update menu template
 // @Description Update menu template
 // @Tags Menu template
@@ -1538,7 +1456,7 @@ func (h *HandlerV2) UpdateMenuTemplate(c *gin.Context) {
 // DeleteMenuTemplate godoc
 // @Security ApiKeyAuth
 // @ID delete_menu_template
-// @Router /v1/menu-template/{id} [DELETE]
+// @Router /v2/menu-template/{id} [DELETE]
 // @Summary Delete menu template
 // @Description Delete menu template
 // @Tags Menu template
@@ -1684,4 +1602,8 @@ func (h *HandlerV2) GetWikiFolder(c *gin.Context) {
 		// Does Not Implemented
 	}
 	h.handleResponse(c, status_http.OK, resp)
+}
+
+func IsEmptyStruct2(s interface{}) bool {
+	return reflect.DeepEqual(s, reflect.Zero(reflect.TypeOf(s)).Interface())
 }

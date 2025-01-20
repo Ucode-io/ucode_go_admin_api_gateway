@@ -73,21 +73,6 @@ func (h *HandlerV1) GetSingleLayout(c *gin.Context) {
 	h.handleResponse(c, status_http.OK, resp)
 }
 
-// GetListLayouts godoc
-// @Security ApiKeyAuth
-// @ID get_list_layouts
-// @Router /v1/layout [GET]
-// @Summary Get list layouts
-// @Description Get list layouts
-// @Tags Layout
-// @Accept json
-// @Produce json
-// @Param table-id query string false "table-id"
-// @Param table-slug query string false "table-slug"
-// @Param language_setting query string false "language_setting"
-// @Success 200 {object} status_http.Response{data=obs.GetListLayoutResponse} "TableBody"
-// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetListLayouts(c *gin.Context) {
 	tableSlug := c.Query("table-slug")
 	tableId := c.Query("table-id")
@@ -184,21 +169,7 @@ func (h *HandlerV1) GetListLayouts(c *gin.Context) {
 	h.handleResponse(c, status_http.OK, resp)
 }
 
-// UpdateLayout godoc
-// @Security ApiKeyAuth
-// @ID update_layout
-// @Router /v1/layout [PUT]
-// @Summary Update layouts
-// @Description Update layouts
-// @Tags Layout
-// @Accept json
-// @Produce json
-// @Param table body obs.UpdateLayoutRequest true "UpdateLayoutRequest"
-// @Success 200 {object} status_http.Response{data=string} "Layout data"
-// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) UpdateLayout(c *gin.Context) {
-
 	var input obs.LayoutRequest
 
 	err := c.ShouldBindJSON(&input)

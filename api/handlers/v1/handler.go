@@ -240,7 +240,7 @@ func (h *HandlerV1) versionHistoryGo(c *gin.Context, req *models.CreateVersionHi
 }
 
 func (h *HandlerV1) MakeProxy(c *gin.Context, proxyUrl, path string) (err error) {
-	req := c.Request
+	var req = c.Request
 
 	proxy, err := url.Parse(proxyUrl)
 	if err != nil {

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
@@ -379,9 +380,14 @@ func (h *HandlerV1) UpdateFile(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) DeleteFile(c *gin.Context) {
+	path := c.Param("id")
+	if path == "" {
+		h.handleResponse(c, status_http.BadRequest, "id is empty")
+		return
+	}
 
-	id := c.Param("id")
-	res := obs.File{}
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 20*time.Second)
+	defer cancel()
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -396,8 +402,7 @@ func (h *HandlerV1) DeleteFile(c *gin.Context) {
 		return
 	}
 
-	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
+	resource, err := h.companyServices.ServiceResource().GetSingle(ctx,
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
@@ -409,118 +414,22 @@ func (h *HandlerV1) DeleteFile(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
-	switch resource.ResourceType {
-	case pb.ResourceType_MONGODB:
-		resp, err := services.GetBuilderServiceByType(resource.NodeType).File().GetSingle(
-			context.Background(),
-			&obs.FilePrimaryKey{
-				ProjectId: resource.ResourceEnvironmentId,
-				Id:        id,
-			},
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
-		res.Id = resp.Id
-		res.Title = resp.Title
-		res.Description = resp.Description
-		res.Tags = resp.Tags
-		res.Storage = resp.Storage
-		res.FileNameDisk = resp.FileNameDisk
-		res.FileNameDownload = resp.FileNameDownload
-		res.Link = resp.Link
-		res.FileSize = resp.FileSize
-		res.ProjectId = resp.ProjectId
-
-	case pb.ResourceType_POSTGRESQL:
-		resp, err := services.GoObjectBuilderService().File().GetSingle(
-			context.Background(),
-			&nb.FilePrimaryKey{
-				ProjectId: resource.ResourceEnvironmentId,
-				Id:        id,
-			},
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
-		res.Id = resp.Id
-		res.Title = resp.Title
-		res.Description = resp.Description
-		res.Tags = resp.Tags
-		res.Storage = resp.Storage
-		res.FileNameDisk = resp.FileNameDisk
-		res.FileNameDownload = resp.FileNameDownload
-		res.Link = resp.Link
-		res.FileSize = resp.FileSize
-		res.ProjectId = resp.ProjectId
-
-	}
-
 	minioClient, err := minio.New(h.baseConf.MinioEndpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(h.baseConf.MinioAccessKeyID, h.baseConf.MinioSecretAccessKey, ""),
 		Secure: true,
 	})
 	if err != nil {
-		log.Println(err)
+		h.handleResponse(c, status_http.InternalServerError, err.Error())
+		return
 	}
 
-	ctx := context.Background()
-
-	var delete_request []string
-
-	delete_request = append(delete_request, id)
-	err = minioClient.RemoveObject(ctx, resource.ResourceEnvironmentId, res.Storage+"/"+res.FileNameDisk, minio.RemoveObjectOptions{})
+	err = minioClient.RemoveObject(ctx, resource.ResourceEnvironmentId, path, minio.RemoveObjectOptions{})
 	if err != nil {
-		log.Println(err)
+		h.handleResponse(c, status_http.InternalServerError, err.Error())
+		return
 	}
 
-	switch resource.ResourceType {
-	case pb.ResourceType_MONGODB:
-		resp, err := services.GetBuilderServiceByType(resource.NodeType).File().Delete(
-			context.Background(),
-			&obs.FileDeleteRequest{
-				Ids:       delete_request,
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
-		h.handleResponse(c, status_http.NoContent, resp)
-	case pb.ResourceType_POSTGRESQL:
-		resp, err := services.GoObjectBuilderService().File().Delete(
-			context.Background(),
-			&nb.FileDeleteRequest{
-				Ids:       delete_request,
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
-		h.handleResponse(c, status_http.NoContent, resp)
-	}
-
+	h.handleResponse(c, status_http.NoContent, "Successfully deleted")
 }
 
 // DeleteFiles godoc

@@ -11,6 +11,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
+	nobs "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/logger"
@@ -703,8 +704,49 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 				return
 			}
 		case pb.ResourceType_POSTGRESQL:
-			// Does Not Implemented
-			h.handleResponse(c, status_http.BadRequest, "does not implemented")
+			redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("collection"), structData.String(), resource.ResourceEnvironmentId))), resource.ProjectId, resource.NodeType)
+			if err == nil {
+				var (
+					resp = make(map[string]interface{})
+					m    = make(map[string]interface{})
+				)
+
+				if err = json.Unmarshal([]byte(redisResp), &m); err != nil {
+					h.log.Error("Error while unmarshal redis", logger.Error(err))
+				} else {
+					resp["data"] = m
+					h.handleResponse(c, status_http.OK, resp)
+					return
+				}
+			}
+
+			resp, err := services.GoObjectBuilderService().ObjectBuilder().GetList2(
+				c.Request.Context(),
+				&nobs.CommonMessage{
+					TableSlug: c.Param("collection"),
+					Data:      structData,
+					ProjectId: resource.ResourceEnvironmentId,
+				},
+			)
+
+			if err == nil {
+				if resp.IsCached {
+					jsonData, _ := resp.GetData().MarshalJSON()
+					err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("collection"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, resource.ProjectId, resource.NodeType)
+					if err != nil {
+						h.log.Error("Error while setting redis", logger.Error(err))
+					}
+				}
+			}
+
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+
+			statusHttp.CustomMessage = resp.GetCustomMessage()
+			h.handleResponse(c, statusHttp, resp)
+
 			return
 		}
 	}
@@ -1538,9 +1580,24 @@ func (h *HandlerV2) DeleteItems(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		// Does Not Implemented
-		h.handleResponse(c, status_http.BadRequest, "does not implemented")
-		return
+		_, err = services.GoObjectBuilderService().Items().DeleteMany(
+			c.Request.Context(), &nb.CommonMessage{
+				TableSlug: c.Param("collection"),
+				Data:      structData,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+
+		if err != nil {
+			statusHttp = status_http.GrpcStatusToHTTP["Internal"]
+			stat, ok := status.FromError(err)
+			if ok {
+				statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
+				statusHttp.CustomMessage = stat.Message()
+			}
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	if len(afterActions) > 0 {

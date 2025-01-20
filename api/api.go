@@ -383,15 +383,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			projectResource.GET("/:id", h.V1.GetSingleProjectResource)
 			projectResource.DELETE("/:id", h.V1.DeleteProjectResource)
 		}
-
-		functions := v2Admin.Group("functions")
-		{
-			functions.POST("/micro-frontend", h.V1.CreateMicroFrontEnd)
-			functions.GET("/micro-frontend/:micro-frontend-id", h.V1.GetMicroFrontEndByID)
-			functions.GET("/micro-frontend", h.V1.GetAllMicroFrontEnd)
-			functions.PUT("/micro-frontend", h.V1.UpdateMicroFrontEnd)
-			functions.DELETE("/micro-frontend/:micro-frontend-id", h.V1.DeleteMicroFrontEnd)
-		}
 	}
 
 	{
@@ -585,11 +576,19 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 	}
 
+	proxyFunctions := proxyApi.Group("functions")
+	{
+		proxyFunctions.POST("/micro-frontend", h.V1.CreateMicroFrontEnd)
+		proxyFunctions.GET("/micro-frontend/:micro-frontend-id", h.V1.GetMicroFrontEndByID)
+		proxyFunctions.GET("/micro-frontend", h.V1.GetAllMicroFrontEnd)
+		proxyFunctions.PUT("/micro-frontend", h.V1.UpdateMicroFrontEnd)
+		proxyFunctions.DELETE("/micro-frontend/:micro-frontend-id", h.V1.DeleteMicroFrontEnd)
+	}
+
 	proxyGrafana := proxyApi.Group("/grafana")
 	{
 		proxyGrafana.POST("/loki", h.V2.GetGrafanaFunctionLogs)
 		proxyGrafana.GET("/function", h.V2.GetGrafanaFunctionList)
-
 	}
 
 	{
