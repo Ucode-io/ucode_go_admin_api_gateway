@@ -29,11 +29,15 @@ service ProjectService {
     rpc UpsertRecord(Record) returns (EmptyProto) {};
     rpc ListRecord(ListRecordRequest) returns(EmptyProto) {};
 
-    rpc ListProjectsRPS(GetProjectsRequest) returns (GetProjectListResponse) {};
+    rpc ListProjectsRPS(GetProjectListRequest) returns (ListProjectsRPSResponse) {};
 }
 
 message GetPorjectConfigByProjectIdRequest {
     string project_id = 1;
+}
+
+message ListProjectsRPSResponse {
+    map<string, int32> projects = 1;
 }
 
 message ListPorjectConfig {
@@ -220,6 +224,9 @@ message Project {
     Timezone timezone = 9;
     string fare_id = 10;
     repeated Currency currencies = 11;
+    int32 request_per_second = 12;
+    double balance = 13;
+    double credit_limit = 14;
 }
 
 message CreateProjectRequest {
