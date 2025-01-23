@@ -194,7 +194,7 @@ func (h *HandlerV1) DeleteCompanyProject(c *gin.Context) {
 
 // GetCompanyProjectList godoc
 // @Security ApiKeyAuth
-// @ID get_project_list
+// @ID get_companies_id_projects_list
 // @Router /v1/companies/{company_id}/projects [GET]
 // @Summary Get all projects
 // @Description Get all projects
