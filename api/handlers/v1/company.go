@@ -118,36 +118,27 @@ func (h *HandlerV1) GetCompanyByID(c *gin.Context) {
 }
 
 func (h *HandlerV1) GetCompanyList(c *gin.Context) {
-
-	userProjects, err := h.authService.User().GetUserProjects(context.Background(), &auth_service.UserPrimaryKey{
-		Id: c.DefaultQuery("owner_id", ""),
-	})
-
+	limit, err := h.getLimitParam(c)
 	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
-	companies := make([]*pb.Company, 0, len(userProjects.GetCompanies()))
-	for _, company := range userProjects.GetCompanies() {
 
-		companyFromService, err := h.companyServices.Company().GetById(
-			context.Background(),
-			&pb.GetCompanyByIdRequest{
-				Id: company.GetId(),
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-		companies = append(companies, companyFromService.Company)
-	}
-	resp := &pb.GetComanyListResponse{
-		Count:     int32(len(companies)),
-		Companies: companies,
+	offset, err := h.getOffsetParam(c)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
 	}
 
-	h.handleResponse(c, status_http.OK, resp)
+	companies, err := h.companyServices.Company().GetList(
+		c.Request.Context(), &pb.GetCompanyListRequest{
+			Limit:  int32(limit),
+			Offset: int32(offset),
+			Search: c.Query("search"),
+		},
+	)
+
+	h.handleResponse(c, status_http.OK, companies)
 }
 
 func (h *HandlerV1) GetCompanyListWithProjects(c *gin.Context) {

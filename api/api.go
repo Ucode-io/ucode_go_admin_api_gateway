@@ -307,6 +307,19 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1Admin.PUT("/company-project/:project_id", h.V1.UpdateCompanyProject)
 		v1Admin.DELETE("/company-project/:project_id", h.V1.DeleteCompanyProject)
 
+		company := v1Admin.Group("/companies")
+		{
+			company.GET("", h.V1.GetCompanyList)
+			company.POST("", h.V1.CreateCompany)
+			company.GET("/:company_id", h.V1.GetCompanyByID)
+			company.PUT("/:company_id", h.V1.UpdateCompany)
+			company.DELETE("/:company_id", h.V1.DeleteCompany)
+			company.GET("/:company_id/projects", h.V1.ListCompanyProjects)
+			company.POST("/:company_id/projects", h.V1.CreateCompanyProject)
+		}
+
+
+
 		// project settings
 		v1Admin.GET("/project/setting", h.V1.GetAllSettings)
 

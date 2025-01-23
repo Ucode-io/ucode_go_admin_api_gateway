@@ -191,3 +191,52 @@ func (h *HandlerV1) DeleteCompanyProject(c *gin.Context) {
 
 	h.handleResponse(c, status_http.NoContent, resp)
 }
+
+// GetCompanyProjectList godoc
+// @Security ApiKeyAuth
+// @ID get_project_list
+// @Router /v1/companies/{company_id}/projects [GET]
+// @Summary Get all projects
+// @Description Get all projects
+// @Tags Company Project
+// @Accept json
+// @Produce json
+// @Param company_id path string true "company_id"
+// @Param filters query company_service.GetProjectListRequest true "filters"
+// @Success 200 {object} status_http.Response{data=company_service.GetProjectListResponse} "Company data"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *HandlerV1) ListCompanyProjects(c *gin.Context) {
+	companyId := c.Param("company_id")
+	if companyId == "" {
+		h.handleResponse(c, status_http.BadRequest, "company_id is required")
+		return
+	}
+
+	limit, err := h.getLimitParam(c)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
+	offset, err := h.getOffsetParam(c)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
+	resp, err := h.companyServices.Project().GetList(c.Request.Context(),
+		&company_service.GetProjectListRequest{
+			Limit:     int32(limit),
+			Offset:    int32(offset),
+			Search:    c.Query("search"),
+			CompanyId: companyId,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.OK, resp)
+}
