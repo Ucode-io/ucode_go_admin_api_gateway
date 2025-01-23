@@ -112,7 +112,7 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 	}
 
 	_, err = minioClient.PutObject(
-		context.Background(),
+		c.Request.Context(),
 		resource.ResourceEnvironmentId,
 		folder_name+"/"+file.File.Filename,
 		object,
@@ -121,16 +121,12 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 	)
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
-		// err = os.Remove(dst + "/" + file.File.Filename)
-		// if err != nil {
-		// 	h.log.Error("cant remove file")
-		// }
 		return
 	}
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err := services.GetBuilderServiceByType(resource.NodeType).File().Create(context.Background(), &obs.CreateFileRequest{
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).File().Create(c.Request.Context(), &obs.CreateFileRequest{
 			Id:               fName.String(),
 			Title:            title,
 			Storage:          folder_name,
@@ -148,8 +144,7 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 		h.handleResponse(c, status_http.Created, resp)
 		return
 	case pb.ResourceType_POSTGRESQL:
-
-		resp, err := services.GoObjectBuilderService().File().Create(context.Background(), &nb.CreateFileRequest{
+		resp, err := services.GoObjectBuilderService().File().Create(c.Request.Context(), &nb.CreateFileRequest{
 			Id:               fName.String(),
 			Title:            title,
 			Storage:          folder_name,
@@ -168,12 +163,6 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 		h.handleResponse(c, status_http.Created, resp)
 		return
 	}
-
-	// err = os.Remove(dst + "/" + file.File.Filename)
-	// if err != nil {
-	// 	h.log.Error("cant remove file")
-	// }
-
 }
 
 // GetSingleFile godoc
@@ -205,14 +194,12 @@ func (h *HandlerV1) GetSingleFile(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err := errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -223,11 +210,7 @@ func (h *HandlerV1) GetSingleFile(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -236,8 +219,7 @@ func (h *HandlerV1) GetSingleFile(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err := services.GetBuilderServiceByType(resource.NodeType).File().GetSingle(
-			context.Background(),
-			&obs.FilePrimaryKey{
+			c.Request.Context(), &obs.FilePrimaryKey{
 				ProjectId: resource.ResourceEnvironmentId,
 				Id:        fileID,
 			},
@@ -251,8 +233,7 @@ func (h *HandlerV1) GetSingleFile(c *gin.Context) {
 		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().File().GetSingle(
-			context.Background(),
-			&nb.FilePrimaryKey{
+			c.Request.Context(), &nb.FilePrimaryKey{
 				ProjectId: resource.ResourceEnvironmentId,
 				Id:        fileID,
 			},
@@ -285,8 +266,7 @@ func (h *HandlerV1) GetSingleFile(c *gin.Context) {
 func (h *HandlerV1) UpdateFile(c *gin.Context) {
 	var file models.UpdateFileRequest
 
-	err := c.ShouldBindJSON(&file)
-	if err != nil {
+	if err := c.ShouldBindJSON(&file); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -299,14 +279,12 @@ func (h *HandlerV1) UpdateFile(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -317,11 +295,7 @@ func (h *HandlerV1) UpdateFile(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -330,8 +304,7 @@ func (h *HandlerV1) UpdateFile(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err := services.GetBuilderServiceByType(resource.NodeType).File().Update(
-			context.Background(),
-			&obs.File{
+			c.Request.Context(), &obs.File{
 				Id:               file.Id,
 				Title:            file.Title,
 				Description:      file.Description,
@@ -347,8 +320,7 @@ func (h *HandlerV1) UpdateFile(c *gin.Context) {
 		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().File().Update(
-			context.Background(),
-			&nb.File{
+			c.Request.Context(), &nb.File{
 				Id:               file.Id,
 				Title:            file.Title,
 				Description:      file.Description,
@@ -380,8 +352,8 @@ func (h *HandlerV1) UpdateFile(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) DeleteFile(c *gin.Context) {
-	path := c.Param("id")
-	if path == "" {
+	var path = c.Param("id")
+	if util.IsValidUUID(path) {
 		h.handleResponse(c, status_http.BadRequest, "id is empty")
 		return
 	}
@@ -397,8 +369,7 @@ func (h *HandlerV1) DeleteFile(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err := errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
@@ -446,12 +417,12 @@ func (h *HandlerV1) DeleteFile(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) DeleteFiles(c *gin.Context) {
+	var (
+		file models.FileDeleteRequest
+		res  = obs.File{}
+	)
 
-	var file models.FileDeleteRequest
-	res := obs.File{}
-
-	err := c.ShouldBindJSON(&file)
-	if err != nil {
+	if err := c.ShouldBindJSON(&file); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -464,14 +435,12 @@ func (h *HandlerV1) DeleteFiles(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -482,11 +451,7 @@ func (h *HandlerV1) DeleteFiles(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -495,8 +460,7 @@ func (h *HandlerV1) DeleteFiles(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err := services.GetBuilderServiceByType(resource.NodeType).File().GetSingle(
-			context.Background(),
-			&obs.FilePrimaryKey{
+			c.Request.Context(), &obs.FilePrimaryKey{
 				ProjectId: resource.ResourceEnvironmentId,
 				Id:        file.Objects[0].ObjectId,
 			},
@@ -520,8 +484,7 @@ func (h *HandlerV1) DeleteFiles(c *gin.Context) {
 
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().File().GetSingle(
-			context.Background(),
-			&nb.FilePrimaryKey{
+			c.Request.Context(), &nb.FilePrimaryKey{
 				ProjectId: resource.ResourceEnvironmentId,
 				Id:        file.Objects[0].ObjectId,
 			},
@@ -553,13 +516,11 @@ func (h *HandlerV1) DeleteFiles(c *gin.Context) {
 		log.Println(err)
 	}
 
-	ctx := context.Background()
-
 	var delete_request []string
 
 	for _, val := range file.Objects {
 		delete_request = append(delete_request, val.ObjectId)
-		err = minioClient.RemoveObject(ctx, resource.ResourceEnvironmentId, res.Storage+"/"+val.ObjectName, minio.RemoveObjectOptions{})
+		err = minioClient.RemoveObject(c.Request.Context(), resource.ResourceEnvironmentId, res.Storage+"/"+val.ObjectName, minio.RemoveObjectOptions{})
 		if err != nil {
 			log.Println(err)
 		}
@@ -568,8 +529,7 @@ func (h *HandlerV1) DeleteFiles(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err := services.GetBuilderServiceByType(resource.NodeType).File().Delete(
-			context.Background(),
-			&obs.FileDeleteRequest{
+			c.Request.Context(), &obs.FileDeleteRequest{
 				Ids:       delete_request,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -582,8 +542,7 @@ func (h *HandlerV1) DeleteFiles(c *gin.Context) {
 		h.handleResponse(c, status_http.NoContent, resp)
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().File().Delete(
-			context.Background(),
-			&nb.FileDeleteRequest{
+			c.Request.Context(), &nb.FileDeleteRequest{
 				Ids:       delete_request,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -611,7 +570,6 @@ func (h *HandlerV1) DeleteFiles(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetAllFiles(c *gin.Context) {
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -620,14 +578,12 @@ func (h *HandlerV1) GetAllFiles(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err := errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -638,11 +594,7 @@ func (h *HandlerV1) GetAllFiles(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -651,8 +603,7 @@ func (h *HandlerV1) GetAllFiles(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err := services.GetBuilderServiceByType(resource.NodeType).File().GetList(
-			context.Background(),
-			&obs.GetAllFilesRequest{
+			c.Request.Context(), &obs.GetAllFilesRequest{
 				Search:     c.DefaultQuery("search", ""),
 				Sort:       c.DefaultQuery("sort", ""),
 				ProjectId:  resource.ResourceEnvironmentId,
@@ -668,8 +619,7 @@ func (h *HandlerV1) GetAllFiles(c *gin.Context) {
 		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().File().GetList(
-			context.Background(),
-			&nb.GetAllFilesRequest{
+			c.Request.Context(), &nb.GetAllFilesRequest{
 				Search:     c.DefaultQuery("search", ""),
 				Sort:       c.DefaultQuery("sort", ""),
 				ProjectId:  resource.ResourceEnvironmentId,
@@ -703,8 +653,7 @@ func (h *HandlerV1) GetAllFiles(c *gin.Context) {
 func (h *HandlerV1) WordTemplate(c *gin.Context) {
 	var file models.CommonMessage
 
-	err := c.ShouldBindJSON(&file)
-	if err != nil {
+	if err := c.ShouldBindJSON(&file); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -723,14 +672,12 @@ func (h *HandlerV1) WordTemplate(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -741,11 +688,7 @@ func (h *HandlerV1) WordTemplate(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -754,8 +697,7 @@ func (h *HandlerV1) WordTemplate(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err := services.GetBuilderServiceByType(resource.NodeType).File().WordTemplate(
-			context.Background(),
-			&obs.CommonMessage{
+			c.Request.Context(), &obs.CommonMessage{
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
 			},

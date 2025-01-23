@@ -28,8 +28,8 @@ import (
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) CreateFunctionFolder(c *gin.Context) {
 	var functionFolder fc.CreateFunctionFolderRequest
-	err := c.ShouldBindJSON(&functionFolder)
-	if err != nil {
+
+	if err := c.ShouldBindJSON(&functionFolder); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -42,8 +42,7 @@ func (h *HandlerV1) CreateFunctionFolder(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
@@ -60,11 +59,7 @@ func (h *HandlerV1) CreateFunctionFolder(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -75,8 +70,7 @@ func (h *HandlerV1) CreateFunctionFolder(c *gin.Context) {
 	}
 
 	resp, err := services.FunctionService().FunctionFolderService().Create(
-		context.Background(),
-		&fc.CreateFunctionFolderRequest{
+		c.Request.Context(), &fc.CreateFunctionFolderRequest{
 			Title:       functionFolder.Title,
 			Description: functionFolder.Description,
 			ProjectId:   resource.ResourceEnvironmentId,
@@ -121,14 +115,12 @@ func (h *HandlerV1) GetFunctionFolderById(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err := errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_FUNCTION_SERVICE,
@@ -139,19 +131,14 @@ func (h *HandlerV1) GetFunctionFolderById(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
 	resp, err := services.FunctionService().FunctionService().GetSingle(
-		context.Background(),
-		&fc.FunctionPrimaryKey{
+		c.Request.Context(), &fc.FunctionPrimaryKey{
 			Id:        functionFolderID,
 			ProjectId: resource.ResourceEnvironmentId,
 		},
@@ -181,13 +168,12 @@ func (h *HandlerV1) GetFunctionFolderById(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetAllFunctionFolder(c *gin.Context) {
-
-	//var resourceEnvironment *obs.ResourceEnvironment
 	limit, err := h.getLimitParam(c)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
+
 	offset, err := h.getOffsetParam(c)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
@@ -222,11 +208,7 @@ func (h *HandlerV1) GetAllFunctionFolder(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -235,8 +217,7 @@ func (h *HandlerV1) GetAllFunctionFolder(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err := services.FunctionService().FunctionFolderService().GetList(
-			context.Background(),
-			&fc.GetAllFunctionFoldersRequest{
+			c.Request.Context(), &fc.GetAllFunctionFoldersRequest{
 				Search:    c.DefaultQuery("search", ""),
 				Limit:     int32(limit),
 				Offset:    int32(offset),
@@ -271,8 +252,7 @@ func (h *HandlerV1) GetAllFunctionFolder(c *gin.Context) {
 func (h *HandlerV1) UpdateFunctionFolder(c *gin.Context) {
 	var functionFolder models.FunctionFolder
 
-	err := c.ShouldBindJSON(&functionFolder)
-	if err != nil {
+	if err := c.ShouldBindJSON(&functionFolder); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -285,14 +265,12 @@ func (h *HandlerV1) UpdateFunctionFolder(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_FUNCTION_SERVICE,
@@ -303,11 +281,7 @@ func (h *HandlerV1) UpdateFunctionFolder(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -318,8 +292,7 @@ func (h *HandlerV1) UpdateFunctionFolder(c *gin.Context) {
 	}
 
 	_, err = services.FunctionService().FunctionFolderService().Update(
-		context.Background(),
-		&fc.FunctionFolder{
+		c.Request.Context(), &fc.FunctionFolder{
 			Id:          functionFolder.Id,
 			Description: functionFolder.Description,
 			Title:       functionFolder.Title,
@@ -371,8 +344,7 @@ func (h *HandlerV1) DeleteFunctionFolder(c *gin.Context) {
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_FUNCTION_SERVICE,
@@ -383,18 +355,14 @@ func (h *HandlerV1) DeleteFunctionFolder(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
 	resp, err := services.FunctionService().FunctionFolderService().Delete(
-		context.Background(),
+		c.Request.Context(),
 		&fc.FunctionFolderPrimaryKey{
 			Id:        functionFolderID,
 			ProjectId: resource.ResourceEnvironmentId,

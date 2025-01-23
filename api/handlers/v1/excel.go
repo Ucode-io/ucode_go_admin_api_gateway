@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"errors"
 	"ucode/ucode_go_api_gateway/api/models"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
@@ -29,7 +28,7 @@ import (
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) ExcelReader(c *gin.Context) {
-	excelId := c.Param("excel_id")
+	var excelId = c.Param("excel_id")
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -39,14 +38,12 @@ func (h *HandlerV1) ExcelReader(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err := errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -57,11 +54,7 @@ func (h *HandlerV1) ExcelReader(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -117,8 +110,7 @@ func (h *HandlerV1) ExcelToDb(c *gin.Context) {
 		resp         = models.ExcelToDbResponse{Message: "Success"}
 	)
 
-	err := c.ShouldBindJSON(&excelRequest)
-	if err != nil {
+	if err := c.ShouldBindJSON(&excelRequest); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -131,16 +123,14 @@ func (h *HandlerV1) ExcelToDb(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -159,11 +149,7 @@ func (h *HandlerV1) ExcelToDb(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -194,8 +180,7 @@ func (h *HandlerV1) ExcelToDb(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		_, err = services.GetBuilderServiceByType(resource.NodeType).Excel().ExcelToDb(
-			c.Request.Context(),
-			&obs.ExcelToDbRequest{
+			c.Request.Context(), &obs.ExcelToDbRequest{
 				Id:        c.Param("excel_id"),
 				TableSlug: excelRequest.TableSlug,
 				Data:      data,
@@ -207,8 +192,7 @@ func (h *HandlerV1) ExcelToDb(c *gin.Context) {
 		}
 	case pb.ResourceType_POSTGRESQL:
 		_, err = services.GoObjectBuilderService().Excel().ExcelToDb(
-			c.Request.Context(),
-			&nb.ExcelToDbRequest{
+			c.Request.Context(), &nb.ExcelToDbRequest{
 				Id:        c.Param("excel_id"),
 				TableSlug: excelRequest.TableSlug,
 				Data:      data,
