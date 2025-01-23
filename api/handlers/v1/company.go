@@ -118,28 +118,61 @@ func (h *HandlerV1) GetCompanyByID(c *gin.Context) {
 }
 
 func (h *HandlerV1) GetCompanyList(c *gin.Context) {
-	limit, err := h.getLimitParam(c)
+
+	userProjects, err := h.authService.User().GetUserProjects(context.Background(), &auth_service.UserPrimaryKey{
+		Id: c.DefaultQuery("owner_id", ""),
+	})
+
 	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+	companies := make([]*pb.Company, 0, len(userProjects.GetCompanies()))
+	for _, company := range userProjects.GetCompanies() {
 
-	offset, err := h.getOffsetParam(c)
-	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
-		return
+		companyFromService, err := h.companyServices.Company().GetById(
+			context.Background(),
+			&pb.GetCompanyByIdRequest{
+				Id: company.GetId(),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+		companies = append(companies, companyFromService.Company)
+	}
+	resp := &pb.GetComanyListResponse{
+		Count:     int32(len(companies)),
+		Companies: companies,
 	}
 
-	companies, err := h.companyServices.Company().GetList(
-		c.Request.Context(), &pb.GetCompanyListRequest{
-			Limit:  int32(limit),
-			Offset: int32(offset),
-			Search: c.Query("search"),
-		},
-	)
-
-	h.handleResponse(c, status_http.OK, companies)
+	h.handleResponse(c, status_http.OK, resp)
 }
+
+// func (h *HandlerV1) GetCompanyList(c *gin.Context) {
+// 	limit, err := h.getLimitParam(c)
+// 	if err != nil {
+// 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+// 		return
+// 	}
+
+// 	offset, err := h.getOffsetParam(c)
+// 	if err != nil {
+// 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+// 		return
+// 	}
+
+// 	companies, err := h.companyServices.Company().GetList(
+// 		c.Request.Context(), &pb.GetCompanyListRequest{
+// 			Limit:  int32(limit),
+// 			Offset: int32(offset),
+// 			Search: c.Query("search"),
+// 		},
+// 	)
+
+// 	h.handleResponse(c, status_http.OK, companies)
+// }
 
 func (h *HandlerV1) GetCompanyListWithProjects(c *gin.Context) {
 
@@ -204,18 +237,6 @@ func (h *HandlerV1) UpdateCompany(c *gin.Context) {
 		return
 	}
 
-	// _, err = h.authService.Company().Update(
-	// 	c.Request.Context(),
-	// 	&auth_service.UpdateCompanyRequest{
-	// 		Id:   companyId,
-	// 		Name: company.Name,
-	// 	},
-	// )
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.BadRequest, err.Error())
-	// 	return
-	// }
-
 	resp, err := h.companyServices.Company().Update(
 		context.Background(),
 		&pb.Company{
@@ -249,15 +270,6 @@ func (h *HandlerV1) UpdateCompany(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) DeleteCompany(c *gin.Context) {
 	companyId := c.Param("company_id")
-
-	// _, err := h.authService.Company().Remove(
-	// 	c.Request.Context(),
-	// 	&auth_service.CompanyPrimaryKey{Id: companyId},
-	// )
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.GRPCError, err.Error())
-	// 	return
-	// }
 
 	resp, err := h.companyServices.Company().Delete(
 		context.Background(),
