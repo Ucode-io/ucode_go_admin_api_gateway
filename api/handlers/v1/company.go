@@ -150,29 +150,29 @@ func (h *HandlerV1) GetCompanyList(c *gin.Context) {
 	h.handleResponse(c, status_http.OK, resp)
 }
 
-// func (h *HandlerV1) GetCompanyList(c *gin.Context) {
-// 	limit, err := h.getLimitParam(c)
-// 	if err != nil {
-// 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
-// 		return
-// 	}
+func (h *HandlerV1) ListCompanies(c *gin.Context) {
+	limit, err := h.getLimitParam(c)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
 
-// 	offset, err := h.getOffsetParam(c)
-// 	if err != nil {
-// 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
-// 		return
-// 	}
+	offset, err := h.getOffsetParam(c)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
 
-// 	companies, err := h.companyServices.Company().GetList(
-// 		c.Request.Context(), &pb.GetCompanyListRequest{
-// 			Limit:  int32(limit),
-// 			Offset: int32(offset),
-// 			Search: c.Query("search"),
-// 		},
-// 	)
+	companies, err := h.companyServices.Company().GetList(
+		c.Request.Context(), &pb.GetCompanyListRequest{
+			Limit:  int32(limit),
+			Offset: int32(offset),
+			Search: c.Query("search"),
+		},
+	)
 
-// 	h.handleResponse(c, status_http.OK, companies)
-// }
+	h.handleResponse(c, status_http.OK, companies)
+}
 
 func (h *HandlerV1) GetCompanyListWithProjects(c *gin.Context) {
 
