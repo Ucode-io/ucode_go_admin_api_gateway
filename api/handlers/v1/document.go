@@ -1,8 +1,6 @@
 package v1
 
 import (
-	"context"
-	"errors"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
@@ -27,8 +25,7 @@ import (
 func (h *HandlerV1) CreateDocument(c *gin.Context) {
 	var document obs.CreateDocumentRequest
 
-	err := c.ShouldBindJSON(&document)
-	if err != nil {
+	if err := c.ShouldBindJSON(&document); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -41,14 +38,12 @@ func (h *HandlerV1) CreateDocument(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -59,11 +54,7 @@ func (h *HandlerV1) CreateDocument(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -72,8 +63,7 @@ func (h *HandlerV1) CreateDocument(c *gin.Context) {
 	document.ProjectId = resource.ResourceEnvironmentId
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Document().Create(
-		context.Background(),
-		&document,
+		c.Request.Context(), &document,
 	)
 
 	if err != nil {
@@ -98,7 +88,7 @@ func (h *HandlerV1) CreateDocument(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetSingleDocument(c *gin.Context) {
-	documentID := c.Param("document_id")
+	var documentID = c.Param("document_id")
 
 	if !util.IsValidUUID(documentID) {
 		h.handleResponse(c, status_http.InvalidArgument, "Document id is an invalid uuid")
@@ -113,14 +103,12 @@ func (h *HandlerV1) GetSingleDocument(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err := errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -131,26 +119,20 @@ func (h *HandlerV1) GetSingleDocument(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Document().GetSingle(
-		context.Background(),
-		&obs.DocumentPrimaryKey{
+		c.Request.Context(), &obs.DocumentPrimaryKey{
 			Id:        documentID,
 			ProjectId: resource.ResourceEnvironmentId,
 		},
 	)
 	if resp == nil {
-		err := errors.New("not Found")
-		h.handleResponse(c, status_http.NoContent, err.Error())
+		h.handleResponse(c, status_http.NoContent, "not Found")
 		return
 	}
 	if err != nil {
@@ -177,8 +159,7 @@ func (h *HandlerV1) GetSingleDocument(c *gin.Context) {
 func (h *HandlerV1) UpdateDocument(c *gin.Context) {
 	var document obs.Document
 
-	err := c.ShouldBindJSON(&document)
-	if err != nil {
+	if err := c.ShouldBindJSON(&document); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -191,14 +172,12 @@ func (h *HandlerV1) UpdateDocument(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -209,11 +188,7 @@ func (h *HandlerV1) UpdateDocument(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -222,8 +197,7 @@ func (h *HandlerV1) UpdateDocument(c *gin.Context) {
 	document.ProjectId = resource.ResourceEnvironmentId
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Document().Update(
-		context.Background(),
-		&document,
+		c.Request.Context(), &document,
 	)
 
 	if err != nil {
@@ -248,7 +222,7 @@ func (h *HandlerV1) UpdateDocument(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) DeleteDocument(c *gin.Context) {
-	documentID := c.Param("document_id")
+	var documentID = c.Param("document_id")
 
 	if !util.IsValidUUID(documentID) {
 		h.handleResponse(c, status_http.InvalidArgument, "Document id is an invalid uuid")
@@ -263,14 +237,12 @@ func (h *HandlerV1) DeleteDocument(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err := errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -281,19 +253,14 @@ func (h *HandlerV1) DeleteDocument(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Document().Delete(
-		context.Background(),
-		&obs.DocumentPrimaryKey{
+		c.Request.Context(), &obs.DocumentPrimaryKey{
 			Id:        documentID,
 			ProjectId: resource.ResourceEnvironmentId,
 		},
@@ -321,10 +288,8 @@ func (h *HandlerV1) DeleteDocument(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetDocumentList(c *gin.Context) {
-
 	if c.Query("start_date") > c.Query("end_date") {
-		err := errors.New("end date must be bigger than start date")
-		h.handleResponse(c, status_http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, "end date must be bigger than start date")
 		return
 	}
 
@@ -336,14 +301,12 @@ func (h *HandlerV1) GetDocumentList(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err := errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -354,19 +317,14 @@ func (h *HandlerV1) GetDocumentList(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Document().GetList(
-		context.Background(),
-		&obs.GetAllDocumentsRequest{
+		c.Request.Context(), &obs.GetAllDocumentsRequest{
 			ObjectId:  c.Query("object_id"),
 			Tags:      c.Query("tags"),
 			StartDate: c.Query("start_date"),

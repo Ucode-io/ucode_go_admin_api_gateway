@@ -1,8 +1,6 @@
 package v1
 
 import (
-	"context"
-	"errors"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
@@ -33,8 +31,7 @@ func (h *HandlerV1) CreateCustomErrorMessage(c *gin.Context) {
 		resp                *obs.CustomErrorMessage
 	)
 
-	err := c.ShouldBindJSON(&customErrorMessages)
-	if err != nil {
+	if err := c.ShouldBindJSON(&customErrorMessages); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -47,16 +44,14 @@ func (h *HandlerV1) CreateCustomErrorMessage(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -67,11 +62,7 @@ func (h *HandlerV1) CreateCustomErrorMessage(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -84,12 +75,9 @@ func (h *HandlerV1) CreateCustomErrorMessage(c *gin.Context) {
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: c.Request.URL.String(),
 			ActionType:   "CREATE",
-			UsedEnvironments: map[string]bool{
-				cast.ToString(environmentId): true,
-			},
-			UserInfo:  cast.ToString(userId),
-			Request:   &customErrorMessages,
-			TableSlug: "CUSTOM_ERROR",
+			UserInfo:     cast.ToString(userId),
+			Request:      &customErrorMessages,
+			TableSlug:    "CUSTOM_ERROR",
 		}
 	)
 
@@ -108,8 +96,7 @@ func (h *HandlerV1) CreateCustomErrorMessage(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).CustomErrorMessage().Create(
-			context.Background(),
-			&customErrorMessages,
+			c.Request.Context(), &customErrorMessages,
 		)
 		if err != nil {
 			return
@@ -133,9 +120,8 @@ func (h *HandlerV1) CreateCustomErrorMessage(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetByIdCustomErrorMessage(c *gin.Context) {
-	var (
-		resp *obs.CustomErrorMessage
-	)
+	var resp *obs.CustomErrorMessage
+
 	if !util.IsValidUUID(c.Param("id")) {
 		h.handleResponse(c, status_http.InvalidArgument, "custom error message id is an invalid uuid")
 		return
@@ -149,14 +135,12 @@ func (h *HandlerV1) GetByIdCustomErrorMessage(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err := errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -167,11 +151,7 @@ func (h *HandlerV1) GetByIdCustomErrorMessage(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -180,8 +160,7 @@ func (h *HandlerV1) GetByIdCustomErrorMessage(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).CustomErrorMessage().GetById(
-			context.Background(),
-			&obs.CustomErrorMessagePK{
+			c.Request.Context(), &obs.CustomErrorMessagePK{
 				Id:        c.Param("id"),
 				ProjectId: resource.GetResourceEnvironmentId(),
 			},
@@ -211,10 +190,7 @@ func (h *HandlerV1) GetByIdCustomErrorMessage(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetAllCustomErrorMessage(c *gin.Context) {
-
-	var (
-		resp *obs.GetCustomErrorMessageListResponse
-	)
+	var resp *obs.GetCustomErrorMessageListResponse
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -224,18 +200,17 @@ func (h *HandlerV1) GetAllCustomErrorMessage(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err := errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
+
 	if c.Query("table_id") == "" && c.Query("table_slug") == "" {
 		h.handleResponse(c, status_http.BadEnvironment, "table_id or table_slug is required")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -259,8 +234,7 @@ func (h *HandlerV1) GetAllCustomErrorMessage(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).CustomErrorMessage().GetList(
-			context.Background(),
-			&obs.GetCustomErrorMessageListRequest{
+			c.Request.Context(), &obs.GetCustomErrorMessageListRequest{
 				TableId:   c.Query("table_id"),
 				TableSlug: c.Query("table_slug"),
 				ProjectId: resource.ResourceEnvironmentId,
@@ -297,8 +271,7 @@ func (h *HandlerV1) UpdateCustomErrorMessage(c *gin.Context) {
 		resp                *emptypb.Empty
 	)
 
-	err := c.ShouldBindJSON(&customErrorMessages)
-	if err != nil {
+	if err := c.ShouldBindJSON(&customErrorMessages); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -311,16 +284,14 @@ func (h *HandlerV1) UpdateCustomErrorMessage(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -331,11 +302,7 @@ func (h *HandlerV1) UpdateCustomErrorMessage(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -348,12 +315,9 @@ func (h *HandlerV1) UpdateCustomErrorMessage(c *gin.Context) {
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: c.Request.URL.String(),
 			ActionType:   "UPDATE",
-			UsedEnvironments: map[string]bool{
-				cast.ToString(environmentId): true,
-			},
-			UserInfo:  cast.ToString(userId),
-			Request:   &customErrorMessages,
-			TableSlug: "CUSTOM_ERROR",
+			UserInfo:     cast.ToString(userId),
+			Request:      &customErrorMessages,
+			TableSlug:    "CUSTOM_ERROR",
 		}
 	)
 
@@ -371,8 +335,7 @@ func (h *HandlerV1) UpdateCustomErrorMessage(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).CustomErrorMessage().Update(
-			context.Background(),
-			&customErrorMessages,
+			c.Request.Context(), &customErrorMessages,
 		)
 		if err != nil {
 			return
@@ -396,9 +359,8 @@ func (h *HandlerV1) UpdateCustomErrorMessage(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) DeleteCustomErrorMessage(c *gin.Context) {
-	var (
-		resp *emptypb.Empty
-	)
+	var resp *emptypb.Empty
+
 	if !util.IsValidUUID(c.Param("id")) {
 		h.handleResponse(c, status_http.BadRequest, "invalid custom error message id")
 		return
@@ -412,16 +374,14 @@ func (h *HandlerV1) DeleteCustomErrorMessage(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err := errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -432,11 +392,7 @@ func (h *HandlerV1) DeleteCustomErrorMessage(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -449,11 +405,8 @@ func (h *HandlerV1) DeleteCustomErrorMessage(c *gin.Context) {
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: c.Request.URL.String(),
 			ActionType:   "DELETE",
-			UsedEnvironments: map[string]bool{
-				cast.ToString(environmentId): true,
-			},
-			UserInfo:  cast.ToString(userId),
-			TableSlug: "CUSTOM_ERROR",
+			UserInfo:     cast.ToString(userId),
+			TableSlug:    "CUSTOM_ERROR",
 		}
 	)
 
@@ -470,8 +423,7 @@ func (h *HandlerV1) DeleteCustomErrorMessage(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).CustomErrorMessage().Delete(
-			context.Background(),
-			&obs.CustomErrorMessagePK{
+			c.Request.Context(), &obs.CustomErrorMessagePK{
 				Id:        c.Param("id"),
 				ProjectId: resource.GetResourceEnvironmentId(),
 			},
