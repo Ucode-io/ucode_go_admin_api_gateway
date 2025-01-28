@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"ucode/ucode_go_api_gateway/api/models"
+	custom "ucode/ucode_go_api_gateway/function"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
@@ -457,11 +458,7 @@ func (h *HandlerV1) InvokeFunction(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -483,7 +480,7 @@ func (h *HandlerV1) InvokeFunction(c *gin.Context) {
 		}
 	case pb.ResourceType_POSTGRESQL:
 		newFunction, err := services.GoObjectBuilderService().Function().GetSingle(
-			context.Background(),
+			c.Request.Context(),
 			&nb.FunctionPrimaryKey{
 				Id:        invokeFunction.FunctionID,
 				ProjectId: resource.ResourceEnvironmentId,
@@ -501,7 +498,7 @@ func (h *HandlerV1) InvokeFunction(c *gin.Context) {
 		}
 	}
 
-	apiKeys, err := h.authService.ApiKey().GetList(context.Background(), &auth_service.GetListReq{
+	apiKeys, err := h.authService.ApiKey().GetList(c.Request.Context(), &auth_service.GetListReq{
 		EnvironmentId: environmentId.(string),
 		ProjectId:     resource.ProjectId,
 	})
@@ -519,6 +516,36 @@ func (h *HandlerV1) InvokeFunction(c *gin.Context) {
 		invokeFunction.Attributes = make(map[string]interface{}, 0)
 	}
 	authInfo, _ := h.GetAuthInfo(c)
+
+	requestType := function.GetRequestType()
+	functionType := function.GetType()
+	path := function.GetPath()
+	name := function.GetName()
+
+	invokeFunctionRequest := models.NewInvokeFunctionRequest{
+		Data: map[string]interface{}{
+			"object_ids":     invokeFunction.ObjectIDs,
+			"app_id":         apiKeys.GetData()[0].GetAppId(),
+			"attributes":     invokeFunction.Attributes,
+			"user_id":        authInfo.GetUserId(),
+			"project_id":     projectId,
+			"environment_id": environmentId,
+			"action_type":    "HTTP",
+			"table_slug":     invokeFunction.TableSlug,
+		},
+	}
+
+	if requestType == "" || requestType == "ASYNC" {
+		functionName, err := custom.FuncHandlers[functionType](path, name, invokeFunctionRequest)
+		if err != nil {
+			h.handleResponse(c, status_http.InvalidArgument, err.Error()+" in "+functionName)
+			return
+		}
+	} else if requestType == "SYNC" {
+		go func() {
+			custom.FuncHandlers[functionType](path, name, invokeFunctionRequest)
+		}()
+	}
 
 	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+function.Path, "POST", models.NewInvokeFunctionRequest{
 		Data: map[string]interface{}{
@@ -543,11 +570,12 @@ func (h *HandlerV1) InvokeFunction(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, errStr)
 		return
 	}
+
 	if c.Query("form_input") != "true" && c.Query("use_no_limit") != "true" {
 		switch resource.ResourceType {
 		case pb.ResourceType_MONGODB:
 			_, err = services.GetBuilderServiceByType(resource.NodeType).CustomEvent().UpdateByFunctionId(
-				context.Background(),
+				c.Request.Context(),
 				&obs.UpdateByFunctionIdRequest{
 					FunctionId: invokeFunction.FunctionID,
 					ObjectIds:  invokeFunction.ObjectIDs,
@@ -561,7 +589,7 @@ func (h *HandlerV1) InvokeFunction(c *gin.Context) {
 			}
 		case pb.ResourceType_POSTGRESQL:
 			_, err = services.GoObjectBuilderService().CustomEvent().UpdateByFunctionId(
-				context.Background(),
+				c.Request.Context(),
 				&nb.UpdateByFunctionIdRequest{
 					FunctionId: invokeFunction.FunctionID,
 					ObjectIds:  invokeFunction.ObjectIDs,

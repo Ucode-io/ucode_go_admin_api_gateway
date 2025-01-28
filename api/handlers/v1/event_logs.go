@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"context"
 	"errors"
 	"strconv"
 	_ "ucode/ucode_go_api_gateway/api/models"
@@ -74,8 +73,7 @@ func (h *HandlerV1) GetEventLogs(c *gin.Context) {
 	}
 
 	res, err := services.GetBuilderServiceByType(resource.NodeType).EventLogs().GetList(
-		context.Background(),
-		&obs.GetEventLogsListRequest{
+		c.Request.Context(), &obs.GetEventLogsListRequest{
 			TableSlug: c.Query("table_slug"),
 			Offset:    int32(offset),
 			Limit:     int32(limit),
@@ -147,8 +145,7 @@ func (h *HandlerV1) GetEventLogById(c *gin.Context) {
 	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).EventLogs().GetSingle(
-		context.Background(),
-		&obs.GetEventLogById{
+		c.Request.Context(), &obs.GetEventLogById{
 			Id:        eventLogID,
 			ProjectId: resource.ResourceEnvironmentId,
 		},

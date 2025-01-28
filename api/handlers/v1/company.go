@@ -1,15 +1,14 @@
 package v1
 
 import (
-	"context"
 	"errors"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
+	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 // CreateCompany godoc
@@ -28,36 +27,40 @@ import (
 func (h *HandlerV1) CreateCompany(c *gin.Context) {
 	var company models.CompanyCreateRequest
 
-	err := c.ShouldBindJSON(&company)
-	if err != nil {
+	if err := c.ShouldBindJSON(&company); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
+
 	authInfo, _ := h.GetAuthInfo(c)
-	companyPKey, err := h.companyServices.Company().Create(context.Background(), &pb.CreateCompanyRequest{
-		Title:       company.Name,
-		Logo:        "",
-		Description: "",
-		OwnerId:     authInfo.GetUserId(),
-	})
+
+	companyPKey, err := h.companyServices.Company().Create(
+		c.Request.Context(), &pb.CreateCompanyRequest{
+			Title:       company.Name,
+			Logo:        "",
+			Description: "",
+			OwnerId:     authInfo.GetUserId(),
+		},
+	)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	project, err := h.companyServices.Project().Create(context.Background(), &pb.CreateProjectRequest{
-		CompanyId:    companyPKey.GetId(),
-		K8SNamespace: "cp-region-type-id",
-		Title:        company.Name,
-	})
+	project, err := h.companyServices.Project().Create(
+		c.Request.Context(), &pb.CreateProjectRequest{
+			CompanyId:    companyPKey.GetId(),
+			K8SNamespace: "cp-region-type-id",
+			Title:        company.Name,
+		},
+	)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
 	_, err = h.companyServices.Environment().Create(
-		context.Background(),
-		&pb.CreateEnvironmentRequest{
+		c.Request.Context(), &pb.CreateEnvironmentRequest{
 			ProjectId:    project.GetProjectId(),
 			Name:         "Production",
 			DisplayColor: "#00FF00",
@@ -69,12 +72,14 @@ func (h *HandlerV1) CreateCompany(c *gin.Context) {
 		return
 	}
 
-	_, err = h.authService.User().AddUserToProject(context.Background(), &auth_service.AddUserToProjectReq{
-		CompanyId: companyPKey.GetId(),
-		ProjectId: project.GetProjectId(),
-		UserId:    authInfo.GetUserId(),
-		RoleId:    authInfo.GetRoleId(),
-	})
+	_, err = h.authService.User().AddUserToProject(
+		c.Request.Context(), &auth_service.AddUserToProjectReq{
+			CompanyId: companyPKey.GetId(),
+			ProjectId: project.GetProjectId(),
+			UserId:    authInfo.GetUserId(),
+			RoleId:    authInfo.GetRoleId(),
+		},
+	)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -101,10 +106,10 @@ func (h *HandlerV1) CreateCompany(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetCompanyByID(c *gin.Context) {
-	companyId := c.Param("company_id")
+	var companyId = c.Param("company_id")
+
 	resp, err := h.companyServices.Company().GetById(
-		context.Background(),
-		&pb.GetCompanyByIdRequest{
+		c.Request.Context(), &pb.GetCompanyByIdRequest{
 			Id: companyId,
 		},
 	)
@@ -118,8 +123,7 @@ func (h *HandlerV1) GetCompanyByID(c *gin.Context) {
 }
 
 func (h *HandlerV1) GetCompanyList(c *gin.Context) {
-
-	userProjects, err := h.authService.User().GetUserProjects(context.Background(), &auth_service.UserPrimaryKey{
+	userProjects, err := h.authService.User().GetUserProjects(c.Request.Context(), &auth_service.UserPrimaryKey{
 		Id: c.DefaultQuery("owner_id", ""),
 	})
 
@@ -127,14 +131,12 @@ func (h *HandlerV1) GetCompanyList(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
 	companies := make([]*pb.Company, 0, len(userProjects.GetCompanies()))
 	for _, company := range userProjects.GetCompanies() {
 
 		companyFromService, err := h.companyServices.Company().GetById(
-			context.Background(),
-			&pb.GetCompanyByIdRequest{
-				Id: company.GetId(),
-			},
+			c.Request.Context(), &pb.GetCompanyByIdRequest{Id: company.GetId()},
 		)
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
@@ -142,16 +144,42 @@ func (h *HandlerV1) GetCompanyList(c *gin.Context) {
 		}
 		companies = append(companies, companyFromService.Company)
 	}
-	resp := &pb.GetComanyListResponse{
+
+	h.handleResponse(c, status_http.OK, &pb.GetComanyListResponse{
 		Count:     int32(len(companies)),
 		Companies: companies,
+	})
+}
+
+func (h *HandlerV1) ListCompanies(c *gin.Context) {
+	limit, err := h.getLimitParam(c)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
 	}
 
-	h.handleResponse(c, status_http.OK, resp)
+	offset, err := h.getOffsetParam(c)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
+	companies, err := h.companyServices.Company().GetList(
+		c.Request.Context(), &pb.GetCompanyListRequest{
+			Limit:  int32(limit),
+			Offset: int32(offset),
+			Search: c.Query("search"),
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.OK, companies)
 }
 
 func (h *HandlerV1) GetCompanyListWithProjects(c *gin.Context) {
-
 	limit, err := h.getLimitParam(c)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
@@ -165,8 +193,7 @@ func (h *HandlerV1) GetCompanyListWithProjects(c *gin.Context) {
 	}
 
 	resp, err := h.companyServices.Company().GetListWithProjects(
-		context.Background(),
-		&pb.GetListWithProjectsRequest{
+		c.Request.Context(), &pb.GetListWithProjectsRequest{
 			Limit:    int32(limit),
 			Offset:   int32(offset),
 			Search:   c.DefaultQuery("search", ""),
@@ -197,44 +224,28 @@ func (h *HandlerV1) GetCompanyListWithProjects(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) UpdateCompany(c *gin.Context) {
-	companyId := c.Param("company_id")
+	var companyId = c.Param("company_id")
 
-	_, err := uuid.Parse(companyId)
-	if err != nil {
-
+	if !util.IsValidUUID(companyId) {
 		h.handleResponse(c, status_http.BadRequest, errors.New("uuid invalid!!! : "+companyId))
 		return
 	}
+
 	var company models.CompanyCreateRequest
 
-	err = c.ShouldBindJSON(&company)
-	if err != nil {
+	if err := c.ShouldBindJSON(&company); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
-	// _, err = h.authService.Company().Update(
-	// 	c.Request.Context(),
-	// 	&auth_service.UpdateCompanyRequest{
-	// 		Id:   companyId,
-	// 		Name: company.Name,
-	// 	},
-	// )
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.BadRequest, err.Error())
-	// 	return
-	// }
-
 	resp, err := h.companyServices.Company().Update(
-		context.Background(),
-		&pb.Company{
+		c.Request.Context(), &pb.Company{
 			Id:          companyId,
 			Name:        company.Name,
 			Logo:        company.Logo,
 			Description: company.Description,
 		},
 	)
-
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -257,24 +268,11 @@ func (h *HandlerV1) UpdateCompany(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) DeleteCompany(c *gin.Context) {
-	companyId := c.Param("company_id")
-
-	// _, err := h.authService.Company().Remove(
-	// 	c.Request.Context(),
-	// 	&auth_service.CompanyPrimaryKey{Id: companyId},
-	// )
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.GRPCError, err.Error())
-	// 	return
-	// }
+	var companyId = c.Param("company_id")
 
 	resp, err := h.companyServices.Company().Delete(
-		context.Background(),
-		&pb.DeleteCompanyRequest{
-			Id: companyId,
-		},
+		c.Request.Context(), &pb.DeleteCompanyRequest{Id: companyId},
 	)
-
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -299,21 +297,18 @@ func (h *HandlerV1) DeleteCompany(c *gin.Context) {
 func (h *HandlerV1) CreateCompanyProject(c *gin.Context) {
 	var project pb.CreateProjectRequest
 
-	err := c.ShouldBindJSON(&project)
-	if err != nil {
+	if err := c.ShouldBindJSON(&project); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
 	resp, err := h.companyServices.Project().Create(
-		context.Background(),
-		&pb.CreateProjectRequest{
+		c.Request.Context(), &pb.CreateProjectRequest{
 			Title:        project.Title,
 			K8SNamespace: project.K8SNamespace,
 			CompanyId:    project.CompanyId,
 		},
 	)
-
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -326,8 +321,7 @@ func (h *HandlerV1) CreateCompanyProject(c *gin.Context) {
 	}
 
 	_, err = h.authService.User().AddUserToProject(
-		c.Request.Context(),
-		&auth_service.AddUserToProjectReq{
+		c.Request.Context(), &auth_service.AddUserToProjectReq{
 			UserId:    authInfo.GetUserId(),
 			ProjectId: resp.GetProjectId(),
 			CompanyId: project.GetCompanyId(),
@@ -339,8 +333,7 @@ func (h *HandlerV1) CreateCompanyProject(c *gin.Context) {
 	}
 
 	_, err = h.companyServices.Environment().Create(
-		c.Request.Context(),
-		&pb.CreateEnvironmentRequest{
+		c.Request.Context(), &pb.CreateEnvironmentRequest{
 			ProjectId:    resp.ProjectId,
 			Name:         "Production",
 			DisplayColor: "#00FF00",
