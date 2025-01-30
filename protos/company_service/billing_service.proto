@@ -92,6 +92,7 @@ message Transaction {
     string created_at = 12;
     string accepted_at = 13;
     Currency currency = 14;
+    string receipt_file = 15;
 }
 
 // Requests and Responses
@@ -149,6 +150,7 @@ message CreateTransactionRequest {
     string currency_id = 8;
     string acceptor_id = 9;
     string fare_id = 10;
+    string receipt_file = 11;
 }
 
 message ListTransactionsResponse {
