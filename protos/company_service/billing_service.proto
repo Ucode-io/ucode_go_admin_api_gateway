@@ -54,6 +54,7 @@ message Fare {
     repeated FareItemPrice fare_item_prices = 8;
     string created_at = 9;
     string updated_at = 10;
+    bool is_public = 11;
 }
 
 // FareItem
@@ -106,6 +107,7 @@ message CreateFareRequest {
     int32 disactivate_day = 5;
     string description = 6;
     repeated FareItemPrice fare_item_prices = 7;
+    bool is_public = 8;
 }
 
 message PrimaryKey {
