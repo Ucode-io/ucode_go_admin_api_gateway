@@ -11,7 +11,6 @@ import (
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
-	nobs "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/logger"
@@ -721,8 +720,7 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 			}
 
 			resp, err := services.GoObjectBuilderService().ObjectBuilder().GetList2(
-				c.Request.Context(),
-				&nobs.CommonMessage{
+				c.Request.Context(), &nb.CommonMessage{
 					TableSlug: c.Param("collection"),
 					Data:      structData,
 					ProjectId: resource.ResourceEnvironmentId,

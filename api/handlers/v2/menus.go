@@ -108,9 +108,7 @@ func (h *HandlerV2) CreateMenu(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err := services.GetBuilderServiceByType(resource.NodeType).Menu().Create(
-			c.Request.Context(), menuRequest,
-		)
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).Menu().Create(c.Request.Context(), menuRequest)
 		if err != nil {
 			logReq.Response = err.Error()
 			h.handleResponse(c, status_http.GRPCError, err.Error())
@@ -129,9 +127,7 @@ func (h *HandlerV2) CreateMenu(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 		}
 
-		pgResp, err := services.GoObjectBuilderService().Menu().Create(
-			c.Request.Context(), &newReq,
-		)
+		pgResp, err := services.GoObjectBuilderService().Menu().Create(c.Request.Context(), &newReq)
 		if err != nil {
 			logReq.Response = err.Error()
 			h.handleResponse(c, status_http.GRPCError, err.Error())

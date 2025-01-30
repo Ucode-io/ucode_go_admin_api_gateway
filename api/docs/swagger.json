@@ -5,6 +5,763 @@
         "contact": {}
     },
     "paths": {
+        "/github/branches": {
+            "get": {
+                "description": "Github Branches",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Github"
+                ],
+                "summary": "Github Branches",
+                "operationId": "github_get_branches",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "username",
+                        "name": "username",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "full_name": {
+                                                        "type": "string"
+                                                    },
+                                                    "id": {
+                                                        "type": "integer"
+                                                    },
+                                                    "name": {
+                                                        "type": "string"
+                                                    },
+                                                    "node_id": {
+                                                        "type": "string"
+                                                    },
+                                                    "private": {
+                                                        "type": "boolean"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/github/login": {
+            "get": {
+                "description": "Github Login",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Github"
+                ],
+                "summary": "Github Login",
+                "operationId": "github_login",
+                "parameters": [
+                    {
+                        "type": "number",
+                        "description": "code",
+                        "name": "code",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/github/repos": {
+            "get": {
+                "description": "Github Repo",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Github"
+                ],
+                "summary": "Github Repo",
+                "operationId": "github_get_repos",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "username",
+                        "name": "username",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "full_name": {
+                                                        "type": "string"
+                                                    },
+                                                    "id": {
+                                                        "type": "integer"
+                                                    },
+                                                    "name": {
+                                                        "type": "string"
+                                                    },
+                                                    "node_id": {
+                                                        "type": "string"
+                                                    },
+                                                    "private": {
+                                                        "type": "boolean"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/github/user": {
+            "get": {
+                "description": "Github User",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Github"
+                ],
+                "summary": "Github User",
+                "operationId": "github_get_user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.GithubUser"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/gitlab/branches": {
+            "get": {
+                "description": "Gitlab Branches",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Gitlab"
+                ],
+                "summary": "Gitlab Branches",
+                "operationId": "gitlab_get_branches",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project_id",
+                        "name": "project_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "name": {
+                                                        "type": "string"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/gitlab/login": {
+            "get": {
+                "description": "Gitlab Login",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Gitlab"
+                ],
+                "summary": "Gitlab Login",
+                "operationId": "gitlab_login",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "code",
+                        "name": "code",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/gitlab/repos": {
+            "get": {
+                "description": "Gitlab Repo",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Gitlab"
+                ],
+                "summary": "Gitlab Repo",
+                "operationId": "gitlab_get_repos",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "created_at": {
+                                                        "type": "string"
+                                                    },
+                                                    "default_branch": {
+                                                        "type": "string"
+                                                    },
+                                                    "id": {
+                                                        "type": "integer"
+                                                    },
+                                                    "name": {
+                                                        "type": "string"
+                                                    },
+                                                    "name_with_namespace": {
+                                                        "type": "string"
+                                                    },
+                                                    "namespace": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "full_path": {
+                                                                "type": "string"
+                                                            },
+                                                            "id": {
+                                                                "type": "integer"
+                                                            },
+                                                            "kind": {
+                                                                "type": "string"
+                                                            },
+                                                            "name": {
+                                                                "type": "string"
+                                                            },
+                                                            "path": {
+                                                                "type": "string"
+                                                            },
+                                                            "web_url": {
+                                                                "type": "string"
+                                                            }
+                                                        }
+                                                    },
+                                                    "path": {
+                                                        "type": "string"
+                                                    },
+                                                    "path_with_namespace": {
+                                                        "type": "string"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/gitlab/user": {
+            "get": {
+                "description": "Gitlab User",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Gitlab"
+                ],
+                "summary": "Gitlab User",
+                "operationId": "gitlab_get_user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.GitlabUser"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/menu/wiki_folder": {
             "get": {
                 "description": "Get wiki folder",
@@ -452,6 +1209,117 @@
                 }
             }
         },
+        "/v1/companies/{company_id}/projects": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get all projects",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Company Project"
+                ],
+                "summary": "Get all projects",
+                "operationId": "get_companies_id_projects_list",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "company_id",
+                        "name": "company_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "name": "active",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "company_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "search",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Company data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/company_service.GetProjectListResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v1/company": {
             "post": {
                 "security": [
@@ -560,6 +1428,11 @@
                 "summary": "Get all projects",
                 "operationId": "get_project_list",
                 "parameters": [
+                    {
+                        "type": "boolean",
+                        "name": "active",
+                        "in": "query"
+                    },
                     {
                         "type": "string",
                         "name": "company_id",
@@ -3836,6 +4709,7 @@
                         "items": {
                             "type": "string"
                         },
+                        "collectionFormat": "csv",
                         "name": "ids",
                         "in": "query"
                     },
@@ -6684,7 +7558,11 @@
                         "in": "query"
                     },
                     {
-                        "type": "string",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "csv",
                         "name": "type",
                         "in": "query"
                     }
@@ -7619,6 +8497,7 @@
                         "items": {
                             "type": "string"
                         },
+                        "collectionFormat": "csv",
                         "name": "ids",
                         "in": "query"
                     },
@@ -7721,6 +8600,11 @@
                 "summary": "Get all global projects",
                 "operationId": "get_global_project_list",
                 "parameters": [
+                    {
+                        "type": "boolean",
+                        "name": "active",
+                        "in": "query"
+                    },
                     {
                         "type": "string",
                         "name": "company_id",
@@ -16908,7 +17792,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "string"
+                                            "$ref": "#/definitions/object_builder_service.GetCustomEventsListResponse"
                                         }
                                     }
                                 }
@@ -17094,7 +17978,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "string"
+                                            "$ref": "#/definitions/object_builder_service.CustomEvent"
                                         }
                                     }
                                 }
@@ -17187,7 +18071,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "string"
+                                            "$ref": "#/definitions/object_builder_service.CustomEvent"
                                         }
                                     }
                                 }
@@ -18339,7 +19223,7 @@
                     }
                 ],
                 "responses": {
-                    "200": {
+                    "201": {
                         "description": "Company data",
                         "schema": {
                             "allOf": [
@@ -18509,23 +19393,8 @@
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "VariableResource",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/company_service.Empty"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
+                    "204": {
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -20209,84 +21078,6 @@
                     {
                         "type": "string",
                         "description": "id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "/v2/files/{path}": {
-            "delete": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Delete file by path",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "V2Files"
-                ],
-                "summary": "Delete file by path",
-                "operationId": "v2_delete_file_by_path",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "bucket",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "path",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -26170,6 +26961,7 @@
                         "items": {
                             "type": "string"
                         },
+                        "collectionFormat": "csv",
                         "name": "version_ids",
                         "in": "query"
                     }
@@ -27829,6 +28621,23 @@
                 }
             }
         },
+        "company_service.Gitlab": {
+            "type": "object",
+            "properties": {
+                "expires_in": {
+                    "type": "integer"
+                },
+                "refresh_token": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
         "company_service.IntegrationResource": {
             "type": "object",
             "properties": {
@@ -27886,11 +28695,26 @@
         "company_service.Project": {
             "type": "object",
             "properties": {
+                "balance": {
+                    "type": "number"
+                },
                 "company_id": {
                     "type": "string"
                 },
+                "credit_limit": {
+                    "type": "number"
+                },
+                "currencies": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/company_service.Currency"
+                    }
+                },
                 "currency": {
                     "$ref": "#/definitions/company_service.Currency"
+                },
+                "fare": {
+                    "$ref": "#/definitions/company_service.Fare"
                 },
                 "fare_id": {
                     "type": "string"
@@ -27910,11 +28734,17 @@
                 "project_id": {
                     "type": "string"
                 },
+                "request_per_second": {
+                    "type": "integer"
+                },
                 "resources": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/company_service.ResourceWithoutPassword"
                     }
+                },
+                "status": {
+                    "type": "string"
                 },
                 "timezone": {
                     "$ref": "#/definitions/company_service.Timezone"
@@ -28085,7 +28915,8 @@
                 4,
                 5,
                 6,
-                7
+                7,
+                8
             ],
             "x-enum-varnames": [
                 "ResourceType_NOT_DECIDED",
@@ -28095,7 +28926,8 @@
                 "ResourceType_REST",
                 "ResourceType_GITHUB",
                 "ResourceType_SMS",
-                "ResourceType_SMTP"
+                "ResourceType_SMTP",
+                "ResourceType_GITLAB"
             ]
         },
         "company_service.ResourceWithoutPassword": {
@@ -28321,6 +29153,9 @@
                 "github": {
                     "$ref": "#/definitions/company_service.Github"
                 },
+                "gitlab": {
+                    "$ref": "#/definitions/company_service.Gitlab"
+                },
                 "sms": {
                     "$ref": "#/definitions/company_service.SmsCredentials"
                 },
@@ -28389,6 +29224,9 @@
                 },
                 "creator_type": {
                     "type": "string"
+                },
+                "currency": {
+                    "$ref": "#/definitions/company_service.Currency"
                 },
                 "currency_id": {
                     "type": "string"
@@ -29079,6 +29917,96 @@
                     "type": "string"
                 },
                 "to": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.GithubUser": {
+            "type": "object",
+            "properties": {
+                "avatar_url": {
+                    "type": "string"
+                },
+                "bio": {},
+                "blog": {
+                    "type": "string"
+                },
+                "company": {},
+                "email": {},
+                "events_url": {
+                    "type": "string"
+                },
+                "followers_url": {
+                    "type": "string"
+                },
+                "following_url": {
+                    "type": "string"
+                },
+                "gists_url": {
+                    "type": "string"
+                },
+                "gravatar_id": {
+                    "type": "string"
+                },
+                "hireable": {},
+                "html_url": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "location": {},
+                "login": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "node_id": {
+                    "type": "string"
+                },
+                "organizations_url": {
+                    "type": "string"
+                },
+                "received_events_url": {
+                    "type": "string"
+                },
+                "repos_url": {
+                    "type": "string"
+                },
+                "site_admin": {
+                    "type": "boolean"
+                },
+                "starred_url": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "subscriptions_url": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                },
+                "user_view_type": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.GitlabUser": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "username": {
                     "type": "string"
                 }
             }
@@ -30208,6 +31136,56 @@
                 }
             }
         },
+        "object_builder_service.CustomEvent": {
+            "type": "object",
+            "properties": {
+                "action_permission": {
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                },
+                "action_type": {
+                    "type": "string"
+                },
+                "attributes": {
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                },
+                "disable": {
+                    "type": "boolean"
+                },
+                "env_id": {
+                    "type": "string"
+                },
+                "event_path": {
+                    "type": "string"
+                },
+                "functions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.Function"
+                    }
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "method": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "table_slug": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
         "object_builder_service.DisableDates": {
             "type": "object",
             "properties": {
@@ -30582,6 +31560,80 @@
                 }
             }
         },
+        "object_builder_service.Function": {
+            "type": "object",
+            "properties": {
+                "branch": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "environment_id": {
+                    "type": "string"
+                },
+                "error_message": {
+                    "type": "string"
+                },
+                "framework_type": {
+                    "type": "string"
+                },
+                "function_folder_id": {
+                    "type": "string"
+                },
+                "gitlab_group_id": {
+                    "type": "string"
+                },
+                "gitlab_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "job_name": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "pipeline_status": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "provided_name": {
+                    "type": "string"
+                },
+                "repo_id": {
+                    "type": "string"
+                },
+                "request_type": {
+                    "type": "string"
+                },
+                "resource": {
+                    "type": "string"
+                },
+                "source_url": {
+                    "type": "string"
+                },
+                "ssh_url": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
         "object_builder_service.GatAllMenuTemplateResponse": {
             "type": "object",
             "properties": {
@@ -30701,6 +31753,20 @@
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/object_builder_service.View"
+                    }
+                }
+            }
+        },
+        "object_builder_service.GetCustomEventsListResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "custom_events": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.CustomEvent"
                     }
                 }
             }

@@ -576,6 +576,14 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		github.GET("/branches", h.V2.GithubGetBranches)
 	}
 
+	gitlab := r.Group("/gitlab")
+	{
+		gitlab.GET("/login", h.V2.GitlabLogin)
+		gitlab.GET("/user", h.V2.GitlabGetUser)
+		gitlab.GET("/repos", h.V2.GitlabGetRepos)
+		gitlab.GET("/branches", h.V2.GitlabGetBranches)
+	}
+
 	proxyApi := r.Group("/v2")
 
 	proxyFunction := proxyApi.Group("/function")

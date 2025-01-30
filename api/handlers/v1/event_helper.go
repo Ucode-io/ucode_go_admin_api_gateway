@@ -24,11 +24,7 @@ func GetListCustomEvents(request models.GetListCustomEventsStruct, c *gin.Contex
 		goRes *nb.GetCustomEventsListResponse
 	)
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		request.Resource.ProjectId,
-		request.Resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), request.Resource.ProjectId, request.Resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return

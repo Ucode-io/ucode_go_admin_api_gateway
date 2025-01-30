@@ -1,75 +1,22 @@
 package models
 
-type CreateWebhook struct {
-	Username      string `json:"username"`
-	RepoName      string `json:"repo_name" binding:"required"`
-	Branch        string `json:"branch"`
-	FrameworkType string `json:"framework_type"`
-	GithubToken   string `json:"github_token"`
-	FunctionType  string `json:"type"`
-	Resource      string `json:"resource_id"`
-	Name          string `json:"provided_name"`
-}
+type (
+	GithubLogin struct {
+		Code string `json:"code"`
+	}
 
-type GithubLogin struct {
-	Code string `json:"code"`
-}
+	PipelineLogRequest struct {
+		RepoId string `json:"repo_id"`
+	}
 
-type PipelineLogRequest struct {
-	RepoId string `json:"repo_id"`
-}
+	PipelineLogResponse struct {
+		JobName string `json:"job_name"`
+		Log     string `json:"log"`
+	}
 
-type PipelineLogResponse struct {
-	JobName string `json:"job_name"`
-	Log     string `json:"log"`
-}
-
-type Job struct {
-	Id     int    `json:"id"`
-	Name   string `json:"name"`
-	Status string `json:"status"`
-}
-
-type GithubUser struct {
-	Status            string      `json:"status"`
-	Login             string      `json:"login"`
-	ID                int         `json:"id"`
-	NodeID            string      `json:"node_id"`
-	AvatarURL         string      `json:"avatar_url"`
-	GravatarID        string      `json:"gravatar_id"`
-	URL               string      `json:"url"`
-	HTMLURL           string      `json:"html_url"`
-	FollowersURL      string      `json:"followers_url"`
-	FollowingURL      string      `json:"following_url"`
-	GistsURL          string      `json:"gists_url"`
-	StarredURL        string      `json:"starred_url"`
-	SubscriptionsURL  string      `json:"subscriptions_url"`
-	OrganizationsURL  string      `json:"organizations_url"`
-	ReposURL          string      `json:"repos_url"`
-	EventsURL         string      `json:"events_url"`
-	ReceivedEventsURL string      `json:"received_events_url"`
-	Type              string      `json:"type"`
-	UserViewType      string      `json:"user_view_type"`
-	SiteAdmin         bool        `json:"site_admin"`
-	Name              string      `json:"name"`
-	Company           interface{} `json:"company"`
-	Blog              string      `json:"blog"`
-	Location          interface{} `json:"location"`
-	Email             interface{} `json:"email"`
-	Hireable          interface{} `json:"hireable"`
-	Bio               interface{} `json:"bio"`
-}
-
-type GithubRepo []struct {
-	ID       int    `json:"id"`
-	NodeID   string `json:"node_id"`
-	Name     string `json:"name"`
-	FullName string `json:"full_name"`
-	Private  bool   `json:"private"`
-}
-
-type GithubBranch []struct {
-	Name          string `json:"name"`
-	Protected     bool   `json:"protected"`
-	ProtectionURL string `json:"protection_url"`
-}
+	Job struct {
+		Id     int    `json:"id"`
+		Name   string `json:"name"`
+		Status string `json:"status"`
+	}
+)
