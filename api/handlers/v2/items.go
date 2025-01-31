@@ -2347,16 +2347,34 @@ func (h *HandlerV2) AgTree(c *gin.Context) {
 		return
 	}
 
-	body, err := services.GoObjectBuilderService().ObjectBuilder().AgGridTree(
-		c.Request.Context(), &nb.CommonMessage{
-			TableSlug: c.Param("collection"),
-			Data:      structData,
-			ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().AgGridTree(
+			c.Request.Context(),
+			&obs.CommonMessage{
+				TableSlug: c.Param("collection"),
+				Data:      structData,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+		h.handleResponse(c, status_http.OK, resp)
+	case pb.ResourceType_POSTGRESQL:
+		resp, err := services.GoObjectBuilderService().ObjectBuilder().AgGridTree(
+			c.Request.Context(),
+			&nb.CommonMessage{
+				TableSlug: c.Param("collection"),
+				Data:      structData,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+		h.handleResponse(c, status_http.OK, resp)
 	}
-	h.handleResponse(c, status_http.OK, body)
 }

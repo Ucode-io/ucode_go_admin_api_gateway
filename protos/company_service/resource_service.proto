@@ -362,5 +362,6 @@ message Gitlab {
     string username = 1;
     string token = 2;
     string refresh_token = 3;
-    int32 expires_in = 4; 
+    int64 created_at = 4;
+    int32 expires_in = 5; 
 }
