@@ -568,7 +568,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		}
 	}
 
-	github := r.Group("/github")
+	github := r.Group("/v1/github")
 	{
 		github.GET("/login", h.V2.GithubLogin)
 		github.GET("/user", h.V2.GithubGetUser)
@@ -576,7 +576,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		github.GET("/branches", h.V2.GithubGetBranches)
 	}
 
-	gitlab := r.Group("/gitlab")
+	gitlab := r.Group("/v1/gitlab")
 	{
 		gitlab.GET("/login", h.V2.GitlabLogin)
 		gitlab.GET("/user", h.V2.GitlabGetUser)
