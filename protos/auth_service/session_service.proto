@@ -87,6 +87,7 @@ message Project2 {
         string name_plural = 8;
     }
     repeated Currency currencies = 9;
+    bool new_design = 10;
 }
 
 message Company2 {
