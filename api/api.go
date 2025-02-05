@@ -465,6 +465,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			v2Items.PUT("/many-to-many", h.V2.AppendManyToMany)
 			v2Items.DELETE("/many-to-many", h.V2.DeleteManyToMany)
 			v2Items.PUT("/update-row/:collection", h.V2.UpdateRowOrder)
+			v2Items.POST("/:collection/tree", h.V2.AgTree)
 		}
 
 		// menu group
@@ -567,12 +568,20 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		}
 	}
 
-	github := r.Group("/github")
+	github := r.Group("/v1/github")
 	{
 		github.GET("/login", h.V2.GithubLogin)
 		github.GET("/user", h.V2.GithubGetUser)
 		github.GET("/repos", h.V2.GithubGetRepos)
 		github.GET("/branches", h.V2.GithubGetBranches)
+	}
+
+	gitlab := r.Group("/v1/gitlab")
+	{
+		gitlab.GET("/login", h.V2.GitlabLogin)
+		gitlab.GET("/user", h.V2.GitlabGetUser)
+		gitlab.GET("/repos", h.V2.GitlabGetRepos)
+		gitlab.GET("/branches", h.V2.GitlabGetBranches)
 	}
 
 	proxyApi := r.Group("/v2")

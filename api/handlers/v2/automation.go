@@ -1,8 +1,6 @@
 package v2
 
 import (
-	"context"
-	"errors"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
@@ -25,7 +23,7 @@ import (
 // @Produce json
 // @Param collection path string true "collection"
 // @Param Automation body obs.CreateCustomEventRequest true "AutomationRequestBody"
-// @Success 201 {object} status_http.Response{data=string} "Automation data"
+// @Success 201 {object} status_http.Response{data=obs.CustomEvent} "Automation data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) CreateAutomation(c *gin.Context) {
@@ -34,8 +32,7 @@ func (h *HandlerV2) CreateAutomation(c *gin.Context) {
 		resp        *obs.CustomEvent
 	)
 
-	err := c.ShouldBindJSON(&customevent)
-	if err != nil {
+	if err := c.ShouldBindJSON(&customevent); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -48,14 +45,12 @@ func (h *HandlerV2) CreateAutomation(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -66,11 +61,7 @@ func (h *HandlerV2) CreateAutomation(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		resource.GetProjectId(),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), resource.GetProjectId(), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -81,11 +72,11 @@ func (h *HandlerV2) CreateAutomation(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).CustomEvent().Create(
-			context.Background(),
-			&obs.CreateCustomEventRequest{
+			c.Request.Context(), &obs.CreateCustomEventRequest{
 				TableSlug:  customevent.TableSlug,
 				EventPath:  customevent.EventPath,
 				Label:      customevent.Label,
@@ -107,8 +98,7 @@ func (h *HandlerV2) CreateAutomation(c *gin.Context) {
 		h.handleResponse(c, status_http.Created, resp)
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().CustomEvent().Create(
-			context.Background(),
-			&nb.CreateCustomEventRequest{
+			c.Request.Context(), &nb.CreateCustomEventRequest{
 				TableSlug:  customevent.TableSlug,
 				EventPath:  customevent.EventPath,
 				Label:      customevent.Label,
@@ -143,7 +133,7 @@ func (h *HandlerV2) CreateAutomation(c *gin.Context) {
 // @Produce json
 // @Param collection path string true "collection"
 // @Param id path string true "id"
-// @Success 200 {object} status_http.Response{data=string} "AutomationBody"
+// @Success 200 {object} status_http.Response{data=obs.CustomEvent} "AutomationBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) GetByIdAutomation(c *gin.Context) {
@@ -162,14 +152,12 @@ func (h *HandlerV2) GetByIdAutomation(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err := errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.InvalidArgument, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -180,11 +168,7 @@ func (h *HandlerV2) GetByIdAutomation(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		resource.GetProjectId(),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), resource.GetProjectId(), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -193,8 +177,7 @@ func (h *HandlerV2) GetByIdAutomation(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err := services.GetBuilderServiceByType(resource.NodeType).CustomEvent().GetSingle(
-			context.Background(),
-			&obs.CustomEventPrimaryKey{
+			c.Request.Context(), &obs.CustomEventPrimaryKey{
 				Id:        customeventID,
 				ProjectId: resource.EnvironmentId,
 			},
@@ -207,8 +190,7 @@ func (h *HandlerV2) GetByIdAutomation(c *gin.Context) {
 		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().CustomEvent().GetSingle(
-			context.Background(),
-			&nb.CustomEventPrimaryKey{
+			c.Request.Context(), &nb.CustomEventPrimaryKey{
 				Id:        customeventID,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -234,7 +216,7 @@ func (h *HandlerV2) GetByIdAutomation(c *gin.Context) {
 // @Produce json
 // @Param collection path string true "collection"
 // @Param filters query obs.GetCustomEventsListRequest true "filters"
-// @Success 200 {object} status_http.Response{data=string} "AutomationBody"
+// @Success 200 {object} status_http.Response{data=obs.GetCustomEventsListResponse} "AutomationBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) GetAllAutomation(c *gin.Context) {
@@ -253,14 +235,12 @@ func (h *HandlerV2) GetAllAutomation(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -271,11 +251,7 @@ func (h *HandlerV2) GetAllAutomation(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		resource.GetProjectId(),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), resource.GetProjectId(), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -284,8 +260,7 @@ func (h *HandlerV2) GetAllAutomation(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).CustomEvent().GetList(
-			context.Background(),
-			&obs.GetCustomEventsListRequest{
+			c.Request.Context(), &obs.GetCustomEventsListRequest{
 				TableSlug: c.DefaultQuery("table_slug", ""),
 				RoleId:    authInfo.GetRoleId(),
 				ProjectId: resource.ResourceEnvironmentId,
@@ -300,8 +275,7 @@ func (h *HandlerV2) GetAllAutomation(c *gin.Context) {
 		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().CustomEvent().GetList(
-			context.Background(),
-			&nb.GetCustomEventsListRequest{
+			c.Request.Context(), &nb.GetCustomEventsListRequest{
 				TableSlug: c.DefaultQuery("table_slug", ""),
 				RoleId:    authInfo.GetRoleId(),
 				ProjectId: resource.ResourceEnvironmentId,
@@ -333,11 +307,11 @@ func (h *HandlerV2) GetAllAutomation(c *gin.Context) {
 func (h *HandlerV2) UpdateAutomation(c *gin.Context) {
 	var customevent models.CustomEvent
 
-	err := c.ShouldBindJSON(&customevent)
-	if err != nil {
+	if err := c.ShouldBindJSON(&customevent); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
+
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -346,14 +320,12 @@ func (h *HandlerV2) UpdateAutomation(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.InvalidArgument, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -364,11 +336,7 @@ func (h *HandlerV2) UpdateAutomation(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		resource.GetProjectId(),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), resource.GetProjectId(), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -383,8 +351,7 @@ func (h *HandlerV2) UpdateAutomation(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err := services.GetBuilderServiceByType(resource.NodeType).CustomEvent().Update(
-			context.Background(),
-			&obs.CustomEvent{
+			c.Request.Context(), &obs.CustomEvent{
 				Id:         customevent.Id,
 				TableSlug:  customevent.TableSlug,
 				EventPath:  customevent.EventPath,
@@ -407,8 +374,7 @@ func (h *HandlerV2) UpdateAutomation(c *gin.Context) {
 		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().CustomEvent().Update(
-			context.Background(),
-			&nb.CustomEvent{
+			c.Request.Context(), &nb.CustomEvent{
 				Id:         customevent.Id,
 				TableSlug:  customevent.TableSlug,
 				EventPath:  customevent.EventPath,
@@ -462,14 +428,12 @@ func (h *HandlerV2) DeleteAutomation(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err := errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.InvalidArgument, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -480,11 +444,7 @@ func (h *HandlerV2) DeleteAutomation(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		resource.GetProjectId(),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), resource.GetProjectId(), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -493,8 +453,7 @@ func (h *HandlerV2) DeleteAutomation(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err := services.GetBuilderServiceByType(resource.NodeType).CustomEvent().Delete(
-			context.Background(),
-			&obs.CustomEventPrimaryKey{
+			c.Request.Context(), &obs.CustomEventPrimaryKey{
 				Id:        customeventID,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -507,8 +466,7 @@ func (h *HandlerV2) DeleteAutomation(c *gin.Context) {
 		h.handleResponse(c, status_http.NoContent, resp)
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().CustomEvent().Delete(
-			context.Background(),
-			&nb.CustomEventPrimaryKey{
+			c.Request.Context(), &nb.CustomEventPrimaryKey{
 				Id:        customeventID,
 				ProjectId: resource.ResourceEnvironmentId,
 			},

@@ -24,11 +24,7 @@ func GetListCustomEvents(request models.GetListCustomEventsStruct, c *gin.Contex
 		goRes *nb.GetCustomEventsListResponse
 	)
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		request.Resource.ProjectId,
-		request.Resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), request.Resource.ProjectId, request.Resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -125,6 +121,7 @@ func DoInvokeFuntion(request models.DoInvokeFuntionStruct, c *gin.Context, h *Ha
 		data["method"] = request.Method
 		data["app_id"] = appId
 		data["user_id"] = authInfo.GetUserId()
+		data["session_id"] = authInfo.GetId()
 		data["project_id"] = request.Resource.ProjectId
 		data["environment_id"] = request.Resource.EnvironmentId
 		invokeFunction.Data = data
@@ -178,6 +175,7 @@ func DoInvokeFuntionForGetList(request models.DoInvokeFuntionStruct, c *gin.Cont
 		data["method"] = request.Method
 		data["app_id"] = appId
 		data["user_id"] = authInfo.GetUserId()
+		data["session_id"] = authInfo.GetId()
 		data["project_id"] = request.Resource.ProjectId
 		data["environment_id"] = request.Resource.EnvironmentId
 		invokeFunction.Data = data

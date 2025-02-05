@@ -1,8 +1,6 @@
 package v1
 
 import (
-	"context"
-	"errors"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
@@ -22,7 +20,7 @@ import (
 // @Accept json
 // @Produce json
 // @Param data body pb.AddResourceToProjectRequest true "AddResourceToProjectRequest"
-// @Success 200 {object} status_http.Response{data=pb.ProjectResource} "Company data"
+// @Success 201 {object} status_http.Response{data=pb.ProjectResource} "Company data"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) AddResourceToProject(c *gin.Context) {
@@ -31,8 +29,7 @@ func (h *HandlerV1) AddResourceToProject(c *gin.Context) {
 		resp    = &pb.ProjectResource{}
 	)
 
-	err := c.ShouldBindJSON(&request)
-	if err != nil {
+	if err := c.ShouldBindJSON(&request); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -45,16 +42,14 @@ func (h *HandlerV1) AddResourceToProject(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err := errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.InvalidArgument, "error getting environment id | not valid")
 		return
 	}
 
 	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -65,11 +60,7 @@ func (h *HandlerV1) AddResourceToProject(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -85,11 +76,8 @@ func (h *HandlerV1) AddResourceToProject(c *gin.Context) {
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: c.Request.URL.String(),
 			ActionType:   "CREATE",
-			UsedEnvironments: map[string]bool{
-				cast.ToString(environmentId): true,
-			},
-			UserInfo: cast.ToString(userId),
-			Request:  &request,
+			UserInfo:     cast.ToString(userId),
+			Request:      &request,
 		}
 	)
 
@@ -104,13 +92,13 @@ func (h *HandlerV1) AddResourceToProject(c *gin.Context) {
 		go h.versionHistory(logReq)
 	}()
 
-	resp, err = h.companyServices.Resource().AddResourceToProject(
-		context.Background(),
-		request,
-	)
+	resp, err = h.companyServices.Resource().AddResourceToProject(c.Request.Context(), request)
 	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	h.handleResponse(c, status_http.Created, resp)
 }
 
 // UpdateProjectResource godoc
@@ -132,8 +120,7 @@ func (h *HandlerV1) UpdateProjectResource(c *gin.Context) {
 		resp    = &pb.Empty{}
 	)
 
-	err := c.ShouldBindJSON(&request)
-	if err != nil {
+	if err := c.ShouldBindJSON(&request); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -146,16 +133,14 @@ func (h *HandlerV1) UpdateProjectResource(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err := errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.InvalidArgument, "error getting environment id | not valid")
 		return
 	}
 
 	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -166,11 +151,7 @@ func (h *HandlerV1) UpdateProjectResource(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -186,11 +167,8 @@ func (h *HandlerV1) UpdateProjectResource(c *gin.Context) {
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: c.Request.URL.String(),
 			ActionType:   "UPDATE",
-			UsedEnvironments: map[string]bool{
-				cast.ToString(environmentId): true,
-			},
-			UserInfo: cast.ToString(userId),
-			Request:  &request,
+			UserInfo:     cast.ToString(userId),
+			Request:      &request,
 		}
 	)
 
@@ -204,13 +182,13 @@ func (h *HandlerV1) UpdateProjectResource(c *gin.Context) {
 		go h.versionHistory(logReq)
 	}()
 
-	resp, err = h.companyServices.Resource().UpdateProjectResource(
-		context.Background(),
-		request,
-	)
+	resp, err = h.companyServices.Resource().UpdateProjectResource(c.Request.Context(), request)
 	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	h.handleResponse(c, status_http.OK, resp)
 }
 
 // GetListProjectResource godoc
@@ -237,8 +215,7 @@ func (h *HandlerV1) GetListProjectResourceList(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err := errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.InvalidArgument, "error getting environment id | not valid")
 		return
 	}
 
@@ -249,11 +226,7 @@ func (h *HandlerV1) GetListProjectResourceList(c *gin.Context) {
 		request.Type = pb.ResourceType(pb.ResourceType_value[c.DefaultQuery("type", "")])
 	}
 
-	resp, err := h.companyServices.Resource().GetProjectResourceList(
-		c.Request.Context(),
-		request,
-	)
-
+	resp, err := h.companyServices.Resource().GetProjectResourceList(c.Request.Context(), request)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -276,7 +249,6 @@ func (h *HandlerV1) GetListProjectResourceList(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetSingleProjectResource(c *gin.Context) {
-
 	request := &pb.PrimaryKeyProjectResource{}
 
 	projectId, ok := c.Get("project_id")
@@ -287,8 +259,7 @@ func (h *HandlerV1) GetSingleProjectResource(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err := errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.InvalidArgument, "error getting environment id | not valid")
 		return
 	}
 
@@ -296,11 +267,7 @@ func (h *HandlerV1) GetSingleProjectResource(c *gin.Context) {
 	request.EnvironmentId = environmentId.(string)
 	request.Id = c.Param("id")
 
-	resp, err := h.companyServices.Resource().GetSingleProjectResouece(
-		context.Background(),
-		request,
-	)
-
+	resp, err := h.companyServices.Resource().GetSingleProjectResouece(c.Request.Context(), request)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -319,11 +286,10 @@ func (h *HandlerV1) GetSingleProjectResource(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path string true "id"
-// @Success 200 {object} status_http.Response{data=pb.Empty} "VariableResource"
+// @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) DeleteProjectResource(c *gin.Context) {
-
 	var (
 		request = &pb.PrimaryKeyProjectResource{}
 		resp    = &pb.Empty{}
@@ -337,8 +303,7 @@ func (h *HandlerV1) DeleteProjectResource(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err := errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.InvalidArgument, "error getting environment id | not valid")
 		return
 	}
 
@@ -349,8 +314,7 @@ func (h *HandlerV1) DeleteProjectResource(c *gin.Context) {
 	request.Id = c.Param("id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -361,11 +325,7 @@ func (h *HandlerV1) DeleteProjectResource(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -378,10 +338,7 @@ func (h *HandlerV1) DeleteProjectResource(c *gin.Context) {
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: c.Request.URL.String(),
 			ActionType:   "DELETE",
-			UsedEnvironments: map[string]bool{
-				cast.ToString(environmentId): true,
-			},
-			UserInfo: cast.ToString(userId),
+			UserInfo:     cast.ToString(userId),
 		}
 	)
 
@@ -395,11 +352,11 @@ func (h *HandlerV1) DeleteProjectResource(c *gin.Context) {
 		go h.versionHistory(logReq)
 	}()
 
-	resp, err = h.companyServices.Resource().DeleteProjectResource(
-		c.Request.Context(),
-		request,
-	)
+	resp, err = h.companyServices.Resource().DeleteProjectResource(c.Request.Context(), request)
 	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	h.handleResponse(c, status_http.NoContent, nil)
 }
