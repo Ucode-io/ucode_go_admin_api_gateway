@@ -124,6 +124,7 @@ func DoInvokeFuntion(request models.DoInvokeFuntionStruct, c *gin.Context, h *Ha
 		data["method"] = request.Method
 		data["app_id"] = appId
 		data["user_id"] = authInfo.GetUserId()
+		data["session_id"] = authInfo.GetId()
 		data["project_id"] = request.Resource.ProjectId
 		data["environment_id"] = request.Resource.EnvironmentId
 		data["action_type"] = request.ActionType
