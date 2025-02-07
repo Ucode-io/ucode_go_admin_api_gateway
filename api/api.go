@@ -256,6 +256,11 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			transaction.GET("/:id", h.V1.GetTransaction)
 			transaction.PUT("", h.V1.UpdateTransaction)
 		}
+		payme := v1.Group("/payme")
+		{
+			payme.POST("/card", h.V1.CreateProjectCard)
+			payme.POST("/verify", h.V1.VerifyCard)
+		}
 	}
 
 	v2 := r.Group("/v2")

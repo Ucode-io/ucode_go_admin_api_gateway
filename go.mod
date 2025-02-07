@@ -40,6 +40,7 @@ require (
 	github.com/tus/tusd v1.13.0
 	github.com/uber/jaeger-client-go v2.30.0+incompatible
 	github.com/ucode-io/ucode_sdk v1.0.1
+	golang.org/x/exp v0.0.0-20220827204233-334a2380cb91
 	golang.org/x/time v0.5.0
 )
 

@@ -36,6 +36,7 @@ const (
 	BillingService_UpdateTransaction_FullMethodName    = "/company_service.BillingService/UpdateTransaction"
 	BillingService_CompareFunction_FullMethodName      = "/company_service.BillingService/CompareFunction"
 	BillingService_UpsertMonthlyRequest_FullMethodName = "/company_service.BillingService/UpsertMonthlyRequest"
+	BillingService_CreateCard_FullMethodName           = "/company_service.BillingService/CreateCard"
 )
 
 // BillingServiceClient is the client API for BillingService service.
@@ -62,6 +63,8 @@ type BillingServiceClient interface {
 	// Compare
 	CompareFunction(ctx context.Context, in *CompareFunctionRequest, opts ...grpc.CallOption) (*CompareFunctionResponse, error)
 	UpsertMonthlyRequest(ctx context.Context, in *MonthlyRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	// Payme
+	CreateCard(ctx context.Context, in *CreateProjectCardRequest, opts ...grpc.CallOption) (*ProjectCard, error)
 }
 
 type billingServiceClient struct {
@@ -232,6 +235,16 @@ func (c *billingServiceClient) UpsertMonthlyRequest(ctx context.Context, in *Mon
 	return out, nil
 }
 
+func (c *billingServiceClient) CreateCard(ctx context.Context, in *CreateProjectCardRequest, opts ...grpc.CallOption) (*ProjectCard, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ProjectCard)
+	err := c.cc.Invoke(ctx, BillingService_CreateCard_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // BillingServiceServer is the server API for BillingService service.
 // All implementations must embed UnimplementedBillingServiceServer
 // for forward compatibility.
@@ -256,6 +269,8 @@ type BillingServiceServer interface {
 	// Compare
 	CompareFunction(context.Context, *CompareFunctionRequest) (*CompareFunctionResponse, error)
 	UpsertMonthlyRequest(context.Context, *MonthlyRequest) (*empty.Empty, error)
+	// Payme
+	CreateCard(context.Context, *CreateProjectCardRequest) (*ProjectCard, error)
 	mustEmbedUnimplementedBillingServiceServer()
 }
 
@@ -313,6 +328,9 @@ func (UnimplementedBillingServiceServer) CompareFunction(context.Context, *Compa
 }
 func (UnimplementedBillingServiceServer) UpsertMonthlyRequest(context.Context, *MonthlyRequest) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpsertMonthlyRequest not implemented")
+}
+func (UnimplementedBillingServiceServer) CreateCard(context.Context, *CreateProjectCardRequest) (*ProjectCard, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateCard not implemented")
 }
 func (UnimplementedBillingServiceServer) mustEmbedUnimplementedBillingServiceServer() {}
 func (UnimplementedBillingServiceServer) testEmbeddedByValue()                        {}
@@ -623,6 +641,24 @@ func _BillingService_UpsertMonthlyRequest_Handler(srv interface{}, ctx context.C
 	return interceptor(ctx, in, info, handler)
 }
 
+func _BillingService_CreateCard_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateProjectCardRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BillingServiceServer).CreateCard(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BillingService_CreateCard_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BillingServiceServer).CreateCard(ctx, req.(*CreateProjectCardRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // BillingService_ServiceDesc is the grpc.ServiceDesc for BillingService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -693,6 +729,10 @@ var BillingService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpsertMonthlyRequest",
 			Handler:    _BillingService_UpsertMonthlyRequest_Handler,
+		},
+		{
+			MethodName: "CreateCard",
+			Handler:    _BillingService_CreateCard_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
