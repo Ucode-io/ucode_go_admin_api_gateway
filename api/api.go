@@ -258,8 +258,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		}
 		payme := v1.Group("/payme")
 		{
-			payme.POST("/card", h.V1.CreateProjectCard)
-			payme.POST("/verify", h.V1.VerifyCard)
+			payme.POST("/get-verify-code", h.V1.GetVerifyCode)
+			payme.POST("/verify", h.V1.Verify)
 		}
 	}
 

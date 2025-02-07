@@ -37,6 +37,10 @@ const (
 	BillingService_CompareFunction_FullMethodName      = "/company_service.BillingService/CompareFunction"
 	BillingService_UpsertMonthlyRequest_FullMethodName = "/company_service.BillingService/UpsertMonthlyRequest"
 	BillingService_CreateCard_FullMethodName           = "/company_service.BillingService/CreateCard"
+	BillingService_GetProjectCard_FullMethodName       = "/company_service.BillingService/GetProjectCard"
+	BillingService_GetVerifyCode_FullMethodName        = "/company_service.BillingService/GetVerifyCode"
+	BillingService_Verify_FullMethodName               = "/company_service.BillingService/Verify"
+	BillingService_UpdateProjectCard_FullMethodName    = "/company_service.BillingService/UpdateProjectCard"
 )
 
 // BillingServiceClient is the client API for BillingService service.
@@ -65,6 +69,10 @@ type BillingServiceClient interface {
 	UpsertMonthlyRequest(ctx context.Context, in *MonthlyRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	// Payme
 	CreateCard(ctx context.Context, in *CreateProjectCardRequest, opts ...grpc.CallOption) (*ProjectCard, error)
+	GetProjectCard(ctx context.Context, in *PrimaryKey, opts ...grpc.CallOption) (*ProjectCard, error)
+	GetVerifyCode(ctx context.Context, in *GetVerifyCodeRequest, opts ...grpc.CallOption) (*GetVerifyCodeResponse, error)
+	Verify(ctx context.Context, in *VerifyRequest, opts ...grpc.CallOption) (*ProjectCard, error)
+	UpdateProjectCard(ctx context.Context, in *ProjectCard, opts ...grpc.CallOption) (*ProjectCard, error)
 }
 
 type billingServiceClient struct {
@@ -245,6 +253,46 @@ func (c *billingServiceClient) CreateCard(ctx context.Context, in *CreateProject
 	return out, nil
 }
 
+func (c *billingServiceClient) GetProjectCard(ctx context.Context, in *PrimaryKey, opts ...grpc.CallOption) (*ProjectCard, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ProjectCard)
+	err := c.cc.Invoke(ctx, BillingService_GetProjectCard_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *billingServiceClient) GetVerifyCode(ctx context.Context, in *GetVerifyCodeRequest, opts ...grpc.CallOption) (*GetVerifyCodeResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetVerifyCodeResponse)
+	err := c.cc.Invoke(ctx, BillingService_GetVerifyCode_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *billingServiceClient) Verify(ctx context.Context, in *VerifyRequest, opts ...grpc.CallOption) (*ProjectCard, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ProjectCard)
+	err := c.cc.Invoke(ctx, BillingService_Verify_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *billingServiceClient) UpdateProjectCard(ctx context.Context, in *ProjectCard, opts ...grpc.CallOption) (*ProjectCard, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ProjectCard)
+	err := c.cc.Invoke(ctx, BillingService_UpdateProjectCard_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // BillingServiceServer is the server API for BillingService service.
 // All implementations must embed UnimplementedBillingServiceServer
 // for forward compatibility.
@@ -271,6 +319,10 @@ type BillingServiceServer interface {
 	UpsertMonthlyRequest(context.Context, *MonthlyRequest) (*empty.Empty, error)
 	// Payme
 	CreateCard(context.Context, *CreateProjectCardRequest) (*ProjectCard, error)
+	GetProjectCard(context.Context, *PrimaryKey) (*ProjectCard, error)
+	GetVerifyCode(context.Context, *GetVerifyCodeRequest) (*GetVerifyCodeResponse, error)
+	Verify(context.Context, *VerifyRequest) (*ProjectCard, error)
+	UpdateProjectCard(context.Context, *ProjectCard) (*ProjectCard, error)
 	mustEmbedUnimplementedBillingServiceServer()
 }
 
@@ -331,6 +383,18 @@ func (UnimplementedBillingServiceServer) UpsertMonthlyRequest(context.Context, *
 }
 func (UnimplementedBillingServiceServer) CreateCard(context.Context, *CreateProjectCardRequest) (*ProjectCard, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateCard not implemented")
+}
+func (UnimplementedBillingServiceServer) GetProjectCard(context.Context, *PrimaryKey) (*ProjectCard, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetProjectCard not implemented")
+}
+func (UnimplementedBillingServiceServer) GetVerifyCode(context.Context, *GetVerifyCodeRequest) (*GetVerifyCodeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetVerifyCode not implemented")
+}
+func (UnimplementedBillingServiceServer) Verify(context.Context, *VerifyRequest) (*ProjectCard, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Verify not implemented")
+}
+func (UnimplementedBillingServiceServer) UpdateProjectCard(context.Context, *ProjectCard) (*ProjectCard, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateProjectCard not implemented")
 }
 func (UnimplementedBillingServiceServer) mustEmbedUnimplementedBillingServiceServer() {}
 func (UnimplementedBillingServiceServer) testEmbeddedByValue()                        {}
@@ -659,6 +723,78 @@ func _BillingService_CreateCard_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _BillingService_GetProjectCard_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PrimaryKey)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BillingServiceServer).GetProjectCard(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BillingService_GetProjectCard_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BillingServiceServer).GetProjectCard(ctx, req.(*PrimaryKey))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BillingService_GetVerifyCode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetVerifyCodeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BillingServiceServer).GetVerifyCode(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BillingService_GetVerifyCode_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BillingServiceServer).GetVerifyCode(ctx, req.(*GetVerifyCodeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BillingService_Verify_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(VerifyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BillingServiceServer).Verify(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BillingService_Verify_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BillingServiceServer).Verify(ctx, req.(*VerifyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BillingService_UpdateProjectCard_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ProjectCard)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BillingServiceServer).UpdateProjectCard(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BillingService_UpdateProjectCard_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BillingServiceServer).UpdateProjectCard(ctx, req.(*ProjectCard))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // BillingService_ServiceDesc is the grpc.ServiceDesc for BillingService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -733,6 +869,22 @@ var BillingService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateCard",
 			Handler:    _BillingService_CreateCard_Handler,
+		},
+		{
+			MethodName: "GetProjectCard",
+			Handler:    _BillingService_GetProjectCard_Handler,
+		},
+		{
+			MethodName: "GetVerifyCode",
+			Handler:    _BillingService_GetVerifyCode_Handler,
+		},
+		{
+			MethodName: "Verify",
+			Handler:    _BillingService_Verify_Handler,
+		},
+		{
+			MethodName: "UpdateProjectCard",
+			Handler:    _BillingService_UpdateProjectCard_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

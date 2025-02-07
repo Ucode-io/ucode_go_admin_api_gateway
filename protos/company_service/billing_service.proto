@@ -33,6 +33,10 @@ service BillingService {
 
     // Payme
     rpc CreateCard(CreateProjectCardRequest) returns (ProjectCard);
+    rpc GetProjectCard(PrimaryKey) returns (ProjectCard);
+    rpc GetVerifyCode(GetVerifyCodeRequest) returns (GetVerifyCodeResponse);
+    rpc Verify(VerifyRequest) returns (ProjectCard);
+    rpc UpdateProjectCard(ProjectCard) returns (ProjectCard);
 }
 
 message CompareFunctionRequest {
@@ -180,7 +184,27 @@ message ProjectCard {
     string pan = 2;
     string expire = 3;
     string payme_token = 4;
-    string project_id = 5;
-    string created_at = 6;
-    string updated_at = 7;
+    bool verify = 5;
+    string project_id = 6;
+    string created_at = 7;
+    string updated_at = 8;
+}
+
+message GetVerifyCodeRequest {
+    string pan = 1;
+    string expire = 2;
+    string project_id = 3;
+}
+
+message GetVerifyCodeResponse {
+    bool sent = 1;
+    string phone = 2;
+    int64 wait = 3;
+    string project_card_id = 4;
+}
+
+message VerifyRequest {
+    string project_card_id = 1;
+    string code = 2;
+    string project_id = 3;
 }
