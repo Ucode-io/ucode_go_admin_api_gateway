@@ -85,3 +85,29 @@ func (h *HandlerV1) GetAllProjectCards(c *gin.Context) {
 
 	h.handleResponse(c, status_http.OK, response)
 }
+
+func (h *HandlerV1) ReceiptPay(c *gin.Context) {
+	var request pb.ReceiptPayRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	userId, _ := c.Get("user_id")
+
+	request.ProjectId = projectId.(string)
+	request.UserId = userId.(string)
+	response, err := h.companyServices.Billing().ReceiptPay(c, &request)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.OK, response)
+}

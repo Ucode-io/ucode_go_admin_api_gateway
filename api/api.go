@@ -261,6 +261,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			payme.POST("/get-verify-code", h.V1.GetVerifyCode)
 			payme.POST("/verify", h.V1.Verify)
 			payme.GET("/card-list", h.V1.GetAllProjectCards)
+			payme.POST("/receipt-pay", h.V1.ReceiptPay)
 		}
 	}
 
