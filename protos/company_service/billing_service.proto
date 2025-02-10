@@ -37,6 +37,7 @@ service BillingService {
     rpc GetVerifyCode(GetVerifyCodeRequest) returns (GetVerifyCodeResponse);
     rpc Verify(VerifyRequest) returns (ProjectCard);
     rpc UpdateProjectCard(ProjectCard) returns (ProjectCard);
+    rpc ListProjectCards(ListRequest) returns (ListProjectCardsResponse);
 }
 
 message CompareFunctionRequest {
@@ -207,4 +208,9 @@ message VerifyRequest {
     string project_card_id = 1;
     string code = 2;
     string project_id = 3;
+}
+
+message ListProjectCardsResponse {
+    repeated ProjectCard project_cards = 1;
+    int32 count = 2;
 }
