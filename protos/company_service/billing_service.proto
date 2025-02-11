@@ -227,7 +227,8 @@ message ReceiptPayRequest {
 }
 
 message ReceiptPayResponse {
-    string project_card_id = 1;
+    string pan = 1;
     double amount = 2;
     string status = 3;
+    string organization = 4;
 }
