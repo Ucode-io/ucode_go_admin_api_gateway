@@ -111,3 +111,20 @@ func (h *HandlerV1) ReceiptPay(c *gin.Context) {
 
 	h.handleResponse(c, status_http.OK, response)
 }
+
+func (h *HandlerV1) DeleteProjectCard(c *gin.Context) {
+	var id = c.Param("id")
+
+	if !util.IsValidUUID(id) {
+		h.handleResponse(c, status_http.BadRequest, "invalid id")
+		return
+	}
+
+	response, err := h.companyServices.Billing().DeleteProjectCard(c, &pb.PrimaryKey{Id: id})
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.NoContent, response)
+}

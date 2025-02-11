@@ -43,6 +43,7 @@ const (
 	BillingService_UpdateProjectCard_FullMethodName    = "/company_service.BillingService/UpdateProjectCard"
 	BillingService_ListProjectCards_FullMethodName     = "/company_service.BillingService/ListProjectCards"
 	BillingService_ReceiptPay_FullMethodName           = "/company_service.BillingService/ReceiptPay"
+	BillingService_DeleteProjectCard_FullMethodName    = "/company_service.BillingService/DeleteProjectCard"
 )
 
 // BillingServiceClient is the client API for BillingService service.
@@ -77,6 +78,7 @@ type BillingServiceClient interface {
 	UpdateProjectCard(ctx context.Context, in *ProjectCard, opts ...grpc.CallOption) (*ProjectCard, error)
 	ListProjectCards(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListProjectCardsResponse, error)
 	ReceiptPay(ctx context.Context, in *ReceiptPayRequest, opts ...grpc.CallOption) (*ReceiptPayResponse, error)
+	DeleteProjectCard(ctx context.Context, in *PrimaryKey, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
 type billingServiceClient struct {
@@ -317,6 +319,16 @@ func (c *billingServiceClient) ReceiptPay(ctx context.Context, in *ReceiptPayReq
 	return out, nil
 }
 
+func (c *billingServiceClient) DeleteProjectCard(ctx context.Context, in *PrimaryKey, opts ...grpc.CallOption) (*empty.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, BillingService_DeleteProjectCard_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // BillingServiceServer is the server API for BillingService service.
 // All implementations must embed UnimplementedBillingServiceServer
 // for forward compatibility.
@@ -349,6 +361,7 @@ type BillingServiceServer interface {
 	UpdateProjectCard(context.Context, *ProjectCard) (*ProjectCard, error)
 	ListProjectCards(context.Context, *ListRequest) (*ListProjectCardsResponse, error)
 	ReceiptPay(context.Context, *ReceiptPayRequest) (*ReceiptPayResponse, error)
+	DeleteProjectCard(context.Context, *PrimaryKey) (*empty.Empty, error)
 	mustEmbedUnimplementedBillingServiceServer()
 }
 
@@ -427,6 +440,9 @@ func (UnimplementedBillingServiceServer) ListProjectCards(context.Context, *List
 }
 func (UnimplementedBillingServiceServer) ReceiptPay(context.Context, *ReceiptPayRequest) (*ReceiptPayResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReceiptPay not implemented")
+}
+func (UnimplementedBillingServiceServer) DeleteProjectCard(context.Context, *PrimaryKey) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteProjectCard not implemented")
 }
 func (UnimplementedBillingServiceServer) mustEmbedUnimplementedBillingServiceServer() {}
 func (UnimplementedBillingServiceServer) testEmbeddedByValue()                        {}
@@ -863,6 +879,24 @@ func _BillingService_ReceiptPay_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _BillingService_DeleteProjectCard_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PrimaryKey)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BillingServiceServer).DeleteProjectCard(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BillingService_DeleteProjectCard_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BillingServiceServer).DeleteProjectCard(ctx, req.(*PrimaryKey))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // BillingService_ServiceDesc is the grpc.ServiceDesc for BillingService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -961,6 +995,10 @@ var BillingService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ReceiptPay",
 			Handler:    _BillingService_ReceiptPay_Handler,
+		},
+		{
+			MethodName: "DeleteProjectCard",
+			Handler:    _BillingService_DeleteProjectCard_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

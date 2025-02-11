@@ -262,6 +262,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			payme.POST("/verify", h.V1.Verify)
 			payme.GET("/card-list", h.V1.GetAllProjectCards)
 			payme.POST("/receipt-pay", h.V1.ReceiptPay)
+			payme.DELETE("/card/:id", h.V1.DeleteProjectCard)
 		}
 	}
 

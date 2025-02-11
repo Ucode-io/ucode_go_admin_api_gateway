@@ -39,6 +39,7 @@ service BillingService {
     rpc UpdateProjectCard(ProjectCard) returns (ProjectCard);
     rpc ListProjectCards(ListRequest) returns (ListProjectCardsResponse);
     rpc ReceiptPay(ReceiptPayRequest) returns (ReceiptPayResponse);
+    rpc DeleteProjectCard(PrimaryKey) returns (google.protobuf.Empty);
 }
 
 message CompareFunctionRequest {

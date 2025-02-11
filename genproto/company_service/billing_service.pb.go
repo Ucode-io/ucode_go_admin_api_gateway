@@ -2013,7 +2013,7 @@ var file_billing_service_proto_rawDesc = []byte{
 	0x65, 0x63, 0x74, 0x43, 0x61, 0x72, 0x64, 0x49, 0x64, 0x12, 0x16, 0x0a, 0x06, 0x61, 0x6d, 0x6f,
 	0x75, 0x6e, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x01, 0x52, 0x06, 0x61, 0x6d, 0x6f, 0x75, 0x6e,
 	0x74, 0x12, 0x16, 0x0a, 0x06, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x18, 0x03, 0x20, 0x01, 0x28,
-	0x09, 0x52, 0x06, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x32, 0xc8, 0x0e, 0x0a, 0x0e, 0x42, 0x69,
+	0x09, 0x52, 0x06, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x32, 0x92, 0x0f, 0x0a, 0x0e, 0x42, 0x69,
 	0x6c, 0x6c, 0x69, 0x6e, 0x67, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x47, 0x0a, 0x0a,
 	0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x46, 0x61, 0x72, 0x65, 0x12, 0x22, 0x2e, 0x63, 0x6f, 0x6d,
 	0x70, 0x61, 0x6e, 0x79, 0x5f, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2e, 0x43, 0x72, 0x65,
@@ -2130,9 +2130,14 @@ var file_billing_service_proto_rawDesc = []byte{
 	0x63, 0x65, 0x69, 0x70, 0x74, 0x50, 0x61, 0x79, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a,
 	0x23, 0x2e, 0x63, 0x6f, 0x6d, 0x70, 0x61, 0x6e, 0x79, 0x5f, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63,
 	0x65, 0x2e, 0x52, 0x65, 0x63, 0x65, 0x69, 0x70, 0x74, 0x50, 0x61, 0x79, 0x52, 0x65, 0x73, 0x70,
-	0x6f, 0x6e, 0x73, 0x65, 0x42, 0x1a, 0x5a, 0x18, 0x67, 0x65, 0x6e, 0x70, 0x72, 0x6f, 0x74, 0x6f,
-	0x2f, 0x63, 0x6f, 0x6d, 0x70, 0x61, 0x6e, 0x79, 0x5f, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65,
-	0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x6f, 0x6e, 0x73, 0x65, 0x12, 0x48, 0x0a, 0x11, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x50, 0x72,
+	0x6f, 0x6a, 0x65, 0x63, 0x74, 0x43, 0x61, 0x72, 0x64, 0x12, 0x1b, 0x2e, 0x63, 0x6f, 0x6d, 0x70,
+	0x61, 0x6e, 0x79, 0x5f, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2e, 0x50, 0x72, 0x69, 0x6d,
+	0x61, 0x72, 0x79, 0x4b, 0x65, 0x79, 0x1a, 0x16, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e,
+	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x42, 0x1a,
+	0x5a, 0x18, 0x67, 0x65, 0x6e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x63, 0x6f, 0x6d, 0x70, 0x61,
+	0x6e, 0x79, 0x5f, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74,
+	0x6f, 0x33,
 }
 
 var (
@@ -2207,31 +2212,33 @@ var file_billing_service_proto_depIdxs = []int32{
 	16, // 28: company_service.BillingService.UpdateProjectCard:input_type -> company_service.ProjectCard
 	8,  // 29: company_service.BillingService.ListProjectCards:input_type -> company_service.ListRequest
 	21, // 30: company_service.BillingService.ReceiptPay:input_type -> company_service.ReceiptPayRequest
-	2,  // 31: company_service.BillingService.CreateFare:output_type -> company_service.Fare
-	2,  // 32: company_service.BillingService.GetFare:output_type -> company_service.Fare
-	9,  // 33: company_service.BillingService.ListFares:output_type -> company_service.ListFareResponse
-	2,  // 34: company_service.BillingService.UpdateFare:output_type -> company_service.Fare
-	24, // 35: company_service.BillingService.DeleteFare:output_type -> google.protobuf.Empty
-	3,  // 36: company_service.BillingService.CreateFareItem:output_type -> company_service.FareItem
-	3,  // 37: company_service.BillingService.GetFareItem:output_type -> company_service.FareItem
-	11, // 38: company_service.BillingService.ListFareItems:output_type -> company_service.ListFareItemsResponse
-	3,  // 39: company_service.BillingService.UpdateFareItem:output_type -> company_service.FareItem
-	24, // 40: company_service.BillingService.DeleteFareItem:output_type -> google.protobuf.Empty
-	5,  // 41: company_service.BillingService.CreateTransaction:output_type -> company_service.Transaction
-	5,  // 42: company_service.BillingService.GetTransaction:output_type -> company_service.Transaction
-	13, // 43: company_service.BillingService.ListTransactions:output_type -> company_service.ListTransactionsResponse
-	5,  // 44: company_service.BillingService.UpdateTransaction:output_type -> company_service.Transaction
-	1,  // 45: company_service.BillingService.CompareFunction:output_type -> company_service.CompareFunctionResponse
-	24, // 46: company_service.BillingService.UpsertMonthlyRequest:output_type -> google.protobuf.Empty
-	16, // 47: company_service.BillingService.CreateCard:output_type -> company_service.ProjectCard
-	16, // 48: company_service.BillingService.GetProjectCard:output_type -> company_service.ProjectCard
-	18, // 49: company_service.BillingService.GetVerifyCode:output_type -> company_service.GetVerifyCodeResponse
-	16, // 50: company_service.BillingService.Verify:output_type -> company_service.ProjectCard
-	16, // 51: company_service.BillingService.UpdateProjectCard:output_type -> company_service.ProjectCard
-	20, // 52: company_service.BillingService.ListProjectCards:output_type -> company_service.ListProjectCardsResponse
-	22, // 53: company_service.BillingService.ReceiptPay:output_type -> company_service.ReceiptPayResponse
-	31, // [31:54] is the sub-list for method output_type
-	8,  // [8:31] is the sub-list for method input_type
+	7,  // 31: company_service.BillingService.DeleteProjectCard:input_type -> company_service.PrimaryKey
+	2,  // 32: company_service.BillingService.CreateFare:output_type -> company_service.Fare
+	2,  // 33: company_service.BillingService.GetFare:output_type -> company_service.Fare
+	9,  // 34: company_service.BillingService.ListFares:output_type -> company_service.ListFareResponse
+	2,  // 35: company_service.BillingService.UpdateFare:output_type -> company_service.Fare
+	24, // 36: company_service.BillingService.DeleteFare:output_type -> google.protobuf.Empty
+	3,  // 37: company_service.BillingService.CreateFareItem:output_type -> company_service.FareItem
+	3,  // 38: company_service.BillingService.GetFareItem:output_type -> company_service.FareItem
+	11, // 39: company_service.BillingService.ListFareItems:output_type -> company_service.ListFareItemsResponse
+	3,  // 40: company_service.BillingService.UpdateFareItem:output_type -> company_service.FareItem
+	24, // 41: company_service.BillingService.DeleteFareItem:output_type -> google.protobuf.Empty
+	5,  // 42: company_service.BillingService.CreateTransaction:output_type -> company_service.Transaction
+	5,  // 43: company_service.BillingService.GetTransaction:output_type -> company_service.Transaction
+	13, // 44: company_service.BillingService.ListTransactions:output_type -> company_service.ListTransactionsResponse
+	5,  // 45: company_service.BillingService.UpdateTransaction:output_type -> company_service.Transaction
+	1,  // 46: company_service.BillingService.CompareFunction:output_type -> company_service.CompareFunctionResponse
+	24, // 47: company_service.BillingService.UpsertMonthlyRequest:output_type -> google.protobuf.Empty
+	16, // 48: company_service.BillingService.CreateCard:output_type -> company_service.ProjectCard
+	16, // 49: company_service.BillingService.GetProjectCard:output_type -> company_service.ProjectCard
+	18, // 50: company_service.BillingService.GetVerifyCode:output_type -> company_service.GetVerifyCodeResponse
+	16, // 51: company_service.BillingService.Verify:output_type -> company_service.ProjectCard
+	16, // 52: company_service.BillingService.UpdateProjectCard:output_type -> company_service.ProjectCard
+	20, // 53: company_service.BillingService.ListProjectCards:output_type -> company_service.ListProjectCardsResponse
+	22, // 54: company_service.BillingService.ReceiptPay:output_type -> company_service.ReceiptPayResponse
+	24, // 55: company_service.BillingService.DeleteProjectCard:output_type -> google.protobuf.Empty
+	32, // [32:56] is the sub-list for method output_type
+	8,  // [8:32] is the sub-list for method input_type
 	8,  // [8:8] is the sub-list for extension type_name
 	8,  // [8:8] is the sub-list for extension extendee
 	0,  // [0:8] is the sub-list for field type_name
