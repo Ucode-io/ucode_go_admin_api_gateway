@@ -103,7 +103,7 @@ func (h *HandlerV2) handleError(c *gin.Context, statusHttp status_http.Status, e
 		c.JSON(http.StatusInternalServerError, status_http.Response{
 			Status:        statusHttp.Status,
 			Description:   st.String(),
-			Data:          "This slug already exists. Ple ase choose a unique one.",
+			Data:          "This slug already exists. Please choose a unique one.",
 			CustomMessage: statusHttp.CustomMessage,
 		})
 	} else if st.Err() != nil {
