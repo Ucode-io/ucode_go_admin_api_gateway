@@ -256,6 +256,14 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			transaction.GET("/:id", h.V1.GetTransaction)
 			transaction.PUT("", h.V1.UpdateTransaction)
 		}
+		payme := v1.Group("/payme")
+		{
+			payme.POST("/get-verify-code", h.V1.GetVerifyCode)
+			payme.POST("/verify", h.V1.Verify)
+			payme.GET("/card-list", h.V1.GetAllProjectCards)
+			payme.POST("/receipt-pay", h.V1.ReceiptPay)
+			payme.DELETE("/card/:id", h.V1.DeleteProjectCard)
+		}
 	}
 
 	v2 := r.Group("/v2")
