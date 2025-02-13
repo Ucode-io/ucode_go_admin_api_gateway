@@ -106,6 +106,13 @@ func (h *HandlerV2) handleError(c *gin.Context, statusHttp status_http.Status, e
 			Data:          "This slug already exists. Please choose a unique one.",
 			CustomMessage: statusHttp.CustomMessage,
 		})
+	} else if st.Code() == codes.InvalidArgument {
+		c.JSON(http.StatusInternalServerError, status_http.Response{
+			Status:        statusHttp.Status,
+			Description:   st.String(),
+			Data:          "Required data is not provided.",
+			CustomMessage: statusHttp.CustomMessage,
+		})
 	} else if st.Err() != nil {
 		c.JSON(http.StatusInternalServerError, status_http.Response{
 			Status:        statusHttp.Status,
