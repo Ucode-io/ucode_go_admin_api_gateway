@@ -740,7 +740,7 @@ func (h *HandlerV1) DeleteTable(c *gin.Context) {
 		)
 
 		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
+			h.handleError(c, status_http.InternalServerError, err)
 			return
 		}
 
@@ -754,7 +754,7 @@ func (h *HandlerV1) DeleteTable(c *gin.Context) {
 		logReq.Previous = oldTable
 		if err != nil {
 			logReq.Response = err.Error()
-			h.handleResponse(c, status_http.GRPCError, err.Error())
+			h.handleError(c, status_http.InternalServerError, err)
 		} else {
 			logReq.Response = resp
 			logReq.Current = resp
