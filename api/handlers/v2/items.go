@@ -839,9 +839,10 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 		singleObject, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().GetSingleSlim(
 			c.Request.Context(),
 			&obs.CommonMessage{
-				TableSlug: c.Param("collection"),
-				Data:      &structpb.Struct{Fields: map[string]*structpb.Value{"id": structpb.NewStringValue(id)}},
-				ProjectId: resource.ResourceEnvironmentId,
+				TableSlug:      c.Param("collection"),
+				Data:           &structpb.Struct{Fields: map[string]*structpb.Value{"id": structpb.NewStringValue(id)}},
+				ProjectId:      resource.ResourceEnvironmentId,
+				BlockedBuilder: cast.ToBool(c.DefaultQuery("block_builder", "false")),
 			},
 		)
 		if err != nil {
