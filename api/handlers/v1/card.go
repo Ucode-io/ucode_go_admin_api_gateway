@@ -2,6 +2,7 @@ package v1
 
 import (
 	"ucode/ucode_go_api_gateway/api/status_http"
+	"ucode/ucode_go_api_gateway/config"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
@@ -11,20 +12,20 @@ import (
 func (h *HandlerV1) GetVerifyCode(c *gin.Context) {
 	var request pb.GetVerifyCodeRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
-		h.handleResponse(c, status_http.BadRequest, err.Error())
+		h.handleError(c, status_http.BadRequest, err)
 		return
 	}
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
-		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		h.handleError(c, status_http.InvalidArgument, config.ErrProjectIdValid)
 		return
 	}
 
 	request.ProjectId = projectId.(string)
 	resp, err := h.companyServices.Billing().GetVerifyCode(c, &request)
 	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err.Error())
+		h.handleError(c, status_http.InternalServerError, err)
 		return
 	}
 
@@ -34,20 +35,20 @@ func (h *HandlerV1) GetVerifyCode(c *gin.Context) {
 func (h *HandlerV1) Verify(c *gin.Context) {
 	var request pb.VerifyRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
-		h.handleResponse(c, status_http.BadRequest, err.Error())
+		h.handleError(c, status_http.BadRequest, err)
 		return
 	}
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
-		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		h.handleError(c, status_http.InvalidArgument, config.ErrProjectIdValid)
 		return
 	}
 
 	request.ProjectId = projectId.(string)
 	resp, err := h.companyServices.Billing().Verify(c, &request)
 	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err.Error())
+		h.handleError(c, status_http.InternalServerError, err)
 		return
 	}
 
@@ -57,19 +58,19 @@ func (h *HandlerV1) Verify(c *gin.Context) {
 func (h *HandlerV1) GetAllProjectCards(c *gin.Context) {
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
-		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		h.handleError(c, status_http.InvalidArgument, config.ErrProjectIdValid)
 		return
 	}
 
 	offset, err := h.getOffsetParam(c)
 	if err != nil {
-		h.handleResponse(c, status_http.BadRequest, err.Error())
+		h.handleError(c, status_http.BadRequest, err)
 		return
 	}
 
 	limit, err := h.getLimitParam(c)
 	if err != nil {
-		h.handleResponse(c, status_http.BadRequest, err.Error())
+		h.handleError(c, status_http.BadRequest, err)
 		return
 	}
 
@@ -79,7 +80,7 @@ func (h *HandlerV1) GetAllProjectCards(c *gin.Context) {
 		ProjectId: projectId.(string),
 	})
 	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
+		h.handleError(c, status_http.InternalServerError, err)
 		return
 	}
 
@@ -89,13 +90,13 @@ func (h *HandlerV1) GetAllProjectCards(c *gin.Context) {
 func (h *HandlerV1) ReceiptPay(c *gin.Context) {
 	var request pb.ReceiptPayRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
-		h.handleResponse(c, status_http.BadRequest, err.Error())
+		h.handleError(c, status_http.BadRequest, err)
 		return
 	}
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
-		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		h.handleError(c, status_http.InvalidArgument, config.ErrProjectIdValid)
 		return
 	}
 
@@ -105,7 +106,7 @@ func (h *HandlerV1) ReceiptPay(c *gin.Context) {
 	request.UserId = userId.(string)
 	response, err := h.companyServices.Billing().ReceiptPay(c, &request)
 	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
+		h.handleError(c, status_http.GRPCError, err)
 		return
 	}
 
@@ -116,13 +117,13 @@ func (h *HandlerV1) DeleteProjectCard(c *gin.Context) {
 	var id = c.Param("id")
 
 	if !util.IsValidUUID(id) {
-		h.handleResponse(c, status_http.BadRequest, "invalid id")
+		h.handleResponse(c, status_http.BadRequest, config.ErrIdValid)
 		return
 	}
 
 	response, err := h.companyServices.Billing().DeleteProjectCard(c, &pb.PrimaryKey{Id: id})
 	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
+		h.handleError(c, status_http.InternalServerError, err)
 		return
 	}
 
