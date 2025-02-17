@@ -49,6 +49,7 @@ type BuilderServiceI interface {
 	File() object_builder_service.FileServiceClient
 	VersionHistory() object_builder_service.VersionHistoryServiceClient
 	Version() object_builder_service.VersionServiceClient
+	Language() object_builder_service.LanguageServiceClient
 }
 
 func NewBuilderServiceClient(ctx context.Context, cfg config.Config) (BuilderServiceI, error) {
@@ -116,6 +117,7 @@ func NewBuilderServiceClient(ctx context.Context, cfg config.Config) (BuilderSer
 		itemsService:              object_builder_service.NewItemsServiceClient(connObjectBuilderService),
 		versionHistoryService:     object_builder_service.NewVersionHistoryServiceClient(connObjectBuilderService),
 		versionService:            object_builder_service.NewVersionServiceClient(connObjectBuilderService),
+		languageService:           object_builder_service.NewLanguageServiceClient(connObjectBuilderService),
 		clientLb:                  grpcClientLB,
 	}, nil
 }
@@ -158,6 +160,7 @@ type builderServiceClient struct {
 	itemsService              object_builder_service.ItemsServiceClient
 	versionHistoryService     object_builder_service.VersionHistoryServiceClient
 	versionService            object_builder_service.VersionServiceClient
+	languageService           object_builder_service.LanguageServiceClient
 	objectBuilderConnPool     *grpcpool.Pool
 	clientLb                  gRPCClientLb.GrpcClientLB
 }
@@ -310,4 +313,8 @@ func (g *builderServiceClient) VersionHistory() object_builder_service.VersionHi
 
 func (g *builderServiceClient) Version() object_builder_service.VersionServiceClient {
 	return g.versionService
+}
+
+func (g *builderServiceClient) Language() object_builder_service.LanguageServiceClient {
+	return g.languageService
 }
