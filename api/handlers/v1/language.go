@@ -190,11 +190,13 @@ func (h *HandlerV1) GetListLanguage(c *gin.Context) {
 		return
 	}
 
-	limit, err := h.getLimitParam(c)
+	limit, err := h.getLimitParamWithoutDefault(c)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
+
+	search := c.DefaultQuery("search", "")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(), &pb.GetSingleServiceResourceReq{
@@ -225,6 +227,7 @@ func (h *HandlerV1) GetListLanguage(c *gin.Context) {
 				Offset:    int32(offset),
 				Limit:     int32(limit),
 				ProjectId: resourceEnvironmentId,
+				Search:    search,
 			},
 		)
 		if err != nil {
@@ -238,6 +241,7 @@ func (h *HandlerV1) GetListLanguage(c *gin.Context) {
 				Offset:    int32(offset),
 				Limit:     int32(limit),
 				ProjectId: resourceEnvironmentId,
+				Search:    search,
 			},
 		)
 		if err != nil {

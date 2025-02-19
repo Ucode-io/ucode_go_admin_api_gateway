@@ -137,6 +137,11 @@ func (h *HandlerV1) getLimitParam(c *gin.Context) (limit int, err error) {
 	return strconv.Atoi(limitStr)
 }
 
+func (h *HandlerV1) getLimitParamWithoutDefault(c *gin.Context) (limit int, err error) {
+	limitStr := c.DefaultQuery("limit", "0")
+	return strconv.Atoi(limitStr)
+}
+
 func (h *HandlerV1) versionHistory(req *models.CreateVersionHistoryRequest) error {
 	var (
 		current  = map[string]interface{}{"data": req.Current}
