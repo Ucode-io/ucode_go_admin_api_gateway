@@ -20,6 +20,8 @@ message Language {
     string id = 1;
     string key = 2;
     google.protobuf.Struct translations = 3;
+    string category = 4;
+    string platform = 5;
 }
 
 message PrimaryKey {
@@ -31,6 +33,8 @@ message CreateLanguageRequest {
     string key = 1;
     google.protobuf.Struct translations = 2;
     string project_id = 3;
+    string category = 4;
+    string platform = 5;
 }
 
 message GetListLanguagesRequest {
@@ -49,4 +53,6 @@ message UpdateLanguageRequest {
     string key = 2;
     google.protobuf.Struct translations = 3;
     string project_id = 4;
+    string category = 5;
+    string platform = 6;
 }
