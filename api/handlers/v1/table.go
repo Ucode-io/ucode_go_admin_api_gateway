@@ -867,7 +867,7 @@ func (h *HandlerV1) GetTableDetails(c *gin.Context) {
 		)
 
 		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
+			h.handleError(c, status_http.GRPCError, err)
 			return
 		}
 
