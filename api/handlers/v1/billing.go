@@ -461,3 +461,33 @@ func (h *HandlerV1) UpdateTransaction(c *gin.Context) {
 
 	h.handleResponse(c, status_http.OK, response)
 }
+
+// CreateFare godoc
+// @Security ApiKeyAuth
+// @ID create-fare
+// @Router /v1/fare [POST]
+// @Summary Create fare
+// @Description Create fare
+// @Tags Billing
+// @Accept json
+// @Produce json
+// @Param billing body pb.CreateFareRequest true "FareCreateRequest"
+// @Success 201 {object} status_http.Response{data=pb.Fare} "Fare data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *HandlerV1) CalculatePrice(c *gin.Context) {
+	var request pb.CalculatePriceRequest
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	response, err := h.companyServices.Billing().CalculatePrice(c, &request)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.Created, response)
+}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
+	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -242,6 +243,38 @@ func (h *HandlerV1) ListCompanyProjects(c *gin.Context) {
 			CompanyId: companyId,
 		},
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.OK, resp)
+}
+
+func (h *HandlerV1) AttachFareToProject(c *gin.Context) {
+	var (
+		data pb.AttachFareRequest
+	)
+
+	if err := c.ShouldBindJSON(&data); err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+	data.ProjectId = projectId.(string)
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id")
+		return
+	}
+
+	resp, err := h.companyServices.Project().AttachFare(c.Request.Context(), &data)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return

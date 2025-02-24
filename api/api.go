@@ -245,6 +245,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			fare.GET("/:id", h.V1.GetFare)
 			fare.PUT("", h.V1.UpdateFare)
 			fare.DELETE("/:id", h.V1.DeleteFare)
+			fare.GET("/calculate-price", h.V1.CalculatePrice)
 
 			fareItem := fare.Group("/item")
 			{
@@ -349,6 +350,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1Admin.GET("/company/project/resource-environment/:resource_id", h.V1.GetResourceEnvironment)
 		v1Admin.GET("/company/project/resource-default", h.V1.GetServiceResources)
 		v1Admin.PUT("/company/project/resource-default", h.V1.SetDefaultResource)
+		v1Admin.PATCH("/company/project/attach-fare", h.V1.AttachFareToProject)
 
 		// airbyte
 		v1Admin.GET("/company/airbyte/:id", h.V1.GetByIdAirbyte)
