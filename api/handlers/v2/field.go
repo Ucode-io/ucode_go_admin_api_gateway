@@ -1,6 +1,7 @@
 package v2
 
 import (
+	"errors"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
@@ -38,25 +39,25 @@ func (h *HandlerV2) CreateField(c *gin.Context) {
 	)
 
 	if err := c.ShouldBindJSON(&fieldRequest); err != nil {
-		h.handleResponse(c, status_http.BadRequest, err.Error())
+		h.handleError(c, status_http.BadRequest, err)
 		return
 	}
 
 	attributes, err := helper.ConvertMapToStruct(fieldRequest.Attributes)
 	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		h.handleError(c, status_http.InvalidArgument, err)
 		return
 	}
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
-		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		h.handleError(c, status_http.InvalidArgument, errors.New("project id is not valid"))
 		return
 	}
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
+		h.handleError(c, status_http.BadRequest, errors.New("environment id is not valid"))
 		return
 	}
 
@@ -70,13 +71,13 @@ func (h *HandlerV2) CreateField(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
+		h.handleError(c, status_http.GRPCError, err)
 		return
 	}
 
 	services, err := h.GetProjectSrvc(c.Request.Context(), resource.GetProjectId(), resource.NodeType)
 	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
+		h.handleError(c, status_http.InternalServerError, err)
 		return
 	}
 
@@ -88,7 +89,7 @@ func (h *HandlerV2) CreateField(c *gin.Context) {
 				},
 			)
 			if err != nil {
-				h.handleResponse(c, status_http.GRPCError, err.Error())
+				h.handleError(c, status_http.InternalServerError, err)
 				return
 			}
 			if len(languages.GetLanguage()) > 1 {
@@ -122,7 +123,7 @@ func (h *HandlerV2) CreateField(c *gin.Context) {
 			"label_en": fields[0].Label + " Alt",
 		})
 		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
+			h.handleError(c, status_http.InternalServerError, err)
 			return
 		}
 
@@ -172,7 +173,7 @@ func (h *HandlerV2) CreateField(c *gin.Context) {
 			var newReq = nb.CreateFieldRequest{}
 
 			if err = helper.MarshalToStruct(&field, &newReq); err != nil {
-				h.handleResponse(c, status_http.GRPCError, err.Error())
+				h.handleError(c, status_http.InternalServerError, err)
 				return
 			}
 
@@ -183,7 +184,7 @@ func (h *HandlerV2) CreateField(c *gin.Context) {
 				logReq.Request = field
 				logReq.Response = err.Error()
 				go h.versionHistory(logReq)
-				h.handleResponse(c, status_http.GRPCError, err.Error())
+				h.handleError(c, status_http.InternalServerError, err)
 				return
 			}
 			logReq.Request = field
@@ -194,7 +195,6 @@ func (h *HandlerV2) CreateField(c *gin.Context) {
 
 		h.handleResponse(c, status_http.Created, resp)
 	}
-
 }
 
 // GetAllFields godoc

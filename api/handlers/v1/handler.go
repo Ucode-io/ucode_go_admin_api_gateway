@@ -24,6 +24,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type HandlerV1 struct {
@@ -92,6 +94,39 @@ func (h *HandlerV1) handleResponse(c *gin.Context, status status_http.Status, da
 	})
 }
 
+func (h *HandlerV1) handleError(c *gin.Context, statusHttp status_http.Status, err error) {
+	st, _ := status.FromError(err)
+	if statusHttp.Status == status_http.BadRequest.Status {
+		c.JSON(http.StatusInternalServerError, status_http.Response{
+			Status:        statusHttp.Status,
+			Description:   st.String(),
+			Data:          "Invalid JSON",
+			CustomMessage: statusHttp.CustomMessage,
+		})
+	} else if st.Code() == codes.AlreadyExists {
+		c.JSON(http.StatusInternalServerError, status_http.Response{
+			Status:        statusHttp.Status,
+			Description:   st.String(),
+			Data:          "This slug already exists. Please choose a unique one.",
+			CustomMessage: statusHttp.CustomMessage,
+		})
+	} else if st.Code() == codes.FailedPrecondition {
+		c.JSON(http.StatusInternalServerError, status_http.Response{
+			Status:        statusHttp.Status,
+			Description:   st.String(),
+			Data:          "Cannot drop or modify the object because dependent objects exist.",
+			CustomMessage: statusHttp.CustomMessage,
+		})
+	} else if st.Err() != nil {
+		c.JSON(http.StatusInternalServerError, status_http.Response{
+			Status:        statusHttp.Status,
+			Description:   st.String(),
+			Data:          st.Message(),
+			CustomMessage: statusHttp.CustomMessage,
+		})
+	}
+}
+
 func (h *HandlerV1) getOffsetParam(c *gin.Context) (offset int, err error) {
 	offsetStr := c.DefaultQuery("offset", h.baseConf.DefaultOffset)
 	return strconv.Atoi(offsetStr)
@@ -99,6 +134,11 @@ func (h *HandlerV1) getOffsetParam(c *gin.Context) (offset int, err error) {
 
 func (h *HandlerV1) getLimitParam(c *gin.Context) (limit int, err error) {
 	limitStr := c.DefaultQuery("limit", h.baseConf.DefaultLimit)
+	return strconv.Atoi(limitStr)
+}
+
+func (h *HandlerV1) getLimitParamWithoutDefault(c *gin.Context) (limit int, err error) {
+	limitStr := c.DefaultQuery("limit", "0")
 	return strconv.Atoi(limitStr)
 }
 

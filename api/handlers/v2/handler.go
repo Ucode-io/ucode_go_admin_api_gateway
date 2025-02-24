@@ -22,6 +22,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type HandlerV2 struct {
@@ -86,6 +88,39 @@ func (h *HandlerV2) handleResponse(c *gin.Context, status status_http.Status, da
 		Data:          data,
 		CustomMessage: status.CustomMessage,
 	})
+}
+
+func (h *HandlerV2) handleError(c *gin.Context, statusHttp status_http.Status, err error) {
+	st, _ := status.FromError(err)
+	if statusHttp.Status == status_http.BadRequest.Status {
+		c.JSON(http.StatusInternalServerError, status_http.Response{
+			Status:        statusHttp.Status,
+			Description:   st.String(),
+			Data:          "Invalid JSON",
+			CustomMessage: statusHttp.CustomMessage,
+		})
+	} else if st.Code() == codes.AlreadyExists {
+		c.JSON(http.StatusInternalServerError, status_http.Response{
+			Status:        statusHttp.Status,
+			Description:   st.String(),
+			Data:          "This slug already exists. Please choose a unique one.",
+			CustomMessage: statusHttp.CustomMessage,
+		})
+	} else if st.Code() == codes.InvalidArgument {
+		c.JSON(http.StatusInternalServerError, status_http.Response{
+			Status:        statusHttp.Status,
+			Description:   st.String(),
+			Data:          "Required data is not provided.",
+			CustomMessage: statusHttp.CustomMessage,
+		})
+	} else if st.Err() != nil {
+		c.JSON(http.StatusInternalServerError, status_http.Response{
+			Status:        statusHttp.Status,
+			Description:   st.String(),
+			Data:          st.Message(),
+			CustomMessage: statusHttp.CustomMessage,
+		})
+	}
 }
 
 func (h *HandlerV2) getOffsetParam(c *gin.Context) (offset int, err error) {

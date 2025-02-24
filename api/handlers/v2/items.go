@@ -951,6 +951,7 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 				ProjectId:        resource.ResourceEnvironmentId,
 				EnvId:            resource.EnvironmentId,
 				CompanyProjectId: resource.ProjectId,
+				BlockedBuilder:   cast.ToBool(c.DefaultQuery("block_builder", "false")),
 			},
 		)
 		if err != nil {

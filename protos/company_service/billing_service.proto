@@ -105,6 +105,7 @@ message Transaction {
     Currency currency = 14;
     string receipt_file = 15;
     int64 order_id = 16;
+    string payment_type = 17;
 }
 
 // Requests and Responses
@@ -165,6 +166,7 @@ message CreateTransactionRequest {
     string fare_id = 10;
     string receipt_file = 11;
     int64 order_id = 12;
+    string payment_type = 13;
 }
 
 message ListTransactionsResponse {

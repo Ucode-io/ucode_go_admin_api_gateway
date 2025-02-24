@@ -82,6 +82,15 @@ func (h *HandlerV1) GetCompanyProjectList(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+	if len(userProjects.Companies) == 0 {
+		userProjects, err = h.authService.User().GetUserProjects(context.Background(), &auth_service.UserPrimaryKey{
+			Id: authInfo.UserIdAuth,
+		})
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	}
 
 	var projectIds []string
 	for _, userProject := range userProjects.GetCompanies() {

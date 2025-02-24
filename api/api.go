@@ -232,6 +232,12 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1.GET("/files", h.V1.GetAllFiles)
 		v1.POST("/files/word-template", h.V1.WordTemplate)
 
+		v1.POST("/language", h.V1.CreateLanguage)
+		v1.GET("/language/:id", h.V1.GetByIdLanguage)
+		v1.GET("/language", h.V1.GetListLanguage)
+		v1.PUT("/language", h.V1.UpdateLanguage)
+		v1.DELETE("/language/:id", h.V1.DeleteLanguage)
+
 		fare := v1.Group("/fare")
 		{
 			fare.POST("", h.V1.CreateFare)
