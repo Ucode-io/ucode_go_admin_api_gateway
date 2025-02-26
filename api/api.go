@@ -66,7 +66,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1.DELETE("/menu-template/:id", h.V1.DeleteMenuTemplate)
 
 		v1.POST("/upload", h.V1.Upload)
-		v1.POST("/upload-file/:table_slug/:object_id", h.V1.UploadFile)
+		v1.POST("/upload-file/:collection/:object_id", h.V1.UploadFile)
 
 		// OBJECT_BUILDER_SERVICE
 
@@ -74,7 +74,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1.POST("/table", h.V1.CreateTable)
 		v1.GET("/table", h.V1.GetAllTables)
 		v1.GET("/table/:table_id", h.V1.GetTableByID)
-		v1.POST("/table-details/:table_slug", h.V1.GetTableDetails)
+		v1.POST("/table-details/:collection", h.V1.GetTableDetails)
 
 		v1.PUT("/table", h.V1.UpdateTable)
 		v1.DELETE("/table/:table_id", h.V1.DeleteTable)
@@ -84,7 +84,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1.GET("/relation", h.V1.GetAllRelations)
 		v1.PUT("/relation", h.V1.UpdateRelation)
 		v1.DELETE("/relation/:relation_id", h.V1.DeleteRelation)
-		v1.GET("/get-relation-cascading/:table_slug", h.V1.GetRelationCascaders)
+		v1.GET("/get-relation-cascading/:collection", h.V1.GetRelationCascaders)
 
 		//section
 		v1.GET("/section", h.V1.GetAllSections)
@@ -95,27 +95,26 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1.PUT("/view_relation", h.V1.UpsertViewRelations)
 
 		//object-builder
-		v1.POST("/object/:table_slug", h.V1.CreateObject)
-		v1.GET("/object/:table_slug/:object_id", h.V1.GetSingle)
-		v1.POST("/object/get-list/:table_slug", h.V1.GetList)
-		v1.PUT("/object/:table_slug", h.V1.UpdateObject)
-		v1.DELETE("/object/:table_slug/:object_id", h.V1.DeleteObject)
-		v1.DELETE("/object/:table_slug", h.V1.DeleteManyObject)
-		v1.POST("/object/excel/:table_slug", h.V1.GetListInExcel)
-		v1.POST("/object-upsert/:table_slug", h.V1.UpsertObject)
-		v1.PUT("/object/multiple-update/:table_slug", h.V1.MultipleUpdateObject)
-		v1.POST("/object/get-financial-analytics/:table_slug", h.V1.GetFinancialAnalytics)
-		v1.POST("/object/get-list-group-by/:table_slug/:column_table_slug", h.V1.GetListGroupBy)
-		v1.POST("/object/get-group-by-field/:table_slug", h.V1.GetGroupByField)
-		v1.POST("/object/get-list-aggregate/:table_slug", h.V1.GetListAggregate)
-		v1.POST("/object/get-list-without-relation/:table_slug", h.V1.GetListWithOutRelation)
+		v1.POST("/object/:collection", h.V1.CreateObject)
+		v1.GET("/object/:collection/:object_id", h.V1.GetSingle)
+		v1.POST("/object/get-list/:collection", h.V1.GetList)
+		v1.PUT("/object/:table_collectionslug", h.V1.UpdateObject)
+		v1.DELETE("/object/:collection/:object_id", h.V1.DeleteObject)
+		v1.DELETE("/object/:collection", h.V1.DeleteManyObject)
+		v1.POST("/object/excel/:collection", h.V1.GetListInExcel)
+		v1.POST("/object-upsert/:collection", h.V1.UpsertObject)
+		v1.PUT("/object/multiple-update/:collection", h.V1.MultipleUpdateObject)
+		v1.POST("/object/get-financial-analytics/:collection", h.V1.GetFinancialAnalytics)
+		v1.POST("/object/get-list-group-by/:collection/:column_table_slug", h.V1.GetListGroupBy)
+		v1.POST("/object/get-list-aggregate/:collection", h.V1.GetListAggregate)
+		v1.POST("/object/get-list-without-relation/:collection", h.V1.GetListWithOutRelation)
 
 		// permission
 		v1.POST("/permission-upsert/:app_id", h.V1.UpsertPermissionsByAppId)
 		v1.GET("/permission-get-all/:role_id", h.V1.GetAllPermissionByRoleId)
-		v1.GET("/field-permission/:role_id/:table_slug", h.V1.GetFieldPermissions)
-		v1.GET("/action-permission/:role_id/:table_slug", h.V1.GetActionPermissions)
-		v1.GET("/view-relation-permission/:role_id/:table_slug", h.V1.GetViewRelationPermissions)
+		v1.GET("/field-permission/:role_id/:collection", h.V1.GetFieldPermissions)
+		v1.GET("/action-permission/:role_id/:collection", h.V1.GetActionPermissions)
+		v1.GET("/view-relation-permission/:role_id/:collection", h.V1.GetViewRelationPermissions)
 
 		//many-to-many
 		v1.PUT("/many-to-many", h.V1.AppendManyToMany)
@@ -245,6 +244,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			fare.GET("/:id", h.V1.GetFare)
 			fare.PUT("", h.V1.UpdateFare)
 			fare.DELETE("/:id", h.V1.DeleteFare)
+			fare.GET("/calculate-price", h.V1.CalculatePrice)
 
 			fareItem := fare.Group("/item")
 			{
@@ -270,6 +270,10 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			payme.POST("/receipt-pay", h.V1.ReceiptPay)
 			payme.DELETE("/card/:id", h.V1.DeleteProjectCard)
 		}
+		discount := v1.Group("/discounts")
+		{
+			discount.GET("", h.V1.ListDiscounts)
+		}
 	}
 
 	v2 := r.Group("/v2")
@@ -278,7 +282,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 		v2.GET("/language-json", h.V1.GetLanguageJson)
 
-		v2.POST("/object/get-list/:table_slug", h.V1.GetListV2)
+		v2.POST("/object/get-list/:collection", h.V1.GetListV2)
 
 		v2.PUT("/update-with/:collection", h.V1.UpdateWithParams)
 
@@ -290,14 +294,14 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	v1Slim := r.Group("/v1")
 	v1Slim.Use(h.V1.SlimAuthMiddleware(cfg))
 	{
-		v1Slim.GET("/object-slim/:table_slug/:object_id", h.V1.GetSingleSlim)
-		v1.GET("/object-slim/get-list/:table_slug", h.V1.GetListSlim)
+		v1Slim.GET("/object-slim/:collection/:object_id", h.V1.GetSingleSlim)
+		v1.GET("/object-slim/get-list/:collection", h.V1.GetListSlim)
 	}
 
 	v2Slim := r.Group("/v2")
 	v2Slim.Use(h.V1.SlimAuthMiddleware(cfg))
 	{
-		v2Slim.GET("/object-slim/get-list/:table_slug", h.V1.GetListSlimV2)
+		v2Slim.GET("/object-slim/get-list/:collection", h.V1.GetListSlimV2)
 	}
 
 	v1Admin := r.Group("/v1")
@@ -349,6 +353,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1Admin.GET("/company/project/resource-environment/:resource_id", h.V1.GetResourceEnvironment)
 		v1Admin.GET("/company/project/resource-default", h.V1.GetServiceResources)
 		v1Admin.PUT("/company/project/resource-default", h.V1.SetDefaultResource)
+		v1Admin.PATCH("/company/project/attach-fare", h.V1.AttachFareToProject)
 
 		// airbyte
 		v1Admin.GET("/company/airbyte/:id", h.V1.GetByIdAirbyte)
@@ -423,7 +428,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	v2Version := r.Group("/v2")
 	v2Version.Use(h.V2.AuthMiddleware())
 	{
-		v2Version.POST("/csv/:table_slug/download", h.V2.GetListInCSV)
+		v2Version.POST("/csv/:collection/download", h.V2.GetListInCSV)
 		v2Version.POST("/send-to-gpt", h.V2.SendToGpt)
 
 		// collections group

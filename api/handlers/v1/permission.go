@@ -187,19 +187,18 @@ func (h *HandlerV1) GetAllPermissionByRoleId(c *gin.Context) {
 // GetFieldPermissions godoc
 // @Security ApiKeyAuth
 // @ID get_all_field_permission
-// @Router /v1/field-permission/{role_id}/{table_slug} [GET]
+// @Router /v1/field-permission/{role_id}/{collection} [GET]
 // @Summary Get all field permissions
 // @Description Get all field permissions
 // @Tags Permission
 // @Accept json
 // @Produce json
 // @Param role_id path string true "role_id"
-// @Param table_slug path string true "table_slug"
+// @Param collection path string true "collection"
 // @Success 200 {object} status_http.Response{data=models.CommonMessage} "Get All Field Permission data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetFieldPermissions(c *gin.Context) {
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -226,11 +225,7 @@ func (h *HandlerV1) GetFieldPermissions(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -240,7 +235,7 @@ func (h *HandlerV1) GetFieldPermissions(c *gin.Context) {
 		context.Background(),
 		&obs.GetFieldPermissionRequest{
 			RoleId:    c.Param("role_id"),
-			TableSlug: c.Param("table_slug"),
+			TableSlug: c.Param("collection"),
 			ProjectId: resource.ResourceEnvironmentId,
 		},
 	)
@@ -256,14 +251,14 @@ func (h *HandlerV1) GetFieldPermissions(c *gin.Context) {
 // GetActionPermissions godoc
 // @Security ApiKeyAuth
 // @ID get_all_action_permission
-// @Router /v1/action-permission/{role_id}/{table_slug} [GET]
+// @Router /v1/action-permission/{role_id}/{collection} [GET]
 // @Summary Get all action permissions
 // @Description Get all action permissions
 // @Tags Permission
 // @Accept json
 // @Produce json
 // @Param role_id path string true "role_id"
-// @Param table_slug path string true "table_slug"
+// @Param collection path string true "collection"
 // @Success 200 {object} status_http.Response{data=models.CommonMessage} "Get All Action Permission data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -309,7 +304,7 @@ func (h *HandlerV1) GetActionPermissions(c *gin.Context) {
 		context.Background(),
 		&obs.GetActionPermissionRequest{
 			RoleId:    c.Param("role_id"),
-			TableSlug: c.Param("table_slug"),
+			TableSlug: c.Param("collection"),
 			ProjectId: resource.ResourceEnvironmentId,
 		},
 	)
@@ -325,14 +320,14 @@ func (h *HandlerV1) GetActionPermissions(c *gin.Context) {
 // GetViewRelationPermissions godoc
 // @Security ApiKeyAuth
 // @ID get_all_view_relation_permission
-// @Router /v1/view-relation-permission/{role_id}/{table_slug} [GET]
+// @Router /v1/view-relation-permission/{role_id}/{collection} [GET]
 // @Summary Get all view relation permissions
 // @Description Get all view relation permissions
 // @Tags Permission
 // @Accept json
 // @Produce json
 // @Param role_id path string true "role_id"
-// @Param table_slug path string true "table_slug"
+// @Param collection path string true "collection"
 // @Success 200 {object} status_http.Response{data=models.CommonMessage} "Get All View Relation Permission data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -377,7 +372,7 @@ func (h *HandlerV1) GetViewRelationPermissions(c *gin.Context) {
 		context.Background(),
 		&obs.GetActionPermissionRequest{
 			RoleId:    c.Param("role_id"),
-			TableSlug: c.Param("table_slug"),
+			TableSlug: c.Param("collection"),
 			ProjectId: resource.ResourceEnvironmentId,
 		},
 	)

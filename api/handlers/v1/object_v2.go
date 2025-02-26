@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
@@ -27,13 +28,13 @@ import (
 // GetListV2 godoc
 // @Security ApiKeyAuth
 // @ID get_list_objects_v2
-// @Router /v2/object/get-list/{table_slug} [POST]
+// @Router /v2/object/get-list/{collection} [POST]
 // @Summary Get all objects version 2
 // @Description Get all objects version 2
 // @Tags Object
 // @Accept json
 // @Produce json
-// @Param table_slug path string true "table_slug"
+// @Param collection path string true "collection"
 // @Param language_setting query string false "language_setting"
 // @Param object body models.CommonMessage true "GetListObjectRequestBody"
 // @Success 200 {object} status_http.Response{data=models.CommonMessage} "ObjectBody"
@@ -46,6 +47,8 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 		beforeActions []*obs.CustomEvent
 		statusHttp    = status_http.GrpcStatusToHTTP["Ok"]
 	)
+
+	tableSlug := c.Param("collection")
 
 	if err := c.ShouldBindJSON(&objectRequest); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
@@ -128,7 +131,7 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 	fromOfs := c.Query("from-ofs")
 	if fromOfs != "true" {
 		beforeActions, _, err = GetListCustomEvents(models.GetListCustomEventsStruct{
-			TableSlug: c.Param("table_slug"),
+			TableSlug: tableSlug,
 			RoleId:    "",
 			Method:    "GETLIST",
 			Resource:  resource,
@@ -145,7 +148,7 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 	if len(beforeActions) > 0 {
 		functionName, resp, err := DoInvokeFuntionForGetList(models.DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
-			TableSlug:    c.Param("table_slug"),
+			TableSlug:    tableSlug,
 			ObjectData:   objectRequest.Data,
 			Method:       "GETLIST",
 			ActionType:   "BEFORE",
@@ -159,11 +162,12 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 			return
 		}
 
-		h.handleResponse(c, statusHttp, map[string]interface{}{"data": resp})
+		h.handleResponse(c, statusHttp, map[string]any{"data": resp})
 		return
 	}
 
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
+	redisKey := base64.StdEncoding.EncodeToString(fmt.Appendf(nil, "%s-%s-%s", tableSlug, structData.String(), resource.ResourceEnvironmentId))
 
 	if viewId, ok := objectRequest.Data["builder_service_view_id"].(string); ok {
 		if util.IsValidUUID(viewId) {
@@ -174,10 +178,10 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 					return
 				}
 
-				redisResp, err := h.redis.Get(c.Request.Context(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
+				redisResp, err := h.redis.Get(c.Request.Context(), redisKey, projectId.(string), resource.NodeType)
 				if err == nil {
-					resp := make(map[string]interface{})
-					m := make(map[string]interface{})
+					resp := make(map[string]any)
+					m := make(map[string]any)
 					err = json.Unmarshal([]byte(redisResp), &m)
 					if err != nil {
 						h.log.Error("Error while unmarshal redis", logger.Error(err))
@@ -188,10 +192,9 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 					}
 				}
 
-				resp, err = service.GroupByColumns(
-					c.Request.Context(),
+				resp, err = service.GroupByColumns(c.Request.Context(),
 					&obs.CommonMessage{
-						TableSlug: c.Param("table_slug"),
+						TableSlug: tableSlug,
 						Data:      structData,
 						ProjectId: resource.ResourceEnvironmentId,
 					},
@@ -200,7 +203,7 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 				if err == nil {
 					if resp.IsCached {
 						jsonData, _ := resp.GetData().MarshalJSON()
-						err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
+						err = h.redis.SetX(c.Request.Context(), redisKey, string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
 						if err != nil {
 							h.log.Error("Error while setting redis", logger.Error(err))
 						}
@@ -212,10 +215,9 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 					return
 				}
 			case pb.ResourceType_POSTGRESQL:
-				resp, err := services.GoObjectBuilderService().ObjectBuilder().GetGroupByField(
-					c.Request.Context(),
+				resp, err := services.GoObjectBuilderService().ObjectBuilder().GetGroupByField(c.Request.Context(),
 					&nb.CommonMessage{
-						TableSlug: c.Param("table_slug"),
+						TableSlug: tableSlug,
 						Data:      structData,
 						ProjectId: resource.ResourceEnvironmentId,
 					},
@@ -234,10 +236,10 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 	} else {
 		switch resource.ResourceType {
 		case pb.ResourceType_MONGODB:
-			redisResp, err := h.redis.Get(c.Request.Context(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
+			redisResp, err := h.redis.Get(c.Request.Context(), redisKey, projectId.(string), resource.NodeType)
 			if err == nil {
-				resp := make(map[string]interface{})
-				m := make(map[string]interface{})
+				resp := make(map[string]any)
+				m := make(map[string]any)
 				err = json.Unmarshal([]byte(redisResp), &m)
 				if err != nil {
 					h.log.Error("Error while unmarshal redis", logger.Error(err))
@@ -251,10 +253,9 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 				}
 			}
 
-			resp, err = service.GetList2(
-				c.Request.Context(),
+			resp, err = service.GetList2(c.Request.Context(),
 				&obs.CommonMessage{
-					TableSlug: c.Param("table_slug"),
+					TableSlug: tableSlug,
 					Data:      structData,
 					ProjectId: resource.ResourceEnvironmentId,
 				},
@@ -263,7 +264,7 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 			if err == nil {
 				if resp.IsCached {
 					jsonData, _ := resp.GetData().MarshalJSON()
-					err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
+					err = h.redis.SetX(context.Background(), redisKey, string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
 					if err != nil {
 						h.log.Error("Error while setting redis", logger.Error(err))
 					}
@@ -277,7 +278,7 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 		case pb.ResourceType_POSTGRESQL:
 			resp, err := services.GoObjectBuilderService().ObjectBuilder().GetList2(
 				c.Request.Context(), &nb.CommonMessage{
-					TableSlug: c.Param("table_slug"),
+					TableSlug: tableSlug,
 					Data:      structData,
 					ProjectId: resource.ResourceEnvironmentId,
 				},
@@ -301,13 +302,13 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 // GetListSlimV2 godoc
 // @Security ApiKeyAuth
 // @ID get_list_objects_slim_v2
-// @Router /v2/object-slim/get-list/{table_slug} [GET]
+// @Router /v2/object-slim/get-list/{collection} [GET]
 // @Summary Get all objects slim v2
 // @Description Get all objects slim v2
 // @Tags Object
 // @Accept json
 // @Produce json
-// @Param table_slug path string true "table_slug"
+// @Param collection path string true "collection"
 // @Param limit query number false "limit"
 // @Param offset query number false "offset"
 // @Param data query string false "data"
@@ -322,6 +323,8 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 		hashed        bool
 	)
 
+	tableSlug := c.Param("collection")
+
 	queryParams := c.Request.URL.Query()
 	if ok := queryParams.Has("data"); ok {
 		queryData = queryParams.Get("data")
@@ -335,7 +338,7 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 		}
 	}
 
-	queryMap := make(map[string]interface{})
+	queryMap := make(map[string]any)
 	if err := json.Unmarshal([]byte(queryData), &queryMap); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
@@ -365,12 +368,8 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 		return
 	}
 
-	if projectId == "42ab0799-deff-4f8c-bf3f-64bf9665d304" { // rizo taxi
-		limit = 100
-	} else {
-		if limit > 40 {
-			limit = 40
-		}
+	if limit > 40 {
+		limit = 40
 	}
 
 	queryMap["limit"] = limit
@@ -453,7 +452,7 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 			Request:      &structData,
 			ApiKey:       apiKey,
 			Type:         "API_KEY",
-			TableSlug:    c.Param("table_slug"),
+			TableSlug:    tableSlug,
 		}
 	)
 
@@ -466,7 +465,7 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 			permission, err := service.Permission().GetTablePermission(
 				c.Request.Context(),
 				&obs.GetTablePermissionRequest{
-					TableSlug:             c.Param("table_slug"),
+					TableSlug:             tableSlug,
 					ResourceEnvironmentId: resource.ResourceEnvironmentId,
 					Method:                "read",
 				},
@@ -482,7 +481,7 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 			}
 		}
 
-		var slimKey = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("slim-%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId)))
+		var slimKey = base64.StdEncoding.EncodeToString(fmt.Appendf(nil, "slim-%s-%s-%s", tableSlug, structData.String(), resource.ResourceEnvironmentId))
 		if !cast.ToBool(c.Query("block_cached")) {
 			if cast.ToBool(c.Query("is_wait_cached")) {
 				var slimWaitKey = config.CACHE_WAIT + "-slim"
@@ -498,14 +497,14 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 					for {
 						slimBody, ok := h.cache.Get(slimKey)
 						if ok {
-							m := make(map[string]interface{})
+							m := make(map[string]any)
 							err = json.Unmarshal(slimBody, &m)
 							if err != nil {
 								h.handleResponse(c, status_http.GRPCError, err.Error())
 								return
 							}
 
-							h.handleResponse(c, status_http.OK, map[string]interface{}{"data": m})
+							h.handleResponse(c, status_http.OK, map[string]any{"data": m})
 							return
 						}
 
@@ -519,8 +518,8 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 			} else {
 				redisResp, err := h.redis.Get(c.Request.Context(), slimKey, projectId.(string), resource.NodeType)
 				if err == nil {
-					resp := make(map[string]interface{})
-					m := make(map[string]interface{})
+					resp := make(map[string]any)
+					m := make(map[string]any)
 					err = json.Unmarshal([]byte(redisResp), &m)
 					if err != nil {
 						h.log.Error("Error while unmarshal redis", logger.Error(err))
@@ -540,7 +539,7 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 		resp, err := service.ObjectBuilder().GetListSlimV2(
 			c.Request.Context(),
 			&obs.CommonMessage{
-				TableSlug: c.Param("table_slug"),
+				TableSlug: tableSlug,
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -566,7 +565,7 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 			if cast.ToBool(c.Query("is_wait_cached")) {
 				h.cache.Add(slimKey, jsonData, 15*time.Second)
 			} else if resp.IsCached {
-				err = h.redis.SetX(context.Background(), slimKey, string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
+				err = h.redis.SetX(c.Request.Context(), slimKey, string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
 				if err != nil {
 					h.log.Error("Error while setting redis", logger.Error(err))
 				}
@@ -589,7 +588,7 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().ObjectBuilder().GetListSlim(
 			c.Request.Context(), &nb.CommonMessage{
-				TableSlug: c.Param("table_slug"),
+				TableSlug: tableSlug,
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -614,7 +613,6 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 		statusHttp.CustomMessage = resp.GetCustomMessage()
 		h.handleResponse(c, statusHttp, resp)
 	}
-
 }
 
 // UpdateWithParams godoc

@@ -767,13 +767,13 @@ func (h *HandlerV1) DeleteTable(c *gin.Context) {
 // GetTableDetails godoc
 // @Security ApiKeyAuth
 // @ID get_table_details
-// @Router /v1/table-details/{table_slug} [POST]
+// @Router /v1/table-details/{collection} [POST]
 // @Summary Get table details
 // @Description Get table details
 // @Tags Object
 // @Accept json
 // @Produce json
-// @Param table_slug path string true "table_slug"
+// @Param collection path string true "collection"
 // @Param language_setting query string false "language_setting"
 // @Param object body models.CommonMessage true "GetListObjectRequestBody"
 // @Success 200 {object} status_http.Response{data=models.CommonMessage} "ObjectBody"
@@ -783,6 +783,7 @@ func (h *HandlerV1) GetTableDetails(c *gin.Context) {
 	var (
 		objectRequest models.CommonMessage
 		statusHttp    = status_http.GrpcStatusToHTTP["Ok"]
+		tableSlug     = c.Param("collection")
 	)
 
 	if err := c.ShouldBindJSON(&objectRequest); err != nil {
@@ -845,7 +846,7 @@ func (h *HandlerV1) GetTableDetails(c *gin.Context) {
 	case pb.ResourceType_MONGODB:
 		resp, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().GetTableDetails(
 			c.Request.Context(), &obs.CommonMessage{
-				TableSlug: c.Param("table_slug"),
+				TableSlug: tableSlug,
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -860,7 +861,7 @@ func (h *HandlerV1) GetTableDetails(c *gin.Context) {
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().ObjectBuilder().GetTableDetails(
 			c.Request.Context(), &nb.CommonMessage{
-				TableSlug: c.Param("table_slug"),
+				TableSlug: tableSlug,
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
 			},

@@ -39,7 +39,6 @@ func (h *HandlerV2) AuthMiddleware() gin.HandlerFunc {
 		case "Bearer":
 			res, ok = h.hasAccess(c)
 			if !ok {
-				h.log.Error("---ERR->AuthMiddleware->hasNotAccess-->")
 				c.Abort()
 				return
 			}

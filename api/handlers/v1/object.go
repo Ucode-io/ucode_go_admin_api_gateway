@@ -31,13 +31,13 @@ import (
 // CreateObject godoc
 // @Security ApiKeyAuth
 // @ID create_object
-// @Router /v1/object/{table_slug}/ [POST]
+// @Router /v1/object/{collection}/ [POST]
 // @Summary Create object
 // @Description Create object
 // @Tags Object
 // @Accept json
 // @Produce json
-// @Param table_slug path string true "table_slug"
+// @Param collection path string true "collection"
 // @Param object body models.CommonMessage true "CreateObjectRequestBody"
 // @Success 201 {object} status_http.Response{data=models.CommonMessage} "Object data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -50,6 +50,8 @@ func (h *HandlerV1) CreateObject(c *gin.Context) {
 		statusHttp                  = status_http.GrpcStatusToHTTP["Created"]
 		err                         error
 	)
+
+	tableSlug := c.Param("collection")
 
 	if err = c.ShouldBindJSON(&objectRequest); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
@@ -120,8 +122,7 @@ func (h *HandlerV1) CreateObject(c *gin.Context) {
 
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 
-	var id string
-	id = uuid.New().String()
+	id := uuid.New().String()
 
 	guid, ok := objectRequest.Data["guid"]
 	if ok {
@@ -136,7 +137,7 @@ func (h *HandlerV1) CreateObject(c *gin.Context) {
 	for key, value := range objectRequest.Data {
 		if key[0] == '$' {
 			var (
-				interfaceToMap = value.(map[string]interface{})
+				interfaceToMap = value.(map[string]any)
 				id             = uuid.New()
 			)
 
@@ -148,8 +149,7 @@ func (h *HandlerV1) CreateObject(c *gin.Context) {
 				return
 			}
 
-			_, err = service.Create(
-				c.Request.Context(),
+			_, err = service.Create(c.Request.Context(),
 				&obs.CommonMessage{
 					TableSlug: key[1:],
 					Data:      mapToStruct,
@@ -174,15 +174,13 @@ func (h *HandlerV1) CreateObject(c *gin.Context) {
 
 	fromOfs := c.Query("from-ofs")
 	if fromOfs != "true" {
-		beforeActions, afterActions, err = GetListCustomEvents(models.GetListCustomEventsStruct{
-			TableSlug: c.Param("table_slug"),
+		event := models.GetListCustomEventsStruct{
+			TableSlug: tableSlug,
 			RoleId:    "",
 			Method:    "CREATE",
 			Resource:  resource,
-		},
-			c,
-			h,
-		)
+		}
+		beforeActions, afterActions, err = GetListCustomEvents(event, c, h)
 		if err != nil {
 			h.handleResponse(c, status_http.InvalidArgument, err.Error())
 			return
@@ -190,17 +188,15 @@ func (h *HandlerV1) CreateObject(c *gin.Context) {
 	}
 
 	if len(beforeActions) > 0 {
-		functionName, err := DoInvokeFuntion(models.DoInvokeFuntionStruct{
+		invoke := models.DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			IDs:          []string{id},
-			TableSlug:    c.Param("table_slug"),
+			TableSlug:    tableSlug,
 			ObjectData:   objectRequest.Data,
 			Method:       "CREATE",
 			Resource:     resource,
-		},
-			c, // gin context,
-			h, // handler
-		)
+		}
+		functionName, err := DoInvokeFuntion(invoke, c, h)
 		if err != nil {
 			h.handleResponse(c, status_http.InvalidArgument, err.Error()+" in "+functionName)
 			return
@@ -209,10 +205,9 @@ func (h *HandlerV1) CreateObject(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = service.Create(
-			c.Request.Context(),
+		resp, err = service.Create(c.Request.Context(),
 			&obs.CommonMessage{
-				TableSlug:         c.Param("table_slug"),
+				TableSlug:         tableSlug,
 				Data:              structData,
 				ProjectId:         resource.ResourceEnvironmentId,
 				BlockedLoginTable: cast.ToBool(c.DefaultQuery("blocked_login_table", "false")),
@@ -230,12 +225,11 @@ func (h *HandlerV1) CreateObject(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		// Does Not Implemented
 		h.handleResponse(c, status_http.BadRequest, "does not implemented")
 		return
 	}
 
-	if data, ok := resp.Data.AsMap()["data"].(map[string]interface{}); ok {
+	if data, ok := resp.Data.AsMap()["data"].(map[string]any); ok {
 		objectRequest.Data = data
 		if _, ok = data["guid"].(string); ok {
 			id = data["guid"].(string)
@@ -243,17 +237,15 @@ func (h *HandlerV1) CreateObject(c *gin.Context) {
 	}
 
 	if len(afterActions) > 0 {
-		functionName, err := DoInvokeFuntion(models.DoInvokeFuntionStruct{
+		invoke := models.DoInvokeFuntionStruct{
 			CustomEvents: afterActions,
 			IDs:          []string{id},
-			TableSlug:    c.Param("table_slug"),
+			TableSlug:    tableSlug,
 			ObjectData:   objectRequest.Data,
 			Method:       "CREATE",
 			Resource:     resource,
-		},
-			c, // gin context,
-			h, // handler
-		)
+		}
+		functionName, err := DoInvokeFuntion(invoke, c, h)
 		if err != nil {
 			h.handleResponse(c, status_http.InvalidArgument, err.Error()+" in "+functionName)
 			return
@@ -267,13 +259,13 @@ func (h *HandlerV1) CreateObject(c *gin.Context) {
 // GetSingle godoc
 // @Security ApiKeyAuth
 // @ID get_object_by_id
-// @Router /v1/object/{table_slug}/{object_id} [GET]
+// @Router /v1/object/{collection}/{object_id} [GET]
 // @Summary Get object by id
 // @Description Get object by id
 // @Tags Object
 // @Accept json
 // @Produce json
-// @Param table_slug path string true "table_slug"
+// @Param collection path string true "collection"
 // @Param object_id path string true "object_id"
 // @Success 200 {object} status_http.Response{data=models.CommonMessage} "ObjectBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -283,9 +275,10 @@ func (h *HandlerV1) GetSingle(c *gin.Context) {
 		object     models.CommonMessage
 		resp       *obs.CommonMessage
 		statusHttp = status_http.GrpcStatusToHTTP["Ok"]
+		tableSlug  = c.Param("collection")
 	)
 
-	object.Data = make(map[string]interface{})
+	object.Data = make(map[string]any)
 
 	objectID := c.Param("object_id")
 	if !util.IsValidUUID(objectID) {
@@ -346,10 +339,9 @@ func (h *HandlerV1) GetSingle(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = service.GetSingle(
-			c.Request.Context(),
+		resp, err = service.GetSingle(c.Request.Context(),
 			&obs.CommonMessage{
-				TableSlug: c.Param("table_slug"),
+				TableSlug: tableSlug,
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -365,7 +357,6 @@ func (h *HandlerV1) GetSingle(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		// Does Not Implemented
 		h.handleResponse(c, status_http.BadEnvironment, "does not implemented")
 		return
 	}
@@ -377,13 +368,13 @@ func (h *HandlerV1) GetSingle(c *gin.Context) {
 // GetSingleSlim godoc
 // @Security ApiKeyAuth
 // @ID get_object_by_id_slim
-// @Router /v1/object-slim/{table_slug}/{object_id} [GET]
+// @Router /v1/object-slim/{collection}/{object_id} [GET]
 // @Summary Get object by id slim
 // @Description Get object by id slim
 // @Tags Object
 // @Accept json
 // @Produce json
-// @Param table_slug path string true "table_slug"
+// @Param collection path string true "collection"
 // @Param object_id path string true "object_id"
 // @Success 200 {object} status_http.Response{data=models.CommonMessage} "ObjectBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -393,9 +384,10 @@ func (h *HandlerV1) GetSingleSlim(c *gin.Context) {
 		object     models.CommonMessage
 		statusHttp = status_http.GrpcStatusToHTTP["Ok"]
 		hashed     bool
+		tableSlug  = c.Param("collection")
 	)
 
-	object.Data = make(map[string]interface{})
+	object.Data = make(map[string]any)
 
 	objectID := c.Param("object_id")
 	if !util.IsValidUUID(objectID) {
@@ -463,18 +455,20 @@ func (h *HandlerV1) GetSingleSlim(c *gin.Context) {
 			Request:      &structData,
 			ApiKey:       apiKey,
 			Type:         "API_KEY",
-			TableSlug:    c.Param("table_slug"),
+			TableSlug:    tableSlug,
 		}
 	)
+
+	redisKey := base64.StdEncoding.EncodeToString(fmt.Appendf(nil, "%s-%s-%s", tableSlug, structData.String(), resource.ResourceEnvironmentId))
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
-		redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
+		redisResp, err := h.redis.Get(c.Request.Context(), redisKey, projectId.(string), resource.NodeType)
 		if err == nil {
 			var (
-				resp = make(map[string]interface{})
-				m    = make(map[string]interface{})
+				resp = make(map[string]any)
+				m    = make(map[string]any)
 			)
 
 			if err = json.Unmarshal([]byte(redisResp), &m); err != nil {
@@ -493,7 +487,7 @@ func (h *HandlerV1) GetSingleSlim(c *gin.Context) {
 		resp, err := service.GetSingleSlim(
 			c.Request.Context(),
 			&obs.CommonMessage{
-				TableSlug: c.Param("table_slug"),
+				TableSlug: tableSlug,
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -516,7 +510,7 @@ func (h *HandlerV1) GetSingleSlim(c *gin.Context) {
 
 		if resp.IsCached {
 			jsonData, _ := resp.GetData().MarshalJSON()
-			err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
+			err = h.redis.SetX(c.Request.Context(), redisKey, string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
 			if err != nil {
 				h.log.Error("Error while setting redis", logger.Error(err))
 			}
@@ -534,11 +528,11 @@ func (h *HandlerV1) GetSingleSlim(c *gin.Context) {
 		}
 		h.handleResponse(c, statusHttp, resp)
 	case pb.ResourceType_POSTGRESQL:
-		redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
+		redisResp, err := h.redis.Get(c.Request.Context(), redisKey, projectId.(string), resource.NodeType)
 		if err == nil {
 			var (
-				resp = make(map[string]interface{})
-				m    = make(map[string]interface{})
+				resp = make(map[string]any)
+				m    = make(map[string]any)
 			)
 
 			if err = json.Unmarshal([]byte(redisResp), &m); err != nil {
@@ -556,7 +550,7 @@ func (h *HandlerV1) GetSingleSlim(c *gin.Context) {
 
 		resp, err := services.GoObjectBuilderService().ObjectBuilder().GetSingleSlim(
 			c.Request.Context(), &nb.CommonMessage{
-				TableSlug: c.Param("table_slug"),
+				TableSlug: tableSlug,
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -580,7 +574,7 @@ func (h *HandlerV1) GetSingleSlim(c *gin.Context) {
 
 		if resp.IsCached {
 			jsonData, _ := resp.GetData().MarshalJSON()
-			err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
+			err = h.redis.SetX(c.Request.Context(), redisKey, string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
 			if err != nil {
 				h.log.Error("Error while setting redis", logger.Error(err))
 			}
@@ -595,13 +589,13 @@ func (h *HandlerV1) GetSingleSlim(c *gin.Context) {
 // UpdateObject godoc
 // @Security ApiKeyAuth
 // @ID update_object
-// @Router /v1/object/{table_slug} [PUT]
+// @Router /v1/object/{collection} [PUT]
 // @Summary Update object
 // @Description Update object
 // @Tags Object
 // @Accept json
 // @Produce json
-// @Param table_slug path string true "table_slug"
+// @Param collection path string true "collection"
 // @Param object body models.CommonMessage true "UpdateObjectRequestBody"
 // @Success 200 {object} status_http.Response{data=models.CommonMessage} "Object data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -612,6 +606,7 @@ func (h *HandlerV1) UpdateObject(c *gin.Context) {
 		resp, singleObject          *obs.CommonMessage
 		beforeActions, afterActions []*obs.CustomEvent
 		statusHttp                  = status_http.GrpcStatusToHTTP["Ok"]
+		tableSlug                   = c.Param("collection")
 	)
 
 	if err := c.ShouldBindJSON(&objectRequest); err != nil {
@@ -696,7 +691,7 @@ func (h *HandlerV1) UpdateObject(c *gin.Context) {
 	fromOfs := c.Query("from-ofs")
 	if fromOfs != "true" {
 		beforeActions, afterActions, err = GetListCustomEvents(models.GetListCustomEventsStruct{
-			TableSlug: c.Param("table_slug"),
+			TableSlug: tableSlug,
 			RoleId:    "",
 			Method:    "UPDATE",
 			Resource:  resource,
@@ -714,7 +709,7 @@ func (h *HandlerV1) UpdateObject(c *gin.Context) {
 			singleObject, err = service.GetSingle(
 				c.Request.Context(),
 				&obs.CommonMessage{
-					TableSlug: c.Param("table_slug"),
+					TableSlug: tableSlug,
 					Data:      &structpb.Struct{Fields: map[string]*structpb.Value{"id": structpb.NewStringValue(id)}},
 					ProjectId: resource.ResourceEnvironmentId,
 				},
@@ -730,7 +725,6 @@ func (h *HandlerV1) UpdateObject(c *gin.Context) {
 				return
 			}
 		case pb.ResourceType_POSTGRESQL:
-			// Does Not Implemented
 			h.handleResponse(c, status_http.BadEnvironment, "does not implemented")
 			return
 		}
@@ -740,7 +734,7 @@ func (h *HandlerV1) UpdateObject(c *gin.Context) {
 		functionName, err := DoInvokeFuntion(models.DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			IDs:          []string{id},
-			TableSlug:    c.Param("table_slug"),
+			TableSlug:    tableSlug,
 			ObjectData:   objectRequest.Data,
 			Method:       "UPDATE",
 			Resource:     resource,
@@ -758,7 +752,7 @@ func (h *HandlerV1) UpdateObject(c *gin.Context) {
 	case pb.ResourceType_MONGODB:
 		resp, err = service.Update(
 			c.Request.Context(), &obs.CommonMessage{
-				TableSlug:        c.Param("table_slug"),
+				TableSlug:        tableSlug,
 				Data:             structData,
 				ProjectId:        resource.ResourceEnvironmentId,
 				BlockedBuilder:   cast.ToBool(c.DefaultQuery("block_builder", "false")),
@@ -782,7 +776,7 @@ func (h *HandlerV1) UpdateObject(c *gin.Context) {
 		return
 	}
 
-	if c.Param("table_slug") == "record_permission" {
+	if tableSlug == "record_permission" {
 		if objectRequest.Data["role_id"] == nil {
 			h.handleResponse(c, status_http.BadRequest, "role id must be have in update permission")
 			return
@@ -812,7 +806,7 @@ func (h *HandlerV1) UpdateObject(c *gin.Context) {
 		functionName, err := DoInvokeFuntion(models.DoInvokeFuntionStruct{
 			CustomEvents:           afterActions,
 			IDs:                    []string{id},
-			TableSlug:              c.Param("table_slug"),
+			TableSlug:              tableSlug,
 			ObjectData:             objectRequest.Data,
 			Method:                 "UPDATE",
 			ObjectDataBeforeUpdate: singleObject.Data.AsMap(),
@@ -834,13 +828,13 @@ func (h *HandlerV1) UpdateObject(c *gin.Context) {
 // DeleteObject godoc
 // @Security ApiKeyAuth
 // @ID delete_object
-// @Router /v1/object/{table_slug}/{object_id} [DELETE]
+// @Router /v1/object/{collection}/{object_id} [DELETE]
 // @Summary Delete object
 // @Description Delete object
 // @Tags Object
 // @Accept json
 // @Produce json
-// @Param table_slug path string true "table_slug"
+// @Param collection path string true "collection"
 // @Param object body models.CommonMessage true "DeleteObjectRequestBody"
 // @Param object_id path string true "object_id"
 // @Success 204
@@ -852,6 +846,7 @@ func (h *HandlerV1) DeleteObject(c *gin.Context) {
 		resp                        *obs.CommonMessage
 		beforeActions, afterActions []*obs.CustomEvent
 		statusHttp                  = status_http.GrpcStatusToHTTP["NoContent"]
+		tableSlug                   = c.Param("collection")
 	)
 
 	if err := c.ShouldBindJSON(&objectRequest); err != nil {
@@ -906,7 +901,7 @@ func (h *HandlerV1) DeleteObject(c *gin.Context) {
 	fromOfs := c.Query("from-ofs")
 	if fromOfs != "true" {
 		beforeActions, afterActions, err = GetListCustomEvents(models.GetListCustomEventsStruct{
-			TableSlug: c.Param("table_slug"),
+			TableSlug: tableSlug,
 			RoleId:    "",
 			Method:    http.MethodDelete,
 			Resource:  resource,
@@ -924,7 +919,7 @@ func (h *HandlerV1) DeleteObject(c *gin.Context) {
 		functionName, err := DoInvokeFuntion(models.DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			IDs:          []string{objectID},
-			TableSlug:    c.Param("table_slug"),
+			TableSlug:    tableSlug,
 			ObjectData:   objectRequest.Data,
 			Method:       "DELETE",
 			Resource:     resource,
@@ -943,7 +938,7 @@ func (h *HandlerV1) DeleteObject(c *gin.Context) {
 		resp, err = service.Delete(
 			c.Request.Context(),
 			&obs.CommonMessage{
-				TableSlug: c.Param("table_slug"),
+				TableSlug: tableSlug,
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -968,7 +963,7 @@ func (h *HandlerV1) DeleteObject(c *gin.Context) {
 		functionName, err := DoInvokeFuntion(models.DoInvokeFuntionStruct{
 			CustomEvents: afterActions,
 			IDs:          []string{objectID},
-			TableSlug:    c.Param("table_slug"),
+			TableSlug:    tableSlug,
 			ObjectData:   objectRequest.Data,
 			Method:       "DELETE",
 			Resource:     resource,
@@ -989,13 +984,13 @@ func (h *HandlerV1) DeleteObject(c *gin.Context) {
 // GetList godoc
 // @Security ApiKeyAuth
 // @ID get_list_objects
-// @Router /v1/object/get-list/{table_slug} [POST]
+// @Router /v1/object/get-list/{collection} [POST]
 // @Summary Get all objects
 // @Description Get all objects
 // @Tags Object
 // @Accept json
 // @Produce json
-// @Param table_slug path string true "table_slug"
+// @Param collection path string true "collection"
 // @Param language_setting query string false "language_setting"
 // @Param object body models.CommonMessage true "GetListObjectRequestBody"
 // @Success 200 {object} status_http.Response{data=models.CommonMessage} "ObjectBody"
@@ -1007,6 +1002,7 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 		resp          *obs.CommonMessage
 		beforeActions []*obs.CustomEvent
 		statusHttp    = status_http.GrpcStatusToHTTP["Ok"]
+		tableSlug     = c.Param("collection")
 	)
 
 	if err := c.ShouldBindJSON(&objectRequest); err != nil {
@@ -1080,10 +1076,11 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 		return
 	}
 
+	redisKey := fmt.Appendf(nil, "%s-%s-%s", tableSlug, structData.String(), resource.ResourceEnvironmentId)
 	fromOfs := c.Query("from-ofs")
 	if fromOfs != "true" {
 		beforeActions, _, err = GetListCustomEvents(models.GetListCustomEventsStruct{
-			TableSlug: c.Param("table_slug"),
+			TableSlug: tableSlug,
 			RoleId:    "",
 			Method:    "GETLIST",
 			Resource:  resource,
@@ -1100,7 +1097,7 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 	if len(beforeActions) > 0 {
 		functionName, resp, err := DoInvokeFuntionForGetList(models.DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
-			TableSlug:    c.Param("table_slug"),
+			TableSlug:    tableSlug,
 			ObjectData:   objectRequest.Data,
 			Method:       "GETLIST",
 			ActionType:   "BEFORE",
@@ -1114,7 +1111,7 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 			return
 		}
 
-		h.handleResponse(c, statusHttp, map[string]interface{}{"data": resp})
+		h.handleResponse(c, statusHttp, map[string]any{"data": resp})
 		return
 	}
 
@@ -1126,7 +1123,7 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 				resp, err = service.GroupByColumns(
 					c.Request.Context(),
 					&obs.CommonMessage{
-						TableSlug: c.Param("table_slug"),
+						TableSlug: tableSlug,
 						Data:      structData,
 						ProjectId: resource.ResourceEnvironmentId,
 					},
@@ -1144,11 +1141,11 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 	} else {
 		switch resource.ResourceType {
 		case pb.ResourceType_MONGODB:
-			redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
+			redisResp, err := h.redis.Get(c.Request.Context(), string(redisKey), projectId.(string), resource.NodeType)
 			if err == nil {
 				var (
-					resp = make(map[string]interface{})
-					m    = make(map[string]interface{})
+					resp = make(map[string]any)
+					m    = make(map[string]any)
 				)
 
 				if err = json.Unmarshal([]byte(redisResp), &m); err != nil {
@@ -1163,7 +1160,7 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 			resp, err = service.GetList(
 				c.Request.Context(),
 				&obs.CommonMessage{
-					TableSlug: c.Param("table_slug"),
+					TableSlug: tableSlug,
 					Data:      structData,
 					ProjectId: resource.ResourceEnvironmentId,
 				},
@@ -1171,7 +1168,7 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 			if err == nil {
 				if resp.IsCached {
 					jsonData, _ := resp.GetData().MarshalJSON()
-					err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
+					err = h.redis.SetX(c.Request.Context(), string(redisKey), string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
 					if err != nil {
 						h.log.Error("Error while setting redis", logger.Error(err))
 					}
@@ -1185,7 +1182,7 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 			resp, err := services.GoObjectBuilderService().ObjectBuilder().GetAll(
 				c.Request.Context(),
 				&nb.CommonMessage{
-					TableSlug: c.Param("table_slug"),
+					TableSlug: tableSlug,
 					Data:      structData,
 					ProjectId: resource.ResourceEnvironmentId,
 				},
@@ -1208,13 +1205,13 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 // GetListSlim godoc
 // @Security ApiKeyAuth
 // @ID get_list_objects_slim
-// @Router /v1/object-slim/get-list/{table_slug} [GET]
+// @Router /v1/object-slim/get-list/{collection} [GET]
 // @Summary Get all objects slim
 // @Description Get all objects slim
 // @Tags Object
 // @Accept json
 // @Produce json
-// @Param table_slug path string true "table_slug"
+// @Param collection path string true "collection"
 // @Param limit query number false "limit"
 // @Param offset query number false "offset"
 // @Param data query string false "data"
@@ -1227,6 +1224,7 @@ func (h *HandlerV1) GetListSlim(c *gin.Context) {
 		queryData     string
 		statusHttp    = status_http.GrpcStatusToHTTP["Ok"]
 		hashed        bool
+		tableSlug     = c.Param("collection")
 	)
 
 	queryParams := c.Request.URL.Query()
@@ -1242,7 +1240,7 @@ func (h *HandlerV1) GetListSlim(c *gin.Context) {
 		}
 	}
 
-	queryMap := make(map[string]interface{})
+	queryMap := make(map[string]any)
 	if err := json.Unmarshal([]byte(queryData), &queryMap); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
@@ -1363,14 +1361,14 @@ func (h *HandlerV1) GetListSlim(c *gin.Context) {
 			Request:      &structData,
 			ApiKey:       apiKey,
 			Type:         "API_KEY",
-			TableSlug:    c.Param("table_slug"),
+			TableSlug:    tableSlug,
 		}
 	)
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
-		var slimKey = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("slim-%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId)))
+		var slimKey = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("slim-%s-%s-%s", tableSlug, structData.String(), resource.ResourceEnvironmentId)))
 		if !cast.ToBool(c.Query("block_cached")) {
 			if cast.ToBool(c.Query("is_wait_cached")) {
 				var slimWaitKey = config.CACHE_WAIT + "-slim"
@@ -1386,14 +1384,14 @@ func (h *HandlerV1) GetListSlim(c *gin.Context) {
 					for {
 						slimBody, ok := h.cache.Get(slimKey)
 						if ok {
-							m := make(map[string]interface{})
+							m := make(map[string]any)
 							err = json.Unmarshal(slimBody, &m)
 							if err != nil {
 								h.handleResponse(c, status_http.GRPCError, err.Error())
 								return
 							}
 
-							h.handleResponse(c, status_http.OK, map[string]interface{}{"data": m})
+							h.handleResponse(c, status_http.OK, map[string]any{"data": m})
 							return
 						}
 
@@ -1407,8 +1405,8 @@ func (h *HandlerV1) GetListSlim(c *gin.Context) {
 			} else {
 				redisResp, err := h.redis.Get(context.Background(), slimKey, projectId.(string), resource.NodeType)
 				if err == nil {
-					resp := make(map[string]interface{})
-					m := make(map[string]interface{})
+					resp := make(map[string]any)
+					m := make(map[string]any)
 					err = json.Unmarshal([]byte(redisResp), &m)
 					if err != nil {
 						h.log.Error("Error while unmarshal redis", logger.Error(err))
@@ -1428,7 +1426,7 @@ func (h *HandlerV1) GetListSlim(c *gin.Context) {
 		resp, err := service.GetListSlimV2(
 			c.Request.Context(),
 			&obs.CommonMessage{
-				TableSlug: c.Param("table_slug"),
+				TableSlug: tableSlug,
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -1477,7 +1475,7 @@ func (h *HandlerV1) GetListSlim(c *gin.Context) {
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().ObjectBuilder().GetListSlim(
 			c.Request.Context(), &nb.CommonMessage{
-				TableSlug: c.Param("table_slug"),
+				TableSlug: tableSlug,
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -1507,13 +1505,13 @@ func (h *HandlerV1) GetListSlim(c *gin.Context) {
 // GetListInExcel godoc
 // @Security ApiKeyAuth
 // @ID get_list_objects_in_excel
-// @Router /v1/object/excel/{table_slug} [POST]
+// @Router /v1/object/excel/{collection} [POST]
 // @Summary Get all objects in excel
 // @Description Get all objects in excel
 // @Tags Object
 // @Accept json
 // @Produce json
-// @Param table_slug path string true "table_slug"
+// @Param collection path string true "collection"
 // @Param object body models.CommonMessage true "GetListObjectRequestBody"
 // @Success 200 {object} status_http.Response{data=models.CommonMessage} "ObjectBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -1522,6 +1520,7 @@ func (h *HandlerV1) GetListInExcel(c *gin.Context) {
 	var (
 		objectRequest models.CommonMessage
 		statusHttp    = status_http.GrpcStatusToHTTP["Ok"]
+		tableSlug     = c.Param("collection")
 	)
 
 	if err := c.ShouldBindJSON(&objectRequest); err != nil {
@@ -1588,7 +1587,7 @@ func (h *HandlerV1) GetListInExcel(c *gin.Context) {
 		resp, err := service.GetListInExcel(
 			c.Request.Context(),
 			&obs.CommonMessage{
-				TableSlug: c.Param("table_slug"),
+				TableSlug: tableSlug,
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -1611,7 +1610,7 @@ func (h *HandlerV1) GetListInExcel(c *gin.Context) {
 		resp, err := services.GoObjectBuilderService().ObjectBuilder().GetListInExcel(
 			c.Request.Context(),
 			&nb.CommonMessage{
-				TableSlug: c.Param("table_slug"),
+				TableSlug: tableSlug,
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -1646,6 +1645,7 @@ func (h *HandlerV1) DeleteManyToMany(c *gin.Context) {
 		resp                        *obs.CommonMessage
 		beforeActions, afterActions []*obs.CustomEvent
 		statusHttp                  = status_http.GrpcStatusToHTTP["NoContent"]
+		tableSlug                   = c.Param("collection")
 	)
 
 	if err := c.ShouldBindJSON(&m2mMessage); err != nil {
@@ -1688,7 +1688,7 @@ func (h *HandlerV1) DeleteManyToMany(c *gin.Context) {
 	fromOfs := c.Query("from-ofs")
 	if fromOfs != "true" {
 		beforeActions, afterActions, err = GetListCustomEvents(models.GetListCustomEventsStruct{
-			TableSlug: c.Param("table_slug"),
+			TableSlug: tableSlug,
 			RoleId:    "",
 			Method:    "DELETE_MANY2MANY",
 			Resource:  resource,
@@ -1707,7 +1707,7 @@ func (h *HandlerV1) DeleteManyToMany(c *gin.Context) {
 			CustomEvents: beforeActions,
 			IDs:          []string{m2mMessage.IdFrom},
 			TableSlug:    m2mMessage.TableTo,
-			ObjectData:   map[string]interface{}{"id_to": m2mMessage.IdTo, "table_to": m2mMessage.TableFrom},
+			ObjectData:   map[string]any{"id_to": m2mMessage.IdTo, "table_to": m2mMessage.TableFrom},
 			Method:       "DELETE_MANY2MANY",
 			Resource:     resource,
 		},
@@ -1744,8 +1744,8 @@ func (h *HandlerV1) DeleteManyToMany(c *gin.Context) {
 		functionName, err := DoInvokeFuntion(models.DoInvokeFuntionStruct{
 			CustomEvents: afterActions,
 			IDs:          []string{m2mMessage.IdFrom},
-			TableSlug:    c.Param("table_slug"),
-			ObjectData:   map[string]interface{}{"id_to": m2mMessage.IdTo, "table_from": m2mMessage.TableTo},
+			TableSlug:    tableSlug,
+			ObjectData:   map[string]any{"id_to": m2mMessage.IdTo, "table_from": m2mMessage.TableTo},
 			Method:       "DELETE_MANY2MANY",
 			Resource:     resource,
 		},
@@ -1780,6 +1780,7 @@ func (h *HandlerV1) AppendManyToMany(c *gin.Context) {
 		resp                        *obs.CommonMessage
 		beforeActions, afterActions []*obs.CustomEvent
 		statusHttp                  = status_http.GrpcStatusToHTTP["Ok"]
+		tableSlug                   = c.Param("collection")
 	)
 
 	if err := c.ShouldBindJSON(&m2mMessage); err != nil {
@@ -1822,7 +1823,7 @@ func (h *HandlerV1) AppendManyToMany(c *gin.Context) {
 	fromOfs := c.Query("from-ofs")
 	if fromOfs != "true" {
 		beforeActions, afterActions, err = GetListCustomEvents(models.GetListCustomEventsStruct{
-			TableSlug: c.Param("table_slug"),
+			TableSlug: tableSlug,
 			RoleId:    "",
 			Method:    "APPEND_MANY2MANY",
 			Resource:  resource,
@@ -1841,7 +1842,7 @@ func (h *HandlerV1) AppendManyToMany(c *gin.Context) {
 			CustomEvents: beforeActions,
 			IDs:          []string{m2mMessage.IdFrom},
 			TableSlug:    m2mMessage.TableTo,
-			ObjectData:   map[string]interface{}{"id_to": m2mMessage.IdTo, "table_from": m2mMessage.TableFrom},
+			ObjectData:   map[string]any{"id_to": m2mMessage.IdTo, "table_from": m2mMessage.TableFrom},
 			Method:       "APPEND_MANY2MANY",
 			Resource:     resource,
 		},
@@ -1879,7 +1880,7 @@ func (h *HandlerV1) AppendManyToMany(c *gin.Context) {
 			CustomEvents: afterActions,
 			IDs:          []string{m2mMessage.IdFrom},
 			TableSlug:    m2mMessage.TableTo,
-			ObjectData:   map[string]interface{}{"id_to": m2mMessage.IdTo, "table_from": m2mMessage.TableFrom},
+			ObjectData:   map[string]any{"id_to": m2mMessage.IdTo, "table_from": m2mMessage.TableFrom},
 			Method:       "APPEND_MANY2MANY",
 			Resource:     resource,
 		},
@@ -1899,13 +1900,13 @@ func (h *HandlerV1) AppendManyToMany(c *gin.Context) {
 // UpsertObject godoc
 // @Security ApiKeyAuth
 // @ID upsert_object
-// @Router /v1/object-upsert/{table_slug} [POST]
+// @Router /v1/object-upsert/{collection} [POST]
 // @Summary Upsert object
 // @Description Upsert object
 // @Tags Object
 // @Accept json
 // @Produce json
-// @Param table_slug path string true "table_slug"
+// @Param collection path string true "collection"
 // @Param object body models.UpsertCommonMessage true "CreateObjectRequestBody"
 // @Success 201 {object} status_http.Response{data=models.CommonMessage} "Object data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -1915,6 +1916,7 @@ func (h *HandlerV1) UpsertObject(c *gin.Context) {
 		objectRequest               models.UpsertCommonMessage
 		beforeActions, afterActions []*obs.CustomEvent
 		statusHttp                  = status_http.GrpcStatusToHTTP["Created"]
+		tableSlug                   = c.Param("collection")
 	)
 
 	if err := c.ShouldBindJSON(&objectRequest); err != nil {
@@ -1954,11 +1956,11 @@ func (h *HandlerV1) UpsertObject(c *gin.Context) {
 
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 
-	objects := objectRequest.Data["objects"].([]interface{})
-	editedObjects := make([]interface{}, 0, len(objects))
+	objects := objectRequest.Data["objects"].([]any)
+	editedObjects := make([]any, 0, len(objects))
 	var objectIds = make([]string, 0, len(objects))
 	for _, object := range objects {
-		newObject := object.(map[string]interface{})
+		newObject := object.(map[string]any)
 		if newObject["guid"] == nil || newObject["guid"] == "" {
 			guid, _ := uuid.NewRandom()
 			newObject["guid"] = guid.String()
@@ -1972,7 +1974,7 @@ func (h *HandlerV1) UpsertObject(c *gin.Context) {
 	fromOfs := c.Query("from-ofs")
 	if fromOfs != "true" {
 		beforeActions, afterActions, err = GetListCustomEvents(models.GetListCustomEventsStruct{
-			TableSlug: c.Param("table_slug"),
+			TableSlug: tableSlug,
 			RoleId:    "",
 			Method:    "MULTIPLE_UPDATE",
 			Resource:  resource,
@@ -1989,7 +1991,7 @@ func (h *HandlerV1) UpsertObject(c *gin.Context) {
 		functionName, err := DoInvokeFuntion(models.DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			IDs:          []string{},
-			TableSlug:    c.Param("table_slug"),
+			TableSlug:    tableSlug,
 			ObjectData:   objectRequest.Data,
 			Method:       "MULTIPLE_UPDATE",
 			Resource:     resource,
@@ -2007,7 +2009,7 @@ func (h *HandlerV1) UpsertObject(c *gin.Context) {
 	for key, value := range objectRequest.Data {
 		if key[0] == '$' {
 
-			interfaceToMap := value.(map[string]interface{})
+			interfaceToMap := value.(map[string]any)
 
 			id, _ := uuid.NewRandom()
 			interfaceToMap["guid"] = id
@@ -2032,7 +2034,7 @@ func (h *HandlerV1) UpsertObject(c *gin.Context) {
 	case pb.ResourceType_MONGODB:
 		resp, err = service.Batch(
 			c.Request.Context(), &obs.BatchRequest{
-				TableSlug:     c.Param("table_slug"),
+				TableSlug:     tableSlug,
 				Data:          structData,
 				UpdatedFields: objectRequest.UpdatedFields,
 				ProjectId:     resource.ResourceEnvironmentId,
@@ -2055,8 +2057,8 @@ func (h *HandlerV1) UpsertObject(c *gin.Context) {
 		return
 	}
 
-	if c.Param("table_slug") == "record_permission" {
-		roleId := objectRequest.Data["objects"].([]interface{})[0].(map[string]interface{})["role_id"]
+	if tableSlug == "record_permission" {
+		roleId := objectRequest.Data["objects"].([]any)[0].(map[string]any)["role_id"]
 		if roleId == nil {
 			err := errors.New("role id must be have in upsert permission")
 			h.handleResponse(c, status_http.BadRequest, err.Error())
@@ -2087,7 +2089,7 @@ func (h *HandlerV1) UpsertObject(c *gin.Context) {
 		functionName, err := DoInvokeFuntion(models.DoInvokeFuntionStruct{
 			CustomEvents: afterActions,
 			IDs:          objectIds,
-			TableSlug:    c.Param("table_slug"),
+			TableSlug:    tableSlug,
 			ObjectData:   objectRequest.Data,
 			Method:       "MULTIPLE_UPDATE",
 			Resource:     resource,
@@ -2108,13 +2110,13 @@ func (h *HandlerV1) UpsertObject(c *gin.Context) {
 // MultipleUpdateObject godoc
 // @Security ApiKeyAuth
 // @ID multiple_update_object
-// @Router /v1/object/multiple-update/{table_slug} [PUT]
+// @Router /v1/object/multiple-update/{collection} [PUT]
 // @Summary Multiple Update object
 // @Description Multiple Update object
 // @Tags Object
 // @Accept json
 // @Produce json
-// @Param table_slug path string true "table_slug"
+// @Param collection path string true "collection"
 // @Param object body models.CommonMessage true "MultipleUpdateObjectRequestBody"
 // @Success 201 {object} status_http.Response{data=models.CommonMessage} "Object data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -2128,6 +2130,7 @@ func (h *HandlerV1) MultipleUpdateObject(c *gin.Context) {
 		resourceList                *pb.GetResourceByEnvIDResponse
 		resp                        *obs.CommonMessage
 		err                         error
+		tableSlug                   = c.Param("collection")
 	)
 
 	if err = c.ShouldBindJSON(&objectRequest); err != nil {
@@ -2196,18 +2199,18 @@ func (h *HandlerV1) MultipleUpdateObject(c *gin.Context) {
 
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 
-	objects, ok := objectRequest.Data["objects"].([]interface{})
+	objects, ok := objectRequest.Data["objects"].([]any)
 	if !ok {
 		err = errors.New("objects is not an array")
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	editedObjects := make([]map[string]interface{}, 0, len(objects))
+	editedObjects := make([]map[string]any, 0, len(objects))
 	objectIds := make([]string, 0, len(objects))
 
 	for _, object := range objects {
-		newObjects := object.(map[string]interface{})
+		newObjects := object.(map[string]any)
 
 		if _, ok := newObjects["guid"].(string); !ok {
 			newObjects["guid"] = uuid.NewString()
@@ -2231,7 +2234,7 @@ func (h *HandlerV1) MultipleUpdateObject(c *gin.Context) {
 	fromOfs := c.Query("from-ofs")
 	if fromOfs != "true" {
 		beforeActions, afterActions, err = GetListCustomEvents(models.GetListCustomEventsStruct{
-			TableSlug: c.Param("table_slug"),
+			TableSlug: tableSlug,
 			RoleId:    "",
 			Method:    "MULTIPLE_UPDATE",
 			Resource:  resource,
@@ -2249,7 +2252,7 @@ func (h *HandlerV1) MultipleUpdateObject(c *gin.Context) {
 		functionName, err := DoInvokeFuntion(models.DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			IDs:          objectIds,
-			TableSlug:    c.Param("table_slug"),
+			TableSlug:    tableSlug,
 			ObjectData:   objectRequest.Data,
 			Method:       "MULTIPLE_UPDATE",
 			Resource:     resource,
@@ -2264,7 +2267,7 @@ func (h *HandlerV1) MultipleUpdateObject(c *gin.Context) {
 	case pb.ResourceType_MONGODB:
 		resp, err = service.MultipleUpdate(
 			c.Request.Context(), &obs.CommonMessage{
-				TableSlug:        c.Param("table_slug"),
+				TableSlug:        tableSlug,
 				Data:             structData,
 				ProjectId:        resource.ResourceEnvironmentId,
 				BlockedBuilder:   cast.ToBool(c.DefaultQuery("block_builder", "false")),
@@ -2284,7 +2287,7 @@ func (h *HandlerV1) MultipleUpdateObject(c *gin.Context) {
 	case pb.ResourceType_POSTGRESQL:
 		goResp, err := services.GoObjectBuilderService().Items().MultipleUpdate(
 			c.Request.Context(), &nb.CommonMessage{
-				TableSlug:        c.Param("table_slug"),
+				TableSlug:        tableSlug,
 				Data:             structData,
 				ProjectId:        resource.ResourceEnvironmentId,
 				EnvId:            resource.EnvironmentId,
@@ -2307,7 +2310,7 @@ func (h *HandlerV1) MultipleUpdateObject(c *gin.Context) {
 		functionName, err := DoInvokeFuntion(models.DoInvokeFuntionStruct{
 			CustomEvents: afterActions,
 			IDs:          objectIds,
-			TableSlug:    c.Param("table_slug"),
+			TableSlug:    tableSlug,
 			ObjectData:   objectRequest.Data,
 			Method:       "MULTIPLE_UPDATE",
 			Resource:     resource,
@@ -2328,13 +2331,13 @@ func (h *HandlerV1) MultipleUpdateObject(c *gin.Context) {
 // GetFinancialAnalytics godoc
 // @Security ApiKeyAuth
 // @ID get_financial_analytics
-// @Router /v1/object/get-financial-analytics/{table_slug} [POST]
+// @Router /v1/object/get-financial-analytics/{collection} [POST]
 // @Summary Get financial analytics
 // @Description Get financial analytics
 // @Tags Object
 // @Accept json
 // @Produce json
-// @Param table_slug path string true "table_slug"
+// @Param collection path string true "collection"
 // @Param object body models.CommonMessage true "GetFinancialAnalyticsRequestBody"
 // @Success 200 {object} status_http.Response{data=models.CommonMessage} "ObjectBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -2343,6 +2346,7 @@ func (h *HandlerV1) GetFinancialAnalytics(c *gin.Context) {
 	var (
 		objectRequest models.CommonMessage
 		statusHttp    = status_http.GrpcStatusToHTTP["Ok"]
+		tableSlug     = c.Param("collection")
 	)
 
 	if err := c.ShouldBindJSON(&objectRequest); err != nil {
@@ -2401,7 +2405,7 @@ func (h *HandlerV1) GetFinancialAnalytics(c *gin.Context) {
 
 	resp, err := service.GetFinancialAnalytics(
 		c.Request.Context(), &obs.CommonMessage{
-			TableSlug: c.Param("table_slug"),
+			TableSlug: tableSlug,
 			Data:      structData,
 			ProjectId: resource.ResourceEnvironmentId,
 		},
@@ -2425,14 +2429,14 @@ func (h *HandlerV1) GetFinancialAnalytics(c *gin.Context) {
 // GetListGroupByObject godoc
 // @Security ApiKeyAuth
 // @ID get_list_group_by_objects
-// @Router /v1/object/get-list-group-by/{table_slug}/{column_table_slug} [POST]
+// @Router /v1/object/get-list-group-by/{collection}/{column_collection} [POST]
 // @Summary Get List Group By Object
 // @Description Get List Group By Object
 // @Tags Object
 // @Accept json
 // @Produce json
-// @Param table_slug path string true "table_slug"
-// @Param column_table_slug path string true "column_table_slug"
+// @Param collection path string true "collection"
+// @Param column_collection path string true "column_collection"
 // @Param limit query string false "limit"
 // @Param search query string false "search"
 // @Param project query string false "project"
@@ -2441,36 +2445,39 @@ func (h *HandlerV1) GetFinancialAnalytics(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetListGroupBy(c *gin.Context) {
-	var object models.CommonMessage
+	var (
+		object    models.CommonMessage
+		tableSlug = c.Param("collection")
+	)
 
 	if err := c.ShouldBindJSON(&object); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
-	if c.Param("table_slug") == "" {
-		h.handleResponse(c, status_http.BadRequest, "table_slug required")
+	if tableSlug == "" {
+		h.handleResponse(c, status_http.BadRequest, "collection required")
 		return
 	}
 
-	if c.Param("column_table_slug") == "" {
-		h.handleResponse(c, status_http.BadRequest, "table_slug required")
+	if c.Param("column_collection") == "" {
+		h.handleResponse(c, status_http.BadRequest, "collection required")
 		return
 	}
 
 	var (
-		relationSlug      = c.Param("column_table_slug")
+		relationSlug      = c.Param("column_collection")
 		selectedGuid      = cast.ToSlice(object.Data["additional_values"])
 		relationTableSlug = util.PluralizeWord(relationSlug)
 	)
 
-	object.Data = map[string]interface{}{
-		"match": map[string]interface{}{
-			"$match": map[string]interface{}{},
+	object.Data = map[string]any{
+		"match": map[string]any{
+			"$match": map[string]any{},
 		},
-		"lookups": []interface{}{
-			map[string]interface{}{
-				"$lookup": map[string]interface{}{
+		"lookups": []any{
+			map[string]any{
+				"$lookup": map[string]any{
 					"from":         relationTableSlug,
 					"localField":   relationSlug + "_id",
 					"foreignField": "guid",
@@ -2478,15 +2485,15 @@ func (h *HandlerV1) GetListGroupBy(c *gin.Context) {
 				},
 			},
 		},
-		"query": map[string]interface{}{
-			"$group": map[string]interface{}{
+		"query": map[string]any{
+			"$group": map[string]any{
 				"_id":                "$" + relationSlug + "_id",
-				"guid":               map[string]interface{}{"$first": "$" + relationSlug + "_id"},
-				relationSlug + "_id": map[string]interface{}{"$first": "$" + relationSlug + "_id"},
+				"guid":               map[string]any{"$first": "$" + relationSlug + "_id"},
+				relationSlug + "_id": map[string]any{"$first": "$" + relationSlug + "_id"},
 			},
 		},
-		"sort": map[string]interface{}{
-			"$sort": map[string]interface{}{
+		"sort": map[string]any{
+			"$sort": map[string]any{
 				"_id": 1,
 			},
 		},
@@ -2497,29 +2504,29 @@ func (h *HandlerV1) GetListGroupBy(c *gin.Context) {
 	}
 
 	if c.Query("project") != "" {
-		object.Data["project"] = map[string]interface{}{
-			"$project": map[string]interface{}{
+		object.Data["project"] = map[string]any{
+			"$project": map[string]any{
 				"_id":              0,
 				"guid":             1,
-				c.Query("project"): map[string]interface{}{"$first": "$" + relationSlug + "_details." + c.Query("project")},
+				c.Query("project"): map[string]any{"$first": "$" + relationSlug + "_details." + c.Query("project")},
 			},
 		}
 	}
 
 	if c.Query("project") != "" && c.Query("search") != "" {
-		object.Data["second_match"] = map[string]interface{}{
-			relationSlug + "_details." + c.Query("project"): map[string]interface{}{
+		object.Data["second_match"] = map[string]any{
+			relationSlug + "_details." + c.Query("project"): map[string]any{
 				"$regex":   c.Query("search"),
 				"$options": "i",
 			},
 		}
-		object.Data["sort"] = map[string]interface{}{"$sort": map[string]interface{}{c.Query("project"): 1}}
+		object.Data["sort"] = map[string]any{"$sort": map[string]any{c.Query("project"): 1}}
 	}
 
 	if len(selectedGuid) > 0 {
-		object.Data["match"] = map[string]interface{}{
-			"$match": map[string]interface{}{
-				relationSlug + "_id": map[string]interface{}{"$nin": selectedGuid},
+		object.Data["match"] = map[string]any{
+			"$match": map[string]any{
+				relationSlug + "_id": map[string]any{"$nin": selectedGuid},
 			},
 		}
 	}
@@ -2565,7 +2572,7 @@ func (h *HandlerV1) GetListGroupBy(c *gin.Context) {
 	tableResp, err := service.GetGroupByField(
 		c.Request.Context(),
 		&obs.CommonMessage{
-			TableSlug: c.Param("table_slug"),
+			TableSlug: tableSlug,
 			Data:      structData,
 			ProjectId: resource.ResourceEnvironmentId,
 		},
@@ -2582,9 +2589,9 @@ func (h *HandlerV1) GetListGroupBy(c *gin.Context) {
 	)
 
 	if len(selectedGuid) > 0 {
-		object.Data["match"] = map[string]interface{}{
-			"$match": map[string]interface{}{
-				relationSlug + "_id": map[string]interface{}{"$in": selectedGuid},
+		object.Data["match"] = map[string]any{
+			"$match": map[string]any{
+				relationSlug + "_id": map[string]any{"$in": selectedGuid},
 			},
 		}
 
@@ -2602,7 +2609,7 @@ func (h *HandlerV1) GetListGroupBy(c *gin.Context) {
 
 		selectedTableResp, err := service.GetGroupByField(
 			c.Request.Context(), &obs.CommonMessage{
-				TableSlug: c.Param("table_slug"),
+				TableSlug: tableSlug,
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -2618,11 +2625,11 @@ func (h *HandlerV1) GetListGroupBy(c *gin.Context) {
 		response = append(response, cast.ToSlice(tableResp.Data.AsMap()["response"])...)
 
 		h.handleResponse(c, status_http.OK, struct {
-			TableSlug string                 `json:"table_slug"`
-			Data      map[string]interface{} `json:"data"`
+			TableSlug string         `json:"collection"`
+			Data      map[string]any `json:"data"`
 		}{
 			TableSlug: tableResp.TableSlug,
-			Data: map[string]interface{}{
+			Data: map[string]any{
 				"count":    count,
 				"response": response,
 			},
@@ -2631,134 +2638,27 @@ func (h *HandlerV1) GetListGroupBy(c *gin.Context) {
 	}
 
 	h.handleResponse(c, status_http.OK, struct {
-		TableSlug string                 `json:"table_slug"`
-		Data      map[string]interface{} `json:"data"`
+		TableSlug string         `json:"collection"`
+		Data      map[string]any `json:"data"`
 	}{
 		TableSlug: tableResp.TableSlug,
-		Data: map[string]interface{}{
+		Data: map[string]any{
 			"count":    count,
 			"response": response,
 		},
 	})
 }
 
-// GetGroupByFieldObject godoc
-// @Security ApiKeyAuth
-// @ID get_group_by_field_objects
-// @Router /v1/object/get-group-by-field/{table_slug} [POST]
-// @Summary Get Group By Field Object
-// @Description Get Group By Field Object
-// @Tags Object
-// @Accept json
-// @Produce json
-// @Param table_slug path string true "table_slug"
-// @Param object body models.CommonMessage true "GetGroupByFieldObjectRequestBody"
-// @Success 200 {object} status_http.Response{data=models.CommonMessage} "ObjectBody"
-// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *HandlerV1) GetGroupByField(c *gin.Context) {
-	var (
-		objectRequest models.CommonMessage
-		resp          *obs.CommonMessage
-	)
-
-	if err := c.ShouldBindJSON(&objectRequest); err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
-	projectId, ok := c.Get("project_id")
-	if !ok || !util.IsValidUUID(projectId.(string)) {
-		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
-		return
-	}
-
-	environmentId, ok := c.Get("environment_id")
-	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
-		return
-	}
-
-	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(), &pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId.(string),
-			EnvironmentId: environmentId.(string),
-			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
-	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
-	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
-
-	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
-	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
-		return
-	}
-
-	switch resource.ResourceType {
-	case pb.ResourceType_MONGODB:
-		redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("group-%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
-		if err == nil {
-			var (
-				resp = make(map[string]interface{})
-				m    = make(map[string]interface{})
-			)
-
-			if err = json.Unmarshal([]byte(redisResp), &m); err != nil {
-				h.log.Error("Error while unmarshal redis", logger.Error(err))
-			} else {
-				resp["data"] = m
-				h.handleResponse(c, status_http.OK, resp)
-				return
-			}
-		}
-
-		resp, err = service.GetGroupByField(
-			c.Request.Context(),
-			&obs.CommonMessage{
-				TableSlug: c.Param("table_slug"),
-				Data:      structData,
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-
-		if err == nil {
-			jsonData, _ := resp.GetData().MarshalJSON()
-			err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("group-%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
-			if err != nil {
-				h.log.Error("Error while setting redis", logger.Error(err))
-			}
-		}
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-	}
-
-	h.handleResponse(c, status_http.OK, resp)
-}
-
 // DeleteManyObject godoc
 // @Security ApiKeyAuth
 // @ID delete_many_object
-// @Router /v1/object/{table_slug} [DELETE]
+// @Router /v1/object/{collection} [DELETE]
 // @Summary Delete many objects
 // @Description Delete many objects
 // @Tags Object
 // @Accept json
 // @Produce json
-// @Param table_slug path string true "table_slug"
+// @Param collection path string true "collection"
 // @Param object body models.Ids true "DeleteManyObjectRequestBody"
 // @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -2769,7 +2669,8 @@ func (h *HandlerV1) DeleteManyObject(c *gin.Context) {
 		resp                        *obs.CommonMessage
 		beforeActions, afterActions []*obs.CustomEvent
 		statusHttp                  = status_http.GrpcStatusToHTTP["NoContent"]
-		data                        = make(map[string]interface{})
+		data                        = make(map[string]any)
+		tableSlug                   = c.Param("collection")
 	)
 
 	if err := c.ShouldBindJSON(&objectRequest); err != nil {
@@ -2818,7 +2719,7 @@ func (h *HandlerV1) DeleteManyObject(c *gin.Context) {
 	fromOfs := c.Query("from-ofs")
 	if fromOfs != "true" {
 		beforeActions, afterActions, err = GetListCustomEvents(models.GetListCustomEventsStruct{
-			TableSlug: c.Param("table_slug"),
+			TableSlug: tableSlug,
 			RoleId:    "",
 			Method:    "DELETE_MANY",
 			Resource:  resource,
@@ -2836,7 +2737,7 @@ func (h *HandlerV1) DeleteManyObject(c *gin.Context) {
 		functionName, err := DoInvokeFuntion(models.DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			IDs:          objectRequest.Ids,
-			TableSlug:    c.Param("table_slug"),
+			TableSlug:    tableSlug,
 			ObjectData:   data,
 			Method:       "DELETE_MANY",
 			Resource:     resource,
@@ -2854,7 +2755,7 @@ func (h *HandlerV1) DeleteManyObject(c *gin.Context) {
 		resp, err = service.DeleteMany(
 			c.Request.Context(),
 			&obs.CommonMessage{
-				TableSlug: c.Param("table_slug"),
+				TableSlug: tableSlug,
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -2873,7 +2774,7 @@ func (h *HandlerV1) DeleteManyObject(c *gin.Context) {
 		goResp, err := services.GoObjectBuilderService().Items().DeleteMany(
 			c.Request.Context(),
 			&nb.CommonMessage{
-				TableSlug: c.Param("table_slug"),
+				TableSlug: tableSlug,
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -2900,7 +2801,7 @@ func (h *HandlerV1) DeleteManyObject(c *gin.Context) {
 		functionName, err := DoInvokeFuntion(models.DoInvokeFuntionStruct{
 			CustomEvents: afterActions,
 			IDs:          objectRequest.Ids,
-			TableSlug:    c.Param("table_slug"),
+			TableSlug:    tableSlug,
 			ObjectData:   data,
 			Method:       "DELETE_MANY",
 			Resource:     resource,
@@ -2921,13 +2822,13 @@ func (h *HandlerV1) DeleteManyObject(c *gin.Context) {
 // GetListWithOut godoc
 // @Security ApiKeyAuth
 // @ID get_list_objects_without_relation
-// @Router /v1/object/get-list-without-relation/{table_slug} [POST]
+// @Router /v1/object/get-list-without-relation/{collection} [POST]
 // @Summary Get all objects without relation
 // @Description Get all objects without relation
 // @Tags Object
 // @Accept json
 // @Produce json
-// @Param table_slug path string true "table_slug"
+// @Param collection path string true "collection"
 // @Param object body models.CommonMessage true "GetListObjectRequestBody"
 // @Success 200 {object} status_http.Response{data=models.CommonMessage} "ObjectBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -2937,6 +2838,7 @@ func (h *HandlerV1) GetListWithOutRelation(c *gin.Context) {
 		objectRequest models.CommonMessage
 		resp          *obs.CommonMessage
 		statusHttp    = status_http.GrpcStatusToHTTP["Ok"]
+		tableSlug     = c.Param("collection")
 	)
 
 	if err := c.ShouldBindJSON(&objectRequest); err != nil {
@@ -2983,10 +2885,10 @@ func (h *HandlerV1) GetListWithOutRelation(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
+		redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", tableSlug, structData.String(), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
 		if err == nil {
-			resp := make(map[string]interface{})
-			m := make(map[string]interface{})
+			resp := make(map[string]any)
+			m := make(map[string]any)
 			err = json.Unmarshal([]byte(redisResp), &m)
 			if err != nil {
 				h.log.Error("Error while unmarshal redis", logger.Error(err))
@@ -3000,7 +2902,7 @@ func (h *HandlerV1) GetListWithOutRelation(c *gin.Context) {
 		resp, err = service.GetListWithOutRelations(
 			c.Request.Context(),
 			&obs.CommonMessage{
-				TableSlug: c.Param("table_slug"),
+				TableSlug: tableSlug,
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -3009,7 +2911,7 @@ func (h *HandlerV1) GetListWithOutRelation(c *gin.Context) {
 		if err == nil {
 			if resp.IsCached {
 				jsonData, _ := resp.GetData().MarshalJSON()
-				err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
+				err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", tableSlug, structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
 				if err != nil {
 					h.log.Error("Error while setting redis", logger.Error(err))
 				}
@@ -3033,13 +2935,13 @@ func (h *HandlerV1) GetListWithOutRelation(c *gin.Context) {
 // GetListAggregate godoc
 // @Security ApiKeyAuth
 // @ID get_list_aggregate
-// @Router /v1/object/get-list-aggregate/{table_slug} [POST]
+// @Router /v1/object/get-list-aggregate/{collection} [POST]
 // @Summary Get List Aggregate
 // @Description Get List Aggregate
 // @Tags Object
 // @Accept json
 // @Produce json
-// @Param table_slug path string true "table_slug"
+// @Param collection path string true "collection"
 // @Param limit query string false "limit"
 // @Param offset query string false "offset"
 // @Param sort_type query string false "sort_type"
@@ -3052,6 +2954,7 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 		objectRequest models.CommonMessage
 		resp          *obs.CommonMessage
 		err           error
+		tableSlug     = c.Param("collection")
 	)
 
 	if err = c.ShouldBindJSON(&objectRequest); err != nil {
@@ -3127,7 +3030,7 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 
 	if len(cast.ToSlice(objectRequest.Data["group_selects"])) <= 0 || len(cast.ToSlice(objectRequest.Data["projects"])) <= 0 {
 		var (
-			fieldKey     = fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), projectId.(string), environmentId.(string))
+			fieldKey     = fmt.Sprintf("%s-%s-%s", tableSlug, projectId.(string), environmentId.(string))
 			fieldKeyWait = config.CACHE_WAIT + "-field"
 		)
 
@@ -3164,7 +3067,7 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 
 		if len(fieldResp.Fields) <= 0 {
 			fieldResp, err = services.GetBuilderServiceByType(resource.NodeType).Field().GetAll(c.Request.Context(), &obs.GetAllFieldsRequest{
-				TableSlug: c.Param("table_slug"),
+				TableSlug: tableSlug,
 				ProjectId: resource.ResourceEnvironmentId,
 			})
 			if err != nil {
@@ -3183,9 +3086,9 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 		}
 	}
 
-	object.Data = map[string]interface{}{
-		"match": map[string]interface{}{"$match": map[string]interface{}{}},
-		"sort":  map[string]interface{}{"$sort": map[string]interface{}{"_id": 1}},
+	object.Data = map[string]any{
+		"match": map[string]any{"$match": map[string]any{}},
+		"sort":  map[string]any{"$sort": map[string]any{"_id": 1}},
 	}
 
 	if c.Query("limit") != "" {
@@ -3198,7 +3101,7 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 
 	if _, ok := objectRequest.Data["search"]; ok {
 		var (
-			searchQuery = map[string]interface{}{}
+			searchQuery = map[string]any{}
 			search      = cast.ToStringMap(objectRequest.Data["search"])
 		)
 
@@ -3206,7 +3109,7 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 			if cast.ToString(value) == "" {
 				searchQuery[key] = value
 			} else {
-				searchQuery[key] = map[string]interface{}{"$regex": value, "$options": "i"}
+				searchQuery[key] = map[string]any{"$regex": value, "$options": "i"}
 			}
 		}
 		object.Data["second_match"] = searchQuery
@@ -3214,16 +3117,16 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 
 	if _, ok := objectRequest.Data["match"]; ok {
 		var (
-			matchQuery = map[string]interface{}{}
+			matchQuery = map[string]any{}
 			match      = cast.ToStringMap(objectRequest.Data["match"])
 		)
 		for key, value := range match {
 			matchQuery[key] = value
 		}
-		object.Data["match"] = map[string]interface{}{"$match": matchQuery}
+		object.Data["match"] = map[string]any{"$match": matchQuery}
 	}
 
-	var groupQuery = map[string]interface{}{"_id": "$guid"}
+	var groupQuery = map[string]any{"_id": "$guid"}
 	if _, ok := objectRequest.Data["groups"]; ok {
 		var (
 			groupSlice = cast.ToStringSlice(objectRequest.Data["groups"])
@@ -3231,26 +3134,26 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 		)
 		if groupLen > 0 {
 			if groupLen > 1 {
-				var manyGroup = map[string]interface{}{}
+				var manyGroup = map[string]any{}
 				for _, value := range groupSlice {
 					manyGroup[value] = "$" + value
 				}
-				groupQuery = map[string]interface{}{"_id": manyGroup}
+				groupQuery = map[string]any{"_id": manyGroup}
 			} else {
-				groupQuery = map[string]interface{}{"_id": "$" + groupSlice[0]}
+				groupQuery = map[string]any{"_id": "$" + groupSlice[0]}
 			}
 		}
 	}
-	groupQuery["guid"] = map[string]interface{}{"$first": "$guid"}
+	groupQuery["guid"] = map[string]any{"$first": "$guid"}
 
 	if _, ok := objectRequest.Data["group_selects"]; ok {
 		var groupSelects = cast.ToStringSlice(objectRequest.Data["group_selects"])
 		for _, value := range groupSelects {
-			groupQuery[value] = map[string]interface{}{"$first": "$" + value}
+			groupQuery[value] = map[string]any{"$first": "$" + value}
 		}
 	} else {
 		for _, field := range fieldResp.Fields {
-			groupQuery[field.Slug] = map[string]interface{}{"$first": "$" + field.Slug}
+			groupQuery[field.Slug] = map[string]any{"$first": "$" + field.Slug}
 		}
 	}
 
@@ -3260,12 +3163,12 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 			groupQuery[key] = value
 		}
 	}
-	object.Data["query"] = map[string]interface{}{"$group": groupQuery}
+	object.Data["query"] = map[string]any{"$group": groupQuery}
 
 	if _, ok := objectRequest.Data["lookups"]; ok {
 		var (
 			lookups      = cast.ToSlice(objectRequest.Data["lookups"])
-			lookupsQuery = []interface{}{}
+			lookupsQuery = []any{}
 		)
 		for _, objectLookup := range lookups {
 			var (
@@ -3287,7 +3190,7 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 				}
 			}
 
-			lookupQuery := map[string]interface{}{
+			lookupQuery := map[string]any{
 				"from":         fromSlug,
 				"foreignField": lookupMap["from_field"],
 				"localField":   lookupMap["to_field"],
@@ -3298,18 +3201,18 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 				lookupQuery["pipeline"] = cast.ToSlice(lookupMap["pipeline"])
 			}
 
-			lookupsQuery = append(lookupsQuery, map[string]interface{}{"$lookup": lookupQuery})
+			lookupsQuery = append(lookupsQuery, map[string]any{"$lookup": lookupQuery})
 		}
 		object.Data["lookups"] = lookupsQuery
 	}
 
-	var projectQuery = map[string]interface{}{"_id": 0, "guid": 1}
+	var projectQuery = map[string]any{"_id": 0, "guid": 1}
 	if _, ok := objectRequest.Data["projects"]; ok {
 		var projects = cast.ToStringSlice(objectRequest.Data["projects"])
 		for _, value := range projects {
 			if strings.Contains(value, ".") {
 				var key = strings.ReplaceAll(value, ".", "_")
-				projectQuery[key] = map[string]interface{}{"$first": "$" + value}
+				projectQuery[key] = map[string]any{"$first": "$" + value}
 			} else {
 				projectQuery[value] = 1
 			}
@@ -3326,12 +3229,12 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 			projectQuery[key] = value
 		}
 	}
-	object.Data["project"] = map[string]interface{}{"$project": projectQuery}
+	object.Data["project"] = map[string]any{"$project": projectQuery}
 
 	if _, ok := objectRequest.Data["sorts"]; ok {
 		var (
 			sorts      = cast.ToStringSlice(objectRequest.Data["sorts"])
-			sortQuery  = map[string]interface{}{}
+			sortQuery  = map[string]any{}
 			sortedType = 1
 		)
 
@@ -3347,7 +3250,7 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 		for _, value := range sorts {
 			sortQuery[value] = sortedType
 		}
-		object.Data["sort"] = map[string]interface{}{"$sort": sortQuery}
+		object.Data["sort"] = map[string]any{"$sort": sortQuery}
 	}
 
 	structData, err := helper.ConvertMapToStruct(object.Data)
@@ -3357,7 +3260,7 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 	}
 
 	var (
-		key              = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("aggregate-%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId)))
+		key              = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("aggregate-%s-%s-%s", tableSlug, structData.String(), resource.ResourceEnvironmentId)))
 		aggregateWaitKey = config.CACHE_WAIT + "-aggregate"
 	)
 
@@ -3374,13 +3277,13 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 			for {
 				aggregateBody, ok := h.cache.Get(key)
 				if ok {
-					m := make(map[string]interface{})
+					m := make(map[string]any)
 					err = json.Unmarshal(aggregateBody, &m)
 					if err != nil {
 						h.handleResponse(c, status_http.GRPCError, err.Error())
 						return
 					}
-					resp := map[string]interface{}{"data": m}
+					resp := map[string]any{"data": m}
 					h.handleResponse(c, status_http.OK, resp)
 					return
 				}
@@ -3397,7 +3300,7 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 	resp, err = service.GetGroupByField(
 		c.Request.Context(),
 		&obs.CommonMessage{
-			TableSlug: c.Param("table_slug"),
+			TableSlug: tableSlug,
 			Data:      structData,
 			ProjectId: resource.ResourceEnvironmentId,
 		},
