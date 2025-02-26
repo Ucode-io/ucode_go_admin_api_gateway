@@ -491,3 +491,35 @@ func (h *HandlerV1) CalculatePrice(c *gin.Context) {
 
 	h.handleResponse(c, status_http.Created, response)
 }
+
+func (h *HandlerV1) ListDiscounts(c *gin.Context) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	offset, err := h.getOffsetParam(c)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	limit, err := h.getLimitParam(c)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	response, err := h.companyServices.Billing().ListDiscounts(c, &pb.ListRequest{
+		Offset:    int32(offset),
+		Limit:     int32(limit),
+		ProjectId: projectId.(string),
+	})
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.OK, response)
+}
