@@ -200,6 +200,8 @@ definitions:
         type: string
       environment_id:
         type: string
+      name:
+        type: string
       node_type:
         type: string
       project_id:

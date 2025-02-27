@@ -28069,6 +28069,9 @@ const docTemplate = `{
                 "environment_id": {
                     "type": "string"
                 },
+                "name": {
+                    "type": "string"
+                },
                 "node_type": {
                     "type": "string"
                 },
