@@ -85,6 +85,26 @@ definitions:
       workspace_id:
         type: string
     type: object
+  company_service.CalculatePriceRequest:
+    properties:
+      discount_id:
+        type: string
+      fare_id:
+        type: string
+      project_id:
+        type: string
+    type: object
+  company_service.CalculatePriceResponse:
+    properties:
+      calculated_price:
+        type: number
+      credit_limit:
+        type: number
+      discount_percentage:
+        type: number
+      project_balance:
+        type: number
+    type: object
   company_service.Company:
     properties:
       description:
@@ -290,6 +310,15 @@ definitions:
         type: string
       symbol_native:
         type: string
+    type: object
+  company_service.Discount:
+    properties:
+      id:
+        type: string
+      months:
+        type: integer
+      value:
+        type: number
     type: object
   company_service.Empty:
     type: object
@@ -556,6 +585,15 @@ definitions:
         type: string
       short_name:
         type: string
+    type: object
+  company_service.ListDiscountsResponse:
+    properties:
+      count:
+        type: integer
+      discounts:
+        items:
+          $ref: '#/definitions/company_service.Discount'
+        type: array
     type: object
   company_service.ListProjectResource:
     properties:
@@ -6517,6 +6555,56 @@ paths:
       summary: Get by id custom error message
       tags:
       - CustomErrorMessage
+  /v1/discounts:
+    get:
+      consumes:
+      - application/json
+      description: List discounts
+      operationId: list-discounts
+      parameters:
+      - description: limit
+        in: query
+        name: limit
+        type: string
+      - description: offset
+        in: query
+        name: offset
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Fare data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.ListDiscountsResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: List discounts
+      tags:
+      - Billing
   /v1/document:
     get:
       consumes:
@@ -7699,6 +7787,54 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get fare
+      tags:
+      - Billing
+  /v1/fare/calculate-price:
+    post:
+      consumes:
+      - application/json
+      description: Calculate price
+      operationId: calculate_price
+      parameters:
+      - description: CalculatePriceRequest
+        in: body
+        name: billing
+        required: true
+        schema:
+          $ref: '#/definitions/company_service.CalculatePriceRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: CalculatePriceResponse data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.CalculatePriceResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Calculate price
       tags:
       - Billing
   /v1/fare/item:
