@@ -60,7 +60,7 @@ message CompareFunctionResponse {
 message Fare {
     string id = 1;
     string name = 2;
-    string currency = 3;
+    string currency_id = 3;
     double price = 4;
     int32 trial_days = 5;
     int32 disactivate_day = 6;
@@ -69,6 +69,7 @@ message Fare {
     string created_at = 9;
     string updated_at = 10;
     bool is_public = 11;
+    Currency currency = 14;
 }
 
 // FareItem
@@ -118,13 +119,14 @@ message Transaction {
 // Fare
 message CreateFareRequest {
     string name = 1;
-    string currency = 2;
+    string currency_id = 2;
     double price = 3;
     int32 trial_days = 4;
     int32 disactivate_day = 5;
     string description = 6;
     repeated FareItemPrice fare_item_prices = 7;
     bool is_public = 8;
+    Currency currency = 9;
 }
 
 message PrimaryKey {
@@ -262,6 +264,9 @@ message CalculatePriceResponse {
     double project_balance = 2;
     double credit_limit = 3;
     double discount_percentage = 4;
+    string start_date = 5;
+    string end_date = 6;
+    double currency_rate = 7;
 }
 
 message Discount {
