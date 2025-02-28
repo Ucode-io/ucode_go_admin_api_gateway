@@ -12,7 +12,7 @@ replicaCount: 2
 
 image:
   registry: gitlab.udevs.io:5050
-  repository: /ucode/ucode_go_admin_api_gateway
+  repository: /wayll/ucode_go_admin_api_gateway
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
@@ -35,42 +35,37 @@ serviceAccount:
 
 podAnnotations:
   vault.hashicorp.com/agent-inject: "true"
-  vault.hashicorp.com/auth-path: "auth/kubernetes-ucode"
-  vault.hashicorp.com/agent-inject-secret-.env: "secret/data/k8s/ucode-prod/go-admin-api-gateway"
+  vault.hashicorp.com/auth-path: "auth/kubernetes-wayll"
+  vault.hashicorp.com/agent-inject-secret-.env: "secret/data/k8s/wayll-prod/go-admin-api-gateway"
   vault.hashicorp.com/secret-volume-path-.env: "/app"
-  vault.hashicorp.com/role: "ucode-prod"
+  vault.hashicorp.com/role: "wayll-prod"
   vault.hashicorp.com/agent-inject-template-.env: |
-    {{- with secret "secret/data/k8s/ucode-prod/redis" -}}
+    {{- with secret "secret/data/k8s/wayll-prod/redis" -}}
     {{- range $key, $value := .Data.data }}
     {{ $key }}: {{ $value }}
     {{- end }}
     {{ end -}}
-    {{- with secret "secret/data/k8s/ucode-prod/minio" -}}
+    {{- with secret "secret/data/k8s/wayll-prod/minio" -}}
     {{- range $key, $value := .Data.data }}
     {{ $key }}: {{ $value }}
     {{- end }}
     {{ end -}}
-    {{- with secret "secret/data/k8s/ucode-prod/services" -}}
+    {{- with secret "secret/data/k8s/wayll-prod/services" -}}
     {{- range $key, $value := .Data.data }}
     {{ $key }}: {{ $value }}
     {{- end }}
     {{ end -}}
-    {{- with secret "secret/data/k8s/ucode-prod/postgres" -}}
+    {{- with secret "secret/data/k8s/wayll-prod/postgres" -}}
     {{- range $key, $value := .Data.data }}
     {{ $key }}: {{ $value }}
     {{- end }}
     {{ end -}}
-    {{- with secret "secret/data/k8s/ucode-prod/go-admin-api-gateway" -}}
+    {{- with secret "secret/data/k8s/wayll-prod/go-admin-api-gateway" -}}
     {{- range $key, $value := .Data.data }}
     {{ $key }}: {{ $value }}
     {{- end }}
     {{ end -}}
-    {{- with secret "secret/data/k8s/ucode-prod/gitlab" -}}
-    {{- range $key, $value := .Data.data }}
-    {{ $key }}: {{ $value }}
-    {{- end }}
-    {{ end -}}
-    {{- with secret "secret/data/k8s/ucode-prod/jaeger" -}}
+    {{- with secret "secret/data/k8s/wayll-prod/gitlab" -}}
     {{- range $key, $value := .Data.data }}
     {{ $key }}: {{ $value }}
     {{- end }}
@@ -146,7 +141,7 @@ ingress:
         # cert-manager.io/cluster-issuer: letsencrypt-prod
       type: web
       hosts:
-        - host: "api.admin.u-code.io"
+        - host: "api-admin.app-wayll"
           path: /
           servicePort: 8080
     - annotations:
@@ -163,7 +158,7 @@ ingress:
         # cert-manager.io/cluster-issuer: letsencrypt-prod
       type: auth
       hosts:
-        - host: "api.admin.u-code.io"
+        - host: "api-admin.app-wayll"
           path: /swagger
           servicePort: 8080
 
@@ -192,4 +187,4 @@ affinity:
             - key: workload
               operator: In
               values:
-                - "ucode-prod"
+                - "wayll-prod"

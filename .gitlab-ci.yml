@@ -2,37 +2,9 @@ include:
   - .gitlab/ci/*.gitlab-ci.yml
 
 stages:
-  # - test
   - build
   - deploy
   - rollback
-
-# test-staging:
-#   image: golang:1.22
-#   stage: test
-#   script:
-#   - go mod tidy && go mod vendor
-#   - go test ./tests/...
-#   only:
-#     - staging 
-  
-# test-prod:
-#   image: golang:1.22
-#   stage: test
-#   script:
-#   - go mod tidy && go mod vendor
-#   - go test ./tests/...
-#   only:
-#     - master 
-
-build-dev:
-  stage: build
-  extends: .build_template
-  variables:
-    ENV_TAG: dev
-    DOCKERFILE: Dockerfile
-  only:
-    - dev
 
 build-staging:
   stage: build
@@ -56,29 +28,19 @@ deploy-staging:
   stage: deploy
   extends: .deploy_template
   variables:
-    NAMESPACE: ucode-test
+    NAMESPACE: wayll-test
     VALUES_FILE: .helm/values-test.yml
-    K8SCONFIGJSON: $UCODE_HZN_KUBECONFIG
+    K8SCONFIGJSON: $WAYLL_KUBECONFIG
   only:
     - staging
-
-deploy-dev: 
-  stage: deploy
-  extends: .deploy_template
-  variables:
-    NAMESPACE: ucode-dev
-    VALUES_FILE: .helm/values-dev.yml
-    K8SCONFIGJSON: $UCODE_HZN_KUBECONFIG
-  only: 
-    - dev
 
 deploy-prod:
   stage: deploy
   extends: .deploy_template
   variables:
-    NAMESPACE: ucode-prod
+    NAMESPACE: wayll-prod
     VALUES_FILE: .helm/values-prod.yml
-    K8SCONFIGJSON: $UCODE_KUBECONFIG
+    K8SCONFIGJSON: $WAYLL_KUBECONFIG
   only:
     - master
 
@@ -86,17 +48,8 @@ rollback-staging:
   stage: rollback
   extends: .rollback_template
   variables:
-    NAMESPACE: ucode-test
-    K8SCONFIGJSON: $UCODE_HZN_KUBECONFIG
-  when: manual
-
-
-rollback-dev:
-  stage: rollback
-  extends: .rollback_template
-  variables:
-    NAMESPACE: ucode-dev
-    K8SCONFIGJSON: $UCODE_HZN_KUBECONFIG
+    NAMESPACE: wayll-test
+    K8SCONFIGJSON: $WAYLL_KUBECONFIG
   when: manual
 
 
@@ -104,7 +57,7 @@ rollback-prod:
   stage: rollback
   extends: .rollback_template
   variables:
-    NAMESPACE: ucode-prod
-    K8SCONFIGJSON: $UCODE_KUBECONFIG
+    NAMESPACE: wayll-prod
+    K8SCONFIGJSON: $WAYLL_KUBECONFIG
   when: manual
 #
