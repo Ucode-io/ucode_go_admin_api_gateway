@@ -2150,11 +2150,6 @@ func (h *HandlerV1) MultipleUpdateObject(c *gin.Context) {
 		return
 	}
 
-	if projectId == "0f111e78-3a93-4bec-945a-2a77e0e0a82d" && c.Param("table_slug") == "surver_analytics" {
-		h.handleResponse(c, status_http.Created, pb.Empty{})
-		return
-	}
-
 	if resourceBody, ok := c.Get("resource"); ok {
 		if err = json.Unmarshal([]byte(resourceBody.(string)), &resourceList); err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
