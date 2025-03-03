@@ -70,6 +70,7 @@ message Fare {
     string updated_at = 10;
     bool is_public = 11;
     Currency currency = 14;
+    Subscription subscription = 15;
 }
 
 // FareItem
@@ -112,6 +113,7 @@ message Transaction {
     int64 order_id = 16;
     string payment_type = 17;
     string subscription_id = 18;
+    Fare fare = 19;
 }
 
 // Requests and Responses
@@ -131,6 +133,7 @@ message CreateFareRequest {
 
 message PrimaryKey {
     string id = 1;
+    string project_id = 2;
 }
 
 message ListRequest {

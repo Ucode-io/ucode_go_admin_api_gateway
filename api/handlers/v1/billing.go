@@ -2,6 +2,7 @@ package v1
 
 import (
 	"ucode/ucode_go_api_gateway/api/status_http"
+	"ucode/ucode_go_api_gateway/config"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
@@ -98,7 +99,13 @@ func (h *HandlerV1) GetFare(c *gin.Context) {
 		return
 	}
 
-	response, err := h.companyServices.Billing().GetFare(c, &pb.PrimaryKey{Id: id})
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleError(c, status_http.InvalidArgument, config.ErrProjectIdValid)
+		return
+	}
+
+	response, err := h.companyServices.Billing().GetFare(c, &pb.PrimaryKey{Id: id, ProjectId: projectId.(string)})
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
