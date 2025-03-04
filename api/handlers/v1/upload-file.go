@@ -121,14 +121,14 @@ func (h *HandlerV1) Upload(c *gin.Context) {
 // UploadFile godoc
 // @Security ApiKeyAuth
 // @ID upload_file
-// @Router /v1/upload-file/{table_slug}/{object_id} [POST]
+// @Router /v1/upload-file/{collection}/{object_id} [POST]
 // @Summary Upload file
 // @Description Upload file
 // @Tags file
 // @Accept multipart/form-data
 // @Produce json
 // @Param file formData file true "file"
-// @Param table_slug path string true "table_slug"
+// @Param collection path string true "collection"
 // @Param object_id path string true "object_id"
 // @Param tags query string false "tags"
 // @Success 200 {object} status_http.Response{data=Path} "Path"
@@ -200,8 +200,8 @@ func (h *HandlerV1) UploadFile(c *gin.Context) {
 	if c.Query("tags") != "" {
 		tags = strings.Split(c.Query("tags"), ",")
 	}
-	var requestMap = make(map[string]interface{})
-	requestMap["table_slug"] = c.Param("table_slug")
+	var requestMap = make(map[string]any)
+	requestMap["table_slug"] = c.Param("collection")
 	requestMap["object_id"] = c.Param("object_id")
 	requestMap["date"] = time.Now().Format(time.RFC3339)
 	requestMap["tags"] = tags

@@ -513,7 +513,7 @@ func (h *HandlerV1) InvokeFunction(c *gin.Context) {
 	}
 
 	if invokeFunction.Attributes == nil {
-		invokeFunction.Attributes = make(map[string]interface{}, 0)
+		invokeFunction.Attributes = make(map[string]any, 0)
 	}
 	authInfo, _ := h.GetAuthInfo(c)
 
@@ -523,7 +523,7 @@ func (h *HandlerV1) InvokeFunction(c *gin.Context) {
 	name := function.GetName()
 
 	invokeFunctionRequest := models.NewInvokeFunctionRequest{
-		Data: map[string]interface{}{
+		Data: map[string]any{
 			"object_ids":     invokeFunction.ObjectIDs,
 			"app_id":         apiKeys.GetData()[0].GetAppId(),
 			"attributes":     invokeFunction.Attributes,
@@ -547,61 +547,5 @@ func (h *HandlerV1) InvokeFunction(c *gin.Context) {
 		}()
 	}
 
-	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+function.Path, "POST", models.NewInvokeFunctionRequest{
-		Data: map[string]interface{}{
-			"object_ids":     invokeFunction.ObjectIDs,
-			"app_id":         apiKeys.GetData()[0].GetAppId(),
-			"attributes":     invokeFunction.Attributes,
-			"user_id":        authInfo.GetUserId(),
-			"project_id":     projectId,
-			"environment_id": environmentId,
-			"action_type":    "HTTP",
-			"table_slug":     invokeFunction.TableSlug,
-		},
-	})
-	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
-		return
-	} else if resp.Status == "error" {
-		var errStr = resp.Status
-		if resp.Data != nil && resp.Data["message"] != nil {
-			errStr = resp.Data["message"].(string)
-		}
-		h.handleResponse(c, status_http.InvalidArgument, errStr)
-		return
-	}
-
-	if c.Query("form_input") != "true" && c.Query("use_no_limit") != "true" {
-		switch resource.ResourceType {
-		case pb.ResourceType_MONGODB:
-			_, err = services.GetBuilderServiceByType(resource.NodeType).CustomEvent().UpdateByFunctionId(
-				c.Request.Context(),
-				&obs.UpdateByFunctionIdRequest{
-					FunctionId: invokeFunction.FunctionID,
-					ObjectIds:  invokeFunction.ObjectIDs,
-					FieldSlug:  function.Path + "_disable",
-					ProjectId:  resource.ResourceEnvironmentId,
-				},
-			)
-			if err != nil {
-				h.handleResponse(c, status_http.GRPCError, err.Error())
-				return
-			}
-		case pb.ResourceType_POSTGRESQL:
-			_, err = services.GoObjectBuilderService().CustomEvent().UpdateByFunctionId(
-				c.Request.Context(),
-				&nb.UpdateByFunctionIdRequest{
-					FunctionId: invokeFunction.FunctionID,
-					ObjectIds:  invokeFunction.ObjectIDs,
-					FieldSlug:  function.Path + "_disable",
-					ProjectId:  resource.ResourceEnvironmentId,
-				},
-			)
-			if err != nil {
-				h.handleResponse(c, status_http.GRPCError, err.Error())
-				return
-			}
-		}
-	}
-	h.handleResponse(c, status_http.Created, resp)
+	h.handleResponse(c, status_http.Created, models.InvokeFunctionResponse{})
 }

@@ -85,6 +85,26 @@ definitions:
       workspace_id:
         type: string
     type: object
+  company_service.CalculatePriceRequest:
+    properties:
+      discount_id:
+        type: string
+      fare_id:
+        type: string
+      project_id:
+        type: string
+    type: object
+  company_service.CalculatePriceResponse:
+    properties:
+      calculated_price:
+        type: number
+      credit_limit:
+        type: number
+      discount_percentage:
+        type: number
+      project_balance:
+        type: number
+    type: object
   company_service.Company:
     properties:
       description:
@@ -170,6 +190,8 @@ definitions:
         items:
           $ref: '#/definitions/company_service.FareItemPrice'
         type: array
+      is_public:
+        type: boolean
       name:
         type: string
       price:
@@ -197,6 +219,8 @@ definitions:
       company_id:
         type: string
       environment_id:
+        type: string
+      name:
         type: string
       node_type:
         type: string
@@ -240,9 +264,17 @@ definitions:
         type: string
       fare_id:
         type: string
+      order_id:
+        type: integer
       payment_status:
         type: string
+      payment_type:
+        type: string
       project_id:
+        type: string
+      receipt_file:
+        type: string
+      subscription_id:
         type: string
       transaction_type:
         type: string
@@ -278,6 +310,15 @@ definitions:
         type: string
       symbol_native:
         type: string
+    type: object
+  company_service.Discount:
+    properties:
+      id:
+        type: string
+      months:
+        type: integer
+      value:
+        type: number
     type: object
   company_service.Empty:
     type: object
@@ -344,6 +385,8 @@ definitions:
         type: array
       id:
         type: string
+      is_public:
+        type: boolean
       name:
         type: string
       price:
@@ -504,6 +547,8 @@ definitions:
     type: object
   company_service.Gitlab:
     properties:
+      created_at:
+        type: integer
       expires_in:
         type: integer
       refresh_token:
@@ -541,6 +586,15 @@ definitions:
       short_name:
         type: string
     type: object
+  company_service.ListDiscountsResponse:
+    properties:
+      count:
+        type: integer
+      discounts:
+        items:
+          $ref: '#/definitions/company_service.Discount'
+        type: array
+    type: object
   company_service.ListProjectResource:
     properties:
       resources:
@@ -574,6 +628,8 @@ definitions:
         type: array
       logo:
         type: string
+      new_design:
+        type: boolean
       project_id:
         type: string
       request_per_second:
@@ -711,6 +767,8 @@ definitions:
     - 6
     - 7
     - 8
+    - 9
+    - 10
     type: integer
     x-enum-varnames:
     - ResourceType_NOT_DECIDED
@@ -722,6 +780,8 @@ definitions:
     - ResourceType_SMS
     - ResourceType_SMTP
     - ResourceType_GITLAB
+    - ResourceType_GIT
+    - ResourceType_BITBUCKET
   company_service.ResourceWithoutPassword:
     properties:
       credentials:
@@ -793,6 +853,8 @@ definitions:
       node_type:
         type: string
       project_id:
+        type: string
+      project_status:
         type: string
       resource_environment_id:
         type: string
@@ -915,9 +977,17 @@ definitions:
         type: string
       id:
         type: string
+      order_id:
+        type: integer
       payment_status:
         type: string
+      payment_type:
+        type: string
       project_id:
+        type: string
+      receipt_file:
+        type: string
+      subscription_id:
         type: string
       transaction_type:
         type: string
@@ -4716,7 +4786,7 @@ paths:
       summary: Get single object template
       tags:
       - Template
-  /v1/action-permission/{role_id}/{table_slug}:
+  /v1/action-permission/{role_id}/{collection}:
     get:
       consumes:
       - application/json
@@ -4728,9 +4798,9 @@ paths:
         name: role_id
         required: true
         type: string
-      - description: table_slug
+      - description: collection
         in: path
-        name: table_slug
+        name: collection
         required: true
         type: string
       produces:
@@ -6485,6 +6555,56 @@ paths:
       summary: Get by id custom error message
       tags:
       - CustomErrorMessage
+  /v1/discounts:
+    get:
+      consumes:
+      - application/json
+      description: List discounts
+      operationId: list-discounts
+      parameters:
+      - description: limit
+        in: query
+        name: limit
+        type: string
+      - description: offset
+        in: query
+        name: offset
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Fare data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.ListDiscountsResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: List discounts
+      tags:
+      - Billing
   /v1/document:
     get:
       consumes:
@@ -6729,8 +6849,7 @@ paths:
       description: Get environment list
       operationId: get_environment_list
       parameters:
-      - collectionFormat: csv
-        in: query
+      - in: query
         items:
           type: string
         name: ids
@@ -7670,6 +7789,54 @@ paths:
       summary: Get fare
       tags:
       - Billing
+  /v1/fare/calculate-price:
+    post:
+      consumes:
+      - application/json
+      description: Calculate price
+      operationId: calculate_price
+      parameters:
+      - description: CalculatePriceRequest
+        in: body
+        name: billing
+        required: true
+        schema:
+          $ref: '#/definitions/company_service.CalculatePriceRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: CalculatePriceResponse data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.CalculatePriceResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Calculate price
+      tags:
+      - Billing
   /v1/fare/item:
     get:
       consumes:
@@ -7900,7 +8067,7 @@ paths:
       summary: Get fare item
       tags:
       - Billing
-  /v1/field-permission/{role_id}/{table_slug}:
+  /v1/field-permission/{role_id}/{collection}:
     get:
       consumes:
       - application/json
@@ -7912,9 +8079,9 @@ paths:
         name: role_id
         required: true
         type: string
-      - description: table_slug
+      - description: collection
         in: path
-        name: table_slug
+        name: collection
         required: true
         type: string
       produces:
@@ -8301,8 +8468,7 @@ paths:
       - in: query
         name: search
         type: string
-      - collectionFormat: csv
-        in: query
+      - in: query
         items:
           type: string
         name: type
@@ -8761,16 +8927,16 @@ paths:
       summary: Get Function by id
       tags:
       - Function
-  /v1/get-relation-cascading/{table_slug}:
+  /v1/get-relation-cascading/{collection}:
     get:
       consumes:
       - application/json
       description: Get all relations
       operationId: v2_get_relation_cascaders
       parameters:
-      - description: table_slug
+      - description: collection
         in: path
-        name: table_slug
+        name: collection
         required: true
         type: string
       produces:
@@ -8816,8 +8982,7 @@ paths:
       description: Get global project environment list
       operationId: get_global_project_environment_list
       parameters:
-      - collectionFormat: csv
-        in: query
+      - in: query
         items:
           type: string
         name: ids
@@ -10160,16 +10325,16 @@ paths:
       summary: Get Bucket size
       tags:
       - Minio
-  /v1/object-slim/{table_slug}/{object_id}:
+  /v1/object-slim/{collection}/{object_id}:
     get:
       consumes:
       - application/json
       description: Get object by id slim
       operationId: get_object_by_id_slim
       parameters:
-      - description: table_slug
+      - description: collection
         in: path
-        name: table_slug
+        name: collection
         required: true
         type: string
       - description: object_id
@@ -10212,16 +10377,16 @@ paths:
       summary: Get object by id slim
       tags:
       - Object
-  /v1/object-slim/get-list/{table_slug}:
+  /v1/object-slim/get-list/{collection}:
     get:
       consumes:
       - application/json
       description: Get all objects slim
       operationId: get_list_objects_slim
       parameters:
-      - description: table_slug
+      - description: collection
         in: path
-        name: table_slug
+        name: collection
         required: true
         type: string
       - description: limit
@@ -10271,16 +10436,16 @@ paths:
       summary: Get all objects slim
       tags:
       - Object
-  /v1/object-upsert/{table_slug}:
+  /v1/object-upsert/{collection}:
     post:
       consumes:
       - application/json
       description: Upsert object
       operationId: upsert_object
       parameters:
-      - description: table_slug
+      - description: collection
         in: path
-        name: table_slug
+        name: collection
         required: true
         type: string
       - description: CreateObjectRequestBody
@@ -10324,16 +10489,16 @@ paths:
       summary: Upsert object
       tags:
       - Object
-  /v1/object/{table_slug}:
+  /v1/object/{collection}:
     delete:
       consumes:
       - application/json
       description: Delete many objects
       operationId: delete_many_object
       parameters:
-      - description: table_slug
+      - description: collection
         in: path
-        name: table_slug
+        name: collection
         required: true
         type: string
       - description: DeleteManyObjectRequestBody
@@ -10376,9 +10541,9 @@ paths:
       description: Update object
       operationId: update_object
       parameters:
-      - description: table_slug
+      - description: collection
         in: path
-        name: table_slug
+        name: collection
         required: true
         type: string
       - description: UpdateObjectRequestBody
@@ -10422,16 +10587,16 @@ paths:
       summary: Update object
       tags:
       - Object
-  /v1/object/{table_slug}/:
+  /v1/object/{collection}/:
     post:
       consumes:
       - application/json
       description: Create object
       operationId: create_object
       parameters:
-      - description: table_slug
+      - description: collection
         in: path
-        name: table_slug
+        name: collection
         required: true
         type: string
       - description: CreateObjectRequestBody
@@ -10475,16 +10640,16 @@ paths:
       summary: Create object
       tags:
       - Object
-  /v1/object/{table_slug}/{object_id}:
+  /v1/object/{collection}/{object_id}:
     delete:
       consumes:
       - application/json
       description: Delete object
       operationId: delete_object
       parameters:
-      - description: table_slug
+      - description: collection
         in: path
-        name: table_slug
+        name: collection
         required: true
         type: string
       - description: DeleteObjectRequestBody
@@ -10532,9 +10697,9 @@ paths:
       description: Get object by id
       operationId: get_object_by_id
       parameters:
-      - description: table_slug
+      - description: collection
         in: path
-        name: table_slug
+        name: collection
         required: true
         type: string
       - description: object_id
@@ -10577,16 +10742,16 @@ paths:
       summary: Get object by id
       tags:
       - Object
-  /v1/object/excel/{table_slug}:
+  /v1/object/excel/{collection}:
     post:
       consumes:
       - application/json
       description: Get all objects in excel
       operationId: get_list_objects_in_excel
       parameters:
-      - description: table_slug
+      - description: collection
         in: path
-        name: table_slug
+        name: collection
         required: true
         type: string
       - description: GetListObjectRequestBody
@@ -10630,16 +10795,16 @@ paths:
       summary: Get all objects in excel
       tags:
       - Object
-  /v1/object/get-financial-analytics/{table_slug}:
+  /v1/object/get-financial-analytics/{collection}:
     post:
       consumes:
       - application/json
       description: Get financial analytics
       operationId: get_financial_analytics
       parameters:
-      - description: table_slug
+      - description: collection
         in: path
-        name: table_slug
+        name: collection
         required: true
         type: string
       - description: GetFinancialAnalyticsRequestBody
@@ -10683,69 +10848,16 @@ paths:
       summary: Get financial analytics
       tags:
       - Object
-  /v1/object/get-group-by-field/{table_slug}:
-    post:
-      consumes:
-      - application/json
-      description: Get Group By Field Object
-      operationId: get_group_by_field_objects
-      parameters:
-      - description: table_slug
-        in: path
-        name: table_slug
-        required: true
-        type: string
-      - description: GetGroupByFieldObjectRequestBody
-        in: body
-        name: object
-        required: true
-        schema:
-          $ref: '#/definitions/models.CommonMessage'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: ObjectBody
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/models.CommonMessage'
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get Group By Field Object
-      tags:
-      - Object
-  /v1/object/get-list-aggregate/{table_slug}:
+  /v1/object/get-list-aggregate/{collection}:
     post:
       consumes:
       - application/json
       description: Get List Aggregate
       operationId: get_list_aggregate
       parameters:
-      - description: table_slug
+      - description: collection
         in: path
-        name: table_slug
+        name: collection
         required: true
         type: string
       - description: limit
@@ -10801,21 +10913,21 @@ paths:
       summary: Get List Aggregate
       tags:
       - Object
-  /v1/object/get-list-group-by/{table_slug}/{column_table_slug}:
+  /v1/object/get-list-group-by/{collection}/{column_collection}:
     post:
       consumes:
       - application/json
       description: Get List Group By Object
       operationId: get_list_group_by_objects
       parameters:
-      - description: table_slug
+      - description: collection
         in: path
-        name: table_slug
+        name: collection
         required: true
         type: string
-      - description: column_table_slug
+      - description: column_collection
         in: path
-        name: column_table_slug
+        name: column_collection
         required: true
         type: string
       - description: limit
@@ -10871,16 +10983,16 @@ paths:
       summary: Get List Group By Object
       tags:
       - Object
-  /v1/object/get-list-without-relation/{table_slug}:
+  /v1/object/get-list-without-relation/{collection}:
     post:
       consumes:
       - application/json
       description: Get all objects without relation
       operationId: get_list_objects_without_relation
       parameters:
-      - description: table_slug
+      - description: collection
         in: path
-        name: table_slug
+        name: collection
         required: true
         type: string
       - description: GetListObjectRequestBody
@@ -10924,16 +11036,16 @@ paths:
       summary: Get all objects without relation
       tags:
       - Object
-  /v1/object/get-list/{table_slug}:
+  /v1/object/get-list/{collection}:
     post:
       consumes:
       - application/json
       description: Get all objects
       operationId: get_list_objects
       parameters:
-      - description: table_slug
+      - description: collection
         in: path
-        name: table_slug
+        name: collection
         required: true
         type: string
       - description: language_setting
@@ -10981,16 +11093,16 @@ paths:
       summary: Get all objects
       tags:
       - Object
-  /v1/object/multiple-update/{table_slug}:
+  /v1/object/multiple-update/{collection}:
     put:
       consumes:
       - application/json
       description: Multiple Update object
       operationId: multiple_update_object
       parameters:
-      - description: table_slug
+      - description: collection
         in: path
-        name: table_slug
+        name: collection
         required: true
         type: string
       - description: MultipleUpdateObjectRequestBody
@@ -11735,16 +11847,16 @@ paths:
       summary: Update table
       tags:
       - Table
-  /v1/table-details/{table_slug}:
+  /v1/table-details/{collection}:
     post:
       consumes:
       - application/json
       description: Get table details
       operationId: get_table_details
       parameters:
-      - description: table_slug
+      - description: collection
         in: path
-        name: table_slug
+        name: collection
         required: true
         type: string
       - description: language_setting
@@ -13237,7 +13349,7 @@ paths:
       summary: Upload
       tags:
       - file
-  /v1/upload-file/{table_slug}/{object_id}:
+  /v1/upload-file/{collection}/{object_id}:
     post:
       consumes:
       - multipart/form-data
@@ -13249,9 +13361,9 @@ paths:
         name: file
         required: true
         type: file
-      - description: table_slug
+      - description: collection
         in: path
-        name: table_slug
+        name: collection
         required: true
         type: string
       - description: object_id
@@ -13446,7 +13558,7 @@ paths:
       summary: Update view
       tags:
       - View
-  /v1/view-relation-permission/{role_id}/{table_slug}:
+  /v1/view-relation-permission/{role_id}/{collection}:
     get:
       consumes:
       - application/json
@@ -13458,9 +13570,9 @@ paths:
         name: role_id
         required: true
         type: string
-      - description: table_slug
+      - description: collection
         in: path
-        name: table_slug
+        name: collection
         required: true
         type: string
       produces:
@@ -16399,16 +16511,16 @@ paths:
       summary: Get Micro Frontend By Id
       tags:
       - Functions
-  /v2/get-relation-cascading/{table_slug}:
+  /v2/get-relation-cascading/{collection}:
     get:
       consumes:
       - application/json
       description: Get all relations
       operationId: get_relation_cascaders
       parameters:
-      - description: table_slug
+      - description: collection
         in: path
-        name: table_slug
+        name: collection
         required: true
         type: string
       produces:
@@ -17669,16 +17781,16 @@ paths:
       summary: Delete menu
       tags:
       - Menu
-  /v2/object-slim/get-list/{table_slug}:
+  /v2/object-slim/get-list/{collection}:
     get:
       consumes:
       - application/json
       description: Get all objects slim v2
       operationId: get_list_objects_slim_v2
       parameters:
-      - description: table_slug
+      - description: collection
         in: path
-        name: table_slug
+        name: collection
         required: true
         type: string
       - description: limit
@@ -17728,16 +17840,16 @@ paths:
       summary: Get all objects slim v2
       tags:
       - Object
-  /v2/object/get-list/{table_slug}:
+  /v2/object/get-list/{collection}:
     post:
       consumes:
       - application/json
       description: Get all objects version 2
       operationId: get_list_objects_v2
       parameters:
-      - description: table_slug
+      - description: collection
         in: path
-        name: table_slug
+        name: collection
         required: true
         type: string
       - description: language_setting
@@ -19014,8 +19126,7 @@ paths:
       - in: query
         name: user_info
         type: string
-      - collectionFormat: csv
-        in: query
+      - in: query
         items:
           type: string
         name: version_ids

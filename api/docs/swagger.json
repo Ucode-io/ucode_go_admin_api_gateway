@@ -1028,7 +1028,7 @@
                 }
             }
         },
-        "/v1/action-permission/{role_id}/{table_slug}": {
+        "/v1/action-permission/{role_id}/{collection}": {
             "get": {
                 "security": [
                     {
@@ -1057,8 +1057,8 @@
                     },
                     {
                         "type": "string",
-                        "description": "table_slug",
-                        "name": "table_slug",
+                        "description": "collection",
+                        "name": "collection",
                         "in": "path",
                         "required": true
                     }
@@ -4253,6 +4253,97 @@
                 }
             }
         },
+        "/v1/discounts": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "List discounts",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Billing"
+                ],
+                "summary": "List discounts",
+                "operationId": "list-discounts",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "limit",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "offset",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Fare data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/company_service.ListDiscountsResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v1/document": {
             "get": {
                 "security": [
@@ -4709,7 +4800,6 @@
                         "items": {
                             "type": "string"
                         },
-                        "collectionFormat": "csv",
                         "name": "ids",
                         "in": "query"
                     },
@@ -6254,6 +6344,94 @@
                 }
             }
         },
+        "/v1/fare/calculate-price": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Calculate price",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Billing"
+                ],
+                "summary": "Calculate price",
+                "operationId": "calculate_price",
+                "parameters": [
+                    {
+                        "description": "CalculatePriceRequest",
+                        "name": "billing",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/company_service.CalculatePriceRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "CalculatePriceResponse data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/company_service.CalculatePriceResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v1/fare/item": {
             "get": {
                 "security": [
@@ -6827,7 +7005,7 @@
                 }
             }
         },
-        "/v1/field-permission/{role_id}/{table_slug}": {
+        "/v1/field-permission/{role_id}/{collection}": {
             "get": {
                 "security": [
                     {
@@ -6856,8 +7034,8 @@
                     },
                     {
                         "type": "string",
-                        "description": "table_slug",
-                        "name": "table_slug",
+                        "description": "collection",
+                        "name": "collection",
                         "in": "path",
                         "required": true
                     }
@@ -7562,7 +7740,6 @@
                         "items": {
                             "type": "string"
                         },
-                        "collectionFormat": "csv",
                         "name": "type",
                         "in": "query"
                     }
@@ -8383,7 +8560,7 @@
                 }
             }
         },
-        "/v1/get-relation-cascading/{table_slug}": {
+        "/v1/get-relation-cascading/{collection}": {
             "get": {
                 "security": [
                     {
@@ -8408,8 +8585,8 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "table_slug",
-                        "name": "table_slug",
+                        "description": "collection",
+                        "name": "collection",
                         "in": "path",
                         "required": true
                     }
@@ -8497,7 +8674,6 @@
                         "items": {
                             "type": "string"
                         },
-                        "collectionFormat": "csv",
                         "name": "ids",
                         "in": "query"
                     },
@@ -10918,7 +11094,7 @@
                 }
             }
         },
-        "/v1/object-slim/get-list/{table_slug}": {
+        "/v1/object-slim/get-list/{collection}": {
             "get": {
                 "security": [
                     {
@@ -10940,8 +11116,8 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "table_slug",
-                        "name": "table_slug",
+                        "description": "collection",
+                        "name": "collection",
                         "in": "path",
                         "required": true
                     },
@@ -11022,7 +11198,7 @@
                 }
             }
         },
-        "/v1/object-slim/{table_slug}/{object_id}": {
+        "/v1/object-slim/{collection}/{object_id}": {
             "get": {
                 "security": [
                     {
@@ -11044,8 +11220,8 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "table_slug",
-                        "name": "table_slug",
+                        "description": "collection",
+                        "name": "collection",
                         "in": "path",
                         "required": true
                     },
@@ -11115,7 +11291,7 @@
                 }
             }
         },
-        "/v1/object-upsert/{table_slug}": {
+        "/v1/object-upsert/{collection}": {
             "post": {
                 "security": [
                     {
@@ -11137,8 +11313,8 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "table_slug",
-                        "name": "table_slug",
+                        "description": "collection",
+                        "name": "collection",
                         "in": "path",
                         "required": true
                     },
@@ -11210,7 +11386,7 @@
                 }
             }
         },
-        "/v1/object/excel/{table_slug}": {
+        "/v1/object/excel/{collection}": {
             "post": {
                 "security": [
                     {
@@ -11232,8 +11408,8 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "table_slug",
-                        "name": "table_slug",
+                        "description": "collection",
+                        "name": "collection",
                         "in": "path",
                         "required": true
                     },
@@ -11305,7 +11481,7 @@
                 }
             }
         },
-        "/v1/object/get-financial-analytics/{table_slug}": {
+        "/v1/object/get-financial-analytics/{collection}": {
             "post": {
                 "security": [
                     {
@@ -11327,8 +11503,8 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "table_slug",
-                        "name": "table_slug",
+                        "description": "collection",
+                        "name": "collection",
                         "in": "path",
                         "required": true
                     },
@@ -11400,102 +11576,7 @@
                 }
             }
         },
-        "/v1/object/get-group-by-field/{table_slug}": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Get Group By Field Object",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Object"
-                ],
-                "summary": "Get Group By Field Object",
-                "operationId": "get_group_by_field_objects",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "table_slug",
-                        "name": "table_slug",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "GetGroupByFieldObjectRequestBody",
-                        "name": "object",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.CommonMessage"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "ObjectBody",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/models.CommonMessage"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "/v1/object/get-list-aggregate/{table_slug}": {
+        "/v1/object/get-list-aggregate/{collection}": {
             "post": {
                 "security": [
                     {
@@ -11517,8 +11598,8 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "table_slug",
-                        "name": "table_slug",
+                        "description": "collection",
+                        "name": "collection",
                         "in": "path",
                         "required": true
                     },
@@ -11608,7 +11689,7 @@
                 }
             }
         },
-        "/v1/object/get-list-group-by/{table_slug}/{column_table_slug}": {
+        "/v1/object/get-list-group-by/{collection}/{column_collection}": {
             "post": {
                 "security": [
                     {
@@ -11630,15 +11711,15 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "table_slug",
-                        "name": "table_slug",
+                        "description": "collection",
+                        "name": "collection",
                         "in": "path",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "column_table_slug",
-                        "name": "column_table_slug",
+                        "description": "column_collection",
+                        "name": "column_collection",
                         "in": "path",
                         "required": true
                     },
@@ -11728,7 +11809,7 @@
                 }
             }
         },
-        "/v1/object/get-list-without-relation/{table_slug}": {
+        "/v1/object/get-list-without-relation/{collection}": {
             "post": {
                 "security": [
                     {
@@ -11750,8 +11831,8 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "table_slug",
-                        "name": "table_slug",
+                        "description": "collection",
+                        "name": "collection",
                         "in": "path",
                         "required": true
                     },
@@ -11823,7 +11904,7 @@
                 }
             }
         },
-        "/v1/object/get-list/{table_slug}": {
+        "/v1/object/get-list/{collection}": {
             "post": {
                 "security": [
                     {
@@ -11845,8 +11926,8 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "table_slug",
-                        "name": "table_slug",
+                        "description": "collection",
+                        "name": "collection",
                         "in": "path",
                         "required": true
                     },
@@ -11924,7 +12005,7 @@
                 }
             }
         },
-        "/v1/object/multiple-update/{table_slug}": {
+        "/v1/object/multiple-update/{collection}": {
             "put": {
                 "security": [
                     {
@@ -11946,8 +12027,8 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "table_slug",
-                        "name": "table_slug",
+                        "description": "collection",
+                        "name": "collection",
                         "in": "path",
                         "required": true
                     },
@@ -12019,7 +12100,7 @@
                 }
             }
         },
-        "/v1/object/{table_slug}": {
+        "/v1/object/{collection}": {
             "put": {
                 "security": [
                     {
@@ -12041,8 +12122,8 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "table_slug",
-                        "name": "table_slug",
+                        "description": "collection",
+                        "name": "collection",
                         "in": "path",
                         "required": true
                     },
@@ -12134,8 +12215,8 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "table_slug",
-                        "name": "table_slug",
+                        "description": "collection",
+                        "name": "collection",
                         "in": "path",
                         "required": true
                     },
@@ -12192,7 +12273,7 @@
                 }
             }
         },
-        "/v1/object/{table_slug}/": {
+        "/v1/object/{collection}/": {
             "post": {
                 "security": [
                     {
@@ -12214,8 +12295,8 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "table_slug",
-                        "name": "table_slug",
+                        "description": "collection",
+                        "name": "collection",
                         "in": "path",
                         "required": true
                     },
@@ -12287,7 +12368,7 @@
                 }
             }
         },
-        "/v1/object/{table_slug}/{object_id}": {
+        "/v1/object/{collection}/{object_id}": {
             "get": {
                 "security": [
                     {
@@ -12309,8 +12390,8 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "table_slug",
-                        "name": "table_slug",
+                        "description": "collection",
+                        "name": "collection",
                         "in": "path",
                         "required": true
                     },
@@ -12400,8 +12481,8 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "table_slug",
-                        "name": "table_slug",
+                        "description": "collection",
+                        "name": "collection",
                         "in": "path",
                         "required": true
                     },
@@ -13737,7 +13818,7 @@
                 }
             }
         },
-        "/v1/table-details/{table_slug}": {
+        "/v1/table-details/{collection}": {
             "post": {
                 "security": [
                     {
@@ -13759,8 +13840,8 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "table_slug",
-                        "name": "table_slug",
+                        "description": "collection",
+                        "name": "collection",
                         "in": "path",
                         "required": true
                     },
@@ -16471,7 +16552,7 @@
                 }
             }
         },
-        "/v1/upload-file/{table_slug}/{object_id}": {
+        "/v1/upload-file/{collection}/{object_id}": {
             "post": {
                 "security": [
                     {
@@ -16500,8 +16581,8 @@
                     },
                     {
                         "type": "string",
-                        "description": "table_slug",
-                        "name": "table_slug",
+                        "description": "collection",
+                        "name": "collection",
                         "in": "path",
                         "required": true
                     },
@@ -16848,7 +16929,7 @@
                 }
             }
         },
-        "/v1/view-relation-permission/{role_id}/{table_slug}": {
+        "/v1/view-relation-permission/{role_id}/{collection}": {
             "get": {
                 "security": [
                     {
@@ -16877,8 +16958,8 @@
                     },
                     {
                         "type": "string",
-                        "description": "table_slug",
-                        "name": "table_slug",
+                        "description": "collection",
+                        "name": "collection",
                         "in": "path",
                         "required": true
                     }
@@ -22159,7 +22240,7 @@
                 }
             }
         },
-        "/v2/get-relation-cascading/{table_slug}": {
+        "/v2/get-relation-cascading/{collection}": {
             "get": {
                 "security": [
                     {
@@ -22184,8 +22265,8 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "table_slug",
-                        "name": "table_slug",
+                        "description": "collection",
+                        "name": "collection",
                         "in": "path",
                         "required": true
                     }
@@ -24445,7 +24526,7 @@
                 }
             }
         },
-        "/v2/object-slim/get-list/{table_slug}": {
+        "/v2/object-slim/get-list/{collection}": {
             "get": {
                 "security": [
                     {
@@ -24467,8 +24548,8 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "table_slug",
-                        "name": "table_slug",
+                        "description": "collection",
+                        "name": "collection",
                         "in": "path",
                         "required": true
                     },
@@ -24549,7 +24630,7 @@
                 }
             }
         },
-        "/v2/object/get-list/{table_slug}": {
+        "/v2/object/get-list/{collection}": {
             "post": {
                 "security": [
                     {
@@ -24571,8 +24652,8 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "table_slug",
-                        "name": "table_slug",
+                        "description": "collection",
+                        "name": "collection",
                         "in": "path",
                         "required": true
                     },
@@ -26961,7 +27042,6 @@
                         "items": {
                             "type": "string"
                         },
-                        "collectionFormat": "csv",
                         "name": "version_ids",
                         "in": "query"
                     }
@@ -27980,6 +28060,37 @@
                 }
             }
         },
+        "company_service.CalculatePriceRequest": {
+            "type": "object",
+            "properties": {
+                "discount_id": {
+                    "type": "string"
+                },
+                "fare_id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "company_service.CalculatePriceResponse": {
+            "type": "object",
+            "properties": {
+                "calculated_price": {
+                    "type": "number"
+                },
+                "credit_limit": {
+                    "type": "number"
+                },
+                "discount_percentage": {
+                    "type": "number"
+                },
+                "project_balance": {
+                    "type": "number"
+                }
+            }
+        },
         "company_service.Company": {
             "type": "object",
             "properties": {
@@ -28110,6 +28221,9 @@
                         "$ref": "#/definitions/company_service.FareItemPrice"
                     }
                 },
+                "is_public": {
+                    "type": "boolean"
+                },
                 "name": {
                     "type": "string"
                 },
@@ -28151,6 +28265,9 @@
                     "type": "string"
                 },
                 "environment_id": {
+                    "type": "string"
+                },
+                "name": {
                     "type": "string"
                 },
                 "node_type": {
@@ -28217,10 +28334,22 @@
                 "fare_id": {
                     "type": "string"
                 },
+                "order_id": {
+                    "type": "integer"
+                },
                 "payment_status": {
                     "type": "string"
                 },
+                "payment_type": {
+                    "type": "string"
+                },
                 "project_id": {
+                    "type": "string"
+                },
+                "receipt_file": {
+                    "type": "string"
+                },
+                "subscription_id": {
                     "type": "string"
                 },
                 "transaction_type": {
@@ -28274,6 +28403,20 @@
                 },
                 "symbol_native": {
                     "type": "string"
+                }
+            }
+        },
+        "company_service.Discount": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "months": {
+                    "type": "integer"
+                },
+                "value": {
+                    "type": "number"
                 }
             }
         },
@@ -28375,6 +28518,9 @@
                 },
                 "id": {
                     "type": "string"
+                },
+                "is_public": {
+                    "type": "boolean"
                 },
                 "name": {
                     "type": "string"
@@ -28624,6 +28770,9 @@
         "company_service.Gitlab": {
             "type": "object",
             "properties": {
+                "created_at": {
+                    "type": "integer"
+                },
                 "expires_in": {
                     "type": "integer"
                 },
@@ -28681,6 +28830,20 @@
                 }
             }
         },
+        "company_service.ListDiscountsResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "discounts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/company_service.Discount"
+                    }
+                }
+            }
+        },
         "company_service.ListProjectResource": {
             "type": "object",
             "properties": {
@@ -28730,6 +28893,9 @@
                 },
                 "logo": {
                     "type": "string"
+                },
+                "new_design": {
+                    "type": "boolean"
                 },
                 "project_id": {
                     "type": "string"
@@ -28916,7 +29082,9 @@
                 5,
                 6,
                 7,
-                8
+                8,
+                9,
+                10
             ],
             "x-enum-varnames": [
                 "ResourceType_NOT_DECIDED",
@@ -28927,7 +29095,9 @@
                 "ResourceType_GITHUB",
                 "ResourceType_SMS",
                 "ResourceType_SMTP",
-                "ResourceType_GITLAB"
+                "ResourceType_GITLAB",
+                "ResourceType_GIT",
+                "ResourceType_BITBUCKET"
             ]
         },
         "company_service.ResourceWithoutPassword": {
@@ -29058,6 +29228,9 @@
                     "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                },
+                "project_status": {
                     "type": "string"
                 },
                 "resource_environment_id": {
@@ -29237,10 +29410,22 @@
                 "id": {
                     "type": "string"
                 },
+                "order_id": {
+                    "type": "integer"
+                },
                 "payment_status": {
                     "type": "string"
                 },
+                "payment_type": {
+                    "type": "string"
+                },
                 "project_id": {
+                    "type": "string"
+                },
+                "receipt_file": {
+                    "type": "string"
+                },
+                "subscription_id": {
                     "type": "string"
                 },
                 "transaction_type": {

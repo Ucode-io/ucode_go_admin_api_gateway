@@ -495,7 +495,7 @@ func (h *HandlerV1) GetAllNewFunctionsForApp(c *gin.Context) {
 				Limit:     int32(limit),
 				Offset:    int32(offset),
 				ProjectId: resource.ResourceEnvironmentId,
-				Type:      config.FUNCTION,
+				Type:      []string{config.FUNCTION, config.KNATIVE},
 			},
 		)
 		if err != nil {

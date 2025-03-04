@@ -615,14 +615,14 @@ func (h *HandlerV2) DeleteRelation(c *gin.Context) {
 // GetRelationCascaders godoc
 // @Security ApiKeyAuth
 // @ID get_relation_cascaders
-// @Router /v2/get-relation-cascading/{table_slug} [GET]
+// @Router /v2/get-relation-cascading/{collection} [GET]
 // @Security ApiKeyAuth
 // @Summary Get all relations
 // @Description Get all relations
 // @Tags Relation
 // @Accept json
 // @Produce json
-// @Param table_slug path string true "table_slug"
+// @Param collection path string true "collection"
 // @Success 200 {object} status_http.Response{data=string} "CascaderBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -663,7 +663,7 @@ func (h *HandlerV2) GetRelationCascaders(c *gin.Context) {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Cascading().GetCascadings(
 			c.Request.Context(), &obs.GetCascadingRequest{
-				TableSlug: c.Param("table_slug"),
+				TableSlug: c.Param("collection"),
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)

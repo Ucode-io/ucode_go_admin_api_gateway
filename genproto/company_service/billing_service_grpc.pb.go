@@ -25,6 +25,7 @@ const (
 	BillingService_ListFares_FullMethodName            = "/company_service.BillingService/ListFares"
 	BillingService_UpdateFare_FullMethodName           = "/company_service.BillingService/UpdateFare"
 	BillingService_DeleteFare_FullMethodName           = "/company_service.BillingService/DeleteFare"
+	BillingService_CalculatePrice_FullMethodName       = "/company_service.BillingService/CalculatePrice"
 	BillingService_CreateFareItem_FullMethodName       = "/company_service.BillingService/CreateFareItem"
 	BillingService_GetFareItem_FullMethodName          = "/company_service.BillingService/GetFareItem"
 	BillingService_ListFareItems_FullMethodName        = "/company_service.BillingService/ListFareItems"
@@ -44,6 +45,7 @@ const (
 	BillingService_ListProjectCards_FullMethodName     = "/company_service.BillingService/ListProjectCards"
 	BillingService_ReceiptPay_FullMethodName           = "/company_service.BillingService/ReceiptPay"
 	BillingService_DeleteProjectCard_FullMethodName    = "/company_service.BillingService/DeleteProjectCard"
+	BillingService_ListDiscounts_FullMethodName        = "/company_service.BillingService/ListDiscounts"
 )
 
 // BillingServiceClient is the client API for BillingService service.
@@ -56,6 +58,7 @@ type BillingServiceClient interface {
 	ListFares(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListFareResponse, error)
 	UpdateFare(ctx context.Context, in *Fare, opts ...grpc.CallOption) (*Fare, error)
 	DeleteFare(ctx context.Context, in *PrimaryKey, opts ...grpc.CallOption) (*empty.Empty, error)
+	CalculatePrice(ctx context.Context, in *CalculatePriceRequest, opts ...grpc.CallOption) (*CalculatePriceResponse, error)
 	// Fare Item Methods
 	CreateFareItem(ctx context.Context, in *CreateFareItemRequest, opts ...grpc.CallOption) (*FareItem, error)
 	GetFareItem(ctx context.Context, in *PrimaryKey, opts ...grpc.CallOption) (*FareItem, error)
@@ -79,6 +82,8 @@ type BillingServiceClient interface {
 	ListProjectCards(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListProjectCardsResponse, error)
 	ReceiptPay(ctx context.Context, in *ReceiptPayRequest, opts ...grpc.CallOption) (*ReceiptPayResponse, error)
 	DeleteProjectCard(ctx context.Context, in *PrimaryKey, opts ...grpc.CallOption) (*empty.Empty, error)
+	// Discount
+	ListDiscounts(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListDiscountsResponse, error)
 }
 
 type billingServiceClient struct {
@@ -133,6 +138,16 @@ func (c *billingServiceClient) DeleteFare(ctx context.Context, in *PrimaryKey, o
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(empty.Empty)
 	err := c.cc.Invoke(ctx, BillingService_DeleteFare_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *billingServiceClient) CalculatePrice(ctx context.Context, in *CalculatePriceRequest, opts ...grpc.CallOption) (*CalculatePriceResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CalculatePriceResponse)
+	err := c.cc.Invoke(ctx, BillingService_CalculatePrice_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -329,6 +344,16 @@ func (c *billingServiceClient) DeleteProjectCard(ctx context.Context, in *Primar
 	return out, nil
 }
 
+func (c *billingServiceClient) ListDiscounts(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListDiscountsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListDiscountsResponse)
+	err := c.cc.Invoke(ctx, BillingService_ListDiscounts_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // BillingServiceServer is the server API for BillingService service.
 // All implementations must embed UnimplementedBillingServiceServer
 // for forward compatibility.
@@ -339,6 +364,7 @@ type BillingServiceServer interface {
 	ListFares(context.Context, *ListRequest) (*ListFareResponse, error)
 	UpdateFare(context.Context, *Fare) (*Fare, error)
 	DeleteFare(context.Context, *PrimaryKey) (*empty.Empty, error)
+	CalculatePrice(context.Context, *CalculatePriceRequest) (*CalculatePriceResponse, error)
 	// Fare Item Methods
 	CreateFareItem(context.Context, *CreateFareItemRequest) (*FareItem, error)
 	GetFareItem(context.Context, *PrimaryKey) (*FareItem, error)
@@ -362,6 +388,8 @@ type BillingServiceServer interface {
 	ListProjectCards(context.Context, *ListRequest) (*ListProjectCardsResponse, error)
 	ReceiptPay(context.Context, *ReceiptPayRequest) (*ReceiptPayResponse, error)
 	DeleteProjectCard(context.Context, *PrimaryKey) (*empty.Empty, error)
+	// Discount
+	ListDiscounts(context.Context, *ListRequest) (*ListDiscountsResponse, error)
 	mustEmbedUnimplementedBillingServiceServer()
 }
 
@@ -386,6 +414,9 @@ func (UnimplementedBillingServiceServer) UpdateFare(context.Context, *Fare) (*Fa
 }
 func (UnimplementedBillingServiceServer) DeleteFare(context.Context, *PrimaryKey) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteFare not implemented")
+}
+func (UnimplementedBillingServiceServer) CalculatePrice(context.Context, *CalculatePriceRequest) (*CalculatePriceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CalculatePrice not implemented")
 }
 func (UnimplementedBillingServiceServer) CreateFareItem(context.Context, *CreateFareItemRequest) (*FareItem, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateFareItem not implemented")
@@ -443,6 +474,9 @@ func (UnimplementedBillingServiceServer) ReceiptPay(context.Context, *ReceiptPay
 }
 func (UnimplementedBillingServiceServer) DeleteProjectCard(context.Context, *PrimaryKey) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteProjectCard not implemented")
+}
+func (UnimplementedBillingServiceServer) ListDiscounts(context.Context, *ListRequest) (*ListDiscountsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListDiscounts not implemented")
 }
 func (UnimplementedBillingServiceServer) mustEmbedUnimplementedBillingServiceServer() {}
 func (UnimplementedBillingServiceServer) testEmbeddedByValue()                        {}
@@ -551,6 +585,24 @@ func _BillingService_DeleteFare_Handler(srv interface{}, ctx context.Context, de
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(BillingServiceServer).DeleteFare(ctx, req.(*PrimaryKey))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BillingService_CalculatePrice_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CalculatePriceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BillingServiceServer).CalculatePrice(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BillingService_CalculatePrice_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BillingServiceServer).CalculatePrice(ctx, req.(*CalculatePriceRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -897,6 +949,24 @@ func _BillingService_DeleteProjectCard_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _BillingService_ListDiscounts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BillingServiceServer).ListDiscounts(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BillingService_ListDiscounts_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BillingServiceServer).ListDiscounts(ctx, req.(*ListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // BillingService_ServiceDesc is the grpc.ServiceDesc for BillingService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -923,6 +993,10 @@ var BillingService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteFare",
 			Handler:    _BillingService_DeleteFare_Handler,
+		},
+		{
+			MethodName: "CalculatePrice",
+			Handler:    _BillingService_CalculatePrice_Handler,
 		},
 		{
 			MethodName: "CreateFareItem",
@@ -999,6 +1073,10 @@ var BillingService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteProjectCard",
 			Handler:    _BillingService_DeleteProjectCard_Handler,
+		},
+		{
+			MethodName: "ListDiscounts",
+			Handler:    _BillingService_ListDiscounts_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
