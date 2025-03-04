@@ -244,7 +244,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			fare.GET("/:id", h.V1.GetFare)
 			fare.PUT("", h.V1.UpdateFare)
 			fare.DELETE("/:id", h.V1.DeleteFare)
-			fare.GET("/calculate-price", h.V1.CalculatePrice)
+			fare.POST("/calculate-price", h.V1.CalculatePrice)
 
 			fareItem := fare.Group("/item")
 			{

@@ -2,6 +2,7 @@ package v1
 
 import (
 	"ucode/ucode_go_api_gateway/api/status_http"
+	"ucode/ucode_go_api_gateway/config"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
@@ -98,7 +99,13 @@ func (h *HandlerV1) GetFare(c *gin.Context) {
 		return
 	}
 
-	response, err := h.companyServices.Billing().GetFare(c, &pb.PrimaryKey{Id: id})
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleError(c, status_http.InvalidArgument, config.ErrProjectIdValid)
+		return
+	}
+
+	response, err := h.companyServices.Billing().GetFare(c, &pb.PrimaryKey{Id: id, ProjectId: projectId.(string)})
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -464,15 +471,15 @@ func (h *HandlerV1) UpdateTransaction(c *gin.Context) {
 
 // CreateFare godoc
 // @Security ApiKeyAuth
-// @ID create-fare
-// @Router /v1/fare [POST]
-// @Summary Create fare
-// @Description Create fare
+// @ID calculate_price
+// @Router /v1/fare/calculate-price [POST]
+// @Summary Calculate price
+// @Description Calculate price
 // @Tags Billing
 // @Accept json
 // @Produce json
-// @Param billing body pb.CreateFareRequest true "FareCreateRequest"
-// @Success 201 {object} status_http.Response{data=pb.Fare} "Fare data"
+// @Param billing body pb.CalculatePriceRequest true "CalculatePriceRequest"
+// @Success 201 {object} status_http.Response{data=pb.CalculatePriceResponse} "CalculatePriceResponse data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) CalculatePrice(c *gin.Context) {
@@ -492,6 +499,20 @@ func (h *HandlerV1) CalculatePrice(c *gin.Context) {
 	h.handleResponse(c, status_http.Created, response)
 }
 
+// ListDiscounts godoc
+// @Security ApiKeyAuth
+// @ID list-discounts
+// @Router /v1/discounts [GET]
+// @Summary List discounts
+// @Description List discounts
+// @Tags Billing
+// @Accept json
+// @Produce json
+// @Param limit query string false "limit"
+// @Param offset query string false "offset"
+// @Success 201 {object} status_http.Response{data=pb.ListDiscountsResponse} "Fare data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) ListDiscounts(c *gin.Context) {
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {

@@ -4265,6 +4265,97 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/discounts": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "List discounts",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Billing"
+                ],
+                "summary": "List discounts",
+                "operationId": "list-discounts",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "limit",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "offset",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Fare data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/company_service.ListDiscountsResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v1/document": {
             "get": {
                 "security": [
@@ -6220,6 +6311,94 @@ const docTemplate = `{
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/company_service.Fare"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/fare/calculate-price": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Calculate price",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Billing"
+                ],
+                "summary": "Calculate price",
+                "operationId": "calculate_price",
+                "parameters": [
+                    {
+                        "description": "CalculatePriceRequest",
+                        "name": "billing",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/company_service.CalculatePriceRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "CalculatePriceResponse data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/company_service.CalculatePriceResponse"
                                         }
                                     }
                                 }
@@ -27893,6 +28072,37 @@ const docTemplate = `{
                 }
             }
         },
+        "company_service.CalculatePriceRequest": {
+            "type": "object",
+            "properties": {
+                "discount_id": {
+                    "type": "string"
+                },
+                "fare_id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "company_service.CalculatePriceResponse": {
+            "type": "object",
+            "properties": {
+                "calculated_price": {
+                    "type": "number"
+                },
+                "credit_limit": {
+                    "type": "number"
+                },
+                "discount_percentage": {
+                    "type": "number"
+                },
+                "project_balance": {
+                    "type": "number"
+                }
+            }
+        },
         "company_service.Company": {
             "type": "object",
             "properties": {
@@ -28069,6 +28279,9 @@ const docTemplate = `{
                 "environment_id": {
                     "type": "string"
                 },
+                "name": {
+                    "type": "string"
+                },
                 "node_type": {
                     "type": "string"
                 },
@@ -28202,6 +28415,20 @@ const docTemplate = `{
                 },
                 "symbol_native": {
                     "type": "string"
+                }
+            }
+        },
+        "company_service.Discount": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "months": {
+                    "type": "integer"
+                },
+                "value": {
+                    "type": "number"
                 }
             }
         },
@@ -28612,6 +28839,20 @@ const docTemplate = `{
                 },
                 "short_name": {
                     "type": "string"
+                }
+            }
+        },
+        "company_service.ListDiscountsResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "discounts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/company_service.Discount"
+                    }
                 }
             }
         },
