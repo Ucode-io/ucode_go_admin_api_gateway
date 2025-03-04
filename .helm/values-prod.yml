@@ -141,7 +141,7 @@ ingress:
         # cert-manager.io/cluster-issuer: letsencrypt-prod
       type: web
       hosts:
-        - host: "api-admin.app-wayll"
+        - host: "api-admin.app-wayll.uz"
           path: /
           servicePort: 8080
     - annotations:
