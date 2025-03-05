@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"net/url"
@@ -289,6 +290,7 @@ func (h *HandlerV1) MakeProxy(c *gin.Context, proxyUrl, path string) (err error)
 		return
 	}
 
+	h.log.Info(fmt.Sprintf("Proxying request to: %s ; schema : %s ; url : %s", proxy.Host, proxy.Scheme, proxyUrl))
 	req.URL.Scheme = proxy.Scheme
 	req.URL.Host = proxy.Host
 	req.URL.Path = path
