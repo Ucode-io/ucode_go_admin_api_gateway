@@ -48,8 +48,8 @@ const (
 	TIME_LAYOUT string = "15:04"
 
 	// FaasBaseurl
-	OpenFaaSBaseUrl string = "https://ofs.u-code.io/function/"
-	KnativeBaseUrl  string = "knative-fn.u-code.io"
+	// OpenFaaSBaseUrl string = "https://ofs.u-code.io/function/"
+	KnativeBaseUrl string = "knative-fn.app-wayll.uz"
 
 	// Function Types
 	FUNCTION string = "FUNCTION"
