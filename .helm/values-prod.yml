@@ -150,6 +150,17 @@ ingress:
           path: /
           servicePort: 8080
     - annotations:
+        nginx.ingress.kubernetes.io/proxy-body-size: "0"
+        nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+        nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+        kubernetes.io/ingress.class: nginx
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+      type: web
+      hosts:
+        - host: "api-client-admin.app-wayll.uz"
+          path: /
+          servicePort: 8080
+    - annotations:
         # type of authentication
         nginx.ingress.kubernetes.io/auth-type: basic
         # name of the secret that contains the user/password definitions
@@ -164,6 +175,23 @@ ingress:
       type: auth
       hosts:
         - host: "api.admin.u-code.io"
+          path: /swagger
+          servicePort: 8080
+    - annotations:
+        # type of authentication
+        nginx.ingress.kubernetes.io/auth-type: basic
+        # name of the secret that contains the user/password definitions
+        nginx.ingress.kubernetes.io/auth-secret: basic-auth
+        # message to display with an appropriate context why the authentication is required
+        nginx.ingress.kubernetes.io/auth-realm: "Authentication Required - u-code"
+        nginx.ingress.kubernetes.io/proxy-body-size: "0"
+        nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+        nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+        kubernetes.io/ingress.class: nginx
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+      type: auth
+      hosts:
+        - host: "api-client-admin.app-wayll.uz"
           path: /swagger
           servicePort: 8080
 
