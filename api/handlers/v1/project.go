@@ -276,7 +276,7 @@ func (h *HandlerV1) AttachFareToProject(c *gin.Context) {
 
 	resp, err := h.companyServices.Project().AttachFare(c.Request.Context(), &data)
 	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
+		h.handleError(c, status_http.GRPCError, err)
 		return
 	}
 
