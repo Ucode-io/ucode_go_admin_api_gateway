@@ -155,7 +155,7 @@ ingress:
         nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
         kubernetes.io/ingress.class: nginx
         cert-manager.io/cluster-issuer: letsencrypt-prod
-      type: web
+      type: web-2
       hosts:
         - host: "api-client-admin.app-wayll.uz"
           path: /
@@ -189,7 +189,7 @@ ingress:
         nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
         kubernetes.io/ingress.class: nginx
         cert-manager.io/cluster-issuer: letsencrypt-prod
-      type: auth
+      type: auth-2
       hosts:
         - host: "api-client-admin.app-wayll.uz"
           path: /swagger
