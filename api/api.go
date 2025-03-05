@@ -161,7 +161,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		// INVOKE FUNCTION
 
 		v1.POST("/invoke_function", h.V1.InvokeFunction)
-		v1.POST("/invoke_function/:function-path", h.V1.InvokeFunctionByPath)
+		v1.POST("/invoke_function/:function-path", h.V2.InvokeFunctionByPath)
 
 		//cache
 		v1.POST("/cache", h.V1.Cache)

@@ -2,6 +2,7 @@ package v1
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -9,6 +10,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
+	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	_ "ucode/ucode_go_api_gateway/genproto/new_function_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
@@ -123,7 +125,97 @@ func (h *HandlerV1) DeleteNewFunction(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) InvokeFunctionByPath(c *gin.Context) {
-	_ = h.MakeProxy(c, h.baseConf.GoFunctionServiceHost+h.baseConf.GoFunctionServiceHTTPPort, c.Request.URL.Path)
+	var invokeFunction models.CommonMessage
+
+	if err := c.ShouldBindJSON(&invokeFunction); err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err := errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	apiKeys, err := h.authService.ApiKey().GetList(c.Request.Context(), &auth_service.GetListReq{
+		EnvironmentId: environmentId.(string),
+		ProjectId:     resource.ProjectId,
+	})
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+	if len(apiKeys.Data) < 1 {
+		h.handleResponse(c, status_http.InvalidArgument, "Api key not found")
+		return
+	}
+
+	authInfo, _ := h.GetAuthInfo(c)
+
+	invokeFunction.Data["user_id"] = authInfo.GetUserId()
+	invokeFunction.Data["project_id"] = authInfo.GetProjectId()
+	invokeFunction.Data["environment_id"] = authInfo.GetEnvId()
+	invokeFunction.Data["app_id"] = apiKeys.GetData()[0].GetAppId()
+
+	functionPath := map[string]string{
+		"wayll-main-report":                  "wayll-main-report-knative",
+		"wayll-profit-report":                "wayll-profit-report-knative",
+		"wayll-create-required-pockets":      "wayll-create-required-pockets-knative",
+		"wayll-candle-chart":                 "wayll-candle-chart-knative",
+		"wayll-get-projects":                 "wayll-get-projects-knative",
+		"wayll-payment":                      "wayll-payment-knative",
+		"wayll-payme-integration":            "wayll-payme-integration-knative",
+		"wayll-generate-doc":                 "wayll-generate-doc-knative",
+		"wayll-create-investor-legal-entity": "wayll-create-investor-legal-entity-knative",
+		"wayll-get-profile":                  "wayll-get-profile-knative",
+		"wayll-get-comments":                 "wayll-get-comments-knative",
+		"wayll-get-followers-list":           "wayll-get-followers-list-knative",
+		"wayll-get-project":                  "wayll-get-project-knative",
+	}
+
+	knativeFunctionPath := c.Param("function-path")
+	if val, ok := functionPath[knativeFunctionPath]; ok {
+		knativeFunctionPath = val
+	}
+
+	url := fmt.Sprintf("http://%s.%s", knativeFunctionPath, config.KnativeBaseUrl)
+	resp, err := util.DoRequest(url, http.MethodPost, models.NewInvokeFunctionRequest{
+		Data: invokeFunction.Data,
+	})
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	} else if resp.Status == "error" {
+		var errStr = resp.Status
+		if resp.Data != nil && resp.Data["message"] != nil {
+			errStr = resp.Data["message"].(string)
+		}
+		h.handleResponse(c, status_http.InvalidArgument, errStr)
+		return
+	}
+
+	h.handleResponse(c, status_http.Created, resp)
 }
 
 // FunctionRun godoc
