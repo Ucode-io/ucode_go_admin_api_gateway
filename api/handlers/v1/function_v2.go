@@ -2,7 +2,6 @@ package v1
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -140,17 +139,15 @@ func (h *HandlerV1) InvokeFunctionByPath(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err := errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
-			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+			ServiceType:   pb.ServiceType_FUNCTION_SERVICE,
 		},
 	)
 	if err != nil {
@@ -172,37 +169,16 @@ func (h *HandlerV1) InvokeFunctionByPath(c *gin.Context) {
 	}
 
 	authInfo, _ := h.GetAuthInfo(c)
-
 	invokeFunction.Data["user_id"] = authInfo.GetUserId()
 	invokeFunction.Data["project_id"] = authInfo.GetProjectId()
 	invokeFunction.Data["environment_id"] = authInfo.GetEnvId()
 	invokeFunction.Data["app_id"] = apiKeys.GetData()[0].GetAppId()
 
-	functionPath := map[string]string{
-		"wayll-main-report":                  "wayll-main-report-knative",
-		"wayll-profit-report":                "wayll-profit-report-knative",
-		"wayll-create-required-pockets":      "wayll-create-required-pockets-knative",
-		"wayll-candle-chart":                 "wayll-candle-chart-knative",
-		"wayll-get-projects":                 "wayll-get-projects-knative",
-		"wayll-payment":                      "wayll-payment-knative",
-		"wayll-payme-integration":            "wayll-payme-integration-knative",
-		"wayll-generate-doc":                 "wayll-generate-doc-knative",
-		"wayll-create-investor-legal-entity": "wayll-create-investor-legal-entity-knative",
-		"wayll-get-profile":                  "wayll-get-profile-knative",
-		"wayll-get-comments":                 "wayll-get-comments-knative",
-		"wayll-get-followers-list":           "wayll-get-followers-list-knative",
-		"wayll-get-project":                  "wayll-get-project-knative",
-	}
-
-	knativeFunctionPath := c.Param("function-path")
-	if val, ok := functionPath[knativeFunctionPath]; ok {
-		knativeFunctionPath = val
-	}
-
-	url := fmt.Sprintf("http://%s.%s", knativeFunctionPath, config.KnativeBaseUrl)
-	resp, err := util.DoRequest(url, http.MethodPost, models.NewInvokeFunctionRequest{
-		Data: invokeFunction.Data,
-	})
+	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+c.Param("function-path"), http.MethodPost,
+		models.NewInvokeFunctionRequest{
+			Data: invokeFunction.Data,
+		},
+	)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
@@ -373,27 +349,53 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 
 	var resp = models.InvokeFunctionResponse{}
 
-	resp, err = util.DoRequest(fmt.Sprintf("http://%s.%s", functionResponse.GetPath(), config.KnativeBaseUrl), http.MethodPost,
-		models.FunctionRunV2{
-			Auth:        models.AuthData{},
-			RequestData: requestData,
-			Data: map[string]any{
-				"object_ids": invokeFunction.ObjectIDs,
-				"attributes": invokeFunction.Attributes,
-				"app_id":     authInfo.Data["app_id"],
+	switch functionResponse.Type {
+	case config.FUNCTION:
+		resp, err = util.DoRequest(config.OpenFaaSBaseUrl+functionResponse.GetPath(), http.MethodPost,
+			models.FunctionRunV2{
+				Auth:        models.AuthData{},
+				RequestData: requestData,
+				Data: map[string]any{
+					"object_ids": invokeFunction.ObjectIDs,
+					"attributes": invokeFunction.Attributes,
+					"app_id":     authInfo.Data["app_id"],
+				},
 			},
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
-		return
-	} else if resp.Status == "error" {
-		var errStr = resp.Status
-		if resp.Data != nil && resp.Data["message"] != nil {
-			errStr = resp.Data["message"].(string)
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.InvalidArgument, err.Error())
+			return
+		} else if resp.Status == "error" {
+			var errStr = resp.Status
+			if resp.Data != nil && resp.Data["message"] != nil {
+				errStr = resp.Data["message"].(string)
+			}
+			h.handleResponse(c, status_http.InvalidArgument, errStr)
+			return
 		}
-		h.handleResponse(c, status_http.InvalidArgument, errStr)
-		return
+	case config.KNATIVE:
+		resp, err = util.DoRequest(fmt.Sprintf("http://%s.%s", functionResponse.GetPath(), config.KnativeBaseUrl), http.MethodPost,
+			models.FunctionRunV2{
+				Auth:        models.AuthData{},
+				RequestData: requestData,
+				Data: map[string]any{
+					"object_ids": invokeFunction.ObjectIDs,
+					"attributes": invokeFunction.Attributes,
+					"app_id":     authInfo.Data["app_id"],
+				},
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.InvalidArgument, err.Error())
+			return
+		} else if resp.Status == "error" {
+			var errStr = resp.Status
+			if resp.Data != nil && resp.Data["message"] != nil {
+				errStr = resp.Data["message"].(string)
+			}
+			h.handleResponse(c, status_http.InvalidArgument, errStr)
+			return
+		}
 	}
 
 	if isOwnData, ok := resp.Attributes["is_own_data"].(bool); ok {

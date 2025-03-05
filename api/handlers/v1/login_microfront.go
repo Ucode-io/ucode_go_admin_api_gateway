@@ -3,7 +3,6 @@ package v1
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -124,19 +123,18 @@ func (h *HandlerV1) GetLoginMicroFrontBySubdomain(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, "subdomain or project-id is required")
 		return
 	}
-	fmt.Println(h.baseConf.CompanyServiceHost, "  ", h.baseConf.CompanyServicePort)
+
 	resp, err := h.companyServices.Project().GetProjectLoginMicroFront(
 		context.Background(),
 		&pb.GetProjectLoginMicroFrontRequest{
 			Subdomain: subdomain,
 		},
 	)
-	fmt.Println("LOG 0")
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	fmt.Println("LOG 1")
+
 	if resp.ProjectId == "" || resp.EnvironmentId == "" {
 		h.handleResponse(c, status_http.OK, models.MicrofrontForLoginPage{})
 		return
