@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 	"ucode/ucode_go_api_gateway/api/models"
+	custom "ucode/ucode_go_api_gateway/function"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
-	"ucode/ucode_go_api_gateway/genproto/new_function_service"
-	"ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
+	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
@@ -244,7 +244,7 @@ func (h *HandlerV1) GetAllFunctions(c *gin.Context) {
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().Function().GetList(
 			context.Background(),
-			&new_object_builder_service.GetAllFunctionsRequest{
+			&nb.GetAllFunctionsRequest{
 				Search:    c.DefaultQuery("search", ""),
 				Limit:     int32(limit),
 				ProjectId: resource.ResourceEnvironmentId,
@@ -458,22 +458,18 @@ func (h *HandlerV1) InvokeFunction(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	function := &new_function_service.Function{}
+	function := &obs.Function{}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		function, err = services.FunctionService().FunctionService().GetSingle(
-			context.Background(),
-			&new_function_service.FunctionPrimaryKey{
+		function, err = services.GetBuilderServiceByType(resource.NodeType).Function().GetSingle(
+			c.Request.Context(),
+			&obs.FunctionPrimaryKey{
 				Id:        invokeFunction.FunctionID,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -484,8 +480,8 @@ func (h *HandlerV1) InvokeFunction(c *gin.Context) {
 		}
 	case pb.ResourceType_POSTGRESQL:
 		newFunction, err := services.GoObjectBuilderService().Function().GetSingle(
-			context.Background(),
-			&new_object_builder_service.FunctionPrimaryKey{
+			c.Request.Context(),
+			&nb.FunctionPrimaryKey{
 				Id:        invokeFunction.FunctionID,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -502,7 +498,7 @@ func (h *HandlerV1) InvokeFunction(c *gin.Context) {
 		}
 	}
 
-	apiKeys, err := h.authService.ApiKey().GetList(context.Background(), &auth_service.GetListReq{
+	apiKeys, err := h.authService.ApiKey().GetList(c.Request.Context(), &auth_service.GetListReq{
 		EnvironmentId: environmentId.(string),
 		ProjectId:     resource.ProjectId,
 	})
@@ -517,12 +513,17 @@ func (h *HandlerV1) InvokeFunction(c *gin.Context) {
 	}
 
 	if invokeFunction.Attributes == nil {
-		invokeFunction.Attributes = make(map[string]interface{}, 0)
+		invokeFunction.Attributes = make(map[string]any, 0)
 	}
 	authInfo, _ := h.GetAuthInfo(c)
 
-	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+function.Path, "POST", models.NewInvokeFunctionRequest{
-		Data: map[string]interface{}{
+	requestType := function.GetRequestType()
+	functionType := function.GetType()
+	path := function.GetPath()
+	name := function.GetName()
+
+	invokeFunctionRequest := models.NewInvokeFunctionRequest{
+		Data: map[string]any{
 			"object_ids":     invokeFunction.ObjectIDs,
 			"app_id":         apiKeys.GetData()[0].GetAppId(),
 			"attributes":     invokeFunction.Attributes,
@@ -530,50 +531,21 @@ func (h *HandlerV1) InvokeFunction(c *gin.Context) {
 			"project_id":     projectId,
 			"environment_id": environmentId,
 			"action_type":    "HTTP",
+			"table_slug":     invokeFunction.TableSlug,
 		},
-	})
-	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
-		return
-	} else if resp.Status == "error" {
-		var errStr = resp.Status
-		if resp.Data != nil && resp.Data["message"] != nil {
-			errStr = resp.Data["message"].(string)
-		}
-		h.handleResponse(c, status_http.InvalidArgument, errStr)
-		return
 	}
-	if c.Query("form_input") != "true" && c.Query("use_no_limit") != "true" {
-		switch resource.ResourceType {
-		case pb.ResourceType_MONGODB:
-			_, err = services.GetBuilderServiceByType(resource.NodeType).CustomEvent().UpdateByFunctionId(
-				context.Background(),
-				&obs.UpdateByFunctionIdRequest{
-					FunctionId: invokeFunction.FunctionID,
-					ObjectIds:  invokeFunction.ObjectIDs,
-					FieldSlug:  function.Path + "_disable",
-					ProjectId:  resource.ResourceEnvironmentId,
-				},
-			)
-			if err != nil {
-				h.handleResponse(c, status_http.GRPCError, err.Error())
-				return
-			}
-		case pb.ResourceType_POSTGRESQL:
-			_, err = services.GoObjectBuilderService().CustomEvent().UpdateByFunctionId(
-				context.Background(),
-				&new_object_builder_service.UpdateByFunctionIdRequest{
-					FunctionId: invokeFunction.FunctionID,
-					ObjectIds:  invokeFunction.ObjectIDs,
-					FieldSlug:  function.Path + "_disable",
-					ProjectId:  resource.ResourceEnvironmentId,
-				},
-			)
-			if err != nil {
-				h.handleResponse(c, status_http.GRPCError, err.Error())
-				return
-			}
+
+	if requestType == "" || requestType == "ASYNC" {
+		functionName, err := custom.FuncHandlers[functionType](path, name, invokeFunctionRequest)
+		if err != nil {
+			h.handleResponse(c, status_http.InvalidArgument, err.Error()+" in "+functionName)
+			return
 		}
+	} else if requestType == "SYNC" {
+		go func() {
+			custom.FuncHandlers[functionType](path, name, invokeFunctionRequest)
+		}()
 	}
-	h.handleResponse(c, status_http.Created, resp)
+
+	h.handleResponse(c, status_http.Created, models.InvokeFunctionResponse{})
 }

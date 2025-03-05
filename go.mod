@@ -1,8 +1,6 @@
 module ucode/ucode_go_api_gateway
 
-go 1.22
-
-toolchain go1.23.2
+go 1.23.2
 
 require (
 	github.com/gin-gonic/gin v1.9.0
@@ -25,13 +23,12 @@ require (
 )
 
 require (
-	github.com/aws/aws-sdk-go v1.45.1
+	github.com/aws/aws-sdk-go v1.55.5
 	github.com/baxromumarov/ucode-sdk v0.0.3
 	github.com/go-git/go-git/v5 v5.12.0
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/golang/protobuf v1.5.4
 	github.com/golanguzb70/grpc-client-lb v1.0.0
-	github.com/golanguzb70/ucode-sdk v1.4.0
 	github.com/hashicorp/golang-lru v1.0.2
 	github.com/manveru/faker v0.0.0-20171103152722-9fbc68a78c4d
 	github.com/opentracing-contrib/go-gin v0.0.0-20230313182354-1499e56cc906
@@ -39,10 +36,10 @@ require (
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/pkg/errors v0.9.1
 	github.com/processout/grpc-go-pool v1.2.1
-	github.com/saidamir98/udevs_pkg v0.0.0-20220413125729-5342e90c08a3
 	github.com/stretchr/testify v1.9.0
 	github.com/tus/tusd v1.13.0
 	github.com/uber/jaeger-client-go v2.30.0+incompatible
+	github.com/ucode-io/ucode_sdk v1.0.1
 	golang.org/x/time v0.5.0
 )
 

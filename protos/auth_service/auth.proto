@@ -41,6 +41,7 @@ message ClientType {
     string project_id = 6;
     repeated Table tables = 7;
     string default_page = 8;
+    int32 session_limit = 9;
 }
 
 message Relation {
@@ -119,6 +120,7 @@ message User {
     Language language = 15;
     Timezone  timezone = 16;
     string hash_type = 17;
+    string status = 18;
 }
 message Timezone {
     string id = 1;
@@ -159,6 +161,7 @@ message Session {
     bool is_changed = 13;
     string env_id = 14;
     string user_id_auth = 15;
+    string client_id = 16;
 }
 
 message Passcode {

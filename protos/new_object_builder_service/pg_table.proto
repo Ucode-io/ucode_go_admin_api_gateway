@@ -90,6 +90,7 @@ message CreateTableRequest {
     string id = 25;
     string view_id = 26;
     string layout_id = 27;
+    bool is_login_table = 28;
 }
 
 message IncrementID {
@@ -163,6 +164,7 @@ message Table {
     google.protobuf.Struct attributes = 20;
     bool order_by = 21;
     int32 section_column_count = 22;
+    bool exists = 23;
 }
 
 message CommitInfo {

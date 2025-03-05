@@ -29,24 +29,9 @@ func EnterPriceProjectsGrpcSvcs(ctx context.Context, compSrvc services.CompanySe
 				log.Error("Error:", logger.Error(err))
 			}
 
-			// v.OBJECT_BUILDER_GRPC_PORT = ":9102"
-			// v.OBJECT_BUILDER_SERVICE_HOST = "localhost"
-
-			// v.REDIS_HOST = "localhost"
-			// v.REDIS_PORT = "6379"
-			// v.REDIS_PASSWORD = ""
-			// num = 0
-
-			// v.FUNCTION_GRPC_PORT = ":8100"
-			// v.FUNCTION_SERVICE_HOST = "localhost"
-
 			projectConf := config.Config{
 				ConvertTemplateServiceGrpcPort: v.CONVERT_TEMPLATE_GRPC_PORT,
 				ConvertTemplateServiceGrpcHost: v.CONVERT_TEMPLATE_SERVICE_HOST,
-				AnalyticsGRPCPort:              v.ANALYTICS_GRPC_PORT,
-				AnalyticsServiceHost:           v.ANALYTICS_SERVICE_HOST,
-				ApiReferenceServicePort:        v.API_REF_GRPC_PORT,
-				ApiReferenceServiceHost:        v.API_REF_SERVICE_HOST,
 				ChatServiceGrpcPort:            v.CHAT_GRPC_PORT,
 				ChatServiceGrpcHost:            v.CHAT_SERVICE_HOST,
 				FunctionServicePort:            v.FUNCTION_GRPC_PORT,
@@ -59,8 +44,6 @@ func EnterPriceProjectsGrpcSvcs(ctx context.Context, compSrvc services.CompanySe
 				HighObjectBuilderServiceHost:   v.OBJECT_BUILDER_SERVICE_HIGHT_HOST,
 				TemplateGRPCPort:               v.TEMPLATE_GRPC_PORT,
 				TemplateServiceHost:            v.TEMPLATE_SERVICE_HOST,
-				VersioningGRPCPort:             v.VERSIONING_GRPC_PORT,
-				VersioningServiceHost:          v.VERSIONING_SERVICE_HOST,
 				GetRequestRedisHost:            v.REDIS_HOST,
 				GetRequestRedisPort:            v.REDIS_PORT,
 				GetRequestRedisDatabase:        num,

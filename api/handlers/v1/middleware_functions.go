@@ -2,25 +2,22 @@ package v1
 
 import (
 	"errors"
-	"fmt"
 	"strings"
-	"time"
 	"ucode/ucode_go_api_gateway/api/status_http"
-	"ucode/ucode_go_api_gateway/config"
-	"ucode/ucode_go_api_gateway/genproto/auth_service"
-	"ucode/ucode_go_api_gateway/genproto/versioning_service"
+	auth "ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/logger"
-	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
-func (h *HandlerV1) hasAccess(c *gin.Context) (*auth_service.V2HasAccessUserRes, bool) {
-	bearerToken := c.GetHeader("Authorization")
-	strArr := strings.Split(bearerToken, " ")
+func (h *HandlerV1) hasAccess(c *gin.Context) (*auth.V2HasAccessUserRes, bool) {
+	var (
+		bearerToken = c.GetHeader("Authorization")
+		strArr      = strings.Split(bearerToken, " ")
+	)
 
 	if len(strArr) != 2 || strArr[0] != "Bearer" {
 		h.log.Error("---ERR->HasAccess->Unexpected token format")
@@ -35,8 +32,7 @@ func (h *HandlerV1) hasAccess(c *gin.Context) (*auth_service.V2HasAccessUserRes,
 	}
 	defer conn.Close()
 	resp, err := service.V2HasAccessUser(
-		c.Request.Context(),
-		&auth_service.V2HasAccessUserReq{
+		c.Request.Context(), &auth.V2HasAccessUserReq{
 			AccessToken:   accessToken,
 			Path:          helper.GetURLWithTableSlug(c),
 			Method:        c.Request.Method,
@@ -71,7 +67,7 @@ func (h *HandlerV1) hasAccess(c *gin.Context) (*auth_service.V2HasAccessUserRes,
 	return resp, true
 }
 
-func (h *HandlerV1) GetAuthInfo(c *gin.Context) (result *auth_service.V2HasAccessUserRes, err error) {
+func (h *HandlerV1) GetAuthInfo(c *gin.Context) (result *auth.V2HasAccessUserRes, err error) {
 	data, ok := c.Get("Auth")
 	if !ok {
 		h.handleResponse(c, status_http.Forbidden, "token error: wrong format")
@@ -79,7 +75,7 @@ func (h *HandlerV1) GetAuthInfo(c *gin.Context) (result *auth_service.V2HasAcces
 		return nil, errors.New("token error: wrong format")
 	}
 
-	accessResponse, ok := data.(*auth_service.V2HasAccessUserRes)
+	accessResponse, ok := data.(*auth.V2HasAccessUserRes)
 	if !ok {
 		h.handleResponse(c, status_http.Forbidden, "token error: wrong format")
 		c.Abort()
@@ -89,7 +85,7 @@ func (h *HandlerV1) GetAuthInfo(c *gin.Context) (result *auth_service.V2HasAcces
 	return accessResponse, nil
 }
 
-func (h *HandlerV1) GetAuthAdminInfo(c *gin.Context) (result *auth_service.HasAccessSuperAdminRes, err error) {
+func (h *HandlerV1) GetAuthAdminInfo(c *gin.Context) (result *auth.HasAccessSuperAdminRes, err error) {
 	data, ok := c.Get("Auth_Admin")
 	if !ok {
 		h.handleResponse(c, status_http.Forbidden, "token error: wrong format")
@@ -97,7 +93,7 @@ func (h *HandlerV1) GetAuthAdminInfo(c *gin.Context) (result *auth_service.HasAc
 		return nil, errors.New("token error: wrong format")
 	}
 
-	accessResponse, ok := data.(*auth_service.HasAccessSuperAdminRes)
+	accessResponse, ok := data.(*auth.HasAccessSuperAdminRes)
 	if !ok {
 		h.handleResponse(c, status_http.Forbidden, "token error: wrong format")
 		c.Abort()
@@ -105,100 +101,4 @@ func (h *HandlerV1) GetAuthAdminInfo(c *gin.Context) (result *auth_service.HasAc
 	}
 
 	return accessResponse, nil
-}
-
-func (h *HandlerV1) CreateAutoCommit(c *gin.Context, environmentID, commitType string) (versionId, commitGuid string, err error) {
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		return "", "", err
-	}
-
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
-	if !util.IsValidUUID(authInfo.GetUserId()) {
-		err := errors.New("invalid or missing user id")
-		h.log.Error("--CreateAutoCommit--", logger.Error(err))
-		return "", "", err
-	}
-
-	if !util.IsValidUUID(authInfo.GetProjectId()) {
-		err := errors.New("invalid or missing project id")
-		h.log.Error("--CreateAutoCommit--", logger.Error(err))
-		return "", "", err
-	}
-
-	if !util.IsValidUUID(environmentID) {
-		err := errors.New("invalid or missing environment id")
-		h.log.Error("--CreateAutoCommit--", logger.Error(err))
-		return "", "", err
-	}
-
-	commit, err := services.VersioningService().Commit().Insert(
-		c.Request.Context(),
-		&versioning_service.CreateCommitRequest{
-			AuthorId:      authInfo.GetUserId(),
-			ProjectId:     authInfo.GetProjectId(),
-			EnvironmentId: environmentID,
-			CommitType:    config.COMMIT_TYPE_APP,
-			Name:          fmt.Sprintf("Auto Created Commit - %s", time.Now().Format(time.RFC1123)),
-		},
-	)
-	if err != nil {
-		return "", "", err
-	}
-
-	return commit.GetVersionId(), commit.GetCommitId(), nil
-}
-
-func (h *HandlerV1) CreateAutoCommitForAdminChange(c *gin.Context, environmentID, commitType string, project_id string) (versionId, commitGuid string, err error) {
-	authInfo, err := h.adminAuthInfo(c)
-	if err != nil {
-		return "", "", err
-	}
-
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
-	if !util.IsValidUUID(authInfo.GetUserId()) {
-		err := errors.New("invalid or missing user id")
-		h.log.Error("--CreateAutoCommit--", logger.Error(err))
-		return "", "", err
-	}
-
-	if !util.IsValidUUID(project_id) {
-		err := errors.New("invalid or missing project id")
-		h.log.Error("--CreateAutoCommit--", logger.Error(err))
-		return "", "", err
-	}
-
-	if !util.IsValidUUID(environmentID) {
-		err := errors.New("invalid or missing environment id")
-		h.log.Error("--CreateAutoCommit--", logger.Error(err))
-		return "", "", err
-	}
-
-	commit, err := services.VersioningService().Commit().Insert(
-		c.Request.Context(),
-		&versioning_service.CreateCommitRequest{
-			AuthorId:      authInfo.GetUserId(),
-			ProjectId:     project_id,
-			EnvironmentId: environmentID,
-			CommitType:    config.COMMIT_TYPE_APP,
-			Name:          fmt.Sprintf("Auto Created Commit - %s", time.Now().Format(time.RFC1123)),
-		},
-	)
-	if err != nil {
-		return "", "", err
-	}
-
-	return commit.GetVersionId(), commit.GetCommitId(), nil
 }

@@ -75,6 +75,7 @@ func NewHighBuilderServiceClient(ctx context.Context, cfg config.Config) (Builde
 		fileService:               object_builder_service.NewFileServiceClient(connObjectBuilderService),
 		itemsService:              object_builder_service.NewItemsServiceClient(connObjectBuilderService),
 		versionHistoryService:     object_builder_service.NewVersionHistoryServiceClient(connObjectBuilderService),
+		languageService:           object_builder_service.NewLanguageServiceClient(connObjectBuilderService),
 		clientLb:                  grpcClientLB,
 	}, nil
 }

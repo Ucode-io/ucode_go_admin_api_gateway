@@ -1,8 +1,6 @@
 package v2
 
 import (
-	"context"
-	"errors"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
@@ -30,12 +28,9 @@ import (
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) CreateView(c *gin.Context) {
-	var (
-		view obs.CreateViewRequest
-	)
+	var view obs.CreateViewRequest
 
-	err := c.ShouldBindJSON(&view)
-	if err != nil {
+	if err := c.ShouldBindJSON(&view); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -48,16 +43,14 @@ func (h *HandlerV2) CreateView(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -68,11 +61,7 @@ func (h *HandlerV2) CreateView(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -96,8 +85,7 @@ func (h *HandlerV2) CreateView(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err := services.GetBuilderServiceByType(resource.NodeType).View().Create(
-			context.Background(),
-			&view,
+			c.Request.Context(), &view,
 		)
 		if err != nil {
 			logReq.Response = err.Error()
@@ -118,8 +106,7 @@ func (h *HandlerV2) CreateView(c *gin.Context) {
 		}
 
 		resp, err := services.GoObjectBuilderService().View().Create(
-			context.Background(),
-			&newReq,
+			c.Request.Context(), &newReq,
 		)
 		if err != nil {
 			logReq.Response = err.Error()
@@ -164,14 +151,12 @@ func (h *HandlerV2) GetSingleView(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err := errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -182,11 +167,7 @@ func (h *HandlerV2) GetSingleView(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -195,8 +176,7 @@ func (h *HandlerV2) GetSingleView(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err := services.GetBuilderServiceByType(resource.NodeType).View().GetSingle(
-			context.Background(),
-			&obs.ViewPrimaryKey{
+			c.Request.Context(), &obs.ViewPrimaryKey{
 				Id:        viewID,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -208,8 +188,7 @@ func (h *HandlerV2) GetSingleView(c *gin.Context) {
 		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().View().GetSingle(
-			context.Background(),
-			&nb.ViewPrimaryKey{
+			c.Request.Context(), &nb.ViewPrimaryKey{
 				Id:        viewID,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -237,12 +216,9 @@ func (h *HandlerV2) GetSingleView(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) UpdateView(c *gin.Context) {
-	var (
-		view obs.View
-	)
+	var view obs.View
 
-	err := c.ShouldBindJSON(&view)
-	if err != nil {
+	if err := c.ShouldBindJSON(&view); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -255,16 +231,14 @@ func (h *HandlerV2) UpdateView(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -275,30 +249,23 @@ func (h *HandlerV2) UpdateView(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
 	var (
-		oldView = &obs.View{}
+		oldView *obs.View
 		logReq  = &models.CreateVersionHistoryRequest{
 			Services:     services,
 			NodeType:     resource.NodeType,
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: "VIEW",
 			ActionType:   "UPDATE VIEW",
-			// UsedEnvironments: map[string]bool{
-			// 	cast.ToString(environmentId): true,
-			// },
-			UserInfo:  cast.ToString(userId),
-			Request:   &view,
-			TableSlug: c.Param("collection"),
+			UserInfo:     cast.ToString(userId),
+			Request:      &view,
+			TableSlug:    c.Param("collection"),
 		}
 	)
 
@@ -307,8 +274,7 @@ func (h *HandlerV2) UpdateView(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		oldView, err = services.GetBuilderServiceByType(resource.NodeType).View().GetSingle(
-			context.Background(),
-			&obs.ViewPrimaryKey{
+			c.Request.Context(), &obs.ViewPrimaryKey{
 				Id:        view.Id,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -320,10 +286,11 @@ func (h *HandlerV2) UpdateView(c *gin.Context) {
 		logReq.Previous = oldView
 
 		resp, err := services.GetBuilderServiceByType(resource.NodeType).View().Update(
-			context.Background(),
+			c.Request.Context(),
 			&view,
 		)
 		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		} else {
 			logReq.Response = resp
@@ -333,10 +300,8 @@ func (h *HandlerV2) UpdateView(c *gin.Context) {
 		go h.versionHistory(logReq)
 		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
-
 		oldView, err := services.GoObjectBuilderService().View().GetSingle(
-			context.Background(),
-			&nb.ViewPrimaryKey{
+			c.Request.Context(), &nb.ViewPrimaryKey{
 				Id:        view.Id,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -356,10 +321,10 @@ func (h *HandlerV2) UpdateView(c *gin.Context) {
 		}
 
 		resp, err := services.GoObjectBuilderService().View().Update(
-			context.Background(),
-			&newReq,
+			c.Request.Context(), &newReq,
 		)
 		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		} else {
 			logReq.Response = resp
@@ -401,8 +366,7 @@ func (h *HandlerV2) DeleteView(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err := errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
@@ -421,11 +385,7 @@ func (h *HandlerV2) DeleteView(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -439,19 +399,15 @@ func (h *HandlerV2) DeleteView(c *gin.Context) {
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: "VIEW",
 			ActionType:   "DELETE VIEW",
-			// UsedEnvironments: map[string]bool{
-			// 	cast.ToString(environmentId): true,
-			// },
-			UserInfo:  cast.ToString(userId),
-			TableSlug: c.Param("collection"),
+			UserInfo:     cast.ToString(userId),
+			TableSlug:    c.Param("collection"),
 		}
 	)
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		oldView, err = services.GetBuilderServiceByType(resource.NodeType).View().GetSingle(
-			context.Background(),
-			&obs.ViewPrimaryKey{
+			c.Request.Context(), &obs.ViewPrimaryKey{
 				Id:        viewID,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -464,8 +420,7 @@ func (h *HandlerV2) DeleteView(c *gin.Context) {
 
 		logReq.Previous = oldView
 		resp, err := services.GetBuilderServiceByType(resource.NodeType).View().Delete(
-			context.Background(),
-			&obs.ViewPrimaryKey{
+			c.Request.Context(), &obs.ViewPrimaryKey{
 				Id:        viewID,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -477,10 +432,8 @@ func (h *HandlerV2) DeleteView(c *gin.Context) {
 		go h.versionHistory(logReq)
 		h.handleResponse(c, status_http.NoContent, resp)
 	case pb.ResourceType_POSTGRESQL:
-
 		oldView, err := services.GoObjectBuilderService().View().GetSingle(
-			context.Background(),
-			&nb.ViewPrimaryKey{
+			c.Request.Context(), &nb.ViewPrimaryKey{
 				Id:        viewID,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -493,8 +446,7 @@ func (h *HandlerV2) DeleteView(c *gin.Context) {
 		logReq.Previous = oldView
 
 		resp, err := services.GoObjectBuilderService().View().Delete(
-			context.Background(),
-			&nb.ViewPrimaryKey{
+			c.Request.Context(), &nb.ViewPrimaryKey{
 				Id:        viewID,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -522,7 +474,6 @@ func (h *HandlerV2) DeleteView(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) GetAllViews(c *gin.Context) {
-
 	var roleId string
 
 	if c.Param("collection") == "" {
@@ -543,14 +494,12 @@ func (h *HandlerV2) GetAllViews(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err := errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -561,11 +510,7 @@ func (h *HandlerV2) GetAllViews(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -574,8 +519,7 @@ func (h *HandlerV2) GetAllViews(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err := services.GetBuilderServiceByType(resource.NodeType).View().GetList(
-			context.Background(),
-			&obs.GetAllViewsRequest{
+			c.Request.Context(), &obs.GetAllViewsRequest{
 				TableSlug: c.Param("collection"),
 				ProjectId: resource.ResourceEnvironmentId,
 				RoleId:    roleId,
@@ -589,8 +533,7 @@ func (h *HandlerV2) GetAllViews(c *gin.Context) {
 		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().View().GetList(
-			context.Background(),
-			&nb.GetAllViewsRequest{
+			c.Request.Context(), &nb.GetAllViewsRequest{
 				TableSlug: c.Param("collection"),
 				ProjectId: resource.ResourceEnvironmentId,
 				RoleId:    roleId,
@@ -619,12 +562,9 @@ func (h *HandlerV2) GetAllViews(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) UpdateViewOrder(c *gin.Context) {
-	var (
-		view obs.UpdateViewOrderRequest
-	)
+	var view obs.UpdateViewOrderRequest
 
-	err := c.ShouldBindJSON(&view)
-	if err != nil {
+	if err := c.ShouldBindJSON(&view); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -637,14 +577,12 @@ func (h *HandlerV2) UpdateViewOrder(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -656,11 +594,7 @@ func (h *HandlerV2) UpdateViewOrder(c *gin.Context) {
 	}
 	view.ProjectId = resource.ResourceEnvironmentId
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -670,14 +604,13 @@ func (h *HandlerV2) UpdateViewOrder(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err := services.GetBuilderServiceByType(resource.NodeType).View().UpdateViewOrder(
-			context.Background(),
-			&view,
+			c.Request.Context(), &view,
 		)
-
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
+
 		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
 		newReq := nb.UpdateViewOrderRequest{}
@@ -688,13 +621,13 @@ func (h *HandlerV2) UpdateViewOrder(c *gin.Context) {
 		}
 
 		resp, err := services.GoObjectBuilderService().View().UpdateViewOrder(
-			context.Background(),
-			&newReq,
+			c.Request.Context(), &newReq,
 		)
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
+
 		h.handleResponse(c, status_http.OK, resp)
 	}
 }

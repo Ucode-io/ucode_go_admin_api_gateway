@@ -5,6 +5,8 @@ import (
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 
+	otgrpc "github.com/opentracing-contrib/go-grpc"
+	"github.com/opentracing/opentracing-go"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -19,6 +21,7 @@ type CompanyServiceI interface {
 	CompanyPing() company_service.CompanyPingServiceClient
 	IntegrationResource() company_service.IntegrationResourceServiceClient
 	AirByte() company_service.AirbyteServiceClient
+	Billing() company_service.BillingServiceClient
 }
 
 type companyServiceClient struct {
@@ -31,6 +34,7 @@ type companyServiceClient struct {
 	companyPingService         company_service.CompanyPingServiceClient
 	integrationResourceService company_service.IntegrationResourceServiceClient
 	airbyteService             company_service.AirbyteServiceClient
+	billingService             company_service.BillingServiceClient
 }
 
 func NewCompanyServiceClient(ctx context.Context, cfg config.Config) (CompanyServiceI, error) {
@@ -39,6 +43,10 @@ func NewCompanyServiceClient(ctx context.Context, cfg config.Config) (CompanySer
 		ctx,
 		cfg.CompanyServiceHost+cfg.CompanyServicePort,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithUnaryInterceptor(
+			otgrpc.OpenTracingClientInterceptor(opentracing.GlobalTracer())),
+		grpc.WithStreamInterceptor(
+			otgrpc.OpenTracingStreamClientInterceptor(opentracing.GlobalTracer())),
 	)
 	if err != nil {
 		return nil, err
@@ -54,6 +62,7 @@ func NewCompanyServiceClient(ctx context.Context, cfg config.Config) (CompanySer
 		companyPingService:         company_service.NewCompanyPingServiceClient(connCompanyService),
 		integrationResourceService: company_service.NewIntegrationResourceServiceClient(connCompanyService),
 		airbyteService:             company_service.NewAirbyteServiceClient(connCompanyService),
+		billingService:             company_service.NewBillingServiceClient(connCompanyService),
 	}, nil
 }
 
@@ -91,4 +100,8 @@ func (g *companyServiceClient) IntegrationResource() company_service.Integration
 
 func (g *companyServiceClient) AirByte() company_service.AirbyteServiceClient {
 	return g.airbyteService
+}
+
+func (g *companyServiceClient) Billing() company_service.BillingServiceClient {
+	return g.billingService
 }

@@ -6,6 +6,7 @@ option go_package="genproto/company_service";
 import "company.proto";
 import "google/protobuf/struct.proto";
 import "google/protobuf/empty.proto";
+import "billing_service.proto";
 
 service ProjectService {
     rpc Create(CreateProjectRequest) returns (CreateProjectResponse) {}
@@ -17,6 +18,8 @@ service ProjectService {
     rpc GetProjectsByCompanyId(GetProjectsByCompanyIdReq) returns (GetProjectsByCompanyIdRes) {}
     rpc UpdateProjectUserData (UpdateProjectUserDataReq) returns (UpdateProjectUserDataRes) {}
     rpc GetListSetting(GetListSettingReq) returns (Setting) {};
+    rpc AttachFare(AttachFareRequest) returns (Project) {};
+
 
     rpc CreateProjectLoginMicroFront(ProjectLoginMicroFrontend) returns (ProjectLoginMicroFrontend) {};
     rpc GetProjectLoginMicroFront(GetProjectLoginMicroFrontRequest) returns (ProjectLoginMicroFrontend) {};
@@ -25,10 +28,19 @@ service ProjectService {
     rpc UpdateProjectConfig (ProjectConfig) returns (ProjectConfig) {};
     rpc GetPorjectConfigByProjectId (GetPorjectConfigByProjectIdRequest) returns (ProjectConfig) {};
     rpc GetProjectConfigList (google.protobuf.Empty) returns (ListPorjectConfig) {};
+
+    rpc UpsertRecord(Record) returns (EmptyProto) {};
+    rpc ListRecord(ListRecordRequest) returns(EmptyProto) {};
+
+    rpc ListProjectsRPS(GetProjectListRequest) returns (ListProjectsRPSResponse) {};
 }
 
 message GetPorjectConfigByProjectIdRequest {
     string project_id = 1;
+}
+
+message ListProjectsRPSResponse {
+    map<string, int32> projects = 1;
 }
 
 message ListPorjectConfig {
@@ -135,6 +147,7 @@ message GetProjectsByCompanyIdRes {
             string created_at = 5;
             string updated_at = 6;
             string logo = 7;
+            string fare_id = 8;
         }
         string id = 1;
         string name = 2;
@@ -212,6 +225,14 @@ message Project {
     repeated Language language = 7;
     Currency currency = 8;
     Timezone timezone = 9;
+    string fare_id = 10;
+    repeated Currency currencies = 11;
+    int32 request_per_second = 12;
+    double balance = 13;
+    double credit_limit = 14;
+    Fare fare = 15;
+    string status = 16;
+    bool new_design = 17;
 }
 
 message CreateProjectRequest {
@@ -230,6 +251,7 @@ message GetProjectListRequest {
     int32 offset = 2;
     string company_id = 3;
     string search = 4;
+    bool active = 5;
 }
 
 message GetProjectListResponse {
@@ -383,4 +405,21 @@ message GetResourceManyWithPathResponse {
 
 message GetProjectRes {
     repeated GetProjectsResponse response = 1;
+}
+
+message Record {
+    string project_id = 1;
+    int32 amount = 2;
+    string resource_environment_id = 3;
+    string table_slug = 4;
+}
+
+message ListRecordRequest {
+
+}
+
+message AttachFareRequest {
+    string project_id = 1;
+    string fare_id = 2;
+    string discount_id = 3;
 }

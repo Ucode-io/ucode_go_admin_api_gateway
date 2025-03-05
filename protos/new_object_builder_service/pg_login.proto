@@ -38,6 +38,7 @@ message LoginDataReq {
     string project_id = 3;
     string resource_environment_id = 4;
     string node_type = 5;
+    string password = 6;
 }
 
 message LoginDataRes {
@@ -52,6 +53,7 @@ message LoginDataRes {
     GlobalPermission global_permission = 9;
     google.protobuf.Struct user_data = 10;
     string user_id_auth = 11;
+    bool compare_password = 12;
 }
 
 enum ConfirmStrategies {
@@ -107,6 +109,7 @@ message ClientType {
     string project_id = 6;
     repeated TableClientType tables = 7;
     string default_page = 8;
+    int32 session_limit = 9;
 }
 
 message Role {

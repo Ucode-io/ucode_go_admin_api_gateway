@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"strings"
+
 	"ucode/ucode_go_api_gateway/api/docs"
 	"ucode/ucode_go_api_gateway/api/handlers"
 	"ucode/ucode_go_api_gateway/config"
@@ -19,11 +20,10 @@ import (
 )
 
 // SetUpAPI @description This is an api gateway
-// @termsOfService https://udevs.io
+// @termsOfService https://u-code.io/
 func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer opentracing.Tracer) {
 	docs.SwaggerInfo.Title = cfg.ServiceName
 	docs.SwaggerInfo.Version = cfg.Version
-	// docs.SwaggerInfo.Host = cfg.ServiceHost + cfg.HTTPPort
 	docs.SwaggerInfo.Schemes = []string{cfg.HTTPScheme}
 
 	r.Use(customCORSMiddleware())
@@ -34,19 +34,9 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 	r.Any("/x-api/*any", h.V1.RedirectAuthMiddleware(cfg), proxyMiddleware(r, &h), h.V1.Proxy)
 
-	r.POST("/send-code", h.V1.SendCode)
-	r.POST("/test-for-time-limit", h.V1.TestForTimeLimit)
-	r.POST("/verify/:sms_id/:otp", h.V1.Verify)
-	r.POST("/register-otp/:table_slug", h.V1.RegisterOtp)
-	r.POST("/send-message", h.V1.SendMessageToEmail)
-	r.POST("/verify-email/:sms_id/:otp", h.V1.VerifyEmail)
-	r.POST("/register-email-otp/:table_slug", h.V1.RegisterEmailOtp)
 	r.GET("/v1/login-microfront", h.V1.GetLoginMicroFrontBySubdomain)
-	r.GET("/v3/note/:note-id", h.V1.GetSingleNoteWithoutToken)
 
 	r.GET("/menu/wiki_folder", h.V1.GetWikiFolder)
-
-	r.POST("webhook/handle", h.V2.HandleWebhook)
 
 	global := r.Group("/v1/global")
 	global.Use(h.V1.GlobalAuthMiddleware(cfg))
@@ -76,8 +66,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1.DELETE("/menu-template/:id", h.V1.DeleteMenuTemplate)
 
 		v1.POST("/upload", h.V1.Upload)
-		v1.POST("/upload-template/:template_name", h.V1.UploadTemplate)
-		v1.POST("/upload-file/:table_slug/:object_id", h.V1.UploadFile)
+		v1.POST("/upload-file/:collection/:object_id", h.V1.UploadFile)
 
 		// OBJECT_BUILDER_SERVICE
 
@@ -85,23 +74,17 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1.POST("/table", h.V1.CreateTable)
 		v1.GET("/table", h.V1.GetAllTables)
 		v1.GET("/table/:table_id", h.V1.GetTableByID)
-		v1.POST("/table-details/:table_slug", h.V1.GetTableDetails)
+		v1.POST("/table-details/:collection", h.V1.GetTableDetails)
 
 		v1.PUT("/table", h.V1.UpdateTable)
 		v1.DELETE("/table/:table_id", h.V1.DeleteTable)
-		//field
-		v1.POST("/field", h.V1.CreateField)
-		v1.GET("/field", h.V1.GetAllFields)
-		v1.PUT("/field", h.V1.UpdateField)
-		v1.DELETE("/field/:field_id", h.V1.DeleteField)
-		v1.POST("/fields-relations", h.V1.CreateFieldsAndRelations)
 
 		//relation
 		v1.POST("/relation", h.V1.CreateRelation)
 		v1.GET("/relation", h.V1.GetAllRelations)
 		v1.PUT("/relation", h.V1.UpdateRelation)
 		v1.DELETE("/relation/:relation_id", h.V1.DeleteRelation)
-		v1.GET("/get-relation-cascading/:table_slug", h.V1.GetRelationCascaders)
+		v1.GET("/get-relation-cascading/:collection", h.V1.GetRelationCascaders)
 
 		//section
 		v1.GET("/section", h.V1.GetAllSections)
@@ -112,27 +95,26 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1.PUT("/view_relation", h.V1.UpsertViewRelations)
 
 		//object-builder
-		v1.POST("/object/:table_slug", h.V1.CreateObject)
-		v1.GET("/object/:table_slug/:object_id", h.V1.GetSingle)
-		v1.POST("/object/get-list/:table_slug", h.V1.GetList)
-		v1.PUT("/object/:table_slug", h.V1.UpdateObject)
-		v1.DELETE("/object/:table_slug/:object_id", h.V1.DeleteObject)
-		v1.DELETE("/object/:table_slug", h.V1.DeleteManyObject)
-		v1.POST("/object/excel/:table_slug", h.V1.GetListInExcel)
-		v1.POST("/object-upsert/:table_slug", h.V1.UpsertObject)
-		v1.PUT("/object/multiple-update/:table_slug", h.V1.MultipleUpdateObject)
-		v1.POST("/object/get-financial-analytics/:table_slug", h.V1.GetFinancialAnalytics)
-		v1.POST("/object/get-list-group-by/:table_slug/:column_table_slug", h.V1.GetListGroupBy)
-		v1.POST("/object/get-group-by-field/:table_slug", h.V1.GetGroupByField)
-		v1.POST("/object/get-list-aggregate/:table_slug", h.V1.GetListAggregate)
-		v1.POST("/object/get-list-without-relation/:table_slug", h.V1.GetListWithOutRelation)
+		v1.POST("/object/:collection", h.V1.CreateObject)
+		v1.GET("/object/:collection/:object_id", h.V1.GetSingle)
+		v1.POST("/object/get-list/:collection", h.V1.GetList)
+		v1.PUT("/object/:table_collectionslug", h.V1.UpdateObject)
+		v1.DELETE("/object/:collection/:object_id", h.V1.DeleteObject)
+		v1.DELETE("/object/:collection", h.V1.DeleteManyObject)
+		v1.POST("/object/excel/:collection", h.V1.GetListInExcel)
+		v1.POST("/object-upsert/:collection", h.V1.UpsertObject)
+		v1.PUT("/object/multiple-update/:collection", h.V1.MultipleUpdateObject)
+		v1.POST("/object/get-financial-analytics/:collection", h.V1.GetFinancialAnalytics)
+		v1.POST("/object/get-list-group-by/:collection/:column_table_slug", h.V1.GetListGroupBy)
+		v1.POST("/object/get-list-aggregate/:collection", h.V1.GetListAggregate)
+		v1.POST("/object/get-list-without-relation/:collection", h.V1.GetListWithOutRelation)
 
 		// permission
 		v1.POST("/permission-upsert/:app_id", h.V1.UpsertPermissionsByAppId)
 		v1.GET("/permission-get-all/:role_id", h.V1.GetAllPermissionByRoleId)
-		v1.GET("/field-permission/:role_id/:table_slug", h.V1.GetFieldPermissions)
-		v1.GET("/action-permission/:role_id/:table_slug", h.V1.GetActionPermissions)
-		v1.GET("/view-relation-permission/:role_id/:table_slug", h.V1.GetViewRelationPermissions)
+		v1.GET("/field-permission/:role_id/:collection", h.V1.GetFieldPermissions)
+		v1.GET("/action-permission/:role_id/:collection", h.V1.GetActionPermissions)
+		v1.GET("/view-relation-permission/:role_id/:collection", h.V1.GetViewRelationPermissions)
 
 		//many-to-many
 		v1.PUT("/many-to-many", h.V1.AppendManyToMany)
@@ -146,57 +128,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1.DELETE("/view/:view_id", h.V1.DeleteView)
 		v1.PUT("/update-view-order", h.V1.UpdateViewOrder)
 
-		//anaytics dashboard
-		v1.POST("/analytics/dashboard", h.V1.CreateDashboard)
-		v1.GET("/analytics/dashboard/:dashboard_id", h.V1.GetSingleDashboard)
-		v1.GET("/analytics/dashboard", h.V1.GetAllDashboards)
-		v1.PUT("/analytics/dashboard", h.V1.UpdateDashboard)
-		v1.DELETE("/analytics/dashboard/:dashboard_id", h.V1.DeleteDashboard)
-
-		//anaytics variable
-		v1.POST("/analytics/variable", h.V1.CreateVariable)
-		v1.GET("/analytics/variable/:variable_id", h.V1.GetSingleVariable)
-		v1.GET("/analytics/variable", h.V1.GetAllVariables)
-		v1.PUT("/analytics/variable", h.V1.UpdateVariable)
-		v1.DELETE("/analytics/variable/:variable_id", h.V1.DeleteVariable)
-
-		//anaytics panel
-		v1.POST("/analytics/panel/updateCoordinates", h.V1.UpdateCoordinates)
-		v1.POST("/analytics/panel", h.V1.CreatePanel)
-		v1.GET("/analytics/panel/:panel_id", h.V1.GetSinglePanel)
-		v1.GET("/analytics/panel", h.V1.GetAllPanels)
-		v1.PUT("/analytics/panel", h.V1.UpdatePanel)
-		v1.DELETE("/analytics/panel/:panel_id", h.V1.DeletePanel)
-
-		//app
-		v1.POST("/app", h.V1.CreateApp)
-		v1.GET("/app/:app_id", h.V1.GetAppByID)
-		v1.GET("/app", h.V1.GetAllApps)
-		v1.PUT("/app", h.V1.UpdateApp)
-		v1.DELETE("/app/:app_id", h.V1.DeleteApp)
-
-		// POS_SERVICE
-
-		//appointments
-		v1.GET("/offline_appointment", h.V1.GetAllOfflineAppointments)
-		v1.GET("/booked_appointment", h.V1.GetAllBookedAppointments)
-
-		v1.GET("/offline_appointment/:offline_appointment_id", h.V1.GetSingleOfflineAppointment)
-		v1.GET("/booked_appointment/:booked_appointment_id", h.V1.GetSingleBookedAppointment)
-
-		v1.PUT("/payment_status/:appointment_id", h.V1.UpdateAppointmentPaymentStatus)
-
-		// cashbox
-		v1.GET("/close-cashbox", h.V1.GetCloseCashboxInfo)
-		v1.GET("/open-cashbox", h.V1.GetOpenCashboxInfo)
-
-		// ANALYTICS_SERVICE
-		// CASHBOX TRANSACTION
-		v1.POST("/cashbox_transaction", h.V1.CashboxTransaction)
-		// query
-		v1.POST("/query", h.V1.GetQueryRows)
-
-		// html-template
 		//view
 		v1.POST("/html-template", h.V1.CreateHtmlTemplate)
 		v1.GET("/html-template/:html_template_id", h.V1.GetSingleHtmlTemplate)
@@ -220,13 +151,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1.GET("/event-log", h.V1.GetEventLogs)
 		v1.GET("/event-log/:event_log_id", h.V1.GetEventLogById)
 
-		// custom event
-		v1.POST("/custom-event", h.V1.CreateCustomEvent)
-		v1.GET("/custom-event/:custom_event_id", h.V1.GetCustomEventByID)
-		v1.GET("/custom-event", h.V1.GetAllCustomEvents)
-		v1.PUT("/custom-event", h.V1.UpdateCustomEvent)
-		v1.DELETE("/custom-event/:custom_event_id", h.V1.DeleteCustomEvent)
-
 		// function
 		v1.POST("/function", h.V1.CreateFunction)
 		v1.GET("/function/:function_id", h.V1.GetFunctionByID)
@@ -238,7 +162,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 		v1.POST("/invoke_function", h.V1.InvokeFunction)
 		v1.POST("/invoke_function/:function-path", h.V1.InvokeFunctionByPath)
-		v1.POST("/wayll-payment", h.V1.WayllPayment)
 
 		//cache
 		v1.POST("/cache", h.V1.Cache)
@@ -246,14 +169,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		// Excel Reader
 		v1.GET("/excel/:excel_id", h.V1.ExcelReader)
 		v1.POST("/excel/excel_to_db/:excel_id", h.V1.ExcelToDb)
-
-		v1.GET("/barcode-generator/:table_slug", h.V1.GetNewGeneratedBarCode)
-		v1.GET("/code-generator/:table_slug/:field_id", h.V1.GetNewGeneratedCode)
-
-		// Integration with AlfaLab
-		// v1.POST("/alfalab/directions", h.V1.CreateDirections)
-		// v1.GET("/alfalab/referral", h.V1.GetReferral)
-
 		v1.POST("/export-to-json", h.V1.ExportToJSON)
 		v1.POST("import-from-json", h.V1.ImportFromJSON)
 
@@ -279,31 +194,12 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1.POST("/html-to-pdf", h.V1.ConvertHtmlToPdf)
 		v1.POST("/template-to-html", h.V1.ConvertTemplateToHtml)
 
-		// note
-		v1.POST("/note-folder", h.V1.CreateNoteFolder)
-		v1.GET("/note-folder/:note-folder-id", h.V1.GetSingleNoteFolder)
-		v1.PUT("/note-folder", h.V1.UpdateNoteFolder)
-		v1.DELETE("/note-folder/:note-folder-id", h.V1.DeleteNoteFolder)
-		v1.GET("/note-folder", h.V1.GetListNoteFolder)
-		v1.GET("/note-folder/commits/:note-folder-id", h.V1.GetNoteFolderCommits)
-		v1.POST("/note", h.V1.CreateNote)
-		v1.GET("/note/:note-id", h.V1.GetSingleNote)
-		v1.PUT("/note", h.V1.UpdateNote)
-		v1.DELETE("/note/:note-id", h.V1.DeleteNote)
-		v1.GET("/note", h.V1.GetListNote)
-		v1.GET("/note/commits/:note-id", h.V1.GetNoteCommits)
 		v1.POST("/template-note/users", h.V1.CreateUserTemplate)
 		v1.GET("/template-note/users", h.V1.GetListUserTemplate)
 		v1.PUT("/template-note/users", h.V1.UpdateUserTemplate)
 		v1.DELETE("/template-note/users/:user-permission-id", h.V1.DeleteUserTemplate)
 		v1.POST("/template-note/share", h.V1.CreateSharingToken)
 		v1.PUT("/template-note/share", h.V1.UpdateSharingToken)
-
-		// api-reference
-		v1.GET("/api-reference", h.V1.GetAllApiReferences)
-		v1.GET("/api-reference/:api_reference_id", h.V1.GetApiReferenceByID)
-		v1.GET("/category/:category_id", h.V1.GetApiCategoryByID)
-		v1.GET("/category", h.V1.GetAllCategories)
 
 		v1.GET("/layout", h.V1.GetListLayouts)
 		v1.PUT("/layout", h.V1.UpdateLayout)
@@ -327,25 +223,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1.GET("/table-permission", h.V1.GetTablePermission)
 		v1.PUT("/table-permission", h.V1.UpdateTablePermission)
 
-		//report setting
-		v1.GET("/get-report-setting/:id", h.V1.GetByIdReportSetting)
-		v1.GET("/get-report-setting", h.V1.GetListReportSetting)
-		v1.PUT("/upsert-report-setting", h.V1.UpsertReportSetting)
-		v1.DELETE("/delete-report-setting/:id", h.V1.DeleteReportSetting)
-
-		//dynamic-report
-		v1.POST("/dynamic-report", h.V1.DynamicReport)
-		// v1.GET("/export/dynamic-report/excel/:id", h.V1.ExportDynamicReportExcel) //TODO: should copy from parfume
-
-		//dynamic-report template
-		v1.POST("/save-pivot-template", h.V1.SavePivotTemplate)
-		v1.GET("/get-pivot-template-setting/:id", h.V1.GetByIdPivotTemplate)
-		v1.GET("/get-pivot-template-setting", h.V1.GetListPivotTemplate)
-		v1.PUT("/upsert-pivot-template", h.V1.UpsertPivotTemplate)
-		v1.DELETE("/remove-pivot-template/:id", h.V1.RemovePivotTemplate)
-
-		v1.GET("/dynamic-report-formula", h.V1.DynamicReportFormula)
-
 		v1.POST("/files/folder_upload", h.V1.UploadToFolder)
 		v1.GET("/files/:id", h.V1.GetSingleFile)
 		v1.PUT("/files", h.V1.UpdateFile)
@@ -353,22 +230,59 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1.DELETE("/files/:id", h.V1.DeleteFile)
 		v1.GET("/files", h.V1.GetAllFiles)
 		v1.POST("/files/word-template", h.V1.WordTemplate)
+
+		v1.POST("/language", h.V1.CreateLanguage)
+		v1.GET("/language/:id", h.V1.GetByIdLanguage)
+		v1.GET("/language", h.V1.GetListLanguage)
+		v1.PUT("/language", h.V1.UpdateLanguage)
+		v1.DELETE("/language/:id", h.V1.DeleteLanguage)
+
+		fare := v1.Group("/fare")
+		{
+			fare.POST("", h.V1.CreateFare)
+			fare.GET("", h.V1.GetAllFares)
+			fare.GET("/:id", h.V1.GetFare)
+			fare.PUT("", h.V1.UpdateFare)
+			fare.DELETE("/:id", h.V1.DeleteFare)
+			fare.POST("/calculate-price", h.V1.CalculatePrice)
+
+			fareItem := fare.Group("/item")
+			{
+				fareItem.POST("", h.V1.CreateFareItem)
+				fareItem.GET("", h.V1.GetAllFareItem)
+				fareItem.GET("/:id", h.V1.GetFareItem)
+				fareItem.PUT("", h.V1.UpdateFareItem)
+				fareItem.DELETE("/:id", h.V1.DeleteFareItem)
+			}
+		}
+		transaction := v1.Group("/transaction")
+		{
+			transaction.POST("", h.V1.CreateTransaction)
+			transaction.GET("", h.V1.GetAllTransactions)
+			transaction.GET("/:id", h.V1.GetTransaction)
+			transaction.PUT("", h.V1.UpdateTransaction)
+		}
+		payme := v1.Group("/payme")
+		{
+			payme.POST("/get-verify-code", h.V1.GetVerifyCode)
+			payme.POST("/verify", h.V1.Verify)
+			payme.GET("/card-list", h.V1.GetAllProjectCards)
+			payme.POST("/receipt-pay", h.V1.ReceiptPay)
+			payme.DELETE("/card/:id", h.V1.DeleteProjectCard)
+		}
+		discount := v1.Group("/discounts")
+		{
+			discount.GET("", h.V1.ListDiscounts)
+		}
 	}
+
 	v2 := r.Group("/v2")
 	v2.Use(h.V1.AuthMiddleware(cfg))
 	{
-		// sleep api
-		v2.GET("/sleep-api", h.V1.SleepApi)
-		// custom event
-		v2.POST("/custom-event", h.V1.CreateNewCustomEvent)
-		v2.GET("/custom-event/:custom_event_id", h.V1.GetNewCustomEventByID)
-		v2.GET("/custom-event", h.V1.GetAllNewCustomEvents)
-		v2.PUT("/custom-event", h.V1.UpdateNewCustomEvent)
-		v2.DELETE("/custom-event/:custom_event_id", h.V1.DeleteNewCustomEvent)
 
 		v2.GET("/language-json", h.V1.GetLanguageJson)
 
-		v2.POST("/object/get-list/:table_slug", h.V1.GetListV2)
+		v2.POST("/object/get-list/:collection", h.V1.GetListV2)
 
 		v2.PUT("/update-with/:collection", h.V1.UpdateWithParams)
 
@@ -380,20 +294,19 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	v1Slim := r.Group("/v1")
 	v1Slim.Use(h.V1.SlimAuthMiddleware(cfg))
 	{
-		v1Slim.GET("/object-slim/:table_slug/:object_id", h.V1.GetSingleSlim)
-		v1.GET("/object-slim/get-list/:table_slug", h.V1.GetListSlim)
+		v1Slim.GET("/object-slim/:collection/:object_id", h.V1.GetSingleSlim)
+		v1.GET("/object-slim/get-list/:collection", h.V1.GetListSlim)
 	}
 
 	v2Slim := r.Group("/v2")
 	v2Slim.Use(h.V1.SlimAuthMiddleware(cfg))
 	{
-		v2Slim.GET("/object-slim/get-list/:table_slug", h.V1.GetListSlimV2)
+		v2Slim.GET("/object-slim/get-list/:collection", h.V1.GetListSlimV2)
 	}
 
 	v1Admin := r.Group("/v1")
 	v1Admin.Use(h.V1.AdminAuthMiddleware())
 	{
-
 		// login microfront
 		v1Admin.POST("/login-microfront", h.V1.BindLoginMicroFrontToProject)
 		v1Admin.PUT("/login-microfront", h.V1.UpdateLoginMicroFrontProject)
@@ -404,14 +317,28 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1Admin.GET("/company", h.V1.GetCompanyList)
 		v1Admin.PUT("company/:company_id", h.V1.UpdateCompany)
 		v1Admin.DELETE("/company/:company_id", h.V1.DeleteCompany)
+
 		// project service
 		v1Admin.POST("/company-project", h.V1.CreateCompanyProject)
 		v1Admin.GET("/company-project", h.V1.GetCompanyProjectList)
 		v1Admin.GET("/company-project/:project_id", h.V1.GetCompanyProjectById)
 		v1Admin.PUT("/company-project/:project_id", h.V1.UpdateCompanyProject)
 		v1Admin.DELETE("/company-project/:project_id", h.V1.DeleteCompanyProject)
+
+		company := v1Admin.Group("/companies")
+		{
+			company.GET("", h.V1.ListCompanies)
+			company.POST("", h.V1.CreateCompany)
+			company.GET("/:company_id", h.V1.GetCompanyByID)
+			company.PUT("/:company_id", h.V1.UpdateCompany)
+			company.DELETE("/:company_id", h.V1.DeleteCompany)
+			company.GET("/:company_id/projects", h.V1.ListCompanyProjects)
+			company.POST("/:company_id/projects", h.V1.CreateCompanyProject)
+		}
+
 		// project settings
 		v1Admin.GET("/project/setting", h.V1.GetAllSettings)
+
 		// project resource
 		v1Admin.POST("/company/project/resource", h.V1.AddProjectResource)
 		v1Admin.POST("/company/project/create-resource", h.V1.CreateProjectResource)
@@ -426,6 +353,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1Admin.GET("/company/project/resource-environment/:resource_id", h.V1.GetResourceEnvironment)
 		v1Admin.GET("/company/project/resource-default", h.V1.GetServiceResources)
 		v1Admin.PUT("/company/project/resource-default", h.V1.SetDefaultResource)
+		v1Admin.PATCH("/company/project/attach-fare", h.V1.AttachFareToProject)
 
 		// airbyte
 		v1Admin.GET("/company/airbyte/:id", h.V1.GetByIdAirbyte)
@@ -445,108 +373,12 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1Admin.PUT("/environment", h.V1.UpdateEnvironment)
 		v1Admin.DELETE("/environment/:environment_id", h.V1.DeleteEnvironment)
 
-		// release service
-		v1Admin.POST("/release", h.V1.CreateRelease)
-		v1Admin.GET("/release/:project_id/:version_id", h.V1.GetReleaseByID)
-		v1Admin.GET("/release/:project_id", h.V1.GetAllReleases)
-		v1Admin.PUT("/release/:version_id", h.V1.UpdateRelease)
-		v1Admin.DELETE("/release/:project_id/:version_id", h.V1.DeleteRelease)
-		v1Admin.POST("/release/current", h.V1.SetCurrentRelease)
-		v1Admin.GET("/release/current/:project_id", h.V1.GetCurrentRelease)
-
-		// commit service
-		v1Admin.POST("/commit", h.V1.CreateCommit)
-		v1Admin.GET("/commit/:id", h.V1.GetCommitByID)
-		v1Admin.GET("/commit", h.V1.GetAllCommits)
-
-		// integration service
-		v1Admin.POST("/generate-payze-link", h.V1.GeneratePayzeLink)
-		v1Admin.POST("/payze-save-card", h.V1.PayzeSaveCard)
-
-		//api-reference service
-		v1Admin.POST("/api-reference", h.V1.CreateApiReference)
-		v1Admin.PUT("/api-reference", h.V1.UpdateApiReference)
-		// v1Admin.GET("/api-reference/:api_reference_id", h.V1.GetApiReferenceByID)
-		// v1Admin.GET("/api-reference", h.V1.GetAllApiReferences)
-		v1Admin.DELETE("/api-reference/:project_id/:api_reference_id", h.V1.DeleteApiReference)
-		v1Admin.GET("/api-reference/history/:project_id/:api_reference_id", h.V1.GetApiReferenceChanges)
-		v1Admin.POST("/api-reference/revert/:api_reference_id", h.V1.RevertApiReference)
-		v1Admin.POST("/api-reference/select-versions/:api_reference_id", h.V1.InsertManyVersionForApiReference)
-
-		v1Admin.POST("/category", h.V1.CreateCategory)
-		v1Admin.PUT("/category", h.V1.UpdateCategory)
-		// v1Admin.GET("/category/:category_id", h.V1.GetApiCategoryByID)
-		// v1Admin.GET("/category", h.V1.GetAllCategories)
-		v1Admin.DELETE("/category/:category_id", h.V1.DeleteCategory)
-
 		// function folder
 		v1Admin.POST("/function-folder", h.V1.CreateFunctionFolder)
 		v1Admin.GET("/function-folder/:function_ifolder_d", h.V1.GetFunctionFolderById)
 		v1Admin.GET("/function-folder", h.V1.GetAllFunctionFolder)
 		v1Admin.PUT("/function-folder", h.V1.UpdateFunctionFolder)
 		v1Admin.DELETE("/function-folder/:function_folder_id", h.V1.DeleteFunctionFolder)
-
-		// scenario service
-		v1Admin.POST("/scenario/dag", h.V1.CreateDAG)
-		v1Admin.GET("/scenario/dag/:id", h.V1.GetDAG)
-		v1Admin.GET("/scenario/dag", h.V1.GetAllDAG)
-		v1Admin.PUT("/scenario/dag", h.V1.UpdateDAG)
-		v1Admin.DELETE("/scenario/dag/:id", h.V1.DeleteDAG)
-
-		v1Admin.POST("/scenario/dag-step", h.V1.CreateDagStep)
-		v1Admin.GET("/scenario/dag-step/:id", h.V1.GetDagStep)
-		v1Admin.GET("/scenario/dag-step", h.V1.GetAllDagStep)
-		v1Admin.PUT("/scenario/dag-step", h.V1.UpdateDagStep)
-		v1Admin.DELETE("/scenario/dag-step/:id", h.V1.DeleteDAG)
-
-		v1Admin.POST("/scenario/category", h.V1.CreateCategoryScenario)
-		v1Admin.GET("/scenario/category/:id", h.V1.GetCategoryScenario)
-		v1Admin.GET("/scenario/category", h.V1.GetListCategoryScenario)
-
-		v1Admin.POST("/scenario/run", h.V1.RunScenario)
-		v1Admin.POST("/scenario", h.V1.CreateFullScenario)
-		v1Admin.PUT("/scenario", h.V1.UpdateFullScenario) //--- update means also create but with new commit
-		v1Admin.GET("/scenario/:id/history", h.V1.GetScenarioHistory)
-		v1Admin.PUT("/scenario/:id/select-versions", h.V1.SelectVersionsScenario)
-		v1Admin.POST("/scenario/revert", h.V1.RevertScenario)
-
-		// web page service
-		v1Admin.POST("/webpage-folder", h.V1.CreateWebPageFolder)
-		v1Admin.PUT("/webpage-folder", h.V1.UpdateWebPageFolder)
-		v1Admin.GET("/webpage-folder", h.V1.GetListWebPageFolder)
-		v1Admin.GET("/webpage-folder/:webpage-folder-id", h.V1.GetSingleWebPageFolder)
-		v1Admin.DELETE("/webpage-folder/:webpage-folder-id", h.V1.DeleteWebPageFolder)
-
-		v1Admin.POST("/webpage-app", h.V1.CreateWebPageApp)
-		v1Admin.PUT("/webpage-app", h.V1.UpdateWebPageApp)
-		v1Admin.GET("/webpage-app", h.V1.GetListWebPageApp)
-		v1Admin.GET("/webpage-app/:webpage-app-id", h.V1.GetSingleWebPageApp)
-		v1Admin.DELETE("/webpage-app/:webpage-app-id", h.V1.DeleteWebPageApp)
-
-		v1Admin.POST("/webpageV2", h.V1.CreateWebPageV2)
-		v1Admin.PUT("/webpageV2", h.V1.UpdateWebPageV2)
-		v1Admin.GET("/webpageV2", h.V1.GetListWebPageV2)
-		v1Admin.GET("/webpageV2/:webpage-id", h.V1.GetSingleWebPageV2)
-		v1Admin.DELETE("/webpageV2/:webpage-id", h.V1.DeleteWebPageV2)
-		v1Admin.POST("/webpageV2/select-versions/:webpage-id", h.V1.InsertManyVersionForWebPageService)
-		v1Admin.GET("/webpageV2/:webpage-id/history", h.V1.GetWebPageHistory)
-		v1Admin.POST("/webpageV2/:webpage-id/revert", h.V1.RevertWebPage)
-
-		// notification service
-		v1Admin.POST("/notification/user-fcmtoken", h.V1.CreateUserFCMToken)
-		v1Admin.POST("/notification", h.V1.CreateNotificationUsers)
-		v1Admin.GET("/notification", h.V1.GetAllNotifications)
-		v1Admin.GET("/notification/:id", h.V1.GetNotificationById)
-		v1Admin.GET("/notification/category", h.V1.GetListCategoryNotification)
-		v1Admin.POST("/notification/category", h.V1.CreateCategoryNotification)
-		v1Admin.GET("/notification/category/:id", h.V1.GetCategoryNotification)
-		v1Admin.PUT("/notification/category", h.V1.UpdateCategoryNotification)
-		v1Admin.DELETE("/notification/category/:id", h.V1.DeleteCategoryNotification)
-
-		v1Admin.GET("/table-history/list/:table_id", h.V1.GetListTableHistory)
-		v1Admin.GET("/table-history/:id", h.V1.GetTableHistoryById)
-		v1Admin.PUT("/table-history/revert", h.V1.RevertTableHistory)
-		v1Admin.PUT("/table-history", h.V1.InsetrVersionsIdsToTableHistory)
 
 		v1Admin.POST("/redirect-url", h.V1.CreateRedirectUrl)
 		v1Admin.PUT("/redirect-url", h.V1.UpdateRedirectUrl)
@@ -555,6 +387,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1Admin.DELETE("/redirect-url/:redirect-url-id", h.V1.DeleteRedirectUrl)
 		v1Admin.PUT("/redirect-url/re-order", h.V1.UpdateRedirectUrlOrder)
 	}
+
 	v2Admin := r.Group("/v2")
 	v2Admin.Use(h.V1.AdminAuthMiddleware())
 	v2Admin.POST("/table-folder", h.V1.CreateTableFolder)
@@ -571,29 +404,14 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	}
 
 	{
-		// function
-		v2Admin.POST("/function", h.V1.CreateNewFunction)
-		v2Admin.GET("/function/:function_id", h.V1.GetNewFunctionByID)
-		v2Admin.GET("/function", h.V1.GetAllNewFunctions)
-		v2Admin.PUT("/function", h.V1.UpdateNewFunction)
-		v2Admin.DELETE("/function/:function_id", h.V1.DeleteNewFunction)
-
 		// project resource /rest
-		v2Admin.POST("/company/project/resource", h.V1.AddResourceToProject)
-		v2Admin.PUT("/company/project/resource", h.V1.UpdateProjectResource)
-		v2Admin.GET("/company/project/resource", h.V1.GetListProjectResourceList)
-		v2Admin.GET("/company/project/resource/:id", h.V1.GetSingleProjectResource)
-		v2Admin.DELETE("/company/project/resource/:id", h.V1.DeleteProjectResource)
-
-		v2Admin.POST("/copy-project", h.V1.CopyProjectTemplate)
-
-		functions := v2Admin.Group("functions")
+		projectResource := v2Admin.Group("/company/project/resource")
 		{
-			functions.POST("/micro-frontend", h.V1.CreateMicroFrontEnd)
-			functions.GET("/micro-frontend/:micro-frontend-id", h.V1.GetMicroFrontEndByID)
-			functions.GET("/micro-frontend", h.V1.GetAllMicroFrontEnd)
-			functions.PUT("/micro-frontend", h.V1.UpdateMicroFrontEnd)
-			functions.DELETE("/micro-frontend/:micro-frontend-id", h.V1.DeleteMicroFrontEnd)
+			projectResource.POST("", h.V1.AddResourceToProject)
+			projectResource.PUT("", h.V1.UpdateProjectResource)
+			projectResource.GET("", h.V1.GetListProjectResourceList)
+			projectResource.GET("/:id", h.V1.GetSingleProjectResource)
+			projectResource.DELETE("/:id", h.V1.DeleteProjectResource)
 		}
 	}
 
@@ -604,44 +422,18 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v2Admin.PUT("/docx-template", h.V2.UpdateDocxTemplate)
 		v2Admin.DELETE("/docx-template/:docx-template-id", h.V2.DeleteDocxTemplate)
 		v2Admin.GET("/docx-template", h.V2.GetListDocxTemplate)
-		v2Admin.POST("/docx-template/convert/pdf", h.V2.GenerateDocxToPdf)
 		v2Admin.GET("/docx-template/fields/list", h.V2.GetAllFieldsDocxTemplate)
-	}
-
-	// v3 for ucode version 2
-	v3 := r.Group("/v3")
-	v3.Use(h.V1.AdminAuthMiddleware())
-	{
-
-		// // web pages
-		v3.POST("/web_pages", h.V1.CreateWebPage)
-		v3.GET("/web_pages/:guid", h.V1.GetWebPagesById)
-		v3.GET("/web_pages", h.V1.GetWebPagesList)
-		v3.PUT("/web_pages/:guid", h.V1.UpdateWebPage)
-		v3.DELETE("/web_pages/:guid", h.V1.DeleteWebPage)
-
-		v3.POST("/chat", h.V1.CreatChat)
-		v3.GET("/chat", h.V1.GetChatList)
-		v3.GET("/chat/:id", h.V1.GetChatByChatID)
-
-		v3.POST("/bot", h.V1.CreateBot)
-		v3.GET("/bot/:id", h.V1.GetBotTokenByBotID)
-		v3.GET("/bot", h.V1.GetBotTokenList)
-		v3.PUT("/bot", h.V1.UpdateBotToken)
-		v3.DELETE("/bot/:id", h.V1.DeleteBotToken)
 	}
 
 	v2Version := r.Group("/v2")
 	v2Version.Use(h.V2.AuthMiddleware())
 	{
-		v2Version.POST("/csv/:table_slug/download", h.V2.GetListInCSV)
-
+		v2Version.POST("/csv/:collection/download", h.V2.GetListInCSV)
 		v2Version.POST("/send-to-gpt", h.V2.SendToGpt)
 
 		// collections group
 		v2Collection := v2Version.Group("/collections")
 		{
-
 			// error messages
 			v2Collection.GET("/:collection/error_messages", h.V2.GetAllErrorMessage)
 			v2Collection.POST("/:collection/error_messages", h.V2.CreateErrorMessage)
@@ -692,6 +484,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			v2Items.PUT("/many-to-many", h.V2.AppendManyToMany)
 			v2Items.DELETE("/many-to-many", h.V2.DeleteManyToMany)
 			v2Items.PUT("/update-row/:collection", h.V2.UpdateRowOrder)
+			v2Items.POST("/:collection/tree", h.V2.AgTree)
 		}
 
 		// menu group
@@ -732,23 +525,23 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		// fields
 		v2Fields := v2Version.Group("/fields")
 		{
-			v2Fields.GET("/:collection", h.V2.GetAllFields)
 			v2Fields.POST("/:collection", h.V2.CreateField)
+			v2Fields.GET("/:collection", h.V2.GetAllFields)
+			v2Fields.GET("/:collection/with-relations", h.V2.FieldsWithPermissions)
 			v2Fields.PUT("/:collection", h.V2.UpdateField)
 			v2Fields.PUT("/:collection/update-search", h.V2.UpdateSearch)
 			v2Fields.DELETE("/:collection/:id", h.V2.DeleteField)
-			v2Fields.GET("/:collection/with-relations", h.V2.FieldsWithPermissions)
 		}
 
 		// relations
 		v2Relations := v2Version.Group("/relations")
 		{
+			v2Relations.POST("/:collection", h.V2.CreateRelation)
 			v2Relations.GET("/:collection/:id", h.V2.GetByIdRelation)
 			v2Relations.GET("/:collection", h.V2.GetAllRelations)
-			v2Relations.POST("/:collection", h.V2.CreateRelation)
+			v2Relations.GET("/:collection/cascading", h.V2.GetRelationCascading)
 			v2Relations.PUT("/:collection", h.V2.UpdateRelation)
 			v2Relations.DELETE("/:collection/:id", h.V2.DeleteRelation)
-			v2Relations.GET("/:collection/cascading", h.V2.GetRelationCascading)
 		}
 
 		// utils
@@ -780,16 +573,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			v2Files.GET("", h.V2.GetAllFiles)
 		}
 
-		v2Github := v2Version.Group("/github")
-		{
-			v2Github.POST("/login", h.V2.GithubLogin)
-		}
-
-		v2Webhook := v2Version.Group("/webhook")
-		{
-			v2Webhook.POST("/create", h.V2.CreateWebhook)
-		}
-
 		v2Version := v2Version.Group("/version")
 		{
 			v2Version.POST("", h.V2.CreateVersion)
@@ -804,9 +587,61 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		}
 	}
 
-	r.Any("/api/*any", h.V1.AuthMiddleware(cfg), proxyMiddleware(r, &h), h.V1.Proxy)
+	github := r.Group("/v1/github")
+	{
+		github.GET("/login", h.V2.GithubLogin)
+		github.GET("/user", h.V2.GithubGetUser)
+		github.GET("/repos", h.V2.GithubGetRepos)
+		github.GET("/branches", h.V2.GithubGetBranches)
+	}
 
-	// r.Any("/x-api/*any", h.V1.RedirectAuthMiddleware(cfg), proxyMiddleware(r, &h), h.V1.Proxy)
+	gitlab := r.Group("/v1/gitlab")
+	{
+		gitlab.GET("/login", h.V2.GitlabLogin)
+		gitlab.GET("/user", h.V2.GitlabGetUser)
+		gitlab.GET("/repos", h.V2.GitlabGetRepos)
+		gitlab.GET("/branches", h.V2.GitlabGetBranches)
+	}
+
+	proxyApi := r.Group("/v2")
+
+	proxyFunction := proxyApi.Group("/function")
+	{
+		proxyFunction.POST("", h.V1.CreateNewFunction)
+		proxyFunction.GET("/:function_id", h.V1.GetNewFunctionByID)
+		proxyFunction.GET("", h.V1.GetAllNewFunctions)
+		proxyFunction.PUT("", h.V1.UpdateNewFunction)
+		proxyFunction.DELETE("/:function_id", h.V1.DeleteNewFunction)
+
+	}
+
+	proxyFunctions := proxyApi.Group("functions")
+	{
+		proxyFunctions.POST("/micro-frontend", h.V1.CreateMicroFrontEnd)
+		proxyFunctions.GET("/micro-frontend/:micro-frontend-id", h.V1.GetMicroFrontEndByID)
+		proxyFunctions.GET("/micro-frontend", h.V1.GetAllMicroFrontEnd)
+		proxyFunctions.PUT("/micro-frontend", h.V1.UpdateMicroFrontEnd)
+		proxyFunctions.DELETE("/micro-frontend/:micro-frontend-id", h.V1.DeleteMicroFrontEnd)
+	}
+
+	proxyGrafana := proxyApi.Group("/grafana")
+	{
+		proxyGrafana.POST("/loki", h.V2.GetGrafanaFunctionLogs)
+		proxyGrafana.GET("/function", h.V2.GetGrafanaFunctionList)
+	}
+
+	{
+		proxyApi.POST("/invoke_function/:function-path", h.V2.InvokeFunctionByPath)
+
+		v2Webhook := proxyApi.Group("/webhook")
+		{
+			v2Webhook.POST("/create", h.V2.CreateWebhook)
+			v2Webhook.POST("/handle", h.V2.HandleWebhook)
+
+		}
+	}
+
+	r.Any("/api/*any", h.V1.AuthMiddleware(cfg), proxyMiddleware(r, &h), h.V1.Proxy)
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
@@ -816,8 +651,6 @@ func customCORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Credentials", "true")
-		// c.Header("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, PATCH, DELETE")
-		// c.Header("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, Origin, Cache-Control, X-Requested-With, Resource-Id, Environment-Id, Platform-Type, X-API-KEY, Project-Id")
 		c.Header("Access-Control-Max-Age", "3600")
 		c.Header("Access-Control-Allow-Methods", "*")
 		c.Header("Access-Control-Allow-Headers", "*")
@@ -831,40 +664,10 @@ func customCORSMiddleware() gin.HandlerFunc {
 	}
 }
 
-func MaxAllowed(n int) gin.HandlerFunc {
-	var countReq int64
-	sem := make(chan struct{}, n)
-	acquire := func() {
-		sem <- struct{}{}
-		countReq++
-	}
-
-	release := func() {
-		select {
-		case <-sem:
-		default:
-		}
-		countReq--
-	}
-
-	return func(c *gin.Context) {
-		go func() {
-			acquire()       // before request
-			defer release() // after request
-
-			c.Set("sem", sem)
-			c.Set("count_request", countReq)
-		}()
-
-		c.Next()
-	}
-}
-
 func proxyMiddleware(r *gin.Engine, h *handlers.Handler) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var (
-			err error
-		)
+		var err error
+
 		c, err = RedirectUrl(c, h)
 		if err == nil {
 			r.HandleContext(c)
@@ -874,7 +677,8 @@ func proxyMiddleware(r *gin.Engine, h *handlers.Handler) gin.HandlerFunc {
 }
 
 func RedirectUrl(c *gin.Context, h *handlers.Handler) (*gin.Context, error) {
-	path := c.Request.URL.Path
+	var path = c.Request.URL.Path
+
 	projectId, ok := c.Get("project_id")
 	if !ok {
 		return c, errors.New("something went wrong")
@@ -886,13 +690,12 @@ func RedirectUrl(c *gin.Context, h *handlers.Handler) (*gin.Context, error) {
 	}
 
 	c.Request.Header.Add("prev_path", path)
-	data := helper.MatchingData{
+	var data = helper.MatchingData{
 		ProjectId: projectId.(string),
 		EnvId:     envId.(string),
 		Path:      path,
 	}
 
-	// companyRedirectGetListTime := time.Now()
 	res, err := h.V1.CompanyRedirectGetList(data, h.GetCompanyService(c))
 	if err != nil {
 		return c, errors.New("cant change")
@@ -921,6 +724,8 @@ func RedirectUrl(c *gin.Context, h *handlers.Handler) (*gin.Context, error) {
 	if err != nil {
 		return c, errors.New("something went wrong")
 	}
+
 	c.Request.Header.Add("auth", string(auth))
+
 	return c, nil
 }

@@ -569,7 +569,6 @@ func (h *HandlerV2) UpdateFile(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) DeleteFile(c *gin.Context) {
-
 	id := c.Param("id")
 
 	projectId, ok := c.Get("project_id")
@@ -598,11 +597,7 @@ func (h *HandlerV2) DeleteFile(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return

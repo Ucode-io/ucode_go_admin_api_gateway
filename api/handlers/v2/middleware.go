@@ -5,18 +5,13 @@ import (
 	"net/http"
 	"strings"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
-	"ucode/ucode_go_api_gateway/genproto/company_service"
+	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 
 	"ucode/ucode_go_api_gateway/api/status_http"
 
 	"github.com/gin-gonic/gin"
 )
-
-// const (
-// 	SUPERADMIN_HOST string = "test.admin.u-code.io"
-// 	CLIENT_HOST     string = "test.app.u-code.io"
-// )
 
 func (h *HandlerV2) NodeMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -44,7 +39,6 @@ func (h *HandlerV2) AuthMiddleware() gin.HandlerFunc {
 		case "Bearer":
 			res, ok = h.hasAccess(c)
 			if !ok {
-				h.log.Error("---ERR->AuthMiddleware->hasNotAccess-->")
 				c.Abort()
 				return
 			}
@@ -99,7 +93,7 @@ func (h *HandlerV2) AuthMiddleware() gin.HandlerFunc {
 
 			resource, err := h.companyServices.Resource().GetResourceByEnvID(
 				c.Request.Context(),
-				&company_service.GetResourceByEnvIDRequest{
+				&pb.GetResourceByEnvIDRequest{
 					EnvId: apikeys.GetEnvironmentId(),
 				},
 			)

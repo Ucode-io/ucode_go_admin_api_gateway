@@ -70,7 +70,7 @@ func (h *HandlerV2) GetListInCSV(c *gin.Context) {
 	resp, err := services.GoObjectBuilderService().CSV().GetListInCSV(
 		context.Background(),
 		&nb.CommonMessage{
-			TableSlug: c.Param("table_slug"),
+			TableSlug: c.Param("collection"),
 			Data:      structData,
 			ProjectId: resource.ResourceEnvironmentId,
 		},

@@ -1,9 +1,12 @@
 package v2
 
 import (
+	"bufio"
 	"context"
 	"encoding/json"
 	"log"
+	"net/http"
+	"net/url"
 	"strconv"
 	"time"
 	"ucode/ucode_go_api_gateway/api/models"
@@ -11,7 +14,7 @@ import (
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
-	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
+	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
 	"ucode/ucode_go_api_gateway/services"
@@ -19,6 +22,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type HandlerV2 struct {
@@ -85,6 +90,39 @@ func (h *HandlerV2) handleResponse(c *gin.Context, status status_http.Status, da
 	})
 }
 
+func (h *HandlerV2) handleError(c *gin.Context, statusHttp status_http.Status, err error) {
+	st, _ := status.FromError(err)
+	if statusHttp.Status == status_http.BadRequest.Status {
+		c.JSON(http.StatusInternalServerError, status_http.Response{
+			Status:        statusHttp.Status,
+			Description:   st.String(),
+			Data:          "Invalid JSON",
+			CustomMessage: statusHttp.CustomMessage,
+		})
+	} else if st.Code() == codes.AlreadyExists {
+		c.JSON(http.StatusInternalServerError, status_http.Response{
+			Status:        statusHttp.Status,
+			Description:   st.String(),
+			Data:          "This slug already exists. Please choose a unique one.",
+			CustomMessage: statusHttp.CustomMessage,
+		})
+	} else if st.Code() == codes.InvalidArgument {
+		c.JSON(http.StatusInternalServerError, status_http.Response{
+			Status:        statusHttp.Status,
+			Description:   st.String(),
+			Data:          "Required data is not provided.",
+			CustomMessage: statusHttp.CustomMessage,
+		})
+	} else if st.Err() != nil {
+		c.JSON(http.StatusInternalServerError, status_http.Response{
+			Status:        statusHttp.Status,
+			Description:   st.String(),
+			Data:          st.Message(),
+			CustomMessage: statusHttp.CustomMessage,
+		})
+	}
+}
+
 func (h *HandlerV2) getOffsetParam(c *gin.Context) (offset int, err error) {
 	offsetStr := c.DefaultQuery("offset", h.baseConf.DefaultOffset)
 	return strconv.Atoi(offsetStr)
@@ -135,7 +173,7 @@ func (h *HandlerV2) versionHistory(req *models.CreateVersionHistoryRequest) erro
 
 	_, err := req.Services.GetBuilderServiceByType(req.NodeType).VersionHistory().Create(
 		context.Background(),
-		&object_builder_service.CreateVersionHistoryRequest{
+		&obs.CreateVersionHistoryRequest{
 			Id:                uuid.NewString(),
 			ProjectId:         req.ProjectId,
 			ActionSource:      req.ActionSource,
@@ -232,4 +270,37 @@ func (h *HandlerV2) versionHistoryGo(c *gin.Context, req *models.CreateVersionHi
 		return err
 	}
 	return nil
+}
+
+func (h *HandlerV2) MakeProxy(c *gin.Context, proxyUrl, path string) (err error) {
+	req := c.Request
+
+	proxy, err := url.Parse(proxyUrl)
+	if err != nil {
+		h.log.Error("error in parse addr: %v", logger.Error(err))
+		c.String(http.StatusInternalServerError, "error")
+		return
+	}
+
+	req.URL.Scheme = proxy.Scheme
+	req.URL.Host = proxy.Host
+	req.URL.Path = path
+	transport := http.DefaultTransport
+
+	resp, err := transport.RoundTrip(req)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
+	for k, vv := range resp.Header {
+		for _, v := range vv {
+			c.Header(k, v)
+		}
+	}
+	defer resp.Body.Close()
+
+	c.Status(resp.StatusCode)
+	_, _ = bufio.NewReader(resp.Body).WriteTo(c.Writer)
+	return
 }

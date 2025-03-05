@@ -2,7 +2,6 @@ package v2
 
 import (
 	"context"
-	"errors"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
@@ -30,12 +29,9 @@ import (
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) CreateVersion(c *gin.Context) {
-	var (
-		version obs.CreateVersionRequest
-	)
+	var version obs.CreateVersionRequest
 
-	err := c.ShouldBindJSON(&version)
-	if err != nil {
+	if err := c.ShouldBindJSON(&version); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -48,16 +44,14 @@ func (h *HandlerV2) CreateVersion(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -68,19 +62,14 @@ func (h *HandlerV2) CreateVersion(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
 	info, err := h.authService.User().GetUserByID(
-		context.Background(),
-		&auth_service.UserPrimaryKey{
+		context.Background(), &auth_service.UserPrimaryKey{
 			Id: userId.(string),
 		},
 	)
@@ -92,50 +81,24 @@ func (h *HandlerV2) CreateVersion(c *gin.Context) {
 		}
 	}
 
-	// var (
-	// 	logReq = &models.CreateVersionHistoryRequest{
-	// 		Services:     services,
-	// 		NodeType:     resource.NodeType,
-	// 		ProjectId:    resource.ResourceEnvironmentId,
-	// 		ActionSource: "VERSION",
-	// 		ActionType:   "CREATE VERSION",
-	// 		UserInfo:     cast.ToString(userId),
-	// 		Request:      &version,
-	// 		TableSlug:    "version",
-	// 	}
-	// )
-
-	// defer func() {
-	// 	if err != nil {
-	// 		logReq.Response = err.Error()
-	// 		h.handleResponse(c, status_http.GRPCError, err.Error())
-	// 	} else {
-	// 		logReq.Current = resp
-	// 		logReq.Response = resp
-	// 		h.handleResponse(c, status_http.Created, resp)
-	// 	}
-	// 	go h.versionHistory( logReq)
-	// }()
-
 	version.ProjectId = resource.ResourceEnvironmentId
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		var resp *obs.Version
 
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Version().Create(
-			context.Background(),
-			&version,
+			c.Request.Context(), &version,
 		)
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
+
 		h.handleResponse(c, status_http.Created, resp)
 	case pb.ResourceType_POSTGRESQL:
 		var resp *nb.Version
 		resp, err = services.GoObjectBuilderService().Version().Create(
-			context.Background(),
-			&nb.CreateVersionRequest{
+			c.Request.Context(), &nb.CreateVersionRequest{
 				Name:          version.Name,
 				Description:   version.Description,
 				IsCurrent:     version.IsCurrent,
@@ -167,10 +130,8 @@ func (h *HandlerV2) CreateVersion(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) GetVersionList(c *gin.Context) {
+	var resp *obs.GetVersionListResponse
 
-	var (
-		resp *obs.GetVersionListResponse
-	)
 	offset, err := h.getOffsetParam(c)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
@@ -198,14 +159,12 @@ func (h *HandlerV2) GetVersionList(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -219,8 +178,7 @@ func (h *HandlerV2) GetVersionList(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Version().GetList(
-			context.Background(),
-			&obs.GetVersionListRequest{
+			c.Request.Context(), &obs.GetVersionListRequest{
 				ProjectId: resource.ResourceEnvironmentId,
 				Offset:    int32(offset),
 				Limit:     int32(limit),
@@ -233,8 +191,7 @@ func (h *HandlerV2) GetVersionList(c *gin.Context) {
 		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().Version().GetList(
-			context.Background(),
-			&nb.GetVersionListRequest{
+			c.Request.Context(), &nb.GetVersionListRequest{
 				ProjectId: resource.ResourceEnvironmentId,
 				Offset:    int32(offset),
 				Limit:     int32(limit),
@@ -244,6 +201,7 @@ func (h *HandlerV2) GetVersionList(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
+
 		h.handleResponse(c, status_http.OK, resp)
 	}
 }
@@ -267,8 +225,7 @@ func (h *HandlerV2) UpdateVersion(c *gin.Context) {
 		resp    *obs.Version
 	)
 
-	err := c.ShouldBindJSON(&version)
-	if err != nil {
+	if err := c.ShouldBindJSON(&version); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -288,14 +245,12 @@ func (h *HandlerV2) UpdateVersion(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -330,7 +285,6 @@ func (h *HandlerV2) UpdateVersion(c *gin.Context) {
 		} else {
 			logReq.Response = resp
 			logReq.Current = resp
-			// h.handleResponse(c, status_http.OK, resp)
 		}
 		go h.versionHistory(logReq)
 	}()
@@ -340,8 +294,7 @@ func (h *HandlerV2) UpdateVersion(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		_, err = services.GetBuilderServiceByType(resource.NodeType).Version().Update(
-			context.Background(),
-			&version,
+			c.Request.Context(), &version,
 		)
 
 		if err != nil {
@@ -350,8 +303,7 @@ func (h *HandlerV2) UpdateVersion(c *gin.Context) {
 		}
 	case pb.ResourceType_POSTGRESQL:
 		_, err = services.GoObjectBuilderService().Version().Update(
-			context.Background(),
-			&nb.Version{
+			c.Request.Context(), &nb.Version{
 				Id:            version.Id,
 				Name:          version.Name,
 				Description:   version.Description,
@@ -385,7 +337,6 @@ func (h *HandlerV2) UpdateVersion(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) PublishVersion(c *gin.Context) {
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -448,8 +399,7 @@ func (h *HandlerV2) PublishVersionMongo(c *gin.Context) {
 	userId, _ := c.Get("user_id")
 
 	currentResource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -463,11 +413,7 @@ func (h *HandlerV2) PublishVersionMongo(c *gin.Context) {
 	currentNodeType := currentResource.NodeType
 	currentResourceType := currentResource.ResourceType
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		currentResource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), currentResource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -490,19 +436,14 @@ func (h *HandlerV2) PublishVersionMongo(c *gin.Context) {
 		publishedNodeType := publishedResource.NodeType
 		resourceType := publishedResource.ResourceType
 
-		publishedServices, err := h.GetProjectSrvc(
-			c.Request.Context(),
-			projectId.(string),
-			publishedResource.NodeType,
-		)
+		publishedServices, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), publishedResource.NodeType)
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 
 		publishedEnvLiveVersion, _ := publishedServices.GetBuilderServiceByType(publishedNodeType).Version().GetSingle(
-			c.Request.Context(),
-			&obs.VersionPrimaryKey{
+			c.Request.Context(), &obs.VersionPrimaryKey{
 				ProjectId: publishedResource.ResourceEnvironmentId,
 				Live:      true,
 			},
@@ -518,8 +459,7 @@ func (h *HandlerV2) PublishVersionMongo(c *gin.Context) {
 		}
 
 		versions, err := services.GetBuilderServiceByType(currentNodeType).Version().GetList(
-			c.Request.Context(),
-			&obs.GetVersionListRequest{
+			c.Request.Context(), &obs.GetVersionListRequest{
 				ProjectId: currentResource.ResourceEnvironmentId,
 				FromDate:  fromDate,
 				ToDate:    toDate,
@@ -535,20 +475,14 @@ func (h *HandlerV2) PublishVersionMongo(c *gin.Context) {
 		}
 
 		_, _ = publishedServices.GetBuilderServiceByType(publishedNodeType).Version().CreateMany(
-			c.Request.Context(),
-			&obs.CreateManyVersionRequest{
+			c.Request.Context(), &obs.CreateManyVersionRequest{
 				Versions:  versions.Versions,
 				ProjectId: publishedResource.ResourceEnvironmentId,
 			},
 		)
-		// if err != nil {
-		// 	h.handleResponse(c, status_http.GRPCError, err.Error())
-		// 	return
-		// }
 
 		activityLogs, err := services.GetBuilderServiceByType(currentNodeType).VersionHistory().GatAll(
-			c.Request.Context(),
-			&obs.GetAllRquest{
+			c.Request.Context(), &obs.GetAllRquest{
 				ProjectId:  currentResource.ResourceEnvironmentId,
 				VersionIds: versionIDs,
 				OrderBy:    upOrDown,

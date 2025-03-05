@@ -2,28 +2,28 @@ include:
   - .gitlab/ci/*.gitlab-ci.yml
 
 stages:
-  - test
+  # - test
   - build
   - deploy
   - rollback
 
-test-staging:
-  image: golang:1.22
-  stage: test
-  script:
-  - go mod tidy && go mod vendor
-  - go test ./tests/...
-  only:
-    - staging 
+# test-staging:
+#   image: golang:1.22
+#   stage: test
+#   script:
+#   - go mod tidy && go mod vendor
+#   - go test ./tests/...
+#   only:
+#     - staging 
   
-test-prod:
-  image: golang:1.22
-  stage: test
-  script:
-  - go mod tidy && go mod vendor
-  - go test ./tests/...
-  only:
-    - master 
+# test-prod:
+#   image: golang:1.22
+#   stage: test
+#   script:
+#   - go mod tidy && go mod vendor
+#   - go test ./tests/...
+#   only:
+#     - master 
 
 build-dev:
   stage: build

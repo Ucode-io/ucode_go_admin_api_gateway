@@ -1,31 +1,22 @@
 package models
 
-type CreateWebhook struct {
-	Username      string `json:"username" binding:"required"`
-	RepoName      string `json:"repo_name" binding:"required"`
-	Branch        string `json:"branch"`
-	FrameworkType string `json:"framework_type"`
-	GithubToken   string `json:"github_token"`
-	FunctionType  string `json:"type"`
-	Resource      string `json:"resource_id"`
-	Name          string `json:"provided_name"`
-}
+type (
+	GithubLogin struct {
+		Code string `json:"code"`
+	}
 
-type GithubLogin struct {
-	Code string `json:"code"`
-}
+	PipelineLogRequest struct {
+		RepoId string `json:"repo_id"`
+	}
 
-type PipelineLogRequest struct {
-	RepoId string `json:"repo_id"`
-}
+	PipelineLogResponse struct {
+		JobName string `json:"job_name"`
+		Log     string `json:"log"`
+	}
 
-type PipelineLogResponse struct {
-	JobName string `json:"job_name"`
-	Log     string `json:"log"`
-}
-
-type Job struct {
-	Id     int    `json:"id"`
-	Name   string `json:"name"`
-	Status string `json:"status"`
-}
+	Job struct {
+		Id     int    `json:"id"`
+		Name   string `json:"name"`
+		Status string `json:"status"`
+	}
+)

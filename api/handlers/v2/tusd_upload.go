@@ -5,31 +5,16 @@ import (
 
 	//"ucode/ucode_go_api_gateway/api/models"
 
+	_ "ucode/ucode_go_api_gateway/api/status_http"
+
 	"github.com/aws/aws-sdk-go/aws"
 	awscredentials "github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	tusd "github.com/tus/tusd/pkg/handler"
 	"github.com/tus/tusd/pkg/s3store"
-	_ "ucode/ucode_go_api_gateway/api/status_http"
 )
 
-// UploadFile godoc
-// @Security ApiKeyAuth
-// @ID v2_upload_file
-// @Router /v2/upload-file/{collection}/{id} [POST]
-// @Summary Upload file
-// @Description Upload file
-// @Tags file
-// @Accept multipart/form-data
-// @Produce json
-// @Param file formData file true "file"
-// @Param collection path string true "collection"
-// @Param id path string true "id"
-// @Param tags query string false "tags"
-// @Success 200 {object} status_http.Response{data=Path} "Path"
-// @Response 400 {object} status_http.Response{data=string} "Bad Request"
-// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) MovieUpload() *tusd.Handler {
 	ResourceEnvironmentId := "75fd774f-f048-4658-9244-4be214ce293c"
 	//defaultBucket := "ucode"

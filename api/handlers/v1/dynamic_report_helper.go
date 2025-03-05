@@ -175,9 +175,6 @@ func (h *HandlerV1) DynamicReportHelper(requestData NewRequestBody, services ser
 		columnTableFields []interface{}
 		columnExists      bool
 
-		// columnDateSlugs          []string
-		// columnLookupMapInterface = []interface{}{}
-
 		valueObjects = make(map[string]interface{}, 0)
 
 		defaultTableFields []interface{}
@@ -959,7 +956,6 @@ func DetermineFormula(rowsLength, orderNumber int, aggregateFormula string) stri
 }
 
 func MongoAggregation(valueAs string) string {
-
 	switch valueAs {
 	case SUM:
 		return "$sum"

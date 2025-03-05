@@ -4,6 +4,7 @@ import (
 	"context"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
+	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -81,6 +82,15 @@ func (h *HandlerV1) GetCompanyProjectList(c *gin.Context) {
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
+	}
+	if len(userProjects.Companies) == 0 {
+		userProjects, err = h.authService.User().GetUserProjects(context.Background(), &auth_service.UserPrimaryKey{
+			Id: authInfo.UserIdAuth,
+		})
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	var projectIds []string
@@ -190,4 +200,85 @@ func (h *HandlerV1) DeleteCompanyProject(c *gin.Context) {
 	}
 
 	h.handleResponse(c, status_http.NoContent, resp)
+}
+
+// GetCompanyProjectList godoc
+// @Security ApiKeyAuth
+// @ID get_companies_id_projects_list
+// @Router /v1/companies/{company_id}/projects [GET]
+// @Summary Get all projects
+// @Description Get all projects
+// @Tags Company Project
+// @Accept json
+// @Produce json
+// @Param company_id path string true "company_id"
+// @Param filters query company_service.GetProjectListRequest true "filters"
+// @Success 200 {object} status_http.Response{data=company_service.GetProjectListResponse} "Company data"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *HandlerV1) ListCompanyProjects(c *gin.Context) {
+	companyId := c.Param("company_id")
+	if companyId == "" {
+		h.handleResponse(c, status_http.BadRequest, "company_id is required")
+		return
+	}
+
+	limit, err := h.getLimitParam(c)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
+	offset, err := h.getOffsetParam(c)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
+	resp, err := h.companyServices.Project().GetList(c.Request.Context(),
+		&company_service.GetProjectListRequest{
+			Limit:     int32(limit),
+			Offset:    int32(offset),
+			Search:    c.Query("search"),
+			CompanyId: companyId,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.OK, resp)
+}
+
+func (h *HandlerV1) AttachFareToProject(c *gin.Context) {
+	var (
+		data pb.AttachFareRequest
+	)
+
+	if err := c.ShouldBindJSON(&data); err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+	data.ProjectId = projectId.(string)
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id")
+		return
+	}
+
+	resp, err := h.companyServices.Project().AttachFare(c.Request.Context(), &data)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.OK, resp)
 }

@@ -3,122 +3,81 @@ package v2
 import (
 	"context"
 	"encoding/json"
-	"errors"
-	"time"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
+	"ucode/ucode_go_api_gateway/config"
+	"ucode/ucode_go_api_gateway/function"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
-	"ucode/ucode_go_api_gateway/pkg/logger"
-	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
 )
 
-type DoInvokeFuntionStruct struct {
-	CustomEvents           []*obs.CustomEvent
-	IDs                    []string
-	TableSlug              string
-	ObjectData             map[string]interface{}
-	Method                 string
-	ActionType             string
-	ObjectDataBeforeUpdate map[string]interface{}
-}
-
-func GetListCustomEvents(tableSlug, roleId, method string, c *gin.Context, h *HandlerV2) (beforeEvents, afterEvents []*obs.CustomEvent, err error) {
+func GetListCustomEvents(request models.GetListCustomEventsStruct, c *gin.Context, h *HandlerV2) (beforeEvents, afterEvents []*obs.CustomEvent, err error) {
 	var (
 		res   *obs.GetCustomEventsListResponse
 		gores *nb.GetCustomEventsListResponse
 		body  []byte
 	)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
-	defer cancel()
-
 	namespace := c.GetString("namespace")
+
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
 
-	projectId, ok := c.Get("project_id")
-	if !ok || !util.IsValidUUID(projectId.(string)) {
-		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
-		return
-	}
-
-	environmentId, ok := c.Get("environment_id")
-	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
-		return
-	}
-
-	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId.(string),
-			EnvironmentId: environmentId.(string),
-			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
-	switch resource.ResourceType {
+	switch request.Resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		res, err = services.GetBuilderServiceByType(resource.NodeType).CustomEvent().GetList(
-			ctx,
-			&obs.GetCustomEventsListRequest{
-				TableSlug: tableSlug,
-				Method:    method,
-				RoleId:    roleId,
-				ProjectId: resource.ResourceEnvironmentId,
+		res, err = services.GetBuilderServiceByType(request.Resource.NodeType).CustomEvent().GetList(
+			c.Request.Context(), &obs.GetCustomEventsListRequest{
+				TableSlug: request.TableSlug,
+				Method:    request.Method,
+				RoleId:    request.RoleId,
+				ProjectId: request.Resource.ResourceEnvironmentId,
 			},
 		)
 
 		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
 		gores, err = services.GoObjectBuilderService().CustomEvent().GetList(
-			ctx,
-			&nb.GetCustomEventsListRequest{
-				TableSlug: tableSlug,
-				Method:    method,
-				RoleId:    roleId,
-				ProjectId: resource.ResourceEnvironmentId,
+			c.Request.Context(), &nb.GetCustomEventsListRequest{
+				TableSlug: request.TableSlug,
+				Method:    request.Method,
+				RoleId:    request.RoleId,
+				ProjectId: request.Resource.ResourceEnvironmentId,
 			},
 		)
 
 		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 
 		body, err = json.Marshal(gores)
 		if err != nil {
+			h.handleResponse(c, status_http.InternalServerError, err.Error())
 			return
 		}
 
 		if err = json.Unmarshal(body, &res); err != nil {
+			h.handleResponse(c, status_http.InternalServerError, err.Error())
 			return
 		}
 	}
 
 	if res != nil {
 		for _, customEvent := range res.CustomEvents {
-			if err != nil {
-				return nil, nil, err
-			}
-			if customEvent.ActionType == "before" {
+			if customEvent.ActionType == config.BEFORE {
 				beforeEvents = append(beforeEvents, customEvent)
-			} else if customEvent.ActionType == "after" {
+			} else if customEvent.ActionType == config.AFTER {
 				afterEvents = append(afterEvents, customEvent)
 			}
 		}
@@ -126,40 +85,13 @@ func GetListCustomEvents(tableSlug, roleId, method string, c *gin.Context, h *Ha
 	return
 }
 
-func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *HandlerV2) (functionName string, err error) {
-	projectId, ok := c.Get("project_id")
-	if !ok || !util.IsValidUUID(projectId.(string)) {
-		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
-		return
-	}
-
-	environmentId, ok := c.Get("environment_id")
-	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
-		return
-	}
-
-	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId.(string),
-			EnvironmentId: environmentId.(string),
-			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
+func DoInvokeFuntion(request models.DoInvokeFuntionStruct, c *gin.Context, h *HandlerV2) (functionName string, err error) {
 	apiKeys, err := h.authService.ApiKey().GetList(context.Background(), &auth_service.GetListReq{
-		EnvironmentId: environmentId.(string),
-		ProjectId:     resource.ProjectId,
+		EnvironmentId: request.Resource.EnvironmentId,
+		ProjectId:     request.Resource.ProjectId,
 	})
 	if err != nil {
-		err = errors.New("error getting api keys by environment id")
-		h.handleResponse(c, status_http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, "error getting api keys by environment id")
 		return
 	}
 
@@ -167,17 +99,22 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *HandlerV2
 	if len(apiKeys.Data) > 0 {
 		appId = apiKeys.Data[0].AppId
 	} else {
-		err = errors.New("error no app id for this environment")
-		h.handleResponse(c, status_http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, "error no app id for this environment")
 		return
 	}
+
 	authInfo, _ := h.GetAuthInfo(c)
 	for _, customEvent := range request.CustomEvents {
-		//this is new invoke function request for befor and after actions
-		var invokeFunction models.NewInvokeFunctionRequest
+		var (
+			path           = customEvent.GetFunctions()[0].GetPath()
+			name           = customEvent.GetFunctions()[0].GetName()
+			requestType    = customEvent.GetFunctions()[0].GetRequestType()
+			invokeFunction models.NewInvokeFunctionRequest
+		)
+
 		data, err := helper.ConvertStructToResponse(customEvent.Attributes)
 		if err != nil {
-			return customEvent.GetFunctions()[0].Name, err
+			return name, err
 		}
 
 		data["object_ids"] = request.IDs
@@ -187,42 +124,20 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *HandlerV2
 		data["method"] = request.Method
 		data["app_id"] = appId
 		data["user_id"] = authInfo.GetUserId()
-		data["project_id"] = projectId
-		data["environment_id"] = environmentId
+		data["session_id"] = authInfo.GetId()
+		data["project_id"] = request.Resource.ProjectId
+		data["environment_id"] = request.Resource.EnvironmentId
 		data["action_type"] = request.ActionType
 		invokeFunction.Data = data
 
-		if customEvent.GetFunctions()[0].RequestType == "" || customEvent.GetFunctions()[0].RequestType == "ASYNC" {
-			resp, err := util.DoRequest("https://ofs.u-code.io/function/"+customEvent.GetFunctions()[0].Path, "POST", invokeFunction)
+		if requestType == "" || requestType == "ASYNC" {
+			functionName, err = function.FuncHandlers[customEvent.Functions[0].Type](path, name, invokeFunction)
 			if err != nil {
-				return customEvent.GetFunctions()[0].Name, err
-			} else if resp.Status == "error" {
-				var errStr = resp.Status
-				if resp.Data != nil && resp.Data["message"] != nil {
-					errStr = resp.Data["message"].(string)
-				}
-				return customEvent.GetFunctions()[0].Name, errors.New(errStr)
+				return functionName, err
 			}
-
-			h.log.Info("----FUNCTION--->>>>", logger.Any("mes", resp.Data["message"]))
-
-		} else if customEvent.GetFunctions()[0].RequestType == "SYNC" {
+		} else if requestType == "SYNC" {
 			go func(customEvent *obs.CustomEvent) {
-				resp, err := util.DoRequest("https://ofs.u-code.io/function/"+customEvent.GetFunctions()[0].Path, "POST", invokeFunction)
-				if err != nil {
-					h.log.Error("ERROR FROM OFS", logger.Any("err", err.Error()))
-					return
-				} else if resp.Status == "error" {
-					var errStr = resp.Status
-					if resp.Data != nil && resp.Data["message"] != nil {
-						errStr = resp.Data["message"].(string)
-						h.log.Error("ERROR FROM OFS"+customEvent.GetFunctions()[0].Path, logger.Any("err", errStr))
-						return
-					}
-
-					h.log.Error("ERROR FROM OFS", logger.Any("err", errStr))
-					return
-				}
+				function.FuncHandlers[customEvent.Functions[0].Type](path, name, invokeFunction)
 			}(customEvent)
 		}
 	}

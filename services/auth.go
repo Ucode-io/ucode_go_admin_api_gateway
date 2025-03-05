@@ -7,6 +7,8 @@ import (
 
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 
+	otgrpc "github.com/opentracing-contrib/go-grpc"
+	"github.com/opentracing/opentracing-go"
 	grpcpool "github.com/processout/grpc-go-pool"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -46,16 +48,25 @@ func NewAuthGrpcClient(ctx context.Context, cfg config.BaseConfig) (AuthServiceM
 		ctx,
 		cfg.AuthServiceHost+cfg.AuthGRPCPort,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithUnaryInterceptor(
+			otgrpc.OpenTracingClientInterceptor(opentracing.GlobalTracer())),
+		grpc.WithStreamInterceptor(
+			otgrpc.OpenTracingStreamClientInterceptor(opentracing.GlobalTracer())),
 	)
 	if err != nil {
 		return nil, err
 	}
 
 	factory := func() (*grpc.ClientConn, error) {
-		conn, err := grpc.Dial(
+		conn, err := grpc.DialContext(
+			ctx,
 			cfg.AuthServiceHost+cfg.AuthGRPCPort,
 			grpc.WithTransportCredentials(insecure.NewCredentials()),
-			grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(52428800), grpc.MaxCallSendMsgSize(52428800)))
+			grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(52428800), grpc.MaxCallSendMsgSize(52428800)),
+			grpc.WithUnaryInterceptor(
+				otgrpc.OpenTracingClientInterceptor(opentracing.GlobalTracer())),
+			grpc.WithStreamInterceptor(
+				otgrpc.OpenTracingStreamClientInterceptor(opentracing.GlobalTracer())))
 		if err != nil {
 			return nil, err
 		}

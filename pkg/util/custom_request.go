@@ -5,23 +5,23 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"time"
 
 	"ucode/ucode_go_api_gateway/api/models"
 )
 
-const (
-	Header = `<?xml version="1.0" encoding="UTF-8"?>` + "\n"
-)
+const Header = `<?xml version="1.0" encoding="UTF-8"?>` + "\n"
 
 func DoRequest(url string, method string, body interface{}) (responseModel models.InvokeFunctionResponse, err error) {
 	data, err := json.Marshal(&body)
 	if err != nil {
 		return
 	}
-	client := &http.Client{}
+
+	client := &http.Client{
+		Timeout: time.Duration(time.Second * 30),
+	}
 
 	req, err := http.NewRequest(method, url, bytes.NewBuffer(data))
 	if err != nil {
@@ -32,6 +32,7 @@ func DoRequest(url string, method string, body interface{}) (responseModel model
 	if err != nil {
 		return
 	}
+
 	defer resp.Body.Close()
 
 	respByte, err := io.ReadAll(resp.Body)
@@ -73,7 +74,7 @@ func DoXMLRequest(url string, method string, body interface{}) (responseModel mo
 	}
 	defer resp.Body.Close()
 
-	respByte, err := ioutil.ReadAll(resp.Body)
+	respByte, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return
 	}

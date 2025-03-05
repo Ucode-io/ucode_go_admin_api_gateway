@@ -801,7 +801,7 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 					continue
 				}
 
-				services.GetBuilderServiceByType(nodeType).View().Delete(
+				_, _ = services.GetBuilderServiceByType(nodeType).View().Delete(
 					context.Background(),
 					&obs.ViewPrimaryKey{
 						TableSlug: current.Data.Slug,
@@ -1227,11 +1227,6 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 }
 
 func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.ServiceManagerI, lists *obs.ListVersionHistory, environmentId, nodeType, userId string, resourceType pb.ResourceType) error {
-	// var (
-	// 	resp models.MigrateUpResponse
-	// 	ids  []string
-	// )
-
 	listData, err := json.Marshal(lists.Histories)
 	if err != nil {
 		h.log.Error("!!!MigrateUpByVersions--->Error while marshalling list data", logger.Error(err))
@@ -1240,8 +1235,7 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 
 	req := models.MigrateUpRequest{}
 
-	err = json.Unmarshal(listData, &req.Data)
-	if err != nil {
+	if err = json.Unmarshal(listData, &req.Data); err != nil {
 		h.log.Error("!!!MigrationUpByVersion--->Error while unmarshalling list data", logger.Error(err))
 		return err
 	}
@@ -2265,7 +2259,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 						continue
 					}
 
-					services.GetBuilderServiceByType(nodeType).View().Delete(
+					_, _ = services.GetBuilderServiceByType(nodeType).View().Delete(
 						context.Background(),
 						&obs.ViewPrimaryKey{
 							TableSlug: current.Data.Slug,
@@ -2287,7 +2281,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 						continue
 					}
 
-					services.GoObjectBuilderService().View().Delete(
+					_, _ = services.GoObjectBuilderService().View().Delete(
 						context.Background(),
 						&nb.ViewPrimaryKey{
 							TableSlug: currentPsql.Data.Slug,

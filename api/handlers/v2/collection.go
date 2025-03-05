@@ -9,7 +9,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
-	"ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
+	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
@@ -323,7 +323,7 @@ func (h *HandlerV2) GetAllCollections(c *gin.Context) {
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().Table().GetAll(
 			context.Background(),
-			&new_object_builder_service.GetAllTablesRequest{
+			&nb.GetAllTablesRequest{
 				Limit:        int32(limit),
 				Offset:       int32(offset),
 				Search:       c.DefaultQuery("search", ""),

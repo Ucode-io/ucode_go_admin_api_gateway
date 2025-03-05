@@ -34,29 +34,14 @@ type Config struct {
 	TemplateServiceHost string
 	TemplateGRPCPort    string
 
-	PosServiceHost string
-	PosGRPCPort    string
-
-	AnalyticsServiceHost string
-	AnalyticsGRPCPort    string
-
 	SmsServiceHost string
 	SmsGRPCPort    string
-
-	VersioningServiceHost string
-	VersioningGRPCPort    string
 
 	AuthServiceHost string
 	AuthGRPCPort    string
 
 	CompanyServiceHost string
 	CompanyServicePort string
-
-	IntegrationServiceHost string
-	IntegrationGRPCPort    string
-
-	ApiReferenceServiceHost string
-	ApiReferenceServicePort string
 
 	ChatServiceGrpcHost string
 	ChatServiceGrpcPort string
@@ -95,9 +80,6 @@ type Config struct {
 	NotificationServiceHost string
 	NotificationGRPCPort    string
 
-	PostgresBuilderServiceHost string
-	PostgresBuilderServicePort string
-
 	GoObjectBuilderServiceHost string
 	GoObjectBuilderGRPCPort    string
 
@@ -135,6 +117,12 @@ type BaseConfig struct {
 	CompanyServiceHost string
 	CompanyServicePort string
 
+	GoObjectBuilderServiceHost string
+	GoObjectBuilderGRPCPort    string
+
+	GoFunctionServiceHost     string
+	GoFunctionServiceHTTPPort string
+
 	MinioEndpoint        string
 	MinioAccessKeyID     string
 	MinioSecretAccessKey string
@@ -147,30 +135,20 @@ type BaseConfig struct {
 	DefaultOffset string
 	DefaultLimit  string
 
-	GoObjectBuilderServiceHost string
-	GoObjectBuilderGRPCPort    string
+	CLIENT_HOST     string
+	SUPERADMIN_HOST string
 
-	CLIENT_HOST                   string
-	SUPERADMIN_HOST               string
-	GitlabIntegrationToken        string
-	GitlabIntegrationURL          string
-	GitlabGroupId                 int
-	GitlabProjectId               int
-	GitlabProjectIdMicroFEReact   int
-	GitlabProjectIdMicroFEAngular int
-	GitlabProjectIdMicroFEVue     int
-	PathToClone                   string
-	SecretKey                     string
-	PlatformType                  string
+	PathToClone  string
+	SecretKey    string
+	PlatformType string
 
 	UcodeNamespace string
 	JaegerHostPort string
 
-	GithubClientId     string
-	GithubClientSecret string
-	ProjectUrl         string
-	WebhookSecret      string
-	//OfsHost string
+	GithubClientId         string
+	GithubClientSecret     string
+	ProjectUrl             string
+	WebhookSecret          string
 	ConvertDocxToPdfSecret string
 }
 
@@ -208,29 +186,25 @@ func BaseLoad() BaseConfig {
 	config.GitlabProjectIdMicroFE = cast.ToInt(GetOrReturnDefaultValue("GITLAB_PROJECT_ID_MICROFE", 0))
 	config.GitlabHostMicroFE = cast.ToString(GetOrReturnDefaultValue("GITLAB_HOST_MICROFE", "test-page.u-code.io"))
 
+	config.GoFunctionServiceHost = cast.ToString(GetOrReturnDefaultValue("GO_FUNCTION_SERVICE_HOST", "http://localhost"))
+	config.GoFunctionServiceHTTPPort = cast.ToString(GetOrReturnDefaultValue("GO_FUNCTION_SERVICE_HTTP_PORT", ":7090"))
+
 	config.GoObjectBuilderServiceHost = cast.ToString(GetOrReturnDefaultValue("GO_OBJECT_BUILDER_SERVICE_GRPC_HOST", "localhost"))
 	config.GoObjectBuilderGRPCPort = cast.ToString(GetOrReturnDefaultValue("GO_OBJECT_BUILDER_SERVICE_GRPC_PORT", ":7107"))
 
 	config.DefaultOffset = cast.ToString(GetOrReturnDefaultValue("DEFAULT_OFFSET", "0"))
 	config.DefaultLimit = "60"
 
-	config.GitlabIntegrationToken = cast.ToString(GetOrReturnDefaultValue("GITLAB_ACCESS_TOKEN", "glpat-3o5LFtq9wE-UzzPF8osd"))
-	config.GitlabIntegrationURL = cast.ToString(GetOrReturnDefaultValue("GITLAB_URL", "https://gitlab.udevs.io"))
-	config.GitlabGroupId = cast.ToInt(GetOrReturnDefaultValue("GITLAB_GROUP_ID", 2008))
-	config.GitlabProjectId = cast.ToInt(GetOrReturnDefaultValue("GITLAB_PROJECT_ID", 1467))
-	config.GitlabProjectIdMicroFEReact = cast.ToInt(GetOrReturnDefaultValue("GITLAB_PROJECT_ID_MICROFEReact", 1993))
-	config.GitlabProjectIdMicroFEAngular = cast.ToInt(GetOrReturnDefaultValue("GITLAB_PROJECT_ID_MICROFEAngular", 0))
-	config.GitlabProjectIdMicroFEVue = cast.ToInt(GetOrReturnDefaultValue("GITLAB_PROJECT_ID_MICROFEVue", 0))
 	config.PathToClone = cast.ToString(GetOrReturnDefaultValue("CLONE_PATH", "./app"))
 
 	config.UcodeNamespace = "u-code"
 	config.SecretKey = cast.ToString(GetOrReturnDefaultValue("SECRET_KEY", ""))
 	config.JaegerHostPort = cast.ToString(GetOrReturnDefaultValue("JAEGER_URL", ""))
 
-	config.GithubClientId = ""
-	config.GithubClientSecret = ""
-	config.ProjectUrl = ""
-	config.WebhookSecret = ""
+	config.GithubClientId = cast.ToString(GetOrReturnDefaultValue("GITHUB_CLIENT_ID", "Ov23liaLeqZ4ihyU3CWQ"))
+	config.GithubClientSecret = cast.ToString(GetOrReturnDefaultValue("GITHUB_CLIENT_SECRET", "cd5e802aa567432f8a053660dca5698678dfbe23"))
+	config.ProjectUrl = "https://admin-api.ucode.run"
+	config.WebhookSecret = "X8kJnsNHD9f4nRQfjs72YLSfPqxjG+PWRjxN3KBuDhE="
 
 	return config
 }
@@ -262,23 +236,8 @@ func Load() Config {
 	config.TemplateServiceHost = cast.ToString(GetOrReturnDefaultValue("TEMPLATE_SERVICE_HOST", ""))
 	config.TemplateGRPCPort = cast.ToString(GetOrReturnDefaultValue("TEMPLATE_GRPC_PORT", ":2012"))
 
-	config.IntegrationServiceHost = cast.ToString(GetOrReturnDefaultValue("INTEGRATION_SERVICE_HOST", ""))
-	config.IntegrationGRPCPort = cast.ToString(GetOrReturnDefaultValue("INTEGRATION_GRPC_PORT", ":4001"))
-
-	config.PosServiceHost = cast.ToString(GetOrReturnDefaultValue("POS_SERVICE_HOST", ""))
-	config.PosGRPCPort = cast.ToString(GetOrReturnDefaultValue("POS_SERVICE_GRPC_PORT", ":2011"))
-
-	config.AnalyticsServiceHost = cast.ToString(GetOrReturnDefaultValue("ANALYTICS_SERVICE_HOST", ""))
-	config.AnalyticsGRPCPort = cast.ToString(GetOrReturnDefaultValue("ANALYTICS_GRPC_PORT", ":2010"))
-
 	config.SmsServiceHost = cast.ToString(GetOrReturnDefaultValue("SMS_SERVICE_HOST", ""))
 	config.SmsGRPCPort = cast.ToString(GetOrReturnDefaultValue("SMS_GRPC_PORT", ":2008"))
-
-	config.VersioningServiceHost = cast.ToString(GetOrReturnDefaultValue("VERSIONING_SERVICE_HOST", ""))
-	config.VersioningGRPCPort = cast.ToString(GetOrReturnDefaultValue("VERSIONING_GRPC_PORT", ":2009"))
-
-	config.ApiReferenceServiceHost = cast.ToString(GetOrReturnDefaultValue("API_REF_SERVICE_HOST", ""))
-	config.ApiReferenceServicePort = cast.ToString(GetOrReturnDefaultValue("API_REF_GRPC_PORT", ":2007"))
 
 	config.ConvertTemplateServiceGrpcHost = cast.ToString(GetOrReturnDefaultValue("CONVERT_TEMPLATE_SERVICE_HOST", ""))
 	config.ConvertTemplateServiceGrpcPort = cast.ToString(GetOrReturnDefaultValue("CONVERT_TEMPLATE_GRPC_PORT", ":2006"))
@@ -301,9 +260,6 @@ func Load() Config {
 	config.ChatServiceGrpcPort = cast.ToString(GetOrReturnDefaultValue("CHAT_GRPC_PORT", ":2112"))
 	config.NotificationServiceHost = cast.ToString(GetOrReturnDefaultValue("NOTIFICATION_SERVICE_HOST", ""))
 	config.NotificationGRPCPort = cast.ToString(GetOrReturnDefaultValue("NOTIFICATION_GRPC_PORT", ":2001"))
-
-	config.PostgresBuilderServiceHost = cast.ToString(GetOrReturnDefaultValue("NODE_POSTGRES_SERVICE_HOST", ""))
-	config.PostgresBuilderServicePort = cast.ToString(GetOrReturnDefaultValue("NODE_POSTGRES_SERVICE_PORT", ":2002"))
 
 	config.GetRequestRedisHost = cast.ToString(GetOrReturnDefaultValue("GET_REQUEST_REDIS_HOST", ""))
 	config.GetRequestRedisPort = cast.ToString(GetOrReturnDefaultValue("GET_REQUEST_REDIS_PORT", ""))

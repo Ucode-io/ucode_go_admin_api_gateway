@@ -29,13 +29,9 @@ import (
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) CreateTemplateFolder(c *gin.Context) {
-	var (
-		folder tmp.CreateFolderReq
-		//resourceEnvironment *obs.ResourceEnvironment
-	)
+	var folder tmp.CreateFolderReq
 
-	err := c.ShouldBindJSON(&folder)
-	if err != nil {
+	if err := c.ShouldBindJSON(&folder); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -48,8 +44,7 @@ func (h *HandlerV1) CreateTemplateFolder(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
@@ -194,13 +189,9 @@ func (h *HandlerV1) GetSingleTemplateFolder(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) UpdateTemplateFolder(c *gin.Context) {
-	var (
-		//resourceEnvironment *obs.ResourceEnvironment
-		folder tmp.UpdateFolderReq
-	)
+	var folder tmp.UpdateFolderReq
 
-	err := c.ShouldBindJSON(&folder)
-	if err != nil {
+	if err := c.ShouldBindJSON(&folder); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -213,8 +204,7 @@ func (h *HandlerV1) UpdateTemplateFolder(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
@@ -281,9 +271,6 @@ func (h *HandlerV1) UpdateTemplateFolder(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) DeleteTemplateFolder(c *gin.Context) {
-	var (
-	//resourceEnvironment *obs.ResourceEnvironment
-	)
 	folderId := c.Param("template-folder-id")
 
 	if !util.IsValidUUID(folderId) {
@@ -358,10 +345,6 @@ func (h *HandlerV1) DeleteTemplateFolder(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetListTemplateFolder(c *gin.Context) {
-	var (
-	//resourceEnvironment *obs.ResourceEnvironment
-	)
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -429,10 +412,6 @@ func (h *HandlerV1) GetListTemplateFolder(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetTemplateFolderCommits(c *gin.Context) {
-	var (
-	//resourceEnvironment *obs.ResourceEnvironment
-	)
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -501,13 +480,9 @@ func (h *HandlerV1) GetTemplateFolderCommits(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) CreateTemplate(c *gin.Context) {
-	var (
-		//resourceEnvironment *obs.ResourceEnvironment
-		template tmp.CreateTemplateReq
-	)
+	var template tmp.CreateTemplateReq
 
-	err := c.ShouldBindJSON(&template)
-	if err != nil {
+	if err := c.ShouldBindJSON(&template); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -520,8 +495,7 @@ func (h *HandlerV1) CreateTemplate(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
@@ -588,9 +562,6 @@ func (h *HandlerV1) CreateTemplate(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetSingleTemplate(c *gin.Context) {
-	var (
-	//resourceEnvironment *obs.ResourceEnvironment
-	)
 	templateId := c.Param("template-id")
 
 	if !util.IsValidUUID(templateId) {
@@ -666,13 +637,9 @@ func (h *HandlerV1) GetSingleTemplate(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) UpdateTemplate(c *gin.Context) {
-	var (
-		//resourceEnvironment *obs.ResourceEnvironment
-		template tmp.UpdateTemplateReq
-	)
+	var template tmp.UpdateTemplateReq
 
-	err := c.ShouldBindJSON(&template)
-	if err != nil {
+	if err := c.ShouldBindJSON(&template); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -685,8 +652,7 @@ func (h *HandlerV1) UpdateTemplate(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
@@ -753,9 +719,6 @@ func (h *HandlerV1) UpdateTemplate(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) DeleteTemplate(c *gin.Context) {
-	var (
-	//resourceEnvironment *obs.ResourceEnvironment
-	)
 	templateId := c.Param("template-id")
 
 	if !util.IsValidUUID(templateId) {
@@ -833,10 +796,6 @@ func (h *HandlerV1) DeleteTemplate(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetListTemplate(c *gin.Context) {
-	var (
-	//resourceEnvironment *obs.ResourceEnvironment
-	)
-
 	limit, err := strconv.Atoi(c.DefaultQuery("limit", "100"))
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err)
@@ -919,10 +878,6 @@ func (h *HandlerV1) GetListTemplate(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetTemplateCommits(c *gin.Context) {
-	var (
-	//resourceEnvironment *obs.ResourceEnvironment
-	)
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -991,18 +946,14 @@ func (h *HandlerV1) GetTemplateCommits(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) ConvertHtmlToPdfV2(c *gin.Context) {
-	var (
-		//resourceEnvironment *obs.ResourceEnvironment
-		html models.HtmlBody
-	)
+	var html models.HtmlBody
 
-	err := c.ShouldBindJSON(&html)
-	if err != nil {
+	if err := c.ShouldBindJSON(&html); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
-	structData, err := helper.ConvertMapToStruct(html.Data)
 
+	structData, err := helper.ConvertMapToStruct(html.Data)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
@@ -1076,19 +1027,14 @@ func (h *HandlerV1) ConvertHtmlToPdfV2(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) ConvertTemplateToHtmlV2(c *gin.Context) {
-	var (
-		//resourceEnvironment *obs.ResourceEnvironment
-		html models.HtmlBody
-	)
+	var html models.HtmlBody
 
-	err := c.ShouldBindJSON(&html)
-	if err != nil {
+	if err := c.ShouldBindJSON(&html); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
 	structData, err := helper.ConvertMapToStruct(html.Data)
-
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return

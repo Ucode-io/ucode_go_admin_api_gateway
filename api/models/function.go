@@ -3,7 +3,9 @@ package models
 import (
 	"net/http"
 	"net/url"
+	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/genproto/new_function_service"
+	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
 )
 
 type Function struct {
@@ -12,6 +14,7 @@ type Function struct {
 	Name             string `json:"name"`
 	Description      string `json:"description"`
 	FuncitonFolderId string `json:"function_folder_id"`
+	Type             string `json:"type"`
 }
 
 type CreateFunctionRequest struct {
@@ -23,26 +26,28 @@ type CreateFunctionRequest struct {
 	VersionId        string `json:"-"`
 	FunctionFolderId string `json:"function_folder_id"`
 	FrameworkType    string `json:"framework_type"`
+	Type             string `json:"type"`
 }
 
 type InvokeFunctionRequest struct {
 	FunctionID string   `json:"function_id"`
 	ObjectIDs  []string `json:"object_ids"`
-	Attributes map[string]interface{}
+	Attributes map[string]any
+	TableSlug  string `json:"table_slug"`
 }
 
 type InvokeFunctionResponse struct {
-	Status      string                 `json:"status"`
-	Data        map[string]interface{} `json:"data"`
-	Attributes  map[string]interface{} `json:"attributes"`
-	ServerError string                 `json:"server_error"`
+	Status      string         `json:"status"`
+	Data        map[string]any `json:"data"`
+	Attributes  map[string]any `json:"attributes"`
+	ServerError string         `json:"server_error"`
 }
 
 type GetListClientApiResp struct {
-	Response       []map[string]interface{} `json:"response"`
-	Fields         []map[string]interface{} `json:"fields"`
-	Views          []map[string]interface{} `json:"views"`
-	RelationFields []map[string]interface{} `json:"relation_fields"`
+	Response       []map[string]any `json:"response"`
+	Fields         []map[string]any `json:"fields"`
+	Views          []map[string]any `json:"views"`
+	RelationFields []map[string]any `json:"relation_fields"`
 }
 
 type InvokeFunctionResponse2 struct {
@@ -51,7 +56,9 @@ type InvokeFunctionResponse2 struct {
 }
 
 type NewInvokeFunctionRequest struct {
-	Data map[string]interface{} `json:"data"`
+	Auth        AuthData       `json:"auth"`
+	Data        map[string]any `json:"data"`
+	RequestData HttpRequest    `json:"request_data"`
 }
 
 type HttpRequest struct {
@@ -63,14 +70,14 @@ type HttpRequest struct {
 }
 
 type AuthData struct {
-	Type string                 `json:"type"`
-	Data map[string]interface{} `json:"data"`
+	Type string         `json:"type"`
+	Data map[string]any `json:"data"`
 }
 
 type FunctionRunV2 struct {
-	RequestData HttpRequest            `json:"request_data"`
-	Auth        AuthData               `json:"auth"`
-	Data        map[string]interface{} `json:"data"`
+	RequestData HttpRequest    `json:"request_data"`
+	Auth        AuthData       `json:"auth"`
+	Data        map[string]any `json:"data"`
 }
 
 type InvokeFunctionRequestWithAppId struct {
@@ -95,4 +102,22 @@ type MicrofrontForLoginPage struct {
 	EnvironmentId string                         `json:"environment_id"`
 	MicrofrontId  string                         `json:"microfront_id"`
 	Subdomain     string                         `json:"subdomain"`
+}
+
+type DoInvokeFuntionStruct struct {
+	CustomEvents           []*object_builder_service.CustomEvent
+	IDs                    []string
+	TableSlug              string
+	ObjectData             map[string]any
+	Method                 string
+	ActionType             string
+	ObjectDataBeforeUpdate map[string]any
+	Resource               *pb.ServiceResourceModel
+}
+
+type GetListCustomEventsStruct struct {
+	TableSlug string
+	RoleId    string
+	Method    string
+	Resource  *pb.ServiceResourceModel
 }

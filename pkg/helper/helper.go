@@ -43,9 +43,9 @@ func ConvertMapToStruct(inputMap map[string]interface{}) (*structpb.Struct, erro
 
 func GetURLWithTableSlug(c *gin.Context) string {
 	url := c.FullPath()
-	if strings.Contains(url, ":table_slug") {
-		tableSlug := c.Param("table_slug")
-		url = strings.Replace(url, ":table_slug", tableSlug, -1)
+	if strings.Contains(url, ":collection") {
+		tableSlug := c.Param("collection")
+		url = strings.Replace(url, ":collection", tableSlug, -1)
 	}
 
 	return url

@@ -12,19 +12,6 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-// CreateRelation godoc
-// @ID create_relation
-// @Router /v1/relation [POST]
-// @Security ApiKeyAuth
-// @Summary Create relation
-// @Description Create relation
-// @Tags Relation
-// @Accept json
-// @Produce json
-// @Param table body obs.CreateRelationRequest true "CreateRelationRequestBody"
-// @Success 201 {object} status_http.Response{data=string} "Relation data"
-// @Response 400 {object} status_http.Response{data=string} "Bad Request"
-// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) CreateRelation(c *gin.Context) {
 	var (
 		relation obs.CreateRelationRequest
@@ -92,20 +79,6 @@ func (h *HandlerV1) CreateRelation(c *gin.Context) {
 	h.handleResponse(c, status_http.Created, resp)
 }
 
-// GetAllRelations godoc
-// @Security ApiKeyAuth
-// @ID get_all_relations
-// @Router /v1/relation [GET]
-// @Security ApiKeyAuth
-// @Summary Get all relations
-// @Description Get all relations
-// @Tags Relation
-// @Accept json
-// @Produce json
-// @Param filters query obs.GetAllRelationsRequest true "filters"
-// @Success 200 {object} status_http.Response{data=string} "RelationBody"
-// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetAllRelations(c *gin.Context) {
 	var (
 		resp *obs.GetAllRelationsResponse
@@ -182,20 +155,6 @@ func (h *HandlerV1) GetAllRelations(c *gin.Context) {
 	h.handleResponse(c, status_http.OK, resp)
 }
 
-// UpdateRelation godoc
-// @Security ApiKeyAuth
-// @ID update_relation
-// @Router /v1/relation [PUT]
-// @Security ApiKeyAuth
-// @Summary Update relation
-// @Description Update relation
-// @Tags Relation
-// @Accept json
-// @Produce json
-// @Param relation body obs.UpdateRelationRequest  true "UpdateRelationRequestBody"
-// @Success 200 {object} status_http.Response{data=string} "Relation data"
-// @Response 400 {object} status_http.Response{data=string} "Bad Request"
-// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) UpdateRelation(c *gin.Context) {
 	var (
 		relation obs.UpdateRelationRequest
@@ -263,20 +222,6 @@ func (h *HandlerV1) UpdateRelation(c *gin.Context) {
 	h.handleResponse(c, status_http.OK, resp)
 }
 
-// DeleteRelation godoc
-// @Security ApiKeyAuth
-// @ID delete_relation
-// @Router /v1/relation/{relation_id} [DELETE]
-// @Security ApiKeyAuth
-// @Summary Delete Relation
-// @Description Delete Relation
-// @Tags Relation
-// @Accept json
-// @Produce json
-// @Param relation_id path string true "relation_id"
-// @Success 204
-// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) DeleteRelation(c *gin.Context) {
 	var (
 		resp *emptypb.Empty
@@ -345,15 +290,15 @@ func (h *HandlerV1) DeleteRelation(c *gin.Context) {
 
 // GetRelationCascaders godoc
 // @Security ApiKeyAuth
-// @ID get_relation_cascaders
-// @Router /v1/get-relation-cascading/{table_slug} [GET]
+// @ID v2_get_relation_cascaders
+// @Router /v1/get-relation-cascading/{collection} [GET]
 // @Security ApiKeyAuth
 // @Summary Get all relations
 // @Description Get all relations
 // @Tags Relation
 // @Accept json
 // @Produce json
-// @Param table_slug path string true "table_slug"
+// @Param collection path string true "collection"
 // @Success 200 {object} status_http.Response{data=string} "CascaderBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -401,7 +346,7 @@ func (h *HandlerV1) GetRelationCascaders(c *gin.Context) {
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Cascading().GetCascadings(
 			context.Background(),
 			&obs.GetCascadingRequest{
-				TableSlug: c.Param("table_slug"),
+				TableSlug: c.Param("collection"),
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)

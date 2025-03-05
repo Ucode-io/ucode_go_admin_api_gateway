@@ -1,11 +1,10 @@
 package v2
 
 import (
-	"context"
 	"errors"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
-	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
+	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
@@ -20,13 +19,16 @@ import (
 )
 
 func (h *HandlerV2) GetSingleLayout(c *gin.Context) {
-	collection := c.Param("collection")
-	menuId := c.Param("menu_id")
+	var (
+		collection = c.Param("collection")
+		menuId     = c.Param("menu_id")
+	)
 
 	if collection == "" && menuId == "" {
 		h.handleResponse(c, status_http.BadRequest, "table-slug or table-id is required")
 		return
 	}
+
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -35,14 +37,12 @@ func (h *HandlerV2) GetSingleLayout(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err := errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.InvalidArgument, "error getting environment id | not valid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -52,11 +52,8 @@ func (h *HandlerV2) GetSingleLayout(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -67,8 +64,7 @@ func (h *HandlerV2) GetSingleLayout(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err := services.GetBuilderServiceByType(resource.NodeType).Layout().GetSingleLayout(
-			context.Background(),
-			&object_builder_service.GetSingleLayoutRequest{
+			c.Request.Context(), &obs.GetSingleLayoutRequest{
 				TableSlug: collection,
 				ProjectId: resource.ResourceEnvironmentId,
 				MenuId:    menuId,
@@ -82,8 +78,7 @@ func (h *HandlerV2) GetSingleLayout(c *gin.Context) {
 		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().Layout().GetSingleLayout(
-			context.Background(),
-			&nb.GetSingleLayoutRequest{
+			c.Request.Context(), &nb.GetSingleLayoutRequest{
 				TableSlug: collection,
 				ProjectId: resource.ResourceEnvironmentId,
 				MenuId:    menuId,
@@ -101,7 +96,7 @@ func (h *HandlerV2) GetSingleLayout(c *gin.Context) {
 // GetListLayouts godoc
 // @Security ApiKeyAuth
 // @ID get_list_layouts
-// @Router /v1/layout [GET]
+// @Router /v2/layout [GET]
 // @Summary Get list layouts
 // @Description Get list layouts
 // @Tags Layout
@@ -110,12 +105,15 @@ func (h *HandlerV2) GetSingleLayout(c *gin.Context) {
 // @Param table-id query string false "table-id"
 // @Param table-slug query string false "table-slug"
 // @Param language_setting query string false "language_setting"
-// @Success 200 {object} status_http.Response{data=object_builder_service.GetListLayoutResponse} "TableBody"
+// @Success 200 {object} status_http.Response{data=obs.GetListLayoutResponse} "TableBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) GetListLayouts(c *gin.Context) {
-	tableSlug := c.Query("table-slug")
-	tableId := c.Query("table-id")
+	var (
+		tableSlug = c.Query("table-slug")
+		tableId   = c.Query("table-id")
+	)
+
 	if tableSlug == "" && tableId == "" {
 		h.handleResponse(c, status_http.BadRequest, "table-slug or table-id is required")
 		return
@@ -129,17 +127,17 @@ func (h *HandlerV2) GetListLayouts(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err := errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
 
-	var resourceEnvironmentId string
-	var nodeType string
+	var (
+		resourceEnvironmentId string
+		nodeType              string
+	)
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -153,21 +151,9 @@ func (h *HandlerV2) GetListLayouts(c *gin.Context) {
 	resourceEnvironmentId = resource.ResourceEnvironmentId
 	nodeType = resource.NodeType
 
-	var isDefault = false
-	var languageSettings = ""
-	if c.Query("is_defualt") == "true" {
-		isDefault = true
-	}
-	if c.Query("language_setting") != "" {
-		languageSettings = c.Query("language_setting")
-	}
 	authInfo, _ := h.GetAuthInfo(c)
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		nodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), nodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -176,13 +162,12 @@ func (h *HandlerV2) GetListLayouts(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err := services.GetBuilderServiceByType(resource.NodeType).Layout().GetAll(
-			context.Background(),
-			&object_builder_service.GetListLayoutRequest{
+			c.Request.Context(), &obs.GetListLayoutRequest{
 				TableSlug:       tableSlug,
 				ProjectId:       resourceEnvironmentId,
-				IsDefualt:       isDefault,
+				IsDefualt:       cast.ToBool(c.Query("is_defualt")),
 				RoleId:          authInfo.GetRoleId(),
-				LanguageSetting: languageSettings,
+				LanguageSetting: c.Query("language_setting"),
 			},
 		)
 		if err != nil {
@@ -193,13 +178,12 @@ func (h *HandlerV2) GetListLayouts(c *gin.Context) {
 
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().Layout().GetAll(
-			context.Background(),
-			&nb.GetListLayoutRequest{
+			c.Request.Context(), &nb.GetListLayoutRequest{
 				TableSlug:       tableSlug,
 				ProjectId:       resourceEnvironmentId,
-				IsDefault:       isDefault,
+				IsDefault:       cast.ToBool(c.Query("is_defualt")),
 				RoleId:          authInfo.GetRoleId(),
-				LanguageSetting: languageSettings,
+				LanguageSetting: c.Query("language_setting"),
 			},
 		)
 		if err != nil {
@@ -221,19 +205,17 @@ func (h *HandlerV2) GetListLayouts(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param collection path string true "collection"
-// @Param layout body object_builder_service.LayoutRequest true "LayoutRequest"
-// @Success 200 {object} status_http.Response{data=object_builder_service.LayoutResponse} "Layout data"
+// @Param layout body obs.LayoutRequest true "LayoutRequest"
+// @Success 200 {object} status_http.Response{data=obs.LayoutResponse} "Layout data"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) UpdateLayout(c *gin.Context) {
-
 	var (
-		input object_builder_service.LayoutRequest
-		resp  *object_builder_service.LayoutResponse
+		input obs.LayoutRequest
+		resp  *obs.LayoutResponse
 	)
 
-	err := c.ShouldBindJSON(&input)
-	if err != nil {
+	if err := c.ShouldBindJSON(&input); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -251,18 +233,14 @@ func (h *HandlerV2) UpdateLayout(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.InvalidArgument, "error getting environment id | not valid")
 		return
 	}
 
 	userId, _ := c.Get("user_id")
 
-	var resourceEnvironmentId string
-	var nodeType string
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -273,20 +251,13 @@ func (h *HandlerV2) UpdateLayout(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironmentId = resource.ResourceEnvironmentId
-	nodeType = resource.NodeType
-
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		nodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	input.ProjectId = resourceEnvironmentId
+	input.ProjectId = resource.ResourceEnvironmentId
 
 	if input.Id == "" {
 		input.Id = uuid.NewString()
@@ -299,21 +270,16 @@ func (h *HandlerV2) UpdateLayout(c *gin.Context) {
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: "LAYOUT",
 			ActionType:   "UPDATE LAYOUT",
-			// UsedEnvironments: map[string]bool{
-			// 	cast.ToString(environmentId): true,
-			// },
-			UserInfo:  cast.ToString(userId),
-			Request:   &input,
-			TableSlug: c.Param("collection"),
+			UserInfo:     cast.ToString(userId),
+			Request:      &input,
+			TableSlug:    c.Param("collection"),
 		}
 	)
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.GetBuilderServiceByType(resource.NodeType).Layout().Update(
-			context.Background(),
-			&input,
-		)
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).Layout().Update(c.Request.Context(), &input)
+
 		logReq.Previous = &input
 		if err != nil {
 			logReq.Response = err.Error()
@@ -326,25 +292,22 @@ func (h *HandlerV2) UpdateLayout(c *gin.Context) {
 		h.handleResponse(c, status_http.OK, resp)
 		return
 	case pb.ResourceType_POSTGRESQL:
-		newInput := nb.LayoutRequest{}
-		err = helper.MarshalToStruct(&input, &newInput)
-		if err != nil {
+		var newInput = nb.LayoutRequest{}
+
+		if err = helper.MarshalToStruct(&input, &newInput); err != nil {
 			logReq.Response = err.Error()
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
-		resp2, err := services.GoObjectBuilderService().Layout().Update(
-			context.Background(),
-			&newInput,
-		)
+
+		resp2, err := services.GoObjectBuilderService().Layout().Update(c.Request.Context(), &newInput)
 		if err != nil {
 			logReq.Response = err.Error()
 			h.handleResponse(c, status_http.GRPCError, resp2)
 			return
 		}
 
-		err = helper.MarshalToStruct(resp2, &resp)
-		if err != nil {
+		if err = helper.MarshalToStruct(resp2, &resp); err != nil {
 			logReq.Response = err.Error()
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
@@ -373,10 +336,7 @@ func (h *HandlerV2) UpdateLayout(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) DeleteLayout(c *gin.Context) {
-
-	var (
-		resp = &empty.Empty{}
-	)
+	var resp = &empty.Empty{}
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -386,15 +346,12 @@ func (h *HandlerV2) DeleteLayout(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err := errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.InvalidArgument, "error getting environment id | not valid")
 		return
 	}
 
 	userId, _ := c.Get("user_id")
 
-	var resourceEnvironmentId string
-	var nodeType string
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
@@ -408,32 +365,22 @@ func (h *HandlerV2) DeleteLayout(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironmentId = resource.ResourceEnvironmentId
-	nodeType = resource.NodeType
-
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		nodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
 	var (
-		oldLayout = &object_builder_service.LayoutResponse{}
+		oldLayout = &obs.LayoutResponse{}
 		logReq    = &models.CreateVersionHistoryRequest{
 			Services:     services,
 			NodeType:     resource.NodeType,
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: "LAYOUT",
 			ActionType:   "DELETE LAYOUT",
-			// UsedEnvironments: map[string]bool{
-			// 	cast.ToString(environmentId): true,
-			// },
-			UserInfo:  cast.ToString(userId),
-			TableSlug: c.Param("collection"),
+			UserInfo:     cast.ToString(userId),
+			TableSlug:    c.Param("collection"),
 		}
 	)
 
@@ -456,37 +403,38 @@ func (h *HandlerV2) DeleteLayout(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		oldLayout, err = services.GetBuilderServiceByType(nodeType).Layout().GetByID(
-			context.Background(),
-			&object_builder_service.LayoutPrimaryKey{
+		oldLayout, err = services.GetBuilderServiceByType(resource.NodeType).Layout().GetByID(
+			c.Request.Context(), &obs.LayoutPrimaryKey{
 				Id:        c.Param("id"),
-				ProjectId: resourceEnvironmentId,
+				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
 		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
-		resp, err = services.GetBuilderServiceByType(nodeType).Layout().RemoveLayout(
-			context.Background(),
-			&object_builder_service.LayoutPrimaryKey{
+
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).Layout().RemoveLayout(
+			c.Request.Context(), &obs.LayoutPrimaryKey{
 				Id:        c.Param("id"),
-				ProjectId: resourceEnvironmentId,
+				ProjectId: resource.ResourceEnvironmentId,
 				EnvId:     environmentId.(string),
 			},
 		)
 		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
 		resp, err = services.GoObjectBuilderService().Layout().RemoveLayout(
-			context.Background(),
-			&nb.LayoutPrimaryKey{
+			c.Request.Context(), &nb.LayoutPrimaryKey{
 				Id:        c.Param("id"),
-				ProjectId: resourceEnvironmentId,
+				ProjectId: resource.ResourceEnvironmentId,
 				EnvId:     environmentId.(string),
 			},
 		)
 		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 	}
