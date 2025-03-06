@@ -3,7 +3,6 @@ package api
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -682,13 +681,11 @@ func RedirectUrl(c *gin.Context, h *handlers.Handler) (*gin.Context, error) {
 
 	projectId, ok := c.Get("project_id")
 	if !ok {
-		fmt.Println("error on get project_id")
 		return c, errors.New("something went wrong")
 	}
 
 	envId, ok := c.Get("environment_id")
 	if !ok {
-		fmt.Println("error on get environment_id")
 		return c, errors.New("something went wrong")
 	}
 
@@ -701,17 +698,14 @@ func RedirectUrl(c *gin.Context, h *handlers.Handler) (*gin.Context, error) {
 
 	res, err := h.V1.CompanyRedirectGetList(data, h.GetCompanyService(c))
 	if err != nil {
-		fmt.Println("error on get company redirect")
 		return c, errors.New("cant change")
 	}
 
 	pathM, err := helper.FindUrlTo(res, data)
 	if err != nil {
-		fmt.Println("error on find url")
 		return c, errors.New("cant change")
 	}
 	if path == pathM {
-		fmt.Println("error on identical path")
 		return c, errors.New("identical path")
 	}
 
@@ -730,7 +724,7 @@ func RedirectUrl(c *gin.Context, h *handlers.Handler) (*gin.Context, error) {
 	if err != nil {
 		return c, errors.New("something went wrong")
 	}
-	fmt.Println("auth", string(auth))
+
 	c.Request.Header.Add("auth", string(auth))
 
 	return c, nil
