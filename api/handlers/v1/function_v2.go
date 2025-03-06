@@ -219,8 +219,9 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 		return
 	}
 
-	err = json.Unmarshal(bodyReq, &invokeFunction)
-	if err != nil {
+	h.log.Info("Click on function run", logger.Any("body", string(bodyReq)))
+
+	if err = json.Unmarshal(bodyReq, &invokeFunction); err != nil {
 		h.log.Error("cant parse body or an empty body received", logger.Any("req", c.Request))
 		return
 	}
@@ -306,6 +307,9 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 	requestData.Body = bodyReq
 
 	var functionResponse = &obs.Function{}
+
+	h.log.Info("Invoke function-id", logger.Any("invokeFunction", c.Param("function-id")))
+	h.log.Info("Invoke function-id requestData", logger.Any("invokeFunction", requestData))
 
 	if util.IsValidUUID(c.Param("function-id")) {
 		services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
@@ -397,7 +401,7 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 			return
 		}
 	}
-
+	h.log.Info("Invoke function-id response", logger.Any("invokeFunction", resp))
 	if isOwnData, ok := resp.Attributes["is_own_data"].(bool); ok {
 		if isOwnData {
 			if _, ok := resp.Data["code"]; ok {
