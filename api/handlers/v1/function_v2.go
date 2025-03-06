@@ -215,14 +215,14 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 
 	bodyReq, err := io.ReadAll(c.Request.Body)
 	if err != nil {
-		h.log.Error("cant parse body or an empty body received", logger.Any("req", c.Request))
+		h.log.Error("cant read request body", logger.Any("req", c.Request))
 		return
 	}
 
 	h.log.Info("Click on function run", logger.Any("body", string(bodyReq)))
 
 	if err = json.Unmarshal(bodyReq, &invokeFunction); err != nil {
-		h.log.Error("cant parse body or an empty body received", logger.Any("req", c.Request))
+		h.log.Error("cant parse body or an empty body received", logger.Any("error", err.Error()))
 		return
 	}
 
