@@ -399,10 +399,11 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 	if isOwnData, ok := resp.Attributes["is_own_data"].(bool); ok {
 		if isOwnData {
 			if _, ok := resp.Data["code"]; ok {
+				h.log.Info("own data with code", logger.Any("data", resp.Data))
 				c.JSON(cast.ToInt(resp.Data["code"]), resp.Data)
 				return
 			}
-
+			h.log.Info("own data", logger.Any("data", resp.Data))
 			c.JSON(http.StatusOK, resp.Data)
 			return
 		}
