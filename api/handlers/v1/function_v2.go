@@ -396,15 +396,13 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 		}
 	}
 
-	h.log.Info("Invoke function-id response", logger.Any("invokeFunction", resp))
-
 	if isOwnData, ok := resp.Attributes["is_own_data"].(bool); ok {
 		if isOwnData {
 			if _, ok := resp.Data["code"]; ok {
 				c.JSON(cast.ToInt(resp.Data["code"]), resp.Data)
 				return
 			}
-			h.log.Info("Invoke function-id response", logger.Any("invokeFunction", resp.Data))
+
 			c.JSON(http.StatusOK, resp.Data)
 			return
 		}
