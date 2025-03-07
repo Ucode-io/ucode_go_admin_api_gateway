@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
 	"ucode/ucode_go_api_gateway/api/models"
@@ -121,7 +122,7 @@ func (h *HandlerV1) handleError(c *gin.Context, statusHttp status_http.Status, e
 		c.JSON(http.StatusInternalServerError, status_http.Response{
 			Status:        statusHttp.Status,
 			Description:   st.String(),
-			Data:          st.Message(),
+			Data:          strings.ToUpper(st.Message()[:1]) + st.Message()[1:],
 			CustomMessage: statusHttp.CustomMessage,
 		})
 	}
