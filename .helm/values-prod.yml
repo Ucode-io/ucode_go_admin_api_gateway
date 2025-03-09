@@ -149,6 +149,13 @@ ingress:
         - host: "api.admin.u-code.io"
           path: /
           servicePort: 8080
+        - host: "api-client-admin.app-wayll.uz"
+          path: /
+          servicePort: 8080
+      tls:
+        - secretName: api-admin-wayll-tls
+          hosts: 
+            - "api-client-admin.app-wayll.uz"
     - annotations:
         # type of authentication
         nginx.ingress.kubernetes.io/auth-type: basic
@@ -166,6 +173,13 @@ ingress:
         - host: "api.admin.u-code.io"
           path: /swagger
           servicePort: 8080
+        - host: "api-client-admin.app-wayll.uz"
+          path: /swagger
+          servicePort: 8080
+      tls:
+        - secretName: api-admin-wayll-swagger-tls
+          hosts: 
+            - "api-client-admin.app-wayll.uz"
 
 resources:
    limits:
