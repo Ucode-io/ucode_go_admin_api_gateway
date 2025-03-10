@@ -143,12 +143,14 @@ ingress:
         nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
         nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
         kubernetes.io/ingress.class: nginx
-        # cert-manager.io/cluster-issuer: letsencrypt-prod
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+        acme.cert-manager.io/http01-edit-in-place: "true"
       type: web
       hosts:
         - host: "api.admin.u-code.io"
           path: /
           servicePort: 8080
+<<<<<<< HEAD
     - annotations:
         nginx.ingress.kubernetes.io/proxy-body-size: "0"
         nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
@@ -157,26 +159,15 @@ ingress:
         cert-manager.io/cluster-issuer: letsencrypt-prod
       type: web-2
       hosts:
+=======
+>>>>>>> d4d4f6409fb6529f1d172debf8daf53ccff590ef
         - host: "api-client-admin.app-wayll.uz"
           path: /
           servicePort: 8080
-    - annotations:
-        # type of authentication
-        nginx.ingress.kubernetes.io/auth-type: basic
-        # name of the secret that contains the user/password definitions
-        nginx.ingress.kubernetes.io/auth-secret: basic-auth
-        # message to display with an appropriate context why the authentication is required
-        nginx.ingress.kubernetes.io/auth-realm: "Authentication Required - u-code"
-        nginx.ingress.kubernetes.io/proxy-body-size: "0"
-        nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
-        nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
-        kubernetes.io/ingress.class: nginx
-        # cert-manager.io/cluster-issuer: letsencrypt-prod
-      type: auth
-      hosts:
-        - host: "api.admin.u-code.io"
-          path: /swagger
-          servicePort: 8080
+      tls:
+        - secretName: api-admin-wayll-tls
+          hosts: 
+            - "api-client-admin.app-wayll.uz"
     - annotations:
         # type of authentication
         nginx.ingress.kubernetes.io/auth-type: basic
@@ -189,11 +180,23 @@ ingress:
         nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
         kubernetes.io/ingress.class: nginx
         cert-manager.io/cluster-issuer: letsencrypt-prod
+<<<<<<< HEAD
       type: auth-2
+=======
+        acme.cert-manager.io/http01-edit-in-place: "true"
+      type: auth
+>>>>>>> d4d4f6409fb6529f1d172debf8daf53ccff590ef
       hosts:
+        - host: "api.admin.u-code.io"
+          path: /swagger
+          servicePort: 8080
         - host: "api-client-admin.app-wayll.uz"
           path: /swagger
           servicePort: 8080
+      tls:
+        - secretName: api-admin-wayll-swagger-tls
+          hosts: 
+            - "api-client-admin.app-wayll.uz"
 
 resources:
    limits:
