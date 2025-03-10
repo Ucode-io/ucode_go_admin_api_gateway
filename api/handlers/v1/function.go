@@ -532,6 +532,7 @@ func (h *HandlerV1) InvokeFunction(c *gin.Context) {
 			"environment_id": environmentId,
 			"action_type":    "HTTP",
 			"table_slug":     invokeFunction.TableSlug,
+			"object_data":    invokeFunction.ObjectData,
 		},
 	}
 
