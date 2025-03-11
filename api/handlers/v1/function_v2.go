@@ -215,14 +215,12 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 
 	bodyReq, err := io.ReadAll(c.Request.Body)
 	if err != nil {
-		h.log.Error("cant parse body or an empty body received", logger.Any("req", c.Request))
+		h.log.Error("cant read request body", logger.Any("req", c.Request))
 		return
 	}
 
-	err = json.Unmarshal(bodyReq, &invokeFunction)
-	if err != nil {
-		h.log.Error("cant parse body or an empty body received", logger.Any("req", c.Request))
-		return
+	if err = json.Unmarshal(bodyReq, &invokeFunction); err != nil {
+		h.log.Error("cant parse body or an empty body received", logger.Any("error", err.Error()))
 	}
 
 	if cast.ToBool(c.GetHeader("/v1/functions/")) {
@@ -401,10 +399,11 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 	if isOwnData, ok := resp.Attributes["is_own_data"].(bool); ok {
 		if isOwnData {
 			if _, ok := resp.Data["code"]; ok {
+				h.log.Info("own data with code", logger.Any("data", resp.Data))
 				c.JSON(cast.ToInt(resp.Data["code"]), resp.Data)
 				return
 			}
-
+			h.log.Info("own data", logger.Any("data", resp.Data))
 			c.JSON(http.StatusOK, resp.Data)
 			return
 		}

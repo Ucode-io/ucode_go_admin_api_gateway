@@ -30,10 +30,11 @@ type CreateFunctionRequest struct {
 }
 
 type InvokeFunctionRequest struct {
-	FunctionID string   `json:"function_id"`
-	ObjectIDs  []string `json:"object_ids"`
-	Attributes map[string]any
-	TableSlug  string `json:"table_slug"`
+	FunctionID string         `json:"function_id"`
+	ObjectIDs  []string       `json:"object_ids"`
+	Attributes map[string]any `json:"attributes"`
+	TableSlug  string         `json:"table_slug"`
+	ObjectData map[string]any `json:"object_data"`
 }
 
 type InvokeFunctionResponse struct {

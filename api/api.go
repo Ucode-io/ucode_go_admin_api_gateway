@@ -98,7 +98,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1.POST("/object/:collection", h.V1.CreateObject)
 		v1.GET("/object/:collection/:object_id", h.V1.GetSingle)
 		v1.POST("/object/get-list/:collection", h.V1.GetList)
-		v1.PUT("/object/:table_collectionslug", h.V1.UpdateObject)
+		v1.PUT("/object/:collection", h.V1.UpdateObject)
 		v1.DELETE("/object/:collection/:object_id", h.V1.DeleteObject)
 		v1.DELETE("/object/:collection", h.V1.DeleteManyObject)
 		v1.POST("/object/excel/:collection", h.V1.GetListInExcel)
