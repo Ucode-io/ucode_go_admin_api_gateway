@@ -4,7 +4,6 @@ import (
 	"context"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
-	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -253,7 +252,7 @@ func (h *HandlerV1) ListCompanyProjects(c *gin.Context) {
 
 func (h *HandlerV1) AttachFareToProject(c *gin.Context) {
 	var (
-		data pb.AttachFareRequest
+		data company_service.AttachFareRequest
 	)
 
 	if err := c.ShouldBindJSON(&data); err != nil {
