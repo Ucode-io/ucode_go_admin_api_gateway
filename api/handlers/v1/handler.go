@@ -8,8 +8,9 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
-	"strings"
 	"time"
+	"unicode"
+	"unicode/utf8"
 
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -122,10 +123,18 @@ func (h *HandlerV1) handleError(c *gin.Context, statusHttp status_http.Status, e
 		c.JSON(http.StatusInternalServerError, status_http.Response{
 			Status:        statusHttp.Status,
 			Description:   st.String(),
-			Data:          strings.ToUpper(st.Message()[:1]) + st.Message()[1:],
+			Data:          capitalFirstLetter(st.Message()),
 			CustomMessage: statusHttp.CustomMessage,
 		})
 	}
+}
+
+func capitalFirstLetter(s string) string {
+	if s == "" {
+		return s
+	}
+	r, size := utf8.DecodeRuneInString(s)
+	return string(unicode.ToUpper(r)) + s[size:]
 }
 
 func (h *HandlerV1) getOffsetParam(c *gin.Context) (offset int, err error) {
