@@ -61,7 +61,7 @@ func (h *HandlerV1) hasAccess(c *gin.Context) (*auth.V2HasAccessUserRes, bool) {
 		}
 
 		h.log.Error("---ERR->HasAccess->Session->V2HasAccessUser--->", logger.Error(err))
-		h.handleResponse(c, status_http.Unauthorized, err.Error())
+		h.handleError(c, status_http.Unauthorized, err)
 		return nil, false
 	}
 

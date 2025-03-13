@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 	"unicode"
 	"unicode/utf8"
@@ -118,6 +119,18 @@ func (h *HandlerV1) handleError(c *gin.Context, statusHttp status_http.Status, e
 			Description:   st.String(),
 			Data:          "Cannot drop or modify the object because dependent objects exist.",
 			CustomMessage: statusHttp.CustomMessage,
+		})
+	} else if statusHttp.Status == status_http.Unauthorized.Status {
+		c.JSON(http.StatusUnauthorized, status_http.Response{
+			Status:      statusHttp.Status,
+			Description: st.String(),
+			Data:        strings.ToUpper(st.Message()[:1]) + st.Message()[1:],
+		})
+	} else if statusHttp.Status == status_http.Forbidden.Status {
+		c.JSON(http.StatusForbidden, status_http.Response{
+			Status:      statusHttp.Status,
+			Description: st.String(),
+			Data:        strings.ToUpper(st.Message()[:1]) + st.Message()[1:],
 		})
 	} else if st.Err() != nil {
 		c.JSON(http.StatusInternalServerError, status_http.Response{

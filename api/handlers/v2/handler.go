@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -112,6 +113,18 @@ func (h *HandlerV2) handleError(c *gin.Context, statusHttp status_http.Status, e
 			Description:   st.String(),
 			Data:          "Required data is not provided.",
 			CustomMessage: statusHttp.CustomMessage,
+		})
+	} else if statusHttp.Status == status_http.Unauthorized.Status {
+		c.JSON(http.StatusUnauthorized, status_http.Response{
+			Status:      statusHttp.Status,
+			Description: st.String(),
+			Data:        strings.ToUpper(st.Message()[:1]) + st.Message()[1:],
+		})
+	} else if statusHttp.Status == status_http.Forbidden.Status {
+		c.JSON(http.StatusForbidden, status_http.Response{
+			Status:      statusHttp.Status,
+			Description: st.String(),
+			Data:        strings.ToUpper(st.Message()[:1]) + st.Message()[1:],
 		})
 	} else if st.Err() != nil {
 		c.JSON(http.StatusInternalServerError, status_http.Response{
