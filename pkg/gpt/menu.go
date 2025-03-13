@@ -13,7 +13,7 @@ import (
 
 func CreateMenu(reqBody *models.CreateMenuAI) ([]*models.CreateVersionHistoryRequest, error) {
 
-	attributes, err := helper.ConvertMapToStruct(map[string]interface{}{
+	attributes, err := helper.ConvertMapToStruct(map[string]any{
 		"label":    "",
 		"label_en": reqBody.Label,
 	})

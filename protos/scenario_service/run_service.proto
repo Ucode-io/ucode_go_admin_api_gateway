@@ -26,6 +26,6 @@ message RunScenarioResponse {
 
 /*
 
-dag_id string, header map[string]string, body interface{}, url string
+dag_id string, header map[string]string, body any, url string
 
 */

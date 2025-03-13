@@ -45,7 +45,7 @@ func (h *HandlerV1) CreateTable(c *gin.Context) {
 	}
 
 	if tableRequest.Attributes == nil {
-		tableRequest.Attributes = make(map[string]interface{})
+		tableRequest.Attributes = make(map[string]any)
 	}
 
 	attributes, err := helper.ConvertMapToStruct(tableRequest.Attributes)

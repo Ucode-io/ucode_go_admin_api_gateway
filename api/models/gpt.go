@@ -23,14 +23,14 @@ type OpenAIRequestV2 struct {
 }
 
 type OpenAIResponse struct {
-	ID                string      `json:"id"`
-	Object            string      `json:"object"`
-	Created           int         `json:"created"`
-	Model             string      `json:"model"`
-	Choices           []Choice    `json:"choices"`
-	Usage             Usage       `json:"usage"`
-	SystemFingerprint interface{} `json:"system_fingerprint"`
-	Error             ErrorAI     `json:"error"`
+	ID                string   `json:"id"`
+	Object            string   `json:"object"`
+	Created           int      `json:"created"`
+	Model             string   `json:"model"`
+	Choices           []Choice `json:"choices"`
+	Usage             Usage    `json:"usage"`
+	SystemFingerprint any      `json:"system_fingerprint"`
+	Error             ErrorAI  `json:"error"`
 }
 
 type ErrorAI struct {
@@ -66,7 +66,7 @@ type MessageChoice struct {
 type Choice struct {
 	Index        int           `json:"index"`
 	Message      MessageChoice `json:"message"`
-	Logprobs     interface{}   `json:"logprobs"`
+	Logprobs     any           `json:"logprobs"`
 	FinishReason string        `json:"finish_reason"`
 }
 
@@ -81,9 +81,9 @@ type Tool struct {
 }
 
 type FunctionDescription struct {
-	Name        string                 `json:"name"`
-	Description string                 `json:"description"`
-	Parameters  map[string]interface{} `json:"parameters"`
+	Name        string         `json:"name"`
+	Description string         `json:"description"`
+	Parameters  map[string]any `json:"parameters"`
 }
 
 type CreateMenuAI struct {
@@ -194,8 +194,8 @@ type GenerateItemsAI struct {
 }
 
 type UpdateItemsAI struct {
-	OldColumn interface{}
-	NewColumn interface{}
+	OldColumn any
+	NewColumn any
 	Table     string
 	UserId    string
 	Resource  *pb.ServiceResourceModel

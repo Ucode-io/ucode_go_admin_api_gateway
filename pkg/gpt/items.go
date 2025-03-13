@@ -36,7 +36,7 @@ func CreateItems(req *models.CreateItemsAI) ([]*models.CreateVersionHistoryReque
 			return respLogReq, err
 		}
 
-		params := make(map[string]interface{})
+		params := make(map[string]any)
 
 		for i, s := range field.Slugs {
 			params[s] = req.Arguments[i]
@@ -117,7 +117,7 @@ func GenerateItems(req *models.GenerateItemsAI) ([]*models.CreateVersionHistoryR
 		var (
 			functionCall = toolCall.Function
 			functionName = functionCall.Name
-			arguments    map[string]interface{}
+			arguments    map[string]any
 		)
 
 		err = json.Unmarshal([]byte(functionCall.Arguments), &arguments)
@@ -127,7 +127,7 @@ func GenerateItems(req *models.GenerateItemsAI) ([]*models.CreateVersionHistoryR
 
 		if functionName == "generate_values" {
 
-			params := make(map[string]interface{})
+			params := make(map[string]any)
 
 			for _, arg := range cast.ToSlice(arguments["arguments"]) {
 				col := cast.ToStringMap(arg)
@@ -172,7 +172,7 @@ func UpdateItems(req *models.UpdateItemsAI) ([]*models.CreateVersionHistoryReque
 		respLogReq = []*models.CreateVersionHistoryRequest{}
 	)
 
-	data, err := helper.ConvertMapToStruct(map[string]interface{}{
+	data, err := helper.ConvertMapToStruct(map[string]any{
 		"column":     req.OldColumn,
 		"new_column": req.NewColumn,
 	})
@@ -208,7 +208,7 @@ func DeleteItems(req *models.UpdateItemsAI) ([]*models.CreateVersionHistoryReque
 		respLogReq = []*models.CreateVersionHistoryRequest{}
 	)
 
-	data, err := helper.ConvertMapToStruct(map[string]interface{}{
+	data, err := helper.ConvertMapToStruct(map[string]any{
 		"column": req.OldColumn,
 	})
 	if err != nil {

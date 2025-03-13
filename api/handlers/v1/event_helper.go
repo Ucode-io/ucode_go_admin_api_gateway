@@ -141,7 +141,7 @@ func DoInvokeFuntion(request models.DoInvokeFuntionStruct, c *gin.Context, h *Ha
 	return
 }
 
-func DoInvokeFuntionForGetList(request models.DoInvokeFuntionStruct, c *gin.Context, h *HandlerV1) (functionName string, data map[string]interface{}, err error) {
+func DoInvokeFuntionForGetList(request models.DoInvokeFuntionStruct, c *gin.Context, h *HandlerV1) (functionName string, data map[string]any, err error) {
 	apiKeys, err := h.authService.ApiKey().GetList(context.Background(), &auth_service.GetListReq{
 		EnvironmentId: request.Resource.EnvironmentId,
 		ProjectId:     request.Resource.ProjectId,

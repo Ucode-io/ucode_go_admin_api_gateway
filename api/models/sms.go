@@ -22,7 +22,7 @@ type Verify struct {
 }
 
 type RegisterOtp struct {
-	Data map[string]interface{} `json:"data"`
+	Data map[string]any `json:"data"`
 }
 
 type Email struct {

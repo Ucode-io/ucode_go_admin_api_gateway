@@ -123,6 +123,6 @@ func (h *HandlerV2) GetMenuSettingByUserID(c *gin.Context) {
 
 }
 
-func IsEmptyStruct(s interface{}) bool {
+func IsEmptyStruct(s any) bool {
 	return reflect.DeepEqual(s, reflect.Zero(reflect.TypeOf(s)).Interface())
 }

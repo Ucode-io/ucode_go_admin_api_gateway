@@ -24,7 +24,7 @@ func (h *HandlerV2) AdminAuthMiddleware() gin.HandlerFunc {
 			ok  bool
 		)
 
-		data := make(map[string]interface{})
+		data := make(map[string]any)
 
 		bearerToken := c.GetHeader("Authorization")
 		strArr := strings.Split(bearerToken, " ")

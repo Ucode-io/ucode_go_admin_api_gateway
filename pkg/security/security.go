@@ -12,7 +12,7 @@ import (
 	"strings"
 )
 
-func Encrypt(body interface{}, key string) (string, error) {
+func Encrypt(body any, key string) (string, error) {
 	// Convert the body to JSON bytes
 	respByte, err := json.Marshal(body)
 	if err != nil {
