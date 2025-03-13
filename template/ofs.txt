@@ -35,7 +35,7 @@ const (
 
 %s
 
-func DoRequest(url string, method string, body interface{}) ([]byte, error) {
+func DoRequest(url string, method string, body any) ([]byte, error) {
 	data, err := json.Marshal(&body)
 	if err != nil {
 		return nil, err
@@ -69,13 +69,13 @@ func DoRequest(url string, method string, body interface{}) ([]byte, error) {
 func Handler(status, message string) string {
 	var (
 		response Response
-		Message  = make(map[string]interface{})
+		Message  = make(map[string]any)
 	)
 
 	// sendMessage("", status, message)
 	response.Status = status
 	data := Request{
-		Data: map[string]interface{}{
+		Data: map[string]any{
 			"data": message,
 		},
 	}
@@ -85,7 +85,7 @@ func Handler(status, message string) string {
 	return string(respByte)
 }
 
-func sendMessage(functionName, errorStatus string, message interface{}) {
+func sendMessage(functionName, errorStatus string, message any) {
 	bot, err := tgbotapi.NewBotAPI("")
 	if err != nil {
 		log.Panic(err)
@@ -101,7 +101,7 @@ func sendMessage(functionName, errorStatus string, message interface{}) {
 
 type Response struct {
 	Status string                 `json:"status"`
-	Data   map[string]interface{} `json:"data"`
+	Data   map[string]any `json:"data"`
 }
 
 type RequestBody struct {
@@ -110,12 +110,12 @@ type RequestBody struct {
 }
 
 type RequestData struct {
-	ObjectData             map[string]interface{} `json:"object_data"`
+	ObjectData             map[string]any `json:"object_data"`
 	ObjectDataBeforeUpdate BeforeResp `json:"object_data_before_update"`
 }
 
 type BeforeResp struct {
-	Response map[string]interface{} `json:"response"`
+	Response map[string]any `json:"response"`
 }
 
 type ClientApiResponse struct {
@@ -127,11 +127,11 @@ type ClientApiData struct {
 }
 
 type ClientApiResp struct {
-	Response map[string]interface{} `json:"response"`
+	Response map[string]any `json:"response"`
 }
 
 type Request struct {
-	Data map[string]interface{} `json:"data"`
+	Data map[string]any `json:"data"`
 }
 
 type MultipleUpdateRequest struct {
@@ -139,7 +139,7 @@ type MultipleUpdateRequest struct {
 }
 
 type Data struct {
-	Objects []map[string]interface{} `json:"objects"`
+	Objects []map[string]any `json:"objects"`
 }
 
 type GetListClientApiResponse struct {
@@ -151,12 +151,12 @@ type GetListClientApiData struct {
 }
 
 type GetListClientApiResp struct {
-	Response []map[string]interface{} `json:"response"`
+	Response []map[string]any `json:"response"`
 }
 
 type ResponseModel struct {
 	Status string                 `json:"status"`
-	Data   map[string]interface{} `json:"data"`
+	Data   map[string]any `json:"data"`
 }
 
 type CreateResponseBody struct {
@@ -168,5 +168,5 @@ type CreateResponseModel struct {
 }
 
 type CreateResponse struct {
-	Data map[string]interface{} `json:"data"`
+	Data map[string]any `json:"data"`
 }

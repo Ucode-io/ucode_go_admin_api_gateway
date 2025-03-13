@@ -7,7 +7,7 @@ package tests
 // 	_, _, err := UcodeApiForPg.CreateObject(&sdk.Argument{
 // 		TableSlug: "product",
 // 		Request: sdk.Request{
-// 			Data: map[string]interface{}{
+// 			Data: map[string]any{
 // 				"guid":                             guid,
 // 				"single_line_field":                fakeData.CompanyName(),
 // 				"multi_line_field":                 fakeData.FirstName(),
@@ -24,7 +24,7 @@ package tests
 // 	_, _, err = UcodeApiForPg.UpdateObject(&sdk.Argument{
 // 		TableSlug: "product",
 // 		Request: sdk.Request{
-// 			Data: map[string]interface{}{
+// 			Data: map[string]any{
 // 				"guid":             guid,
 // 				"multi_line_field": fakeData.Name(),
 // 				"checkbox_field":   true,
@@ -36,7 +36,7 @@ package tests
 // 	slimResponse, _, err := UcodeApiForPg.GetSingleSlim(&sdk.Argument{
 // 		TableSlug: "product",
 // 		Request: sdk.Request{
-// 			Data: map[string]interface{}{
+// 			Data: map[string]any{
 // 				"guid":           guid,
 // 				"with_relations": true,
 // 			},
@@ -49,7 +49,7 @@ package tests
 // 	itemResponse, _, err := UcodeApiForPg.GetSingle(&sdk.Argument{
 // 		TableSlug: "product",
 // 		Request: sdk.Request{
-// 			Data: map[string]interface{}{
+// 			Data: map[string]any{
 // 				"guid": guid,
 // 			},
 // 		},
@@ -61,7 +61,7 @@ package tests
 // 	_, err = UcodeApiForPg.Delete(&sdk.Argument{
 // 		TableSlug: "product",
 // 		Request: sdk.Request{
-// 			Data: map[string]interface{}{
+// 			Data: map[string]any{
 // 				"guid": guid,
 // 			},
 // 		},
@@ -73,7 +73,7 @@ package tests
 // func TestGetListSlimPg(t *testing.T) {
 // 	getProductResp, _, err := UcodeApiForPg.GetListSlim(&sdk.ArgumentWithPegination{
 // 		TableSlug: "product",
-// 		Request:   sdk.Request{Data: map[string]interface{}{}},
+// 		Request:   sdk.Request{Data: map[string]any{}},
 // 		Limit:     10,
 // 		Page:      1,
 // 	})
@@ -86,7 +86,7 @@ package tests
 // func TestGetListSlimPaginationPg(t *testing.T) {
 // 	getProductResp, _, err := UcodeApiForPg.GetListSlim(&sdk.ArgumentWithPegination{
 // 		TableSlug: "product",
-// 		Request:   sdk.Request{Data: map[string]interface{}{}},
+// 		Request:   sdk.Request{Data: map[string]any{}},
 // 		Limit:     5,
 // 		Page:      4,
 // 	})
@@ -96,7 +96,7 @@ package tests
 
 // 	getProductResp, _, err = UcodeApiForPg.GetListSlim(&sdk.ArgumentWithPegination{
 // 		TableSlug:   "product",
-// 		Request:     sdk.Request{Data: map[string]interface{}{}},
+// 		Request:     sdk.Request{Data: map[string]any{}},
 // 		Limit:       5,
 // 		Page:        5,
 // 		DisableFaas: true,
@@ -111,7 +111,7 @@ package tests
 // 	getProductResp, _, err := UcodeApiForPg.GetListSlim(&sdk.ArgumentWithPegination{
 // 		TableSlug: "product",
 // 		Request: sdk.Request{
-// 			Data: map[string]interface{}{"with_relations": true},
+// 			Data: map[string]any{"with_relations": true},
 // 		},
 // 		Limit:       10,
 // 		Page:        1,
@@ -125,8 +125,8 @@ package tests
 // // Done
 // func TestGetListSlimWithDatePg(t *testing.T) { // $lt and $gte
 // 	getProductReq := sdk.Request{
-// 		Data: map[string]interface{}{
-// 			"date_time_field": map[string]interface{}{
+// 		Data: map[string]any{
+// 			"date_time_field": map[string]any{
 // 				"$gte": "2024-10-01T00:04:19.336Z",
 // 			}},
 // 	}
@@ -142,8 +142,8 @@ package tests
 // 	assert.NotEmpty(t, getProductResp.Data.Data.Response, err)
 
 // 	getProductReq = sdk.Request{
-// 		Data: map[string]interface{}{
-// 			"date_time_field": map[string]interface{}{
+// 		Data: map[string]any{
+// 			"date_time_field": map[string]any{
 // 				"$gte": "2024-10-01T00:04:19.336Z",
 // 				"$lt":  "2024-10-06T00:04:19.336Z",
 // 			}},
@@ -164,8 +164,8 @@ package tests
 // // Done
 // func TestGetListSlimWithInPg(t *testing.T) { // $in
 // 	getProductReq := sdk.Request{
-// 		Data: map[string]interface{}{
-// 			"increment_id_field": map[string]interface{}{
+// 		Data: map[string]any{
+// 			"increment_id_field": map[string]any{
 // 				"$in": []string{"T-000000021", "T-000000023", "T-000000026"},
 // 			}},
 // 	}
@@ -186,7 +186,7 @@ package tests
 // // func TestGetListSlimWithBooleanPg(t *testing.T) {
 // // 	getProductResp, _, err := UcodeApiForPg.GetListSlim(&sdk.ArgumentWithPegination{
 // // 		TableSlug:   "product",
-// // 		Request:     sdk.Request{Data: map[string]interface{}{"switch_field": false}},
+// // 		Request:     sdk.Request{Data: map[string]any{"switch_field": false}},
 // // 		Limit:       10,
 // // 		Page:        1,
 // // 		DisableFaas: true,
@@ -200,7 +200,7 @@ package tests
 // func TestGetListObjectPg(t *testing.T) {
 // 	getProductResp, _, err := UcodeApiForPg.GetList(&sdk.ArgumentWithPegination{
 // 		TableSlug:   "product",
-// 		Request:     sdk.Request{Data: map[string]interface{}{}},
+// 		Request:     sdk.Request{Data: map[string]any{}},
 // 		Limit:       10,
 // 		Page:        1,
 // 		DisableFaas: true,
@@ -212,7 +212,7 @@ package tests
 // // Done
 // func TestGetListObjectSearchPg(t *testing.T) {
 // 	getProductReq := sdk.Request{
-// 		Data: map[string]interface{}{"search": "+99894", "view_fields": []string{"internation_phone_field"}},
+// 		Data: map[string]any{"search": "+99894", "view_fields": []string{"internation_phone_field"}},
 // 	}
 // 	getProductResp, _, err := UcodeApiForPg.GetList(&sdk.ArgumentWithPegination{
 // 		TableSlug:   "product",
@@ -225,7 +225,7 @@ package tests
 // 	assert.NotEmpty(t, getProductResp.Data.Data.Response, "Switch Does not work")
 
 // 	getProductReq = sdk.Request{
-// 		Data: map[string]interface{}{"search": "+4", "view_fields": []string{"internation_phone_field"}},
+// 		Data: map[string]any{"search": "+4", "view_fields": []string{"internation_phone_field"}},
 // 	}
 // 	getProductResp, _, err = UcodeApi.GetList(&sdk.ArgumentWithPegination{
 // 		TableSlug: "product",
@@ -242,8 +242,8 @@ package tests
 // 	resp, err := LoginPg()
 // 	assert.NoError(t, err)
 
-// 	body, err := UcodeApi.DoRequest(BaseUrlStaging+"/v2/object/get-list/product", "POST", map[string]interface{}{
-// 		"data": map[string]interface{}{},
+// 	body, err := UcodeApi.DoRequest(BaseUrlStaging+"/v2/object/get-list/product", "POST", map[string]any{
+// 		"data": map[string]any{},
 // 	}, map[string]string{
 // 		"Authorization": "Bearer " + resp,
 // 	})
@@ -275,8 +275,8 @@ package tests
 // // 	resp, err := Login()
 // // 	assert.NoError(t, err)
 
-// // 	body, err := UcodeApi.DoRequest(BaseUrl+"/v2/object/get-list/company", "POST", map[string]interface{}{
-// // 		"data": map[string]interface{}{},
+// // 	body, err := UcodeApi.DoRequest(BaseUrl+"/v2/object/get-list/company", "POST", map[string]any{
+// // 		"data": map[string]any{},
 // // 	}, map[string]string{
 // // 		"Authorization": "Bearer " + resp,
 // // 	})
@@ -291,13 +291,13 @@ package tests
 // // Done
 // func TestMultipleCRUDPg(t *testing.T) {
 // 	var ids = []string{}
-// 	var multipleInsert = []map[string]interface{}{}
-// 	var multipleUpdate = []map[string]interface{}{}
+// 	var multipleInsert = []map[string]any{}
+// 	var multipleUpdate = []map[string]any{}
 // 	UcodeApiForPg.Config().RequestTimeout = time.Second * 30
 
 // 	for i := 0; i < 10; i++ {
 // 		guid := uuid.New().String()
-// 		multipleInsert = append(multipleInsert, map[string]interface{}{
+// 		multipleInsert = append(multipleInsert, map[string]any{
 // 			"guid":                             guid,
 // 			"single_line_field":                fakeData.CompanyName(),
 // 			"multi_line_field":                 fakeData.FirstName(),
@@ -309,7 +309,7 @@ package tests
 // 			"is_new":                           true,
 // 		})
 
-// 		multipleUpdate = append(multipleUpdate, map[string]interface{}{
+// 		multipleUpdate = append(multipleUpdate, map[string]any{
 // 			"guid":                             guid,
 // 			"single_line_field":                fakeData.CompanyName(),
 // 			"multi_line_field":                 fakeData.FirstName(),
@@ -326,7 +326,7 @@ package tests
 // 	_, _, err := UcodeApiForPg.MultipleUpdate(&sdk.Argument{
 // 		TableSlug: "product",
 // 		Request: sdk.Request{
-// 			Data: map[string]interface{}{
+// 			Data: map[string]any{
 // 				"objects": multipleInsert,
 // 			},
 // 		},
@@ -337,7 +337,7 @@ package tests
 // 	_, _, err = UcodeApiForPg.MultipleUpdate(&sdk.Argument{
 // 		TableSlug: "product",
 // 		Request: sdk.Request{
-// 			Data: map[string]interface{}{
+// 			Data: map[string]any{
 // 				"objects": multipleUpdate,
 // 			},
 // 		},
@@ -348,7 +348,7 @@ package tests
 // 	_, err = UcodeApiForPg.MultipleDelete(&sdk.Argument{
 // 		TableSlug: "product",
 // 		Request: sdk.Request{
-// 			Data: map[string]interface{}{
+// 			Data: map[string]any{
 // 				"ids": ids,
 // 			},
 // 		},

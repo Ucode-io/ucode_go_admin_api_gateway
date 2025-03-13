@@ -1,7 +1,6 @@
 package v2
 
 import (
-	"context"
 	"errors"
 	"strings"
 	"time"
@@ -71,7 +70,7 @@ func (h *HandlerV2) GetVersionHistoryByID(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err := services.GetBuilderServiceByType(resource.NodeType).VersionHistory().GetByID(
-			context.Background(),
+			c.Request.Context(),
 			&obs.VersionHistoryPrimaryKey{
 				Id:        id,
 				ProjectId: resource.ResourceEnvironmentId,
@@ -85,7 +84,7 @@ func (h *HandlerV2) GetVersionHistoryByID(c *gin.Context) {
 		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().VersionHistory().GetByID(
-			context.Background(),
+			c.Request.Context(),
 			&nb.VersionHistoryPrimaryKey{
 				Id:        id,
 				ProjectId: resource.ResourceEnvironmentId,
@@ -134,6 +133,8 @@ func (h *HandlerV2) GetAllVersionHistory(c *gin.Context) {
 	}
 
 	apiKey := c.Query("api_key")
+	actionType := c.Query("action_type")
+	collection := c.Query("collection")
 
 	if c.Query("from_date") != "" {
 		formatFromDate, err := time.Parse("2006-01-02", c.Query("from_date"))
@@ -168,13 +169,6 @@ func (h *HandlerV2) GetAllVersionHistory(c *gin.Context) {
 		return
 	}
 
-	// environmentId := c.Param("environment_id")
-	// if !util.IsValidUUID(environmentId) {
-	// 	err := errors.New("error getting environment id | not valid")
-	// 	h.handleResponse(c, status_http.BadRequest, err)
-	// 	return
-	// }
-
 	currEnvironmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(currEnvironmentId.(string)) {
 		err = errors.New("error getting environment id | not valid")
@@ -202,18 +196,19 @@ func (h *HandlerV2) GetAllVersionHistory(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err := services.GetBuilderServiceByType(resource.NodeType).VersionHistory().GatAll(
-			context.Background(),
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).VersionHistory().GatAll(c.Request.Context(),
 			&obs.GetAllRquest{
-				Type:      tip,
-				ProjectId: resource.ResourceEnvironmentId,
-				EnvId:     currEnvironmentId.(string),
-				ApiKey:    apiKey,
-				Offset:    int32(offset),
-				Limit:     int32(limit),
-				FromDate:  fromDate,
-				ToDate:    toDate,
-				OrderBy:   orderby,
+				Type:       tip,
+				ProjectId:  resource.ResourceEnvironmentId,
+				EnvId:      currEnvironmentId.(string),
+				ApiKey:     apiKey,
+				Offset:     int32(offset),
+				Limit:      int32(limit),
+				FromDate:   fromDate,
+				ToDate:     toDate,
+				OrderBy:    orderby,
+				ActionType: actionType,
+				Collection: collection,
 			},
 		)
 		if err != nil {
@@ -224,17 +219,19 @@ func (h *HandlerV2) GetAllVersionHistory(c *gin.Context) {
 		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().VersionHistory().GatAll(
-			context.Background(),
+			c.Request.Context(),
 			&nb.GetAllRquest{
-				Type:      tip,
-				ProjectId: resource.ResourceEnvironmentId,
-				EnvId:     currEnvironmentId.(string),
-				ApiKey:    apiKey,
-				Offset:    int32(offset),
-				Limit:     int32(limit),
-				FromDate:  fromDate,
-				ToDate:    toDate,
-				OrderBy:   orderby,
+				Type:       tip,
+				ProjectId:  resource.ResourceEnvironmentId,
+				EnvId:      currEnvironmentId.(string),
+				ApiKey:     apiKey,
+				Offset:     int32(offset),
+				Limit:      int32(limit),
+				FromDate:   fromDate,
+				ToDate:     toDate,
+				OrderBy:    orderby,
+				ActionType: actionType,
+				Collection: collection,
 			},
 		)
 
@@ -311,7 +308,7 @@ func (h *HandlerV2) UpdateVersionHistory(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		_, err = services.GetBuilderServiceByType(resource.NodeType).VersionHistory().Update(
-			context.Background(),
+			c.Request.Context(),
 			&view,
 		)
 
@@ -321,7 +318,7 @@ func (h *HandlerV2) UpdateVersionHistory(c *gin.Context) {
 		}
 	case pb.ResourceType_POSTGRESQL:
 		// resp, err = services.PostgresBuilderService().View().Update(
-		// 	context.Background(),
+		// 	c.Request.Context(),
 		// 	&view,
 		// )
 

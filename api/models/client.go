@@ -1,11 +1,11 @@
 package models
 
-//StructBody is alternative for structpb.Struct
+// StructBody is alternative for structpb.Struct
 type StructBody struct {
-	Body map[string]interface{}
+	Body map[string]any
 }
 
-//Table ...
+// Table ...
 type Table struct {
 	Slug      string      `json:"slug"`
 	ViewField []ViewField `json:"view_field"`
@@ -13,14 +13,14 @@ type Table struct {
 	Icon      string      `json:"icon"`
 }
 
-//ViewField ...
+// ViewField ...
 type ViewField struct {
 	Slug      string   `json:"slug"`
 	ViewField []string `json:"view_field"`
 	Label     string   `json:"label"`
 }
 
-//CreateClientTypeRequest for create client type request
+// CreateClientTypeRequest for create client type request
 type CreateClientTypeRequest struct {
 	Name         string  `json:"name"`
 	ConfirmBy    int32   `json:"confirm_by"`

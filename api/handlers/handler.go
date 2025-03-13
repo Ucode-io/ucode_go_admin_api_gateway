@@ -77,7 +77,7 @@ func (h *Handler) GetProjectSrvc(c context.Context, projectId string, nodeType s
 	}
 }
 
-func (h *Handler) handleResponse(c *gin.Context, status status_http.Status, data interface{}) {
+func (h *Handler) handleResponse(c *gin.Context, status status_http.Status, data any) {
 	switch code := status.Code; {
 	case code < 400:
 	default:

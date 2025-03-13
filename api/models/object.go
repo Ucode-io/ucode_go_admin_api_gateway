@@ -1,13 +1,13 @@
 package models
 
 type CommonMessage struct {
-	Data     map[string]interface{} `json:"data"`
-	IsCached bool                   `json:"is_cached"`
+	Data     map[string]any `json:"data"`
+	IsCached bool           `json:"is_cached"`
 }
 
 type HtmlBody struct {
-	Data map[string]interface{} `json:"data"`
-	Html string                 `json:"html"`
+	Data map[string]any `json:"data"`
+	Html string         `json:"html"`
 }
 
 type GetListRequest struct {
@@ -18,22 +18,22 @@ type GetListRequest struct {
 }
 
 type UpsertCommonMessage struct {
-	Data          map[string]interface{} `json:"data"`
-	UpdatedFields []string               `json:"updated_fields"`
+	Data          map[string]any `json:"data"`
+	UpdatedFields []string       `json:"updated_fields"`
 }
 
 type Ids struct {
-	Ids   []string               `json:"ids"`
-	Query map[string]interface{} `json:"query"`
+	Ids   []string       `json:"ids"`
+	Query map[string]any `json:"query"`
 }
 
 type MultipleUpdateItems struct {
-	Ids  []string               `json:"ids"`
-	Data map[string]interface{} `json:"data"`
+	Ids  []string       `json:"ids"`
+	Data map[string]any `json:"data"`
 }
 
 type MultipleInsertItems struct {
-	Items []map[string]interface{} `json:"items"`
+	Items []map[string]any `json:"items"`
 }
 
 type ObjectsResponse struct {

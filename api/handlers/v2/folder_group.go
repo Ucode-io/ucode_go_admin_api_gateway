@@ -196,7 +196,7 @@ func (h *HandlerV2) GetAllFolderGroups(c *gin.Context) {
 	}
 
 	if tokenInfo != nil {
-		objectRequest.Data = make(map[string]interface{})
+		objectRequest.Data = make(map[string]any)
 		if tokenInfo.Tables != nil {
 			objectRequest.Data["tables"] = tokenInfo.GetTables()
 		}

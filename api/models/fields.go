@@ -3,69 +3,69 @@ package models
 import "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 
 type Field struct {
-	ID                  string                 `json:"id"`
-	Default             string                 `json:"default"`
-	Type                string                 `json:"type"`
-	Index               string                 `json:"index"`
-	Label               string                 `json:"label"`
-	Slug                string                 `json:"slug"`
-	TableID             string                 `json:"table_id"`
-	Required            bool                   `json:"required"`
-	Attributes          map[string]interface{} `json:"attributes"`
-	IsVisible           bool                   `json:"is_visible"`
-	AutoFillField       string                 `json:"autofill_field"`
-	AutoFillTable       string                 `json:"autofill_table"`
-	RelationId          string                 `json:"relation_id"`
-	Unique              bool                   `json:"unique"`
-	Automatic           bool                   `json:"automatic"`
-	RelationField       string                 `json:"relation_field"`
-	ShowLabel           bool                   `json:"show_label"`
-	EnableMultilanguage bool                   `json:"enable_multilanguage"`
-	MinioFolder         string                 `json:"minio_folder"`
-	IsAlt               bool                   `json:"is_alt"`
+	ID                  string         `json:"id"`
+	Default             string         `json:"default"`
+	Type                string         `json:"type"`
+	Index               string         `json:"index"`
+	Label               string         `json:"label"`
+	Slug                string         `json:"slug"`
+	TableID             string         `json:"table_id"`
+	Required            bool           `json:"required"`
+	Attributes          map[string]any `json:"attributes"`
+	IsVisible           bool           `json:"is_visible"`
+	AutoFillField       string         `json:"autofill_field"`
+	AutoFillTable       string         `json:"autofill_table"`
+	RelationId          string         `json:"relation_id"`
+	Unique              bool           `json:"unique"`
+	Automatic           bool           `json:"automatic"`
+	RelationField       string         `json:"relation_field"`
+	ShowLabel           bool           `json:"show_label"`
+	EnableMultilanguage bool           `json:"enable_multilanguage"`
+	MinioFolder         string         `json:"minio_folder"`
+	IsAlt               bool           `json:"is_alt"`
 }
 
 type CreateFieldsRequest struct {
-	ID          string                 `json:"id"`
-	Default     string                 `json:"default"`
-	Type        string                 `json:"type"`
-	Index       string                 `json:"index"`
-	Label       string                 `json:"label"`
-	Slug        string                 `json:"slug"`
-	Required    bool                   `json:"required"`
-	Attributes  map[string]interface{} `json:"attributes"`
-	IsVisible   bool                   `json:"is_visible"`
-	Unique      bool                   `json:"unique"`
-	Automatic   bool                   `json:"automatic"`
-	MinioFolder string                 `json:"minio_folder"`
+	ID          string         `json:"id"`
+	Default     string         `json:"default"`
+	Type        string         `json:"type"`
+	Index       string         `json:"index"`
+	Label       string         `json:"label"`
+	Slug        string         `json:"slug"`
+	Required    bool           `json:"required"`
+	Attributes  map[string]any `json:"attributes"`
+	IsVisible   bool           `json:"is_visible"`
+	Unique      bool           `json:"unique"`
+	Automatic   bool           `json:"automatic"`
+	MinioFolder string         `json:"minio_folder"`
 }
 
 type CreateFieldRequest struct {
-	ID                  string                 `json:"id"`
-	Default             string                 `json:"default"`
-	Type                string                 `json:"type"`
-	Index               string                 `json:"index"`
-	Label               string                 `json:"label"`
-	Slug                string                 `json:"slug"`
-	TableID             string                 `json:"table_id"`
-	Required            bool                   `json:"required"`
-	Attributes          map[string]interface{} `json:"attributes"`
-	IsVisible           bool                   `json:"is_visible"`
-	AutoFillField       string                 `json:"autofill_field"`
-	AutoFillTable       string                 `json:"autofill_table"`
-	RelationField       string                 `json:"relation_field"`
-	Unique              bool                   `json:"unique"`
-	Automatic           bool                   `json:"automatic"`
-	ShowLabel           bool                   `json:"show_label"`
-	EnableMultilanguage bool                   `json:"enable_multilanguage"`
-	MinioFolder         string                 `json:"minio_folder"`
-	IsAlt               bool                   `json:"is_alt"`
+	ID                  string         `json:"id"`
+	Default             string         `json:"default"`
+	Type                string         `json:"type"`
+	Index               string         `json:"index"`
+	Label               string         `json:"label"`
+	Slug                string         `json:"slug"`
+	TableID             string         `json:"table_id"`
+	Required            bool           `json:"required"`
+	Attributes          map[string]any `json:"attributes"`
+	IsVisible           bool           `json:"is_visible"`
+	AutoFillField       string         `json:"autofill_field"`
+	AutoFillTable       string         `json:"autofill_table"`
+	RelationField       string         `json:"relation_field"`
+	Unique              bool           `json:"unique"`
+	Automatic           bool           `json:"automatic"`
+	ShowLabel           bool           `json:"show_label"`
+	EnableMultilanguage bool           `json:"enable_multilanguage"`
+	MinioFolder         string         `json:"minio_folder"`
+	IsAlt               bool           `json:"is_alt"`
 }
 
 type GetAllFieldsResponse struct {
-	Fields []Field                `json:"fields"`
-	Count  int32                  `json:"count"`
-	Data   map[string]interface{} `json:"data"`
+	Fields []Field        `json:"fields"`
+	Count  int32          `json:"count"`
+	Data   map[string]any `json:"data"`
 }
 
 type VariablesForCustomErrorMessage struct {
@@ -87,7 +87,7 @@ type CreateTableRequest struct {
 	IncrementID        IncrementId                                  `json:"increment_id"`
 	CustomErrorMessage []*object_builder_service.CustomErrorMessage `json:"custom_error_messages"`
 	OrderBy            bool                                         `json:"order_by"`
-	Attributes         map[string]interface{}                       `json:"attributes"`
+	Attributes         map[string]any                               `json:"attributes"`
 }
 
 type IncrementId struct {

@@ -31,7 +31,7 @@ func (h *HandlerV1) GetLanguageJson(c *gin.Context) {
 		objectRequest models.CommonMessage
 		resp          *obs.CommonMessage
 		statusHttp    = status_http.GrpcStatusToHTTP["Ok"]
-		object        = make(map[string]interface{})
+		object        = make(map[string]any)
 	)
 	tokenInfo, err := h.GetAuthInfo(c)
 	if err != nil {

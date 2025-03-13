@@ -1,8 +1,8 @@
 package models
 
 type ExcelToDbRequest struct {
-	TableSlug string                 `json:"table_slug"`
-	Data      map[string]interface{} `json:"data"`
+	TableSlug string         `json:"table_slug"`
+	Data      map[string]any `json:"data"`
 }
 
 type ExcelToDbResponse struct {

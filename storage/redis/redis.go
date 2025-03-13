@@ -19,9 +19,9 @@ func NewRedis(cfg map[string]config.Config) storage.RedisStorageI {
 
 	for k, v := range cfg {
 		redisPool[k] = redis.NewClient(&redis.Options{
-			Addr:     fmt.Sprintf("%s:%s", v.GetRequestRedisHost, v.GetRequestRedisPort),
+			Addr: fmt.Sprintf("%s:%s", v.GetRequestRedisHost, v.GetRequestRedisPort),
 			//Password: v.GetRequestRedisPassword,
-			DB:       v.GetRequestRedisDatabase,
+			DB: v.GetRequestRedisDatabase,
 		})
 	}
 
@@ -51,7 +51,7 @@ func (s Storage) Del(ctx context.Context, keys string, projectId string, nodeTyp
 	return s.pool[projectId].Del(ctx, keys).Err()
 }
 
-func (s Storage) Set(ctx context.Context, key string, value interface{}, duration time.Duration, projectId string, nodeType string) error {
+func (s Storage) Set(ctx context.Context, key string, value any, duration time.Duration, projectId string, nodeType string) error {
 	if nodeType != config.ENTER_PRICE_TYPE {
 		projectId = config.BaseLoad().UcodeNamespace
 	}

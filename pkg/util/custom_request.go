@@ -13,7 +13,7 @@ import (
 
 const Header = `<?xml version="1.0" encoding="UTF-8"?>` + "\n"
 
-func DoRequest(url string, method string, body interface{}) (responseModel models.InvokeFunctionResponse, err error) {
+func DoRequest(url string, method string, body any) (responseModel models.InvokeFunctionResponse, err error) {
 	data, err := json.Marshal(&body)
 	if err != nil {
 		return
@@ -49,7 +49,7 @@ func DoRequest(url string, method string, body interface{}) (responseModel model
 }
 
 // DoXMLRequest function for alaflab integration
-func DoXMLRequest(url string, method string, body interface{}) (responseModel models.InvokeFunctionResponse, err error) {
+func DoXMLRequest(url string, method string, body any) (responseModel models.InvokeFunctionResponse, err error) {
 	data, err := xml.MarshalIndent(&body, " ", "  ")
 	if err != nil {
 		return
@@ -84,7 +84,7 @@ func DoXMLRequest(url string, method string, body interface{}) (responseModel mo
 	return
 }
 
-func DoRequestCheckCodeServer(url string, method string, body interface{}) (status int, err error) {
+func DoRequestCheckCodeServer(url string, method string, body any) (status int, err error) {
 	data, err := json.Marshal(&body)
 	if err != nil {
 		return

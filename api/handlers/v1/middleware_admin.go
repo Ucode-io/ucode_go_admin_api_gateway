@@ -37,7 +37,7 @@ func (h *HandlerV1) AdminAuthMiddleware() gin.HandlerFunc {
 			var (
 				ok          bool
 				res         = &auth.HasAccessSuperAdminRes{}
-				data        = make(map[string]interface{})
+				data        = make(map[string]any)
 				bearerToken = c.GetHeader("Authorization")
 				strArr      = strings.Split(bearerToken, " ")
 			)

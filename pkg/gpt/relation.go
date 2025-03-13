@@ -15,7 +15,7 @@ func CreateRelation(req *models.CreateRelationAI) ([]*models.CreateVersionHistor
 		respLogReq = []*models.CreateVersionHistoryRequest{}
 	)
 
-	attributes, err := helper.ConvertMapToStruct(map[string]interface{}{
+	attributes, err := helper.ConvertMapToStruct(map[string]any{
 		"label_to_en": req.TableFrom,
 		"label_en":    req.TableTo,
 	})

@@ -40,7 +40,7 @@ func (h *HandlerV1) Cache(c *gin.Context) {
 		return
 	}
 
-	var res = make(map[string]interface{})
+	var res = make(map[string]any)
 
 	if request.Method == "GET" {
 		data, err := h.redis.Get(c, key, "", h.baseConf.UcodeNamespace)

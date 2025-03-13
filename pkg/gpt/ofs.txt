@@ -56,7 +56,7 @@ func Handle(req []byte) string {
 		createTableNameUrl = createURL + tableSlug
 		// column name get from prompt
 		createTableNameReq = Request{
-			Data: map[string]interface{}{
+			Data: map[string]any{
 				"guid": uuid.NewString(), // always use it
 				"name": "some name",
 			},
@@ -77,7 +77,7 @@ func Handle(req []byte) string {
 		updateTableNameUrl = updateURL + tableSlug + "/guid from prompt"
 		// column name get from prompt
 		updateTableNameReq = Request{
-			Data: map[string]interface{}{
+			Data: map[string]any{
 				"guid": "guid from prompt",
 				"name": "some name",
 			},
@@ -98,14 +98,14 @@ func Handle(req []byte) string {
 	var (
 		getListTableNameUrl = getListURL + tableSlug
 		getListTableNameReq = Request{
-			Data: map[string]interface{}{}, // default u give like this or u can give limit, offset, or other filters which user gives in pormpt
+			Data: map[string]any{}, // default u give like this or u can give limit, offset, or other filters which user gives in pormpt
 		}
 
 		// exemple with filters
 		// getListTableNameReq = Request{
-		// 	Data: map[string]interface{}{
+		// 	Data: map[string]any{
 		// 		"name": "John",
-		// 		"age": map[string]interface{}{
+		// 		"age": map[string]any{
 		// 			"$gt": 18,
 		// 		},
 		// 	},
@@ -142,11 +142,11 @@ func Handle(req []byte) string {
 		multipleUpdateTableNameReq = MultipleUpdateRequest{
 			Data: Data{},
 		}
-		objects = []map[string]interface{}{}
+		objects = []map[string]any{}
 	)
 
 	for _, obj := range getListTableNameResp.Data.Data.Response { // or other data for loop
-		objects = append(objects, obj) // ther some info about multiple update in  map[string]interface{} if you don't give guid system create this data if uyou give then he updates
+		objects = append(objects, obj) // ther some info about multiple update in  map[string]any if you don't give guid system create this data if uyou give then he updates
 	}
 
 	multipleUpdateTableNameReq.Data.Objects = objects
@@ -159,7 +159,7 @@ func Handle(req []byte) string {
 	return Handler("OK", "Successfully updated!")
 }
 
-func DoRequest(url string, method string, body interface{}) ([]byte, error) {
+func DoRequest(url string, method string, body any) ([]byte, error) {
 	data, err := json.Marshal(&body)
 	if err != nil {
 		return nil, err
@@ -193,13 +193,13 @@ func DoRequest(url string, method string, body interface{}) ([]byte, error) {
 func Handler(status, message string) string {
 	var (
 		response Response
-		Message  = make(map[string]interface{})
+		Message  = make(map[string]any)
 	)
 
 	// sendMessage("", status, message)
 	response.Status = status
 	data := Request{
-		Data: map[string]interface{}{
+		Data: map[string]any{
 			"data": message,
 		},
 	}
@@ -209,7 +209,7 @@ func Handler(status, message string) string {
 	return string(respByte)
 }
 
-func sendMessage(functionName, errorStatus string, message interface{}) {
+func sendMessage(functionName, errorStatus string, message any) {
 	bot, err := tgbotapi.NewBotAPI("")
 	if err != nil {
 		log.Panic(err)
@@ -225,7 +225,7 @@ func sendMessage(functionName, errorStatus string, message interface{}) {
 
 type Response struct {
 	Status string                 `json:"status"`
-	Data   map[string]interface{} `json:"data"`
+	Data   map[string]any `json:"data"`
 }
 
 // This struct for request of ofs unmarshal
@@ -235,12 +235,12 @@ type RequestBody struct {
 }
 
 type RequestData struct {
-	ObjectData             map[string]interface{} `json:"object_data"`
+	ObjectData             map[string]any `json:"object_data"`
 	ObjectDataBeforeUpdate BeforeResp `json:"object_data_before_update"`
 }
 
 type BeforeResp struct {
-	Response map[string]interface{} `json:"response"`
+	Response map[string]any `json:"response"`
 }
 
 // Response of single data get
@@ -253,12 +253,12 @@ type ClientApiData struct {
 }
 
 type ClientApiResp struct {
-	Response map[string]interface{} `json:"response"`
+	Response map[string]any `json:"response"`
 }
 
 // All request struct for get-list, create, update
 type Request struct {
-	Data map[string]interface{} `json:"data"`
+	Data map[string]any `json:"data"`
 }
 
 // This struct for create multiple update data
@@ -267,7 +267,7 @@ type MultipleUpdateRequest struct {
 }
 
 type Data struct {
-	Objects []map[string]interface{} `json:"objects"`
+	Objects []map[string]any `json:"objects"`
 }
 
 // This for response get-list data
@@ -280,12 +280,12 @@ type GetListClientApiData struct {
 }
 
 type GetListClientApiResp struct {
-	Response []map[string]interface{} `json:"response"`
+	Response []map[string]any `json:"response"`
 }
 
 type ResponseModel struct {
 	Status string                 `json:"status"`
-	Data   map[string]interface{} `json:"data"`
+	Data   map[string]any `json:"data"`
 }
 
 type CreateResponseBody struct {
@@ -297,5 +297,5 @@ type CreateResponseModel struct {
 }
 
 type CreateResponse struct {
-	Data map[string]interface{} `json:"data"`
+	Data map[string]any `json:"data"`
 }

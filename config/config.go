@@ -273,7 +273,7 @@ func Load() Config {
 	return config
 }
 
-func GetOrReturnDefaultValue(key string, defaultValue interface{}) interface{} {
+func GetOrReturnDefaultValue(key string, defaultValue any) any {
 	val, exists := os.LookupEnv(key)
 
 	if exists {

@@ -200,7 +200,7 @@ func (h *HandlerV1) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 				}()
 			}
 
-			data := make(map[string]interface{})
+			data := make(map[string]any)
 
 			if err = json.Unmarshal(apiJson, &data); err != nil {
 				h.handleResponse(c, status_http.BadRequest, "cant get auth info")
@@ -427,7 +427,7 @@ func (h *HandlerV1) SlimAuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 					}()
 				}
 
-				data := make(map[string]interface{})
+				data := make(map[string]any)
 				err = json.Unmarshal(apiJson, &data)
 				if err != nil {
 					h.handleResponse(c, status_http.BadRequest, "cant get auth info")
@@ -736,7 +736,7 @@ func (h *HandlerV1) RedirectAuthMiddleware(cfg config.BaseConfig) gin.HandlerFun
 				h.cache.Add(resourceAppIdKey, resourceBody, config.REDIS_TIMEOUT)
 			}()
 		}
-		data := make(map[string]interface{})
+		data := make(map[string]any)
 		err = json.Unmarshal(apiJson, &data)
 		if err != nil {
 			h.handleResponse(c, status_http.BadRequest, "cant get auth info")
