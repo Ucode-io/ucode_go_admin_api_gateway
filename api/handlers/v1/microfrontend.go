@@ -2,6 +2,8 @@ package v1
 
 import (
 	_ "ucode/ucode_go_api_gateway/genproto/new_function_service"
+	_ "ucode/ucode_go_api_gateway/api/models"
+	_ "ucode/ucode_go_api_gateway/api/status_http"
 
 	"github.com/gin-gonic/gin"
 )
