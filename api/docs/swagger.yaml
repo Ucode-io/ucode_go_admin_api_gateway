@@ -19575,6 +19575,94 @@ paths:
       summary: Get single version history
       tags:
       - VersionHistory
+  /v2/version/history/{environment_id}/excel:
+    get:
+      consumes:
+      - application/json
+      description: Get version history list in excel format
+      operationId: version_history_excel_download
+      parameters:
+      - description: environment_id
+        in: path
+        name: environment_id
+        required: true
+        type: string
+      - in: query
+        name: action_type
+        type: string
+      - in: query
+        name: api_key
+        type: string
+      - in: query
+        name: collection
+        type: string
+      - in: query
+        name: env_id
+        type: string
+      - in: query
+        name: from_date
+        type: string
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: offset
+        type: integer
+      - in: query
+        name: order_by
+        type: boolean
+      - in: query
+        name: project_id
+        type: string
+      - in: query
+        name: to_date
+        type: string
+      - in: query
+        name: type
+        type: string
+      - in: query
+        name: user_info
+        type: string
+      - in: query
+        items:
+          type: string
+        name: version_ids
+        type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ObjectBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.CommonMessage'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get version history list in excel format
+      tags:
+      - VersionHistory
   /v2/version/history/migrate/up/{environment_id}:
     post:
       consumes:
