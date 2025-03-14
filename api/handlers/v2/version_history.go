@@ -1,7 +1,10 @@
 package v2
 
 import (
+	"bytes"
+	"context"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -11,6 +14,9 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
+	"github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
+	"github.com/xuri/excelize/v2"
 )
 
 // GetByUDVersionHistory godoc
@@ -329,4 +335,197 @@ func (h *HandlerV2) UpdateVersionHistory(c *gin.Context) {
 	}
 
 	h.handleResponse(c, status_http.OK, nil)
+}
+
+// VersionHistoryExcelDownload godoc
+// @Security ApiKeyAuth
+// @ID version_history_excel_download
+// @Router /v2/version/history/excel/{environment_id} [GET]
+// @Summary Get version history list in excel format
+// @Description Get version history list in excel format
+// @Tags VersionHistory
+// @Accept json
+// @Produce json
+// @Param environment_id path string true "environment_id"
+// @Param filters query obs.GetAllRquest true "filters"
+// @Success 200 {object} status_http.Response{data=models.CommonMessage} "ObjectBody"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *HandlerV2) VersionHistoryExcelDownload(c *gin.Context) {
+
+	var (
+		response         = map[string]string{}
+		fileName         = fmt.Sprintf("report_%d.xlsx", time.Now().Unix())
+		fromDate, toDate string
+		orderby          bool
+	)
+	offset, err := h.getOffsetParam(c)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
+	limit, err := h.getLimitParam(c)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
+	apiKey := c.Query("api_key")
+	actionType := c.Query("action_type")
+	collection := c.Query("collection")
+
+	if c.Query("from_date") != "" {
+		formatFromDate, err := time.Parse("2006-01-02", c.Query("from_date"))
+		if err != nil {
+			h.handleResponse(c, status_http.BadRequest, err.Error())
+			return
+		}
+
+		fromDate = formatFromDate.Format("2006-01-02")
+	}
+
+	if c.Query("to_date") != "" {
+		formatToDate, err := time.Parse("2006-01-02", c.Query("to_date"))
+		if err != nil {
+			h.handleResponse(c, status_http.BadRequest, err.Error())
+			return
+		}
+
+		toDate = formatToDate.Format("2006-01-02")
+	}
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	currEnvironmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(currEnvironmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: currEnvironmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	tip := strings.ToUpper(c.Query("type"))
+	if tip == "UP" {
+		orderby = false
+	}
+
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).VersionHistory().GatAll(c.Request.Context(),
+			&obs.GetAllRquest{
+				Type:       tip,
+				ProjectId:  resource.ResourceEnvironmentId,
+				EnvId:      currEnvironmentId.(string),
+				ApiKey:     apiKey,
+				Offset:     int32(offset),
+				Limit:      int32(20000),
+				FromDate:   fromDate,
+				ToDate:     toDate,
+				OrderBy:    orderby,
+				ActionType: actionType,
+				Collection: collection,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		f := excelize.NewFile()
+		sheetName := "Users"
+		f.SetSheetName("Sheet1", sheetName)
+
+		headers := []string{"table_slug", "date", "action_type", "user_info", "action_source", "api_key", "type"}
+
+		// this is static solution
+		for colIdx, header := range headers {
+			cell := fmt.Sprintf("%c1", 'A'+colIdx)
+			f.SetCellValue(sheetName, cell, header)
+		}
+
+		for rowIdx, hst := range resp.Histories {
+			f.SetCellValue(sheetName, fmt.Sprintf("A%d", rowIdx+2), hst.TableSlug)
+			f.SetCellValue(sheetName, fmt.Sprintf("B%d", rowIdx+2), hst.Date)
+			f.SetCellValue(sheetName, fmt.Sprintf("C%d", rowIdx+2), hst.ActionType)
+			f.SetCellValue(sheetName, fmt.Sprintf("D%d", rowIdx+2), hst.UserInfo)
+			f.SetCellValue(sheetName, fmt.Sprintf("E%d", rowIdx+2), hst.ActionSource)
+			f.SetCellValue(sheetName, fmt.Sprintf("F%d", rowIdx+2), hst.ApiKey)
+			f.SetCellValue(sheetName, fmt.Sprintf("G%d", rowIdx+2), hst.Type)
+		}
+
+		var buf bytes.Buffer
+		if err := f.Write(&buf); err != nil {
+			h.handleResponse(c, status_http.InternalServerError, err.Error())
+			return
+		}
+
+		minioClient, err := minio.New(h.baseConf.MinioEndpoint, &minio.Options{
+			Creds:  credentials.NewStaticV4(h.baseConf.MinioAccessKeyID, h.baseConf.MinioSecretAccessKey, ""),
+			Secure: h.baseConf.MinioProtocol,
+		})
+
+		if err != nil {
+			h.handleResponse(c, status_http.BadRequest, err.Error())
+			return
+		}
+
+		_, err = minioClient.PutObject(context.Background(), resource.ResourceEnvironmentId, fileName, bytes.NewReader(buf.Bytes()), int64(buf.Len()), minio.PutObjectOptions{ContentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"})
+		if err != nil {
+			h.handleResponse(c, status_http.BadRequest, err.Error())
+			return
+		}
+
+		response["link"] = fmt.Sprintf("%s/%s/%s", h.baseConf.MinioEndpoint, resource.ResourceEnvironmentId, fileName)
+		h.handleResponse(c, status_http.OK, response)
+
+	case pb.ResourceType_POSTGRESQL:
+		resp, err := services.GoObjectBuilderService().VersionHistory().GatAll(
+			c.Request.Context(),
+			&nb.GetAllRquest{
+				Type:       tip,
+				ProjectId:  resource.ResourceEnvironmentId,
+				EnvId:      currEnvironmentId.(string),
+				ApiKey:     apiKey,
+				Offset:     int32(offset),
+				Limit:      int32(limit),
+				FromDate:   fromDate,
+				ToDate:     toDate,
+				OrderBy:    orderby,
+				ActionType: actionType,
+				Collection: collection,
+			},
+		)
+
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		h.handleResponse(c, status_http.OK, resp)
+	}
+
 }
