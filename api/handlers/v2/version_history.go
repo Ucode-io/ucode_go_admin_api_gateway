@@ -141,6 +141,7 @@ func (h *HandlerV2) GetAllVersionHistory(c *gin.Context) {
 	apiKey := c.Query("api_key")
 	actionType := c.Query("action_type")
 	collection := c.Query("collection")
+	userInfo := c.Query("user_info")
 
 	if c.Query("from_date") != "" {
 		formatFromDate, err := time.Parse("2006-01-02", c.Query("from_date"))
@@ -215,6 +216,7 @@ func (h *HandlerV2) GetAllVersionHistory(c *gin.Context) {
 				OrderBy:    orderby,
 				ActionType: actionType,
 				Collection: collection,
+				UserInfo:   userInfo,
 			},
 		)
 		if err != nil {
@@ -238,6 +240,7 @@ func (h *HandlerV2) GetAllVersionHistory(c *gin.Context) {
 				OrderBy:    orderby,
 				ActionType: actionType,
 				Collection: collection,
+				UserInfo:   userInfo,
 			},
 		)
 
@@ -374,6 +377,7 @@ func (h *HandlerV2) VersionHistoryExcelDownload(c *gin.Context) {
 	apiKey := c.Query("api_key")
 	actionType := c.Query("action_type")
 	collection := c.Query("collection")
+	userInfo := c.Query("user_info")
 
 	if c.Query("from_date") != "" {
 		formatFromDate, err := time.Parse("2006-01-02", c.Query("from_date"))
@@ -448,6 +452,7 @@ func (h *HandlerV2) VersionHistoryExcelDownload(c *gin.Context) {
 				OrderBy:    orderby,
 				ActionType: actionType,
 				Collection: collection,
+				UserInfo:   userInfo,
 			},
 		)
 		if err != nil {
@@ -470,6 +475,7 @@ func (h *HandlerV2) VersionHistoryExcelDownload(c *gin.Context) {
 				OrderBy:    orderby,
 				ActionType: actionType,
 				Collection: collection,
+				UserInfo:   userInfo,
 			},
 		)
 
