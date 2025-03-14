@@ -2,7 +2,7 @@ package v2
 
 import (
 	"bytes"
-	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -340,7 +340,7 @@ func (h *HandlerV2) UpdateVersionHistory(c *gin.Context) {
 // VersionHistoryExcelDownload godoc
 // @Security ApiKeyAuth
 // @ID version_history_excel_download
-// @Router /v2/version/history/excel/{environment_id} [GET]
+// @Router /v2/version/history/{environment_id}/excel [GET]
 // @Summary Get version history list in excel format
 // @Description Get version history list in excel format
 // @Tags VersionHistory
@@ -352,12 +352,12 @@ func (h *HandlerV2) UpdateVersionHistory(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) VersionHistoryExcelDownload(c *gin.Context) {
-
 	var (
 		response         = map[string]string{}
 		fileName         = fmt.Sprintf("report_%d.xlsx", time.Now().Unix())
 		fromDate, toDate string
 		orderby          bool
+		resp             *obs.ListVersionHistory
 	)
 	offset, err := h.getOffsetParam(c)
 	if err != nil {
@@ -435,7 +435,7 @@ func (h *HandlerV2) VersionHistoryExcelDownload(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err := services.GetBuilderServiceByType(resource.NodeType).VersionHistory().GatAll(c.Request.Context(),
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).VersionHistory().GatAll(c.Request.Context(),
 			&obs.GetAllRquest{
 				Type:       tip,
 				ProjectId:  resource.ResourceEnvironmentId,
@@ -455,55 +455,8 @@ func (h *HandlerV2) VersionHistoryExcelDownload(c *gin.Context) {
 			return
 		}
 
-		f := excelize.NewFile()
-		sheetName := "Users"
-		f.SetSheetName("Sheet1", sheetName)
-
-		headers := []string{"table_slug", "date", "action_type", "user_info", "action_source", "api_key", "type"}
-
-		// this is static solution
-		for colIdx, header := range headers {
-			cell := fmt.Sprintf("%c1", 'A'+colIdx)
-			f.SetCellValue(sheetName, cell, header)
-		}
-
-		for rowIdx, hst := range resp.Histories {
-			f.SetCellValue(sheetName, fmt.Sprintf("A%d", rowIdx+2), hst.TableSlug)
-			f.SetCellValue(sheetName, fmt.Sprintf("B%d", rowIdx+2), hst.Date)
-			f.SetCellValue(sheetName, fmt.Sprintf("C%d", rowIdx+2), hst.ActionType)
-			f.SetCellValue(sheetName, fmt.Sprintf("D%d", rowIdx+2), hst.UserInfo)
-			f.SetCellValue(sheetName, fmt.Sprintf("E%d", rowIdx+2), hst.ActionSource)
-			f.SetCellValue(sheetName, fmt.Sprintf("F%d", rowIdx+2), hst.ApiKey)
-			f.SetCellValue(sheetName, fmt.Sprintf("G%d", rowIdx+2), hst.Type)
-		}
-
-		var buf bytes.Buffer
-		if err := f.Write(&buf); err != nil {
-			h.handleResponse(c, status_http.InternalServerError, err.Error())
-			return
-		}
-
-		minioClient, err := minio.New(h.baseConf.MinioEndpoint, &minio.Options{
-			Creds:  credentials.NewStaticV4(h.baseConf.MinioAccessKeyID, h.baseConf.MinioSecretAccessKey, ""),
-			Secure: h.baseConf.MinioProtocol,
-		})
-
-		if err != nil {
-			h.handleResponse(c, status_http.BadRequest, err.Error())
-			return
-		}
-
-		_, err = minioClient.PutObject(context.Background(), resource.ResourceEnvironmentId, fileName, bytes.NewReader(buf.Bytes()), int64(buf.Len()), minio.PutObjectOptions{ContentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"})
-		if err != nil {
-			h.handleResponse(c, status_http.BadRequest, err.Error())
-			return
-		}
-
-		response["link"] = fmt.Sprintf("%s/%s/%s", h.baseConf.MinioEndpoint, resource.ResourceEnvironmentId, fileName)
-		h.handleResponse(c, status_http.OK, response)
-
 	case pb.ResourceType_POSTGRESQL:
-		resp, err := services.GoObjectBuilderService().VersionHistory().GatAll(
+		goResp, err := services.GoObjectBuilderService().VersionHistory().GatAll(
 			c.Request.Context(),
 			&nb.GetAllRquest{
 				Type:       tip,
@@ -525,7 +478,72 @@ func (h *HandlerV2) VersionHistoryExcelDownload(c *gin.Context) {
 			return
 		}
 
-		h.handleResponse(c, status_http.OK, resp)
+		//convert goResp to resp
+		goRespByte, err := json.Marshal(goResp)
+		if err != nil {
+			h.handleResponse(c, status_http.InternalServerError, err.Error())
+			return
+		}
+
+		err = json.Unmarshal(goRespByte, &resp)
+		if err != nil {
+			h.handleResponse(c, status_http.InternalServerError, err.Error())
+			return
+		}
 	}
+
+	f := excelize.NewFile()
+	sheetName := "Users"
+	f.SetSheetName("Sheet1", sheetName)
+
+	headers := []string{"table_slug", "date", "action_type", "user_info", "action_source", "api_key", "type"}
+
+	// this is static solution
+	for colIdx, header := range headers {
+		cell := fmt.Sprintf("%c1", 'A'+colIdx)
+		f.SetCellValue(sheetName, cell, header)
+	}
+
+	for rowIdx, hst := range resp.Histories {
+		f.SetCellValue(sheetName, fmt.Sprintf("A%d", rowIdx+2), hst.TableSlug)
+		f.SetCellValue(sheetName, fmt.Sprintf("B%d", rowIdx+2), hst.Date)
+		f.SetCellValue(sheetName, fmt.Sprintf("C%d", rowIdx+2), hst.ActionType)
+		f.SetCellValue(sheetName, fmt.Sprintf("D%d", rowIdx+2), hst.UserInfo)
+		f.SetCellValue(sheetName, fmt.Sprintf("E%d", rowIdx+2), hst.ActionSource)
+		f.SetCellValue(sheetName, fmt.Sprintf("F%d", rowIdx+2), hst.ApiKey)
+		f.SetCellValue(sheetName, fmt.Sprintf("G%d", rowIdx+2), hst.Type)
+	}
+
+	var buf bytes.Buffer
+	if err := f.Write(&buf); err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err.Error())
+		return
+	}
+
+	minioClient, err := minio.New(h.baseConf.MinioEndpoint, &minio.Options{
+		Creds:  credentials.NewStaticV4(h.baseConf.MinioAccessKeyID, h.baseConf.MinioSecretAccessKey, ""),
+		Secure: h.baseConf.MinioProtocol,
+	})
+
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	_, err = minioClient.PutObject(
+		c.Request.Context(),
+		resource.ResourceEnvironmentId,
+		fileName,
+		bytes.NewReader(buf.Bytes()),
+		int64(buf.Len()),
+		minio.PutObjectOptions{ContentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	response["link"] = fmt.Sprintf("%s/%s/%s", h.baseConf.MinioEndpoint, resource.ResourceEnvironmentId, fileName)
+	h.handleResponse(c, status_http.OK, response)
 
 }
