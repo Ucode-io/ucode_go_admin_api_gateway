@@ -234,6 +234,7 @@ message Project {
     string status = 16;
     bool new_design = 17;
     string expire_date = 18;
+    bool new_layout = 19;
 }
 
 message CreateProjectRequest {
