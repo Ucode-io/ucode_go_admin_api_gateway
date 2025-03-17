@@ -92,6 +92,7 @@ message Project2 {
     string status = 11;
     string expire_date = 12;
     bool new_layout = 13;
+    string subscription_type = 14;
 }
 
 message Company2 {
