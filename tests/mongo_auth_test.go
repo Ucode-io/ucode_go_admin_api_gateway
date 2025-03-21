@@ -6,8 +6,8 @@ package tests
 // 	assert.NoError(t, err, "faker error")
 
 // 	body, err := UcodeApiForStaging.DoRequest(BaseUrlAuthStaging+"/v2/register?project-id="+ProjectIdMongo, "POST",
-// 		map[string]interface{}{
-// 			"data": map[string]interface{}{"type": "email", "client_type_id": ClientTypeIdMongo, "role_id": RoleIdMongo, "email": Email, "name": faker1.Name()},
+// 		map[string]any{
+// 			"data": map[string]any{"type": "email", "client_type_id": ClientTypeIdMongo, "role_id": RoleIdMongo, "email": Email, "name": faker1.Name()},
 // 		},
 // 		map[string]string{"Resource-Id": ResourceIdMongo, "Environment-Id": EnvironmentIdMongo, "X-API-KEY": UcodeApiForStaging.Config().AppId},
 // 	)
@@ -19,7 +19,7 @@ package tests
 
 // 	userId := registerResponse.Data.UserID
 
-// 	body, err = UcodeApiForStaging.DoRequest(BaseUrlAuthStaging+"/v2/send-code", "POST", map[string]interface{}{
+// 	body, err = UcodeApiForStaging.DoRequest(BaseUrlAuthStaging+"/v2/send-code", "POST", map[string]any{
 // 		"recipient": Email,
 // 		"text":      "This is your code",
 // 		"type":      "EMAIL",
@@ -33,8 +33,8 @@ package tests
 
 // 	smsId := smsResponse.Data.SmsID
 
-// 	_, err = UcodeApiForStaging.DoRequest(BaseUrlAuthStaging+"/v2/login/with-option?project-id="+ProjectIdMongo, "POST", map[string]interface{}{
-// 		"data": map[string]interface{}{
+// 	_, err = UcodeApiForStaging.DoRequest(BaseUrlAuthStaging+"/v2/login/with-option?project-id="+ProjectIdMongo, "POST", map[string]any{
+// 		"data": map[string]any{
 // 			"sms_id":         smsId,
 // 			"otp":            "111111",
 // 			"email":          Email,
@@ -48,7 +48,7 @@ package tests
 
 // 	_, err = UcodeApiForStaging.Delete(&sdk.Argument{
 // 		TableSlug: "user_email",
-// 		Request: sdk.Request{Data: map[string]interface{}{
+// 		Request: sdk.Request{Data: map[string]any{
 // 			"guid": userId,
 // 		}},
 // 	})
@@ -62,8 +62,8 @@ package tests
 // 	phone := "+998946236953"
 
 // 	body, err := UcodeApi.DoRequest(BaseUrlAuthStaging+"/v2/register?project-id="+ProjectIdMongo, "POST",
-// 		map[string]interface{}{
-// 			"data": map[string]interface{}{"type": "phone", "client_type_id": ClientTypeIdMongo, "role_id": RoleIdMongo, "phone": phone, "name": faker1.Name()},
+// 		map[string]any{
+// 			"data": map[string]any{"type": "phone", "client_type_id": ClientTypeIdMongo, "role_id": RoleIdMongo, "phone": phone, "name": faker1.Name()},
 // 		},
 // 		map[string]string{"Resource-Id": ResourceIdMongo, "Environment-Id": EnvironmentIdMongo, "X-API-KEY": UcodeApiForStaging.Config().AppId},
 // 	)
@@ -75,7 +75,7 @@ package tests
 
 // 	userId := registerResponse.Data.UserID
 
-// 	body, err = UcodeApiForStaging.DoRequest(BaseUrlAuthStaging+"/v2/send-code", "POST", map[string]interface{}{
+// 	body, err = UcodeApiForStaging.DoRequest(BaseUrlAuthStaging+"/v2/send-code", "POST", map[string]any{
 // 		"recipient": phone,
 // 		"text":      "This is your code",
 // 		"type":      "PHONE",
@@ -89,8 +89,8 @@ package tests
 
 // 	smsId := smsResponse.Data.SmsID
 
-// 	_, err = UcodeApiForStaging.DoRequest(BaseUrlAuthStaging+"/v2/login/with-option?project-id="+ProjectIdPg, "POST", map[string]interface{}{
-// 		"data": map[string]interface{}{
+// 	_, err = UcodeApiForStaging.DoRequest(BaseUrlAuthStaging+"/v2/login/with-option?project-id="+ProjectIdPg, "POST", map[string]any{
+// 		"data": map[string]any{
 // 			"sms_id":         smsId,
 // 			"otp":            "111111",
 // 			"phone":          phone,
@@ -104,7 +104,7 @@ package tests
 
 // 	_, err = UcodeApiForStaging.Delete(&sdk.Argument{
 // 		TableSlug: "user_email",
-// 		Request: sdk.Request{Data: map[string]interface{}{
+// 		Request: sdk.Request{Data: map[string]any{
 // 			"guid": userId,
 // 		}},
 // 	})
@@ -121,7 +121,7 @@ package tests
 // 	_, _, err := UcodeApiForStaging.CreateObject(&sdk.Argument{
 // 		TableSlug: "employee",
 // 		Request: sdk.Request{
-// 			Data: map[string]interface{}{
+// 			Data: map[string]any{
 // 				"guid":           guid,
 // 				"login":          login,
 // 				"password":       login,
@@ -134,8 +134,8 @@ package tests
 // 	})
 // 	assert.NoError(t, err)
 
-// 	_, err = UcodeApiForStaging.DoRequest(BaseUrlAuthStaging+"/v2/login/with-option?project-id="+ProjectIdMongo, "POST", map[string]interface{}{
-// 		"data": map[string]interface{}{
+// 	_, err = UcodeApiForStaging.DoRequest(BaseUrlAuthStaging+"/v2/login/with-option?project-id="+ProjectIdMongo, "POST", map[string]any{
+// 		"data": map[string]any{
 // 			"username":       login,
 // 			"password":       login,
 // 			"client_type_id": EmployeeClientTypeIdMongo,
@@ -150,19 +150,19 @@ package tests
 // 		TableSlug:   "employee",
 // 		DisableFaas: true,
 // 		Request: sdk.Request{
-// 			Data: map[string]interface{}{"guid": guid},
+// 			Data: map[string]any{"guid": guid},
 // 		},
 // 	})
 // 	assert.NoError(t, err)
 
-// 	_, err = UcodeApiForStaging.DoRequest(BaseUrlAuthStaging+"/v2/reset-password", "PUT", map[string]interface{}{
+// 	_, err = UcodeApiForStaging.DoRequest(BaseUrlAuthStaging+"/v2/reset-password", "PUT", map[string]any{
 // 		"password": "12345678",
 // 		"user_id":  userResp.Data.Data.Response["user_id_auth"],
 // 	}, map[string]string{})
 // 	assert.NoError(t, err)
 
-// 	_, err = UcodeApiForStaging.DoRequest(BaseUrlAuthStaging+"/v2/login/with-option?project-id="+ProjectIdMongo, "POST", map[string]interface{}{
-// 		"data": map[string]interface{}{
+// 	_, err = UcodeApiForStaging.DoRequest(BaseUrlAuthStaging+"/v2/login/with-option?project-id="+ProjectIdMongo, "POST", map[string]any{
+// 		"data": map[string]any{
 // 			"username":       login,
 // 			"password":       "12345678",
 // 			"client_type_id": EmployeeClientTypeIdMongo,
@@ -173,13 +173,13 @@ package tests
 // 	)
 // 	assert.NoError(t, err)
 
-// 	_, err = UcodeApiForStaging.DoRequest(BaseUrlAuthStaging+"/v2/forgot-password", "POST", map[string]interface{}{"login": login}, map[string]string{})
+// 	_, err = UcodeApiForStaging.DoRequest(BaseUrlAuthStaging+"/v2/forgot-password", "POST", map[string]any{"login": login}, map[string]string{})
 // 	assert.NoError(t, err)
 
 // 	_, err = UcodeApiForStaging.Delete(&sdk.Argument{
 // 		TableSlug: "employee",
 // 		Request: sdk.Request{
-// 			Data: map[string]interface{}{
+// 			Data: map[string]any{
 // 				"guid": guid,
 // 			},
 // 		},

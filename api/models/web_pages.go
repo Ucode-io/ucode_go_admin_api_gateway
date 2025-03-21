@@ -1,12 +1,12 @@
 package models
 
 type CreateWebPageRequest struct {
-	Title      string                 `json:"title"`
-	Components map[string]interface{} `json:"components"`
+	Title      string         `json:"title"`
+	Components map[string]any `json:"components"`
 }
 
 type WebPage struct {
-	Id         string                 `json:"guid"`
-	Title      string                 `json:"title"`
-	Components map[string]interface{} `json:"components"`
+	Id         string         `json:"guid"`
+	Title      string         `json:"title"`
+	Components map[string]any `json:"components"`
 }

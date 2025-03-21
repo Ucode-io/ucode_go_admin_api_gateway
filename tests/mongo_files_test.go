@@ -13,7 +13,7 @@ var (
 // 	assert.NoError(t, err)
 // 	assert.NotEmpty(t, uploadResp)
 
-// 	_, err = UcodeApi.DoRequest(BaseUrl+"/v1/files/"+uploadResp.Data.ID, http.MethodDelete, map[string]interface{}{},
+// 	_, err = UcodeApi.DoRequest(BaseUrl+"/v1/files/"+uploadResp.Data.ID, http.MethodDelete, map[string]any{},
 // 		map[string]string{
 // 			"Resource-Id":    ResourceId,
 // 			"Environment-Id": EnvironmentId,

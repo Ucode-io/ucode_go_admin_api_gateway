@@ -2,8 +2,8 @@ package models
 
 // JSONResult ..
 type JSONResult struct {
-	Message string      `json:"message"`
-	Data    interface{} `json:"data"`
+	Message string `json:"message"`
+	Data    any    `json:"data"`
 }
 
 // JSONErrorResponse ..

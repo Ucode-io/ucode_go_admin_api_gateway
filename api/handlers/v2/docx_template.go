@@ -136,11 +136,11 @@ func (h *HandlerV2) CreateDocxTemplate(c *gin.Context) {
 		}
 		base64FileData := base64.StdEncoding.EncodeToString(fileData)
 
-		payload := map[string]interface{}{
-			"Parameters": []map[string]interface{}{
+		payload := map[string]any{
+			"Parameters": []map[string]any{
 				{
 					"Name": "File",
-					"FileValue": map[string]interface{}{
+					"FileValue": map[string]any{
 						"Name": "output.docx",
 						"Data": base64FileData,
 					},
@@ -448,11 +448,11 @@ func (h *HandlerV2) UpdateDocxTemplate(c *gin.Context) {
 		}
 		base64FileData := base64.StdEncoding.EncodeToString(fileData)
 
-		payload := map[string]interface{}{
-			"Parameters": []map[string]interface{}{
+		payload := map[string]any{
+			"Parameters": []map[string]any{
 				{
 					"Name": "File",
-					"FileValue": map[string]interface{}{
+					"FileValue": map[string]any{
 						"Name": "output.docx",
 						"Data": base64FileData,
 					},

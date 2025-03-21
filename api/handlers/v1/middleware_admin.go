@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 	"ucode/ucode_go_api_gateway/api/models"
+	"ucode/ucode_go_api_gateway/config"
 	auth "ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/logger"
@@ -37,7 +38,7 @@ func (h *HandlerV1) AdminAuthMiddleware() gin.HandlerFunc {
 			var (
 				ok          bool
 				res         = &auth.HasAccessSuperAdminRes{}
-				data        = make(map[string]interface{})
+				data        = make(map[string]any)
 				bearerToken = c.GetHeader("Authorization")
 				strArr      = strings.Split(bearerToken, " ")
 			)
@@ -156,12 +157,15 @@ func (h *HandlerV1) adminHasAccess(c *gin.Context) (*auth.HasAccessSuperAdminRes
 		},
 	)
 	if err != nil {
-		errr := status.Error(codes.PermissionDenied, "Permission denied")
-		if errr.Error() == err.Error() {
+		permissionErrors := map[string]struct{}{
+			status.Error(codes.PermissionDenied, config.PermissionDenied).Error(): {},
+			status.Error(codes.PermissionDenied, config.InactiveStatus).Error():   {},
+		}
+		if _, exists := permissionErrors[err.Error()]; exists {
 			h.handleResponse(c, status_http.BadRequest, err.Error())
 			return nil, false
 		}
-		errr = status.Error(codes.InvalidArgument, "User has been expired")
+		errr := status.Error(codes.InvalidArgument, "User has been expired")
 		if errr.Error() == err.Error() {
 			h.handleResponse(c, status_http.Forbidden, err.Error())
 			return nil, false

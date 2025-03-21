@@ -100,10 +100,16 @@ definitions:
         type: number
       credit_limit:
         type: number
+      currency_rate:
+        type: number
       discount_percentage:
         type: number
+      end_date:
+        type: string
       project_balance:
         type: number
+      start_date:
+        type: string
     type: object
   company_service.Company:
     properties:
@@ -181,6 +187,8 @@ definitions:
   company_service.CreateFareRequest:
     properties:
       currency:
+        $ref: '#/definitions/company_service.Currency'
+      currency_id:
         type: string
       description:
         type: string
@@ -202,6 +210,8 @@ definitions:
   company_service.CreateProjectRequest:
     properties:
       company_id:
+        type: string
+      fare_id:
         type: string
       k8s_namespace:
         type: string
@@ -374,6 +384,8 @@ definitions:
       created_at:
         type: string
       currency:
+        $ref: '#/definitions/company_service.Currency'
+      currency_id:
         type: string
       description:
         type: string
@@ -391,6 +403,8 @@ definitions:
         type: string
       price:
         type: number
+      subscription:
+        $ref: '#/definitions/company_service.Subscription'
       trial_days:
         type: integer
       updated_at:
@@ -547,6 +561,8 @@ definitions:
     type: object
   company_service.Gitlab:
     properties:
+      base_url:
+        type: string
       created_at:
         type: integer
       expires_in:
@@ -616,6 +632,8 @@ definitions:
         type: array
       currency:
         $ref: '#/definitions/company_service.Currency'
+      expire_date:
+        type: string
       fare:
         $ref: '#/definitions/company_service.Fare'
       fare_id:
@@ -944,6 +962,23 @@ definitions:
       service_type:
         type: string
     type: object
+  company_service.Subscription:
+    properties:
+      end_date:
+        type: string
+      fare_id:
+        type: string
+      id:
+        type: string
+      project_id:
+        type: string
+      renewal_date:
+        type: string
+      start_date:
+        type: string
+      status:
+        type: string
+    type: object
   company_service.Timezone:
     properties:
       id:
@@ -973,6 +1008,8 @@ definitions:
         $ref: '#/definitions/company_service.Currency'
       currency_id:
         type: string
+      fare:
+        $ref: '#/definitions/company_service.Fare'
       fare_id:
         type: string
       id:
@@ -1097,19 +1134,19 @@ definitions:
       projectId:
         type: string
       value:
-        additionalProperties: true
+        additionalProperties: {}
         type: object
     type: object
   models.CacheResponse:
     properties:
       value:
-        additionalProperties: true
+        additionalProperties: {}
         type: object
     type: object
   models.CommonMessage:
     properties:
       data:
-        additionalProperties: true
+        additionalProperties: {}
         type: object
       is_cached:
         type: boolean
@@ -1131,7 +1168,7 @@ definitions:
   models.CreateFieldRequest:
     properties:
       attributes:
-        additionalProperties: true
+        additionalProperties: {}
         type: object
       autofill_field:
         type: string
@@ -1173,7 +1210,7 @@ definitions:
   models.CreateFieldsRequest:
     properties:
       attributes:
-        additionalProperties: true
+        additionalProperties: {}
         type: object
       automatic:
         type: boolean
@@ -1225,7 +1262,7 @@ definitions:
   models.CreateMenuRequest:
     properties:
       attributes:
-        additionalProperties: true
+        additionalProperties: {}
         type: object
       icon:
         type: string
@@ -1258,7 +1295,7 @@ definitions:
   models.CreateTableRequest:
     properties:
       attributes:
-        additionalProperties: true
+        additionalProperties: {}
         type: object
       custom_error_messages:
         items:
@@ -1318,7 +1355,7 @@ definitions:
       action_type:
         type: string
       attributes:
-        additionalProperties: true
+        additionalProperties: {}
         type: object
       commit_guid:
         type: string
@@ -1344,7 +1381,7 @@ definitions:
   models.Environment:
     properties:
       data:
-        additionalProperties: true
+        additionalProperties: {}
         type: object
       description:
         type: string
@@ -1360,7 +1397,7 @@ definitions:
   models.ExcelToDbRequest:
     properties:
       data:
-        additionalProperties: true
+        additionalProperties: {}
         type: object
       table_slug:
         type: string
@@ -1415,7 +1452,7 @@ definitions:
       count:
         type: integer
       data:
-        additionalProperties: true
+        additionalProperties: {}
         type: object
       fields:
         items:
@@ -1497,7 +1534,7 @@ definitions:
   models.HtmlBody:
     properties:
       data:
-        additionalProperties: true
+        additionalProperties: {}
         type: object
       html:
         type: string
@@ -1509,7 +1546,7 @@ definitions:
           type: string
         type: array
       query:
-        additionalProperties: true
+        additionalProperties: {}
         type: object
     type: object
   models.IncrementId:
@@ -1528,6 +1565,9 @@ definitions:
         type: object
       function_id:
         type: string
+      object_data:
+        additionalProperties: {}
+        type: object
       object_ids:
         items:
           type: string
@@ -1551,7 +1591,7 @@ definitions:
   models.Menu:
     properties:
       attributes:
-        additionalProperties: true
+        additionalProperties: {}
         type: object
       icon:
         type: string
@@ -1638,14 +1678,14 @@ definitions:
     properties:
       items:
         items:
-          additionalProperties: true
+          additionalProperties: {}
           type: object
         type: array
     type: object
   models.MultipleUpdateItems:
     properties:
       data:
-        additionalProperties: true
+        additionalProperties: {}
         type: object
       ids:
         items:
@@ -1675,7 +1715,7 @@ definitions:
   models.UpdateTableRequest:
     properties:
       attributes:
-        additionalProperties: true
+        additionalProperties: {}
         type: object
       author_id:
         type: string
@@ -1719,7 +1759,7 @@ definitions:
   models.UpsertCommonMessage:
     properties:
       data:
-        additionalProperties: true
+        additionalProperties: {}
         type: object
       updated_fields:
         items:
@@ -1813,6 +1853,19 @@ definitions:
       title:
         type: string
     type: object
+  new_object_builder_service.CreateLanguageRequest:
+    properties:
+      category:
+        type: string
+      key:
+        type: string
+      platform:
+        type: string
+      project_id:
+        type: string
+      translations:
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+    type: object
   new_object_builder_service.DocxTemplate:
     properties:
       file_url:
@@ -1838,6 +1891,19 @@ definitions:
         items:
           $ref: '#/definitions/new_object_builder_service.DocxTemplate'
         type: array
+    type: object
+  new_object_builder_service.Language:
+    properties:
+      category:
+        type: string
+      id:
+        type: string
+      key:
+        type: string
+      platform:
+        type: string
+      translations:
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
     type: object
   object_builder_service.ActionRelation:
     properties:
@@ -4136,7 +4202,7 @@ definitions:
   ucode_ucode_go_api_gateway_api_models.Field:
     properties:
       attributes:
-        additionalProperties: true
+        additionalProperties: {}
         type: object
       autofill_field:
         type: string
@@ -8457,6 +8523,9 @@ paths:
         name: environment_id
         type: string
       - in: query
+        name: function_id
+        type: string
+      - in: query
         name: limit
         type: integer
       - in: query
@@ -9643,6 +9712,236 @@ paths:
       summary: Invoke Function By Path
       tags:
       - Function
+  /v1/language:
+    get:
+      consumes:
+      - application/json
+      description: List languages
+      operationId: list-languages
+      parameters:
+      - description: limit
+        in: query
+        name: limit
+        type: string
+      - description: offset
+        in: query
+        name: offset
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Languages data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/new_object_builder_service.Language'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: List languages
+      tags:
+      - Language
+    post:
+      consumes:
+      - application/json
+      description: Create language
+      operationId: create-language
+      parameters:
+      - description: LanguageCreateRequest
+        in: body
+        name: language
+        required: true
+        schema:
+          $ref: '#/definitions/new_object_builder_service.CreateLanguageRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Language data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/new_object_builder_service.Language'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create language
+      tags:
+      - Language
+    put:
+      consumes:
+      - application/json
+      description: Update language
+      operationId: update-language
+      parameters:
+      - description: Language
+        in: body
+        name: language
+        required: true
+        schema:
+          $ref: '#/definitions/new_object_builder_service.Language'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Language data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/new_object_builder_service.Language'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update language
+      tags:
+      - Language
+  /v1/language/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete language
+      operationId: delete-language
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete language
+      tags:
+      - Language
+    get:
+      consumes:
+      - application/json
+      description: Get language
+      operationId: get-language
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Language data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/new_object_builder_service.Language'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get language
+      tags:
+      - Language
   /v1/login-microfront:
     get:
       consumes:
@@ -19097,7 +19396,13 @@ paths:
         required: true
         type: string
       - in: query
+        name: action_type
+        type: string
+      - in: query
         name: api_key
+        type: string
+      - in: query
+        name: collection
         type: string
       - in: query
         name: env_id
@@ -19268,6 +19573,94 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get single version history
+      tags:
+      - VersionHistory
+  /v2/version/history/{environment_id}/excel:
+    get:
+      consumes:
+      - application/json
+      description: Get version history list in excel format
+      operationId: version_history_excel_download
+      parameters:
+      - description: environment_id
+        in: path
+        name: environment_id
+        required: true
+        type: string
+      - in: query
+        name: action_type
+        type: string
+      - in: query
+        name: api_key
+        type: string
+      - in: query
+        name: collection
+        type: string
+      - in: query
+        name: env_id
+        type: string
+      - in: query
+        name: from_date
+        type: string
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: offset
+        type: integer
+      - in: query
+        name: order_by
+        type: boolean
+      - in: query
+        name: project_id
+        type: string
+      - in: query
+        name: to_date
+        type: string
+      - in: query
+        name: type
+        type: string
+      - in: query
+        name: user_info
+        type: string
+      - in: query
+        items:
+          type: string
+        name: version_ids
+        type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ObjectBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.CommonMessage'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get version history list in excel format
       tags:
       - VersionHistory
   /v2/version/history/migrate/up/{environment_id}:

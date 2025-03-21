@@ -94,7 +94,7 @@ func (h *HandlerV2) SendToGpt(c *gin.Context) {
 		var (
 			functionCall = toolCall.Function
 			functionName = functionCall.Name
-			arguments    map[string]interface{}
+			arguments    map[string]any
 			logReq       []*models.CreateVersionHistoryRequest
 			msg          string
 		)

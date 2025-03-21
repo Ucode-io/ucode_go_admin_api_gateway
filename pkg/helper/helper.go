@@ -16,7 +16,7 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
-func MarshalToStruct(data interface{}, resp interface{}) error {
+func MarshalToStruct(data any, resp any) error {
 	js, err := json.Marshal(data)
 	if err != nil {
 		return err
@@ -30,7 +30,7 @@ func MarshalToStruct(data interface{}, resp interface{}) error {
 	return nil
 }
 
-func ConvertMapToStruct(inputMap map[string]interface{}) (*structpb.Struct, error) {
+func ConvertMapToStruct(inputMap map[string]any) (*structpb.Struct, error) {
 	marshledInputMap, err := json.Marshal(inputMap)
 	outputStruct := &structpb.Struct{}
 	if err != nil {
@@ -51,10 +51,10 @@ func GetURLWithTableSlug(c *gin.Context) string {
 	return url
 }
 
-func ReplaceQueryParams(namedQuery string, params map[string]interface{}) (string, []interface{}) {
+func ReplaceQueryParams(namedQuery string, params map[string]any) (string, []any) {
 	var (
 		i    int = 1
-		args     = make([]interface{}, 0, len(params))
+		args     = make([]any, 0, len(params))
 	)
 
 	for k, v := range params {
@@ -138,9 +138,9 @@ func ConverPhoneNumberToMongoPhoneFormat(input string) string {
 	return input
 }
 
-func ConvertStructToResponse(inputStruct *structpb.Struct) (map[string]interface{}, error) {
+func ConvertStructToResponse(inputStruct *structpb.Struct) (map[string]any, error) {
 	marshelledInputStruct, err := protojson.Marshal(inputStruct)
-	outputMap := make(map[string]interface{}, 0)
+	outputMap := make(map[string]any, 0)
 	if err != nil {
 		return nil, err
 	}
@@ -148,7 +148,7 @@ func ConvertStructToResponse(inputStruct *structpb.Struct) (map[string]interface
 	return outputMap, err
 }
 
-func DeleteKeys(m map[string]interface{}, keysToDelete ...string) {
+func DeleteKeys(m map[string]any, keysToDelete ...string) {
 	for _, key := range keysToDelete {
 		delete(m, key)
 	}
@@ -207,9 +207,9 @@ func ContainsLike(s []string, e string) bool {
 	return false
 }
 
-// InterfaceToMap converts an interface{} to a map[string]interface{}
-func InterfaceToMap(data interface{}) (map[string]interface{}, error) {
-	result := make(map[string]interface{})
+// InterfaceToMap converts an any to a map[string]any
+func InterfaceToMap(data any) (map[string]any, error) {
+	result := make(map[string]any)
 
 	body, err := json.Marshal(data)
 	if err != nil {
@@ -242,16 +242,16 @@ func ListFiles(folderPath string) ([]string, error) {
 	return files, err
 }
 
-func ConvertStructToMap(s *structpb.Struct) (map[string]interface{}, error) {
+func ConvertStructToMap(s *structpb.Struct) (map[string]any, error) {
 
-	newMap := make(map[string]interface{})
+	newMap := make(map[string]any)
 
 	body, err := json.Marshal(s)
 	if err != nil {
-		return map[string]interface{}{}, err
+		return map[string]any{}, err
 	}
 	if err := json.Unmarshal(body, &newMap); err != nil {
-		return map[string]interface{}{}, err
+		return map[string]any{}, err
 	}
 
 	return newMap, nil

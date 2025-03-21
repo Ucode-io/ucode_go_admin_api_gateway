@@ -30,7 +30,7 @@ func (h *HandlerV1) CreateMenu(c *gin.Context) {
 	}
 
 	if menu.Attributes == nil {
-		menu.Attributes = make(map[string]interface{})
+		menu.Attributes = make(map[string]any)
 	}
 
 	attributes, err := helper.ConvertMapToStruct(menu.Attributes)
@@ -257,7 +257,7 @@ func (h *HandlerV1) UpdateMenu(c *gin.Context) {
 	}
 
 	if menu.Attributes == nil {
-		menu.Attributes = make(map[string]interface{})
+		menu.Attributes = make(map[string]any)
 	}
 
 	attributes, err := helper.ConvertMapToStruct(menu.Attributes)
@@ -707,7 +707,7 @@ func (h *HandlerV1) GetMenuSettingByID(c *gin.Context) {
 	h.handleResponse(c, status_http.OK, resp)
 }
 
-func IsEmptyStruct2(s interface{}) bool {
+func IsEmptyStruct2(s any) bool {
 	return reflect.DeepEqual(s, reflect.Zero(reflect.TypeOf(s)).Interface())
 }
 

@@ -202,7 +202,7 @@ func (h *HandlerV2) UploadFile(c *gin.Context) {
 	if c.Query("tags") != "" {
 		tags = strings.Split(c.Query("tags"), ",")
 	}
-	var requestMap = make(map[string]interface{})
+	var requestMap = make(map[string]any)
 	requestMap["table_slug"] = c.Param("collection")
 	requestMap["object_id"] = c.Param("id")
 	requestMap["date"] = time.Now().Format(time.RFC3339)

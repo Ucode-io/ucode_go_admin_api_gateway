@@ -7728,6 +7728,11 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
+                        "type": "string",
+                        "name": "function_id",
+                        "in": "query"
+                    },
+                    {
                         "type": "integer",
                         "name": "limit",
                         "in": "query"
@@ -9833,6 +9838,424 @@ const docTemplate = `{
                                 }
                             ]
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/language": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "List languages",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Language"
+                ],
+                "summary": "List languages",
+                "operationId": "list-languages",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "limit",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "offset",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Languages data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/new_object_builder_service.Language"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update language",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Language"
+                ],
+                "summary": "Update language",
+                "operationId": "update-language",
+                "parameters": [
+                    {
+                        "description": "Language",
+                        "name": "language",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/new_object_builder_service.Language"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Language data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/new_object_builder_service.Language"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Create language",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Language"
+                ],
+                "summary": "Create language",
+                "operationId": "create-language",
+                "parameters": [
+                    {
+                        "description": "LanguageCreateRequest",
+                        "name": "language",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/new_object_builder_service.CreateLanguageRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Language data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/new_object_builder_service.Language"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/language/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get language",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Language"
+                ],
+                "summary": "Get language",
+                "operationId": "get-language",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Language data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/new_object_builder_service.Language"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Delete language",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Language"
+                ],
+                "summary": "Delete language",
+                "operationId": "delete-language",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Bad Request",
@@ -27001,7 +27424,17 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "name": "action_type",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
                         "name": "api_key",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "collection",
                         "in": "query"
                     },
                     {
@@ -27172,6 +27605,160 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v2/version/history/{environment_id}/excel": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get version history list in excel format",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "VersionHistory"
+                ],
+                "summary": "Get version history list in excel format",
+                "operationId": "version_history_excel_download",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "environment_id",
+                        "name": "environment_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "name": "action_type",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "api_key",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "collection",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "env_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "from_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "name": "order_by",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "project_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "to_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "type",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "user_info",
+                        "in": "query"
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "name": "version_ids",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ObjectBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.CommonMessage"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
                         "schema": {
                             "allOf": [
                                 {
@@ -28095,11 +28682,20 @@ const docTemplate = `{
                 "credit_limit": {
                     "type": "number"
                 },
+                "currency_rate": {
+                    "type": "number"
+                },
                 "discount_percentage": {
                     "type": "number"
                 },
+                "end_date": {
+                    "type": "string"
+                },
                 "project_balance": {
                     "type": "number"
+                },
+                "start_date": {
+                    "type": "string"
                 }
             }
         },
@@ -28219,6 +28815,9 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "currency": {
+                    "$ref": "#/definitions/company_service.Currency"
+                },
+                "currency_id": {
                     "type": "string"
                 },
                 "description": {
@@ -28251,6 +28850,9 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "company_id": {
+                    "type": "string"
+                },
+                "fare_id": {
                     "type": "string"
                 },
                 "k8s_namespace": {
@@ -28514,6 +29116,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "currency": {
+                    "$ref": "#/definitions/company_service.Currency"
+                },
+                "currency_id": {
                     "type": "string"
                 },
                 "description": {
@@ -28539,6 +29144,9 @@ const docTemplate = `{
                 },
                 "price": {
                     "type": "number"
+                },
+                "subscription": {
+                    "$ref": "#/definitions/company_service.Subscription"
                 },
                 "trial_days": {
                     "type": "integer"
@@ -28782,6 +29390,9 @@ const docTemplate = `{
         "company_service.Gitlab": {
             "type": "object",
             "properties": {
+                "base_url": {
+                    "type": "string"
+                },
                 "created_at": {
                     "type": "integer"
                 },
@@ -28887,6 +29498,9 @@ const docTemplate = `{
                 },
                 "currency": {
                     "$ref": "#/definitions/company_service.Currency"
+                },
+                "expire_date": {
+                    "type": "string"
                 },
                 "fare": {
                     "$ref": "#/definitions/company_service.Fare"
@@ -29372,6 +29986,32 @@ const docTemplate = `{
                 }
             }
         },
+        "company_service.Subscription": {
+            "type": "object",
+            "properties": {
+                "end_date": {
+                    "type": "string"
+                },
+                "fare_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "renewal_date": {
+                    "type": "string"
+                },
+                "start_date": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
         "company_service.Timezone": {
             "type": "object",
             "properties": {
@@ -29415,6 +30055,9 @@ const docTemplate = `{
                 },
                 "currency_id": {
                     "type": "string"
+                },
+                "fare": {
+                    "$ref": "#/definitions/company_service.Fare"
                 },
                 "fare_id": {
                     "type": "string"
@@ -29607,7 +30250,7 @@ const docTemplate = `{
                 },
                 "value": {
                     "type": "object",
-                    "additionalProperties": true
+                    "additionalProperties": {}
                 }
             }
         },
@@ -29616,7 +30259,7 @@ const docTemplate = `{
             "properties": {
                 "value": {
                     "type": "object",
-                    "additionalProperties": true
+                    "additionalProperties": {}
                 }
             }
         },
@@ -29625,7 +30268,7 @@ const docTemplate = `{
             "properties": {
                 "data": {
                     "type": "object",
-                    "additionalProperties": true
+                    "additionalProperties": {}
                 },
                 "is_cached": {
                     "type": "boolean"
@@ -29659,7 +30302,7 @@ const docTemplate = `{
             "properties": {
                 "attributes": {
                     "type": "object",
-                    "additionalProperties": true
+                    "additionalProperties": {}
                 },
                 "autofill_field": {
                     "type": "string"
@@ -29722,7 +30365,7 @@ const docTemplate = `{
             "properties": {
                 "attributes": {
                     "type": "object",
-                    "additionalProperties": true
+                    "additionalProperties": {}
                 },
                 "automatic": {
                     "type": "boolean"
@@ -29801,7 +30444,7 @@ const docTemplate = `{
             "properties": {
                 "attributes": {
                     "type": "object",
-                    "additionalProperties": true
+                    "additionalProperties": {}
                 },
                 "icon": {
                     "type": "string"
@@ -29851,7 +30494,7 @@ const docTemplate = `{
             "properties": {
                 "attributes": {
                     "type": "object",
-                    "additionalProperties": true
+                    "additionalProperties": {}
                 },
                 "custom_error_messages": {
                     "type": "array",
@@ -29943,7 +30586,7 @@ const docTemplate = `{
                 },
                 "attributes": {
                     "type": "object",
-                    "additionalProperties": true
+                    "additionalProperties": {}
                 },
                 "commit_guid": {
                     "type": "string"
@@ -29982,7 +30625,7 @@ const docTemplate = `{
             "properties": {
                 "data": {
                     "type": "object",
-                    "additionalProperties": true
+                    "additionalProperties": {}
                 },
                 "description": {
                     "type": "string"
@@ -30006,7 +30649,7 @@ const docTemplate = `{
             "properties": {
                 "data": {
                     "type": "object",
-                    "additionalProperties": true
+                    "additionalProperties": {}
                 },
                 "table_slug": {
                     "type": "string"
@@ -30091,7 +30734,7 @@ const docTemplate = `{
                 },
                 "data": {
                     "type": "object",
-                    "additionalProperties": true
+                    "additionalProperties": {}
                 },
                 "fields": {
                     "type": "array",
@@ -30213,7 +30856,7 @@ const docTemplate = `{
             "properties": {
                 "data": {
                     "type": "object",
-                    "additionalProperties": true
+                    "additionalProperties": {}
                 },
                 "html": {
                     "type": "string"
@@ -30231,7 +30874,7 @@ const docTemplate = `{
                 },
                 "query": {
                     "type": "object",
-                    "additionalProperties": true
+                    "additionalProperties": {}
                 }
             }
         },
@@ -30258,6 +30901,10 @@ const docTemplate = `{
                 },
                 "function_id": {
                     "type": "string"
+                },
+                "object_data": {
+                    "type": "object",
+                    "additionalProperties": {}
                 },
                 "object_ids": {
                     "type": "array",
@@ -30294,7 +30941,7 @@ const docTemplate = `{
             "properties": {
                 "attributes": {
                     "type": "object",
-                    "additionalProperties": true
+                    "additionalProperties": {}
                 },
                 "icon": {
                     "type": "string"
@@ -30425,7 +31072,7 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "type": "object",
-                        "additionalProperties": true
+                        "additionalProperties": {}
                     }
                 }
             }
@@ -30435,7 +31082,7 @@ const docTemplate = `{
             "properties": {
                 "data": {
                     "type": "object",
-                    "additionalProperties": true
+                    "additionalProperties": {}
                 },
                 "ids": {
                     "type": "array",
@@ -30481,7 +31128,7 @@ const docTemplate = `{
             "properties": {
                 "attributes": {
                     "type": "object",
-                    "additionalProperties": true
+                    "additionalProperties": {}
                 },
                 "author_id": {
                     "type": "string"
@@ -30547,7 +31194,7 @@ const docTemplate = `{
             "properties": {
                 "data": {
                     "type": "object",
-                    "additionalProperties": true
+                    "additionalProperties": {}
                 },
                 "updated_fields": {
                     "type": "array",
@@ -30689,6 +31336,26 @@ const docTemplate = `{
                 }
             }
         },
+        "new_object_builder_service.CreateLanguageRequest": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
+                },
+                "platform": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "translations": {
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                }
+            }
+        },
         "new_object_builder_service.DocxTemplate": {
             "type": "object",
             "properties": {
@@ -30726,6 +31393,26 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/new_object_builder_service.DocxTemplate"
                     }
+                }
+            }
+        },
+        "new_object_builder_service.Language": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
+                },
+                "platform": {
+                    "type": "string"
+                },
+                "translations": {
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 }
             }
         },
@@ -34236,7 +34923,7 @@ const docTemplate = `{
             "properties": {
                 "attributes": {
                     "type": "object",
-                    "additionalProperties": true
+                    "additionalProperties": {}
                 },
                 "autofill_field": {
                     "type": "string"

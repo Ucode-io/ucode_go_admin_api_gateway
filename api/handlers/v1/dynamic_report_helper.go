@@ -42,12 +42,12 @@ type ClientApiData struct {
 }
 
 type ClientApiResp struct {
-	Response map[string]interface{} `json:"response,omitempty"`
+	Response map[string]any `json:"response,omitempty"`
 }
 
 type Response struct {
-	Status string                 `json:"status,omitempty"`
-	Data   map[string]interface{} `json:"data,omitempty"`
+	Status string         `json:"status,omitempty"`
+	Data   map[string]any `json:"data,omitempty"`
 }
 
 type RequestBody struct {
@@ -55,16 +55,16 @@ type RequestBody struct {
 }
 
 type Request struct {
-	Data map[string]interface{} `json:"data,omitempty"`
+	Data map[string]any `json:"data,omitempty"`
 }
 
 type GetListClientApiResponse struct {
-	Data              GetListClientApiData   `json:"data,omitempty"`
-	MatchTables       map[string]interface{} `json:"match_tables,omitempty"`
-	TableSlug         string                 `json:"table_slug,omitempty"`
-	OrderNumber       int                    `json:"order_number,omitempty"`
-	RelationTableSlug string                 `json:"relation_table_slug"`
-	ReportSetting     map[string]interface{} `json:"report_setting,omitempty"`
+	Data              GetListClientApiData `json:"data,omitempty"`
+	MatchTables       map[string]any       `json:"match_tables,omitempty"`
+	TableSlug         string               `json:"table_slug,omitempty"`
+	OrderNumber       int                  `json:"order_number,omitempty"`
+	RelationTableSlug string               `json:"relation_table_slug"`
+	ReportSetting     map[string]any       `json:"report_setting,omitempty"`
 }
 
 type GetListClientApiData struct {
@@ -73,12 +73,12 @@ type GetListClientApiData struct {
 }
 
 type GetListClientApiResp struct {
-	Count       int                      `json:"count,omitempty"`
-	Rows        []map[string]interface{} `json:"rows,omitempty"`
-	Columns     []map[string]interface{} `json:"columns,omitempty"`
-	Values      []map[string]interface{} `json:"values,omitempty"`
-	Value       map[string]interface{}   `json:"value,omitempty"`
-	TotalValues []map[string]interface{} `json:"total_values,omitempty"`
+	Count       int              `json:"count,omitempty"`
+	Rows        []map[string]any `json:"rows,omitempty"`
+	Columns     []map[string]any `json:"columns,omitempty"`
+	Values      []map[string]any `json:"values,omitempty"`
+	Value       map[string]any   `json:"value,omitempty"`
+	TotalValues []map[string]any `json:"total_values,omitempty"`
 }
 
 type CreateClientApiResponse struct {
@@ -90,19 +90,19 @@ type CreateClientApiData struct {
 }
 
 type CreateClientApiResp struct {
-	Data map[string]interface{} `json:"data,omitempty"`
+	Data map[string]any `json:"data,omitempty"`
 }
 
 type NewRequestBody struct {
-	Data map[string]interface{} `json:"data,omitempty"`
+	Data map[string]any `json:"data,omitempty"`
 }
 
 func (h *HandlerV1) DynamicReportHelper(requestData NewRequestBody, services services.ServiceManagerI, resourceEnvironmentId string, nodeType string) (Response, error) {
 	var (
 		response       Response
 		request        GetListClientApiResponse
-		errorMessage   = make(map[string]interface{})
-		successMessage = make(map[string]interface{})
+		errorMessage   = make(map[string]any)
+		successMessage = make(map[string]any)
 	)
 
 	object_data, err := json.Marshal(requestData.Data)
@@ -139,51 +139,51 @@ func (h *HandlerV1) DynamicReportHelper(requestData NewRequestBody, services ser
 
 	var (
 		// Mongo query variables
-		rowsQuery               = map[string]interface{}{}
-		rowsRelationQuery       = map[string]interface{}{}
-		rowsInsideRelationQuery = map[string]interface{}{}
-		rowsRelationNestedQuery = map[string]interface{}{}
-		columnsQuery            = map[string]interface{}{}
-		valuesQuery             = map[string]interface{}{}
-		totalValuesQuery        = map[string]interface{}{}
+		rowsQuery               = map[string]any{}
+		rowsRelationQuery       = map[string]any{}
+		rowsInsideRelationQuery = map[string]any{}
+		rowsRelationNestedQuery = map[string]any{}
+		columnsQuery            = map[string]any{}
+		valuesQuery             = map[string]any{}
+		totalValuesQuery        = map[string]any{}
 
 		rowTableSlug                 string
-		rowTableFields               []interface{}
+		rowTableFields               []any
 		rowFieldOrderNumber          int
-		rowMatchValues               = make([]map[string]interface{}, 0)
-		rowMatchMapInterface         = make(map[string]interface{}, 0)
-		rowRelationMatchMapInterface = make(map[string]interface{}, 0)
-		rowMatchRecursive            func(map[string]interface{})
+		rowMatchValues               = make([]map[string]any, 0)
+		rowMatchMapInterface         = make(map[string]any, 0)
+		rowRelationMatchMapInterface = make(map[string]any, 0)
+		rowMatchRecursive            func(map[string]any)
 		rowExists                    bool
 
 		rowRelationTableSlug    string
-		rowRelationTables       []interface{}
+		rowRelationTables       []any
 		rowRelationTablesExists bool
 
 		rowInsideRelationTableSlug   string
-		rowInsideRelationTableFields []interface{}
+		rowInsideRelationTableFields []any
 		rowInsideRelationExists      bool
 
 		rowRelationNestedTableSlug   string
-		rowRelationNestedTableFields []interface{}
+		rowRelationNestedTableFields []any
 		rowRelationNestedExists      bool
 
 		rowDateSlugs          []string
-		rowLookupMapInterface = []interface{}{}
+		rowLookupMapInterface = []any{}
 
 		columnTableSlug   string
-		columnTableFields []interface{}
+		columnTableFields []any
 		columnExists      bool
 
-		valueObjects = make(map[string]interface{}, 0)
+		valueObjects = make(map[string]any, 0)
 
-		defaultTableFields []interface{}
+		defaultTableFields []any
 
 		// Field variable
 
-		rowsFiltersTableFieldsMap               map[string]interface{} = make(map[string]interface{}, 0)
-		rowsInsideRelationFiltersTableFieldsMap map[string]interface{} = make(map[string]interface{}, 0)
-		columnsFiltersTableFieldsMap            map[string]interface{} = make(map[string]interface{}, 0)
+		rowsFiltersTableFieldsMap               map[string]any = make(map[string]any, 0)
+		rowsInsideRelationFiltersTableFieldsMap map[string]any = make(map[string]any, 0)
+		columnsFiltersTableFieldsMap            map[string]any = make(map[string]any, 0)
 
 		mainTableSlug = cast.ToString(request.ReportSetting["main_table_slug"])
 		fromDate      = cast.ToString(request.ReportSetting["from_date"])
@@ -203,7 +203,7 @@ func (h *HandlerV1) DynamicReportHelper(requestData NewRequestBody, services ser
 
 	// Rows and Rows Relation and Rows Inside Relation and  Rows Relation Nested...
 	{
-		rowMatchRecursive = func(rowMatchObject map[string]interface{}) {
+		rowMatchRecursive = func(rowMatchObject map[string]any) {
 			if len(rowMatchObject) > 0 {
 				childObject := rowMatchObject["child"]
 				delete(rowMatchObject, "child")
@@ -215,7 +215,7 @@ func (h *HandlerV1) DynamicReportHelper(requestData NewRequestBody, services ser
 		rowMatchRecursive(request.MatchTables)
 
 		if len(rowMatchValues) > 0 {
-			rowMatchMapInterface = map[string]interface{}{"$and": rowMatchValues}
+			rowMatchMapInterface = map[string]any{"$and": rowMatchValues}
 		}
 
 		for _, row := range rows {
@@ -269,15 +269,15 @@ func (h *HandlerV1) DynamicReportHelper(requestData NewRequestBody, services ser
 
 		// Tables settings parse match, project and sort query
 		if rowExists {
-			rowsQuery = map[string]interface{}{
+			rowsQuery = map[string]any{
 				"row_table_slug": rowTableSlug,
-				"match":          map[string]interface{}{"$match": rowMatchMapInterface},
-				"group":          map[string]interface{}{"$group": map[string]interface{}{"_id": "$" + rowTableSlug + "_id"}},
+				"match":          map[string]any{"$match": rowMatchMapInterface},
+				"group":          map[string]any{"$group": map[string]any{"_id": "$" + rowTableSlug + "_id"}},
 			}
 
 			var (
-				rowProjectMapInterface = map[string]interface{}{"_id": 0, "guid": 1, "table_slug": 1}
-				rowSortMapInterface    = map[string]interface{}{}
+				rowProjectMapInterface = map[string]any{"_id": 0, "guid": 1, "table_slug": 1}
+				rowSortMapInterface    = map[string]any{}
 			)
 
 			for ind, val := range rowTableFields {
@@ -294,33 +294,33 @@ func (h *HandlerV1) DynamicReportHelper(requestData NewRequestBody, services ser
 
 				if fieldType == LOOKUP {
 					var (
-						concatString    []interface{}
-						projectLookup   = map[string]interface{}{}
+						concatString    []any
+						projectLookup   = map[string]any{}
 						lookupTableSlug = cast.ToString(cast.ToStringMap(cast.ToStringMap(val)["table_to"])["slug"])
 					)
 
 					for index, lookupViewField := range lookupViewFields {
 						var lookupViewSlug = cast.ToString(cast.ToStringMap(lookupViewField)["slug"])
 						projectLookup[lookupViewSlug] = 1
-						concatString = append(concatString, map[string]interface{}{"$arrayElemAt": []interface{}{"$" + lookupTableSlug + "_data." + lookupViewSlug, 0}})
+						concatString = append(concatString, map[string]any{"$arrayElemAt": []any{"$" + lookupTableSlug + "_data." + lookupViewSlug, 0}})
 						if len(lookupViewFields)-1 > index {
 							concatString = append(concatString, " ")
 						}
 					}
 					joinTable := util.PluralizeWord(lookupTableSlug)
-					rowLookupMapInterface = append(rowLookupMapInterface, map[string]interface{}{
-						"$lookup": map[string]interface{}{
+					rowLookupMapInterface = append(rowLookupMapInterface, map[string]any{
+						"$lookup": map[string]any{
 							"from": joinTable,
-							"let":  map[string]interface{}{fieldSlug: "$" + fieldSlug},
-							"pipeline": []interface{}{
-								map[string]interface{}{"$match": map[string]interface{}{"$expr": map[string]interface{}{"$eq": []string{"$guid", "$$" + fieldSlug}}}},
-								map[string]interface{}{"$project": projectLookup},
+							"let":  map[string]any{fieldSlug: "$" + fieldSlug},
+							"pipeline": []any{
+								map[string]any{"$match": map[string]any{"$expr": map[string]any{"$eq": []string{"$guid", "$$" + fieldSlug}}}},
+								map[string]any{"$project": projectLookup},
 							},
 							"as": lookupTableSlug + "_data",
 						},
 					})
 
-					rowLookupMapInterface = append(rowLookupMapInterface, map[string]interface{}{"$set": map[string]interface{}{fieldSlug: map[string]interface{}{"$concat": concatString}}})
+					rowLookupMapInterface = append(rowLookupMapInterface, map[string]any{"$set": map[string]any{fieldSlug: map[string]any{"$concat": concatString}}})
 				} else if fieldType == DATETIME {
 					rowDateSlugs = append(rowDateSlugs, fieldSlug)
 				}
@@ -331,13 +331,13 @@ func (h *HandlerV1) DynamicReportHelper(requestData NewRequestBody, services ser
 			rowsQuery["lookups"] = rowLookupMapInterface
 		} else if rowRelationTablesExists {
 			if len(rowMatchValues) > 0 {
-				var rowRelationTablesMatchValues = []map[string]interface{}{}
+				var rowRelationTablesMatchValues = []map[string]any{}
 				for _, rowMatchValue := range rowMatchValues {
 					for rowMatchKey, rowMatchVal := range rowMatchValue {
-						rowRelationTablesMatchValues = append(rowRelationTablesMatchValues, map[string]interface{}{rowMatchKey: map[string]interface{}{"$in": []interface{}{nil, rowMatchVal}}})
+						rowRelationTablesMatchValues = append(rowRelationTablesMatchValues, map[string]any{rowMatchKey: map[string]any{"$in": []any{nil, rowMatchVal}}})
 					}
 				}
-				rowMatchMapInterface = map[string]interface{}{"$and": rowRelationTablesMatchValues}
+				rowMatchMapInterface = map[string]any{"$and": rowRelationTablesMatchValues}
 			}
 
 			var rowInsideRelationTableSlugs []string
@@ -346,27 +346,27 @@ func (h *HandlerV1) DynamicReportHelper(requestData NewRequestBody, services ser
 				rowInsideRelationTableSlugs = append(rowInsideRelationTableSlugs, cast.ToString(rowRelationTableMap["inside_relation_table_slug"]))
 			}
 
-			rowsRelationQuery = map[string]interface{}{"match": map[string]interface{}{"$match": rowMatchMapInterface}, "inside_relation_tables": rowInsideRelationTableSlugs}
+			rowsRelationQuery = map[string]any{"match": map[string]any{"$match": rowMatchMapInterface}, "inside_relation_tables": rowInsideRelationTableSlugs}
 		} else if rowInsideRelationExists {
 			if len(rowMatchValues) > 0 {
-				var rowInsideRelationMatchValues = []map[string]interface{}{}
+				var rowInsideRelationMatchValues = []map[string]any{}
 				for _, rowMatchValue := range rowMatchValues {
 					for rowMatchKey, rowMatchVal := range rowMatchValue {
-						rowInsideRelationMatchValues = append(rowInsideRelationMatchValues, map[string]interface{}{rowMatchKey: map[string]interface{}{"$in": []interface{}{nil, rowMatchVal}}})
+						rowInsideRelationMatchValues = append(rowInsideRelationMatchValues, map[string]any{rowMatchKey: map[string]any{"$in": []any{nil, rowMatchVal}}})
 					}
 				}
-				rowMatchMapInterface = map[string]interface{}{"$and": rowInsideRelationMatchValues}
+				rowMatchMapInterface = map[string]any{"$and": rowInsideRelationMatchValues}
 			}
 
-			rowsInsideRelationQuery = map[string]interface{}{
+			rowsInsideRelationQuery = map[string]any{
 				"row_relation_table_slug":        rowRelationTableSlug,
 				"row_inside_relation_table_slug": rowInsideRelationTableSlug,
-				"match":                          map[string]interface{}{"$match": rowMatchMapInterface},
+				"match":                          map[string]any{"$match": rowMatchMapInterface},
 			}
 
 			var (
-				rowRelationProjectMapInterface = map[string]interface{}{"_id": 0, "guid": 1, "table_slug": 1}
-				rowRelationSortMapInterface    = map[string]interface{}{}
+				rowRelationProjectMapInterface = map[string]any{"_id": 0, "guid": 1, "table_slug": 1}
+				rowRelationSortMapInterface    = map[string]any{}
 			)
 
 			for ind, val := range rowInsideRelationTableFields {
@@ -383,34 +383,34 @@ func (h *HandlerV1) DynamicReportHelper(requestData NewRequestBody, services ser
 
 				if fieldType == LOOKUP {
 					var (
-						concatString    []interface{}
-						projectLookup   = map[string]interface{}{}
+						concatString    []any
+						projectLookup   = map[string]any{}
 						lookupTableSlug = cast.ToString(cast.ToStringMap(cast.ToStringMap(val)["table_to"])["slug"])
 					)
 
 					for index, lookupViewField := range lookupViewFields {
 						var lookupViewSlug = cast.ToString(cast.ToStringMap(lookupViewField)["slug"])
 						projectLookup[lookupViewSlug] = 1
-						concatString = append(concatString, map[string]interface{}{"$arrayElemAt": []interface{}{"$" + lookupTableSlug + "_data." + lookupViewSlug, 0}})
+						concatString = append(concatString, map[string]any{"$arrayElemAt": []any{"$" + lookupTableSlug + "_data." + lookupViewSlug, 0}})
 						if len(lookupViewFields)-1 > index {
 							concatString = append(concatString, " ")
 						}
 					}
 					joinTable := util.PluralizeWord(lookupTableSlug)
 
-					rowLookupMapInterface = append(rowLookupMapInterface, map[string]interface{}{
-						"$lookup": map[string]interface{}{
+					rowLookupMapInterface = append(rowLookupMapInterface, map[string]any{
+						"$lookup": map[string]any{
 							"from": joinTable,
-							"let":  map[string]interface{}{fieldSlug: "$" + fieldSlug},
-							"pipeline": []interface{}{
-								map[string]interface{}{"$match": map[string]interface{}{"$expr": map[string]interface{}{"$eq": []string{"$guid", "$$" + fieldSlug}}}},
-								map[string]interface{}{"$project": projectLookup},
+							"let":  map[string]any{fieldSlug: "$" + fieldSlug},
+							"pipeline": []any{
+								map[string]any{"$match": map[string]any{"$expr": map[string]any{"$eq": []string{"$guid", "$$" + fieldSlug}}}},
+								map[string]any{"$project": projectLookup},
 							},
 							"as": lookupTableSlug + "_data",
 						},
 					})
 
-					rowLookupMapInterface = append(rowLookupMapInterface, map[string]interface{}{"$set": map[string]interface{}{fieldSlug: map[string]interface{}{"$concat": concatString}}})
+					rowLookupMapInterface = append(rowLookupMapInterface, map[string]any{"$set": map[string]any{fieldSlug: map[string]any{"$concat": concatString}}})
 				} else if fieldType == DATETIME {
 					rowDateSlugs = append(rowDateSlugs, fieldSlug)
 				}
@@ -440,41 +440,41 @@ func (h *HandlerV1) DynamicReportHelper(requestData NewRequestBody, services ser
 			if len(rowMatchValues) > 0 {
 				var (
 					findRowRelation              bool
-					rowRelationMatchValues       = []map[string]interface{}{}
-					rowInsideRelationMatchValues = []map[string]interface{}{}
+					rowRelationMatchValues       = []map[string]any{}
+					rowInsideRelationMatchValues = []map[string]any{}
 				)
 
 				for _, rowMatchValue := range rowMatchValues {
 					for rowMatchKey, rowMatchVal := range rowMatchValue {
 						if rowMatchKey == rowRelationTableSlug+"_id" {
-							rowRelationMatchValues = append(rowRelationMatchValues, map[string]interface{}{"guid": map[string]interface{}{"$in": []interface{}{nil, rowMatchVal}}})
-							rowInsideRelationMatchValues = append(rowInsideRelationMatchValues, map[string]interface{}{rowMatchKey: map[string]interface{}{"$in": []interface{}{nil, rowMatchVal}}})
+							rowRelationMatchValues = append(rowRelationMatchValues, map[string]any{"guid": map[string]any{"$in": []any{nil, rowMatchVal}}})
+							rowInsideRelationMatchValues = append(rowInsideRelationMatchValues, map[string]any{rowMatchKey: map[string]any{"$in": []any{nil, rowMatchVal}}})
 							findRowRelation = true
 						} else if findRowRelation {
-							rowRelationMatchValues = append(rowRelationMatchValues, map[string]interface{}{rowMatchKey: map[string]interface{}{"$in": []interface{}{nil, rowMatchVal}}})
-							rowInsideRelationMatchValues = append(rowInsideRelationMatchValues, map[string]interface{}{rowMatchKey: map[string]interface{}{"$in": []interface{}{nil, rowMatchVal}}})
+							rowRelationMatchValues = append(rowRelationMatchValues, map[string]any{rowMatchKey: map[string]any{"$in": []any{nil, rowMatchVal}}})
+							rowInsideRelationMatchValues = append(rowInsideRelationMatchValues, map[string]any{rowMatchKey: map[string]any{"$in": []any{nil, rowMatchVal}}})
 						}
 					}
 				}
 
-				rowRelationMatchValues = append(rowRelationMatchValues, map[string]interface{}{rowRelationNestedTableSlug + "_id": map[string]interface{}{"$exists": true}})
-				rowInsideRelationMatchValues = append(rowInsideRelationMatchValues, map[string]interface{}{rowRelationNestedTableSlug + "_id": map[string]interface{}{"$exists": true}})
+				rowRelationMatchValues = append(rowRelationMatchValues, map[string]any{rowRelationNestedTableSlug + "_id": map[string]any{"$exists": true}})
+				rowInsideRelationMatchValues = append(rowInsideRelationMatchValues, map[string]any{rowRelationNestedTableSlug + "_id": map[string]any{"$exists": true}})
 
-				rowRelationMatchMapInterface = map[string]interface{}{"$and": rowRelationMatchValues}
-				rowMatchMapInterface = map[string]interface{}{"$and": rowInsideRelationMatchValues}
+				rowRelationMatchMapInterface = map[string]any{"$and": rowRelationMatchValues}
+				rowMatchMapInterface = map[string]any{"$and": rowInsideRelationMatchValues}
 			}
 
-			rowsRelationNestedQuery = map[string]interface{}{
+			rowsRelationNestedQuery = map[string]any{
 				"row_relation_table_slug":        rowRelationTableSlug,
 				"row_inside_relation_table_slug": rowInsideRelationTableSlug,
 				"row_relation_nested_table_slug": rowRelationNestedTableSlug,
-				"match_relation_table":           map[string]interface{}{"$match": rowRelationMatchMapInterface},
-				"match_inside_relation_table":    map[string]interface{}{"$match": rowMatchMapInterface},
+				"match_relation_table":           map[string]any{"$match": rowRelationMatchMapInterface},
+				"match_inside_relation_table":    map[string]any{"$match": rowMatchMapInterface},
 			}
 
 			var (
-				rowRelationNestedProjectMapInterface = map[string]interface{}{"_id": 0, "guid": 1, "table_slug": 1}
-				rowRelationNestedSortMapInterface    = map[string]interface{}{}
+				rowRelationNestedProjectMapInterface = map[string]any{"_id": 0, "guid": 1, "table_slug": 1}
+				rowRelationNestedSortMapInterface    = map[string]any{}
 			)
 
 			for ind, val := range rowRelationNestedTableFields {
@@ -501,15 +501,15 @@ func (h *HandlerV1) DynamicReportHelper(requestData NewRequestBody, services ser
 		}
 
 		if len(columnTableFields) > 0 {
-			columnsQuery = map[string]interface{}{
+			columnsQuery = map[string]any{
 				"column_table_slug": columnTableSlug,
-				"match":             map[string]interface{}{"$match": map[string]interface{}{}},
-				"group":             map[string]interface{}{"$group": map[string]interface{}{"_id": "$" + columnTableSlug + "_id"}},
+				"match":             map[string]any{"$match": map[string]any{}},
+				"group":             map[string]any{"$group": map[string]any{"_id": "$" + columnTableSlug + "_id"}},
 			}
 
 			var (
-				columnProjectMapInterface = map[string]interface{}{"_id": 0, "guid": 1}
-				columnSortMapInterface    = map[string]interface{}{}
+				columnProjectMapInterface = map[string]any{"_id": 0, "guid": 1}
+				columnSortMapInterface    = map[string]any{}
 			)
 
 			for ind, val := range columnTableFields {
@@ -536,9 +536,9 @@ func (h *HandlerV1) DynamicReportHelper(requestData NewRequestBody, services ser
 
 			if len(tableGuids) > 0 {
 				tableGuids = append(tableGuids, nil)
-				rowsFiltersTableFieldsMap[filterTableSlug] = map[string]interface{}{"$in": tableGuids}
-				rowsInsideRelationFiltersTableFieldsMap[filterTableSlug] = map[string]interface{}{"$in": tableGuids}
-				columnsFiltersTableFieldsMap[filterTableSlug] = map[string]interface{}{"$in": tableGuids}
+				rowsFiltersTableFieldsMap[filterTableSlug] = map[string]any{"$in": tableGuids}
+				rowsInsideRelationFiltersTableFieldsMap[filterTableSlug] = map[string]any{"$in": tableGuids}
+				columnsFiltersTableFieldsMap[filterTableSlug] = map[string]any{"$in": tableGuids}
 			}
 		}
 
@@ -547,7 +547,7 @@ func (h *HandlerV1) DynamicReportHelper(requestData NewRequestBody, services ser
 			if _, ok := matchRowAnd["$and"]; ok {
 				rowsFiltersTableFieldsMap["$and"] = matchRowAnd["$and"]
 			}
-			rowsQuery["match"] = map[string]interface{}{"$match": rowsFiltersTableFieldsMap}
+			rowsQuery["match"] = map[string]any{"$match": rowsFiltersTableFieldsMap}
 		}
 
 		if rowInsideRelationExists {
@@ -555,11 +555,11 @@ func (h *HandlerV1) DynamicReportHelper(requestData NewRequestBody, services ser
 			if _, ok := matchRowInsideAnd["$and"]; ok {
 				rowsInsideRelationFiltersTableFieldsMap["$and"] = matchRowInsideAnd["$and"]
 			}
-			rowsInsideRelationQuery["inside_relation_match"] = map[string]interface{}{"$match": rowsInsideRelationFiltersTableFieldsMap}
+			rowsInsideRelationQuery["inside_relation_match"] = map[string]any{"$match": rowsInsideRelationFiltersTableFieldsMap}
 		}
 
 		if columnExists {
-			columnsQuery["match"] = map[string]interface{}{"$match": columnsFiltersTableFieldsMap}
+			columnsQuery["match"] = map[string]any{"$match": columnsFiltersTableFieldsMap}
 		}
 	}
 
@@ -568,8 +568,8 @@ func (h *HandlerV1) DynamicReportHelper(requestData NewRequestBody, services ser
 		var (
 			slug               string
 			dateFieldSlug      string
-			objects            []interface{}
-			tableFieldSettings []interface{}
+			objects            []any
+			tableFieldSettings []any
 		)
 
 		for _, value := range values {
@@ -582,24 +582,24 @@ func (h *HandlerV1) DynamicReportHelper(requestData NewRequestBody, services ser
 
 				var (
 					fieldSlugsGroupMapInterface = cast.ToStringMap(cast.ToStringMap(cast.ToStringMap(valuesQuery[slug])["group"])["$group"])
-					valueAggregationQuery       = make(map[string]interface{}, 0)
+					valueAggregationQuery       = make(map[string]any, 0)
 					fieldGroup                  = make(map[string]string, 0)
 				)
 
 				if rowExists {
-					fieldSlugsGroupMapInterface["row_id"] = map[string]interface{}{"$first": "$" + rowTableSlug + "_id"}
+					fieldSlugsGroupMapInterface["row_id"] = map[string]any{"$first": "$" + rowTableSlug + "_id"}
 					valueAggregationQuery["match_row_guid"] = rowTableSlug + "_id"
 					fieldGroup[rowTableSlug+"_id"] = "$" + rowTableSlug + "_id"
 				}
 
 				if rowInsideRelationExists {
-					fieldSlugsGroupMapInterface["row_relatoin_id"] = map[string]interface{}{"$first": "$" + rowRelationTableSlug + "_id"}
+					fieldSlugsGroupMapInterface["row_relatoin_id"] = map[string]any{"$first": "$" + rowRelationTableSlug + "_id"}
 					valueAggregationQuery["match_row_relation_guid"] = rowRelationTableSlug + "_id"
 					fieldGroup[rowRelationTableSlug+"_id"] = "$" + rowRelationTableSlug + "_id"
 				}
 
 				if columnExists {
-					fieldSlugsGroupMapInterface["column_id"] = map[string]interface{}{"$first": "$" + columnTableSlug + "_id"}
+					fieldSlugsGroupMapInterface["column_id"] = map[string]any{"$first": "$" + columnTableSlug + "_id"}
 					valueAggregationQuery["match_column_guid"] = columnTableSlug + "_id"
 					fieldGroup[columnTableSlug+"_id"] = "$" + columnTableSlug + "_id"
 				}
@@ -617,13 +617,13 @@ func (h *HandlerV1) DynamicReportHelper(requestData NewRequestBody, services ser
 					fieldSlug := cast.ToString(cast.ToStringMap(tableFieldSetting)["field_slug"])
 					aggregateFormula := cast.ToString(cast.ToStringMap(tableFieldSetting)["aggregate_formula"])
 					if aggregateFormula != "" {
-						fieldSlugsGroupMapInterface[fieldSlug] = map[string]interface{}{MongoAggregation(DetermineFormula(len(rows), rowFieldOrderNumber, aggregateFormula)): "$" + fieldSlug}
+						fieldSlugsGroupMapInterface[fieldSlug] = map[string]any{MongoAggregation(DetermineFormula(len(rows), rowFieldOrderNumber, aggregateFormula)): "$" + fieldSlug}
 					} else {
-						fieldSlugsGroupMapInterface[fieldSlug] = map[string]interface{}{MongoAggregation(SUM): "$" + fieldSlug}
+						fieldSlugsGroupMapInterface[fieldSlug] = map[string]any{MongoAggregation(SUM): "$" + fieldSlug}
 					}
 				}
 
-				valueAggregationQuery["group"] = map[string]interface{}{"$group": fieldSlugsGroupMapInterface}
+				valueAggregationQuery["group"] = map[string]any{"$group": fieldSlugsGroupMapInterface}
 				valuesQuery[slug] = valueAggregationQuery
 			}
 		}
@@ -634,8 +634,8 @@ func (h *HandlerV1) DynamicReportHelper(requestData NewRequestBody, services ser
 		var (
 			slug               string
 			dateFieldSlug      string
-			objects            []interface{}
-			tableFieldSettings []interface{}
+			objects            []any
+			tableFieldSettings []any
 		)
 
 		for _, value := range values {
@@ -648,18 +648,18 @@ func (h *HandlerV1) DynamicReportHelper(requestData NewRequestBody, services ser
 
 				var (
 					fieldSlugsGroupMapInterface = cast.ToStringMap(cast.ToStringMap(cast.ToStringMap(totalValuesQuery[slug])["group"])["$group"])
-					totalValueAggregationQuery  = make(map[string]interface{}, 0)
+					totalValueAggregationQuery  = make(map[string]any, 0)
 					fieldGroup                  = make(map[string]string, 0)
 				)
 
 				if rowExists {
-					fieldSlugsGroupMapInterface["row_id"] = map[string]interface{}{"$first": "$" + rowTableSlug + "_id"}
+					fieldSlugsGroupMapInterface["row_id"] = map[string]any{"$first": "$" + rowTableSlug + "_id"}
 					totalValueAggregationQuery["match_row_guid"] = rowTableSlug + "_id"
 					fieldGroup[rowTableSlug+"_id"] = "$" + rowTableSlug + "_id"
 				}
 
 				if rowInsideRelationExists {
-					fieldSlugsGroupMapInterface["row_relatoin_id"] = map[string]interface{}{"$first": "$" + rowRelationTableSlug + "_id"}
+					fieldSlugsGroupMapInterface["row_relatoin_id"] = map[string]any{"$first": "$" + rowRelationTableSlug + "_id"}
 					totalValueAggregationQuery["match_row_relation_guid"] = rowRelationTableSlug + "_id"
 					fieldGroup[rowRelationTableSlug+"_id"] = "$" + rowRelationTableSlug + "_id"
 				}
@@ -677,13 +677,13 @@ func (h *HandlerV1) DynamicReportHelper(requestData NewRequestBody, services ser
 					fieldSlug := cast.ToString(cast.ToStringMap(tableFieldSetting)["field_slug"])
 					aggregateFormula := cast.ToString(cast.ToStringMap(tableFieldSetting)["aggregate_formula"])
 					if aggregateFormula != "" {
-						fieldSlugsGroupMapInterface[fieldSlug] = map[string]interface{}{MongoAggregation(DetermineFormula(len(rows), rowFieldOrderNumber, aggregateFormula)): "$" + fieldSlug}
+						fieldSlugsGroupMapInterface[fieldSlug] = map[string]any{MongoAggregation(DetermineFormula(len(rows), rowFieldOrderNumber, aggregateFormula)): "$" + fieldSlug}
 					} else {
-						fieldSlugsGroupMapInterface[fieldSlug] = map[string]interface{}{MongoAggregation(SUM): "$" + fieldSlug}
+						fieldSlugsGroupMapInterface[fieldSlug] = map[string]any{MongoAggregation(SUM): "$" + fieldSlug}
 					}
 				}
 
-				totalValueAggregationQuery["group"] = map[string]interface{}{"$group": fieldSlugsGroupMapInterface}
+				totalValueAggregationQuery["group"] = map[string]any{"$group": fieldSlugsGroupMapInterface}
 				totalValuesQuery[slug] = totalValueAggregationQuery
 			}
 		}
@@ -729,7 +729,7 @@ func (h *HandlerV1) DynamicReportHelper(requestData NewRequestBody, services ser
 		tableGetFilterResp GetListClientApiResponse
 	)
 
-	structData, err := helper.ConvertMapToStruct(map[string]interface{}{
+	structData, err := helper.ConvertMapToStruct(map[string]any{
 		"rows":                 rowsQuery,
 		"rows_relation":        rowsRelationQuery,
 		"rows_inside_relation": rowsInsideRelationQuery,
@@ -766,11 +766,11 @@ func (h *HandlerV1) DynamicReportHelper(requestData NewRequestBody, services ser
 		TableSlug: responseBuilderReport.TableSlug,
 		Data: GetListClientApiResp{
 			Count:       0,
-			Rows:        []map[string]interface{}{},
-			Columns:     []map[string]interface{}{},
-			Values:      []map[string]interface{}{},
-			Value:       map[string]interface{}{},
-			TotalValues: []map[string]interface{}{},
+			Rows:        []map[string]any{},
+			Columns:     []map[string]any{},
+			Values:      []map[string]any{},
+			Value:       map[string]any{},
+			TotalValues: []map[string]any{},
 		},
 	}
 	body, _ := json.Marshal(responseBuilderReport.Data.AsMap())
@@ -843,18 +843,18 @@ func (h *HandlerV1) DynamicReportHelper(requestData NewRequestBody, services ser
 			}
 		}
 	} else if rowRelationTablesExists {
-		var rowRelationTableExists = map[string]interface{}{}
+		var rowRelationTableExists = map[string]any{}
 		if len(cast.ToSlice(tableGetFilterResp.Data.Data.Rows)) > 0 {
 			rowRelationTableExists = cast.ToStringMap(cast.ToSlice(tableGetFilterResp.Data.Data.Rows)[0])
 		}
-		tableGetFilterResp.Data.Data.Rows = []map[string]interface{}{}
+		tableGetFilterResp.Data.Data.Rows = []map[string]any{}
 
 		for _, rowRelationTable := range rowRelationTables {
 			var (
 				rowRelationTableMap           = cast.ToStringMap(rowRelationTable)
 				rowRelationTableSettings      = cast.ToSlice(rowRelationTableMap["table_field_settings"])
 				rowRelationTableSettingExists = false
-				rowRelationTableResp          = map[string]interface{}{
+				rowRelationTableResp          = map[string]any{
 					"guid":         rowRelationTableMap["slug"],
 					"title":        rowRelationTableMap["label"],
 					"table_slug":   rowRelationTableMap["slug"],

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"strings"
 	"ucode/ucode_go_api_gateway/api/status_http"
+	"ucode/ucode_go_api_gateway/config"
 	auth "ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/logger"
@@ -41,13 +42,16 @@ func (h *HandlerV1) hasAccess(c *gin.Context) (*auth.V2HasAccessUserRes, bool) {
 		},
 	)
 	if err != nil {
-		errr := status.Error(codes.PermissionDenied, "Permission denied")
-		if errr.Error() == err.Error() {
+		permissionErrors := map[string]struct{}{
+			status.Error(codes.PermissionDenied, config.PermissionDenied).Error(): {},
+			status.Error(codes.PermissionDenied, config.InactiveStatus).Error():   {},
+		}
+		if _, exists := permissionErrors[err.Error()]; exists {
 			h.log.Error("---ERR->HasAccess->Permission--->", logger.Error(err))
 			h.handleResponse(c, status_http.BadRequest, err.Error())
 			return nil, false
 		}
-		errr = status.Error(codes.InvalidArgument, "User has been expired")
+		errr := status.Error(codes.InvalidArgument, "User has been expired")
 		if errr.Error() == err.Error() {
 			h.log.Error("---ERR->HasAccess->User Expired-->")
 			h.handleResponse(c, status_http.Forbidden, err.Error())
@@ -61,7 +65,7 @@ func (h *HandlerV1) hasAccess(c *gin.Context) (*auth.V2HasAccessUserRes, bool) {
 		}
 
 		h.log.Error("---ERR->HasAccess->Session->V2HasAccessUser--->", logger.Error(err))
-		h.handleResponse(c, status_http.Unauthorized, err.Error())
+		h.handleError(c, status_http.Unauthorized, err)
 		return nil, false
 	}
 

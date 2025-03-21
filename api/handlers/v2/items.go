@@ -208,7 +208,7 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 		defer func() { go h.versionHistoryGo(c, logReq) }()
 	}
 
-	if data, ok := resp.Data.AsMap()["data"].(map[string]interface{}); ok {
+	if data, ok := resp.Data.AsMap()["data"].(map[string]any); ok {
 		objectRequest.Data = data
 		if _, ok = data["guid"].(string); ok {
 			id = data["guid"].(string)
@@ -296,7 +296,7 @@ func (h *HandlerV2) CreateItems(c *gin.Context) {
 		return
 	}
 
-	request := make(map[string]interface{})
+	request := make(map[string]any)
 	request["company_service_project_id"] = resource.GetProjectId()
 	request["company_service_environment_id"] = resource.GetEnvironmentId()
 	request["items"] = objectRequest
@@ -383,13 +383,13 @@ func (h *HandlerV2) CreateItems(c *gin.Context) {
 		return
 	}
 
-	var items []interface{}
-	if itemsFromResp, ok := resp.Data.AsMap()["items"].([]interface{}); ok {
+	var items []any
+	if itemsFromResp, ok := resp.Data.AsMap()["items"].([]any); ok {
 		items = itemsFromResp
 	}
 	var ids = make([]string, 0, len(items))
 	for _, item := range items {
-		if itemMap, ok := item.(map[string]interface{}); ok {
+		if itemMap, ok := item.(map[string]any); ok {
 			if id, ok := itemMap["guid"].(string); ok {
 				ids = append(ids, id)
 			}
@@ -436,7 +436,7 @@ func (h *HandlerV2) GetSingleItem(c *gin.Context) {
 		statusHttp = status_http.GrpcStatusToHTTP["Ok"]
 	)
 
-	object.Data = make(map[string]interface{})
+	object.Data = make(map[string]any)
 
 	objectID := c.Param("id")
 	if !util.IsValidUUID(objectID) {
@@ -543,7 +543,7 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 		resp          *obs.CommonMessage
 		statusHttp    = status_http.GrpcStatusToHTTP["Ok"]
 		queryData     string
-		objectRequest = make(map[string]interface{})
+		objectRequest = make(map[string]any)
 	)
 
 	queryParams := c.Request.URL.Query()
@@ -619,8 +619,8 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 			case pb.ResourceType_MONGODB:
 				redisResp, err := h.redis.Get(c.Request.Context(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("collection"), structData.String(), resource.ResourceEnvironmentId))), resource.ProjectId, resource.NodeType)
 				if err == nil {
-					resp := make(map[string]interface{})
-					m := make(map[string]interface{})
+					resp := make(map[string]any)
+					m := make(map[string]any)
 					err = json.Unmarshal([]byte(redisResp), &m)
 					if err != nil {
 						h.log.Error("Error while unmarshal redis", logger.Error(err))
@@ -666,8 +666,8 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 			redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("collection"), structData.String(), resource.ResourceEnvironmentId))), resource.ProjectId, resource.NodeType)
 			if err == nil {
 				var (
-					resp = make(map[string]interface{})
-					m    = make(map[string]interface{})
+					resp = make(map[string]any)
+					m    = make(map[string]any)
 				)
 
 				if err = json.Unmarshal([]byte(redisResp), &m); err != nil {
@@ -706,8 +706,8 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 			redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("collection"), structData.String(), resource.ResourceEnvironmentId))), resource.ProjectId, resource.NodeType)
 			if err == nil {
 				var (
-					resp = make(map[string]interface{})
-					m    = make(map[string]interface{})
+					resp = make(map[string]any)
+					m    = make(map[string]any)
 				)
 
 				if err = json.Unmarshal([]byte(redisResp), &m); err != nil {
@@ -1429,7 +1429,7 @@ func (h *HandlerV2) DeleteItems(c *gin.Context) {
 		resp                        *obs.CommonMessage
 		beforeActions, afterActions []*obs.CustomEvent
 		statusHttp                  = status_http.GrpcStatusToHTTP["NoContent"]
-		data                        = make(map[string]interface{})
+		data                        = make(map[string]any)
 		actionErr                   error
 		functionName                string
 	)
@@ -1709,7 +1709,7 @@ func (h *HandlerV2) DeleteManyToMany(c *gin.Context) {
 			CustomEvents: beforeActions,
 			IDs:          []string{m2mMessage.IdFrom},
 			TableSlug:    m2mMessage.TableFrom,
-			ObjectData:   map[string]interface{}{"id_to": m2mMessage.IdTo, "table_to": m2mMessage.TableTo},
+			ObjectData:   map[string]any{"id_to": m2mMessage.IdTo, "table_to": m2mMessage.TableTo},
 			Method:       "DELETE_MANY2MANY",
 			Resource:     resource,
 		},
@@ -1783,7 +1783,7 @@ func (h *HandlerV2) DeleteManyToMany(c *gin.Context) {
 			CustomEvents: afterActions,
 			IDs:          []string{m2mMessage.IdFrom},
 			TableSlug:    m2mMessage.TableFrom,
-			ObjectData:   map[string]interface{}{"id_to": m2mMessage.IdTo, "table_from": m2mMessage.TableTo},
+			ObjectData:   map[string]any{"id_to": m2mMessage.IdTo, "table_from": m2mMessage.TableTo},
 			Method:       "DELETE_MANY2MANY",
 			Resource:     resource,
 		},
@@ -1888,7 +1888,7 @@ func (h *HandlerV2) AppendManyToMany(c *gin.Context) {
 			CustomEvents: beforeActions,
 			IDs:          []string{m2mMessage.IdFrom},
 			TableSlug:    m2mMessage.TableFrom,
-			ObjectData:   map[string]interface{}{"id_to": m2mMessage.IdTo, "table_to": m2mMessage.TableTo},
+			ObjectData:   map[string]any{"id_to": m2mMessage.IdTo, "table_to": m2mMessage.TableTo},
 			Method:       "APPEND_MANY2MANY",
 			Resource:     resource,
 		},
@@ -1956,7 +1956,7 @@ func (h *HandlerV2) AppendManyToMany(c *gin.Context) {
 			CustomEvents: afterActions,
 			IDs:          []string{m2mMessage.IdFrom},
 			TableSlug:    m2mMessage.TableFrom,
-			ObjectData:   map[string]interface{}{"id_to": m2mMessage.IdTo, "table_to": m2mMessage.TableTo},
+			ObjectData:   map[string]any{"id_to": m2mMessage.IdTo, "table_to": m2mMessage.TableTo},
 			Method:       "APPEND_MANY2MANY",
 			Resource:     resource,
 		},
@@ -2040,8 +2040,8 @@ func (h *HandlerV2) GetListAggregation(c *gin.Context) {
 		redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("collection"), string(key), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
 		if err == nil {
 			var (
-				resp = make(map[string]interface{})
-				m    = make(map[string]interface{})
+				resp = make(map[string]any)
+				m    = make(map[string]any)
 			)
 
 			if err = json.Unmarshal([]byte(redisResp), &m); err != nil {

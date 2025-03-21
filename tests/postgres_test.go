@@ -39,7 +39,7 @@ func TestEndToEnd(t *testing.T) {
 			Exec()
 		assert.NoError(t, err)
 
-		body = map[string]interface{}{
+		body = map[string]any{
 			"guid":             guid,
 			"multi_line_field": faker1.Name(),
 			"checkbox_field":   true,
@@ -81,7 +81,7 @@ func TestEndToEnd(t *testing.T) {
 
 	t.Run("TestGetListSlimWithDate", func(t *testing.T) {
 		filter := map[string]any{
-			"date_time_field": map[string]interface{}{
+			"date_time_field": map[string]any{
 				"$gte": "2024-10-01T00:04:19.336Z",
 			}}
 		getProductResp, _, err := UcodeApiForStaging.Items("product").GetList().Filter(filter).Page(1).Limit(10).Exec()
@@ -89,7 +89,7 @@ func TestEndToEnd(t *testing.T) {
 		assert.NotEmpty(t, getProductResp.Data.Data.Response, err)
 
 		filter = map[string]any{
-			"date_time_field": map[string]interface{}{
+			"date_time_field": map[string]any{
 				"$gte": "2024-10-01T00:04:19.336Z",
 				"$lt":  "2024-10-06T00:04:19.336Z",
 			},
@@ -102,7 +102,7 @@ func TestEndToEnd(t *testing.T) {
 
 	t.Run("TestGetListSlimWithEq", func(t *testing.T) {
 		filter := map[string]any{
-			"increment_id_field": map[string]interface{}{
+			"increment_id_field": map[string]any{
 				"$eq": "T-000000021",
 			}}
 		getProductResp, _, err := UcodeApiForStaging.Items("product").GetList().Filter(filter).Page(1).Limit(10).Exec()
@@ -112,7 +112,7 @@ func TestEndToEnd(t *testing.T) {
 
 	t.Run("TestGetListSlimWithIn", func(t *testing.T) {
 		filter := map[string]any{
-			"increment_id_field": map[string]interface{}{
+			"increment_id_field": map[string]any{
 				"$in": []string{"T-000000022", "T-000000023", "T-000000024"},
 			}}
 		getProductResp, _, err := UcodeApiForStaging.Items("product").GetList().Filter(filter).Page(1).Limit(10).Exec()
@@ -157,8 +157,8 @@ func TestEndToEnd(t *testing.T) {
 
 	t.Run("TestGetAggregation", func(t *testing.T) {
 		filter := map[string]any{
-			"pipelines": []map[string]interface{}{
-				{"$group": map[string]interface{}{"_id": "$single_line_field"}},
+			"pipelines": []map[string]any{
+				{"$group": map[string]any{"_id": "$single_line_field"}},
 			},
 		}
 		getProductResp, _, err := UcodeApiForStaging.Items("product").
@@ -173,8 +173,8 @@ func TestEndToEnd(t *testing.T) {
 	t.Run("TestGetListAutoFilter", func(t *testing.T) {
 		assert.NoError(t, err)
 
-		body, err := UcodeApiForStaging.DoRequest(BaseUrlStaging+"/v2/object/get-list/product", "POST", map[string]interface{}{
-			"data": map[string]interface{}{},
+		body, err := UcodeApiForStaging.DoRequest(BaseUrlStaging+"/v2/object/get-list/product", "POST", map[string]any{
+			"data": map[string]any{},
 		}, map[string]string{
 			"Authorization": "Bearer " + token,
 		})
@@ -203,8 +203,8 @@ func TestEndToEnd(t *testing.T) {
 	t.Run("TestGetListRBAC", func(t *testing.T) {
 		assert.NoError(t, err)
 
-		body, err := UcodeApi.DoRequest(BaseUrlStaging+"/v2/object/get-list/company", "POST", map[string]interface{}{
-			"data": map[string]interface{}{},
+		body, err := UcodeApi.DoRequest(BaseUrlStaging+"/v2/object/get-list/company", "POST", map[string]any{
+			"data": map[string]any{},
 		}, map[string]string{
 			"Authorization": "Bearer " + token,
 		})
@@ -219,13 +219,13 @@ func TestEndToEnd(t *testing.T) {
 
 	t.Run("TestMultipleCRUD", func(t *testing.T) {
 		var ids = []string{}
-		var multipleInsert = []map[string]interface{}{}
-		var multipleUpdate = []map[string]interface{}{}
+		var multipleInsert = []map[string]any{}
+		var multipleUpdate = []map[string]any{}
 		UcodeApiForStaging.Config().RequestTimeout = time.Second * 30
 
 		for i := 0; i < 10; i++ {
 			guid := uuid.New().String()
-			multipleInsert = append(multipleInsert, map[string]interface{}{
+			multipleInsert = append(multipleInsert, map[string]any{
 				"guid":                             guid,
 				"single_line_field":                faker1.CompanyName(),
 				"multi_line_field":                 faker1.FirstName(),
@@ -237,7 +237,7 @@ func TestEndToEnd(t *testing.T) {
 				"is_new":                           true,
 			})
 
-			multipleUpdate = append(multipleUpdate, map[string]interface{}{
+			multipleUpdate = append(multipleUpdate, map[string]any{
 				"guid":                             guid,
 				"single_line_field":                faker1.CompanyName(),
 				"multi_line_field":                 faker1.FirstName(),

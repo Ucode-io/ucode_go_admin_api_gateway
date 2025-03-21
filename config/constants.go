@@ -60,6 +60,10 @@ const (
 	AFTER  string = "after"
 
 	PublicStatus = "unapproved"
+
+	InactiveStatus   string = "inactive"
+	PermissionDenied string = "Permission denied"
+	SessionExpired   string = "Session has been expired"
 )
 
 var (

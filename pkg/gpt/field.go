@@ -23,7 +23,7 @@ func CreateField(req *models.CreateFieldAI) ([]*models.CreateVersionHistoryReque
 		err        error
 	)
 
-	attributes, err = helper.ConvertMapToStruct(map[string]interface{}{
+	attributes, err = helper.ConvertMapToStruct(map[string]any{
 		"label":        "",
 		"defaultValue": "",
 		"label_en":     req.Label,
@@ -144,7 +144,7 @@ func UpdateField(req *models.UpdateFieldAI) ([]*models.CreateVersionHistoryReque
 		respLogReq = []*models.CreateVersionHistoryRequest{}
 	)
 
-	// attributes, err := helper.ConvertMapToStruct(map[string]interface{}{
+	// attributes, err := helper.ConvertMapToStruct(map[string]any{
 	// 	"label":        "",
 	// 	"defaultValue": "",
 	// 	"label_en":     req.NewLabel,

@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 	"unicode"
 	"unicode/utf8"
@@ -74,7 +75,7 @@ func (h *HandlerV1) GetProjectSrvc(c context.Context, projectId string, nodeType
 	}
 }
 
-func (h *HandlerV1) handleResponse(c *gin.Context, status status_http.Status, data interface{}) {
+func (h *HandlerV1) handleResponse(c *gin.Context, status status_http.Status, data any) {
 	switch code := status.Code; {
 	case code < 400:
 	default:
@@ -119,6 +120,18 @@ func (h *HandlerV1) handleError(c *gin.Context, statusHttp status_http.Status, e
 			Data:          "Cannot drop or modify the object because dependent objects exist.",
 			CustomMessage: statusHttp.CustomMessage,
 		})
+	} else if statusHttp.Status == status_http.Unauthorized.Status {
+		c.JSON(http.StatusUnauthorized, status_http.Response{
+			Status:      statusHttp.Status,
+			Description: st.String(),
+			Data:        strings.ToUpper(st.Message()[:1]) + st.Message()[1:],
+		})
+	} else if statusHttp.Status == status_http.Forbidden.Status {
+		c.JSON(http.StatusForbidden, status_http.Response{
+			Status:      statusHttp.Status,
+			Description: st.String(),
+			Data:        strings.ToUpper(st.Message()[:1]) + st.Message()[1:],
+		})
 	} else if st.Err() != nil {
 		c.JSON(http.StatusInternalServerError, status_http.Response{
 			Status:        statusHttp.Status,
@@ -154,24 +167,24 @@ func (h *HandlerV1) getLimitParamWithoutDefault(c *gin.Context) (limit int, err 
 
 func (h *HandlerV1) versionHistory(req *models.CreateVersionHistoryRequest) error {
 	var (
-		current  = map[string]interface{}{"data": req.Current}
-		previous = map[string]interface{}{"data": req.Previous}
-		request  = map[string]interface{}{"data": req.Request}
-		response = map[string]interface{}{"data": req.Response}
+		current  = map[string]any{"data": req.Current}
+		previous = map[string]any{"data": req.Previous}
+		request  = map[string]any{"data": req.Request}
+		response = map[string]any{"data": req.Response}
 		user     = ""
 	)
 
 	if req.Current == nil {
-		current["data"] = make(map[string]interface{})
+		current["data"] = make(map[string]any)
 	}
 	if req.Previous == nil {
-		previous["data"] = make(map[string]interface{})
+		previous["data"] = make(map[string]any)
 	}
 	if req.Request == nil {
-		request["data"] = make(map[string]interface{})
+		request["data"] = make(map[string]any)
 	}
 	if req.Response == nil {
-		response["data"] = make(map[string]interface{})
+		response["data"] = make(map[string]any)
 	}
 
 	if util.IsValidUUID(req.UserInfo) {
@@ -216,7 +229,7 @@ func (h *HandlerV1) versionHistory(req *models.CreateVersionHistoryRequest) erro
 	return nil
 }
 
-func fromMapToString(req map[string]interface{}) string {
+func fromMapToString(req map[string]any) string {
 	reqString, err := json.Marshal(req)
 	if err != nil {
 		return ""
@@ -226,24 +239,24 @@ func fromMapToString(req map[string]interface{}) string {
 
 func (h *HandlerV1) versionHistoryGo(c *gin.Context, req *models.CreateVersionHistoryRequest) error {
 	var (
-		current  = map[string]interface{}{"data": req.Current}
-		previous = map[string]interface{}{"data": req.Previous}
-		request  = map[string]interface{}{"data": req.Request}
-		response = map[string]interface{}{"data": req.Response}
+		current  = map[string]any{"data": req.Current}
+		previous = map[string]any{"data": req.Previous}
+		request  = map[string]any{"data": req.Request}
+		response = map[string]any{"data": req.Response}
 		user     = ""
 	)
 
 	if req.Current == nil {
-		current["data"] = make(map[string]interface{})
+		current["data"] = make(map[string]any)
 	}
 	if req.Previous == nil {
-		previous["data"] = make(map[string]interface{})
+		previous["data"] = make(map[string]any)
 	}
 	if req.Request == nil {
-		request["data"] = make(map[string]interface{})
+		request["data"] = make(map[string]any)
 	}
 	if req.Response == nil {
-		response["data"] = make(map[string]interface{})
+		response["data"] = make(map[string]any)
 	}
 
 	if util.IsValidUUID(req.UserInfo) {

@@ -86,7 +86,7 @@ func TestMain(m *testing.M) {
 	bodyAsMap := cast.ToStringMap(string(body))
 	tableId := cast.ToString(cast.ToStringMap(bodyAsMap["data"])["id"])
 
-	_, err = UcodeApiForStaging.DoRequest(BaseUrl+"/v1/table/"+tableId, http.MethodDelete, map[string]interface{}{},
+	_, err = UcodeApiForStaging.DoRequest(BaseUrl+"/v1/table/"+tableId, http.MethodDelete, map[string]any{},
 		map[string]string{
 			"Resource-Id":    ResourceId,
 			"Environment-Id": EnvironmentId,
@@ -101,18 +101,18 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-var TableReq = map[string]interface{}{
+var TableReq = map[string]any{
 	"show_in_menu": true,
 	"label":        "Integration table",
 	"slug":         "integration_table",
-	"attributes": map[string]interface{}{
+	"attributes": map[string]any{
 		"label":    "",
 		"label_en": "pikachu",
 	},
 }
 
-var ExcelReq = map[string]interface{}{
-	"data": map[string]interface{}{
+var ExcelReq = map[string]any{
+	"data": map[string]any{
 		"field_ids": []string{
 			"fd33c3ed-9326-4f76-9c43-706689369738",
 			"e4eec7bd-0748-4543-b7b3-ad7559173e83",
@@ -149,8 +149,8 @@ var ExcelReq = map[string]interface{}{
 	},
 }
 
-var ExcelReqPg = map[string]interface{}{
-	"data": map[string]interface{}{
+var ExcelReqPg = map[string]any{
+	"data": map[string]any{
 		"field_ids": []string{
 			"540c6dee-09bb-4a8c-a541-0189590eadfb",
 			"3dee395d-fa70-4f22-a8cf-06b66e017357",
@@ -214,7 +214,7 @@ func Login() (string, error) {
 func LoginPg() (string, error) {
 	var (
 		url  = "https://auth-api.ucode.run/v2/login?project-id=8e83e7d6-954e-4c13-bb85-2119c245dcea"
-		body = map[string]interface{}{
+		body = map[string]any{
 			"username":        "bosit_test_001",
 			"password":        "bosit_test_001",
 			"company_id":      "1ada9292-c76a-453d-a323-559538baa0ee",
@@ -255,7 +255,7 @@ type GetListApiResponse struct {
 	Status string `json:"status"`
 	Data   struct {
 		Data struct {
-			Response []map[string]interface{} `json:"response"`
+			Response []map[string]any `json:"response"`
 		} `json:"data"`
 	} `json:"data"`
 }

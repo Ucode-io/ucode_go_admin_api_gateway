@@ -12,6 +12,19 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// CreateLanguage godoc
+// @Security ApiKeyAuth
+// @ID create-language
+// @Router /v1/language [POST]
+// @Summary Create language
+// @Description Create language
+// @Tags Language
+// @Accept json
+// @Produce json
+// @Param language body nb.CreateLanguageRequest true "LanguageCreateRequest"
+// @Success 201 {object} status_http.Response{data=nb.Language} "Language data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) CreateLanguage(c *gin.Context) {
 	var (
 		resourceEnvironmentId string
@@ -89,6 +102,19 @@ func (h *HandlerV1) CreateLanguage(c *gin.Context) {
 	}
 }
 
+// GetByIdLanguage godoc
+// @Security ApiKeyAuth
+// @ID get-language
+// @Router /v1/language/{id} [GET]
+// @Summary Get language
+// @Description Get language
+// @Tags Language
+// @Accept json
+// @Produce json
+// @Param id path string true "id"
+// @Success 200 {object} status_http.Response{data=nb.Language} "Language data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetByIdLanguage(c *gin.Context) {
 	var (
 		resourceEnvironmentId string
@@ -165,6 +191,20 @@ func (h *HandlerV1) GetByIdLanguage(c *gin.Context) {
 	}
 }
 
+// GetListLanguage godoc
+// @Security ApiKeyAuth
+// @ID list-languages
+// @Router /v1/language [GET]
+// @Summary List languages
+// @Description List languages
+// @Tags Language
+// @Accept json
+// @Produce json
+// @Param limit query string false "limit"
+// @Param offset query string false "offset"
+// @Success 200 {object} status_http.Response{data=nb.Language} "Languages data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetListLanguage(c *gin.Context) {
 	var (
 		resourceEnvironmentId string
@@ -252,6 +292,19 @@ func (h *HandlerV1) GetListLanguage(c *gin.Context) {
 	}
 }
 
+// UpdateLanguage godoc
+// @Security ApiKeyAuth
+// @ID update-language
+// @Router /v1/language [PUT]
+// @Summary Update language
+// @Description Update language
+// @Tags Language
+// @Accept json
+// @Produce json
+// @Param language body nb.Language true "Language"
+// @Success 200 {object} status_http.Response{data=nb.Language} "Language data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) UpdateLanguage(c *gin.Context) {
 	var (
 		resourceEnvironmentId string
@@ -329,6 +382,19 @@ func (h *HandlerV1) UpdateLanguage(c *gin.Context) {
 	}
 }
 
+// DeleteLanguage godoc
+// @Security ApiKeyAuth
+// @ID delete-language
+// @Router /v1/language/{id} [DELETE]
+// @Summary Delete language
+// @Description Delete language
+// @Tags Language
+// @Accept json
+// @Produce json
+// @Param id path string true "id"
+// @Success 204
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) DeleteLanguage(c *gin.Context) {
 	var (
 		resourceEnvironmentId string

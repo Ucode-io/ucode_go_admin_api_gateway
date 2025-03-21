@@ -118,7 +118,7 @@ func (h *HandlerV2) CreateField(c *gin.Context) {
 	}
 
 	if fieldRequest.IsAlt && len(fields) == 1 {
-		atr, err := helper.ConvertMapToStruct(map[string]interface{}{
+		atr, err := helper.ConvertMapToStruct(map[string]any{
 			"label":    fields[0].Label + " Alt",
 			"label_en": fields[0].Label + " Alt",
 		})

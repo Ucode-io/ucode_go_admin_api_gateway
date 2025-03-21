@@ -17,7 +17,7 @@ import (
 
 func CreateTable(reqBody *models.CreateTableAI) ([]*models.CreateVersionHistoryRequest, error) {
 
-	attributes, err := helper.ConvertMapToStruct(map[string]interface{}{
+	attributes, err := helper.ConvertMapToStruct(map[string]any{
 		"label":    "",
 		"label_en": reqBody.Label,
 	})
@@ -193,7 +193,7 @@ func UpdateTable(req *models.UpdateTableAI) ([]*models.CreateVersionHistoryReque
 		respLogReq = []*models.CreateVersionHistoryRequest{}
 	)
 
-	attributes, err := helper.ConvertMapToStruct(map[string]interface{}{
+	attributes, err := helper.ConvertMapToStruct(map[string]any{
 		"label":    "",
 		"label_en": req.NewLabel,
 	})
@@ -376,7 +376,7 @@ func LoginTable(req *models.LoginTableAI) ([]*models.CreateVersionHistoryRequest
 			return respLogReq, err
 		}
 
-		authInfo := make(map[string]interface{})
+		authInfo := make(map[string]any)
 
 		for _, field := range fields.Fields {
 			if field.Slug == "client_type_id" {

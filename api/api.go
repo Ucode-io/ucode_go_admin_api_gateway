@@ -38,6 +38,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 	r.GET("/menu/wiki_folder", h.V1.GetWikiFolder)
 
+	r.GET("/v1/fare", h.V1.GetAllFares)
+
 	global := r.Group("/v1/global")
 	global.Use(h.V1.GlobalAuthMiddleware(cfg))
 	{
@@ -240,7 +242,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		fare := v1.Group("/fare")
 		{
 			fare.POST("", h.V1.CreateFare)
-			fare.GET("", h.V1.GetAllFares)
 			fare.GET("/:id", h.V1.GetFare)
 			fare.PUT("", h.V1.UpdateFare)
 			fare.DELETE("/:id", h.V1.DeleteFare)
@@ -584,6 +585,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			v2Version.GET("/history/:environment_id/:id", h.V2.GetVersionHistoryByID)
 			v2Version.POST("/history/migrate/up/:environment_id", h.V2.MigrateUp)
 			v2Version.POST("/history/migrate/down/:environment_id", h.V2.MigrateDown)
+			v2Version.GET("/history/:environment_id/excel", h.V2.VersionHistoryExcelDownload)
 		}
 	}
 
