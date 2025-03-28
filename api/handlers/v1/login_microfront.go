@@ -7,7 +7,9 @@ import (
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
-	"ucode/ucode_go_api_gateway/genproto/new_function_service"
+	nobs "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
+	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
+	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
@@ -163,10 +165,32 @@ func (h *HandlerV1) GetLoginMicroFrontBySubdomain(c *gin.Context) {
 		return
 	}
 
-	function, err := services.FunctionService().FunctionService().GetSingle(context.Background(), &new_function_service.FunctionPrimaryKey{
-		Id:        resp.MicrofrontId,
-		ProjectId: resource.ResourceEnvironmentId,
-	})
+	functionResp := &obs.Function{}
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		functionResp, err = services.GetBuilderServiceByType(resource.NodeType).Function().GetSingle(context.Background(), &obs.FunctionPrimaryKey{
+			Id:        resp.MicrofrontId,
+			ProjectId: resource.ResourceEnvironmentId,
+		})
+		if err != nil {
+			h.handleResponse(c, status_http.InternalServerError, err.Error())
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+		function, err := services.GoObjectBuilderService().Function().GetSingle(context.Background(), &nobs.FunctionPrimaryKey{
+			Id:        resp.MicrofrontId,
+			ProjectId: resource.ResourceEnvironmentId,
+		})
+		if err != nil {
+			h.handleResponse(c, status_http.InternalServerError, err.Error())
+			return
+		}
+
+		if err = helper.MarshalToStruct(function, &functionResp); err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	}
 
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
@@ -174,7 +198,7 @@ func (h *HandlerV1) GetLoginMicroFrontBySubdomain(c *gin.Context) {
 	}
 
 	h.handleResponse(c, status_http.OK, models.MicrofrontForLoginPage{
-		Function:      function,
+		Function:      functionResp,
 		Id:            resp.GetId(),
 		MicrofrontId:  resp.GetMicrofrontId(),
 		ProjectId:     resp.GetProjectId(),
