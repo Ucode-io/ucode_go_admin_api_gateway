@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"net/url"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
-	"ucode/ucode_go_api_gateway/genproto/new_function_service"
 	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
 )
 
@@ -97,12 +96,12 @@ type GetByIdFunctionResponse struct {
 }
 
 type MicrofrontForLoginPage struct {
-	Function      *new_function_service.Function `json:"function"`
-	Id            string                         `json:"id"`
-	ProjectId     string                         `json:"project_id"`
-	EnvironmentId string                         `json:"environment_id"`
-	MicrofrontId  string                         `json:"microfront_id"`
-	Subdomain     string                         `json:"subdomain"`
+	Function      *object_builder_service.Function `json:"function"`
+	Id            string                           `json:"id"`
+	ProjectId     string                           `json:"project_id"`
+	EnvironmentId string                           `json:"environment_id"`
+	MicrofrontId  string                           `json:"microfront_id"`
+	Subdomain     string                           `json:"subdomain"`
 }
 
 type DoInvokeFuntionStruct struct {
