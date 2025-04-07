@@ -1986,7 +1986,11 @@ func (h *HandlerV2) AppendManyToMany(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) GetListAggregation(c *gin.Context) {
-	var reqBody models.CommonMessage
+	var (
+		reqBody   models.CommonMessage
+		tableSlug = c.Param("collection")
+		resp      = &obs.CommonMessage{}
+	)
 
 	if err := c.ShouldBindJSON(&reqBody); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
@@ -2034,10 +2038,13 @@ func (h *HandlerV2) GetListAggregation(c *gin.Context) {
 		return
 	}
 
-	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
-
 	if reqBody.IsCached {
-		redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("collection"), string(key), resource.ResourceEnvironmentId))), projectId.(string), resource.NodeType)
+		redisResp, err := h.redis.Get(
+			c.Request.Context(),
+			base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", tableSlug, string(key), resource.ResourceEnvironmentId))),
+			projectId.(string),
+			resource.NodeType,
+		)
 		if err == nil {
 			var (
 				resp = make(map[string]any)
@@ -2054,21 +2061,48 @@ func (h *HandlerV2) GetListAggregation(c *gin.Context) {
 		}
 	}
 
-	resp, err := service.GetListAggregation(
-		c.Request.Context(), &obs.CommonMessage{
-			TableSlug: c.Param("collection"),
-			Data:      structData,
-			ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().GetListAggregation(
+			c.Request.Context(), &obs.CommonMessage{
+				TableSlug: c.Param("collection"),
+				Data:      structData,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+		pgResp, err := services.GoObjectBuilderService().ObjectBuilder().GetListAggregation(
+			c.Request.Context(), &nb.CommonMessage{
+				TableSlug: c.Param("collection"),
+				Data:      structData,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+		err = helper.MarshalToStruct(pgResp, &resp)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	if reqBody.IsCached {
 		jsonData, _ := resp.GetData().MarshalJSON()
-		err = h.redis.SetX(c.Request.Context(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("collection"), string(key), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
+		err = h.redis.SetX(
+			c.Request.Context(),
+			base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", tableSlug, string(key), resource.ResourceEnvironmentId))),
+			string(jsonData),
+			15*time.Second,
+			projectId.(string),
+			resource.NodeType,
+		)
 		if err != nil {
 			h.log.Error("Error while setting redis in items aggregation", logger.Error(err))
 		}
