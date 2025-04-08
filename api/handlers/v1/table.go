@@ -880,13 +880,13 @@ func (h *HandlerV1) GetTableDetails(c *gin.Context) {
 func (h *HandlerV1) GetChart(c *gin.Context) {
 	statusHttp := status_http.GrpcStatusToHTTP["Ok"]
 
-	projectId := c.DefaultQuery("project_id", "")
+	projectId := c.DefaultQuery("project-id", "")
 	if !util.IsValidUUID(projectId) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
-	environmentId := c.DefaultQuery("environment_id", "")
+	environmentId := c.DefaultQuery("environment-id", "")
 	if !util.IsValidUUID(environmentId) {
 		h.handleResponse(c, status_http.InvalidArgument, "environment id is an invalid uuid")
 		return
