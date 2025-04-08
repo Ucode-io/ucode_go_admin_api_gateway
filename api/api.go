@@ -77,6 +77,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1.GET("/table", h.V1.GetAllTables)
 		v1.GET("/table/:table_id", h.V1.GetTableByID)
 		v1.POST("/table-details/:collection", h.V1.GetTableDetails)
+		v1.GET("/chart", h.V1.GetChart)
 
 		v1.PUT("/table", h.V1.UpdateTable)
 		v1.DELETE("/table/:table_id", h.V1.DeleteTable)
