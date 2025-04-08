@@ -880,22 +880,22 @@ func (h *HandlerV1) GetTableDetails(c *gin.Context) {
 func (h *HandlerV1) GetChart(c *gin.Context) {
 	statusHttp := status_http.GrpcStatusToHTTP["Ok"]
 
-	projectId, ok := c.Get("project_id")
-	if !ok || !util.IsValidUUID(projectId.(string)) {
+	projectId := c.DefaultQuery("project_id", "")
+	if !util.IsValidUUID(projectId) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
-	environmentId, ok := c.Get("environment_id")
-	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
+	environmentId := c.DefaultQuery("environment_id", "")
+	if !util.IsValidUUID(environmentId) {
+		h.handleResponse(c, status_http.InvalidArgument, "environment id is an invalid uuid")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(), &pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId.(string),
-			EnvironmentId: environmentId.(string),
+			ProjectId:     projectId,
+			EnvironmentId: environmentId,
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
 	)
