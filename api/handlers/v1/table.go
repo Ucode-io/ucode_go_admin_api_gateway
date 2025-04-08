@@ -910,15 +910,18 @@ func (h *HandlerV1) GetChart(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.GoObjectBuilderService().Table().GetChart(
-		c.Request.Context(), &nb.ChartPrimaryKey{
-			ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
+	switch resource.ResourceType {
+	case pb.ResourceType_POSTGRESQL:
+		resp, err := services.GoObjectBuilderService().Table().GetChart(
+			c.Request.Context(), &nb.ChartPrimaryKey{
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 
-	h.handleResponse(c, statusHttp, resp)
+		h.handleResponse(c, statusHttp, resp)
+	}
 }
