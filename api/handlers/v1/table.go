@@ -911,6 +911,17 @@ func (h *HandlerV1) GetChart(c *gin.Context) {
 	}
 
 	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).Table().GetChart(
+			c.Request.Context(), &obs.ChartPrimaryKey{
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+		h.handleResponse(c, statusHttp, resp)
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().Table().GetChart(
 			c.Request.Context(), &nb.ChartPrimaryKey{
