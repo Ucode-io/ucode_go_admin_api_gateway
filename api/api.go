@@ -40,6 +40,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 	r.GET("/v1/fare", h.V1.GetAllFares)
 
+	r.GET("v1/chart", h.V1.GetChart)
+
 	global := r.Group("/v1/global")
 	global.Use(h.V1.GlobalAuthMiddleware(cfg))
 	{

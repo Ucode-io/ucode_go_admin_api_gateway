@@ -876,3 +876,63 @@ func (h *HandlerV1) GetTableDetails(c *gin.Context) {
 		h.handleResponse(c, statusHttp, resp)
 	}
 }
+
+func (h *HandlerV1) GetChart(c *gin.Context) {
+	statusHttp := status_http.GrpcStatusToHTTP["Ok"]
+
+	projectId := c.DefaultQuery("project-id", "")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId := c.DefaultQuery("environment-id", "")
+	if !util.IsValidUUID(environmentId) {
+		h.handleResponse(c, status_http.InvalidArgument, "environment id is an invalid uuid")
+		return
+	}
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId,
+			EnvironmentId: environmentId,
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	services, err := h.GetProjectSrvc(c.Request.Context(), resource.GetProjectId(), resource.NodeType)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).Table().GetChart(
+			c.Request.Context(), &obs.ChartPrimaryKey{
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+		h.handleResponse(c, statusHttp, resp)
+	case pb.ResourceType_POSTGRESQL:
+		resp, err := services.GoObjectBuilderService().Table().GetChart(
+			c.Request.Context(), &nb.ChartPrimaryKey{
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		h.handleResponse(c, statusHttp, resp)
+	}
+}
