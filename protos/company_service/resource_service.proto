@@ -336,6 +336,7 @@ message Settings {
     SMTPCredentials smtp = 2;
     Github github = 3;
     Gitlab gitlab = 4;
+    SupersetCredentials superset = 5;
 }
 
 message SmsCredentials {
@@ -352,6 +353,12 @@ message SMTPCredentials {
     string password = 2;
     int32 number_of_otp = 3;
     string default_otp = 4;
+}
+
+message SupersetCredentials {
+    string username = 1;
+    string password = 2;
+    string url = 3;
 }
 
 message Github {

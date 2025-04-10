@@ -236,6 +236,7 @@ message Project {
     string expire_date = 18;
     bool new_layout = 19;
     string subscription_type = 20;
+    bool balance_set = 21;
 }
 
 message CreateProjectRequest {
