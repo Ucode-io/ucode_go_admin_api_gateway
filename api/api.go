@@ -645,6 +645,12 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		}
 	}
 
+	knative := r.Group("/v1/knative")
+	knative.Use(h.V1.AuthMiddleware(cfg))
+	{
+		knative.POST("/:function-path", h.V2.InvokeInAdmin)
+	}
+
 	r.Any("/api/*any", h.V1.AuthMiddleware(cfg), proxyMiddleware(r, &h), h.V1.Proxy)
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
