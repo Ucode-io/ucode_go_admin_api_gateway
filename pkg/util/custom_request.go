@@ -107,3 +107,37 @@ func DoRequestCheckCodeServer(url string, method string, body any) (status int, 
 
 	return
 }
+
+func DoDynamicRequest(url string, headers map[string]string, method string, body any) (respByte []byte, err error) {
+	data, err := json.Marshal(&body)
+	if err != nil {
+		return
+	}
+
+	client := &http.Client{
+		Timeout: time.Duration(time.Second * 30),
+	}
+
+	req, err := http.NewRequest(method, url, bytes.NewBuffer(data))
+	if err != nil {
+		return
+	}
+
+	for key, value := range headers {
+		req.Header.Set(key, value)
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return
+	}
+
+	defer resp.Body.Close()
+
+	respByte, err = io.ReadAll(resp.Body)
+	if err != nil {
+		return
+	}
+
+	return
+}
