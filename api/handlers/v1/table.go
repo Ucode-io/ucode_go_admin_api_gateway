@@ -2,6 +2,7 @@ package v1
 
 import (
 	"fmt"
+	"net/http"
 	"time"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -935,4 +936,133 @@ func (h *HandlerV1) GetChart(c *gin.Context) {
 
 		h.handleResponse(c, statusHttp, resp)
 	}
+}
+
+func (h *HandlerV1) TrackTables(c *gin.Context) {
+	var (
+		resourceEnvironmentId string
+		resourceType          pb.ResourceType
+		nodeType              string
+	)
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
+		return
+	}
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	resourceEnvironmentId = resource.ResourceEnvironmentId
+	resourceType = resource.ResourceType
+	nodeType = resource.NodeType
+
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), nodeType)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	resEnv, err := h.companyServices.Resource().GetResource(c.Request.Context(), &pb.GetResourceRequest{
+		Id: resourceEnvironmentId,
+	})
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	resp := &nb.GetAllTablesResponse{}
+
+	var tables []Tables
+
+	switch resourceType {
+	case pb.ResourceType_MONGODB:
+	case pb.ResourceType_POSTGRESQL:
+		resp, err = services.GoObjectBuilderService().Table().GetAll(
+			c.Request.Context(), &nb.GetAllTablesRequest{
+				Limit:     1000,
+				Offset:    0,
+				ProjectId: resourceEnvironmentId,
+			},
+		)
+
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	}
+
+	for _, val := range resp.GetTables() {
+		tables = append(tables, Tables{
+			Table: Table{
+				Name:   val.GetSlug(),
+				Schema: "public",
+			},
+			Source: resEnv.GetCredentials().GetDatabase(),
+		})
+	}
+
+	tableArgs := TableArgs{
+		Args: Args{
+			Tables:        tables,
+			AllowWarnings: true,
+		},
+		Type: "postgres_track_tables",
+	}
+
+	trackTableRequest := TrackRequest{
+		Type:   "bulk",
+		Source: resEnv.GetCredentials().GetDatabase(),
+		Args:   []TableArgs{tableArgs},
+	}
+
+	headers := map[string]string{
+		"Content-Type": "application/json",
+	}
+
+	respByte, err := util.DoDynamicRequest("", headers, http.MethodPost, trackTableRequest)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.OK, string(respByte))
+}
+
+type TrackRequest struct {
+	Type   string      `json:"type"`
+	Source string      `json:"source"`
+	Args   []TableArgs `json:"args"`
+}
+type Table struct {
+	Name   string `json:"name"`
+	Schema string `json:"schema"`
+}
+type Tables struct {
+	Table  Table  `json:"table"`
+	Source string `json:"source"`
+}
+type Args struct {
+	AllowWarnings bool     `json:"allow_warnings"`
+	Tables        []Tables `json:"tables"`
+}
+type TableArgs struct {
+	Type string `json:"type"`
+	Args Args   `json:"args"`
 }
