@@ -131,24 +131,15 @@ func (h *HandlerV2) InvokeInAdminWithoutAuth(c *gin.Context) {
 		return
 	}
 
-	projectId, ok := c.Get("project_id")
-	if !ok || !util.IsValidUUID(projectId.(string)) {
-		h.handleResponse(c, status.InvalidArgument, "project id is an invalid uuid")
-		return
-	}
+	projectId := c.Query("project_id")
 
-	environmentId, ok := c.Get("environment_id")
-	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err := errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status.BadRequest, err)
-		return
-	}
+	environmentId := c.Query("environment_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId.(string),
-			EnvironmentId: environmentId.(string),
+			ProjectId:     projectId,
+			EnvironmentId: environmentId,
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
 	)
@@ -158,7 +149,7 @@ func (h *HandlerV2) InvokeInAdminWithoutAuth(c *gin.Context) {
 	}
 
 	apiKeys, err := h.authService.ApiKey().GetList(c.Request.Context(), &as.GetListReq{
-		EnvironmentId: environmentId.(string),
+		EnvironmentId: environmentId,
 		ProjectId:     resource.ProjectId,
 		Limit:         1,
 		Offset:        0,
@@ -172,11 +163,8 @@ func (h *HandlerV2) InvokeInAdminWithoutAuth(c *gin.Context) {
 		return
 	}
 
-	authInfo, _ := h.GetAuthInfo(c)
-
-	invokeFunction.Data["user_id"] = authInfo.GetUserId()
-	invokeFunction.Data["project_id"] = authInfo.GetProjectId()
-	invokeFunction.Data["environment_id"] = authInfo.GetEnvId()
+	invokeFunction.Data["project_id"] = projectId
+	invokeFunction.Data["environment_id"] = environmentId
 	invokeFunction.Data["app_id"] = apiKeys.GetData()[0].GetAppId()
 	request := models.NewInvokeFunctionRequest{Data: invokeFunction.Data}
 
