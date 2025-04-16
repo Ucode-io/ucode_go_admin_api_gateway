@@ -646,9 +646,13 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	}
 
 	knative := r.Group("/v1/knative")
+	knative.POST("/:function-path/without-auth", h.V2.InvokeInAdminWithoutAuth)
+	knative.POST("/:function-path/without-data", h.V2.InvokeInAdminWithoutData)
+	knative.POST("/:function-path/proxy/noauth", h.V2.InvokeInAdminProxyWithoutAuth)
 	knative.Use(h.V1.AuthMiddleware(cfg))
 	{
 		knative.POST("/:function-path", h.V2.InvokeInAdmin)
+		knative.POST("/:function-path/auth-data", h.V2.InvokeInAdminAuthData)
 	}
 
 	r.Any("/api/*any", h.V1.AuthMiddleware(cfg), proxyMiddleware(r, &h), h.V1.Proxy)
