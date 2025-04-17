@@ -1,6 +1,7 @@
 package v2
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -15,6 +16,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
+
+type ApiKey struct {
+	AppId string `json:"app_id"`
+}
 
 // InvokeFunctionByPath godoc
 // @Security ApiKeyAuth
@@ -38,6 +43,7 @@ func (h *HandlerV2) InvokeInAdmin(c *gin.Context) {
 	var (
 		invokeFunction models.CommonMessage
 		path           = c.Param("function-path")
+		apiKey         ApiKey
 	)
 
 	if err := c.ShouldBindJSON(&invokeFunction); err != nil {
@@ -58,40 +64,59 @@ func (h *HandlerV2) InvokeInAdmin(c *gin.Context) {
 		return
 	}
 
-	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId.(string),
+	resourceBody, exist := h.cache.Get(fmt.Sprintf("project:%s:env:%s", projectId.(string), environmentId.(string)))
+	if !exist {
+		resource, err := h.companyServices.ServiceResource().GetSingle(
+			c.Request.Context(),
+			&pb.GetSingleServiceResourceReq{
+				ProjectId:     projectId.(string),
+				EnvironmentId: environmentId.(string),
+				ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status.GRPCError, err.Error())
+			return
+		}
+
+		apiKeys, err := h.authService.ApiKey().GetList(c.Request.Context(), &as.GetListReq{
 			EnvironmentId: environmentId.(string),
-			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status.GRPCError, err.Error())
-		return
+			ProjectId:     resource.ProjectId,
+			Limit:         1,
+			Offset:        0,
+		})
+		if err != nil {
+			h.handleResponse(c, status.GRPCError, err.Error())
+			return
+		}
+		if len(apiKeys.Data) < 1 {
+			h.handleResponse(c, status.InvalidArgument, "Api key not found")
+			return
+		}
+
+		appIdByte, err := json.Marshal(ApiKey{AppId: apiKeys.GetData()[0].GetAppId()})
+		if err != nil {
+			h.handleResponse(c, status.InvalidArgument, err.Error())
+			return
+		}
+
+		h.cache.Add(fmt.Sprintf("project:%s:env:%s", projectId.(string), environmentId.(string)), appIdByte, config.REDIS_KEY_TIMEOUT)
+	} else {
+		fmt.Println("getting from cache")
+		if err := json.Unmarshal(resourceBody, &apiKey); err != nil {
+			h.handleResponse(c, status.InvalidArgument, err.Error())
+			return
+		}
 	}
 
-	apiKeys, err := h.authService.ApiKey().GetList(c.Request.Context(), &as.GetListReq{
-		EnvironmentId: environmentId.(string),
-		ProjectId:     resource.ProjectId,
-		Limit:         1,
-		Offset:        0,
-	})
-	if err != nil {
-		h.handleResponse(c, status.GRPCError, err.Error())
-		return
-	}
-	if len(apiKeys.Data) < 1 {
-		h.handleResponse(c, status.InvalidArgument, "Api key not found")
-		return
-	}
+	fmt.Println("apiKey", apiKey)
 
 	authInfo, _ := h.GetAuthInfo(c)
 
 	invokeFunction.Data["user_id"] = authInfo.GetUserId()
 	invokeFunction.Data["project_id"] = authInfo.GetProjectId()
 	invokeFunction.Data["environment_id"] = authInfo.GetEnvId()
-	invokeFunction.Data["app_id"] = apiKeys.GetData()[0].GetAppId()
+	invokeFunction.Data["app_id"] = apiKey.AppId
 	request := models.NewInvokeFunctionRequest{Data: invokeFunction.Data}
 
 	resp, err := h.ExecKnative(path, request)

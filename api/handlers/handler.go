@@ -42,7 +42,7 @@ func NewHandler(baseConf config.BaseConfig, projectConfs map[string]config.Confi
 		authService:     authService,
 		redis:           redis,
 		V1:              v1.NewHandlerV1(baseConf, projectConfs, log, svcs, cmpServ, authService, redis, cache, limiter),
-		V2:              v2.NewHandlerV2(baseConf, projectConfs, log, svcs, cmpServ, authService, redis, limiter),
+		V2:              v2.NewHandlerV2(baseConf, projectConfs, log, svcs, cmpServ, authService, redis, cache, limiter),
 		cache:           cache,
 	}
 }
