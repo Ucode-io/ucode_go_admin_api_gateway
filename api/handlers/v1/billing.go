@@ -66,9 +66,12 @@ func (h *HandlerV1) GetAllFares(c *gin.Context) {
 		return
 	}
 
+	projectId := c.Query("project-id")
+
 	response, err := h.companyServices.Billing().ListFares(c, &pb.ListRequest{
-		Offset: int32(offset),
-		Limit:  int32(limit),
+		Offset:    int32(offset),
+		Limit:     int32(limit),
+		ProjectId: projectId,
 	})
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
