@@ -307,16 +307,9 @@ func createField(c *gin.Context, req *createFieldReq) error {
 }
 
 func createRelation(c *gin.Context, req *createRelationReq) error {
-	relationType := ""
-	if req.relType == "UUID" {
-		relationType = "Many2One"
-	} else {
-		relationType = "Many2Many"
-	}
-
 	relationReq := &obj.CreateRelationRequest{
 		Id:        uuid.NewString(),
-		Type:      relationType,
+		Type:      "Many2One",
 		TableFrom: req.tableFrom,
 		TableTo:   req.tableTo,
 		Attributes: &structpb.Struct{
@@ -388,5 +381,4 @@ type createRelationReq struct {
 	resourceCreds resourceCreds
 	tableFrom     string
 	tableTo       string
-	relType       string
 }
