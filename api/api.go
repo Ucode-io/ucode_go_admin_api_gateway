@@ -638,6 +638,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 	{
 		proxyApi.POST("/invoke_function/:function-path", h.V2.InvokeFunctionByPath)
+		proxyApi.POST("/invoke_function/:function-path/*any", h.V2.InvokeFunctionByPath)
 
 		v2Webhook := proxyApi.Group("/webhook")
 		{

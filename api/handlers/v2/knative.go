@@ -39,6 +39,10 @@ func (h *HandlerV2) InvokeFunctionByPath(c *gin.Context) {
 	_ = h.MakeProxy(c, h.baseConf.GoFunctionServiceHost+h.baseConf.GoFunctionServiceHTTPPort, c.Request.URL.Path)
 }
 
+func (h *HandlerV2) InvokeFunctionByApiPath(c *gin.Context) {
+	_ = h.MakeProxy(c, h.baseConf.GoFunctionServiceHost+h.baseConf.GoFunctionServiceHTTPPort, c.Request.URL.Path)
+}
+
 func (h *HandlerV2) InvokeInAdmin(c *gin.Context) {
 	var (
 		invokeFunction models.CommonMessage
