@@ -389,6 +389,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1Admin.GET("/redirect-url/:redirect-url-id", h.V1.GetSingleRedirectUrl)
 		v1Admin.DELETE("/redirect-url/:redirect-url-id", h.V1.DeleteRedirectUrl)
 		v1Admin.PUT("/redirect-url/re-order", h.V1.UpdateRedirectUrlOrder)
+
+		v1Admin.POST("dbml-to-ucode", h.V1.DbmlToUcode)
 	}
 
 	v2Admin := r.Group("/v2")
@@ -636,6 +638,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 	{
 		proxyApi.POST("/invoke_function/:function-path", h.V2.InvokeFunctionByPath)
+		proxyApi.POST("/invoke_function/:function-path/*any", h.V2.InvokeFunctionByPath)
 
 		v2Webhook := proxyApi.Group("/webhook")
 		{
