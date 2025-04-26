@@ -106,14 +106,11 @@ func (h *HandlerV2) InvokeInAdmin(c *gin.Context) {
 
 		h.cache.Add(fmt.Sprintf("project:%s:env:%s", projectId.(string), environmentId.(string)), appIdByte, config.REDIS_KEY_TIMEOUT)
 	} else {
-		fmt.Println("getting from cache")
 		if err := json.Unmarshal(resourceBody, &apiKey); err != nil {
 			h.handleResponse(c, status.InvalidArgument, err.Error())
 			return
 		}
 	}
-
-	fmt.Println("apiKey", apiKey)
 
 	authInfo, _ := h.GetAuthInfo(c)
 
