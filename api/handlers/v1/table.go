@@ -1201,6 +1201,124 @@ func (h *HandlerV1) GetTrackedConnections(c *gin.Context) {
 	}
 }
 
+func (h *HandlerV1) TrackTablesByIds(c *gin.Context) {
+	var (
+		request = &nb.TrackedTablesByIdsReq{}
+	)
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, status_http.BadRequest, "environment id is an invalid uuid")
+		return
+	}
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
+			ProjectId:     cast.ToString(projectId),
+			EnvironmentId: cast.ToString(environmentId),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	services, err := h.GetProjectSrvc(c.Request.Context(), resource.GetProjectId(), resource.NodeType)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	switch resource.ResourceType {
+	case pb.ResourceType_POSTGRESQL:
+		resp, err := services.GoObjectBuilderService().Table().TrackedTablesByIds(
+			c.Request.Context(),
+			&nb.TrackedTablesByIdsReq{
+				TableIds:     request.TableIds,
+				ConnectionId: request.ConnectionId,
+				ProjectId:    resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.InternalServerError, err.Error())
+			return
+		}
+
+		h.handleResponse(c, status_http.OK, resp)
+	}
+}
+
+func (h *HandlerV1) UntrackTableById(c *gin.Context) {
+	var (
+		request = &nb.UntrackTableByIdReq{}
+	)
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, status_http.BadRequest, "environment id is an invalid uuid")
+		return
+	}
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
+			ProjectId:     cast.ToString(projectId),
+			EnvironmentId: cast.ToString(environmentId),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	services, err := h.GetProjectSrvc(c.Request.Context(), resource.GetProjectId(), resource.NodeType)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	switch resource.ResourceType {
+	case pb.ResourceType_POSTGRESQL:
+		resp, err := services.GoObjectBuilderService().Table().UntrackTableById(
+			c.Request.Context(),
+			&nb.UntrackTableByIdReq{
+				TableId:      request.TableId,
+				ProjectId:    resource.ResourceEnvironmentId,
+				ConnectionId: request.ConnectionId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.InternalServerError, err.Error())
+			return
+		}
+
+		h.handleResponse(c, status_http.OK, resp)
+	}
+}
+
 type TrackRequest struct {
 	Type   string      `json:"type"`
 	Source string      `json:"source"`
