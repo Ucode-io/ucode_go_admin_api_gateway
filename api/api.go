@@ -83,11 +83,11 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1.PUT("/table", h.V1.UpdateTable)
 		v1.DELETE("/table/:table_id", h.V1.DeleteTable)
 
-		v1.POST("/connection-schema", h.V1.CreateConnectionAndSchema)
-		v1.GET("/tracked-untracked-tables", h.V1.GetTrackedUntrackedTables)
-		v1.GET("/tracked-connections", h.V1.GetTrackedConnections)
-		v1.POST("/track-tables", h.V1.TrackTablesByIds)
-		v1.POST("/untrack-table", h.V1.UntrackTableById)
+		v1.POST("/connections", h.V1.CreateConnectionAndSchema)
+		v1.GET("/connections/:connection_id/tables", h.V1.GetTrackedUntrackedTables)
+		v1.GET("/connections", h.V1.GetTrackedConnections)
+		v1.POST("/connections/:connection_id/tables/track", h.V1.TrackTablesByIds)
+		v1.POST("/connections/:connection_id/tables/:table_id", h.V1.UntrackTableById)
 
 		//relation
 		v1.POST("/relation", h.V1.CreateRelation)

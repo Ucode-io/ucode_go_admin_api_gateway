@@ -1047,7 +1047,7 @@ func (h *HandlerV1) TrackTables(c *gin.Context) {
 
 func (h *HandlerV1) CreateConnectionAndSchema(c *gin.Context) {
 	var (
-		request = &nb.CreateConnectionAndSchemaReq{}
+		request nb.CreateConnectionAndSchemaReq
 	)
 
 	if err := c.ShouldBindJSON(&request); err != nil {
@@ -1117,7 +1117,7 @@ func (h *HandlerV1) GetTrackedUntrackedTables(c *gin.Context) {
 		return
 	}
 
-	connectionId := c.Query("connection_id")
+	connectionId := c.Param("connection_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(), &pb.GetSingleServiceResourceReq{
@@ -1203,7 +1203,8 @@ func (h *HandlerV1) GetTrackedConnections(c *gin.Context) {
 
 func (h *HandlerV1) TrackTablesByIds(c *gin.Context) {
 	var (
-		request = &nb.TrackedTablesByIdsReq{}
+		request      nb.TrackedTablesByIdsReq
+		connectionId = c.Param("connection_id")
 	)
 
 	if err := c.ShouldBindJSON(&request); err != nil {
@@ -1247,7 +1248,7 @@ func (h *HandlerV1) TrackTablesByIds(c *gin.Context) {
 			c.Request.Context(),
 			&nb.TrackedTablesByIdsReq{
 				TableIds:     request.TableIds,
-				ConnectionId: request.ConnectionId,
+				ConnectionId: connectionId,
 				ProjectId:    resource.ResourceEnvironmentId,
 			},
 		)
@@ -1262,13 +1263,9 @@ func (h *HandlerV1) TrackTablesByIds(c *gin.Context) {
 
 func (h *HandlerV1) UntrackTableById(c *gin.Context) {
 	var (
-		request = &nb.UntrackTableByIdReq{}
+		connectionId = c.Param("connection_id")
+		tableId      = c.Param("table_id")
 	)
-
-	if err := c.ShouldBindJSON(&request); err != nil {
-		h.handleResponse(c, status_http.BadRequest, err.Error())
-		return
-	}
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -1305,9 +1302,9 @@ func (h *HandlerV1) UntrackTableById(c *gin.Context) {
 		resp, err := services.GoObjectBuilderService().Table().UntrackTableById(
 			c.Request.Context(),
 			&nb.UntrackTableByIdReq{
-				TableId:      request.TableId,
+				TableId:      tableId,
 				ProjectId:    resource.ResourceEnvironmentId,
-				ConnectionId: request.ConnectionId,
+				ConnectionId: connectionId,
 			},
 		)
 		if err != nil {
