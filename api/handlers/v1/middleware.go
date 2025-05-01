@@ -253,7 +253,7 @@ func (h *HandlerV1) SlimAuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 
 			c.Set("environment_id", environmentId)
 			c.Set("project_id", projectId)
-			c.Set("access", config.PublicStatus)
+			c.Set("with_access", false)
 		} else {
 			strArr := strings.Split(bearerToken, " ")
 

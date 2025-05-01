@@ -456,12 +456,12 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 		}
 	)
 
-	switch resource.ResourceType {
-	case pb.ResourceType_MONGODB:
-		service := services.GetBuilderServiceByType(resource.NodeType)
+	service := services.GetBuilderServiceByType(resource.NodeType)
 
-		accessType, ok := c.Get("access")
-		if ok && cast.ToString(accessType) == config.PublicStatus {
+	accessType, ok := c.Get("with_access")
+	if ok && !cast.ToBool(accessType) {
+		switch resource.ResourceType {
+		case pb.ResourceType_MONGODB:
 			permission, err := service.Permission().GetTablePermission(
 				c.Request.Context(),
 				&obs.GetTablePermissionRequest{
@@ -471,7 +471,25 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 				},
 			)
 			if err != nil {
-				h.handleResponse(c, status_http.GRPCError, err.Error())
+				h.handleResponse(c, status_http.Forbidden, "table is not public")
+				return
+			}
+
+			if !permission.IsHavePermission {
+				h.handleResponse(c, status_http.Forbidden, "table is not public")
+				return
+			}
+		case pb.ResourceType_POSTGRESQL:
+			permission, err := services.GoObjectBuilderService().Permission().GetTablePermission(
+				c.Request.Context(),
+				&nb.GetTablePermissionRequest{
+					TableSlug:             tableSlug,
+					ResourceEnvironmentId: resource.ResourceEnvironmentId,
+					Method:                "read",
+				},
+			)
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, "table is not public")
 				return
 			}
 
@@ -481,6 +499,10 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 			}
 		}
 
+	}
+
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
 		var slimKey = base64.StdEncoding.EncodeToString(fmt.Appendf(nil, "slim-%s-%s-%s", tableSlug, structData.String(), resource.ResourceEnvironmentId))
 		if !cast.ToBool(c.Query("block_cached")) {
 			if cast.ToBool(c.Query("is_wait_cached")) {
