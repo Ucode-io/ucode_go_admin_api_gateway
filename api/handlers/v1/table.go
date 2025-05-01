@@ -1244,7 +1244,7 @@ func (h *HandlerV1) TrackTablesByIds(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_POSTGRESQL:
-		resp, err := services.GoObjectBuilderService().Table().TrackedTablesByIds(
+		resp, err := services.GoObjectBuilderService().Table().TrackTables(
 			c.Request.Context(),
 			&nb.TrackedTablesByIdsReq{
 				TableIds:     request.TableIds,
