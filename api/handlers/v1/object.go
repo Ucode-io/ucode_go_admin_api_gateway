@@ -461,6 +461,50 @@ func (h *HandlerV1) GetSingleSlim(c *gin.Context) {
 
 	redisKey := base64.StdEncoding.EncodeToString(fmt.Appendf(nil, "%s-%s-%s", tableSlug, structData.String(), resource.ResourceEnvironmentId))
 
+	service := services.GetBuilderServiceByType(resource.NodeType)
+
+	accessType, ok := c.Get("with_access")
+	if ok && !cast.ToBool(accessType) {
+		switch resource.ResourceType {
+		case pb.ResourceType_MONGODB:
+			permission, err := service.Permission().GetTablePermission(
+				c.Request.Context(),
+				&obs.GetTablePermissionRequest{
+					TableSlug:             tableSlug,
+					ResourceEnvironmentId: resource.ResourceEnvironmentId,
+					Method:                "read",
+				},
+			)
+			if err != nil {
+				h.handleResponse(c, status_http.Forbidden, "table is not public")
+				return
+			}
+
+			if !permission.IsHavePermission {
+				h.handleResponse(c, status_http.Forbidden, "table is not public")
+				return
+			}
+		case pb.ResourceType_POSTGRESQL:
+			permission, err := services.GoObjectBuilderService().Permission().GetTablePermission(
+				c.Request.Context(),
+				&nb.GetTablePermissionRequest{
+					TableSlug:             tableSlug,
+					ResourceEnvironmentId: resource.ResourceEnvironmentId,
+					Method:                "read",
+				},
+			)
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, "table is not public")
+				return
+			}
+
+			if !permission.IsHavePermission {
+				h.handleResponse(c, status_http.Forbidden, "table is not public")
+				return
+			}
+		}
+	}
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
