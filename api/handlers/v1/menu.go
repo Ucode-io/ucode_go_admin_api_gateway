@@ -915,6 +915,53 @@ func (h *HandlerV1) CreateMenuTemplate(c *gin.Context) {
 	h.handleResponse(c, status_http.Created, resp)
 }
 
+func (h *HandlerV1) CreateProjectMenuTemplate(c *gin.Context) {
+	var (
+		menuTemplate pb.CreateMenuTemplateRequest
+	)
+
+	err := c.ShouldBindJSON(&menuTemplate)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	menuTemplate.ProjectId = resource.ResourceEnvironmentId
+	resp, err := h.companyServices.Company().CreateMenuTemplate(c.Request.Context(), &menuTemplate)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.Created, resp)
+}
+
 func (h *HandlerV1) GetAllMenuTemplates(c *gin.Context) {
 	offset, err := h.getOffsetParam(c)
 	var (

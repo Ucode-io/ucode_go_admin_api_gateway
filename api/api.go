@@ -72,6 +72,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1.POST("/upload", h.V1.Upload)
 		v1.POST("/upload-file/:collection/:object_id", h.V1.UploadFile)
 
+		v1.POST("/menu/template", h.V1.CreateProjectMenuTemplate)
+
 		// OBJECT_BUILDER_SERVICE
 
 		//table
