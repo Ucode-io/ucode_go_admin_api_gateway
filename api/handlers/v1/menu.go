@@ -962,6 +962,33 @@ func (h *HandlerV1) CreateProjectMenuTemplate(c *gin.Context) {
 	h.handleResponse(c, status_http.Created, resp)
 }
 
+func (h *HandlerV1) GetProjectMenuTemplates(c *gin.Context) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
+		return
+	}
+
+	resp, err := h.companyServices.Company().GetProjectMenuTemplates(
+		c.Request.Context(),
+		&pb.GetProjectMenuTemplateRequest{
+			ProjectId: projectId.(string),
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.OK, resp)
+}
+
 func (h *HandlerV1) GetAllMenuTemplates(c *gin.Context) {
 	offset, err := h.getOffsetParam(c)
 	var (
