@@ -133,6 +133,7 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 			ObjectData:   objectRequest.Data,
 			Method:       "CREATE",
 			Resource:     resource,
+			ActionType:   "BEFORE",
 		},
 			c,
 			h,
@@ -223,6 +224,7 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 			ObjectData:   objectRequest.Data,
 			Method:       "CREATE",
 			Resource:     resource,
+			ActionType:   "AFTER",
 		},
 			c, // gin context,
 			h, // handler
@@ -1308,6 +1310,7 @@ func (h *HandlerV2) DeleteItem(c *gin.Context) {
 			ObjectData:   objectRequest.Data,
 			Method:       "DELETE",
 			Resource:     resource,
+			ActionType:   "BEFORE",
 		},
 			c,
 			h,
@@ -1324,12 +1327,9 @@ func (h *HandlerV2) DeleteItem(c *gin.Context) {
 		ProjectId:    resource.ResourceEnvironmentId,
 		ActionSource: c.Request.URL.String(),
 		ActionType:   "DELETE ITEM",
-		UsedEnvironments: map[string]bool{
-			cast.ToString(environmentId): true,
-		},
-		UserInfo:  cast.ToString(userId),
-		Request:   structData,
-		TableSlug: c.Param("collection"),
+		UserInfo:     cast.ToString(userId),
+		Request:      structData,
+		TableSlug:    c.Param("collection"),
 	}
 
 	switch resource.ResourceType {
@@ -1395,6 +1395,7 @@ func (h *HandlerV2) DeleteItem(c *gin.Context) {
 			ObjectData:   objectRequest.Data,
 			Method:       "DELETE",
 			Resource:     resource,
+			ActionType:   "AFTER",
 		},
 			c, // gin context,
 			h, // handler
@@ -1531,12 +1532,9 @@ func (h *HandlerV2) DeleteItems(c *gin.Context) {
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: c.Request.URL.String(),
 			ActionType:   "DELETE ITEM",
-			UsedEnvironments: map[string]bool{
-				cast.ToString(environmentId): true,
-			},
-			UserInfo:  cast.ToString(userId),
-			Request:   &structData,
-			TableSlug: c.Param("collection"),
+			UserInfo:     cast.ToString(userId),
+			Request:      &structData,
+			TableSlug:    c.Param("collection"),
 		}
 	)
 
