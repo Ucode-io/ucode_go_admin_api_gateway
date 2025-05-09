@@ -70,6 +70,10 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1.POST("/connections/:connection_id/tables/track", h.V1.TrackTablesByIds)
 		v1.POST("/connections/:connection_id/tables/:table_id", h.V1.UntrackTableById)
 
+		//view_relation
+		v1.GET("/view_relation", h.V1.GetViewRelation)
+		v1.PUT("/view_relation", h.V1.UpsertViewRelations)
+
 		//object-builder
 		v1.POST("/object/:collection", h.V1.CreateObject)
 		v1.GET("/object/:collection/:object_id", h.V1.GetSingle)
