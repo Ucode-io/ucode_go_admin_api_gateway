@@ -1,12 +1,9 @@
-package v2
+package v3
 
 import (
-	"bufio"
 	"context"
 	"encoding/json"
-	"log"
 	"net/http"
-	"net/url"
 	"strconv"
 	"time"
 
@@ -28,7 +25,10 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-type HandlerV2 struct {
+type AdditionalParams struct {
+}
+
+type HandlerV3 struct {
 	baseConf        config.BaseConfig
 	projectConfs    map[string]config.Config
 	log             logger.LoggerI
@@ -40,21 +40,33 @@ type HandlerV2 struct {
 	rateLimiter     *util.ApiKeyRateLimiter
 }
 
-func NewHandlerV2(baseConf config.BaseConfig, projectConfs map[string]config.Config, log logger.LoggerI, svcs services.ServiceNodesI, cmpServ services.CompanyServiceI, authService services.AuthServiceManagerI, redis storage.RedisStorageI, cache *caching.ExpiringLRUCache, limiter *util.ApiKeyRateLimiter) HandlerV2 {
-	return HandlerV2{
-		baseConf:        baseConf,
-		projectConfs:    projectConfs,
-		log:             log,
-		services:        svcs,
-		companyServices: cmpServ,
-		authService:     authService,
-		redis:           redis,
-		cache:           cache,
-		rateLimiter:     limiter,
+type HandlerV3Config struct {
+	BaseConf        config.BaseConfig
+	ProjectConfs    map[string]config.Config
+	Log             logger.LoggerI
+	Services        services.ServiceNodesI
+	CompanyServices services.CompanyServiceI
+	AuthService     services.AuthServiceManagerI
+	Redis           storage.RedisStorageI
+	Cache           *caching.ExpiringLRUCache
+	RateLimiter     *util.ApiKeyRateLimiter
+}
+
+func NewHandlerV3(cf *HandlerV3Config) HandlerV3 {
+	return HandlerV3{
+		baseConf:        cf.BaseConf,
+		projectConfs:    cf.ProjectConfs,
+		log:             cf.Log,
+		services:        cf.Services,
+		companyServices: cf.CompanyServices,
+		authService:     cf.AuthService,
+		redis:           cf.Redis,
+		cache:           cf.Cache,
+		rateLimiter:     cf.RateLimiter,
 	}
 }
 
-func (h *HandlerV2) GetProjectSrvc(c context.Context, projectId string, nodeType string) (services.ServiceManagerI, error) {
+func (h *HandlerV3) GetProjectSrvc(c context.Context, projectId string, nodeType string) (services.ServiceManagerI, error) {
 	if nodeType == config.ENTER_PRICE_TYPE {
 		srvc, err := h.services.Get(projectId)
 		if err != nil {
@@ -72,7 +84,7 @@ func (h *HandlerV2) GetProjectSrvc(c context.Context, projectId string, nodeType
 	}
 }
 
-func (h *HandlerV2) handleResponse(c *gin.Context, status status_http.Status, data any) {
+func (h *HandlerV3) handleResponse(c *gin.Context, status status_http.Status, data any) {
 	switch code := status.Code; {
 	case code < 400:
 	default:
@@ -94,7 +106,7 @@ func (h *HandlerV2) handleResponse(c *gin.Context, status status_http.Status, da
 	})
 }
 
-func (h *HandlerV2) handleError(c *gin.Context, statusHttp status_http.Status, err error) {
+func (h *HandlerV3) handleError(c *gin.Context, statusHttp status_http.Status, err error) {
 	st, _ := status.FromError(err)
 	if statusHttp.Status == status_http.BadRequest.Status {
 		c.JSON(http.StatusInternalServerError, status_http.Response{
@@ -139,17 +151,17 @@ func (h *HandlerV2) handleError(c *gin.Context, statusHttp status_http.Status, e
 	}
 }
 
-func (h *HandlerV2) getOffsetParam(c *gin.Context) (offset int, err error) {
+func (h *HandlerV3) getOffsetParam(c *gin.Context) (offset int, err error) {
 	offsetStr := c.DefaultQuery("offset", h.baseConf.DefaultOffset)
 	return strconv.Atoi(offsetStr)
 }
 
-func (h *HandlerV2) getLimitParam(c *gin.Context) (limit int, err error) {
+func (h *HandlerV3) getLimitParam(c *gin.Context) (limit int, err error) {
 	limitStr := c.DefaultQuery("limit", h.baseConf.DefaultLimit)
 	return strconv.Atoi(limitStr)
 }
 
-func (h *HandlerV2) versionHistory(req *models.CreateVersionHistoryRequest) error {
+func (h *HandlerV3) versionHistory(req *models.CreateVersionHistoryRequest) error {
 	var (
 		current  = map[string]any{"data": req.Current}
 		previous = map[string]any{"data": req.Previous}
@@ -190,25 +202,23 @@ func (h *HandlerV2) versionHistory(req *models.CreateVersionHistoryRequest) erro
 	_, err := req.Services.GetBuilderServiceByType(req.NodeType).VersionHistory().Create(
 		context.Background(),
 		&obs.CreateVersionHistoryRequest{
-			Id:                uuid.NewString(),
-			ProjectId:         req.ProjectId,
-			ActionSource:      req.ActionSource,
-			ActionType:        req.ActionType,
-			Previus:           fromMapToString(previous),
-			Current:           fromMapToString(current),
-			UsedEnvrironments: req.UsedEnvironments,
-			Date:              time.Now().Format("2006-01-02T15:04:05.000Z"),
-			UserInfo:          user,
-			Request:           fromMapToString(request),
-			Response:          fromMapToString(response),
-			ApiKey:            req.ApiKey,
-			Type:              req.Type,
-			TableSlug:         req.TableSlug,
-			VersionId:         req.VersionId,
+			Id:           uuid.NewString(),
+			ProjectId:    req.ProjectId,
+			ActionSource: req.ActionSource,
+			ActionType:   req.ActionType,
+			Previus:      fromMapToString(previous),
+			Current:      fromMapToString(current),
+			Date:         time.Now().Format("2006-01-02T15:04:05.000Z"),
+			UserInfo:     user,
+			Request:      fromMapToString(request),
+			Response:     fromMapToString(response),
+			ApiKey:       req.ApiKey,
+			Type:         req.Type,
+			TableSlug:    req.TableSlug,
+			VersionId:    req.VersionId,
 		},
 	)
 	if err != nil {
-		log.Println(err)
 		return err
 	}
 
@@ -223,7 +233,7 @@ func fromMapToString(req map[string]any) string {
 	return string(reqString)
 }
 
-func (h *HandlerV2) versionHistoryGo(c *gin.Context, req *models.CreateVersionHistoryRequest) error {
+func (h *HandlerV3) versionHistoryGo(c *gin.Context, req *models.CreateVersionHistoryRequest) error {
 	var (
 		current  = map[string]any{"data": req.Current}
 		previous = map[string]any{"data": req.Previous}
@@ -282,41 +292,11 @@ func (h *HandlerV2) versionHistoryGo(c *gin.Context, req *models.CreateVersionHi
 		},
 	)
 	if err != nil {
-		log.Println("ERROR FROM VERSION CREATE >>>>>", err)
 		return err
 	}
 	return nil
 }
 
-func (h *HandlerV2) MakeProxy(c *gin.Context, proxyUrl, path string) (err error) {
-	req := c.Request
-
-	proxy, err := url.Parse(proxyUrl)
-	if err != nil {
-		h.log.Error("error in parse addr: %v", logger.Error(err))
-		c.String(http.StatusInternalServerError, "error")
-		return
-	}
-
-	req.URL.Scheme = proxy.Scheme
-	req.URL.Host = proxy.Host
-	req.URL.Path = path
-	transport := http.DefaultTransport
-
-	resp, err := transport.RoundTrip(req)
-	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
-		return
-	}
-
-	for k, vv := range resp.Header {
-		for _, v := range vv {
-			c.Header(k, v)
-		}
-	}
-	defer resp.Body.Close()
-
-	c.Status(resp.StatusCode)
-	_, _ = bufio.NewReader(resp.Body).WriteTo(c.Writer)
-	return
+func (h *HandlerV3) GetService(namespace string) (services.ServiceManagerI, error) {
+	return h.services.Get(namespace)
 }

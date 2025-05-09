@@ -42,7 +42,7 @@ func (h *HandlerV1) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 
 		if len(strArr) < 1 && (strArr[0] != "Bearer" && strArr[0] != "API-KEY") {
 			h.log.Error("---ERR->Unexpected token format")
-			_ = c.AbortWithError(http.StatusForbidden, errors.New("token error: wrong format"))
+			_ = c.AbortWithError(http.StatusForbidden, config.ErrTokenFormat)
 			return
 		}
 
@@ -259,7 +259,7 @@ func (h *HandlerV1) SlimAuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 
 			if len(strArr) < 1 && (strArr[0] != "Bearer" && strArr[0] != "API-KEY") {
 				h.log.Error("---ERR->Unexpected token format")
-				_ = c.AbortWithError(http.StatusForbidden, errors.New("token error: wrong format"))
+				_ = c.AbortWithError(http.StatusForbidden, config.ErrTokenFormat)
 				return
 			}
 			switch strArr[0] {
@@ -552,7 +552,7 @@ func (h *HandlerV1) GlobalAuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc 
 
 		if len(strArr) < 1 && (strArr[0] != "Bearer" && strArr[0] != "API-KEY") {
 			h.log.Error("---ERR->Unexpected token format")
-			_ = c.AbortWithError(http.StatusForbidden, errors.New("token error: wrong format"))
+			_ = c.AbortWithError(http.StatusForbidden, config.ErrTokenFormat)
 			return
 		}
 		switch strArr[0] {

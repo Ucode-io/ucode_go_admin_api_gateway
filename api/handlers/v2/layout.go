@@ -2,15 +2,14 @@ package v2
 
 import (
 	"errors"
-	pb "ucode/ucode_go_api_gateway/genproto/company_service"
-	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
-	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
-
-	"ucode/ucode_go_api_gateway/pkg/helper"
-	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
+	pb "ucode/ucode_go_api_gateway/genproto/company_service"
+	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
+	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
+	"ucode/ucode_go_api_gateway/pkg/helper"
+	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang/protobuf/ptypes/empty"

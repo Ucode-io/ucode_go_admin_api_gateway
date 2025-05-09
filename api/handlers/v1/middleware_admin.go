@@ -45,7 +45,7 @@ func (h *HandlerV1) AdminAuthMiddleware() gin.HandlerFunc {
 
 			if len(strArr) < 1 && (strArr[0] != "Bearer" && strArr[0] != "API-KEY") {
 				h.log.Error("---ERR->Unexpected token format")
-				_ = c.AbortWithError(http.StatusForbidden, errors.New("token error: wrong format"))
+				_ = c.AbortWithError(http.StatusForbidden, config.ErrTokenFormat)
 				return
 			}
 
@@ -183,13 +183,13 @@ func (h *HandlerV1) adminAuthInfo(c *gin.Context) (result *auth.HasAccessSuperAd
 	if !ok {
 		h.handleResponse(c, status_http.Forbidden, "token error: wrong format")
 		c.Abort()
-		return nil, errors.New("token error: wrong format")
+		return nil, config.ErrTokenFormat
 	}
 	accessResponse, ok := data.(*auth.HasAccessSuperAdminRes)
 	if !ok {
 		h.handleResponse(c, status_http.Forbidden, "token error: wrong format")
 		c.Abort()
-		return nil, errors.New("token error: wrong format")
+		return nil, config.ErrTokenFormat
 	}
 
 	return accessResponse, nil

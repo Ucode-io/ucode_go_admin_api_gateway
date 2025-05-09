@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"errors"
 	"strings"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
@@ -77,14 +76,14 @@ func (h *HandlerV1) GetAuthInfo(c *gin.Context) (result *auth.V2HasAccessUserRes
 	if !ok {
 		h.handleResponse(c, status_http.Forbidden, "token error: wrong format")
 		c.Abort()
-		return nil, errors.New("token error: wrong format")
+		return nil, config.ErrTokenFormat
 	}
 
 	accessResponse, ok := data.(*auth.V2HasAccessUserRes)
 	if !ok {
 		h.handleResponse(c, status_http.Forbidden, "token error: wrong format")
 		c.Abort()
-		return nil, errors.New("token error: wrong format")
+		return nil, config.ErrTokenFormat
 	}
 
 	return accessResponse, nil
@@ -95,14 +94,14 @@ func (h *HandlerV1) GetAuthAdminInfo(c *gin.Context) (result *auth.HasAccessSupe
 	if !ok {
 		h.handleResponse(c, status_http.Forbidden, "token error: wrong format")
 		c.Abort()
-		return nil, errors.New("token error: wrong format")
+		return nil, config.ErrTokenFormat
 	}
 
 	accessResponse, ok := data.(*auth.HasAccessSuperAdminRes)
 	if !ok {
 		h.handleResponse(c, status_http.Forbidden, "token error: wrong format")
 		c.Abort()
-		return nil, errors.New("token error: wrong format")
+		return nil, config.ErrTokenFormat
 	}
 
 	return accessResponse, nil
