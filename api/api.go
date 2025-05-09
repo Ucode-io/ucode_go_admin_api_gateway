@@ -577,12 +577,12 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 			v3table := v3views.Group("/:view_id/tables")
 			{
-				v3table.POST("", h.V1.CreateTable)
-				v3table.GET("", h.V1.GetAllTables)
-				v3table.GET("/:collection", h.V1.GetTableByID)
-				v3table.POST("/table-details/:collection", h.V1.GetTableDetails)
-				v3table.PUT("", h.V1.UpdateTable)
-				v3table.DELETE("/:collection", h.V1.DeleteTable)
+				v3table.POST("", h.V3.CreateTable)
+				v3table.GET("", h.V3.GetAllTables)
+				v3table.GET("/:collection", h.V3.GetTableByID)
+				v3table.POST("/:collection", h.V3.GetTableDetails)
+				v3table.PUT("", h.V3.UpdateTable)
+				v3table.DELETE("/:collection", h.V3.DeleteTable)
 
 				v3items := v3table.Group("/:collection/items")
 				{

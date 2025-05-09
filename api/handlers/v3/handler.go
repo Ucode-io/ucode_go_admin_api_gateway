@@ -156,11 +156,6 @@ func (h *HandlerV3) getOffsetParam(c *gin.Context) (offset int, err error) {
 	return strconv.Atoi(offsetStr)
 }
 
-func (h *HandlerV3) getLimitParam(c *gin.Context) (limit int, err error) {
-	limitStr := c.DefaultQuery("limit", h.baseConf.DefaultLimit)
-	return strconv.Atoi(limitStr)
-}
-
 func (h *HandlerV3) versionHistory(req *models.CreateVersionHistoryRequest) error {
 	var (
 		current  = map[string]any{"data": req.Current}
