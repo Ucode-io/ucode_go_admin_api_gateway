@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	"ucode/ucode_go_api_gateway/api/models"
-	_ "ucode/ucode_go_api_gateway/api/models"
 	status "ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
 	as "ucode/ucode_go_api_gateway/genproto/auth_service"
