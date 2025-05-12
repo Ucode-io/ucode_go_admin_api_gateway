@@ -38,6 +38,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 	r.GET("/v1/fare", h.V1.GetAllFares)
 	r.GET("v1/chart", h.V1.GetChart)
+	r.Any("v1/functions/:function-id/run", h.V1.FunctionRun)
 
 	global := r.Group("/v1/global")
 	global.Use(h.V1.GlobalAuthMiddleware(cfg))
@@ -323,7 +324,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	function := v2Admin.Group("/functions")
 	{
 		function.Any("/:function-id/run", h.V1.FunctionRun)
-		r.Any("v1/functions/:function-id/run", h.V1.FunctionRun)
 		function.Any("/:function-id/invoke", h.V1.FunctionRun)
 	}
 
@@ -588,24 +588,33 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 				v3table.PUT("", h.V3.UpdateTable)
 				v3table.DELETE("/:collection", h.V3.DeleteTable)
 
+				v3Layout := v3table.Group("/:collection/layout")
+				{
+					// layout
+					v3Layout.GET("", h.V3.GetListLayouts)
+					v3Layout.PUT("", h.V3.UpdateLayout)
+					v3Layout.POST("", h.V3.GetSingleLayout)
+					v3Layout.DELETE("/:id", h.V3.DeleteLayout)
+				}
+
 				v3items := v3table.Group("/:collection/items")
 				{
-					v3items.GET("", h.V2.GetAllItems)
-					v3items.GET("/:id", h.V2.GetSingleItem)
-					v3items.POST("", h.V2.CreateItem)
-					v3items.POST("/multiple-insert", h.V2.CreateItems)
-					v3items.POST("/upsert-many", h.V2.UpsertMany)
-					v3items.PUT("", h.V2.UpdateItem)
-					v3items.PUT("/:id", h.V2.UpdateItem)
-					v3items.PATCH("", h.V2.MultipleUpdateItems)
-					v3items.PATCH("/:id", h.V2.UpdateItem)
-					v3items.DELETE("", h.V2.DeleteItems)
-					v3items.DELETE("/:id", h.V2.DeleteItem)
-					v3items.POST("/aggregation", h.V2.GetListAggregation)
-					v3items.PUT("/many-to-many", h.V2.AppendManyToMany)
-					v3items.DELETE("/many-to-many", h.V2.DeleteManyToMany)
-					v3items.PUT("/update-row", h.V2.UpdateRowOrder)
-					v3items.POST("/tree", h.V2.AgTree)
+					v3items.POST("/list", h.V3.GetListV2)
+					v3items.GET("/:id", h.V3.GetSingleItem)
+					v3items.POST("", h.V3.CreateItem)
+					v3items.POST("/multiple-insert", h.V3.CreateItems)
+					v3items.POST("/upsert-many", h.V3.UpsertMany)
+					v3items.PUT("", h.V3.UpdateItem)
+					v3items.PUT("/:id", h.V3.UpdateItem)
+					v3items.PATCH("", h.V3.MultipleUpdateItems)
+					v3items.PATCH("/:id", h.V3.UpdateItem)
+					v3items.DELETE("", h.V3.DeleteItems)
+					v3items.DELETE("/:id", h.V3.DeleteItem)
+					v3items.POST("/aggregation", h.V3.GetListAggregation)
+					v3items.PUT("/many-to-many", h.V3.AppendManyToMany)
+					v3items.DELETE("/many-to-many", h.V3.DeleteManyToMany)
+					v3items.PUT("/update-row", h.V3.UpdateRowOrder)
+					v3items.POST("/tree", h.V3.AgTree)
 				}
 			}
 		}

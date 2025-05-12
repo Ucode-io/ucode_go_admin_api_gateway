@@ -10,6 +10,7 @@ import (
 
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
+	"ucode/ucode_go_api_gateway/config"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
@@ -30,6 +31,7 @@ func (h *HandlerV3) CreateItem(c *gin.Context) {
 		resp                        *obs.CommonMessage
 		beforeActions, afterActions []*obs.CustomEvent
 		statusHttp                  = status_http.GrpcStatusToHTTP["Created"]
+		collection                  = c.Param("collection")
 	)
 
 	ctx, cancel := context.WithTimeout(c.Request.Context(), time.Second*15)
@@ -96,7 +98,7 @@ func (h *HandlerV3) CreateItem(c *gin.Context) {
 	fromOfs := c.Query("from-ofs")
 	if fromOfs != "true" {
 		beforeActions, afterActions, err = h.GetListCustomEvents(models.GetListCustomEventsStruct{
-			TableSlug: c.Param("collection"),
+			TableSlug: collection,
 			RoleId:    "",
 			Method:    "CREATE",
 			Resource:  resource,
@@ -113,7 +115,7 @@ func (h *HandlerV3) CreateItem(c *gin.Context) {
 		functionName, err := h.DoInvokeFuntion(models.DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			IDs:          []string{id},
-			TableSlug:    c.Param("collection"),
+			TableSlug:    collection,
 			ObjectData:   objectRequest.Data,
 			Method:       "CREATE",
 			Resource:     resource,
@@ -134,14 +136,14 @@ func (h *HandlerV3) CreateItem(c *gin.Context) {
 		ActionType:   "CREATE ITEM",
 		UserInfo:     cast.ToString(userId),
 		Request:      &structData,
-		TableSlug:    c.Param("collection"),
+		TableSlug:    collection,
 	}
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().Create(
 			ctx, &obs.CommonMessage{
-				TableSlug: c.Param("collection"),
+				TableSlug: collection,
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -165,7 +167,7 @@ func (h *HandlerV3) CreateItem(c *gin.Context) {
 	case pb.ResourceType_POSTGRESQL:
 		body, err := services.GoObjectBuilderService().Items().Create(
 			ctx, &nb.CommonMessage{
-				TableSlug: c.Param("collection"),
+				TableSlug: collection,
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -202,7 +204,7 @@ func (h *HandlerV3) CreateItem(c *gin.Context) {
 		functionName, err := h.DoInvokeFuntion(models.DoInvokeFuntionStruct{
 			CustomEvents: afterActions,
 			IDs:          []string{id},
-			TableSlug:    c.Param("collection"),
+			TableSlug:    collection,
 			ObjectData:   objectRequest.Data,
 			Method:       "CREATE",
 			Resource:     resource,
@@ -225,6 +227,7 @@ func (h *HandlerV3) CreateItems(c *gin.Context) {
 		resp                        *obs.CommonMessage
 		beforeActions, afterActions []*obs.CustomEvent
 		statusHttp                  = status_http.GrpcStatusToHTTP["Created"]
+		collection                  = c.Param("collection")
 	)
 
 	if err := c.ShouldBindJSON(&objectRequest); err != nil {
@@ -278,7 +281,7 @@ func (h *HandlerV3) CreateItems(c *gin.Context) {
 	fromOfs := c.Query("from-ofs")
 	if fromOfs != "true" {
 		beforeActions, afterActions, err = h.GetListCustomEvents(models.GetListCustomEventsStruct{
-			TableSlug: c.Param("collection"),
+			TableSlug: collection,
 			RoleId:    "",
 			Method:    "CREATE_MANY",
 			Resource:  resource,
@@ -294,7 +297,7 @@ func (h *HandlerV3) CreateItems(c *gin.Context) {
 	if len(beforeActions) > 0 {
 		functionName, err := h.DoInvokeFuntion(models.DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
-			TableSlug:    c.Param("collection"),
+			TableSlug:    collection,
 			ObjectData:   request,
 			Method:       "CREATE_MANY",
 			Resource:     resource,
@@ -315,7 +318,7 @@ func (h *HandlerV3) CreateItems(c *gin.Context) {
 		ActionType:   "CREATE ITEM",
 		UserInfo:     cast.ToString(userId),
 		Request:      structData,
-		TableSlug:    c.Param("collection"),
+		TableSlug:    collection,
 	}
 
 	switch resource.ResourceType {
@@ -323,7 +326,7 @@ func (h *HandlerV3) CreateItems(c *gin.Context) {
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().Create(
 			context.Background(),
 			&obs.CommonMessage{
-				TableSlug: c.Param("collection"),
+				TableSlug: collection,
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -365,7 +368,7 @@ func (h *HandlerV3) CreateItems(c *gin.Context) {
 		invoke := models.DoInvokeFuntionStruct{
 			CustomEvents: afterActions,
 			IDs:          ids,
-			TableSlug:    c.Param("collection"),
+			TableSlug:    collection,
 			ObjectData:   request,
 			Method:       "CREATE_MANY",
 			Resource:     resource,
@@ -386,6 +389,7 @@ func (h *HandlerV3) GetSingleItem(c *gin.Context) {
 	var (
 		object     models.CommonMessage
 		statusHttp = status_http.GrpcStatusToHTTP["Ok"]
+		collection = c.Param("collection")
 	)
 
 	object.Data = make(map[string]any)
@@ -439,7 +443,7 @@ func (h *HandlerV3) GetSingleItem(c *gin.Context) {
 		resp, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().GetSingle(
 			c.Request.Context(),
 			&obs.CommonMessage{
-				TableSlug: c.Param("collection"),
+				TableSlug: collection,
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -460,7 +464,7 @@ func (h *HandlerV3) GetSingleItem(c *gin.Context) {
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().Items().GetSingle(
 			c.Request.Context(), &nb.CommonMessage{
-				TableSlug: c.Param("collection"),
+				TableSlug: collection,
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -475,37 +479,16 @@ func (h *HandlerV3) GetSingleItem(c *gin.Context) {
 	}
 }
 
-// GetAllItems godoc
-// @Security ApiKeyAuth
-// @ID get_list_items
-// @Router /v2/items/{collection} [GET]
-// @Summary Get all items
-// @Description Get all items
-// @Tags Items
-// @Accept json
-// @Produce json
-// @Param collection path string true "collection"
-// @Param language_setting query string false "language_setting"
-// @Param data query string false "data"
-// @Success 200 {object} status_http.Response{data=models.CommonMessage} "ObjectBody"
-// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *HandlerV3) GetAllItems(c *gin.Context) {
+func (h *HandlerV3) GetListV2(c *gin.Context) {
 	var (
+		objectRequest models.CommonMessage
 		resp          *obs.CommonMessage
 		statusHttp    = status_http.GrpcStatusToHTTP["Ok"]
-		queryData     string
-		objectRequest = make(map[string]any)
 	)
 
-	queryParams := c.Request.URL.Query()
-	if ok := queryParams.Has("data"); ok {
-		queryData = queryParams.Get("data")
-	} else {
-		queryData = "{}"
-	}
+	tableSlug := c.Param("collection")
 
-	if err := json.Unmarshal([]byte(queryData), &objectRequest); err != nil {
+	if err := c.ShouldBindJSON(&objectRequest); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -518,20 +501,14 @@ func (h *HandlerV3) GetAllItems(c *gin.Context) {
 
 	if tokenInfo != nil {
 		if tokenInfo.Tables != nil {
-			objectRequest["tables"] = tokenInfo.GetTables()
+			objectRequest.Data["tables"] = tokenInfo.GetTables()
 		}
-		objectRequest["user_id_from_token"] = tokenInfo.GetUserId()
-		objectRequest["role_id_from_token"] = tokenInfo.GetRoleId()
-		objectRequest["client_type_id_from_token"] = tokenInfo.GetClientTypeId()
+		objectRequest.Data["user_id_from_token"] = tokenInfo.GetUserId()
+		objectRequest.Data["role_id_from_token"] = tokenInfo.GetRoleId()
+		objectRequest.Data["client_type_id_from_token"] = tokenInfo.GetClientTypeId()
 	}
 
-	objectRequest["language_setting"] = c.DefaultQuery("language_setting", "")
-
-	structData, err := helper.ConvertMapToStruct(objectRequest)
-	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
-		return
-	}
+	objectRequest.Data["language_setting"] = c.DefaultQuery("language_setting", "")
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -545,8 +522,34 @@ func (h *HandlerV3) GetAllItems(c *gin.Context) {
 		return
 	}
 
+	var projectIDs = map[string]bool{
+		"0f111e78-3a93-4bec-945a-2a77e0e0a82d": true, // wayll
+		"25d16930-b1a9-4ae5-ab01-b79cc993f06e": true, // dasyor
+		"da7ced2e-ed43-4bbe-8b5a-3b545c8e7ef0": true, // taskmanager
+	}
+
+	if objectRequest.Data["view_type"] != "CALENDAR" {
+		if _, ok := objectRequest.Data["limit"]; ok {
+			if cast.ToInt(objectRequest.Data["limit"]) > 40 {
+				objectRequest.Data["limit"] = 40
+			}
+		} else {
+			if !projectIDs[projectId.(string)] {
+				objectRequest.Data["limit"] = 10
+			}
+
+		}
+	}
+
+	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(), &pb.GetSingleServiceResourceReq{
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -557,19 +560,25 @@ func (h *HandlerV3) GetAllItems(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(c.Request.Context(), resource.GetProjectId(), resource.NodeType)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
+	redisKey := base64.StdEncoding.EncodeToString(fmt.Appendf(nil, "%s-%s-%s", tableSlug, structData.String(), resource.ResourceEnvironmentId))
 
-	if viewId, ok := objectRequest["builder_service_view_id"].(string); ok {
+	if viewId, ok := objectRequest.Data["builder_service_view_id"].(string); ok {
 		if util.IsValidUUID(viewId) {
 			switch resource.ResourceType {
 			case pb.ResourceType_MONGODB:
-				redisResp, err := h.redis.Get(c.Request.Context(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("collection"), structData.String(), resource.ResourceEnvironmentId))), resource.ProjectId, resource.NodeType)
+				if resource.ResourceEnvironmentId == "49ae6c46-5397-4975-b238-320617f0190c" { // starex
+					h.handleResponse(c, statusHttp, pb.Empty{})
+					return
+				}
+
+				redisResp, err := h.redis.Get(c.Request.Context(), redisKey, projectId.(string), resource.NodeType)
 				if err == nil {
 					resp := make(map[string]any)
 					m := make(map[string]any)
@@ -583,10 +592,9 @@ func (h *HandlerV3) GetAllItems(c *gin.Context) {
 					}
 				}
 
-				resp, err = service.GroupByColumns(
-					c.Request.Context(),
+				resp, err = service.GroupByColumns(c.Request.Context(),
 					&obs.CommonMessage{
-						TableSlug: c.Param("collection"),
+						TableSlug: tableSlug,
 						Data:      structData,
 						ProjectId: resource.ResourceEnvironmentId,
 					},
@@ -595,7 +603,7 @@ func (h *HandlerV3) GetAllItems(c *gin.Context) {
 				if err == nil {
 					if resp.IsCached {
 						jsonData, _ := resp.GetData().MarshalJSON()
-						err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("collection"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, resource.ProjectId, resource.NodeType)
+						err = h.redis.SetX(c.Request.Context(), redisKey, string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
 						if err != nil {
 							h.log.Error("Error while setting redis", logger.Error(err))
 						}
@@ -607,34 +615,47 @@ func (h *HandlerV3) GetAllItems(c *gin.Context) {
 					return
 				}
 			case pb.ResourceType_POSTGRESQL:
-				// Does Not Implemented
-				h.handleResponse(c, status_http.BadRequest, "does not implemented")
+				resp, err := services.GoObjectBuilderService().ObjectBuilder().GetGroupByField(c.Request.Context(),
+					&nb.CommonMessage{
+						TableSlug: tableSlug,
+						Data:      structData,
+						ProjectId: resource.ResourceEnvironmentId,
+					},
+				)
+
+				if err != nil {
+					h.handleError(c, status_http.GRPCError, err)
+					return
+				}
+
+				statusHttp.CustomMessage = resp.GetCustomMessage()
+				h.handleResponse(c, statusHttp, resp)
 				return
 			}
 		}
 	} else {
 		switch resource.ResourceType {
 		case pb.ResourceType_MONGODB:
-			redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("collection"), structData.String(), resource.ResourceEnvironmentId))), resource.ProjectId, resource.NodeType)
+			redisResp, err := h.redis.Get(c.Request.Context(), redisKey, projectId.(string), resource.NodeType)
 			if err == nil {
-				var (
-					resp = make(map[string]any)
-					m    = make(map[string]any)
-				)
-
-				if err = json.Unmarshal([]byte(redisResp), &m); err != nil {
+				resp := make(map[string]any)
+				m := make(map[string]any)
+				err = json.Unmarshal([]byte(redisResp), &m)
+				if err != nil {
 					h.log.Error("Error while unmarshal redis", logger.Error(err))
 				} else {
 					resp["data"] = m
+					if _, ok := objectRequest.Data["load_test"].(bool); ok {
+						config.CountReq += 1
+					}
 					h.handleResponse(c, status_http.OK, resp)
 					return
 				}
 			}
 
-			resp, err = services.GetBuilderServiceByType(resource.NodeType).ItemsService().GetList(
-				c.Request.Context(),
+			resp, err = service.GetList2(c.Request.Context(),
 				&obs.CommonMessage{
-					TableSlug: c.Param("collection"),
+					TableSlug: tableSlug,
 					Data:      structData,
 					ProjectId: resource.ResourceEnvironmentId,
 				},
@@ -643,7 +664,7 @@ func (h *HandlerV3) GetAllItems(c *gin.Context) {
 			if err == nil {
 				if resp.IsCached {
 					jsonData, _ := resp.GetData().MarshalJSON()
-					err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("collection"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, resource.ProjectId, resource.NodeType)
+					err = h.redis.SetX(context.Background(), redisKey, string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
 					if err != nil {
 						h.log.Error("Error while setting redis", logger.Error(err))
 					}
@@ -655,48 +676,21 @@ func (h *HandlerV3) GetAllItems(c *gin.Context) {
 				return
 			}
 		case pb.ResourceType_POSTGRESQL:
-			redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("collection"), structData.String(), resource.ResourceEnvironmentId))), resource.ProjectId, resource.NodeType)
-			if err == nil {
-				var (
-					resp = make(map[string]any)
-					m    = make(map[string]any)
-				)
-
-				if err = json.Unmarshal([]byte(redisResp), &m); err != nil {
-					h.log.Error("Error while unmarshal redis", logger.Error(err))
-				} else {
-					resp["data"] = m
-					h.handleResponse(c, status_http.OK, resp)
-					return
-				}
-			}
-
 			resp, err := services.GoObjectBuilderService().ObjectBuilder().GetList2(
 				c.Request.Context(), &nb.CommonMessage{
-					TableSlug: c.Param("collection"),
+					TableSlug: tableSlug,
 					Data:      structData,
 					ProjectId: resource.ResourceEnvironmentId,
 				},
 			)
-
-			if err == nil {
-				if resp.IsCached {
-					jsonData, _ := resp.GetData().MarshalJSON()
-					err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("collection"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, resource.ProjectId, resource.NodeType)
-					if err != nil {
-						h.log.Error("Error while setting redis", logger.Error(err))
-					}
-				}
-			}
-
 			if err != nil {
 				h.handleResponse(c, status_http.GRPCError, err.Error())
 				return
 			}
 
+			resp.ProjectId = cast.ToString(projectId)
 			statusHttp.CustomMessage = resp.GetCustomMessage()
 			h.handleResponse(c, statusHttp, resp)
-
 			return
 		}
 	}
@@ -705,20 +699,6 @@ func (h *HandlerV3) GetAllItems(c *gin.Context) {
 	h.handleResponse(c, statusHttp, resp)
 }
 
-// UpdateItem godoc
-// @Security ApiKeyAuth
-// @ID update_item
-// @Router /v2/items/{collection} [PUT]
-// @Summary Update item
-// @Description Update item
-// @Tags Items
-// @Accept json
-// @Produce json
-// @Param collection path string true "collection"
-// @Param item body models.CommonMessage true "UpdateItemRequestBody"
-// @Success 200 {object} status_http.Response{data=models.CommonMessage} "Item data"
-// @Response 400 {object} status_http.Response{data=string} "Bad Request"
-// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV3) UpdateItem(c *gin.Context) {
 	var (
 		objectRequest               models.CommonMessage
@@ -729,6 +709,7 @@ func (h *HandlerV3) UpdateItem(c *gin.Context) {
 		actionErr                   error
 		functionName                string
 		id                          string
+		collection                  = c.Param("collection")
 	)
 
 	if err := c.ShouldBindJSON(&objectRequest); err != nil {
@@ -791,7 +772,7 @@ func (h *HandlerV3) UpdateItem(c *gin.Context) {
 		singleObject, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().GetSingleSlim(
 			c.Request.Context(),
 			&obs.CommonMessage{
-				TableSlug: c.Param("collection"),
+				TableSlug: collection,
 				Data:      &structpb.Struct{Fields: map[string]*structpb.Value{"id": structpb.NewStringValue(id)}},
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -809,7 +790,7 @@ func (h *HandlerV3) UpdateItem(c *gin.Context) {
 	case pb.ResourceType_POSTGRESQL:
 		single, err := services.GoObjectBuilderService().Items().GetSingle(
 			c.Request.Context(), &nb.CommonMessage{
-				TableSlug: c.Param("collection"),
+				TableSlug: collection,
 				Data:      &structpb.Struct{Fields: map[string]*structpb.Value{"id": structpb.NewStringValue(id)}},
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -828,7 +809,7 @@ func (h *HandlerV3) UpdateItem(c *gin.Context) {
 	fromOfs := c.Query("from-ofs")
 	if fromOfs != "true" {
 		beforeActions, afterActions, err = h.GetListCustomEvents(models.GetListCustomEventsStruct{
-			TableSlug: c.Param("collection"),
+			TableSlug: collection,
 			RoleId:    "",
 			Method:    "UPDATE",
 			Resource:  resource,
@@ -845,7 +826,7 @@ func (h *HandlerV3) UpdateItem(c *gin.Context) {
 		functionName, err := h.DoInvokeFuntion(models.DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			IDs:          []string{id},
-			TableSlug:    c.Param("collection"),
+			TableSlug:    collection,
 			ObjectData:   objectRequest.Data,
 			Method:       "UPDATE",
 			ActionType:   "BEFORE",
@@ -868,7 +849,7 @@ func (h *HandlerV3) UpdateItem(c *gin.Context) {
 			ActionType:   "UPDATE ITEM",
 			UserInfo:     cast.ToString(userId),
 			Request:      &structData,
-			TableSlug:    c.Param("collection"),
+			TableSlug:    collection,
 		}
 	)
 
@@ -896,7 +877,7 @@ func (h *HandlerV3) UpdateItem(c *gin.Context) {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().Update(
 			c.Request.Context(), &obs.CommonMessage{
-				TableSlug:        c.Param("collection"),
+				TableSlug:        collection,
 				Data:             structData,
 				ProjectId:        resource.ResourceEnvironmentId,
 				EnvId:            resource.EnvironmentId,
@@ -916,7 +897,7 @@ func (h *HandlerV3) UpdateItem(c *gin.Context) {
 	case pb.ResourceType_POSTGRESQL:
 		body, err = services.GoObjectBuilderService().Items().Update(
 			c.Request.Context(), &nb.CommonMessage{
-				TableSlug:        c.Param("collection"),
+				TableSlug:        collection,
 				Data:             structData,
 				ProjectId:        resource.ResourceEnvironmentId,
 				BlockedBuilder:   cast.ToBool(c.DefaultQuery("block_builder", "false")),
@@ -944,7 +925,7 @@ func (h *HandlerV3) UpdateItem(c *gin.Context) {
 		functionName, actionErr = h.DoInvokeFuntion(models.DoInvokeFuntionStruct{
 			CustomEvents:           afterActions,
 			IDs:                    []string{id},
-			TableSlug:              c.Param("collection"),
+			TableSlug:              collection,
 			ObjectData:             objectRequest.Data,
 			Method:                 "UPDATE",
 			ObjectDataBeforeUpdate: singleObject.Data.AsMap(),
@@ -968,6 +949,7 @@ func (h *HandlerV3) MultipleUpdateItems(c *gin.Context) {
 		statusHttp                  = status_http.GrpcStatusToHTTP["Created"]
 		actionErr                   error
 		functionName                string
+		collection                  = c.Param("collection")
 	)
 
 	if err := c.ShouldBindJSON(&objectRequest); err != nil {
@@ -1017,7 +999,7 @@ func (h *HandlerV3) MultipleUpdateItems(c *gin.Context) {
 	fromOfs := c.Query("from-ofs")
 	if fromOfs != "true" {
 		beforeActions, afterActions, err = h.GetListCustomEvents(models.GetListCustomEventsStruct{
-			TableSlug: c.Param("collection"),
+			TableSlug: collection,
 			RoleId:    "",
 			Method:    "MULTIPLE_UPDATE",
 			Resource:  resource,
@@ -1033,7 +1015,7 @@ func (h *HandlerV3) MultipleUpdateItems(c *gin.Context) {
 		functionName, err := h.DoInvokeFuntion(models.DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			IDs:          objectRequest.Ids,
-			TableSlug:    c.Param("collection"),
+			TableSlug:    collection,
 			ObjectData:   objectRequest.Data,
 			Method:       "MULTIPLE_UPDATE",
 			ActionType:   "BEFORE",
@@ -1056,7 +1038,7 @@ func (h *HandlerV3) MultipleUpdateItems(c *gin.Context) {
 			ActionType:   "UPDATE ITEM",
 			UserInfo:     cast.ToString(userId),
 			Request:      &structData,
-			TableSlug:    c.Param("collection"),
+			TableSlug:    collection,
 		}
 	)
 
@@ -1085,7 +1067,7 @@ func (h *HandlerV3) MultipleUpdateItems(c *gin.Context) {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().MultipleUpdate(
 			c.Request.Context(), &obs.CommonMessage{
-				TableSlug: c.Param("collection"),
+				TableSlug: collection,
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -1103,7 +1085,7 @@ func (h *HandlerV3) MultipleUpdateItems(c *gin.Context) {
 	case pb.ResourceType_POSTGRESQL:
 		body, err := services.GoObjectBuilderService().Items().MultipleUpdate(
 			c.Request.Context(), &nb.CommonMessage{
-				TableSlug: c.Param("collection"),
+				TableSlug: collection,
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -1124,7 +1106,7 @@ func (h *HandlerV3) MultipleUpdateItems(c *gin.Context) {
 		functionName, actionErr = h.DoInvokeFuntion(models.DoInvokeFuntionStruct{
 			CustomEvents: afterActions,
 			IDs:          objectRequest.Ids,
-			TableSlug:    c.Param("collection"),
+			TableSlug:    collection,
 			ObjectData:   objectRequest.Data,
 			Method:       "MULTIPLE_UPDATE",
 			ActionType:   "AFTER",
@@ -1146,6 +1128,7 @@ func (h *HandlerV3) DeleteItem(c *gin.Context) {
 		resp                        *obs.CommonMessage
 		beforeActions, afterActions []*obs.CustomEvent
 		statusHttp                  = status_http.GrpcStatusToHTTP["NoContent"]
+		collection                  = c.Param("collection")
 	)
 
 	if err := c.ShouldBindJSON(&objectRequest); err != nil {
@@ -1204,7 +1187,7 @@ func (h *HandlerV3) DeleteItem(c *gin.Context) {
 	fromOfs := c.Query("from-ofs")
 	if fromOfs != "true" {
 		beforeActions, afterActions, err = h.GetListCustomEvents(models.GetListCustomEventsStruct{
-			TableSlug: c.Param("collection"),
+			TableSlug: collection,
 			RoleId:    "",
 			Method:    "DELETE",
 			Resource:  resource,
@@ -1221,7 +1204,7 @@ func (h *HandlerV3) DeleteItem(c *gin.Context) {
 		functionName, err := h.DoInvokeFuntion(models.DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			IDs:          []string{objectID},
-			TableSlug:    c.Param("collection"),
+			TableSlug:    collection,
 			ObjectData:   objectRequest.Data,
 			Method:       "DELETE",
 			Resource:     resource,
@@ -1245,14 +1228,14 @@ func (h *HandlerV3) DeleteItem(c *gin.Context) {
 		},
 		UserInfo:  cast.ToString(userId),
 		Request:   structData,
-		TableSlug: c.Param("collection"),
+		TableSlug: collection,
 	}
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().Delete(
 			c.Request.Context(), &obs.CommonMessage{
-				TableSlug: c.Param("collection"),
+				TableSlug: collection,
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -1274,7 +1257,7 @@ func (h *HandlerV3) DeleteItem(c *gin.Context) {
 	case pb.ResourceType_POSTGRESQL:
 		new, err := services.GoObjectBuilderService().Items().Delete(
 			c.Request.Context(), &nb.CommonMessage{
-				TableSlug: c.Param("collection"),
+				TableSlug: collection,
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -1307,7 +1290,7 @@ func (h *HandlerV3) DeleteItem(c *gin.Context) {
 		functionName, err := h.DoInvokeFuntion(models.DoInvokeFuntionStruct{
 			CustomEvents: afterActions,
 			IDs:          []string{objectID},
-			TableSlug:    c.Param("collection"),
+			TableSlug:    collection,
 			ObjectData:   objectRequest.Data,
 			Method:       "DELETE",
 			Resource:     resource,
@@ -1333,6 +1316,7 @@ func (h *HandlerV3) DeleteItems(c *gin.Context) {
 		data                        = make(map[string]any)
 		actionErr                   error
 		functionName                string
+		collection                  = c.Param("collection")
 	)
 
 	if err := c.ShouldBindJSON(&objectRequest); err != nil {
@@ -1393,7 +1377,7 @@ func (h *HandlerV3) DeleteItems(c *gin.Context) {
 	fromOfs := c.Query("from-ofs")
 	if fromOfs != "true" {
 		beforeActions, afterActions, err = h.GetListCustomEvents(models.GetListCustomEventsStruct{
-			TableSlug: c.Param("collection"),
+			TableSlug: collection,
 			RoleId:    "",
 			Method:    "DELETE_MANY",
 			Resource:  resource,
@@ -1410,7 +1394,7 @@ func (h *HandlerV3) DeleteItems(c *gin.Context) {
 		functionName, err := h.DoInvokeFuntion(models.DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			IDs:          objectRequest.Ids,
-			TableSlug:    c.Param("collection"),
+			TableSlug:    collection,
 			ObjectData:   data,
 			Method:       "DELETE_MANY",
 			Resource:     resource,
@@ -1435,7 +1419,7 @@ func (h *HandlerV3) DeleteItems(c *gin.Context) {
 			},
 			UserInfo:  cast.ToString(userId),
 			Request:   &structData,
-			TableSlug: c.Param("collection"),
+			TableSlug: collection,
 		}
 	)
 
@@ -1462,7 +1446,7 @@ func (h *HandlerV3) DeleteItems(c *gin.Context) {
 	case pb.ResourceType_MONGODB:
 		resp, err = service.DeleteMany(
 			c.Request.Context(), &obs.CommonMessage{
-				TableSlug: c.Param("collection"),
+				TableSlug: collection,
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -1480,7 +1464,7 @@ func (h *HandlerV3) DeleteItems(c *gin.Context) {
 	case pb.ResourceType_POSTGRESQL:
 		_, err = services.GoObjectBuilderService().Items().DeleteMany(
 			c.Request.Context(), &nb.CommonMessage{
-				TableSlug: c.Param("collection"),
+				TableSlug: collection,
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -1502,7 +1486,7 @@ func (h *HandlerV3) DeleteItems(c *gin.Context) {
 		functionName, actionErr = h.DoInvokeFuntion(models.DoInvokeFuntionStruct{
 			CustomEvents: afterActions,
 			IDs:          objectRequest.Ids,
-			TableSlug:    c.Param("collection"),
+			TableSlug:    collection,
 			ObjectData:   data,
 			Method:       "DELETE_MANY",
 			Resource:     resource,
@@ -1526,6 +1510,7 @@ func (h *HandlerV3) DeleteManyToMany(c *gin.Context) {
 		statusHttp                  = status_http.GrpcStatusToHTTP["NoContent"]
 		actionErr                   error
 		functionName                string
+		collection                  = c.Param("collection")
 	)
 
 	if err := c.ShouldBindJSON(&m2mMessage); err != nil {
@@ -1617,7 +1602,7 @@ func (h *HandlerV3) DeleteManyToMany(c *gin.Context) {
 			},
 			UserInfo:  cast.ToString(userId),
 			Request:   &m2mMessage,
-			TableSlug: c.Param("collection"),
+			TableSlug: collection,
 		}
 	)
 
@@ -1689,6 +1674,7 @@ func (h *HandlerV3) AppendManyToMany(c *gin.Context) {
 		statusHttp                  = status_http.GrpcStatusToHTTP["Ok"]
 		actionErr                   error
 		functionName                string
+		collection                  = c.Param("collection")
 	)
 
 	if err := c.ShouldBindJSON(&m2mMessage); err != nil {
@@ -1777,7 +1763,7 @@ func (h *HandlerV3) AppendManyToMany(c *gin.Context) {
 			ActionType:   "UPDATE ITEM",
 			UserInfo:     cast.ToString(userId),
 			Request:      &m2mMessage,
-			TableSlug:    c.Param("collection"),
+			TableSlug:    collection,
 		}
 	)
 
@@ -1835,9 +1821,9 @@ func (h *HandlerV3) AppendManyToMany(c *gin.Context) {
 
 func (h *HandlerV3) GetListAggregation(c *gin.Context) {
 	var (
-		reqBody   models.CommonMessage
-		tableSlug = c.Param("collection")
-		resp      = &obs.CommonMessage{}
+		reqBody    models.CommonMessage
+		collection = c.Param("collection")
+		resp       = &obs.CommonMessage{}
 	)
 
 	if err := c.ShouldBindJSON(&reqBody); err != nil {
@@ -1889,7 +1875,7 @@ func (h *HandlerV3) GetListAggregation(c *gin.Context) {
 	if reqBody.IsCached {
 		redisResp, err := h.redis.Get(
 			c.Request.Context(),
-			base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", tableSlug, string(key), resource.ResourceEnvironmentId))),
+			base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", collection, string(key), resource.ResourceEnvironmentId))),
 			projectId.(string),
 			resource.NodeType,
 		)
@@ -1913,7 +1899,7 @@ func (h *HandlerV3) GetListAggregation(c *gin.Context) {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().GetListAggregation(
 			c.Request.Context(), &obs.CommonMessage{
-				TableSlug: c.Param("collection"),
+				TableSlug: collection,
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -1925,7 +1911,7 @@ func (h *HandlerV3) GetListAggregation(c *gin.Context) {
 	case pb.ResourceType_POSTGRESQL:
 		pgResp, err := services.GoObjectBuilderService().ObjectBuilder().GetListAggregation(
 			c.Request.Context(), &nb.CommonMessage{
-				TableSlug: c.Param("collection"),
+				TableSlug: collection,
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -1945,7 +1931,7 @@ func (h *HandlerV3) GetListAggregation(c *gin.Context) {
 		jsonData, _ := resp.GetData().MarshalJSON()
 		err = h.redis.SetX(
 			c.Request.Context(),
-			base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", tableSlug, string(key), resource.ResourceEnvironmentId))),
+			base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", collection, string(key), resource.ResourceEnvironmentId))),
 			string(jsonData),
 			15*time.Second,
 			projectId.(string),
@@ -1959,22 +1945,11 @@ func (h *HandlerV3) GetListAggregation(c *gin.Context) {
 	h.handleResponse(c, status_http.OK, resp)
 }
 
-// UpdateRowOrder godoc
-// @Security ApiKeyAuth
-// @ID update_row_order
-// @Router /v2/update-row/{collection} [PUT]
-// @Summary Update Row Order
-// @Description Update Row Order
-// @Tags Items
-// @Accept json
-// @Produce json
-// @Param collection path string true "collection"
-// @Param object body models.CommonMessage true "GetListAggregation"
-// @Success 200 {object} status_http.Response{data=models.CommonMessage} "ObjectBody"
-// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV3) UpdateRowOrder(c *gin.Context) {
-	var objectRequest models.CommonMessage
+	var (
+		objectRequest models.CommonMessage
+		collection    = c.Param("collection")
+	)
 
 	if err := c.ShouldBindJSON(&objectRequest); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
@@ -2041,7 +2016,7 @@ func (h *HandlerV3) UpdateRowOrder(c *gin.Context) {
 	case pb.ResourceType_MONGODB:
 		_, err = service.MultipleUpdate(
 			c.Request.Context(), &obs.CommonMessage{
-				TableSlug: c.Param("collection"),
+				TableSlug: collection,
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -2053,25 +2028,12 @@ func (h *HandlerV3) UpdateRowOrder(c *gin.Context) {
 	}
 }
 
-// UpsertManyItems godoc
-// @Security ApiKeyAuth
-// @ID upsert_many_items
-// @Router /v2/items/{collection}/upsert-many [POST]
-// @Summary Upsert Many items
-// @Description Upsert Many items
-// @Tags Items
-// @Accept json
-// @Produce json
-// @Param collection path string true "collection"
-// @Param object body models.CommonMessage true "UpsertManyItemsRequestBody"
-// @Success 201 {object} status_http.Response{data=models.CommonMessage} "Object data"
-// @Response 400 {object} status_http.Response{data=string} "Bad Request"
-// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV3) UpsertMany(c *gin.Context) {
 	var (
 		objectRequest models.CommonMessage
 		actionErr     error
 		functionName  string
+		collection    = c.Param("collection")
 	)
 
 	if err := c.ShouldBindJSON(&objectRequest); err != nil {
@@ -2132,7 +2094,7 @@ func (h *HandlerV3) UpsertMany(c *gin.Context) {
 			ActionType:   "UPSERT MANY ITEM",
 			UserInfo:     cast.ToString(userId),
 			Request:      &structData,
-			TableSlug:    c.Param("collection"),
+			TableSlug:    collection,
 		}
 	)
 
@@ -2162,7 +2124,7 @@ func (h *HandlerV3) UpsertMany(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = service.UpsertMany(c.Request.Context(), &obs.CommonMessage{
-			TableSlug: c.Param("collection"),
+			TableSlug: collection,
 			Data:      structData,
 			ProjectId: resource.ResourceEnvironmentId,
 		})
@@ -2173,7 +2135,7 @@ func (h *HandlerV3) UpsertMany(c *gin.Context) {
 	case pb.ResourceType_POSTGRESQL:
 		_, err = services.GoObjectBuilderService().Items().UpsertMany(c.Request.Context(),
 			&nb.CommonMessage{
-				TableSlug: c.Param("collection"),
+				TableSlug: collection,
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -2186,7 +2148,10 @@ func (h *HandlerV3) UpsertMany(c *gin.Context) {
 }
 
 func (h *HandlerV3) AgTree(c *gin.Context) {
-	var objectRequest models.CommonMessage
+	var (
+		objectRequest models.CommonMessage
+		collection    = c.Param("collection")
+	)
 
 	if err := c.ShouldBindJSON(&objectRequest); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
@@ -2235,7 +2200,7 @@ func (h *HandlerV3) AgTree(c *gin.Context) {
 		resp, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().AgGridTree(
 			c.Request.Context(),
 			&obs.CommonMessage{
-				TableSlug: c.Param("collection"),
+				TableSlug: collection,
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -2249,7 +2214,7 @@ func (h *HandlerV3) AgTree(c *gin.Context) {
 		resp, err := services.GoObjectBuilderService().ObjectBuilder().AgGridTree(
 			c.Request.Context(),
 			&nb.CommonMessage{
-				TableSlug: c.Param("collection"),
+				TableSlug: collection,
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
