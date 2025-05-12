@@ -31,13 +31,17 @@ func (h *HandlerV1) hasAccess(c *gin.Context) (*auth.V2HasAccessUserRes, bool) {
 		return nil, false
 	}
 	defer conn.Close()
+
+	path, tableSlug := helper.GetURLWithTableSlug(c)
+
 	resp, err := service.V2HasAccessUser(
 		c.Request.Context(), &auth.V2HasAccessUserReq{
 			AccessToken:   accessToken,
-			Path:          helper.GetURLWithTableSlug(c),
+			Path:          path,
 			Method:        c.Request.Method,
 			ProjectId:     c.Query("project-id"),
 			EnvironmentId: c.GetHeader("Environment-Id"),
+			TableSlug:     tableSlug,
 		},
 	)
 	if err != nil {

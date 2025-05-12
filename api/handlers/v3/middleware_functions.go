@@ -28,12 +28,16 @@ func (h *HandlerV3) hasAccess(c *gin.Context) (*auth_service.V2HasAccessUserRes,
 		return nil, false
 	}
 	defer conn.Close()
+
+	path, tableSlug := helper.GetURLWithTableSlug(c)
+
 	resp, err := service.V2HasAccessUser(
 		c.Request.Context(),
 		&auth_service.V2HasAccessUserReq{
 			AccessToken: accessToken,
-			Path:        helper.GetURLWithTableSlug(c),
+			Path:        path,
 			Method:      c.Request.Method,
+			TableSlug:   tableSlug,
 		},
 	)
 	if err != nil {

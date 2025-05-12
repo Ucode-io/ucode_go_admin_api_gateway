@@ -148,12 +148,16 @@ func (h *HandlerV1) adminHasAccess(c *gin.Context) (*auth.HasAccessSuperAdminRes
 		return nil, false
 	}
 	defer conn.Close()
+
+	path, tableSlug := helper.GetURLWithTableSlug(c)
+
 	resp, err := service.HasAccessSuperAdmin(
 		c.Request.Context(),
 		&auth.HasAccessSuperAdminReq{
 			AccessToken: accessToken,
-			Path:        helper.GetURLWithTableSlug(c),
+			Path:        path,
 			Method:      c.Request.Method,
+			TableSlug:   tableSlug,
 		},
 	)
 	if err != nil {
