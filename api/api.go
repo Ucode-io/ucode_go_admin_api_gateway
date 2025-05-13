@@ -570,6 +570,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v3Menus.POST("", h.V3.CreateMenu)
 		v3Menus.DELETE("/:menu_id", h.V3.DeleteMenu)
 		v3Menus.PUT("/order", h.V3.UpdateMenuOrder)
+		v3Menus.PUT("/menu-order", h.V3.UpdateMenuOrder)
 
 		v3views := v3Menus.Group("/:menu_id/views")
 		{
