@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/url"
 	"time"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -555,7 +556,13 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 		queryData = "{}"
 	}
 
-	if err := json.Unmarshal([]byte(queryData), &objectRequest); err != nil {
+	decoded, err := url.QueryUnescape(queryData)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	if err := json.Unmarshal([]byte(decoded), &objectRequest); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
