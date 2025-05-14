@@ -45,7 +45,6 @@ func GetURLWithTableSlug(c *gin.Context) (string, string) {
 	url := c.FullPath()
 	if strings.Contains(url, ":collection") {
 		tableSlug := c.Param("collection")
-		url = strings.Replace(url, ":collection", tableSlug, -1)
 		return url, tableSlug
 	}
 
