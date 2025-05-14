@@ -1,4 +1,4 @@
-package v2
+package v3
 
 import (
 	"errors"
@@ -17,7 +17,7 @@ import (
 	"github.com/spf13/cast"
 )
 
-func (h *HandlerV2) GetSingleLayout(c *gin.Context) {
+func (h *HandlerV3) GetSingleLayout(c *gin.Context) {
 	var (
 		collection = c.Param("collection")
 		menuId     = c.Param("menu_id")
@@ -107,13 +107,12 @@ func (h *HandlerV2) GetSingleLayout(c *gin.Context) {
 // @Success 200 {object} status_http.Response{data=obs.GetListLayoutResponse} "TableBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *HandlerV2) GetListLayouts(c *gin.Context) {
+func (h *HandlerV3) GetListLayouts(c *gin.Context) {
 	var (
-		tableSlug = c.Query("table-slug")
-		tableId   = c.Query("table-id")
+		tableSlug = c.Query("collection")
 	)
 
-	if tableSlug == "" && tableId == "" {
+	if tableSlug == "" {
 		h.handleResponse(c, status_http.BadRequest, "table-slug or table-id is required")
 		return
 	}
@@ -194,21 +193,7 @@ func (h *HandlerV2) GetListLayouts(c *gin.Context) {
 	}
 }
 
-// UpdateLayout godoc
-// @Security ApiKeyAuth
-// @ID update_layout_v2
-// @Router /v2/collections/{collection}/layout [PUT]
-// @Summary Update layouts
-// @Description Update layouts
-// @Tags Layout
-// @Accept json
-// @Produce json
-// @Param collection path string true "collection"
-// @Param layout body obs.LayoutRequest true "LayoutRequest"
-// @Success 200 {object} status_http.Response{data=obs.LayoutResponse} "Layout data"
-// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *HandlerV2) UpdateLayout(c *gin.Context) {
+func (h *HandlerV3) UpdateLayout(c *gin.Context) {
 	var (
 		input obs.LayoutRequest
 		resp  *obs.LayoutResponse
@@ -320,21 +305,7 @@ func (h *HandlerV2) UpdateLayout(c *gin.Context) {
 	}
 }
 
-// DeleteLayout godoc
-// @Security ApiKeyAuth
-// @ID delete_layout_v2
-// @Router /v2/collections/{collection}/layout/{id} [DELETE]
-// @Summary Delete layout
-// @Description Delete layouts
-// @Tags Layout
-// @Accept json
-// @Produce json
-// @Param collection path string true "collection"
-// @Param id path string true "id"
-// @Success 204
-// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *HandlerV2) DeleteLayout(c *gin.Context) {
+func (h *HandlerV3) DeleteLayout(c *gin.Context) {
 	var resp = &empty.Empty{}
 
 	projectId, ok := c.Get("project_id")

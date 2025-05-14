@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"mime/multipart"
 	"strings"
 	"time"
 	"ucode/ucode_go_api_gateway/api/models"
@@ -20,6 +21,19 @@ import (
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 )
+
+type UploadResponse struct {
+	Filename string `json:"filename"`
+}
+
+type File struct {
+	File *multipart.FileHeader `form:"file" binding:"required"`
+}
+
+type Path struct {
+	Filename string `json:"filename"`
+	Hash     string `json:"hash"`
+}
 
 // Upload godoc
 // @ID create_file

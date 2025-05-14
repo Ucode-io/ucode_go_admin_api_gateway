@@ -20,6 +20,7 @@ service CompanyService {
     rpc GetMenuTemplateById(GetMenuTemplateRequest) returns (MenuTemplate) {}
     rpc CreateMenuTemplate(CreateMenuTemplateRequest) returns (Empty) {}
     rpc GetProjectMenuTemplates(GetProjectMenuTemplateRequest) returns (GetProjectMenuTemplateResponse) {}
+    rpc CreateMenuTemplateByTemplateId(CreateMenuTemplateByTemplateIdRequest) returns (Empty) {}
 }
 
 message GetMenuTemplateRequest {
@@ -138,4 +139,9 @@ message GetProjectMenuTemplateRequest {
 message GetProjectMenuTemplateResponse {
     repeated ProjectMenuTemplate project_menu_templates = 1;
     int32 count = 2;
+}
+
+message CreateMenuTemplateByTemplateIdRequest {
+    string project_id = 1;
+    string template_id = 2;
 }

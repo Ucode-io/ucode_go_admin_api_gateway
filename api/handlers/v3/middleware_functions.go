@@ -1,4 +1,4 @@
-package v2
+package v3
 
 import (
 	"strings"
@@ -6,20 +6,18 @@ import (
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
-	"ucode/ucode_go_api_gateway/pkg/logger"
 
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
-func (h *HandlerV2) hasAccess(c *gin.Context) (*auth_service.V2HasAccessUserRes, bool) {
+func (h *HandlerV3) hasAccess(c *gin.Context) (*auth_service.V2HasAccessUserRes, bool) {
 	bearerToken := c.GetHeader("Authorization")
 
 	strArr := strings.Split(bearerToken, " ")
 
 	if len(strArr) != 2 || strArr[0] != "Bearer" {
-		h.log.Error("---ERR->HasAccess->Unexpected token format")
 		h.handleResponse(c, status_http.Forbidden, "token error: wrong format")
 		return nil, false
 	}
@@ -48,17 +46,14 @@ func (h *HandlerV2) hasAccess(c *gin.Context) (*auth_service.V2HasAccessUserRes,
 			status.Error(codes.PermissionDenied, config.InactiveStatus).Error():   {},
 		}
 		if _, exists := permissionErrors[err.Error()]; exists {
-			h.log.Error("---ERR->HasAccess->Permission--->", logger.Error(err))
 			h.handleResponse(c, status_http.BadRequest, err.Error())
 			return nil, false
 		}
 		errr := status.Error(codes.InvalidArgument, "User has been expired")
 		if errr.Error() == err.Error() {
-			h.log.Error("---ERR->HasAccess->User Expired-->")
 			h.handleResponse(c, status_http.Forbidden, err.Error())
 			return nil, false
 		}
-		h.log.Error("---ERR->HasAccess->Session->V2HasAccessUser--->", logger.Error(err))
 		h.handleError(c, status_http.Unauthorized, err)
 		return nil, false
 	}
@@ -66,7 +61,7 @@ func (h *HandlerV2) hasAccess(c *gin.Context) (*auth_service.V2HasAccessUserRes,
 	return resp, true
 }
 
-func (h *HandlerV2) GetAuthInfo(c *gin.Context) (result *auth_service.V2HasAccessUserRes, err error) {
+func (h *HandlerV3) GetAuthInfo(c *gin.Context) (result *auth_service.V2HasAccessUserRes, err error) {
 	data, ok := c.Get("Auth")
 	if !ok {
 		h.handleResponse(c, status_http.Forbidden, "token error: wrong format")
