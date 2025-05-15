@@ -1,5 +1,7 @@
 package models
 
+import "mime/multipart"
+
 type FileCreateRequest struct {
 	Title            string   `json:"title"`
 	Description      string   `json:"description"`
@@ -26,4 +28,17 @@ type UpdateFileRequest struct {
 	Description      string   `json:"description"`
 	Tags             []string `json:"tags"`
 	FileNameDownload string   `json:"file_name_download"`
+}
+
+type UploadResponse struct {
+	Filename string `json:"filename"`
+}
+
+type File struct {
+	File *multipart.FileHeader `form:"file" binding:"required"`
+}
+
+type Path struct {
+	Filename string `json:"filename"`
+	Hash     string `json:"hash"`
 }

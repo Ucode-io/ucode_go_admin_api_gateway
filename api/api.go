@@ -52,8 +52,26 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	// @name Authorization
 	v1.Use(h.V1.AuthMiddleware(cfg))
 	{
+		v1.POST("/menu-settings", h.V1.CreateMenuSettings)
+		v1.PUT("/menu-settings", h.V1.UpdateMenuSettings)
+		v1.GET("/menu-settings", h.V1.GetAllMenuSettings)
+		v1.GET("/menu-settings/:id", h.V1.GetMenuSettingByID)
+		v1.DELETE("/menu-settings/:id", h.V1.DeleteMenuSettings)
+
 		// MINIO
 		v1.POST("/minio/bucket-size", h.V1.BucketSize)
+
+		v1.POST("/menu-template", h.V1.CreateMenuTemplate)
+		v1.PUT("/menu-template", h.V1.UpdateMenuTemplate)
+		v1.GET("/menu-template", h.V1.GetAllMenuTemplates)
+		v1.GET("/menu-template/:id", h.V1.GetMenuTemplateByID)
+		v1.DELETE("/menu-template/:id", h.V1.DeleteMenuTemplate)
+
+		v1.POST("/upload", h.V1.Upload)
+		v1.POST("/upload-file/:collection/:object_id", h.V1.UploadFile)
+
+		v1.POST("/menu/template", h.V1.CreateProjectMenuTemplate)
+		v1.GET("/menu/template", h.V1.GetProjectMenuTemplates)
 
 		// OBJECT_BUILDER_SERVICE
 
