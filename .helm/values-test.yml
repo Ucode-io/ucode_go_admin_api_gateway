@@ -152,26 +152,16 @@ ingress:
         nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
         nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
         kubernetes.io/ingress.class: nginx
-        nginx.ingress.kubernetes.io/server-snippet: |
-          location /v2/items/popular_brand_items {
-            content_by_lua_block {
-              ngx.req.read_body()
-              local args = ngx.req.get_uri_args()
-              local data = args.data
-              ngx.req.set_method(ngx.HTTP_POST)
-              ngx.req.set_header("Content-Type", "application/json")
-              ngx.req.set_body_data(data)
-            }
-          }
+        cert-manager.io/cluster-issuer: letsencrypt-prod
       type: web
       hosts:
         - host: "admin-api.ucode.run"
           path: /
           servicePort: 8080
-      # tls:
-      #   - secretName: ucode-star
-      #     hosts:
-      #       - "admin-api.ucode.run"
+      tls:
+        - secretName: admin-api-tls
+          hosts:
+            - "admin-api.ucode.run"
     - annotations:
         # type of authentication
         nginx.ingress.kubernetes.io/auth-type: basic
