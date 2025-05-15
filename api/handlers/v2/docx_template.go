@@ -87,7 +87,7 @@ func (h *HandlerV2) CreateDocxTemplate(c *gin.Context) {
 		return
 	}
 
-	docxTemplate.ProjectId = projectId.(string)
+	docxTemplate.ProjectId = resource.ResourceEnvironmentId
 
 	fileUUID := uuid.New().String()
 	docxFileName := fileUUID + ".docx"
