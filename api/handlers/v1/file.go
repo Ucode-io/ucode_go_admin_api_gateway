@@ -4,10 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
-	"mime/multipart"
 	"strings"
 	"time"
+
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
@@ -21,19 +20,6 @@ import (
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 )
-
-type UploadResponse struct {
-	Filename string `json:"filename"`
-}
-
-type File struct {
-	File *multipart.FileHeader `form:"file" binding:"required"`
-}
-
-type Path struct {
-	Filename string `json:"filename"`
-	Hash     string `json:"hash"`
-}
 
 // Upload godoc
 // @ID create_file
@@ -51,7 +37,7 @@ type Path struct {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 	var (
-		file File
+		file models.File
 	)
 
 	if file.File != nil {
@@ -527,7 +513,8 @@ func (h *HandlerV1) DeleteFiles(c *gin.Context) {
 		Secure: true,
 	})
 	if err != nil {
-		log.Println(err)
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
 	}
 
 	var delete_request []string
@@ -536,7 +523,8 @@ func (h *HandlerV1) DeleteFiles(c *gin.Context) {
 		delete_request = append(delete_request, val.ObjectId)
 		err = minioClient.RemoveObject(c.Request.Context(), resource.ResourceEnvironmentId, res.Storage+"/"+val.ObjectName, minio.RemoveObjectOptions{})
 		if err != nil {
-			log.Println(err)
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
 		}
 	}
 
@@ -724,3 +712,4 @@ func (h *HandlerV1) WordTemplate(c *gin.Context) {
 	}
 
 }
+
