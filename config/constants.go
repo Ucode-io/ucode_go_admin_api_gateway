@@ -78,7 +78,8 @@ var (
 		"LOOKUPS": true,
 	}
 
-	ConvertDocxToPdfUrl    = "https://v2.convertapi.com/convert/docx/to/pdf?Secret="
-	secretKeys             = []string{"secret_WQc40yJ2wbcbtI6J", "secret_4y6SXNIXFZwths6R"}
-	ConvertDocxToPdfSecret = secretKeys[rand.Intn(len(secretKeys))]
+	ConvertDocxToPdfUrl                = "https://v2.convertapi.com/convert/docx/to/pdf?Secret="
+	secretKeys                         = []string{"secret_WQc40yJ2wbcbtI6J", "secret_4y6SXNIXFZwths6R"}
+	ConvertDocxToPdfSecret             = secretKeys[rand.Intn(len(secretKeys))]
+	TestNodeDocxConvertToPdfServiceUrl = "localhost:3000/generate-doc"
 )
