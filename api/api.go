@@ -115,15 +115,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1.PUT("/document", h.V1.UpdateDocument)
 		v1.DELETE("/document/:document_id", h.V1.DeleteDocument)
 
-		// event
-		v1.POST("/event", h.V1.CreateEvent)
-		v1.GET("/event/:event_id", h.V1.GetEventByID)
-		v1.GET("/event", h.V1.GetAllEvents)
-		v1.PUT("/event", h.V1.UpdateEvent)
-		v1.DELETE("/event/:event_id", h.V1.DeleteEvent)
-		v1.GET("/event-log", h.V1.GetEventLogs)
-		v1.GET("/event-log/:event_log_id", h.V1.GetEventLogById)
-
 		// function
 		v1.POST("/function", h.V1.CreateFunction)
 		v1.GET("/function/:function_id", h.V1.GetFunctionByID)
