@@ -73,9 +73,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1.POST("/menu/template", h.V1.CreateProjectMenuTemplate)
 		v1.GET("/menu/template", h.V1.GetProjectMenuTemplates)
 
-		// MINIO
-		v1.POST("/minio/bucket-size", h.V1.BucketSize)
-
 		// OBJECT_BUILDER_SERVICE
 
 		//table
