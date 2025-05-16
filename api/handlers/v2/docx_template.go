@@ -87,7 +87,7 @@ func (h *HandlerV2) CreateDocxTemplate(c *gin.Context) {
 		return
 	}
 
-	docxTemplate.ProjectId = projectId.(string)
+	docxTemplate.ProjectId = resource.ResourceEnvironmentId
 
 	fileUUID := uuid.New().String()
 	docxFileName := fileUUID + ".docx"
@@ -717,7 +717,7 @@ func (h *HandlerV2) GetListDocxTemplate(c *gin.Context) {
 	res, err := services.GoObjectBuilderService().DocxTemplate().GetAll(
 		context.Background(),
 		&nb.GetAllDocxTemplateRequest{
-			ProjectId:  projectId.(string),
+			ProjectId:  resource.GetResourceEnvironmentId(),
 			TableSlug:  c.DefaultQuery("table-slug", ""),
 			Limit:      int32(limit),
 			Offset:     int32(offset),
@@ -797,4 +797,107 @@ func (h *HandlerV2) GetAllFieldsDocxTemplate(c *gin.Context) {
 	}
 
 	h.handleResponse(c, status_http.OK, res)
+}
+
+// ConvertConstructorDocxToPdf godoc
+// @Security ApiKeyAuth
+// @ID convert_contructor_docx_to_pdf
+// @Router /v2/docx-constructor/convert/pdf [POST]
+// @Summary Generate PDF from docx-constructor template
+// @Description Generate PDF from docx-constructor template
+// @Tags Template
+// @Accept json
+// @Produce json
+// @Param link query string true "link"
+// @Param request body models.DocxTemplateVariables true "Variables"
+// @Success 200 {object} status_http.Response{data=string} "Success"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *HandlerV2) ConvertDocxToPdf(c *gin.Context) {
+	link := c.Query("link")
+
+	if link == "" {
+		h.handleResponse(c, status_http.InvalidArgument, "link is required")
+		return
+	}
+
+	request := models.DocxTemplateVariables{
+		Data: make(map[string]any),
+	}
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		h.handleResponse(c, status_http.BadRequest, "invalid body data")
+		return
+	}
+
+	// const data2 = {
+	//     "clients": [
+	//         {
+	//             "first_name": "Zafarbek",
+	//             "last_name": "Khamidullayev",
+	//             "phone": "+998777 8866"
+	//         },
+	//         {
+	//             "first_name": "Jason",
+	//             "last_name": "Statham",
+	//             "phone": "+998777 6688"
+	//         }
+	//     ],
+	//     "first_name": "Hipp",
+	//     "last_name": "Edgar",
+	//     "phone": "0652455478",
+	//     "description": "New Website is",
+	//     "order": {
+	//         "count": 12
+	//     }
+	// };
+
+	reqData := map[string]any{
+		"link":       link,
+		"data":       request.Data,
+		"table_slug": request.TableSlug,
+	}
+
+	jsonData, err := json.Marshal(reqData)
+	if err != nil {
+		h.log.Error("error in marshalling data", logger.Error(err))
+		h.handleResponse(c, status_http.InternalServerError, err.Error())
+		return
+	}
+	req, err := http.NewRequest(http.MethodPost, config.TestNodeDocxConvertToPdfServiceUrl, bytes.NewBuffer(jsonData))
+	if err != nil {
+		h.log.Error("error in creating request", logger.Error(err))
+		h.handleResponse(c, status_http.InternalServerError, err.Error())
+		return
+	}
+
+	// Set the Content-Type to application/json
+	req.Header.Set("Content-Type", "application/json")
+
+	client := http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		h.log.Error("error in docx conversion", logger.Error(err))
+		h.handleResponse(c, status_http.InternalServerError, err.Error())
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		js, _ := json.Marshal(resp.Body)
+		h.log.Error("error in 3 docx gen", logger.Error(err), logger.Int("resp status", resp.StatusCode), logger.Any("resp", string(js)))
+		h.handleResponse(c, status_http.InternalServerError, err)
+		return
+	}
+
+	c.Header("Content-Disposition", "inline; filename=file.pdf")
+	c.Header("Content-Type", resp.Header.Get("Content-Type"))
+
+	_, err = io.Copy(c.Writer, resp.Body)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Failed to send file")
+		return
+	}
+
+	c.Status(http.StatusOK)
 }

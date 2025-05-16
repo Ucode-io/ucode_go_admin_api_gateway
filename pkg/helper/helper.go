@@ -41,14 +41,14 @@ func ConvertMapToStruct(inputMap map[string]any) (*structpb.Struct, error) {
 	return outputStruct, err
 }
 
-func GetURLWithTableSlug(c *gin.Context) string {
+func GetURLWithTableSlug(c *gin.Context) (string, string) {
 	url := c.FullPath()
 	if strings.Contains(url, ":collection") {
 		tableSlug := c.Param("collection")
-		url = strings.Replace(url, ":collection", tableSlug, -1)
+		return url, tableSlug
 	}
 
-	return url
+	return url, ""
 }
 
 func ReplaceQueryParams(namedQuery string, params map[string]any) (string, []any) {

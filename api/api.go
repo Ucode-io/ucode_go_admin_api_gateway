@@ -36,11 +36,9 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 	r.GET("/v1/login-microfront", h.V1.GetLoginMicroFrontBySubdomain)
 
-	r.GET("/menu/wiki_folder", h.V1.GetWikiFolder)
-
 	r.GET("/v1/fare", h.V1.GetAllFares)
-
 	r.GET("v1/chart", h.V1.GetChart)
+	r.Any("v1/functions/:function-id/run", h.V1.FunctionRun)
 
 	global := r.Group("/v1/global")
 	global.Use(h.V1.GlobalAuthMiddleware(cfg))
@@ -82,7 +80,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1.GET("/table", h.V1.GetAllTables)
 		v1.GET("/table/:table_id", h.V1.GetTableByID)
 		v1.POST("/table-details/:collection", h.V1.GetTableDetails)
-
 		v1.PUT("/table", h.V1.UpdateTable)
 		v1.DELETE("/table/:table_id", h.V1.DeleteTable)
 
@@ -91,17 +88,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1.GET("/connections", h.V1.GetTrackedConnections)
 		v1.POST("/connections/:connection_id/tables/track", h.V1.TrackTablesByIds)
 		v1.POST("/connections/:connection_id/tables/:table_id", h.V1.UntrackTableById)
-
-		//relation
-		v1.POST("/relation", h.V1.CreateRelation)
-		v1.GET("/relation", h.V1.GetAllRelations)
-		v1.PUT("/relation", h.V1.UpdateRelation)
-		v1.DELETE("/relation/:relation_id", h.V1.DeleteRelation)
-		v1.GET("/get-relation-cascading/:collection", h.V1.GetRelationCascaders)
-
-		//section
-		v1.GET("/section", h.V1.GetAllSections)
-		v1.PUT("/section", h.V1.UpdateSection)
 
 		//view_relation
 		v1.GET("/view_relation", h.V1.GetViewRelation)
@@ -134,14 +120,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1.DELETE("/many-to-many", h.V1.DeleteManyToMany)
 
 		//view
-		v1.POST("/view", h.V1.CreateView)
-		v1.GET("/view/:view_id", h.V1.GetSingleView)
-		v1.GET("/view", h.V1.GetViewList)
-		v1.PUT("/view", h.V1.UpdateView)
-		v1.DELETE("/view/:view_id", h.V1.DeleteView)
-		v1.PUT("/update-view-order", h.V1.UpdateViewOrder)
-
-		//view
 		v1.POST("/html-template", h.V1.CreateHtmlTemplate)
 		v1.GET("/html-template/:html_template_id", h.V1.GetSingleHtmlTemplate)
 		v1.GET("/html-template", h.V1.GetHtmlTemplateList)
@@ -155,15 +133,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1.PUT("/document", h.V1.UpdateDocument)
 		v1.DELETE("/document/:document_id", h.V1.DeleteDocument)
 
-		// event
-		v1.POST("/event", h.V1.CreateEvent)
-		v1.GET("/event/:event_id", h.V1.GetEventByID)
-		v1.GET("/event", h.V1.GetAllEvents)
-		v1.PUT("/event", h.V1.UpdateEvent)
-		v1.DELETE("/event/:event_id", h.V1.DeleteEvent)
-		v1.GET("/event-log", h.V1.GetEventLogs)
-		v1.GET("/event-log/:event_log_id", h.V1.GetEventLogById)
-
 		// function
 		v1.POST("/function", h.V1.CreateFunction)
 		v1.GET("/function/:function_id", h.V1.GetFunctionByID)
@@ -175,9 +144,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 		v1.POST("/invoke_function", h.V1.InvokeFunction)
 		v1.POST("/invoke_function/:function-path", h.V1.InvokeFunctionByPath)
-
-		//cache
-		v1.POST("/cache", h.V1.Cache)
 
 		// Excel Reader
 		v1.GET("/excel/:excel_id", h.V1.ExcelReader)
@@ -206,35 +172,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		// HTML TO PDF CONVERTER
 		v1.POST("/html-to-pdf", h.V1.ConvertHtmlToPdf)
 		v1.POST("/template-to-html", h.V1.ConvertTemplateToHtml)
-
-		v1.POST("/template-note/users", h.V1.CreateUserTemplate)
-		v1.GET("/template-note/users", h.V1.GetListUserTemplate)
-		v1.PUT("/template-note/users", h.V1.UpdateUserTemplate)
-		v1.DELETE("/template-note/users/:user-permission-id", h.V1.DeleteUserTemplate)
-		v1.POST("/template-note/share", h.V1.CreateSharingToken)
-		v1.PUT("/template-note/share", h.V1.UpdateSharingToken)
-
-		v1.GET("/layout", h.V1.GetListLayouts)
-		v1.PUT("/layout", h.V1.UpdateLayout)
-		v1.GET("/layout/:table_id/:menu_id", h.V1.GetSingleLayout)
-
-		//menu
-		v1.POST("/menu", h.V1.CreateMenu)
-		v1.GET("/menu/:menu_id", h.V1.GetMenuByID)
-		v1.GET("/menu", h.V1.GetAllMenus)
-		v1.PUT("/menu", h.V1.UpdateMenu)
-		v1.DELETE("/menu/:menu_id", h.V1.DeleteMenu)
-		v1.PUT("menu/menu-order", h.V1.UpdateMenuOrder)
-
-		//custom-error-message
-		v1.GET("/custom-error-message", h.V1.GetAllCustomErrorMessage)
-		v1.GET("/custom-error-message/:id", h.V1.GetByIdCustomErrorMessage)
-		v1.PUT("/custom-error-message", h.V1.UpdateCustomErrorMessage)
-		v1.POST("/custom-error-message", h.V1.CreateCustomErrorMessage)
-		v1.DELETE("/custom-error-message/:id", h.V1.DeleteCustomErrorMessage)
-		// table-permission
-		v1.GET("/table-permission", h.V1.GetTablePermission)
-		v1.PUT("/table-permission", h.V1.UpdateTablePermission)
 
 		v1.POST("/files/folder_upload", h.V1.UploadToFolder)
 		v1.GET("/files/:id", h.V1.GetSingleFile)
@@ -291,17 +228,12 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	v2 := r.Group("/v2")
 	v2.Use(h.V1.AuthMiddleware(cfg))
 	{
-
 		v2.GET("/language-json", h.V1.GetLanguageJson)
-
 		v2.POST("/object/get-list/:collection", h.V1.GetListV2)
-
 		v2.PUT("/update-with/:collection", h.V1.UpdateWithParams)
-
 		v2.POST("/erd", h.V2.UploadERD)
 
 	}
-	r.POST("/template-note/share-get", h.V1.GetObjectToken)
 
 	v1Slim := r.Group("/v1")
 	v1Slim.Use(h.V1.SlimAuthMiddleware(cfg))
@@ -385,13 +317,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1Admin.PUT("/environment", h.V1.UpdateEnvironment)
 		v1Admin.DELETE("/environment/:environment_id", h.V1.DeleteEnvironment)
 
-		// function folder
-		v1Admin.POST("/function-folder", h.V1.CreateFunctionFolder)
-		v1Admin.GET("/function-folder/:function_ifolder_d", h.V1.GetFunctionFolderById)
-		v1Admin.GET("/function-folder", h.V1.GetAllFunctionFolder)
-		v1Admin.PUT("/function-folder", h.V1.UpdateFunctionFolder)
-		v1Admin.DELETE("/function-folder/:function_folder_id", h.V1.DeleteFunctionFolder)
-
 		v1Admin.POST("/redirect-url", h.V1.CreateRedirectUrl)
 		v1Admin.PUT("/redirect-url", h.V1.UpdateRedirectUrl)
 		v1Admin.GET("/redirect-url", h.V1.GetListRedirectUrl)
@@ -404,16 +329,10 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 	v2Admin := r.Group("/v2")
 	v2Admin.Use(h.V1.AdminAuthMiddleware())
-	v2Admin.POST("/table-folder", h.V1.CreateTableFolder)
-	v2Admin.PUT("/table-folder", h.V1.UpdateTableFolder)
-	v2Admin.GET("/table-folder", h.V1.GetAllTableFolders)
-	v2Admin.GET("/table-folder/:id", h.V1.GetTableFolderByID)
-	v2Admin.DELETE("/table-folder/:id", h.V1.DeleteTableFolder)
 
 	function := v2Admin.Group("/functions")
 	{
 		function.Any("/:function-id/run", h.V1.FunctionRun)
-		r.Any("v1/functions/:function-id/run", h.V1.FunctionRun)
 		function.Any("/:function-id/invoke", h.V1.FunctionRun)
 	}
 
@@ -437,6 +356,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v2Admin.DELETE("/docx-template/:docx-template-id", h.V2.DeleteDocxTemplate)
 		v2Admin.GET("/docx-template", h.V2.GetListDocxTemplate)
 		v2Admin.GET("/docx-template/fields/list", h.V2.GetAllFieldsDocxTemplate)
+		// docx-constructor
+		v2Admin.POST("/docx-constructor/convert/pdf", h.V2.ConvertDocxToPdf)
 	}
 
 	v2Version := r.Group("/v2")
@@ -448,13 +369,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		// collections group
 		v2Collection := v2Version.Group("/collections")
 		{
-			// error messages
-			v2Collection.GET("/:collection/error_messages", h.V2.GetAllErrorMessage)
-			v2Collection.POST("/:collection/error_messages", h.V2.CreateErrorMessage)
-			v2Collection.PUT("/:collection/error_messages", h.V2.UpdateErrorMessage)
-			v2Collection.GET("/:collection/error_messages/:id", h.V2.GetByIdErrorMessage)
-			v2Collection.DELETE("/:collection/error_messages/:id", h.V2.DeleteErrorMessage)
-
 			// automation
 			v2Collection.GET("/:collection/automation", h.V2.GetAllAutomation)
 			v2Collection.POST("/:collection/automation", h.V2.CreateAutomation)
@@ -654,6 +568,67 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			v2Webhook.POST("/create", h.V2.CreateWebhook)
 			v2Webhook.POST("/handle", h.V2.HandleWebhook)
 
+		}
+	}
+
+	v3 := r.Group("/v3")
+	v3.Use(h.V1.AuthMiddleware(cfg))
+	v3Menus := v3.Group("/menus")
+	{
+		v3Menus.GET("", h.V3.GetAllMenus)
+		v3Menus.GET("/:menu_id", h.V3.GetMenuByID)
+		v3Menus.PUT("", h.V3.UpdateMenu)
+		v3Menus.POST("", h.V3.CreateMenu)
+		v3Menus.DELETE("/:menu_id", h.V3.DeleteMenu)
+		v3Menus.PUT("/order", h.V3.UpdateMenuOrder)
+		v3Menus.PUT("/menu-order", h.V3.UpdateMenuOrder)
+
+		v3views := v3Menus.Group("/:menu_id/views")
+		{
+			v3views.GET("", h.V3.GetAllViews)
+			v3views.POST("", h.V3.CreateView)
+			v3views.PUT("", h.V3.UpdateView)
+			v3views.DELETE("/:view_id", h.V3.DeleteView)
+			v3views.PUT("/update-order", h.V3.UpdateViewOrder)
+
+			v3table := v3views.Group("/:view_id/tables")
+			{
+				v3table.POST("", h.V3.CreateTable)
+				v3table.GET("", h.V3.GetAllTables)
+				v3table.GET("/:collection", h.V3.GetTableByID)
+				v3table.POST("/:collection", h.V3.GetTableDetails)
+				v3table.PUT("", h.V3.UpdateTable)
+				v3table.DELETE("/:collection", h.V3.DeleteTable)
+
+				v3Layout := v3table.Group("/:collection/layout")
+				{
+					// layout
+					v3Layout.GET("", h.V3.GetListLayouts)
+					v3Layout.PUT("", h.V3.UpdateLayout)
+					v3Layout.POST("", h.V3.GetSingleLayout)
+					v3Layout.DELETE("/:id", h.V3.DeleteLayout)
+				}
+
+				v3items := v3table.Group("/:collection/items")
+				{
+					v3items.POST("/list", h.V3.GetListV2)
+					v3items.GET("/:id", h.V3.GetSingleItem)
+					v3items.POST("", h.V3.CreateItem)
+					v3items.POST("/multiple-insert", h.V3.CreateItems)
+					v3items.POST("/upsert-many", h.V3.UpsertMany)
+					v3items.PUT("", h.V3.UpdateItem)
+					v3items.PUT("/:id", h.V3.UpdateItem)
+					v3items.PATCH("", h.V3.MultipleUpdateItems)
+					v3items.PATCH("/:id", h.V3.UpdateItem)
+					v3items.DELETE("", h.V3.DeleteItems)
+					v3items.DELETE("/:id", h.V3.DeleteItem)
+					v3items.POST("/aggregation", h.V3.GetListAggregation)
+					v3items.PUT("/many-to-many", h.V3.AppendManyToMany)
+					v3items.DELETE("/many-to-many", h.V3.DeleteManyToMany)
+					v3items.PUT("/update-row", h.V3.UpdateRowOrder)
+					v3items.POST("/tree", h.V3.AgTree)
+				}
+			}
 		}
 	}
 
