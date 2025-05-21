@@ -197,7 +197,7 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 			}
 			logReq.Response = err.Error()
 			defer func() { go h.versionHistoryGo(c, logReq) }()
-			h.handleResponse(c, statusHttp, err.Error())
+			h.handleError(c, statusHttp, err)
 			return
 		}
 

@@ -96,7 +96,6 @@ func (h *HandlerV2) CreateView(c *gin.Context) {
 			h.handleResponse(c, status_http.Created, resp)
 		}
 		go h.versionHistory(logReq)
-		h.handleResponse(c, status_http.Created, resp)
 	case pb.ResourceType_POSTGRESQL:
 		newReq := nb.CreateViewRequest{}
 		err = helper.MarshalToStruct(&view, &newReq)
@@ -117,7 +116,6 @@ func (h *HandlerV2) CreateView(c *gin.Context) {
 			h.handleResponse(c, status_http.Created, resp)
 		}
 		go h.versionHistoryGo(c, logReq)
-		h.handleResponse(c, status_http.Created, resp)
 	}
 }
 

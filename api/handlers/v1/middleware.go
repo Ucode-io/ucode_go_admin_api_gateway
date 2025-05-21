@@ -290,8 +290,6 @@ func (h *HandlerV1) SlimAuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 				app_id := c.GetHeader("X-API-KEY")
 
 				if app_id == "" {
-					err := errors.New("error invalid api-key method")
-					h.log.Error("--AuthMiddleware--", logger.Error(err))
 					c.JSON(401, struct {
 						Code    int    `json:"code"`
 						Message string `json:"message"`
