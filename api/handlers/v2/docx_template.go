@@ -11,11 +11,13 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
+	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
@@ -777,7 +779,7 @@ func (h *HandlerV2) GetAllFieldsDocxTemplate(c *gin.Context) {
 		context.Background(),
 		&nb.CommonMessage{
 			TableSlug: c.DefaultQuery("table-slug", ""),
-			ProjectId: projectId.(string),
+			ProjectId: resource.ResourceEnvironmentId,
 		},
 	)
 
@@ -820,31 +822,112 @@ func (h *HandlerV2) ConvertDocxToPdf(c *gin.Context) {
 		return
 	}
 
-	// const data2 = {
-	//     "clients": [
-	//         {
-	//             "first_name": "Zafarbek",
-	//             "last_name": "Khamidullayev",
-	//             "phone": "+998777 8866"
-	//         },
-	//         {
-	//             "first_name": "Jason",
-	//             "last_name": "Statham",
-	//             "phone": "+998777 6688"
-	//         }
-	//     ],
-	//     "first_name": "Hipp",
-	//     "last_name": "Edgar",
-	//     "phone": "0652455478",
-	//     "description": "New Website is",
-	//     "order": {
-	//         "count": 12
-	//     }
-	// };
+	additionalFields := make(map[string]any)
+	for key, value := range request.Data {
+		if strings.Contains(key, "_id") {
+			additionalFields[key] = value
+		}
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, config.ErrProjectIdValid)
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, status_http.BadRequest, config.ErrEnvironmentIdValid)
+		return
+	}
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_TEMPLATE_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	res, err := services.GoObjectBuilderService().Relation().GetAll(
+		c.Request.Context(),
+		&nb.GetAllRelationsRequest{
+			TableSlug: request.TableSlug,
+			Limit:     100,
+			Offset:    0,
+			ProjectId: resource.ResourceEnvironmentId,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	var (
+		tableSlugs = make([]string, 0)
+	)
+
+	for _, relation := range res.GetRelations() {
+
+		if relation.GetTableTo().GetSlug() != request.TableSlug {
+			tableSlugs = append(tableSlugs, relation.GetTableTo().GetSlug())
+		} else if relation.GetTableFrom().GetSlug() != request.TableSlug {
+			tableSlugs = append(tableSlugs, relation.GetTableFrom().GetSlug())
+		}
+	}
+
+	objectRequest := models.CommonMessage{
+		Data: map[string]any{
+			"limit":                                 10,
+			fmt.Sprintf("%s_id", request.TableSlug): request.ID,
+			"table_slugs":                           tableSlugs,
+			"with_relations":                        true,
+			"additional_fields":                     additionalFields,
+		},
+	}
+
+	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
+	respGetAll, err := services.GoObjectBuilderService().ObjectBuilder().GetAllForDocx(
+		context.Background(),
+		&nb.CommonMessage{
+			TableSlug: request.TableSlug,
+			Data:      structData,
+			ProjectId: resource.ResourceEnvironmentId,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	mapV2, err := helper.ConvertStructToMap(respGetAll.Data)
+	if err != nil {
+		h.log.Error("error converting struct to map resp to respNew", logger.Error(err))
+	}
 
 	reqData := map[string]any{
 		"link":       link,
-		"data":       request.Data,
+		"data":       mapV2,
 		"table_slug": request.TableSlug,
 	}
 
