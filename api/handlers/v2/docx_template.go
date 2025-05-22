@@ -21,6 +21,8 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
+	"maps"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/minio/minio-go/v7"
@@ -864,40 +866,9 @@ func (h *HandlerV2) ConvertDocxToPdf(c *gin.Context) {
 		return
 	}
 
-	res, err := services.GoObjectBuilderService().Relation().GetAll(
-		c.Request.Context(),
-		&nb.GetAllRelationsRequest{
-			TableSlug: request.TableSlug,
-			Limit:     100,
-			Offset:    0,
-			ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
-	var (
-		tableSlugs = make([]string, 0)
-	)
-
-	for _, relation := range res.GetRelations() {
-
-		if relation.GetTableTo().GetSlug() != request.TableSlug {
-			tableSlugs = append(tableSlugs, relation.GetTableTo().GetSlug())
-		} else if relation.GetTableFrom().GetSlug() != request.TableSlug {
-			tableSlugs = append(tableSlugs, relation.GetTableFrom().GetSlug())
-		}
-	}
-
 	objectRequest := models.CommonMessage{
 		Data: map[string]any{
-			"limit":                                 10,
-			fmt.Sprintf("%s_id", request.TableSlug): request.ID,
-			"table_slugs":                           tableSlugs,
-			"with_relations":                        true,
-			"additional_fields":                     additionalFields,
+			"additional_fields": additionalFields,
 		},
 	}
 
@@ -924,6 +895,8 @@ func (h *HandlerV2) ConvertDocxToPdf(c *gin.Context) {
 	if err != nil {
 		h.log.Error("error converting struct to map resp to respNew", logger.Error(err))
 	}
+
+	maps.Copy(mapV2, request.Data)
 
 	reqData := map[string]any{
 		"link":       link,
