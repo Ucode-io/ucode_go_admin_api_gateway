@@ -84,22 +84,9 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 		return
 	}
 
-	var projectIDs = map[string]bool{
-		"0f111e78-3a93-4bec-945a-2a77e0e0a82d": true, // wayll
-		"25d16930-b1a9-4ae5-ab01-b79cc993f06e": true, // dasyor
-		"da7ced2e-ed43-4bbe-8b5a-3b545c8e7ef0": true, // taskmanager
-	}
-
 	if objectRequest.Data["view_type"] != "CALENDAR" {
-		if _, ok := objectRequest.Data["limit"]; ok {
-			if cast.ToInt(objectRequest.Data["limit"]) > 40 {
-				objectRequest.Data["limit"] = 40
-			}
-		} else {
-			if !projectIDs[projectId.(string)] {
-				objectRequest.Data["limit"] = 10
-			}
-
+		if _, ok := objectRequest.Data["limit"]; !ok {
+			objectRequest.Data["limit"] = h.baseConf.DefaultLimitInt
 		}
 	}
 
