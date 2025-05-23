@@ -160,9 +160,10 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().Create(
 			ctx, &obs.CommonMessage{
-				TableSlug: c.Param("collection"),
-				Data:      structData,
-				ProjectId: resource.ResourceEnvironmentId,
+				TableSlug:      c.Param("collection"),
+				Data:           structData,
+				ProjectId:      resource.ResourceEnvironmentId,
+				BlockedBuilder: cast.ToBool(c.DefaultQuery("block_builder", "false")),
 			},
 		)
 
@@ -184,9 +185,10 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 	case pb.ResourceType_POSTGRESQL:
 		body, err := services.GoObjectBuilderService().Items().Create(
 			ctx, &nb.CommonMessage{
-				TableSlug: c.Param("collection"),
-				Data:      structData,
-				ProjectId: resource.ResourceEnvironmentId,
+				TableSlug:      c.Param("collection"),
+				Data:           structData,
+				ProjectId:      resource.ResourceEnvironmentId,
+				BlockedBuilder: cast.ToBool(c.DefaultQuery("block_builder", "false")),
 			},
 		)
 		if err != nil {
@@ -198,7 +200,7 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 			}
 			logReq.Response = err.Error()
 			defer func() { go h.versionHistoryGo(c, logReq) }()
-			h.handleResponse(c, statusHttp, err.Error())
+			h.handleDynamicError(c, statusHttp, err)
 			return
 		}
 

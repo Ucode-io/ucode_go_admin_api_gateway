@@ -357,7 +357,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v2Admin.GET("/docx-template", h.V2.GetListDocxTemplate)
 		v2Admin.GET("/docx-template/fields/list", h.V2.GetAllFieldsDocxTemplate)
 		// docx-constructor
-		v2Admin.POST("/docx-constructor/convert/pdf", h.V2.ConvertDocxToPdf)
+		v2Admin.POST("/docx-template/convert/pdf", h.V2.ConvertDocxToPdf)
 	}
 
 	v2Version := r.Group("/v2")

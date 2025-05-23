@@ -93,29 +93,6 @@ func (h *HandlerV2) CreateCollection(c *gin.Context) {
 	}
 
 	var fields []*obs.CreateFieldsRequest
-	for _, field := range tableRequest.Fields {
-		attributes, err := helper.ConvertMapToStruct(field.Attributes)
-		if err != nil {
-			h.handleResponse(c, status_http.InvalidArgument, err.Error())
-			return
-		}
-		var tempField = obs.CreateFieldsRequest{
-			Id:         field.ID,
-			Default:    field.Default,
-			Type:       field.Type,
-			Index:      field.Index,
-			Label:      field.Label,
-			Slug:       field.Slug,
-			Attributes: attributes,
-			IsVisible:  field.IsVisible,
-			Unique:     field.Unique,
-			Automatic:  field.Automatic,
-		}
-
-		tempField.ProjectId = resource.ResourceEnvironmentId
-
-		fields = append(fields, &tempField)
-	}
 
 	var table = obs.CreateTableRequest{
 		Label:             tableRequest.Label,
@@ -125,7 +102,6 @@ func (h *HandlerV2) CreateCollection(c *gin.Context) {
 		Icon:              tableRequest.Icon,
 		Fields:            fields,
 		SubtitleFieldSlug: tableRequest.SubtitleFieldSlug,
-		Layouts:           tableRequest.Layouts,
 		IncrementId: &obs.IncrementID{
 			WithIncrementId: tableRequest.IncrementID.WithIncrementID,
 			DigitNumber:     tableRequest.IncrementID.DigitNumber,

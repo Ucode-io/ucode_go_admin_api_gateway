@@ -132,8 +132,9 @@ type BaseConfig struct {
 	GitlabProjectIdMicroFE int
 	GitlabHostMicroFE      string
 
-	DefaultOffset string
-	DefaultLimit  string
+	DefaultOffset   string
+	DefaultLimit    string
+	DefaultLimitInt int
 
 	CLIENT_HOST     string
 	SUPERADMIN_HOST string
@@ -194,6 +195,7 @@ func BaseLoad() BaseConfig {
 
 	config.DefaultOffset = cast.ToString(GetOrReturnDefaultValue("DEFAULT_OFFSET", "0"))
 	config.DefaultLimit = "60"
+	config.DefaultLimitInt = 20
 
 	config.PathToClone = cast.ToString(GetOrReturnDefaultValue("CLONE_PATH", "./app"))
 

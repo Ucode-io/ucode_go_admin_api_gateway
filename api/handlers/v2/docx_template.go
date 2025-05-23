@@ -8,17 +8,20 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
+	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
+
+	"maps"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -51,14 +54,13 @@ func (h *HandlerV2) CreateDocxTemplate(c *gin.Context) {
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
-		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		h.handleResponse(c, status_http.InvalidArgument, config.ErrProjectIdValid)
 		return
 	}
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err := errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, config.ErrEnvironmentIdValid)
 		return
 	}
 
@@ -129,7 +131,7 @@ func (h *HandlerV2) CreateDocxTemplate(c *gin.Context) {
 
 		dst, _ := os.Getwd()
 
-		fileData, err := ioutil.ReadFile(dst + "/" + docxFileName)
+		fileData, err := os.ReadFile(dst + "/" + docxFileName)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error reading saved document"})
 			return
@@ -287,14 +289,13 @@ func (h *HandlerV2) GetSingleDocxTemplate(c *gin.Context) {
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
-		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		h.handleResponse(c, status_http.InvalidArgument, config.ErrProjectIdValid)
 		return
 	}
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err := errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, config.ErrEnvironmentIdValid)
 		return
 	}
 
@@ -323,9 +324,8 @@ func (h *HandlerV2) GetSingleDocxTemplate(c *gin.Context) {
 	res, err := services.GoObjectBuilderService().DocxTemplate().GetByID(
 		context.Background(),
 		&nb.DocxTemplatePrimaryKey{
-			Id:         docxTemplateId,
-			ProjectId:  projectId.(string),
-			ResourceId: resource.GetResourceEnvironmentId(),
+			Id:        docxTemplateId,
+			ProjectId: resource.ResourceEnvironmentId,
 		},
 	)
 
@@ -362,14 +362,13 @@ func (h *HandlerV2) UpdateDocxTemplate(c *gin.Context) {
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
-		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		h.handleResponse(c, status_http.InvalidArgument, config.ErrProjectIdValid)
 		return
 	}
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err := errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, config.ErrEnvironmentIdValid)
 		return
 	}
 
@@ -386,8 +385,6 @@ func (h *HandlerV2) UpdateDocxTemplate(c *gin.Context) {
 		return
 	}
 
-	docxTemplate.ResourceId = resource.GetResourceEnvironmentId()
-
 	services, err := h.GetProjectSrvc(
 		c.Request.Context(),
 		projectId.(string),
@@ -398,7 +395,7 @@ func (h *HandlerV2) UpdateDocxTemplate(c *gin.Context) {
 		return
 	}
 
-	docxTemplate.ProjectId = projectId.(string)
+	docxTemplate.ProjectId = resource.ResourceEnvironmentId
 
 	fileUUID := uuid.New().String()
 	docxFileName := fileUUID + ".docx"
@@ -441,7 +438,7 @@ func (h *HandlerV2) UpdateDocxTemplate(c *gin.Context) {
 
 		dst, _ := os.Getwd()
 
-		fileData, err := ioutil.ReadFile(dst + "/" + docxFileName)
+		fileData, err := os.ReadFile(dst + "/" + docxFileName)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error reading saved document"})
 			return
@@ -600,14 +597,13 @@ func (h *HandlerV2) DeleteDocxTemplate(c *gin.Context) {
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
-		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		h.handleResponse(c, status_http.InvalidArgument, config.ErrProjectIdValid)
 		return
 	}
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err := errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, config.ErrEnvironmentIdValid)
 		return
 	}
 	resource, err := h.companyServices.ServiceResource().GetSingle(
@@ -636,9 +632,8 @@ func (h *HandlerV2) DeleteDocxTemplate(c *gin.Context) {
 	res, err := services.GoObjectBuilderService().DocxTemplate().Delete(
 		context.Background(),
 		&nb.DocxTemplatePrimaryKey{
-			Id:         docxTemplateId,
-			ProjectId:  projectId.(string),
-			ResourceId: resource.GetResourceEnvironmentId(),
+			Id:        docxTemplateId,
+			ProjectId: resource.GetResourceEnvironmentId(),
 		},
 	)
 
@@ -680,14 +675,13 @@ func (h *HandlerV2) GetListDocxTemplate(c *gin.Context) {
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
-		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		h.handleResponse(c, status_http.InvalidArgument, config.ErrProjectIdValid)
 		return
 	}
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, config.ErrEnvironmentIdValid)
 		return
 	}
 
@@ -718,7 +712,7 @@ func (h *HandlerV2) GetListDocxTemplate(c *gin.Context) {
 		context.Background(),
 		&nb.GetAllDocxTemplateRequest{
 			ProjectId:  resource.GetResourceEnvironmentId(),
-			TableSlug:  c.DefaultQuery("table-slug", ""),
+			TableSlug:  c.Query("table-slug"),
 			Limit:      int32(limit),
 			Offset:     int32(offset),
 			ResourceId: resource.GetResourceEnvironmentId(),
@@ -787,7 +781,7 @@ func (h *HandlerV2) GetAllFieldsDocxTemplate(c *gin.Context) {
 		context.Background(),
 		&nb.CommonMessage{
 			TableSlug: c.DefaultQuery("table-slug", ""),
-			ProjectId: projectId.(string),
+			ProjectId: resource.ResourceEnvironmentId,
 		},
 	)
 
@@ -830,63 +824,110 @@ func (h *HandlerV2) ConvertDocxToPdf(c *gin.Context) {
 		return
 	}
 
-	// const data2 = {
-	//     "clients": [
-	//         {
-	//             "first_name": "Zafarbek",
-	//             "last_name": "Khamidullayev",
-	//             "phone": "+998777 8866"
-	//         },
-	//         {
-	//             "first_name": "Jason",
-	//             "last_name": "Statham",
-	//             "phone": "+998777 6688"
-	//         }
-	//     ],
-	//     "first_name": "Hipp",
-	//     "last_name": "Edgar",
-	//     "phone": "0652455478",
-	//     "description": "New Website is",
-	//     "order": {
-	//         "count": 12
-	//     }
-	// };
+	additionalFields := make(map[string]any)
+	for key, value := range request.Data {
+		if strings.Contains(key, "_id") {
+			additionalFields[key] = value
+		}
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, config.ErrProjectIdValid)
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, status_http.BadRequest, config.ErrEnvironmentIdValid)
+		return
+	}
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_TEMPLATE_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		projectId.(string),
+		resource.NodeType,
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	objectRequest := models.CommonMessage{
+		Data: map[string]any{
+			"additional_fields": additionalFields,
+		},
+	}
+
+	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
+	respGetAll, err := services.GoObjectBuilderService().ObjectBuilder().GetAllForDocx(
+		context.Background(),
+		&nb.CommonMessage{
+			TableSlug: request.TableSlug,
+			Data:      structData,
+			ProjectId: resource.ResourceEnvironmentId,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	mapV2, err := helper.ConvertStructToMap(respGetAll.Data)
+	if err != nil {
+		h.log.Error("error converting struct to map resp to respNew", logger.Error(err))
+	}
+
+	maps.Copy(mapV2, request.Data)
 
 	reqData := map[string]any{
 		"link":       link,
-		"data":       request.Data,
+		"data":       mapV2,
 		"table_slug": request.TableSlug,
 	}
 
 	jsonData, err := json.Marshal(reqData)
 	if err != nil {
-		h.log.Error("error in marshalling data", logger.Error(err))
-		h.handleResponse(c, status_http.InternalServerError, err.Error())
-		return
-	}
-	req, err := http.NewRequest(http.MethodPost, config.TestNodeDocxConvertToPdfServiceUrl, bytes.NewBuffer(jsonData))
-	if err != nil {
-		h.log.Error("error in creating request", logger.Error(err))
 		h.handleResponse(c, status_http.InternalServerError, err.Error())
 		return
 	}
 
-	// Set the Content-Type to application/json
+	req, err := http.NewRequest(http.MethodPost, config.TestNodeDocxConvertToPdfServiceUrl, bytes.NewBuffer(jsonData))
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err.Error())
+		return
+	}
+
 	req.Header.Set("Content-Type", "application/json")
 
 	client := http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		h.log.Error("error in docx conversion", logger.Error(err))
 		h.handleResponse(c, status_http.InternalServerError, err.Error())
 		return
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		js, _ := json.Marshal(resp.Body)
-		h.log.Error("error in 3 docx gen", logger.Error(err), logger.Int("resp status", resp.StatusCode), logger.Any("resp", string(js)))
-		h.handleResponse(c, status_http.InternalServerError, err)
+		h.handleResponse(c, status_http.InternalServerError, errors.New("status code is not ok"))
 		return
 	}
 

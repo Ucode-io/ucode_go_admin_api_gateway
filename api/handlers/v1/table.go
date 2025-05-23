@@ -33,31 +33,15 @@ import (
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) CreateTable(c *gin.Context) {
 	var (
-		tableRequest          models.CreateTableRequest
+		table                 obs.CreateTableRequest
 		err                   error
 		resourceEnvironmentId string
 		resourceType          pb.ResourceType
 		nodeType              string
 	)
 
-	if err = c.ShouldBindJSON(&tableRequest); err != nil {
+	if err = c.ShouldBindJSON(&table); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
-		return
-	}
-
-	if tableRequest.Attributes == nil {
-		tableRequest.Attributes = make(map[string]any)
-	}
-
-	attributes, err := helper.ConvertMapToStruct(tableRequest.Attributes)
-	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
-		return
-	}
-
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error getting auth info: %w", err).Error())
 		return
 	}
 
@@ -97,56 +81,9 @@ func (h *HandlerV1) CreateTable(c *gin.Context) {
 		return
 	}
 
-	var fields []*obs.CreateFieldsRequest
-	for _, field := range tableRequest.Fields {
-		attributes, err := helper.ConvertMapToStruct(field.Attributes)
-		if err != nil {
-			h.handleResponse(c, status_http.InvalidArgument, err.Error())
-			return
-		}
-		var tempField = obs.CreateFieldsRequest{
-			Id:         field.ID,
-			Default:    field.Default,
-			Type:       field.Type,
-			Index:      field.Index,
-			Label:      field.Label,
-			Slug:       field.Slug,
-			Attributes: attributes,
-			IsVisible:  field.IsVisible,
-			Unique:     field.Unique,
-			Automatic:  field.Automatic,
-		}
-
-		tempField.ProjectId = resourceEnvironmentId
-
-		fields = append(fields, &tempField)
-	}
-
-	var table = obs.CreateTableRequest{
-		Label:             tableRequest.Label,
-		Description:       tableRequest.Description,
-		Slug:              tableRequest.Slug,
-		ShowInMenu:        tableRequest.ShowInMeny,
-		Icon:              tableRequest.Icon,
-		Fields:            fields,
-		SubtitleFieldSlug: tableRequest.SubtitleFieldSlug,
-		Layouts:           tableRequest.Layouts,
-		IncrementId: &obs.IncrementID{
-			WithIncrementId: tableRequest.IncrementID.WithIncrementID,
-			DigitNumber:     tableRequest.IncrementID.DigitNumber,
-			Prefix:          tableRequest.IncrementID.Prefix,
-		},
-		AuthorId:   authInfo.GetUserId(),
-		Name:       fmt.Sprintf("Auto Created Commit Create table - %s", time.Now().Format(time.RFC1123)),
-		CommitType: config.COMMIT_TYPE_TABLE,
-		OrderBy:    tableRequest.OrderBy,
-		Attributes: attributes,
-		EnvId:      environmentId.(string),
-		ViewId:     uuid.NewString(),
-		LayoutId:   uuid.NewString(),
-	}
-
 	table.ProjectId = resourceEnvironmentId
+	table.ViewId = uuid.NewString()
+	table.LayoutId = uuid.NewString()
 
 	var (
 		logReq = &models.CreateVersionHistoryRequest{
@@ -157,7 +94,7 @@ func (h *HandlerV1) CreateTable(c *gin.Context) {
 			ActionType:   "CREATE TABLE",
 			UserInfo:     cast.ToString(userId),
 			Request:      &table,
-			TableSlug:    tableRequest.Slug,
+			TableSlug:    table.Slug,
 		}
 	)
 
