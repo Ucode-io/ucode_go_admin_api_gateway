@@ -23,11 +23,9 @@ var (
 	ApiKeys sync.Map
 )
 
-func (h *HandlerV1) NodeMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Set(h.baseConf.UcodeNamespace, h.baseConf.UcodeNamespace)
-		c.Next()
-	}
+type Response struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
 }
 
 func (h *HandlerV1) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
@@ -290,13 +288,7 @@ func (h *HandlerV1) SlimAuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 				app_id := c.GetHeader("X-API-KEY")
 
 				if app_id == "" {
-					c.JSON(401, struct {
-						Code    int    `json:"code"`
-						Message string `json:"message"`
-					}{
-						Code:    401,
-						Message: "The request requires an user authentication.",
-					})
+					h.handleResponse(c, status_http.Unauthorized, "The request requires an user authentication.")
 					c.Abort()
 					return
 				}
@@ -317,7 +309,7 @@ func (h *HandlerV1) SlimAuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 				}
 
 				if appIdOk {
-					ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
+					ctx, cancel := context.WithTimeout(c.Request.Context(), config.REDIS_WAIT_TIMEOUT)
 					defer cancel()
 
 					for {
@@ -376,7 +368,7 @@ func (h *HandlerV1) SlimAuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 				}
 
 				if resourceOk {
-					ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
+					ctx, cancel := context.WithTimeout(c.Request.Context(), config.REDIS_WAIT_TIMEOUT)
 					defer cancel()
 
 					for {
@@ -439,6 +431,12 @@ func (h *HandlerV1) SlimAuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 					return
 				}
 
+				if resource.ProjectStatus == config.STATUS_INACTIVE {
+					h.handleResponse(c, status_http.BadRequest, "project is inactive")
+					c.Abort()
+					return
+				}
+
 				c.Set("auth", models.AuthData{Type: "API-KEY", Data: data})
 				c.Set("resource_id", resource.GetResource().GetId())
 				c.Set("environment_id", apikeys.GetEnvironmentId())
@@ -453,10 +451,7 @@ func (h *HandlerV1) SlimAuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 				} else {
 					err := errors.New("error invalid authorization method")
 					h.log.Error("--AuthMiddleware--", logger.Error(err))
-					c.JSON(401, struct {
-						Code    int    `json:"code"`
-						Message string `json:"message"`
-					}{
+					c.JSON(401, Response{
 						Code:    401,
 						Message: "The request requires an user authentication.",
 					})
@@ -604,10 +599,7 @@ func (h *HandlerV1) RedirectAuthMiddleware(cfg config.BaseConfig) gin.HandlerFun
 		if app_id == "" {
 			err := errors.New("error invalid api-key method")
 			h.log.Error("--AuthMiddleware--", logger.Error(err))
-			c.JSON(401, struct {
-				Code    int    `json:"code"`
-				Message string `json:"message"`
-			}{
+			c.JSON(401, Response{
 				Code:    401,
 				Message: "The request requires an user authentication.",
 			})
@@ -629,7 +621,7 @@ func (h *HandlerV1) RedirectAuthMiddleware(cfg config.BaseConfig) gin.HandlerFun
 			h.cache.Add(appWaitkey, []byte(appWaitkey), config.REDIS_KEY_TIMEOUT)
 		}
 		if appIdOk {
-			ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
+			ctx, cancel := context.WithTimeout(c.Request.Context(), config.REDIS_WAIT_TIMEOUT)
 			defer cancel()
 
 			for {
@@ -687,7 +679,7 @@ func (h *HandlerV1) RedirectAuthMiddleware(cfg config.BaseConfig) gin.HandlerFun
 		}
 
 		if resourceOk {
-			ctx, cancel := context.WithTimeout(context.Background(), config.REDIS_WAIT_TIMEOUT)
+			ctx, cancel := context.WithTimeout(c.Request.Context(), config.REDIS_WAIT_TIMEOUT)
 			defer cancel()
 
 			for {

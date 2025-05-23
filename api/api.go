@@ -239,7 +239,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	v1Slim.Use(h.V1.SlimAuthMiddleware(cfg))
 	{
 		v1Slim.GET("/object-slim/:collection/:object_id", h.V1.GetSingleSlim)
-		v1.GET("/object-slim/get-list/:collection", h.V1.GetListSlim)
+		v1Slim.GET("/object-slim/get-list/:collection", h.V1.GetListSlim)
 	}
 
 	v2Slim := r.Group("/v2")
@@ -475,7 +475,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		// utils
 		v2Utils := v2Version.Group("/utils")
 		{
-			v2Utils.GET("/barcode/:collection/:type", h.V2.GetGeneratedBarcode)
 			v2Utils.POST("/export/:collection/html-to-pdf", h.V2.ConvertHtmlToPdf)
 			v2Utils.POST("/export/:collection/template-to-html", h.V2.ConvertTemplateToHtml)
 			v2Utils.POST("/export/:collection", h.V2.ExportData)

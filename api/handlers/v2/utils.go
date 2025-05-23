@@ -6,7 +6,6 @@ import (
 	"log"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
-	"ucode/ucode_go_api_gateway/config"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
@@ -15,83 +14,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc/status"
 )
-
-// GetGeneratedBarcode godoc
-// @Security ApiKeyAuth
-// @ID generate_barcode_for_items
-// @Router /v2/utils/barcode/{collection}/{type} [GET]
-// @Summary get barcode
-// @Description Get new barcode for items
-// @Description type must be one of following: ["barcode", "codabar"]
-// @Tags Utils
-// @Accept json
-// @Produce json
-// @Param collection path string true "collection"
-// @Param type path string true "type"
-// @Param field_id query string false "field_id"
-// @Success 200 {object} status_http.Response{data=obs.GenerateDynamicBarcodeResponse} "Barcode"
-// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *HandlerV2) GetGeneratedBarcode(c *gin.Context) {
-	collection := c.Param("collection")
-
-	if _, ok := config.BarcodeTypes[c.Param("type")]; !ok {
-		h.handleResponse(c, status_http.InvalidArgument, "unsupported barcode type")
-		return
-	}
-
-	projectId, ok := c.Get("project_id")
-	if !ok || !util.IsValidUUID(projectId.(string)) {
-		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
-		return
-	}
-
-	environmentId, ok := c.Get("environment_id")
-	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err := errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
-		return
-	}
-
-	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId.(string),
-			EnvironmentId: environmentId.(string),
-			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
-	resp, err := services.GetBuilderServiceByType(resource.NodeType).Barcode().GenerateDynamic(
-		context.Background(),
-		&obs.GenerateDynamicBarcodeRequest{
-			TableSlug: collection,
-			ProjectId: resource.ResourceEnvironmentId,
-			FieldId:   c.Query("field_id"),
-			Type:      c.Param("type"),
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
-	h.handleResponse(c, status_http.OK, resp)
-}
 
 // ConvertHtmlToPdf godoc
 // @Security ApiKeyAuth
