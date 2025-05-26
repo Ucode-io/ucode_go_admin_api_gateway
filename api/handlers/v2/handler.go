@@ -320,3 +320,48 @@ func (h *HandlerV2) MakeProxy(c *gin.Context, proxyUrl, path string) (err error)
 	_, _ = bufio.NewReader(resp.Body).WriteTo(c.Writer)
 	return
 }
+
+func (h *HandlerV2) handleDynamicError(c *gin.Context, statusHttp status_http.Status, err error) {
+	st, _ := status.FromError(err)
+	if statusHttp.Status == status_http.BadRequest.Status {
+		c.JSON(http.StatusInternalServerError, status_http.Response{
+			Status:        statusHttp.Status,
+			Description:   st.String(),
+			Data:          "Invalid JSON",
+			CustomMessage: statusHttp.CustomMessage,
+		})
+	} else if st.Code() == codes.AlreadyExists {
+		c.JSON(http.StatusInternalServerError, status_http.Response{
+			Status:        statusHttp.Status,
+			Description:   st.String(),
+			Data:          st.Message(),
+			CustomMessage: statusHttp.CustomMessage,
+		})
+	} else if st.Code() == codes.InvalidArgument {
+		c.JSON(http.StatusInternalServerError, status_http.Response{
+			Status:        statusHttp.Status,
+			Description:   st.String(),
+			Data:          "Required data is not provided.",
+			CustomMessage: statusHttp.CustomMessage,
+		})
+	} else if statusHttp.Status == status_http.Unauthorized.Status {
+		c.JSON(http.StatusUnauthorized, status_http.Response{
+			Status:      statusHttp.Status,
+			Description: st.String(),
+			Data:        config.SessionExpired,
+		})
+	} else if statusHttp.Status == status_http.Forbidden.Status {
+		c.JSON(http.StatusForbidden, status_http.Response{
+			Status:      statusHttp.Status,
+			Description: st.String(),
+			Data:        config.SessionExpired,
+		})
+	} else if st.Err() != nil {
+		c.JSON(http.StatusInternalServerError, status_http.Response{
+			Status:        statusHttp.Status,
+			Description:   st.String(),
+			Data:          st.Message(),
+			CustomMessage: statusHttp.CustomMessage,
+		})
+	}
+}

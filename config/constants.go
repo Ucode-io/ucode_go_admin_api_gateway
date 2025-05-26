@@ -79,5 +79,5 @@ var (
 
 	ConvertDocxToPdfUrl                = "https://v2.convertapi.com/convert/docx/to/pdf?Auth="
 	ConvertDocxToPdfSecret             = "secret_M2phGaOMkak05F8L"
-	TestNodeDocxConvertToPdfServiceUrl = "localhost:3000/generate-doc"
+	TestNodeDocxConvertToPdfServiceUrl = "https://doc-generator.ucode.run/generate-doc"
 )

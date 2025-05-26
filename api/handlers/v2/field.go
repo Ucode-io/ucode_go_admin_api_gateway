@@ -452,7 +452,7 @@ func (h *HandlerV2) UpdateField(c *gin.Context) {
 		logReq.Previous = oldField
 		if deferErr != nil {
 			logReq.Response = deferErr.Error()
-			h.handleResponse(c, status_http.GRPCError, deferErr.Error())
+			h.handleDynamicError(c, status_http.GRPCError, deferErr)
 		} else {
 			logReq.Response = resp
 			logReq.Current = resp
