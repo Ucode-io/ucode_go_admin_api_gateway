@@ -392,21 +392,14 @@ func (h *HandlerV1) GetListSlimV2(c *gin.Context) {
 			return
 		}
 
-		for _, resourceObject := range resourceList.ServiceResources {
-			if resourceObject.Title == pb.ServiceType_name[1] {
-				resource = &pb.ServiceResourceModel{
-					Id:                    resourceObject.Id,
-					ServiceType:           resourceObject.ServiceType,
-					ProjectId:             resourceObject.ProjectId,
-					Title:                 resourceObject.Title,
-					ResourceId:            resourceObject.ResourceId,
-					ResourceEnvironmentId: resourceObject.ResourceEnvironmentId,
-					EnvironmentId:         resourceObject.EnvironmentId,
-					ResourceType:          resourceObject.ResourceType,
-					NodeType:              resourceObject.NodeType,
-				}
-				break
-			}
+		resource = &pb.ServiceResourceModel{
+			ServiceType:           resourceList.ResourceEnvironment.ServiceType,
+			ProjectId:             resourceList.ResourceEnvironment.ProjectId,
+			ResourceId:            resourceList.ResourceEnvironment.ResourceId,
+			ResourceEnvironmentId: resourceList.ResourceEnvironment.ResourceEnvironmentId,
+			EnvironmentId:         resourceList.ResourceEnvironment.EnvironmentId,
+			ResourceType:          resourceList.ResourceEnvironment.ResourceType,
+			NodeType:              resourceList.ResourceEnvironment.NodeType,
 		}
 	} else {
 		resource, err = h.companyServices.ServiceResource().GetSingle(

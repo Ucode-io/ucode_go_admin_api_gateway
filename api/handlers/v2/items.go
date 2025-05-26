@@ -929,10 +929,10 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 	defer func() {
 		if err != nil {
 			logReq.Response = err.Error()
-			h.handleResponse(c, status_http.GRPCError, err.Error())
+			h.handleDynamicError(c, status_http.GRPCError, err)
 		} else if actionErr != nil {
 			logReq.Response = actionErr.Error() + " in " + functionName
-			h.handleResponse(c, status_http.InvalidArgument, actionErr.Error()+" in "+functionName)
+			h.handleDynamicError(c, status_http.InvalidArgument, actionErr)
 		} else {
 			logReq.Response = resp
 			h.handleResponse(c, status_http.OK, resp)

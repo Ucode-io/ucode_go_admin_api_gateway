@@ -33,6 +33,8 @@ const (
 	HIGH_NODE_TYPE                       string = "HIGH"
 	ENTER_PRICE_TYPE                     string = "ENTER_PRICE"
 	CACHE_WAIT                           string = "WAIT"
+
+	STATUS_INACTIVE string = "inactive"
 )
 
 const (
@@ -66,12 +68,6 @@ const (
 )
 
 var (
-	DynamicReportFormula = []string{"SUM", "COUNT", "AVERAGE", "MAX", "MIN", "FIRST", "LAST", "END_FIRST", "END_LAST"}
-	BarcodeTypes         = map[string]int{
-		"barcode": 1,
-		"codabar": 1,
-	}
-
 	RelationFieldTypes = map[string]bool{
 		"LOOKUP":  true,
 		"LOOKUPS": true,

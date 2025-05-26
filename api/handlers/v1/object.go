@@ -80,21 +80,14 @@ func (h *HandlerV1) CreateObject(c *gin.Context) {
 			return
 		}
 
-		for _, resourceObject := range resourceList.ServiceResources {
-			if resourceObject.Title == pb.ServiceType_name[1] {
-				resource = &pb.ServiceResourceModel{
-					Id:                    resourceObject.Id,
-					ServiceType:           resourceObject.ServiceType,
-					ProjectId:             resourceObject.ProjectId,
-					Title:                 resourceObject.Title,
-					ResourceId:            resourceObject.ResourceId,
-					ResourceEnvironmentId: resourceObject.ResourceEnvironmentId,
-					EnvironmentId:         resourceObject.EnvironmentId,
-					ResourceType:          resourceObject.ResourceType,
-					NodeType:              resourceObject.NodeType,
-				}
-				break
-			}
+		resource = &pb.ServiceResourceModel{
+			ServiceType:           resourceList.ResourceEnvironment.ServiceType,
+			ProjectId:             resourceList.ResourceEnvironment.ProjectId,
+			ResourceId:            resourceList.ResourceEnvironment.ResourceId,
+			ResourceEnvironmentId: resourceList.ResourceEnvironment.ResourceEnvironmentId,
+			EnvironmentId:         resourceList.ResourceEnvironment.EnvironmentId,
+			ResourceType:          resourceList.ResourceEnvironment.ResourceType,
+			NodeType:              resourceList.ResourceEnvironment.NodeType,
 		}
 	} else {
 		resource, err = h.companyServices.ServiceResource().GetSingle(
@@ -694,21 +687,14 @@ func (h *HandlerV1) UpdateObject(c *gin.Context) {
 			return
 		}
 
-		for _, resourceObject := range resourceList.ServiceResources {
-			if resourceObject.Title == pb.ServiceType_name[1] {
-				resource = &pb.ServiceResourceModel{
-					Id:                    resourceObject.Id,
-					ServiceType:           resourceObject.ServiceType,
-					ProjectId:             resourceObject.ProjectId,
-					Title:                 resourceObject.Title,
-					ResourceId:            resourceObject.ResourceId,
-					ResourceEnvironmentId: resourceObject.ResourceEnvironmentId,
-					EnvironmentId:         resourceObject.EnvironmentId,
-					ResourceType:          resourceObject.ResourceType,
-					NodeType:              resourceObject.NodeType,
-				}
-				break
-			}
+		resource = &pb.ServiceResourceModel{
+			ServiceType:           resourceList.ResourceEnvironment.ServiceType,
+			ProjectId:             resourceList.ResourceEnvironment.ProjectId,
+			ResourceId:            resourceList.ResourceEnvironment.ResourceId,
+			ResourceEnvironmentId: resourceList.ResourceEnvironment.ResourceEnvironmentId,
+			EnvironmentId:         resourceList.ResourceEnvironment.EnvironmentId,
+			ResourceType:          resourceList.ResourceEnvironment.ResourceType,
+			NodeType:              resourceList.ResourceEnvironment.NodeType,
 		}
 	} else {
 		resource, err = h.companyServices.ServiceResource().GetSingle(
@@ -1355,21 +1341,14 @@ func (h *HandlerV1) GetListSlim(c *gin.Context) {
 			return
 		}
 
-		for _, resourceObject := range resourceList.ServiceResources {
-			if resourceObject.Title == pb.ServiceType_name[1] {
-				resource = &pb.ServiceResourceModel{
-					Id:                    resourceObject.Id,
-					ServiceType:           resourceObject.ServiceType,
-					ProjectId:             resourceObject.ProjectId,
-					Title:                 resourceObject.Title,
-					ResourceId:            resourceObject.ResourceId,
-					ResourceEnvironmentId: resourceObject.ResourceEnvironmentId,
-					EnvironmentId:         resourceObject.EnvironmentId,
-					ResourceType:          resourceObject.ResourceType,
-					NodeType:              resourceObject.NodeType,
-				}
-				break
-			}
+		resource = &pb.ServiceResourceModel{
+			ServiceType:           resourceList.ResourceEnvironment.ServiceType,
+			ProjectId:             resourceList.ResourceEnvironment.ProjectId,
+			ResourceId:            resourceList.ResourceEnvironment.ResourceId,
+			ResourceEnvironmentId: resourceList.ResourceEnvironment.ResourceEnvironmentId,
+			EnvironmentId:         resourceList.ResourceEnvironment.EnvironmentId,
+			ResourceType:          resourceList.ResourceEnvironment.ResourceType,
+			NodeType:              resourceList.ResourceEnvironment.NodeType,
 		}
 	} else {
 		resource, err = h.companyServices.ServiceResource().GetSingle(
@@ -1384,11 +1363,7 @@ func (h *HandlerV1) GetListSlim(c *gin.Context) {
 			return
 		}
 	}
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -2200,21 +2175,14 @@ func (h *HandlerV1) MultipleUpdateObject(c *gin.Context) {
 			return
 		}
 
-		for _, resourceObject := range resourceList.ServiceResources {
-			if resourceObject.Title == pb.ServiceType_name[1] {
-				resource = &pb.ServiceResourceModel{
-					Id:                    resourceObject.Id,
-					ServiceType:           resourceObject.ServiceType,
-					ProjectId:             resourceObject.ProjectId,
-					Title:                 resourceObject.Title,
-					ResourceId:            resourceObject.ResourceId,
-					ResourceEnvironmentId: resourceObject.ResourceEnvironmentId,
-					EnvironmentId:         resourceObject.EnvironmentId,
-					ResourceType:          resourceObject.ResourceType,
-					NodeType:              resourceObject.NodeType,
-				}
-				break
-			}
+		resource = &pb.ServiceResourceModel{
+			ServiceType:           resourceList.ResourceEnvironment.ServiceType,
+			ProjectId:             resourceList.ResourceEnvironment.ProjectId,
+			ResourceId:            resourceList.ResourceEnvironment.ResourceId,
+			ResourceEnvironmentId: resourceList.ResourceEnvironment.ResourceEnvironmentId,
+			EnvironmentId:         resourceList.ResourceEnvironment.EnvironmentId,
+			ResourceType:          resourceList.ResourceEnvironment.ResourceType,
+			NodeType:              resourceList.ResourceEnvironment.NodeType,
 		}
 	} else {
 		resource, err = h.companyServices.ServiceResource().GetSingle(c.Request.Context(),
@@ -3023,21 +2991,14 @@ func (h *HandlerV1) GetListAggregate(c *gin.Context) {
 			return
 		}
 
-		for _, resourceObject := range resourceList.ServiceResources {
-			if resourceObject.Title == pb.ServiceType_name[1] {
-				resource = &pb.ServiceResourceModel{
-					Id:                    resourceObject.Id,
-					ServiceType:           resourceObject.ServiceType,
-					ProjectId:             resourceObject.ProjectId,
-					Title:                 resourceObject.Title,
-					ResourceId:            resourceObject.ResourceId,
-					ResourceEnvironmentId: resourceObject.ResourceEnvironmentId,
-					EnvironmentId:         resourceObject.EnvironmentId,
-					ResourceType:          resourceObject.ResourceType,
-					NodeType:              resourceObject.NodeType,
-				}
-				break
-			}
+		resource = &pb.ServiceResourceModel{
+			ServiceType:           resourceList.ResourceEnvironment.ServiceType,
+			ProjectId:             resourceList.ResourceEnvironment.ProjectId,
+			ResourceId:            resourceList.ResourceEnvironment.ResourceId,
+			ResourceEnvironmentId: resourceList.ResourceEnvironment.ResourceEnvironmentId,
+			EnvironmentId:         resourceList.ResourceEnvironment.EnvironmentId,
+			ResourceType:          resourceList.ResourceEnvironment.ResourceType,
+			NodeType:              resourceList.ResourceEnvironment.NodeType,
 		}
 	} else {
 		resource, err = h.companyServices.ServiceResource().GetSingle(
