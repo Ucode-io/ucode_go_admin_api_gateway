@@ -2345,6 +2345,19 @@ func (h *HandlerV2) AgTree(c *gin.Context) {
 		return
 	}
 
+	tokenInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err.Error())
+		return
+	}
+
+	objectRequest.Data["role_id_from_token"] = tokenInfo.GetRoleId()
+
+	limit := cast.ToInt(objectRequest.Data["limit"])
+	if limit == 0 || limit > 100 {
+		objectRequest.Data["limit"] = 100
+	}
+
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
