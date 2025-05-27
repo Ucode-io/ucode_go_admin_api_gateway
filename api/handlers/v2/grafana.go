@@ -33,7 +33,6 @@ func (h *HandlerV2) GetGrafanaFunctionLogs(c *gin.Context) {
 // @Tags Grafana
 // @Accept json
 // @Produce json
-// @Param namespace query string true "namespace"
 // @Param start query string true "start"
 // @Param end query string true "end"
 // @Success 200 {object} status_http.Response{data=string} "Success"
