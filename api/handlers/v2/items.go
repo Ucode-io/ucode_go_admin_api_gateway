@@ -936,10 +936,10 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 	defer func() {
 		if err != nil {
 			logReq.Response = err.Error()
-			h.handleResponse(c, status_http.GRPCError, err.Error())
+			h.handleDynamicError(c, status_http.GRPCError, err)
 		} else if actionErr != nil {
 			logReq.Response = actionErr.Error() + " in " + functionName
-			h.handleResponse(c, status_http.InvalidArgument, actionErr.Error()+" in "+functionName)
+			h.handleDynamicError(c, status_http.InvalidArgument, actionErr)
 		} else {
 			logReq.Response = resp
 			h.handleResponse(c, status_http.OK, resp)
@@ -2359,6 +2359,7 @@ func (h *HandlerV2) AgTree(c *gin.Context) {
 	}
 
 	objectRequest.Data["role_id_from_token"] = tokenInfo.GetRoleId()
+	objectRequest.Data["user_id_from_token"] = tokenInfo.GetUserId()
 
 	offset := objectRequest.Data["offset"]
 	if offset == nil {

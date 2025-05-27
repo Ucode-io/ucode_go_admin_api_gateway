@@ -239,7 +239,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	v1Slim.Use(h.V1.SlimAuthMiddleware(cfg))
 	{
 		v1Slim.GET("/object-slim/:collection/:object_id", h.V1.GetSingleSlim)
-		v1.GET("/object-slim/get-list/:collection", h.V1.GetListSlim)
+		v1Slim.GET("/object-slim/get-list/:collection", h.V1.GetListSlim)
 	}
 
 	v2Slim := r.Group("/v2")
@@ -360,8 +360,31 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v2Admin.POST("/docx-template/convert/pdf", h.V2.ConvertDocxToPdf)
 	}
 
+	clientV2 := r.Group("/v2")
+	clientV2.Use(h.V2.AuthMiddleware())
+	// items group
+	v2Items := clientV2.Group("/items")
+	{
+		v2Items.GET("/:collection", h.V2.GetAllItems)
+		v2Items.GET("/:collection/:id", h.V2.GetSingleItem)
+		v2Items.POST("/:collection", h.V2.CreateItem)
+		v2Items.POST("/:collection/multiple-insert", h.V2.CreateItems)
+		v2Items.POST("/:collection/upsert-many", h.V2.UpsertMany)
+		v2Items.PUT("/:collection", h.V2.UpdateItem)
+		v2Items.PUT("/:collection/:id", h.V2.UpdateItem)
+		v2Items.PATCH("/:collection", h.V2.MultipleUpdateItems)
+		v2Items.PATCH("/:collection/:id", h.V2.UpdateItem)
+		v2Items.DELETE("/:collection", h.V2.DeleteItems)
+		v2Items.DELETE("/:collection/:id", h.V2.DeleteItem)
+		v2Items.POST("/:collection/aggregation", h.V2.GetListAggregation)
+		v2Items.PUT("/many-to-many", h.V2.AppendManyToMany)
+		v2Items.DELETE("/many-to-many", h.V2.DeleteManyToMany)
+		v2Items.PUT("/update-row/:collection", h.V2.UpdateRowOrder)
+		v2Items.POST("/:collection/tree", h.V2.AgTree)
+	}
+
 	v2Version := r.Group("/v2")
-	v2Version.Use(h.V2.AuthMiddleware())
+	v2Version.Use(h.V1.AuthMiddleware(cfg))
 	{
 		v2Version.POST("/csv/:collection/download", h.V2.GetListInCSV)
 		v2Version.POST("/send-to-gpt", h.V2.SendToGpt)
@@ -392,27 +415,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			v2Collection.GET("/:collection", h.V2.GetSingleCollection)
 			v2Collection.DELETE("/:collection", h.V2.DeleteCollection)
 
-		}
-
-		// items group
-		v2Items := v2Version.Group("/items")
-		{
-			v2Items.GET("/:collection", h.V2.GetAllItems)
-			v2Items.GET("/:collection/:id", h.V2.GetSingleItem)
-			v2Items.POST("/:collection", h.V2.CreateItem)
-			v2Items.POST("/:collection/multiple-insert", h.V2.CreateItems)
-			v2Items.POST("/:collection/upsert-many", h.V2.UpsertMany)
-			v2Items.PUT("/:collection", h.V2.UpdateItem)
-			v2Items.PUT("/:collection/:id", h.V2.UpdateItem)
-			v2Items.PATCH("/:collection", h.V2.MultipleUpdateItems)
-			v2Items.PATCH("/:collection/:id", h.V2.UpdateItem)
-			v2Items.DELETE("/:collection", h.V2.DeleteItems)
-			v2Items.DELETE("/:collection/:id", h.V2.DeleteItem)
-			v2Items.POST("/:collection/aggregation", h.V2.GetListAggregation)
-			v2Items.PUT("/many-to-many", h.V2.AppendManyToMany)
-			v2Items.DELETE("/many-to-many", h.V2.DeleteManyToMany)
-			v2Items.PUT("/update-row/:collection", h.V2.UpdateRowOrder)
-			v2Items.POST("/:collection/tree", h.V2.AgTree)
 		}
 
 		// menu group
@@ -475,7 +477,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		// utils
 		v2Utils := v2Version.Group("/utils")
 		{
-			v2Utils.GET("/barcode/:collection/:type", h.V2.GetGeneratedBarcode)
 			v2Utils.POST("/export/:collection/html-to-pdf", h.V2.ConvertHtmlToPdf)
 			v2Utils.POST("/export/:collection/template-to-html", h.V2.ConvertTemplateToHtml)
 			v2Utils.POST("/export/:collection", h.V2.ExportData)

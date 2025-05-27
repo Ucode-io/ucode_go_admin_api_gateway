@@ -68,11 +68,6 @@ type GetAllFieldsResponse struct {
 	Data   map[string]any `json:"data"`
 }
 
-type VariablesForCustomErrorMessage struct {
-	Key   string `json:"key"`
-	Value string `json:"value"`
-}
-
 type CreateTableRequest struct {
 	Label             string         `json:"label"`
 	Description       string         `json:"description"`
