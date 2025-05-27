@@ -2352,6 +2352,7 @@ func (h *HandlerV2) AgTree(c *gin.Context) {
 	}
 
 	objectRequest.Data["role_id_from_token"] = tokenInfo.GetRoleId()
+	objectRequest.Data["user_id_from_token"] = tokenInfo.GetUserId()
 
 	limit := cast.ToInt(objectRequest.Data["limit"])
 	if limit == 0 || limit > 100 {
