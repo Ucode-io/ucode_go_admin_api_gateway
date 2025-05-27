@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/url"
 	"time"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -557,7 +558,13 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 		queryData = "{}"
 	}
 
-	if err := json.Unmarshal([]byte(queryData), &objectRequest); err != nil {
+	decoded, err := url.QueryUnescape(queryData)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	if err := json.Unmarshal([]byte(decoded), &objectRequest); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -2343,6 +2350,24 @@ func (h *HandlerV2) AgTree(c *gin.Context) {
 	if err := c.ShouldBindJSON(&objectRequest); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
+	}
+
+	tokenInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err.Error())
+		return
+	}
+
+	objectRequest.Data["role_id_from_token"] = tokenInfo.GetRoleId()
+	objectRequest.Data["user_id_from_token"] = tokenInfo.GetUserId()
+
+	offset := objectRequest.Data["offset"]
+	if offset == nil {
+		objectRequest.Data["offset"] = 0
+	}
+	limit := cast.ToInt(objectRequest.Data["limit"])
+	if limit == 0 || limit > 100 {
+		objectRequest.Data["limit"] = 100
 	}
 
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)

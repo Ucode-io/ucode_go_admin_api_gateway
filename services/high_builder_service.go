@@ -16,7 +16,7 @@ func NewHighBuilderServiceClient(ctx context.Context, cfg config.Config) (Builde
 		ctx,
 		cfg.HighObjectBuilderServiceHost+cfg.HighObjectBuilderGRPCPort,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(52428800), grpc.MaxCallSendMsgSize(52428800)),
+		grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(100*1024*1024), grpc.MaxCallSendMsgSize(100*1024*1024)),
 	)
 	if err != nil {
 		return nil, err
@@ -26,7 +26,7 @@ func NewHighBuilderServiceClient(ctx context.Context, cfg config.Config) (Builde
 		conn, err := grpc.Dial(
 			cfg.HighObjectBuilderServiceHost+cfg.HighObjectBuilderGRPCPort,
 			grpc.WithTransportCredentials(insecure.NewCredentials()),
-			grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(52428800), grpc.MaxCallSendMsgSize(52428800)))
+			grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(100*1024*1024), grpc.MaxCallSendMsgSize(100*1024*1024)))
 		if err != nil {
 			return nil, err
 		}
