@@ -2358,8 +2358,14 @@ func (h *HandlerV2) AgTree(c *gin.Context) {
 		return
 	}
 
-	objectRequest.Data["role_id_from_token"] = tokenInfo.GetRoleId()
-	objectRequest.Data["user_id_from_token"] = tokenInfo.GetUserId()
+	if tokenInfo != nil {
+		if tokenInfo.Tables != nil {
+			objectRequest.Data["tables"] = tokenInfo.GetTables()
+		}
+		objectRequest.Data["user_id_from_token"] = tokenInfo.GetUserId()
+		objectRequest.Data["role_id_from_token"] = tokenInfo.GetRoleId()
+		objectRequest.Data["client_type_id_from_token"] = tokenInfo.GetClientTypeId()
+	}
 
 	offset := objectRequest.Data["offset"]
 	if offset == nil {
