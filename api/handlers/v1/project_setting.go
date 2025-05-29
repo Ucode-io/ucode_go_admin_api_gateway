@@ -61,13 +61,6 @@ func (h *HandlerV1) GetAllSettings(c *gin.Context) {
 		return
 	}
 
-	// namespace := c.GetString("namespace")
-	// services, err := h.GetService(namespace)
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.Forbidden, err)
-	// 	return
-	// }
-
 	projectId := c.DefaultQuery("project-id", "")
 
 	res, err := h.companyServices.Project().GetListSetting(
