@@ -582,7 +582,6 @@ func (h *HandlerV1) GlobalAuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc 
 		c.Set("project_id", c.Query("project-id"))
 
 		c.Set("Auth", res)
-		// c.Set("namespace", h.cfg.UcodeNamespace)
 
 		c.Next()
 
@@ -740,7 +739,7 @@ func (h *HandlerV1) RedirectAuthMiddleware(cfg config.BaseConfig) gin.HandlerFun
 		c.Set("project_id", apikeys.GetProjectId())
 
 		c.Set("Auth", res)
-		// c.Set("namespace", h.cfg.UcodeNamespace)
+		// c.Set(, h.cfg.UcodeNamespace)
 
 		c.Next()
 	}

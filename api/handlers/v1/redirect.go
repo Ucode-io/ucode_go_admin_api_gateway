@@ -129,22 +129,12 @@ func (h *HandlerV1) CreateRedirectUrl(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetSingleRedirectUrl(c *gin.Context) {
-	var (
-	//resourceEnvironment *obs.ResourceEnvironment
-	)
 	id := c.Param("redirect-url-id")
 
 	if !util.IsValidUUID(id) {
 		h.handleResponse(c, status_http.InvalidArgument, "app id is an invalid uuid")
 		return
 	}
-
-	// namespace := c.GetString("namespace")
-	// services, err := h.GetService(namespace)
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.Forbidden, err)
-	// 	return
-	// }
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -406,13 +396,6 @@ func (h *HandlerV1) GetListRedirectUrl(c *gin.Context) {
 		return
 	}
 
-	// namespace := c.GetString("namespace")
-	// services, err := h.GetService(namespace)
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.Forbidden, err)
-	// 	return
-	// }
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -467,13 +450,6 @@ func (h *HandlerV1) UpdateRedirectUrlOrder(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
-
-	// namespace := c.GetString("namespace")
-	// services, err := h.GetService(namespace)
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.Forbidden, err)
-	// 	return
-	// }
 
 	res, err := h.companyServices.Redirect().UpdateOrder(
 		context.Background(),
