@@ -610,6 +610,15 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 					v3Layout.DELETE("/:id", h.V3.DeleteLayout)
 				}
 
+				// v3Fields := v3table.Group("/:collection/fields")
+				// {
+				// 	v3Fields.POST("", h.V3.CreateField)
+				// 	v3Fields.GET("", h.V3.GetAllFields)
+				// 	v3Fields.PUT("", h.V3.UpdateField)
+				// 	v3Fields.PUT("/update-search", h.V3.UpdateSearch)
+				// 	v3Fields.DELETE("/:id", h.V3.DeleteField)
+				// }
+
 				v3items := v3table.Group("/:collection/items")
 				{
 					v3items.POST("/list", h.V3.GetListV2)
