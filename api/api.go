@@ -381,6 +381,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v2Items.DELETE("/many-to-many", h.V2.DeleteManyToMany)
 		v2Items.PUT("/update-row/:collection", h.V2.UpdateRowOrder)
 		v2Items.POST("/:collection/tree", h.V2.AgTree)
+		v2Items.POST("/:collection/board/structure", h.V2.GetBoardStructure)
+		v2Items.POST("/:collection/board", h.V2.GetBoardData)
 	}
 
 	v2Version := r.Group("/v2")
