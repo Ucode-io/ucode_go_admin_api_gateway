@@ -2492,7 +2492,19 @@ func (h *HandlerV2) GetBoardStructure(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		h.handleResponse(c, status_http.InternalServerError, "not implemented")
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().GetBoardStructure(
+			c.Request.Context(),
+			&obs.CommonMessage{
+				TableSlug: c.Param("collection"),
+				Data:      structData,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().ObjectBuilder().GetBoardStructure(
 			c.Request.Context(),
