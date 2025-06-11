@@ -10,6 +10,7 @@ import (
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	obj "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
+	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
 	"ucode/ucode_go_api_gateway/services"
 
@@ -121,8 +122,8 @@ func (h *HandlerV1) DbmlToUcode(c *gin.Context) {
 			label:         table.Name,
 		})
 		if err != nil {
-			h.handleResponse(c, status_http.InternalServerError, err)
-			return
+			h.log.Error("Failed to create table:", logger.Error(err))
+			continue
 		}
 
 		err = createMenu(c, &createMenuReq{
@@ -131,8 +132,8 @@ func (h *HandlerV1) DbmlToUcode(c *gin.Context) {
 			tableId:       tableId,
 		})
 		if err != nil {
-			h.handleResponse(c, status_http.InternalServerError, err)
-			return
+			h.log.Error("Failed to create menu:", logger.Error(err))
+			continue
 		}
 
 		for _, field := range table.Columns {
@@ -140,33 +141,30 @@ func (h *HandlerV1) DbmlToUcode(c *gin.Context) {
 				continue
 			}
 
-			err := createField(c, &createFieldReq{
-				resourceCreds: resourceCreds,
-				tableId:       tableId,
-				fieldType:     field.Type,
-				label:         field.Name,
-			})
-			if err != nil {
-				h.handleResponse(c, status_http.InternalServerError, err)
-				return
+			if field.Settings.Ref.Type == 0 {
+				err := createField(c, &createFieldReq{
+					resourceCreds: resourceCreds,
+					tableId:       tableId,
+					fieldType:     FIELD_TYPES[strings.ToLower(field.Type)],
+					label:         field.Name,
+				})
+				if err != nil {
+					h.handleResponse(c, status_http.InternalServerError, err)
+					return
+				}
+			} else {
+				toParts := strings.Split(field.Settings.Ref.To, ".")
+				err := createRelation(c, &createRelationReq{
+					resourceCreds: resourceCreds,
+					tableFrom:     table.Name,
+					tableTo:       toParts[0],
+				})
+				if err != nil {
+					h.handleResponse(c, status_http.InternalServerError, err)
+					return
+				}
 			}
-		}
-	}
 
-	for _, ref := range dbml.Refs {
-		for _, relation := range ref.Relationships {
-			fromParts := strings.Split(relation.From, ".")
-			toParts := strings.Split(relation.To, ".")
-
-			err := createRelation(c, &createRelationReq{
-				resourceCreds: resourceCreds,
-				tableFrom:     fromParts[0],
-				tableTo:       toParts[0],
-			})
-			if err != nil {
-				h.handleResponse(c, status_http.InternalServerError, err)
-				return
-			}
 		}
 	}
 
@@ -314,14 +312,12 @@ func createRelation(c *gin.Context, req *createRelationReq) error {
 		TableTo:   req.tableTo,
 		Attributes: &structpb.Struct{
 			Fields: map[string]*structpb.Value{
-				"label_en":    structpb.NewStringValue(req.tableFrom),
-				"label_to_en": structpb.NewStringValue(req.tableTo),
+				"label_en":    structpb.NewStringValue(req.tableTo),
+				"label_to_en": structpb.NewStringValue(req.tableFrom),
 			},
 		},
-		RelationFieldId:   uuid.NewString(),
-		RelationToFieldId: uuid.NewString(),
-		ProjectId:         req.resourceCreds.resourceEnvironmentId,
-		EnvId:             req.resourceCreds.environmentId,
+		ProjectId: req.resourceCreds.resourceEnvironmentId,
+		EnvId:     req.resourceCreds.environmentId,
 	}
 
 	switch req.resourceCreds.resourceType {
@@ -382,3 +378,42 @@ type createRelationReq struct {
 	tableFrom     string
 	tableTo       string
 }
+
+var (
+	FIELD_TYPES = map[string]string{
+		"character varying": "SINGLE_LINE",
+		"varchar":           "SINGLE_LINE",
+		"text":              "SINGLE_LINE",
+		"enum":              "SINGLE_LINE",
+		"bytea":             "SINGLE_LINE",
+		"citext":            "SINGLE_LINE",
+
+		"jsonb": "JSON",
+		"json":  "JSON",
+
+		"int":              "FLOAT",
+		"smallint":         "FLOAT",
+		"integer":          "FLOAT",
+		"bigint":           "FLOAT",
+		"numeric":          "FLOAT",
+		"decimal":          "FLOAT",
+		"real":             "FLOAT",
+		"double precision": "FLOAT",
+		"smallserial":      "FLOAT",
+		"serial":           "FLOAT",
+		"bigserial":        "FLOAT",
+		"money":            "FLOAT",
+		"int2":             "FLOAT",
+		"int4":             "FLOAT",
+
+		"timestamp":                   "DATE_TIME",
+		"timestamptz":                 "DATE_TIME",
+		"timestamp without time zone": "DATE_TIME_WITHOUT_TIME_ZONE",
+		"timestamp with time zone":    "DATE_TIME",
+		"date":                        "DATE",
+
+		"boolean": "CHECKBOX",
+
+		"uuid": "UUID",
+	}
+)
