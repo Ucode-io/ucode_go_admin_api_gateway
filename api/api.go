@@ -104,7 +104,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1.POST("/object-upsert/:collection", h.V1.UpsertObject)
 		v1.PUT("/object/multiple-update/:collection", h.V1.MultipleUpdateObject)
 		v1.POST("/object/get-financial-analytics/:collection", h.V1.GetFinancialAnalytics)
-		v1.POST("/object/get-list-group-by/:collection/:column_table_slug", h.V1.GetListGroupBy)
 		v1.POST("/object/get-list-aggregate/:collection", h.V1.GetListAggregate)
 		v1.POST("/object/get-list-without-relation/:collection", h.V1.GetListWithOutRelation)
 
