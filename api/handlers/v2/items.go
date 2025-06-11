@@ -2530,6 +2530,21 @@ func (h *HandlerV2) GetBoardData(c *gin.Context) {
 		return
 	}
 
+	tokenInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err.Error())
+		return
+	}
+
+	if tokenInfo != nil {
+		if tokenInfo.Tables != nil {
+			objectRequest.Data["tables"] = tokenInfo.GetTables()
+		}
+		objectRequest.Data["user_id_from_token"] = tokenInfo.GetUserId()
+		objectRequest.Data["role_id_from_token"] = tokenInfo.GetRoleId()
+		objectRequest.Data["client_type_id_from_token"] = tokenInfo.GetClientTypeId()
+	}
+
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
@@ -2569,7 +2584,19 @@ func (h *HandlerV2) GetBoardData(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		h.handleResponse(c, status_http.InternalServerError, "not implemented")
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().GetBoardData(
+			c.Request.Context(),
+			&obs.CommonMessage{
+				TableSlug: c.Param("collection"),
+				Data:      structData,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleError(c, status_http.GRPCError, err)
+			return
+		}
+		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().ObjectBuilder().GetBoardData(
 			c.Request.Context(),
