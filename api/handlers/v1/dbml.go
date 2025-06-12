@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
@@ -109,8 +110,13 @@ func (h *HandlerV1) DbmlToUcode(c *gin.Context) {
 	}
 
 	skipTables := map[string]bool{"role": true, "client_type": true}
-	skipFields := map[string]bool{"guid": true, "folder_id": true}
-	skipTypes := map[string]bool{"UUID": true, "UUID[]": true}
+	skipFields := map[string]bool{
+		"guid":       true,
+		"folder_id":  true,
+		"created_at": true,
+		"updated_at": true,
+		"deleted_at": true}
+	skipTypes := map[string]bool{"uuid": true, "uuid[]": true}
 
 	for _, table := range dbml.Tables {
 		if skipTables[table.Name] {
@@ -137,6 +143,7 @@ func (h *HandlerV1) DbmlToUcode(c *gin.Context) {
 		}
 
 		for _, field := range table.Columns {
+			field.Type = strings.ToLower(field.Type)
 			if skipFields[field.Name] || skipTypes[field.Type] {
 				continue
 			}
@@ -145,7 +152,7 @@ func (h *HandlerV1) DbmlToUcode(c *gin.Context) {
 				err := createField(c, &createFieldReq{
 					resourceCreds: resourceCreds,
 					tableId:       tableId,
-					fieldType:     FIELD_TYPES[strings.ToLower(field.Type)],
+					fieldType:     FIELD_TYPES[field.Type],
 					label:         field.Name,
 				})
 				if err != nil {
