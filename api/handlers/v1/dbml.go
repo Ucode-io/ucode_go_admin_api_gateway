@@ -15,10 +15,10 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/util"
 	"ucode/ucode_go_api_gateway/services"
 
-	"github.com/duythinht/dbml-go/parser"
-	"github.com/duythinht/dbml-go/scanner"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/ucode-io/dbml-go/parser"
+	"github.com/ucode-io/dbml-go/scanner"
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
