@@ -304,12 +304,7 @@ func createMenu(c *gin.Context, req *createMenuReq) error {
 }
 
 func createField(c *gin.Context, req *createFieldReq) error {
-	fieldType := req.fieldType
-	ucodeType, isStandardType := FIELD_TYPES[fieldType]
-
-	if !isStandardType {
-		ucodeType = "MULTISELECT"
-	}
+	ucodeType := getFieldType(req.fieldType)
 
 	fieldReq := &obj.CreateFieldRequest{
 		Id:      uuid.NewString(),
@@ -328,7 +323,7 @@ func createField(c *gin.Context, req *createFieldReq) error {
 
 	if ucodeType == "MULTISELECT" {
 		fieldReq.Attributes.Fields["options"] = structpb.NewListValue(&structpb.ListValue{
-			Values: enumMap[fieldType],
+			Values: enumMap[req.fieldType],
 		})
 	}
 
@@ -436,41 +431,55 @@ type createRelationReq struct {
 	tableTo       string
 }
 
-var (
-	FIELD_TYPES = map[string]string{
-		"character varying": "SINGLE_LINE",
-		"varchar":           "SINGLE_LINE",
-		"text":              "SINGLE_LINE",
-		"enum":              "SINGLE_LINE",
-		"bytea":             "SINGLE_LINE",
-		"citext":            "SINGLE_LINE",
+var FIELD_TYPES = map[string]string{
+	"character varying": "SINGLE_LINE",
+	"varchar":           "SINGLE_LINE",
+	"text":              "MULTI_LINE",
+	"enum":              "SINGLE_LINE",
+	"bytea":             "SINGLE_LINE",
+	"citext":            "SINGLE_LINE",
 
-		"jsonb": "JSON",
-		"json":  "JSON",
+	"jsonb": "JSON",
+	"json":  "JSON",
 
-		"int":              "FLOAT",
-		"smallint":         "FLOAT",
-		"integer":          "FLOAT",
-		"bigint":           "FLOAT",
-		"numeric":          "FLOAT",
-		"decimal":          "FLOAT",
-		"real":             "FLOAT",
-		"double precision": "FLOAT",
-		"smallserial":      "FLOAT",
-		"serial":           "FLOAT",
-		"bigserial":        "FLOAT",
-		"money":            "FLOAT",
-		"int2":             "FLOAT",
-		"int4":             "FLOAT",
+	"int":              "FLOAT",
+	"float":            "FLOAT",
+	"smallint":         "FLOAT",
+	"integer":          "FLOAT",
+	"bigint":           "FLOAT",
+	"numeric":          "FLOAT",
+	"decimal":          "FLOAT",
+	"real":             "FLOAT",
+	"double precision": "FLOAT",
+	"smallserial":      "FLOAT",
+	"serial":           "FLOAT",
+	"bigserial":        "FLOAT",
+	"money":            "FLOAT",
+	"int2":             "FLOAT",
+	"int4":             "FLOAT",
+	"float8":           "FLOAT",
 
-		"timestamp":                   "DATE_TIME",
-		"timestamptz":                 "DATE_TIME",
-		"timestamp without time zone": "DATE_TIME_WITHOUT_TIME_ZONE",
-		"timestamp with time zone":    "DATE_TIME",
-		"date":                        "DATE",
+	"timestamp":                   "DATE_TIME",
+	"timestamptz":                 "DATE_TIME",
+	"timestamp without time zone": "DATE_TIME_WITHOUT_TIME_ZONE",
+	"timestamp with time zone":    "DATE_TIME",
+	"date":                        "DATE",
 
-		"boolean": "CHECKBOX",
+	"boolean": "CHECKBOX",
 
-		"uuid": "UUID",
+	"uuid": "UUID",
+
+	"point":   "MAP",
+	"polygon": "POLYGON",
+}
+
+func getFieldType(fieldType string) string {
+	if _, ok := enumMap[fieldType]; ok {
+		return "MULTISELECT"
 	}
-)
+	if _, ok := FIELD_TYPES[fieldType]; !ok {
+		return "SINGLE_LINE"
+	}
+
+	return FIELD_TYPES[fieldType]
+}
