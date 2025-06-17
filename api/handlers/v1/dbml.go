@@ -152,7 +152,7 @@ func (h *HandlerV1) DbmlToUcode(c *gin.Context) {
 				err := createField(c, &createFieldReq{
 					resourceCreds: resourceCreds,
 					tableId:       tableId,
-					fieldType:     FIELD_TYPES[field.Type],
+					fieldType:     getFieldType(field.Type),
 					label:         field.Name,
 				})
 				if err != nil {
@@ -386,41 +386,52 @@ type createRelationReq struct {
 	tableTo       string
 }
 
-var (
-	FIELD_TYPES = map[string]string{
-		"character varying": "SINGLE_LINE",
-		"varchar":           "SINGLE_LINE",
-		"text":              "SINGLE_LINE",
-		"enum":              "SINGLE_LINE",
-		"bytea":             "SINGLE_LINE",
-		"citext":            "SINGLE_LINE",
+var FIELD_TYPES = map[string]string{
+	"character varying": "SINGLE_LINE",
+	"varchar":           "SINGLE_LINE",
+	"text":              "MULTI_LINE",
+	"enum":              "SINGLE_LINE",
+	"bytea":             "SINGLE_LINE",
+	"citext":            "SINGLE_LINE",
 
-		"jsonb": "JSON",
-		"json":  "JSON",
+	"jsonb": "JSON",
+	"json":  "JSON",
 
-		"int":              "FLOAT",
-		"smallint":         "FLOAT",
-		"integer":          "FLOAT",
-		"bigint":           "FLOAT",
-		"numeric":          "FLOAT",
-		"decimal":          "FLOAT",
-		"real":             "FLOAT",
-		"double precision": "FLOAT",
-		"smallserial":      "FLOAT",
-		"serial":           "FLOAT",
-		"bigserial":        "FLOAT",
-		"money":            "FLOAT",
-		"int2":             "FLOAT",
-		"int4":             "FLOAT",
+	"int":              "FLOAT",
+	"float":            "FLOAT",
+	"smallint":         "FLOAT",
+	"integer":          "FLOAT",
+	"bigint":           "FLOAT",
+	"numeric":          "FLOAT",
+	"decimal":          "FLOAT",
+	"real":             "FLOAT",
+	"double precision": "FLOAT",
+	"smallserial":      "FLOAT",
+	"serial":           "FLOAT",
+	"bigserial":        "FLOAT",
+	"money":            "FLOAT",
+	"int2":             "FLOAT",
+	"int4":             "FLOAT",
+	"float8":           "FLOAT",
 
-		"timestamp":                   "DATE_TIME",
-		"timestamptz":                 "DATE_TIME",
-		"timestamp without time zone": "DATE_TIME_WITHOUT_TIME_ZONE",
-		"timestamp with time zone":    "DATE_TIME",
-		"date":                        "DATE",
+	"timestamp":                   "DATE_TIME",
+	"timestamptz":                 "DATE_TIME",
+	"timestamp without time zone": "DATE_TIME_WITHOUT_TIME_ZONE",
+	"timestamp with time zone":    "DATE_TIME",
+	"date":                        "DATE",
 
-		"boolean": "CHECKBOX",
+	"boolean": "CHECKBOX",
 
-		"uuid": "UUID",
+	"uuid": "UUID",
+
+	"point":   "MAP",
+	"polygon": "POLYGON",
+}
+
+func getFieldType(fieldType string) string {
+	if _, ok := FIELD_TYPES[fieldType]; !ok {
+		return "SINGLE_LINE" // Default type if not found
 	}
-)
+
+	return FIELD_TYPES[fieldType]
+}
