@@ -144,7 +144,7 @@ func (h *HandlerV1) DbmlToUcode(c *gin.Context) {
 
 		for _, field := range table.Columns {
 			field.Type = strings.ToLower(field.Type)
-			if skipFields[field.Name] || skipTypes[field.Type] {
+			if skipFields[field.Name] || skipTypes[field.Type] || field.Settings.PK {
 				continue
 			}
 
