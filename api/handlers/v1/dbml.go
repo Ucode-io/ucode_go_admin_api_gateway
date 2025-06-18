@@ -22,6 +22,10 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
+var (
+	enumMap = map[string][]*structpb.Value{}
+)
+
 type DbmlToUcodeRequest struct {
 	Dbml string `json:"dbml"`
 }
@@ -109,6 +113,20 @@ func (h *HandlerV1) DbmlToUcode(c *gin.Context) {
 		return
 	}
 
+	for _, enum := range dbml.Enums {
+		options := make([]*structpb.Value, len(enum.Values))
+		for i, value := range enum.Values {
+			option, _ := structpb.NewStruct(map[string]any{
+				"value": value.Name,
+				"icon":  "",
+				"color": "",
+				"label": value.Name,
+			})
+			options[i] = structpb.NewStructValue(option)
+		}
+		enumMap[strings.ToLower(enum.Name)] = options
+	}
+
 	skipTables := map[string]bool{"role": true, "client_type": true}
 	skipFields := map[string]bool{
 		"guid":       true,
@@ -152,7 +170,7 @@ func (h *HandlerV1) DbmlToUcode(c *gin.Context) {
 				err := createField(c, &createFieldReq{
 					resourceCreds: resourceCreds,
 					tableId:       tableId,
-					fieldType:     getFieldType(field.Type),
+					fieldType:     field.Type,
 					label:         field.Name,
 				})
 				if err != nil {
@@ -172,6 +190,23 @@ func (h *HandlerV1) DbmlToUcode(c *gin.Context) {
 				}
 			}
 
+		}
+	}
+
+	for _, ref := range dbml.Refs {
+		for _, relation := range ref.Relationships {
+			fromParts := strings.Split(relation.From, ".")
+			toParts := strings.Split(relation.To, ".")
+
+			err := createRelation(c, &createRelationReq{
+				resourceCreds: resourceCreds,
+				tableFrom:     fromParts[0],
+				tableTo:       toParts[0],
+			})
+			if err != nil {
+				h.handleResponse(c, status_http.InternalServerError, err)
+				return
+			}
 		}
 	}
 
@@ -269,10 +304,12 @@ func createMenu(c *gin.Context, req *createMenuReq) error {
 }
 
 func createField(c *gin.Context, req *createFieldReq) error {
+	ucodeType := getFieldType(req.fieldType)
+
 	fieldReq := &obj.CreateFieldRequest{
 		Id:      uuid.NewString(),
 		TableId: req.tableId,
-		Type:    req.fieldType,
+		Type:    ucodeType,
 		Label:   req.label,
 		Slug:    req.label,
 		Attributes: &structpb.Struct{
@@ -282,6 +319,12 @@ func createField(c *gin.Context, req *createFieldReq) error {
 		},
 		ProjectId: req.resourceCreds.resourceEnvironmentId,
 		EnvId:     req.resourceCreds.environmentId,
+	}
+
+	if ucodeType == "MULTISELECT" {
+		fieldReq.Attributes.Fields["options"] = structpb.NewListValue(&structpb.ListValue{
+			Values: enumMap[req.fieldType],
+		})
 	}
 
 	switch req.resourceCreds.resourceType {
@@ -323,8 +366,10 @@ func createRelation(c *gin.Context, req *createRelationReq) error {
 				"label_to_en": structpb.NewStringValue(req.tableFrom),
 			},
 		},
-		ProjectId: req.resourceCreds.resourceEnvironmentId,
-		EnvId:     req.resourceCreds.environmentId,
+		RelationFieldId:   uuid.NewString(),
+		RelationToFieldId: uuid.NewString(),
+		ProjectId:         req.resourceCreds.resourceEnvironmentId,
+		EnvId:             req.resourceCreds.environmentId,
 	}
 
 	switch req.resourceCreds.resourceType {
@@ -429,8 +474,11 @@ var FIELD_TYPES = map[string]string{
 }
 
 func getFieldType(fieldType string) string {
+	if _, ok := enumMap[fieldType]; ok {
+		return "MULTISELECT"
+	}
 	if _, ok := FIELD_TYPES[fieldType]; !ok {
-		return "SINGLE_LINE" // Default type if not found
+		return "SINGLE_LINE"
 	}
 
 	return FIELD_TYPES[fieldType]
