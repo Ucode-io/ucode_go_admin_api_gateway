@@ -642,6 +642,7 @@ func (h *HandlerV3) GetTableDetails(c *gin.Context) {
 		objectRequest models.CommonMessage
 		statusHttp    = status_http.GrpcStatusToHTTP["Ok"]
 		tableSlug     = c.Param("collection")
+		menuId        = c.Param("menu_id")
 	)
 
 	if err := c.ShouldBindJSON(&objectRequest); err != nil {
@@ -662,6 +663,7 @@ func (h *HandlerV3) GetTableDetails(c *gin.Context) {
 		objectRequest.Data["client_type_id_from_token"] = tokenInfo.GetClientTypeId()
 	}
 	objectRequest.Data["language_setting"] = c.DefaultQuery("language_setting", "")
+	objectRequest.Data["menu_id"] = menuId
 
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
 	if err != nil {
