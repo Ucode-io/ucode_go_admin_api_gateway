@@ -1,15 +1,22 @@
 package v1
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
+	"image"
+	"image/jpeg"
+	"image/png"
+	"io"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
+	"ucode/ucode_go_api_gateway/config"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
@@ -46,24 +53,33 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 		return
 	}
 
-	folder_name := c.DefaultQuery("folder_name", "Media")
+	var (
+		folderName = c.DefaultQuery("folder_name", "Media")
+		rationStr  = c.Query("ratio")
+		ratio      float64
+	)
 
-	err := c.ShouldBind(&file)
-	if err != nil {
+	if rationStr != "" {
+		ratio, _ = strconv.ParseFloat(rationStr, 64)
+		if ratio <= 0 {
+			ratio = 0
+		}
+	}
+
+	if err := c.ShouldBind(&file); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
-		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		h.handleResponse(c, status_http.InvalidArgument, config.ErrProjectIdValid)
 		return
 	}
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, config.ErrEnvironmentIdValid)
 		return
 	}
 
@@ -90,11 +106,12 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 		return
 	}
 
-	var title string = file.File.Filename
-
+	title := file.File.Filename
 	fName, _ := uuid.NewRandom()
 	file.File.Filename = strings.ReplaceAll(file.File.Filename, " ", "")
 	file.File.Filename = fmt.Sprintf("%s_%s", fName.String(), file.File.Filename)
+	contentType := file.File.Header.Get("Content-Type")
+
 	object, err := file.File.Open()
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
@@ -102,11 +119,42 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 	}
 	defer object.Close()
 
+	var uploadReader io.Reader = object
+	var uploadSize int64 = file.File.Size
+
+	if ratio > 0 && strings.HasPrefix(contentType, "image/") {
+		img, format, err := image.Decode(object)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		croppedImg, err := cropImageByRatio(img, ratio)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		var buf bytes.Buffer
+		switch format {
+		case "jpeg", "jpg":
+			err = jpeg.Encode(&buf, croppedImg, &jpeg.Options{Quality: 90})
+		case "png":
+			err = png.Encode(&buf, croppedImg)
+		}
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		uploadReader = bytes.NewReader(buf.Bytes())
+		uploadSize = int64(buf.Len())
+	}
+
 	minioClient, err := minio.New(h.baseConf.MinioEndpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(h.baseConf.MinioAccessKeyID, h.baseConf.MinioSecretAccessKey, ""),
 		Secure: h.baseConf.MinioProtocol,
 	})
-
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
@@ -115,9 +163,9 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 	_, err = minioClient.PutObject(
 		c.Request.Context(),
 		resource.ResourceEnvironmentId,
-		folder_name+"/"+file.File.Filename,
-		object,
-		file.File.Size,
+		folderName+"/"+file.File.Filename,
+		uploadReader,
+		uploadSize,
 		minio.PutObjectOptions{ContentType: file.File.Header["Content-Type"][0]},
 	)
 	if err != nil {
@@ -130,10 +178,10 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 		resp, err := services.GetBuilderServiceByType(resource.NodeType).File().Create(c.Request.Context(), &obs.CreateFileRequest{
 			Id:               fName.String(),
 			Title:            title,
-			Storage:          folder_name,
+			Storage:          folderName,
 			FileNameDisk:     file.File.Filename,
 			FileNameDownload: title,
-			Link:             resource.ResourceEnvironmentId + "/" + folder_name + "/" + file.File.Filename,
+			Link:             resource.ResourceEnvironmentId + "/" + folderName + "/" + file.File.Filename,
 			FileSize:         file.File.Size,
 			ProjectId:        resource.ResourceEnvironmentId,
 		})
@@ -148,10 +196,10 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 		resp, err := services.GoObjectBuilderService().File().Create(c.Request.Context(), &nb.CreateFileRequest{
 			Id:               fName.String(),
 			Title:            title,
-			Storage:          folder_name,
+			Storage:          folderName,
 			FileNameDisk:     file.File.Filename,
 			FileNameDownload: title,
-			Link:             resource.ResourceEnvironmentId + "/" + folder_name + "/" + file.File.Filename,
+			Link:             resource.ResourceEnvironmentId + "/" + folderName + "/" + file.File.Filename,
 			FileSize:         file.File.Size,
 			ProjectId:        resource.ResourceEnvironmentId,
 		})
@@ -164,6 +212,34 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 		h.handleResponse(c, status_http.Created, resp)
 		return
 	}
+}
+
+func cropImageByRatio(img image.Image, ratio float64) (image.Image, error) {
+	bounds := img.Bounds()
+	width := bounds.Dx()
+	height := bounds.Dy()
+
+	targetWidth := width
+	targetHeight := int(float64(width) / ratio)
+
+	if targetHeight > height {
+		targetHeight = height
+		targetWidth = int(float64(height) * ratio)
+	}
+
+	x0 := (width - targetWidth) / 2
+	y0 := (height - targetHeight) / 2
+	x1 := x0 + targetWidth
+	y1 := y0 + targetHeight
+
+	subImg, ok := img.(interface {
+		SubImage(r image.Rectangle) image.Image
+	})
+	if !ok {
+		return nil, errors.New("image doesn't support cropping")
+	}
+
+	return subImg.SubImage(image.Rect(x0, y0, x1, y1)), nil
 }
 
 // GetSingleFile godoc
