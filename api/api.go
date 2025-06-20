@@ -324,6 +324,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1Admin.PUT("/redirect-url/re-order", h.V1.UpdateRedirectUrlOrder)
 
 		v1Admin.POST("dbml-to-ucode", h.V1.DbmlToUcode)
+		v1Admin.POST("mcp-call", h.V1.MCPCall)
 	}
 
 	v2Admin := r.Group("/v2")
