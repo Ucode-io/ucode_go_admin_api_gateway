@@ -7,8 +7,10 @@ import (
 	"io"
 	"net/http"
 	"time"
+
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
+	as "ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
@@ -58,7 +60,24 @@ func (h *HandlerV1) MCPCall(c *gin.Context) {
 		return
 	}
 
-	resp, err := sendAnthropicRequest(req.ProjectType, req.ManagementSystem, "IT", projectId.(string), environmentId.(string))
+	apiKeys, err := h.authService.ApiKey().GetList(c.Request.Context(), &as.GetListReq{
+		EnvironmentId: environmentId.(string),
+		ProjectId:     projectId.(string),
+		Limit:         1,
+		Offset:        0,
+	})
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+	if len(apiKeys.Data) < 1 {
+		h.handleResponse(c, status_http.InvalidArgument, "Api key not found")
+		return
+	}
+
+	apiKey := apiKeys.GetData()[0].GetAppId()
+
+	resp, err := sendAnthropicRequest(req.ProjectType, req.ManagementSystem, "IT", projectId.(string), environmentId.(string), apiKey)
 	fmt.Println("************ MCP Response ************", resp)
 	if err != nil {
 		h.handleResponse(c, status_http.InternalServerError, fmt.Sprintf("Your request for %s %s could not be processed.", req.ProjectType, req.ManagementSystem))
@@ -68,7 +87,7 @@ func (h *HandlerV1) MCPCall(c *gin.Context) {
 	h.handleResponse(c, status_http.OK, fmt.Sprintf("Your request for %s %s has been successfully processed.", req.ProjectType, req.ManagementSystem))
 }
 
-func sendAnthropicRequest(projectType, managementSystem, industry, projectId, envId string) (string, error) {
+func sendAnthropicRequest(projectType, managementSystem, industry, projectId, envId, apiKey string) (string, error) {
 	url := config.ANTHROPIC_BASE_API_URL
 
 	// Construct the request body
@@ -97,7 +116,7 @@ func sendAnthropicRequest(projectType, managementSystem, industry, projectId, en
 
 Get the current DBML schema for the project with project-id = %s and environment-id = %s.
 Then, prepare a new DBML schema that excludes all existing tables from the current schema.
-Finally, execute the new DBML schema using the dbml_to_ucode tool.`, projectType, managementSystem, industry, projectId, envId),
+Finally, execute the new DBML schema using the dbml_to_ucode tool. X-API-KEY = %s. Attempt the operation once. If it fails, do not retry.`, projectType, managementSystem, industry, projectId, envId, apiKey),
 			},
 		},
 		MCPServer: []MCPServer{
