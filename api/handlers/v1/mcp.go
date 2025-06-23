@@ -58,7 +58,7 @@ func (h *HandlerV1) MCPCall(c *gin.Context) {
 		return
 	}
 
-	resp, err := sendAnthropicRequest(req.ProjectType, req.ManagementSystem, req.Industry, projectId.(string), environmentId.(string))
+	resp, err := sendAnthropicRequest(req.ProjectType, req.ManagementSystem, "IT", projectId.(string), environmentId.(string))
 	fmt.Println("************ MCP Response ************", resp)
 	if err != nil {
 		h.handleResponse(c, status_http.InternalServerError, fmt.Sprintf("Your request for %s %s could not be processed.", req.ProjectType, req.ManagementSystem))
