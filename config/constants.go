@@ -37,7 +37,7 @@ const (
 	STATUS_INACTIVE string = "inactive"
 
 	ANTHROPIC_API_KEY      string = "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"
-	MCP_SERVER_URL         string = "https://1d48-84-54-116-4.ngrok-free.app/sse"
+	MCP_SERVER_URL         string = "https://mcp.ucode.run/sse"
 	ANTHROPIC_BETA         string = "mcp-client-2025-04-04"
 	CLAUDE_MODEL           string = "claude-3-7-sonnet-latest"
 	ANTHROPIC_BASE_API_URL string = "https://api.anthropic.com/v1/messages"
