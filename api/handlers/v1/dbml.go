@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"unicode"
 
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
@@ -215,14 +216,14 @@ func (h *HandlerV1) DbmlToUcode(c *gin.Context) {
 
 func createTable(c *gin.Context, req *createTableReq) (string, error) {
 	tableReq := &obj.CreateTableRequest{
-		Label:      req.label,
+		Label:      formatString(req.label),
 		Slug:       req.label,
 		ShowInMenu: true,
 		ViewId:     uuid.NewString(),
 		LayoutId:   uuid.NewString(),
 		Attributes: &structpb.Struct{
 			Fields: map[string]*structpb.Value{
-				"label_en": structpb.NewStringValue(req.label),
+				"label_en": structpb.NewStringValue(formatString(req.label)),
 			},
 		},
 		EnvId:     req.resourceCreds.environmentId,
@@ -268,7 +269,7 @@ func createMenu(c *gin.Context, req *createMenuReq) error {
 		ParentId: "c57eedc3-a954-4262-a0af-376c65b5a284",
 		Attributes: &structpb.Struct{
 			Fields: map[string]*structpb.Value{
-				"label_en": structpb.NewStringValue(req.label),
+				"label_en": structpb.NewStringValue(formatString(req.label)),
 			},
 		},
 		ProjectId: req.resourceCreds.resourceEnvironmentId,
@@ -310,11 +311,11 @@ func createField(c *gin.Context, req *createFieldReq) error {
 		Id:      uuid.NewString(),
 		TableId: req.tableId,
 		Type:    ucodeType,
-		Label:   req.label,
+		Label:   formatString(req.label),
 		Slug:    req.label,
 		Attributes: &structpb.Struct{
 			Fields: map[string]*structpb.Value{
-				"label_en": structpb.NewStringValue(req.label),
+				"label_en": structpb.NewStringValue(formatString(req.label)),
 			},
 		},
 		ProjectId: req.resourceCreds.resourceEnvironmentId,
@@ -362,8 +363,8 @@ func createRelation(c *gin.Context, req *createRelationReq) error {
 		TableTo:   req.tableTo,
 		Attributes: &structpb.Struct{
 			Fields: map[string]*structpb.Value{
-				"label_en":    structpb.NewStringValue(req.tableTo),
-				"label_to_en": structpb.NewStringValue(req.tableFrom),
+				"label_en":    structpb.NewStringValue(formatString(req.tableTo)),
+				"label_to_en": structpb.NewStringValue(formatString(req.tableFrom)),
 			},
 		},
 		RelationFieldId:   uuid.NewString(),
@@ -482,4 +483,17 @@ func getFieldType(fieldType string) string {
 	}
 
 	return FIELD_TYPES[fieldType]
+}
+
+func formatString(input string) string {
+	// Replace underscores with spaces
+	input = strings.ReplaceAll(input, "_", " ")
+
+	// Capitalize the first letter of the string
+	runes := []rune(input)
+	if len(runes) > 0 {
+		runes[0] = unicode.ToUpper(runes[0])
+	}
+
+	return string(runes)
 }
