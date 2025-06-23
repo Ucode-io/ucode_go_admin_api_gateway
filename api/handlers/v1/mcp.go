@@ -59,11 +59,11 @@ func (h *HandlerV1) MCPCall(c *gin.Context) {
 
 	// err := sendAnthropicRequest(req.ProjectType, req.ManagementSystem, req.Industry, projectId.(string), environmentId.(string))
 	// if err != nil {
-	// 	h.handleResponse(c, status_http.InternalServerError, err.Error())
+	// 	h.handleResponse(c, status_http.InternalServerError, fmt.Sprintf("Your request for %s %s could not be processed.", req.ProjectType, req.ManagementSystem))
 	// 	return
 	// }
 
-	h.handleResponse(c, status_http.OK, nil)
+	h.handleResponse(c, status_http.OK, fmt.Sprintf("Your request for %s %s has been successfully processed.", req.ProjectType, req.ManagementSystem))
 }
 
 func sendAnthropicRequest(projectType, managementSystem, industry, projectId, envId string) error {
@@ -129,6 +129,9 @@ Finally, execute the new DBML schema using the dbml_to_ucode tool.`, projectType
 	}
 	defer resp.Body.Close()
 
-	fmt.Println("Status Code:", resp.StatusCode)
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+
 	return nil
 }
