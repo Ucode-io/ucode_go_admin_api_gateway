@@ -4,6 +4,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"unicode"
+
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
@@ -14,11 +16,15 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/util"
 	"ucode/ucode_go_api_gateway/services"
 
-	"github.com/duythinht/dbml-go/parser"
-	"github.com/duythinht/dbml-go/scanner"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/ucode-io/dbml-go/parser"
+	"github.com/ucode-io/dbml-go/scanner"
 	"google.golang.org/protobuf/types/known/structpb"
+)
+
+var (
+	enumMap = map[string][]*structpb.Value{}
 )
 
 type DbmlToUcodeRequest struct {
@@ -108,9 +114,28 @@ func (h *HandlerV1) DbmlToUcode(c *gin.Context) {
 		return
 	}
 
+	for _, enum := range dbml.Enums {
+		options := make([]*structpb.Value, len(enum.Values))
+		for i, value := range enum.Values {
+			option, _ := structpb.NewStruct(map[string]any{
+				"value": value.Name,
+				"icon":  "",
+				"color": "",
+				"label": value.Name,
+			})
+			options[i] = structpb.NewStructValue(option)
+		}
+		enumMap[strings.ToLower(enum.Name)] = options
+	}
+
 	skipTables := map[string]bool{"role": true, "client_type": true}
-	skipFields := map[string]bool{"guid": true, "folder_id": true}
-	skipTypes := map[string]bool{"UUID": true, "UUID[]": true}
+	skipFields := map[string]bool{
+		"guid":       true,
+		"folder_id":  true,
+		"created_at": true,
+		"updated_at": true,
+		"deleted_at": true}
+	skipTypes := map[string]bool{"uuid": true, "uuid[]": true}
 
 	for _, table := range dbml.Tables {
 		if skipTables[table.Name] {
@@ -137,7 +162,8 @@ func (h *HandlerV1) DbmlToUcode(c *gin.Context) {
 		}
 
 		for _, field := range table.Columns {
-			if skipFields[field.Name] || skipTypes[field.Type] {
+			field.Type = strings.ToLower(field.Type)
+			if skipFields[field.Name] || skipTypes[field.Type] || field.Settings.PK {
 				continue
 			}
 
@@ -145,7 +171,7 @@ func (h *HandlerV1) DbmlToUcode(c *gin.Context) {
 				err := createField(c, &createFieldReq{
 					resourceCreds: resourceCreds,
 					tableId:       tableId,
-					fieldType:     FIELD_TYPES[strings.ToLower(field.Type)],
+					fieldType:     field.Type,
 					label:         field.Name,
 				})
 				if err != nil {
@@ -168,19 +194,36 @@ func (h *HandlerV1) DbmlToUcode(c *gin.Context) {
 		}
 	}
 
+	for _, ref := range dbml.Refs {
+		for _, relation := range ref.Relationships {
+			fromParts := strings.Split(relation.From, ".")
+			toParts := strings.Split(relation.To, ".")
+
+			err := createRelation(c, &createRelationReq{
+				resourceCreds: resourceCreds,
+				tableFrom:     fromParts[0],
+				tableTo:       toParts[0],
+			})
+			if err != nil {
+				h.handleResponse(c, status_http.InternalServerError, err)
+				return
+			}
+		}
+	}
+
 	h.handleResponse(c, status_http.OK, nil)
 }
 
 func createTable(c *gin.Context, req *createTableReq) (string, error) {
 	tableReq := &obj.CreateTableRequest{
-		Label:      req.label,
+		Label:      formatString(req.label),
 		Slug:       req.label,
 		ShowInMenu: true,
 		ViewId:     uuid.NewString(),
 		LayoutId:   uuid.NewString(),
 		Attributes: &structpb.Struct{
 			Fields: map[string]*structpb.Value{
-				"label_en": structpb.NewStringValue(req.label),
+				"label_en": structpb.NewStringValue(formatString(req.label)),
 			},
 		},
 		EnvId:     req.resourceCreds.environmentId,
@@ -226,7 +269,7 @@ func createMenu(c *gin.Context, req *createMenuReq) error {
 		ParentId: "c57eedc3-a954-4262-a0af-376c65b5a284",
 		Attributes: &structpb.Struct{
 			Fields: map[string]*structpb.Value{
-				"label_en": structpb.NewStringValue(req.label),
+				"label_en": structpb.NewStringValue(formatString(req.label)),
 			},
 		},
 		ProjectId: req.resourceCreds.resourceEnvironmentId,
@@ -262,19 +305,27 @@ func createMenu(c *gin.Context, req *createMenuReq) error {
 }
 
 func createField(c *gin.Context, req *createFieldReq) error {
+	ucodeType := getFieldType(req.fieldType)
+
 	fieldReq := &obj.CreateFieldRequest{
 		Id:      uuid.NewString(),
 		TableId: req.tableId,
-		Type:    req.fieldType,
-		Label:   req.label,
+		Type:    ucodeType,
+		Label:   formatString(req.label),
 		Slug:    req.label,
 		Attributes: &structpb.Struct{
 			Fields: map[string]*structpb.Value{
-				"label_en": structpb.NewStringValue(req.label),
+				"label_en": structpb.NewStringValue(formatString(req.label)),
 			},
 		},
 		ProjectId: req.resourceCreds.resourceEnvironmentId,
 		EnvId:     req.resourceCreds.environmentId,
+	}
+
+	if ucodeType == "MULTISELECT" {
+		fieldReq.Attributes.Fields["options"] = structpb.NewListValue(&structpb.ListValue{
+			Values: enumMap[req.fieldType],
+		})
 	}
 
 	switch req.resourceCreds.resourceType {
@@ -312,12 +363,14 @@ func createRelation(c *gin.Context, req *createRelationReq) error {
 		TableTo:   req.tableTo,
 		Attributes: &structpb.Struct{
 			Fields: map[string]*structpb.Value{
-				"label_en":    structpb.NewStringValue(req.tableTo),
-				"label_to_en": structpb.NewStringValue(req.tableFrom),
+				"label_en":    structpb.NewStringValue(formatString(req.tableTo)),
+				"label_to_en": structpb.NewStringValue(formatString(req.tableFrom)),
 			},
 		},
-		ProjectId: req.resourceCreds.resourceEnvironmentId,
-		EnvId:     req.resourceCreds.environmentId,
+		RelationFieldId:   uuid.NewString(),
+		RelationToFieldId: uuid.NewString(),
+		ProjectId:         req.resourceCreds.resourceEnvironmentId,
+		EnvId:             req.resourceCreds.environmentId,
 	}
 
 	switch req.resourceCreds.resourceType {
@@ -379,41 +432,68 @@ type createRelationReq struct {
 	tableTo       string
 }
 
-var (
-	FIELD_TYPES = map[string]string{
-		"character varying": "SINGLE_LINE",
-		"varchar":           "SINGLE_LINE",
-		"text":              "SINGLE_LINE",
-		"enum":              "SINGLE_LINE",
-		"bytea":             "SINGLE_LINE",
-		"citext":            "SINGLE_LINE",
+var FIELD_TYPES = map[string]string{
+	"character varying": "SINGLE_LINE",
+	"varchar":           "SINGLE_LINE",
+	"text":              "MULTI_LINE",
+	"enum":              "SINGLE_LINE",
+	"bytea":             "SINGLE_LINE",
+	"citext":            "SINGLE_LINE",
 
-		"jsonb": "JSON",
-		"json":  "JSON",
+	"jsonb": "JSON",
+	"json":  "JSON",
 
-		"int":              "FLOAT",
-		"smallint":         "FLOAT",
-		"integer":          "FLOAT",
-		"bigint":           "FLOAT",
-		"numeric":          "FLOAT",
-		"decimal":          "FLOAT",
-		"real":             "FLOAT",
-		"double precision": "FLOAT",
-		"smallserial":      "FLOAT",
-		"serial":           "FLOAT",
-		"bigserial":        "FLOAT",
-		"money":            "FLOAT",
-		"int2":             "FLOAT",
-		"int4":             "FLOAT",
+	"int":              "FLOAT",
+	"float":            "FLOAT",
+	"smallint":         "FLOAT",
+	"integer":          "FLOAT",
+	"bigint":           "FLOAT",
+	"numeric":          "FLOAT",
+	"decimal":          "FLOAT",
+	"real":             "FLOAT",
+	"double precision": "FLOAT",
+	"smallserial":      "FLOAT",
+	"serial":           "FLOAT",
+	"bigserial":        "FLOAT",
+	"money":            "FLOAT",
+	"int2":             "FLOAT",
+	"int4":             "FLOAT",
+	"float8":           "FLOAT",
 
-		"timestamp":                   "DATE_TIME",
-		"timestamptz":                 "DATE_TIME",
-		"timestamp without time zone": "DATE_TIME_WITHOUT_TIME_ZONE",
-		"timestamp with time zone":    "DATE_TIME",
-		"date":                        "DATE",
+	"timestamp":                   "DATE_TIME",
+	"timestamptz":                 "DATE_TIME",
+	"timestamp without time zone": "DATE_TIME_WITHOUT_TIME_ZONE",
+	"timestamp with time zone":    "DATE_TIME",
+	"date":                        "DATE",
 
-		"boolean": "CHECKBOX",
+	"boolean": "CHECKBOX",
 
-		"uuid": "UUID",
+	"uuid": "UUID",
+
+	"point":   "MAP",
+	"polygon": "POLYGON",
+}
+
+func getFieldType(fieldType string) string {
+	if _, ok := enumMap[fieldType]; ok {
+		return "MULTISELECT"
 	}
-)
+	if _, ok := FIELD_TYPES[fieldType]; !ok {
+		return "SINGLE_LINE"
+	}
+
+	return FIELD_TYPES[fieldType]
+}
+
+func formatString(input string) string {
+	// Replace underscores with spaces
+	input = strings.ReplaceAll(input, "_", " ")
+
+	// Capitalize the first letter of the string
+	runes := []rune(input)
+	if len(runes) > 0 {
+		runes[0] = unicode.ToUpper(runes[0])
+	}
+
+	return string(runes)
+}

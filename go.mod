@@ -25,7 +25,6 @@ require (
 require (
 	github.com/aws/aws-sdk-go v1.55.5
 	github.com/baxromumarov/ucode-sdk v0.0.3
-	github.com/duythinht/dbml-go v0.0.0-20220713090938-b5659a82f71b
 	github.com/eclipse/paho.mqtt.golang v1.5.0
 	github.com/go-git/go-git/v5 v5.12.0
 	github.com/go-redis/redis/v8 v8.11.5
@@ -40,6 +39,7 @@ require (
 	github.com/stretchr/testify v1.10.0
 	github.com/tus/tusd v1.13.0
 	github.com/uber/jaeger-client-go v2.30.0+incompatible
+	github.com/ucode-io/dbml-go v1.0.3
 	github.com/ucode-io/ucode_sdk v1.0.1
 	github.com/xuri/excelize/v2 v2.9.0
 	golang.org/x/time v0.5.0

@@ -453,6 +453,7 @@ func (h *HandlerV3) GetAllViews(c *gin.Context) {
 				TableSlug: c.Param("collection"),
 				ProjectId: resource.ResourceEnvironmentId,
 				RoleId:    roleId,
+				MenuId:    menuId,
 			},
 		)
 
