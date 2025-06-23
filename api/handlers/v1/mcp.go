@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"time"
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -57,7 +58,8 @@ func (h *HandlerV1) MCPCall(c *gin.Context) {
 		return
 	}
 
-	err := sendAnthropicRequest(req.ProjectType, req.ManagementSystem, req.Industry, projectId.(string), environmentId.(string))
+	resp, err := sendAnthropicRequest(req.ProjectType, req.ManagementSystem, req.Industry, projectId.(string), environmentId.(string))
+	fmt.Println("************ MCP Response ************", resp)
 	if err != nil {
 		h.handleResponse(c, status_http.InternalServerError, fmt.Sprintf("Your request for %s %s could not be processed.", req.ProjectType, req.ManagementSystem))
 		return
@@ -66,7 +68,7 @@ func (h *HandlerV1) MCPCall(c *gin.Context) {
 	h.handleResponse(c, status_http.OK, fmt.Sprintf("Your request for %s %s has been successfully processed.", req.ProjectType, req.ManagementSystem))
 }
 
-func sendAnthropicRequest(projectType, managementSystem, industry, projectId, envId string) error {
+func sendAnthropicRequest(projectType, managementSystem, industry, projectId, envId string) (string, error) {
 	url := config.ANTHROPIC_BASE_API_URL
 
 	// Construct the request body
@@ -109,12 +111,12 @@ Finally, execute the new DBML schema using the dbml_to_ucode tool.`, projectType
 
 	jsonBody, err := json.Marshal(body)
 	if err != nil {
-		return fmt.Errorf("failed to marshal request body: %w", err)
+		return "", fmt.Errorf("failed to marshal request body: %w", err)
 	}
 
 	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(jsonBody))
 	if err != nil {
-		return fmt.Errorf("failed to create request: %w", err)
+		return "", fmt.Errorf("failed to create request: %w", err)
 	}
 
 	req.Header.Set("Content-Type", "application/json")
@@ -125,13 +127,18 @@ Finally, execute the new DBML schema using the dbml_to_ucode tool.`, projectType
 	client := &http.Client{Timeout: 300 * time.Second}
 	resp, err := client.Do(req)
 	if err != nil {
-		return fmt.Errorf("request failed: %w", err)
+		return "", fmt.Errorf("request failed: %w", err)
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	respByte, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
 	}
 
-	return nil
+	if resp.StatusCode != http.StatusOK {
+		return string(respByte), fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+
+	return string(respByte), nil
 }
