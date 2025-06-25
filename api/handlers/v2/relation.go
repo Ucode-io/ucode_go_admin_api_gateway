@@ -337,11 +337,12 @@ func (h *HandlerV2) GetAllRelations(c *gin.Context) {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Relation().GetAll(
 			c.Request.Context(), &obs.GetAllRelationsRequest{
-				Limit:     int32(limit),
-				Offset:    int32(offset),
-				TableSlug: c.DefaultQuery("table_slug", ""),
-				TableId:   c.DefaultQuery("table_id", ""),
-				ProjectId: resource.ResourceEnvironmentId,
+				Limit:          int32(limit),
+				Offset:         int32(offset),
+				TableSlug:      c.DefaultQuery("table_slug", ""),
+				TableId:        c.DefaultQuery("table_id", ""),
+				ProjectId:      resource.ResourceEnvironmentId,
+				DisableTableTo: c.DefaultQuery("disable_table_to", "false") == "true",
 			},
 		)
 
@@ -354,11 +355,12 @@ func (h *HandlerV2) GetAllRelations(c *gin.Context) {
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().Relation().GetAll(
 			c.Request.Context(), &nb.GetAllRelationsRequest{
-				Limit:     int32(limit),
-				Offset:    int32(offset),
-				TableSlug: c.DefaultQuery("table_slug", ""),
-				TableId:   c.DefaultQuery("table_id", ""),
-				ProjectId: resource.ResourceEnvironmentId,
+				Limit:          int32(limit),
+				Offset:         int32(offset),
+				TableSlug:      c.DefaultQuery("table_slug", ""),
+				TableId:        c.DefaultQuery("table_id", ""),
+				ProjectId:      resource.ResourceEnvironmentId,
+				DisableTableTo: c.DefaultQuery("disable_table_to", "false") == "true",
 			},
 		)
 
