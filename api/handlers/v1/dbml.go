@@ -28,7 +28,8 @@ var (
 )
 
 type DbmlToUcodeRequest struct {
-	Dbml string `json:"dbml"`
+	Dbml    string            `json:"dbml"`
+	Options map[string]string `json:"options"`
 }
 
 func (h *HandlerV1) DbmlToUcode(c *gin.Context) {

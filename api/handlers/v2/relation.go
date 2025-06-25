@@ -289,7 +289,10 @@ func (h *HandlerV2) CreateRelation(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) GetAllRelations(c *gin.Context) {
-	var resp *obs.GetAllRelationsResponse
+	var (
+		resp      *obs.GetAllRelationsResponse
+		tableSlug = c.Param("collection")
+	)
 
 	offset, err := h.getOffsetParam(c)
 	if err != nil {
@@ -337,11 +340,12 @@ func (h *HandlerV2) GetAllRelations(c *gin.Context) {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Relation().GetAll(
 			c.Request.Context(), &obs.GetAllRelationsRequest{
-				Limit:     int32(limit),
-				Offset:    int32(offset),
-				TableSlug: c.DefaultQuery("table_slug", ""),
-				TableId:   c.DefaultQuery("table_id", ""),
-				ProjectId: resource.ResourceEnvironmentId,
+				Limit:          int32(limit),
+				Offset:         int32(offset),
+				TableSlug:      tableSlug,
+				TableId:        c.DefaultQuery("table_id", ""),
+				ProjectId:      resource.ResourceEnvironmentId,
+				DisableTableTo: c.DefaultQuery("disable_table_to", "false") == "true",
 			},
 		)
 
@@ -354,11 +358,12 @@ func (h *HandlerV2) GetAllRelations(c *gin.Context) {
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().Relation().GetAll(
 			c.Request.Context(), &nb.GetAllRelationsRequest{
-				Limit:     int32(limit),
-				Offset:    int32(offset),
-				TableSlug: c.DefaultQuery("table_slug", ""),
-				TableId:   c.DefaultQuery("table_id", ""),
-				ProjectId: resource.ResourceEnvironmentId,
+				Limit:          int32(limit),
+				Offset:         int32(offset),
+				TableSlug:      tableSlug,
+				TableId:        c.DefaultQuery("table_id", ""),
+				ProjectId:      resource.ResourceEnvironmentId,
+				DisableTableTo: c.DefaultQuery("disable_table_to", "false") == "true",
 			},
 		)
 
