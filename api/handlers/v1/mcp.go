@@ -97,7 +97,8 @@ func sendAnthropicRequest(projectType, managementSystem, industry, projectId, en
 		Messages: []Message{
 			{
 				Role: "user",
-				Content: fmt.Sprintf(`Task: Generate a DBML schema for an %s %s tailored for the %s industry, using PostgreSQL.
+				Content: fmt.Sprintf(`
+Task: Generate a DBML schema for an %s %s tailored for the %s industry, using PostgreSQL.
 
 📌 Requirements:
  • Include the industry specific functional areas:
@@ -107,7 +108,7 @@ func sendAnthropicRequest(projectType, managementSystem, industry, projectId, en
  • Optional: use camelCase or snake_case consistently if preferred
  • Don't add any indexes 
  • Show references only in the format: Ref fk_name:table1.column1 < table2.column2. Do not include quotes or any additional options like [delete: cascade].
- • Don't incluede any quotes
+ • Don't include any quotes
 
 🛠️ Style:
  • Use descriptive field names and comments where needed

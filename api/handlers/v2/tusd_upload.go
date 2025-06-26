@@ -3,10 +3,6 @@ package v2
 import (
 	"log"
 
-	//"ucode/ucode_go_api_gateway/api/models"
-
-	_ "ucode/ucode_go_api_gateway/api/status_http"
-
 	"github.com/aws/aws-sdk-go/aws"
 	awscredentials "github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
