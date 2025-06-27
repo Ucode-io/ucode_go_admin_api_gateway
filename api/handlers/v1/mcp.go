@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -17,9 +18,9 @@ import (
 )
 
 type MCPRequest struct {
-	ProjectType      string `json:"project_type"`
-	ManagementSystem string `json:"management_system"`
-	Industry         string `json:"industry"`
+	ProjectType      string   `json:"project_type"`
+	ManagementSystem []string `json:"management_system"`
+	Industry         string   `json:"industry"`
 }
 
 type Message struct {
@@ -77,7 +78,7 @@ func (h *HandlerV1) MCPCall(c *gin.Context) {
 
 	apiKey := apiKeys.GetData()[0].GetAppId()
 
-	resp, err := sendAnthropicRequest(req.ProjectType, req.ManagementSystem, "IT", projectId.(string), environmentId.(string), apiKey)
+	resp, err := sendAnthropicRequest(req.ProjectType, "IT", projectId.(string), environmentId.(string), apiKey, req.ManagementSystem)
 	fmt.Println("************ MCP Response ************", resp)
 	if err != nil {
 		h.handleResponse(c, status_http.InternalServerError, fmt.Sprintf("Your request for %s %s could not be processed.", req.ProjectType, req.ManagementSystem))
@@ -87,7 +88,7 @@ func (h *HandlerV1) MCPCall(c *gin.Context) {
 	h.handleResponse(c, status_http.OK, fmt.Sprintf("Your request for %s %s has been successfully processed.", req.ProjectType, req.ManagementSystem))
 }
 
-func sendAnthropicRequest(projectType, managementSystem, industry, projectId, envId, apiKey string) (string, error) {
+func sendAnthropicRequest(projectType, industry, projectId, envId, apiKey string, managementSystems []string) (string, error) {
 	url := config.ANTHROPIC_BASE_API_URL
 
 	// Construct the request body
@@ -120,7 +121,7 @@ Task: Generate a DBML schema for an %s %s tailored for the %s industry, using Po
 5. Execute the new DBML schema using the dbml_to_ucode tool:
    Use X-API-KEY = %s  
 ⚠️ Attempt the operation **once only** — do not retry on failure.
-`, projectType, managementSystem, industry, projectId, envId, apiKey),
+`, projectType, strings.Join(managementSystems, "/"), industry, projectId, envId, apiKey),
 			},
 		},
 		MCPServer: []MCPServer{
