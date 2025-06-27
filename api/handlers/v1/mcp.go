@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -17,9 +18,9 @@ import (
 )
 
 type MCPRequest struct {
-	ProjectType      string `json:"project_type"`
-	ManagementSystem string `json:"management_system"`
-	Industry         string `json:"industry"`
+	ProjectType      string   `json:"project_type"`
+	ManagementSystem []string `json:"management_system"`
+	Industry         string   `json:"industry"`
 }
 
 type Message struct {
@@ -87,7 +88,7 @@ func (h *HandlerV1) MCPCall(c *gin.Context) {
 	h.handleResponse(c, status_http.OK, fmt.Sprintf("Your request for %s %s has been successfully processed.", req.ProjectType, req.ManagementSystem))
 }
 
-func sendAnthropicRequest(projectType, industry, projectId, envId, apiKey string, managementSystems string) (string, error) {
+func sendAnthropicRequest(projectType, industry, projectId, envId, apiKey string, managementSystems []string) (string, error) {
 	url := config.ANTHROPIC_BASE_API_URL
 
 	// Construct the request body
@@ -117,7 +118,7 @@ func sendAnthropicRequest(projectType, industry, projectId, envId, apiKey string
 5. Execute the new DBML schema using the dbml_to_ucode tool:
    Use X-API-KEY = %s  
 ⚠️ Attempt any operation **once only** — do not retry on failure. If the dbml_to_ucode tool returns an error, **end the operation immediately**.
-`, projectId, envId, projectType, managementSystems, industry, apiKey),
+`, projectId, envId, projectType, strings.Join(managementSystems, "/"), industry, apiKey),
 			},
 		},
 		MCPServer: []MCPServer{
