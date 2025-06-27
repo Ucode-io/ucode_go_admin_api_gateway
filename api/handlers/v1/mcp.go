@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
 	"time"
 
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -18,9 +17,9 @@ import (
 )
 
 type MCPRequest struct {
-	ProjectType      string   `json:"project_type"`
-	ManagementSystem []string `json:"management_system"`
-	Industry         string   `json:"industry"`
+	ProjectType      string `json:"project_type"`
+	ManagementSystem string `json:"management_system"`
+	Industry         string `json:"industry"`
 }
 
 type Message struct {
@@ -88,7 +87,7 @@ func (h *HandlerV1) MCPCall(c *gin.Context) {
 	h.handleResponse(c, status_http.OK, fmt.Sprintf("Your request for %s %s has been successfully processed.", req.ProjectType, req.ManagementSystem))
 }
 
-func sendAnthropicRequest(projectType, industry, projectId, envId, apiKey string, managementSystems []string) (string, error) {
+func sendAnthropicRequest(projectType, industry, projectId, envId, apiKey string, managementSystems string) (string, error) {
 	url := config.ANTHROPIC_BASE_API_URL
 
 	// Construct the request body
@@ -99,8 +98,8 @@ func sendAnthropicRequest(projectType, industry, projectId, envId, apiKey string
 			{
 				Role: "user",
 				Content: fmt.Sprintf(`
-Task: Generate a DBML schema for an %s %s tailored for the %s industry, using PostgreSQL.
-
+1. Retrieve the current DBML schema using: project-id = %s  environment-id = %s
+2. Generate a DBML schema for an %s %s tailored for the %s industry, using PostgreSQL. **excluding all existing tables from the current schema**.
 📌 Requirements:
  • Include the industry specific functional areas:
  • Do NOT include Users or Roles tables.
@@ -113,15 +112,12 @@ Task: Generate a DBML schema for an %s %s tailored for the %s industry, using Po
  • Do not include comments anywhere in the schema.
  • Follow relational design principles and ensure consistency with systems like ProjectManagement, Payroll, and CRM.
 
-🔄 Steps:
-1. Retrieve the current DBML schema using: project-id = %s  environment-id = %s
-2. Generate a new DBML schema excluding all existing tables from the current schema.
 3. Organize the new tables into **menus** by their functional purpose.
 4. Provide a view_fields JSON that maps each table to its most important column: Example: { "customer": "name" }
 5. Execute the new DBML schema using the dbml_to_ucode tool:
    Use X-API-KEY = %s  
-⚠️ Attempt the operation **once only** — do not retry on failure.
-`, projectType, strings.Join(managementSystems, "/"), industry, projectId, envId, apiKey),
+⚠️ Attempt any operation **once only** — do not retry on failure. If the dbml_to_ucode tool returns an error, **end the operation immediately**.
+`, projectId, envId, projectType, managementSystems, industry, apiKey),
 			},
 		},
 		MCPServer: []MCPServer{
