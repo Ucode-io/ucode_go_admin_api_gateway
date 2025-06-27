@@ -102,22 +102,25 @@ Task: Generate a DBML schema for an %s %s tailored for the %s industry, using Po
 
 📌 Requirements:
  • Include the industry specific functional areas:
- • Don't add Users & Roles tables
- • Use proper ref: keys for relations
+ • Do NOT include Users or Roles tables.
+ • Use proper Ref definitions for relationships, in this format: Ref fk_name: table1.column1 < table2.column2
  • For fields like status or type, use realistic Enum definitions in proper DBML syntax. Example: Enum "tax_type" { "Fixed" "Percentage" }. Do not use comments or inline values. Use separate Enum blocks with clearly defined, realistic values.
  • Optional: use camelCase or snake_case consistently if preferred
- • Don't add any indexes 
- • Show references only in the format: Ref fk_name:table1.column1 < table2.column2. Do not include quotes or any additional options like [delete: cascade].
- • Don't include any quotes
+ • Do not include indexes 
+ • Do not include quotes, additional options (e.g., [delete: cascade]) and default values.
+ • Use descriptive field names and don't use comments
+ • Do not include comments anywhere in the schema.
+ • Follow relational design principles and ensure consistency with systems like ProjectManagement, Payroll, and CRM.
 
-🛠️ Style:
- • Use descriptive field names and comments where needed
- • Follow the design principles of relational databases
- • Ensure consistency with other systems like ProjectManagement, Payroll, and CRM
-
-Get the current DBML schema for the project with project-id = %s and environment-id = %s.
-Then, prepare a new DBML schema that excludes all existing tables from the current schema.
-Finally, execute the new DBML schema using the dbml_to_ucode tool. X-API-KEY = %s. Attempt the operation once. If it fails, do not retry.`, projectType, managementSystem, industry, projectId, envId, apiKey),
+🔄 Steps:
+1. Retrieve the current DBML schema using: project-id = %s  environment-id = %s
+2. Generate a new DBML schema excluding all existing tables from the current schema.
+3. Organize the new tables into **menus** by their functional purpose.
+4. Provide a view_fields JSON that maps each table to its most important column: Example: { "customer": "name" }
+5. Execute the new DBML schema using the dbml_to_ucode tool:
+   Use X-API-KEY = %s  
+⚠️ Attempt the operation **once only** — do not retry on failure.
+`, projectType, managementSystem, industry, projectId, envId, apiKey),
 			},
 		},
 		MCPServer: []MCPServer{

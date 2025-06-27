@@ -31,7 +31,7 @@ var (
 
 type DbmlToUcodeRequest struct {
 	Dbml    string              `json:"dbml"`
-	Options map[string]string   `json:"options"`
+	Options map[string]string   `json:"view_fields"`
 	Menus   map[string][]string `json:"menus"`
 }
 
