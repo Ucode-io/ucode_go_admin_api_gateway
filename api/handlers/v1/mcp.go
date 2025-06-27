@@ -104,7 +104,7 @@ func sendAnthropicRequest(projectType, industry, projectId, envId, apiKey string
  • Include the industry specific functional areas:
  • Do NOT include Users or Roles tables.
  • Use proper Ref definitions for relationships, in this format: Ref fk_name: table1.column1 < table2.column2
- • For fields like status or type, use realistic Enum definitions in proper DBML syntax. Example: Enum "tax_type" { "Fixed" "Percentage" }. Do not use comments or inline values. Use separate Enum blocks with clearly defined, realistic values.
+ • For fields like status or type, use realistic Enum definitions in proper DBML syntax. Example: Enum "tax_type" { "Fixed" "Percentage" }. Use separate Enum blocks with clearly defined, realistic values and wrap all enum values in double quotes to ensure compatibility.
  • Optional: use camelCase or snake_case consistently if preferred
  • Do not include indexes 
  • Do not include quotes, additional options (e.g., [delete: cascade]) and default values.
