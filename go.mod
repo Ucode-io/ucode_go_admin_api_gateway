@@ -25,6 +25,7 @@ require (
 require (
 	github.com/aws/aws-sdk-go v1.55.5
 	github.com/baxromumarov/ucode-sdk v0.0.3
+	github.com/chai2010/webp v1.4.0
 	github.com/eclipse/paho.mqtt.golang v1.5.0
 	github.com/go-git/go-git/v5 v5.12.0
 	github.com/go-redis/redis/v8 v8.11.5
