@@ -112,6 +112,9 @@ func (h *HandlerV1) MCPCall(c *gin.Context) {
 `, projectId.(string), environmentId.(string), req.ProjectType, strings.Join(req.ManagementSystem, "/"), "IT", apiKey)
 	case "table":
 		content = req.Prompt
+		content += fmt.Sprintf(`
+			x-api-key = %s
+		`, apiKey)
 	}
 
 	resp, err := sendAnthropicRequest(content)
