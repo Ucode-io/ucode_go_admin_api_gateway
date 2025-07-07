@@ -1393,4 +1393,6 @@ func (h *HandlerV1) UpdateTableByMCP(c *gin.Context) {
 			}
 		}
 	}
+
+	h.handleResponse(c, status_http.OK, "Table updated successfully")
 }
