@@ -21,6 +21,8 @@ type MCPRequest struct {
 	ProjectType      string   `json:"project_type"`
 	ManagementSystem []string `json:"management_system"`
 	Industry         string   `json:"industry"`
+	Method           string   `json:"method"`
+	Prompt           string   `json:"prompt"`
 }
 
 type Message struct {
@@ -42,7 +44,10 @@ type RequestBody struct {
 }
 
 func (h *HandlerV1) MCPCall(c *gin.Context) {
-	var req MCPRequest
+	var (
+		req     MCPRequest
+		content string
+	)
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
@@ -78,27 +83,13 @@ func (h *HandlerV1) MCPCall(c *gin.Context) {
 
 	apiKey := apiKeys.GetData()[0].GetAppId()
 
-	resp, err := sendAnthropicRequest(req.ProjectType, "IT", projectId.(string), environmentId.(string), apiKey, req.ManagementSystem)
-	fmt.Println("************ MCP Response ************", resp)
-	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, fmt.Sprintf("Your request for %s %s could not be processed.", req.ProjectType, req.ManagementSystem))
-		return
+	if req.Method == "" {
+		req.Method = "project"
 	}
 
-	h.handleResponse(c, status_http.OK, fmt.Sprintf("Your request for %s %s has been successfully processed.", req.ProjectType, req.ManagementSystem))
-}
-
-func sendAnthropicRequest(projectType, industry, projectId, envId, apiKey string, managementSystems []string) (string, error) {
-	url := config.ANTHROPIC_BASE_API_URL
-
-	// Construct the request body
-	body := RequestBody{
-		Model:     config.CLAUDE_MODEL,
-		MaxTokens: config.MAX_TOKENS,
-		Messages: []Message{
-			{
-				Role: "user",
-				Content: fmt.Sprintf(`
+	switch req.Method {
+	case "project":
+		content = fmt.Sprintf(`
 1. Retrieve the current DBML schema using: project-id = %s  environment-id = %s
 2. Generate a DBML schema for an %s %s tailored for the %s industry, using PostgreSQL. **excluding all existing tables from the current schema**.
 📌 Requirements:
@@ -118,7 +109,32 @@ func sendAnthropicRequest(projectType, industry, projectId, envId, apiKey string
 5. Execute the new DBML schema using the dbml_to_ucode tool:
    Use X-API-KEY = %s  
 ⚠️ Attempt any operation **once only** — do not retry on failure. If the dbml_to_ucode tool returns an error, **end the operation immediately**.
-`, projectId, envId, projectType, strings.Join(managementSystems, "/"), industry, apiKey),
+`, projectId.(string), environmentId.(string), req.ProjectType, strings.Join(req.ManagementSystem, "/"), "IT", apiKey)
+	case "table":
+		content = req.Prompt
+	}
+
+	resp, err := sendAnthropicRequest(content)
+	fmt.Println("************ MCP Response ************", resp)
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, fmt.Sprintf("Your request for %s %s could not be processed.", req.ProjectType, req.ManagementSystem))
+		return
+	}
+
+	h.handleResponse(c, status_http.OK, fmt.Sprintf("Your request for %s %s has been successfully processed.", req.ProjectType, req.ManagementSystem))
+}
+
+func sendAnthropicRequest(content string) (string, error) {
+	url := config.ANTHROPIC_BASE_API_URL
+
+	// Construct the request body
+	body := RequestBody{
+		Model:     config.CLAUDE_MODEL,
+		MaxTokens: config.MAX_TOKENS,
+		Messages: []Message{
+			{
+				Role:    "user",
+				Content: content,
 			},
 		},
 		MCPServer: []MCPServer{
