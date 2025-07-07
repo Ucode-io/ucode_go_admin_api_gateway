@@ -156,7 +156,7 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 
 		file.File.Header["Content-Type"][0] = "image/" + format
 		file.File.Filename = strings.TrimSuffix(file.File.Filename, filepath.Ext(file.File.Filename)) + "." + format
-	}
+ 	}
 
 	minioClient, err := minio.New(h.baseConf.MinioEndpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(h.baseConf.MinioAccessKeyID, h.baseConf.MinioSecretAccessKey, ""),
