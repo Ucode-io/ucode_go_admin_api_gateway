@@ -23,9 +23,9 @@ require (
 )
 
 require (
+	github.com/HugoSmits86/nativewebp v1.2.0
 	github.com/aws/aws-sdk-go v1.55.5
 	github.com/baxromumarov/ucode-sdk v0.0.3
-	github.com/chai2010/webp v1.4.0
 	github.com/eclipse/paho.mqtt.golang v1.5.0
 	github.com/go-git/go-git/v5 v5.12.0
 	github.com/go-redis/redis/v8 v8.11.5
@@ -108,6 +108,7 @@ require (
 	go.uber.org/multierr v1.6.0 // indirect
 	golang.org/x/arch v0.16.0 // indirect
 	golang.org/x/crypto v0.37.0 // indirect
+	golang.org/x/image v0.24.0 // indirect
 	golang.org/x/mod v0.19.0 // indirect
 	golang.org/x/net v0.38.0 // indirect
 	golang.org/x/sync v0.13.0 // indirect
