@@ -23,7 +23,7 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
-	"github.com/chai2010/webp"
+	"github.com/HugoSmits86/nativewebp"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/minio/minio-go/v7"
@@ -141,7 +141,7 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 
 		var buf bytes.Buffer
 		if format == "webp" {
-			err = webp.Encode(&buf, img, &webp.Options{Quality: 100})
+			err = nativewebp.Encode(&buf, img, nil)
 		} else {
 			err = png.Encode(&buf, img)
 		}
@@ -156,7 +156,7 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 
 		file.File.Header["Content-Type"][0] = "image/" + format
 		file.File.Filename = strings.TrimSuffix(file.File.Filename, filepath.Ext(file.File.Filename)) + "." + format
- 	}
+	}
 
 	minioClient, err := minio.New(h.baseConf.MinioEndpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(h.baseConf.MinioAccessKeyID, h.baseConf.MinioSecretAccessKey, ""),

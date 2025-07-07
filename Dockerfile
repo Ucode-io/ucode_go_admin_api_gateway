@@ -6,7 +6,7 @@ WORKDIR $GOPATH/src/gitlab.udevs.io/ucode/ucode_go_admin_api_gateway
 COPY . ./
 
 # installing depends and build
-RUN export CGO_ENABLED=1 && \
+RUN export CGO_ENABLED=0 && \
     export GOOS=linux && \
     go mod vendor && \
     make build && \
