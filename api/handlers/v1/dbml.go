@@ -336,7 +336,7 @@ func createMenu(c *gin.Context, req *createMenuReq) error {
 }
 
 func createField(c *gin.Context, req *createFieldReq) error {
-	ucodeType := getFieldType(req.fieldType)
+	ucodeType := GetFieldType(req.fieldType)
 
 	fieldReq := &obj.CreateFieldRequest{
 		Id:      req.id,
@@ -509,7 +509,7 @@ var FIELD_TYPES = map[string]string{
 	"polygon": "POLYGON",
 }
 
-func getFieldType(fieldType string) string {
+func GetFieldType(fieldType string) string {
 	if _, ok := enumMap[fieldType]; ok {
 		return "MULTISELECT"
 	}

@@ -41,3 +41,42 @@ type UpdateTableRequest struct {
 	OrderBy           bool           `json:"order_by"`
 	SoftDelete        bool           `json:"soft_delete"`
 }
+
+type TableMCP struct {
+	Fields    []Fields    `json:"fields"`
+	Relations []Relations `json:"relations"`
+}
+type Fields struct {
+	Label  string `json:"label,omitempty"`
+	Slug   string `json:"slug"`
+	Type   string `json:"type,omitempty"`
+	Action string `json:"action"`
+}
+type Relations struct {
+	TableTo string `json:"table_to"`
+	Type    string `json:"type,omitempty"`
+	LabelTo string `json:"label_to,omitempty"`
+	Action  string `json:"action"`
+}
+
+type TrackRequest struct {
+	Type   string      `json:"type"`
+	Source string      `json:"source"`
+	Args   []TableArgs `json:"args"`
+}
+type Table struct {
+	Name   string `json:"name"`
+	Schema string `json:"schema"`
+}
+type Tables struct {
+	Table  Table  `json:"table"`
+	Source string `json:"source"`
+}
+type Args struct {
+	AllowWarnings bool     `json:"allow_warnings"`
+	Tables        []Tables `json:"tables"`
+}
+type TableArgs struct {
+	Type string `json:"type"`
+	Args Args   `json:"args"`
+}

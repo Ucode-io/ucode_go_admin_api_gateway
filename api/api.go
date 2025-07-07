@@ -81,6 +81,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1.GET("/table/:table_id", h.V1.GetTableByID)
 		v1.POST("/table-details/:collection", h.V1.GetTableDetails)
 		v1.PUT("/table", h.V1.UpdateTable)
+		v1.PUT("/table/:collection/mcp", h.V1.UpdateTableByMCP)
 		v1.DELETE("/table/:table_id", h.V1.DeleteTable)
 
 		v1.POST("/connections", h.V1.CreateConnectionAndSchema)
@@ -611,15 +612,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 					v3Layout.POST("", h.V3.GetSingleLayout)
 					v3Layout.DELETE("/:id", h.V3.DeleteLayout)
 				}
-
-				// v3Fields := v3table.Group("/:collection/fields")
-				// {
-				// 	v3Fields.POST("", h.V3.CreateField)
-				// 	v3Fields.GET("", h.V3.GetAllFields)
-				// 	v3Fields.PUT("", h.V3.UpdateField)
-				// 	v3Fields.PUT("/update-search", h.V3.UpdateSearch)
-				// 	v3Fields.DELETE("/:id", h.V3.DeleteField)
-				// }
 
 				v3items := v3table.Group("/:collection/items")
 				{
