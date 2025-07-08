@@ -47,6 +47,7 @@ func (h *HandlerV1) MCPCall(c *gin.Context) {
 	var (
 		req     MCPRequest
 		content string
+		message string
 	)
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -110,22 +111,26 @@ func (h *HandlerV1) MCPCall(c *gin.Context) {
    Use X-API-KEY = %s  
 ⚠️ Attempt any operation **once only** — do not retry on failure. If the dbml_to_ucode tool returns an error, **end the operation immediately**.
 `, projectId.(string), environmentId.(string), req.ProjectType, strings.Join(req.ManagementSystem, "/"), "IT", apiKey)
+
+		message = fmt.Sprintf("Your request for %s %s has been successfully processed.", req.ProjectType, strings.Join(req.ManagementSystem, ", "))
 	case "table":
 		content = req.Prompt
 		content += fmt.Sprintf(`
 x-api-key = %s
 		`, apiKey)
+		message = "The table has been successfully updated."
+
 	}
 
 	fmt.Println("content", content)
 	resp, err := sendAnthropicRequest(content)
 	fmt.Println("************ MCP Response ************", resp)
 	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, fmt.Sprintf("Your request for %s %s could not be processed.", req.ProjectType, req.ManagementSystem))
+		h.handleResponse(c, status_http.InternalServerError, "Your request could not be processed.")
 		return
 	}
 
-	h.handleResponse(c, status_http.OK, fmt.Sprintf("Your request for %s %s has been successfully processed.", req.ProjectType, req.ManagementSystem))
+	h.handleResponse(c, status_http.OK, message)
 }
 
 func sendAnthropicRequest(content string) (string, error) {
