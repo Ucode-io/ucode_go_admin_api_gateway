@@ -113,10 +113,11 @@ func (h *HandlerV1) MCPCall(c *gin.Context) {
 	case "table":
 		content = req.Prompt
 		content += fmt.Sprintf(`
-			x-api-key = %s
+x-api-key = %s
 		`, apiKey)
 	}
 
+	fmt.Println("content", content)
 	resp, err := sendAnthropicRequest(content)
 	fmt.Println("************ MCP Response ************", resp)
 	if err != nil {

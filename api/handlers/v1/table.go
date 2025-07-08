@@ -1301,7 +1301,7 @@ func (h *HandlerV1) UpdateTableByMCP(c *gin.Context) {
 	case pb.ResourceType_POSTGRESQL:
 		for _, field := range request.Fields {
 			fieldType := GetFieldType(strings.ToLower(field.Type))
-			fmt.Println("Field Type:", fieldType)
+
 			switch field.Action {
 			case "create":
 				_, err = services.GoObjectBuilderService().Field().Create(
@@ -1324,6 +1324,24 @@ func (h *HandlerV1) UpdateTableByMCP(c *gin.Context) {
 				if err != nil {
 					continue
 				}
+			case "update":
+				_, err = services.GoObjectBuilderService().Field().Update(
+					c.Request.Context(),
+					&nb.Field{
+						Id:      field.Slug,
+						TableId: tableSlug,
+						Type:    fieldType,
+						Label:   formatString(field.Slug),
+						Attributes: &structpb.Struct{
+							Fields: map[string]*structpb.Value{
+								"label":    structpb.NewStringValue(formatString(field.Slug)),
+								"label_en": structpb.NewStringValue(formatString(field.Slug)),
+							},
+						},
+						ProjectId: resource.ResourceEnvironmentId,
+						EnvId:     resource.EnvironmentId,
+					},
+				)
 			case "delete":
 				_, err = services.GoObjectBuilderService().Field().Delete(
 					c.Request.Context(),
@@ -1339,6 +1357,14 @@ func (h *HandlerV1) UpdateTableByMCP(c *gin.Context) {
 		for _, relation := range request.Relations {
 			switch relation.Action {
 			case "create":
+				viewField, err := services.GoObjectBuilderService().Field().ObtainRandomOne(
+					c.Request.Context(),
+					&nb.ObtainRandomRequest{
+						TableSlug: tableSlug,
+						ProjectId: resource.ResourceEnvironmentId,
+						EnvId:     resource.EnvironmentId,
+					},
+				)
 				_, err = services.GoObjectBuilderService().Relation().Create(
 					c.Request.Context(),
 					&nb.CreateRelationRequest{
@@ -1357,7 +1383,7 @@ func (h *HandlerV1) UpdateTableByMCP(c *gin.Context) {
 						RelationToFieldId: uuid.NewString(),
 						ProjectId:         resource.ResourceEnvironmentId,
 						EnvId:             resource.EnvironmentId,
-						ViewFields:        []string{},
+						ViewFields:        []string{viewField.Id},
 					},
 				)
 				if err != nil {
