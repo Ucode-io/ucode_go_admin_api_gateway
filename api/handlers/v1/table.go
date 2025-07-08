@@ -1301,24 +1301,43 @@ func (h *HandlerV1) UpdateTableByMCP(c *gin.Context) {
 	case pb.ResourceType_POSTGRESQL:
 		for _, field := range request.Fields {
 			fieldType := GetFieldType(strings.ToLower(field.Type))
+			attributes := &structpb.Struct{
+				Fields: map[string]*structpb.Value{
+					"label":    structpb.NewStringValue(formatString(field.Slug)),
+					"label_en": structpb.NewStringValue(formatString(field.Slug)),
+				},
+			}
+
+			if fieldType == "MULTISELECT" {
+				options := make([]*structpb.Value, len(field.Enum))
+				for i, value := range field.Enum {
+					option, _ := structpb.NewStruct(map[string]any{
+						"value": value,
+						"icon":  "",
+						"color": "",
+						"label": value,
+					})
+					options[i] = structpb.NewStructValue(option)
+				}
+
+				attributes.Fields["options"] = structpb.NewListValue(&structpb.ListValue{
+					Values: options,
+				})
+			}
 
 			switch field.Action {
 			case "create":
 				_, err = services.GoObjectBuilderService().Field().Create(
 					c.Request.Context(),
 					&nb.CreateFieldRequest{
-						Id:      uuid.NewString(),
-						TableId: tableSlug,
-						Type:    fieldType,
-						Label:   formatString(field.Slug),
-						Slug:    field.Slug,
-						Attributes: &structpb.Struct{
-							Fields: map[string]*structpb.Value{
-								"label_en": structpb.NewStringValue(formatString(field.Slug)),
-							},
-						},
-						ProjectId: resource.ResourceEnvironmentId,
-						EnvId:     resource.EnvironmentId,
+						Id:         uuid.NewString(),
+						TableId:    tableSlug,
+						Type:       fieldType,
+						Label:      formatString(field.Slug),
+						Slug:       field.Slug,
+						Attributes: attributes,
+						ProjectId:  resource.ResourceEnvironmentId,
+						EnvId:      resource.EnvironmentId,
 					},
 				)
 				if err != nil {
@@ -1328,18 +1347,13 @@ func (h *HandlerV1) UpdateTableByMCP(c *gin.Context) {
 				_, err = services.GoObjectBuilderService().Field().Update(
 					c.Request.Context(),
 					&nb.Field{
-						Id:      field.Slug,
-						TableId: tableSlug,
-						Type:    fieldType,
-						Label:   formatString(field.Slug),
-						Attributes: &structpb.Struct{
-							Fields: map[string]*structpb.Value{
-								"label":    structpb.NewStringValue(formatString(field.Slug)),
-								"label_en": structpb.NewStringValue(formatString(field.Slug)),
-							},
-						},
-						ProjectId: resource.ResourceEnvironmentId,
-						EnvId:     resource.EnvironmentId,
+						Id:         field.Slug,
+						TableId:    tableSlug,
+						Type:       fieldType,
+						Label:      formatString(field.Slug),
+						Attributes: attributes,
+						ProjectId:  resource.ResourceEnvironmentId,
+						EnvId:      resource.EnvironmentId,
 					},
 				)
 			case "delete":

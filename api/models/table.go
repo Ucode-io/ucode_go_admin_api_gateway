@@ -47,10 +47,11 @@ type TableMCP struct {
 	Relations []Relations `json:"relations"`
 }
 type Fields struct {
-	Label  string `json:"label,omitempty"`
-	Slug   string `json:"slug"`
-	Type   string `json:"type,omitempty"`
-	Action string `json:"action"`
+	Label  string   `json:"label,omitempty"`
+	Slug   string   `json:"slug"`
+	Type   string   `json:"type,omitempty"`
+	Action string   `json:"action"`
+	Enum   []string `json:"enum"`
 }
 type Relations struct {
 	TableTo string `json:"table_to"`

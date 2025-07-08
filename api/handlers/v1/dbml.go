@@ -471,7 +471,6 @@ var FIELD_TYPES = map[string]string{
 	"character varying": "SINGLE_LINE",
 	"varchar":           "SINGLE_LINE",
 	"text":              "MULTI_LINE",
-	"enum":              "SINGLE_LINE",
 	"bytea":             "SINGLE_LINE",
 	"citext":            "SINGLE_LINE",
 
@@ -507,6 +506,8 @@ var FIELD_TYPES = map[string]string{
 
 	"point":   "MAP",
 	"polygon": "POLYGON",
+
+	"enum": "MULTISELECT",
 }
 
 func GetFieldType(fieldType string) string {
