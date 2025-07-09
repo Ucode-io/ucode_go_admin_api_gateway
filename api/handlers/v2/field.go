@@ -548,7 +548,10 @@ func (h *HandlerV2) UpdateSearch(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) DeleteField(c *gin.Context) {
-	fieldID := c.Param("id")
+	var (
+		fieldID   = c.Param("id")
+		tableSlug = c.Param("collection")
+	)
 
 	if !util.IsValidUUID(fieldID) {
 		h.handleResponse(c, status_http.InvalidArgument, "field id is an invalid uuid")
@@ -595,7 +598,7 @@ func (h *HandlerV2) DeleteField(c *gin.Context) {
 			ActionSource: "FIELD",
 			ActionType:   "DELETE FIELD",
 			UserInfo:     cast.ToString(userId),
-			TableSlug:    c.Param("collection"),
+			TableSlug:    tableSlug,
 		}
 	)
 
@@ -656,6 +659,7 @@ func (h *HandlerV2) DeleteField(c *gin.Context) {
 			c.Request.Context(), &nb.FieldPrimaryKey{
 				Id:        fieldID,
 				ProjectId: resource.ResourceEnvironmentId,
+				TableSlug: tableSlug,
 			},
 		)
 		if err != nil {
