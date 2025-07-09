@@ -10,6 +10,7 @@ import (
 	"time"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
+	"ucode/ucode_go_api_gateway/config"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
@@ -439,6 +440,7 @@ func (h *HandlerV2) GetSingleItem(c *gin.Context) {
 	var (
 		object     models.CommonMessage
 		statusHttp = status_http.GrpcStatusToHTTP["Ok"]
+		tableSlug  = c.Param("collection")
 	)
 
 	object.Data = make(map[string]any)
@@ -487,12 +489,14 @@ func (h *HandlerV2) GetSingleItem(c *gin.Context) {
 		return
 	}
 
+	redisKey := base64.StdEncoding.EncodeToString(fmt.Appendf(nil, "%s-%s-%s", resource.ResourceEnvironmentId, tableSlug, objectID))
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().GetSingle(
 			c.Request.Context(),
 			&obs.CommonMessage{
-				TableSlug: c.Param("collection"),
+				TableSlug: tableSlug,
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -511,9 +515,24 @@ func (h *HandlerV2) GetSingleItem(c *gin.Context) {
 		statusHttp.CustomMessage = resp.GetCustomMessage()
 		h.handleResponse(c, statusHttp, resp)
 	case pb.ResourceType_POSTGRESQL:
+		redisResp, err := h.redis.Get(c.Request.Context(), redisKey, projectId.(string), resource.NodeType)
+		if err == nil {
+			var (
+				resp = make(map[string]any)
+				m    = make(map[string]any)
+			)
+
+			if err = json.Unmarshal([]byte(redisResp), &m); err != nil {
+				h.log.Error("Error while unmarshal redis", logger.Error(err))
+			} else {
+				resp["data"] = m
+				h.handleResponse(c, status_http.OK, resp)
+				return
+			}
+		}
 		resp, err := services.GoObjectBuilderService().Items().GetSingle(
 			c.Request.Context(), &nb.CommonMessage{
-				TableSlug: c.Param("collection"),
+				TableSlug: tableSlug,
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -521,6 +540,14 @@ func (h *HandlerV2) GetSingleItem(c *gin.Context) {
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
+		}
+
+		if resp.IsCached {
+			jsonData, _ := resp.GetData().MarshalJSON()
+			err = h.redis.SetX(c.Request.Context(), redisKey, string(jsonData), config.REDIS_KEY_TIMEOUT, projectId.(string), resource.NodeType)
+			if err != nil {
+				h.log.Error("Error while setting redis", logger.Error(err))
+			}
 		}
 
 		statusHttp.CustomMessage = resp.GetCustomMessage()
