@@ -207,7 +207,7 @@ affinity:
     requiredDuringSchedulingIgnoredDuringExecution:
       nodeSelectorTerms:
         - matchExpressions:
-            - key: kubernetes.io/code-server
+            - key: kubernetes.io/ucode-test
               operator: In
               values:
                 - "true"
