@@ -576,6 +576,7 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 		statusHttp    = status_http.GrpcStatusToHTTP["Ok"]
 		queryData     string
 		objectRequest = make(map[string]any)
+		tableSlug     = c.Param("collection")
 	)
 
 	queryParams := c.Request.URL.Query()
@@ -651,11 +652,13 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 
+	redisKey := base64.StdEncoding.EncodeToString(fmt.Appendf(nil, "%s-%s-%s", tableSlug, structData.String(), resource.ResourceEnvironmentId))
+
 	if viewId, ok := objectRequest["builder_service_view_id"].(string); ok {
 		if util.IsValidUUID(viewId) {
 			switch resource.ResourceType {
 			case pb.ResourceType_MONGODB:
-				redisResp, err := h.redis.Get(c.Request.Context(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("collection"), structData.String(), resource.ResourceEnvironmentId))), resource.ProjectId, resource.NodeType)
+				redisResp, err := h.redis.Get(c.Request.Context(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", tableSlug, structData.String(), resource.ResourceEnvironmentId))), resource.ProjectId, resource.NodeType)
 				if err == nil {
 					resp := make(map[string]any)
 					m := make(map[string]any)
@@ -672,7 +675,7 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 				resp, err = service.GroupByColumns(
 					c.Request.Context(),
 					&obs.CommonMessage{
-						TableSlug: c.Param("collection"),
+						TableSlug: tableSlug,
 						Data:      structData,
 						ProjectId: resource.ResourceEnvironmentId,
 					},
@@ -681,7 +684,7 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 				if err == nil {
 					if resp.IsCached {
 						jsonData, _ := resp.GetData().MarshalJSON()
-						err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("collection"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, resource.ProjectId, resource.NodeType)
+						err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", tableSlug, structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, resource.ProjectId, resource.NodeType)
 						if err != nil {
 							h.log.Error("Error while setting redis", logger.Error(err))
 						}
@@ -701,7 +704,7 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 	} else {
 		switch resource.ResourceType {
 		case pb.ResourceType_MONGODB:
-			redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("collection"), structData.String(), resource.ResourceEnvironmentId))), resource.ProjectId, resource.NodeType)
+			redisResp, err := h.redis.Get(context.Background(), redisKey, resource.ProjectId, resource.NodeType)
 			if err == nil {
 				var (
 					resp = make(map[string]any)
@@ -720,7 +723,7 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 			resp, err = services.GetBuilderServiceByType(resource.NodeType).ItemsService().GetList(
 				c.Request.Context(),
 				&obs.CommonMessage{
-					TableSlug: c.Param("collection"),
+					TableSlug: tableSlug,
 					Data:      structData,
 					ProjectId: resource.ResourceEnvironmentId,
 				},
@@ -729,7 +732,7 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 			if err == nil {
 				if resp.IsCached {
 					jsonData, _ := resp.GetData().MarshalJSON()
-					err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("collection"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, resource.ProjectId, resource.NodeType)
+					err = h.redis.SetX(context.Background(), redisKey, string(jsonData), config.REDIS_KEY_TIMEOUT, resource.ProjectId, resource.NodeType)
 					if err != nil {
 						h.log.Error("Error while setting redis", logger.Error(err))
 					}
@@ -741,7 +744,7 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 				return
 			}
 		case pb.ResourceType_POSTGRESQL:
-			redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("collection"), structData.String(), resource.ResourceEnvironmentId))), resource.ProjectId, resource.NodeType)
+			redisResp, err := h.redis.Get(context.Background(), redisKey, resource.ProjectId, resource.NodeType)
 			if err == nil {
 				var (
 					resp = make(map[string]any)
@@ -759,7 +762,7 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 
 			resp, err := services.GoObjectBuilderService().ObjectBuilder().GetList2(
 				c.Request.Context(), &nb.CommonMessage{
-					TableSlug: c.Param("collection"),
+					TableSlug: tableSlug,
 					Data:      structData,
 					ProjectId: resource.ResourceEnvironmentId,
 				},
@@ -768,7 +771,7 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 			if err == nil {
 				if resp.IsCached {
 					jsonData, _ := resp.GetData().MarshalJSON()
-					err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("collection"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, resource.ProjectId, resource.NodeType)
+					err = h.redis.SetX(context.Background(), redisKey, string(jsonData), config.REDIS_KEY_TIMEOUT, resource.ProjectId, resource.NodeType)
 					if err != nil {
 						h.log.Error("Error while setting redis", logger.Error(err))
 					}

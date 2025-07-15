@@ -3,9 +3,12 @@ package v1
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 	"unicode"
 
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -149,11 +152,21 @@ func (h *HandlerV1) DbmlToUcode(c *gin.Context) {
 	skipTypes := map[string]bool{"uuid": true, "uuid[]": true}
 
 	for key, tables := range req.Menus {
-		menuId := uuid.NewString()
+		var (
+			menuId = uuid.NewString()
+			icon   string
+		)
+
+		icon, err = smartSearch(formatString(key))
+		if err != nil {
+			icon = "folder-new.svg"
+		}
+
 		err = createMenu(c, &createMenuReq{
 			resourceCreds: resourceCreds,
 			id:            menuId,
 			label:         key,
+			icon:          icon,
 		})
 		if err != nil {
 			h.log.Error("Failed to create menu:", logger.Error(err))
@@ -170,10 +183,20 @@ func (h *HandlerV1) DbmlToUcode(c *gin.Context) {
 			continue
 		}
 
+		var (
+			icon string
+		)
+
+		icon, err = smartSearch(formatString(table.Name))
+		if err != nil {
+			icon = ""
+		}
+
 		tableId, err := createTable(c, &createTableReq{
 			resourceCreds: resourceCreds,
 			label:         table.Name,
 			menuId:        tableMenuM[table.Name],
+			icon:          icon,
 		})
 		if err != nil {
 			h.log.Error("Failed to create table:", logger.Error(err))
@@ -197,7 +220,6 @@ func (h *HandlerV1) DbmlToUcode(c *gin.Context) {
 					label:         field.Name,
 				})
 				if err != nil {
-					h.handleResponse(c, status_http.InternalServerError, err)
 					continue
 				}
 
@@ -214,7 +236,6 @@ func (h *HandlerV1) DbmlToUcode(c *gin.Context) {
 					viewFieldId:   tableFieldM[toParts[0]][req.Options[toParts[0]]],
 				})
 				if err != nil {
-					h.handleResponse(c, status_http.InternalServerError, err)
 					continue
 				}
 			}
@@ -234,7 +255,6 @@ func (h *HandlerV1) DbmlToUcode(c *gin.Context) {
 				viewFieldId:   tableFieldM[toParts[0]][req.Options[toParts[0]]],
 			})
 			if err != nil {
-				h.handleResponse(c, status_http.InternalServerError, err)
 				continue
 			}
 		}
@@ -256,6 +276,7 @@ func createTable(c *gin.Context, req *createTableReq) (string, error) {
 				"label_en": structpb.NewStringValue(formatString(req.label)),
 			},
 		},
+		Icon:      req.icon,
 		EnvId:     req.resourceCreds.environmentId,
 		ProjectId: req.resourceCreds.resourceEnvironmentId,
 	}
@@ -297,6 +318,7 @@ func createMenu(c *gin.Context, req *createMenuReq) error {
 		Label:    formatString(req.label),
 		Type:     "FOLDER",
 		ParentId: "c57eedc3-a954-4262-a0af-376c65b5a284",
+		Icon:     req.icon,
 		Attributes: &structpb.Struct{
 			Fields: map[string]*structpb.Value{
 				"label":    structpb.NewStringValue(formatString(formatString(req.label))),
@@ -444,12 +466,14 @@ type createTableReq struct {
 	resourceCreds resourceCreds
 	label         string
 	menuId        string
+	icon          string
 }
 
 type createMenuReq struct {
 	resourceCreds resourceCreds
 	id            string
 	label         string
+	icon          string
 }
 
 type createFieldReq struct {
@@ -532,4 +556,57 @@ func formatString(input string) string {
 	}
 
 	return string(runes)
+}
+
+type IconSearchResponse struct {
+	Icons []string `json:"icons"`
+}
+
+func searchIcons(query string) (string, error) {
+	// Encode query for URL
+	escapedQuery := url.QueryEscape(query)
+	searchURL := fmt.Sprintf("https://api.iconify.design/search?query=%s", escapedQuery)
+
+	// HTTP client
+	client := http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Get(searchURL)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	// Decode JSON
+	var result IconSearchResponse
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return "", err
+	}
+
+	if len(result.Icons) > 0 {
+		return fmt.Sprintf("https://api.iconify.design/%s.svg", result.Icons[0]), nil
+	}
+
+	return "", nil
+}
+
+func smartSearch(query string) (string, error) {
+	icon, err := searchIcons(query)
+	if err != nil {
+		return "", err
+	}
+	if icon != "" {
+		return icon, nil
+	}
+
+	words := strings.Split(query, "_")
+	for _, word := range words {
+		icon, err := searchIcons(word)
+		if err != nil {
+			continue
+		}
+		if icon != "" {
+			return icon, nil
+		}
+	}
+
+	return "", fmt.Errorf("no icons found")
 }
