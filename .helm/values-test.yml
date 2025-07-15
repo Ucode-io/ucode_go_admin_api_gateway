@@ -108,33 +108,33 @@ vault:
     VAULT_TOKEN: vault_token
     SECRETS_PATH: vault_path
 
-environment:
-  KUBECONFIG: /kubeconfig/config
-  GIT_SSH_COMMAND: "ssh -i /key/ssh-privatekey -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
-volumes:
-  enabled: true
-  hostpath:
-    enabled: true
-    name: code-server
-    path: /functions
-    mountPath: /functions
-    type: Directory
-  pvc:
-    enabled: false
-    existing_claim:
-    name: pvc
-    mountPath: /functions
-    size: 1G
-    class:
-    accessModes:
-      - ReadWriteMany
-  configMaps:
-    - name: code-server-kubeconfig
-      mountPath: /kubeconfig
-  secrets:
-    - name: ssh-key-secret
-      mountPath: /key
-      defaultMode: 256
+# environment:
+#   KUBECONFIG: /kubeconfig/config
+#   GIT_SSH_COMMAND: "ssh -i /key/ssh-privatekey -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
+# volumes:
+#   enabled: true
+#   hostpath:
+#     enabled: true
+#     name: code-server
+#     path: /functions
+#     mountPath: /functions
+#     type: Directory
+#   pvc:
+#     enabled: false
+#     existing_claim:
+#     name: pvc
+#     mountPath: /functions
+#     size: 1G
+#     class:
+#     accessModes:
+#       - ReadWriteMany
+#   configMaps:
+#     - name: code-server-kubeconfig
+#       mountPath: /kubeconfig
+#   secrets:
+#     - name: ssh-key-secret
+#       mountPath: /key
+#       defaultMode: 256
 
 service:
   type: ClusterIP
@@ -207,7 +207,7 @@ affinity:
     requiredDuringSchedulingIgnoredDuringExecution:
       nodeSelectorTerms:
         - matchExpressions:
-            - key: kubernetes.io/code-server
+            - key: kubernetes.io/ucode-test
               operator: In
               values:
                 - "true"
