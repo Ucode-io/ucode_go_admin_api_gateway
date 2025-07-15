@@ -1,9 +1,14 @@
 package v1
 
 import (
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 	"unicode"
 
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -28,17 +33,25 @@ var (
 )
 
 type DbmlToUcodeRequest struct {
-	Dbml    string            `json:"dbml"`
-	Options map[string]string `json:"options"`
+	Dbml    string              `json:"dbml"`
+	Options map[string]string   `json:"view_fields"`
+	Menus   map[string][]string `json:"menus"`
 }
 
 func (h *HandlerV1) DbmlToUcode(c *gin.Context) {
-	var req DbmlToUcodeRequest
+	var (
+		req         DbmlToUcodeRequest
+		tableFieldM = make(map[string]map[string]string)
+		tableMenuM  = make(map[string]string)
+	)
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
+
+	qqqqq, _ := json.Marshal(req)
+	fmt.Println("DbmlToUcode request:", string(qqqqq))
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -138,27 +151,55 @@ func (h *HandlerV1) DbmlToUcode(c *gin.Context) {
 		"deleted_at": true}
 	skipTypes := map[string]bool{"uuid": true, "uuid[]": true}
 
+	for key, tables := range req.Menus {
+		var (
+			menuId = uuid.NewString()
+			icon   string
+		)
+
+		icon, err = smartSearch(formatString(key))
+		if err != nil {
+			icon = "folder-new.svg"
+		}
+
+		err = createMenu(c, &createMenuReq{
+			resourceCreds: resourceCreds,
+			id:            menuId,
+			label:         key,
+			icon:          icon,
+		})
+		if err != nil {
+			h.log.Error("Failed to create menu:", logger.Error(err))
+			continue
+		}
+
+		for _, table := range tables {
+			tableMenuM[table] = menuId
+		}
+	}
+
 	for _, table := range dbml.Tables {
 		if skipTables[table.Name] {
 			continue
 		}
 
+		var (
+			icon string
+		)
+
+		icon, err = smartSearch(formatString(table.Name))
+		if err != nil {
+			icon = ""
+		}
+
 		tableId, err := createTable(c, &createTableReq{
 			resourceCreds: resourceCreds,
 			label:         table.Name,
+			menuId:        tableMenuM[table.Name],
+			icon:          icon,
 		})
 		if err != nil {
 			h.log.Error("Failed to create table:", logger.Error(err))
-			continue
-		}
-
-		err = createMenu(c, &createMenuReq{
-			resourceCreds: resourceCreds,
-			label:         table.Name,
-			tableId:       tableId,
-		})
-		if err != nil {
-			h.log.Error("Failed to create menu:", logger.Error(err))
 			continue
 		}
 
@@ -168,27 +209,34 @@ func (h *HandlerV1) DbmlToUcode(c *gin.Context) {
 				continue
 			}
 
+			fieldId := uuid.NewString()
+
 			if field.Settings.Ref.Type == 0 {
 				err := createField(c, &createFieldReq{
 					resourceCreds: resourceCreds,
+					id:            fieldId,
 					tableId:       tableId,
 					fieldType:     field.Type,
 					label:         field.Name,
 				})
 				if err != nil {
-					h.handleResponse(c, status_http.InternalServerError, err)
-					return
+					continue
 				}
+
+				if _, ok := tableFieldM[table.Name]; !ok {
+					tableFieldM[table.Name] = make(map[string]string)
+				}
+				tableFieldM[table.Name][field.Name] = fieldId
 			} else {
 				toParts := strings.Split(field.Settings.Ref.To, ".")
 				err := createRelation(c, &createRelationReq{
 					resourceCreds: resourceCreds,
 					tableFrom:     table.Name,
 					tableTo:       toParts[0],
+					viewFieldId:   tableFieldM[toParts[0]][req.Options[toParts[0]]],
 				})
 				if err != nil {
-					h.handleResponse(c, status_http.InternalServerError, err)
-					return
+					continue
 				}
 			}
 
@@ -204,10 +252,10 @@ func (h *HandlerV1) DbmlToUcode(c *gin.Context) {
 				resourceCreds: resourceCreds,
 				tableFrom:     fromParts[0],
 				tableTo:       toParts[0],
+				viewFieldId:   tableFieldM[toParts[0]][req.Options[toParts[0]]],
 			})
 			if err != nil {
-				h.handleResponse(c, status_http.InternalServerError, err)
-				return
+				continue
 			}
 		}
 	}
@@ -222,11 +270,13 @@ func createTable(c *gin.Context, req *createTableReq) (string, error) {
 		ShowInMenu: true,
 		ViewId:     uuid.NewString(),
 		LayoutId:   uuid.NewString(),
+		MenuId:     req.menuId,
 		Attributes: &structpb.Struct{
 			Fields: map[string]*structpb.Value{
 				"label_en": structpb.NewStringValue(formatString(req.label)),
 			},
 		},
+		Icon:      req.icon,
 		EnvId:     req.resourceCreds.environmentId,
 		ProjectId: req.resourceCreds.resourceEnvironmentId,
 	}
@@ -264,13 +314,15 @@ func createTable(c *gin.Context, req *createTableReq) (string, error) {
 
 func createMenu(c *gin.Context, req *createMenuReq) error {
 	menuReq := &obj.CreateMenuRequest{
-		Label:    req.label,
-		TableId:  req.tableId,
-		Type:     "TABLE",
+		Id:       req.id,
+		Label:    formatString(req.label),
+		Type:     "FOLDER",
 		ParentId: "c57eedc3-a954-4262-a0af-376c65b5a284",
+		Icon:     req.icon,
 		Attributes: &structpb.Struct{
 			Fields: map[string]*structpb.Value{
-				"label_en": structpb.NewStringValue(formatString(req.label)),
+				"label":    structpb.NewStringValue(formatString(formatString(req.label))),
+				"label_en": structpb.NewStringValue(formatString(formatString(req.label))),
 			},
 		},
 		ProjectId: req.resourceCreds.resourceEnvironmentId,
@@ -306,10 +358,10 @@ func createMenu(c *gin.Context, req *createMenuReq) error {
 }
 
 func createField(c *gin.Context, req *createFieldReq) error {
-	ucodeType := getFieldType(req.fieldType)
+	ucodeType := GetFieldType(req.fieldType)
 
 	fieldReq := &obj.CreateFieldRequest{
-		Id:      uuid.NewString(),
+		Id:      req.id,
 		TableId: req.tableId,
 		Type:    ucodeType,
 		Label:   formatString(req.label),
@@ -372,6 +424,7 @@ func createRelation(c *gin.Context, req *createRelationReq) error {
 		RelationToFieldId: uuid.NewString(),
 		ProjectId:         req.resourceCreds.resourceEnvironmentId,
 		EnvId:             req.resourceCreds.environmentId,
+		ViewFields:        []string{req.viewFieldId},
 	}
 
 	switch req.resourceCreds.resourceType {
@@ -412,16 +465,20 @@ type resourceCreds struct {
 type createTableReq struct {
 	resourceCreds resourceCreds
 	label         string
+	menuId        string
+	icon          string
 }
 
 type createMenuReq struct {
 	resourceCreds resourceCreds
+	id            string
 	label         string
-	tableId       string
+	icon          string
 }
 
 type createFieldReq struct {
 	resourceCreds resourceCreds
+	id            string
 	tableId       string
 	fieldType     string
 	label         string
@@ -431,13 +488,13 @@ type createRelationReq struct {
 	resourceCreds resourceCreds
 	tableFrom     string
 	tableTo       string
+	viewFieldId   string
 }
 
 var FIELD_TYPES = map[string]string{
 	"character varying": "SINGLE_LINE",
 	"varchar":           "SINGLE_LINE",
 	"text":              "MULTI_LINE",
-	"enum":              "SINGLE_LINE",
 	"bytea":             "SINGLE_LINE",
 	"citext":            "SINGLE_LINE",
 
@@ -473,9 +530,11 @@ var FIELD_TYPES = map[string]string{
 
 	"point":   "MAP",
 	"polygon": "POLYGON",
+
+	"enum": "MULTISELECT",
 }
 
-func getFieldType(fieldType string) string {
+func GetFieldType(fieldType string) string {
 	if _, ok := enumMap[fieldType]; ok {
 		return "MULTISELECT"
 	}
@@ -497,4 +556,57 @@ func formatString(input string) string {
 	}
 
 	return string(runes)
+}
+
+type IconSearchResponse struct {
+	Icons []string `json:"icons"`
+}
+
+func searchIcons(query string) (string, error) {
+	// Encode query for URL
+	escapedQuery := url.QueryEscape(query)
+	searchURL := fmt.Sprintf("https://api.iconify.design/search?query=%s", escapedQuery)
+
+	// HTTP client
+	client := http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Get(searchURL)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	// Decode JSON
+	var result IconSearchResponse
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return "", err
+	}
+
+	if len(result.Icons) > 0 {
+		return fmt.Sprintf("https://api.iconify.design/%s.svg", result.Icons[0]), nil
+	}
+
+	return "", nil
+}
+
+func smartSearch(query string) (string, error) {
+	icon, err := searchIcons(query)
+	if err != nil {
+		return "", err
+	}
+	if icon != "" {
+		return icon, nil
+	}
+
+	words := strings.Split(query, "_")
+	for _, word := range words {
+		icon, err := searchIcons(word)
+		if err != nil {
+			continue
+		}
+		if icon != "" {
+			return icon, nil
+		}
+	}
+
+	return "", fmt.Errorf("no icons found")
 }

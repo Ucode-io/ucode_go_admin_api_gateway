@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -17,9 +18,11 @@ import (
 )
 
 type MCPRequest struct {
-	ProjectType      string `json:"project_type"`
-	ManagementSystem string `json:"management_system"`
-	Industry         string `json:"industry"`
+	ProjectType      string   `json:"project_type"`
+	ManagementSystem []string `json:"management_system"`
+	Industry         string   `json:"industry"`
+	Method           string   `json:"method"`
+	Prompt           string   `json:"prompt"`
 }
 
 type Message struct {
@@ -41,7 +44,11 @@ type RequestBody struct {
 }
 
 func (h *HandlerV1) MCPCall(c *gin.Context) {
-	var req MCPRequest
+	var (
+		req     MCPRequest
+		content string
+		message string
+	)
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
@@ -77,17 +84,56 @@ func (h *HandlerV1) MCPCall(c *gin.Context) {
 
 	apiKey := apiKeys.GetData()[0].GetAppId()
 
-	resp, err := sendAnthropicRequest(req.ProjectType, req.ManagementSystem, "IT", projectId.(string), environmentId.(string), apiKey)
+	if req.Method == "" {
+		req.Method = "project"
+	}
+
+	switch req.Method {
+	case "project":
+		content = fmt.Sprintf(`
+1. Retrieve the current DBML schema using: project-id = %s  environment-id = %s
+2. Generate a DBML schema for an %s %s tailored for the %s industry, using PostgreSQL. **excluding all existing tables from the current schema**.
+📌 Requirements:
+ • Include the industry specific functional areas:
+ • Do NOT include Users or Roles tables.
+ • Use proper Ref definitions for relationships, in this format: Ref fk_name: table1.column1 < table2.column2
+ • For fields like status or type, use realistic Enum definitions in proper DBML syntax. Example: Enum "tax_type" { "Fixed" "Percentage" }. Use separate Enum blocks with clearly defined, realistic values and wrap all enum values in double quotes to ensure compatibility.
+ • Optional: use camelCase or snake_case consistently if preferred
+ • Do not include indexes 
+ • Do not include quotes, additional options (e.g., [delete: cascade]) and default values.
+ • Use descriptive field names and don't use comments
+ • Do not include comments anywhere in the schema.
+ • Follow relational design principles and ensure consistency with systems like ProjectManagement, Payroll, and CRM.
+
+3. Organize the new tables into **menus** by their functional purpose.
+4. Provide a view_fields JSON that maps each table to its most important column: Example: { "customer": "name" }
+5. Execute the new DBML schema using the dbml_to_ucode tool:
+   Use X-API-KEY = %s  
+⚠️ Attempt any operation **once only** — do not retry on failure. If the dbml_to_ucode tool returns an error, **end the operation immediately**.
+`, projectId.(string), environmentId.(string), req.ProjectType, strings.Join(req.ManagementSystem, "/"), "IT", apiKey)
+
+		message = fmt.Sprintf("Your request for %s %s has been successfully processed.", req.ProjectType, strings.Join(req.ManagementSystem, ", "))
+	case "table":
+		content = req.Prompt
+		content += fmt.Sprintf(`
+x-api-key = %s
+		`, apiKey)
+		message = "The table has been successfully updated."
+
+	}
+
+	fmt.Println("content", content)
+	resp, err := sendAnthropicRequest(content)
 	fmt.Println("************ MCP Response ************", resp)
 	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, fmt.Sprintf("Your request for %s %s could not be processed.", req.ProjectType, req.ManagementSystem))
+		h.handleResponse(c, status_http.InternalServerError, "Your request could not be processed.")
 		return
 	}
 
-	h.handleResponse(c, status_http.OK, fmt.Sprintf("Your request for %s %s has been successfully processed.", req.ProjectType, req.ManagementSystem))
+	h.handleResponse(c, status_http.OK, message)
 }
 
-func sendAnthropicRequest(projectType, managementSystem, industry, projectId, envId, apiKey string) (string, error) {
+func sendAnthropicRequest(content string) (string, error) {
 	url := config.ANTHROPIC_BASE_API_URL
 
 	// Construct the request body
@@ -96,27 +142,8 @@ func sendAnthropicRequest(projectType, managementSystem, industry, projectId, en
 		MaxTokens: config.MAX_TOKENS,
 		Messages: []Message{
 			{
-				Role: "user",
-				Content: fmt.Sprintf(`Task: Generate a DBML schema for an %s %s tailored for the %s industry, using PostgreSQL.
-
-📌 Requirements:
- • Include the industry specific functional areas:
- • Don't add Users & Roles tables
- • Use proper ref: keys for relations
- • For fields like status or type, use realistic Enum definitions in proper DBML syntax. Example: Enum "tax_type" { "Fixed" "Percentage" }. Do not use comments or inline values. Use separate Enum blocks with clearly defined, realistic values.
- • Optional: use camelCase or snake_case consistently if preferred
- • Don't add any indexes 
- • Show references only in the format: Ref fk_name:table1.column1 < table2.column2. Do not include quotes or any additional options like [delete: cascade].
- • Don't incluede any quotes
-
-🛠️ Style:
- • Use descriptive field names and comments where needed
- • Follow the design principles of relational databases
- • Ensure consistency with other systems like ProjectManagement, Payroll, and CRM
-
-Get the current DBML schema for the project with project-id = %s and environment-id = %s.
-Then, prepare a new DBML schema that excludes all existing tables from the current schema.
-Finally, execute the new DBML schema using the dbml_to_ucode tool. X-API-KEY = %s. Attempt the operation once. If it fails, do not retry.`, projectType, managementSystem, industry, projectId, envId, apiKey),
+				Role:    "user",
+				Content: content,
 			},
 		},
 		MCPServer: []MCPServer{

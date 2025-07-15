@@ -3,6 +3,7 @@ package v1
 import (
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -16,6 +17,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/spf13/cast"
+	"google.golang.org/protobuf/types/known/structpb"
 )
 
 // CreateTable godoc
@@ -926,7 +928,7 @@ func (h *HandlerV1) TrackTables(c *gin.Context) {
 
 	resp := &nb.GetAllTablesResponse{}
 
-	var tables []Tables
+	var tables []models.Tables
 
 	switch resourceType {
 	case pb.ResourceType_MONGODB:
@@ -946,8 +948,8 @@ func (h *HandlerV1) TrackTables(c *gin.Context) {
 	}
 
 	for _, val := range resp.GetTables() {
-		tables = append(tables, Tables{
-			Table: Table{
+		tables = append(tables, models.Tables{
+			Table: models.Table{
 				Name:   val.GetSlug(),
 				Schema: "public",
 			},
@@ -955,18 +957,18 @@ func (h *HandlerV1) TrackTables(c *gin.Context) {
 		})
 	}
 
-	tableArgs := TableArgs{
-		Args: Args{
+	tableArgs := models.TableArgs{
+		Args: models.Args{
 			Tables:        tables,
 			AllowWarnings: true,
 		},
 		Type: "postgres_track_tables",
 	}
 
-	trackTableRequest := TrackRequest{
+	trackTableRequest := models.TrackRequest{
 		Type:   "bulk",
 		Source: resEnv.GetCredentials().GetDatabase(),
-		Args:   []TableArgs{tableArgs},
+		Args:   []models.TableArgs{tableArgs},
 	}
 
 	headers := map[string]string{
@@ -1253,24 +1255,184 @@ func (h *HandlerV1) UntrackTableById(c *gin.Context) {
 	}
 }
 
-type TrackRequest struct {
-	Type   string      `json:"type"`
-	Source string      `json:"source"`
-	Args   []TableArgs `json:"args"`
-}
-type Table struct {
-	Name   string `json:"name"`
-	Schema string `json:"schema"`
-}
-type Tables struct {
-	Table  Table  `json:"table"`
-	Source string `json:"source"`
-}
-type Args struct {
-	AllowWarnings bool     `json:"allow_warnings"`
-	Tables        []Tables `json:"tables"`
-}
-type TableArgs struct {
-	Type string `json:"type"`
-	Args Args   `json:"args"`
+func (h *HandlerV1) UpdateTableByMCP(c *gin.Context) {
+	var (
+		tableSlug = c.Param("collection")
+		request   models.TableMCP
+	)
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
+		return
+	}
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	switch resource.ResourceType {
+	case pb.ResourceType_POSTGRESQL:
+		for _, field := range request.Fields {
+			fieldType := GetFieldType(strings.ToLower(field.Type))
+			attributes := &structpb.Struct{
+				Fields: map[string]*structpb.Value{
+					"label":    structpb.NewStringValue(formatString(field.Slug)),
+					"label_en": structpb.NewStringValue(formatString(field.Slug)),
+				},
+			}
+
+			if fieldType == "MULTISELECT" {
+				options := make([]*structpb.Value, len(field.Enum))
+				for i, value := range field.Enum {
+					option, _ := structpb.NewStruct(map[string]any{
+						"value": value,
+						"icon":  "",
+						"color": "",
+						"label": value,
+					})
+					options[i] = structpb.NewStructValue(option)
+				}
+
+				attributes.Fields["options"] = structpb.NewListValue(&structpb.ListValue{
+					Values: options,
+				})
+			}
+
+			switch field.Action {
+			case "create":
+				_, err = services.GoObjectBuilderService().Field().Create(
+					c.Request.Context(),
+					&nb.CreateFieldRequest{
+						Id:         uuid.NewString(),
+						TableId:    tableSlug,
+						Type:       fieldType,
+						Label:      formatString(field.Slug),
+						Slug:       field.Slug,
+						Attributes: attributes,
+						ProjectId:  resource.ResourceEnvironmentId,
+						EnvId:      resource.EnvironmentId,
+					},
+				)
+				if err != nil {
+					continue
+				}
+			case "update":
+				_, err = services.GoObjectBuilderService().Field().Update(
+					c.Request.Context(),
+					&nb.Field{
+						Id:         field.Slug,
+						TableId:    tableSlug,
+						Type:       fieldType,
+						Label:      formatString(field.Slug),
+						Attributes: attributes,
+						ProjectId:  resource.ResourceEnvironmentId,
+						EnvId:      resource.EnvironmentId,
+					},
+				)
+			case "delete":
+				_, err = services.GoObjectBuilderService().Field().Delete(
+					c.Request.Context(),
+					&nb.FieldPrimaryKey{
+						Id:        field.Slug,
+						ProjectId: resource.ResourceEnvironmentId,
+						TableSlug: tableSlug,
+					},
+				)
+			}
+		}
+
+		for _, relation := range request.Relations {
+			switch relation.Action {
+			case "create":
+				viewField, err := services.GoObjectBuilderService().Field().ObtainRandomOne(
+					c.Request.Context(),
+					&nb.ObtainRandomRequest{
+						TableSlug: tableSlug,
+						ProjectId: resource.ResourceEnvironmentId,
+						EnvId:     resource.EnvironmentId,
+					},
+				)
+				_, err = services.GoObjectBuilderService().Relation().Create(
+					c.Request.Context(),
+					&nb.CreateRelationRequest{
+						Id:        uuid.NewString(),
+						Type:      relation.Type,
+						TableFrom: tableSlug,
+						TableTo:   relation.TableTo,
+						Attributes: &structpb.Struct{
+							Fields: map[string]*structpb.Value{
+								"label_en":    structpb.NewStringValue(formatString(relation.TableTo)),
+								"label_to_en": structpb.NewStringValue(formatString(tableSlug)),
+							},
+						},
+						RelationFieldId:   uuid.NewString(),
+						RelationTableSlug: relation.TableTo,
+						RelationToFieldId: uuid.NewString(),
+						ProjectId:         resource.ResourceEnvironmentId,
+						EnvId:             resource.EnvironmentId,
+						ViewFields:        []string{viewField.Id},
+					},
+				)
+				if err != nil {
+					continue
+				}
+			case "delete":
+				relations, err := services.GoObjectBuilderService().Relation().GetIds(
+					c.Request.Context(),
+					&nb.GetIdsReq{
+						TableFrom: tableSlug,
+						TableTo:   relation.TableTo,
+						ProjectId: resource.ResourceEnvironmentId,
+					},
+				)
+				if err != nil {
+					continue
+				}
+
+				for _, relationId := range relations.GetIds() {
+					_, err := services.GoObjectBuilderService().Relation().Delete(
+						c.Request.Context(),
+						&nb.RelationPrimaryKey{
+							Id:        relationId,
+							ProjectId: resource.ResourceEnvironmentId,
+							EnvId:     resource.EnvironmentId,
+						},
+					)
+					if err != nil {
+						continue
+					}
+				}
+
+			}
+		}
+	}
+
+	h.handleResponse(c, status_http.OK, "Table updated successfully")
 }

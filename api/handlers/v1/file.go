@@ -6,10 +6,10 @@ import (
 	"errors"
 	"fmt"
 	"image"
-	"image/jpeg"
 	"image/png"
 	"io"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -23,6 +23,7 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
+	"github.com/HugoSmits86/nativewebp"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/minio/minio-go/v7"
@@ -55,6 +56,7 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 
 	var (
 		folderName = c.DefaultQuery("folder_name", "Media")
+		format     = c.DefaultQuery("format", "png")
 		rationStr  = c.Query("ratio")
 		ratio      float64
 	)
@@ -122,26 +124,28 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 	var uploadReader io.Reader = object
 	var uploadSize int64 = file.File.Size
 
-	if ratio > 0 && strings.HasPrefix(contentType, "image/") {
-		img, format, err := image.Decode(object)
+	if strings.HasPrefix(contentType, "image/") {
+		img, _, err := image.Decode(object)
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 
-		croppedImg, err := cropImageByRatio(img, ratio)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
+		if ratio > 0 {
+			img, err = cropImageByRatio(img, ratio)
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
 		}
 
 		var buf bytes.Buffer
-		switch format {
-		case "jpeg", "jpg":
-			err = jpeg.Encode(&buf, croppedImg, &jpeg.Options{Quality: 90})
-		case "png":
-			err = png.Encode(&buf, croppedImg)
+		if format == "webp" {
+			err = nativewebp.Encode(&buf, img, nil)
+		} else {
+			err = png.Encode(&buf, img)
 		}
+
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
@@ -149,6 +153,9 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 
 		uploadReader = bytes.NewReader(buf.Bytes())
 		uploadSize = int64(buf.Len())
+
+		file.File.Header["Content-Type"][0] = "image/" + format
+		file.File.Filename = strings.TrimSuffix(file.File.Filename, filepath.Ext(file.File.Filename)) + "." + format
 	}
 
 	minioClient, err := minio.New(h.baseConf.MinioEndpoint, &minio.Options{
