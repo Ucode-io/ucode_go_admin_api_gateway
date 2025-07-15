@@ -658,7 +658,7 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 		if util.IsValidUUID(viewId) {
 			switch resource.ResourceType {
 			case pb.ResourceType_MONGODB:
-				redisResp, err := h.redis.Get(c.Request.Context(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", tableSlug, structData.String(), resource.ResourceEnvironmentId))), resource.ProjectId, resource.NodeType)
+				redisResp, err := h.redis.Get(c.Request.Context(), redisKey, resource.ProjectId, resource.NodeType)
 				if err == nil {
 					resp := make(map[string]any)
 					m := make(map[string]any)
@@ -684,7 +684,7 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 				if err == nil {
 					if resp.IsCached {
 						jsonData, _ := resp.GetData().MarshalJSON()
-						err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", tableSlug, structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second, resource.ProjectId, resource.NodeType)
+						err = h.redis.SetX(context.Background(), redisKey, string(jsonData), 15*time.Second, resource.ProjectId, resource.NodeType)
 						if err != nil {
 							h.log.Error("Error while setting redis", logger.Error(err))
 						}
@@ -732,7 +732,7 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 			if err == nil {
 				if resp.IsCached {
 					jsonData, _ := resp.GetData().MarshalJSON()
-					err = h.redis.SetX(context.Background(), redisKey, string(jsonData), config.REDIS_KEY_TIMEOUT, resource.ProjectId, resource.NodeType)
+					err = h.redis.SetX(context.Background(), redisKey, string(jsonData), 15*time.Second, resource.ProjectId, resource.NodeType)
 					if err != nil {
 						h.log.Error("Error while setting redis", logger.Error(err))
 					}
@@ -771,7 +771,7 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 			if err == nil {
 				if resp.IsCached {
 					jsonData, _ := resp.GetData().MarshalJSON()
-					err = h.redis.SetX(context.Background(), redisKey, string(jsonData), config.REDIS_KEY_TIMEOUT, resource.ProjectId, resource.NodeType)
+					err = h.redis.SetX(context.Background(), redisKey, string(jsonData), 15*time.Second, resource.ProjectId, resource.NodeType)
 					if err != nil {
 						h.log.Error("Error while setting redis", logger.Error(err))
 					}
