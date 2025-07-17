@@ -1164,10 +1164,10 @@ func (h *HandlerV1) ConvertTemplateToHtmlV3(c *gin.Context) {
 		log.Printf("Warning: Failed to remove temporary PDF file %s: %v", outputPDFPath, err)
 	}
 
+	link := fmt.Sprintf("%s/%s/%s", h.baseConf.MinioEndpoint, resource.ResourceEnvironmentId, pdfFileName)
+
 	response := map[string]any{
-		"data": map[string]any{
-			"pdf_url": "",
-		},
+		"pdf_url": link,
 	}
 
 	h.handleResponse(c, status_http.OK, response)
