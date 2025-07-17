@@ -1073,7 +1073,7 @@ func (h *HandlerV1) ConvertTemplateToHtmlV3(c *gin.Context) {
 	}
 
 	htmlFileName := fmt.Sprintf("%s_temp.html", uuid.New().String())
-	htmlPath := filepath.Join(currentDir, "htmls", htmlFileName)
+	htmlPath := filepath.Join(currentDir, htmlFileName)
 
 	if err := h.downloadFileFromURL(htmlUrl, htmlPath); err != nil {
 		h.handleResponse(c, status_http.InternalServerError, fmt.Sprintf("Failed to download HTML file: %v", err))
@@ -1115,7 +1115,7 @@ func (h *HandlerV1) ConvertTemplateToHtmlV3(c *gin.Context) {
 	}
 
 	pdfFileName := fmt.Sprintf("%s.pdf", uuid.New().String())
-	outputPDFPath := filepath.Join(currentDir, "pdfs", pdfFileName)
+	outputPDFPath := filepath.Join(currentDir, pdfFileName)
 
 	// Write PDF to local file
 	if err := pdfg.WriteFile(outputPDFPath); err != nil {
