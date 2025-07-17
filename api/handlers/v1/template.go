@@ -3,7 +3,15 @@ package v1
 import (
 	"context"
 	"errors"
+	"fmt"
+	"io"
+	"log"
+	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
+	"time"
+
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
@@ -11,8 +19,12 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
+	"github.com/SebastiaanKlippert/go-wkhtmltopdf"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
+	"github.com/spf13/cast"
 )
 
 // CreateTemplateFolder godoc
@@ -1013,6 +1025,154 @@ func (h *HandlerV1) ConvertHtmlToPdfV2(c *gin.Context) {
 	h.handleResponse(c, status_http.Created, resp)
 }
 
+func (h *HandlerV1) ConvertTemplateToHtmlV3(c *gin.Context) {
+	var html models.HtmlBody
+
+	if err := c.ShouldBindJSON(&html); err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err := errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_TEMPLATE_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	htmlUrl := cast.ToString(html.Data["html_url"])
+
+	if htmlUrl == "" {
+		h.handleResponse(c, status_http.BadRequest, "html_url is required")
+		return
+	}
+
+	currentDir, err := os.Getwd()
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err.Error())
+		return
+	}
+
+	htmlFileName := fmt.Sprintf("%s_temp.html", uuid.New().String())
+	htmlPath := filepath.Join(currentDir, "htmls", htmlFileName)
+
+	if err := h.downloadFileFromURL(htmlUrl, htmlPath); err != nil {
+		h.handleResponse(c, status_http.InternalServerError, fmt.Sprintf("Failed to download HTML file: %v", err))
+		return
+	}
+
+	// Clean up downloaded HTML file after processing
+	defer func() {
+		if err := os.Remove(htmlPath); err != nil {
+			log.Printf("Warning: Failed to remove temporary HTML file %s: %v", htmlPath, err)
+		}
+	}()
+
+	htmlFile, err := os.Open(htmlPath)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+	defer htmlFile.Close()
+
+	pdfg, err := wkhtmltopdf.NewPDFGenerator()
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err.Error())
+		return
+	}
+
+	page := wkhtmltopdf.NewPageReader(htmlFile)
+	page.EnableLocalFileAccess.Set(true)
+
+	pdfg.AddPage(page)
+
+	pdfg.Dpi.Set(300)
+	pdfg.Orientation.Set(wkhtmltopdf.OrientationPortrait)
+	pdfg.PageSize.Set(wkhtmltopdf.PageSizeA4)
+
+	if err := pdfg.Create(); err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err.Error())
+		return
+	}
+
+	pdfFileName := fmt.Sprintf("%s.pdf", uuid.New().String())
+	outputPDFPath := filepath.Join(currentDir, "pdfs", pdfFileName)
+
+	// Write PDF to local file
+	if err := pdfg.WriteFile(outputPDFPath); err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err.Error())
+		return
+	}
+
+	minioClient, err := minio.New(h.baseConf.MinioEndpoint, &minio.Options{
+		Creds:  credentials.NewStaticV4(h.baseConf.MinioAccessKeyID, h.baseConf.MinioSecretAccessKey, ""),
+		Secure: h.baseConf.MinioProtocol,
+	})
+
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	file, err := os.Open(outputPDFPath)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+	defer file.Close()
+
+	// Get file info
+	fileInfo, err := file.Stat()
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	_, err = minioClient.PutObject(
+		c.Request.Context(),
+		resource.ResourceEnvironmentId,
+		pdfFileName,
+		file,
+		fileInfo.Size(),
+		minio.PutObjectOptions{ContentType: "application/pdf"},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	if err := os.Remove(outputPDFPath); err != nil {
+		log.Printf("Warning: Failed to remove temporary PDF file %s: %v", outputPDFPath, err)
+	}
+
+	response := map[string]any{
+		"data": map[string]any{
+			"pdf_url": "",
+		},
+	}
+
+	h.handleResponse(c, status_http.OK, response)
+}
+
 // ConvertTemplateToHtmlV2 godoc
 // @Security ApiKeyAuth
 // @ID convert_template_to_htmlV2
@@ -1092,4 +1252,47 @@ func (h *HandlerV1) ConvertTemplateToHtmlV2(c *gin.Context) {
 	}
 
 	h.handleResponse(c, status_http.Created, resp)
+}
+
+func (h *HandlerV1) downloadFileFromURL(url, filepath string) error {
+	// Create HTTP client with timeout
+	client := &http.Client{
+		Timeout: 30 * time.Second,
+	}
+
+	// Create GET request
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return fmt.Errorf("failed to create request: %v", err)
+	}
+
+	// Add headers if needed (for authentication, etc.)
+	req.Header.Set("User-Agent", "HTML-to-PDF-Service/1.0")
+
+	// Make the request
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to download file: %v", err)
+	}
+	defer resp.Body.Close()
+
+	// Check if the response is successful
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("failed to download file: HTTP %d", resp.StatusCode)
+	}
+
+	// Create the output file
+	out, err := os.Create(filepath)
+	if err != nil {
+		return fmt.Errorf("failed to create file: %v", err)
+	}
+	defer out.Close()
+
+	// Copy the response body to the file
+	_, err = io.Copy(out, resp.Body)
+	if err != nil {
+		return fmt.Errorf("failed to save file: %v", err)
+	}
+
+	return nil
 }
