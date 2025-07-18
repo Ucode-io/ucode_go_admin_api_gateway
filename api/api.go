@@ -168,6 +168,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		// HTML TO PDF CONVERTER
 		v1.POST("/html-to-pdfV2", h.V1.ConvertHtmlToPdfV2)
 		v1.POST("/template-to-htmlV2", h.V1.ConvertTemplateToHtmlV2)
+		v1.POST("/template-to-htmlV3", h.V1.ConvertTemplateToHtmlV3)
 
 		// HTML TO PDF CONVERTER
 		v1.POST("/html-to-pdf", h.V1.ConvertHtmlToPdf)

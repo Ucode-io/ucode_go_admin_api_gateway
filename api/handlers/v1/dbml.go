@@ -597,7 +597,7 @@ func smartSearch(query string) (string, error) {
 		return icon, nil
 	}
 
-	words := strings.Split(query, "_")
+	words := strings.Split(query, " ")
 	for _, word := range words {
 		icon, err := searchIcons(word)
 		if err != nil {
