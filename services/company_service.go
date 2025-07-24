@@ -22,6 +22,7 @@ type CompanyServiceI interface {
 	IntegrationResource() company_service.IntegrationResourceServiceClient
 	AirByte() company_service.AirbyteServiceClient
 	Billing() company_service.BillingServiceClient
+	Visualization() company_service.VisualizationServiceClient
 }
 
 type companyServiceClient struct {
@@ -35,6 +36,7 @@ type companyServiceClient struct {
 	integrationResourceService company_service.IntegrationResourceServiceClient
 	airbyteService             company_service.AirbyteServiceClient
 	billingService             company_service.BillingServiceClient
+	visualizationService       company_service.VisualizationServiceClient
 }
 
 func NewCompanyServiceClient(ctx context.Context, cfg config.Config) (CompanyServiceI, error) {
@@ -63,6 +65,7 @@ func NewCompanyServiceClient(ctx context.Context, cfg config.Config) (CompanySer
 		integrationResourceService: company_service.NewIntegrationResourceServiceClient(connCompanyService),
 		airbyteService:             company_service.NewAirbyteServiceClient(connCompanyService),
 		billingService:             company_service.NewBillingServiceClient(connCompanyService),
+		visualizationService:       company_service.NewVisualizationServiceClient(connCompanyService),
 	}, nil
 }
 
@@ -104,4 +107,8 @@ func (g *companyServiceClient) AirByte() company_service.AirbyteServiceClient {
 
 func (g *companyServiceClient) Billing() company_service.BillingServiceClient {
 	return g.billingService
+}
+
+func (g *companyServiceClient) Visualization() company_service.VisualizationServiceClient {
+	return g.visualizationService
 }
