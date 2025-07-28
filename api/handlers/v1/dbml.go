@@ -582,7 +582,7 @@ func searchIcons(query string) (string, error) {
 	}
 
 	if len(result.Icons) > 0 {
-		return fmt.Sprintf("https://api.iconify.design/%s.svg", result.Icons[0]), nil
+		return fmt.Sprintf("%s", result.Icons[0]), nil
 	}
 
 	return "", nil
