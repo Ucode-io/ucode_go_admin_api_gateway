@@ -356,12 +356,19 @@ func (h *HandlerV1) GetAllEnvironments(c *gin.Context) {
 		return
 	}
 
+	authInfo, err := h.GetAuthAdminInfo(c)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err.Error())
+		return
+	}
+
 	resp, err := h.companyServices.Environment().GetList(
 		c.Request.Context(), &pb.GetEnvironmentListRequest{
 			Offset:    int32(offset),
 			Limit:     int32(limit),
-			Search:    c.DefaultQuery("search", ""),
-			ProjectId: c.DefaultQuery("project_id", ""),
+			Search:    c.Query("search"),
+			ProjectId: c.Query("project_id"),
+			UserId:    authInfo.GetUserIdAuth(),
 		},
 	)
 

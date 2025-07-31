@@ -124,7 +124,7 @@ func (h *HandlerV1) GetCompanyByID(c *gin.Context) {
 
 func (h *HandlerV1) GetCompanyList(c *gin.Context) {
 	userProjects, err := h.authService.User().GetUserProjects(c.Request.Context(), &auth_service.UserPrimaryKey{
-		Id: c.DefaultQuery("owner_id", ""),
+		Id: c.Query("owner_id"),
 	})
 
 	if err != nil {
@@ -134,7 +134,6 @@ func (h *HandlerV1) GetCompanyList(c *gin.Context) {
 
 	companies := make([]*pb.Company, 0, len(userProjects.GetCompanies()))
 	for _, company := range userProjects.GetCompanies() {
-
 		companyFromService, err := h.companyServices.Company().GetById(
 			c.Request.Context(), &pb.GetCompanyByIdRequest{Id: company.GetId()},
 		)

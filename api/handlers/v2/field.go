@@ -264,8 +264,8 @@ func (h *HandlerV2) GetAllFields(c *gin.Context) {
 			c.Request.Context(), &obs.GetAllFieldsRequest{
 				Limit:            int32(limit),
 				Offset:           int32(offset),
-				Search:           c.DefaultQuery("search", ""),
-				TableId:          c.DefaultQuery("table_id", ""),
+				Search:           c.Query("search"),
+				TableId:          c.Query("table_id"),
 				TableSlug:        c.Param("collection"),
 				WithManyRelation: withManyRelation,
 				WithOneRelation:  withOneRelation,
@@ -284,8 +284,8 @@ func (h *HandlerV2) GetAllFields(c *gin.Context) {
 			c.Request.Context(), &nb.GetAllFieldsRequest{
 				Limit:            int32(limit),
 				Offset:           int32(offset),
-				Search:           c.DefaultQuery("search", ""),
-				TableId:          c.DefaultQuery("table_id", ""),
+				Search:           c.Query("search"),
+				TableId:          c.Query("table_id"),
 				TableSlug:        c.Param("collection"),
 				WithManyRelation: withManyRelation,
 				WithOneRelation:  withOneRelation,
@@ -746,7 +746,7 @@ func (h *HandlerV2) GetAllFieldsWithDetails(c *gin.Context) {
 			c.Request.Context(), &obs.GetAllFieldsForItemsRequest{
 				Collection:       c.Param("collection"),
 				ProjectId:        resource.ResourceEnvironmentId,
-				LanguageSettings: c.DefaultQuery("language_setting", ""),
+				LanguageSettings: c.Query("language_setting"),
 				WithRelations:    withRelations,
 				RoleId:           roleId,
 			},
