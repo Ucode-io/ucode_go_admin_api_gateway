@@ -364,11 +364,12 @@ func (h *HandlerV1) GetAllEnvironments(c *gin.Context) {
 
 	resp, err := h.companyServices.Environment().GetList(
 		c.Request.Context(), &pb.GetEnvironmentListRequest{
-			Offset:    int32(offset),
-			Limit:     int32(limit),
-			Search:    c.Query("search"),
-			ProjectId: c.Query("project_id"),
-			UserId:    authInfo.GetUserIdAuth(),
+			Offset:         int32(offset),
+			Limit:          int32(limit),
+			Search:         c.Query("search"),
+			ProjectId:      c.Query("project_id"),
+			UserId:         authInfo.GetUserIdAuth(),
+			WithClientType: true,
 		},
 	)
 

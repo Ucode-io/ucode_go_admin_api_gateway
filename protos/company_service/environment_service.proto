@@ -33,6 +33,7 @@ message GetEnvironmentListRequest {
     string project_id = 4;
     repeated string ids = 5;
     string user_id = 6;
+    bool with_client_type = 7;
 }
 
 message GetEnvironmentListResponse {
