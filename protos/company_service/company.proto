@@ -88,7 +88,8 @@ message EnvironmentWithResources {
     string access_type = 8;
     string node_type = 9;
     google.protobuf.Struct client_types = 10;
-    string resource_type = 11;
+    int32 resource_type = 11;
+    string resource_environment_id = 12;
 }
 
 message NewResource {

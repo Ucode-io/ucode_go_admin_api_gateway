@@ -224,6 +224,12 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		{
 			discount.GET("", h.V1.ListDiscounts)
 		}
+
+		metabase := v1.Group("/metabase")
+		{
+			metabase.POST("/dashboard", h.V1.GetMetabaseDashboards)
+			metabase.POST("/public-url", h.V1.GetMetabasePublicUrl)
+		}
 	}
 
 	v2 := r.Group("/v2")

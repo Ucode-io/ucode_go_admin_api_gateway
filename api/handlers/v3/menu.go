@@ -1,6 +1,5 @@
 package v3
 
-
 import (
 	"context"
 
@@ -94,6 +93,8 @@ func (h *HandlerV3) CreateMenu(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
+		menuRequest.NewRouter = true
+
 		resp, err := services.GetBuilderServiceByType(resource.NodeType).Menu().Create(c.Request.Context(), menuRequest)
 		if err != nil {
 			logReq.Response = err.Error()
@@ -112,6 +113,8 @@ func (h *HandlerV3) CreateMenu(c *gin.Context) {
 			logReq.Response = err.Error()
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 		}
+
+		newReq.NewRouter = true
 
 		pgResp, err := services.GoObjectBuilderService().Menu().Create(c.Request.Context(), &newReq)
 		if err != nil {
