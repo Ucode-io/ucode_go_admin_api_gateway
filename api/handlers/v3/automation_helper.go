@@ -76,9 +76,10 @@ func (h *HandlerV3) GetListCustomEvents(request models.GetListCustomEventsStruct
 
 	if res != nil {
 		for _, customEvent := range res.CustomEvents {
-			if customEvent.ActionType == config.BEFORE {
+			switch customEvent.ActionType {
+			case config.BEFORE:
 				beforeEvents = append(beforeEvents, customEvent)
-			} else if customEvent.ActionType == config.AFTER {
+			case config.AFTER:
 				afterEvents = append(afterEvents, customEvent)
 			}
 		}
@@ -131,12 +132,13 @@ func (h *HandlerV3) DoInvokeFuntion(request models.DoInvokeFuntionStruct, c *gin
 		data["action_type"] = request.ActionType
 		invokeFunction.Data = data
 
-		if requestType == "" || requestType == "ASYNC" {
+		switch requestType {
+		case "", "ASYNC":
 			functionName, err = function.FuncHandlers[customEvent.Functions[0].Type](path, name, invokeFunction)
 			if err != nil {
 				return functionName, err
 			}
-		} else if requestType == "SYNC" {
+		case "SYNC":
 			go func(customEvent *obs.CustomEvent) {
 				function.FuncHandlers[customEvent.Functions[0].Type](path, name, invokeFunction)
 			}(customEvent)

@@ -306,6 +306,7 @@ func (h *HandlerV1) CreateCompanyProject(c *gin.Context) {
 			Title:        project.Title,
 			K8SNamespace: project.K8SNamespace,
 			CompanyId:    project.CompanyId,
+			FareId:       project.FareId,
 		},
 	)
 	if err != nil {
@@ -319,21 +320,13 @@ func (h *HandlerV1) CreateCompanyProject(c *gin.Context) {
 		return
 	}
 
-	_, err = h.authService.User().AddUserToProject(
-		c.Request.Context(), &auth_service.AddUserToProjectReq{
-			UserId:    authInfo.GetUserId(),
-			ProjectId: resp.GetProjectId(),
-			CompanyId: project.GetCompanyId(),
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
-	_, err = h.companyServices.Environment().Create(
+	_, err = h.companyServices.Environment().CreateV2(
 		c.Request.Context(), &pb.CreateEnvironmentRequest{
+			CompanyId:    project.CompanyId,
 			ProjectId:    resp.ProjectId,
+			UserId:       authInfo.GetUserIdAuth(),
+			ClientTypeId: authInfo.GetClientTypeId(),
+			RoleId:       authInfo.GetRoleId(),
 			Name:         "Production",
 			DisplayColor: "#00FF00",
 			Description:  "Production Environment",

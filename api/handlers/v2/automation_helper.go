@@ -3,6 +3,7 @@ package v2
 import (
 	"context"
 	"encoding/json"
+
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
@@ -75,9 +76,10 @@ func GetListCustomEvents(request models.GetListCustomEventsStruct, c *gin.Contex
 
 	if res != nil {
 		for _, customEvent := range res.CustomEvents {
-			if customEvent.ActionType == config.BEFORE {
+			switch customEvent.ActionType {
+			case config.BEFORE:
 				beforeEvents = append(beforeEvents, customEvent)
-			} else if customEvent.ActionType == config.AFTER {
+			case config.AFTER:
 				afterEvents = append(afterEvents, customEvent)
 			}
 		}
@@ -130,12 +132,13 @@ func DoInvokeFuntion(request models.DoInvokeFuntionStruct, c *gin.Context, h *Ha
 		data["action_type"] = request.ActionType
 		invokeFunction.Data = data
 
-		if requestType == "" || requestType == "ASYNC" {
+		switch requestType {
+		case "", "ASYNC":
 			functionName, err = function.FuncHandlers[customEvent.Functions[0].Type](path, name, invokeFunction)
 			if err != nil {
 				return functionName, err
 			}
-		} else if requestType == "SYNC" {
+		case "SYNC":
 			go func(customEvent *obs.CustomEvent) {
 				function.FuncHandlers[customEvent.Functions[0].Type](path, name, invokeFunction)
 			}(customEvent)
