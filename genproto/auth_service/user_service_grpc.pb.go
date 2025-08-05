@@ -79,7 +79,7 @@ type UserServiceClient interface {
 	GetListSetting(ctx context.Context, in *GetListSettingReq, opts ...grpc.CallOption) (*Setting, error)
 	GetUserByUsername(ctx context.Context, in *GetUserByUsernameRequest, opts ...grpc.CallOption) (*User, error)
 	GetUserProjects(ctx context.Context, in *UserPrimaryKey, opts ...grpc.CallOption) (*GetUserProjectsRes, error)
-	GetUserProjectClientTypes(ctx context.Context, in *UserPrimaryKey, opts ...grpc.CallOption) (*GetUserProjectClientTypesResponse, error)
+	GetUserProjectClientTypes(ctx context.Context, in *UserInfoPrimaryKey, opts ...grpc.CallOption) (*GetUserProjectClientTypesResponse, error)
 }
 
 type userServiceClient struct {
@@ -350,7 +350,7 @@ func (c *userServiceClient) GetUserProjects(ctx context.Context, in *UserPrimary
 	return out, nil
 }
 
-func (c *userServiceClient) GetUserProjectClientTypes(ctx context.Context, in *UserPrimaryKey, opts ...grpc.CallOption) (*GetUserProjectClientTypesResponse, error) {
+func (c *userServiceClient) GetUserProjectClientTypes(ctx context.Context, in *UserInfoPrimaryKey, opts ...grpc.CallOption) (*GetUserProjectClientTypesResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetUserProjectClientTypesResponse)
 	err := c.cc.Invoke(ctx, UserService_GetUserProjectClientTypes_FullMethodName, in, out, cOpts...)
@@ -390,7 +390,7 @@ type UserServiceServer interface {
 	GetListSetting(context.Context, *GetListSettingReq) (*Setting, error)
 	GetUserByUsername(context.Context, *GetUserByUsernameRequest) (*User, error)
 	GetUserProjects(context.Context, *UserPrimaryKey) (*GetUserProjectsRes, error)
-	GetUserProjectClientTypes(context.Context, *UserPrimaryKey) (*GetUserProjectClientTypesResponse, error)
+	GetUserProjectClientTypes(context.Context, *UserInfoPrimaryKey) (*GetUserProjectClientTypesResponse, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -479,7 +479,7 @@ func (UnimplementedUserServiceServer) GetUserByUsername(context.Context, *GetUse
 func (UnimplementedUserServiceServer) GetUserProjects(context.Context, *UserPrimaryKey) (*GetUserProjectsRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserProjects not implemented")
 }
-func (UnimplementedUserServiceServer) GetUserProjectClientTypes(context.Context, *UserPrimaryKey) (*GetUserProjectClientTypesResponse, error) {
+func (UnimplementedUserServiceServer) GetUserProjectClientTypes(context.Context, *UserInfoPrimaryKey) (*GetUserProjectClientTypesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserProjectClientTypes not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
@@ -972,7 +972,7 @@ func _UserService_GetUserProjects_Handler(srv interface{}, ctx context.Context, 
 }
 
 func _UserService_GetUserProjectClientTypes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UserPrimaryKey)
+	in := new(UserInfoPrimaryKey)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -984,7 +984,7 @@ func _UserService_GetUserProjectClientTypes_Handler(srv interface{}, ctx context
 		FullMethod: UserService_GetUserProjectClientTypes_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).GetUserProjectClientTypes(ctx, req.(*UserPrimaryKey))
+		return srv.(UserServiceServer).GetUserProjectClientTypes(ctx, req.(*UserInfoPrimaryKey))
 	}
 	return interceptor(ctx, in, info, handler)
 }

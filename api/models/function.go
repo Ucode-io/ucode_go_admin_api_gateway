@@ -56,9 +56,10 @@ type InvokeFunctionResponse2 struct {
 }
 
 type NewInvokeFunctionRequest struct {
-	Auth        AuthData       `json:"auth"`
-	Data        map[string]any `json:"data"`
-	RequestData HttpRequest    `json:"request_data"`
+	Auth          AuthData       `json:"auth"`
+	Data          map[string]any `json:"data"`
+	RequestData   HttpRequest    `json:"request_data"`
+	AutomationURL string         `json:"-"`
 }
 
 type HttpRequest struct {
