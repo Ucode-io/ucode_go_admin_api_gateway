@@ -82,6 +82,6 @@ var (
 	}
 
 	ConvertDocxToPdfUrl                = "https://v2.convertapi.com/convert/docx/to/pdf?Auth="
-	ConvertDocxToPdfSecret             = "secret_M2phGaOMkak05F8L"
+	ConvertDocxToPdfSecret             = "FIfurq7JjengpchT899ytEaHdY78q4nv"
 	TestNodeDocxConvertToPdfServiceUrl = "https://doc-generator.ucode.run/generate-doc"
 )
