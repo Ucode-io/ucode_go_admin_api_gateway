@@ -54,6 +54,9 @@ const (
 	REDIS_WAIT_TIMEOUT     time.Duration = 1 * time.Second
 	REDIS_SLEEP            time.Duration = 100 * time.Millisecond
 
+	GRPC_MAX_CALL_SEND_MSG_SIZE = 100 * 1024 * 1024
+	GRPC_MAX_CALL_RECV_MSG_SIZE = 100 * 1024 * 1024
+
 	TIME_LAYOUT string = "15:04"
 
 	// FaasBaseurl
@@ -82,6 +85,6 @@ var (
 	}
 
 	ConvertDocxToPdfUrl                = "https://v2.convertapi.com/convert/docx/to/pdf?Auth="
-	ConvertDocxToPdfSecret             = "secret_M2phGaOMkak05F8L"
+	ConvertDocxToPdfSecret             = "FIfurq7JjengpchT899ytEaHdY78q4nv"
 	TestNodeDocxConvertToPdfServiceUrl = "https://doc-generator.ucode.run/generate-doc"
 )
