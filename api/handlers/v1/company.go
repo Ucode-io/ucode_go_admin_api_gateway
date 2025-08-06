@@ -32,14 +32,16 @@ func (h *HandlerV1) CreateCompany(c *gin.Context) {
 		return
 	}
 
-	authInfo, _ := h.GetAuthInfo(c)
+	authInfo, err := h.adminAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	companyPKey, err := h.companyServices.Company().Create(
 		c.Request.Context(), &pb.CreateCompanyRequest{
-			Title:       company.Name,
-			Logo:        "",
-			Description: "",
-			OwnerId:     authInfo.GetUserId(),
+			Title:   company.Name,
+			OwnerId: authInfo.GetUserIdAuth(),
 		},
 	)
 	if err != nil {
@@ -59,25 +61,16 @@ func (h *HandlerV1) CreateCompany(c *gin.Context) {
 		return
 	}
 
-	_, err = h.companyServices.Environment().Create(
+	_, err = h.companyServices.Environment().CreateV2(
 		c.Request.Context(), &pb.CreateEnvironmentRequest{
-			ProjectId:    project.GetProjectId(),
+			CompanyId:    companyPKey.GetId(),
+			ProjectId:    project.ProjectId,
+			UserId:       authInfo.GetUserIdAuth(),
+			ClientTypeId: authInfo.GetClientTypeId(),
+			RoleId:       authInfo.GetRoleId(),
 			Name:         "Production",
 			DisplayColor: "#00FF00",
 			Description:  "Production Environment",
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
-	_, err = h.authService.User().AddUserToProject(
-		c.Request.Context(), &auth_service.AddUserToProjectReq{
-			CompanyId: companyPKey.GetId(),
-			ProjectId: project.GetProjectId(),
-			UserId:    authInfo.GetUserId(),
-			RoleId:    authInfo.GetRoleId(),
 		},
 	)
 	if err != nil {
