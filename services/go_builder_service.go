@@ -68,6 +68,7 @@ func NewGoBuilderServiceClient(ctx context.Context, cfg config.Config) (GoBuilde
 			otgrpc.OpenTracingClientInterceptor(opentracing.GlobalTracer())),
 		grpc.WithStreamInterceptor(
 			otgrpc.OpenTracingStreamClientInterceptor(opentracing.GlobalTracer())),
+		grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(config.GRPC_MAX_CALL_RECV_MSG_SIZE), grpc.MaxCallSendMsgSize(config.GRPC_MAX_CALL_SEND_MSG_SIZE)),
 	)
 
 	if err != nil {
@@ -177,13 +178,3 @@ func (g *goBuilderServiceClient) DocxTemplate() nb.DocxTemplateServiceClient {
 func (g *goBuilderServiceClient) Language() nb.LanguageServiceClient {
 	return g.languageService
 }
-
-// func (g *goBuilderServiceClient) GoObjectBuilderConnPool(ctx context.Context) (nb.ObjectBuilderServiceClient, *grpcpool.ClientConn, error) {
-// 	conn, err := g.goObjectBuilderConnPool.Get(ctx)
-// 	if err != nil {
-// 		return nil, nil, err
-// 	}
-// 	service := nb.NewObjectBuilderServiceClient(conn)
-
-// 	return service, conn, nil
-// }

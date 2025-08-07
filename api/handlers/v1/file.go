@@ -124,7 +124,9 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 	var uploadReader io.Reader = object
 	var uploadSize int64 = file.File.Size
 
-	if strings.HasPrefix(contentType, "image/") {
+	isImage := strings.HasPrefix(contentType, "image/")
+	isSVG := strings.Contains(contentType, "svg")
+	if isImage && !isSVG {
 		img, _, err := image.Decode(object)
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())

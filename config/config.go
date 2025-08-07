@@ -43,11 +43,8 @@ type Config struct {
 	CompanyServiceHost string
 	CompanyServicePort string
 
-	ChatServiceGrpcHost string
-	ChatServiceGrpcPort string
-
 	DocGeneratorGrpcHost string
-	DocGeneratorGrpcPort    string
+	DocGeneratorGrpcPort string
 
 	ConvertTemplateServiceGrpcHost string
 	ConvertTemplateServiceGrpcPort string
@@ -79,9 +76,6 @@ type Config struct {
 	ScenarioServiceHost    string
 	ScenarioGRPCPort       string
 	AdminHostForCodeServer string
-
-	NotificationServiceHost string
-	NotificationGRPCPort    string
 
 	GoObjectBuilderServiceHost string
 	GoObjectBuilderGRPCPort    string
@@ -154,6 +148,9 @@ type BaseConfig struct {
 	ProjectUrl             string
 	WebhookSecret          string
 	ConvertDocxToPdfSecret string
+
+	N8NApiKey  string
+	N8NBaseURL string
 }
 
 func BaseLoad() BaseConfig {
@@ -211,6 +208,9 @@ func BaseLoad() BaseConfig {
 	config.ProjectUrl = "https://admin-api.ucode.run"
 	config.WebhookSecret = "X8kJnsNHD9f4nRQfjs72YLSfPqxjG+PWRjxN3KBuDhE="
 
+	config.N8NApiKey = cast.ToString(GetOrReturnDefaultValue("N8N_API_KEY", ""))
+	config.N8NBaseURL = cast.ToString(GetOrReturnDefaultValue("N8N_BASE_URL", "https://n8n.u-code.io"))
+
 	return config
 }
 
@@ -261,14 +261,8 @@ func Load() Config {
 	config.UcodeNamespace = "cp-region-type-id"
 	config.SecretKey = cast.ToString(GetOrReturnDefaultValue("SECRET_KEY", ""))
 
-	config.ChatServiceGrpcHost = cast.ToString(GetOrReturnDefaultValue("CHAT_SERVICE_HOST", ""))
-	config.ChatServiceGrpcPort = cast.ToString(GetOrReturnDefaultValue("CHAT_GRPC_PORT", ":2112"))
-
 	config.DocGeneratorGrpcHost = cast.ToString(GetOrReturnDefaultValue("DOC_GENERATOR_SERVICE_HOST", "localhost"))
 	config.DocGeneratorGrpcPort = cast.ToString(GetOrReturnDefaultValue("DOC_GENERATOR_GRPC_PORT", ":50051"))
-
-	config.NotificationServiceHost = cast.ToString(GetOrReturnDefaultValue("NOTIFICATION_SERVICE_HOST", ""))
-	config.NotificationGRPCPort = cast.ToString(GetOrReturnDefaultValue("NOTIFICATION_GRPC_PORT", ":2001"))
 
 	config.GetRequestRedisHost = cast.ToString(GetOrReturnDefaultValue("GET_REQUEST_REDIS_HOST", ""))
 	config.GetRequestRedisPort = cast.ToString(GetOrReturnDefaultValue("GET_REQUEST_REDIS_PORT", ""))
