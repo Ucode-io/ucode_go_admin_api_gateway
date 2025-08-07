@@ -11,6 +11,7 @@ type ServiceManagerI interface {
 	AuthService() AuthServiceI
 	CompanyService() CompanyServiceI
 	SmsService() SmsServiceI
+	DocGeneratorService() DocGeneratorServiceI
 	FunctionService() FunctionServiceI
 	TemplateService() TemplateServiceI
 	GetBuilderServiceByType(nodeType string) BuilderServiceI
@@ -23,6 +24,7 @@ type grpcClients struct {
 	authService            AuthServiceI
 	companyService         CompanyServiceI
 	smsService             SmsServiceI
+	docGeneratorService    DocGeneratorServiceI
 	functionService        FunctionServiceI
 	templateService        TemplateServiceI
 	goObjectBuilderService GoBuilderServiceI
@@ -54,6 +56,11 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 		return nil, err
 	}
 
+	docGeneratorServiceClient, err := NewDocGeneratorServiceClient(ctx, cfg)
+	if err != nil {
+		return nil, err
+	}
+
 	functionServiceClient, err := NewFunctionServiceClient(ctx, cfg)
 	if err != nil {
 		return nil, err
@@ -75,6 +82,7 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 		highBuilderService:     highBuilderServiceClient,
 		smsService:             smsServiceClient,
 		companyService:         companyServiceClient,
+		docGeneratorService:    docGeneratorServiceClient,
 		functionService:        functionServiceClient,
 		templateService:        templateServiceClient,
 		goObjectBuilderService: goObjectBuilderServiceClient,
@@ -114,6 +122,10 @@ func (g grpcClients) CompanyService() CompanyServiceI {
 
 func (g grpcClients) SmsService() SmsServiceI {
 	return g.smsService
+}
+
+func (g grpcClients) DocGeneratorService() DocGeneratorServiceI {
+	return g.docGeneratorService
 }
 
 func (g grpcClients) FunctionService() FunctionServiceI {

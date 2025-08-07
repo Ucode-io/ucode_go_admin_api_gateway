@@ -46,6 +46,9 @@ type Config struct {
 	ChatServiceGrpcHost string
 	ChatServiceGrpcPort string
 
+	DocGeneratorGrpcHost string
+	DocGeneratorGrpcPort    string
+
 	ConvertTemplateServiceGrpcHost string
 	ConvertTemplateServiceGrpcPort string
 
@@ -260,6 +263,10 @@ func Load() Config {
 
 	config.ChatServiceGrpcHost = cast.ToString(GetOrReturnDefaultValue("CHAT_SERVICE_HOST", ""))
 	config.ChatServiceGrpcPort = cast.ToString(GetOrReturnDefaultValue("CHAT_GRPC_PORT", ":2112"))
+
+	config.DocGeneratorGrpcHost = cast.ToString(GetOrReturnDefaultValue("DOC_GENERATOR_SERVICE_HOST", "localhost"))
+	config.DocGeneratorGrpcPort = cast.ToString(GetOrReturnDefaultValue("DOC_GENERATOR_GRPC_PORT", ":50051"))
+
 	config.NotificationServiceHost = cast.ToString(GetOrReturnDefaultValue("NOTIFICATION_SERVICE_HOST", ""))
 	config.NotificationGRPCPort = cast.ToString(GetOrReturnDefaultValue("NOTIFICATION_GRPC_PORT", ":2001"))
 

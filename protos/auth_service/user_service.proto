@@ -38,7 +38,7 @@ service UserService {
     rpc GetListSetting(GetListSettingReq) returns (Setting) {}
     rpc GetUserByUsername(GetUserByUsernameRequest) returns (User) {}
     rpc GetUserProjects(UserPrimaryKey) returns (GetUserProjectsRes) {}
-    rpc GetUserProjectClientTypes(UserPrimaryKey) returns (GetUserProjectClientTypesResponse) {}
+    rpc GetUserProjectClientTypes(UserInfoPrimaryKey) returns (GetUserProjectClientTypesResponse) {}
 }
 
 

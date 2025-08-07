@@ -34,6 +34,8 @@ func EnterPriceProjectsGrpcSvcs(ctx context.Context, compSrvc services.CompanySe
 				ConvertTemplateServiceGrpcHost: v.CONVERT_TEMPLATE_SERVICE_HOST,
 				ChatServiceGrpcPort:            v.CHAT_GRPC_PORT,
 				ChatServiceGrpcHost:            v.CHAT_SERVICE_HOST,
+				DocGeneratorGrpcHost:           v.DOC_GENERATOR_GRPC_PORT,
+				DocGeneratorGrpcPort:           v.DOC_GENERATOR_SERVICE_HOST,
 				FunctionServicePort:            v.FUNCTION_GRPC_PORT,
 				FunctionServiceHost:            v.FUNCTION_SERVICE_HOST,
 				NotificationGRPCPort:           v.NOTIFICATION_GRPC_PORT,

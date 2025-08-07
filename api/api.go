@@ -368,6 +368,11 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v2Admin.POST("/docx-template/convert/pdf", h.V2.ConvertDocxToPdf)
 	}
 
+	{
+		// HTML TO PDF CONVERTER
+		v2Admin.POST("/html/convert", h.V2.ConvertHtmlToDocxOrPdf)
+	}
+
 	clientV2 := r.Group("/v2")
 	clientV2.Use(h.V2.AuthMiddleware())
 	// items group

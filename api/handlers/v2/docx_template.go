@@ -16,6 +16,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
+	"ucode/ucode_go_api_gateway/genproto/doc_generator_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/logger"
@@ -46,7 +47,6 @@ func (h *HandlerV2) CreateDocxTemplate(c *gin.Context) {
 	var (
 		docxTemplate nb.CreateDocxTemplateRequest
 	)
-
 	if err := c.ShouldBindJSON(&docxTemplate); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
@@ -865,7 +865,6 @@ func (h *HandlerV2) ConvertDocxToPdf(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-
 	objectRequest := models.CommonMessage{
 		Data: map[string]any{
 			"additional_fields": additionalFields,
@@ -877,7 +876,6 @@ func (h *HandlerV2) ConvertDocxToPdf(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
-
 	respGetAll, err := services.GoObjectBuilderService().ObjectBuilder().GetAllForDocx(
 		context.Background(),
 		&nb.CommonMessage{
@@ -890,7 +888,6 @@ func (h *HandlerV2) ConvertDocxToPdf(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-
 	mapV2, err := helper.ConvertStructToMap(respGetAll.Data)
 	if err != nil {
 		h.log.Error("error converting struct to map resp to respNew", logger.Error(err))
@@ -898,43 +895,129 @@ func (h *HandlerV2) ConvertDocxToPdf(c *gin.Context) {
 
 	maps.Copy(mapV2, request.Data)
 
-	reqData := map[string]any{
-		"link":       link,
-		"data":       mapV2,
-		"table_slug": request.TableSlug,
-	}
 
-	jsonData, err := json.Marshal(reqData)
+	structData, err = helper.ConvertMapToStruct(mapV2)
 	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err.Error())
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
 
-	req, err := http.NewRequest(http.MethodPost, config.TestNodeDocxConvertToPdfServiceUrl, bytes.NewBuffer(jsonData))
+	res, err := services.DocGeneratorService().DocumentGenerator().GenerateDocument(context.Background(), &doc_generator_service.GenerateDocumentRequest{
+		Data: structData,
+		Link: link,
+	})
 	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err.Error())
-		return
-	}
-
-	req.Header.Set("Content-Type", "application/json")
-
-	client := http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err.Error())
-		return
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		h.handleResponse(c, status_http.InternalServerError, errors.New("status code is not ok"))
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
 	c.Header("Content-Disposition", "inline; filename=file.pdf")
-	c.Header("Content-Type", resp.Header.Get("Content-Type"))
+	c.Header("Content-Type", "application/pdf")
 
-	_, err = io.Copy(c.Writer, resp.Body)
+	_, err = io.Copy(c.Writer, bytes.NewReader(res.PdfContent))
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Failed to send file")
+		return
+	}
+
+	c.Status(http.StatusOK)
+}
+
+// ConvertHtmlToDocxOrPdf godoc
+// @Security ApiKeyAuth
+// @ID convert_html_to_docx_or_pdf
+// @Router /v2/html/convert [POST]
+// @Summary Convert HTML to DOCX or PDF
+// @Description Convert HTML content to DOCX or PDF format
+// @Tags Template
+// @Accept json
+// @Produce json
+// @Param request body models.HtmlConvertRequest true "HTML Convert Request"
+// @Success 200 {object} status_http.Response{data=string} "Success"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *HandlerV2) ConvertHtmlToDocxOrPdf(c *gin.Context) {
+	var request models.HtmlConvertRequest
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	if request.HtmlContent == "" {
+		h.handleResponse(c, status_http.InvalidArgument, "html content is required")
+		return
+	}
+
+	if request.OutputFormat != "docx" && request.OutputFormat != "pdf" {
+		h.handleResponse(c, status_http.InvalidArgument, "format must be 'docx' or 'pdf'")
+		return
+	}
+	
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, config.ErrProjectIdValid)
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, status_http.BadRequest, config.ErrEnvironmentIdValid)
+		return
+	}
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		resource.GetProjectId(),
+		resource.NodeType,
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	// Convert HTML content to desired format
+	convertResponse, err := services.DocGeneratorService().DocumentGenerator().ConvertHtml(c.Request.Context(), &doc_generator_service.ConvertHtmlRequest{
+		Data:         []byte(request.HtmlContent),
+		InputFormat:  "html",
+		OutputFormat: request.OutputFormat,
+	})
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	if !convertResponse.Success {
+		h.handleResponse(c, status_http.BadRequest, convertResponse.ErrorMessage)
+		return
+	}
+
+	// Set response headers based on output format
+	fileName := fmt.Sprintf("file.%s", request.OutputFormat)
+
+	switch request.OutputFormat {
+	case "pdf":
+		c.Header("Content-Disposition", fmt.Sprintf("inline; filename=%s", fileName))
+		c.Header("Content-Type", "application/pdf")
+	case "docx":
+		c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", fileName))
+		c.Header("Content-Type", "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+	}
+
+	_, err = io.Copy(c.Writer, bytes.NewReader(convertResponse.Data))
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Failed to send file")
 		return
