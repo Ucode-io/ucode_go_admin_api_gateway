@@ -66,6 +66,7 @@ const (
 	// Function Types
 	FUNCTION string = "FUNCTION"
 	KNATIVE  string = "KNATIVE"
+	WORKFLOW string = "WORKFLOW"
 
 	// CustomEventTypes
 	BEFORE string = "before"

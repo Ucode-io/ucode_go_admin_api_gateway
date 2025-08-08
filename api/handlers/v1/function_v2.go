@@ -467,11 +467,11 @@ func (h *HandlerV1) GetAllNewFunctionsForApp(c *gin.Context) {
 	case pb.ResourceType_MONGODB:
 		resp, err := services.GetBuilderServiceByType(resource.NodeType).Function().GetList(
 			c.Request.Context(), &obs.GetAllFunctionsRequest{
-				Search:    c.DefaultQuery("search", ""),
+				Search:    c.Query("search"),
 				Limit:     int32(limit),
 				Offset:    int32(offset),
 				ProjectId: resource.ResourceEnvironmentId,
-				Type:      []string{config.FUNCTION, config.KNATIVE},
+				Type:      []string{config.FUNCTION, config.KNATIVE, config.WORKFLOW},
 			},
 		)
 		if err != nil {
@@ -483,11 +483,11 @@ func (h *HandlerV1) GetAllNewFunctionsForApp(c *gin.Context) {
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().Function().GetList(
 			c.Request.Context(), &nb.GetAllFunctionsRequest{
-				Search:    c.DefaultQuery("search", ""),
+				Search:    c.Query("search"),
 				Limit:     int32(limit),
 				Offset:    int32(offset),
 				ProjectId: resource.ResourceEnvironmentId,
-				Type:      []string{config.FUNCTION, config.KNATIVE},
+				Type:      []string{config.FUNCTION, config.KNATIVE, config.WORKFLOW},
 			},
 		)
 		if err != nil {
