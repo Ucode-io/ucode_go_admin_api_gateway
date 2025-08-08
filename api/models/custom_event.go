@@ -12,6 +12,7 @@ type CreateCustomEventRequest struct {
 	Attributes map[string]any `json:"attributes"`
 	CommitId   string         `json:"commit_id"`
 	CommitGuid string         `json:"commit_guid"`
+	Path       string         `json:"path"`
 }
 
 type CustomEvent struct {
@@ -27,4 +28,5 @@ type CustomEvent struct {
 	Attributes map[string]any `json:"attributes"`
 	CommitId   string         `json:"commit_id"`
 	CommitGuid string         `json:"commit_guid"`
+	Path       string         `json:"path"`
 }

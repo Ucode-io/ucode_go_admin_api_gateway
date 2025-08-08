@@ -86,7 +86,7 @@ func (h *HandlerV2) CreateAutomation(c *gin.Context) {
 				ActionType: customevent.ActionType,
 				Method:     customevent.Method,
 				Attributes: structData,
-				ProjectId:  resource.ResourceEnvironmentId, //added resource id
+				ProjectId:  resource.ResourceEnvironmentId,
 			},
 		)
 
@@ -108,7 +108,8 @@ func (h *HandlerV2) CreateAutomation(c *gin.Context) {
 				ActionType: customevent.ActionType,
 				Method:     customevent.Method,
 				Attributes: structData,
-				ProjectId:  resource.ResourceEnvironmentId, //added resource id
+				ProjectId:  resource.ResourceEnvironmentId,
+				Path:       customevent.Path,
 			},
 		)
 
@@ -261,7 +262,7 @@ func (h *HandlerV2) GetAllAutomation(c *gin.Context) {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).CustomEvent().GetList(
 			c.Request.Context(), &obs.GetCustomEventsListRequest{
-				TableSlug: c.DefaultQuery("table_slug", ""),
+				TableSlug: c.Query("table_slug"),
 				RoleId:    authInfo.GetRoleId(),
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -276,7 +277,7 @@ func (h *HandlerV2) GetAllAutomation(c *gin.Context) {
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().CustomEvent().GetList(
 			c.Request.Context(), &nb.GetCustomEventsListRequest{
-				TableSlug: c.DefaultQuery("table_slug", ""),
+				TableSlug: c.Query("table_slug"),
 				RoleId:    authInfo.GetRoleId(),
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -305,7 +306,9 @@ func (h *HandlerV2) GetAllAutomation(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) UpdateAutomation(c *gin.Context) {
-	var customevent models.CustomEvent
+	var (
+		customevent models.CustomEvent
+	)
 
 	if err := c.ShouldBindJSON(&customevent); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
@@ -386,6 +389,7 @@ func (h *HandlerV2) UpdateAutomation(c *gin.Context) {
 				Method:     customevent.Method,
 				Attributes: structData,
 				ProjectId:  resource.ResourceEnvironmentId,
+				Path:       customevent.Path,
 			},
 		)
 		if err != nil {
