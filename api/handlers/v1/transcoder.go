@@ -8,6 +8,7 @@ import (
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	"ucode/ucode_go_api_gateway/genproto/transcoder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
+	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
 )
@@ -27,8 +28,8 @@ func (h *HandlerV1) TranscoderWebhook(c *gin.Context) {
 	}
 
 	structDate, err := helper.ConvertMapToStruct(map[string]any{
-		"guid":  req.KeyId,
-		"video": fmt.Sprintf("%v/movies/%v/master.m3u8", "https://cdn.u-code.io", req.OutputKey),
+		"guid":        req.KeyId,
+		req.FieldSlug: fmt.Sprintf("https://%v/movies/%v/master.m3u8", h.baseConf.MinioEndpoint, req.OutputKey),
 	})
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
@@ -57,7 +58,7 @@ func (h *HandlerV1) TranscoderWebhook(c *gin.Context) {
 	case 3:
 		_, err = services.GoObjectBuilderService().Items().Update(
 			c.Request.Context(), &nb.CommonMessage{
-				TableSlug:        "transcoder",
+				TableSlug:        req.TableSlug,
 				Data:             structDate,
 				ProjectId:        resourceEnvironment.GetId(),
 				BlockedBuilder:   false,
@@ -85,10 +86,34 @@ func (h *HandlerV1) GetListPipeline(c *gin.Context) {
 		return
 	}
 
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
+		return
+	}
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
 	response, err := h.transcoderService.Pipeline().GetList(c, &transcoder_service.GetListPipelineRequest{
 		Page:      int32(offset),
 		Limit:     int32(limit),
-		ProjectId: "f3752975-d396-4baa-a4fc-54c8cd5bd959",
+		ProjectId: resource.ResourceEnvironmentId,
 	})
 	if err != nil {
 		h.handleError(c, status_http.InternalServerError, err)
