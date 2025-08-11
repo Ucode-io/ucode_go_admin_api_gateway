@@ -16,6 +16,7 @@ type ServiceManagerI interface {
 	TemplateService() TemplateServiceI
 	GetBuilderServiceByType(nodeType string) BuilderServiceI
 	GoObjectBuilderService() GoBuilderServiceI
+	TranscoderService() TranscoderServiceI
 }
 
 type grpcClients struct {
@@ -28,6 +29,7 @@ type grpcClients struct {
 	functionService        FunctionServiceI
 	templateService        TemplateServiceI
 	goObjectBuilderService GoBuilderServiceI
+	transcoderService      TranscoderServiceI
 }
 
 func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, error) {
@@ -76,6 +78,11 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 		return nil, err
 	}
 
+	transcoderServiceClient, err := NewTranscoderServiceClient(ctx, cfg)
+	if err != nil {
+		return nil, err
+	}
+
 	return grpcClients{
 		authService:            authServiceClient,
 		builderService:         builderServiceClient,
@@ -86,6 +93,7 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 		functionService:        functionServiceClient,
 		templateService:        templateServiceClient,
 		goObjectBuilderService: goObjectBuilderServiceClient,
+		transcoderService:      transcoderServiceClient,
 	}, nil
 }
 
@@ -133,4 +141,8 @@ func (g grpcClients) FunctionService() FunctionServiceI {
 }
 func (g grpcClients) TemplateService() TemplateServiceI {
 	return g.templateService
+}
+
+func (g grpcClients) TranscoderService() TranscoderServiceI {
+	return g.transcoderService
 }

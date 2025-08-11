@@ -110,7 +110,17 @@ func (h *HandlerV1) GetListPipeline(c *gin.Context) {
 		return
 	}
 
-	response, err := h.transcoderService.Pipeline().GetList(c, &transcoder_service.GetListPipelineRequest{
+	services, err := h.GetProjectSrvc(
+		c.Request.Context(),
+		resource.GetProjectId(),
+		resource.GetNodeType(),
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	response, err := services.TranscoderService().Pipeline().GetList(c, &transcoder_service.GetListPipelineRequest{
 		Page:      int32(offset),
 		Limit:     int32(limit),
 		ProjectId: resource.ResourceEnvironmentId,
