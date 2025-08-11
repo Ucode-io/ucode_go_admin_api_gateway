@@ -1030,7 +1030,6 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 	var (
 		objectRequest models.CommonMessage
 		resp          *obs.CommonMessage
-		beforeActions []*obs.CustomEvent
 		statusHttp    = status_http.GrpcStatusToHTTP["Ok"]
 		tableSlug     = c.Param("collection")
 	)
@@ -1107,43 +1106,6 @@ func (h *HandlerV1) GetList(c *gin.Context) {
 	}
 
 	redisKey := fmt.Appendf(nil, "%s-%s-%s", tableSlug, structData.String(), resource.ResourceEnvironmentId)
-	fromOfs := c.Query("from-ofs")
-	if fromOfs != "true" {
-		beforeActions, _, err = GetListCustomEvents(models.GetListCustomEventsStruct{
-			TableSlug: tableSlug,
-			RoleId:    "",
-			Method:    "GETLIST",
-			Resource:  resource,
-		},
-			c,
-			h,
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.InvalidArgument, err.Error())
-			return
-		}
-	}
-
-	if len(beforeActions) > 0 {
-		functionName, resp, err := DoInvokeFuntionForGetList(models.DoInvokeFuntionStruct{
-			CustomEvents: beforeActions,
-			TableSlug:    tableSlug,
-			ObjectData:   objectRequest.Data,
-			Method:       "GETLIST",
-			ActionType:   "BEFORE",
-			Resource:     resource,
-		},
-			c,
-			h,
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.InvalidArgument, err.Error()+" in "+functionName)
-			return
-		}
-
-		h.handleResponse(c, statusHttp, map[string]any{"data": resp})
-		return
-	}
 
 	if viewId, ok := objectRequest.Data["builder_service_view_id"].(string); ok {
 		if util.IsValidUUID(viewId) {

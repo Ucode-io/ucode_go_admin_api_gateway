@@ -114,6 +114,10 @@ func (h *HandlerV3) DoInvokeFuntion(request models.DoInvokeFuntionStruct, c *gin
 			invokeFunction models.NewInvokeFunctionRequest
 		)
 
+		if customEvent.Path != "" {
+			path = customEvent.Path
+		}
+
 		data, err := helper.ConvertStructToResponse(customEvent.Attributes)
 		if err != nil {
 			return name, err

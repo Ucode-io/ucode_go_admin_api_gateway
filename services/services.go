@@ -11,10 +11,12 @@ type ServiceManagerI interface {
 	AuthService() AuthServiceI
 	CompanyService() CompanyServiceI
 	SmsService() SmsServiceI
+	DocGeneratorService() DocGeneratorServiceI
 	FunctionService() FunctionServiceI
 	TemplateService() TemplateServiceI
 	GetBuilderServiceByType(nodeType string) BuilderServiceI
 	GoObjectBuilderService() GoBuilderServiceI
+	TranscoderService() TranscoderServiceI
 }
 
 type grpcClients struct {
@@ -23,9 +25,11 @@ type grpcClients struct {
 	authService            AuthServiceI
 	companyService         CompanyServiceI
 	smsService             SmsServiceI
+	docGeneratorService    DocGeneratorServiceI
 	functionService        FunctionServiceI
 	templateService        TemplateServiceI
 	goObjectBuilderService GoBuilderServiceI
+	transcoderService      TranscoderServiceI
 }
 
 func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, error) {
@@ -54,6 +58,11 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 		return nil, err
 	}
 
+	docGeneratorServiceClient, err := NewDocGeneratorServiceClient(ctx, cfg)
+	if err != nil {
+		return nil, err
+	}
+
 	functionServiceClient, err := NewFunctionServiceClient(ctx, cfg)
 	if err != nil {
 		return nil, err
@@ -69,15 +78,22 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 		return nil, err
 	}
 
+	transcoderServiceClient, err := NewTranscoderServiceClient(ctx, cfg)
+	if err != nil {
+		return nil, err
+	}
+
 	return grpcClients{
 		authService:            authServiceClient,
 		builderService:         builderServiceClient,
 		highBuilderService:     highBuilderServiceClient,
 		smsService:             smsServiceClient,
 		companyService:         companyServiceClient,
+		docGeneratorService:    docGeneratorServiceClient,
 		functionService:        functionServiceClient,
 		templateService:        templateServiceClient,
 		goObjectBuilderService: goObjectBuilderServiceClient,
+		transcoderService:      transcoderServiceClient,
 	}, nil
 }
 
@@ -116,9 +132,17 @@ func (g grpcClients) SmsService() SmsServiceI {
 	return g.smsService
 }
 
+func (g grpcClients) DocGeneratorService() DocGeneratorServiceI {
+	return g.docGeneratorService
+}
+
 func (g grpcClients) FunctionService() FunctionServiceI {
 	return g.functionService
 }
 func (g grpcClients) TemplateService() TemplateServiceI {
 	return g.templateService
+}
+
+func (g grpcClients) TranscoderService() TranscoderServiceI {
+	return g.transcoderService
 }

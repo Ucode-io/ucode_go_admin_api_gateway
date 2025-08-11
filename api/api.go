@@ -40,6 +40,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	r.GET("v1/chart", h.V1.GetChart)
 	r.Any("v1/functions/:function-id/run", h.V1.FunctionRun)
 
+	r.Any("/v1/transcoder/webhook", h.V1.TranscoderWebhook)
+
 	global := r.Group("/v1/global")
 	global.Use(h.V1.GlobalAuthMiddleware(cfg))
 	{
@@ -230,6 +232,11 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			metabase.POST("/dashboard", h.V1.GetMetabaseDashboards)
 			metabase.POST("/public-url", h.V1.GetMetabasePublicUrl)
 		}
+
+		transcoder := v1.Group("/transcoder")
+		{
+			transcoder.GET("/pipeline", h.V1.GetListPipeline)
+		}
 	}
 
 	v2 := r.Group("/v2")
@@ -366,6 +373,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v2Admin.GET("/docx-template/fields/list", h.V2.GetAllFieldsDocxTemplate)
 		// docx-constructor
 		v2Admin.POST("/docx-template/convert/pdf", h.V2.ConvertDocxToPdf)
+		// HTML TO PDF CONVERTER
+		v2Admin.POST("/html/convert", h.V2.ConvertHtmlToDocxOrPdf)
 	}
 
 	clientV2 := r.Group("/v2")

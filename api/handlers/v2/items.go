@@ -168,7 +168,6 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 			},
 		)
 
-		// this logic for custom error message, object builder service may be return 400, 404, 500
 		if err != nil {
 			statusHttp = status_http.GrpcStatusToHTTP["Internal"]
 			stat, ok := status.FromError(err)

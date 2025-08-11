@@ -19,16 +19,13 @@ type Handler struct {
 	projectConfs    map[string]config.Config
 	log             logger.LoggerI
 	services        services.ServiceNodesI
-	storage         storage.StorageI
 	companyServices services.CompanyServiceI
 	authService     services.AuthServiceManagerI
-	apikeyService   services.AuthServiceManagerI
 	redis           storage.RedisStorageI
 	V1              v1.HandlerV1
 	V2              v2.HandlerV2
 	V3              v3.HandlerV3
 	cache           *caching.ExpiringLRUCache
-	rateLimiter     *util.ApiKeyRateLimiter
 }
 
 func NewHandler(baseConf config.BaseConfig, projectConfs map[string]config.Config, log logger.LoggerI, svcs services.ServiceNodesI, cmpServ services.CompanyServiceI, authService services.AuthServiceManagerI, redis storage.RedisStorageI, cache *caching.ExpiringLRUCache, limiter *util.ApiKeyRateLimiter) Handler {
