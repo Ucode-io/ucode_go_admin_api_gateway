@@ -32,28 +32,30 @@ import (
 )
 
 type HandlerV1 struct {
-	baseConf        config.BaseConfig
-	projectConfs    map[string]config.Config
-	log             logger.LoggerI
-	services        services.ServiceNodesI
-	companyServices services.CompanyServiceI
-	authService     services.AuthServiceManagerI
-	redis           storage.RedisStorageI
-	cache           *caching.ExpiringLRUCache
-	rateLimiter     *util.ApiKeyRateLimiter
+	baseConf          config.BaseConfig
+	projectConfs      map[string]config.Config
+	log               logger.LoggerI
+	services          services.ServiceNodesI
+	companyServices   services.CompanyServiceI
+	authService       services.AuthServiceManagerI
+	transcoderService services.TranscoderServiceI
+	redis             storage.RedisStorageI
+	cache             *caching.ExpiringLRUCache
+	rateLimiter       *util.ApiKeyRateLimiter
 }
 
-func NewHandlerV1(baseConf config.BaseConfig, projectConfs map[string]config.Config, log logger.LoggerI, svcs services.ServiceNodesI, cmpServ services.CompanyServiceI, authService services.AuthServiceManagerI, redis storage.RedisStorageI, cache *caching.ExpiringLRUCache, limiter *util.ApiKeyRateLimiter) HandlerV1 {
+func NewHandlerV1(baseConf config.BaseConfig, projectConfs map[string]config.Config, log logger.LoggerI, svcs services.ServiceNodesI, cmpServ services.CompanyServiceI, authService services.AuthServiceManagerI, transcoderService services.TranscoderServiceI, redis storage.RedisStorageI, cache *caching.ExpiringLRUCache, limiter *util.ApiKeyRateLimiter) HandlerV1 {
 	return HandlerV1{
-		baseConf:        baseConf,
-		projectConfs:    projectConfs,
-		log:             log,
-		services:        svcs,
-		companyServices: cmpServ,
-		authService:     authService,
-		redis:           redis,
-		cache:           cache,
-		rateLimiter:     limiter,
+		baseConf:          baseConf,
+		projectConfs:      projectConfs,
+		log:               log,
+		services:          svcs,
+		companyServices:   cmpServ,
+		authService:       authService,
+		transcoderService: transcoderService,
+		redis:             redis,
+		cache:             cache,
+		rateLimiter:       limiter,
 	}
 }
 

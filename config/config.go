@@ -43,6 +43,9 @@ type Config struct {
 	CompanyServiceHost string
 	CompanyServicePort string
 
+	TranscoderServiceHost string
+	TranscoderServicePort string
+
 	ConvertTemplateServiceGrpcHost string
 	ConvertTemplateServiceGrpcPort string
 
@@ -231,6 +234,9 @@ func Load() Config {
 
 	config.CompanyServiceHost = cast.ToString(GetOrReturnDefaultValue("COMPANY_SERVICE_HOST", ""))
 	config.CompanyServicePort = cast.ToString(GetOrReturnDefaultValue("COMPANY_GRPC_PORT", ""))
+
+	config.TranscoderServiceHost = cast.ToString(GetOrReturnDefaultValue("TRANSCODER_SERVICE_HOST", "localhost"))
+	config.TranscoderServicePort = cast.ToString(GetOrReturnDefaultValue("TRANSCODER_GRPC_PORT", ":9110"))
 
 	config.HighObjectBuilderServiceHost = cast.ToString(GetOrReturnDefaultValue("OBJECT_BUILDER_SERVICE_HIGHT_HOST", ""))
 	config.HighObjectBuilderGRPCPort = cast.ToString(GetOrReturnDefaultValue("OBJECT_BUILDER_HIGH_GRPC_PORT", ""))

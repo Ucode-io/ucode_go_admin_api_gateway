@@ -40,6 +40,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	r.GET("v1/chart", h.V1.GetChart)
 	r.Any("v1/functions/:function-id/run", h.V1.FunctionRun)
 
+	r.Any("/v1/transcoder/webhook", h.V1.TranscoderWebhook)
+
 	global := r.Group("/v1/global")
 	global.Use(h.V1.GlobalAuthMiddleware(cfg))
 	{
@@ -229,6 +231,11 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		{
 			metabase.POST("/dashboard", h.V1.GetMetabaseDashboards)
 			metabase.POST("/public-url", h.V1.GetMetabasePublicUrl)
+		}
+
+		transcoder := v1.Group("/transcoder")
+		{
+			transcoder.GET("/pipeline", h.V1.GetListPipeline)
 		}
 	}
 
