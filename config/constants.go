@@ -62,6 +62,7 @@ const (
 	// FaasBaseurl
 	OpenFaaSBaseUrl string = "https://ofs.u-code.io/function/"
 	KnativeBaseUrl  string = "knative-fn.u-code.io"
+	AutomationURL   string = "https://yukod.app.n8n.cloud"
 
 	// Function Types
 	FUNCTION string = "FUNCTION"
