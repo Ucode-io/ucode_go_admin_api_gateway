@@ -267,8 +267,8 @@ func Load() Config {
 	config.UcodeNamespace = "cp-region-type-id"
 	config.SecretKey = cast.ToString(GetOrReturnDefaultValue("SECRET_KEY", ""))
 
-	config.DocGeneratorGrpcHost = cast.ToString(GetOrReturnDefaultValue("DOC_GENERATOR_SERVICE_HOST", "localhost"))
-	config.DocGeneratorGrpcPort = cast.ToString(GetOrReturnDefaultValue("DOC_GENERATOR_GRPC_PORT", ":50051"))
+	config.DocGeneratorGrpcHost = cast.ToString(GetOrReturnDefaultValue("NODE_DOC_GENERATOR_SERVICE_HOST", "localhost"))
+	config.DocGeneratorGrpcPort = cast.ToString(GetOrReturnDefaultValue("NODE_DOC_GENERATOR_GRPC_PORT", ":50051"))
 
 	config.GetRequestRedisHost = cast.ToString(GetOrReturnDefaultValue("GET_REQUEST_REDIS_HOST", ""))
 	config.GetRequestRedisPort = cast.ToString(GetOrReturnDefaultValue("GET_REQUEST_REDIS_PORT", ""))
