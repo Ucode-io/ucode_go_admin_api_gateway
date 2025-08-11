@@ -84,6 +84,12 @@ func main() {
 		return
 	}
 
+	transcoderSrvc, err := services.NewTranscoderServiceClient(ctx, uConf)
+	if err != nil {
+		log.Error("[ucode] error while establishing transcoder grpc conn", logger.Error(err))
+		return
+	}
+
 	serviceNodes := services.NewServiceNodes()
 	// u-code grpc services
 	grpcSvcs, err := services.NewGrpcClients(ctx, uConf)
@@ -126,7 +132,7 @@ func main() {
 
 	limiter := util.NewApiKeyRateLimiter(newRedis, config.RATE_LIMITER_RPS_LIMIT, config.RATE_LIMITER_RPS_LIMIT)
 
-	h := handlers.NewHandler(baseConf, mapProjectConfs, log, projectServiceNodes, compSrvc, authSrvc, newRedis, cache, limiter)
+	h := handlers.NewHandler(baseConf, mapProjectConfs, log, projectServiceNodes, compSrvc, authSrvc, transcoderSrvc, newRedis, cache, limiter)
 
 	api.SetUpAPI(r, h, baseConf, tracer)
 	cronjobs := crons.ExecuteCron()

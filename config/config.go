@@ -43,6 +43,9 @@ type Config struct {
 	CompanyServiceHost string
 	CompanyServicePort string
 
+	TranscoderServiceHost string
+	TranscoderServicePort string
+
 	DocGeneratorGrpcHost string
 	DocGeneratorGrpcPort string
 
@@ -235,6 +238,9 @@ func Load() Config {
 	config.CompanyServiceHost = cast.ToString(GetOrReturnDefaultValue("COMPANY_SERVICE_HOST", ""))
 	config.CompanyServicePort = cast.ToString(GetOrReturnDefaultValue("COMPANY_GRPC_PORT", ""))
 
+	config.TranscoderServiceHost = cast.ToString(GetOrReturnDefaultValue("TRANSCODER_SERVICE_HOST", "localhost"))
+	config.TranscoderServicePort = cast.ToString(GetOrReturnDefaultValue("TRANSCODER_GRPC_PORT", ":9110"))
+
 	config.HighObjectBuilderServiceHost = cast.ToString(GetOrReturnDefaultValue("OBJECT_BUILDER_SERVICE_HIGHT_HOST", ""))
 	config.HighObjectBuilderGRPCPort = cast.ToString(GetOrReturnDefaultValue("OBJECT_BUILDER_HIGH_GRPC_PORT", ""))
 
@@ -261,8 +267,8 @@ func Load() Config {
 	config.UcodeNamespace = "cp-region-type-id"
 	config.SecretKey = cast.ToString(GetOrReturnDefaultValue("SECRET_KEY", ""))
 
-	config.DocGeneratorGrpcHost = cast.ToString(GetOrReturnDefaultValue("DOC_GENERATOR_SERVICE_HOST", "localhost"))
-	config.DocGeneratorGrpcPort = cast.ToString(GetOrReturnDefaultValue("DOC_GENERATOR_GRPC_PORT", ":50051"))
+	config.DocGeneratorGrpcHost = cast.ToString(GetOrReturnDefaultValue("NODE_DOC_GENERATOR_SERVICE_HOST", "localhost"))
+	config.DocGeneratorGrpcPort = cast.ToString(GetOrReturnDefaultValue("NODE_DOC_GENERATOR_GRPC_PORT", ":50051"))
 
 	config.GetRequestRedisHost = cast.ToString(GetOrReturnDefaultValue("GET_REQUEST_REDIS_HOST", ""))
 	config.GetRequestRedisPort = cast.ToString(GetOrReturnDefaultValue("GET_REQUEST_REDIS_PORT", ""))
