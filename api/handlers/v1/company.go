@@ -32,7 +32,7 @@ func (h *HandlerV1) CreateCompany(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.adminAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return

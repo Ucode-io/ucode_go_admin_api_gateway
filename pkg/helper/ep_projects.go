@@ -32,6 +32,8 @@ func EnterPriceProjectsGrpcSvcs(ctx context.Context, compSrvc services.CompanySe
 			projectConf := config.Config{
 				ConvertTemplateServiceGrpcPort: v.CONVERT_TEMPLATE_GRPC_PORT,
 				ConvertTemplateServiceGrpcHost: v.CONVERT_TEMPLATE_SERVICE_HOST,
+				DocGeneratorGrpcHost:           v.DOC_GENERATOR_GRPC_PORT,
+				DocGeneratorGrpcPort:           v.DOC_GENERATOR_SERVICE_HOST,
 				FunctionServicePort:            v.FUNCTION_GRPC_PORT,
 				FunctionServiceHost:            v.FUNCTION_SERVICE_HOST,
 				ObjectBuilderGRPCPort:          v.OBJECT_BUILDER_GRPC_PORT,
