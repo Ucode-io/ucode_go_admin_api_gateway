@@ -15,35 +15,30 @@ import (
 )
 
 type Handler struct {
-	baseConf          config.BaseConfig
-	projectConfs      map[string]config.Config
-	log               logger.LoggerI
-	services          services.ServiceNodesI
-	storage           storage.StorageI
-	companyServices   services.CompanyServiceI
-	transcoderService services.TranscoderServiceI
-	authService       services.AuthServiceManagerI
-	apikeyService     services.AuthServiceManagerI
-	redis             storage.RedisStorageI
-	V1                v1.HandlerV1
-	V2                v2.HandlerV2
-	V3                v3.HandlerV3
-	cache             *caching.ExpiringLRUCache
-	rateLimiter       *util.ApiKeyRateLimiter
+	baseConf        config.BaseConfig
+	projectConfs    map[string]config.Config
+	log             logger.LoggerI
+	services        services.ServiceNodesI
+	companyServices services.CompanyServiceI
+	authService     services.AuthServiceManagerI
+	redis           storage.RedisStorageI
+	V1              v1.HandlerV1
+	V2              v2.HandlerV2
+	V3              v3.HandlerV3
+	cache           *caching.ExpiringLRUCache
 }
 
-func NewHandler(baseConf config.BaseConfig, projectConfs map[string]config.Config, log logger.LoggerI, svcs services.ServiceNodesI, cmpServ services.CompanyServiceI, authService services.AuthServiceManagerI, transcoderService services.TranscoderServiceI, redis storage.RedisStorageI, cache *caching.ExpiringLRUCache, limiter *util.ApiKeyRateLimiter) Handler {
+func NewHandler(baseConf config.BaseConfig, projectConfs map[string]config.Config, log logger.LoggerI, svcs services.ServiceNodesI, cmpServ services.CompanyServiceI, authService services.AuthServiceManagerI, redis storage.RedisStorageI, cache *caching.ExpiringLRUCache, limiter *util.ApiKeyRateLimiter) Handler {
 	return Handler{
-		baseConf:          baseConf,
-		projectConfs:      projectConfs,
-		log:               log,
-		services:          svcs,
-		companyServices:   cmpServ,
-		authService:       authService,
-		transcoderService: transcoderService,
-		redis:             redis,
-		V1:                v1.NewHandlerV1(baseConf, projectConfs, log, svcs, cmpServ, authService, transcoderService, redis, cache, limiter),
-		V2:                v2.NewHandlerV2(baseConf, projectConfs, log, svcs, cmpServ, authService, redis, cache, limiter),
+		baseConf:        baseConf,
+		projectConfs:    projectConfs,
+		log:             log,
+		services:        svcs,
+		companyServices: cmpServ,
+		authService:     authService,
+		redis:           redis,
+		V1:              v1.NewHandlerV1(baseConf, projectConfs, log, svcs, cmpServ, authService, redis, cache, limiter),
+		V2:              v2.NewHandlerV2(baseConf, projectConfs, log, svcs, cmpServ, authService, redis, cache, limiter),
 		V3: v3.NewHandlerV3(&v3.HandlerV3Config{
 			BaseConf:        baseConf,
 			ProjectConfs:    projectConfs,
