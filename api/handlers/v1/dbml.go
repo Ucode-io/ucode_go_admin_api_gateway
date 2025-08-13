@@ -50,9 +50,6 @@ func (h *HandlerV1) DbmlToUcode(c *gin.Context) {
 		return
 	}
 
-	qqqqq, _ := json.Marshal(req)
-	fmt.Println("DbmlToUcode request:", string(qqqqq))
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, config.ErrProjectIdValid)

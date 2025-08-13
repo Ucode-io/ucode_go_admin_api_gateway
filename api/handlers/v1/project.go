@@ -33,7 +33,7 @@ func (h *HandlerV1) GetCompanyProjectById(c *gin.Context) {
 	}
 
 	resp, err := h.companyServices.Project().GetById(
-		context.Background(),
+		c.Request.Context(),
 		&company_service.GetProjectByIdRequest{
 			ProjectId: projectId.(string),
 			CompanyId: c.Query("company_id"),
@@ -76,25 +76,16 @@ func (h *HandlerV1) GetCompanyProjectList(c *gin.Context) {
 
 	authInfo, _ := h.GetAuthAdminInfo(c)
 	userProjects, err := h.authService.User().GetUserProjects(context.Background(), &auth_service.UserPrimaryKey{
-		Id: authInfo.GetUserId(),
+		Id: authInfo.GetUserIdAuth(),
 	})
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	if len(userProjects.Companies) == 0 {
-		userProjects, err = h.authService.User().GetUserProjects(context.Background(), &auth_service.UserPrimaryKey{
-			Id: authInfo.UserIdAuth,
-		})
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-	}
 
 	var projectIds []string
 	for _, userProject := range userProjects.GetCompanies() {
-		if userProject.GetId() == c.DefaultQuery("company_id", "") {
+		if userProject.GetId() == c.Query("company_id") {
 			projectIds = userProject.GetProjectIds()
 		}
 	}
@@ -104,8 +95,8 @@ func (h *HandlerV1) GetCompanyProjectList(c *gin.Context) {
 		&company_service.GetProjectListRequest{
 			Limit:     int32(limit),
 			Offset:    int32(offset),
-			Search:    c.DefaultQuery("search", ""),
-			CompanyId: c.DefaultQuery("company_id", ""),
+			Search:    c.Query("search"),
+			CompanyId: c.Query("company_id"),
 		},
 	)
 
@@ -146,9 +137,11 @@ func (h *HandlerV1) GetCompanyProjectList(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) UpdateCompanyProject(c *gin.Context) {
-	var project company_service.Project
+	var (
+		project   company_service.Project
+		projectId = c.Param("project_id")
+	)
 
-	projectId := c.Param("project_id")
 	project.ProjectId = projectId
 
 	err := c.ShouldBindJSON(&project)
@@ -157,10 +150,7 @@ func (h *HandlerV1) UpdateCompanyProject(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.Project().Update(
-		context.Background(),
-		&project,
-	)
+	resp, err := h.companyServices.Project().Update(c.Request.Context(), &project)
 
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())

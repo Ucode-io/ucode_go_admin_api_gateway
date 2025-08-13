@@ -122,7 +122,6 @@ x-api-key = %s
 
 	}
 
-	fmt.Println("content", content)
 	resp, err := sendAnthropicRequest(content)
 	fmt.Println("************ MCP Response ************", resp)
 	if err != nil {
