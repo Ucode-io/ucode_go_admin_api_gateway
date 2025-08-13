@@ -235,6 +235,11 @@ func (h *HandlerV3) GetAllMenus(c *gin.Context) {
 		return
 	}
 
+	roleId := c.Query("role_id")
+	if len(roleId) == 0 {
+		roleId = authInfo.GetRoleId()
+	}
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err := services.GetBuilderServiceByType(resource.NodeType).Menu().GetAll(
@@ -244,7 +249,7 @@ func (h *HandlerV3) GetAllMenus(c *gin.Context) {
 				Search:    c.DefaultQuery("search", ""),
 				ProjectId: resource.ResourceEnvironmentId,
 				ParentId:  c.DefaultQuery("parent_id", ""),
-				RoleId:    authInfo.GetRoleId(),
+				RoleId:    roleId,
 				TableId:   c.DefaultQuery("table_id", ""),
 			},
 		)
@@ -261,7 +266,7 @@ func (h *HandlerV3) GetAllMenus(c *gin.Context) {
 				Search:    c.DefaultQuery("search", ""),
 				ProjectId: resource.ResourceEnvironmentId,
 				ParentId:  c.DefaultQuery("parent_id", ""),
-				RoleId:    authInfo.GetRoleId(),
+				RoleId:    roleId,
 				TableId:   c.DefaultQuery("table_id", ""),
 			},
 		)
