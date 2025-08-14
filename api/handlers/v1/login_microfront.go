@@ -3,7 +3,6 @@ package v1
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -137,7 +136,6 @@ func (h *HandlerV1) GetLoginMicroFrontBySubdomain(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	fmt.Println("Resp->", resp)
 
 	if resp.ProjectId == "" || resp.EnvironmentId == "" {
 		h.handleResponse(c, status_http.OK, models.MicrofrontForLoginPage{})
@@ -167,11 +165,9 @@ func (h *HandlerV1) GetLoginMicroFrontBySubdomain(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("Resource type->", resource.ResourceType)
 	functionResp := &obs.Function{}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		fmt.Println("I am inside mongodb")
 		functionResp, err = services.GetBuilderServiceByType(resource.NodeType).Function().GetSingle(context.Background(), &obs.FunctionPrimaryKey{
 			Id:        resp.MicrofrontId,
 			ProjectId: resource.ResourceEnvironmentId,
