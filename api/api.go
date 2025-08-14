@@ -42,12 +42,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 	r.Any("/v1/transcoder/webhook", h.V1.TranscoderWebhook)
 
-	global := r.Group("/v1/global")
-	global.Use(h.V1.GlobalAuthMiddleware(cfg))
-	{
-		global.GET("/template", h.V1.GetGlobalProjectTemplate)
-	}
-
 	v1 := r.Group("/v1")
 	// @securityDefinitions.apikey ApiKeyAuth
 	// @in header
@@ -106,16 +100,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1.POST("/object/excel/:collection", h.V1.GetListInExcel)
 		v1.POST("/object-upsert/:collection", h.V1.UpsertObject)
 		v1.PUT("/object/multiple-update/:collection", h.V1.MultipleUpdateObject)
-		v1.POST("/object/get-financial-analytics/:collection", h.V1.GetFinancialAnalytics)
-		v1.POST("/object/get-list-aggregate/:collection", h.V1.GetListAggregate)
-		v1.POST("/object/get-list-without-relation/:collection", h.V1.GetListWithOutRelation)
-
-		// permission
-		v1.POST("/permission-upsert/:app_id", h.V1.UpsertPermissionsByAppId)
-		v1.GET("/permission-get-all/:role_id", h.V1.GetAllPermissionByRoleId)
-		v1.GET("/field-permission/:role_id/:collection", h.V1.GetFieldPermissions)
-		v1.GET("/action-permission/:role_id/:collection", h.V1.GetActionPermissions)
-		v1.GET("/view-relation-permission/:role_id/:collection", h.V1.GetViewRelationPermissions)
 
 		//many-to-many
 		v1.PUT("/many-to-many", h.V1.AppendManyToMany)
@@ -127,13 +111,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1.GET("/html-template", h.V1.GetHtmlTemplateList)
 		v1.PUT("/html-template", h.V1.UpdateHtmlTemplate)
 		v1.DELETE("/html-template/:html_template_id", h.V1.DeleteHtmlTemplate)
-
-		// document
-		v1.POST("/document", h.V1.CreateDocument)
-		v1.GET("/document/:document_id", h.V1.GetSingleDocument)
-		v1.GET("/document", h.V1.GetDocumentList)
-		v1.PUT("/document", h.V1.UpdateDocument)
-		v1.DELETE("/document/:document_id", h.V1.DeleteDocument)
 
 		// function
 		v1.POST("/function", h.V1.CreateFunction)
@@ -150,27 +127,17 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		// Excel Reader
 		v1.GET("/excel/:excel_id", h.V1.ExcelReader)
 		v1.POST("/excel/excel_to_db/:excel_id", h.V1.ExcelToDb)
-		v1.POST("/export-to-json", h.V1.ExportToJSON)
-		v1.POST("import-from-json", h.V1.ImportFromJSON)
 
 		// template
-		v1.POST("/template-folder", h.V1.CreateTemplateFolder)
-		v1.GET("/template-folder/:template-folder-id", h.V1.GetSingleTemplateFolder)
-		v1.PUT("/template-folder", h.V1.UpdateTemplateFolder)
-		v1.DELETE("/template-folder/:template-folder-id", h.V1.DeleteTemplateFolder)
-		v1.GET("/template-folder", h.V1.GetListTemplateFolder)
-		v1.GET("/template-folder/commits/:template-folder-id", h.V1.GetTemplateFolderCommits)
 		v1.POST("/template", h.V1.CreateTemplate)
 		v1.GET("/template/:template-id", h.V1.GetSingleTemplate)
 		v1.PUT("/template", h.V1.UpdateTemplate)
 		v1.DELETE("/template/:template-id", h.V1.DeleteTemplate)
 		v1.GET("/template", h.V1.GetListTemplate)
-		v1.GET("/template/commits/:template-id", h.V1.GetTemplateCommits)
 
 		// HTML TO PDF CONVERTER
 		v1.POST("/html-to-pdfV2", h.V1.ConvertHtmlToPdfV2)
 		v1.POST("/template-to-htmlV2", h.V1.ConvertTemplateToHtmlV2)
-		v1.POST("/template-to-htmlV3", h.V1.ConvertTemplateToHtmlV3)
 
 		// HTML TO PDF CONVERTER
 		v1.POST("/html-to-pdf", h.V1.ConvertHtmlToPdf)
@@ -242,10 +209,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	v2 := r.Group("/v2")
 	v2.Use(h.V1.AuthMiddleware(cfg))
 	{
-		v2.GET("/language-json", h.V1.GetLanguageJson)
 		v2.POST("/object/get-list/:collection", h.V1.GetListV2)
 		v2.PUT("/update-with/:collection", h.V1.UpdateWithParams)
-		v2.POST("/erd", h.V2.UploadERD)
 
 	}
 
@@ -293,9 +258,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			company.GET("/:company_id/projects", h.V1.ListCompanyProjects)
 			company.POST("/:company_id/projects", h.V1.CreateCompanyProject)
 		}
-
-		// project settings
-		v1Admin.GET("/project/setting", h.V1.GetAllSettings)
 
 		// project resource
 		v1Admin.POST("/company/project/resource", h.V1.AddProjectResource)
@@ -445,22 +407,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			v2Menus.POST("", h.V2.CreateMenu)
 			v2Menus.DELETE("/:id", h.V2.DeleteMenu)
 			v2Menus.PUT("/menu-order", h.V2.UpdateMenuOrder)
-
-			v2Menus.POST("/menu-settings", h.V2.CreateMenuSettings)
-			v2Menus.PUT("/menu-settings", h.V2.UpdateMenuSettings)
-
-			v2Menus.GET("/menu-template", h.V2.GetAllMenuTemplates)
-			v2Menus.GET("/menu-template/:id", h.V2.GetMenuTemplateByID)
-			v2Menus.PUT("/menu-template", h.V2.UpdateMenuTemplate)
-			v2Menus.POST("/menu-template", h.V2.CreateMenuTemplate)
-			v2Menus.DELETE("/menu-template", h.V2.DeleteMenuTemplate)
 		}
 
-		// user group
-		v2User := v2Version.Group("/user")
-		{
-			v2User.GET("/:id/menu-settings", h.V2.GetMenuSettingByUserID)
-		}
 		// view group
 		v2View := v2Version.Group("/views")
 		{
@@ -491,24 +439,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			v2Relations.GET("/:collection/cascading", h.V2.GetRelationCascading)
 			v2Relations.PUT("/:collection", h.V2.UpdateRelation)
 			v2Relations.DELETE("/:collection/:id", h.V2.DeleteRelation)
-		}
-
-		// utils
-		v2Utils := v2Version.Group("/utils")
-		{
-			v2Utils.POST("/export/:collection/html-to-pdf", h.V2.ConvertHtmlToPdf)
-			v2Utils.POST("/export/:collection/template-to-html", h.V2.ConvertTemplateToHtml)
-			v2Utils.POST("/export/:collection", h.V2.ExportData)
-		}
-
-		// folder groups
-		v2FolderGroups := v2Version.Group("folder-group")
-		{
-			v2FolderGroups.POST("", h.V2.CreateFolderGroup)
-			v2FolderGroups.GET("/:id", h.V2.GetFolderGroupById)
-			v2FolderGroups.GET("", h.V2.GetAllFolderGroups)
-			v2FolderGroups.PUT("", h.V2.UpdateFolderGroup)
-			v2FolderGroups.DELETE("/:id", h.V2.DeleteFolderGroup)
 		}
 
 		v2Files := v2Version.Group("/files")
