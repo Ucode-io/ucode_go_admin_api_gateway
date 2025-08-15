@@ -259,6 +259,9 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			company.POST("/:company_id/projects", h.V1.CreateCompanyProject)
 		}
 
+		// project settings
+		v1Admin.GET("/project/setting", h.V1.GetAllSettings)
+
 		// project resource
 		v1Admin.POST("/company/project/resource", h.V1.AddProjectResource)
 		v1Admin.POST("/company/project/create-resource", h.V1.CreateProjectResource)
