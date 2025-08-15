@@ -26,7 +26,6 @@ require (
 	github.com/HugoSmits86/nativewebp v1.2.0
 	github.com/SebastiaanKlippert/go-wkhtmltopdf v1.9.3
 	github.com/aws/aws-sdk-go v1.55.5
-	github.com/baxromumarov/ucode-sdk v0.0.3
 	github.com/eclipse/paho.mqtt.golang v1.5.0
 	github.com/go-git/go-git/v5 v5.12.0
 	github.com/go-redis/redis/v8 v8.11.5
@@ -63,7 +62,6 @@ require (
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
-	github.com/fatih/color v1.17.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.8 // indirect
 	github.com/gin-contrib/sse v1.0.0 // indirect
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
@@ -84,7 +82,6 @@ require (
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/manveru/gobdd v0.0.0-20131210092515-f1a17fdd710b // indirect
-	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/minio/md5-simd v1.1.2 // indirect
 	github.com/minio/sha256-simd v1.0.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect

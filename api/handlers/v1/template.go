@@ -73,11 +73,7 @@ func (h *HandlerV1) CreateTemplate(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -92,6 +88,8 @@ func (h *HandlerV1) CreateTemplate(c *gin.Context) {
 		h.handleResponse(c, status_http.InternalServerError, err.Error())
 		return
 	}
+
+	
 
 	template.CommitId = uuID.String()
 	template.VersionId = "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88"
