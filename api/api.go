@@ -102,6 +102,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1.POST("/object/excel/:collection", h.V1.GetListInExcel)
 		v1.POST("/object-upsert/:collection", h.V1.UpsertObject)
 		v1.PUT("/object/multiple-update/:collection", h.V1.MultipleUpdateObject)
+		v1.POST("/object/get-list-aggregate/:collection", h.V1.GetListAggregate)
 
 		//many-to-many
 		v1.PUT("/many-to-many", h.V1.AppendManyToMany)
