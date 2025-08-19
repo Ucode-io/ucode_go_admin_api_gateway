@@ -48,6 +48,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	// @name Authorization
 	v1.Use(h.V1.AuthMiddleware(cfg))
 	{
+		// v1.Any("/tusd/*any", gin.WrapH(http.StripPrefix("/v1/tusd/", h.V2.Tusd())))
+
 		v1.POST("/menu-settings", h.V1.CreateMenuSettings)
 		v1.PUT("/menu-settings", h.V1.UpdateMenuSettings)
 		v1.GET("/menu-settings", h.V1.GetAllMenuSettings)
