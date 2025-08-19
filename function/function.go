@@ -50,7 +50,7 @@ func ExecKnative(path, name string, req models.NewInvokeFunctionRequest) (string
 }
 
 func ExecWorkflow(path, name string, req models.NewInvokeFunctionRequest) (string, error) {
-	url := fmt.Sprintf("%s/webhook/%s", config.AutomationURL, path)
+	url := fmt.Sprintf("%s/webhook-test/%s", config.AutomationURL, path)
 	resp, err := util.DoRequest(url, http.MethodPost, req)
 	if err != nil {
 		return name, err
