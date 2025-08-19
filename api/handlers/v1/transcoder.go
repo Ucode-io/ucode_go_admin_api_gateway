@@ -124,6 +124,11 @@ func (h *HandlerV1) GetListPipeline(c *gin.Context) {
 		Page:      int32(offset),
 		Limit:     int32(limit),
 		ProjectId: resource.ResourceEnvironmentId,
+		OrderBy:   c.Query("order_by"),
+		Order:     c.Query("order"),
+		FromDate:  c.Query("from_date"),
+		ToDate:    c.Query("to_date"),
+		Search:    c.Query("search"),
 	})
 	if err != nil {
 		h.handleError(c, status_http.InternalServerError, err)
