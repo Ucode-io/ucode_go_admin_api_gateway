@@ -1,7 +1,6 @@
 package v2
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"time"
@@ -119,7 +118,7 @@ func (h *HandlerV2) CreateCollection(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Table().Create(
-			context.Background(),
+			c.Request.Context(),
 			&table,
 		)
 
@@ -192,7 +191,7 @@ func (h *HandlerV2) GetSingleCollection(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Table().GetByID(
-			context.Background(),
+			c.Request.Context(),
 			&obs.TablePrimaryKey{
 				Id:        tableID,
 				ProjectId: resource.ResourceEnvironmentId,
@@ -280,7 +279,7 @@ func (h *HandlerV2) GetAllCollections(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err := services.GetBuilderServiceByType(resource.NodeType).Table().GetAll(
-			context.Background(),
+			c.Request.Context(),
 			&obs.GetAllTablesRequest{
 				Limit:        int32(limit),
 				Offset:       int32(offset),
@@ -298,7 +297,7 @@ func (h *HandlerV2) GetAllCollections(c *gin.Context) {
 		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().Table().GetAll(
-			context.Background(),
+			c.Request.Context(),
 			&nb.GetAllTablesRequest{
 				Limit:        int32(limit),
 				Offset:       int32(offset),
@@ -397,7 +396,7 @@ func (h *HandlerV2) UpdateCollection(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Table().Update(
-			context.Background(),
+			c.Request.Context(),
 			&obs.UpdateTableRequest{
 				Id:                table.Id,
 				Description:       table.Description,
@@ -505,7 +504,7 @@ func (h *HandlerV2) DeleteCollection(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Table().Delete(
-			context.Background(),
+			c.Request.Context(),
 			&obs.TablePrimaryKey{
 				Id:         tableID,
 				ProjectId:  resource.ResourceEnvironmentId,

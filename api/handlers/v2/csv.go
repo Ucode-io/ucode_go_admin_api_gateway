@@ -1,7 +1,6 @@
 package v2
 
 import (
-	"context"
 	"errors"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -68,7 +67,7 @@ func (h *HandlerV2) GetListInCSV(c *gin.Context) {
 	}
 
 	resp, err := services.GoObjectBuilderService().CSV().GetListInCSV(
-		context.Background(),
+		c.Request.Context(),
 		&nb.CommonMessage{
 			TableSlug: c.Param("collection"),
 			Data:      structData,

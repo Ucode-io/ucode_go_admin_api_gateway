@@ -2,7 +2,6 @@ package v2
 
 import (
 	"bytes"
-	"context"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -229,7 +228,7 @@ func (h *HandlerV2) CreateDocxTemplate(c *gin.Context) {
 
 		defaultBucket := "docs"
 
-		if _, err = minioClient.FPutObject(context.Background(), defaultBucket, docxFileName, dst+"/"+docxFileName, minio.PutObjectOptions{}); err != nil {
+		if _, err = minioClient.FPutObject(c.Request.Context(), defaultBucket, docxFileName, dst+"/"+docxFileName, minio.PutObjectOptions{}); err != nil {
 			err = os.Remove(dst + "/" + docxFileName)
 			h.handleResponse(c, status_http.BadRequest, err.Error())
 			return
@@ -239,7 +238,7 @@ func (h *HandlerV2) CreateDocxTemplate(c *gin.Context) {
 			h.handleResponse(c, status_http.BadRequest, err.Error())
 		}
 
-		if _, err = minioClient.FPutObject(context.Background(), defaultBucket, pdfFileName, dst+"/"+pdfFileName, minio.PutObjectOptions{}); err != nil {
+		if _, err = minioClient.FPutObject(c.Request.Context(), defaultBucket, pdfFileName, dst+"/"+pdfFileName, minio.PutObjectOptions{}); err != nil {
 			err = os.Remove(dst + "/" + pdfFileName)
 			h.handleResponse(c, status_http.BadRequest, err.Error())
 			return
@@ -254,7 +253,7 @@ func (h *HandlerV2) CreateDocxTemplate(c *gin.Context) {
 	}
 
 	res, err := services.GoObjectBuilderService().DocxTemplate().Create(
-		context.Background(),
+		c.Request.Context(),
 		&docxTemplate,
 	)
 
@@ -322,7 +321,7 @@ func (h *HandlerV2) GetSingleDocxTemplate(c *gin.Context) {
 	}
 
 	res, err := services.GoObjectBuilderService().DocxTemplate().GetByID(
-		context.Background(),
+		c.Request.Context(),
 		&nb.DocxTemplatePrimaryKey{
 			Id:        docxTemplateId,
 			ProjectId: resource.ResourceEnvironmentId,
@@ -536,7 +535,7 @@ func (h *HandlerV2) UpdateDocxTemplate(c *gin.Context) {
 
 		defaultBucket := "docs"
 
-		if _, err = minioClient.FPutObject(context.Background(), defaultBucket, docxFileName, dst+"/"+docxFileName, minio.PutObjectOptions{}); err != nil {
+		if _, err = minioClient.FPutObject(c.Request.Context(), defaultBucket, docxFileName, dst+"/"+docxFileName, minio.PutObjectOptions{}); err != nil {
 			err = os.Remove(dst + "/" + docxFileName)
 			h.handleResponse(c, status_http.BadRequest, err.Error())
 			return
@@ -546,7 +545,7 @@ func (h *HandlerV2) UpdateDocxTemplate(c *gin.Context) {
 			h.log.Error("Error removing file", logger.Error(err))
 		}
 
-		if _, err = minioClient.FPutObject(context.Background(), defaultBucket, pdfFileName, dst+"/"+pdfFileName, minio.PutObjectOptions{}); err != nil {
+		if _, err = minioClient.FPutObject(c.Request.Context(), defaultBucket, pdfFileName, dst+"/"+pdfFileName, minio.PutObjectOptions{}); err != nil {
 			err = os.Remove(dst + "/" + pdfFileName)
 			h.handleResponse(c, status_http.BadRequest, err.Error())
 			return
@@ -561,7 +560,7 @@ func (h *HandlerV2) UpdateDocxTemplate(c *gin.Context) {
 	}
 
 	res, err := services.GoObjectBuilderService().DocxTemplate().Update(
-		context.Background(),
+		c.Request.Context(),
 		&docxTemplate,
 	)
 
@@ -630,7 +629,7 @@ func (h *HandlerV2) DeleteDocxTemplate(c *gin.Context) {
 	}
 
 	res, err := services.GoObjectBuilderService().DocxTemplate().Delete(
-		context.Background(),
+		c.Request.Context(),
 		&nb.DocxTemplatePrimaryKey{
 			Id:        docxTemplateId,
 			ProjectId: resource.GetResourceEnvironmentId(),
@@ -709,7 +708,7 @@ func (h *HandlerV2) GetListDocxTemplate(c *gin.Context) {
 	}
 
 	res, err := services.GoObjectBuilderService().DocxTemplate().GetAll(
-		context.Background(),
+		c.Request.Context(),
 		&nb.GetAllDocxTemplateRequest{
 			ProjectId:  resource.GetResourceEnvironmentId(),
 			TableSlug:  c.Query("table-slug"),
@@ -778,7 +777,7 @@ func (h *HandlerV2) GetAllFieldsDocxTemplate(c *gin.Context) {
 	}
 
 	res, err := services.GoObjectBuilderService().ObjectBuilder().GetAllFieldsForDocx(
-		context.Background(),
+		c.Request.Context(),
 		&nb.CommonMessage{
 			TableSlug: c.DefaultQuery("table-slug", ""),
 			ProjectId: resource.ResourceEnvironmentId,
@@ -877,7 +876,7 @@ func (h *HandlerV2) ConvertDocxToPdf(c *gin.Context) {
 		return
 	}
 	respGetAll, err := services.GoObjectBuilderService().ObjectBuilder().GetAllForDocx(
-		context.Background(),
+		c.Request.Context(),
 		&nb.CommonMessage{
 			TableSlug: request.TableSlug,
 			Data:      structData,
@@ -895,14 +894,13 @@ func (h *HandlerV2) ConvertDocxToPdf(c *gin.Context) {
 
 	maps.Copy(mapV2, request.Data)
 
-
 	structData, err = helper.ConvertMapToStruct(mapV2)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
 
-	res, err := services.DocGeneratorService().DocumentGenerator().GenerateDocument(context.Background(), &doc_generator_service.GenerateDocumentRequest{
+	res, err := services.DocGeneratorService().DocumentGenerator().GenerateDocument(c.Request.Context(), &doc_generator_service.GenerateDocumentRequest{
 		Data: structData,
 		Link: link,
 	})
@@ -953,7 +951,7 @@ func (h *HandlerV2) ConvertHtmlToDocxOrPdf(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, "format must be 'docx' or 'pdf'")
 		return
 	}
-	
+
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, config.ErrProjectIdValid)

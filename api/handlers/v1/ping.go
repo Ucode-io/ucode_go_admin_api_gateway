@@ -33,20 +33,21 @@ func (h *HandlerV1) Ping(c *gin.Context) {
 		offset        = 0
 	)
 
-	if service == "company_service" {
+	switch service {
+	case "company_service":
 		_, err := h.companyServices.CompanyPing().Ping(c.Request.Context(), &pb.PingRequest{})
 		if err != nil {
 			h.handleResponse(c, status_http.InternalServerError, err.Error())
 			return
 		}
-	} else if service == "auth_service" {
+	case "auth_service":
 		_, err := h.authService.AuthPing().Ping(c.Request.Context(), &auth_service.PingRequest{})
 		if err != nil {
 			h.handleResponse(c, status_http.InternalServerError, err.Error())
 			return
 		}
 
-	} else if service == "object_builder_service" {
+	case "object_builder_service":
 		resource, err := h.companyServices.ServiceResource().GetSingle(
 			c.Request.Context(), &pb.GetSingleServiceResourceReq{
 				ProjectId:     projectId,
@@ -77,7 +78,7 @@ func (h *HandlerV1) Ping(c *gin.Context) {
 			return
 		}
 
-	} else if service == "function_service" {
+	case "function_service":
 		resource, err := h.companyServices.ServiceResource().GetSingle(
 			c.Request.Context(), &pb.GetSingleServiceResourceReq{
 				ProjectId:     projectId,

@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"context"
 	"errors"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
@@ -48,7 +47,7 @@ func (h *HandlerV1) AddDataToVariableResource(c *gin.Context) {
 	request.EnvironmentId = environmentId.(string)
 
 	resp, err := h.companyServices.Resource().CreateVariableResource(
-		context.Background(),
+		c.Request.Context(),
 		request,
 	)
 	if err != nil {
@@ -98,7 +97,7 @@ func (h *HandlerV1) UpdateVariableResource(c *gin.Context) {
 	request.EnvironmentId = environmentId.(string)
 
 	resp, err := h.companyServices.Resource().UpdateVariableResource(
-		context.Background(),
+		c.Request.Context(),
 		request,
 	)
 
@@ -145,7 +144,7 @@ func (h *HandlerV1) GetListVariableResource(c *gin.Context) {
 	request.ProjectResourceId = c.Param("project-resource-id")
 
 	resp, err := h.companyServices.Resource().GetVariableResourceList(
-		context.Background(),
+		c.Request.Context(),
 		request,
 	)
 
@@ -194,7 +193,7 @@ func (h *HandlerV1) GetSingleVariableResource(c *gin.Context) {
 	request.Id = c.DefaultQuery("id", "")
 
 	resp, err := h.companyServices.Resource().GetSingleVariableResource(
-		context.Background(),
+		c.Request.Context(),
 		request,
 	)
 
