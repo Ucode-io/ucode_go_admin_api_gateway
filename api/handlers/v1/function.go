@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"context"
 	"errors"
 	"ucode/ucode_go_api_gateway/api/models"
 	custom "ucode/ucode_go_api_gateway/function"
@@ -78,7 +77,7 @@ func (h *HandlerV1) CreateFunction(c *gin.Context) {
 	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Function().Create(
-		context.Background(),
+		c.Request.Context(),
 		&obs.CreateFunctionRequest{
 			Path:        function.Path,
 			Name:        function.Name,
@@ -154,7 +153,7 @@ func (h *HandlerV1) GetFunctionByID(c *gin.Context) {
 	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Function().GetSingle(
-		context.Background(),
+		c.Request.Context(),
 		&obs.FunctionPrimaryKey{
 			Id:        functionID,
 			ProjectId: resource.ResourceEnvironmentId,
@@ -228,7 +227,7 @@ func (h *HandlerV1) GetAllFunctions(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err := services.GetBuilderServiceByType(resource.NodeType).Function().GetList(
-			context.Background(),
+			c.Request.Context(),
 			&obs.GetAllFunctionsRequest{
 				Search:    c.DefaultQuery("search", ""),
 				Limit:     int32(limit),
@@ -243,7 +242,7 @@ func (h *HandlerV1) GetAllFunctions(c *gin.Context) {
 		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().Function().GetList(
-			context.Background(),
+			c.Request.Context(),
 			&nb.GetAllFunctionsRequest{
 				Search:    c.DefaultQuery("search", ""),
 				Limit:     int32(limit),
@@ -318,7 +317,7 @@ func (h *HandlerV1) UpdateFunction(c *gin.Context) {
 	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Function().Update(
-		context.Background(),
+		c.Request.Context(),
 		&obs.Function{
 			Id:          function.ID,
 			Description: function.Description,
@@ -395,7 +394,7 @@ func (h *HandlerV1) DeleteFunction(c *gin.Context) {
 	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).Function().Delete(
-		context.Background(),
+		c.Request.Context(),
 		&obs.FunctionPrimaryKey{
 			Id:        functionID,
 			ProjectId: resource.ResourceEnvironmentId,

@@ -133,14 +133,14 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 		// template
 		v1.POST("/template", h.V1.CreateTemplate)
-		v1.GET("/template/:template-id", h.V1.GetSingleTemplate)
-		v1.PUT("/template", h.V1.UpdateTemplate)
-		v1.DELETE("/template/:template-id", h.V1.DeleteTemplate)
-		v1.GET("/template", h.V1.GetListTemplate)
+		// v1.GET("/template/:template-id", h.V1.GetSingleTemplate)
+		// v1.PUT("/template", h.V1.UpdateTemplate)
+		// v1.DELETE("/template/:template-id", h.V1.DeleteTemplate)
+		// v1.GET("/template", h.V1.GetListTemplate)
 
-		// HTML TO PDF CONVERTER
-		v1.POST("/html-to-pdfV2", h.V1.ConvertHtmlToPdfV2)
-		v1.POST("/template-to-htmlV2", h.V1.ConvertTemplateToHtmlV2)
+		// // HTML TO PDF CONVERTER
+		// v1.POST("/html-to-pdfV2", h.V1.ConvertHtmlToPdfV2)
+		// v1.POST("/template-to-htmlV2", h.V1.ConvertTemplateToHtmlV2)
 
 		// HTML TO PDF CONVERTER
 		v1.POST("/html-to-pdf", h.V1.ConvertHtmlToPdf)

@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"context"
 	"errors"
 	"strconv"
 	"strings"
@@ -79,7 +78,7 @@ func (h *HandlerV1) GetCompanyProjectList(c *gin.Context) {
 	}
 
 	authInfo, _ := h.GetAuthAdminInfo(c)
-	userProjects, err := h.authService.User().GetUserProjects(context.Background(), &auth_service.UserPrimaryKey{
+	userProjects, err := h.authService.User().GetUserProjects(c.Request.Context(), &auth_service.UserPrimaryKey{
 		Id: authInfo.GetUserIdAuth(),
 	})
 	if err != nil {
@@ -95,7 +94,7 @@ func (h *HandlerV1) GetCompanyProjectList(c *gin.Context) {
 	}
 
 	resp, err := h.companyServices.Project().GetList(
-		context.Background(),
+		c.Request.Context(),
 		&company_service.GetProjectListRequest{
 			Limit:     int32(limit),
 			Offset:    int32(offset),
@@ -181,7 +180,7 @@ func (h *HandlerV1) DeleteCompanyProject(c *gin.Context) {
 	projectId := c.Param("project_id")
 
 	resp, err := h.companyServices.Project().Delete(
-		context.Background(),
+		c.Request.Context(),
 		&company_service.DeleteProjectRequest{
 			ProjectId: projectId,
 		},
@@ -329,7 +328,7 @@ func (h *HandlerV1) GetAllSettings(c *gin.Context) {
 	projectId := c.DefaultQuery("project-id", "")
 
 	res, err := h.companyServices.Project().GetListSetting(
-		context.Background(),
+		c.Request.Context(),
 		&obs.GetListSettingReq{
 			Type:      settingType,
 			ProjectId: projectId,

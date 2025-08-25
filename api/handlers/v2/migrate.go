@@ -145,6 +145,9 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 		ids  []string
 	)
 
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 300*time.Second)
+	defer cancel()
+
 	if err := c.ShouldBindJSON(&req); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
@@ -240,7 +243,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 			switch actionType {
 			case "CREATE":
 				_, err = services.GetBuilderServiceByType(nodeType).Table().Create(
-					context.Background(),
+					ctx,
 					current.Data,
 				)
 				if err != nil {
@@ -255,7 +258,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				logReq.Previous = previous.Data
 
 				_, err = services.GetBuilderServiceByType(nodeType).Table().Update(
-					context.Background(),
+					ctx,
 					currentUpdate.Data,
 				)
 				if err != nil {
@@ -269,7 +272,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 			case "DELETE":
 				logReq.Previous = previous.Data
 				_, err := services.GetBuilderServiceByType(nodeType).Table().Delete(
-					context.Background(),
+					ctx,
 					&obs.TablePrimaryKey{
 						Id:        previous.Data.Id,
 						ProjectId: resourceEnvId,
@@ -331,7 +334,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 			switch actionType {
 			case "CREATE":
 				createField, err := services.GetBuilderServiceByType(nodeType).Field().Create(
-					context.Background(),
+					ctx,
 					request.Data,
 				)
 				if err != nil {
@@ -347,7 +350,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 				logReq.Previous = previous.Data
 
 				updateField, err := services.GetBuilderServiceByType(nodeType).Field().Update(
-					context.Background(),
+					ctx,
 					currentUpdate.Data,
 				)
 				if err != nil {
@@ -362,7 +365,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 			case "DELETE":
 				logReq.Previous = previous.Data
 				_, err := services.GetBuilderServiceByType(nodeType).Field().Delete(
-					context.Background(),
+					ctx,
 					&obs.FieldPrimaryKey{
 						Id:        previous.Data.Id,
 						ProjectId: resourceEnvId,
@@ -415,7 +418,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 			switch actionType {
 			case "CREATE":
 				createRelation, err := services.GetBuilderServiceByType(nodeType).Relation().Create(
-					context.Background(),
+					ctx,
 					request.Data,
 				)
 				if err != nil {
@@ -430,7 +433,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 			case "UPDATE":
 				logReq.Previous = previous.Data
 				updateRelation, err := services.GetBuilderServiceByType(nodeType).Relation().Update(
-					context.Background(),
+					ctx,
 					current.Data,
 				)
 				if err != nil {
@@ -445,7 +448,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 			case "DELETE":
 				logReq.Previous = response.Data
 				_, err := services.GetBuilderServiceByType(nodeType).Field().Delete(
-					context.Background(),
+					ctx,
 					&obs.FieldPrimaryKey{
 						Id:        response.Data.Id,
 						ProjectId: resourceEnvId,
@@ -497,7 +500,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 			switch actionType {
 			case "CREATE":
 				createMenu, err := services.GetBuilderServiceByType(nodeType).Menu().Create(
-					context.Background(),
+					ctx,
 					request.Data,
 				)
 				if err != nil {
@@ -512,7 +515,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 			case "UPDATE":
 				logReq.Previous = previous.Data
 				updatemenu, err := services.GetBuilderServiceByType(nodeType).Menu().Update(
-					context.Background(),
+					ctx,
 					current.Data,
 				)
 				if err != nil {
@@ -527,7 +530,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 			case "DELETE":
 				logReq.Previous = previous.Data
 				_, err = services.GetBuilderServiceByType(nodeType).Menu().Delete(
-					context.Background(),
+					ctx,
 					&obs.MenuPrimaryKey{
 						Id:        previous.Data.Id,
 						ProjectId: resourceEnvId,
@@ -579,7 +582,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 			case "CREATE":
 				request.Data.Id = current.Data.Id
 				createView, err := services.GetBuilderServiceByType(nodeType).View().Create(
-					context.Background(),
+					ctx,
 					request.Data,
 				)
 				if err != nil {
@@ -594,7 +597,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 			case "UPDATE":
 				logReq.Previous = previous.Data
 				updateView, err := services.GetBuilderServiceByType(nodeType).View().Update(
-					context.Background(),
+					ctx,
 					current.Data,
 				)
 				if err != nil {
@@ -609,7 +612,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 			case "DELETE":
 				logReq.Previous = previous.Data
 				_, err = services.GetBuilderServiceByType(nodeType).View().Delete(
-					context.Background(),
+					ctx,
 					&obs.ViewPrimaryKey{
 						Id:        previous.Data.Id,
 						ProjectId: resourceEnvId,
@@ -653,7 +656,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 			case "UPDATE":
 				logReq.Previous = previous.Data
 				updateLayout, err := services.GetBuilderServiceByType(nodeType).Layout().Update(
-					context.Background(),
+					ctx,
 					current.Data,
 				)
 				if err != nil {
@@ -668,7 +671,7 @@ func (h *HandlerV2) MigrateUp(c *gin.Context) {
 			case "DELETE":
 				logReq.Previous = previous.Data
 				_, err = services.GetBuilderServiceByType(nodeType).Layout().RemoveLayout(
-					context.Background(),
+					ctx,
 					&obs.LayoutPrimaryKey{
 						Id:        previous.Data.Id,
 						ProjectId: resourceEnvId,
@@ -696,6 +699,9 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 		req  models.MigrateUpRequest
 		resp models.MigrateUpResponse
 	)
+
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 300*time.Second)
+	defer cancel()
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
@@ -788,7 +794,7 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 			switch actionType {
 			case "CREATE":
 				_, err := services.GetBuilderServiceByType(nodeType).Table().Delete(
-					context.Background(),
+					ctx,
 					&obs.TablePrimaryKey{
 						Id:        current.Data.Id,
 						ProjectId: resourceEnvId,
@@ -800,7 +806,7 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 				}
 
 				_, _ = services.GetBuilderServiceByType(nodeType).View().Delete(
-					context.Background(),
+					ctx,
 					&obs.ViewPrimaryKey{
 						TableSlug: current.Data.Slug,
 						ProjectId: resourceEnvId,
@@ -812,7 +818,7 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 				previous.Data.CommitType = "TABLE"
 				previous.Data.Name = fmt.Sprintf("Auto Created Commit Create table - %s", time.Now().Format(time.RFC1123))
 				_, err := services.GetBuilderServiceByType(nodeType).Table().Update(
-					context.Background(),
+					ctx,
 					previous.Data,
 				)
 				if err != nil {
@@ -824,7 +830,7 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 				createPrevious.Data.CommitType = "TABLE"
 				createPrevious.Data.Name = fmt.Sprintf("Auto Created Commit Create table - %s", time.Now().Format(time.RFC1123))
 				_, err := services.GetBuilderServiceByType(nodeType).Table().Create(
-					context.Background(),
+					ctx,
 					createPrevious.Data,
 				)
 				if err != nil {
@@ -869,7 +875,7 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 			switch actionType {
 			case "CREATE":
 				_, err := services.GetBuilderServiceByType(nodeType).Field().Delete(
-					context.Background(),
+					ctx,
 					&obs.FieldPrimaryKey{
 						ProjectId: current.Data.ProjectId,
 						EnvId:     current.Data.EnvId,
@@ -882,7 +888,7 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 				//ids = append(ids, v.Id)
 			case "UPDATE":
 				_, err := services.GetBuilderServiceByType(nodeType).Field().Update(
-					context.Background(),
+					ctx,
 					previous.Data,
 				)
 				if err != nil {
@@ -891,7 +897,7 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 				//ids = append(ids, v.Id)
 			case "DELETE":
 				_, err := services.GetBuilderServiceByType(nodeType).Field().Create(
-					context.Background(),
+					ctx,
 					createPrevious.Data,
 				)
 				if err != nil {
@@ -925,7 +931,7 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 				}
 
 				_, err := services.GetBuilderServiceByType(nodeType).Relation().Delete(
-					context.Background(),
+					ctx,
 					&obs.RelationPrimaryKey{
 						Id:        current.Data.Id,
 						ProjectId: resourceEnvId,
@@ -984,7 +990,7 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 				updateRelation.ViewFields = viewFields
 
 				_, err := services.GetBuilderServiceByType(nodeType).Relation().Update(
-					context.Background(),
+					ctx,
 					updateRelation,
 				)
 				if err != nil {
@@ -1037,7 +1043,7 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 				createRelation.ViewFields = viewFields
 
 				_, err := services.GetBuilderServiceByType(nodeType).Relation().Create(
-					context.Background(),
+					ctx,
 					createRelation,
 				)
 				if err != nil {
@@ -1093,7 +1099,7 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 			switch actionType {
 			case "CREATE":
 				_, err = services.GetBuilderServiceByType(nodeType).Menu().Delete(
-					context.Background(),
+					ctx,
 					&obs.MenuPrimaryKey{
 						Id:        current.Data.Id,
 						ProjectId: resourceEnvId,
@@ -1106,7 +1112,7 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 				//ids = append(ids, v.Id)
 			case "UPDATE":
 				_, err := services.GetBuilderServiceByType(nodeType).Menu().Update(
-					context.Background(),
+					ctx,
 					previous.Data,
 				)
 				if err != nil {
@@ -1115,7 +1121,7 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 				//ids = append(ids, v.Id)
 			case "DELETE":
 				_, err := services.GetBuilderServiceByType(nodeType).Menu().Create(
-					context.Background(),
+					ctx,
 					createRequest.Data,
 				)
 				if err != nil {
@@ -1161,7 +1167,7 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 			switch actionType {
 			case "CREATE":
 				_, err := services.GetBuilderServiceByType(nodeType).View().Delete(
-					context.Background(),
+					ctx,
 					&obs.ViewPrimaryKey{
 						Id:        current.Data.Id,
 						ProjectId: resourceEnvId,
@@ -1174,7 +1180,7 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 				//ids = append(ids, v.Id)
 			case "UPDATE":
 				_, err := services.GetBuilderServiceByType(nodeType).View().Update(
-					context.Background(),
+					ctx,
 					previous.Data,
 				)
 				if err != nil {
@@ -1183,7 +1189,7 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 				//ids = append(ids, v.Id)
 			case "DELETE":
 				_, err := services.GetBuilderServiceByType(nodeType).View().Create(
-					context.Background(),
+					ctx,
 					createPrevious.Data,
 				)
 				if err != nil {
@@ -1208,7 +1214,7 @@ func (h *HandlerV2) MigrateDown(c *gin.Context) {
 			switch actionType {
 			case "DELETE", "UPDATE":
 				_, err := services.GetBuilderServiceByType(nodeType).Layout().Update(
-					context.Background(),
+					ctx,
 					previous.Data,
 				)
 				if err != nil {
@@ -1230,6 +1236,9 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 		h.log.Error("!!!MigrateUpByVersions--->Error while marshalling list data", logger.Error(err))
 		return err
 	}
+
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 300*time.Second)
+	defer cancel()
 
 	req := models.MigrateUpRequest{}
 
@@ -1322,7 +1331,7 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 				switch resourceType {
 				case pb.ResourceType_MONGODB:
 					_, err = services.GetBuilderServiceByType(nodeType).Table().Create(
-						context.Background(),
+						ctx,
 						current.Data,
 					)
 					if err != nil {
@@ -1333,7 +1342,7 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 
 				case pb.ResourceType_POSTGRESQL:
 					_, err = services.GoObjectBuilderService().Table().Create(
-						context.Background(),
+						ctx,
 						currentPsql.Data,
 					)
 					if err != nil {
@@ -1352,7 +1361,7 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 				switch resourceType {
 				case pb.ResourceType_MONGODB:
 					_, err = services.GetBuilderServiceByType(nodeType).Table().Update(
-						context.Background(),
+						ctx,
 						currentUpdate.Data,
 					)
 					if err != nil {
@@ -1362,7 +1371,7 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 					}
 				case pb.ResourceType_POSTGRESQL:
 					_, err = services.GoObjectBuilderService().Table().Update(
-						context.Background(),
+						ctx,
 						currentUpdatePsql.Data,
 					)
 					if err != nil {
@@ -1381,7 +1390,7 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 				switch resourceType {
 				case pb.ResourceType_MONGODB:
 					_, err := services.GetBuilderServiceByType(nodeType).Table().Delete(
-						context.Background(),
+						ctx,
 						&obs.TablePrimaryKey{
 							Id:        previous.Data.Id,
 							ProjectId: resourceEnvId,
@@ -1398,7 +1407,7 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 					}
 				case pb.ResourceType_POSTGRESQL:
 					_, err := services.GoObjectBuilderService().Table().Delete(
-						context.Background(),
+						ctx,
 						&nb.TablePrimaryKey{
 							Id:         previous.Data.Id,
 							ProjectId:  resourceEnvId,
@@ -1470,7 +1479,7 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 				switch resourceType {
 				case pb.ResourceType_MONGODB:
 					createField, err := services.GetBuilderServiceByType(nodeType).Field().Create(
-						context.Background(),
+						ctx,
 						request.Data,
 					)
 					if err != nil {
@@ -1481,7 +1490,7 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 					logReq.Response = createField
 				case pb.ResourceType_POSTGRESQL:
 					createField, err := services.GoObjectBuilderService().Field().Create(
-						context.Background(),
+						ctx,
 						requestPsql.Data,
 					)
 					if err != nil {
@@ -1502,7 +1511,7 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 				switch resourceType {
 				case pb.ResourceType_MONGODB:
 					updateField, err := services.GetBuilderServiceByType(nodeType).Field().Update(
-						context.Background(),
+						ctx,
 						currentUpdate.Data,
 					)
 					if err != nil {
@@ -1516,7 +1525,7 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 					logReq.Request = currentUpdate.Data
 				case pb.ResourceType_POSTGRESQL:
 					updateField, err := services.GoObjectBuilderService().Field().Update(
-						context.Background(),
+						ctx,
 						currentUpdatePsql.Data,
 					)
 					if err != nil {
@@ -1537,7 +1546,7 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 				switch resourceType {
 				case pb.ResourceType_MONGODB:
 					_, err := services.GetBuilderServiceByType(nodeType).Field().Delete(
-						context.Background(),
+						ctx,
 						&obs.FieldPrimaryKey{
 							Id:        previous.Data.Id,
 							ProjectId: resourceEnvId,
@@ -1551,7 +1560,7 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 					}
 				case pb.ResourceType_POSTGRESQL:
 					_, err := services.GoObjectBuilderService().Field().Delete(
-						context.Background(),
+						ctx,
 						&nb.FieldPrimaryKey{
 							Id:        previous.Data.Id,
 							ProjectId: resourceEnvId,
@@ -1630,7 +1639,7 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 				switch resourceType {
 				case pb.ResourceType_MONGODB:
 					createRelation, err := services.GetBuilderServiceByType(nodeType).Relation().Create(
-						context.Background(),
+						ctx,
 						request.Data,
 					)
 					if err != nil {
@@ -1643,7 +1652,7 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 					logReq.Response = createRelation
 				case pb.ResourceType_POSTGRESQL:
 					createRelation, err := services.GoObjectBuilderService().Relation().Create(
-						context.Background(),
+						ctx,
 						requestPsql.Data,
 					)
 					if err != nil {
@@ -1665,7 +1674,7 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 				switch resourceType {
 				case pb.ResourceType_MONGODB:
 					updateRelation, err := services.GetBuilderServiceByType(nodeType).Relation().Update(
-						context.Background(),
+						ctx,
 						current.Data,
 					)
 					if err != nil {
@@ -1678,7 +1687,7 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 					logReq.Response = updateRelation
 				case pb.ResourceType_POSTGRESQL:
 					updateRelation, err := services.GoObjectBuilderService().Relation().Update(
-						context.Background(),
+						ctx,
 						currentPsql.Data,
 					)
 					if err != nil {
@@ -1700,7 +1709,7 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 				switch resourceType {
 				case pb.ResourceType_MONGODB:
 					_, err := services.GetBuilderServiceByType(nodeType).Field().Delete(
-						context.Background(),
+						ctx,
 						&obs.FieldPrimaryKey{
 							Id:        response.Data.Id,
 							ProjectId: resourceEnvId,
@@ -1714,7 +1723,7 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 					}
 				case pb.ResourceType_POSTGRESQL:
 					_, err := services.GoObjectBuilderService().Field().Delete(
-						context.Background(),
+						ctx,
 						&nb.FieldPrimaryKey{
 							Id:        response.Data.Id,
 							ProjectId: resourceEnvId,
@@ -1783,7 +1792,7 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 				switch resourceType {
 				case pb.ResourceType_MONGODB:
 					createMenu, err := services.GetBuilderServiceByType(nodeType).Menu().Create(
-						context.Background(),
+						ctx,
 						request.Data,
 					)
 					if err != nil {
@@ -1796,7 +1805,7 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 					logReq.Response = createMenu
 				case pb.ResourceType_POSTGRESQL:
 					createMenu, err := services.GoObjectBuilderService().Menu().Create(
-						context.Background(),
+						ctx,
 						requestPsql.Data,
 					)
 					if err != nil {
@@ -1816,7 +1825,7 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 				switch resourceType {
 				case pb.ResourceType_MONGODB:
 					updatemenu, err := services.GetBuilderServiceByType(nodeType).Menu().Update(
-						context.Background(),
+						ctx,
 						current.Data,
 					)
 					if err != nil {
@@ -1828,7 +1837,7 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 					logReq.Response = updatemenu
 				case pb.ResourceType_POSTGRESQL:
 					updatemenu, err := services.GoObjectBuilderService().Menu().Update(
-						context.Background(),
+						ctx,
 						currentPsql.Data,
 					)
 					if err != nil {
@@ -1848,7 +1857,7 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 				switch resourceType {
 				case pb.ResourceType_MONGODB:
 					_, err = services.GetBuilderServiceByType(nodeType).Menu().Delete(
-						context.Background(),
+						ctx,
 						&obs.MenuPrimaryKey{
 							Id:        previous.Data.Id,
 							ProjectId: resourceEnvId,
@@ -1862,7 +1871,7 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 					}
 				case pb.ResourceType_POSTGRESQL:
 					_, err = services.GoObjectBuilderService().Menu().Delete(
-						context.Background(),
+						ctx,
 						&nb.MenuPrimaryKey{
 							Id:        previous.Data.Id,
 							ProjectId: resourceEnvId,
@@ -1932,7 +1941,7 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 					request.Data.Id = current.Data.Id
 
 					createView, err := services.GetBuilderServiceByType(nodeType).View().Create(
-						context.Background(),
+						ctx,
 						request.Data,
 					)
 					if err != nil {
@@ -1948,7 +1957,7 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 					requestPsql.Data.Id = current.Data.Id
 
 					createView, err := services.GoObjectBuilderService().View().Create(
-						context.Background(),
+						ctx,
 						requestPsql.Data,
 					)
 					if err != nil {
@@ -1968,7 +1977,7 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 				switch resourceType {
 				case pb.ResourceType_MONGODB:
 					updateView, err := services.GetBuilderServiceByType(nodeType).View().Update(
-						context.Background(),
+						ctx,
 						current.Data,
 					)
 					if err != nil {
@@ -1981,7 +1990,7 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 					logReq.Response = updateView
 				case pb.ResourceType_POSTGRESQL:
 					updateView, err := services.GoObjectBuilderService().View().Update(
-						context.Background(),
+						ctx,
 						currentPsql.Data,
 					)
 					if err != nil {
@@ -2003,7 +2012,7 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 				switch resourceType {
 				case pb.ResourceType_MONGODB:
 					_, err = services.GetBuilderServiceByType(nodeType).View().Delete(
-						context.Background(),
+						ctx,
 						&obs.ViewPrimaryKey{
 							Id:        previous.Data.Id,
 							ProjectId: resourceEnvId,
@@ -2017,7 +2026,7 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 					}
 				case pb.ResourceType_POSTGRESQL:
 					_, err = services.GoObjectBuilderService().View().Delete(
-						context.Background(),
+						ctx,
 						&nb.ViewPrimaryKey{
 							Id:        previous.Data.Id,
 							ProjectId: resourceEnvId,
@@ -2073,7 +2082,7 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 				switch resourceType {
 				case pb.ResourceType_MONGODB:
 					updateLayout, err := services.GetBuilderServiceByType(nodeType).Layout().Update(
-						context.Background(),
+						ctx,
 						current.Data,
 					)
 					if err != nil {
@@ -2087,7 +2096,7 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 					logReq.Request = current.Data
 				case pb.ResourceType_POSTGRESQL:
 					updateLayout, err := services.GoObjectBuilderService().Layout().Update(
-						context.Background(),
+						ctx,
 						currentPsql.Data,
 					)
 					if err != nil {
@@ -2110,7 +2119,7 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 				switch resourceType {
 				case pb.ResourceType_MONGODB:
 					_, err = services.GetBuilderServiceByType(nodeType).Layout().RemoveLayout(
-						context.Background(),
+						ctx,
 						&obs.LayoutPrimaryKey{
 							Id:        previous.Data.Id,
 							ProjectId: resourceEnvId,
@@ -2124,7 +2133,7 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 					}
 				case pb.ResourceType_POSTGRESQL:
 					_, err = services.GoObjectBuilderService().Layout().RemoveLayout(
-						context.Background(),
+						ctx,
 						&nb.LayoutPrimaryKey{
 							Id:        previous.Data.Id,
 							ProjectId: resourceEnvId,
@@ -2137,21 +2146,15 @@ func (h *HandlerV2) MigrateUpByVersion(c *gin.Context, services services.Service
 						continue
 					}
 				}
-
-				//ids = append(ids, v.Id)
 			}
 		}
 	}
-
-	// resp.Ids = ids
 
 	return nil
 }
 
 func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.ServiceManagerI, lists *obs.ListVersionHistory, environmentId, nodeType, userId string, resourceType pb.ResourceType) error {
 	var (
-		// ids []string
-		// resp models.MigrateUpResponse
 		err error
 	)
 
@@ -2160,6 +2163,9 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 		h.log.Error("!!!MigrateDownByVersions--->Error while marshalling list data", logger.Error(err))
 		return err
 	}
+
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 300*time.Second)
+	defer cancel()
 
 	req := models.MigrateUpRequest{}
 
@@ -2246,7 +2252,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 				switch resourceType {
 				case pb.ResourceType_MONGODB:
 					_, err := services.GetBuilderServiceByType(nodeType).Table().Delete(
-						context.Background(),
+						ctx,
 						&obs.TablePrimaryKey{
 							Id:        current.Data.Id,
 							ProjectId: resourceEnvId,
@@ -2258,7 +2264,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					}
 
 					_, _ = services.GetBuilderServiceByType(nodeType).View().Delete(
-						context.Background(),
+						ctx,
 						&obs.ViewPrimaryKey{
 							TableSlug: current.Data.Slug,
 							ProjectId: resourceEnvId,
@@ -2268,7 +2274,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					// //ids = append(ids, v.Id)
 				case pb.ResourceType_POSTGRESQL:
 					_, err := services.GoObjectBuilderService().Table().Delete(
-						context.Background(),
+						ctx,
 						&nb.TablePrimaryKey{
 							Id:        currentPsql.Data.Id,
 							ProjectId: resourceEnvId,
@@ -2280,7 +2286,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					}
 
 					_, _ = services.GoObjectBuilderService().View().Delete(
-						context.Background(),
+						ctx,
 						&nb.ViewPrimaryKey{
 							TableSlug: currentPsql.Data.Slug,
 							ProjectId: resourceEnvId,
@@ -2295,7 +2301,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					previous.Data.CommitType = "TABLE"
 					previous.Data.Name = fmt.Sprintf("Auto Created Commit Create table - %s", time.Now().Format(time.RFC1123))
 					_, err := services.GetBuilderServiceByType(nodeType).Table().Update(
-						context.Background(),
+						ctx,
 						previous.Data,
 					)
 					if err != nil {
@@ -2307,7 +2313,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					previousPsql.Data.CommitType = "TABLE"
 					previousPsql.Data.Name = fmt.Sprintf("Auto Created Commit Create table - %s", time.Now().Format(time.RFC1123))
 					_, err := services.GoObjectBuilderService().Table().Update(
-						context.Background(),
+						ctx,
 						previousPsql.Data,
 					)
 					if err != nil {
@@ -2322,7 +2328,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					createPrevious.Data.CommitType = "TABLE"
 					createPrevious.Data.Name = fmt.Sprintf("Auto Created Commit Create table - %s", time.Now().Format(time.RFC1123))
 					_, err := services.GetBuilderServiceByType(nodeType).Table().Create(
-						context.Background(),
+						ctx,
 						createPrevious.Data,
 					)
 					if err != nil {
@@ -2333,7 +2339,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					createPreviousPsql.Data.CommitType = "TABLE"
 					createPreviousPsql.Data.Name = fmt.Sprintf("Auto Created Commit Create table - %s", time.Now().Format(time.RFC1123))
 					_, err := services.GoObjectBuilderService().Table().Create(
-						context.Background(),
+						ctx,
 						createPreviousPsql.Data,
 					)
 					if err != nil {
@@ -2405,7 +2411,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 				switch resourceType {
 				case pb.ResourceType_MONGODB:
 					_, err := services.GetBuilderServiceByType(nodeType).Field().Delete(
-						context.Background(),
+						ctx,
 						&obs.FieldPrimaryKey{
 							ProjectId: current.Data.ProjectId,
 							EnvId:     current.Data.EnvId,
@@ -2418,7 +2424,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					//ids = append(ids, v.Id)
 				case pb.ResourceType_POSTGRESQL:
 					_, err := services.GoObjectBuilderService().Field().Delete(
-						context.Background(),
+						ctx,
 						&nb.FieldPrimaryKey{
 							ProjectId: currentPsql.Data.ProjectId,
 							EnvId:     currentPsql.Data.EnvId,
@@ -2434,7 +2440,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 				switch resourceType {
 				case pb.ResourceType_MONGODB:
 					_, err := services.GetBuilderServiceByType(nodeType).Field().Update(
-						context.Background(),
+						ctx,
 						previous.Data,
 					)
 					if err != nil {
@@ -2443,7 +2449,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					//ids = append(ids, v.Id)
 				case pb.ResourceType_POSTGRESQL:
 					_, err := services.GoObjectBuilderService().Field().Update(
-						context.Background(),
+						ctx,
 						previousPsql.Data,
 					)
 					if err != nil {
@@ -2455,7 +2461,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 				switch resourceType {
 				case pb.ResourceType_MONGODB:
 					_, err := services.GetBuilderServiceByType(nodeType).Field().Create(
-						context.Background(),
+						ctx,
 						createPrevious.Data,
 					)
 					if err != nil {
@@ -2464,7 +2470,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					//ids = append(ids, v.Id)
 				case pb.ResourceType_POSTGRESQL:
 					_, err := services.GoObjectBuilderService().Field().Create(
-						context.Background(),
+						ctx,
 						createPreviousPsql.Data,
 					)
 					if err != nil {
@@ -2507,7 +2513,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					}
 
 					_, err := services.GetBuilderServiceByType(nodeType).Relation().Delete(
-						context.Background(),
+						ctx,
 						&obs.RelationPrimaryKey{
 							Id:        current.Data.Id,
 							ProjectId: resourceEnvId,
@@ -2531,7 +2537,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					}
 
 					_, err := services.GoObjectBuilderService().Relation().Delete(
-						context.Background(),
+						ctx,
 						&nb.RelationPrimaryKey{
 							Id:        currentPsql.Data.Id,
 							ProjectId: resourceEnvId,
@@ -2593,7 +2599,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					updateRelation.ViewFields = viewFields
 
 					_, err := services.GetBuilderServiceByType(nodeType).Relation().Update(
-						context.Background(),
+						ctx,
 						updateRelation,
 					)
 					if err != nil {
@@ -2648,7 +2654,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					updateRelationPsql.ViewFields = viewFields
 
 					_, err := services.GoObjectBuilderService().Relation().Update(
-						context.Background(),
+						ctx,
 						updateRelationPsql,
 					)
 					if err != nil {
@@ -2704,7 +2710,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					createRelation.ViewFields = viewFields
 
 					_, err := services.GetBuilderServiceByType(nodeType).Relation().Create(
-						context.Background(),
+						ctx,
 						createRelation,
 					)
 					if err != nil {
@@ -2757,7 +2763,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					createRelationPsql.ViewFields = viewFields
 
 					_, err := services.GoObjectBuilderService().Relation().Create(
-						context.Background(),
+						ctx,
 						createRelationPsql,
 					)
 					if err != nil {
@@ -2848,7 +2854,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 				switch resourceType {
 				case pb.ResourceType_MONGODB:
 					_, err = services.GetBuilderServiceByType(nodeType).Menu().Delete(
-						context.Background(),
+						ctx,
 						&obs.MenuPrimaryKey{
 							Id:        current.Data.Id,
 							ProjectId: resourceEnvId,
@@ -2861,7 +2867,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					//ids = append(ids, v.Id)
 				case pb.ResourceType_POSTGRESQL:
 					_, err = services.GoObjectBuilderService().Menu().Delete(
-						context.Background(),
+						ctx,
 						&nb.MenuPrimaryKey{
 							Id:        currentPsql.Data.Id,
 							ProjectId: resourceEnvId,
@@ -2877,7 +2883,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 				switch resourceType {
 				case pb.ResourceType_MONGODB:
 					_, err := services.GetBuilderServiceByType(nodeType).Menu().Update(
-						context.Background(),
+						ctx,
 						previous.Data,
 					)
 					if err != nil {
@@ -2886,7 +2892,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					//ids = append(ids, v.Id)
 				case pb.ResourceType_POSTGRESQL:
 					_, err := services.GoObjectBuilderService().Menu().Update(
-						context.Background(),
+						ctx,
 						previousPsql.Data,
 					)
 					if err != nil {
@@ -2898,7 +2904,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 				switch resourceType {
 				case pb.ResourceType_MONGODB:
 					_, err := services.GetBuilderServiceByType(nodeType).Menu().Create(
-						context.Background(),
+						ctx,
 						createRequest.Data,
 					)
 					if err != nil {
@@ -2907,7 +2913,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					//ids = append(ids, v.Id)
 				case pb.ResourceType_POSTGRESQL:
 					_, err := services.GoObjectBuilderService().Menu().Create(
-						context.Background(),
+						ctx,
 						createRequestPsql.Data,
 					)
 					if err != nil {
@@ -2980,7 +2986,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 				switch resourceType {
 				case pb.ResourceType_MONGODB:
 					_, err := services.GetBuilderServiceByType(nodeType).View().Delete(
-						context.Background(),
+						ctx,
 						&obs.ViewPrimaryKey{
 							Id:        current.Data.Id,
 							ProjectId: resourceEnvId,
@@ -2993,7 +2999,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					//ids = append(ids, v.Id)
 				case pb.ResourceType_POSTGRESQL:
 					_, err := services.GoObjectBuilderService().View().Delete(
-						context.Background(),
+						ctx,
 						&nb.ViewPrimaryKey{
 							Id:        currentPsql.Data.Id,
 							ProjectId: resourceEnvId,
@@ -3009,7 +3015,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 				switch resourceType {
 				case pb.ResourceType_MONGODB:
 					_, err := services.GetBuilderServiceByType(nodeType).View().Update(
-						context.Background(),
+						ctx,
 						previous.Data,
 					)
 					if err != nil {
@@ -3018,7 +3024,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					//ids = append(ids, v.Id)
 				case pb.ResourceType_POSTGRESQL:
 					_, err := services.GoObjectBuilderService().View().Update(
-						context.Background(),
+						ctx,
 						previousPsql.Data,
 					)
 					if err != nil {
@@ -3030,7 +3036,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 				switch resourceType {
 				case pb.ResourceType_MONGODB:
 					_, err := services.GetBuilderServiceByType(nodeType).View().Create(
-						context.Background(),
+						ctx,
 						createPrevious.Data,
 					)
 					if err != nil {
@@ -3039,7 +3045,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					//ids = append(ids, v.Id)
 				case pb.ResourceType_POSTGRESQL:
 					_, err := services.GoObjectBuilderService().View().Create(
-						context.Background(),
+						ctx,
 						createPreviousPsql.Data,
 					)
 					if err != nil {
@@ -3075,7 +3081,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 				switch resourceType {
 				case pb.ResourceType_MONGODB:
 					_, err := services.GetBuilderServiceByType(nodeType).Layout().Update(
-						context.Background(),
+						ctx,
 						previous.Data,
 					)
 					if err != nil {
@@ -3084,7 +3090,7 @@ func (h *HandlerV2) MigrateDownByVersion(c *gin.Context, services services.Servi
 					//ids = append(ids, v.Id)
 				case pb.ResourceType_POSTGRESQL:
 					_, err := services.GoObjectBuilderService().Layout().Update(
-						context.Background(),
+						ctx,
 						previousPsql.Data,
 					)
 					if err != nil {

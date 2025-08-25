@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"context"
 	"errors"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
@@ -72,7 +71,7 @@ func (h *HandlerV1) CreateHtmlTemplate(c *gin.Context) {
 	htmlTemplate.ProjectId = resource.ResourceEnvironmentId
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).HtmlTemplate().Create(
-		context.Background(),
+		c.Request.Context(),
 		&htmlTemplate,
 	)
 
@@ -141,7 +140,7 @@ func (h *HandlerV1) GetSingleHtmlTemplate(c *gin.Context) {
 	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).HtmlTemplate().GetSingle(
-		context.Background(),
+		c.Request.Context(),
 		&obs.HtmlTemplatePrimaryKey{
 			Id:        htmlTemplateID,
 			ProjectId: resource.ResourceEnvironmentId,
@@ -216,7 +215,7 @@ func (h *HandlerV1) UpdateHtmlTemplate(c *gin.Context) {
 	htmlTemplate.ProjectId = resource.ResourceEnvironmentId
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).HtmlTemplate().Update(
-		context.Background(),
+		c.Request.Context(),
 		&htmlTemplate,
 	)
 
@@ -286,7 +285,7 @@ func (h *HandlerV1) DeleteHtmlTemplate(c *gin.Context) {
 	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).HtmlTemplate().Delete(
-		context.Background(),
+		c.Request.Context(),
 		&obs.HtmlTemplatePrimaryKey{
 			Id:        htmlTemplateID,
 			ProjectId: resource.ResourceEnvironmentId,
@@ -353,7 +352,7 @@ func (h *HandlerV1) GetHtmlTemplateList(c *gin.Context) {
 	}
 
 	resp, err := services.GetBuilderServiceByType(resource.NodeType).HtmlTemplate().GetList(
-		context.Background(),
+		c.Request.Context(),
 		&obs.GetAllHtmlTemplateRequest{
 			TableSlug: c.Query("table_slug"),
 			ProjectId: resource.ResourceEnvironmentId,

@@ -324,7 +324,7 @@ func (h *HandlerV3) CreateItems(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().Create(
-			context.Background(),
+			c.Request.Context(),
 			&obs.CommonMessage{
 				TableSlug: collection,
 				Data:      structData,
