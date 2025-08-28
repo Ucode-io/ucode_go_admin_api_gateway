@@ -535,13 +535,14 @@ func (h *HandlerV1) InvokeFunction(c *gin.Context) {
 		},
 	}
 
-	if requestType == "" || requestType == "ASYNC" {
+	switch requestType {
+	case "", "ASYNC":
 		functionName, err := custom.FuncHandlers[functionType](path, name, invokeFunctionRequest)
 		if err != nil {
 			h.handleResponse(c, status_http.InvalidArgument, err.Error()+" in "+functionName)
 			return
 		}
-	} else if requestType == "SYNC" {
+	case "SYNC":
 		go func() {
 			custom.FuncHandlers[functionType](path, name, invokeFunctionRequest)
 		}()
