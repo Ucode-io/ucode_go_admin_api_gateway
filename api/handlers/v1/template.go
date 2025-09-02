@@ -10,6 +10,7 @@ import (
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
+	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
 	"ucode/ucode_go_api_gateway/services"
 
@@ -32,6 +33,7 @@ type ExecuteTemplate struct {
 type Temp struct {
 	Id           string                      `json:"id"`
 	Slug         string                      `json:"slug"`
+	WithRows     bool                        `json:"with_rows"`
 	Info         *nb.CreateTableRequest      `json:"info"`
 	Fields       []*nb.CreateFieldRequest    `json:"fields"`
 	Relations    []*nb.CreateRelationRequest `json:"relations"`
@@ -84,18 +86,19 @@ func (h *HandlerV1) CreateTemplate(c *gin.Context) {
 		nodeType      string
 		limit, offset int = 100, 0
 		menuResp          = &nb.MenuTree{}
+		rowsData          = []map[string]any{}
 	)
 
-	// listRequest := map[string]any{
-	// 	"limit":  limit,
-	// 	"offset": offset,
-	// }
+	listRequest := map[string]any{
+		"limit":  limit,
+		"offset": offset,
+	}
 
-	// structData, err := helper.ConvertMapToStruct(listRequest)
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.InvalidArgument, err.Error())
-	// 	return
-	// }
+	structData, err := helper.ConvertMapToStruct(listRequest)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
 
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 300*time.Second)
 	defer cancel()
@@ -154,6 +157,12 @@ func (h *HandlerV1) CreateTemplate(c *gin.Context) {
 	resourceType = resource.ResourceType
 	nodeType = resource.NodeType
 
+	requestTables, err := convert[any, []Temp](template.Tables)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
 	switch resourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err := services.GetBuilderServiceByType(nodeType).Table().GetAll(
@@ -171,19 +180,6 @@ func (h *HandlerV1) CreateTemplate(c *gin.Context) {
 
 		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
-		tableResp, err := services.GoObjectBuilderService().Table().GetAll(
-			ctx, &nb.GetAllTablesRequest{
-				Limit:     int32(limit),
-				Offset:    int32(offset),
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
 		menuResp, err = services.GoObjectBuilderService().Menu().GetMenuTree(
 			ctx, &nb.MenuPrimaryKey{
 				ProjectId: resource.ResourceEnvironmentId,
@@ -208,22 +204,17 @@ func (h *HandlerV1) CreateTemplate(c *gin.Context) {
 		// }
 		// buildTableToMenuMapping(menuResp)
 
-		for _, table := range tableResp.Tables {
+		for _, table := range requestTables {
 			if tableSlugs[table.Slug] {
 				continue
 			}
 
-			// rows, err := services.GoObjectBuilderService().ObjectBuilder().GetList2(
-			// 	c.Request.Context(), &nb.CommonMessage{
-			// 		TableSlug: table.Slug,
-			// 		Data:      structData,
-			// 		ProjectId: resource.ResourceEnvironmentId,
-			// 	},
-			// )
-			// if err != nil {
-			// 	h.handleResponse(c, status_http.GRPCError, err.Error())
-			// 	return
-			// }
+			tableResp, err := services.GoObjectBuilderService().Table().GetByID(
+				ctx, &nb.TablePrimaryKey{
+					Id:        table.Id,
+					ProjectId: resource.ResourceEnvironmentId,
+				},
+			)
 
 			fieldResp, err := services.GoObjectBuilderService().Field().GetAll(
 				ctx, &nb.GetAllFieldsRequest{
@@ -287,6 +278,8 @@ func (h *HandlerV1) CreateTemplate(c *gin.Context) {
 				return
 			}
 
+			tbl, err := convert[*nb.Table, any](tableResp)
+
 			fields, err := convert[[]*nb.Field, any](fieldResp.Fields)
 			if err != nil {
 				h.handleResponse(c, status_http.GRPCError, err.Error())
@@ -312,22 +305,37 @@ func (h *HandlerV1) CreateTemplate(c *gin.Context) {
 				h.handleResponse(c, status_http.GRPCError, err.Error())
 				return
 			}
-			// rowsData, err := convert[*structpb.Struct, []map[string]any](rows.Data)
-			// if err != nil {
-			// 	h.handleResponse(c, status_http.GRPCError, err.Error())
-			// 	return
-			// }
+
+			if table.WithRows {
+				rows, err := services.GoObjectBuilderService().ObjectBuilder().GetList2(
+					c.Request.Context(), &nb.CommonMessage{
+						TableSlug: table.Slug,
+						Data:      structData,
+						ProjectId: resource.ResourceEnvironmentId,
+					},
+				)
+				if err != nil {
+					h.handleResponse(c, status_http.GRPCError, err.Error())
+					return
+				}
+
+				rowsData, err = convert[*structpb.Struct, []map[string]any](rows.Data)
+				if err != nil {
+					h.handleResponse(c, status_http.GRPCError, err.Error())
+					return
+				}
+			}
 
 			tables = append(tables, &TableResponse{
 				Id:           table.Id,
 				Slug:         table.Slug,
-				Info:         table,
+				Info:         tbl,
 				Fields:       fields,
 				Relations:    relations,
 				Views:        views,
 				Layouts:      layouts,
 				CustomEvents: customeevents,
-				// Rows:         rowsData,
+				Rows:         rowsData,
 			})
 		}
 	}
