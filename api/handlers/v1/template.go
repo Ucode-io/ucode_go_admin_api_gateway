@@ -205,10 +205,6 @@ func (h *HandlerV1) CreateTemplate(c *gin.Context) {
 		// buildTableToMenuMapping(menuResp)
 
 		for _, table := range requestTables {
-			if tableSlugs[table.Slug] {
-				continue
-			}
-
 			tableResp, err := services.GoObjectBuilderService().Table().GetByID(
 				ctx, &nb.TablePrimaryKey{
 					Id:        table.Id,
@@ -216,13 +212,17 @@ func (h *HandlerV1) CreateTemplate(c *gin.Context) {
 				},
 			)
 
+			if tableSlugs[tableResp.Slug] {
+				continue
+			}
+
 			fieldResp, err := services.GoObjectBuilderService().Field().GetAll(
 				ctx, &nb.GetAllFieldsRequest{
 					Limit:     int32(limit),
 					Offset:    int32(offset),
 					Search:    c.Query("search"),
 					TableId:   table.Id,
-					TableSlug: table.Slug,
+					TableSlug: tableResp.Slug,
 					ProjectId: resource.ResourceEnvironmentId,
 				},
 			)
@@ -233,7 +233,7 @@ func (h *HandlerV1) CreateTemplate(c *gin.Context) {
 
 			relationResp, err := services.GoObjectBuilderService().Relation().GetRelationsByTableFrom(
 				ctx, &nb.GetRelationsByTableFromRequest{
-					TableFrom: table.Slug,
+					TableFrom: tableResp.Slug,
 					ProjectId: resource.ResourceEnvironmentId,
 				},
 			)
@@ -255,10 +255,10 @@ func (h *HandlerV1) CreateTemplate(c *gin.Context) {
 
 			viewResp, err := services.GoObjectBuilderService().View().GetList(
 				ctx, &nb.GetAllViewsRequest{
-					TableSlug: table.Slug,
+					TableSlug: tableResp.Slug,
 					ProjectId: resource.ResourceEnvironmentId,
 					RoleId:    tokenInfo.RoleId,
-					MenuId:    table.Slug,
+					MenuId:    tableResp.Slug,
 				},
 			)
 			if err != nil {
@@ -268,7 +268,7 @@ func (h *HandlerV1) CreateTemplate(c *gin.Context) {
 
 			customEventResp, err := services.GoObjectBuilderService().CustomEvent().GetList(
 				ctx, &nb.GetCustomEventsListRequest{
-					TableSlug: table.Slug,
+					TableSlug: tableResp.Slug,
 					RoleId:    tokenInfo.RoleId,
 					ProjectId: resource.ResourceEnvironmentId,
 				},
@@ -309,7 +309,7 @@ func (h *HandlerV1) CreateTemplate(c *gin.Context) {
 			if table.WithRows {
 				rows, err := services.GoObjectBuilderService().ObjectBuilder().GetList2(
 					c.Request.Context(), &nb.CommonMessage{
-						TableSlug: table.Slug,
+						TableSlug: tableResp.Slug,
 						Data:      structData,
 						ProjectId: resource.ResourceEnvironmentId,
 					},
@@ -328,7 +328,7 @@ func (h *HandlerV1) CreateTemplate(c *gin.Context) {
 
 			tables = append(tables, &TableResponse{
 				Id:           table.Id,
-				Slug:         table.Slug,
+				Slug:         tableResp.Slug,
 				Info:         tbl,
 				Fields:       fields,
 				Relations:    relations,
