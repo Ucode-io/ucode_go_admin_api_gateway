@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
@@ -16,6 +17,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/spf13/cast"
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
@@ -41,19 +43,20 @@ type Temp struct {
 	Layouts      []*nb.LayoutRequest         `json:"layouts"`
 	CustomEvents []*nb.CustomEvent           `json:"custom_events"`
 	Functions    []*nb.CreateFunctionRequest `json:"functions"`
+	Rows         []map[string]any            `json:"rows"`
 }
 
 type TableResponse struct {
-	Id           string           `json:"id"`
-	Slug         string           `json:"slug"`
-	Info         any              `json:"info"`
-	Fields       any              `json:"fields"`
-	Relations    any              `json:"relations"`
-	Views        any              `json:"views"`
-	Layouts      any              `json:"layouts"`
-	CustomEvents any              `json:"custom_events"`
-	Functions    any              `json:"functions"`
-	Rows         []map[string]any `json:"rows"`
+	Id           string `json:"id"`
+	Slug         string `json:"slug"`
+	Info         any    `json:"info"`
+	Fields       any    `json:"fields"`
+	Relations    any    `json:"relations"`
+	Views        any    `json:"views"`
+	Layouts      any    `json:"layouts"`
+	CustomEvents any    `json:"custom_events"`
+	Functions    any    `json:"functions"`
+	Rows         []any  `json:"rows"`
 }
 
 type CreateTemplate struct {
@@ -86,7 +89,7 @@ func (h *HandlerV1) CreateTemplate(c *gin.Context) {
 		nodeType      string
 		limit, offset int = 100, 0
 		menuResp          = &nb.MenuTree{}
-		rowsData          = []map[string]any{}
+		rowsData          = map[string]any{}
 	)
 
 	listRequest := map[string]any{
@@ -319,7 +322,7 @@ func (h *HandlerV1) CreateTemplate(c *gin.Context) {
 					return
 				}
 
-				rowsData, err = convert[*structpb.Struct, []map[string]any](rows.Data)
+				rowsData, err = convert[*structpb.Struct, map[string]any](rows.Data)
 				if err != nil {
 					h.handleResponse(c, status_http.GRPCError, err.Error())
 					return
@@ -335,7 +338,7 @@ func (h *HandlerV1) CreateTemplate(c *gin.Context) {
 				Views:        views,
 				Layouts:      layouts,
 				CustomEvents: customeevents,
-				Rows:         rowsData,
+				Rows:         cast.ToSlice(rowsData["response"]),
 			})
 		}
 	}
@@ -721,6 +724,40 @@ func (h *HandlerV1) ExecuteTemplate(c *gin.Context) {
 				_, err = services.GoObjectBuilderService().CustomEvent().Create(ctx, customEventReq)
 				if err != nil {
 					h.handleResponse(c, status_http.GRPCError, fmt.Sprintf("Failed to create custom event '%s': %v", customevent.Label, err))
+					return
+				}
+			}
+
+			result := models.CommonMessage{}
+
+			if len(table.Rows) > 0 {
+				var fields []string
+				for field := range table.Rows[0] {
+					fields = append(fields, field)
+				}
+
+				// Build the structure
+				data := map[string]any{
+					"objects":    table.Rows,
+					"field_slug": "guid",
+					"fields":     fields,
+				}
+
+				result.Data = data
+
+				structData, err := helper.ConvertMapToStruct(result.Data)
+				if err != nil {
+					h.handleResponse(c, status_http.InvalidArgument, err.Error())
+					return
+				}
+
+				_, err = services.GoObjectBuilderService().Items().UpsertMany(ctx, &nb.CommonMessage{
+					TableSlug: table.Slug,
+					Data:      structData,
+					ProjectId: resource.ResourceEnvironmentId,
+				})
+				if err != nil {
+					h.handleResponse(c, status_http.InvalidArgument, err.Error())
 					return
 				}
 			}
