@@ -3,7 +3,6 @@ package v1
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"time"
 
@@ -25,6 +24,7 @@ type CreateTemplateReq struct {
 }
 
 type ExecuteTemplate struct {
+	Id     string       `json:"id"`
 	Tables []*Temp      `json:"tables"`
 	Menu   *nb.MenuTree `json:"menus"`
 }
@@ -42,15 +42,26 @@ type Temp struct {
 }
 
 type TableResponse struct {
-	Id           string `json:"id"`
-	Slug         string `json:"slug"`
-	Info         any    `json:"info"`
-	Fields       any    `json:"fields"`
-	Relations    any    `json:"relations"`
-	Views        any    `json:"views"`
-	Layouts      any    `json:"layouts"`
-	CustomEvents any    `json:"custom_events"`
-	Functions    any    `json:"functions"`
+	Id           string           `json:"id"`
+	Slug         string           `json:"slug"`
+	Info         any              `json:"info"`
+	Fields       any              `json:"fields"`
+	Relations    any              `json:"relations"`
+	Views        any              `json:"views"`
+	Layouts      any              `json:"layouts"`
+	CustomEvents any              `json:"custom_events"`
+	Functions    any              `json:"functions"`
+	Rows         []map[string]any `json:"rows"`
+}
+
+type CreateTemplate struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Photo       string `json:"photo"`
+	MenuId      string `json:"menu_id"`
+	Tables      any    `json:"tables"`
+	Functions   any    `json:"functions"`
+	Microfronts any    `json:"microfronts"`
 }
 
 // CreateTemplate godoc
@@ -68,12 +79,23 @@ type TableResponse struct {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) CreateTemplate(c *gin.Context) {
 	var (
-		template      pb.CreateTemplateMetadataReq
+		template      CreateTemplate
 		resourceType  pb.ResourceType
 		nodeType      string
 		limit, offset int = 100, 0
 		menuResp          = &nb.MenuTree{}
 	)
+
+	// listRequest := map[string]any{
+	// 	"limit":  limit,
+	// 	"offset": offset,
+	// }
+
+	// structData, err := helper.ConvertMapToStruct(listRequest)
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.InvalidArgument, err.Error())
+	// 	return
+	// }
 
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 300*time.Second)
 	defer cancel()
@@ -191,6 +213,18 @@ func (h *HandlerV1) CreateTemplate(c *gin.Context) {
 				continue
 			}
 
+			// rows, err := services.GoObjectBuilderService().ObjectBuilder().GetList2(
+			// 	c.Request.Context(), &nb.CommonMessage{
+			// 		TableSlug: table.Slug,
+			// 		Data:      structData,
+			// 		ProjectId: resource.ResourceEnvironmentId,
+			// 	},
+			// )
+			// if err != nil {
+			// 	h.handleResponse(c, status_http.GRPCError, err.Error())
+			// 	return
+			// }
+
 			fieldResp, err := services.GoObjectBuilderService().Field().GetAll(
 				ctx, &nb.GetAllFieldsRequest{
 					Limit:     int32(limit),
@@ -202,7 +236,6 @@ func (h *HandlerV1) CreateTemplate(c *gin.Context) {
 				},
 			)
 			if err != nil {
-				fmt.Println("field error", err)
 				h.handleResponse(c, status_http.GRPCError, err.Error())
 				return
 			}
@@ -238,7 +271,6 @@ func (h *HandlerV1) CreateTemplate(c *gin.Context) {
 				},
 			)
 			if err != nil {
-				fmt.Println("view error", err)
 				h.handleResponse(c, status_http.GRPCError, err.Error())
 				return
 			}
@@ -250,18 +282,41 @@ func (h *HandlerV1) CreateTemplate(c *gin.Context) {
 					ProjectId: resource.ResourceEnvironmentId,
 				},
 			)
-
 			if err != nil {
-				fmt.Println("cutom event error", err)
 				h.handleResponse(c, status_http.GRPCError, err.Error())
 				return
 			}
 
-			fields, _ := convert[[]*nb.Field, any](fieldResp.Fields)
-			relations, _ := convert[[]*nb.CreateRelationRequest, any](relationResp.Relations)
-			views, _ := convert[[]*nb.View, any](viewResp.Views)
-			layouts, _ := convert[[]*nb.LayoutResponse, any](layoutResp.Layouts)
-			customeevents, _ := convert[[]*nb.CustomEvent, any](customEventResp.CustomEvents)
+			fields, err := convert[[]*nb.Field, any](fieldResp.Fields)
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+			relations, err := convert[[]*nb.CreateRelationRequest, any](relationResp.Relations)
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+			views, err := convert[[]*nb.View, any](viewResp.Views)
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+			layouts, err := convert[[]*nb.LayoutResponse, any](layoutResp.Layouts)
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+			customeevents, err := convert[[]*nb.CustomEvent, any](customEventResp.CustomEvents)
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+			// rowsData, err := convert[*structpb.Struct, []map[string]any](rows.Data)
+			// if err != nil {
+			// 	h.handleResponse(c, status_http.GRPCError, err.Error())
+			// 	return
+			// }
 
 			tables = append(tables, &TableResponse{
 				Id:           table.Id,
@@ -272,6 +327,7 @@ func (h *HandlerV1) CreateTemplate(c *gin.Context) {
 				Views:        views,
 				Layouts:      layouts,
 				CustomEvents: customeevents,
+				// Rows:         rowsData,
 			})
 		}
 	}
@@ -283,7 +339,22 @@ func (h *HandlerV1) CreateTemplate(c *gin.Context) {
 
 	tbls, err := convert[CreateTemplateReq, *structpb.Struct](tablesReq)
 	if err != nil {
-		fmt.Println("convert error", err)
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
+	functions, err := convert[map[string]any, *structpb.Struct](map[string]any{
+		"functions": template.Functions,
+	})
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
+	microfronts, err := convert[map[string]any, *structpb.Struct](map[string]any{
+		"microfronts": template.Microfronts,
+	})
+	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
@@ -293,8 +364,8 @@ func (h *HandlerV1) CreateTemplate(c *gin.Context) {
 		Description: template.Description,
 		Photo:       template.Photo,
 		Tables:      tbls,
-		Functions:   template.Functions,
-		Microfronts: template.Microfronts,
+		Functions:   functions,
+		Microfronts: microfronts,
 	})
 
 	if err != nil {
@@ -346,8 +417,7 @@ func (h *HandlerV1) GetSingleTemplate(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err := errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "environment id is an invalid uuid")
 		return
 	}
 
@@ -397,8 +467,7 @@ func (h *HandlerV1) DeleteTemplate(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err := errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "environment id is an invalid uuid")
 		return
 	}
 
@@ -449,8 +518,7 @@ func (h *HandlerV1) GetListTemplate(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "environment id is an invalid uuid")
 		return
 	}
 
@@ -476,12 +544,18 @@ func (h *HandlerV1) GetListTemplate(c *gin.Context) {
 
 func (h *HandlerV1) ExecuteTemplate(c *gin.Context) {
 	var (
-		templateId   = c.Param("template-id")
 		resourceType pb.ResourceType
+		body         ExecuteTemplate
+		template     ExecuteTemplate
 	)
 
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 300*time.Second)
 	defer cancel()
+
+	if err := c.ShouldBindJSON(&body); err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -516,20 +590,24 @@ func (h *HandlerV1) ExecuteTemplate(c *gin.Context) {
 		return
 	}
 
-	res, err := h.companyServices.Template().GetById(c.Request.Context(),
-		&pb.GetTemplateMetadataByIdReq{
-			Id: templateId,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
+	templateId := body.Id
+	template = body
+	if templateId != "" {
+		res, err := h.companyServices.Template().GetById(c.Request.Context(),
+			&pb.GetTemplateMetadataByIdReq{
+				Id: templateId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 
-	template, err := convert[*structpb.Struct, ExecuteTemplate](res.Tables)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+		template, err = convert[*structpb.Struct, ExecuteTemplate](res.Tables)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	fieldSlugMap := map[string]bool{
@@ -632,13 +710,11 @@ func (h *HandlerV1) ExecuteTemplate(c *gin.Context) {
 					Path:       customevent.Path,
 				}
 
-				createdCustomEvent, err := services.GoObjectBuilderService().CustomEvent().Create(ctx, customEventReq)
+				_, err = services.GoObjectBuilderService().CustomEvent().Create(ctx, customEventReq)
 				if err != nil {
 					h.handleResponse(c, status_http.GRPCError, fmt.Sprintf("Failed to create custom event '%s': %v", customevent.Label, err))
 					return
 				}
-
-				fmt.Printf("Created custom event: %s with ID: %s\n", customevent.Label, createdCustomEvent.Id)
 			}
 		}
 	}
