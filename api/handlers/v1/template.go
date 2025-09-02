@@ -31,7 +31,7 @@ type ExecuteTemplate struct {
 }
 
 type Temp struct {
-	Id           string                      `json:"id"`
+	Id           string                      `json:"table_id"`
 	Slug         string                      `json:"slug"`
 	WithRows     bool                        `json:"with_rows"`
 	Info         *nb.CreateTableRequest      `json:"info"`
