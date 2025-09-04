@@ -3,19 +3,21 @@ package v1
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"time"
 
+	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
+	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
 	"ucode/ucode_go_api_gateway/services"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/spf13/cast"
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
@@ -25,13 +27,15 @@ type CreateTemplateReq struct {
 }
 
 type ExecuteTemplate struct {
+	Id     string       `json:"id"`
 	Tables []*Temp      `json:"tables"`
 	Menu   *nb.MenuTree `json:"menus"`
 }
 
 type Temp struct {
-	Id           string                      `json:"id"`
+	Id           string                      `json:"table_id"`
 	Slug         string                      `json:"slug"`
+	WithRows     bool                        `json:"with_rows"`
 	Info         *nb.CreateTableRequest      `json:"info"`
 	Fields       []*nb.CreateFieldRequest    `json:"fields"`
 	Relations    []*nb.CreateRelationRequest `json:"relations"`
@@ -39,6 +43,7 @@ type Temp struct {
 	Layouts      []*nb.LayoutRequest         `json:"layouts"`
 	CustomEvents []*nb.CustomEvent           `json:"custom_events"`
 	Functions    []*nb.CreateFunctionRequest `json:"functions"`
+	Rows         []map[string]any            `json:"rows"`
 }
 
 type TableResponse struct {
@@ -51,6 +56,17 @@ type TableResponse struct {
 	Layouts      any    `json:"layouts"`
 	CustomEvents any    `json:"custom_events"`
 	Functions    any    `json:"functions"`
+	Rows         []any  `json:"rows"`
+}
+
+type CreateTemplate struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Photo       string `json:"photo"`
+	MenuId      string `json:"menu_id"`
+	Tables      any    `json:"tables"`
+	Functions   any    `json:"functions"`
+	Microfronts any    `json:"microfronts"`
 }
 
 // CreateTemplate godoc
@@ -68,12 +84,24 @@ type TableResponse struct {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) CreateTemplate(c *gin.Context) {
 	var (
-		template      pb.CreateTemplateMetadataReq
+		template      CreateTemplate
 		resourceType  pb.ResourceType
 		nodeType      string
 		limit, offset int = 100, 0
 		menuResp          = &nb.MenuTree{}
+		rowsData          = map[string]any{}
 	)
+
+	listRequest := map[string]any{
+		"limit":  limit,
+		"offset": offset,
+	}
+
+	structData, err := helper.ConvertMapToStruct(listRequest)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
 
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 300*time.Second)
 	defer cancel()
@@ -132,6 +160,12 @@ func (h *HandlerV1) CreateTemplate(c *gin.Context) {
 	resourceType = resource.ResourceType
 	nodeType = resource.NodeType
 
+	requestTables, err := convert[any, []Temp](template.Tables)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
 	switch resourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err := services.GetBuilderServiceByType(nodeType).Table().GetAll(
@@ -149,19 +183,6 @@ func (h *HandlerV1) CreateTemplate(c *gin.Context) {
 
 		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
-		tableResp, err := services.GoObjectBuilderService().Table().GetAll(
-			ctx, &nb.GetAllTablesRequest{
-				Limit:     int32(limit),
-				Offset:    int32(offset),
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
 		menuResp, err = services.GoObjectBuilderService().Menu().GetMenuTree(
 			ctx, &nb.MenuPrimaryKey{
 				ProjectId: resource.ResourceEnvironmentId,
@@ -186,8 +207,15 @@ func (h *HandlerV1) CreateTemplate(c *gin.Context) {
 		// }
 		// buildTableToMenuMapping(menuResp)
 
-		for _, table := range tableResp.Tables {
-			if tableSlugs[table.Slug] {
+		for _, table := range requestTables {
+			tableResp, err := services.GoObjectBuilderService().Table().GetByID(
+				ctx, &nb.TablePrimaryKey{
+					Id:        table.Id,
+					ProjectId: resource.ResourceEnvironmentId,
+				},
+			)
+
+			if tableSlugs[tableResp.Slug] {
 				continue
 			}
 
@@ -197,19 +225,18 @@ func (h *HandlerV1) CreateTemplate(c *gin.Context) {
 					Offset:    int32(offset),
 					Search:    c.Query("search"),
 					TableId:   table.Id,
-					TableSlug: table.Slug,
+					TableSlug: tableResp.Slug,
 					ProjectId: resource.ResourceEnvironmentId,
 				},
 			)
 			if err != nil {
-				fmt.Println("field error", err)
 				h.handleResponse(c, status_http.GRPCError, err.Error())
 				return
 			}
 
 			relationResp, err := services.GoObjectBuilderService().Relation().GetRelationsByTableFrom(
 				ctx, &nb.GetRelationsByTableFromRequest{
-					TableFrom: table.Slug,
+					TableFrom: tableResp.Slug,
 					ProjectId: resource.ResourceEnvironmentId,
 				},
 			)
@@ -231,47 +258,87 @@ func (h *HandlerV1) CreateTemplate(c *gin.Context) {
 
 			viewResp, err := services.GoObjectBuilderService().View().GetList(
 				ctx, &nb.GetAllViewsRequest{
-					TableSlug: table.Slug,
+					TableSlug: tableResp.Slug,
 					ProjectId: resource.ResourceEnvironmentId,
 					RoleId:    tokenInfo.RoleId,
-					MenuId:    table.Slug,
+					MenuId:    tableResp.Slug,
 				},
 			)
 			if err != nil {
-				fmt.Println("view error", err)
 				h.handleResponse(c, status_http.GRPCError, err.Error())
 				return
 			}
 
 			customEventResp, err := services.GoObjectBuilderService().CustomEvent().GetList(
 				ctx, &nb.GetCustomEventsListRequest{
-					TableSlug: table.Slug,
+					TableSlug: tableResp.Slug,
 					RoleId:    tokenInfo.RoleId,
 					ProjectId: resource.ResourceEnvironmentId,
 				},
 			)
-
 			if err != nil {
-				fmt.Println("cutom event error", err)
 				h.handleResponse(c, status_http.GRPCError, err.Error())
 				return
 			}
 
-			fields, _ := convert[[]*nb.Field, any](fieldResp.Fields)
-			relations, _ := convert[[]*nb.CreateRelationRequest, any](relationResp.Relations)
-			views, _ := convert[[]*nb.View, any](viewResp.Views)
-			layouts, _ := convert[[]*nb.LayoutResponse, any](layoutResp.Layouts)
-			customeevents, _ := convert[[]*nb.CustomEvent, any](customEventResp.CustomEvents)
+			tbl, err := convert[*nb.Table, any](tableResp)
+
+			fields, err := convert[[]*nb.Field, any](fieldResp.Fields)
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+			relations, err := convert[[]*nb.CreateRelationRequest, any](relationResp.Relations)
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+			views, err := convert[[]*nb.View, any](viewResp.Views)
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+			layouts, err := convert[[]*nb.LayoutResponse, any](layoutResp.Layouts)
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+			customeevents, err := convert[[]*nb.CustomEvent, any](customEventResp.CustomEvents)
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+
+			if table.WithRows {
+				rows, err := services.GoObjectBuilderService().ObjectBuilder().GetList2(
+					c.Request.Context(), &nb.CommonMessage{
+						TableSlug: tableResp.Slug,
+						Data:      structData,
+						ProjectId: resource.ResourceEnvironmentId,
+					},
+				)
+				if err != nil {
+					h.handleResponse(c, status_http.GRPCError, err.Error())
+					return
+				}
+
+				rowsData, err = convert[*structpb.Struct, map[string]any](rows.Data)
+				if err != nil {
+					h.handleResponse(c, status_http.GRPCError, err.Error())
+					return
+				}
+			}
 
 			tables = append(tables, &TableResponse{
 				Id:           table.Id,
-				Slug:         table.Slug,
-				Info:         table,
+				Slug:         tableResp.Slug,
+				Info:         tbl,
 				Fields:       fields,
 				Relations:    relations,
 				Views:        views,
 				Layouts:      layouts,
 				CustomEvents: customeevents,
+				Rows:         cast.ToSlice(rowsData["response"]),
 			})
 		}
 	}
@@ -283,7 +350,22 @@ func (h *HandlerV1) CreateTemplate(c *gin.Context) {
 
 	tbls, err := convert[CreateTemplateReq, *structpb.Struct](tablesReq)
 	if err != nil {
-		fmt.Println("convert error", err)
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
+	functions, err := convert[map[string]any, *structpb.Struct](map[string]any{
+		"functions": template.Functions,
+	})
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
+	microfronts, err := convert[map[string]any, *structpb.Struct](map[string]any{
+		"microfronts": template.Microfronts,
+	})
+	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
@@ -293,8 +375,8 @@ func (h *HandlerV1) CreateTemplate(c *gin.Context) {
 		Description: template.Description,
 		Photo:       template.Photo,
 		Tables:      tbls,
-		Functions:   template.Functions,
-		Microfronts: template.Microfronts,
+		Functions:   functions,
+		Microfronts: microfronts,
 	})
 
 	if err != nil {
@@ -346,8 +428,7 @@ func (h *HandlerV1) GetSingleTemplate(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err := errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "environment id is an invalid uuid")
 		return
 	}
 
@@ -397,8 +478,7 @@ func (h *HandlerV1) DeleteTemplate(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err := errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "environment id is an invalid uuid")
 		return
 	}
 
@@ -449,8 +529,7 @@ func (h *HandlerV1) GetListTemplate(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, "environment id is an invalid uuid")
 		return
 	}
 
@@ -476,12 +555,18 @@ func (h *HandlerV1) GetListTemplate(c *gin.Context) {
 
 func (h *HandlerV1) ExecuteTemplate(c *gin.Context) {
 	var (
-		templateId   = c.Param("template-id")
 		resourceType pb.ResourceType
+		body         ExecuteTemplate
+		template     ExecuteTemplate
 	)
 
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 300*time.Second)
 	defer cancel()
+
+	if err := c.ShouldBindJSON(&body); err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -516,20 +601,24 @@ func (h *HandlerV1) ExecuteTemplate(c *gin.Context) {
 		return
 	}
 
-	res, err := h.companyServices.Template().GetById(c.Request.Context(),
-		&pb.GetTemplateMetadataByIdReq{
-			Id: templateId,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
+	templateId := body.Id
+	template = body
+	if templateId != "" {
+		res, err := h.companyServices.Template().GetById(c.Request.Context(),
+			&pb.GetTemplateMetadataByIdReq{
+				Id: templateId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 
-	template, err := convert[*structpb.Struct, ExecuteTemplate](res.Tables)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+		template, err = convert[*structpb.Struct, ExecuteTemplate](res.Tables)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	fieldSlugMap := map[string]bool{
@@ -632,13 +721,45 @@ func (h *HandlerV1) ExecuteTemplate(c *gin.Context) {
 					Path:       customevent.Path,
 				}
 
-				createdCustomEvent, err := services.GoObjectBuilderService().CustomEvent().Create(ctx, customEventReq)
+				_, err = services.GoObjectBuilderService().CustomEvent().Create(ctx, customEventReq)
 				if err != nil {
 					h.handleResponse(c, status_http.GRPCError, fmt.Sprintf("Failed to create custom event '%s': %v", customevent.Label, err))
 					return
 				}
+			}
 
-				fmt.Printf("Created custom event: %s with ID: %s\n", customevent.Label, createdCustomEvent.Id)
+			result := models.CommonMessage{}
+
+			if len(table.Rows) > 0 {
+				var fields []string
+				for field := range table.Rows[0] {
+					fields = append(fields, field)
+				}
+
+				// Build the structure
+				data := map[string]any{
+					"objects":    table.Rows,
+					"field_slug": "guid",
+					"fields":     fields,
+				}
+
+				result.Data = data
+
+				structData, err := helper.ConvertMapToStruct(result.Data)
+				if err != nil {
+					h.handleResponse(c, status_http.InvalidArgument, err.Error())
+					return
+				}
+
+				_, err = services.GoObjectBuilderService().Items().UpsertMany(ctx, &nb.CommonMessage{
+					TableSlug: table.Slug,
+					Data:      structData,
+					ProjectId: resource.ResourceEnvironmentId,
+				})
+				if err != nil {
+					h.handleResponse(c, status_http.InvalidArgument, err.Error())
+					return
+				}
 			}
 		}
 	}

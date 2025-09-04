@@ -97,6 +97,8 @@ func (h *HandlerV2) Tusd() *tusd.Handler {
 	go func() {
 		for {
 			select {
+			case event := <-handler.UploadProgress:
+				log.Printf("-------------------UPLOAD FINISHED--------------- %s\n", event.Upload.ID)
 			case event := <-handler.CompleteUploads:
 				log.Printf("-------------------UPLOAD FINISHED--------------- %s\n", event.Upload.ID)
 			case event := <-handler.TerminatedUploads:
