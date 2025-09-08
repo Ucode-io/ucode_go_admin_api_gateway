@@ -46,6 +46,20 @@ type Temp struct {
 	Rows         []map[string]any            `json:"rows"`
 }
 
+type TempTable struct {
+	Id           string                      `json:"id"`
+	Slug         string                      `json:"slug"`
+	WithRows     bool                        `json:"with_rows"`
+	Info         *nb.CreateTableRequest      `json:"info"`
+	Fields       []*nb.CreateFieldRequest    `json:"fields"`
+	Relations    []*nb.CreateRelationRequest `json:"relations"`
+	Views        []*nb.CreateViewRequest     `json:"views"`
+	Layouts      []*nb.LayoutRequest         `json:"layouts"`
+	CustomEvents []*nb.CustomEvent           `json:"custom_events"`
+	Functions    []*nb.CreateFunctionRequest `json:"functions"`
+	Rows         []map[string]any            `json:"rows"`
+}
+
 type TableResponse struct {
 	Id           string `json:"id"`
 	Slug         string `json:"slug"`
@@ -60,13 +74,13 @@ type TableResponse struct {
 }
 
 type CreateTemplate struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Photo       string `json:"photo"`
-	MenuId      string `json:"menu_id"`
-	Tables      any    `json:"tables"`
-	Functions   any    `json:"functions"`
-	Microfronts any    `json:"microfronts"`
+	Name        string           `json:"name"`
+	Description string           `json:"description"`
+	Photo       string           `json:"photo"`
+	MenuId      string           `json:"menu_id"`
+	Tables      []map[string]any `json:"tables"`
+	Functions   any              `json:"functions"`
+	Microfronts any              `json:"microfronts"`
 }
 
 // CreateTemplate godoc
@@ -160,7 +174,7 @@ func (h *HandlerV1) CreateTemplate(c *gin.Context) {
 	resourceType = resource.ResourceType
 	nodeType = resource.NodeType
 
-	requestTables, err := convert[any, []Temp](template.Tables)
+	requestTables, err := convert[[]map[string]any, []TempTable](template.Tables)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -214,6 +228,10 @@ func (h *HandlerV1) CreateTemplate(c *gin.Context) {
 					ProjectId: resource.ResourceEnvironmentId,
 				},
 			)
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
 
 			if tableSlugs[tableResp.Slug] {
 				continue
@@ -223,7 +241,6 @@ func (h *HandlerV1) CreateTemplate(c *gin.Context) {
 				ctx, &nb.GetAllFieldsRequest{
 					Limit:     int32(limit),
 					Offset:    int32(offset),
-					Search:    c.Query("search"),
 					TableId:   table.Id,
 					TableSlug: tableResp.Slug,
 					ProjectId: resource.ResourceEnvironmentId,
