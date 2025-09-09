@@ -208,19 +208,6 @@ func (h *HandlerV1) CreateTemplate(c *gin.Context) {
 			return
 		}
 
-		// Create mapping from table_id to menu_id
-		// tableToMenuMapping := make(map[string]string)
-		// var buildTableToMenuMapping func(*nb.MenuTree)
-		// buildTableToMenuMapping = func(menu *nb.MenuTree) {
-		// 	if menu.TableId != "" {
-		// 		tableToMenuMapping[menu.TableId] = menu.Id
-		// 	}
-		// 	for _, child := range menu.Children {
-		// 		buildTableToMenuMapping(child)
-		// 	}
-		// }
-		// buildTableToMenuMapping(menuResp)
-
 		for _, table := range requestTables {
 			tableResp, err := services.GoObjectBuilderService().Table().GetByID(
 				ctx, &nb.TablePrimaryKey{
@@ -714,6 +701,51 @@ func (h *HandlerV1) ExecuteTemplate(c *gin.Context) {
 
 			for _, view := range table.Views {
 				view.ProjectId = resource.ResourceEnvironmentId
+
+				if view.MenuId != "" {
+					_, getMenuErr := services.GoObjectBuilderService().Menu().GetByID(
+						ctx,
+						&nb.MenuPrimaryKey{
+							Id:        view.MenuId,
+							ProjectId: resource.ResourceEnvironmentId,
+						},
+					)
+					if getMenuErr != nil {
+						menuLabel := table.Info.GetLabel()
+						if menuLabel == "" {
+							menuLabel = table.Slug
+						}
+
+						attribute := map[string]any{
+							"label_en": menuLabel,
+							"label_ru": menuLabel,
+						}
+
+						attributeStruct, err := convert[map[string]any, *structpb.Struct](attribute)
+						if err != nil {
+							h.handleResponse(c, status_http.GRPCError, err.Error())
+							return
+						}
+
+						createdMenu, createMenuErr := services.GoObjectBuilderService().Menu().Create(ctx,
+							&nb.CreateMenuRequest{
+								Label:      menuLabel,
+								ProjectId:  resource.ResourceEnvironmentId,
+								TableId:    table.Id,
+								Type:       "TABLE",
+								Id:         view.MenuId,
+								Attributes: attributeStruct,
+								ParentId:   "c57eedc3-a954-4262-a0af-376c65b5a284",
+							},
+						)
+						if createMenuErr != nil {
+							h.handleResponse(c, status_http.GRPCError, createMenuErr.Error())
+							return
+						}
+
+						view.MenuId = createdMenu.Id
+					}
+				}
 				_, err := services.GoObjectBuilderService().View().Create(ctx, view)
 				if err != nil {
 					h.handleResponse(c, status_http.GRPCError, err.Error())
