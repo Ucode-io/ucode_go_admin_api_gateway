@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"context"
 	"errors"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
@@ -75,7 +74,7 @@ func (h *HandlerV1) GetViewRelation(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err := services.GetBuilderServiceByType(resource.NodeType).Section().GetViewRelation(
-			context.Background(),
+			c.Request.Context(),
 			&obs.GetAllSectionsRequest{
 				TableId:   c.Query("table_id"),
 				TableSlug: c.Query("table_slug"),
@@ -91,7 +90,7 @@ func (h *HandlerV1) GetViewRelation(c *gin.Context) {
 		h.handleResponse(c, status_http.OK, resp)
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().Section().GetViewRelation(
-			context.Background(),
+			c.Request.Context(),
 			&nb.GetAllSectionsRequest{
 				TableId:   c.Query("table_id"),
 				TableSlug: c.Query("table_slug"),
@@ -162,7 +161,7 @@ func (h *HandlerV1) UpsertViewRelations(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		// resp, err = services.GetBuilderServiceByType(resource.NodeType).Section().UpsertViewRelations(
-		// 	context.Background(),
+		// 	c.Request.Context(),
 		// 	&viewRelation,
 		// )
 
@@ -172,7 +171,7 @@ func (h *HandlerV1) UpsertViewRelations(c *gin.Context) {
 		// }
 	case pb.ResourceType_POSTGRESQL:
 		// resp, err = services.PostgresBuilderService().Section().UpsertViewRelations(
-		// 	context.Background(),
+		// 	c.Request.Context(),
 		// 	&viewRelation,
 		// )
 

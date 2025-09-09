@@ -8,7 +8,6 @@ import (
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
-	tmp "ucode/ucode_go_api_gateway/genproto/template_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
 	"ucode/ucode_go_api_gateway/services"
@@ -383,31 +382,6 @@ func (h *HandlerV1) DeleteMenu(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-
-		oldMenu, err := services.GetBuilderServiceByType(resource.NodeType).Menu().GetByID(
-			context.Background(),
-			&obs.MenuPrimaryKey{
-				Id:        menuID,
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
-		if oldMenu.Type == "WIKI" {
-			_, _ = services.TemplateService().Note().DeleteNote(
-				context.Background(),
-				&tmp.DeleteNoteReq{
-					Id:         oldMenu.WikiId,
-					ProjectId:  projectId.(string),
-					ResourceId: resource.ResourceEnvironmentId,
-					VersionId:  "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
-				},
-			)
-		}
-
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).Menu().Delete(
 			context.Background(),
 			&obs.MenuPrimaryKey{

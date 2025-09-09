@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"context"
 	"errors"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -27,7 +26,7 @@ import (
 func (h *HandlerV1) GetResource(c *gin.Context) {
 
 	resp, err := h.companyServices.Resource().GetResource(
-		context.Background(),
+		c.Request.Context(),
 		&company_service.GetResourceRequest{
 			Id: c.Param("resource_id"),
 		},
@@ -285,7 +284,7 @@ func (h *HandlerV1) GetResourceList(c *gin.Context) {
 	}
 
 	resp, err := h.companyServices.Resource().GetResourceList(
-		context.Background(),
+		c.Request.Context(),
 		&company_service.GetResourceListRequest{
 			Limit:         int32(limit),
 			Offset:        int32(offset),
@@ -365,7 +364,7 @@ func (h *HandlerV1) ReconnectProjectResource(c *gin.Context) {
 func (h *HandlerV1) GetResourceEnvironment(c *gin.Context) {
 
 	resp, err := h.companyServices.Resource().GetResourceByResEnvironId(
-		context.Background(),
+		c.Request.Context(),
 		&company_service.GetResourceRequest{
 			Id: c.Param("resource_id"),
 		},

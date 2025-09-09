@@ -1,7 +1,6 @@
 package v2
 
 import (
-	"context"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
@@ -546,7 +545,7 @@ func (h *HandlerV2) DeleteMenu(c *gin.Context) {
 
 		h.handleResponse(c, status_http.NoContent, resp)
 	case pb.ResourceType_POSTGRESQL:
-		oldMenu, err := services.GoObjectBuilderService().Menu().GetByID(context.Background(), &nb.MenuPrimaryKey{
+		oldMenu, err := services.GoObjectBuilderService().Menu().GetByID(c.Request.Context(), &nb.MenuPrimaryKey{
 			Id:        menuID,
 			ProjectId: resource.ResourceEnvironmentId,
 		})
