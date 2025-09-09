@@ -731,7 +731,7 @@ func (h *HandlerV1) ExecuteTemplate(c *gin.Context) {
 							&nb.CreateMenuRequest{
 								Label:      menuLabel,
 								ProjectId:  resource.ResourceEnvironmentId,
-								TableId:    table.Id,
+								TableId:    table.Info.Id,
 								Type:       "TABLE",
 								Id:         view.MenuId,
 								Attributes: attributeStruct,
