@@ -1,11 +1,11 @@
 include:
-  - project: 'ucode/ops/ci-cd/microservices'
+  - project: 'ucode/ops/ci-cd'
     ref: master
-    file: 'ci.gitlab-ci.yml'
+    file: 'microservices/ci.gitlab-ci.yml'
 
-  - project: 'ucode/ops/ci-cd/microservices'
+  - project: 'ucode/ops/ci-cd'
     ref: master
-    file: 'cd.gitlab-ci.yml'
+    file: 'microservices/cd.gitlab-ci.yml'
 
 stages:
   - build
