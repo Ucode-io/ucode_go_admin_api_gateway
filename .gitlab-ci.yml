@@ -1,9 +1,9 @@
 include:
-  - project: 'ucode/ops/ci-cd'
+  - project: 'ucode/ops/ci-cd/microservices'
     ref: master
     file: 'ci.gitlab-ci.yml'
 
-  - project: 'ucode/ops/ci-cd'
+  - project: 'ucode/ops/ci-cd/microservices'
     ref: master
     file: 'cd.gitlab-ci.yml'
 
