@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"context"
 	"errors"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
@@ -49,7 +48,7 @@ func (h *HandlerV1) UpdateServiceResource(c *gin.Context) {
 	// data.EnvironmentId = environmentId.(string)
 
 	resp, err := h.companyServices.ServiceResource().Update(
-		context.Background(),
+		c.Request.Context(),
 		&data,
 	)
 
@@ -89,7 +88,7 @@ func (h *HandlerV1) GetListServiceResource(c *gin.Context) {
 	}
 
 	resp, err := h.companyServices.ServiceResource().GetList(
-		context.Background(),
+		c.Request.Context(),
 		&pb.GetListServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),

@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"context"
 	"errors"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -173,7 +172,7 @@ func (h *HandlerV1) ConvertTemplateToHtml(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.GetBuilderServiceByType(resource.NodeType).View().ConvertTemplateToHtml(
-			context.Background(),
+			c.Request.Context(),
 			&obs.HtmlBody{
 				Data:      structData,
 				Html:      html.Html,

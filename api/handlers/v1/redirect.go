@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"context"
 	"errors"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -107,7 +106,7 @@ func (h *HandlerV1) CreateRedirectUrl(c *gin.Context) {
 	}()
 
 	res, err = h.companyServices.Redirect().Create(
-		context.Background(),
+		c.Request.Context(),
 		&data,
 	)
 	if err != nil {
@@ -150,7 +149,7 @@ func (h *HandlerV1) GetSingleRedirectUrl(c *gin.Context) {
 	}
 
 	res, err := h.companyServices.Redirect().GetSingle(
-		context.Background(),
+		c.Request.Context(),
 		&pb.GetSingleRedirectUrlReq{
 			Id: id,
 		},
@@ -258,7 +257,7 @@ func (h *HandlerV1) UpdateRedirectUrl(c *gin.Context) {
 	}()
 
 	res, err = h.companyServices.Redirect().Update(
-		context.Background(),
+		c.Request.Context(),
 		&data,
 	)
 	if err != nil {
@@ -354,7 +353,7 @@ func (h *HandlerV1) DeleteRedirectUrl(c *gin.Context) {
 	}()
 
 	res, err = h.companyServices.Redirect().Delete(
-		context.Background(),
+		c.Request.Context(),
 		&pb.DeleteRedirectUrlReq{
 			Id: id,
 		},
@@ -410,7 +409,7 @@ func (h *HandlerV1) GetListRedirectUrl(c *gin.Context) {
 	}
 
 	res, err := h.companyServices.Redirect().GetList(
-		context.Background(),
+		c.Request.Context(),
 		&pb.GetListRedirectUrlReq{
 			ProjectId: projectId.(string),
 			EnvId:     environmentId.(string),
@@ -452,7 +451,7 @@ func (h *HandlerV1) UpdateRedirectUrlOrder(c *gin.Context) {
 	}
 
 	res, err := h.companyServices.Redirect().UpdateOrder(
-		context.Background(),
+		c.Request.Context(),
 		&data,
 	)
 

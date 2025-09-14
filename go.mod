@@ -24,7 +24,6 @@ require (
 
 require (
 	github.com/HugoSmits86/nativewebp v1.2.0
-	github.com/SebastiaanKlippert/go-wkhtmltopdf v1.9.3
 	github.com/aws/aws-sdk-go v1.55.5
 	github.com/eclipse/paho.mqtt.golang v1.5.0
 	github.com/go-git/go-git/v5 v5.12.0

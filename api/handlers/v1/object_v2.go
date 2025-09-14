@@ -212,7 +212,7 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 			if err == nil {
 				if resp.IsCached {
 					jsonData, _ := resp.GetData().MarshalJSON()
-					err = h.redis.SetX(context.Background(), redisKey, string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
+					err = h.redis.SetX(c.Request.Context(), redisKey, string(jsonData), 15*time.Second, projectId.(string), resource.NodeType)
 					if err != nil {
 						h.log.Error("Error while setting redis", logger.Error(err))
 					}

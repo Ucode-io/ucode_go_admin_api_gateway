@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"context"
 	"errors"
 
 	"ucode/ucode_go_api_gateway/api/models"
@@ -57,7 +56,7 @@ func (h *HandlerV1) BindLoginMicroFrontToProject(c *gin.Context) {
 	data.EnvironmentId = environmentId.(string)
 
 	res, err := h.companyServices.Project().CreateProjectLoginMicroFront(
-		context.Background(),
+		c.Request.Context(),
 		&data,
 	)
 
@@ -92,7 +91,7 @@ func (h *HandlerV1) UpdateLoginMicroFrontProject(c *gin.Context) {
 	}
 
 	resp, err := h.companyServices.Project().UpdateProjectLoginMicroFront(
-		context.Background(),
+		c.Request.Context(),
 		&req,
 	)
 
@@ -127,7 +126,7 @@ func (h *HandlerV1) GetLoginMicroFrontBySubdomain(c *gin.Context) {
 	}
 
 	resp, err := h.companyServices.Project().GetProjectLoginMicroFront(
-		context.Background(),
+		c.Request.Context(),
 		&pb.GetProjectLoginMicroFrontRequest{
 			Subdomain: subdomain,
 		},
@@ -168,7 +167,7 @@ func (h *HandlerV1) GetLoginMicroFrontBySubdomain(c *gin.Context) {
 	functionResp := &obs.Function{}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		functionResp, err = services.GetBuilderServiceByType(resource.NodeType).Function().GetSingle(context.Background(), &obs.FunctionPrimaryKey{
+		functionResp, err = services.GetBuilderServiceByType(resource.NodeType).Function().GetSingle(c.Request.Context(), &obs.FunctionPrimaryKey{
 			Id:        resp.MicrofrontId,
 			ProjectId: resource.ResourceEnvironmentId,
 		})
@@ -177,7 +176,7 @@ func (h *HandlerV1) GetLoginMicroFrontBySubdomain(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		function, err := services.GoObjectBuilderService().Function().GetSingle(context.Background(), &nobs.FunctionPrimaryKey{
+		function, err := services.GoObjectBuilderService().Function().GetSingle(c.Request.Context(), &nobs.FunctionPrimaryKey{
 			Id:        resp.MicrofrontId,
 			ProjectId: resource.ResourceEnvironmentId,
 		})
