@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"encoding/json"
 	"ucode/ucode_go_api_gateway/api/models"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
@@ -11,7 +12,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/status_http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/spf13/cast"
+	structpb "github.com/golang/protobuf/ptypes/struct"
 )
 
 // ExcelReader godoc
@@ -107,7 +108,6 @@ func (h *HandlerV1) ExcelReader(c *gin.Context) {
 func (h *HandlerV1) ExcelToDb(c *gin.Context) {
 	var (
 		excelRequest models.ExcelToDbRequest
-		resp         = models.ExcelToDbResponse{Message: "Success"}
 	)
 
 	if err := c.ShouldBindJSON(&excelRequest); err != nil {
@@ -126,8 +126,6 @@ func (h *HandlerV1) ExcelToDb(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
 		return
 	}
-
-	userId, _ := c.Get("user_id")
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(), &pb.GetSingleServiceResourceReq{
@@ -155,27 +153,35 @@ func (h *HandlerV1) ExcelToDb(c *gin.Context) {
 		return
 	}
 
-	var (
-		logReq = &models.CreateVersionHistoryRequest{
-			Services:     services,
-			NodeType:     resource.NodeType,
-			ProjectId:    resource.ResourceEnvironmentId,
-			ActionSource: c.Request.URL.String(),
-			ActionType:   "CREATE",
-			UserInfo:     cast.ToString(userId),
-			Request:      &data,
-		}
-	)
+	beforeActions, afterActions, getEventsErr := GetListCustomEvents(models.GetListCustomEventsStruct{
+		TableSlug: excelRequest.TableSlug,
+		Method:    "EXCEL_IMPORT",
+		Resource:  resource,
+	}, c, h)
+	if getEventsErr != nil {
+		h.handleResponse(c, status_http.InvalidArgument, getEventsErr.Error())
+		return
+	}
 
-	defer func() {
-		if err != nil {
-			logReq.Response = err.Error()
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-		} else {
-			h.handleResponse(c, status_http.Created, resp)
+	objectData := map[string]any{
+		"bucket": resource.ResourceEnvironmentId,
+	}
+
+	actionRequest := models.DoInvokeFuntionStruct{
+		TableSlug: excelRequest.TableSlug,
+		Method:    "EXCEL_IMPORT",
+		Resource:  resource,
+	}
+
+	if len(beforeActions) > 0 {
+		actionRequest.ObjectData = objectData
+		actionRequest.CustomEvents = beforeActions
+		actionRequest.ActionType = "BEFORE"
+		if _, err := DoInvokeFuntion(actionRequest, c, h); err != nil {
+			h.handleResponse(c, status_http.InvalidArgument, err.Error())
+			return
 		}
-		go h.versionHistory(logReq)
-	}()
+	}
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
@@ -188,10 +194,11 @@ func (h *HandlerV1) ExcelToDb(c *gin.Context) {
 			},
 		)
 		if err != nil {
+			h.handleResponse(c, status_http.InternalServerError, err.Error())
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		_, err = services.GoObjectBuilderService().Excel().ExcelToDb(
+		resp, err := services.GoObjectBuilderService().Excel().ExcelToDb(
 			c.Request.Context(), &nb.ExcelToDbRequest{
 				Id:        c.Param("excel_id"),
 				TableSlug: excelRequest.TableSlug,
@@ -200,7 +207,39 @@ func (h *HandlerV1) ExcelToDb(c *gin.Context) {
 			},
 		)
 		if err != nil {
+			h.handleResponse(c, status_http.InternalServerError, err.Error())
+			return
+		}
+
+		rowsMap, err := convert[[]*structpb.Struct, []map[string]any](resp.Rows)
+		if err != nil {
+			h.handleResponse(c, status_http.InternalServerError, err.Error())
+			return
+		}
+		objectData["rows"] = rowsMap
+	}
+
+	if len(afterActions) > 0 {
+		actionRequest.ObjectData = objectData
+		actionRequest.CustomEvents = afterActions
+		actionRequest.ActionType = "AFTER"
+		if _, err := DoInvokeFuntion(actionRequest, c, h); err != nil {
+			h.handleResponse(c, status_http.InvalidArgument, err.Error())
 			return
 		}
 	}
+
+	h.handleResponse(c, status_http.OK, models.ExcelToDbResponse{Message: "Success"})
+}
+
+func Convert[T any, U any](in T) (U, error) {
+	var out U
+
+	data, err := json.Marshal(in)
+	if err != nil {
+		return out, err
+	}
+
+	err = json.Unmarshal(data, &out)
+	return out, err
 }

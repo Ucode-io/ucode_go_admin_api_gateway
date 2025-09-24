@@ -815,12 +815,36 @@ func (h *HandlerV1) WordTemplate(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) Upload(c *gin.Context) {
 	var (
-		file          models.File
-		defaultBucket = "ucode"
+		file models.File
 	)
 	err := c.ShouldBind(&file)
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	// fetch project/environment and service resource for actions
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
+		return
+	}
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
@@ -845,18 +869,9 @@ func (h *HandlerV1) Upload(c *gin.Context) {
 		return
 	}
 
-	splitedContentType := strings.Split(file.File.Header["Content-Type"][0], "/")
-	if splitedContentType[0] != "image" && splitedContentType[0] != "video" {
-		defaultBucket = "docs"
-	}
-
-	if c.Query("from-chat") == "to_telegram_bot" {
-		defaultBucket = "telegram"
-	}
-
 	_, err = minioClient.FPutObject(
-		context.Background(),
-		defaultBucket,
+		c.Request.Context(),
+		resource.ResourceEnvironmentId,
 		file.File.Filename,
 		dst+"/"+file.File.Filename,
 		minio.PutObjectOptions{ContentType: file.File.Header["Content-Type"][0]},
