@@ -42,8 +42,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 	r.Any("/v1/transcoder/webhook", h.V1.TranscoderWebhook)
 
-	// Mock PaymentIntent endpoint (no external API call)
-	r.POST("/v1/payment-intent", h.V1.MockPaymentIntent)
+	// Real Stripe PaymentIntent endpoint
+	r.POST("/v1/payment-intent/stripe", h.V1.CreatePaymentIntent)
 
 	v1 := r.Group("/v1")
 	// @securityDefinitions.apikey ApiKeyAuth
