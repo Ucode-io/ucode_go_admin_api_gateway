@@ -24,7 +24,7 @@ func (h *HandlerV1) CreatePaymentIntent(c *gin.Context) {
 
 	// For SetupIntents, amount/currency are not required; ignoring provided values
 
-	stripe.Key = "sk_test_51SDcleECKew23mDJnmG6yfVSLAVjHUskKFh27GdEeGujYsBfi4yLFOqyQGnNBIXHxV9pja1DXYitDShTbrCLZxUa00cvbfmFBb"
+	stripe.Key = "sk_test_51QvC6qCx1p2EqOQp37eMRD73jmsECnITZ1eYTn4BbYv8uLNUfGOJUf3X0j14fyjhAvcoZYucz9oCy1aEJrg7Yyp300ScU9kgfh"
 
 	params := &stripe.SetupIntentParams{
 		PaymentMethodTypes: []*string{stripe.String("card")},
