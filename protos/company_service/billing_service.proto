@@ -119,6 +119,7 @@ message Transaction {
     string subscription_id = 18;
     Fare fare = 19;
     string project_name = 20;
+    string external_id = 21;
 }
 
 // Requests and Responses
@@ -183,6 +184,7 @@ message CreateTransactionRequest {
     int64 order_id = 12;
     string payment_type = 13;
     string subscription_id = 14;
+    string external_id = 15;
 }
 
 message ListTransactionsResponse {
@@ -200,6 +202,8 @@ message CreateProjectCardRequest {
     string expire = 2;
     string payme_token = 3;
     string project_id = 4;
+    string type = 5;
+    string external_id = 6;
 }
 
 message ProjectCard {
@@ -211,6 +215,8 @@ message ProjectCard {
     string project_id = 6;
     string created_at = 7;
     string updated_at = 8;
+    string external_id = 9;
+    string type = 10;
 }
 
 message GetVerifyCodeRequest {
