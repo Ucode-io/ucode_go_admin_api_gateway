@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/stripe/stripe-go/v83"
+	"github.com/stripe/stripe-go/v83/customer"
 	"github.com/stripe/stripe-go/v83/setupintent"
 
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -14,6 +15,8 @@ import (
 type createPaymentIntentRequest struct {
 	Amount   int64  `json:"amount"`
 	Currency string `json:"currency"`
+	Email    string `json:"email"`
+	Phone    string `json:"phone"`
 	// Optional: metadata or description can be extended later
 }
 
@@ -29,11 +32,26 @@ func (h *HandlerV1) CreatePaymentIntent(c *gin.Context) {
 
 	stripe.Key = "sk_test_51QvC6qCx1p2EqOQp37eMRD73jmsECnITZ1eYTn4BbYv8uLNUfGOJUf3X0j14fyjhAvcoZYucz9oCy1aEJrg7Yyp300ScU9kgfh"
 
-	params := &stripe.SetupIntentParams{
-		PaymentMethodTypes: []*string{stripe.String("card")},
+	params := &stripe.CustomerParams{}
+	if req.Email != "" {
+		params.Email = stripe.String(req.Email)
+	}
+	if req.Phone != "" {
+		params.Phone = stripe.String(req.Phone)
 	}
 
-	si, err := setupintent.New(params)
+	cus, err := customer.New(params)
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err.Error())
+		return
+	}
+
+	intentParams := &stripe.SetupIntentParams{
+		PaymentMethodTypes: []*string{stripe.String("card")},
+		Customer:           stripe.String(cus.ID),
+	}
+
+	si, err := setupintent.New(intentParams)
 	if err != nil {
 		h.handleResponse(c, status_http.InternalServerError, err.Error())
 		return
