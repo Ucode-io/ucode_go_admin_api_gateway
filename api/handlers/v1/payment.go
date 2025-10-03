@@ -1,6 +1,9 @@
 package v1
 
 import (
+	"encoding/json"
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"github.com/stripe/stripe-go/v83"
 	"github.com/stripe/stripe-go/v83/setupintent"
@@ -38,4 +41,17 @@ func (h *HandlerV1) CreatePaymentIntent(c *gin.Context) {
 
 	// return the Stripe SetupIntent directly for maximum fidelity
 	h.handleResponse(c, status_http.Created, si)
+}
+
+func (h *HandlerV1) StripeWebhook(c *gin.Context) {
+	req := make(map[string]any)
+	if err := c.ShouldBindJSON(&req); err != nil {
+		h.handleResponse(c, status_http.BadRequest, "Invalid JSON")
+		return
+	}
+
+	asd, _ := json.Marshal(req)
+	fmt.Println("Stripe Webhook received: ", string(asd))
+
+	h.handleResponse(c, status_http.Created, status_http.OK)
 }

@@ -44,6 +44,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 	// Real Stripe PaymentIntent endpoint
 	r.POST("/v1/payment-intent/stripe", h.V1.CreatePaymentIntent)
+	r.POST("/stripe/webhook", h.V1.StripeWebhook)
 
 	v1 := r.Group("/v1")
 	// @securityDefinitions.apikey ApiKeyAuth
