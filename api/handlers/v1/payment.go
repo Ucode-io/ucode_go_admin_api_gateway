@@ -99,7 +99,7 @@ func (h *HandlerV1) CreatePaymentIntent(c *gin.Context) {
 		PaymentMethod: &paymentMethod.ID,
 		Confirm:       stripe.Bool(true),
 		OffSession:    stripe.Bool(true),
-		ReceiptEmail:  stripe.String(req.Email),
+		// ReceiptEmail:  stripe.String(req.Email),
 	}
 	paymentItent, err := paymentintent.New(paymentIntentParams)
 	if err != nil {
