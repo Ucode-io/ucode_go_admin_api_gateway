@@ -3,13 +3,19 @@ package v1
 import (
 	"encoding/json"
 	"fmt"
+	"log"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stripe/stripe-go/v83"
 	"github.com/stripe/stripe-go/v83/customer"
+	"github.com/stripe/stripe-go/v83/paymentintent"
+	"github.com/stripe/stripe-go/v83/paymentmethod"
 	"github.com/stripe/stripe-go/v83/setupintent"
+	"github.com/stripe/stripe-go/v83/webhook"
 
 	"ucode/ucode_go_api_gateway/api/status_http"
+	"ucode/ucode_go_api_gateway/pkg/logger"
 )
 
 type createPaymentIntentRequest struct {
@@ -46,30 +52,110 @@ func (h *HandlerV1) CreatePaymentIntent(c *gin.Context) {
 		return
 	}
 
-	intentParams := &stripe.SetupIntentParams{
-		PaymentMethodTypes: []*string{stripe.String("card")},
-		Customer:           stripe.String(cus.ID),
+	pm := &stripe.PaymentMethodParams{
+		// Customer: stripe.String(cus.ID),
+		Card: &stripe.PaymentMethodCardParams{
+			Token: stripe.String("tok_visa"), // Using a test token; in real scenarios, use Stripe.js to create tokens securely
+		},
+		Type: stripe.String("card"),
 	}
 
-	si, err := setupintent.New(intentParams)
+	paymentMethod, err := paymentmethod.New(pm)
 	if err != nil {
+		fmt.Println("paymentMethod err", err)
 		h.handleResponse(c, status_http.InternalServerError, err.Error())
 		return
 	}
 
+	_, err = paymentmethod.Attach(paymentMethod.ID, &stripe.PaymentMethodAttachParams{
+		Customer: stripe.String(cus.ID),
+	})
+	if err != nil {
+		fmt.Println("attach err", err)
+		h.handleResponse(c, status_http.InternalServerError, err.Error())
+		return
+	}
+
+	// card.List(&stripe.CardListParams{
+	// 	Customer: stripe.String(cus.ID),
+	// })
+
+	intentParams := &stripe.SetupIntentParams{
+		Customer:      stripe.String(cus.ID),
+		PaymentMethod: &paymentMethod.ID,
+	}
+
+	_, err = setupintent.New(intentParams)
+	if err != nil {
+		fmt.Println("setupintent err", err)
+		h.handleResponse(c, status_http.InternalServerError, err.Error())
+		return
+	}
+
+	paymentIntentParams := &stripe.PaymentIntentParams{
+		Amount:        stripe.Int64(req.Amount),
+		Currency:      stripe.String(string(stripe.CurrencyUSD)),
+		Customer:      stripe.String(cus.ID),
+		PaymentMethod: &paymentMethod.ID,
+		Confirm:       stripe.Bool(true),
+		OffSession:    stripe.Bool(true),
+		ReceiptEmail:  stripe.String(req.Email),
+	}
+	paymentItent, err := paymentintent.New(paymentIntentParams)
+	if err != nil {
+		fmt.Println("paymentintent err", err)
+		h.handleResponse(c, status_http.InternalServerError, err.Error())
+		return
+	}
+
+	asdff, _ := json.Marshal(paymentItent)
+	fmt.Println("PaymentIntent created: ", string(asdff))
+
 	// return the Stripe SetupIntent directly for maximum fidelity
-	h.handleResponse(c, status_http.Created, si)
+	h.handleResponse(c, status_http.Created, paymentItent)
 }
 
 func (h *HandlerV1) StripeWebhook(c *gin.Context) {
-	req := make(map[string]any)
-	if err := c.ShouldBindJSON(&req); err != nil {
+	var payload []byte
+	if err := c.ShouldBindJSON(&payload); err != nil {
 		h.handleResponse(c, status_http.BadRequest, "Invalid JSON")
 		return
 	}
 
-	asd, _ := json.Marshal(req)
-	fmt.Println("Stripe Webhook received: ", string(asd))
+	endpointSecret := "whsec_cOGBaP6EVo4kRUCfeKXuSWg0JAL2avRg"
+	signatureHeader := c.GetHeader("Stripe-Signature")
+	event, err := webhook.ConstructEvent(payload, signatureHeader, endpointSecret)
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, "Webhook signature verification failed."+err.Error())
+		return
+	}
+
+	switch event.Type {
+	case "payment_intent.succeeded":
+		var paymentIntent stripe.PaymentIntent
+		err := json.Unmarshal(event.Data.Raw, &paymentIntent)
+		if err != nil {
+			h.log.Error("Error parsing webhook JSON: ", logger.Error(err))
+			h.handleResponse(c, status_http.InternalServerError, err.Error())
+			return
+		}
+
+		log.Printf("Successful payment for %d.", paymentIntent.Amount)
+		// Then define and call a func to handle the successful payment intent.
+		// handlePaymentIntentSucceeded(paymentIntent)
+	case "payment_method.attached":
+		var paymentMethod stripe.PaymentMethod
+		err := json.Unmarshal(event.Data.Raw, &paymentMethod)
+		if err != nil {
+			h.log.Error("Error parsing webhook JSON: ", logger.Error(err))
+			h.handleResponse(c, status_http.InternalServerError, err.Error())
+			return
+		}
+		// Then define and call a func to handle the successful attachment of a PaymentMethod.
+		// handlePaymentMethodAttached(paymentMethod)
+	default:
+		fmt.Fprintf(os.Stderr, "Unhandled event type: %s\n", event.Type)
+	}
 
 	h.handleResponse(c, status_http.Created, status_http.OK)
 }
