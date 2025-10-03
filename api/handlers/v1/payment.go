@@ -7,7 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stripe/stripe-go/v83"
 	"github.com/stripe/stripe-go/v83/customer"
-	"github.com/stripe/stripe-go/v83/paymentintent"
 	"github.com/stripe/stripe-go/v83/paymentmethod"
 	"github.com/stripe/stripe-go/v83/setupintent"
 
@@ -81,34 +80,31 @@ func (h *HandlerV1) CreatePaymentIntent(c *gin.Context) {
 		PaymentMethod: &paymentMethod.ID,
 	}
 
-	_, err = setupintent.New(intentParams)
+	setI, err := setupintent.New(intentParams)
 	if err != nil {
 		fmt.Println("setupintent err", err)
 		h.handleResponse(c, status_http.InternalServerError, err.Error())
 		return
 	}
 
-	paymentIntentParams := &stripe.PaymentIntentParams{
-		Amount:        stripe.Int64(req.Amount),
-		Currency:      stripe.String(string(stripe.CurrencyUSD)),
-		Customer:      stripe.String(cus.ID),
-		PaymentMethod: &paymentMethod.ID,
-		Confirm:       stripe.Bool(true),
-		OffSession:    stripe.Bool(true),
-		// ReceiptEmail:  stripe.String(req.Email),
-	}
-	paymentItent, err := paymentintent.New(paymentIntentParams)
-	if err != nil {
-		fmt.Println("paymentintent err", err)
-		h.handleResponse(c, status_http.InternalServerError, err.Error())
-		return
-	}
-
-	asdff, _ := json.Marshal(paymentItent)
-	fmt.Println("PaymentIntent created: ", string(asdff))
+	// paymentIntentParams := &stripe.PaymentIntentParams{
+	// 	Amount:        stripe.Int64(req.Amount),
+	// 	Currency:      stripe.String(string(stripe.CurrencyUSD)),
+	// 	Customer:      stripe.String(cus.ID),
+	// 	PaymentMethod: &paymentMethod.ID,
+	// 	Confirm:       stripe.Bool(true),
+	// 	OffSession:    stripe.Bool(true),
+	// 	// ReceiptEmail:  stripe.String(req.Email),
+	// }
+	// paymentItent, err := paymentintent.New(paymentIntentParams)
+	// if err != nil {
+	// 	fmt.Println("paymentintent err", err)
+	// 	h.handleResponse(c, status_http.InternalServerError, err.Error())
+	// 	return
+	// }
 
 	// return the Stripe SetupIntent directly for maximum fidelity
-	h.handleResponse(c, status_http.Created, paymentItent)
+	h.handleResponse(c, status_http.Created, setI)
 }
 
 func (h *HandlerV1) StripeWebhook(c *gin.Context) {
