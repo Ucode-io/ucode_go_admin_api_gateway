@@ -130,7 +130,7 @@ func (h *HandlerV1) StripeWebhook(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("Received event: ", string(payload))
+	fmt.Println("Received event: ", string(event.Data.Raw))
 
 	switch event.Type {
 	case "payment_intent.succeeded":
