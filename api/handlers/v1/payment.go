@@ -58,6 +58,8 @@ func (h *HandlerV1) CreatePaymentIntent(c *gin.Context) {
 		return
 	}
 
+	customerId = project.CustomerId
+
 	if project.CustomerId == "" {
 		params := &stripe.CustomerParams{}
 		if req.Email != "" {
