@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"strings"
@@ -103,26 +104,28 @@ func (h *HandlerV1) CreatePaymentIntent(c *gin.Context) {
 }
 
 func (h *HandlerV1) StripeWebhook(c *gin.Context) {
-	var payload = make(map[string]any)
-	if err := c.ShouldBindJSON(&payload); err != nil {
-		h.handleResponse(c, status_http.BadRequest, "Invalid JSON")
+	payload, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, "body read is failed. "+err.Error())
 		return
 	}
 
-	payloadBytes, err := json.Marshal(payload)
-	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, "Failed to marshal payload."+err.Error())
+	event := stripe.Event{}
+
+	if err := json.Unmarshal(payload, &event); err != nil {
+		h.handleResponse(c, status_http.InternalServerError, "json unmarshal is failed. "+err.Error())
 		return
 	}
 
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 20*time.Second)
 	defer cancel()
 
-	fmt.Println("payload", string(payloadBytes))
+	fmt.Println("payload", string(payload))
 
 	endpointSecret := "whsec_cOGBaP6EVo4kRUCfeKXuSWg0JAL2avRg"
 	signatureHeader := c.GetHeader("Stripe-Signature")
-	event, err := webhook.ConstructEvent(payloadBytes, signatureHeader, endpointSecret)
+	fmt.Println("signatureHeader", signatureHeader)
+	event, err = webhook.ConstructEvent(payload, signatureHeader, endpointSecret)
 	if err != nil {
 		h.handleResponse(c, status_http.InternalServerError, "Webhook signature verification failed."+err.Error())
 		return
@@ -141,8 +144,6 @@ func (h *HandlerV1) StripeWebhook(c *gin.Context) {
 		}
 
 		log.Printf("Successful payment for %d.", paymentIntent.Amount)
-		// Then define and call a func to handle the successful payment intent.
-		// handlePaymentIntentSucceeded(paymentIntent)
 	case "payment_method.attached":
 		var paymentMethod stripe.PaymentMethod
 		err := json.Unmarshal(event.Data.Raw, &paymentMethod)
@@ -151,7 +152,6 @@ func (h *HandlerV1) StripeWebhook(c *gin.Context) {
 			h.handleResponse(c, status_http.InternalServerError, err.Error())
 			return
 		}
-		// Then define and call a func to handle the successful attachment of a PaymentMethod.
 		h.handlePaymentMethodAttached(ctx, paymentMethod)
 	default:
 		fmt.Fprintf(os.Stderr, "Unhandled event type: %s\n", event.Type)
