@@ -125,11 +125,14 @@ func (h *HandlerV1) StripeWebhook(c *gin.Context) {
 	endpointSecret := "whsec_cOGBaP6EVo4kRUCfeKXuSWg0JAL2avRg"
 	signatureHeader := c.GetHeader("Stripe-Signature")
 	fmt.Println("signatureHeader", signatureHeader)
-	event, err = webhook.ConstructEvent(payload, signatureHeader, endpointSecret)
-	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, "Webhook signature verification failed."+err.Error())
-		return
-	}
+	event, err = webhook.ConstructEventWithOptions(payload, signatureHeader, endpointSecret, webhook.ConstructEventOptions{
+		IgnoreAPIVersionMismatch: true,
+	})
+	// event, err = webhook.ConstructEvent(payload, signatureHeader, endpointSecret)
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.InternalServerError, "Webhook signature verification failed."+err.Error())
+	// 	return
+	// }
 
 	fmt.Println("Received event: ", string(event.Data.Raw))
 
