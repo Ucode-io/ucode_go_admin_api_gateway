@@ -43,7 +43,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	r.Any("/v1/transcoder/webhook", h.V1.TranscoderWebhook)
 
 	// Real Stripe PaymentIntent endpoint
-	r.POST("/v1/payment-intent/stripe", h.V1.CreatePaymentIntent)
 	r.POST("/stripe/webhook", h.V1.StripeWebhook)
 
 	v1 := r.Group("/v1")
@@ -52,8 +51,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	// @name Authorization
 	v1.Use(h.V1.AuthMiddleware(cfg))
 	{
-		// v1.Any("/tusd/*any", gin.WrapH(http.StripPrefix("/v1/tusd/", h.V2.Tusd())))
-
 		v1.POST("/menu-settings", h.V1.CreateMenuSettings)
 		v1.PUT("/menu-settings", h.V1.UpdateMenuSettings)
 		v1.GET("/menu-settings", h.V1.GetAllMenuSettings)
@@ -159,6 +156,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1.GET("/language", h.V1.GetListLanguage)
 		v1.PUT("/language", h.V1.UpdateLanguage)
 		v1.DELETE("/language/:id", h.V1.DeleteLanguage)
+
+		v1.POST("/payment-intent/stripe", h.V1.CreatePaymentIntent)
 
 		fare := v1.Group("/fare")
 		{
