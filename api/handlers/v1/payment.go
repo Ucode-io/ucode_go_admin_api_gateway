@@ -165,8 +165,10 @@ func (h *HandlerV1) StripeWebhook(c *gin.Context) {
 func (h *HandlerV1) handlePaymentMethodAttached(ctx context.Context, paymentMethod stripe.PaymentMethod) {
 
 	_, err := h.companyServices.Billing().CreateCard(ctx, &pb.CreateProjectCardRequest{
-		Pan:        paymentMethod.Card.Last4,
-		Expire:     fmt.Sprintf("%d/%d", paymentMethod.Card.ExpMonth, paymentMethod.Card.ExpYear),
+		Pan: fmt.Sprintf("****%s", paymentMethod.Card.Last4),
+		Expire: func(month, year int64) string {
+			return fmt.Sprintf("%02d/%02d", month, year%100)
+		}(paymentMethod.Card.ExpMonth, paymentMethod.Card.ExpYear),
 		ProjectId:  paymentMethod.Customer.ID,
 		Type:       strings.ToUpper(string(paymentMethod.Card.Brand)),
 		ExternalId: paymentMethod.ID,
