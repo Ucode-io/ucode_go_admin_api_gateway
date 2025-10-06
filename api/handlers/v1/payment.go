@@ -103,21 +103,26 @@ func (h *HandlerV1) CreatePaymentIntent(c *gin.Context) {
 }
 
 func (h *HandlerV1) StripeWebhook(c *gin.Context) {
-	var payload []byte
-	// var payload = make(map[string]any)
+	var payload = make(map[string]any)
 	if err := c.ShouldBindJSON(&payload); err != nil {
 		h.handleResponse(c, status_http.BadRequest, "Invalid JSON")
+		return
+	}
+
+	payloadBytes, err := json.Marshal(payload)
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, "Failed to marshal payload."+err.Error())
 		return
 	}
 
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 20*time.Second)
 	defer cancel()
 
-	fmt.Println("payload", string(payload))
+	fmt.Println("payload", string(payloadBytes))
 
 	endpointSecret := "whsec_cOGBaP6EVo4kRUCfeKXuSWg0JAL2avRg"
 	signatureHeader := c.GetHeader("Stripe-Signature")
-	event, err := webhook.ConstructEvent(payload, signatureHeader, endpointSecret)
+	event, err := webhook.ConstructEvent(payloadBytes, signatureHeader, endpointSecret)
 	if err != nil {
 		h.handleResponse(c, status_http.InternalServerError, "Webhook signature verification failed."+err.Error())
 		return
