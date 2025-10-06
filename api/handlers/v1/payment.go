@@ -27,7 +27,6 @@ type createPaymentIntentRequest struct {
 	Currency string `json:"currency"`
 	Email    string `json:"email"`
 	Phone    string `json:"phone"`
-	// Optional: metadata or description can be extended later
 }
 
 // CreatePaymentIntent calls Stripe to create a real SetupIntent (uses configured Stripe key)
@@ -171,6 +170,7 @@ func (h *HandlerV1) handlePaymentMethodAttached(ctx context.Context, paymentMeth
 		ProjectId:  paymentMethod.Customer.ID,
 		Type:       strings.ToUpper(string(paymentMethod.Card.Brand)),
 		ExternalId: paymentMethod.ID,
+		Verify:     true,
 	})
 	if err != nil {
 		h.log.Error("Error while creating card: ", logger.Error(err))

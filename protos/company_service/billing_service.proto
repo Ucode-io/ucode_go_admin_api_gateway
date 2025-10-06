@@ -204,6 +204,7 @@ message CreateProjectCardRequest {
     string project_id = 4;
     string type = 5;
     string external_id = 6;
+    bool verify = 7;
 }
 
 message ProjectCard {
