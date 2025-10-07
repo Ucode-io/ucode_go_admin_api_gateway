@@ -50,7 +50,7 @@ func (h *HandlerV1) CreatePaymentIntent(c *gin.Context) {
 		return
 	}
 
-	stripe.Key = "sk_test_51QvC6qCx1p2EqOQp37eMRD73jmsECnITZ1eYTn4BbYv8uLNUfGOJUf3X0j14fyjhAvcoZYucz9oCy1aEJrg7Yyp300ScU9kgfh"
+	stripe.Key = h.baseConf.StripeApiKey
 
 	project, err := h.companyServices.Project().GetById(ctx, &pb.GetProjectByIdRequest{ProjectId: projectId.(string)})
 	if err != nil {
@@ -121,18 +121,12 @@ func (h *HandlerV1) StripeWebhook(c *gin.Context) {
 
 	fmt.Println("payload", string(payload))
 
-	endpointSecret := "whsec_cOGBaP6EVo4kRUCfeKXuSWg0JAL2avRg"
+	endpointSecret := h.baseConf.StripeWebhookSecret
 	signatureHeader := c.GetHeader("Stripe-Signature")
 	fmt.Println("signatureHeader", signatureHeader)
 	event, err = webhook.ConstructEventWithOptions(payload, signatureHeader, endpointSecret, webhook.ConstructEventOptions{
 		IgnoreAPIVersionMismatch: true,
 	})
-	// event, err = webhook.ConstructEvent(payload, signatureHeader, endpointSecret)
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.InternalServerError, "Webhook signature verification failed."+err.Error())
-	// 	return
-	// }
-
 	fmt.Println("Received event: ", string(event.Data.Raw))
 
 	switch event.Type {

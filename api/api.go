@@ -157,8 +157,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1.PUT("/language", h.V1.UpdateLanguage)
 		v1.DELETE("/language/:id", h.V1.DeleteLanguage)
 
-		v1.POST("/payment-intent/stripe", h.V1.CreatePaymentIntent)
-
 		fare := v1.Group("/fare")
 		{
 			fare.POST("", h.V1.CreateFare)
@@ -183,13 +181,14 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			transaction.GET("/:id", h.V1.GetTransaction)
 			transaction.PUT("", h.V1.UpdateTransaction)
 		}
-		payme := v1.Group("/payme")
+		payment := v1.Group("/payment")
 		{
-			payme.POST("/get-verify-code", h.V1.GetVerifyCode)
-			payme.POST("/verify", h.V1.Verify)
-			payme.GET("/card-list", h.V1.GetAllProjectCards)
-			payme.POST("/receipt-pay", h.V1.ReceiptPay)
-			payme.DELETE("/card/:id", h.V1.DeleteProjectCard)
+			payment.POST("/intent", h.V1.CreatePaymentIntent)
+			payment.POST("/get-verify-code", h.V1.GetVerifyCode)
+			payment.POST("/verify", h.V1.Verify)
+			payment.GET("/card-list", h.V1.GetAllProjectCards)
+			payment.POST("/receipt-pay", h.V1.ReceiptPay)
+			payment.DELETE("/card/:id", h.V1.DeleteProjectCard)
 		}
 		discount := v1.Group("/discounts")
 		{
