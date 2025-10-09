@@ -46,53 +46,10 @@ func (h *HandlerV1) AddResourceToProject(c *gin.Context) {
 		return
 	}
 
-	userId, _ := c.Get("user_id")
-
-	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(), &pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId.(string),
-			EnvironmentId: environmentId.(string),
-			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
-	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
 	request.ProjectId = projectId.(string)
 	request.EnvironmentId = environmentId.(string)
 
-	var (
-		logReq = &models.CreateVersionHistoryRequest{
-			Services:     services,
-			NodeType:     resource.NodeType,
-			ProjectId:    resource.ResourceEnvironmentId,
-			ActionSource: c.Request.URL.String(),
-			ActionType:   "CREATE",
-			UserInfo:     cast.ToString(userId),
-			Request:      &request,
-		}
-	)
-
-	defer func() {
-		if err != nil {
-			logReq.Response = err.Error()
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-		} else {
-			logReq.Response = resp
-			h.handleResponse(c, status_http.OK, resp)
-		}
-		go h.versionHistory(logReq)
-	}()
-
-	resp, err = h.companyServices.Resource().AddResourceToProject(c.Request.Context(), request)
+	resp, err := h.companyServices.Resource().AddResourceToProject(c.Request.Context(), request)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return

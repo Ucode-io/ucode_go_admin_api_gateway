@@ -37,6 +37,7 @@ require (
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/processout/grpc-go-pool v1.2.1
 	github.com/stretchr/testify v1.10.0
+	github.com/stripe/stripe-go/v83 v83.0.0
 	github.com/tus/tusd v1.13.0
 	github.com/uber/jaeger-client-go v2.30.0+incompatible
 	github.com/ucode-io/dbml-go v1.0.3

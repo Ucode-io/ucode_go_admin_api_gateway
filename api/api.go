@@ -42,14 +42,15 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 	r.Any("/v1/transcoder/webhook", h.V1.TranscoderWebhook)
 
+	// Real Stripe PaymentIntent endpoint
+	r.POST("/stripe/webhook", h.V1.StripeWebhook)
+
 	v1 := r.Group("/v1")
 	// @securityDefinitions.apikey ApiKeyAuth
 	// @in header
 	// @name Authorization
 	v1.Use(h.V1.AuthMiddleware(cfg))
 	{
-		// v1.Any("/tusd/*any", gin.WrapH(http.StripPrefix("/v1/tusd/", h.V2.Tusd())))
-
 		v1.POST("/menu-settings", h.V1.CreateMenuSettings)
 		v1.PUT("/menu-settings", h.V1.UpdateMenuSettings)
 		v1.GET("/menu-settings", h.V1.GetAllMenuSettings)
@@ -180,13 +181,14 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			transaction.GET("/:id", h.V1.GetTransaction)
 			transaction.PUT("", h.V1.UpdateTransaction)
 		}
-		payme := v1.Group("/payme")
+		payment := v1.Group("/payment")
 		{
-			payme.POST("/get-verify-code", h.V1.GetVerifyCode)
-			payme.POST("/verify", h.V1.Verify)
-			payme.GET("/card-list", h.V1.GetAllProjectCards)
-			payme.POST("/receipt-pay", h.V1.ReceiptPay)
-			payme.DELETE("/card/:id", h.V1.DeleteProjectCard)
+			payment.POST("/intent", h.V1.CreatePaymentIntent)
+			payment.POST("/get-verify-code", h.V1.GetVerifyCode)
+			payment.POST("/verify", h.V1.Verify)
+			payment.GET("/card-list", h.V1.GetAllProjectCards)
+			payment.POST("/receipt-pay", h.V1.ReceiptPay)
+			payment.DELETE("/card/:id", h.V1.DeleteProjectCard)
 		}
 		discount := v1.Group("/discounts")
 		{

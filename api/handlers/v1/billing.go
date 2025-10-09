@@ -411,7 +411,11 @@ func (h *HandlerV1) GetTransaction(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetAllTransactions(c *gin.Context) {
-	projectId := c.Query("project-id")
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
 
 	offset, err := h.getOffsetParam(c)
 	if err != nil {
@@ -428,7 +432,7 @@ func (h *HandlerV1) GetAllTransactions(c *gin.Context) {
 	response, err := h.companyServices.Billing().ListTransactions(c, &pb.ListRequest{
 		Offset:    int32(offset),
 		Limit:     int32(limit),
-		ProjectId: projectId,
+		ProjectId: projectId.(string),
 	})
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())

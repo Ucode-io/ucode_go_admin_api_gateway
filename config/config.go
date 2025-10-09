@@ -154,6 +154,9 @@ type BaseConfig struct {
 
 	N8NApiKey  string
 	N8NBaseURL string
+
+	StripeApiKey        string
+	StripeWebhookSecret string
 }
 
 func BaseLoad() BaseConfig {
@@ -213,6 +216,9 @@ func BaseLoad() BaseConfig {
 
 	config.N8NApiKey = cast.ToString(GetOrReturnDefaultValue("N8N_API_KEY", ""))
 	config.N8NBaseURL = cast.ToString(GetOrReturnDefaultValue("N8N_BASE_URL", "https://n8n.u-code.io"))
+
+	config.StripeApiKey = cast.ToString(GetOrReturnDefaultValue("STRIPE_API_KEY", "sk_test_51QvC6qCx1p2EqOQp37eMRD73jmsECnITZ1eYTn4BbYv8uLNUfGOJUf3X0j14fyjhAvcoZYucz9oCy1aEJrg7Yyp300ScU9kgfh"))
+	config.StripeWebhookSecret = cast.ToString(GetOrReturnDefaultValue("STRIPE_WEBHOOK_SECRET", "whsec_cOGBaP6EVo4kRUCfeKXuSWg0JAL2avRg"))
 
 	return config
 }
