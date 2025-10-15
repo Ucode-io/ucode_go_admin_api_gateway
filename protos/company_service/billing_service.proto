@@ -120,6 +120,8 @@ message Transaction {
     Fare fare = 19;
     string project_name = 20;
     string external_id = 21;
+    string card_id = 22;
+    double rate = 23;
 }
 
 // Requests and Responses
@@ -185,6 +187,8 @@ message CreateTransactionRequest {
     string payment_type = 13;
     string subscription_id = 14;
     string external_id = 15;
+    string card_id = 16;
+    double rate = 17;
 }
 
 message ListTransactionsResponse {
@@ -285,6 +289,7 @@ message CalculatePriceResponse {
     string end_date = 6;
     double currency_rate = 7;
     string renewal_date = 8;
+    double calculated_price_without_rate = 9;
 }
 
 message Discount {

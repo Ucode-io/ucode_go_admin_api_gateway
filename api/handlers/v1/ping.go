@@ -4,7 +4,6 @@ import (
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
-	fc "ucode/ucode_go_api_gateway/genproto/new_function_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -30,7 +29,7 @@ func (h *HandlerV1) Ping(c *gin.Context) {
 		projectId     = c.Query("project_id")
 		environmentId = c.Query("environment_id")
 		limit         = 10
-		offset        = 0
+		// offset        = 0
 	)
 
 	switch service {
@@ -79,49 +78,6 @@ func (h *HandlerV1) Ping(c *gin.Context) {
 		}
 
 	case "function_service":
-		resource, err := h.companyServices.ServiceResource().GetSingle(
-			c.Request.Context(), &pb.GetSingleServiceResourceReq{
-				ProjectId:     projectId,
-				EnvironmentId: environmentId,
-				ServiceType:   pb.ServiceType_FUNCTION_SERVICE,
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
-		environment, err := h.companyServices.Environment().GetById(
-			c.Request.Context(), &pb.EnvironmentPrimaryKey{
-				Id: environmentId,
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, "error getting resource environment id")
-			return
-		}
-
-		services, err := h.GetProjectSrvc(c.Request.Context(), projectId, resource.NodeType)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
-		_, err = services.FunctionService().FunctionService().GetList(
-			c.Request.Context(), &fc.GetAllFunctionsRequest{
-				Search:        c.DefaultQuery("search", ""),
-				Limit:         int32(limit),
-				Offset:        int32(offset),
-				ProjectId:     resource.ResourceEnvironmentId,
-				EnvironmentId: environment.GetId(),
-				Type:          config.FUNCTION,
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
 	}
 
 	h.handleResponse(c, status_http.OK, "pong")
