@@ -30,22 +30,16 @@ func EnterPriceProjectsGrpcSvcs(ctx context.Context, compSrvc services.CompanySe
 			}
 
 			projectConf := config.Config{
-				ConvertTemplateServiceGrpcPort: v.CONVERT_TEMPLATE_GRPC_PORT,
-				ConvertTemplateServiceGrpcHost: v.CONVERT_TEMPLATE_SERVICE_HOST,
-				DocGeneratorGrpcHost:           v.DOC_GENERATOR_GRPC_PORT,
-				DocGeneratorGrpcPort:           v.DOC_GENERATOR_SERVICE_HOST,
-				FunctionServicePort:            v.FUNCTION_GRPC_PORT,
-				FunctionServiceHost:            v.FUNCTION_SERVICE_HOST,
-				ObjectBuilderGRPCPort:          v.OBJECT_BUILDER_GRPC_PORT,
-				ObjectBuilderServiceHost:       v.OBJECT_BUILDER_SERVICE_HOST,
-				HighObjectBuilderGRPCPort:      v.OBJECT_BUILDER_HIGH_GRPC_PORT,
-				HighObjectBuilderServiceHost:   v.OBJECT_BUILDER_SERVICE_HIGHT_HOST,
-				TemplateGRPCPort:               v.TEMPLATE_GRPC_PORT,
-				TemplateServiceHost:            v.TEMPLATE_SERVICE_HOST,
-				GetRequestRedisHost:            v.REDIS_HOST,
-				GetRequestRedisPort:            v.REDIS_PORT,
-				GetRequestRedisDatabase:        num,
-				GetRequestRedisPassword:        v.REDIS_PASSWORD,
+				DocGeneratorGrpcHost:         v.DOC_GENERATOR_GRPC_PORT,
+				DocGeneratorGrpcPort:         v.DOC_GENERATOR_SERVICE_HOST,
+				ObjectBuilderGRPCPort:        v.OBJECT_BUILDER_GRPC_PORT,
+				ObjectBuilderServiceHost:     v.OBJECT_BUILDER_SERVICE_HOST,
+				HighObjectBuilderGRPCPort:    v.OBJECT_BUILDER_HIGH_GRPC_PORT,
+				HighObjectBuilderServiceHost: v.OBJECT_BUILDER_SERVICE_HIGHT_HOST,
+				GetRequestRedisHost:          v.REDIS_HOST,
+				GetRequestRedisPort:          v.REDIS_PORT,
+				GetRequestRedisDatabase:      num,
+				GetRequestRedisPassword:      v.REDIS_PASSWORD,
 			}
 
 			grpcSvcs, err := services.NewGrpcClients(ctx, projectConf)

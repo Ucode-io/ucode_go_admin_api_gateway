@@ -2,15 +2,11 @@ package code_server
 
 import (
 	"bytes"
-	"context"
 	"errors"
 	"log"
 	"os/exec"
 	"strings"
 	"ucode/ucode_go_api_gateway/config"
-	"ucode/ucode_go_api_gateway/genproto/company_service"
-	pb "ucode/ucode_go_api_gateway/genproto/new_function_service"
-	"ucode/ucode_go_api_gateway/services"
 )
 
 type CodeServer struct {
@@ -64,62 +60,6 @@ func CreateCodeServerV2(data CodeServer) error {
 	isErr := !strings.HasPrefix(stderr.String(), "WARNING:")
 	if err != nil && isErr {
 		return errors.New("error while install code server:" + stderr.String())
-	}
-
-	return nil
-}
-
-func DeleteCodeServer(ctx context.Context, srvs services.ServiceManagerI, cfg config.BaseConfig, comp services.CompanyServiceI) error {
-	var (
-		allFunctions = make([]*pb.Function, 0)
-		ids          = make([]string, 0)
-	)
-
-	req := &company_service.GetListResourceEnvironmentReq{}
-	resEnvsIds, err := comp.Resource().GetListResourceEnvironment(ctx, req)
-	if err != nil {
-		return err
-	}
-
-	if len(resEnvsIds.GetData()) == 0 {
-		return nil
-	}
-
-	for _, v := range resEnvsIds.GetData() {
-		functions, err := srvs.FunctionService().FunctionService().GetListByRequestTime(context.Background(), &pb.GetListByRequestTimeRequest{
-			ProjectId: v.GetId(),
-			Type:      "FUNCTION",
-		})
-		if err != nil {
-			continue
-		}
-
-		allFunctions = append(allFunctions, functions.GetFunctions()...)
-	}
-
-	for _, function := range allFunctions {
-		var stdout bytes.Buffer
-
-		var cmd = exec.Command("helm", "uninstall", function.Path, "-n", "test")
-		err = cmd.Run()
-		var stderr bytes.Buffer
-		cmd.Stderr = &stderr
-		cmd.Stdout = &stdout
-		if err != nil {
-			continue
-		}
-		ids = append(ids, function.GetId())
-	}
-	for _, v := range resEnvsIds.GetData() {
-		if len(ids) > 0 {
-			_, err = srvs.FunctionService().FunctionService().UpdateManyByRequestTime(context.Background(), &pb.UpdateManyUrlAndPassword{
-				Ids:       ids,
-				ProjectId: v.GetId(),
-			})
-			if err != nil {
-				return err
-			}
-		}
 	}
 
 	return nil

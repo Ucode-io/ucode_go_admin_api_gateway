@@ -2,12 +2,10 @@ package main
 
 import (
 	"context"
-	"time"
 	"ucode/ucode_go_api_gateway/api"
 	"ucode/ucode_go_api_gateway/api/handlers"
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/pkg/caching"
-	"ucode/ucode_go_api_gateway/pkg/crons"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
@@ -129,21 +127,6 @@ func main() {
 	h := handlers.NewHandler(baseConf, mapProjectConfs, log, projectServiceNodes, compSrvc, authSrvc, newRedis, cache, limiter)
 
 	api.SetUpAPI(r, h, baseConf, tracer)
-	cronjobs := crons.ExecuteCron()
-	for _, cronjob := range cronjobs {
-		go func(ctx context.Context, cronjob crons.Cronjob) {
-			for {
-				select {
-				case <-time.After(cronjob.Interval):
-					// err := cronjob.Function(ctx, grpcSvcs, baseConf, compSrvc)
-					// if err != nil {
-					// }
-				case <-ctx.Done():
-					return
-				}
-			}
-		}(ctx, cronjob)
-	}
 
 	log.Info("server is running...")
 	if err := r.Run(baseConf.HTTPPort); err != nil {
