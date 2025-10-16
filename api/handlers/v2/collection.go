@@ -14,6 +14,7 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/cast"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -228,11 +229,8 @@ func (h *HandlerV2) GetAllCollections(c *gin.Context) {
 		return
 	}
 
-	limit, err := h.getLimitParam(c)
-	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
-		return
-	}
+	limitStr := c.DefaultQuery("limit", "120")
+	limit := cast.ToInt32(limitStr)
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -283,7 +281,7 @@ func (h *HandlerV2) GetAllCollections(c *gin.Context) {
 			&obs.GetAllTablesRequest{
 				Limit:        int32(limit),
 				Offset:       int32(offset),
-				Search:       c.DefaultQuery("search", ""),
+				Search:       c.Query("search"),
 				ProjectId:    resource.ResourceEnvironmentId,
 				FolderId:     c.Query("folder_id"),
 				IsLoginTable: isLoginTable,
@@ -301,7 +299,7 @@ func (h *HandlerV2) GetAllCollections(c *gin.Context) {
 			&nb.GetAllTablesRequest{
 				Limit:        int32(limit),
 				Offset:       int32(offset),
-				Search:       c.DefaultQuery("search", ""),
+				Search:       c.Query("search"),
 				ProjectId:    resource.ResourceEnvironmentId,
 				IsLoginTable: isLoginTable,
 			},
