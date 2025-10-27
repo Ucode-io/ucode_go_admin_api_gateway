@@ -6,7 +6,6 @@ import (
 	"errors"
 	"net/http"
 	"strings"
-	"sync"
 	"time"
 
 	"ucode/ucode_go_api_gateway/api/models"
@@ -17,10 +16,6 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/logger"
 
 	"github.com/gin-gonic/gin"
-)
-
-var (
-	ApiKeys sync.Map
 )
 
 type Response struct {
