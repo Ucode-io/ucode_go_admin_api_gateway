@@ -205,6 +205,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		{
 			transcoder.GET("/pipeline", h.V1.GetListPipeline)
 		}
+
+		v1.PUT("/subscription", h.V1.UpdateSubscriptionEndDate)
 	}
 
 	v2 := r.Group("/v2")

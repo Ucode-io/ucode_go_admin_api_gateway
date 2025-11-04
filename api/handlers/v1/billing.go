@@ -547,3 +547,36 @@ func (h *HandlerV1) ListDiscounts(c *gin.Context) {
 
 	h.handleResponse(c, status_http.OK, response)
 }
+
+// UpdateSubscriptionEndDate godoc
+// @Security ApiKeyAuth
+// @Router /v1/subscription [PUT]
+// @Summary Update subscription date
+// @Description Update subscription date
+// @Tags Subscription
+// @Accept json
+// @Produce json
+// @Success 201 {object} status_http.Response{data=pb.ListDiscountsResponse} "Fare data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *HandlerV1) UpdateSubscriptionEndDate(c *gin.Context) {
+	var request pb.UpdateSubscriptionEndDateReq
+	
+	if err := c.ShouldBindJSON(&request); err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	if !util.IsValidUUID(request.ProjectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	response, err := h.companyServices.Billing().UpdateSubscriptionEndDate(c, &request)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.OK, response)
+}
