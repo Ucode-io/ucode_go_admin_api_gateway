@@ -561,14 +561,14 @@ func (h *HandlerV1) ListDiscounts(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) UpdateSubscriptionEndDate(c *gin.Context) {
 	var request pb.UpdateSubscriptionEndDateReq
-	
+
 	if err := c.ShouldBindJSON(&request); err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
 	if !util.IsValidUUID(request.ProjectId) {
-		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		h.handleResponse(c, status_http.InvalidArgument, "project_id is an invalid uuid")
 		return
 	}
 
