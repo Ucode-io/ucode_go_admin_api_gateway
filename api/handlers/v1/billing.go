@@ -429,11 +429,20 @@ func (h *HandlerV1) GetAllTransactions(c *gin.Context) {
 		return
 	}
 
-	response, err := h.companyServices.Billing().ListTransactions(c, &pb.ListRequest{
-		Offset:    int32(offset),
-		Limit:     int32(limit),
-		ProjectId: projectId.(string),
-	})
+	var (
+		request = &pb.ListRequest{
+			Offset: int32(offset),
+			Limit:  int32(limit),
+		}
+
+		isAll = c.Query("all_transactions")
+	)
+
+	if isAll != "true" {
+		request.ProjectId = projectId.(string)
+	}
+
+	response, err := h.companyServices.Billing().ListTransactions(c, request)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
