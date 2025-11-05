@@ -251,6 +251,9 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1Admin.PUT("/company-project/:project_id", h.V1.UpdateCompanyProject)
 		v1Admin.DELETE("/company-project/:project_id", h.V1.DeleteCompanyProject)
 
+		// projects list
+		v1Admin.GET("/project-list", h.V1.GetProjectList)
+
 		company := v1Admin.Group("/companies")
 		{
 			company.GET("", h.V1.ListCompanies)

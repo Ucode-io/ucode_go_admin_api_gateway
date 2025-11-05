@@ -345,3 +345,42 @@ func (h *HandlerV1) GetAllSettings(c *gin.Context) {
 
 	h.handleResponse(c, status_http.OK, res)
 }
+
+// GetProjectList godoc
+// @Security ApiKeyAuth
+// @ID get_project_list
+// @Router /v1/company-project [GET]
+// @Summary Get all projects
+// @Description Get all projects
+// @Tags Company Project
+// @Accept json
+// @Produce json
+// @Param filters query company_service.GetProjectListRequest true "filters"
+// @Success 200 {object} status_http.Response{data=company_service.GetProjectListResponse} "Company data"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *HandlerV1) GetProjectList(c *gin.Context) {
+	limit, err := h.getLimitParam(c)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
+	offset, err := h.getOffsetParam(c)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
+	resp, err := h.companyServices.Project().GetList(
+		c.Request.Context(),
+		&company_service.GetProjectListRequest{
+			Limit:     int32(limit),
+			Offset:    int32(offset),
+			Search:    c.Query("search"),
+			CompanyId: c.Query("company_id"),
+		},
+	)
+
+	h.handleResponse(c, status_http.OK, resp)
+}
