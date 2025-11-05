@@ -435,7 +435,7 @@ func (h *HandlerV1) GetAllTransactions(c *gin.Context) {
 			Limit:  int32(limit),
 		}
 
-		isAll = c.Query("all_transactions")
+		isAll = c.Query("all")
 	)
 
 	if isAll != "true" {
