@@ -103,7 +103,6 @@ func (h *HandlerV1) CreateEnvironment(c *gin.Context) {
 
 	resp, err = h.companyServices.Environment().CreateV2(c.Request.Context(), &environmentRequest)
 	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
