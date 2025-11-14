@@ -199,6 +199,7 @@ func TestItemsFlow(t *testing.T) {
 		assert.NoError(t, err)
 	})
 
+	// 8) Get single
 	t.Run("8 - Get single item", func(t *testing.T) {
 		_, _, err = UcodeApi.Items(table1Slug).GetSingle(mainId).Exec()
 		assert.NoError(t, err)
@@ -274,26 +275,41 @@ func TestItemsFlow(t *testing.T) {
 		assert.NoError(t, err)
 	})
 
+	// 12) Get list 2
 	t.Run("12 - Getlist2", func(t *testing.T) {
 
 		_, _, err = UcodeApi.Items(table1Slug).GetList().Exec()
 		assert.NoError(t, err)
 	})
 
-	// 12) DeleteMany (remove existing and the one created by MultipleUpdate)
-	t.Run("13 - DeleteMany", func(t *testing.T) {
+	// 13) Get list aggregation
+	t.Run("13 - GetList aggregation", func(t *testing.T) {
+
+		var pipeline = map[string]any{
+			"operation": "SELECT",
+			"table":     table1Slug,
+			"columns":   []string{"guid", "first_name", "last_name"},
+			"limit":     1,
+		}
+
+		_, _, err = UcodeApi.Items(table1Slug).GetList().Pipelines(pipeline).ExecAggregation()
+		assert.NoError(t, err)
+	})
+
+	// 14) DeleteMany (remove existing and the one created by MultipleUpdate)
+	t.Run("14 - DeleteMany", func(t *testing.T) {
 		_, err = UcodeApi.Items(table1Slug).Delete().Multiple([]string{mainId, multipleUpdateId, upsertNewId}).Exec()
 		assert.NoError(t, err)
 	})
 
-	// 13) Delete single (remove the one created by UpsertMany)
-	t.Run("14 - Delete single", func(t *testing.T) {
+	// 15) Delete single (remove the one created by UpsertMany)
+	t.Run("15 - Delete single", func(t *testing.T) {
 		_, err = UcodeApi.Items(table2Slug).Delete().Single(relatedId).Exec()
 		assert.NoError(t, err)
 	})
 
-	// 15) Delete tables
-	t.Run("15 - Delete tables", func(t *testing.T) {
+	// 16) Delete tables
+	t.Run("16 - Delete tables", func(t *testing.T) {
 
 		var (
 			tableDeleteUrl = BaseUrl + "/v1/table/" + mainTableId

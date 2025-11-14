@@ -362,12 +362,12 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v2Items.DELETE("/:collection", h.V2.DeleteItems)
 		v2Items.DELETE("/:collection/:id", h.V2.DeleteItem)
 		v2Items.POST("/:collection/aggregation", h.V2.GetListAggregation)
-		v2Items.PUT("/many-to-many", h.V2.AppendManyToMany)
-		v2Items.DELETE("/many-to-many", h.V2.DeleteManyToMany)
-		v2Items.PUT("/update-row/:collection", h.V2.UpdateRowOrder)
-		v2Items.POST("/:collection/tree", h.V2.AgTree)
-		v2Items.POST("/:collection/board/structure", h.V2.GetBoardStructure)
-		v2Items.POST("/:collection/board", h.V2.GetBoardData)
+		v2Items.PUT("/many-to-many", h.V2.AppendManyToMany)                  // TODO test
+		v2Items.DELETE("/many-to-many", h.V2.DeleteManyToMany)               // TODO test
+		v2Items.PUT("/update-row/:collection", h.V2.UpdateRowOrder)          // TODO test
+		v2Items.POST("/:collection/tree", h.V2.AgTree)                       // TODO test
+		v2Items.POST("/:collection/board/structure", h.V2.GetBoardStructure) // TODO test
+		v2Items.POST("/:collection/board", h.V2.GetBoardData)                // TODO test
 	}
 
 	v2Version := r.Group("/v2")
