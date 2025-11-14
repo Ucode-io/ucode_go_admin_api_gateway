@@ -41,7 +41,7 @@ require (
 	github.com/tus/tusd v1.13.0
 	github.com/uber/jaeger-client-go v2.30.0+incompatible
 	github.com/ucode-io/dbml-go v1.0.3
-	github.com/ucode-io/ucode_sdk v1.0.1
+	github.com/ucode-io/ucode_sdk v1.0.9
 	github.com/xuri/excelize/v2 v2.9.0
 	golang.org/x/time v0.10.0
 )

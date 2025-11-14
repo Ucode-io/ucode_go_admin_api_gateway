@@ -1,180 +1,123 @@
 package tests
 
-// func TestEmailRegisterPg(t *testing.T) {
-// 	body, err := UcodeApiForPg.DoRequest(BaseUrlAuthStaging+"/v2/register?project-id="+ProjectIdPg, "POST",
-// 		map[string]any{
-// 			"data": map[string]any{"type": "email", "client_type_id": ClientTypeIdPg, "role_id": RoleIdPg, "email": Email, "name": fakeData.Name()},
-// 		},
-// 		map[string]string{"Resource-Id": ResourceIdPg, "Environment-Id": EnvironmentIdPg, "X-API-KEY": UcodeApiForPg.Config().AppId},
-// 	)
-// 	assert.NoError(t, err)
+import (
+	"encoding/json"
+	"fmt"
+	"testing"
 
-// 	var registerResponse RegisterResponse
-// 	err = json.Unmarshal(body, &registerResponse)
-// 	assert.NoError(t, err)
+	"github.com/google/uuid"
+)
 
-// 	userId := registerResponse.Data.UserID
+func TestAuthItemsFlow(t *testing.T) {
 
-// 	body, err = UcodeApiForPg.DoRequest(BaseUrlAuthStaging+"/v2/send-code", "POST", map[string]any{
-// 		"recipient": Email,
-// 		"text":      "This is your code",
-// 		"type":      "EMAIL",
-// 	}, map[string]string{"Resource-Id": ResourceIdPg, "Environment-Id": EnvironmentIdPg, "X-API-KEY": UcodeApiForPg.Config().AppId},
-// 	)
-// 	assert.NoError(t, err)
+	var (
+		newPassword  = fakeData.UserName() + "!1"
+		userIdAuth   string
+		roleId       string
+		clientTypeId string
+	)
 
-// 	var smsResponse SmsResponse
-// 	err = json.Unmarshal(body, &smsResponse)
-// 	assert.NoError(t, err)
+	t.Run("1 - Get client type ids", func(t *testing.T) {
+		response, res, err := UcodeApi.Items("role").GetList().Page(1).Limit(1).Exec()
+		if err != nil {
+			respByte, _ := json.Marshal(res)
+			fmt.Println("ERROR IN GETLIST ROLE", string(respByte))
+			t.Error(err)
+		}
 
-// 	smsId := smsResponse.Data.SmsID
+		if len(response.Data.Data.Response) == 0 {
+			t.Error("role ids is empty")
+		}
 
-// 	_, err = UcodeApiForPg.DoRequest(BaseUrlAuthStaging+"/v2/login/with-option?project-id="+ProjectIdPg, "POST", map[string]any{
-// 		"data": map[string]any{
-// 			"sms_id":         smsId,
-// 			"otp":            "111111",
-// 			"email":          Email,
-// 			"client_type_id": ClientTypeIdPg,
-// 			"role_id":        RoleIdPg,
-// 		},
-// 		"login_strategy": "EMAIL_OTP",
-// 	}, map[string]string{"Environment-Id": EnvironmentIdPg, "X-API-KEY": UcodeApiForPg.Config().AppId},
-// 	)
-// 	assert.NoError(t, err)
+		var ok bool
 
-// 	_, err = UcodeApiForPg.Delete(&sdk.Argument{
-// 		TableSlug: "user_email",
-// 		Request: sdk.Request{Data: map[string]any{
-// 			"guid": userId,
-// 		}},
-// 	})
-// 	assert.NoError(t, err)
-// }
+		if roleId, ok = response.Data.Data.Response[0]["guid"].(string); !ok {
+			t.Error("role id is empty")
+		}
 
-// func TestPhoneRegisterPg(t *testing.T) {
-// 	var phone = "+998946236953"
+		if clientTypeId, ok = response.Data.Data.Response[0]["client_type_id"].(string); !ok {
+			t.Error("client_type_id is empty")
+		}
+	})
 
-// 	body, err := UcodeApiForPg.DoRequest(BaseUrlAuthStaging+"/v2/register?project-id="+ProjectIdPg, "POST",
-// 		map[string]any{
-// 			"data": map[string]any{"type": "phone", "client_type_id": ClientTypeIdPg, "role_id": RoleIdPg, "phone": phone, "name": fakeData.Name()},
-// 		},
-// 		map[string]string{"Resource-Id": ResourceIdPg, "Environment-Id": EnvironmentIdPg, "X-API-KEY": UcodeApiForPg.Config().AppId},
-// 	)
-// 	assert.NoError(t, err)
+	t.Run("2 - Register user", func(t *testing.T) {
 
-// 	var registerResponse RegisterResponse
-// 	err = json.Unmarshal(body, &registerResponse)
-// 	assert.NoError(t, err)
+		var (
+			body = map[string]any{
+				"guid":           uuid.NewString(),
+				"environment_id": EnvironmentId,
+				"project_id":     ProjectId,
+				"type":           "login",
+				"role_id":        roleId,
+				"client_type_id": clientTypeId,
+				"login":          Login,
+				"password":       Password,
+			}
 
-// 	userId := registerResponse.Data.UserID
+			header = map[string]string{
+				"project-id":     ProjectId,
+				"Environment-Id": EnvironmentId,
+			}
+		)
 
-// 	body, err = UcodeApiForPg.DoRequest(BaseUrlAuthStaging+"/v2/send-code", "POST", map[string]any{
-// 		"recipient": phone,
-// 		"text":      "This is your code",
-// 		"type":      "PHONE",
-// 	}, map[string]string{"Resource-Id": ResourceIdPg, "Environment-Id": EnvironmentIdPg, "X-API-KEY": UcodeApiForPg.Config().AppId},
-// 	)
-// 	assert.NoError(t, err)
+		registerData, resp, err := UcodeApi.Auth().Register(map[string]any{"data": body}).Headers(header).Exec()
+		if err != nil {
+			respByte, _ := json.Marshal(resp)
+			fmt.Println("ERROR IN REGISTER", string(respByte))
+			t.Error(err)
+		}
 
-// 	var smsResponse SmsResponse
-// 	err = json.Unmarshal(body, &smsResponse)
-// 	assert.NoError(t, err)
+		AccessToken = registerData.Data.Token.AccessToken
+		userIdAuth = registerData.Data.UserIdAuth
+		UserId = registerData.Data.UserId
+	})
 
-// 	smsId := smsResponse.Data.SmsID
+	t.Run("3 - Reset password", func(t *testing.T) {
 
-// 	_, err = UcodeApiForPg.DoRequest(BaseUrlAuthStaging+"/v2/login/with-option?project-id="+ProjectIdPg, "POST", map[string]any{
-// 		"data": map[string]any{
-// 			"sms_id":         smsId,
-// 			"otp":            "111111",
-// 			"phone":          phone,
-// 			"client_type_id": ClientTypeIdPg,
-// 			"role_id":        RoleIdPg,
-// 		},
-// 		"login_strategy": "PHONE_OTP",
-// 	}, map[string]string{"Environment-Id": EnvironmentIdPg, "X-API-KEY": UcodeApiForPg.Config().AppId},
-// 	)
-// 	assert.NoError(t, err)
+		var (
+			body = map[string]any{
+				"user_id":  userIdAuth,
+				"password": newPassword,
+			}
 
-// 	_, err = UcodeApiForPg.Delete(&sdk.Argument{
-// 		TableSlug: "user_email",
-// 		Request: sdk.Request{Data: map[string]any{
-// 			"guid": userId,
-// 		}},
-// 	})
-// 	assert.NoError(t, err)
-// }
+			header = map[string]string{
+				"project-id":     ProjectId,
+				"Environment-Id": EnvironmentId,
+			}
+		)
 
-// func TestLoginRegisterPg(t *testing.T) {
-// 	var (
-// 		guid  = uuid.New().String()
-// 		login = "test_login123"
-// 	)
+		response, err := UcodeApi.Auth().ResetPassword(body).Headers(header).Exec()
+		if err != nil {
+			fmt.Println("ERROR IN Reset password", response.Status, response.Data, response.Error)
+			t.Error(err)
+		}
+	})
 
-// 	_, _, err := UcodeApiForPg.CreateObject(&sdk.Argument{
-// 		TableSlug: "employee",
-// 		Request: sdk.Request{
-// 			Data: map[string]any{
-// 				"guid":           guid,
-// 				"login":          login,
-// 				"password":       login,
-// 				"email":          Email,
-// 				"role_id":        EmployeeRoleIdPg,
-// 				"client_type_id": EmployeeClientTypeIdPg,
-// 			},
-// 		},
-// 		DisableFaas: true,
-// 	})
-// 	assert.NoError(t, err)
+	t.Run("4 - Login user", func(t *testing.T) {
 
-// 	_, err = UcodeApiForPg.DoRequest(BaseUrlAuthStaging+"/v2/login/with-option?project-id="+ProjectIdPg, "POST", map[string]any{
-// 		"data": map[string]any{
-// 			"username":       login,
-// 			"password":       login,
-// 			"client_type_id": EmployeeClientTypeIdPg,
-// 			"role_id":        EmployeeRoleIdPg,
-// 		},
-// 		"login_strategy": "LOGIN_PWD",
-// 	}, map[string]string{"Environment-Id": EnvironmentIdPg, "X-API-KEY": UcodeApiForPg.Config().AppId},
-// 	)
-// 	assert.NoError(t, err)
+		var (
+			body = map[string]any{
+				"client_type":    clientTypeId,
+				"environment_id": EnvironmentId,
+				"project_id":     ProjectId,
+				"username":       Login,
+				"password":       newPassword,
+			}
 
-// 	userResp, _, err := UcodeApiForPg.GetSingleSlim(&sdk.Argument{
-// 		TableSlug:   "employee",
-// 		DisableFaas: true,
-// 		Request: sdk.Request{
-// 			Data: map[string]any{"guid": guid},
-// 		},
-// 	})
-// 	assert.NoError(t, err)
+			header = map[string]string{
+				"project_id":     ProjectId,
+				"environment_id": EnvironmentId,
+			}
+		)
 
-// 	_, err = UcodeApiForPg.DoRequest(BaseUrlAuthStaging+"/v2/reset-password", "PUT", map[string]any{
-// 		"password": "12345678",
-// 		"user_id":  userResp.Data.Data.Response["user_id_auth"],
-// 	}, map[string]string{})
-// 	assert.NoError(t, err)
+		registerData, resp, err := UcodeApi.Auth().Login(body).Headers(header).Exec()
+		if err != nil {
+			respByte, _ := json.Marshal(resp)
+			fmt.Println("ERROR IN LOGIN USER", string(respByte))
+			t.Error(err)
+		}
 
-// 	_, err = UcodeApiForPg.DoRequest(BaseUrlAuthStaging+"/v2/login/with-option?project-id="+ProjectIdPg, "POST", map[string]any{
-// 		"data": map[string]any{
-// 			"username":       login,
-// 			"password":       "12345678",
-// 			"client_type_id": EmployeeClientTypeIdPg,
-// 			"role_id":        EmployeeRoleIdPg,
-// 		},
-// 		"login_strategy": "LOGIN_PWD",
-// 	}, map[string]string{"Environment-Id": EnvironmentIdPg, "X-API-KEY": UcodeApiForPg.Config().AppId},
-// 	)
-// 	assert.NoError(t, err)
+		AccessToken = registerData.Data.Token.AccessToken
+	})
 
-// 	_, err = UcodeApiForPg.DoRequest(BaseUrlAuthStaging+"/v2/forgot-password", "POST", map[string]any{"login": login}, map[string]string{})
-// 	assert.NoError(t, err)
-
-// 	_, err = UcodeApiForPg.Delete(&sdk.Argument{
-// 		TableSlug: "employee",
-// 		Request: sdk.Request{
-// 			Data: map[string]any{
-// 				"guid": guid,
-// 			},
-// 		},
-// 	})
-// 	assert.NoError(t, err)
-// }
+}

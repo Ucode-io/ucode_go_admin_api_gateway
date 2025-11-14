@@ -1348,8 +1348,8 @@ github.com/uber/jaeger-lib v2.4.1+incompatible h1:td4jdvLcExb4cBISKIpHuGoVXh+dVK
 github.com/uber/jaeger-lib v2.4.1+incompatible/go.mod h1:ComeNDZlWwrWnDv8aPp0Ba6+uUTzImX/AauajbLI56U=
 github.com/ucode-io/dbml-go v1.0.3 h1:80ExEuFOW0yXj31mDrVxxibfOcq9QM9aPrj0CCbMxKQ=
 github.com/ucode-io/dbml-go v1.0.3/go.mod h1:mzr0wzlNcfmr2rdhPtktRa3xHMqSarcY1caTgnDLink=
-github.com/ucode-io/ucode_sdk v1.0.1 h1:08ube86Gka2FdGtqDDZnKhp9fffCUhqDyL60Aap82Ig=
-github.com/ucode-io/ucode_sdk v1.0.1/go.mod h1:G9V7eKHOZjQmSVSinEFNCeryKYr3N2ZBkQ2CuClldeo=
+github.com/ucode-io/ucode_sdk v1.0.9 h1:mYNaFRsQ505x5ct8kjdJcASCtBdSjXhBq4yVPp1Giec=
+github.com/ucode-io/ucode_sdk v1.0.9/go.mod h1:+UyhDz9OqJRJjELHTDC+m6HrRTvIJePThVO9QUuP2wo=
 github.com/ugorji/go v1.1.4/go.mod h1:uQMGLiO92mf5W77hV/PUCpI3pbzQx3CRekS0kk+RGrc=
 github.com/ugorji/go v1.1.5-pre/go.mod h1:FwP/aQVg39TXzItUBMwnWp9T9gPQnXw4Poh4/oBQZ/0=
 github.com/ugorji/go v1.1.7/go.mod h1:kZn38zHttfInRq0xu/PH0az30d+z6vm202qpg1oXVMw=

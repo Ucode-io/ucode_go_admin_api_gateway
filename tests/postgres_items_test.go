@@ -1,357 +1,316 @@
 package tests
 
-// // Done
-// func TestCRUDPgPg(t *testing.T) {
-// 	guid := uuid.New().String()
+import (
+	"encoding/json"
+	"net/http"
+	"testing"
 
-// 	_, _, err := UcodeApiForPg.CreateObject(&sdk.Argument{
-// 		TableSlug: "product",
-// 		Request: sdk.Request{
-// 			Data: map[string]any{
-// 				"guid":                             guid,
-// 				"single_line_field":                fakeData.CompanyName(),
-// 				"multi_line_field":                 fakeData.FirstName(),
-// 				"email_field":                      fakeData.Email(),
-// 				"internation_phone_field":          fakeData.PhoneNumber(),
-// 				"date_time_field":                  time.Now(),
-// 				"date_time_without_timezone_field": time.Now().UTC(),
-// 				"date_field":                       time.Now(),
-// 			},
-// 		},
-// 	})
-// 	assert.NoError(t, err)
+	"github.com/google/uuid"
+	"github.com/stretchr/testify/assert"
+)
 
-// 	_, _, err = UcodeApiForPg.UpdateObject(&sdk.Argument{
-// 		TableSlug: "product",
-// 		Request: sdk.Request{
-// 			Data: map[string]any{
-// 				"guid":             guid,
-// 				"multi_line_field": fakeData.Name(),
-// 				"checkbox_field":   true,
-// 			},
-// 		},
-// 	})
-// 	assert.NoError(t, err)
+var (
+	table1Slug = "test_table_1"
+	table2Slug = "test_table_2"
 
-// 	slimResponse, _, err := UcodeApiForPg.GetSingleSlim(&sdk.Argument{
-// 		TableSlug: "product",
-// 		Request: sdk.Request{
-// 			Data: map[string]any{
-// 				"guid":           guid,
-// 				"with_relations": true,
-// 			},
-// 		},
-// 	})
-// 	assert.NoError(t, err)
+	table1Label = "Test Table 1"
+	table2Label = "Related Table"
 
-// 	assert.NotEmpty(t, slimResponse.Data.Data.Response, "item response should not be empty")
+	table1Fields = []map[string]any{
+		{
+			"slug":       "first_name",
+			"label":      "First Name",
+			"type":       "string",
+			"index":      "btree",
+			"attributes": json.RawMessage("{}"),
+			"is_visible": true,
+			"unique":     false,
+			"automatic":  false,
+			"required":   true,
+		},
+		{
+			"slug":       "last_name",
+			"label":      "Last Name",
+			"type":       "string",
+			"index":      "btree",
+			"attributes": json.RawMessage("{}"),
+			"is_visible": true,
+			"unique":     false,
+			"automatic":  false,
+			"required":   true,
+		},
+	}
 
-// 	itemResponse, _, err := UcodeApiForPg.GetSingle(&sdk.Argument{
-// 		TableSlug: "product",
-// 		Request: sdk.Request{
-// 			Data: map[string]any{
-// 				"guid": guid,
-// 			},
-// 		},
-// 	})
-// 	assert.NoError(t, err)
+	table2Fields = []map[string]any{
+		{
+			"slug":       "name",
+			"label":      "Name",
+			"type":       "string",
+			"index":      "btree",
+			"attributes": json.RawMessage("{}"),
+			"is_visible": true,
+			"unique":     false,
+			"automatic":  false,
+			"required":   true,
+		},
+	}
+)
 
-// 	assert.NotEmpty(t, itemResponse.Data.Data.Response, "item response should not be empty")
+// --- Тестовый сценарий (тот же порядок вызовов, что и в storage-версии) ---
+func TestItemsFlow(t *testing.T) {
 
-// 	_, err = UcodeApiForPg.Delete(&sdk.Argument{
-// 		TableSlug: "product",
-// 		Request: sdk.Request{
-// 			Data: map[string]any{
-// 				"guid": guid,
-// 			},
-// 		},
-// 	})
-// 	assert.NoError(t, err)
-// }
+	var (
+		mainTableId      = uuid.NewString()
+		relatedTableId   = uuid.NewString()
+		relatedId        = uuid.NewString()
+		mainId           = uuid.NewString()
+		multipleUpdateId string
+		upsertNewId      string
 
-// // Done
-// func TestGetListSlimPg(t *testing.T) {
-// 	getProductResp, _, err := UcodeApiForPg.GetListSlim(&sdk.ArgumentWithPegination{
-// 		TableSlug: "product",
-// 		Request:   sdk.Request{Data: map[string]any{}},
-// 		Limit:     10,
-// 		Page:      1,
-// 	})
-// 	assert.NoError(t, err)
+		err error
+	)
 
-// 	assert.NotEmpty(t, getProductResp.Data.Data.Response, "response not equal to limit")
-// }
+	//1) Create main table
+	t.Run("1 - Create main table", func(t *testing.T) {
+		var (
+			tableCreateUrl = BaseUrl + "/v1/table"
+			method         = http.MethodPost
 
-// // Done
-// func TestGetListSlimPaginationPg(t *testing.T) {
-// 	getProductResp, _, err := UcodeApiForPg.GetListSlim(&sdk.ArgumentWithPegination{
-// 		TableSlug: "product",
-// 		Request:   sdk.Request{Data: map[string]any{}},
-// 		Limit:     5,
-// 		Page:      4,
-// 	})
-// 	assert.NoError(t, err)
+			body = map[string]any{
+				"slug": table1Slug,
+				"id":   mainTableId,
+			}
+			header = map[string]string{
+				"Authorization": AccessToken,
+			}
+		)
 
-// 	assert.NotEmpty(t, getProductResp.Data.Data.Response, "response not equal to limit")
+		_, err = UcodeApi.DoRequest(tableCreateUrl, method, body, header)
+		assert.NoError(t, err)
+	})
 
-// 	getProductResp, _, err = UcodeApiForPg.GetListSlim(&sdk.ArgumentWithPegination{
-// 		TableSlug:   "product",
-// 		Request:     sdk.Request{Data: map[string]any{}},
-// 		Limit:       5,
-// 		Page:        5,
-// 		DisableFaas: true,
-// 	})
-// 	assert.NoError(t, err)
+	// 2) Create fields for main table
+	t.Run("2 - Create fields for main table", func(t *testing.T) {
+		var (
+			tableCreateUrl = BaseUrl + "/v2/fields/" + table1Slug
+			method         = http.MethodPost
 
-// 	assert.Empty(t, getProductResp.Data.Data.Response, "response should be emtpy")
-// }
+			header = map[string]string{
+				"Authorization": AccessToken,
+			}
+		)
 
-// // Done
-// func TestGetListSlimWithRelationPg(t *testing.T) {
-// 	getProductResp, _, err := UcodeApiForPg.GetListSlim(&sdk.ArgumentWithPegination{
-// 		TableSlug: "product",
-// 		Request: sdk.Request{
-// 			Data: map[string]any{"with_relations": true},
-// 		},
-// 		Limit:       10,
-// 		Page:        1,
-// 		DisableFaas: true,
-// 	})
-// 	assert.NoError(t, err)
+		for _, field := range table1Fields {
+			field["table_id"] = table1Slug
+			field["id"] = uuid.NewString()
 
-// 	assert.NotEmpty(t, getProductResp.Data.Data.Response, "wrong response")
-// }
+			_, err := UcodeApi.DoRequest(tableCreateUrl, method, field, header)
+			assert.NoError(t, err)
+		}
+	})
 
-// // Done
-// func TestGetListSlimWithDatePg(t *testing.T) { // $lt and $gte
-// 	getProductReq := sdk.Request{
-// 		Data: map[string]any{
-// 			"date_time_field": map[string]any{
-// 				"$gte": "2024-10-01T00:04:19.336Z",
-// 			}},
-// 	}
+	// 3) Create related table
+	t.Run("3 - Create related table", func(t *testing.T) {
+		var (
+			tableCreateUrl = BaseUrl + "/v1/table"
+			method         = http.MethodPost
 
-// 	getProductResp, _, err := UcodeApiForPg.GetListSlim(&sdk.ArgumentWithPegination{
-// 		TableSlug: "product",
-// 		Request:   getProductReq,
-// 		Limit:     10,
-// 		Page:      1,
-// 	})
-// 	assert.NoError(t, err)
+			body = map[string]any{
+				"slug": table2Slug,
+				"id":   relatedTableId,
+			}
+			header = map[string]string{
+				"Authorization": AccessToken,
+			}
+		)
 
-// 	assert.NotEmpty(t, getProductResp.Data.Data.Response, err)
+		_, err = UcodeApi.DoRequest(tableCreateUrl, method, body, header)
+		assert.NoError(t, err)
+	})
 
-// 	getProductReq = sdk.Request{
-// 		Data: map[string]any{
-// 			"date_time_field": map[string]any{
-// 				"$gte": "2024-10-01T00:04:19.336Z",
-// 				"$lt":  "2024-10-06T00:04:19.336Z",
-// 			}},
-// 	}
+	// 4) Create fields for related table
+	t.Run("4 - Create fields for related table", func(t *testing.T) {
+		var (
+			tableCreateUrl = BaseUrl + "/v2/fields/" + table1Slug
+			method         = http.MethodPost
 
-// 	getProductResp, _, err = UcodeApiForPg.GetListSlim(&sdk.ArgumentWithPegination{
-// 		TableSlug:   "product",
-// 		Request:     getProductReq,
-// 		Limit:       10,
-// 		Page:        1,
-// 		DisableFaas: true,
-// 	})
-// 	assert.NoError(t, err)
+			header = map[string]string{
+				"Authorization": AccessToken,
+			}
+		)
 
-// 	assert.NotEmpty(t, getProductResp.Data.Data.Response, err)
-// }
+		for _, field := range table2Fields {
+			field["table_id"] = table2Slug
+			field["id"] = uuid.NewString()
 
-// // Done
-// func TestGetListSlimWithInPg(t *testing.T) { // $in
-// 	getProductReq := sdk.Request{
-// 		Data: map[string]any{
-// 			"increment_id_field": map[string]any{
-// 				"$in": []string{"T-000000021", "T-000000023", "T-000000026"},
-// 			}},
-// 	}
+			_, err := UcodeApi.DoRequest(tableCreateUrl, method, field, header)
+			assert.NoError(t, err)
+		}
+	})
 
-// 	getProductResp, _, err := UcodeApiForPg.GetListSlim(&sdk.ArgumentWithPegination{
-// 		TableSlug:   "product",
-// 		Request:     getProductReq,
-// 		Limit:       10,
-// 		Page:        1,
-// 		DisableFaas: true,
-// 	})
-// 	assert.NoError(t, err)
+	// 5) Create relation for main table
+	t.Run("5 - Create relation for main table", func(t *testing.T) {
+		var (
+			tableCreateUrl = BaseUrl + "/v2/relations/" + table1Slug
+			method         = http.MethodPost
 
-// 	assert.NotEmpty(t, getProductResp.Data.Data.Response, err)
-// }
+			body = map[string]any{
+				"table_from": table1Slug,
+				"table_to":   table2Slug,
+				"required":   false,
+				"show_label": true,
+				"type":       "Many2One",
+			}
 
-// // Does Not Work
-// // func TestGetListSlimWithBooleanPg(t *testing.T) {
-// // 	getProductResp, _, err := UcodeApiForPg.GetListSlim(&sdk.ArgumentWithPegination{
-// // 		TableSlug:   "product",
-// // 		Request:     sdk.Request{Data: map[string]any{"switch_field": false}},
-// // 		Limit:       10,
-// // 		Page:        1,
-// // 		DisableFaas: true,
-// // 	})
-// // 	assert.NoError(t, err)
+			header = map[string]string{
+				"Authorization": AccessToken,
+			}
+		)
 
-// // 	assert.NotEmpty(t, getProductResp.Data.Data.Response, "Switch Does not work")
-// // }
+		_, err = UcodeApi.DoRequest(tableCreateUrl, method, body, header)
+		assert.NoError(t, err)
+	})
 
-// // Done
-// func TestGetListObjectPg(t *testing.T) {
-// 	getProductResp, _, err := UcodeApiForPg.GetList(&sdk.ArgumentWithPegination{
-// 		TableSlug:   "product",
-// 		Request:     sdk.Request{Data: map[string]any{}},
-// 		Limit:       10,
-// 		Page:        1,
-// 		DisableFaas: true,
-// 	})
-// 	assert.NoError(t, err)
-// 	assert.NotEmpty(t, getProductResp.Data.Data.Response, "Switch Does not work")
-// }
+	// 6) Create related item (will be referenced via relation field)
+	t.Run("6 - Create related item", func(t *testing.T) {
 
-// // Done
-// func TestGetListObjectSearchPg(t *testing.T) {
-// 	getProductReq := sdk.Request{
-// 		Data: map[string]any{"search": "+99894", "view_fields": []string{"internation_phone_field"}},
-// 	}
-// 	getProductResp, _, err := UcodeApiForPg.GetList(&sdk.ArgumentWithPegination{
-// 		TableSlug:   "product",
-// 		Request:     getProductReq,
-// 		Limit:       10,
-// 		Page:        1,
-// 		DisableFaas: true,
-// 	})
-// 	assert.NoError(t, err)
-// 	assert.NotEmpty(t, getProductResp.Data.Data.Response, "Switch Does not work")
+		_, _, err = UcodeApi.Items(table2Slug).Create(
+			map[string]any{
+				"from_auth_service": false,
+				"guid":              relatedId,
+				"name":              fakeData.Name(),
+			},
+		).Exec()
+		assert.NoError(t, err)
+	})
 
-// 	getProductReq = sdk.Request{
-// 		Data: map[string]any{"search": "+4", "view_fields": []string{"internation_phone_field"}},
-// 	}
-// 	getProductResp, _, err = UcodeApi.GetList(&sdk.ArgumentWithPegination{
-// 		TableSlug: "product",
-// 		Request:   getProductReq,
-// 		Limit:     10,
-// 		Page:      1,
-// 	})
-// 	assert.NoError(t, err)
-// 	assert.Empty(t, getProductResp.Data.Data.Response, "Response should be empty")
-// }
+	// 7) Create main item with relation to relatedId
+	t.Run("7 - Create main item with relation", func(t *testing.T) {
 
-// // Done
-// func TestGetListAutoFilterPg(t *testing.T) {
-// 	resp, err := LoginPg()
-// 	assert.NoError(t, err)
+		_, _, err = UcodeApi.Items(table1Slug).Create(
+			map[string]any{
+				"from_auth_service": false,
+				"guid":              mainId,
+				"first_name":        fakeData.FirstName(),
+				"last_name":         fakeData.LastName(),
+				"test_table_2_id":   relatedId,
+			},
+		).Exec()
+		assert.NoError(t, err)
+	})
 
-// 	body, err := UcodeApi.DoRequest(BaseUrlStaging+"/v2/object/get-list/product", "POST", map[string]any{
-// 		"data": map[string]any{},
-// 	}, map[string]string{
-// 		"Authorization": "Bearer " + resp,
-// 	})
-// 	assert.NoError(t, err)
-// 	var response GetListApiResponse
+	t.Run("8 - Get single item", func(t *testing.T) {
+		_, _, err = UcodeApi.Items(table1Slug).GetSingle(mainId).Exec()
+		assert.NoError(t, err)
+	})
 
-// 	err = json.Unmarshal(body, &response)
-// 	assert.NoError(t, err)
+	// 9) Update main item
+	t.Run("9 - Update main item", func(t *testing.T) {
 
-// 	assert.NotEmpty(t, response.Data.Data.Response)
-// }
+		_, _, err = UcodeApi.Items(table1Slug).Update(
+			map[string]any{
+				"guid":       mainId,
+				"first_name": fakeData.FirstName(),
+			},
+		).ExecSingle()
+		assert.NoError(t, err)
+	})
 
-// // Done
-// func TestGetListExcelPg(t *testing.T) {
-// 	body, err := UcodeApi.DoRequest(BaseUrlStaging+"/v1/object/excel/product", "POST", ExcelReqPg, map[string]string{
-// 		"authorization": "API-KEY",
-// 		"X-API-KEY":     UcodeApiForPg.Config().AppId,
-// 	})
-// 	assert.NoError(t, err)
-// 	var response ExcelResponse
-// 	err = json.Unmarshal(body, &response)
-// 	assert.NoError(t, err)
+	// 10) MultipleUpdate: update existing and add new
+	t.Run("10 - MultipleUpdate (update existing and add new)", func(t *testing.T) {
+		multipleUpdateId = uuid.NewString()
 
-// 	assert.NotEmpty(t, response.Data.Data.Link)
-// }
+		objects := []map[string]any{
+			{
+				"guid":       mainId,
+				"first_name": fakeData.FirstName(),
+				"last_name":  fakeData.LastName(),
+				"is_new":     false,
+			},
+			{
+				"first_name": fakeData.FirstName(),
+				"last_name":  fakeData.LastName(),
+				"is_new":     true,
+			},
+		}
+		_, _, err = UcodeApi.Items(table1Slug).Update(map[string]any{"objects": objects}).ExecMultiple()
+		assert.NoError(t, err)
+	})
 
-// // NOT DONE
-// // func TestGetListRBACPg(t *testing.T) {
-// // 	resp, err := Login()
-// // 	assert.NoError(t, err)
+	// 11) UpsertMany
+	t.Run("11 - UpsertMany", func(t *testing.T) {
 
-// // 	body, err := UcodeApi.DoRequest(BaseUrl+"/v2/object/get-list/company", "POST", map[string]any{
-// // 		"data": map[string]any{},
-// // 	}, map[string]string{
-// // 		"Authorization": "Bearer " + resp,
-// // 	})
-// // 	assert.NoError(t, err)
-// // 	var response GetListApiResponse
-// // 	err = json.Unmarshal(body, &response)
-// // 	assert.NoError(t, err)
+		upsertNewId = uuid.NewString()
 
-// // 	assert.NotEmpty(t, response.Data.Data.Response)
-// // }
+		var (
+			tableCreateUrl = BaseUrl + "/v2/items/" + table1Slug + "/upsert-many"
+			method         = http.MethodPost
 
-// // Done
-// func TestMultipleCRUDPg(t *testing.T) {
-// 	var ids = []string{}
-// 	var multipleInsert = []map[string]any{}
-// 	var multipleUpdate = []map[string]any{}
-// 	UcodeApiForPg.Config().RequestTimeout = time.Second * 30
+			header = map[string]string{
+				"Authorization": AccessToken,
+			}
 
-// 	for i := 0; i < 10; i++ {
-// 		guid := uuid.New().String()
-// 		multipleInsert = append(multipleInsert, map[string]any{
-// 			"guid":                             guid,
-// 			"single_line_field":                fakeData.CompanyName(),
-// 			"multi_line_field":                 fakeData.FirstName(),
-// 			"email_field":                      fakeData.Email(),
-// 			"internation_phone_field":          fakeData.PhoneNumber(),
-// 			"date_time_field":                  time.Now(),
-// 			"date_time_without_timezone_field": time.Now().UTC(),
-// 			"date_field":                       time.Now(),
-// 			"is_new":                           true,
-// 		})
+			upsertObjects = []map[string]any{
+				{
+					"guid":       mainId,
+					"first_name": fakeData.FirstName(),
+					"last_name":  fakeData.LastName(),
+				},
+				{
+					"guid":       upsertNewId,
+					"first_name": fakeData.FirstName(),
+					"last_name":  fakeData.LastName(),
+				},
+			}
 
-// 		multipleUpdate = append(multipleUpdate, map[string]any{
-// 			"guid":                             guid,
-// 			"single_line_field":                fakeData.CompanyName(),
-// 			"multi_line_field":                 fakeData.FirstName(),
-// 			"email_field":                      fakeData.Email(),
-// 			"internation_phone_field":          fakeData.PhoneNumber(),
-// 			"date_time_field":                  time.Now(),
-// 			"date_time_without_timezone_field": time.Now().UTC(),
-// 			"date_field":                       time.Now(),
-// 			"is_new":                           false,
-// 		})
-// 		ids = append(ids, guid)
-// 	}
+			dataMap = map[string]any{
+				"field_slug": "guid",
+				"fields":     []string{"guid", "first_name", "last_name"},
+				"objects":    upsertObjects,
+			}
+		)
 
-// 	_, _, err := UcodeApiForPg.MultipleUpdate(&sdk.Argument{
-// 		TableSlug: "product",
-// 		Request: sdk.Request{
-// 			Data: map[string]any{
-// 				"objects": multipleInsert,
-// 			},
-// 		},
-// 		DisableFaas: true,
-// 	})
-// 	assert.NoError(t, err)
+		_, err = UcodeApi.DoRequest(tableCreateUrl, method, map[string]any{"data": dataMap}, header)
+		assert.NoError(t, err)
+	})
 
-// 	_, _, err = UcodeApiForPg.MultipleUpdate(&sdk.Argument{
-// 		TableSlug: "product",
-// 		Request: sdk.Request{
-// 			Data: map[string]any{
-// 				"objects": multipleUpdate,
-// 			},
-// 		},
-// 		DisableFaas: true,
-// 	})
-// 	assert.NoError(t, err)
+	t.Run("12 - Getlist2", func(t *testing.T) {
 
-// 	_, err = UcodeApiForPg.MultipleDelete(&sdk.Argument{
-// 		TableSlug: "product",
-// 		Request: sdk.Request{
-// 			Data: map[string]any{
-// 				"ids": ids,
-// 			},
-// 		},
-// 	})
-// 	assert.NoError(t, err)
-// }
+		_, _, err = UcodeApi.Items(table1Slug).GetList().Exec()
+		assert.NoError(t, err)
+	})
+
+	// 12) DeleteMany (remove existing and the one created by MultipleUpdate)
+	t.Run("13 - DeleteMany", func(t *testing.T) {
+		_, err = UcodeApi.Items(table1Slug).Delete().Multiple([]string{mainId, multipleUpdateId, upsertNewId}).Exec()
+		assert.NoError(t, err)
+	})
+
+	// 13) Delete single (remove the one created by UpsertMany)
+	t.Run("14 - Delete single", func(t *testing.T) {
+		_, err = UcodeApi.Items(table2Slug).Delete().Single(relatedId).Exec()
+		assert.NoError(t, err)
+	})
+
+	// 15) Delete tables
+	t.Run("15 - Delete tables", func(t *testing.T) {
+
+		var (
+			tableDeleteUrl = BaseUrl + "/v1/table/" + mainTableId
+			method         = http.MethodDelete
+
+			header = map[string]string{
+				"Authorization": AccessToken,
+			}
+		)
+
+		_, err = UcodeApi.DoRequest(tableDeleteUrl, method, nil, header)
+		assert.NoError(t, err)
+
+		tableDeleteUrl = BaseUrl + "/v1/table/" + relatedTableId
+
+		_, err = UcodeApi.DoRequest(tableDeleteUrl, method, nil, header)
+		assert.NoError(t, err)
+
+	})
+}
