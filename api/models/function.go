@@ -60,6 +60,8 @@ type NewInvokeFunctionRequest struct {
 	Data          map[string]any `json:"data"`
 	RequestData   HttpRequest    `json:"request_data"`
 	AutomationURL string         `json:"-"`
+	KnativeURL    string         `json:"-"`
+	OpenFaaSURL   string         `json:"-"`
 }
 
 type HttpRequest struct {

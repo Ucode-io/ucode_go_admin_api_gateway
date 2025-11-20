@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"ucode/ucode_go_api_gateway/api/models"
-	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/pkg/util"
 )
 
@@ -18,7 +17,7 @@ var FuncHandlers = map[string]HandlerFunc{
 }
 
 func ExecOpenFaaS(path, name string, req models.NewInvokeFunctionRequest) (string, error) {
-	url := fmt.Sprintf("%s%s", config.OpenFaaSBaseUrl, path)
+	url := fmt.Sprintf("%s%s", req.OpenFaaSURL, path)
 	resp, err := util.DoRequest(url, http.MethodPost, req)
 	if err != nil {
 		return name, err
@@ -34,7 +33,7 @@ func ExecOpenFaaS(path, name string, req models.NewInvokeFunctionRequest) (strin
 }
 
 func ExecKnative(path, name string, req models.NewInvokeFunctionRequest) (string, error) {
-	url := fmt.Sprintf("http://%s.%s", path, config.KnativeBaseUrl)
+	url := fmt.Sprintf("http://%s.%s", path, req.KnativeURL)
 	resp, err := util.DoRequest(url, http.MethodPost, req)
 	if err != nil {
 		return name, err
@@ -50,7 +49,7 @@ func ExecKnative(path, name string, req models.NewInvokeFunctionRequest) (string
 }
 
 func ExecWorkflow(path, name string, req models.NewInvokeFunctionRequest) (string, error) {
-	url := fmt.Sprintf("%s/webhook/%s", config.AutomationURL, path)
+	url := fmt.Sprintf("%s/webhook/%s", req.AutomationURL, path)
 	resp, err := util.DoRequest(url, http.MethodPost, req)
 	if err != nil {
 		return name, err

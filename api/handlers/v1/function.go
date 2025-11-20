@@ -533,6 +533,9 @@ func (h *HandlerV1) InvokeFunction(c *gin.Context) {
 			"table_slug":     invokeFunction.TableSlug,
 			"object_data":    invokeFunction.ObjectData,
 		},
+		OpenFaaSURL:   h.baseConf.OpenFaaSBaseUrl,
+		KnativeURL:    h.baseConf.KnativeBaseUrl,
+		AutomationURL: h.baseConf.AutomationURL,
 	}
 
 	switch requestType {
