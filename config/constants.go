@@ -64,10 +64,6 @@ const (
 	InactiveStatus   string = "inactive"
 	PermissionDenied string = "Permission denied"
 	SessionExpired   string = "Session has been expired"
-
-	OpenFaaSBaseUrl string = "https://ofs.u-code.io/function/"
-	KnativeBaseUrl  string = "knative-fn.u-code.io"
-	AutomationURL   string = "https://yukod.app.n8n.cloud"
 )
 
 var (

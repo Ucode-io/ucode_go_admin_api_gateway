@@ -10,7 +10,6 @@ import (
 
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
-	"ucode/ucode_go_api_gateway/config"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
@@ -645,9 +644,6 @@ func (h *HandlerV3) GetListV2(c *gin.Context) {
 					h.log.Error("Error while unmarshal redis", logger.Error(err))
 				} else {
 					resp["data"] = m
-					if _, ok := objectRequest.Data["load_test"].(bool); ok {
-						config.CountReq += 1
-					}
 					h.handleResponse(c, status_http.OK, resp)
 					return
 				}

@@ -127,6 +127,9 @@ func DoInvokeFuntion(request models.DoInvokeFuntionStruct, c *gin.Context, h *Ha
 		data["project_id"] = request.Resource.ProjectId
 		data["environment_id"] = request.Resource.EnvironmentId
 		invokeFunction.Data = data
+		invokeFunction.OpenFaaSURL = h.baseConf.OpenFaaSBaseUrl
+		invokeFunction.KnativeURL = h.baseConf.KnativeBaseUrl
+		invokeFunction.AutomationURL = h.baseConf.AutomationURL
 
 		switch requestType {
 		case "", "ASYNC":

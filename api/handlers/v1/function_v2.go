@@ -174,7 +174,7 @@ func (h *HandlerV1) InvokeFunctionByPath(c *gin.Context) {
 	invokeFunction.Data["environment_id"] = authInfo.GetEnvId()
 	invokeFunction.Data["app_id"] = apiKeys.GetData()[0].GetAppId()
 
-	resp, err := util.DoRequest(config.OpenFaaSBaseUrl+c.Param("function-path"), http.MethodPost,
+	resp, err := util.DoRequest(h.baseConf.OpenFaaSBaseUrl+c.Param("function-path"), http.MethodPost,
 		models.NewInvokeFunctionRequest{
 			Data: invokeFunction.Data,
 		},

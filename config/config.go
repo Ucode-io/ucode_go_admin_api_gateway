@@ -16,8 +16,6 @@ const (
 	ReleaseMode = "release"
 )
 
-var CountReq = 0
-
 type Config struct {
 	DefaultOffset string
 	DefaultLimit  string
