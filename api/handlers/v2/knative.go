@@ -136,7 +136,7 @@ func (h *HandlerV2) InvokeInAdmin(c *gin.Context) {
 }
 
 func (h *HandlerV2) ExecKnative(path string, req models.NewInvokeFunctionRequest) (models.InvokeFunctionResponse, error) {
-	url := fmt.Sprintf("http://%s.%s", path, config.KnativeBaseUrl)
+	url := fmt.Sprintf("http://%s.%s", path, h.baseConf.KnativeBaseUrl)
 	resp, err := util.DoRequest(url, http.MethodPost, req)
 	if err != nil {
 		return models.InvokeFunctionResponse{}, err

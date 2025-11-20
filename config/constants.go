@@ -35,14 +35,7 @@ const (
 	CACHE_WAIT                           string = "WAIT"
 
 	STATUS_INACTIVE string = "inactive"
-
-	ANTHROPIC_API_KEY      string = "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"
-	MCP_SERVER_URL         string = "https://mcp.ucode.run/sse"
-	ANTHROPIC_BETA         string = "mcp-client-2025-04-04"
-	CLAUDE_MODEL           string = "claude-3-7-sonnet-latest"
-	ANTHROPIC_BASE_API_URL string = "https://api.anthropic.com/v1/messages"
-	MAX_TOKENS             int    = 12000
-	ANTHROPIC_VERSION      string = "2023-06-01"
+	PUBLIC_STATUS   string = "unapproved"
 )
 
 const (
@@ -59,11 +52,6 @@ const (
 
 	TIME_LAYOUT string = "15:04"
 
-	// FaasBaseurl
-	OpenFaaSBaseUrl string = "https://ofs.u-code.io/function/"
-	KnativeBaseUrl  string = "knative-fn.u-code.io"
-	AutomationURL   string = "https://yukod.app.n8n.cloud"
-
 	// Function Types
 	FUNCTION string = "FUNCTION"
 	KNATIVE  string = "KNATIVE"
@@ -73,11 +61,13 @@ const (
 	BEFORE string = "before"
 	AFTER  string = "after"
 
-	PublicStatus = "unapproved"
-
 	InactiveStatus   string = "inactive"
 	PermissionDenied string = "Permission denied"
 	SessionExpired   string = "Session has been expired"
+
+	OpenFaaSBaseUrl string = "https://ofs.u-code.io/function/"
+	KnativeBaseUrl  string = "knative-fn.u-code.io"
+	AutomationURL   string = "https://yukod.app.n8n.cloud"
 )
 
 var (
@@ -86,7 +76,6 @@ var (
 		"LOOKUPS": true,
 	}
 
-	ConvertDocxToPdfUrl                = "https://v2.convertapi.com/convert/docx/to/pdf?Auth="
-	ConvertDocxToPdfSecret             = "FIfurq7JjengpchT899ytEaHdY78q4nv"
-	TestNodeDocxConvertToPdfServiceUrl = "https://doc-generator.ucode.run/generate-doc"
+	ConvertDocxToPdfUrl    = ""
+	ConvertDocxToPdfSecret = ""
 )

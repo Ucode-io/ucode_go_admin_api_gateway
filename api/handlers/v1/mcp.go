@@ -122,7 +122,7 @@ x-api-key = %s
 
 	}
 
-	resp, err := sendAnthropicRequest(content)
+	resp, err := h.sendAnthropicRequest(content)
 	fmt.Println("************ MCP Response ************", resp)
 	if err != nil {
 		h.handleResponse(c, status_http.InternalServerError, "Your request could not be processed.")
@@ -132,13 +132,13 @@ x-api-key = %s
 	h.handleResponse(c, status_http.OK, message)
 }
 
-func sendAnthropicRequest(content string) (string, error) {
-	url := config.ANTHROPIC_BASE_API_URL
+func (h *HandlerV1) sendAnthropicRequest(content string) (string, error) {
+	url := h.baseConf.AnthropicBaseAPIURL
 
 	// Construct the request body
 	body := RequestBody{
-		Model:     config.CLAUDE_MODEL,
-		MaxTokens: config.MAX_TOKENS,
+		Model:     h.baseConf.ClaudeModel,
+		MaxTokens: h.baseConf.MaxTokens,
 		Messages: []Message{
 			{
 				Role:    "user",
@@ -148,7 +148,7 @@ func sendAnthropicRequest(content string) (string, error) {
 		MCPServer: []MCPServer{
 			{
 				Type: "url",
-				URL:  config.MCP_SERVER_URL,
+				URL:  h.baseConf.MCPServerURL,
 				Name: "ucode",
 			},
 		},
@@ -165,9 +165,9 @@ func sendAnthropicRequest(content string) (string, error) {
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("X-API-Key", config.ANTHROPIC_API_KEY)
-	req.Header.Set("anthropic-version", config.ANTHROPIC_VERSION)
-	req.Header.Set("anthropic-beta", config.ANTHROPIC_BETA)
+	req.Header.Set("X-API-Key", h.baseConf.AnthropicAPIKey)
+	req.Header.Set("anthropic-version", h.baseConf.AnthropicVersion)
+	req.Header.Set("anthropic-beta", h.baseConf.AnthropicBeta)
 
 	client := &http.Client{Timeout: 300 * time.Second}
 	resp, err := client.Do(req)

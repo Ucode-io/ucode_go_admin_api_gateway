@@ -101,6 +101,17 @@ type BaseConfig struct {
 
 	StripeApiKey        string
 	StripeWebhookSecret string
+
+	AnthropicAPIKey     string
+	AnthropicBeta       string
+	AnthropicBaseAPIURL string
+	ClaudeModel         string
+	AutomationURL       string
+	OpenFaaSBaseUrl     string
+	KnativeBaseUrl      string
+	MaxTokens           int
+	AnthropicVersion    string
+	MCPServerURL        string
 }
 
 func BaseLoad() BaseConfig {
@@ -117,7 +128,7 @@ func BaseLoad() BaseConfig {
 	config.Environment = cast.ToString(GetOrReturnDefaultValue("ENVIRONMENT", DebugMode))
 	config.Version = cast.ToString(GetOrReturnDefaultValue("VERSION", "1.0"))
 
-	config.HTTPBaseURL = cast.ToString(GetOrReturnDefaultValue("HTTP_BASE_URL", "https://api.admin.u-code.io"))
+	config.HTTPBaseURL = cast.ToString(GetOrReturnDefaultValue("HTTP_BASE_URL", ""))
 	config.ServiceHost = cast.ToString(GetOrReturnDefaultValue("SERVICE_HOST", ""))
 	config.HTTPPort = cast.ToString(GetOrReturnDefaultValue("HTTP_PORT", ":8000"))
 	config.HTTPScheme = cast.ToString(GetOrReturnDefaultValue("HTTP_SCHEME", ""))
@@ -145,10 +156,21 @@ func BaseLoad() BaseConfig {
 	config.JaegerHostPort = cast.ToString(GetOrReturnDefaultValue("JAEGER_URL", ""))
 
 	config.N8NApiKey = cast.ToString(GetOrReturnDefaultValue("N8N_API_KEY", ""))
-	config.N8NBaseURL = cast.ToString(GetOrReturnDefaultValue("N8N_BASE_URL", "https://n8n.u-code.io"))
+	config.N8NBaseURL = cast.ToString(GetOrReturnDefaultValue("N8N_BASE_URL", ""))
 
-	config.StripeApiKey = cast.ToString(GetOrReturnDefaultValue("STRIPE_API_KEY", "sk_test_51QvC6qCx1p2EqOQp37eMRD73jmsECnITZ1eYTn4BbYv8uLNUfGOJUf3X0j14fyjhAvcoZYucz9oCy1aEJrg7Yyp300ScU9kgfh"))
-	config.StripeWebhookSecret = cast.ToString(GetOrReturnDefaultValue("STRIPE_WEBHOOK_SECRET", "whsec_cOGBaP6EVo4kRUCfeKXuSWg0JAL2avRg"))
+	config.StripeApiKey = cast.ToString(GetOrReturnDefaultValue("STRIPE_API_KEY", ""))
+	config.StripeWebhookSecret = cast.ToString(GetOrReturnDefaultValue("STRIPE_WEBHOOK_SECRET", ""))
+
+	config.AnthropicAPIKey = cast.ToString(GetOrReturnDefaultValue("ANTHROPIC_API_KEY", ""))
+	config.AnthropicBeta = cast.ToString(GetOrReturnDefaultValue("ANTHROPIC_BETA", ""))
+	config.AnthropicBaseAPIURL = cast.ToString(GetOrReturnDefaultValue("ANTHROPIC_BASE_API_URL", ""))
+	config.AnthropicVersion = cast.ToString(GetOrReturnDefaultValue("ANTHROPIC_VERSION", ""))
+	config.ClaudeModel = cast.ToString(GetOrReturnDefaultValue("CLAUDE_MODEL", ""))
+	config.AutomationURL = cast.ToString(GetOrReturnDefaultValue("AUTOMATION_URL", ""))
+	config.OpenFaaSBaseUrl = cast.ToString(GetOrReturnDefaultValue("OPENFAAS_BASE_URL", ""))
+	config.KnativeBaseUrl = cast.ToString(GetOrReturnDefaultValue("KNATIVE_BASE_URL", ""))
+	config.MaxTokens = cast.ToInt(GetOrReturnDefaultValue("MAX_TOKENS", 12000))
+	config.MCPServerURL = cast.ToString(GetOrReturnDefaultValue("MCP_SERVER_URL", ""))
 
 	return config
 }

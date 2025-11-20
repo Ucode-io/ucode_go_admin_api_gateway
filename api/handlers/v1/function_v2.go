@@ -174,7 +174,7 @@ func (h *HandlerV1) InvokeFunctionByPath(c *gin.Context) {
 	invokeFunction.Data["environment_id"] = authInfo.GetEnvId()
 	invokeFunction.Data["app_id"] = apiKeys.GetData()[0].GetAppId()
 
-	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+c.Param("function-path"), http.MethodPost,
+	resp, err := util.DoRequest(config.OpenFaaSBaseUrl+c.Param("function-path"), http.MethodPost,
 		models.NewInvokeFunctionRequest{
 			Data: invokeFunction.Data,
 		},
@@ -342,7 +342,7 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 
 	switch functionResponse.Type {
 	case config.FUNCTION:
-		resp, err = util.DoRequest(config.OpenFaaSBaseUrl+functionResponse.GetPath(), http.MethodPost,
+		resp, err = util.DoRequest(h.baseConf.OpenFaaSBaseUrl+functionResponse.GetPath(), http.MethodPost,
 			models.FunctionRunV2{
 				Auth:        models.AuthData{},
 				RequestData: requestData,
@@ -365,7 +365,7 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 			return
 		}
 	case config.KNATIVE:
-		resp, err = util.DoRequest(fmt.Sprintf("http://%s.%s", functionResponse.GetPath(), config.KnativeBaseUrl), http.MethodPost,
+		resp, err = util.DoRequest(fmt.Sprintf("http://%s.%s", functionResponse.GetPath(), h.baseConf.KnativeBaseUrl), http.MethodPost,
 			models.FunctionRunV2{
 				Auth:        models.AuthData{},
 				RequestData: requestData,
