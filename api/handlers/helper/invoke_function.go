@@ -78,6 +78,7 @@ func DoInvokeFunction(request models.DoInvokeFunctionStruct, c *gin.Context, h H
 		data["object_data"] = request.ObjectData
 		data["object_data_before_update"] = request.ObjectDataBeforeUpdate
 		data["method"] = request.Method
+		data["action_type"] = request.ActionType
 		data["app_id"] = appId
 		data["user_id"] = authInfo.GetUserId()
 		data["session_id"] = authInfo.GetId()
