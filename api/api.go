@@ -313,6 +313,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	v2Admin := r.Group("/v2")
 	v2Admin.Use(h.V1.AdminAuthMiddleware())
 
+	// functions-logs
 	v2Admin.GET("/functions/log", h.V2.GetListFunctionLogs)
 
 	function := v2Admin.Group("/functions")

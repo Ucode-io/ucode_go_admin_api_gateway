@@ -1,7 +1,6 @@
 package v2
 
 import (
-	"log"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
@@ -13,12 +12,17 @@ import (
 
 func (h *HandlerV2) GetListFunctionLogs(c *gin.Context) {
 
-	log.Println("KELDI KELDIDIIII")
 	var (
-		request       nb.GetFunctionLogsReq
 		projectId     any
 		environmentId any
 		ok            bool
+
+		tableSlug     = cast.ToString(c.Query("table"))
+		requestMethod = cast.ToString(c.Query("method"))
+		actionType    = cast.ToString(c.Query("action_type"))
+		status        = cast.ToString(c.Query("status"))
+		fromDate      = cast.ToString(c.Query("from_date"))
+		toDate        = cast.ToString(c.Query("to_date"))
 
 		limit      = cast.ToInt64(c.Query("limit"))
 		offset     = cast.ToInt64(c.Query("offset"))
@@ -60,11 +64,19 @@ func (h *HandlerV2) GetListFunctionLogs(c *gin.Context) {
 		return
 	}
 
-	request.ProjectId = resource.ResourceEnvironmentId
-	request.FunctionId = functionId
-	request.Search = search
-	request.Limit = limit
-	request.Offset = offset
+	var request = nb.GetFunctionLogsReq{
+		ProjectId:     resource.ResourceEnvironmentId,
+		FunctionId:    functionId,
+		TableSlug:     tableSlug,
+		RequestMethod: requestMethod,
+		ActionType:    actionType,
+		Status:        status,
+		FromDate:      fromDate,
+		ToDate:        toDate,
+		Search:        search,
+		Limit:         limit,
+		Offset:        offset,
+	}
 
 	if resource.ResourceType == pb.ResourceType_POSTGRESQL {
 		response, err := services.GoObjectBuilderService().VersionHistory().GetFunctionLogs(c, &request)
