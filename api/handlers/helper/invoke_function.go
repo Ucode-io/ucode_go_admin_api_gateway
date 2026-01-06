@@ -1,8 +1,12 @@
 package helper
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
+	"errors"
 	"log"
+	"net/http"
 	"time"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -196,4 +200,57 @@ func GetListCustomEvents(request models.GetListCustomEventsStruct, c *gin.Contex
 	}
 
 	return
+}
+
+// =======================
+// MCP AI UI INVOCATION
+// =======================
+
+func DoInvokeMCPAIUI(c *gin.Context, h HandlerInterface, payload map[string]any,) (any, error) {
+
+	mcpBaseURL := h.BaseConf().MCPServerURL
+	if mcpBaseURL == "" {
+		return nil, errors.New("MCP service URL is not configured")
+	}
+
+	log.Println("MCP URL:", mcpBaseURL)
+
+	body, err := json.Marshal(payload)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(
+		http.MethodPost,
+		mcpBaseURL+"/ai/ui",
+		bytes.NewBuffer(body),
+	)
+	if err != nil {
+		log.Println("HERE ERROR 1111")
+		return nil, err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{
+		Timeout: 60 * time.Second,
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Println("HERE ERROR 2222")
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var result any
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode >= 400 {
+		return result, errors.New("MCP AI UI invocation failed")
+	}
+
+	return result, nil
 }
