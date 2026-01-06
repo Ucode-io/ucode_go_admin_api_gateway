@@ -6,9 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
 	"time"
-
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
 	as "ucode/ucode_go_api_gateway/genproto/auth_service"
@@ -17,31 +15,49 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type MCPRequest struct {
-	ProjectType      string   `json:"project_type"`
-	ManagementSystem []string `json:"management_system"`
-	Industry         string   `json:"industry"`
-	Method           string   `json:"method"`
-	Prompt           string   `json:"prompt"`
-}
+type (
+	MCPRequest struct {
+		ProjectType      string   `json:"project_type"`
+		ManagementSystem []string `json:"management_system"`
+		Industry         string   `json:"industry"`
+		Method           string   `json:"method"`
+		Prompt           string   `json:"prompt"`
+	}
 
-type Message struct {
-	Role    string `json:"role"`
-	Content string `json:"content"`
-}
+	Message struct {
+		Role    string `json:"role"`
+		Content string `json:"content"`
+	}
 
-type MCPServer struct {
-	Type string `json:"type"`
-	URL  string `json:"url"`
-	Name string `json:"name"`
-}
+	MCPServer struct {
+		Type               string `json:"type"`
+		URL                string `json:"url"`
+		Name               string `json:"name"`
+		AuthorizationToken string `json:"authorization_token,omitempty"`
+	}
 
-type RequestBody struct {
-	Model     string      `json:"model"`
-	MaxTokens int         `json:"max_tokens"`
-	Messages  []Message   `json:"messages"`
-	MCPServer []MCPServer `json:"mcp_servers"`
-}
+	Tool struct {
+		Type          string `json:"type"`
+		MCPServerName string `json:"mcp_server_name,omitempty"`
+	}
+
+	RequestBody struct {
+		Model      string      `json:"model"`
+		MaxTokens  int         `json:"max_tokens"`
+		Messages   []Message   `json:"messages"`
+		MCPServers []MCPServer `json:"mcp_servers,omitempty"`
+		Tools      []Tool      `json:"tools,omitempty"`
+	}
+
+	RequestBodyAnthropic struct {
+		Model      string      `json:"model"`
+		MaxTokens  int         `json:"max_tokens"`
+		System     string      `json:"system,omitempty"`
+		Messages   []Message   `json:"messages"`
+		MCPServers []MCPServer `json:"mcp_servers,omitempty"`
+		Tools      []Tool      `json:"tools,omitempty"`
+	}
+)
 
 func (h *HandlerV1) MCPCall(c *gin.Context) {
 	var (
@@ -88,38 +104,134 @@ func (h *HandlerV1) MCPCall(c *gin.Context) {
 		req.Method = "project"
 	}
 
+	req.Prompt += ". containing about 10 tables and icons for each table."
+
 	switch req.Method {
 	case "project":
-		content = fmt.Sprintf(`
-1. Retrieve the current DBML schema using: project-id = %s  environment-id = %s
-2. Generate a DBML schema for an %s %s tailored for the %s industry, using PostgreSQL. **excluding all existing tables from the current schema**.
-📌 Requirements:
- • Include the industry specific functional areas:
- • Do NOT include Users or Roles tables.
- • Use proper Ref definitions for relationships, in this format: Ref fk_name: table1.column1 < table2.column2
- • For fields like status or type, use realistic Enum definitions in proper DBML syntax. Example: Enum "tax_type" { "Fixed" "Percentage" }. Use separate Enum blocks with clearly defined, realistic values and wrap all enum values in double quotes to ensure compatibility.
- • Optional: use camelCase or snake_case consistently if preferred
- • Do not include indexes 
- • Do not include quotes, additional options (e.g., [delete: cascade]) and default values.
- • Use descriptive field names and don't use comments
- • Do not include comments anywhere in the schema.
- • Follow relational design principles and ensure consistency with systems like ProjectManagement, Payroll, and CRM.
+		content = fmt.Sprintf(`You are creating a complete u-code project from scratch. Analyze the user's request and determine:
+- Project Type (CRM, ERP, E-commerce, Admin Panel, etc.)
+- Management Systems needed (ProjectManagement, Payroll, Inventory, Sales, etc.)
+- Industry (IT, Healthcare, Finance, Retail, etc.)
 
-3. Organize the new tables into **menus** by their functional purpose.
-4. Provide a view_fields JSON that maps each table to its most important column: Example: { "customer": "name" }
-5. Execute the new DBML schema using the dbml_to_ucode tool:
-   Use X-API-KEY = %s  
-⚠️ Attempt any operation **once only** — do not retry on failure. If the dbml_to_ucode tool returns an error, **end the operation immediately**.
-`, projectId.(string), environmentId.(string), req.ProjectType, strings.Join(req.ManagementSystem, "/"), "IT", apiKey)
+Then follow these steps EXACTLY:
 
-		message = fmt.Sprintf("Your request for %s %s has been successfully processed.", req.ProjectType, strings.Join(req.ManagementSystem, ", "))
+STEP 1: Retrieve current DBML schema (if any exists)
+- Use get_dbml tool with:
+  project-id = %s
+  environment-id = %s
+  x-api-key = %s
+
+STEP 2: Analyze user request and generate comprehensive DBML schema
+User Request: "%s"
+
+Based on the user's request, determine:
+1. What type of project/system they need (CRM, ERP, Admin Panel, etc.)
+2. What functional areas/modules are required
+3. What industry/domain this is for
+4. What tables, relationships, and data structures are needed
+
+Generate a complete DBML schema that:
+- Matches the user's requirements EXACTLY
+- Uses PostgreSQL syntax
+- **EXCLUDES all existing tables** from current schema (if retrieved in STEP 1)
+- Includes industry-specific functional areas based on your analysis
+- DO NOT include Users or Roles tables (they already exist in u-code)
+- Use proper Ref definitions: Ref fk_name: table1.column1 < table2.column2
+- For status/type fields, use realistic Enum definitions: Enum "status" { "Active" "Inactive" "Pending" }
+- Use camelCase or snake_case consistently
+- No indexes, no quotes, no cascade options, no default values
+- Use descriptive field names, NO comments
+- Follow relational design principles
+- If user mentions specific number of menus/tables (e.g., "10 menus"), create exactly that many
+
+STEP 3: Create tables directly using create_table tool
+- For each table, call create_table with: label, slug (snake_case), parent_id = "%s", x-api-key
+- IMPORTANT: Save the response from each create_table call - you need table_id and slug (collection) for next steps
+- Example: create_table({label: "Customers", slug: "customers", parent_id: "%s", x_api_key: "%s"})
+- Do NOT create folders, all tables are created at root level
+
+STEP 4: Create fields for each table (IMPORTANT: use update_table, not create_field)
+- IMPORTANT INSTRUCTION FOR FIELD CREATION:
+  - Do NOT call the create_field tool under any circumstances for automated field creation.
+  - Instead, always aggregate fields for a table and call update_table with a fields array and relations array.
+  - If the plan would create several individual fields, combine them into a single update_table call per table (bulk create).
+  - If update_table cannot perform a specific field creation (server returns error), STOP and report the error back (do not retry individual create_field).
+  - Use create_field only if a human explicitly requests a single manual field creation and only after explicit confirmation.
+- Then use update_table to add all fields and relations for each table.
+
+- For each table created, add ALL necessary fields based on DBML schema
+- Use update_table with: tableSlug (collection slug), xapikey, fields array, relations array
+- Field types: SINGLE_LINE, TEXT, NUMBER, DATE, BOOLEAN, ENUM, etc.
+- Add standard fields: id (auto), name/title (required), created_at, updated_at
+- Add all fields from your DBML schema
+- Example: update_table({tableSlug: "customers", xapikey: "%s", fields: [...], relations: [...]})
+
+STEP 5: Organize tables into menus
+- Since no folders are created, all tables use parent_id = "%s"
+- Provide view_fields JSON: { "table_slug": "primary_field_slug" }
+- Example: { "customers": "name", "orders": "order_number" }
+
+STEP 6: Execute DBML (optional - if you prefer bulk creation)
+- If you want to use dbml_to_ucode for bulk creation, provide:
+  - dbml: (full DBML string)
+  - view_fields: (JSON object)
+  - menus: (JSON object where keys are table names, values are table slugs)
+  - x-api-key: %s
+
+CRITICAL RULES:
+1. All tables are created at root level: parent_id = "%s"
+2. Save table_id and collection (slug) from create_table responses
+3. Use collection (slug) as the "collection" parameter in create_field (only for manual single-field requests)
+4. If any tool call fails, STOP and report the error - do not retry
+5. Create a COMPLETE, working project - not just partial structure
+6. Analyze user request carefully - if they say "10 menus", create exactly 10 tables
+7. Remember: Empty folders are not used, all tables are at root level
+
+Context:
+project-id = %s
+environment-id = %s
+x-api-key = %s
+main-menu-parent-id = %s
+
+User Request: "%s"
+
+Now analyze the user's request, determine project type/systems/industry, and create the complete project structure directly as tables at root level.`,
+			projectId.(string), environmentId.(string), apiKey, req.Prompt,
+
+			config.MainMenuID, config.MainMenuID, apiKey,
+
+			apiKey,
+
+			config.MainMenuID,
+
+			apiKey,
+
+			config.MainMenuID,
+
+			projectId.(string), environmentId.(string), apiKey, config.MainMenuID,
+			req.Prompt,
+		)
+
+		message = "Your project has been successfully created."
+
 	case "table":
 		content = req.Prompt
 		content += fmt.Sprintf(`
-x-api-key = %s
-		`, apiKey)
-		message = "The table has been successfully updated."
 
+Context:
+project-id = %s
+environment-id = %s
+x-api-key = %s
+
+Rules:
+- Use available MCP tools to actually perform the action (do not just reply with text).
+- When creating a table:
+  - label must match the requested name
+  - slug should be a safe snake_case variant of the name
+- After tool execution, return the API result (or clear error).`,
+			projectId.(string), environmentId.(string), apiKey)
+
+		message = "The table has been successfully updated."
 	}
 
 	resp, err := h.sendAnthropicRequest(content)
@@ -133,33 +245,51 @@ x-api-key = %s
 }
 
 func (h *HandlerV1) sendAnthropicRequest(content string) (string, error) {
-	url := h.baseConf.AnthropicBaseAPIURL
+	var (
+		systemContent = `You are connected to an MCP server named "ucode" and have access to tools via the mcp_toolset.
+When an external action is required (get_dbml, create_menu, create_table, update_table, dbml_to_ucode), CALL the tools using the MCP tool calling mechanism.
+DO NOT call the create_field tool for automated field creation. Instead, ALWAYS use update_table to add or modify fields and relations in bulk (send a fields array and relations array).
+Only call create_field when a human explicitly requests a single manual field creation and after receiving explicit confirmation.
+Do not invent results — call the appropriate tool with exact parameters. Use the tool names as documented.`
 
-	// Construct the request body
-	body := RequestBody{
+		userMessage = Message{
+			Role:    "user",
+			Content: content,
+		}
+
+		maxTokens = h.baseConf.MaxTokens
+	)
+
+	if len(content) > 2000 && maxTokens < 4000 {
+		maxTokens = 4000
+	}
+
+	body := RequestBodyAnthropic{
 		Model:     h.baseConf.ClaudeModel,
-		MaxTokens: h.baseConf.MaxTokens,
-		Messages: []Message{
-			{
-				Role:    "user",
-				Content: content,
-			},
-		},
-		MCPServer: []MCPServer{
+		MaxTokens: maxTokens,
+		System:    systemContent,
+		Messages:  []Message{userMessage},
+		MCPServers: []MCPServer{
 			{
 				Type: "url",
 				URL:  h.baseConf.MCPServerURL,
 				Name: "ucode",
 			},
 		},
+		Tools: []Tool{
+			{
+				Type:          "mcp_toolset",
+				MCPServerName: "ucode",
+			},
+		},
 	}
 
-	jsonBody, err := json.Marshal(body)
+	jsonBody, err := json.MarshalIndent(body, "", "  ")
 	if err != nil {
 		return "", fmt.Errorf("failed to marshal request body: %w", err)
 	}
 
-	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(jsonBody))
+	req, err := http.NewRequest(http.MethodPost, h.baseConf.AnthropicBaseAPIURL, bytes.NewBuffer(jsonBody))
 	if err != nil {
 		return "", fmt.Errorf("failed to create request: %w", err)
 	}
@@ -169,7 +299,7 @@ func (h *HandlerV1) sendAnthropicRequest(content string) (string, error) {
 	req.Header.Set("anthropic-version", h.baseConf.AnthropicVersion)
 	req.Header.Set("anthropic-beta", h.baseConf.AnthropicBeta)
 
-	client := &http.Client{Timeout: 300 * time.Second}
+	client := &http.Client{Timeout: 420 * time.Second}
 	resp, err := client.Do(req)
 	if err != nil {
 		return "", fmt.Errorf("request failed: %w", err)

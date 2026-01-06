@@ -64,6 +64,8 @@ const (
 	InactiveStatus   string = "inactive"
 	PermissionDenied string = "Permission denied"
 	SessionExpired   string = "Session has been expired"
+
+	MainMenuID = "c57eedc3-a954-4262-a0af-376c65b5a284"
 )
 
 var (
