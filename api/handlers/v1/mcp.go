@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"time"
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -263,6 +264,10 @@ Do not invent results — call the appropriate tool with exact parameters. Use t
 	if len(content) > 2000 && maxTokens < 4000 {
 		maxTokens = 4000
 	}
+
+	log.Println("MCP URL:", h.baseConf.MCPServerURL)
+	log.Println("ANTHROPIC API URL:", h.baseConf.AnthropicBaseAPIURL)
+	log.Println("CONTENT:", content)
 
 	body := RequestBodyAnthropic{
 		Model:     h.baseConf.ClaudeModel,
