@@ -235,12 +235,16 @@ Rules:
 		message = "The table has been successfully updated."
 	}
 
-	resp, err := h.sendAnthropicRequest(content)
-	fmt.Println("************ MCP Response ************", resp)
-	if err != nil {
-		h.HandleResponse(c, status_http.InternalServerError, "Your request could not be processed.")
-		return
-	}
+	go func() {
+		resp, err := h.sendAnthropicRequest(content)
+		fmt.Println("************ MCP Response ************", resp)
+		if err != nil {
+			h.HandleResponse(c, status_http.InternalServerError, "Your request could not be processed.")
+			return
+		}
+	}()
+
+	time.Sleep(1 * time.Minute)
 
 	h.HandleResponse(c, status_http.OK, message)
 }
