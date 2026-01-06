@@ -104,8 +104,6 @@ func (h *HandlerV1) MCPCall(c *gin.Context) {
 		req.Method = "project"
 	}
 
-	req.Prompt += ". containing about 10 tables and icons for each table and ."
-
 	switch req.Method {
 	case "project":
 		content = fmt.Sprintf(`You are creating a complete u-code project from scratch. Analyze the user's request and determine:
@@ -145,11 +143,13 @@ Generate a complete DBML schema that:
 - If user mentions specific number of menus/tables (e.g., "10 menus"), create exactly that many
 
 STEP 3: Create tables directly using create_table tool
-- For each table, call create_table with: label, slug (snake_case), parent_id = "%s", x-api-key
+- **Quantity Rule**: If the user did NOT specify a number of tables/menus, strictly create approximately **10 tables** suitable for the project logic.
+- **Icon Rule**: You **MUST** provide an 'icon' parameter for EVERY table. Use a valid full URL from Iconify (e.g., "https://api.iconify.design/mdi:account.svg"). Pick an icon relevant to the table's function.
+- **Menu ID Rule**: You **MUST** provide 'menu_id' for every table. Use the root parent_id = "%s".
+- Call create_table with: label, slug (snake_case), icon, menu_id, x-api-key.
 - IMPORTANT: Save the response from each create_table call - you need table_id and slug (collection) for next steps
-- Example: create_table({label: "Customers", slug: "customers", parent_id: "%s", x_api_key: "%s"})
-- Do NOT create folders, all tables are created at root level
-
+- Example: create_table({label: "Customers", slug: "customers", icon: "https://api.iconify.design/mdi:account.svg", menu_id: "%s", x_api_key: "%s"})
+- Do NOT create folders, all tables are created at root level using the provided menu_id.
 STEP 4: Create fields for each table (IMPORTANT: use update_table, not create_field)
 - IMPORTANT INSTRUCTION FOR FIELD CREATION:
   - Do NOT call the create_field tool under any circumstances for automated field creation.
