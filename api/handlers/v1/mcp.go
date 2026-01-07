@@ -2,6 +2,7 @@ package v1
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -234,18 +235,29 @@ Rules:
 		message = "The table has been successfully updated."
 	}
 
+	var (
+		mcpError    chan error
+		mcpResp     string
+		ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+	)
+
+	defer cancel()
+
 	go func() {
-		resp, err := h.sendAnthropicRequest(content)
-		fmt.Println("************ MCP Response ************", resp)
-		if err != nil {
-			h.HandleResponse(c, status_http.InternalServerError, "Your request could not be processed.")
-			return
-		}
+		mcpResp, err = h.sendAnthropicRequest(content)
+		fmt.Println("************ MCP Response ************", mcpResp)
+		mcpError <- err
 	}()
 
-	time.Sleep(1 * time.Minute)
+	select {
+	case <-ctx.Done():
+		h.HandleResponse(c, status_http.OK, message)
+		return
+	case err = <-mcpError:
+		h.HandleResponse(c, status_http.InternalServerError, "Your request could not be processed.")
+		return
 
-	h.HandleResponse(c, status_http.OK, message)
+	}
 }
 
 func (h *HandlerV1) sendAnthropicRequest(content string) (string, error) {
