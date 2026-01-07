@@ -235,28 +235,36 @@ Rules:
 		message = "The table has been successfully updated."
 	}
 
+	type mcpResult struct {
+		resp string
+		err  error
+	}
+
 	var (
-		mcpError    chan error
-		mcpResp     string
-		ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		mcpRespChan = make(chan mcpResult)
+		ctx, cancel = context.WithTimeout(context.Background(), 500*time.Second)
 	)
 
 	defer cancel()
 
 	go func() {
-		mcpResp, err = h.sendAnthropicRequest(content)
+		mcpResp, mcpError := h.sendAnthropicRequest(content)
 		fmt.Println("************ MCP Response ************", mcpResp)
-		mcpError <- err
+		mcpRespChan <- mcpResult{resp: mcpResp, err: mcpError}
 	}()
 
 	select {
 	case <-ctx.Done():
-		h.HandleResponse(c, status_http.OK, message)
+		h.HandleResponse(c, status_http.OK, message+"  . TIMEOUT")
 		return
-	case err = <-mcpError:
-		h.HandleResponse(c, status_http.InternalServerError, "Your request could not be processed.")
-		return
+	case result := <-mcpRespChan:
+		if result.err != nil {
+			h.HandleResponse(c, status_http.InternalServerError, result.err.Error())
+			return
+		}
 
+		h.HandleResponse(c, status_http.OK, result.resp)
+		return
 	}
 }
 
@@ -276,8 +284,8 @@ Do not invent results — call the appropriate tool with exact parameters. Use t
 		maxTokens = h.baseConf.MaxTokens
 	)
 
-	if len(content) > 2000 && maxTokens < 4000 {
-		maxTokens = 4000
+	if len(content) > 2000 {
+		maxTokens = 8192
 	}
 
 	body := RequestBodyAnthropic{
