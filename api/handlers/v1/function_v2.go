@@ -36,6 +36,10 @@ import (
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) CreateNewFunction(c *gin.Context) {
+	fmt.Println("I am here")
+	fmt.Println("Function host->", h.baseConf.GoFunctionServiceHost)
+	fmt.Println("Function port->", h.baseConf.GoFunctionServiceHTTPPort)
+	fmt.Println("Url path->", c.Request.URL.Path)
 	_ = h.MakeProxy(c, h.baseConf.GoFunctionServiceHost+h.baseConf.GoFunctionServiceHTTPPort, c.Request.URL.Path)
 }
 
