@@ -2,7 +2,6 @@ package v1
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -243,30 +242,30 @@ Rules:
 
 	var (
 		mcpRespChan = make(chan mcpResult)
-		ctx, cancel = context.WithTimeout(context.Background(), 500*time.Second)
+		//ctx, cancel = context.WithTimeout(context.Background(), 500*time.Second)
 	)
 
-	defer cancel()
+	//defer cancel()
 
-	go func() {
-		mcpResp, mcpError := h.sendAnthropicRequest(content)
-		fmt.Println("************ MCP Response ************", mcpResp)
-		mcpRespChan <- mcpResult{resp: mcpResp, err: mcpError}
-	}()
+	//go func() {
+	mcpResp, mcpError := h.sendAnthropicRequest(content)
+	fmt.Println("************ MCP Response ************", mcpResp)
+	mcpRespChan <- mcpResult{resp: mcpResp, err: mcpError}
+	//}()
 
-	select {
-	case <-ctx.Done():
-		h.HandleResponse(c, status_http.OK, message+"  . TIMEOUT")
-		return
-	case result := <-mcpRespChan:
-		if result.err != nil {
-			h.HandleResponse(c, status_http.InternalServerError, result.err.Error())
-			return
-		}
-
-		h.HandleResponse(c, status_http.OK, result.resp)
-		return
-	}
+	//select {
+	//case <-ctx.Done():
+	h.HandleResponse(c, status_http.OK, message+"")
+	return
+	//case result := <-mcpRespChan:
+	//	if result.err != nil {
+	//		h.HandleResponse(c, status_http.InternalServerError, result.err.Error())
+	//		return
+	//	}
+	//
+	//	h.HandleResponse(c, status_http.OK, result.resp)
+	//	return
+	//}
 }
 
 func (h *HandlerV1) sendAnthropicRequest(content string) (string, error) {
@@ -285,9 +284,9 @@ Do not invent results — call the appropriate tool with exact parameters. Use t
 		maxTokens = h.baseConf.MaxTokens
 	)
 
-	if len(content) > 2000 {
-		maxTokens = 8192
-	}
+	//if len(content) > 2000 {
+	//	maxTokens = 8192
+	//}
 
 	body := RequestBodyAnthropic{
 		Model:     h.baseConf.ClaudeModel,
