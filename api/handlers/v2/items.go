@@ -444,18 +444,21 @@ func (h *HandlerV2) GetSingleItem(c *gin.Context) {
 	var (
 		object     models.CommonMessage
 		statusHttp = status_http.GrpcStatusToHTTP["Ok"]
-		tableSlug  = c.Param("collection")
+
+		tableSlug = c.Param("collection")
+		objectID  = c.Param("id")
+
+		withRelations = cast.ToBool(c.Query("with_relations"))
 	)
 
-	object.Data = make(map[string]any)
-
-	objectID := c.Param("id")
 	if !util.IsValidUUID(objectID) {
 		h.HandleResponse(c, status_http.InvalidArgument, "id is an invalid uuid")
 		return
 	}
 
+	object.Data = make(map[string]any)
 	object.Data["id"] = objectID
+	object.Data["with_relations"] = withRelations
 
 	structData, err := helper.ConvertMapToStruct(object.Data)
 	if err != nil {
