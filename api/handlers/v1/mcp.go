@@ -361,5 +361,6 @@ type GeneratedProject struct {
 		Path    string `json:"path"`
 		Content string `json:"content"`
 	} `json:"files"`
-	Env map[string]string `json:"env"`
+	FileGraph map[string]any    `json:"file_graph"`
+	Env       map[string]string `json:"env"`
 }

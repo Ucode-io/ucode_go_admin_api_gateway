@@ -13,7 +13,7 @@ DO NOT call the create_field tool for automated field creation. Instead, ALWAYS 
 Only call create_field when a human explicitly requests a single manual field creation and after receiving explicit confirmation.
 Do not invent results — call the appropriate tool with exact parameters. Use the tool names as documented.`
 
-func GenerateBackendMCPPrompt(request models.GenerateBackendPromptMCP) (content, message string, err error) {
+func GenerateBackendMCPPrompt(request models.GeneratePromptMCP) (content, message string, err error) {
 	switch request.Method {
 	case "project":
 		content = fmt.Sprintf(`You are creating a complete u-code project from scratch. Analyze the user's request and determine:

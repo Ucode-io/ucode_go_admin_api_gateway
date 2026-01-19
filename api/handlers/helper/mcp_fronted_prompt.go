@@ -180,7 +180,7 @@ var ClaudeFrontendSystemPrompt = `
 
 	DO NOT use item.slug directly
 	The route MUST be built using: item.data.table.slug
-	Correct behavior: navigate("/${item.data.table.slug}")
+	Correct behavior: navigate("/tables/${item.data.table.slug}")
 	This rule is MANDATORY.
 	If the UI navigates using any other property, the result is INVALID.
 
@@ -213,7 +213,7 @@ var ClaudeFrontendSystemPrompt = `
 
 	/ → Dashboard Home
 
-	/:tableSlug → Dynamic Table Page
+	/tables/:tableSlug → Dynamic Table Page
 
 	Navigation:
 
@@ -254,7 +254,7 @@ var ClaudeFrontendSystemPrompt = `
 
 	TABLE DETAILS (schema, fields, attributes):
 
-	Endpoint: GET /v1/table-details/:tableSlug
+	Endpoint: POST /v1/table-details/:tableSlug
 
 	Request body: { "data": {} }
 
@@ -302,7 +302,7 @@ var ClaudeFrontendSystemPrompt = `
 	====================================
 	DYNAMIC TABLE PAGE
 
-	Route: /:tableSlug
+	Route: /tables/:tableSlug
 
 	Behavior:
 
@@ -821,7 +821,7 @@ var ClaudeFrontendSystemPrompt = `
 	project_name: "ucode-erp-admin-panel",
 	files: [ { path: "...", content: "..." } ],
 	env: {
-	VITE_ADMIN_BASE_URL: "https://admin-api.ucode.run\",
+	VITE_ADMIN_BASE_URL: "https://admin-api.ucode.run",
 	VITE_PROJECT_ID: "f1c4ae97-ee0f-4868-b4fc-1b26869ebc69",
 	VITE_PARENT_ID: "c57eedc3-a954-4262-a0af-376c65b5a284",
 	VITE_X_API_KEY: "P-wkLyW3aBURDx6oSwtlhk33WQn8Q3VhIc"
@@ -897,22 +897,97 @@ var ClaudeFrontendSystemPrompt = `
 	Only apply the specified fixes.
 
 	Generate the full project now.
-` +
-	// Response json
-	`CRITICAL OUTPUT INSTRUCTION:
-You MUST respond with ONLY a valid JSON object, with NO markdown, NO code blocks, NO explanations.
-The response must be PURE JSON starting with { and ending with }.
 
-Your response will be parsed directly as JSON using json.Unmarshal.
-If you include ANYTHING other than the JSON object, parsing will fail.
+` + `
 
-Example of CORRECT response:
-{"project_name":"admin-panel","files":[{"path":"src/App.jsx","content":"import React from 'react';\n\nexport default function App() {\n  return <div>Hello</div>;\n}"}],"env":{"VITE_API_URL":"https://api.example.com"}}
+RESPOND WITH ONLY THE JSON OBJECT NOW.
 
-Example of INCORRECT response (will cause parsing error):
-` + "```json\n{\"project_name\":\"...\"}\n```" + `
+` + `FILE GRAPH (MANDATORY — SIMPLIFIED FOR CLARITY)
 
-RESPOND WITH ONLY THE JSON OBJECT NOW.`
+After generating the full project files and env object, you MUST also produce a "file_graph" object at the root of the JSON output.
+
+ABSOLUTE RULES:
+
+The root JSON MUST include: "project_name", "files", "env", and "file_graph"
+
+"file_graph" MUST contain one entry for every file in the "files" array
+
+File node schema (4 ESSENTIAL FIELDS ONLY):
+
+{
+  "path": "src/components/Sidebar.jsx",  // exact file path
+  "kind": "component",  // one of: component, page, layout, hook, api, style, config, util
+  "imports": ["react", "./SidebarItem", "../api/axios"],  // all import specifiers as written
+  "deps": ["src/components/SidebarItem.jsx", "src/api/axios.js"]  // resolved project files only (no "react", "axios")
+}
+
+FIELD EXPLANATIONS:
+
+1. "path" (string): exact file path matching files[].path
+
+2. "kind" (string): file type category
+   - "component" → React components (*.jsx in /components/)
+   - "page" → Route pages (*.jsx in /pages/)
+   - "layout" → Layout wrappers (DashboardLayout.jsx)
+   - "api" → API/HTTP modules (axios.js)
+   - "style" → CSS files (*.css)
+   - "config" → Config files (vite.config.js, package.json, tailwind.config.js)
+   - "hook" → Custom React hooks (use*.js)
+   - "util" → Utility functions
+
+3. "imports" (array of strings): ALL import specifiers exactly as written in the file
+   - Include: "react", "axios", "./Component", "../api/axios"
+   - Just copy what's in the import statements
+
+4. "deps" (array of strings): project file dependencies ONLY (resolved paths)
+   - EXCLUDE: "react", "react-dom", "axios", "react-router-dom" (external packages)
+   - INCLUDE: "src/components/Table.jsx", "src/api/axios.js" (project files)
+   - Must be resolvable paths within the generated project
+
+OUTPUT EXAMPLE:
+
+{
+  "project_name": "admin-panel",
+  "files": [...],
+  "env": {...},
+  "file_graph": {
+    "src/App.jsx": {
+      "path": "src/App.jsx",
+      "kind": "component",
+      "imports": ["react", "react-router-dom", "./layouts/DashboardLayout"],
+      "deps": ["src/layouts/DashboardLayout.jsx"]
+    },
+    "src/components/Table.jsx": {
+      "path": "src/components/Table.jsx",
+      "kind": "component",
+      "imports": ["react", "./StatusCell"],
+      "deps": ["src/components/StatusCell.jsx"]
+    },
+    "src/api/axios.js": {
+      "path": "src/api/axios.js",
+      "kind": "api",
+      "imports": ["axios"],
+      "deps": []
+    },
+    "package.json": {
+      "path": "package.json",
+      "kind": "config",
+      "imports": [],
+      "deps": []
+    }
+  }
+}
+
+WHY THESE 4 FIELDS:
+- "path" → identify the file
+- "kind" → understand file role
+- "imports" → see what file uses
+- "deps" → trace project file connections
+
+These 4 fields give complete picture for any developer or AI to understand the codebase structure and find where to make changes.
+
+CRITICAL: Do NOT include any other fields. Keep it simple and parseable.
+`
 
 func FrontendGenerateUserPrompt(request models.GeneratePromptMCP) string {
 	// USER prompt template: dynamic; will be injected with the runtime values.
@@ -925,41 +1000,45 @@ func FrontendGenerateUserPrompt(request models.GeneratePromptMCP) string {
 
 Task:
 1) Generate a complete production-ready frontend-only admin project (React 18 + Vite + TailwindCSS v2.2.19) as a single JSON object with fields:
-   { "project_name": "<string>", "files": [ { "path": "<path>", "content": "<file contents>" }, ... ] }
+   { "project_name": "<string>", "files": [ { "path": "<path>", "content": "<file contents>" }, ... ], "file_graph": {...}, "env": {...} }
    - File contents must be plain raw file text (use real newlines in JSON string values).
    - No markdown, no extra text outside that single JSON root.
-2) Default to DARK MODE when the Description includes "dark", "erp", "admin", "dashboard", or "backoffice" (unless the user explicitly requests "light only").
+2) Default to LIGHT MODE (Notion-style) as specified in system prompt.
 3) Implement client-side routing using react-router-dom:
    - Include BrowserRouter and a Routes config with at least "/" (DashboardHome) and "/tables/:collection" (DynamicTablePage).
-   - Sidebar menu item clicks must navigate using useNavigate to a path derived from the menu (e.g. '/tables/${table_slug}' for TABLE menus or '/menu/${id}').
+   - Sidebar menu item clicks must navigate using useNavigate to a path derived from the menu (e.g. '/tables/${item.data.table.slug}' for TABLE menus).
    - Top header must display selected menu label via router state or URL params.
-4) Implement runtime fetching of menus and table details using MCP tools 'get_menus' and 'get_table_details' when available.
-   If MCP tools are not available, include exact axios calls that the generated code will use:
-   - GET %%VITE_ADMIN_BASE_URL%%/v3/menus?parent_id=%s&project-id=%s
+4) Implement runtime fetching of menus and table details using exact axios calls:
+   - GET %s/v3/menus?parent_id=%s&project-id=%s
      Headers: { Authorization: "API-KEY", "X-API-KEY": "%s" }
-   - POST %%VITE_ADMIN_BASE_URL%%/v1/table-details/:collection
+   - POST %s/v1/table-details/:collection
      Body: { "data": {} }
      Headers: same as above
+   - GET %s/v2/items/:collection
+     Query params: limit, offset, search, sort_by, sort_order
+     Headers: same as above
 5) Ensure table components follow the documented layout rules:
-   - <=6 columns => table-fixed
-   - >6 columns => auto layout + min-w per column + horizontal scroll
+   - Columns: min-width 220px, max-width 220px, resizable
    - thead th must be position: sticky; top: 0; z-index: 10; inside the scroll container
-6) Include required components ElementLink and ElementText with the behaviors described in the system prompt.
-7) If any runtime env is missing, still output full project and include README_HOW_TO_RUN.txt explaining where to inject PROJECT_ID, PARENT_ID, X_API_KEY, VITE_ADMIN_BASE_URL.
-8) Return EXACTLY one JSON object and nothing else.
+   - Cells render in VIEW mode, edit on click
+6) Include all required components as specified.
+7) Include README_HOW_TO_RUN.txt explaining setup.
+8) Return EXACTLY one JSON object with: project_name, files, file_graph (5 fields per file), env.
 
-Now produce the project JSON immediately.`
+Now produce the complete project JSON immediately.`
 
 	return fmt.Sprintf(userTpl,
-		request.UserPrompt, // description
+		request.UserPrompt,
 		request.ProjectId,
 		config.MainMenuID,
 		request.APIKey,
 		request.BaseURL,
-		// for axios example parameters (reused)
+		request.BaseURL,
 		config.MainMenuID,
 		request.ProjectId,
 		request.APIKey,
+		request.BaseURL,
+		request.BaseURL,
 	)
 
 }
