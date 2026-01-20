@@ -128,877 +128,980 @@ FORBIDDEN:
 ------------------------------------
 - Random ids (uuid, nanoid, Math.random)
 - Dynamic ids based on props: id={'item-${props.id}'}
-	- Missing ids on root elements
-	- Multiple root elements without ids
-	- ids generated in JavaScript logic
-	- Conditional ids
+- Missing ids on root elements
+- Multiple root elements without ids
+- ids generated in JavaScript logic
+- Conditional ids
 
-	------------------------------------
-	FRONTEND ↔ BACKEND MAPPING RULE (IMPORTANT):
-	------------------------------------
-	The id value MUST be logically traceable to the component file.
+------------------------------------
+FRONTEND ↔ BACKEND MAPPING RULE (IMPORTANT):
+------------------------------------
+The id value MUST be logically traceable to the component file.
 
-	Example:
-	- id="main-sidebar" → Component file: src/components/Sidebar.jsx
-	- id="data-table" → Component file: src/components/Table.jsx
-	- id="create-item-drawer" → Component file: src/components/CreateItemDrawer.jsx
-	- id="dashboard-home-page" → Component file: src/pages/DashboardHome.jsx
+Example:
+- id="main-sidebar" → Component file: src/components/Sidebar.jsx
+- id="data-table" → Component file: src/components/Table.jsx
+- id="create-item-drawer" → Component file: src/components/CreateItemDrawer.jsx
+- id="dashboard-home-page" → Component file: src/pages/DashboardHome.jsx
 
-	This mapping MUST be obvious and predictable.
+This mapping MUST be obvious and predictable.
 
-	If a component does not include a root id, the solution is INVALID.
+If a component does not include a root id, the solution is INVALID.
 
-	====================================
-	LAYOUT RULES
+====================================
+LAYOUT RULES
 
-	TOTAL APPLICATION HEIGHT MUST BE 100vh
-	No global page scroll
-	Scroll allowed ONLY inside components
+TOTAL APPLICATION HEIGHT MUST BE 100vh
+No global page scroll
+Scroll allowed ONLY inside components
 
-	TWO-COLUMN LAYOUT:
-	LEFT: Sidebar
-	RIGHT: Main content
+TWO-COLUMN LAYOUT:
+LEFT: Sidebar
+RIGHT: Main content
 
-	HEADER HEIGHT RULE:
-	Sidebar header height MUST be EXACTLY the same height as the main page header
-	They must visually align perfectly
+HEADER HEIGHT RULE:
+Sidebar header height MUST be EXACTLY the same height as the main page header
+They must visually align perfectly
 
-	====================================
-	APPLICATION PROVIDERS (CRITICAL):
-	ALL application-level providers MUST be defined ONLY in App.jsx.
+====================================
+APPLICATION PROVIDERS (CRITICAL):
+ALL application-level providers MUST be defined ONLY in App.jsx.
 
-	This includes (but not limited to):
-	- BrowserRouter
-	- Any context providers
-	- Theme providers
-	- Query / data providers
-	- Global state providers
+This includes (but not limited to):
+- BrowserRouter
+- Any context providers
+- Theme providers
+- Query / data providers
+- Global state providers
 
-	Rules:
-	- App.jsx is the SINGLE ROOT for providers
-	- Layout components MUST NOT create or wrap providers
-	- Pages MUST NOT create providers
+Rules:
+- App.jsx is the SINGLE ROOT for providers
+- Layout components MUST NOT create or wrap providers
+- Pages MUST NOT create providers
 
-	Correct pattern:
-	App.jsx
-		→ Providers
-			→ DashboardLayout
-				→ Routes / Pages
+Correct pattern:
+App.jsx
+	→ Providers
+		→ DashboardLayout
+			→ Routes / Pages
 
-	If any provider is created outside App.jsx, the result is INVALID.
+If any provider is created outside App.jsx, the result is INVALID.
 
-	LAYOUT BACKGROUND (MANDATORY):
+LAYOUT BACKGROUND (MANDATORY):
 
-	The main layout container MUST have:
-	- background-color: #FFFFFF
+The main layout container MUST have:
+- background-color: #FFFFFF
 
-	This applies to:
-	- Root layout wrapper
-	- Main content area
-	- Any full-height layout container
+This applies to:
+- Root layout wrapper
+- Main content area
+- Any full-height layout container
 
-	No transparent or inherited background is allowed for layout containers.
+No transparent or inherited background is allowed for layout containers.
 
-	====================================
-	SIDEBAR (MENU)
+====================================
+SIDEBAR (MENU)
 
-	Menu items:
-	- Settings
-	- Users
+Menu items:
+- Settings
+- Users
 
-	Sidebar requirements:
+Sidebar requirements:
 
-	Scrollable menu list if items overflow
+Scrollable menu list if items overflow
 
-	Collapsible sidebar
+Collapsible sidebar
 
-	Smooth animations (width + opacity)
+Smooth animations (width + opacity)
 
-	Active menu item highlighted using #F0F0EF
+Active menu item highlighted using #F0F0EF
 
-	Minimal, Notion-like spacing
+Minimal, Notion-like spacing
 
-	SIDEBAR OVERFLOW (CRITICAL FIX):
+SIDEBAR OVERFLOW (CRITICAL FIX):
 
-	The sidebar toggle button MUST never be clipped.
+The sidebar toggle button MUST never be clipped.
 
-	Implementation rule:
+Implementation rule:
 
-	The SIDEBAR OUTER container may keep overflow hidden when collapsed.
+The SIDEBAR OUTER container may keep overflow hidden when collapsed.
 
-	BUT the menu list area (the scrollable area under the sidebar header) must manage scrolling independently:
+BUT the menu list area (the scrollable area under the sidebar header) must manage scrolling independently:
 
-	When sidebar is OPEN:
+When sidebar is OPEN:
 
-	menu list area (below header) MUST be: overflow-y: auto
+menu list area (below header) MUST be: overflow-y: auto
 
-	sidebar header MUST be: overflow: visible (so toggle can stick out)
+sidebar header MUST be: overflow: visible (so toggle can stick out)
 
-	When sidebar is CLOSED:
+When sidebar is CLOSED:
 
-	menu list area MUST be: overflow: hidden
+menu list area MUST be: overflow: hidden
 
-	sidebar header MUST still be: overflow: visible
+sidebar header MUST still be: overflow: visible
 
-	overall sidebar may be overflow hidden, but NOT the header.
+overall sidebar may be overflow hidden, but NOT the header.
 
-	Do NOT move the toggle button. Keep it inside the sidebar header as already implemented.
-	Do NOT change styling, spacing, or layout — only fix overflow behavior.
+Do NOT move the toggle button. Keep it inside the sidebar header as already implemented.
+Do NOT change styling, spacing, or layout — only fix overflow behavior.
 
-	MENU TOGGLER VISIBILITY (CRITICAL FIX):
+MENU TOGGLER VISIBILITY (CRITICAL FIX):
 
-	The menu toggle button MUST ALWAYS be visible,
-	even when the sidebar is fully collapsed.
+The menu toggle button MUST ALWAYS be visible,
+even when the sidebar is fully collapsed.
 
-	Rules:
-	- Sidebar collapse MUST NOT hide the toggle button
-	- Toggle button MUST remain clickable in collapsed state
-	- Sidebar header MUST remain rendered when collapsed
-	- Sidebar header MUST have overflow: visible at all times
+Rules:
+- Sidebar collapse MUST NOT hide the toggle button
+- Toggle button MUST remain clickable in collapsed state
+- Sidebar header MUST remain rendered when collapsed
+- Sidebar header MUST have overflow: visible at all times
 
-	The sidebar may collapse its width,
-	but the header area containing the toggle MUST NOT disappear.
+The sidebar may collapse its width,
+but the header area containing the toggle MUST NOT disappear.
 
-	If the toggle button becomes invisible or inaccessible
-	when the menu is closed, the result is INVALID.
+If the toggle button becomes invisible or inaccessible
+when the menu is closed, the result is INVALID.
 
 
-	MENU ICON RULES:
+MENU ICON RULES:
 
-	Menu icon MUST be read from: item.icon
+Menu icon MUST be read from: item.icon
 
-	If item.icon is null, empty, or missing: render default icon: "📁"
-	Do NOT hide the icon area.
-	Do NOT break layout if icon is missing.
+If item.icon is null, empty, or missing: render default icon: "📁"
+Do NOT hide the icon area.
+Do NOT break layout if icon is missing.
 
-	MENU NAVIGATION (CRITICAL):
-	When clicking a menu item:
+MENU NAVIGATION (CRITICAL):
+When clicking a menu item:
 
-	DO NOT use item.table_slug
+DO NOT use item.table_slug
 
-	DO NOT use item.slug directly
-	The route MUST be built using: item.data.table.slug
-	Correct behavior: navigate("/tables/${item.data.table.slug}")
-	This rule is MANDATORY.
-	If the UI navigates using any other property, the result is INVALID.
+DO NOT use item.slug directly
+The route MUST be built using: item.data.table.slug
+Correct behavior: navigate("/tables/${item.data.table.slug}")
+This rule is MANDATORY.
+If the UI navigates using any other property, the result is INVALID.
 
-	MENU TOGGLER (IMPORTANT)
+MENU TOGGLER (IMPORTANT)
 
-	The menu toggle button MUST be placed INSIDE the SIDEBAR HEADER
+The menu toggle button MUST be placed INSIDE the SIDEBAR HEADER
 
-	NOT in the main page header
+NOT in the main page header
 
-	Shape: perfectly round (circle)
+Shape: perfectly round (circle)
 
-	Size: 25px × 25px
+Size: 25px × 25px
 
-	Position:
+Position:
 
-	Located at the FAR RIGHT of the sidebar header
+Located at the FAR RIGHT of the sidebar header
 
-	Offset by +12.5px so that HALF of the toggle button visually sticks OUTSIDE the sidebar boundary
+Offset by +12.5px so that HALF of the toggle button visually sticks OUTSIDE the sidebar boundary
 
-	Toggle animation must be smooth
+Toggle animation must be smooth
 
-	Sidebar open/close must feel premium and fluid
+Sidebar open/close must feel premium and fluid
 
-	====================================
-	ROUTING
+====================================
+ROUTING
 
-	Use React Router DOM v6.
+Use React Router DOM v6.
 
-	Routes:
+Routes:
 
-	/ → Dashboard Home
+/ → Dashboard Home
 
-	/tables/:tableSlug → Dynamic Table Page
+/tables/:tableSlug → Dynamic Table Page
 
-	Navigation:
+Navigation:
 
-	Use navigate()
+Use navigate()
 
-	Menu click → dynamic routing
+Menu click → dynamic routing
 
-	====================================
-	DATA SOURCE (CRITICAL):
+====================================
+DATA SOURCE (CRITICAL):
 
-	DO NOT use mock data
+DO NOT use mock data
 
-	DO NOT hardcode table rows
+DO NOT hardcode table rows
 
-	ALL table data MUST be loaded from MCP
+ALL table data MUST be loaded from MCP
 
-	MCP is the SINGLE SOURCE OF TRUTH
+MCP is the SINGLE SOURCE OF TRUTH
 
-	Allowed:
+Allowed:
 
-	Dynamic schema rendering from MCP
+Dynamic schema rendering from MCP
 
-	Dynamic columns
+Dynamic columns
 
-	Dynamic rows
+Dynamic rows
 
-	Loading / empty / error states
+Loading / empty / error states
 
-	Forbidden:
+Forbidden:
 
-	Hardcoded arrays
+Hardcoded arrays
 
-	Example rows
+Example rows
 
-	Fake demo data
+Fake demo data
 
-	TABLE API ENDPOINTS (FIXED — DO NOT CHANGE):
+TABLE API ENDPOINTS (FIXED — DO NOT CHANGE):
 
-	TABLE DETAILS (schema, fields, attributes):
+TABLE DETAILS (schema, fields, attributes):
 
-	Endpoint: POST /v1/table-details/:tableSlug
+Endpoint: POST /v1/table-details/:tableSlug
 
-	Request body: { "data": {} }
+Request body: { "data": {} }
 
-	CRITICAL RESPONSE PATH FOR TABLE DETAILS:
+CRITICAL RESPONSE PATH FOR TABLE DETAILS:
 
-	Fields are NOT in response.data.data
+Fields are NOT in response.data.data
 
-	Fields are located in: response.data.data.data
-	Frontend MUST read table details from:
+Fields are located in: response.data.data.data
+Frontend MUST read table details from:
 
-	detailsRoot = response?.data?.data?.data ?? null
+detailsRoot = response?.data?.data?.data ?? null
 
-	fields = response?.data?.data?.data?.fields ?? []
-	If the UI reads table details from response.data.data (without .data), the result is INVALID.
+fields = response?.data?.data?.data?.fields ?? []
+If the UI reads table details from response.data.data (without .data), the result is INVALID.
 
-	TABLE DATA (rows, pagination):
+TABLE DATA (rows, pagination):
 
-	Endpoint: GET /v2/items/:tableSlug
+Endpoint: GET /v2/items/:tableSlug
 
-	Query params: limit, offset, search, sort_by, sort_order
+Query params: limit, offset, search, sort_by, sort_order
 
-	Frontend MUST read:
+Frontend MUST read:
 
-	Rows from: response.data.data.data.response
+Rows from: response.data.data.data.response
 
-	Total count from: response.data.data.data.count
+Total count from: response.data.data.data.count
 
-	Correct example:
-	const rows = res?.data?.data?.data?.response ?? [];
-	const total = res?.data?.data?.data?.count ?? 0;
+Correct example:
+const rows = res?.data?.data?.data?.response ?? [];
+const total = res?.data?.data?.data?.count ?? 0;
 
-	DO NOT:
+DO NOT:
 
-	Assume items[]
+Assume items[]
 
-	Assume result[]
+Assume result[]
 
-	Assume flat arrays
+Assume flat arrays
 
-	Modify backend response
+Modify backend response
 
-	If the UI reads table rows or fields from an incorrect path, the solution is INVALID.
-	If mock data is detected anywhere in the project, the result is INVALID.
+If the UI reads table rows or fields from an incorrect path, the solution is INVALID.
+If mock data is detected anywhere in the project, the result is INVALID.
 
-	====================================
-	DYNAMIC TABLE PAGE
+====================================
+DYNAMIC TABLE PAGE
 
-	Route: /tables/:tableSlug
+Route: /tables/:tableSlug
 
-	Behavior:
+Behavior:
 
-	Read tableSlug from URL
+Read tableSlug from URL
 
-	Show a BEAUTIFUL loader while data loads
+Show a BEAUTIFUL loader while data loads
 
-	Loader:
+Loader:
 
-	Centered
+Centered
 
-	Minimal
+Minimal
 
-	Enterprise-grade
+Enterprise-grade
 
-	Notion-like skeleton or spinner
+Notion-like skeleton or spinner
 
-	Table:
+Table:
 
-	Clean spacing
+Clean spacing
 
-	Subtle hover effect
+Subtle hover effect
 
-	No heavy borders
+No heavy borders
 
-	====================================
-	TABLE PAGE SUB HEADER (MANDATORY):
+====================================
+TABLE PAGE SUB HEADER (MANDATORY):
 
-	Above the table, render a SUB HEADER.
+Above the table, render a SUB HEADER.
 
-	Layout:
+Layout:
 
-	Left side: View tabs
+Left side: View tabs
 
-	Right side: Table actions
+Right side: Table actions
 
-	Sub header height must be fixed and visually separated from the table using a subtle divider.
+Sub header height must be fixed and visually separated from the table using a subtle divider.
 
-	VIEW TABS (LEFT):
-	Tabs:
+VIEW TABS (LEFT):
+Tabs:
 
-	Table (active by default)
+Table (active by default)
 
-	Board
+Board
 
-	Timeline
+Timeline
 
-	Calendar
+Calendar
 
-	Tree
+Tree
 
-	Rules:
+Rules:
 
-	Tabs are horizontally aligned
+Tabs are horizontally aligned
 
-	If tabs overflow width → horizontal scroll MUST appear
+If tabs overflow width → horizontal scroll MUST appear
 
-	Active tab highlighted using Notion-like style
+Active tab highlighted using Notion-like style
 
-	Non-active tabs muted
-	Note:
+Non-active tabs muted
+Note:
 
-	Only Table view is functional for now
+Only Table view is functional for now
 
-	Other tabs are TEMPORARY MOCK TABS
+Other tabs are TEMPORARY MOCK TABS
 
-	Clicking other tabs does NOT change functionality yet
+Clicking other tabs does NOT change functionality yet
 
-	TABLE ACTIONS (RIGHT):
-	Components (from left to right):
+TABLE ACTIONS (RIGHT):
+Components (from left to right):
 
-	Search input
+Search input
 
-	Placeholder: "Search..."
+Placeholder: "Search..."
 
-	Used to filter table rows
+Used to filter table rows
 
-	Minimal input style (Notion-like)
+Minimal input style (Notion-like)
 
-	Sort button
+Sort button
 
-	Toggles ASC / DESC
+Toggles ASC / DESC
 
-	Visual indicator of current sort state
+Visual indicator of current sort state
 
-	Filter button
+Filter button
 
-	Secondary button style
+Secondary button style
 
-	On click: Opens FILTER PANEL below sub header
+On click: Opens FILTER PANEL below sub header
 
-	Create Item button
+Create Item button
 
-	Primary button style
+Primary button style
 
-	Background: #007AFF
+Background: #007AFF
 
-	Text: "Create item"
+Text: "Create item"
 
-	CREATE ITEM DRAWER (MANDATORY):
-	Behavior:
+CREATE ITEM DRAWER (MANDATORY):
+Behavior:
 
-	Opens from the RIGHT side of the screen
+Opens from the RIGHT side of the screen
 
-	Overlayed drawer (does NOT replace page)
+Overlayed drawer (does NOT replace page)
 
-	Smooth slide-in animation
+Smooth slide-in animation
 
-	Drawer content:
+Drawer content:
 
-	Form generated dynamically from table columns (MCP)
+Form generated dynamically from table columns (MCP)
 
-	One input per column
+One input per column
 
-	Label = column name
+Label = column name
 
-	Proper input type when possible
+Proper input type when possible
 
-	Actions:
+Actions:
 
-	Cancel button (secondary)
+Cancel button (secondary)
 
-	Create button (primary)
+Create button (primary)
 
-	Rules:
+Rules:
 
-	Drawer width fixed (e.g. 420px)
+Drawer width fixed (e.g. 420px)
 
-	Scroll inside drawer if content overflows
+Scroll inside drawer if content overflows
 
-	Drawer closes on:
+Drawer closes on:
 
-	Cancel
+Cancel
 
-	Outside click
+Outside click
 
-	Successful create
+Successful create
 
-	FILTER PANEL (MANDATORY):
-	Behavior:
+FILTER PANEL (MANDATORY):
+Behavior:
 
-	Appears BELOW the sub header
+Appears BELOW the sub header
 
-	Similar height and style as sub header
+Similar height and style as sub header
 
-	Full-width panel
+Full-width panel
 
-	Content:
+Content:
 
-	List of table columns (from MCP)
+List of table columns (from MCP)
 
-	Each column has filter controls (input / select depending on column type)
+Each column has filter controls (input / select depending on column type)
 
-	Rules:
+Rules:
 
-	Panel toggles via Filter button
+Panel toggles via Filter button
 
-	Panel closes on outside click
+Panel closes on outside click
 
-	Clean, Notion-like UI
+Clean, Notion-like UI
 
-	No heavy borders
+No heavy borders
 
-	====================================
-	TABLE UI RULES (CRITICAL)
+====================================
+TABLE UI RULES (CRITICAL)
 
-	TABLE COMPONENT (ADVANCED — ERP/CRM LEVEL):
+TABLE COMPONENT (ADVANCED — ERP/CRM LEVEL):
 
-	The table MUST be a SMART, ENTERPRISE-GRADE table.
+The table MUST be a SMART, ENTERPRISE-GRADE table.
 
-	Required features:
+Required features:
 
-	Dynamic columns from MCP
+Dynamic columns from MCP
 
-	Dynamic rows from MCP
+Dynamic rows from MCP
 
-	Vertical scroll
+Vertical scroll
 
-	Horizontal scroll
+Horizontal scroll
 
-	Sticky header
+Sticky header
 
-	Column sizing: fixed width columns with horizontal scrolling
+Column sizing: fixed width columns with horizontal scrolling
 
-	Column height: 32px
+Column height: 32px
 
-	COLUMN SIZING (FINAL):
+COLUMN SIZING (FINAL):
 
-	Each column:
+Each column:
 
-	min-width: 220px
+min-width: 220px
 
-	max-width: 220px
+max-width: 220px
 
-	Do NOT use width: 100% for columns
+Do NOT use width: 100% for columns
 
-	Columns must stay fixed at 220px and table scrolls horizontally
+Columns must stay fixed at 220px and table scrolls horizontally
 
-	Cell rules:
+Cell rules:
 
-	Single-line text only
+Single-line text only
 
-	white-space: nowrap
+white-space: nowrap
 
-	overflow: hidden
+overflow: hidden
 
-	text-overflow: ellipsis
-	Column width must NEVER auto-expand even if content is longer.
+text-overflow: ellipsis
+Column width must NEVER auto-expand even if content is longer.
 
-	BORDERS (UI REQUIREMENT):
+BORDERS (UI REQUIREMENT):
 
-	Every cell MUST have a visible border (light, Notion-like):
-	border: 1px solid rgba(55, 53, 47, 0.12) or rgba(55, 53, 47, 0.16)
+Every cell MUST have a visible border (light, Notion-like):
+border: 1px solid rgba(55, 53, 47, 0.12) or rgba(55, 53, 47, 0.16)
 
-	Header cells and body cells must both have borders
+Header cells and body cells must both have borders
 
-	No missing borders anywhere
+No missing borders anywhere
 
-	PERFORMANCE (CRITICAL):
+PERFORMANCE (CRITICAL):
 
-	The table MUST render cells in optimized mode:
+The table MUST render cells in optimized mode:
 
-	Default rendering for each cell is VIEW MODE (not an input)
+Default rendering for each cell is VIEW MODE (not an input)
 
-	Only when user clicks a cell, that cell becomes EDIT MODE (input/dropdown)
+Only when user clicks a cell, that cell becomes EDIT MODE (input/dropdown)
 
-	Only ONE active editing cell at a time (or minimal state)
+Only ONE active editing cell at a time (or minimal state)
 
-	Avoid rendering inputs for all cells simultaneously
-	If the solution renders input elements for every cell by default, the result is INVALID.
+Avoid rendering inputs for all cells simultaneously
+If the solution renders input elements for every cell by default, the result is INVALID.
 
-	RESIZABLE COLUMNS (MANDATORY):
+RESIZABLE COLUMNS (MANDATORY):
 
-	Table columns MUST be resizable by dragging a resize handle on the header
+Table columns MUST be resizable by dragging a resize handle on the header
 
-	Dragging must adjust the column width in pixels
+Dragging must adjust the column width in pixels
 
-	Respect min width 220px as the minimum
+Respect min width 220px as the minimum
 
-	Persist widths in React state
+Persist widths in React state
 
-	Resizing must be smooth and not laggy
+Resizing must be smooth and not laggy
 
-	Advanced UX features:
+Advanced UX features:
 
-	Column hover highlight
+Column hover highlight
 
-	Row hover highlight
+Row hover highlight
 
-	Column visibility toggle
+Column visibility toggle
 
-	Sorting (ASC / DESC)
+Sorting (ASC / DESC)
 
-	Search and filters integrated
+Search and filters integrated
 
-	Empty state UI
+Empty state UI
 
-	Loading skeleton (2–3 seconds)
+Loading skeleton (2–3 seconds)
 
-	PAGINATION (MANDATORY):
-	The table MUST support pagination.
-	Requirements:
+PAGINATION (MANDATORY):
+The table MUST support pagination.
+Requirements:
 
-	Pagination controls at the bottom of the table
+Pagination controls at the bottom of the table
 
-	Page size selector (e.g. 10 / 20 / 50)
+Page size selector (e.g. 10 / 20 / 50)
 
-	Current page indicator
+Current page indicator
 
-	Next / Previous buttons
+Next / Previous buttons
 
-	Pagination must work with MCP data
+Pagination must work with MCP data
 
-	Pagination UI style:
+Pagination UI style:
 
-	Minimal
+Minimal
 
-	Notion-like
+Notion-like
 
-	Secondary button style
+Secondary button style
 
-	====================================
-	BACKEND RESPONSE STRUCTURE
+====================================
+BACKEND RESPONSE STRUCTURE
 
-	ALL backend responses follow ONE of the following shapes.
+ALL backend responses follow ONE of the following shapes.
 
-	MENUS LIST RESPONSE:
-	Menu list API response:
-	{
-	"status": "OK",
-	"description": "The request has succeeded",
-	"data": {
-	"menus": [
-	{ "label": "Content", "icon": "folder.svg" }
-	]
-	}
-	}
-	FRONTEND RULES FOR MENUS:
+MENUS LIST RESPONSE:
+Menu list API response:
+{
+"status": "OK",
+"description": "The request has succeeded",
+"data": {
+"menus": [
+{ "label": "Content", "icon": "folder.svg" }
+]
+}
+}
+FRONTEND RULES FOR MENUS:
 
-	Menu items MUST be read from: response.data.data.menus
-	Correct example: const menus = response?.data?.data?.menus ?? [];
-	NEVER read menus from: response.data.menus, response.data.result, response.data.items
+Menu items MUST be read from: response.data.data.menus
+Correct example: const menus = response?.data?.data?.menus ?? [];
+NEVER read menus from: response.data.menus, response.data.result, response.data.items
 
-	TABLE LIST RESPONSE:
-	Table data API response:
-	{
-	"status": "OK",
-	"description": "The request has succeeded",
-	"data": {
-	"data": {
-	"count": 3,
-	"response": [ { "guid": "...", "discount": 88 } ]
-	}
-	}
-	}
-	FRONTEND RULES FOR TABLE DATA:
+TABLE LIST RESPONSE:
+Table data API response:
+{
+"status": "OK",
+"description": "The request has succeeded",
+"data": {
+"data": {
+"count": 3,
+"response": [ { "guid": "...", "discount": 88 } ]
+}
+}
+}
+FRONTEND RULES FOR TABLE DATA:
 
-	Table rows MUST be read from: response.data.data.data.response
+Table rows MUST be read from: response.data.data.data.response
 
-	Total count MUST be read from: response.data.data.data.count
+Total count MUST be read from: response.data.data.data.count
 
-	GENERAL FRONTEND RULES:
+GENERAL FRONTEND RULES:
 
-	NEVER assume a simplified response
+NEVER assume a simplified response
 
-	ALWAYS use optional chaining (?.)
+ALWAYS use optional chaining (?.)
 
-	ALWAYS provide safe fallbacks (?? [])
+ALWAYS provide safe fallbacks (?? [])
 
-	DO NOT refactor or normalize backend response
+DO NOT refactor or normalize backend response
 
-	UI must adapt to backend, not vice versa
+UI must adapt to backend, not vice versa
 
-	====================================
-	TABLE MAPPING RULES
+====================================
+TABLE MAPPING RULES
 
-	Columns MUST be driven by MCP table details fields metadata (fields with type and attributes)
+Columns MUST be driven by MCP table details fields metadata (fields with type and attributes)
 
-	Ignore technical fields like: id, guid, *_id, *_id_data
+Ignore technical fields like: id, guid, *_id, *_id_data
 
-	Long text must use ellipsis
+Long text must use ellipsis
 
-	CELL RENDERING BY FIELD TYPE (MVP TYPES — MANDATORY):
-	Each table cell MUST render based on the field type coming from MCP schema.
-	Default value MUST be taken from the row data returned by backend (response rows).
+CELL RENDERING BY FIELD TYPE (MVP TYPES — MANDATORY):
+Each table cell MUST render based on the field type coming from MCP schema.
+Default value MUST be taken from the row data returned by backend (response rows).
 
-	Supported field types:
+Supported field types:
 
-	NUMBER:
+NUMBER:
 
-	Editable
+Editable
 
-	On click → inline edit with <input type="number" />
+On click → inline edit with <input type="number" />
 
-	Default value = row[field.slug]
+Default value = row[field.slug]
 
-	FLOAT:
+FLOAT:
 
-	SAME AS NUMBER
+SAME AS NUMBER
 
-	Editable
+Editable
 
-	On click → inline edit with <input type="number" step="any" />
+On click → inline edit with <input type="number" step="any" />
 
-	Default value = row[field.slug]
+Default value = row[field.slug]
 
-	TEXT:
+TEXT:
 
-	View-only (NOT editable)
+View-only (NOT editable)
 
-	Render as plain text with ellipsis
+Render as plain text with ellipsis
 
-	Default value = row[field.slug]
+Default value = row[field.slug]
 
-	SINGLE_LINE:
+SINGLE_LINE:
 
-	Editable
+Editable
 
-	On click → inline edit with <input type="text" />
+On click → inline edit with <input type="text" />
 
-	Default value = row[field.slug]
+Default value = row[field.slug]
 
-	STATUS:
+STATUS:
 
-	Render as a clickable status pill / cell (view mode)
+Render as a clickable status pill / cell (view mode)
 
-	On click: open a dropdown menu anchored UNDER the cell (not a native <select>)
+On click: open a dropdown menu anchored UNDER the cell (not a native <select>)
 
-	Dropdown MUST render options in categories: todo, in progress, complete
+Dropdown MUST render options in categories: todo, in progress, complete
 
-	Options MUST be read from field.attributes:
+Options MUST be read from field.attributes:
 
-	todo options: field.attributes.todo.options
+todo options: field.attributes.todo.options
 
-	progress options: field.attributes.progress.options
+progress options: field.attributes.progress.options
 
-	complete options: field.attributes.complete.options
-	Option rendering rules:
+complete options: field.attributes.complete.options
+Option rendering rules:
 
-	Label priority: label_ru -> label_en -> value
+Label priority: label_ru -> label_en -> value
 
-	If missing/empty, fallback to value
+If missing/empty, fallback to value
 
-	Use option.color for text/badge color
+Use option.color for text/badge color
 
-	Background = same color but more transparent (approx 14–18% opacity)
+Background = same color but more transparent (approx 14–18% opacity)
 
-	If category options are missing, safely fall back to:
-	[{ value: "todo" }, { value: "in_progress" }, { value: "complete" }]
-	Dropdown behavior:
+If category options are missing, safely fall back to:
+[{ value: "todo" }, { value: "in_progress" }, { value: "complete" }]
+Dropdown behavior:
 
-	Close on outside click
+Close on outside click
 
-	Close on option select
+Close on option select
 
-	Escape closes (optional)
+Escape closes (optional)
 
-	Must not break table scrolling
+Must not break table scrolling
 
-	SCHEMA SOURCE (IMPORTANT):
-	MCP provides both:
+SCHEMA SOURCE (IMPORTANT):
+MCP provides both:
 
-	table rows at response.data.data.data.response
+table rows at response.data.data.data.response
 
-	table fields metadata at response.data.data.data.fields (from table-details)
-	You MUST use fields metadata to decide how to render cells.
-	Do NOT infer type from JS typeof.
-	If fields metadata is missing, fallback to TEXT view-only.
+table fields metadata at response.data.data.data.fields (from table-details)
+You MUST use fields metadata to decide how to render cells.
+Do NOT infer type from JS typeof.
+If fields metadata is missing, fallback to TEXT view-only.
 
-	CELL EDITING VISUAL RULES (CRITICAL):
-	Editable cells MUST NOT visually look like form inputs.
-	Rules:
+CELL EDITING VISUAL RULES (CRITICAL):
+Editable cells MUST NOT visually look like form inputs.
+Rules:
 
-	No visible input borders
+No visible input borders
 
-	No default input background
+No default input background
 
-	No focus ring
+No focus ring
 
-	No input padding that breaks table rhythm
-	Behavior:
+No input padding that breaks table rhythm
+Behavior:
 
-	Cell looks like plain text by default
+Cell looks like plain text by default
 
-	On hover: subtle background highlight (Notion-like)
+On hover: subtle background highlight (Notion-like)
 
-	On focus/edit: input is visually identical to cell text (invisible input)
-	Implementation hint (conceptual):
+On focus/edit: input is visually identical to cell text (invisible input)
+Implementation hint (conceptual):
 
-	border: none
+border: none
 
-	background: transparent
+background: transparent
 
-	outline: none
+outline: none
 
-	inherit font, size, line-height
+inherit font, size, line-height
 
-	====================================
-	PROJECT STRUCTURE (MANDATORY)
+====================================
+PROJECT STRUCTURE (MANDATORY)
 
-	src/
+src/
 
-	components/
+components/
 
-	Sidebar.jsx
+Sidebar.jsx
 
-	Table.jsx
+Table.jsx
 
-	Loader.jsx
+Loader.jsx
 
-	layouts/
+layouts/
 
-	DashboardLayout.jsx
+DashboardLayout.jsx
 
-	pages/
+pages/
 
-	DashboardHome.jsx
+DashboardHome.jsx
 
-	DynamicTablePage.jsx
+DynamicTablePage.jsx
 
-	data/
+data/
 
-	tables.js
+tables.js
 
-	api/
+api/
 
-	axios.js
+axios.js
 
-	App.jsx
+App.jsx
 
-	main.jsx
+main.jsx
 
-	index.css
+index.css
 
-	====================================
-	OUTPUT FORMAT (CRITICAL — MUST FOLLOW)
+====================================
+MODULE FEDERATION CONFIGURATION (CRITICAL — MICRO-FRONTEND DEPLOYMENT):
 
-	Return the result as a PURE JAVASCRIPT OBJECT.
+This project MUST be configured as a Micro-Frontend using Vite Module Federation.
 
-	ABSOLUTE RULES:
+PACKAGE.JSON REQUIREMENTS (MANDATORY):
 
-	DO NOT wrap the output in markdown or code blocks
+The package.json MUST include these EXACT dependencies:
 
-	DO NOT stringify the whole object
+{
+  "name": "ucode-erp-admin-panel",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-router-dom": "^6.3.0",
+    "axios": "^1.6.7"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.2.1",
+    "@originjs/vite-plugin-federation": "^1.2.3",
+    "autoprefixer": "^10.4.17",
+    "postcss": "^8.4.35",
+    "tailwindcss": "^2.2.19",
+    "vite": "^5.1.0"
+  }
+}
 
-	DO NOT escape JSON globally
+CRITICAL VERSION REQUIREMENTS:
+- "react": "^18.0.0" (MINIMUM)
+- "react-dom": "^18.0.0" (MINIMUM)
+- "react-router-dom": "^6.3.0" (MINIMUM)
+- "@originjs/vite-plugin-federation": "^1.2.3" (REQUIRED)
 
-	DO NOT return a single string
+VITE.CONFIG.JS REQUIREMENTS (MANDATORY):
 
-	Return a REAL object structure
+The vite.config.js MUST be configured as follows:
 
-	The response MUST START with "{" and END with "}".
+import federation from "@originjs/vite-plugin-federation";
+import react from "@vitejs/plugin-react";
+import { defineConfig } from "vite";
 
-	The root response MUST be:
-	{
-	project_name: "ucode-erp-admin-panel",
-	files: [ { path: "...", content: "..." } ],
-	env: {
-	VITE_ADMIN_BASE_URL: "https://admin-api.ucode.run",
-	VITE_PROJECT_ID: "f1c4ae97-ee0f-4868-b4fc-1b26869ebc69",
-	VITE_PARENT_ID: "c57eedc3-a954-4262-a0af-376c65b5a284",
-	VITE_X_API_KEY: "P-wkLyW3aBURDx6oSwtlhk33WQn8Q3VhIc"
-	}
-	}
+export default defineConfig({
+  plugins: [
+    react(),
+    federation({
+      name: "remote_app",
+      filename: "remoteEntry.js",
+      exposes: {
+        "./Page": "./src/App.jsx"
+      },
+      shared: ["react", "react-dom"]
+    })
+  ],
+  publicDir: "public",
+  build: {
+    outDir: "build",
+    modulePreload: false,
+    target: "esnext",
+    minify: false,
+    cssCodeSplit: false
+  },
+  server: {
+    port: 3000,
+    host: true
+  }
+});
 
-	ENV OUTPUT RULE (MANDATORY):
+MODULE FEDERATION RULES:
 
-	In addition to generating .env.example file, you MUST return env object at root.
+1. The App.jsx MUST be exposed as "./Page"
+2. "react" and "react-dom" MUST be in shared array
+3. Build output MUST go to "build" directory
+4. remoteEntry.js MUST be generated
+5. modulePreload MUST be false
+6. cssCodeSplit MUST be false
 
-	The env object MUST include ALL variables used by the project in any .env file.
+FAILURE CONDITIONS FOR MODULE FEDERATION:
+The solution is INVALID if:
+- @originjs/vite-plugin-federation is missing from devDependencies
+- vite.config.js does not import federation plugin
+- federation plugin is not configured in plugins array
+- App.jsx is not exposed as "./Page"
+- shared array does not include "react" and "react-dom"
+- build.outDir is not "build"
+- build.modulePreload is not false
+- build.cssCodeSplit is not false
 
-	The UI code MUST reference import.meta.env.VITE_* variables (not hardcoded constants).
+====================================
+OUTPUT FORMAT (CRITICAL — MUST FOLLOW)
 
-	If you return the entire project as a single JSON string, or wrap it inside markdown code blocks, the result is INVALID.
+Return the result as a PURE JAVASCRIPT OBJECT.
 
-	====================================
-	QUALITY BAR
+ABSOLUTE RULES:
 
-	This must look like a REAL commercial ERP / CRM admin panel:
+DO NOT wrap the output in markdown or code blocks
 
-	Premium feel
+DO NOT stringify the whole object
 
-	Perfect spacing
+DO NOT escape JSON globally
 
-	Clean typography
+DO NOT return a single string
 
-	Smooth animations
+Return a REAL object structure
 
-	Notion-level UI discipline
+The response MUST START with "{" and END with "}".
 
-	You are generating FRONTEND UI code.
-	The backend response format is ALREADY FIXED and MUST NOT be changed.
+The root response MUST be:
+{
+project_name: "ucode-erp-admin-panel",
+files: [ { path: "...", content: "..." } ],
+env: {
+VITE_ADMIN_BASE_URL: "https://admin-api.ucode.run",
+VITE_PROJECT_ID: "f1c4ae97-ee0f-4868-b4fc-1b26869ebc69",
+VITE_PARENT_ID: "c57eedc3-a954-4262-a0af-376c65b5a284",
+VITE_X_API_KEY: "P-wkLyW3aBURDx6oSwtlhk33WQn8Q3VhIc"
+}
+}
 
-	Your task is to correctly READ data from backend responses and map them into UI components WITHOUT assumptions.
+ENV OUTPUT RULE (MANDATORY):
 
-	FAILURE CONDITIONS:
-	The solution is INVALID if:
+In addition to generating .env.example file, you MUST return env object at root.
 
-	UI reads data from wrong response paths
+The env object MUST include ALL variables used by the project in any .env file.
 
-	UI renders inputs for every cell by default (must be view mode first)
+The UI code MUST reference import.meta.env.VITE_* variables (not hardcoded constants).
 
-	Table details fields read from response.data.data (must be response.data.data.data)
+If you return the entire project as a single JSON string, or wrap it inside markdown code blocks, the result is INVALID.
 
-	Missing cell borders
+====================================
+QUALITY BAR
 
-	Columns are not resizable
+This must look like a REAL commercial ERP / CRM admin panel:
 
-	The root output is not an object or misses env at root
+Premium feel
 
-	Any component is missing a root id attribute
+Perfect spacing
 
-	SUCCESS CONDITION:
-	Frontend must correctly render:
+Clean typography
 
-	Empty state when response is empty
+Smooth animations
 
-	Table with rows when response exists
+Notion-level UI discipline
 
-	Pagination using count
+You are generating FRONTEND UI code.
+The backend response format is ALREADY FIXED and MUST NOT be changed.
 
-	Menu using menus
+Your task is to correctly READ data from backend responses and map them into UI components WITHOUT assumptions.
 
-	Typed cells and status dropdown from attributes
+FAILURE CONDITIONS:
+The solution is INVALID if:
 
-	Resizable columns
+UI reads data from wrong response paths
 
-	All components have unique, stable id attributes on root elements
+UI renders inputs for every cell by default (must be view mode first)
 
-	ARCHITECTURE FREEZE:
+Table details fields read from response.data.data (must be response.data.data.data)
 
-	Do NOT move providers into Layout or Pages.
-	Do NOT conditionally render providers.
-	Do NOT change layout hierarchy.
+Missing cell borders
 
-	Only apply the specified fixes.
+Columns are not resizable
 
-	Generate the full project now.
+The root output is not an object or misses env at root
+
+Any component is missing a root id attribute
+
+Module Federation is not properly configured
+
+package.json missing required dependencies
+
+vite.config.js missing federation plugin
+
+SUCCESS CONDITION:
+Frontend must correctly render:
+
+Empty state when response is empty
+
+Table with rows when response exists
+
+Pagination using count
+
+Menu using menus
+
+Typed cells and status dropdown from attributes
+
+Resizable columns
+
+All components have unique, stable id attributes on root elements
+
+Module Federation properly configured for micro-frontend deployment
+
+ARCHITECTURE FREEZE:
+
+Do NOT move providers into Layout or Pages.
+Do NOT conditionally render providers.
+Do NOT change layout hierarchy.
+
+Only apply the specified fixes.
+
+Generate the full project now.
 
 
 RESPOND WITH ONLY THE JSON OBJECT NOW.
