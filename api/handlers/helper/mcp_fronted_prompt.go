@@ -148,6 +148,28 @@ This mapping MUST be obvious and predictable.
 
 If a component does not include a root id, the solution is INVALID.
 
+For EVERY file that returns JSX (components, pages, layouts):
+
+- You MUST wrap the returned JSX with a root HTML element
+- This root element MUST contain a 'data-path' attribute
+- 'data-path' value MUST be the FULL RELATIVE FILE PATH
+
+Example:
+
+File: 'src/components/Sidebar.jsx'
+
+Return value MUST start with:
+
+<div data-path="src/components/Sidebar.jsx">
+  ...
+</div>
+
+Rules:
+- The wrapper MUST be the outermost element
+- Fragment ('<>...</>') is NOT allowed
+- 'data-path' MUST exactly match the file path
+- This rule applies to ALL JSX files without exception
+
 ====================================
 LAYOUT RULES
 
@@ -162,6 +184,50 @@ RIGHT: Main content
 HEADER HEIGHT RULE:
 Sidebar header height MUST be EXACTLY the same height as the main page header
 They must visually align perfectly
+
+────────────────────────────────────────
+TAILWIND CONFIG RULES
+────────────────────────────────────────
+
+You MUST generate 'tailwind.config.js' with the following guarantees:
+
+- 'mode: "jit"' MUST be present
+- 'purge' MUST include:
+  - './index.html'
+  - './src/**/*.{js,jsx,ts,tsx}'
+- DO NOT use 'content'
+- DO NOT omit JIT mode
+
+Example (structure, not optional):
+
+module.exports = {
+  mode: "jit",
+  purge: [
+    "./index.html",
+    "./src/**/*.{js,jsx,ts,tsx}",
+  ],
+  theme: {
+    extend: {},
+  },
+  variants: {
+    extend: {},
+  },
+  plugins: [],
+};
+
+────────────────────────────────────────
+ENV FILE RULES
+────────────────────────────────────────
+
+- You MUST create a '.env' file
+- You MUST list all environment variables explicitly
+- Example:
+
+VITE_API_BASE_URL=https://api.example.com
+VITE_APP_NAME=MyApp
+
+- Do NOT hardcode values inside source files
+- Always access env values via 'import.meta.env.VITE_*'
 
 ====================================
 APPLICATION PROVIDERS (CRITICAL):
@@ -267,9 +333,32 @@ MENU ICON RULES:
 
 Menu icon MUST be read from: item.icon
 
-If item.icon is null, empty, or missing: render default icon: "📁"
 Do NOT hide the icon area.
 Do NOT break layout if icon is missing.
+Menu item icons are provided as URL strings.
+
+You MUST support this case correctly:
+
+- Icon value comes as a URL (string), NOT as a React component
+- You MUST render icons using '<img />'
+- You MUST NOT assume SVG imports or React icon libraries
+
+Correct example:
+
+<img
+  src={item.icon}
+  alt=""
+/>
+
+DO NOT use:
+- inline SVG
+- react-icons
+- lucide / heroicons
+- imports for icons
+If item.icon is null, empty, or missing: render default icon: "📁" example: item.icon ? <img
+  src={item.icon}
+  alt={item.label}
+/> : "📁"
 
 MENU NAVIGATION (CRITICAL):
 When clicking a menu item:
@@ -733,6 +822,24 @@ ALWAYS provide safe fallbacks (?? [])
 DO NOT refactor or normalize backend response
 
 UI must adapt to backend, not vice versa
+
+❌ NEVER add '"type": "module"' to 'package.json'
+   - Do NOT add it implicitly
+   - Do NOT suggest it
+   - Do NOT mention it
+   - 'package.json' must NOT contain '"type": "module"' under any circumstances
+
+TailwindCSS version is 2.x
+   - You MUST explicitly add 'mode: "jit"' in 'tailwind.config.js'
+   - Use 'purge', NOT 'content'
+   - This rule is mandatory and non-negotiable
+
+Environment variables
+   - You MUST always generate a '.env' file
+   - All required environment variables MUST be written into '.env'
+   - Frontend environment variables MUST use the 'VITE_' prefix
+   - Do NOT inline environment variables in code
+   - Always read them via 'import.meta.env'
 
 ====================================
 TABLE MAPPING RULES
