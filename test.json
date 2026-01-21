@@ -1,0 +1,33 @@
+{
+  "updated_files": [
+    {
+      "path": "src/components/Sidebar.jsx",
+      "content": "import React, { useEffect, useState } from 'react';\nimport { useNavigate, useLocation } from 'react-router-dom';\nimport apiClient from '../api/axios';\n\nfunction Sidebar({ isOpen, onToggle, onMenuSelect }) {\n  const [menus, setMenus] = useState([]);\n  const [loading, setLoading] = useState(true);\n  const navigate = useNavigate();\n  const location = useLocation();\n\n  useEffect(() => {\n    fetchMenus();\n  }, []);\n\n  const fetchMenus = async () => {\n    try {\n      setLoading(true);\n      const response = await apiClient.get('/v3/menus', {\n        params: {\n          'parent_id': import.meta.env.VITE_PARENT_ID,\n          'project-id': import.meta.env.VITE_PROJECT_ID,\n        },\n      });\n      const menuData = response?.data?.data?.menus ?? [];\n      setMenus(menuData);\n    } catch (error) {\n      console.error('Failed to fetch menus:', error);\n      setMenus([]);\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  const handleMenuClick = (item) => {\n    if (item.type === 'TABLE' && item.data?.table?.slug) {\n      const slug = item.data.table.slug;\n      navigate(`/tables/${slug}`, { state: { menuLabel: item.label } });\n      onMenuSelect?.(item);\n    }\n  };\n\n  const isActive = (item) => {\n    if (item.type === 'TABLE' && item.data?.table?.slug) {\n      return location.pathname === `/tables/${item.data.table.slug}`;\n    }\n    return false;\n  };\n\n  return (\n    <div\n      id=\"main-sidebar\"\n      className=\"flex flex-col transition-all duration-300 ease-in-out\"\n      style={{\n        width: isOpen ? '240px' : '0px',\n        minWidth: isOpen ? '240px' : '0px',\n        backgroundColor: '#1F2937',\n        borderRight: `1px solid rgba(0, 0, 0, 0.3)`,\n        overflow: isOpen ? 'visible' : 'hidden',\n      }}\n    >\n      <div\n        className=\"flex items-center justify-between px-4 flex-shrink-0\"\n        style={{\n          height: '56px',\n          borderBottom: `1px solid rgba(0, 0, 0, 0.3)`,\n          overflow: 'visible',\n        }}\n      >\n        <div\n          className=\"font-semibold text-base transition-opacity duration-300\"\n          style={{\n            color: '#F9FAFB',\n            opacity: isOpen ? 1 : 0,\n          }}\n        >\n          ERP Admin\n        </div>\n        <button\n          onClick={onToggle}\n          className=\"flex items-center justify-center rounded-full transition-all duration-200\"\n          style={{\n            width: '25px',\n            height: '25px',\n            backgroundColor: 'rgba(255, 255, 255, 0.1)',\n            border: `1px solid rgba(255, 255, 255, 0.2)`,\n            color: '#F9FAFB',\n            cursor: 'pointer',\n            position: 'relative',\n            right: '-12.5px',\n          }}\n          onMouseEnter={(e) => {\n            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)';\n          }}\n          onMouseLeave={(e) => {\n            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';\n          }}\n        >\n          <span style={{ fontSize: '12px' }}>{isOpen ? '‹' : '›'}</span>\n        </button>\n      </div>\n\n      <div\n        className=\"flex-1 transition-opacity duration-300\"\n        style={{\n          overflowY: isOpen ? 'auto' : 'hidden',\n          overflowX: 'hidden',\n          opacity: isOpen ? 1 : 0,\n        }}\n      >\n        {loading ? (\n          <div className=\"p-4\" style={{ color: 'rgba(249, 250, 251, 0.5)' }}>\n            Loading menus...\n          </div>\n        ) : (\n          <nav className=\"py-2\">\n            {menus.map((item) => {\n              const icon = item.icon || '📁';\n              const active = isActive(item);\n\n              return (\n                <button\n                  key={item.guid}\n                  onClick={() => handleMenuClick(item)}\n                  className=\"w-full flex items-center px-4 py-2 text-left transition-colors duration-150\"\n                  style={{\n                    backgroundColor: active ? 'rgba(59, 130, 246, 0.3)' : 'transparent',\n                    color: active ? '#60A5FA' : '#D1D5DB',\n                    border: 'none',\n                    cursor: 'pointer',\n                  }}\n                  onMouseEnter={(e) => {\n                    if (!active) {\n                      e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';\n                      e.currentTarget.style.color = '#F9FAFB';\n                    }\n                  }}\n                  onMouseLeave={(e) => {\n                    if (!active) {\n                      e.currentTarget.style.backgroundColor = 'transparent';\n                      e.currentTarget.style.color = '#D1D5DB';\n                    }\n                  }}\n                >\n                  <span className=\"mr-2\" style={{ fontSize: '16px' }}>\n                    {icon}\n                  </span>\n                  <span style={{ fontSize: '14px' }}>{item.label}</span>\n                </button>\n              );\n            })}\n          </nav>\n        )}\n      </div>\n    </div>\n  );\n}\n\nexport default Sidebar;"
+    }
+  ],
+  "new_files": [],
+  "deleted_files": [],
+  "file_graph_updates": {
+    "src/components/Sidebar.jsx": {
+      "path": "src/components/Sidebar.jsx",
+      "kind": "component",
+      "imports": [
+        "react",
+        "react-router-dom",
+        "../api/axios"
+      ],
+      "deps": [
+        "src/api/axios.js"
+      ]
+    }
+  },
+  "integration_notes": [
+    "Sidebar component now uses dark color scheme (#1F2937 background) while maintaining all existing functionality",
+    "Text and UI elements use light colors (#F9FAFB, #D1D5DB) for proper contrast against dark background",
+    "Active menu items highlighted with blue accent (rgba(59, 130, 246, 0.3)) and lighter blue text (#60A5FA)",
+    "Hover states adjusted to use light overlays (rgba(255, 255, 255, 0.08)) for better visibility on dark background",
+    "Toggle button uses light border and background with increased opacity on hover",
+    "No changes required to DashboardLayout or other components - sidebar styling is self-contained",
+    "All existing props, state management, and navigation logic remain unchanged"
+  ]
+}
