@@ -65,8 +65,8 @@ type (
 			Path    string `json:"path"`
 			Content string `json:"content"`
 		} `json:"files"`
-		FileGraph map[string]any    `json:"file_graph"`
-		Env       map[string]string `json:"env"`
+		FileGraph map[string]any `json:"file_graph"`
+		Env       map[string]any `json:"env"`
 	}
 
 	UpdateProjectReq struct {
@@ -342,6 +342,9 @@ func (h *HandlerV1) MCPGenerateFrontend(c *gin.Context) {
 		}
 
 		fileGraphStruct, err = helperFunc.ConvertMapToStruct(fileGraph)
+		if err != nil {
+			log.Println("error converting file graph")
+		}
 
 		reqFiles := &pbo.McpProjectFiles{
 			FilePath:    file.Path,
@@ -352,6 +355,12 @@ func (h *HandlerV1) MCPGenerateFrontend(c *gin.Context) {
 		projectFiles = append(projectFiles, reqFiles)
 	}
 
+	projectEnv, err := helperFunc.ConvertMapToStruct(project.Env)
+	if err != nil {
+		log.Println("error converting file graph")
+	}
+
+	saveProject.ProjectEnv = projectEnv
 	saveProject.ProjectFiles = projectFiles
 
 	response, err := services.GoObjectBuilderService().McpProject().CreateMcpProject(context.Background(), &saveProject)
