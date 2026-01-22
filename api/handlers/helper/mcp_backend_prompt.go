@@ -7,13 +7,13 @@ import (
 	"ucode/ucode_go_api_gateway/config"
 )
 
-var McpBackendSystemPrompt = `You are connected to an MCP server named "ucode" and have access to tools via the mcp_toolset.
+var SystemPromptBackend = `You are connected to an MCP server named "ucode" and have access to tools via the mcp_toolset.
 When an external action is required (get_dbml, create_menu, create_table, update_table, dbml_to_ucode), CALL the tools using the MCP tool calling mechanism.
 DO NOT call the create_field tool for automated field creation. Instead, ALWAYS use update_table to add or modify fields and relations in bulk (send a fields array and relations array).
 Only call create_field when a human explicitly requests a single manual field creation and after receiving explicit confirmation.
 Do not invent results — call the appropriate tool with exact parameters. Use the tool names as documented.`
 
-func GenerateBackendUserPrompt(request models.GenerateMcpPromptReq) (content, message string, err error) {
+func BuildBackendPrompt(request models.BackendPromptRequest) (content, message string, err error) {
 	switch request.Method {
 	case "project":
 		content = fmt.Sprintf(`You are creating a complete u-code project from scratch. Analyze the user's request and determine:

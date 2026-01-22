@@ -20,17 +20,17 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
-	structpb "github.com/golang/protobuf/ptypes/struct"
 )
 
-// ==================== MODELS ====================
-type ()
+// ====================  MCP HANDLERS  ====================
 
 func (h *HandlerV1) MCPCall(c *gin.Context) {
 	var (
-		req     models.MCPRequest
-		content string
-		message string
+		req           models.MCPRequest
+		projectId     any
+		environmentId any
+
+		ok bool
 	)
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -38,13 +38,13 @@ func (h *HandlerV1) MCPCall(c *gin.Context) {
 		return
 	}
 
-	projectId, ok := c.Get("project_id")
+	projectId, ok = c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.HandleResponse(c, status_http.InvalidArgument, config.ErrProjectIdValid)
 		return
 	}
 
-	environmentId, ok := c.Get("environment_id")
+	environmentId, ok = c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		h.HandleResponse(c, status_http.InvalidArgument, config.ErrEnvironmentIdValid)
 		return
@@ -65,97 +65,31 @@ func (h *HandlerV1) MCPCall(c *gin.Context) {
 		return
 	}
 
-	apiKey := apiKeys.GetData()[0].GetAppId()
-
 	if req.Method == "" {
 		req.Method = "project"
 	}
 
-	var generatePromptRequest = models.GenerateMcpPromptReq{
-		ProjectId:     projectId.(string),
-		EnvironmentId: environmentId.(string),
-		Method:        req.Method,
-		APIKey:        apiKey,
-		UserPrompt:    req.Prompt,
-	}
-
-	content, message, err = helper.GenerateBackendUserPrompt(generatePromptRequest)
-	if err != nil {
-		h.HandleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
-	mcpResp, err := h.sendAnthropicRequestBackend(content)
-	fmt.Println("************ MCP Response ************", mcpResp)
-	if err != nil {
-		h.HandleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
-	h.HandleResponse(c, status_http.OK, message+"")
-	return
-}
-
-func (h *HandlerV1) sendAnthropicRequestBackend(content string) (string, error) {
-	var (
-		userMessage = models.McpUserMessage{
-			Role:    "user",
-			Content: content,
-		}
-
-		body = models.RequestBodyAnthropic{
-			Model:     h.baseConf.ClaudeModel,
-			MaxTokens: h.baseConf.MaxTokens,
-			System:    helper.McpBackendSystemPrompt,
-			Messages:  []models.McpUserMessage{userMessage},
-			MCPServers: []models.MCPServer{
-				{
-					Type: "url",
-					URL:  h.baseConf.MCPServerURL,
-					Name: "ucode",
-				},
-			},
-			McpTools: []models.McpTool{
-				{
-					Type:          "mcp_toolset",
-					MCPServerName: "ucode",
-				},
-			},
-		}
+	content, message, err := helper.BuildBackendPrompt(
+		models.BackendPromptRequest{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			Method:        req.Method,
+			APIKey:        apiKeys.GetData()[0].GetAppId(),
+			UserPrompt:    req.Prompt,
+		},
 	)
-
-	jsonBody, err := json.MarshalIndent(body, "", "  ")
 	if err != nil {
-		return "", fmt.Errorf("failed to marshal request body: %w", err)
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
 	}
 
-	req, err := http.NewRequest(http.MethodPost, h.baseConf.AnthropicBaseAPIURL, bytes.NewBuffer(jsonBody))
+	_, err = h.sendAnthropicBackend(content)
 	if err != nil {
-		return "", fmt.Errorf("failed to create request: %w", err)
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
 	}
 
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("X-API-Key", h.baseConf.AnthropicAPIKey)
-	req.Header.Set("anthropic-version", h.baseConf.AnthropicVersion)
-	req.Header.Set("anthropic-beta", h.baseConf.AnthropicBeta)
-
-	client := &http.Client{Timeout: 420 * time.Second}
-	resp, err := client.Do(req)
-	if err != nil {
-		return "", fmt.Errorf("request failed: %w", err)
-	}
-	defer resp.Body.Close()
-
-	respByte, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", err
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		return string(respByte), fmt.Errorf("unexpected status code: %d", resp.StatusCode)
-	}
-
-	return string(respByte), nil
+	h.HandleResponse(c, status_http.OK, message)
 }
 
 func (h *HandlerV1) MCPGenerateFrontend(c *gin.Context) {
@@ -163,7 +97,8 @@ func (h *HandlerV1) MCPGenerateFrontend(c *gin.Context) {
 		req           models.MCPRequest
 		projectId     any
 		environmentId any
-		ok            bool
+
+		ok bool
 	)
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -224,8 +159,8 @@ func (h *HandlerV1) MCPGenerateFrontend(c *gin.Context) {
 		return
 	}
 
-	frontendUserPrompt := helper.GenerateFrontendUserPrompt(
-		models.GenerateMcpPromptReq{
+	userPrompt := helper.BuildFrontendGeneratePrompt(
+		models.FrontendPromptRequest{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			APIKey:        apiKeys.GetData()[0].GetAppId(),
@@ -234,7 +169,7 @@ func (h *HandlerV1) MCPGenerateFrontend(c *gin.Context) {
 		},
 	)
 
-	project, err := h.sendAnthropicRequestFront(frontendUserPrompt)
+	project, err := h.generateFrontendProject(userPrompt)
 	if err != nil {
 		h.HandleResponse(c, status_http.InternalServerError, "AI Generation Failed: "+err.Error())
 		return
@@ -244,37 +179,22 @@ func (h *HandlerV1) MCPGenerateFrontend(c *gin.Context) {
 		saveProject = pbo.CreateMcpProjectReqeust{
 			ResourceEnvId: resource.ResourceEnvironmentId,
 			Title:         project.ProjectName,
-			Description:   "this project generated by ucode whit claude-sonnet-4-5",
+			Description:   "Generated by ucode with claude-sonnet-4-5",
 		}
 
-		projectFiles    []*pbo.McpProjectFiles
-		fileGraph       = make(map[string]any)
-		fileGraphStruct *structpb.Struct
+		projectFiles  []*pbo.McpProjectFiles
+		projectEnv, _ = helperFunc.ConvertMapToStruct(project.Env)
 	)
 
 	for _, file := range project.Files {
+		fileGraph, _ := project.FileGraph[file.Path].(map[string]any)
+		fileGraphStruct, _ := helperFunc.ConvertMapToStruct(fileGraph)
 
-		if fileGraph, ok = project.FileGraph[file.Path].(map[string]any); ok {
-			log.Println("error converting file graph")
-		}
-
-		fileGraphStruct, err = helperFunc.ConvertMapToStruct(fileGraph)
-		if err != nil {
-			log.Println("error converting file graph")
-		}
-
-		reqFiles := &pbo.McpProjectFiles{
+		projectFiles = append(projectFiles, &pbo.McpProjectFiles{
 			FilePath:    file.Path,
 			FileContent: file.Content,
 			FileGraph:   fileGraphStruct,
-		}
-
-		projectFiles = append(projectFiles, reqFiles)
-	}
-
-	projectEnv, err := helperFunc.ConvertMapToStruct(project.Env)
-	if err != nil {
-		log.Println("error converting file graph")
+		})
 	}
 
 	saveProject.ProjectEnv = projectEnv
@@ -283,7 +203,7 @@ func (h *HandlerV1) MCPGenerateFrontend(c *gin.Context) {
 	response, err := services.GoObjectBuilderService().McpProject().CreateMcpProject(context.Background(), &saveProject)
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
-		log.Printf("error creating mcp project: %v", err)
+		return
 	}
 
 	h.HandleResponse(c, status_http.OK, response)
@@ -291,8 +211,9 @@ func (h *HandlerV1) MCPGenerateFrontend(c *gin.Context) {
 
 func (h *HandlerV1) MCPUpdateFrontend(c *gin.Context) {
 	var (
-		request       models.MCPRequest
-		mcpProjectId  = c.Param("mcp_project_id")
+		request      models.MCPRequest
+		mcpProjectId = c.Param("mcp_project_id")
+
 		projectId     any
 		environmentId any
 		ok            bool
@@ -312,23 +233,6 @@ func (h *HandlerV1) MCPUpdateFrontend(c *gin.Context) {
 	environmentId, ok = c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		h.HandleResponse(c, status_http.InvalidArgument, config.ErrEnvironmentIdValid)
-		return
-	}
-
-	apiKeys, err := h.authService.ApiKey().GetList(c.Request.Context(), &as.GetListReq{
-		EnvironmentId: environmentId.(string),
-		ProjectId:     projectId.(string),
-		Limit:         1,
-		Offset:        0,
-	})
-
-	if err != nil {
-		h.HandleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
-	if len(apiKeys.Data) < 1 {
-		h.HandleResponse(c, status_http.InvalidArgument, "Api key not found")
 		return
 	}
 
@@ -371,7 +275,6 @@ func (h *HandlerV1) MCPUpdateFrontend(c *gin.Context) {
 
 	var (
 		filesGraphMap = make(map[string]any)
-		filesToUpdate = make([]models.FileContent, 0)
 		filesMap      = make(map[string]string)
 	)
 
@@ -380,39 +283,38 @@ func (h *HandlerV1) MCPUpdateFrontend(c *gin.Context) {
 		filesMap[file.FilePath] = file.FileContent
 	}
 
-	// ========== ЭТАП 1: АНАЛИЗ ==========
 	fmt.Println("========== STEP 1: ANALYSIS ==========")
-	fmt.Printf("Analyzing project '%s' for request: %s\n", projectFiles.Title, request.Prompt)
 
-	analysisPrompt, err := helper.GenerateAnalyseFrontendUserPrompt(
-		models.GenerateAnalysisPromptReq{
+	var (
+		analyzeReq = models.AnalyzeFrontendPromptRequest{
 			UserRequest: request.Prompt,
 			FileGraph:   filesGraphMap,
 			ProjectName: projectFiles.Title,
-		},
+			Context:     request.Context,
+		}
+
+		filesToUpdate []models.ProjectFile
 	)
+
+	analysisPrompt, err := helper.BuildFrontendAnalyzePrompt(analyzeReq)
 	if err != nil {
-		log.Println("AnalysisUserPrompt failed:", err)
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	analysis, err := SendAnalysisRequest(h.baseConf, analysisPrompt)
+	analysis, err := h.analyzeProject(analysisPrompt)
 	if err != nil {
-		log.Println("SendAnalysisRequest failed:", err)
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	fmt.Printf("Analysis completed. Files to modify: %d, Files to create: %d, Files to delete: %d\n",
+	fmt.Printf("Analysis: modify=%d, create=%d, delete=%d\n",
 		len(analysis.FilesToModify),
 		len(analysis.NewFilesNeeded),
-		len(analysis.FilesToDelete),
-	)
+		len(analysis.FilesToDelete))
 
 	if len(analysis.FilesToModify) == 0 && len(analysis.NewFilesNeeded) == 0 && len(analysis.FilesToDelete) == 0 {
-		log.Println("Nothing to update")
-		h.HandleResponse(c, status_http.OK, "OK")
+		h.HandleResponse(c, status_http.OK, "Nothing to update")
 		return
 	}
 
@@ -420,114 +322,130 @@ func (h *HandlerV1) MCPUpdateFrontend(c *gin.Context) {
 
 	for _, fileToMod := range analysis.FilesToModify {
 		if content, exists := filesMap[fileToMod.Path]; exists {
-			filesToUpdate = append(filesToUpdate, models.FileContent{
+			filesToUpdate = append(filesToUpdate, models.ProjectFile{
 				Path:    fileToMod.Path,
 				Content: content,
 			})
-			fmt.Printf("  - Prepared file: %s (Priority: %s)\n", fileToMod.Path, fileToMod.Priority)
-		} else {
-			fmt.Printf("  - WARNING: File not found in project: %s\n", fileToMod.Path)
+			fmt.Printf("  - Prepared: %s\n", fileToMod.Path)
 		}
 	}
 
 	if len(filesToUpdate) == 0 && len(analysis.NewFilesNeeded) == 0 {
-		log.Println("Nothing to update")
-		h.HandleResponse(c, status_http.OK, "OK")
+		h.HandleResponse(c, status_http.OK, "Nothing to update")
 		return
 	}
 
 	fmt.Println("========== STEP 3: UPDATE REQUEST ==========")
-	fmt.Printf("Sending %d files for update...\n", len(filesToUpdate))
 
-	var updateReq = models.GenerateUpdatePromptReq{
-		UserRequest:    request.Prompt,
-		FilesToUpdate:  filesToUpdate,
-		AnalysisResult: *analysis,
-		ProjectName:    projectFiles.Title,
-	}
+	var (
+		updateReq = models.UpdateFrontendPromptRequest{
+			UserRequest:    request.Prompt,
+			FilesToUpdate:  filesToUpdate,
+			AnalysisResult: *analysis,
+			ProjectName:    projectFiles.Title,
+			Context:        request.Context,
+		}
 
-	updatePrompt, err := helper.UpdateFrontendUserPrompt(updateReq)
-	if err != nil {
-		log.Println("UpdateUserPrompt failed:", err)
-		h.HandleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
-	update, err := SendUpdateRequest(h.baseConf, updatePrompt)
-	if err != nil {
-		log.Println("SendUpdateRequest failed:", err)
-		h.HandleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
-	fmt.Printf("Update completed. Updated files: %d, New files: %d, Deleted files: %d\n",
-		len(update.UpdatedFiles),
-		len(update.NewFiles),
-		len(update.DeletedFiles),
+		graphUpdate     any
+		mcpProjectFiles []*pbo.McpProjectFiles
 	)
 
-	for _, file := range update.UpdatedFiles {
-		filesGraphMap[file.Path] = update.FileGraphUpdates[file.Path]
+	updatePrompt, err := helper.BuildFrontendUpdatePrompt(updateReq)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
+	update, err := h.updateProject(updatePrompt)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	fmt.Printf("Update: updated=%d, new=%d, deleted=%d\n",
+		len(update.UpdatedFiles),
+		len(update.NewFiles),
+		len(update.DeletedFiles))
+
+	for _, file := range update.UpdatedFiles {
 		filesMap[file.Path] = file.Content
-		filesGraphMap[file.Path] = file
+		if graphUpdate, ok = update.FileGraphUpdates[file.Path]; ok {
+			filesGraphMap[file.Path] = graphUpdate
+		}
 	}
 
 	for _, file := range update.NewFiles {
-		filesGraphMap[file.Path] = update.FileGraphUpdates[file.Path]
-
 		filesMap[file.Path] = file.Content
-		filesGraphMap[file.Path] = file
-
+		if graphUpdate, ok = update.FileGraphUpdates[file.Path]; ok {
+			filesGraphMap[file.Path] = graphUpdate
+		}
 	}
 
-	var (
-		saveProject = pbo.McpProject{
-			ResourceEnvId: resource.ResourceEnvironmentId,
-			Id:            mcpProjectId,
-		}
+	for path, content := range filesMap {
+		fileGraph, _ := filesGraphMap[path].(map[string]any)
+		fileGraphStruct, _ := helperFunc.ConvertMapToStruct(fileGraph)
 
-		mcpProjectFiles  []*pbo.McpProjectFiles
-		filesGraphStruck *structpb.Struct
-		fileGraph        = make(map[string]any)
-	)
-
-	for filesMapKey, filesMapValue := range filesMap {
-
-		if fileGraph, ok = filesGraphMap[filesMapKey].(map[string]any); ok {
-			filesGraphStruck, err = helperFunc.ConvertMapToStruct(fileGraph)
-			if err != nil {
-				log.Println("ConvertMapToStruct failed:", err)
-			}
-		}
-
-		var file = pbo.McpProjectFiles{
+		mcpProjectFiles = append(mcpProjectFiles, &pbo.McpProjectFiles{
 			ProjectId:   mcpProjectId,
-			FilePath:    filesMapKey,
-			FileContent: filesMapValue,
-			FileGraph:   filesGraphStruck,
-		}
-
-		mcpProjectFiles = append(mcpProjectFiles, &file)
+			FilePath:    path,
+			FileContent: content,
+			FileGraph:   fileGraphStruct,
+		})
 	}
 
-	saveProject.ProjectFiles = mcpProjectFiles
+	var saveProject = pbo.McpProject{
+		ResourceEnvId: resource.ResourceEnvironmentId,
+		Id:            mcpProjectId,
+		ProjectFiles:  mcpProjectFiles,
+	}
 
 	_, err = services.GoObjectBuilderService().McpProject().UpdateMcpProject(context.Background(), &saveProject)
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
-		log.Printf("error updating mcp project: %v", err)
+		return
 	}
 
 	h.HandleResponse(c, status_http.OK, update)
 }
 
-func (h *HandlerV1) sendAnthropicRequestFront(userPrompt string) (*models.FrontGeneratedProject, error) {
-	var body = models.RequestBodyAnthropic{
+// ==================== Send Anthropic Request methods ====================
+
+func (h *HandlerV1) sendAnthropicBackend(content string) (string, error) {
+	return h.callAnthropicAPI(
+		models.AnthropicRequest{
+			Model:     h.baseConf.ClaudeModel,
+			MaxTokens: h.baseConf.MaxTokens,
+			System:    helper.SystemPromptBackend,
+			Messages: []models.ChatMessage{
+				{
+					Role:    "user",
+					Content: content,
+				},
+			},
+			MCPServers: []models.MCPServer{
+				{
+					Type: "url",
+					URL:  h.baseConf.MCPServerURL,
+					Name: "ucode",
+				},
+			},
+			Tools: []models.MCPTool{
+				{
+					Type:          "mcp_toolset",
+					MCPServerName: "ucode",
+				},
+			},
+		},
+		420*time.Second,
+	)
+}
+
+func (h *HandlerV1) generateFrontendProject(userPrompt string) (*models.GeneratedProject, error) {
+	var body = models.AnthropicRequest{
 		Model:     h.baseConf.ClaudeModel,
 		MaxTokens: h.baseConf.MaxTokens,
-		System:    helper.ClaudeSystemPromptGenerateFrontend,
-		Messages: []models.McpUserMessage{
+		System:    helper.SystemPromptGenerateFrontend,
+		Messages: []models.ChatMessage{
 			{
 				Role:    "user",
 				Content: userPrompt,
@@ -540,7 +458,7 @@ func (h *HandlerV1) sendAnthropicRequestFront(userPrompt string) (*models.FrontG
 				Name: "ucode",
 			},
 		},
-		McpTools: []models.McpTool{
+		Tools: []models.MCPTool{
 			{
 				Type:          "mcp_toolset",
 				MCPServerName: "ucode",
@@ -548,130 +466,23 @@ func (h *HandlerV1) sendAnthropicRequestFront(userPrompt string) (*models.FrontG
 		},
 	}
 
-	jsonBody, err := json.MarshalIndent(body, "", "  ")
+	respText, err := h.callAnthropicAPI(body, 420*time.Second)
 	if err != nil {
-		return nil, fmt.Errorf("failed to marshal request: %w", err)
-	}
-
-	request, err := http.NewRequest(http.MethodPost, h.baseConf.AnthropicBaseAPIURL, bytes.NewBuffer(jsonBody))
-	if err != nil {
-		return nil, fmt.Errorf("failed to create request: %w", err)
-	}
-
-	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("X-API-Key", h.baseConf.AnthropicAPIKey)
-	request.Header.Set("anthropic-version", h.baseConf.AnthropicVersion)
-	request.Header.Set("anthropic-beta", h.baseConf.AnthropicBeta)
-
-	client := &http.Client{Timeout: 420 * time.Second}
-	resp, err := client.Do(request)
-	if err != nil {
-		return nil, fmt.Errorf("request failed: %w", err)
-	}
-	defer resp.Body.Close()
-
-	respBytes, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read response: %w", err)
-	}
-
-	log.Println("************ Anthropic response ************:", string(respBytes))
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBytes))
-	}
-
-	var apiResponse struct {
-		Content []struct {
-			Type string `json:"type"`
-			Text string `json:"text"`
-		} `json:"content"`
-		StopReason string `json:"stop_reason"`
-	}
-
-	if err = json.Unmarshal(respBytes, &apiResponse); err != nil {
-		return nil, fmt.Errorf("failed to parse API response: %w", err)
-	}
-
-	if len(apiResponse.Content) == 0 {
-		return nil, fmt.Errorf("empty content in response")
+		return nil, err
 	}
 
 	var (
-		responseText = apiResponse.Content[0].Text
-		cleanedText  = helper.CleanJSONResponse(responseText)
-		project      models.FrontGeneratedProject
+		apiResponse struct {
+			Content []struct {
+				Type string `json:"type"`
+				Text string `json:"text"`
+			} `json:"content"`
+		}
+
+		project models.GeneratedProject
 	)
 
-	if err = json.Unmarshal([]byte(cleanedText), &project); err != nil {
-		return nil, fmt.Errorf("failed to parse generated project JSON: %w\nResponse: %s", err, cleanedText)
-	}
-
-	return &project, nil
-}
-
-// ==================== ANTHROPIC API FUNCTIONS ====================
-
-func SendAnalysisRequest(conf config.BaseConfig, userPrompt string) (*models.AnalysedProjectResponse, error) {
-	var body = models.RequestBodyAnthropic{
-		Model:     conf.ClaudeModel,
-		MaxTokens: 5000,
-		System:    helper.ClaudeSystemPromptAnalysisUpdateFrontend,
-		Messages: []models.McpUserMessage{
-			{
-				Role:    "user",
-				Content: userPrompt,
-			},
-		},
-	}
-
-	log.Println("MODEL:", conf.ClaudeModel)
-
-	jsonBody, err := json.MarshalIndent(body, "", "  ")
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal request: %w", err)
-	}
-
-	request, err := http.NewRequest(
-		http.MethodPost,
-		conf.AnthropicBaseAPIURL,
-		bytes.NewBuffer(jsonBody),
-	)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create request: %w", err)
-	}
-
-	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("X-API-Key", conf.AnthropicAPIKey)
-	request.Header.Set("anthropic-version", conf.AnthropicVersion)
-	request.Header.Set("anthropic-beta", conf.AnthropicBeta)
-
-	client := &http.Client{Timeout: 120 * time.Second}
-	resp, err := client.Do(request)
-	if err != nil {
-		return nil, fmt.Errorf("request failed: %w", err)
-	}
-	defer resp.Body.Close()
-
-	respBytes, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read response: %w", err)
-	}
-
-	log.Println("CLAUDE RESPONSE:", string(respBytes))
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBytes))
-	}
-
-	var apiResponse struct {
-		Content []struct {
-			Type string `json:"type"`
-			Text string `json:"text"`
-		} `json:"content"`
-	}
-
-	if err = json.Unmarshal(respBytes, &apiResponse); err != nil {
+	if err = json.Unmarshal([]byte(respText), &apiResponse); err != nil {
 		return nil, fmt.Errorf("failed to parse API response: %w", err)
 	}
 
@@ -681,20 +492,64 @@ func SendAnalysisRequest(conf config.BaseConfig, userPrompt string) (*models.Ana
 
 	cleanedText := helper.CleanJSONResponse(apiResponse.Content[0].Text)
 
-	var analysis models.AnalysedProjectResponse
-	if err := json.Unmarshal([]byte(cleanedText), &analysis); err != nil {
-		return nil, fmt.Errorf("failed to parse analysis JSON: %w\nResponse: %s", err, cleanedText)
+	if err = json.Unmarshal([]byte(cleanedText), &project); err != nil {
+		return nil, fmt.Errorf("failed to parse project JSON: %w", err)
+	}
+
+	return &project, nil
+}
+
+func (h *HandlerV1) analyzeProject(userPrompt string) (*models.AnalysisResult, error) {
+	var body = models.AnthropicRequest{
+		Model:     h.baseConf.ClaudeModel,
+		MaxTokens: 5000,
+		System:    helper.SystemPromptAnalyzeFrontend,
+		Messages: []models.ChatMessage{
+			{
+				Role:    "user",
+				Content: userPrompt,
+			},
+		},
+	}
+
+	respText, err := h.callAnthropicAPI(body, 120*time.Second)
+	if err != nil {
+		return nil, err
+	}
+
+	var (
+		apiResponse struct {
+			Content []struct {
+				Text string `json:"text"`
+			} `json:"content"`
+		}
+
+		analysis models.AnalysisResult
+	)
+
+	if err = json.Unmarshal([]byte(respText), &apiResponse); err != nil {
+		return nil, fmt.Errorf("failed to parse response: %w", err)
+	}
+
+	if len(apiResponse.Content) == 0 {
+		return nil, fmt.Errorf("empty content")
+	}
+
+	cleanedText := helper.CleanJSONResponse(apiResponse.Content[0].Text)
+
+	if err = json.Unmarshal([]byte(cleanedText), &analysis); err != nil {
+		return nil, fmt.Errorf("failed to parse analysis: %w", err)
 	}
 
 	return &analysis, nil
 }
 
-func SendUpdateRequest(conf config.BaseConfig, userPrompt string) (*models.McpUpdatedProject, error) {
-	var body = models.RequestBodyAnthropic{
-		Model:     conf.ClaudeModel,
-		MaxTokens: conf.MaxTokens,
-		System:    helper.ClaudeSystemPromptUpdateFrontend,
-		Messages: []models.McpUserMessage{
+func (h *HandlerV1) updateProject(userPrompt string) (*models.UpdateResult, error) {
+	body := models.AnthropicRequest{
+		Model:     h.baseConf.ClaudeModel,
+		MaxTokens: h.baseConf.MaxTokens,
+		System:    helper.SystemPromptUpdateFrontend,
+		Messages: []models.ChatMessage{
 			{
 				Role:    "user",
 				Content: userPrompt,
@@ -703,11 +558,11 @@ func SendUpdateRequest(conf config.BaseConfig, userPrompt string) (*models.McpUp
 		MCPServers: []models.MCPServer{
 			{
 				Type: "url",
-				URL:  conf.MCPServerURL,
+				URL:  h.baseConf.MCPServerURL,
 				Name: "ucode",
 			},
 		},
-		McpTools: []models.McpTool{
+		Tools: []models.MCPTool{
 			{
 				Type:          "mcp_toolset",
 				MCPServerName: "ucode",
@@ -715,64 +570,75 @@ func SendUpdateRequest(conf config.BaseConfig, userPrompt string) (*models.McpUp
 		},
 	}
 
-	jsonBody, err := json.MarshalIndent(body, "", "  ")
+	respText, err := h.callAnthropicAPI(body, 420*time.Second)
 	if err != nil {
-		return nil, fmt.Errorf("failed to marshal request: %w", err)
+		return nil, err
 	}
 
-	request, err := http.NewRequest(
-		http.MethodPost,
-		conf.AnthropicBaseAPIURL,
-		bytes.NewBuffer(jsonBody),
+	var (
+		apiResponse struct {
+			Content []struct {
+				Text string `json:"text"`
+			} `json:"content"`
+		}
+
+		update models.UpdateResult
 	)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create request: %w", err)
+
+	if err = json.Unmarshal([]byte(respText), &apiResponse); err != nil {
+		return nil, fmt.Errorf("failed to parse response: %w", err)
 	}
 
-	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("X-API-Key", conf.AnthropicAPIKey)
-	request.Header.Set("anthropic-version", conf.AnthropicVersion)
-	request.Header.Set("anthropic-beta", conf.AnthropicBeta)
+	if len(apiResponse.Content) == 0 {
+		return nil, fmt.Errorf("empty content")
+	}
 
-	client := &http.Client{Timeout: 420 * time.Second}
-	resp, err := client.Do(request)
+	cleanedText := helper.CleanJSONResponse(apiResponse.Content[0].Text)
+
+	if err = json.Unmarshal([]byte(cleanedText), &update); err != nil {
+		return nil, fmt.Errorf("failed to parse update: %w", err)
+	}
+
+	return &update, nil
+}
+
+// ==================== SHARED ANTHROPIC CALLER ====================
+
+func (h *HandlerV1) callAnthropicAPI(body models.AnthropicRequest, timeout time.Duration) (string, error) {
+
+	jsonBody, err := json.Marshal(body)
 	if err != nil {
-		return nil, fmt.Errorf("request failed: %w", err)
+		return "", fmt.Errorf("failed to marshal request: %w", err)
+	}
+
+	req, err := http.NewRequest(http.MethodPost, h.baseConf.AnthropicBaseAPIURL, bytes.NewBuffer(jsonBody))
+	if err != nil {
+		return "", fmt.Errorf("failed to create request: %w", err)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("X-API-Key", h.baseConf.AnthropicAPIKey)
+	req.Header.Set("anthropic-version", h.baseConf.AnthropicVersion)
+	req.Header.Set("anthropic-beta", h.baseConf.AnthropicBeta)
+
+	var client = &http.Client{Timeout: timeout}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("request failed: %w", err)
 	}
 	defer resp.Body.Close()
 
 	respBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read response: %w", err)
+		return "", fmt.Errorf("failed to read response: %w", err)
 	}
+
+	log.Println("MCP RESPONSE>>>>", string(respBytes))
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBytes))
+		return "", fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBytes))
 	}
 
-	var apiResponse struct {
-		Content []struct {
-			Type string `json:"type"`
-			Text string `json:"text"`
-		} `json:"content"`
-	}
-
-	if err = json.Unmarshal(respBytes, &apiResponse); err != nil {
-		return nil, fmt.Errorf("failed to parse API response: %w", err)
-	}
-
-	if len(apiResponse.Content) == 0 {
-		return nil, fmt.Errorf("empty content in response")
-	}
-
-	var (
-		cleanedText = helper.CleanJSONResponse(apiResponse.Content[0].Text)
-		update      models.McpUpdatedProject
-	)
-
-	if err = json.Unmarshal([]byte(cleanedText), &update); err != nil {
-		return nil, fmt.Errorf("failed to parse update JSON: %w\nResponse: %s", err, cleanedText)
-	}
-
-	return &update, nil
+	return string(respBytes), nil
 }

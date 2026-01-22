@@ -1,8 +1,7 @@
 package models
 
 type (
-
-	// ========================== MCP Method Requests ==============================
+	// ========================== API Requests ==========================
 
 	MCPRequest struct {
 		Method  string          `json:"method"`
@@ -16,9 +15,9 @@ type (
 		CodeFragment    string `json:"code_fragment"`
 	}
 
-	// =========================== Generate Prompt Requests ==========================
+	// ========================== Prompt Building Requests ==========================
 
-	GenerateMcpPromptReq struct {
+	BackendPromptRequest struct {
 		ProjectId     string `json:"project_id"`
 		EnvironmentId string `json:"environment_id"`
 		APIKey        string `json:"api_key"`
@@ -27,35 +26,48 @@ type (
 		BaseURL       string `json:"base_url"`
 	}
 
-	GenerateAnalysisPromptReq struct {
+	FrontendPromptRequest struct {
+		ProjectId     string `json:"project_id"`
+		EnvironmentId string `json:"environment_id"`
+		APIKey        string `json:"api_key"`
+		UserPrompt    string `json:"user_prompt"`
+		BaseURL       string `json:"base_url"`
+	}
+
+	AnalyzeFrontendPromptRequest struct {
 		UserRequest string          `json:"user_request"`
 		FileGraph   map[string]any  `json:"file_graph"`
 		ProjectName string          `json:"project_name"`
 		Context     *InspectContext `json:"context,omitempty"`
 	}
 
-	GenerateUpdatePromptReq struct {
-		UserRequest    string                  `json:"user_request"`
-		FilesToUpdate  []FileContent           `json:"files_to_update"`
-		AnalysisResult AnalysedProjectResponse `json:"analysis_result"`
-		ProjectName    string                  `json:"project_name"`
+	UpdateFrontendPromptRequest struct {
+		UserRequest    string          `json:"user_request"`
+		FilesToUpdate  []ProjectFile   `json:"files_to_update"`
+		AnalysisResult AnalysisResult  `json:"analysis_result"`
+		ProjectName    string          `json:"project_name"`
+		Context        *InspectContext `json:"context,omitempty"`
 	}
 
-	FileContent struct {
-		Path    string `json:"path"`
-		Content string `json:"content"`
+	// ========================== Unified File Model ==========================
+
+	ProjectFile struct {
+		Path          string `json:"path"`
+		Content       string `json:"content"`
+		ChangeSummary string `json:"change_summary,omitempty"` // for updated files
+		Purpose       string `json:"purpose,omitempty"`        // for new files
 	}
 
-	// ================================ AI Response ================================
+	// ========================== AI Responses ==========================
 
-	FrontGeneratedProject struct {
+	GeneratedProject struct {
 		ProjectName string         `json:"project_name"`
-		Files       []FileContent  `json:"files"`
+		Files       []ProjectFile  `json:"files"`
 		FileGraph   map[string]any `json:"file_graph"`
 		Env         map[string]any `json:"env"`
 	}
 
-	AnalysedProjectResponse struct {
+	AnalysisResult struct {
 		AnalysisSummary      string         `json:"analysis_summary"`
 		FilesToModify        []FileToModify `json:"files_to_modify"`
 		NewFilesNeeded       []FileToCreate `json:"new_files_needed"`
@@ -65,12 +77,12 @@ type (
 		Risks                []string       `json:"risks"`
 	}
 
-	McpUpdatedProject struct {
-		UpdatedFiles     []McpUpdatedFile `json:"updated_files"`
-		NewFiles         []McpNewFile     `json:"new_files"`
-		DeletedFiles     []string         `json:"deleted_files"`
-		FileGraphUpdates map[string]any   `json:"file_graph_updates"`
-		IntegrationNotes []string         `json:"integration_notes"`
+	UpdateResult struct {
+		UpdatedFiles     []ProjectFile  `json:"updated_files"`
+		NewFiles         []ProjectFile  `json:"new_files"`
+		DeletedFiles     []string       `json:"deleted_files"`
+		FileGraphUpdates map[string]any `json:"file_graph_updates"`
+		IntegrationNotes []string       `json:"integration_notes"`
 	}
 
 	FileToModify struct {
@@ -91,21 +103,18 @@ type (
 		Reason string `json:"reason"`
 	}
 
-	McpUpdatedFile struct {
-		Path          string `json:"path"`
-		Content       string `json:"content"`
-		ChangeSummary string `json:"change_summary"`
+	// ========================== Anthropic API Models ==========================
+
+	AnthropicRequest struct {
+		Model      string        `json:"model"`
+		MaxTokens  int           `json:"max_tokens"`
+		System     string        `json:"system,omitempty"`
+		Messages   []ChatMessage `json:"messages"`
+		MCPServers []MCPServer   `json:"mcp_servers,omitempty"`
+		Tools      []MCPTool     `json:"tools,omitempty"`
 	}
 
-	McpNewFile struct {
-		Path    string `json:"path"`
-		Content string `json:"content"`
-		Purpose string `json:"purpose"`
-	}
-
-	// ======================= Anthropic Request Body =============================
-
-	McpUserMessage struct {
+	ChatMessage struct {
 		Role    string `json:"role"`
 		Content string `json:"content"`
 	}
@@ -117,17 +126,8 @@ type (
 		AuthorizationToken string `json:"authorization_token,omitempty"`
 	}
 
-	McpTool struct {
+	MCPTool struct {
 		Type          string `json:"type"`
 		MCPServerName string `json:"mcp_server_name,omitempty"`
-	}
-
-	RequestBodyAnthropic struct {
-		Model      string           `json:"model"`
-		MaxTokens  int              `json:"max_tokens"`
-		System     string           `json:"system,omitempty"`
-		Messages   []McpUserMessage `json:"messages"`
-		MCPServers []MCPServer      `json:"mcp_servers,omitempty"`
-		McpTools   []McpTool        `json:"tools,omitempty"`
 	}
 )

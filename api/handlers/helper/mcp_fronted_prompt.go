@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	ClaudeSystemPromptGenerateFrontend = `
+	SystemPromptGenerateFrontend = `
 You are a senior frontend engineer and UI/UX architect.
 
 Your task is to GENERATE a FULL React-based Admin Panel project using the following stack:
@@ -1300,7 +1300,7 @@ These 4 fields give complete picture for any developer or AI to understand the c
 CRITICAL: Do NOT include any other fields. Keep it simple and parseable.
 `
 
-	ClaudeSystemPromptAnalysisUpdateFrontend = `
+	SystemPromptAnalyzeFrontend = `
 You are a senior software architect and code analyst.
 
 Your task is to ANALYZE an existing React frontend project and determine EXACTLY which files need to be modified to fulfill the user's request.
@@ -1379,7 +1379,7 @@ OUTPUT MUST BE VALID JSON OBJECT ONLY - NO MARKDOWN, NO CODE BLOCKS.
 Start with "{" and end with "}".
 `
 
-	ClaudeSystemPromptUpdateFrontend = `
+	SystemPromptUpdateFrontend = `
 You are a senior frontend engineer specializing in React applications.
 
 Your task is to UPDATE specific files in an existing React project based on user requirements.
@@ -1486,7 +1486,7 @@ Start with "{" and end with "}".
 `
 )
 
-func GenerateFrontendUserPrompt(request models.GenerateMcpPromptReq) string {
+func BuildFrontendGeneratePrompt(request models.FrontendPromptRequest) string {
 	// USER prompt template: dynamic; will be injected with the runtime values.
 	var userTpl = `User request:
 - Description: "%s"
@@ -1539,7 +1539,7 @@ Now produce the complete project JSON immediately.`
 	)
 }
 
-func GenerateAnalyseFrontendUserPrompt(request models.GenerateAnalysisPromptReq) (string, error) {
+func BuildFrontendAnalyzePrompt(request models.AnalyzeFrontendPromptRequest) (string, error) {
 	fileGraphJSON, err := json.MarshalIndent(request.FileGraph, "", "  ")
 	if err != nil {
 		return "", fmt.Errorf("failed to marshal file_graph: %w", err)
@@ -1621,7 +1621,7 @@ Generate the analysis now.`,
 	return prompt, nil
 }
 
-func UpdateFrontendUserPrompt(request models.GenerateUpdatePromptReq) (string, error) {
+func BuildFrontendUpdatePrompt(request models.UpdateFrontendPromptRequest) (string, error) {
 	var filesSection strings.Builder
 
 	analysisJSON, err := json.MarshalIndent(request.AnalysisResult, "", "  ")
