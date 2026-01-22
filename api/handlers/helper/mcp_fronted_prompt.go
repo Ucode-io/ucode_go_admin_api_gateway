@@ -1486,7 +1486,7 @@ Start with "{" and end with "}".
 `
 )
 
-func UserPromptFrontendGenerate(request models.GeneratePromptMCP) string {
+func GenerateFrontendUserPrompt(request models.GenerateMcpPromptReq) string {
 	// USER prompt template: dynamic; will be injected with the runtime values.
 	var userTpl = `User request:
 - Description: "%s"
@@ -1539,7 +1539,7 @@ Now produce the complete project JSON immediately.`
 	)
 }
 
-func UserPromptAnalyseUpdateFrontend(request models.AnalysisRequest) (string, error) {
+func GenerateAnalyseFrontendUserPrompt(request models.GenerateAnalysisPromptReq) (string, error) {
 	fileGraphJSON, err := json.MarshalIndent(request.FileGraph, "", "  ")
 	if err != nil {
 		return "", fmt.Errorf("failed to marshal file_graph: %w", err)
@@ -1621,7 +1621,7 @@ Generate the analysis now.`,
 	return prompt, nil
 }
 
-func UserPromptUpdateFrontend(request models.UpdateRequest) (string, error) {
+func UpdateFrontendUserPrompt(request models.GenerateUpdatePromptReq) (string, error) {
 	var filesSection strings.Builder
 
 	analysisJSON, err := json.MarshalIndent(request.AnalysisResult, "", "  ")

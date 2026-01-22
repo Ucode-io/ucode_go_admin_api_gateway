@@ -24,94 +24,11 @@ import (
 )
 
 // ==================== MODELS ====================
-type (
-	MCPRequest struct {
-		ProjectType      string   `json:"project_type"`
-		ManagementSystem []string `json:"management_system"`
-		Industry         string   `json:"industry"`
-		Method           string   `json:"method"`
-		Prompt           string   `json:"prompt"`
-	}
-
-	UserMessage struct {
-		Role    string `json:"role"`
-		Content string `json:"content"`
-	}
-
-	MCPServer struct {
-		Type               string `json:"type"`
-		URL                string `json:"url"`
-		Name               string `json:"name"`
-		AuthorizationToken string `json:"authorization_token,omitempty"`
-	}
-
-	Tool struct {
-		Type          string `json:"type"`
-		MCPServerName string `json:"mcp_server_name,omitempty"`
-	}
-
-	RequestBodyAnthropic struct {
-		Model      string        `json:"model"`
-		MaxTokens  int           `json:"max_tokens"`
-		System     string        `json:"system,omitempty"`
-		Messages   []UserMessage `json:"messages"`
-		MCPServers []MCPServer   `json:"mcp_servers,omitempty"`
-		Tools      []Tool        `json:"tools,omitempty"`
-	}
-
-	GeneratedProject struct {
-		ProjectName string `json:"project_name"`
-		Files       []struct {
-			Path    string `json:"path"`
-			Content string `json:"content"`
-		} `json:"files"`
-		FileGraph map[string]any `json:"file_graph"`
-		Env       map[string]any `json:"env"`
-	}
-
-	UpdateProjectReq struct {
-		ProjectName string `json:"project_name"`
-		Files       []struct {
-			Path    string `json:"path"`
-			Content string `json:"content"`
-		} `json:"files"`
-		FileGraph   map[string]any    `json:"file_graph"`
-		Env         map[string]string `json:"env"`
-		UserPrompt  string            `json:"user_prompt"`
-		UserContext []string          `json:"user_context"`
-	}
-
-	FileToModify struct {
-		Path       string `json:"path"`
-		Reason     string `json:"reason"`
-		ChangeType string `json:"change_type"`
-		Priority   string `json:"priority"`
-	}
-
-	UpdateResponse struct {
-		UpdatedFiles     []UpdatedFile  `json:"updated_files"`
-		NewFiles         []NewFile      `json:"new_files"`
-		DeletedFiles     []string       `json:"deleted_files"`
-		FileGraphUpdates map[string]any `json:"file_graph_updates"`
-		IntegrationNotes []string       `json:"integration_notes"`
-	}
-
-	UpdatedFile struct {
-		Path          string `json:"path"`
-		Content       string `json:"content"`
-		ChangeSummary string `json:"change_summary"`
-	}
-
-	NewFile struct {
-		Path    string `json:"path"`
-		Content string `json:"content"`
-		Purpose string `json:"purpose"`
-	}
-)
+type ()
 
 func (h *HandlerV1) MCPCall(c *gin.Context) {
 	var (
-		req     MCPRequest
+		req     models.MCPRequest
 		content string
 		message string
 	)
@@ -154,7 +71,7 @@ func (h *HandlerV1) MCPCall(c *gin.Context) {
 		req.Method = "project"
 	}
 
-	var generatePromptRequest = models.GeneratePromptMCP{
+	var generatePromptRequest = models.GenerateMcpPromptReq{
 		ProjectId:     projectId.(string),
 		EnvironmentId: environmentId.(string),
 		Method:        req.Method,
@@ -162,7 +79,7 @@ func (h *HandlerV1) MCPCall(c *gin.Context) {
 		UserPrompt:    req.Prompt,
 	}
 
-	content, message, err = helper.GenerateBackendMCPPrompt(generatePromptRequest)
+	content, message, err = helper.GenerateBackendUserPrompt(generatePromptRequest)
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -181,24 +98,24 @@ func (h *HandlerV1) MCPCall(c *gin.Context) {
 
 func (h *HandlerV1) sendAnthropicRequestBackend(content string) (string, error) {
 	var (
-		userMessage = UserMessage{
+		userMessage = models.McpUserMessage{
 			Role:    "user",
 			Content: content,
 		}
 
-		body = RequestBodyAnthropic{
+		body = models.RequestBodyAnthropic{
 			Model:     h.baseConf.ClaudeModel,
 			MaxTokens: h.baseConf.MaxTokens,
 			System:    helper.McpBackendSystemPrompt,
-			Messages:  []UserMessage{userMessage},
-			MCPServers: []MCPServer{
+			Messages:  []models.McpUserMessage{userMessage},
+			MCPServers: []models.MCPServer{
 				{
 					Type: "url",
 					URL:  h.baseConf.MCPServerURL,
 					Name: "ucode",
 				},
 			},
-			Tools: []Tool{
+			McpTools: []models.McpTool{
 				{
 					Type:          "mcp_toolset",
 					MCPServerName: "ucode",
@@ -243,7 +160,7 @@ func (h *HandlerV1) sendAnthropicRequestBackend(content string) (string, error) 
 
 func (h *HandlerV1) MCPGenerateFrontend(c *gin.Context) {
 	var (
-		req           MCPRequest
+		req           models.MCPRequest
 		projectId     any
 		environmentId any
 		ok            bool
@@ -307,8 +224,8 @@ func (h *HandlerV1) MCPGenerateFrontend(c *gin.Context) {
 		return
 	}
 
-	frontendUserPrompt := helper.UserPromptFrontendGenerate(
-		models.GeneratePromptMCP{
+	frontendUserPrompt := helper.GenerateFrontendUserPrompt(
+		models.GenerateMcpPromptReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			APIKey:        apiKeys.GetData()[0].GetAppId(),
@@ -374,7 +291,7 @@ func (h *HandlerV1) MCPGenerateFrontend(c *gin.Context) {
 
 func (h *HandlerV1) MCPUpdateFrontend(c *gin.Context) {
 	var (
-		request       MCPRequest
+		request       models.MCPRequest
 		mcpProjectId  = c.Param("mcp_project_id")
 		projectId     any
 		environmentId any
@@ -467,8 +384,8 @@ func (h *HandlerV1) MCPUpdateFrontend(c *gin.Context) {
 	fmt.Println("========== STEP 1: ANALYSIS ==========")
 	fmt.Printf("Analyzing project '%s' for request: %s\n", projectFiles.Title, request.Prompt)
 
-	analysisPrompt, err := helper.UserPromptAnalyseUpdateFrontend(
-		models.AnalysisRequest{
+	analysisPrompt, err := helper.GenerateAnalyseFrontendUserPrompt(
+		models.GenerateAnalysisPromptReq{
 			UserRequest: request.Prompt,
 			FileGraph:   filesGraphMap,
 			ProjectName: projectFiles.Title,
@@ -522,14 +439,14 @@ func (h *HandlerV1) MCPUpdateFrontend(c *gin.Context) {
 	fmt.Println("========== STEP 3: UPDATE REQUEST ==========")
 	fmt.Printf("Sending %d files for update...\n", len(filesToUpdate))
 
-	var updateReq = models.UpdateRequest{
+	var updateReq = models.GenerateUpdatePromptReq{
 		UserRequest:    request.Prompt,
 		FilesToUpdate:  filesToUpdate,
 		AnalysisResult: *analysis,
 		ProjectName:    projectFiles.Title,
 	}
 
-	updatePrompt, err := helper.UserPromptUpdateFrontend(updateReq)
+	updatePrompt, err := helper.UpdateFrontendUserPrompt(updateReq)
 	if err != nil {
 		log.Println("UpdateUserPrompt failed:", err)
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
@@ -605,25 +522,25 @@ func (h *HandlerV1) MCPUpdateFrontend(c *gin.Context) {
 	h.HandleResponse(c, status_http.OK, update)
 }
 
-func (h *HandlerV1) sendAnthropicRequestFront(userPrompt string) (*GeneratedProject, error) {
-	var body = RequestBodyAnthropic{
+func (h *HandlerV1) sendAnthropicRequestFront(userPrompt string) (*models.FrontGeneratedProject, error) {
+	var body = models.RequestBodyAnthropic{
 		Model:     h.baseConf.ClaudeModel,
 		MaxTokens: h.baseConf.MaxTokens,
 		System:    helper.ClaudeSystemPromptGenerateFrontend,
-		Messages: []UserMessage{
+		Messages: []models.McpUserMessage{
 			{
 				Role:    "user",
 				Content: userPrompt,
 			},
 		},
-		MCPServers: []MCPServer{
+		MCPServers: []models.MCPServer{
 			{
 				Type: "url",
 				URL:  h.baseConf.MCPServerURL,
 				Name: "ucode",
 			},
 		},
-		Tools: []Tool{
+		McpTools: []models.McpTool{
 			{
 				Type:          "mcp_toolset",
 				MCPServerName: "ucode",
@@ -683,7 +600,7 @@ func (h *HandlerV1) sendAnthropicRequestFront(userPrompt string) (*GeneratedProj
 	var (
 		responseText = apiResponse.Content[0].Text
 		cleanedText  = helper.CleanJSONResponse(responseText)
-		project      GeneratedProject
+		project      models.FrontGeneratedProject
 	)
 
 	if err = json.Unmarshal([]byte(cleanedText), &project); err != nil {
@@ -695,12 +612,12 @@ func (h *HandlerV1) sendAnthropicRequestFront(userPrompt string) (*GeneratedProj
 
 // ==================== ANTHROPIC API FUNCTIONS ====================
 
-func SendAnalysisRequest(conf config.BaseConfig, userPrompt string) (*models.AnalysisResponse, error) {
-	var body = RequestBodyAnthropic{
+func SendAnalysisRequest(conf config.BaseConfig, userPrompt string) (*models.AnalysedProjectResponse, error) {
+	var body = models.RequestBodyAnthropic{
 		Model:     conf.ClaudeModel,
 		MaxTokens: 5000,
 		System:    helper.ClaudeSystemPromptAnalysisUpdateFrontend,
-		Messages: []UserMessage{
+		Messages: []models.McpUserMessage{
 			{
 				Role:    "user",
 				Content: userPrompt,
@@ -764,7 +681,7 @@ func SendAnalysisRequest(conf config.BaseConfig, userPrompt string) (*models.Ana
 
 	cleanedText := helper.CleanJSONResponse(apiResponse.Content[0].Text)
 
-	var analysis models.AnalysisResponse
+	var analysis models.AnalysedProjectResponse
 	if err := json.Unmarshal([]byte(cleanedText), &analysis); err != nil {
 		return nil, fmt.Errorf("failed to parse analysis JSON: %w\nResponse: %s", err, cleanedText)
 	}
@@ -772,25 +689,25 @@ func SendAnalysisRequest(conf config.BaseConfig, userPrompt string) (*models.Ana
 	return &analysis, nil
 }
 
-func SendUpdateRequest(conf config.BaseConfig, userPrompt string) (*UpdateResponse, error) {
-	var body = RequestBodyAnthropic{
+func SendUpdateRequest(conf config.BaseConfig, userPrompt string) (*models.McpUpdatedProject, error) {
+	var body = models.RequestBodyAnthropic{
 		Model:     conf.ClaudeModel,
 		MaxTokens: conf.MaxTokens,
 		System:    helper.ClaudeSystemPromptUpdateFrontend,
-		Messages: []UserMessage{
+		Messages: []models.McpUserMessage{
 			{
 				Role:    "user",
 				Content: userPrompt,
 			},
 		},
-		MCPServers: []MCPServer{
+		MCPServers: []models.MCPServer{
 			{
 				Type: "url",
 				URL:  conf.MCPServerURL,
 				Name: "ucode",
 			},
 		},
-		Tools: []Tool{
+		McpTools: []models.McpTool{
 			{
 				Type:          "mcp_toolset",
 				MCPServerName: "ucode",
@@ -848,9 +765,11 @@ func SendUpdateRequest(conf config.BaseConfig, userPrompt string) (*UpdateRespon
 		return nil, fmt.Errorf("empty content in response")
 	}
 
-	cleanedText := helper.CleanJSONResponse(apiResponse.Content[0].Text)
+	var (
+		cleanedText = helper.CleanJSONResponse(apiResponse.Content[0].Text)
+		update      models.McpUpdatedProject
+	)
 
-	var update UpdateResponse
 	if err = json.Unmarshal([]byte(cleanedText), &update); err != nil {
 		return nil, fmt.Errorf("failed to parse update JSON: %w\nResponse: %s", err, cleanedText)
 	}
