@@ -191,9 +191,9 @@ func (h *HandlerV1) MCPGenerateFrontend(c *gin.Context) {
 		fileGraphStruct, _ := helperFunc.ConvertMapToStruct(fileGraph)
 
 		projectFiles = append(projectFiles, &pbo.McpProjectFiles{
-			FilePath:    file.Path,
-			FileContent: file.Content,
-			FileGraph:   fileGraphStruct,
+			Path:      file.Path,
+			Content:   file.Content,
+			FileGraph: fileGraphStruct,
 		})
 	}
 
@@ -279,8 +279,8 @@ func (h *HandlerV1) MCPUpdateFrontend(c *gin.Context) {
 	)
 
 	for _, file := range projectFiles.ProjectFiles {
-		filesGraphMap[file.FilePath] = file.FileGraph.AsMap()
-		filesMap[file.FilePath] = file.FileContent
+		filesGraphMap[file.Path] = file.FileGraph.AsMap()
+		filesMap[file.Path] = file.Content
 	}
 
 	fmt.Println("========== STEP 1: ANALYSIS ==========")
@@ -386,10 +386,10 @@ func (h *HandlerV1) MCPUpdateFrontend(c *gin.Context) {
 		fileGraphStruct, _ := helperFunc.ConvertMapToStruct(fileGraph)
 
 		mcpProjectFiles = append(mcpProjectFiles, &pbo.McpProjectFiles{
-			ProjectId:   mcpProjectId,
-			FilePath:    path,
-			FileContent: content,
-			FileGraph:   fileGraphStruct,
+			ProjectId: mcpProjectId,
+			Path:      path,
+			Content:   content,
+			FileGraph: fileGraphStruct,
 		})
 	}
 
