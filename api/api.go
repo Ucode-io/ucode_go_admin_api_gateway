@@ -309,7 +309,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1Admin.POST("dbml-to-ucode", h.V1.DbmlToUcode)
 		v1Admin.POST("mcp-call", h.V1.MCPCall)
 
-		mcpProject := v1Admin.Group("mcp_project")
+		mcpProject := v1Admin.Group("/mcp_project")
 		{
 			mcpProject.POST("/generate_frontend", h.V1.MCPGenerateFrontend)
 			v1Admin.PATCH("/update_frontend/:mcp_project_id", h.V1.MCPUpdateFrontend)
