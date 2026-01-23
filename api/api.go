@@ -314,7 +314,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			mcpProject.POST("/generate_frontend", h.V1.MCPGenerateFrontend)
 			v1Admin.PATCH("/update_frontend/:mcp_project_id", h.V1.MCPUpdateFrontend)
 
-			mcpProject.GET("/", h.V1.GetMcpProjects)
+			mcpProject.GET("", h.V1.GetMcpProjects)
 			mcpProject.GET("/:mcp_project_id", h.V1.GetMcpProjectFiles)
 			mcpProject.PUT("/:mcp_project_id", h.V1.SaveMcpProject)
 		}
