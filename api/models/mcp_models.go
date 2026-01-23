@@ -13,6 +13,10 @@ type (
 		TargetFile      string `json:"target_file"`
 		TargetElementId string `json:"target_element_id"`
 		CodeFragment    string `json:"code_fragment"`
+		Tag             string `json:"tag"`
+		DOMPath         string `json:"dom_path"`
+		Line            int    `json:"line"`
+		Column          int    `json:"column"`
 	}
 
 	// ========================== Prompt Building Requests ==========================

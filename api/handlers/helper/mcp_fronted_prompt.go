@@ -1546,21 +1546,46 @@ func BuildFrontendAnalyzePrompt(request models.AnalyzeFrontendPromptRequest) (st
 	}
 
 	var contextSection string
-
 	if request.Context != nil && len(*request.Context) > 0 {
-		contextSection = "\n\nINSPECT CONTEXT (User selected code fragments):\n"
+		contextSection = "\n\nINSPECT CONTEXT (User selected code):\n"
 		for i, ctx := range *request.Context {
 			contextSection += fmt.Sprintf(`
 Context Item %d:
-- Target File: %s
-- Element ID: %s
+- File: %s
 - Code Fragment:
 """
 %s
 """
-`, i+1, ctx.TargetFile, ctx.TargetElementId, ctx.CodeFragment)
+`, i+1, ctx.TargetFile, ctx.CodeFragment)
+
+			if ctx.TargetElementId != "" {
+				contextSection += fmt.Sprintf("- Element ID: %s\n", ctx.TargetElementId)
+			}
+			if ctx.Tag != "" {
+				contextSection += fmt.Sprintf("- Tag: %s\n", ctx.Tag)
+			}
+			if ctx.DOMPath != "" {
+				contextSection += fmt.Sprintf("- DOM Path: %s\n", ctx.DOMPath)
+			}
+			if ctx.Line != 0 {
+				contextSection += fmt.Sprintf("- Line: %d (hint only)\n", ctx.Line)
+			}
+			if ctx.Column != 0 {
+				contextSection += fmt.Sprintf("- Column: %d (hint only)\n", ctx.Column)
+			}
 		}
-		contextSection += "\nNOTE: These code fragments show what the user is currently viewing/editing. Use this context to better understand their intent and focus your analysis on these specific areas.\n"
+
+		contextSection += `
+CONTEXT USAGE RULES:
+1. Code Fragment is GROUND TRUTH - always search by exact code content first
+2. Element ID is most reliable identifier if provided
+3. Tag and DOM Path help verify you found the right element
+4. Line/Column numbers are HINTS ONLY - code may have shifted, use for reference but NOT as primary locator
+5. When precision is high (element_id + tag provided), focus changes ONLY on that specific element
+6. When precision is low (only fragment), search entire file for matching code
+
+PRIORITY: code_fragment > element_id > tag > dom_path > line > column
+`
 	}
 
 	var prompt = fmt.Sprintf(`PROJECT ANALYSIS REQUEST
@@ -1581,9 +1606,12 @@ ANALYSIS REQUIREMENTS:
    - Component hierarchy and relationships
    - Import/export dependencies
    - File types (component, page, layout, api, hook, etc.)
-   - Which files depend on which
 
-2. **If INSPECT CONTEXT is provided, prioritize these files and code areas** - the user is actively working on them
+2. **If INSPECT CONTEXT is provided above:**
+   - These are EXACT code areas the user is working on
+   - Prioritize these files in your analysis
+   - Use code_fragment to locate exact code (don't rely on line numbers!)
+   - If element_id or tag provided, target that specific element only
 
 3. For the user request, identify:
    - Which components/modules are directly affected
@@ -1595,7 +1623,6 @@ ANALYSIS REQUIREMENTS:
    - Include all files that MUST change
    - Don't include files that won't be affected
    - Consider cascade effects through imports
-   - Think about new files that might be needed
 
 5. Output your analysis as a VALID JSON object with this EXACT structure:
 {
@@ -1660,22 +1687,47 @@ func BuildFrontendUpdatePrompt(request models.UpdateFrontendPromptRequest) (stri
 		filesSection.WriteString("\n```\n\n")
 	}
 
-	// Добавить секцию контекста
 	var contextSection string
 	if request.Context != nil && len(*request.Context) > 0 {
 		contextSection = "\n\nINSPECT CONTEXT (User's focus area):\n"
 		for i, ctx := range *request.Context {
 			contextSection += fmt.Sprintf(`
 Context Item %d:
-- Target File: %s
-- Element ID: %s
+- File: %s
 - Code Fragment:
 """
 %s
 """
-`, i+1, ctx.TargetFile, ctx.TargetElementId, ctx.CodeFragment)
+`, i+1, ctx.TargetFile, ctx.CodeFragment)
+
+			if ctx.TargetElementId != "" {
+				contextSection += fmt.Sprintf("- Element ID: %s\n", ctx.TargetElementId)
+			}
+			if ctx.Tag != "" {
+				contextSection += fmt.Sprintf("- Tag: %s\n", ctx.Tag)
+			}
+			if ctx.DOMPath != "" {
+				contextSection += fmt.Sprintf("- DOM Path: %s\n", ctx.DOMPath)
+			}
+			if ctx.Line != 0 {
+				contextSection += fmt.Sprintf("- Line: %d (hint only)\n", ctx.Line)
+			}
+			if ctx.Column != 0 {
+				contextSection += fmt.Sprintf("- Column: %d (hint only)\n", ctx.Column)
+			}
 		}
-		contextSection += "\nIMPORTANT: The user is actively viewing/editing these code fragments. Pay special attention to these areas when making updates. Ensure changes integrate smoothly with this context.\n"
+
+		contextSection += `
+HOW TO USE CONTEXT:
+1. Open the target file
+2. Search for the EXACT code_fragment content (ignore line/column numbers)
+3. If element_id provided, verify you found the element with that ID
+4. If tag provided, verify the element type matches
+5. Make changes ONLY to that specific code area
+6. Don't modify similar code elsewhere unless necessary
+
+REMEMBER: code_fragment is absolute truth, line numbers can be wrong!
+`
 	}
 
 	prompt := fmt.Sprintf(`PROJECT UPDATE REQUEST
@@ -1694,14 +1746,18 @@ TASK:
 Based on the analysis, implement the required changes to fulfill the user's request.
 
 UPDATE REQUIREMENTS:
-1. **If INSPECT CONTEXT is provided**: Focus your changes on those specific files and code areas first
+
+1. **If INSPECT CONTEXT is provided:**
+   - Locate code by searching for code_fragment content (NOT by line number!)
+   - If element_id exists, verify you're modifying the right element
+   - Make surgical changes to that specific code area only
+   - Don't change similar code elsewhere in the file
 
 2. For each file marked as "modify":
    - Generate COMPLETE updated file content
    - Maintain existing code style and patterns
    - Preserve working functionality
    - Add new features as requested
-   - If the file is in the inspect context, ensure changes align with the user's selection
 
 3. For each file marked as "create":
    - Generate COMPLETE new file content
