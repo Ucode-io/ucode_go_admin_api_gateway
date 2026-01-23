@@ -4,9 +4,9 @@ type (
 	// ========================== API Requests ==========================
 
 	MCPRequest struct {
-		Method  string          `json:"method"`
-		Prompt  string          `json:"prompt"`
-		Context *InspectContext `json:"context,omitempty"`
+		Method  string            `json:"method"`
+		Prompt  string            `json:"prompt"`
+		Context *[]InspectContext `json:"context,omitempty"`
 	}
 
 	InspectContext struct {
@@ -35,18 +35,18 @@ type (
 	}
 
 	AnalyzeFrontendPromptRequest struct {
-		UserRequest string          `json:"user_request"`
-		FileGraph   map[string]any  `json:"file_graph"`
-		ProjectName string          `json:"project_name"`
-		Context     *InspectContext `json:"context,omitempty"`
+		UserRequest string            `json:"user_request"`
+		FileGraph   map[string]any    `json:"file_graph"`
+		ProjectName string            `json:"project_name"`
+		Context     *[]InspectContext `json:"context,omitempty"`
 	}
 
 	UpdateFrontendPromptRequest struct {
-		UserRequest    string          `json:"user_request"`
-		FilesToUpdate  []ProjectFile   `json:"files_to_update"`
-		AnalysisResult AnalysisResult  `json:"analysis_result"`
-		ProjectName    string          `json:"project_name"`
-		Context        *InspectContext `json:"context,omitempty"`
+		UserRequest    string            `json:"user_request"`
+		FilesToUpdate  []ProjectFile     `json:"files_to_update"`
+		AnalysisResult AnalysisResult    `json:"analysis_result"`
+		ProjectName    string            `json:"project_name"`
+		Context        *[]InspectContext `json:"context,omitempty"`
 	}
 
 	// ========================== Unified File Model ==========================

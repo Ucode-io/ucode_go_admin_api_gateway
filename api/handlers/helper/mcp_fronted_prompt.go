@@ -1545,13 +1545,31 @@ func BuildFrontendAnalyzePrompt(request models.AnalyzeFrontendPromptRequest) (st
 		return "", fmt.Errorf("failed to marshal file_graph: %w", err)
 	}
 
+	var contextSection string
+
+	if request.Context != nil && len(*request.Context) > 0 {
+		contextSection = "\n\nINSPECT CONTEXT (User selected code fragments):\n"
+		for i, ctx := range *request.Context {
+			contextSection += fmt.Sprintf(`
+Context Item %d:
+- Target File: %s
+- Element ID: %s
+- Code Fragment:
+"""
+%s
+"""
+`, i+1, ctx.TargetFile, ctx.TargetElementId, ctx.CodeFragment)
+		}
+		contextSection += "\nNOTE: These code fragments show what the user is currently viewing/editing. Use this context to better understand their intent and focus your analysis on these specific areas.\n"
+	}
+
 	var prompt = fmt.Sprintf(`PROJECT ANALYSIS REQUEST
 
 Project Name: %s
 
 USER REQUEST:
 %s
-
+%s
 FILE GRAPH (Complete project structure):
 %s
 
@@ -1565,19 +1583,21 @@ ANALYSIS REQUIREMENTS:
    - File types (component, page, layout, api, hook, etc.)
    - Which files depend on which
 
-2. For the user request, identify:
+2. **If INSPECT CONTEXT is provided, prioritize these files and code areas** - the user is actively working on them
+
+3. For the user request, identify:
    - Which components/modules are directly affected
    - Which files import the affected components
    - Which new files might be needed
    - Which files might become obsolete
 
-3. Be thorough but precise:
+4. Be thorough but precise:
    - Include all files that MUST change
    - Don't include files that won't be affected
    - Consider cascade effects through imports
    - Think about new files that might be needed
 
-4. Output your analysis as a VALID JSON object with this EXACT structure:
+5. Output your analysis as a VALID JSON object with this EXACT structure:
 {
   "analysis_summary": "string - brief explanation of what needs to change",
   "files_to_modify": [
@@ -1615,6 +1635,7 @@ CRITICAL:
 Generate the analysis now.`,
 		request.ProjectName,
 		request.UserRequest,
+		contextSection,
 		string(fileGraphJSON),
 	)
 
@@ -1639,13 +1660,31 @@ func BuildFrontendUpdatePrompt(request models.UpdateFrontendPromptRequest) (stri
 		filesSection.WriteString("\n```\n\n")
 	}
 
+	// Добавить секцию контекста
+	var contextSection string
+	if request.Context != nil && len(*request.Context) > 0 {
+		contextSection = "\n\nINSPECT CONTEXT (User's focus area):\n"
+		for i, ctx := range *request.Context {
+			contextSection += fmt.Sprintf(`
+Context Item %d:
+- Target File: %s
+- Element ID: %s
+- Code Fragment:
+"""
+%s
+"""
+`, i+1, ctx.TargetFile, ctx.TargetElementId, ctx.CodeFragment)
+		}
+		contextSection += "\nIMPORTANT: The user is actively viewing/editing these code fragments. Pay special attention to these areas when making updates. Ensure changes integrate smoothly with this context.\n"
+	}
+
 	prompt := fmt.Sprintf(`PROJECT UPDATE REQUEST
 
 Project Name: %s
 
 ORIGINAL USER REQUEST:
 %s
-
+%s
 ANALYSIS RESULTS:
 %s
 
@@ -1655,28 +1694,31 @@ TASK:
 Based on the analysis, implement the required changes to fulfill the user's request.
 
 UPDATE REQUIREMENTS:
-1. For each file marked as "modify":
+1. **If INSPECT CONTEXT is provided**: Focus your changes on those specific files and code areas first
+
+2. For each file marked as "modify":
    - Generate COMPLETE updated file content
    - Maintain existing code style and patterns
    - Preserve working functionality
    - Add new features as requested
+   - If the file is in the inspect context, ensure changes align with the user's selection
 
-2. For each file marked as "create":
+3. For each file marked as "create":
    - Generate COMPLETE new file content
    - Follow project conventions
    - Integrate properly with existing code
 
-3. For each file marked as "delete":
+4. For each file marked as "delete":
    - Confirm removal in output
    - Ensure no broken imports remain
 
-4. Update file_graph:
+5. Update file_graph:
    - Reflect new/modified imports
    - Update dependencies
    - Add new files to graph
    - Remove deleted files
 
-5. Code quality:
+6. Code quality:
    - Clean, production-ready code
    - Proper error handling
    - React best practices
@@ -1684,7 +1726,7 @@ UPDATE REQUIREMENTS:
    - Notion-like light mode design
    - No TypeScript (JavaScript only)
 
-6. Output format (STRICT JSON):
+7. Output format (STRICT JSON):
 {
   "updated_files": [
     {
@@ -1726,6 +1768,7 @@ CRITICAL RULES:
 Implement the updates now.`,
 		request.ProjectName,
 		request.UserRequest,
+		contextSection,
 		string(analysisJSON),
 		filesSection.String(),
 	)
