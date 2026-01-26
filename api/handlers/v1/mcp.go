@@ -159,6 +159,30 @@ func (h *HandlerV1) MCPGenerateFrontend(c *gin.Context) {
 		return
 	}
 
+	go func() {
+		content, _, err := helper.BuildBackendPrompt(
+			models.BackendPromptRequest{
+				ProjectId:     projectId.(string),
+				EnvironmentId: environmentId.(string),
+				Method:        req.Method,
+				APIKey:        apiKeys.GetData()[0].GetAppId(),
+				UserPrompt:    req.Prompt,
+			},
+		)
+		if err != nil {
+			h.HandleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		_, err = h.sendAnthropicBackend(content)
+		if err != nil {
+			log.Println("error in generating backend: " + err.Error())
+			h.HandleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+	}()
+
 	userPrompt := helper.BuildFrontendGeneratePrompt(
 		models.FrontendPromptRequest{
 			ProjectId:     projectId.(string),
