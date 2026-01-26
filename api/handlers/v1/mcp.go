@@ -160,7 +160,11 @@ func (h *HandlerV1) MCPGenerateFrontend(c *gin.Context) {
 	}
 
 	go func() {
-		content, _, err := helper.BuildBackendPrompt(
+		if req.Method == "" {
+			req.Method = "project"
+		}
+
+		content, message, err := helper.BuildBackendPrompt(
 			models.BackendPromptRequest{
 				ProjectId:     projectId.(string),
 				EnvironmentId: environmentId.(string),
@@ -176,10 +180,11 @@ func (h *HandlerV1) MCPGenerateFrontend(c *gin.Context) {
 
 		_, err = h.sendAnthropicBackend(content)
 		if err != nil {
-			log.Println("error in generating backend: " + err.Error())
 			h.HandleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
+
+		h.HandleResponse(c, status_http.OK, message)
 
 	}()
 
