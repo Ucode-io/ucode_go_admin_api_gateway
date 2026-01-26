@@ -1,17 +1,22 @@
 package helper
 
-import "bytes"
+import (
+	"regexp"
+	"strings"
+)
 
-func CleanJSONResponse(text string) string {
-
-	text = string(bytes.TrimSpace([]byte(text)))
-	if bytes.HasPrefix([]byte(text), []byte("```json")) {
-		text = string(bytes.TrimPrefix([]byte(text), []byte("```json")))
-		text = string(bytes.TrimPrefix([]byte(text), []byte("```")))
+func CleanJSONResponse(input string) string {
+	re := regexp.MustCompile("(?s)^.*?(?:```json|```)?\\s*(\\{.*\\})\\s*(?:```)?.*?$")
+	match := re.FindStringSubmatch(input)
+	if len(match) > 1 {
+		return strings.TrimSpace(match[1])
 	}
-	if bytes.HasSuffix([]byte(text), []byte("```")) {
-		text = string(bytes.TrimSuffix([]byte(text), []byte("```")))
+
+	start := strings.Index(input, "{")
+	end := strings.LastIndex(input, "}")
+	if start != -1 && end != -1 && end > start {
+		return input[start : end+1]
 	}
 
-	return string(bytes.TrimSpace([]byte(text)))
+	return input
 }

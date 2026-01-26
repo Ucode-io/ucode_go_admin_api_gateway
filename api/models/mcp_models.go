@@ -17,6 +17,7 @@ type (
 		DOMPath         string `json:"dom_path"`
 		Line            int    `json:"line"`
 		Column          int    `json:"column"`
+		ElementName     string `json:"name"`
 	}
 
 	// ========================== Prompt Building Requests ==========================

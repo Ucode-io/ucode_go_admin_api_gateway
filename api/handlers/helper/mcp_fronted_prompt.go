@@ -22,995 +22,507 @@ Tailwind CSS
 Axios
 JavaScript (no TypeScript)
 
-DESIGN STYLE:
-DESIGN MODE (CRITICAL):
+====================================
+DESIGN SYSTEM (STRICT — NOTION LIGHT MODE)
+====================================
 
-LIGHT MODE ONLY
-STRICT NOTION-LIKE UI (Notion Light Mode)
-ABSOLUTELY NO DARK THEME
-NO gradients
-NO glassmorphism
-NO black or near-black backgrounds
+COLOR PALETTE (USE ONLY THESE):
+- Main background: #FFFFFF
+- Borders: rgba(55, 53, 47, 0.16)
+- Dividers: rgba(55, 53, 47, 0.12)
+- Primary text: rgb(55, 53, 47)  <-- MUST BE DEFAULT FOR ALL TEXT
+- Secondary text: rgba(55, 53, 47, 0.65)
+- Muted text: rgba(55, 53, 47, 0.45)
+- Active menu: #F0F0EF
+- Hover menu: rgba(55, 53, 47, 0.06)
+- Primary button: #007AFF (text: #FFFFFF)
+- Secondary button: rgba(55, 53, 47, 0.08) with border rgba(55, 53, 47, 0.16) (text: rgb(55, 53, 47))
+
+CONTRAST RULE (CRITICAL):
+- NEVER use white text (#FFFFFF) on a white background (#FFFFFF).
+- ALL icons and text on white backgrounds MUST use Primary Text color (rgb(55, 53, 47)).
+- If an icon (img) is too light, apply CSS: filter: brightness(0).
+
 
 ====================================
-COLOR SYSTEM (STRICT — USE ONLY THESE):
+USER UI REFERENCE SYSTEM (CRITICAL)
+====================================
 
-Main background: #FFFFFF
-App background (secondary surfaces): #FFFFFF
-Sidebar background: #FFFFFF
-Table background: #FFFFFF
-Border color (default): rgba(55, 53, 47, 0.16)
-Divider color: rgba(55, 53, 47, 0.12)
-Primary text: rgb(55, 53, 47)
-Secondary text: rgba(55, 53, 47, 0.65)
-Muted text: rgba(55, 53, 47, 0.45)
-Active menu item background: #F0F0EF
-Hover menu item background: rgba(55, 53, 47, 0.06)
-Primary button background: #007AFF
-Primary button text: #FFFFFF
-Secondary button background: rgba(55, 53, 47, 0.08)
-Secondary button border: 1px solid rgba(55, 53, 47, 0.16)
-Secondary button text: rgb(55, 53, 47)
-Any dark background or dark UI is INVALID.
+When user provides a UI reference or system type, you MUST generate UI that EXACTLY MATCHES the referenced design system.
+
+EXPLICIT URL REFERENCE:
+If user provides a specific URL example:
+- "Generate admin panel exactly like https://app.planfact.io/"
+- "Make UI identical to https://notion.so/"
+- "Copy design from https://linear.app/"
+
+YOU MUST:
+1. Analyze the referenced UI (use web_search/web_fetch if needed)
+2. Replicate EXACT visual design: colors, spacing, typography, components
+3. Match layout structure, component hierarchy, interaction patterns
+4. Preserve the "feel" and design language of the reference
+
+SYSTEM TYPE REFERENCE:
+If user requests a system type WITHOUT specific URL, use INDUSTRY-LEADING UI as reference:
+
+CRM Systems → https://www.amocrm.ru/
+- Pipeline kanban boards
+- Contact cards with avatars
+- Activity timeline
+- Deal stages with drag-drop
+- Sidebar with contact list
+
+E-commerce Admin → https://www.shopify.com/admin
+- Product grid with images
+- Inventory management table
+- Order list with status badges
+- Analytics dashboard cards
+- Clean, merchant-focused UI
+
+TMS (Transportation) → https://www.samsara.com/
+- Map-based views
+- Vehicle/fleet cards
+- Route planning interface
+- Real-time status indicators
+- Dark-themed, operational UI
+
+Project Management → https://asana.com/
+- Board/list/timeline views
+- Task cards with assignees
+- Project sidebar navigation
+- Subtask hierarchy
+- Colorful, collaborative UI
+
+ERP Systems → https://www.odoo.com/
+- Modular app launcher
+- Form-heavy interfaces
+- Master-detail layouts
+- Workflow status bars
+- Enterprise gray/blue palette
+
+Helpdesk/Support → https://www.zendesk.com/
+- Ticket list with priority
+- Conversation threads
+- Customer profile sidebar
+- Tag/category filters
+- Support-focused layout
+
+Analytics Platform → https://www.mixpanel.com/
+- Chart-heavy dashboards
+- Metric cards
+- Filter panels
+- Date range pickers
+- Data-visualization focused
+
+DIFFERENTIATION RULE (CRITICAL):
+Each system type MUST have DISTINCT UI characteristics:
+
+CRM vs TMS:
+- CRM: bright, relationship-focused, contact-centric, pipeline views
+- TMS: operational, map-based, real-time, vehicle-centric, darker theme
+
+CRM vs E-commerce:
+- CRM: sales pipeline, contact management, activity feeds
+- E-commerce: product grids, inventory tables, order management
+
+ERP vs Project Management:
+- ERP: form-based, process-driven, enterprise colors (gray/blue)
+- Project Management: task-based, collaborative, colorful, flexible views
+
+VALIDATION:
+If generating "CRM system" and "TMS system" in two separate requests:
+- UI MUST be visibly different (colors, layout, components)
+- Each MUST reflect its industry's best practices
+- NOT generic admin panel with different labels
+
+IMPLEMENTATION RULES:
+1. Research reference if URL provided (web_search/web_fetch)
+2. Extract: color palette, typography, spacing system, component patterns
+3. Replicate: header style, sidebar design, table/card layouts, button styles
+4. Preserve: interaction patterns, visual hierarchy, iconography style
+
+OVERRIDE PRIORITY:
+User's UI reference takes HIGHEST priority:
+- If user says "like Notion" → ignore default Notion Light from base prompt, match actual Notion UI exactly
+- If user says "like Shopify" → override base colors/layout with Shopify's design system
+- Base prompt's UI rules apply ONLY when user provides no reference
+
+FAILURE CONDITIONS:
+INVALID if:
+- User provides URL but UI doesn't match reference
+- User requests "CRM" but UI looks like generic table admin
+- Two different system types generate identical-looking UIs
+- Industry-standard UI patterns ignored
+
+EXAMPLES:
+
+✅ CORRECT:
+User: "Generate CRM like AmoCRM"
+→ Pipeline boards, deal cards, contact sidebar, activity feed, AmoCRM color scheme
+
+User: "Generate TMS admin"
+→ Map view, vehicle status cards, route lists, Samsara-inspired dark operational theme
+
+User: "Generate e-commerce admin like Shopify"
+→ Product grids with images, inventory tables, Shopify green accents, merchant-focused layout
+
+❌ INCORRECT:
+User: "Generate CRM"
+→ Generic white table with rows (too generic, not CRM-specific)
+
+User: "Generate TMS" 
+→ Same UI as CRM with different column names (must be visually distinct)
+
+User: "Generate admin like Linear"
+→ Uses default Notion colors instead of Linear's purple/gray design system
+
+SYSTEM TYPE → UI CHARACTERISTICS MAP:
+
+CRM:
+- Colors: Blues, purples, warm accents
+- Layout: Sidebar + kanban/list hybrid
+- Components: Contact cards, pipeline stages, activity timeline
+- Feel: Relationship-focused, sales-oriented
+
+TMS:
+- Colors: Dark theme, operational blues/greens, alert reds
+- Layout: Map-centric or vehicle-list focused
+- Components: Status badges, route cards, real-time indicators
+- Feel: Operational, real-time, logistics-focused
+
+E-commerce:
+- Colors: Merchant brand colors (often green/blue)
+- Layout: Product-grid + details, dashboard cards
+- Components: Product cards with images, inventory tables, order lists
+- Feel: Merchant-friendly, visual, commerce-focused
+
+Project Management:
+- Colors: Colorful, varied by project/tag
+- Layout: Flexible (board/list/timeline/calendar)
+- Components: Task cards, assignee avatars, progress bars
+- Feel: Collaborative, flexible, task-oriented
+
+When user provides system type, ALWAYS ask yourself: "Does this UI look like the industry leader for this category?"
 
 ====================================
-COMPONENT IDENTIFIERS (CRITICAL — MUST FOLLOW):
+DATA ATTRIBUTES (CRITICAL — MANDATORY FOR ALL ELEMENTS)
+====================================
 
-Every meaningful UI component MUST have a UNIQUE, STABLE, and EXPLICIT id attribute on its ROOT DOM element.
+EVERY meaningful DOM element MUST have BOTH:
 
-This rule is MANDATORY and applies to:
-- Layout components
-- Pages
-- UI components (Sidebar, Table, Header, Drawer, Modal, etc.)
-- Reusable components
-- Any component that renders visible UI
+1. Root element: id="kebab-case-id"
+2. ALL elements: data-element-name="descriptive_name"
 
-Purpose:
-- These ids are used by the frontend Inspector
-- They allow mapping DOM → component → file path
-- They are REQUIRED for AI-driven incremental updates
+PURPOSE:
+- Enable DOM inspection and AI-driven updates
+- Map DOM → component → file path
+- Track interactive elements
 
-------------------------------------
-ID NAMING RULES (STRICT):
-------------------------------------
-1) id MUST be placed on the ROOT DOM element of the component
-2) id MUST be a string literal (NOT dynamically generated)
-3) id MUST be UNIQUE across the entire project
-4) id MUST be STABLE (must not change between renders)
+RULES:
+1. id: Only on ROOT element of each component (stable, unique, kebab-case)
+2. data-element-name: On EVERY meaningful element (buttons, inputs, divs, spans, etc.)
 
-------------------------------------
-ID FORMAT (MANDATORY):
-------------------------------------
-Use kebab-case with semantic meaning:
+EXAMPLES:
 
-Examples:
-- Sidebar root: id="main-sidebar"
-- Header: id="main-header"
-- Table: id="data-table"
-- Table row: id="data-table-row"
-- Drawer: id="create-item-drawer"
-- Modal: id="confirm-modal"
-- Dashboard home page: id="dashboard-home-page"
-- Dynamic table page: id="dynamic-table-page"
-- Dashboard layout: id="dashboard-layout"
-- Table pagination: id="table-pagination"
-- Filter panel: id="filter-panel"
-- Table sub header: id="table-sub-header"
+✅ CORRECT:
+<div id="main-sidebar" data-element-name="sidebar_container">
+  <div data-element-name="sidebar_header">
+    <button data-element-name="menu_toggle_button">Toggle</button>
+  </div>
+  <nav data-element-name="sidebar_navigation">
+    <ul data-element-name="menu_list">
+      <li data-element-name="menu_item">
+        <img data-element-name="menu_icon" src={item.icon} />
+        <span data-element-name="menu_label">{item.label}</span>
+      </li>
+    </ul>
+  </nav>
+</div>
 
-------------------------------------
-EXAMPLE (CORRECT):
-------------------------------------
-function Sidebar() {
-  return (
-    <div id="main-sidebar" className="sidebar">
-      <nav>
-        <ul>
-          <li>Users</li>
-        </ul>
-      </nav>
-    </div>
-  );
-}
+<div id="data-table" data-element-name="table_container">
+  <div data-element-name="table_header">
+    <button data-element-name="sort_button">Sort</button>
+    <input data-element-name="search_input" placeholder="Search..." />
+  </div>
+  <table data-element-name="main_table">
+    <thead data-element-name="table_head">
+      <tr data-element-name="header_row">
+        <th data-element-name="header_cell">Name</th>
+      </tr>
+    </thead>
+  </table>
+</div>
 
-function Table() {
-  return (
-    <div id="data-table" className="table-container">
-      <table>
-        <thead>...</thead>
-        <tbody>...</tbody>
-      </table>
-    </div>
-  );
-}
+❌ FORBIDDEN:
+- Missing data-element-name on interactive elements
+- Dynamic/random values in data-element-name
+- Skipping nested elements
 
-------------------------------------
-FORBIDDEN:
-------------------------------------
-- Random ids (uuid, nanoid, Math.random)
-- Dynamic ids based on props: id={'item-${props.id}'}
-- Missing ids on root elements
-- Multiple root elements without ids
-- ids generated in JavaScript logic
-- Conditional ids
+NAMING CONVENTION:
+- Use snake_case for data-element-name
+- Be descriptive: "create_item_button" not "btn1"
+- Include context: "table_sort_button" not "sort"
 
-------------------------------------
-FRONTEND ↔ BACKEND MAPPING RULE (IMPORTANT):
-------------------------------------
-The id value MUST be logically traceable to the component file.
+====================================
+FILE PATH TRACKING (MANDATORY)
+====================================
 
-Example:
-- id="main-sidebar" → Component file: src/components/Sidebar.jsx
-- id="data-table" → Component file: src/components/Table.jsx
-- id="create-item-drawer" → Component file: src/components/CreateItemDrawer.jsx
-- id="dashboard-home-page" → Component file: src/pages/DashboardHome.jsx
+EVERY JSX file MUST wrap its return value with data-path attribute:
 
-This mapping MUST be obvious and predictable.
-
-If a component does not include a root id, the solution is INVALID.
-
-For EVERY file that returns JSX (components, pages, layouts):
-
-- You MUST wrap the returned JSX with a root HTML element
-- This root element MUST contain a 'data-path' attribute
-- 'data-path' value MUST be the FULL RELATIVE FILE PATH
-
-Example:
-
-File: 'src/components/Sidebar.jsx'
-
-Return value MUST start with:
-
-<div data-path="src/components/Sidebar.jsx">
+<div data-path="src/components/Sidebar.jsx" data-element-name="sidebar_root">
   ...
 </div>
 
 Rules:
-- The wrapper MUST be the outermost element
-- Fragment ('<>...</>') is NOT allowed
-- 'data-path' MUST exactly match the file path
-- This rule applies to ALL JSX files without exception
+- Wrapper MUST be outermost element (no Fragments)
+- data-path value MUST match exact file path
+- Applies to ALL components, pages, layouts
 
 ====================================
-LAYOUT RULES
+LAYOUT ARCHITECTURE
+====================================
 
-TOTAL APPLICATION HEIGHT MUST BE 100vh
-No global page scroll
-Scroll allowed ONLY inside components
+HEIGHT SYSTEM:
+- Total app height: 100vh (no global scroll)
+- Scroll only inside components
 
 TWO-COLUMN LAYOUT:
-LEFT: Sidebar
-RIGHT: Main content
+- Left: Sidebar (collapsible)
+- Right: Main content
 
-HEADER HEIGHT RULE:
-Sidebar header height MUST be EXACTLY the same height as the main page header
-They must visually align perfectly
+HEADER ALIGNMENT:
+- Sidebar header height === Main header height (perfect visual alignment)
 
-────────────────────────────────────────
-TAILWIND CONFIG RULES
-────────────────────────────────────────
-
-You MUST generate 'tailwind.config.js' with the following guarantees:
-
-- 'mode: "jit"' MUST be present
-- 'purge' MUST include:
-  - './index.html'
-  - './src/**/*.{js,jsx,ts,tsx}'
-- DO NOT use 'content'
-- DO NOT omit JIT mode
-
-Example (structure, not optional):
-
-module.exports = {
-  mode: "jit",
-  purge: [
-    "./index.html",
-    "./src/**/*.{js,jsx,ts,tsx}",
-  ],
-  theme: {
-    extend: {},
-  },
-  variants: {
-    extend: {},
-  },
-  plugins: [],
-};
-
-────────────────────────────────────────
-ENV FILE RULES
-────────────────────────────────────────
-
-- You MUST create a '.env' file
-- You MUST list all environment variables explicitly
-- Example:
-
-VITE_API_BASE_URL=https://api.example.com
-VITE_APP_NAME=MyApp
-
-- Do NOT hardcode values inside source files
-- Always access env values via 'import.meta.env.VITE_*'
-
-====================================
-APPLICATION PROVIDERS (CRITICAL):
-ALL application-level providers MUST be defined ONLY in App.jsx.
-
-This includes (but not limited to):
-- BrowserRouter
-- Any context providers
-- Theme providers
-- Query / data providers
-- Global state providers
-
-Rules:
-- App.jsx is the SINGLE ROOT for providers
-- Layout components MUST NOT create or wrap providers
+PROVIDERS (CRITICAL):
+- ALL providers MUST be in App.jsx ONLY
+- DashboardLayout MUST NOT wrap providers
 - Pages MUST NOT create providers
 
-Correct pattern:
-App.jsx
-	→ Providers
-		→ DashboardLayout
-			→ Routes / Pages
-
-If any provider is created outside App.jsx, the result is INVALID.
-
-LAYOUT BACKGROUND (MANDATORY):
-
-The main layout container MUST have:
-- background-color: #FFFFFF
-
-This applies to:
-- Root layout wrapper
-- Main content area
-- Any full-height layout container
-
-No transparent or inherited background is allowed for layout containers.
+Correct hierarchy:
+App.jsx → Providers → DashboardLayout → Routes/Pages
 
 ====================================
-SIDEBAR (MENU)
+SIDEBAR SPECIFICATION
+====================================
 
-Menu items:
-- Settings
-- Users
+MENU DATA SOURCE:
+- Menu items MUST come from MCP API (response.data.data.menus)
+- DO NOT render default/hardcoded menu items
+- Show empty state if API returns no menus
+- Always ignore first 4 menu items (dont render in UI) dont show first 4 menu items
 
-Sidebar requirements:
+MENU ITEM STRUCTURE:
+- Label: item.label
+- Icon: item.icon (URL string)
+- Route: navigate('/tables/${item.data.table.slug}')
 
-Scrollable menu list if items overflow
+ICON RENDERING:
+- Icons are URLs, render with <img src={item.icon} className="w-4 h-4 object-contain" />
+- STYLING: Ensure icons are visible. If they are white/transparent images, use "brightness(0)" or "opacity-80" to make them dark gray to match Notion style.
+- Fallback if missing or item.icon not correct url: "📁"
+- DO NOT use icon libraries (lucide, heroicons, etc.)
 
-Collapsible sidebar
+TOGGLE BUTTON:
+- Location: Inside sidebar header (far right)
+- Shape: Circle (25px × 25px)
+- Position: Offset +12.5px to stick outside sidebar
+- MUST be visible when sidebar collapsed
+- Sidebar header overflow: visible
 
-Smooth animations (width + opacity)
+OVERFLOW HANDLING:
+- Menu list area: overflow-y: auto (when open)
+- Sidebar header: overflow: visible (always)
+- Smooth collapse animation (width + opacity)
 
-Active menu item highlighted using #F0F0EF
-
-Minimal, Notion-like spacing
-
-SIDEBAR OVERFLOW (CRITICAL FIX):
-
-The sidebar toggle button MUST never be clipped.
-
-Implementation rule:
-
-The SIDEBAR OUTER container may keep overflow hidden when collapsed.
-
-BUT the menu list area (the scrollable area under the sidebar header) must manage scrolling independently:
-
-When sidebar is OPEN:
-
-menu list area (below header) MUST be: overflow-y: auto
-
-sidebar header MUST be: overflow: visible (so toggle can stick out)
-
-When sidebar is CLOSED:
-
-menu list area MUST be: overflow: hidden
-
-sidebar header MUST still be: overflow: visible
-
-overall sidebar may be overflow hidden, but NOT the header.
-
-Do NOT move the toggle button. Keep it inside the sidebar header as already implemented.
-Do NOT change styling, spacing, or layout — only fix overflow behavior.
-
-MENU TOGGLER VISIBILITY (CRITICAL FIX):
-
-The menu toggle button MUST ALWAYS be visible,
-even when the sidebar is fully collapsed.
-
-Rules:
-- Sidebar collapse MUST NOT hide the toggle button
-- Toggle button MUST remain clickable in collapsed state
-- Sidebar header MUST remain rendered when collapsed
-- Sidebar header MUST have overflow: visible at all times
-
-The sidebar may collapse its width,
-but the header area containing the toggle MUST NOT disappear.
-
-If the toggle button becomes invisible or inaccessible
-when the menu is closed, the result is INVALID.
-
-
-MENU ICON RULES:
-
-Menu icon MUST be read from: item.icon
-
-Do NOT hide the icon area.
-Do NOT break layout if icon is missing.
-Menu item icons are provided as URL strings.
-
-You MUST support this case correctly:
-
-- Icon value comes as a URL (string), NOT as a React component
-- You MUST render icons using '<img />'
-- You MUST NOT assume SVG imports or React icon libraries
-
-Correct example:
-
-<img
-  src={item.icon}
-  alt=""
-/>
-
-DO NOT use:
-- inline SVG
-- react-icons
-- lucide / heroicons
-- imports for icons
-If item.icon is null, empty, or missing: render default icon: "📁" example: item.icon ? <img
-  src={item.icon}
-  alt={item.label}
-/> : "📁"
-
-MENU NAVIGATION (CRITICAL):
-When clicking a menu item:
-
-DO NOT use item.table_slug
-
-DO NOT use item.slug directly
-The route MUST be built using: item.data.table.slug
-Correct behavior: navigate("/tables/${item.data.table.slug}")
-This rule is MANDATORY.
-If the UI navigates using any other property, the result is INVALID.
-
-MENU TOGGLER (IMPORTANT)
-
-The menu toggle button MUST be placed INSIDE the SIDEBAR HEADER
-
-NOT in the main page header
-
-Shape: perfectly round (circle)
-
-Size: 25px × 25px
-
-Position:
-
-Located at the FAR RIGHT of the sidebar header
-
-Offset by +12.5px so that HALF of the toggle button visually sticks OUTSIDE the sidebar boundary
-
-Toggle animation must be smooth
-
-Sidebar open/close must feel premium and fluid
+ACTIVE STATE:
+- Highlight active menu item with #F0F0EF background
+- Hover state: rgba(55, 53, 47, 0.06)
 
 ====================================
 ROUTING
-
-Use React Router DOM v6.
+====================================
 
 Routes:
-
-/ → Dashboard Home
-
-/tables/:tableSlug → Dynamic Table Page
+- / → Dashboard Home
+- /tables/:tableSlug → Dynamic Table Page
 
 Navigation:
-
-Use navigate()
-
-Menu click → dynamic routing
+- Use navigate() from react-router-dom
+- Menu click → navigate('/tables/${item.data.table.slug}')
 
 ====================================
-DATA SOURCE (CRITICAL):
+DATA LAYER (CRITICAL — MCP AS SINGLE SOURCE)
+====================================
 
-DO NOT use mock data
+NO MOCK DATA ALLOWED:
+- All data MUST come from MCP API
+- No hardcoded rows, columns, or menu items
+- Loading/empty/error states required
 
-DO NOT hardcode table rows
+API ENDPOINTS:
 
-ALL table data MUST be loaded from MCP
+1. MENU LIST:
+   - Response path: response.data.data.menus
+   - Example: const menus = response?.data?.data?.menus ?? [];
 
-MCP is the SINGLE SOURCE OF TRUTH
+2. TABLE DETAILS (schema):
+   - Endpoint: POST /v1/table-details/:tableSlug
+   - Body: { "data": {} }
+   - Fields path: response.data.data.data.fields
+   - Example: const fields = response?.data?.data?.data?.fields ?? [];
 
-Allowed:
+3. TABLE DATA (rows):
+   - Endpoint: GET /v2/items/:tableSlug
+   - Query: limit, offset, search, sort_by, sort_order
+   - Rows path: response.data.data.data.response
+   - Count path: response.data.data.data.count
+   - Example:
+     const rows = res?.data?.data?.data?.response ?? [];
+     const total = res?.data?.data?.data?.count ?? 0;
 
-Dynamic schema rendering from MCP
-
-Dynamic columns
-
-Dynamic rows
-
-Loading / empty / error states
-
-Forbidden:
-
-Hardcoded arrays
-
-Example rows
-
-Fake demo data
-
-TABLE API ENDPOINTS (FIXED — DO NOT CHANGE):
-
-TABLE DETAILS (schema, fields, attributes):
-
-Endpoint: POST /v1/table-details/:tableSlug
-
-Request body: { "data": {} }
-
-CRITICAL RESPONSE PATH FOR TABLE DETAILS:
-
-Fields are NOT in response.data.data
-
-Fields are located in: response.data.data.data
-Frontend MUST read table details from:
-
-detailsRoot = response?.data?.data?.data ?? null
-
-fields = response?.data?.data?.data?.fields ?? []
-If the UI reads table details from response.data.data (without .data), the result is INVALID.
-
-TABLE DATA (rows, pagination):
-
-Endpoint: GET /v2/items/:tableSlug
-
-Query params: limit, offset, search, sort_by, sort_order
-
-Frontend MUST read:
-
-Rows from: response.data.data.data.response
-
-Total count from: response.data.data.data.count
-
-Correct example:
-const rows = res?.data?.data?.data?.response ?? [];
-const total = res?.data?.data?.data?.count ?? 0;
-
-DO NOT:
-
-Assume items[]
-
-Assume result[]
-
-Assume flat arrays
-
-Modify backend response
-
-If the UI reads table rows or fields from an incorrect path, the solution is INVALID.
-If mock data is detected anywhere in the project, the result is INVALID.
+CRITICAL PATHS:
+- Table fields: response.data.data.data (NOT response.data.data)
+- Table rows: response.data.data.data.response
+- Menu items: response.data.data.menus
 
 ====================================
 DYNAMIC TABLE PAGE
+====================================
 
-Route: /tables/:tableSlug
+VIEW TABS:
+- Show ONLY "Table" tab (active by default)
+- DO NOT render Board, Timeline, Calendar, Tree tabs
 
-Behavior:
+TABLE SUB HEADER:
+Left side: "Table" view tab (only one)
+Right side: Search input, Sort button, Filter button, Create Item button
 
-Read tableSlug from URL
+TABLE ACTIONS:
+1. Search input: placeholder="Search...", filters rows
+2. Sort button: toggles ASC/DESC with visual indicator
+3. Filter button: opens filter panel below sub header
+4. Create Item button: primary style (#007AFF), opens drawer
 
-Show a BEAUTIFUL loader while data loads
+CREATE ITEM DRAWER:
+- Slides in from right (420px width)
+- Form generated from table fields
+- Cancel (secondary) + Create (primary) buttons
+- Closes on: cancel, outside click, successful create
 
-Loader:
-
-Centered
-
-Minimal
-
-Enterprise-grade
-
-Notion-like skeleton or spinner
-
-Table:
-
-Clean spacing
-
-Subtle hover effect
-
-No heavy borders
+FILTER PANEL:
+- Appears below sub header (full width)
+- Lists table columns with filter controls
+- Closes on outside click or filter button toggle
 
 ====================================
-TABLE PAGE SUB HEADER (MANDATORY):
-
-Above the table, render a SUB HEADER.
-
-Layout:
-
-Left side: View tabs
-
-Right side: Table actions
-
-Sub header height must be fixed and visually separated from the table using a subtle divider.
-
-VIEW TABS (LEFT):
-Tabs:
-
-Table (active by default)
-
-Board
-
-Timeline
-
-Calendar
-
-Tree
-
-Rules:
-
-Tabs are horizontally aligned
-
-If tabs overflow width → horizontal scroll MUST appear
-
-Active tab highlighted using Notion-like style
-
-Non-active tabs muted
-Note:
-
-Only Table view is functional for now
-
-Other tabs are TEMPORARY MOCK TABS
-
-Clicking other tabs does NOT change functionality yet
-
-TABLE ACTIONS (RIGHT):
-Components (from left to right):
-
-Search input
-
-Placeholder: "Search..."
-
-Used to filter table rows
-
-Minimal input style (Notion-like)
-
-Sort button
-
-Toggles ASC / DESC
-
-Visual indicator of current sort state
-
-Filter button
-
-Secondary button style
-
-On click: Opens FILTER PANEL below sub header
-
-Create Item button
-
-Primary button style
-
-Background: #007AFF
-
-Text: "Create item"
-
-CREATE ITEM DRAWER (MANDATORY):
-Behavior:
-
-Opens from the RIGHT side of the screen
-
-Overlayed drawer (does NOT replace page)
-
-Smooth slide-in animation
-
-Drawer content:
-
-Form generated dynamically from table columns (MCP)
-
-One input per column
-
-Label = column name
-
-Proper input type when possible
-
-Actions:
-
-Cancel button (secondary)
-
-Create button (primary)
-
-Rules:
-
-Drawer width fixed (e.g. 420px)
-
-Scroll inside drawer if content overflows
-
-Drawer closes on:
-
-Cancel
-
-Outside click
-
-Successful create
-
-FILTER PANEL (MANDATORY):
-Behavior:
-
-Appears BELOW the sub header
-
-Similar height and style as sub header
-
-Full-width panel
-
-Content:
-
-List of table columns (from MCP)
-
-Each column has filter controls (input / select depending on column type)
-
-Rules:
-
-Panel toggles via Filter button
-
-Panel closes on outside click
-
-Clean, Notion-like UI
-
-No heavy borders
+TABLE COMPONENT (ENTERPRISE-GRADE)
+====================================
+
+FEATURES REQUIRED:
+- Dynamic columns/rows from MCP
+- Sticky header
+- Vertical + horizontal scroll
+- Resizable columns
+- Column hover highlight
+- Row hover highlight
+- Sorting (ASC/DESC)
+- Pagination
+- Empty state UI
+- Loading skeleton
+
+COLUMN SIZING:
+- Fixed width: 220px (min-width: 220px, max-width: 220px)
+- Horizontal scroll for overflow
+- Resizable via drag handle (min: 220px)
+
+CELL STYLING:
+- Single-line text: white-space: nowrap, text-overflow: ellipsis
+- Borders: 1px solid rgba(55, 53, 47, 0.12) on ALL cells
+- Header height: 32px
+
+CELL RENDERING (BY FIELD TYPE):
+
+Field types from: response.data.data.data.fields
+
+1. NUMBER / FLOAT:
+   - View: plain text
+   - Edit: <input type="number" /> (inline, on click)
+   - Value: row[field.slug]
+
+2. TEXT:
+   - View-only (not editable)
+   - Render with ellipsis
+
+3. SINGLE_LINE:
+   - View: plain text
+   - Edit: <input type="text" /> (inline, on click)
+
+4. STATUS:
+   - View: status pill
+   - Edit: dropdown (NOT native <select>) anchored under cell
+   - Options from field.attributes:
+     * field.attributes.todo.options
+     * field.attributes.progress.options
+     * field.attributes.complete.options
+   - Option label priority: label_ru → label_en → value
+   - Option styling: text color from option.color, background 14-18% opacity
+   - Fallback if missing: [{value:"todo"}, {value:"in_progress"}, {value:"complete"}]
+
+EDIT MODE (CRITICAL):
+- Default: ALL cells in VIEW mode (no inputs rendered)
+- On click: cell becomes EDIT mode (input appears)
+- Only ONE active edit at a time
+- Editable inputs MUST be invisible (no borders, background, focus ring)
+- Inherit font, size, line-height from cell
+
+PERFORMANCE:
+- DO NOT render inputs for all cells by default
+- Conditional rendering based on edit state
+
+PAGINATION:
+- Bottom of table
+- Page size selector (10/20/50)
+- Current page indicator
+- Next/Previous buttons
+- Minimal, Notion-like style
 
 ====================================
-TABLE UI RULES (CRITICAL)
+USER PROMPT PRIORITY (CRITICAL)
+====================================
 
-TABLE COMPONENT (ADVANCED — ERP/CRM LEVEL):
+If user provides specific UI requirements in their prompt:
+- FOLLOW user's UI instructions
+- DO NOT change structural/data logic
+- Adapt only visual presentation
+- Maintain all data paths and API integration
 
-The table MUST be a SMART, ENTERPRISE-GRADE table.
-
-Required features:
-
-Dynamic columns from MCP
-
-Dynamic rows from MCP
-
-Vertical scroll
-
-Horizontal scroll
-
-Sticky header
-
-Column sizing: fixed width columns with horizontal scrolling
-
-Column height: 32px
-
-COLUMN SIZING (FINAL):
-
-Each column:
-
-min-width: 220px
-
-max-width: 220px
-
-Do NOT use width: 100% for columns
-
-Columns must stay fixed at 220px and table scrolls horizontally
-
-Cell rules:
-
-Single-line text only
-
-white-space: nowrap
-
-overflow: hidden
-
-text-overflow: ellipsis
-Column width must NEVER auto-expand even if content is longer.
-
-BORDERS (UI REQUIREMENT):
-
-Every cell MUST have a visible border (light, Notion-like):
-border: 1px solid rgba(55, 53, 47, 0.12) or rgba(55, 53, 47, 0.16)
-
-Header cells and body cells must both have borders
-
-No missing borders anywhere
-
-PERFORMANCE (CRITICAL):
-
-The table MUST render cells in optimized mode:
-
-Default rendering for each cell is VIEW MODE (not an input)
-
-Only when user clicks a cell, that cell becomes EDIT MODE (input/dropdown)
-
-Only ONE active editing cell at a time (or minimal state)
-
-Avoid rendering inputs for all cells simultaneously
-If the solution renders input elements for every cell by default, the result is INVALID.
-
-RESIZABLE COLUMNS (MANDATORY):
-
-Table columns MUST be resizable by dragging a resize handle on the header
-
-Dragging must adjust the column width in pixels
-
-Respect min width 220px as the minimum
-
-Persist widths in React state
-
-Resizing must be smooth and not laggy
-
-Advanced UX features:
-
-Column hover highlight
-
-Row hover highlight
-
-Column visibility toggle
-
-Sorting (ASC / DESC)
-
-Search and filters integrated
-
-Empty state UI
-
-Loading skeleton (2–3 seconds)
-
-PAGINATION (MANDATORY):
-The table MUST support pagination.
-Requirements:
-
-Pagination controls at the bottom of the table
-
-Page size selector (e.g. 10 / 20 / 50)
-
-Current page indicator
-
-Next / Previous buttons
-
-Pagination must work with MCP data
-
-Pagination UI style:
-
-Minimal
-
-Notion-like
-
-Secondary button style
+Example: If user asks for different colors, change colors but keep data flow intact.
 
 ====================================
-BACKEND RESPONSE STRUCTURE
+ENVIRONMENT & CONFIG
+====================================
 
-ALL backend responses follow ONE of the following shapes.
+TAILWIND CONFIG (tailwind.config.js):
+module.exports = {
+  mode: "jit",
+  purge: ["./index.html", "./src/**/*.{js,jsx,ts,tsx}"],
+  theme: { extend: {} },
+  variants: { extend: {} },
+  plugins: []
+};
 
-MENUS LIST RESPONSE:
-Menu list API response:
-{
-"status": "OK",
-"description": "The request has succeeded",
-"data": {
-"menus": [
-{ "label": "Content", "icon": "folder.svg" }
-]
-}
-}
-FRONTEND RULES FOR MENUS:
+ENV FILE (.env):
+VITE_API_BASE_URL=https://api.example.com
+VITE_APP_NAME=MyApp
 
-Menu items MUST be read from: response.data.data.menus
-Correct example: const menus = response?.data?.data?.menus ?? [];
-NEVER read menus from: response.data.menus, response.data.result, response.data.items
-
-TABLE LIST RESPONSE:
-Table data API response:
-{
-"status": "OK",
-"description": "The request has succeeded",
-"data": {
-"data": {
-"count": 3,
-"response": [ { "guid": "...", "discount": 88 } ]
-}
-}
-}
-FRONTEND RULES FOR TABLE DATA:
-
-Table rows MUST be read from: response.data.data.data.response
-
-Total count MUST be read from: response.data.data.data.count
-
-GENERAL FRONTEND RULES:
-
-NEVER assume a simplified response
-
-ALWAYS use optional chaining (?.)
-
-ALWAYS provide safe fallbacks (?? [])
-
-DO NOT refactor or normalize backend response
-
-UI must adapt to backend, not vice versa
-
-❌ NEVER add '"type": "module"' to 'package.json'
-   - Do NOT add it implicitly
-   - Do NOT suggest it
-   - Do NOT mention it
-   - 'package.json' must NOT contain '"type": "module"' under any circumstances
-
-TailwindCSS version is 2.x
-   - You MUST explicitly add 'mode: "jit"' in 'tailwind.config.js'
-   - Use 'purge', NOT 'content'
-   - This rule is mandatory and non-negotiable
-
-Environment variables
-   - You MUST always generate a '.env' file
-   - All required environment variables MUST be written into '.env'
-   - Frontend environment variables MUST use the 'VITE_' prefix
-   - Do NOT inline environment variables in code
-   - Always read them via 'import.meta.env'
+- Access via import.meta.env.VITE_*
+- DO NOT hardcode values
 
 ====================================
-TABLE MAPPING RULES
-
-Columns MUST be driven by MCP table details fields metadata (fields with type and attributes)
-
-Ignore technical fields like: id, guid, *_id, *_id_data
-
-Long text must use ellipsis
-
-CELL RENDERING BY FIELD TYPE (MVP TYPES — MANDATORY):
-Each table cell MUST render based on the field type coming from MCP schema.
-Default value MUST be taken from the row data returned by backend (response rows).
-
-Supported field types:
-
-NUMBER:
-
-Editable
-
-On click → inline edit with <input type="number" />
-
-Default value = row[field.slug]
-
-FLOAT:
-
-SAME AS NUMBER
-
-Editable
-
-On click → inline edit with <input type="number" step="any" />
-
-Default value = row[field.slug]
-
-TEXT:
-
-View-only (NOT editable)
-
-Render as plain text with ellipsis
-
-Default value = row[field.slug]
-
-SINGLE_LINE:
-
-Editable
-
-On click → inline edit with <input type="text" />
-
-Default value = row[field.slug]
-
-STATUS:
-
-Render as a clickable status pill / cell (view mode)
-
-On click: open a dropdown menu anchored UNDER the cell (not a native <select>)
-
-Dropdown MUST render options in categories: todo, in progress, complete
-
-Options MUST be read from field.attributes:
-
-todo options: field.attributes.todo.options
-
-progress options: field.attributes.progress.options
-
-complete options: field.attributes.complete.options
-Option rendering rules:
-
-Label priority: label_ru -> label_en -> value
-
-If missing/empty, fallback to value
-
-Use option.color for text/badge color
-
-Background = same color but more transparent (approx 14–18% opacity)
-
-If category options are missing, safely fall back to:
-[{ value: "todo" }, { value: "in_progress" }, { value: "complete" }]
-Dropdown behavior:
-
-Close on outside click
-
-Close on option select
-
-Escape closes (optional)
-
-Must not break table scrolling
-
-SCHEMA SOURCE (IMPORTANT):
-MCP provides both:
-
-table rows at response.data.data.data.response
-
-table fields metadata at response.data.data.data.fields (from table-details)
-You MUST use fields metadata to decide how to render cells.
-Do NOT infer type from JS typeof.
-If fields metadata is missing, fallback to TEXT view-only.
-
-CELL EDITING VISUAL RULES (CRITICAL):
-Editable cells MUST NOT visually look like form inputs.
-Rules:
-
-No visible input borders
-
-No default input background
-
-No focus ring
-
-No input padding that breaks table rhythm
-Behavior:
-
-Cell looks like plain text by default
-
-On hover: subtle background highlight (Notion-like)
-
-On focus/edit: input is visually identical to cell text (invisible input)
-Implementation hint (conceptual):
-
-border: none
-
-background: transparent
-
-outline: none
-
-inherit font, size, line-height
-
+MODULE FEDERATION (MICRO-FRONTEND)
 ====================================
-PROJECT STRUCTURE (MANDATORY)
 
-src/
-
-components/
-
-Sidebar.jsx
-
-Table.jsx
-
-Loader.jsx
-
-layouts/
-
-DashboardLayout.jsx
-
-pages/
-
-DashboardHome.jsx
-
-DynamicTablePage.jsx
-
-data/
-
-tables.js
-
-api/
-
-axios.js
-
-App.jsx
-
-main.jsx
-
-index.css
-
-====================================
-MODULE FEDERATION CONFIGURATION (CRITICAL — MICRO-FRONTEND DEPLOYMENT):
-
-This project MUST be configured as a Micro-Frontend using Vite Module Federation.
-
-PACKAGE.JSON REQUIREMENTS (MANDATORY):
-
-The package.json MUST include these EXACT dependencies:
-
+PACKAGE.JSON (exact dependencies):
 {
   "name": "ucode-erp-admin-panel",
   "private": true,
@@ -1037,16 +549,9 @@ The package.json MUST include these EXACT dependencies:
   }
 }
 
-CRITICAL VERSION REQUIREMENTS:
-- "react": "^18.0.0" (MINIMUM)
-- "react-dom": "^18.0.0" (MINIMUM)
-- "react-router-dom": "^6.3.0" (MINIMUM)
-- "@originjs/vite-plugin-federation": "^1.2.3" (REQUIRED)
+DO NOT add libraries not listed above.
 
-VITE.CONFIG.JS REQUIREMENTS (MANDATORY):
-
-The vite.config.js MUST be configured as follows:
-
+VITE CONFIG (vite.config.js):
 import federation from "@originjs/vite-plugin-federation";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
@@ -1057,9 +562,7 @@ export default defineConfig({
     federation({
       name: "remote_app",
       filename: "remoteEntry.js",
-      exposes: {
-        "./Page": "./src/App.jsx"
-      },
+      exposes: { "./Page": "./src/App.jsx" },
       shared: ["react", "react-dom"]
     })
   ],
@@ -1071,196 +574,47 @@ export default defineConfig({
     minify: false,
     cssCodeSplit: false
   },
-  server: {
-    port: 3000,
-    host: true
-  }
+  server: { port: 3000, host: true }
 });
 
-MODULE FEDERATION RULES:
+====================================
+PROJECT STRUCTURE
+====================================
 
-1. The App.jsx MUST be exposed as "./Page"
-2. "react" and "react-dom" MUST be in shared array
-3. Build output MUST go to "build" directory
-4. remoteEntry.js MUST be generated
-5. modulePreload MUST be false
-6. cssCodeSplit MUST be false
-
-FAILURE CONDITIONS FOR MODULE FEDERATION:
-The solution is INVALID if:
-- @originjs/vite-plugin-federation is missing from devDependencies
-- vite.config.js does not import federation plugin
-- federation plugin is not configured in plugins array
-- App.jsx is not exposed as "./Page"
-- shared array does not include "react" and "react-dom"
-- build.outDir is not "build"
-- build.modulePreload is not false
-- build.cssCodeSplit is not false
+src/
+  components/
+    Sidebar.jsx
+    Table.jsx
+    Loader.jsx
+  layouts/
+    DashboardLayout.jsx
+  pages/
+    DashboardHome.jsx
+    DynamicTablePage.jsx
+  api/
+    axios.js
+  App.jsx
+  main.jsx
+  index.css
 
 ====================================
-OUTPUT FORMAT (CRITICAL — MUST FOLLOW)
-
-Return the result as a PURE JAVASCRIPT OBJECT.
-
-ABSOLUTE RULES:
-
-DO NOT wrap the output in markdown or code blocks
-
-DO NOT stringify the whole object
-
-DO NOT escape JSON globally
-
-DO NOT return a single string
-
-Return a REAL object structure
-
-The response MUST START with "{" and END with "}".
-
-The root response MUST be:
-{
-project_name: "ucode-erp-admin-panel",
-files: [ { path: "...", content: "..." } ],
-env: {
-VITE_ADMIN_BASE_URL: "https://admin-api.ucode.run",
-VITE_PROJECT_ID: "f1c4ae97-ee0f-4868-b4fc-1b26869ebc69",
-VITE_PARENT_ID: "c57eedc3-a954-4262-a0af-376c65b5a284",
-VITE_X_API_KEY: "P-wkLyW3aBURDx6oSwtlhk33WQn8Q3VhIc"
-}
-}
-
-ENV OUTPUT RULE (MANDATORY):
-
-In addition to generating .env.example file, you MUST return env object at root.
-
-The env object MUST include ALL variables used by the project in any .env file.
-
-The UI code MUST reference import.meta.env.VITE_* variables (not hardcoded constants).
-
-If you return the entire project as a single JSON string, or wrap it inside markdown code blocks, the result is INVALID.
-
+OUTPUT FORMAT (CRITICAL)
 ====================================
-QUALITY BAR
 
-This must look like a REAL commercial ERP / CRM admin panel:
-
-Premium feel
-
-Perfect spacing
-
-Clean typography
-
-Smooth animations
-
-Notion-level UI discipline
-
-You are generating FRONTEND UI code.
-The backend response format is ALREADY FIXED and MUST NOT be changed.
-
-Your task is to correctly READ data from backend responses and map them into UI components WITHOUT assumptions.
-
-FAILURE CONDITIONS:
-The solution is INVALID if:
-
-UI reads data from wrong response paths
-
-UI renders inputs for every cell by default (must be view mode first)
-
-Table details fields read from response.data.data (must be response.data.data.data)
-
-Missing cell borders
-
-Columns are not resizable
-
-The root output is not an object or misses env at root
-
-Any component is missing a root id attribute
-
-Module Federation is not properly configured
-
-package.json missing required dependencies
-
-vite.config.js missing federation plugin
-
-SUCCESS CONDITION:
-Frontend must correctly render:
-
-Empty state when response is empty
-
-Table with rows when response exists
-
-Pagination using count
-
-Menu using menus
-
-Typed cells and status dropdown from attributes
-
-Resizable columns
-
-All components have unique, stable id attributes on root elements
-
-Module Federation properly configured for micro-frontend deployment
-
-ARCHITECTURE FREEZE:
-
-Do NOT move providers into Layout or Pages.
-Do NOT conditionally render providers.
-Do NOT change layout hierarchy.
-
-Only apply the specified fixes.
-
-Generate the full project now.
-
-
-RESPOND WITH ONLY THE JSON OBJECT NOW.
-
-FILE GRAPH (MANDATORY — SIMPLIFIED FOR CLARITY)
-
-After generating the full project files and env object, you MUST also produce a "file_graph" object at the root of the JSON output.
-
-ABSOLUTE RULES:
-
-The root JSON MUST include: "project_name", "files", "env", and "file_graph"
-
-"file_graph" MUST contain one entry for every file in the "files" array
-
-File node schema (4 ESSENTIAL FIELDS ONLY):
+Return PURE JAVASCRIPT OBJECT (not string, not markdown):
 
 {
-  "path": "src/components/Sidebar.jsx",  // exact file path
-  "kind": "component",  // one of: component, page, layout, hook, api, style, config, util
-  "imports": ["react", "./SidebarItem", "../api/axios"],  // all import specifiers as written
-  "deps": ["src/components/SidebarItem.jsx", "src/api/axios.js"]  // resolved project files only (no "react", "axios")
-}
-
-FIELD EXPLANATIONS:
-
-1. "path" (string): exact file path matching files[].path
-
-2. "kind" (string): file type category
-   - "component" → React components (*.jsx in /components/)
-   - "page" → Route pages (*.jsx in /pages/)
-   - "layout" → Layout wrappers (DashboardLayout.jsx)
-   - "api" → API/HTTP modules (axios.js)
-   - "style" → CSS files (*.css)
-   - "config" → Config files (vite.config.js, package.json, tailwind.config.js)
-   - "hook" → Custom React hooks (use*.js)
-   - "util" → Utility functions
-
-3. "imports" (array of strings): ALL import specifiers exactly as written in the file
-   - Include: "react", "axios", "./Component", "../api/axios"
-   - Just copy what's in the import statements
-
-4. "deps" (array of strings): project file dependencies ONLY (resolved paths)
-   - EXCLUDE: "react", "react-dom", "axios", "react-router-dom" (external packages)
-   - INCLUDE: "src/components/Table.jsx", "src/api/axios.js" (project files)
-   - Must be resolvable paths within the generated project
-
-OUTPUT EXAMPLE:
-
-{
-  "project_name": "admin-panel",
-  "files": [...],
-  "env": {...},
+  "project_name": "ucode-erp-admin-panel",
+  "files": [
+    { "path": "src/App.jsx", "content": "..." },
+    ...
+  ],
+  "env": {
+    "VITE_ADMIN_BASE_URL": "https://admin-api.ucode.run",
+    "VITE_PROJECT_ID": "f1c4ae97-ee0f-4868-b4fc-1b26869ebc69",
+    "VITE_PARENT_ID": "c57eedc3-a954-4262-a0af-376c65b5a284",
+    "VITE_X_API_KEY": "P-wkLyW3aBURDx6oSwtlhk33WQn8Q3VhIc"
+  },
   "file_graph": {
     "src/App.jsx": {
       "path": "src/App.jsx",
@@ -1268,36 +622,48 @@ OUTPUT EXAMPLE:
       "imports": ["react", "react-router-dom", "./layouts/DashboardLayout"],
       "deps": ["src/layouts/DashboardLayout.jsx"]
     },
-    "src/components/Table.jsx": {
-      "path": "src/components/Table.jsx",
-      "kind": "component",
-      "imports": ["react", "./StatusCell"],
-      "deps": ["src/components/StatusCell.jsx"]
-    },
-    "src/api/axios.js": {
-      "path": "src/api/axios.js",
-      "kind": "api",
-      "imports": ["axios"],
-      "deps": []
-    },
-    "package.json": {
-      "path": "package.json",
-      "kind": "config",
-      "imports": [],
-      "deps": []
-    }
+    ...
   }
 }
 
-WHY THESE 4 FIELDS:
-- "path" → identify the file
-- "kind" → understand file role
-- "imports" → see what file uses
-- "deps" → trace project file connections
+FILE GRAPH RULES:
+- One entry per file
+- Fields: path, kind, imports, deps
+- kind values: component, page, layout, hook, api, style, config, util
+- imports: all import specifiers as written
+- deps: only project files (exclude react, axios, etc.)
 
-These 4 fields give complete picture for any developer or AI to understand the codebase structure and find where to make changes.
+====================================
+VALIDATION CHECKLIST
+====================================
 
-CRITICAL: Do NOT include any other fields. Keep it simple and parseable.
+INVALID if:
+- Mock data used anywhere
+- Default menu items rendered
+- Wrong API response paths
+- Multiple view tabs shown (only "Table" allowed)
+- Missing data-element-name attributes
+- Missing id on root elements
+- Cells render inputs by default (must be view mode)
+- Missing cell borders
+- Columns not resizable
+- Module Federation misconfigured
+- Extra libraries added
+- Output not pure object
+
+VALID if:
+- Empty states handled
+- All data from MCP
+- Correct response paths
+- Proper data attributes
+- Single "Table" tab
+- User prompt UI requirements applied
+- View-first cell rendering
+- Clean Notion-like UI
+
+Generate the full project now.
+
+RESPOND WITH ONLY THE JSON OBJECT NOW.
 `
 
 	SystemPromptAnalyzeFrontend = `
@@ -1488,23 +854,49 @@ Start with "{" and end with "}".
 
 func BuildFrontendGeneratePrompt(request models.FrontendPromptRequest) string {
 	// USER prompt template: dynamic; will be injected with the runtime values.
-	var userTpl = `User request:
-- Description: "%s"
+	var userTpl = `
+====================================
+CRITICAL USER UI REQUIREMENTS (HIGHEST PRIORITY)
+====================================
+
+%s
+
+This user requirement MUST take precedence over default design system.
+If user specifies a reference system (e.g., "Plan-fact", "like Shopify", "CRM like AmoCRM"):
+- Research the reference UI using web_search/web_fetch if needed
+- Replicate exact visual design, layout, colors, component placement
+- Match interaction patterns and user experience
+- Override default Notion Light theme with reference system's design
+
+====================================
+PROJECT CONFIGURATION
+====================================
+
+Runtime Configuration:
 - Project ID: "%s"
 - Main Menu Parent ID: "%s"
 - X-API-KEY: "%s"
 - Base URL: "%s"
 
-Task:
+====================================
+TECHNICAL REQUIREMENTS
+====================================
+
 1) Generate a complete production-ready frontend-only admin project (React 18 + Vite + TailwindCSS v2.2.19) as a single JSON object with fields:
    { "project_name": "<string>", "files": [ { "path": "<path>", "content": "<file contents>" }, ... ], "file_graph": {...}, "env": {...} }
    - File contents must be plain raw file text (use real newlines in JSON string values).
    - No markdown, no extra text outside that single JSON root.
-2) Default to LIGHT MODE (Notion-style) as specified in system prompt.
+
+2) UI Design Priority:
+   - PRIMARY: Follow user's UI requirements from above section
+   - SECONDARY: If no specific UI mentioned, use default LIGHT MODE (Notion-style) from system prompt
+   - CRITICAL: If user mentions "Plan-fact" or specific system reference, match that UI exactly
+
 3) Implement client-side routing using react-router-dom:
    - Include BrowserRouter and a Routes config with at least "/" (DashboardHome) and "/tables/:collection" (DynamicTablePage).
    - Sidebar menu item clicks must navigate using useNavigate to a path derived from the menu (e.g. '/tables/${item.data.table.slug}' for TABLE menus).
    - Top header must display selected menu label via router state or URL params.
+
 4) Implement runtime fetching of menus and table details using exact axios calls:
    - GET %s/v3/menus?parent_id=%s&project-id=%s
      Headers: { Authorization: "API-KEY", "X-API-KEY": "%s" }
@@ -1514,18 +906,60 @@ Task:
    - GET %s/v2/items/:collection
      Query params: limit, offset, search, sort_by, sort_order
      Headers: same as above
-5) Ensure table components follow the documented layout rules:
-   - Columns: min-width 220px, max-width 220px, resizable
-   - thead th must be position: sticky; top: 0; z-index: 10; inside the scroll container
-   - Cells render in VIEW mode, edit on click
-6) Include all required components as specified.
+
+5) Table Layout Rules (ADAPT TO USER'S UI REFERENCE):
+   - If user specifies "Plan-fact" style:
+     * Filters on RIGHT side of table (not in sub-header)
+     * Color-coded status columns (different colors per status value)
+     * Plan-fact specific layout and color scheme
+   - Default table rules (if no reference):
+     * Columns: min-width 220px, max-width 220px, resizable
+     * thead th must be position: sticky; top: 0; z-index: 10; inside the scroll container
+     * Cells render in VIEW mode, edit on click
+
+6) Include all required components as specified in system prompt.
+
 7) Include README_HOW_TO_RUN.txt explaining setup.
+
 8) Return EXACTLY one JSON object with: project_name, files, file_graph (5 fields per file), env.
 
-Now produce the complete project JSON immediately.`
+====================================
+VALIDATION BEFORE GENERATING
+====================================
+
+Before generating, ask yourself:
+- Did user specify a UI reference system? (Plan-fact, Shopify, AmoCRM, etc.)
+- If YES: Does my generated UI match that reference system's design?
+- Are filters, colors, layout matching the reference?
+- Are status columns color-coded if user mentioned Plan-fact?
+- Is there ANY white text on a white background? (FIX IT: Use rgb(55, 53, 47))
+- Are the icons visible? (FIX IT: Add brightness(0) filter if icons are white)
+- Did I use Tailwind "text-white" on a white sidebar? (FIX IT: Remove it)
+- Did user specify a UI reference system? ...
+
+====================================
+STRICT OUTPUT FORMAT
+====================================
+You are acting as a REST API. Return ONLY the JSON object.
+Do NOT use markdown code blocks. 
+Do NOT include any commentary. 
+
+Your response MUST start with '{' and end with '}'.
+
+Project JSON Structure:
+{
+  "project_name": "...",
+  "files": [...],
+  "env": {...},
+  "file_graph": {...}
+}
+
+GENERATE THE JSON NOW:
+
+`
 
 	return fmt.Sprintf(userTpl,
-		request.UserPrompt,
+		request.UserPrompt, // Теперь это первое и самое важное
 		request.ProjectId,
 		config.MainMenuID,
 		request.APIKey,
@@ -1573,6 +1007,9 @@ Context Item %d:
 			if ctx.Column != 0 {
 				contextSection += fmt.Sprintf("- Column: %d (hint only)\n", ctx.Column)
 			}
+			if ctx.ElementName != "" {
+				contextSection += fmt.Sprintf("- Element name: %s (hint only)\n", ctx.ElementName)
+			}
 		}
 
 		contextSection += `
@@ -1583,8 +1020,9 @@ CONTEXT USAGE RULES:
 4. Line/Column numbers are HINTS ONLY - code may have shifted, use for reference but NOT as primary locator
 5. When precision is high (element_id + tag provided), focus changes ONLY on that specific element
 6. When precision is low (only fragment), search entire file for matching code
+7. Element data-element-name (name) is most reliable identifier if provided
 
-PRIORITY: code_fragment > element_id > tag > dom_path > line > column
+PRIORITY:  code_fragment > name > element_id > tag > dom_path > line > column
 `
 	}
 
