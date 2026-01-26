@@ -160,9 +160,7 @@ func (h *HandlerV1) MCPGenerateFrontend(c *gin.Context) {
 	}
 
 	go func() {
-		if req.Method == "" {
-			req.Method = "project"
-		}
+		req.Method = "project"
 
 		content, message, err := helper.BuildBackendPrompt(
 			models.BackendPromptRequest{
