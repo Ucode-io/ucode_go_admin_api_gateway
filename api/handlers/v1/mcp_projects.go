@@ -207,3 +207,7 @@ func (h *HandlerV1) SaveMcpProject(c *gin.Context) {
 
 	h.HandleResponse(c, status_http.OK, response)
 }
+
+func (h *HandlerV1) PublishMcpProjectFront(c *gin.Context) {
+	_ = h.MakeProxy(c, h.baseConf.GoFunctionServiceHost+h.baseConf.GoFunctionServiceHTTPPort, c.Request.URL.Path)
+}

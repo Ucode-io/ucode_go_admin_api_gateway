@@ -159,32 +159,32 @@ func (h *HandlerV1) MCPGenerateFrontend(c *gin.Context) {
 		return
 	}
 
-	go func() {
-		req.Method = "project"
-
-		content, message, err := helper.BuildBackendPrompt(
-			models.BackendPromptRequest{
-				ProjectId:     projectId.(string),
-				EnvironmentId: environmentId.(string),
-				Method:        req.Method,
-				APIKey:        apiKeys.GetData()[0].GetAppId(),
-				UserPrompt:    req.Prompt,
-			},
-		)
-		if err != nil {
-			h.HandleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
-		_, err = h.sendAnthropicBackend(content)
-		if err != nil {
-			h.HandleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
-		h.HandleResponse(c, status_http.OK, message)
-
-	}()
+	//go func() {
+	//	req.Method = "project"
+	//
+	//	content, message, err := helper.BuildBackendPrompt(
+	//		models.BackendPromptRequest{
+	//			ProjectId:     projectId.(string),
+	//			EnvironmentId: environmentId.(string),
+	//			Method:        req.Method,
+	//			APIKey:        apiKeys.GetData()[0].GetAppId(),
+	//			UserPrompt:    req.Prompt,
+	//		},
+	//	)
+	//	if err != nil {
+	//		h.HandleResponse(c, status_http.GRPCError, err.Error())
+	//		return
+	//	}
+	//
+	//	_, err = h.sendAnthropicBackend(content)
+	//	if err != nil {
+	//		h.HandleResponse(c, status_http.GRPCError, err.Error())
+	//		return
+	//	}
+	//
+	//	h.HandleResponse(c, status_http.OK, message)
+	//
+	//}()
 
 	userPrompt := helper.BuildFrontendGeneratePrompt(
 		models.FrontendPromptRequest{

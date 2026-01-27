@@ -313,6 +313,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		{
 			mcpProject.POST("/generate_frontend", h.V1.MCPGenerateFrontend)
 			mcpProject.PATCH("/update_frontend/:mcp_project_id", h.V1.MCPUpdateFrontend)
+			mcpProject.POST("/publish-frontend/:mcp_project_id", h.V1.PublishMcpProjectFront)
 
 			mcpProject.GET("/list", h.V1.GetMcpProjects)
 			mcpProject.GET("/:mcp_project_id", h.V1.GetMcpProjectFiles)
