@@ -26,25 +26,35 @@ var (
   You MAY use standard React ecosystem libraries if the UI requires them (e.g., 'recharts' for analytics, 'framer-motion' for animations, 'react-beautiful-dnd' for kanban, 'date-fns' for formatting, 'lucide-react' for icons).
 
   ====================================
-  DESIGN SYSTEM (STRICT — NOTION LIGHT MODE)
+  DESIGN SYSTEM (NOTION STYLE + DARK MODE SUPPORT)
   ====================================
 
-  COLOR PALETTE (USE ONLY THESE):
-  - Main background: #FFFFFF
-  - Borders: rgba(55, 53, 47, 0.16)
-  - Dividers: rgba(55, 53, 47, 0.12)
-  - Primary text: rgb(55, 53, 47)  <-- MUST BE DEFAULT FOR ALL TEXT
-  - Secondary text: rgba(55, 53, 47, 0.65)
-  - Muted text: rgba(55, 53, 47, 0.45)
-  - Active menu: #F0F0EF
-  - Hover menu: rgba(55, 53, 47, 0.06)
-  - Primary button: #007AFF (text: #FFFFFF)
-  - Secondary button: rgba(55, 53, 47, 0.08) with border rgba(55, 53, 47, 0.16) (text: rgb(55, 53, 47))
+  COLOR PALETTE (MAPPING):
+  You MUST use Tailwind's "dark:" prefix for all color definitions to support both modes.
+
+  1. Backgrounds:
+     - Main:      bg-white             dark:bg-[#191919]
+     - Sidebar:   bg-[#F7F7F5]         dark:bg-[#202020]
+     - Cards:     bg-white             dark:bg-[#252525]
+     - Active:    bg-[#F0F0EF]         dark:bg-[#2C2C2C]
+     - Hover:     hover:bg-[#F0F0EF]   dark:hover:bg-[#2C2C2C]
+
+  2. Text:
+     - Primary:   text-[#37352F]       dark:text-[#D4D4D4]
+     - Secondary: text-[#37352F]/65    dark:text-[#D4D4D4]/65
+     - Muted:     text-[#37352F]/45    dark:text-[#D4D4D4]/45
+
+  3. Borders:
+     - Default:   border-[#37352F]/16  dark:border-[#FFFFFF]/10
+     - Divider:   border-[#37352F]/12  dark:border-[#FFFFFF]/06
+
+  4. Buttons:
+     - Primary:   bg-[#007AFF] text-white (Keep consistent)
+     - Secondary: bg-transparent border border-[#37352F]/16 dark:border-[#FFFFFF]/16
 
   CONTRAST RULE (CRITICAL):
-  - NEVER use white text (#FFFFFF) on a white background (#FFFFFF).
-  - ALL icons and text on white backgrounds MUST use Primary Text color (rgb(55, 53, 47)).
-  - If an icon (img) is too light, apply CSS: filter: brightness(0).
+  - NEVER use hardcoded text colors without a dark variant.
+  - Icons must invert brightness in dark mode automatically via text color or CSS filters.
 
 
   ====================================
@@ -514,9 +524,13 @@ var (
     plugins: []
   };
 
-  ENV FILE (.env):
-  VITE_API_BASE_URL=https://api.example.com
-  VITE_APP_NAME=MyApp
+  ENV FILES (CRITICAL):
+  You MUST include two environment files in the "files" array:
+  1. ".env"
+  2. ".env.production"
+  
+  Both files must contain the same keys/values from the Runtime Configuration (VITE_API_BASE_URL, VITE_APP_NAME, etc.).
+  FORMAT: KEY=VALUE (standard .env format).
 
   - Access via import.meta.env.VITE_*
   - DO NOT hardcode values
@@ -531,7 +545,25 @@ var (
 
   You MUST generate a 'package.json' file with the correct dependencies.
 
-  STEP 1: Start with these MANDATORY CORE DEPENDENCIES (Use EXACT versions):
+  STEP 1: MANDATORY CORE DEPENDENCIES (EXACT VERSIONS):
+  - "react": "18.0.0"
+  - "react-dom": "18.0.0"
+  - "react-router-dom": "6.3.0"  <-- Older version compatible with 18.0.0
+  - "axios": "^1.6.0"
+
+  STEP 2: DYNAMIC LIBRARIES VERSIONING (CRITICAL):
+  - Do NOT use "latest" versions for libraries like framer-motion, recharts, or react-leaflet.
+  - You MUST choose versions released around year 2022-2023.
+  - KNOWN COMPATIBLE VERSIONS (Use these or similar):
+    * "framer-motion": "^6.0.0" (Do NOT use v10/v11/v12 - they break React 18.0.0)
+    * "recharts": "^2.1.0"
+    * "react-leaflet": "^4.0.0"
+    * "leaflet": "^1.7.0"
+    * "dnd-kit": "^6.0.0"
+  
+  STEP 3: If you are unsure, pick an older stable version rather than the newest one.
+
+  STEP 4: Start with these MANDATORY CORE DEPENDENCIES (Use EXACT versions):
   - "react": "^18.2.0"
   - "react-dom": "^18.2.0"
   - "react-router-dom": "^6.22.0"
@@ -540,13 +572,13 @@ var (
   - "clsx": "^2.1.0"
   - "tailwind-merge": "^2.2.0"
 
-  STEP 2: SCAN YOUR GENERATED CODE.
+  STEP 5: SCAN YOUR GENERATED CODE.
   - If you imported "recharts", ADD "recharts": "^2.12.0" to dependencies.
   - If you imported "framer-motion", ADD "framer-motion": "^11.0.0" to dependencies.
   - If you imported "react-beautiful-dnd", ADD it to dependencies.
   - Apply this rule for ANY external library you used.
 
-  STEP 3: FORMATTING RULES
+  STEP 6: FORMATTING RULES
   - Do NOT include the "type" field (e.g., REMOVE "type": "module").
   - Do NOT use UI kits (MUI, AntD, Chakra) - use Tailwind only.
 
@@ -793,12 +825,12 @@ CRITICAL RULES:
    - User's original request
    - File graph context for dependencies
 
-2. Code quality standards:
-   - Maintain existing code style and patterns
-   - Preserve all imports that are still needed
-   - Keep the same file structure conventions
-   - Don't break existing functionality
-   - Add comments only where complex logic is added
+2. **IMMUTABILITY RULES (ZERO SIDE EFFECTS):**
+   - CHANGE ONLY WHAT IS REQUESTED. Do not touch anything else.
+   - DO NOT "clean up", "refactor", or "format" existing code unrelated to the task.
+   - DO NOT change border-radius, paddings, colors, or margins unless explicitly asked.
+   - If the user asks to "change the icon", modify ONLY the icon tag/import. Leave the wrapping button styles EXACTLY as they are.
+   - Preserve all existing comments and structure.
 
 3. Integration rules:
    - New code must integrate seamlessly with unchanged files
@@ -853,11 +885,8 @@ CRITICAL RULES:
 
 TECHNICAL REQUIREMENTS FROM ORIGINAL PROJECT:
 
-Design: Notion-like light mode
-- Background: #FFFFFF
-- Text: rgb(55, 53, 47)
-- Borders: rgba(55, 53, 47, 0.16)
-- No dark mode, no gradients
+- Keep Notion-like light/dark mode logic (don't break existing dark mode)
+- No TypeScript (JavaScript only)
 
 React patterns:
 - Functional components only
