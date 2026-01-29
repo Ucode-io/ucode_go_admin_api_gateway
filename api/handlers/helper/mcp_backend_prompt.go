@@ -7,13 +7,73 @@ import (
 	"ucode/ucode_go_api_gateway/config"
 )
 
-var SystemPromptBackend = `You are connected to an MCP server named "ucode" and have access to tools via the mcp_toolset.
+var (
+	SystemPromptBackend = `You are connected to an MCP server named "ucode" and have access to tools via the mcp_toolset.
 When an external action is required (get_dbml, create_menu, create_table, update_table, dbml_to_ucode), CALL the tools using the MCP tool calling mechanism.
 DO NOT call the create_field tool for automated field creation. Instead, ALWAYS use update_table to add or modify fields and relations in bulk (send a fields array and relations array).
 Only call create_field when a human explicitly requests a single manual field creation and after receiving explicit confirmation.
 Do not invent results — call the appropriate tool with exact parameters. Use the tool names as documented.`
 
-func BuildBackendPrompt(request models.BackendPromptRequest) (content, message string, err error) {
+	SystemPromptClassifyRequest = `You are a request classifier for a full-stack admin panel system.
+
+Your task: Analyze user request and determine if it requires BACKEND operations, FRONTEND operations, or BOTH.
+
+BACKEND operations include:
+- Creating/deleting tables (e.g., "add table users", "create table products")
+- Creating/updating/deleting fields (e.g., "add field email to users", "remove field phone")
+- Creating/modifying menus (e.g., "create menu orders")
+- Database schema changes (e.g., "add relation between users and orders")
+- Any operation involving database structure
+
+FRONTEND operations include:
+- UI/visual changes (e.g., "change sidebar color", "make header sticky")
+- Layout modifications (e.g., "add search bar", "change button size")
+- Styling updates (e.g., "use blue theme", "increase font size")
+- Component behavior (e.g., "add loading spinner", "make table sortable")
+- Any operation involving visual presentation
+
+IMPORTANT RULES:
+1. A request can require BOTH backend and frontend operations
+2. If user mentions table/field/menu creation AND UI changes → both=true
+3. If image is provided, it typically indicates frontend changes (but can still have backend operations in text)
+4. Backend operations use MCP tools, frontend operations modify React code
+5. Analyze the COMPLETE request - don't ignore any part
+
+Examples:
+
+Request: "add table users"
+→ requires_backend=true, requires_frontend=false
+
+Request: "change sidebar to dark blue"
+→ requires_backend=false, requires_frontend=true
+
+Request: "add table products with fields name, price AND make sidebar blue"
+→ requires_backend=true, requires_frontend=true
+
+Request: "create menu orders" [with image showing UI design]
+→ requires_backend=true, requires_frontend=true (image suggests UI changes)
+
+Analyze this request carefully and return ONLY valid JSON (no markdown, no explanation):
+
+{
+  "requires_backend": true/false,
+  "requires_frontend": true/false,
+  "backend_reason": "brief explanation why backend is/isn't needed",
+  "frontend_reason": "brief explanation why frontend is/isn't needed",
+  "confidence": "high/medium/low"
+}
+
+User Request: "%s"
+Has Images: %v
+
+Return ONLY the JSON object. Start with { and end with }.`
+)
+
+func BuildClassificationPrompt(userRequest string, hasImages bool) string {
+	return fmt.Sprintf(SystemPromptClassifyRequest, userRequest, hasImages)
+}
+
+func BuildBackendPrompt(request models.GeneratePromptRequest) (content, message string, err error) {
 	switch request.Method {
 	case "project":
 		content = fmt.Sprintf(`You are creating a complete u-code project from scratch. Analyze the user's request and determine:
@@ -125,26 +185,133 @@ Now analyze the user's request, determine project type/systems/industry, and cre
 		message = "Your project has been successfully created."
 
 	case "table":
-		content = request.UserPrompt
-		content += fmt.Sprintf(`
+		content = fmt.Sprintf(`You are managing backend operations for a u-code project.
 
-Context:
-project-id = %s
-environment-id = %s
-x-api-key = %s
+USER REQUEST: "%s"
 
-Rules:
-- Use available MCP tools to actually perform the action (do not just reply with text).
-- When creating a table:
-  - label must match the requested name
-  - slug should be a safe snake_case variant of the name
-- After tool execution, return the API result (or clear error).`,
-			request.ProjectId, request.EnvironmentId, request.APIKey)
+AVAILABLE MCP TOOLS (via mcp_toolset):
+You have access to these tools through the MCP server "ucode":
 
-		message = "The table has been successfully updated."
+1. get_dbml - Get current database schema
+   Parameters: 
+     - project-id: "%s"
+     - environment-id: "%s"
+     - x-api-key: "%s"
+
+2. create_table - Create new table
+   Parameters:
+     - label: Display name (e.g., "Users", "Products")
+     - slug: URL-safe name in snake_case (e.g., "users", "products")
+     - icon: Valid Iconify URL (e.g., "https://api.iconify.design/mdi:account.svg")
+     - menu_id: "%s" (ALWAYS use this value)
+     - x-api-key: "%s"
+   Example: create_table({label: "Users", slug: "users", icon: "https://api.iconify.design/mdi:account.svg", menu_id: "%s", x_api_key: "%s"})
+
+3. update_table - Add or modify fields and relations in bulk
+   Parameters:
+     - tableSlug: Table slug (collection name)
+     - xapikey: "%s"
+     - fields: Array of field objects
+     - relations: Array of relation objects
+   
+   Field types available:
+     - SINGLE_LINE: Short text (names, titles)
+     - TEXT: Long text (descriptions)
+     - NUMBER: Integers
+     - FLOAT: Decimal numbers
+     - DATE: Date values
+     - BOOLEAN: True/false
+     - ENUM: Predefined options
+     - RELATION: Foreign key to another table
+   
+   Field object structure:
+   {
+     "type": "SINGLE_LINE",
+     "label": "Full Name",
+     "slug": "full_name",
+     "required": true,
+     "attributes": {}
+   }
+   
+   Example: update_table({tableSlug: "users", xapikey: "%s", fields: [{type: "SINGLE_LINE", label: "Name", slug: "name", required: true}, {type: "TEXT", label: "Bio", slug: "bio"}], relations: []})
+
+4. create_field - Create single field (USE ONLY FOR EXPLICIT SINGLE FIELD REQUESTS)
+   IMPORTANT: Do NOT use this for bulk operations. Use update_table instead.
+   Only call this when user explicitly says "add one field" or "create single field"
+   Parameters:
+     - collection: Table slug
+     - xapikey: "%s"
+     - type: Field type
+     - label: Display name
+     - slug: Field slug
+     - required: boolean
+     - attributes: Field-specific settings
+
+CRITICAL RULES FOR OPERATIONS:
+
+For TABLE CREATION:
+1. ALWAYS provide a valid icon URL from Iconify (https://api.iconify.design/...)
+2. ALWAYS use menu_id = "%s"
+3. Slug must be snake_case (e.g., "user_profiles", not "UserProfiles")
+4. After creating table, use update_table to add fields
+
+For FIELD CREATION:
+1. PREFER update_table for adding multiple fields at once
+2. Use create_field ONLY when explicitly requested for single field
+3. Always include standard fields: name/title, created_at, updated_at
+4. For ENUM fields, define options in attributes
+
+For MENU CREATION:
+1. Creating a menu means creating a table (menus and tables are same in u-code)
+2. Follow same rules as table creation
+
+OPERATION WORKFLOW:
+
+Step 1: Understand the request
+- Is this creating new table/menu?
+- Is this adding fields to existing table?
+- Is this modifying existing structure?
+
+Step 2: Check current schema (if modifying existing)
+- Call get_dbml to see existing structure
+- Identify what needs to change
+
+Step 3: Execute appropriate MCP tool
+- create_table for new tables/menus
+- update_table for adding/modifying fields in bulk
+- create_field ONLY for single manual field creation
+
+Step 4: Return clear result
+- Report what was created/modified
+- Include any relevant IDs or slugs
+- Report any errors clearly
+
+CONTEXT:
+project-id: %s
+environment-id: %s
+x-api-key: %s
+main-menu-id: %s
+
+TASK: 
+Analyze the user request above and execute the appropriate MCP tool calls to fulfill it.
+Return a clear, concise message about what was done.
+If any operation fails, report the error clearly.
+
+Execute now.`,
+			request.UserPrompt,
+			request.ProjectId, request.EnvironmentId, request.APIKey,
+			config.MainMenuID, request.APIKey, config.MainMenuID, request.APIKey,
+			request.APIKey,
+			request.APIKey,
+			request.APIKey,
+			config.MainMenuID,
+			request.ProjectId, request.EnvironmentId, request.APIKey, config.MainMenuID,
+		)
+
+		message = "Backend operation completed successfully."
 
 	default:
-		message = fmt.Sprintf("method not implemented: %s", message)
+		message = fmt.Sprintf("method not implemented: %s", request.Method)
 		err = errors.New(message)
 	}
 

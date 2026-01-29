@@ -1049,7 +1049,7 @@ Start with "{" and end with "}".
 `
 )
 
-func BuildFrontendGeneratePrompt(request models.FrontendPromptRequest) string {
+func BuildFrontendGeneratePrompt(request models.GeneratePromptRequest) string {
 	// USER prompt template: dynamic; will be injected with the runtime values.
 	var userTpl = `
 ====================================
@@ -1164,7 +1164,7 @@ GENERATE THE JSON NOW:
 `
 
 	return fmt.Sprintf(userTpl,
-		request.UserPrompt, // Теперь это первое и самое важное
+		request.UserPrompt,
 		request.ProjectId,
 		config.MainMenuID,
 		request.APIKey,

@@ -23,20 +23,12 @@ type (
 
 	// ========================== Prompt Building Requests ==========================
 
-	BackendPromptRequest struct {
+	GeneratePromptRequest struct {
 		ProjectId     string `json:"project_id"`
 		EnvironmentId string `json:"environment_id"`
 		APIKey        string `json:"api_key"`
 		UserPrompt    string `json:"user_prompt"`
 		Method        string `json:"method"`
-		BaseURL       string `json:"base_url"`
-	}
-
-	FrontendPromptRequest struct {
-		ProjectId     string `json:"project_id"`
-		EnvironmentId string `json:"environment_id"`
-		APIKey        string `json:"api_key"`
-		UserPrompt    string `json:"user_prompt"`
 		BaseURL       string `json:"base_url"`
 	}
 
@@ -60,8 +52,8 @@ type (
 	ProjectFile struct {
 		Path          string `json:"path"`
 		Content       string `json:"content"`
-		ChangeSummary string `json:"change_summary,omitempty"` // for updated files
-		Purpose       string `json:"purpose,omitempty"`        // for new files
+		ChangeSummary string `json:"change_summary,omitempty"`
+		Purpose       string `json:"purpose,omitempty"`
 	}
 
 	// ========================== AI Responses ==========================
@@ -133,7 +125,7 @@ type (
 	}
 
 	ContentBlock struct {
-		Type   string       `json:"type"` // "text" или "image"
+		Type   string       `json:"type"`
 		Text   string       `json:"text,omitempty"`
 		Source *ImageSource `json:"source,omitempty"`
 	}
@@ -141,11 +133,28 @@ type (
 	ImageSource struct {
 		Type      string `json:"type" default:"url"`
 		URL       string `json:"url,omitempty"`
-		MediaType string `json:"media_type,omitempty"` // "image/jpeg", "image/png", etc.
+		MediaType string `json:"media_type,omitempty"`
 	}
 
 	ChatMessage struct {
 		Role    string         `json:"role"`
 		Content []ContentBlock `json:"content"`
+	}
+
+	// ============================ Classification Models ============================
+
+	RequestClassification struct {
+		RequiresBackend  bool   `json:"requires_backend"`
+		RequiresFrontend bool   `json:"requires_frontend"`
+		BackendReason    string `json:"backend_reason"`
+		FrontendReason   string `json:"frontend_reason"`
+		Confidence       string `json:"confidence"`
+	}
+
+	AnthropicApiResponse struct {
+		Content []struct {
+			Type string `json:"type"`
+			Text string `json:"text"`
+		} `json:"content"`
 	}
 )

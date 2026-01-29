@@ -24,7 +24,7 @@ import (
 
 // ====================  MCP HANDLERS  ====================
 
-func (h *HandlerV1) MCPCall(c *gin.Context) {
+func (h *HandlerV1) McpCreateBackend(c *gin.Context) {
 	var (
 		req           models.MCPRequest
 		projectId     any
@@ -70,7 +70,7 @@ func (h *HandlerV1) MCPCall(c *gin.Context) {
 	}
 
 	content, message, err := helper.BuildBackendPrompt(
-		models.BackendPromptRequest{
+		models.GeneratePromptRequest{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			Method:        req.Method,
@@ -92,7 +92,7 @@ func (h *HandlerV1) MCPCall(c *gin.Context) {
 	h.HandleResponse(c, status_http.OK, message)
 }
 
-func (h *HandlerV1) MCPGenerateFrontend(c *gin.Context) {
+func (h *HandlerV1) McpGenerateProject(c *gin.Context) {
 	var (
 		req           models.MCPRequest
 		projectId     any
@@ -163,7 +163,7 @@ func (h *HandlerV1) MCPGenerateFrontend(c *gin.Context) {
 		req.Method = "project"
 
 		content, message, err := helper.BuildBackendPrompt(
-			models.BackendPromptRequest{
+			models.GeneratePromptRequest{
 				ProjectId:     projectId.(string),
 				EnvironmentId: environmentId.(string),
 				Method:        req.Method,
@@ -187,7 +187,7 @@ func (h *HandlerV1) MCPGenerateFrontend(c *gin.Context) {
 	}()
 
 	userPrompt := helper.BuildFrontendGeneratePrompt(
-		models.FrontendPromptRequest{
+		models.GeneratePromptRequest{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			APIKey:        apiKeys.GetData()[0].GetAppId(),
@@ -263,6 +263,24 @@ func (h *HandlerV1) MCPUpdateFrontend(c *gin.Context) {
 		return
 	}
 
+	apiKeys, err := h.authService.ApiKey().GetList(
+		c.Request.Context(),
+		&as.GetListReq{
+			EnvironmentId: environmentId.(string),
+			ProjectId:     projectId.(string),
+			Limit:         1,
+			Offset:        0,
+		},
+	)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+	if len(apiKeys.Data) < 1 {
+		h.HandleResponse(c, status_http.InvalidArgument, "Api key not found")
+		return
+	}
+
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
@@ -284,6 +302,61 @@ func (h *HandlerV1) MCPUpdateFrontend(c *gin.Context) {
 	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	log.Println("========== STEP 1: CLASSIFYING REQUEST ==========")
+
+	classification, err := h.classifyRequest(request.Prompt, request.ImageURLs)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, "Classification failed: "+err.Error())
+		return
+	}
+
+	log.Printf("Classification result: backend=%v, frontend=%v",
+		classification.RequiresBackend,
+		classification.RequiresFrontend,
+	)
+
+	if !classification.RequiresBackend && !classification.RequiresFrontend {
+		h.HandleResponse(
+			c, status_http.OK,
+			map[string]string{
+				"status":  "success",
+				"message": "No operations required for this request",
+			},
+		)
+		return
+	}
+
+	var (
+		generatePromptReq = models.GeneratePromptRequest{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			UserPrompt:    request.Prompt,
+			APIKey:        apiKeys.GetData()[0].GetAppId(),
+			Method:        "table",
+		}
+
+		content, message string
+	)
+
+	if classification.RequiresBackend && !classification.RequiresFrontend {
+		content, message, err = helper.BuildBackendPrompt(generatePromptReq)
+		if err != nil {
+			h.HandleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		_, err = h.sendAnthropicBackend(content)
+		if err != nil {
+			h.HandleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		h.HandleResponse(c, status_http.OK, map[string]any{
+			"message": message,
+		})
 		return
 	}
 
@@ -310,7 +383,25 @@ func (h *HandlerV1) MCPUpdateFrontend(c *gin.Context) {
 		filesMap[file.Path] = file.Content
 	}
 
-	fmt.Println("========== STEP 1: ANALYSIS ==========")
+	if classification.RequiresBackend && classification.RequiresFrontend {
+		go func() {
+			content, message, err = helper.BuildBackendPrompt(generatePromptReq)
+			if err != nil {
+				log.Println("Backend operation failed, building user prompt: " + err.Error())
+				return
+			}
+
+			_, err = h.sendAnthropicBackend(content)
+			if err != nil {
+				log.Println("Backend operation failed: " + err.Error())
+				return
+			}
+
+			log.Println("Async backend operation completed successfully")
+		}()
+	}
+
+	log.Println("========== STEP 5: ANALYZING FRONTEND CHANGES ==========")
 
 	var (
 		analyzeReq = models.AnalyzeFrontendPromptRequest{
@@ -335,34 +426,36 @@ func (h *HandlerV1) MCPUpdateFrontend(c *gin.Context) {
 		return
 	}
 
-	fmt.Printf("Analysis: modify=%d, create=%d, delete=%d\n",
+	log.Printf("Analysis: modify=%d, create=%d, delete=%d",
 		len(analysis.FilesToModify),
 		len(analysis.NewFilesNeeded),
-		len(analysis.FilesToDelete))
+		len(analysis.FilesToDelete),
+	)
 
 	if len(analysis.FilesToModify) == 0 && len(analysis.NewFilesNeeded) == 0 && len(analysis.FilesToDelete) == 0 {
-		h.HandleResponse(c, status_http.OK, "Nothing to update")
+		if classification.RequiresBackend {
+			h.HandleResponse(c, status_http.OK, map[string]interface{}{
+				"status":             "success",
+				"message":            "Backend table creation in progress. No frontend changes needed.",
+				"backend_processing": true,
+			})
+		} else {
+			h.HandleResponse(c, status_http.OK, map[string]string{
+				"status":  "success",
+				"message": "No frontend changes needed",
+			})
+		}
 		return
 	}
-
-	fmt.Println("========== STEP 2: PREPARING FILES ==========")
 
 	for _, fileToMod := range analysis.FilesToModify {
-		if content, exists := filesMap[fileToMod.Path]; exists {
+		if fileContent, exists := filesMap[fileToMod.Path]; exists {
 			filesToUpdate = append(filesToUpdate, models.ProjectFile{
 				Path:    fileToMod.Path,
-				Content: content,
+				Content: fileContent,
 			})
-			fmt.Printf("  - Prepared: %s\n", fileToMod.Path)
 		}
 	}
-
-	if len(filesToUpdate) == 0 && len(analysis.NewFilesNeeded) == 0 {
-		h.HandleResponse(c, status_http.OK, "Nothing to update")
-		return
-	}
-
-	fmt.Println("========== STEP 3: UPDATE REQUEST ==========")
 
 	var (
 		updateReq = models.UpdateFrontendPromptRequest{
@@ -389,10 +482,11 @@ func (h *HandlerV1) MCPUpdateFrontend(c *gin.Context) {
 		return
 	}
 
-	fmt.Printf("Update: updated=%d, new=%d, deleted=%d\n",
+	log.Printf("Update: updated=%d, new=%d, deleted=%d",
 		len(update.UpdatedFiles),
 		len(update.NewFiles),
-		len(update.DeletedFiles))
+		len(update.DeletedFiles),
+	)
 
 	for _, file := range update.UpdatedFiles {
 		filesMap[file.Path] = file.Content
@@ -476,6 +570,9 @@ func (h *HandlerV1) generateFrontendProject(userPrompt string, imageURLs []strin
 	var (
 		contentBlocks []models.ContentBlock
 		body          models.AnthropicRequest
+
+		apiResponse models.AnthropicApiResponse
+		project     models.GeneratedProject
 	)
 
 	for _, imageURL := range imageURLs {
@@ -525,17 +622,6 @@ func (h *HandlerV1) generateFrontendProject(userPrompt string, imageURLs []strin
 		return nil, err
 	}
 
-	var (
-		apiResponse struct {
-			Content []struct {
-				Type string `json:"type"`
-				Text string `json:"text"`
-			} `json:"content"`
-		}
-
-		project models.GeneratedProject
-	)
-
 	if err = json.Unmarshal([]byte(respText), &apiResponse); err != nil {
 		return nil, fmt.Errorf("failed to parse API response: %w", err)
 	}
@@ -553,10 +639,68 @@ func (h *HandlerV1) generateFrontendProject(userPrompt string, imageURLs []strin
 	return &project, nil
 }
 
+func (h *HandlerV1) classifyRequest(prompt string, imageURLs []string) (*models.RequestClassification, error) {
+	var (
+		hasImages = len(imageURLs) > 0
+
+		classificationPrompt = helper.BuildClassificationPrompt(prompt, hasImages)
+
+		body = models.AnthropicRequest{
+			Model:     h.baseConf.ClaudeModel,
+			MaxTokens: 2048,
+			System:    helper.SystemPromptClassifyRequest,
+			Messages: []models.ChatMessage{
+				{
+					Role: "user",
+					Content: []models.ContentBlock{
+						{
+							Type: "text",
+							Text: classificationPrompt,
+						},
+					},
+				},
+			},
+		}
+
+		apiResponse    models.AnthropicApiResponse
+		classification models.RequestClassification
+	)
+
+	respText, err := h.callAnthropicAPI(body, 60*time.Second)
+	if err != nil {
+		return nil, fmt.Errorf("classification API call failed: %w", err)
+	}
+
+	if err = json.Unmarshal([]byte(respText), &apiResponse); err != nil {
+		return nil, fmt.Errorf("failed to parse classification response: %w", err)
+	}
+
+	if len(apiResponse.Content) == 0 {
+		return nil, fmt.Errorf("empty classification response")
+	}
+
+	cleanedText := helper.CleanJSONResponse(apiResponse.Content[0].Text)
+
+	if err = json.Unmarshal([]byte(cleanedText), &classification); err != nil {
+		return nil, fmt.Errorf("failed to parse classification JSON: %w", err)
+	}
+
+	log.Printf("REQUEST CLASSIFIED: backend=%v, frontend=%v, confidence=%s",
+		classification.RequiresBackend,
+		classification.RequiresFrontend,
+		classification.Confidence,
+	)
+
+	return &classification, nil
+}
+
 func (h *HandlerV1) analyzeProject(userPrompt string, imageURLs []string) (*models.AnalysisResult, error) {
 	var (
 		contentBlocks []models.ContentBlock
 		body          models.AnthropicRequest
+
+		apiResponse models.AnthropicApiResponse
+		analysis    models.AnalysisResult
 	)
 
 	for _, imageURL := range imageURLs {
@@ -593,16 +737,6 @@ func (h *HandlerV1) analyzeProject(userPrompt string, imageURLs []string) (*mode
 		return nil, err
 	}
 
-	var (
-		apiResponse struct {
-			Content []struct {
-				Text string `json:"text"`
-			} `json:"content"`
-		}
-
-		analysis models.AnalysisResult
-	)
-
 	if err = json.Unmarshal([]byte(respText), &apiResponse); err != nil {
 		return nil, fmt.Errorf("failed to parse response: %w", err)
 	}
@@ -624,6 +758,9 @@ func (h *HandlerV1) updateProject(userPrompt string, imageURLs []string) (*model
 	var (
 		contentBlocks []models.ContentBlock
 		body          models.AnthropicRequest
+
+		apiResponse models.AnthropicApiResponse
+		update      models.UpdateResult
 	)
 
 	for _, imageURL := range imageURLs {
@@ -672,16 +809,6 @@ func (h *HandlerV1) updateProject(userPrompt string, imageURLs []string) (*model
 	if err != nil {
 		return nil, err
 	}
-
-	var (
-		apiResponse struct {
-			Content []struct {
-				Text string `json:"text"`
-			} `json:"content"`
-		}
-
-		update models.UpdateResult
-	)
 
 	if err = json.Unmarshal([]byte(respText), &apiResponse); err != nil {
 		return nil, fmt.Errorf("failed to parse response: %w", err)
@@ -732,7 +859,7 @@ func (h *HandlerV1) callAnthropicAPI(body models.AnthropicRequest, timeout time.
 		return "", fmt.Errorf("failed to read response: %w", err)
 	}
 
-	log.Println("MCP RESPONSE>>>>", string(respBytes))
+	//log.Println("MCP RESPONSE>>>>", string(respBytes))
 
 	if resp.StatusCode != http.StatusOK {
 		return "", fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBytes))
