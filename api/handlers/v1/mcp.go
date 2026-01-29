@@ -196,7 +196,7 @@ func (h *HandlerV1) MCPGenerateFrontend(c *gin.Context) {
 		},
 	)
 
-	project, err := h.generateFrontendProject(userPrompt)
+	project, err := h.generateFrontendProject(userPrompt, req.ImageURLs)
 	if err != nil {
 		h.HandleResponse(c, status_http.InternalServerError, "AI Generation Failed: "+err.Error())
 		return
@@ -329,7 +329,7 @@ func (h *HandlerV1) MCPUpdateFrontend(c *gin.Context) {
 		return
 	}
 
-	analysis, err := h.analyzeProject(analysisPrompt)
+	analysis, err := h.analyzeProject(analysisPrompt, request.ImageURLs)
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -383,7 +383,7 @@ func (h *HandlerV1) MCPUpdateFrontend(c *gin.Context) {
 		return
 	}
 
-	update, err := h.updateProject(updatePrompt)
+	update, err := h.updateProject(updatePrompt, request.ImageURLs)
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -445,8 +445,13 @@ func (h *HandlerV1) sendAnthropicBackend(content string) (string, error) {
 			System:    helper.SystemPromptBackend,
 			Messages: []models.ChatMessage{
 				{
-					Role:    "user",
-					Content: content,
+					Role: "user",
+					Content: []models.ContentBlock{
+						{
+							Type: "text",
+							Text: content,
+						},
+					},
 				},
 			},
 			MCPServers: []models.MCPServer{
@@ -467,15 +472,37 @@ func (h *HandlerV1) sendAnthropicBackend(content string) (string, error) {
 	)
 }
 
-func (h *HandlerV1) generateFrontendProject(userPrompt string) (*models.GeneratedProject, error) {
-	var body = models.AnthropicRequest{
+func (h *HandlerV1) generateFrontendProject(userPrompt string, imageURLs []string) (*models.GeneratedProject, error) {
+	var (
+		contentBlocks []models.ContentBlock
+		body          models.AnthropicRequest
+	)
+
+	for _, imageURL := range imageURLs {
+		if imageURL != "" {
+			contentBlocks = append(contentBlocks, models.ContentBlock{
+				Type: "image",
+				Source: &models.ImageSource{
+					Type: "url",
+					URL:  imageURL,
+				},
+			})
+		}
+	}
+
+	contentBlocks = append(contentBlocks, models.ContentBlock{
+		Type: "text",
+		Text: userPrompt,
+	})
+
+	body = models.AnthropicRequest{
 		Model:     h.baseConf.ClaudeModel,
 		MaxTokens: h.baseConf.MaxTokens,
 		System:    helper.SystemPromptGenerateFrontend,
 		Messages: []models.ChatMessage{
 			{
 				Role:    "user",
-				Content: userPrompt,
+				Content: contentBlocks,
 			},
 		},
 		MCPServers: []models.MCPServer{
@@ -526,15 +553,37 @@ func (h *HandlerV1) generateFrontendProject(userPrompt string) (*models.Generate
 	return &project, nil
 }
 
-func (h *HandlerV1) analyzeProject(userPrompt string) (*models.AnalysisResult, error) {
-	var body = models.AnthropicRequest{
+func (h *HandlerV1) analyzeProject(userPrompt string, imageURLs []string) (*models.AnalysisResult, error) {
+	var (
+		contentBlocks []models.ContentBlock
+		body          models.AnthropicRequest
+	)
+
+	for _, imageURL := range imageURLs {
+		if imageURL != "" {
+			contentBlocks = append(contentBlocks, models.ContentBlock{
+				Type: "image",
+				Source: &models.ImageSource{
+					Type: "url",
+					URL:  imageURL,
+				},
+			})
+		}
+	}
+
+	contentBlocks = append(contentBlocks, models.ContentBlock{
+		Type: "text",
+		Text: userPrompt,
+	})
+
+	body = models.AnthropicRequest{
 		Model:     h.baseConf.ClaudeModel,
-		MaxTokens: 5000,
+		MaxTokens: h.baseConf.AnalyseProjectMaxTokens,
 		System:    helper.SystemPromptAnalyzeFrontend,
 		Messages: []models.ChatMessage{
 			{
 				Role:    "user",
-				Content: userPrompt,
+				Content: contentBlocks,
 			},
 		},
 	}
@@ -571,15 +620,37 @@ func (h *HandlerV1) analyzeProject(userPrompt string) (*models.AnalysisResult, e
 	return &analysis, nil
 }
 
-func (h *HandlerV1) updateProject(userPrompt string) (*models.UpdateResult, error) {
-	body := models.AnthropicRequest{
+func (h *HandlerV1) updateProject(userPrompt string, imageURLs []string) (*models.UpdateResult, error) {
+	var (
+		contentBlocks []models.ContentBlock
+		body          models.AnthropicRequest
+	)
+
+	for _, imageURL := range imageURLs {
+		if imageURL != "" {
+			contentBlocks = append(contentBlocks, models.ContentBlock{
+				Type: "image",
+				Source: &models.ImageSource{
+					Type: "url",
+					URL:  imageURL,
+				},
+			})
+		}
+	}
+
+	contentBlocks = append(contentBlocks, models.ContentBlock{
+		Type: "text",
+		Text: userPrompt,
+	})
+
+	body = models.AnthropicRequest{
 		Model:     h.baseConf.ClaudeModel,
 		MaxTokens: h.baseConf.MaxTokens,
 		System:    helper.SystemPromptUpdateFrontend,
 		Messages: []models.ChatMessage{
 			{
 				Role:    "user",
-				Content: userPrompt,
+				Content: contentBlocks,
 			},
 		},
 		MCPServers: []models.MCPServer{

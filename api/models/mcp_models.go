@@ -4,9 +4,10 @@ type (
 	// ========================== API Requests ==========================
 
 	MCPRequest struct {
-		Method  string            `json:"method"`
-		Prompt  string            `json:"prompt"`
-		Context *[]InspectContext `json:"context,omitempty"`
+		Method    string            `json:"method"`
+		Prompt    string            `json:"prompt"`
+		ImageURLs []string          `json:"image_urls,omitempty"`
+		Context   *[]InspectContext `json:"context,omitempty"`
 	}
 
 	InspectContext struct {
@@ -119,11 +120,6 @@ type (
 		Tools      []MCPTool     `json:"tools,omitempty"`
 	}
 
-	ChatMessage struct {
-		Role    string `json:"role"`
-		Content string `json:"content"`
-	}
-
 	MCPServer struct {
 		Type               string `json:"type"`
 		URL                string `json:"url"`
@@ -134,5 +130,22 @@ type (
 	MCPTool struct {
 		Type          string `json:"type"`
 		MCPServerName string `json:"mcp_server_name,omitempty"`
+	}
+
+	ContentBlock struct {
+		Type   string       `json:"type"` // "text" или "image"
+		Text   string       `json:"text,omitempty"`
+		Source *ImageSource `json:"source,omitempty"`
+	}
+
+	ImageSource struct {
+		Type      string `json:"type" default:"url"`
+		URL       string `json:"url,omitempty"`
+		MediaType string `json:"media_type,omitempty"` // "image/jpeg", "image/png", etc.
+	}
+
+	ChatMessage struct {
+		Role    string         `json:"role"`
+		Content []ContentBlock `json:"content"`
 	}
 )

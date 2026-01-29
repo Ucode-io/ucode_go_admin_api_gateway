@@ -100,16 +100,18 @@ type BaseConfig struct {
 	StripeApiKey        string
 	StripeWebhookSecret string
 
-	AnthropicAPIKey     string
-	AnthropicBeta       string
-	AnthropicBaseAPIURL string
-	ClaudeModel         string
-	AutomationURL       string
-	OpenFaaSBaseUrl     string
-	KnativeBaseUrl      string
-	MaxTokens           int
-	AnthropicVersion    string
-	MCPServerURL        string
+	AnthropicAPIKey         string
+	AnthropicBeta           string
+	AnthropicBaseAPIURL     string
+	ClaudeModel             string
+	AutomationURL           string
+	OpenFaaSBaseUrl         string
+	KnativeBaseUrl          string
+	MaxTokens               int
+	AnthropicVersion        string
+	MCPServerURL            string
+	AnalyseProjectMaxTokens int
+	CreateTableMaxTokens    int
 }
 
 func BaseLoad() BaseConfig {
@@ -169,6 +171,8 @@ func BaseLoad() BaseConfig {
 	config.KnativeBaseUrl = cast.ToString(GetOrReturnDefaultValue("KNATIVE_BASE_URL", ""))
 	config.MaxTokens = cast.ToInt(GetOrReturnDefaultValue("MAX_TOKENS", 12000))
 	config.MCPServerURL = cast.ToString(GetOrReturnDefaultValue("MCP_SERVER_URL", ""))
+	config.AnalyseProjectMaxTokens = cast.ToInt(GetOrReturnDefaultValue("ANALYSE_PROJECT_MAX_TOKENS", 5000))
+	config.CreateTableMaxTokens = cast.ToInt(GetOrReturnDefaultValue("CREATE_TABLE_MAX_TOKENS", 10000))
 
 	return config
 }
