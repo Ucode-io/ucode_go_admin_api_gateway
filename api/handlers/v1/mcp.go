@@ -227,13 +227,13 @@ func (h *HandlerV1) MCPGenerateFrontend(c *gin.Context) {
 	saveProject.ProjectEnv = projectEnv
 	saveProject.ProjectFiles = projectFiles
 
-	response, err := services.GoObjectBuilderService().McpProject().CreateMcpProject(context.Background(), &saveProject)
+	createdProject, err := services.GoObjectBuilderService().McpProject().CreateMcpProject(context.Background(), &saveProject)
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.HandleResponse(c, status_http.OK, response)
+	h.HandleResponse(c, status_http.OK, createdProject)
 }
 
 func (h *HandlerV1) MCPUpdateFrontend(c *gin.Context) {

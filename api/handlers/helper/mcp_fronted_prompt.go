@@ -283,18 +283,14 @@ IMAGE REFERENCE SYSTEM (HIGHEST PRIORITY)
 If user provides IMAGE(S) along with their request:
 
 SINGLE IMAGE:
-- This is the PRIMARY design reference
+- This is the PRIMARY reference for **VISUAL STYLING ONLY**
 - Extract EXACT visual design: colors, layout, typography, spacing, components
 - Replicate with PIXEL-PERFECT accuracy
-- Image overrides ALL default design rules
 
 MULTIPLE IMAGES:
 - Analyze ALL images in sequence
-- Each may represent: different pages, states, components, or UI flow
-- Extract CONSISTENT design system (colors, typography, spacing, patterns)
-- Identify VARIATIONS (page-specific layouts, responsive breakpoints)
-- Priority: Image 1 = main reference, Image 2+ = additional context
-- If images conflict, use Image 1 as source of truth
+- Priority: Image 1 = main visual reference
+- Extract CONSISTENT design system
 
 IMAGE ANALYSIS CHECKLIST:
 □ Colors (backgrounds, text, borders, buttons)
@@ -305,16 +301,31 @@ IMAGE ANALYSIS CHECKLIST:
 □ UI patterns (sidebars, headers, modals, forms)
 □ Shadows, borders, border-radius
 □ Icons (style, size, color)
-□ Responsive breakpoints (if visible)
 
-IMPLEMENTATION PRIORITY:
-1. IMAGE(S) - ABSOLUTE HIGHEST PRIORITY
-2. User's text requirements
-3. System type reference (CRM, TMS, etc.)
-4. Default design system
+====================================
+VISUAL VS FUNCTIONAL SEPARATION (CRITICAL)
+====================================
+
+You must use a **HYBRID APPROACH**:
+
+1. **VISUALS (Look & Feel) → FROM IMAGE**
+   - Copy colors, fonts, border-radius, shadows, spacing, and layout structure exactly from the image.
+   - If the image shows a specific sidebar style (e.g., dark glassmorphism), use that STYLE.
+
+2. **DATA & LOGIC (Content & Behavior) → FROM SYSTEM PROMPT**
+   - **MENU/SIDEBAR:** Use the *style* from the image, but the **items** MUST come from the MCP API ('response.data.data.menus'). DO NOT hardcode menu items visible in the image.
+   - **TABLES:** Use the *style* (row height, borders, colors) from the image, but columns/rows MUST be dynamic based on the API data.
+   - **ROUTING:** Buttons and links must follow the technical routing rules ('/tables/:slug'), even if the image implies otherwise.
 
 CRITICAL RULE:
-If image provided → Ignore default Notion theme, use ONLY what's in the image.
+- Image dictates HOW it looks.
+- System Prompt dictates HOW it works and WHAT data it shows.
+- **NEVER hardcode content** from the image (like specific user names, menu items, or stats) -> create the dynamic structure to hold *that type* of data.
+
+IMPLEMENTATION PRIORITY:
+1. **Visual Style:** Match Image provided.
+2. **Data Source:** ALWAYS use MCP API (ignore image text content).
+3. **Functionality:** ALWAYS use React Router/Hooks (ignore image static nature).
 
   ====================================
   FILE PATH TRACKING (MANDATORY)
