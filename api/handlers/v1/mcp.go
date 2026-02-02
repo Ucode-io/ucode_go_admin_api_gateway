@@ -18,6 +18,7 @@ import (
 	pbo "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	helperFunc "ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
+	"ucode/ucode_go_api_gateway/services"
 
 	"github.com/gin-gonic/gin"
 )
@@ -26,56 +27,32 @@ import (
 
 func (h *HandlerV1) McpCreateBackend(c *gin.Context) {
 	var (
-		req           models.MCPRequest
-		projectId     any
-		environmentId any
-
-		ok bool
+		request models.MCPRequest
+		message string
+		content string
 	)
 
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := c.ShouldBindJSON(&request); err != nil {
 		h.HandleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
-	projectId, ok = c.Get("project_id")
-	if !ok || !util.IsValidUUID(projectId.(string)) {
-		h.HandleResponse(c, status_http.InvalidArgument, config.ErrProjectIdValid)
-		return
-	}
-
-	environmentId, ok = c.Get("environment_id")
-	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		h.HandleResponse(c, status_http.InvalidArgument, config.ErrEnvironmentIdValid)
-		return
-	}
-
-	apiKeys, err := h.authService.ApiKey().GetList(c.Request.Context(), &as.GetListReq{
-		EnvironmentId: environmentId.(string),
-		ProjectId:     projectId.(string),
-		Limit:         1,
-		Offset:        0,
-	})
+	scope, err := h.resolveProjectScope(c)
 	if err != nil {
-		h.HandleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-	if len(apiKeys.Data) < 1 {
-		h.HandleResponse(c, status_http.InvalidArgument, "Api key not found")
 		return
 	}
 
-	if req.Method == "" {
-		req.Method = "project"
+	if request.Method == "" {
+		request.Method = "project"
 	}
 
-	content, message, err := helper.BuildBackendPrompt(
+	content, message, err = helper.BuildBackendPrompt(
 		models.GeneratePromptRequest{
-			ProjectId:     projectId.(string),
-			EnvironmentId: environmentId.(string),
-			Method:        req.Method,
-			APIKey:        apiKeys.GetData()[0].GetAppId(),
-			UserPrompt:    req.Prompt,
+			ProjectId:     scope.ProjectId,
+			EnvironmentId: scope.EnvironmentId,
+			Method:        request.Method,
+			APIKey:        scope.APIKey,
+			UserPrompt:    request.Prompt,
 		},
 	)
 	if err != nil {
@@ -94,35 +71,25 @@ func (h *HandlerV1) McpCreateBackend(c *gin.Context) {
 
 func (h *HandlerV1) McpGenerateProject(c *gin.Context) {
 	var (
-		req           models.MCPRequest
-		projectId     any
-		environmentId any
-
-		ok bool
+		request models.MCPRequest
+		err     error
 	)
 
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err = c.ShouldBindJSON(&request); err != nil {
 		h.HandleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
-	projectId, ok = c.Get("project_id")
-	if !ok || !util.IsValidUUID(projectId.(string)) {
-		h.HandleResponse(c, status_http.InvalidArgument, config.ErrProjectIdValid)
-		return
-	}
-
-	environmentId, ok = c.Get("environment_id")
-	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		h.HandleResponse(c, status_http.InvalidArgument, config.ErrEnvironmentIdValid)
+	scope, err := h.resolveProjectScope(c)
+	if err != nil {
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId.(string),
-			EnvironmentId: environmentId.(string),
+			ProjectId:     scope.ProjectId,
+			EnvironmentId: scope.EnvironmentId,
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
 	)
@@ -136,85 +103,63 @@ func (h *HandlerV1) McpGenerateProject(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
+	projectSrv, err := h.GetProjectSrvc(c.Request.Context(), scope.ProjectId, resource.NodeType)
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
-	apiKeys, err := h.authService.ApiKey().GetList(c.Request.Context(), &as.GetListReq{
-		EnvironmentId: environmentId.(string),
-		ProjectId:     projectId.(string),
-		Limit:         1,
-		Offset:        0,
-	})
-
-	if err != nil {
-		h.HandleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
-	if len(apiKeys.Data) < 1 {
-		h.HandleResponse(c, status_http.InvalidArgument, "Api key not found")
 		return
 	}
 
 	go func() {
-		req.Method = "project"
-
-		content, message, err := helper.BuildBackendPrompt(
+		bgContent, _, bgErr := helper.BuildBackendPrompt(
 			models.GeneratePromptRequest{
-				ProjectId:     projectId.(string),
-				EnvironmentId: environmentId.(string),
-				Method:        req.Method,
-				APIKey:        apiKeys.GetData()[0].GetAppId(),
-				UserPrompt:    req.Prompt,
+				ProjectId:     scope.ProjectId,
+				EnvironmentId: scope.EnvironmentId,
+				Method:        "project",
+				APIKey:        scope.APIKey,
+				UserPrompt:    request.Prompt,
 			},
 		)
-		if err != nil {
-			h.HandleResponse(c, status_http.GRPCError, err.Error())
+		if bgErr != nil {
+			log.Printf("Background BuildBackendPrompt Error: %v", bgErr)
 			return
 		}
 
-		_, err = h.sendAnthropicBackend(content)
-		if err != nil {
-			h.HandleResponse(c, status_http.GRPCError, err.Error())
+		_, bgErr = h.sendAnthropicBackend(bgContent)
+		if bgErr != nil {
+			log.Printf("Background sendAnthropicBackend Error: %v", bgErr)
 			return
 		}
-
-		h.HandleResponse(c, status_http.OK, message)
-
+		log.Println("Background Backend generation completed successfully")
 	}()
 
 	userPrompt := helper.BuildFrontendGeneratePrompt(
 		models.GeneratePromptRequest{
-			ProjectId:     projectId.(string),
-			EnvironmentId: environmentId.(string),
-			APIKey:        apiKeys.GetData()[0].GetAppId(),
-			UserPrompt:    req.Prompt,
+			ProjectId:     scope.ProjectId,
+			EnvironmentId: scope.EnvironmentId,
+			APIKey:        scope.APIKey,
+			UserPrompt:    request.Prompt,
 			BaseURL:       "https://admin-api.ucode.run",
 		},
 	)
 
-	project, err := h.generateFrontendProject(userPrompt, req.ImageURLs)
+	project, err := h.generateFrontendProject(userPrompt, request.ImageURLs)
 	if err != nil {
 		h.HandleResponse(c, status_http.InternalServerError, "AI Generation Failed: "+err.Error())
 		return
 	}
 
-	var (
-		saveProject = pbo.CreateMcpProjectReqeust{
-			ResourceEnvId: resource.ResourceEnvironmentId,
-			Title:         project.ProjectName,
-			Description:   "Generated by ucode with claude-sonnet-4-5",
-		}
+	projectEnv, _ := helperFunc.ConvertMapToStruct(project.Env)
 
-		projectFiles  []*pbo.McpProjectFiles
-		projectEnv, _ = helperFunc.ConvertMapToStruct(project.Env)
+	var (
+		projectFiles []*pbo.McpProjectFiles
+		fileGraph    map[string]any
 	)
 
 	for _, file := range project.Files {
-		fileGraph, _ := project.FileGraph[file.Path].(map[string]any)
+		if val, ok := project.FileGraph[file.Path].(map[string]any); ok {
+			fileGraph = val
+		}
+
 		fileGraphStruct, _ := helperFunc.ConvertMapToStruct(fileGraph)
 
 		projectFiles = append(projectFiles, &pbo.McpProjectFiles{
@@ -222,12 +167,19 @@ func (h *HandlerV1) McpGenerateProject(c *gin.Context) {
 			Content:   file.Content,
 			FileGraph: fileGraphStruct,
 		})
+
+		fileGraph = make(map[string]any)
 	}
 
-	saveProject.ProjectEnv = projectEnv
-	saveProject.ProjectFiles = projectFiles
+	saveProject := pbo.CreateMcpProjectReqeust{
+		ResourceEnvId: resource.ResourceEnvironmentId,
+		Title:         project.ProjectName,
+		Description:   "Generated by ucode with claude-sonnet-4-5",
+		ProjectEnv:    projectEnv,
+		ProjectFiles:  projectFiles,
+	}
 
-	createdProject, err := services.GoObjectBuilderService().McpProject().CreateMcpProject(context.Background(), &saveProject)
+	createdProject, err := projectSrv.GoObjectBuilderService().McpProject().CreateMcpProject(context.Background(), &saveProject)
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -240,10 +192,6 @@ func (h *HandlerV1) MCPUpdateFrontend(c *gin.Context) {
 	var (
 		request      models.MCPRequest
 		mcpProjectId = c.Param("mcp_project_id")
-
-		projectId     any
-		environmentId any
-		ok            bool
 	)
 
 	if err := c.ShouldBindJSON(&request); err != nil {
@@ -251,41 +199,16 @@ func (h *HandlerV1) MCPUpdateFrontend(c *gin.Context) {
 		return
 	}
 
-	projectId, ok = c.Get("project_id")
-	if !ok || !util.IsValidUUID(projectId.(string)) {
-		h.HandleResponse(c, status_http.InvalidArgument, config.ErrProjectIdValid)
-		return
-	}
-
-	environmentId, ok = c.Get("environment_id")
-	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		h.HandleResponse(c, status_http.InvalidArgument, config.ErrEnvironmentIdValid)
-		return
-	}
-
-	apiKeys, err := h.authService.ApiKey().GetList(
-		c.Request.Context(),
-		&as.GetListReq{
-			EnvironmentId: environmentId.(string),
-			ProjectId:     projectId.(string),
-			Limit:         1,
-			Offset:        0,
-		},
-	)
+	scope, err := h.resolveProjectScope(c)
 	if err != nil {
-		h.HandleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-	if len(apiKeys.Data) < 1 {
-		h.HandleResponse(c, status_http.InvalidArgument, "Api key not found")
 		return
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId.(string),
-			EnvironmentId: environmentId.(string),
+			ProjectId:     scope.ProjectId,
+			EnvironmentId: scope.EnvironmentId,
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
 	)
@@ -299,7 +222,7 @@ func (h *HandlerV1) MCPUpdateFrontend(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
+	service, err := h.GetProjectSrvc(c.Request.Context(), scope.ProjectId, resource.NodeType)
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -319,48 +242,53 @@ func (h *HandlerV1) MCPUpdateFrontend(c *gin.Context) {
 	)
 
 	if !classification.RequiresBackend && !classification.RequiresFrontend {
-		h.HandleResponse(
-			c, status_http.OK,
-			map[string]string{
-				"status":  "success",
-				"message": "No operations required for this request",
-			},
-		)
-		return
-	}
-
-	var (
-		generatePromptReq = models.GeneratePromptRequest{
-			ProjectId:     projectId.(string),
-			EnvironmentId: environmentId.(string),
-			UserPrompt:    request.Prompt,
-			APIKey:        apiKeys.GetData()[0].GetAppId(),
-			Method:        "table",
-		}
-
-		content, message string
-	)
-
-	if classification.RequiresBackend && !classification.RequiresFrontend {
-		content, message, err = helper.BuildBackendPrompt(generatePromptReq)
-		if err != nil {
-			h.HandleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
-		_, err = h.sendAnthropicBackend(content)
-		if err != nil {
-			h.HandleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
-		h.HandleResponse(c, status_http.OK, map[string]any{
-			"message": message,
+		h.HandleResponse(c, status_http.OK, map[string]string{
+			"status":  "success",
+			"message": "No operations required for this request",
 		})
 		return
 	}
 
-	projectFiles, err := services.GoObjectBuilderService().McpProject().GetMcpProjectFiles(
+	if classification.RequiresBackend {
+		var promptReq = models.GeneratePromptRequest{
+			ProjectId:     scope.ProjectId,
+			EnvironmentId: scope.EnvironmentId,
+			UserPrompt:    request.Prompt,
+			APIKey:        scope.APIKey,
+			Method:        "table",
+		}
+
+		if !classification.RequiresFrontend {
+			backendContent, backendMsg, err := helper.BuildBackendPrompt(promptReq)
+			if err != nil {
+				h.HandleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+			_, err = h.sendAnthropicBackend(backendContent)
+			if err != nil {
+				h.HandleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+			h.HandleResponse(c, status_http.OK, map[string]any{"message": backendMsg})
+			return
+		}
+
+		go func() {
+			content, _, err := helper.BuildBackendPrompt(promptReq)
+			if err != nil {
+				log.Println("Backend async build failed: " + err.Error())
+				return
+			}
+			_, err = h.sendAnthropicBackend(content)
+			if err != nil {
+				log.Println("Backend async send failed: " + err.Error())
+				return
+			}
+			log.Println("Async backend operation completed successfully")
+		}()
+	}
+
+	projectFilesRes, err := service.GoObjectBuilderService().McpProject().GetMcpProjectFiles(
 		c.Request.Context(),
 		&pbo.McpProjectId{
 			Id:            mcpProjectId,
@@ -376,43 +304,24 @@ func (h *HandlerV1) MCPUpdateFrontend(c *gin.Context) {
 	var (
 		filesGraphMap = make(map[string]any)
 		filesMap      = make(map[string]string)
+		filesToUpdate []models.ProjectFile
+
+		mcpProjectFiles []*pbo.McpProjectFiles
 	)
 
-	for _, file := range projectFiles.ProjectFiles {
+	for _, file := range projectFilesRes.ProjectFiles {
 		filesGraphMap[file.Path] = file.FileGraph.AsMap()
 		filesMap[file.Path] = file.Content
 	}
 
-	if classification.RequiresBackend && classification.RequiresFrontend {
-		go func() {
-			content, message, err = helper.BuildBackendPrompt(generatePromptReq)
-			if err != nil {
-				log.Println("Backend operation failed, building user prompt: " + err.Error())
-				return
-			}
-
-			_, err = h.sendAnthropicBackend(content)
-			if err != nil {
-				log.Println("Backend operation failed: " + err.Error())
-				return
-			}
-
-			log.Println("Async backend operation completed successfully")
-		}()
-	}
-
 	log.Println("========== STEP 5: ANALYZING FRONTEND CHANGES ==========")
 
-	var (
-		analyzeReq = models.AnalyzeFrontendPromptRequest{
-			UserRequest: request.Prompt,
-			FileGraph:   filesGraphMap,
-			ProjectName: projectFiles.Title,
-			Context:     request.Context,
-		}
-
-		filesToUpdate []models.ProjectFile
-	)
+	var analyzeReq = models.AnalyzeFrontendPromptRequest{
+		UserRequest: request.Prompt,
+		FileGraph:   filesGraphMap,
+		ProjectName: projectFilesRes.Title,
+		Context:     request.Context,
+	}
 
 	analysisPrompt, err := helper.BuildFrontendAnalyzePrompt(analyzeReq)
 	if err != nil {
@@ -433,18 +342,11 @@ func (h *HandlerV1) MCPUpdateFrontend(c *gin.Context) {
 	)
 
 	if len(analysis.FilesToModify) == 0 && len(analysis.NewFilesNeeded) == 0 && len(analysis.FilesToDelete) == 0 {
-		if classification.RequiresBackend {
-			h.HandleResponse(c, status_http.OK, map[string]interface{}{
-				"status":             "success",
-				"message":            "Backend table creation in progress. No frontend changes needed.",
-				"backend_processing": true,
-			})
-		} else {
-			h.HandleResponse(c, status_http.OK, map[string]string{
-				"status":  "success",
-				"message": "No frontend changes needed",
-			})
-		}
+		h.HandleResponse(c, status_http.OK, map[string]interface{}{
+			"status":             "success",
+			"message":            "No frontend changes needed",
+			"backend_processing": classification.RequiresBackend,
+		})
 		return
 	}
 
@@ -457,18 +359,13 @@ func (h *HandlerV1) MCPUpdateFrontend(c *gin.Context) {
 		}
 	}
 
-	var (
-		updateReq = models.UpdateFrontendPromptRequest{
-			UserRequest:    request.Prompt,
-			FilesToUpdate:  filesToUpdate,
-			AnalysisResult: *analysis,
-			ProjectName:    projectFiles.Title,
-			Context:        request.Context,
-		}
-
-		graphUpdate     any
-		mcpProjectFiles []*pbo.McpProjectFiles
-	)
+	var updateReq = models.UpdateFrontendPromptRequest{
+		UserRequest:    request.Prompt,
+		FilesToUpdate:  filesToUpdate,
+		AnalysisResult: *analysis,
+		ProjectName:    projectFilesRes.Title,
+		Context:        request.Context,
+	}
 
 	updatePrompt, err := helper.BuildFrontendUpdatePrompt(updateReq)
 	if err != nil {
@@ -482,22 +379,16 @@ func (h *HandlerV1) MCPUpdateFrontend(c *gin.Context) {
 		return
 	}
 
-	log.Printf("Update: updated=%d, new=%d, deleted=%d",
-		len(update.UpdatedFiles),
-		len(update.NewFiles),
-		len(update.DeletedFiles),
-	)
-
 	for _, file := range update.UpdatedFiles {
 		filesMap[file.Path] = file.Content
-		if graphUpdate, ok = update.FileGraphUpdates[file.Path]; ok {
+		if graphUpdate, ok := update.FileGraphUpdates[file.Path]; ok {
 			filesGraphMap[file.Path] = graphUpdate
 		}
 	}
 
 	for _, file := range update.NewFiles {
 		filesMap[file.Path] = file.Content
-		if graphUpdate, ok = update.FileGraphUpdates[file.Path]; ok {
+		if graphUpdate, ok := update.FileGraphUpdates[file.Path]; ok {
 			filesGraphMap[file.Path] = graphUpdate
 		}
 	}
@@ -520,13 +411,346 @@ func (h *HandlerV1) MCPUpdateFrontend(c *gin.Context) {
 		ProjectFiles:  mcpProjectFiles,
 	}
 
-	_, err = services.GoObjectBuilderService().McpProject().UpdateMcpProject(context.Background(), &saveProject)
+	_, err = service.GoObjectBuilderService().McpProject().UpdateMcpProject(context.Background(), &saveProject)
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
 	h.HandleResponse(c, status_http.OK, update)
+}
+
+func (h *HandlerV1) McpGeneratePlan(c *gin.Context) {
+	var req models.MCPRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		h.HandleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	if req.Prompt == "" {
+		h.HandleResponse(c, status_http.BadRequest, "prompt is required")
+		return
+	}
+
+	backendPlan, err := h.generateBackendPlan(req.Prompt)
+	if err != nil {
+		h.HandleResponse(c, status_http.InternalServerError, "Backend plan generation failed: "+err.Error())
+		return
+	}
+
+	frontendPlan, err := h.generateFrontendPlan(req.Prompt, req.ImageURLs)
+	if err != nil {
+		h.HandleResponse(c, status_http.InternalServerError, "Frontend plan generation failed: "+err.Error())
+		return
+	}
+
+	h.HandleResponse(c, status_http.OK, gin.H{
+		"backend_plan":  backendPlan,
+		"frontend_plan": frontendPlan,
+	})
+}
+
+func (h *HandlerV1) McpGenerateProjectV2(c *gin.Context) {
+	var (
+		req              models.MCPRequestWithPlanning
+		withPlanning     bool
+		generatedProject *models.GeneratedProject
+	)
+
+	withPlanning = c.Query("with_planning") == "true"
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		h.HandleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	scope, err := h.resolveProjectScope(c)
+	if err != nil {
+		return
+	}
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     scope.ProjectId,
+			EnvironmentId: scope.EnvironmentId,
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	if resource.ResourceType != pb.ResourceType_POSTGRESQL {
+		h.HandleResponse(c, status_http.InvalidArgument, "resource type not supported")
+		return
+	}
+
+	projectSrv, err := h.GetProjectSrvc(c.Request.Context(), scope.ProjectId, resource.NodeType)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	log.Println("WITH PLANNING:", withPlanning)
+
+	if withPlanning {
+		if req.BackendPlan == "" || req.FrontendPlan == "" {
+			h.HandleResponse(c, status_http.BadRequest, "backend_plan and frontend_plan are required when with_planning=true")
+			return
+		}
+
+		go func() {
+			backendPrompt := helper.BuildBackendPromptWithPlan(req.BackendPlan, scope.ProjectId, scope.EnvironmentId, scope.APIKey)
+			if _, err = h.sendAnthropicBackend(backendPrompt); err != nil {
+				log.Printf("Backend plan execution failed: %v\n", err)
+			}
+		}()
+
+		var frontendPrompt = helper.BuildFrontendPromptWithPlan(
+			req.FrontendPlan,
+			req.Prompt,
+			scope.ProjectId,
+			scope.EnvironmentId,
+			scope.APIKey,
+			"https://admin-api.ucode.run",
+		)
+
+		generatedProject, err = h.generateFrontendProject(frontendPrompt, req.ImageURLs)
+		if err != nil {
+			h.HandleResponse(c, status_http.InternalServerError, "Frontend generation failed: "+err.Error())
+			return
+		}
+
+	} else {
+		if req.Prompt == "" {
+			h.HandleResponse(c, status_http.BadRequest, "prompt is required")
+			return
+		}
+
+		go func() {
+			content, _, err := helper.BuildBackendPrompt(
+				models.GeneratePromptRequest{
+					ProjectId:     scope.ProjectId,
+					EnvironmentId: scope.EnvironmentId,
+					Method:        "project",
+					APIKey:        scope.APIKey,
+					UserPrompt:    req.Prompt,
+				},
+			)
+			if err != nil {
+				log.Printf("Backend generation failed: %v\n", err)
+				return
+			}
+			if _, err = h.sendAnthropicBackend(content); err != nil {
+				log.Printf("Backend execution failed: %v\n", err)
+				return
+			}
+			log.Println("Backend operation completed:")
+		}()
+
+		userPrompt := helper.BuildFrontendGeneratePrompt(
+			models.GeneratePromptRequest{
+				ProjectId:     scope.ProjectId,
+				EnvironmentId: scope.EnvironmentId,
+				APIKey:        scope.APIKey,
+				UserPrompt:    req.Prompt,
+				BaseURL:       "https://admin-api.ucode.run",
+			},
+		)
+
+		generatedProject, err = h.generateFrontendProject(userPrompt, req.ImageURLs)
+		if err != nil {
+			h.HandleResponse(c, status_http.InternalServerError, "AI Generation Failed: "+err.Error())
+			return
+		}
+	}
+
+	createdProject, err := h.saveFrontendProject(
+		c.Request.Context(),
+		projectSrv,
+		generatedProject,
+		resource.ResourceEnvironmentId,
+	)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.HandleResponse(c, status_http.OK, createdProject)
+}
+
+// ========================= Main functions ============================
+
+func (h *HandlerV1) resolveProjectScope(c *gin.Context) (*models.ProjectScope, error) {
+	var (
+		projectIDRaw any
+		envIDRaw     any
+		exists       bool
+		apiKeys      *as.GetListRes
+		err          error
+	)
+
+	projectIDRaw, exists = c.Get("project_id")
+	if !exists || !util.IsValidUUID(projectIDRaw.(string)) {
+		h.HandleResponse(c, status_http.InvalidArgument, config.ErrProjectIdValid)
+		return nil, config.ErrProjectIdValid
+	}
+
+	envIDRaw, exists = c.Get("environment_id")
+	if !exists || !util.IsValidUUID(envIDRaw.(string)) {
+		h.HandleResponse(c, status_http.InvalidArgument, config.ErrEnvironmentIdValid)
+		return nil, config.ErrEnvironmentIdValid
+	}
+
+	apiKeys, err = h.authService.ApiKey().GetList(c.Request.Context(), &as.GetListReq{
+		EnvironmentId: envIDRaw.(string),
+		ProjectId:     projectIDRaw.(string),
+		Limit:         1,
+		Offset:        0,
+	})
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return nil, err
+	}
+	if len(apiKeys.Data) < 1 {
+		h.HandleResponse(c, status_http.InvalidArgument, "Api key not found")
+		return nil, fmt.Errorf("api key not found")
+	}
+
+	return &models.ProjectScope{
+		ProjectId:     projectIDRaw.(string),
+		EnvironmentId: envIDRaw.(string),
+		APIKey:        apiKeys.GetData()[0].GetAppId(),
+	}, nil
+}
+
+func (h *HandlerV1) generateBackendPlan(userPrompt string) (string, error) {
+	var (
+		body = models.AnthropicRequest{
+			Model:     h.baseConf.ClaudeModel,
+			MaxTokens: 10000,
+			System:    helper.SystemPromptPlanBackend,
+			Messages: []models.ChatMessage{
+				{
+					Role: "user",
+					Content: []models.ContentBlock{
+						{
+							Type: "text",
+							Text: helper.BuildBackendPlanPrompt(userPrompt),
+						},
+					},
+				},
+			},
+		}
+		apiResponse models.AnthropicApiResponse
+	)
+
+	respText, err := h.callAnthropicAPI(body, 300*time.Second)
+	if err != nil {
+		return "", fmt.Errorf("backend plan API call failed: %w", err)
+	}
+
+	if err = json.Unmarshal([]byte(respText), &apiResponse); err != nil {
+		return "", fmt.Errorf("failed to parse backend plan response: %w", err)
+	}
+
+	if len(apiResponse.Content) == 0 {
+		return "", fmt.Errorf("empty backend plan response")
+	}
+
+	return apiResponse.Content[0].Text, nil
+}
+
+func (h *HandlerV1) generateFrontendPlan(userPrompt string, imageURLs []string) (string, error) {
+	var (
+		contentBlocks []models.ContentBlock
+		body          models.AnthropicRequest
+		apiResponse   models.AnthropicApiResponse
+	)
+
+	for _, imageURL := range imageURLs {
+		if imageURL != "" {
+			contentBlocks = append(contentBlocks, models.ContentBlock{
+				Type: "image",
+				Source: &models.ImageSource{
+					Type: "url",
+					URL:  imageURL,
+				},
+			})
+		}
+	}
+
+	contentBlocks = append(contentBlocks, models.ContentBlock{
+		Type: "text",
+		Text: helper.BuildFrontendPlanPrompt(userPrompt, len(imageURLs) > 0),
+	})
+
+	body = models.AnthropicRequest{
+		Model:     h.baseConf.ClaudeModel,
+		MaxTokens: 10000,
+		System:    helper.SystemPromptPlanFrontend,
+		Messages: []models.ChatMessage{
+			{
+				Role:    "user",
+				Content: contentBlocks,
+			},
+		},
+	}
+
+	respText, err := h.callAnthropicAPI(body, 300*time.Second)
+	if err != nil {
+		return "", fmt.Errorf("frontend plan API call failed: %w", err)
+	}
+
+	if err = json.Unmarshal([]byte(respText), &apiResponse); err != nil {
+		return "", fmt.Errorf("failed to parse frontend plan response: %w", err)
+	}
+
+	if len(apiResponse.Content) == 0 {
+		return "", fmt.Errorf("empty frontend plan response")
+	}
+
+	return apiResponse.Content[0].Text, nil
+}
+
+func (h *HandlerV1) saveFrontendProject(ctx context.Context, services services.ServiceManagerI, project *models.GeneratedProject, resourceEnvId string) (*pbo.McpProject, error) {
+	var (
+		saveProject = pbo.CreateMcpProjectReqeust{
+			ResourceEnvId: resourceEnvId,
+			Title:         project.ProjectName,
+			Description:   "Generated by ucode with claude-sonnet-4-5",
+		}
+
+		projectFiles []*pbo.McpProjectFiles
+		fileGraph    map[string]any
+	)
+
+	projectEnv, _ := helperFunc.ConvertMapToStruct(project.Env)
+
+	for _, file := range project.Files {
+		var ()
+		if val, ok := project.FileGraph[file.Path].(map[string]any); ok {
+			fileGraph = val
+		}
+
+		fileGraphStruct, _ := helperFunc.ConvertMapToStruct(fileGraph)
+
+		projectFiles = append(projectFiles, &pbo.McpProjectFiles{
+			Path:      file.Path,
+			Content:   file.Content,
+			FileGraph: fileGraphStruct,
+		})
+
+		fileGraph = make(map[string]any)
+	}
+
+	saveProject.ProjectEnv = projectEnv
+	saveProject.ProjectFiles = projectFiles
+
+	return services.GoObjectBuilderService().McpProject().CreateMcpProject(ctx, &saveProject)
 }
 
 // ==================== Send Anthropic Request methods ====================
@@ -570,9 +794,8 @@ func (h *HandlerV1) generateFrontendProject(userPrompt string, imageURLs []strin
 	var (
 		contentBlocks []models.ContentBlock
 		body          models.AnthropicRequest
-
-		apiResponse models.AnthropicApiResponse
-		project     models.GeneratedProject
+		apiResponse   models.AnthropicApiResponse
+		project       models.GeneratedProject
 	)
 
 	for _, imageURL := range imageURLs {
@@ -602,19 +825,6 @@ func (h *HandlerV1) generateFrontendProject(userPrompt string, imageURLs []strin
 				Content: contentBlocks,
 			},
 		},
-		MCPServers: []models.MCPServer{
-			{
-				Type: "url",
-				URL:  h.baseConf.MCPServerURL,
-				Name: "ucode",
-			},
-		},
-		Tools: []models.MCPTool{
-			{
-				Type:          "mcp_toolset",
-				MCPServerName: "ucode",
-			},
-		},
 	}
 
 	respText, err := h.callAnthropicAPI(body, 420*time.Second)
@@ -641,11 +851,9 @@ func (h *HandlerV1) generateFrontendProject(userPrompt string, imageURLs []strin
 
 func (h *HandlerV1) classifyRequest(prompt string, imageURLs []string) (*models.RequestClassification, error) {
 	var (
-		hasImages = len(imageURLs) > 0
-
+		hasImages            = len(imageURLs) > 0
 		classificationPrompt = helper.BuildClassificationPrompt(prompt, hasImages)
-
-		body = models.AnthropicRequest{
+		body                 = models.AnthropicRequest{
 			Model:     h.baseConf.ClaudeModel,
 			MaxTokens: 2048,
 			System:    helper.SystemPromptClassifyRequest,
@@ -661,7 +869,6 @@ func (h *HandlerV1) classifyRequest(prompt string, imageURLs []string) (*models.
 				},
 			},
 		}
-
 		apiResponse    models.AnthropicApiResponse
 		classification models.RequestClassification
 	)
@@ -698,9 +905,8 @@ func (h *HandlerV1) analyzeProject(userPrompt string, imageURLs []string) (*mode
 	var (
 		contentBlocks []models.ContentBlock
 		body          models.AnthropicRequest
-
-		apiResponse models.AnthropicApiResponse
-		analysis    models.AnalysisResult
+		apiResponse   models.AnthropicApiResponse
+		analysis      models.AnalysisResult
 	)
 
 	for _, imageURL := range imageURLs {
@@ -758,9 +964,8 @@ func (h *HandlerV1) updateProject(userPrompt string, imageURLs []string) (*model
 	var (
 		contentBlocks []models.ContentBlock
 		body          models.AnthropicRequest
-
-		apiResponse models.AnthropicApiResponse
-		update      models.UpdateResult
+		apiResponse   models.AnthropicApiResponse
+		update        models.UpdateResult
 	)
 
 	for _, imageURL := range imageURLs {
@@ -846,7 +1051,7 @@ func (h *HandlerV1) callAnthropicAPI(body models.AnthropicRequest, timeout time.
 	req.Header.Set("anthropic-version", h.baseConf.AnthropicVersion)
 	req.Header.Set("anthropic-beta", h.baseConf.AnthropicBeta)
 
-	var client = &http.Client{Timeout: timeout}
+	client := &http.Client{Timeout: timeout}
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -858,8 +1063,6 @@ func (h *HandlerV1) callAnthropicAPI(body models.AnthropicRequest, timeout time.
 	if err != nil {
 		return "", fmt.Errorf("failed to read response: %w", err)
 	}
-
-	//log.Println("MCP RESPONSE>>>>", string(respBytes))
 
 	if resp.StatusCode != http.StatusOK {
 		return "", fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBytes))

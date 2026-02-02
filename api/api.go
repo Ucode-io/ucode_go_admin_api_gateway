@@ -311,7 +311,11 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 		mcpProject := v1Admin.Group("/mcp_project")
 		{
+			mcpProject.POST("/create-plan", h.V1.McpGeneratePlan)
+			mcpProject.POST("/generate-project/with-plan", h.V1.McpGenerateProjectV2)
+
 			mcpProject.POST("/generate_frontend", h.V1.McpGenerateProject)
+
 			mcpProject.PATCH("/update_frontend/:mcp_project_id", h.V1.MCPUpdateFrontend)
 			mcpProject.POST("/publish-frontend/:mcp_project_id", h.V1.PublishMcpProjectFront)
 

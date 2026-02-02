@@ -1,7 +1,21 @@
 package models
 
 type (
+	ProjectScope struct {
+		ProjectId     string
+		EnvironmentId string
+		APIKey        string
+	}
 	// ========================== API Requests ==========================
+
+	MCPRequestWithPlanning struct {
+		Prompt       string            `json:"prompt"`
+		ImageURLs    []string          `json:"image_urls,omitempty"`
+		Method       string            `json:"method,omitempty"`
+		Context      *[]InspectContext `json:"context,omitempty"`
+		BackendPlan  string            `json:"backend_plan,omitempty"`
+		FrontendPlan string            `json:"frontend_plan,omitempty"`
+	}
 
 	MCPRequest struct {
 		Method    string            `json:"method"`
