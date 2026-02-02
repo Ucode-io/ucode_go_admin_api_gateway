@@ -120,6 +120,7 @@ STEP 3: Create tables directly using create_table tool
 - IMPORTANT: Save the response from each create_table call - you need table_id and slug (collection) for next steps
 - Example: create_table({label: "Customers", slug: "customers", icon: "https://api.iconify.design/mdi:account.svg", menu_id: "%s", x_api_key: "%s"})
 - Do NOT create folders, all tables are created at root level using the provided menu_id.
+
 STEP 4: Create fields for each table (IMPORTANT: use update_table, not create_field)
 - IMPORTANT INSTRUCTION FOR FIELD CREATION:
   - Do NOT call the create_field tool under any circumstances for automated field creation.
@@ -148,6 +149,24 @@ STEP 6: Execute DBML (optional - if you prefer bulk creation)
   - menus: (JSON object where keys are table names, values are table slugs)
   - x-api-key: %s
 
+STEP 7: Create test data for each table (CRITICAL: Create exactly 3 items per table)
+- After ALL tables and fields are created, you MUST populate EVERY SINGLE TABLE with exactly **3 test rows**.
+- Use create_table_item tool with: table_slug, data (object with field values), x_api_key
+- Example: create_table_item({table_slug: "customers", data: {name: "John Doe", email: "john@example.com", status: "Active"}, x_api_key: "%s"})
+
+CRITICAL RULES FOR TEST DATA CREATION:
+1. **Iterate ALL Tables**: Do not stop after creating data for just 2 or 3 tables. If you created 10 tables in Step 3, you MUST create test data for all 10 tables.
+2. **Quantity**: Create exactly **3 records** per table.
+3. **Dependency Order (Crucial)**: 
+   - First create records in parent tables (tables referenced by others).
+   - Then create records in child tables (tables containing foreign keys).
+   - SAVE the 'id' from parent records to use in child records.
+4. **Realistic Data**: 
+   - Use realistic names, dates, and numbers suitable for the industry (Finance, Healthcare, etc.).
+   - For ENUMs, use valid options defined in Step 2.
+   - For RELATIONS, use only valid IDs from previously created records.
+5. **Orphans**: Never create a child record without a valid parent ID.
+
 CRITICAL RULES:
 1. All tables are created at root level: parent_id = "%s"
 2. Save table_id and collection (slug) from create_table responses
@@ -156,6 +175,7 @@ CRITICAL RULES:
 5. Create a COMPLETE, working project - not just partial structure
 6. Analyze user request carefully - if they say "10 menus", create exactly 10 tables
 7. Remember: Empty folders are not used, all tables are at root level
+8. **Final Verification**: Ensure that Step 7 was executed for ALL tables before finishing.
 
 Context:
 project-id = %s
@@ -165,14 +185,18 @@ main-menu-parent-id = %s
 
 User Request: "%s"
 
-Now analyze the user's request, determine project type/systems/industry, and create the complete project structure directly as tables at root level.`,
+Now analyze the user's request, determine project type/systems/industry, create the complete project structure directly as tables at root level, and finally populate ALL tables with 3 test items each.`,
 			request.ProjectId, request.EnvironmentId, request.APIKey, request.UserPrompt,
 
 			config.MainMenuID, config.MainMenuID, request.APIKey,
 
 			request.APIKey,
 
+			request.APIKey,
+
 			config.MainMenuID,
+
+			request.APIKey,
 
 			request.APIKey,
 
@@ -182,7 +206,7 @@ Now analyze the user's request, determine project type/systems/industry, and cre
 			request.UserPrompt,
 		)
 
-		message = "Your project has been successfully created."
+		message = "Your project has been successfully created with test data."
 
 	case "table":
 		content = fmt.Sprintf(`You are managing backend operations for a u-code project.
