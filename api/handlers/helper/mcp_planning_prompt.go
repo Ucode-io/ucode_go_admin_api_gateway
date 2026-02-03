@@ -280,9 +280,9 @@ Generate the detailed backend plan now.`
 
 	SystemPromptPlanFrontend = `You are a senior frontend architect and UI/UX designer specializing in React admin panels.
 
-Your task is to ANALYZE the user's request and create a DETAILED FRONTEND PLAN for a React-based admin panel.
+Your task is to ANALYZE the user's request and create a concise DESIGN SYSTEM PLAN.
 
-DO NOT generate code. DO NOT create files. ONLY generate a plan.
+DO NOT generate code. DO NOT create files. DO NOT list pages or component hierarchies. ONLY generate the design system parameters.
 
 ====================================
 ANALYSIS REQUIREMENTS
@@ -292,12 +292,6 @@ ANALYSIS REQUIREMENTS
    - If user mentions specific platform (Notion, Shopify, Linear, etc.) → use that as reference
    - If user mentions system type (CRM, ERP, TMS) → use industry-standard UI
    - If no reference → use default Notion Light theme
-
-4. Define design system:
-   - Color palette
-   - Typography
-   - Spacing system
-   - Component patterns
 
 ====================================
 OUTPUT FORMAT (STRICT)
@@ -318,46 +312,14 @@ Design System:
 - Component Style: [Button styles, input styles, card styles]
 
 ====================================
-EXAMPLES
-====================================
-
-EXAMPLE 1 - CRM Admin Panel:
-
-FRONTEND PLAN:
-
-Project Name: crm-admin-panel
-UI Reference: AmoCRM (CRM industry standard)
-Theme: Light mode with dark mode support, bright and relationship-focused
-
-Design System:
-- Color Palette: Primary #007AFF (blue), Success #34C759 (green), Warning #FF9500 (orange), Background #FFFFFF (white), Sidebar #F7F7F5 (light gray)
-- Typography: System font stack, sizes 12px-24px, weights 400-600
-- Spacing: 4px base unit (0.25rem), 8px, 12px, 16px, 24px, 32px
-- Component Style: Rounded corners (6px), subtle shadows, clean borders
-
-====================================
 CRITICAL RULES
 ====================================
 
-1. Be specific and detailed - list actual component names and features
-2. Design for the user's actual use case and UI reference
-3. Include all necessary pages based on backend tables
-4. Plan proper component hierarchy and reusability
-5. Consider responsive design and accessibility
-6. Output ONLY the plan text - no JSON, no markdown, no code blocks
-7. Start with "FRONTEND PLAN:" and follow the exact format shown above
-8. If user provides image reference, mention how UI should match it
-9. If user mentions specific UI system, design according to that system's patterns
-
-====================================
-USER REQUEST
-====================================
-
-%s
-
-%s
-
-Generate the detailed frontend plan now.`
+1. Output ONLY the plan text following the exact format above.
+2. STOP after the "Component Style" section. 
+3. DO NOT include "Page Structure", "Component Hierarchy", or "Key Features".
+4. If user provides image reference, mention how UI should match it in the Design System section.
+`
 )
 
 func BuildBackendPlanPrompt(userRequest string) string {
