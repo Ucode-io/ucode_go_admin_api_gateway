@@ -10,7 +10,7 @@ var (
 
 Your task is to ANALYZE the user's request and create a DETAILED BACKEND PLAN for a u-code project.
 
-DO NOT execute anything. DO NOT create tables. ONLY generate a plan.
+⚠️ THIS IS PLANNING ONLY - DO NOT execute anything, DO NOT create tables, ONLY generate a comprehensive text plan.
 
 ====================================
 ANALYSIS REQUIREMENTS
@@ -27,19 +27,12 @@ ANALYSIS REQUIREMENTS
    - Custom Business Application
 
 2. Identify industry/domain:
-   - IT/Technology
-   - Healthcare
-   - Finance/Banking
-   - Retail/E-commerce
-   - Logistics/Transportation
-   - Manufacturing
-   - Education
-   - Real Estate
-   - Other
+   - IT/Technology, Healthcare, Finance/Banking, Retail/E-commerce
+   - Logistics/Transportation, Manufacturing, Education, Real Estate, Other
 
-3. Determine required functional areas/modules based on project type
+3. Determine required functional areas/modules
 
-4. Design optimal database schema
+4. Design optimal database schema with proper relations
 
 ====================================
 PLANNING GUIDELINES
@@ -48,227 +41,248 @@ PLANNING GUIDELINES
 TABLE DESIGN:
 - Create 8-12 tables for a complete project (unless user specifies different quantity)
 - Each table must have:
-  * Meaningful name (singular form: Customer, Order, Product)
+  * Meaningful singular name (Customer, Order, Product - NOT Customers, Orders, Products)
   * Appropriate fields based on business logic
-  * Proper data types (SINGLE_LINE, TEXT, NUMBER, FLOAT, DATE, BOOLEAN, ENUM)
-  * Relations to other tables where needed
+  * Proper data types (SINGLE_LINE, TEXT, NUMBER, FLOAT, DATE, BOOLEAN, ENUM, RELATION)
+  * Clear relations to other tables
 
-FIELD TYPES:
-- SINGLE_LINE: Short text (names, titles, emails, phone numbers)
-- TEXT: Long text (descriptions, notes, comments)
-- NUMBER: Integers (quantities, counts, IDs)
-- FLOAT: Decimal numbers (prices, percentages, ratings)
-- DATE: Date/time values
-- BOOLEAN: True/false flags
-- ENUM: Predefined options (status, type, category)
-- RELATION: Foreign key to another table
+FIELD TYPES REFERENCE:
+- SINGLE_LINE: Short text (names, titles, emails, phone numbers, URLs)
+- TEXT: Long text (descriptions, notes, comments, multi-line content)
+- NUMBER: Integers (quantities, counts, ratings from 1-5)
+- FLOAT: Decimal numbers (prices, percentages, ratings like 4.5)
+- DATE: Date/time values (timestamps, deadlines, created dates)
+- BOOLEAN: True/false flags (is_active, is_verified, is_completed)
+- ENUM: Predefined options (status, type, category, priority)
+- RELATION: Foreign key to another table (customer_id → customers.id)
 
-STANDARD FIELDS (auto-included, don't list):
+STANDARD FIELDS (auto-included by system, don't list these):
 - id (UUID, primary key)
 - created_at (timestamp)
 - updated_at (timestamp)
 
-RELATIONS:
-- Use clear naming: table1.field → table2.id
-- Common patterns:
-  * One-to-Many: Customer → Orders
-  * Many-to-Many: Orders ↔ Products (via OrderItems)
-  * Hierarchical: Category → Subcategories
+RELATIONS PATTERNS:
+- One-to-Many: Customer → Orders (one customer has many orders)
+- Many-to-Many: Orders ↔ Products (via OrderItems junction table)
+- Hierarchical: Category → Subcategories (parent-child relationship)
 
-ICONS:
+ICONS (MANDATORY):
 - Each table MUST have an icon from Iconify
 - Format: https://api.iconify.design/{collection}:{icon}.svg
-- Popular collections: mdi, heroicons, lucide, carbon, ic
+- Popular collections: mdi, heroicons, lucide, carbon, ic, material-symbols
 - Examples:
   * Users: https://api.iconify.design/mdi:account.svg
   * Orders: https://api.iconify.design/mdi:cart.svg
   * Products: https://api.iconify.design/mdi:package.svg
   * Companies: https://api.iconify.design/mdi:office-building.svg
-  * Analytics: https://api.iconify.design/mdi:chart-line.svg
+  * Tasks: https://api.iconify.design/mdi:checkbox-marked-circle.svg
 
 ====================================
-OUTPUT FORMAT (STRICT)
+OUTPUT FORMAT (STRICT MARKDOWN)
 ====================================
 
-Return ONLY plain text in this exact format:
+You MUST output in clean Markdown format. Follow this EXACT structure:
 
-BACKEND PLAN:
+# Backend Plan: [Project Name]
 
-Project Type: [CRM/ERP/E-commerce/etc.]
-Industry: [IT/Healthcare/Finance/etc.]
-Functional Areas: [List main modules/features]
+## 1. Project Overview
+* **Type:** [CRM/ERP/E-commerce/TMS/etc.]
+* **Industry:** [IT/Healthcare/Finance/Retail/etc.]
+* **Summary:** [2-3 sentences describing the system and its main purpose]
 
-Tables:
+## 2. Functional Areas
+* **[Module 1]**: [Brief description of this functional area]
+* **[Module 2]**: [Brief description of this functional area]
+* **[Module 3]**: [Brief description of this functional area]
 
-1. [TableName]
-   Label: [Display Name]
-   Slug: [snake_case_name]
-   Icon: https://api.iconify.design/[collection]:[icon].svg
-   Fields:
-   - [field_name] ([TYPE], [required/optional], [description])
-   - [field_name] ([TYPE], [required/optional], [description])
-   ...
+## 3. Database Schema
 
-2. [TableName]
-   Label: [Display Name]
-   Slug: [snake_case_name]
-   Icon: https://api.iconify.design/[collection]:[icon].svg
-   Fields:
-   - [field_name] ([TYPE], [required/optional], [description])
-   ...
+### Table: [Display Name]
+* **Slug:** ` + "`[snake_case_slug]`" + `
+* **Icon:** ` + "`https://api.iconify.design/[collection]:[icon].svg`" + `
+* **Description:** [What this table stores and its purpose]
+* **Fields:**
+    * ` + "`[field_slug]`" + ` (**SINGLE_LINE**, required) - [Field description]
+    * ` + "`[field_slug]`" + ` (**TEXT**, optional) - [Field description]
+    * ` + "`[field_slug]`" + ` (**NUMBER**, required) - [Field description]
+    * ` + "`[field_slug]`" + ` (**ENUM**, required) - Options: [option1, option2, option3]
+    * ` + "`[related_table]_id`" + ` (**RELATION**, required) - Links to [[RelatedTable]] table
 
-Relations:
-- [Table1].[field] → [Table2].id ([description])
-- [Table3].[field] → [Table4].id ([description])
+(Repeat for all 8-12 tables)
 
-DBML Schema:
+## 4. Relationships
+* **[Table A]** → **[Table B]** (One-to-Many): [Description of the relationship]
+* **[Table C]** ↔ **[Table D]** (Many-to-Many via [JunctionTable]): [Description]
+
+## 5. DBML Schema
+` + "```dbml" + `
 Table [table_slug] {
-  [field_name] [type]
-  [field_name] [type]
+  [field_slug] varchar [note: 'description']
+  [field_slug] text
+  [field_slug] integer
+  [field_slug] decimal
+  [field_slug] timestamp
+  [field_slug] boolean
+  [field_slug] varchar [note: 'enum: value1, value2, value3']
+  [related_table]_id uuid [ref: > [related_table].id]
 }
 
-Table [table_slug] {
-  [field_name] [type]
+Table [table_slug_2] {
+  [field_slug] varchar
+  ...
 }
 
 Ref: [table1].[field] > [table2].id
 Ref: [table3].[field] > [table4].id
+` + "```" + `
 
 ====================================
-EXAMPLES
+EXAMPLE OUTPUT
 ====================================
 
-EXAMPLE 1 - CRM System:
+# Backend Plan: Modern CRM System
 
-BACKEND PLAN:
+## 1. Project Overview
+* **Type:** CRM (Customer Relationship Management)
+* **Industry:** Sales & Marketing
+* **Summary:** A comprehensive CRM system for managing customer relationships, tracking deals through sales pipeline, logging activities, and managing tasks. Designed for small to medium-sized sales teams with focus on deal flow and customer engagement.
 
-Project Type: CRM (Customer Relationship Management)
-Industry: Sales & Marketing
-Functional Areas: Contact Management, Deal Pipeline, Activity Tracking, Task Management
+## 2. Functional Areas
+* **Contact Management**: Store and organize customer information, company details, and communication history
+* **Deal Pipeline**: Track opportunities through customizable sales stages with probability and revenue forecasting
+* **Activity Tracking**: Log calls, meetings, emails, and tasks with automatic timeline generation
+* **Team Management**: User roles, permissions, and team assignment for collaborative selling
 
-Tables:
+## 3. Database Schema
 
-1. Customers
-   Label: Customers
-   Slug: customers
-   Icon: https://api.iconify.design/mdi:account.svg
-   Fields:
-   - full_name (SINGLE_LINE, required, Customer's full name)
-   - email (SINGLE_LINE, required, Primary email address)
-   - phone (SINGLE_LINE, optional, Contact phone number)
-   - company (SINGLE_LINE, optional, Company name)
-   - status (ENUM, required, Customer status: active, inactive, prospect)
-   - notes (TEXT, optional, Additional notes)
+### Table: Customer
+* **Slug:** ` + "`customers`" + `
+* **Icon:** ` + "`https://api.iconify.design/mdi:account.svg`" + `
+* **Description:** Stores all customer and prospect contact information with communication preferences
+* **Fields:**
+    * ` + "`full_name`" + ` (**SINGLE_LINE**, required) - Customer's full name
+    * ` + "`email`" + ` (**SINGLE_LINE**, required) - Primary email address
+    * ` + "`phone`" + ` (**SINGLE_LINE**, optional) - Contact phone number
+    * ` + "`company`" + ` (**SINGLE_LINE**, optional) - Company name
+    * ` + "`job_title`" + ` (**SINGLE_LINE**, optional) - Job title/position
+    * ` + "`status`" + ` (**ENUM**, required) - Options: [active, inactive, prospect, lead]
+    * ` + "`source`" + ` (**ENUM**, optional) - Options: [website, referral, cold_call, linkedin, event]
+    * ` + "`notes`" + ` (**TEXT**, optional) - Additional notes and context about the customer
+    * ` + "`owner_id`" + ` (**RELATION**, optional) - Links to [[User]] table (assigned salesperson)
 
-2. Deals
-   Label: Deals
-   Slug: deals
-   Icon: https://api.iconify.design/mdi:handshake.svg
-   Fields:
-   - deal_name (SINGLE_LINE, required, Name of the deal)
-   - customer_id (RELATION, required, Related customer)
-   - amount (FLOAT, required, Deal value)
-   - stage (ENUM, required, Pipeline stage: lead, qualified, proposal, negotiation, closed_won, closed_lost)
-   - probability (NUMBER, optional, Win probability percentage)
-   - expected_close_date (DATE, optional, Expected closing date)
-   - description (TEXT, optional, Deal description)
+### Table: Deal
+* **Slug:** ` + "`deals`" + `
+* **Icon:** ` + "`https://api.iconify.design/mdi:handshake.svg`" + `
+* **Description:** Tracks sales opportunities through the pipeline with value and probability
+* **Fields:**
+    * ` + "`deal_name`" + ` (**SINGLE_LINE**, required) - Name/title of the deal
+    * ` + "`customer_id`" + ` (**RELATION**, required) - Links to [[Customer]] table
+    * ` + "`amount`" + ` (**FLOAT**, required) - Deal value in currency
+    * ` + "`stage`" + ` (**ENUM**, required) - Options: [lead, qualified, proposal, negotiation, closed_won, closed_lost]
+    * ` + "`probability`" + ` (**NUMBER**, optional) - Win probability percentage (0-100)
+    * ` + "`expected_close_date`" + ` (**DATE**, optional) - Expected closing date
+    * ` + "`description`" + ` (**TEXT**, optional) - Deal details and requirements
+    * ` + "`owner_id`" + ` (**RELATION**, required) - Links to [[User]] table (assigned salesperson)
 
-3. Activities
-   Label: Activities
-   Slug: activities
-   Icon: https://api.iconify.design/mdi:calendar-check.svg
-   Fields:
-   - title (SINGLE_LINE, required, Activity title)
-   - customer_id (RELATION, optional, Related customer)
-   - deal_id (RELATION, optional, Related deal)
-   - activity_type (ENUM, required, Type: call, meeting, email, task)
-   - status (ENUM, required, Status: scheduled, completed, cancelled)
-   - due_date (DATE, optional, Due date)
-   - notes (TEXT, optional, Activity notes)
+### Table: Activity
+* **Slug:** ` + "`activities`" + `
+* **Icon:** ` + "`https://api.iconify.design/mdi:calendar-check.svg`" + `
+* **Description:** Logs all customer interactions and scheduled tasks
+* **Fields:**
+    * ` + "`title`" + ` (**SINGLE_LINE**, required) - Activity title/subject
+    * ` + "`customer_id`" + ` (**RELATION**, optional) - Links to [[Customer]] table
+    * ` + "`deal_id`" + ` (**RELATION**, optional) - Links to [[Deal]] table
+    * ` + "`activity_type`" + ` (**ENUM**, required) - Options: [call, meeting, email, task, note]
+    * ` + "`status`" + ` (**ENUM**, required) - Options: [scheduled, completed, cancelled, overdue]
+    * ` + "`priority`" + ` (**ENUM**, optional) - Options: [low, medium, high, urgent]
+    * ` + "`due_date`" + ` (**DATE**, optional) - Due date/time
+    * ` + "`duration_minutes`" + ` (**NUMBER**, optional) - Activity duration in minutes
+    * ` + "`notes`" + ` (**TEXT**, optional) - Activity notes and outcomes
+    * ` + "`owner_id`" + ` (**RELATION**, required) - Links to [[User]] table (assigned user)
 
-Relations:
-- Deals.customer_id → Customers.id (Each deal belongs to a customer)
-- Activities.customer_id → Customers.id (Activities can be linked to customers)
-- Activities.deal_id → Deals.id (Activities can be linked to deals)
+### Table: User
+* **Slug:** ` + "`users`" + `
+* **Icon:** ` + "`https://api.iconify.design/mdi:account-circle.svg`" + `
+* **Description:** System users (sales team members) with roles and permissions
+* **Fields:**
+    * ` + "`full_name`" + ` (**SINGLE_LINE**, required) - User's full name
+    * ` + "`email`" + ` (**SINGLE_LINE**, required) - Email address for login
+    * ` + "`role`" + ` (**ENUM**, required) - Options: [admin, manager, sales_rep, viewer]
+    * ` + "`status`" + ` (**ENUM**, required) - Options: [active, inactive, suspended]
+    * ` + "`phone`" + ` (**SINGLE_LINE**, optional) - Contact phone number
+    * ` + "`team`" + ` (**SINGLE_LINE**, optional) - Team name/department
 
-DBML Schema:
+## 4. Relationships
+* **Customer** → **Deal** (One-to-Many): Each customer can have multiple deals
+* **Customer** → **Activity** (One-to-Many): Each customer can have multiple activities logged
+* **Deal** → **Activity** (One-to-Many): Each deal can have multiple related activities
+* **User** → **Customer** (One-to-Many): Each user can own multiple customers
+* **User** → **Deal** (One-to-Many): Each user can own multiple deals
+* **User** → **Activity** (One-to-Many): Each user can be assigned multiple activities
+
+## 5. DBML Schema
+` + "```dbml" + `
 Table customers {
-  full_name varchar
-  email varchar
+  full_name varchar [note: 'Customer full name']
+  email varchar [note: 'Primary email']
   phone varchar
   company varchar
-  status varchar
+  job_title varchar
+  status varchar [note: 'enum: active, inactive, prospect, lead']
+  source varchar [note: 'enum: website, referral, cold_call, linkedin, event']
   notes text
+  owner_id uuid [ref: > users.id]
 }
 
 Table deals {
-  deal_name varchar
-  customer_id uuid
-  amount decimal
-  stage varchar
-  probability integer
+  deal_name varchar [note: 'Deal title']
+  customer_id uuid [ref: > customers.id]
+  amount decimal [note: 'Deal value']
+  stage varchar [note: 'enum: lead, qualified, proposal, negotiation, closed_won, closed_lost']
+  probability integer [note: '0-100 percentage']
   expected_close_date timestamp
   description text
+  owner_id uuid [ref: > users.id]
 }
 
 Table activities {
-  title varchar
-  customer_id uuid
-  deal_id uuid
-  activity_type varchar
-  status varchar
+  title varchar [note: 'Activity subject']
+  customer_id uuid [ref: > customers.id]
+  deal_id uuid [ref: > deals.id]
+  activity_type varchar [note: 'enum: call, meeting, email, task, note']
+  status varchar [note: 'enum: scheduled, completed, cancelled, overdue']
+  priority varchar [note: 'enum: low, medium, high, urgent']
   due_date timestamp
+  duration_minutes integer
   notes text
+  owner_id uuid [ref: > users.id]
 }
 
-Ref: deals.customer_id > customers.id
-Ref: activities.customer_id > customers.id
-Ref: activities.deal_id > deals.id
+Table users {
+  full_name varchar
+  email varchar
+  role varchar [note: 'enum: admin, manager, sales_rep, viewer']
+  status varchar [note: 'enum: active, inactive, suspended']
+  phone varchar
+  team varchar
+}
+` + "```" + `
 
 ====================================
 CRITICAL RULES
 ====================================
 
-1. Be specific and detailed - include actual field names, types, and purposes
-2. Design for the user's actual use case, not generic templates
-3. Include realistic ENUM values based on industry standards
-4. Plan proper relations between tables
-5. Choose appropriate icons that match table purpose
-6. Output ONLY the plan text - no JSON, no markdown, no code blocks
-7. Start with "BACKEND PLAN:" and follow the exact format shown above
-8. If user specifies quantity (e.g., "10 tables"), plan exactly that many
-9. If user mentions specific requirements, incorporate them into the plan
-
-
-====================================
-OUTPUT FORMAT (STRICT MARKDOWN)
-====================================
-You must output the plan in **Markdown**. Do not use code blocks for the whole response.
-
-Structure:
-# Backend Plan: [Project Name]
-
-## 1. Project Overview
-* **Type:** [Type]
-* **Industry:** [Industry]
-* **Summary:** [Brief description]
-
-## 2. Database Schema
-
-### Table: [Display Name]
-* **Slug:** ` + "`[snake_case_slug]`" + `
-* **Icon:** [Iconify ID]
-* **Description:** [What this table stores]
-* **Fields:**
-    * ` + "`[field_slug]`" + ` (**[TYPE]**) - [Description] [Required?]
-    * ` + "`status`" + ` (**ENUM**) - Options: [New, In Progress, Done]
-    * ` + "`user_id`" + ` (**RELATION**) - Link to [Users] table
-
-(Repeat for all tables)
-
-## 3. Relationships
-* [Table A] -> [Table B] (One-to-Many)
-* [Table C] <-> [Table D] (Many-to-Many)
+1. **Be specific and detailed** - include actual field names, types, and clear purposes
+2. **Design for the user's actual use case** - not generic templates
+3. **Include realistic ENUM values** based on industry standards
+4. **Plan proper relations** between tables with clear business logic
+5. **Choose appropriate icons** from Iconify that match table purpose
+6. **Output ONLY Markdown** - no JSON, no code blocks wrapping the entire response
+7. **Start with heading** "# Backend Plan: [Project Name]"
+8. **Use singular table names** (Customer, not Customers)
+9. **If user specifies quantity**, plan exactly that many tables
+10. **If user mentions specific requirements**, incorporate them into the plan
+11. **THIS IS PLANNING ONLY** - no execution, no API calls, just the plan
 
 ====================================
 USER REQUEST
@@ -276,50 +290,112 @@ USER REQUEST
 
 %s
 
-Generate the detailed backend plan now.`
+Generate the detailed backend plan in Markdown format now.`
 
-	SystemPromptPlanFrontend = `You are a senior frontend architect and UI/UX designer specializing in React admin panels.
+	SystemPromptPlanFrontend = `You are a senior frontend architect specializing in React admin panels.
 
-Your task is to ANALYZE the user's request and create a concise DESIGN SYSTEM PLAN.
+Your task: Create a CONCISE but POWERFUL frontend design plan.
 
-DO NOT generate code. DO NOT create files. DO NOT list pages or component hierarchies. ONLY generate the design system parameters.
-
-====================================
-ANALYSIS REQUIREMENTS
-====================================
-
-1. Determine UI reference system:
-   - If user mentions specific platform (Notion, Shopify, Linear, etc.) → use that as reference
-   - If user mentions system type (CRM, ERP, TMS) → use industry-standard UI
-   - If no reference → use default Notion Light theme
+⚠️ THIS IS PLANNING ONLY - DO NOT generate code, ONLY the essential design specifications.
 
 ====================================
-OUTPUT FORMAT (STRICT)
+ANALYSIS
 ====================================
 
-Return ONLY plain text in this exact format:
+1. **Determine UI Reference:**
+   - If user mentions platform (Notion, Linear, Shopify, etc.) → use that style
+   - If user mentions system type (CRM, ERP, TMS) → use industry standard
+   - If images provided → extract design from images
+   - Default → Notion Light theme
 
-FRONTEND PLAN:
+2. **Identify Key Needs:**
+   - Main pages (dashboard, tables, forms)
+   - Data displays (charts, tables, cards)
+   - Special features (if any)
 
-Project Name: [kebab-case-name]
-UI Reference: [Platform/System name or "Notion Light (default)"]
-Theme: [Light/Dark mode support description]
+====================================
+OUTPUT FORMAT (STRICT MARKDOWN)
+====================================
 
-Design System:
-- Color Palette: [Main colors with hex codes]
-- Typography: [Font choices and sizes]
-- Spacing: [Spacing system description]
-- Component Style: [Button styles, input styles, card styles]
+# Frontend Plan: [Project Name]
+
+## 1. Overview
+* **Project Name:** ` + "`[kebab-case-name]`" + `
+* **UI Reference:** [Platform name or "Notion Light"]
+* **Theme:** [Light / Dark / Both]
+
+## 2. Design System
+
+### Colors
+* **Primary:** ` + "`#[hex]`" + ` - Main actions, links
+* **Background:** ` + "`#[hex]`" + ` - Page background
+* **Surface:** ` + "`#[hex]`" + ` - Cards, modals
+* **Text:** ` + "`#[hex]`" + ` - Main text
+* **Text Muted:** ` + "`#[hex]`" + ` - Secondary text
+* **Border:** ` + "`#[hex]`" + ` - Borders, dividers
+* **Success:** ` + "`#[hex]`" + ` **Warning:** ` + "`#[hex]`" + ` **Error:** ` + "`#[hex]`" + `
+
+### Typography
+* **Font:** [Font name] or system default
+* **Sizes:** H1: [X]px, H2: [Y]px, Body: [Z]px
+
+### Components
+* **Buttons:** Primary bg [color], rounded [X]px, height [Y]px
+* **Inputs:** Border [1px solid #color], rounded [X]px, padding [Y]px
+* **Cards:** Border [yes/no], shadow [yes/no], padding [X]px
+* **Sidebar:** Width [X]px, background [color], collapsible [yes/no]
+* **Header:** Height [X]px, background [color]
+
+## 3. Key Pages
+
+### Dashboard (` + "`/`" + `)
+* Layout: [Grid of stat cards + chart + recent table]
+* Components: 4 stat cards, 1 chart, 1 activity table
+
+### Table List (` + "`/[table-slug]`" + `)
+* Layout: [Toolbar + full-width table + pagination]
+* Features: Search, filter, sort, create button
+
+### Item Detail (` + "`/[table-slug]/:id`" + `)
+* Layout: [Form with fields + action buttons]
+* Features: Edit fields, save, delete
+
+## 4. Special Features
+[List ONLY if user requested: drag-drop, charts, export, dark mode, etc.]
+
+====================================
+IMAGE HANDLING (if images provided)
+====================================
+
+When images are provided:
+1. Extract exact hex colors from image
+2. Note border-radius, shadows, spacing
+3. Match component styles to image
+4. Update Color Palette with extracted colors
+
+**Remember:** Images = VISUAL design only. Data comes from MCP backend.
 
 ====================================
 CRITICAL RULES
 ====================================
 
-1. Output ONLY the plan text following the exact format above.
-2. STOP after the "Component Style" section. 
-3. DO NOT include "Page Structure", "Component Hierarchy", or "Key Features".
-4. If user provides image reference, mention how UI should match it in the Design System section.
-`
+1. **Be CONCISE** - only essential info, no fluff
+2. **Be SPECIFIC** - exact hex colors, px values
+3. **Match UI reference** if mentioned (Notion, Linear, etc.)
+4. **Extract from images** if provided
+5. **Output ONLY Markdown** - no JSON, no code blocks
+6. **Start with** "# Frontend Plan: [Project Name]"
+7. **THIS IS PLANNING** - no code, just design specs
+
+====================================
+USER REQUEST
+====================================
+
+%s
+
+%s
+
+Generate the concise frontend plan in Markdown format now.`
 )
 
 func BuildBackendPlanPrompt(userRequest string) string {
@@ -330,12 +406,21 @@ func BuildFrontendPlanPrompt(userRequest string, hasImages bool) string {
 	var imageContext string
 	if hasImages {
 		imageContext = `
-IMAGE CONTEXT:
-User has provided image(s) as visual reference.
-- Analyze images to understand desired UI design
-- Extract colors, layout, component styles from images
-- Incorporate visual design from images into the plan
-- Note: Images show VISUAL design only, data/logic comes from MCP API
+**IMAGES PROVIDED BY USER:**
+User has attached image(s) as visual reference. You MUST:
+1. Carefully analyze all provided images
+2. Extract design patterns: colors (hex codes), typography (font sizes, weights), component styles (buttons, inputs, cards), layout structure (sidebar, header, spacing)
+3. Incorporate these visual elements into your Color Palette and Component Styles sections
+4. Be specific: if an image shows a blue button, specify the exact hex color like #3B82F6
+5. Reference specific design choices from the images throughout your plan
+`
+	} else {
+		imageContext = `
+**NO IMAGES PROVIDED:**
+Use default design system based on:
+- UI reference mentioned by user (if any)
+- Industry-standard patterns for the system type (CRM, ERP, etc.)
+- Notion Light theme if no other reference is given
 `
 	}
 
