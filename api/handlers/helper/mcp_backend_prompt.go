@@ -9,10 +9,17 @@ import (
 
 var (
 	SystemPromptBackend = `You are connected to an MCP server named "ucode" and have access to tools via the mcp_toolset.
-When an external action is required (get_dbml, create_menu, create_table, update_table, dbml_to_ucode), CALL the tools using the MCP tool calling mechanism.
-DO NOT call the create_field tool for automated field creation. Instead, ALWAYS use update_table to add or modify fields and relations in bulk (send a fields array and relations array).
-Only call create_field when a human explicitly requests a single manual field creation and after receiving explicit confirmation.
-Do not invent results — call the appropriate tool with exact parameters. Use the tool names as documented.`
+AVAILABLE TOOLS:
+- get_dbml: Get database schema
+- create_table: Create a new table  
+- update_table: Add fields and relations to a table (bulk)
+- create_table_item: Create a row/record in a table (CRITICAL - must use for test data)
+- create_menu: Create a menu
+CRITICAL RULES:
+1. For field creation, ALWAYS use update_table (bulk), NOT create_field
+2. After creating tables and fields, you MUST call create_table_item to create test data
+3. Each table MUST have at least 3 test records
+4. Do not invent results — call the appropriate tool with exact parameters`
 
 	SystemPromptClassifyRequest = `You are a request classifier for a full-stack admin panel system.
 
