@@ -430,7 +430,7 @@ Use default design system based on:
 func BuildBackendPromptWithPlan(plan string, projectId, environmentId, apiKey string) string {
 	return fmt.Sprintf(`You are executing a pre-approved BACKEND PLAN for a u-code project.
 
-Your task: Execute this plan EXACTLY as written using MCP tools.
+Your task: Execute this plan EXACTLY as written using MCP tools, then populate ALL tables with test data.
 
 ====================================
 BACKEND PLAN TO EXECUTE
@@ -442,45 +442,159 @@ BACKEND PLAN TO EXECUTE
 EXECUTION INSTRUCTIONS
 ====================================
 
-Follow the plan above and execute it using these MCP tools (via mcp_toolset):
+You will execute this plan in 3 steps using MCP tools (via mcp_toolset):
 
-1. create_table - Create each table from the plan
-   Parameters:
-     - label: Display name from plan
-     - slug: snake_case slug from plan
-     - icon: Icon URL from plan
-     - menu_id: "%s" (ALWAYS use this)
-     - x-api-key: "%s"
-   
-   IMPORTANT: Save table_id and slug from each response for next steps
+====================================
+STEP 1: CREATE TABLES
+====================================
 
-2. update_table - Add fields and relations in bulk
-   Parameters:
-     - tableSlug: Table slug (collection name from create_table response)
-     - xapikey: "%s"
-     - fields: Array of field objects from plan
-     - relations: Array of relation objects from plan
-   
-   Field object structure:
-   {
-     "type": "SINGLE_LINE|TEXT|NUMBER|FLOAT|DATE|BOOLEAN|ENUM|RELATION",
-     "label": "Display Name",
-     "slug": "field_slug",
-     "required": true/false,
-     "attributes": {} // For ENUM: {"options": [{value, label}]}
-   }
+Use create_table tool for EACH table in the plan.
 
-3. Workflow:
-   STEP 1: For each table in plan:
-     - Call create_table with label, slug, icon from plan
-     - Save the returned table_id and collection (slug)
-   
-   STEP 2: For each table created:
-     - Build fields array from plan
-     - Build relations array from plan
-     - Call update_table with tableSlug, fields, relations
-   
-   STEP 3: Verify all tables and fields created successfully
+Parameters:
+  - label: Display name from plan (e.g., "Customer")
+  - slug: snake_case slug from plan (e.g., "customers")
+  - icon: Full Iconify URL from plan (e.g., "https://api.iconify.design/mdi:account.svg")
+  - menu_id: "%s" (ALWAYS use this exact value)
+  - x-api-key: "%s"
+
+⚠️ CRITICAL: Save the response from EACH create_table call
+   - You need table_id for later steps
+   - You need slug (collection name) for STEP 2
+
+Example:
+create_table({
+  label: "Customer",
+  slug: "customers",
+  icon: "https://api.iconify.design/mdi:account.svg",
+  menu_id: "%s",
+  x_api_key: "%s"
+})
+
+Repeat for ALL tables in the plan.
+
+====================================
+STEP 2: ADD FIELDS AND RELATIONS
+====================================
+
+Use update_table tool to add ALL fields and relations for EACH table.
+
+Parameters:
+  - tableSlug: The slug (collection name) from STEP 1 response
+  - xapikey: "%s"
+  - fields: Array of ALL field objects from the plan for this table
+  - relations: Array of ALL relation objects from the plan for this table
+
+Field object structure:
+{
+  "type": "SINGLE_LINE|TEXT|NUMBER|FLOAT|DATE|BOOLEAN|ENUM|RELATION",
+  "label": "Display Name",
+  "slug": "field_slug",
+  "required": true/false,
+  "attributes": {}
+}
+
+For ENUM fields, attributes must contain options:
+{
+  "type": "ENUM",
+  "label": "Status",
+  "slug": "status",
+  "required": true,
+  "attributes": {
+    "options": [
+      {"value": "active", "label": "Active"},
+      {"value": "inactive", "label": "Inactive"}
+    ]
+  }
+}
+
+Example:
+update_table({
+  tableSlug: "customers",
+  xapikey: "%s",
+  fields: [
+    {type: "SINGLE_LINE", label: "Full Name", slug: "full_name", required: true},
+    {type: "SINGLE_LINE", label: "Email", slug: "email", required: true},
+    {type: "ENUM", label: "Status", slug: "status", required: true, attributes: {options: [{value: "active", label: "Active"}, {value: "inactive", label: "Inactive"}]}}
+  ],
+  relations: []
+})
+
+Repeat for ALL tables created in STEP 1.
+
+====================================
+STEP 3: CREATE TEST DATA (CRITICAL - MUST DO)
+====================================
+
+⚠️ THIS STEP IS MANDATORY - You MUST create test data for EVERY table.
+
+Use create_table_item tool to create 3 records for EACH table.
+
+Parameters:
+  - table_slug: The slug of the table
+  - data: Object with field:value pairs
+  - x_api_key: "%s"
+
+Example:
+create_table_item({
+  table_slug: "customers",
+  data: {
+    full_name: "John Doe",
+    email: "john@example.com",
+    status: "active"
+  },
+  x_api_key: "%s"
+})
+
+🔴 CRITICAL RULES FOR TEST DATA CREATION:
+
+1. **Quantity**: Create EXACTLY 3 records per table (no more, no less)
+
+2. **Coverage**: Create data for EVERY table in the plan
+   - If plan has 4 tables → create 3 records × 4 = 12 total records
+   - If plan has 10 tables → create 3 records × 10 = 30 total records
+
+3. **Dependency Order** (VERY IMPORTANT):
+   - Tables WITH NO foreign keys (parent tables) → create FIRST
+   - Tables WITH foreign keys (child tables) → create AFTER parents
+   - SAVE the 'id' field from each parent record response
+   - USE saved IDs in child RELATION fields
+
+4. **Data Validity**:
+   - Required fields MUST have values (check plan for required=true)
+   - ENUM fields MUST use values from plan options (e.g., if options are [active, inactive], use only these)
+   - RELATION fields MUST use real IDs from previously created records
+   - Optional fields can be omitted or set to realistic values
+
+5. **Realistic Data**:
+   - Names: Use real-sounding names (John Doe, Jane Smith, etc.)
+   - Emails: Use realistic emails (john@example.com, jane@company.com)
+   - Dates: Use recent dates in ISO format (2024-01-15T10:00:00Z)
+   - Numbers: Use realistic values for the context
+
+6. **Example Workflow**:
+
+Plan has tables: User, Customer, Deal
+
+Step 3.1: Create 3 Users (no foreign keys)
+  create_table_item({table_slug: "users", data: {full_name: "Admin User", email: "admin@company.com", role: "admin", status: "active"}, x_api_key: "%s"})
+  → Response: {id: "user-id-1", ...}
+  create_table_item({table_slug: "users", data: {full_name: "Manager User", email: "manager@company.com", role: "manager", status: "active"}, x_api_key: "%s"})
+  → Response: {id: "user-id-2", ...}
+  create_table_item({table_slug: "users", data: {full_name: "Sales Rep", email: "sales@company.com", role: "sales_rep", status: "active"}, x_api_key: "%s"})
+  → Response: {id: "user-id-3", ...}
+
+Step 3.2: Create 3 Customers (has owner_id → User)
+  create_table_item({table_slug: "customers", data: {full_name: "Acme Corp", email: "contact@acme.com", status: "active", owner_id: "user-id-1"}, x_api_key: "%s"})
+  → Response: {id: "cust-id-1", ...}
+  create_table_item({table_slug: "customers", data: {full_name: "Tech Inc", email: "info@tech.com", status: "active", owner_id: "user-id-2"}, x_api_key: "%s"})
+  → Response: {id: "cust-id-2", ...}
+  create_table_item({table_slug: "customers", data: {full_name: "Global Ltd", email: "hello@global.com", status: "prospect", owner_id: "user-id-3"}, x_api_key: "%s"})
+  → Response: {id: "cust-id-3", ...}
+
+Step 3.3: Create 3 Deals (has customer_id → Customer AND owner_id → User)
+  create_table_item({table_slug: "deals", data: {deal_name: "Q1 Contract", customer_id: "cust-id-1", amount: 50000, stage: "negotiation", owner_id: "user-id-1"}, x_api_key: "%s"})
+  create_table_item({table_slug: "deals", data: {deal_name: "Annual License", customer_id: "cust-id-2", amount: 75000, stage: "proposal", owner_id: "user-id-2"}, x_api_key: "%s"})
+  create_table_item({table_slug: "deals", data: {deal_name: "Consulting Project", customer_id: "cust-id-3", amount: 30000, stage: "lead", owner_id: "user-id-3"}, x_api_key: "%s"})
 
 ====================================
 CONTEXT
@@ -492,22 +606,51 @@ x-api-key: %s
 main-menu-id: "%s"
 
 ====================================
-CRITICAL RULES
+FINAL CHECKLIST (BEFORE FINISHING)
 ====================================
 
-1. Execute plan EXACTLY as written - do not add or remove tables/fields
-2. Use exact field types from plan (SINGLE_LINE, TEXT, NUMBER, etc.)
-3. All tables created at root level using menu_id above
-4. For ENUM fields, extract options from plan and format properly
-5. For RELATION fields, reference the target table's ID
-6. If any step fails, report error and stop
-7. Do not call create_field - use update_table for all fields
+Before completing, verify:
+✓ STEP 1: ALL tables from plan created
+✓ STEP 2: ALL fields and relations added to ALL tables
+✓ STEP 3: 3 test records created for EVERY table
+✓ No orphan records (all foreign keys point to valid IDs)
+✓ No errors occurred during execution
 
-Execute the plan now.`,
+====================================
+CRITICAL EXECUTION RULES
+====================================
+
+1. Execute plan EXACTLY - don't add or remove tables/fields
+2. Use exact field types from plan (SINGLE_LINE, TEXT, NUMBER, FLOAT, DATE, BOOLEAN, ENUM, RELATION)
+3. All tables created at root level using menu_id = "%s"
+4. For ENUM fields, extract options from plan and format as shown above
+5. For RELATION fields, use real IDs from previously created records
+6. If ANY step fails, STOP and report the error - don't continue
+7. Do NOT use create_field - only use update_table for fields
+8. MUST complete ALL 3 STEPS - especially STEP 3 (test data)
+9. Save IDs from responses - you need them for STEP 3
+10. Before finishing, verify ALL tables have test data
+
+====================================
+BEGIN EXECUTION
+====================================
+
+Execute ALL 3 steps now:
+1. Create ALL tables from plan
+2. Add ALL fields and relations to ALL tables
+3. Create 3 test records for EVERY table
+
+Start now.`,
 		plan,
 		config.MainMenuID, apiKey,
+		config.MainMenuID, apiKey,
 		apiKey,
+		apiKey,
+		apiKey, apiKey,
+		apiKey, apiKey, apiKey,
+		apiKey, apiKey, apiKey,
 		projectId, environmentId, apiKey, config.MainMenuID,
+		config.MainMenuID,
 	)
 }
 
