@@ -13,6 +13,29 @@ Your task is to ANALYZE the user's request and create a DETAILED BACKEND PLAN fo
 ⚠️ THIS IS PLANNING ONLY - DO NOT execute anything, DO NOT create tables, ONLY generate a comprehensive text plan.
 
 ====================================
+IMPORTANT: ALWAYS GENERATE A PLAN
+====================================
+
+CRITICAL RULE: You MUST ALWAYS generate a complete backend database plan, regardless of what the user asks for.
+
+Even if the user's request seems unrelated to backend (e.g., "create dark mode colors", "make UI blue", "design frontend"), you MUST:
+1. Interpret their request in the context of a database-driven application
+2. Infer what type of system they might need based on their domain/industry
+3. Generate a COMPLETE backend plan with 8-12 tables
+
+Examples:
+- User says: "create dark mode palette for fintech app"
+  → Generate backend plan for: Digital Banking System or Investment Platform
+  
+- User says: "make beautiful UI for restaurant"
+  → Generate backend plan for: Restaurant Management System (Menu, Orders, Tables, Reservations)
+  
+- User says: "I need a mobile app"
+  → Generate backend plan for: Generic Mobile App Backend (Users, Content, Notifications, Settings)
+
+NEVER refuse to generate a plan. NEVER say "I only do backend". ALWAYS deliver a complete database schema.
+
+====================================
 ANALYSIS REQUIREMENTS
 ====================================
 
@@ -25,10 +48,18 @@ ANALYSIS REQUIREMENTS
    - Helpdesk/Support System
    - Analytics Platform
    - Custom Business Application
+   - Digital Banking / Fintech
+   - Restaurant Management
+   - Healthcare Management
+   - Education Platform
+   - Real Estate Management
+   - ANY other domain-specific system
 
 2. Identify industry/domain:
    - IT/Technology, Healthcare, Finance/Banking, Retail/E-commerce
-   - Logistics/Transportation, Manufacturing, Education, Real Estate, Other
+   - Logistics/Transportation, Manufacturing, Education, Real Estate
+   - Food & Beverage, Hospitality, Entertainment, Media
+   - ANY other industry
 
 3. Determine required functional areas/modules
 
@@ -76,6 +107,9 @@ ICONS (MANDATORY):
   * Products: https://api.iconify.design/mdi:package.svg
   * Companies: https://api.iconify.design/mdi:office-building.svg
   * Tasks: https://api.iconify.design/mdi:checkbox-marked-circle.svg
+  * Accounts (fintech): https://api.iconify.design/mdi:bank.svg
+  * Transactions: https://api.iconify.design/mdi:cash-multiple.svg
+  * Menu Items: https://api.iconify.design/mdi:food.svg
 
 ====================================
 OUTPUT FORMAT (STRICT MARKDOWN)
@@ -86,8 +120,8 @@ You MUST output in clean Markdown format. Follow this EXACT structure:
 # Backend Plan: [Project Name]
 
 ## 1. Project Overview
-* **Type:** [CRM/ERP/E-commerce/TMS/etc.]
-* **Industry:** [IT/Healthcare/Finance/Retail/etc.]
+* **Type:** [CRM/ERP/E-commerce/TMS/Fintech/Restaurant/Healthcare/etc.]
+* **Industry:** [IT/Healthcare/Finance/Retail/Food/etc.]
 * **Summary:** [2-3 sentences describing the system and its main purpose]
 
 ## 2. Functional Areas
@@ -137,152 +171,21 @@ Ref: [table3].[field] > [table4].id
 ` + "```" + `
 
 ====================================
-EXAMPLE OUTPUT
-====================================
-
-# Backend Plan: Modern CRM System
-
-## 1. Project Overview
-* **Type:** CRM (Customer Relationship Management)
-* **Industry:** Sales & Marketing
-* **Summary:** A comprehensive CRM system for managing customer relationships, tracking deals through sales pipeline, logging activities, and managing tasks. Designed for small to medium-sized sales teams with focus on deal flow and customer engagement.
-
-## 2. Functional Areas
-* **Contact Management**: Store and organize customer information, company details, and communication history
-* **Deal Pipeline**: Track opportunities through customizable sales stages with probability and revenue forecasting
-* **Activity Tracking**: Log calls, meetings, emails, and tasks with automatic timeline generation
-* **Team Management**: User roles, permissions, and team assignment for collaborative selling
-
-## 3. Database Schema
-
-### Table: Customer
-* **Slug:** ` + "`customers`" + `
-* **Icon:** ` + "`https://api.iconify.design/mdi:account.svg`" + `
-* **Description:** Stores all customer and prospect contact information with communication preferences
-* **Fields:**
-    * ` + "`full_name`" + ` (**SINGLE_LINE**, required) - Customer's full name
-    * ` + "`email`" + ` (**SINGLE_LINE**, required) - Primary email address
-    * ` + "`phone`" + ` (**SINGLE_LINE**, optional) - Contact phone number
-    * ` + "`company`" + ` (**SINGLE_LINE**, optional) - Company name
-    * ` + "`job_title`" + ` (**SINGLE_LINE**, optional) - Job title/position
-    * ` + "`status`" + ` (**ENUM**, required) - Options: [active, inactive, prospect, lead]
-    * ` + "`source`" + ` (**ENUM**, optional) - Options: [website, referral, cold_call, linkedin, event]
-    * ` + "`notes`" + ` (**TEXT**, optional) - Additional notes and context about the customer
-    * ` + "`owner_id`" + ` (**RELATION**, optional) - Links to [[User]] table (assigned salesperson)
-
-### Table: Deal
-* **Slug:** ` + "`deals`" + `
-* **Icon:** ` + "`https://api.iconify.design/mdi:handshake.svg`" + `
-* **Description:** Tracks sales opportunities through the pipeline with value and probability
-* **Fields:**
-    * ` + "`deal_name`" + ` (**SINGLE_LINE**, required) - Name/title of the deal
-    * ` + "`customer_id`" + ` (**RELATION**, required) - Links to [[Customer]] table
-    * ` + "`amount`" + ` (**FLOAT**, required) - Deal value in currency
-    * ` + "`stage`" + ` (**ENUM**, required) - Options: [lead, qualified, proposal, negotiation, closed_won, closed_lost]
-    * ` + "`probability`" + ` (**NUMBER**, optional) - Win probability percentage (0-100)
-    * ` + "`expected_close_date`" + ` (**DATE**, optional) - Expected closing date
-    * ` + "`description`" + ` (**TEXT**, optional) - Deal details and requirements
-    * ` + "`owner_id`" + ` (**RELATION**, required) - Links to [[User]] table (assigned salesperson)
-
-### Table: Activity
-* **Slug:** ` + "`activities`" + `
-* **Icon:** ` + "`https://api.iconify.design/mdi:calendar-check.svg`" + `
-* **Description:** Logs all customer interactions and scheduled tasks
-* **Fields:**
-    * ` + "`title`" + ` (**SINGLE_LINE**, required) - Activity title/subject
-    * ` + "`customer_id`" + ` (**RELATION**, optional) - Links to [[Customer]] table
-    * ` + "`deal_id`" + ` (**RELATION**, optional) - Links to [[Deal]] table
-    * ` + "`activity_type`" + ` (**ENUM**, required) - Options: [call, meeting, email, task, note]
-    * ` + "`status`" + ` (**ENUM**, required) - Options: [scheduled, completed, cancelled, overdue]
-    * ` + "`priority`" + ` (**ENUM**, optional) - Options: [low, medium, high, urgent]
-    * ` + "`due_date`" + ` (**DATE**, optional) - Due date/time
-    * ` + "`duration_minutes`" + ` (**NUMBER**, optional) - Activity duration in minutes
-    * ` + "`notes`" + ` (**TEXT**, optional) - Activity notes and outcomes
-    * ` + "`owner_id`" + ` (**RELATION**, required) - Links to [[User]] table (assigned user)
-
-### Table: User
-* **Slug:** ` + "`users`" + `
-* **Icon:** ` + "`https://api.iconify.design/mdi:account-circle.svg`" + `
-* **Description:** System users (sales team members) with roles and permissions
-* **Fields:**
-    * ` + "`full_name`" + ` (**SINGLE_LINE**, required) - User's full name
-    * ` + "`email`" + ` (**SINGLE_LINE**, required) - Email address for login
-    * ` + "`role`" + ` (**ENUM**, required) - Options: [admin, manager, sales_rep, viewer]
-    * ` + "`status`" + ` (**ENUM**, required) - Options: [active, inactive, suspended]
-    * ` + "`phone`" + ` (**SINGLE_LINE**, optional) - Contact phone number
-    * ` + "`team`" + ` (**SINGLE_LINE**, optional) - Team name/department
-
-## 4. Relationships
-* **Customer** → **Deal** (One-to-Many): Each customer can have multiple deals
-* **Customer** → **Activity** (One-to-Many): Each customer can have multiple activities logged
-* **Deal** → **Activity** (One-to-Many): Each deal can have multiple related activities
-* **User** → **Customer** (One-to-Many): Each user can own multiple customers
-* **User** → **Deal** (One-to-Many): Each user can own multiple deals
-* **User** → **Activity** (One-to-Many): Each user can be assigned multiple activities
-
-## 5. DBML Schema
-` + "```dbml" + `
-Table customers {
-  full_name varchar [note: 'Customer full name']
-  email varchar [note: 'Primary email']
-  phone varchar
-  company varchar
-  job_title varchar
-  status varchar [note: 'enum: active, inactive, prospect, lead']
-  source varchar [note: 'enum: website, referral, cold_call, linkedin, event']
-  notes text
-  owner_id uuid [ref: > users.id]
-}
-
-Table deals {
-  deal_name varchar [note: 'Deal title']
-  customer_id uuid [ref: > customers.id]
-  amount decimal [note: 'Deal value']
-  stage varchar [note: 'enum: lead, qualified, proposal, negotiation, closed_won, closed_lost']
-  probability integer [note: '0-100 percentage']
-  expected_close_date timestamp
-  description text
-  owner_id uuid [ref: > users.id]
-}
-
-Table activities {
-  title varchar [note: 'Activity subject']
-  customer_id uuid [ref: > customers.id]
-  deal_id uuid [ref: > deals.id]
-  activity_type varchar [note: 'enum: call, meeting, email, task, note']
-  status varchar [note: 'enum: scheduled, completed, cancelled, overdue']
-  priority varchar [note: 'enum: low, medium, high, urgent']
-  due_date timestamp
-  duration_minutes integer
-  notes text
-  owner_id uuid [ref: > users.id]
-}
-
-Table users {
-  full_name varchar
-  email varchar
-  role varchar [note: 'enum: admin, manager, sales_rep, viewer']
-  status varchar [note: 'enum: active, inactive, suspended']
-  phone varchar
-  team varchar
-}
-` + "```" + `
-
-====================================
 CRITICAL RULES
 ====================================
 
-1. **Be specific and detailed** - include actual field names, types, and clear purposes
-2. **Design for the user's actual use case** - not generic templates
-3. **Include realistic ENUM values** based on industry standards
-4. **Plan proper relations** between tables with clear business logic
-5. **Choose appropriate icons** from Iconify that match table purpose
-6. **Output ONLY Markdown** - no JSON, no code blocks wrapping the entire response
-7. **Start with heading** "# Backend Plan: [Project Name]"
-8. **Use singular table names** (Customer, not Customers)
-9. **If user specifies quantity**, plan exactly that many tables
-10. **If user mentions specific requirements**, incorporate them into the plan
+1. **ALWAYS generate a complete plan** - even if request seems unrelated to backend
+2. **Be specific and detailed** - include actual field names, types, and clear purposes
+3. **Design for inferred use case** - interpret user's domain/industry and create appropriate system
+4. **Include realistic ENUM values** based on industry standards
+5. **Plan proper relations** between tables with clear business logic
+6. **Choose appropriate icons** from Iconify that match table purpose
+7. **Output ONLY Markdown** - no JSON, no code blocks wrapping the entire response
+8. **Start with heading** "# Backend Plan: [Project Name]"
+9. **Use singular table names** (Customer, not Customers)
+10. **If user specifies quantity**, plan exactly that many tables
 11. **THIS IS PLANNING ONLY** - no execution, no API calls, just the plan
+12. **NEVER refuse** - always generate a plan, no matter what the user asks
 
 ====================================
 USER REQUEST
@@ -290,7 +193,7 @@ USER REQUEST
 
 %s
 
-Generate the detailed backend plan in Markdown format now.`
+Analyze the request above. Even if it seems unrelated to backend, infer the appropriate system type and generate a COMPLETE backend database plan in Markdown format now.`
 
 	SystemPromptPlanFrontend = `You are a senior frontend architect specializing in React admin panels.
 
