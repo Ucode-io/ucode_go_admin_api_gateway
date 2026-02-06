@@ -107,9 +107,15 @@ type BaseConfig struct {
 	AutomationURL       string
 	OpenFaaSBaseUrl     string
 	KnativeBaseUrl      string
-	MaxTokens           int
 	AnthropicVersion    string
 	MCPServerURL        string
+
+	MaxTokens                int
+	AnalyseProjectMaxTokens  int
+	GeneratePlanMaxTokens    int
+	ClassifyReqeustMaxTokens int
+
+	UcodeBaseUrl string
 }
 
 func BaseLoad() BaseConfig {
@@ -167,8 +173,13 @@ func BaseLoad() BaseConfig {
 	config.AutomationURL = cast.ToString(GetOrReturnDefaultValue("AUTOMATION_URL", ""))
 	config.OpenFaaSBaseUrl = cast.ToString(GetOrReturnDefaultValue("OPENFAAS_BASE_URL", ""))
 	config.KnativeBaseUrl = cast.ToString(GetOrReturnDefaultValue("KNATIVE_BASE_URL", ""))
-	config.MaxTokens = cast.ToInt(GetOrReturnDefaultValue("MAX_TOKENS", 12000))
 	config.MCPServerURL = cast.ToString(GetOrReturnDefaultValue("MCP_SERVER_URL", ""))
+	config.UcodeBaseUrl = cast.ToString(GetOrReturnDefaultValue("UCODE_BASE_URL", "https://admin-api.ucode.run"))
+
+	config.MaxTokens = cast.ToInt(GetOrReturnDefaultValue("MAX_TOKENS", 12000))
+	config.AnalyseProjectMaxTokens = cast.ToInt(GetOrReturnDefaultValue("ANALYSE_PROJECT_MAX_TOKENS", 5000))
+	config.GeneratePlanMaxTokens = cast.ToInt(GetOrReturnDefaultValue("GENERATE_PLAN_MAX_TOKENS", 10000))
+	config.ClassifyReqeustMaxTokens = cast.ToInt(GetOrReturnDefaultValue("CLASSIFY_MAX_TOKENS", 3000))
 
 	return config
 }

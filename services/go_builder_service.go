@@ -33,6 +33,7 @@ type GoBuilderServiceI interface {
 	CSV() nb.CSVServiceClient
 	DocxTemplate() nb.DocxTemplateServiceClient
 	Language() nb.LanguageServiceClient
+	McpProject() nb.McpProjectServiceClient
 }
 
 type goBuilderServiceClient struct {
@@ -56,6 +57,7 @@ type goBuilderServiceClient struct {
 	csvService            nb.CSVServiceClient
 	docxTemplateService   nb.DocxTemplateServiceClient
 	languageService       nb.LanguageServiceClient
+	mcpProjectService     nb.McpProjectServiceClient
 }
 
 func NewGoBuilderServiceClient(ctx context.Context, cfg config.Config) (GoBuilderServiceI, error) {
@@ -96,6 +98,7 @@ func NewGoBuilderServiceClient(ctx context.Context, cfg config.Config) (GoBuilde
 		csvService:            nb.NewCSVServiceClient(connGoBuilderService),
 		docxTemplateService:   nb.NewDocxTemplateServiceClient(connGoBuilderService),
 		languageService:       nb.NewLanguageServiceClient(connGoBuilderService),
+		mcpProjectService:     nb.NewMcpProjectServiceClient(connGoBuilderService),
 	}, nil
 }
 
@@ -177,4 +180,8 @@ func (g *goBuilderServiceClient) DocxTemplate() nb.DocxTemplateServiceClient {
 
 func (g *goBuilderServiceClient) Language() nb.LanguageServiceClient {
 	return g.languageService
+}
+
+func (g *goBuilderServiceClient) McpProject() nb.McpProjectServiceClient {
+	return g.mcpProjectService
 }
