@@ -491,7 +491,7 @@ func (h *HandlerV1) McpGenerateProjectV2(c *gin.Context) {
 		UserPrompt:    req.Prompt,
 		ProjectId:     scope.ProjectId,
 		EnvironmentId: scope.EnvironmentId,
-		APIKey:        req.BackendPlan,
+		APIKey:        scope.APIKey,
 		BaseURL:       h.baseConf.UcodeBaseUrl,
 		Method:        "project",
 	}
