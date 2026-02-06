@@ -332,35 +332,147 @@ Use default design system based on:
 }
 
 func BuildBackendPromptWithPlan(request models.GeneratePromptRequest, backendPlan string) string {
-	return fmt.Sprintf(`Execute this BACKEND PLAN using MCP tools. You MUST complete ALL 3 steps.
+	return fmt.Sprintf(`Execute this BACKEND PLAN using MCP tools. You MUST complete ALL 3 steps in ORDER.
+
 ===== PLAN =====
 %s
+
 ===== STEP 1: CREATE TABLES =====
-Use create_table for each table:
-- label, slug, icon (Iconify URL), menu_id: "%s", x_api_key: "%s"
-- SAVE the slug from each response
-===== STEP 2: ADD FIELDS =====
-Use update_table for each table:
-- tableSlug, xapikey: "%s", fields, relations
+For EACH table in the plan, use create_table tool:
+
+create_table({
+  "label": "Customer",
+  "slug": "customer",
+  "icon": "https://api.iconify.design/mdi:account.svg",
+  "menu_id": "%s",
+  "x_api_key": "%s"
+})
+
+CRITICAL: SAVE the response! Each response contains:
+- table_id (UUID) - you NEED this for Step 2
+- slug - use this for Step 3
+
+Create ALL tables before proceeding to Step 2.
+
+===== STEP 2: ADD FIELDS TO EACH TABLE =====
+For EACH table created in Step 1, use update_table tool:
+
+update_table({
+  "tableSlug": "<slug from Step 1 response>",
+  "xapikey": "%s",
+  "fields": [
+    {
+      "label": "Name",
+      "slug": "name",
+      "type": "SINGLE_LINE",
+      "required": true
+    },
+    {
+      "label": "Email",
+      "slug": "email", 
+      "type": "SINGLE_LINE",
+      "required": true
+    },
+    {
+      "label": "Status",
+      "slug": "status",
+      "type": "ENUM",
+      "required": true,
+      "attributes": {
+        "options": ["active", "inactive", "pending"]
+      }
+    }
+  ],
+  "relations": []
+})
+
+FIELD TYPES REFERENCE:
+- SINGLE_LINE: Short text
+- TEXT: Long text
+- NUMBER: Integers
+- FLOAT: Decimals
+- DATE: Date/timestamp
+- BOOLEAN: true/false
+- ENUM: Predefined options (must include "attributes": {"options": [...]})
+- RELATION: Foreign key (must include "attributes": {"table_id": "<related_table_uuid>"})
+
+For RELATION fields, you need the table_id from Step 1:
+{
+  "label": "Customer",
+  "slug": "customer_id",
+  "type": "RELATION",
+  "required": true,
+  "attributes": {
+    "table_id": "<UUID of customer table from Step 1>"
+  }
+}
+
+IMPORTANT: Create parent table fields BEFORE child table fields (so you have table_id for relations).
+
 ===== STEP 3: CREATE TEST DATA (MANDATORY) =====
 ⚠️ THIS IS CRITICAL - DO NOT SKIP ⚠️
-For EACH table, create 3 records using create_table_item:
+
+For EACH table, create 3 realistic records using create_table_item:
+
 create_table_item({
-  table_slug: "customers",
-  data: {"name": "John Doe", "email": "john@example.com", "status": "active"},
-  x_api_key: "%s"
+  "table_slug": "customer",
+  "data": {
+    "name": "John Doe",
+    "email": "john@example.com",
+    "status": "active"
+  },
+  "x_api_key": "%s"
 })
-RULES:
-- Create parent table records FIRST (save their IDs)
-- Then create child records using saved parent IDs
-- Use realistic data
+
+EXECUTION ORDER FOR RELATIONS:
+1. Create parent records FIRST (e.g., customers, categories)
+2. SAVE the returned IDs from parent records
+3. Create child records using saved parent IDs (e.g., orders with customer_id)
+
+Example with relations:
+# First create customer
+create_table_item({
+  "table_slug": "customer",
+  "data": {"name": "John Doe", "email": "john@example.com"},
+  "x_api_key": "%s"
+})
+# Response: {"id": "abc-123-def", ...}
+
+# Then create order with customer_id
+create_table_item({
+  "table_slug": "order",
+  "data": {
+    "order_number": "ORD-001",
+    "customer_id": "abc-123-def",
+    "total": 99.99,
+    "status": "pending"
+  },
+  "x_api_key": "%s"
+})
+
 ===== CONTEXT =====
-project-id: %s | environment-id: %s | x-api-key: %s | menu_id: %s
+project-id: %s
+environment-id: %s
+x-api-key: %s
+menu_id: %s
+
 ===== VERIFY BEFORE FINISHING =====
-✓ Tables created ✓ Fields added ✓ 3 records per table
+✓ All tables created (Step 1 responses saved)
+✓ All fields added to each table (using tableSlug from Step 1)
+✓ 3 records created per table (parent records before child records)
+
+===== EXECUTION RULES =====
+1. Execute steps SEQUENTIALLY - complete Step 1 before Step 2, etc.
+2. SAVE all responses from each step - you need IDs for next steps
+3. For relations: create parent tables → add fields to parent → add fields to child → create parent data → create child data
+4. Use REALISTIC data for test records
+5. DO NOT skip Step 3 - test data is mandatory
+
 Execute all 3 steps now.`,
 		backendPlan,
 		config.MainMenuID, request.APIKey,
+		request.APIKey,
+		request.APIKey,
 		request.APIKey,
 		request.APIKey,
 		request.ProjectId, request.EnvironmentId, request.APIKey, config.MainMenuID,
