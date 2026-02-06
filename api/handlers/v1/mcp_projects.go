@@ -208,6 +208,69 @@ func (h *HandlerV1) SaveMcpProject(c *gin.Context) {
 	h.HandleResponse(c, status_http.OK, response)
 }
 
+func (h *HandlerV1) DeleteMcpProject(c *gin.Context) {
+	var (
+		mcpProjectId  = c.Param("mcp_project_id")
+		projectId     any
+		environmentId any
+		ok            bool
+	)
+
+	if !util.IsValidUUID(mcpProjectId) {
+		h.HandleResponse(c, status_http.InvalidArgument, config.ErrProjectIdValid)
+		return
+	}
+
+	projectId, ok = c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.HandleResponse(c, status_http.InvalidArgument, config.ErrProjectIdValid)
+		return
+	}
+
+	environmentId, ok = c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.HandleResponse(c, status_http.InvalidArgument, config.ErrEnvironmentIdValid)
+		return
+	}
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	if resource.ResourceType != pb.ResourceType_POSTGRESQL {
+		h.HandleResponse(c, status_http.InvalidArgument, "resource type not supported")
+		return
+	}
+
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	response, err := services.GoObjectBuilderService().McpProject().DeleteMcpProject(
+		c.Request.Context(), &pbo.McpProjectId{
+			ResourceEnvId: resource.ResourceEnvironmentId,
+			Id:            mcpProjectId,
+		},
+	)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.HandleResponse(c, status_http.OK, response)
+}
+
 func (h *HandlerV1) PublishMcpProjectFront(c *gin.Context) {
 	_ = h.MakeProxy(c, h.baseConf.GoFunctionServiceHost+h.baseConf.GoFunctionServiceHTTPPort, c.Request.URL.Path)
 }
