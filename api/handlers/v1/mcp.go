@@ -26,11 +26,7 @@ import (
 // ====================  MCP HANDLERS  ====================
 
 func (h *HandlerV1) McpCreateBackend(c *gin.Context) {
-	var (
-		request models.MCPRequest
-		message string
-		content string
-	)
+	var request models.MCPRequest
 
 	if err := c.ShouldBindJSON(&request); err != nil {
 		h.HandleResponse(c, status_http.BadRequest, err.Error())
@@ -46,7 +42,7 @@ func (h *HandlerV1) McpCreateBackend(c *gin.Context) {
 		request.Method = "project"
 	}
 
-	content, message, err = helper.BuildBackendPrompt(
+	content, message, err := helper.BuildBackendPrompt(
 		models.GeneratePromptRequest{
 			ProjectId:     scope.ProjectId,
 			EnvironmentId: scope.EnvironmentId,
@@ -70,12 +66,9 @@ func (h *HandlerV1) McpCreateBackend(c *gin.Context) {
 }
 
 func (h *HandlerV1) McpGenerateProject(c *gin.Context) {
-	var (
-		request models.MCPRequest
-		err     error
-	)
+	var request models.MCPRequest
 
-	if err = c.ShouldBindJSON(&request); err != nil {
+	if err := c.ShouldBindJSON(&request); err != nil {
 		h.HandleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -138,7 +131,7 @@ func (h *HandlerV1) McpGenerateProject(c *gin.Context) {
 			EnvironmentId: scope.EnvironmentId,
 			APIKey:        scope.APIKey,
 			UserPrompt:    request.Prompt,
-			BaseURL:       "https://admin-api.ucode.run",
+			BaseURL:       h.baseConf.UcodeBaseUrl,
 		},
 	)
 
@@ -342,7 +335,7 @@ func (h *HandlerV1) MCPUpdateFrontend(c *gin.Context) {
 	)
 
 	if len(analysis.FilesToModify) == 0 && len(analysis.NewFilesNeeded) == 0 && len(analysis.FilesToDelete) == 0 {
-		h.HandleResponse(c, status_http.OK, map[string]interface{}{
+		h.HandleResponse(c, status_http.OK, map[string]any{
 			"status":             "success",
 			"message":            "No frontend changes needed",
 			"backend_processing": classification.RequiresBackend,
@@ -494,7 +487,14 @@ func (h *HandlerV1) McpGenerateProjectV2(c *gin.Context) {
 		return
 	}
 
-	log.Println("WITH PLANNING:", withPlanning)
+	var generatePromptReq = models.GeneratePromptRequest{
+		UserPrompt:    req.Prompt,
+		ProjectId:     scope.ProjectId,
+		EnvironmentId: scope.EnvironmentId,
+		APIKey:        req.BackendPlan,
+		BaseURL:       h.baseConf.UcodeBaseUrl,
+		Method:        "project",
+	}
 
 	if withPlanning {
 		if req.BackendPlan == "" || req.FrontendPlan == "" {
@@ -502,21 +502,16 @@ func (h *HandlerV1) McpGenerateProjectV2(c *gin.Context) {
 			return
 		}
 
+		var (
+			backendPrompt  = helper.BuildBackendPromptWithPlan(generatePromptReq, req.BackendPlan)
+			frontendPrompt = helper.BuildFrontendPromptWithPlan(generatePromptReq, req.FrontendPlan)
+		)
+
 		go func() {
-			backendPrompt := helper.BuildBackendPromptWithPlan(req.BackendPlan, scope.ProjectId, scope.EnvironmentId, scope.APIKey)
 			if _, err = h.sendAnthropicBackend(backendPrompt); err != nil {
 				log.Printf("Backend plan execution failed: %v\n", err)
 			}
 		}()
-
-		var frontendPrompt = helper.BuildFrontendPromptWithPlan(
-			req.FrontendPlan,
-			req.Prompt,
-			scope.ProjectId,
-			scope.EnvironmentId,
-			scope.APIKey,
-			"https://admin-api.ucode.run",
-		)
 
 		generatedProject, err = h.generateFrontendProject(frontendPrompt, req.ImageURLs)
 		if err != nil {
@@ -531,15 +526,7 @@ func (h *HandlerV1) McpGenerateProjectV2(c *gin.Context) {
 		}
 
 		go func() {
-			content, _, err := helper.BuildBackendPrompt(
-				models.GeneratePromptRequest{
-					ProjectId:     scope.ProjectId,
-					EnvironmentId: scope.EnvironmentId,
-					Method:        "project",
-					APIKey:        scope.APIKey,
-					UserPrompt:    req.Prompt,
-				},
-			)
+			content, _, err := helper.BuildBackendPrompt(generatePromptReq)
 			if err != nil {
 				log.Printf("Backend generation failed: %v\n", err)
 				return
@@ -551,15 +538,7 @@ func (h *HandlerV1) McpGenerateProjectV2(c *gin.Context) {
 			log.Println("Backend operation completed:")
 		}()
 
-		userPrompt := helper.BuildFrontendGeneratePrompt(
-			models.GeneratePromptRequest{
-				ProjectId:     scope.ProjectId,
-				EnvironmentId: scope.EnvironmentId,
-				APIKey:        scope.APIKey,
-				UserPrompt:    req.Prompt,
-				BaseURL:       "https://admin-api.ucode.run",
-			},
-		)
+		userPrompt := helper.BuildFrontendGeneratePrompt(generatePromptReq)
 
 		generatedProject, err = h.generateFrontendProject(userPrompt, req.ImageURLs)
 		if err != nil {
@@ -589,8 +568,6 @@ func (h *HandlerV1) resolveProjectScope(c *gin.Context) (*models.ProjectScope, e
 		projectIDRaw any
 		envIDRaw     any
 		exists       bool
-		apiKeys      *as.GetListRes
-		err          error
 	)
 
 	projectIDRaw, exists = c.Get("project_id")
@@ -605,7 +582,7 @@ func (h *HandlerV1) resolveProjectScope(c *gin.Context) (*models.ProjectScope, e
 		return nil, config.ErrEnvironmentIdValid
 	}
 
-	apiKeys, err = h.authService.ApiKey().GetList(c.Request.Context(), &as.GetListReq{
+	apiKeys, err := h.authService.ApiKey().GetList(c.Request.Context(), &as.GetListReq{
 		EnvironmentId: envIDRaw.(string),
 		ProjectId:     projectIDRaw.(string),
 		Limit:         1,
@@ -631,7 +608,7 @@ func (h *HandlerV1) generateBackendPlan(userPrompt string) (string, error) {
 	var (
 		body = models.AnthropicRequest{
 			Model:     h.baseConf.ClaudeModel,
-			MaxTokens: 10000,
+			MaxTokens: h.baseConf.GeneratePlanMaxTokens,
 			System:    helper.SystemPromptPlanBackend,
 			Messages: []models.ChatMessage{
 				{
@@ -690,7 +667,7 @@ func (h *HandlerV1) generateFrontendPlan(userPrompt string, imageURLs []string) 
 
 	body = models.AnthropicRequest{
 		Model:     h.baseConf.ClaudeModel,
-		MaxTokens: 10000,
+		MaxTokens: h.baseConf.GeneratePlanMaxTokens,
 		System:    helper.SystemPromptPlanFrontend,
 		Messages: []models.ChatMessage{
 			{
@@ -855,7 +832,7 @@ func (h *HandlerV1) classifyRequest(prompt string, imageURLs []string) (*models.
 		classificationPrompt = helper.BuildClassificationPrompt(prompt, hasImages)
 		body                 = models.AnthropicRequest{
 			Model:     h.baseConf.ClaudeModel,
-			MaxTokens: 2048,
+			MaxTokens: h.baseConf.ClassifyReqeustMaxTokens,
 			System:    helper.SystemPromptClassifyRequest,
 			Messages: []models.ChatMessage{
 				{

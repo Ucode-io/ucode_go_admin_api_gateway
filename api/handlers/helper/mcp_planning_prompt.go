@@ -2,6 +2,7 @@ package helper
 
 import (
 	"fmt"
+	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/config"
 )
 
@@ -330,7 +331,7 @@ Use default design system based on:
 	return fmt.Sprintf(SystemPromptPlanFrontend, userRequest, imageContext)
 }
 
-func BuildBackendPromptWithPlan(plan string, projectId, environmentId, apiKey string) string {
+func BuildBackendPromptWithPlan(request models.GeneratePromptRequest, backendPlan string) string {
 	return fmt.Sprintf(`Execute this BACKEND PLAN using MCP tools. You MUST complete ALL 3 steps.
 ===== PLAN =====
 %s
@@ -358,15 +359,15 @@ project-id: %s | environment-id: %s | x-api-key: %s | menu_id: %s
 ===== VERIFY BEFORE FINISHING =====
 ✓ Tables created ✓ Fields added ✓ 3 records per table
 Execute all 3 steps now.`,
-		plan,
-		config.MainMenuID, apiKey,
-		apiKey,
-		apiKey,
-		projectId, environmentId, apiKey, config.MainMenuID,
+		backendPlan,
+		config.MainMenuID, request.APIKey,
+		request.APIKey,
+		request.APIKey,
+		request.ProjectId, request.EnvironmentId, request.APIKey, config.MainMenuID,
 	)
 }
 
-func BuildFrontendPromptWithPlan(plan, userPrompt string, projectId, environmentId, apiKey, baseURL string) string {
+func BuildFrontendPromptWithPlan(request models.GeneratePromptRequest, frontendPlan string) string {
 	return fmt.Sprintf(`
 ====================================
 CRITICAL USER UI REQUIREMENTS (HIGHEST PRIORITY)
@@ -469,11 +470,11 @@ Project JSON Structure:
 
 GENERATE THE JSON NOW:
 `,
-		plan,
-		userPrompt,
-		projectId, config.MainMenuID, apiKey, baseURL,
-		baseURL, config.MainMenuID, projectId, apiKey,
-		baseURL,
-		baseURL,
+		frontendPlan,
+		request.UserPrompt,
+		request.ProjectId, config.MainMenuID, request.APIKey, request.BaseURL,
+		request.BaseURL, config.MainMenuID, request.ProjectId, request.APIKey,
+		request.BaseURL,
+		request.BaseURL,
 	)
 }
