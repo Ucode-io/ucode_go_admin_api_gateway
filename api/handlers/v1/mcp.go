@@ -441,6 +441,7 @@ func (h *HandlerV1) McpGeneratePlan(c *gin.Context) {
 	h.HandleResponse(c, status_http.OK, gin.H{
 		"backend_plan":  backendPlan,
 		"frontend_plan": frontendPlan,
+		"image_urls":    req.ImageURLs,
 	})
 }
 
