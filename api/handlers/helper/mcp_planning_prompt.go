@@ -482,16 +482,30 @@ Execute all 3 steps now.`,
 func BuildFrontendPromptWithPlan(request models.GeneratePromptRequest, frontendPlan string) string {
 	return fmt.Sprintf(`
 ====================================
-CRITICAL USER UI REQUIREMENTS (HIGHEST PRIORITY)
+🚨 HIERARCHY OF TRUTH (HIGHEST PRIORITY) 🚨
+====================================
+
+You must follow the instructions in the order below:
+
+1. **USER FRONTEND PLAN (BELOW)** - THIS IS THE LAW.
+   - If the Plan says "Purple Theme", you make it Purple, even if System Rules say "Notion Gray".
+   - If the Plan says "Sidebar on Right", you put it on Right.
+   - IGNORE any default System Rules that contradict this Plan.
+
+2. **USER IMAGES (IF PROVIDED)** - VISUAL TRUTH.
+   - Match colors, rounding, and spacing from the image exactly.
+
+3. **SYSTEM DEFAULT RULES** - FALLBACK ONLY.
+   - Use the standard "Notion Style" rules ONLY for things NOT mentioned in the Plan.
+
+====================================
+FRONTEND PLAN (EXECUTE THIS EXACTLY)
 ====================================
 
 %s
 
-This FRONTEND PLAN MUST take precedence over default design system.
-Generate the project STRICTLY according to this plan.
-
 ====================================
-ORIGINAL USER REQUEST (FOR CONTEXT)
+ORIGINAL USER REQUEST
 ====================================
 
 %s
