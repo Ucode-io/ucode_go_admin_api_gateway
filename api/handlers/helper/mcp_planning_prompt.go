@@ -825,20 +825,137 @@ Execute all 3 steps now.`,
 
 func BuildFrontendPromptWithPlan(request models.GeneratePromptRequest, frontendPlan string) string {
 	return fmt.Sprintf(`
+🔴🔴🔴 ABSOLUTE PRIORITY INSTRUCTION - READ FIRST 🔴🔴🔴
+
+YOU ARE RECEIVING A DETAILED FRONTEND PLAN THAT WAS CREATED SPECIFICALLY FOR THIS PROJECT.
+THIS PLAN IS **ABSOLUTE LAW** - NOT A SUGGESTION, NOT A GUIDELINE, BUT **MANDATORY SPECIFICATION**.
+
 ====================================
-CRITICAL USER UI REQUIREMENTS (HIGHEST PRIORITY)
+⚠️ CRITICAL: PLAN COMPLIANCE IS MANDATORY ⚠️
+====================================
+
+The plan below contains EXACT specifications that you MUST follow:
+- EXACT hex color codes (e.g., #1e293b, #8b5cf6)
+- EXACT dimensions (e.g., 280px sidebar width, 64px header height)
+- EXACT font specifications
+- EXACT component styles
+- EXACT layout structure
+
+**DEVIATION FROM PLAN = CRITICAL FAILURE**
+
+If plan says:
+- Background: #0f172a → You MUST use #0f172a (NOT #191919, NOT any other color)
+- Sidebar: 280px → You MUST use 280px (NOT 260px, NOT 300px)
+- Font: Inter → You MUST import and use Inter (NOT default font)
+- Primary color: #8b5cf6 → You MUST use #8b5cf6 for primary actions
+
+====================================
+🎯 THE FRONTEND PLAN (YOUR BIBLE)
 ====================================
 
 %s
 
-This FRONTEND PLAN MUST take precedence over default design system.
-Generate the project STRICTLY according to this plan.
-
 ====================================
-ORIGINAL USER REQUEST (FOR CONTEXT)
+PLAN IMPLEMENTATION RULES (NON-NEGOTIABLE)
 ====================================
 
+1. **COLOR IMPLEMENTATION:**
+   - Extract EVERY color from plan's "Colors" section
+   - Add them to tailwind.config.js under theme.extend.colors
+   - Use EXACT hex codes - do not modify or approximate
+   
+   Example from plan:
+   Plan says: "Primary: #8b5cf6"
+   Your tailwind.config.js MUST have:
+   '''js
+theme: {
+extend: {
+colors: {
+primary: '#8b5cf6',  // EXACT match
+	// ... other colors from plan
+}
+}
+}
+	'''
+
+2. **DIMENSION IMPLEMENTATION:**
+   - Sidebar width from plan → Use in Tailwind classes or inline styles
+   - Header height from plan → Use exact px value
+   - Padding/spacing from plan → Use exact values
+   
+   Example:
+   Plan says: "Sidebar: Width 280px"
+   Your code MUST have: 'className="w-[280px]"' or 'style={{ width: '280px' }}'
+
+3. **TYPOGRAPHY IMPLEMENTATION:**
+   - Import font specified in plan
+   - Use exact font sizes from plan
+   - Apply exact font weights from plan
+   
+   Example:
+   Plan says: "Font: Inter, H1: 32px, Body: 14px"
+   Your index.html MUST import Inter
+   Your CSS MUST use these exact sizes
+
+4. **COMPONENT STYLES:**
+   - Buttons: Use exact colors, padding, border-radius from plan
+   - Inputs: Use exact border, padding, focus states from plan
+   - Cards: Use exact background, shadow, padding from plan
+
+====================================
+SELF-CHECK BEFORE GENERATING (MANDATORY)
+====================================
+
+Before you write ANY code, verify:
+
+□ I have READ the entire plan above
+□ I have EXTRACTED all colors from plan's Design System section
+□ I have NOTED all dimensions (sidebar, header, padding, etc.)
+□ I have IDENTIFIED the font to use
+□ I understand the component styles required
+□ I will NOT use Notion Light defaults if plan specifies different colors
+□ I will NOT approximate - I will use EXACT values from plan
+
+====================================
+VERIFICATION CHECKLIST (After Generation)
+====================================
+
+After generating code, verify:
+
+□ tailwind.config.js contains ALL colors from plan (exact hex codes)
+□ Sidebar width matches plan specification
+□ Header height matches plan specification
+□ Font is imported and applied correctly
+□ Button styles match plan (color, padding, radius)
+□ Input styles match plan
+□ Card styles match plan
+□ NO default Notion colors used if plan specified different colors
+
+====================================
+CRITICAL FAILURE EXAMPLES (NEVER DO THIS)
+====================================
+
+❌ Plan says "#8b5cf6" → You use "#9333ea" (WRONG - different color!)
+❌ Plan says "280px sidebar" → You use "260px" (WRONG - different size!)
+❌ Plan says "Dark theme" → You generate light theme (WRONG - opposite!)
+❌ Plan says "Inter font" → You use default font (WRONG - different font!)
+❌ Plan specifies colors → You ignore and use Notion defaults (WRONG!)
+
+✅ CORRECT APPROACH:
+Plan says "#8b5cf6" → You use EXACTLY "#8b5cf6"
+Plan says "280px" → You use EXACTLY "280px"
+Plan says "Dark theme" → You generate dark theme
+Plan says "Inter" → You import and use Inter
+
+====================================
+ORIGINAL USER REQUEST (CONTEXT ONLY)
+====================================
+
+This was the original user request that led to the plan creation:
 %s
+
+**NOTE:** This is for CONTEXT only. Your PRIMARY source of truth is the PLAN above.
+If plan contradicts user request, FOLLOW THE PLAN (the plan is refined specification).
 
 ====================================
 PROJECT CONFIGURATION
@@ -851,7 +968,7 @@ Runtime Configuration:
 - Base URL: "%s"
 
 ====================================
-TECHNICAL REQUIREMENTS
+TECHNICAL REQUIREMENTS (Same as before)
 ====================================
 
 1) Generate a complete production-ready frontend-only admin project (React 18 + Vite + TailwindCSS v2.2.19) as a single JSON object with fields:
@@ -859,10 +976,12 @@ TECHNICAL REQUIREMENTS
    - File contents must be plain raw file text (use real newlines in JSON string values).
    - No markdown, no extra text outside that single JSON root.
 
-2) UI Design Priority:
-   - PRIMARY: Follow the FRONTEND PLAN from above section
-   - Execute plan specifications EXACTLY (components, pages, design system, routes)
-   - CRITICAL: If plan mentions specific UI system reference, match that UI exactly
+2) **UI Design Priority (CHANGED - READ CAREFULLY):**
+   - **ONLY PRIORITY:** Follow the FRONTEND PLAN above with 100%% accuracy
+   - Plan colors → YOUR colors (EXACT hex codes)
+   - Plan dimensions → YOUR dimensions (EXACT px values)
+   - Plan typography → YOUR typography (EXACT font and sizes)
+   - **IGNORE DEFAULT NOTION THEME** - Use ONLY what plan specifies
 
 3) Implement client-side routing using react-router-dom:
    - Include BrowserRouter and a Routes config with routes from the plan
@@ -894,18 +1013,15 @@ TECHNICAL REQUIREMENTS
 9) Return EXACTLY one JSON object with: project_name, files, file_graph (5 fields per file), env
 
 ====================================
-VALIDATION BEFORE GENERATING
+FINAL REMINDER (READ BEFORE STARTING)
 ====================================
 
-Before generating, ask yourself:
-- Did I check every JSX file for external imports?
-- Are all those imports listed in package.json?
-- Is "type": "module" REMOVED from package.json?
-- Does my generated UI match the plan's specifications?
-- Are the components, pages, and routes from the plan included?
-- Is there ANY white text on a white background? (FIX IT: Use rgb(55, 53, 47))
-- Are the icons visible? (FIX IT: Add brightness(0) filter if icons are white)
-- Did I use Tailwind "text-white" on a white sidebar? (FIX IT: Remove it)
+🔴 THE PLAN ABOVE IS NOT A SUGGESTION
+🔴 THE PLAN IS YOUR SPECIFICATION DOCUMENT
+🔴 EVERY COLOR, DIMENSION, FONT MUST MATCH THE PLAN
+🔴 IF YOU DEVIATE FROM PLAN, YOUR OUTPUT IS INCORRECT
+
+Follow the plan with SURGICAL PRECISION.
 
 ====================================
 STRICT OUTPUT FORMAT
@@ -924,7 +1040,7 @@ Project JSON Structure:
   "file_graph": {...}
 }
 
-GENERATE THE JSON NOW:
+GENERATE THE JSON NOW FOLLOWING THE PLAN EXACTLY:
 `,
 		frontendPlan,
 		request.UserPrompt,
