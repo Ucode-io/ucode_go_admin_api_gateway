@@ -426,7 +426,7 @@ func (h *HandlerV1) McpGeneratePlan(c *gin.Context) {
 		return
 	}
 
-	backendPlan, err := h.generateBackendPlan(req.Prompt)
+	backendPlan, err := h.generateBackendPlan(req.Prompt, req.ImageURLs)
 	if err != nil {
 		h.HandleResponse(c, status_http.InternalServerError, "Backend plan generation failed: "+err.Error())
 		return
@@ -604,26 +604,41 @@ func (h *HandlerV1) resolveProjectScope(c *gin.Context) (*models.ProjectScope, e
 	}, nil
 }
 
-func (h *HandlerV1) generateBackendPlan(userPrompt string) (string, error) {
+func (h *HandlerV1) generateBackendPlan(userPrompt string, imageURLs []string) (string, error) {
 	var (
-		body = models.AnthropicRequest{
-			Model:     h.baseConf.ClaudeModel,
-			MaxTokens: h.baseConf.GeneratePlanMaxTokens,
-			System:    helper.SystemPromptPlanBackend,
-			Messages: []models.ChatMessage{
-				{
-					Role: "user",
-					Content: []models.ContentBlock{
-						{
-							Type: "text",
-							Text: helper.BuildBackendPlanPrompt(userPrompt),
-						},
-					},
-				},
-			},
-		}
-		apiResponse models.AnthropicApiResponse
+		contentBlocks []models.ContentBlock
+		body          models.AnthropicRequest
+		apiResponse   models.AnthropicApiResponse
 	)
+
+	for _, imageURL := range imageURLs {
+		if imageURL != "" {
+			contentBlocks = append(contentBlocks, models.ContentBlock{
+				Type: "image",
+				Source: &models.ImageSource{
+					Type: "url",
+					URL:  imageURL,
+				},
+			})
+		}
+	}
+
+	contentBlocks = append(contentBlocks, models.ContentBlock{
+		Type: "text",
+		Text: helper.BuildBackendPlanPrompt(userPrompt, len(imageURLs) > 0),
+	})
+
+	body = models.AnthropicRequest{
+		Model:     h.baseConf.ClaudeModel,
+		MaxTokens: h.baseConf.GeneratePlanMaxTokens,
+		System:    helper.SystemPromptPlanBackend,
+		Messages: []models.ChatMessage{
+			{
+				Role:    "user",
+				Content: contentBlocks,
+			},
+		},
+	}
 
 	respText, err := h.callAnthropicAPI(body, 300*time.Second)
 	if err != nil {
