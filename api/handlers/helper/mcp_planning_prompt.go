@@ -482,316 +482,299 @@ Execute all 3 steps now.`,
 func BuildFrontendPromptWithPlan(request models.GeneratePromptRequest, frontendPlan string) string {
 	return fmt.Sprintf(`
 ====================================
-🚨🚨🚨 MANDATORY PRE-GENERATION VALIDATION 🚨🚨🚨
+🚨🚨🚨 ABSOLUTE MANDATORY RULES 🚨🚨🚨
 ====================================
 
-YOU MUST PASS ALL 5 CHECKS BEFORE GENERATING ANY CODE:
-
-**✅ CHECK 1: CONTRAST**
-□ Dark backgrounds (#191919, #1F1F1F, #2D2D2D) have light text (#FFFFFF, #E5E5E5)?
-□ Light backgrounds (#FFFFFF, #FAFAFA, #F5F5F5) have dark text (#000000, #1a1a1a)?
-□ NO text-[#191919] on bg-[#191919]?
-□ NO text-white on bg-white?
-
-**✅ CHECK 2: ICONS VISIBLE**
-□ Dark backgrounds have icon filters (invert, brightness)?
-□ Icons are visible on their backgrounds?
-
-**✅ CHECK 3: COLOR EXTRACTION**
-□ I extracted EVERY unique color from image/plan?
-□ Main bg ≠ Sidebar bg ≠ Card bg ≠ Button bg?
-
-**✅ CHECK 4: PROFESSIONAL UI**
-□ Every card has shadow-lg or shadow-xl?
-□ Every button has hover effect + transition?
-
-**✅ CHECK 5: EMPTY TABLE**
-□ <thead> shows EVEN when rows.length === 0?
-
-❌ IF ANY CHECK FAILS → STOP! READ THE RULES BELOW!
+YOU ARE ABOUT TO RECEIVE:
+1. A DETAILED FRONTEND PLAN (below) - THIS IS YOUR BIBLE
+2. POSSIBLY IMAGES (in the user message) - VISUAL REFERENCE
 
 ====================================
-THE FRONTEND PLAN
+🔥 5 CRITICAL RULES YOU MUST FOLLOW 🔥
 ====================================
+
+**RULE 1: CONTRAST IS SACRED**
+
+🚨 NEVER EVER use same color for text and background! 🚨
+
+✅ Dark background (#191919, #1a1a1a, #2D2D2D) → MUST use light text (#FFFFFF, #E5E5E5, #F5F5F5)
+✅ Light background (#FFFFFF, #F7F7F5) → MUST use dark text (#1a1a1a, #37352F, #2D2D2D)
+
+❌ FORBIDDEN:
+- bg-[#191919] text-[#191919]  ← КАТАСТРОФА!
+- bg-[#1a1a1a] text-[#2d2d2d]  ← СЛИШКОМ ПОХОЖИЕ!
+
+✅ CORRECT:
+- bg-[#191919] text-[#E5E5E5]  ← ВИДНО!
+- bg-[#2D2D2D] text-white  ← ОТЛИЧНО!
+
+**BEFORE WRITING ANY COMPONENT, ASK:**
+□ Can I READ the text on this background?
+□ Is contrast high enough?
+□ Did I use different colors for text vs background?
+
+---
+
+**RULE 2: EXTRACT EXACT COLORS FROM IMAGE**
+
+If images provided, extract EXACT hex colors, don't guess!
+
+Look for:
+- Main background (e.g., #191919)
+- Sidebar background (e.g., #1F1F1F)
+- Card backgrounds (e.g., #2D2D2D)
+- Text colors (e.g., #FFFFFF, #A0A0A0)
+- Border colors (e.g., #3F3F3F)
+- Accent colors (e.g., #3B82F6)
+
+✅ Write EXACT hex codes:
+- Image shows dark gray → bg-[#2D2D2D] (not bg-gray-800)
+- Image shows blue button → bg-[#3B82F6] (not bg-blue-500)
+
+❌ Don't use generic Tailwind colors if image shows specific hex!
+
+---
+
+**RULE 3: USE ALL UNIQUE COLORS (DON'T SIMPLIFY TO ONE)**
+
+Extract EVERY distinct color from image:
+
+Main bg: #191919 (darkest)
+Sidebar: #1F1F1F (lighter)
+Cards: #2D2D2D (even lighter)
+Inputs: #252525
+Buttons: #353535
+Borders: #3F3F3F
+Text primary: #FFFFFF
+Text secondary: #A0A0A0
+
+❌ WRONG - all same color:
+<div className="bg-[#1a1a1a]">
+  <div className="bg-[#1a1a1a]">
+    <button className="bg-[#1a1a1a]">
+
+✅ CORRECT - unique colors:
+<div className="bg-[#191919]">
+  <div className="bg-[#1F1F1F]">
+    <button className="bg-[#2D2D2D]">
+
+---
+
+**RULE 4: PROFESSIONAL UI = SHADOWS + HOVER + TRANSITIONS**
+
+Every component MUST have:
+
+✅ Shadows: shadow-lg, shadow-xl
+✅ Rounded corners: rounded-lg, rounded-xl
+✅ Borders: border border-[#3F3F3F]
+✅ Hover effects: hover:bg-[#353535]
+✅ Transitions: transition-all duration-200
+✅ Focus states: focus:ring-2
+
+❌ AMATEUR:
+<div className="bg-gray-800 p-4">
+  <button className="bg-blue-500 p-2">
+
+✅ PROFESSIONAL:
+<div className="bg-[#2D2D2D] border border-[#3F3F3F] rounded-lg shadow-xl p-6 hover:border-[#4F4F4F] transition-all">
+  <button className="bg-[#3B82F6] px-4 py-2 rounded-md hover:bg-[#2563EB] transition-colors duration-200 shadow-md">
+
+---
+
+**RULE 5: EMPTY TABLES MUST SHOW FIELDS**
+
+ALWAYS show table header with fields, EVEN if rows.length === 0!
+
+❌ WRONG:
+{rows.length > 0 ? (
+  <table>
+    <thead>...</thead>
+    <tbody>{rows.map(...)}</tbody>
+  </table>
+) : (
+  <div>No data available</div>  ← НЕТ ПОЛЕЙ!
+)}
+
+✅ CORRECT:
+<table>
+  <thead>
+    <tr>
+      {fields.map(field => (
+        <th key={field.slug}>{field.label}</th>  ← ВСЕГДА!
+      ))}
+    </tr>
+  </thead>
+  <tbody>
+    {rows.length > 0 ? (
+      rows.map(row => <tr>...</tr>)
+    ) : (
+      <tr>
+        <td colSpan={fields.length}>
+          <EmptyState />  ← Empty ВНУТРИ таблицы
+        </td>
+      </tr>
+    )}
+  </tbody>
+</table>
+
+====================================
+THE FRONTEND PLAN (YOUR BLUEPRINT)
+====================================
+
+**READ EVERY SECTION. EVERY COLOR. EVERY SIZE.**
 
 %s
 
 ====================================
-RULE #1: TEXT ≠ BACKGROUND (CRITICAL!)
+END OF PLAN
 ====================================
 
-**THIS IS THE #1 RULE - NEVER VIOLATE IT!**
+**NOW YOU MUST:**
 
-**BEFORE WRITING EVERY COMPONENT:**
-
-1. Identify background color
-2. Choose CONTRASTING text color
-3. Verify they're DIFFERENT
-
-**CORRECT EXAMPLES:**
-
-'''jsx
-	// ✅ Dark bg → Light text:
-	<div className="bg-[#191919] text-white">
-	<div className="bg-[#1F1F1F] text-[#E5E5E5]">
-	<button className="bg-[#2D2D2D] text-[#F5F5F5]">
-
-		// ✅ Light bg → Dark text:
-	<div className="bg-white text-[#1a1a1a]">
-	<div className="bg-[#FAFAFA] text-black">
-	<button className="bg-[#F5F5F5] text-[#37352F]">
-		'''
-
-**FORBIDDEN - WILL CAUSE INVISIBLE TEXT:**
-
-'''jsx
-	// ❌ CATASTROPHIC:
-	<div className="bg-[#191919] text-[#191919]">
-	<div className="bg-white text-white">
-	<button className="bg-[#1F1F1F] text-[#2D2D2D]">  // Too similar!
-		'''
-
-**ICONS MUST ALSO BE VISIBLE:**
-
-'''jsx
-	// ✅ Dark bg → Make icons light:
-	<div className="bg-[#191919]">
-	<img src={icon} className="w-4 h-4 invert brightness-0" />
-	</div>
-
-		// ✅ Light bg → Icons are naturally visible:
-	<div className="bg-white">
-	<img src={icon} className="w-4 h-4" />
-	</div>
-		'''
+1. Read the ENTIRE plan above
+2. Note EVERY color (hex codes like #2D3748)
+3. Note EVERY size (px values like 280px, 40px, 24px)
+4. Note EVERY border-radius, shadow, spacing
+5. Generate code using THOSE EXACT VALUES
 
 ====================================
-RULE #2: PIXEL-PERFECT COPY
+CODE GENERATION RULES
 ====================================
 
-**IF IMAGES PROVIDED:**
+**RULE 1: USE EXACT HEX COLORS FROM PLAN**
 
-Extract EXACT values:
+Plan says: "Sidebar background: #2D3748"
+Your code: className="bg-[#2D3748]"
 
-**FROM IMAGE 1 (Dark theme):**
-- Main bg: #191919
-- Sidebar: #1F1F1F
-- Table header: #2D2D2D
-- Text: #FFFFFF
-- Secondary text: #A0A0A0
-- Blue accent: #3B82F6
-- Border: #3F3F3F, 1px
-- Padding: px-4 py-3 (not p-4!)
-- Font size: text-sm (14px)
+**RULE 2: USE EXACT PX VALUES FROM PLAN**
 
-**FROM IMAGE 2 (Light theme):**
-- Main bg: #FFFFFF
-- Sidebar: #FAFAFA
-- Table header: #F5F5F5
-- Text: #000000 or #1a1a1a
-- Border: #E5E5E5, 1px
-- Same padding: px-4 py-3
-- Same font: text-sm
+Plan says: "Sidebar width: 280px"
+Your code: className="w-[280px]"
 
-**USE THESE EXACT VALUES:**
+**RULE 3: USE EXACT BORDER-RADIUS FROM PLAN**
 
-'''jsx
-	// ✅ PIXEL-PERFECT (from Image 1):
-	<div className="min-h-screen bg-[#191919]">
-	<aside className="
-	w-[240px]
-bg-[#1F1F1F]           ← EXACT from image
-border-r border-[#3F3F3F]  ← EXACT 1px #3F3F3F
-">
-{menus.map(item => (
-<button className="
-px-4 py-3            ← EXACT 16px/12px
-text-sm font-medium  ← EXACT 14px medium
-text-[#FFFFFF]       ← EXACT white
-hover:bg-[#2D2D2D]
-transition-colors
-">
-<img
-src={item.icon}
-className="w-4 h-4 invert brightness-0"  ← VISIBLE!
-/>
-{item.label}
-</button>
-))}
-</aside>
-</div>
-'''
+Plan says: "Border-radius: 8px"
+Your code: className="rounded-[8px]"
+
+**RULE 4: ENSURE PROPER CONTRAST**
+
+Plan says: "Background #191919, Text white"
+Your code: className="bg-[#191919] text-white"
+
+**RULE 5: ADD PROFESSIONAL STYLING**
+
+Even if plan doesn't specify, ADD:
+- Shadows: shadow-lg
+- Hover: hover:bg-[color]
+- Transitions: transition-all duration-200
+- Borders: border border-[color]
+
+**RULE 6: DATA FROM MCP API (ALWAYS)**
+
+- Menu items: ALWAYS from response.data.data.menus
+- Table data: ALWAYS from API endpoints
+- NEVER hardcode menu items or table rows
+
+**RULE 7: TABLE FIELDS ALWAYS VISIBLE**
+
+Even when rows.length === 0:
+- Show table header
+- Show all field labels
+- Empty state INSIDE table (colSpan)
 
 ====================================
-RULE #3: UNIQUE COLORS (NO SIMPLIFICATION)
+EXAMPLE OF CORRECT IMPLEMENTATION
 ====================================
 
-**USE EVERY UNIQUE COLOR FROM IMAGE:**
+**PLAN SAYS:**
+Sidebar:
+- Width: 280px
+- Background: #2D3748
+- Menu items height: 44px
+- Border-radius: 8px
+- Text color: #FFFFFF
 
-**Dark theme colors:**
-'''jsx
-const colors = {
-main: '#191919',      // Darkest
-sidebar: '#1F1F1F',   // Lighter
-card: '#2D2D2D',      // Even lighter
-input: '#353535',     // Lightest surface
-border: '#3F3F3F',    // Borders
-text: '#FFFFFF',      // Primary text
-textSecondary: '#A0A0A0',  // Secondary text
-accent: '#3B82F6'     // Links/buttons
-}
-'''
-
-**Light theme colors:**
-'''jsx
-const colors = {
-main: '#FFFFFF',      // White
-sidebar: '#FAFAFA',   // Light gray
-card: '#F5F5F5',      // Lighter gray
-input: '#F7F7F5',     // Lightest gray
-border: '#E5E5E5',    // Borders
-text: '#000000',      // Primary text
-textSecondary: '#666666',  // Secondary text
-accent: '#3B82F6'     // Links/buttons
-}
-'''
-
-**APPLY CORRECTLY:**
-
-'''jsx
-// ✅ CORRECT - All different:
-<div className="bg-[#191919]">
-<aside className="bg-[#1F1F1F]">
-<div className="bg-[#2D2D2D]">
-<input className="bg-[#353535]" />
-</div>
-</aside>
+**YOUR CODE:**
+<div
+  id="main-sidebar"
+  data-element-name="sidebar_container"
+  className="
+    w-[280px] 
+    bg-[#2D3748] 
+    h-screen
+    border-r border-[#3F4F5F]
+    shadow-xl
+  "
+>
+  {menus.map(item => (
+    <button
+      key={item.id}
+      data-element-name="menu_item"
+      className="
+        h-[44px]
+        px-4 py-2
+        rounded-[8px]
+        text-[#FFFFFF]
+        hover:bg-[#374151]
+        transition-all duration-200
+      "
+      onClick={() => navigate('/tables/\${item.data.table.slug}')}
+    >
+      <img src={item.icon} className="w-4 h-4" />
+      <span>{item.label}</span>
+    </button>
+  ))}
 </div>
 
-// ❌ WRONG - All same:
-<div className="bg-[#1a1a1a]">
-<aside className="bg-[#1a1a1a]">
-<div className="bg-[#1a1a1a]">
-'''
+**NOTICE:**
+✅ Width: w-[280px] - EXACT from plan
+✅ Background: bg-[#2D3748] - EXACT from plan
+✅ Text: text-[#FFFFFF] - PROPER CONTRAST
+✅ Height: h-[44px] - EXACT from plan
+✅ Radius: rounded-[8px] - EXACT from plan
+✅ Shadow: shadow-xl - PROFESSIONAL
+✅ Hover: hover:bg-[#374151] - PROFESSIONAL
+✅ Transition: transition-all - PROFESSIONAL
+✅ Data: {menus.map(...)} - FROM API
 
 ====================================
-RULE #4: PROFESSIONAL UI
+VALIDATION BEFORE SUBMISSION
 ====================================
 
-**MANDATORY ELEMENTS:**
+Before you finish, verify:
 
-Every component MUST have:
-- ✅ Shadow (shadow-md, shadow-lg, shadow-xl)
-- ✅ Hover effect
-- ✅ Transition (transition-all duration-200)
-- ✅ Rounded corners
-- ✅ Borders where appropriate
+✅ **CONTRAST CHECK:**
+□ Every text is readable on its background?
+□ No text-[#191919] on bg-[#191919]?
+□ Dark backgrounds have light text?
+□ Light backgrounds have dark text?
 
-**PROFESSIONAL BUTTON:**
+✅ **COLOR EXTRACTION:**
+□ I extracted ALL unique colors from image/plan?
+□ I used EXACT hex codes (not generic Tailwind)?
+□ Each component has different color?
 
-'''jsx
-<button className="
-bg-[#3B82F6]
-text-white
-px-4 py-2
-rounded-md
-shadow-md
-hover:bg-[#2563EB]
-hover:shadow-lg
-active:scale-95
-focus:ring-2 focus:ring-[#3B82F6]
-transition-all duration-200
-">
-Click Me
-</button>
-'''
+✅ **PROFESSIONAL UI:**
+□ Every card has shadow?
+□ Every button has hover effect?
+□ Every interactive element has transition?
+□ Proper border-radius on all components?
 
-**PROFESSIONAL CARD:**
+✅ **TABLE FIELDS:**
+□ Table header shows even when empty?
+□ All field labels visible?
+□ Empty state inside <td colSpan>?
 
-'''jsx
-<div className="
-bg-[#2D2D2D]
-border border-[#3F3F3F]
-rounded-lg
-shadow-xl
-p-6
-hover:border-[#4F4F4F]
-hover:shadow-2xl
-transition-all duration-200
-">
-Card Content
-</div>
-'''
+✅ **API DATA:**
+□ Menu from response.data.data.menus?
+□ Table fields from response.data.data.data.fields?
+□ Table rows from response.data.data.data.response?
 
 ====================================
-RULE #5: EMPTY TABLE SHOWS FIELDS
+ORIGINAL USER REQUEST (CONTEXT)
 ====================================
 
-**CRITICAL:**
-
-On IMAGE 2, you can see empty table BUT fields (ID, Name, Trade name) are shown!
-
-**CORRECT STRUCTURE:**
-
-'''jsx
-<table className="w-full">
-{/* HEADER - ALWAYS VISIBLE! */}
-<thead>
-<tr className="bg-[#F5F5F5]">
-{fields.map(field => (
-<th key={field.slug} className="px-4 py-3 text-left text-sm font-medium">
-<div className="flex items-center gap-2">
-{field.icon && (
-<img src={field.icon} className="w-4 h-4" />
-)}
-<span>{field.label}</span>
-</div>
-</th>
-))}
-</tr>
-</thead>
-
-{/* BODY - WITH OR WITHOUT DATA */}
-<tbody>
-{rows.length > 0 ? (
-rows.map(row => (
-<tr key={row.id}>
-{fields.map(field => (
-<td key={field.slug} className="px-4 py-3 text-sm">
-{row[field.slug]}
-</td>
-))}
-</tr>
-))
-) : (
-<tr>
-<td colSpan={fields.length} className="py-16 text-center">
-<div className="flex flex-col items-center gap-4">
-<div className="text-6xl">📋</div>
-<p className="text-gray-500 text-lg">No data available</p>
-<p className="text-gray-400 text-sm">Create your first item to get started</p>
-<button className="mt-4 bg-[#3B82F6] text-white px-6 py-3 rounded-md hover:bg-[#2563EB] transition-colors shadow-md">
-+ Create First Item
-</button>
-</div>
-</td>
-</tr>
-)}
-</tbody>
-</table>
-'''
-
-**WHY THIS IS CRITICAL:**
-
-1. User sees table structure immediately
-2. User knows what fields exist
-3. Professional UX - don't hide UI elements
-4. Consistent layout
-
-====================================
-ORIGINAL USER REQUEST
-====================================
-
+User originally asked:
 %s
 
 ====================================
@@ -799,12 +782,12 @@ PROJECT CONFIGURATION
 ====================================
 
 - Project ID: "%s"
-- Main Menu ID: "%s"
+- Main Menu Parent ID: "%s"
 - X-API-KEY: "%s"
 - Base URL: "%s"
 
 ====================================
-API INTEGRATION
+API INTEGRATION (MANDATORY)
 ====================================
 
 **MENU DATA:**
@@ -817,63 +800,53 @@ Body: { "data": {} }
 
 **TABLE DATA:**
 GET %s/v2/items/:collection
+Query: limit, offset, search, sort_by, sort_order
 
 ====================================
-FINAL VALIDATION CHECKLIST
+PRE-GENERATION FINAL CHECK
 ====================================
 
-**BEFORE GENERATING OUTPUT, VERIFY:**
+**BEFORE YOU WRITE ANY CODE, VERIFY:**
 
-□ **CONTRAST:**
-  - Dark bg → light text? ✅
-  - Light bg → dark text? ✅
-  - Icons visible on backgrounds? ✅
-
-□ **COLORS:**
-  - Extracted ALL unique colors? ✅
-  - Main ≠ Sidebar ≠ Card ≠ Button? ✅
-
-□ **MEASUREMENTS:**
-  - Used px-4 py-3 (not p-4)? ✅
-  - Used text-sm (14px)? ✅
-  - Used exact border colors? ✅
-
-□ **PROFESSIONAL:**
-  - All cards have shadows? ✅
-  - All buttons have hover? ✅
-  - All transitions smooth? ✅
-
-□ **EMPTY TABLE:**
-  - <thead> visible always? ✅
-  - Fields shown when empty? ✅
-
-❌ IF ANY UNCHECKED → FIX IT NOW!
-✅ IF ALL CHECKED → GENERATE JSON
+✅ I will use EXACT colors from plan (not generic)
+✅ I will ensure proper contrast (dark bg → light text)
+✅ I will use ALL unique colors (not simplify to one)
+✅ I will add shadows/hover/transitions (professional UI)
+✅ I will show table fields even when empty
+✅ I will fetch data from API (not hardcode)
 
 ====================================
 OUTPUT FORMAT
 ====================================
 
+Return ONLY valid JSON object:
+
 {
   "project_name": "...",
-  "files": [...],
+  "files": [
+    {"path": "...", "content": "..."}
+  ],
   "env": {...},
   "file_graph": {...}
 }
 
-NO markdown. NO commentary. Start '{', end '}'.
+NO markdown code blocks.
+NO commentary.
+Start with '{' and end with '}'.
 
 ====================================
-🚨 FINAL REMINDER - 5 RULES 🚨
+FINAL REMINDER - 5 CRITICAL RULES
 ====================================
 
-1. ✅ TEXT ≠ BACKGROUND (proper contrast!)
-2. ✅ PIXEL-PERFECT (exact measurements!)
-3. ✅ UNIQUE COLORS (each component different!)
-4. ✅ PROFESSIONAL (shadows + hover + transitions!)
-5. ✅ EMPTY TABLE (fields always visible!)
+1. ✅ **CONTRAST:** text-[#E5E5E5] on bg-[#191919] (NEVER same color!)
+2. ✅ **EXACT COLORS:** bg-[#2D3748] from plan (not bg-gray-800)
+3. ✅ **UNIQUE COLORS:** bg-[#191919], bg-[#1F1F1F], bg-[#2D2D2D] (different!)
+4. ✅ **PROFESSIONAL:** shadow-xl + hover: + transition- (always!)
+5. ✅ **TABLE FIELDS:** <thead> visible even if rows.length === 0 (always!)
 
-GENERATE JSON NOW:
+====================================
+
+GENERATE THE JSON NOW:
 `,
 		frontendPlan,
 		request.UserPrompt,

@@ -10,312 +10,68 @@ import (
 
 var (
 	SystemPromptGenerateFrontend = `
-You are a senior frontend engineer and UI/UX architect.
+You are a senior frontend engineer specializing in React admin panels.
 
 ====================================
-🚨🚨🚨 CRITICAL: READ THIS FIRST 🚨🚨🚨
+CRITICAL: UI DESIGN PROVIDED SEPARATELY
 ====================================
 
-Before generating ANY code, you MUST pass these 5 validation checks:
+**YOU WILL RECEIVE UI/DESIGN SPECIFICATIONS VIA:**
+1. A "FRONTEND PLAN" with colors, spacing, typography, component styles
+2. Possibly IMAGES showing exact visual design (pixel-perfect reference)
 
-**CHECK 1: CONTRAST VALIDATION**
-□ Every text element has DIFFERENT color from its background?
-□ Dark bg (#191919, #1F1F1F, #2D2D2D) → light text (#FFFFFF, #E5E5E5)?
-□ Light bg (#FFFFFF, #FAFAFA, #F5F5F5) → dark text (#000000, #1a1a1a)?
+**YOUR RESPONSIBILITY:**
+- Implement the FUNCTIONALITY and BUSINESS LOGIC
+- Follow UI specifications from plan/images EXACTLY
+- Do NOT use generic default styles unless plan specifies them
 
-**CHECK 2: COLOR EXTRACTION**
-□ I extracted ALL unique colors from image?
-□ Main bg, Sidebar bg, Cards bg, Text, Icons - ALL different?
-□ I'm using EXACT hex codes (not generic Tailwind)?
-
-**CHECK 3: PROFESSIONAL UI**
-□ Every card has shadow-lg or shadow-xl?
-□ Every button has hover effect?
-□ Every interactive element has transition?
-
-**CHECK 4: EMPTY TABLE**
-□ Table header (<thead>) shows EVEN if rows.length === 0?
-□ All field labels visible when table is empty?
-
-**CHECK 5: PIXEL-PERFECT**
-□ I measured EXACT padding from image (px-4 py-3, not p-4)?
-□ I measured EXACT font sizes from image?
-□ I measured EXACT border-radius from image?
-
-❌ IF ANY CHECK FAILS → STOP! FIX IT FIRST!
-✅ IF ALL CHECKS PASS → PROCEED WITH GENERATION
+The UI styling (colors, spacing, shadows, etc.) comes from the plan/images you'll receive.
+Your job is to make the application WORK correctly with dynamic data and proper logic.
 
 ====================================
-🔥 PROBLEM #1: TEXT = BACKGROUND (CRITICAL!)
+🔥 CRITICAL LOGIC RULE: EMPTY TABLE MUST SHOW FIELDS
 ====================================
 
-**THIS IS THE #1 MOST CRITICAL RULE:**
+**КРИТИЧЕСКОЕ ПРАВИЛО ДЛЯ ТАБЛИЦ:**
 
-🚨 **NEVER EVER** use the same or similar color for text and background! 🚨
+**ВСЕГДА показывай table header с полями, ДАЖЕ если rows.length === 0!**
 
-**MANDATORY CONTRAST RULES:**
-
-**DARK BACKGROUNDS → LIGHT TEXT:**
+❌ **WRONG - CURRENT BEHAVIOR:**
 '''jsx
-// ✅ CORRECT:
-<div className="bg-[#191919] text-white">
-<div className="bg-[#1F1F1F] text-[#E5E5E5]">
-<div className="bg-[#2D2D2D] text-[#F5F5F5]">
-<button className="bg-[#252525] text-[#FFFFFF]">
-
-// ❌ FORBIDDEN - CATASTROPHIC:
-<div className="bg-[#191919] text-[#191919]">  ← INVISIBLE!
-<div className="bg-[#1F1F1F] text-[#2D2D2D]">  ← TOO SIMILAR!
-<button className="bg-white text-gray-100">  ← INVISIBLE!
-'''
-
-**LIGHT BACKGROUNDS → DARK TEXT:**
-'''jsx
-// ✅ CORRECT:
-<div className="bg-white text-[#1a1a1a]">
-<div className="bg-[#FAFAFA] text-[#000000]">
-<div className="bg-[#F5F5F5] text-[#37352F]">
-<button className="bg-[#FFFFFF] text-black">
-
-// ❌ FORBIDDEN - CATASTROPHIC:
-<div className="bg-white text-white">  ← INVISIBLE!
-<div className="bg-[#FAFAFA] text-[#F5F5F5]">  ← TOO SIMILAR!
-<button className="bg-[#F7F7F5] text-[#FAFAFA]">  ← INVISIBLE!
-'''
-
-**VALIDATION BEFORE EVERY COMPONENT:**
-
-Before writing ANY component, ask yourself:
-1. What is the background color? (e.g., bg-[#191919])
-2. What is the text color? (e.g., text-white)
-3. Are they DIFFERENT enough? (contrast ratio ≥ 4.5:1)
-
-**IF UNSURE:**
-- Dark bg (#191919, #1F1F1F, #2D2D2D, #252525) → **ALWAYS** text-white or text-[#E5E5E5]
-- Light bg (#FFFFFF, #FAFAFA, #F5F5F5, #F7F7F5) → **ALWAYS** text-black or text-[#1a1a1a]
-
-**ICONS MUST ALSO BE VISIBLE:**
-
-Icons are rendered as '<img src={url} />' - they also need contrast!
-
-'''jsx
-// ✅ CORRECT - Dark bg, icons visible:
-<div className="bg-[#191919]">
-<img src={icon} className="w-4 h-4 invert brightness-0" />  ← Makes dark icons white!
-</div>
-
-// ✅ CORRECT - Light bg, icons visible:
-<div className="bg-white">
-<img src={icon} className="w-4 h-4" />  ← Dark icons visible on light!
-</div>
-
-// ❌ WRONG - Dark icons on dark bg:
-<div className="bg-[#191919]">
-<img src={icon} className="w-4 h-4" />  ← INVISIBLE!
-</div>
-'''
-
-====================================
-🔥 PROBLEM #2: NOT PIXEL-PERFECT COPY
-====================================
-
-**WHEN IMAGE PROVIDED:**
-
-You MUST copy EVERY SINGLE DETAIL exactly:
-
-**WHAT TO MEASURE FROM IMAGE:**
-
-1. **Backgrounds:**
-   - Image 1 (dark): Main #191919, Sidebar #1F1F1F, Table header #2D2D2D
-   - Image 2 (light): Main #FFFFFF, Sidebar #FAFAFA, Table header #F5F5F5
-
-2. **Text colors:**
-   - Image 1 (dark): Primary #FFFFFF, Secondary #A0A0A0, Blue #3B82F6
-   - Image 2 (light): Primary #000000 or #1a1a1a, Secondary #666666
-
-3. **Spacing:**
-   - NOT p-4 (same all sides)
-   - EXACT: px-4 py-3 (16px horizontal, 12px vertical)
-   - Measure gaps between elements
-
-4. **Typography:**
-   - Font size: 14px = text-sm, 16px = text-base, 18px = text-lg
-   - Font weight: 400 = font-normal, 500 = font-medium, 600 = font-semibold
-
-5. **Borders:**
-   - Thickness: 1px or 2px
-   - Color: exact hex (e.g., #E5E5E5, #3F3F3F)
-   - Radius: 4px=rounded, 6px=rounded-md, 8px=rounded-lg
-
-6. **Shadows:**
-   - Small: shadow-sm
-   - Medium: shadow-md
-   - Large: shadow-lg, shadow-xl
-
-**IMPLEMENTATION EXAMPLE:**
-
-'''jsx
-// FROM IMAGE 1 (dark theme):
-// Main bg: #191919
-// Sidebar: #1F1F1F  
-// Header: #2D2D2D
-// Text: #FFFFFF
-// Icons: need invert filter
-// Border: #3F3F3F, 1px
-// Padding: 16px horizontal, 12px vertical
-// Font: 14px medium
-
-// ✅ PIXEL-PERFECT CODE:
-<div className="min-h-screen bg-[#191919] text-white">
-<aside className="w-[240px] bg-[#1F1F1F] border-r border-[#3F3F3F]">
-{menus.map(item => (
-<button className="
-w-full
-px-4 py-3               ← EXACT 16px/12px
-text-sm font-medium     ← EXACT 14px medium
-text-[#FFFFFF]          ← EXACT from image
-hover:bg-[#2D2D2D]
-transition-colors
-flex items-center gap-2
-">
-<img
-src={item.icon}
-className="w-4 h-4 invert brightness-0"  ← ICONS VISIBLE!
-/>
-{item.label}
-</button>
-))}
-</aside>
-
-<main className="flex-1">
-<header className="h-14 bg-[#2D2D2D] border-b border-[#3F3F3F] px-6 flex items-center">
-<h1 className="text-lg font-semibold text-[#FFFFFF]">
-{selectedMenu}
-</h1>
-</header>
-</main>
-</div>
-'''
-
-====================================
-🔥 PROBLEM #3: ALL ONE COLOR
-====================================
-
-**HIERARCHY OF COLORS:**
-
-For dark themes:
-1. **Main background:** Darkest (#191919)
-2. **Sidebar/panels:** Lighter (#1F1F1F)
-3. **Cards/surfaces:** Even lighter (#2D2D2D)
-4. **Inputs/buttons:** Lightest (#353535)
-5. **Borders:** Visible (#3F3F3F, #404040)
-
-For light themes:
-1. **Main background:** White (#FFFFFF)
-2. **Sidebar/panels:** Light gray (#FAFAFA)
-3. **Cards/surfaces:** Lighter gray (#F5F5F5)
-4. **Inputs/buttons:** Lighter (#F7F7F5)
-5. **Borders:** Visible (#E5E5E5, #D0D0D0)
-
-**CORRECT IMPLEMENTATION:**
-
-'''jsx
-// ✅ DARK THEME - ALL DIFFERENT:
-<div className="bg-[#191919]">              ← Main (darkest)
-<aside className="bg-[#1F1F1F]">          ← Sidebar (lighter)
-<div className="bg-[#2D2D2D]">          ← Card (even lighter)
-<input className="bg-[#353535]" />    ← Input (lightest)
-</div>
-</aside>
-</div>
-
-// ✅ LIGHT THEME - ALL DIFFERENT:
-<div className="bg-[#FFFFFF]">              ← Main (white)
-<aside className="bg-[#FAFAFA]">          ← Sidebar (light gray)
-<div className="bg-[#F5F5F5]">          ← Card (lighter gray)
-<input className="bg-[#F7F7F5]" />    ← Input (lightest gray)
-</div>
-</aside>
-</div>
-
-// ❌ WRONG - ALL SAME:
-<div className="bg-[#1a1a1a]">
-<aside className="bg-[#1a1a1a]">  ← SAME!
-<div className="bg-[#1a1a1a]">  ← SAME!
-'''
-
-====================================
-🔥 PROBLEM #4: NOT PROFESSIONAL
-====================================
-
-**EVERY COMPONENT MUST HAVE:**
-
-✅ **Shadows** (depth)
-✅ **Hover effects** (interactivity)  
-✅ **Transitions** (smoothness)
-✅ **Focus states** (accessibility)
-✅ **Active states** (feedback)
-
-**PROFESSIONAL COMPONENT TEMPLATE:**
-
-'''jsx
-// ❌ AMATEUR:
-<button className="bg-blue-500 p-2">Click</button>
-
-// ✅ PROFESSIONAL:
-<button className="
-bg-[#3B82F6]
-text-white
-px-4 py-2
-rounded-md
-shadow-md
-hover:bg-[#2563EB]
-hover:shadow-lg
-active:scale-95
-focus:ring-2
-focus:ring-[#3B82F6]
-focus:ring-offset-2
-transition-all
-duration-200
-">
-Click
-</button>
-
-// ✅ PROFESSIONAL CARD:
-<div className="
-bg-[#2D2D2D]
-border border-[#3F3F3F]
-rounded-lg
-shadow-xl
-p-6
-hover:border-[#4F4F4F]
-hover:shadow-2xl
-transition-all
-duration-200
-">
-Card content
-</div>
-'''
-
-====================================
-🔥 PROBLEM #5: EMPTY TABLE HIDES FIELDS
-====================================
-
-**CRITICAL RULE:**
-
-Table header (<thead>) MUST show EVEN if rows.length === 0!
-
-**ON IMAGE 2** you can see empty table BUT fields are shown: ID, Name, Trade name!
-
-**CORRECT IMPLEMENTATION:**
-
-'''jsx
-// ✅ CORRECT - Fields ALWAYS visible:
-<table className="w-full">
+{rows.length > 0 ? (
+<table>
 <thead>
-<tr className="bg-[#F5F5F5]">
-{fields.map(field => (
-<th key={field.slug} className="px-4 py-3 text-left text-sm font-medium text-[#1a1a1a]">
+<tr>
+{fields.map(field = > (
+<th key ={field.slug}>{field.label}</th>
+))}
+</tr>
+</thead>
+<tbody>
+{rows.map(row = > (
+<tr key ={row.id}>
+{ /* cells */ }
+</tr>
+))}
+</tbody>
+</table>
+) : (
+<div className = "text-center py-12">
+<p>No data available</p>  ← ❌ НЕТ ТАБЛИЦЫ!
+</div>
+)}
+'''
+
+✅ **CORRECT - ALWAYS SHOW TABLE:**
+'''jsx
+<table className ="w-full">
+<thead>
+<tr>
+{fields.map(field = > (
+<th
+key ={field.slug}
+className = "text-left px-4 py-2 bg-[#2D2D2D] border-b border-[#3F3F3F]"
+>
 {field.label}
 </th>
 ))}
@@ -323,22 +79,25 @@ Table header (<thead>) MUST show EVEN if rows.length === 0!
 </thead>
 <tbody>
 {rows.length > 0 ? (
-rows.map(row => (
-<tr key={row.id}>
-{fields.map(field => (
-<td key={field.slug} className="px-4 py-3 text-sm">
+rows.map(row = > (
+<tr key ={row.id}>
+{fields.map(field = > (
+<td key ={field.slug} className = "px-4 py-3 border-b border-[#3F3F3F]">
 {row[field.slug]}
 </td>
 ))}
 </tr>
 ))
-) : (
+): (
 <tr>
-<td colSpan={fields.length} className="py-16 text-center">
-<div className="flex flex-col items-center gap-4">
-<div className="text-6xl">📋</div>
-<p className="text-gray-500">No data available</p>
-<button className="bg-[#3B82F6] text-white px-4 py-2 rounded-md">
+<td
+colSpan ={fields.length}
+className = "text-center py-12 text-gray-400"
+>
+<div className ="flex flex-col items-center space-y-2">
+<svg className = "w-12 h-12 text-gray-500" /* empty state icon */ >
+<p>No data available</p>
+<button className = "mt-4 bg-[#3B82F6] text-white px-4 py-2 rounded-md">
 Create First Item
 </button>
 </div>
@@ -347,29 +106,131 @@ Create First Item
 )}
 </tbody>
 </table>
-
-// ❌ WRONG - Fields hidden when empty:
-{rows.length > 0 ? (
-<table>...</table>
-) : (
-<div>No data</div>  ← NO FIELDS!
-)}
 '''
 
-====================================
-PRIORITY HIERARCHY
-====================================
+**WHY THIS IS CRITICAL:**
 
-**PRIORITY 1: USER IMAGES** (if provided)
-→ Extract EXACT colors, spacing, typography from image
-→ Override ALL defaults below
+1. **User sees table structure** даже если данных нет
+2. **User understands what fields exist** сразу
+3. **Professional UX** - не скрывать UI элементы
+4. **Consistent layout** - таблица всегда на месте
 
-**PRIORITY 2: FRONTEND PLAN** (always provided)
-→ Follow specifications from plan
-→ Use exact values specified
+**COMPLETE TABLE COMPONENT EXAMPLE:**
 
-**PRIORITY 3: DEFAULT RULES** (fallback only)
-→ Apply only when image/plan doesn't specify
+'''jsx
+const DynamicTablePage = () = > {
+const [fields, setFields] = useState([]);
+const [rows, setRows] = useState([]);
+const [loading, setLoading] = useState(true);
+
+useEffect(() = > {
+fetchTableData();
+}, []);
+
+const fetchTableData = async () = > {
+try {
+// 1. ВСЕГДА сначала получаем fields
+const schemaRes = await axios.post('/v1/table-details/${slug}', { data: {} });
+const tableFields = schemaRes?.data?.data?.data?.fields ?? [];
+setFields(tableFields);
+
+// 2. Потом получаем rows
+const dataRes = await axios.get(/v2/items/\${slug});
+const tableRows = dataRes?.data?.data?.data?.response ?? [];
+setRows(tableRows);
+} catch (err) {
+console.error(err);
+} finally {
+setLoading(false);
+}
+};
+
+if (loading) {
+return <div>Loading...</div>;
+}
+
+return (
+<div className = "p-6">
+<div className = "bg-[#2D2D2D] border border-[#3F3F3F] rounded-lg overflow-hidden">
+<table className = "w-full">
+{ /* HEADER - ВСЕГДА ПОКАЗЫВАЕМ */ }
+<thead>
+<tr className = "bg-[#252525]">
+{fields.map(field = > (
+<th
+key ={field.slug}
+className = "text-left px-4 py-3 text-[#E5E5E5] border-b border-[#3F3F3F]"
+>
+{field.label}
+</th>
+))}
+</tr>
+</thead>
+
+{ /* BODY - С ИЛИ БЕЗ ДАННЫХ */ }
+<tbody>
+{rows.length > 0 ? (
+// Если есть данные - показываем rows
+rows.map((row, idx) = > (
+<tr
+key ={row.id || idx}
+className = "hover:bg-[#353535] transition-colors"
+>
+{fields.map(field = > (
+<td
+key ={field.slug}
+className = "px-4 py-3 text-[#E5E5E5] border-b border-[#3F3F3F]"
+>
+{renderCell(row, field)}
+</td>
+))}
+</tr>
+))
+): (
+// Если нет данных - показываем empty state ВНУТРИ таблицы
+<tr>
+<td
+colSpan ={fields.length}
+className = "text-center py-16"
+>
+<div className ="flex flex-col items-center space-y-4">
+<div className = "text-6xl">📋</div>
+<p className = "text-[#A0A0A0] text-lg">No data available</p>
+<p className ="text-[#707070] text-sm">Create your first item to get started</p>
+<button
+onClick ={openCreateDrawer}
+className = "
+mt-4
+bg-[#3B82F6]
+text-white
+px-6 py-3
+rounded-md
+hover:bg-[#2563EB]
+transition-colors
+shadow-md
+"
+>
++ Create First Item
+</button>
+</div>
+</td>
+</tr>
+)}
+</tbody>
+</table>
+</div>
+</div>
+);
+}
+'''
+
+**КЛЮЧЕВЫЕ МОМЕНТЫ:**
+
+1. ✅ Table header ВСЕГДА видим
+2. ✅ Fields ВСЕГДА показаны
+3. ✅ Empty state ВНУТРИ '<td colSpan ={fields.length}>'
+4. ✅ Кнопка "Create First Item" прямо в empty state
+5. ✅ Professional styling с proper colors
 
 ====================================
 TASK DESCRIPTION
@@ -378,7 +239,7 @@ TASK DESCRIPTION
 Your task is to GENERATE a FULL React-based Admin Panel project using the following stack:
 
 TECH STACK (MANDATORY):
-React 18, Vite, React Router DOM v6, Tailwind CSS v2.2.19, Axios, JavaScript (no TypeScript)
+React 18, Vite, React Router DOM v6, Tailwind CSS, Axios, JavaScript (no TypeScript)
 
 ====================================
 DATA ATTRIBUTES (CRITICAL — MANDATORY)
@@ -491,13 +352,13 @@ PACKAGE.JSON (CRITICAL)
 MANDATORY CORE DEPENDENCIES:
 '''json
 {
-  "react": "^18.2.0",
-  "react-dom": "^18.2.0",
-  "react-router-dom": "^6.22.0",
-  "axios": "^1.6.0",
-  "lucide-react": "^0.330.0",
-  "clsx": "^2.1.0",
-  "tailwind-merge": "^2.2.0"
+"react": "^18.2.0",
+"react-dom": "^18.2.0",
+"react-router-dom": "^6.22.0",
+"axios": "^1.6.0",
+"lucide-react": "^0.330.0",
+"clsx": "^2.1.0",
+"tailwind-merge": "^2.2.0"
 }
 '''
 
@@ -528,116 +389,92 @@ import react from "@vitejs/plugin-react"
 import { defineConfig } from "vite"
 
 export default defineConfig({
-  plugins: [
-    react(),
-    federation({
-      name: "remote_app",
-      filename: "remoteEntry.js",
-      exposes: { "./Page": "./src/App.jsx" },
-      shared: ["react", "react-dom"]
-    })
-  ],
-  build: {
-    outDir: "build",
-    modulePreload: false,
-    target: "esnext",
-    minify: false,
-    cssCodeSplit: false
-  },
-  server: { port: 3000, host: true }
+plugins: [
+react(),
+federation({
+name: "remote_app",
+filename: "remoteEntry.js",
+exposes: { "./Page": "./src/App.jsx" },
+shared: ["react", "react-dom"]
+})
+],
+build: {
+outDir: "build",
+modulePreload: false,
+target: "esnext",
+minify: false,
+cssCodeSplit: false
+},
+server: { port: 3000, host: true }
 })
 '''
 
 ====================================
-MANDATORY FEATURES
+OUTPUT FORMAT (CRITICAL)
 ====================================
 
-- Dynamic menu from MCP API
-- Dynamic tables from MCP API
-- Routing: / → Dashboard, /tables/:slug → Table Page
-- Data attributes on all elements
-- File path tracking
+Return PURE JAVASCRIPT OBJECT:
 
-====================================
-CRITICAL RULES
-====================================
-
-1. ✅ Text READABLE on background (proper contrast)
-2. ✅ Icons VISIBLE on background (use filters)
-3. ✅ Pixel-perfect copy of image (exact measurements)
-4. ✅ All unique colors used (not simplified to one)
-5. ✅ Professional UI (shadows, hover, transitions)
-6. ✅ Table fields ALWAYS visible (even when empty)
+{
+  "project_name": "project-name",
+  "files": [
+    { "path": "src/App.jsx", "content": "..." }
+  ],
+  "env": {
+    "VITE_API_BASE_URL": "...",
+    "VITE_PROJECT_ID": "...",
+    "VITE_PARENT_ID": "...",
+    "VITE_X_API_KEY": "..."
+  },
+  "file_graph": {
+    "src/App.jsx": {
+      "path": "src/App.jsx",
+      "kind": "component",
+      "imports": ["react", "react-router-dom"],
+      "deps": ["src/layouts/DashboardLayout.jsx"]
+    }
+  }
+}
 
 ====================================
 VALIDATION CHECKLIST
 ====================================
 
 INVALID if:
-- Mock data used
-- Wrong API paths
-- Missing data-element-name
-- Missing id on roots
-- Cells render inputs by default
+- Mock data used instead of API calls
+- Wrong API paths or response structure
+- Missing data-element-name attributes
+- Missing id on root elements
+- Cells render inputs by default (should be view mode)
 - Missing used libraries in package.json
-- Text color = background color (CRITICAL!)
-- Colors not extracted from image
-- All components same color
-- No shadows/hover/transitions
-- Empty table hides fields (CRITICAL!)
+- Empty table hides field headers (CRITICAL!)
+- Dynamic menu items hardcoded instead of from API
+- Navigation not using react-router-dom
+- Table data not fetched from MCP API
 
 VALID if:
-- All data from MCP
-- Correct response paths
-- Proper data attributes
-- Single "Table" tab
-- View-first cell rendering
-- Professional UI with shadows/hover/transitions
-- Proper contrast (text readable on background)
-- All unique colors extracted from image
-- Table fields ALWAYS visible (even when empty)
+- All data from MCP API (menus, table details, table rows)
+- Correct API endpoints and response paths
+- Proper data attributes on elements
+- Table headers ALWAYS visible (even when empty)
+- View-first cell rendering with edit on click
+- All imports included in package.json
+- Dynamic routing works correctly
+- Menu navigation functional
 
 ====================================
-FINAL VALIDATION BEFORE OUTPUT
+FINAL REMINDER - CRITICAL LOGIC RULES
 ====================================
 
-Before generating output, verify:
+1. ✅ **DYNAMIC MENUS:** Fetch from API response.data.data.menus (NEVER hardcode!)
+2. ✅ **DYNAMIC TABLES:** Fields from /v1/table-details/:slug, rows from /v2/items/:slug
+3. ✅ **TABLE HEADERS:** ALWAYS show <thead> even if rows.length === 0
+4. ✅ **VIEW MODE:** Cells render as text by default, edit on click
+5. ✅ **DEPENDENCIES:** ALL imported libraries in package.json
 
-□ **CONTRAST:** Every text/icon is readable on its background?
-□ **COLORS:** Extracted ALL unique colors from image?
-□ **MEASUREMENTS:** Used EXACT px values from image?
-□ **PROFESSIONAL:** Every component has shadow/hover/transition?
-□ **EMPTY TABLE:** <thead> shows even if rows === 0?
+Generate the full project now.
 
-❌ IF ANY FAILS → FIX IT NOW!
-✅ IF ALL PASS → OUTPUT JSON
-
-====================================
-OUTPUT FORMAT
-====================================
-
-Return ONLY valid JSON:
-
-{
-  "project_name": "...",
-  "files": [...],
-  "env": {...},
-  "file_graph": {...}
-}
-
-NO markdown. NO commentary. Start with '{', end with '}'.
-
-====================================
-🚨 REMEMBER THE 5 CRITICAL RULES 🚨
-====================================
-
-1. ✅ **TEXT ≠ BACKGROUND** (different colors, proper contrast)
-2. ✅ **PIXEL-PERFECT** (exact measurements from image)
-3. ✅ **UNIQUE COLORS** (each component different shade)
-4. ✅ **PROFESSIONAL** (shadows + hover + transitions)
-5. ✅ **EMPTY TABLE** (fields visible always)
-
-GENERATE THE PROJECT NOW.
+RESPOND WITH ONLY THE JSON OBJECT NOW.
 `
 
 	SystemPromptAnalyzeFrontend = `
