@@ -375,30 +375,227 @@ PRIORITY HIERARCHY
 TASK DESCRIPTION
 ====================================
 
-Generate a FULL React admin panel with:
+Your task is to GENERATE a FULL React-based Admin Panel project using the following stack:
 
-**TECH STACK:**
-- React 18
-- Vite
-- React Router DOM v6
-- Tailwind CSS v2.2.19
-- Axios
-- JavaScript (no TypeScript)
+TECH STACK (MANDATORY):
+React 18, Vite, React Router DOM v6, Tailwind CSS v2.2.19, Axios, JavaScript (no TypeScript)
 
-**MANDATORY FEATURES:**
+====================================
+DATA ATTRIBUTES (CRITICAL — MANDATORY)
+====================================
+
+EVERY meaningful DOM element MUST have BOTH:
+1. Root element: id="kebab-case-id"
+2. ALL elements: data-element-name="descriptive_name"
+
+====================================
+FILE PATH TRACKING (MANDATORY)
+====================================
+
+EVERY JSX file MUST wrap its return value with data-path attribute:
+<div data-path="src/components/Sidebar.jsx" data-element-name="sidebar_root">
+  ...
+</div>
+
+====================================
+LAYOUT ARCHITECTURE
+====================================
+
+HEIGHT SYSTEM: 100vh total, scroll only inside components
+TWO-COLUMN LAYOUT: Sidebar | Main content
+PROVIDERS: ALL in App.jsx ONLY
+
+====================================
+SIDEBAR SPECIFICATION
+====================================
+
+MENU DATA SOURCE:
+- MUST come from MCP API (response.data.data.menus)
+- DO NOT render hardcoded menu items
+- Skip first 4 menu items
+
+ICON RENDERING:
+- Icons are URLs: <img src={item.icon} className="w-4 h-4" />
+- Fallback: "📁"
+
+====================================
+ROUTING
+====================================
+
+Routes:
+- / → Dashboard Home
+- /tables/:tableSlug → Dynamic Table Page
+
+====================================
+DATA LAYER (CRITICAL — MCP API)
+====================================
+
+NO MOCK DATA ALLOWED
+
+API ENDPOINTS:
+1. MENU LIST: response.data.data.menus
+2. TABLE DETAILS: POST /v1/table-details/:tableSlug → response.data.data.data.fields
+3. TABLE DATA: GET /v2/items/:tableSlug → response.data.data.data.response
+
+====================================
+DYNAMIC TABLE PAGE
+====================================
+
+VIEW TABS: Show ONLY "Table" tab
+
+TABLE ACTIONS:
+1. Search input
+2. Sort button
+3. Filter button
+4. Create Item button
+
+CREATE ITEM DRAWER:
+- Slides from right (420px)
+- Form from table fields
+- Cancel + Create buttons
+
+====================================
+TABLE COMPONENT (ENTERPRISE-GRADE)
+====================================
+
+FEATURES REQUIRED:
+- Dynamic columns/rows from MCP
+- Sticky header
+- Scrollable
+- Resizable columns
+- Sorting
+- Pagination
+- Loading/empty states
+
+COLUMN SIZING: 220px fixed, resizable
+
+CELL RENDERING BY FIELD TYPE:
+1. NUMBER/FLOAT: View as text, edit as <input type="number" />
+2. TEXT: View-only
+3. SINGLE_LINE: View as text, edit as <input type="text" />
+4. STATUS: View as pill, edit as dropdown
+
+EDIT MODE:
+- Default: ALL cells in VIEW mode
+- On click: cell becomes EDIT mode
+- Only ONE active edit at a time
+
+PAGINATION:
+- Page size selector (10/20/50)
+- Next/Previous buttons
+
+====================================
+PACKAGE.JSON (CRITICAL)
+====================================
+
+MANDATORY CORE DEPENDENCIES:
+'''json
+{
+  "react": "^18.2.0",
+  "react-dom": "^18.2.0",
+  "react-router-dom": "^6.22.0",
+  "axios": "^1.6.0",
+  "lucide-react": "^0.330.0",
+  "clsx": "^2.1.0",
+  "tailwind-merge": "^2.2.0"
+}
+'''
+
+DYNAMIC DEPENDENCIES:
+If you import a library → ADD it to dependencies
+
+RULES:
+- Do NOT include "type": "module"
+- Do NOT use UI kits (MUI, AntD, Chakra)
+
+====================================
+ENV FILES (CRITICAL)
+====================================
+
+Include TWO files in "files" array:
+1. ".env"
+2. ".env.production"
+
+Format: KEY=VALUE
+
+====================================
+VITE CONFIG
+====================================
+
+'''js
+import federation from "@originjs/vite-plugin-federation"
+import react from "@vitejs/plugin-react"
+import { defineConfig } from "vite"
+
+export default defineConfig({
+  plugins: [
+    react(),
+    federation({
+      name: "remote_app",
+      filename: "remoteEntry.js",
+      exposes: { "./Page": "./src/App.jsx" },
+      shared: ["react", "react-dom"]
+    })
+  ],
+  build: {
+    outDir: "build",
+    modulePreload: false,
+    target: "esnext",
+    minify: false,
+    cssCodeSplit: false
+  },
+  server: { port: 3000, host: true }
+})
+'''
+
+====================================
+MANDATORY FEATURES
+====================================
+
 - Dynamic menu from MCP API
 - Dynamic tables from MCP API
 - Routing: / → Dashboard, /tables/:slug → Table Page
 - Data attributes on all elements
 - File path tracking
 
-**CRITICAL RULES:**
+====================================
+CRITICAL RULES
+====================================
+
 1. ✅ Text READABLE on background (proper contrast)
 2. ✅ Icons VISIBLE on background (use filters)
 3. ✅ Pixel-perfect copy of image (exact measurements)
 4. ✅ All unique colors used (not simplified to one)
 5. ✅ Professional UI (shadows, hover, transitions)
 6. ✅ Table fields ALWAYS visible (even when empty)
+
+====================================
+VALIDATION CHECKLIST
+====================================
+
+INVALID if:
+- Mock data used
+- Wrong API paths
+- Missing data-element-name
+- Missing id on roots
+- Cells render inputs by default
+- Missing used libraries in package.json
+- Text color = background color (CRITICAL!)
+- Colors not extracted from image
+- All components same color
+- No shadows/hover/transitions
+- Empty table hides fields (CRITICAL!)
+
+VALID if:
+- All data from MCP
+- Correct response paths
+- Proper data attributes
+- Single "Table" tab
+- View-first cell rendering
+- Professional UI with shadows/hover/transitions
+- Proper contrast (text readable on background)
+- All unique colors extracted from image
+- Table fields ALWAYS visible (even when empty)
 
 ====================================
 FINAL VALIDATION BEFORE OUTPUT
