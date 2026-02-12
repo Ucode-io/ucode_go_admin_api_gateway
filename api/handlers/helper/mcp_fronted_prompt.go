@@ -54,7 +54,7 @@ READ THIS FIRST - THIS OVERRIDES EVERYTHING BELOW:
 🔥 FIX PROBLEM #1: CONTRAST RULES (CRITICAL)
 ====================================
 
-**ABSOLUTE CONTRAST RULE:**
+**АБСОЛЮТНОЕ ПРАВИЛО КОНТРАСТА:**
 
 🚨 **NEVER EVER** use the same color for text and background! 🚨
 
@@ -70,17 +70,17 @@ READ THIS FIRST - THIS OVERRIDES EVERYTHING BELOW:
 
 ❌ **FORBIDDEN COMBINATIONS:**
 '''jsx
-// NEVER DO THIS:
-<div className = "bg-[#191919] text-[#191919]">  ❌ DISASTER!
-<div className = "bg-[#1a1a1a] text-[#2d2d2d]">  ❌ TOO SIMILAR!
-<div className = "bg-white text-gray-100">  ❌ INVISIBLE!
+// НИКОГДА НЕ ДЕЛАЙ ТАК:
+<div className = "bg-[#191919] text-[#191919]">  ❌ КАТАСТРОФА!
+<div className = "bg-[#1a1a1a] text-[#2d2d2d]">  ❌ СЛИШКОМ ПОХОЖИЕ!
+<div className = "bg-white text-gray-100">  ❌ НЕ ВИДНО!
 '''
 
 ✅ **CORRECT EXAMPLES:**
 '''jsx
-<div className ="bg-[#191919] text-[#E5E5E5]">  ✅ EXCELLENT!
-<div className = "bg-[#2D2D2D] text-white">  ✅ VISIBLE!
-<div className = "bg-white text-[#1a1a1a]">  ✅ CONTRAST!
+<div className ="bg-[#191919] text-[#E5E5E5]">  ✅ ОТЛИЧНО!
+<div className = "bg-[#2D2D2D] text-white">  ✅ ВИДНО!
+<div className = "bg-white text-[#1a1a1a]">  ✅ КОНТРАСТ!
 '''
 
 **CONTRAST VERIFICATION CHECKLIST:**
@@ -91,19 +91,15 @@ Before finishing EVERY component, ask yourself:
 □ Dark bg → light text? Light bg → dark text?
 □ Did I accidentally use same/similar colors?
 
-**IF IN DOUBT:**
-- Dark background (#191919, #1a1a1a, #2D2D2D) → ALWAYS use text-white or text-[#E5E5E5]
-- Light background (#FFFFFF, #F7F7F5) → ALWAYS use text-[#1a1a1a] or text-[#37352F]
-
-**SAME RULE FOR ICONS:**
-- Dark bg → light icons: use text-white for SVG icons, or add "brightness-0 invert" for <img> icons
-- Light bg → dark icons: use text-[#1a1a1a] for SVG icons, or add "brightness-0" for <img> icons
+**ЕСЛИ СОМНЕВАЕШЬСЯ:**
+- Dark background (#191919, #1a1a1a, #2D2D2D) → ВСЕГДА text-white или text-[#E5E5E5]
+- Light background (#FFFFFF, #F7F7F5) → ВСЕГДА text-[#1a1a1a] или text-[#37352F]
 
 ====================================
 🔥 FIX PROBLEM #2: PIXEL-PERFECT COLOR EXTRACTION
 ====================================
 
-**HOW TO PROPERLY EXTRACT COLORS FROM IMAGE:**
+**КАК ПРАВИЛЬНО ИЗВЛЕКАТЬ ЦВЕТА ИЗ ИЗОБРАЖЕНИЯ:**
 
 **STEP 1: IDENTIFY ALL UNIQUE COLORS**
 
@@ -153,12 +149,12 @@ Image shows #3B82F6 → You write: bg-[#3B82F6]  ← EXACT!
 
 **HOW TO EXTRACT EXACT COLORS:**
 
-1. **Visually analyze the image**
-2. **Identify all unique colors** (background, text, borders, buttons)
-3. **Use these hex codes EXACTLY:**
-   - Very dark gray background → likely #191919, #1a1a1a, #1F1F1F, #2D2D2D
-   - Light text on dark → likely #FFFFFF, #E5E5E5, #F5F5F5
-   - Blue button → likely #3B82F6, #2563EB, #1D4ED8
+1. **Визуально анализируй изображение**
+2. **Определи все уникальные цвета** (фон, текст, границы, кнопки)
+3. **Используй эти hex коды ТОЧНО:**
+   - Если видишь очень темный серый фон → вероятно #191919, #1a1a1a, #1F1F1F, #2D2D2D
+   - Если видишь светлый текст на темном → вероятно #FFFFFF, #E5E5E5, #F5F5F5
+   - Если видишь синюю кнопку → вероятно #3B82F6, #2563EB, #1D4ED8
 
 **STEP 3: CREATE COLOR PALETTE IN TAILWIND CONFIG**
 
@@ -198,7 +194,7 @@ Click
 🔥 FIX PROBLEM #3: EXTRACT ALL UNIQUE COLORS
 ====================================
 
-**RULE: EACH COMPONENT = ITS OWN COLOR**
+**ПРАВИЛО: КАЖДЫЙ КОМПОНЕНТ = СВОЙ ЦВЕТ**
 
 ❌ **WRONG - ALL SAME COLOR:**
 '''jsx
@@ -377,9 +373,9 @@ Click
 🔥 FIX PROBLEM #5: EMPTY TABLE MUST SHOW FIELDS
 ====================================
 
-**CRITICAL RULE FOR TABLES:**
+**КРИТИЧЕСКОЕ ПРАВИЛО ДЛЯ ТАБЛИЦ:**
 
-**ALWAYS show table header with fields, EVEN if rows.length === 0!**
+**ВСЕГДА показывай table header с полями, ДАЖЕ если rows.length === 0!**
 
 ❌ **WRONG - CURRENT BEHAVIOR:**
 '''jsx
@@ -402,7 +398,7 @@ Click
 </table>
 ) : (
 <div className = "text-center py-12">
-<p>No data available</p>  ← ❌ NO TABLE!
+<p>No data available</p>  ← ❌ НЕТ ТАБЛИЦЫ!
 </div>
 )}
 '''
@@ -455,10 +451,10 @@ Create First Item
 
 **WHY THIS IS CRITICAL:**
 
-1. **User sees table structure** even if no data
-2. **User understands what fields exist** immediately
-3. **Professional UX** - don't hide UI elements
-4. **Consistent layout** - table always in place
+1. **User sees table structure** даже если данных нет
+2. **User understands what fields exist** сразу
+3. **Professional UX** - не скрывать UI элементы
+4. **Consistent layout** - таблица всегда на месте
 
 **COMPLETE TABLE COMPONENT EXAMPLE:**
 
@@ -474,12 +470,12 @@ fetchTableData();
 
 const fetchTableData = async () = > {
 try {
-// 1. ALWAYS fetch fields first
+// 1. ВСЕГДА сначала получаем fields
 const schemaRes = await axios.post('/v1/table-details/${slug}', { data: {} });
 const tableFields = schemaRes?.data?.data?.data?.fields ?? [];
 setFields(tableFields);
 
-// 2. Then fetch rows
+// 2. Потом получаем rows
 const dataRes = await axios.get(/v2/items/\${slug});
 const tableRows = dataRes?.data?.data?.data?.response ?? [];
 setRows(tableRows);
@@ -498,7 +494,7 @@ return (
 <div className = "p-6">
 <div className = "bg-[#2D2D2D] border border-[#3F3F3F] rounded-lg overflow-hidden">
 <table className = "w-full">
-{ /* HEADER - ALWAYS SHOW */ }
+{ /* HEADER - ВСЕГДА ПОКАЗЫВАЕМ */ }
 <thead>
 <tr className = "bg-[#252525]">
 {fields.map(field = > (
@@ -512,10 +508,10 @@ className = "text-left px-4 py-3 text-[#E5E5E5] border-b border-[#3F3F3F]"
 </tr>
 </thead>
 
-{ /* BODY - WITH OR WITHOUT DATA */ }
+{ /* BODY - С ИЛИ БЕЗ ДАННЫХ */ }
 <tbody>
 {rows.length > 0 ? (
-// If we have data - show rows
+// Если есть данные - показываем rows
 rows.map((row, idx) = > (
 <tr
 key ={row.id || idx}
@@ -524,7 +520,7 @@ className = "hover:bg-[#353535] transition-colors"
 {fields.map(field = > (
 <td
 key ={field.slug}
-className = "px-4 py-3 text-[#E5E5E5] border-b border-[#3F3F3F] max-w-[300px] overflow-hidden text-ellipsis whitespace-nowrap"
+className = "px-4 py-3 text-[#E5E5E5] border-b border-[#3F3F3F]"
 >
 {renderCell(row, field)}
 </td>
@@ -532,7 +528,7 @@ className = "px-4 py-3 text-[#E5E5E5] border-b border-[#3F3F3F] max-w-[300px] ov
 </tr>
 ))
 ): (
-// If no data - show empty state INSIDE table
+// Если нет данных - показываем empty state ВНУТРИ таблицы
 <tr>
 <td
 colSpan ={fields.length}
@@ -569,13 +565,13 @@ shadow-md
 }
 '''
 
-**KEY POINTS:**
+**КЛЮЧЕВЫЕ МОМЕНТЫ:**
 
-1. ✅ Table header ALWAYS visible
-2. ✅ Fields ALWAYS shown
-3. ✅ Empty state INSIDE '<td colSpan ={fields.length}>'
-4. ✅ "Create First Item" button directly in empty state
-5. ✅ Professional styling with proper colors
+1. ✅ Table header ВСЕГДА видим
+2. ✅ Fields ВСЕГДА показаны
+3. ✅ Empty state ВНУТРИ '<td colSpan ={fields.length}>'
+4. ✅ Кнопка "Create First Item" прямо в empty state
+5. ✅ Professional styling с proper colors
 
 ====================================
 TASK DESCRIPTION
@@ -673,10 +669,7 @@ FEATURES REQUIRED:
 - Pagination
 - Loading/empty states
 
-COLUMN SIZING: 
-- Min-width: 220px fixed, resizable
-- Max-width: 300px
-- Overflow: text-ellipsis with whitespace-nowrap for long content
+COLUMN SIZING: 220px fixed, resizable
 
 CELL RENDERING BY FIELD TYPE:
 1. NUMBER/FLOAT: View as text, edit as <input type="number" />
@@ -796,7 +789,6 @@ INVALID if:
 - Cells render inputs by default
 - Missing used libraries in package.json
 - Text color = background color (CRITICAL!)
-- Icon color = background color (CRITICAL!)
 - Colors not extracted from image
 - All components same color
 - No shadows/hover/transitions
@@ -809,20 +801,19 @@ VALID if:
 - Single "Table" tab
 - View-first cell rendering
 - Professional UI with shadows/hover/transitions
-- Proper contrast (text and icons readable on background)
+- Proper contrast (text readable on background)
 - All unique colors extracted from image
 - Table fields ALWAYS visible (even when empty)
 
 ====================================
-FINAL REMINDER - 6 CRITICAL RULES
+FINAL REMINDER - 5 CRITICAL RULES
 ====================================
 
-1. ✅ **CONTRAST:** Dark bg → light text/icons, Light bg → dark text/icons (NEVER same color!)
+1. ✅ **CONTRAST:** Dark bg → light text, Light bg → dark text (NEVER same color!)
 2. ✅ **EXACT COLORS:** Extract ALL unique colors from image (don't guess!)
 3. ✅ **UNIQUE COLORS:** Each component = different color (not all same!)
 4. ✅ **PROFESSIONAL:** Shadows + hover + transitions + borders + rounded corners
 5. ✅ **EMPTY TABLES:** ALWAYS show table header with fields (even if no rows!)
-6. ✅ **ICONS:** Add brightness-0 invert for dark bg, brightness-0 for light bg
 
 Generate the full project now.
 
@@ -1189,7 +1180,7 @@ Before generating, ask yourself:
 - Are filters, colors, layout matching the reference?
 - Are status columns color-coded if user mentioned Plan-fact?
 - Is there ANY white text on a white background? (FIX IT: Use rgb(55, 53, 47))
-- Are icons visible? (Dark bg → add brightness-0 invert, Light bg → add brightness-0)
+- Are the icons visible? (FIX IT: Add brightness(0) filter if icons are white)
 - Did I use Tailwind "text-white" on a white sidebar? (FIX IT: Remove it)
 
 ====================================
