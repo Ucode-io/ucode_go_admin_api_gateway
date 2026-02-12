@@ -96,115 +96,6 @@ Before finishing EVERY component, ask yourself:
 - Light background (#FFFFFF, #F7F7F5) → ВСЕГДА text-[#1a1a1a] или text-[#37352F]
 
 ====================================
-🔥 FIX PROBLEM #6: ICON VISIBILITY (CRITICAL)
-====================================
-
-**АБСОЛЮТНОЕ ПРАВИЛО ДЛЯ ИКОНОК:**
-
-🚨 **ICONS MUST BE VISIBLE on their background!** 🚨
-
-Icons are rendered as: '<img src ={item.icon} className = "..." />'
-
-**PROBLEM:** Icon images can be white, transparent, or dark - they need proper visibility!
-
-**MANDATORY ICON VISIBILITY RULES:**
-
-✅ **DARK BACKGROUND → LIGHT/VISIBLE ICONS:**
-- bg-[#191919], bg-[#1a1a1a], bg-[#2D2D2D] (dark backgrounds)
-- Icons MUST be visible!
-- Solutions:
-  1. If icon is white/light → use as is ✅
-  2. If icon is dark/black → add 'brightness(
-0
-) invert(1)' filter ✅
-  3. If icon is colored → add 'opacity-80' or 'brightness(1.2)' ✅
-
-✅ **LIGHT BACKGROUND → DARK/VISIBLE ICONS:**
-- bg-white, bg-[#FFFFFF], bg-[#F7F7F5] (light backgrounds)
-- Icons MUST be visible!
-- Solutions:
-  1. If icon is dark → use as is ✅
-  2. If icon is white/light → add 'brightness(0)' filter ✅
-  3. If icon is colored → use as is ✅
-
-**IMPLEMENTATION EXAMPLES:**
-
-'''jsx
-// ✅ CORRECT - Dark background with proper icon visibility:
-<div className = "bg-[#191919]">
-<button className= "bg-[#2D2D2D]">
-<img
-src ={item.icon}
-className = "w-4 h-4 brightness-0 invert" // Makes dark icons → white
-alt = ""
-/>
-<span className = "text-[#E5E5E5]">Menu Item</span>
-</button>
-</div>
-
-// ✅ CORRECT - Light background with proper icon visibility:
-<div className = "bg-white">
-<button className= "bg-gray-100">
-<img
-src ={item.icon}
-className = "w-4 h-4 brightness-0" // Makes light icons → dark
-alt = ""
-/>
-<span className = "text-[#1a1a1a]">Menu Item</span>
-</button>
-</div>
-
-// ✅ CORRECT - Colored icons with opacity:
-<div className = "bg-[#2D2D2D]">
-<img
-src ={item.icon}
-className = "w-5 h-5 opacity-90" // Visible colored icon
-alt = ""
-/>
-</div>
-'''
-
-**CSS FILTER REFERENCE:**
-
-- 'brightness(0)' - Makes any color → black
-- 'invert(1)' or 'invert' - Inverts colors (black → white)
-- 'brightness(0) invert(1)' - Makes any color → white (useful for dark backgrounds)
-- 'opacity-80' or 'opacity-90' - Makes icon slightly transparent (if too bright)
-- 'brightness(1.2)' - Makes icon 20% brighter
-
-**ICON STYLING CHECKLIST:**
-
-□ On DARK background → icons have 'brightness-0 invert' or similar filter?
-□ On LIGHT background → icons have 'brightness-0' or are naturally dark?
-□ Can I SEE the icon clearly on its background?
-□ Icon color contrasts with background (just like text)?
-
-**DEFAULT ICON CLASSES BY BACKGROUND:**
-
-**Dark backgrounds (#191919, #1F1F1F, #2D2D2D, #252525):**
-'''jsx
-className = "w-4 h-4 brightness-0 invert opacity-80"
-'''
-
-**Light backgrounds (#FFFFFF, #F7F7F5, white):**
-'''jsx
-className = "w-4 h-4 brightness-0 opacity-70"
-'''
-
-**Medium backgrounds (grays):**
-'''jsx
-className = "w-4 h-4 opacity-80"
-'''
-
-**VERIFICATION:**
-
-Before submitting, check EVERY icon:
-□ Is icon visible on its background?
-□ Does icon have sufficient contrast?
-□ Did I apply appropriate CSS filters?
-□ Icons look good in both light and dark modes (if applicable)?
-
-====================================
 🔥 FIX PROBLEM #2: PIXEL-PERFECT COLOR EXTRACTION
 ====================================
 
@@ -318,7 +209,9 @@ Click
 ✅ **CORRECT - UNIQUE COLORS:**
 '''jsx
 <div className = "bg-[#191919]">  ← Main background
-<div className = "bg-[#1F1F1F]">  ← Sidebar (lighter)
+<div className = "bg-[#1F1F1F]">  ← Sidebar (
+lighter
+)
 <button className = "bg-[#2D2D2D] hover:bg-[#353535]">  ← Button (even lighter)
 <input className = "bg-[#252525] border border-[#3F3F3F]">  ← Input (different)
 </div>
@@ -356,10 +249,10 @@ Looking at image 1 (dark ERP):
 ✅ **1. PROPER SPACING:**
 '''jsx
 // ❌ WRONG - Too simple:
-<div className = "p-4">
+<div className= "p-4">
 
 // ✅ CORRECT - Professional:
-<div className = "px-6 py-4">     // Different horizontal/vertical
+<div className = "px-6 py-4"> // Different horizontal/vertical
 <div className = "p-6 space-y-4"> // Internal spacing
 '''
 
@@ -369,7 +262,7 @@ Looking at image 1 (dark ERP):
 <div className = "bg-white">
 
 // ✅ CORRECT - Has depth:
-<div className = "bg-white shadow-lg">
+<div className ="bg-white shadow-lg">
 <div className = "bg-white shadow-xl rounded-lg">
 <div className = "bg-[#2D2D2D] shadow-[0_4px_12px_rgba(0,0,0,0.3)]">
 '''
@@ -380,9 +273,9 @@ Looking at image 1 (dark ERP):
 <div className = "bg-white">
 
 // ✅ CORRECT - Rounded:
-<div className= "bg-white rounded-lg">  // 8px
+<div className = "bg-white rounded-lg"> // 8px
 <div className = "bg-white rounded-xl"> // 12px
-<button className = "rounded-md"> // 6px
+<button className= "rounded-md"> // 6px
 '''
 
 ✅ **4. BORDERS:**
@@ -391,7 +284,7 @@ Looking at image 1 (dark ERP):
 <div className = "bg-[#2D2D2D]">
 
 // ✅ CORRECT - Visible borders:
-<div className ="bg-[#2D2D2D] border border-[#3F3F3F]">
+<div className = "bg-[#2D2D2D] border border-[#3F3F3F]">
 <div className = "bg-white border border-gray-200">
 '''
 
@@ -401,14 +294,14 @@ Looking at image 1 (dark ERP):
 <button className = "bg-[#3B82F6]">
 
 // ✅ CORRECT - Interactive:
-<button className = "bg-[#3B82F6] hover:bg-[#2563EB] transition-colors duration-200">
+<button className= "bg-[#3B82F6] hover:bg-[#2563EB] transition-colors duration-200">
 <div className = "hover:bg-[#353535] transition-all duration-150">
 '''
 
 ✅ **6. TRANSITIONS:**
 '''jsx
 // ❌ WRONG - Instant changes:
-<div className ="hover:bg-gray-100">
+<div className = "hover:bg-gray-100">
 
 // ✅ CORRECT - Smooth:
 <div className = "hover:bg-gray-100 transition-all duration-200 ease-in-out">
@@ -420,7 +313,7 @@ Looking at image 1 (dark ERP):
 <input className = "border">
 
 // ✅ CORRECT - Clear focus:
-<input className = "border focus:ring-2 focus:ring-[#3B82F6] focus:outline-none">
+<input className= "border focus:ring-2 focus:ring-[#3B82F6] focus:outline-none">
 '''
 
 **COMPLETE PROFESSIONAL COMPONENT EXAMPLE:**
@@ -452,6 +345,26 @@ shadow-md hover:shadow-lg
 "
 >
 Click Me
+</button>
+</div>
+'''
+
+**COMPARISON:**
+
+❌ **Amateur UI:**
+'''jsx
+<div className = "bg-gray-800 p-4">
+<button className = "bg-blue-500 text-white p-2">
+Click
+</button>
+</div>
+'''
+
+✅ **Professional UI:**
+'''jsx
+<div className = "bg-[#2D2D2D] border border-[#3F3F3F] rounded-lg shadow-xl p-6 hover:border-[#4F4F4F] transition-all">
+<button className = "bg-[#3B82F6] text-white px-4 py-2 rounded-md hover:bg-[#2563EB] transition-colors duration-200 shadow-md">
+Click
 </button>
 </div>
 '''
@@ -536,325 +449,129 @@ Create First Item
 </table>
 '''
 
-====================================
-🔥 FIX PROBLEM #7: TABLE CELL WIDTH & ELLIPSIS
-====================================
+**WHY THIS IS CRITICAL:**
 
-**КРИТИЧЕСКИЕ ПРАВИЛА ДЛЯ TABLE CELLS:**
+1. **User sees table structure** даже если данных нет
+2. **User understands what fields exist** сразу
+3. **Professional UX** - не скрывать UI элементы
+4. **Consistent layout** - таблица всегда на месте
 
-🚨 **Table cells MUST have max-width 300px with ellipsis!** 🚨
-
-**MANDATORY TABLE CELL STYLING:**
-
-'''jsx
-// ✅ CORRECT TableCell styling:
-<td
-className = "
-px-4 py-3
-min-w-[220px]
-max-w-[300px]        ← MAXIMUM 300px!
-overflow-hidden      ← Hide overflow
-text-ellipsis        ← Show ellipsis (...)
-whitespace-nowrap    ← No line breaks
-border-b border-[#3F3F3F]
-"
->
-{row[field.slug]}
-</td>
-'''
-
-**DETAILED CELL WIDTH RULES:**
-
-1. **min-width: 220px** - Minimum column width
-2. **max-width: 300px** - MAXIMUM column width (NEW!)
-3. **overflow: hidden** - Hide content that exceeds width
-4. **text-overflow: ellipsis** - Show "..." for overflow
-5. **white-space: nowrap** - Don't wrap text to new line
-
-**EXAMPLE - Long Text Handling:**
+**COMPLETE TABLE COMPONENT EXAMPLE:**
 
 '''jsx
-// Cell with very long text:
-<td className = "px-4 py-3 min-w-[220px] max-w-[300px] overflow-hidden text-ellipsis whitespace-nowrap">
-This is a very long text that will be truncated with ellipsis when it exceeds 300px width...
-</td>
+const DynamicTablePage = () = > {
+const [fields, setFields] = useState([]);
+const [rows, setRows] = useState([]);
+const [loading, setLoading] = useState(true);
 
-// Rendered result (if width > 300px):
-This is a very long text that will be truncated with...
-'''
+useEffect(() = > {
+fetchTableData();
+}, []);
 
-**TABLE COLUMN SIZING RULES:**
+const fetchTableData = async () = > {
+try {
+// 1. ВСЕГДА сначала получаем fields
+const schemaRes = await axios.post('/v1/table-details/${slug}', { data: {} });
+const tableFields = schemaRes?.data?.data?.data?.fields ?? [];
+setFields(tableFields);
 
-'''jsx
-// Table header (th):
-<th
-className= "
-px-4 py-3
-min-w-[220px]
-max-w-[300px]
-text-left
-font-medium
-bg-[#2D2D2D]
-border-b border-[#3F3F3F]
-"
->
-Column Name
-</th>
+// 2. Потом получаем rows
+const dataRes = await axios.get(/v2/items/\${slug});
+const tableRows = dataRes?.data?.data?.data?.response ?? [];
+setRows(tableRows);
+} catch (err) {
+console.error(err);
+} finally {
+setLoading(false);
+}
+};
 
-// Table cell (td):
-<td
-className ="
-px-4 py-3
-min-w-[220px]
-max-w-[300px]
-overflow-hidden
-text-ellipsis
-whitespace-nowrap
-border-b border-[#3F3F3F]
-"
->
-{cellValue}
-</td>
-'''
+if (loading) {
+return <div>Loading...</div>;
+}
 
-**RESIZABLE COLUMNS (if needed):**
-
-If implementing resizable columns:
-- Initial width: 220px
-- Minimum resize: 220px
-- Maximum resize: 300px
-- User can drag to resize between 220px-300px
-
-**VERIFICATION CHECKLIST:**
-
-□ Every '<td>' has 'ax-w-[300px]'?
-□ Every '<td>' has 'verflow-hidden'?
-□ Every '<td>' has 'ext-ellipsis'?
-□ Every '<td>' has 'hitespace-nowrap'?
-□ Long text shows "..." when exceeds 300px?
-
-====================================
-🔥 FIX PROBLEM #8: PIXEL-PERFECT UI REPLICATION
-====================================
-
-**АБСОЛЮТНОЕ ПРАВИЛО ДЛЯ КОПИРОВАНИЯ UI ИЗ IMAGE:**
-
-🚨 **When user provides IMAGE → UI must be PIXEL-PERFECT COPY!** 🚨
-
-**WHAT "PIXEL-PERFECT" MEANS:**
-
-When image is provided, you MUST copy EVERY SINGLE VISUAL DETAIL:
-
-□ **Table Styling:**
-  - Border thickness (exact px: 1px, 2px, etc.)
-  - Border colors (exact hex)
-  - Cell padding (exact px)
-  - Row height (exact px)
-  - Header height (exact px)
-  - Background colors (exact hex for header, rows, hover)
-
-□ **Typography:**
-  - Font family (exact font name)
-  - Font size (exact px: 14px, 16px, etc.)
-  - Font weight (exact: 400, 500, 600, 700)
-  - Line height (exact: 1.2, 1.5, etc.)
-  - Letter spacing (if visible)
-
-□ **Spacing:**
-  - Cell padding (exact: px-4 py-3 vs px-6 py-4)
-  - Row gaps (exact gap values)
-  - Column gaps (exact gap values)
-  - Margin between sections (exact spacing)
-
-□ **Borders & Dividers:**
-  - Border thickness (1px vs 2px)
-  - Border color (exact hex)
-  - Border style (solid, dashed, dotted)
-  - Border radius (exact px)
-
-□ **Shadows:**
-  - Shadow size (small, medium, large)
-  - Shadow color (exact rgba)
-  - Shadow blur radius
-  - Shadow offset
-
-□ **Icons:**
-  - Icon size (exact px: 16px, 20px, 24px)
-  - Icon color (exact hex or filter)
-  - Icon position (in cells, headers, buttons)
-  - Icon spacing from text
-
-□ **Colors:**
-  - All backgrounds (exact hex)
-  - All text colors (exact hex)
-  - All borders (exact hex)
-  - All hover states (exact hex)
-  - All accent colors (exact hex)
-
-**EXTRACTION CHECKLIST FROM IMAGE:**
-
-**STEP 1: TABLE STRUCTURE**
-- [ ] Count columns
-- [ ] Measure column widths
-- [ ] Note header background color
-- [ ] Note row background colors (normal vs hover)
-- [ ] Measure row height
-- [ ] Note border colors and thickness
-
-**STEP 2: TYPOGRAPHY**
-- [ ] Identify font family (if visible)
-- [ ] Measure header font size
-- [ ] Measure cell font size
-- [ ] Note font weights (normal, medium, bold)
-- [ ] Check line heights
-
-**STEP 3: SPACING**
-- [ ] Measure cell padding (horizontal)
-- [ ] Measure cell padding (vertical)
-- [ ] Measure gaps between rows
-- [ ] Measure gaps between columns
-- [ ] Note table margins
-
-**STEP 4: COLORS**
-- [ ] Extract header background (#...)
-- [ ] Extract row background (#...)
-- [ ] Extract hover background (#...)
-- [ ] Extract text color (#...)
-- [ ] Extract border color (#...)
-- [ ] Extract accent colors (#...)
-
-**STEP 5: BORDERS & EFFECTS**
-- [ ] Note border thickness (1px, 2px?)
-- [ ] Extract border color
-- [ ] Check for rounded corners (border-radius)
-- [ ] Note shadow (if any)
-
-**STEP 6: ICONS**
-- [ ] Measure icon size
-- [ ] Note icon position (start, end, center)
-- [ ] Extract icon color or needed filters
-- [ ] Measure icon spacing from text
-
-**IMPLEMENTATION EXAMPLE:**
-
-'''jsx
-// Image analysis results:
-// Header bg: #252525
-// Row bg: #2D2D2D
-// Hover bg: #353535
-// Text: #FFFFFF
-// Border: #3F3F3F, 1px solid
-// Cell padding: 16px horizontal, 12px vertical
-// Row height: 48px
-// Font size: 14px
-// Font weight: 400 (normal)
-// Border radius: 8px (table corners)
-
-// ✅ PIXEL-PERFECT IMPLEMENTATION:
-<div className= "rounded-lg overflow-hidden border border-[#3F3F3F]">
+return (
+<div className = "p-6">
+<div className = "bg-[#2D2D2D] border border-[#3F3F3F] rounded-lg overflow-hidden">
 <table className = "w-full">
+{ /* HEADER - ВСЕГДА ПОКАЗЫВАЕМ */ }
 <thead>
 <tr className = "bg-[#252525]">
 {fields.map(field = > (
 <th
 key ={field.slug}
-className = "
-px-4 py-3               ← EXACT padding from image
-text-left
-text-sm                 ← EXACT font size (14px)
-font-normal             ← EXACT font weight (400)
-text-[#FFFFFF]          ← EXACT text color
-border-b border-[#3F3F3F]  ← EXACT border
-"
-style ={{ height: '48px' }}  ← EXACT row height
+className = "text-left px-4 py-3 text-[#E5E5E5] border-b border-[#3F3F3F]"
 >
 {field.label}
 </th>
 ))}
 </tr>
 </thead>
+
+{ /* BODY - С ИЛИ БЕЗ ДАННЫХ */ }
 <tbody>
-{rows.map(row = > (
+{rows.length > 0 ? (
+// Если есть данные - показываем rows
+rows.map((row, idx) = > (
 <tr
-key ={row.id}
-className = "
-bg-[#2D2D2D]            ← EXACT row bg
-hover:bg-[#353535]      ← EXACT hover bg
-transition-colors
-"
+key ={row.id || idx}
+className = "hover:bg-[#353535] transition-colors"
 >
 {fields.map(field = > (
 <td
 key ={field.slug}
-className = "
-px-4 py-3             ← EXACT padding
-text-sm               ← EXACT font size
-font-normal           ← EXACT weight
-text-[#FFFFFF]        ← EXACT text color
-border-b border-[#3F3F3F]  ← EXACT border
-min-w-[220px]
-max-w-[300px]
-overflow-hidden
-text-ellipsis
-whitespace-nowrap
-"
-style ={{ height: '48px' }}  ← EXACT row height
+className = "px-4 py-3 text-[#E5E5E5] border-b border-[#3F3F3F]"
 >
-{row[field.slug]}
+{renderCell(row, field)}
 </td>
 ))}
 </tr>
-))}
+))
+): (
+// Если нет данных - показываем empty state ВНУТРИ таблицы
+<tr>
+<td
+colSpan ={fields.length}
+className = "text-center py-16"
+>
+<div className ="flex flex-col items-center space-y-4">
+<div className = "text-6xl">📋</div>
+<p className = "text-[#A0A0A0] text-lg">No data available</p>
+<p className ="text-[#707070] text-sm">Create your first item to get started</p>
+<button
+onClick ={openCreateDrawer}
+className = "
+mt-4
+bg-[#3B82F6]
+text-white
+px-6 py-3
+rounded-md
+hover:bg-[#2563EB]
+transition-colors
+shadow-md
+"
+>
++ Create First Item
+</button>
+</div>
+</td>
+</tr>
+)}
 </tbody>
 </table>
 </div>
-'''
-
-**FIELD ICONS IN TABLE (from image):**
-
-If image shows icons in table column headers:
-
-'''jsx
-<th className = "...">
-<div className = "flex items-center gap-2">
-<img
-src ={field.icon}
-className = "w-4 h-4 brightness-0 invert opacity-80"  ← EXACT size, proper visibility
-alt = ""
-/>
-<span>{field.label}</span>
 </div>
-</th>
+);
+}
 '''
 
-**CRITICAL RULES:**
+**КЛЮЧЕВЫЕ МОМЕНТЫ:**
 
-1. **MEASURE EVERYTHING** from image (don't guess!)
-2. **USE EXACT VALUES** in code (not approximations)
-3. **COPY EVERY DETAIL** (borders, shadows, spacing, colors)
-4. **PRESERVE LOGIC** (dynamic data, API calls, routing)
-5. **MATCH VISUALLY** but keep data sources intact
-
-**WHAT TO COPY (Visual):**
-✅ Colors, borders, padding, fonts, shadows, icons styles
-
-**WHAT NOT TO TOUCH (Logic):**
-❌ API calls, dynamic rendering, routing, data fetching
-
-**FINAL VERIFICATION:**
-
-Before submitting, compare your generated UI with image:
-□ Colors match exactly?
-□ Border thickness matches?
-□ Padding matches?
-□ Font sizes match?
-□ Row heights match?
-□ Icons visible and correctly sized?
-□ Shadows match (if any)?
-□ Border radius matches?
-□ Overall appearance identical to image?
-
-If answer is "NO" to any → FIX IT until pixel-perfect!
+1. ✅ Table header ВСЕГДА видим
+2. ✅ Fields ВСЕГДА показаны
+3. ✅ Empty state ВНУТРИ '<td colSpan ={fields.length}>'
+4. ✅ Кнопка "Create First Item" прямо в empty state
+5. ✅ Professional styling с proper colors
 
 ====================================
 TASK DESCRIPTION
@@ -901,7 +618,6 @@ MENU DATA SOURCE:
 
 ICON RENDERING:
 - Icons are URLs: <img src={item.icon} className="w-4 h-4" />
-- MUST apply proper filters for visibility (see PROBLEM #6)
 - Fallback: "📁"
 
 ====================================
@@ -948,17 +664,12 @@ FEATURES REQUIRED:
 - Dynamic columns/rows from MCP
 - Sticky header
 - Scrollable
-- Resizable columns (220px - 300px range)
+- Resizable columns
 - Sorting
 - Pagination
 - Loading/empty states
 
-COLUMN SIZING (UPDATED):
-- min-width: 220px
-- max-width: 300px  ← NEW RULE!
-- overflow: hidden
-- text-overflow: ellipsis
-- white-space: nowrap
+COLUMN SIZING: 220px fixed, resizable
 
 CELL RENDERING BY FIELD TYPE:
 1. NUMBER/FLOAT: View as text, edit as <input type="number" />
@@ -1078,14 +789,10 @@ INVALID if:
 - Cells render inputs by default
 - Missing used libraries in package.json
 - Text color = background color (CRITICAL!)
-- Icons same color as background (CRITICAL!)
 - Colors not extracted from image
 - All components same color
 - No shadows/hover/transitions
 - Empty table hides fields (CRITICAL!)
-- Table cells exceed 300px width
-- Long text in cells without ellipsis
-- UI doesn't match image pixel-perfect
 
 VALID if:
 - All data from MCP
@@ -1095,24 +802,18 @@ VALID if:
 - View-first cell rendering
 - Professional UI with shadows/hover/transitions
 - Proper contrast (text readable on background)
-- Icons visible on background (with proper filters)
 - All unique colors extracted from image
 - Table fields ALWAYS visible (even when empty)
-- Table cells max 300px with ellipsis
-- UI pixel-perfect copy of image (if provided)
 
 ====================================
-FINAL REMINDER - 8 CRITICAL RULES
+FINAL REMINDER - 5 CRITICAL RULES
 ====================================
 
-1. ✅ **CONTRAST TEXT:** Dark bg → light text, Light bg → dark text (NEVER same!)
-2. ✅ **CONTRAST ICONS:** Icons visible on background (use filters: brightness, invert)
-3. ✅ **EXACT COLORS:** Extract ALL unique colors from image (don't guess!)
-4. ✅ **UNIQUE COLORS:** Each component = different color (not all same!)
-5. ✅ **PROFESSIONAL:** Shadows + hover + transitions + borders + rounded corners
-6. ✅ **EMPTY TABLES:** Table header with fields ALWAYS visible (even if no rows!)
-7. ✅ **CELL WIDTH:** max-w-[300px] + overflow-hidden + text-ellipsis + whitespace-nowrap
-8. ✅ **PIXEL-PERFECT:** UI identical to image (borders, padding, fonts, colors, everything!)
+1. ✅ **CONTRAST:** Dark bg → light text, Light bg → dark text (NEVER same color!)
+2. ✅ **EXACT COLORS:** Extract ALL unique colors from image (don't guess!)
+3. ✅ **UNIQUE COLORS:** Each component = different color (not all same!)
+4. ✅ **PROFESSIONAL:** Shadows + hover + transitions + borders + rounded corners
+5. ✅ **EMPTY TABLES:** ALWAYS show table header with fields (even if no rows!)
 
 Generate the full project now.
 
