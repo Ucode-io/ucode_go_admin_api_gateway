@@ -24,15 +24,52 @@ READ THIS FIRST - THIS OVERRIDES EVERYTHING BELOW:
 
 **CRITICAL PRIORITY ORDER:**
 
-**PRIORITY 1: USER-PROVIDED IMAGES** (If provided)
-→ Images are ABSOLUTE VISUAL TRUTH for colors, spacing, borders, shadows, typography
-→ Extract and replicate EXACTLY:
-  * All colors (backgrounds, text, borders, buttons, shadows)
-  * Border-radius, spacing (margins, paddings, gaps)
-  * Typography (font sizes, weights, line-heights)
-  * Layout structure and component positioning
+**PRIORITY 1: USER-PROVIDED IMAGES = 1:1 PIXEL-PERFECT CLONE** (If provided)
+→ Your generated UI MUST be **VISUALLY INDISTINGUISHABLE** from the provided image
+→ This is NOT "similar to" or "inspired by" — it MUST be an EXACT VISUAL CLONE
+
+🔹 **CLONE EVERYTHING FROM IMAGE:**
+  * Layout structure: sidebar width, header height, content area layout — EXACT match
+  * All colors: extract EVERY unique hex code — backgrounds, text, borders, buttons, shadows
+  * All dimensions: sidebar width (px), menu item height (px), table row height, card sizes
+  * All spacing: margins, paddings, gaps between elements — EXACT match
+  * All borders: border-radius, border-width, border-color — EXACT match
+  * All shadows: box-shadow values — EXACT match
+  * Typography: font sizes, font weights, line-heights — EXACT match
+  * Component styles: buttons, inputs, badges, pills, cards — EXACT match
+
+🔹 **SIDEBAR** (clone from image):
+  * Same width, same background color
+  * Menu items: same height, padding, icon size, text size, gap between icon and text
+  * Active item: same background color, text color, left border indicator if visible
+  * Hover state: same hover background
+  * Logo/brand area: same height, position, style
+
+🔹 **TABLE** (clone from image):
+  * Header row: same background, text color, font-weight, text-transform, padding
+  * Body rows: same height, padding, border-bottom style
+  * Row hover: same hover background color
+  * Toolbar above table: same search bar style, filter/sort buttons, create button
+  * Pagination: same style, position
+
+🔹 **CARDS/DASHBOARD** (clone from image):
+  * Same grid layout (e.g., 4 cards in a row, 2x2 grid)
+  * Same card dimensions, padding, border-radius, shadow
+  * Same content structure inside cards
+
+🔹 **HEADER** (clone from image):
+  * Same height, background, content positioning
+  * Same search bar style, user avatar position
+
 → Images OVERRIDE all default style rules below
 → If image shows purple sidebar → use purple, NOT default gray
+→ Do NOT "improve" the design — CLONE it exactly as shown
+
+🔹 **ONLY EXCEPTION — DYNAMIC DATA:**
+  * Menu items come from API (response.data.data.menus) — but STYLED exactly like image
+  * Table rows come from API — but TABLE VISUAL LAYOUT matches image exactly
+  * Table fields come from API — but COLUMN STYLING matches image exactly
+  * NEVER hardcode menu items, table data, or any data — only the VISUAL STYLE comes from image
 
 **PRIORITY 2: FRONTEND PLAN** (Always provided)
 → The plan text is THE LAW for:
