@@ -496,13 +496,21 @@ YOU ARE ABOUT TO RECEIVE:
 **RULE 1: CONTRAST IS SACRED**
 
 🚨 NEVER EVER use same color for text and background! 🚨
+🚨 NEVER EVER let ICONS disappear on background! 🚨
 
 ✅ Dark background (#191919, #1a1a1a, #2D2D2D) → MUST use light text (#FFFFFF, #E5E5E5, #F5F5F5)
 ✅ Light background (#FFFFFF, #F7F7F5) → MUST use dark text (#1a1a1a, #37352F, #2D2D2D)
 
+**ICONS - CRITICAL:**
+✅ Dark bg → Use "brightness-0 invert" for icons:
+  <img src="icon.svg" className="brightness-0 invert" />
+✅ Light bg → Use "brightness(0)" for icons:
+  <img src="icon.svg" className="brightness-0" />
+
 ❌ FORBIDDEN:
 - bg-[#191919] text-[#191919]  ← КАТАСТРОФА!
 - bg-[#1a1a1a] text-[#2d2d2d]  ← СЛИШКОМ ПОХОЖИЕ!
+- Icons without filters on dark bg ← ИКОНКИ НЕ ВИДНЫ!
 
 ✅ CORRECT:
 - bg-[#191919] text-[#E5E5E5]  ← ВИДНО!
@@ -510,14 +518,22 @@ YOU ARE ABOUT TO RECEIVE:
 
 **BEFORE WRITING ANY COMPONENT, ASK:**
 □ Can I READ the text on this background?
+□ Can I SEE the icons on this background?
 □ Is contrast high enough?
 □ Did I use different colors for text vs background?
+□ Did I add filters to icons for visibility?
 
 ---
 
 **RULE 2: EXTRACT EXACT COLORS FROM IMAGE**
 
 If images provided, extract EXACT hex colors, don't guess!
+
+🚨 CAPTURE EVERY DETAIL - EVEN SMALL ONES! 🚨
+- Typography: font sizes (12px/14px/16px), weights
+- Spacing: exact padding/margins (px-4, gap-6)
+- Radius: border-radius (rounded-lg=8px)
+- Shadows: exact shadow depths
 
 Look for:
 - Main background (e.g., #191919)
@@ -526,6 +542,7 @@ Look for:
 - Text colors (e.g., #FFFFFF, #A0A0A0)
 - Border colors (e.g., #3F3F3F)
 - Accent colors (e.g., #3B82F6)
+- **Icon colors/filters** (for menu visibility!)
 
 ✅ Write EXACT hex codes:
 - Image shows dark gray → bg-[#2D2D2D] (not bg-gray-800)
