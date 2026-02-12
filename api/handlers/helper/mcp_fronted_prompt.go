@@ -25,51 +25,30 @@ READ THIS FIRST - THIS OVERRIDES EVERYTHING BELOW:
 **CRITICAL PRIORITY ORDER:**
 
 **PRIORITY 1: USER-PROVIDED IMAGES** (If provided)
-→ Images are ABSOLUTE VISUAL TRUTH — your UI must be a 1:1 PIXEL-PERFECT CLONE of the image
-→ CLONE EXACTLY: all colors (hex), all dimensions (px), all spacing, borders, shadows, typography
-→ Clone each component: sidebar (width, bg, menu styles), header (height, bg), table (rows, headers), cards, forms
-→ Images OVERRIDE ALL default style rules below — EVERY default in this prompt is IRRELEVANT when image exists
-→ If image shows DARK theme → ENTIRE UI must be DARK. IGNORE ALL light theme examples below
-→ If image shows LIGHT theme → ENTIRE UI must be LIGHT
-→ Do NOT "improve" or "simplify" the image — CLONE it exactly as shown
-→ ONLY EXCEPTION: Data (menus, table rows) comes from API dynamically — but STYLED exactly like the image
+→ Images are ABSOLUTE VISUAL TRUTH for colors, spacing, borders, shadows, typography
+→ Extract and replicate EXACTLY:
+  * All colors (backgrounds, text, borders, buttons, shadows)
+  * Border-radius, spacing (margins, paddings, gaps)
+  * Typography (font sizes, weights, line-heights)
+  * Layout structure and component positioning
+→ Images OVERRIDE all default style rules below
+→ If image shows purple sidebar → use purple, NOT default gray
 
 **PRIORITY 2: FRONTEND PLAN** (Always provided)
-→ The PLAN contains EXACT hex colors, px dimensions, and component specs — use them ALL
-→ If plan says dark colors (#0A0A0A, #1A1A1A, #141414) → this is DARK THEME, use ONLY those colors
+→ The plan text is THE LAW for:
+  * Component structure and logic
+  * Routing and navigation
+  * Feature specifications
+  * UI system references
 → If plan says "Purple Theme #8B5CF6" → use #8B5CF6, ignore defaults
-→ Plan colors OVERRIDE ALL default colors below
+→ If plan specifies colors/spacing → use those EXACT values
 
 **PRIORITY 3: DEFAULT FALLBACK RULES** (Below)
-→ Apply ONLY when: No image provided AND Plan doesn't specify that aspect
-→ These are FALLBACK SUGGESTIONS that CAN be IGNORED if contradicted by Plan/Images
-
-====================================
-⚠️ THEME OVERRIDE (CRITICAL — READ THIS!)
-====================================
-
-BEFORE generating ANY code, detect the THEME from plan/images:
-
-**IF the plan specifies dark background colors** (like #0A0A0A, #1A1A1A, #141414, #191919, #1F1F1F):
-→ This is a **DARK THEME** project
-→ ALL backgrounds MUST use the dark colors FROM THE PLAN — NOT white, NOT gray-100, NOT #F7F7F5
-→ Sidebar background: dark color from plan (e.g., bg-[#1A1A1A])
-→ Header background: dark color from plan (e.g., bg-[#1F1F1F])
-→ Page background: dark color from plan (e.g., bg-[#0A0A0A])
-→ Table header: dark color from plan (e.g., bg-[#141414])
-→ Cards/surfaces: dark color from plan
-→ ALL text MUST be light for contrast (#FFFFFF, #E5E5E5, #F5F5F5)
-→ ALL borders: dark border colors from plan (e.g., border-[#2A2A2A])
-→ 🚨 IGNORE ALL light-theme examples below (bg-[PLAN_SURFACE], bg-[PLAN_SEC], text-gray-900)
-
-**IF the plan specifies light background colors** (like #FFFFFF, #F7F7F5, #FAFAFA):
-→ This is a **LIGHT THEME** project
-→ Use light backgrounds with dark text
-→ Follow the plan colors exactly
-
-**IN BOTH CASES:**
-→ Use EXACT hex colors from the plan — NOT generic Tailwind colors (bg-gray-800, bg-blue-500)
-→ Every component gets its SPECIFIC color from the plan, not one universal color
+→ Apply ONLY when:
+  * No image provided AND
+  * Plan doesn't specify that aspect
+→ These are SUGGESTIONS, not requirements
+→ Can be IGNORED if contradicted by Plan/Images
 
 ====================================
 🔥 FIX PROBLEM #1: CONTRAST RULES (CRITICAL)
@@ -82,7 +61,7 @@ BEFORE generating ANY code, detect the THEME from plan/images:
 **MANDATORY CHECKS BEFORE WRITING ANY CODE:**
 
 ✅ **LIGHT BACKGROUND → DARK TEXT:**
-- bg-[PLAN_SURFACE], bg-[PLAN_SEC], bg-[#F7F7F5] → MUST use text-gray-900, text-[#37352F], text-black
+- bg-white, bg-gray-100, bg-[#F7F7F5] → MUST use text-gray-900, text-[#37352F], text-black
 - bg-[#FFFFFF], bg-[#F5F5F5] → MUST use text-[#1a1a1a], text-[#2d2d2d]
 
 ✅ **DARK BACKGROUND → LIGHT TEXT:**
@@ -94,14 +73,14 @@ BEFORE generating ANY code, detect the THEME from plan/images:
 // НИКОГДА НЕ ДЕЛАЙ ТАК:
 <div className = "bg-[#191919] text-[#191919]">  ❌ КАТАСТРОФА!
 <div className = "bg-[#1a1a1a] text-[#2d2d2d]">  ❌ СЛИШКОМ ПОХОЖИЕ!
-<div className = "bg-[PLAN_SURFACE] text-gray-100">  ❌ НЕ ВИДНО!
+<div className = "bg-white text-gray-100">  ❌ НЕ ВИДНО!
 '''
 
 ✅ **CORRECT EXAMPLES:**
 '''jsx
 <div className ="bg-[#191919] text-[#E5E5E5]">  ✅ ОТЛИЧНО!
 <div className = "bg-[#2D2D2D] text-white">  ✅ ВИДНО!
-<div className = "bg-[PLAN_SURFACE] text-[#1a1a1a]">  ✅ КОНТРАСТ!
+<div className = "bg-white text-[#1a1a1a]">  ✅ КОНТРАСТ!
 '''
 
 **CONTRAST VERIFICATION CHECKLIST:**
@@ -280,33 +259,33 @@ Looking at image 1 (dark ERP):
 ✅ **2. SHADOWS:**
 '''jsx
 // ❌ WRONG - No depth:
-<div className = "bg-[PLAN_SURFACE]">
+<div className = "bg-white">
 
 // ✅ CORRECT - Has depth:
-<div className ="bg-[PLAN_SURFACE] shadow-lg">
-<div className = "bg-[PLAN_SURFACE] shadow-xl rounded-lg">
+<div className ="bg-white shadow-lg">
+<div className = "bg-white shadow-xl rounded-lg">
 <div className = "bg-[#2D2D2D] shadow-[0_4px_12px_rgba(0,0,0,0.3)]">
 '''
 
 ✅ **3. BORDER RADIUS:**
 '''jsx
 // ❌ WRONG - Sharp corners:
-<div className = "bg-[PLAN_SURFACE]">
+<div className = "bg-white">
 
 // ✅ CORRECT - Rounded:
-<div className = "bg-[PLAN_SURFACE] rounded-lg"> // 8px
-<div className = "bg-[PLAN_SURFACE] rounded-xl"> // 12px
+<div className = "bg-white rounded-lg"> // 8px
+<div className = "bg-white rounded-xl"> // 12px
 <button className= "rounded-md"> // 6px
 '''
 
 ✅ **4. BORDERS:**
 '''jsx
 // ❌ WRONG - No definition:
-<div className = "bg-[PLAN_SURFACE]">
+<div className = "bg-[#2D2D2D]">
 
 // ✅ CORRECT - Visible borders:
-<div className = "bg-[PLAN_SURFACE] border border-[PLAN_BORDER]">
 <div className = "bg-[#2D2D2D] border border-[#3F3F3F]">
+<div className = "bg-white border border-gray-200">
 '''
 
 ✅ **5. HOVER EFFECTS:**
@@ -322,10 +301,10 @@ Looking at image 1 (dark ERP):
 ✅ **6. TRANSITIONS:**
 '''jsx
 // ❌ WRONG - Instant changes:
-<div className = "hover:bg-[PLAN_SEC]">
+<div className = "hover:bg-gray-100">
 
 // ✅ CORRECT - Smooth:
-<div className = "hover:bg-[PLAN_SEC] transition-all duration-200 ease-in-out">
+<div className = "hover:bg-gray-100 transition-all duration-200 ease-in-out">
 '''
 
 ✅ **7. FOCUS STATES:**

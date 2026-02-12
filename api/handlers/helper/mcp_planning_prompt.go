@@ -268,62 +268,16 @@ OUTPUT FORMAT (STRICT MARKDOWN)
 [List ONLY if user requested: drag-drop, charts, export, dark mode, etc.]
 
 ====================================
-🔥 IMAGE HANDLING: 1:1 PIXEL-PERFECT SPECIFICATION (CRITICAL)
+IMAGE HANDLING (if images provided)
 ====================================
 
-⚠️ When images are provided, your plan becomes a PIXEL-PERFECT BLUEPRINT of the image.
-Another AI reading ONLY your plan must be able to generate UI INDISTINGUISHABLE from the image.
+When images are provided:
+1. Extract exact hex colors from image
+2. Note border-radius, shadows, spacing
+3. Match component styles to image
+4. Update Color Palette with extracted colors
 
-**YOUR PLAN MUST DESCRIBE EVERY VISUAL DETAIL:**
-
-1. **LAYOUT STRUCTURE** (exact from image):
-   - Overall layout type: sidebar + main content? top nav? split view?
-   - Sidebar: exact width (e.g., 260px), position (left/right), collapsible?
-   - Header: exact height (e.g., 64px), what it contains (logo, search, user avatar)
-   - Main content area: padding, grid structure, gap between elements
-
-2. **COLORS** (extract ALL unique hex codes from image):
-   - Page background, sidebar background, header background
-   - Card/surface backgrounds, input backgrounds, table header background
-   - Text colors: primary, secondary, muted, link
-   - Border colors: main, divider, input
-   - Button colors: primary, secondary, hover states
-   - Status/badge colors: success, warning, error, info
-   - Active/selected menu item background and text color
-
-3. **COMPONENT DIMENSIONS** (exact px from image):
-   - Sidebar menu item: height, padding, icon size, text size, gap between icon and text
-   - Buttons: height, padding, border-radius, font-size
-   - Inputs: height, padding, border-radius, border-width
-   - Cards: padding, border-radius, shadow, border
-   - Table: row height, header height, column min-width, cell padding
-   - Badges/pills: padding, border-radius, font-size
-
-4. **TYPOGRAPHY** (from image):
-   - Font family (if identifiable)
-   - Heading sizes, body text size, small text size
-   - Font weights for different contexts
-
-5. **SPACING & BORDERS** (from image):
-   - Margin/padding between sections
-   - Border-radius values (rounded-sm, rounded-md, rounded-lg)
-   - Shadow styles (subtle, medium, strong)
-   - Border widths and colors
-
-6. **TABLE APPEARANCE** (exact from image):
-   - Header row: background color, text color, font-weight, text-transform
-   - Body rows: background, hover color, border between rows
-   - Column alignment, cell padding
-   - Pagination style, position
-
-7. **SIDEBAR APPEARANCE** (exact from image):
-   - Logo/brand area: height, content
-   - Menu items: active vs inactive styling differences
-   - Hover effects, selected indicator (left border, background change, etc.)
-   - Section dividers, group headers
-
-**CRITICAL:** Your plan specification must be so precise that the generated UI is a VISUAL CLONE of the image.
-**Remember:** Images = VISUAL design only. Data (menus, table rows) comes dynamically from MCP backend API.
+**Remember:** Images = VISUAL design only. Data comes from MCP backend.
 
 ====================================
 CRITICAL RULES
@@ -356,36 +310,13 @@ func BuildFrontendPlanPrompt(userRequest string, hasImages bool) string {
 	var imageContext string
 	if hasImages {
 		imageContext = `
-🚨🚨🚨 PIXEL-PERFECT IMAGE REFERENCE PROVIDED 🚨🚨🚨
-
-User has attached image(s) as visual reference. Your plan MUST be a 1:1 PIXEL-PERFECT SPECIFICATION of the image.
-
-YOU MUST:
-1. **Analyze the image pixel by pixel** — identify EVERY visual element
-2. **Extract ALL colors** — not just 3-4 main colors, but EVERY unique hex code:
-   - Background colors (page, sidebar, header, cards, table headers, inputs)
-   - Text colors (primary, secondary, muted, links, active menu)
-   - Border colors (main borders, dividers, input borders, card borders)
-   - Accent colors (buttons, badges, status indicators, hover states)
-3. **Measure ALL dimensions** — describe exact px values:
-   - Sidebar width (e.g., "260px"), header height (e.g., "64px")
-   - Menu item height, padding, icon size, text size, gap
-   - Table row height, column width, cell padding
-   - Button height, padding, border-radius
-   - Card padding, border-radius, shadow
-4. **Describe LAYOUT STRUCTURE exactly**:
-   - Is sidebar on left or right? What is inside it? How are menu items grouped?
-   - What does the header contain? Logo position, search bar, user avatar?
-   - How is the table laid out? Toolbar above? Pagination below?
-   - Are there stat cards? How many? What grid layout (2x2, 4x1, etc.)?
-5. **Describe COMPONENT STYLES exactly**:
-   - Active menu item: background color, text color, left border indicator?
-   - Table header: background, text color, font-weight, text-transform?
-   - Buttons: primary color, text color, hover color, border-radius?
-   - Status badges: colors for each status, padding, border-radius?
-6. **Your plan = BLUEPRINT for 1:1 clone**: Another AI reading ONLY your plan must generate UI VISUALLY IDENTICAL to the image
-7. **Do NOT interpret or simplify** — describe what you SEE, not what you think looks good
-8. **Dynamic data stays dynamic**: menus from API, table data from API — only the VISUAL DESIGN comes from the image
+**IMAGES PROVIDED BY USER:**
+User has attached image(s) as visual reference. You MUST:
+1. Carefully analyze all provided images
+2. Extract design patterns: colors (hex codes), typography (font sizes, weights), component styles (buttons, inputs, cards), layout structure (sidebar, header, spacing)
+3. Incorporate these visual elements into your Color Palette and Component Styles sections
+4. Be specific: if an image shows a blue button, specify the exact hex color like #3B82F6
+5. Reference specific design choices from the images throughout your plan
 `
 	} else {
 		imageContext = `
@@ -559,18 +490,7 @@ YOU ARE ABOUT TO RECEIVE:
 2. POSSIBLY IMAGES (in the user message) - VISUAL REFERENCE
 
 ====================================
-🔥 RULE 0: PIXEL-PERFECT IMAGE REPLICATION 🔥
-====================================
-
-⚠️ If images provided → your UI MUST be a 1:1 PIXEL-PERFECT CLONE of the image.
-→ CLONE: all colors (exact hex), dimensions (px), spacing, borders, shadows, typography
-→ CLONE each component: sidebar, header, table, cards, forms — EXACTLY as seen in image
-→ Images OVERRIDE ALL defaults — if image is dark, ENTIRE UI is dark
-→ Do NOT "improve" the design. CLONE it exactly.
-→ Data stays dynamic (menus from API, table data from API) — only VISUAL STYLE from image
-
-====================================
-🔥 6 CRITICAL RULES YOU MUST FOLLOW 🔥
+🔥 5 CRITICAL RULES YOU MUST FOLLOW 🔥
 ====================================
 
 **RULE 1: CONTRAST IS SACRED**
@@ -696,19 +616,6 @@ ALWAYS show table header with fields, EVEN if rows.length === 0!
     )}
   </tbody>
 </table>
-
-====================================
-⚠️ THEME & COLORS FROM PLAN (CRITICAL)
-====================================
-
-The plan below contains EXACT hex colors. BEFORE generating code:
-1. **Detect THEME**: If plan has dark backgrounds (#0A0A0A, #1A1A1A, #141414, #191919) → DARK THEME
-2. **If DARK THEME** → ALL backgrounds MUST be dark from plan, ALL text MUST be light (#FFFFFF, #E5E5E5)
-   → sidebar bg: from plan, header bg: from plan, page bg: from plan, table header: from plan
-   → 🚨 DO NOT use bg-white, bg-gray-100, or ANY light background — the ENTIRE UI is DARK
-3. **If LIGHT THEME** → use light backgrounds with dark text, all from plan
-4. **Use EXACT hex** from plan → not generic Tailwind colors (bg-gray-800), but bg-[#1A1A1A]
-5. **Every component** gets its own specific color from the plan
 
 ====================================
 THE FRONTEND PLAN (YOUR BLUEPRINT)
