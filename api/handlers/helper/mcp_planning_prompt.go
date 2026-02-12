@@ -559,59 +559,15 @@ YOU ARE ABOUT TO RECEIVE:
 2. POSSIBLY IMAGES (in the user message) - VISUAL REFERENCE
 
 ====================================
-🔥 RULE 0: PIXEL-PERFECT IMAGE REPLICATION (HIGHEST PRIORITY) 🔥
+🔥 RULE 0: PIXEL-PERFECT IMAGE REPLICATION 🔥
 ====================================
 
-⚠️ If images are provided in the user message, your generated UI MUST be **VISUALLY IDENTICAL** to the image.
-
-**WHAT "1:1 PIXEL-PERFECT" MEANS:**
-- The generated frontend must look like a **screenshot** of the provided image
-- Same layout structure (sidebar position, header position, content area)
-- Same colors (EXACT hex values, not approximations)
-- Same dimensions (sidebar width, header height, row heights, card sizes)
-- Same spacing (margins, paddings, gaps between elements)
-- Same borders (border-radius, border-width, border-color)
-- Same shadows (box-shadow values)
-- Same typography (font sizes, font weights)
-
-**THE ONLY DIFFERENCE:** Data is dynamic from API, NOT hardcoded
-- Menus come from response.data.data.menus (but STYLED exactly like image)
-- Table rows come from API (but TABLE LAYOUT matches image exactly)
-- Table fields come from API (but COLUMN STYLING matches image exactly)
-
-**COMPONENT-SPECIFIC RULES:**
-
-🔹 **SIDEBAR:** If image shows sidebar with specific width, background, menu item style, active indicator → your sidebar MUST match:
-   - Same width (e.g., w-[260px])
-   - Same background color (e.g., bg-[#1E1E2E])
-   - Same menu item height, padding, icon size, text size
-   - Same active/hover/selected states
-   - Same section dividers or group headers
-
-🔹 **HEADER:** If image shows header → match exactly:
-   - Same height, background, content layout
-   - Same search bar style, user avatar position
-   - Same breadcrumb or page title style
-
-🔹 **TABLE:** If image shows table → match exactly:
-   - Same header row style (bg color, text color, font-weight)
-   - Same body row style (height, padding, borders)
-   - Same hover effects on rows
-   - Same toolbar above table (search, filter, buttons)
-   - Same pagination style below table
-
-🔹 **CARDS/DASHBOARD:** If image shows stat cards → match exactly:
-   - Same card dimensions, border-radius, shadow
-   - Same grid layout (2x2, 4x1, etc.)
-   - Same content structure inside cards
-
-🔹 **FORMS/DRAWERS:** If image shows forms → match exactly:
-   - Same input styles, label positions
-   - Same button styles and positions
-
-**CRITICAL:** Do NOT "improve" the image design. Do NOT add your own style. CLONE the image exactly.
-If the image shows a simple flat design → generate simple flat design.
-If the image shows a rich design with gradients → generate with gradients.
+⚠️ If images provided → your UI MUST be a 1:1 PIXEL-PERFECT CLONE of the image.
+→ CLONE: all colors (exact hex), dimensions (px), spacing, borders, shadows, typography
+→ CLONE each component: sidebar, header, table, cards, forms — EXACTLY as seen in image
+→ Images OVERRIDE ALL defaults — if image is dark, ENTIRE UI is dark
+→ Do NOT "improve" the design. CLONE it exactly.
+→ Data stays dynamic (menus from API, table data from API) — only VISUAL STYLE from image
 
 ====================================
 🔥 6 CRITICAL RULES YOU MUST FOLLOW 🔥
@@ -740,6 +696,19 @@ ALWAYS show table header with fields, EVEN if rows.length === 0!
     )}
   </tbody>
 </table>
+
+====================================
+⚠️ THEME & COLORS FROM PLAN (CRITICAL)
+====================================
+
+The plan below contains EXACT hex colors. BEFORE generating code:
+1. **Detect THEME**: If plan has dark backgrounds (#0A0A0A, #1A1A1A, #141414, #191919) → DARK THEME
+2. **If DARK THEME** → ALL backgrounds MUST be dark from plan, ALL text MUST be light (#FFFFFF, #E5E5E5)
+   → sidebar bg: from plan, header bg: from plan, page bg: from plan, table header: from plan
+   → 🚨 DO NOT use bg-white, bg-gray-100, or ANY light background — the ENTIRE UI is DARK
+3. **If LIGHT THEME** → use light backgrounds with dark text, all from plan
+4. **Use EXACT hex** from plan → not generic Tailwind colors (bg-gray-800), but bg-[#1A1A1A]
+5. **Every component** gets its own specific color from the plan
 
 ====================================
 THE FRONTEND PLAN (YOUR BLUEPRINT)

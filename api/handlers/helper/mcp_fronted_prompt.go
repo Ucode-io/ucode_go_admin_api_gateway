@@ -24,68 +24,52 @@ READ THIS FIRST - THIS OVERRIDES EVERYTHING BELOW:
 
 **CRITICAL PRIORITY ORDER:**
 
-**PRIORITY 1: USER-PROVIDED IMAGES = 1:1 PIXEL-PERFECT CLONE** (If provided)
-→ Your generated UI MUST be **VISUALLY INDISTINGUISHABLE** from the provided image
-→ This is NOT "similar to" or "inspired by" — it MUST be an EXACT VISUAL CLONE
-
-🔹 **CLONE EVERYTHING FROM IMAGE:**
-  * Layout structure: sidebar width, header height, content area layout — EXACT match
-  * All colors: extract EVERY unique hex code — backgrounds, text, borders, buttons, shadows
-  * All dimensions: sidebar width (px), menu item height (px), table row height, card sizes
-  * All spacing: margins, paddings, gaps between elements — EXACT match
-  * All borders: border-radius, border-width, border-color — EXACT match
-  * All shadows: box-shadow values — EXACT match
-  * Typography: font sizes, font weights, line-heights — EXACT match
-  * Component styles: buttons, inputs, badges, pills, cards — EXACT match
-
-🔹 **SIDEBAR** (clone from image):
-  * Same width, same background color
-  * Menu items: same height, padding, icon size, text size, gap between icon and text
-  * Active item: same background color, text color, left border indicator if visible
-  * Hover state: same hover background
-  * Logo/brand area: same height, position, style
-
-🔹 **TABLE** (clone from image):
-  * Header row: same background, text color, font-weight, text-transform, padding
-  * Body rows: same height, padding, border-bottom style
-  * Row hover: same hover background color
-  * Toolbar above table: same search bar style, filter/sort buttons, create button
-  * Pagination: same style, position
-
-🔹 **CARDS/DASHBOARD** (clone from image):
-  * Same grid layout (e.g., 4 cards in a row, 2x2 grid)
-  * Same card dimensions, padding, border-radius, shadow
-  * Same content structure inside cards
-
-🔹 **HEADER** (clone from image):
-  * Same height, background, content positioning
-  * Same search bar style, user avatar position
-
-→ Images OVERRIDE all default style rules below
-→ If image shows purple sidebar → use purple, NOT default gray
-→ Do NOT "improve" the design — CLONE it exactly as shown
-
-🔹 **ONLY EXCEPTION — DYNAMIC DATA:**
-  * Menu items come from API (response.data.data.menus) — but STYLED exactly like image
-  * Table rows come from API — but TABLE VISUAL LAYOUT matches image exactly
-  * Table fields come from API — but COLUMN STYLING matches image exactly
-  * NEVER hardcode menu items, table data, or any data — only the VISUAL STYLE comes from image
+**PRIORITY 1: USER-PROVIDED IMAGES** (If provided)
+→ Images are ABSOLUTE VISUAL TRUTH — your UI must be a 1:1 PIXEL-PERFECT CLONE of the image
+→ CLONE EXACTLY: all colors (hex), all dimensions (px), all spacing, borders, shadows, typography
+→ Clone each component: sidebar (width, bg, menu styles), header (height, bg), table (rows, headers), cards, forms
+→ Images OVERRIDE ALL default style rules below — EVERY default in this prompt is IRRELEVANT when image exists
+→ If image shows DARK theme → ENTIRE UI must be DARK. IGNORE ALL light theme examples below
+→ If image shows LIGHT theme → ENTIRE UI must be LIGHT
+→ Do NOT "improve" or "simplify" the image — CLONE it exactly as shown
+→ ONLY EXCEPTION: Data (menus, table rows) comes from API dynamically — but STYLED exactly like the image
 
 **PRIORITY 2: FRONTEND PLAN** (Always provided)
-→ The plan text is THE LAW for:
-  * Component structure and logic
-  * Routing and navigation
-  * Feature specifications
-  * UI system references
+→ The PLAN contains EXACT hex colors, px dimensions, and component specs — use them ALL
+→ If plan says dark colors (#0A0A0A, #1A1A1A, #141414) → this is DARK THEME, use ONLY those colors
 → If plan says "Purple Theme #8B5CF6" → use #8B5CF6, ignore defaults
-→ If plan specifies colors/spacing → use those EXACT values
+→ Plan colors OVERRIDE ALL default colors below
 
 **PRIORITY 3: DEFAULT FALLBACK RULES** (Below)
-→ Apply ONLY when:
-  * No image provided AND
-  * Plan doesn't specify that aspect
-→ These are SUGGESTIONS, not requirements
-→ Can be IGNORED if contradicted by Plan/Images
+→ Apply ONLY when: No image provided AND Plan doesn't specify that aspect
+→ These are FALLBACK SUGGESTIONS that CAN be IGNORED if contradicted by Plan/Images
+
+====================================
+⚠️ THEME OVERRIDE (CRITICAL — READ THIS!)
+====================================
+
+BEFORE generating ANY code, detect the THEME from plan/images:
+
+**IF the plan specifies dark background colors** (like #0A0A0A, #1A1A1A, #141414, #191919, #1F1F1F):
+→ This is a **DARK THEME** project
+→ ALL backgrounds MUST use the dark colors FROM THE PLAN — NOT white, NOT gray-100, NOT #F7F7F5
+→ Sidebar background: dark color from plan (e.g., bg-[#1A1A1A])
+→ Header background: dark color from plan (e.g., bg-[#1F1F1F])
+→ Page background: dark color from plan (e.g., bg-[#0A0A0A])
+→ Table header: dark color from plan (e.g., bg-[#141414])
+→ Cards/surfaces: dark color from plan
+→ ALL text MUST be light for contrast (#FFFFFF, #E5E5E5, #F5F5F5)
+→ ALL borders: dark border colors from plan (e.g., border-[#2A2A2A])
+→ 🚨 IGNORE ALL light-theme examples below (bg-white, bg-gray-100, text-gray-900)
+
+**IF the plan specifies light background colors** (like #FFFFFF, #F7F7F5, #FAFAFA):
+→ This is a **LIGHT THEME** project
+→ Use light backgrounds with dark text
+→ Follow the plan colors exactly
+
+**IN BOTH CASES:**
+→ Use EXACT hex colors from the plan — NOT generic Tailwind colors (bg-gray-800, bg-blue-500)
+→ Every component gets its SPECIFIC color from the plan, not one universal color
 
 ====================================
 🔥 FIX PROBLEM #1: CONTRAST RULES (CRITICAL)
