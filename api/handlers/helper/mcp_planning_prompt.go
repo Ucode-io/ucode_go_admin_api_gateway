@@ -482,117 +482,368 @@ Execute all 3 steps now.`,
 func BuildFrontendPromptWithPlan(request models.GeneratePromptRequest, frontendPlan string) string {
 	return fmt.Sprintf(`
 ====================================
-🚨 HIERARCHY OF TRUTH (HIGHEST PRIORITY) 🚨
+🚨🚨🚨 ABSOLUTE MANDATORY RULES 🚨🚨🚨
 ====================================
 
-You must follow the instructions in the order below:
+YOU ARE ABOUT TO RECEIVE:
+1. A DETAILED FRONTEND PLAN (below) - THIS IS YOUR BIBLE
+2. POSSIBLY IMAGES (in the user message) - VISUAL REFERENCE
 
-1. **USER FRONTEND PLAN (BELOW)** - THIS IS THE LAW.
-   - If the Plan says "Purple Theme", you make it Purple, even if System Rules say "Notion Gray".
-   - If the Plan says "Sidebar on Right", you put it on Right.
-   - IGNORE any default System Rules that contradict this Plan.
-
-2. **USER IMAGES (IF PROVIDED)** - VISUAL TRUTH.
-   - Match colors, rounding, and spacing from the image exactly.
-
-3. **SYSTEM DEFAULT RULES** - FALLBACK ONLY.
-   - Use the standard "Notion Style" rules ONLY for things NOT mentioned in the Plan.
+**READ THIS CAREFULLY - YOUR ENTIRE TASK DEPENDS ON THIS:**
 
 ====================================
-FRONTEND PLAN (EXECUTE THIS EXACTLY)
+PRIORITY #1: FRONTEND PLAN IS THE LAW
 ====================================
+
+The PLAN below contains EXACT specifications extracted by a planning AI:
+- EXACT hex colors (like #2D3748, #3B82F6)
+- EXACT sizes (like 280px sidebar, 40px buttons)
+- EXACT border-radius (like 8px, 12px)
+- EXACT spacing (like 24px padding, 12px gaps)
+
+**YOU MUST USE THESE EXACT VALUES. NOT "similar". NOT "close to". EXACT.**
+
+Example from plan:
+'''
+	Sidebar background: #2D3748
+	Button border-radius: 8px
+	Card padding: 24px
+	'''
+
+**YOU WRITE IN CODE:**
+'''jsx
+	<div className="bg-[#2D3748]">  // EXACT color from plan
+	<button className="rounded-[8px]">  // EXACT radius from plan
+	<div className="p-[24px]">  // EXACT padding from plan
+		'''
+
+**❌ WRONG - DO NOT DO THIS:**
+'''jsx
+	<div className="bg-gray-800">  // Generic Tailwind color - WRONG
+	<button className="rounded-lg">  // Generic rounding - WRONG
+	<div className="p-6">  // Generic padding - WRONG
+		'''
+
+====================================
+PRIORITY #2: IMAGES (IF PROVIDED)
+====================================
+
+If user provided images:
+- Images were already analyzed by the planning AI
+- The extracted colors/styles are IN THE PLAN
+- You don't need to re-extract
+- Just use the values from the plan
+
+**Images = visual confirmation of what's in the plan**
+
+====================================
+PRIORITY #3: IGNORE DEFAULT RULES
+====================================
+
+Your system prompt contains default Notion-style rules (gray colors, etc.).
+
+**IGNORE ALL DEFAULTS IF PLAN SPECIFIES DIFFERENT VALUES.**
+
+Example:
+- Default says: Sidebar 'bg-[#F7F7F5]'
+- Plan says: Sidebar '#2D3748'
+- **YOU USE:** '#2D3748' (from plan, ignore default)
+
+====================================
+THE FRONTEND PLAN (YOUR BLUEPRINT)
+====================================
+
+**READ EVERY SECTION. EVERY COLOR. EVERY SIZE.**
 
 %s
 
 ====================================
-ORIGINAL USER REQUEST
+END OF PLAN
 ====================================
 
+**NOW YOU MUST:**
+
+1. Read the ENTIRE plan above
+2. Note EVERY color (hex codes like #2D3748)
+3. Note EVERY size (px values like 280px, 40px, 24px)
+4. Note EVERY border-radius, shadow, spacing
+5. Generate code using THOSE EXACT VALUES
+
+====================================
+IMPLEMENTATION CHECKLIST
+====================================
+
+Before writing ANY code, go through the plan and extract:
+
+**COLORS:**
+- [ ] Background colors (main, sidebar, cards, modal)
+- [ ] Text colors (primary, secondary, muted)
+- [ ] Border colors
+- [ ] Button colors (primary, secondary, hover states)
+- [ ] Accent colors (success, warning, error)
+
+**SIZES:**
+- [ ] Sidebar width (expanded and collapsed)
+- [ ] Header height
+- [ ] Button heights
+- [ ] Input heights
+- [ ] Card padding
+- [ ] Content area padding
+
+**STYLING:**
+- [ ] Border-radius for all components
+- [ ] Shadows for all components
+- [ ] Spacing between elements
+- [ ] Typography (font sizes, weights)
+
+**THEN WRITE CODE USING THESE EXTRACTED VALUES.**
+
+====================================
+CODE GENERATION RULES
+====================================
+
+**RULE 1: USE EXACT HEX COLORS FROM PLAN**
+
+Plan says: "Sidebar background: #2D3748"
+Your code: 'className="bg-[#2D3748]"'
+
+**RULE 2: USE EXACT PX VALUES FROM PLAN**
+
+Plan says: "Sidebar width: 280px"
+Your code: 'className="w-[280px]"'
+
+Plan says: "Button height: 40px"
+Your code: 'className="h-[40px]"'
+
+**RULE 3: USE EXACT BORDER-RADIUS FROM PLAN**
+
+Plan says: "Border-radius: 8px"
+Your code: 'className="rounded-[8px]"'
+
+**RULE 4: DATA FROM MCP API (ALWAYS)**
+
+- Menu items: ALWAYS from 'response.data.data.menus'
+- Table data: ALWAYS from API endpoints
+- NEVER hardcode menu items or table rows
+
+**RULE 5: COMPONENT STRUCTURE FROM PLAN**
+
+Plan describes:
+- Which pages exist (Dashboard, Table List, Detail)
+- Which components needed (Sidebar, Header, Table)
+- Routing structure
+
+Implement EXACTLY as described.
+
+====================================
+EXAMPLE OF CORRECT IMPLEMENTATION
+====================================
+
+**PLAN SAYS:**
+'''
+Sidebar:
+- Width: 280px
+- Background: #2D3748
+- Menu items height: 44px
+- Menu items padding: 12px 16px
+- Border-radius: 8px
+- Text color: #FFFFFF
+'''
+
+**YOUR CODE:**
+'''jsx
+<div
+id="main-sidebar"
+data-element-name="sidebar_container"
+className="w-[280px] bg-[#2D3748] h-screen"
+>
+{menus.map(item => (
+<button
+key={item.id}
+data-element-name="menu_item"
+className="
+h-[44px]
+px-[16px] py-[12px]
+rounded-[8px]
+text-[#FFFFFF]
+hover:bg-white/10
+"
+onClick={() => navigate(\'/tables/\${item.data.table.slug}\')}
+>
+<img src={item.icon} className="w-4 h-4" />
+<span>{item.label}</span>
+</button>
+))}
+</div>
+'''
+
+**NOTICE:**
+- ✅ Width: 'w-[280px]' - EXACT from plan
+- ✅ Background: 'bg-[#2D3748]' - EXACT from plan
+- ✅ Height: 'h-[44px]' - EXACT from plan
+- ✅ Padding: px-[16px] py-[12px]' - EXACT from plan
+- ✅ Radius: 'rounded-[8px]' - EXACT from plan
+- ✅ Text: 'text-[#FFFFFF]' - EXACT from plan
+- ✅ Data: '{menus.map(...)}' - DYNAMIC from API
+
+====================================
+WRONG EXAMPLES (DO NOT DO THIS)
+====================================
+
+**❌ EXAMPLE 1: Using generic Tailwind classes**
+'''jsx
+<div className="w-72 bg-gray-800">  // WRONG - not exact values
+'''
+
+**✅ CORRECT:**
+'''jsx
+<div className="w-[280px] bg-[#2D3748]">  // EXACT values from plan
+'''
+
+---
+
+**❌ EXAMPLE 2: Ignoring plan values**
+'''jsx
+// Plan says: "Button height 40px"
+<button className="h-10">  // h-10 = 40px, but plan specified px value
+'''
+
+**✅ CORRECT:**
+'''jsx
+<button className="h-[40px]">  // EXACT as plan specified
+'''
+
+---
+
+**❌ EXAMPLE 3: Hardcoding menu items**
+'''jsx
+<div>
+<button>Dashboard</button>
+<button>Users</button>
+<button>Orders</button>
+</div>
+'''
+
+**✅ CORRECT:**
+'''jsx
+<div>
+{menus.map(item => (
+<button key={item.id}>{item.label}</button>
+))}
+</div>
+'''
+
+====================================
+ORIGINAL USER REQUEST (CONTEXT)
+====================================
+
+User originally asked:
 %s
+
+This is context. The PLAN above is the authoritative specification.
 
 ====================================
 PROJECT CONFIGURATION
 ====================================
 
-Runtime Configuration:
 - Project ID: "%s"
 - Main Menu Parent ID: "%s"
 - X-API-KEY: "%s"
 - Base URL: "%s"
 
 ====================================
+API INTEGRATION (MANDATORY)
+====================================
+
+**MENU DATA:**
+GET %s/v3/menus?parent_id=%s&project-id=%s
+Headers: { Authorization: "API-KEY", "X-API-KEY": "%s" }
+
+**TABLE SCHEMA:**
+POST %s/v1/table-details/:collection
+Body: { "data": {} }
+
+**TABLE DATA:**
+GET %s/v2/items/:collection
+Query: limit, offset, search, sort_by, sort_order
+
+====================================
 TECHNICAL REQUIREMENTS
 ====================================
 
-1) Generate a complete production-ready frontend-only admin project (React 18 + Vite + TailwindCSS v2.2.19) as a single JSON object with fields:
-   { "project_name": "<string>", "files": [ { "path": "<path>", "content": "<file contents>" }, ... ], "file_graph": {...}, "env": {...} }
-   - File contents must be plain raw file text (use real newlines in JSON string values).
-   - No markdown, no extra text outside that single JSON root.
+**STACK:**
+- React 18
+- Vite
+- React Router DOM v6
+- Tailwind CSS v2.2.19
+- Axios
 
-2) UI Design Priority:
-   - PRIMARY: Follow the FRONTEND PLAN from above section
-   - Execute plan specifications EXACTLY (components, pages, design system, routes)
-   - CRITICAL: If plan mentions specific UI system reference, match that UI exactly
+**PACKAGE.JSON:**
+- Scan ALL imports in your generated code
+- Add ALL used libraries to dependencies
+- NO "type": "module" field
+- Use 2022-2023 era versions
 
-3) Implement client-side routing using react-router-dom:
-   - Include BrowserRouter and a Routes config with routes from the plan
-   - Sidebar menu item clicks must navigate using useNavigate to paths from plan
-   - Top header must display selected menu label via router state or URL params
+**FILE STRUCTURE:**
+- src/components/ (Sidebar.jsx, Table.jsx, etc.)
+- src/pages/ (DashboardHome.jsx, DynamicTablePage.jsx)
+- src/layouts/ (DashboardLayout.jsx)
+- src/api/ (axios.js)
 
-4) Implement runtime fetching of menus and table details using exact axios calls:
-   - GET %s/v3/menus?parent_id=%s&project-id=%s
-     Headers: { Authorization: "API-KEY", "X-API-KEY": "%s" }
-   - POST %s/v1/table-details/:collection
-     Body: { "data": {} }
-     Headers: same as above
-   - GET %s/v2/items/:collection
-     Query params: limit, offset, search, sort_by, sort_order
-     Headers: same as above
-
-5) Follow the plan's table layout rules, component structure, and design system specifications
-
-6) Generate package.json:
-   - SCAN all your generated JSX files for imports
-   - If you use a library (e.g., 'recharts', 'framer-motion'), you MUST add it to the "dependencies" list
-   - DO NOT include "type": "module" in package.json
-   - Use compatible versions from 2022-2023 era for React 18.0.0
-
-7) Include all required components as specified in the plan
-
-8) Include README_HOW_TO_RUN.txt explaining setup
-
-9) Return EXACTLY one JSON object with: project_name, files, file_graph (5 fields per file), env
+**DATA ATTRIBUTES (MANDATORY):**
+- Root element: 'id="kebab-case"'
+- ALL elements: 'data-element-name="snake_case"'
 
 ====================================
-VALIDATION BEFORE GENERATING
+PRE-GENERATION FINAL CHECK
 ====================================
 
-Before generating, ask yourself:
-- Did I check every JSX file for external imports?
-- Are all those imports listed in package.json?
-- Is "type": "module" REMOVED from package.json?
-- Does my generated UI match the plan's specifications?
-- Are the components, pages, and routes from the plan included?
-- Is there ANY white text on a white background? (FIX IT: Use rgb(55, 53, 47))
-- Are the icons visible? (FIX IT: Add brightness(0) filter if icons are white)
-- Did I use Tailwind "text-white" on a white sidebar? (FIX IT: Remove it)
+**BEFORE YOU WRITE ANY CODE, VERIFY:**
+
+✅ I read the ENTIRE plan
+✅ I extracted ALL colors (hex codes)
+✅ I extracted ALL sizes (px values)
+✅ I extracted ALL border-radius values
+✅ I extracted ALL spacing values
+✅ I will use EXACT values from plan, not generics
+✅ I will fetch data from API, not hardcode
+✅ I will ignore default rules if plan specifies different
 
 ====================================
-STRICT OUTPUT FORMAT
+OUTPUT FORMAT
 ====================================
-You are acting as a REST API. Return ONLY the JSON object.
-Do NOT use markdown code blocks. 
-Do NOT include any commentary. 
 
-Your response MUST start with '{' and end with '}'.
+Return ONLY valid JSON object:
 
-Project JSON Structure:
 {
   "project_name": "...",
-  "files": [...],
+  "files": [
+    {"path": "...", "content": "..."}
+  ],
   "env": {...},
   "file_graph": {...}
 }
+
+NO markdown code blocks.
+NO commentary.
+Start with '{' and end with '}'.
+
+====================================
+FINAL REMINDER
+====================================
+
+**THE PLAN CONTAINS EXACT VALUES.**
+**USE THEM EXACTLY.**
+**DO NOT IMPROVISE.**
+**DO NOT USE GENERIC VALUES.**
+
+Plan says #2D3748 → You write bg-[#2D3748]
+Plan says 280px → You write w-[280px]
+Plan says 8px radius → You write rounded-[8px]
+
+**EXACT. EXACT. EXACT.**
+
+====================================
 
 GENERATE THE JSON NOW:
 `,
