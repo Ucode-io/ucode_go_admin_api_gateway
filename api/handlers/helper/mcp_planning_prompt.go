@@ -490,132 +490,191 @@ YOU ARE ABOUT TO RECEIVE:
 2. POSSIBLY IMAGES (in the user message) - VISUAL REFERENCE
 
 ====================================
-🔥 5 CRITICAL RULES YOU MUST FOLLOW 🔥
+🔥 8 CRITICAL RULES YOU MUST FOLLOW 🔥
 ====================================
 
-**RULE 1: CONTRAST IS SACRED**
+**RULE 1: CONTRAST FOR TEXT**
 
-🚨 NEVER EVER use same color for text and background! 🚨
+🚨 NEVER use same color for text and background! 🚨
 
-✅ Dark background (#191919, #1a1a1a, #2D2D2D) → MUST use light text (#FFFFFF, #E5E5E5, #F5F5F5)
-✅ Light background (#FFFFFF, #F7F7F5) → MUST use dark text (#1a1a1a, #37352F, #2D2D2D)
-
-❌ FORBIDDEN:
-- bg-[#191919] text-[#191919]  ← КАТАСТРОФА!
-- bg-[#1a1a1a] text-[#2d2d2d]  ← СЛИШКОМ ПОХОЖИЕ!
-
-✅ CORRECT:
-- bg-[#191919] text-[#E5E5E5]  ← ВИДНО!
-- bg-[#2D2D2D] text-white  ← ОТЛИЧНО!
-
-**BEFORE WRITING ANY COMPONENT, ASK:**
-□ Can I READ the text on this background?
-□ Is contrast high enough?
-□ Did I use different colors for text vs background?
+✅ Dark bg (#191919, #1a1a1a, #2D2D2D) → MUST use light text (#FFFFFF, #E5E5E5)
+✅ Light bg (#FFFFFF, #F7F7F5) → MUST use dark text (#1a1a1a, #37352F)
 
 ---
 
-**RULE 2: EXTRACT EXACT COLORS FROM IMAGE**
+**RULE 2: ICONS MUST BE VISIBLE (NEW!)**
 
-If images provided, extract EXACT hex colors, don't guess!
+🚨 Icons MUST be visible on their background! 🚨
 
-Look for:
-- Main background (e.g., #191919)
-- Sidebar background (e.g., #1F1F1F)
-- Card backgrounds (e.g., #2D2D2D)
-- Text colors (e.g., #FFFFFF, #A0A0A0)
-- Border colors (e.g., #3F3F3F)
-- Accent colors (e.g., #3B82F6)
+Icons are rendered as: <img src={item.icon} />
 
-✅ Write EXACT hex codes:
-- Image shows dark gray → bg-[#2D2D2D] (not bg-gray-800)
-- Image shows blue button → bg-[#3B82F6] (not bg-blue-500)
+**PROBLEM:** Icon images can be white, transparent, or dark - they MUST be visible!
 
-❌ Don't use generic Tailwind colors if image shows specific hex!
+**SOLUTIONS:**
 
----
+On DARK backgrounds (#191919, #1F1F1F, #2D2D2D):
+'''jsx
+	// Make dark icons → white
+	<img src={item.icon} className="w-4 h-4 brightness-0 invert" />
 
-**RULE 3: USE ALL UNIQUE COLORS (DON'T SIMPLIFY TO ONE)**
+		// OR for colored icons
+	<img src={item.icon} className="w-4 h-4 opacity-90" />
+		'''
 
-Extract EVERY distinct color from image:
+On LIGHT backgrounds (#FFFFFF, #F7F7F5):
+'''jsx
+	// Make light icons → dark
+	<img src={item.icon} className="w-4 h-4 brightness-0" />
+		'''
 
-Main bg: #191919 (darkest)
-Sidebar: #1F1F1F (lighter)
-Cards: #2D2D2D (even lighter)
-Inputs: #252525
-Buttons: #353535
-Borders: #3F3F3F
-Text primary: #FFFFFF
-Text secondary: #A0A0A0
+**DEFAULT RULES:**
+- Dark sidebar → 'className="w-4 h-4 brightness-0 invert opacity-80"'
+- Light sidebar → 'className="w-4 h-4 brightness-0 opacity-70"'
 
-❌ WRONG - all same color:
-<div className="bg-[#1a1a1a]">
-  <div className="bg-[#1a1a1a]">
-    <button className="bg-[#1a1a1a]">
-
-✅ CORRECT - unique colors:
-<div className="bg-[#191919]">
-  <div className="bg-[#1F1F1F]">
-    <button className="bg-[#2D2D2D]">
+✅ ALWAYS check: Can I SEE the icon on this background?
 
 ---
 
-**RULE 4: PROFESSIONAL UI = SHADOWS + HOVER + TRANSITIONS**
+**RULE 3: TABLE CELLS MAX 300PX (NEW!)**
+
+🚨 Table cells MUST have max-width 300px with ellipsis! 🚨
+
+'''jsx
+	<td className="
+	px-4 py-3
+	min-w-[220px]
+max-w-[300px]      ← MAXIMUM!
+overflow-hidden
+text-ellipsis
+whitespace-nowrap
+border-b border-[#3F3F3F]
+">
+{cellValue}
+</td>
+'''
+
+**EVERY table cell MUST have:**
+- min-w-[220px] - minimum width
+- max-w-[300px] - MAXIMUM width
+- overflow-hidden - hide overflow
+- text-ellipsis - show "..."
+- whitespace-nowrap - no wrap
+
+Long text example:
+'''
+Input: "This is a very long text that exceeds 300 pixels..."
+Output: "This is a very long text that exc..."
+'''
+
+---
+
+**RULE 4: PIXEL-PERFECT UI FROM IMAGE (NEW!)**
+
+🚨 When image provided → UI MUST be EXACT PIXEL-PERFECT COPY! 🚨
+
+**WHAT TO COPY FROM IMAGE (Visual Details):**
+
+□ **Table Styling:**
+  - Border thickness (1px, 2px - EXACT!)
+  - Border colors (exact hex)
+  - Cell padding (exact px: px-4 py-3 vs px-6 py-4)
+  - Row height (exact px)
+  - Header height (exact px)
+  - Background colors (header, rows, hover)
+
+□ **Typography:**
+  - Font size (EXACT: 14px, 16px, 18px)
+  - Font weight (EXACT: 400, 500, 600, 700)
+  - Line height (EXACT: 1.2, 1.5, etc.)
+
+□ **Spacing:**
+  - Cell padding (EXACT px values)
+  - Row gaps (EXACT)
+  - Column gaps (EXACT)
+  - Margins (EXACT)
+
+□ **Borders:**
+  - Thickness (1px vs 2px)
+  - Color (exact hex)
+  - Radius (exact px: 8px, 12px)
+
+□ **Icons:**
+  - Size (EXACT: 16px, 20px, 24px)
+  - Position (in cells, headers)
+  - Spacing from text
+
+**MEASUREMENT PROCESS:**
+
+From image extract:
+1. Header bg color → #252525
+2. Row bg color → #2D2D2D
+3. Border color → #3F3F3F, 1px
+4. Cell padding → 16px horizontal, 12px vertical
+5. Row height → 48px
+6. Font size → 14px
+7. Font weight → 400
+
+Then write EXACT code:
+'''jsx
+<tr className="bg-[#252525]" style={{ height: '48px' }}>
+<th className="px-4 py-3 text-sm font-normal border-b border-[#3F3F3F]">
+Label
+</th>
+</tr>
+'''
+
+**WHAT NOT TO TOUCH (Logic):**
+❌ API calls (axios requests)
+❌ Dynamic data (response.data.data.menus)
+❌ Routing (navigate, useParams)
+❌ State management (useState, useEffect)
+
+**Copy VISUAL, Keep LOGIC!**
+
+---
+
+**RULE 5: EXTRACT EXACT COLORS**
+
+Extract EXACT hex colors from image/plan, don't guess!
+
+✅ Image shows #2D2D2D → bg-[#2D2D2D]
+❌ Image shows dark gray → bg-gray-800 (WRONG!)
+
+---
+
+**RULE 6: USE ALL UNIQUE COLORS**
+
+Each component = different color!
+
+Main: #191919, Sidebar: #1F1F1F, Cards: #2D2D2D, Buttons: #353535 - ALL DIFFERENT!
+
+---
+
+**RULE 7: PROFESSIONAL UI**
 
 Every component MUST have:
-
-✅ Shadows: shadow-lg, shadow-xl
-✅ Rounded corners: rounded-lg, rounded-xl
-✅ Borders: border border-[#3F3F3F]
-✅ Hover effects: hover:bg-[#353535]
-✅ Transitions: transition-all duration-200
-✅ Focus states: focus:ring-2
-
-❌ AMATEUR:
-<div className="bg-gray-800 p-4">
-  <button className="bg-blue-500 p-2">
-
-✅ PROFESSIONAL:
-<div className="bg-[#2D2D2D] border border-[#3F3F3F] rounded-lg shadow-xl p-6 hover:border-[#4F4F4F] transition-all">
-  <button className="bg-[#3B82F6] px-4 py-2 rounded-md hover:bg-[#2563EB] transition-colors duration-200 shadow-md">
+- Shadows: shadow-lg, shadow-xl
+- Hover: hover:bg-[...]
+- Transitions: transition-all duration-200
+- Borders: border border-[...]
+- Rounded: rounded-lg
 
 ---
 
-**RULE 5: EMPTY TABLES MUST SHOW FIELDS**
+**RULE 8: EMPTY TABLES SHOW FIELDS**
 
-ALWAYS show table header with fields, EVEN if rows.length === 0!
+Table header ALWAYS visible, even if rows.length === 0!
 
-❌ WRONG:
-{rows.length > 0 ? (
-  <table>
-    <thead>...</thead>
-    <tbody>{rows.map(...)}</tbody>
-  </table>
-) : (
-  <div>No data available</div>  ← НЕТ ПОЛЕЙ!
-)}
-
-✅ CORRECT:
+'''jsx
 <table>
-  <thead>
-    <tr>
-      {fields.map(field => (
-        <th key={field.slug}>{field.label}</th>  ← ВСЕГДА!
-      ))}
-    </tr>
-  </thead>
-  <tbody>
-    {rows.length > 0 ? (
-      rows.map(row => <tr>...</tr>)
-    ) : (
-      <tr>
-        <td colSpan={fields.length}>
-          <EmptyState />  ← Empty ВНУТРИ таблицы
-        </td>
-      </tr>
-    )}
-  </tbody>
+<thead>
+{fields.map(f => <th>{f.label}</th>)}  ← ALWAYS!
+</thead>
+<tbody>
+{rows.length > 0 ? rows.map(...) : <EmptyState />}
+</tbody>
 </table>
+'''
 
 ====================================
 THE FRONTEND PLAN (YOUR BLUEPRINT)
@@ -632,143 +691,162 @@ END OF PLAN
 **NOW YOU MUST:**
 
 1. Read the ENTIRE plan above
-2. Note EVERY color (hex codes like #2D3748)
-3. Note EVERY size (px values like 280px, 40px, 24px)
-4. Note EVERY border-radius, shadow, spacing
-5. Generate code using THOSE EXACT VALUES
+2. Note EVERY color (hex codes)
+3. Note EVERY size (px values)
+4. Note EVERY border, shadow, spacing
+5. Generate code using EXACT VALUES
 
 ====================================
-CODE GENERATION RULES
+CODE GENERATION CHECKLIST
 ====================================
 
-**RULE 1: USE EXACT HEX COLORS FROM PLAN**
+Before writing ANY code, verify:
 
-Plan says: "Sidebar background: #2D3748"
-Your code: className="bg-[#2D3748]"
-
-**RULE 2: USE EXACT PX VALUES FROM PLAN**
-
-Plan says: "Sidebar width: 280px"
-Your code: className="w-[280px]"
-
-**RULE 3: USE EXACT BORDER-RADIUS FROM PLAN**
-
-Plan says: "Border-radius: 8px"
-Your code: className="rounded-[8px]"
-
-**RULE 4: ENSURE PROPER CONTRAST**
-
-Plan says: "Background #191919, Text white"
-Your code: className="bg-[#191919] text-white"
-
-**RULE 5: ADD PROFESSIONAL STYLING**
-
-Even if plan doesn't specify, ADD:
-- Shadows: shadow-lg
-- Hover: hover:bg-[color]
-- Transitions: transition-all duration-200
-- Borders: border border-[color]
-
-**RULE 6: DATA FROM MCP API (ALWAYS)**
-
-- Menu items: ALWAYS from response.data.data.menus
-- Table data: ALWAYS from API endpoints
-- NEVER hardcode menu items or table rows
-
-**RULE 7: TABLE FIELDS ALWAYS VISIBLE**
-
-Even when rows.length === 0:
-- Show table header
-- Show all field labels
-- Empty state INSIDE table (colSpan)
-
-====================================
-EXAMPLE OF CORRECT IMPLEMENTATION
-====================================
-
-**PLAN SAYS:**
-Sidebar:
-- Width: 280px
-- Background: #2D3748
-- Menu items height: 44px
-- Border-radius: 8px
-- Text color: #FFFFFF
-
-**YOUR CODE:**
-<div
-  id="main-sidebar"
-  data-element-name="sidebar_container"
-  className="
-    w-[280px] 
-    bg-[#2D3748] 
-    h-screen
-    border-r border-[#3F4F5F]
-    shadow-xl
-  "
->
-  {menus.map(item => (
-    <button
-      key={item.id}
-      data-element-name="menu_item"
-      className="
-        h-[44px]
-        px-4 py-2
-        rounded-[8px]
-        text-[#FFFFFF]
-        hover:bg-[#374151]
-        transition-all duration-200
-      "
-      onClick={() => navigate('/tables/\${item.data.table.slug}')}
-    >
-      <img src={item.icon} className="w-4 h-4" />
-      <span>{item.label}</span>
-    </button>
-  ))}
-</div>
-
-**NOTICE:**
-✅ Width: w-[280px] - EXACT from plan
-✅ Background: bg-[#2D3748] - EXACT from plan
-✅ Text: text-[#FFFFFF] - PROPER CONTRAST
-✅ Height: h-[44px] - EXACT from plan
-✅ Radius: rounded-[8px] - EXACT from plan
-✅ Shadow: shadow-xl - PROFESSIONAL
-✅ Hover: hover:bg-[#374151] - PROFESSIONAL
-✅ Transition: transition-all - PROFESSIONAL
-✅ Data: {menus.map(...)} - FROM API
-
-====================================
-VALIDATION BEFORE SUBMISSION
-====================================
-
-Before you finish, verify:
-
-✅ **CONTRAST CHECK:**
-□ Every text is readable on its background?
+✅ **TEXT CONTRAST:**
+□ Dark bg → light text?
+□ Light bg → dark text?
 □ No text-[#191919] on bg-[#191919]?
-□ Dark backgrounds have light text?
-□ Light backgrounds have dark text?
 
-✅ **COLOR EXTRACTION:**
-□ I extracted ALL unique colors from image/plan?
-□ I used EXACT hex codes (not generic Tailwind)?
-□ Each component has different color?
+✅ **ICON VISIBILITY:**
+□ Dark bg → icons have brightness-0 invert?
+□ Light bg → icons have brightness-0?
+□ Can I SEE every icon?
+
+✅ **TABLE CELLS:**
+□ Every <td> has max-w-[300px]?
+□ Every <td> has overflow-hidden?
+□ Every <td> has text-ellipsis?
+□ Every <td> has whitespace-nowrap?
+
+✅ **PIXEL-PERFECT:**
+□ Measured EXACT border thickness from image?
+□ Measured EXACT padding from image?
+□ Measured EXACT font size from image?
+□ Measured EXACT row height from image?
+□ Border colors EXACT hex from image?
+
+✅ **COLORS:**
+□ Extracted ALL unique colors?
+□ Used EXACT hex codes?
+□ Each component different color?
 
 ✅ **PROFESSIONAL UI:**
-□ Every card has shadow?
-□ Every button has hover effect?
-□ Every interactive element has transition?
-□ Proper border-radius on all components?
+□ Shadows on cards?
+□ Hover effects on buttons?
+□ Transitions everywhere?
+□ Borders where needed?
 
-✅ **TABLE FIELDS:**
-□ Table header shows even when empty?
-□ All field labels visible?
-□ Empty state inside <td colSpan>?
+✅ **EMPTY TABLES:**
+□ <thead> always visible?
+□ Fields shown even if no rows?
 
 ✅ **API DATA:**
 □ Menu from response.data.data.menus?
-□ Table fields from response.data.data.data.fields?
-□ Table rows from response.data.data.data.response?
+□ Table fields from API?
+□ Table rows from API?
+
+====================================
+IMPLEMENTATION EXAMPLE (PIXEL-PERFECT)
+====================================
+
+**IMAGE ANALYSIS:**
+- Header bg: #252525
+- Row bg: #2D2D2D
+- Hover: #353535
+- Text: #FFFFFF
+- Border: #3F3F3F, 1px
+- Padding: px-4 py-3 (16px, 12px)
+- Row height: 48px
+- Font size: 14px (text-sm)
+- Font weight: 400 (font-normal)
+- Icon size: 16px (w-4 h-4)
+
+**GENERATED CODE:**
+'''jsx
+<div className="rounded-lg overflow-hidden border border-[#3F3F3F]">
+<table className="w-full">
+<thead>
+<tr className="bg-[#252525]" style={{ height: '48px' }}>
+{fields.map(field => (
+<th
+key={field.slug}
+className="
+px-4 py-3               ← EXACT from image
+text-left
+text-sm                 ← EXACT font-size
+font-normal             ← EXACT weight
+text-[#FFFFFF]          ← EXACT color
+border-b border-[#3F3F3F]  ← EXACT border
+min-w-[220px]
+max-w-[300px]           ← MAX WIDTH!
+"
+>
+<div className="flex items-center gap-2">
+<img
+src={field.icon}
+className="w-4 h-4 brightness-0 invert opacity-80"  ← VISIBLE!
+alt=""
+/>
+<span className="overflow-hidden text-ellipsis whitespace-nowrap">
+{field.label}
+</span>
+</div>
+</th>
+))}
+</tr>
+</thead>
+<tbody>
+{rows.length > 0 ? (
+rows.map(row => (
+<tr
+key={row.id}
+className="bg-[#2D2D2D] hover:bg-[#353535] transition-colors"
+style={{ height: '48px' }}
+>
+{fields.map(field => (
+<td
+key={field.slug}
+className="
+px-4 py-3             ← EXACT padding
+text-sm               ← EXACT size
+font-normal           ← EXACT weight
+text-[#FFFFFF]        ← EXACT color
+border-b border-[#3F3F3F]  ← EXACT border
+min-w-[220px]
+max-w-[300px]         ← MAX WIDTH!
+overflow-hidden       ← ELLIPSIS!
+text-ellipsis         ← ELLIPSIS!
+whitespace-nowrap     ← ELLIPSIS!
+"
+>
+{row[field.slug]}
+</td>
+))}
+</tr>
+))
+) : (
+<tr>
+<td colSpan={fields.length} className="py-16 text-center">
+<EmptyState />
+</td>
+</tr>
+)}
+</tbody>
+</table>
+</div>
+'''
+
+**NOTICE EVERY DETAIL:**
+✅ Header bg: bg-[#252525] - EXACT
+✅ Row bg: bg-[#2D2D2D] - EXACT
+✅ Hover: hover:bg-[#353535] - EXACT
+✅ Border: border-[#3F3F3F] - EXACT
+✅ Padding: px-4 py-3 - EXACT (16px, 12px)
+✅ Height: style={{ height: '48px' }} - EXACT
+✅ Font: text-sm font-normal - EXACT
+✅ Icon: w-4 h-4 brightness-0 invert - VISIBLE!
+✅ Max width: max-w-[300px] - ENFORCED!
+✅ Ellipsis: overflow-hidden text-ellipsis whitespace-nowrap - WORKING!
 
 ====================================
 ORIGINAL USER REQUEST (CONTEXT)
@@ -808,10 +886,13 @@ PRE-GENERATION FINAL CHECK
 
 **BEFORE YOU WRITE ANY CODE, VERIFY:**
 
-✅ I will use EXACT colors from plan (not generic)
-✅ I will ensure proper contrast (dark bg → light text)
-✅ I will use ALL unique colors (not simplify to one)
-✅ I will add shadows/hover/transitions (professional UI)
+✅ I will ensure text readable (dark bg → light text)
+✅ I will make icons visible (brightness-0 invert on dark)
+✅ I will limit table cells to 300px with ellipsis
+✅ I will copy EXACT measurements from image (if provided)
+✅ I will use EXACT colors from plan
+✅ I will use ALL unique colors (not simplify)
+✅ I will add shadows/hover/transitions
 ✅ I will show table fields even when empty
 ✅ I will fetch data from API (not hardcode)
 
@@ -835,14 +916,17 @@ NO commentary.
 Start with '{' and end with '}'.
 
 ====================================
-FINAL REMINDER - 5 CRITICAL RULES
+FINAL REMINDER - 8 CRITICAL RULES
 ====================================
 
-1. ✅ **CONTRAST:** text-[#E5E5E5] on bg-[#191919] (NEVER same color!)
-2. ✅ **EXACT COLORS:** bg-[#2D3748] from plan (not bg-gray-800)
-3. ✅ **UNIQUE COLORS:** bg-[#191919], bg-[#1F1F1F], bg-[#2D2D2D] (different!)
-4. ✅ **PROFESSIONAL:** shadow-xl + hover: + transition- (always!)
-5. ✅ **TABLE FIELDS:** <thead> visible even if rows.length === 0 (always!)
+1. ✅ **TEXT CONTRAST:** text-[#E5E5E5] on bg-[#191919]
+2. ✅ **ICON VISIBILITY:** brightness-0 invert on dark backgrounds
+3. ✅ **TABLE MAX WIDTH:** max-w-[300px] + ellipsis
+4. ✅ **PIXEL-PERFECT:** Exact borders, padding, fonts from image
+5. ✅ **EXACT COLORS:** bg-[#2D3748] from plan (not bg-gray-800)
+6. ✅ **UNIQUE COLORS:** All different shades
+7. ✅ **PROFESSIONAL:** shadow + hover + transitions
+8. ✅ **TABLE FIELDS:** <thead> visible always
 
 ====================================
 
