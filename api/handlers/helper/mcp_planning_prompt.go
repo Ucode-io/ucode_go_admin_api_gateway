@@ -489,65 +489,133 @@ YOU ARE ABOUT TO RECEIVE:
 1. A DETAILED FRONTEND PLAN (below) - THIS IS YOUR BIBLE
 2. POSSIBLY IMAGES (in the user message) - VISUAL REFERENCE
 
-**READ THIS CAREFULLY - YOUR ENTIRE TASK DEPENDS ON THIS:**
-
 ====================================
-PRIORITY #1: FRONTEND PLAN IS THE LAW
+🔥 5 CRITICAL RULES YOU MUST FOLLOW 🔥
 ====================================
 
-The PLAN below contains EXACT specifications extracted by a planning AI:
-- EXACT hex colors (like #2D3748, #3B82F6)
-- EXACT sizes (like 280px sidebar, 40px buttons)
-- EXACT border-radius (like 8px, 12px)
-- EXACT spacing (like 24px padding, 12px gaps)
+**RULE 1: CONTRAST IS SACRED**
 
-**YOU MUST USE THESE EXACT VALUES. NOT "similar". NOT "close to". EXACT.**
+🚨 NEVER EVER use same color for text and background! 🚨
 
-Example from plan:
-'''
-	Sidebar background: #2D3748
-	Button border-radius: 8px
-	Card padding: 24px
-	'''
+✅ Dark background (#191919, #1a1a1a, #2D2D2D) → MUST use light text (#FFFFFF, #E5E5E5, #F5F5F5)
+✅ Light background (#FFFFFF, #F7F7F5) → MUST use dark text (#1a1a1a, #37352F, #2D2D2D)
 
-**YOU WRITE IN CODE:**
-'''jsx
-	<div className="bg-[#2D3748]">  // EXACT color from plan
-	<button className="rounded-[8px]">  // EXACT radius from plan
-	<div className="p-[24px]">  // EXACT padding from plan
-		'''
+❌ FORBIDDEN:
+- bg-[#191919] text-[#191919]  ← КАТАСТРОФА!
+- bg-[#1a1a1a] text-[#2d2d2d]  ← СЛИШКОМ ПОХОЖИЕ!
 
-**❌ WRONG - DO NOT DO THIS:**
-'''jsx
-	<div className="bg-gray-800">  // Generic Tailwind color - WRONG
-	<button className="rounded-lg">  // Generic rounding - WRONG
-	<div className="p-6">  // Generic padding - WRONG
-		'''
+✅ CORRECT:
+- bg-[#191919] text-[#E5E5E5]  ← ВИДНО!
+- bg-[#2D2D2D] text-white  ← ОТЛИЧНО!
 
-====================================
-PRIORITY #2: IMAGES (IF PROVIDED)
-====================================
+**BEFORE WRITING ANY COMPONENT, ASK:**
+□ Can I READ the text on this background?
+□ Is contrast high enough?
+□ Did I use different colors for text vs background?
 
-If user provided images:
-- Images were already analyzed by the planning AI
-- The extracted colors/styles are IN THE PLAN
-- You don't need to re-extract
-- Just use the values from the plan
+---
 
-**Images = visual confirmation of what's in the plan**
+**RULE 2: EXTRACT EXACT COLORS FROM IMAGE**
 
-====================================
-PRIORITY #3: IGNORE DEFAULT RULES
-====================================
+If images provided, extract EXACT hex colors, don't guess!
 
-Your system prompt contains default Notion-style rules (gray colors, etc.).
+Look for:
+- Main background (e.g., #191919)
+- Sidebar background (e.g., #1F1F1F)
+- Card backgrounds (e.g., #2D2D2D)
+- Text colors (e.g., #FFFFFF, #A0A0A0)
+- Border colors (e.g., #3F3F3F)
+- Accent colors (e.g., #3B82F6)
 
-**IGNORE ALL DEFAULTS IF PLAN SPECIFIES DIFFERENT VALUES.**
+✅ Write EXACT hex codes:
+- Image shows dark gray → bg-[#2D2D2D] (not bg-gray-800)
+- Image shows blue button → bg-[#3B82F6] (not bg-blue-500)
 
-Example:
-- Default says: Sidebar 'bg-[#F7F7F5]'
-- Plan says: Sidebar '#2D3748'
-- **YOU USE:** '#2D3748' (from plan, ignore default)
+❌ Don't use generic Tailwind colors if image shows specific hex!
+
+---
+
+**RULE 3: USE ALL UNIQUE COLORS (DON'T SIMPLIFY TO ONE)**
+
+Extract EVERY distinct color from image:
+
+Main bg: #191919 (darkest)
+Sidebar: #1F1F1F (lighter)
+Cards: #2D2D2D (even lighter)
+Inputs: #252525
+Buttons: #353535
+Borders: #3F3F3F
+Text primary: #FFFFFF
+Text secondary: #A0A0A0
+
+❌ WRONG - all same color:
+<div className="bg-[#1a1a1a]">
+  <div className="bg-[#1a1a1a]">
+    <button className="bg-[#1a1a1a]">
+
+✅ CORRECT - unique colors:
+<div className="bg-[#191919]">
+  <div className="bg-[#1F1F1F]">
+    <button className="bg-[#2D2D2D]">
+
+---
+
+**RULE 4: PROFESSIONAL UI = SHADOWS + HOVER + TRANSITIONS**
+
+Every component MUST have:
+
+✅ Shadows: shadow-lg, shadow-xl
+✅ Rounded corners: rounded-lg, rounded-xl
+✅ Borders: border border-[#3F3F3F]
+✅ Hover effects: hover:bg-[#353535]
+✅ Transitions: transition-all duration-200
+✅ Focus states: focus:ring-2
+
+❌ AMATEUR:
+<div className="bg-gray-800 p-4">
+  <button className="bg-blue-500 p-2">
+
+✅ PROFESSIONAL:
+<div className="bg-[#2D2D2D] border border-[#3F3F3F] rounded-lg shadow-xl p-6 hover:border-[#4F4F4F] transition-all">
+  <button className="bg-[#3B82F6] px-4 py-2 rounded-md hover:bg-[#2563EB] transition-colors duration-200 shadow-md">
+
+---
+
+**RULE 5: EMPTY TABLES MUST SHOW FIELDS**
+
+ALWAYS show table header with fields, EVEN if rows.length === 0!
+
+❌ WRONG:
+{rows.length > 0 ? (
+  <table>
+    <thead>...</thead>
+    <tbody>{rows.map(...)}</tbody>
+  </table>
+) : (
+  <div>No data available</div>  ← НЕТ ПОЛЕЙ!
+)}
+
+✅ CORRECT:
+<table>
+  <thead>
+    <tr>
+      {fields.map(field => (
+        <th key={field.slug}>{field.label}</th>  ← ВСЕГДА!
+      ))}
+    </tr>
+  </thead>
+  <tbody>
+    {rows.length > 0 ? (
+      rows.map(row => <tr>...</tr>)
+    ) : (
+      <tr>
+        <td colSpan={fields.length}>
+          <EmptyState />  ← Empty ВНУТРИ таблицы
+        </td>
+      </tr>
+    )}
+  </tbody>
+</table>
 
 ====================================
 THE FRONTEND PLAN (YOUR BLUEPRINT)
@@ -570,168 +638,137 @@ END OF PLAN
 5. Generate code using THOSE EXACT VALUES
 
 ====================================
-IMPLEMENTATION CHECKLIST
-====================================
-
-Before writing ANY code, go through the plan and extract:
-
-**COLORS:**
-- [ ] Background colors (main, sidebar, cards, modal)
-- [ ] Text colors (primary, secondary, muted)
-- [ ] Border colors
-- [ ] Button colors (primary, secondary, hover states)
-- [ ] Accent colors (success, warning, error)
-
-**SIZES:**
-- [ ] Sidebar width (expanded and collapsed)
-- [ ] Header height
-- [ ] Button heights
-- [ ] Input heights
-- [ ] Card padding
-- [ ] Content area padding
-
-**STYLING:**
-- [ ] Border-radius for all components
-- [ ] Shadows for all components
-- [ ] Spacing between elements
-- [ ] Typography (font sizes, weights)
-
-**THEN WRITE CODE USING THESE EXTRACTED VALUES.**
-
-====================================
 CODE GENERATION RULES
 ====================================
 
 **RULE 1: USE EXACT HEX COLORS FROM PLAN**
 
 Plan says: "Sidebar background: #2D3748"
-Your code: 'className="bg-[#2D3748]"'
+Your code: className="bg-[#2D3748]"
 
 **RULE 2: USE EXACT PX VALUES FROM PLAN**
 
 Plan says: "Sidebar width: 280px"
-Your code: 'className="w-[280px]"'
-
-Plan says: "Button height: 40px"
-Your code: 'className="h-[40px]"'
+Your code: className="w-[280px]"
 
 **RULE 3: USE EXACT BORDER-RADIUS FROM PLAN**
 
 Plan says: "Border-radius: 8px"
-Your code: 'className="rounded-[8px]"'
+Your code: className="rounded-[8px]"
 
-**RULE 4: DATA FROM MCP API (ALWAYS)**
+**RULE 4: ENSURE PROPER CONTRAST**
 
-- Menu items: ALWAYS from 'response.data.data.menus'
+Plan says: "Background #191919, Text white"
+Your code: className="bg-[#191919] text-white"
+
+**RULE 5: ADD PROFESSIONAL STYLING**
+
+Even if plan doesn't specify, ADD:
+- Shadows: shadow-lg
+- Hover: hover:bg-[color]
+- Transitions: transition-all duration-200
+- Borders: border border-[color]
+
+**RULE 6: DATA FROM MCP API (ALWAYS)**
+
+- Menu items: ALWAYS from response.data.data.menus
 - Table data: ALWAYS from API endpoints
 - NEVER hardcode menu items or table rows
 
-**RULE 5: COMPONENT STRUCTURE FROM PLAN**
+**RULE 7: TABLE FIELDS ALWAYS VISIBLE**
 
-Plan describes:
-- Which pages exist (Dashboard, Table List, Detail)
-- Which components needed (Sidebar, Header, Table)
-- Routing structure
-
-Implement EXACTLY as described.
+Even when rows.length === 0:
+- Show table header
+- Show all field labels
+- Empty state INSIDE table (colSpan)
 
 ====================================
 EXAMPLE OF CORRECT IMPLEMENTATION
 ====================================
 
 **PLAN SAYS:**
-'''
 Sidebar:
 - Width: 280px
 - Background: #2D3748
 - Menu items height: 44px
-- Menu items padding: 12px 16px
 - Border-radius: 8px
 - Text color: #FFFFFF
-'''
 
 **YOUR CODE:**
-'''jsx
 <div
-id="main-sidebar"
-data-element-name="sidebar_container"
-className="w-[280px] bg-[#2D3748] h-screen"
+  id="main-sidebar"
+  data-element-name="sidebar_container"
+  className="
+    w-[280px] 
+    bg-[#2D3748] 
+    h-screen
+    border-r border-[#3F4F5F]
+    shadow-xl
+  "
 >
-{menus.map(item => (
-<button
-key={item.id}
-data-element-name="menu_item"
-className="
-h-[44px]
-px-[16px] py-[12px]
-rounded-[8px]
-text-[#FFFFFF]
-hover:bg-white/10
-"
-onClick={() => navigate(\'/tables/\${item.data.table.slug}\')}
->
-<img src={item.icon} className="w-4 h-4" />
-<span>{item.label}</span>
-</button>
-))}
+  {menus.map(item => (
+    <button
+      key={item.id}
+      data-element-name="menu_item"
+      className="
+        h-[44px]
+        px-4 py-2
+        rounded-[8px]
+        text-[#FFFFFF]
+        hover:bg-[#374151]
+        transition-all duration-200
+      "
+      onClick={() => navigate('/tables/\${item.data.table.slug}')}
+    >
+      <img src={item.icon} className="w-4 h-4" />
+      <span>{item.label}</span>
+    </button>
+  ))}
 </div>
-'''
 
 **NOTICE:**
-- ✅ Width: 'w-[280px]' - EXACT from plan
-- ✅ Background: 'bg-[#2D3748]' - EXACT from plan
-- ✅ Height: 'h-[44px]' - EXACT from plan
-- ✅ Padding: px-[16px] py-[12px]' - EXACT from plan
-- ✅ Radius: 'rounded-[8px]' - EXACT from plan
-- ✅ Text: 'text-[#FFFFFF]' - EXACT from plan
-- ✅ Data: '{menus.map(...)}' - DYNAMIC from API
+✅ Width: w-[280px] - EXACT from plan
+✅ Background: bg-[#2D3748] - EXACT from plan
+✅ Text: text-[#FFFFFF] - PROPER CONTRAST
+✅ Height: h-[44px] - EXACT from plan
+✅ Radius: rounded-[8px] - EXACT from plan
+✅ Shadow: shadow-xl - PROFESSIONAL
+✅ Hover: hover:bg-[#374151] - PROFESSIONAL
+✅ Transition: transition-all - PROFESSIONAL
+✅ Data: {menus.map(...)} - FROM API
 
 ====================================
-WRONG EXAMPLES (DO NOT DO THIS)
+VALIDATION BEFORE SUBMISSION
 ====================================
 
-**❌ EXAMPLE 1: Using generic Tailwind classes**
-'''jsx
-<div className="w-72 bg-gray-800">  // WRONG - not exact values
-'''
+Before you finish, verify:
 
-**✅ CORRECT:**
-'''jsx
-<div className="w-[280px] bg-[#2D3748]">  // EXACT values from plan
-'''
+✅ **CONTRAST CHECK:**
+□ Every text is readable on its background?
+□ No text-[#191919] on bg-[#191919]?
+□ Dark backgrounds have light text?
+□ Light backgrounds have dark text?
 
----
+✅ **COLOR EXTRACTION:**
+□ I extracted ALL unique colors from image/plan?
+□ I used EXACT hex codes (not generic Tailwind)?
+□ Each component has different color?
 
-**❌ EXAMPLE 2: Ignoring plan values**
-'''jsx
-// Plan says: "Button height 40px"
-<button className="h-10">  // h-10 = 40px, but plan specified px value
-'''
+✅ **PROFESSIONAL UI:**
+□ Every card has shadow?
+□ Every button has hover effect?
+□ Every interactive element has transition?
+□ Proper border-radius on all components?
 
-**✅ CORRECT:**
-'''jsx
-<button className="h-[40px]">  // EXACT as plan specified
-'''
+✅ **TABLE FIELDS:**
+□ Table header shows even when empty?
+□ All field labels visible?
+□ Empty state inside <td colSpan>?
 
----
-
-**❌ EXAMPLE 3: Hardcoding menu items**
-'''jsx
-<div>
-<button>Dashboard</button>
-<button>Users</button>
-<button>Orders</button>
-</div>
-'''
-
-**✅ CORRECT:**
-'''jsx
-<div>
-{menus.map(item => (
-<button key={item.id}>{item.label}</button>
-))}
-</div>
-'''
+✅ **API DATA:**
+□ Menu from response.data.data.menus?
+□ Table fields from response.data.data.data.fields?
+□ Table rows from response.data.data.data.response?
 
 ====================================
 ORIGINAL USER REQUEST (CONTEXT)
@@ -739,8 +776,6 @@ ORIGINAL USER REQUEST (CONTEXT)
 
 User originally asked:
 %s
-
-This is context. The PLAN above is the authoritative specification.
 
 ====================================
 PROJECT CONFIGURATION
@@ -768,46 +803,17 @@ GET %s/v2/items/:collection
 Query: limit, offset, search, sort_by, sort_order
 
 ====================================
-TECHNICAL REQUIREMENTS
-====================================
-
-**STACK:**
-- React 18
-- Vite
-- React Router DOM v6
-- Tailwind CSS v2.2.19
-- Axios
-
-**PACKAGE.JSON:**
-- Scan ALL imports in your generated code
-- Add ALL used libraries to dependencies
-- NO "type": "module" field
-- Use 2022-2023 era versions
-
-**FILE STRUCTURE:**
-- src/components/ (Sidebar.jsx, Table.jsx, etc.)
-- src/pages/ (DashboardHome.jsx, DynamicTablePage.jsx)
-- src/layouts/ (DashboardLayout.jsx)
-- src/api/ (axios.js)
-
-**DATA ATTRIBUTES (MANDATORY):**
-- Root element: 'id="kebab-case"'
-- ALL elements: 'data-element-name="snake_case"'
-
-====================================
 PRE-GENERATION FINAL CHECK
 ====================================
 
 **BEFORE YOU WRITE ANY CODE, VERIFY:**
 
-✅ I read the ENTIRE plan
-✅ I extracted ALL colors (hex codes)
-✅ I extracted ALL sizes (px values)
-✅ I extracted ALL border-radius values
-✅ I extracted ALL spacing values
-✅ I will use EXACT values from plan, not generics
-✅ I will fetch data from API, not hardcode
-✅ I will ignore default rules if plan specifies different
+✅ I will use EXACT colors from plan (not generic)
+✅ I will ensure proper contrast (dark bg → light text)
+✅ I will use ALL unique colors (not simplify to one)
+✅ I will add shadows/hover/transitions (professional UI)
+✅ I will show table fields even when empty
+✅ I will fetch data from API (not hardcode)
 
 ====================================
 OUTPUT FORMAT
@@ -829,19 +835,14 @@ NO commentary.
 Start with '{' and end with '}'.
 
 ====================================
-FINAL REMINDER
+FINAL REMINDER - 5 CRITICAL RULES
 ====================================
 
-**THE PLAN CONTAINS EXACT VALUES.**
-**USE THEM EXACTLY.**
-**DO NOT IMPROVISE.**
-**DO NOT USE GENERIC VALUES.**
-
-Plan says #2D3748 → You write bg-[#2D3748]
-Plan says 280px → You write w-[280px]
-Plan says 8px radius → You write rounded-[8px]
-
-**EXACT. EXACT. EXACT.**
+1. ✅ **CONTRAST:** text-[#E5E5E5] on bg-[#191919] (NEVER same color!)
+2. ✅ **EXACT COLORS:** bg-[#2D3748] from plan (not bg-gray-800)
+3. ✅ **UNIQUE COLORS:** bg-[#191919], bg-[#1F1F1F], bg-[#2D2D2D] (different!)
+4. ✅ **PROFESSIONAL:** shadow-xl + hover: + transition- (always!)
+5. ✅ **TABLE FIELDS:** <thead> visible even if rows.length === 0 (always!)
 
 ====================================
 
