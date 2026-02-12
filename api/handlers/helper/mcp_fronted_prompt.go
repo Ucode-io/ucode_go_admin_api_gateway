@@ -60,7 +60,7 @@ BEFORE generating ANY code, detect the THEME from plan/images:
 → Cards/surfaces: dark color from plan
 → ALL text MUST be light for contrast (#FFFFFF, #E5E5E5, #F5F5F5)
 → ALL borders: dark border colors from plan (e.g., border-[#2A2A2A])
-→ 🚨 IGNORE ALL light-theme examples below (bg-white, bg-gray-100, text-gray-900)
+→ 🚨 IGNORE ALL light-theme examples below (bg-[PLAN_SURFACE], bg-[PLAN_SEC], text-gray-900)
 
 **IF the plan specifies light background colors** (like #FFFFFF, #F7F7F5, #FAFAFA):
 → This is a **LIGHT THEME** project
@@ -82,7 +82,7 @@ BEFORE generating ANY code, detect the THEME from plan/images:
 **MANDATORY CHECKS BEFORE WRITING ANY CODE:**
 
 ✅ **LIGHT BACKGROUND → DARK TEXT:**
-- bg-white, bg-gray-100, bg-[#F7F7F5] → MUST use text-gray-900, text-[#37352F], text-black
+- bg-[PLAN_SURFACE], bg-[PLAN_SEC], bg-[#F7F7F5] → MUST use text-gray-900, text-[#37352F], text-black
 - bg-[#FFFFFF], bg-[#F5F5F5] → MUST use text-[#1a1a1a], text-[#2d2d2d]
 
 ✅ **DARK BACKGROUND → LIGHT TEXT:**
@@ -94,14 +94,14 @@ BEFORE generating ANY code, detect the THEME from plan/images:
 // НИКОГДА НЕ ДЕЛАЙ ТАК:
 <div className = "bg-[#191919] text-[#191919]">  ❌ КАТАСТРОФА!
 <div className = "bg-[#1a1a1a] text-[#2d2d2d]">  ❌ СЛИШКОМ ПОХОЖИЕ!
-<div className = "bg-white text-gray-100">  ❌ НЕ ВИДНО!
+<div className = "bg-[PLAN_SURFACE] text-gray-100">  ❌ НЕ ВИДНО!
 '''
 
 ✅ **CORRECT EXAMPLES:**
 '''jsx
 <div className ="bg-[#191919] text-[#E5E5E5]">  ✅ ОТЛИЧНО!
 <div className = "bg-[#2D2D2D] text-white">  ✅ ВИДНО!
-<div className = "bg-white text-[#1a1a1a]">  ✅ КОНТРАСТ!
+<div className = "bg-[PLAN_SURFACE] text-[#1a1a1a]">  ✅ КОНТРАСТ!
 '''
 
 **CONTRAST VERIFICATION CHECKLIST:**
@@ -280,33 +280,33 @@ Looking at image 1 (dark ERP):
 ✅ **2. SHADOWS:**
 '''jsx
 // ❌ WRONG - No depth:
-<div className = "bg-white">
+<div className = "bg-[PLAN_SURFACE]">
 
 // ✅ CORRECT - Has depth:
-<div className ="bg-white shadow-lg">
-<div className = "bg-white shadow-xl rounded-lg">
+<div className ="bg-[PLAN_SURFACE] shadow-lg">
+<div className = "bg-[PLAN_SURFACE] shadow-xl rounded-lg">
 <div className = "bg-[#2D2D2D] shadow-[0_4px_12px_rgba(0,0,0,0.3)]">
 '''
 
 ✅ **3. BORDER RADIUS:**
 '''jsx
 // ❌ WRONG - Sharp corners:
-<div className = "bg-white">
+<div className = "bg-[PLAN_SURFACE]">
 
 // ✅ CORRECT - Rounded:
-<div className = "bg-white rounded-lg"> // 8px
-<div className = "bg-white rounded-xl"> // 12px
+<div className = "bg-[PLAN_SURFACE] rounded-lg"> // 8px
+<div className = "bg-[PLAN_SURFACE] rounded-xl"> // 12px
 <button className= "rounded-md"> // 6px
 '''
 
 ✅ **4. BORDERS:**
 '''jsx
 // ❌ WRONG - No definition:
-<div className = "bg-[#2D2D2D]">
+<div className = "bg-[PLAN_SURFACE]">
 
 // ✅ CORRECT - Visible borders:
+<div className = "bg-[PLAN_SURFACE] border border-[PLAN_BORDER]">
 <div className = "bg-[#2D2D2D] border border-[#3F3F3F]">
-<div className = "bg-white border border-gray-200">
 '''
 
 ✅ **5. HOVER EFFECTS:**
@@ -322,10 +322,10 @@ Looking at image 1 (dark ERP):
 ✅ **6. TRANSITIONS:**
 '''jsx
 // ❌ WRONG - Instant changes:
-<div className = "hover:bg-gray-100">
+<div className = "hover:bg-[PLAN_SEC]">
 
 // ✅ CORRECT - Smooth:
-<div className = "hover:bg-gray-100 transition-all duration-200 ease-in-out">
+<div className = "hover:bg-[PLAN_SEC] transition-all duration-200 ease-in-out">
 '''
 
 ✅ **7. FOCUS STATES:**
