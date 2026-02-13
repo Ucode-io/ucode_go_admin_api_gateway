@@ -324,6 +324,17 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			mcpProject.PUT("/:mcp_project_id", h.V1.SaveMcpProject)
 			mcpProject.DELETE("/:mcp_project_id", h.V1.DeleteMcpProject)
 		}
+
+		customPermission := v1Admin.Group("/custom-permission")
+		{
+			customPermission.POST("", h.V1.CreateCustomPermission)
+			customPermission.PUT("", h.V1.UpdateCustomPermission)
+			customPermission.DELETE("/:id", h.V1.DeleteCustomPermission)
+			customPermission.GET("", h.V1.GetAllCustomPermissions)
+			customPermission.GET("/accesses", h.V1.GetCustomPermissionAccesses)
+			customPermission.GET("/accesses/all", h.V1.GetAllCustomPermissionAccesses)
+			customPermission.PUT("/accesses", h.V1.UpdateCustomPermissionAccess)
+		}
 	}
 
 	v2Admin := r.Group("/v2")

@@ -34,6 +34,7 @@ type GoBuilderServiceI interface {
 	DocxTemplate() nb.DocxTemplateServiceClient
 	Language() nb.LanguageServiceClient
 	McpProject() nb.McpProjectServiceClient
+	CustomPermission() nb.CustomPermissionsServiceClient
 }
 
 type goBuilderServiceClient struct {
@@ -57,7 +58,8 @@ type goBuilderServiceClient struct {
 	csvService            nb.CSVServiceClient
 	docxTemplateService   nb.DocxTemplateServiceClient
 	languageService       nb.LanguageServiceClient
-	mcpProjectService     nb.McpProjectServiceClient
+	mcpProjectService          nb.McpProjectServiceClient
+	customPermissionService    nb.CustomPermissionsServiceClient
 }
 
 func NewGoBuilderServiceClient(ctx context.Context, cfg config.Config) (GoBuilderServiceI, error) {
@@ -98,7 +100,8 @@ func NewGoBuilderServiceClient(ctx context.Context, cfg config.Config) (GoBuilde
 		csvService:            nb.NewCSVServiceClient(connGoBuilderService),
 		docxTemplateService:   nb.NewDocxTemplateServiceClient(connGoBuilderService),
 		languageService:       nb.NewLanguageServiceClient(connGoBuilderService),
-		mcpProjectService:     nb.NewMcpProjectServiceClient(connGoBuilderService),
+		mcpProjectService:          nb.NewMcpProjectServiceClient(connGoBuilderService),
+		customPermissionService:    nb.NewCustomPermissionsServiceClient(connGoBuilderService),
 	}, nil
 }
 
@@ -184,4 +187,8 @@ func (g *goBuilderServiceClient) Language() nb.LanguageServiceClient {
 
 func (g *goBuilderServiceClient) McpProject() nb.McpProjectServiceClient {
 	return g.mcpProjectService
+}
+
+func (g *goBuilderServiceClient) CustomPermission() nb.CustomPermissionsServiceClient {
+	return g.customPermissionService
 }

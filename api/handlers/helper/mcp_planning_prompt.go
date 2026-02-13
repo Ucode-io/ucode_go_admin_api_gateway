@@ -482,103 +482,386 @@ Execute all 3 steps now.`,
 func BuildFrontendPromptWithPlan(request models.GeneratePromptRequest, frontendPlan string) string {
 	return fmt.Sprintf(`
 ====================================
-CRITICAL USER UI REQUIREMENTS (HIGHEST PRIORITY)
+🚨🚨🚨 ABSOLUTE MANDATORY RULES 🚨🚨🚨
 ====================================
+
+YOU ARE ABOUT TO RECEIVE:
+1. A DETAILED FRONTEND PLAN (below) - THIS IS YOUR BIBLE
+2. POSSIBLY IMAGES (in the user message) - VISUAL REFERENCE
+
+====================================
+🔥 5 CRITICAL RULES YOU MUST FOLLOW 🔥
+====================================
+
+**RULE 1: CONTRAST IS SACRED**
+
+🚨 NEVER EVER use same color for text and background! 🚨
+🚨 NEVER EVER let ICONS disappear on background! 🚨
+
+✅ Dark background (#191919, #1a1a1a, #2D2D2D) → MUST use light text (#FFFFFF, #E5E5E5, #F5F5F5)
+✅ Light background (#FFFFFF, #F7F7F5) → MUST use dark text (#1a1a1a, #37352F, #2D2D2D)
+
+**ICONS - CRITICAL:**
+✅ Dark bg → Use "brightness-0 invert" for icons:
+  <img src="icon.svg" className="brightness-0 invert" />
+✅ Light bg → Use "brightness(0)" for icons:
+  <img src="icon.svg" className="brightness-0" />
+
+❌ FORBIDDEN:
+- bg-[#191919] text-[#191919]  ← КАТАСТРОФА!
+- bg-[#1a1a1a] text-[#2d2d2d]  ← СЛИШКОМ ПОХОЖИЕ!
+- Icons without filters on dark bg ← ИКОНКИ НЕ ВИДНЫ!
+
+✅ CORRECT:
+- bg-[#191919] text-[#E5E5E5]  ← ВИДНО!
+- bg-[#2D2D2D] text-white  ← ОТЛИЧНО!
+
+**BEFORE WRITING ANY COMPONENT, ASK:**
+□ Can I READ the text on this background?
+□ Can I SEE the icons on this background?
+□ Is contrast high enough?
+□ Did I use different colors for text vs background?
+□ Did I add filters to icons for visibility?
+
+---
+
+**RULE 2: EXTRACT EXACT COLORS FROM IMAGE**
+
+If images provided, extract EXACT hex colors, don't guess!
+
+🚨 CAPTURE EVERY DETAIL - EVEN SMALL ONES! 🚨
+- Typography: font sizes (12px/14px/16px), weights
+- Spacing: exact padding/margins (px-4, gap-6)
+- Radius: border-radius (rounded-lg=8px)
+- Shadows: exact shadow depths
+
+Look for:
+- Main background (e.g., #191919)
+- Sidebar background (e.g., #1F1F1F)
+- Card backgrounds (e.g., #2D2D2D)
+- Text colors (e.g., #FFFFFF, #A0A0A0)
+- Border colors (e.g., #3F3F3F)
+- Accent colors (e.g., #3B82F6)
+- **Icon colors/filters** (for menu visibility!)
+
+✅ Write EXACT hex codes:
+- Image shows dark gray → bg-[#2D2D2D] (not bg-gray-800)
+- Image shows blue button → bg-[#3B82F6] (not bg-blue-500)
+
+❌ Don't use generic Tailwind colors if image shows specific hex!
+
+---
+
+**RULE 3: USE ALL UNIQUE COLORS (DON'T SIMPLIFY TO ONE)**
+
+Extract EVERY distinct color from image:
+
+Main bg: #191919 (darkest)
+Sidebar: #1F1F1F (lighter)
+Cards: #2D2D2D (even lighter)
+Inputs: #252525
+Buttons: #353535
+Borders: #3F3F3F
+Text primary: #FFFFFF
+Text secondary: #A0A0A0
+
+❌ WRONG - all same color:
+<div className="bg-[#1a1a1a]">
+  <div className="bg-[#1a1a1a]">
+    <button className="bg-[#1a1a1a]">
+
+✅ CORRECT - unique colors:
+<div className="bg-[#191919]">
+  <div className="bg-[#1F1F1F]">
+    <button className="bg-[#2D2D2D]">
+
+---
+
+**RULE 4: PROFESSIONAL UI = SHADOWS + HOVER + TRANSITIONS**
+
+Every component MUST have:
+
+✅ Shadows: shadow-lg, shadow-xl
+✅ Rounded corners: rounded-lg, rounded-xl
+✅ Borders: border border-[#3F3F3F]
+✅ Hover effects: hover:bg-[#353535]
+✅ Transitions: transition-all duration-200
+✅ Focus states: focus:ring-2
+
+❌ AMATEUR:
+<div className="bg-gray-800 p-4">
+  <button className="bg-blue-500 p-2">
+
+✅ PROFESSIONAL:
+<div className="bg-[#2D2D2D] border border-[#3F3F3F] rounded-lg shadow-xl p-6 hover:border-[#4F4F4F] transition-all">
+  <button className="bg-[#3B82F6] px-4 py-2 rounded-md hover:bg-[#2563EB] transition-colors duration-200 shadow-md">
+
+---
+
+**RULE 5: EMPTY TABLES MUST SHOW FIELDS**
+
+ALWAYS show table header with fields, EVEN if rows.length === 0!
+
+❌ WRONG:
+{rows.length > 0 ? (
+  <table>
+    <thead>...</thead>
+    <tbody>{rows.map(...)}</tbody>
+  </table>
+) : (
+  <div>No data available</div>  ← НЕТ ПОЛЕЙ!
+)}
+
+✅ CORRECT:
+<table>
+  <thead>
+    <tr>
+      {fields.map(field => (
+        <th key={field.slug}>{field.label}</th>  ← ВСЕГДА!
+      ))}
+    </tr>
+  </thead>
+  <tbody>
+    {rows.length > 0 ? (
+      rows.map(row => <tr>...</tr>)
+    ) : (
+      <tr>
+        <td colSpan={fields.length}>
+          <EmptyState />  ← Empty ВНУТРИ таблицы
+        </td>
+      </tr>
+    )}
+  </tbody>
+</table>
+
+====================================
+THE FRONTEND PLAN (YOUR BLUEPRINT)
+====================================
+
+**READ EVERY SECTION. EVERY COLOR. EVERY SIZE.**
 
 %s
 
-This FRONTEND PLAN MUST take precedence over default design system.
-Generate the project STRICTLY according to this plan.
-
 ====================================
-ORIGINAL USER REQUEST (FOR CONTEXT)
+END OF PLAN
 ====================================
 
+**NOW YOU MUST:**
+
+1. Read the ENTIRE plan above
+2. Note EVERY color (hex codes like #2D3748)
+3. Note EVERY size (px values like 280px, 40px, 24px)
+4. Note EVERY border-radius, shadow, spacing
+5. Generate code using THOSE EXACT VALUES
+
+====================================
+CODE GENERATION RULES
+====================================
+
+**RULE 1: USE EXACT HEX COLORS FROM PLAN**
+
+Plan says: "Sidebar background: #2D3748"
+Your code: className="bg-[#2D3748]"
+
+**RULE 2: USE EXACT PX VALUES FROM PLAN**
+
+Plan says: "Sidebar width: 280px"
+Your code: className="w-[280px]"
+
+**RULE 3: USE EXACT BORDER-RADIUS FROM PLAN**
+
+Plan says: "Border-radius: 8px"
+Your code: className="rounded-[8px]"
+
+**RULE 4: ENSURE PROPER CONTRAST**
+
+Plan says: "Background #191919, Text white"
+Your code: className="bg-[#191919] text-white"
+
+**RULE 5: ADD PROFESSIONAL STYLING**
+
+Even if plan doesn't specify, ADD:
+- Shadows: shadow-lg
+- Hover: hover:bg-[color]
+- Transitions: transition-all duration-200
+- Borders: border border-[color]
+
+**RULE 6: DATA FROM MCP API (ALWAYS)**
+
+- Menu items: ALWAYS from response.data.data.menus
+- Table data: ALWAYS from API endpoints
+- NEVER hardcode menu items or table rows
+
+**RULE 7: TABLE FIELDS ALWAYS VISIBLE**
+
+Even when rows.length === 0:
+- Show table header
+- Show all field labels
+- Empty state INSIDE table (colSpan)
+
+====================================
+EXAMPLE OF CORRECT IMPLEMENTATION
+====================================
+
+**PLAN SAYS:**
+Sidebar:
+- Width: 280px
+- Background: #2D3748
+- Menu items height: 44px
+- Border-radius: 8px
+- Text color: #FFFFFF
+
+**YOUR CODE:**
+<div
+  id="main-sidebar"
+  data-element-name="sidebar_container"
+  className="
+    w-[280px] 
+    bg-[#2D3748] 
+    h-screen
+    border-r border-[#3F4F5F]
+    shadow-xl
+  "
+>
+  {menus.map(item => (
+    <button
+      key={item.id}
+      data-element-name="menu_item"
+      className="
+        h-[44px]
+        px-4 py-2
+        rounded-[8px]
+        text-[#FFFFFF]
+        hover:bg-[#374151]
+        transition-all duration-200
+      "
+      onClick={() => navigate('/tables/\${item.data.table.slug}')}
+    >
+      <img src={item.icon} className="w-4 h-4" />
+      <span>{item.label}</span>
+    </button>
+  ))}
+</div>
+
+**NOTICE:**
+✅ Width: w-[280px] - EXACT from plan
+✅ Background: bg-[#2D3748] - EXACT from plan
+✅ Text: text-[#FFFFFF] - PROPER CONTRAST
+✅ Height: h-[44px] - EXACT from plan
+✅ Radius: rounded-[8px] - EXACT from plan
+✅ Shadow: shadow-xl - PROFESSIONAL
+✅ Hover: hover:bg-[#374151] - PROFESSIONAL
+✅ Transition: transition-all - PROFESSIONAL
+✅ Data: {menus.map(...)} - FROM API
+
+====================================
+VALIDATION BEFORE SUBMISSION
+====================================
+
+Before you finish, verify:
+
+✅ **CONTRAST CHECK:**
+□ Every text is readable on its background?
+□ No text-[#191919] on bg-[#191919]?
+□ Dark backgrounds have light text?
+□ Light backgrounds have dark text?
+
+✅ **COLOR EXTRACTION:**
+□ I extracted ALL unique colors from image/plan?
+□ I used EXACT hex codes (not generic Tailwind)?
+□ Each component has different color?
+
+✅ **PROFESSIONAL UI:**
+□ Every card has shadow?
+□ Every button has hover effect?
+□ Every interactive element has transition?
+□ Proper border-radius on all components?
+
+✅ **TABLE FIELDS:**
+□ Table header shows even when empty?
+□ All field labels visible?
+□ Empty state inside <td colSpan>?
+
+✅ **API DATA:**
+□ Menu from response.data.data.menus?
+□ Table fields from response.data.data.data.fields?
+□ Table rows from response.data.data.data.response?
+
+====================================
+ORIGINAL USER REQUEST (CONTEXT)
+====================================
+
+User originally asked:
 %s
 
 ====================================
 PROJECT CONFIGURATION
 ====================================
 
-Runtime Configuration:
 - Project ID: "%s"
 - Main Menu Parent ID: "%s"
 - X-API-KEY: "%s"
 - Base URL: "%s"
 
 ====================================
-TECHNICAL REQUIREMENTS
+API INTEGRATION (MANDATORY)
 ====================================
 
-1) Generate a complete production-ready frontend-only admin project (React 18 + Vite + TailwindCSS v2.2.19) as a single JSON object with fields:
-   { "project_name": "<string>", "files": [ { "path": "<path>", "content": "<file contents>" }, ... ], "file_graph": {...}, "env": {...} }
-   - File contents must be plain raw file text (use real newlines in JSON string values).
-   - No markdown, no extra text outside that single JSON root.
+**MENU DATA:**
+GET %s/v3/menus?parent_id=%s&project-id=%s
+Headers: { Authorization: "API-KEY", "X-API-KEY": "%s" }
 
-2) UI Design Priority:
-   - PRIMARY: Follow the FRONTEND PLAN from above section
-   - Execute plan specifications EXACTLY (components, pages, design system, routes)
-   - CRITICAL: If plan mentions specific UI system reference, match that UI exactly
+**TABLE SCHEMA:**
+POST %s/v1/table-details/:collection
+Body: { "data": {} }
 
-3) Implement client-side routing using react-router-dom:
-   - Include BrowserRouter and a Routes config with routes from the plan
-   - Sidebar menu item clicks must navigate using useNavigate to paths from plan
-   - Top header must display selected menu label via router state or URL params
-
-4) Implement runtime fetching of menus and table details using exact axios calls:
-   - GET %s/v3/menus?parent_id=%s&project-id=%s
-     Headers: { Authorization: "API-KEY", "X-API-KEY": "%s" }
-   - POST %s/v1/table-details/:collection
-     Body: { "data": {} }
-     Headers: same as above
-   - GET %s/v2/items/:collection
-     Query params: limit, offset, search, sort_by, sort_order
-     Headers: same as above
-
-5) Follow the plan's table layout rules, component structure, and design system specifications
-
-6) Generate package.json:
-   - SCAN all your generated JSX files for imports
-   - If you use a library (e.g., 'recharts', 'framer-motion'), you MUST add it to the "dependencies" list
-   - DO NOT include "type": "module" in package.json
-   - Use compatible versions from 2022-2023 era for React 18.0.0
-
-7) Include all required components as specified in the plan
-
-8) Include README_HOW_TO_RUN.txt explaining setup
-
-9) Return EXACTLY one JSON object with: project_name, files, file_graph (5 fields per file), env
+**TABLE DATA:**
+GET %s/v2/items/:collection
+Query: limit, offset, search, sort_by, sort_order
 
 ====================================
-VALIDATION BEFORE GENERATING
+PRE-GENERATION FINAL CHECK
 ====================================
 
-Before generating, ask yourself:
-- Did I check every JSX file for external imports?
-- Are all those imports listed in package.json?
-- Is "type": "module" REMOVED from package.json?
-- Does my generated UI match the plan's specifications?
-- Are the components, pages, and routes from the plan included?
-- Is there ANY white text on a white background? (FIX IT: Use rgb(55, 53, 47))
-- Are the icons visible? (FIX IT: Add brightness(0) filter if icons are white)
-- Did I use Tailwind "text-white" on a white sidebar? (FIX IT: Remove it)
+**BEFORE YOU WRITE ANY CODE, VERIFY:**
+
+✅ I will use EXACT colors from plan (not generic)
+✅ I will ensure proper contrast (dark bg → light text)
+✅ I will use ALL unique colors (not simplify to one)
+✅ I will add shadows/hover/transitions (professional UI)
+✅ I will show table fields even when empty
+✅ I will fetch data from API (not hardcode)
 
 ====================================
-STRICT OUTPUT FORMAT
+OUTPUT FORMAT
 ====================================
-You are acting as a REST API. Return ONLY the JSON object.
-Do NOT use markdown code blocks. 
-Do NOT include any commentary. 
 
-Your response MUST start with '{' and end with '}'.
+Return ONLY valid JSON object:
 
-Project JSON Structure:
 {
   "project_name": "...",
-  "files": [...],
+  "files": [
+    {"path": "...", "content": "..."}
+  ],
   "env": {...},
   "file_graph": {...}
 }
+
+NO markdown code blocks.
+NO commentary.
+Start with '{' and end with '}'.
+
+====================================
+FINAL REMINDER - 5 CRITICAL RULES
+====================================
+
+1. ✅ **CONTRAST:** text-[#E5E5E5] on bg-[#191919] (NEVER same color!)
+2. ✅ **EXACT COLORS:** bg-[#2D3748] from plan (not bg-gray-800)
+3. ✅ **UNIQUE COLORS:** bg-[#191919], bg-[#1F1F1F], bg-[#2D2D2D] (different!)
+4. ✅ **PROFESSIONAL:** shadow-xl + hover: + transition- (always!)
+5. ✅ **TABLE FIELDS:** <thead> visible even if rows.length === 0 (always!)
+
+====================================
 
 GENERATE THE JSON NOW:
 `,
