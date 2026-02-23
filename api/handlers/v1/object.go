@@ -1551,6 +1551,8 @@ func (h *HandlerV1) GetListInExcel(c *gin.Context) {
 		return
 	}
 
+	userId, _ := c.Get("user_id")
+
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -1569,6 +1571,21 @@ func (h *HandlerV1) GetListInExcel(c *gin.Context) {
 		return
 	}
 
+	var logReq = &models.CreateVersionHistoryRequest{
+		Services:     services,
+		NodeType:     resource.NodeType,
+		ProjectId:    resource.ResourceEnvironmentId,
+		ActionSource: "EXCEL",
+		ActionType:   "EXPORT EXCEL",
+		UserInfo:     cast.ToString(userId),
+		Request:      &objectRequest,
+		TableSlug:    tableSlug,
+	}
+
+	defer func() {
+		go h.versionHistoryGo(c, logReq)
+	}()
+
 	service := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder()
 
 	switch resource.ResourceType {
@@ -1583,6 +1600,8 @@ func (h *HandlerV1) GetListInExcel(c *gin.Context) {
 		)
 
 		if err != nil {
+			logReq.Response = err.Error()
+
 			statusHttp = status_http.GrpcStatusToHTTP["Internal"]
 			stat, ok := status.FromError(err)
 			if ok {
@@ -1593,6 +1612,7 @@ func (h *HandlerV1) GetListInExcel(c *gin.Context) {
 			return
 		}
 
+		logReq.Response = resp
 		statusHttp.CustomMessage = resp.GetCustomMessage()
 		h.HandleResponse(c, statusHttp, resp)
 	case pb.ResourceType_POSTGRESQL:
@@ -1606,9 +1626,11 @@ func (h *HandlerV1) GetListInExcel(c *gin.Context) {
 		)
 
 		if err != nil {
+			logReq.Response = err.Error()
 			h.HandleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
+		logReq.Response = resp
 		statusHttp.CustomMessage = resp.GetCustomMessage()
 		h.HandleResponse(c, statusHttp, resp)
 	}
