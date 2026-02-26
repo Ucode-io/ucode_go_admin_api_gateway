@@ -335,6 +335,20 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			customPermission.GET("/accesses/all", h.V1.GetAllCustomPermissionAccesses)
 			customPermission.PUT("/accesses", h.V1.UpdateCustomPermissionAccess)
 		}
+
+		aiChat := v1Admin.Group("/ai-chat")
+		{
+			aiChat.POST("", h.V1.CreateAiChat)
+			aiChat.GET("/project/:project-id", h.V1.GetProjectChat)
+
+			aiChat.PUT("/:chat-id", h.V1.UpdateAiChat)
+			aiChat.DELETE("/:chat-id", h.V1.DeleteAiChat)
+
+			aiChat.POST("/new-messages/:chat-id", h.V1.CreateAiChatMessage)
+			aiChat.GET("/messages/:chat-id", h.V1.GetAiChatMessages)
+			aiChat.DELETE("/messages/:message_id", h.V1.DeleteAiChatMessage)
+
+		}
 	}
 
 	v2Admin := r.Group("/v2")
