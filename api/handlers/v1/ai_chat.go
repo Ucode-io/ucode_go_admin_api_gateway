@@ -111,6 +111,43 @@ func (h *HandlerV1) CreateAiChat(c *gin.Context) {
 	h.HandleResponse(c, status_http.Created, response)
 }
 
+func (h *HandlerV1) GetAllChats(c *gin.Context) {
+	service, resourceEnvId, err := h.getAiChatServices(c)
+	if err != nil {
+		return
+	}
+
+	var (
+		title          = c.Query("title")
+		model          = c.Query("model")
+		projectId      = c.Query("project_id")
+		orderBy        = c.Query("order_by")
+		orderDirection = c.Query("order_direction")
+		limit          = cast.ToInt32(c.DefaultQuery("limit", "20"))
+		offset         = cast.ToInt32(c.DefaultQuery("offset", "0"))
+	)
+
+	response, err := service.GoObjectBuilderService().AiChat().GetAllChats(
+		c.Request.Context(),
+		&pbo.GetAllChatsRequest{
+			ResourceEnvId:  resourceEnvId,
+			Title:          title,
+			Model:          model,
+			ProjectId:      projectId,
+			OrderBy:        orderBy,
+			OrderDirection: orderDirection,
+			Limit:          limit,
+			Offset:         offset,
+		},
+	)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.HandleResponse(c, status_http.OK, response)
+}
+
 func (h *HandlerV1) GetProjectChat(c *gin.Context) {
 	service, resourceEnvId, err := h.getAiChatServices(c)
 	if err != nil {

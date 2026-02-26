@@ -339,6 +339,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		aiChat := v1Admin.Group("/ai-chat")
 		{
 			aiChat.POST("", h.V1.CreateAiChat)
+			aiChat.GET("/list", h.V1.GetAllChats)
 			aiChat.GET("/project/:project-id", h.V1.GetProjectChat)
 
 			aiChat.PUT("/:chat-id", h.V1.UpdateAiChat)
