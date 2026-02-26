@@ -13,12 +13,14 @@ import (
 
 func (h *HandlerV1) GetMcpProjects(c *gin.Context) {
 	var (
-		projectTitle  = c.Query("title")
-		limit         = cast.ToUint32(c.Query("limit"))
-		offset        = cast.ToUint32(c.Query("offset"))
-		projectId     any
-		environmentId any
-		ok            bool
+		projectTitle   = c.Query("title")
+		limit          = cast.ToUint32(c.Query("limit"))
+		offset         = cast.ToUint32(c.Query("offset"))
+		orderBy        = c.Query("order_by")
+		orderDirection = c.Query("order_direction")
+		projectId      any
+		environmentId  any
+		ok             bool
 	)
 
 	if limit == 0 {
@@ -64,10 +66,12 @@ func (h *HandlerV1) GetMcpProjects(c *gin.Context) {
 	response, err := services.GoObjectBuilderService().McpProject().GetAllMcpProject(
 		c.Request.Context(),
 		&pbo.GetMcpProjectListReq{
-			ResourceEnvId: resource.ResourceEnvironmentId,
-			Limit:         limit,
-			Offset:        offset,
-			Title:         projectTitle,
+			ResourceEnvId:  resource.ResourceEnvironmentId,
+			Limit:          limit,
+			Offset:         offset,
+			Title:          projectTitle,
+			OrderBy:        orderBy,
+			OrderDirection: orderDirection,
 		},
 	)
 	if err != nil {
