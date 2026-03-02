@@ -72,8 +72,8 @@ func (h *HandlerV1) CreateAiChat(c *gin.Context) {
 		return
 	}
 
-	if len(request.ProjectId) == 0 {
-		if request.GetProjectId() == "" && request.GetDescription() == "" {
+	if len(request.GetProjectId()) == 0 {
+		if request.GetTitle() == "" && request.GetDescription() == "" {
 			h.HandleResponse(c, status_http.InvalidArgument, "project_id or project_name is required")
 			return
 		}
