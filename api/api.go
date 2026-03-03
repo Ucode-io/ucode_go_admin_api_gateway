@@ -350,6 +350,16 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			aiChat.DELETE("/messages/:message_id", h.V1.DeleteAiChatMessage)
 
 		}
+
+		projectFolders := v1Admin.Group("/project-folders")
+		{
+			projectFolders.POST("", h.V1.CreateProjectFolder)
+			projectFolders.GET("", h.V1.GetAllProjectFolders)
+			projectFolders.GET("/:folder_id", h.V1.GetProjectFolderById)
+			projectFolders.PUT("/:folder_id", h.V1.UpdateProjectFolder)
+			projectFolders.DELETE("/:folder_id", h.V1.DeleteProjectFolder)
+			projectFolders.PUT("/order", h.V1.UpdateProjectFolderOrder)
+		}
 	}
 
 	v2Admin := r.Group("/v2")
