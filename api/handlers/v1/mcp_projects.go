@@ -202,6 +202,7 @@ func (h *HandlerV1) SaveMcpProject(c *gin.Context) {
 	}
 
 	request.ResourceEnvId = resource.ResourceEnvironmentId
+	resource.ProjectId = mcpProjectId
 
 	response, err := services.GoObjectBuilderService().McpProject().UpdateMcpProject(c.Request.Context(), &request)
 	if err != nil {
