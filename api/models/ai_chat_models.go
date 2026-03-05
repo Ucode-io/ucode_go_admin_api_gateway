@@ -4,8 +4,8 @@ type (
 	// ========================== Basic Requests ==========================
 
 	NewMessageReq struct {
-		Prompt string   `json:"prompt"`
-		Images []string `json:"images"`
+		Content string   `json:"content"`
+		Images  []string `json:"images"`
 	}
 
 	SendMessageRequest struct {

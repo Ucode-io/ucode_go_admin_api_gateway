@@ -82,7 +82,7 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 		&pbo.CreateMessageRequest{
 			ChatId:        chatId,
 			Role:          "user",
-			Content:       userMessage.Prompt,
+			Content:       userMessage.Content,
 			Images:        userMessage.Images,
 			ResourceEnvId: resourceEnvId,
 		})
@@ -90,8 +90,6 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-
-	log.Println("CHAT HISOTRY:", chatHistory)
 
 	aiResponse, err := messaging.routeAndProcess(userMessage, chatHistory)
 	if err != nil {
@@ -137,7 +135,7 @@ func (m *messagingStc) routeAndProcess(req models.NewMessageReq, chatHistory []m
 		return nil, err
 	}
 
-	haikuResult, err := m.callHaikuRouter(req.Prompt, fileGraphJSON, chatHistory)
+	haikuResult, err := m.callHaikuRouter(req.Content, fileGraphJSON, chatHistory)
 	if err != nil {
 		return nil, err
 	}
@@ -158,7 +156,7 @@ func (m *messagingStc) routeAndProcess(req models.NewMessageReq, chatHistory []m
 		}, nil
 
 	case "project_inspect":
-		return m.runInspectFlow(req.Prompt, haikuResult.FilesNeeded, chatHistory)
+		return m.runInspectFlow(req.Content, haikuResult.FilesNeeded, chatHistory)
 
 	case "code_change":
 		return m.runCodeFlow(haikuResult.Clarified, fileGraphJSON, chatHistory)
@@ -216,8 +214,6 @@ func (m *messagingStc) callHaikuRouter(userPrompt, fileGraphJSON string, chatHis
 		content  = helper.ProcessHaikuPrompt(userPrompt, fileGraphJSON)
 		messages = buildMessagesWithHistory(chatHistory, content)
 	)
-
-	log.Println("MESSAGESaaaaaaa", messages)
 
 	rawResp, err := helper.CallAnthropicAPI(
 		m.baseConf,
