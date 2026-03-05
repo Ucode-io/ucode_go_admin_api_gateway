@@ -1,13 +1,10 @@
 package v1
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
-	"net/http"
 	"time"
 	"ucode/ucode_go_api_gateway/api/handlers/helper"
 	"ucode/ucode_go_api_gateway/api/models"
@@ -624,10 +621,10 @@ func (h *HandlerV1) generateBackendPlan(userPrompt string) (string, error) {
 				},
 			},
 		}
-		apiResponse models.AnthropicApiResponse
+		apiResponse models.ClaudeResponse
 	)
 
-	respText, err := h.callAnthropicAPI(body, 300*time.Second)
+	respText, err := helper.CallAnthropicAPI(h.baseConf, body, 300*time.Second)
 	if err != nil {
 		return "", fmt.Errorf("backend plan API call failed: %w", err)
 	}
@@ -647,7 +644,7 @@ func (h *HandlerV1) generateFrontendPlan(userPrompt string, imageURLs []string) 
 	var (
 		contentBlocks []models.ContentBlock
 		body          models.AnthropicRequest
-		apiResponse   models.AnthropicApiResponse
+		apiResponse   models.ClaudeResponse
 	)
 
 	for _, imageURL := range imageURLs {
@@ -679,7 +676,7 @@ func (h *HandlerV1) generateFrontendPlan(userPrompt string, imageURLs []string) 
 		},
 	}
 
-	respText, err := h.callAnthropicAPI(body, 300*time.Second)
+	respText, err := helper.CallAnthropicAPI(h.baseConf, body, 300*time.Second)
 	if err != nil {
 		return "", fmt.Errorf("frontend plan API call failed: %w", err)
 	}
@@ -710,7 +707,6 @@ func (h *HandlerV1) saveFrontendProject(ctx context.Context, services services.S
 	projectEnv, _ := helperFunc.ConvertMapToStruct(project.Env)
 
 	for _, file := range project.Files {
-		var ()
 		if val, ok := project.FileGraph[file.Path].(map[string]any); ok {
 			fileGraph = val
 		}
@@ -735,7 +731,7 @@ func (h *HandlerV1) saveFrontendProject(ctx context.Context, services services.S
 // ==================== Send Anthropic Request methods ====================
 
 func (h *HandlerV1) sendAnthropicBackend(content string) (string, error) {
-	return h.callAnthropicAPI(
+	return helper.CallAnthropicAPI(h.baseConf,
 		models.AnthropicRequest{
 			Model:     h.baseConf.ClaudeModel,
 			MaxTokens: h.baseConf.MaxTokens,
@@ -773,7 +769,7 @@ func (h *HandlerV1) generateFrontendProject(userPrompt string, imageURLs []strin
 	var (
 		contentBlocks []models.ContentBlock
 		body          models.AnthropicRequest
-		apiResponse   models.AnthropicApiResponse
+		apiResponse   models.ClaudeResponse
 		project       models.GeneratedProject
 	)
 
@@ -806,7 +802,7 @@ func (h *HandlerV1) generateFrontendProject(userPrompt string, imageURLs []strin
 		},
 	}
 
-	respText, err := h.callAnthropicAPI(body, 420*time.Second)
+	respText, err := helper.CallAnthropicAPI(h.baseConf, body, 420*time.Second)
 	if err != nil {
 		return nil, err
 	}
@@ -848,11 +844,11 @@ func (h *HandlerV1) classifyRequest(prompt string, imageURLs []string) (*models.
 				},
 			},
 		}
-		apiResponse    models.AnthropicApiResponse
+		apiResponse    models.ClaudeResponse
 		classification models.RequestClassification
 	)
 
-	respText, err := h.callAnthropicAPI(body, 60*time.Second)
+	respText, err := helper.CallAnthropicAPI(h.baseConf, body, 60*time.Second)
 	if err != nil {
 		return nil, fmt.Errorf("classification API call failed: %w", err)
 	}
@@ -884,7 +880,7 @@ func (h *HandlerV1) analyzeProject(userPrompt string, imageURLs []string) (*mode
 	var (
 		contentBlocks []models.ContentBlock
 		body          models.AnthropicRequest
-		apiResponse   models.AnthropicApiResponse
+		apiResponse   models.ClaudeResponse
 		analysis      models.AnalysisResult
 	)
 
@@ -917,7 +913,7 @@ func (h *HandlerV1) analyzeProject(userPrompt string, imageURLs []string) (*mode
 		},
 	}
 
-	respText, err := h.callAnthropicAPI(body, 120*time.Second)
+	respText, err := helper.CallAnthropicAPI(h.baseConf, body, 120*time.Second)
 	if err != nil {
 		return nil, err
 	}
@@ -943,7 +939,7 @@ func (h *HandlerV1) updateProject(userPrompt string, imageURLs []string) (*model
 	var (
 		contentBlocks []models.ContentBlock
 		body          models.AnthropicRequest
-		apiResponse   models.AnthropicApiResponse
+		apiResponse   models.ClaudeResponse
 		update        models.UpdateResult
 	)
 
@@ -989,7 +985,7 @@ func (h *HandlerV1) updateProject(userPrompt string, imageURLs []string) (*model
 		},
 	}
 
-	respText, err := h.callAnthropicAPI(body, 420*time.Second)
+	respText, err := helper.CallAnthropicAPI(h.baseConf, body, 420*time.Second)
 	if err != nil {
 		return nil, err
 	}
@@ -1009,43 +1005,4 @@ func (h *HandlerV1) updateProject(userPrompt string, imageURLs []string) (*model
 	}
 
 	return &update, nil
-}
-
-// ==================== SHARED ANTHROPIC CALLER ====================
-
-func (h *HandlerV1) callAnthropicAPI(body models.AnthropicRequest, timeout time.Duration) (string, error) {
-
-	jsonBody, err := json.Marshal(body)
-	if err != nil {
-		return "", fmt.Errorf("failed to marshal request: %w", err)
-	}
-
-	req, err := http.NewRequest(http.MethodPost, h.baseConf.AnthropicBaseAPIURL, bytes.NewBuffer(jsonBody))
-	if err != nil {
-		return "", fmt.Errorf("failed to create request: %w", err)
-	}
-
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("X-API-Key", h.baseConf.AnthropicAPIKey)
-	req.Header.Set("anthropic-version", h.baseConf.AnthropicVersion)
-	req.Header.Set("anthropic-beta", h.baseConf.AnthropicBeta)
-
-	client := &http.Client{Timeout: timeout}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return "", fmt.Errorf("request failed: %w", err)
-	}
-	defer resp.Body.Close()
-
-	respBytes, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", fmt.Errorf("failed to read response: %w", err)
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBytes))
-	}
-
-	return string(respBytes), nil
 }

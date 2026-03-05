@@ -231,44 +231,6 @@ func (h *HandlerV1) DeleteAiChat(c *gin.Context) {
 
 // ==================== Message Endpoints ====================
 
-func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
-	var (
-		userMessage pbo.CreateMessageRequest
-		chatId      = c.Param("chat-id")
-	)
-
-	if err := c.ShouldBindJSON(&userMessage); err != nil {
-		h.HandleResponse(c, status_http.BadRequest, err.Error())
-		return
-	}
-
-	service, resourceEnvId, err := h.getAiChatServices(c)
-	if err != nil {
-		return
-	}
-
-	userMessage.ResourceEnvId = resourceEnvId
-	userMessage.ChatId = chatId
-	userMessage.Role = "user"
-
-	_, err = service.GoObjectBuilderService().AiChat().CreateMessage(c.Request.Context(), &userMessage)
-	if err != nil {
-		h.HandleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
-	userMessage.Role = "assistant"
-	userMessage.Content = "Qonday e"
-
-	message, err := service.GoObjectBuilderService().AiChat().CreateMessage(c.Request.Context(), &userMessage)
-	if err != nil {
-		h.HandleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
-	h.HandleResponse(c, status_http.Created, message)
-}
-
 func (h *HandlerV1) GetAiChatMessages(c *gin.Context) {
 	service, resourceEnvId, err := h.getAiChatServices(c)
 	if err != nil {

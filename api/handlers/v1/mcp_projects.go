@@ -18,6 +18,7 @@ func (h *HandlerV1) GetMcpProjects(c *gin.Context) {
 		offset         = cast.ToUint32(c.Query("offset"))
 		orderBy        = c.Query("order_by")
 		orderDirection = c.Query("order_direction")
+		ids            = c.QueryArray("ids")
 		projectId      any
 		environmentId  any
 		ok             bool
@@ -72,6 +73,7 @@ func (h *HandlerV1) GetMcpProjects(c *gin.Context) {
 			Title:          projectTitle,
 			OrderBy:        orderBy,
 			OrderDirection: orderDirection,
+			Ids:            ids,
 		},
 	)
 	if err != nil {
