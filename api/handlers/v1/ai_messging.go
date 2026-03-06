@@ -213,6 +213,11 @@ func (m *messagingStc) runInspectFlow(ctx context.Context, userQuestion string, 
 func (m *messagingStc) runCodeFlow(ctx context.Context, clarified, fileGraphJSON string, chatHistory []models.ChatMessage, imageURLs []string) (*models.ParsedClaudeResponse, error) {
 	hasImages := len(imageURLs) > 0
 
+	if fileGraphJSON == "{}" || fileGraphJSON == "" || fileGraphJSON == "null" {
+		log.Println("NEW PROJECT DETECTED: skipping planner, using SystemPromptAiChat")
+		return m.callSonnetCoderNewProject(clarified, imageURLs)
+	}
+
 	plan, err := m.callSonnetPlanner(clarified, fileGraphJSON, chatHistory, hasImages)
 	if err != nil {
 		return nil, err
@@ -374,6 +379,47 @@ func (m *messagingStc) callSonnetCoder(clarified string, plan *models.SonnetPlan
 		return nil, fmt.Errorf("error in parse claude response: %v", err)
 	}
 
+	return parsedProject, nil
+}
+
+func (m *messagingStc) callSonnetCoderNewProject(clarified string, imageURLs []string) (*models.ParsedClaudeResponse, error) {
+	log.Println("CALLING SONNET CODER FOR NEW PROJECT, clarified:", clarified)
+
+	contentBlocks := buildContentBlocksWithImages(clarified, imageURLs)
+
+	messages := []models.ChatMessage{
+		{
+			Role:    "user",
+			Content: contentBlocks,
+		},
+	}
+
+	rawResp, err := helper.CallAnthropicAPI(m.baseConf,
+		models.AnthropicRequest{
+			Model:     m.baseConf.ClaudeModel,
+			MaxTokens: m.baseConf.CoderMaxTokens,
+			System:    helper.SystemPromptAiChat,
+			Messages:  messages,
+		},
+		720*time.Second,
+	)
+	if err != nil {
+		log.Println("ERROR IN NEW PROJECT CODER:", err)
+		return nil, err
+	}
+
+	parsedProject, err := helper.ParseClaudeResponse(rawResp)
+	if err != nil {
+		log.Println("ERROR PARSING NEW PROJECT RESPONSE:", err)
+		return nil, fmt.Errorf("error parsing new project response: %v", err)
+	}
+
+	if parsedProject.Project == nil {
+		log.Println("WARNING: parsedProject.Project is nil after new project generation")
+		return nil, fmt.Errorf("claude returned no project data")
+	}
+
+	log.Printf("NEW PROJECT GENERATED: files=%d", len(parsedProject.Project.Files))
 	return parsedProject, nil
 }
 
