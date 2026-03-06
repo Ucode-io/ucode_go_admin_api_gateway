@@ -24,6 +24,8 @@ type messagingStc struct {
 	chatId        string
 	mcpProjectId  string
 	resourceEnvId string
+
+	cachedProject *pbo.McpProject
 }
 
 func newMessaging(service services.ServiceManagerI, baseConf config.BaseConfig, chatId, mcpProjectId, resourceEnvId string) *messagingStc {
@@ -44,6 +46,11 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&userMessage); err != nil {
 		h.HandleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	if strings.TrimSpace(userMessage.Content) == "" {
+		h.HandleResponse(c, status_http.BadRequest, "content is required")
 		return
 	}
 
@@ -91,13 +98,12 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 		return
 	}
 
-	aiResponse, err := messaging.routeAndProcess(userMessage, chatHistory)
+	aiResponse, err := messaging.routeAndProcess(c.Request.Context(), userMessage, chatHistory)
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	// В историю чата сохраняем только description — без кода
 	message, err := service.GoObjectBuilderService().AiChat().CreateMessage(
 		c.Request.Context(),
 		&pbo.CreateMessageRequest{
@@ -112,13 +118,32 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 		return
 	}
 
-	var updateProject *pbo.McpProject
+	var (
+		updateProject  *pbo.McpProject
+		isFirstMessage = len(chatHistory) == 0
+	)
+
 	if aiResponse.Project != nil {
-		updateProject, err = messaging.saveProject(aiResponse)
+		updateProject, err = messaging.saveProject(c.Request.Context(), aiResponse)
 		if err != nil {
 			h.HandleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
+	}
+
+	if isFirstMessage {
+		chatTitle := truncateString(userMessage.Content, 80)
+		chatDescription := truncateString(aiResponse.Description, 200)
+
+		_, _ = service.GoObjectBuilderService().AiChat().UpdateChat(
+			c.Request.Context(),
+			&pbo.UpdateChatRequest{
+				ResourceEnvId: resourceEnvId,
+				Id:            chatId,
+				Title:         chatTitle,
+				Description:   chatDescription,
+			},
+		)
 	}
 
 	h.HandleResponse(c, status_http.Created,
@@ -129,18 +154,20 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 	)
 }
 
-func (m *messagingStc) routeAndProcess(req models.NewMessageReq, chatHistory []models.ChatMessage) (*models.ParsedClaudeResponse, error) {
-	fileGraphJSON, err := m.getFileGraphJSON()
+func (m *messagingStc) routeAndProcess(ctx context.Context, req models.NewMessageReq, chatHistory []models.ChatMessage) (*models.ParsedClaudeResponse, error) {
+	hasImages := len(req.Images) > 0
+
+	fileGraphJSON, err := m.getFileGraphJSON(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	haikuResult, err := m.callHaikuRouter(req.Content, fileGraphJSON, chatHistory)
+	haikuResult, err := m.callHaikuRouter(req.Content, fileGraphJSON, chatHistory, hasImages)
 	if err != nil {
 		return nil, err
 	}
 
-	log.Printf("HAIKU ROUTING: next_step=%v intent=%s files_needed=%v", haikuResult.NextStep, haikuResult.Intent, haikuResult.FilesNeeded)
+	log.Printf("HAIKU ROUTING: next_step=%v intent=%s has_images=%v files_needed=%v", haikuResult.NextStep, haikuResult.Intent, haikuResult.HasImages, haikuResult.FilesNeeded)
 
 	if !haikuResult.NextStep {
 		return &models.ParsedClaudeResponse{
@@ -156,25 +183,24 @@ func (m *messagingStc) routeAndProcess(req models.NewMessageReq, chatHistory []m
 		}, nil
 
 	case "project_inspect":
-		return m.runInspectFlow(req.Content, haikuResult.FilesNeeded, chatHistory)
+		return m.runInspectFlow(ctx, req.Content, haikuResult.FilesNeeded, chatHistory, req.Images)
 
 	case "code_change":
-		return m.runCodeFlow(haikuResult.Clarified, fileGraphJSON, chatHistory)
+		return m.runCodeFlow(ctx, haikuResult.Clarified, fileGraphJSON, chatHistory, req.Images)
 	}
 
-	// fallback
 	return &models.ParsedClaudeResponse{
 		Description: haikuResult.Reply,
 	}, nil
 }
 
-func (m *messagingStc) runInspectFlow(userQuestion string, filesNeeded []string, chatHistory []models.ChatMessage) (*models.ParsedClaudeResponse, error) {
-	filesContext, err := m.getFilesContext(filesNeeded)
+func (m *messagingStc) runInspectFlow(ctx context.Context, userQuestion string, filesNeeded []string, chatHistory []models.ChatMessage, imageURLs []string) (*models.ParsedClaudeResponse, error) {
+	filesContext, err := m.getFilesContext(ctx, filesNeeded)
 	if err != nil {
 		return nil, err
 	}
 
-	answer, err := m.callSonnetInspector(userQuestion, filesContext, chatHistory)
+	answer, err := m.callSonnetInspector(userQuestion, filesContext, chatHistory, imageURLs)
 	if err != nil {
 		return nil, err
 	}
@@ -184,8 +210,10 @@ func (m *messagingStc) runInspectFlow(userQuestion string, filesNeeded []string,
 	}, nil
 }
 
-func (m *messagingStc) runCodeFlow(clarified, fileGraphJSON string, chatHistory []models.ChatMessage) (*models.ParsedClaudeResponse, error) {
-	plan, err := m.callSonnetPlanner(clarified, fileGraphJSON)
+func (m *messagingStc) runCodeFlow(ctx context.Context, clarified, fileGraphJSON string, chatHistory []models.ChatMessage, imageURLs []string) (*models.ParsedClaudeResponse, error) {
+	hasImages := len(imageURLs) > 0
+
+	plan, err := m.callSonnetPlanner(clarified, fileGraphJSON, chatHistory, hasImages)
 	if err != nil {
 		return nil, err
 	}
@@ -197,29 +225,30 @@ func (m *messagingStc) runCodeFlow(clarified, fileGraphJSON string, chatHistory 
 		neededPaths = append(neededPaths, f.Path)
 	}
 
-	filesContext, err := m.getFilesContext(neededPaths)
+	filesContext, err := m.getFilesContext(ctx, neededPaths)
 	if err != nil {
 		return nil, err
 	}
 
-	return m.callSonnetCoder(clarified, plan, filesContext, chatHistory)
+	return m.callSonnetCoder(clarified, plan, filesContext, chatHistory, imageURLs)
 }
 
 // --- Вызовы к Anthropic API ---
 
-func (m *messagingStc) callHaikuRouter(userPrompt, fileGraphJSON string, chatHistory []models.ChatMessage) (*models.HaikuRoutingResult, error) {
+func (m *messagingStc) callHaikuRouter(userPrompt, fileGraphJSON string, chatHistory []models.ChatMessage, hasImages bool) (*models.HaikuRoutingResult, error) {
 	log.Println("USER PROMPT:", userPrompt)
 
 	var (
-		content  = helper.ProcessHaikuPrompt(userPrompt, fileGraphJSON)
-		messages = buildMessagesWithHistory(chatHistory, content)
+		content       = helper.ProcessHaikuPrompt(userPrompt, fileGraphJSON, hasImages)
+		contentBlocks = []models.ContentBlock{{Type: "text", Text: content}}
+		messages      = buildMessagesWithHistory(chatHistory, contentBlocks)
 	)
 
 	rawResp, err := helper.CallAnthropicAPI(
 		m.baseConf,
 		models.AnthropicRequest{
-			Model:     "claude-haiku-4-5", // TODO m.baseConf.ClaudeHaikuModel
-			MaxTokens: 3500,
+			Model:     m.baseConf.ClaudeHaikuModel,
+			MaxTokens: m.baseConf.RouterMaxTokens,
 			System:    helper.SystemPromptHaikuRouter,
 			Messages:  messages,
 		},
@@ -236,20 +265,25 @@ func (m *messagingStc) callHaikuRouter(userPrompt, fileGraphJSON string, chatHis
 		return nil, err
 	}
 
+	if hasImages {
+		result.HasImages = true
+	}
+
 	return result, nil
 }
 
-func (m *messagingStc) callSonnetInspector(userQuestion, filesContext string, chatHistory []models.ChatMessage) (string, error) {
+func (m *messagingStc) callSonnetInspector(userQuestion, filesContext string, chatHistory []models.ChatMessage, imageURLs []string) (string, error) {
 	var (
-		content  = helper.ProcessSonnetInspectorPrompt(userQuestion, filesContext)
-		messages = buildMessagesWithHistory(chatHistory, content)
+		content       = helper.ProcessSonnetInspectorPrompt(userQuestion, filesContext)
+		contentBlocks = buildContentBlocksWithImages(content, imageURLs)
+		messages      = buildMessagesWithHistory(chatHistory, contentBlocks)
 	)
 
 	rawResp, err := helper.CallAnthropicAPI(
 		m.baseConf,
 		models.AnthropicRequest{
 			Model:     m.baseConf.ClaudeModel,
-			MaxTokens: 3500,
+			MaxTokens: m.baseConf.InspectorMaxTokens,
 			System:    helper.SystemPromptSonnetInspector,
 			Messages:  messages,
 		},
@@ -269,21 +303,20 @@ func (m *messagingStc) callSonnetInspector(userQuestion, filesContext string, ch
 	return answer, nil
 }
 
-func (m *messagingStc) callSonnetPlanner(clarified, fileGraphJSON string) (*models.SonnetPlanResult, error) {
-	var content = helper.ProcessSonnetPlanPrompt(clarified, fileGraphJSON)
+func (m *messagingStc) callSonnetPlanner(clarified, fileGraphJSON string, chatHistory []models.ChatMessage, hasImages bool) (*models.SonnetPlanResult, error) {
+	var (
+		content       = helper.ProcessSonnetPlanPrompt(clarified, fileGraphJSON, hasImages)
+		contentBlocks = []models.ContentBlock{{Type: "text", Text: content}}
+		messages      = buildMessagesWithHistory(chatHistory, contentBlocks)
+	)
 
 	rawResp, err := helper.CallAnthropicAPI(
 		m.baseConf,
 		models.AnthropicRequest{
 			Model:     m.baseConf.ClaudeModel,
-			MaxTokens: 10000,
+			MaxTokens: m.baseConf.PlannerMaxTokens,
 			System:    helper.SystemPromptSonnetPlanner,
-			Messages: []models.ChatMessage{
-				{
-					Role:    "user",
-					Content: []models.ContentBlock{{Type: "text", Text: content}},
-				},
-			},
+			Messages:  messages,
 		},
 		120*time.Second,
 	)
@@ -301,11 +334,14 @@ func (m *messagingStc) callSonnetPlanner(clarified, fileGraphJSON string) (*mode
 	return result, nil
 }
 
-func (m *messagingStc) callSonnetCoder(clarified string, plan *models.SonnetPlanResult, filesContext string, chatHistory []models.ChatMessage) (*models.ParsedClaudeResponse, error) {
+func (m *messagingStc) callSonnetCoder(clarified string, plan *models.SonnetPlanResult, filesContext string, chatHistory []models.ChatMessage, imageURLs []string) (*models.ParsedClaudeResponse, error) {
+	hasImages := len(imageURLs) > 0
+
 	var (
-		planJSON, _ = json.Marshal(plan)
-		content     = helper.ProcessSonnetCoderPrompt(clarified, string(planJSON), filesContext)
-		messages    = buildMessagesWithHistory(chatHistory, content)
+		planJSON, _   = json.Marshal(plan)
+		content       = helper.ProcessSonnetCoderPrompt(clarified, string(planJSON), filesContext, hasImages)
+		contentBlocks = buildContentBlocksWithImages(content, imageURLs)
+		messages      = buildMessagesWithHistory(chatHistory, contentBlocks)
 	)
 
 	systemPrompt := helper.SystemPromptSonnetCoder
@@ -316,7 +352,7 @@ func (m *messagingStc) callSonnetCoder(clarified string, plan *models.SonnetPlan
 	rawResp, err := helper.CallAnthropicAPI(m.baseConf,
 		models.AnthropicRequest{
 			Model:     m.baseConf.ClaudeModel,
-			MaxTokens: m.baseConf.MaxTokens,
+			MaxTokens: m.baseConf.CoderMaxTokens,
 			System:    systemPrompt,
 			Messages:  messages,
 		},
@@ -365,16 +401,30 @@ func (m *messagingStc) getChatHistory(ctx context.Context) ([]models.ChatMessage
 	return result, nil
 }
 
-func (m *messagingStc) getFileGraphJSON() (string, error) {
+func (m *messagingStc) getProjectData(ctx context.Context) (*pbo.McpProject, error) {
+	if m.cachedProject != nil {
+		return m.cachedProject, nil
+	}
+
 	project, err := m.service.GoObjectBuilderService().McpProject().GetMcpProjectFiles(
-		context.Background(),
+		ctx,
 		&pbo.McpProjectId{
 			ResourceEnvId: m.resourceEnvId,
 			Id:            m.mcpProjectId,
 		},
 	)
 	if err != nil {
-		return "{}", fmt.Errorf("error getting project files: %w", err)
+		return nil, fmt.Errorf("error getting project files: %w", err)
+	}
+
+	m.cachedProject = project
+	return project, nil
+}
+
+func (m *messagingStc) getFileGraphJSON(ctx context.Context) (string, error) {
+	project, err := m.getProjectData(ctx)
+	if err != nil {
+		return "{}", err
 	}
 
 	var graph = make(map[string]models.GraphNode, len(project.GetProjectFiles()))
@@ -393,20 +443,14 @@ func (m *messagingStc) getFileGraphJSON() (string, error) {
 	return string(jsonBytes), nil
 }
 
-func (m *messagingStc) getFilesContext(paths []string) (string, error) {
+func (m *messagingStc) getFilesContext(ctx context.Context, paths []string) (string, error) {
 	if len(paths) == 0 {
 		return "No existing files to modify.", nil
 	}
 
-	project, err := m.service.GoObjectBuilderService().McpProject().GetMcpProjectFiles(
-		context.Background(),
-		&pbo.McpProjectId{
-			ResourceEnvId: m.resourceEnvId,
-			Id:            m.mcpProjectId,
-		},
-	)
+	project, err := m.getProjectData(ctx)
 	if err != nil {
-		return "", fmt.Errorf("error getting project files: %w", err)
+		return "", err
 	}
 
 	var (
@@ -431,7 +475,7 @@ func (m *messagingStc) getFilesContext(paths []string) (string, error) {
 	return sb.String(), nil
 }
 
-func (m *messagingStc) saveProject(req *models.ParsedClaudeResponse) (*pbo.McpProject, error) {
+func (m *messagingStc) saveProject(ctx context.Context, req *models.ParsedClaudeResponse) (*pbo.McpProject, error) {
 	projectEnv, err := helperFunc.ConvertMapToStruct(req.Project.Env)
 	if err != nil {
 		return nil, err
@@ -459,12 +503,12 @@ func (m *messagingStc) saveProject(req *models.ParsedClaudeResponse) (*pbo.McpPr
 	}
 
 	createdProject, err := m.service.GoObjectBuilderService().McpProject().UpdateMcpProject(
-		context.Background(),
+		ctx,
 		&pbo.McpProject{
 			Id:            m.mcpProjectId,
 			ResourceEnvId: m.resourceEnvId,
 			Title:         req.Project.ProjectName,
-			Description:   "Generated with claude",
+			Description:   truncateString(req.Description, 300),
 			ProjectFiles:  projectFiles,
 			ProjectEnv:    projectEnv,
 		},
@@ -476,12 +520,44 @@ func (m *messagingStc) saveProject(req *models.ParsedClaudeResponse) (*pbo.McpPr
 	return createdProject, nil
 }
 
-func buildMessagesWithHistory(history []models.ChatMessage, currentContent string) []models.ChatMessage {
+func buildContentBlocksWithImages(textContent string, imageURLs []string) []models.ContentBlock {
+	var blocks []models.ContentBlock
+
+	for _, imageURL := range imageURLs {
+		if imageURL != "" {
+			blocks = append(blocks, models.ContentBlock{
+				Type: "image",
+				Source: &models.ImageSource{
+					Type: "url",
+					URL:  imageURL,
+				},
+			})
+		}
+	}
+
+	// Then add text
+	blocks = append(blocks, models.ContentBlock{
+		Type: "text",
+		Text: textContent,
+	})
+
+	return blocks
+}
+
+func buildMessagesWithHistory(history []models.ChatMessage, contentBlocks []models.ContentBlock) []models.ChatMessage {
 	var messages = make([]models.ChatMessage, 0, len(history)+1)
 	messages = append(messages, history...)
 	messages = append(messages, models.ChatMessage{
 		Role:    "user",
-		Content: []models.ContentBlock{{Type: "text", Text: currentContent}},
+		Content: contentBlocks,
 	})
 	return messages
+}
+
+func truncateString(s string, maxLen int) string {
+	s = strings.TrimSpace(s)
+	if len(s) <= maxLen {
+		return s
+	}
+	return s[:maxLen-3] + "..."
 }

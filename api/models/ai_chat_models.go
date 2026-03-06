@@ -78,6 +78,7 @@ type (
 		Reply       string   `json:"reply"`        // готовый ответ если next_step=false
 		Clarified   string   `json:"clarified"`    // уточнённый запрос для code_change
 		FilesNeeded []string `json:"files_needed"` // нужные файлы для project_inspect
+		HasImages   bool     `json:"has_images"`   // есть ли изображения в запросе
 	}
 
 	// SonnetPlanResult — план Sonnet: какие файлы создать/изменить
