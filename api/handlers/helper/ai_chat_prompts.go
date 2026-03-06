@@ -143,14 +143,39 @@ You MUST generate vite.config.js with federation plugin:
 - server: { port: 3000, host: true }
 
 ====================================
-RULE 7: ENV FILES
+RULE 7: MANDATORY FILES (CRITICAL — BUILD WILL FAIL WITHOUT THESE)
+====================================
+Your project MUST ALWAYS include ALL of these files. Missing ANY will crash the build:
+
+1. src/App.jsx          — Main app component (THIS IS THE ENTRY POINT - NEVER SKIP)
+2. src/main.jsx         — ReactDOM.createRoot, imports App and index.css
+3. index.html           — Has <div id="root"> and <script type="module" src="/src/main.jsx">
+4. package.json         — All dependencies listed
+5. vite.config.js       — With federation plugin config
+6. tailwind.config.js   — content: ["./index.html", "./src/**/*.{js,jsx}"]
+7. postcss.config.js    — plugins: { tailwindcss: {}, autoprefixer: {} }
+8. src/index.css         — MUST have: @tailwind base; @tailwind components; @tailwind utilities;
+9. .env                 — Environment variables
+10. .env.production     — Production env variables
+
+CRITICAL RULES FOR FILES:
+- src/App.jsx MUST exist and MUST be a valid React component with default export
+- src/main.jsx MUST import App from "./App" (NOT from "./src/App")
+- All component imports MUST use relative paths: "./components/Header" NOT "src/components/Header"
+- All file paths in JSON must NOT start with "/" — use "src/App.jsx" not "/src/App.jsx"
+- Use .jsx extension for React files, .js for non-React files
+- NEVER use require() — only import/export (ES modules)
+- NEVER use TypeScript (.ts, .tsx extensions)
+
+====================================
+RULE 8: ENV FILES
 ====================================
 Always include BOTH files in the "files" array:
 - ".env"
 - ".env.production"
 
 ====================================
-RULE 8: EMPTY TABLES MUST SHOW FIELDS
+RULE 9: EMPTY TABLES MUST SHOW FIELDS
 ====================================
 ALWAYS show table header with fields, EVEN if rows.length === 0!
 Table header (<thead>) is ALWAYS visible. Empty state goes INSIDE <td colSpan={fields.length}>.
@@ -320,6 +345,19 @@ TECHNICAL RULES
 - Tech Stack: React 18, Vite, Tailwind CSS, JavaScript (NO TypeScript)
 - Use lucide-react for icons
 - No UI kits (no MUI, AntD, Chakra)
+
+====================================
+MANDATORY FILE RULES (CRITICAL)
+====================================
+- src/App.jsx MUST always exist with a valid default export
+- src/main.jsx MUST import from "./App" (relative, NOT "./src/App")
+- All imports MUST use relative paths: "./components/X" NOT "src/components/X"
+- File paths in JSON must NOT start with "/" — use "src/App.jsx" not "/src/App.jsx"
+- Use .jsx for React files, .js for config/utility files
+- NEVER use require() — only ES module import/export
+- NEVER use TypeScript (.ts, .tsx)
+- Include tailwind.config.js and postcss.config.js if creating a new project
+- src/index.css MUST contain @tailwind base; @tailwind components; @tailwind utilities;
 
 ====================================
 CONTRAST RULES (NEVER VIOLATE)
