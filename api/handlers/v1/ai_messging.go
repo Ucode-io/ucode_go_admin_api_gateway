@@ -338,16 +338,21 @@ func (m *messagingStc) callSonnetCoder(clarified string, plan *models.SonnetPlan
 	hasImages := len(imageURLs) > 0
 
 	var (
-		planJSON, _   = json.Marshal(plan)
-		content       = helper.ProcessSonnetCoderPrompt(clarified, string(planJSON), filesContext, hasImages)
-		contentBlocks = buildContentBlocksWithImages(content, imageURLs)
-		messages      = buildMessagesWithHistory(chatHistory, contentBlocks)
+		systemPrompt  string
+		contentBlocks []models.ContentBlock
 	)
 
-	systemPrompt := helper.SystemPromptSonnetCoder
 	if filesContext == "No existing files to modify." {
 		systemPrompt = helper.SystemPromptAiChat
+		contentBlocks = buildContentBlocksWithImages(clarified, imageURLs)
+	} else {
+		systemPrompt = helper.SystemPromptSonnetCoder
+		planJSON, _ := json.Marshal(plan)
+		content := helper.ProcessSonnetCoderPrompt(clarified, string(planJSON), filesContext, hasImages)
+		contentBlocks = buildContentBlocksWithImages(content, imageURLs)
 	}
+
+	messages := buildMessagesWithHistory(chatHistory, contentBlocks)
 
 	rawResp, err := helper.CallAnthropicAPI(m.baseConf,
 		models.AnthropicRequest{
