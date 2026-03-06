@@ -132,8 +132,8 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 	}
 
 	if isFirstMessage {
-		chatTitle := truncateString(userMessage.Content, 80)
-		chatDescription := truncateString(aiResponse.Description, 200)
+		chatTitle := truncateString(userMessage.Content, 100)
+		chatDescription := aiResponse.Description
 
 		_, _ = service.GoObjectBuilderService().AiChat().UpdateChat(
 			c.Request.Context(),
@@ -507,8 +507,8 @@ func (m *messagingStc) saveProject(ctx context.Context, req *models.ParsedClaude
 		&pbo.McpProject{
 			Id:            m.mcpProjectId,
 			ResourceEnvId: m.resourceEnvId,
-			Title:         req.Project.ProjectName,
-			Description:   truncateString(req.Description, 300),
+			Title:         truncateString(req.Project.ProjectName, 255),
+			Description:   truncateString(req.Description, 255),
 			ProjectFiles:  projectFiles,
 			ProjectEnv:    projectEnv,
 		},
