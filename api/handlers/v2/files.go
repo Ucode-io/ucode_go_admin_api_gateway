@@ -7,6 +7,7 @@ import (
 	"log"
 	"mime/multipart"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 	"ucode/ucode_go_api_gateway/api/models"
@@ -770,6 +771,8 @@ func (h *HandlerV2) DeleteFiles(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) GetAllFiles(c *gin.Context) {
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
+	offset, _ := strconv.Atoi(c.DefaultQuery("offset", "0"))
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -814,6 +817,8 @@ func (h *HandlerV2) GetAllFiles(c *gin.Context) {
 			Sort:       c.DefaultQuery("sort", ""),
 			ProjectId:  resource.ResourceEnvironmentId,
 			FolderName: c.DefaultQuery("folder_name", ""),
+			Limit:      int32(limit),
+			Offset:     int32(offset),
 		},
 	)
 
