@@ -1,3 +1,0 @@
-[submodule "ucode_protos"]
-	path = ucode_protos
-	url = git@github.com:Ucode-io/ucode_protos.git
