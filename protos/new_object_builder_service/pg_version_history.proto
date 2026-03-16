@@ -45,7 +45,6 @@ message FunctionLogReq {
   string  file_bandwidth = 12;
   string vector_bandwidth = 13;
   int64 return_size = 14;
-  string status = 15;
 }
 
 
@@ -64,7 +63,6 @@ message FunctionLogModel {
   string  file_bandwidth = 12;
   string vector_bandwidth = 13;
   int64 return_size = 14;
-  string status = 15;
 }
 
 
