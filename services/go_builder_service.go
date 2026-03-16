@@ -35,31 +35,35 @@ type GoBuilderServiceI interface {
 	Language() nb.LanguageServiceClient
 	McpProject() nb.McpProjectServiceClient
 	CustomPermission() nb.CustomPermissionsServiceClient
+	AiChat() nb.AiChatServiceClient
+	ProjectFolders() nb.ProjectFoldersServiceClient
 }
 
 type goBuilderServiceClient struct {
-	tableService          nb.TableServiceClient
-	menuService           nb.MenuServiceClient
-	viewService           nb.ViewServiceClient
-	objectBuilderService  nb.ObjectBuilderServiceClient
-	fieldService          nb.FieldServiceClient
-	sectionService        nb.SectionServiceClient
-	layoutService         nb.LayoutServiceClient
-	itemsService          nb.ItemsServiceClient
-	relationService       nb.RelationServiceClient
-	fileService           nb.FileServiceClient
-	excelService          nb.ExcelServiceClient
-	functionService       nb.FunctionServiceV2Client
-	customEventService    nb.CustomEventServiceClient
-	permissionService     nb.PermissionServiceClient
-	versionService        nb.VersionServiceClient
-	versionHistoryService nb.VersionHistoryServiceClient
-	folderGroupService    nb.FolderGroupServiceClient
-	csvService            nb.CSVServiceClient
-	docxTemplateService   nb.DocxTemplateServiceClient
-	languageService       nb.LanguageServiceClient
-	mcpProjectService          nb.McpProjectServiceClient
-	customPermissionService    nb.CustomPermissionsServiceClient
+	tableService            nb.TableServiceClient
+	menuService             nb.MenuServiceClient
+	viewService             nb.ViewServiceClient
+	objectBuilderService    nb.ObjectBuilderServiceClient
+	fieldService            nb.FieldServiceClient
+	sectionService          nb.SectionServiceClient
+	layoutService           nb.LayoutServiceClient
+	itemsService            nb.ItemsServiceClient
+	relationService         nb.RelationServiceClient
+	fileService             nb.FileServiceClient
+	excelService            nb.ExcelServiceClient
+	functionService         nb.FunctionServiceV2Client
+	customEventService      nb.CustomEventServiceClient
+	permissionService       nb.PermissionServiceClient
+	versionService          nb.VersionServiceClient
+	versionHistoryService   nb.VersionHistoryServiceClient
+	folderGroupService      nb.FolderGroupServiceClient
+	csvService              nb.CSVServiceClient
+	docxTemplateService     nb.DocxTemplateServiceClient
+	languageService         nb.LanguageServiceClient
+	mcpProjectService       nb.McpProjectServiceClient
+	customPermissionService nb.CustomPermissionsServiceClient
+	aiChatService           nb.AiChatServiceClient
+	projectFoldersService   nb.ProjectFoldersServiceClient
 }
 
 func NewGoBuilderServiceClient(ctx context.Context, cfg config.Config) (GoBuilderServiceI, error) {
@@ -80,28 +84,30 @@ func NewGoBuilderServiceClient(ctx context.Context, cfg config.Config) (GoBuilde
 	}
 
 	return &goBuilderServiceClient{
-		tableService:          nb.NewTableServiceClient(connGoBuilderService),
-		menuService:           nb.NewMenuServiceClient(connGoBuilderService),
-		viewService:           nb.NewViewServiceClient(connGoBuilderService),
-		objectBuilderService:  nb.NewObjectBuilderServiceClient(connGoBuilderService),
-		fieldService:          nb.NewFieldServiceClient(connGoBuilderService),
-		sectionService:        nb.NewSectionServiceClient(connGoBuilderService),
-		layoutService:         nb.NewLayoutServiceClient(connGoBuilderService),
-		itemsService:          nb.NewItemsServiceClient(connGoBuilderService),
-		relationService:       nb.NewRelationServiceClient(connGoBuilderService),
-		fileService:           nb.NewFileServiceClient(connGoBuilderService),
-		excelService:          nb.NewExcelServiceClient(connGoBuilderService),
-		functionService:       nb.NewFunctionServiceV2Client(connGoBuilderService),
-		customEventService:    nb.NewCustomEventServiceClient(connGoBuilderService),
-		permissionService:     nb.NewPermissionServiceClient(connGoBuilderService),
-		versionService:        nb.NewVersionServiceClient(connGoBuilderService),
-		versionHistoryService: nb.NewVersionHistoryServiceClient(connGoBuilderService),
-		folderGroupService:    nb.NewFolderGroupServiceClient(connGoBuilderService),
-		csvService:            nb.NewCSVServiceClient(connGoBuilderService),
-		docxTemplateService:   nb.NewDocxTemplateServiceClient(connGoBuilderService),
-		languageService:       nb.NewLanguageServiceClient(connGoBuilderService),
-		mcpProjectService:          nb.NewMcpProjectServiceClient(connGoBuilderService),
-		customPermissionService:    nb.NewCustomPermissionsServiceClient(connGoBuilderService),
+		tableService:            nb.NewTableServiceClient(connGoBuilderService),
+		menuService:             nb.NewMenuServiceClient(connGoBuilderService),
+		viewService:             nb.NewViewServiceClient(connGoBuilderService),
+		objectBuilderService:    nb.NewObjectBuilderServiceClient(connGoBuilderService),
+		fieldService:            nb.NewFieldServiceClient(connGoBuilderService),
+		sectionService:          nb.NewSectionServiceClient(connGoBuilderService),
+		layoutService:           nb.NewLayoutServiceClient(connGoBuilderService),
+		itemsService:            nb.NewItemsServiceClient(connGoBuilderService),
+		relationService:         nb.NewRelationServiceClient(connGoBuilderService),
+		fileService:             nb.NewFileServiceClient(connGoBuilderService),
+		excelService:            nb.NewExcelServiceClient(connGoBuilderService),
+		functionService:         nb.NewFunctionServiceV2Client(connGoBuilderService),
+		customEventService:      nb.NewCustomEventServiceClient(connGoBuilderService),
+		permissionService:       nb.NewPermissionServiceClient(connGoBuilderService),
+		versionService:          nb.NewVersionServiceClient(connGoBuilderService),
+		versionHistoryService:   nb.NewVersionHistoryServiceClient(connGoBuilderService),
+		folderGroupService:      nb.NewFolderGroupServiceClient(connGoBuilderService),
+		csvService:              nb.NewCSVServiceClient(connGoBuilderService),
+		docxTemplateService:     nb.NewDocxTemplateServiceClient(connGoBuilderService),
+		languageService:         nb.NewLanguageServiceClient(connGoBuilderService),
+		mcpProjectService:       nb.NewMcpProjectServiceClient(connGoBuilderService),
+		customPermissionService: nb.NewCustomPermissionsServiceClient(connGoBuilderService),
+		aiChatService:           nb.NewAiChatServiceClient(connGoBuilderService),
+		projectFoldersService:   nb.NewProjectFoldersServiceClient(connGoBuilderService),
 	}, nil
 }
 
@@ -191,4 +197,12 @@ func (g *goBuilderServiceClient) McpProject() nb.McpProjectServiceClient {
 
 func (g *goBuilderServiceClient) CustomPermission() nb.CustomPermissionsServiceClient {
 	return g.customPermissionService
+}
+
+func (g *goBuilderServiceClient) AiChat() nb.AiChatServiceClient {
+	return g.aiChatService
+}
+
+func (g *goBuilderServiceClient) ProjectFolders() nb.ProjectFoldersServiceClient {
+	return g.projectFoldersService
 }

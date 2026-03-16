@@ -6,7 +6,8 @@ type (
 		EnvironmentId string
 		APIKey        string
 	}
-	// ========================== API Requests ==========================
+
+	// ========================== MCP Requests ==========================
 
 	MCPRequestWithPlanning struct {
 		Prompt       string            `json:"prompt"`
@@ -61,7 +62,7 @@ type (
 		Context        *[]InspectContext `json:"context,omitempty"`
 	}
 
-	// ========================== Unified File Model ==========================
+	// ========================== Project File Models ==========================
 
 	ProjectFile struct {
 		Path          string `json:"path"`
@@ -70,7 +71,7 @@ type (
 		Purpose       string `json:"purpose,omitempty"`
 	}
 
-	// ========================== AI Responses ==========================
+	// ========================== AI Generated Results ==========================
 
 	GeneratedProject struct {
 		ProjectName string         `json:"project_name"`
@@ -153,22 +154,5 @@ type (
 	ChatMessage struct {
 		Role    string         `json:"role"`
 		Content []ContentBlock `json:"content"`
-	}
-
-	// ============================ Classification Models ============================
-
-	RequestClassification struct {
-		RequiresBackend  bool   `json:"requires_backend"`
-		RequiresFrontend bool   `json:"requires_frontend"`
-		BackendReason    string `json:"backend_reason"`
-		FrontendReason   string `json:"frontend_reason"`
-		Confidence       string `json:"confidence"`
-	}
-
-	AnthropicApiResponse struct {
-		Content []struct {
-			Type string `json:"type"`
-			Text string `json:"text"`
-		} `json:"content"`
 	}
 )

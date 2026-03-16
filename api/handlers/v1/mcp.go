@@ -1,282 +1,983 @@
 package v1
 
 import (
-	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
+	"log"
 	"time"
+	"ucode/ucode_go_api_gateway/api/handlers/helper"
+	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
 	as "ucode/ucode_go_api_gateway/genproto/auth_service"
+	pb "ucode/ucode_go_api_gateway/genproto/company_service"
+	pbo "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
+	helperFunc "ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
+	"ucode/ucode_go_api_gateway/services"
 
 	"github.com/gin-gonic/gin"
 )
 
-type (
-	MCPRequest struct {
-		ProjectType      string   `json:"project_type"`
-		ManagementSystem []string `json:"management_system"`
-		Industry         string   `json:"industry"`
-		Method           string   `json:"method"`
-		Prompt           string   `json:"prompt"`
-	}
+// ====================  MCP HANDLERS  ====================
 
-	Message struct {
-		Role    string `json:"role"`
-		Content string `json:"content"`
-	}
+func (h *HandlerV1) McpCreateBackend(c *gin.Context) {
+	var request models.MCPRequest
 
-	MCPServer struct {
-		Type               string `json:"type"`
-		URL                string `json:"url"`
-		Name               string `json:"name"`
-		AuthorizationToken string `json:"authorization_token,omitempty"`
-	}
-
-	Tool struct {
-		Type          string `json:"type"`
-		MCPServerName string `json:"mcp_server_name,omitempty"`
-	}
-
-	RequestBody struct {
-		Model      string      `json:"model"`
-		MaxTokens  int         `json:"max_tokens"`
-		Messages   []Message   `json:"messages"`
-		MCPServers []MCPServer `json:"mcp_servers,omitempty"`
-		Tools      []Tool      `json:"tools,omitempty"`
-	}
-
-	RequestBodyAnthropic struct {
-		Model      string      `json:"model"`
-		MaxTokens  int         `json:"max_tokens"`
-		System     string      `json:"system,omitempty"`
-		Messages   []Message   `json:"messages"`
-		MCPServers []MCPServer `json:"mcp_servers,omitempty"`
-		Tools      []Tool      `json:"tools,omitempty"`
-	}
-)
-
-func (h *HandlerV1) MCPCall(c *gin.Context) {
-	var (
-		req     MCPRequest
-		content string
-		message string
-	)
-
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := c.ShouldBindJSON(&request); err != nil {
 		h.HandleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
-	projectId, ok := c.Get("project_id")
-	if !ok || !util.IsValidUUID(projectId.(string)) {
-		h.HandleResponse(c, status_http.InvalidArgument, config.ErrProjectIdValid)
+	scope, err := h.resolveProjectScope(c)
+	if err != nil {
 		return
 	}
 
-	environmentId, ok := c.Get("environment_id")
-	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		h.HandleResponse(c, status_http.InvalidArgument, config.ErrEnvironmentIdValid)
-		return
+	if request.Method == "" {
+		request.Method = "project"
 	}
 
-	apiKeys, err := h.authService.ApiKey().GetList(c.Request.Context(), &as.GetListReq{
-		EnvironmentId: environmentId.(string),
-		ProjectId:     projectId.(string),
-		Limit:         1,
-		Offset:        0,
-	})
+	content, message, err := helper.BuildBackendPrompt(
+		models.GeneratePromptRequest{
+			ProjectId:     scope.ProjectId,
+			EnvironmentId: scope.EnvironmentId,
+			Method:        request.Method,
+			APIKey:        scope.APIKey,
+			UserPrompt:    request.Prompt,
+		},
+	)
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	if len(apiKeys.Data) < 1 {
-		h.HandleResponse(c, status_http.InvalidArgument, "Api key not found")
-		return
-	}
 
-	apiKey := apiKeys.GetData()[0].GetAppId()
-
-	if req.Method == "" {
-		req.Method = "project"
-	}
-
-	switch req.Method {
-	case "project":
-		content = fmt.Sprintf(`You are creating a complete u-code project from scratch. Analyze the user's request and determine:
-- Project Type (CRM, ERP, E-commerce, Admin Panel, etc.)
-- Management Systems needed (ProjectManagement, Payroll, Inventory, Sales, etc.)
-- Industry (IT, Healthcare, Finance, Retail, etc.)
-
-Then follow these steps EXACTLY:
-
-STEP 1: Retrieve current DBML schema (if any exists)
-- Use get_dbml tool with:
-  project-id = %s
-  environment-id = %s
-  x-api-key = %s
-
-STEP 2: Analyze user request and generate comprehensive DBML schema
-User Request: "%s"
-
-Based on the user's request, determine:
-1. What type of project/system they need (CRM, ERP, Admin Panel, etc.)
-2. What functional areas/modules are required
-3. What industry/domain this is for
-4. What tables, relationships, and data structures are needed
-
-Generate a complete DBML schema that:
-- Matches the user's requirements EXACTLY
-- Uses PostgreSQL syntax
-- **EXCLUDES all existing tables** from current schema (if retrieved in STEP 1)
-- Includes industry-specific functional areas based on your analysis
-- DO NOT include Users or Roles tables (they already exist in u-code)
-- Use proper Ref definitions: Ref fk_name: table1.column1 < table2.column2
-- For status/type fields, use realistic Enum definitions: Enum "status" { "Active" "Inactive" "Pending" }
-- Use camelCase or snake_case consistently
-- No indexes, no quotes, no cascade options, no default values
-- Use descriptive field names, NO comments
-- Follow relational design principles
-- If user mentions specific number of menus/tables (e.g., "10 menus"), create exactly that many
-
-STEP 3: Create tables directly using create_table tool
-- **Quantity Rule**: If the user did NOT specify a number of tables/menus, strictly create approximately **10 tables** suitable for the project logic.
-- **Icon Rule**: You **MUST** provide an 'icon' parameter for EVERY table. Use a valid full URL from Iconify (e.g., "https://api.iconify.design/mdi:account.svg"). Pick an icon relevant to the table's function.
-- **Menu ID Rule**: You **MUST** provide 'menu_id' for every table. Use the root parent_id = "%s".
-- Call create_table with: label, slug (snake_case), icon, menu_id, x-api-key.
-- IMPORTANT: Save the response from each create_table call - you need table_id and slug (collection) for next steps
-- Example: create_table({label: "Customers", slug: "customers", icon: "https://api.iconify.design/mdi:account.svg", menu_id: "%s", x_api_key: "%s"})
-- Do NOT create folders, all tables are created at root level using the provided menu_id.
-STEP 4: Create fields for each table (IMPORTANT: use update_table, not create_field)
-- IMPORTANT INSTRUCTION FOR FIELD CREATION:
-  - Do NOT call the create_field tool under any circumstances for automated field creation.
-  - Instead, always aggregate fields for a table and call update_table with a fields array and relations array.
-  - If the plan would create several individual fields, combine them into a single update_table call per table (bulk create).
-  - If update_table cannot perform a specific field creation (server returns error), STOP and report the error back (do not retry individual create_field).
-  - Use create_field only if a human explicitly requests a single manual field creation and only after explicit confirmation.
-- Then use update_table to add all fields and relations for each table.
-
-- For each table created, add ALL necessary fields based on DBML schema
-- Use update_table with: tableSlug (collection slug), xapikey, fields array, relations array
-- Field types: SINGLE_LINE, TEXT, NUMBER, DATE, BOOLEAN, ENUM, etc.
-- Add standard fields: id (auto), name/title (required), created_at, updated_at
-- Add all fields from your DBML schema
-- Example: update_table({tableSlug: "customers", xapikey: "%s", fields: [...], relations: [...]})
-
-STEP 5: Organize tables into menus
-- Since no folders are created, all tables use parent_id = "%s"
-- Provide view_fields JSON: { "table_slug": "primary_field_slug" }
-- Example: { "customers": "name", "orders": "order_number" }
-
-STEP 6: Execute DBML (optional - if you prefer bulk creation)
-- If you want to use dbml_to_ucode for bulk creation, provide:
-  - dbml: (full DBML string)
-  - view_fields: (JSON object)
-  - menus: (JSON object where keys are table names, values are table slugs)
-  - x-api-key: %s
-
-CRITICAL RULES:
-1. All tables are created at root level: parent_id = "%s"
-2. Save table_id and collection (slug) from create_table responses
-3. Use collection (slug) as the "collection" parameter in create_field (only for manual single-field requests)
-4. If any tool call fails, STOP and report the error - do not retry
-5. Create a COMPLETE, working project - not just partial structure
-6. Analyze user request carefully - if they say "10 menus", create exactly 10 tables
-7. Remember: Empty folders are not used, all tables are at root level
-
-Context:
-project-id = %s
-environment-id = %s
-x-api-key = %s
-main-menu-parent-id = %s
-
-User Request: "%s"
-
-Now analyze the user's request, determine project type/systems/industry, and create the complete project structure directly as tables at root level.`,
-			projectId.(string), environmentId.(string), apiKey, req.Prompt,
-
-			config.MainMenuID, config.MainMenuID, apiKey,
-
-			apiKey,
-
-			config.MainMenuID,
-
-			apiKey,
-
-			config.MainMenuID,
-
-			projectId.(string), environmentId.(string), apiKey, config.MainMenuID,
-			req.Prompt,
-		)
-
-		message = "Your project has been successfully created."
-
-	case "table":
-		content = req.Prompt
-		content += fmt.Sprintf(`
-
-Context:
-project-id = %s
-environment-id = %s
-x-api-key = %s
-
-Rules:
-- Use available MCP tools to actually perform the action (do not just reply with text).
-- When creating a table:
-  - label must match the requested name
-  - slug should be a safe snake_case variant of the name
-- After tool execution, return the API result (or clear error).`,
-			projectId.(string), environmentId.(string), apiKey)
-
-		message = "The table has been successfully updated."
-	}
-
-	resp, err := h.sendAnthropicRequest(content)
-	fmt.Println("************ MCP Response ************", resp)
+	_, err = h.sendAnthropicBackend(content)
 	if err != nil {
-		h.HandleResponse(c, status_http.InternalServerError, "Your request could not be processed.")
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
 	h.HandleResponse(c, status_http.OK, message)
 }
 
-func (h *HandlerV1) sendAnthropicRequest(content string) (string, error) {
-	var (
-		systemContent = `You are connected to an MCP server named "ucode" and have access to tools via the mcp_toolset.
-When an external action is required (get_dbml, create_menu, create_table, update_table, dbml_to_ucode), CALL the tools using the MCP tool calling mechanism.
-DO NOT call the create_field tool for automated field creation. Instead, ALWAYS use update_table to add or modify fields and relations in bulk (send a fields array and relations array).
-Only call create_field when a human explicitly requests a single manual field creation and after receiving explicit confirmation.
-Do not invent results — call the appropriate tool with exact parameters. Use the tool names as documented.`
+func (h *HandlerV1) McpGenerateProject(c *gin.Context) {
+	var request models.MCPRequest
 
-		userMessage = Message{
-			Role:    "user",
-			Content: content,
-		}
-
-		maxTokens = h.baseConf.MaxTokens
-	)
-
-	if len(content) > 2000 && maxTokens < 4000 {
-		maxTokens = 4000
+	if err := c.ShouldBindJSON(&request); err != nil {
+		h.HandleResponse(c, status_http.BadRequest, err.Error())
+		return
 	}
 
-	body := RequestBodyAnthropic{
+	scope, err := h.resolveProjectScope(c)
+	if err != nil {
+		return
+	}
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     scope.ProjectId,
+			EnvironmentId: scope.EnvironmentId,
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	if resource.ResourceType != pb.ResourceType_POSTGRESQL {
+		h.HandleResponse(c, status_http.InvalidArgument, "resource type not supported")
+		return
+	}
+
+	projectSrv, err := h.GetProjectSrvc(c.Request.Context(), scope.ProjectId, resource.NodeType)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	go func() {
+		bgContent, _, bgErr := helper.BuildBackendPrompt(
+			models.GeneratePromptRequest{
+				ProjectId:     scope.ProjectId,
+				EnvironmentId: scope.EnvironmentId,
+				Method:        "project",
+				APIKey:        scope.APIKey,
+				UserPrompt:    request.Prompt,
+			},
+		)
+		if bgErr != nil {
+			log.Printf("Background BuildBackendPrompt Error: %v", bgErr)
+			return
+		}
+
+		_, bgErr = h.sendAnthropicBackend(bgContent)
+		if bgErr != nil {
+			log.Printf("Background sendAnthropicBackend Error: %v", bgErr)
+			return
+		}
+		log.Println("Background Backend generation completed successfully")
+	}()
+
+	userPrompt := helper.BuildFrontendGeneratePrompt(
+		models.GeneratePromptRequest{
+			ProjectId:     scope.ProjectId,
+			EnvironmentId: scope.EnvironmentId,
+			APIKey:        scope.APIKey,
+			UserPrompt:    request.Prompt,
+			BaseURL:       h.baseConf.UcodeBaseUrl,
+		},
+	)
+
+	project, err := h.generateFrontendProject(userPrompt, request.ImageURLs)
+	if err != nil {
+		h.HandleResponse(c, status_http.InternalServerError, "AI Generation Failed: "+err.Error())
+		return
+	}
+
+	projectEnv, _ := helperFunc.ConvertMapToStruct(project.Env)
+
+	var (
+		projectFiles []*pbo.McpProjectFiles
+		fileGraph    map[string]any
+	)
+
+	for _, file := range project.Files {
+		if val, ok := project.FileGraph[file.Path].(map[string]any); ok {
+			fileGraph = val
+		}
+
+		fileGraphStruct, _ := helperFunc.ConvertMapToStruct(fileGraph)
+
+		projectFiles = append(projectFiles, &pbo.McpProjectFiles{
+			Path:      file.Path,
+			Content:   file.Content,
+			FileGraph: fileGraphStruct,
+		})
+
+		fileGraph = make(map[string]any)
+	}
+
+	saveProject := pbo.CreateMcpProjectReqeust{
+		ResourceEnvId: resource.ResourceEnvironmentId,
+		Title:         project.ProjectName,
+		Description:   "Generated by ucode with claude-sonnet-4-5",
+		ProjectEnv:    projectEnv,
+		ProjectFiles:  projectFiles,
+	}
+
+	createdProject, err := projectSrv.GoObjectBuilderService().McpProject().CreateMcpProject(context.Background(), &saveProject)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.HandleResponse(c, status_http.OK, createdProject)
+}
+
+func (h *HandlerV1) MCPUpdateFrontend(c *gin.Context) {
+	var (
+		request      models.MCPRequest
+		mcpProjectId = c.Param("mcp_project_id")
+	)
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		h.HandleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	scope, err := h.resolveProjectScope(c)
+	if err != nil {
+		return
+	}
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     scope.ProjectId,
+			EnvironmentId: scope.EnvironmentId,
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	if resource.ResourceType != pb.ResourceType_POSTGRESQL {
+		h.HandleResponse(c, status_http.InvalidArgument, "resource type not supported")
+		return
+	}
+
+	service, err := h.GetProjectSrvc(c.Request.Context(), scope.ProjectId, resource.NodeType)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	log.Println("========== STEP 1: CLASSIFYING REQUEST ==========")
+
+	classification, err := h.classifyRequest(request.Prompt, request.ImageURLs)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, "Classification failed: "+err.Error())
+		return
+	}
+
+	log.Printf("Classification result: backend=%v, frontend=%v",
+		classification.RequiresBackend,
+		classification.RequiresFrontend,
+	)
+
+	if !classification.RequiresBackend && !classification.RequiresFrontend {
+		h.HandleResponse(c, status_http.OK, map[string]string{
+			"status":  "success",
+			"message": "No operations required for this request",
+		})
+		return
+	}
+
+	if classification.RequiresBackend {
+		var promptReq = models.GeneratePromptRequest{
+			ProjectId:     scope.ProjectId,
+			EnvironmentId: scope.EnvironmentId,
+			UserPrompt:    request.Prompt,
+			APIKey:        scope.APIKey,
+			Method:        "table",
+		}
+
+		if !classification.RequiresFrontend {
+			backendContent, backendMsg, err := helper.BuildBackendPrompt(promptReq)
+			if err != nil {
+				h.HandleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+			_, err = h.sendAnthropicBackend(backendContent)
+			if err != nil {
+				h.HandleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+			h.HandleResponse(c, status_http.OK, map[string]any{"message": backendMsg})
+			return
+		}
+
+		go func() {
+			content, _, err := helper.BuildBackendPrompt(promptReq)
+			if err != nil {
+				log.Println("Backend async build failed: " + err.Error())
+				return
+			}
+			_, err = h.sendAnthropicBackend(content)
+			if err != nil {
+				log.Println("Backend async send failed: " + err.Error())
+				return
+			}
+			log.Println("Async backend operation completed successfully")
+		}()
+	}
+
+	projectFilesRes, err := service.GoObjectBuilderService().McpProject().GetMcpProjectFiles(
+		c.Request.Context(),
+		&pbo.McpProjectId{
+			Id:            mcpProjectId,
+			ResourceEnvId: resource.ResourceEnvironmentId,
+		},
+	)
+
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	var (
+		filesGraphMap = make(map[string]any)
+		filesMap      = make(map[string]string)
+		filesToUpdate []models.ProjectFile
+
+		mcpProjectFiles []*pbo.McpProjectFiles
+	)
+
+	for _, file := range projectFilesRes.ProjectFiles {
+		filesGraphMap[file.Path] = file.FileGraph.AsMap()
+		filesMap[file.Path] = file.Content
+	}
+
+	log.Println("========== STEP 5: ANALYZING FRONTEND CHANGES ==========")
+
+	var analyzeReq = models.AnalyzeFrontendPromptRequest{
+		UserRequest: request.Prompt,
+		FileGraph:   filesGraphMap,
+		ProjectName: projectFilesRes.Title,
+		Context:     request.Context,
+	}
+
+	analysisPrompt, err := helper.BuildFrontendAnalyzePrompt(analyzeReq)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	analysis, err := h.analyzeProject(analysisPrompt, request.ImageURLs)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	log.Printf("Analysis: modify=%d, create=%d, delete=%d",
+		len(analysis.FilesToModify),
+		len(analysis.NewFilesNeeded),
+		len(analysis.FilesToDelete),
+	)
+
+	if len(analysis.FilesToModify) == 0 && len(analysis.NewFilesNeeded) == 0 && len(analysis.FilesToDelete) == 0 {
+		h.HandleResponse(c, status_http.OK, map[string]any{
+			"status":             "success",
+			"message":            "No frontend changes needed",
+			"backend_processing": classification.RequiresBackend,
+		})
+		return
+	}
+
+	for _, fileToMod := range analysis.FilesToModify {
+		if fileContent, exists := filesMap[fileToMod.Path]; exists {
+			filesToUpdate = append(filesToUpdate, models.ProjectFile{
+				Path:    fileToMod.Path,
+				Content: fileContent,
+			})
+		}
+	}
+
+	var updateReq = models.UpdateFrontendPromptRequest{
+		UserRequest:    request.Prompt,
+		FilesToUpdate:  filesToUpdate,
+		AnalysisResult: *analysis,
+		ProjectName:    projectFilesRes.Title,
+		Context:        request.Context,
+	}
+
+	updatePrompt, err := helper.BuildFrontendUpdatePrompt(updateReq)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	update, err := h.updateProject(updatePrompt, request.ImageURLs)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	for _, file := range update.UpdatedFiles {
+		filesMap[file.Path] = file.Content
+		if graphUpdate, ok := update.FileGraphUpdates[file.Path]; ok {
+			filesGraphMap[file.Path] = graphUpdate
+		}
+	}
+
+	for _, file := range update.NewFiles {
+		filesMap[file.Path] = file.Content
+		if graphUpdate, ok := update.FileGraphUpdates[file.Path]; ok {
+			filesGraphMap[file.Path] = graphUpdate
+		}
+	}
+
+	for path, content := range filesMap {
+		fileGraph, _ := filesGraphMap[path].(map[string]any)
+		fileGraphStruct, _ := helperFunc.ConvertMapToStruct(fileGraph)
+
+		mcpProjectFiles = append(mcpProjectFiles, &pbo.McpProjectFiles{
+			ProjectId: mcpProjectId,
+			Path:      path,
+			Content:   content,
+			FileGraph: fileGraphStruct,
+		})
+	}
+
+	var saveProject = pbo.McpProject{
+		ResourceEnvId: resource.ResourceEnvironmentId,
+		Id:            mcpProjectId,
+		ProjectFiles:  mcpProjectFiles,
+	}
+
+	_, err = service.GoObjectBuilderService().McpProject().UpdateMcpProject(context.Background(), &saveProject)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.HandleResponse(c, status_http.OK, update)
+}
+
+func (h *HandlerV1) McpGeneratePlan(c *gin.Context) {
+	var req models.MCPRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		h.HandleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	if req.Prompt == "" {
+		h.HandleResponse(c, status_http.BadRequest, "prompt is required")
+		return
+	}
+
+	backendPlan, err := h.generateBackendPlan(req.Prompt)
+	if err != nil {
+		h.HandleResponse(c, status_http.InternalServerError, "Backend plan generation failed: "+err.Error())
+		return
+	}
+
+	frontendPlan, err := h.generateFrontendPlan(req.Prompt, req.ImageURLs)
+	if err != nil {
+		h.HandleResponse(c, status_http.InternalServerError, "Frontend plan generation failed: "+err.Error())
+		return
+	}
+
+	h.HandleResponse(c, status_http.OK, gin.H{
+		"backend_plan":  backendPlan,
+		"frontend_plan": frontendPlan,
+		"prompt":        req.Prompt,
+		"image_urls":    req.ImageURLs,
+	})
+}
+
+func (h *HandlerV1) McpGenerateProjectV2(c *gin.Context) {
+	var (
+		req              models.MCPRequestWithPlanning
+		withPlanning     bool
+		generatedProject *models.GeneratedProject
+	)
+
+	withPlanning = c.Query("with_planning") == "true"
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		h.HandleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	scope, err := h.resolveProjectScope(c)
+	if err != nil {
+		return
+	}
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     scope.ProjectId,
+			EnvironmentId: scope.EnvironmentId,
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	if resource.ResourceType != pb.ResourceType_POSTGRESQL {
+		h.HandleResponse(c, status_http.InvalidArgument, "resource type not supported")
+		return
+	}
+
+	projectSrv, err := h.GetProjectSrvc(c.Request.Context(), scope.ProjectId, resource.NodeType)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	var generatePromptReq = models.GeneratePromptRequest{
+		UserPrompt:    req.Prompt,
+		ProjectId:     scope.ProjectId,
+		EnvironmentId: scope.EnvironmentId,
+		APIKey:        scope.APIKey,
+		BaseURL:       h.baseConf.UcodeBaseUrl,
+		Method:        "project",
+	}
+
+	if withPlanning {
+		if req.BackendPlan == "" || req.FrontendPlan == "" {
+			h.HandleResponse(c, status_http.BadRequest, "backend_plan and frontend_plan are required when with_planning=true")
+			return
+		}
+
+		var (
+			backendPrompt  = helper.BuildBackendPromptWithPlan(generatePromptReq, req.BackendPlan)
+			frontendPrompt = helper.BuildFrontendPromptWithPlan(generatePromptReq, req.FrontendPlan)
+		)
+
+		go func() {
+			if _, err = h.sendAnthropicBackend(backendPrompt); err != nil {
+				log.Printf("Backend plan execution failed: %v\n", err)
+			}
+		}()
+
+		generatedProject, err = h.generateFrontendProject(frontendPrompt, req.ImageURLs)
+		if err != nil {
+			h.HandleResponse(c, status_http.InternalServerError, "Frontend generation failed: "+err.Error())
+			return
+		}
+
+	} else {
+		if req.Prompt == "" {
+			h.HandleResponse(c, status_http.BadRequest, "prompt is required")
+			return
+		}
+
+		go func() {
+			content, _, err := helper.BuildBackendPrompt(generatePromptReq)
+			if err != nil {
+				log.Printf("Backend generation failed: %v\n", err)
+				return
+			}
+			if _, err = h.sendAnthropicBackend(content); err != nil {
+				log.Printf("Backend execution failed: %v\n", err)
+				return
+			}
+			log.Println("Backend operation completed:")
+		}()
+
+		userPrompt := helper.BuildFrontendGeneratePrompt(generatePromptReq)
+
+		generatedProject, err = h.generateFrontendProject(userPrompt, req.ImageURLs)
+		if err != nil {
+			h.HandleResponse(c, status_http.InternalServerError, "AI Generation Failed: "+err.Error())
+			return
+		}
+	}
+
+	createdProject, err := h.saveFrontendProject(
+		c.Request.Context(),
+		projectSrv,
+		generatedProject,
+		resource.ResourceEnvironmentId,
+	)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.HandleResponse(c, status_http.OK, createdProject)
+}
+
+// ========================= Main functions ============================
+
+func (h *HandlerV1) resolveProjectScope(c *gin.Context) (*models.ProjectScope, error) {
+	var (
+		projectIDRaw any
+		envIDRaw     any
+		exists       bool
+	)
+
+	projectIDRaw, exists = c.Get("project_id")
+	if !exists || !util.IsValidUUID(projectIDRaw.(string)) {
+		h.HandleResponse(c, status_http.InvalidArgument, config.ErrProjectIdValid)
+		return nil, config.ErrProjectIdValid
+	}
+
+	envIDRaw, exists = c.Get("environment_id")
+	if !exists || !util.IsValidUUID(envIDRaw.(string)) {
+		h.HandleResponse(c, status_http.InvalidArgument, config.ErrEnvironmentIdValid)
+		return nil, config.ErrEnvironmentIdValid
+	}
+
+	apiKeys, err := h.authService.ApiKey().GetList(c.Request.Context(), &as.GetListReq{
+		EnvironmentId: envIDRaw.(string),
+		ProjectId:     projectIDRaw.(string),
+		Limit:         1,
+		Offset:        0,
+	})
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return nil, err
+	}
+	if len(apiKeys.Data) < 1 {
+		h.HandleResponse(c, status_http.InvalidArgument, "Api key not found")
+		return nil, fmt.Errorf("api key not found")
+	}
+
+	return &models.ProjectScope{
+		ProjectId:     projectIDRaw.(string),
+		EnvironmentId: envIDRaw.(string),
+		APIKey:        apiKeys.GetData()[0].GetAppId(),
+	}, nil
+}
+
+func (h *HandlerV1) generateBackendPlan(userPrompt string) (string, error) {
+	var (
+		body = models.AnthropicRequest{
+			Model:     h.baseConf.ClaudeModel,
+			MaxTokens: h.baseConf.GeneratePlanMaxTokens,
+			System:    helper.SystemPromptPlanBackend,
+			Messages: []models.ChatMessage{
+				{
+					Role: "user",
+					Content: []models.ContentBlock{
+						{
+							Type: "text",
+							Text: helper.BuildBackendPlanPrompt(userPrompt),
+						},
+					},
+				},
+			},
+		}
+		apiResponse models.ClaudeResponse
+	)
+
+	respText, err := helper.CallAnthropicAPI(h.baseConf, body, 300*time.Second)
+	if err != nil {
+		return "", fmt.Errorf("backend plan API call failed: %w", err)
+	}
+
+	if err = json.Unmarshal([]byte(respText), &apiResponse); err != nil {
+		return "", fmt.Errorf("failed to parse backend plan response: %w", err)
+	}
+
+	if len(apiResponse.Content) == 0 {
+		return "", fmt.Errorf("empty backend plan response")
+	}
+
+	return apiResponse.Content[0].Text, nil
+}
+
+func (h *HandlerV1) generateFrontendPlan(userPrompt string, imageURLs []string) (string, error) {
+	var (
+		contentBlocks []models.ContentBlock
+		body          models.AnthropicRequest
+		apiResponse   models.ClaudeResponse
+	)
+
+	for _, imageURL := range imageURLs {
+		if imageURL != "" {
+			contentBlocks = append(contentBlocks, models.ContentBlock{
+				Type: "image",
+				Source: &models.ImageSource{
+					Type: "url",
+					URL:  imageURL,
+				},
+			})
+		}
+	}
+
+	contentBlocks = append(contentBlocks, models.ContentBlock{
+		Type: "text",
+		Text: helper.BuildFrontendPlanPrompt(userPrompt, len(imageURLs) > 0),
+	})
+
+	body = models.AnthropicRequest{
 		Model:     h.baseConf.ClaudeModel,
-		MaxTokens: maxTokens,
-		System:    systemContent,
-		Messages:  []Message{userMessage},
-		MCPServers: []MCPServer{
+		MaxTokens: h.baseConf.GeneratePlanMaxTokens,
+		System:    helper.SystemPromptPlanFrontend,
+		Messages: []models.ChatMessage{
+			{
+				Role:    "user",
+				Content: contentBlocks,
+			},
+		},
+	}
+
+	respText, err := helper.CallAnthropicAPI(h.baseConf, body, 300*time.Second)
+	if err != nil {
+		return "", fmt.Errorf("frontend plan API call failed: %w", err)
+	}
+
+	if err = json.Unmarshal([]byte(respText), &apiResponse); err != nil {
+		return "", fmt.Errorf("failed to parse frontend plan response: %w", err)
+	}
+
+	if len(apiResponse.Content) == 0 {
+		return "", fmt.Errorf("empty frontend plan response")
+	}
+
+	return apiResponse.Content[0].Text, nil
+}
+
+func (h *HandlerV1) saveFrontendProject(ctx context.Context, services services.ServiceManagerI, project *models.GeneratedProject, resourceEnvId string) (*pbo.McpProject, error) {
+	var (
+		saveProject = pbo.CreateMcpProjectReqeust{
+			ResourceEnvId: resourceEnvId,
+			Title:         project.ProjectName,
+			Description:   "Generated by ucode with claude-sonnet-4-5",
+		}
+
+		projectFiles []*pbo.McpProjectFiles
+		fileGraph    map[string]any
+	)
+
+	projectEnv, _ := helperFunc.ConvertMapToStruct(project.Env)
+
+	for _, file := range project.Files {
+		if val, ok := project.FileGraph[file.Path].(map[string]any); ok {
+			fileGraph = val
+		}
+
+		fileGraphStruct, _ := helperFunc.ConvertMapToStruct(fileGraph)
+
+		projectFiles = append(projectFiles, &pbo.McpProjectFiles{
+			Path:      file.Path,
+			Content:   file.Content,
+			FileGraph: fileGraphStruct,
+		})
+
+		fileGraph = make(map[string]any)
+	}
+
+	saveProject.ProjectEnv = projectEnv
+	saveProject.ProjectFiles = projectFiles
+
+	return services.GoObjectBuilderService().McpProject().CreateMcpProject(ctx, &saveProject)
+}
+
+// ==================== Send Anthropic Request methods ====================
+
+func (h *HandlerV1) sendAnthropicBackend(content string) (string, error) {
+	return helper.CallAnthropicAPI(h.baseConf,
+		models.AnthropicRequest{
+			Model:     h.baseConf.ClaudeModel,
+			MaxTokens: h.baseConf.MaxTokens,
+			System:    helper.SystemPromptBackend,
+			Messages: []models.ChatMessage{
+				{
+					Role: "user",
+					Content: []models.ContentBlock{
+						{
+							Type: "text",
+							Text: content,
+						},
+					},
+				},
+			},
+			MCPServers: []models.MCPServer{
+				{
+					Type: "url",
+					URL:  h.baseConf.MCPServerURL,
+					Name: "ucode",
+				},
+			},
+			Tools: []models.MCPTool{
+				{
+					Type:          "mcp_toolset",
+					MCPServerName: "ucode",
+				},
+			},
+		},
+		420*time.Second,
+	)
+}
+
+func (h *HandlerV1) generateFrontendProject(userPrompt string, imageURLs []string) (*models.GeneratedProject, error) {
+	var (
+		contentBlocks []models.ContentBlock
+		body          models.AnthropicRequest
+		apiResponse   models.ClaudeResponse
+		project       models.GeneratedProject
+	)
+
+	for _, imageURL := range imageURLs {
+		if imageURL != "" {
+			contentBlocks = append(contentBlocks, models.ContentBlock{
+				Type: "image",
+				Source: &models.ImageSource{
+					Type: "url",
+					URL:  imageURL,
+				},
+			})
+		}
+	}
+
+	contentBlocks = append(contentBlocks, models.ContentBlock{
+		Type: "text",
+		Text: userPrompt,
+	})
+
+	body = models.AnthropicRequest{
+		Model:     h.baseConf.ClaudeModel,
+		MaxTokens: h.baseConf.MaxTokens,
+		System:    helper.SystemPromptGenerateFrontend,
+		Messages: []models.ChatMessage{
+			{
+				Role:    "user",
+				Content: contentBlocks,
+			},
+		},
+	}
+
+	respText, err := helper.CallAnthropicAPI(h.baseConf, body, 420*time.Second)
+	if err != nil {
+		return nil, err
+	}
+
+	if err = json.Unmarshal([]byte(respText), &apiResponse); err != nil {
+		return nil, fmt.Errorf("failed to parse API response: %w", err)
+	}
+
+	if len(apiResponse.Content) == 0 {
+		return nil, fmt.Errorf("empty content in response")
+	}
+
+	cleanedText := helper.CleanJSONResponse(apiResponse.Content[0].Text)
+
+	if err = json.Unmarshal([]byte(cleanedText), &project); err != nil {
+		return nil, fmt.Errorf("failed to parse project JSON: %w", err)
+	}
+
+	return &project, nil
+}
+
+func (h *HandlerV1) classifyRequest(prompt string, imageURLs []string) (*models.RequestClassification, error) {
+	var (
+		hasImages            = len(imageURLs) > 0
+		classificationPrompt = helper.BuildClassificationPrompt(prompt, hasImages)
+		body                 = models.AnthropicRequest{
+			Model:     h.baseConf.ClaudeModel,
+			MaxTokens: h.baseConf.ClassifyReqeustMaxTokens,
+			System:    helper.SystemPromptClassifyRequest,
+			Messages: []models.ChatMessage{
+				{
+					Role: "user",
+					Content: []models.ContentBlock{
+						{
+							Type: "text",
+							Text: classificationPrompt,
+						},
+					},
+				},
+			},
+		}
+		apiResponse    models.ClaudeResponse
+		classification models.RequestClassification
+	)
+
+	respText, err := helper.CallAnthropicAPI(h.baseConf, body, 60*time.Second)
+	if err != nil {
+		return nil, fmt.Errorf("classification API call failed: %w", err)
+	}
+
+	if err = json.Unmarshal([]byte(respText), &apiResponse); err != nil {
+		return nil, fmt.Errorf("failed to parse classification response: %w", err)
+	}
+
+	if len(apiResponse.Content) == 0 {
+		return nil, fmt.Errorf("empty classification response")
+	}
+
+	cleanedText := helper.CleanJSONResponse(apiResponse.Content[0].Text)
+
+	if err = json.Unmarshal([]byte(cleanedText), &classification); err != nil {
+		return nil, fmt.Errorf("failed to parse classification JSON: %w", err)
+	}
+
+	log.Printf("REQUEST CLASSIFIED: backend=%v, frontend=%v, confidence=%s",
+		classification.RequiresBackend,
+		classification.RequiresFrontend,
+		classification.Confidence,
+	)
+
+	return &classification, nil
+}
+
+func (h *HandlerV1) analyzeProject(userPrompt string, imageURLs []string) (*models.AnalysisResult, error) {
+	var (
+		contentBlocks []models.ContentBlock
+		body          models.AnthropicRequest
+		apiResponse   models.ClaudeResponse
+		analysis      models.AnalysisResult
+	)
+
+	for _, imageURL := range imageURLs {
+		if imageURL != "" {
+			contentBlocks = append(contentBlocks, models.ContentBlock{
+				Type: "image",
+				Source: &models.ImageSource{
+					Type: "url",
+					URL:  imageURL,
+				},
+			})
+		}
+	}
+
+	contentBlocks = append(contentBlocks, models.ContentBlock{
+		Type: "text",
+		Text: userPrompt,
+	})
+
+	body = models.AnthropicRequest{
+		Model:     h.baseConf.ClaudeModel,
+		MaxTokens: h.baseConf.AnalyseProjectMaxTokens,
+		System:    helper.SystemPromptAnalyzeFrontend,
+		Messages: []models.ChatMessage{
+			{
+				Role:    "user",
+				Content: contentBlocks,
+			},
+		},
+	}
+
+	respText, err := helper.CallAnthropicAPI(h.baseConf, body, 120*time.Second)
+	if err != nil {
+		return nil, err
+	}
+
+	if err = json.Unmarshal([]byte(respText), &apiResponse); err != nil {
+		return nil, fmt.Errorf("failed to parse response: %w", err)
+	}
+
+	if len(apiResponse.Content) == 0 {
+		return nil, fmt.Errorf("empty content")
+	}
+
+	cleanedText := helper.CleanJSONResponse(apiResponse.Content[0].Text)
+
+	if err = json.Unmarshal([]byte(cleanedText), &analysis); err != nil {
+		return nil, fmt.Errorf("failed to parse analysis: %w", err)
+	}
+
+	return &analysis, nil
+}
+
+func (h *HandlerV1) updateProject(userPrompt string, imageURLs []string) (*models.UpdateResult, error) {
+	var (
+		contentBlocks []models.ContentBlock
+		body          models.AnthropicRequest
+		apiResponse   models.ClaudeResponse
+		update        models.UpdateResult
+	)
+
+	for _, imageURL := range imageURLs {
+		if imageURL != "" {
+			contentBlocks = append(contentBlocks, models.ContentBlock{
+				Type: "image",
+				Source: &models.ImageSource{
+					Type: "url",
+					URL:  imageURL,
+				},
+			})
+		}
+	}
+
+	contentBlocks = append(contentBlocks, models.ContentBlock{
+		Type: "text",
+		Text: userPrompt,
+	})
+
+	body = models.AnthropicRequest{
+		Model:     h.baseConf.ClaudeModel,
+		MaxTokens: h.baseConf.MaxTokens,
+		System:    helper.SystemPromptUpdateFrontend,
+		Messages: []models.ChatMessage{
+			{
+				Role:    "user",
+				Content: contentBlocks,
+			},
+		},
+		MCPServers: []models.MCPServer{
 			{
 				Type: "url",
 				URL:  h.baseConf.MCPServerURL,
 				Name: "ucode",
 			},
 		},
-		Tools: []Tool{
+		Tools: []models.MCPTool{
 			{
 				Type:          "mcp_toolset",
 				MCPServerName: "ucode",
@@ -284,36 +985,24 @@ Do not invent results — call the appropriate tool with exact parameters. Use t
 		},
 	}
 
-	jsonBody, err := json.MarshalIndent(body, "", "  ")
+	respText, err := helper.CallAnthropicAPI(h.baseConf, body, 420*time.Second)
 	if err != nil {
-		return "", fmt.Errorf("failed to marshal request body: %w", err)
+		return nil, err
 	}
 
-	req, err := http.NewRequest(http.MethodPost, h.baseConf.AnthropicBaseAPIURL, bytes.NewBuffer(jsonBody))
-	if err != nil {
-		return "", fmt.Errorf("failed to create request: %w", err)
+	if err = json.Unmarshal([]byte(respText), &apiResponse); err != nil {
+		return nil, fmt.Errorf("failed to parse response: %w", err)
 	}
 
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("X-API-Key", h.baseConf.AnthropicAPIKey)
-	req.Header.Set("anthropic-version", h.baseConf.AnthropicVersion)
-	req.Header.Set("anthropic-beta", h.baseConf.AnthropicBeta)
-
-	client := &http.Client{Timeout: 420 * time.Second}
-	resp, err := client.Do(req)
-	if err != nil {
-		return "", fmt.Errorf("request failed: %w", err)
-	}
-	defer resp.Body.Close()
-
-	respByte, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", err
+	if len(apiResponse.Content) == 0 {
+		return nil, fmt.Errorf("empty content")
 	}
 
-	if resp.StatusCode != http.StatusOK {
-		return string(respByte), fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	cleanedText := helper.CleanJSONResponse(apiResponse.Content[0].Text)
+
+	if err = json.Unmarshal([]byte(cleanedText), &update); err != nil {
+		return nil, fmt.Errorf("failed to parse update: %w", err)
 	}
 
-	return string(respByte), nil
+	return &update, nil
 }

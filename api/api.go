@@ -335,6 +335,31 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			customPermission.GET("/accesses/all", h.V1.GetAllCustomPermissionAccesses)
 			customPermission.PUT("/accesses", h.V1.UpdateCustomPermissionAccess)
 		}
+
+		aiChat := v1Admin.Group("/ai-chat")
+		{
+			aiChat.POST("", h.V1.CreateAiChat)
+			aiChat.GET("/list", h.V1.GetAllChats)
+			aiChat.GET("/project/:project-id", h.V1.GetProjectChat)
+
+			aiChat.PUT("/:chat-id", h.V1.UpdateAiChat)
+			aiChat.DELETE("/:chat-id", h.V1.DeleteAiChat)
+
+			aiChat.POST("/new-messages/:chat-id", h.V1.CreateAiChatMessage)
+			aiChat.GET("/messages/:chat-id", h.V1.GetAiChatMessages)
+			aiChat.DELETE("/messages/:message_id", h.V1.DeleteAiChatMessage)
+
+		}
+
+		projectFolders := v1Admin.Group("/project-folders")
+		{
+			projectFolders.POST("", h.V1.CreateProjectFolder)
+			projectFolders.GET("", h.V1.GetAllProjectFolders)
+			projectFolders.GET("/:folder_id", h.V1.GetProjectFolderById)
+			projectFolders.PUT("/:folder_id", h.V1.UpdateProjectFolder)
+			projectFolders.DELETE("/:folder_id", h.V1.DeleteProjectFolder)
+			projectFolders.PUT("/order", h.V1.UpdateProjectFolderOrder)
+		}
 	}
 
 	v2Admin := r.Group("/v2")

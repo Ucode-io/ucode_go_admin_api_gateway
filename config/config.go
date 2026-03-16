@@ -104,6 +104,7 @@ type BaseConfig struct {
 	AnthropicBeta       string
 	AnthropicBaseAPIURL string
 	ClaudeModel         string
+	ClaudeHaikuModel    string
 	AutomationURL       string
 	OpenFaaSBaseUrl     string
 	KnativeBaseUrl      string
@@ -114,6 +115,10 @@ type BaseConfig struct {
 	AnalyseProjectMaxTokens  int
 	GeneratePlanMaxTokens    int
 	ClassifyReqeustMaxTokens int
+	CoderMaxTokens           int
+	RouterMaxTokens          int
+	InspectorMaxTokens       int
+	PlannerMaxTokens         int
 
 	UcodeBaseUrl string
 }
@@ -170,6 +175,7 @@ func BaseLoad() BaseConfig {
 	config.AnthropicBaseAPIURL = cast.ToString(GetOrReturnDefaultValue("ANTHROPIC_BASE_API_URL", ""))
 	config.AnthropicVersion = cast.ToString(GetOrReturnDefaultValue("ANTHROPIC_VERSION", ""))
 	config.ClaudeModel = cast.ToString(GetOrReturnDefaultValue("CLAUDE_MODEL", ""))
+	config.ClaudeHaikuModel = cast.ToString(GetOrReturnDefaultValue("CLAUDE_HAIKU_MODEL", "claude-haiku-4-5"))
 	config.AutomationURL = cast.ToString(GetOrReturnDefaultValue("AUTOMATION_URL", ""))
 	config.OpenFaaSBaseUrl = cast.ToString(GetOrReturnDefaultValue("OPENFAAS_BASE_URL", ""))
 	config.KnativeBaseUrl = cast.ToString(GetOrReturnDefaultValue("KNATIVE_BASE_URL", ""))
@@ -180,6 +186,10 @@ func BaseLoad() BaseConfig {
 	config.AnalyseProjectMaxTokens = cast.ToInt(GetOrReturnDefaultValue("ANALYSE_PROJECT_MAX_TOKENS", 5000))
 	config.GeneratePlanMaxTokens = cast.ToInt(GetOrReturnDefaultValue("GENERATE_PLAN_MAX_TOKENS", 10000))
 	config.ClassifyReqeustMaxTokens = cast.ToInt(GetOrReturnDefaultValue("CLASSIFY_MAX_TOKENS", 3000))
+	config.CoderMaxTokens = cast.ToInt(GetOrReturnDefaultValue("CODER_MAX_TOKENS", 64000))
+	config.RouterMaxTokens = cast.ToInt(GetOrReturnDefaultValue("ROUTER_MAX_TOKENS", 4000))
+	config.InspectorMaxTokens = cast.ToInt(GetOrReturnDefaultValue("INSPECTOR_MAX_TOKENS", 8000))
+	config.PlannerMaxTokens = cast.ToInt(GetOrReturnDefaultValue("PLANNER_MAX_TOKENS", 16000))
 
 	return config
 }
