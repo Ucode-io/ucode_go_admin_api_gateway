@@ -36,6 +36,8 @@ import (
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) CreateNewFunction(c *gin.Context) {
+	logText := fmt.Sprintf("I am inside create func %v-%v-%v", h.baseConf.GoFunctionServiceHost, h.baseConf.GoFunctionServiceHTTPPort, c.Request.URL.Path)
+	h.log.Info(logText)
 	_ = h.MakeProxy(c, h.baseConf.GoFunctionServiceHost+h.baseConf.GoFunctionServiceHTTPPort, c.Request.URL.Path)
 }
 

@@ -14,6 +14,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	structpb "github.com/golang/protobuf/ptypes/struct"
+	"github.com/spf13/cast"
 )
 
 // ExcelReader godoc
@@ -128,6 +129,8 @@ func (h *HandlerV1) ExcelToDb(c *gin.Context) {
 		return
 	}
 
+	userId, _ := c.Get("user_id")
+
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
@@ -185,6 +188,21 @@ func (h *HandlerV1) ExcelToDb(c *gin.Context) {
 		}
 	}
 
+	var logReq = &models.CreateVersionHistoryRequest{
+		Services:     services,
+		NodeType:     resource.NodeType,
+		ProjectId:    resource.ResourceEnvironmentId,
+		ActionSource: "EXCEL",
+		ActionType:   "IMPORT EXCEL",
+		UserInfo:     cast.ToString(userId),
+		Request:      &excelRequest,
+		TableSlug:    excelRequest.TableSlug,
+	}
+
+	defer func() {
+		go h.versionHistoryGo(c, logReq)
+	}()
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		_, err = services.GetBuilderServiceByType(resource.NodeType).Excel().ExcelToDb(
@@ -196,6 +214,7 @@ func (h *HandlerV1) ExcelToDb(c *gin.Context) {
 			},
 		)
 		if err != nil {
+			logReq.Response = err.Error()
 			h.HandleResponse(c, status_http.InternalServerError, err.Error())
 			return
 		}
@@ -209,6 +228,7 @@ func (h *HandlerV1) ExcelToDb(c *gin.Context) {
 			},
 		)
 		if err != nil {
+			logReq.Response = err.Error()
 			h.HandleResponse(c, status_http.InternalServerError, err.Error())
 			return
 		}
@@ -226,6 +246,7 @@ func (h *HandlerV1) ExcelToDb(c *gin.Context) {
 		actionRequest.CustomEvents = afterActions
 		actionRequest.ActionType = "AFTER"
 		if _, err := hHelper.DoInvokeFunction(actionRequest, c, h); err != nil {
+			logReq.Response = err.Error()
 			h.HandleResponse(c, status_http.InvalidArgument, err.Error())
 			return
 		}
