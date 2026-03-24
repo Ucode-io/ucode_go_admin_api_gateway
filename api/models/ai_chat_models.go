@@ -73,12 +73,13 @@ type (
 	//   "project_inspect"  — вопрос требующий чтения контента файлов (пиксели, цвета, логика), next_step=true
 	//   "code_change"      — изменение/генерация кода, next_step=true
 	HaikuRoutingResult struct {
-		NextStep    bool     `json:"next_step"`
-		Intent      string   `json:"intent"`
-		Reply       string   `json:"reply"`        // готовый ответ если next_step=false
-		Clarified   string   `json:"clarified"`    // уточнённый запрос для code_change
-		FilesNeeded []string `json:"files_needed"` // нужные файлы для project_inspect
-		HasImages   bool     `json:"has_images"`   // есть ли изображения в запросе
+		NextStep      bool     `json:"next_step"`
+		Intent        string   `json:"intent"`
+		Reply         string   `json:"reply"`          // готовый ответ если next_step=false
+		Clarified     string   `json:"clarified"`      // уточнённый запрос для code_change
+		FilesNeeded   []string `json:"files_needed"`   // нужные файлы для project_inspect
+		HasImages     bool     `json:"has_images"`     // есть ли изображения в запросе
+		IsCrudConfirm bool     `json:"is_crud_confirm"` // подтверждение CRUD операции
 	}
 
 	// SonnetPlanResult — план Sonnet: какие файлы создать/изменить
@@ -91,5 +92,27 @@ type (
 	FilePlan struct {
 		Path        string `json:"path"`
 		Description string `json:"description"`
+	}
+
+	// ========================== CRUD Operations ==========================
+
+	CrudOperation struct {
+		Operation            string         `json:"operation"`             // "insert"|"update"|"delete"|"select"
+		Table                string         `json:"table"`
+		Data                 map[string]any `json:"data"`                  // for insert/update
+		Where                map[string]any `json:"where"`                 // for update/delete/select
+		ConfirmationRequired bool           `json:"confirmation_required"` // always true for update/delete
+		PreviewMessage       string         `json:"preview_message"`       // shown to user before confirm
+	}
+
+	DBColumn struct {
+		ColumnName string `json:"column_name"`
+		DataType   string `json:"data_type"`
+		IsNullable string `json:"is_nullable"`
+	}
+
+	DBTableSchema struct {
+		TableName string     `json:"table_name"`
+		Columns   []DBColumn `json:"columns"`
 	}
 )

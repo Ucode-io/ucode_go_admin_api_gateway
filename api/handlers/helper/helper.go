@@ -69,6 +69,11 @@ func CleanJSONResponse(input string) string {
 	return extractJSON(input)
 }
 
+// ExtractJSON — public alias for extractJSON
+func ExtractJSON(input string) string {
+	return extractJSON(input)
+}
+
 // ParseClaudeResponse — парсит полный ответ Sonnet с проектом (JSON + description)
 func ParseClaudeResponse(rawJSON string) (*models.ParsedClaudeResponse, error) {
 	fullText, resp, err := extractTextFromClaudeResponse(rawJSON)

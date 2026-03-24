@@ -167,7 +167,12 @@ func (m *messagingStc) routeAndProcess(ctx context.Context, req models.NewMessag
 		return nil, err
 	}
 
-	log.Printf("HAIKU ROUTING: next_step=%v intent=%s has_images=%v files_needed=%v", haikuResult.NextStep, haikuResult.Intent, haikuResult.HasImages, haikuResult.FilesNeeded)
+	log.Printf("HAIKU ROUTING: next_step=%v intent=%s has_images=%v files_needed=%v is_crud_confirm=%v", haikuResult.NextStep, haikuResult.Intent, haikuResult.HasImages, haikuResult.FilesNeeded, haikuResult.IsCrudConfirm)
+
+	// Handle CRUD confirmation (user said "да"/"yes"/"confirm")
+	if haikuResult.IsCrudConfirm {
+		return m.executePendingCrud(ctx)
+	}
 
 	if !haikuResult.NextStep {
 		return &models.ParsedClaudeResponse{
@@ -187,6 +192,9 @@ func (m *messagingStc) routeAndProcess(ctx context.Context, req models.NewMessag
 
 	case "code_change":
 		return m.runCodeFlow(ctx, haikuResult.Clarified, fileGraphJSON, chatHistory, req.Images)
+
+	case "db_crud":
+		return m.runCrudFlow(ctx, req.Content)
 	}
 
 	return &models.ParsedClaudeResponse{

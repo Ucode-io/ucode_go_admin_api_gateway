@@ -205,11 +205,12 @@ Analyze the user's message and return ONLY valid JSON — no markdown, no explan
 JSON schema:
 {
   "next_step": bool,
-  "intent": "chat" | "project_question" | "project_inspect" | "code_change",
+  "intent": "chat" | "project_question" | "project_inspect" | "code_change" | "db_crud",
   "reply": "string",
   "clarified": "string",
   "files_needed": ["string"],
-  "has_images": bool
+  "has_images": bool,
+  "is_crud_confirm": bool
 }
 
 Intent rules:
@@ -217,6 +218,10 @@ Intent rules:
 - "project_question" -> user asks about project structure, file count, what files exist, etc. You can answer from the file_graph alone. next_step=false. Fill reply.
 - "project_inspect"  -> user asks a question that requires reading actual file content: pixel sizes, colors, specific logic, component props, CSS classes, exact values. next_step=true. Fill files_needed with the relevant file paths from the file_graph.
 - "code_change"      -> user wants to create, edit, fix or add anything to the project. next_step=true. Fill clarified.
+- "db_crud"          -> user wants to INSERT, UPDATE, DELETE, or SELECT data in a database table. Examples: "добавь юзера", "удали запись", "измени email", "покажи всех пользователей", "add user", "delete record". Set next_step=true. Set is_crud_confirm=false.
+
+CRUD confirmation rule:
+- If the user is confirming a pending CRUD operation (e.g. "да", "yes", "подтверди", "confirm", "ок", "давай", "apply") -> intent stays "chat", set is_crud_confirm=true, next_step=false, reply="".
 
 IMAGE RULES (CRITICAL):
 - If has_images=true AND user wants to create/change something -> intent MUST be "code_change"
@@ -244,6 +249,7 @@ Field rules:
 - clarified    -> fill when intent is "code_change"
 - files_needed -> fill when intent is "project_inspect"
 - has_images   -> set to true if images are present in the request
+- is_crud_confirm -> set to true ONLY when user confirms a pending operation
 - Always respond in the same language the user wrote in`
 
 	// SystemPromptSonnetInspector — отвечает на вопросы читая реальный код файлов
@@ -424,4 +430,41 @@ func ProcessSonnetCoderPrompt(clarified, planJSON, filesContext string, hasImage
 		imageNote = "\n\nIMAGES ARE PROVIDED as visual reference. You MUST:\n1. Extract EXACT hex colors from the images\n2. Replicate the EXACT layout structure\n3. Match typography, spacing, shadows, border-radius\n4. Make the result PIXEL-PERFECT match to the images\n5. Do NOT guess colors — analyze the images carefully"
 	}
 	return fmt.Sprintf("Task: %s%s\n\nPlan (what to change):\n%s\n\nExisting file contents:\n%s", clarified, imageNote, planJSON, filesContext)
+}
+
+// ========================== CRUD Agent ==========================
+
+var SystemPromptCrudAgent = `You are a database assistant. You receive a user request in any language and the full schema of available database tables with their columns and types.
+
+Your task:
+1. Identify which table the user is referring to (match by meaning, not just exact name)
+2. Identify the operation: insert / update / delete / select
+3. Map the user's data to the correct column names, cast to correct types
+4. Return ONLY a valid JSON object — no markdown, no explanation, no extra text
+
+JSON schema:
+{
+  "operation": "insert" | "update" | "delete" | "select",
+  "table": "exact_table_name_from_schema",
+  "data": { "column_name": value },
+  "where": { "column_name": value },
+  "confirmation_required": false,
+  "preview_message": "string"
+}
+
+Rules:
+- operation "insert" and "select": confirmation_required = false
+- operation "update" and "delete": confirmation_required = true, ALWAYS
+- "data" is used for insert and update (the values to write)
+- "where" is used for update, delete, select (the filter condition)
+- Cast types correctly: if column is integer and user says "2001" — write 2001 not "2001"
+- preview_message must be in the same language the user wrote in
+- preview_message for insert: "Добавлю [description of what will be added]. Всё верно?"
+- preview_message for update: "Изменю [what] у [who/what record]. Подтвердить?"
+- preview_message for delete: "Удалю [description of what will be deleted]. Вы уверены?"
+- preview_message for select: describe what will be shown
+- If you cannot determine the table or operation — return {"operation":"unknown","preview_message":"Не понял запрос. Уточните пожалуйста."}`
+
+func ProcessCrudAgentPrompt(userRequest, schemaJSON string) string {
+	return fmt.Sprintf("User request: \"%s\"\n\nAvailable tables schema:\n%s", userRequest, schemaJSON)
 }
