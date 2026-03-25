@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"ucode/ucode_go_api_gateway/config"
 
 	"ucode/ucode_go_api_gateway/api/models"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
@@ -25,6 +26,7 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, proj
 			Slug:       tablePlan.Slug,
 			ProjectId:  projectId,
 			EnvId:      envId,
+			MenuId:     config.MainMenuID,
 			ShowInMenu: true,
 		}
 
