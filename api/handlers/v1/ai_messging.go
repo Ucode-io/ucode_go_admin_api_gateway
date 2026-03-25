@@ -22,10 +22,10 @@ import (
 )
 
 const (
-	timeoutHaiku     = 60 * time.Second
-	timeoutArchitect = 120 * time.Second
-	timeoutInspector = 120 * time.Second
-	timeoutPlanner   = 120 * time.Second
+	timeoutHaiku     = 90 * time.Second
+	timeoutArchitect = 720 * time.Second
+	timeoutInspector = 180 * time.Second
+	timeoutPlanner   = 180 * time.Second
 	timeoutCoder     = 720 * time.Second
 )
 
