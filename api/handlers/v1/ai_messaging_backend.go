@@ -16,74 +16,28 @@ import (
 )
 
 func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, projectId, envId string, service services.ServiceManagerI) error {
-	log.Printf("[ai_messaging_backend] Starting backend creation for project %s (env: %s)", projectId, envId)
+	log.Printf("[ai_messaging_backend] Starting sequential backend creation for project %s (env: %s)", projectId, envId)
 
 	var errs []string
 
 	for _, tablePlan := range plan.Tables {
-		var fields []*nb.CreateFieldsRequest
-		for _, fieldPlan := range tablePlan.Fields {
-			if fieldPlan.Slug == "created_at" || fieldPlan.Slug == "updated_at" || fieldPlan.Slug == "deleted_at" || fieldPlan.Slug == "guid" {
-				continue
-			}
-
-			fieldType := fieldPlan.Type
-			// Map Architect types to object-builder-service types
-			switch fieldType {
-			case "BOOLEAN", "SWITCH":
-				fieldType = "CHECKBOX"
-			case "TEXT":
-				fieldType = "MULTI_LINE"
-			case "IMAGE":
-				fieldType = "PHOTO"
-			case "DATE":
-				fieldType = "DATE"
-			case "DATE_TIME":
-				fieldType = "DATE_TIME"
-			case "JSON":
-				fieldType = "JSON"
-			default:
-				if fieldType == "" {
-					fieldType = "SINGLE_LINE"
-				}
-			}
-
-			attr, _ := helper.ConvertMapToStruct(nil)
-			fields = append(fields, &nb.CreateFieldsRequest{
-				Id:         uuid.NewString(),
-				Label:      fieldPlan.Label,
-				Slug:       fieldPlan.Slug,
-				Type:       fieldType,
-				Attributes: attr,
-			})
-		}
-
-		summarySection := &nb.Section{
-			Id:               uuid.NewString(),
-			Label:            "Summary",
-			Order:            1,
-			Column:           "SINGLE",
-			IsSummarySection: true,
-		}
-
+		// 1. Create the Table metadata & physical structure
 		attributesMap := map[string]interface{}{
-			"label_undefined": tablePlan.Label,
+			"label":    "",
+			"label_en": tablePlan.Label,
 		}
 		attributes, _ := helper.ConvertMapToStruct(attributesMap)
 
 		tableReq := &nb.CreateTableRequest{
-			Label:             tablePlan.Label,
-			Slug:              tablePlan.Slug,
-			ProjectId:         projectId,
-			EnvId:             envId,
-			MenuId:            config.MainMenuID,
-			ViewId:            uuid.NewString(),
-			LayoutId:          uuid.NewString(),
-			ShowInMenu:        true,
-			Fields:            fields,
-			Sections:          []*nb.Section{summarySection},
-			Attributes:        attributes,
-			SubtitleFieldSlug: "",
+			Label:      tablePlan.Label,
+			Slug:       tablePlan.Slug,
+			ProjectId:  projectId,
+			EnvId:      envId,
+			MenuId:     config.MainMenuID,
+			ViewId:     uuid.NewString(), // Server generates if empty, but good to be explicit
+			LayoutId:   uuid.NewString(),
+			ShowInMenu: true,
+			Attributes: attributes,
 		}
 
 		tableResp, err := service.GoObjectBuilderService().Table().Create(ctx, tableReq)
@@ -92,8 +46,42 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, proj
 			continue
 		}
 
-		log.Printf("[ai_messaging_backend] Created table: %s (id: %s) with %d fields", tablePlan.Slug, tableResp.GetId(), len(fields))
+		tableId := tableResp.GetId()
+		log.Printf("[ai_messaging_backend] Created table: %s (id: %s)", tablePlan.Slug, tableId)
 
+		// 2. Create each Field individually (triggers DB alter, permissions, and UI placement)
+		for _, fieldPlan := range tablePlan.Fields {
+			if isSystemField(fieldPlan.Slug) {
+				continue
+			}
+
+			mappedType := mapFieldType(fieldPlan.Type)
+			
+			fieldAttrMap := map[string]interface{}{
+				"label":    "",
+				"label_en": fieldPlan.Label,
+			}
+			fieldAttr, _ := helper.ConvertMapToStruct(fieldAttrMap)
+
+			fieldReq := &nb.CreateFieldRequest{
+				Id:         uuid.NewString(),
+				TableId:    tableId,
+				Label:      fieldPlan.Label,
+				Slug:       fieldPlan.Slug,
+				Type:       mappedType,
+				Attributes: fieldAttr,
+				ProjectId:  projectId,
+				Index:      "string", // Consistent with existing patterns
+				IsVisible:  true,
+			}
+
+			_, err = service.GoObjectBuilderService().Field().Create(ctx, fieldReq)
+			if err != nil {
+				errs = append(errs, fmt.Sprintf("field %s.%s creation failed: %v", tablePlan.Slug, fieldPlan.Slug, err))
+			}
+		}
+
+		// 3. Insert Mock Data via Items service
 		for i, mockRow := range tablePlan.MockData {
 			structData, err := helper.ConvertMapToStruct(mockRow)
 			if err != nil {
@@ -121,4 +109,52 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, proj
 
 	log.Printf("[ai_messaging_backend] Successfully completed backend creation")
 	return nil
+}
+
+func isSystemField(slug string) bool {
+	systemSlugs := map[string]bool{
+		"guid":       true,
+		"created_at": true,
+		"updated_at": true,
+		"deleted_at": true,
+	}
+	return systemSlugs[slug]
+}
+
+func mapFieldType(aiType string) string {
+	// Verified mapping against ucode_go_object_builder_service/pkg/helper/convert.go
+	switch strings.ToUpper(aiType) {
+	case "BOOLEAN", "SWITCH", "CHECKBOX":
+		return "CHECKBOX"
+	case "TEXT", "LONGTEXT", "MARKDOWN", "MULTI_LINE":
+		return "MULTI_LINE"
+	case "IMAGE", "PHOTO", "AVATAR":
+		return "PHOTO"
+	case "DATE":
+		return "DATE"
+	case "DATE_TIME", "DATETIME":
+		return "DATE_TIME"
+	case "JSON", "OBJECT", "ARRAY", "MAP":
+		return "JSON"
+	case "NUMBER", "INTEGER", "FLOAT", "DECIMAL", "INT":
+		return "NUMBER"
+	case "EMAIL":
+		return "EMAIL"
+	case "URL", "LINK":
+		return "SINGLE_LINE" // Ucode usually uses SINGLE_LINE for URLs
+	case "PHONE", "TEL":
+		return "PHONE"
+	case "INTERNATIONAL_PHONE":
+		return "INTERNATION_PHONE" // Note: misspelled in Ucode source but used consistently
+	case "PASSWORD":
+		return "PASSWORD"
+	case "COLOR":
+		return "COLOR"
+	case "UUID":
+		return "UUID"
+	case "PICK_LIST", "SELECT", "DROPDOWN":
+		return "PICK_LIST"
+	default:
+		return "SINGLE_LINE"
+	}
 }
