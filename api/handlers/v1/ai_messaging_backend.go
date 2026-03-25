@@ -21,50 +21,78 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, proj
 	var errs []string
 
 	for _, tablePlan := range plan.Tables {
-		tableReq := &nb.CreateTableRequest{
-			Label:      tablePlan.Label,
-			Slug:       tablePlan.Slug,
-			ProjectId:  projectId,
-			EnvId:      envId,
-			MenuId:     config.MainMenuID,
-			ShowInMenu: true,
-		}
-
-		tableResp, err := service.GoObjectBuilderService().Table().Create(ctx, tableReq)
-		if err != nil {
-			errs = append(errs, fmt.Sprintf("table %s: %v", tablePlan.Slug, err))
-			continue
-		}
-
-		log.Printf("[ai_messaging_backend] Created table: %s (id: %s)", tablePlan.Slug, tableResp.GetId())
-
+		var fields []*nb.CreateFieldsRequest
 		for _, fieldPlan := range tablePlan.Fields {
+			if fieldPlan.Slug == "created_at" || fieldPlan.Slug == "updated_at" || fieldPlan.Slug == "deleted_at" || fieldPlan.Slug == "guid" {
+				continue
+			}
+
 			fieldType := fieldPlan.Type
 			// Map Architect types to object-builder-service types
 			switch fieldType {
-			case "BOOLEAN":
+			case "BOOLEAN", "SWITCH":
 				fieldType = "CHECKBOX"
 			case "TEXT":
 				fieldType = "MULTI_LINE"
 			case "IMAGE":
 				fieldType = "PHOTO"
+			case "DATE":
+				fieldType = "DATE"
+			case "DATE_TIME":
+				fieldType = "DATE_TIME"
+			case "JSON":
+				fieldType = "JSON"
+			default:
+				if fieldType == "" {
+					fieldType = "SINGLE_LINE"
+				}
 			}
 
-			fieldReq := &nb.CreateFieldRequest{
-				Id:        uuid.NewString(),
-				Label:     fieldPlan.Label,
-				Slug:      fieldPlan.Slug,
-				Type:      fieldType,
-				TableId:   tableResp.GetId(),
-				ProjectId: projectId,
-				EnvId:     envId,
-			}
-
-			_, err = service.GoObjectBuilderService().Field().Create(ctx, fieldReq)
-			if err != nil {
-				errs = append(errs, fmt.Sprintf("field %s.%s: %v", tablePlan.Slug, fieldPlan.Slug, err))
-			}
+			attr, _ := helper.ConvertMapToStruct(nil)
+			fields = append(fields, &nb.CreateFieldsRequest{
+				Id:         uuid.NewString(),
+				Label:      fieldPlan.Label,
+				Slug:       fieldPlan.Slug,
+				Type:       fieldType,
+				Attributes: attr,
+			})
 		}
+
+		summarySection := &nb.Section{
+			Id:               uuid.NewString(),
+			Label:            "Summary",
+			Order:            1,
+			Column:           "SINGLE",
+			IsSummarySection: true,
+		}
+
+		attributesMap := map[string]interface{}{
+			"label_undefined": tablePlan.Label,
+		}
+		attributes, _ := helper.ConvertMapToStruct(attributesMap)
+
+		tableReq := &nb.CreateTableRequest{
+			Label:             tablePlan.Label,
+			Slug:              tablePlan.Slug,
+			ProjectId:         projectId,
+			EnvId:             envId,
+			MenuId:            config.MainMenuID,
+			ViewId:            uuid.NewString(),
+			LayoutId:          uuid.NewString(),
+			ShowInMenu:        true,
+			Fields:            fields,
+			Sections:          []*nb.Section{summarySection},
+			Attributes:        attributes,
+			SubtitleFieldSlug: "",
+		}
+
+		tableResp, err := service.GoObjectBuilderService().Table().Create(ctx, tableReq)
+		if err != nil {
+			errs = append(errs, fmt.Sprintf("table %s creation failed: %v", tablePlan.Slug, err))
+			continue
+		}
+
+		log.Printf("[ai_messaging_backend] Created table: %s (id: %s) with %d fields", tablePlan.Slug, tableResp.GetId(), len(fields))
 
 		for i, mockRow := range tablePlan.MockData {
 			structData, err := helper.ConvertMapToStruct(mockRow)

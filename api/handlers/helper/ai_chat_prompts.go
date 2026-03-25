@@ -312,8 +312,10 @@ ARCHITECTURAL RULES:
 1. Deduce the necessary database models (tables) for the application requested by the user.
 2. For every table, define the exact fields needed.
 3. For every table, provide 3 to 5 rows of realistic mock data matching those fields. This data will be inserted programmatically.
-4. The "ui_structure" must be highly descriptive, acting as the specification for the frontend coder.
+   - If a field type is PASSWORD, the mock password MUST contain at least one uppercase letter (e.g. 'Pa$$w0rd').
+4. The "ui_structure" must be highly descriptive, acting as the specification for the frontend developer.
 5. Provide NO limitations on UI or flexibility. The frontend can be any kind of app (e-commerce, CRM, landing page, dashboard, etc.).
+6. CRITICAL: NEVER include system fields like 'created_at', 'updated_at', 'deleted_at', or 'guid' in your fields list. They are managed by the system automatically.
 `
 
 	// SystemPromptSonnetInspector — отвечает на вопросы читая реальный код файлов
