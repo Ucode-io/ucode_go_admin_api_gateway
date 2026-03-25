@@ -664,7 +664,7 @@ func (p *ChatProcessor) createUcodeProject(ctx context.Context, projectName stri
 		return nil, fmt.Errorf("failed to create backend project: %w", err)
 	}
 
-	env, err := p.h.companyServices.Environment().Create(
+	env, err := p.h.companyServices.Environment().CreateV2(
 		ctx, &pb.CreateEnvironmentRequest{
 			CompanyId:    currentProject.GetCompanyId(),
 			ProjectId:    backendProject.GetProjectId(),
