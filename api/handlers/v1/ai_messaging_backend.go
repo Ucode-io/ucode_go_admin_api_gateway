@@ -10,6 +10,8 @@ import (
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/services"
+
+	"github.com/google/uuid"
 )
 
 func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, projectId, envId string, service services.ServiceManagerI) error {
@@ -36,6 +38,7 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, proj
 
 		for _, fieldPlan := range tablePlan.Fields {
 			fieldReq := &nb.CreateFieldRequest{
+				Id:        uuid.NewString(),
 				Label:     fieldPlan.Label,
 				Slug:      fieldPlan.Slug,
 				Type:      fieldPlan.Type,
