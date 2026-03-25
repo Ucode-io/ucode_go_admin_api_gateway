@@ -112,5 +112,6 @@ type (
 		ApiKey         string `json:"api_key"`
 		UcodeProjectId string `json:"ucode_project_id"`
 		EnvironmentId  string `json:"environment_id"`
+		ResourceEnvId  string `json:"resource_env_id"`
 	}
 )

@@ -66,7 +66,7 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 	var (
 		userMessage models.NewMessageReq
 		chatId      = c.Param("chat-id")
-		ctx         = c.Request.Context()
+		ctx         = context.Background()
 	)
 
 	if err := c.ShouldBindJSON(&userMessage); err != nil {
@@ -285,11 +285,11 @@ func (p *ChatProcessor) handleNewProjectPhase(ctx context.Context, clarified str
 
 	p.mcpProjectID = projectData.McpProjectId
 
-	go func(bPlan *models.ArchitectPlan, ucodeProjectId, envId string) {
-		if buildErr := createBackendFromPlan(context.Background(), bPlan, ucodeProjectId, envId, p.service); buildErr != nil {
-			log.Printf("[CRITICAL ERROR] Failed to build backend from plan for project %s: %v", ucodeProjectId, buildErr)
+	go func(bPlan *models.ArchitectPlan, resourceEnvId, envId string) {
+		if buildErr := createBackendFromPlan(context.Background(), bPlan, resourceEnvId, envId, p.service); buildErr != nil {
+			log.Printf("[CRITICAL ERROR] Failed to build backend from plan for resourceEnv %s: %v", resourceEnvId, buildErr)
 		}
-	}(plan, projectData.UcodeProjectId, projectData.EnvironmentId)
+	}(plan, projectData.ResourceEnvId, projectData.EnvironmentId)
 
 	return p.callSonnetCoderNewProject(ctx, clarified, imageURLs, plan, projectData.ApiKey, projectData.EnvironmentId)
 }
@@ -742,6 +742,7 @@ func (p *ChatProcessor) createUcodeProject(ctx context.Context, projectName stri
 		McpProjectId:   mcpProjectID,
 		ApiKey:         apiKey,
 		EnvironmentId:  env.GetId(),
+		ResourceEnvId:  env.GetResourceEnvironmentId(),
 	}, nil
 }
 
