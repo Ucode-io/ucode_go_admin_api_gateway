@@ -465,7 +465,7 @@ func (p *ChatProcessor) callSonnetCoderNewProject(ctx context.Context, clarified
 	var apiContext strings.Builder
 
 	apiContext.WriteString(
-		fmt.Sprintf("\n====================================\nAPI CONFIGURATION FOR FRONTEND\n====================================\nBASE URL: %s\nVITE_X_API_KEY: %s\n\nTables to use:\n",
+		fmt.Sprintf("\n====================================\nAPI CONFIGURATION FOR FRONTEND\n====================================\nVITE_API_BASE_URL: %s\nVITE_X_API_KEY: %s\n\nTables to use:\n",
 			p.baseConf.UcodeBaseUrl, apiKey,
 		),
 	)

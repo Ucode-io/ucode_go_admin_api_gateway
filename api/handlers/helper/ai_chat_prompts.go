@@ -193,9 +193,13 @@ You are building the frontend connected to a dynamically generated Backend API.
 You will receive an API CONFIGURATION from the system in your prompt (Base URL, API Key, Table slugs).
 You MUST connect your React frontend to this API for data fetching and mutations (CRUD).
 
-API HEADERS FORMAT:
+API HEADERS FORMAT (MANDATORY):
 axios.defaults.headers.common['authorization'] = 'API-KEY';
-axios.defaults.headers.common['x-api-key'] = import.meta.env.VITE_X_API_KEY;
+axios.defaults.headers.common['X-API-KEY'] = import.meta.env.VITE_X_API_KEY;
+
+CRITICAL: NEVER hardcode the BASE URL or API KEY directly in your code. 
+ALWAYS use 'import.meta.env.VITE_API_BASE_URL' and 'import.meta.env.VITE_X_API_KEY'.
+FAILURE TO DO THIS WILL BREAK THE DEPLOYMENT.
 
 CRUD ENDPOINTS:
 - GET list:  axios.get(import.meta.env.VITE_API_BASE_URL + "/v2/items/{table_slug}")
@@ -293,7 +297,7 @@ JSON SCHEMA:
         {
           "slug": "string (snake_case, e.g. 'full_name', 'phone_number')",
           "label": "string (Human readable, e.g. 'Full Name')",
-          "type": "string (Must be one of: SINGLE_LINE, NUMBER, EMAIL, PHONE, DATE, BOOLEAN, TEXT, RELATION)"
+          "type": "string (Must be one of: SINGLE_LINE, MULTI_LINE, NUMBER, EMAIL, PHONE, DATE, DATE_TIME, TIME, BOOLEAN, SWITCH, PHOTO, FILE, PASSWORD, COLOR, ICON, JSON)"
         }
       ],
       "mock_data": [
@@ -420,9 +424,13 @@ API INTEGRATION (CRITICAL)
 You are building the frontend connected to a dynamically generated Backend API.
 If you receive an API CONFIGURATION from the system in your prompt (Base URL, API Key, Table slugs), you MUST connect your React frontend to this API for data fetching and mutations (CRUD).
 
-API HEADERS FORMAT:
+API HEADERS FORMAT (MANDATORY):
 axios.defaults.headers.common['authorization'] = 'API-KEY';
-axios.defaults.headers.common['x-api-key'] = import.meta.env.VITE_X_API_KEY;
+axios.defaults.headers.common['X-API-KEY'] = import.meta.env.VITE_X_API_KEY;
+
+CRITICAL: NEVER hardcode the BASE URL or API KEY directly in your code. 
+ALWAYS use 'import.meta.env.VITE_API_BASE_URL' and 'import.meta.env.VITE_X_API_KEY'.
+FAILURE TO DO THIS WILL BREAK THE DEPLOYMENT.
 
 CRUD ENDPOINTS:
 - GET list:  axios.get(import.meta.env.VITE_API_BASE_URL + "/v2/items/{table_slug}")

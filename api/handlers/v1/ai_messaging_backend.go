@@ -37,11 +37,22 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, proj
 		log.Printf("[ai_messaging_backend] Created table: %s (id: %s)", tablePlan.Slug, tableResp.GetId())
 
 		for _, fieldPlan := range tablePlan.Fields {
+			fieldType := fieldPlan.Type
+			// Map Architect types to object-builder-service types
+			switch fieldType {
+			case "BOOLEAN":
+				fieldType = "CHECKBOX"
+			case "TEXT":
+				fieldType = "MULTI_LINE"
+			case "IMAGE":
+				fieldType = "PHOTO"
+			}
+
 			fieldReq := &nb.CreateFieldRequest{
 				Id:        uuid.NewString(),
 				Label:     fieldPlan.Label,
 				Slug:      fieldPlan.Slug,
-				Type:      fieldPlan.Type,
+				Type:      fieldType,
 				TableId:   tableResp.GetId(),
 				ProjectId: projectId,
 				EnvId:     envId,
