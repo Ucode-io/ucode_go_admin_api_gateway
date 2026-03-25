@@ -27,7 +27,6 @@ func extractTextFromClaudeResponse(rawJSON string) (string, *models.ClaudeRespon
 	return text, &resp, nil
 }
 
-// ExtractPlainText — достаёт чистый текст ответа (для SonnetInspector и простых ответов)
 func ExtractPlainText(rawJSON string) (string, error) {
 	text, _, err := extractTextFromClaudeResponse(rawJSON)
 	return text, err
@@ -105,7 +104,6 @@ func ParseClaudeResponse(rawJSON string) (*models.ParsedClaudeResponse, error) {
 	return result, nil
 }
 
-// ParseHaikuRoutingResult — парсит JSON ответ от Haiku роутера
 func ParseHaikuRoutingResult(rawJSON string) (*models.HaikuRoutingResult, error) {
 	fullText, resp, err := extractTextFromClaudeResponse(rawJSON)
 	if err != nil {

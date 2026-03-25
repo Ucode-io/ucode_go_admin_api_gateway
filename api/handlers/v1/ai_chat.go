@@ -1,10 +1,8 @@
 package v1
 
 import (
-	"log"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
-	as "ucode/ucode_go_api_gateway/genproto/auth_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	pbo "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
@@ -59,10 +57,7 @@ func (h *HandlerV1) getAiChatServices(c *gin.Context) (services.ServiceManagerI,
 // ==================== Chat Endpoints ====================
 
 func (h *HandlerV1) CreateAiChat(c *gin.Context) {
-	var (
-		request pbo.CreateChatRequest
-		project *pbo.McpProject
-	)
+	var request pbo.CreateChatRequest
 
 	if err := c.ShouldBindJSON(&request); err != nil {
 		h.HandleResponse(c, status_http.BadRequest, err.Error())
@@ -74,111 +69,8 @@ func (h *HandlerV1) CreateAiChat(c *gin.Context) {
 		return
 	}
 
-	if len(request.GetProjectId()) == 0 {
-		if request.GetTitle() == "" && request.GetDescription() == "" {
-			h.HandleResponse(c, status_http.InvalidArgument, "project_id or project_name is required")
-			return
-		}
-
-		if request.GetTitle() == "" {
-			request.Title = request.GetDescription()
-		}
-
-		// ========== Backend Project Provisioning ==========
-
-		projectId, _ := c.Get("project_id")
-		currentProject, err := h.companyServices.Project().GetById(
-			c.Request.Context(),
-			&pb.GetProjectByIdRequest{
-				ProjectId: projectId.(string),
-			},
-		)
-		if err != nil {
-			h.HandleResponse(c, status_http.GRPCError, "failed to get current project: "+err.Error())
-			return
-		}
-
-		// 2. Create backend Ucode project
-		backendProject, err := h.companyServices.Project().Create(
-			c.Request.Context(),
-			&pb.CreateProjectRequest{
-				Title:        request.GetTitle(),
-				CompanyId:    currentProject.GetCompanyId(),
-				K8SNamespace: currentProject.GetK8SNamespace(),
-			},
-		)
-		if err != nil {
-			h.HandleResponse(c, status_http.GRPCError, "failed to create backend project: "+err.Error())
-			return
-		}
-
-		log.Printf("Backend project created: %s for chat: %s", backendProject.GetProjectId(), request.GetTitle())
-
-		// 3. Create environment for new project
-		authInfo, err := h.adminAuthInfo(c)
-		if err != nil {
-			return
-		}
-
-		env, err := h.companyServices.Environment().CreateV2(
-			c.Request.Context(),
-			&pb.CreateEnvironmentRequest{
-				CompanyId:    currentProject.GetCompanyId(),
-				ProjectId:    backendProject.GetProjectId(),
-				UserId:       authInfo.GetUserIdAuth(),
-				ClientTypeId: authInfo.GetClientTypeId(),
-				RoleId:       authInfo.GetRoleId(),
-				Name:         "Production",
-				DisplayColor: "#00FF00",
-				Description:  "Production Environment",
-			},
-		)
-		if err != nil {
-			h.HandleResponse(c, status_http.GRPCError, "failed to create environment: "+err.Error())
-			return
-		}
-
-		log.Printf("Environment created: %s for project: %s", env.GetId(), backendProject.GetProjectId())
-
-		apiKeys, err := h.authService.ApiKey().GetList(
-			c.Request.Context(),
-			&as.GetListReq{
-				EnvironmentId: env.GetId(),
-				ProjectId:     backendProject.GetProjectId(),
-				Limit:         1,
-			},
-		)
-		if err != nil {
-			h.HandleResponse(c, status_http.GRPCError, "failed to get API key: "+err.Error())
-			return
-		}
-
-		var apiKey string
-		if len(apiKeys.GetData()) > 0 {
-			apiKey = apiKeys.GetData()[0].GetAppId()
-		}
-
-		project, err = service.GoObjectBuilderService().McpProject().CreateMcpProject(
-			c.Request.Context(),
-			&pbo.CreateMcpProjectReqeust{
-				ResourceEnvId:  resourceEnvId,
-				Title:          request.GetTitle(),
-				Description:    request.GetDescription(),
-				UcodeProjectId: backendProject.GetProjectId(),
-				ApiKey:         apiKey,
-				EnvironmentId:  env.GetId(),
-				Status:         "ready",
-			},
-		)
-		if err != nil {
-			h.HandleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
-		log.Printf("MCP project created: %s with backend: %s, api_key: %s",
-			project.GetId(), backendProject.GetProjectId(), apiKey)
-
-		request.ProjectId = project.Id
+	if request.GetTitle() == "" && request.GetDescription() != "" {
+		request.Title = request.GetDescription()
 	}
 
 	request.ResourceEnvId = resourceEnvId

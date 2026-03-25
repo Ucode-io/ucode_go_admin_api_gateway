@@ -66,12 +66,6 @@ type (
 
 	// ========================== AI Agent Routing ==========================
 
-	// HaikuRoutingResult — ответ Haiku роутера
-	// intent values:
-	//   "chat"             — оффтоп, Haiku отвечает сам, next_step=false
-	//   "project_question" — вопрос о структуре проекта, Haiku отвечает из графа, next_step=false
-	//   "project_inspect"  — вопрос требующий чтения контента файлов (пиксели, цвета, логика), next_step=true
-	//   "code_change"      — изменение/генерация кода, next_step=true
 	HaikuRoutingResult struct {
 		NextStep    bool     `json:"next_step"`
 		Intent      string   `json:"intent"`
@@ -79,9 +73,9 @@ type (
 		Clarified   string   `json:"clarified"`    // уточнённый запрос для code_change
 		FilesNeeded []string `json:"files_needed"` // нужные файлы для project_inspect
 		HasImages   bool     `json:"has_images"`   // есть ли изображения в запросе
+		ProjectName string   `json:"project_name"` // осмысленное имя проекта (max 3 слова)
 	}
 
-	// SonnetPlanResult — план Sonnet: какие файлы создать/изменить
 	SonnetPlanResult struct {
 		FilesToChange []FilePlan `json:"files_to_change"`
 		FilesToCreate []FilePlan `json:"files_to_create"`
@@ -91,5 +85,31 @@ type (
 	FilePlan struct {
 		Path        string `json:"path"`
 		Description string `json:"description"`
+	}
+
+	// ========================== Architect Plan ==========================
+	TableFieldPlan struct {
+		Slug  string `json:"slug"`
+		Label string `json:"label"`
+		Type  string `json:"type"` // SINGLE_LINE, NUMBER, EMAIL, PHONE, DATE, etc.
+	}
+
+	TablePlan struct {
+		Slug     string           `json:"slug"`
+		Label    string           `json:"label"`
+		Fields   []TableFieldPlan `json:"fields"`
+		MockData []map[string]any `json:"mock_data"` // 3-5 реалистичных записей
+	}
+
+	ArchitectPlan struct {
+		ProjectName string      `json:"project_name"`
+		Tables      []TablePlan `json:"tables"`
+		UIStructure string      `json:"ui_structure"`
+	}
+
+	ProjectData struct {
+		McpProjectId   string `json:"project_id"`
+		ApiKey         string `json:"api_key"`
+		UcodeProjectId string `json:"ucode_project_id"`
 	}
 )
