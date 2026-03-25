@@ -664,7 +664,7 @@ func (p *ChatProcessor) createUcodeProject(ctx context.Context, projectName stri
 		return nil, fmt.Errorf("failed to create backend project: %w", err)
 	}
 
-	env, err := p.h.companyServices.Environment().CreateV2(
+	env, err := p.h.companyServices.Environment().Create(
 		ctx, &pb.CreateEnvironmentRequest{
 			CompanyId:    currentProject.GetCompanyId(),
 			ProjectId:    backendProject.GetProjectId(),
@@ -678,6 +678,19 @@ func (p *ChatProcessor) createUcodeProject(ctx context.Context, projectName stri
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create environment: %w", err)
+	}
+
+	// Fetch service resource to get the correct resource_environment_id for the builder service
+	resource, err := p.h.companyServices.ServiceResource().GetSingle(
+		ctx,
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     backendProject.GetProjectId(),
+			EnvironmentId: env.GetId(),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch service resource details: %w", err)
 	}
 
 	apiKeys, err := p.h.authService.ApiKey().GetList(
@@ -742,7 +755,7 @@ func (p *ChatProcessor) createUcodeProject(ctx context.Context, projectName stri
 		McpProjectId:   mcpProjectID,
 		ApiKey:         apiKey,
 		EnvironmentId:  env.GetId(),
-		ResourceEnvId:  env.GetResourceEnvironmentId(),
+		ResourceEnvId:  resource.GetResourceEnvironmentId(),
 	}, nil
 }
 
