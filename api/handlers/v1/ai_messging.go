@@ -291,6 +291,11 @@ func (p *ChatProcessor) handleNewProjectPhase(ctx context.Context, clarified str
 		}
 	}(plan, projectData.ResourceEnvId, projectData.EnvironmentId)
 
+	if plan.ProjectType == "admin_panel" {
+		log.Printf("[CODER] Admin panel detected — using template-based generation")
+		return p.callSonnetCoderWithTemplate(ctx, clarified, imageURLs, plan, projectData.ApiKey, projectData.EnvironmentId)
+	}
+
 	return p.callSonnetCoderNewProject(ctx, clarified, imageURLs, plan, projectData.ApiKey, projectData.EnvironmentId)
 }
 
@@ -511,6 +516,65 @@ func (p *ChatProcessor) callSonnetCoderNewProject(ctx context.Context, clarified
 	}
 
 	log.Printf("[NEW PROJECT GENERATED] Files created: %d", len(parsedProject.Project.Files))
+	return parsedProject, nil
+}
+
+func (p *ChatProcessor) callSonnetCoderWithTemplate(ctx context.Context, clarified string, imageURLs []string, plan *models.ArchitectPlan, apiKey, envId string) (*models.ParsedClaudeResponse, error) {
+	var apiContext strings.Builder
+
+	apiContext.WriteString(
+		fmt.Sprintf("\n====================================\nAPI CONFIGURATION FOR FRONTEND\n====================================\nVITE_API_BASE_URL: %s\nVITE_X_API_KEY: %s\n\nTables to use:\n",
+			p.baseConf.UcodeBaseUrl, apiKey,
+		),
+	)
+
+	for _, t := range plan.Tables {
+		apiContext.WriteString(fmt.Sprintf("- Table: %s, slug: %s\n", t.Label, t.Slug))
+		for _, f := range t.Fields {
+			apiContext.WriteString(fmt.Sprintf("  * field: %s, type: %s\n", f.Slug, f.Type))
+		}
+	}
+	apiContext.WriteString("\nUse this UI Structure provided by the Architect:\n" + plan.UIStructure + "\n")
+
+	var (
+		fullPrompt = clarified + "\n\n" + apiContext.String()
+		messages   = []models.ChatMessage{
+			{
+				Role:    "user",
+				Content: buildContentBlocksWithImages(fullPrompt, imageURLs),
+			},
+		}
+	)
+
+	response, err := helper.CallAnthropicAPI(
+		p.baseConf, models.AnthropicRequest{
+			Model:     p.baseConf.ClaudeModel,
+			MaxTokens: p.baseConf.CoderMaxTokens,
+			System:    helper.SystemPromptAiChatTemplate,
+			Messages:  messages,
+		},
+		timeoutCoder,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("template coder api call failed: %w", err)
+	}
+
+	parsedProject, err := helper.ParseClaudeResponse(response)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse template coder response: %w", err)
+	}
+
+	if parsedProject.Project == nil {
+		return nil, fmt.Errorf("claude returned empty project data")
+	}
+
+	templateFiles := GetTemplate("admin_panel")
+	if templateFiles != nil {
+		parsedProject.Project.Files = MergeTemplateWithAIFiles(templateFiles, parsedProject.Project.Files)
+		log.Printf("[TEMPLATE MERGE] Merged %d template + %d AI files", len(templateFiles), len(parsedProject.Project.Files)-len(templateFiles))
+	}
+
+	log.Printf("[NEW PROJECT GENERATED WITH TEMPLATE] Total files: %d", len(parsedProject.Project.Files))
 	return parsedProject, nil
 }
 

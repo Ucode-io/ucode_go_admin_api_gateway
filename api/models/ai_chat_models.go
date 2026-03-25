@@ -103,6 +103,7 @@ type (
 
 	ArchitectPlan struct {
 		ProjectName string      `json:"project_name"`
+		ProjectType string      `json:"project_type"` // "admin_panel" | "landing" | "web" | "other"
 		Tables      []TablePlan `json:"tables"`
 		UIStructure string      `json:"ui_structure"`
 	}
