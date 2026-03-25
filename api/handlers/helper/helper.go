@@ -9,14 +9,16 @@ import (
 	"ucode/ucode_go_api_gateway/api/models"
 )
 
-// extractTextFromClaudeResponse — достаёт весь текст из ContentBlock[] и возвращает ClaudeResponse
 func extractTextFromClaudeResponse(rawJSON string) (string, *models.ClaudeResponse, error) {
-	var resp models.ClaudeResponse
+	var (
+		resp  models.ClaudeResponse
+		parts []string
+	)
+
 	if err := json.Unmarshal([]byte(rawJSON), &resp); err != nil {
 		return "", nil, fmt.Errorf("failed to parse Claude response envelope: %w", err)
 	}
 
-	var parts []string
 	for _, block := range resp.Content {
 		if block.Type == "text" {
 			parts = append(parts, block.Text)
@@ -32,43 +34,41 @@ func ExtractPlainText(rawJSON string) (string, error) {
 	return text, err
 }
 
-// extractJSON — многоуровневая стратегия извлечения JSON из текста модели
-// Порядок попыток:
-//  1. ```json ... ``` блок
-//  2. ``` ... ``` блок
-//  3. Первый { до последнего } (самый агрессивный fallback)
+var (
+	jsonBlockRegex       = regexp.MustCompile("(?s)```json\\s*\\n?(.*?)\\n?```")
+	genericBlockRegex    = regexp.MustCompile("(?s)```\\s*\\n?(.*?)\\n?```")
+	jsonAndDescRegex     = regexp.MustCompile("(?s)```json\\s*\\n?(.*?)\\n?```(.*)")
+	jsonOnlyAndDescRegex = regexp.MustCompile("(?s)```\\s*\\n?(\\{.*?\\})\\n?```(.*)")
+)
+
 func extractJSON(text string) string {
-	// Стратегия 1: ```json ... ```
-	re1 := regexp.MustCompile("(?s)```json\\s*\\n?(.*?)\\n?```")
-	if m := re1.FindStringSubmatch(text); len(m) > 1 {
+	if m := jsonBlockRegex.FindStringSubmatch(text); len(m) > 1 {
 		return strings.TrimSpace(m[1])
 	}
 
-	// Стратегия 2: ``` ... ```
-	re2 := regexp.MustCompile("(?s)```\\s*\\n?(.*?)\\n?```")
-	if m := re2.FindStringSubmatch(text); len(m) > 1 {
+	if m := genericBlockRegex.FindStringSubmatch(text); len(m) > 1 {
 		candidate := strings.TrimSpace(m[1])
 		if strings.HasPrefix(candidate, "{") {
 			return candidate
 		}
 	}
 
-	// Стратегия 3: найти первый { и последний }
-	start := strings.Index(text, "{")
-	end := strings.LastIndex(text, "}")
+	var (
+		start = strings.Index(text, "{")
+		end   = strings.LastIndex(text, "}")
+	)
+
 	if start != -1 && end != -1 && end > start {
 		return strings.TrimSpace(text[start : end+1])
 	}
 
-	return text
+	return strings.TrimSpace(text)
 }
 
-// CleanJSONResponse — публичная обёртка над extractJSON (для обратной совместимости)
 func CleanJSONResponse(input string) string {
 	return extractJSON(input)
 }
 
-// ParseClaudeResponse — парсит полный ответ Sonnet с проектом (JSON + description)
 func ParseClaudeResponse(rawJSON string) (*models.ParsedClaudeResponse, error) {
 	fullText, resp, err := extractTextFromClaudeResponse(rawJSON)
 	if err != nil {
@@ -130,7 +130,6 @@ func ParseHaikuRoutingResult(rawJSON string) (*models.HaikuRoutingResult, error)
 	return &result, nil
 }
 
-// ParseSonnetPlanResult — парсит JSON ответ от Sonnet планировщика
 func ParseSonnetPlanResult(rawJSON string) (*models.SonnetPlanResult, error) {
 	fullText, resp, err := extractTextFromClaudeResponse(rawJSON)
 	if err != nil {
@@ -158,21 +157,17 @@ func ParseSonnetPlanResult(rawJSON string) (*models.SonnetPlanResult, error) {
 	return &result, nil
 }
 
-// extractJSONAndDescription — разделяет JSON блок и текстовое описание после него
 func extractJSONAndDescription(text string) (jsonBlock, description string) {
-	// Пробуем ```json ... ``` с описанием после
 	re := regexp.MustCompile("(?s)```json\\s*\\n?(.*?)\\n?```(.*)")
 	if matches := re.FindStringSubmatch(text); len(matches) > 2 {
 		return strings.TrimSpace(matches[1]), strings.TrimSpace(matches[2])
 	}
 
-	// Пробуем ``` ... ``` с описанием после
 	re2 := regexp.MustCompile("(?s)```\\s*\\n?(\\{.*?\\})\\n?```(.*)")
 	if matches := re2.FindStringSubmatch(text); len(matches) > 2 {
 		return strings.TrimSpace(matches[1]), strings.TrimSpace(matches[2])
 	}
 
-	// Пробуем разделитель ---
 	if idx := strings.Index(text, "\n---\n"); idx != -1 {
 		jsonPart := strings.TrimSpace(text[:idx])
 		descPart := strings.TrimSpace(text[idx+5:])
@@ -180,7 +175,6 @@ func extractJSONAndDescription(text string) (jsonBlock, description string) {
 		return jsonPart, descPart
 	}
 
-	// Fallback: весь текст это JSON
 	if strings.HasPrefix(strings.TrimSpace(text), "{") {
 		return extractJSON(text), ""
 	}

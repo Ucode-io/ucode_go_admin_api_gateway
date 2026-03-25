@@ -81,14 +81,15 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 
 	service, resourceEnvID, err := h.getAiChatServices(c)
 	if err != nil {
-		h.HandleResponse(c, status_http.InternalServerError, "failed to init services: "+err.Error())
 		return
 	}
 
-	chat, err := service.GoObjectBuilderService().AiChat().GetChat(ctx, &pbo.ChatPrimaryKey{
-		ResourceEnvId: resourceEnvID,
-		Id:            chatId,
-	})
+	chat, err := service.GoObjectBuilderService().AiChat().GetChat(
+		ctx, &pbo.ChatPrimaryKey{
+			ResourceEnvId: resourceEnvID,
+			Id:            chatId,
+		},
+	)
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, fmt.Sprintf("failed to get chat: %v", err))
 		return
@@ -100,8 +101,15 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 		return
 	}
 
+	var (
+		projectIdObj, _ = c.Get("project_id")
+		realProjectID   = projectIdObj.(string)
+
+		updateProject *pbo.McpProject
+	)
+
 	processor := newChatProcessor(
-		h, service, h.baseConf, chatId, chat.GetProjectId(), resourceEnvID, "ucodeProjectID",
+		h, service, h.baseConf, chatId, chat.GetProjectId(), resourceEnvID, realProjectID,
 		authInfo.GetUserIdAuth(), authInfo.GetClientTypeId(), authInfo.GetRoleId(),
 	)
 
@@ -123,16 +131,15 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 		return
 	}
 
-	// 6. Сохранение ответа AI
-	message, err := processor.createMessageRecord(ctx, "assistant", aiResponse.Description, userMessage.Images)
+	if strings.TrimSpace(aiResponse.Description) == "" {
+		aiResponse.Description = "Project has been updated."
+	}
+
+	message, err := processor.createMessageRecord(ctx, "assistant", aiResponse.Description, nil)
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, fmt.Sprintf("failed to save ai message: %v", err))
 		return
 	}
-
-	// 7. Обновление состояния проекта и чата
-	var updateProject *pbo.McpProject
-	isFirstMessage := len(chatHistory) == 0
 
 	if aiResponse.Project != nil {
 		updateProject, err = processor.saveProject(ctx, aiResponse)
@@ -142,18 +149,21 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 		}
 	}
 
-	if isFirstMessage {
-		_, _ = service.GoObjectBuilderService().AiChat().UpdateChat(ctx, &pbo.UpdateChatRequest{
+	if len(chatHistory) == 0 {
+		updateReq := &pbo.UpdateChatRequest{
 			ResourceEnvId: resourceEnvID,
 			Id:            chatId,
 			Title:         truncateString(userMessage.Content, 100),
-			Description:   aiResponse.Description,
-		})
+			Description:   truncateString(aiResponse.Description, 255),
+			ProjectId:     processor.mcpProjectID,
+		}
+		_, _ = service.GoObjectBuilderService().AiChat().UpdateChat(ctx, updateReq)
 	}
 
 	h.HandleResponse(c, status_http.Created, map[string]any{
-		"message": message,
-		"project": updateProject,
+		"message":        message,
+		"project":        updateProject,
+		"mcp_project_id": processor.mcpProjectID,
 	})
 }
 
@@ -162,21 +172,28 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 // ============================================================================
 
 func (p *ChatProcessor) routeAndProcess(ctx context.Context, req models.NewMessageReq, chatHistory []models.ChatMessage) (*models.ParsedClaudeResponse, error) {
-	var hasImages = len(req.Images) > 0
-
-	projectData, err := p.service.GoObjectBuilderService().McpProject().GetMcpProjectFiles(
-		ctx, &pbo.McpProjectId{
-			ResourceEnvId: p.resourceEnvID,
-			Id:            p.mcpProjectID,
-		},
+	var (
+		hasImages     = len(req.Images) > 0
+		projectData   *pbo.McpProject
+		fileGraphJSON = "{}"
+		err           error
 	)
-	if err != nil {
-		return nil, fmt.Errorf("database error getting project files: %w", err)
-	}
 
-	fileGraphJSON, err := p.buildFileGraphJSON(projectData)
-	if err != nil {
-		return nil, err
+	if p.mcpProjectID != "" {
+		projectData, err = p.service.GoObjectBuilderService().McpProject().GetMcpProjectFiles(
+			ctx, &pbo.McpProjectId{
+				ResourceEnvId: p.resourceEnvID,
+				Id:            p.mcpProjectID,
+			},
+		)
+		if err != nil {
+			log.Printf("[ROUTER] Warning: failed to get project files (mcpProjectID=%s): %v", p.mcpProjectID, err)
+			projectData = nil
+		}
+
+		if projectData != nil {
+			fileGraphJSON, _ = p.buildFileGraphJSON(projectData)
+		}
 	}
 
 	haikuResult, err := p.callHaikuRouter(req.Content, fileGraphJSON, chatHistory, hasImages)
@@ -198,6 +215,9 @@ func (p *ChatProcessor) routeAndProcess(ctx context.Context, req models.NewMessa
 		return &models.ParsedClaudeResponse{Description: haikuResult.Reply}, nil
 
 	case "project_inspect":
+		if projectData == nil {
+			return &models.ParsedClaudeResponse{Description: "No project exists yet. Please create a project first by describing what you want to build."}, nil
+		}
 		return p.runInspectFlow(ctx, req.Content, haikuResult.FilesNeeded, chatHistory, req.Images, projectData)
 
 	case "code_change":
@@ -221,7 +241,7 @@ func (p *ChatProcessor) runInspectFlow(ctx context.Context, userQuestion string,
 func (p *ChatProcessor) runCodeFlow(ctx context.Context, clarified, fileGraphJSON string, chatHistory []models.ChatMessage, imageURLs []string, projectName string, projectData *pbo.McpProject) (*models.ParsedClaudeResponse, error) {
 	var hasImages = len(imageURLs) > 0
 
-	if len(projectData.GetProjectFiles()) == 0 {
+	if projectData == nil || len(projectData.GetProjectFiles()) == 0 {
 		log.Println("[CODER] New Project Detected: Routing to Architect & SystemPromptAiChat")
 		return p.handleNewProjectPhase(ctx, clarified, chatHistory, imageURLs, projectName)
 	}
@@ -251,27 +271,27 @@ func (p *ChatProcessor) handleNewProjectPhase(ctx context.Context, clarified str
 	}
 
 	if plan.ProjectName == "" {
-		plan.ProjectName = estimatedName
-	}
-
-	if plan.ProjectName == "" {
 		plan.ProjectName = "AI Project"
+
+		if estimatedName != "" {
+			plan.ProjectName = estimatedName
+		}
 	}
 
-	projectData, err := p.createUcodeProject(ctx, plan.ProjectName)
+	projectData, err := p.createUcodeProject(ctx, plan.ProjectName, p.mcpProjectID)
 	if err != nil {
 		return nil, fmt.Errorf("backend provisioning failed: %w", err)
 	}
 
 	p.mcpProjectID = projectData.McpProjectId
 
-	go func(bPlan *models.ArchitectPlan, ucodeProjectId string) {
-		if buildErr := createBackendFromPlan(context.Background(), bPlan, ucodeProjectId, p.service); buildErr != nil {
+	go func(bPlan *models.ArchitectPlan, ucodeProjectId, envId string) {
+		if buildErr := createBackendFromPlan(context.Background(), bPlan, ucodeProjectId, envId, p.service); buildErr != nil {
 			log.Printf("[CRITICAL ERROR] Failed to build backend from plan for project %s: %v", ucodeProjectId, buildErr)
 		}
-	}(plan, projectData.McpProjectId)
+	}(plan, projectData.UcodeProjectId, projectData.EnvironmentId)
 
-	return p.callSonnetCoderNewProject(ctx, clarified, imageURLs, plan, projectData.ApiKey)
+	return p.callSonnetCoderNewProject(ctx, clarified, imageURLs, plan, projectData.ApiKey, projectData.EnvironmentId)
 }
 
 // ============================================================================
@@ -363,11 +383,12 @@ func (p *ChatProcessor) callSonnetPlanner(ctx context.Context, clarified, fileGr
 
 func (p *ChatProcessor) callSonnetCoder(ctx context.Context, clarified string, plan *models.SonnetPlanResult, filesContext string, chatHistory []models.ChatMessage, imageURLs []string) (*models.ParsedClaudeResponse, error) {
 	var (
+		hasFiles      = filesContext != "No existing files to modify." && filesContext != "No matching files found."
 		systemPrompt  string
 		contentBlocks []models.ContentBlock
 	)
 
-	if filesContext == "No existing files to modify." {
+	if !hasFiles {
 		systemPrompt = helper.SystemPromptAiChat
 		contentBlocks = buildContentBlocksWithImages(clarified, imageURLs)
 	} else {
@@ -440,7 +461,7 @@ func (p *ChatProcessor) callArchitect(ctx context.Context, clarified string, ima
 	return &plan, nil
 }
 
-func (p *ChatProcessor) callSonnetCoderNewProject(ctx context.Context, clarified string, imageURLs []string, plan *models.ArchitectPlan, apiKey string) (*models.ParsedClaudeResponse, error) {
+func (p *ChatProcessor) callSonnetCoderNewProject(ctx context.Context, clarified string, imageURLs []string, plan *models.ArchitectPlan, apiKey, envId string) (*models.ParsedClaudeResponse, error) {
 	var apiContext strings.Builder
 
 	apiContext.WriteString(
@@ -622,7 +643,7 @@ func (p *ChatProcessor) saveProject(ctx context.Context, req *models.ParsedClaud
 	return createdProject, nil
 }
 
-func (p *ChatProcessor) createUcodeProject(ctx context.Context, projectName string) (*models.ProjectData, error) {
+func (p *ChatProcessor) createUcodeProject(ctx context.Context, projectName string, existingMcpID string) (*models.ProjectData, error) {
 	currentProject, err := p.h.companyServices.Project().GetById(
 		ctx, &pb.GetProjectByIdRequest{
 			ProjectId: p.ucodeProjectID,
@@ -632,11 +653,13 @@ func (p *ChatProcessor) createUcodeProject(ctx context.Context, projectName stri
 		return nil, fmt.Errorf("failed to get current project info: %w", err)
 	}
 
-	backendProject, err := p.h.companyServices.Project().Create(ctx, &pb.CreateProjectRequest{
-		Title:        projectName,
-		CompanyId:    currentProject.GetCompanyId(),
-		K8SNamespace: currentProject.GetK8SNamespace(),
-	})
+	backendProject, err := p.h.companyServices.Project().Create(
+		ctx, &pb.CreateProjectRequest{
+			Title:        projectName,
+			CompanyId:    currentProject.GetCompanyId(),
+			K8SNamespace: currentProject.GetK8SNamespace(),
+		},
+	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create backend project: %w", err)
 	}
@@ -674,25 +697,51 @@ func (p *ChatProcessor) createUcodeProject(ctx context.Context, projectName stri
 		apiKey = apiKeys.GetData()[0].GetAppId()
 	}
 
-	project, err := p.service.GoObjectBuilderService().McpProject().CreateMcpProject(
-		ctx, &pbo.CreateMcpProjectReqeust{
-			ResourceEnvId:  p.resourceEnvID,
-			Title:          projectName,
-			Description:    "Generated by AI Architect",
-			UcodeProjectId: backendProject.GetProjectId(),
-			ApiKey:         apiKey,
-			EnvironmentId:  env.GetId(),
-			Status:         "ready",
-		},
+	var (
+		mcpProjectID = existingMcpID
+		status       = "ready"
 	)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create MCP project link: %w", err)
+
+	if mcpProjectID != "" {
+		// Update existing skeleton project
+		_, err = p.service.GoObjectBuilderService().McpProject().UpdateMcpProject(
+			ctx, &pbo.McpProject{
+				ResourceEnvId:  p.resourceEnvID,
+				Id:             mcpProjectID,
+				Title:          projectName,
+				Description:    "Provisioned by AI architect",
+				UcodeProjectId: backendProject.GetProjectId(),
+				ApiKey:         apiKey,
+				EnvironmentId:  env.GetId(),
+				Status:         status,
+			},
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to update MCP project: %w", err)
+		}
+	} else {
+		project, err := p.service.GoObjectBuilderService().McpProject().CreateMcpProject(
+			ctx, &pbo.CreateMcpProjectReqeust{
+				ResourceEnvId:  p.resourceEnvID,
+				Title:          projectName,
+				Description:    "Generated by AI Architect",
+				UcodeProjectId: backendProject.GetProjectId(),
+				ApiKey:         apiKey,
+				EnvironmentId:  env.GetId(),
+				Status:         status,
+			},
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create MCP project link: %w", err)
+		}
+		mcpProjectID = project.GetId()
 	}
 
 	return &models.ProjectData{
 		UcodeProjectId: backendProject.GetProjectId(),
-		McpProjectId:   project.GetId(),
+		McpProjectId:   mcpProjectID,
 		ApiKey:         apiKey,
+		EnvironmentId:  env.GetId(),
 	}, nil
 }
 

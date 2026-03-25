@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"fmt"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
@@ -74,6 +75,22 @@ func (h *HandlerV1) CreateAiChat(c *gin.Context) {
 	}
 
 	request.ResourceEnvId = resourceEnvId
+
+	if request.GetProjectId() == "" {
+		mcpProject, err := service.GoObjectBuilderService().McpProject().CreateMcpProject(
+			c.Request.Context(),
+			&pbo.CreateMcpProjectReqeust{
+				ResourceEnvId: resourceEnvId,
+				Title:         "Draft Project",
+				Description:   "Provisioning...",
+			},
+		)
+		if err != nil {
+			h.HandleResponse(c, status_http.GRPCError, fmt.Sprintf("failed to pre-create mcp project: %v", err))
+			return
+		}
+		request.ProjectId = mcpProject.GetId()
+	}
 
 	response, err := service.GoObjectBuilderService().AiChat().CreateChat(
 		c.Request.Context(), &request,
