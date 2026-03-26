@@ -349,8 +349,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			aiChat.GET("/messages/:chat-id", h.V1.GetAiChatMessages)
 			aiChat.DELETE("/messages/:message_id", h.V1.DeleteAiChatMessage)
 
-			// Database Assistant — confirm pending mutation actions
-			aiChat.POST("/actions/:action-id/confirm", h.V1.ConfirmDatabaseAction)
 		}
 
 		projectFolders := v1Admin.Group("/project-folders")
