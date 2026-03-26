@@ -134,26 +134,29 @@ type (
 		Fields []FieldSchema `json:"fields"`
 	}
 
-	// DatabaseActionRequest — what Claude returns as a structured database action
 	DatabaseActionRequest struct {
-		Action           string         `json:"action"`             // "read" | "create" | "update" | "delete" | "count" | "aggregate"
+		Action           string         `json:"action"`
 		TableSlug        string         `json:"table_slug"`
-		Filters          map[string]any `json:"filters,omitempty"`
-		Data             map[string]any `json:"data,omitempty"`        // for create/update
-		AggregationField string         `json:"aggregation_field,omitempty"` // field to aggregate (sum/avg/min/max of this)
-		Aggregation      string         `json:"aggregation,omitempty"` // "count" | "sum" | "avg" | "min" | "max"
-		GroupBy          string         `json:"group_by,omitempty"`
-		OrderBy          string         `json:"order_by,omitempty"`
-		Limit            int            `json:"limit,omitempty"`
-		Offset           int            `json:"offset,omitempty"`
-		Reply            string         `json:"reply"` // AI's human-readable answer for the user
+		Filters          map[string]any `json:"filters"`
+		Data             map[string]any `json:"data"`
+		AggregationField string         `json:"aggregation_field"`
+		Aggregation      string         `json:"aggregation"`
+		GroupBy          string         `json:"group_by"`
+		OrderBy          string         `json:"order_by"`
+		Limit            int            `json:"limit"`
+		Offset           int            `json:"offset"`
+		Reply            string         `json:"reply"`
+
+		// Agentic loop fields — new
+		NeedsMoreData bool   `json:"needs_more_data"` // true = Claude wants another iteration
+		QueryPlan     string `json:"query_plan"`      // description of what next step fetches
 	}
 
 	// PendingAction — stored action waiting for user confirmation
 	PendingAction struct {
 		ID            string         `json:"id"`
 		ChatID        string         `json:"chat_id"`
-		Action        string         `json:"action"`    // "create" | "update" | "delete"
+		Action        string         `json:"action"` // "create" | "update" | "delete"
 		TableSlug     string         `json:"table_slug"`
 		Filters       map[string]any `json:"filters,omitempty"`
 		Data          map[string]any `json:"data,omitempty"`
