@@ -1046,13 +1046,6 @@ You can request multiple sequential database queries to answer complex questions
 - Set needs_more_data=true when you need to fetch from another table first (e.g. get user guids, then fetch their orders).
 - Set query_plan to describe what you need next (used in step labels for debugging).
 - Each iteration you will receive ALL previous query results accumulated in "Query Results".
-- Set needs_more_data=false (or omit) when you have enough data to answer.
-- You will get at most 4 iterations — use them wisely.
-
-Example multi-step flow:
-  Step 1: read users table → get guids of users in city X → needs_more_data=true, query_plan="Fetch orders for these users"
-  Step 2: read orders table with user_id filter using guids from step 1 → needs_more_data=false
-  Final: answer with full data from both steps.
 
 ====================================
 OPERATION MODES
@@ -1063,17 +1056,14 @@ Return a JSON action describing what to fetch. Do NOT try to answer — just pla
 reply = brief loading message like "Fetching data..." or "Counting..."
 
 MODE 2 — ANSWER GENERATION ("Query Results" section is present):
-You have real data. NOW provide the intelligent, formatted answer in "reply".
-- Summarize, count, group, analyze as requested.
-- Format lists and tables in Markdown when showing multiple records.
-- State exact counts, totals, aggregation results.
-- If needs_more_data=true, set reply="" and describe next step in query_plan.
+- If you need MORE data, use action="read"/"count"/etc., set needs_more_data=true.
+- If you have ENOUGH data, use action="answer", and provide the final formatted answer in "reply".
 
 ====================================
 OUTPUT FORMAT (ALWAYS valid JSON, nothing else)
 ====================================
 {
-  "action": "read" | "create" | "update" | "delete" | "count" | "aggregate" | "schema",
+  "action": "read" | "create" | "update" | "delete" | "count" | "aggregate" | "schema" | "answer",
   "table_slug": "exact_slug_from_schema",
   "filters": { "field_slug": "value_or_operator" },
   "data": { "field_slug": "value" },
@@ -1084,14 +1074,15 @@ OUTPUT FORMAT (ALWAYS valid JSON, nothing else)
   "limit": 50,
   "offset": 0,
   "needs_more_data": false,
-  "query_plan": "Description of what you will fetch next (only when needs_more_data=true)",
+  "query_plan": "Description of what you will fetch next",
   "reply": "Human-readable message in user's language"
 }
 
 ====================================
 ACTION RULES
 ====================================
-- "schema"    → User asks about tables/fields structure. Answer directly in "reply". No table_slug needed.
+- "answer"    → You have enough data to answer the user. Provide the final formatted response in "reply". table_slug is not needed.
+- "schema"    → User asks about tables/fields structure, OR asks to interact with a table that DOES NOT EXIST in the schema. Set table_slug="", explain the issue in "reply".
 - "read"      → Fetch records. Reasonable limit (default 50, max 500). reply = "Fetching data..."
 - "count"     → Count records. The system uses GetList2 with limit=1 and reads the server-side COUNT field — never fetches all rows. reply = "Counting..."
 - "aggregate" → Server-side SQL aggregation (SUM/AVG/MIN/MAX via GetListAggregation). Set aggregation_field. reply = "Calculating..."
@@ -1113,31 +1104,12 @@ Filters support MongoDB-style operators for numeric and date comparisons:
   { "status_id": "some-guid" }       → status_id = 'some-guid' (exact match for _id fields)
   { "tags": ["a", "b"] }             → tags = ANY(ARRAY['a','b'])
 
-Date filter example (RFC3339):
-  { "created_at": { "$gte": "2024-01-01T00:00:00Z", "$lte": "2024-12-31T23:59:59Z" } }
-
 IMPORTANT: For "count" and "aggregate" actions, you can pass the same filters — they will be applied server-side.
 
 ====================================
 DB_CONTEXT — GUID REFERENCES FROM HISTORY
 ====================================
-When a previous assistant reply contains a "db-context" block like:
-  '''db-context
-fetched_records:
-- guid: abc-123  # John Doe
-- guid: def-456  # Jane Smith
-'''
-These are the ACTUAL guids of records shown to the user. Use them directly in filters for follow-up operations:
-  "filters": { "guid": "abc-123" }   ← for single record
-  "filters": { "user_id": "abc-123" } ← when joining to another table
-
-====================================
-CONTEXT AWARENESS RULES
-====================================
-- "delete the first one", "update this record", "show me the next ones" → resolve using chat history and db-context block.
-- If previous results showed guids → use them in filters for follow-up.
-- If ambiguous → ask for clarification in "reply" using action="schema".
-
+// ... existing code ...
 ====================================
 CREATE/UPDATE SPECIFIC RULES
 ====================================
@@ -1145,14 +1117,13 @@ CREATE/UPDATE SPECIFIC RULES
 - UPDATE: "filters" MUST contain "guid". "data" contains ONLY changed fields. Never merge filters into data.
 
 ====================================
-REPLY QUALITY RULES
+REPLY QUALITY RULES (For "answer" action)
 ====================================
 - Lists: format as Markdown table or bullet list — show count + top 5-10 records
 - Counts: state the exact number clearly (from the "count" field in results, not array length)
 - Aggregations: state the exact computed value with units if known
 - Mutations: be explicit about what was/will be changed
 - Be conversational and helpful, not robotic
-- When needs_more_data=true: set reply="" (empty) — the user sees nothing until the final answer
 `
 )
 
@@ -1162,12 +1133,13 @@ func ProcessDatabaseAssistantPrompt(clarified string, schemaJSON string, dataCon
 	if dataContext != "" {
 		sb.WriteString("== MODE: ANSWER GENERATION ==\n")
 		sb.WriteString("The database has been queried. Accumulated results are below.\n")
-		sb.WriteString("If you have enough data → set needs_more_data=false and provide the full answer in 'reply'.\n")
-		sb.WriteString("If you still need more data → set needs_more_data=true, set reply=\"\", describe next step in query_plan.\n\n")
+		sb.WriteString("If you have enough data → use action=\"answer\" and provide the full answer in 'reply'.\n")
+		sb.WriteString("If you still need more data → use action=\"read\"/\"count\"/etc., set needs_more_data=true, describe next step in query_plan.\n\n")
 	} else {
 		sb.WriteString("== MODE: QUERY PLANNING ==\n")
 		sb.WriteString("Plan the first database operation. Do NOT answer yet — just describe what to fetch.\n")
-		sb.WriteString("If you will need multiple tables, set needs_more_data=true with query_plan describing the next step.\n\n")
+		sb.WriteString("If you will need multiple tables, set needs_more_data=true with query_plan describing the next step.\n")
+		sb.WriteString("If the requested table DOES NOT EXIST, use action=\"schema\" and explain that it's missing.\n\n")
 	}
 
 	sb.WriteString("User request: \"")
