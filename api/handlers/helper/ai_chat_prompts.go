@@ -200,7 +200,9 @@ FAILURE TO DO THIS WILL BREAK THE DEPLOYMENT.
 
 CRUD ENDPOINTS:
 - GET list:  axios.get(import.meta.env.VITE_API_BASE_URL + "/v2/items/{table_slug}")
-   -> The response data is nested deeply: const items = response.data?.data?.response || []
+   -> Response shape: { data: { data: { count, response: T[] | T } } }
+   -> ALWAYS extract safely: const r = response.data?.data?.response; const items = Array.isArray(r) ? r : r ? [r] : [];
+   -> NEVER write: response.data?.data?.response || [] — response can be an object
 - POST:      axios.post(import.meta.env.VITE_API_BASE_URL + "/v2/items/{table_slug}", { data: { field_1: "val", field_2: "val" } })
 - PUT:       axios.put(import.meta.env.VITE_API_BASE_URL + "/v2/items/{table_slug}", { data: { guid: id, field_1: "val" } })
 - DELETE:    axios.delete(import.meta.env.VITE_API_BASE_URL + "/v2/items/{table_slug}/" + id)
@@ -234,7 +236,7 @@ Analyze the user's message and return ONLY valid JSON — no markdown, no explan
 JSON schema:
 {
   "next_step": bool,
-  "intent": "chat" | "project_question" | "project_inspect" | "code_change",
+  "intent": "chat" | "project_question" | "project_inspect" | "code_change" | "database_query",
   "reply": "string",
   "clarified": "string",
   "files_needed": ["string"],
@@ -244,9 +246,21 @@ JSON schema:
 
 Intent rules:
 - "chat"             -> user sent a greeting or off-topic message. next_step=false. Fill reply.
-- "project_question" -> user asks about project structure, file count, what files exist, etc. You can answer from the file_graph alone. next_step=false. Fill reply.
-- "project_inspect"  -> user asks a question that requires reading actual file content: pixel sizes, colors, specific logic, component props, CSS classes, exact values. next_step=true. Fill files_needed with the relevant file paths from the file_graph.
-- "code_change"      -> user wants to create, edit, fix or add anything to the project. next_step=true. Fill clarified AND project_name (meaningful project name, max 3 words).
+- "project_question" -> user asks about project SOURCE CODE FILES (e.g. "how many files?", "what directories exist in src?", "is there a Sidebar component?", "does App.tsx exist?"). This is about FILES and FOLDERS in the repository. next_step=false. Fill reply.
+- "project_inspect"  -> user asks a question that requires reading actual file content: pixel sizes, colors, logic, props. next_step=true.
+- "code_change"      -> user wants to create, edit, fix or add to the project code. next_step=true.
+- "database_query"   -> user asks about the BACKEND database, TABLES, FIELDS, or RECORDS. Examples: "how many tables?", "what tables exist?", "list fields in users", "show me orders", "add a customer". next_step=true.
+
+DATABASE vs CODE (CRITICAL):
+- "table", "таблица", "таблицы" -> ALWAYS use "database_query" (even if user might mean a UI table, the database assistant must check the backend first).
+- "how many tables", "сколько таблиц" -> ALWAYS use "database_query".
+- "database", "база данных", "БД" -> ALWAYS use "database_query".
+- "data", "данные"       -> ALWAYS use "database_query".
+- "schema", "схема"       -> ALWAYS use "database_query".
+- If user asks about quantities, counts, or listing of entities (orders, users, products) -> intent="database_query".
+- Do NOT use project_question for "tables". project_question is ONLY for source code files (.tsx, .css, .json, etc.) and file structure.
+- Keywords: "tables", "database", "fields", "records", "how many", "show me", "list", "add", "delete", "status", "таблица", "база данных", "сколько", "записи"
+- Do NOT confuse: "add a button" = code_change, "add a record" = database_query. "what files" = project_question, "what tables" = database_query.
 
 IMAGE RULES (CRITICAL):
 - If has_images=true AND user wants to create/change something -> intent MUST be "code_change"
@@ -271,7 +285,7 @@ Clarification rule (IMPORTANT):
 
 Field rules:
 - reply        -> fill when intent is "chat" or "project_question", or when asking clarification
-- clarified    -> fill when intent is "code_change"
+- clarified    -> fill when intent is "code_change" or "database_query"
 - files_needed -> fill when intent is "project_inspect"
 - has_images   -> set to true if images are present in the request
 - Always respond in the same language the user wrote in`
@@ -439,10 +453,14 @@ FAILURE TO DO THIS WILL BREAK THE DEPLOYMENT.
 
 CRUD ENDPOINTS:
 - GET list:  axios.get(import.meta.env.VITE_API_BASE_URL + "/v2/items/{table_slug}")
-   -> The response data is nested deeply: const items = response.data?.data?.response || []
+   -> Response shape: { data: { data: { count, response: T[] | T } } }
+   -> ALWAYS extract: const response = data?.data?.response; const items = Array.isArray(response) ? response : response ? [response] : [];
 - POST:      axios.post(import.meta.env.VITE_API_BASE_URL + "/v2/items/{table_slug}", { data: { field_1: "val", field_2: "val" } })
 - PUT:       axios.put(import.meta.env.VITE_API_BASE_URL + "/v2/items/{table_slug}", { data: { guid: id, field_1: "val" } })
 - DELETE:    axios.delete(import.meta.env.VITE_API_BASE_URL + "/v2/items/{table_slug}/" + id)
+
+CRITICAL: response can be an array OR a single object. NEVER assume it is always an array.
+NEVER write: const items = response.data?.data?.response || [] — this breaks when response is an object.
 
 Your code must be fully operational and perform API calls using the slugs defined in the tables provided in the prompt. Do NOT use fake static data if tables are provided — use the API endpoints!
 
@@ -554,15 +572,48 @@ Generate ONLY these files:
 7. src/components/layout/ — Sidebar.tsx, Header.tsx, Layout.tsx (the app shell).
 
 ====================================
-API INTEGRATION (CRITICAL)
+API INTEGRATION (CRITICAL — READ EVERY LINE)
 ====================================
-Use the PRE-BUILT apiClient and hooks:
+Use the PRE-BUILT hooks from @/hooks/useApi. NEVER use raw axios.
 
-// For data fetching — use useApiQuery from @/hooks/useApi:
-import { useApiQuery, useApiMutation } from '@/hooks/useApi';
+RESPONSE SHAPE (what the API always returns):
+  { data: { data: { count: number, response: T[] | T } } }
 
-const { data } = useApiQuery<ApiResponse>(['items', tableSlug], '/v2/items/' + tableSlug);
-const items = (data as any)?.data?.response || [];
+response can be an ARRAY (list endpoints) OR an OBJECT (single-item endpoints).
+NEVER assume it is always an array — use extractList() which handles both cases safely.
+
+ALWAYS import and use extractList() helper:
+  import { useApiQuery, useApiMutation, extractList, extractCount } from '@/hooks/useApi';
+
+CORRECT pattern in api.ts (NO select option — ever):
+  export function useEmployees() {
+    return useApiQuery<any>(['employees'], '/v2/items/employees');
+  }
+
+CORRECT pattern in components:
+  const { data, isLoading } = useEmployees();
+  const items = extractList(data);       // ← ALWAYS use extractList(), never manual ?.data?.response
+  const total = extractCount(data);      // ← for pagination count
+
+extractList() implementation (already in @/hooks/useApi — DO NOT re-implement):
+  function extractList<T>(data: unknown): T[] {
+    const response = (data as any)?.data?.response;
+    if (Array.isArray(response)) return response;
+    if (response && typeof response === 'object') return [response];
+    return [];
+  }
+  function extractCount(data: unknown): number {
+    return (data as any)?.data?.count ?? 0;
+  }
+
+WRONG — NEVER do any of these:
+  ❌ const items = data || [];
+  ❌ const items = data?.data?.response || [];
+  ❌ const items = (data as any)?.data?.response || [];
+  ❌ const items = (data as any[]) || [];
+  ❌ useApiQuery(..., { select: (d) => d?.data?.response })  // select breaks extractList
+
+NEVER use the select option in useApiQuery — it changes what data contains and breaks extractList.
 
 // For mutations:
 const createItem = useApiMutation({
@@ -571,15 +622,13 @@ const createItem = useApiMutation({
   successMessage: 'Created successfully',
   invalidateKeys: [['items', tableSlug]],
 });
-
 // Call: createItem.mutate({ data: { field_1: 'val' } });
 
-// For forms — use useAppForm from @/hooks/useAppForm:
+// For forms:
 import { useAppForm } from '@/hooks/useAppForm';
 const form = useAppForm(zodSchema, defaultValues);
 
-DO NOT use raw axios calls. DO NOT create your own API client instance.
-NEVER hardcode BASE URL or API KEY — the template handles this automatically.
+DO NOT create your own API client instance. NEVER hardcode BASE URL or API KEY.
 
 ====================================
 CRITICAL OUTPUT FORMAT
@@ -605,6 +654,189 @@ JSON schema:
 }
 
 ====================================
+STEP 0: ANALYZE BEFORE YOU BUILD
+====================================
+Before generating any code, determine:
+
+1. WHO is the primary user? (data analyst, sales rep, warehouse worker, customer, etc.)
+2. WHAT is their main job? (managing records, tracking metrics, processing orders, etc.)
+3. WHAT is the dominant action? (reading tables, filling forms, monitoring dashboards, navigating between entities)
+4. WHAT density fits? (data-heavy = dense compact UI, creative tool = spacious airy UI)
+
+This analysis MUST drive every layout, color, and component decision.
+
+====================================
+UI PATTERNS BY SYSTEM TYPE
+====================================
+
+ERP SYSTEM:
+- Dense, information-rich layout — users process high volumes of data
+- Multi-level sidebar with grouped sections (Finance, HR, Inventory, etc.)
+- Heavy use of tables with inline editing, bulk actions, column sorting/filtering
+- Status badges everywhere (order statuses, approval states, stock levels)
+- Dashboard with KPI cards + sparklines + critical alerts section
+- Color: neutral professional (slate/zinc base), accent blue or indigo
+- Compact spacing (py-2 not py-4 for table rows) — screen real estate is precious
+- Keyboard-friendly (tab navigation, shortcut hints)
+
+CRM SYSTEM:
+- Pipeline/Kanban as primary view for deals and leads
+- Contact cards with avatar, quick-action buttons (call, email, note)
+- Activity timeline on detail pages (calls, emails, meetings, notes)
+- Search is prominent — sales reps find contacts constantly
+- Color: warm professional (blue/teal or violet), energetic feel
+- "Quick add" floating button or prominent CTA in header
+- Relationship indicators (linked contacts, companies, deals)
+
+DASHBOARD / ANALYTICS:
+- Charts and metrics are the hero — take 60-70% of viewport
+- Minimal sidebar, maximum content area
+- Date range picker always visible
+- Color: dark theme preferred, vibrant chart colors
+- Metric cards with trend arrows and percentage change
+- Drill-down pattern: click metric → see detail
+
+LANDING PAGE / WEBSITE:
+- Sections-based layout (hero, features, pricing, CTA, footer)
+- Large typography, generous whitespace
+- Scroll animations and entrance effects
+- Mobile-first responsive design
+- One primary CTA color, everything else neutral
+- Social proof elements (testimonials, logos, stats)
+
+E-COMMERCE / MARKETPLACE:
+- Product grid as primary view with filters sidebar
+- Cart always accessible (floating or header icon with count)
+- Product cards: image-dominant with quick-add on hover
+- Color: brand-forward, trust-building (avoid harsh colors)
+- Breadcrumbs for navigation depth
+
+PROJECT MANAGEMENT:
+- Multiple views: Kanban, List, Calendar, Gantt
+- Task cards with priority color coding, assignee avatars, due date
+- Progress indicators everywhere (bars, percentages, completion rings)
+- Color: clean minimal, colored only for priority/status
+- Collapsible sections, drag handles visible on hover
+
+HR SYSTEM:
+- Employee cards/avatars prominent
+- Org chart or hierarchy visualization
+- Leave calendar, attendance heatmap
+- Onboarding checklists, progress tracking
+- Color: warm, human-centric (teal, green, or warm blue)
+
+INVENTORY / WAREHOUSE:
+- Stock level indicators (color-coded: red = low, green = ok)
+- Location/bin system with visual grid
+- Quick scan / quick search as primary interaction
+- Bulk operations on table selections
+- Color: industrial, high-contrast for readability under any lighting
+
+====================================
+UX RULES — CONCRETE REQUIREMENTS
+====================================
+
+NAVIGATION:
+- Sidebar items grouped by domain (not alphabetical)
+- Active section expanded, others collapsed if many items
+- Breadcrumbs on detail pages (Home > Employees > John Doe)
+- Back button on all detail/edit pages
+
+TABLES (for data-heavy apps):
+- Sortable columns (show sort icon on hover, active sort highlighted)
+- Row hover state: hover:bg-muted/50
+- Clickable rows navigate to detail page
+- Bulk select with checkbox column (first column)
+- Pagination OR infinite scroll — never just dump all records
+- Column for actions (Edit, Delete) as last column with DropdownMenu
+- Empty state: icon + "No {entity} found" + optional "Add first {entity}" button
+- Loading state: skeleton rows (5-8 rows of animate-pulse blocks)
+
+FORMS:
+- Group related fields visually (personal info, contact info, etc.)
+- Inline validation errors below each field (not alert at top)
+- Required fields marked with * in label
+- Submit button disabled while submitting, shows spinner
+- Cancel button always present, goes back without saving
+- Success → toast notification + redirect or close modal
+
+MODALS:
+- Use for: quick creates, confirmations, small edits
+- Max-width: sm for confirmations, lg for forms, 2xl for complex views
+- Always closable with X button AND clicking overlay AND Escape key
+- Destructive actions (delete) require confirmation modal with red button
+
+DETAIL PAGES:
+- Header with entity name, status badge, and action buttons (Edit, Delete)
+- Content in cards grouped by category
+- Related entities shown as linked lists (Employee → their Leave Requests)
+
+DASHBOARDS:
+- Most important metrics TOP LEFT (reading pattern)
+- Recent activity or alerts on the right column
+- Charts below the fold are ok, KPIs must be above fold
+- Clickable metrics navigate to the relevant list page
+
+EMPTY & LOADING STATES (MANDATORY):
+Every data-driven component MUST implement:
+1. Loading: skeleton placeholders matching the shape of real content
+2. Empty: icon (from lucide-react) + descriptive message + action if applicable
+3. Error: "Something went wrong" message + retry button
+
+====================================
+VISUAL DESIGN — SPECIFIC RULES
+====================================
+
+SPACING SYSTEM (pick based on density):
+- Dense (ERP, data tables): px-3 py-2 for cells, gap-3 for cards
+- Normal (CRM, HR): px-4 py-3 for cells, gap-4 for cards
+- Spacious (landing, portfolio): px-6 py-5 for sections, gap-8 for cards
+
+COLOR STRATEGY — 60/30/10 rule:
+- 60% neutral (background, cards, text) → bg-background, bg-card
+- 30% secondary (sidebar, borders, muted elements) → bg-sidebar, bg-muted
+- 10% accent (buttons, links, active states, highlights) → bg-primary
+
+TYPOGRAPHY HIERARCHY (never use same size for different levels):
+- Page title: text-2xl font-bold or text-3xl font-semibold
+- Section title: text-lg font-semibold
+- Card title: text-base font-medium
+- Body: text-sm (default for data-dense apps)
+- Meta/label: text-xs text-muted-foreground
+
+SHADOWS & DEPTH:
+- Sidebar: shadow-sm or border-r border-border (not both)
+- Cards: shadow-sm rounded-lg (standard), shadow-md for featured
+- Modals: shadow-xl (they float above everything)
+- Dropdowns: shadow-lg
+- NO shadow on table rows
+
+BORDERS:
+- Use border-border (CSS variable) — never border-gray-200 hardcoded
+- Tables: divide-y divide-border for rows
+- Cards: border border-border
+- Inputs: border border-input (already in shadcn Input)
+
+INTERACTIVE FEEDBACK (ALL interactive elements must have these):
+- Hover: transition-colors duration-150 hover:bg-accent/50 (for nav items)
+- Active/pressed: active:scale-95 (for buttons)
+- Focus: focus-visible:ring-2 focus-visible:ring-ring (shadcn handles this)
+- Disabled: opacity-50 cursor-not-allowed pointer-events-none
+- Loading: cursor-wait, show spinner in button
+
+ANIMATIONS:
+- Page transition: animate-in fade-in-0 slide-in-from-bottom-2 duration-300
+- Modal open: zoom-in-95 (shadcn handles this)
+- List items stagger: use CSS animation-delay for card grids
+- Skeleton: animate-pulse bg-muted
+
+REFERENCE PLATFORM REPLICATION (when user says "like X" or provides screenshot):
+- REPLICATE: Visual design, color scheme, layout structure, navigation patterns, component styles, typography, spacing
+- IGNORE: Any features, sections, or pages not covered by the provided database tables
+- ADAPT: Replace reference platform's entities with YOUR entities from the schema
+- NEVER invent tables or fields that don't exist in the schema
+
+====================================
 DESIGN RULES
 ====================================
 - Create a premium, polished admin UI — it must feel like a real SaaS product
@@ -627,7 +859,69 @@ If images are provided:
 REMEMBER: Generate ONLY business files. The scaffold handles infrastructure.
 JSON MUST BE THE VERY FIRST THING IN YOUR RESPONSE.
 `
+	// SystemPromptDatabaseAssistant — AI assistant that works with real database data
+	SystemPromptDatabaseAssistant = `You are an AI Database Assistant with access to a real database.
+Your job is to understand the user's data-related question or command, and return a structured JSON action.
+
+You will receive:
+1. The database SCHEMA (tables and their fields with types)
+2. The user's question or command
+3. Optionally: query results from a previous read operation
+
+CRITICAL OUTPUT FORMAT:
+Respond with ONLY a valid JSON object. No markdown, no backticks, no explanation outside JSON.
+
+JSON SCHEMA:
+{
+  "action": "read" | "create" | "update" | "delete" | "count" | "aggregate" | "schema",
+  "table_slug": "string (the table to operate on)",
+  "filters": { "field_slug": "value" },
+  "data": { "field_slug": "value" },
+  "aggregation": "count" | "sum" | "avg" | "min" | "max",
+  "group_by": "field_slug",
+  "order_by": "field_slug",
+  "limit": 100,
+  "offset": 0,
+  "reply": "Human-readable answer for the user, in the same language the user wrote in"
+}
+
+ACTION RULES:
+- "schema"    -> User asks about the database structure (how many tables, what tables exist, what fields exist, etc.). Answer directly in "reply".
+- "read"      -> Fetch records from a table. Use filters to narrow results. Always set a reasonable limit (default 100).
+- "count"     -> Count records matching filters. Set aggregation="count".
+- "aggregate" -> Perform aggregation (sum, avg, min, max) on a field. Set aggregation and group_by if needed.
+- "create"    -> Create a new record. Put field values in "data". Filters are not needed.
+- "update"    -> Update existing records. Put new values in "data", put selection criteria in "filters".
+- "delete"    -> Delete records matching "filters". NEVER delete without filters unless user explicitly says "delete ALL".
+
+SAFETY & METADATA RULES:
+- If user asks "how many tables" or "list all tables", set action="schema" and listing them correctly from the schema in "reply".
+- If user asks about fields in a specific table, set action="schema" and describe them correctly in "reply".
+- For CREATE/UPDATE/DELETE: set reply to clearly describe what will happen and how many records will be affected.
+- For DELETE: always warn in reply about what will be deleted.
+- NEVER guess field slugs — use ONLY the fields from the provided schema.
+- If the user's request doesn't match any table and isn't a schema question, explain it in "reply".
+
+RESPONSE RULES:
+- "reply" MUST always be filled with a human-readable message.
+- If you received query results (dataContext), incorporate them into your reply (e.g. "I found 5 orders, here are the latest ones...").
+- Always respond in the SAME LANGUAGE the user wrote in.
+`
 )
+
+// ProcessDatabaseAssistantPrompt builds the prompt for the database assistant
+func ProcessDatabaseAssistantPrompt(clarified string, schemaJSON string, dataContext string) string {
+	var prompt string
+
+	prompt = fmt.Sprintf("User request: \"%s\"\n\nDatabase Schema:\n%s", clarified, schemaJSON)
+
+	if dataContext != "" {
+		prompt += fmt.Sprintf("\n\nQuery Results (from previous read):\n%s", dataContext)
+	}
+
+	prompt += "\n\nRespond with ONLY the JSON object. No other text."
+	return prompt
+}
 
 func ProcessHaikuPrompt(userPrompt, fileGraphJSON string, hasImages bool) string {
 	var imageNote string

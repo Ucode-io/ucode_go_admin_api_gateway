@@ -37,6 +37,7 @@ type ChatProcessor struct {
 	mcpProjectID   string
 	resourceEnvID  string
 	ucodeProjectID string
+	builderResourceID string
 
 	userID       string
 	clientTypeID string
@@ -164,6 +165,7 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 		"message":        message,
 		"project":        updateProject,
 		"mcp_project_id": processor.mcpProjectID,
+		"pending_action": aiResponse.PendingAction,
 	})
 }
 
@@ -222,6 +224,9 @@ func (p *ChatProcessor) routeAndProcess(ctx context.Context, req models.NewMessa
 
 	case "code_change":
 		return p.runCodeFlow(ctx, haikuResult.Clarified, fileGraphJSON, chatHistory, req.Images, haikuResult.ProjectName, projectData)
+
+	case "database_query":
+		return p.runDatabaseFlow(ctx, haikuResult.Clarified, chatHistory)
 	}
 
 	return &models.ParsedClaudeResponse{Description: haikuResult.Reply}, nil
