@@ -29,15 +29,16 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, proj
 		attributes, _ := helper.ConvertMapToStruct(attributesMap)
 
 		tableReq := &nb.CreateTableRequest{
-			Label:      tablePlan.Label,
-			Slug:       tablePlan.Slug,
-			ProjectId:  projectId,
-			EnvId:      envId,
-			MenuId:     config.MainMenuID,
-			ViewId:     uuid.NewString(), // Server generates if empty, but good to be explicit
-			LayoutId:   uuid.NewString(),
-			ShowInMenu: true,
-			Attributes: attributes,
+			Label:        tablePlan.Label,
+			Slug:         tablePlan.Slug,
+			ProjectId:    projectId,
+			EnvId:        envId,
+			MenuId:       config.MainMenuID,
+			ViewId:       uuid.NewString(), // Server generates if empty, but good to be explicit
+			LayoutId:     uuid.NewString(),
+			ShowInMenu:   true,
+			Attributes:   attributes,
+			IsLoginTable: tablePlan.IsLoginTable,
 		}
 
 		tableResp, err := service.GoObjectBuilderService().Table().Create(ctx, tableReq)

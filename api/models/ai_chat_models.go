@@ -96,10 +96,11 @@ type (
 	}
 
 	TablePlan struct {
-		Slug     string           `json:"slug"`
-		Label    string           `json:"label"`
-		Fields   []TableFieldPlan `json:"fields"`
-		MockData []map[string]any `json:"mock_data"` // 3-5 реалистичных записей
+		Slug         string           `json:"slug"`
+		Label        string           `json:"label"`
+		Fields       []TableFieldPlan `json:"fields"`
+		MockData     []map[string]any `json:"mock_data"`      // 3-5 реалистичных записей
+		IsLoginTable bool             `json:"is_login_table"` // true for the project's login/users table
 	}
 
 	ArchitectPlan struct {
@@ -135,16 +136,17 @@ type (
 
 	// DatabaseActionRequest — what Claude returns as a structured database action
 	DatabaseActionRequest struct {
-		Action      string         `json:"action"`       // "read" | "create" | "update" | "delete" | "count" | "aggregate"
-		TableSlug   string         `json:"table_slug"`
-		Filters     map[string]any `json:"filters,omitempty"`
-		Data        map[string]any `json:"data,omitempty"`      // for create/update
-		Aggregation string         `json:"aggregation,omitempty"` // "count" | "sum" | "avg" etc.
-		GroupBy     string         `json:"group_by,omitempty"`
-		OrderBy     string         `json:"order_by,omitempty"`
-		Limit       int            `json:"limit,omitempty"`
-		Offset      int            `json:"offset,omitempty"`
-		Reply       string         `json:"reply"` // AI's human-readable answer for the user
+		Action           string         `json:"action"`             // "read" | "create" | "update" | "delete" | "count" | "aggregate"
+		TableSlug        string         `json:"table_slug"`
+		Filters          map[string]any `json:"filters,omitempty"`
+		Data             map[string]any `json:"data,omitempty"`        // for create/update
+		AggregationField string         `json:"aggregation_field,omitempty"` // field to aggregate (sum/avg/min/max of this)
+		Aggregation      string         `json:"aggregation,omitempty"` // "count" | "sum" | "avg" | "min" | "max"
+		GroupBy          string         `json:"group_by,omitempty"`
+		OrderBy          string         `json:"order_by,omitempty"`
+		Limit            int            `json:"limit,omitempty"`
+		Offset           int            `json:"offset,omitempty"`
+		Reply            string         `json:"reply"` // AI's human-readable answer for the user
 	}
 
 	// PendingAction — stored action waiting for user confirmation

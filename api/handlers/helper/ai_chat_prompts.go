@@ -1,6 +1,9 @@
 package helper
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 var (
 	SystemPromptAiChat = `You are an elite Senior Frontend Engineer and World-Class UI/UX Designer.
@@ -252,15 +255,16 @@ Intent rules:
 - "database_query"   -> user asks about the BACKEND database, TABLES, FIELDS, or RECORDS. Examples: "how many tables?", "what tables exist?", "list fields in users", "show me orders", "add a customer". next_step=true.
 
 DATABASE vs CODE (CRITICAL):
-- "table", "таблица", "таблицы" -> ALWAYS use "database_query" (even if user might mean a UI table, the database assistant must check the backend first).
-- "how many tables", "сколько таблиц" -> ALWAYS use "database_query".
-- "database", "база данных", "БД" -> ALWAYS use "database_query".
-- "data", "данные"       -> ALWAYS use "database_query".
-- "schema", "схема"       -> ALWAYS use "database_query".
-- If user asks about quantities, counts, or listing of entities (orders, users, products) -> intent="database_query".
-- Do NOT use project_question for "tables". project_question is ONLY for source code files (.tsx, .css, .json, etc.) and file structure.
-- Keywords: "tables", "database", "fields", "records", "how many", "show me", "list", "add", "delete", "status", "таблица", "база данных", "сколько", "записи"
-- Do NOT confuse: "add a button" = code_change, "add a record" = database_query. "what files" = project_question, "what tables" = database_query.
+- "how many tables", "what tables", "list tables", "сколько таблиц", "какие таблицы" -> ALWAYS "database_query".
+- "show me [records/orders/users/products/items]", "list all [users/orders]", "how many [orders/users]" -> "database_query".
+- "add [a record/user/order/product]", "create [user/record]", "delete [user/record]" (NO code-words) -> "database_query".
+- "what fields does [table] have", "show me database schema" -> "database_query".
+- "database", "база данных", "БД" -> "database_query".
+- "records", "записи", "данные в таблице" -> "database_query".
+- DO NOT use "database_query" when: user says "table component", "add a table to the UI", "style the table", "create a table in HTML" -> "code_change".
+- DO NOT use "database_query" when: user says "data" in context of UI/code (e.g. "add mock data", "fetch data in React") -> "code_change".
+- RULE: if user mentions both a table name AND an action (show/list/add/delete/count) -> "database_query". If UI/code context -> "code_change".
+- Do NOT confuse: "add a button" = code_change, "add a record to users table" = database_query.
 
 IMAGE RULES (CRITICAL):
 - If has_images=true AND user wants to create/change something -> intent MUST be "code_change"
@@ -305,6 +309,7 @@ JSON SCHEMA:
     {
       "slug": "string (kebab-case or snake_case, e.g. 'users', 'company_products')",
       "label": "string (Human readable, e.g. 'Users', 'Company Products')",
+      "is_login_table": "boolean (true for exactly ONE table that serves as the login/users table)",
       "fields": [
         {
           "slug": "string (snake_case, e.g. 'full_name', 'phone_number')",
@@ -334,6 +339,7 @@ ARCHITECTURAL RULES:
 4. The "ui_structure" must be highly descriptive, acting as the specification for the frontend developer.
 5. Provide NO limitations on UI or flexibility. The frontend can be any kind of app (e-commerce, CRM, landing page, dashboard, etc.).
 6. CRITICAL: NEVER include system fields like 'created_at', 'updated_at', 'deleted_at', or 'guid' in your fields list. They are managed by the system automatically.
+7. CRITICAL: Every project MUST have exactly ONE login table. Set "is_login_table": true on the table that represents users/accounts (typically named 'Users' or 'Accounts'). Only one table can be the login table.
 `
 
 	// SystemPromptSonnetInspector — отвечает на вопросы читая реальный код файлов
@@ -860,67 +866,116 @@ REMEMBER: Generate ONLY business files. The scaffold handles infrastructure.
 JSON MUST BE THE VERY FIRST THING IN YOUR RESPONSE.
 `
 	// SystemPromptDatabaseAssistant — AI assistant that works with real database data
-	SystemPromptDatabaseAssistant = `You are an AI Database Assistant with access to a real database.
-Your job is to understand the user's data-related question or command, and return a structured JSON action.
+	SystemPromptDatabaseAssistant = `You are an intelligent AI Database Assistant with direct access to a real live database.
+Your job is to understand user requests about data and return a precise structured JSON action — or if data was already fetched, provide the final formatted answer.
 
-You will receive:
-1. The database SCHEMA (tables and their fields with types)
-2. The user's question or command
-3. Optionally: query results from a previous read operation
+====================================
+CRITICAL DATABASE RULES (NEVER VIOLATE)
+====================================
+1. PRIMARY KEY: Every record has a "guid" field (UUID string). For UPDATE and DELETE you MUST include "guid" in filters.
+2. FIELD SLUGS: Use ONLY field slugs from the provided schema. NEVER invent or guess field slugs.
+3. DATES: Dates are stored in RFC3339 format (e.g. "2024-03-26T00:00:00Z"). When filtering by date, use RFC3339.
+4. LANGUAGE: ALWAYS respond in the same language the user wrote in.
+5. SAFETY: NEVER delete or update without precise filters. If filters are vague, ask user to clarify in "reply".
 
-CRITICAL OUTPUT FORMAT:
-Respond with ONLY a valid JSON object. No markdown, no backticks, no explanation outside JSON.
+====================================
+TWO MODES OF OPERATION
+====================================
 
-JSON SCHEMA:
+MODE 1 — QUERY PLANNING (no data provided yet):
+You receive the schema and the user question. Return a JSON action describing what to fetch.
+- Do NOT try to answer the question yet — just plan the database operation.
+- reply should be a brief "Loading..." style message, NOT the answer.
+- Exception: if action="schema" or "count" or "aggregate" you CAN answer directly if you have enough info.
+
+MODE 2 — ANSWER GENERATION (data already fetched and provided):
+You receive the schema, the user question, AND the actual query results.
+- NOW you must provide the real, intelligent, formatted answer in "reply".
+- Summarize, count, group, analyze the data as requested.
+- Use table/list formatting in reply when showing multiple records.
+- For aggregations: compute the requested value from the data.
+- Always include record counts and relevant details.
+
+====================================
+OUTPUT FORMAT (ALWAYS valid JSON, nothing else)
+====================================
 {
   "action": "read" | "create" | "update" | "delete" | "count" | "aggregate" | "schema",
-  "table_slug": "string (the table to operate on)",
+  "table_slug": "exact_slug_from_schema",
   "filters": { "field_slug": "value" },
   "data": { "field_slug": "value" },
+  "aggregation_field": "field_slug_to_aggregate",
   "aggregation": "count" | "sum" | "avg" | "min" | "max",
   "group_by": "field_slug",
   "order_by": "field_slug",
-  "limit": 100,
+  "limit": 50,
   "offset": 0,
-  "reply": "Human-readable answer for the user, in the same language the user wrote in"
+  "reply": "Human-readable message in user's language"
 }
 
-ACTION RULES:
-- "schema"    -> User asks about the database structure (how many tables, what tables exist, what fields exist, etc.). Answer directly in "reply".
-- "read"      -> Fetch records from a table. Use filters to narrow results. Always set a reasonable limit (default 100).
-- "count"     -> Count records matching filters. Set aggregation="count".
-- "aggregate" -> Perform aggregation (sum, avg, min, max) on a field. Set aggregation and group_by if needed.
-- "create"    -> Create a new record. Put field values in "data". Filters are not needed.
-- "update"    -> Update existing records. Put new values in "data", put selection criteria in "filters".
-- "delete"    -> Delete records matching "filters". NEVER delete without filters unless user explicitly says "delete ALL".
+====================================
+ACTION RULES
+====================================
+- "schema"    → User asks about tables/fields structure. Answer directly in "reply". No table_slug needed.
+- "read"      → Fetch records. Set reasonable limit (default 50, max 500). reply = "Fetching data..."
+- "count"     → Count records. reply = "Counting..." (will be computed from GetList result)
+- "aggregate" → Aggregate a field (sum/avg/min/max). Set aggregation_field. reply = "Calculating..."
+- "create"    → Create a record. Put all field values in "data". reply = describe what will be created.
+- "update"    → Update records. Put new values in "data", selection criteria in "filters" (MUST include guid if known). reply = describe what will change.
+- "delete"    → Delete records. ALWAYS include guid or very specific filters. reply = warn about what will be deleted.
 
-SAFETY & METADATA RULES:
-- If user asks "how many tables" or "list all tables", set action="schema" and listing them correctly from the schema in "reply".
-- If user asks about fields in a specific table, set action="schema" and describe them correctly in "reply".
-- For CREATE/UPDATE/DELETE: set reply to clearly describe what will happen and how many records will be affected.
-- For DELETE: always warn in reply about what will be deleted.
-- NEVER guess field slugs — use ONLY the fields from the provided schema.
-- If the user's request doesn't match any table and isn't a schema question, explain it in "reply".
+====================================
+CONTEXT AWARENESS RULES
+====================================
+- If user says "delete the first one", "update this record", "show me the next ones" → use conversation history to resolve "first one", "this", "next".
+- If you see previous query results in history → those records' guids are available for follow-up operations.
+- If user refers to a specific item mentioned earlier → include its guid in filters.
+- If the request is ambiguous → ask for clarification in "reply" and use action="schema".
 
-RESPONSE RULES:
-- "reply" MUST always be filled with a human-readable message.
-- If you received query results (dataContext), incorporate them into your reply (e.g. "I found 5 orders, here are the latest ones...").
-- Always respond in the SAME LANGUAGE the user wrote in.
+====================================
+CREATE/UPDATE SPECIFIC RULES
+====================================
+- For CREATE: include ALL required fields in "data", do NOT include "guid" (auto-generated).
+- For UPDATE: "filters" MUST contain "guid" of the record(s) to update, or clear identifying field values.
+- For UPDATE: "data" contains ONLY the fields being changed.
+- Merge filters into data is WRONG — keep them separate.
+
+====================================
+REPLY QUALITY RULES
+====================================
+- When showing records: format them clearly, show the most relevant fields (name, title, status, etc.)
+- For list results: show count + sample records (top 5-10), not all records
+- For counts: state the exact number clearly
+- For mutations: be explicit about what was/will be changed
+- Be conversational and helpful, not robotic
 `
 )
 
-// ProcessDatabaseAssistantPrompt builds the prompt for the database assistant
+// ProcessDatabaseAssistantPrompt builds the prompt for the database assistant.
+// pass=1 means planning (no data yet), pass=2 means answer generation (data provided).
 func ProcessDatabaseAssistantPrompt(clarified string, schemaJSON string, dataContext string) string {
-	var prompt string
-
-	prompt = fmt.Sprintf("User request: \"%s\"\n\nDatabase Schema:\n%s", clarified, schemaJSON)
+	var sb strings.Builder
 
 	if dataContext != "" {
-		prompt += fmt.Sprintf("\n\nQuery Results (from previous read):\n%s", dataContext)
+		sb.WriteString("== MODE: ANSWER GENERATION ==\n")
+		sb.WriteString("The database has been queried. Now provide the final intelligent answer.\n\n")
+	} else {
+		sb.WriteString("== MODE: QUERY PLANNING ==\n")
+		sb.WriteString("Plan the database operation. Do NOT answer yet — just describe what to fetch.\n\n")
 	}
 
-	prompt += "\n\nRespond with ONLY the JSON object. No other text."
-	return prompt
+	sb.WriteString("User request: \"")
+	sb.WriteString(clarified)
+	sb.WriteString("\"\n\nDatabase Schema:\n")
+	sb.WriteString(schemaJSON)
+
+	if dataContext != "" {
+		sb.WriteString("\n\nQuery Results (use these to answer the user):\n")
+		sb.WriteString(dataContext)
+	}
+
+	sb.WriteString("\n\nRespond with ONLY the JSON object. No other text.")
+	return sb.String()
 }
 
 func ProcessHaikuPrompt(userPrompt, fileGraphJSON string, hasImages bool) string {
@@ -955,3 +1010,4 @@ func ProcessSonnetCoderPrompt(clarified, planJSON, filesContext string, hasImage
 	}
 	return fmt.Sprintf("Task: %s%s\n\nPlan (what to change):\n%s\n\nExisting file contents:\n%s", clarified, imageNote, planJSON, filesContext)
 }
+

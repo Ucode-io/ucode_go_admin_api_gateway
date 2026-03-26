@@ -5,6 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math"
+	"sort"
+	"strings"
 	"sync"
 	"time"
 
@@ -20,34 +23,61 @@ import (
 	"github.com/google/uuid"
 )
 
-const timeoutDatabaseAssistant = 120 * time.Second
+const (
+	timeoutDatabaseAssistant = 120 * time.Second
+	pendingActionTTL         = 30 * time.Minute // pending actions expire after 30 min
+	schemaCacheTTL           = 5 * time.Minute  // re-fetch schema every 5 min
+)
 
 // ============================================================================
-// PENDING ACTIONS STORE (in-memory, thread-safe)
+// PENDING ACTIONS STORE (in-memory, thread-safe, with TTL)
 // ============================================================================
+
+type timedPendingAction struct {
+	action    *models.PendingAction
+	expiresAt time.Time
+}
 
 var (
-	pendingActions   = make(map[string]*models.PendingAction)
+	pendingActions   = make(map[string]*timedPendingAction)
 	pendingActionsMu sync.RWMutex
 )
 
 func storePendingAction(action *models.PendingAction) {
 	pendingActionsMu.Lock()
 	defer pendingActionsMu.Unlock()
-	pendingActions[action.ID] = action
+	pendingActions[action.ID] = &timedPendingAction{
+		action:    action,
+		expiresAt: time.Now().Add(pendingActionTTL),
+	}
 }
 
 func getPendingAction(id string) (*models.PendingAction, bool) {
 	pendingActionsMu.RLock()
 	defer pendingActionsMu.RUnlock()
-	action, ok := pendingActions[id]
-	return action, ok
+	entry, ok := pendingActions[id]
+	if !ok || time.Now().After(entry.expiresAt) {
+		return nil, false
+	}
+	return entry.action, true
 }
 
 func deletePendingAction(id string) {
 	pendingActionsMu.Lock()
 	defer pendingActionsMu.Unlock()
 	delete(pendingActions, id)
+}
+
+// cleanupExpiredPendingActions removes expired pending actions — called lazily before reads
+func cleanupExpiredPendingActions() {
+	pendingActionsMu.Lock()
+	defer pendingActionsMu.Unlock()
+	now := time.Now()
+	for id, entry := range pendingActions {
+		if now.After(entry.expiresAt) {
+			delete(pendingActions, id)
+		}
+	}
 }
 
 // ============================================================================
@@ -63,9 +93,11 @@ func (h *HandlerV1) ConfirmDatabaseAction(c *gin.Context) {
 		return
 	}
 
+	cleanupExpiredPendingActions()
+
 	action, ok := getPendingAction(actionID)
 	if !ok {
-		h.HandleResponse(c, status_http.NotFound, "pending action not found or expired")
+		h.HandleResponse(c, status_http.NotFound, "pending action not found or expired (actions expire after 30 minutes)")
 		return
 	}
 
@@ -104,7 +136,8 @@ func (h *HandlerV1) ConfirmDatabaseAction(c *gin.Context) {
 // ============================================================================
 
 func (p *ChatProcessor) runDatabaseFlow(ctx context.Context, clarified string, chatHistory []models.ChatMessage) (*models.ParsedClaudeResponse, error) {
-	schema, err := p.getProjectSchema(ctx)
+	// 1. Get schema (cached within processor lifecycle)
+	schema, err := p.getProjectSchemaCached(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get project schema: %w", err)
 	}
@@ -114,14 +147,15 @@ func (p *ChatProcessor) runDatabaseFlow(ctx context.Context, clarified string, c
 		return nil, fmt.Errorf("failed to marshal schema: %w", err)
 	}
 
+	// 2. First Claude call: understand the intent and plan the query
 	action, err := p.callDatabaseAssistant(ctx, clarified, string(schemaJSON), "", chatHistory)
 	if err != nil {
 		return nil, fmt.Errorf("database assistant failed: %w", err)
 	}
 
-	log.Printf("[DB_ASSISTANT] action=%s table=%s", action.Action, action.TableSlug)
+	log.Printf("[DB_ASSISTANT] action=%s table=%s aggregation=%s", action.Action, action.TableSlug, action.Aggregation)
 
-	// If it's a schema/metadata question or no table is targeted, just return the reply
+	// 3. Handle schema-only queries — no DB access needed
 	if action.TableSlug == "" || action.Action == "schema" {
 		return &models.ParsedClaudeResponse{
 			Description: action.Reply,
@@ -129,8 +163,14 @@ func (p *ChatProcessor) runDatabaseFlow(ctx context.Context, clarified string, c
 	}
 
 	switch action.Action {
-	case "read", "count", "aggregate":
+	case "read":
 		return p.handleDatabaseRead(ctx, action, clarified, string(schemaJSON), chatHistory)
+
+	case "count":
+		return p.handleDatabaseCount(ctx, action, clarified, string(schemaJSON), chatHistory)
+
+	case "aggregate":
+		return p.handleDatabaseAggregate(ctx, action, clarified, string(schemaJSON), chatHistory)
 
 	case "create", "update", "delete":
 		return p.handleDatabaseMutation(ctx, action)
@@ -142,6 +182,7 @@ func (p *ChatProcessor) runDatabaseFlow(ctx context.Context, clarified string, c
 	}
 }
 
+// handleDatabaseRead fetches records and uses a second Claude call to format a rich answer
 func (p *ChatProcessor) handleDatabaseRead(ctx context.Context, action *models.DatabaseActionRequest, clarified, schemaJSON string, chatHistory []models.ChatMessage) (*models.ParsedClaudeResponse, error) {
 	data, err := p.executeDatabaseRead(ctx, action)
 	if err != nil {
@@ -153,16 +194,99 @@ func (p *ChatProcessor) handleDatabaseRead(ctx context.Context, action *models.D
 		return nil, fmt.Errorf("failed to marshal query results: %w", err)
 	}
 
+	// Second Claude call: now with actual data for intelligent answer generation
 	finalAction, err := p.callDatabaseAssistant(ctx, clarified, schemaJSON, string(dataJSON), chatHistory)
 	if err != nil {
+		// Fallback to a simple reply if second call fails
 		return &models.ParsedClaudeResponse{
 			Description: action.Reply,
 		}, nil
 	}
 
+	// Build a data context hint for conversation — guids of fetched records for follow-up ops
+	dataHint := buildDataContextHint(data)
+
+	reply := finalAction.Reply
+	if dataHint != "" {
+		reply = reply + dataHint
+	}
+
 	return &models.ParsedClaudeResponse{
-		Description: finalAction.Reply,
+		Description: reply,
 	}, nil
+}
+
+// handleDatabaseCount counts records using GetList and computes count on the Go side
+func (p *ChatProcessor) handleDatabaseCount(ctx context.Context, action *models.DatabaseActionRequest, clarified, schemaJSON string, chatHistory []models.ChatMessage) (*models.ParsedClaudeResponse, error) {
+	countAction := &models.DatabaseActionRequest{
+		Action:    "read",
+		TableSlug: action.TableSlug,
+		Filters:   action.Filters,
+		Limit:     5000, // large enough to count accurately
+	}
+
+	data, err := p.executeDatabaseRead(ctx, countAction)
+	if err != nil {
+		return nil, fmt.Errorf("database count failed: %w", err)
+	}
+
+	count := extractCountFromData(data)
+
+	// Format rich count reply via second Claude call with actual number
+	countResult := map[string]any{
+		"count":      count,
+		"table_slug": action.TableSlug,
+		"filters":    action.Filters,
+	}
+
+	countJSON, _ := json.Marshal(countResult)
+
+	finalAction, err := p.callDatabaseAssistant(ctx, clarified, schemaJSON, string(countJSON), chatHistory)
+	if err != nil {
+		return &models.ParsedClaudeResponse{
+			Description: fmt.Sprintf("Found **%d** records in table `%s`.", count, action.TableSlug),
+		}, nil
+	}
+
+	return &models.ParsedClaudeResponse{Description: finalAction.Reply}, nil
+}
+
+// handleDatabaseAggregate performs server-side aggregation (sum/avg/min/max) on fetched records
+func (p *ChatProcessor) handleDatabaseAggregate(ctx context.Context, action *models.DatabaseActionRequest, clarified, schemaJSON string, chatHistory []models.ChatMessage) (*models.ParsedClaudeResponse, error) {
+	readAction := &models.DatabaseActionRequest{
+		Action:    "read",
+		TableSlug: action.TableSlug,
+		Filters:   action.Filters,
+		Limit:     5000,
+	}
+
+	data, err := p.executeDatabaseRead(ctx, readAction)
+	if err != nil {
+		return nil, fmt.Errorf("database aggregate fetch failed: %w", err)
+	}
+
+	field := action.AggregationField
+	aggregationType := action.Aggregation
+	result := computeAggregation(data, field, aggregationType)
+
+	aggResult := map[string]any{
+		"aggregation":       aggregationType,
+		"field":             field,
+		"result":            result,
+		"table_slug":        action.TableSlug,
+		"records_processed": extractCountFromData(data),
+	}
+
+	aggJSON, _ := json.Marshal(aggResult)
+
+	finalAction, err := p.callDatabaseAssistant(ctx, clarified, schemaJSON, string(aggJSON), chatHistory)
+	if err != nil {
+		return &models.ParsedClaudeResponse{
+			Description: fmt.Sprintf("Aggregation result: **%s(%s)** = `%.4f`", aggregationType, field, result),
+		}, nil
+	}
+
+	return &models.ParsedClaudeResponse{Description: finalAction.Reply}, nil
 }
 
 func (p *ChatProcessor) handleDatabaseMutation(ctx context.Context, action *models.DatabaseActionRequest) (*models.ParsedClaudeResponse, error) {
@@ -176,16 +300,7 @@ func (p *ChatProcessor) handleDatabaseMutation(ctx context.Context, action *mode
 		}
 		data, err := p.executeDatabaseRead(ctx, countAction)
 		if err == nil {
-			if dataMap, ok := data.(map[string]any); ok {
-				if resp, ok := dataMap["response"]; ok {
-					if items, ok := resp.([]any); ok {
-						affectedCount = len(items)
-					}
-				}
-				if count, ok := dataMap["count"].(float64); ok {
-					affectedCount = int(count)
-				}
-			}
+			affectedCount = extractCountFromData(data)
 		}
 	}
 
@@ -210,16 +325,15 @@ func (p *ChatProcessor) handleDatabaseMutation(ctx context.Context, action *mode
 	log.Printf("[DB_ASSISTANT] Created pending action: id=%s action=%s table=%s affected=%d",
 		pending.ID, pending.Action, pending.TableSlug, pending.AffectedCount)
 
-	// Construct a response that includes the pending action for the frontend
 	description := action.Reply
 	if description == "" {
 		switch action.Action {
 		case "create":
-			description = fmt.Sprintf("Create a new record in table '%s'.", action.TableSlug)
+			description = fmt.Sprintf("Create a new record in table `%s`.", action.TableSlug)
 		case "update":
-			description = fmt.Sprintf("Update %d record(s) in table '%s'.", affectedCount, action.TableSlug)
+			description = fmt.Sprintf("Update **%d** record(s) in table `%s`.", affectedCount, action.TableSlug)
 		case "delete":
-			description = fmt.Sprintf("Delete %d record(s) from table '%s'.", affectedCount, action.TableSlug)
+			description = fmt.Sprintf("⚠️ Delete **%d** record(s) from table `%s`.", affectedCount, action.TableSlug)
 		}
 	}
 
@@ -230,10 +344,28 @@ func (p *ChatProcessor) handleDatabaseMutation(ctx context.Context, action *mode
 }
 
 // ============================================================================
-// SCHEMA INTROSPECTION
+// SCHEMA INTROSPECTION (with per-processor cache)
 // ============================================================================
 
-func (p *ChatProcessor) getProjectSchema(ctx context.Context) ([]models.TableSchema, error) {
+// getProjectSchemaCached returns schema from cache if fresh, otherwise fetches and caches
+func (p *ChatProcessor) getProjectSchemaCached(ctx context.Context) ([]models.TableSchema, error) {
+	if p.schemaCache != nil && time.Now().Before(p.schemaCachedAt.Add(schemaCacheTTL)) {
+		log.Printf("[DB_ASSISTANT] Using cached schema (%d tables)", len(p.schemaCache))
+		return p.schemaCache, nil
+	}
+
+	schema, err := p.fetchProjectSchema(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	p.schemaCache = schema
+	p.schemaCachedAt = time.Now()
+	log.Printf("[DB_ASSISTANT] Schema cache refreshed (%d tables)", len(schema))
+	return schema, nil
+}
+
+func (p *ChatProcessor) fetchProjectSchema(ctx context.Context) ([]models.TableSchema, error) {
 	if p.mcpProjectID == "" {
 		return nil, fmt.Errorf("no backend project associated with this chat")
 	}
@@ -253,34 +385,61 @@ func (p *ChatProcessor) getProjectSchema(ctx context.Context) ([]models.TableSch
 		return nil, fmt.Errorf("failed to list tables: %w", err)
 	}
 
-	var schemas []models.TableSchema
+	tables := tablesResp.GetTables()
+	schemas := make([]models.TableSchema, 0, len(tables))
 
-	for _, table := range tablesResp.GetTables() {
-		fieldsResp, err := p.service.GoObjectBuilderService().Field().GetAll(
-			ctx, &nb.GetAllFieldsRequest{
-				TableId:   table.GetId(),
-				ProjectId: builderID,
-				Limit:     200,
-			},
-		)
+	// Fetch fields for all tables in parallel
+	type result struct {
+		idx    int
+		schema models.TableSchema
+	}
 
-		var fields []models.FieldSchema
+	resultChan := make(chan result, len(tables))
 
-		if err == nil {
-			for _, field := range fieldsResp.GetFields() {
-				fields = append(fields, models.FieldSchema{
-					Slug:  field.GetSlug(),
-					Label: field.GetLabel(),
-					Type:  field.GetType(),
-				})
+	for i, table := range tables {
+		go func(idx int, tbl interface {
+			GetId() string
+			GetSlug() string
+			GetLabel() string
+		}) {
+			fieldsResp, err := p.service.GoObjectBuilderService().Field().GetAll(
+				ctx, &nb.GetAllFieldsRequest{
+					TableId:   tbl.GetId(),
+					ProjectId: builderID,
+					Limit:     200,
+				},
+			)
+
+			var fields []models.FieldSchema
+			if err == nil {
+				for _, field := range fieldsResp.GetFields() {
+					fields = append(fields, models.FieldSchema{
+						Slug:  field.GetSlug(),
+						Label: field.GetLabel(),
+						Type:  field.GetType(),
+					})
+				}
 			}
-		}
 
-		schemas = append(schemas, models.TableSchema{
-			Slug:   table.GetSlug(),
-			Label:  table.GetLabel(),
-			Fields: fields,
-		})
+			resultChan <- result{
+				idx: idx,
+				schema: models.TableSchema{
+					Slug:   tbl.GetSlug(),
+					Label:  tbl.GetLabel(),
+					Fields: fields,
+				},
+			}
+		}(i, table)
+	}
+
+	collected := make([]models.TableSchema, len(tables))
+	for range tables {
+		r := <-resultChan
+		collected[r.idx] = r.schema
+	}
+
+	for _, s := range collected {
+		schemas = append(schemas, s)
 	}
 
 	return schemas, nil
@@ -295,7 +454,6 @@ func (p *ChatProcessor) resolveBuilderResourceID(ctx context.Context) (string, e
 		return p.builderResourceID, nil
 	}
 
-	// 1. Get MCP project to find the actual linked backend IDs
 	mcpProject, err := p.service.GoObjectBuilderService().McpProject().GetMcpProjectFiles(
 		ctx, &nb.McpProjectId{
 			ResourceEnvId: p.resourceEnvID,
@@ -313,7 +471,6 @@ func (p *ChatProcessor) resolveBuilderResourceID(ctx context.Context) (string, e
 		return "", fmt.Errorf("no backend project/environment linked to this AI project (project=%s, env=%s)", backendProjectID, backendEnvID)
 	}
 
-	// 2. Resolve the builder resource ID using backend metadata
 	resp, err := p.service.CompanyService().ServiceResource().GetSingle(
 		ctx,
 		&company_service.GetSingleServiceResourceReq{
@@ -336,10 +493,8 @@ func (p *ChatProcessor) resolveBuilderResourceID(ctx context.Context) (string, e
 // ============================================================================
 
 func (p *ChatProcessor) callDatabaseAssistant(ctx context.Context, clarified, schemaJSON, dataContext string, chatHistory []models.ChatMessage) (*models.DatabaseActionRequest, error) {
-	var (
-		content  = helper.ProcessDatabaseAssistantPrompt(clarified, schemaJSON, dataContext)
-		messages = buildMessagesWithHistory(chatHistory, []models.ContentBlock{{Type: "text", Text: content}})
-	)
+	content := helper.ProcessDatabaseAssistantPrompt(clarified, schemaJSON, dataContext)
+	messages := buildMessagesWithHistory(chatHistory, []models.ContentBlock{{Type: "text", Text: content}})
 
 	response, err := helper.CallAnthropicAPI(
 		p.baseConf,
@@ -352,7 +507,7 @@ func (p *ChatProcessor) callDatabaseAssistant(ctx context.Context, clarified, sc
 		timeoutDatabaseAssistant,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("database assistant api call failed: %w", err)
+		return nil, fmt.Errorf("database assistant API call failed: %w", err)
 	}
 
 	text, err := helper.ExtractPlainText(response)
@@ -363,7 +518,6 @@ func (p *ChatProcessor) callDatabaseAssistant(ctx context.Context, clarified, sc
 	cleaned := helper.CleanJSONResponse(text)
 
 	var action models.DatabaseActionRequest
-
 	if err = json.Unmarshal([]byte(cleaned), &action); err != nil {
 		return nil, fmt.Errorf("failed to parse database action JSON: %w | raw=%.300s", err, text)
 	}
@@ -380,19 +534,16 @@ func (p *ChatProcessor) executeDatabaseRead(ctx context.Context, action *models.
 		return nil, fmt.Errorf("table_slug is required for database read")
 	}
 
-	// Build the data struct with filters, limit, offset
 	dataMap := make(map[string]any)
 
-	if len(action.Filters) > 0 {
-		for k, v := range action.Filters {
-			dataMap[k] = v
-		}
+	for k, v := range action.Filters {
+		dataMap[k] = v
 	}
 
 	if action.Limit > 0 {
 		dataMap["limit"] = action.Limit
 	} else {
-		dataMap["limit"] = 100
+		dataMap["limit"] = 50
 	}
 
 	if action.Offset > 0 {
@@ -424,7 +575,6 @@ func (p *ChatProcessor) executeDatabaseRead(ctx context.Context, action *models.
 		return nil, fmt.Errorf("items GetList failed: %w", err)
 	}
 
-	// Convert response data to a map
 	if resp.GetData() != nil {
 		result, err := helperFunc.ConvertStructToMap(resp.GetData())
 		if err != nil {
@@ -441,7 +591,6 @@ func executeDatabaseMutation(ctx context.Context, action *models.PendingAction, 
 		return nil, fmt.Errorf("table_slug is required")
 	}
 
-	// We need the ucode project ID — it's stored in the action
 	projectID := action.ProjectID
 
 	switch action.Action {
@@ -470,11 +619,11 @@ func executeDatabaseMutation(ctx context.Context, action *models.PendingAction, 
 		return map[string]any{"status": "created"}, nil
 
 	case "update":
+		// Merge data + filters so the update identifies and changes the right record
 		dataMap := make(map[string]any)
 		for k, v := range action.Data {
 			dataMap[k] = v
 		}
-		// Merge filters as search criteria
 		for k, v := range action.Filters {
 			dataMap[k] = v
 		}
@@ -521,4 +670,164 @@ func executeDatabaseMutation(ctx context.Context, action *models.PendingAction, 
 	default:
 		return nil, fmt.Errorf("unsupported mutation action: %s", action.Action)
 	}
+}
+
+// ============================================================================
+// DATA HELPERS — aggregation and context extraction
+// ============================================================================
+
+// extractItemsFromData extracts the list of records from a GetList response map
+func extractItemsFromData(data any) []map[string]any {
+	dataMap, ok := data.(map[string]any)
+	if !ok {
+		return nil
+	}
+
+	// Try "response" key first (standard), then "data"
+	for _, key := range []string{"response", "data", "items"} {
+		if raw, ok := dataMap[key]; ok {
+			if items, ok := raw.([]any); ok {
+				result := make([]map[string]any, 0, len(items))
+				for _, item := range items {
+					if m, ok := item.(map[string]any); ok {
+						result = append(result, m)
+					}
+				}
+				return result
+			}
+		}
+	}
+	return nil
+}
+
+// extractCountFromData returns the count of records from a GetList response
+func extractCountFromData(data any) int {
+	dataMap, ok := data.(map[string]any)
+	if !ok {
+		return 0
+	}
+
+	// Direct count field
+	if count, ok := dataMap["count"]; ok {
+		switch v := count.(type) {
+		case float64:
+			return int(v)
+		case int:
+			return v
+		case int64:
+			return int(v)
+		}
+	}
+
+	// Fall back to length of response array
+	items := extractItemsFromData(data)
+	return len(items)
+}
+
+// computeAggregation computes sum/avg/min/max on a specific field of the fetched records
+func computeAggregation(data any, field, aggType string) float64 {
+	items := extractItemsFromData(data)
+	if len(items) == 0 || field == "" {
+		return 0
+	}
+
+	var values []float64
+	for _, item := range items {
+		if raw, ok := item[field]; ok {
+			switch v := raw.(type) {
+			case float64:
+				values = append(values, v)
+			case int:
+				values = append(values, float64(v))
+			case int64:
+				values = append(values, float64(v))
+			}
+		}
+	}
+
+	if len(values) == 0 {
+		return 0
+	}
+
+	switch strings.ToLower(aggType) {
+	case "sum":
+		var total float64
+		for _, v := range values {
+			total += v
+		}
+		return total
+
+	case "avg":
+		var total float64
+		for _, v := range values {
+			total += v
+		}
+		return total / float64(len(values))
+
+	case "min":
+		sort.Float64s(values)
+		return values[0]
+
+	case "max":
+		sort.Float64s(values)
+		return values[len(values)-1]
+
+	case "count":
+		return float64(len(values))
+	}
+
+	return 0
+}
+
+// buildDataContextHint creates a hidden context note of guids fetched, for follow-up operations.
+// It's appended (invisibly to UI) so that the next message can reference these records.
+func buildDataContextHint(data any) string {
+	items := extractItemsFromData(data)
+	if len(items) == 0 {
+		return ""
+	}
+
+	// Collect guids and any display field (name, title, label, etc.)
+	type recordRef struct {
+		guid    string
+		display string
+	}
+
+	displayFields := []string{"name", "title", "label", "full_name", "email", "username", "code"}
+	refs := make([]recordRef, 0, len(items))
+
+	for _, item := range items {
+		guid, _ := item["guid"].(string)
+		if guid == "" {
+			continue
+		}
+
+		var display string
+		for _, df := range displayFields {
+			if val, ok := item[df]; ok && val != nil {
+				display = fmt.Sprintf("%v", val)
+				break
+			}
+		}
+
+		refs = append(refs, recordRef{guid: guid, display: display})
+	}
+
+	if len(refs) == 0 {
+		return ""
+	}
+
+	// Build a compact hidden context note (not shown to user, but part of AI context in next turn)
+	limit := int(math.Min(float64(len(refs)), 20))
+	var sb strings.Builder
+	sb.WriteString("\n\n<!-- DB_CONTEXT: fetched_records=[")
+	for i := 0; i < limit; i++ {
+		if i > 0 {
+			sb.WriteString(",")
+		}
+		sb.WriteString(fmt.Sprintf(`{"guid":"%s","display":"%s"}`, refs[i].guid, refs[i].display))
+	}
+	sb.WriteString("] -->")
+
+	return sb.String()
 }

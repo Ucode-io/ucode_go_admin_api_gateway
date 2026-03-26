@@ -42,6 +42,10 @@ type ChatProcessor struct {
 	userID       string
 	clientTypeID string
 	roleID       string
+
+	// Schema cache for DB assistant — avoids N+1 gRPC calls per message
+	schemaCache    []models.TableSchema
+	schemaCachedAt time.Time
 }
 
 func newChatProcessor(h *HandlerV1, service services.ServiceManagerI, baseConf config.BaseConfig, chatId, mcpProjectID, resourceEnvID, ucodeProjectID string, userID, clientTypeID, roleID string) *ChatProcessor {
