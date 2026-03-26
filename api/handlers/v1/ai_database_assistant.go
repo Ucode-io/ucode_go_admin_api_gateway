@@ -317,23 +317,12 @@ func buildWhereClause(filters map[string]any) string {
 // MUTATION HANDLER — stateless, no RAM store
 // ============================================================================
 
-// handleDatabaseMutation builds a PendingAction and returns it embedded in the response.
-//
-// Flow:
-//
-//	Go → response{pending_action: {...}} → Frontend
-//	Frontend shows confirmation UI ("Delete 5 records. Yes/No?")
-//	User clicks Yes → Frontend sends new message{pending_action: {approved: true, ...all data...}}
-//	Go detects pending_action in request → calls executeMutation directly, skips Haiku/Claude
-//
-// Nothing is stored in server RAM. Zero memory leak.
 func (p *ChatProcessor) handleDatabaseMutation(ctx context.Context, action *models.DatabaseActionRequest) (*models.ParsedClaudeResponse, error) {
 	builderID, err := p.resolveBuilderResourceID(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("resolve builder ID: %w", err)
 	}
 
-	// Count affected records so the frontend can show an accurate confirmation message
 	affectedCount := 1
 	if action.Action != "create" && len(action.Filters) > 0 {
 		if data, err := p.executeDatabaseRead(ctx, &models.DatabaseActionRequest{
@@ -345,31 +334,51 @@ func (p *ChatProcessor) handleDatabaseMutation(ctx context.Context, action *mode
 		}
 	}
 
-	description := action.Reply
-	if description == "" {
+	confirmationPrompt := action.Reply
+	if confirmationPrompt == "" {
 		switch action.Action {
 		case "create":
-			description = fmt.Sprintf("Create a new record in `%s`.", action.TableSlug)
+			confirmationPrompt = fmt.Sprintf("Создать новую запись в `%s`?", action.TableSlug)
 		case "update":
-			description = fmt.Sprintf("Update **%d** record(s) in `%s`.", affectedCount, action.TableSlug)
+			confirmationPrompt = fmt.Sprintf("Обновить **%d** запис(ей) в `%s`?", affectedCount, action.TableSlug)
 		case "delete":
-			description = fmt.Sprintf("⚠️ Delete **%d** record(s) from `%s`.", affectedCount, action.TableSlug)
+			confirmationPrompt = fmt.Sprintf("⚠️ Удалить **%d** запис(ей) из `%s`?", affectedCount, action.TableSlug)
 		}
 	}
 
+	successMessage := action.SuccessMessage
+	if successMessage == "" {
+		switch action.Action {
+		case "create":
+			successMessage = fmt.Sprintf("✅ Запись успешно создана в `%s`.", action.TableSlug)
+		case "update":
+			successMessage = fmt.Sprintf("✅ Обновлено **%d** запис(ей) в `%s`.", affectedCount, action.TableSlug)
+		case "delete":
+			successMessage = fmt.Sprintf("✅ Удалено **%d** запис(ей) из `%s`.", affectedCount, action.TableSlug)
+		}
+	}
+
+	cancelMessage := action.CancelMessage
+	if cancelMessage == "" {
+		cancelMessage = "Окей, действие отменено. Ничего не изменено."
+	}
+
 	pending := &models.PendingAction{
-		Action:        action.Action,
-		TableSlug:     action.TableSlug,
-		Filters:       action.Filters,
-		Data:          action.Data,
-		AffectedCount: affectedCount,
-		Description:   description,
-		ProjectID:     builderID,
-		ResourceEnvID: p.resourceEnvID,
+		Action:             action.Action,
+		TableSlug:          action.TableSlug,
+		Filters:            action.Filters,
+		Data:               action.Data,
+		AffectedCount:      affectedCount,
+		Description:        confirmationPrompt,
+		ProjectID:          builderID,
+		ResourceEnvID:      p.resourceEnvID,
+		SuccessMessage:     successMessage,
+		CancelMessage:      cancelMessage,
+		ConfirmationPrompt: confirmationPrompt,
 	}
 
 	return &models.ParsedClaudeResponse{
-		Description:   description,
+		Description:   confirmationPrompt,
 		PendingAction: pending,
 	}, nil
 }

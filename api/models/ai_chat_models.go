@@ -145,25 +145,29 @@ type (
 		OrderBy          string         `json:"order_by"`
 		Limit            int            `json:"limit"`
 		Offset           int            `json:"offset"`
+		NeedsMoreData    bool           `json:"needs_more_data"`
+		QueryPlan        string         `json:"query_plan"`
 		Reply            string         `json:"reply"`
 
-		NeedsMoreData bool   `json:"needs_more_data"`
-		QueryPlan     string `json:"query_plan"`
+		SuccessMessage string `json:"success_message"` // что написать в чат после апрува
+		CancelMessage  string `json:"cancel_message"`  // что написать при отмене
 	}
 
 	PendingAction struct {
-		Action        string         `json:"action"`          // create | update | delete
-		TableSlug     string         `json:"table_slug"`      // which table
-		Filters       map[string]any `json:"filters"`         // for update/delete: record selector (contains guid)
-		Data          map[string]any `json:"data"`            // for create/update: field values
-		AffectedCount int            `json:"affected_count"`  // shown in confirmation UI
-		Description   string         `json:"description"`     // human-readable confirmation text
-		ProjectID     string         `json:"project_id"`      // builder resource ID
-		ResourceEnvID string         `json:"resource_env_id"` // environment context
+		Action        string         `json:"action"`
+		TableSlug     string         `json:"table_slug"`
+		Filters       map[string]any `json:"filters"`
+		Data          map[string]any `json:"data"`
+		AffectedCount int            `json:"affected_count"`
+		Description   string         `json:"description"`
+		ProjectID     string         `json:"project_id"`
+		ResourceEnvID string         `json:"resource_env_id"`
+		Approved      bool           `json:"approved"`
 
-		Approved bool `json:"approved"` // true = execute, false = cancel
+		SuccessMessage     string `json:"success_message"`     // умный текст после апрува
+		CancelMessage      string `json:"cancel_message"`      // текст при отмене
+		ConfirmationPrompt string `json:"confirmation_prompt"` // короткий текст для кнопок фронта
 	}
-
 	// ConfirmActionRequest — frontend sends this to confirm/reject a pending action
 	ConfirmActionRequest struct {
 		Confirmed bool `json:"confirmed"`

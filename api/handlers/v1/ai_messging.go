@@ -144,7 +144,11 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 	}
 
 	if strings.TrimSpace(aiResponse.Description) == "" {
-		aiResponse.Description = "Project has been updated."
+		if aiResponse.PendingAction != nil {
+			aiResponse.Description = aiResponse.PendingAction.ConfirmationPrompt
+		} else {
+			aiResponse.Description = "Project has been updated."
+		}
 	}
 
 	message, err := processor.createMessageRecord(ctx, "assistant", aiResponse.Description, nil)
@@ -193,9 +197,9 @@ func (h *HandlerV1) handlePendingConfirmation(c *gin.Context, ctx context.Contex
 
 	if userContent == "" {
 		if action.Approved {
-			userContent = "Yes"
+			userContent = "Да"
 		} else {
-			userContent = "No"
+			userContent = "Нет"
 		}
 	}
 
@@ -206,7 +210,11 @@ func (h *HandlerV1) handlePendingConfirmation(c *gin.Context, ctx context.Contex
 	}
 
 	if !action.Approved {
-		assistantReply = "Action cancelled."
+		// Используем cancel_message от AI, fallback — дефолтный
+		assistantReply = action.CancelMessage
+		if strings.TrimSpace(assistantReply) == "" {
+			assistantReply = "Окей, действие отменено. Ничего не изменено."
+		}
 	} else {
 		mutationResult, err = executeMutation(ctx, action, service)
 		if err != nil {
@@ -214,19 +222,19 @@ func (h *HandlerV1) handlePendingConfirmation(c *gin.Context, ctx context.Contex
 			return
 		}
 
-		switch action.Action {
-		case "create":
-			assistantReply = fmt.Sprintf("✅ Created successfully in `%s`.", action.TableSlug)
-		case "update":
-			assistantReply = fmt.Sprintf("✅ Updated **%d** record(s) in `%s`.", action.AffectedCount, action.TableSlug)
-		case "delete":
-			assistantReply = fmt.Sprintf("✅ Deleted **%d** record(s) from `%s`.", action.AffectedCount, action.TableSlug)
-		default:
-			assistantReply = "✅ Done."
-		}
-
-		if action.Description != "" {
-			assistantReply = "✅ " + action.Description
+		assistantReply = action.SuccessMessage
+		if strings.TrimSpace(assistantReply) == "" {
+			// fallback если AI не заполнил
+			switch action.Action {
+			case "create":
+				assistantReply = fmt.Sprintf("✅ Запись успешно создана в `%s`.", action.TableSlug)
+			case "update":
+				assistantReply = fmt.Sprintf("✅ Обновлено **%d** запис(ей) в `%s`.", action.AffectedCount, action.TableSlug)
+			case "delete":
+				assistantReply = fmt.Sprintf("✅ Удалено **%d** запис(ей) из `%s`.", action.AffectedCount, action.TableSlug)
+			default:
+				assistantReply = "✅ Готово."
+			}
 		}
 	}
 
