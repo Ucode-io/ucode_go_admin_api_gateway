@@ -540,20 +540,35 @@ ALREADY AVAILABLE — DO NOT GENERATE THESE:
 - src/components/shared/AppProviders.tsx (QueryClientProvider + Sonner toasts)
 - src/components/shared/AppMap.tsx (Leaflet map component)
 
+MUST GENERATE — NOT IN TEMPLATE:
+- .env (CRITICAL — you MUST generate this with real values from API CONFIGURATION below)
+- .env.production (same real values as .env)
+
 AVAILABLE UI COMPONENTS (import from @/components/ui/*):
+These are the ONLY pre-built components in the scaffold:
+- Avatar, AvatarImage, AvatarFallback
+- Badge (variants: default, secondary, destructive, outline, success, warning, info)
 - Button (variants: default, destructive, outline, secondary, ghost, link)
 - Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter
-- Input
 - Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter
-- Select, SelectTrigger, SelectValue, SelectContent, SelectItem
 - DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem
-- Table, TableHeader, TableBody, TableRow, TableHead, TableCell
-- Badge (variants: default, secondary, destructive, outline, success, warning, info)
-- Label, Separator
-- Tabs, TabsList, TabsTrigger, TabsContent
+- Input
+- Label
 - ScrollArea
-- Avatar, AvatarImage, AvatarFallback
+- Select, SelectTrigger, SelectValue, SelectContent, SelectItem
+- Separator
+- Table, TableHeader, TableBody, TableRow, TableHead, TableCell
+- Tabs, TabsList, TabsTrigger, TabsContent
 - Tooltip, TooltipProvider, TooltipTrigger, TooltipContent
+
+MISSING COMPONENT RULE (CRITICAL):
+If you need a component NOT in the list above (e.g. Textarea, Checkbox, Switch, Popover,
+RadioGroup, Skeleton, Sheet, Progress, Slider, etc.) — you MUST:
+1. CREATE it yourself as a new file: src/components/ui/{component-name}.tsx
+2. Style it to match the project's design system (same border-radius, colors, focus rings, etc.)
+3. Export it with the standard pattern matching the other UI components
+4. Import it from '@/components/ui/{component-name}' wherever you use it
+NEVER import a component from @/components/ui/* that is not in the list above without first generating its file.
 
 ====================================
 WHAT YOU MUST GENERATE
@@ -578,48 +593,72 @@ Generate ONLY these files:
 7. src/components/layout/ — Sidebar.tsx, Header.tsx, Layout.tsx (the app shell).
 
 ====================================
+ENV FILES (CRITICAL — BUILD BREAKS WITHOUT THIS)
+====================================
+The template does NOT include .env — YOU must generate it.
+You will receive real values in the API CONFIGURATION section of the user prompt.
+You MUST copy those exact values into .env and .env.production.
+
+CORRECT — always generate BOTH files with REAL values:
+  { "path": ".env", "content": "VITE_API_BASE_URL=https://real-url-from-config\nVITE_X_API_KEY=real-key-from-config\nVITE_APP_NAME=My App\n" }
+  { "path": ".env.production", "content": "VITE_API_BASE_URL=https://real-url-from-config\nVITE_X_API_KEY=real-key-from-config\nVITE_APP_NAME=My App\n" }
+
+WRONG — NEVER do any of these:
+  ❌ Leave .env empty
+  ❌ Write placeholder values like "your-api-key-here" or "..."
+  ❌ Omit .env from the files array
+  ❌ Hardcode values in source code instead of using import.meta.env.*
+
+====================================
 API INTEGRATION (CRITICAL — READ EVERY LINE)
 ====================================
 Use the PRE-BUILT hooks from @/hooks/useApi. NEVER use raw axios.
+
+AVAILABLE exports from @/hooks/useApi:
+  import { apiFetch, useApiQuery, useApiMutation, useApiInfiniteQuery } from '@/hooks/useApi';
 
 RESPONSE SHAPE (what the API always returns):
   { data: { data: { count: number, response: T[] | T } } }
 
 response can be an ARRAY (list endpoints) OR an OBJECT (single-item endpoints).
-NEVER assume it is always an array — use extractList() which handles both cases safely.
+NEVER assume it is always an array.
 
-ALWAYS import and use extractList() helper:
-  import { useApiQuery, useApiMutation, extractList, extractCount } from '@/hooks/useApi';
+SAFE DATA EXTRACTION — CRITICAL:
+Do NOT import extractList or extractCount from @/hooks/useApi — they do NOT exist there.
+Instead, either:
 
-CORRECT pattern in api.ts (NO select option — ever):
-  export function useEmployees() {
-    return useApiQuery<any>(['employees'], '/v2/items/employees');
-  }
-
-CORRECT pattern in components:
+OPTION A — inline extraction (for simple cases):
   const { data, isLoading } = useEmployees();
-  const items = extractList(data);       // ← ALWAYS use extractList(), never manual ?.data?.response
-  const total = extractCount(data);      // ← for pagination count
+  const raw = (data as any)?.data?.response;
+  const items = Array.isArray(raw) ? raw : raw ? [raw] : [];
+  const total = (data as any)?.data?.count ?? 0;
 
-extractList() implementation (already in @/hooks/useApi — DO NOT re-implement):
-  function extractList<T>(data: unknown): T[] {
-    const response = (data as any)?.data?.response;
-    if (Array.isArray(response)) return response;
-    if (response && typeof response === 'object') return [response];
-    return [];
-  }
-  function extractCount(data: unknown): number {
-    return (data as any)?.data?.count ?? 0;
-  }
+OPTION B — create a utility file (RECOMMENDED when used in multiple places):
+  Create src/lib/apiUtils.ts with:
+    export function extractList<T>(data: unknown): T[] {
+      const response = (data as any)?.data?.response;
+      if (Array.isArray(response)) return response;
+      if (response && typeof response === 'object') return [response as T];
+      return [];
+    }
+    export function extractCount(data: unknown): number {
+      return (data as any)?.data?.count ?? 0;
+    }
+  Then import from '@/lib/apiUtils' wherever needed.
+
+MISSING HOOK/UTILITY RULE: If you need any helper, utility, or hook that is NOT listed
+in the pre-built scaffold above — CREATE it in the appropriate file and import it from there.
+NEVER import something that does not exist.
 
 WRONG — NEVER do any of these:
   ❌ const items = data || [];
   ❌ const items = data?.data?.response || [];
   ❌ const items = (data as any)?.data?.response || [];
   ❌ const items = (data as any[]) || [];
-  ❌ useApiQuery(..., { select: (d) => d?.data?.response })  // select breaks extractList
+  ❌ import { extractList } from '@/hooks/useApi';        // does NOT exist in useApi
+  ❌ useApiQuery(..., { select: (d) => d?.data?.response })  // breaks safe extraction
 
-NEVER use the select option in useApiQuery — it changes what data contains and breaks extractList.
+NEVER use the select option in useApiQuery — it transforms data and breaks the safe extraction pattern.
 
 // For mutations:
 const createItem = useApiMutation({
@@ -648,11 +687,13 @@ JSON schema:
   "project_name": "string",
   "files": [
     { "path": "src/App.tsx", "content": "..." },
-    { "path": "src/features/contacts/types.ts", "content": "..." }
+    { "path": "src/features/contacts/types.ts", "content": "..." },
+    { "path": ".env", "content": "VITE_API_BASE_URL=<value from API CONFIGURATION>\nVITE_X_API_KEY=<value from API CONFIGURATION>\nVITE_APP_NAME=My App\n" },
+    { "path": ".env.production", "content": "VITE_API_BASE_URL=<value from API CONFIGURATION>\nVITE_X_API_KEY=<value from API CONFIGURATION>\nVITE_APP_NAME=My App\n" }
   ],
   "env": {
-    "VITE_API_BASE_URL": "...",
-    "VITE_X_API_KEY": "..."
+    "VITE_API_BASE_URL": "<value from API CONFIGURATION>",
+    "VITE_X_API_KEY": "<value from API CONFIGURATION>"
   },
   "file_graph": {
     "src/App.tsx": { "path": "src/App.tsx", "kind": "component", "imports": [], "deps": [] }
@@ -1010,4 +1051,3 @@ func ProcessSonnetCoderPrompt(clarified, planJSON, filesContext string, hasImage
 	}
 	return fmt.Sprintf("Task: %s%s\n\nPlan (what to change):\n%s\n\nExisting file contents:\n%s", clarified, imageNote, planJSON, filesContext)
 }
-

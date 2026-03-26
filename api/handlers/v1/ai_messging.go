@@ -30,20 +30,19 @@ const (
 )
 
 type ChatProcessor struct {
-	h              *HandlerV1
-	service        services.ServiceManagerI
-	baseConf       config.BaseConfig
-	chatId         string
-	mcpProjectID   string
-	resourceEnvID  string
-	ucodeProjectID string
+	h                 *HandlerV1
+	service           services.ServiceManagerI
+	baseConf          config.BaseConfig
+	chatId            string
+	mcpProjectID      string
+	resourceEnvID     string
+	ucodeProjectID    string
 	builderResourceID string
 
 	userID       string
 	clientTypeID string
 	roleID       string
 
-	// Schema cache for DB assistant — avoids N+1 gRPC calls per message
 	schemaCache    []models.TableSchema
 	schemaCachedAt time.Time
 }

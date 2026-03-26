@@ -1,9 +1,6 @@
 {
   "files": [
     {
-      "path": ".env"
-    },
-    {
       "path": ".env.example",
       "content": "# API Configuration\nVITE_API_BASE_URL=https://admin-api.ucode.run\nVITE_API_KEY=your-api-key-here\nVITE_X_API_KEY=your-x-api-key-here\n\n# Map tiles (default: OpenStreetMap, free)\n# For Yandex-like experience use: https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png\n# Or CartoDB dark: https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png\nVITE_MAP_TILE_URL=https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png\n\n# App\nVITE_APP_NAME=My App\n"
     },
