@@ -564,6 +564,8 @@ func (p *ChatProcessor) executeDatabaseRead(ctx context.Context, action *models.
 		return nil, err
 	}
 
+	log.Println("DATAAAAAAAA.", structData)
+
 	resp, err := p.service.GoObjectBuilderService().ObjectBuilder().GetList(
 		ctx, &nb.CommonMessage{
 			TableSlug: action.TableSlug,
@@ -575,6 +577,8 @@ func (p *ChatProcessor) executeDatabaseRead(ctx context.Context, action *models.
 		return nil, fmt.Errorf("items GetList failed: %w", err)
 	}
 
+	log.Println("RESPONSEEEEEEEEEE>>>>>>", resp.Data)
+
 	if resp.GetData() != nil {
 		result, err := helperFunc.ConvertStructToMap(resp.GetData())
 		if err != nil {
@@ -582,6 +586,8 @@ func (p *ChatProcessor) executeDatabaseRead(ctx context.Context, action *models.
 		}
 		return result, nil
 	}
+
+	log.Println("DATA IS NULLLLL")
 
 	return map[string]any{"response": []any{}, "count": 0}, nil
 }
