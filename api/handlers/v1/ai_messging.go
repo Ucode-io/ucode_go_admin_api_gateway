@@ -63,7 +63,7 @@ func newChatProcessor(h *HandlerV1, service services.ServiceManagerI, baseConf c
 }
 
 // ============================================================================
-// HTTP HANDLER
+// HTTP HANDLER — main entry point
 // ============================================================================
 
 func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
@@ -78,7 +78,9 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 		return
 	}
 
-	if strings.TrimSpace(userMessage.Content) == "" {
+	var isPendingConfirmation = userMessage.PendingAction != nil
+
+	if !isPendingConfirmation && strings.TrimSpace(userMessage.Content) == "" {
 		h.HandleResponse(c, status_http.BadRequest, "content is required")
 		return
 	}
@@ -113,13 +115,19 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 	)
 
 	processor := newChatProcessor(
-		h, service, h.baseConf, chatId, chat.GetProjectId(), resourceEnvID, realProjectID,
+		h, service, h.baseConf,
+		chatId, chat.GetProjectId(), resourceEnvID, realProjectID,
 		authInfo.GetUserIdAuth(), authInfo.GetClientTypeId(), authInfo.GetRoleId(),
 	)
 
 	chatHistory, err := processor.getChatHistory(ctx)
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, fmt.Sprintf("failed to fetch history: %v", err))
+		return
+	}
+
+	if isPendingConfirmation {
+		h.handlePendingConfirmation(c, ctx, processor, userMessage, chatHistory, service, resourceEnvID, chatId)
 		return
 	}
 
@@ -154,14 +162,15 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 	}
 
 	if len(chatHistory) == 0 {
-		updateReq := &pbo.UpdateChatRequest{
-			ResourceEnvId: resourceEnvID,
-			Id:            chatId,
-			Title:         truncateString(userMessage.Content, 100),
-			Description:   truncateString(aiResponse.Description, 255),
-			ProjectId:     processor.mcpProjectID,
-		}
-		_, _ = service.GoObjectBuilderService().AiChat().UpdateChat(ctx, updateReq)
+		_, _ = service.GoObjectBuilderService().AiChat().UpdateChat(
+			ctx, &pbo.UpdateChatRequest{
+				ResourceEnvId: resourceEnvID,
+				Id:            chatId,
+				Title:         truncateString(userMessage.Content, 100),
+				Description:   truncateString(aiResponse.Description, 255),
+				ProjectId:     processor.mcpProjectID,
+			},
+		)
 	}
 
 	h.HandleResponse(c, status_http.Created, map[string]any{
@@ -172,8 +181,82 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 	})
 }
 
+func (h *HandlerV1) handlePendingConfirmation(c *gin.Context, ctx context.Context, processor *ChatProcessor, req models.NewMessageReq, chatHistory []models.ChatMessage, service services.ServiceManagerI, resourceEnvID, chatId string) {
+	var (
+		action = req.PendingAction
+
+		assistantReply string
+		mutationResult any
+
+		userContent = strings.TrimSpace(req.Content)
+	)
+
+	if userContent == "" {
+		if action.Approved {
+			userContent = "Yes"
+		} else {
+			userContent = "No"
+		}
+	}
+
+	_, err := processor.createMessageRecord(ctx, "user", userContent, nil)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, fmt.Sprintf("failed to save confirmation message: %v", err))
+		return
+	}
+
+	if !action.Approved {
+		assistantReply = "Action cancelled."
+	} else {
+		mutationResult, err = executeMutation(ctx, action, service)
+		if err != nil {
+			h.HandleResponse(c, status_http.GRPCError, fmt.Sprintf("mutation failed: %v", err))
+			return
+		}
+
+		switch action.Action {
+		case "create":
+			assistantReply = fmt.Sprintf("✅ Created successfully in `%s`.", action.TableSlug)
+		case "update":
+			assistantReply = fmt.Sprintf("✅ Updated **%d** record(s) in `%s`.", action.AffectedCount, action.TableSlug)
+		case "delete":
+			assistantReply = fmt.Sprintf("✅ Deleted **%d** record(s) from `%s`.", action.AffectedCount, action.TableSlug)
+		default:
+			assistantReply = "✅ Done."
+		}
+
+		if action.Description != "" {
+			assistantReply = "✅ " + action.Description
+		}
+	}
+
+	message, err := processor.createMessageRecord(ctx, "assistant", assistantReply, nil)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, fmt.Sprintf("failed to save assistant message: %v", err))
+		return
+	}
+
+	if len(chatHistory) == 0 {
+		_, _ = service.GoObjectBuilderService().AiChat().UpdateChat(
+			ctx, &pbo.UpdateChatRequest{
+				ResourceEnvId: resourceEnvID,
+				Id:            chatId,
+				Title:         truncateString(userContent, 100),
+				Description:   truncateString(assistantReply, 255),
+				ProjectId:     processor.mcpProjectID,
+			},
+		)
+	}
+
+	h.HandleResponse(c, status_http.Created, map[string]any{
+		"message":         message,
+		"mcp_project_id":  processor.mcpProjectID,
+		"mutation_result": mutationResult,
+	})
+}
+
 // ============================================================================
-// CORE BUSINESS LOGIC (ROUTING & FLOWS)
+// ROUTING & FLOW ORCHESTRATION
 // ============================================================================
 
 func (p *ChatProcessor) routeAndProcess(ctx context.Context, req models.NewMessageReq, chatHistory []models.ChatMessage) (*models.ParsedClaudeResponse, error) {
@@ -192,7 +275,7 @@ func (p *ChatProcessor) routeAndProcess(ctx context.Context, req models.NewMessa
 			},
 		)
 		if err != nil {
-			log.Printf("[ROUTER] Warning: failed to get project files (mcpProjectID=%s): %v", p.mcpProjectID, err)
+			log.Printf("[ROUTER] failed to get project files (mcpProjectID=%s): %v", p.mcpProjectID, err)
 			projectData = nil
 		}
 
@@ -206,10 +289,8 @@ func (p *ChatProcessor) routeAndProcess(ctx context.Context, req models.NewMessa
 		return nil, err
 	}
 
-	log.Printf(
-		"[ROUTER] next_step=%v intent=%s has_images=%v files_needed=%v",
-		haikuResult.NextStep, haikuResult.Intent, haikuResult.HasImages, len(haikuResult.FilesNeeded),
-	)
+	log.Printf("[ROUTER] next_step=%v intent=%s has_images=%v files_needed=%d",
+		haikuResult.NextStep, haikuResult.Intent, haikuResult.HasImages, len(haikuResult.FilesNeeded))
 
 	if !haikuResult.NextStep {
 		return &models.ParsedClaudeResponse{Description: haikuResult.Reply}, nil
@@ -221,7 +302,9 @@ func (p *ChatProcessor) routeAndProcess(ctx context.Context, req models.NewMessa
 
 	case "project_inspect":
 		if projectData == nil {
-			return &models.ParsedClaudeResponse{Description: "No project exists yet. Please create a project first by describing what you want to build."}, nil
+			return &models.ParsedClaudeResponse{
+				Description: "No project exists yet. Please create a project first by describing what you want to build.",
+			}, nil
 		}
 		return p.runInspectFlow(ctx, req.Content, haikuResult.FilesNeeded, chatHistory, req.Images, projectData)
 
@@ -247,19 +330,18 @@ func (p *ChatProcessor) runInspectFlow(ctx context.Context, userQuestion string,
 }
 
 func (p *ChatProcessor) runCodeFlow(ctx context.Context, clarified, fileGraphJSON string, chatHistory []models.ChatMessage, imageURLs []string, projectName string, projectData *pbo.McpProject) (*models.ParsedClaudeResponse, error) {
-	var hasImages = len(imageURLs) > 0
 
 	if projectData == nil || len(projectData.GetProjectFiles()) == 0 {
-		log.Println("[CODER] New Project Detected: Routing to Architect & SystemPromptAiChat")
+		log.Println("[CODER] New project — routing to Architect")
 		return p.handleNewProjectPhase(ctx, clarified, chatHistory, imageURLs, projectName)
 	}
 
-	plan, err := p.callSonnetPlanner(ctx, clarified, fileGraphJSON, chatHistory, hasImages)
+	plan, err := p.callSonnetPlanner(ctx, clarified, fileGraphJSON, chatHistory, len(imageURLs) > 0)
 	if err != nil {
 		return nil, err
 	}
 
-	log.Printf("[PLANNER] Changes planned: modify=%d, create=%d", len(plan.FilesToChange), len(plan.FilesToCreate))
+	log.Printf("[PLANNER] modify=%d create=%d", len(plan.FilesToChange), len(plan.FilesToCreate))
 
 	var neededPaths = make([]string, 0, len(plan.FilesToChange))
 
@@ -267,10 +349,12 @@ func (p *ChatProcessor) runCodeFlow(ctx context.Context, clarified, fileGraphJSO
 		neededPaths = append(neededPaths, f.Path)
 	}
 
-	filesContext := p.buildFilesContext(projectData, neededPaths)
-
-	return p.callSonnetCoder(ctx, clarified, plan, filesContext, chatHistory, imageURLs)
+	return p.callSonnetCoder(ctx, clarified, plan, p.buildFilesContext(projectData, neededPaths), chatHistory, imageURLs)
 }
+
+// ============================================================================
+// NEW PROJECT PHASE
+// ============================================================================
 
 func (p *ChatProcessor) handleNewProjectPhase(ctx context.Context, clarified string, chatHistory []models.ChatMessage, imageURLs []string, estimatedName string) (*models.ParsedClaudeResponse, error) {
 	plan, err := p.callArchitect(ctx, clarified, imageURLs)
@@ -280,7 +364,6 @@ func (p *ChatProcessor) handleNewProjectPhase(ctx context.Context, clarified str
 
 	if plan.ProjectName == "" {
 		plan.ProjectName = "AI Project"
-
 		if estimatedName != "" {
 			plan.ProjectName = estimatedName
 		}
@@ -294,13 +377,13 @@ func (p *ChatProcessor) handleNewProjectPhase(ctx context.Context, clarified str
 	p.mcpProjectID = projectData.McpProjectId
 
 	go func(bPlan *models.ArchitectPlan, resourceEnvId, envId string) {
-		if buildErr := createBackendFromPlan(context.Background(), bPlan, resourceEnvId, envId, p.service); buildErr != nil {
-			log.Printf("[CRITICAL ERROR] Failed to build backend from plan for resourceEnv %s: %v", resourceEnvId, buildErr)
+		if err := createBackendFromPlan(context.Background(), bPlan, resourceEnvId, envId, p.service); err != nil {
+			log.Printf("[ARCHITECT] backend build failed (resourceEnv=%s): %v", resourceEnvId, err)
 		}
 	}(plan, projectData.ResourceEnvId, projectData.EnvironmentId)
 
 	if plan.ProjectType == "admin_panel" {
-		log.Printf("[CODER] Admin panel detected — using template-based generation")
+		log.Printf("[CODER] admin panel — using template generation")
 		return p.callSonnetCoderWithTemplate(ctx, clarified, imageURLs, plan, projectData.ApiKey, projectData.EnvironmentId)
 	}
 
@@ -308,14 +391,12 @@ func (p *ChatProcessor) handleNewProjectPhase(ctx context.Context, clarified str
 }
 
 // ============================================================================
-// ANTHROPIC AI INTEGRATIONS
+// CLAUDE API INTEGRATIONS
 // ============================================================================
 
 func (p *ChatProcessor) callHaikuRouter(userPrompt, fileGraphJSON string, chatHistory []models.ChatMessage, hasImages bool) (*models.HaikuRoutingResult, error) {
-	var (
-		content  = helper.ProcessHaikuPrompt(userPrompt, fileGraphJSON, hasImages)
-		messages = buildMessagesWithHistory(chatHistory, []models.ContentBlock{{Type: "text", Text: content}})
-	)
+	content := helper.ProcessHaikuPrompt(userPrompt, fileGraphJSON, hasImages)
+	messages := buildMessagesWithHistory(chatHistory, []models.ContentBlock{{Type: "text", Text: content}})
 
 	response, err := helper.CallAnthropicAPI(
 		p.baseConf,
@@ -328,12 +409,12 @@ func (p *ChatProcessor) callHaikuRouter(userPrompt, fileGraphJSON string, chatHi
 		timeoutHaiku,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("haiku router api call failed: %w", err)
+		return nil, fmt.Errorf("haiku router: %w", err)
 	}
 
 	result, err := helper.ParseHaikuRoutingResult(response)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse haiku result: %w", err)
+		return nil, fmt.Errorf("parse haiku result: %w", err)
 	}
 
 	result.HasImages = hasImages
@@ -341,10 +422,8 @@ func (p *ChatProcessor) callHaikuRouter(userPrompt, fileGraphJSON string, chatHi
 }
 
 func (p *ChatProcessor) callSonnetInspector(ctx context.Context, userQuestion, filesContext string, chatHistory []models.ChatMessage, imageURLs []string) (string, error) {
-	var (
-		content  = helper.ProcessSonnetInspectorPrompt(userQuestion, filesContext)
-		messages = buildMessagesWithHistory(chatHistory, buildContentBlocksWithImages(content, imageURLs))
-	)
+	content := helper.ProcessSonnetInspectorPrompt(userQuestion, filesContext)
+	messages := buildMessagesWithHistory(chatHistory, buildContentBlocksWithImages(content, imageURLs))
 
 	response, err := helper.CallAnthropicAPI(
 		p.baseConf,
@@ -357,24 +436,24 @@ func (p *ChatProcessor) callSonnetInspector(ctx context.Context, userQuestion, f
 		timeoutInspector,
 	)
 	if err != nil {
-		return "", fmt.Errorf("sonnet inspector api call failed: %w", err)
+		return "", fmt.Errorf("sonnet inspector: %w", err)
 	}
 
 	answer, err := helper.ExtractPlainText(response)
 	if err != nil {
-		return "", fmt.Errorf("failed to extract plain text from inspector: %w", err)
+		return "", fmt.Errorf("extract inspector text: %w", err)
 	}
+
 	return answer, nil
 }
 
 func (p *ChatProcessor) callSonnetPlanner(ctx context.Context, clarified, fileGraphJSON string, chatHistory []models.ChatMessage, hasImages bool) (*models.SonnetPlanResult, error) {
-	var (
-		content  = helper.ProcessSonnetPlanPrompt(clarified, fileGraphJSON, hasImages)
-		messages = buildMessagesWithHistory(chatHistory, []models.ContentBlock{{Type: "text", Text: content}})
-	)
+	content := helper.ProcessSonnetPlanPrompt(clarified, fileGraphJSON, hasImages)
+	messages := buildMessagesWithHistory(chatHistory, []models.ContentBlock{{Type: "text", Text: content}})
 
 	response, err := helper.CallAnthropicAPI(
-		p.baseConf, models.AnthropicRequest{
+		p.baseConf,
+		models.AnthropicRequest{
 			Model:     p.baseConf.ClaudeModel,
 			MaxTokens: p.baseConf.PlannerMaxTokens,
 			System:    helper.SystemPromptSonnetPlanner,
@@ -383,20 +462,21 @@ func (p *ChatProcessor) callSonnetPlanner(ctx context.Context, clarified, fileGr
 		timeoutPlanner,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("sonnet planner api call failed: %w", err)
+		return nil, fmt.Errorf("sonnet planner: %w", err)
 	}
 
 	result, err := helper.ParseSonnetPlanResult(response)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse sonnet plan: %w", err)
+		return nil, fmt.Errorf("parse plan: %w", err)
 	}
 
 	return result, nil
 }
 
 func (p *ChatProcessor) callSonnetCoder(ctx context.Context, clarified string, plan *models.SonnetPlanResult, filesContext string, chatHistory []models.ChatMessage, imageURLs []string) (*models.ParsedClaudeResponse, error) {
+	hasFiles := filesContext != "No existing files to modify." && filesContext != "No matching files found."
+
 	var (
-		hasFiles      = filesContext != "No existing files to modify." && filesContext != "No matching files found."
 		systemPrompt  string
 		contentBlocks []models.ContentBlock
 	)
@@ -411,179 +491,157 @@ func (p *ChatProcessor) callSonnetCoder(ctx context.Context, clarified string, p
 		contentBlocks = buildContentBlocksWithImages(content, imageURLs)
 	}
 
-	messages := buildMessagesWithHistory(chatHistory, contentBlocks)
-
 	response, err := helper.CallAnthropicAPI(
 		p.baseConf,
 		models.AnthropicRequest{
 			Model:     p.baseConf.ClaudeModel,
 			MaxTokens: p.baseConf.CoderMaxTokens,
 			System:    systemPrompt,
-			Messages:  messages,
+			Messages:  buildMessagesWithHistory(chatHistory, contentBlocks),
 		},
 		timeoutCoder,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("sonnet coder api call failed: %w", err)
+		return nil, fmt.Errorf("sonnet coder: %w", err)
 	}
 
-	parsedProject, err := helper.ParseClaudeResponse(response)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse claude coder response: %w", err)
-	}
-
-	return parsedProject, nil
+	return helper.ParseClaudeResponse(response)
 }
 
 func (p *ChatProcessor) callArchitect(ctx context.Context, clarified string, imageURLs []string) (*models.ArchitectPlan, error) {
-	var (
-		messages = []models.ChatMessage{
-			{
-				Role:    "user",
-				Content: buildContentBlocksWithImages(clarified, imageURLs),
-			},
-		}
-		plan models.ArchitectPlan
-	)
-
 	response, err := helper.CallAnthropicAPI(
 		p.baseConf,
 		models.AnthropicRequest{
 			Model:     p.baseConf.ClaudeModel,
 			MaxTokens: p.baseConf.PlannerMaxTokens,
 			System:    helper.SystemPromptArchitect,
-			Messages:  messages,
+			Messages: []models.ChatMessage{
+				{
+					Role:    "user",
+					Content: buildContentBlocksWithImages(clarified, imageURLs),
+				},
+			},
 		},
 		timeoutArchitect,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("architect api call failed: %w", err)
+		return nil, fmt.Errorf("architect: %w", err)
 	}
 
 	text, err := helper.ExtractPlainText(response)
 	if err != nil {
-		return nil, fmt.Errorf("architect text extraction failed: %w", err)
+		return nil, fmt.Errorf("architect extract text: %w", err)
 	}
 
-	text = helper.CleanJSONResponse(text)
+	var plan models.ArchitectPlan
 
-	if err = json.Unmarshal([]byte(text), &plan); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal architect plan: %w", err)
+	if err = json.Unmarshal([]byte(helper.CleanJSONResponse(text)), &plan); err != nil {
+		return nil, fmt.Errorf("unmarshal architect plan: %w", err)
 	}
-
 	return &plan, nil
 }
 
 func (p *ChatProcessor) callSonnetCoderNewProject(ctx context.Context, clarified string, imageURLs []string, plan *models.ArchitectPlan, apiKey, envId string) (*models.ParsedClaudeResponse, error) {
-	var apiContext strings.Builder
+	var apiCtx strings.Builder
 
-	apiContext.WriteString(
-		fmt.Sprintf("\n====================================\nAPI CONFIGURATION FOR FRONTEND\n====================================\nVITE_API_BASE_URL: %s\nVITE_X_API_KEY: %s\n\nTables to use:\n",
-			p.baseConf.UcodeBaseUrl, apiKey,
-		),
-	)
-
+	apiCtx.WriteString(fmt.Sprintf(
+		"\n====================================\nAPI CONFIGURATION FOR FRONTEND\n====================================\nVITE_API_BASE_URL: %s\nVITE_X_API_KEY: %s\n\nTables to use:\n",
+		p.baseConf.UcodeBaseUrl, apiKey,
+	))
 	for _, t := range plan.Tables {
-		apiContext.WriteString(fmt.Sprintf("- Table: %s, slug: %s\n", t.Label, t.Slug))
+		apiCtx.WriteString(fmt.Sprintf("- Table: %s, slug: %s\n", t.Label, t.Slug))
 		for _, f := range t.Fields {
-			apiContext.WriteString(fmt.Sprintf("  * field: %s, type: %s\n", f.Slug, f.Type))
+			apiCtx.WriteString(fmt.Sprintf("  * field: %s, type: %s\n", f.Slug, f.Type))
 		}
 	}
-	apiContext.WriteString("\nUse this UI Structure provided by the Architect:\n" + plan.UIStructure + "\n")
-
-	var (
-		fullPrompt = clarified + "\n\n" + apiContext.String()
-		messages   = []models.ChatMessage{
-			{
-				Role:    "user",
-				Content: buildContentBlocksWithImages(fullPrompt, imageURLs),
-			},
-		}
-	)
+	apiCtx.WriteString("\nUse this UI Structure provided by the Architect:\n" + plan.UIStructure + "\n")
 
 	response, err := helper.CallAnthropicAPI(
-		p.baseConf, models.AnthropicRequest{
+		p.baseConf,
+		models.AnthropicRequest{
 			Model:     p.baseConf.ClaudeModel,
 			MaxTokens: p.baseConf.CoderMaxTokens,
 			System:    helper.SystemPromptAiChat,
-			Messages:  messages,
+			Messages: []models.ChatMessage{
+				{
+					Role:    "user",
+					Content: buildContentBlocksWithImages(clarified+"\n\n"+apiCtx.String(), imageURLs),
+				},
+			},
 		},
 		timeoutCoder,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("new project coder api call failed: %w", err)
+		return nil, fmt.Errorf("new project coder: %w", err)
 	}
 
-	parsedProject, err := helper.ParseClaudeResponse(response)
+	parsed, err := helper.ParseClaudeResponse(response)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse new project response: %w", err)
+		return nil, fmt.Errorf("parse new project response: %w", err)
 	}
 
-	if parsedProject.Project == nil {
+	if parsed.Project == nil {
 		return nil, fmt.Errorf("claude returned empty project data")
 	}
 
-	log.Printf("[NEW PROJECT GENERATED] Files created: %d", len(parsedProject.Project.Files))
-	return parsedProject, nil
+	log.Printf("[NEW PROJECT] files created: %d", len(parsed.Project.Files))
+	return parsed, nil
 }
 
 func (p *ChatProcessor) callSonnetCoderWithTemplate(ctx context.Context, clarified string, imageURLs []string, plan *models.ArchitectPlan, apiKey, envId string) (*models.ParsedClaudeResponse, error) {
-	var apiContext strings.Builder
+	var apiCtx strings.Builder
 
-	apiContext.WriteString(
-		fmt.Sprintf("\n====================================\nAPI CONFIGURATION FOR FRONTEND\n====================================\nVITE_API_BASE_URL: %s\nVITE_X_API_KEY: %s\n\nTables to use:\n",
-			p.baseConf.UcodeBaseUrl, apiKey,
-		),
-	)
+	apiCtx.WriteString(fmt.Sprintf(
+		"\n====================================\nAPI CONFIGURATION FOR FRONTEND\n====================================\nVITE_API_BASE_URL: %s\nVITE_X_API_KEY: %s\n\nTables to use:\n",
+		p.baseConf.UcodeBaseUrl, apiKey,
+	))
 
 	for _, t := range plan.Tables {
-		apiContext.WriteString(fmt.Sprintf("- Table: %s, slug: %s\n", t.Label, t.Slug))
+		apiCtx.WriteString(fmt.Sprintf("- Table: %s, slug: %s\n", t.Label, t.Slug))
 		for _, f := range t.Fields {
-			apiContext.WriteString(fmt.Sprintf("  * field: %s, type: %s\n", f.Slug, f.Type))
+			apiCtx.WriteString(fmt.Sprintf("  * field: %s, type: %s\n", f.Slug, f.Type))
 		}
 	}
-	apiContext.WriteString("\nUse this UI Structure provided by the Architect:\n" + plan.UIStructure + "\n")
-
-	var (
-		fullPrompt = clarified + "\n\n" + apiContext.String()
-		messages   = []models.ChatMessage{
-			{
-				Role:    "user",
-				Content: buildContentBlocksWithImages(fullPrompt, imageURLs),
-			},
-		}
-	)
+	apiCtx.WriteString("\nUse this UI Structure provided by the Architect:\n" + plan.UIStructure + "\n")
 
 	response, err := helper.CallAnthropicAPI(
-		p.baseConf, models.AnthropicRequest{
+		p.baseConf,
+		models.AnthropicRequest{
 			Model:     p.baseConf.ClaudeModel,
 			MaxTokens: p.baseConf.CoderMaxTokens,
 			System:    helper.SystemPromptAiChatTemplate,
-			Messages:  messages,
+			Messages: []models.ChatMessage{
+				{
+					Role:    "user",
+					Content: buildContentBlocksWithImages(clarified+"\n\n"+apiCtx.String(), imageURLs),
+				},
+			},
 		},
 		timeoutCoder,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("template coder api call failed: %w", err)
+		return nil, fmt.Errorf("template coder: %w", err)
 	}
 
-	parsedProject, err := helper.ParseClaudeResponse(response)
+	parsed, err := helper.ParseClaudeResponse(response)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse template coder response: %w", err)
+		return nil, fmt.Errorf("parse template coder response: %w", err)
 	}
 
-	if parsedProject.Project == nil {
+	if parsed.Project == nil {
 		return nil, fmt.Errorf("claude returned empty project data")
 	}
 
 	templateFiles := GetTemplate("admin_panel")
 	if templateFiles != nil {
-		parsedProject.Project.Files = MergeTemplateWithAIFiles(templateFiles, parsedProject.Project.Files)
-		log.Printf("[TEMPLATE MERGE] Merged %d template + %d AI files", len(templateFiles), len(parsedProject.Project.Files)-len(templateFiles))
+		parsed.Project.Files = MergeTemplateWithAIFiles(templateFiles, parsed.Project.Files)
+		log.Printf("[TEMPLATE MERGE] template=%d ai=%d total=%d",
+			len(templateFiles), len(parsed.Project.Files)-len(templateFiles), len(parsed.Project.Files),
+		)
 	}
 
-	log.Printf("[NEW PROJECT GENERATED WITH TEMPLATE] Total files: %d", len(parsedProject.Project.Files))
-	return parsedProject, nil
+	log.Printf("[NEW PROJECT WITH TEMPLATE] total files: %d", len(parsed.Project.Files))
+	return parsed, nil
 }
 
 // ============================================================================
@@ -606,18 +664,16 @@ func (p *ChatProcessor) getChatHistory(ctx context.Context) ([]models.ChatMessag
 		ChatId:        p.chatId,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("database error getting chat history: %w", err)
+		return nil, fmt.Errorf("get chat history: %w", err)
 	}
 
-	var (
-		msgList = messages.GetMessages()
-		result  = make([]models.ChatMessage, 0, len(msgList))
-	)
+	msgList := messages.GetMessages()
 
 	if len(msgList) > 10 {
 		msgList = msgList[len(msgList)-10:]
 	}
 
+	result := make([]models.ChatMessage, 0, len(msgList))
 	for _, msg := range msgList {
 		result = append(result, models.ChatMessage{
 			Role:    msg.GetRole(),
@@ -632,8 +688,7 @@ func (p *ChatProcessor) buildFileGraphJSON(project *pbo.McpProject) (string, err
 		return "{}", nil
 	}
 
-	var graph = make(map[string]models.GraphNode, len(project.GetProjectFiles()))
-
+	graph := make(map[string]models.GraphNode, len(project.GetProjectFiles()))
 	for _, f := range project.GetProjectFiles() {
 		graph[f.GetPath()] = models.GraphNode{
 			Path:      f.GetPath(),
@@ -643,7 +698,7 @@ func (p *ChatProcessor) buildFileGraphJSON(project *pbo.McpProject) (string, err
 
 	jsonBytes, err := json.Marshal(graph)
 	if err != nil {
-		return "{}", fmt.Errorf("failed to marshal file graph: %w", err)
+		return "{}", fmt.Errorf("marshal file graph: %w", err)
 	}
 
 	return string(jsonBytes), nil
@@ -654,15 +709,12 @@ func (p *ChatProcessor) buildFilesContext(project *pbo.McpProject, paths []strin
 		return "No existing files to modify."
 	}
 
-	var (
-		pathSet = make(map[string]bool, len(paths))
-		sb      strings.Builder
-	)
-
+	pathSet := make(map[string]bool, len(paths))
 	for _, path := range paths {
 		pathSet[path] = true
 	}
 
+	var sb strings.Builder
 	for _, file := range project.GetProjectFiles() {
 		if pathSet[file.GetPath()] {
 			sb.WriteString(fmt.Sprintf("\n\n### FILE: %s\n```\n%s\n```", file.GetPath(), file.GetContent()))
@@ -677,21 +729,21 @@ func (p *ChatProcessor) buildFilesContext(project *pbo.McpProject, paths []strin
 
 func (p *ChatProcessor) saveProject(ctx context.Context, req *models.ParsedClaudeResponse) (*pbo.McpProject, error) {
 	if req == nil || req.Project == nil {
-		return nil, fmt.Errorf("invalid project data received for saving")
+		return nil, fmt.Errorf("invalid project data")
 	}
 
 	projectEnv, err := helperFunc.ConvertMapToStruct(req.Project.Env)
 	if err != nil {
-		return nil, fmt.Errorf("failed to convert project env: %w", err)
+		return nil, fmt.Errorf("convert project env: %w", err)
 	}
 
 	var projectFiles []*pbo.McpProjectFiles
+
 	for _, file := range req.Project.Files {
 		var fileGraph map[string]any
 		if val, ok := req.Project.FileGraph[file.Path].(map[string]any); ok {
 			fileGraph = val
 		}
-
 		fileGraphStruct, _ := helperFunc.ConvertMapToStruct(fileGraph)
 		projectFiles = append(projectFiles, &pbo.McpProjectFiles{
 			Path:      file.Path,
@@ -700,7 +752,7 @@ func (p *ChatProcessor) saveProject(ctx context.Context, req *models.ParsedClaud
 		})
 	}
 
-	createdProject, err := p.service.GoObjectBuilderService().McpProject().UpdateMcpProject(ctx, &pbo.McpProject{
+	return p.service.GoObjectBuilderService().McpProject().UpdateMcpProject(ctx, &pbo.McpProject{
 		Id:            p.mcpProjectID,
 		ResourceEnvId: p.resourceEnvID,
 		Title:         truncateString(req.Project.ProjectName, 255),
@@ -708,11 +760,6 @@ func (p *ChatProcessor) saveProject(ctx context.Context, req *models.ParsedClaud
 		ProjectFiles:  projectFiles,
 		ProjectEnv:    projectEnv,
 	})
-	if err != nil {
-		return nil, fmt.Errorf("failed to update MCP project in DB: %w", err)
-	}
-
-	return createdProject, nil
 }
 
 func (p *ChatProcessor) createUcodeProject(ctx context.Context, projectName string, existingMcpID string) (*models.ProjectData, error) {
@@ -722,7 +769,7 @@ func (p *ChatProcessor) createUcodeProject(ctx context.Context, projectName stri
 		},
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get current project info: %w", err)
+		return nil, fmt.Errorf("get current project info: %w", err)
 	}
 
 	backendProject, err := p.h.companyServices.Project().Create(
@@ -733,7 +780,7 @@ func (p *ChatProcessor) createUcodeProject(ctx context.Context, projectName stri
 		},
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create backend project: %w", err)
+		return nil, fmt.Errorf("create backend project: %w", err)
 	}
 
 	env, err := p.h.companyServices.Environment().CreateV2(
@@ -749,20 +796,18 @@ func (p *ChatProcessor) createUcodeProject(ctx context.Context, projectName stri
 		},
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create environment: %w", err)
+		return nil, fmt.Errorf("create environment: %w", err)
 	}
 
-	// Fetch service resource to get the correct resource_environment_id for the builder service
 	resource, err := p.h.companyServices.ServiceResource().GetSingle(
-		ctx,
-		&pb.GetSingleServiceResourceReq{
+		ctx, &pb.GetSingleServiceResourceReq{
 			ProjectId:     backendProject.GetProjectId(),
 			EnvironmentId: env.GetId(),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch service resource details: %w", err)
+		return nil, fmt.Errorf("fetch service resource: %w", err)
 	}
 
 	apiKeys, err := p.h.authService.ApiKey().GetList(
@@ -773,7 +818,7 @@ func (p *ChatProcessor) createUcodeProject(ctx context.Context, projectName stri
 		},
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch api keys: %w", err)
+		return nil, fmt.Errorf("fetch api keys: %w", err)
 	}
 
 	var apiKey string
@@ -782,13 +827,8 @@ func (p *ChatProcessor) createUcodeProject(ctx context.Context, projectName stri
 		apiKey = apiKeys.GetData()[0].GetAppId()
 	}
 
-	var (
-		mcpProjectID = existingMcpID
-		status       = "ready"
-	)
-
+	mcpProjectID := existingMcpID
 	if mcpProjectID != "" {
-		// Update existing skeleton project
 		_, err = p.service.GoObjectBuilderService().McpProject().UpdateMcpProject(
 			ctx, &pbo.McpProject{
 				ResourceEnvId:  p.resourceEnvID,
@@ -798,11 +838,11 @@ func (p *ChatProcessor) createUcodeProject(ctx context.Context, projectName stri
 				UcodeProjectId: backendProject.GetProjectId(),
 				ApiKey:         apiKey,
 				EnvironmentId:  env.GetId(),
-				Status:         status,
+				Status:         "ready",
 			},
 		)
 		if err != nil {
-			return nil, fmt.Errorf("failed to update MCP project: %w", err)
+			return nil, fmt.Errorf("update MCP project: %w", err)
 		}
 	} else {
 		project, err := p.service.GoObjectBuilderService().McpProject().CreateMcpProject(
@@ -813,11 +853,11 @@ func (p *ChatProcessor) createUcodeProject(ctx context.Context, projectName stri
 				UcodeProjectId: backendProject.GetProjectId(),
 				ApiKey:         apiKey,
 				EnvironmentId:  env.GetId(),
-				Status:         status,
+				Status:         "ready",
 			},
 		)
 		if err != nil {
-			return nil, fmt.Errorf("failed to create MCP project link: %w", err)
+			return nil, fmt.Errorf("create MCP project link: %w", err)
 		}
 		mcpProjectID = project.GetId()
 	}
@@ -832,7 +872,7 @@ func (p *ChatProcessor) createUcodeProject(ctx context.Context, projectName stri
 }
 
 // ============================================================================
-// UTILITIES & FORMATTING
+// UTILITIES
 // ============================================================================
 
 func truncateString(s string, maxLen int) string {
@@ -851,24 +891,17 @@ func truncateString(s string, maxLen int) string {
 }
 
 func buildContentBlocksWithImages(textContent string, imageURLs []string) []models.ContentBlock {
-	var blocks []models.ContentBlock
-
+	var blocks = make([]models.ContentBlock, 0, len(imageURLs)+1)
 	for _, imageURL := range imageURLs {
 		if strings.TrimSpace(imageURL) != "" {
 			blocks = append(blocks, models.ContentBlock{
-				Type: "image",
-				Source: &models.ImageSource{
-					Type: "url",
-					URL:  imageURL,
-				},
+				Type:   "image",
+				Source: &models.ImageSource{Type: "url", URL: imageURL},
 			})
 		}
 	}
 
-	blocks = append(blocks, models.ContentBlock{
-		Type: "text",
-		Text: textContent,
-	})
+	blocks = append(blocks, models.ContentBlock{Type: "text", Text: textContent})
 
 	return blocks
 }

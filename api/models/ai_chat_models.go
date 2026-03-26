@@ -4,10 +4,10 @@ type (
 	// ========================== Basic Requests ==========================
 
 	NewMessageReq struct {
-		Content string   `json:"content"`
-		Images  []string `json:"images"`
+		Content       string         `json:"content"`
+		Images        []string       `json:"images"`
+		PendingAction *PendingAction `json:"pending_action,omitempty"`
 	}
-
 	SendMessageRequest struct {
 		UserPrompt    string `json:"user_prompt"`
 		ChatId        string `json:"chat_id"`
@@ -147,24 +147,21 @@ type (
 		Offset           int            `json:"offset"`
 		Reply            string         `json:"reply"`
 
-		// Agentic loop fields — new
-		NeedsMoreData bool   `json:"needs_more_data"` // true = Claude wants another iteration
-		QueryPlan     string `json:"query_plan"`      // description of what next step fetches
+		NeedsMoreData bool   `json:"needs_more_data"`
+		QueryPlan     string `json:"query_plan"`
 	}
 
-	// PendingAction — stored action waiting for user confirmation
 	PendingAction struct {
-		ID            string         `json:"id"`
-		ChatID        string         `json:"chat_id"`
-		Action        string         `json:"action"` // "create" | "update" | "delete"
-		TableSlug     string         `json:"table_slug"`
-		Filters       map[string]any `json:"filters,omitempty"`
-		Data          map[string]any `json:"data,omitempty"`
-		AffectedCount int            `json:"affected_count"`
-		Description   string         `json:"description"`
-		Status        string         `json:"status"` // "pending" | "confirmed" | "rejected"
-		ProjectID     string         `json:"project_id"`
-		ResourceEnvID string         `json:"resource_env_id"`
+		Action        string         `json:"action"`          // create | update | delete
+		TableSlug     string         `json:"table_slug"`      // which table
+		Filters       map[string]any `json:"filters"`         // for update/delete: record selector (contains guid)
+		Data          map[string]any `json:"data"`            // for create/update: field values
+		AffectedCount int            `json:"affected_count"`  // shown in confirmation UI
+		Description   string         `json:"description"`     // human-readable confirmation text
+		ProjectID     string         `json:"project_id"`      // builder resource ID
+		ResourceEnvID string         `json:"resource_env_id"` // environment context
+
+		Approved bool `json:"approved"` // true = execute, false = cancel
 	}
 
 	// ConfirmActionRequest — frontend sends this to confirm/reject a pending action
