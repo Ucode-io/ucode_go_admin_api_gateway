@@ -566,7 +566,7 @@ func (p *ChatProcessor) executeDatabaseRead(ctx context.Context, action *models.
 
 	log.Println("DATAAAAAAAA.", structData)
 
-	resp, err := p.service.GoObjectBuilderService().ObjectBuilder().GetList(
+	resp, err := p.service.GoObjectBuilderService().Items().GetList(
 		ctx, &nb.CommonMessage{
 			TableSlug: action.TableSlug,
 			ProjectId: builderID,
