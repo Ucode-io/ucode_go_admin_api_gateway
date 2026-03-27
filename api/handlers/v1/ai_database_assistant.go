@@ -13,6 +13,8 @@ import (
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	helperFunc "ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/services"
+
+	"github.com/spf13/cast"
 )
 
 const (
@@ -311,6 +313,28 @@ func buildWhereClause(filters map[string]any) string {
 // ============================================================================
 
 func (p *ChatProcessor) handleDatabaseMutation(ctx context.Context, action *models.DatabaseActionRequest) (*models.ParsedClaudeResponse, error) {
+	if action.Action == "update" || action.Action == "delete" {
+		if _, hasGuid := action.Filters["guid"]; !hasGuid {
+			guids, err := p.resolveGuidsFromFilters(ctx, action)
+			if err != nil {
+				return nil, fmt.Errorf("guid resolution failed: %w", err)
+			}
+			if len(guids) == 0 {
+				return &models.ParsedClaudeResponse{
+					Description: "Записи с такими параметрами не найдены. Уточните запрос.",
+				}, nil
+			}
+			// Заменяем filters: теперь там только guid(ы)
+			if len(guids) == 1 {
+				action.Filters = map[string]any{"guid": guids[0]}
+			} else {
+				// Несколько записей — кладём список, executeMutation обработает
+				action.Filters = map[string]any{"guid": guids[0], "_resolved_guids": guids}
+			}
+		}
+	}
+	// ─────────────────────────────────────────────────────────────────────────
+
 	affectedCount := 1
 	if action.Action != "create" && len(action.Filters) > 0 {
 		if data, err := p.executeDatabaseRead(ctx, &models.DatabaseActionRequest{
@@ -372,24 +396,62 @@ func (p *ChatProcessor) handleDatabaseMutation(ctx context.Context, action *mode
 	}, nil
 }
 
+func (p *ChatProcessor) resolveGuidsFromFilters(ctx context.Context, action *models.DatabaseActionRequest) ([]string, error) {
+	filterMap := make(map[string]any, len(action.Filters)+1)
+	for k, v := range action.Filters {
+		filterMap[k] = v
+	}
+	filterMap["limit"] = 100
+
+	structData, err := helperFunc.ConvertMapToStruct(filterMap)
+	if err != nil {
+		return nil, fmt.Errorf("convert filters for guid resolution: %w", err)
+	}
+
+	resp, err := p.service.GoObjectBuilderService().ObjectBuilder().GetList2(
+		ctx,
+		&nb.CommonMessage{
+			TableSlug: action.TableSlug,
+			ProjectId: action.ResourceEnvID,
+			Data:      structData,
+		},
+	)
+	if err != nil {
+		return nil, fmt.Errorf("GetList2 for guid resolution: %w", err)
+	}
+
+	var guids []string
+	if resp.GetData() != nil {
+		listData, err := helperFunc.ConvertStructToMap(resp.GetData())
+		if err == nil {
+			for _, item := range extractItemsFromData(listData) {
+				if g, ok := item["guid"].(string); ok && g != "" {
+					guids = append(guids, g)
+				}
+			}
+		}
+	}
+	return guids, nil
+}
+
 func executeMutation(ctx context.Context, action *models.PendingAction, service services.ServiceManagerI) (any, error) {
 	if action.TableSlug == "" {
 		return nil, fmt.Errorf("table_slug is required")
 	}
 
-	// For compatibility with Items service patterns, ensure we use ResourceEnvID as ProjectId
 	effectiveProjectID := action.ResourceEnvID
 	if effectiveProjectID == "" {
 		effectiveProjectID = action.ProjectID
 	}
 
 	switch action.Action {
+
+	// ── CREATE ────────────────────────────────────────────────────────────────
 	case "create":
 		data := action.Data
 		if data == nil {
 			data = map[string]any{}
 		}
-		// Inject consistency fields for consistency with V2 handlers
 		data["company_service_project_id"] = action.ProjectID
 
 		structData, err := helperFunc.ConvertMapToStruct(data)
@@ -409,54 +471,158 @@ func executeMutation(ctx context.Context, action *models.PendingAction, service 
 		}
 		return map[string]any{"status": "created"}, nil
 
+	// ── UPDATE ────────────────────────────────────────────────────────────────
 	case "update":
-		// Merge: Filters contain the record identifier (guid), Data contains changed fields
-		merged := make(map[string]any, len(action.Data)+len(action.Filters))
-		for k, v := range action.Data {
-			merged[k] = v
-		}
-		for k, v := range action.Filters {
-			merged[k] = v
-		}
-		// Ensure id is present if guid is provided for compatibility with backend patterns
-		if guid, ok := merged["guid"]; ok {
-			merged["id"] = guid
-		}
-		// Inject consistency fields
-		merged["company_service_project_id"] = action.ProjectID
+		var guidsToUpdate []string
 
-		structData, err := helperFunc.ConvertMapToStruct(merged)
-		if err != nil {
-			return nil, fmt.Errorf("convert update data: %w", err)
+		if raw, ok := action.Filters["_resolved_guids"]; ok {
+			for _, g := range cast.ToStringSlice(raw) {
+				if g != "" {
+					guidsToUpdate = append(guidsToUpdate, g)
+				}
+			}
 		}
-		resp, err := service.GoObjectBuilderService().Items().Update(ctx, &nb.CommonMessage{
-			TableSlug: action.TableSlug,
-			ProjectId: effectiveProjectID,
-			Data:      structData,
-		})
-		if err != nil {
-			return nil, fmt.Errorf("update failed: %w", err)
-		}
-		if resp.GetData() != nil {
-			return helperFunc.ConvertStructToMap(resp.GetData())
-		}
-		return map[string]any{"status": "updated"}, nil
 
+		if len(guidsToUpdate) == 0 {
+			if guid, ok := action.Filters["guid"]; ok {
+				if g := cast.ToString(guid); g != "" {
+					guidsToUpdate = append(guidsToUpdate, g)
+				}
+			}
+		}
+
+		if len(guidsToUpdate) == 0 {
+			filterMap := make(map[string]any, len(action.Filters)+1)
+			for k, v := range action.Filters {
+				if k == "_resolved_guids" {
+					continue
+				}
+				filterMap[k] = v
+			}
+			filterMap["limit"] = 100
+
+			filterStruct, err := helperFunc.ConvertMapToStruct(filterMap)
+			if err != nil {
+				return nil, fmt.Errorf("convert lookup filters for update: %w", err)
+			}
+			listResp, err := service.GoObjectBuilderService().ObjectBuilder().GetList2(
+				ctx,
+				&nb.CommonMessage{
+					TableSlug: action.TableSlug,
+					ProjectId: effectiveProjectID,
+					Data:      filterStruct,
+				},
+			)
+			if err != nil {
+				return nil, fmt.Errorf("lookup before update failed: %w", err)
+			}
+			if listResp.GetData() != nil {
+				listData, err := helperFunc.ConvertStructToMap(listResp.GetData())
+				if err == nil {
+					for _, item := range extractItemsFromData(listData) {
+						if g, ok := item["guid"].(string); ok && g != "" {
+							guidsToUpdate = append(guidsToUpdate, g)
+						}
+					}
+				}
+			}
+		}
+
+		if len(guidsToUpdate) == 0 {
+			return nil, fmt.Errorf("update failed: no records found with given filters (guid is required by backend)")
+		}
+
+		var lastResp any
+		for _, guid := range guidsToUpdate {
+			updateData := make(map[string]any, len(action.Data)+3)
+			for k, v := range action.Data {
+				updateData[k] = v
+			}
+			updateData["guid"] = guid
+			updateData["id"] = guid
+			updateData["company_service_project_id"] = action.ProjectID
+
+			structData, err := helperFunc.ConvertMapToStruct(updateData)
+			if err != nil {
+				return nil, fmt.Errorf("convert update data for guid %s: %w", guid, err)
+			}
+			resp, err := service.GoObjectBuilderService().Items().Update(ctx, &nb.CommonMessage{
+				TableSlug: action.TableSlug,
+				ProjectId: effectiveProjectID,
+				Data:      structData,
+			})
+			if err != nil {
+				return nil, fmt.Errorf("update failed for guid %s: %w", guid, err)
+			}
+			if resp.GetData() != nil {
+				lastResp, _ = helperFunc.ConvertStructToMap(resp.GetData())
+			}
+		}
+
+		if lastResp != nil {
+			return lastResp, nil
+		}
+		return map[string]any{"status": "updated", "count": len(guidsToUpdate)}, nil
+
+	// ── DELETE ────────────────────────────────────────────────────────────────
 	case "delete":
-		filters := action.Filters
-		if filters == nil {
-			filters = map[string]any{}
-		}
-		// For compatibility with Items service patterns, map guid to id
-		if guid, ok := filters["guid"]; ok {
-			filters["id"] = guid
-		}
-		// Inject consistency fields
-		filters["company_service_project_id"] = action.ProjectID
+		var idToDelete string
 
-		structData, err := helperFunc.ConvertMapToStruct(filters)
+		if guid, ok := action.Filters["guid"]; ok {
+			idToDelete = cast.ToString(guid)
+		}
+
+		if idToDelete == "" {
+			if id, ok := action.Filters["id"]; ok {
+				idToDelete = cast.ToString(id)
+			}
+		}
+
+		if idToDelete == "" {
+			filterMap := make(map[string]any, len(action.Filters)+1)
+			for k, v := range action.Filters {
+				filterMap[k] = v
+			}
+			filterMap["limit"] = 1
+
+			filterStruct, err := helperFunc.ConvertMapToStruct(filterMap)
+			if err != nil {
+				return nil, fmt.Errorf("convert lookup filters for delete: %w", err)
+			}
+			listResp, err := service.GoObjectBuilderService().ObjectBuilder().GetList2(
+				ctx,
+				&nb.CommonMessage{
+					TableSlug: action.TableSlug,
+					ProjectId: effectiveProjectID,
+					Data:      filterStruct,
+				},
+			)
+			if err != nil {
+				return nil, fmt.Errorf("lookup before delete failed: %w", err)
+			}
+			if listResp.GetData() != nil {
+				listData, err := helperFunc.ConvertStructToMap(listResp.GetData())
+				if err == nil {
+					items := extractItemsFromData(listData)
+					if len(items) > 0 {
+						idToDelete, _ = items[0]["guid"].(string)
+					}
+				}
+			}
+		}
+
+		if idToDelete == "" {
+			return nil, fmt.Errorf("delete failed: record not found (guid is required by backend)")
+		}
+
+		deleteData := map[string]any{
+			"id":                         idToDelete,
+			"guid":                       idToDelete,
+			"company_service_project_id": action.ProjectID,
+		}
+		structData, err := helperFunc.ConvertMapToStruct(deleteData)
 		if err != nil {
-			return nil, fmt.Errorf("convert delete filters: %w", err)
+			return nil, fmt.Errorf("convert delete data: %w", err)
 		}
 		if _, err = service.GoObjectBuilderService().Items().Delete(ctx, &nb.CommonMessage{
 			TableSlug: action.TableSlug,
