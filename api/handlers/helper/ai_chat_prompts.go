@@ -882,6 +882,7 @@ CORRECT hook usage in src/features/{name}/api.ts:
   }
 
   // DELETE
+  // 💥 CRITICAL: ALL DELETE requests MUST send { data: {} } in body. useApiMutation handles this automatically.
   export function useDeletePost() {
     return useApiMutation<void, string>({
       url: (id) => '/v2/items/posts/${id}',
