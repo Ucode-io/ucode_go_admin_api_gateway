@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"strings"
 	"time"
 
@@ -36,8 +35,6 @@ func (p *ChatProcessor) runDatabaseFlow(ctx context.Context, clarified string, c
 	if err != nil {
 		return nil, fmt.Errorf("resolve builder resource ID: %w", err)
 	}
-
-	log.Println("RESOURCE ENV ID......:", resourceEnvId)
 
 	schema, err := p.getProjectSchemaCached(ctx, resourceEnvId)
 	if err != nil {
@@ -76,8 +73,6 @@ func (p *ChatProcessor) runDatabaseFlow(ctx context.Context, clarified string, c
 		if action.Action == "create" || action.Action == "update" || action.Action == "delete" {
 			return p.handleDatabaseMutation(ctx, action)
 		}
-
-		log.Println("RESOUREEEEEEEE ENNNNNV ID:", action.ResourceEnvID)
 
 		// Execute read / count / aggregate
 		iterData, execErr := p.executeDBAction(ctx, action)
@@ -122,8 +117,8 @@ func (p *ChatProcessor) runDatabaseFlow(ctx context.Context, clarified string, c
 	return &models.ParsedClaudeResponse{Description: finalAction.Reply}, nil
 }
 
-// executeDBAction dispatches a read-type action to the correct executor.
 func (p *ChatProcessor) executeDBAction(ctx context.Context, action *models.DatabaseActionRequest) (any, error) {
+
 	switch action.Action {
 	case "read":
 		return p.executeDatabaseRead(ctx, action)
@@ -175,8 +170,6 @@ func (p *ChatProcessor) executeDatabaseRead(ctx context.Context, action *models.
 		return nil, fmt.Errorf("convert filters: %w", err)
 	}
 
-	log.Println("RESOURCE ENV ID 3333", action.ResourceEnvID)
-
 	resp, err := p.service.GoObjectBuilderService().ObjectBuilder().GetList2(
 		ctx, &nb.CommonMessage{
 			TableSlug: action.TableSlug,
@@ -203,9 +196,10 @@ func (p *ChatProcessor) executeDatabaseRead(ctx context.Context, action *models.
 // GetList2 with limit=1 still runs the full SELECT COUNT(*) internally.
 func (p *ChatProcessor) executeDatabaseCount(ctx context.Context, action *models.DatabaseActionRequest) (any, error) {
 	data, err := p.executeDatabaseRead(ctx, &models.DatabaseActionRequest{
-		TableSlug: action.TableSlug,
-		Filters:   action.Filters,
-		Limit:     1,
+		TableSlug:     action.TableSlug,
+		Filters:       action.Filters,
+		Limit:         1,
+		ResourceEnvID: action.ResourceEnvID,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("count read failed: %w", err)
@@ -320,9 +314,10 @@ func (p *ChatProcessor) handleDatabaseMutation(ctx context.Context, action *mode
 	affectedCount := 1
 	if action.Action != "create" && len(action.Filters) > 0 {
 		if data, err := p.executeDatabaseRead(ctx, &models.DatabaseActionRequest{
-			TableSlug: action.TableSlug,
-			Filters:   action.Filters,
-			Limit:     1,
+			TableSlug:     action.TableSlug,
+			Filters:       action.Filters,
+			Limit:         1,
+			ResourceEnvID: action.ResourceEnvID,
 		}); err == nil {
 			affectedCount = extractCountFromData(data)
 		}
