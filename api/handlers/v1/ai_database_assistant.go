@@ -175,6 +175,8 @@ func (p *ChatProcessor) executeDatabaseRead(ctx context.Context, action *models.
 		return nil, fmt.Errorf("convert filters: %w", err)
 	}
 
+	log.Println("RESOURCE ENV ID 3333", action.ResourceEnvID)
+
 	resp, err := p.service.GoObjectBuilderService().ObjectBuilder().GetList2(
 		ctx, &nb.CommonMessage{
 			TableSlug: action.TableSlug,
