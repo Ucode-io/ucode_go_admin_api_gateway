@@ -7,73 +7,55 @@ import (
 
 const sharedRules = `
 ====================================
-RULE 3.1: COLOR CONTRAST (CRITICAL — NEVER VIOLATE)
+RULE 3.1: COLOR CONTRAST (CRITICAL)
 ====================================
-EVERY text element MUST be clearly readable against its background.
-
-FORBIDDEN — these combinations make text invisible:
-- Light text on light background
-- Dark text on dark background
-- Same or similar color for text and background
-
-REQUIRED:
-- Dark background -> MUST use light text (text-white, text-gray-100, text-slate-100)
-- Light background -> MUST use dark text (text-gray-900, text-slate-800, text-gray-800)
-- Colored background (bg-blue-600, bg-purple-500) -> MUST use white or very light text
-
-ICONS — CRITICAL:
-- Dark bg -> Use "brightness-0 invert" for icons
-- Light bg -> Use "brightness-0" for icons
-
-BEFORE WRITING ANY COMPONENT:
-- Can I READ the text on this background?
-- Can I SEE the icons on this background?
-- Are ALL unique colors different (not all the same shade)?
+EVERY text element MUST be clearly readable.
+- Dark background -> MUST use light text (text-slate-100)
+- Light background -> MUST use dark text (text-slate-900)
+- Colored background -> MUST use its foreground variable (text-primary-foreground)
 
 ====================================
-RULE 5: PACKAGE.JSON (CRITICAL)
+RULE 4: API DATA STRUCTURE (CRITICAL — BACKEND WILL FAIL OTHERWISE)
 ====================================
-MANDATORY dependencies — always include ALL of these:
-- "react": "^18.3.1"
-- "react-dom": "^18.3.1"
-- "react-router-dom": "^6.26.0"
-- "axios": "^1.7.7"
-- "lucide-react": "^0.441.0"
-- "clsx": "^2.1.1"
-- "tailwind-merge": "^2.5.2"
-
-CRITICAL RULES:
-- If you import any additional library -> you MUST add it to dependencies
-- Include TypeScript devDependencies: @types/react, @types/react-dom, typescript, @vitejs/plugin-react
+Your backend expects a specific JSON wrapper for all mutations.
+- POST (Create): You MUST wrap fields in a "data" object.
+  Example: useApiMutation({ url: '/v2/items/slug', method: 'POST' }) 
+  Called as: mutate({ data: { name: "John" } })
+- PUT (Update): You MUST include the "guid" AND wrap fields in "data".
+  Example: mutate({ data: { guid: id, name: "New Name" } })
+- DELETE: No body needed, just the ID in the URL.
 
 ====================================
-API INTEGRATION (CRITICAL)
+RULE 5: API AUTH & HEADERS
 ====================================
-You are building the frontend connected to a dynamically generated Backend API.
-You will receive an API CONFIGURATION from the system in your prompt (Base URL, API Key, Table slugs).
-You MUST connect your React frontend to this API for data fetching and mutations (CRUD).
+The apiClient in "@/config/axios" is PRE-CONFIGURED. 
+It uses the following logic (ensure your .env matches this):
+1. Authorization: ALWAYS set to the static string "API-KEY"
+2. X-API-KEY: Taken from import.meta.env.VITE_X_API_KEY
+NEVER try to set these headers manually in components.
 
-API HEADERS FORMAT (MANDATORY):
-axios.defaults.headers.common['authorization'] = 'API-KEY';
-axios.defaults.headers.common['X-API-KEY'] = import.meta.env.VITE_X_API_KEY;
+====================================
+RULE 6: RESPONSE EXTRACTION (MANDATORY)
+====================================
+The API response is deeply nested: { data: { data: { response: T | T[] } } }.
+You MUST ALWAYS use the following utilities from "@/lib/apiUtils":
+- import { extractList, extractCount, extractSingle } from '@/lib/apiUtils';
+- const items = extractList<User>(data); // for arrays
+- const user = extractSingle<User>(data); // for single objects
+NEVER use "data?.data?.response" directly in UI components.
 
-CRITICAL: NEVER hardcode the BASE URL or API KEY directly in your code.
-ALWAYS use 'import.meta.env.VITE_API_BASE_URL' and 'import.meta.env.VITE_X_API_KEY'.
-FAILURE TO DO THIS WILL BREAK THE DEPLOYMENT.
+====================================
+CRUD ENDPOINTS FORMAT
+====================================
+- List:   "/v2/items/{table_slug}"
+- Single: "/v2/items/{table_slug}/{id}" (for GET, PUT, DELETE)
+NEVER omit the "/v2/items/" prefix. NEVER use "/api/" or other paths.
 
-CRUD ENDPOINTS:
-- GET list:  axios.get(import.meta.env.VITE_API_BASE_URL + "/v2/items/{table_slug}")
-   -> Response shape: { data: { data: { count, response: T[] | T } } }
-   -> RESPONSE EXTRACTION — ALWAYS AND ONLY USE:
-      import { extractList, extractCount } from '@/lib/apiUtils';
-      const items = extractList<YourType>(response.data);
-      const total = extractCount(response.data);
-   -> NEVER write inline response.data?.data?.response in components — it will be wrong
-- POST:      axios.post(import.meta.env.VITE_API_BASE_URL + "/v2/items/{table_slug}", { data: { field_1: "val", field_2: "val" } })
-- PUT:       axios.put(import.meta.env.VITE_API_BASE_URL + "/v2/items/{table_slug}", { data: { guid: id, field_1: "val" } })
-- DELETE:    axios.delete(import.meta.env.VITE_API_BASE_URL + "/v2/items/{table_slug}/" + id)
-
-Your code must be fully operational and perform API calls using the slugs defined in the tables provided in the prompt. Do NOT use fake static data if tables are provided — use the API endpoints!
+====================================
+RULE 7: DEPENDENCIES
+====================================
+If you use NEW libraries (recharts, framer-motion, etc.), add them to "dependencies" in package.json.
+Include TypeScript types in "devDependencies" if needed.
 `
 
 var (
@@ -379,7 +361,8 @@ JSON SCHEMA:
     {
       "slug": "string (kebab-case or snake_case, e.g. 'users', 'company_products')",
       "label": "string (Human readable, e.g. 'Users', 'Company Products')",
-      "is_login_table": "boolean (true for exactly ONE table that serves as the login/users table)",
+      "is_login_table": "boolean (true for exactly ONE table that represents users/accounts)",
+      "login_strategy": "array — REQUIRED when is_login_table=true. Choose ONE: [\"login\"] for username+password, [\"email\"] for email+password, [\"phone\"] for phone+password. Default: [\"login\"]",
       "fields": [
         {
           "slug": "string (snake_case, e.g. 'full_name', 'phone_number')",
@@ -410,6 +393,7 @@ ARCHITECTURAL RULES:
 5. Provide NO limitations on UI or flexibility. The frontend can be any kind of app (e-commerce, CRM, landing page, dashboard, etc.).
 6. CRITICAL: NEVER include system fields like 'created_at', 'updated_at', 'deleted_at', or 'guid' in your fields list. They are managed by the system automatically.
 7. CRITICAL: Every project MUST have exactly ONE login table. Set "is_login_table": true on the table that represents users/accounts (typically named 'Users' or 'Accounts'). Only one table can be the login table.
+8. CRITICAL: For the login table, do NOT include auth fields (login, email, phone, password, tin) in the "fields" list — these are created automatically by the system based on "login_strategy". Only include additional custom fields like "full_name", "avatar", etc
 `
 
 	SystemPromptSonnetInspector = `You are a senior frontend engineer helping a user understand their project code.
@@ -588,6 +572,7 @@ CRITICAL: PRIME THEME FIRST
 ====================================
 You MUST customize src/index.css before generating any other UI/code.
 Treat it as the "first file" override: it defines CSS variables used by every layout, component, and interaction.
+The template contains [AI: Generate HSL] and [AI: Set radius] placeholders in src/index.css. You MUST replace every single one of them with actual HSL values and units (e.g., 221 83% 53%, 0.5rem). Leaving placeholders as-is will break the build.
 
 Pick a brand color + sidebar style based on the user's domain:
 - CRM / Sales        → violet (258 90% 62%) + dark sidebar / tight spacing
@@ -690,6 +675,7 @@ You are NOT limited to this list — create as many files as the project require
    RULES:
    - Keep variable NAMES fixed (--primary, --sidebar-background, etc.)
    - Change only the HSL VALUES
+   - Define --card-shadow (e.g., 0 2px 4px rgba(0,0,0,0.1) or 4px 4px 0px 0px #000) and --radius (0rem to 1.5rem) to set the visual tone.
    - MUST start with: @tailwind base; @tailwind components; @tailwind utilities;
    - Choose a brand color that fits the domain:
        CRM / Sales      → blue 221 83% 53% or violet 258 90% 62%

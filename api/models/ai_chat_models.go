@@ -96,11 +96,12 @@ type (
 	}
 
 	TablePlan struct {
-		Slug         string           `json:"slug"`
-		Label        string           `json:"label"`
-		Fields       []TableFieldPlan `json:"fields"`
-		MockData     []map[string]any `json:"mock_data"`      // 3-5 реалистичных записей
-		IsLoginTable bool             `json:"is_login_table"` // true for the project's login/users table
+		Slug          string                   `json:"slug"`
+		Label         string                   `json:"label"`
+		IsLoginTable  bool                     `json:"is_login_table"`
+		LoginStrategy []string                 `json:"login_strategy"`
+		Fields        []TableFieldPlan         `json:"fields"`
+		MockData      []map[string]interface{} `json:"mock_data"`
 	}
 
 	ArchitectPlan struct {

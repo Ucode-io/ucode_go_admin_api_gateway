@@ -557,11 +557,24 @@ func (p *ChatProcessor) callSonnetCoderNewProject(ctx context.Context, clarified
 		p.baseConf.UcodeBaseUrl, apiKey,
 	))
 	for _, t := range plan.Tables {
-		apiCtx.WriteString(fmt.Sprintf("- Table: %s, slug: %s\n", t.Label, t.Slug))
+		apiCtx.WriteString(fmt.Sprintf("- Table: %s, slug: %s", t.Label, t.Slug))
+		if t.IsLoginTable {
+			strategy := strings.Join(t.LoginStrategy, ", ")
+			if strategy == "" {
+				strategy = "login"
+			}
+			apiCtx.WriteString(fmt.Sprintf(" [LOGIN TABLE — strategy: %s]", strategy))
+		}
+		apiCtx.WriteString("\n")
 		for _, f := range t.Fields {
 			apiCtx.WriteString(fmt.Sprintf("  * field: %s, type: %s\n", f.Slug, f.Type))
 		}
+		if t.IsLoginTable {
+			apiCtx.WriteString("  * IMPORTANT: Build a Login page that uses this table for authentication\n")
+			apiCtx.WriteString(fmt.Sprintf("  * Login endpoint: POST %s/v2/auth/signin?table-slug=%s&env=%s\n", p.baseConf.UcodeBaseUrl, t.Slug, envId))
+		}
 	}
+
 	apiCtx.WriteString("\nUse this UI Structure provided by the Architect:\n" + plan.UIStructure + "\n")
 
 	response, err := helper.CallAnthropicAPI(
@@ -605,9 +618,21 @@ func (p *ChatProcessor) callSonnetCoderWithTemplate(ctx context.Context, clarifi
 	))
 
 	for _, t := range plan.Tables {
-		apiCtx.WriteString(fmt.Sprintf("- Table: %s, slug: %s\n", t.Label, t.Slug))
+		apiCtx.WriteString(fmt.Sprintf("- Table: %s, slug: %s", t.Label, t.Slug))
+		if t.IsLoginTable {
+			strategy := strings.Join(t.LoginStrategy, ", ")
+			if strategy == "" {
+				strategy = "login"
+			}
+			apiCtx.WriteString(fmt.Sprintf(" [LOGIN TABLE — strategy: %s]", strategy))
+		}
+		apiCtx.WriteString("\n")
 		for _, f := range t.Fields {
 			apiCtx.WriteString(fmt.Sprintf("  * field: %s, type: %s\n", f.Slug, f.Type))
+		}
+		if t.IsLoginTable {
+			apiCtx.WriteString("  * IMPORTANT: Build a Login page that uses this table for authentication\n")
+			apiCtx.WriteString(fmt.Sprintf("  * Login endpoint: POST %s/v2/auth/signin?table-slug=%s&env=%s\n", p.baseConf.UcodeBaseUrl, t.Slug, envId))
 		}
 	}
 	apiCtx.WriteString("\nUse this UI Structure provided by the Architect:\n" + plan.UIStructure + "\n")

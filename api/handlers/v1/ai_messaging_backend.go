@@ -18,13 +18,25 @@ import (
 func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, projectId, envId string, service services.ServiceManagerI) error {
 	log.Printf("[ai_messaging_backend] Starting sequential backend creation for project %s (env: %s)", projectId, envId)
 
+	plan = ensureLoginTable(plan)
+
 	var errs []string
 
 	for _, tablePlan := range plan.Tables {
-		// 1. Create the Table metadata & physical structure
+
 		attributesMap := map[string]interface{}{
 			"label":    "",
 			"label_en": tablePlan.Label,
+		}
+
+		if tablePlan.IsLoginTable {
+			loginStrategy := tablePlan.LoginStrategy
+			if len(loginStrategy) == 0 {
+				loginStrategy = []string{"login"}
+			}
+			attributesMap["auth_info"] = map[string]interface{}{
+				"login_strategy": loginStrategy,
+			}
 		}
 		attributes, _ := helper.ConvertMapToStruct(attributesMap)
 
@@ -55,9 +67,12 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, proj
 			if isSystemField(fieldPlan.Slug) {
 				continue
 			}
+			if tablePlan.IsLoginTable && isAuthField(fieldPlan.Slug) {
+				continue
+			}
 
 			mappedType := mapFieldType(fieldPlan.Type)
-			
+
 			fieldAttrMap := map[string]interface{}{
 				"label":    "",
 				"label_en": fieldPlan.Label,
@@ -158,4 +173,44 @@ func mapFieldType(aiType string) string {
 	default:
 		return "SINGLE_LINE"
 	}
+}
+
+func isAuthField(slug string) bool {
+	return map[string]bool{
+		"login":    true,
+		"email":    true,
+		"phone":    true,
+		"password": true,
+		"tin":      true,
+	}[slug]
+}
+
+func ensureLoginTable(plan *models.ArchitectPlan) *models.ArchitectPlan {
+	for _, t := range plan.Tables {
+		if t.IsLoginTable {
+			return plan
+		}
+	}
+
+	log.Printf("[ai_messaging_backend] WARNING: no login table found in plan — injecting default users table")
+
+	defaultUsers := models.TablePlan{
+		Slug:          "users",
+		Label:         "Users",
+		IsLoginTable:  true,
+		LoginStrategy: []string{"login"},
+		Fields: []models.TableFieldPlan{
+			{
+				Slug:  "full_name",
+				Label: "Full Name",
+				Type:  "SINGLE_LINE",
+			},
+		},
+		MockData: []map[string]interface{}{
+			{"full_name": "Admin User"},
+		},
+	}
+
+	plan.Tables = append([]models.TablePlan{defaultUsers}, plan.Tables...)
+	return plan
 }
