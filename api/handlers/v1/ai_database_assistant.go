@@ -360,7 +360,7 @@ func (p *ChatProcessor) handleDatabaseMutation(ctx context.Context, action *mode
 		AffectedCount:      affectedCount,
 		Description:        confirmationPrompt,
 		ProjectID:          action.ResourceEnvID,
-		ResourceEnvID:      p.resourceEnvID,
+		ResourceEnvID:      action.ResourceEnvID,
 		SuccessMessage:     successMessage,
 		CancelMessage:      cancelMessage,
 		ConfirmationPrompt: confirmationPrompt,
