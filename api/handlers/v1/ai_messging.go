@@ -513,7 +513,61 @@ func (p *ChatProcessor) callSonnetCoder(ctx context.Context, clarified string, p
 		return nil, fmt.Errorf("sonnet coder: %w", err)
 	}
 
-	return helper.ParseClaudeResponse(response)
+	parsed, parseErr := helper.ParseClaudeResponse(response)
+	if parseErr != nil {
+		log.Printf("[CODER] parse failed, attempting Claude-side JSON repair: %v", parseErr)
+		return p.retryWithJSONRepair(ctx, response, clarified, systemPrompt)
+	}
+	return parsed, nil
+}
+
+func (p *ChatProcessor) retryWithJSONRepair(ctx context.Context, brokenRawResponse, originalTask, systemPrompt string) (*models.ParsedClaudeResponse, error) {
+	brokenText, _ := helper.ExtractPlainText(brokenRawResponse)
+
+	fixPrompt := fmt.Sprintf(
+		"Your previous response contained a JSON object that could not be parsed because "+
+			"some string values had improperly escaped characters "+
+			"(e.g. raw newlines, unescaped backslashes, or invalid control characters inside JSON strings).\n\n"+
+			"Original task: %s\n\n"+
+			"Return the SAME project JSON but with ALL string values correctly escaped:\n"+
+			"  - Newlines inside strings  → \\n\n"+
+			"  - Backslashes inside strings → \\\\\n"+
+			"  - Double quotes inside strings → \\\"\n"+
+			"  - No raw control characters (ASCII < 0x20) anywhere\n\n"+
+			"Output ONLY the corrected raw JSON object starting with { and ending with }. "+
+			"No markdown, no explanation, no backticks.\n\n"+
+			"Broken response to fix (truncated for context):\n%.600s",
+		originalTask, brokenText,
+	)
+
+	retryResponse, err := helper.CallAnthropicAPI(
+		p.baseConf,
+		models.AnthropicRequest{
+			Model:     p.baseConf.ClaudeModel,
+			MaxTokens: p.baseConf.CoderMaxTokens,
+			System:    systemPrompt,
+			Messages: []models.ChatMessage{
+				{Role: "user", Content: []models.ContentBlock{{Type: "text", Text: fixPrompt}}},
+			},
+		},
+		timeoutCoder,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("JSON repair retry API call failed: %w", err)
+	}
+
+	parsed, err := helper.ParseClaudeResponse(retryResponse)
+	if err != nil {
+		return nil, fmt.Errorf("JSON repair retry parse also failed: %w", err)
+	}
+
+	log.Printf("[CODER] JSON repair retry succeeded, files=%d", func() int {
+		if parsed.Project != nil {
+			return len(parsed.Project.Files)
+		}
+		return 0
+	}())
+	return parsed, nil
 }
 
 func (p *ChatProcessor) callArchitect(ctx context.Context, clarified string, imageURLs []string) (*models.ArchitectPlan, error) {
@@ -596,9 +650,13 @@ func (p *ChatProcessor) callSonnetCoderNewProject(ctx context.Context, clarified
 		return nil, fmt.Errorf("new project coder: %w", err)
 	}
 
-	parsed, err := helper.ParseClaudeResponse(response)
-	if err != nil {
-		return nil, fmt.Errorf("parse new project response: %w", err)
+	parsed, parseErr := helper.ParseClaudeResponse(response)
+	if parseErr != nil {
+		log.Printf("[NEW PROJECT] parse failed, attempting Claude-side JSON repair: %v", parseErr)
+		parsed, parseErr = p.retryWithJSONRepair(ctx, response, clarified, helper.SystemPromptAiChat)
+		if parseErr != nil {
+			return nil, fmt.Errorf("new project coder failed after repair retry: %w", parseErr)
+		}
 	}
 
 	if parsed.Project == nil {
@@ -656,9 +714,13 @@ func (p *ChatProcessor) callSonnetCoderWithTemplate(ctx context.Context, clarifi
 		return nil, fmt.Errorf("template coder: %w", err)
 	}
 
-	parsed, err := helper.ParseClaudeResponse(response)
-	if err != nil {
-		return nil, fmt.Errorf("parse template coder response: %w", err)
+	parsed, parseErr := helper.ParseClaudeResponse(response)
+	if parseErr != nil {
+		log.Printf("[TEMPLATE CODER] parse failed, attempting Claude-side JSON repair: %v", parseErr)
+		parsed, parseErr = p.retryWithJSONRepair(ctx, response, clarified, helper.SystemPromptAiChatTemplate)
+		if parseErr != nil {
+			return nil, fmt.Errorf("template coder failed after repair retry: %w", parseErr)
+		}
 	}
 
 	if parsed.Project == nil {

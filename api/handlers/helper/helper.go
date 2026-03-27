@@ -69,6 +69,77 @@ func CleanJSONResponse(input string) string {
 	return extractJSON(input)
 }
 
+func sanitizeJSONContent(s string) string {
+	var b strings.Builder
+	b.Grow(len(s))
+	for i := 0; i < len(s); i++ {
+		c := s[i]
+
+		if c >= 0x20 || c == '\n' || c == '\r' || c == '\t' || c >= 0x80 {
+			b.WriteByte(c)
+		}
+	}
+	return b.String()
+}
+
+func repairJSONStrings(input string) string {
+	var out strings.Builder
+	out.Grow(len(input) + 512)
+
+	inString := false
+	escaped := false
+
+	for i := 0; i < len(input); i++ {
+		c := input[i]
+
+		if escaped {
+			out.WriteByte(c)
+			escaped = false
+			continue
+		}
+
+		if c == '\\' && inString {
+
+			if i+1 < len(input) {
+				next := input[i+1]
+				validEscape := next == '"' || next == '\\' || next == '/' ||
+					next == 'b' || next == 'f' || next == 'n' ||
+					next == 'r' || next == 't' || next == 'u'
+				if !validEscape {
+					out.WriteString(`\\`)
+					continue
+				}
+			}
+			out.WriteByte(c)
+			escaped = true
+			continue
+		}
+
+		if c == '"' && !escaped {
+			inString = !inString
+			out.WriteByte(c)
+			continue
+		}
+
+		if inString {
+			switch c {
+			case '\n':
+				out.WriteString(`\n`)
+				continue
+			case '\r':
+				out.WriteString(`\r`)
+				continue
+			case '\t':
+				out.WriteString(`\t`)
+				continue
+			}
+		}
+
+		out.WriteByte(c)
+	}
+	return out.String()
+}
+
 func ParseClaudeResponse(rawJSON string) (*models.ParsedClaudeResponse, error) {
 	fullText, resp, err := extractTextFromClaudeResponse(rawJSON)
 	if err != nil {
@@ -93,11 +164,34 @@ func ParseClaudeResponse(rawJSON string) (*models.ParsedClaudeResponse, error) {
 
 	if jsonBlock != "" {
 		var project models.GeneratedProject
-		if err := json.Unmarshal([]byte(jsonBlock), &project); err != nil {
-			log.Printf("PARSE_CLAUDE_RESPONSE: failed to unmarshal project JSON: %v | json_preview=%.200s", err, jsonBlock)
-		} else {
-			result.Project = &project
+
+		// Pass 1: try to unmarshal as-is (fast path, no allocation overhead)
+		parseErr := json.Unmarshal([]byte(jsonBlock), &project)
+
+		if parseErr != nil {
+			log.Printf("PARSE_CLAUDE_RESPONSE: pass-1 unmarshal failed (%v) | json_preview=%.200s", parseErr, jsonBlock)
+
+			// Pass 2: strip invalid control characters, then retry
+			sanitized := sanitizeJSONContent(jsonBlock)
+			parseErr = json.Unmarshal([]byte(sanitized), &project)
+
+			if parseErr != nil {
+				log.Printf("PARSE_CLAUDE_RESPONSE: pass-2 (sanitize) failed (%v), trying escape repair", parseErr)
+
+				repaired := repairJSONStrings(sanitized)
+				parseErr = json.Unmarshal([]byte(repaired), &project)
+
+				if parseErr != nil {
+					log.Printf("PARSE_CLAUDE_RESPONSE: all passes failed: %v | repaired_preview=%.300s", parseErr, repaired)
+					return nil, fmt.Errorf("project JSON parse failed after 3 repair passes: %w", parseErr)
+				}
+				log.Printf("PARSE_CLAUDE_RESPONSE: pass-3 (escape repair) succeeded")
+			} else {
+				log.Printf("PARSE_CLAUDE_RESPONSE: pass-2 (sanitize) succeeded")
+			}
 		}
+
+		result.Project = &project
 	}
 
 	result.Description = strings.TrimSpace(description)

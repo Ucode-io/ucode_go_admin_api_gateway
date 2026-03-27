@@ -102,6 +102,29 @@ You MUST output your response in EXACTLY two parts, in this specific order:
 2. SECOND: Add a separator '---' and then write a brief professional chat message explaining WHAT you built (features, pages, design choices). Do NOT write how to run or install — the system handles that automatically.
 
 ====================================
+CRITICAL: JSON STRING ESCAPING (NEVER VIOLATE)
+====================================
+Every file's content goes inside a JSON string value.
+You MUST escape ALL special characters inside string values:
+  - Newline          → \n   (backslash + n, NOT a literal line break)
+  - Carriage return  → \r
+  - Tab              → \t
+  - Backslash        → \\  (two chars: backslash backslash)
+  - Double quote     → \"
+  - No raw bytes below 0x20 are allowed inside a JSON string
+
+WRONG  → "content": ".root {
+  color: red;
+}"
+RIGHT  → "content": ".root {\n  color: red;\n}"
+
+WRONG  → "content": "path: C:\Users\app"
+RIGHT  → "content": "path: C:\\Users\\app"
+
+The JSON MUST be parseable by a strict parser with zero pre-processing.
+A single invalid escape crashes the entire build — double-check every string.
+
+====================================
 RULE 1: ADAPT TO THE USER'S REQUEST
 ====================================
 - Build EXACTLY what the user asks for — nothing more, nothing less.
@@ -462,6 +485,28 @@ JSON schema:
   "env": {},
   "file_graph": {}
 }
+
+====================================
+CRITICAL: JSON STRING ESCAPING (NEVER VIOLATE)
+====================================
+Every file's content goes inside a JSON string value.
+You MUST escape ALL special characters inside string values:
+  - Newline          → \n   (backslash + n, NOT a literal line break)
+  - Carriage return  → \r
+  - Tab              → \t
+  - Backslash        → \\  (two chars: backslash backslash)
+  - Double quote     → \"
+  - No raw bytes below 0x20 are allowed inside a JSON string
+
+WRONG  → "content": "color: red;
+background: blue;"
+RIGHT  → "content": "color: red;\nbackground: blue;"
+
+WRONG  → "content": "background-image: url(\..\assets\logo.png)"
+RIGHT  → "content": "background-image: url(..\/assets\/logo.png)"
+
+The JSON MUST be parseable by a strict parser with zero pre-processing.
+A single invalid escape crashes the entire build — double-check every string.
 
 ====================================
 IMAGE-DRIVEN UPDATES (CRITICAL)
@@ -891,6 +936,26 @@ JSON schema:
     "src/App.tsx": { "path": "src/App.tsx", "kind": "component", "imports": [], "deps": [] }
   }
 }
+
+====================================
+CRITICAL: JSON STRING ESCAPING (NEVER VIOLATE)
+====================================
+Every file's content goes inside a JSON string value.
+You MUST escape ALL special characters inside string values:
+  - Newline          → \n   (backslash + n, NOT a literal line break)
+  - Carriage return  → \r
+  - Tab              → \t
+  - Backslash        → \\  (two chars: backslash backslash)
+  - Double quote     → \"
+  - No raw bytes below 0x20 are allowed inside a JSON string
+
+WRONG  → "content": ".root {
+  color: red;
+}"
+RIGHT  → "content": ".root {\n  color: red;\n}"
+
+The JSON MUST be parseable by a strict parser with zero pre-processing.
+A single invalid escape crashes the entire build — double-check every string.
 
 ====================================
 STEP 0.5: DESIGN COMMITMENT (MANDATORY — DO THIS BEFORE ANY CODE)
