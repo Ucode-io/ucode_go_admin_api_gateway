@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"encoding/json"
 	"log"
+	"strings"
 	"sync"
 
 	"ucode/ucode_go_api_gateway/api/models"
@@ -52,9 +53,6 @@ func GetTemplate(projectType string) []models.ProjectFile {
 	return templateStore[projectType]
 }
 
-// MergeTemplateWithAIFiles combines template base files with AI-generated files.
-// AI files take precedence — if AI generates a file with the same path as a
-// template file, the AI version wins. Template files not touched by AI are preserved.
 func MergeTemplateWithAIFiles(templateFiles, aiFiles []models.ProjectFile) []models.ProjectFile {
 	aiPathSet := make(map[string]bool, len(aiFiles))
 	for _, f := range aiFiles {
@@ -63,9 +61,13 @@ func MergeTemplateWithAIFiles(templateFiles, aiFiles []models.ProjectFile) []mod
 
 	merged := make([]models.ProjectFile, 0, len(templateFiles)+len(aiFiles))
 	for _, tf := range templateFiles {
-		if !aiPathSet[tf.Path] {
-			merged = append(merged, tf)
+		if aiPathSet[tf.Path] {
+			continue
 		}
+		if strings.Contains(tf.Content, "[AI:") {
+			continue
+		}
+		merged = append(merged, tf)
 	}
 	merged = append(merged, aiFiles...)
 

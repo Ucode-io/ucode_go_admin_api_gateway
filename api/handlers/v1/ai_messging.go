@@ -595,11 +595,45 @@ func (p *ChatProcessor) callArchitect(ctx context.Context, clarified string, ima
 		return nil, fmt.Errorf("architect extract text: %w", err)
 	}
 
-	var plan models.ArchitectPlan
+	cleaned := helper.CleanJSONResponse(text)
 
-	if err = json.Unmarshal([]byte(helper.CleanJSONResponse(text)), &plan); err != nil {
-		return nil, fmt.Errorf("unmarshal architect plan: %w", err)
+	var plan models.ArchitectPlan
+	if err = json.Unmarshal([]byte(cleaned), &plan); err != nil {
+		log.Printf("[ARCHITECT] first parse failed (%v), attempting repair...", err)
+
+		repairPrompt := fmt.Sprintf(
+			"Your previous response was a JSON object that could not be parsed due to invalid escaping or truncation.\n\n"+
+				"Original task: %s\n\n"+
+				"Broken response (truncated for context):\n%.800s\n\n"+
+				"Return ONLY the corrected, complete JSON object. No markdown, no backticks, no explanation.\n"+
+				"Ensure ALL string values are properly escaped (newlines → \\n, quotes → \\\", backslashes → \\\\).",
+			clarified, cleaned,
+		)
+
+		retryResponse, retryErr := helper.CallAnthropicAPI(
+			p.baseConf,
+			models.AnthropicRequest{
+				Model:     p.baseConf.ClaudeModel,
+				MaxTokens: p.baseConf.PlannerMaxTokens,
+				System:    helper.SystemPromptArchitect,
+				Messages: []models.ChatMessage{
+					{Role: "user", Content: []models.ContentBlock{{Type: "text", Text: repairPrompt}}},
+				},
+			},
+			timeoutArchitect,
+		)
+		if retryErr != nil {
+			return nil, fmt.Errorf("unmarshal architect plan: %w (repair call also failed: %v)", err, retryErr)
+		}
+
+		retryText, _ := helper.ExtractPlainText(retryResponse)
+		if retryErr = json.Unmarshal([]byte(helper.CleanJSONResponse(retryText)), &plan); retryErr != nil {
+			return nil, fmt.Errorf("unmarshal architect plan: %w (repair also failed: %v)", err, retryErr)
+		}
+
+		log.Printf("[ARCHITECT] repair retry succeeded")
 	}
+
 	return &plan, nil
 }
 
@@ -612,20 +646,9 @@ func (p *ChatProcessor) callSonnetCoderNewProject(ctx context.Context, clarified
 	))
 	for _, t := range plan.Tables {
 		apiCtx.WriteString(fmt.Sprintf("- Table: %s, slug: %s", t.Label, t.Slug))
-		if t.IsLoginTable {
-			strategy := strings.Join(t.LoginStrategy, ", ")
-			if strategy == "" {
-				strategy = "login"
-			}
-			apiCtx.WriteString(fmt.Sprintf(" [LOGIN TABLE — strategy: %s]", strategy))
-		}
 		apiCtx.WriteString("\n")
 		for _, f := range t.Fields {
 			apiCtx.WriteString(fmt.Sprintf("  * field: %s, type: %s\n", f.Slug, f.Type))
-		}
-		if t.IsLoginTable {
-			apiCtx.WriteString("  * IMPORTANT: Build a Login page that uses this table for authentication\n")
-			apiCtx.WriteString(fmt.Sprintf("  * Login endpoint: POST %s/v2/auth/signin?table-slug=%s&env=%s\n", p.baseConf.UcodeBaseUrl, t.Slug, envId))
 		}
 	}
 
@@ -677,20 +700,9 @@ func (p *ChatProcessor) callSonnetCoderWithTemplate(ctx context.Context, clarifi
 
 	for _, t := range plan.Tables {
 		apiCtx.WriteString(fmt.Sprintf("- Table: %s, slug: %s", t.Label, t.Slug))
-		if t.IsLoginTable {
-			strategy := strings.Join(t.LoginStrategy, ", ")
-			if strategy == "" {
-				strategy = "login"
-			}
-			apiCtx.WriteString(fmt.Sprintf(" [LOGIN TABLE — strategy: %s]", strategy))
-		}
 		apiCtx.WriteString("\n")
 		for _, f := range t.Fields {
 			apiCtx.WriteString(fmt.Sprintf("  * field: %s, type: %s\n", f.Slug, f.Type))
-		}
-		if t.IsLoginTable {
-			apiCtx.WriteString("  * IMPORTANT: Build a Login page that uses this table for authentication\n")
-			apiCtx.WriteString(fmt.Sprintf("  * Login endpoint: POST %s/v2/auth/signin?table-slug=%s&env=%s\n", p.baseConf.UcodeBaseUrl, t.Slug, envId))
 		}
 	}
 	apiCtx.WriteString("\nUse this UI Structure provided by the Architect:\n" + plan.UIStructure + "\n")
@@ -708,8 +720,9 @@ func (p *ChatProcessor) callSonnetCoderWithTemplate(ctx context.Context, clarifi
 		}
 	}
 
-	finalPrompt := clarified + "\n\n" + apiCtx.String() + "\n\n" + templateCtx.String()
+	designForce := buildDesignForceBlock(clarified)
 
+	finalPrompt := designForce + clarified + "\n\n" + apiCtx.String() + "\n\n" + templateCtx.String()
 	response, err := helper.CallAnthropicAPI(
 		p.baseConf,
 		models.AnthropicRequest{
@@ -1024,4 +1037,53 @@ func buildMessagesWithHistory(history []models.ChatMessage, contentBlocks []mode
 		Content: contentBlocks,
 	})
 	return messages
+}
+
+// a high-priority instruction block that appears BEFORE the template context.
+func buildDesignForceBlock(clarified string) string {
+	lower := strings.ToLower(clarified)
+
+	// Detect explicit reference platform
+	var reference string
+	platforms := []string{
+		"planfact", "linear", "notion", "stripe", "salesforce", "shopify",
+		"amocrm", "amo crm", "jira", "figma", "asana", "trello", "monday",
+		"hubspot", "pipedrive", "clickup",
+	}
+	for _, p := range platforms {
+		if strings.Contains(lower, p) {
+			reference = p
+			break
+		}
+	}
+
+	var sb strings.Builder
+	sb.WriteString("====================================\n")
+	sb.WriteString("DESIGN DIRECTIVE — HIGHEST PRIORITY (READ BEFORE ANYTHING ELSE)\n")
+	sb.WriteString("====================================\n")
+
+	if reference != "" {
+		sb.WriteString(fmt.Sprintf(
+			"The user explicitly requested UI style: \"%s\"\n"+
+				"You MUST replicate its exact visual design:\n"+
+				"- Color scheme, typography, spacing, component styles\n"+
+				"- Layout structure (sidebar style, header, content areas)\n"+
+				"- Navigation patterns and interaction patterns\n"+
+				"This is NON-NEGOTIABLE. Generic white/gray default UI is FAILURE.\n\n",
+			reference,
+		))
+	} else {
+		sb.WriteString(
+			"Choose a UNIQUE, domain-appropriate visual style. Generic white/gray default UI is FAILURE.\n" +
+				"- Pick a brand color that fits the domain (NOT default blue #3b82f6)\n" +
+				"- Make the sidebar visually distinct from content\n" +
+				"- The result must look like a real SaaS product\n\n",
+		)
+	}
+
+	sb.WriteString("MANDATORY: src/index.css MUST be in your output with ALL [AI: Generate HSL] placeholders replaced with real HSL values.\n")
+	sb.WriteString("The --primary color MUST NOT be 221 83% 53% (default blue).\n")
+	sb.WriteString("====================================\n\n")
+
+	return sb.String()
 }
