@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
@@ -25,8 +26,6 @@ const (
 // DATABASE FLOW — agentic loop
 // ============================================================================
 
-// runDatabaseFlow runs Claude in an agentic loop:
-//
 //   - Iteration 1: Claude sees schema → plans what to fetch (no data yet)
 //   - Iterations 2-N: Claude sees accumulated results → fetches more or answers
 //
@@ -37,6 +36,8 @@ func (p *ChatProcessor) runDatabaseFlow(ctx context.Context, clarified string, c
 	if err != nil {
 		return nil, fmt.Errorf("resolve builder resource ID: %w", err)
 	}
+
+	log.Println("RESOURCE ENV ID......:", resourceEnvId)
 
 	schema, err := p.getProjectSchemaCached(ctx, resourceEnvId)
 	if err != nil {
@@ -75,6 +76,8 @@ func (p *ChatProcessor) runDatabaseFlow(ctx context.Context, clarified string, c
 		if action.Action == "create" || action.Action == "update" || action.Action == "delete" {
 			return p.handleDatabaseMutation(ctx, action)
 		}
+
+		log.Println("RESOUREEEEEEEE ENNNNNV ID:", action.ResourceEnvID)
 
 		// Execute read / count / aggregate
 		iterData, execErr := p.executeDBAction(ctx, action)
@@ -146,10 +149,6 @@ func appendDataContext(existing, label, jsonData string) string {
 // DATABASE EXECUTORS
 // ============================================================================
 
-// executeDatabaseRead calls GetList2.
-// Returns {"count": N, "response": [...]}.
-// Use Limit=1 when only the count is needed — GetList2 runs SELECT COUNT(*) server-side
-// regardless of the limit, so the full total is always accurate.
 func (p *ChatProcessor) executeDatabaseRead(ctx context.Context, action *models.DatabaseActionRequest) (any, error) {
 	if action.TableSlug == "" {
 		return nil, fmt.Errorf("table_slug is required")
