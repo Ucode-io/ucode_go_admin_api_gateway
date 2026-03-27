@@ -33,7 +33,12 @@ const (
 // Mutations (create/update/delete) always break out immediately and return
 // a PendingAction to the frontend for confirmation. No server-side RAM store.
 func (p *ChatProcessor) runDatabaseFlow(ctx context.Context, clarified string, chatHistory []models.ChatMessage) (*models.ParsedClaudeResponse, error) {
-	schema, err := p.getProjectSchemaCached(ctx)
+	resourceEnvId, err := p.resolveBuilderResourceID(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("resolve builder resource ID: %w", err)
+	}
+
+	schema, err := p.getProjectSchemaCached(ctx, resourceEnvId)
 	if err != nil {
 		return nil, fmt.Errorf("schema fetch failed: %w", err)
 	}
@@ -58,6 +63,7 @@ func (p *ChatProcessor) runDatabaseFlow(ctx context.Context, clarified string, c
 		if err != nil {
 			return nil, fmt.Errorf("claude call failed (iter %d): %w", i, err)
 		}
+		action.ResourceEnvID = resourceEnvId
 		lastAction = action
 
 		// Schema-only or clarification — answer immediately, no DB access needed
@@ -170,16 +176,13 @@ func (p *ChatProcessor) executeDatabaseRead(ctx context.Context, action *models.
 		return nil, fmt.Errorf("convert filters: %w", err)
 	}
 
-	builderID, err := p.resolveBuilderResourceID(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	resp, err := p.service.GoObjectBuilderService().ObjectBuilder().GetList2(ctx, &nb.CommonMessage{
-		TableSlug: action.TableSlug,
-		ProjectId: builderID,
-		Data:      structData,
-	})
+	resp, err := p.service.GoObjectBuilderService().ObjectBuilder().GetList2(
+		ctx, &nb.CommonMessage{
+			TableSlug: action.TableSlug,
+			ProjectId: action.ResourceEnvID,
+			Data:      structData,
+		},
+	)
 	if err != nil {
 		return nil, fmt.Errorf("GetList2 failed: %w", err)
 	}
@@ -249,14 +252,9 @@ func (p *ChatProcessor) executeDatabaseAggregate(ctx context.Context, action *mo
 		return nil, fmt.Errorf("build aggregation params: %w", err)
 	}
 
-	builderID, err := p.resolveBuilderResourceID(ctx)
-	if err != nil {
-		return nil, err
-	}
-
 	resp, err := p.service.GoObjectBuilderService().ObjectBuilder().GetListAggregation(ctx, &nb.CommonMessage{
 		TableSlug: action.TableSlug,
-		ProjectId: builderID,
+		ProjectId: action.ResourceEnvID,
 		Data:      structData,
 	})
 	if err != nil {
@@ -318,11 +316,6 @@ func buildWhereClause(filters map[string]any) string {
 // ============================================================================
 
 func (p *ChatProcessor) handleDatabaseMutation(ctx context.Context, action *models.DatabaseActionRequest) (*models.ParsedClaudeResponse, error) {
-	builderID, err := p.resolveBuilderResourceID(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("resolve builder ID: %w", err)
-	}
-
 	affectedCount := 1
 	if action.Action != "create" && len(action.Filters) > 0 {
 		if data, err := p.executeDatabaseRead(ctx, &models.DatabaseActionRequest{
@@ -370,7 +363,7 @@ func (p *ChatProcessor) handleDatabaseMutation(ctx context.Context, action *mode
 		Data:               action.Data,
 		AffectedCount:      affectedCount,
 		Description:        confirmationPrompt,
-		ProjectID:          builderID,
+		ProjectID:          action.ResourceEnvID,
 		ResourceEnvID:      p.resourceEnvID,
 		SuccessMessage:     successMessage,
 		CancelMessage:      cancelMessage,
@@ -487,11 +480,11 @@ func executeMutation(ctx context.Context, action *models.PendingAction, service 
 // SCHEMA — cached per ChatProcessor instance lifecycle
 // ============================================================================
 
-func (p *ChatProcessor) getProjectSchemaCached(ctx context.Context) ([]models.TableSchema, error) {
+func (p *ChatProcessor) getProjectSchemaCached(ctx context.Context, resourceEnvId string) ([]models.TableSchema, error) {
 	if p.schemaCache != nil && time.Now().Before(p.schemaCachedAt.Add(schemaCacheTTL)) {
 		return p.schemaCache, nil
 	}
-	schema, err := p.fetchProjectSchema(ctx)
+	schema, err := p.fetchProjectSchema(ctx, resourceEnvId)
 	if err != nil {
 		return nil, err
 	}
@@ -500,18 +493,13 @@ func (p *ChatProcessor) getProjectSchemaCached(ctx context.Context) ([]models.Ta
 	return schema, nil
 }
 
-func (p *ChatProcessor) fetchProjectSchema(ctx context.Context) ([]models.TableSchema, error) {
+func (p *ChatProcessor) fetchProjectSchema(ctx context.Context, resourceEnvId string) ([]models.TableSchema, error) {
 	if p.mcpProjectID == "" {
 		return nil, fmt.Errorf("no backend project associated with this chat")
 	}
 
-	builderID, err := p.resolveBuilderResourceID(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("resolve builder ID: %w", err)
-	}
-
 	tablesResp, err := p.service.GoObjectBuilderService().Table().GetAll(ctx, &nb.GetAllTablesRequest{
-		ProjectId: builderID,
+		ProjectId: resourceEnvId,
 		Limit:     100,
 	})
 	if err != nil {
@@ -534,7 +522,7 @@ func (p *ChatProcessor) fetchProjectSchema(ctx context.Context) ([]models.TableS
 		}) {
 			fieldsResp, err := p.service.GoObjectBuilderService().Field().GetAll(ctx, &nb.GetAllFieldsRequest{
 				TableId:   t.GetId(),
-				ProjectId: builderID,
+				ProjectId: resourceEnvId,
 				Limit:     200,
 			})
 			var fields []models.FieldSchema

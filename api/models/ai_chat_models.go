@@ -149,6 +149,7 @@ type (
 		NeedsMoreData    bool           `json:"needs_more_data"`
 		QueryPlan        string         `json:"query_plan"`
 		Reply            string         `json:"reply"`
+		ResourceEnvID    string         `json:"resource_env_id"`
 
 		SuccessMessage string `json:"success_message"` // что написать в чат после апрува
 		CancelMessage  string `json:"cancel_message"`  // что написать при отмене
