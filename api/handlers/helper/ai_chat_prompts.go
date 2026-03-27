@@ -692,7 +692,6 @@ These files exist in the template. Skip them unless you need to customize:
 - src/lib/apiUtils.ts (extractList, extractCount, extractSingle — already in scaffold, do NOT regenerate)
 - src/hooks/useApi.ts (useApiQuery, useApiMutation, useApiInfiniteQuery)
 - src/hooks/useAppForm.ts (react-hook-form + zod wrapper)
-- src/store/auth.store.ts (Zustand auth store with persist)
 - src/types/common.ts (PaginationParams, ApiResponse, NavItem, TableColumn, SelectOption, etc.)
 - src/components/shared/AppProviders.tsx, AppMap.tsx
 
@@ -721,6 +720,10 @@ These are the ONLY pre-built components in the scaffold:
 
 MISSING COMPONENT RULE:
 If you need ANY component not listed above — CREATE it as src/components/ui/{component-name}.tsx, style it using project CSS variables, and export with named exports matching shadcn/ui patterns. Never import from @/components/ui/* without the file existing.
+COMPONENT FILE NAMING (CRITICAL — build breaks if violated):
+- Always create component files with lowercase filename: button.tsx, data-table.tsx, user-card.tsx
+- Import must exactly match the filename: import { Button } from '@/components/ui/button'
+- Never mix cases: if file is button.tsx — import from '@/components/ui/button', not '@/components/ui/Button'
 
 FLOATING/OVERLAY COMPONENT BACKGROUND RULE (CRITICAL — NEVER VIOLATE):
 Any component that floats above the page (Popover, Tooltip content, ContextMenu,
@@ -997,6 +1000,14 @@ Misc:
   Megaphone, Radio, Rss,
   Zap, Flame, Sparkles, Wand2,
   ThumbsUp, ThumbsDown
+
+
+JSX RENDER SAFETY (CRITICAL — white screen if violated):
+- Never render objects or arrays directly in JSX
+- Always extract primitive values: {item.name}, {item.id}, {String(item.status)}
+- For nullable values use: {item.name ?? '—'}
+- For related/nested objects always access the field: {item.client_type?.name} not {item.client_type}
+- If a field might be an object (foreign key relation) — always render a specific property, never the field itself
 
 ====================================
 BEFORE OUTPUTTING JSON, VERIFY:

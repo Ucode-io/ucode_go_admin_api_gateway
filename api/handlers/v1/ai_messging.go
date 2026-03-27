@@ -695,6 +695,21 @@ func (p *ChatProcessor) callSonnetCoderWithTemplate(ctx context.Context, clarifi
 	}
 	apiCtx.WriteString("\nUse this UI Structure provided by the Architect:\n" + plan.UIStructure + "\n")
 
+	templateFiles := GetTemplate("admin_panel")
+	var templateCtx strings.Builder
+
+	if len(templateFiles) > 0 {
+		templateCtx.WriteString("\n====================================\nBASE TEMPLATE FILES\n====================================\n")
+		templateCtx.WriteString("Below are the existing files from the 'admin_panel' template.\n")
+		templateCtx.WriteString("CRITICAL: Build your new features UPON these files. Modify them if necessary (e.g., adding routes, updating imports), but do NOT ignore their existing structure and styling.\n")
+
+		for _, f := range templateFiles {
+			templateCtx.WriteString(fmt.Sprintf("\n### FILE: %s\n```\n%s\n```\n", f.Path, f.Content))
+		}
+	}
+
+	finalPrompt := clarified + "\n\n" + apiCtx.String() + "\n\n" + templateCtx.String()
+
 	response, err := helper.CallAnthropicAPI(
 		p.baseConf,
 		models.AnthropicRequest{
@@ -704,7 +719,7 @@ func (p *ChatProcessor) callSonnetCoderWithTemplate(ctx context.Context, clarifi
 			Messages: []models.ChatMessage{
 				{
 					Role:    "user",
-					Content: buildContentBlocksWithImages(clarified+"\n\n"+apiCtx.String(), imageURLs),
+					Content: buildContentBlocksWithImages(finalPrompt, imageURLs),
 				},
 			},
 		},
@@ -727,7 +742,6 @@ func (p *ChatProcessor) callSonnetCoderWithTemplate(ctx context.Context, clarifi
 		return nil, fmt.Errorf("claude returned empty project data")
 	}
 
-	templateFiles := GetTemplate("admin_panel")
 	if templateFiles != nil {
 		parsed.Project.Files = MergeTemplateWithAIFiles(templateFiles, parsed.Project.Files)
 		log.Printf("[TEMPLATE MERGE] template=%d ai=%d total=%d",
