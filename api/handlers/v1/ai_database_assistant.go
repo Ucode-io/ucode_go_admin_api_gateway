@@ -388,19 +388,28 @@ func executeMutation(ctx context.Context, action *models.PendingAction, service 
 		return nil, fmt.Errorf("table_slug is required")
 	}
 
+	// For compatibility with Items service patterns, ensure we use ResourceEnvID as ProjectId
+	effectiveProjectID := action.ResourceEnvID
+	if effectiveProjectID == "" {
+		effectiveProjectID = action.ProjectID
+	}
+
 	switch action.Action {
 	case "create":
 		data := action.Data
 		if data == nil {
 			data = map[string]any{}
 		}
+		// Inject consistency fields for consistency with V2 handlers
+		data["company_service_project_id"] = action.ProjectID
+
 		structData, err := helperFunc.ConvertMapToStruct(data)
 		if err != nil {
 			return nil, fmt.Errorf("convert create data: %w", err)
 		}
 		resp, err := service.GoObjectBuilderService().Items().Create(ctx, &nb.CommonMessage{
 			TableSlug: action.TableSlug,
-			ProjectId: action.ProjectID,
+			ProjectId: effectiveProjectID,
 			Data:      structData,
 		})
 		if err != nil {
@@ -420,13 +429,20 @@ func executeMutation(ctx context.Context, action *models.PendingAction, service 
 		for k, v := range action.Filters {
 			merged[k] = v
 		}
+		// Ensure id is present if guid is provided for compatibility with backend patterns
+		if guid, ok := merged["guid"]; ok {
+			merged["id"] = guid
+		}
+		// Inject consistency fields
+		merged["company_service_project_id"] = action.ProjectID
+
 		structData, err := helperFunc.ConvertMapToStruct(merged)
 		if err != nil {
 			return nil, fmt.Errorf("convert update data: %w", err)
 		}
 		resp, err := service.GoObjectBuilderService().Items().Update(ctx, &nb.CommonMessage{
 			TableSlug: action.TableSlug,
-			ProjectId: action.ProjectID,
+			ProjectId: effectiveProjectID,
 			Data:      structData,
 		})
 		if err != nil {
@@ -442,13 +458,20 @@ func executeMutation(ctx context.Context, action *models.PendingAction, service 
 		if filters == nil {
 			filters = map[string]any{}
 		}
+		// For compatibility with Items service patterns, map guid to id
+		if guid, ok := filters["guid"]; ok {
+			filters["id"] = guid
+		}
+		// Inject consistency fields
+		filters["company_service_project_id"] = action.ProjectID
+
 		structData, err := helperFunc.ConvertMapToStruct(filters)
 		if err != nil {
 			return nil, fmt.Errorf("convert delete filters: %w", err)
 		}
 		if _, err = service.GoObjectBuilderService().Items().Delete(ctx, &nb.CommonMessage{
 			TableSlug: action.TableSlug,
-			ProjectId: action.ProjectID,
+			ProjectId: effectiveProjectID,
 			Data:      structData,
 		}); err != nil {
 			return nil, fmt.Errorf("delete failed: %w", err)
