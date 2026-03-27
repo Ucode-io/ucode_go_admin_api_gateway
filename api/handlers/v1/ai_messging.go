@@ -22,11 +22,11 @@ import (
 )
 
 const (
-	timeoutHaiku     = 90 * time.Second
-	timeoutArchitect = 720 * time.Second
-	timeoutInspector = 180 * time.Second
-	timeoutPlanner   = 180 * time.Second
-	timeoutCoder     = 720 * time.Second
+	timeoutHaiku     = 180 * time.Second
+	timeoutArchitect = 900 * time.Second
+	timeoutInspector = 300 * time.Second
+	timeoutPlanner   = 300 * time.Second
+	timeoutCoder     = 900 * time.Second
 )
 
 type ChatProcessor struct {
