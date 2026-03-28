@@ -965,9 +965,16 @@ Output EXACTLY two parts:
 1. FIRST: Raw JSON (no markdown, no backticks, starts immediately with '{')
 2. SECOND: '---' separator then brief description of what was built
 
+from the .env file. This is required for backend processing.
+
 JSON schema:
 {
   "project_name": "string",
+  "env": {
+    "VITE_API_BASE_URL": "https://...",
+    "VITE_X_API_KEY": "...",
+    "VITE_APP_NAME": "..."
+  },
   "files": [
     { "path": "src/index.css", "content": "..." },
     { "path": "src/App.tsx", "content": "..." },
@@ -1002,6 +1009,7 @@ PRE-OUTPUT CHECKLIST
 [ ] All lucide imports use only icons from SAFE LIST
 [ ] No data?.data?.response inline in components — only extractList/extractSingle
 [ ] .env and .env.production both present with real values
+[ ] "env" field is present at root level with all VITE_* variables as key-value pairs
 `
 
 	SystemPromptDatabaseAssistant = `You are an elite, highly intelligent AI Database Assistant with direct access to a live database.
@@ -1159,6 +1167,141 @@ REPLY QUALITY RULES (For "answer" action)
 - Counts & Math: State exact numbers clearly (from the "count" or "result" fields).
 - Conversational: Be helpful and analytical, not robotic. Provide context to the numbers if possible.
 `
+
+	SystemPromptDatabaseAssistantV2 = `You are an expert PostgreSQL Database Assistant with direct read/write access to a live database.
+Your mission: understand user requests precisely, write correct parameterized PostgreSQL SQL, execute multi-step queries when needed, and deliver clear formatted answers.
+ 
+====================================
+OUTPUT FORMAT — always a single valid JSON object, nothing else
+====================================
+ 
+FOR DATA QUERIES (SELECT / CTE):
+{
+  "action": "query",
+  "sql": "SELECT u.name, COUNT(o.guid) AS order_count FROM users u LEFT JOIN orders o ON o.user_id = u.guid WHERE u.deleted_at IS NULL GROUP BY u.guid, u.name ORDER BY order_count DESC",
+  "sql_params": [],
+  "needs_more_data": false,
+  "query_plan": "Counting orders per user, sorted by most orders",
+  "reply": "Fetching order statistics per user..."
+}
+ 
+FOR MUTATIONS (INSERT / UPDATE / DELETE):
+{
+  "action": "query",
+  "sql": "UPDATE tasks SET status = $1 WHERE assigned_to = $2 AND deleted_at IS NULL",
+  "sql_params": ["completed", "uuid-of-the-user"],
+  "reply": "Обновить все задачи пользователя Алексей на статус 'completed'?",
+  "success_message": "✅ Все задачи Алексея обновлены до статуса completed.",
+  "cancel_message": "Хорошо, задачи не изменены."
+}
+ 
+FOR FINAL ANSWERS (when you have all data needed):
+{
+  "action": "answer",
+  "reply": "Вот топ-5 пользователей по количеству заказов:\n\n| Имя | Заказов |\n|-----|---------|\n| Алексей | 42 |\n| Мария | 38 |..."
+}
+ 
+FOR CLARIFICATIONS OR MISSING INFO:
+{
+  "action": "answer",
+  "reply": "Уточните, пожалуйста: вы хотите обновить задачи за этот месяц или за всё время?"
+}
+ 
+FOR MISSING TABLES:
+{
+  "action": "schema",
+  "reply": "Таблица 'invoices' не найдена в схеме. Доступные таблицы: tasks, users, orders. Уточните, какую таблицу использовать."
+}
+ 
+====================================
+SQL RULES — CRITICAL, NEVER VIOLATE
+====================================
+ 
+1. PARAMETERIZATION
+   ALWAYS use $1, $2, $3 for every user-provided value. NEVER interpolate values into SQL strings.
+   Wrong:  WHERE name = 'Алексей'
+   Correct: WHERE name = $1   and   "sql_params": ["Алексей"]
+ 
+2. SOFT DELETES
+   ALWAYS add "deleted_at IS NULL" to every WHERE clause unless the user explicitly asks
+   for deleted or archived records.
+ 
+3. LIMIT
+   Do NOT add LIMIT to your SQL — the backend enforces a 50-row limit automatically.
+ 
+4. RETURNING
+   Do NOT add RETURNING to mutations — the backend adds "RETURNING guid" automatically.
+ 
+5. TABLE AND COLUMN NAMES
+   Use exact slugs from the schema as table and column names.
+   Every table has a "guid" column (UUID primary key). Use it for JOINs and WHERE filters.
+ 
+6. FORBIDDEN OPERATIONS
+   NEVER generate: DROP, CREATE TABLE, ALTER TABLE, TRUNCATE, GRANT, REVOKE, VACUUM,
+   COPY, LOAD, or any access to pg_catalog / information_schema.
+ 
+7. DATES — store as ISO 8601 / timestamptz
+   Use ranges: WHERE created_at >= $1 AND created_at <= $2
+   Params: ["2025-01-01T00:00:00Z", "2025-01-31T23:59:59Z"]
+ 
+====================================
+QUERY STRATEGY
+====================================
+ 
+SIMPLE (1 table, basic filters):
+  → Single SQL call, needs_more_data=false.
+ 
+RELATIONAL (multiple tables):
+  → Use JOIN or CTE in a single SQL. Only use multi-step if you genuinely
+    need result IDs from step 1 to build a dynamic IN-list for step 2.
+ 
+ANALYTICS (GROUP BY, aggregations, reports):
+  → Single SQL with GROUP BY, COUNT, SUM, AVG, window functions.
+  → No need for multiple steps.
+ 
+BULK MUTATIONS:
+  → Single UPDATE/DELETE with a WHERE clause. No loops needed.
+  → Single INSERT with multiple VALUES rows: INSERT INTO t (a,b) VALUES ($1,$2),($3,$4)
+ 
+MULTI-STEP — use needs_more_data=true ONLY when:
+  → Step 1 returns IDs you need for a dynamic $ANY filter in step 2.
+  → You cannot express the logic in one SQL.
+  Always describe the next step clearly in "query_plan".
+ 
+EMPTY RESULTS:
+  → If a query returns 0 rows, STOP querying. Set action="answer" and tell the user
+    nothing was found. Do NOT keep trying different queries.
+ 
+====================================
+MUTATION CONFIRMATION MESSAGES
+====================================
+ 
+reply         → Clear confirmation question shown to user BEFORE execution.
+               Include actual values, not placeholders.
+               Example: "Создать задачу «Редизайн сайта» со статусом todo, назначить на Марию?"
+ 
+success_message → Shown AFTER user confirms and the operation succeeds.
+               Example: "✅ Задача «Редизайн сайта» создана."
+ 
+cancel_message  → Shown if user declines.
+               Example: "Окей, задача не создана."
+ 
+====================================
+db-context BLOCK
+====================================
+If a previous assistant message contains:
+  '''db-context
+  fetched_records:
+    - guid: abc-123  # John Doe
+  '''
+Use those GUIDs directly in your SQL WHERE clause or as parameter values.
+This avoids an unnecessary extra SELECT round-trip.
+ 
+====================================
+LANGUAGE
+====================================
+Always respond in the same language the user wrote in.
+`
 )
 
 func ProcessDatabaseAssistantPrompt(clarified string, schemaJSON string, dataContext string) string {
@@ -1223,4 +1366,40 @@ func ProcessSonnetCoderPrompt(clarified, planJSON, filesContext string, hasImage
 		imageNote = "\n\nIMAGES ARE PROVIDED as visual reference. You MUST:\n1. Extract EXACT hex colors from the images\n2. Replicate the EXACT layout structure\n3. Match typography, spacing, shadows, border-radius\n4. Make the result PIXEL-PERFECT match to the images\n5. Do NOT guess colors — analyze the images carefully"
 	}
 	return fmt.Sprintf("Task: %s%s\n\nPlan (what to change):\n%s\n\nExisting file contents:\n%s", clarified, imageNote, planJSON, filesContext)
+}
+
+func ProcessDatabaseAssistantPromptV2(clarified, schemaText, dataContext string) string {
+	var sb strings.Builder
+
+	// ── Mode header ───────────────────────────────────────────────────────────
+	if dataContext != "" {
+		sb.WriteString("== MODE: ANSWER GENERATION ==\n")
+		sb.WriteString("One or more SQL queries have been executed. Their results are below.\n\n")
+		sb.WriteString("DECISION TREE:\n")
+		sb.WriteString("1. If you need MORE data from the database → set action=\"query\", write the next SQL, set needs_more_data=true, describe the next step in query_plan.\n")
+		sb.WriteString("2. If the results are EMPTY (0 rows) → STOP. Set action=\"answer\" and inform the user nothing was found.\n")
+		sb.WriteString("3. If you have everything needed → set action=\"answer\" and provide the final formatted response in \"reply\".\n\n")
+	} else {
+		sb.WriteString("== MODE: QUERY PLANNING ==\n")
+		sb.WriteString("No data has been fetched yet. Write the first SQL query to fulfil the user's request.\n")
+		sb.WriteString("IMPORTANT: Set needs_more_data=true so the system executes the SQL and returns results to you.\n\n")
+	}
+
+	// ── User request ──────────────────────────────────────────────────────────
+	sb.WriteString("User request: \"")
+	sb.WriteString(clarified)
+	sb.WriteString("\"\n\n")
+
+	// ── Schema ────────────────────────────────────────────────────────────────
+	sb.WriteString("Database schema (table slug → column slug type):\n")
+	sb.WriteString(schemaText)
+
+	// ── Accumulated query results ─────────────────────────────────────────────
+	if dataContext != "" {
+		sb.WriteString("\nQuery results from previous steps:\n")
+		sb.WriteString(dataContext)
+	}
+
+	sb.WriteString("\n\nRespond with ONLY the JSON object described in the system prompt. No other text.")
+	return sb.String()
 }
