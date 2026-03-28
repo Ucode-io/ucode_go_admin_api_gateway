@@ -305,6 +305,7 @@ func (p *ChatProcessor) routeAndProcess(ctx context.Context, req models.NewMessa
 	}
 
 	switch haikuResult.Intent {
+
 	case "clarify":
 		return &models.ParsedClaudeResponse{Description: haikuResult.Reply}, nil
 
