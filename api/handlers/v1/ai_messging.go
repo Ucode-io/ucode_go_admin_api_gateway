@@ -292,7 +292,7 @@ func (p *ChatProcessor) routeAndProcess(ctx context.Context, req models.NewMessa
 		}
 	}
 
-	haikuResult, err := p.callHaikuRouter(req.Content, fileGraphJSON, hasImages)
+	haikuResult, err := p.callHaikuRouter(req.Content, fileGraphJSON, hasImages, chatHistory)
 	if err != nil {
 		return nil, err
 	}
@@ -406,16 +406,14 @@ func (p *ChatProcessor) handleNewProjectPhase(ctx context.Context, clarified str
 // CLAUDE API INTEGRATIONS
 // ============================================================================
 
-func (p *ChatProcessor) callHaikuRouter(userPrompt, fileGraphJSON string, hasImages bool) (*models.HaikuRoutingResult, error) {
-	content := helper.ProcessHaikuPrompt(userPrompt, fileGraphJSON, hasImages)
+func (p *ChatProcessor) callHaikuRouter(userPrompt, fileGraphJSON string, hasImages bool, chatHistory []models.ChatMessage) (*models.HaikuRoutingResult, error) {
+	historyText := buildHistoryText(chatHistory)
+
+	content := helper.ProcessHaikuPrompt(userPrompt, fileGraphJSON, hasImages, historyText)
 	messages := []models.ChatMessage{
 		{
-			Role: "user",
-			Content: []models.ContentBlock{
-				{
-					Type: "text", Text: content,
-				},
-			},
+			Role:    "user",
+			Content: []models.ContentBlock{{Type: "text", Text: content}},
 		},
 	}
 	response, err := helper.CallAnthropicAPI(
@@ -1104,5 +1102,26 @@ func buildDesignForceBlock(clarified string, hasImages bool) string {
 	sb.WriteString("--background MUST NOT be 0 0% 100% pure white UNLESS image explicitly shows white background.\n")
 	sb.WriteString("====================================\n\n")
 
+	return sb.String()
+}
+
+func buildHistoryText(history []models.ChatMessage) string {
+	if len(history) == 0 {
+		return ""
+	}
+	start := 0
+	if len(history) > 6 {
+		start = len(history) - 6
+	}
+	var sb strings.Builder
+	for _, msg := range history[start:] {
+		var text string
+		for _, block := range msg.Content {
+			if block.Type == "text" {
+				text += block.Text
+			}
+		}
+		sb.WriteString(fmt.Sprintf("[%s]: %s\n", strings.ToUpper(msg.Role), text))
+	}
 	return sb.String()
 }
