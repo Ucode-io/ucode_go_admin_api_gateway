@@ -610,27 +610,47 @@ RULE 0: VISUAL IDENTITY & REFERENCE ADAPTATION
 ====================================
 Every project must be visually distinct. 
 
+RULE 0.5: IMAGE COLOR EXTRACTION (MANDATORY)
+	If an image is attached to this request:
+	1. Scan the image for: background color, sidebar/panel color, primary/accent color, text color
+	2. Convert each color to HSL format
+	3. These HSL values MUST be used in src/index.css — no other source takes priority
+	4. Do NOT use the domain color map when image is present
+	5. The generated UI must visually match the image's color palette
+
+Example: image shows dark navy sidebar #1a2332, green buttons #22c55e →
+--sidebar-background: 215 35% 15%;
+--primary: 142 71% 45%;
+
 1. REFERENCE FIRST: If the user mentions a reference (e.g., "amoCRM", "Stripe", "Linear"), PRIORITIZE their design language over the domain map.
    - For amoCRM: Use a very narrow dark-blue/grey left sidebar, light-grey background for the workspace (#f4f7f9), and "floating" white cards for lead lists. Use specific status colors (orange, blue, green).
    - For Linear: Use dark themes, very tight borders (1px), and high contrast.
 
-2. STYLE ANALYSIS STEP: Before generating code, mentally define:
-   - Layout: (e.g., Dual Sidebar for CRM, Top-nav for Analytics, Minimalist for SaaS).
-   - Palette: (Specific HSL variables).
-   - Components: (e.g., rounded buttons for friendly apps, sharp corners for enterprise).
+2.BEFORE writing any file, you MUST decide and commit:
+	- chosen_palette: "e.g. Deep Navy + Emerald"  
+	- primary_hsl: "e.g. 160 84% 39%"
+	- sidebar_style: "e.g. dark / light / colored
 
-3. DOMAIN MAP (Only if NO reference is provided):
-   - CRM → Emerald/Teal (160 84% 39%)
-   - Finance → Slate/Indigo (224 71% 45%)
-   - Logistics → Amber (38 92% 50%)
-   [Keep your other colors, but treat them as FALLBACKS, not mandates]
+====================================
+IMAGE COLOR EXTRACTION (CRITICAL)
+====================================
+If an image is provided:
+1. Extract dominant colors: background, sidebar, primary, accent, text
+2. Convert to HSL values
+3. Use THESE colors in src/index.css — ignore domain color map
+4. UI must visually match the image palette
+
+If a reference site is mentioned (e.g. "like amoCRM"):
+- Use that site's exact color language
+
+If user specified colors explicitly:
+- Use exactly what user said
 
 ====================================
 CRITICAL: THEME FIRST
 ====================================
 src/index.css MUST be the FIRST file in your "files" array.
 Replace ALL CSS variable values with your chosen brand color palette.
-The template has real default values — you MUST override them with something unique.
 
 Rules:
 - Keep variable NAMES fixed (--primary, --sidebar-background, etc.)
@@ -646,67 +666,6 @@ Rules:
 - For "Enterprise": use --radius: 0rem.
 - IMPORTANT: Ensure --popover and --card variables are explicitly defined as pure HSL. 
   Example: '--popover: 0 0% 100%;' (white).
-
-Example — violet CRM with dark sidebar:
-:root {
-  --background: 0 0% 100%;
-  --foreground: 258 47% 11%;
-  --card: 0 0% 100%;
-  --card-foreground: 258 47% 11%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 258 47% 11%;
-  --primary: 258 90% 62%;
-  --primary-foreground: 0 0% 100%;
-  --secondary: 258 30% 96%;
-  --secondary-foreground: 258 47% 20%;
-  --muted: 258 20% 96%;
-  --muted-foreground: 258 15% 50%;
-  --accent: 258 30% 94%;
-  --accent-foreground: 258 47% 20%;
-  --destructive: 0 84% 60%;
-  --destructive-foreground: 0 0% 100%;
-  --border: 258 20% 91%;
-  --input: 258 20% 91%;
-  --ring: 258 90% 62%;
-  --sidebar-background: 258 47% 10%;
-  --sidebar-foreground: 210 40% 95%;
-  --sidebar-primary: 258 90% 68%;
-  --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 258 47% 17%;
-  --sidebar-accent-foreground: 210 40% 95%;
-  --sidebar-border: 258 47% 17%;
-  --sidebar-ring: 258 90% 62%;
-  --radius: 0.5rem;
-  --card-shadow: 0 1px 3px rgba(0,0,0,0.08);
-}
-
-====================================
-TEMPLATE SCAFFOLD — DO NOT REGENERATE THESE FILES
-====================================
-These files exist in the template. SKIP them — do not include in your output:
-- package.json, vite.config.ts, tsconfig.json, tsconfig.node.json
-- tailwind.config.js, postcss.config.js, index.html, components.json
-- src/main.tsx
-- src/config/env.ts
-- src/config/axios.ts
-- src/config/queryClient.ts
-- src/lib/utils.ts (cn, formatDate, formatCurrency, formatNumber, debounce, getInitials, truncate, generateId, sleep)
-- src/lib/apiUtils.ts (extractList, extractCount, extractSingle, getRelationLabel)
-- src/hooks/useApi.ts (apiFetch, useApiQuery, useApiMutation, useApiInfiniteQuery)
-- src/hooks/useAppForm.ts
-- src/types/common.ts
-- src/components/shared/AppProviders.tsx
-- src/components/shared/AppMap.tsx
-
-NEVER regenerate package.json. All needed npm packages are already installed (see AVAILABLE PACKAGES below).
-
-MUST GENERATE — NOT IN TEMPLATE:
-- src/index.css (MUST be first in files array, MUST override default theme)
-- src/App.tsx
-- src/components/layout/ (Sidebar, Header, Layout — your custom design)
-- src/features/{name}/types.ts, api.ts, components/
-- src/pages/{Name}Page.tsx
-- .env and .env.production
 
 ====================================
 AVAILABLE NPM PACKAGES (already installed — use freely, never add to package.json)
@@ -971,8 +930,9 @@ A single invalid escape crashes the build.
 PRE-OUTPUT CHECKLIST
 ====================================
 [ ] src/index.css is the FIRST file in the array
-[ ] --primary is NOT 221 83% 53% (default blue)
-[ ] --primary matches domain color from the map
+[ ] --primary is NOT any of: 243 75% 59%, 221 83% 53%, 210 40% 98% (these are template defaults — forbidden)
+[ ] --background is NOT 0 0% 100% pure white UNLESS image/reference explicitly shows white bg
+[ ] All 6 sidebar variables are unique to chosen palette, not copied from template
 [ ] No LoginPage, ProtectedRoute, useAuth, auth.store anywhere
 [ ] No logout button in sidebar
 [ ] No package.json in generated files

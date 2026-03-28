@@ -725,14 +725,17 @@ func (p *ChatProcessor) callSonnetCoderWithTemplate(ctx context.Context, clarifi
 	if len(templateFiles) > 0 {
 		templateCtx.WriteString("\n====================================\nBASE TEMPLATE FILES\n====================================\n")
 		templateCtx.WriteString("Below are the existing files from the 'admin_panel' template.\n")
-		templateCtx.WriteString("CRITICAL: Build your new features UPON these files. Modify them if necessary (e.g., adding routes, updating imports), but do NOT ignore their existing structure and styling.\n")
+		templateCtx.WriteString("These are BASE TEMPLATE files for API/config/hooks only.\n")
+		templateCtx.WriteString("USE only: hooks, axios config, queryClient, utility functions, types.\n")
+		templateCtx.WriteString("IGNORE AND REGENERATE: src/index.css and src/App.tsx — output them fully with your own unique design.\n")
+		templateCtx.WriteString("NEVER copy colors, layout or structure from template files — only copy API/utility logic.\n")
 
 		for _, f := range templateFiles {
 			templateCtx.WriteString(fmt.Sprintf("\n### FILE: %s\n```\n%s\n```\n", f.Path, f.Content))
 		}
 	}
 
-	designForce := buildDesignForceBlock(clarified)
+	designForce := buildDesignForceBlock(clarified, len(imageURLs) > 0)
 
 	finalPrompt := designForce + clarified + "\n\n" + apiCtx.String() + "\n\n" + templateCtx.String()
 	response, err := helper.CallAnthropicAPI(
@@ -765,13 +768,6 @@ func (p *ChatProcessor) callSonnetCoderWithTemplate(ctx context.Context, clarifi
 
 	if parsed.Project == nil {
 		return nil, fmt.Errorf("claude returned empty project data")
-	}
-
-	if templateFiles != nil {
-		parsed.Project.Files = MergeTemplateWithAIFiles(templateFiles, parsed.Project.Files)
-		log.Printf("[TEMPLATE MERGE] template=%d ai=%d total=%d",
-			len(templateFiles), len(parsed.Project.Files)-len(templateFiles), len(parsed.Project.Files),
-		)
 	}
 
 	log.Printf("[NEW PROJECT WITH TEMPLATE] total files: %d", len(parsed.Project.Files))
@@ -1051,12 +1047,12 @@ func buildMessagesWithHistory(history []models.ChatMessage, contentBlocks []mode
 	return messages
 }
 
-// a high-priority instruction block that appears BEFORE the template context.
-func buildDesignForceBlock(clarified string) string {
-	lower := strings.ToLower(clarified)
+func buildDesignForceBlock(clarified string, hasImages bool) string {
+	var (
+		lower     = strings.ToLower(clarified)
+		reference string
+	)
 
-	// Detect explicit reference platform
-	var reference string
 	platforms := []string{
 		"planfact", "linear", "notion", "stripe", "salesforce", "shopify",
 		"amocrm", "amo crm", "jira", "figma", "asana", "trello", "monday",
@@ -1074,7 +1070,17 @@ func buildDesignForceBlock(clarified string) string {
 	sb.WriteString("DESIGN DIRECTIVE — HIGHEST PRIORITY (READ BEFORE ANYTHING ELSE)\n")
 	sb.WriteString("====================================\n")
 
-	if reference != "" {
+	// НОВОЕ: image блок — самый высокий приоритет
+	if hasImages {
+		sb.WriteString("⚠️ AN IMAGE HAS BEEN PROVIDED IN THIS REQUEST.\n")
+		sb.WriteString("You MUST extract colors directly from the image:\n")
+		sb.WriteString("- Identify: background color, sidebar color, primary/accent color, text color\n")
+		sb.WriteString("- Convert each to HSL format\n")
+		sb.WriteString("- Use THESE HSL values in src/index.css — nothing else takes priority\n")
+		sb.WriteString("- Do NOT use domain color map or reference platform colors\n")
+		sb.WriteString("- The UI must visually match the image palette\n")
+		sb.WriteString("This overrides domain map, reference platforms, and everything below.\n\n")
+	} else if reference != "" {
 		sb.WriteString(fmt.Sprintf(
 			"The user explicitly requested UI style: \"%s\"\n"+
 				"You MUST replicate its exact visual design:\n"+
@@ -1094,7 +1100,8 @@ func buildDesignForceBlock(clarified string) string {
 	}
 
 	sb.WriteString("MANDATORY: src/index.css MUST be in your output with ALL [AI: Generate HSL] placeholders replaced with real HSL values.\n")
-	sb.WriteString("The --primary color MUST NOT be 221 83% 53% (default blue).\n")
+	sb.WriteString("The --primary color MUST NOT be 221 83% 53% or 243 75% 59% (both are forbidden defaults).\n")
+	sb.WriteString("--background MUST NOT be 0 0% 100% pure white UNLESS image explicitly shows white background.\n")
 	sb.WriteString("====================================\n\n")
 
 	return sb.String()

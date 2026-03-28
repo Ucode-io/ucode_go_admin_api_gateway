@@ -41,16 +41,8 @@
       "content": "import path from 'path';\nimport { defineConfig } from 'vite';\nimport react from '@vitejs/plugin-react-oxc';\n\nexport default defineConfig({\n  plugins: [react()],\n  resolve: {\n    alias: {\n      '@': path.resolve(__dirname, './src'),\n    },\n  },\n});\n"
     },
     {
-      "path": "src/index.css",
-      "content": "@tailwind base;\n@tailwind components;\n@tailwind utilities;\n\n@layer base {\n  :root {\n    /* AI: GENERATE UNIQUE THEME BASED ON CLIENT REQUEST (e.g. amoCRM colors) */\n    --background: 0 0% 100%;\n    --foreground: 222 47% 11%;\n    --card: 0 0% 100%;\n    --card-foreground: 222 47% 11%;\n    --popover: 0 0% 100%;\n    --popover-foreground: 222 47% 11%;\n    --primary: 243 75% 59%;\n    --primary-foreground: 0 0% 100%;\n    --secondary: 210 40% 96.1%;\n    --secondary-foreground: 222.2 47.4% 11.2%;\n    --muted: 210 40% 96.1%;\n    --muted-foreground: 215.4 16.3% 46.9%;\n    --accent: 210 40% 96.1%;\n    --accent-foreground: 222.2 47.4% 11.2%;\n    --destructive: 0 84.2% 60.2%;\n    --destructive-foreground: 210 40% 98%;\n    --border: 214.3 31.8% 91.4%;\n    --input: 214.3 31.8% 91.4%;\n    --ring: 243 75% 59%;\n    --radius: 0.5rem;\n    --sidebar-background: 222 47% 11%;\n    --sidebar-foreground: 210 40% 98%;\n    --sidebar-primary: 243 75% 59%;\n    --sidebar-primary-foreground: 0 0% 100%;\n    --sidebar-accent: 217 32% 17%;\n    --sidebar-accent-foreground: 210 40% 98%;\n    --sidebar-border: 217 32% 17%;\n    --sidebar-ring: 243 75% 59%;\n  }\n\n  .dark {\n    /* AI: GENERATE UNIQUE DARK THEME IF NEEDED */\n    --background: 222 47% 4%;\n    --foreground: 210 40% 98%;\n    --card: 222 47% 4%;\n    --card-foreground: 210 40% 98%;\n    --popover: 222 47% 4%;\n    --popover-foreground: 210 40% 98%;\n    --border: 217 32% 17%;\n    --input: 217 32% 17%;\n    --sidebar-background: 222 47% 4%;\n    --sidebar-border: 217 32% 17%;\n  }\n}\n\n@layer base {\n  * {\n    @apply border-border;\n  }\n  body {\n    @apply bg-background text-foreground;\n    font-feature-settings: \"rlig\" 1, \"calt\" 1;\n  }\n}\n"
-    },
-    {
       "path": "src/main.tsx",
       "content": "import ReactDOM from 'react-dom/client';\nimport App from './App';\nimport './index.css';\n\nReactDOM.createRoot(document.getElementById('root')!).render(\n  <App />\n);\n"
-    },
-    {
-      "path": "src/App.tsx",
-      "content": "import { BrowserRouter, Routes, Route } from 'react-router-dom';\nimport { AppProviders } from '@/components/shared/AppProviders';\n\nexport default function App() {\n  return (\n    <BrowserRouter>\n      <AppProviders>\n        <Routes>\n          {/* AI: Define all routes here. No hardcoded redirects to allow custom entry points. */}\n        </Routes>\n      </AppProviders>\n    </BrowserRouter>\n  );\n}\n"
     },
     {
       "path": "src/hooks/useApi.ts",
