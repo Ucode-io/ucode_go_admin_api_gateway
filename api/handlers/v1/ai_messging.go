@@ -292,7 +292,7 @@ func (p *ChatProcessor) routeAndProcess(ctx context.Context, req models.NewMessa
 		}
 	}
 
-	haikuResult, err := p.callHaikuRouter(req.Content, fileGraphJSON, chatHistory, hasImages)
+	haikuResult, err := p.callHaikuRouter(req.Content, fileGraphJSON, hasImages)
 	if err != nil {
 		return nil, err
 	}
@@ -406,10 +406,18 @@ func (p *ChatProcessor) handleNewProjectPhase(ctx context.Context, clarified str
 // CLAUDE API INTEGRATIONS
 // ============================================================================
 
-func (p *ChatProcessor) callHaikuRouter(userPrompt, fileGraphJSON string, chatHistory []models.ChatMessage, hasImages bool) (*models.HaikuRoutingResult, error) {
+func (p *ChatProcessor) callHaikuRouter(userPrompt, fileGraphJSON string, hasImages bool) (*models.HaikuRoutingResult, error) {
 	content := helper.ProcessHaikuPrompt(userPrompt, fileGraphJSON, hasImages)
-	messages := buildMessagesWithHistory(chatHistory, []models.ContentBlock{{Type: "text", Text: content}})
-
+	messages := []models.ChatMessage{
+		{
+			Role: "user",
+			Content: []models.ContentBlock{
+				{
+					Type: "text", Text: content,
+				},
+			},
+		},
+	}
 	response, err := helper.CallAnthropicAPI(
 		p.baseConf,
 		models.AnthropicRequest{
