@@ -17,36 +17,96 @@ import (
 	"github.com/spf13/cast"
 )
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Constants
+// ─────────────────────────────────────────────────────────────────────────────
+
 const (
 	timeoutDatabaseAssistant = 120 * time.Second
 	schemaCacheTTL           = 5 * time.Minute
-	maxAgentIterations       = 4
+
+	// maxAgentIterations is the maximum number of AI↔DB round-trips per user
+	// request. Each iteration is one SQL execution + one AI call.
+	// Set to 8: complex analytics might need several SELECTs before answering.
+	maxAgentIterations = 8
+
+	// defaultSelectLimit caps SELECT result sets so we never pull entire tables
+	// into the AI context window. Applied automatically by EnsureSelectLimit.
+	defaultSelectLimit = 50
 )
 
-// ============================================================================
-// DATABASE FLOW — agentic loop
-// ============================================================================
-
-//   - Iteration 1: Claude sees schema → plans what to fetch (no data yet)
-//   - Iterations 2-N: Claude sees accumulated results → fetches more or answers
+// ─────────────────────────────────────────────────────────────────────────────
+// PROTO INTERFACE NOTE
+// ─────────────────────────────────────────────────────────────────────────────
 //
-// Mutations (create/update/delete) always break out immediately and return
-// a PendingAction to the frontend for confirmation. No server-side RAM store.
-func (p *ChatProcessor) runDatabaseFlow(ctx context.Context, clarified string, chatHistory []models.ChatMessage) (*models.ParsedClaudeResponse, error) {
+// You must add the following to new_object_builder_service.proto:
+//
+//   message ExecuteSQLRequest {
+//     string resource_env_id = 1;
+//     string sql             = 2;
+//     repeated string params = 3;  // $1, $2, $3 ... values as strings
+//     bool in_transaction    = 4;  // wrap in BEGIN/COMMIT automatically
+//   }
+//
+//   message ExecuteSQLResponse {
+//     repeated google.protobuf.Struct rows = 1; // SELECT result rows
+//     int64 rows_affected                  = 2; // INSERT/UPDATE/DELETE count
+//     string error                         = 3; // non-empty = server error
+//   }
+//
+//   rpc ExecuteSQL(ExecuteSQLRequest) returns (ExecuteSQLResponse);
+//
+// And expose it through the ObjectBuilder service client interface.
+//
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MODEL ADDITIONS NEEDED
+// ─────────────────────────────────────────────────────────────────────────────
+//
+// In models.DatabaseActionRequest add:
+//   SQL       string `json:"sql,omitempty"`
+//   SQLParams []any  `json:"sql_params,omitempty"`
+//
+// In models.PendingAction add:
+//   SQL       string `json:"sql,omitempty"`
+//   SQLParams []any  `json:"sql_params,omitempty"`
+//
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DATABASE FLOW — agentic loop
+// ─────────────────────────────────────────────────────────────────────────────
+//
+// Each iteration:
+//  1. AI receives schema + accumulated query results → returns JSON with SQL.
+//  2. If the SQL is a SELECT/WITH (read) → execute, accumulate result, repeat.
+//  3. If the SQL is INSERT/UPDATE/DELETE (mutation) → stop loop, return
+//     PendingAction for the frontend confirmation flow.
+//  4. If action="answer" → stop loop, return final formatted reply.
+//
+// The confirmation flow (PendingAction → user clicks Yes/No → executeMutation)
+// is unchanged from the previous implementation.
+func (p *ChatProcessor) runDatabaseFlow(
+	ctx context.Context,
+	clarified string,
+	chatHistory []models.ChatMessage,
+) (*models.ParsedClaudeResponse, error) {
+
 	resourceEnvId, err := p.resolveBuilderResourceID(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("resolve builder resource ID: %w", err)
 	}
 
+	// Fetch and cache the project schema for this request's lifetime.
 	schema, err := p.getProjectSchemaCached(ctx, resourceEnvId)
 	if err != nil {
 		return nil, fmt.Errorf("schema fetch failed: %w", err)
 	}
 
-	schemaJSON, err := json.Marshal(schema)
-	if err != nil {
-		return nil, fmt.Errorf("schema marshal failed: %w", err)
-	}
+	// Format schema as compact SQL-friendly text instead of raw JSON.
+	// This gives the AI clearer column type information for writing correct SQL.
+	schemaText := formatSchemaForSQL(schema)
 
 	var (
 		dataContext string
@@ -54,73 +114,226 @@ func (p *ChatProcessor) runDatabaseFlow(ctx context.Context, clarified string, c
 	)
 
 	for i := 0; i < maxAgentIterations; i++ {
-		// On the last allowed iteration force a final answer — no more fetches
+
+		// On the final allowed iteration, force the AI to produce an answer.
+		// This prevents the loop from exhausting without giving a user reply.
 		if i == maxAgentIterations-1 && dataContext != "" {
-			dataContext += "\n\n[SYSTEM: Final iteration. Provide the complete answer in 'reply' now. Do not set needs_more_data=true.]"
+			dataContext += "\n\n[SYSTEM: This is the final iteration. " +
+				"You MUST set action=\"answer\" and provide the complete response in \"reply\" now. " +
+				"Do NOT set needs_more_data=true.]"
 		}
 
-		action, err := p.callDatabaseAssistant(ctx, clarified, string(schemaJSON), dataContext, chatHistory)
+		action, err := p.callDatabaseAssistant(ctx, clarified, schemaText, dataContext, chatHistory)
 		if err != nil {
-			return nil, fmt.Errorf("claude call failed (iter %d): %w", i, err)
+			return nil, fmt.Errorf("AI call failed (iter %d): %w", i, err)
 		}
 		action.ResourceEnvID = resourceEnvId
 		lastAction = action
 
-		// Schema-only or clarification — answer immediately, no DB access needed
-		if action.TableSlug == "" || action.Action == "schema" {
+		// ── Terminal: AI has enough information to answer ─────────────────────
+		if action.Action == "answer" || action.Action == "schema" {
 			return &models.ParsedClaudeResponse{Description: action.Reply}, nil
 		}
 
-		// Mutations break out — frontend handles confirmation flow
+		// ── SQL mode: AI provided a SQL statement ─────────────────────────────
+		if action.SQL != "" {
+			sqlType, valErr := ValidateAndClassifySQL(action.SQL)
+			if valErr != nil {
+				// Return a safe user-facing error without exposing internals.
+				return &models.ParsedClaudeResponse{
+					Description: fmt.Sprintf(
+						"Не удалось сформировать безопасный запрос: %v\n\nПожалуйста, переформулируйте ваш запрос.",
+						valErr,
+					),
+				}, nil
+			}
+
+			// ── Mutation: break out for user confirmation ─────────────────────
+			if IsMutation(sqlType) {
+				return p.handleSQLMutation(ctx, action, sqlType)
+			}
+
+			// ── Read query: execute and accumulate results ────────────────────
+			safeSQL := EnsureSelectLimit(action.SQL, defaultSelectLimit)
+			result, execErr := p.executeSQLQuery(ctx, safeSQL, action.SQLParams, resourceEnvId)
+			if execErr != nil {
+				return nil, fmt.Errorf("SQL execution failed (iter %d): %w", i, execErr)
+			}
+
+			resultJSON, _ := json.Marshal(result)
+			label := fmt.Sprintf("Step %d — SQL query", i+1)
+			if action.QueryPlan != "" {
+				label = fmt.Sprintf("Step %d — %s", i+1, action.QueryPlan)
+			}
+			dataContext = appendDataContext(dataContext, label, string(resultJSON))
+
+			// AI says it has all the data it needs → exit the loop.
+			if !action.NeedsMoreData {
+				break
+			}
+			continue
+		}
+
+		// ── ORM fallback: AI used the old JSON-action format ──────────────────
+		// This branch handles backward-compatibility if the AI occasionally
+		// falls back to the old schema-based action format.
 		if action.Action == "create" || action.Action == "update" || action.Action == "delete" {
 			return p.handleDatabaseMutation(ctx, action)
 		}
 
-		// Execute read / count / aggregate
+		// read / count / aggregate via ORM
 		iterData, execErr := p.executeDBAction(ctx, action)
 		if execErr != nil {
-			return nil, fmt.Errorf("db execution failed (iter %d, action=%s): %w", i, action.Action, execErr)
+			return nil, fmt.Errorf("ORM execution failed (iter %d, action=%s): %w", i, action.Action, execErr)
 		}
 
-		iterJSON, err := json.Marshal(iterData)
-		if err != nil {
-			return nil, fmt.Errorf("marshal iteration data: %w", err)
-		}
-
+		iterJSON, _ := json.Marshal(iterData)
 		label := fmt.Sprintf("Step %d (%s → %s)", i+1, action.Action, action.TableSlug)
 		if action.QueryPlan != "" {
 			label = fmt.Sprintf("Step %d — %s", i+1, action.QueryPlan)
 		}
 		dataContext = appendDataContext(dataContext, label, string(iterJSON))
 
-		// Claude signals it has enough data to answer
 		if !action.NeedsMoreData {
 			break
 		}
 	}
 
-	// If the last action already carries a complete reply, use it directly
-	// (avoids one extra Claude round-trip)
+	// ── Final answer synthesis ────────────────────────────────────────────────
+	// If the last action already carries a complete reply (and we broke out of
+	// the loop because needs_more_data=false), return it directly to save one
+	// extra AI round-trip.
 	if lastAction != nil && !lastAction.NeedsMoreData && strings.TrimSpace(lastAction.Reply) != "" {
 		reply := lastAction.Reply + buildDataContextHint(dataContext)
 		return &models.ParsedClaudeResponse{Description: reply}, nil
 	}
 
-	// Final Claude call: generate polished answer from all accumulated data
-	finalAction, err := p.callDatabaseAssistant(ctx, clarified, string(schemaJSON), dataContext, chatHistory)
+	// Call AI one final time to produce a polished, formatted reply from all
+	// the accumulated query results.
+	finalAction, err := p.callDatabaseAssistant(ctx, clarified, schemaText, dataContext, chatHistory)
 	if err != nil {
-		// Degrade gracefully — return whatever we have
+		// Graceful degradation: return whatever partial reply we have.
 		if lastAction != nil && lastAction.Reply != "" {
 			return &models.ParsedClaudeResponse{Description: lastAction.Reply}, nil
 		}
-		return nil, fmt.Errorf("final claude call failed: %w", err)
+		return nil, fmt.Errorf("final AI synthesis call failed: %w", err)
 	}
 
 	return &models.ParsedClaudeResponse{Description: finalAction.Reply}, nil
 }
 
-func (p *ChatProcessor) executeDBAction(ctx context.Context, action *models.DatabaseActionRequest) (any, error) {
+// ─────────────────────────────────────────────────────────────────────────────
+// SQL EXECUTION
+// ─────────────────────────────────────────────────────────────────────────────
 
+// executeSQLQuery executes a read-only SQL statement (SELECT / CTE) via the
+// new gRPC ExecuteSQL method and returns a normalised result map.
+//
+// params contains the $1, $2, ... bound values.
+func (p *ChatProcessor) executeSQLQuery(
+	ctx context.Context,
+	sql string,
+	params []any,
+	resourceEnvId string,
+) (any, error) {
+
+	resp, err := p.service.GoObjectBuilderService().ObjectBuilder().ExecuteSQL(
+		ctx,
+		&nb.ExecuteSQLRequest{
+			ResourceEnvId: resourceEnvId,
+			Sql:           sql,
+			Params:        sqlParamsToStrings(params),
+			InTransaction: false, // reads never need a transaction
+		},
+	)
+	if err != nil {
+		return nil, fmt.Errorf("ExecuteSQL gRPC error: %w", err)
+	}
+
+	// Surface server-side errors returned in the response body.
+	if errMsg := resp.GetError(); errMsg != "" {
+		return nil, fmt.Errorf("database error: %s", errMsg)
+	}
+
+	// Convert repeated google.protobuf.Struct rows → []map[string]any
+	rows := make([]map[string]any, 0, len(resp.GetRows()))
+	for _, rowStruct := range resp.GetRows() {
+		if m, convErr := helperFunc.ConvertStructToMap(rowStruct); convErr == nil {
+			rows = append(rows, m)
+		}
+	}
+
+	return map[string]any{
+		"rows":          rows,
+		"count":         len(rows),
+		"rows_affected": resp.GetRowsAffected(),
+	}, nil
+}
+
+// handleSQLMutation prepares a PendingAction for a mutation SQL statement.
+// The mutation is NOT executed here — it is sent to the frontend, which
+// shows the user a confirmation dialog and calls back with Approved=true/false.
+func (p *ChatProcessor) handleSQLMutation(
+	ctx context.Context,
+	action *models.DatabaseActionRequest,
+	sqlType SQLType,
+) (*models.ParsedClaudeResponse, error) {
+
+	// Ensure we get affected record GUIDs back after execution.
+	sqlWithReturning := EnsureReturning(action.SQL)
+
+	// Build human-readable confirmation messages.
+	confirmationPrompt := action.Reply
+	if strings.TrimSpace(confirmationPrompt) == "" {
+		switch sqlType {
+		case SQLTypeInsert:
+			confirmationPrompt = "Создать записи в базе данных?"
+		case SQLTypeUpdate:
+			confirmationPrompt = "⚠️ Обновить записи в базе данных?"
+		case SQLTypeDelete:
+			confirmationPrompt = "⚠️ Удалить записи из базы данных? Это действие необратимо."
+		}
+	}
+
+	successMessage := action.SuccessMessage
+	if strings.TrimSpace(successMessage) == "" {
+		successMessage = "✅ Операция выполнена успешно."
+	}
+
+	cancelMessage := action.CancelMessage
+	if strings.TrimSpace(cancelMessage) == "" {
+		cancelMessage = "Окей, действие отменено. Ничего не изменено."
+	}
+
+	pending := &models.PendingAction{
+		// Tell executeMutation to use SQL path, not the ORM path.
+		Action: "sql",
+
+		// The validated + RETURNING-enriched SQL ready for execution.
+		SQL:       sqlWithReturning,
+		SQLParams: action.SQLParams,
+
+		// Metadata for display and fallback error messages.
+		TableSlug:          action.TableSlug, // may be empty for multi-table SQL
+		ResourceEnvID:      action.ResourceEnvID,
+		ProjectID:          action.ResourceEnvID,
+		SuccessMessage:     successMessage,
+		CancelMessage:      cancelMessage,
+		ConfirmationPrompt: confirmationPrompt,
+		Description:        confirmationPrompt,
+	}
+
+	return &models.ParsedClaudeResponse{
+		Description:   confirmationPrompt,
+		PendingAction: pending,
+	}, nil
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ORM FALLBACK EXECUTORS  (unchanged — kept for backward-compatibility)
+// ─────────────────────────────────────────────────────────────────────────────
+
+func (p *ChatProcessor) executeDBAction(ctx context.Context, action *models.DatabaseActionRequest) (any, error) {
 	switch action.Action {
 	case "read":
 		return p.executeDatabaseRead(ctx, action)
@@ -133,19 +346,6 @@ func (p *ChatProcessor) executeDBAction(ctx context.Context, action *models.Data
 	}
 }
 
-// appendDataContext accumulates labelled step results into a single string
-// that grows with each agentic iteration and is passed back to Claude.
-func appendDataContext(existing, label, jsonData string) string {
-	if existing == "" {
-		return fmt.Sprintf("=== %s ===\n%s", label, jsonData)
-	}
-	return fmt.Sprintf("%s\n\n=== %s ===\n%s", existing, label, jsonData)
-}
-
-// ============================================================================
-// DATABASE EXECUTORS
-// ============================================================================
-
 func (p *ChatProcessor) executeDatabaseRead(ctx context.Context, action *models.DatabaseActionRequest) (any, error) {
 	if action.TableSlug == "" {
 		return nil, fmt.Errorf("table_slug is required")
@@ -155,7 +355,6 @@ func (p *ChatProcessor) executeDatabaseRead(ctx context.Context, action *models.
 	for k, v := range action.Filters {
 		dataMap[k] = v
 	}
-
 	dataMap["limit"] = 50
 	if action.Limit > 0 {
 		dataMap["limit"] = action.Limit
@@ -194,8 +393,6 @@ func (p *ChatProcessor) executeDatabaseRead(ctx context.Context, action *models.
 	return map[string]any{"response": []any{}, "count": 0}, nil
 }
 
-// executeDatabaseCount returns the server-side count without fetching rows.
-// GetList2 with limit=1 still runs the full SELECT COUNT(*) internally.
 func (p *ChatProcessor) executeDatabaseCount(ctx context.Context, action *models.DatabaseActionRequest) (any, error) {
 	data, err := p.executeDatabaseRead(ctx, &models.DatabaseActionRequest{
 		TableSlug:     action.TableSlug,
@@ -206,7 +403,6 @@ func (p *ChatProcessor) executeDatabaseCount(ctx context.Context, action *models
 	if err != nil {
 		return nil, fmt.Errorf("count read failed: %w", err)
 	}
-
 	return map[string]any{
 		"count":      extractCountFromData(data),
 		"table_slug": action.TableSlug,
@@ -214,8 +410,6 @@ func (p *ChatProcessor) executeDatabaseCount(ctx context.Context, action *models
 	}, nil
 }
 
-// executeDatabaseAggregate delegates SUM/AVG/MIN/MAX to PostgreSQL via GetListAggregation.
-// Zero rows are transferred to Go — the DB returns a single aggregate value.
 func (p *ChatProcessor) executeDatabaseAggregate(ctx context.Context, action *models.DatabaseActionRequest) (any, error) {
 	if action.AggregationField == "" {
 		return nil, fmt.Errorf("aggregation_field is required")
@@ -274,12 +468,10 @@ func (p *ChatProcessor) executeDatabaseAggregate(ctx context.Context, action *mo
 	}, nil
 }
 
-// buildWhereClause converts a filters map into a raw SQL WHERE string.
-// Used exclusively by GetListAggregation which takes raw SQL (no parameterization).
-// Values originate from Claude (not end-users), but string literals are escaped defensively.
+// buildWhereClause converts a filters map to a raw SQL WHERE string.
+// Used only by GetListAggregation which takes raw SQL (ORM path).
 func buildWhereClause(filters map[string]any) string {
 	conditions := []string{"deleted_at IS NULL"}
-
 	for k, v := range filters {
 		switch val := v.(type) {
 		case string:
@@ -304,13 +496,12 @@ func buildWhereClause(filters map[string]any) string {
 			}
 		}
 	}
-
 	return strings.Join(conditions, " AND ")
 }
 
-// ============================================================================
-// MUTATION HANDLER — stateless, no RAM store
-// ============================================================================
+// ─────────────────────────────────────────────────────────────────────────────
+// MUTATION HANDLER — ORM path (unchanged, kept for backward-compatibility)
+// ─────────────────────────────────────────────────────────────────────────────
 
 func (p *ChatProcessor) handleDatabaseMutation(ctx context.Context, action *models.DatabaseActionRequest) (*models.ParsedClaudeResponse, error) {
 	if action.Action == "update" || action.Action == "delete" {
@@ -324,16 +515,13 @@ func (p *ChatProcessor) handleDatabaseMutation(ctx context.Context, action *mode
 					Description: "Записи с такими параметрами не найдены. Уточните запрос.",
 				}, nil
 			}
-			// Заменяем filters: теперь там только guid(ы)
 			if len(guids) == 1 {
 				action.Filters = map[string]any{"guid": guids[0]}
 			} else {
-				// Несколько записей — кладём список, executeMutation обработает
 				action.Filters = map[string]any{"guid": guids[0], "_resolved_guids": guids}
 			}
 		}
 	}
-	// ─────────────────────────────────────────────────────────────────────────
 
 	affectedCount := 1
 	if action.Action != "create" && len(action.Filters) > 0 {
@@ -434,9 +622,20 @@ func (p *ChatProcessor) resolveGuidsFromFilters(ctx context.Context, action *mod
 	return guids, nil
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// executeMutation — executes a confirmed PendingAction
+//
+// Called from handlePendingConfirmation after the user clicks "Yes".
+// Supports two paths:
+//   - "sql"    → new SQL path: executes action.SQL via ExecuteSQL gRPC
+//   - "create" → ORM path: Items.Create (single record)
+//   - "update" → ORM path: Items.Update per guid (may be multiple)
+//   - "delete" → ORM path: Items.Delete (single record)
+//
+// ─────────────────────────────────────────────────────────────────────────────
 func executeMutation(ctx context.Context, action *models.PendingAction, service services.ServiceManagerI) (any, error) {
-	if action.TableSlug == "" {
-		return nil, fmt.Errorf("table_slug is required")
+	if action.TableSlug == "" && action.SQL == "" {
+		return nil, fmt.Errorf("either table_slug or sql is required")
 	}
 
 	effectiveProjectID := action.ResourceEnvID
@@ -446,7 +645,63 @@ func executeMutation(ctx context.Context, action *models.PendingAction, service 
 
 	switch action.Action {
 
-	// ── CREATE ────────────────────────────────────────────────────────────────
+	// ── SQL PATH — bulk-safe, atomic, supports JOINs and CTEs ─────────────
+	case "sql":
+		if strings.TrimSpace(action.SQL) == "" {
+			return nil, fmt.Errorf("sql field is required for action=sql")
+		}
+
+		// Re-validate SQL as a second layer of defence.
+		// The first validation happened in handleSQLMutation before the user
+		// even saw the confirmation prompt.
+		sqlType, err := ValidateAndClassifySQL(action.SQL)
+		if err != nil {
+			return nil, fmt.Errorf("SQL safety re-validation failed: %w", err)
+		}
+		if !IsMutation(sqlType) {
+			// SELECT somehow made it through — refuse execution.
+			return nil, fmt.Errorf("only INSERT/UPDATE/DELETE are allowed in mutation context, got: %s", sqlType)
+		}
+
+		resp, err := service.GoObjectBuilderService().ObjectBuilder().ExecuteSQL(
+			ctx,
+			&nb.ExecuteSQLRequest{
+				ResourceEnvId: effectiveProjectID,
+				Sql:           action.SQL,
+				Params:        sqlParamsToStrings(action.SQLParams),
+				InTransaction: true, // always wrap mutations in a transaction
+			},
+		)
+		if err != nil {
+			return nil, fmt.Errorf("SQL mutation failed: %w", err)
+		}
+
+		// Surface server-side errors.
+		if errMsg := resp.GetError(); errMsg != "" {
+			return nil, fmt.Errorf("database error: %s", errMsg)
+		}
+
+		// Convert returned rows (from RETURNING clause) to Go maps.
+		rows := make([]map[string]any, 0, len(resp.GetRows()))
+		for _, rowStruct := range resp.GetRows() {
+			if m, convErr := helperFunc.ConvertStructToMap(rowStruct); convErr == nil {
+				rows = append(rows, m)
+			}
+		}
+
+		// rows_affected can come from the proto field or from the RETURNING rows count.
+		rowsAffected := resp.GetRowsAffected()
+		if rowsAffected == 0 && len(rows) > 0 {
+			rowsAffected = int64(len(rows))
+		}
+
+		return map[string]any{
+			"status":        "executed",
+			"rows_affected": rowsAffected,
+			"rows":          rows,
+		}, nil
+
+	// ── ORM CREATE PATH — single record ───────────────────────────────────
 	case "create":
 		data := action.Data
 		if data == nil {
@@ -471,69 +726,15 @@ func executeMutation(ctx context.Context, action *models.PendingAction, service 
 		}
 		return map[string]any{"status": "created"}, nil
 
-	// ── UPDATE ────────────────────────────────────────────────────────────────
+	// ── ORM UPDATE PATH — one gRPC call per guid ──────────────────────────
 	case "update":
-		var guidsToUpdate []string
-
-		if raw, ok := action.Filters["_resolved_guids"]; ok {
-			for _, g := range cast.ToStringSlice(raw) {
-				if g != "" {
-					guidsToUpdate = append(guidsToUpdate, g)
-				}
-			}
-		}
-
-		if len(guidsToUpdate) == 0 {
-			if guid, ok := action.Filters["guid"]; ok {
-				if g := cast.ToString(guid); g != "" {
-					guidsToUpdate = append(guidsToUpdate, g)
-				}
-			}
-		}
-
-		if len(guidsToUpdate) == 0 {
-			filterMap := make(map[string]any, len(action.Filters)+1)
-			for k, v := range action.Filters {
-				if k == "_resolved_guids" {
-					continue
-				}
-				filterMap[k] = v
-			}
-			filterMap["limit"] = 100
-
-			filterStruct, err := helperFunc.ConvertMapToStruct(filterMap)
-			if err != nil {
-				return nil, fmt.Errorf("convert lookup filters for update: %w", err)
-			}
-			listResp, err := service.GoObjectBuilderService().ObjectBuilder().GetList2(
-				ctx,
-				&nb.CommonMessage{
-					TableSlug: action.TableSlug,
-					ProjectId: effectiveProjectID,
-					Data:      filterStruct,
-				},
-			)
-			if err != nil {
-				return nil, fmt.Errorf("lookup before update failed: %w", err)
-			}
-			if listResp.GetData() != nil {
-				listData, err := helperFunc.ConvertStructToMap(listResp.GetData())
-				if err == nil {
-					for _, item := range extractItemsFromData(listData) {
-						if g, ok := item["guid"].(string); ok && g != "" {
-							guidsToUpdate = append(guidsToUpdate, g)
-						}
-					}
-				}
-			}
-		}
-
-		if len(guidsToUpdate) == 0 {
-			return nil, fmt.Errorf("update failed: no records found with given filters (guid is required by backend)")
+		guids, err := resolveUpdateGuids(ctx, action, service, effectiveProjectID)
+		if err != nil {
+			return nil, err
 		}
 
 		var lastResp any
-		for _, guid := range guidsToUpdate {
+		for _, guid := range guids {
 			updateData := make(map[string]any, len(action.Data)+3)
 			for k, v := range action.Data {
 				updateData[k] = v
@@ -558,61 +759,16 @@ func executeMutation(ctx context.Context, action *models.PendingAction, service 
 				lastResp, _ = helperFunc.ConvertStructToMap(resp.GetData())
 			}
 		}
-
 		if lastResp != nil {
 			return lastResp, nil
 		}
-		return map[string]any{"status": "updated", "count": len(guidsToUpdate)}, nil
+		return map[string]any{"status": "updated", "count": len(guids)}, nil
 
-	// ── DELETE ────────────────────────────────────────────────────────────────
+	// ── ORM DELETE PATH — single record ───────────────────────────────────
 	case "delete":
-		var idToDelete string
-
-		if guid, ok := action.Filters["guid"]; ok {
-			idToDelete = cast.ToString(guid)
-		}
-
-		if idToDelete == "" {
-			if id, ok := action.Filters["id"]; ok {
-				idToDelete = cast.ToString(id)
-			}
-		}
-
-		if idToDelete == "" {
-			filterMap := make(map[string]any, len(action.Filters)+1)
-			for k, v := range action.Filters {
-				filterMap[k] = v
-			}
-			filterMap["limit"] = 1
-
-			filterStruct, err := helperFunc.ConvertMapToStruct(filterMap)
-			if err != nil {
-				return nil, fmt.Errorf("convert lookup filters for delete: %w", err)
-			}
-			listResp, err := service.GoObjectBuilderService().ObjectBuilder().GetList2(
-				ctx,
-				&nb.CommonMessage{
-					TableSlug: action.TableSlug,
-					ProjectId: effectiveProjectID,
-					Data:      filterStruct,
-				},
-			)
-			if err != nil {
-				return nil, fmt.Errorf("lookup before delete failed: %w", err)
-			}
-			if listResp.GetData() != nil {
-				listData, err := helperFunc.ConvertStructToMap(listResp.GetData())
-				if err == nil {
-					items := extractItemsFromData(listData)
-					if len(items) > 0 {
-						idToDelete, _ = items[0]["guid"].(string)
-					}
-				}
-			}
-		}
-
-		if idToDelete == "" {
-			return nil, fmt.Errorf("delete failed: record not found (guid is required by backend)")
+		idToDelete, err := resolveDeleteGuid(ctx, action, service, effectiveProjectID)
+		if err != nil {
+			return nil, err
 		}
 
 		deleteData := map[string]any{
@@ -638,9 +794,140 @@ func executeMutation(ctx context.Context, action *models.PendingAction, service 
 	}
 }
 
-// ============================================================================
-// SCHEMA — cached per ChatProcessor instance lifecycle
-// ============================================================================
+// resolveUpdateGuids extracts or resolves the list of GUIDs to update.
+// Priority: _resolved_guids filter → single guid filter → lookup by other filters.
+func resolveUpdateGuids(
+	ctx context.Context,
+	action *models.PendingAction,
+	service services.ServiceManagerI,
+	effectiveProjectID string,
+) ([]string, error) {
+
+	// 1. Pre-resolved list from handleDatabaseMutation
+	if raw, ok := action.Filters["_resolved_guids"]; ok {
+		guids := cast.ToStringSlice(raw)
+		result := make([]string, 0, len(guids))
+		for _, g := range guids {
+			if g != "" {
+				result = append(result, g)
+			}
+		}
+		if len(result) > 0 {
+			return result, nil
+		}
+	}
+
+	// 2. Single guid in filters
+	if guid, ok := action.Filters["guid"]; ok {
+		if g := cast.ToString(guid); g != "" {
+			return []string{g}, nil
+		}
+	}
+
+	// 3. Lookup by other filter fields
+	filterMap := make(map[string]any, len(action.Filters)+1)
+	for k, v := range action.Filters {
+		if k == "_resolved_guids" {
+			continue
+		}
+		filterMap[k] = v
+	}
+	filterMap["limit"] = 100
+
+	filterStruct, err := helperFunc.ConvertMapToStruct(filterMap)
+	if err != nil {
+		return nil, fmt.Errorf("convert lookup filters for update: %w", err)
+	}
+	listResp, err := service.GoObjectBuilderService().ObjectBuilder().GetList2(
+		ctx,
+		&nb.CommonMessage{
+			TableSlug: action.TableSlug,
+			ProjectId: effectiveProjectID,
+			Data:      filterStruct,
+		},
+	)
+	if err != nil {
+		return nil, fmt.Errorf("lookup before update failed: %w", err)
+	}
+
+	var guids []string
+	if listResp.GetData() != nil {
+		listData, err := helperFunc.ConvertStructToMap(listResp.GetData())
+		if err == nil {
+			for _, item := range extractItemsFromData(listData) {
+				if g, ok := item["guid"].(string); ok && g != "" {
+					guids = append(guids, g)
+				}
+			}
+		}
+	}
+
+	if len(guids) == 0 {
+		return nil, fmt.Errorf("update failed: no records found with given filters")
+	}
+	return guids, nil
+}
+
+// resolveDeleteGuid extracts or resolves the single GUID to delete.
+func resolveDeleteGuid(
+	ctx context.Context,
+	action *models.PendingAction,
+	service services.ServiceManagerI,
+	effectiveProjectID string,
+) (string, error) {
+
+	if guid, ok := action.Filters["guid"]; ok {
+		if g := cast.ToString(guid); g != "" {
+			return g, nil
+		}
+	}
+	if id, ok := action.Filters["id"]; ok {
+		if g := cast.ToString(id); g != "" {
+			return g, nil
+		}
+	}
+
+	// Fallback: lookup by other filters, take first result
+	filterMap := make(map[string]any, len(action.Filters)+1)
+	for k, v := range action.Filters {
+		filterMap[k] = v
+	}
+	filterMap["limit"] = 1
+
+	filterStruct, err := helperFunc.ConvertMapToStruct(filterMap)
+	if err != nil {
+		return "", fmt.Errorf("convert lookup filters for delete: %w", err)
+	}
+	listResp, err := service.GoObjectBuilderService().ObjectBuilder().GetList2(
+		ctx,
+		&nb.CommonMessage{
+			TableSlug: action.TableSlug,
+			ProjectId: effectiveProjectID,
+			Data:      filterStruct,
+		},
+	)
+	if err != nil {
+		return "", fmt.Errorf("lookup before delete failed: %w", err)
+	}
+
+	if listResp.GetData() != nil {
+		listData, err := helperFunc.ConvertStructToMap(listResp.GetData())
+		if err == nil {
+			items := extractItemsFromData(listData)
+			if len(items) > 0 {
+				if g, ok := items[0]["guid"].(string); ok && g != "" {
+					return g, nil
+				}
+			}
+		}
+	}
+
+	return "", fmt.Errorf("delete failed: record not found")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SCHEMA — cached per ChatProcessor instance
+// ─────────────────────────────────────────────────────────────────────────────
 
 func (p *ChatProcessor) getProjectSchemaCached(ctx context.Context, resourceEnvId string) ([]models.TableSchema, error) {
 	if p.schemaCache != nil && time.Now().Before(p.schemaCachedAt.Add(schemaCacheTTL)) {
@@ -718,9 +1005,45 @@ func (p *ChatProcessor) fetchProjectSchema(ctx context.Context, resourceEnvId st
 	return schemas, nil
 }
 
-// ============================================================================
-// RESOURCE RESOLUTION — cached on ChatProcessor
-// ============================================================================
+// formatSchemaForSQL converts the project schema into a compact, SQL-friendly
+// plain-text format that is more useful to the AI than raw JSON.
+//
+// Example output:
+//
+//	Table: tasks (Задачи)
+//	Columns: guid uuid, title text, status text, assigned_to uuid, due_date timestamptz, deleted_at timestamptz
+//
+//	Table: users (Пользователи)
+//	Columns: guid uuid, name text, email text, deleted_at timestamptz
+func formatSchemaForSQL(tables []models.TableSchema) string {
+	var sb strings.Builder
+	for _, t := range tables {
+		sb.WriteString("Table: ")
+		sb.WriteString(t.Slug)
+		if t.Label != "" && t.Label != t.Slug {
+			sb.WriteString(" (")
+			sb.WriteString(t.Label)
+			sb.WriteString(")")
+		}
+		sb.WriteString("\nColumns: ")
+
+		cols := make([]string, 0, len(t.Fields))
+		for _, f := range t.Fields {
+			colType := f.Type
+			if colType == "" {
+				colType = "text"
+			}
+			cols = append(cols, fmt.Sprintf("%s %s", f.Slug, colType))
+		}
+		sb.WriteString(strings.Join(cols, ", "))
+		sb.WriteString("\n\n")
+	}
+	return sb.String()
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RESOURCE RESOLUTION
+// ─────────────────────────────────────────────────────────────────────────────
 
 func (p *ChatProcessor) resolveBuilderResourceID(ctx context.Context) (string, error) {
 	if p.builderResourceID != "" {
@@ -754,12 +1077,17 @@ func (p *ChatProcessor) resolveBuilderResourceID(ctx context.Context) (string, e
 	return p.builderResourceID, nil
 }
 
-// ============================================================================
-// CLAUDE API CALL
-// ============================================================================
+// ─────────────────────────────────────────────────────────────────────────────
+// AI API CALL
+// ─────────────────────────────────────────────────────────────────────────────
 
-func (p *ChatProcessor) callDatabaseAssistant(ctx context.Context, clarified, schemaJSON, dataContext string, chatHistory []models.ChatMessage) (*models.DatabaseActionRequest, error) {
-	content := helper.ProcessDatabaseAssistantPrompt(clarified, schemaJSON, dataContext)
+func (p *ChatProcessor) callDatabaseAssistant(
+	ctx context.Context,
+	clarified, schemaText, dataContext string,
+	chatHistory []models.ChatMessage,
+) (*models.DatabaseActionRequest, error) {
+
+	content := helper.ProcessDatabaseAssistantPromptV2(clarified, schemaText, dataContext)
 	messages := buildMessagesWithHistory(chatHistory, []models.ContentBlock{{Type: "text", Text: content}})
 
 	response, err := helper.CallAnthropicAPI(
@@ -767,18 +1095,18 @@ func (p *ChatProcessor) callDatabaseAssistant(ctx context.Context, clarified, sc
 		models.AnthropicRequest{
 			Model:     p.baseConf.ClaudeModel,
 			MaxTokens: p.baseConf.InspectorMaxTokens,
-			System:    helper.SystemPromptDatabaseAssistant,
+			System:    helper.SystemPromptDatabaseAssistantV2,
 			Messages:  messages,
 		},
 		timeoutDatabaseAssistant,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("anthropic API: %w", err)
+		return nil, fmt.Errorf("Anthropic API error: %w", err)
 	}
 
 	text, err := helper.ExtractPlainText(response)
 	if err != nil {
-		return nil, fmt.Errorf("extract text: %w", err)
+		return nil, fmt.Errorf("extract text from response: %w", err)
 	}
 
 	var action models.DatabaseActionRequest
@@ -789,18 +1117,20 @@ func (p *ChatProcessor) callDatabaseAssistant(ctx context.Context, clarified, sc
 	return &action, nil
 }
 
-// ============================================================================
+// ─────────────────────────────────────────────────────────────────────────────
 // DATA HELPERS
-// ============================================================================
+// ─────────────────────────────────────────────────────────────────────────────
 
-// extractItemsFromData pulls the records slice out of a GetList2 response map.
-// Tries "response", "data", "items" keys in that order.
+// extractItemsFromData pulls the records slice out of a response map.
+// Handles both ORM responses ("response", "data", "items") and
+// SQL responses ("rows").
 func extractItemsFromData(data any) []map[string]any {
 	m, ok := data.(map[string]any)
 	if !ok {
 		return nil
 	}
-	for _, key := range []string{"response", "data", "items"} {
+	// SQL path returns "rows"; ORM path returns "response" / "data" / "items"
+	for _, key := range []string{"rows", "response", "data", "items"} {
 		if raw, ok := m[key]; ok {
 			if items, ok := raw.([]any); ok {
 				out := make([]map[string]any, 0, len(items))
@@ -811,13 +1141,16 @@ func extractItemsFromData(data any) []map[string]any {
 				}
 				return out
 			}
+			// SQL path may return []map[string]any directly
+			if items, ok := raw.([]map[string]any); ok {
+				return items
+			}
 		}
 	}
 	return nil
 }
 
-// extractCountFromData reads the server-side "count" field from a GetList2 response.
-// This is always the full dataset size (SELECT COUNT(*)), not the page length.
+// extractCountFromData reads the server-side total count from a response map.
 func extractCountFromData(data any) int {
 	m, ok := data.(map[string]any)
 	if !ok {
@@ -836,9 +1169,19 @@ func extractCountFromData(data any) int {
 	return len(extractItemsFromData(data))
 }
 
-// buildDataContextHint parses GUIDs from accumulated dataContext steps and formats them
-// as a fenced ```db-context``` block. Claude reads this in subsequent turns to resolve
-// references like "update the first one" or "delete it" without re-fetching.
+// appendDataContext appends a labelled JSON blob to the growing dataContext
+// string that is passed back to the AI on each iteration.
+func appendDataContext(existing, label, jsonData string) string {
+	if existing == "" {
+		return fmt.Sprintf("=== %s ===\n%s", label, jsonData)
+	}
+	return fmt.Sprintf("%s\n\n=== %s ===\n%s", existing, label, jsonData)
+}
+
+// buildDataContextHint parses GUIDs from the accumulated dataContext and
+// formats them as a fenced ```db-context``` block. The AI reads this in
+// subsequent turns to resolve follow-up references ("update the first one")
+// without re-fetching.
 func buildDataContextHint(dataContext string) string {
 	if dataContext == "" {
 		return ""
@@ -852,7 +1195,6 @@ func buildDataContextHint(dataContext string) string {
 	displayFields := []string{"name", "title", "label", "full_name", "email", "username", "code"}
 	var refs []recordRef
 
-	// Each step is separated by "\n\n=== "; parse the JSON blob of each section
 	sections := strings.Split(dataContext, "\n\n=== ")
 	for _, section := range sections {
 		newline := strings.Index(section, "\n")
@@ -904,4 +1246,19 @@ done:
 	}
 	sb.WriteString("```")
 	return sb.String()
+}
+
+// sqlParamsToStrings converts []any params from the AI JSON response to
+// []string for the gRPC ExecuteSQLRequest.Params field.
+// Every value is formatted via fmt.Sprintf so numbers, bools, and strings
+// all serialize predictably.
+func sqlParamsToStrings(params []any) []string {
+	if len(params) == 0 {
+		return nil
+	}
+	out := make([]string, len(params))
+	for i, p := range params {
+		out[i] = fmt.Sprintf("%v", p)
+	}
+	return out
 }

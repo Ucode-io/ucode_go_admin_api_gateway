@@ -68,13 +68,14 @@ type (
 	// ========================== AI Agent Routing ==========================
 
 	HaikuRoutingResult struct {
-		NextStep    bool     `json:"next_step"`
-		Intent      string   `json:"intent"`
-		Reply       string   `json:"reply"`        // готовый ответ если next_step=false
-		Clarified   string   `json:"clarified"`    // уточнённый запрос для code_change
-		FilesNeeded []string `json:"files_needed"` // нужные файлы для project_inspect
-		HasImages   bool     `json:"has_images"`   // есть ли изображения в запросе
-		ProjectName string   `json:"project_name"` // осмысленное имя проекта (max 3 слова)
+		NextStep       bool     `json:"next_step"`
+		Intent         string   `json:"intent"`
+		Reply          string   `json:"reply"`
+		Clarified      string   `json:"clarified"`
+		ClarifyOptions []string `json:"clarify_options"`
+		FilesNeeded    []string `json:"files_needed"`
+		HasImages      bool     `json:"has_images"`
+		ProjectName    string   `json:"project_name"`
 	}
 
 	SonnetPlanResult struct {
@@ -137,38 +138,45 @@ type (
 
 	DatabaseActionRequest struct {
 		Action           string         `json:"action"`
-		TableSlug        string         `json:"table_slug"`
-		Filters          map[string]any `json:"filters"`
-		Data             map[string]any `json:"data"`
-		AggregationField string         `json:"aggregation_field"`
-		Aggregation      string         `json:"aggregation"`
-		GroupBy          string         `json:"group_by"`
-		OrderBy          string         `json:"order_by"`
-		Limit            int            `json:"limit"`
-		Offset           int            `json:"offset"`
+		TableSlug        string         `json:"table_slug,omitempty"`
+		Filters          map[string]any `json:"filters,omitempty"`
+		Data             map[string]any `json:"data,omitempty"`
+		AggregationField string         `json:"aggregation_field,omitempty"`
+		Aggregation      string         `json:"aggregation,omitempty"`
+		GroupBy          string         `json:"group_by,omitempty"`
+		OrderBy          string         `json:"order_by,omitempty"`
+		Limit            int            `json:"limit,omitempty"`
+		Offset           int            `json:"offset,omitempty"`
 		NeedsMoreData    bool           `json:"needs_more_data"`
-		QueryPlan        string         `json:"query_plan"`
-		Reply            string         `json:"reply"`
-		ResourceEnvID    string         `json:"resource_env_id"`
+		QueryPlan        string         `json:"query_plan,omitempty"`
+		Reply            string         `json:"reply,omitempty"`
+		SuccessMessage   string         `json:"success_message,omitempty"`
+		CancelMessage    string         `json:"cancel_message,omitempty"`
+		ResourceEnvID    string         `json:"-"` // set by backend, not from AI
 
-		SuccessMessage string `json:"success_message"` // что написать в чат после апрува
-		CancelMessage  string `json:"cancel_message"`  // что написать при отмене
+		SQL string `json:"sql,omitempty"`
+
+		SQLParams []any `json:"sql_params,omitempty"`
 	}
 
 	PendingAction struct {
-		Action        string         `json:"action"`
-		TableSlug     string         `json:"table_slug"`
-		Filters       map[string]any `json:"filters"`
-		Data          map[string]any `json:"data"`
-		AffectedCount int            `json:"affected_count"`
-		Description   string         `json:"description"`
-		ProjectID     string         `json:"project_id"`
-		ResourceEnvID string         `json:"resource_env_id"`
-		Approved      bool           `json:"approved"`
+		Action             string         `json:"action"`
+		TableSlug          string         `json:"table_slug,omitempty"`
+		Filters            map[string]any `json:"filters,omitempty"`
+		Data               map[string]any `json:"data,omitempty"`
+		AffectedCount      int            `json:"affected_count,omitempty"`
+		Description        string         `json:"description,omitempty"`
+		ProjectID          string         `json:"project_id,omitempty"`
+		ResourceEnvID      string         `json:"resource_env_id,omitempty"`
+		SuccessMessage     string         `json:"success_message,omitempty"`
+		CancelMessage      string         `json:"cancel_message,omitempty"`
+		ConfirmationPrompt string         `json:"confirmation_prompt,omitempty"`
+		Approved           bool           `json:"approved,omitempty"`
 
-		SuccessMessage     string `json:"success_message"`     // умный текст после апрува
-		CancelMessage      string `json:"cancel_message"`      // текст при отмене
-		ConfirmationPrompt string `json:"confirmation_prompt"` // короткий текст для кнопок фронта
+		// ── NEW: SQL mode fields ──────────────────────────────────────────────────
+
+		SQL       string `json:"sql,omitempty"`
+		SQLParams []any  `json:"sql_params,omitempty"`
 	}
 	// ConfirmActionRequest — frontend sends this to confirm/reject a pending action
 	ConfirmActionRequest struct {
