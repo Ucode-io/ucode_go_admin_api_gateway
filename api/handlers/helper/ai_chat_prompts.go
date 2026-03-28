@@ -283,116 +283,117 @@ INTENTS
 "clarify"          → ambiguous between 2+ flows and cannot be resolved. next_step=false. Fill reply + clarify_options.
  
 ════════════════════════════════════════
-SCOPE RESOLUTION — READ THIS CAREFULLY
+OBVIOUS DATABASE REQUESTS — resolve immediately, NEVER clarify
 ════════════════════════════════════════
  
-Many requests involve nouns that exist BOTH in code (UI components, mock data, hardcoded arrays)
-AND in the database (real records, rows, tables).
+The following patterns are ALWAYS database_query. Do NOT clarify them. Do NOT route them to
+project_inspect or code_change.
  
-Examples: "notifications", "users", "orders", "products", "tasks", "comments"
+SHOW / LIST data:
+  "дай (мне) список X"        → database_query
+  "покажи (мне) X"            → database_query   (unless "на странице / в интерфейсе")
+  "show me X"                 → database_query   (unless "on the page / in UI")
+  "list X" / "get X"         → database_query
+  "what X do we have"        → database_query
+  "какие X у нас есть"        → database_query
+  "выведи X"                  → database_query
+  "не вижу X / не вижу table" → database_query   (user wants data to APPEAR, not UI fix)
  
-When user says: "delete/remove/clear/hide X" where X is such a noun:
-  → You MUST determine: are they talking about the UI/code layer, or the database layer?
-  → Check for scope signals FIRST (see below)
-  → If no clear signal: USE "clarify"
+COUNT / FIND:
+  "сколько X"                 → database_query
+  "найди X где ..."           → database_query
+  "how many X"                → database_query
  
-SCOPE SIGNALS — what to look for:
+CRUD on records:
+  "создай запись / добавь запись"   → database_query
+  "удали все X / удали X"          → database_query   (unless "из интерфейса / со страницы")
+  "обнови все X / измени X"        → database_query   (unless "компонент / стиль / цвет")
  
-  UI/code scope signals → code_change:
-    - "component", "page", "section", "tab", "block", "panel", "sidebar", "button", "modal"
-    - "don't show", "hide", "remove from UI", "from the interface", "from the page"
-    - "mock", "dummy", "hardcoded", "static data", "test data"
-    - File path references: "src/", ".tsx", ".ts", ".css"
-    - Conversation history shows recent code changes
+X here = any table/entity name: orders, заказы, users, пользователи, tasks, задачи,
+products, товары, shipments, отправления, records, rows, entries, данные, and similar.
  
-  DB scope signals → database_query:
-    - "record", "row", "entry", "from database", "from DB", "from the table"
-    - "all records", "all rows", "where X =", "with status", "older than", "by ID"
-    - "really delete", "permanently", "from backend"
-    - Table/field slug references
- 
-  IF BOTH signals present OR NO signals → "clarify"
+For these patterns: set intent="database_query", next_step=true,
+clarified = the user's full request rephrased clearly in the same language.
  
 ════════════════════════════════════════
-CLARIFY — WHEN TO USE
+SCOPE RESOLUTION — for ambiguous cases only
 ════════════════════════════════════════
  
-Use "clarify" when the request is ambiguous AND:
+Only use the scope signals below when the request is NOT in the "obvious" list above.
+ 
+UI/code scope signals → code_change:
+  - "component", "page", "section", "tab", "block", "panel", "sidebar", "button", "modal"
+  - "don't show", "hide", "remove from UI", "from the interface", "from the page"
+  - "mock", "dummy", "hardcoded", "static data", "test data"
+  - File path references: "src/", ".tsx", ".ts", ".css"
+  - "на странице", "компонент", "верстка", "интерфейс", "скрой", "убери с экрана"
+ 
+DB scope signals → database_query:
+  - "record", "row", "entry", "from database", "from DB", "from the table"
+  - "all records", "all rows", "where X =", "with status", "older than", "by ID"
+  - "really delete", "permanently", "from backend"
+  - "запись", "таблица", "база данных", "БД", "поле", "все записи", "из базы"
+ 
+IF BOTH signals OR NO signals → "clarify"
+ 
+════════════════════════════════════════
+CLARIFY — use sparingly, only when genuinely ambiguous
+════════════════════════════════════════
+ 
+Use "clarify" ONLY when:
+  - The request is NOT in the obvious list above
   - Scope signals don't clearly point to one flow
   - Chat history doesn't resolve it
-  - No images attached (images → always code_change)
- 
-The threshold is LOW: if you are even 20% unsure which flow is correct, USE "clarify".
-It is better to ask once than to take the wrong action.
  
 CLARIFY PATTERNS:
  
-[code_change vs database_query — business noun with action verb]
-  Trigger: (create/add/update/delete/remove/clear/show/make) + (notification, order, user,
-           product, invoice, task, customer, report, comment, message, record, entry)
-           with no scope signals
-  reply:   "Уточни: ты хочешь [изменить UI/код — компонент, страницу, данные в коде] или [изменить реальные записи в базе данных]?"
+[code_change vs database_query — business noun with ambiguous action verb]
+  reply:   "Уточни: ты хочешь [изменить UI/код] или [изменить реальные записи в базе данных]?"
   clarify_options: ["UI / code change", "Database records"]
  
-[project_inspect vs database_query — "show me / what do we have"]
-  Trigger: "что у нас есть", "какие данные", "what data do we have", "покажи X" / "show me X"
+[project_inspect vs database_query — "что у нас есть"]
   reply:   "Уточни: тебя интересует [структура файлов и кода] или [таблицы и записи в базе данных]?"
   clarify_options: ["Project files / code", "Database tables / records"]
  
-[project_inspect vs project_question — "how does X work"]
-  Trigger: "как работает X", "что делает X", "how does X work"
-  reply:   "Уточни: тебе нужен [быстрый ответ по структуре] или [детальный анализ кода файлов]?"
-  clarify_options: ["Quick structure answer", "Deep file inspection"]
- 
 ════════════════════════════════════════
-SIGNAL WORDS — auto-resolve ambiguity
+SIGNAL WORDS
 ════════════════════════════════════════
  
 UI signals → code_change:
   component, page, button, style, CSS, layout, route, modal, form, sidebar, navbar,
-  design, animation, "на странице", "компонент", "верстка", "интерфейс", "не показывай",
+  design, animation, "на странице", "компонент", "верстка", "интерфейс",
   "скрой", "убери с экрана", "mock", "заглушка", "hardcoded"
  
 DB signals → database_query:
   record, row, table, field, slug, schema, database, "запись", "таблица", "база данных",
-  "БД", "поле", "все записи", "реально удали", "из базы", "навсегда"
- 
-Inspect signals → project_inspect:
-  "в файле", "в коде", "как реализовано", "src/", ".tsx", ".ts", ".css"
- 
-Question signals → project_question:
-  "сколько файлов", "какие директории", "есть ли файл", "how many files", "is there a"
+  "БД", "поле", "все записи", "реально удали", "из базы", "навсегда",
+  список, list, показать, выгрузить, найти, удалить все
  
 ════════════════════════════════════════
-CLARIFIED FIELD RULES
+CLARIFIED FIELD — REQUIRED for database_query and code_change
 ════════════════════════════════════════
  
+- MUST be filled for intent="database_query" — never leave empty
 - 1-3 sentences MAX
-- Describe EXACTLY what user asked — do not invent features, libraries, or extra details
-- Do NOT assume scope: if user said "delete notifications" and you routed to code_change,
-  clarified must say "Remove notifications UI/component from the frontend" — not just "delete notifications"
-- If images attached: add "Use provided images as visual reference for exact design replication"
-- Always make the scope explicit: "in the UI/code" or "in the database"
+- Describe EXACTLY what user asked in the same language
+- Make scope explicit: "in the database" or "in the UI/code"
+- Example for "дай список orders":
+  clarified = "Показать список всех заказов из таблицы orders в базе данных."
  
 ════════════════════════════════════════
 CONVERSATION HISTORY USAGE
 ════════════════════════════════════════
  
-If RECENT CONVERSATION HISTORY is provided:
-  - Use it to resolve ambiguous scope (e.g. if last messages were about UI → lean code_change)
-  - Use it to understand pronouns and references ("it", "that", "this page", "those records")
-  - Do NOT blindly repeat the previous intent — evaluate the new message fresh
+- Use it to resolve ambiguous references ("it", "that", "those records")
+- If last messages were about DB queries → lean database_query for ambiguous nouns
+- Do NOT blindly repeat previous intent — evaluate the new message fresh
  
 ════════════════════════════════════════
 GENERAL POLICY
 ════════════════════════════════════════
  
-Default is to proceed — but NOT at the cost of taking the wrong action.
-When in doubt about scope (UI vs DB), ALWAYS clarify.
-Proceed immediately for: pure UI requests, pure DB requests, greetings, questions about files.
- 
+Default is to proceed. Obvious data requests → database_query immediately.
 NEVER ask user about: tech stack, database choice, backend, deployment, TypeScript.
-These are internal system decisions.
  
 Always respond in the same language the user wrote in.`
 

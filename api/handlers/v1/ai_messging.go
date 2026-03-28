@@ -297,8 +297,10 @@ func (p *ChatProcessor) routeAndProcess(ctx context.Context, req models.NewMessa
 		return nil, err
 	}
 
-	log.Printf("[ROUTER] next_step=%v intent=%s has_images=%v files_needed=%d",
-		haikuResult.NextStep, haikuResult.Intent, haikuResult.HasImages, len(haikuResult.FilesNeeded))
+	log.Printf("[ROUTER] next_step=%v intent=%s has_images=%v files_needed=%d clarified=%q",
+		haikuResult.NextStep, haikuResult.Intent, haikuResult.HasImages,
+		len(haikuResult.FilesNeeded), haikuResult.Clarified,
+	)
 
 	if !haikuResult.NextStep {
 		return &models.ParsedClaudeResponse{Description: haikuResult.Reply}, nil
@@ -324,7 +326,12 @@ func (p *ChatProcessor) routeAndProcess(ctx context.Context, req models.NewMessa
 		return p.runCodeFlow(ctx, haikuResult.Clarified, fileGraphJSON, chatHistory, req.Images, haikuResult.ProjectName, projectData)
 
 	case "database_query":
-		return p.runDatabaseFlow(ctx, haikuResult.Clarified, chatHistory)
+		clarified := strings.TrimSpace(haikuResult.Clarified)
+		if clarified == "" {
+			clarified = req.Content
+			log.Printf("[ROUTER] database_query clarified was empty — using raw content")
+		}
+		return p.runDatabaseFlow(ctx, clarified, chatHistory)
 	}
 
 	return &models.ParsedClaudeResponse{Description: haikuResult.Reply}, nil
