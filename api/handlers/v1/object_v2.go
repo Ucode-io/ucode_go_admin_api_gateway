@@ -204,7 +204,7 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 					Data:      structData,
 					ProjectId: resource.ResourceEnvironmentId,
 				},
-			)
+			) 
 
 			if err == nil {
 				if resp.IsCached {
