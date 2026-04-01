@@ -42,7 +42,11 @@
     },
     {
       "path": "src/App.tsx",
-      "content": "import { BrowserRouter, Routes, Route } from 'react-router-dom';\nimport { AppProviders } from '@/components/shared/AppProviders';\n\nexport default function App() {\n  return (\n    <BrowserRouter>\n      <AppProviders>\n        <Routes>\n          {/* AI: Generate unique routes and redirects based on the domain (e.g. /leads for CRM) */}\n        </Routes>\n      </AppProviders>\n    </BrowserRouter>\n  );\n}"
+      "content": "import { BrowserRouter, Routes, Route } from 'react-router-dom';\nimport { AppProviders } from '@/components/shared/AppProviders';\n\nexport default function App() {\n  return (\n    <BrowserRouter>\n      <AppProviders>\n        <Routes>\n          {/* [AI: Generate unique routes and redirects based on the domain] */}\n        </Routes>\n      </AppProviders>\n    </BrowserRouter>\n  );\n}"
+    },
+    {
+      "path": "src/index.css",
+      "content": "/* [AI: You MUST generate all CSS variables here using the Architect's colors. Do NOT use default gray/slate themes.] */\n\n@tailwind base;\n@tailwind components;\n@tailwind utilities;\n"
     },
     {
       "path": "src/main.tsx",

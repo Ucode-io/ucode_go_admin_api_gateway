@@ -381,6 +381,13 @@ func (p *ChatProcessor) handleNewProjectPhase(ctx context.Context, clarified str
 		return nil, fmt.Errorf("architect phase failed: %w", err)
 	}
 
+	// Fix #2: Log the design output to diagnose empty design issues
+	log.Printf("[ARCHITECT] design output: primary=%q bg=%q sidebar=%q style=%q font=%q inspiration=%q",
+		plan.Design.PrimaryColor, plan.Design.BackgroundColor,
+		plan.Design.SidebarBackground, plan.Design.SidebarStyle,
+		plan.Design.FontFamily, plan.Design.DesignInspiration)
+
+
 	if plan.ProjectName == "" {
 		plan.ProjectName = "AI Project"
 		if estimatedName != "" {
@@ -1085,52 +1092,42 @@ func buildMessagesWithHistory(history []models.ChatMessage, contentBlocks []mode
 func buildDesignSpecBlock(design models.DesignSpec) string {
 	var sb strings.Builder
 	sb.WriteString("====================================\n")
-	sb.WriteString("DESIGN SPECIFICATION (FROM ARCHITECT — USE EXACTLY)\n")
+	sb.WriteString("DESIGN SPECIFICATION (FROM ARCHITECT)\n")
 	sb.WriteString("====================================\n\n")
+	sb.WriteString("Based on the user's request, here is the chosen visual identity and color palette for this project.\n")
+	sb.WriteString("YOU MUST build a full, production-ready src/index.css that perfectly realizes this design.\n\n")
 
-	if design.PrimaryColor != "" {
-		sb.WriteString(fmt.Sprintf("Primary Color: %s (HSL: %s)\n", design.PrimaryColor, design.PrimaryHSL))
-	}
-	if design.BackgroundColor != "" {
-		sb.WriteString(fmt.Sprintf("Background: %s (HSL: %s)\n", design.BackgroundColor, design.BackgroundHSL))
-	}
-	if design.SurfaceColor != "" {
-		sb.WriteString(fmt.Sprintf("Surface/Cards: %s (HSL: %s)\n", design.SurfaceColor, design.SurfaceHSL))
-	}
-	if design.SidebarBackground != "" {
-		sb.WriteString(fmt.Sprintf("Sidebar Background: %s (HSL: %s) — style: %s\n", design.SidebarBackground, design.SidebarBackgroundHSL, design.SidebarStyle))
-	}
-	if design.SidebarForeground != "" {
-		sb.WriteString(fmt.Sprintf("Sidebar Foreground: %s\n", design.SidebarForeground))
-	}
-	if design.TextColor != "" {
-		sb.WriteString(fmt.Sprintf("Text Color: %s\n", design.TextColor))
-	}
-	if design.TextMutedColor != "" {
-		sb.WriteString(fmt.Sprintf("Text Muted: %s\n", design.TextMutedColor))
-	}
-	if design.BorderColor != "" {
-		sb.WriteString(fmt.Sprintf("Border Color: %s\n", design.BorderColor))
-	}
-	if design.AccentColor != "" {
-		sb.WriteString(fmt.Sprintf("Accent Color: %s (HSL: %s)\n", design.AccentColor, design.AccentHSL))
-	}
-	if design.FontFamily != "" {
-		sb.WriteString(fmt.Sprintf("Font Family: %s\n", design.FontFamily))
-	}
-	if design.BorderRadius != "" {
-		sb.WriteString(fmt.Sprintf("Border Radius: %s\n", design.BorderRadius))
-	}
-	if design.DesignInspiration != "" {
-		sb.WriteString(fmt.Sprintf("Design Inspiration: %s\n", design.DesignInspiration))
-	}
+	if design.PrimaryColor != "" { sb.WriteString(fmt.Sprintf("Primary Color: %s\n", design.PrimaryColor)) }
+	if design.BackgroundColor != "" { sb.WriteString(fmt.Sprintf("Background: %s\n", design.BackgroundColor)) }
+	if design.SurfaceColor != "" { sb.WriteString(fmt.Sprintf("Surface/Cards: %s\n", design.SurfaceColor)) }
+	if design.SidebarBackground != "" { sb.WriteString(fmt.Sprintf("Sidebar Background: %s (Style: %s)\n", design.SidebarBackground, design.SidebarStyle)) }
+	if design.SidebarForeground != "" { sb.WriteString(fmt.Sprintf("Sidebar Text: %s\n", design.SidebarForeground)) }
+	if design.AccentColor != "" { sb.WriteString(fmt.Sprintf("Accent/Highlight: %s\n", design.AccentColor)) }
+	
+	sb.WriteString("\nFor your convenience, here are some of those colors pre-converted to raw HSL (format: H S% L%):\n")
+	if design.PrimaryHSL != "" { sb.WriteString(fmt.Sprintf("Primary HSL: %s\n", design.PrimaryHSL)) }
+	if design.BackgroundHSL != "" { sb.WriteString(fmt.Sprintf("Background HSL: %s\n", design.BackgroundHSL)) }
+	if design.SurfaceHSL != "" { sb.WriteString(fmt.Sprintf("Surface HSL: %s\n", design.SurfaceHSL)) }
+	if design.SidebarBackgroundHSL != "" { sb.WriteString(fmt.Sprintf("Sidebar Background HSL: %s\n", design.SidebarBackgroundHSL)) }
+	if design.AccentHSL != "" { sb.WriteString(fmt.Sprintf("Accent HSL: %s\n", design.AccentHSL)) }
 
-	sb.WriteString("\nApply these colors to src/index.css CSS variables.\n")
-	sb.WriteString("Do NOT change these colors. Do NOT use defaults.\n")
+	sb.WriteString("\nAdditional Context:\n")
+	if design.TextColor != "" { sb.WriteString(fmt.Sprintf("Text Color: %s\n", design.TextColor)) }
+	if design.TextMutedColor != "" { sb.WriteString(fmt.Sprintf("Muted Text Color: %s\n", design.TextMutedColor)) }
+	if design.BorderColor != "" { sb.WriteString(fmt.Sprintf("Border Color: %s\n", design.BorderColor)) }
+	if design.FontFamily != "" { sb.WriteString(fmt.Sprintf("Font Family: %s\n", design.FontFamily)) }
+	if design.BorderRadius != "" { sb.WriteString(fmt.Sprintf("Border Radius: %s\n", design.BorderRadius)) }
+	if design.DesignInspiration != "" { sb.WriteString(fmt.Sprintf("Design Inspiration / Reference: %s\n", design.DesignInspiration)) }
+
+	sb.WriteString("\nCRITICAL INSTRUCTIONS FOR CODER:\n")
+	sb.WriteString("1. You MUST define ALL REQUIRED CSS VARIABLES for shadcn/tailwind (e.g., --muted, --border, --ring, --secondary, etc.) using this palette as a base.\n")
+	sb.WriteString("2. If you miss variables, the UI will break or become white. Do NOT just copy these 5 variables and stop. Expand this into a COMPLETE, jaw-dropping theme matching the Design Inspiration.\n")
+	sb.WriteString("3. NEVER use Tailwind's default generic gray/blue theme.\n")
 	sb.WriteString("====================================\n\n")
 
 	return sb.String()
 }
+
 
 func buildHistoryText(history []models.ChatMessage) string {
 	if len(history) == 0 {
