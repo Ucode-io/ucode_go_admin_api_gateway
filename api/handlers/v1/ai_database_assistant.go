@@ -1095,7 +1095,7 @@ func (p *ChatProcessor) callDatabaseAssistant(
 		models.AnthropicRequest{
 			Model:     p.baseConf.ClaudeModel,
 			MaxTokens: p.baseConf.InspectorMaxTokens,
-			System:    helper.SystemPromptDatabaseAssistantV2,
+			System:    helper.SystemPromptDatabaseAssistant,
 			Messages:  messages,
 		},
 		timeoutDatabaseAssistant,
