@@ -671,6 +671,8 @@ func (p *ChatProcessor) callSonnetCoderNewProject(ctx context.Context, clarified
 
 	apiCtx.WriteString("\nUse this UI Structure provided by the Architect:\n" + plan.UIStructure + "\n")
 
+	designSpec := buildDesignSpecBlock(plan.Design)
+
 	response, err := helper.CallAnthropicAPI(
 		p.baseConf,
 		models.AnthropicRequest{
@@ -680,7 +682,7 @@ func (p *ChatProcessor) callSonnetCoderNewProject(ctx context.Context, clarified
 			Messages: []models.ChatMessage{
 				{
 					Role:    "user",
-					Content: buildContentBlocksWithImages(clarified+"\n\n"+apiCtx.String(), imageURLs),
+					Content: buildContentBlocksWithImages(designSpec+clarified+"\n\n"+apiCtx.String(), imageURLs),
 				},
 			},
 		},
@@ -746,9 +748,9 @@ func (p *ChatProcessor) callSonnetCoderWithTemplate(ctx context.Context, clarifi
 		}
 	}
 
-	designForce := buildDesignForceBlock(clarified, len(imageURLs) > 0, slugs)
+	designSpec := buildDesignSpecBlock(plan.Design)
 
-	finalPrompt := designForce +
+	finalPrompt := designSpec +
 		clarified + "\n\n" +
 		apiCtx.String() + "\n" +
 		templateCtx.String()
@@ -1080,89 +1082,51 @@ func buildMessagesWithHistory(history []models.ChatMessage, contentBlocks []mode
 	return messages
 }
 
-func buildDesignForceBlock(clarified string, hasImages bool, availableSlugs []string) string {
-	var (
-		lower     = strings.ToLower(clarified)
-		reference string
-	)
-
-	platforms := []string{
-		"planfact", "linear", "notion", "stripe", "salesforce", "shopify",
-		"amocrm", "amo crm", "jira", "figma", "asana", "trello", "monday",
-		"hubspot", "pipedrive", "clickup",
-	}
-	for _, p := range platforms {
-		if strings.Contains(lower, p) {
-			reference = p
-			break
-		}
-	}
-
+func buildDesignSpecBlock(design models.DesignSpec) string {
 	var sb strings.Builder
 	sb.WriteString("====================================\n")
-	sb.WriteString("DESIGN DIRECTIVE — HIGHEST PRIORITY (READ BEFORE ANYTHING ELSE)\n")
+	sb.WriteString("DESIGN SPECIFICATION (FROM ARCHITECT — USE EXACTLY)\n")
 	sb.WriteString("====================================\n\n")
 
-	switch {
-
-	// ── MODE C: image provided ────────────────────────────────────────────────
-	case hasImages:
-		sb.WriteString("⚠️  MODE C — IMAGE PROVIDED\n\n")
-
-		sb.WriteString("STEP 1 — COLOR EXTRACTION (mandatory):\n")
-		sb.WriteString("- Scan the image: background, sidebar/panel, primary/accent, text colors\n")
-		sb.WriteString("- Convert each to HSL format\n")
-		sb.WriteString("- Use THESE HSL values in src/index.css — nothing else takes priority\n")
-		sb.WriteString("- Do NOT use domain color map or reference platform colors\n")
-		sb.WriteString("- The generated UI MUST visually match the image palette\n\n")
-
-		sb.WriteString("STEP 2 — FEATURE FILTERING (mandatory):\n")
-		sb.WriteString("The image may show sections that DO NOT exist in the backend schema.\n")
-		sb.WriteString("YOU MUST IGNORE any image section with no corresponding table below.\n\n")
-
-		if len(availableSlugs) > 0 {
-			sb.WriteString("AVAILABLE BACKEND TABLES — the ONLY features you may build:\n")
-			for _, slug := range availableSlugs {
-				sb.WriteString(fmt.Sprintf("  - %s\n", slug))
-			}
-			sb.WriteString("\n")
-			sb.WriteString("Any image section NOT in this list → SKIP IT.\n")
-			sb.WriteString("Number of pages to build = number of tables above (not number of image sections).\n\n")
-		}
-
-		sb.WriteString("EXAMPLE:\n")
-		sb.WriteString("  Image shows: Dashboard, Leads, Reports, Calendar, Chat (5 sections)\n")
-		sb.WriteString("  Schema has:  leads, contacts (2 tables)\n")
-		sb.WriteString("  → Build LeadsPage + ContactsPage with image colors. Skip the other 3.\n\n")
-
-	// ── MODE B: reference platform named ─────────────────────────────────────
-	case reference != "":
-		sb.WriteString(fmt.Sprintf("⚠️  MODE B — REFERENCE PLATFORM: \"%s\"\n\n", reference))
-		sb.WriteString(fmt.Sprintf(
-			"Replicate the exact visual design of %s:\n"+
-				"- Color scheme, typography, spacing, component shapes\n"+
-				"- Layout structure (sidebar style, header, content areas)\n"+
-				"- Navigation and interaction patterns\n\n"+
-				"Generic white/gray default UI is FAILURE.\n\n",
-			reference,
-		))
-
-	// ── MODE A: no image, no reference ───────────────────────────────────────
-	default:
-		sb.WriteString("⚠️  MODE A — NO IMAGE, NO REFERENCE\n\n")
-		sb.WriteString(
-			"Choose a UNIQUE, domain-appropriate visual style.\n" +
-				"- Pick a brand color that fits the domain (NOT #3b82f6, NOT slate-gray)\n" +
-				"- Make the sidebar visually distinct from the content area\n" +
-				"- Must look like a real SaaS product, not a boilerplate\n\n",
-		)
+	if design.PrimaryColor != "" {
+		sb.WriteString(fmt.Sprintf("Primary Color: %s (HSL: %s)\n", design.PrimaryColor, design.PrimaryHSL))
+	}
+	if design.BackgroundColor != "" {
+		sb.WriteString(fmt.Sprintf("Background: %s (HSL: %s)\n", design.BackgroundColor, design.BackgroundHSL))
+	}
+	if design.SurfaceColor != "" {
+		sb.WriteString(fmt.Sprintf("Surface/Cards: %s (HSL: %s)\n", design.SurfaceColor, design.SurfaceHSL))
+	}
+	if design.SidebarBackground != "" {
+		sb.WriteString(fmt.Sprintf("Sidebar Background: %s (HSL: %s) — style: %s\n", design.SidebarBackground, design.SidebarBackgroundHSL, design.SidebarStyle))
+	}
+	if design.SidebarForeground != "" {
+		sb.WriteString(fmt.Sprintf("Sidebar Foreground: %s\n", design.SidebarForeground))
+	}
+	if design.TextColor != "" {
+		sb.WriteString(fmt.Sprintf("Text Color: %s\n", design.TextColor))
+	}
+	if design.TextMutedColor != "" {
+		sb.WriteString(fmt.Sprintf("Text Muted: %s\n", design.TextMutedColor))
+	}
+	if design.BorderColor != "" {
+		sb.WriteString(fmt.Sprintf("Border Color: %s\n", design.BorderColor))
+	}
+	if design.AccentColor != "" {
+		sb.WriteString(fmt.Sprintf("Accent Color: %s (HSL: %s)\n", design.AccentColor, design.AccentHSL))
+	}
+	if design.FontFamily != "" {
+		sb.WriteString(fmt.Sprintf("Font Family: %s\n", design.FontFamily))
+	}
+	if design.BorderRadius != "" {
+		sb.WriteString(fmt.Sprintf("Border Radius: %s\n", design.BorderRadius))
+	}
+	if design.DesignInspiration != "" {
+		sb.WriteString(fmt.Sprintf("Design Inspiration: %s\n", design.DesignInspiration))
 	}
 
-	// ── Shared CSS enforcement (all modes) ────────────────────────────────────
-	sb.WriteString("MANDATORY CSS RULES:\n")
-	sb.WriteString("- src/index.css MUST be the FIRST file in your output\n")
-	sb.WriteString("- --primary MUST NOT be 221 83% 53% or 243 75% 59% (forbidden defaults)\n")
-	sb.WriteString("- --background MUST NOT be 0 0% 100% pure white UNLESS image shows white bg\n")
+	sb.WriteString("\nApply these colors to src/index.css CSS variables.\n")
+	sb.WriteString("Do NOT change these colors. Do NOT use defaults.\n")
 	sb.WriteString("====================================\n\n")
 
 	return sb.String()

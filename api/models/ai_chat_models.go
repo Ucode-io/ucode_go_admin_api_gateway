@@ -105,11 +105,33 @@ type (
 		MockData      []map[string]interface{} `json:"mock_data"`
 	}
 
+	DesignSpec struct {
+		PrimaryColor         string `json:"primary_color"`
+		PrimaryHSL           string `json:"primary_hsl"`
+		BackgroundColor      string `json:"background_color"`
+		BackgroundHSL        string `json:"background_hsl"`
+		SurfaceColor         string `json:"surface_color"`
+		SurfaceHSL           string `json:"surface_hsl"`
+		SidebarBackground    string `json:"sidebar_background"`
+		SidebarBackgroundHSL string `json:"sidebar_background_hsl"`
+		SidebarForeground    string `json:"sidebar_foreground"`
+		SidebarStyle         string `json:"sidebar_style"` // "dark" | "light" | "colored"
+		TextColor            string `json:"text_color"`
+		TextMutedColor       string `json:"text_muted_color"`
+		BorderColor          string `json:"border_color"`
+		AccentColor          string `json:"accent_color"`
+		AccentHSL            string `json:"accent_hsl"`
+		FontFamily           string `json:"font_family"`
+		BorderRadius         string `json:"border_radius"`
+		DesignInspiration     string `json:"design_inspiration"`
+	}
+
 	ArchitectPlan struct {
 		ProjectName string      `json:"project_name"`
 		ProjectType string      `json:"project_type"` // "admin_panel" | "landing" | "web" | "other"
 		Tables      []TablePlan `json:"tables"`
 		UIStructure string      `json:"ui_structure"`
+		Design      DesignSpec  `json:"design"`
 	}
 
 	ProjectData struct {
