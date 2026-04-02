@@ -3,6 +3,7 @@ package v1
 import (
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
+	auth "ucode/ucode_go_api_gateway/genproto/auth_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
@@ -28,6 +29,9 @@ func (h *HandlerV1) CreateEnvironment(c *gin.Context) {
 	var (
 		environmentRequest pb.CreateEnvironmentRequest
 		resp               = &pb.Environment{}
+
+		isUgen      = c.DefaultQuery("is_uagen", "false") == "true"
+		systemToken = c.GetHeader("system-token")
 	)
 
 	if err := c.ShouldBindJSON(&environmentRequest); err != nil {
@@ -73,6 +77,29 @@ func (h *HandlerV1) CreateEnvironment(c *gin.Context) {
 		return
 	}
 
+	environmentRequest.RoleId = tokenInfo.GetRoleId()
+	environmentRequest.UserId = tokenInfo.GetUserIdAuth()
+	environmentRequest.ClientTypeId = tokenInfo.GetClientTypeId()
+
+	if isUgen && systemToken != "" {
+		authService, conn, err := services.AuthService().Session(c.Request.Context())
+		if err != nil {
+			h.HandleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+		defer conn.Close()
+
+		ugenUserInfo, err := authService.GetUserInfoByToken(c.Request.Context(), &auth.GetUserInfoByTokenReq{Token: systemToken})
+		if err != nil {
+			h.HandleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		environmentRequest.RoleId = ugenUserInfo.GetRoleId()
+		environmentRequest.UserId = ugenUserInfo.GetUserId()
+		environmentRequest.ClientTypeId = ugenUserInfo.GetClientId()
+	}
+
 	var (
 		logReq = &models.CreateVersionHistoryRequest{
 			Services:     services,
@@ -96,10 +123,6 @@ func (h *HandlerV1) CreateEnvironment(c *gin.Context) {
 		}
 		go h.versionHistory(logReq)
 	}()
-
-	environmentRequest.RoleId = tokenInfo.GetRoleId()
-	environmentRequest.UserId = tokenInfo.GetUserIdAuth()
-	environmentRequest.ClientTypeId = tokenInfo.GetClientTypeId()
 
 	resp, err = h.companyServices.Environment().CreateV2(c.Request.Context(), &environmentRequest)
 	if err != nil {
