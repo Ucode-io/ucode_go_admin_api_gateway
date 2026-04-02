@@ -97,7 +97,7 @@ func (h *HandlerV1) CreateEnvironment(c *gin.Context) {
 
 		environmentRequest.RoleId = ugenUserInfo.GetRoleId()
 		environmentRequest.UserId = ugenUserInfo.GetUserId()
-		environmentRequest.ClientTypeId = ugenUserInfo.GetClientId()
+		environmentRequest.ClientTypeId = ugenUserInfo.GetClientTypeId()
 	}
 
 	var (
