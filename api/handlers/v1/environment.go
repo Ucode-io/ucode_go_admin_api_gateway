@@ -5,7 +5,6 @@ import (
 	"ucode/ucode_go_api_gateway/api/status_http"
 	auth "ucode/ucode_go_api_gateway/genproto/auth_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
-	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
@@ -186,12 +185,6 @@ func (h *HandlerV1) UpdateEnvironment(c *gin.Context) {
 		return
 	}
 
-	structData, err := helper.ConvertMapToStruct(environment.Data)
-	if err != nil {
-		h.HandleResponse(c, status_http.InternalServerError, err.Error())
-		return
-	}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.HandleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -231,7 +224,6 @@ func (h *HandlerV1) UpdateEnvironment(c *gin.Context) {
 			Name:         environment.Name,
 			DisplayColor: environment.DisplayColor,
 			Description:  environment.Description,
-			Data:         structData,
 		}
 		logReq = &models.CreateVersionHistoryRequest{
 			Services:     services,
