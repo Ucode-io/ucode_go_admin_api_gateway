@@ -1046,9 +1046,6 @@ func formatSchemaForSQL(tables []models.TableSchema) string {
 // ─────────────────────────────────────────────────────────────────────────────
 
 func (p *ChatProcessor) resolveBuilderResourceID(ctx context.Context) (string, error) {
-	if p.builderResourceID != "" {
-		return p.builderResourceID, nil
-	}
 
 	mcpProject, err := p.service.GoObjectBuilderService().McpProject().GetMcpProjectFiles(ctx, &nb.McpProjectId{
 		ResourceEnvId: p.resourceEnvID,
@@ -1073,8 +1070,7 @@ func (p *ChatProcessor) resolveBuilderResourceID(ctx context.Context) (string, e
 		return "", fmt.Errorf("resolve builder resource (%s/%s): %w", backendProjectID, backendEnvID, err)
 	}
 
-	p.builderResourceID = resp.ResourceEnvironmentId
-	return p.builderResourceID, nil
+	return resp.ResourceEnvironmentId, nil
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1087,7 +1083,7 @@ func (p *ChatProcessor) callDatabaseAssistant(
 	chatHistory []models.ChatMessage,
 ) (*models.DatabaseActionRequest, error) {
 
-	content := helper.ProcessDatabaseAssistantPromptV2(clarified, schemaText, dataContext)
+	content := helper.BuildDatabaseMessage(clarified, schemaText, dataContext)
 	messages := buildMessagesWithHistory(chatHistory, []models.ContentBlock{{Type: "text", Text: content}})
 
 	response, err := helper.CallAnthropicAPI(
@@ -1095,7 +1091,7 @@ func (p *ChatProcessor) callDatabaseAssistant(
 		models.AnthropicRequest{
 			Model:     p.baseConf.ClaudeModel,
 			MaxTokens: p.baseConf.InspectorMaxTokens,
-			System:    helper.SystemPromptDatabaseAssistantV2,
+			System:    helper.PromptDatabaseAssistant,
 			Messages:  messages,
 		},
 		timeoutDatabaseAssistant,
