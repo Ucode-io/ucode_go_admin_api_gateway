@@ -368,7 +368,7 @@ func (h *HandlerV1) GetAllEnvironments(c *gin.Context) {
 			Search:         c.Query("search"),
 			ProjectId:      c.Query("project_id"),
 			UserId:         authInfo.GetUserIdAuth(),
-			WithClientType: true,
+			WithClientType: c.DefaultQuery("with_client_type", "true") == "true",
 		},
 	)
 

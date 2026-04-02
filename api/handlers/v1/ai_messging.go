@@ -373,11 +373,16 @@ func (p *ChatProcessor) runCodeChange(ctx context.Context, clarified, fileGraphJ
 // ============================================================================
 
 func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, chatHistory []models.ChatMessage, imageURLs []string, estimatedName string) (*models.ParsedClaudeResponse, error) {
-	// Step 1: Architect designs the project structure (tables, fields, UI layout)
+	log.Printf("\n=======================================================")
+	log.Printf("[NEW PROJECT] 🚀 STARTING FULL-STACK GENERATION 🚀")
+	log.Printf("=======================================================")
+
+	log.Printf("[NEW PROJECT] [Step 1/4] Calling Architect (Planning & Design Phase)...")
 	plan, err := p.callArchitect(ctx, clarified, imageURLs)
 	if err != nil {
 		return nil, fmt.Errorf("architect phase failed: %w", err)
 	}
+	log.Printf("[NEW PROJECT] ✅ Architect generation successful. Name: %q, Type: %q", plan.ProjectName, plan.ProjectType)
 
 	if plan.ProjectName == "" {
 		plan.ProjectName = "AI Project"
@@ -386,26 +391,30 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 		}
 	}
 
-	// Step 2: Provision backend (project, environment, API key)
+	log.Printf("[NEW PROJECT] [Step 2/4] Provisioning Backend (Ucode Project & Env)...")
 	projectData, err := p.provisionBackend(ctx, plan.ProjectName, p.mcpProjectID)
 	if err != nil {
 		return nil, fmt.Errorf("backend provisioning failed: %w", err)
 	}
 	p.mcpProjectID = projectData.McpProjectId
+	log.Printf("[NEW PROJECT] ✅ Backend provisioned successfully (MCP ID: %s)", p.mcpProjectID)
 
-	// Step 3: Create backend tables asynchronously
+	log.Printf("[NEW PROJECT] [Step 3/4] Creating Tables (Async in background)...")
 	go func(bPlan *models.ArchitectPlan, resourceEnvId, envId string) {
 		if err := createBackendFromPlan(context.Background(), bPlan, resourceEnvId, envId, p.service); err != nil {
 			log.Printf("[ARCHITECT] backend table creation failed (resourceEnv=%s): %v", resourceEnvId, err)
+		} else {
+			log.Printf("[ARCHITECT] ✅ Async backend tables created successfully")
 		}
 	}(plan, projectData.ResourceEnvId, projectData.EnvironmentId)
 
-	// Step 4: Generate frontend code
+	log.Printf("[NEW PROJECT] [Step 4/4] Writing Frontend Code (Coder Phase)...")
 	if plan.ProjectType == "admin_panel" {
-		log.Printf("[CODE] generating admin panel with template system")
+		log.Printf("[CODE] Using admin panel template system...")
 		return p.generateAdminPanel(ctx, clarified, imageURLs, plan, projectData.ApiKey, projectData.EnvironmentId)
 	}
 
+	log.Printf("[CODE] Using open project generator...")
 	return p.generateProject(ctx, clarified, imageURLs, plan, projectData.ApiKey, projectData.EnvironmentId)
 }
 
@@ -610,6 +619,8 @@ func (p *ChatProcessor) callArchitect(ctx context.Context, clarified string, ima
 		return nil, fmt.Errorf("architect: extract text: %w", err)
 	}
 
+	log.Printf("\n--- [ARCHITECT RAW RESPONSE] ---\n%s\n--------------------------------\n", text)
+
 	var plan models.ArchitectPlan
 	if err = json.Unmarshal([]byte(helper.CleanJSONResponse(text)), &plan); err != nil {
 		log.Printf("[ARCHITECT] parse failed (%v), attempting JSON repair...", err)
@@ -685,7 +696,11 @@ func (p *ChatProcessor) generateProject(ctx context.Context, clarified string, i
 		return nil, fmt.Errorf("generate project: claude returned empty project")
 	}
 
-	log.Printf("[CODE] generate project done, files=%d", len(parsed.Project.Files))
+	log.Printf("[CODE] ✅ Generate project completed. Built %d files:", len(parsed.Project.Files))
+	for _, f := range parsed.Project.Files {
+		log.Printf("  - %s (%d bytes)", f.Path, len(f.Content))
+	}
+
 	return parsed, nil
 }
 
@@ -759,7 +774,11 @@ func (p *ChatProcessor) generateAdminPanel(ctx context.Context, clarified string
 		}
 	}
 
-	log.Printf("[CODE] admin panel done, files=%d", len(parsed.Project.Files))
+	log.Printf("[CODE] ✅ Admin panel generation completed. Total %d files:", len(parsed.Project.Files))
+	for _, f := range parsed.Project.Files {
+		log.Printf("  - %s (%d bytes)", f.Path, len(f.Content))
+	}
+
 	return parsed, nil
 }
 
