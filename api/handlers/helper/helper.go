@@ -35,10 +35,8 @@ func ExtractPlainText(rawJSON string) (string, error) {
 }
 
 var (
-	jsonBlockRegex       = regexp.MustCompile("(?s)```json\\s*\\n?(.*?)\\n?```")
-	genericBlockRegex    = regexp.MustCompile("(?s)```\\s*\\n?(.*?)\\n?```")
-	jsonAndDescRegex     = regexp.MustCompile("(?s)```json\\s*\\n?(.*?)\\n?```(.*)")
-	jsonOnlyAndDescRegex = regexp.MustCompile("(?s)```\\s*\\n?(\\{.*?\\})\\n?```(.*)")
+	jsonBlockRegex    = regexp.MustCompile("(?s)```json\\s*\\n?(.*?)\\n?```")
+	genericBlockRegex = regexp.MustCompile("(?s)```\\s*\\n?(.*?)\\n?```")
 )
 
 func extractJSON(text string) string {
@@ -53,11 +51,8 @@ func extractJSON(text string) string {
 		}
 	}
 
-	var (
-		start = strings.Index(text, "{")
-		end   = strings.LastIndex(text, "}")
-	)
-
+	start := strings.Index(text, "{")
+	end := strings.LastIndex(text, "}")
 	if start != -1 && end != -1 && end > start {
 		return strings.TrimSpace(text[start : end+1])
 	}
@@ -74,7 +69,6 @@ func sanitizeJSONContent(s string) string {
 	b.Grow(len(s))
 	for i := 0; i < len(s); i++ {
 		c := s[i]
-
 		if c >= 0x20 || c == '\n' || c == '\r' || c == '\t' || c >= 0x80 {
 			b.WriteByte(c)
 		}
@@ -99,7 +93,6 @@ func repairJSONStrings(input string) string {
 		}
 
 		if c == '\\' && inString {
-
 			if i+1 < len(input) {
 				next := input[i+1]
 				validEscape := next == '"' || next == '\\' || next == '/' ||
@@ -140,17 +133,16 @@ func repairJSONStrings(input string) string {
 	return out.String()
 }
 
+// ParseClaudeResponse parses a raw Claude API response into a structured result.
+// Runs up to 3 JSON repair passes if the initial parse fails.
 func ParseClaudeResponse(rawJSON string) (*models.ParsedClaudeResponse, error) {
 	fullText, resp, err := extractTextFromClaudeResponse(rawJSON)
 	if err != nil {
 		return nil, err
 	}
 
-	log.Printf("PARSE_CLAUDE_RESPONSE: stop_reason=%s input_tokens=%d output_tokens=%d text_length=%d",
-		resp.StopReason, resp.Usage.InputTokens, resp.Usage.OutputTokens, len(fullText))
-
 	if resp.StopReason == "max_tokens" {
-		log.Printf("PARSE_CLAUDE_RESPONSE WARNING: response was cut off by max_tokens! Consider increasing MaxTokens.")
+		log.Printf("[PARSE] WARNING: response cut off by max_tokens — consider increasing MaxTokens (input=%d output=%d)", resp.Usage.InputTokens, resp.Usage.OutputTokens)
 	}
 
 	result := &models.ParsedClaudeResponse{
@@ -165,29 +157,24 @@ func ParseClaudeResponse(rawJSON string) (*models.ParsedClaudeResponse, error) {
 	if jsonBlock != "" {
 		var project models.GeneratedProject
 
-		// Pass 1: try to unmarshal as-is (fast path, no allocation overhead)
+		// Pass 1: try to parse as-is
 		parseErr := json.Unmarshal([]byte(jsonBlock), &project)
 
 		if parseErr != nil {
-			log.Printf("PARSE_CLAUDE_RESPONSE: pass-1 unmarshal failed (%v) | json_preview=%.200s", parseErr, jsonBlock)
-
 			// Pass 2: strip invalid control characters, then retry
 			sanitized := sanitizeJSONContent(jsonBlock)
 			parseErr = json.Unmarshal([]byte(sanitized), &project)
 
 			if parseErr != nil {
-				log.Printf("PARSE_CLAUDE_RESPONSE: pass-2 (sanitize) failed (%v), trying escape repair", parseErr)
-
+				// Pass 3: repair escape sequences, then retry
 				repaired := repairJSONStrings(sanitized)
 				parseErr = json.Unmarshal([]byte(repaired), &project)
 
 				if parseErr != nil {
-					log.Printf("PARSE_CLAUDE_RESPONSE: all passes failed: %v | repaired_preview=%.300s", parseErr, repaired)
+					log.Printf("[PARSE] all 3 repair passes failed: %v", parseErr)
 					return nil, fmt.Errorf("project JSON parse failed after 3 repair passes: %w", parseErr)
 				}
-				log.Printf("PARSE_CLAUDE_RESPONSE: pass-3 (escape repair) succeeded")
-			} else {
-				log.Printf("PARSE_CLAUDE_RESPONSE: pass-2 (sanitize) succeeded")
+				log.Printf("[PARSE] pass-3 (escape repair) succeeded")
 			}
 		}
 
@@ -199,21 +186,16 @@ func ParseClaudeResponse(rawJSON string) (*models.ParsedClaudeResponse, error) {
 }
 
 func ParseHaikuRoutingResult(rawJSON string) (*models.HaikuRoutingResult, error) {
-	fullText, resp, err := extractTextFromClaudeResponse(rawJSON)
+	fullText, _, err := extractTextFromClaudeResponse(rawJSON)
 	if err != nil {
 		return nil, err
 	}
 
-	log.Printf("PARSE_HAIKU: stop_reason=%s input_tokens=%d output_tokens=%d",
-		resp.StopReason, resp.Usage.InputTokens, resp.Usage.OutputTokens)
-	log.Printf("PARSE_HAIKU RAW TEXT: %.500s", fullText)
-
 	cleaned := extractJSON(fullText)
-	log.Printf("PARSE_HAIKU CLEANED JSON: %.500s", cleaned)
 
 	var result models.HaikuRoutingResult
 	if err := json.Unmarshal([]byte(cleaned), &result); err != nil {
-		log.Printf("PARSE_HAIKU: unmarshal failed (%v), falling back to chat reply", err)
+		log.Printf("[PARSE] haiku routing: unmarshal failed (%v), falling back to plain reply", err)
 		return &models.HaikuRoutingResult{
 			NextStep: false,
 			Intent:   "chat",
@@ -230,24 +212,17 @@ func ParseSonnetPlanResult(rawJSON string) (*models.SonnetPlanResult, error) {
 		return nil, err
 	}
 
-	log.Printf("PARSE_SONNET_PLAN: stop_reason=%s input_tokens=%d output_tokens=%d text_length=%d",
-		resp.StopReason, resp.Usage.InputTokens, resp.Usage.OutputTokens, len(fullText))
-
 	if resp.StopReason == "max_tokens" {
-		log.Printf("PARSE_SONNET_PLAN WARNING: response cut off by max_tokens!")
+		log.Printf("[PARSE] WARNING: planner response cut off by max_tokens")
 	}
 
-	log.Printf("PARSE_SONNET_PLAN RAW TEXT: %.1000s", fullText)
-
 	cleaned := extractJSON(fullText)
-	log.Printf("PARSE_SONNET_PLAN CLEANED JSON: %.1000s", cleaned)
 
 	var result models.SonnetPlanResult
 	if err := json.Unmarshal([]byte(cleaned), &result); err != nil {
-		return nil, fmt.Errorf("failed to parse sonnet plan json: %w | raw_text_preview=%.300s", err, fullText)
+		return nil, fmt.Errorf("failed to parse planner JSON: %w", err)
 	}
 
-	log.Printf("PARSE_SONNET_PLAN OK: files_to_change=%d files_to_create=%d", len(result.FilesToChange), len(result.FilesToCreate))
 	return &result, nil
 }
 
@@ -265,8 +240,7 @@ func extractJSONAndDescription(text string) (jsonBlock, description string) {
 	if idx := strings.Index(text, "\n---\n"); idx != -1 {
 		jsonPart := strings.TrimSpace(text[:idx])
 		descPart := strings.TrimSpace(text[idx+5:])
-		jsonPart = extractJSON(jsonPart)
-		return jsonPart, descPart
+		return extractJSON(jsonPart), descPart
 	}
 
 	if strings.HasPrefix(strings.TrimSpace(text), "{") {

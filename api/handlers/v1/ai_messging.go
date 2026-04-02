@@ -30,14 +30,13 @@ const (
 )
 
 type ChatProcessor struct {
-	h                 *HandlerV1
-	service           services.ServiceManagerI
-	baseConf          config.BaseConfig
-	chatId            string
-	mcpProjectID      string
-	resourceEnvID     string
-	ucodeProjectID    string
-	builderResourceID string
+	h              *HandlerV1
+	service        services.ServiceManagerI
+	baseConf       config.BaseConfig
+	chatId         string
+	mcpProjectID   string
+	resourceEnvID  string
+	ucodeProjectID string
 
 	userID       string
 	clientTypeID string
@@ -78,7 +77,7 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 		return
 	}
 
-	var isPendingConfirmation = userMessage.PendingAction != nil
+	isPendingConfirmation := userMessage.PendingAction != nil
 
 	if !isPendingConfirmation && strings.TrimSpace(userMessage.Content) == "" {
 		h.HandleResponse(c, status_http.BadRequest, "content is required")
@@ -107,12 +106,8 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 		return
 	}
 
-	var (
-		projectIdObj, _ = c.Get("project_id")
-		realProjectID   = projectIdObj.(string)
-
-		updateProject *pbo.McpProject
-	)
+	projectIdObj, _ := c.Get("project_id")
+	realProjectID := projectIdObj.(string)
 
 	processor := newChatProcessor(
 		h, service, h.baseConf,
@@ -131,7 +126,7 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 		return
 	}
 
-	_, err = processor.createMessageRecord(ctx, "user", userMessage.Content, userMessage.Images)
+	_, err = processor.saveMessage(ctx, "user", userMessage.Content, userMessage.Images)
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, fmt.Sprintf("failed to save user message: %v", err))
 		return
@@ -151,20 +146,22 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 		}
 	}
 
-	message, err := processor.createMessageRecord(ctx, "assistant", aiResponse.Description, nil)
+	message, err := processor.saveMessage(ctx, "assistant", aiResponse.Description, nil)
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, fmt.Sprintf("failed to save ai message: %v", err))
 		return
 	}
 
+	var updatedProject *pbo.McpProject
 	if aiResponse.Project != nil {
-		updateProject, err = processor.saveProject(ctx, aiResponse)
+		updatedProject, err = processor.saveProject(ctx, aiResponse)
 		if err != nil {
 			h.HandleResponse(c, status_http.GRPCError, fmt.Sprintf("failed to save project: %v", err))
 			return
 		}
 	}
 
+	// Set chat title on first message
 	if len(chatHistory) == 0 {
 		_, _ = service.GoObjectBuilderService().AiChat().UpdateChat(
 			ctx, &pbo.UpdateChatRequest{
@@ -179,22 +176,25 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 
 	h.HandleResponse(c, status_http.Created, map[string]any{
 		"message":        message,
-		"project":        updateProject,
+		"project":        updatedProject,
 		"mcp_project_id": processor.mcpProjectID,
 		"pending_action": aiResponse.PendingAction,
 	})
 }
 
-func (h *HandlerV1) handlePendingConfirmation(c *gin.Context, ctx context.Context, processor *ChatProcessor, req models.NewMessageReq, chatHistory []models.ChatMessage, service services.ServiceManagerI, resourceEnvID, chatId string) {
-	var (
-		action = req.PendingAction
+func (h *HandlerV1) handlePendingConfirmation(
+	c *gin.Context,
+	ctx context.Context,
+	processor *ChatProcessor,
+	req models.NewMessageReq,
+	chatHistory []models.ChatMessage,
+	service services.ServiceManagerI,
+	resourceEnvID, chatId string,
+) {
+	action := req.PendingAction
 
-		assistantReply string
-		mutationResult any
-
-		userContent = strings.TrimSpace(req.Content)
-	)
-
+	// Use explicit content if provided, otherwise derive from approval status
+	userContent := strings.TrimSpace(req.Content)
 	if userContent == "" {
 		if action.Approved {
 			userContent = "Да"
@@ -203,14 +203,18 @@ func (h *HandlerV1) handlePendingConfirmation(c *gin.Context, ctx context.Contex
 		}
 	}
 
-	_, err := processor.createMessageRecord(ctx, "user", userContent, nil)
+	_, err := processor.saveMessage(ctx, "user", userContent, nil)
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, fmt.Sprintf("failed to save confirmation message: %v", err))
 		return
 	}
 
+	var (
+		assistantReply string
+		mutationResult any
+	)
+
 	if !action.Approved {
-		// Используем cancel_message от AI, fallback — дефолтный
 		assistantReply = action.CancelMessage
 		if strings.TrimSpace(assistantReply) == "" {
 			assistantReply = "Окей, действие отменено. Ничего не изменено."
@@ -224,7 +228,6 @@ func (h *HandlerV1) handlePendingConfirmation(c *gin.Context, ctx context.Contex
 
 		assistantReply = action.SuccessMessage
 		if strings.TrimSpace(assistantReply) == "" {
-			// fallback если AI не заполнил
 			switch action.Action {
 			case "create":
 				assistantReply = fmt.Sprintf("✅ Запись успешно создана в `%s`.", action.TableSlug)
@@ -238,7 +241,7 @@ func (h *HandlerV1) handlePendingConfirmation(c *gin.Context, ctx context.Contex
 		}
 	}
 
-	message, err := processor.createMessageRecord(ctx, "assistant", assistantReply, nil)
+	message, err := processor.saveMessage(ctx, "assistant", assistantReply, nil)
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, fmt.Sprintf("failed to save assistant message: %v", err))
 		return
@@ -268,13 +271,14 @@ func (h *HandlerV1) handlePendingConfirmation(c *gin.Context, ctx context.Contex
 // ============================================================================
 
 func (p *ChatProcessor) routeAndProcess(ctx context.Context, req models.NewMessageReq, chatHistory []models.ChatMessage) (*models.ParsedClaudeResponse, error) {
+	hasImages := len(req.Images) > 0
+
+	// Load existing project files if a project is linked
 	var (
-		hasImages     = len(req.Images) > 0
 		projectData   *pbo.McpProject
 		fileGraphJSON = "{}"
 		err           error
 	)
-
 	if p.mcpProjectID != "" {
 		projectData, err = p.service.GoObjectBuilderService().McpProject().GetMcpProjectFiles(
 			ctx, &pbo.McpProjectId{
@@ -283,36 +287,32 @@ func (p *ChatProcessor) routeAndProcess(ctx context.Context, req models.NewMessa
 			},
 		)
 		if err != nil {
-			log.Printf("[ROUTER] failed to get project files (mcpProjectID=%s): %v", p.mcpProjectID, err)
+			log.Printf("[ROUTER] failed to load project files (mcpProjectID=%s): %v", p.mcpProjectID, err)
 			projectData = nil
 		}
-
 		if projectData != nil {
 			fileGraphJSON, _ = p.buildFileGraphJSON(projectData)
 		}
 	}
 
-	haikuResult, err := p.callHaikuRouter(req.Content, fileGraphJSON, hasImages, chatHistory)
+	// Step 1: classify intent using fast Haiku model
+	routeResult, err := p.routeRequest(req.Content, fileGraphJSON, hasImages, chatHistory)
 	if err != nil {
 		return nil, err
 	}
 
-	log.Printf("[ROUTER] next_step=%v intent=%s has_images=%v files_needed=%d clarified=%q",
-		haikuResult.NextStep, haikuResult.Intent, haikuResult.HasImages,
-		len(haikuResult.FilesNeeded), haikuResult.Clarified,
-	)
+	log.Printf("[ROUTER] intent=%s next_step=%v files_needed=%d", routeResult.Intent, routeResult.NextStep, len(routeResult.FilesNeeded))
 
-	if !haikuResult.NextStep {
-		return &models.ParsedClaudeResponse{Description: haikuResult.Reply}, nil
+	// If Haiku said no further processing needed, return its reply directly
+	if !routeResult.NextStep {
+		return &models.ParsedClaudeResponse{Description: routeResult.Reply}, nil
 	}
 
-	switch haikuResult.Intent {
+	// Step 2: route to the appropriate handler based on intent
+	switch routeResult.Intent {
 
-	case "clarify":
-		return &models.ParsedClaudeResponse{Description: haikuResult.Reply}, nil
-
-	case "project_question":
-		return &models.ParsedClaudeResponse{Description: haikuResult.Reply}, nil
+	case "clarify", "project_question":
+		return &models.ParsedClaudeResponse{Description: routeResult.Reply}, nil
 
 	case "project_inspect":
 		if projectData == nil {
@@ -320,62 +320,60 @@ func (p *ChatProcessor) routeAndProcess(ctx context.Context, req models.NewMessa
 				Description: "No project exists yet. Please create a project first by describing what you want to build.",
 			}, nil
 		}
-		return p.runInspectFlow(ctx, req.Content, haikuResult.FilesNeeded, chatHistory, req.Images, projectData)
+		return p.runInspect(ctx, req.Content, routeResult.FilesNeeded, chatHistory, req.Images, projectData)
 
 	case "code_change":
-		return p.runCodeFlow(ctx, haikuResult.Clarified, fileGraphJSON, chatHistory, req.Images, haikuResult.ProjectName, projectData)
+		return p.runCodeChange(ctx, routeResult.Clarified, fileGraphJSON, chatHistory, req.Images, routeResult.ProjectName, projectData)
 
 	case "database_query":
-		clarified := strings.TrimSpace(haikuResult.Clarified)
+		clarified := strings.TrimSpace(routeResult.Clarified)
 		if clarified == "" {
 			clarified = req.Content
-			log.Printf("[ROUTER] database_query clarified was empty — using raw content")
+			log.Printf("[ROUTER] database_query: clarified was empty, using raw content")
 		}
 		return p.runDatabaseFlow(ctx, clarified, chatHistory)
 	}
 
-	return &models.ParsedClaudeResponse{Description: haikuResult.Reply}, nil
+	return &models.ParsedClaudeResponse{Description: routeResult.Reply}, nil
 }
 
-func (p *ChatProcessor) runInspectFlow(ctx context.Context, userQuestion string, filesNeeded []string, chatHistory []models.ChatMessage, imageURLs []string, projectData *pbo.McpProject) (*models.ParsedClaudeResponse, error) {
+func (p *ChatProcessor) runInspect(ctx context.Context, userQuestion string, filesNeeded []string, chatHistory []models.ChatMessage, imageURLs []string, projectData *pbo.McpProject) (*models.ParsedClaudeResponse, error) {
 	filesContext := p.buildFilesContext(projectData, filesNeeded)
-
-	answer, err := p.callSonnetInspector(ctx, userQuestion, filesContext, chatHistory, imageURLs)
+	answer, err := p.inspectCode(ctx, userQuestion, filesContext, chatHistory, imageURLs)
 	if err != nil {
 		return nil, err
 	}
-
 	return &models.ParsedClaudeResponse{Description: answer}, nil
 }
 
-func (p *ChatProcessor) runCodeFlow(ctx context.Context, clarified, fileGraphJSON string, chatHistory []models.ChatMessage, imageURLs []string, projectName string, projectData *pbo.McpProject) (*models.ParsedClaudeResponse, error) {
-
+func (p *ChatProcessor) runCodeChange(ctx context.Context, clarified, fileGraphJSON string, chatHistory []models.ChatMessage, imageURLs []string, projectName string, projectData *pbo.McpProject) (*models.ParsedClaudeResponse, error) {
+	// No existing project — run the full new project creation flow
 	if projectData == nil || len(projectData.GetProjectFiles()) == 0 {
-		log.Println("[CODER] New project — routing to Architect")
-		return p.handleNewProjectPhase(ctx, clarified, chatHistory, imageURLs, projectName)
+		log.Printf("[CODE] no existing project — starting new project build")
+		return p.buildNewProject(ctx, clarified, chatHistory, imageURLs, projectName)
 	}
 
-	plan, err := p.callSonnetPlanner(ctx, clarified, fileGraphJSON, chatHistory, len(imageURLs) > 0)
+	// Existing project — plan then edit
+	plan, err := p.planChanges(ctx, clarified, fileGraphJSON, chatHistory, len(imageURLs) > 0)
 	if err != nil {
 		return nil, err
 	}
+	log.Printf("[PLANNER] files_to_change=%d files_to_create=%d", len(plan.FilesToChange), len(plan.FilesToCreate))
 
-	log.Printf("[PLANNER] modify=%d create=%d", len(plan.FilesToChange), len(plan.FilesToCreate))
-
-	var neededPaths = make([]string, 0, len(plan.FilesToChange))
-
+	neededPaths := make([]string, 0, len(plan.FilesToChange))
 	for _, f := range plan.FilesToChange {
 		neededPaths = append(neededPaths, f.Path)
 	}
 
-	return p.callSonnetCoder(ctx, clarified, plan, p.buildFilesContext(projectData, neededPaths), chatHistory, imageURLs)
+	return p.editCode(ctx, clarified, plan, p.buildFilesContext(projectData, neededPaths), chatHistory, imageURLs)
 }
 
 // ============================================================================
-// NEW PROJECT PHASE
+// NEW PROJECT BUILD
 // ============================================================================
 
-func (p *ChatProcessor) handleNewProjectPhase(ctx context.Context, clarified string, chatHistory []models.ChatMessage, imageURLs []string, estimatedName string) (*models.ParsedClaudeResponse, error) {
+func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, chatHistory []models.ChatMessage, imageURLs []string, estimatedName string) (*models.ParsedClaudeResponse, error) {
+	// Step 1: Architect designs the project structure (tables, fields, UI layout)
 	plan, err := p.callArchitect(ctx, clarified, imageURLs)
 	if err != nil {
 		return nil, fmt.Errorf("architect phase failed: %w", err)
@@ -388,66 +386,66 @@ func (p *ChatProcessor) handleNewProjectPhase(ctx context.Context, clarified str
 		}
 	}
 
-	projectData, err := p.createUcodeProject(ctx, plan.ProjectName, p.mcpProjectID)
+	// Step 2: Provision backend (project, environment, API key)
+	projectData, err := p.provisionBackend(ctx, plan.ProjectName, p.mcpProjectID)
 	if err != nil {
 		return nil, fmt.Errorf("backend provisioning failed: %w", err)
 	}
-
 	p.mcpProjectID = projectData.McpProjectId
 
+	// Step 3: Create backend tables asynchronously
 	go func(bPlan *models.ArchitectPlan, resourceEnvId, envId string) {
 		if err := createBackendFromPlan(context.Background(), bPlan, resourceEnvId, envId, p.service); err != nil {
-			log.Printf("[ARCHITECT] backend build failed (resourceEnv=%s): %v", resourceEnvId, err)
+			log.Printf("[ARCHITECT] backend table creation failed (resourceEnv=%s): %v", resourceEnvId, err)
 		}
 	}(plan, projectData.ResourceEnvId, projectData.EnvironmentId)
 
+	// Step 4: Generate frontend code
 	if plan.ProjectType == "admin_panel" {
-		log.Printf("[CODER] admin panel — using template generation")
-		return p.callSonnetCoderWithTemplate(ctx, clarified, imageURLs, plan, projectData.ApiKey, projectData.EnvironmentId)
+		log.Printf("[CODE] generating admin panel with template system")
+		return p.generateAdminPanel(ctx, clarified, imageURLs, plan, projectData.ApiKey, projectData.EnvironmentId)
 	}
 
-	return p.callSonnetCoderNewProject(ctx, clarified, imageURLs, plan, projectData.ApiKey, projectData.EnvironmentId)
+	return p.generateProject(ctx, clarified, imageURLs, plan, projectData.ApiKey, projectData.EnvironmentId)
 }
 
 // ============================================================================
-// CLAUDE API INTEGRATIONS
+// CLAUDE API CALLS
 // ============================================================================
 
-func (p *ChatProcessor) callHaikuRouter(userPrompt, fileGraphJSON string, hasImages bool, chatHistory []models.ChatMessage) (*models.HaikuRoutingResult, error) {
+// routeRequest classifies the user's message and decides the next step using the fast Haiku model.
+func (p *ChatProcessor) routeRequest(userPrompt, fileGraphJSON string, hasImages bool, chatHistory []models.ChatMessage) (*models.HaikuRoutingResult, error) {
 	historyText := buildHistoryText(chatHistory)
+	content := helper.BuildRouterMessage(userPrompt, fileGraphJSON, hasImages, historyText)
 
-	content := helper.ProcessHaikuPrompt(userPrompt, fileGraphJSON, hasImages, historyText)
-	messages := []models.ChatMessage{
-		{
-			Role:    "user",
-			Content: []models.ContentBlock{{Type: "text", Text: content}},
-		},
-	}
 	response, err := helper.CallAnthropicAPI(
 		p.baseConf,
 		models.AnthropicRequest{
 			Model:     p.baseConf.ClaudeHaikuModel,
 			MaxTokens: p.baseConf.RouterMaxTokens,
-			System:    helper.SystemPromptHaikuRouter,
-			Messages:  messages,
+			System:    helper.PromptRouter,
+			Messages: []models.ChatMessage{
+				{Role: "user", Content: []models.ContentBlock{{Type: "text", Text: content}}},
+			},
 		},
 		timeoutHaiku,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("haiku router: %w", err)
+		return nil, fmt.Errorf("router (haiku): %w", err)
 	}
 
 	result, err := helper.ParseHaikuRoutingResult(response)
 	if err != nil {
-		return nil, fmt.Errorf("parse haiku result: %w", err)
+		return nil, fmt.Errorf("router: parse failed: %w", err)
 	}
 
 	result.HasImages = hasImages
 	return result, nil
 }
 
-func (p *ChatProcessor) callSonnetInspector(ctx context.Context, userQuestion, filesContext string, chatHistory []models.ChatMessage, imageURLs []string) (string, error) {
-	content := helper.ProcessSonnetInspectorPrompt(userQuestion, filesContext)
+// inspectCode answers questions about existing project file contents.
+func (p *ChatProcessor) inspectCode(ctx context.Context, userQuestion, filesContext string, chatHistory []models.ChatMessage, imageURLs []string) (string, error) {
+	content := helper.BuildInspectorMessage(userQuestion, filesContext)
 	messages := buildMessagesWithHistory(chatHistory, buildContentBlocksWithImages(content, imageURLs))
 
 	response, err := helper.CallAnthropicAPI(
@@ -455,25 +453,25 @@ func (p *ChatProcessor) callSonnetInspector(ctx context.Context, userQuestion, f
 		models.AnthropicRequest{
 			Model:     p.baseConf.ClaudeModel,
 			MaxTokens: p.baseConf.InspectorMaxTokens,
-			System:    helper.SystemPromptSonnetInspector,
+			System:    helper.PromptInspector,
 			Messages:  messages,
 		},
 		timeoutInspector,
 	)
 	if err != nil {
-		return "", fmt.Errorf("sonnet inspector: %w", err)
+		return "", fmt.Errorf("inspector: %w", err)
 	}
 
 	answer, err := helper.ExtractPlainText(response)
 	if err != nil {
-		return "", fmt.Errorf("extract inspector text: %w", err)
+		return "", fmt.Errorf("inspector: extract text: %w", err)
 	}
-
 	return answer, nil
 }
 
-func (p *ChatProcessor) callSonnetPlanner(ctx context.Context, clarified, fileGraphJSON string, chatHistory []models.ChatMessage, hasImages bool) (*models.SonnetPlanResult, error) {
-	content := helper.ProcessSonnetPlanPrompt(clarified, fileGraphJSON, hasImages)
+// planChanges analyzes the file graph and returns a list of files to create/modify.
+func (p *ChatProcessor) planChanges(ctx context.Context, clarified, fileGraphJSON string, chatHistory []models.ChatMessage, hasImages bool) (*models.SonnetPlanResult, error) {
+	content := helper.BuildPlannerMessage(clarified, fileGraphJSON, hasImages)
 	messages := buildMessagesWithHistory(chatHistory, []models.ContentBlock{{Type: "text", Text: content}})
 
 	response, err := helper.CallAnthropicAPI(
@@ -481,39 +479,41 @@ func (p *ChatProcessor) callSonnetPlanner(ctx context.Context, clarified, fileGr
 		models.AnthropicRequest{
 			Model:     p.baseConf.ClaudeModel,
 			MaxTokens: p.baseConf.PlannerMaxTokens,
-			System:    helper.SystemPromptSonnetPlanner,
+			System:    helper.PromptPlanner,
 			Messages:  messages,
 		},
 		timeoutPlanner,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("sonnet planner: %w", err)
+		return nil, fmt.Errorf("planner: %w", err)
 	}
 
 	result, err := helper.ParseSonnetPlanResult(response)
 	if err != nil {
-		return nil, fmt.Errorf("parse plan: %w", err)
+		return nil, fmt.Errorf("planner: parse failed: %w", err)
 	}
-
 	return result, nil
 }
 
-func (p *ChatProcessor) callSonnetCoder(ctx context.Context, clarified string, plan *models.SonnetPlanResult, filesContext string, chatHistory []models.ChatMessage, imageURLs []string) (*models.ParsedClaudeResponse, error) {
-	hasFiles := filesContext != "No existing files to modify." && filesContext != "No matching files found."
+// editCode applies changes to specific files in an existing project.
+// If the planned files are not found in the project, falls back to free generation.
+func (p *ChatProcessor) editCode(ctx context.Context, clarified string, plan *models.SonnetPlanResult, filesContext string, chatHistory []models.ChatMessage, imageURLs []string) (*models.ParsedClaudeResponse, error) {
+	hasMatchingFiles := filesContext != "No existing files to modify." && filesContext != "No matching files found."
 
-	var (
-		systemPrompt  string
-		contentBlocks []models.ContentBlock
-	)
+	var systemPrompt string
+	var contentBlocks []models.ContentBlock
 
-	if !hasFiles {
-		systemPrompt = helper.SystemPromptAiChat
-		contentBlocks = buildContentBlocksWithImages(clarified, imageURLs)
-	} else {
-		systemPrompt = helper.SystemPromptSonnetCoder
+	if hasMatchingFiles {
+		systemPrompt = helper.PromptCodeEditor
 		planJSON, _ := json.Marshal(plan)
-		content := helper.ProcessSonnetCoderPrompt(clarified, string(planJSON), filesContext, len(imageURLs) > 0)
+		content := helper.BuildCodeEditorMessage(clarified, string(planJSON), filesContext, len(imageURLs) > 0)
 		contentBlocks = buildContentBlocksWithImages(content, imageURLs)
+	} else {
+		// Planner found files to change but none exist in the project yet —
+		// fall back to free generation using the full code generator prompt.
+		log.Printf("[CODE] planned files not found in project, falling back to free generation")
+		systemPrompt = helper.PromptCodeGenerator
+		contentBlocks = buildContentBlocksWithImages(clarified, imageURLs)
 	}
 
 	response, err := helper.CallAnthropicAPI(
@@ -527,18 +527,19 @@ func (p *ChatProcessor) callSonnetCoder(ctx context.Context, clarified string, p
 		timeoutCoder,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("sonnet coder: %w", err)
+		return nil, fmt.Errorf("code editor: %w", err)
 	}
 
 	parsed, parseErr := helper.ParseClaudeResponse(response)
 	if parseErr != nil {
-		log.Printf("[CODER] parse failed, attempting Claude-side JSON repair: %v", parseErr)
-		return p.retryWithJSONRepair(ctx, response, clarified, systemPrompt)
+		log.Printf("[CODE] parse failed, attempting JSON repair: %v", parseErr)
+		return p.repairJSON(ctx, response, clarified, systemPrompt)
 	}
 	return parsed, nil
 }
 
-func (p *ChatProcessor) retryWithJSONRepair(ctx context.Context, brokenRawResponse, originalTask, systemPrompt string) (*models.ParsedClaudeResponse, error) {
+// repairJSON asks Claude to fix a broken JSON response it previously generated.
+func (p *ChatProcessor) repairJSON(ctx context.Context, brokenRawResponse, originalTask, systemPrompt string) (*models.ParsedClaudeResponse, error) {
 	brokenText, _ := helper.ExtractPlainText(brokenRawResponse)
 
 	fixPrompt := fmt.Sprintf(
@@ -570,35 +571,32 @@ func (p *ChatProcessor) retryWithJSONRepair(ctx context.Context, brokenRawRespon
 		timeoutCoder,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("JSON repair retry API call failed: %w", err)
+		return nil, fmt.Errorf("JSON repair: API call failed: %w", err)
 	}
 
 	parsed, err := helper.ParseClaudeResponse(retryResponse)
 	if err != nil {
-		return nil, fmt.Errorf("JSON repair retry parse also failed: %w", err)
+		return nil, fmt.Errorf("JSON repair: parse still failed: %w", err)
 	}
 
-	log.Printf("[CODER] JSON repair retry succeeded, files=%d", func() int {
-		if parsed.Project != nil {
-			return len(parsed.Project.Files)
-		}
-		return 0
-	}())
+	fileCount := 0
+	if parsed.Project != nil {
+		fileCount = len(parsed.Project.Files)
+	}
+	log.Printf("[CODE] JSON repair succeeded, files=%d", fileCount)
 	return parsed, nil
 }
 
+// callArchitect plans the full project structure — tables, fields, UI layout.
 func (p *ChatProcessor) callArchitect(ctx context.Context, clarified string, imageURLs []string) (*models.ArchitectPlan, error) {
 	response, err := helper.CallAnthropicAPI(
 		p.baseConf,
 		models.AnthropicRequest{
 			Model:     p.baseConf.ClaudeModel,
 			MaxTokens: p.baseConf.PlannerMaxTokens,
-			System:    helper.SystemPromptArchitect,
+			System:    helper.PromptArchitect,
 			Messages: []models.ChatMessage{
-				{
-					Role:    "user",
-					Content: buildContentBlocksWithImages(clarified, imageURLs),
-				},
+				{Role: "user", Content: buildContentBlocksWithImages(clarified, imageURLs)},
 			},
 		},
 		timeoutArchitect,
@@ -609,14 +607,12 @@ func (p *ChatProcessor) callArchitect(ctx context.Context, clarified string, ima
 
 	text, err := helper.ExtractPlainText(response)
 	if err != nil {
-		return nil, fmt.Errorf("architect extract text: %w", err)
+		return nil, fmt.Errorf("architect: extract text: %w", err)
 	}
 
-	cleaned := helper.CleanJSONResponse(text)
-
 	var plan models.ArchitectPlan
-	if err = json.Unmarshal([]byte(cleaned), &plan); err != nil {
-		log.Printf("[ARCHITECT] first parse failed (%v), attempting repair...", err)
+	if err = json.Unmarshal([]byte(helper.CleanJSONResponse(text)), &plan); err != nil {
+		log.Printf("[ARCHITECT] parse failed (%v), attempting JSON repair...", err)
 
 		repairPrompt := fmt.Sprintf(
 			"Your previous response was a JSON object that could not be parsed due to invalid escaping or truncation.\n\n"+
@@ -624,7 +620,7 @@ func (p *ChatProcessor) callArchitect(ctx context.Context, clarified string, ima
 				"Broken response (truncated for context):\n%.800s\n\n"+
 				"Return ONLY the corrected, complete JSON object. No markdown, no backticks, no explanation.\n"+
 				"Ensure ALL string values are properly escaped (newlines → \\n, quotes → \\\", backslashes → \\\\).",
-			clarified, cleaned,
+			clarified, text,
 		)
 
 		retryResponse, retryErr := helper.CallAnthropicAPI(
@@ -632,7 +628,7 @@ func (p *ChatProcessor) callArchitect(ctx context.Context, clarified string, ima
 			models.AnthropicRequest{
 				Model:     p.baseConf.ClaudeModel,
 				MaxTokens: p.baseConf.PlannerMaxTokens,
-				System:    helper.SystemPromptArchitect,
+				System:    helper.PromptArchitect,
 				Messages: []models.ChatMessage{
 					{Role: "user", Content: []models.ContentBlock{{Type: "text", Text: repairPrompt}}},
 				},
@@ -640,104 +636,66 @@ func (p *ChatProcessor) callArchitect(ctx context.Context, clarified string, ima
 			timeoutArchitect,
 		)
 		if retryErr != nil {
-			return nil, fmt.Errorf("unmarshal architect plan: %w (repair call also failed: %v)", err, retryErr)
+			return nil, fmt.Errorf("architect: parse failed: %w (repair call also failed: %v)", err, retryErr)
 		}
 
 		retryText, _ := helper.ExtractPlainText(retryResponse)
 		if retryErr = json.Unmarshal([]byte(helper.CleanJSONResponse(retryText)), &plan); retryErr != nil {
-			return nil, fmt.Errorf("unmarshal architect plan: %w (repair also failed: %v)", err, retryErr)
+			return nil, fmt.Errorf("architect: parse failed: %w (repair also failed: %v)", err, retryErr)
 		}
-
-		log.Printf("[ARCHITECT] repair retry succeeded")
+		log.Printf("[ARCHITECT] JSON repair succeeded")
 	}
 
 	return &plan, nil
 }
 
-func (p *ChatProcessor) callSonnetCoderNewProject(ctx context.Context, clarified string, imageURLs []string, plan *models.ArchitectPlan, apiKey, envId string) (*models.ParsedClaudeResponse, error) {
-	var apiCtx strings.Builder
-
-	apiCtx.WriteString(fmt.Sprintf(
-		"\n====================================\nAPI CONFIGURATION FOR FRONTEND\n====================================\nVITE_API_BASE_URL: %s\nVITE_X_API_KEY: %s\n\nTables to use:\n",
-		p.baseConf.UcodeBaseUrl, apiKey,
-	))
-	for _, t := range plan.Tables {
-		apiCtx.WriteString(fmt.Sprintf("- Table: %s, slug: %s", t.Label, t.Slug))
-		apiCtx.WriteString("\n")
-		for _, f := range t.Fields {
-			apiCtx.WriteString(fmt.Sprintf("  * field: %s, type: %s\n", f.Slug, f.Type))
-		}
-	}
-
-	apiCtx.WriteString("\nUse this UI Structure provided by the Architect:\n" + plan.UIStructure + "\n")
+// generateProject generates frontend code for non-admin-panel project types (landing, web, other).
+func (p *ChatProcessor) generateProject(ctx context.Context, clarified string, imageURLs []string, plan *models.ArchitectPlan, apiKey, envId string) (*models.ParsedClaudeResponse, error) {
+	apiConfig := buildAPIConfigBlock(p.baseConf.UcodeBaseUrl, apiKey, plan)
 
 	response, err := helper.CallAnthropicAPI(
 		p.baseConf,
 		models.AnthropicRequest{
 			Model:     p.baseConf.ClaudeModel,
 			MaxTokens: p.baseConf.CoderMaxTokens,
-			System:    helper.SystemPromptAiChat,
+			System:    helper.PromptCodeGenerator,
 			Messages: []models.ChatMessage{
 				{
 					Role:    "user",
-					Content: buildContentBlocksWithImages(clarified+"\n\n"+apiCtx.String(), imageURLs),
+					Content: buildContentBlocksWithImages(clarified+"\n\n"+apiConfig, imageURLs),
 				},
 			},
 		},
 		timeoutCoder,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("new project coder: %w", err)
+		return nil, fmt.Errorf("generate project: %w", err)
 	}
 
 	parsed, parseErr := helper.ParseClaudeResponse(response)
 	if parseErr != nil {
-		log.Printf("[TEMPLATE CODER] parse failed, retrying with JSON repair: %v", parseErr)
-		parsed, parseErr = p.retryWithJSONRepair(ctx, response, clarified, helper.SystemPromptAiChatTemplate)
+		log.Printf("[CODE] generate project: parse failed, attempting JSON repair: %v", parseErr)
+		parsed, parseErr = p.repairJSON(ctx, response, clarified, helper.PromptCodeGenerator)
 		if parseErr != nil {
-			return nil, fmt.Errorf("template coder failed after repair retry: %w", parseErr)
+			return nil, fmt.Errorf("generate project: failed after repair: %w", parseErr)
 		}
 	}
 
 	if parsed.Project == nil {
-		return nil, fmt.Errorf("claude returned empty project data")
+		return nil, fmt.Errorf("generate project: claude returned empty project")
 	}
 
-	log.Printf("[NEW PROJECT] files created: %d", len(parsed.Project.Files))
+	log.Printf("[CODE] generate project done, files=%d", len(parsed.Project.Files))
 	return parsed, nil
 }
 
-func (p *ChatProcessor) callSonnetCoderWithTemplate(ctx context.Context, clarified string, imageURLs []string, plan *models.ArchitectPlan, apiKey, envId string) (*models.ParsedClaudeResponse, error) {
+// generateAdminPanel generates an admin panel using the template system with pre-built hooks and utilities.
+func (p *ChatProcessor) generateAdminPanel(ctx context.Context, clarified string, imageURLs []string, plan *models.ArchitectPlan, apiKey, envId string) (*models.ParsedClaudeResponse, error) {
+	apiConfig := buildAPIConfigBlock(p.baseConf.UcodeBaseUrl, apiKey, plan)
 
-	var apiCtx strings.Builder
-	apiCtx.WriteString(fmt.Sprintf(
-		"\n====================================\n"+
-			"API CONFIGURATION FOR FRONTEND\n"+
-			"====================================\n"+
-			"VITE_API_BASE_URL: %s\n"+
-			"VITE_X_API_KEY: %s\n\n"+
-			"Tables to use:\n",
-		p.baseConf.UcodeBaseUrl, apiKey,
-	))
-
-	slugs := make([]string, 0, len(plan.Tables))
-	for _, t := range plan.Tables {
-		slugs = append(slugs, t.Slug)
-		apiCtx.WriteString(fmt.Sprintf("- Table: %s, slug: %s\n", t.Label, t.Slug))
-		for _, f := range t.Fields {
-			apiCtx.WriteString(fmt.Sprintf("  * field: %s, type: %s\n", f.Slug, f.Type))
-		}
-	}
-	apiCtx.WriteString("\nUse this UI Structure provided by the Architect:\n" + plan.UIStructure + "\n")
-
-	templateFiles := GetTemplate("admin_panel")
-
-	for _, f := range templateFiles {
-		log.Printf("[TEMPLATE FILE] %s", f.Path)
-	}
-
+	// Inject read-only template files for the AI to import from (not regenerate)
 	var templateCtx strings.Builder
-
+	templateFiles := GetTemplate("admin_panel")
 	if len(templateFiles) > 0 {
 		templateCtx.WriteString("\n====================================\n")
 		templateCtx.WriteString("BASE TEMPLATE FILES (read-only — DO NOT output these files)\n")
@@ -745,37 +703,19 @@ func (p *ChatProcessor) callSonnetCoderWithTemplate(ctx context.Context, clarifi
 		templateCtx.WriteString("Import hooks, utils, and config from these paths. Do not re-implement them.\n")
 		templateCtx.WriteString("Do NOT copy colors or layout from these files.\n")
 		templateCtx.WriteString("src/index.css and src/App.tsx MUST be fully regenerated by you.\n")
-		templateCtx.WriteString("NOTE: src/index.css and src/App.tsx are NOT listed here — you must generate them fresh.\n")
-
-		// paths the model must generate from scratch — never show in template context
-		modelOwnedPaths := map[string]bool{
-			"src/index.css": true,
-			"src/App.tsx":   true,
-		}
-
 		for _, f := range templateFiles {
-			if modelOwnedPaths[f.Path] {
-				continue // never show — model must own this file entirely
-			}
 			templateCtx.WriteString(fmt.Sprintf("\n### FILE: %s\n```\n%s\n```\n", f.Path, f.Content))
 		}
 	}
 
-	designForce := buildDesignForceBlock(clarified, len(imageURLs) > 0, slugs)
-
-	finalPrompt := designForce +
-		clarified + "\n\n" +
-		apiCtx.String() + "\n" +
-		templateCtx.String()
-
-	log.Printf("[FINAL_PROMPT_START]\n%.300s\n[END_PREVIEW]", finalPrompt)
+	finalPrompt := clarified + "\n\n" + apiConfig + "\n" + templateCtx.String()
 
 	response, err := helper.CallAnthropicAPI(
 		p.baseConf,
 		models.AnthropicRequest{
 			Model:     p.baseConf.ClaudeModel,
 			MaxTokens: p.baseConf.CoderMaxTokens,
-			System:    helper.SystemPromptAiChatTemplate,
+			System:    helper.PromptAdminPanelGenerator,
 			Messages: []models.ChatMessage{
 				{
 					Role:    "user",
@@ -786,67 +726,48 @@ func (p *ChatProcessor) callSonnetCoderWithTemplate(ctx context.Context, clarifi
 		timeoutCoder,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("template coder: %w", err)
+		return nil, fmt.Errorf("generate admin panel: %w", err)
 	}
 
 	parsed, parseErr := helper.ParseClaudeResponse(response)
-	log.Printf("[TEMPLATE CODER] done, files=%d", len(parsed.Project.Files))
-
 	if parseErr != nil {
-		log.Printf("[TEMPLATE CODER] parse failed, retrying with JSON repair: %v", parseErr)
-		parsed, parseErr = p.retryWithJSONRepair(ctx, response, clarified, helper.SystemPromptAiChatTemplate)
+		log.Printf("[CODE] admin panel: parse failed, attempting JSON repair: %v", parseErr)
+		parsed, parseErr = p.repairJSON(ctx, response, clarified, helper.PromptAdminPanelGenerator)
 		if parseErr != nil {
-			return nil, fmt.Errorf("template coder failed after repair retry: %w", parseErr)
+			return nil, fmt.Errorf("generate admin panel: failed after repair: %w", parseErr)
 		}
 	}
 
 	if parsed.Project == nil {
-		return nil, fmt.Errorf("claude returned empty project data")
+		return nil, fmt.Errorf("generate admin panel: claude returned empty project")
 	}
 
-	// merging
+	// Merge any template files the AI didn't regenerate (safety fallback)
 	if len(templateFiles) > 0 {
 		generatedPaths := make(map[string]struct{}, len(parsed.Project.Files))
 		for _, f := range parsed.Project.Files {
 			generatedPaths[f.Path] = struct{}{}
 		}
-
-		for _, f := range parsed.Project.Files {
-			log.Printf("[FINAL FILE BEFORE MERGE] %s", f.Path)
-			if f.Path == "src/index.css" {
-				log.Printf("[INDEX_CSS CONTENT]\n%s", f.Content)
-			}
-		}
-
-		// paths the model must generate from scratch — never fall back
-		modelOwnedPaths := map[string]bool{
-			"src/index.css": true,
-			"src/App.tsx":   true,
-		}
-
 		for _, tf := range templateFiles {
-			if modelOwnedPaths[tf.Path] {
-				continue // never fall back — model must have generated this
-			}
 			if _, exists := generatedPaths[tf.Path]; !exists {
 				parsed.Project.Files = append(parsed.Project.Files, models.ProjectFile{
 					Path:    tf.Path,
 					Content: tf.Content,
 				})
-				log.Printf("[TEMPLATE CODER] fallback merge: %s", tf.Path)
+				log.Printf("[CODE] merged missing template file: %s", tf.Path)
 			}
 		}
 	}
 
-	log.Printf("[TEMPLATE CODER] done, files=%d", len(parsed.Project.Files))
+	log.Printf("[CODE] admin panel done, files=%d", len(parsed.Project.Files))
 	return parsed, nil
 }
 
 // ============================================================================
-// DATA ACCESS & DB HELPERS
+// DATA ACCESS HELPERS
 // ============================================================================
 
-func (p *ChatProcessor) createMessageRecord(ctx context.Context, role, content string, images []string) (*pbo.Message, error) {
+func (p *ChatProcessor) saveMessage(ctx context.Context, role, content string, images []string) (*pbo.Message, error) {
 	return p.service.GoObjectBuilderService().AiChat().CreateMessage(ctx, &pbo.CreateMessageRequest{
 		ChatId:        p.chatId,
 		Role:          role,
@@ -866,7 +787,6 @@ func (p *ChatProcessor) getChatHistory(ctx context.Context) ([]models.ChatMessag
 	}
 
 	msgList := messages.GetMessages()
-
 	if len(msgList) > 10 {
 		msgList = msgList[len(msgList)-10:]
 	}
@@ -898,7 +818,6 @@ func (p *ChatProcessor) buildFileGraphJSON(project *pbo.McpProject) (string, err
 	if err != nil {
 		return "{}", fmt.Errorf("marshal file graph: %w", err)
 	}
-
 	return string(jsonBytes), nil
 }
 
@@ -936,7 +855,6 @@ func (p *ChatProcessor) saveProject(ctx context.Context, req *models.ParsedClaud
 	}
 
 	var projectFiles []*pbo.McpProjectFiles
-
 	for _, file := range req.Project.Files {
 		var fileGraph map[string]any
 		if val, ok := req.Project.FileGraph[file.Path].(map[string]any); ok {
@@ -960,7 +878,8 @@ func (p *ChatProcessor) saveProject(ctx context.Context, req *models.ParsedClaud
 	})
 }
 
-func (p *ChatProcessor) createUcodeProject(ctx context.Context, projectName string, existingMcpID string) (*models.ProjectData, error) {
+// provisionBackend creates (or links) the ucode backend project, environment, and API key.
+func (p *ChatProcessor) provisionBackend(ctx context.Context, projectName string, existingMcpID string) (*models.ProjectData, error) {
 	currentProject, err := p.h.companyServices.Project().GetById(
 		ctx, &pb.GetProjectByIdRequest{
 			ProjectId: p.ucodeProjectID,
@@ -1020,7 +939,6 @@ func (p *ChatProcessor) createUcodeProject(ctx context.Context, projectName stri
 	}
 
 	var apiKey string
-
 	if len(apiKeys.GetData()) > 0 {
 		apiKey = apiKeys.GetData()[0].GetAppId()
 	}
@@ -1076,20 +994,34 @@ func (p *ChatProcessor) createUcodeProject(ctx context.Context, projectName stri
 func truncateString(s string, maxLen int) string {
 	s = strings.TrimSpace(s)
 	runes := []rune(s)
-
 	if len(runes) <= maxLen {
 		return s
 	}
-
 	if maxLen <= 3 {
 		return string(runes[:maxLen])
 	}
-
 	return string(runes[:maxLen-3]) + "..."
 }
 
+// buildAPIConfigBlock generates the API configuration section injected into the coder prompt.
+func buildAPIConfigBlock(baseURL, apiKey string, plan *models.ArchitectPlan) string {
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf(
+		"\n====================================\nAPI CONFIGURATION FOR FRONTEND\n====================================\nVITE_API_BASE_URL: %s\nVITE_X_API_KEY: %s\n\nTables to use:\n",
+		baseURL, apiKey,
+	))
+	for _, t := range plan.Tables {
+		sb.WriteString(fmt.Sprintf("- Table: %s, slug: %s\n", t.Label, t.Slug))
+		for _, f := range t.Fields {
+			sb.WriteString(fmt.Sprintf("  * field: %s, type: %s\n", f.Slug, f.Type))
+		}
+	}
+	sb.WriteString("\nUse this UI Structure provided by the Architect:\n" + plan.UIStructure + "\n")
+	return sb.String()
+}
+
 func buildContentBlocksWithImages(textContent string, imageURLs []string) []models.ContentBlock {
-	var blocks = make([]models.ContentBlock, 0, len(imageURLs)+1)
+	blocks := make([]models.ContentBlock, 0, len(imageURLs)+1)
 	for _, imageURL := range imageURLs {
 		if strings.TrimSpace(imageURL) != "" {
 			blocks = append(blocks, models.ContentBlock{
@@ -1098,196 +1030,18 @@ func buildContentBlocksWithImages(textContent string, imageURLs []string) []mode
 			})
 		}
 	}
-
 	blocks = append(blocks, models.ContentBlock{Type: "text", Text: textContent})
-
 	return blocks
 }
 
 func buildMessagesWithHistory(history []models.ChatMessage, contentBlocks []models.ContentBlock) []models.ChatMessage {
-	var messages = make([]models.ChatMessage, 0, len(history)+1)
-
+	messages := make([]models.ChatMessage, 0, len(history)+1)
 	messages = append(messages, history...)
 	messages = append(messages, models.ChatMessage{
 		Role:    "user",
 		Content: contentBlocks,
 	})
 	return messages
-}
-
-func buildDesignForceBlock(clarified string, hasImages bool, availableSlugs []string) string {
-	log.Printf("[DESIGN_FORCE] hasImages=%v slugs=%v", hasImages, availableSlugs)
-
-	var (
-		lower     = strings.ToLower(clarified)
-		reference string
-	)
-
-	platforms := []string{
-		"planfact", "linear", "notion", "stripe", "salesforce", "shopify",
-		"amocrm", "amo crm", "jira", "figma", "asana", "trello", "monday",
-		"hubspot", "pipedrive", "clickup",
-	}
-	for _, p := range platforms {
-		if strings.Contains(lower, p) {
-			reference = p
-			break
-		}
-	}
-
-	var sb strings.Builder
-	sb.WriteString("====================================\n")
-	sb.WriteString("DESIGN DIRECTIVE — HIGHEST PRIORITY (READ BEFORE ANYTHING ELSE)\n")
-	sb.WriteString("====================================\n\n")
-
-	switch {
-
-	// ── MODE C: image provided ────────────────────────────────────────────────
-	case hasImages:
-		sb.WriteString("⚠️  MODE C — IMAGE PROVIDED\n\n")
-
-		sb.WriteString("STEP 1 — COLOR EXTRACTION (mandatory):\n")
-		sb.WriteString("- Scan the image: background, sidebar/panel, primary/accent, text colors\n")
-		sb.WriteString("- Convert each to HSL format\n")
-		sb.WriteString("- Use THESE HSL values in src/index.css — nothing else takes priority\n")
-		sb.WriteString("- Do NOT use domain color map or reference platform colors\n")
-		sb.WriteString("- The generated UI MUST visually match the image palette\n\n")
-
-		sb.WriteString("STEP 2 — FEATURE FILTERING (mandatory):\n")
-		sb.WriteString("The image may show sections that DO NOT exist in the backend schema.\n")
-		sb.WriteString("YOU MUST IGNORE any image section with no corresponding table below.\n\n")
-
-		if len(availableSlugs) > 0 {
-			sb.WriteString("AVAILABLE BACKEND TABLES — the ONLY features you may build:\n")
-			for _, slug := range availableSlugs {
-				sb.WriteString(fmt.Sprintf("  - %s\n", slug))
-			}
-			sb.WriteString("\n")
-			sb.WriteString("Any image section NOT in this list → SKIP IT.\n")
-			sb.WriteString("Number of pages to build = number of tables above (not number of image sections).\n\n")
-		}
-
-		sb.WriteString("EXAMPLE:\n")
-		sb.WriteString("  Image shows: Dashboard, Leads, Reports, Calendar, Chat (5 sections)\n")
-		sb.WriteString("  Schema has:  leads, contacts (2 tables)\n")
-		sb.WriteString("  → Build LeadsPage + ContactsPage with image colors. Skip the other 3.\n\n")
-
-	// ── MODE B: reference platform named ─────────────────────────────────────
-	case reference != "":
-		sb.WriteString(fmt.Sprintf("⚠️  MODE B — REFERENCE PLATFORM: \"%s\"\n\n", reference))
-		sb.WriteString(fmt.Sprintf(
-			"Replicate the exact visual design of %s:\n"+
-				"- Color scheme, typography, spacing, component shapes\n"+
-				"- Layout structure (sidebar style, header, content areas)\n"+
-				"- Navigation and interaction patterns\n\n"+
-				"Generic white/gray default UI is FAILURE.\n\n",
-			reference,
-		))
-
-	// ── MODE A: no image, no reference ───────────────────────────────────────
-	default:
-		palette := choosePaletteForSlugs(availableSlugs)
-		sb.WriteString("⚠️  MODE A — MANDATORY PALETTE (no image, no reference)\n\n")
-		sb.WriteString("You MUST use EXACTLY these HSL values in src/index.css:\n\n")
-		sb.WriteString(fmt.Sprintf("  --primary:            %s\n", palette.primary))
-		sb.WriteString(fmt.Sprintf("  --background:         %s\n", palette.background))
-		sb.WriteString(fmt.Sprintf("  --sidebar-background: %s\n", palette.sidebar))
-		sb.WriteString(fmt.Sprintf("  --card:               %s\n", palette.card))
-		sb.WriteString(fmt.Sprintf("\nPalette name: %s\n", palette.name))
-		sb.WriteString("\nThese are NOT suggestions. Deviating from them = FAILURE.\n")
-		sb.WriteString("Do NOT replace them with blue 221 83% 53% or any gray.\n\n")
-	}
-
-	// ── Shared CSS enforcement (all modes) ────────────────────────────────────
-	sb.WriteString("MANDATORY CSS RULES:\n")
-	sb.WriteString("- src/index.css MUST be the FIRST file in your output\n")
-	sb.WriteString("- --primary MUST NOT be 221 83% 53% or 243 75% 59% (forbidden defaults)\n")
-	sb.WriteString("- --background MUST NOT be 0 0% 100% pure white UNLESS image shows white bg\n")
-	sb.WriteString("====================================\n\n")
-
-	log.Printf("[DESIGN_FORCE] result=\n%s", sb.String())
-
-	return sb.String()
-}
-
-type designPalette struct {
-	name       string
-	primary    string // HSL triple, e.g. "258 90% 62%"
-	background string
-	sidebar    string
-	card       string
-}
-
-func choosePaletteForSlugs(slugs []string) designPalette {
-	joined := strings.ToLower(strings.Join(slugs, " "))
-
-	switch {
-	case containsAny(joined, "order", "product", "inventory", "warehouse", "stock"):
-		return designPalette{
-			name:       "Deep Navy + Amber",
-			primary:    "38 92% 50%",
-			background: "220 20% 97%",
-			sidebar:    "222 47% 11%",
-			card:       "220 14% 99%",
-		}
-	case containsAny(joined, "lead", "client", "contact", "deal", "pipeline"):
-		return designPalette{
-			name:       "Dark Slate + Emerald",
-			primary:    "160 84% 39%",
-			background: "210 20% 96%",
-			sidebar:    "215 28% 17%",
-			card:       "0 0% 100%",
-		}
-	case containsAny(joined, "employee", "hr", "staff", "department", "leave", "payroll"):
-		return designPalette{
-			name:       "Charcoal + Violet",
-			primary:    "262 80% 58%",
-			background: "250 14% 96%",
-			sidebar:    "250 24% 14%",
-			card:       "250 10% 99%",
-		}
-	case containsAny(joined, "finance", "payment", "invoice", "budget", "transaction", "account"):
-		return designPalette{
-			name:       "Dark Forest + Teal",
-			primary:    "174 72% 40%",
-			background: "210 16% 97%",
-			sidebar:    "200 28% 14%",
-			card:       "0 0% 100%",
-		}
-	case containsAny(joined, "patient", "doctor", "clinic", "medical", "appointment"):
-		return designPalette{
-			name:       "Deep Blue + Cyan",
-			primary:    "192 91% 46%",
-			background: "210 22% 97%",
-			sidebar:    "213 39% 13%",
-			card:       "0 0% 100%",
-		}
-	case containsAny(joined, "course", "student", "lesson", "education", "quiz"):
-		return designPalette{
-			name:       "Dark Indigo + Purple",
-			primary:    "270 91% 65%",
-			background: "250 16% 96%",
-			sidebar:    "252 39% 12%",
-			card:       "250 10% 99%",
-		}
-	default:
-		return designPalette{
-			name:       "Midnight + Cyan",
-			primary:    "199 89% 48%",
-			background: "220 18% 96%",
-			sidebar:    "224 44% 13%",
-			card:       "220 14% 99%",
-		}
-	}
-}
-
-func containsAny(s string, keywords ...string) bool {
-	for _, k := range keywords {
-		if strings.Contains(s, k) {
-			return true
-		}
-	}
-	return false
 }
 
 func buildHistoryText(history []models.ChatMessage) string {
