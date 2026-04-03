@@ -363,7 +363,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 		customEndpoints := v1Admin.Group("/custom-endpoints")
 		{
-			customEndpoints.POST("/exec-query")
+			customEndpoints.POST("/exec-query", h.V1.ExecQuery)
 		}
 	}
 
