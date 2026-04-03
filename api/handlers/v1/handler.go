@@ -22,6 +22,7 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/caching"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
+	"ucode/ucode_go_api_gateway/pkg/vault"
 	"ucode/ucode_go_api_gateway/services"
 	"ucode/ucode_go_api_gateway/storage"
 
@@ -41,9 +42,10 @@ type HandlerV1 struct {
 	redis           storage.RedisStorageI
 	cache           *caching.ExpiringLRUCache
 	rateLimiter     *util.ApiKeyRateLimiter
+	vault           vault.VaultClient
 }
 
-func NewHandlerV1(baseConf config.BaseConfig, projectConfs map[string]config.Config, log logger.LoggerI, svcs services.ServiceNodesI, cmpServ services.CompanyServiceI, authService services.AuthServiceManagerI, redis storage.RedisStorageI, cache *caching.ExpiringLRUCache, limiter *util.ApiKeyRateLimiter) HandlerV1 {
+func NewHandlerV1(baseConf config.BaseConfig, projectConfs map[string]config.Config, log logger.LoggerI, svcs services.ServiceNodesI, cmpServ services.CompanyServiceI, authService services.AuthServiceManagerI, redis storage.RedisStorageI, cache *caching.ExpiringLRUCache, limiter *util.ApiKeyRateLimiter, vaultClient vault.VaultClient) HandlerV1 {
 	return HandlerV1{
 		baseConf:        baseConf,
 		projectConfs:    projectConfs,
@@ -54,6 +56,7 @@ func NewHandlerV1(baseConf config.BaseConfig, projectConfs map[string]config.Con
 		redis:           redis,
 		cache:           cache,
 		rateLimiter:     limiter,
+		vault:           vaultClient,
 	}
 }
 
