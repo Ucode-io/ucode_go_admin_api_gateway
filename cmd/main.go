@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"ucode/ucode_go_api_gateway/api"
 	"ucode/ucode_go_api_gateway/api/handlers"
 	"ucode/ucode_go_api_gateway/config"
@@ -124,6 +125,11 @@ func main() {
 	r.Use(gin.Logger(), gin.Recovery())
 
 	limiter := util.NewApiKeyRateLimiter(newRedis, config.RATE_LIMITER_RPS_LIMIT, config.RATE_LIMITER_RPS_LIMIT)
+
+	fmt.Println("Address->", baseConf.VaultAddress)
+	fmt.Println("role id->", baseConf.VaultRoleID)
+	fmt.Println("secret id->", baseConf.VaultSecretID)
+	fmt.Println("mount path->", baseConf.VaultMountPath)
 
 	var vaultClient vault.VaultClient
 	if baseConf.VaultAddress != "" {
