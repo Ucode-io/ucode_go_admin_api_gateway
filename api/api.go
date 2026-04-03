@@ -369,7 +369,13 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 		customEndpoints := v1Admin.Group("/custom-endpoints")
 		{
+			customEndpoints.POST("", h.V1.CreateCustomEndpoint)
+			customEndpoints.PUT("/:id", h.V1.UpdateCustomEndpoint)
+			customEndpoints.GET("", h.V1.GetAllCustomEndpoints)
+			customEndpoints.GET("/:id", h.V1.GetCustomEndpointById)
+			customEndpoints.DELETE("/:id", h.V1.DeleteCustomEndpoint)
 			customEndpoints.POST("/exec-query", h.V1.ExecQuery)
+			customEndpoints.POST("/:id/run", h.V1.RunCustomEndpoint)
 		}
 	}
 

@@ -37,6 +37,7 @@ type GoBuilderServiceI interface {
 	CustomPermission() nb.CustomPermissionsServiceClient
 	AiChat() nb.AiChatServiceClient
 	ProjectFolders() nb.ProjectFoldersServiceClient
+	CustomEndpoint() nb.CustomEndpointServiceClient
 }
 
 type goBuilderServiceClient struct {
@@ -64,6 +65,7 @@ type goBuilderServiceClient struct {
 	customPermissionService nb.CustomPermissionsServiceClient
 	aiChatService           nb.AiChatServiceClient
 	projectFoldersService   nb.ProjectFoldersServiceClient
+	customEndpointService   nb.CustomEndpointServiceClient
 }
 
 func NewGoBuilderServiceClient(ctx context.Context, cfg config.Config) (GoBuilderServiceI, error) {
@@ -108,6 +110,7 @@ func NewGoBuilderServiceClient(ctx context.Context, cfg config.Config) (GoBuilde
 		customPermissionService: nb.NewCustomPermissionsServiceClient(connGoBuilderService),
 		aiChatService:           nb.NewAiChatServiceClient(connGoBuilderService),
 		projectFoldersService:   nb.NewProjectFoldersServiceClient(connGoBuilderService),
+		customEndpointService:   nb.NewCustomEndpointServiceClient(connGoBuilderService),
 	}, nil
 }
 
@@ -205,4 +208,8 @@ func (g *goBuilderServiceClient) AiChat() nb.AiChatServiceClient {
 
 func (g *goBuilderServiceClient) ProjectFolders() nb.ProjectFoldersServiceClient {
 	return g.projectFoldersService
+}
+
+func (g *goBuilderServiceClient) CustomEndpoint() nb.CustomEndpointServiceClient {
+	return g.customEndpointService
 }
