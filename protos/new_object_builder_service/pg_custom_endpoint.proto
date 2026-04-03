@@ -12,6 +12,12 @@ service CustomEndpointService {
   rpc Run(RunCustomEndpointRequest) returns (RunCustomEndpointResponse) {}
 }
 
+message Parameter {
+  string name     = 1;
+  string type     = 2;
+  bool   required = 3;
+}
+
 message CustomEndpoint {
   string id              = 1;
   string resource_env_id = 2;
@@ -22,6 +28,7 @@ message CustomEndpoint {
   bool   in_transaction  = 7;
   string created_at      = 8;
   string updated_at      = 9;
+  repeated Parameter parameters = 10;
 }
 
 message CreateCustomEndpointRequest {
@@ -31,6 +38,7 @@ message CreateCustomEndpointRequest {
   string sql             = 4;
   string method          = 5;
   bool   in_transaction  = 6;
+  repeated Parameter parameters = 7;
 }
 
 message GetCustomEndpointListRequest {
@@ -55,7 +63,7 @@ message CustomEndpointId {
 message RunCustomEndpointRequest {
   string resource_env_id = 1;
   string id              = 2;
-  repeated string params = 3;
+  map<string, string> params = 3;
 }
 
 message RunCustomEndpointResponse {

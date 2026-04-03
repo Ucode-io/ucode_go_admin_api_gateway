@@ -55,6 +55,7 @@ func (x *Parameter) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
+// Deprecated: Use Parameter.ProtoReflect.Descriptor instead.
 func (*Parameter) Descriptor() ([]byte, []int) {
 	return file_pg_custom_endpoint_proto_rawDescGZIP(), []int{0}
 }
@@ -121,6 +122,7 @@ func (x *CustomEndpoint) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
+// Deprecated: Use CustomEndpoint.ProtoReflect.Descriptor instead.
 func (*CustomEndpoint) Descriptor() ([]byte, []int) {
 	return file_pg_custom_endpoint_proto_rawDescGZIP(), []int{1}
 }
@@ -233,6 +235,7 @@ func (x *CreateCustomEndpointRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
+// Deprecated: Use CreateCustomEndpointRequest.ProtoReflect.Descriptor instead.
 func (*CreateCustomEndpointRequest) Descriptor() ([]byte, []int) {
 	return file_pg_custom_endpoint_proto_rawDescGZIP(), []int{2}
 }
@@ -323,6 +326,7 @@ func (x *GetCustomEndpointListRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
+// Deprecated: Use GetCustomEndpointListRequest.ProtoReflect.Descriptor instead.
 func (*GetCustomEndpointListRequest) Descriptor() ([]byte, []int) {
 	return file_pg_custom_endpoint_proto_rawDescGZIP(), []int{3}
 }
@@ -402,6 +406,7 @@ func (x *CustomEndpointList) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
+// Deprecated: Use CustomEndpointList.ProtoReflect.Descriptor instead.
 func (*CustomEndpointList) Descriptor() ([]byte, []int) {
 	return file_pg_custom_endpoint_proto_rawDescGZIP(), []int{4}
 }
@@ -453,6 +458,7 @@ func (x *CustomEndpointId) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
+// Deprecated: Use CustomEndpointId.ProtoReflect.Descriptor instead.
 func (*CustomEndpointId) Descriptor() ([]byte, []int) {
 	return file_pg_custom_endpoint_proto_rawDescGZIP(), []int{5}
 }
@@ -475,7 +481,7 @@ type RunCustomEndpointRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ResourceEnvId string                 `protobuf:"bytes,1,opt,name=resource_env_id,json=resourceEnvId,proto3" json:"resource_env_id,omitempty"`
 	Id            string                 `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
-	Params        map[string]string      `protobuf:"bytes,3,rep,name=params,proto3" json:"params,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	Params        map[string]string      `protobuf:"bytes,3,rep,name=params,proto3" json:"params,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -505,6 +511,7 @@ func (x *RunCustomEndpointRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
+// Deprecated: Use RunCustomEndpointRequest.ProtoReflect.Descriptor instead.
 func (*RunCustomEndpointRequest) Descriptor() ([]byte, []int) {
 	return file_pg_custom_endpoint_proto_rawDescGZIP(), []int{6}
 }
@@ -563,6 +570,7 @@ func (x *RunCustomEndpointResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
+// Deprecated: Use RunCustomEndpointResponse.ProtoReflect.Descriptor instead.
 func (*RunCustomEndpointResponse) Descriptor() ([]byte, []int) {
 	return file_pg_custom_endpoint_proto_rawDescGZIP(), []int{7}
 }
@@ -585,11 +593,11 @@ var File_pg_custom_endpoint_proto protoreflect.FileDescriptor
 
 const file_pg_custom_endpoint_proto_rawDesc = "" +
 	"\n" +
-	"\x18pg_custom_endpoint.proto\x12\x1anew_object_builder_service\"G\n" +
+	"\x18pg_custom_endpoint.proto\x12\x1anew_object_builder_service\"O\n" +
 	"\tParameter\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x12\n" +
 	"\x04type\x18\x02 \x01(\tR\x04type\x12\x1a\n" +
-	"\brequired\x18\x03 \x01(\bR\brequired\"\xad\x02\n" +
+	"\brequired\x18\x03 \x01(\bR\brequired\"\xd4\x02\n" +
 	"\x0eCustomEndpoint\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12&\n" +
 	"\x0fresource_env_id\x18\x02 \x01(\tR\rresourceEnvId\x12\x12\n" +
@@ -597,24 +605,24 @@ const file_pg_custom_endpoint_proto_rawDesc = "" +
 	"\vdescription\x18\x04 \x01(\tR\vdescription\x12\x10\n" +
 	"\x03sql\x18\x05 \x01(\tR\x03sql\x12\x16\n" +
 	"\x06method\x18\x06 \x01(\tR\x06method\x12%\n" +
-	"\x0ein_transaction\x18\x07 \x01(\bR\rinTransaction\x12\x1d\n" +
+	"\x0ein_transaction\x18\a \x01(\bR\rinTransaction\x12\x1d\n" +
 	"\n" +
 	"created_at\x18\b \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
-	"updated_at\x18\t \x01(\tR\tupdatedAt\x12\x45\n" +
+	"updated_at\x18\t \x01(\tR\tupdatedAt\x12E\n" +
 	"\n" +
 	"parameters\x18\n" +
 	" \x03(\v2%.new_object_builder_service.ParameterR\n" +
-	"parameters\"\xf7\x01\n" +
+	"parameters\"\x93\x02\n" +
 	"\x1bCreateCustomEndpointRequest\x12&\n" +
 	"\x0fresource_env_id\x18\x01 \x01(\tR\rresourceEnvId\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
 	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x10\n" +
 	"\x03sql\x18\x04 \x01(\tR\x03sql\x12\x16\n" +
 	"\x06method\x18\x05 \x01(\tR\x06method\x12%\n" +
-	"\x0ein_transaction\x18\x06 \x01(\bR\rinTransaction\x12\x45\n" +
+	"\x0ein_transaction\x18\x06 \x01(\bR\rinTransaction\x12E\n" +
 	"\n" +
-	"parameters\x18\x07 \x03(\v2%.new_object_builder_service.ParameterR\n" +
+	"parameters\x18\a \x03(\v2%.new_object_builder_service.ParameterR\n" +
 	"parameters\"\xd0\x01\n" +
 	"\x1cGetCustomEndpointListRequest\x12&\n" +
 	"\x0fresource_env_id\x18\x01 \x01(\tR\rresourceEnvId\x12\x16\n" +
@@ -628,14 +636,14 @@ const file_pg_custom_endpoint_proto_rawDesc = "" +
 	"\x05count\x18\x02 \x01(\rR\x05count\"J\n" +
 	"\x10CustomEndpointId\x12&\n" +
 	"\x0fresource_env_id\x18\x01 \x01(\tR\rresourceEnvId\x12\x0e\n" +
-	"\x02id\x18\x02 \x01(\tR\x02id\"\xbe\x01\n" +
+	"\x02id\x18\x02 \x01(\tR\x02id\"\xe7\x01\n" +
 	"\x18RunCustomEndpointRequest\x12&\n" +
 	"\x0fresource_env_id\x18\x01 \x01(\tR\rresourceEnvId\x12\x0e\n" +
-	"\x02id\x18\x02 \x01(\tR\x02id\x12R\n" +
-	"\x06params\x18\x03 \x03(\v2:.new_object_builder_service.RunCustomEndpointRequest.ParamsEntryR\x06params\x1a\x39\n" +
+	"\x02id\x18\x02 \x01(\tR\x02id\x12X\n" +
+	"\x06params\x18\x03 \x03(\v2@.new_object_builder_service.RunCustomEndpointRequest.ParamsEntryR\x06params\x1a9\n" +
 	"\vParamsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x02\x38\x01\"E\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"E\n" +
 	"\x19RunCustomEndpointResponse\x12\x12\n" +
 	"\x04data\x18\x01 \x01(\fR\x04data\x12\x14\n" +
 	"\x05error\x18\x02 \x01(\tR\x05error2\xa5\x05\n" +
@@ -672,27 +680,27 @@ var file_pg_custom_endpoint_proto_goTypes = []any{
 	nil,                                  // 8: new_object_builder_service.RunCustomEndpointRequest.ParamsEntry
 }
 var file_pg_custom_endpoint_proto_depIdxs = []int32{
-	0, // 0: new_object_builder_service.CustomEndpoint.parameters:type_name -> new_object_builder_service.Parameter
-	0, // 1: new_object_builder_service.CreateCustomEndpointRequest.parameters:type_name -> new_object_builder_service.Parameter
-	1, // 2: new_object_builder_service.CustomEndpointList.endpoints:type_name -> new_object_builder_service.CustomEndpoint
-	8, // 3: new_object_builder_service.RunCustomEndpointRequest.params:type_name -> new_object_builder_service.RunCustomEndpointRequest.ParamsEntry
-	2, // 4: new_object_builder_service.CustomEndpointService.Create:input_type -> new_object_builder_service.CreateCustomEndpointRequest
-	1, // 5: new_object_builder_service.CustomEndpointService.Update:input_type -> new_object_builder_service.CustomEndpoint
-	3, // 6: new_object_builder_service.CustomEndpointService.GetAll:input_type -> new_object_builder_service.GetCustomEndpointListRequest
-	5, // 7: new_object_builder_service.CustomEndpointService.GetById:input_type -> new_object_builder_service.CustomEndpointId
-	5, // 8: new_object_builder_service.CustomEndpointService.Delete:input_type -> new_object_builder_service.CustomEndpointId
-	6, // 9: new_object_builder_service.CustomEndpointService.Run:input_type -> new_object_builder_service.RunCustomEndpointRequest
-	1, // 10: new_object_builder_service.CustomEndpointService.Create:output_type -> new_object_builder_service.CustomEndpoint
-	1, // 11: new_object_builder_service.CustomEndpointService.Update:output_type -> new_object_builder_service.CustomEndpoint
-	4, // 12: new_object_builder_service.CustomEndpointService.GetAll:output_type -> new_object_builder_service.CustomEndpointList
-	1, // 13: new_object_builder_service.CustomEndpointService.GetById:output_type -> new_object_builder_service.CustomEndpoint
-	1, // 14: new_object_builder_service.CustomEndpointService.Delete:output_type -> new_object_builder_service.CustomEndpoint
-	7, // 15: new_object_builder_service.CustomEndpointService.Run:output_type -> new_object_builder_service.RunCustomEndpointResponse
-	4, // [4:16] is the sub-list for method output_type
-	4, // [4:4] is the sub-list for method input_type
-	4, // [4:4] is the sub-list for extension type_name
-	4, // [4:4] is the sub-list for extension extendee
-	0, // [0:4] is the sub-list for field type_name
+	0,  // 0: new_object_builder_service.CustomEndpoint.parameters:type_name -> new_object_builder_service.Parameter
+	0,  // 1: new_object_builder_service.CreateCustomEndpointRequest.parameters:type_name -> new_object_builder_service.Parameter
+	1,  // 2: new_object_builder_service.CustomEndpointList.endpoints:type_name -> new_object_builder_service.CustomEndpoint
+	8,  // 3: new_object_builder_service.RunCustomEndpointRequest.params:type_name -> new_object_builder_service.RunCustomEndpointRequest.ParamsEntry
+	2,  // 4: new_object_builder_service.CustomEndpointService.Create:input_type -> new_object_builder_service.CreateCustomEndpointRequest
+	1,  // 5: new_object_builder_service.CustomEndpointService.Update:input_type -> new_object_builder_service.CustomEndpoint
+	3,  // 6: new_object_builder_service.CustomEndpointService.GetAll:input_type -> new_object_builder_service.GetCustomEndpointListRequest
+	5,  // 7: new_object_builder_service.CustomEndpointService.GetById:input_type -> new_object_builder_service.CustomEndpointId
+	5,  // 8: new_object_builder_service.CustomEndpointService.Delete:input_type -> new_object_builder_service.CustomEndpointId
+	6,  // 9: new_object_builder_service.CustomEndpointService.Run:input_type -> new_object_builder_service.RunCustomEndpointRequest
+	1,  // 10: new_object_builder_service.CustomEndpointService.Create:output_type -> new_object_builder_service.CustomEndpoint
+	1,  // 11: new_object_builder_service.CustomEndpointService.Update:output_type -> new_object_builder_service.CustomEndpoint
+	4,  // 12: new_object_builder_service.CustomEndpointService.GetAll:output_type -> new_object_builder_service.CustomEndpointList
+	1,  // 13: new_object_builder_service.CustomEndpointService.GetById:output_type -> new_object_builder_service.CustomEndpoint
+	1,  // 14: new_object_builder_service.CustomEndpointService.Delete:output_type -> new_object_builder_service.CustomEndpoint
+	7,  // 15: new_object_builder_service.CustomEndpointService.Run:output_type -> new_object_builder_service.RunCustomEndpointResponse
+	10, // [10:16] is the sub-list for method output_type
+	4,  // [4:10] is the sub-list for method input_type
+	4,  // [4:4] is the sub-list for extension type_name
+	4,  // [4:4] is the sub-list for extension extendee
+	0,  // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_pg_custom_endpoint_proto_init() }
