@@ -360,6 +360,11 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			projectFolders.DELETE("/:folder_id", h.V1.DeleteProjectFolder)
 			projectFolders.PUT("/order", h.V1.UpdateProjectFolderOrder)
 		}
+
+		customEndpoints := v1Admin.Group("/custom-endpoints")
+		{
+			customEndpoints.POST("/exec-query")
+		}
 	}
 
 	v2Admin := r.Group("/v2")
