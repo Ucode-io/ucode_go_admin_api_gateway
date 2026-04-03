@@ -84,7 +84,7 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 		return
 	}
 
-	log.Printf("CLAUDE MODEL.....", h.baseConf.ClaudeModel)
+	log.Println("CLAUDE MODEL.....", h.baseConf.ClaudeModel)
 
 	service, resourceEnvID, err := h.getAiChatServices(c)
 	if err != nil {
