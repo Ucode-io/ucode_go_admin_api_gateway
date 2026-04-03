@@ -151,6 +151,12 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1.GET("/files", h.V1.GetAllFiles)
 		v1.POST("/files/word-template", h.V1.WordTemplate)
 
+		// vault
+		v1.GET("/vault/keys", h.V1.GetListVaultKeys)
+		v1.POST("/vault/keys", h.V1.CreateVaultKey)
+		v1.PUT("/vault/keys/:key", h.V1.UpdateVaultKey)
+		v1.DELETE("/vault/keys/:key", h.V1.DeleteVaultKey)
+
 		v1.POST("/language", h.V1.CreateLanguage)
 		v1.GET("/language/:id", h.V1.GetByIdLanguage)
 		v1.GET("/language", h.V1.GetListLanguage)

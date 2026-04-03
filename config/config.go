@@ -121,6 +121,11 @@ type BaseConfig struct {
 	PlannerMaxTokens         int
 
 	UcodeBaseUrl string
+
+	VaultAddress    string
+	VaultRoleID     string
+	VaultSecretID   string
+	VaultMountPath  string
 }
 
 func BaseLoad() BaseConfig {
@@ -181,6 +186,11 @@ func BaseLoad() BaseConfig {
 	config.KnativeBaseUrl = cast.ToString(GetOrReturnDefaultValue("KNATIVE_BASE_URL", ""))
 	config.MCPServerURL = cast.ToString(GetOrReturnDefaultValue("MCP_SERVER_URL", ""))
 	config.UcodeBaseUrl = cast.ToString(GetOrReturnDefaultValue("UCODE_BASE_URL", "https://admin-api.ucode.run"))
+
+	config.VaultAddress   = cast.ToString(GetOrReturnDefaultValue("VAULT_ADDR", ""))
+	config.VaultRoleID    = cast.ToString(GetOrReturnDefaultValue("VAULT_ROLE_ID", ""))
+	config.VaultSecretID  = cast.ToString(GetOrReturnDefaultValue("VAULT_SECRET_ID", ""))
+	config.VaultMountPath = cast.ToString(GetOrReturnDefaultValue("VAULT_MOUNT_PATH", "approle"))
 
 	config.MaxTokens = cast.ToInt(GetOrReturnDefaultValue("MAX_TOKENS", 12000))
 	config.AnalyseProjectMaxTokens = cast.ToInt(GetOrReturnDefaultValue("ANALYSE_PROJECT_MAX_TOKENS", 5000))

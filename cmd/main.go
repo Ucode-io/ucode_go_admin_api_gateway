@@ -9,6 +9,7 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
+	"ucode/ucode_go_api_gateway/pkg/vault"
 	"ucode/ucode_go_api_gateway/services"
 	"ucode/ucode_go_api_gateway/storage/redis"
 
@@ -124,7 +125,20 @@ func main() {
 
 	limiter := util.NewApiKeyRateLimiter(newRedis, config.RATE_LIMITER_RPS_LIMIT, config.RATE_LIMITER_RPS_LIMIT)
 
-	h := handlers.NewHandler(baseConf, mapProjectConfs, log, projectServiceNodes, compSrvc, authSrvc, newRedis, cache, limiter)
+	var vaultClient vault.VaultClient
+	if baseConf.VaultAddress != "" {
+		vaultClient, err = vault.New(ctx, vault.Config{
+			Address:   baseConf.VaultAddress,
+			RoleID:    baseConf.VaultRoleID,
+			SecretID:  baseConf.VaultSecretID,
+			MountPath: baseConf.VaultMountPath,
+		})
+		if err != nil {
+			log.Error("[ucode] error while initializing vault client", logger.Error(err))
+		}
+	}
+
+	h := handlers.NewHandler(baseConf, mapProjectConfs, log, projectServiceNodes, compSrvc, authSrvc, newRedis, cache, limiter, vaultClient)
 
 	api.SetUpAPI(r, h, baseConf, tracer)
 
