@@ -105,6 +105,9 @@ func (h *HandlerV1) GetListVaultKeys(c *gin.Context) {
 
 	keys := make([]string, 0, len(secrets))
 	for k := range secrets {
+		if k == "database" || k == "host" || k == "password" || k == "port" || k == "username" {
+			continue
+		}
 		keys = append(keys, k)
 	}
 	sort.Strings(keys)
@@ -123,7 +126,7 @@ func (h *HandlerV1) GetListVaultKeys(c *gin.Context) {
 
 	entries := make([]VaultKeyEntry, 0, end-offset)
 	for _, k := range keys[offset:end] {
-		entries = append(entries, VaultKeyEntry{Key: k, Value: secrets[k]})
+		entries = append(entries, VaultKeyEntry{Key: k, Value: ""})
 	}
 
 	h.HandleResponse(c, status_http.OK, GetListVaultKeysResponse{Data: entries, Count: total})
