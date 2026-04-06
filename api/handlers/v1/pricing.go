@@ -23,9 +23,8 @@ import (
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 // @Router /v1/pricing/all [get]
 func (h *HandlerV1) GetAllPricingUsage(c *gin.Context) {
-	projectId, ok := c.Get("project_id")
-	if !ok {
-		h.HandleResponse(c, status_http.BadRequest, "project_id is required")
+	service, resourceEnvId, err := h.getAiChatServices(c)
+	if err != nil {
 		return
 	}
 
@@ -39,17 +38,11 @@ func (h *HandlerV1) GetAllPricingUsage(c *gin.Context) {
 		return
 	}
 
-	// 2. Get usage from object builder service
-	srvc, err := h.services.Get(h.baseConf.UcodeNamespace)
-	if err != nil {
-		h.log.Error("Get service error", logger.Error(err), logger.String("project_id", cast.ToString(projectId)))
-		h.HandleResponse(c, status_http.InternalServerError, err.Error())
-		return
-	}
-
-	usageResp, err := srvc.GoObjectBuilderService().ObjectBuilder().GetResourceUsage(c.Request.Context(), &nb.GetResourceUsageRequest{
-		ProjectId: cast.ToString(projectId),
-	})
+	usageResp, err := service.GoObjectBuilderService().ObjectBuilder().GetResourceUsage(
+		c.Request.Context(), &nb.GetResourceUsageRequest{
+			ProjectId: resourceEnvId,
+		},
+	)
 	if err != nil {
 		h.log.Error("GetResourceUsage error", logger.Error(err), logger.String("project_id", cast.ToString(projectId)))
 		h.HandleResponse(c, status_http.InternalServerError, err.Error())
