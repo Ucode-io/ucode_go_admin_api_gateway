@@ -16,11 +16,15 @@ type GitlabTreeItem struct {
 	Mode string `json:"mode"`
 }
 
+type GitlabFileChange struct {
+	FilePath string `json:"file_path"`
+	Content  string `json:"content"`
+}
+
 type GitlabUpdateFileRequest struct {
-	FilePath      string `json:"file_path"`
-	Content       string `json:"content"`
-	Branch        string `json:"branch"`
-	CommitMessage string `json:"commit_message"`
+	Files         []GitlabFileChange `json:"files"`
+	Branch        string             `json:"branch"`
+	CommitMessage string             `json:"commit_message"`
 }
 
 type Function struct {
