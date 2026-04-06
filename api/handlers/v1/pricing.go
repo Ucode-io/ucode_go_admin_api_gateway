@@ -4,6 +4,7 @@ import (
 	"log"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
+	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/logger"
@@ -57,6 +58,20 @@ func (h *HandlerV1) GetAllPricingUsage(c *gin.Context) {
 		return
 	}
 
+	usersCountResp, err := h.authService.User().GetProjectUsersCount(
+		c.Request.Context(), &auth_service.GetProjectUsersCountRequest{
+			ProjectId: resourceEnvId,
+		},
+	)
+	if err != nil {
+		h.log.Error("GetProjectUsersCount error", logger.Error(err), logger.String("project_id", resourceEnvId))
+	}
+
+	var userCount float64
+	if usersCountResp != nil {
+		userCount = float64(usersCountResp.Count)
+	}
+
 	// 3. Aggregate results
 	response := models.AllPricingUsage{
 		Functions: models.PricingUsage{
@@ -75,6 +90,10 @@ func (h *HandlerV1) GetAllPricingUsage(c *gin.Context) {
 			Current: float64(usageResp.DatabaseSize / 1024),
 			Unit:    "bytes",
 		},
+		Users: models.PricingUsage{
+			Current: userCount,
+			Unit:    "count",
+		},
 	}
 
 	// Map limits
@@ -91,6 +110,8 @@ func (h *HandlerV1) GetAllPricingUsage(c *gin.Context) {
 			response.DatabaseSize.Limit = cast.ToFloat64(limit.Value[:len(limit.Value)-2]) * 1024
 		case "Asset Size info":
 			response.AssetSize.Limit = cast.ToFloat64(limit.Value[:len(limit.Value)-2]) * 1024
+		case "Total Users & Roles":
+			response.Users.Limit = cast.ToFloat64(limit.Value)
 		}
 	}
 

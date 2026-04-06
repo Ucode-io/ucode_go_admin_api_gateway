@@ -7,8 +7,9 @@ type PricingUsage struct {
 }
 
 type AllPricingUsage struct {
-	Functions      PricingUsage `json:"functions"`
-	Microfrontend  PricingUsage `json:"microfrontend"`
-	DatabaseSize   PricingUsage `json:"database_size"`
-	AssetSize      PricingUsage `json:"asset_size"`
+	Functions     PricingUsage `json:"functions"`
+	Microfrontend PricingUsage `json:"microfrontend"`
+	AssetSize     PricingUsage `json:"asset_size"`
+	DatabaseSize  PricingUsage `json:"database_size"`
+	Users         PricingUsage `json:"users"`
 }
