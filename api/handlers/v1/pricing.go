@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"log"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
@@ -59,34 +60,37 @@ func (h *HandlerV1) GetAllPricingUsage(c *gin.Context) {
 	// 3. Aggregate results
 	response := models.AllPricingUsage{
 		Functions: models.PricingUsage{
-			Current: float64(usageResp.FunctionsCount),
+			Current: float64(usageResp.FunctionsCount) / 1024,
 			Unit:    "count",
 		},
 		Microfrontend: models.PricingUsage{
-			Current: float64(usageResp.MicrofrontendsCount),
+			Current: float64(usageResp.MicrofrontendsCount) / 1024,
 			Unit:    "count",
 		},
 		AssetSize: models.PricingUsage{
-			Current: float64(usageResp.AssetSize),
+			Current: float64(usageResp.AssetSize) / 1024,
 			Unit:    "bytes",
 		},
 		DatabaseSize: models.PricingUsage{
-			Current: float64(usageResp.DatabaseSize),
+			Current: float64(usageResp.DatabaseSize) / 1024,
 			Unit:    "bytes",
 		},
 	}
 
 	// Map limits
 	for _, limit := range limitsResp.Limits {
-		switch limit.Type {
-		case "function":
+
+		log.Println("AAA:", limit.Name, limit.Value)
+
+		switch limit.Name {
+		case "Functions":
 			response.Functions.Limit = cast.ToFloat64(limit.Value)
-		case "microfrontend":
+		case "Microfrontend":
 			response.Microfrontend.Limit = cast.ToFloat64(limit.Value)
-		case "database":
-			response.DatabaseSize.Limit = cast.ToFloat64(limit.Value)
-		case "asset_storage":
-			response.AssetSize.Limit = cast.ToFloat64(limit.Value)
+		case "Database Size":
+			response.DatabaseSize.Limit = cast.ToFloat64(limit.Value[:len(limit.Value)-2]) * 1024
+		case "Asset Size info":
+			response.AssetSize.Limit = cast.ToFloat64(limit.Value[:len(limit.Value)-2]) * 1024
 		}
 	}
 
