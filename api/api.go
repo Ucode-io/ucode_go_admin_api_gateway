@@ -564,6 +564,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		gitlab.GET("/tree", h.V2.GitlabGetTree)
 		gitlab.GET("/file", h.V2.GitlabGetFile)
 		gitlab.PUT("/file", h.V2.GitlabUpdateFile)
+		gitlab.GET("/pipeline", h.V2.GitlabGetPipelineStatus)
 	}
 
 	proxyApi := r.Group("/v2")
