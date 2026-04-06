@@ -57,6 +57,9 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1.GET("/menu-settings/:id", h.V1.GetMenuSettingByID)
 		v1.DELETE("/menu-settings/:id", h.V1.DeleteMenuSettings)
 
+		// Pricing
+		v1.GET("/pricing/all", h.V1.GetAllPricingUsage)
+
 		// MINIO
 		v1.POST("/minio/bucket-size", h.V1.BucketSize)
 
