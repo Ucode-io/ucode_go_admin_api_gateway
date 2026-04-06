@@ -23,15 +23,22 @@ import (
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 // @Router /v1/pricing/all [get]
 func (h *HandlerV1) GetAllPricingUsage(c *gin.Context) {
+	projectId, ok := c.Get("project_id")
+	if !ok {
+		h.HandleResponse(c, status_http.BadRequest, "project_id is required")
+		return
+	}
+
 	service, resourceEnvId, err := h.getAiChatServices(c)
 	if err != nil {
 		return
 	}
 
-	// 1. Get limits from company service
-	limitsResp, err := h.companyServices.Billing().GetPricingLimits(c.Request.Context(), &company_service.GetPricingLimitsRequest{
-		ProjectId: cast.ToString(projectId),
-	})
+	limitsResp, err := h.companyServices.Billing().GetPricingLimits(
+		c.Request.Context(), &company_service.GetPricingLimitsRequest{
+			ProjectId: cast.ToString(projectId),
+		},
+	)
 	if err != nil {
 		h.log.Error("GetPricingLimits error", logger.Error(err), logger.String("project_id", cast.ToString(projectId)))
 		h.HandleResponse(c, status_http.InternalServerError, err.Error())
