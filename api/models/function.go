@@ -8,6 +8,25 @@ import (
 	"ucode/ucode_go_api_gateway/services"
 )
 
+type GitlabTreeItem struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	Type string `json:"type"` // "blob" (file) or "tree" (folder)
+	Path string `json:"path"`
+	Mode string `json:"mode"`
+}
+
+type GitlabFileChange struct {
+	FilePath string `json:"file_path"`
+	Content  string `json:"content"`
+}
+
+type GitlabUpdateFileRequest struct {
+	Files         []GitlabFileChange `json:"files"`
+	Branch        string             `json:"branch"`
+	CommitMessage string             `json:"commit_message"`
+}
+
 type Function struct {
 	ID               string `json:"id"`
 	Path             string `json:"path"`
