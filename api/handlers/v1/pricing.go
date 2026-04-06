@@ -60,7 +60,7 @@ func (h *HandlerV1) GetAllPricingUsage(c *gin.Context) {
 
 	usersCountResp, err := h.authService.User().GetProjectUsersCount(
 		c.Request.Context(), &auth_service.GetProjectUsersCountRequest{
-			ProjectId: resourceEnvId,
+			ProjectId: projectId.(string),
 		},
 	)
 	if err != nil {
