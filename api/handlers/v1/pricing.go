@@ -60,19 +60,19 @@ func (h *HandlerV1) GetAllPricingUsage(c *gin.Context) {
 	// 3. Aggregate results
 	response := models.AllPricingUsage{
 		Functions: models.PricingUsage{
-			Current: float64(usageResp.FunctionsCount) / 1024,
+			Current: float64(usageResp.FunctionsCount / 1024),
 			Unit:    "count",
 		},
 		Microfrontend: models.PricingUsage{
-			Current: float64(usageResp.MicrofrontendsCount) / 1024,
+			Current: float64(usageResp.MicrofrontendsCount / 1024),
 			Unit:    "count",
 		},
 		AssetSize: models.PricingUsage{
-			Current: float64(usageResp.AssetSize) / 1024,
+			Current: float64(usageResp.AssetSize / 1024),
 			Unit:    "bytes",
 		},
 		DatabaseSize: models.PricingUsage{
-			Current: float64(usageResp.DatabaseSize) / 1024,
+			Current: float64(usageResp.DatabaseSize / 1024),
 			Unit:    "bytes",
 		},
 	}
