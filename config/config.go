@@ -126,6 +126,9 @@ type BaseConfig struct {
 	VaultRoleID    string
 	VaultSecretID  string
 	VaultMountPath string
+
+	GitlabBaseURL string
+	GitlabToken   string
 }
 
 func BaseLoad() BaseConfig {
@@ -196,6 +199,9 @@ func BaseLoad() BaseConfig {
 	config.VaultRoleID = "c4a803bc-2350-a925-7618-970fa8af6b15"
 	config.VaultSecretID = "a94ed517-55fc-f01e-808c-b255a0058879"
 	config.VaultMountPath = "ucode"
+
+	config.GitlabBaseURL = cast.ToString(GetOrReturnDefaultValue("GITLAB_BASE_URL", "https://gitlab.udevs.io/"))
+	config.GitlabToken = cast.ToString(GetOrReturnDefaultValue("GITLAB_TOKEN", ""))
 
 	config.MaxTokens = cast.ToInt(GetOrReturnDefaultValue("MAX_TOKENS", 12000))
 	config.AnalyseProjectMaxTokens = cast.ToInt(GetOrReturnDefaultValue("ANALYSE_PROJECT_MAX_TOKENS", 5000))
