@@ -126,3 +126,20 @@ func (h *HandlerV2) GitlabGetFile(c *gin.Context) {
 func (h *HandlerV2) GitlabUpdateFile(c *gin.Context) {
 	_ = h.MakeProxy(c, h.baseConf.GoFunctionServiceHost+h.baseConf.GoFunctionServiceHTTPPort, c.Request.URL.Path)
 }
+
+// GitlabGetPipelineStatus godoc
+// @Security ApiKeyAuth
+// @ID gitlab_get_pipeline_status
+// @Router /gitlab/pipeline [GET]
+// @Summary Gitlab Get Pipeline Status
+// @Description Get the latest pipeline status for a GitLab repository
+// @Tags Gitlab
+// @Accept json
+// @Produce json
+// @Param project_id query string true "gitlab numeric project id"
+// @Param branch query string false "branch name (default: master)"
+// @Success 200 {object} status_http.Response{data=string} "Data"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *HandlerV2) GitlabGetPipelineStatus(c *gin.Context) {
+	_ = h.MakeProxy(c, h.baseConf.GoFunctionServiceHost+h.baseConf.GoFunctionServiceHTTPPort, c.Request.URL.Path)
+}
