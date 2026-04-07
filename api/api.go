@@ -437,6 +437,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v2Items.DELETE("/:collection", h.V2.DeleteItems)
 		v2Items.DELETE("/:collection/:id", h.V2.DeleteItem)
 		v2Items.POST("/:collection/aggregation", h.V2.GetListAggregation)
+		v2Items.POST("/:collection/filter", h.V2.GetListWithFilters)
 		v2Items.PUT("/many-to-many", h.V2.AppendManyToMany)                  // TODO test
 		v2Items.DELETE("/many-to-many", h.V2.DeleteManyToMany)               // TODO test
 		v2Items.PUT("/update-row/:collection", h.V2.UpdateRowOrder)          // TODO test
