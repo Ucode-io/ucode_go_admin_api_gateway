@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"strings"
 
 	vaultapi "github.com/hashicorp/vault/api"
@@ -13,6 +14,7 @@ import (
 type VaultClient interface {
 	Get(ctx context.Context, secretPath string) (map[string]any, error)
 	Put(ctx context.Context, secretPath string, data map[string]any) error
+	Delete(ctx context.Context, secretPath string) error
 }
 
 type Config struct {
@@ -49,32 +51,78 @@ func New(ctx context.Context, cfg Config) (VaultClient, error) {
 		mountPath: cfg.MountPath,
 	}
 
-	if err := vc.login(ctx); err != nil {
+	if _, err := vc.login(ctx); err != nil {
 		return nil, fmt.Errorf("vault login failed: %w", err)
 	}
+
+	go func() {
+		for {
+			loginResp, err := vc.login(ctx)
+			if err != nil {
+				log.Printf("vault: re-login failed: %v, retrying...", err)
+				continue
+			}
+			if err := vc.manageTokenLifecycle(loginResp); err != nil {
+				log.Printf("vault: token lifecycle error: %v", err)
+			}
+		}
+	}()
 
 	return vc, nil
 }
 
-func (v *vaultClient) login(ctx context.Context) error {
+func (v *vaultClient) login(ctx context.Context) (*vaultapi.Secret, error) {
 	appRoleAuth, err := auth.NewAppRoleAuth(
 		v.roleID,
 		&auth.SecretID{FromString: v.secretID},
 		auth.WithMountPath(v.mountPath),
 	)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	authInfo, err := v.client.Auth().Login(ctx, appRoleAuth)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if authInfo == nil {
-		return errors.New("no auth info returned from vault")
+		return nil, errors.New("no auth info returned from vault")
 	}
 
-	return nil
+	return authInfo, nil
+}
+
+// manageTokenLifecycle uses Vault's LifetimeWatcher to renew the token automatically.
+// Returns nil when token can no longer be renewed (caller should re-login).
+func (v *vaultClient) manageTokenLifecycle(token *vaultapi.Secret) error {
+	if !token.Auth.Renewable {
+		return nil
+	}
+
+	watcher, err := v.client.NewLifetimeWatcher(&vaultapi.LifetimeWatcherInput{
+		Secret:    token,
+		Increment: 3600,
+	})
+	if err != nil {
+		return fmt.Errorf("unable to initialize lifetime watcher: %w", err)
+	}
+
+	go watcher.Start()
+	defer watcher.Stop()
+
+	for {
+		select {
+		case err := <-watcher.DoneCh():
+			if err != nil {
+				log.Printf("vault: failed to renew token: %v. Re-attempting login.", err)
+			} else {
+				log.Printf("vault: token reached max TTL. Re-attempting login.")
+			}
+			return nil
+		case renewal := <-watcher.RenewCh():
+			log.Printf("vault: token successfully renewed: %v", renewal.Secret.Auth.ClientToken[:8]+"...")
+		}
+	}
 }
 
 func (v *vaultClient) Get(ctx context.Context, secretPath string) (map[string]any, error) {
@@ -88,4 +136,8 @@ func (v *vaultClient) Get(ctx context.Context, secretPath string) (map[string]an
 func (v *vaultClient) Put(ctx context.Context, secretPath string, data map[string]any) error {
 	_, err := v.client.KVv2("secret").Put(ctx, secretPath, data)
 	return err
+}
+
+func (v *vaultClient) Delete(ctx context.Context, secretPath string) error {
+	return v.client.KVv2("secret").Delete(ctx, secretPath)
 }
