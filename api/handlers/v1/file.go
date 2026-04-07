@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"image"
+	"image/jpeg"
 	"image/png"
 	"io"
 	"os"
@@ -49,14 +50,13 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 		file models.File
 	)
 
-	if file.File != nil {
-		h.HandleResponse(c, status_http.BadRequest, "file is empty")
+	if err := c.ShouldBind(&file); err != nil {
+		h.HandleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
 	var (
 		folderName = c.DefaultQuery("folder_name", "Media")
-		format     = c.DefaultQuery("format", "png")
 		rationStr  = c.Query("ratio")
 		ratio      float64
 	)
@@ -66,11 +66,6 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 		if ratio <= 0 {
 			ratio = 0
 		}
-	}
-
-	if err := c.ShouldBind(&file); err != nil {
-		h.HandleResponse(c, status_http.BadRequest, err.Error())
-		return
 	}
 
 	projectId, ok := c.Get("project_id")
@@ -98,11 +93,7 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c.Request.Context(),
-		projectId.(string),
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -110,8 +101,8 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 
 	title := file.File.Filename
 	fName, _ := uuid.NewRandom()
-	file.File.Filename = strings.ReplaceAll(file.File.Filename, " ", "")
-	file.File.Filename = fmt.Sprintf("%s_%s", fName.String(), file.File.Filename)
+	cleanFileName := strings.ReplaceAll(title, " ", "")
+	finalFilename := fmt.Sprintf("%s_%s", fName.String(), cleanFileName)
 	contentType := file.File.Header.Get("Content-Type")
 
 	object, err := file.File.Open()
@@ -126,38 +117,46 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 
 	isImage := strings.HasPrefix(contentType, "image/")
 	isSVG := strings.Contains(contentType, "svg")
-	if isImage && !isSVG {
-		img, _, err := image.Decode(object)
+
+	if isImage && !isSVG && ratio > 0 {
+		img, imgFormat, err := image.Decode(object)
+		if err != nil {
+			h.HandleResponse(c, status_http.GRPCError, "decode error: "+err.Error())
+			return
+		}
+
+		img, err = cropImageByRatio(img, ratio)
 		if err != nil {
 			h.HandleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 
-		if ratio > 0 {
-			img, err = cropImageByRatio(img, ratio)
-			if err != nil {
-				h.HandleResponse(c, status_http.GRPCError, err.Error())
-				return
-			}
-		}
-
 		var buf bytes.Buffer
-		if format == "webp" {
+		// Сохраняем в том же формате, в котором пришло
+		switch imgFormat {
+		case "jpeg", "jpg":
+			err = jpeg.Encode(&buf, img, nil)
+			contentType = "image/jpeg"
+		case "webp":
 			err = nativewebp.Encode(&buf, img, nil)
-		} else {
+			contentType = "image/webp"
+		default:
 			err = png.Encode(&buf, img)
+			contentType = "image/png"
+			imgFormat = "png"
 		}
 
 		if err != nil {
-			h.HandleResponse(c, status_http.GRPCError, err.Error())
+			h.HandleResponse(c, status_http.GRPCError, "encode error: "+err.Error())
 			return
 		}
 
 		uploadReader = bytes.NewReader(buf.Bytes())
 		uploadSize = int64(buf.Len())
 
-		file.File.Header["Content-Type"][0] = "image/" + format
-		file.File.Filename = strings.TrimSuffix(file.File.Filename, filepath.Ext(file.File.Filename)) + "." + format
+		ext := filepath.Ext(cleanFileName)
+		baseName := strings.TrimSuffix(cleanFileName, ext)
+		finalFilename = fmt.Sprintf("%s_%s.%s", fName.String(), baseName, imgFormat)
 	}
 
 	minioClient, err := minio.New(h.baseConf.MinioEndpoint, &minio.Options{
@@ -172,10 +171,10 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 	_, err = minioClient.PutObject(
 		c.Request.Context(),
 		resource.ResourceEnvironmentId,
-		folderName+"/"+file.File.Filename,
+		folderName+"/"+finalFilename,
 		uploadReader,
 		uploadSize,
-		minio.PutObjectOptions{ContentType: file.File.Header["Content-Type"][0]},
+		minio.PutObjectOptions{ContentType: contentType},
 	)
 	if err != nil {
 		h.HandleResponse(c, status_http.BadRequest, err.Error())
@@ -188,38 +187,34 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 			Id:               fName.String(),
 			Title:            title,
 			Storage:          folderName,
-			FileNameDisk:     file.File.Filename,
+			FileNameDisk:     finalFilename,
 			FileNameDownload: title,
-			Link:             resource.ResourceEnvironmentId + "/" + folderName + "/" + file.File.Filename,
-			FileSize:         file.File.Size,
+			Link:             resource.ResourceEnvironmentId + "/" + folderName + "/" + finalFilename,
+			FileSize:         uploadSize,
 			ProjectId:        resource.ResourceEnvironmentId,
 		})
 		if err != nil {
 			h.HandleResponse(c, status_http.BadRequest, err.Error())
 			return
 		}
-
 		h.HandleResponse(c, status_http.Created, resp)
-		return
+
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().File().Create(c.Request.Context(), &nb.CreateFileRequest{
 			Id:               fName.String(),
 			Title:            title,
 			Storage:          folderName,
-			FileNameDisk:     file.File.Filename,
+			FileNameDisk:     finalFilename,
 			FileNameDownload: title,
-			Link:             resource.ResourceEnvironmentId + "/" + folderName + "/" + file.File.Filename,
-			FileSize:         file.File.Size,
+			Link:             resource.ResourceEnvironmentId + "/" + folderName + "/" + finalFilename,
+			FileSize:         uploadSize,
 			ProjectId:        resource.ResourceEnvironmentId,
 		})
-
 		if err != nil {
 			h.HandleResponse(c, status_http.BadRequest, err.Error())
 			return
 		}
-
 		h.HandleResponse(c, status_http.Created, resp)
-		return
 	}
 }
 
