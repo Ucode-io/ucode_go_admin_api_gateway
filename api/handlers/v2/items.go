@@ -769,9 +769,10 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 
 			resp, err := services.GoObjectBuilderService().ObjectBuilder().GetList2(
 				c.Request.Context(), &nb.CommonMessage{
-					TableSlug: tableSlug,
-					Data:      structData,
-					ProjectId: resource.ResourceEnvironmentId,
+					TableSlug:        tableSlug,
+					Data:             structData,
+					ProjectId:        resource.ResourceEnvironmentId,
+					CompanyProjectId: resource.ProjectId,
 				},
 			)
 

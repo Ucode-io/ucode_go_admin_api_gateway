@@ -200,9 +200,10 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 
 			resp, err = service.GetList2(c.Request.Context(),
 				&obs.CommonMessage{
-					TableSlug: tableSlug,
-					Data:      structData,
-					ProjectId: resource.ResourceEnvironmentId,
+					TableSlug:        tableSlug,
+					Data:             structData,
+					ProjectId:        resource.ResourceEnvironmentId,
+					CompanyProjectId: projectId.(string),
 				},
 			)
 
@@ -223,9 +224,10 @@ func (h *HandlerV1) GetListV2(c *gin.Context) {
 		case pb.ResourceType_POSTGRESQL:
 			resp, err := services.GoObjectBuilderService().ObjectBuilder().GetList2(
 				c.Request.Context(), &nb.CommonMessage{
-					TableSlug: tableSlug,
-					Data:      structData,
-					ProjectId: resource.ResourceEnvironmentId,
+					TableSlug:        tableSlug,
+					Data:             structData,
+					ProjectId:        resource.ResourceEnvironmentId,
+					CompanyProjectId: projectId.(string),
 				},
 			)
 			if err != nil {
