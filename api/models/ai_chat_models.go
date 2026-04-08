@@ -45,6 +45,18 @@ type (
 		InferenceGeo             string `json:"inference_geo"`
 	}
 
+	QuestionOption struct {
+		ID    string `json:"id"`
+		Label string `json:"label"`
+	}
+
+	AiQuestion struct {
+		ID      string           `json:"id"`
+		Title   string           `json:"title"`
+		Type    string           `json:"type"` // "single" | "multi"
+		Options []QuestionOption `json:"options"`
+	}
+
 	ParsedClaudeResponse struct {
 		Model         string            `json:"model"`
 		MessageID     string            `json:"message_id"`
@@ -53,6 +65,7 @@ type (
 		Project       *GeneratedProject `json:"project,omitempty"`
 		Description   string            `json:"description"`
 		PendingAction *PendingAction    `json:"pending_action,omitempty"`
+		Question      *AiQuestion       `json:"question,omitempty"`
 	}
 
 	// ========================== Classification ==========================
@@ -68,14 +81,15 @@ type (
 	// ========================== AI Agent Routing ==========================
 
 	HaikuRoutingResult struct {
-		NextStep       bool     `json:"next_step"`
-		Intent         string   `json:"intent"`
-		Reply          string   `json:"reply"`
-		Clarified      string   `json:"clarified"`
-		ClarifyOptions []string `json:"clarify_options"`
-		FilesNeeded    []string `json:"files_needed"`
-		HasImages      bool     `json:"has_images"`
-		ProjectName    string   `json:"project_name"`
+		NextStep       bool        `json:"next_step"`
+		Intent         string      `json:"intent"`
+		Reply          string      `json:"reply"`
+		Clarified      string      `json:"clarified"`
+		ClarifyOptions []string    `json:"clarify_options"`
+		FilesNeeded    []string    `json:"files_needed"`
+		HasImages      bool        `json:"has_images"`
+		ProjectName    string      `json:"project_name"`
+		Question       *AiQuestion `json:"question,omitempty"`
 	}
 
 	SonnetPlanResult struct {

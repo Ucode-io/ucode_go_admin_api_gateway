@@ -143,6 +143,8 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 	if strings.TrimSpace(aiResponse.Description) == "" {
 		if aiResponse.PendingAction != nil {
 			aiResponse.Description = aiResponse.PendingAction.ConfirmationPrompt
+		} else if aiResponse.Question != nil {
+			aiResponse.Description = aiResponse.Question.Title
 		} else {
 			aiResponse.Description = "Project has been updated."
 		}
@@ -181,6 +183,7 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 		"project":        updatedProject,
 		"mcp_project_id": processor.mcpProjectID,
 		"pending_action": aiResponse.PendingAction,
+		"question":       aiResponse.Question,
 	})
 }
 
@@ -304,6 +307,14 @@ func (p *ChatProcessor) routeAndProcess(ctx context.Context, req models.NewMessa
 	}
 
 	log.Printf("[ROUTER] intent=%s next_step=%v files_needed=%d", routeResult.Intent, routeResult.NextStep, len(routeResult.FilesNeeded))
+
+	// If the router wants to present a structured question to the user, return it immediately.
+	if routeResult.Intent == "ask_question" {
+		return &models.ParsedClaudeResponse{
+			Description: routeResult.Reply,
+			Question:    routeResult.Question,
+		}, nil
+	}
 
 	// If Haiku said no further processing needed, return its reply directly
 	if !routeResult.NextStep {
