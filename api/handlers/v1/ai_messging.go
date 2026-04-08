@@ -319,12 +319,9 @@ func (p *ChatProcessor) routeAndProcess(ctx context.Context, req models.NewMessa
 		}, nil
 	}
 
-	// If the router produced a full project plan, return it immediately.
+	// If the router detected a plan request, generate the full structured plan via a dedicated call.
 	if routeResult.Intent == "plan_request" {
-		return &models.ParsedClaudeResponse{
-			Description: routeResult.Reply,
-			Plan:        routeResult.Plan,
-		}, nil
+		return p.runGeneratePlan(ctx, req.Content, chatHistory)
 	}
 
 	// If Haiku said no further processing needed, return its reply directly
@@ -359,6 +356,35 @@ func (p *ChatProcessor) routeAndProcess(ctx context.Context, req models.NewMessa
 	}
 
 	return &models.ParsedClaudeResponse{Description: routeResult.Reply}, nil
+}
+
+func (p *ChatProcessor) runGeneratePlan(ctx context.Context, userRequest string, chatHistory []models.ChatMessage) (*models.ParsedClaudeResponse, error) {
+	content := helper.BuildPlanGeneratorMessage(userRequest)
+	messages := buildMessagesWithHistory(chatHistory, []models.ContentBlock{{Type: "text", Text: content}})
+
+	response, err := helper.CallAnthropicAPI(
+		p.baseConf,
+		models.AnthropicRequest{
+			Model:     p.baseConf.ClaudeModel,
+			MaxTokens: p.baseConf.PlannerMaxTokens,
+			System:    helper.PromptPlanGenerator,
+			Messages:  messages,
+		},
+		timeoutPlanner,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("plan generator: %w", err)
+	}
+
+	plan, err := helper.ParsePlanResult(response)
+	if err != nil {
+		return nil, fmt.Errorf("plan generator: parse failed: %w", err)
+	}
+
+	return &models.ParsedClaudeResponse{
+		Description: plan.BusinessSummary,
+		Plan:        plan,
+	}, nil
 }
 
 func (p *ChatProcessor) runInspect(ctx context.Context, userQuestion string, filesNeeded []string, chatHistory []models.ChatMessage, imageURLs []string, projectData *pbo.McpProject) (*models.ParsedClaudeResponse, error) {

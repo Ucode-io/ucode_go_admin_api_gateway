@@ -226,6 +226,26 @@ func ParseSonnetPlanResult(rawJSON string) (*models.SonnetPlanResult, error) {
 	return &result, nil
 }
 
+func ParsePlanResult(rawJSON string) (*models.HaikuPlan, error) {
+	fullText, resp, err := extractTextFromClaudeResponse(rawJSON)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StopReason == "max_tokens" {
+		log.Printf("[PARSE] WARNING: plan generator response cut off by max_tokens")
+	}
+
+	cleaned := extractJSON(fullText)
+
+	var result models.HaikuPlan
+	if err := json.Unmarshal([]byte(cleaned), &result); err != nil {
+		return nil, fmt.Errorf("failed to parse plan JSON: %w", err)
+	}
+
+	return &result, nil
+}
+
 func extractJSONAndDescription(text string) (jsonBlock, description string) {
 	re := regexp.MustCompile("(?s)```json\\s*\\n?(.*?)\\n?```(.*)")
 	if matches := re.FindStringSubmatch(text); len(matches) > 2 {
