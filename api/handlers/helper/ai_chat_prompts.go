@@ -276,9 +276,9 @@ JSON schema:
   "files_needed": ["string"],
   "has_images": bool,
   "project_name": "string",
-  "question": null
+  "questions": []
 }
-Note: "question" is null for all intents except "ask_question". Only populate it when intent="ask_question".
+Note: "questions" is an empty array for all intents except "ask_question". Only populate it when intent="ask_question".
  
 ════════════════════════════════════════
 INTENTS
@@ -337,36 +337,51 @@ When to use:
   - Do NOT use for database or inspect intents — only for code_change
   - Do NOT ask about tech stack, framework, TypeScript, or deployment — those are decided automatically
 
-When intent="ask_question", set "question" to:
-  {
-    "id": "string (kebab-case, e.g. panel-type)",
-    "title": "string (the question text, same language as user)",
-    "type": "single" | "multi",
-    "options": [{"id": "string", "label": "string"}]
-  }
+When intent="ask_question", set "questions" to an array of one or more question objects:
+  [
+    {
+      "id": "string (kebab-case, e.g. panel-type)",
+      "title": "string (the question text, same language as user)",
+      "type": "single" | "multi",
+      "options": [{"id": "string", "label": "string"}]
+    }
+  ]
 
 Rules:
-  - "id": short kebab-case identifier (e.g. "panel-type")
+  - Include as many questions as needed — this is used for questionnaires, not just one question
+  - "id": unique kebab-case identifier per question (e.g. "panel-type", "target-audience")
   - "title": the question text in the same language the user wrote in
-  - "type": "single" if only one option, "multi" if multiple allowed
-  - "options": concrete, useful business-level choices
-  - Fill "reply" with a brief intro sentence (e.g. "Please select the panel type to get started.")
+  - "type": "single" if only one option should be chosen, "multi" if multiple are allowed
+  - "options": concrete, useful business-level choices per question
+  - Fill "reply" with a brief intro sentence (e.g. "Please answer a few questions to get started.")
 
 Example:
   User: "create a panel for me"
   → intent="ask_question", next_step=false,
-    reply="Please choose the type of panel you want to build.",
-    question={
-      "id": "panel-type",
-      "title": "What type of panel do you want?",
-      "type": "single",
-      "options": [
-        {"id": "crm", "label": "CRM"},
-        {"id": "tms", "label": "TMS"},
-        {"id": "erp", "label": "ERP"},
-        {"id": "custom", "label": "Custom"}
-      ]
-    }
+    reply="Please answer a few questions to get started.",
+    questions=[
+      {
+        "id": "panel-type",
+        "title": "What type of panel do you want?",
+        "type": "single",
+        "options": [
+          {"id": "crm", "label": "CRM"},
+          {"id": "tms", "label": "TMS"},
+          {"id": "erp", "label": "ERP"},
+          {"id": "custom", "label": "Custom"}
+        ]
+      },
+      {
+        "id": "target-audience",
+        "title": "Who will use this panel?",
+        "type": "single",
+        "options": [
+          {"id": "internal", "label": "Internal team"},
+          {"id": "clients", "label": "Clients / customers"},
+          {"id": "both", "label": "Both"}
+        ]
+      }
+    ]
 
 ════════════════════════════════════════
 SCOPE RESOLUTION — for ambiguous cases only

@@ -65,7 +65,7 @@ type (
 		Project       *GeneratedProject `json:"project,omitempty"`
 		Description   string            `json:"description"`
 		PendingAction *PendingAction    `json:"pending_action,omitempty"`
-		Question      *AiQuestion       `json:"question,omitempty"`
+		Questions     []AiQuestion      `json:"questions,omitempty"`
 	}
 
 	// ========================== Classification ==========================
@@ -89,7 +89,7 @@ type (
 		FilesNeeded    []string    `json:"files_needed"`
 		HasImages      bool        `json:"has_images"`
 		ProjectName    string      `json:"project_name"`
-		Question       *AiQuestion `json:"question,omitempty"`
+		Questions      []AiQuestion `json:"questions,omitempty"`
 	}
 
 	SonnetPlanResult struct {
