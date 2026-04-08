@@ -269,16 +269,20 @@ Analyze the user's message (and conversation history if provided) and return ONL
 JSON schema:
 {
   "next_step": bool,
-  "intent": "chat" | "project_question" | "project_inspect" | "code_change" | "database_query" | "clarify" | "ask_question",
+  "intent": "chat" | "project_question" | "project_inspect" | "code_change" | "database_query" | "clarify" | "ask_question" | "plan_request",
   "reply": "string",
   "clarified": "string",
   "clarify_options": ["string", "string"],
   "files_needed": ["string"],
   "has_images": bool,
   "project_name": "string",
-  "questions": []
+  "questions": [],
+  "plan": null
 }
-Note: "questions" is an empty array for all intents except "ask_question". Only populate it when intent="ask_question".
+Notes:
+- "questions" is an empty array for all intents except "ask_question".
+- "plan" is null for all intents except "plan_request". Only populate it when intent="plan_request".
+- When intent="plan_request", "plan" must contain: business_summary, client_types, platforms, steps, tables, bpmn_xml, dbml. infra_diagram is optional.
  
 ════════════════════════════════════════
 INTENTS
@@ -291,6 +295,7 @@ INTENTS
 "database_query"   → read/write REAL database records, rows, tables, fields, schema. next_step=true. Fill clarified.
 "clarify"          → ambiguous between 2+ flows and cannot be resolved. next_step=false. Fill reply + clarify_options.
 "ask_question"     → the request is clearly a project build (code_change) but the type/category is unspecified (e.g. "make a panel" without saying CRM/ERP/TMS). next_step=false. Fill reply (brief intro text) + question (structured options). Do NOT ask about tech stack.
+"plan_request"     → user wants a detailed project plan before building (e.g. "plan a TMS", "give me a plan for CRM", "what would this system look like"). next_step=false. Fill reply + plan (full structured plan with dbml).
  
 ════════════════════════════════════════
 OBVIOUS DATABASE REQUESTS — resolve immediately, NEVER clarify
@@ -382,6 +387,67 @@ Example:
         ]
       }
     ]
+
+════════════════════════════════════════
+PLAN_REQUEST — structured project plan with diagrams
+════════════════════════════════════════
+
+Use "plan_request" when the user explicitly wants a plan, overview, or architecture review BEFORE building (e.g. "plan a TMS for me", "show me what a CRM would look like", "give me a project plan").
+
+When intent="plan_request", populate the "plan" object:
+
+{
+  "business_summary": "2-3 sentence description of the system and its purpose",
+  "client_types": ["Role1", "Role2", ...],
+  "platforms": ["Web Admin Panel", "REST API", ...],
+  "steps": ["Step 1: ...", "Step 2: ...", ...],
+  "tables": [
+    { "name": "table_name", "columns": ["col1", "col2", ...] }
+  ],
+  "bpmn_xml": "<full BPMN 2.0 XML string with lanes per role>",
+  "infra_diagram": [
+    { "from": "NodeA", "to": "NodeB", "label": "HTTPS" }
+  ],
+  "dbml": "<full DBML schema string>"
+}
+
+DBML RULES (CRITICAL — always include when tables are present):
+- Generate complete DBML for ALL tables in the plan
+- Infer foreign key relationships from column names ending in _id
+- Include Ref lines for every detected relationship
+- Use appropriate types: varchar, text, integer, decimal, boolean, timestamp, uuid
+- Always include id (uuid [pk]) and created_at (timestamp) in every table
+
+DBML EXAMPLE for a TMS:
+Table vehicles {
+  id uuid [pk]
+  plate varchar
+  type varchar
+  status varchar
+  driver_id uuid [ref: > drivers.id]
+  lat decimal
+  lng decimal
+  speed decimal
+  created_at timestamp
+}
+
+Table drivers {
+  id uuid [pk]
+  name varchar
+  phone varchar
+  license varchar
+  status varchar
+  vehicle_id uuid [ref: > vehicles.id]
+  created_at timestamp
+}
+
+Ref: vehicles.driver_id > drivers.id
+Ref: drivers.vehicle_id > vehicles.id
+
+BPMN XML RULES:
+- Use BPMN 2.0 format with lanes per client_type role
+- Include start events, service tasks, sequence flows, and cross-lane flows
+- Include bpmndi layout coordinates so it renders correctly
 
 ════════════════════════════════════════
 SCOPE RESOLUTION — for ambiguous cases only

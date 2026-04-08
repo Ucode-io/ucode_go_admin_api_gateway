@@ -145,6 +145,8 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 			aiResponse.Description = aiResponse.PendingAction.ConfirmationPrompt
 		} else if len(aiResponse.Questions) > 0 {
 			aiResponse.Description = aiResponse.Questions[0].Title
+		} else if aiResponse.Plan != nil {
+			aiResponse.Description = aiResponse.Plan.BusinessSummary
 		} else {
 			aiResponse.Description = "Project has been updated."
 		}
@@ -184,6 +186,7 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 		"mcp_project_id": processor.mcpProjectID,
 		"pending_action": aiResponse.PendingAction,
 		"questions":      aiResponse.Questions,
+		"plan":           aiResponse.Plan,
 	})
 }
 
@@ -313,6 +316,14 @@ func (p *ChatProcessor) routeAndProcess(ctx context.Context, req models.NewMessa
 		return &models.ParsedClaudeResponse{
 			Description: routeResult.Reply,
 			Questions:   routeResult.Questions,
+		}, nil
+	}
+
+	// If the router produced a full project plan, return it immediately.
+	if routeResult.Intent == "plan_request" {
+		return &models.ParsedClaudeResponse{
+			Description: routeResult.Reply,
+			Plan:        routeResult.Plan,
 		}, nil
 	}
 
