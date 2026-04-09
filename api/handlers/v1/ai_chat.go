@@ -16,6 +16,44 @@ import (
 	"github.com/spf13/cast"
 )
 
+// ==================== Enrichment ====================
+
+// enrichMessages converts raw proto messages into EnrichedMessage slice.
+// For messages saved with [DIAGRAMS_GENERATED] marker, it strips the embedded
+// plan JSON from content and exposes it as a separate Plan field.
+func enrichMessages(msgs []*pbo.Message) []models.EnrichedMessage {
+	result := make([]models.EnrichedMessage, 0, len(msgs))
+	for _, msg := range msgs {
+		em := models.EnrichedMessage{
+			ID:         msg.GetId(),
+			ChatID:     msg.GetChatId(),
+			Role:       msg.GetRole(),
+			Content:    msg.GetContent(),
+			Images:     msg.GetImages(),
+			HasFiles:   msg.GetHasFiles(),
+			TokensUsed: msg.GetTokensUsed(),
+			CreatedAt:  msg.GetCreatedAt(),
+		}
+		content := msg.GetContent()
+		if strings.HasPrefix(content, "[DIAGRAMS_GENERATED] ") {
+			body := strings.TrimPrefix(content, "[DIAGRAMS_GENERATED] ")
+			if idx := strings.Index(body, "\n"); idx != -1 {
+				em.Content = body[:idx]
+				var plan models.HaikuPlan
+				if err := json.Unmarshal([]byte(body[idx+1:]), &plan); err == nil {
+					em.Plan = &plan
+				}
+			} else {
+				em.Content = body
+			}
+		} else if strings.HasPrefix(content, "[QUESTIONS_ASKED] ") {
+			em.Content = strings.TrimPrefix(content, "[QUESTIONS_ASKED] ")
+		}
+		result = append(result, em)
+	}
+	return result
+}
+
 // ==================== Helper ====================
 
 func (h *HandlerV1) getAiChatServices(c *gin.Context) (services.ServiceManagerI, string, error) {
@@ -165,10 +203,19 @@ func (h *HandlerV1) GetProjectChat(c *gin.Context) {
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return
-
 	}
 
-	h.HandleResponse(c, status_http.OK, chat)
+	h.HandleResponse(c, status_http.OK, map[string]any{
+		"id":           chat.GetId(),
+		"project_id":   chat.GetProjectId(),
+		"title":        chat.GetTitle(),
+		"description":  chat.GetDescription(),
+		"model":        chat.GetModel(),
+		"total_tokens": chat.GetTotalTokens(),
+		"created_at":   chat.GetCreatedAt(),
+		"updated_at":   chat.GetUpdatedAt(),
+		"messages":     enrichMessages(chat.GetMessages()),
+	})
 }
 
 func (h *HandlerV1) UpdateAiChat(c *gin.Context) {
@@ -252,43 +299,8 @@ func (h *HandlerV1) GetAiChatMessages(c *gin.Context) {
 		return
 	}
 
-	// Enrich messages: parse embedded plan data from diagram messages so the
-	// frontend can render diagrams when loading history after a page refresh.
-	enriched := make([]models.EnrichedMessage, 0, len(response.GetMessages()))
-	for _, msg := range response.GetMessages() {
-		em := models.EnrichedMessage{
-			ID:         msg.GetId(),
-			ChatID:     msg.GetChatId(),
-			Role:       msg.GetRole(),
-			Content:    msg.GetContent(),
-			Images:     msg.GetImages(),
-			HasFiles:   msg.GetHasFiles(),
-			TokensUsed: msg.GetTokensUsed(),
-			CreatedAt:  msg.GetCreatedAt(),
-		}
-
-		content := msg.GetContent()
-		if strings.HasPrefix(content, "[DIAGRAMS_GENERATED] ") {
-			// Content format: "[DIAGRAMS_GENERATED] <description>\n<plan_json>"
-			body := strings.TrimPrefix(content, "[DIAGRAMS_GENERATED] ")
-			if idx := strings.Index(body, "\n"); idx != -1 {
-				em.Content = body[:idx]
-				var plan models.HaikuPlan
-				if jsonErr := json.Unmarshal([]byte(body[idx+1:]), &plan); jsonErr == nil {
-					em.Plan = &plan
-				}
-			} else {
-				em.Content = body
-			}
-		} else if strings.HasPrefix(content, "[QUESTIONS_ASKED] ") {
-			em.Content = strings.TrimPrefix(content, "[QUESTIONS_ASKED] ")
-		}
-
-		enriched = append(enriched, em)
-	}
-
 	h.HandleResponse(c, status_http.OK, map[string]any{
-		"messages": enriched,
+		"messages": enrichMessages(response.GetMessages()),
 		"count":    response.GetCount(),
 	})
 }
