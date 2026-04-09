@@ -393,6 +393,7 @@ func (h *HandlerV2) CreateItems(c *gin.Context) {
 			return
 		}
 		logReq.Response = resp
+		logReq.StatusCode = statusHttp.Code
 		go h.versionHistory(logReq)
 	case pb.ResourceType_POSTGRESQL:
 		// Does Not Implemented
