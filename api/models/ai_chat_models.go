@@ -81,12 +81,6 @@ type (
 
 	// ========================== AI Agent Routing ==========================
 
-	// PlanTable — a single table entry inside a HaikuPlan.
-	PlanTable struct {
-		Name    string   `json:"name"`
-		Columns []string `json:"columns"`
-	}
-
 	// PlanInfraEdge — a single directed edge in the infrastructure diagram.
 	PlanInfraEdge struct {
 		From  string `json:"from"`
@@ -94,16 +88,11 @@ type (
 		Label string `json:"label"`
 	}
 
-	// HaikuPlan — structured plan returned when intent is "plan_request".
+	// HaikuPlan — diagram plan returned after the user answers questionnaire questions.
+	// Contains only the visual diagrams needed before code generation.
 	HaikuPlan struct {
-		BusinessSummary string          `json:"business_summary"`
-		ClientTypes     []string        `json:"client_types"`
-		Platforms       []string        `json:"platforms"`
-		Steps           []string        `json:"steps"`
-		Tables          []PlanTable     `json:"tables"`
-		BpmnXML         string          `json:"bpmn_xml,omitempty"`
-		InfraDiagram    []PlanInfraEdge `json:"infra_diagram,omitempty"`
-		Dbml            string          `json:"dbml,omitempty"`
+		BpmnXML      string          `json:"bpmn_xml"`
+		InfraDiagram []PlanInfraEdge `json:"infra_diagram,omitempty"`
 	}
 
 	HaikuRoutingResult struct {
