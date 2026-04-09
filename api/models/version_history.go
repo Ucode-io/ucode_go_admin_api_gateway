@@ -25,6 +25,7 @@ type CreateVersionHistoryRequest struct {
 	TimeStarted      string          `json:"time_started"`
 	TimeCompleted    string          `json:"time_completed"`
 	Duration         int64           `json:"duration"`
+	StatusCode       int             `json:"status_code"`
 	ResourceType     int
 }
 

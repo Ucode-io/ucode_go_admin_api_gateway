@@ -180,11 +180,13 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 				statusHttp.CustomMessage = stat.Message()
 			}
 			logReq.Response = err.Error()
+			logReq.StatusCode = statusHttp.Code
 			defer func() { go h.versionHistory(logReq) }()
 			h.HandleResponse(c, statusHttp, err.Error())
 			return
 		}
 		logReq.Response = resp
+		logReq.StatusCode = statusHttp.Code
 		defer func() { go h.versionHistory(logReq) }()
 	case pb.ResourceType_POSTGRESQL:
 		body, err := services.GoObjectBuilderService().Items().Create(
@@ -203,6 +205,7 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 				statusHttp.CustomMessage = stat.Message()
 			}
 			logReq.Response = err.Error()
+			logReq.StatusCode = statusHttp.Code
 			defer func() { go h.versionHistoryGo(c, logReq) }()
 			h.handleDynamicError(c, statusHttp, err)
 			return
@@ -213,6 +216,7 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 		}
 
 		logReq.Response = resp
+		logReq.StatusCode = statusHttp.Code
 		defer func() { go h.versionHistoryGo(c, logReq) }()
 	}
 

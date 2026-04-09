@@ -217,6 +217,11 @@ func (h *HandlerV2) versionHistory(req *models.CreateVersionHistoryRequest) erro
 			Type:              req.Type,
 			TableSlug:         req.TableSlug,
 			VersionId:         req.VersionId,
+			MethodApi:         req.MethodApi,
+			TimeStarted:       req.TimeStarted,
+			TimeCompleted:     req.TimeCompleted,
+			Duration:          req.Duration,
+			StatusCode:        int64(req.StatusCode),
 		},
 	)
 	if err != nil {
@@ -273,6 +278,10 @@ func (h *HandlerV2) versionHistoryGo(c *gin.Context, req *models.CreateVersionHi
 		}
 	}
 
+	if req.StatusCode == 0 && c != nil {
+		req.StatusCode = c.Writer.Status()
+	}
+
 	if req.TimeCompleted == "" {
 		req.TimeCompleted = time.Now().Format(time.RFC3339)
 	}
@@ -304,6 +313,7 @@ func (h *HandlerV2) versionHistoryGo(c *gin.Context, req *models.CreateVersionHi
 			TimeStarted:       req.TimeStarted,
 			TimeCompleted:     req.TimeCompleted,
 			Duration:          req.Duration,
+			StatusCode:        int64(req.StatusCode),
 		},
 	)
 	if err != nil {

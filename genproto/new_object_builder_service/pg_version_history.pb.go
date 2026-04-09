@@ -678,6 +678,7 @@ type VersionHistory struct {
 	TimeStarted       string          `protobuf:"bytes,17,opt,name=time_started,json=timeStarted,proto3" json:"time_started,omitempty"`
 	TimeCompleted     string          `protobuf:"bytes,18,opt,name=time_completed,json=timeCompleted,proto3" json:"time_completed,omitempty"`
 	Duration          int64           `protobuf:"varint,19,opt,name=duration,proto3" json:"duration,omitempty"`
+	StatusCode        int64           `protobuf:"varint,20,opt,name=status_code,json=statusCode,proto3" json:"status_code,omitempty"`
 }
 
 func (x *VersionHistory) Reset() {
@@ -843,6 +844,13 @@ func (x *VersionHistory) GetDuration() int64 {
 	return 0
 }
 
+func (x *VersionHistory) GetStatusCode() int64 {
+	if x != nil {
+		return x.StatusCode
+	}
+	return 0
+}
+
 type CreateVersionHistoryRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -867,6 +875,7 @@ type CreateVersionHistoryRequest struct {
 	TimeStarted       string          `protobuf:"bytes,17,opt,name=time_started,json=timeStarted,proto3" json:"time_started,omitempty"`
 	TimeCompleted     string          `protobuf:"bytes,18,opt,name=time_completed,json=timeCompleted,proto3" json:"time_completed,omitempty"`
 	Duration          int64           `protobuf:"varint,19,opt,name=duration,proto3" json:"duration,omitempty"`
+	StatusCode        int64           `protobuf:"varint,20,opt,name=status_code,json=statusCode,proto3" json:"status_code,omitempty"`
 }
 
 func (x *CreateVersionHistoryRequest) Reset() {
@@ -1028,6 +1037,13 @@ func (x *CreateVersionHistoryRequest) GetTimeCompleted() string {
 func (x *CreateVersionHistoryRequest) GetDuration() int64 {
 	if x != nil {
 		return x.Duration
+	}
+	return 0
+}
+
+func (x *CreateVersionHistoryRequest) GetStatusCode() int64 {
+	if x != nil {
+		return x.StatusCode
 	}
 	return 0
 }

@@ -182,6 +182,11 @@ type VersionHistory struct {
 	TableSlug         string          `protobuf:"bytes,13,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
 	VersionId         string          `protobuf:"bytes,14,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
 	Version           *Version        `protobuf:"bytes,15,opt,name=version,proto3" json:"version,omitempty"`
+	MethodApi         string          `protobuf:"bytes,16,opt,name=method_api,json=methodApi,proto3" json:"method_api,omitempty"`
+	TimeStarted       string          `protobuf:"bytes,17,opt,name=time_started,json=timeStarted,proto3" json:"time_started,omitempty"`
+	TimeCompleted     string          `protobuf:"bytes,18,opt,name=time_completed,json=timeCompleted,proto3" json:"time_completed,omitempty"`
+	Duration          int64           `protobuf:"varint,19,opt,name=duration,proto3" json:"duration,omitempty"`
+	StatusCode        int64           `protobuf:"varint,20,opt,name=status_code,json=statusCode,proto3" json:"status_code,omitempty"`
 }
 
 func (x *VersionHistory) Reset() {
@@ -319,6 +324,41 @@ func (x *VersionHistory) GetVersion() *Version {
 	return nil
 }
 
+func (x *VersionHistory) GetMethodApi() string {
+	if x != nil {
+		return x.MethodApi
+	}
+	return ""
+}
+
+func (x *VersionHistory) GetTimeStarted() string {
+	if x != nil {
+		return x.TimeStarted
+	}
+	return ""
+}
+
+func (x *VersionHistory) GetTimeCompleted() string {
+	if x != nil {
+		return x.TimeCompleted
+	}
+	return ""
+}
+
+func (x *VersionHistory) GetDuration() int64 {
+	if x != nil {
+		return x.Duration
+	}
+	return 0
+}
+
+func (x *VersionHistory) GetStatusCode() int64 {
+	if x != nil {
+		return x.StatusCode
+	}
+	return 0
+}
+
 type CreateVersionHistoryRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -339,6 +379,11 @@ type CreateVersionHistoryRequest struct {
 	Type              string          `protobuf:"bytes,13,opt,name=type,proto3" json:"type,omitempty"`
 	TableSlug         string          `protobuf:"bytes,14,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
 	VersionId         string          `protobuf:"bytes,15,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
+	MethodApi         string          `protobuf:"bytes,16,opt,name=method_api,json=methodApi,proto3" json:"method_api,omitempty"`
+	TimeStarted       string          `protobuf:"bytes,17,opt,name=time_started,json=timeStarted,proto3" json:"time_started,omitempty"`
+	TimeCompleted     string          `protobuf:"bytes,18,opt,name=time_completed,json=timeCompleted,proto3" json:"time_completed,omitempty"`
+	Duration          int64           `protobuf:"varint,19,opt,name=duration,proto3" json:"duration,omitempty"`
+	StatusCode        int64           `protobuf:"varint,20,opt,name=status_code,json=statusCode,proto3" json:"status_code,omitempty"`
 }
 
 func (x *CreateVersionHistoryRequest) Reset() {
@@ -474,6 +519,41 @@ func (x *CreateVersionHistoryRequest) GetVersionId() string {
 		return x.VersionId
 	}
 	return ""
+}
+
+func (x *CreateVersionHistoryRequest) GetMethodApi() string {
+	if x != nil {
+		return x.MethodApi
+	}
+	return ""
+}
+
+func (x *CreateVersionHistoryRequest) GetTimeStarted() string {
+	if x != nil {
+		return x.TimeStarted
+	}
+	return ""
+}
+
+func (x *CreateVersionHistoryRequest) GetTimeCompleted() string {
+	if x != nil {
+		return x.TimeCompleted
+	}
+	return ""
+}
+
+func (x *CreateVersionHistoryRequest) GetDuration() int64 {
+	if x != nil {
+		return x.Duration
+	}
+	return 0
+}
+
+func (x *CreateVersionHistoryRequest) GetStatusCode() int64 {
+	if x != nil {
+		return x.StatusCode
+	}
+	return 0
 }
 
 type ListVersionHistory struct {
