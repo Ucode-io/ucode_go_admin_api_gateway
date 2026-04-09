@@ -63,8 +63,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 		// Pricing
 		v1.GET("/pricing/all", h.V1.GetAllPricingUsage)
-		v1.GET("/pricing/api-metrics", h.V1.GetApiMetrics)
-		v1.GET("/pricing/api-chart", h.V1.GetApiChart)
+		v1.GET("/pricing/api-call/api-metrics", h.V1.GetApiMetrics)
+		v1.GET("/pricing/api-call/api-chart", h.V1.GetApiChart)
 
 		// MINIO
 		v1.POST("/minio/bucket-size", h.V1.BucketSize)
