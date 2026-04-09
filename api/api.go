@@ -8,6 +8,7 @@ import (
 
 	"ucode/ucode_go_api_gateway/api/docs"
 	"ucode/ucode_go_api_gateway/api/handlers"
+	"ucode/ucode_go_api_gateway/api/handlers/api_call_limits"
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 
@@ -21,7 +22,7 @@ import (
 
 // SetUpAPI @description This is an api gateway
 // @termsOfService https://u-code.io/
-func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer opentracing.Tracer) {
+func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer opentracing.Tracer, tracker *api_call_limits.Tracker) {
 	docs.SwaggerInfo.Title = cfg.ServiceName
 	docs.SwaggerInfo.Version = cfg.Version
 	docs.SwaggerInfo.Schemes = []string{cfg.HTTPScheme}
@@ -45,6 +46,9 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	// Real Stripe PaymentIntent endpoint
 	r.POST("/stripe/webhook", h.V1.StripeWebhook)
 
+	// api usage
+	r.Use(tracker.Middleware())
+
 	v1 := r.Group("/v1")
 	// @securityDefinitions.apikey ApiKeyAuth
 	// @in header
@@ -59,6 +63,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 		// Pricing
 		v1.GET("/pricing/all", h.V1.GetAllPricingUsage)
+		v1.GET("/pricing/api-call/api-metrics", h.V1.GetApiMetrics)
+		v1.GET("/pricing/api-call/api-chart", h.V1.GetApiChart)
 
 		// MINIO
 		v1.POST("/minio/bucket-size", h.V1.BucketSize)

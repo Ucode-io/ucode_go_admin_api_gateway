@@ -66,6 +66,15 @@ const (
 	SessionExpired   string = "Session has been expired"
 
 	MainMenuID = "c57eedc3-a954-4262-a0af-376c65b5a284"
+
+	KeyRateMin  = "rate:%s:min:%s"  // ProjectID, 2006-01-02-15-04
+	KeyRateHour = "rate:%s:hour:%s" // ProjectID, 2006-01-02-15
+	KeyRateDay  = "rate:%s:day:%s"  // ProjectID, 2006-01-02
+
+	KeyUsagePending        = "api_usage:pending:%s"
+	KeyUsagePendingPattern = "api_usage:pending:*"
+	KeyUsagePendingPrefix  = "api_usage:pending:"
+	KeyUsageTotalField     = "total"
 )
 
 var (

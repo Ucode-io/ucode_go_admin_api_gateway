@@ -59,6 +59,14 @@ type Config struct {
 	GetRequestRedisPassword string
 
 	OpenAIApiKey string
+
+	// Tracker / Audit Logs
+	AuditMaxBodySize          int64
+	AuditMetricsFlushInterval int
+	AuditFlushInterval        int
+	AuditLogChannelSize       int
+	AuditBatchSize            int
+	AuditLogRetentionDays     int
 }
 
 type BaseConfig struct {
@@ -251,6 +259,13 @@ func Load() Config {
 	config.GetRequestRedisPassword = cast.ToString(GetOrReturnDefaultValue("GET_REQUEST_REDIS_PASSWORD", ""))
 
 	config.OpenAIApiKey = cast.ToString(GetOrReturnDefaultValue("OPENAI_API_KEY", "sk-proj-a2ma7TfGU0msgfY9GDsST3BlbkFJljmuOgGattnpsfQCnJ2C"))
+
+	config.AuditMaxBodySize = cast.ToInt64(GetOrReturnDefaultValue("AUDIT_MAX_BODY_SIZE", 256*1024))
+	config.AuditMetricsFlushInterval = cast.ToInt(GetOrReturnDefaultValue("METRICS_FLUSH_INTERVAL_SEC", 60))
+	config.AuditFlushInterval = cast.ToInt(GetOrReturnDefaultValue("AUDIT_FLUSH_INTERVAL_SEC", 5))
+	config.AuditLogChannelSize = cast.ToInt(GetOrReturnDefaultValue("AUDIT_LOG_CHANNEL_SIZE", 100000))
+	config.AuditBatchSize = cast.ToInt(GetOrReturnDefaultValue("AUDIT_BATCH_SIZE", 100))
+	config.AuditLogRetentionDays = cast.ToInt(GetOrReturnDefaultValue("AUDIT_LOG_RETENTION_DAYS", 30))
 
 	return config
 }

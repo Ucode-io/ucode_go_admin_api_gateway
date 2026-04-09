@@ -190,6 +190,15 @@ func (h *HandlerV2) versionHistory(req *models.CreateVersionHistoryRequest) erro
 		}
 	}
 
+	if req.TimeCompleted == "" {
+		req.TimeCompleted = time.Now().Format(time.RFC3339)
+	}
+	if req.Duration == 0 && req.TimeStarted != "" {
+		if t, err := time.Parse(time.RFC3339, req.TimeStarted); err == nil {
+			req.Duration = time.Since(t).Milliseconds()
+		}
+	}
+
 	_, err := req.Services.GetBuilderServiceByType(req.NodeType).VersionHistory().Create(
 		context.Background(),
 		&obs.CreateVersionHistoryRequest{
@@ -261,6 +270,15 @@ func (h *HandlerV2) versionHistoryGo(c *gin.Context, req *models.CreateVersionHi
 			} else {
 				user = info.Phone
 			}
+		}
+	}
+
+	if req.TimeCompleted == "" {
+		req.TimeCompleted = time.Now().Format(time.RFC3339)
+	}
+	if req.Duration == 0 && req.TimeStarted != "" {
+		if t, err := time.Parse(time.RFC3339, req.TimeStarted); err == nil {
+			req.Duration = time.Since(t).Milliseconds()
 		}
 	}
 

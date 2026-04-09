@@ -21,6 +21,10 @@ type CreateVersionHistoryRequest struct {
 	Type             string          `json:"type"`
 	TableSlug        string          `json:"table_slug"`
 	VersionId        string          `json:"version_id"`
+	MethodApi        string          `json:"method_api"`
+	TimeStarted      string          `json:"time_started"`
+	TimeCompleted    string          `json:"time_completed"`
+	Duration         int64           `json:"duration"`
 	ResourceType     int
 }
 

@@ -2,8 +2,12 @@ package main
 
 import (
 	"context"
+	"fmt"
+	"time"
+
 	"ucode/ucode_go_api_gateway/api"
 	"ucode/ucode_go_api_gateway/api/handlers"
+	"ucode/ucode_go_api_gateway/api/handlers/api_call_limits"
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/pkg/caching"
 	"ucode/ucode_go_api_gateway/pkg/helper"
@@ -14,6 +18,7 @@ import (
 	"ucode/ucode_go_api_gateway/storage/redis"
 
 	"github.com/gin-gonic/gin"
+	go_redis "github.com/go-redis/redis/v8"
 	"github.com/opentracing/opentracing-go"
 	"github.com/uber/jaeger-client-go"
 	jaeger_config "github.com/uber/jaeger-client-go/config"
@@ -114,6 +119,25 @@ func main() {
 
 	newRedis := redis.NewRedis(mapProjectConfs)
 
+	centralRedis := go_redis.NewClient(&go_redis.Options{
+		Addr:     fmt.Sprintf("%s:%s", uConf.GetRequestRedisHost, uConf.GetRequestRedisPort),
+		Password: uConf.GetRequestRedisPassword,
+		DB:       uConf.GetRequestRedisDatabase,
+	})
+
+	trackerCfg := api_call_limits.LoadTrackerConfig(uConf)
+	if trackerCfg.MetricsFlushInterval == 0 {
+		trackerCfg.MetricsFlushInterval = 10 * time.Second
+	}
+	tracker := api_call_limits.NewTracker(centralRedis, trackerCfg)
+	go tracker.Start(ctx)
+
+	consumerCfg := api_call_limits.ConsumerConfig{
+		DbFlushInterval: 1 * time.Minute,
+	}
+	consumer := api_call_limits.NewMetricsConsumer(centralRedis, compSrvc, consumerCfg)
+	go consumer.Start(ctx)
+
 	cache, err := caching.NewExpiringLRUCache(config.LRU_CACHE_SIZE)
 	if err != nil {
 		log.Error("Error adding caching.", logger.Error(err))
@@ -140,7 +164,7 @@ func main() {
 
 	h := handlers.NewHandler(baseConf, mapProjectConfs, log, projectServiceNodes, compSrvc, authSrvc, newRedis, cache, limiter, vaultClient)
 
-	api.SetUpAPI(r, h, baseConf, tracer)
+	api.SetUpAPI(r, h, baseConf, tracer, tracker)
 
 	log.Info("server is running...")
 	if err := r.Run(baseConf.HTTPPort); err != nil {
