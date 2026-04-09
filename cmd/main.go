@@ -117,13 +117,20 @@ func main() {
 
 	mapProjectConfs[baseConf.UcodeNamespace] = uConf
 
-	newRedis := redis.NewRedis(mapProjectConfs)
+	newRedis := redis.NewRedis(mapProjectConfs, log)
 
 	centralRedis := go_redis.NewClient(&go_redis.Options{
 		Addr:     fmt.Sprintf("%s:%s", uConf.GetRequestRedisHost, uConf.GetRequestRedisPort),
 		Password: uConf.GetRequestRedisPassword,
 		DB:       uConf.GetRequestRedisDatabase,
 	})
+
+	err = centralRedis.Ping(ctx).Err()
+	if err != nil {
+		log.Error("error connecting to central redis", logger.Error(err), logger.String("host", uConf.GetRequestRedisHost), logger.String("port", uConf.GetRequestRedisPort))
+	} else {
+		log.Info("successfully connected to central redis", logger.String("host", uConf.GetRequestRedisHost), logger.String("port", uConf.GetRequestRedisPort))
+	}
 
 	trackerCfg := api_call_limits.LoadTrackerConfig(uConf)
 	if trackerCfg.MetricsFlushInterval == 0 {

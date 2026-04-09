@@ -7,6 +7,8 @@ import (
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/storage"
 
+	"ucode/ucode_go_api_gateway/pkg/logger"
+
 	"github.com/go-redis/redis/v8"
 )
 
@@ -14,15 +16,24 @@ type Storage struct {
 	pool map[string]*redis.Client
 }
 
-func NewRedis(cfg map[string]config.Config) storage.RedisStorageI {
+func NewRedis(cfg map[string]config.Config, log logger.LoggerI) storage.RedisStorageI {
 	redisPool := make(map[string]*redis.Client)
 
 	for k, v := range cfg {
-		redisPool[k] = redis.NewClient(&redis.Options{
+		client := redis.NewClient(&redis.Options{
 			Addr:     fmt.Sprintf("%s:%s", v.GetRequestRedisHost, v.GetRequestRedisPort),
 			Password: v.GetRequestRedisPassword,
 			DB:       v.GetRequestRedisDatabase,
 		})
+
+		err := client.Ping(context.Background()).Err()
+		if err != nil {
+			log.Error("error connecting to redis", logger.String("project", k), logger.Error(err), logger.String("host", v.GetRequestRedisHost), logger.String("port", v.GetRequestRedisPort))
+		} else {
+			log.Info("successfully connected to redis", logger.String("project", k), logger.String("host", v.GetRequestRedisHost), logger.String("port", v.GetRequestRedisPort))
+		}
+
+		redisPool[k] = client
 	}
 
 	return Storage{
