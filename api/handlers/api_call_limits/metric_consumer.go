@@ -77,6 +77,13 @@ func (c *MetricsConsumer) flushApiUsage(ctx context.Context) {
 			return
 		}
 
+		if len(keys) == 0 {
+			log.Println("[MetricsConsumer] No pending usage keys found to flush")
+			return
+		}
+
+		log.Printf("[MetricsConsumer] Found %d projects with pending usage to flush", len(keys))
+
 		for _, key := range keys {
 			// Вытаскиваем ProjectID из ключа
 			projectID := key[len(config.KeyUsagePendingPrefix):]
@@ -101,8 +108,10 @@ func (c *MetricsConsumer) flushApiUsage(ctx context.Context) {
 			})
 
 			if err != nil {
-				log.Printf("[Consumer] LogUsage error project=%s: %v", projectID, err)
+				log.Printf("[MetricsConsumer] ERROR sending LogUsage for project %s: %v", projectID, err)
 				continue
+			} else {
+				log.Printf("[MetricsConsumer] SUCCESS LogUsage for project %s: %d calls forwarded to DB", projectID, count)
 			}
 
 			// Минусуем только то количество, которое успешно отправили в БД
