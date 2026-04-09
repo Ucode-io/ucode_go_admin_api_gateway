@@ -562,8 +562,29 @@ DBML RULES:
 - Escape all newlines as \n inside the JSON string value
 
 BPMN XML RULES:
-- BPMN 2.0 format with bpmndi layout
+- Use exactly these root namespaces:
+  xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  xmlns:di="http://www.omg.org/spec/BPMN/20100524/DI"
+  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
 - One lane per client_type role
+- Every flow element (task, startEvent, etc.) MUST be referenced inside its <bpmn:lane> using <bpmn:flowNodeRef>ID</bpmn:flowNodeRef>
+- Follow this hierarchy strictly:
+  <bpmn:collaboration id="Collaboration_1">
+    <bpmn:participant id="Participant_1" name="Company" processRef="Process_1" />
+  </bpmn:collaboration>
+  <bpmn:process id="Process_1">
+    <bpmn:laneSet id="LaneSet_1">
+      <bpmn:lane id="Lane_1" name="Role Name">
+        <bpmn:flowNodeRef>Start_1</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_1</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="Start_1" name="Start" />
+    <bpmn:task id="Task_1" name="Action" />
+    <bpmn:sequenceFlow id="Flow_1" sourceRef="Start_1" targetRef="Task_1" />
+  </bpmn:process>
+- Do NOT include BPMN DI (no <bpmndi:BPMNDiagram> or visual coordinates)
+- Use valid XML IDs starting with letters
 - Include start events, service tasks, sequence flows, cross-lane message flows
 - Escape all special characters for JSON string (quotes → \", newlines → \n)
 
