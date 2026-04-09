@@ -300,6 +300,10 @@ func (h *HandlerV2) versionHistoryGo(c *gin.Context, req *models.CreateVersionHi
 			Type:              req.Type,
 			TableSlug:         req.TableSlug,
 			VersionId:         req.VersionId,
+			MethodApi:         req.MethodApi,
+			TimeStarted:       req.TimeStarted,
+			TimeCompleted:     req.TimeCompleted,
+			Duration:          req.Duration,
 		},
 	)
 	if err != nil {
