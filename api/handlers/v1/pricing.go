@@ -76,6 +76,20 @@ func (h *HandlerV1) GetAllPricingUsage(c *gin.Context) {
 		userCount = float64(usersCountResp.Count)
 	}
 
+	apiKeysCountResp, err := h.authService.ApiKey().GetProjectApiKeysCount(
+		c.Request.Context(), &auth_service.GetProjectApiKeysCountRequest{
+			ProjectId: cast.ToString(projectId),
+		},
+	)
+	if err != nil {
+		h.log.Error("GetProjectApiKeysCount error", logger.Error(err), logger.String("project_id", cast.ToString(projectId)))
+	}
+
+	var apiKeysCount float64
+	if apiKeysCountResp != nil {
+		apiKeysCount = float64(apiKeysCountResp.Count)
+	}
+
 	// 3. Aggregate results
 	response := models.AllPricingUsage{
 		Functions: models.PricingUsage{
@@ -103,6 +117,16 @@ func (h *HandlerV1) GetAllPricingUsage(c *gin.Context) {
 			Limit:   100000, // Static limit as requested
 			Unit:    "count",
 		},
+		Tables: models.PricingUsage{
+			Current: float64(usageResp.TablesCount),
+			Limit:   100, // Static limit
+			Unit:    "count",
+		},
+		ApiKeys: models.PricingUsage{
+			Current: apiKeysCount,
+			Limit:   10, // Static limit
+			Unit:    "count",
+		},
 	}
 
 	// Map limits
@@ -127,6 +151,10 @@ func (h *HandlerV1) GetAllPricingUsage(c *gin.Context) {
 			response.Users.Limit = cast.ToFloat64(limit.Value)
 		case "Items":
 			response.Items.Limit = cast.ToFloat64(limit.Value)
+		case "Tables":
+			response.Tables.Limit = cast.ToFloat64(limit.Value)
+		case "API Keys":
+			response.ApiKeys.Limit = cast.ToFloat64(limit.Value)
 		}
 	}
 
