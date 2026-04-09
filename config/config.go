@@ -198,15 +198,10 @@ func BaseLoad() BaseConfig {
 	config.MCPServerURL = cast.ToString(GetOrReturnDefaultValue("MCP_SERVER_URL", ""))
 	config.UcodeBaseUrl = cast.ToString(GetOrReturnDefaultValue("UCODE_BASE_URL", "https://admin-api.ucode.run"))
 
-	// config.VaultAddress   = cast.ToString(GetOrReturnDefaultValue("VAULT_ADDR", ""))
-	// config.VaultRoleID    = cast.ToString(GetOrReturnDefaultValue("VAULT_ROLE_ID", ""))
-	// config.VaultSecretID  = cast.ToString(GetOrReturnDefaultValue("VAULT_SECRET_ID", ""))
-	// config.VaultMountPath = cast.ToString(GetOrReturnDefaultValue("VAULT_MOUNT_PATH", "approle"))
-
-	config.VaultAddress = "https://vault.u-code.io"
-	config.VaultRoleID = "c4a803bc-2350-a925-7618-970fa8af6b15"
-	config.VaultSecretID = "a94ed517-55fc-f01e-808c-b255a0058879"
-	config.VaultMountPath = "ucode"
+	config.VaultAddress = cast.ToString(GetOrReturnDefaultValue("VAULT_ADDR", ""))
+	config.VaultRoleID = cast.ToString(GetOrReturnDefaultValue("VAULT_ROLE_ID", ""))
+	config.VaultSecretID = cast.ToString(GetOrReturnDefaultValue("VAULT_SECRET_ID", ""))
+	config.VaultMountPath = cast.ToString(GetOrReturnDefaultValue("VAULT_MOUNT_PATH", "approle"))
 
 	config.GitlabBaseURL = cast.ToString(GetOrReturnDefaultValue("GITLAB_BASE_URL", "https://gitlab.udevs.io/"))
 	config.GitlabToken = cast.ToString(GetOrReturnDefaultValue("GITLAB_TOKEN", ""))

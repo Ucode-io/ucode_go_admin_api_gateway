@@ -45,6 +45,18 @@ type (
 		InferenceGeo             string `json:"inference_geo"`
 	}
 
+	QuestionOption struct {
+		ID    string `json:"id"`
+		Label string `json:"label"`
+	}
+
+	AiQuestion struct {
+		ID      string           `json:"id"`
+		Title   string           `json:"title"`
+		Type    string           `json:"type"` // "single" | "multi"
+		Options []QuestionOption `json:"options"`
+	}
+
 	ParsedClaudeResponse struct {
 		Model         string            `json:"model"`
 		MessageID     string            `json:"message_id"`
@@ -53,6 +65,8 @@ type (
 		Project       *GeneratedProject `json:"project,omitempty"`
 		Description   string            `json:"description"`
 		PendingAction *PendingAction    `json:"pending_action,omitempty"`
+		Questions     []AiQuestion      `json:"questions,omitempty"`
+		Plan          *HaikuPlan        `json:"plan,omitempty"`
 	}
 
 	// ========================== Classification ==========================
@@ -67,15 +81,42 @@ type (
 
 	// ========================== AI Agent Routing ==========================
 
+	// PlanTable — a single table entry inside a HaikuPlan.
+	PlanTable struct {
+		Name    string   `json:"name"`
+		Columns []string `json:"columns"`
+	}
+
+	// PlanInfraEdge — a single directed edge in the infrastructure diagram.
+	PlanInfraEdge struct {
+		From  string `json:"from"`
+		To    string `json:"to"`
+		Label string `json:"label"`
+	}
+
+	// HaikuPlan — structured plan returned when intent is "plan_request".
+	HaikuPlan struct {
+		BusinessSummary string          `json:"business_summary"`
+		ClientTypes     []string        `json:"client_types"`
+		Platforms       []string        `json:"platforms"`
+		Steps           []string        `json:"steps"`
+		Tables          []PlanTable     `json:"tables"`
+		BpmnXML         string          `json:"bpmn_xml,omitempty"`
+		InfraDiagram    []PlanInfraEdge `json:"infra_diagram,omitempty"`
+		Dbml            string          `json:"dbml,omitempty"`
+	}
+
 	HaikuRoutingResult struct {
-		NextStep       bool     `json:"next_step"`
-		Intent         string   `json:"intent"`
-		Reply          string   `json:"reply"`
-		Clarified      string   `json:"clarified"`
-		ClarifyOptions []string `json:"clarify_options"`
-		FilesNeeded    []string `json:"files_needed"`
-		HasImages      bool     `json:"has_images"`
-		ProjectName    string   `json:"project_name"`
+		NextStep       bool         `json:"next_step"`
+		Intent         string       `json:"intent"`
+		Reply          string       `json:"reply"`
+		Clarified      string       `json:"clarified"`
+		ClarifyOptions []string     `json:"clarify_options"`
+		FilesNeeded    []string     `json:"files_needed"`
+		HasImages      bool         `json:"has_images"`
+		ProjectName    string       `json:"project_name"`
+		Questions      []AiQuestion `json:"questions,omitempty"`
+		Plan           *HaikuPlan   `json:"plan,omitempty"`
 	}
 
 	SonnetPlanResult struct {

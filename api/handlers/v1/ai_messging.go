@@ -143,6 +143,10 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 	if strings.TrimSpace(aiResponse.Description) == "" {
 		if aiResponse.PendingAction != nil {
 			aiResponse.Description = aiResponse.PendingAction.ConfirmationPrompt
+		} else if len(aiResponse.Questions) > 0 {
+			aiResponse.Description = aiResponse.Questions[0].Title
+		} else if aiResponse.Plan != nil {
+			aiResponse.Description = aiResponse.Plan.BusinessSummary
 		} else {
 			aiResponse.Description = "Project has been updated."
 		}
@@ -181,6 +185,8 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 		"project":        updatedProject,
 		"mcp_project_id": processor.mcpProjectID,
 		"pending_action": aiResponse.PendingAction,
+		"questions":      aiResponse.Questions,
+		"plan":           aiResponse.Plan,
 	})
 }
 
@@ -305,6 +311,19 @@ func (p *ChatProcessor) routeAndProcess(ctx context.Context, req models.NewMessa
 
 	log.Printf("[ROUTER] intent=%s next_step=%v files_needed=%d", routeResult.Intent, routeResult.NextStep, len(routeResult.FilesNeeded))
 
+	// If the router wants to present structured questions to the user, return them immediately.
+	if routeResult.Intent == "ask_question" {
+		return &models.ParsedClaudeResponse{
+			Description: routeResult.Reply,
+			Questions:   routeResult.Questions,
+		}, nil
+	}
+
+	// If the router detected a plan request, generate the full structured plan via a dedicated call.
+	if routeResult.Intent == "plan_request" {
+		return p.runGeneratePlan(ctx, req.Content, chatHistory)
+	}
+
 	// If Haiku said no further processing needed, return its reply directly
 	if !routeResult.NextStep {
 		return &models.ParsedClaudeResponse{Description: routeResult.Reply}, nil
@@ -337,6 +356,35 @@ func (p *ChatProcessor) routeAndProcess(ctx context.Context, req models.NewMessa
 	}
 
 	return &models.ParsedClaudeResponse{Description: routeResult.Reply}, nil
+}
+
+func (p *ChatProcessor) runGeneratePlan(ctx context.Context, userRequest string, chatHistory []models.ChatMessage) (*models.ParsedClaudeResponse, error) {
+	content := helper.BuildPlanGeneratorMessage(userRequest)
+	messages := buildMessagesWithHistory(chatHistory, []models.ContentBlock{{Type: "text", Text: content}})
+
+	response, err := helper.CallAnthropicAPI(
+		p.baseConf,
+		models.AnthropicRequest{
+			Model:     p.baseConf.ClaudeModel,
+			MaxTokens: p.baseConf.PlannerMaxTokens,
+			System:    helper.PromptPlanGenerator,
+			Messages:  messages,
+		},
+		timeoutPlanner,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("plan generator: %w", err)
+	}
+
+	plan, err := helper.ParsePlanResult(response)
+	if err != nil {
+		return nil, fmt.Errorf("plan generator: parse failed: %w", err)
+	}
+
+	return &models.ParsedClaudeResponse{
+		Description: plan.BusinessSummary,
+		Plan:        plan,
+	}, nil
 }
 
 func (p *ChatProcessor) runInspect(ctx context.Context, userQuestion string, filesNeeded []string, chatHistory []models.ChatMessage, imageURLs []string, projectData *pbo.McpProject) (*models.ParsedClaudeResponse, error) {
