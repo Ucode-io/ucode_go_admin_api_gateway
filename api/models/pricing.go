@@ -12,6 +12,7 @@ type AllPricingUsage struct {
 	AssetSize     PricingUsage `json:"asset_size"`
 	DatabaseSize  PricingUsage `json:"database_size"`
 	Users         PricingUsage `json:"users"`
+	Items         PricingUsage `json:"items"`
 }
 
 type ApiMetricsResponse struct {

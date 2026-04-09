@@ -87,15 +87,20 @@ func (h *HandlerV1) GetAllPricingUsage(c *gin.Context) {
 			Unit:    "count",
 		},
 		AssetSize: models.PricingUsage{
-			Current: float64(usageResp.AssetSize / 1024),
-			Unit:    "bytes",
+			Current: float64(usageResp.AssetSize) / (1024 * 1024),
+			Unit:    "MB",
 		},
 		DatabaseSize: models.PricingUsage{
-			Current: float64(usageResp.DatabaseSize / 1024),
-			Unit:    "bytes",
+			Current: float64(usageResp.DatabaseSize) / (1024 * 1024),
+			Unit:    "MB",
 		},
 		Users: models.PricingUsage{
 			Current: userCount,
+			Unit:    "count",
+		},
+		Items: models.PricingUsage{
+			Current: float64(usageResp.ItemsCount),
+			Limit:   100000, // Static limit as requested
 			Unit:    "count",
 		},
 	}
@@ -111,11 +116,17 @@ func (h *HandlerV1) GetAllPricingUsage(c *gin.Context) {
 		case "Microfrontend":
 			response.Microfrontend.Limit = cast.ToFloat64(limit.Value)
 		case "Database Size":
-			response.DatabaseSize.Limit = cast.ToFloat64(limit.Value[:len(limit.Value)-2]) * 1024
+			if len(limit.Value) > 2 {
+				response.DatabaseSize.Limit = cast.ToFloat64(limit.Value[:len(limit.Value)-2]) * 1024
+			}
 		case "Asset Size info":
-			response.AssetSize.Limit = cast.ToFloat64(limit.Value[:len(limit.Value)-2]) * 1024
+			if len(limit.Value) > 2 {
+				response.AssetSize.Limit = cast.ToFloat64(limit.Value[:len(limit.Value)-2]) * 1024
+			}
 		case "Total Users & Roles":
 			response.Users.Limit = cast.ToFloat64(limit.Value)
+		case "Items":
+			response.Items.Limit = cast.ToFloat64(limit.Value)
 		}
 	}
 
