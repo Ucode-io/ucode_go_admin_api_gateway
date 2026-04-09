@@ -78,6 +78,7 @@ func (c *MetricsConsumer) flushApiUsage(ctx context.Context) {
 		}
 
 		if len(keys) == 0 {
+			log.Println("[MetricsConsumer] No pending usage keys found to flush")
 			return
 		}
 
