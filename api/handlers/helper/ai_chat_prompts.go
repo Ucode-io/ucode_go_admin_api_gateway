@@ -293,8 +293,8 @@ INTENTS
 "code_change"      → create/edit/fix/add anything in UI, layout, components, styles, routing, mock data, hardcoded values. next_step=true. Fill clarified.
 "database_query"   → read/write REAL database records, rows, tables, fields, schema. next_step=true. Fill clarified.
 "clarify"          → ambiguous between 2+ flows and cannot be resolved. next_step=false. Fill reply + clarify_options.
-"ask_question"     → the request is clearly a project build but needs clarification (type/category unspecified). next_step=false. Fill reply (brief intro) + questions array. Do NOT ask about tech stack.
-"plan_request"     → generate diagrams: either user answered questionnaire questions, or explicitly asked for a plan/architecture. next_step=true. Fill reply with short acknowledgement. Leave plan=null always.
+"ask_question"     → user wants to build/create/plan a system but we need more detail (tables, fields, user roles, workflows) to generate useful diagrams. next_step=false. Fill reply + questions array. Do NOT ask about tech stack.
+"plan_request"     → ONLY triggered when the last assistant message contains "[QUESTIONS_ASKED]", meaning the user has just answered the questionnaire. Never trigger this directly from the user's first message. next_step=true. Fill reply with short acknowledgement. Leave plan=null always.
  
 ════════════════════════════════════════
 OBVIOUS DATABASE REQUESTS — resolve immediately, NEVER clarify
@@ -333,12 +333,14 @@ clarified = the user's full request rephrased clearly in the same language.
 ASK_QUESTION — structured input needed before proceeding
 ════════════════════════════════════════
 
-Use "ask_question" when the intent is clearly "code_change" but you need one or more specific choices from the user to generate the correct result. This presents a UI questionnaire to the user instead of a plain text reply.
+Use "ask_question" whenever the user wants to build, create, or plan a system and we don't yet have enough detail to generate meaningful diagrams. This includes cases where the system type is named (TMS, CRM, ERP) but specifics are still missing (tables, fields, user roles, key workflows).
 
 When to use:
-  - User says "create a project", "build me an app", "make a panel" with no specifics → ask what type of panel (CRM, ERP, TMS, etc.)
-  - User asks for something with distinct business-level variants that meaningfully change the output
-  - Do NOT use for database or inspect intents — only for code_change
+  - "build me a TMS" — system type known, but tables/fields/roles unknown → ask questions
+  - "plan a CRM" — system type known, but workflows/features unknown → ask questions
+  - "create a project", "make an app", "build me something" — type unknown → ask questions
+  - ANY build/create/plan request where we lack the detail to produce accurate diagrams
+  - Do NOT use for database or inspect intents — only for build/create/plan requests
   - Do NOT ask about tech stack, framework, TypeScript, or deployment — those are decided automatically
 
 When intent="ask_question", set "questions" to an array of one or more question objects:
@@ -403,6 +405,7 @@ STEP 1 → STEP 2  (last assistant message contains "[QUESTIONS_ASKED]"):
   → intent="plan_request", next_step=true
   → reply: short acknowledgement e.g. "Generating your diagrams..."
   → plan=null (a dedicated step generates the diagrams, NOT you)
+  IMPORTANT: This is the ONLY way to trigger plan_request. Never trigger it from the user's first message.
 
 STEP 2 → STEP 3  (last assistant message contains "[DIAGRAMS_GENERATED]"):
   The user has seen the diagrams and wants to proceed. Build code next.
@@ -410,12 +413,6 @@ STEP 2 → STEP 3  (last assistant message contains "[DIAGRAMS_GENERATED]"):
   "let's build", "proceed", "start building", "да" / "ok" / "готово" / "начинай" / "create".
   → intent="code_change", next_step=true
   → clarified: describe what to build using the full conversation history as context
-
-PLAN_REQUEST — also triggered without going through ask_question:
-  Use "plan_request" when the user explicitly asks for diagrams / architecture before building
-  (e.g. "plan a TMS for me", "show me the architecture", "draw the process flow").
-  → next_step=true, reply="Generating your diagrams...", plan=null
-  → DO NOT generate any diagram content yourself — a dedicated step handles it
 
 ════════════════════════════════════════
 SCOPE RESOLUTION — for ambiguous cases only

@@ -1,7 +1,10 @@
 package v1
 
 import (
+	"encoding/json"
 	"fmt"
+	"strings"
+	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
@@ -249,7 +252,45 @@ func (h *HandlerV1) GetAiChatMessages(c *gin.Context) {
 		return
 	}
 
-	h.HandleResponse(c, status_http.OK, response)
+	// Enrich messages: parse embedded plan data from diagram messages so the
+	// frontend can render diagrams when loading history after a page refresh.
+	enriched := make([]models.EnrichedMessage, 0, len(response.GetMessages()))
+	for _, msg := range response.GetMessages() {
+		em := models.EnrichedMessage{
+			ID:         msg.GetId(),
+			ChatID:     msg.GetChatId(),
+			Role:       msg.GetRole(),
+			Content:    msg.GetContent(),
+			Images:     msg.GetImages(),
+			HasFiles:   msg.GetHasFiles(),
+			TokensUsed: msg.GetTokensUsed(),
+			CreatedAt:  msg.GetCreatedAt(),
+		}
+
+		content := msg.GetContent()
+		if strings.HasPrefix(content, "[DIAGRAMS_GENERATED] ") {
+			// Content format: "[DIAGRAMS_GENERATED] <description>\n<plan_json>"
+			body := strings.TrimPrefix(content, "[DIAGRAMS_GENERATED] ")
+			if idx := strings.Index(body, "\n"); idx != -1 {
+				em.Content = body[:idx]
+				var plan models.HaikuPlan
+				if jsonErr := json.Unmarshal([]byte(body[idx+1:]), &plan); jsonErr == nil {
+					em.Plan = &plan
+				}
+			} else {
+				em.Content = body
+			}
+		} else if strings.HasPrefix(content, "[QUESTIONS_ASKED] ") {
+			em.Content = strings.TrimPrefix(content, "[QUESTIONS_ASKED] ")
+		}
+
+		enriched = append(enriched, em)
+	}
+
+	h.HandleResponse(c, status_http.OK, map[string]any{
+		"messages": enriched,
+		"count":    response.GetCount(),
+	})
 }
 
 func (h *HandlerV1) DeleteAiChatMessage(c *gin.Context) {

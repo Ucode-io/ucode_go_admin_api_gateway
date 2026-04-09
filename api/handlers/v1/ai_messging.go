@@ -161,7 +161,11 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 	if len(aiResponse.Questions) > 0 {
 		savedContent = "[QUESTIONS_ASKED] " + aiResponse.Description
 	} else if aiResponse.Plan != nil {
-		savedContent = "[DIAGRAMS_GENERATED] " + aiResponse.Description
+		// Embed the plan JSON in the content so it survives page refreshes.
+		// Format: "[DIAGRAMS_GENERATED] <description>\n<plan_json>"
+		// getChatHistory strips the JSON part; GetAiChatMessages parses it back out.
+		planJSON, _ := json.Marshal(aiResponse.Plan)
+		savedContent = "[DIAGRAMS_GENERATED] " + aiResponse.Description + "\n" + string(planJSON)
 	}
 
 	message, err := processor.saveMessage(ctx, "assistant", savedContent, nil)
@@ -874,9 +878,16 @@ func (p *ChatProcessor) getChatHistory(ctx context.Context) ([]models.ChatMessag
 
 	result := make([]models.ChatMessage, 0, len(msgList))
 	for _, msg := range msgList {
+		text := msg.GetContent()
+		// Strip embedded plan JSON — the AI only needs the marker + description for state detection.
+		if strings.HasPrefix(text, "[DIAGRAMS_GENERATED] ") {
+			if idx := strings.Index(text, "\n"); idx != -1 {
+				text = text[:idx]
+			}
+		}
 		result = append(result, models.ChatMessage{
 			Role:    msg.GetRole(),
-			Content: []models.ContentBlock{{Type: "text", Text: msg.GetContent()}},
+			Content: []models.ContentBlock{{Type: "text", Text: text}},
 		})
 	}
 	return result, nil
