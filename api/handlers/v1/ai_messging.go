@@ -196,8 +196,31 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 		)
 	}
 
+	// Build an EnrichedMessage so the frontend never sees embedded plan JSON or
+	// state markers ([DIAGRAMS_GENERATED], [QUESTIONS_ASKED]) in the content field.
+	em := models.EnrichedMessage{
+		ID:         message.GetId(),
+		ChatID:     message.GetChatId(),
+		Role:       message.GetRole(),
+		Content:    message.GetContent(),
+		Images:     message.GetImages(),
+		HasFiles:   message.GetHasFiles(),
+		TokensUsed: message.GetTokensUsed(),
+		CreatedAt:  message.GetCreatedAt(),
+	}
+	if strings.HasPrefix(em.Content, "[DIAGRAMS_GENERATED] ") {
+		body := strings.TrimPrefix(em.Content, "[DIAGRAMS_GENERATED] ")
+		if idx := strings.Index(body, "\n"); idx != -1 {
+			em.Content = body[:idx]
+		} else {
+			em.Content = body
+		}
+	} else if strings.HasPrefix(em.Content, "[QUESTIONS_ASKED] ") {
+		em.Content = strings.TrimPrefix(em.Content, "[QUESTIONS_ASKED] ")
+	}
+
 	h.HandleResponse(c, status_http.Created, map[string]any{
-		"message":        message,
+		"message":        em,
 		"project":        updatedProject,
 		"mcp_project_id": processor.mcpProjectID,
 		"pending_action": aiResponse.PendingAction,
