@@ -146,13 +146,25 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 		} else if len(aiResponse.Questions) > 0 {
 			aiResponse.Description = aiResponse.Questions[0].Title
 		} else if aiResponse.Plan != nil {
-			aiResponse.Description = aiResponse.Plan.BusinessSummary
+			aiResponse.Description = "Here are the diagrams for your project. Review them and let me know when you're ready to build."
 		} else {
 			aiResponse.Description = "Project has been updated."
 		}
 	}
 
-	message, err := processor.saveMessage(ctx, "assistant", aiResponse.Description, nil)
+	// Persist a state marker in history for every response type so the router can reliably
+	// detect conversation state in future turns without the actual structured data.
+	// - Questions: save [QUESTIONS_ASKED] marker — the question options are sent only to the frontend.
+	// - Diagrams:  save [DIAGRAMS_GENERATED] marker — the plan JSON is sent only to the frontend.
+	// - Everything else: save the plain description.
+	savedContent := aiResponse.Description
+	if len(aiResponse.Questions) > 0 {
+		savedContent = "[QUESTIONS_ASKED] " + aiResponse.Description
+	} else if aiResponse.Plan != nil {
+		savedContent = "[DIAGRAMS_GENERATED] " + aiResponse.Description
+	}
+
+	message, err := processor.saveMessage(ctx, "assistant", savedContent, nil)
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, fmt.Sprintf("failed to save ai message: %v", err))
 		return
@@ -382,7 +394,7 @@ func (p *ChatProcessor) runGeneratePlan(ctx context.Context, userRequest string,
 	}
 
 	return &models.ParsedClaudeResponse{
-		Description: plan.BusinessSummary,
+		Description: "Here are the diagrams for your project. Review them and let me know when you're ready to build.",
 		Plan:        plan,
 	}, nil
 }
