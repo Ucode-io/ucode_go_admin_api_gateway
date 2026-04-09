@@ -585,8 +585,10 @@ BPMN XML RULES:
     <bpmn:sequenceFlow id="Flow_1" sourceRef="Start_1" targetRef="Task_1" />
   </bpmn:process>
 - Do NOT include BPMN DI (no <bpmndi:BPMNDiagram> or visual coordinates)
+- Do NOT include cross-lane interactions — no <bpmn:messageFlow>, no <bpmn:boundaryEvent>, no inter-lane connections of any kind
+- Each lane is self-contained: sequence flows only connect elements within the same lane
 - Use valid XML IDs starting with letters
-- Include start events, service tasks, sequence flows, cross-lane message flows
+- Include start events, tasks, and sequence flows only
 - Escape all special characters for JSON string (quotes → \", newlines → \n)
 
 INFRA DIAGRAM:
