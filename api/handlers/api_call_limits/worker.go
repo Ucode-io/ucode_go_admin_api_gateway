@@ -44,7 +44,10 @@ func (t *Tracker) Start(ctx context.Context) {
 	t.cancelFn = cancel
 
 	t.wg.Add(1)
-	go func() { defer t.wg.Done(); t.metricsWorker(innerCtx) }()
+	go func() {
+		defer t.wg.Done()
+		t.metricsWorker(innerCtx)
+	}()
 
 	log.Printf("[Tracker] started: flush_interval=%v", t.cfg.MetricsFlushInterval)
 }
@@ -104,13 +107,20 @@ func (t *Tracker) flushMetricsToRedis() {
 			// 2. Накопительный ключ для Consumer'а (который пойдет в PostgreSQL)
 			usageKey := fmt.Sprintf(config.KeyUsagePending, projectID)
 			pipe.HIncrBy(ctx, usageKey, config.KeyUsageTotalField, delta)
+
+			log.Printf("[Tracker] Prepared flush for projectID: %s | delta: %d", projectID, delta)
 		}
 		return true
 	})
 
 	if hasData {
+		log.Printf("[Tracker] Flushing aggregated L1 cache to Redis...")
 		if _, err := pipe.Exec(ctx); err != nil {
-			log.Printf("[Tracker] redis flush error: %v", err)
+			log.Printf("[Tracker] ERROR flushing to redis: %v", err)
+		} else {
+			log.Printf("[Tracker] SUCCESS flushing L1 cache to Redis")
 		}
+	} else {
+		log.Printf("[Tracker] No new data in L1 cache to flush")
 	}
 }
