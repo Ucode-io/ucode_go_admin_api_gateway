@@ -31,6 +31,8 @@ require (
 	github.com/golang/protobuf v1.5.4
 	github.com/golanguzb70/grpc-client-lb v1.0.0
 	github.com/hashicorp/golang-lru v1.0.2
+	github.com/hashicorp/vault/api v1.8.2
+	github.com/hashicorp/vault/api/auth/approle v0.3.0
 	github.com/manveru/faker v0.0.0-20171103152722-9fbc68a78c4d
 	github.com/opentracing-contrib/go-gin v0.0.0-20230313182354-1499e56cc906
 	github.com/opentracing-contrib/go-grpc v0.0.0-20240724223109-9dec25a38fa8
@@ -38,6 +40,7 @@ require (
 	github.com/processout/grpc-go-pool v1.2.1
 	github.com/stretchr/testify v1.10.0
 	github.com/stripe/stripe-go/v83 v83.0.0
+	github.com/swaggo/files v1.0.1
 	github.com/tus/tusd v1.13.0
 	github.com/uber/jaeger-client-go v2.30.0+incompatible
 	github.com/ucode-io/dbml-go v1.0.3
@@ -92,8 +95,6 @@ require (
 	github.com/hashicorp/go-uuid v1.0.2 // indirect
 	github.com/hashicorp/go-version v1.2.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
-	github.com/hashicorp/vault/api v1.8.2 // indirect
-	github.com/hashicorp/vault/api/auth/approle v0.3.0 // indirect
 	github.com/hashicorp/vault/sdk v0.6.0 // indirect
 	github.com/hashicorp/yamux v0.0.0-20180604194846-3520598351bb // indirect
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect

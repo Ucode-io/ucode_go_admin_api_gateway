@@ -18,9 +18,8 @@ type TrackerConfig struct {
 }
 
 func LoadTrackerConfig(uConf config.Config) TrackerConfig {
-	// Берем интервал из твоего главного конфига (например, 10 секунд)
 	return TrackerConfig{
-		MetricsFlushInterval: time.Duration(uConf.MetricsFlushIntervalSec) * time.Second,
+		MetricsFlushInterval: time.Duration(uConf.AuditMetricsFlushInterval) * time.Second,
 	}
 }
 
