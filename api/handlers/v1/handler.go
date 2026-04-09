@@ -281,6 +281,15 @@ func (h *HandlerV1) versionHistoryGo(c *gin.Context, req *models.CreateVersionHi
 		}
 	}
 
+	if req.TimeCompleted == "" {
+		req.TimeCompleted = time.Now().Format(time.RFC3339)
+	}
+	if req.Duration == 0 && req.TimeStarted != "" {
+		if t, err := time.Parse(time.RFC3339, req.TimeStarted); err == nil {
+			req.Duration = time.Since(t).Milliseconds()
+		}
+	}
+
 	_, err := req.Services.GoObjectBuilderService().VersionHistory().Create(
 		c,
 		&nb.CreateVersionHistoryRequest{
@@ -299,6 +308,10 @@ func (h *HandlerV1) versionHistoryGo(c *gin.Context, req *models.CreateVersionHi
 			Type:              req.Type,
 			TableSlug:         req.TableSlug,
 			VersionId:         req.VersionId,
+			MethodApi:         req.MethodApi,
+			TimeStarted:       req.TimeStarted,
+			TimeCompleted:     req.TimeCompleted,
+			Duration:          req.Duration,
 		},
 	)
 	if err != nil {
