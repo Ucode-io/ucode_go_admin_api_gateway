@@ -267,3 +267,47 @@ func (h *HandlerV1) GetApiChart(c *gin.Context) {
 
 	h.HandleResponse(c, status_http.OK, models.ApiChartResponse{Chart: chart})
 }
+
+// GetPerformanceMetrics godoc
+// @Summary Get performance metrics
+// @Description Get average response duration (ms) and error rate for today's requests
+// @Tags Billing
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Success 200 {object} status_http.Response{data=models.PerformanceMetricsResponse} "Performance metrics"
+// @Failure 401
+// @Router /v1/pricing/performance [get]
+func (h *HandlerV1) GetPerformanceMetrics(c *gin.Context) {
+	service, resourceEnvId, err := h.getAiChatServices(c)
+	if err != nil {
+		h.HandleResponse(c, status_http.InternalServerError, err.Error())
+		return
+	}
+
+	today := time.Now().Format("2006-01-02")
+	resp, err := service.GoObjectBuilderService().VersionHistory().GetPerformanceMetrics(
+		c.Request.Context(),
+		&nb.GetPerformanceMetricsRequest{
+			ProjectId: resourceEnvId,
+			FromDate:  today,
+			ToDate:    today,
+		},
+	)
+	if err != nil {
+		h.log.Error("[GetPerformanceMetrics] GetPerformanceMetrics error", logger.Error(err))
+		h.HandleResponse(c, status_http.InternalServerError, err.Error())
+		return
+	}
+
+	h.HandleResponse(c, status_http.OK, models.PerformanceMetricsResponse{
+		AverageResponseTime: models.PricingUsage{
+			Current: float64(resp.AverageDuration),
+			Unit:    "ms",
+		},
+		ErrorRate: models.PricingUsage{
+			Current: float64(resp.ErrorRate),
+			Unit:    "%",
+		},
+	})
+}
