@@ -630,6 +630,10 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 
 	objectRequest["language_setting"] = c.DefaultQuery("language_setting", "")
 
+	if c.DefaultQuery("with_types", "false") == "true" {
+		objectRequest["with_types"] = true
+	}
+
 	structData, err := helper.ConvertMapToStruct(objectRequest)
 	if err != nil {
 		h.HandleResponse(c, status_http.InvalidArgument, err.Error())
