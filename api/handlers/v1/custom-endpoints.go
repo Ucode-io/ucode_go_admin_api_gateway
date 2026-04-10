@@ -34,7 +34,11 @@ func (h *HandlerV1) ExecQuery(c *gin.Context) {
 		return
 	}
 
-	h.HandleResponse(c, status_http.Created, response)
+	h.HandleResponse(c, status_http.Created, map[string]any{
+		"rows":          response.GetRows(),
+		"rows_affected": response.GetRowsAffected(),
+		"types":         response.GetTypes(),
+	})
 }
 
 // ─── CreateCustomEndpoint ─────────────────────────────────────────────────────
