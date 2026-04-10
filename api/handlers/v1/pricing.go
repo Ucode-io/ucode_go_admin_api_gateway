@@ -301,13 +301,7 @@ func (h *HandlerV1) GetPerformanceMetrics(c *gin.Context) {
 	}
 
 	h.HandleResponse(c, status_http.OK, models.PerformanceMetricsResponse{
-		AverageResponseTime: models.PricingUsage{
-			Current: float64(resp.AverageDuration),
-			Unit:    "ms",
-		},
-		ErrorRate: models.PricingUsage{
-			Current: float64(resp.ErrorRate),
-			Unit:    "%",
-		},
+		AverageResponseTime: float64(resp.AverageDuration),
+		ErrorRate:           float64(resp.ErrorRate),
 	})
 }

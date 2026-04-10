@@ -22,8 +22,8 @@ type AllPricingUsage struct {
 }
 
 type PerformanceMetricsResponse struct {
-	AverageResponseTime PricingUsage `json:"average_response_time"`
-	ErrorRate           PricingUsage `json:"error_rate"`
+	AverageResponseTime float64 `json:"average_response_time"`
+	ErrorRate           float64 `json:"error_rate"`
 }
 
 type TokenUsage struct {
