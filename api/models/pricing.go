@@ -7,16 +7,17 @@ type PricingUsage struct {
 }
 
 type AllPricingUsage struct {
-	Functions     PricingUsage `json:"functions"`
-	Microfrontend PricingUsage `json:"microfrontend"`
-	AssetSize     PricingUsage `json:"asset_size"`
-	DatabaseSize  PricingUsage `json:"database_size"`
-	Users         PricingUsage `json:"users"`
-	Items         PricingUsage `json:"items"`
-	Tables        PricingUsage `json:"tables"`
-	ApiKeys       PricingUsage `json:"api_keys"`
-	TodayTokens   PricingUsage `json:"today_tokens"`
-	MonthlyTokens PricingUsage `json:"monthly_tokens"`
+	Functions       PricingUsage `json:"functions"`
+	Microfrontend   PricingUsage `json:"microfrontend"`
+	AssetSize       PricingUsage `json:"asset_size"`
+	DatabaseSize    PricingUsage `json:"database_size"`
+	Users           PricingUsage `json:"users"`
+	Items           PricingUsage `json:"items"`
+	Tables          PricingUsage `json:"tables"`
+	ApiKeys         PricingUsage `json:"api_keys"`
+	TodayTokens     PricingUsage `json:"today_tokens"`
+	MonthlyTokens   PricingUsage `json:"monthly_tokens"`
+	MonthlyApiCalls PricingUsage `json:"monthly_api_calls"`
 }
 
 type TokenUsage struct {

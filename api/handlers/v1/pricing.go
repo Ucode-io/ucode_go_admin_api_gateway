@@ -15,121 +15,99 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cast"
+	"golang.org/x/sync/errgroup"
 )
 
-// GetAllPricingUsage godoc
-// @Summary Get all pricing usage
-// @Description Get all pricing usage for a project, including limits and current usage
-// @Tags Billing
-// @Accept  json
-// @Produce  json
-// @Security ApiKeyAuth
-// @Success 200 {object} status_http.Response{data=models.AllPricingUsage} "Pricing usage data"
-// @Failure 400 {object} status_http.Response{data=string} "Bad Request"
-// @Failure 500 {object} status_http.Response{data=string} "Server Error"
-// @Router /v1/pricing/all [get]
+func parseStorageLimitToMB(val string) float64 {
+	if len(val) > 2 {
+		return cast.ToFloat64(val[:len(val)-2]) * 1024
+	}
+	return 0
+}
+
 func (h *HandlerV1) GetAllPricingUsage(c *gin.Context) {
 	projectId, ok := c.Get("project_id")
 	if !ok {
 		h.HandleResponse(c, status_http.BadRequest, "project_id is required")
 		return
 	}
+	projectIDStr := cast.ToString(projectId)
 
 	service, resourceEnvId, err := h.getAiChatServices(c)
 	if err != nil {
-		return
-	}
-
-	limitsResp, err := h.companyServices.Billing().GetPricingLimits(
-		c.Request.Context(), &company_service.GetPricingLimitsRequest{
-			ProjectId: cast.ToString(projectId),
-		},
-	)
-	if err != nil {
-		h.log.Error("GetPricingLimits error", logger.Error(err), logger.String("project_id", cast.ToString(projectId)))
 		h.HandleResponse(c, status_http.InternalServerError, err.Error())
 		return
 	}
 
-	usageResp, err := service.GoObjectBuilderService().ObjectBuilder().GetResourceUsage(
-		c.Request.Context(), &nb.GetResourceUsageRequest{
-			ProjectId: resourceEnvId,
-		},
+	var (
+		limitsResp     *company_service.GetPricingLimitsResponse
+		usageResp      *nb.GetResourceUsageResponse
+		usersCountResp *auth_service.GetProjectUsersCountResponse
+		apiKeysResp    *auth_service.GetProjectApiKeysCountResponse
+		tokenMetrics   *company_service.GetAiTokenUsageMetricsResponse
+		apiMetrics     *company_service.GetApiCallMonitoringMetricsResponse
 	)
-	if err != nil {
-		h.log.Error("GetResourceUsage error", logger.Error(err), logger.String("project_id", cast.ToString(projectId)))
-		h.HandleResponse(c, status_http.InternalServerError, err.Error())
+
+	g, gCtx := errgroup.WithContext(c.Request.Context())
+
+	// 2.1. Лимиты прайсинга
+	g.Go(func() error {
+		var err error
+		limitsResp, err = h.companyServices.Billing().GetPricingLimits(gCtx, &company_service.GetPricingLimitsRequest{ProjectId: projectIDStr})
+		return err
+	})
+
+	g.Go(func() error {
+		var err error
+		usageResp, err = service.GoObjectBuilderService().ObjectBuilder().GetResourceUsage(gCtx, &nb.GetResourceUsageRequest{ProjectId: resourceEnvId})
+		return err
+	})
+
+	// 2.3. Количество пользователей
+	g.Go(func() error {
+		var err error
+		usersCountResp, err = h.authService.User().GetProjectUsersCount(gCtx, &auth_service.GetProjectUsersCountRequest{ProjectId: projectIDStr})
+		return err
+	})
+
+	g.Go(func() error {
+		var err error
+		apiKeysResp, err = h.authService.ApiKey().GetProjectApiKeysCount(gCtx, &auth_service.GetProjectApiKeysCountRequest{ProjectId: projectIDStr})
+		return err
+	})
+
+	g.Go(func() error {
+		var err error
+		tokenMetrics, err = h.companyServices.Billing().GetAiTokenUsageMetrics(gCtx, &company_service.GetAiTokenUsageMetricsRequest{ProjectId: projectIDStr})
+		return err
+	})
+
+	g.Go(func() error {
+		var err error
+		apiMetrics, err = h.companyServices.Billing().GetApiCallMonitoringMetrics(gCtx, &company_service.GetApiCallMonitoringMetricsRequest{ProjectId: projectIDStr})
+		return err
+	})
+
+	if err := g.Wait(); err != nil {
+		h.log.Error("GetAllPricingUsage failed", logger.Error(err), logger.String("project_id", projectIDStr))
+		h.HandleResponse(c, status_http.InternalServerError, "Failed to fetch pricing usage data")
 		return
 	}
 
-	usersCountResp, err := h.authService.User().GetProjectUsersCount(
-		c.Request.Context(), &auth_service.GetProjectUsersCountRequest{
-			ProjectId: projectId.(string),
-		},
-	)
-	if err != nil {
-		h.log.Error("GetProjectUsersCount error", logger.Error(err), logger.String("project_id", resourceEnvId))
-	}
-
-	var userCount float64
-	if usersCountResp != nil {
-		userCount = float64(usersCountResp.Count)
-	}
-
-	apiKeysCountResp, err := h.authService.ApiKey().GetProjectApiKeysCount(
-		c.Request.Context(), &auth_service.GetProjectApiKeysCountRequest{
-			ProjectId: cast.ToString(projectId),
-		},
-	)
-	if err != nil {
-		h.log.Error("GetProjectApiKeysCount error", logger.Error(err), logger.String("project_id", cast.ToString(projectId)))
-	}
-
-	var apiKeysCount float64
-	if apiKeysCountResp != nil {
-		apiKeysCount = float64(apiKeysCountResp.Count)
-	}
-
-	// 3. Aggregate results
 	response := models.AllPricingUsage{
-		Functions: models.PricingUsage{
-			Current: float64(usageResp.FunctionsCount),
-			Unit:    "count",
-		},
-		Microfrontend: models.PricingUsage{
-			Current: float64(usageResp.MicrofrontendsCount),
-			Unit:    "count",
-		},
-		AssetSize: models.PricingUsage{
-			Current: float64(usageResp.AssetSize) / (1024 * 1024),
-			Unit:    "MB",
-		},
-		DatabaseSize: models.PricingUsage{
-			Current: float64(usageResp.DatabaseSize) / (1024 * 1024),
-			Unit:    "MB",
-		},
-		Users: models.PricingUsage{
-			Current: userCount,
-			Unit:    "count",
-		},
-		Items: models.PricingUsage{
-			Current: float64(usageResp.ItemsCount),
-			Limit:   100000, // Static limit as requested
-			Unit:    "count",
-		},
-		Tables: models.PricingUsage{
-			Current: float64(usageResp.TablesCount),
-			Limit:   100, // Static limit
-			Unit:    "count",
-		},
-		ApiKeys: models.PricingUsage{
-			Current: apiKeysCount,
-			Limit:   10, // Static limit
-			Unit:    "count",
-		},
+		Functions:       models.PricingUsage{Current: float64(usageResp.FunctionsCount), Unit: "count"},
+		Microfrontend:   models.PricingUsage{Current: float64(usageResp.MicrofrontendsCount), Unit: "count"},
+		AssetSize:       models.PricingUsage{Current: float64(usageResp.AssetSize) / (1024 * 1024), Unit: "MB"},
+		DatabaseSize:    models.PricingUsage{Current: float64(usageResp.DatabaseSize) / (1024 * 1024), Unit: "MB"},
+		Users:           models.PricingUsage{Current: float64(usersCountResp.Count), Unit: "count"},
+		Items:           models.PricingUsage{Current: float64(usageResp.ItemsCount), Limit: 100_000, Unit: "count"},
+		Tables:          models.PricingUsage{Current: float64(usageResp.TablesCount), Limit: 100, Unit: "count"},
+		ApiKeys:         models.PricingUsage{Current: float64(apiKeysResp.Count), Limit: 10, Unit: "count"},
+		TodayTokens:     models.PricingUsage{Current: float64(tokenMetrics.TodayInputTokens + tokenMetrics.TodayOutputTokens), Limit: 100_000, Unit: "tokens"},
+		MonthlyTokens:   models.PricingUsage{Current: float64(tokenMetrics.MonthlyInputTokens + tokenMetrics.MonthlyOutputTokens), Limit: 1_000_000, Unit: "tokens"},
+		MonthlyApiCalls: models.PricingUsage{Current: float64(apiMetrics.TotalMonthlyCalls), Limit: 1_000_000, Unit: "count"},
 	}
 
-	// Map limits
 	for _, limit := range limitsResp.Limits {
 		switch limit.Name {
 		case "Functions":
@@ -137,13 +115,9 @@ func (h *HandlerV1) GetAllPricingUsage(c *gin.Context) {
 		case "Microfrontend":
 			response.Microfrontend.Limit = cast.ToFloat64(limit.Value)
 		case "Database Size":
-			if len(limit.Value) > 2 {
-				response.DatabaseSize.Limit = cast.ToFloat64(limit.Value[:len(limit.Value)-2]) * 1024
-			}
+			response.DatabaseSize.Limit = parseStorageLimitToMB(limit.Value)
 		case "Asset Size info":
-			if len(limit.Value) > 2 {
-				response.AssetSize.Limit = cast.ToFloat64(limit.Value[:len(limit.Value)-2]) * 1024
-			}
+			response.AssetSize.Limit = parseStorageLimitToMB(limit.Value)
 		case "Total Users & Roles":
 			response.Users.Limit = cast.ToFloat64(limit.Value)
 		case "Items":
@@ -152,26 +126,6 @@ func (h *HandlerV1) GetAllPricingUsage(c *gin.Context) {
 			response.Tables.Limit = cast.ToFloat64(limit.Value)
 		case "API Keys":
 			response.ApiKeys.Limit = cast.ToFloat64(limit.Value)
-		}
-	}
-
-	// Fetch AI token usage metrics
-	tokenMetrics, err := h.companyServices.Billing().GetAiTokenUsageMetrics(
-		c.Request.Context(),
-		&company_service.GetAiTokenUsageMetricsRequest{ProjectId: cast.ToString(projectId)},
-	)
-	if err != nil {
-		h.log.Error("GetAiTokenUsageMetrics error", logger.Error(err), logger.String("project_id", cast.ToString(projectId)))
-	} else if tokenMetrics != nil {
-		response.TodayTokens = models.PricingUsage{
-			Current: float64(tokenMetrics.TodayInputTokens + tokenMetrics.TodayOutputTokens),
-			Unit:    "tokens",
-			Limit:   100_000, // Static limit
-		}
-		response.MonthlyTokens = models.PricingUsage{
-			Current: float64(tokenMetrics.MonthlyInputTokens + tokenMetrics.MonthlyOutputTokens),
-			Limit:   1_000_000, // Static limit
-			Unit:    "tokens",
 		}
 	}
 
