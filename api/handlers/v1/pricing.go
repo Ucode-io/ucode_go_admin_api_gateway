@@ -155,7 +155,62 @@ func (h *HandlerV1) GetAllPricingUsage(c *gin.Context) {
 		}
 	}
 
+	// Fetch AI token usage metrics
+	tokenMetrics, err := h.companyServices.Billing().GetAiTokenUsageMetrics(
+		c.Request.Context(),
+		&company_service.GetAiTokenUsageMetricsRequest{ProjectId: cast.ToString(projectId)},
+	)
+	if err != nil {
+		h.log.Error("GetAiTokenUsageMetrics error", logger.Error(err), logger.String("project_id", cast.ToString(projectId)))
+	} else if tokenMetrics != nil {
+		response.TodayTokens = models.PricingUsage{
+			Current: float64(tokenMetrics.TodayInputTokens + tokenMetrics.TodayOutputTokens),
+			Unit:    "tokens",
+			Limit:   100_000, // Static limit
+		}
+		response.MonthlyTokens = models.PricingUsage{
+			Current: float64(tokenMetrics.MonthlyInputTokens + tokenMetrics.MonthlyOutputTokens),
+			Limit:   1_000_000, // Static limit
+			Unit:    "tokens",
+		}
+	}
+
 	h.HandleResponse(c, status_http.OK, response)
+}
+
+// GetTokenUsage godoc
+// @Summary Get AI token usage
+// @Description Get AI input/output token usage for today and this month
+// @Tags Billing
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Success 200 {object} status_http.Response{data=models.TokenUsageResponse} "Token usage"
+// @Failure 401
+// @Router /v1/pricing/token-usage [get]
+func (h *HandlerV1) GetTokenUsage(c *gin.Context) {
+	projectId := cast.ToString(c.MustGet("project_id"))
+
+	resp, err := h.companyServices.Billing().GetAiTokenUsageMetrics(
+		c.Request.Context(),
+		&company_service.GetAiTokenUsageMetricsRequest{ProjectId: projectId},
+	)
+	if err != nil {
+		h.log.Error("[GetTokenUsage] GetAiTokenUsageMetrics error", logger.Error(err))
+		h.HandleResponse(c, status_http.InternalServerError, err.Error())
+		return
+	}
+
+	h.HandleResponse(c, status_http.OK, models.TokenUsageResponse{
+		Today: models.TokenUsage{
+			InputTokens:  resp.TodayInputTokens,
+			OutputTokens: resp.TodayOutputTokens,
+		},
+		Monthly: models.TokenUsage{
+			InputTokens:  resp.MonthlyInputTokens,
+			OutputTokens: resp.MonthlyOutputTokens,
+		},
+	})
 }
 
 // GetApiMetrics godoc
@@ -199,9 +254,9 @@ func (h *HandlerV1) GetApiMetrics(c *gin.Context) {
 	rps := math.Round(rawRps*100) / 100
 
 	// Получаем исторические данные
-	metricsResp, err := h.companyServices.Billing().GetMonitoringMetrics(
+	metricsResp, err := h.companyServices.Billing().GetApiCallMonitoringMetrics(
 		c.Request.Context(),
-		&company_service.GetMonitoringMetricsRequest{ProjectId: projectId},
+		&company_service.GetApiCallMonitoringMetricsRequest{ProjectId: projectId},
 	)
 
 	var monthly int64
@@ -235,9 +290,9 @@ func (h *HandlerV1) GetApiMetrics(c *gin.Context) {
 func (h *HandlerV1) GetApiChart(c *gin.Context) {
 	projectId := cast.ToString(c.MustGet("project_id"))
 
-	metricsResp, err := h.companyServices.Billing().GetMonitoringMetrics(
+	metricsResp, err := h.companyServices.Billing().GetApiCallMonitoringMetrics(
 		c.Request.Context(),
-		&company_service.GetMonitoringMetricsRequest{ProjectId: projectId},
+		&company_service.GetApiCallMonitoringMetricsRequest{ProjectId: projectId},
 	)
 
 	if err != nil {

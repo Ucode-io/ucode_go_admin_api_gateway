@@ -15,6 +15,18 @@ type AllPricingUsage struct {
 	Items         PricingUsage `json:"items"`
 	Tables        PricingUsage `json:"tables"`
 	ApiKeys       PricingUsage `json:"api_keys"`
+	TodayTokens   PricingUsage `json:"today_tokens"`
+	MonthlyTokens PricingUsage `json:"monthly_tokens"`
+}
+
+type TokenUsage struct {
+	InputTokens  int64 `json:"input_tokens"`
+	OutputTokens int64 `json:"output_tokens"`
+}
+
+type TokenUsageResponse struct {
+	Today   TokenUsage `json:"today"`
+	Monthly TokenUsage `json:"monthly"`
 }
 
 type ApiMetricsResponse struct {
