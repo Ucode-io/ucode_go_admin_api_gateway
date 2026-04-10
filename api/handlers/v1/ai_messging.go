@@ -37,6 +37,7 @@ type ChatProcessor struct {
 	mcpProjectID   string
 	resourceEnvID  string
 	ucodeProjectID string
+	mcpUcodeProjectID string
 
 	userID       string
 	clientTypeID string
@@ -338,6 +339,7 @@ func (p *ChatProcessor) routeAndProcess(ctx context.Context, req models.NewMessa
 			projectData = nil
 		}
 		if projectData != nil {
+			p.mcpUcodeProjectID = projectData.GetUcodeProjectId()
 			fileGraphJSON, _ = p.buildFileGraphJSON(projectData)
 		}
 	}
@@ -976,8 +978,13 @@ func (p *ChatProcessor) callAnthropicWithTracking(ctx context.Context, req model
 			Usage models.ClaudeUsage `json:"usage"`
 		}
 		if err := json.Unmarshal([]byte(response), &parsed); err == nil && (parsed.Usage.InputTokens > 0 || parsed.Usage.OutputTokens > 0) {
+			projectID := p.ucodeProjectID
+			if p.mcpUcodeProjectID != "" {
+				projectID = p.mcpUcodeProjectID
+			}
+
 			_, recErr := p.service.CompanyService().Billing().RecordAiTokenUsage(context.Background(), &pb.RecordAiTokenUsageRequest{
-				ProjectId:    p.ucodeProjectID,
+				ProjectId:    projectID,
 				InputTokens:  int32(parsed.Usage.InputTokens),
 				OutputTokens: int32(parsed.Usage.OutputTokens),
 				Model:        req.Model,
@@ -1125,6 +1132,8 @@ func (p *ChatProcessor) provisionBackend(ctx context.Context, projectName string
 		}
 		mcpProjectID = project.GetId()
 	}
+
+	p.mcpUcodeProjectID = backendProject.GetProjectId()
 
 	return &models.ProjectData{
 		UcodeProjectId: backendProject.GetProjectId(),
