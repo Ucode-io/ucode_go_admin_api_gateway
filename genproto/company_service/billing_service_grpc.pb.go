@@ -52,6 +52,7 @@ const (
 	BillingService_GetPricingLimits_FullMethodName          = "/company_service.BillingService/GetPricingLimits"
 	BillingService_LogUsage_FullMethodName                  = "/company_service.BillingService/LogUsage"
 	BillingService_GetMonitoringMetrics_FullMethodName      = "/company_service.BillingService/GetMonitoringMetrics"
+	BillingService_RecordAiTokenUsage_FullMethodName        = "/company_service.BillingService/RecordAiTokenUsage"
 )
 
 // BillingServiceClient is the client API for BillingService service.
@@ -97,6 +98,7 @@ type BillingServiceClient interface {
 	GetPricingLimits(ctx context.Context, in *GetPricingLimitsRequest, opts ...grpc.CallOption) (*GetPricingLimitsResponse, error)
 	LogUsage(ctx context.Context, in *LogUsageRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	GetMonitoringMetrics(ctx context.Context, in *GetMonitoringMetricsRequest, opts ...grpc.CallOption) (*GetMonitoringMetricsResponse, error)
+	RecordAiTokenUsage(ctx context.Context, in *RecordAiTokenUsageRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
 type billingServiceClient struct {
@@ -427,6 +429,16 @@ func (c *billingServiceClient) GetMonitoringMetrics(ctx context.Context, in *Get
 	return out, nil
 }
 
+func (c *billingServiceClient) RecordAiTokenUsage(ctx context.Context, in *RecordAiTokenUsageRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, BillingService_RecordAiTokenUsage_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // BillingServiceServer is the server API for BillingService service.
 // All implementations must embed UnimplementedBillingServiceServer
 // for forward compatibility.
@@ -470,6 +482,7 @@ type BillingServiceServer interface {
 	GetPricingLimits(context.Context, *GetPricingLimitsRequest) (*GetPricingLimitsResponse, error)
 	LogUsage(context.Context, *LogUsageRequest) (*empty.Empty, error)
 	GetMonitoringMetrics(context.Context, *GetMonitoringMetricsRequest) (*GetMonitoringMetricsResponse, error)
+	RecordAiTokenUsage(context.Context, *RecordAiTokenUsageRequest) (*empty.Empty, error)
 	mustEmbedUnimplementedBillingServiceServer()
 }
 
@@ -575,6 +588,9 @@ func (UnimplementedBillingServiceServer) LogUsage(context.Context, *LogUsageRequ
 }
 func (UnimplementedBillingServiceServer) GetMonitoringMetrics(context.Context, *GetMonitoringMetricsRequest) (*GetMonitoringMetricsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMonitoringMetrics not implemented")
+}
+func (UnimplementedBillingServiceServer) RecordAiTokenUsage(context.Context, *RecordAiTokenUsageRequest) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RecordAiTokenUsage not implemented")
 }
 func (UnimplementedBillingServiceServer) mustEmbedUnimplementedBillingServiceServer() {}
 func (UnimplementedBillingServiceServer) testEmbeddedByValue()                        {}
@@ -1173,6 +1189,24 @@ func _BillingService_GetMonitoringMetrics_Handler(srv interface{}, ctx context.C
 	return interceptor(ctx, in, info, handler)
 }
 
+func _BillingService_RecordAiTokenUsage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RecordAiTokenUsageRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BillingServiceServer).RecordAiTokenUsage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BillingService_RecordAiTokenUsage_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BillingServiceServer).RecordAiTokenUsage(ctx, req.(*RecordAiTokenUsageRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // BillingService_ServiceDesc is the grpc.ServiceDesc for BillingService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1307,6 +1341,10 @@ var BillingService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetMonitoringMetrics",
 			Handler:    _BillingService_GetMonitoringMetrics_Handler,
+		},
+		{
+			MethodName: "RecordAiTokenUsage",
+			Handler:    _BillingService_RecordAiTokenUsage_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

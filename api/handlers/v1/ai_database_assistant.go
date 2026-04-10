@@ -1086,8 +1086,8 @@ func (p *ChatProcessor) callDatabaseAssistant(
 	content := helper.BuildDatabaseMessage(clarified, schemaText, dataContext)
 	messages := buildMessagesWithHistory(chatHistory, []models.ContentBlock{{Type: "text", Text: content}})
 
-	response, err := helper.CallAnthropicAPI(
-		p.baseConf,
+	response, err := p.callAnthropicWithTracking(
+		ctx,
 		models.AnthropicRequest{
 			Model:     p.baseConf.ClaudeModel,
 			MaxTokens: p.baseConf.InspectorMaxTokens,
@@ -1095,6 +1095,7 @@ func (p *ChatProcessor) callDatabaseAssistant(
 			Messages:  messages,
 		},
 		timeoutDatabaseAssistant,
+		"Executing database assistant agent loop",
 	)
 	if err != nil {
 		return nil, fmt.Errorf("Anthropic API error: %w", err)

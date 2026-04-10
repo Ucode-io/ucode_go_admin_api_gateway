@@ -2,7 +2,7 @@ package v1
 
 import (
 	"fmt"
-	"log"
+	"math"
 	"time"
 
 	"ucode/ucode_go_api_gateway/api/models"
@@ -131,9 +131,6 @@ func (h *HandlerV1) GetAllPricingUsage(c *gin.Context) {
 
 	// Map limits
 	for _, limit := range limitsResp.Limits {
-
-		log.Println("AAA:", limit.Name, limit.Value)
-
 		switch limit.Name {
 		case "Functions":
 			response.Functions.Limit = cast.ToFloat64(limit.Value)
@@ -174,7 +171,7 @@ func (h *HandlerV1) GetAllPricingUsage(c *gin.Context) {
 func (h *HandlerV1) GetApiMetrics(c *gin.Context) {
 	projectId := cast.ToString(c.MustGet("project_id"))
 
-	now := time.Now().UTC()
+	now := time.Now()
 	prevNow := now.Add(-1 * time.Minute)
 
 	minKey := fmt.Sprintf(config.KeyRateMin, projectId, now.Format("2006-01-02-15-04"))
@@ -190,23 +187,28 @@ func (h *HandlerV1) GetApiMetrics(c *gin.Context) {
 	rpm := getRedisInt(minKey)
 	rph := getRedisInt(hourKey)
 	today := getRedisInt(dayKey)
-
 	prevRpm := getRedisInt(prevMinKey)
+
 	sec := float64(now.Second())
 
-	// Smooth RPS calculation: blending previous and current minute counts
-	rps := (((float64(prevRpm) * (60 - sec)) + (float64(rpm) * sec)) / 60) / 60
+	prevMinuteWeight := (60.0 - sec) / 60.0
+	rolling60sCalls := float64(rpm) + (float64(prevRpm) * prevMinuteWeight)
 
-	// Get historical DB metrics
+	rawRps := rolling60sCalls / 60.0
+
+	rps := math.Round(rawRps*100) / 100
+
+	// Получаем исторические данные
 	metricsResp, err := h.companyServices.Billing().GetMonitoringMetrics(
 		c.Request.Context(),
 		&company_service.GetMonitoringMetricsRequest{ProjectId: projectId},
 	)
 
-	var monthly, lastDay int64
+	var monthly int64
 	if err == nil && metricsResp != nil {
 		monthly = metricsResp.TotalMonthlyCalls
-		lastDay = metricsResp.TotalLastDayCalls
+	} else if err != nil {
+		h.log.Error("[GetApiMetrics] GetMonitoringMetrics error", logger.Error(err))
 	}
 
 	res := models.ApiMetricsResponse{
@@ -215,7 +217,6 @@ func (h *HandlerV1) GetApiMetrics(c *gin.Context) {
 		Rph:          rph,
 		TodayCalls:   today,
 		MonthlyCalls: monthly,
-		LastDayCalls: lastDay,
 	}
 
 	h.HandleResponse(c, status_http.OK, res)

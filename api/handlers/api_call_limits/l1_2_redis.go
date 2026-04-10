@@ -13,29 +13,18 @@ import (
 	"github.com/go-redis/redis/v8"
 )
 
-type TrackerConfig struct {
-	MetricsFlushInterval time.Duration
-}
-
-func LoadTrackerConfig(uConf config.Config) TrackerConfig {
-	return TrackerConfig{
-		MetricsFlushInterval: time.Duration(uConf.AuditMetricsFlushInterval) * time.Second,
-	}
-}
-
 type Tracker struct {
-	cfg     TrackerConfig
-	rdb     *redis.Client
-	l1Cache sync.Map
-
-	wg       sync.WaitGroup
-	cancelFn context.CancelFunc
+	flushInterval time.Duration
+	rdb           *redis.Client
+	l1Cache       sync.Map
+	wg            sync.WaitGroup
+	cancelFn      context.CancelFunc
 }
 
-func NewTracker(rdb *redis.Client, cfg TrackerConfig) *Tracker {
+func NewTracker(rdb *redis.Client, flushInterval time.Duration) *Tracker {
 	return &Tracker{
-		cfg: cfg,
-		rdb: rdb,
+		flushInterval: flushInterval,
+		rdb:           rdb,
 	}
 }
 
@@ -49,7 +38,7 @@ func (t *Tracker) Start(ctx context.Context) {
 		t.metricsWorker(innerCtx)
 	}()
 
-	log.Printf("[Tracker] started: flush_interval=%v", t.cfg.MetricsFlushInterval)
+	log.Printf("[Tracker] started: flush_interval=%v", t.flushInterval)
 }
 
 func (t *Tracker) Stop() {
@@ -62,7 +51,7 @@ func (t *Tracker) Stop() {
 }
 
 func (t *Tracker) metricsWorker(ctx context.Context) {
-	ticker := time.NewTicker(t.cfg.MetricsFlushInterval)
+	ticker := time.NewTicker(t.flushInterval)
 	defer ticker.Stop()
 
 	for {
@@ -83,18 +72,15 @@ func (t *Tracker) flushMetricsToRedis() {
 
 	t.l1Cache.Range(func(k, v any) bool {
 		projectID := k.(string)
-		// Swap(0) забирает накопленное и сразу ставит 0 без блокировок
 		delta := v.(*atomic.Int64).Swap(0)
 
 		if delta > 0 {
 			hasData = true
 
-			// 1. Ключи для real-time статистики (Форматируем по твоим константам)
 			minKey := fmt.Sprintf(config.KeyRateMin, projectID, now.Format("2006-01-02-15-04"))
 			hourKey := fmt.Sprintf(config.KeyRateHour, projectID, now.Format("2006-01-02-15"))
 			dayKey := fmt.Sprintf(config.KeyRateDay, projectID, now.Format("2006-01-02"))
 
-			// Инкремент и TTL (время жизни)
 			pipe.IncrBy(ctx, minKey, delta)
 			pipe.Expire(ctx, minKey, 15*time.Minute)
 
@@ -104,23 +90,15 @@ func (t *Tracker) flushMetricsToRedis() {
 			pipe.IncrBy(ctx, dayKey, delta)
 			pipe.Expire(ctx, dayKey, 48*time.Hour)
 
-			// 2. Накопительный ключ для Consumer'а (который пойдет в PostgreSQL)
 			usageKey := fmt.Sprintf(config.KeyUsagePending, projectID)
 			pipe.HIncrBy(ctx, usageKey, config.KeyUsageTotalField, delta)
-
-			log.Printf("[Tracker] Prepared flush for projectID: %s | delta: %d", projectID, delta)
 		}
 		return true
 	})
 
 	if hasData {
-		log.Printf("[Tracker] Flushing aggregated L1 cache to Redis...")
 		if _, err := pipe.Exec(ctx); err != nil {
 			log.Printf("[Tracker] ERROR flushing to redis: %v", err)
-		} else {
-			log.Printf("[Tracker] SUCCESS flushing L1 cache to Redis")
 		}
-	} else {
-		log.Printf("[Tracker] No new data in L1 cache to flush")
 	}
 }

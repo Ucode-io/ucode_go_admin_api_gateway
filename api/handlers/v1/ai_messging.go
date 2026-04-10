@@ -401,8 +401,8 @@ func (p *ChatProcessor) runGeneratePlan(ctx context.Context, userRequest string,
 	content := helper.BuildPlanGeneratorMessage(userRequest)
 	messages := buildMessagesWithHistory(chatHistory, []models.ContentBlock{{Type: "text", Text: content}})
 
-	response, err := helper.CallAnthropicAPI(
-		p.baseConf,
+	response, err := p.callAnthropicWithTracking(
+		ctx,
 		models.AnthropicRequest{
 			Model:     p.baseConf.ClaudeModel,
 			MaxTokens: p.baseConf.PlannerMaxTokens,
@@ -410,6 +410,7 @@ func (p *ChatProcessor) runGeneratePlan(ctx context.Context, userRequest string,
 			Messages:  messages,
 		},
 		timeoutPlanner,
+		"Generating architectural plan",
 	)
 	if err != nil {
 		return nil, fmt.Errorf("plan generator: %w", err)
@@ -516,8 +517,8 @@ func (p *ChatProcessor) routeRequest(userPrompt, fileGraphJSON string, hasImages
 	historyText := buildHistoryText(chatHistory)
 	content := helper.BuildRouterMessage(userPrompt, fileGraphJSON, hasImages, historyText)
 
-	response, err := helper.CallAnthropicAPI(
-		p.baseConf,
+	response, err := p.callAnthropicWithTracking(
+		context.Background(),
 		models.AnthropicRequest{
 			Model:     p.baseConf.ClaudeHaikuModel,
 			MaxTokens: p.baseConf.RouterMaxTokens,
@@ -527,6 +528,7 @@ func (p *ChatProcessor) routeRequest(userPrompt, fileGraphJSON string, hasImages
 			},
 		},
 		timeoutHaiku,
+		"Routing user intent",
 	)
 	if err != nil {
 		return nil, fmt.Errorf("router (haiku): %w", err)
@@ -546,8 +548,8 @@ func (p *ChatProcessor) inspectCode(ctx context.Context, userQuestion, filesCont
 	content := helper.BuildInspectorMessage(userQuestion, filesContext)
 	messages := buildMessagesWithHistory(chatHistory, buildContentBlocksWithImages(content, imageURLs))
 
-	response, err := helper.CallAnthropicAPI(
-		p.baseConf,
+	response, err := p.callAnthropicWithTracking(
+		ctx,
 		models.AnthropicRequest{
 			Model:     p.baseConf.ClaudeModel,
 			MaxTokens: p.baseConf.InspectorMaxTokens,
@@ -555,6 +557,7 @@ func (p *ChatProcessor) inspectCode(ctx context.Context, userQuestion, filesCont
 			Messages:  messages,
 		},
 		timeoutInspector,
+		"Inspecting code context",
 	)
 	if err != nil {
 		return "", fmt.Errorf("inspector: %w", err)
@@ -572,8 +575,8 @@ func (p *ChatProcessor) planChanges(ctx context.Context, clarified, fileGraphJSO
 	content := helper.BuildPlannerMessage(clarified, fileGraphJSON, hasImages)
 	messages := buildMessagesWithHistory(chatHistory, []models.ContentBlock{{Type: "text", Text: content}})
 
-	response, err := helper.CallAnthropicAPI(
-		p.baseConf,
+	response, err := p.callAnthropicWithTracking(
+		ctx,
 		models.AnthropicRequest{
 			Model:     p.baseConf.ClaudeModel,
 			MaxTokens: p.baseConf.PlannerMaxTokens,
@@ -581,6 +584,7 @@ func (p *ChatProcessor) planChanges(ctx context.Context, clarified, fileGraphJSO
 			Messages:  messages,
 		},
 		timeoutPlanner,
+		"Planning code changes",
 	)
 	if err != nil {
 		return nil, fmt.Errorf("planner: %w", err)
@@ -614,8 +618,8 @@ func (p *ChatProcessor) editCode(ctx context.Context, clarified string, plan *mo
 		contentBlocks = buildContentBlocksWithImages(clarified, imageURLs)
 	}
 
-	response, err := helper.CallAnthropicAPI(
-		p.baseConf,
+	response, err := p.callAnthropicWithTracking(
+		ctx,
 		models.AnthropicRequest{
 			Model:     p.baseConf.ClaudeModel,
 			MaxTokens: p.baseConf.CoderMaxTokens,
@@ -623,6 +627,7 @@ func (p *ChatProcessor) editCode(ctx context.Context, clarified string, plan *mo
 			Messages:  buildMessagesWithHistory(chatHistory, contentBlocks),
 		},
 		timeoutCoder,
+		"Applying/generating code changes",
 	)
 	if err != nil {
 		return nil, fmt.Errorf("code editor: %w", err)
@@ -656,8 +661,8 @@ func (p *ChatProcessor) repairJSON(ctx context.Context, brokenRawResponse, origi
 		originalTask, brokenText,
 	)
 
-	retryResponse, err := helper.CallAnthropicAPI(
-		p.baseConf,
+	retryResponse, err := p.callAnthropicWithTracking(
+		ctx,
 		models.AnthropicRequest{
 			Model:     p.baseConf.ClaudeModel,
 			MaxTokens: p.baseConf.CoderMaxTokens,
@@ -667,6 +672,7 @@ func (p *ChatProcessor) repairJSON(ctx context.Context, brokenRawResponse, origi
 			},
 		},
 		timeoutCoder,
+		"Repairing invalid JSON response",
 	)
 	if err != nil {
 		return nil, fmt.Errorf("JSON repair: API call failed: %w", err)
@@ -687,8 +693,8 @@ func (p *ChatProcessor) repairJSON(ctx context.Context, brokenRawResponse, origi
 
 // callArchitect plans the full project structure — tables, fields, UI layout.
 func (p *ChatProcessor) callArchitect(ctx context.Context, clarified string, imageURLs []string) (*models.ArchitectPlan, error) {
-	response, err := helper.CallAnthropicAPI(
-		p.baseConf,
+	response, err := p.callAnthropicWithTracking(
+		ctx,
 		models.AnthropicRequest{
 			Model:     p.baseConf.ClaudeModel,
 			MaxTokens: p.baseConf.PlannerMaxTokens,
@@ -698,6 +704,7 @@ func (p *ChatProcessor) callArchitect(ctx context.Context, clarified string, ima
 			},
 		},
 		timeoutArchitect,
+		"Architecting project structure",
 	)
 	if err != nil {
 		return nil, fmt.Errorf("architect: %w", err)
@@ -714,26 +721,20 @@ func (p *ChatProcessor) callArchitect(ctx context.Context, clarified string, ima
 	if err = json.Unmarshal([]byte(helper.CleanJSONResponse(text)), &plan); err != nil {
 		log.Printf("[ARCHITECT] parse failed (%v), attempting JSON repair...", err)
 
-		repairPrompt := fmt.Sprintf(
-			"Your previous response was a JSON object that could not be parsed due to invalid escaping or truncation.\n\n"+
-				"Original task: %s\n\n"+
-				"Broken response (truncated for context):\n%.800s\n\n"+
-				"Return ONLY the corrected, complete JSON object. No markdown, no backticks, no explanation.\n"+
-				"Ensure ALL string values are properly escaped (newlines → \\n, quotes → \\\", backslashes → \\\\).",
-			clarified, text,
-		)
-
-		retryResponse, retryErr := helper.CallAnthropicAPI(
-			p.baseConf,
+		retryResponse, retryErr := p.callAnthropicWithTracking(
+			ctx,
 			models.AnthropicRequest{
 				Model:     p.baseConf.ClaudeModel,
 				MaxTokens: p.baseConf.PlannerMaxTokens,
 				System:    helper.PromptArchitect,
 				Messages: []models.ChatMessage{
-					{Role: "user", Content: []models.ContentBlock{{Type: "text", Text: repairPrompt}}},
+					{Role: "user", Content: buildContentBlocksWithImages(clarified, imageURLs)},
+					{Role: "assistant", Content: []models.ContentBlock{{Type: "text", Text: text}}},
+					{Role: "user", Content: []models.ContentBlock{{Type: "text", Text: "Your response is not valid JSON. Please fix it and output ONLY a single correct JSON object."}}},
 				},
 			},
 			timeoutArchitect,
+			"Repairing invalid Architect JSON",
 		)
 		if retryErr != nil {
 			return nil, fmt.Errorf("architect: parse failed: %w (repair call also failed: %v)", err, retryErr)
@@ -753,8 +754,8 @@ func (p *ChatProcessor) callArchitect(ctx context.Context, clarified string, ima
 func (p *ChatProcessor) generateProject(ctx context.Context, clarified string, imageURLs []string, plan *models.ArchitectPlan, apiKey, envId string) (*models.ParsedClaudeResponse, error) {
 	apiConfig := buildAPIConfigBlock(p.baseConf.UcodeBaseUrl, apiKey, plan)
 
-	response, err := helper.CallAnthropicAPI(
-		p.baseConf,
+	response, err := p.callAnthropicWithTracking(
+		ctx,
 		models.AnthropicRequest{
 			Model:     p.baseConf.ClaudeModel,
 			MaxTokens: p.baseConf.CoderMaxTokens,
@@ -767,6 +768,7 @@ func (p *ChatProcessor) generateProject(ctx context.Context, clarified string, i
 			},
 		},
 		timeoutCoder,
+		"Generating full project code",
 	)
 	if err != nil {
 		return nil, fmt.Errorf("generate project: %w", err)
@@ -814,8 +816,8 @@ func (p *ChatProcessor) generateAdminPanel(ctx context.Context, clarified string
 
 	finalPrompt := clarified + "\n\n" + apiConfig + "\n" + templateCtx.String()
 
-	response, err := helper.CallAnthropicAPI(
-		p.baseConf,
+	response, err := p.callAnthropicWithTracking(
+		ctx,
 		models.AnthropicRequest{
 			Model:     p.baseConf.ClaudeModel,
 			MaxTokens: p.baseConf.CoderMaxTokens,
@@ -828,6 +830,7 @@ func (p *ChatProcessor) generateAdminPanel(ctx context.Context, clarified string
 			},
 		},
 		timeoutCoder,
+		"Generating admin panel code",
 	)
 	if err != nil {
 		return nil, fmt.Errorf("generate admin panel: %w", err)
@@ -957,6 +960,36 @@ func (p *ChatProcessor) buildFilesContext(project *pbo.McpProject, paths []strin
 		return "No matching files found."
 	}
 	return sb.String()
+}
+
+func (p *ChatProcessor) callAnthropicWithTracking(ctx context.Context, req models.AnthropicRequest, timeout time.Duration, description string) (string, error) {
+	log.Printf("[AI] Calling Anthropic: %s", description)
+	response, err := helper.CallAnthropicAPI(p.baseConf, req, timeout)
+	if err != nil {
+		log.Printf("[AI] Anthropic error for %s: %v", description, err)
+		return "", err
+	}
+
+	// Record token usage in background
+	go func() {
+		var parsed struct {
+			Usage models.ClaudeUsage `json:"usage"`
+		}
+		if err := json.Unmarshal([]byte(response), &parsed); err == nil && (parsed.Usage.InputTokens > 0 || parsed.Usage.OutputTokens > 0) {
+			_, recErr := p.service.CompanyService().Billing().RecordAiTokenUsage(context.Background(), &pb.RecordAiTokenUsageRequest{
+				ProjectId:    p.ucodeProjectID,
+				InputTokens:  int32(parsed.Usage.InputTokens),
+				OutputTokens: int32(parsed.Usage.OutputTokens),
+				Model:        req.Model,
+				Description:  description,
+			})
+			if recErr != nil {
+				log.Printf("[TOKEN RECORD] error recording usage for %s: %v", description, recErr)
+			}
+		}
+	}()
+
+	return response, nil
 }
 
 func (p *ChatProcessor) saveProject(ctx context.Context, req *models.ParsedClaudeResponse) (*pbo.McpProject, error) {

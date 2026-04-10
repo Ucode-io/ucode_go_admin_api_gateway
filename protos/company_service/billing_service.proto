@@ -55,6 +55,8 @@ service BillingService {
     rpc LogUsage(LogUsageRequest) returns (google.protobuf.Empty);
 
     rpc GetMonitoringMetrics(GetMonitoringMetricsRequest) returns (GetMonitoringMetricsResponse);
+
+    rpc RecordAiTokenUsage(RecordAiTokenUsageRequest) returns (google.protobuf.Empty);
 }
 
 message GetPricingLimitsRequest {
@@ -357,4 +359,12 @@ message Discount {
 message ListDiscountsResponse {
     repeated Discount discounts = 1;
     int32 count = 2;
+}
+
+message RecordAiTokenUsageRequest {
+    string project_id = 1;
+    int32 input_tokens = 2;
+    int32 output_tokens = 3;
+    string model = 4;
+    string description = 5;
 }

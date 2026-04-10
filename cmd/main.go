@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"time"
-
 	"ucode/ucode_go_api_gateway/api"
 	"ucode/ucode_go_api_gateway/api/handlers"
 	"ucode/ucode_go_api_gateway/api/handlers/api_call_limits"
@@ -132,18 +131,21 @@ func main() {
 		log.Info("successfully connected to central redis", logger.String("host", uConf.GetRequestRedisHost), logger.String("port", uConf.GetRequestRedisPort))
 	}
 
-	trackerCfg := api_call_limits.LoadTrackerConfig(uConf)
-	if trackerCfg.MetricsFlushInterval == 0 {
-		trackerCfg.MetricsFlushInterval = 10 * time.Second
-	}
-	tracker := api_call_limits.NewTracker(centralRedis, trackerCfg)
+	// =========================== API call count methods ============================
+
+	var (
+		trackerFlushInterval     = time.Second * 10
+		MetConsumerFlushInterval = time.Minute * 10
+	)
+	// L1 to Redis
+	tracker := api_call_limits.NewTracker(centralRedis, trackerFlushInterval)
 	go tracker.Start(ctx)
 
-	consumerCfg := api_call_limits.ConsumerConfig{
-		DbFlushInterval: 1 * time.Minute,
-	}
-	consumer := api_call_limits.NewMetricsConsumer(centralRedis, compSrvc, consumerCfg)
+	// Redis to Postgres
+	consumer := api_call_limits.NewMetricsConsumer(centralRedis, compSrvc, MetConsumerFlushInterval)
 	go consumer.Start(ctx)
+
+	// =================================================================================
 
 	cache, err := caching.NewExpiringLRUCache(config.LRU_CACHE_SIZE)
 	if err != nil {
