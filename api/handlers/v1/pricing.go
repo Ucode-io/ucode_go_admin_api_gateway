@@ -50,38 +50,31 @@ func (h *HandlerV1) GetAllPricingUsage(c *gin.Context) {
 
 	g, gCtx := errgroup.WithContext(c.Request.Context())
 
-	// 2.1. Лимиты прайсинга
 	g.Go(func() error {
 		var err error
 		limitsResp, err = h.companyServices.Billing().GetPricingLimits(gCtx, &company_service.GetPricingLimitsRequest{ProjectId: projectIDStr})
 		return err
 	})
-
 	g.Go(func() error {
 		var err error
 		usageResp, err = service.GoObjectBuilderService().ObjectBuilder().GetResourceUsage(gCtx, &nb.GetResourceUsageRequest{ProjectId: resourceEnvId})
 		return err
 	})
-
-	// 2.3. Количество пользователей
 	g.Go(func() error {
 		var err error
 		usersCountResp, err = h.authService.User().GetProjectUsersCount(gCtx, &auth_service.GetProjectUsersCountRequest{ProjectId: projectIDStr})
 		return err
 	})
-
 	g.Go(func() error {
 		var err error
 		apiKeysResp, err = h.authService.ApiKey().GetProjectApiKeysCount(gCtx, &auth_service.GetProjectApiKeysCountRequest{ProjectId: projectIDStr})
 		return err
 	})
-
 	g.Go(func() error {
 		var err error
 		tokenMetrics, err = h.companyServices.Billing().GetAiTokenUsageMetrics(gCtx, &company_service.GetAiTokenUsageMetricsRequest{ProjectId: projectIDStr})
 		return err
 	})
-
 	g.Go(func() error {
 		var err error
 		apiMetrics, err = h.companyServices.Billing().GetApiCallMonitoringMetrics(gCtx, &company_service.GetApiCallMonitoringMetricsRequest{ProjectId: projectIDStr})
@@ -100,32 +93,30 @@ func (h *HandlerV1) GetAllPricingUsage(c *gin.Context) {
 		AssetSize:       models.PricingUsage{Current: float64(usageResp.AssetSize) / (1024 * 1024), Unit: "MB"},
 		DatabaseSize:    models.PricingUsage{Current: float64(usageResp.DatabaseSize) / (1024 * 1024), Unit: "MB"},
 		Users:           models.PricingUsage{Current: float64(usersCountResp.Count), Unit: "count"},
-		Items:           models.PricingUsage{Current: float64(usageResp.ItemsCount), Limit: 100_000, Unit: "count"},
-		Tables:          models.PricingUsage{Current: float64(usageResp.TablesCount), Limit: 100, Unit: "count"},
-		ApiKeys:         models.PricingUsage{Current: float64(apiKeysResp.Count), Limit: 10, Unit: "count"},
-		TodayTokens:     models.PricingUsage{Current: float64(tokenMetrics.TodayInputTokens + tokenMetrics.TodayOutputTokens), Limit: 100_000, Unit: "tokens"},
-		MonthlyTokens:   models.PricingUsage{Current: float64(tokenMetrics.MonthlyInputTokens + tokenMetrics.MonthlyOutputTokens), Limit: 1_000_000, Unit: "tokens"},
-		MonthlyApiCalls: models.PricingUsage{Current: float64(apiMetrics.TotalMonthlyCalls), Limit: 1_000_000, Unit: "count"},
+		Items:           models.PricingUsage{Current: float64(usageResp.ItemsCount), Unit: "count"},
+		Tables:          models.PricingUsage{Current: float64(usageResp.TablesCount), Unit: "count"},
+		ApiKeys:         models.PricingUsage{Current: float64(apiKeysResp.Count), Unit: "count"},
+		TodayTokens:     models.PricingUsage{Current: float64(tokenMetrics.TodayInputTokens + tokenMetrics.TodayOutputTokens), Unit: "tokens"},
+		MonthlyTokens:   models.PricingUsage{Current: float64(tokenMetrics.MonthlyInputTokens + tokenMetrics.MonthlyOutputTokens), Unit: "tokens"},
+		MonthlyApiCalls: models.PricingUsage{Current: float64(apiMetrics.TotalMonthlyCalls), Unit: "count"},
 	}
 
 	for _, limit := range limitsResp.Limits {
-		switch limit.Name {
-		case "Functions":
+		switch limit.Type {
+		case "function":
 			response.Functions.Limit = cast.ToFloat64(limit.Value)
-		case "Microfrontend":
+		case "microfrontend":
 			response.Microfrontend.Limit = cast.ToFloat64(limit.Value)
-		case "Database Size":
-			response.DatabaseSize.Limit = parseStorageLimitToMB(limit.Value)
-		case "Asset Size info":
+		case "database":
+			if limit.Name == "Database Size" {
+				response.DatabaseSize.Limit = parseStorageLimitToMB(limit.Value)
+			}
+		case "asset_size":
 			response.AssetSize.Limit = parseStorageLimitToMB(limit.Value)
-		case "Total Users & Roles":
+		case "request_per_month":
+			response.MonthlyApiCalls.Limit = cast.ToFloat64(limit.Value)
+		case "users_count":
 			response.Users.Limit = cast.ToFloat64(limit.Value)
-		case "Items":
-			response.Items.Limit = cast.ToFloat64(limit.Value)
-		case "Tables":
-			response.Tables.Limit = cast.ToFloat64(limit.Value)
-		case "API Keys":
-			response.ApiKeys.Limit = cast.ToFloat64(limit.Value)
 		}
 	}
 
@@ -193,21 +184,35 @@ func (h *HandlerV1) GetApiMetrics(c *gin.Context) {
 		return cast.ToInt64(valStr)
 	}
 
-	rpm := getRedisInt(minKey)
-	rph := getRedisInt(hourKey)
-	today := getRedisInt(dayKey)
-	prevRpm := getRedisInt(prevMinKey)
+	currentMinCalls := getRedisInt(minKey)
+	prevMinCalls := getRedisInt(prevMinKey)
+	currentHourCalls := getRedisInt(hourKey)
+	todayCalls := getRedisInt(dayKey)
 
 	sec := float64(now.Second())
 
+	// RPS — rolling 60-секундное окно
 	prevMinuteWeight := (60.0 - sec) / 60.0
-	rolling60sCalls := float64(rpm) + (float64(prevRpm) * prevMinuteWeight)
+	rolling60sCalls := float64(currentMinCalls) + (float64(prevMinCalls) * prevMinuteWeight)
+	rps := math.Round((rolling60sCalls/60.0)*100) / 100
 
-	rawRps := rolling60sCalls / 60.0
+	// RPM — экстраполяция текущей скорости на 60 сек
+	var rpm int64
+	elapsedSec := sec + 1
+	if sec >= 5 {
+		rpm = int64(math.Round(float64(currentMinCalls) / elapsedSec * 60.0))
+	} else {
+		rpm = int64(math.Round(rolling60sCalls))
+	}
 
-	rps := math.Round(rawRps*100) / 100
+	var rph int64
+	elapsedMin := float64(now.Minute()) + sec/60.0 + (1.0 / 60.0)
+	if elapsedMin >= 1 {
+		rph = int64(math.Round(float64(currentHourCalls) / elapsedMin * 60.0))
+	} else {
+		rph = currentHourCalls
+	}
 
-	// Получаем исторические данные
 	metricsResp, err := h.companyServices.Billing().GetApiCallMonitoringMetrics(
 		c.Request.Context(),
 		&company_service.GetApiCallMonitoringMetricsRequest{ProjectId: projectId},
@@ -220,15 +225,13 @@ func (h *HandlerV1) GetApiMetrics(c *gin.Context) {
 		h.log.Error("[GetApiMetrics] GetMonitoringMetrics error", logger.Error(err))
 	}
 
-	res := models.ApiMetricsResponse{
+	h.HandleResponse(c, status_http.OK, models.ApiMetricsResponse{
 		Rps:          rps,
 		Rpm:          rpm,
 		Rph:          rph,
-		TodayCalls:   today,
+		TodayCalls:   todayCalls,
 		MonthlyCalls: monthly,
-	}
-
-	h.HandleResponse(c, status_http.OK, res)
+	})
 }
 
 // GetApiChart godoc
@@ -275,7 +278,7 @@ func (h *HandlerV1) GetApiChart(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
-// @Success 200 {object} status_http.Response{data=models.PerformanceMetricsResponse} "Performance metrics"
+// @Summary 200 {object} status_http.Response{data=models.PerformanceMetricsResponse} "Performance metrics"
 // @Failure 401
 // @Router /v1/pricing/performance [get]
 func (h *HandlerV1) GetPerformanceMetrics(c *gin.Context) {
@@ -295,7 +298,7 @@ func (h *HandlerV1) GetPerformanceMetrics(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		h.log.Error("[GetPerformanceMetrics] GetPerformanceMetrics error", logger.Error(err))
+		h.log.Error("[GetPerformanceMetrics] error", logger.Error(err))
 		h.HandleResponse(c, status_http.InternalServerError, err.Error())
 		return
 	}
