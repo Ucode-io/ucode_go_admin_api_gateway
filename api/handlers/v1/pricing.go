@@ -58,7 +58,6 @@ func (h *HandlerV1) GetAllPricingUsage(c *gin.Context) {
 		}
 		return err
 	})
-
 	g.Go(func() error {
 		var err error
 		usageResp, err = service.GoObjectBuilderService().ObjectBuilder().GetResourceUsage(gCtx, &nb.GetResourceUsageRequest{ProjectId: resourceEnvId})
@@ -67,7 +66,6 @@ func (h *HandlerV1) GetAllPricingUsage(c *gin.Context) {
 		}
 		return err
 	})
-
 	g.Go(func() error {
 		var err error
 		usersCountResp, err = h.authService.User().GetProjectUsersCount(gCtx, &auth_service.GetProjectUsersCountRequest{ProjectId: projectIDStr})
@@ -76,7 +74,6 @@ func (h *HandlerV1) GetAllPricingUsage(c *gin.Context) {
 		}
 		return err
 	})
-
 	g.Go(func() error {
 		var err error
 		apiKeysResp, err = h.authService.ApiKey().GetProjectApiKeysCount(gCtx, &auth_service.GetProjectApiKeysCountRequest{ProjectId: projectIDStr})
@@ -85,7 +82,6 @@ func (h *HandlerV1) GetAllPricingUsage(c *gin.Context) {
 		}
 		return err
 	})
-
 	g.Go(func() error {
 		var err error
 		tokenMetrics, err = h.companyServices.Billing().GetAiTokenUsageMetrics(gCtx, &company_service.GetAiTokenUsageMetricsRequest{ProjectId: projectIDStr})
@@ -94,7 +90,6 @@ func (h *HandlerV1) GetAllPricingUsage(c *gin.Context) {
 		}
 		return err
 	})
-
 	g.Go(func() error {
 		var err error
 		apiMetrics, err = h.companyServices.Billing().GetApiCallMonitoringMetrics(gCtx, &company_service.GetApiCallMonitoringMetricsRequest{ProjectId: projectIDStr})
@@ -140,6 +135,16 @@ func (h *HandlerV1) GetAllPricingUsage(c *gin.Context) {
 			response.MonthlyApiCalls.Limit = cast.ToFloat64(limit.Value)
 		case "users_count":
 			response.Users.Limit = cast.ToFloat64(limit.Value)
+		case "items":
+			response.Items.Limit = cast.ToFloat64(limit.Value)
+		case "tables":
+			response.Tables.Limit = cast.ToFloat64(limit.Value)
+		case "api_keys":
+			response.ApiKeys.Limit = cast.ToFloat64(limit.Value)
+		case "tokens_day":
+			response.TodayTokens.Limit = cast.ToFloat64(limit.Value)
+		case "tokens_month":
+			response.MonthlyTokens.Limit = cast.ToFloat64(limit.Value)
 		}
 	}
 
