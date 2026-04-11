@@ -2759,3 +2759,131 @@ func (h *HandlerV2) GetTableSchema(c *gin.Context) {
 	}
 	h.HandleResponse(c, status_http.OK, resp)
 }
+
+// pgTypeToFieldType maps postgres type names to our internal field types.
+// Mirrors TRACKED_TABLES_FIELD_TYPES in object builder.
+var pgTypeToFieldType = map[string]string{
+	"character varying": "SINGLE_LINE",
+	"varchar":           "SINGLE_LINE",
+	"text":              "MULTI_LINE",
+	"enum":              "SINGLE_LINE",
+	"bytea":             "SINGLE_LINE",
+	"citext":            "SINGLE_LINE",
+
+	"jsonb": "JSON",
+	"json":  "JSON",
+
+	"smallint":         "NUMBER",
+	"integer":          "NUMBER",
+	"bigint":           "NUMBER",
+	"numeric":          "FLOAT",
+	"decimal":          "FLOAT",
+	"real":             "FLOAT",
+	"double precision": "FLOAT",
+	"smallserial":      "NUMBER",
+	"serial":           "NUMBER",
+	"bigserial":        "NUMBER",
+	"money":            "FLOAT",
+	"int2":             "NUMBER",
+	"int4":             "NUMBER",
+	"int8":             "NUMBER",
+
+	"timestamp without time zone": "DATE_TIME_WITHOUT_TIME_ZONE",
+	"timestamp with time zone":    "DATE_TIME",
+	"timestamp":                   "DATE_TIME",
+	"timestamptz":                 "DATE_TIME",
+	"date":                        "DATE",
+
+	"boolean": "CHECKBOX",
+
+	"uuid": "UUID",
+
+	"text[]": "MULTISELECT",
+	"uuid[]": "LOOKUPS",
+}
+
+// CreateTableSchemaField godoc
+// @Security ApiKeyAuth
+// @ID create_table_schema_field
+// @Router /v2/items/{collection}/schema [POST]
+// @Summary Create a new field/column for a collection
+// @Description Accepts the same body as POST /v2/fields/:collection but type is a postgres type which gets mapped to a ucode field type
+// @Tags Items
+// @Accept json
+// @Produce json
+// @Param collection path string true "collection"
+// @Param object body models.CreateFieldRequest true "CreateSchemaFieldBody"
+// @Success 201 {object} status_http.Response "Field data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *HandlerV2) CreateTableSchemaField(c *gin.Context) {
+	var fieldRequest models.CreateFieldRequest
+
+	if err := c.ShouldBindJSON(&fieldRequest); err != nil {
+		h.handleError(c, status_http.BadRequest, err)
+		return
+	}
+
+	// Map postgres type to ucode field type
+	ucodeType, ok := pgTypeToFieldType[fieldRequest.Type]
+	if !ok {
+		h.HandleResponse(c, status_http.BadRequest, "unsupported pg_type: "+fieldRequest.Type)
+		return
+	}
+	fieldRequest.Type = ucodeType
+
+	if fieldRequest.ID == "" {
+		fieldRequest.ID = uuid.New().String()
+	}
+
+	attributes, err := helper.ConvertMapToStruct(fieldRequest.Attributes)
+	if err != nil {
+		h.handleError(c, status_http.InvalidArgument, err)
+		return
+	}
+
+	projectId, ok2 := c.Get("project_id")
+	if !ok2 || !util.IsValidUUID(projectId.(string)) {
+		h.handleError(c, status_http.InvalidArgument, errors.New("project id is not valid"))
+		return
+	}
+
+	environmentId, ok3 := c.Get("environment_id")
+	if !ok3 || !util.IsValidUUID(environmentId.(string)) {
+		h.handleError(c, status_http.BadRequest, errors.New("environment id is not valid"))
+		return
+	}
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleError(c, status_http.GRPCError, err)
+		return
+	}
+
+	services, err := h.GetProjectSrvc(c.Request.Context(), resource.GetProjectId(), resource.NodeType)
+	if err != nil {
+		h.handleError(c, status_http.InternalServerError, err)
+		return
+	}
+
+	field := SetTitlePrefix(fieldRequest, "", resource.ResourceEnvironmentId, attributes, false, false)
+
+	var newReq nb.CreateFieldRequest
+	if err = helper.MarshalToStruct(&field, &newReq); err != nil {
+		h.handleError(c, status_http.InternalServerError, err)
+		return
+	}
+
+	resp, err := services.GoObjectBuilderService().Field().Create(c.Request.Context(), &newReq)
+	if err != nil {
+		h.handleError(c, status_http.InternalServerError, err)
+		return
+	}
+	h.HandleResponse(c, status_http.Created, resp)
+}
