@@ -53,37 +53,60 @@ func (h *HandlerV1) GetAllPricingUsage(c *gin.Context) {
 	g.Go(func() error {
 		var err error
 		limitsResp, err = h.companyServices.Billing().GetPricingLimits(gCtx, &company_service.GetPricingLimitsRequest{ProjectId: projectIDStr})
+		if err != nil {
+			h.log.Error(fmt.Sprintf("[GetAllPricingUsage] GetPricingLimits failed: %v", err))
+		}
 		return err
 	})
+
 	g.Go(func() error {
 		var err error
 		usageResp, err = service.GoObjectBuilderService().ObjectBuilder().GetResourceUsage(gCtx, &nb.GetResourceUsageRequest{ProjectId: resourceEnvId})
+		if err != nil {
+			h.log.Error(fmt.Sprintf("[GetAllPricingUsage] GetResourceUsage failed: %v", err))
+		}
 		return err
 	})
+
 	g.Go(func() error {
 		var err error
 		usersCountResp, err = h.authService.User().GetProjectUsersCount(gCtx, &auth_service.GetProjectUsersCountRequest{ProjectId: projectIDStr})
+		if err != nil {
+			h.log.Error(fmt.Sprintf("[GetAllPricingUsage] GetProjectUsersCount failed: %v", err))
+		}
 		return err
 	})
+
 	g.Go(func() error {
 		var err error
 		apiKeysResp, err = h.authService.ApiKey().GetProjectApiKeysCount(gCtx, &auth_service.GetProjectApiKeysCountRequest{ProjectId: projectIDStr})
+		if err != nil {
+			h.log.Error(fmt.Sprintf("[GetAllPricingUsage] GetProjectApiKeysCount failed: %v", err))
+		}
 		return err
 	})
+
 	g.Go(func() error {
 		var err error
 		tokenMetrics, err = h.companyServices.Billing().GetAiTokenUsageMetrics(gCtx, &company_service.GetAiTokenUsageMetricsRequest{ProjectId: projectIDStr})
+		if err != nil {
+			h.log.Error(fmt.Sprintf("[GetAllPricingUsage] GetAiTokenUsageMetrics failed: %v", err))
+		}
 		return err
 	})
+
 	g.Go(func() error {
 		var err error
 		apiMetrics, err = h.companyServices.Billing().GetApiCallMonitoringMetrics(gCtx, &company_service.GetApiCallMonitoringMetricsRequest{ProjectId: projectIDStr})
+		if err != nil {
+			h.log.Error(fmt.Sprintf("[GetAllPricingUsage] GetApiCallMonitoringMetrics failed: %v", err))
+		}
 		return err
 	})
 
 	if err := g.Wait(); err != nil {
-		h.log.Error("GetAllPricingUsage failed", logger.Error(err), logger.String("project_id", projectIDStr))
-		h.HandleResponse(c, status_http.InternalServerError, "Failed to fetch pricing usage data")
+		h.log.Error(fmt.Sprintf("[GetAllPricingUsage] failed project_id=%s: %v", projectIDStr, err))
+		h.HandleResponse(c, status_http.InternalServerError, err.Error())
 		return
 	}
 
@@ -205,6 +228,7 @@ func (h *HandlerV1) GetApiMetrics(c *gin.Context) {
 		rpm = int64(math.Round(rolling60sCalls))
 	}
 
+	// RPH — экстраполяция текущей скорости на 60 мин
 	var rph int64
 	elapsedMin := float64(now.Minute()) + sec/60.0 + (1.0 / 60.0)
 	if elapsedMin >= 1 {
@@ -251,7 +275,6 @@ func (h *HandlerV1) GetApiChart(c *gin.Context) {
 		c.Request.Context(),
 		&company_service.GetApiCallMonitoringMetricsRequest{ProjectId: projectId},
 	)
-
 	if err != nil {
 		h.log.Error("GetMonitoringMetrics chart error", logger.Error(err))
 		h.HandleResponse(c, status_http.InternalServerError, err.Error())
@@ -278,7 +301,7 @@ func (h *HandlerV1) GetApiChart(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
-// @Summary 200 {object} status_http.Response{data=models.PerformanceMetricsResponse} "Performance metrics"
+// @Success 200 {object} status_http.Response{data=models.PerformanceMetricsResponse} "Performance metrics"
 // @Failure 401
 // @Router /v1/pricing/performance [get]
 func (h *HandlerV1) GetPerformanceMetrics(c *gin.Context) {
