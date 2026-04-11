@@ -2702,3 +2702,60 @@ func (h *HandlerV2) GetBoardData(c *gin.Context) {
 		h.HandleResponse(c, status_http.OK, resp)
 	}
 }
+
+// GetTableSchema godoc
+// @Security ApiKeyAuth
+// @ID get_table_schema
+// @Router /v2/items/{collection}/schema [GET]
+// @Summary Get table schema
+// @Description Returns table schema (columns, indexes, constraints) equivalent to PostgreSQL \d command
+// @Tags Items
+// @Produce json
+// @Param collection path string true "collection"
+// @Success 200 {object} status_http.Response{data=object} "Table schema"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *HandlerV2) GetTableSchema(c *gin.Context) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.HandleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.HandleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
+		return
+	}
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	services, err := h.GetProjectSrvc(c.Request.Context(), resource.GetProjectId(), resource.NodeType)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	resp, err := services.GoObjectBuilderService().ObjectBuilder().GetTableSchema(
+		c.Request.Context(),
+		&nb.CommonMessage{
+			TableSlug: c.Param("collection"),
+			ProjectId: resource.ResourceEnvironmentId,
+		},
+	)
+	if err != nil {
+		h.handleError(c, status_http.GRPCError, err)
+		return
+	}
+	h.HandleResponse(c, status_http.OK, resp)
+}

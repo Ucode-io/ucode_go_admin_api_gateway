@@ -451,6 +451,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v2Items.POST("/:collection/tree", h.V2.AgTree)                       // TODO test
 		v2Items.POST("/:collection/board/structure", h.V2.GetBoardStructure) // TODO test
 		v2Items.POST("/:collection/board", h.V2.GetBoardData)                // TODO test
+		v2Items.GET("/:collection/schema", h.V2.GetTableSchema)
 	}
 
 	v2Version := r.Group("/v2")

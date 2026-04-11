@@ -69,6 +69,7 @@ type ObjectBuilderServiceClient interface {
 	// for ai chat
 	ExecuteSQL(ctx context.Context, in *ExecuteSQLRequest, opts ...grpc.CallOption) (*ExecuteSQLResponse, error)
 	GetResourceUsage(ctx context.Context, in *GetResourceUsageRequest, opts ...grpc.CallOption) (*GetResourceUsageResponse, error)
+	GetTableSchema(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*CommonMessage, error)
 }
 
 type objectBuilderServiceClient struct {
@@ -283,6 +284,16 @@ func (c *objectBuilderServiceClient) GetResourceUsage(ctx context.Context, in *G
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetResourceUsageResponse)
 	err := c.cc.Invoke(ctx, ObjectBuilderService_GetResourceUsage_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *objectBuilderServiceClient) GetTableSchema(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*CommonMessage, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CommonMessage)
+	err := c.cc.Invoke(ctx, "/new_object_builder_service.ObjectBuilderService/GetTableSchema", in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
