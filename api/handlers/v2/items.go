@@ -2887,3 +2887,106 @@ func (h *HandlerV2) CreateTableSchemaField(c *gin.Context) {
 	}
 	h.HandleResponse(c, status_http.Created, resp)
 }
+
+// UpdateTableSchemaField godoc
+// @Security ApiKeyAuth
+// @ID update_table_schema_field
+// @Router /v2/items/{collection}/schema [PUT]
+// @Summary Update a field/column for a collection
+// @Description Accepts the same body as PUT /v2/fields/:collection but type is a postgres type which gets mapped to a ucode field type
+// @Tags Items
+// @Accept json
+// @Produce json
+// @Param collection path string true "collection"
+// @Param object body models.Field true "UpdateSchemaFieldBody"
+// @Success 200 {object} status_http.Response "Field data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *HandlerV2) UpdateTableSchemaField(c *gin.Context) {
+	var fieldRequest models.Field
+
+	if err := c.ShouldBindJSON(&fieldRequest); err != nil {
+		h.HandleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	// Map postgres type to ucode field type
+	ucodeType, ok := pgTypeToFieldType[fieldRequest.Type]
+	if !ok {
+		h.HandleResponse(c, status_http.BadRequest, "unsupported pg_type: "+fieldRequest.Type)
+		return
+	}
+	fieldRequest.Type = ucodeType
+
+	attributes, err := helper.ConvertMapToStruct(fieldRequest.Attributes)
+	if err != nil {
+		h.HandleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
+	projectId, ok2 := c.Get("project_id")
+	if !ok2 || !util.IsValidUUID(projectId.(string)) {
+		h.HandleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok3 := c.Get("environment_id")
+	if !ok3 || !util.IsValidUUID(environmentId.(string)) {
+		h.HandleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
+		return
+	}
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	services, err := h.GetProjectSrvc(c.Request.Context(), resource.GetProjectId(), resource.NodeType)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	field := obs.Field{
+		Id:                  fieldRequest.ID,
+		Default:             fieldRequest.Default,
+		Type:                fieldRequest.Type,
+		Index:               fieldRequest.Index,
+		Label:               fieldRequest.Label,
+		Slug:                fieldRequest.Slug,
+		TableId:             fieldRequest.TableID,
+		Required:            fieldRequest.Required,
+		Attributes:          attributes,
+		IsVisible:           fieldRequest.IsVisible,
+		AutofillField:       fieldRequest.AutoFillField,
+		AutofillTable:       fieldRequest.AutoFillTable,
+		RelationId:          fieldRequest.RelationId,
+		Automatic:           fieldRequest.Automatic,
+		Unique:              fieldRequest.Unique,
+		RelationField:       fieldRequest.RelationField,
+		ShowLabel:           fieldRequest.ShowLabel,
+		EnableMultilanguage: fieldRequest.EnableMultilanguage,
+		ProjectId:           resource.ResourceEnvironmentId,
+		EnvId:               resource.EnvironmentId,
+	}
+
+	newReq := nb.Field{}
+	if err = helper.MarshalToStruct(&field, &newReq); err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	resp, err := services.GoObjectBuilderService().Field().Update(c.Request.Context(), &newReq)
+	if err != nil {
+		h.handleDynamicError(c, status_http.GRPCError, err)
+		return
+	}
+	h.HandleResponse(c, status_http.OK, resp)
+}
