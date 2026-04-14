@@ -109,6 +109,23 @@ func (h *HandlerV1) DeleteNewFunction(c *gin.Context) {
 	_ = h.MakeProxy(c, h.baseConf.GoFunctionServiceHost+h.baseConf.GoFunctionServiceHTTPPort, c.Request.URL.Path)
 }
 
+// GetFunctionCodebase godoc
+// @Security ApiKeyAuth
+// @ID get_function_codebase
+// @Router /v2/function/{function_id}/codebase [GET]
+// @Summary Get function codebase from GitLab
+// @Description Returns all files of the function's GitLab repository recursively. Tries the stored branch first, then falls back to master/main.
+// @Tags Function
+// @Accept json
+// @Produce json
+// @Param function_id path string true "function_id"
+// @Success 200 {object} status.Response{data=map[string][]gitlab.RepoFile} "Codebase files"
+// @Response 400 {object} status.Response{data=string} "Bad Request"
+// @Failure 500 {object} status.Response{data=string} "Server Error"
+func (h *HandlerV1) GetFunctionCodebase(c *gin.Context) {
+	_ = h.MakeProxy(c, h.baseConf.GoFunctionServiceHost+h.baseConf.GoFunctionServiceHTTPPort, c.Request.URL.Path)
+}
+
 // InvokeFunctionByPath godoc
 // @Security ApiKeyAuth
 // @Param function-path path string true "function-path"

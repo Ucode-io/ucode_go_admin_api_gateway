@@ -587,6 +587,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		proxyFunction.GET("/:function_id", h.V1.GetNewFunctionByID)
 		proxyFunction.GET("", h.V1.GetAllNewFunctions)
 		proxyFunction.PUT("", h.V1.UpdateNewFunction)
+		proxyFunction.GET("/:function_id/codebase", h.V1.GetFunctionCodebase)
 		proxyFunction.DELETE("/:function_id", h.V1.DeleteNewFunction)
 
 	}
