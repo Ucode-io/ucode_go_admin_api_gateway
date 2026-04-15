@@ -41,6 +41,8 @@ import (
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) CreateItem(c *gin.Context) {
+	timeStarted := time.Now().Format(time.RFC3339)
+
 	var (
 		objectRequest               models.CommonMessage
 		resp                        *obs.CommonMessage
@@ -154,7 +156,7 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 		ProjectId:    resource.ResourceEnvironmentId,
 		ActionSource: c.Request.URL.String(),
 		MethodApi:    c.Request.Method,
-		TimeStarted:  time.Now().Format(time.RFC3339),
+		TimeStarted:  timeStarted,
 		ActionType:   "CREATE ITEM",
 		UserInfo:     cast.ToString(userId),
 		Request:      &structData,
@@ -238,8 +240,8 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 			Resource:     resource,
 			ActionType:   "AFTER",
 		},
-			c, // gin context,
-			h, // handler
+			c,
+			h,
 		)
 		if err != nil {
 			h.HandleResponse(c, status_http.InvalidArgument, err.Error()+" in "+functionName)
@@ -450,6 +452,8 @@ func (h *HandlerV2) CreateItems(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) GetSingleItem(c *gin.Context) {
+	timeStarted := time.Now().Format(time.RFC3339)
+
 	var (
 		object     models.CommonMessage
 		statusHttp = status_http.GrpcStatusToHTTP["Ok"]
@@ -507,6 +511,17 @@ func (h *HandlerV2) GetSingleItem(c *gin.Context) {
 
 	redisKey := base64.StdEncoding.EncodeToString(fmt.Appendf(nil, "%s-%s-%s", resource.ResourceEnvironmentId, tableSlug, objectID))
 
+	var logRequest = &models.CreateVersionHistoryRequest{
+		Services:     services,
+		NodeType:     resource.NodeType,
+		ProjectId:    resource.ResourceEnvironmentId,
+		ActionSource: "ITEMS",
+		ActionType:   "GET_ITEM",
+		Request:      structData,
+		TableSlug:    tableSlug,
+		MethodApi:    "GET",
+		TimeStarted:  timeStarted,
+	}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().GetSingle(
@@ -524,12 +539,23 @@ func (h *HandlerV2) GetSingleItem(c *gin.Context) {
 				statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
 				statusHttp.CustomMessage = stat.Message()
 			}
+			go func() {
+				logRequest.Response = err.Error()
+				logRequest.StatusCode = statusHttp.Code
+				h.versionHistory(logRequest)
+			}()
 			h.HandleResponse(c, statusHttp, err.Error())
 			return
 		}
 
 		statusHttp.CustomMessage = resp.GetCustomMessage()
 		h.HandleResponse(c, statusHttp, resp)
+
+		go func() {
+			logRequest.Response = resp
+			logRequest.StatusCode = statusHttp.Code
+			h.versionHistory(logRequest)
+		}()
 	case pb.ResourceType_POSTGRESQL:
 		redisResp, err := h.redis.Get(c.Request.Context(), redisKey, projectId.(string), resource.NodeType)
 		if err == nil {
@@ -554,6 +580,11 @@ func (h *HandlerV2) GetSingleItem(c *gin.Context) {
 			},
 		)
 		if err != nil {
+			go func() {
+				logRequest.Response = err.Error()
+				logRequest.StatusCode = status_http.GRPCError.Code
+				h.versionHistoryGo(c, logRequest)
+			}()
 			h.HandleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
@@ -568,6 +599,12 @@ func (h *HandlerV2) GetSingleItem(c *gin.Context) {
 
 		statusHttp.CustomMessage = resp.GetCustomMessage()
 		h.HandleResponse(c, statusHttp, resp)
+
+		go func() {
+			logRequest.Response = resp
+			logRequest.StatusCode = statusHttp.Code
+			h.versionHistoryGo(c, logRequest)
+		}()
 	}
 }
 
@@ -587,6 +624,8 @@ func (h *HandlerV2) GetSingleItem(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) GetAllItems(c *gin.Context) {
+	timeStarted := time.Now().Format(time.RFC3339)
+
 	var (
 		resp          *obs.CommonMessage
 		statusHttp    = status_http.GrpcStatusToHTTP["Ok"]
@@ -674,6 +713,18 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 
 	redisKey := base64.StdEncoding.EncodeToString(fmt.Appendf(nil, "%s-%s-%s", tableSlug, structData.String(), resource.ResourceEnvironmentId))
 
+	var logRequest = &models.CreateVersionHistoryRequest{
+		Services:     services,
+		NodeType:     resource.NodeType,
+		ProjectId:    resource.ResourceEnvironmentId,
+		ActionSource: "ITEMS",
+		ActionType:   "GET_LIST",
+		Request:      structData,
+		TableSlug:    tableSlug,
+		MethodApi:    "GET",
+		TimeStarted:  timeStarted,
+	}
+
 	if viewId, ok := objectRequest["builder_service_view_id"].(string); ok {
 		if util.IsValidUUID(viewId) {
 			switch resource.ResourceType {
@@ -700,21 +751,30 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 						ProjectId: resource.ResourceEnvironmentId,
 					},
 				)
-
-				if err == nil {
-					if resp.IsCached {
-						jsonData, _ := resp.GetData().MarshalJSON()
-						err = h.redis.SetX(context.Background(), redisKey, string(jsonData), 15*time.Second, resource.ProjectId, resource.NodeType)
-						if err != nil {
-							h.log.Error("Error while setting redis", logger.Error(err))
-						}
-					}
-				}
-
 				if err != nil {
+					go func() {
+						logRequest.Response = err.Error()
+						logRequest.StatusCode = status_http.GRPCError.Code
+						h.versionHistory(logRequest)
+					}()
 					h.HandleResponse(c, status_http.GRPCError, err.Error())
 					return
 				}
+
+				go func() {
+					logRequest.Response = resp
+					logRequest.StatusCode = status_http.OK.Code
+					h.versionHistory(logRequest)
+				}()
+
+				if resp.IsCached {
+					jsonData, _ := resp.GetData().MarshalJSON()
+					err = h.redis.SetX(context.Background(), redisKey, string(jsonData), 15*time.Second, resource.ProjectId, resource.NodeType)
+					if err != nil {
+						h.log.Error("Error while setting redis", logger.Error(err))
+					}
+				}
+
 			case pb.ResourceType_POSTGRESQL:
 				// Does Not Implemented
 				h.HandleResponse(c, status_http.BadRequest, "does not implemented")
@@ -748,21 +808,30 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 					ProjectId: resource.ResourceEnvironmentId,
 				},
 			)
-
-			if err == nil {
-				if resp.IsCached {
-					jsonData, _ := resp.GetData().MarshalJSON()
-					err = h.redis.SetX(context.Background(), redisKey, string(jsonData), 15*time.Second, resource.ProjectId, resource.NodeType)
-					if err != nil {
-						h.log.Error("Error while setting redis", logger.Error(err))
-					}
-				}
-			}
-
 			if err != nil {
+				go func() {
+					logRequest.Response = err.Error()
+					logRequest.StatusCode = status_http.GRPCError.Code
+					h.versionHistory(logRequest)
+				}()
 				h.HandleResponse(c, status_http.GRPCError, err.Error())
 				return
 			}
+
+			go func() {
+				logRequest.Response = resp
+				logRequest.StatusCode = status_http.OK.Code
+				h.versionHistory(logRequest)
+			}()
+
+			if resp.IsCached {
+				jsonData, _ := resp.GetData().MarshalJSON()
+				err = h.redis.SetX(context.Background(), redisKey, string(jsonData), 15*time.Second, resource.ProjectId, resource.NodeType)
+				if err != nil {
+					h.log.Error("Error while setting redis", logger.Error(err))
+				}
+			}
+
 		case pb.ResourceType_POSTGRESQL:
 			redisResp, err := h.redis.Get(context.Background(), redisKey, resource.ProjectId, resource.NodeType)
 			if err == nil {
@@ -788,20 +857,28 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 					CompanyProjectId: resource.ProjectId,
 				},
 			)
-
-			if err == nil {
-				if resp.IsCached {
-					jsonData, _ := resp.GetData().MarshalJSON()
-					err = h.redis.SetX(context.Background(), redisKey, string(jsonData), 15*time.Second, resource.ProjectId, resource.NodeType)
-					if err != nil {
-						h.log.Error("Error while setting redis", logger.Error(err))
-					}
-				}
-			}
-
 			if err != nil {
+				go func() {
+					logRequest.Response = err.Error()
+					logRequest.StatusCode = status_http.GRPCError.Code
+					h.versionHistoryGo(c, logRequest)
+				}()
 				h.HandleResponse(c, status_http.GRPCError, err.Error())
 				return
+			}
+
+			go func() {
+				logRequest.Response = resp
+				logRequest.StatusCode = status_http.OK.Code
+				h.versionHistoryGo(c, logRequest)
+			}()
+
+			if resp.IsCached {
+				jsonData, _ := resp.GetData().MarshalJSON()
+				err = h.redis.SetX(context.Background(), redisKey, string(jsonData), 15*time.Second, resource.ProjectId, resource.NodeType)
+				if err != nil {
+					h.log.Error("Error while setting redis", logger.Error(err))
+				}
 			}
 
 			statusHttp.CustomMessage = resp.GetCustomMessage()
