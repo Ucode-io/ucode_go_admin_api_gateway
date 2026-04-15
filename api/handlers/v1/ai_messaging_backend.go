@@ -69,7 +69,7 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, proj
 				},
 			)
 
-			clientTypeResp, err := service.GoObjectBuilderService().Items().GetList(
+			clientTypeResp, err := service.GoObjectBuilderService().ObjectBuilder().GetList2(
 				ctx, &nb.CommonMessage{
 					TableSlug: "client_type",
 					Data:      getListData,

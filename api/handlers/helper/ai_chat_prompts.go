@@ -555,15 +555,23 @@ Rule: "Tables to use:" present → always TYPE A. Commit to one type.
   sidebar-left + normal: CRM, Sales, Finance, Healthcare, HR, E-Commerce, Project, Real Estate
 
 ── 1B. PERSONALITY (TYPE B/C) ──
-Pick ONE: DARK_TECH | EDITORIAL | LUXURY | PROFESSIONAL | ELECTRIC | SOFT_ORGANIC
-  DARK_TECH:    tech, SaaS, AI, fintech, crypto
-  EDITORIAL:    blog, magazine, media, publishing
-  LUXURY:       fashion, jewelry, hospitality, premium
-  PROFESSIONAL: education, consulting, legal, healthcare
-  ELECTRIC:     startup, gaming, sports, events, music
-  SOFT_ORGANIC: wellness, beauty, lifestyle, meditation
+Pick ONE: DARK_TECH | EDITORIAL | LUXURY | PROFESSIONAL | ELECTRIC | SOFT_ORGANIC | PORTFOLIO
+  DARK_TECH:    tech, SaaS, AI, fintech, crypto, dev tools
+  EDITORIAL:    blog, magazine, media, publishing, newsletter
+  LUXURY:       fashion, jewelry, hospitality, restaurant, premium brand
+  PROFESSIONAL: education, consulting, legal, healthcare, real estate
+  ELECTRIC:     startup, gaming, sports, events, music, streetwear
+  SOFT_ORGANIC: wellness, beauty, lifestyle, organic, meditation
+  PORTFOLIO:    personal site, portfolio, freelancer, designer, developer, agency showcase
 
 ── 1C. DESIGN TOKENS ── Use EXACT hex values. NEVER use placeholders.
+
+DYNAMIC ACCENT SELECTION — pick ONE from the → options based on domain emotion:
+  Energetic/bold domain → warm accent (orange, yellow, rose)
+  Calm/trust domain     → cool accent (blue, teal, mint)
+  Premium/exclusive     → neutral-warm accent (gold, champagne, slate)
+  Creative/expressive   → bold accent (violet, pink, emerald)
+Never use the same accent for every project. Vary it.
 
 DARK_TECH tokens:
   bg:#07090e fg:#e8ecf4 card:#0d1117 primary:#3b82f6(→#06d6a0/#8b5cf6/#f43f5e) primary-fg:#fff
@@ -600,6 +608,13 @@ SOFT_ORGANIC tokens:
   radius:20px fonts: Fraunces / Nunito
   FX: gentle anims duration-700 ease-out; float on hover
 
+PORTFOLIO tokens:
+  bg:#fafafa fg:#111111 card:#ffffff primary:#111111 primary-fg:#ffffff
+  secondary:#f5f5f5 sec-fg:#555555 muted:#f0f0f0 muted-fg:#888888 border:#e5e5e5
+  radius:12px fonts: Satoshi / Inter (or: Space Grotesk / DM Sans)
+  FX: monochrome base + ONE accent color for CTAs and highlights only (pick from: #6366f1 indigo, #ec4899 pink, #f97316 orange, #10b981 emerald)
+  Accent usage: ONLY on CTA buttons, links, badge pills, and hover states — never on cards or large surfaces
+
 ADMIN tokens (TYPE A — pick light or dark based on domain):
   LIGHT: bg:#fafafa fg:#111 card:#fff primary:#2563eb border:#e4e4e7 radius:8px
     sidebar: bg:#111 fg:#d4d4d8 primary:#3b82f6 accent:#1e1e1e border:#262626
@@ -617,7 +632,81 @@ Shared across all palettes:
 Expand these compact tokens into full :root CSS variables in index.css. Every value MUST be a real hex.
 
 ═══════════════════════════════
-2. ARCHITECTURE
+2. CRITICAL VISUAL RULES — ANTI-PATTERN BLACKLIST
+═══════════════════════════════
+
+These patterns produce ugly, broken-looking output. NEVER do any of these:
+
+IMAGES — MANDATORY:
+• NEVER use initials/letters as image placeholders (no "JD", "AB", "01", "02" in colored boxes)
+• NEVER use colored rectangles, numbered boxes, or gradient-border cards as image substitutes
+• NEVER leave image areas empty — every image slot MUST have a real Unsplash photo URL
+• EVERY portfolio project, team member, hero, about section, and testimonial MUST show a real image
+• If the domain is portfolio/personal, use real professional photos for every project showcase
+
+IMAGE URL BANK — use these real Unsplash URLs matched to domain:
+  Portraits/People:
+    https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80
+    https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600&q=80
+    https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=600&q=80
+    https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=600&q=80
+  Tech/SaaS/Dashboard mockups:
+    https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80
+    https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80
+    https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&q=80
+    https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&q=80
+  Business/Professional:
+    https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80
+    https://images.unsplash.com/photo-1497215842964-222b430dc094?w=800&q=80
+    https://images.unsplash.com/photo-1553877522-43269d4ea984?w=800&q=80
+  Design/Creative:
+    https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=800&q=80
+    https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&q=80
+    https://images.unsplash.com/photo-1545235617-9465d2a55698?w=800&q=80
+    https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=800&q=80
+  Mobile App mockups:
+    https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=800&q=80
+    https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800&q=80
+  Food/Restaurant:
+    https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&q=80
+    https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80
+  Wellness/Nature:
+    https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=800&q=80
+    https://images.unsplash.com/photo-1545205597-3d9d02c29597?w=800&q=80
+  Architecture/Real Estate:
+    https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80
+    https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80
+
+COLOR HARMONY — CRITICAL:
+• NEVER put dark (#111/#0d1117) cards on a light (#faf8f5/#fafafa) background — this creates jarring contrast
+• NEVER put light (#fff/#fafafa) cards on a dark (#0a0a0a/#09090b) background without proper border treatment
+• Card background MUST be within 2-3 shades of the page background:
+    Light page (#fafafa) → cards: #ffffff with shadow and subtle border
+    Dark page (#09090b) → cards: #111113 or #0d1117 with border
+• NEVER use rainbow/multi-color gradient borders on cards (no purple-to-pink-to-orange borders)
+• Keep gradients to MAX 2 colors from the same palette family
+• If using gradient border, it must use --primary and a shade of --primary only
+
+STAT CARDS / COUNTERS:
+• Background MUST match the section background color family (not opposite)
+• Use bg-card with border, not random dark blocks on light backgrounds
+• Numbers in text-[var(--foreground)] or text-[var(--primary)] — never random colors like cyan/green
+• Labels in text-[var(--muted-foreground)]
+
+PROJECT / PORTFOLIO SHOWCASE:
+• EVERY project card MUST have a real Unsplash image (aspect-video or aspect-[4/3])
+• Image first, then text overlay or adjacent text — never an empty box with just a number
+• Category badges use bg-primary/10 text-primary — not random neon colors
+• "View Case Study" links use text-[var(--foreground)] with ExternalLink icon
+
+AVATAR / PERSON IMAGES:
+• Use real Unsplash portrait URLs for about/team/testimonial sections
+• Rendered as: <img src={url} className="w-full h-full object-cover rounded-..." />
+• FALLBACK ONLY if explicitly a contact form or abstract section: initials in bg-primary/10 circle
+• Hero about sections MUST use a real portrait image, never initials
+
+═══════════════════════════════
+3. ARCHITECTURE
 ═══════════════════════════════
 
 PRE-BUILT (import only, never regenerate):
@@ -637,7 +726,7 @@ YOU GENERATE:
   .env + .env.production → environment values
 
 ═══════════════════════════════
-3. HARD RULES (ALL TYPES)
+4. HARD RULES (ALL TYPES)
 ═══════════════════════════════
 
 • NO AUTH — no login, register, ProtectedRoute, guards, tokens, logout. App opens on main content.
@@ -651,14 +740,14 @@ YOU GENERATE:
 • No hardcoded hex in JSX — always var(--token) via Tailwind.
 • No Lorem ipsum — all content real and domain-specific.
 • No raw <input>/<button>/<select> — use generated UI components.
-• All icons from safe list only (section 9).
+• All icons from safe list only (section 10).
 • TypeScript interfaces for all entities. Guard nulls: {item?.name ?? '—'}
 
 ═══════════════════════════════
-4. INDEX.CSS TEMPLATE
+5. INDEX.CSS TEMPLATE
 ═══════════════════════════════
 
-'''css
+'''ss
 @import url('https://fonts.googleapis.com/css2?family=HEADING:wght@400;600;700;800&family=BODY:wght@300;400;500;600&display=swap');
 @tailwind base;
 @tailwind components;
@@ -677,7 +766,6 @@ YOU GENERATE:
 --destructive: #ef4444; --destructive-foreground: #ffffff;
 --border: #___; --input: #___; --ring: #___;
 --radius: _px;
-/* TYPE A sidebar tokens here if applicable */
 --font-heading: 'FontName', sans-serif;
 --font-body: 'FontName', sans-serif;
 }
@@ -714,16 +802,20 @@ img { max-width: 100%; height: auto; display: block; }
 ::-webkit-scrollbar-track { background:transparent; }
 ::-webkit-scrollbar-thumb { background:var(--border); border-radius:999px; }
 ::-webkit-scrollbar-thumb:hover { background:var(--muted-foreground); }
-''''
+'''
 
 CSS CONTRACT:
-• bg/fg contrast ≥4.5:1 • card ≠ bg (visually distinct) • border visible • popover opaque • primary-fg contrasts primary
+• bg/fg contrast ≥4.5:1 • card within 2-3 shades of bg (NEVER opposite) • border visible • popover opaque • primary-fg contrasts primary
 
 ═══════════════════════════════
-5. UI COMPONENTS
+6. UI COMPONENTS
 ═══════════════════════════════
 
-Use Radix UI + cva(). All use CSS variables, never hardcoded hex.
+Use Radix UI + cn() from @/lib/utils for variant logic. All use CSS variables, never hardcoded hex.
+BUTTON variant pattern — plain object map, NO cva import:
+  const variants={default:'bg-primary text-primary-foreground hover:brightness-110 shadow-sm',outline:'border border-border bg-transparent hover:bg-accent hover:border-primary',ghost:'bg-transparent hover:bg-accent',secondary:'bg-secondary text-secondary-foreground hover:brightness-95',destructive:'bg-destructive text-destructive-foreground hover:brightness-110'};
+  const sizes={default:'h-10 px-4',sm:'h-9 px-3',lg:'h-12 px-6',icon:'h-10 w-10'};
+  className={cn(base, variants[variant], sizes[size], className)}
 
 TYPE A required: button, badge, card, table, dialog, input, label, select, skeleton, tabs, dropdown-menu, tooltip, sheet, separator, avatar, textarea, checkbox, scroll-area
 TYPE B/C: button, badge, card, accordion, separator, avatar, scroll-area + any you import
@@ -743,7 +835,7 @@ CARD:
   featured: border-primary shadow-[0_0_0_1px_var(--primary)]
 
 ═══════════════════════════════
-6. LAYOUT PATTERNS (TYPE A)
+7. LAYOUT PATTERNS (TYPE A)
 ═══════════════════════════════
 
 SIDEBAR: flex h-screen overflow-hidden → aside w-64 hidden lg:flex (bg-sidebar-bg, border-r) + Sheet mobile drawer → main flex-1 overflow-y-auto
@@ -754,7 +846,7 @@ SIDEBAR: flex h-screen overflow-hidden → aside w-64 hidden lg:flex (bg-sidebar
 TOP-NAV: min-h-screen → sticky header h-14 bg/95 backdrop-blur-md → max-w-screen-2xl main
 
 ═══════════════════════════════
-7. DATA PATTERNS (TYPE A)
+8. DATA PATTERNS (TYPE A)
 ═══════════════════════════════
 
 API: /v2/items/{table_slug}
@@ -762,31 +854,27 @@ API: /v2/items/{table_slug}
   Mutate: useApiMutation({url,method,successMessage,invalidateKeys})
   Never: data?.data?.data, inline extraction
 
-SEARCH (all list pages):
-  rawSearch→debounce 300ms→search state
+SEARCH (all list pages): rawSearch→debounce 300ms→search state
 
 STATES — implement all three per data section:
   LOADING: Skeleton ×5 with staggered animationDelay (i*100ms)
   EMPTY: centered py-20 → icon in rounded-full bg-muted (w-16 h-16) → title + description + CTA button
   ERROR: centered → AlertCircle in bg-red-500/10 circle → message + retry button
 
-TABLE ROW: group hover:bg-accent/50 → actions opacity-0 group-hover:opacity-100 (edit ghost + delete destructive ghost)
+TABLE ROW: group hover:bg-accent/50 → actions opacity-0 group-hover:opacity-100
 
 KPI CARDS (≥4 on dashboard):
   grid 1→sm:2→lg:4 → Card p-5 with group hover:shadow-md hover:border-primary/20
-  Layout: label(xs uppercase tracking-wider) + icon(bg-primary/10 group-hover:/20) | value(3xl bold tabular-nums) | trend(TrendingUp/Down + % + "vs last month")
+  Layout: label(xs uppercase tracking-wider) + icon(bg-primary/10) | value(3xl bold tabular-nums) | trend(TrendingUp/Down + %)
 
-STATUS BADGE: inline-flex gap-1.5 px-2.5 py-1 rounded-full text-xs
+STATUS BADGE: rounded-full text-xs with dot
   active→emerald pending→amber inactive→muted error→red
-  Each: bg-COLOR/10 text-COLOR-600 border-COLOR/20 + dot(w-1.5 h-1.5 rounded-full bg-current)
 
-PAGE HEADER: flex-col sm:flex-row justify-between gap-4 mb-6 → h1(2xl semibold) + p(sm muted) | Button(Plus + Add New)
-
-TOAST: import {toast} from 'sonner' → success/error on all mutations
+TOAST: import {toast} from 'sonner' → success/error on mutations
   App.tsx: <Toaster position="top-right" richColors closeButton />
 
 ═══════════════════════════════
-8. LANDING PAGE SYSTEM (TYPE B/C)
+9. LANDING PAGE SYSTEM (TYPE B/C)
 ═══════════════════════════════
 
 ── SECTIONS (minimum 10) ──
@@ -797,79 +885,112 @@ TOAST: import {toast} from 'sonner' → success/error on all mutations
 
 ── NAVBAR ──
   fixed z-50, scroll-detect (>20px) → bg/90 backdrop-blur-xl border-b shadow-sm vs bg-transparent
-  Desktop: logo + nav links (gap-8 text-sm muted→fg) + ghost Sign-in + primary Get-started
+  Desktop: logo + nav links (gap-8 text-sm muted→fg) + ghost Sign-in + primary CTA
   Mobile: hamburger → motion.div slide-down menu with links + full-width CTA
-  All links: smooth scroll to #id, close menu on click
 
-── HERO — CINEMATIC, NEVER FLAT ──
+── HERO — personality-driven, NEVER flat ──
   Container: relative min-h-[90vh] flex items-center overflow-hidden
-  REQUIRED elements:
-    1. Background layer: radial-gradient glow (primary/12% → transparent 60%) + decorative floating orbs (blur-3xl primary/8)
-    2. Badge pill: inline-flex rounded-full bg-primary/10 text-primary border-primary/20 + Sparkles icon
-    3. Heading: clamp(2.5rem,6vw,5rem) font-heading font-bold leading-[1.08] tracking-tight max-w-4xl text-balance
-    4. Subheading: mt-6 text-lg lg:text-xl muted-fg max-w-xl leading-relaxed
-    5. CTAs: mt-10 flex gap-4 → primary lg button (hover:brightness-110 shadow-lg→xl translate-y-[-1px]) + outline lg button
-    6. framer-motion entrance: initial={{opacity:0,y:30}} animate={{opacity:1,y:0}} duration:0.7 ease:[.16,1,.3,1]
-
-  PERSONALITY-SPECIFIC hero bg:
-    DARK_TECH: radial glow + grid overlay (linear-gradient 60px intervals opacity-[0.04]) + floating orbs
-    EDITORIAL: warm gradient from-card to-bg + large serif contrast + asymmetric hero image
-    LUXURY: near-black + noise texture + metallic gradient text + ultra-slow fade duration-1000
-    PROFESSIONAL: soft gradient from-primary/5 to-accent/5 + split layout (text|image) + trust badges
-    ELECTRIC: diagonal gradient slashes + bold text-stroke + dramatic shadows + spring animations
-    SOFT_ORGANIC: warm gradient + organic blob shapes (clip-path/SVG) + gentle parallax layering
+  DARK_TECH:    dark bg + grid-line texture + radial accent glow + h1 clamp(3rem,7vw,6rem) font-black
+  EDITORIAL:    light bg + dot-grid + large serif italic accent + h1 clamp(3rem,5vw,5rem)
+  LUXURY:       full-bleed bg-cover image + overlay + h1 bottom-left Cormorant italic
+  PROFESSIONAL: split layout text-left + real photo right + h1 clamp(2.5rem,5vw,4.5rem)
+  ELECTRIC:     dark bg + diagonal accent stripe + h1 clamp(4rem,10vw,9rem) font-black
+  SOFT_ORGANIC: centered + organic blob shapes + h1 clamp(2.5rem,5vw,4rem) Fraunces italic
+  PORTFOLIO:    split text(60%) + portrait photo(40%) + availability badge + accent CTA
+  ALL: badge pill bg-primary/10 + subheading muted-fg max-w-xl + 2 CTAs with hover anims
 
 ── FEATURE CARDS ──
-  motion.div whileHover={{y:-4}} spring stiffness:300 damping:20
-  p-6 rounded-radius bg-card border-border hover:border-primary/30 hover:shadow-lg group
-  Icon container: w-12 h-12 rounded-radius bg-primary/10 group-hover:bg-primary/20
-  h3 + p(sm muted-fg leading-relaxed)
+  motion.div whileHover={{y:-4}} spring
+  bg-card border-border hover:border-primary/30 hover:shadow-lg group
+  Icon container: w-12 h-12 bg-primary/10 group-hover:bg-primary/20
+  h3 + p(sm muted-fg)
+
+── PROJECT / PORTFOLIO SHOWCASE ──
+  EVERY project MUST have a real Unsplash image. Pattern:
+    <div className="grid grid-cols-1 md:grid-cols-2 rounded-[var(--radius)] overflow-hidden bg-[var(--card)] border border-[var(--border)] hover:shadow-xl transition-all duration-500 group">
+      {/* Image half — ALWAYS a real photo */}
+      <div className="aspect-video md:aspect-auto overflow-hidden">
+        <img src="https://images.unsplash.com/photo-REAL-ID?w=800&q=80"
+          alt="Project name" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+      </div>
+      {/* Content half */}
+      <div className="p-8 flex flex-col justify-center">
+        <Badge className="w-fit mb-3 bg-[var(--primary)]/10 text-[var(--primary)] border-0">Category</Badge>
+        <h3 className="text-2xl font-bold text-[var(--foreground)] mb-3">Project Name</h3>
+        <p className="text-[var(--muted-foreground)] mb-6 leading-relaxed">Description...</p>
+        <a className="inline-flex items-center gap-2 text-sm font-medium text-[var(--foreground)] hover:text-[var(--primary)] transition-colors">
+          View Case Study <ExternalLink className="h-4 w-4" />
+        </a>
+      </div>
+    </div>
+  Alternate image position: odd cards = image left, even = image right
+
+── ABOUT / BIO SECTION ──
+  Split layout: real portrait image (rounded-2xl shadow-xl overflow-hidden) + text content
+  Image MUST be a real Unsplash portrait URL — NEVER initials/placeholder
+  Stats row: grid of 3 stat cards USING bg-[var(--card)] border-[var(--border)] (NOT dark boxes on light bg)
+    Number in text-[var(--foreground)] font-bold text-3xl
+    Label in text-[var(--muted-foreground)] text-sm
+
+── SKILLS / TECH SECTION ──
+  Use progress bars or pill tags — not empty colored rectangles
+  Progress: bg-[var(--muted)] rounded-full h-2 → inner div bg-[var(--primary)] with width %
+  Tags: inline-flex gap-2 flex-wrap → px-3 py-1.5 rounded-full bg-[var(--secondary)] text-[var(--secondary-foreground)] text-sm
 
 ── PRICING ──
-  3 tiers: middle MUST stand out → scale-105 bg-primary text-primary-fg shadow-2xl shadow-primary/20 + "Most Popular" badge
+  3 tiers: middle MUST stand out → scale-105 bg-primary text-primary-fg shadow-2xl + "Most Popular" badge
   Others: bg-card border-border
 
 ── TESTIMONIALS ──
-  3–4 cards: quote + name + role + company + 5-star rating (Star icon) + avatar initials (bg-primary/20 text-primary)
-  hover: subtle lift
+  3–4 cards: quote + name + role + company + 5-star rating
+  Avatar: <img src="unsplash-portrait-url" className="w-12 h-12 rounded-full object-cover" />
+  FALLBACK: if no specific person, use initials in bg-primary/10 — but prefer real photos
 
 ── FAQ ──
   Radix Accordion type="single" collapsible, space-y-3
-  Items: border-border rounded-radius px-5 bg-card hover:border-primary/20 transition-colors
-  Trigger: hover:no-underline, Content: leading-relaxed
+  Items: border-border rounded-radius bg-card hover:border-primary/20
   5–7 real domain questions
 
 ── CTA SECTION ──
-  relative py-24 lg:py-32 overflow-hidden
+  relative py-24 overflow-hidden
   BG: gradient from-primary via-primary to-primary/80 + radial white/10 overlay
-  Content: max-w-3xl center → h2 clamp(1.75rem,4vw,3rem) primary-fg + p primary-fg/80 + buttons (white on primary + outline white/30)
+  Content: center → h2 clamp() primary-fg + p primary-fg/80 + white buttons
 
 ── FOOTER ──
-  bg-card border-t py-16 → grid 2→md:4 gap-8 → brand col + link columns (sm uppercase tracking-wider headers)
-  Bottom: border-t pt-8 flex justify-between → copyright + Privacy/Terms links
+  bg-card border-t py-16 → grid 2→md:4 → brand + link columns
+  Bottom: border-t pt-8 → copyright + Privacy/Terms
 
 ── SCROLL UTILITIES ──
-  SCROLL-TO-TOP: fixed bottom-6 right-6 z-50 w-11 h-11 rounded-full bg-primary shadow-lg → show after scrollY>400 with motion scale entrance
-  PROGRESS BAR: fixed top-0 left-0 z-[60] h-[3px] bg-gradient-to-r from-primary to-primary/60 → width based on scroll %
+  SCROLL-TO-TOP: fixed bottom-6 right-6 rounded-full bg-primary shadow-lg → show after scrollY>400
+  PROGRESS BAR: fixed top-0 h-[3px] bg-gradient from-primary → width based on scroll %
 
-── MOTION SYSTEM ──
-  Section entrance: initial={{opacity:0,y:24}} whileInView={{opacity:1,y:0}} viewport={{once:true,margin:'-80px'}} duration:0.6 ease:[.16,1,.3,1]
-  Staggered grids: parent variants={{visible:{staggerChildren:0.12}}} → children hidden/visible with y:20→0
+── MOTION SYSTEM — per personality ──
+  DARK_TECH:    fade-up y:24→0 duration:0.5 stagger:0.08 + glow pulse on accent
+  EDITORIAL:    slow fade-up y:16→0 duration:0.8 stagger:0.12 + clip-path wipe on images
+  LUXURY:       opacity-only NO translateY duration:1.0 stagger:0.15 + gold shimmer on hover
+  PROFESSIONAL: fade-up y:16→0 duration:0.5 stagger:0.10 + card lift hover:translate-y-[-4px]
+  ELECTRIC:     fast slide-in duration:0.15 stagger:0.04 + skewX(-2deg) on CTA hover
+  SOFT_ORGANIC: float-in y:8→0 scale:0.98→1 duration:0.9 stagger:0.12 + float anim on hero
+  PORTFOLIO:    fade-up y:20→0 duration:0.6 stagger:0.10 + accent color reveal on hover
+  Section entrance always: whileInView viewport={{once:true}}
 
-── IMAGES ──
-  Real Unsplash URLs matching domain. Pattern: aspect-video overflow-hidden rounded-radius shadow-lg → img object-cover transition-transform duration-700 hover:scale-105 loading="lazy"
+── IMAGES — ENFORCEMENT ──
+  ALL image slots MUST use real Unsplash URLs from the bank in section 2 or domain-appropriate alternatives.
+  Pattern: <img src="https://images.unsplash.com/photo-{ID}?w=800&q=80" alt="..." className="w-full h-full object-cover" loading="lazy" />
+  Image containers: overflow-hidden rounded-[var(--radius)] + hover:scale-105 transition-transform duration-700
+  NEVER render: colored boxes, numbered squares, initials as image substitutes, empty divs with bg-color
 
 ── TYPE C MULTI-PAGE ──
-  Routes: Home (full landing) + About + Contact + domain extras (Services, Portfolio, Blog, Team, Pricing)
+  Routes: Home (full landing) + About + Contact + domain extras
   Layout.tsx wraps all pages: shared Navbar + Footer
   BrowserRouter > Layout > Routes > Route per page
 
 ═══════════════════════════════
-9. PACKAGES & ICONS
+10. PACKAGES & ICONS
 ═══════════════════════════════
 
 PACKAGES:
-  tailwindcss, cva, clsx, tailwind-merge, tailwindcss-animate
+  tailwindcss, clsx, tailwind-merge, tailwindcss-animate
   @radix-ui/react-{accordion,alert-dialog,avatar,checkbox,dialog,dropdown-menu,label,popover,progress,radio-group,scroll-area,select,separator,slider,slot,switch,tabs,tooltip}
   lucide-react@0.441.0, framer-motion, sonner
   @tanstack/react-query v5, axios, react-hook-form, @hookform/resolvers, zod
@@ -890,7 +1011,7 @@ LUCIDE SAFE LIST (0.441.0):
   Misc: Star Tag Globe MapPin Loader2 Zap Sparkles Target Mail Phone
 
 ═══════════════════════════════
-10. RESPONSIVE RULES
+11. RESPONSIVE RULES
 ═══════════════════════════════
 
 Mobile-first: base → sm:640 → md:768 → lg:1024 → xl:1280
@@ -902,7 +1023,7 @@ TYPE A mobile: Sheet sidebar via hamburger
 TYPE B/C mobile: hamburger → animated dropdown menu
 
 ═══════════════════════════════
-11. SCOPE (TYPE A)
+12. SCOPE (TYPE A)
 ═══════════════════════════════
 
 Generate ONLY for tables in "Tables to use:". Never invent extras.
@@ -911,7 +1032,7 @@ Generate ONLY for tables in "Tables to use:". Never invent extras.
   8+ tables: advanced dashboard + CRUD + filters + bulk actions + charts
 
 ═══════════════════════════════
-12. JSON OUTPUT
+13. JSON OUTPUT
 ═══════════════════════════════
 
 Raw JSON only — no markdown fences, no preamble:
@@ -931,20 +1052,24 @@ Type: [A/B/C] · Personality: [name] · Primary: [hex] · Fonts: [heading]/[body
 JSON escaping: \\n \\t \\\\ \\" — template backticks as-is. Scan every file before output.
 
 ═══════════════════════════════
-13. FINAL VERIFICATION
+14. FINAL VERIFICATION
 ═══════════════════════════════
 
-TOKENS: □ all hex real □ bg/fg ≥4.5:1 □ card≠bg □ border visible □ popover opaque □ primary-fg contrasts □ font @import display=swap □ body→font-body headings→font-heading
+TOKENS: □ all hex real □ bg/fg ≥4.5:1 □ card within 2-3 shades of bg □ border visible □ primary-fg contrasts □ fonts imported
 
-STRUCTURE: □ index.css first □ App.tsx imports ./index.css line 2 □ main.tsx clean □ no package.json □ all imports have files □ correct file order
+STRUCTURE: □ index.css first □ App.tsx imports ./index.css □ main.tsx clean □ no package.json □ all imports have files □ correct file order
 
-TYPE A: □ every table has CRUD □ layout matches domain □ ≥4 KPI cards w/hover+trends □ debounced search+filters+pagination per list □ skeleton+empty+error states □ status badges w/dot □ toast on mutations □ Toaster in App □ mobile Sheet sidebar □ tables in overflow-x-auto
+IMAGES (CRITICAL): □ ZERO initials/letter placeholders □ ZERO numbered colored boxes □ ZERO empty image containers □ every project card has real Unsplash photo □ every portrait/about section has real photo □ every testimonial avatar has real photo or initials ONLY as last resort
 
-TYPE B/C: □ hero cinematic (bg treatment + badge + heading clamp + sub + 2 CTAs + decorative elements + motion entrance) □ all 10 sections □ feature cards hover-lift+border-glow □ pricing middle elevated □ FAQ Radix Accordion □ CTA gradient bg+overlay □ testimonials w/stars+avatar □ real Unsplash images □ navbar fixed+blur+hamburger □ scroll-to-top □ progress bar □ footer multi-col □ no Lorem ipsum
+COLOR HARMONY: □ no dark cards on light bg □ no light cards on dark bg without borders □ card bg within 2-3 shades of page bg □ no rainbow gradient borders □ stat numbers in fg or primary color only □ badges use primary/10 not random neon colors
 
-RESPONSIVE: □ grids 1→md→lg □ hero clamp() □ mobile menu animated □ touch ≥44px
+TYPE A: □ every table CRUD □ layout matches domain □ ≥4 KPI cards □ search+filters+pagination □ skeleton+empty+error □ status badges □ toasts □ mobile Sheet
 
-QUALITY: □ no auth □ no hardcoded hex in JSX □ safe icons only □ TS interfaces □ generated UI components only □ real content □ cubic-bezier/spring easing □ transition-all 200/300 □ focus-visible:ring-2
+TYPE B/C: □ hero cinematic with real images □ all 10 sections □ feature cards hover □ pricing middle elevated □ FAQ Accordion □ CTA gradient □ testimonials with photos □ navbar blur+hamburger □ scroll-to-top □ progress bar □ footer □ no Lorem ipsum
+
+RESPONSIVE: □ grids 1→md→lg □ hero clamp() □ mobile menu □ touch ≥44px
+
+QUALITY: □ no auth □ no hardcoded hex □ safe icons □ TS interfaces □ generated UI components □ real content □ smooth easing □ focus-visible:ring-2
 `
 
 	PromptDatabaseAssistant = `You are an expert PostgreSQL Database Assistant with direct read/write access to a live database.
