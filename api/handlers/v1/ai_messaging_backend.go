@@ -6,6 +6,7 @@ import (
 	"log"
 	"strings"
 	"ucode/ucode_go_api_gateway/config"
+	auth "ucode/ucode_go_api_gateway/genproto/auth_service"
 
 	"ucode/ucode_go_api_gateway/api/models"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
@@ -57,6 +58,41 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, proj
 		if err != nil {
 			errs = append(errs, fmt.Sprintf("table %s creation failed: %v", tablePlan.Slug, err))
 			continue
+		}
+
+		if tablePlan.IsLoginTable {
+			log.Printf("[ai_messaging_backend] Login table created (%s), updating client_type...", tablePlan.Slug)
+
+			clientType, err := service.AuthService().Client().GetClientTypeList(
+				ctx, &auth.GetClientTypeListRequest{
+					ProjectId: projectId,
+				},
+			)
+			if err != nil {
+				log.Printf("[ai_messaging_backend] WARNING: failed to fetch client types: %v", err)
+			}
+
+			if len(clientType.GetClientTypes()) > 0 {
+				_, err = service.AuthService().Client().V2UpdateClientType(
+					ctx, &auth.V2UpdateClientTypeRequest{
+						Guid:                   clientType.GetClientTypes()[0].Id,
+						ProjectId:              projectId,
+						TableSlug:              tablePlan.Slug,
+						Name:                   clientType.GetClientTypes()[0].Name,
+						ConfirmBy:              clientType.GetClientTypes()[0].ConfirmBy,
+						SelfRegister:           clientType.GetClientTypes()[0].SelfRegister,
+						SelfRecover:            clientType.GetClientTypes()[0].SelfRecover,
+						SessionLimit:           clientType.GetClientTypes()[0].SessionLimit,
+						DefaultPage:            clientType.GetClientTypes()[0].DefaultPage,
+						ResourceEnvrironmentId: envId,
+					},
+				)
+				if err != nil {
+					log.Printf("[ai_messaging_backend] WARNING: failed to update client type %s: %v", clientType.GetClientTypes()[0].Id, err)
+				} else {
+					log.Printf("[ai_messaging_backend] Successfully updated client type %s with table_slug %s", clientType.GetClientTypes()[0].Id, tablePlan.Slug)
+				}
+			}
 		}
 
 		tableId := tableResp.GetId()

@@ -808,316 +808,274 @@ TYPE A — ADMIN PANEL / WEB APP:
 TYPE B — LANDING PAGE:
   Signals: "landing page", "landing", "homepage", "marketing page",
            "product page", "SaaS homepage", "coming soon", "hero page"
-  → Single cinematic marketing page, NO admin shell, NO CRUD, NO sidebar
+  → Single cinematic marketing page. NO admin shell, NO CRUD, NO sidebar.
 
 TYPE C — FULL WEBSITE:
   Signals: "website", "corporate site", "company website", "multi-page",
            "blog", "portfolio", "agency", "magazine", "news site"
-  → Multi-page site with routing, real content, cinematic sections
+  → Multi-page site with routing, real content, cinematic sections.
 
-When in doubt: "Tables to use:" present → TYPE A. Otherwise → TYPE B or C.
-Commit to detected type. Never mix types.
+Rule: "Tables to use:" present → TYPE A. When ambiguous → TYPE B or C.
+Commit to one type. Never mix types.
 
 ====================================
-ARCHITECTURE: THREE LAYERS (TYPE A MANDATORY)
+ARCHITECTURE — THREE LAYERS (TYPE A)
 ====================================
-Every admin panel / web app is built on three distinct layers.
 
 LAYER 1 — MCP (Foundation)
-  Pre-built template infrastructure already present in the project.
-  Rules:
-    - IMPORT and USE these — never re-implement them.
-    - NEVER output these files — they already exist.
-    - src/index.css and src/App.tsx must ALWAYS be regenerated.
-  Available pre-built paths:
-    @/hooks/useApi          → useApiQuery, useApiMutation
-    @/lib/apiUtils          → extractList, extractCount, extractSingle
-    @/lib/utils             → cn, formatDate, formatCurrency, getInitials
-    @/types                 → PaginationParams, NavItem, TableColumn
-    @/providers             → AppProviders
+  Pre-built infrastructure already in the project. Import and use — never re-implement or re-emit these files.
+  src/index.css and src/App.tsx MUST always be regenerated.
 
-LAYER 2 — Skills (Knowledge)
-  Your generated code — UI components, layout, features, pages.
-  Rules:
-    - Every UI component MUST be generated as src/components/ui/{name}.tsx
-    - Use Radix UI primitives + Tailwind + cva() — never raw HTML for widgets
-    - CSS variables throughout — NEVER hardcode colors
-    - Files in strict dependency order
-    - index.css MUST be first in the files array
-    - App.tsx MUST be last code file
-    - NEVER import from @/components/ui/* without a matching generated file
+  Available imports:
+    @/hooks/useApi       → useApiQuery, useApiMutation
+    @/lib/apiUtils       → extractList, extractCount, extractSingle
+    @/lib/utils          → cn, formatDate, formatCurrency, getInitials
+    @/types              → PaginationParams, NavItem, TableColumn
+    @/providers          → AppProviders
 
-LAYER 3 — Plugins (All-in-one bundle)
+LAYER 2 — Skills (Generated Code)
+  All UI components, layouts, features, pages you generate.
+  Rules:
+    - Every UI component → src/components/ui/{name}.tsx
+    - Radix UI primitives + Tailwind + cva() — never raw HTML for interactive widgets
+    - CSS variables only — NEVER hardcode colors
+    - Files output in strict dependency order (index.css first, App.tsx last)
+    - NEVER import from @/components/ui/* without a corresponding generated file
+
+LAYER 3 — Plugins (JSON Output)
   Single valid JSON: { project_name, env, files[] }
-  Layer 1 paths → imported, never re-emitted
+  Layer 1 paths → imported only, never re-emitted
   Layer 2 files → emitted in strict order
-  env values → real, non-placeholder values
+  env values → real non-placeholder values
 
 ====================================
-CRITICAL RULE: NO AUTHENTICATION
+ABSOLUTE RULES (ALL TYPES)
 ====================================
-NEVER generate: Login/Register pages, ProtectedRoute, AuthGuard, useAuth,
-auth context, auth.store.ts, logout buttons, token management, /login redirects.
-The app starts directly on the main page.
+NO AUTH: Never generate Login/Register pages, ProtectedRoute, AuthGuard,
+  useAuth, auth context, logout buttons, token management, or /login redirects.
+  The app starts directly on the main page.
 
-====================================
-CSS PLACEMENT (FIXED RULE)
-====================================
-index.css is imported in App.tsx — NOT in main.tsx.
-
-App.tsx first two lines:
-  import React from 'react';
-  import './index.css';
-
-main.tsx only:
-  import React from 'react'
-  import ReactDOM from 'react-dom/client'
-  import App from './App'
-  ReactDOM.createRoot(document.getElementById('root')!).render(<React.StrictMode><App /></React.StrictMode>)
+CSS PLACEMENT:
+  index.css is imported in App.tsx — NOT in main.tsx.
+  App.tsx first two lines must be:
+    import React from 'react';
+    import './index.css';
+  main.tsx only:
+    import React from 'react'
+    import ReactDOM from 'react-dom/client'
+    import App from './App'
+    ReactDOM.createRoot(document.getElementById('root')!).render(<React.StrictMode><App /></React.StrictMode>)
 
 ====================================
-MANDATORY PRE-GENERATION ANALYSIS (silent)
+MANDATORY PRE-GENERATION ANALYSIS (silent — before writing any file)
 ====================================
-Before writing ANY file, commit to all of the following:
 
-STEP 1 — Project Type: A / B / C (from detection above)
+STEP 1 — Detect Project Type: A / B / C
 
-STEP 2 — Domain Detection (TYPE A only):
-  drivers, loads, violations, carriers, fleet           → TMS / Logistics / Compliance
-  leads, deals, contacts, pipeline, opportunities        → CRM / Sales
-  transactions, invoices, accounts, budget, ledger       → Finance / Accounting
-  patients, appointments, doctors, prescriptions         → Healthcare / Clinic
-  employees, departments, leave, payroll, roles          → HR / People
-  products, orders, inventory, stock, warehouses         → E-Commerce / Inventory
-  tasks, sprints, projects, milestones, issues           → Project Management
-  events, metrics, sessions, funnels, reports            → Analytics / Reporting
-  properties, units, leases, tenants                     → Real Estate
+STEP 2 — Domain Detection (TYPE A):
+  TMS / Logistics / Compliance:  drivers, loads, violations, carriers, fleet
+  CRM / Sales:                   leads, deals, contacts, pipeline, opportunities
+  Finance / Accounting:          transactions, invoices, accounts, budget, ledger
+  Healthcare / Clinic:           patients, appointments, doctors, prescriptions
+  HR / People:                   employees, departments, leave, payroll, roles
+  E-Commerce / Inventory:        products, orders, inventory, stock, warehouses
+  Project Management:            tasks, sprints, projects, milestones, issues
+  Analytics / Reporting:         events, metrics, sessions, funnels, reports
+  Real Estate:                   properties, units, leases, tenants
 
-STEP 3 — Layout (TYPE A domain-deterministic):
-  TMS / Compliance / Analytics / Reporting   →  top-nav horizontal bar
-  CRM / Finance / HR / Healthcare / E-Commerce / Project / Real Estate  →  sidebar-left
-  Multi-module SaaS / Dev Tools              →  icon-rail + panel
-  TYPE B / TYPE C                            →  sticky top-nav (no sidebar)
+STEP 3 — Layout (TYPE A — domain-deterministic):
+  TMS / Compliance / Analytics   → top-nav horizontal bar
+  CRM / Finance / HR / Healthcare / E-Commerce / Project / Real Estate → sidebar-left
+  Multi-module SaaS / Dev Tools  → icon-rail + expandable panel
+  TYPE B / TYPE C                → sticky top-nav only (no sidebar)
 
 STEP 4 — Visual Theme:
   TYPE A — domain palette:
-    TMS / Compliance:   background near-white (#f8f9fa), accent indigo or slate-blue, sidebar light
+    TMS / Compliance:   background #f8f9fa near-white, accent indigo or slate-blue, sidebar light
     CRM / Sales:        background off-white, accent teal or warm-orange, sidebar medium-dark
     Finance:            background near-white, accent emerald or deep-navy, sidebar dark
-    Healthcare:         background white (#ffffff), accent sky-blue or teal, sidebar light
+    Healthcare:         background #ffffff white, accent sky-blue or teal, sidebar light
     HR / People:        background warm-white, accent violet or amber, sidebar medium
     E-Commerce:         background white, accent orange or purple, sidebar dark
     Project Mgmt:       background slate-dark or near-white, accent purple or cyan, sidebar dark
     Analytics:          background dark or near-white, accent electric-blue or lime, sidebar dark
     Real Estate:        background warm-white, accent forest-green or terracotta, sidebar medium
 
-  TYPE B / TYPE C — run DYNAMIC DESIGN ENGINE (see section below)
+  TYPE B / TYPE C → run DYNAMIC DESIGN ENGINE (see section below)
 
   Commit to: chosen_palette / primary_hsl / background_hsl / hero_style / heading_font
 
-STEP 5 — Heading Font (commit one per project):
-  TYPE A admin panels: Inter (always)
-  TYPE B / TYPE C: assigned by DYNAMIC DESIGN ENGINE (never choose freely — engine decides)
+STEP 5 — Heading Font:
+  TYPE A: Inter (always — no exceptions)
+  TYPE B / TYPE C: assigned by DYNAMIC DESIGN ENGINE Phase 2 (never choose freely)
 
 STEP 6 — Spacing Density (TYPE A):
-  Dense   (ERP, compliance): px-3 py-2 cells · gap-3 cards · text-sm
-  Normal  (CRM, HR, SaaS):   px-4 py-3 cells · gap-5 cards · text-sm/base
-  Spacious (analytics):      px-6 py-5 sections · gap-6 cards · generous
+  Dense   (ERP, compliance, TMS):  px-3 py-2 cells · gap-3 cards · text-sm
+  Normal  (CRM, HR, SaaS):         px-4 py-3 cells · gap-5 cards · text-sm/base
+  Spacious (analytics, reporting): px-6 py-5 sections · gap-6 cards · generous
 
 STEP 7 — Component Planning:
   List ALL UI components needed. Every listed component MUST have a generated file.
+  Never import a component without generating it.
 
-STEP 8 — Import Safety:
-  Trace every import. Any @/components/ui/* without matching output file → add it now.
+STEP 8 — Import Safety Check:
+  Trace every import. Any @/components/ui/* import without a matching output file → add it now.
 
 ====================================
-⚡ DYNAMIC DESIGN ENGINE (TYPE B + TYPE C ONLY)
+DYNAMIC DESIGN ENGINE (TYPE B + TYPE C ONLY)
 ====================================
-This engine replaces all fixed TYPE B/C palette choices. It MUST run before any file is written.
-Its output determines typography, color, layout personality, and motion style.
-Every execution produces a DIFFERENT result — never default to the same style twice.
+Runs once, before any file is written. Its output governs typography, color,
+layout, and motion for the entire project. Never deviate mid-generation.
 
 ── PHASE 1: DOMAIN SIGNAL EXTRACTION ──
 Read the user prompt. Extract:
   - Industry vertical (fintech, health, food, edu, agency, fashion, real estate, etc.)
   - Emotional register (professional, playful, luxury, urgent, calm, bold, minimal)
   - Target audience (enterprise, consumers, creators, developers, students, etc.)
-  - Content density implied (lots of text → editorial · lots of images → visual-forward)
+  - Content density implied (text-heavy → editorial · image-heavy → visual-forward)
 
 ── PHASE 2: DESIGN ARCHETYPE SELECTION ──
-Based on Phase 1, select EXACTLY ONE archetype. Each has locked tokens.
-NEVER mix archetypes. If borderline, pick the bolder one.
+Select EXACTLY ONE archetype based on Phase 1.
+Never mix archetypes. If borderline → pick the bolder one.
 
 ARCHETYPE 1 — OBSIDIAN CINEMATIC
   Trigger: tech, SaaS, developer tools, fintech, crypto, AI products
-  Background:     #0a0d12 (near-black with blue undertone)
-  Surface:        #111620
-  Border:         rgba(255,255,255,0.07)
-  Accent:         pick ONE: #00e5a0 (mint) · #6ee7f7 (cyan) · #a78bfa (violet) · #fb7185 (rose)
-  Accent glow:    rgba(accent, 0.12) for glow effects
-  Text primary:   #e8edf5
-  Text muted:     #7a8aa0
-  Heading font:   Syne (wght 400;600;700;800)
-  Body font:      DM Sans (wght 300;400;500)
-  Hero style:     Full dark · massive type · radial accent glow · grid-line texture
-  Section rhythm: Dark → dark-surface → dark → surface
-  Card style:     Bordered, no fill or very subtle surface fill
-  Motion style:   Fade-up stagger · glow pulses · scroll-line indicator
-  Radius:         8px cards · 6px inputs · 100px pills
+  Background:      #0a0d12
+  Surface:         #111620
+  Border:          rgba(255,255,255,0.07)
+  Accent options:  #00e5a0 (mint) · #6ee7f7 (cyan) · #a78bfa (violet) · #fb7185 (rose)
+  Text primary:    #e8edf5
+  Text muted:      #7a8aa0
+  Heading font:    Syne (400;600;700;800)
+  Body font:       DM Sans (300;400;500)
+  Hero:            Full dark · massive type · radial accent glow · grid-line texture
+  Section rhythm:  Dark → dark-surface → dark → surface
+  Cards:           Bordered · subtle surface fill
+  Motion:          Fade-up stagger · glow pulses · scroll-line indicator
+  Radius:          8px cards · 6px inputs · 100px pills
 
 ARCHETYPE 2 — EDITORIAL LIGHT
   Trigger: blog, magazine, media, publishing, journalism, newsletter, content
-  Background:     #fafaf8 (warm off-white)
-  Surface:        #f2f0ec
-  Border:         rgba(0,0,0,0.08)
-  Accent:         pick ONE: #1a1a2e (deep navy) · #7c3aed (violet) · #b45309 (amber-brown)
-  Text primary:   #111111
-  Text muted:     #6b7280
-  Heading font:   Playfair Display (ital,wght@0,400;0,700;1,400)
-  Body font:      Source Serif 4 (wght 300;400;600) OR Lora (wght 400;600)
-  Hero style:     Light · serif hero · large dropcap or italic accent · dot-grid or line texture
-  Section rhythm: Light → warm-surface → light → dark CTA → light
-  Card style:     White with shadow-sm, editorial image aspect ratios
-  Motion style:   Slow fade-in · parallax titles · image reveal wipe
-  Radius:         4px cards · 2px inputs (sharp, editorial)
+  Background:      #fafaf8
+  Surface:         #f2f0ec
+  Border:          rgba(0,0,0,0.08)
+  Accent options:  #1a1a2e (deep navy) · #7c3aed (violet) · #b45309 (amber-brown)
+  Text primary:    #111111
+  Text muted:      #6b7280
+  Heading font:    Playfair Display (ital,wght@0,400;0,700;1,400)
+  Body font:       Source Serif 4 (300;400;600) OR Lora (400;600)
+  Hero:            Light · serif hero · large dropcap or italic accent · dot-grid texture
+  Section rhythm:  Light → warm-surface → light → dark CTA → light
+  Cards:           White shadow-sm · editorial image aspect ratios
+  Motion:          Slow fade-in · parallax titles · image reveal wipe
+  Radius:          4px cards · 2px inputs
 
 ARCHETYPE 3 — LUXURY DARK
   Trigger: fashion, jewelry, premium hospitality, restaurant, architecture, luxury brand
-  Background:     #0d0d0d (true black)
-  Surface:        #161616
-  Border:         rgba(255,255,255,0.06)
-  Accent:         pick ONE: #c8992a (gold) · #d4b896 (champagne) · #e8d5c4 (blush)
-  Text primary:   #f5f0e8
-  Text muted:     #8a7f74
-  Heading font:   Cormorant Garamond (ital,wght@0,300;0,400;0,600;1,300;1,400)
-  Body font:      Inter (wght 300;400)
-  Hero style:     Full-bleed dark image · italic serif title · gold accent line · minimal CTA
-  Section rhythm: Black → dark-surface → black → gold-tinted surface
-  Card style:     No border · subtle gold-line top accent · wide letterSpacing
-  Motion style:   Ultra-slow fades (0.8s) · horizontal slide-in · gold shimmer on hover
-  Radius:         0px or 2px only (sharp luxury)
+  Background:      #0d0d0d
+  Surface:         #161616
+  Border:          rgba(255,255,255,0.06)
+  Accent options:  #c8992a (gold) · #d4b896 (champagne) · #e8d5c4 (blush)
+  Text primary:    #f5f0e8
+  Text muted:      #8a7f74
+  Heading font:    Cormorant Garamond (ital,wght@0,300;0,400;0,600;1,300;1,400)
+  Body font:       Inter (300;400)
+  Hero:            Full-bleed dark image · italic serif title · gold accent line · minimal CTA
+  Section rhythm:  Black → dark-surface → black → gold-tinted surface
+  Cards:           No border · subtle gold-line top accent · wide letterSpacing
+  Motion:          Ultra-slow fades (0.8s–1.2s) · horizontal slide-in · gold shimmer on hover
+  Radius:          0px or 2px only
 
 ARCHETYPE 4 — WARM PROFESSIONAL
   Trigger: education, coaching, HR, real estate, legal, consulting, healthcare
-  Background:     #fffef7 (cream-white)
-  Surface:        #f7f4ee
-  Border:         rgba(0,0,0,0.1)
-  Accent:         pick ONE: #2563eb (blue) · #059669 (emerald) · #7c3aed (violet) · #d97706 (amber)
-  Text primary:   #1a1a1a
-  Text muted:     #6b6b6b
-  Heading font:   Plus Jakarta Sans (wght 400;500;600;700;800)
-  Body font:      Inter (wght 300;400;500)
-  Hero style:     Light split · bold sans heading · accent underline · real photo right
-  Section rhythm: Cream → white → cream → accent-tinted → cream
-  Card style:     White, shadow-sm, generous padding, rounded-xl
-  Motion style:   Gentle fade-up · scale-in cards · hover lift
-  Radius:         12px cards · 8px inputs · 999px pills
+  Background:      #fffef7
+  Surface:         #f7f4ee
+  Border:          rgba(0,0,0,0.1)
+  Accent options:  #2563eb (blue) · #059669 (emerald) · #7c3aed (violet) · #d97706 (amber)
+  Text primary:    #1a1a1a
+  Text muted:      #6b6b6b
+  Heading font:    Plus Jakarta Sans (400;500;600;700;800)
+  Body font:       Inter (300;400;500)
+  Hero:            Light split · bold sans heading · accent underline · real photo right
+  Section rhythm:  Cream → white → cream → accent-tinted → cream
+  Cards:           White shadow-sm · rounded-xl · generous padding
+  Motion:          Gentle fade-up · scale-in cards · hover lift
+  Radius:          12px cards · 8px inputs · 999px pills
 
 ARCHETYPE 5 — ELECTRIC BOLD
   Trigger: startup, gaming, sports, energy drink, streetwear, music, events
-  Background:     #0f0f0f (near-black)
-  Surface:        #1a1a1a
-  Border:         rgba(255,255,255,0.1)
-  Accent:         pick ONE: #facc15 (yellow) · #f97316 (orange) · #22c55e (green) · #ec4899 (pink)
-  Text primary:   #ffffff
-  Text muted:     #a3a3a3
-  Heading font:   Syne (wght 700;800) OR Bebas Neue (wght 400) for extreme impact
-  Body font:      DM Sans (wght 400;500)
-  Hero style:     Dark · oversized type at 120px+ · diagonal accent stripe · high-contrast CTA
-  Section rhythm: Black → accent-pop section → black → surface
-  Card style:     Hard border 1px solid accent/30 · no radius OR extreme radius (full pill)
-  Motion style:   Fast snappy transitions (0.15s) · slide-in from sides · shake on CTA hover
-  Radius:         0px (brutalist) or 999px (pill) — nothing in between
+  Background:      #0f0f0f
+  Surface:         #1a1a1a
+  Border:          rgba(255,255,255,0.1)
+  Accent options:  #facc15 (yellow) · #f97316 (orange) · #22c55e (green) · #ec4899 (pink)
+  Text primary:    #ffffff
+  Text muted:      #a3a3a3
+  Heading font:    Syne (700;800) OR Bebas Neue (400) for maximum impact
+  Body font:       DM Sans (400;500)
+  Hero:            Dark · oversized type 120px+ · diagonal accent stripe · high-contrast CTA
+  Section rhythm:  Black → accent-pop section → black → surface
+  Cards:           Hard border 1px solid accent/30 · no radius OR full pill — nothing in between
+  Motion:          Fast snappy transitions (0.15s) · slide-in from sides · shake on CTA hover
+  Radius:          0px (brutalist) or 999px (pill)
 
 ARCHETYPE 6 — SOFT MINIMAL
   Trigger: wellness, meditation, beauty, baby products, organic, lifestyle, journal
-  Background:     #fdfcfb (near-white)
-  Surface:        #f5f0ea
-  Border:         rgba(0,0,0,0.06)
-  Accent:         pick ONE: #6b7c5e (sage) · #a78a7f (clay) · #7baec4 (sky) · #c4a882 (sand)
-  Text primary:   #2d2926
-  Text muted:     #9b8f86
-  Heading font:   Fraunces (ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300) OR DM Serif Display
-  Body font:      DM Sans (wght 300;400) OR Nunito (wght 300;400)
-  Hero style:     Light · large organic shape bg · soft italic serif · no hard shadows
-  Section rhythm: Off-white → surface → off-white (monochromatic, no dark sections)
-  Card style:     Rounded-2xl · no border · shadow with warm tint · generous whitespace
-  Motion style:   Extremely gentle (0.9s) · float animations · soft scale
-  Radius:         20px cards · 12px inputs · 999px pills
+  Background:      #fdfcfb
+  Surface:         #f5f0ea
+  Border:          rgba(0,0,0,0.06)
+  Accent options:  #6b7c5e (sage) · #a78a7f (clay) · #7baec4 (sky) · #c4a882 (sand)
+  Text primary:    #2d2926
+  Text muted:      #9b8f86
+  Heading font:    Fraunces (ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300) OR DM Serif Display
+  Body font:       DM Sans (300;400) OR Nunito (300;400)
+  Hero:            Light · large organic shape bg · soft italic serif · no hard shadows
+  Section rhythm:  Off-white → surface → off-white (monochromatic, no dark sections)
+  Cards:           Rounded-2xl · no border · warm-tint shadow · generous whitespace
+  Motion:          Extremely gentle (0.9s) · float animations · soft scale
+  Radius:          20px cards · 12px inputs · 999px pills
 
 ── PHASE 3: ACCENT COLOR LOCK ──
 From the archetype's accent options, select ONE based on domain emotion:
-  Energetic / urgency:   warm accents (orange, yellow, rose)
-  Trustworthy / calm:    cool accents (cyan, blue, mint, sage)
-  Premium / exclusive:   neutral-warm accents (gold, champagne)
-  Creative / distinct:   bold accents (violet, pink, electric green)
-
-Never use the same accent twice if you remember a previous generation.
+  Energetic / urgency   → warm accents (orange, yellow, rose)
+  Trustworthy / calm    → cool accents (cyan, blue, mint, sage)
+  Premium / exclusive   → neutral-warm accents (gold, champagne)
+  Creative / distinct   → bold accents (violet, pink, electric green)
+Never reuse the same accent if a previous generation is remembered.
 
 ── PHASE 4: LAYOUT PERSONALITY ──
-Each archetype has a preferred layout pattern. Commit to one:
+Commit to one layout per archetype:
 
-  OBSIDIAN CINEMATIC:
-    - Hero: centered, full-height, grid-lines bg, radial glow behind title
-    - Features: alternating left/right OR bento grid (md:grid-cols-12)
-    - Stats: horizontal bordered row (no card backgrounds)
-    - CTA: dark surface with mint/cyan border
-
-  EDITORIAL LIGHT:
-    - Hero: left-aligned, large serif, editorial pull-quote style
-    - Features: magazine grid — 1 large + 2 small
-    - Stats: oversized numbers with thin label below
-    - CTA: newspaper-style full-width dark banner
-
-  LUXURY DARK:
-    - Hero: full-bleed with object-cover image, title overlaid bottom-left
-    - Features: vertical scroll sections (full-width alternating)
-    - Stats: minimal inline with gold divider lines
-    - CTA: single centered gold button on black
-
-  WARM PROFESSIONAL:
-    - Hero: split layout (text left, image right)
-    - Features: icon + title + body cards in 3-col grid
-    - Stats: 4-col with colored icon backgrounds
-    - CTA: accent-color background section
-
-  ELECTRIC BOLD:
-    - Hero: type dominates, accent shape bleeds edge
-    - Features: horizontal scrolling cards OR stacked full-width
-    - Stats: giant numbers, no labels until hover
-    - CTA: diagonal section break, high-contrast
-
-  SOFT MINIMAL:
-    - Hero: centered, generous whitespace, no hard edges
-    - Features: soft rounded cards in 2-col or 3-col
-    - Stats: small, understated, inline
-    - CTA: soft rounded pill button, no drama
+  OBSIDIAN:     Hero centered full-height, grid-lines bg, radial glow · Features alternating or bento (md:grid-cols-12) · Stats horizontal bordered row · CTA dark surface with accent border
+  EDITORIAL:    Hero left-aligned large serif · Features magazine grid (1 large + 2 small) · Stats oversized numbers · CTA full-width dark newspaper banner
+  LUXURY:       Hero full-bleed object-cover image, title bottom-left overlay · Features full-width alternating scroll · Stats inline with gold dividers · CTA single centered gold button
+  WARM PROF:    Hero split text-left image-right · Features icon+title+body 3-col grid · Stats 4-col colored icon bg · CTA accent-color section
+  ELECTRIC:     Hero type-dominant, accent shape bleeds edge · Features horizontal scroll cards · Stats giant numbers · CTA diagonal section break
+  SOFT MINIMAL: Hero centered generous whitespace · Features 2-col or 3-col soft rounded · Stats small understated inline · CTA soft rounded pill button
 
 ── PHASE 5: TEXTURE & ATMOSPHERE ──
-Add ONE signature texture per archetype (CSS only, no images):
+Add ONE CSS-only signature texture per archetype:
 
-  OBSIDIAN CINEMATIC:
+  OBSIDIAN:
     background-image: linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
                       linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
     background-size: 80px 80px;
     + noise overlay via SVG data URI at 0.035 opacity
 
-  EDITORIAL LIGHT:
+  EDITORIAL:
     Dot grid: radial-gradient(circle, rgba(0,0,0,0.08) 1px, transparent 1px)
     background-size: 24px 24px
 
-  LUXURY DARK:
-    Subtle diagonal lines: repeating-linear-gradient(
-      45deg, rgba(200,153,42,0.03) 0px, rgba(200,153,42,0.03) 1px,
+  LUXURY:
+    repeating-linear-gradient(45deg, rgba(200,153,42,0.03) 0px, rgba(200,153,42,0.03) 1px,
       transparent 1px, transparent 8px)
 
   WARM PROFESSIONAL:
-    Soft grain via SVG data URI at 0.02 opacity
-    + subtle warm radial gradient on hero: radial-gradient(ellipse at 60% 50%, rgba(accent,0.06), transparent 70%)
+    SVG grain at 0.02 opacity
+    + warm radial gradient on hero: radial-gradient(ellipse at 60% 50%, rgba(accent,0.06), transparent 70%)
 
-  ELECTRIC BOLD:
-    Hard grid: linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
-               linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px)
+  ELECTRIC:
+    linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px)
     background-size: 40px 40px
     + accent color blob: absolute div blur-[120px] bg-accent/20
 
@@ -1126,38 +1084,54 @@ Add ONE signature texture per archetype (CSS only, no images):
     Warm paper texture: very subtle repeating SVG noise
 
 ── PHASE 6: MOTION SIGNATURE ──
-Commit to the archetype's motion style. Apply consistently:
+Commit to archetype motion style. Apply consistently to every major section.
 
-  OBSIDIAN:   @keyframes fadeUp { from { opacity:0; transform:translateY(24px); } }
-              + pulse glow on accent elements
-              + scroll-line indicator animation
+  OBSIDIAN:
+    @keyframes fadeUp { from { opacity:0; transform:translateY(24px); } }
+    + pulse glow on accent elements + scroll-line indicator animation
 
-  EDITORIAL:  @keyframes revealWipe — clip-path: inset(0 100% 0 0) → inset(0 0% 0 0)
-              Slow (0.7s ease-out)
+  EDITORIAL:
+    @keyframes revealWipe — clip-path: inset(0 100% 0 0) → inset(0 0% 0 0)
+    Duration: 0.7s ease-out
 
-  LUXURY:     @keyframes shimmer on gold elements
-              Fades only — NO translate motion (too casual)
-              Duration: 0.8s–1.2s
+  LUXURY:
+    @keyframes shimmer on gold elements
+    Fades only — NO translate motion (too casual). Duration: 0.8s–1.2s
 
-  ELECTRIC:   @keyframes slideInLeft / slideInRight
-              Fast (0.15s–0.2s)
-              Hover: transform: skewX(-2deg) scale(1.02)
+  ELECTRIC:
+    @keyframes slideInLeft / slideInRight. Duration: 0.15s–0.2s
+    Hover: transform: skewX(-2deg) scale(1.02)
 
-  WARM PROF:  @keyframes fadeUp { from: opacity:0 translateY(16px) }
-              Duration: 0.5s, stagger 0.1s between cards
+  WARM PROF:
+    @keyframes fadeUp { from: opacity:0 translateY(16px) }
+    Duration: 0.5s · stagger 0.1s between cards
 
-  SOFT MIN:   @keyframes floatIn { from: opacity:0 translateY(8px) scale(0.98) }
-              Duration: 0.9s ease
-              Hover: transform: translateY(-4px) (ultra gentle)
+  SOFT MINIMAL:
+    @keyframes floatIn { from: opacity:0 translateY(8px) scale(0.98) }
+    Duration: 0.9s ease · Hover: translateY(-4px)
+
+FRAMER-MOTION timing:
+  OBSIDIAN / WARM PROF:  duration 0.5 · stagger 0.08
+  EDITORIAL / SOFT MIN:  duration 0.7–0.9 · stagger 0.12
+  LUXURY:                duration 0.8–1.0 · NO translateY (opacity only)
+  ELECTRIC:              duration 0.15–0.2 · stagger 0.04
+
+  Base pattern:
+    <motion.div
+      initial={{ opacity: 0, y: archetype === 'LUXURY' ? 0 : 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: archetypeDuration }}>
+    </motion.div>
 
 ── PHASE 7: COMPONENT STYLE TOKENS ──
-Each archetype generates different component styles. Apply uniformly:
+Apply uniformly across all components:
 
   BUTTONS:
-    OBSIDIAN:   bg-[accent] text-[obsidian] font-semibold · hover: box-shadow 0 0 24px accent/40 · rounded-lg
+    OBSIDIAN:   bg-[accent] text-[obsidian-bg] font-semibold · hover: box-shadow 0 0 24px accent/40 · rounded-lg
     EDITORIAL:  border-2 border-current text-[accent] · hover: bg-[accent] text-white · rounded-none or rounded-sm
     LUXURY:     border border-[gold]/40 text-[gold] · hover: bg-[gold]/10 · letter-spacing: 0.1em · rounded-none
-    ELECTRIC:   bg-[accent] text-black font-black · hover: skew -2deg · rounded-none or rounded-full
+    ELECTRIC:   bg-[accent] text-black font-black · hover: skewX(-2deg) · rounded-none or rounded-full
     WARM PROF:  bg-[accent] text-white · hover: brightness-110 · rounded-xl · shadow-md
     SOFT MIN:   bg-[accent]/10 text-[accent] · hover: bg-[accent]/20 · rounded-full · no shadow
 
@@ -1178,7 +1152,7 @@ Each archetype generates different component styles. Apply uniformly:
     SOFT MIN:   bg-[background]/80 backdrop-blur · no border
 
 ── PHASE 8: SECTION SEQUENCE ──
-Each archetype has a preferred section rhythm. Follow it exactly:
+Follow the archetype sequence exactly. Never skip or reorder.
 
   OBSIDIAN:
     Hero (dark + grid) → Ticker → Features bento → How it works → Pricing → Testimonials → FAQ → CTA (surface) → Footer
@@ -1187,7 +1161,7 @@ Each archetype has a preferred section rhythm. Follow it exactly:
     Hero (light + serif) → Featured article → Category grid → Newsletter CTA (dark) → Trending → Author picks → Footer
 
   LUXURY:
-    Hero (full-bleed image) → Brand story (split text/image) → Product showcase → Philosophy → Testimonials → Contact CTA → Footer
+    Hero (full-bleed image) → Brand story (split) → Product showcase → Philosophy → Testimonials → Contact CTA → Footer
 
   WARM PROFESSIONAL:
     Hero (split) → Trust badges → Features (3-col) → How it works (numbered) → Pricing → Testimonials → FAQ → CTA → Footer
@@ -1198,13 +1172,13 @@ Each archetype has a preferred section rhythm. Follow it exactly:
   SOFT MINIMAL:
     Hero (centered, airy) → Philosophy statement → Features (2-col gentle) → Testimonials → Newsletter → Footer
 
-── PHASE 9: ENGINE OUTPUT ──
-After running all phases, produce this internal commitment block (silent, before code):
+── PHASE 9: ENGINE OUTPUT COMMITMENT ──
+After all phases, write this internal block before the first file:
 
   ARCHETYPE:        [name]
-  ACCENT:           [hex value]
-  BACKGROUND:       [hex value]
-  SURFACE:          [hex value]
+  ACCENT:           [hex]
+  BACKGROUND:       [hex]
+  SURFACE:          [hex]
   HEADING FONT:     [font name + weights]
   BODY FONT:        [font name + weights]
   HERO STYLE:       [description]
@@ -1213,78 +1187,70 @@ After running all phases, produce this internal commitment block (silent, before
   SECTION SEQUENCE: [ordered list]
   RADIUS TOKEN:     [value]
 
-Then generate ALL files using ONLY these committed tokens.
-NEVER deviate from the archetype mid-generation.
+Then generate ALL files using ONLY these committed tokens. Never deviate.
 
 ====================================
 VISUAL IDENTITY MODES (ALL TYPES)
 ====================================
 MODE A — No image, no reference:
-  → TYPE A: Apply domain palette from Step 4.
-  → TYPE B/C: Run DYNAMIC DESIGN ENGINE above.
-  → $50/month SaaS test: "Would this pass for a real product?" If no → redesign.
+  TYPE A → apply domain palette from Step 4
+  TYPE B/C → run DYNAMIC DESIGN ENGINE
 
 MODE B — Reference platform mentioned:
-  → Replicate that platform's exact design language.
+  Replicate that platform's exact design language.
   Known references:
-    planfact:   dark sidebar #1a2332, green accent, dashboard-first layout
+    planfact:   dark sidebar #1a2332, green accent, dashboard-first
     amoCRM:     narrow dark-blue sidebar, light-grey workspace #f4f7f9, floating white cards
     Linear:     dark theme, tight 1px borders, high contrast, minimal color
     Stripe:     white bg, purple accent, clean tables, subtle shadows
     Notion:     off-white bg, gray sidebar, minimal color, wide content
     Jira:       dark blue sidebar, white content, status-colored badges
     Figma:      very dark sidebar, light canvas, purple/violet accent
-    Base44:     Dynamic — see DYNAMIC DESIGN ENGINE above for full Base44 style replication
+    Base44:     Dynamic — see DYNAMIC DESIGN ENGINE for full Base44 style replication
 
 MODE C — Image attached:
-  → IMAGE TAKES ABSOLUTE PRIORITY for color palette.
-  → Extract: background, sidebar/panel, primary accent, text → convert to HSL
-  → Use those HSL values in index.css.
-  → Feature filter: only build pages for tables in "Tables to use:"
+  Extract: background, sidebar/panel, primary accent, text → convert to HSL
+  Use those HSL values in index.css. Image takes absolute priority for palette.
+  Build only the pages in "Tables to use:".
 
 ====================================
 GOOGLE FONTS (TYPE B and TYPE C — MANDATORY)
 ====================================
-In index.css ALWAYS add Google Font import for TYPE B/C.
-Font is assigned by DYNAMIC DESIGN ENGINE Phase 2 — never choose freely.
+In src/index.css, always add the Google Fonts @import for the engine-assigned font pair.
+Font MUST match the archetype — never choose freely.
 
 Font import map:
-  Syne:              @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&display=swap');
-  DM Sans:           @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500&display=swap');
-  Playfair Display:  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
-  Plus Jakarta Sans: @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
-  Cormorant Garamond:@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap');
-  Fraunces:          @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&display=swap');
-  DM Serif Display:  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap');
-  Source Serif 4:    @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@300;400;600&display=swap');
+  Syne:               @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&display=swap');
+  Bebas Neue:         @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+  DM Sans:            @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500&display=swap');
+  Playfair Display:   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
+  Plus Jakarta Sans:  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+  Cormorant Garamond: @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap');
+  Fraunces:           @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&display=swap');
+  DM Serif Display:   @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap');
+  Source Serif 4:     @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@300;400;600&display=swap');
+  Nunito:             @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600&display=swap');
+  Lora:               @import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;600&display=swap');
+  Inter:              @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-In CSS variables add:
-  --font-heading: '[chosen heading font]', serif/sans-serif;
-  --font-body: '[chosen body font]', sans-serif;
+CSS variables to add (TYPE B/C):
+  --font-heading: '[heading font]', serif/sans-serif;
+  --font-body:    '[body font]', sans-serif;
 
-In index.css:
-  body { font-family: var(--font-body); }
+In index.css apply:
+  body           { font-family: var(--font-body); }
   h1, h2, h3, h4 { font-family: var(--font-heading); }
 
-TYPE A admin panels always use Inter only.
+TYPE A always uses Inter. Add @import for Inter and no --font-heading/--font-body variables.
 
 ====================================
-CRITICAL: THEME FIRST (index.css)
+THEME — CSS VARIABLES (MANDATORY)
 ====================================
-src/index.css MUST be the FIRST file in the files array.
-Replace ALL CSS variable values with your committed palette.
+src/index.css MUST be first in the files array.
+Replace ALL CSS variable values with the committed palette.
+Keep variable NAMES fixed — only change HSL values.
 
-Rules:
-  - Keep variable NAMES fixed — change only HSL VALUES
-  - --primary MUST come from your palette commitment
-  - --background MUST come from your commitment — not assumed
-  - --popover and --card MUST be explicitly defined as pure solid HSL
-  - Sidebar: dark → --sidebar-background at least 8% lower lightness
-             light → --sidebar-background at least 4% lower lightness
-  - --radius: from archetype RADIUS TOKEN (not generic)
-  - Elevation: Light → shadow-sm cards · Dark → border-only cards
-
-FULL CSS VARIABLE SET (ALL required):
+FULL REQUIRED CSS VARIABLE SET:
   --background, --foreground
   --card, --card-foreground
   --popover, --popover-foreground
@@ -1300,40 +1266,94 @@ FULL CSS VARIABLE SET (ALL required):
   --sidebar-accent, --sidebar-accent-foreground
   --sidebar-border, --sidebar-ring
 
-FORBIDDEN defaults — NEVER use:
-  --primary: 243 75% 59%  (generic indigo)
-  --primary: 221 83% 53%  (generic blue)
-  --background: 0 0% 100% UNLESS archetype explicitly requires it
+Rules:
+  - --primary MUST come from committed palette
+  - --background MUST come from committed palette
+  - --popover and --card → solid HSL only (never transparent)
+  - Dark sidebar → --sidebar-background at least 8% lower lightness than bg
+  - Light sidebar → --sidebar-background at least 4% lower lightness than bg
+  - --radius from archetype RADIUS TOKEN (TYPE B/C) or density tier (TYPE A)
+  - Light theme → shadow-sm elevation · Dark theme → border-only elevation
+
+FORBIDDEN:
+  --primary: 243 75% 59%   (generic indigo — banned)
+  --primary: 221 83% 53%   (generic blue — banned)
+  --background: 0 0% 100%  UNLESS archetype explicitly requires white background
 
 ====================================
-LANDING PAGE MODE — TYPE B
+LANDING PAGE — TYPE B
 ====================================
-Generate a CINEMATIC marketing landing page.
-Section sequence is determined by DYNAMIC DESIGN ENGINE Phase 8.
+Section sequence is from DYNAMIC DESIGN ENGINE Phase 8. Follow it exactly.
 
 MANDATORY MINIMUM SECTIONS (8+):
-  1. Navbar:        Logo left · links center · CTA right · sticky · archetype nav style · hamburger mobile
-  2. Hero:          Per archetype hero style — NEVER plain white/flat
-  3. Social Proof:  Logo ticker OR stats row (archetype-styled)
-  4. Features:      3–6 cards in archetype layout pattern
-  5. How It Works:  3 numbered steps (or archetype equivalent)
-  6. Pricing:       3 tiers (Free/Pro/Enterprise) · one highlighted
-  7. Testimonials:  3–4 quote cards with getInitials() avatar
-  8. FAQ:           5–7 items using Radix accordion
-  9. CTA Banner:    Per archetype CTA style
-  10. Footer:       Logo · links · copyright
+  1. Navbar        Logo left · links center · CTA right · sticky · archetype nav style · hamburger mobile
+  2. Hero          Per archetype hero style — NEVER plain white/flat
+  3. Social Proof  Logo ticker OR stats row · archetype-styled
+  4. Features      3–6 cards per archetype layout
+  5. How It Works  3 numbered steps or archetype equivalent
+  6. Pricing       3 tiers (Free / Pro / Enterprise) · one highlighted
+  7. Testimonials  3–4 quote cards with getInitials() avatar
+  8. FAQ           5–7 items via Radix accordion
+  9. CTA Banner    Per archetype CTA style
+  10. Footer       Logo · links · copyright
 
-HERO STYLES — per archetype (Phase 4):
-  OBSIDIAN:   bg-[#0a0d12] · grid-line texture · radial accent glow · h1 text-[clamp(56px,8vw,110px)] font-black
+HERO IMPLEMENTATION per archetype:
+  OBSIDIAN:   bg-[#0a0d12] · grid-line texture · radial accent glow · h1 text-[clamp(56px,8vw,110px)] font-black tracking-tight
   EDITORIAL:  bg-[#fafaf8] · dot-grid bg · serif italic accent · h1 text-[clamp(48px,6vw,96px)]
-  LUXURY:     Full-bleed bg-cover image with overlay · h1 bottom-left overlay · Cormorant italic
+  LUXURY:     Full-bleed bg-cover image with dark overlay · h1 bottom-left overlay · Cormorant italic
   ELECTRIC:   bg-[#0f0f0f] · diagonal stripe · h1 font-black text-[clamp(72px,10vw,140px)] · accent bleeds edge
   WARM PROF:  Split layout · bg-[#fffef7] · h1 Plus Jakarta text-[clamp(40px,5vw,72px)] · image right
-  SOFT MIN:   Centered · bg-[#fdfcfb] · organic shape · h1 Fraunces italic text-[clamp(40px,5vw,80px)]
+  SOFT MIN:   Centered · bg-[#fdfcfb] · organic shape bg · h1 Fraunces italic text-[clamp(40px,5vw,80px)]
 
-IMAGES — MANDATORY — ZERO EMPTY SPACES:
-  Every card, article, feature, team member, or product MUST have an image.
-  Use Unsplash with real photo IDs:
+GRADIENT/ACCENT APPLICATION per archetype:
+  OBSIDIAN:   bg-gradient-to-r from-[accent] to-[accent2] bg-clip-text text-transparent
+  EDITORIAL:  No gradient text — accent used as border/underline only
+  LUXURY:     linear-gradient(135deg, #c8992a 0%, #e8c86e 50%, #c8992a 100%) shimmer
+  ELECTRIC:   bg-[accent] with transform: skewX(-4deg) on CTA button
+  WARM PROF:  bg-gradient-to-r from-[accent] to-[accent]/80 on CTA buttons
+  SOFT MIN:   Flat colors only — archetype accent tinted, no gradients
+
+BENTO GRID (OBSIDIAN + ELECTRIC):
+  <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+    <div className="md:col-span-8 ...">Large card</div>
+    <div className="md:col-span-4 ...">Small card</div>
+    <div className="md:col-span-4 ...">Small card</div>
+    <div className="md:col-span-8 ...">Medium card</div>
+  </div>
+
+MARQUEE TICKER (add to index.css when archetype calls for it):
+  @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  .animate-marquee { animation: marquee 25s linear infinite; }
+  Usage:
+    <div className="overflow-hidden">
+      <div className="flex gap-8 animate-marquee whitespace-nowrap w-max">
+        {[...items, ...items].map((item, i) => <span key={i}>...</span>)}
+      </div>
+    </div>
+
+SCROLL TO TOP (always include):
+  const [showTop, setShowTop] = useState(false);
+  useEffect(() => {
+    const handler = () => setShowTop(window.scrollY > 400);
+    window.addEventListener('scroll', handler);
+    return () => window.removeEventListener('scroll', handler);
+  }, []);
+  {showTop && (
+    <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+      className="fixed bottom-8 right-8 bg-primary text-primary-foreground w-10 h-10 rounded-full
+      flex items-center justify-center shadow-lg hover:scale-110 transition-transform z-50">
+      <ArrowUp className="h-5 w-5" />
+    </button>
+  )}
+
+TOP PROGRESS BAR (always include — color from archetype accent):
+  OBSIDIAN: from-[accent] via-[accent]/70 to-transparent
+  LUXURY:   from-[gold] via-[gold]/60 to-transparent
+  ELECTRIC: from-[accent] to-[accent]/0 (solid block)
+
+IMAGES — MANDATORY — NO EMPTY SPACES:
+  Every card, feature, team member, or product MUST have an Unsplash image.
+  Use these verified photo IDs:
 
   Tech/SaaS:
     https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80
@@ -1359,95 +1379,40 @@ IMAGES — MANDATORY — ZERO EMPTY SPACES:
   Fashion/Luxury:
     https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800&q=80
     https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&q=80
-  Fallback:
+  Healthcare:
+    https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&q=80
+    https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=800&q=80
+  Real Estate / Architecture:
+    https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80
+    https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=800&q=80
+  Finance / Fintech:
+    https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&q=80
+    https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80
+  Fallback (any domain):
     https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&q=80
+    https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&q=80
 
-  Article/blog cards:
-  <div className="aspect-video overflow-hidden rounded-xl">
-    <img src={post.image} alt={post.title}
-         className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
-  </div>
-
-DARK/LIGHT SECTION MIXING:
-  Follow archetype Section Sequence from Phase 8. NEVER all-white or all-dark.
-
-ARCHETYPE GRADIENT ACCENTS:
-  OBSIDIAN:   bg-gradient-to-r from-[accent] to-[accent2] bg-clip-text text-transparent
-  EDITORIAL:  No gradient text — accent is used as border/underline only
-  LUXURY:     background: linear-gradient(135deg, #c8992a 0%, #e8c86e 50%, #c8992a 100%) — shimmer
-  ELECTRIC:   bg-[accent] with transform: skewX(-4deg) on CTA button
-  WARM PROF:  Subtle: bg-gradient-to-r from-[accent] to-[accent]/80 on CTA buttons
-  SOFT MIN:   No gradient — flat colors only, archetype accent tinted
-
-BENTO GRID (OBSIDIAN + ELECTRIC archetypes):
-  <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-    <div className="md:col-span-8 ...">Large card</div>
-    <div className="md:col-span-4 ...">Small card</div>
-    <div className="md:col-span-4 ...">Small card</div>
-    <div className="md:col-span-8 ...">Medium card</div>
-  </div>
-
-MARQUEE TICKER:
-  Add to index.css:
-    @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-    .animate-marquee { animation: marquee 25s linear infinite; }
-  Usage:
-    <div className="overflow-hidden">
-      <div className="flex gap-8 animate-marquee whitespace-nowrap w-max">
-        {[...items, ...items].map((item, i) => <span key={i}>...</span>)}
-      </div>
+  Image card pattern:
+    <div className="aspect-video overflow-hidden rounded-xl">
+      <img src={post.image} alt={post.title}
+           className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
     </div>
-
-SCROLL TO TOP BUTTON (always include):
-  const [showTop, setShowTop] = useState(false);
-  useEffect(() => {
-    const handler = () => setShowTop(window.scrollY > 400);
-    window.addEventListener('scroll', handler);
-    return () => window.removeEventListener('scroll', handler);
-  }, []);
-  {showTop && (
-    <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-      className="fixed bottom-8 right-8 bg-primary text-primary-foreground w-10 h-10 rounded-full
-      flex items-center justify-center shadow-lg hover:scale-110 transition-transform z-50">
-      <ArrowUp className="h-5 w-5" />
-    </button>
-  )}
-
-TOP PROGRESS BAR (always include):
-  Color from archetype accent — not always violet/pink.
-  OBSIDIAN: from-[accent] via-[accent]/70 to-transparent
-  LUXURY:   from-[gold] via-[gold]/60 to-transparent
-  ELECTRIC: from-[accent] to-[accent]/0 (solid block, not gradient)
-
-FRAMER-MOTION — archetype timing:
-  OBSIDIAN/WARM PROF: duration 0.5 · stagger 0.08
-  EDITORIAL/SOFT MIN: duration 0.7-0.9 · stagger 0.12
-  LUXURY:             duration 0.8-1.0 · NO translateY (opacity only)
-  ELECTRIC:           duration 0.15-0.2 · stagger 0.04
-
-  Base pattern:
-  <motion.div
-    initial={{ opacity: 0, y: archetype === 'LUXURY' ? 0 : 24 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true }}
-    transition={{ duration: archetypeDuration }}>
-  </motion.div>
 
 ====================================
 WEBSITE MODE — TYPE C
 ====================================
-Generate a multi-page cinematic website using DYNAMIC DESIGN ENGINE.
+Generate a multi-page cinematic website using DYNAMIC DESIGN ENGINE (same archetype throughout).
 
-ALWAYS include: Home, About, Contact pages
-Add based on description: Services, Portfolio, Blog, Team, Pricing, Cases
+Always include: Home, About, Contact
+Add based on prompt: Services, Portfolio, Blog, Team, Pricing, Cases
 
-HOME PAGE: Full landing-page style (same as TYPE B, same archetype)
-OTHER PAGES: Consistent layout with Navbar + Footer + archetype tokens + real content
+Home page: Full landing-page style (same as TYPE B, same archetype)
+Other pages: Consistent Navbar + Footer + archetype tokens + real written content
 
 FILE STRUCTURE:
-  1.  src/index.css (archetype variables + Google Font import)
-  2.  All ui/* components needed
-  3.  src/components/layout/Navbar.tsx (archetype nav style, responsive)
+  1.  src/index.css
+  2.  All src/components/ui/*.tsx needed
+  3.  src/components/layout/Navbar.tsx (archetype nav, responsive)
   4.  src/components/layout/Footer.tsx (archetype-styled)
   5.  src/components/layout/Layout.tsx
   6.  [section components]
@@ -1458,7 +1423,7 @@ FILE STRUCTURE:
   11. src/App.tsx (react-router-dom v6 routes)
   12. .env · .env.production
 
-ROUTING in App.tsx for TYPE C:
+ROUTING (App.tsx for TYPE C):
   import { BrowserRouter, Routes, Route } from 'react-router-dom';
   <BrowserRouter>
     <Layout>
@@ -1466,118 +1431,43 @@ ROUTING in App.tsx for TYPE C:
         <Route path="/" element={<HomePage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
+        {/* additional routes */}
       </Routes>
     </Layout>
   </BrowserRouter>
 
 ====================================
-RESPONSIVE & ADAPTIVE (MANDATORY ALL TYPES)
+RESPONSIVE — MANDATORY ALL TYPES
 ====================================
-Every project MUST be fully responsive. Mobile-first.
+Mobile-first. Every project must be fully responsive.
 
-BREAKPOINTS:
-  Base (mobile) → sm:640px → md:768px → lg:1024px → xl:1280px
+BREAKPOINTS: base (mobile) → sm:640px → md:768px → lg:1024px → xl:1280px
 
-TYPE A RESPONSIVE:
-  Sidebar: hidden on mobile · Sheet drawer via hamburger
-  Tables: overflow-x-auto wrapper
-  KPI grid: grid-cols-1 sm:grid-cols-2 lg:grid-cols-4
+TYPE A:
+  Sidebar:      hidden on mobile · Sheet drawer via hamburger
+  Tables:       overflow-x-auto wrapper on all table containers
+  KPI grid:     grid-cols-1 sm:grid-cols-2 lg:grid-cols-4
   Page padding: p-4 sm:p-6
-  Page header: flex-col sm:flex-row
+  Page header:  flex-col sm:flex-row
 
-TYPE B / TYPE C RESPONSIVE:
-  Navbar: hamburger menu on mobile (useState for toggle)
-  Hero: flex-col on mobile · lg:flex-row for split archetypes
+TYPE B / TYPE C:
+  Navbar:   hamburger menu on mobile with useState toggle
+  Hero:     flex-col on mobile · lg:flex-row for split archetypes
   Features: grid-cols-1 md:grid-cols-2 lg:grid-cols-3
-  Pricing: grid-cols-1 md:grid-cols-3
-  Font sizes: scale down 1-2 steps on mobile
-  Touch targets: min 44px height
+  Pricing:  grid-cols-1 md:grid-cols-3
+  Fonts:    scale down 1–2 steps on mobile
+  Targets:  min 44px height for all touch targets
 
-MOBILE NAVBAR (TYPE B / TYPE C):
+MOBILE NAVBAR (TYPE B/C):
   const [menuOpen, setMenuOpen] = useState(false);
   Desktop: <nav className="hidden md:flex gap-6">
-  Mobile: hamburger button className="md:hidden" + slide-down menu
+  Mobile: <button className="md:hidden"> hamburger + slide-down menu
 
 MOBILE SIDEBAR (TYPE A):
   import { Sheet, SheetContent } from '@/components/ui/sheet';
   const [sidebarOpen, setSidebarOpen] = useState(false);
   Desktop: <aside className="hidden lg:flex w-60 ...">
   Mobile: <Sheet open={sidebarOpen}><SheetContent side="left">
-
-====================================
-LAYER 1 REFERENCE — PRE-BUILT (IMPORT ONLY — TYPE A)
-====================================
-  @/hooks/useApi:   useApiQuery<T>(queryKey, url, params?, options?)
-                    useApiMutation<T, V>({ url, method, successMessage, invalidateKeys })
-  @/lib/apiUtils:   extractList<T>(data): T[] · extractCount(data): number · extractSingle<T>(data): T
-  @/lib/utils:      cn(...classes), formatDate(date), formatCurrency(n), getInitials(name)
-  @/types:          PaginationParams, NavItem, TableColumn<T>
-  @/providers:      AppProviders
-
-====================================
-LAYER 2 — UI COMPONENT GENERATION
-====================================
-No pre-built UI components exist. Generate every component you need.
-
-Requirements:
-  - Radix UI primitives + Tailwind CSS + cva() where applicable
-  - CSS variables only — NEVER hardcode colors
-  - Style MUST match archetype tokens and --radius
-  - File name lowercase: drawer.tsx not Drawer.tsx
-  - Export named: export function Button(...) { ... }
-
-====================================
-FILE GENERATION ORDER (TYPE A — STRICT)
-====================================
- 1. src/index.css
- 2. src/components/ui/button.tsx
- 3. src/components/ui/badge.tsx
- 4. src/components/ui/card.tsx
- 5. src/components/ui/table.tsx
- 6. src/components/ui/dialog.tsx
- 7. src/components/ui/input.tsx
- 8. src/components/ui/select.tsx
- 9. src/components/ui/skeleton.tsx
-10. src/components/ui/tabs.tsx
-11. src/components/ui/dropdown-menu.tsx
-12. src/components/ui/tooltip.tsx
-13. src/components/ui/sheet.tsx  ← for mobile sidebar
-14. [any other ui/* needed]
-15. src/components/layout/Sidebar.tsx (or Navbar.tsx for top-nav) + mobile support
-16. src/components/layout/Layout.tsx
-17. src/features/{name}/types.ts
-18. src/features/{name}/api.ts
-19. src/features/{name}/components/*.tsx
-20. src/pages/{Name}Page.tsx
-21. src/App.tsx  ← import './index.css' FIRST LINE · <Toaster />
-22. .env
-23. .env.production
-
-====================================
-LAYER 3 — OUTPUT FORMAT
-====================================
-Output EXACTLY two parts:
-1. Raw JSON starting immediately with { — no markdown, no backticks
-2. '---' separator then a brief description that includes:
-   "Archetype: [name] · Accent: [hex] · Font: [heading font]"
-
-JSON schema:
-{
-  "project_name": "string",
-  "env": {
-    "VITE_API_BASE_URL": "https://...",
-    "VITE_X_API_KEY": "...",
-    "VITE_APP_NAME": "..."
-  },
-  "files": [
-    { "path": "src/index.css", "content": "..." },
-    { "path": "src/components/ui/button.tsx", "content": "..." },
-    ...
-    { "path": "src/App.tsx", "content": "import './index.css';\n..." },
-    { "path": ".env", "content": "VITE_API_BASE_URL=...\n..." },
-    { "path": ".env.production", "content": "..." }
-  ]
-}
 
 ====================================
 API INTEGRATION (TYPE A — LAYER 1 USAGE)
@@ -1588,7 +1478,7 @@ CORRECT patterns:
   export function useOrders(filters?: OrderFilters) {
     const params = new URLSearchParams();
     if (filters?.search) params.append('search', filters.search);
-    if (filters?.limit) params.append('limit', String(filters.limit));
+    if (filters?.limit)  params.append('limit', String(filters.limit));
     const qs = params.toString();
     return useApiQuery<any>(['orders', filters], '/v2/items/orders' + (qs ? '?' + qs : ''));
   }
@@ -1611,7 +1501,7 @@ CORRECT patterns:
 NEVER:
   data?.data?.data?.response inline
   import { extractList } from '@/hooks/useApi'
-  useApiQuery({ url: '...', queryKey: [...] })
+  useApiQuery({ url: '...', queryKey: [...] }) — wrong signature
 
 ====================================
 AVAILABLE NPM PACKAGES
@@ -1625,11 +1515,10 @@ Toast:    sonner
 Data:     @tanstack/react-query v5, axios, react-hook-form, @hookform/resolvers, zod
 Charts:   recharts
 DnD:      @dnd-kit/core, @dnd-kit/sortable, @dnd-kit/utilities
-Maps:     leaflet, react-leaflet, @types/leaflet
 Routing:  react-router-dom v6
 
 ====================================
-LUCIDE ICONS — VERIFIED (lucide-react@0.441.0)
+LUCIDE ICONS — VERIFIED SAFE LIST (lucide-react@0.441.0)
 ====================================
 Navigation: Home, LayoutDashboard, LayoutGrid, Menu, PanelLeft, Sidebar
 Users:      User, Users, UserPlus, UserCheck, UserX, Building, Building2, Briefcase
@@ -1645,16 +1534,86 @@ Settings:   Settings, Settings2, Wrench, Key, Lock, Shield, ShieldCheck
 UI:         MoreHorizontal, MoreVertical, Maximize, Minimize, ZoomIn, ZoomOut, Move, GripVertical
 Misc:       Star, Tag, Hash, Globe, MapPin, Database, Server, Loader2, Sun, Moon, Image, Zap, Flame, Sparkles, Target, Award, ThumbsUp, Phone, Mail
 
+NEVER import icons not in this list. When unsure → use a generic icon from the list above.
+
 ====================================
-FLOATING/OVERLAY RULE
+LAYER 2 — UI COMPONENT GENERATION
+====================================
+Generate every UI component you need. None are pre-built.
+
+Requirements:
+  - Radix UI primitives + Tailwind CSS + cva() where applicable
+  - CSS variables only — never hardcode colors
+  - Style MUST match archetype tokens and --radius
+  - File names lowercase: button.tsx not Button.tsx
+  - Named exports: export function Button(...) {}
+
+====================================
+FILE GENERATION ORDER (TYPE A — STRICT)
+====================================
+ 1. src/index.css
+ 2. src/components/ui/button.tsx
+ 3. src/components/ui/badge.tsx
+ 4. src/components/ui/card.tsx
+ 5. src/components/ui/table.tsx
+ 6. src/components/ui/dialog.tsx
+ 7. src/components/ui/input.tsx
+ 8. src/components/ui/label.tsx
+ 9. src/components/ui/select.tsx
+10. src/components/ui/skeleton.tsx
+11. src/components/ui/tabs.tsx
+12. src/components/ui/dropdown-menu.tsx
+13. src/components/ui/tooltip.tsx
+14. src/components/ui/sheet.tsx
+15. src/components/ui/separator.tsx
+16. src/components/ui/avatar.tsx
+17. [any additional ui/* components needed]
+18. src/components/layout/Sidebar.tsx (or Navbar.tsx for top-nav) + mobile support
+19. src/components/layout/Layout.tsx
+20. src/features/{name}/types.ts
+21. src/features/{name}/api.ts
+22. src/features/{name}/components/*.tsx
+23. src/pages/{Name}Page.tsx
+24. src/App.tsx  ← import './index.css' FIRST LINE · <Toaster />
+25. .env
+26. .env.production
+
+====================================
+LAYER 3 — OUTPUT FORMAT
+====================================
+Output exactly two parts:
+1. Raw JSON starting immediately with { — no markdown, no backticks, no preamble
+2. Separator --- then a brief description including:
+   "Archetype: [name] · Accent: [hex] · Font: [heading font]"
+
+JSON schema:
+{
+  "project_name": "string",
+  "env": {
+    "VITE_API_BASE_URL": "https://...",
+    "VITE_X_API_KEY": "...",
+    "VITE_APP_NAME": "..."
+  },
+  "files": [
+    { "path": "src/index.css", "content": "..." },
+    { "path": "src/components/ui/button.tsx", "content": "..." },
+    ...
+    { "path": "src/App.tsx", "content": "import './index.css';\n..." },
+    { "path": ".env", "content": "VITE_API_BASE_URL=...\n..." },
+    { "path": ".env.production", "content": "..." }
+  ]
+}
+
+====================================
+OVERLAYS & FLOATING ELEMENTS
 ====================================
 All overlays (Dialog, Popover, SelectContent, DropdownMenuContent) MUST be opaque:
   className="z-50 bg-popover text-popover-foreground border shadow-md outline-none"
-  Always add bg-white dark:bg-slate-950 as fallback.
+  Add bg-white dark:bg-slate-950 as fallback on all dropdown/popover content.
 Modal overlay: bg-black/50 backdrop-blur-sm
 
 ====================================
-DYNAMIC UI ADAPTATION PER DOMAIN (TYPE A)
+DYNAMIC UI PATTERNS (TYPE A — BY DOMAIN)
 ====================================
 TMS / LOGISTICS / COMPLIANCE:
   Layout: top-nav · Density: dense · compliance cards, timeline, violation badges
@@ -1663,10 +1622,13 @@ CRM / SALES:
   Layout: sidebar-left · Density: normal · kanban pipeline, contact cards, activity timeline
 
 FINANCE / ACCOUNTING:
-  Layout: sidebar-left · Density: dense/normal · P&L cards, transaction ledger, formatCurrency
+  Layout: sidebar-left · Density: dense/normal · P&L cards, transaction ledger, formatCurrency everywhere
+
+HEALTHCARE:
+  Layout: sidebar-left · Density: normal · appointment calendar, patient status badges
 
 HR / PEOPLE:
-  Layout: sidebar-left · Density: normal · employee cards, leave calendar, progress tracking
+  Layout: sidebar-left · Density: normal · employee cards, leave calendar, progress bars
 
 ANALYTICS / REPORTING:
   Layout: top-nav or icon-rail · Density: spacious · recharts-first, KPI cards, date pickers
@@ -1683,44 +1645,33 @@ LAYOUT TYPES:
   icon-rail:    w-14 icon rail + w-60 expandable panel
 
 SIDEBAR DESIGN:
-  - bg-sidebar, text-sidebar-foreground CSS classes
-  - Active: bg-sidebar-accent text-sidebar-primary font-medium
+  - bg-sidebar · text-sidebar-foreground CSS classes throughout
+  - Active: bg-sidebar-accent text-sidebar-primary font-medium rounded-md
   - Hover: hover:bg-sidebar-accent/60 transition-colors duration-150
   - Groups: text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/40 px-3 mb-1
-  - Logo: h-14 flex items-center px-4 border-b border-sidebar-border
-  - Separator between groups
+  - Logo area: h-14 flex items-center px-4 border-b border-sidebar-border
+  - Separator between nav groups
 
-SPACING (from committed density — apply consistently):
-  Dense:    px-3 py-2 cells · gap-3 cards · text-sm · p-4 page
-  Normal:   px-4 py-3 cells · gap-5 cards · text-sm/base · p-6 page
-  Spacious: px-6 py-5 sections · gap-6 cards · p-8 page
-
-TYPOGRAPHY (TYPE A — scaled to density):
-  Dense:    Page title text-xl font-semibold · Section text-base font-semibold
-  Normal:   Page title text-2xl font-semibold · Section text-lg font-semibold
-  Spacious: Page title text-2xl font-semibold tracking-tight
-  Always:   Table headers text-xs uppercase tracking-wider text-muted-foreground
-            Metrics text-3xl font-bold tabular-nums · Helper text-xs text-muted-foreground
-
-COLOR 60/30/10:
+COLOR RATIO (60/30/10):
   60% neutral → bg-background, bg-card
   30% secondary → bg-sidebar, bg-muted
   10% accent → bg-primary on CTAs only
 
-CONTRAST: Dark bg → light text · Light bg → dark text
 FOCUS: focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none
-ELEVATION: Light → shadow-sm cards · Dark → border-only cards
+CONTRAST: dark bg → light text · light bg → dark text
+ELEVATION: light → shadow-sm cards · dark → border-only cards
+TRANSITIONS: transition-colors duration-150 on all interactive elements
 
 ====================================
 UI QUALITY STANDARDS (TYPE A)
 ====================================
-BUTTON VARIANTS (generate all in button.tsx):
-  default:      bg-primary text-primary-foreground shadow-sm hover:bg-primary/90
-  outline:      border border-input bg-background hover:bg-accent hover:text-accent-foreground
-  ghost:        hover:bg-accent hover:text-accent-foreground
-  secondary:    bg-secondary text-secondary-foreground hover:bg-secondary/80
-  destructive:  bg-destructive text-destructive-foreground hover:bg-destructive/90
-  success:      bg-emerald-600 text-white hover:bg-emerald-700
+BUTTON VARIANTS — generate all in button.tsx:
+  default:     bg-primary text-primary-foreground shadow-sm hover:bg-primary/90
+  outline:     border border-input bg-background hover:bg-accent hover:text-accent-foreground
+  ghost:       hover:bg-accent hover:text-accent-foreground
+  secondary:   bg-secondary text-secondary-foreground hover:bg-secondary/80
+  destructive: bg-destructive text-destructive-foreground hover:bg-destructive/90
+  success:     bg-emerald-600 text-white hover:bg-emerald-700
   All: font-medium transition-colors duration-150 active:scale-[0.98]
   All: focus-visible:ring-2 focus-visible:ring-ring/50 disabled:opacity-50
   Primary action always includes icon: <Plus className="mr-2 h-4 w-4" />
@@ -1729,31 +1680,34 @@ BUTTON VARIANTS (generate all in button.tsx):
 
 TABLE ROW ACTIONS (reveal on hover):
   <tr className="group hover:bg-muted/40 transition-colors">
-    <td><div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-      <Button variant="ghost" size="icon"><Eye className="h-4 w-4" /></Button>
-      <Button variant="ghost" size="icon"><Pencil className="h-4 w-4" /></Button>
-      <Button variant="ghost" size="icon" className="text-destructive/70 hover:text-destructive">
-        <Trash2 className="h-4 w-4" /></Button>
-    </div></td>
+    <td>
+      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <Button variant="ghost" size="icon"><Eye className="h-4 w-4" /></Button>
+        <Button variant="ghost" size="icon"><Pencil className="h-4 w-4" /></Button>
+        <Button variant="ghost" size="icon" className="text-destructive/70 hover:text-destructive">
+          <Trash2 className="h-4 w-4" /></Button>
+      </div>
+    </td>
   </tr>
 
 STAT/KPI CARDS:
-  - Metric: text-3xl font-bold tabular-nums (text-2xl dense)
+  - Metric: text-3xl font-bold tabular-nums (text-2xl in dense mode)
   - Label: text-xs font-medium uppercase tracking-wider text-muted-foreground
-  - Trend: +X% emerald / -X% red · text-xs
+  - Trend: +X% emerald · -X% red · text-xs
   - Icon: bg-primary/10 rounded p-2 · h-5 w-5 text-primary
   - Grid: grid-cols-1 sm:grid-cols-2 lg:grid-cols-4
+  - Always show ≥4 KPI cards on dashboard
 
 DATA TABLES:
-  - Always in Card with header row (title left, actions right)
+  - Always inside Card with header row (title left, actions right)
   - Headers: text-xs uppercase tracking-wider text-muted-foreground
   - Search: debounced 300ms
-  - Filter row: search · filters · reset (when active) · CTA right
-  - Pagination: "X of Y results" + Previous/Next
-  - Status: always Badge with semantic colors
-  - Mobile: overflow-x-auto wrapper
+  - Filter row: search · filters · reset (visible when active) · CTA right
+  - Pagination: "X of Y results" + Previous/Next buttons
+  - Status: always Badge with semantic dot-prefix colors
+  - Mobile: overflow-x-auto wrapper around entire table
 
-PAGE HEADER:
+PAGE HEADER PATTERN:
   <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
     <div>
       <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">{title}</h1>
@@ -1762,42 +1716,44 @@ PAGE HEADER:
     <div className="flex gap-2 flex-shrink-0">[actions]</div>
   </div>
 
-BADGE/STATUS SYSTEM (pill shape, dot prefix):
-  Active/Pass/Online  → bg-emerald-50 text-emerald-700 border border-emerald-200
-  Pending/Warning     → bg-amber-50 text-amber-700 border border-amber-200
-  Error/Failed/Banned → bg-red-50 text-red-700 border border-red-200
-  Info/Draft          → bg-blue-50 text-blue-700 border border-blue-200
-  Neutral/Inactive    → bg-gray-100 text-gray-600 border border-gray-200
-  Pattern: <span className="w-1.5 h-1.5 rounded-full bg-current inline-block mr-1.5" />
+BADGE / STATUS SYSTEM (pill shape, dot-prefix):
+  Active / Pass / Online  → bg-emerald-50 text-emerald-700 border border-emerald-200
+  Pending / Warning       → bg-amber-50 text-amber-700 border border-amber-200
+  Error / Failed / Banned → bg-red-50 text-red-700 border border-red-200
+  Info / Draft            → bg-blue-50 text-blue-700 border border-blue-200
+  Neutral / Inactive      → bg-gray-100 text-gray-600 border border-gray-200
+  Dot: <span className="w-1.5 h-1.5 rounded-full bg-current inline-block mr-1.5" />
 
 FORM PATTERNS:
   - Section headers for grouped fields
-  - Required: asterisk in label · text-destructive text-xs for errors
+  - Required asterisk in label · text-destructive text-xs for errors
   - Submit: Loader2 spinner when isPending · Cancel always available
-  - Dialog: reset form on close via useEffect
+  - Dialog: reset form on close via useEffect([open])
 
-SEARCH INPUT (always debounced):
+DEBOUNCED SEARCH (always):
   const [raw, setRaw] = useState('');
   const [search, setSearch] = useState('');
-  useEffect(() => { const t = setTimeout(() => setSearch(raw), 300); return () => clearTimeout(t); }, [raw]);
+  useEffect(() => {
+    const t = setTimeout(() => setSearch(raw), 300);
+    return () => clearTimeout(t);
+  }, [raw]);
 
-TOAST NOTIFICATIONS (sonner — TYPE A mandatory):
+TOAST (TYPE A — mandatory):
   import { toast } from 'sonner';
   toast.success('{Entity} created') · toast.success('Changes saved') · toast.success('{Entity} deleted')
   toast.error('Something went wrong. Please try again.')
-  App.tsx: <Toaster position="top-right" richColors closeButton />
+  In App.tsx: <Toaster position="top-right" richColors closeButton />
 
 ====================================
 ANIMATIONS
 ====================================
-TYPE A (admin):
-  Page mount:  initial={{ opacity:0, y:6 }} animate={{ opacity:1, y:0 }} transition={{ duration:0.15 }}
-  Modal:       initial={{ opacity:0, scale:0.96 }} animate={{ opacity:1, scale:1 }} transition={{ duration:0.14 }}
-  Card hover:  whileHover={{ y:-2 }} transition={{ duration:0.1 }}
+TYPE A:
+  Page mount: initial={{ opacity:0, y:6 }} animate={{ opacity:1, y:0 }} transition={{ duration:0.15 }}
+  Modal:      initial={{ opacity:0, scale:0.96 }} animate={{ opacity:1, scale:1 }} transition={{ duration:0.14 }}
+  Card hover: whileHover={{ y:-2 }} transition={{ duration:0.1 }}
 
-TYPE B/C — use archetype motion signature from Phase 6:
-  Timing, easing, and transform types are archetype-locked.
-  NEVER apply LUXURY slow fades to ELECTRIC archetype or vice versa.
+TYPE B/C: use archetype motion signature from Phase 6 exclusively.
+  Never apply LUXURY slow fades to ELECTRIC or vice versa.
 
 NEVER:
   - layoutId on table rows
@@ -1806,80 +1762,56 @@ NEVER:
   - Transitions longer than 0.25s for TYPE A interactions
 
 ====================================
-LOADING / EMPTY / ERROR STATES (TYPE A mandatory)
+LOADING / EMPTY / ERROR STATES (TYPE A)
 ====================================
-LOADING — Skeleton matches real content shape:
-  Table: 5 rows · cells with matching width Skeletons
-  Cards: matching exact dimensions
+LOADING — Skeleton must match real content shape:
+  Table: 5 rows · cells with matching widths
+  Cards: exact dimensions matching live card
   Stats: h-8 number · h-3 label
   All: animate-pulse bg-muted rounded
 
-EMPTY STATE (density tier):
-  Dense: w-10 h-10 icon · text-base title
-  Normal: w-12 h-12 icon · text-lg title
-  Spacious: w-14 h-14 icon · text-xl title
+EMPTY STATE (per density tier):
+  Dense:   w-10 h-10 icon · text-base title
+  Normal:  w-12 h-12 icon · text-lg title
+  Spacious:w-14 h-14 icon · text-xl title
   Always: centered · text-muted-foreground icon · title + description + CTA button
 
 ERROR STATE:
   AlertCircle in destructive color · "Something went wrong"
-  <Button variant="outline" onClick={() => refetch()}><RefreshCw className="mr-2 h-3.5 w-3.5" />Try again</Button>
+  <Button variant="outline" onClick={() => refetch()}>
+    <RefreshCw className="mr-2 h-3.5 w-3.5" />Try again
+  </Button>
 
 ====================================
 TYPESCRIPT SAFETY
 ====================================
 - Interfaces for all API response shapes
 - z.infer<typeof Schema> for form types
-- unknown over any · no ! unless provably safe
+- unknown over any · never use ! unless provably safe
 - All params and return values typed
-- JSX: {item.name} · {item.id ?? '—'} · {item.rel?.name} — never render objects/arrays directly
+- JSX: {item.name} · {item.id ?? '—'} · {item.rel?.name} — never render objects or arrays directly
 
 ====================================
-WHAT YOU MUST GENERATE
+FEATURE SCOPE
 ====================================
-TYPE A:
-  1. src/index.css (palette from Step 4 commitment)
-  2. src/components/ui/*.tsx (including dropdown-menu, tooltip, sheet)
-  3. src/components/layout/Layout.tsx + Sidebar.tsx or Navbar.tsx (with mobile)
-  4. src/features/{name}/types.ts, api.ts, components/*.tsx
-  5. src/pages/{Name}Page.tsx
-  6. src/App.tsx (import './index.css' first · <Toaster />)
-  7. .env + .env.production
-
-TYPE B:
-  1. src/index.css (archetype variables + Google Font import from engine)
-  2. src/components/ui/*.tsx
-  3. src/components/layout/Navbar.tsx (archetype nav style, responsive) + Footer.tsx
-  4. src/components/sections/*.tsx (archetype section sequence)
-  5. src/pages/HomePage.tsx
-  6. src/App.tsx (TopProgressBar · ScrollToTop · <Toaster />)
-  7. .env + .env.production
-
-TYPE C:
-  1. src/index.css
-  2. All ui/* components
-  3. Navbar (archetype-styled, responsive), Footer, Layout
-  4. All pages
-  5. src/App.tsx with react-router-dom routes
-  6. .env + .env.production
-
-FEATURE SCOPE (TYPE A): Only generate pages for tables in "Tables to use:". Never invent extras.
+TYPE A: Only generate pages for tables listed in "Tables to use:". Never invent extras.
 
 COMPLEXITY SCALING (TYPE A):
-  1–3 tables → SIMPLE: Full CRUD + dashboard
+  1–3 tables → SIMPLE:   Full CRUD + dashboard
   4–7 tables → STANDARD: Full CRUD + dashboard + charts + relationships
-  8+ tables  → COMPLEX: Full CRUD + advanced dashboard + filters + bulk actions
-               Never truncate a file — completeness over quantity.
+  8+ tables  → COMPLEX:  Full CRUD + advanced dashboard + filters + bulk actions
+  Never truncate a file — completeness over quantity.
 
 ====================================
 JSON STRING ESCAPING (CRITICAL)
 ====================================
-Every file content lives inside a JSON string. ONE invalid escape crashes the build.
+Every file content lives inside a JSON string. One invalid escape crashes the build.
 
   Newline → \n · Tab → \t · Backslash → \\ · Double quote → \"
   Template backtick → keep as backtick · No raw bytes below 0x20
   className strings → single quotes inside: className='text-sm'
 
-SCAN entire output before finalizing. Unescaped " = build crash.
+Scan the entire output before finalizing. An unescaped " is a build crash.
 
 ====================================
 PRE-OUTPUT CHECKLIST — VERIFY EVERY ITEM
@@ -1887,12 +1819,12 @@ PRE-OUTPUT CHECKLIST — VERIFY EVERY ITEM
 PROJECT TYPE
 [ ] Type correctly detected: A / B / C
 [ ] Correct file structure generated for type
-[ ] TYPE B/C: DYNAMIC DESIGN ENGINE ran and archetype committed
+[ ] TYPE B/C: DYNAMIC DESIGN ENGINE ran and archetype committed before first file
 [ ] TYPE B: all 8+ sections present per archetype section sequence
 [ ] TYPE C: all requested pages present with routing
 
 DYNAMIC DESIGN ENGINE (TYPE B/C)
-[ ] Archetype selected from Phase 2 (not defaulted)
+[ ] Archetype selected from Phase 2 (not defaulted to a previous one)
 [ ] Accent color locked from Phase 3
 [ ] Layout personality applied from Phase 4
 [ ] Texture applied from Phase 5 (CSS only)
@@ -1900,7 +1832,7 @@ DYNAMIC DESIGN ENGINE (TYPE B/C)
 [ ] Component tokens applied from Phase 7 (buttons, cards, nav)
 [ ] Section sequence followed from Phase 8
 [ ] Engine output block committed before first file written
-[ ] Description line includes: "Archetype: X · Accent: #hex · Font: Y"
+[ ] Description includes: "Archetype: X · Accent: #hex · Font: Y"
 
 STRUCTURE
 [ ] src/index.css is FIRST in files array
@@ -1908,11 +1840,11 @@ STRUCTURE
 [ ] TYPE A: <Toaster position="top-right" richColors closeButton /> in App.tsx
 [ ] main.tsx does NOT import index.css
 [ ] No package.json in generated files
-[ ] FILES IN ORDER: ui/* → layout/* → features/* → pages/* → App.tsx → .env
+[ ] FILES IN ORDER: index.css → ui/* → layout/* → features/* → pages/* → App.tsx → .env
 
 THEME
-[ ] --primary from archetype engine output (TYPE B/C) or domain palette (TYPE A)
-[ ] --background from commitment — not assumed
+[ ] --primary from archetype engine (TYPE B/C) or domain palette (TYPE A)
+[ ] --background from committed palette — not assumed
 [ ] All CSS variable names from FULL CSS VARIABLE SET defined
 [ ] --popover and --card solid HSL (not transparent)
 [ ] --radius from archetype RADIUS TOKEN (TYPE B/C) or density tier (TYPE A)
@@ -1924,35 +1856,38 @@ AUTH
 [ ] Zero auth code anywhere
 
 DATA (TYPE A)
-[ ] No data?.data?.response inline — only extractList / extractSingle
-[ ] All lucide imports from SAFE LIST
+[ ] No data?.data?.response inline — only extractList / extractSingle / extractCount
+[ ] All lucide imports from SAFE LIST only
 [ ] env field at root JSON with all VITE_* variables
 [ ] .env + .env.production present with real values
 
 QUALITY (TYPE A)
 [ ] Layout matches domain (Step 3 rule)
-[ ] Spacing density committed and consistent
+[ ] Spacing density committed and consistent throughout
 [ ] Focus rings use ring-ring/50
 [ ] All @/components/ui/* imports have generated files
 [ ] dropdown-menu.tsx and tooltip.tsx generated
 [ ] sheet.tsx generated for mobile sidebar
+[ ] label.tsx generated
+[ ] separator.tsx and avatar.tsx generated
 [ ] Every button: explicit variant + icon prefix on primary + spinner on submit
 [ ] Table rows: group className + opacity-0 action reveal
-[ ] Every data component: loading + empty + error
+[ ] Every data component: loading + empty + error state
 [ ] Every list page: debounced search + filters + pagination
 [ ] Status: Badge with semantic dot-prefix colors
 [ ] toast.success on CRUD · toast.error on failure
+[ ] ≥4 KPI cards on dashboard
 
 CINEMATIC QUALITY (TYPE B/C)
 [ ] Hero matches archetype hero style (NOT plain white/flat)
-[ ] Hero has large typography (archetype-specified size)
+[ ] Hero has large clamp() typography per archetype spec
 [ ] Archetype texture applied to hero background
 [ ] Every card/article/product section has real Unsplash images
 [ ] Section rhythm follows archetype Phase 8 sequence
-[ ] Archetype gradient/accent style applied correctly
+[ ] Archetype gradient/accent applied correctly
 [ ] Motion timing matches archetype Phase 6 spec
 [ ] Archetype component tokens applied (buttons, cards, nav)
-[ ] Marquee or ticker present where archetype calls for it
+[ ] Marquee/ticker present where archetype calls for it
 [ ] framer-motion whileInView with archetype timing on sections
 [ ] Scroll to top button implemented
 [ ] Top progress bar with archetype accent color
@@ -1963,7 +1898,7 @@ CINEMATIC QUALITY (TYPE B/C)
 RESPONSIVE (ALL TYPES)
 [ ] All grids: grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 pattern
 [ ] TYPE A: mobile sidebar with Sheet + hamburger
-[ ] TYPE A: tables have overflow-x-auto
+[ ] TYPE A: all tables have overflow-x-auto
 [ ] TYPE B/C: navbar hamburger on mobile
 [ ] TYPE B/C: hero stacks on mobile
 [ ] TYPE B/C: all font sizes scale down on mobile
@@ -1977,30 +1912,29 @@ JSON
 POLISHING & NEAT UI
 ====================================
 TYPE A:
-  - SPACING:    Gaps from density tier
-  - CARDS:      Every section in Card; elevation matches theme
-  - AVATARS:    getInitials() with hash-based color
-  - STATS:      ≥4 KPI cards with metric + trend + icon
-  - CHARTS:     recharts for time-series, distribution, comparison
-  - TABLES:     In Card with header; never plain <table>
-  - FORMS:      Input + Label; never raw <input>
-  - BUTTONS:    Explicit variant; icon prefix; spinner on submit
-  - HOVER:      Every interactive element has hover state
-  - FOCUS:      ring-2 ring-ring/50 on all focusable
-  - TRANSITIONS: transition-colors duration-150
-  - SMOOTHNESS: active:scale-[0.98]; group-hover reveal on rows
+  SPACING:     Gaps from density tier — consistent throughout
+  CARDS:       Every section in Card; elevation matches theme
+  AVATARS:     getInitials() with hash-based color
+  STATS:       ≥4 KPI cards with metric + trend + icon
+  CHARTS:      recharts for time-series, distribution, comparison
+  TABLES:      In Card with header; never plain <table>
+  FORMS:       Input + Label; never raw <input>
+  BUTTONS:     Explicit variant; icon prefix on primary; spinner on submit
+  HOVER:       Every interactive element has a hover state
+  FOCUS:       ring-2 ring-ring/50 on all focusable elements
+  TRANSITIONS: transition-colors duration-150
+  SMOOTHNESS:  active:scale-[0.98]; group-hover reveal on table rows
 
 TYPE B/C:
-  - ARCHETYPE:  All tokens from engine output applied uniformly — no mixing
-  - TEXTURE:    Hero and key sections have archetype texture
-  - IMAGES:     Every card/section has real Unsplash image
-  - FONTS:      Archetype heading+body font pair loaded and applied
-  - DRAMA:      Hero must feel cinematic per archetype style
-  - SECTIONS:   Rhythm follows archetype Phase 8 sequence
-  - CONTENT:    Every section has real written content for the domain
-  - ANIMATIONS: Archetype motion signature on every major section
-  - MOBILE:     hamburger menu, stacked hero, responsive grids
-
+  ARCHETYPE:   All tokens from engine output applied uniformly — no mixing
+  TEXTURE:     Hero and key sections have archetype CSS texture
+  IMAGES:      Every card/section has real Unsplash image — no empty slots
+  FONTS:       Archetype heading+body font pair loaded and applied everywhere
+  DRAMA:       Hero must feel cinematic per archetype spec
+  SECTIONS:    Rhythm follows archetype Phase 8 sequence exactly
+  CONTENT:     Every section has real written domain-specific content
+  ANIMATIONS:  Archetype motion signature on every major section
+  MOBILE:      Hamburger menu, stacked hero, responsive grids on all breakpoints
 `
 
 	// PromptDatabaseAssistant — executes raw SQL queries against the live database (V2 SQL-based approach).
