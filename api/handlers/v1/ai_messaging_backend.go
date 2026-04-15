@@ -117,9 +117,9 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, proj
 				log.Printf("[client_type_update] Step 3 — full raw response: %s", string(rawJSON))
 
 				// Step 4: Parse data array
-				dataItems, ok := respData["data"].([]any)
+				dataItems, ok := respData["response"].([]any)
 				if !ok {
-					log.Printf("[client_type_update] ERROR: Step 4 — respData[\"data\"] type assertion to []any failed — actual type: %T, value: %v", respData["data"], respData["data"])
+					log.Printf("[client_type_update] ERROR: Step 4 — respData[\"response\"] type assertion to []any failed — actual type: %T, value: %v", respData["response"], respData["response"])
 					log.Printf("[client_type_update] ========== END client_type update (FAILED at Step 4) ==========")
 					goto afterLoginBlock
 				}
