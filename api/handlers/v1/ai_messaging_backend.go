@@ -6,7 +6,6 @@ import (
 	"log"
 	"strings"
 	"ucode/ucode_go_api_gateway/config"
-	auth "ucode/ucode_go_api_gateway/genproto/auth_service"
 
 	"ucode/ucode_go_api_gateway/api/models"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
@@ -25,7 +24,7 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, proj
 
 	for _, tablePlan := range plan.Tables {
 
-		attributesMap := map[string]interface{}{
+		attributesMap := map[string]any{
 			"label":    "",
 			"label_en": tablePlan.Label,
 		}
@@ -35,7 +34,7 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, proj
 			if len(loginStrategy) == 0 {
 				loginStrategy = []string{"login"}
 			}
-			attributesMap["auth_info"] = map[string]interface{}{
+			attributesMap["auth_info"] = map[string]any{
 				"login_strategy": loginStrategy,
 			}
 		}
@@ -63,34 +62,48 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, proj
 		if tablePlan.IsLoginTable {
 			log.Printf("[ai_messaging_backend] Login table created (%s), updating client_type...", tablePlan.Slug)
 
-			clientType, err := service.AuthService().Client().GetClientTypeList(
-				ctx, &auth.GetClientTypeListRequest{
-					ProjectId: projectId,
+			getListData, _ := helper.ConvertMapToStruct(
+				map[string]any{
+					"limit":  1,
+					"offset": 0,
+				},
+			)
+
+			clientTypeResp, err := service.GoObjectBuilderService().Items().GetList(
+				ctx, &nb.CommonMessage{
+					TableSlug: "client_type",
+					Data:      getListData,
+					ProjectId: envId,
 				},
 			)
 			if err != nil {
 				log.Printf("[ai_messaging_backend] WARNING: failed to fetch client types: %v", err)
 			}
 
-			if len(clientType.GetClientTypes()) > 0 {
-				_, err = service.AuthService().Client().V2UpdateClientType(
-					ctx, &auth.V2UpdateClientTypeRequest{
-						Guid:                   clientType.GetClientTypes()[0].Id,
-						ProjectId:              projectId,
-						TableSlug:              tablePlan.Slug,
-						Name:                   clientType.GetClientTypes()[0].Name,
-						ConfirmBy:              clientType.GetClientTypes()[0].ConfirmBy,
-						SelfRegister:           clientType.GetClientTypes()[0].SelfRegister,
-						SelfRecover:            clientType.GetClientTypes()[0].SelfRecover,
-						SessionLimit:           clientType.GetClientTypes()[0].SessionLimit,
-						DefaultPage:            clientType.GetClientTypes()[0].DefaultPage,
-						ResourceEnvrironmentId: envId,
-					},
-				)
-				if err != nil {
-					log.Printf("[ai_messaging_backend] WARNING: failed to update client type %s: %v", clientType.GetClientTypes()[0].Id, err)
-				} else {
-					log.Printf("[ai_messaging_backend] Successfully updated client type %s with table_slug %s", clientType.GetClientTypes()[0].Id, tablePlan.Slug)
+			if clientTypeResp != nil && clientTypeResp.GetData() != nil {
+				respData := clientTypeResp.GetData().AsMap()
+				dataItems, _ := respData["data"].([]any)
+
+				if len(dataItems) > 0 {
+					firstItem, _ := dataItems[0].(map[string]any)
+					clientTypeId, _ := firstItem["guid"].(string)
+
+					firstItem["table_slug"] = tablePlan.Slug
+
+					updateData, _ := helper.ConvertMapToStruct(firstItem)
+
+					_, err = service.GoObjectBuilderService().Items().Update(
+						ctx, &nb.CommonMessage{
+							TableSlug: "client_type",
+							Data:      updateData,
+							ProjectId: envId,
+						},
+					)
+					if err != nil {
+						log.Printf("[ai_messaging_backend] WARNING: failed to update client type %s: %v", clientTypeId, err)
+					} else {
+						log.Printf("[ai_messaging_backend] Successfully updated client type %s with table_slug %s", clientTypeId, tablePlan.Slug)
+					}
 				}
 			}
 		}
@@ -109,7 +122,7 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, proj
 
 			mappedType := mapFieldType(fieldPlan.Type)
 
-			fieldAttrMap := map[string]interface{}{
+			fieldAttrMap := map[string]any{
 				"label":    "",
 				"label_en": fieldPlan.Label,
 			}
@@ -242,7 +255,7 @@ func ensureLoginTable(plan *models.ArchitectPlan) *models.ArchitectPlan {
 				Type:  "SINGLE_LINE",
 			},
 		},
-		MockData: []map[string]interface{}{
+		MockData: []map[string]any{
 			{"full_name": "Admin User"},
 		},
 	}
