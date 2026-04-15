@@ -17,10 +17,21 @@ type (
 		Plan       *HaikuPlan `json:"plan,omitempty"`
 	}
 
+	// VisualContext is optional metadata sent by the frontend when the user
+	// selected a specific UI element for visual editing.
+	// All fields are optional — the backend handles whatever is provided.
+	VisualContext struct {
+		Path        string `json:"path,omitempty"`         // e.g. "src/components/layout/TopNav.tsx"
+		Line        int    `json:"line,omitempty"`         // line number inside the file
+		ElementName string `json:"element_name,omitempty"` // data-element-name value
+		OuterHTML   string `json:"outer_html,omitempty"`   // element.outerHTML snapshot
+	}
+
 	NewMessageReq struct {
-		Content       string         `json:"content"`
-		Images        []string       `json:"images"`
-		PendingAction *PendingAction `json:"pending_action,omitempty"`
+		Content       string          `json:"content"`
+		Images        []string        `json:"images"`
+		PendingAction *PendingAction  `json:"pending_action,omitempty"`
+		Context       []VisualContext `json:"context,omitempty"`
 	}
 	SendMessageRequest struct {
 		UserPrompt    string `json:"user_prompt"`

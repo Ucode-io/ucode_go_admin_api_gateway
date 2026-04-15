@@ -269,3 +269,34 @@ func extractJSONAndDescription(text string) (jsonBlock, description string) {
 
 	return "", text
 }
+
+func ParseVisualEditResponse(rawJSON string) ([]models.ProjectFile, string, error) {
+	fullText, _, err := extractTextFromClaudeResponse(rawJSON)
+	if err != nil {
+		return nil, "", err
+	}
+
+	cleaned := extractJSON(fullText)
+
+	var result struct {
+		Files []struct {
+			Path    string `json:"path"`
+			Content string `json:"content"`
+		} `json:"files"`
+		ChangeSummary string `json:"change_summary"`
+	}
+
+	if err := json.Unmarshal([]byte(cleaned), &result); err != nil {
+		return nil, "", fmt.Errorf("failed to parse visual edit JSON: %w", err)
+	}
+
+	files := make([]models.ProjectFile, 0, len(result.Files))
+	for _, f := range result.Files {
+		files = append(files, models.ProjectFile{
+			Path:    f.Path,
+			Content: f.Content,
+		})
+	}
+
+	return files, result.ChangeSummary, nil
+}

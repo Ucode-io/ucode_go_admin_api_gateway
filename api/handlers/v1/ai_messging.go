@@ -321,6 +321,15 @@ func (h *HandlerV1) handlePendingConfirmation(
 func (p *ChatProcessor) routeAndProcess(ctx context.Context, req models.NewMessageReq, chatHistory []models.ChatMessage) (*models.ParsedClaudeResponse, error) {
 	hasImages := len(req.Images) > 0
 
+	if len(req.Context) > 0 {
+		if p.mcpProjectID == "" {
+			return &models.ParsedClaudeResponse{
+				Description: "No project found. Please create a project first before using visual editing.",
+			}, nil
+		}
+		return p.runVisualEdit(ctx, req.Content, req.Context, chatHistory, req.Images)
+	}
+
 	// Load existing project files if a project is linked
 	var (
 		projectData   *pbo.McpProject
@@ -436,6 +445,149 @@ func (p *ChatProcessor) runInspect(ctx context.Context, userQuestion string, fil
 		return nil, err
 	}
 	return &models.ParsedClaudeResponse{Description: answer}, nil
+}
+
+// runVisualEdit performs a surgical edit on one or more files triggered by the
+// frontend visual selector. The frontend can send an array of contexts (for
+// multiple selected elements). Claude returns an array of updated files.
+func (p *ChatProcessor) runVisualEdit(ctx context.Context, instruction string, contexts []models.VisualContext, chatHistory []models.ChatMessage, imageURLs []string) (*models.ParsedClaudeResponse, error) {
+	log.Printf("[VISUAL EDIT] starting: count=%d", len(contexts))
+
+	// Load project files
+	projectData, err := p.service.GoObjectBuilderService().McpProject().GetMcpProjectFiles(
+		ctx, &pbo.McpProjectId{
+			ResourceEnvId: p.resourceEnvID,
+			Id:            p.mcpProjectID,
+		},
+	)
+	if err != nil || projectData == nil {
+		return nil, fmt.Errorf("visual edit: failed to load project files: %w", err)
+	}
+
+	// Resolve target files and contents for each context
+	targetPaths := make(map[string]bool)
+	resolvedContexts := make([]models.VisualContext, 0, len(contexts))
+
+	for _, vc := range contexts {
+		var foundPath string
+		for _, f := range projectData.GetProjectFiles() {
+			if vc.Path != "" && f.GetPath() == vc.Path {
+				foundPath = f.GetPath()
+				break
+			}
+			// Fallback: search by element name if path is missing
+			if vc.Path == "" && vc.ElementName != "" && strings.Contains(f.GetContent(), vc.ElementName) {
+				foundPath = f.GetPath()
+				break
+			}
+		}
+
+		if foundPath != "" {
+			targetPaths[foundPath] = true
+			vc.Path = foundPath // ensure path is set for Claude
+			resolvedContexts = append(resolvedContexts, vc)
+		} else {
+			log.Printf("[VISUAL EDIT] WARNING: could not resolve file for element %q (path: %q)", vc.ElementName, vc.Path)
+		}
+	}
+
+	if len(targetPaths) == 0 {
+		log.Printf("[VISUAL EDIT] no specific files found for contexts, falling back to code_change flow")
+		fileGraphJSON, _ := p.buildFileGraphJSON(projectData)
+		return p.runCodeChange(ctx, instruction, fileGraphJSON, chatHistory, imageURLs, "", projectData)
+	}
+
+	// Build files context (concatenated content of all relevant files)
+	paths := make([]string, 0, len(targetPaths))
+	for p := range targetPaths {
+		paths = append(paths, p)
+	}
+	filesContext := p.buildFilesContext(projectData, paths)
+
+	// Build the surgical edit prompt
+	prompt := helper.BuildVisualEditPrompt(instruction, resolvedContexts, filesContext)
+	messages := buildMessagesWithHistory(chatHistory, buildContentBlocksWithImages(prompt, imageURLs))
+
+	response, err := p.callAnthropicWithTracking(
+		ctx,
+		models.AnthropicRequest{
+			Model:     p.baseConf.ClaudeModel,
+			MaxTokens: p.baseConf.CoderMaxTokens,
+			System:    helper.PromptVisualEdit,
+			Messages:  messages,
+		},
+		timeoutCoder,
+		fmt.Sprintf("Visual edit: %d elements in %d files", len(resolvedContexts), len(targetPaths)),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("visual edit: claude call failed: %w", err)
+	}
+
+	// Parse the multi-file response
+	updatedFiles, changeSummary, err := helper.ParseVisualEditResponse(response)
+	if err != nil {
+		log.Printf("[VISUAL EDIT] surgical parse failed (%v), falling back to full ParseClaudeResponse", err)
+		parsed, parseErr := helper.ParseClaudeResponse(response)
+		if parseErr != nil {
+			return nil, parseErr
+		}
+		if parsed.Project != nil {
+			return parsed, nil
+		}
+		return parsed, nil
+	}
+
+	// Merge the updated files back into the full project
+	updatedSet := make(map[string]string)
+	for _, uf := range updatedFiles {
+		updatedSet[uf.Path] = uf.Content
+	}
+
+	var merged []*pbo.McpProjectFiles
+	for _, f := range projectData.GetProjectFiles() {
+		if newContent, ok := updatedSet[f.GetPath()]; ok {
+			merged = append(merged, &pbo.McpProjectFiles{
+				Path:      f.GetPath(),
+				Content:   newContent,
+				FileGraph: f.GetFileGraph(),
+			})
+			delete(updatedSet, f.GetPath()) // Mark as handled
+		} else {
+			merged = append(merged, f)
+		}
+	}
+	// Add remaining new files if any
+	for path, content := range updatedSet {
+		merged = append(merged, &pbo.McpProjectFiles{
+			Path:    path,
+			Content: content,
+		})
+	}
+
+	// Reconstruct response
+	projectFiles := make([]models.ProjectFile, 0, len(merged))
+	for _, f := range merged {
+		projectFiles = append(projectFiles, models.ProjectFile{
+			Path:    f.GetPath(),
+			Content: f.GetContent(),
+		})
+	}
+
+	description := changeSummary
+	if description == "" {
+		description = "✅ Visual edit applied successfully."
+	}
+
+	log.Printf("[VISUAL EDIT] ✅ done — %d files updated, summary=%s", len(updatedFiles), changeSummary)
+
+	return &models.ParsedClaudeResponse{
+		Description: description,
+		Project: &models.GeneratedProject{
+			ProjectName: projectData.GetTitle(),
+			Files:       projectFiles,
+			Env:         projectData.GetProjectEnv().AsMap(),
+		},
+	}, nil
 }
 
 func (p *ChatProcessor) runCodeChange(ctx context.Context, clarified, fileGraphJSON string, chatHistory []models.ChatMessage, imageURLs []string, projectName string, projectData *pbo.McpProject) (*models.ParsedClaudeResponse, error) {

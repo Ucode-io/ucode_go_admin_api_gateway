@@ -73,7 +73,7 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, proj
 				ctx, &nb.CommonMessage{
 					TableSlug: "client_type",
 					Data:      getListData,
-					ProjectId: envId,
+					ProjectId: projectId,
 				},
 			)
 			if err != nil {
@@ -96,7 +96,7 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, proj
 						ctx, &nb.CommonMessage{
 							TableSlug: "client_type",
 							Data:      updateData,
-							ProjectId: envId,
+							ProjectId: projectId,
 						},
 					)
 					if err != nil {
