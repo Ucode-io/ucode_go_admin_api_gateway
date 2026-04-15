@@ -30,13 +30,13 @@ const (
 )
 
 type ChatProcessor struct {
-	h              *HandlerV1
-	service        services.ServiceManagerI
-	baseConf       config.BaseConfig
-	chatId         string
-	mcpProjectID   string
-	resourceEnvID  string
-	ucodeProjectID string
+	h                 *HandlerV1
+	service           services.ServiceManagerI
+	baseConf          config.BaseConfig
+	chatId            string
+	mcpProjectID      string
+	resourceEnvID     string
+	ucodeProjectID    string
 	mcpUcodeProjectID string
 
 	userID       string
@@ -616,7 +616,7 @@ func (p *ChatProcessor) editCode(ctx context.Context, clarified string, plan *mo
 		// Planner found files to change but none exist in the project yet —
 		// fall back to free generation using the full code generator prompt.
 		log.Printf("[CODE] planned files not found in project, falling back to free generation")
-		systemPrompt = helper.PromptCodeGenerator
+		systemPrompt = helper.PromptAdminPanelGenerator
 		contentBlocks = buildContentBlocksWithImages(clarified, imageURLs)
 	}
 
@@ -752,7 +752,6 @@ func (p *ChatProcessor) callArchitect(ctx context.Context, clarified string, ima
 	return &plan, nil
 }
 
-// generateProject generates frontend code for non-admin-panel project types (landing, web, other).
 func (p *ChatProcessor) generateProject(ctx context.Context, clarified string, imageURLs []string, plan *models.ArchitectPlan, apiKey, envId string) (*models.ParsedClaudeResponse, error) {
 	apiConfig := buildAPIConfigBlock(p.baseConf.UcodeBaseUrl, apiKey, plan)
 
@@ -761,7 +760,7 @@ func (p *ChatProcessor) generateProject(ctx context.Context, clarified string, i
 		models.AnthropicRequest{
 			Model:     p.baseConf.ClaudeModel,
 			MaxTokens: p.baseConf.CoderMaxTokens,
-			System:    helper.PromptCodeGenerator,
+			System:    helper.PromptAdminPanelGenerator,
 			Messages: []models.ChatMessage{
 				{
 					Role:    "user",
@@ -779,7 +778,7 @@ func (p *ChatProcessor) generateProject(ctx context.Context, clarified string, i
 	parsed, parseErr := helper.ParseClaudeResponse(response)
 	if parseErr != nil {
 		log.Printf("[CODE] generate project: parse failed, attempting JSON repair: %v", parseErr)
-		parsed, parseErr = p.repairJSON(ctx, response, clarified, helper.PromptCodeGenerator)
+		parsed, parseErr = p.repairJSON(ctx, response, clarified, helper.PromptAdminPanelGenerator)
 		if parseErr != nil {
 			return nil, fmt.Errorf("generate project: failed after repair: %w", parseErr)
 		}
