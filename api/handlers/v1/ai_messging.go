@@ -645,7 +645,7 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 
 	log.Printf("[NEW PROJECT] [Step 3/4] Creating Tables (Async in background)...")
 	go func(bPlan *models.ArchitectPlan, resourceEnvId, envId string) {
-		if err := createBackendFromPlan(context.Background(), bPlan, resourceEnvId, envId, p.service); err != nil {
+		if err := createBackendFromPlan(context.Background(), bPlan, resourceEnvId, p.ucodeProjectID, p.userID, envId, p.service); err != nil {
 			log.Printf("[ARCHITECT] backend table creation failed (resourceEnv=%s): %v", resourceEnvId, err)
 		} else {
 			log.Printf("[ARCHITECT] ✅ Async backend tables created successfully")
