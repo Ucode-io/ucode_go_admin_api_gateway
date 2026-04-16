@@ -367,6 +367,11 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 		}
 
+		ugen := v1Admin.Group("/ugen")
+		{
+			ugen.GET("/user-projects", h.V1.GetUgenUserProjects)
+		}
+
 		projectFolders := v1Admin.Group("/project-folders")
 		{
 			projectFolders.POST("", h.V1.CreateProjectFolder)
