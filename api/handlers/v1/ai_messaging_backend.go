@@ -173,26 +173,32 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 				if err != nil {
 					log.Printf("[client_type_update] ERROR: Step 7 — Items().Update() failed for guid=%s: %v", clientTypeId, err)
 					log.Printf("[client_type_update] ========== END client_type update (FAILED at Step 7) ==========")
-					// client_type not updated — no point migrating users, auth will still be broken
 					goto afterLoginBlock
 				}
 
 				log.Printf("[client_type_update] SUCCESS: Step 7 — client_type guid=%s updated with table_slug='%s'", clientTypeId, tablePlan.Slug)
 
 				// ──────────────────────────────────────────────────────────────────────
-				// Step 8: Migrate existing users from "user" table to the new login table.
+				// Step 8-9: Migrate existing users from "user" table → new login table.
 				//
-				// Problem: Before this flow, project creator was written to the "user" table.
-				// Now that client_type.table_slug points to the new login table, auth reads
-				// from the new table and the old user is invisible to the login system.
+				// Why: project creator was inserted into "user" (system table) at signup.
+				// After client_type.table_slug now points to the new login table, the auth
+				// service reads from the new table and the original user becomes invisible.
 				//
-				// Fix: fetch all records from "user" table, re-create each one on the new
-				// login table using from_auth_service=true so that:
-				//   • SyncUserService().CreateUser() is NOT called (user already exists in auth)
-				//   • InsertPersonTable() IS called (syncs person table for auth lookups)
-				//   • A row IS inserted into the new login table (so the user is visible in UI)
+				// Strategy: re-create each user row on the new table using
+				//   from_auth_service=true  → skips SyncUserService.CreateUser()
+				//                              (auth record already exists)
+				//   already_hashed=true     → skips bcrypt hashing of stored hash
 				//
-				// already_hashed=true prevents double-hashing the stored bcrypt password.
+				// Root cause of the original error:
+				//   body["password"] was null in the DB (admin user created without one).
+				//   Items.Create reads body["password"] → empty string → passes it to
+				//   InsertPersonTable → auth service rejects: "must be at least 6 chars".
+				//
+				// Fix applied here: we detect a null/empty password and skip InsertPersonTable
+				// password requirement by passing a dummy non-empty placeholder. The user's
+				// actual auth record already exists in the auth service (user_id_auth is set),
+				// so the placeholder is never used for real authentication.
 				// ──────────────────────────────────────────────────────────────────────
 				log.Printf("[migrate_user] ========== START user migration to login table '%s' ==========", tablePlan.Slug)
 
@@ -237,7 +243,6 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 
 					log.Printf("[migrate_user] Step 8 — found %d user(s) to migrate from 'user' table to '%s'", len(userItems), tablePlan.Slug)
 
-					// Step 9: Re-create each user on the new login table
 					for idx, item := range userItems {
 						existingUser, userOk := item.(map[string]any)
 						if !userOk {
@@ -251,32 +256,66 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 						log.Printf("[migrate_user] Step 9 — migrating user[%d]: guid=%s user_id_auth=%s to login table '%s'",
 							idx, existingUserGuid, existingUserIdAuth, tablePlan.Slug)
 
-						// Build migration payload.
-						// Keys follow the Items.Create from_auth_service contract:
-						//   "login", "password", "email", "phone" are read from body and then
-						//   remapped to authInfo.Login / authInfo.Password / etc. field slugs.
-						//   "role_id" and "client_type_id" are also remapped via authInfo.
-						//   "guid" and "user_id_auth" go directly into InsertPersonTable.
-						//   "name" and "photo" populate FullName / Image in InsertPersonTable.
+						// ── PASSWORD HANDLING ──────────────────────────────────────────────
+						// The original error:
+						//   "password field must be at least 6 characters long"
 						//
-						// Note: phone field in "user" table is "phone_number" (matches
-						//   CreateUser call: Phone: cast.ToString(data["phone_number"])).
+						// Cause: the admin user in "user" table has password=null (the user
+						// was created by the auth system, password stored only in auth service,
+						// not in the object builder DB).
+						//
+						// Items.Create with from_auth_service=true still calls InsertPersonTable,
+						// which forwards the password to the auth service for person record sync.
+						// Passing an empty string fails the auth service's length validation.
+						//
+						// Fix: we check if password exists and is non-empty.
+						// If it's null/empty, we use a sentinel value that satisfies the length
+						// check. Since this user's auth record already exists (user_id_auth is
+						// set), they log in via user_id_auth lookup — the password field in
+						// the person table is never used for actual authentication here.
+						// ──────────────────────────────────────────────────────────────────
+						existingPassword := safeString(existingUser["password"])
+						if existingPassword == "" {
+							// Sentinel: a valid-looking bcrypt hash placeholder (60 chars, correct
+							// prefix). This satisfies InsertPersonTable's length check without
+							// granting any real login ability via password.
+							existingPassword = "$2a$10$AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+							log.Printf("[migrate_user] INFO: Step 9 — user[%d] guid=%s has no password in DB (expected for auth-created users), using sentinel",
+								idx, existingUserGuid)
+						}
+
+						// ── PAYLOAD ────────────────────────────────────────────────────────
+						// Items.Create with from_auth_service=true remaps keys as follows:
+						//   body["login"]          → body[authInfo.Login]
+						//   body["password"]       → body[authInfo.Password]  (kept as-is when already_hashed=true)
+						//   body["email"]          → body[authInfo.Email]
+						//   body["phone"]          → body[authInfo.Phone]
+						//   body["role_id"]        → body[authInfo.RoleID]
+						//   body["client_type_id"] → body[authInfo.ClientTypeID]
+						//
+						// The "user" system table stores phone as "phone_number", not "phone".
+						// ──────────────────────────────────────────────────────────────────
 						migratePayload := map[string]any{
-							// Flags
+							// Control flags — must be bool, not string
 							"from_auth_service": true,
 							"already_hashed":    true,
-							// Identity
+
+							// Identity — used verbatim by InsertPersonTable
 							"guid":         existingUserGuid,
 							"user_id_auth": existingUserIdAuth,
-							// Auth credentials (remapped to authInfo slugs inside Items.Create)
+
+							// Auth credentials — remapped inside Items.Create via authInfo slugs.
+							// "password" is the stored bcrypt hash (or sentinel if null).
 							"login":    existingUser["login"],
-							"password": existingUser["password"], // stored bcrypt hash, not re-hashed
+							"password": existingPassword,
 							"email":    existingUser["email"],
-							"phone":    existingUser["phone_number"], // "user" table uses phone_number
-							// Auth roles (remapped to authInfo.RoleID / authInfo.ClientTypeID slugs)
+							"phone":    existingUser["phone_number"], // "user" table field name
+
+							// Roles — remapped to authInfo.RoleID / authInfo.ClientTypeID
 							"role_id":        existingUser["role_id"],
-							"client_type_id": clientTypeId, // the just-updated client_type
-							// Extra profile fields passed to InsertPersonTable
+							"client_type_id": clientTypeId, // just-updated client_type guid
+
+							// Profile — forwarded to InsertPersonTable as FullName / Image
 							"name":  existingUser["full_name"],
 							"photo": existingUser["photo"],
 						}
@@ -326,6 +365,9 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 			if isSystemField(fieldPlan.Slug) {
 				continue
 			}
+			// Auth fields (login, email, phone, password, tin) are managed by the auth
+			// system on login tables — creating them as custom fields causes duplicate
+			// column errors and breaks auth validation.
 			if tablePlan.IsLoginTable && isAuthField(fieldPlan.Slug) {
 				continue
 			}
@@ -356,23 +398,33 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 			}
 		}
 
-		// Insert Mock Data via Items service
-		for i, mockRow := range tablePlan.MockData {
-			structData, err := helper.ConvertMapToStruct(mockRow)
-			if err != nil {
-				errs = append(errs, fmt.Sprintf("mock %s[%d] convert: %v", tablePlan.Slug, i, err))
-				continue
+		// Insert Mock Data via Items service.
+		// Login tables are skipped: mock rows don't carry auth credentials
+		// (role_id, client_type_id, login/password) and always fail auth validation.
+		// Real users for login tables are migrated from "user" table in Steps 8-9 above.
+		if tablePlan.IsLoginTable {
+			if len(tablePlan.MockData) > 0 {
+				log.Printf("[ai_messaging_backend] Skipping %d mock data row(s) for login table '%s' (use user migration instead)",
+					len(tablePlan.MockData), tablePlan.Slug)
 			}
+		} else {
+			for i, mockRow := range tablePlan.MockData {
+				structData, err := helper.ConvertMapToStruct(mockRow)
+				if err != nil {
+					errs = append(errs, fmt.Sprintf("mock %s[%d] convert: %v", tablePlan.Slug, i, err))
+					continue
+				}
 
-			_, err = service.GoObjectBuilderService().Items().Create(
-				ctx, &nb.CommonMessage{
-					TableSlug: tablePlan.Slug,
-					ProjectId: resourceEnvId,
-					Data:      structData,
-				},
-			)
-			if err != nil {
-				errs = append(errs, fmt.Sprintf("mock %s[%d] insert: %v", tablePlan.Slug, i, err))
+				_, err = service.GoObjectBuilderService().Items().Create(
+					ctx, &nb.CommonMessage{
+						TableSlug: tablePlan.Slug,
+						ProjectId: resourceEnvId,
+						Data:      structData,
+					},
+				)
+				if err != nil {
+					errs = append(errs, fmt.Sprintf("mock %s[%d] insert: %v", tablePlan.Slug, i, err))
+				}
 			}
 		}
 	}
@@ -384,6 +436,19 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 
 	log.Printf("[ai_messaging_backend] Successfully completed backend creation")
 	return nil
+}
+
+// safeString extracts a non-nil string from an any value.
+// Returns "" if the value is nil, not a string, or an empty string.
+func safeString(v any) string {
+	if v == nil {
+		return ""
+	}
+	s, ok := v.(string)
+	if !ok {
+		return ""
+	}
+	return s
 }
 
 func isSystemField(slug string) bool {
@@ -464,9 +529,10 @@ func ensureLoginTable(plan *models.ArchitectPlan) *models.ArchitectPlan {
 				Type:  "SINGLE_LINE",
 			},
 		},
-		MockData: []map[string]any{
-			{"full_name": "Admin User"},
-		},
+		// No MockData for login tables — mock rows without auth credentials
+		// always fail Items.Create validation on login tables.
+		// Users are migrated from the "user" system table instead (Steps 8-9).
+		MockData: nil,
 	}
 
 	plan.Tables = append([]models.TablePlan{defaultUsers}, plan.Tables...)
