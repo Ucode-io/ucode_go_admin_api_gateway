@@ -26,8 +26,11 @@ import (
 func (h *HandlerV1) GetUgenUserProjects(c *gin.Context) {
 	var ctx = c.Request.Context()
 
-	userIdRaw, _ := c.Get("user_id")
-	userId, _ := userIdRaw.(string)
+	authInfo, err := h.adminAuthInfo(c)
+	if err != nil {
+		return
+	}
+	userId := authInfo.GetUserIdAuth()
 	if userId == "" {
 		h.HandleResponse(c, status_http.Unauthorized, "unauthorized")
 		return
