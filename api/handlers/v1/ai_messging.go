@@ -240,14 +240,14 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 	}
 
 	h.HandleResponse(c, status_http.Created, map[string]any{
-		"message":          em,
-		"project":          updatedProject,
-		"mcp_project_id":   processor.mcpProjectID,
+		"message":               em,
+		"project":               updatedProject,
+		"mcp_project_id":        processor.mcpProjectID,
 		"microfrontend_id":      processor.microfrontendID,
 		"microfrontend_repo_id": processor.microfrontendRepoID,
-		"pending_action":   aiResponse.PendingAction,
-		"questions":        aiResponse.Questions,
-		"plan":             aiResponse.Plan,
+		"pending_action":        aiResponse.PendingAction,
+		"questions":             aiResponse.Questions,
+		"plan":                  aiResponse.Plan,
 	})
 }
 
@@ -342,51 +342,34 @@ func (h *HandlerV1) handlePendingConfirmation(
 func (p *ChatProcessor) routeAndProcess(ctx context.Context, req models.NewMessageReq, chatHistory []models.ChatMessage) (*models.ParsedClaudeResponse, error) {
 	hasImages := len(req.Images) > 0
 
-	// Load existing project files.
-	// NEW: if a microfrontend is linked, fetch its files from the u-gen branch.
-	// OLD McpProject load is kept below but commented out — no longer the primary path.
+	if len(req.Context) > 0 {
+		if p.mcpProjectID == "" && p.microfrontendID == "" {
+			return &models.ParsedClaudeResponse{
+				Description: "No project found. Please create a project first before using visual editing.",
+			}, nil
+		}
+		return p.runVisualEdit(ctx, req.Content, req.Context, chatHistory, req.Images)
+	}
+
 	var (
-		projectData      *pbo.McpProject
-		fileGraphJSON    = "{}"
-		microfrontFiles  []models.GitlabFileChange // files fetched from microfrontend u-gen branch
-		err              error
+		fileGraphJSON   = "{}"
+		microfrontFiles []models.GitlabFileChange
+		err             error
 	)
 
 	if p.microfrontendID != "" && p.microfrontendRepoID != "" {
-		// Microfrontend edit path: fetch current files from the u-gen branch
 		log.Printf("[ROUTER] microfrontend edit mode — fetching files for repo_id=%s", p.microfrontendRepoID)
 		microfrontFiles, err = p.fetchMicrofrontendFiles(ctx)
 		if err != nil {
 			log.Printf("[ROUTER] failed to fetch microfrontend files: %v", err)
-			// Non-fatal: proceed without existing files (will fall back to free generation)
 		} else {
 			fileGraphJSON = p.buildMicrofrontendFileGraphJSON(microfrontFiles)
 		}
 	}
 
-	// OLD: Load from McpProject (no longer used when microfrontend_id is present)
-	// if p.mcpProjectID != "" {
-	// 	projectData, err = p.service.GoObjectBuilderService().McpProject().GetMcpProjectFiles(
-	// 		ctx, &pbo.McpProjectId{
-	// 			ResourceEnvId: p.resourceEnvID,
-	// 			Id:            p.mcpProjectID,
-	// 		},
-	// 	)
-	// 	if err != nil {
-	// 		fmt.Println("I am here")
-	// 		log.Printf("[ROUTER] failed to load project files (mcpProjectID=%s): %v", p.mcpProjectID, err)
-	// 		projectData = nil
-	// 	}
-	// 	if projectData != nil {
-	// 		p.mcpUcodeProjectID = projectData.GetUcodeProjectId()
-	// 		fileGraphJSON, _ = p.buildFileGraphJSON(projectData)
-	// 	}
-	// }
-
 	// Step 1: classify intent using fast Haiku model
 	routeResult, err := p.routeRequest(req.Content, fileGraphJSON, hasImages, chatHistory)
 	if err != nil {
-		fmt.Println("No I am here")
 		return nil, err
 	}
 
@@ -420,15 +403,12 @@ func (p *ChatProcessor) routeAndProcess(ctx context.Context, req models.NewMessa
 		if p.microfrontendID != "" {
 			return p.runMicrofrontendInspect(ctx, req.Content, routeResult.FilesNeeded, chatHistory, req.Images, microfrontFiles)
 		}
-		if projectData == nil {
-			return &models.ParsedClaudeResponse{
-				Description: "No project exists yet. Please create a project first by describing what you want to build.",
-			}, nil
-		}
-		return p.runInspect(ctx, req.Content, routeResult.FilesNeeded, chatHistory, req.Images, projectData)
+		return &models.ParsedClaudeResponse{
+			Description: "No project exists yet. Please create a project first by describing what you want to build.",
+		}, nil
 
 	case "code_change":
-		return p.runCodeChange(ctx, routeResult.Clarified, fileGraphJSON, chatHistory, req.Images, routeResult.ProjectName, projectData, microfrontFiles)
+		return p.runCodeChange(ctx, routeResult.Clarified, fileGraphJSON, chatHistory, req.Images, routeResult.ProjectName, microfrontFiles)
 
 	case "database_query":
 		clarified := strings.TrimSpace(routeResult.Clarified)
@@ -472,51 +452,111 @@ func (p *ChatProcessor) runGeneratePlan(ctx context.Context, userRequest string,
 	}, nil
 }
 
-func (p *ChatProcessor) runInspect(ctx context.Context, userQuestion string, filesNeeded []string, chatHistory []models.ChatMessage, imageURLs []string, projectData *pbo.McpProject) (*models.ParsedClaudeResponse, error) {
-	filesContext := p.buildFilesContext(projectData, filesNeeded)
-	answer, err := p.inspectCode(ctx, userQuestion, filesContext, chatHistory, imageURLs)
-	if err != nil {
-		return nil, err
-	}
-	return &models.ParsedClaudeResponse{Description: answer}, nil
-}
 
-func (p *ChatProcessor) runCodeChange(ctx context.Context, clarified, fileGraphJSON string, chatHistory []models.ChatMessage, imageURLs []string, projectName string, projectData *pbo.McpProject, microfrontFiles []models.GitlabFileChange) (*models.ParsedClaudeResponse, error) {
-	// NEW: Microfrontend edit path — fetch files, AI edits, push back to u-gen
+func (p *ChatProcessor) runCodeChange(ctx context.Context, clarified, fileGraphJSON string, chatHistory []models.ChatMessage, imageURLs []string, projectName string, microfrontFiles []models.GitlabFileChange) (*models.ParsedClaudeResponse, error) {
 	if p.microfrontendID != "" {
 		return p.runMicrofrontendEdit(ctx, clarified, fileGraphJSON, chatHistory, imageURLs, microfrontFiles)
 	}
+	log.Printf("[CODE] no existing project — starting new project build")
+	return p.buildNewProject(ctx, clarified, chatHistory, imageURLs, projectName)
+}
 
-	// No existing project — run the full new project creation flow
-	if projectData == nil || len(projectData.GetProjectFiles()) == 0 {
-		log.Printf("[CODE] no existing project — starting new project build")
-		return p.buildNewProject(ctx, clarified, chatHistory, imageURLs, projectName)
-	}
+func (p *ChatProcessor) runVisualEdit(ctx context.Context, instruction string, contexts []models.VisualContext, chatHistory []models.ChatMessage, imageURLs []string) (*models.ParsedClaudeResponse, error) {
+	log.Printf("[VISUAL EDIT] starting: count=%d", len(contexts))
 
-	// OLD: Existing McpProject — plan then edit (kept for reference, no longer primary path)
-	// plan, err := p.planChanges(ctx, clarified, fileGraphJSON, chatHistory, len(imageURLs) > 0)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// log.Printf("[PLANNER] files_to_change=%d files_to_create=%d", len(plan.FilesToChange), len(plan.FilesToCreate))
-	// neededPaths := make([]string, 0, len(plan.FilesToChange))
-	// for _, f := range plan.FilesToChange {
-	// 	neededPaths = append(neededPaths, f.Path)
-	// }
-	// return p.editCode(ctx, clarified, plan, p.buildFilesContext(projectData, neededPaths), chatHistory, imageURLs)
-
-	plan, err := p.planChanges(ctx, clarified, fileGraphJSON, chatHistory, len(imageURLs) > 0)
+	existingFiles, err := p.fetchMicrofrontendFiles(ctx)
 	if err != nil {
-		return nil, err
-	}
-	log.Printf("[PLANNER] files_to_change=%d files_to_create=%d", len(plan.FilesToChange), len(plan.FilesToCreate))
-
-	neededPaths := make([]string, 0, len(plan.FilesToChange))
-	for _, f := range plan.FilesToChange {
-		neededPaths = append(neededPaths, f.Path)
+		return nil, fmt.Errorf("visual edit: failed to fetch microfrontend files: %w", err)
 	}
 
-	return p.editCode(ctx, clarified, plan, p.buildFilesContext(projectData, neededPaths), chatHistory, imageURLs)
+	// Resolve target files for each visual context
+	targetPaths := make(map[string]bool)
+	resolvedContexts := make([]models.VisualContext, 0, len(contexts))
+
+	for _, vc := range contexts {
+		var foundPath string
+		for _, f := range existingFiles {
+			if vc.Path != "" && f.FilePath == vc.Path {
+				foundPath = f.FilePath
+				break
+			}
+			if vc.Path == "" && vc.ElementName != "" && strings.Contains(f.Content, vc.ElementName) {
+				foundPath = f.FilePath
+				break
+			}
+		}
+		if foundPath != "" {
+			targetPaths[foundPath] = true
+			vc.Path = foundPath
+			resolvedContexts = append(resolvedContexts, vc)
+		} else {
+			log.Printf("[VISUAL EDIT] WARNING: could not resolve file for element %q (path: %q)", vc.ElementName, vc.Path)
+		}
+	}
+
+	if len(targetPaths) == 0 {
+		log.Printf("[VISUAL EDIT] no specific files found for contexts, falling back to microfrontend edit flow")
+		fileGraphJSON := p.buildMicrofrontendFileGraphJSON(existingFiles)
+		return p.runMicrofrontendEdit(ctx, instruction, fileGraphJSON, chatHistory, imageURLs, existingFiles)
+	}
+
+	paths := make([]string, 0, len(targetPaths))
+	for path := range targetPaths {
+		paths = append(paths, path)
+	}
+	filesContext := p.buildMicrofrontendFilesContext(existingFiles, paths)
+
+	prompt := helper.BuildVisualEditPrompt(instruction, resolvedContexts, filesContext)
+	messages := buildMessagesWithHistory(chatHistory, buildContentBlocksWithImages(prompt, imageURLs))
+
+	response, err := p.callAnthropicWithTracking(
+		ctx,
+		models.AnthropicRequest{
+			Model:     p.baseConf.ClaudeModel,
+			MaxTokens: p.baseConf.CoderMaxTokens,
+			System:    helper.PromptVisualEdit,
+			Messages:  messages,
+		},
+		timeoutCoder,
+		fmt.Sprintf("Visual edit: %d elements in %d files", len(resolvedContexts), len(targetPaths)),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("visual edit: claude call failed: %w", err)
+	}
+
+	updatedFiles, changeSummary, err := helper.ParseVisualEditResponse(response)
+	if err != nil {
+		log.Printf("[VISUAL EDIT] surgical parse failed (%v), falling back to ParseClaudeResponse", err)
+		parsed, parseErr := helper.ParseClaudeResponse(response)
+		if parseErr != nil {
+			return nil, parseErr
+		}
+		if parsed.Project != nil && len(parsed.Project.Files) > 0 {
+			if pushErr := p.pushMicrofrontendChanges(ctx, parsed.Project.Files); pushErr != nil {
+				return nil, fmt.Errorf("visual edit: push failed: %w", pushErr)
+			}
+		}
+		return &models.ParsedClaudeResponse{Description: parsed.Description}, nil
+	}
+
+	projectFiles := make([]models.ProjectFile, 0, len(updatedFiles))
+	for _, uf := range updatedFiles {
+		projectFiles = append(projectFiles, models.ProjectFile{Path: uf.Path, Content: uf.Content})
+	}
+
+	if len(projectFiles) > 0 {
+		if err = p.pushMicrofrontendChanges(ctx, projectFiles); err != nil {
+			return nil, fmt.Errorf("visual edit: push to u-gen failed: %w", err)
+		}
+	}
+
+	description := changeSummary
+	if description == "" {
+		description = "✅ Visual edit applied successfully."
+	}
+
+	log.Printf("[VISUAL EDIT] ✅ done — %d files pushed to u-gen, summary=%s", len(projectFiles), changeSummary)
+	return &models.ParsedClaudeResponse{Description: description}, nil
 }
 
 // ============================================================================
@@ -552,7 +592,7 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 
 	log.Printf("[NEW PROJECT] [Step 3/4] Creating Tables (Async in background)...")
 	go func(bPlan *models.ArchitectPlan, resourceEnvId, envId string) {
-		if err := createBackendFromPlan(context.Background(), bPlan, resourceEnvId, envId, p.service); err != nil {
+		if err := createBackendFromPlan(context.Background(), bPlan, resourceEnvId, p.ucodeProjectID, p.userID, envId, p.service); err != nil {
 			log.Printf("[ARCHITECT] backend table creation failed (resourceEnv=%s): %v", resourceEnvId, err)
 		} else {
 			log.Printf("[ARCHITECT] ✅ Async backend tables created successfully")
@@ -998,48 +1038,6 @@ func (p *ChatProcessor) getChatHistory(ctx context.Context) ([]models.ChatMessag
 	return result, nil
 }
 
-func (p *ChatProcessor) buildFileGraphJSON(project *pbo.McpProject) (string, error) {
-	if project == nil || len(project.GetProjectFiles()) == 0 {
-		return "{}", nil
-	}
-
-	graph := make(map[string]models.GraphNode, len(project.GetProjectFiles()))
-	for _, f := range project.GetProjectFiles() {
-		graph[f.GetPath()] = models.GraphNode{
-			Path:      f.GetPath(),
-			FileGraph: f.GetFileGraph(),
-		}
-	}
-
-	jsonBytes, err := json.Marshal(graph)
-	if err != nil {
-		return "{}", fmt.Errorf("marshal file graph: %w", err)
-	}
-	return string(jsonBytes), nil
-}
-
-func (p *ChatProcessor) buildFilesContext(project *pbo.McpProject, paths []string) string {
-	if len(paths) == 0 || project == nil {
-		return "No existing files to modify."
-	}
-
-	pathSet := make(map[string]bool, len(paths))
-	for _, path := range paths {
-		pathSet[path] = true
-	}
-
-	var sb strings.Builder
-	for _, file := range project.GetProjectFiles() {
-		if pathSet[file.GetPath()] {
-			sb.WriteString(fmt.Sprintf("\n\n### FILE: %s\n```\n%s\n```", file.GetPath(), file.GetContent()))
-		}
-	}
-
-	if sb.Len() == 0 {
-		return "No matching files found."
-	}
-	return sb.String()
-}
 
 func (p *ChatProcessor) callAnthropicWithTracking(ctx context.Context, req models.AnthropicRequest, timeout time.Duration, description string) (string, error) {
 	log.Printf("[AI] Calling Anthropic: %s", description)
@@ -1244,7 +1242,7 @@ func (p *ChatProcessor) pushMicrofrontendChanges(ctx context.Context, generatedF
 	}
 
 	type pushReq struct {
-		RepoID int                      `json:"repo_id"`
+		RepoID int                       `json:"repo_id"`
 		Files  []models.GitlabFileChange `json:"files"`
 	}
 

@@ -17,12 +17,23 @@ type (
 		Plan       *HaikuPlan `json:"plan,omitempty"`
 	}
 
+	// VisualContext is optional metadata sent by the frontend when the user
+	// selected a specific UI element for visual editing.
+	// All fields are optional — the backend handles whatever is provided.
+	VisualContext struct {
+		Path        string `json:"path,omitempty"`         // e.g. "src/components/layout/TopNav.tsx"
+		Line        int    `json:"line,omitempty"`         // line number inside the file
+		ElementName string `json:"element_name,omitempty"` // data-element-name value
+		OuterHTML   string `json:"outer_html,omitempty"`   // element.outerHTML snapshot
+	}
+
 	NewMessageReq struct {
-		Content             string         `json:"content"`
-		Images              []string       `json:"images"`
-		PendingAction       *PendingAction `json:"pending_action,omitempty"`
-		MicrofrontendID     string         `json:"microfrontend_id,omitempty"`
-		MicrofrontendRepoID string         `json:"microfrontend_repo_id,omitempty"`
+		Content             string          `json:"content"`
+		Images              []string        `json:"images"`
+		PendingAction       *PendingAction  `json:"pending_action,omitempty"`
+		Context             []VisualContext `json:"context,omitempty"`
+		MicrofrontendID     string          `json:"microfrontend_id,omitempty"`
+		MicrofrontendRepoID string          `json:"microfrontend_repo_id,omitempty"`
 	}
 	SendMessageRequest struct {
 		UserPrompt    string `json:"user_prompt"`
@@ -169,7 +180,7 @@ type (
 		AccentHSL            string `json:"accent_hsl"`
 		FontFamily           string `json:"font_family"`
 		BorderRadius         string `json:"border_radius"`
-		DesignInspiration     string `json:"design_inspiration"`
+		DesignInspiration    string `json:"design_inspiration"`
 	}
 
 	ArchitectPlan struct {
