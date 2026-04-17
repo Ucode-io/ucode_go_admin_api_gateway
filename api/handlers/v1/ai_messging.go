@@ -1,10 +1,14 @@
 package v1
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
+	"net/http"
+	"regexp"
 	"strings"
 	"time"
 
@@ -27,6 +31,12 @@ const (
 	timeoutInspector = 300 * time.Second
 	timeoutPlanner   = 300 * time.Second
 	timeoutCoder     = 900 * time.Second
+
+	// uGenBranch is the branch where all AI-generated code is pushed.
+	// master is only for pipeline triggers (created when the microfrontend is first forked).
+	uGenBranch = "u-gen"
+
+	timeoutPublishMicrofrontend = 5 * time.Minute
 )
 
 type ChatProcessor struct {
@@ -42,12 +52,16 @@ type ChatProcessor struct {
 	userID       string
 	clientTypeID string
 	roleID       string
+	authToken    string // forwarded to the function service for microfrontend creation
+
+	microfrontendID     string // populated after PublishAiGeneratedMicroFrontend succeeds, or from request
+	microfrontendRepoID string // GitLab numeric project ID — stored from publish response or from request
 
 	schemaCache    []models.TableSchema
 	schemaCachedAt time.Time
 }
 
-func newChatProcessor(h *HandlerV1, service services.ServiceManagerI, baseConf config.BaseConfig, chatId, mcpProjectID, resourceEnvID, ucodeProjectID string, userID, clientTypeID, roleID string) *ChatProcessor {
+func newChatProcessor(h *HandlerV1, service services.ServiceManagerI, baseConf config.BaseConfig, chatId, mcpProjectID, resourceEnvID, ucodeProjectID string, userID, clientTypeID, roleID, authToken string) *ChatProcessor {
 	return &ChatProcessor{
 		h:              h,
 		service:        service,
@@ -59,6 +73,7 @@ func newChatProcessor(h *HandlerV1, service services.ServiceManagerI, baseConf c
 		userID:         userID,
 		clientTypeID:   clientTypeID,
 		roleID:         roleID,
+		authToken:      authToken,
 	}
 }
 
@@ -116,7 +131,11 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 		h, service, h.baseConf,
 		chatId, chat.GetProjectId(), resourceEnvID, realProjectID,
 		authInfo.GetUserIdAuth(), authInfo.GetClientTypeId(), authInfo.GetRoleId(),
+		c.GetHeader("Authorization"),
 	)
+	// Populate microfrontend context from the request when editing an existing microfrontend
+	processor.microfrontendID = userMessage.MicrofrontendID
+	processor.microfrontendRepoID = userMessage.MicrofrontendRepoID
 
 	chatHistory, err := processor.getChatHistory(ctx)
 	if err != nil {
@@ -221,12 +240,14 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 	}
 
 	h.HandleResponse(c, status_http.Created, map[string]any{
-		"message":        em,
-		"project":        updatedProject,
-		"mcp_project_id": processor.mcpProjectID,
-		"pending_action": aiResponse.PendingAction,
-		"questions":      aiResponse.Questions,
-		"plan":           aiResponse.Plan,
+		"message":          em,
+		"project":          updatedProject,
+		"mcp_project_id":   processor.mcpProjectID,
+		"microfrontend_id":      processor.microfrontendID,
+		"microfrontend_repo_id": processor.microfrontendRepoID,
+		"pending_action":   aiResponse.PendingAction,
+		"questions":        aiResponse.Questions,
+		"plan":             aiResponse.Plan,
 	})
 }
 
@@ -321,32 +342,51 @@ func (h *HandlerV1) handlePendingConfirmation(
 func (p *ChatProcessor) routeAndProcess(ctx context.Context, req models.NewMessageReq, chatHistory []models.ChatMessage) (*models.ParsedClaudeResponse, error) {
 	hasImages := len(req.Images) > 0
 
-	// Load existing project files if a project is linked
+	// Load existing project files.
+	// NEW: if a microfrontend is linked, fetch its files from the u-gen branch.
+	// OLD McpProject load is kept below but commented out — no longer the primary path.
 	var (
-		projectData   *pbo.McpProject
-		fileGraphJSON = "{}"
-		err           error
+		projectData      *pbo.McpProject
+		fileGraphJSON    = "{}"
+		microfrontFiles  []models.GitlabFileChange // files fetched from microfrontend u-gen branch
+		err              error
 	)
-	if p.mcpProjectID != "" {
-		projectData, err = p.service.GoObjectBuilderService().McpProject().GetMcpProjectFiles(
-			ctx, &pbo.McpProjectId{
-				ResourceEnvId: p.resourceEnvID,
-				Id:            p.mcpProjectID,
-			},
-		)
+
+	if p.microfrontendID != "" && p.microfrontendRepoID != "" {
+		// Microfrontend edit path: fetch current files from the u-gen branch
+		log.Printf("[ROUTER] microfrontend edit mode — fetching files for repo_id=%s", p.microfrontendRepoID)
+		microfrontFiles, err = p.fetchMicrofrontendFiles(ctx)
 		if err != nil {
-			log.Printf("[ROUTER] failed to load project files (mcpProjectID=%s): %v", p.mcpProjectID, err)
-			projectData = nil
-		}
-		if projectData != nil {
-			p.mcpUcodeProjectID = projectData.GetUcodeProjectId()
-			fileGraphJSON, _ = p.buildFileGraphJSON(projectData)
+			log.Printf("[ROUTER] failed to fetch microfrontend files: %v", err)
+			// Non-fatal: proceed without existing files (will fall back to free generation)
+		} else {
+			fileGraphJSON = p.buildMicrofrontendFileGraphJSON(microfrontFiles)
 		}
 	}
+
+	// OLD: Load from McpProject (no longer used when microfrontend_id is present)
+	// if p.mcpProjectID != "" {
+	// 	projectData, err = p.service.GoObjectBuilderService().McpProject().GetMcpProjectFiles(
+	// 		ctx, &pbo.McpProjectId{
+	// 			ResourceEnvId: p.resourceEnvID,
+	// 			Id:            p.mcpProjectID,
+	// 		},
+	// 	)
+	// 	if err != nil {
+	// 		fmt.Println("I am here")
+	// 		log.Printf("[ROUTER] failed to load project files (mcpProjectID=%s): %v", p.mcpProjectID, err)
+	// 		projectData = nil
+	// 	}
+	// 	if projectData != nil {
+	// 		p.mcpUcodeProjectID = projectData.GetUcodeProjectId()
+	// 		fileGraphJSON, _ = p.buildFileGraphJSON(projectData)
+	// 	}
+	// }
 
 	// Step 1: classify intent using fast Haiku model
 	routeResult, err := p.routeRequest(req.Content, fileGraphJSON, hasImages, chatHistory)
 	if err != nil {
+		fmt.Println("No I am here")
 		return nil, err
 	}
 
@@ -377,6 +417,9 @@ func (p *ChatProcessor) routeAndProcess(ctx context.Context, req models.NewMessa
 		return &models.ParsedClaudeResponse{Description: routeResult.Reply}, nil
 
 	case "project_inspect":
+		if p.microfrontendID != "" {
+			return p.runMicrofrontendInspect(ctx, req.Content, routeResult.FilesNeeded, chatHistory, req.Images, microfrontFiles)
+		}
 		if projectData == nil {
 			return &models.ParsedClaudeResponse{
 				Description: "No project exists yet. Please create a project first by describing what you want to build.",
@@ -385,7 +428,7 @@ func (p *ChatProcessor) routeAndProcess(ctx context.Context, req models.NewMessa
 		return p.runInspect(ctx, req.Content, routeResult.FilesNeeded, chatHistory, req.Images, projectData)
 
 	case "code_change":
-		return p.runCodeChange(ctx, routeResult.Clarified, fileGraphJSON, chatHistory, req.Images, routeResult.ProjectName, projectData)
+		return p.runCodeChange(ctx, routeResult.Clarified, fileGraphJSON, chatHistory, req.Images, routeResult.ProjectName, projectData, microfrontFiles)
 
 	case "database_query":
 		clarified := strings.TrimSpace(routeResult.Clarified)
@@ -438,14 +481,30 @@ func (p *ChatProcessor) runInspect(ctx context.Context, userQuestion string, fil
 	return &models.ParsedClaudeResponse{Description: answer}, nil
 }
 
-func (p *ChatProcessor) runCodeChange(ctx context.Context, clarified, fileGraphJSON string, chatHistory []models.ChatMessage, imageURLs []string, projectName string, projectData *pbo.McpProject) (*models.ParsedClaudeResponse, error) {
+func (p *ChatProcessor) runCodeChange(ctx context.Context, clarified, fileGraphJSON string, chatHistory []models.ChatMessage, imageURLs []string, projectName string, projectData *pbo.McpProject, microfrontFiles []models.GitlabFileChange) (*models.ParsedClaudeResponse, error) {
+	// NEW: Microfrontend edit path — fetch files, AI edits, push back to u-gen
+	if p.microfrontendID != "" {
+		return p.runMicrofrontendEdit(ctx, clarified, fileGraphJSON, chatHistory, imageURLs, microfrontFiles)
+	}
+
 	// No existing project — run the full new project creation flow
 	if projectData == nil || len(projectData.GetProjectFiles()) == 0 {
 		log.Printf("[CODE] no existing project — starting new project build")
 		return p.buildNewProject(ctx, clarified, chatHistory, imageURLs, projectName)
 	}
 
-	// Existing project — plan then edit
+	// OLD: Existing McpProject — plan then edit (kept for reference, no longer primary path)
+	// plan, err := p.planChanges(ctx, clarified, fileGraphJSON, chatHistory, len(imageURLs) > 0)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// log.Printf("[PLANNER] files_to_change=%d files_to_create=%d", len(plan.FilesToChange), len(plan.FilesToCreate))
+	// neededPaths := make([]string, 0, len(plan.FilesToChange))
+	// for _, f := range plan.FilesToChange {
+	// 	neededPaths = append(neededPaths, f.Path)
+	// }
+	// return p.editCode(ctx, clarified, plan, p.buildFilesContext(projectData, neededPaths), chatHistory, imageURLs)
+
 	plan, err := p.planChanges(ctx, clarified, fileGraphJSON, chatHistory, len(imageURLs) > 0)
 	if err != nil {
 		return nil, err
@@ -501,13 +560,32 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 	}(plan, projectData.ResourceEnvId, projectData.EnvironmentId)
 
 	log.Printf("[NEW PROJECT] [Step 4/4] Writing Frontend Code (Coder Phase)...")
+	var generated *models.ParsedClaudeResponse
 	if plan.ProjectType == "admin_panel" {
 		log.Printf("[CODE] Using admin panel template system...")
-		return p.generateAdminPanel(ctx, clarified, imageURLs, plan, projectData.ApiKey, projectData.EnvironmentId)
+		generated, err = p.generateAdminPanel(ctx, clarified, imageURLs, plan, projectData.ApiKey, projectData.EnvironmentId)
+	} else {
+		log.Printf("[CODE] Using open project generator...")
+		generated, err = p.generateProject(ctx, clarified, imageURLs, plan, projectData.ApiKey, projectData.EnvironmentId)
+	}
+	if err != nil {
+		return nil, err
 	}
 
-	log.Printf("[CODE] Using open project generator...")
-	return p.generateProject(ctx, clarified, imageURLs, plan, projectData.ApiKey, projectData.EnvironmentId)
+	// Previously the generated project files were returned here and saved to
+	// McpProject JSON in the DB via saveProject(). That approach is now replaced
+	// by creating a real microfrontend and pushing the code to the u-gen branch.
+	//
+	// OLD (kept for reference):
+	// return generated, nil  →  caller called saveProject() → McpProject.UpdateMcpProject()
+
+	log.Printf("[NEW PROJECT] [Step 5/5] Creating microfrontend and pushing code to %s branch...", uGenBranch)
+	if err = p.publishToMicrofrontend(ctx, plan.ProjectName, generated, projectData); err != nil {
+		return nil, fmt.Errorf("microfrontend publish failed: %w", err)
+	}
+
+	log.Printf("[NEW PROJECT] ✅ Microfrontend created (id: %s)", p.microfrontendID)
+	return &models.ParsedClaudeResponse{Description: generated.Description}, nil
 }
 
 // ============================================================================
@@ -996,6 +1074,329 @@ func (p *ChatProcessor) callAnthropicWithTracking(ctx context.Context, req model
 	}()
 
 	return response, nil
+}
+
+// ============================================================================
+// MICROFRONTEND EDIT HELPERS
+// ============================================================================
+
+// runMicrofrontendEdit fetches the current files from u-gen, asks the AI to edit
+// them, then pushes the result back to u-gen. No McpProject is touched.
+func (p *ChatProcessor) runMicrofrontendEdit(ctx context.Context, clarified, fileGraphJSON string, chatHistory []models.ChatMessage, imageURLs []string, existingFiles []models.GitlabFileChange) (*models.ParsedClaudeResponse, error) {
+	log.Printf("[MICROFE EDIT] planning changes for microfrontend id=%s", p.microfrontendID)
+
+	plan, err := p.planChanges(ctx, clarified, fileGraphJSON, chatHistory, len(imageURLs) > 0)
+	if err != nil {
+		return nil, err
+	}
+	log.Printf("[MICROFE EDIT] planner: files_to_change=%d files_to_create=%d", len(plan.FilesToChange), len(plan.FilesToCreate))
+
+	neededPaths := make([]string, 0, len(plan.FilesToChange))
+	for _, f := range plan.FilesToChange {
+		neededPaths = append(neededPaths, f.Path)
+	}
+
+	filesContext := p.buildMicrofrontendFilesContext(existingFiles, neededPaths)
+
+	edited, err := p.editCode(ctx, clarified, plan, filesContext, chatHistory, imageURLs)
+	if err != nil {
+		return nil, err
+	}
+
+	if edited.Project == nil || len(edited.Project.Files) == 0 {
+		log.Printf("[MICROFE EDIT] no files returned by editor (AI responded conversationally), falling back to full regeneration")
+		log.Printf("[MICROFE EDIT] AI description was: %s", edited.Description)
+
+		// Build full context from all existing files and regenerate directly
+		allFilesContext := p.buildMicrofrontendFilesContext(existingFiles, func() []string {
+			paths := make([]string, 0, len(existingFiles))
+			for _, f := range existingFiles {
+				paths = append(paths, f.FilePath)
+			}
+			return paths
+		}())
+
+		fallbackPrompt := fmt.Sprintf(
+			"IMPORTANT: You MUST return JSON. Do NOT respond with text.\n\nTask: %s\n\nExisting project files (modify as needed):\n%s",
+			clarified, allFilesContext,
+		)
+
+		fallbackResp, err := p.callAnthropicWithTracking(
+			ctx,
+			models.AnthropicRequest{
+				Model:     p.baseConf.ClaudeModel,
+				MaxTokens: p.baseConf.CoderMaxTokens,
+				System:    helper.PromptAdminPanelGenerator,
+				Messages: []models.ChatMessage{
+					{Role: "user", Content: []models.ContentBlock{{Type: "text", Text: fallbackPrompt}}},
+				},
+			},
+			timeoutCoder,
+			"Microfrontend edit fallback regeneration",
+		)
+		if err != nil {
+			return nil, fmt.Errorf("microfrontend edit fallback: %w", err)
+		}
+
+		edited, err = helper.ParseClaudeResponse(fallbackResp)
+		if err != nil {
+			log.Printf("[MICROFE EDIT] fallback parse failed, attempting JSON repair: %v", err)
+			edited, err = p.repairJSON(ctx, fallbackResp, clarified, helper.PromptAdminPanelGenerator)
+			if err != nil {
+				return nil, fmt.Errorf("microfrontend edit fallback: failed after repair: %w", err)
+			}
+		}
+
+		if edited.Project == nil || len(edited.Project.Files) == 0 {
+			log.Printf("[MICROFE EDIT] fallback also returned no files — returning description only")
+			return &models.ParsedClaudeResponse{Description: edited.Description}, nil
+		}
+		log.Printf("[MICROFE EDIT] fallback succeeded with %d file(s)", len(edited.Project.Files))
+	}
+
+	log.Printf("[MICROFE EDIT] pushing %d file(s) to u-gen branch", len(edited.Project.Files))
+	if err = p.pushMicrofrontendChanges(ctx, edited.Project.Files); err != nil {
+		return nil, fmt.Errorf("failed to push microfrontend changes: %w", err)
+	}
+
+	// Return description only — no McpProject save
+	return &models.ParsedClaudeResponse{Description: edited.Description}, nil
+}
+
+// runMicrofrontendInspect answers questions about the microfrontend's current code
+// by loading the requested files from the u-gen branch.
+func (p *ChatProcessor) runMicrofrontendInspect(ctx context.Context, userQuestion string, filesNeeded []string, chatHistory []models.ChatMessage, imageURLs []string, existingFiles []models.GitlabFileChange) (*models.ParsedClaudeResponse, error) {
+	filesContext := p.buildMicrofrontendFilesContext(existingFiles, filesNeeded)
+	answer, err := p.inspectCode(ctx, userQuestion, filesContext, chatHistory, imageURLs)
+	if err != nil {
+		return nil, err
+	}
+	return &models.ParsedClaudeResponse{Description: answer}, nil
+}
+
+// fetchMicrofrontendFiles calls the function service to get all files from the
+// microfrontend's u-gen branch. Returns a flat list of {FilePath, Content}.
+func (p *ChatProcessor) fetchMicrofrontendFiles(ctx context.Context) ([]models.GitlabFileChange, error) {
+	url := p.baseConf.GoFunctionServiceHost + p.baseConf.GoFunctionServiceHTTPPort +
+		"/v2/functions/micro-frontend/files?repo_id=" + p.microfrontendRepoID
+
+	httpReq, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("build request: %w", err)
+	}
+	httpReq.Header.Set("Authorization", p.authToken)
+
+	client := &http.Client{Timeout: 60 * time.Second}
+	resp, err := client.Do(httpReq)
+	if err != nil {
+		return nil, fmt.Errorf("function service call: %w", err)
+	}
+	defer resp.Body.Close()
+
+	respBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("read response: %w", err)
+	}
+
+	if resp.StatusCode >= 400 {
+		return nil, fmt.Errorf("function service returned %d: %s", resp.StatusCode, string(respBytes))
+	}
+
+	// Response shape: {"status":"...","data":{"files":[{"path":"...","content":"..."}]}}
+	var result struct {
+		Data struct {
+			Files []struct {
+				Path    string `json:"path"`
+				Content string `json:"content"`
+			} `json:"files"`
+		} `json:"data"`
+	}
+	if err = json.Unmarshal(respBytes, &result); err != nil {
+		return nil, fmt.Errorf("parse response: %w", err)
+	}
+
+	files := make([]models.GitlabFileChange, 0, len(result.Data.Files))
+	for _, f := range result.Data.Files {
+		files = append(files, models.GitlabFileChange{
+			FilePath: f.Path,
+			Content:  f.Content,
+		})
+	}
+	log.Printf("[MICROFE EDIT] fetched %d files from u-gen", len(files))
+	return files, nil
+}
+
+// pushMicrofrontendChanges sends AI-generated files to the function service which
+// commits them to the u-gen branch of the microfrontend's repo.
+func (p *ChatProcessor) pushMicrofrontendChanges(ctx context.Context, generatedFiles []models.ProjectFile) error {
+	repoIDInt := 0
+	fmt.Sscanf(p.microfrontendRepoID, "%d", &repoIDInt)
+	if repoIDInt == 0 {
+		return fmt.Errorf("invalid microfrontend_repo_id: %q", p.microfrontendRepoID)
+	}
+
+	files := make([]models.GitlabFileChange, 0, len(generatedFiles))
+	for _, f := range generatedFiles {
+		files = append(files, models.GitlabFileChange{
+			FilePath: f.Path,
+			Content:  f.Content,
+		})
+	}
+
+	type pushReq struct {
+		RepoID int                      `json:"repo_id"`
+		Files  []models.GitlabFileChange `json:"files"`
+	}
+
+	bodyBytes, err := json.Marshal(pushReq{RepoID: repoIDInt, Files: files})
+	if err != nil {
+		return fmt.Errorf("marshal request: %w", err)
+	}
+
+	url := p.baseConf.GoFunctionServiceHost + p.baseConf.GoFunctionServiceHTTPPort +
+		"/v2/functions/micro-frontend/push-changes"
+
+	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPut, url, bytes.NewReader(bodyBytes))
+	if err != nil {
+		return fmt.Errorf("build request: %w", err)
+	}
+	httpReq.Header.Set("Content-Type", "application/json")
+	httpReq.Header.Set("Authorization", p.authToken)
+
+	client := &http.Client{Timeout: 60 * time.Second}
+	resp, err := client.Do(httpReq)
+	if err != nil {
+		return fmt.Errorf("function service call: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode >= 400 {
+		respBytes, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("function service returned %d: %s", resp.StatusCode, string(respBytes))
+	}
+	return nil
+}
+
+// buildMicrofrontendFileGraphJSON builds the same file graph JSON that the router
+// uses, from a flat list of GitlabFileChange entries (no per-file graph data).
+func (p *ChatProcessor) buildMicrofrontendFileGraphJSON(files []models.GitlabFileChange) string {
+	if len(files) == 0 {
+		return "{}"
+	}
+	graph := make(map[string]models.GraphNode, len(files))
+	for _, f := range files {
+		graph[f.FilePath] = models.GraphNode{Path: f.FilePath}
+	}
+	jsonBytes, err := json.Marshal(graph)
+	if err != nil {
+		return "{}"
+	}
+	return string(jsonBytes)
+}
+
+// buildMicrofrontendFilesContext returns the file contents for the paths the
+// planner requested, formatted for the code-editor prompt.
+func (p *ChatProcessor) buildMicrofrontendFilesContext(files []models.GitlabFileChange, paths []string) string {
+	if len(paths) == 0 || len(files) == 0 {
+		return "No existing files to modify."
+	}
+	pathSet := make(map[string]bool, len(paths))
+	for _, path := range paths {
+		pathSet[path] = true
+	}
+	var sb strings.Builder
+	for _, f := range files {
+		if pathSet[f.FilePath] {
+			sb.WriteString(fmt.Sprintf("\n\n### FILE: %s\n```\n%s\n```", f.FilePath, f.Content))
+		}
+	}
+	if sb.Len() == 0 {
+		return "No matching files found."
+	}
+	return sb.String()
+}
+
+// publishToMicrofrontend calls the function service to create a microfrontend
+// and push all AI-generated files to the u-gen branch.
+// It stores the resulting microfrontend ID on the processor for the response.
+func (p *ChatProcessor) publishToMicrofrontend(ctx context.Context, projectName string, generated *models.ParsedClaudeResponse, projectData *models.ProjectData) error {
+	if generated == nil || generated.Project == nil || len(generated.Project.Files) == 0 {
+		return fmt.Errorf("no generated files to publish")
+	}
+
+	// Convert ProjectFile list to the format the function service expects
+	files := make([]models.GitlabFileChange, 0, len(generated.Project.Files))
+	for _, f := range generated.Project.Files {
+		files = append(files, models.GitlabFileChange{
+			FilePath: f.Path,
+			Content:  f.Content,
+		})
+	}
+
+	// Path is fixed to "app" so the GitLab repo is named <project-slug>_app,
+	// matching the CreateMicroFrontEnd convention where path is a component name,
+	// not the project name (which would cause duplication like travel-website_travel_website).
+	reqBody := models.PublishAiMicroFrontendRequest{
+		ProjectId:     projectData.UcodeProjectId,
+		EnvironmentId: projectData.EnvironmentId,
+		Name:          projectName,
+		Path:          "app",
+		FrameworkType: "REACT",
+		Files:         files,
+	}
+
+	bodyBytes, err := json.Marshal(reqBody)
+	if err != nil {
+		return fmt.Errorf("marshal request: %w", err)
+	}
+
+	url := p.baseConf.GoFunctionServiceHost + p.baseConf.GoFunctionServiceHTTPPort + "/v2/functions/micro-frontend/publish-ai"
+
+	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(bodyBytes))
+	if err != nil {
+		return fmt.Errorf("build request: %w", err)
+	}
+	httpReq.Header.Set("Content-Type", "application/json")
+	httpReq.Header.Set("Authorization", p.authToken)
+
+	client := &http.Client{Timeout: timeoutPublishMicrofrontend}
+	resp, err := client.Do(httpReq)
+	if err != nil {
+		return fmt.Errorf("function service call failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	respBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("read function service response: %w", err)
+	}
+
+	if resp.StatusCode >= 400 {
+		return fmt.Errorf("function service returned %d: %s", resp.StatusCode, string(respBytes))
+	}
+
+	var result models.PublishAiMicroFrontendResponse
+	if err = json.Unmarshal(respBytes, &result); err != nil {
+		return fmt.Errorf("parse function service response: %w", err)
+	}
+
+	p.microfrontendID = result.Data.ID
+	p.microfrontendRepoID = result.Data.RepoId
+	log.Printf("[MICROFRONTEND] created id=%s repo_id=%s url=%s", result.Data.ID, result.Data.RepoId, result.Data.Url)
+	return nil
+}
+
+// slugify converts a project name to a lowercase hyphen-separated slug
+// valid for use as a GitLab path (only [a-z0-9-]).
+func slugify(name string) string {
+	s := strings.ToLower(strings.TrimSpace(name))
+	re := regexp.MustCompile(`[^a-z0-9]+`)
+	s = re.ReplaceAllString(s, "-")
+	s = strings.Trim(s, "-")
+	if len(s) == 0 {
+		s = "ai-project"
+	}
+	return s
 }
 
 func (p *ChatProcessor) saveProject(ctx context.Context, req *models.ParsedClaudeResponse) (*pbo.McpProject, error) {

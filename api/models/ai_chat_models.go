@@ -18,9 +18,11 @@ type (
 	}
 
 	NewMessageReq struct {
-		Content       string         `json:"content"`
-		Images        []string       `json:"images"`
-		PendingAction *PendingAction `json:"pending_action,omitempty"`
+		Content             string         `json:"content"`
+		Images              []string       `json:"images"`
+		PendingAction       *PendingAction `json:"pending_action,omitempty"`
+		MicrofrontendID     string         `json:"microfrontend_id,omitempty"`
+		MicrofrontendRepoID string         `json:"microfrontend_repo_id,omitempty"`
 	}
 	SendMessageRequest struct {
 		UserPrompt    string `json:"user_prompt"`

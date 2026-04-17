@@ -26,6 +26,29 @@ type GitlabUpdateFileRequest struct {
 	Branch string             `json:"branch"`
 }
 
+// PublishAiMicroFrontendRequest is sent to the function service to create a
+// microfrontend and push AI-generated files to the u-gen branch.
+type PublishAiMicroFrontendRequest struct {
+	ProjectId     string             `json:"project_id"`
+	EnvironmentId string             `json:"environment_id"`
+	Name          string             `json:"name"`
+	Path          string             `json:"path"`
+	FrameworkType string             `json:"framework_type"`
+	Files         []GitlabFileChange `json:"files"`
+}
+
+// PublishAiMicroFrontendResponse holds the fields we need from the function
+// service response (wrapped in the standard {data: ...} envelope).
+type PublishAiMicroFrontendResponse struct {
+	Status string `json:"status"`
+	Data   struct {
+		ID     string `json:"id"`
+		RepoId string `json:"repo_id"`
+		Url    string `json:"url"`
+		Branch string `json:"branch"`
+	} `json:"data"`
+}
+
 type Function struct {
 	ID               string `json:"id"`
 	Path             string `json:"path"`

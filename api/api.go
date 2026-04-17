@@ -600,6 +600,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		proxyFunctions.GET("/micro-frontend", h.V1.GetAllMicroFrontEnd)
 		proxyFunctions.PUT("/micro-frontend", h.V1.UpdateMicroFrontEnd)
 		proxyFunctions.DELETE("/micro-frontend/:micro-frontend-id", h.V1.DeleteMicroFrontEnd)
+		proxyFunctions.POST("/micro-frontend/promote", h.V1.PromoteMicrofrontendToMaster)
 	}
 
 	proxyGrafana := proxyApi.Group("/grafana")

@@ -1128,7 +1128,14 @@ func BuildCodeEditorMessage(clarified, planJSON, filesContext string, hasImages 
 	if hasImages {
 		imageNote = "\n\nIMAGES ARE PROVIDED as visual reference. You MUST:\n1. Extract EXACT hex colors from the images\n2. Replicate the EXACT layout structure\n3. Match typography, spacing, shadows, border-radius\n4. Make the result PIXEL-PERFECT match to the images\n5. Do NOT guess colors — analyze the images carefully"
 	}
-	return fmt.Sprintf("Task: %s%s\n\nPlan (what to change):\n%s\n\nExisting file contents:\n%s", clarified, imageNote, planJSON, filesContext)
+	return fmt.Sprintf(
+		"Task: %s%s\n\nPlan (what to change):\n%s\n\nExisting file contents:\n%s\n\n"+
+			"MANDATORY REMINDER: You MUST output ONLY the JSON structure followed by --- and a description. "+
+			"NEVER respond conversationally. NEVER say 'there is already a comprehensive website' or 'would you like me to improve it' or ask any questions. "+
+			"ALWAYS implement the requested changes and return ALL modified files in the JSON format. "+
+			"If the existing code is already good, still output the JSON with the changed files.",
+		clarified, imageNote, planJSON, filesContext,
+	)
 }
 
 // BuildDatabaseMessage builds the user message for the database assistant step.

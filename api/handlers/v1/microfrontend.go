@@ -94,3 +94,20 @@ func (h *HandlerV1) UpdateMicroFrontEnd(c *gin.Context) {
 func (h *HandlerV1) DeleteMicroFrontEnd(c *gin.Context) {
 	_ = h.MakeProxy(c, h.baseConf.GoFunctionServiceHost+h.baseConf.GoFunctionServiceHTTPPort, c.Request.URL.Path)
 }
+
+// PromoteMicrofrontendToMaster godoc
+// @Security ApiKeyAuth
+// @ID promote_microfrontend_to_master
+// @Router /v2/functions/micro-frontend/promote [POST]
+// @Summary Promote u-gen branch to master
+// @Description Syncs all files from the u-gen branch to master, triggering the CI/CD pipeline.
+// @Tags Functions
+// @Accept json
+// @Produce json
+// @Param body body models.PushMicrofrontendChangesRequest true "repo_id required"
+// @Success 200 {object} status_http.Response "OK"
+// @Failure 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *HandlerV1) PromoteMicrofrontendToMaster(c *gin.Context) {
+	_ = h.MakeProxy(c, h.baseConf.GoFunctionServiceHost+h.baseConf.GoFunctionServiceHTTPPort, c.Request.URL.Path)
+}
