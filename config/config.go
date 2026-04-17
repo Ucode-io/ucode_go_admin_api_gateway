@@ -213,7 +213,7 @@ func BaseLoad() BaseConfig {
 	config.CoderMaxTokens = cast.ToInt(GetOrReturnDefaultValue("CODER_MAX_TOKENS", 64000))
 	config.RouterMaxTokens = cast.ToInt(GetOrReturnDefaultValue("ROUTER_MAX_TOKENS", 4000))
 	config.InspectorMaxTokens = cast.ToInt(GetOrReturnDefaultValue("INSPECTOR_MAX_TOKENS", 16000))
-	config.PlannerMaxTokens = cast.ToInt(GetOrReturnDefaultValue("PLANNER_MAX_TOKENS", 16000))
+	config.PlannerMaxTokens = cast.ToInt(GetOrReturnDefaultValue("PLANNER_MAX_TOKENS", 32000))
 
 	return config
 }
