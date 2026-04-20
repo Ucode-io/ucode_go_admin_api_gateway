@@ -92,7 +92,7 @@ func (h *HandlerV1) GithubConnect(c *gin.Context) {
 	params.Set("state", state)
 	params.Set("scope", "repo read:user user:email")
 
-	c.Redirect(http.StatusTemporaryRedirect, githubAuthURL+"?"+params.Encode())
+	c.JSON(http.StatusCreated, githubAuthURL+"?"+params.Encode())
 }
 
 // GithubCallback handles the OAuth callback from GitHub.
