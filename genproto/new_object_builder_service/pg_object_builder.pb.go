@@ -730,7 +730,7 @@ var file_pg_object_builder_proto_rawDesc = []byte{
 	0x0a, 0x0a, 0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x5f, 0x69, 0x64, 0x18, 0x05, 0x20, 0x01,
 	0x28, 0x09, 0x52, 0x09, 0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x49, 0x64, 0x12, 0x1d, 0x0a,
 	0x0a, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x5f, 0x69, 0x64, 0x18, 0x06, 0x20, 0x01, 0x28,
-	0x09, 0x52, 0x09, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x49, 0x64, 0x32, 0xcc, 0x11, 0x0a,
+	0x09, 0x52, 0x09, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x49, 0x64, 0x32, 0xb4, 0x12, 0x0a,
 	0x14, 0x4f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x42, 0x75, 0x69, 0x6c, 0x64, 0x65, 0x72, 0x53, 0x65,
 	0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x61, 0x0a, 0x07, 0x47, 0x65, 0x74, 0x4c, 0x69, 0x73, 0x74,
 	0x12, 0x29, 0x2e, 0x6e, 0x65, 0x77, 0x5f, 0x6f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x5f, 0x62, 0x75,
@@ -871,10 +871,17 @@ var file_pg_object_builder_proto_rawDesc = []byte{
 	0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x34, 0x2e, 0x6e, 0x65, 0x77, 0x5f, 0x6f, 0x62, 0x6a, 0x65,
 	0x63, 0x74, 0x5f, 0x62, 0x75, 0x69, 0x6c, 0x64, 0x65, 0x72, 0x5f, 0x73, 0x65, 0x72, 0x76, 0x69,
 	0x63, 0x65, 0x2e, 0x47, 0x65, 0x74, 0x52, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x55, 0x73,
-	0x61, 0x67, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x42, 0x25, 0x5a, 0x23, 0x67,
-	0x65, 0x6e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x6e, 0x65, 0x77, 0x5f, 0x6f, 0x62, 0x6a, 0x65,
-	0x63, 0x74, 0x5f, 0x62, 0x75, 0x69, 0x6c, 0x64, 0x65, 0x72, 0x5f, 0x73, 0x65, 0x72, 0x76, 0x69,
-	0x63, 0x65, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x61, 0x67, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x66, 0x0a, 0x0e, 0x47,
+	0x65, 0x74, 0x54, 0x61, 0x62, 0x6c, 0x65, 0x53, 0x63, 0x68, 0x65, 0x6d, 0x61, 0x12, 0x29, 0x2e,
+	0x6e, 0x65, 0x77, 0x5f, 0x6f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x5f, 0x62, 0x75, 0x69, 0x6c, 0x64,
+	0x65, 0x72, 0x5f, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2e, 0x43, 0x6f, 0x6d, 0x6d, 0x6f,
+	0x6e, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x1a, 0x29, 0x2e, 0x6e, 0x65, 0x77, 0x5f, 0x6f,
+	0x62, 0x6a, 0x65, 0x63, 0x74, 0x5f, 0x62, 0x75, 0x69, 0x6c, 0x64, 0x65, 0x72, 0x5f, 0x73, 0x65,
+	0x72, 0x76, 0x69, 0x63, 0x65, 0x2e, 0x43, 0x6f, 0x6d, 0x6d, 0x6f, 0x6e, 0x4d, 0x65, 0x73, 0x73,
+	0x61, 0x67, 0x65, 0x42, 0x25, 0x5a, 0x23, 0x67, 0x65, 0x6e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f,
+	0x6e, 0x65, 0x77, 0x5f, 0x6f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x5f, 0x62, 0x75, 0x69, 0x6c, 0x64,
+	0x65, 0x72, 0x5f, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74,
+	0x6f, 0x33,
 }
 
 var (
@@ -929,29 +936,31 @@ var file_pg_object_builder_proto_depIdxs = []int32{
 	4,  // 22: new_object_builder_service.ObjectBuilderService.UserActivity:input_type -> new_object_builder_service.UserActivityReqeust
 	2,  // 23: new_object_builder_service.ObjectBuilderService.ExecuteSQL:input_type -> new_object_builder_service.ExecuteSQLRequest
 	0,  // 24: new_object_builder_service.ObjectBuilderService.GetResourceUsage:input_type -> new_object_builder_service.GetResourceUsageRequest
-	5,  // 25: new_object_builder_service.ObjectBuilderService.GetList:output_type -> new_object_builder_service.CommonMessage
-	5,  // 26: new_object_builder_service.ObjectBuilderService.GetList2:output_type -> new_object_builder_service.CommonMessage
-	5,  // 27: new_object_builder_service.ObjectBuilderService.GetTableDetails:output_type -> new_object_builder_service.CommonMessage
-	5,  // 28: new_object_builder_service.ObjectBuilderService.GetAll:output_type -> new_object_builder_service.CommonMessage
-	5,  // 29: new_object_builder_service.ObjectBuilderService.GetListSlim:output_type -> new_object_builder_service.CommonMessage
-	5,  // 30: new_object_builder_service.ObjectBuilderService.GetListInExcel:output_type -> new_object_builder_service.CommonMessage
-	5,  // 31: new_object_builder_service.ObjectBuilderService.GetListRelationTabInExcel:output_type -> new_object_builder_service.CommonMessage
-	5,  // 32: new_object_builder_service.ObjectBuilderService.GetGroupByField:output_type -> new_object_builder_service.CommonMessage
-	5,  // 33: new_object_builder_service.ObjectBuilderService.UpdateWithParams:output_type -> new_object_builder_service.CommonMessage
-	5,  // 34: new_object_builder_service.ObjectBuilderService.GetSingleSlim:output_type -> new_object_builder_service.CommonMessage
-	5,  // 35: new_object_builder_service.ObjectBuilderService.TestApi:output_type -> new_object_builder_service.CommonMessage
-	5,  // 36: new_object_builder_service.ObjectBuilderService.GetListForDocx:output_type -> new_object_builder_service.CommonMessage
-	5,  // 37: new_object_builder_service.ObjectBuilderService.GetAllForDocx:output_type -> new_object_builder_service.CommonMessage
-	5,  // 38: new_object_builder_service.ObjectBuilderService.GetAllFieldsForDocx:output_type -> new_object_builder_service.CommonMessage
-	5,  // 39: new_object_builder_service.ObjectBuilderService.GetListAggregation:output_type -> new_object_builder_service.CommonMessage
-	5,  // 40: new_object_builder_service.ObjectBuilderService.AgGridTree:output_type -> new_object_builder_service.CommonMessage
-	5,  // 41: new_object_builder_service.ObjectBuilderService.GetBoardStructure:output_type -> new_object_builder_service.CommonMessage
-	5,  // 42: new_object_builder_service.ObjectBuilderService.GetBoardData:output_type -> new_object_builder_service.CommonMessage
-	10, // 43: new_object_builder_service.ObjectBuilderService.UserActivity:output_type -> google.protobuf.Empty
-	3,  // 44: new_object_builder_service.ObjectBuilderService.ExecuteSQL:output_type -> new_object_builder_service.ExecuteSQLResponse
-	1,  // 45: new_object_builder_service.ObjectBuilderService.GetResourceUsage:output_type -> new_object_builder_service.GetResourceUsageResponse
-	25, // [25:46] is the sub-list for method output_type
-	4,  // [4:25] is the sub-list for method input_type
+	5,  // 25: new_object_builder_service.ObjectBuilderService.GetTableSchema:input_type -> new_object_builder_service.CommonMessage
+	5,  // 26: new_object_builder_service.ObjectBuilderService.GetList:output_type -> new_object_builder_service.CommonMessage
+	5,  // 27: new_object_builder_service.ObjectBuilderService.GetList2:output_type -> new_object_builder_service.CommonMessage
+	5,  // 28: new_object_builder_service.ObjectBuilderService.GetTableDetails:output_type -> new_object_builder_service.CommonMessage
+	5,  // 29: new_object_builder_service.ObjectBuilderService.GetAll:output_type -> new_object_builder_service.CommonMessage
+	5,  // 30: new_object_builder_service.ObjectBuilderService.GetListSlim:output_type -> new_object_builder_service.CommonMessage
+	5,  // 31: new_object_builder_service.ObjectBuilderService.GetListInExcel:output_type -> new_object_builder_service.CommonMessage
+	5,  // 32: new_object_builder_service.ObjectBuilderService.GetListRelationTabInExcel:output_type -> new_object_builder_service.CommonMessage
+	5,  // 33: new_object_builder_service.ObjectBuilderService.GetGroupByField:output_type -> new_object_builder_service.CommonMessage
+	5,  // 34: new_object_builder_service.ObjectBuilderService.UpdateWithParams:output_type -> new_object_builder_service.CommonMessage
+	5,  // 35: new_object_builder_service.ObjectBuilderService.GetSingleSlim:output_type -> new_object_builder_service.CommonMessage
+	5,  // 36: new_object_builder_service.ObjectBuilderService.TestApi:output_type -> new_object_builder_service.CommonMessage
+	5,  // 37: new_object_builder_service.ObjectBuilderService.GetListForDocx:output_type -> new_object_builder_service.CommonMessage
+	5,  // 38: new_object_builder_service.ObjectBuilderService.GetAllForDocx:output_type -> new_object_builder_service.CommonMessage
+	5,  // 39: new_object_builder_service.ObjectBuilderService.GetAllFieldsForDocx:output_type -> new_object_builder_service.CommonMessage
+	5,  // 40: new_object_builder_service.ObjectBuilderService.GetListAggregation:output_type -> new_object_builder_service.CommonMessage
+	5,  // 41: new_object_builder_service.ObjectBuilderService.AgGridTree:output_type -> new_object_builder_service.CommonMessage
+	5,  // 42: new_object_builder_service.ObjectBuilderService.GetBoardStructure:output_type -> new_object_builder_service.CommonMessage
+	5,  // 43: new_object_builder_service.ObjectBuilderService.GetBoardData:output_type -> new_object_builder_service.CommonMessage
+	10, // 44: new_object_builder_service.ObjectBuilderService.UserActivity:output_type -> google.protobuf.Empty
+	3,  // 45: new_object_builder_service.ObjectBuilderService.ExecuteSQL:output_type -> new_object_builder_service.ExecuteSQLResponse
+	1,  // 46: new_object_builder_service.ObjectBuilderService.GetResourceUsage:output_type -> new_object_builder_service.GetResourceUsageResponse
+	5,  // 47: new_object_builder_service.ObjectBuilderService.GetTableSchema:output_type -> new_object_builder_service.CommonMessage
+	26, // [26:48] is the sub-list for method output_type
+	4,  // [4:26] is the sub-list for method input_type
 	4,  // [4:4] is the sub-list for extension type_name
 	4,  // [4:4] is the sub-list for extension extendee
 	0,  // [0:4] is the sub-list for field type_name

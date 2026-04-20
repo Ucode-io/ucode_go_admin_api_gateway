@@ -19,49 +19,63 @@ import (
 )
 
 const (
-	githubAuthURL     = "https://github.com/login/oauth/authorize"
-	githubTokenURL    = "https://github.com/login/oauth/access_token"
-	githubAPIUserURL  = "https://api.github.com/user"
-	githubAPIReposURL = "https://api.github.com/user/repos"
-	githubStatePrefix = "github:state:"
-	githubStateTTL    = 15 * time.Minute
+	githubAuthURL      = "https://github.com/login/oauth/authorize"
+	githubTokenURL     = "https://github.com/login/oauth/access_token"
+	githubAPIUserURL   = "https://api.github.com/user"
+	githubAPIReposURL  = "https://api.github.com/user/repos"
+	githubStatePrefix  = "github:state:"
+	githubStateTTL     = 15 * time.Minute
+	githubReposPerPage = 100
 )
 
-// githubStatePayload is stored in Redis during the OAuth flow to carry context across the redirect.
+var githubHTTPClient = &http.Client{Timeout: 15 * time.Second}
+
 type githubStatePayload struct {
 	ProjectID     string `json:"project_id"`
 	EnvironmentID string `json:"environment_id"`
 	UserID        string `json:"user_id"`
 }
 
-// getProjectAndEnv is a shared helper that reads project_id and environment_id
-// from the gin context (set by AuthMiddleware from the Bearer token / API key).
 func getProjectAndEnv(c *gin.Context) (projectID, environmentID string, ok bool) {
-	pid, pidOk := c.Get("project_id")
-	eid, eidOk := c.Get("environment_id")
-	if !pidOk || !eidOk {
-		return "", "", false
-	}
+	pid, _ := c.Get("project_id")
+	eid, _ := c.Get("environment_id")
 	projectID, _ = pid.(string)
 	environmentID, _ = eid.(string)
-	return projectID, environmentID, projectID != "" && environmentID != ""
+	ok = projectID != "" && environmentID != ""
+	return
 }
 
+func githubAPIRequest(ctx context.Context, method, url string, body io.Reader, token string) (*http.Request, error) {
+	req, err := http.NewRequestWithContext(ctx, method, url, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Authorization", "Bearer "+token)
+	req.Header.Set("Accept", "application/vnd.github+json")
+	req.Header.Set("X-GitHub-Api-Version", "2022-11-28")
+	if body != nil {
+		req.Header.Set("Content-Type", "application/json")
+	}
+	return req, nil
+}
+
+// ─── Handlers ────────────────────────────────────────────────────────────────
+
 // GithubConnect initiates the GitHub OAuth flow.
-// Reads project_id and environment_id from the auth context (set by AuthMiddleware),
-// stores a CSRF state in Redis, then redirects the user to GitHub.
+// Returns the GitHub authorization URL for the frontend to redirect the user to.
 //
 // @Security ApiKeyAuth
 // @ID github_connect
 // @Router /v1/github/connect [GET]
 // @Summary Initiate GitHub OAuth
 // @Tags GitHub Integration
-// @Success 302 "Redirect to GitHub"
+// @Success 200 {object} status_http.Response{data=string} "GitHub authorization URL"
 // @Failure 400 {object} status_http.Response{data=string}
+// @Failure 500 {object} status_http.Response{data=string}
 func (h *HandlerV1) GithubConnect(c *gin.Context) {
 	projectID, environmentID, ok := getProjectAndEnv(c)
 	if !ok {
-		h.HandleResponse(c, status_http.InvalidArgument, "project_id and environment_id not found in token")
+		h.HandleResponse(c, status_http.InvalidArgument, "project_id and environment_id required")
 		return
 	}
 
@@ -92,25 +106,26 @@ func (h *HandlerV1) GithubConnect(c *gin.Context) {
 	params.Set("state", state)
 	params.Set("scope", "repo read:user user:email")
 
-	c.JSON(http.StatusCreated, githubAuthURL+"?"+params.Encode())
+	authURL := githubAuthURL + "?" + params.Encode()
+	h.HandleResponse(c, status_http.OK, authURL)
 }
 
 // GithubCallback handles the OAuth callback from GitHub.
-// This endpoint is public (no auth middleware) — GitHub calls it after user grants access.
-// It validates the CSRF state, exchanges the code for a token, fetches the GitHub user,
-// saves the integration, then redirects the user back to the frontend.
+// This endpoint is public (no auth middleware) — GitHub calls it after the user grants access.
+// It validates the CSRF state, exchanges the code for a token, saves the integration,
+// then redirects the user back to the frontend.
 //
 // @ID github_callback
 // @Router /v1/github/callback [GET]
 // @Summary GitHub OAuth Callback
 // @Tags GitHub Integration
-// @Param code query string true "OAuth code from GitHub"
+// @Param code  query string true "Authorization code from GitHub"
 // @Param state query string true "CSRF state token"
-// @Success 302 "Redirect to frontend success/error page"
+// @Success 307 "Redirect to frontend success page"
+// @Failure 307 "Redirect to frontend error page"
 func (h *HandlerV1) GithubCallback(c *gin.Context) {
 	code := c.Query("code")
 	state := c.Query("state")
-
 	errorURL := h.baseConf.GithubFrontendErrorURL
 
 	if code == "" || state == "" {
@@ -118,15 +133,13 @@ func (h *HandlerV1) GithubCallback(c *gin.Context) {
 		return
 	}
 
-	// Validate CSRF state — must exist in Redis
+	// Validate and consume the CSRF state from Redis (one-time use)
 	redisKey := githubStatePrefix + state
 	payloadStr, err := h.redis.Get(c.Request.Context(), redisKey, "", "")
 	if err != nil {
 		c.Redirect(http.StatusTemporaryRedirect, errorURL+"?reason=invalid_state")
 		return
 	}
-
-	// One-time use — delete immediately after reading
 	_ = h.redis.Del(c.Request.Context(), redisKey, "", "")
 
 	var stateData githubStatePayload
@@ -137,32 +150,32 @@ func (h *HandlerV1) GithubCallback(c *gin.Context) {
 
 	token, err := h.exchangeGithubCode(c.Request.Context(), code)
 	if err != nil {
-		h.log.Error("github: token exchange failed: " + err.Error())
+		h.log.Error("github callback: token exchange failed: " + err.Error())
 		c.Redirect(http.StatusTemporaryRedirect, errorURL+"?reason=token_exchange_failed")
 		return
 	}
 
 	ghUser, err := h.fetchGithubUser(c.Request.Context(), token)
 	if err != nil {
-		h.log.Error("github: fetch user failed: " + err.Error())
+		h.log.Error("github callback: fetch user failed: " + err.Error())
 		c.Redirect(http.StatusTemporaryRedirect, errorURL+"?reason=fetch_user_failed")
 		return
 	}
 
 	integrationID, err := h.upsertGithubIntegration(c.Request.Context(), token, ghUser, stateData)
 	if err != nil {
-		h.log.Error("github: save integration failed: " + err.Error())
+		h.log.Error("github callback: save integration failed: " + err.Error())
 		c.Redirect(http.StatusTemporaryRedirect, errorURL+"?reason=save_failed")
 		return
 	}
 
-	successURL := fmt.Sprintf("%s?integration_id=%s&username=%s",
-		h.baseConf.GithubFrontendSuccessURL, integrationID, ghUser.Login)
-	c.Redirect(http.StatusTemporaryRedirect, successURL)
+	successParams := url.Values{}
+	successParams.Set("integration_id", integrationID)
+	successParams.Set("username", ghUser.Login)
+	c.Redirect(http.StatusTemporaryRedirect, h.baseConf.GithubFrontendSuccessURL+"?"+successParams.Encode())
 }
 
 // GithubGetIntegration returns the stored GitHub integration for the current project/environment.
-// project_id and environment_id are taken from the auth context.
 //
 // @Security ApiKeyAuth
 // @ID github_get_integration
@@ -170,11 +183,12 @@ func (h *HandlerV1) GithubCallback(c *gin.Context) {
 // @Summary Get GitHub Integration
 // @Tags GitHub Integration
 // @Success 200 {object} status_http.Response{data=models.GithubIntegration}
+// @Failure 400 {object} status_http.Response{data=string}
 // @Failure 404 {object} status_http.Response{data=string}
 func (h *HandlerV1) GithubGetIntegration(c *gin.Context) {
 	projectID, environmentID, ok := getProjectAndEnv(c)
 	if !ok {
-		h.HandleResponse(c, status_http.InvalidArgument, "project_id and environment_id not found in token")
+		h.HandleResponse(c, status_http.InvalidArgument, "project_id and environment_id required")
 		return
 	}
 
@@ -207,15 +221,17 @@ func (h *HandlerV1) GithubGetIntegration(c *gin.Context) {
 	})
 }
 
-// GithubDeleteIntegration removes a GitHub integration by its ID.
+// GithubDeleteIntegration removes a GitHub integration by ID.
 //
 // @Security ApiKeyAuth
 // @ID github_delete_integration
-// @Router /v1/github/integration/:id [DELETE]
+// @Router /v1/github/integration/{id} [DELETE]
 // @Summary Delete GitHub Integration
 // @Tags GitHub Integration
 // @Param id path string true "Integration ID"
 // @Success 200 {object} status_http.Response{data=string}
+// @Failure 400 {object} status_http.Response{data=string}
+// @Failure 500 {object} status_http.Response{data=string}
 func (h *HandlerV1) GithubDeleteIntegration(c *gin.Context) {
 	id := c.Param("id")
 	if id == "" {
@@ -243,11 +259,12 @@ func (h *HandlerV1) GithubDeleteIntegration(c *gin.Context) {
 // @Router /v1/github/repo [POST]
 // @Summary Create GitHub Repository
 // @Tags GitHub Integration
-// @Accept json
+// @Accept  json
 // @Produce json
-// @Param body body models.GithubCreateRepoRequest true "Repo details"
+// @Param body body models.GithubCreateRepoRequest true "Repository details"
 // @Success 201 {object} status_http.Response{data=models.GithubRepo}
 // @Failure 400 {object} status_http.Response{data=string}
+// @Failure 404 {object} status_http.Response{data=string}
 func (h *HandlerV1) GithubCreateRepo(c *gin.Context) {
 	var req models.GithubCreateRepoRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -257,7 +274,7 @@ func (h *HandlerV1) GithubCreateRepo(c *gin.Context) {
 
 	projectID, environmentID, ok := getProjectAndEnv(c)
 	if !ok {
-		h.HandleResponse(c, status_http.InvalidArgument, "project_id and environment_id not found in token")
+		h.HandleResponse(c, status_http.InvalidArgument, "project_id and environment_id required")
 		return
 	}
 
@@ -285,10 +302,12 @@ func (h *HandlerV1) GithubCreateRepo(c *gin.Context) {
 // @Summary List GitHub Repositories
 // @Tags GitHub Integration
 // @Success 200 {object} status_http.Response{data=[]models.GithubRepo}
+// @Failure 400 {object} status_http.Response{data=string}
+// @Failure 404 {object} status_http.Response{data=string}
 func (h *HandlerV1) GithubGetRepoList(c *gin.Context) {
 	projectID, environmentID, ok := getProjectAndEnv(c)
 	if !ok {
-		h.HandleResponse(c, status_http.InvalidArgument, "project_id and environment_id not found in token")
+		h.HandleResponse(c, status_http.InvalidArgument, "project_id and environment_id required")
 		return
 	}
 
@@ -307,7 +326,7 @@ func (h *HandlerV1) GithubGetRepoList(c *gin.Context) {
 	h.HandleResponse(c, status_http.OK, repos)
 }
 
-// ─── private helpers ──────────────────────────────────────────────────────────
+// ─── Private helpers ──────────────────────────────────────────────────────────
 
 // exchangeGithubCode exchanges the OAuth authorization code for an access token.
 func (h *HandlerV1) exchangeGithubCode(ctx context.Context, code string) (string, error) {
@@ -324,18 +343,18 @@ func (h *HandlerV1) exchangeGithubCode(ctx context.Context, code string) (string
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Accept", "application/json")
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := githubHTTPClient.Do(req)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("github token request failed: %w", err)
 	}
 	defer resp.Body.Close()
 
 	var tokenResp models.GithubTokenExchangeResponse
 	if err := json.NewDecoder(resp.Body).Decode(&tokenResp); err != nil {
-		return "", err
+		return "", fmt.Errorf("github token response decode failed: %w", err)
 	}
 	if tokenResp.Error != "" {
-		return "", fmt.Errorf("github: %s — %s", tokenResp.Error, tokenResp.ErrorDescription)
+		return "", fmt.Errorf("github oauth error: %s — %s", tokenResp.Error, tokenResp.ErrorDescription)
 	}
 	if tokenResp.AccessToken == "" {
 		return "", fmt.Errorf("github returned empty access token")
@@ -345,35 +364,33 @@ func (h *HandlerV1) exchangeGithubCode(ctx context.Context, code string) (string
 
 // fetchGithubUser calls the GitHub API to get the authenticated user's profile.
 func (h *HandlerV1) fetchGithubUser(ctx context.Context, token string) (*models.GithubUser, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, githubAPIUserURL, nil)
+	req, err := githubAPIRequest(ctx, http.MethodGet, githubAPIUserURL, nil, token)
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("Authorization", "Bearer "+token)
-	req.Header.Set("Accept", "application/vnd.github+json")
-	req.Header.Set("X-GitHub-Api-Version", "2022-11-28")
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := githubHTTPClient.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("github user request failed: %w", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		b, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("github user API: status %d — %s", resp.StatusCode, string(b))
+		return nil, fmt.Errorf("github user API returned %d: %s", resp.StatusCode, string(b))
 	}
 
 	var user models.GithubUser
 	if err := json.NewDecoder(resp.Body).Decode(&user); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("github user response decode failed: %w", err)
 	}
 	return &user, nil
 }
 
 // upsertGithubIntegration saves the GitHub token to the company-service.
-// If an integration already exists for this project/env, it is deleted first.
+// Any existing GITHUB integration for the same project/environment is deleted first.
 func (h *HandlerV1) upsertGithubIntegration(ctx context.Context, token string, user *models.GithubUser, state githubStatePayload) (string, error) {
+	// Delete any previous integration for this project/environment
 	existing, err := h.companyServices.IntegrationResource().GetIntegrationResourceList(ctx, &pb.GetListIntegrationResourceRequest{
 		ProjectId:     state.ProjectID,
 		EnvironmentId: state.EnvironmentID,
@@ -396,9 +413,10 @@ func (h *HandlerV1) upsertGithubIntegration(ctx context.Context, token string, u
 		EnvironmentId: state.EnvironmentID,
 		Username:      user.Login,
 		Name:          displayName,
+		Type:          pb.ResourceType_GITHUB,
 	})
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("create integration resource: %w", err)
 	}
 	return created.GetId(), nil
 }
@@ -411,14 +429,14 @@ func (h *HandlerV1) getGithubToken(ctx context.Context, projectID, environmentID
 		Type:          pb.ResourceType_GITHUB,
 	})
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("get integration list: %w", err)
 	}
 
-	integrations := list.GetIntegrationResources()
-	if len(integrations) == 0 {
-		return "", fmt.Errorf("no GitHub integration found for this project/environment")
+	items := list.GetIntegrationResources()
+	if len(items) == 0 {
+		return "", fmt.Errorf("no GitHub integration found for project %s / environment %s", projectID, environmentID)
 	}
-	return integrations[0].GetToken(), nil
+	return items[0].GetToken(), nil
 }
 
 // createGithubRepo calls the GitHub API to create a new repository.
@@ -433,57 +451,70 @@ func (h *HandlerV1) createGithubRepo(ctx context.Context, token string, req mode
 		return nil, err
 	}
 
-	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://api.github.com/user/repos", bytes.NewBuffer(bodyBytes))
+	httpReq, err := githubAPIRequest(ctx, http.MethodPost, "https://api.github.com/user/repos", bytes.NewBuffer(bodyBytes), token)
 	if err != nil {
 		return nil, err
 	}
-	httpReq.Header.Set("Authorization", "Bearer "+token)
-	httpReq.Header.Set("Accept", "application/vnd.github+json")
-	httpReq.Header.Set("X-GitHub-Api-Version", "2022-11-28")
-	httpReq.Header.Set("Content-Type", "application/json")
 
-	resp, err := http.DefaultClient.Do(httpReq)
+	resp, err := githubHTTPClient.Do(httpReq)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("github create repo request failed: %w", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusCreated {
 		b, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("github create repo: status %d — %s", resp.StatusCode, string(b))
+		return nil, fmt.Errorf("github create repo returned %d: %s", resp.StatusCode, string(b))
 	}
 
 	var repo models.GithubRepo
 	if err := json.NewDecoder(resp.Body).Decode(&repo); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("github create repo response decode failed: %w", err)
 	}
 	return &repo, nil
 }
 
 // listGithubRepos returns all repositories for the authenticated GitHub user.
+// Fetches all pages automatically (GitHub returns at most 100 per page).
 func (h *HandlerV1) listGithubRepos(ctx context.Context, token string) ([]models.GithubRepo, error) {
-	httpReq, err := http.NewRequestWithContext(ctx, http.MethodGet, githubAPIReposURL+"?per_page=100&sort=updated", nil)
-	if err != nil {
-		return nil, err
-	}
-	httpReq.Header.Set("Authorization", "Bearer "+token)
-	httpReq.Header.Set("Accept", "application/vnd.github+json")
-	httpReq.Header.Set("X-GitHub-Api-Version", "2022-11-28")
+	var all []models.GithubRepo
 
-	resp, err := http.DefaultClient.Do(httpReq)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
+	for page := 1; ; page++ {
+		params := url.Values{}
+		params.Set("per_page", fmt.Sprintf("%d", githubReposPerPage))
+		params.Set("sort", "updated")
+		params.Set("page", fmt.Sprintf("%d", page))
 
-	if resp.StatusCode != http.StatusOK {
-		b, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("github list repos: status %d — %s", resp.StatusCode, string(b))
+		req, err := githubAPIRequest(ctx, http.MethodGet, githubAPIReposURL+"?"+params.Encode(), nil, token)
+		if err != nil {
+			return nil, err
+		}
+
+		resp, err := githubHTTPClient.Do(req)
+		if err != nil {
+			return nil, fmt.Errorf("github list repos request failed: %w", err)
+		}
+
+		if resp.StatusCode != http.StatusOK {
+			b, _ := io.ReadAll(resp.Body)
+			resp.Body.Close()
+			return nil, fmt.Errorf("github list repos returned %d: %s", resp.StatusCode, string(b))
+		}
+
+		var pageRepos []models.GithubRepo
+		if err := json.NewDecoder(resp.Body).Decode(&pageRepos); err != nil {
+			resp.Body.Close()
+			return nil, fmt.Errorf("github list repos response decode failed: %w", err)
+		}
+		resp.Body.Close()
+
+		all = append(all, pageRepos...)
+
+		// Stop when GitHub returns fewer repos than the page size — last page reached
+		if len(pageRepos) < githubReposPerPage {
+			break
+		}
 	}
 
-	var repos []models.GithubRepo
-	if err := json.NewDecoder(resp.Body).Decode(&repos); err != nil {
-		return nil, err
-	}
-	return repos, nil
+	return all, nil
 }
