@@ -137,6 +137,12 @@ type BaseConfig struct {
 
 	GitlabBaseURL string
 	GitlabToken   string
+
+	GithubClientID           string
+	GithubClientSecret       string
+	GithubRedirectURI        string
+	GithubFrontendSuccessURL string
+	GithubFrontendErrorURL   string
 }
 
 func BaseLoad() BaseConfig {
@@ -205,6 +211,12 @@ func BaseLoad() BaseConfig {
 
 	config.GitlabBaseURL = cast.ToString(GetOrReturnDefaultValue("GITLAB_BASE_URL", "https://gitlab.udevs.io/"))
 	config.GitlabToken = cast.ToString(GetOrReturnDefaultValue("GITLAB_TOKEN", ""))
+
+	config.GithubClientID = cast.ToString(GetOrReturnDefaultValue("GITHUB_CLIENT_ID", ""))
+	config.GithubClientSecret = cast.ToString(GetOrReturnDefaultValue("GITHUB_CLIENT_SECRET", ""))
+	config.GithubRedirectURI = cast.ToString(GetOrReturnDefaultValue("GITHUB_REDIRECT_URI", ""))
+	config.GithubFrontendSuccessURL = cast.ToString(GetOrReturnDefaultValue("GITHUB_FRONTEND_SUCCESS_URL", "https://app.u-code.io/settings/github-success"))
+	config.GithubFrontendErrorURL = cast.ToString(GetOrReturnDefaultValue("GITHUB_FRONTEND_ERROR_URL", "https://app.u-code.io/settings/github-error"))
 
 	config.MaxTokens = cast.ToInt(GetOrReturnDefaultValue("MAX_TOKENS", 12000))
 	config.AnalyseProjectMaxTokens = cast.ToInt(GetOrReturnDefaultValue("ANALYSE_PROJECT_MAX_TOKENS", 5000))

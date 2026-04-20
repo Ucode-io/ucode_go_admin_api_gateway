@@ -370,6 +370,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		ugen := v1Admin.Group("/ugen")
 		{
 			ugen.GET("/user-projects", h.V1.GetUgenUserProjects)
+			ugen.GET("/company-projects", h.V1.GetUgenCompanyProjects)
 		}
 
 		projectFolders := v1Admin.Group("/project-folders")
@@ -565,12 +566,17 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		}
 	}
 
+	// Public GitHub OAuth callback (no auth — GitHub calls this)
+	r.GET("/v1/github/callback", h.V1.GithubCallback)
+
 	github := r.Group("/v1/github")
+	github.Use(h.V1.AuthMiddleware(cfg))
 	{
-		github.GET("/login", h.V2.GithubLogin)
-		github.GET("/user", h.V2.GithubGetUser)
-		github.GET("/repos", h.V2.GithubGetRepos)
-		github.GET("/branches", h.V2.GithubGetBranches)
+		github.GET("/connect", h.V1.GithubConnect)
+		github.GET("/integration", h.V1.GithubGetIntegration)
+		github.DELETE("/integration/:id", h.V1.GithubDeleteIntegration)
+		github.POST("/repo", h.V1.GithubCreateRepo)
+		github.GET("/repos", h.V1.GithubGetRepoList)
 	}
 
 	gitlab := r.Group("/v1/gitlab")
