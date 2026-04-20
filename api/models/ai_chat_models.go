@@ -34,6 +34,8 @@ type (
 		Context             []VisualContext `json:"context,omitempty"`
 		MicrofrontendID     string          `json:"microfrontend_id,omitempty"`
 		MicrofrontendRepoID string          `json:"microfrontend_repo_id,omitempty"`
+		NewProject          bool            `json:"new_project,omitempty"`
+		UcodeProjectID      string          `json:"ucode_project_id,omitempty"`
 	}
 	SendMessageRequest struct {
 		UserPrompt    string `json:"user_prompt"`

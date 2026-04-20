@@ -56,6 +56,7 @@ type ChatProcessor struct {
 
 	microfrontendID     string // populated after PublishAiGeneratedMicroFrontend succeeds, or from request
 	microfrontendRepoID string // GitLab numeric project ID — stored from publish response or from request
+	newProject          bool   // true → provision a new ucode project; false → create microfrontend in current project
 
 	schemaCache    []models.TableSchema
 	schemaCachedAt time.Time
@@ -133,9 +134,12 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 		authInfo.GetUserIdAuth(), authInfo.GetClientTypeId(), authInfo.GetRoleId(),
 		c.GetHeader("Authorization"),
 	)
-	// Populate microfrontend context from the request when editing an existing microfrontend
 	processor.microfrontendID = userMessage.MicrofrontendID
 	processor.microfrontendRepoID = userMessage.MicrofrontendRepoID
+	processor.newProject = userMessage.NewProject
+	if userMessage.UcodeProjectID != "" {
+		processor.ucodeProjectID = userMessage.UcodeProjectID
+	}
 
 	chatHistory, err := processor.getChatHistory(ctx)
 	if err != nil {
@@ -245,6 +249,7 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 		"mcp_project_id":        processor.mcpProjectID,
 		"microfrontend_id":      processor.microfrontendID,
 		"microfrontend_repo_id": processor.microfrontendRepoID,
+		"ucode_project_id":      processor.mcpUcodeProjectID,
 		"pending_action":        aiResponse.PendingAction,
 		"questions":             aiResponse.Questions,
 		"plan":                  aiResponse.Plan,
@@ -457,8 +462,12 @@ func (p *ChatProcessor) runCodeChange(ctx context.Context, clarified, fileGraphJ
 	if p.microfrontendID != "" {
 		return p.runMicrofrontendEdit(ctx, clarified, fileGraphJSON, chatHistory, imageURLs, microfrontFiles)
 	}
-	log.Printf("[CODE] no existing project — starting new project build")
-	return p.buildNewProject(ctx, clarified, chatHistory, imageURLs, projectName)
+	if p.newProject {
+		log.Printf("[CODE] new_project=true — provisioning new ucode project")
+		return p.buildNewProject(ctx, clarified, chatHistory, imageURLs, projectName)
+	}
+	log.Printf("[CODE] new_project=false — creating microfrontend in current project")
+	return p.buildMicrofrontendForCurrentProject(ctx, clarified, chatHistory, imageURLs, projectName)
 }
 
 func (p *ChatProcessor) runVisualEdit(ctx context.Context, instruction string, contexts []models.VisualContext, chatHistory []models.ChatMessage, imageURLs []string) (*models.ParsedClaudeResponse, error) {
@@ -620,7 +629,7 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 	// return generated, nil  →  caller called saveProject() → McpProject.UpdateMcpProject()
 
 	log.Printf("[NEW PROJECT] [Step 5/5] Creating microfrontend and pushing code to %s branch...", uGenBranch)
-	if err = p.publishToMicrofrontend(ctx, plan.ProjectName, generated, projectData); err != nil {
+	if err = p.publishToMicrofrontend(ctx, plan.ProjectName, "app", generated, projectData); err != nil {
 		return nil, fmt.Errorf("microfrontend publish failed: %w", err)
 	}
 
@@ -661,6 +670,111 @@ func (p *ChatProcessor) routeRequest(userPrompt, fileGraphJSON string, hasImages
 
 	result.HasImages = hasImages
 	return result, nil
+}
+
+// buildMicrofrontendForCurrentProject generates and publishes a microfrontend
+// inside the caller's existing ucode project (no new project/environment provisioned).
+func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context, clarified string, chatHistory []models.ChatMessage, imageURLs []string, estimatedName string) (*models.ParsedClaudeResponse, error) {
+	log.Printf("[MFE CURRENT PROJECT] 🚀 generating microfrontend for existing project")
+
+	log.Printf("[MFE CURRENT PROJECT] [Step 1/3] Calling Architect...")
+	plan, err := p.callArchitect(ctx, clarified, imageURLs)
+	if err != nil {
+		return nil, fmt.Errorf("architect phase failed: %w", err)
+	}
+	if plan.ProjectName == "" {
+		plan.ProjectName = "AI Project"
+		if estimatedName != "" {
+			plan.ProjectName = estimatedName
+		}
+	}
+	log.Printf("[MFE CURRENT PROJECT] ✅ Architect done. Name: %q, Type: %q", plan.ProjectName, plan.ProjectType)
+
+	log.Printf("[MFE CURRENT PROJECT] [Step 2/3] Fetching existing project data...")
+	projectData, err := p.getExistingProjectData(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get existing project data: %w", err)
+	}
+
+	log.Printf("[MFE CURRENT PROJECT] [Step 3/3] Generating frontend code...")
+	var generated *models.ParsedClaudeResponse
+	if plan.ProjectType == "admin_panel" {
+		generated, err = p.generateAdminPanel(ctx, clarified, imageURLs, plan, projectData.ApiKey, projectData.EnvironmentId)
+	} else {
+		generated, err = p.generateProject(ctx, clarified, imageURLs, plan, projectData.ApiKey, projectData.EnvironmentId)
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	// Derive a unique path from the architect's plan name so that multiple
+	// microfrontends inside the same project get distinct GitLab paths.
+	mfePath := slugify(plan.ProjectName)
+	if len(mfePath) > 10 {
+		mfePath = strings.TrimRight(mfePath[:10], "-")
+	}
+
+	log.Printf("[MFE CURRENT PROJECT] Publishing microfrontend to u-gen branch (path=%s)...", mfePath)
+	if err = p.publishToMicrofrontend(ctx, plan.ProjectName, mfePath, generated, projectData); err != nil {
+		return nil, fmt.Errorf("microfrontend publish failed: %w", err)
+	}
+
+	log.Printf("[MFE CURRENT PROJECT] ✅ Done (id: %s)", p.microfrontendID)
+	return &models.ParsedClaudeResponse{Description: generated.Description}, nil
+}
+
+// getExistingProjectData fetches the environment and API key for the target
+// ucode project without creating anything new.
+// Priority: MCP project's ucode_project_id (set when a project was provisioned
+// in a previous request) > middleware project ID.
+func (p *ChatProcessor) getExistingProjectData(ctx context.Context) (*models.ProjectData, error) {
+	ucodeProjectID := p.ucodeProjectID
+
+	if p.mcpProjectID != "" {
+		mcpProject, err := p.service.GoObjectBuilderService().McpProject().GetMcpProjectFiles(ctx, &pbo.McpProjectId{
+			ResourceEnvId: p.resourceEnvID,
+			Id:            p.mcpProjectID,
+		})
+		if err == nil && mcpProject != nil && mcpProject.GetUcodeProjectId() != "" {
+			ucodeProjectID = mcpProject.GetUcodeProjectId()
+			log.Printf("[GET EXISTING PROJECT] using ucode_project_id=%s from MCP project", ucodeProjectID)
+		}
+	}
+
+	envList, err := p.h.companyServices.Environment().GetList(ctx, &pb.GetEnvironmentListRequest{
+		ProjectId: ucodeProjectID,
+		Limit:     1,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("get environment list: %w", err)
+	}
+
+	envs := envList.GetEnvironments()
+	if len(envs) == 0 {
+		return nil, fmt.Errorf("no environment found for project %s", ucodeProjectID)
+	}
+	env := envs[0]
+
+	apiKeys, err := p.h.authService.ApiKey().GetList(ctx, &as.GetListReq{
+		EnvironmentId: env.GetId(),
+		ProjectId:     ucodeProjectID,
+		Limit:         1,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("get api keys: %w", err)
+	}
+
+	var apiKey string
+	if keys := apiKeys.GetData(); len(keys) > 0 {
+		apiKey = keys[0].GetAppId()
+	}
+
+	return &models.ProjectData{
+		UcodeProjectId: ucodeProjectID,
+		EnvironmentId:  env.GetId(),
+		ResourceEnvId:  env.GetResourceEnvironmentId(),
+		ApiKey:         apiKey,
+	}, nil
 }
 
 // inspectCode answers questions about existing project file contents.
@@ -1317,7 +1431,7 @@ func (p *ChatProcessor) buildMicrofrontendFilesContext(files []models.GitlabFile
 // publishToMicrofrontend calls the function service to create a microfrontend
 // and push all AI-generated files to the u-gen branch.
 // It stores the resulting microfrontend ID on the processor for the response.
-func (p *ChatProcessor) publishToMicrofrontend(ctx context.Context, projectName string, generated *models.ParsedClaudeResponse, projectData *models.ProjectData) error {
+func (p *ChatProcessor) publishToMicrofrontend(ctx context.Context, projectName, path string, generated *models.ParsedClaudeResponse, projectData *models.ProjectData) error {
 	if generated == nil || generated.Project == nil || len(generated.Project.Files) == 0 {
 		return fmt.Errorf("no generated files to publish")
 	}
@@ -1331,14 +1445,11 @@ func (p *ChatProcessor) publishToMicrofrontend(ctx context.Context, projectName 
 		})
 	}
 
-	// Path is fixed to "app" so the GitLab repo is named <project-slug>_app,
-	// matching the CreateMicroFrontEnd convention where path is a component name,
-	// not the project name (which would cause duplication like travel-website_travel_website).
 	reqBody := models.PublishAiMicroFrontendRequest{
 		ProjectId:     projectData.UcodeProjectId,
 		EnvironmentId: projectData.EnvironmentId,
 		Name:          projectName,
-		Path:          "app",
+		Path:          path,
 		FrameworkType: "REACT",
 		Files:         files,
 	}
