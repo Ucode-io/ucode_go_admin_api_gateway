@@ -104,8 +104,7 @@ func (h *HandlerV1) GithubConnect(c *gin.Context) {
 	params.Set("client_id", h.baseConf.GithubClientID)
 	params.Set("redirect_uri", h.baseConf.GithubRedirectURI)
 	params.Set("state", state)
-	// Note: for GitHub Apps, scopes are ignored — permissions are configured
-	// in the GitHub App settings (Permissions & events → Repository permissions).
+	params.Set("scope", "repo read:user user:email")
 
 	authURL := githubAuthURL + "?" + params.Encode()
 	h.HandleResponse(c, status_http.OK, authURL)
