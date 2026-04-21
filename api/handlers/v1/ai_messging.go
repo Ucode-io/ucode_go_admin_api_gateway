@@ -457,7 +457,6 @@ func (p *ChatProcessor) runGeneratePlan(ctx context.Context, userRequest string,
 	}, nil
 }
 
-
 func (p *ChatProcessor) runCodeChange(ctx context.Context, clarified, fileGraphJSON string, chatHistory []models.ChatMessage, imageURLs []string, projectName string, microfrontFiles []models.GitlabFileChange) (*models.ParsedClaudeResponse, error) {
 	if p.microfrontendID != "" {
 		return p.runMicrofrontendEdit(ctx, clarified, fileGraphJSON, chatHistory, imageURLs, microfrontFiles)
@@ -677,7 +676,19 @@ func (p *ChatProcessor) routeRequest(userPrompt, fileGraphJSON string, hasImages
 func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context, clarified string, chatHistory []models.ChatMessage, imageURLs []string, estimatedName string) (*models.ParsedClaudeResponse, error) {
 	log.Printf("[MFE CURRENT PROJECT] 🚀 generating microfrontend for existing project")
 
-	log.Printf("[MFE CURRENT PROJECT] [Step 1/3] Calling Architect...")
+	log.Printf("[MFE CURRENT PROJECT] [Step 1/4] Fetching existing project data...")
+	projectData, err := p.getExistingProjectData(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get existing project data: %w", err)
+	}
+
+	// Fetch the real table slugs from the backend so the coder generates correct
+	// /v2/items/{slug} calls. If no tables exist yet, we create them after planning.
+	log.Printf("[MFE CURRENT PROJECT] [Step 2/4] Fetching existing backend schema (resourceEnvId=%s)...", projectData.ResourceEnvId)
+	existingTables := p.fetchExistingTablePlans(ctx, projectData.ResourceEnvId)
+	log.Printf("[MFE CURRENT PROJECT] Found %d existing backend tables", len(existingTables))
+
+	log.Printf("[MFE CURRENT PROJECT] [Step 3/4] Calling Architect...")
 	plan, err := p.callArchitect(ctx, clarified, imageURLs)
 	if err != nil {
 		return nil, fmt.Errorf("architect phase failed: %w", err)
@@ -690,13 +701,23 @@ func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context,
 	}
 	log.Printf("[MFE CURRENT PROJECT] ✅ Architect done. Name: %q, Type: %q", plan.ProjectName, plan.ProjectType)
 
-	log.Printf("[MFE CURRENT PROJECT] [Step 2/3] Fetching existing project data...")
-	projectData, err := p.getExistingProjectData(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get existing project data: %w", err)
+	// Use real existing tables for the API config so the AI generates correct
+	// /v2/items/{slug} endpoints. If no tables exist in the backend, create them.
+	if len(existingTables) > 0 {
+		log.Printf("[MFE CURRENT PROJECT] Overriding architect plan tables with %d real backend tables", len(existingTables))
+		plan.Tables = existingTables
+	} else {
+		log.Printf("[MFE CURRENT PROJECT] No existing tables found — creating backend tables from plan async...")
+		go func(bPlan *models.ArchitectPlan, resEnvId, ucodeProjectId, envId string) {
+			if createErr := createBackendFromPlan(context.Background(), bPlan, resEnvId, ucodeProjectId, p.userID, envId, p.service); createErr != nil {
+				log.Printf("[MFE CURRENT PROJECT] backend table creation failed (resourceEnv=%s): %v", resEnvId, createErr)
+			} else {
+				log.Printf("[MFE CURRENT PROJECT] ✅ Async backend tables created successfully")
+			}
+		}(plan, projectData.ResourceEnvId, projectData.UcodeProjectId, projectData.EnvironmentId)
 	}
 
-	log.Printf("[MFE CURRENT PROJECT] [Step 3/3] Generating frontend code...")
+	log.Printf("[MFE CURRENT PROJECT] [Step 4/4] Generating frontend code...")
 	var generated *models.ParsedClaudeResponse
 	if plan.ProjectType == "admin_panel" {
 		generated, err = p.generateAdminPanel(ctx, clarified, imageURLs, plan, projectData.ApiKey, projectData.EnvironmentId)
@@ -721,6 +742,104 @@ func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context,
 
 	log.Printf("[MFE CURRENT PROJECT] ✅ Done (id: %s)", p.microfrontendID)
 	return &models.ParsedClaudeResponse{Description: generated.Description}, nil
+}
+
+// fetchExistingTablePlans fetches the real table definitions from the backend project
+// and returns them as TablePlan structs for use in the API config block.
+// System tables (user, role, client_type, etc.) are filtered out.
+// Field fetching is parallelised — one goroutine per table.
+// Returns an empty slice if no tables are found or on any error.
+func (p *ChatProcessor) fetchExistingTablePlans(ctx context.Context, resourceEnvId string) []models.TablePlan {
+	if resourceEnvId == "" {
+		return nil
+	}
+
+	systemTables := map[string]bool{
+		"user": true, "role": true, "client_type": true,
+		"sms_template": true, "person": true,
+	}
+
+	tablesResp, err := p.service.GoObjectBuilderService().Table().GetAll(ctx, &pbo.GetAllTablesRequest{
+		ProjectId: resourceEnvId,
+		Limit:     100,
+	})
+	if err != nil {
+		log.Printf("[MFE] fetchExistingTablePlans: Table.GetAll failed: %v", err)
+		return nil
+	}
+
+	tables := tablesResp.GetTables()
+
+	// Filter out system tables first so we don't spin goroutines for them.
+	type tableEntry struct {
+		id    string
+		slug  string
+		label string
+	}
+	filtered := make([]tableEntry, 0, len(tables))
+	for _, t := range tables {
+		if !systemTables[t.GetSlug()] {
+			filtered = append(filtered, tableEntry{id: t.GetId(), slug: t.GetSlug(), label: t.GetLabel()})
+		}
+	}
+
+	if len(filtered) == 0 {
+		return nil
+	}
+
+	// Fetch fields in parallel — one goroutine per table.
+	type result struct {
+		idx  int
+		plan models.TablePlan
+	}
+	results := make([]result, len(filtered))
+	done := make(chan struct{}, len(filtered))
+
+	for i, te := range filtered {
+		i, te := i, te
+		go func() {
+			defer func() { done <- struct{}{} }()
+
+			fieldsResp, fieldsErr := p.service.GoObjectBuilderService().Field().GetAll(ctx, &pbo.GetAllFieldsRequest{
+				TableId:   te.id,
+				ProjectId: resourceEnvId,
+				Limit:     100,
+			})
+
+			var fieldPlans []models.TableFieldPlan
+			if fieldsErr == nil {
+				for _, f := range fieldsResp.GetFields() {
+					if isSystemField(f.GetSlug()) || isAuthField(f.GetSlug()) {
+						continue
+					}
+					fieldPlans = append(fieldPlans, models.TableFieldPlan{
+						Slug:  f.GetSlug(),
+						Label: f.GetLabel(),
+						Type:  f.GetType(),
+					})
+				}
+			}
+
+			results[i] = result{
+				idx: i,
+				plan: models.TablePlan{
+					Slug:   te.slug,
+					Label:  te.label,
+					Fields: fieldPlans,
+				},
+			}
+		}()
+	}
+
+	for range filtered {
+		<-done
+	}
+
+	plans := make([]models.TablePlan, 0, len(filtered))
+	for _, r := range results {
+		plans = append(plans, r.plan)
+	}
+	return plans
 }
 
 // getExistingProjectData fetches the environment and API key for the target
@@ -1152,7 +1271,6 @@ func (p *ChatProcessor) getChatHistory(ctx context.Context) ([]models.ChatMessag
 	return result, nil
 }
 
-
 func (p *ChatProcessor) callAnthropicWithTracking(ctx context.Context, req models.AnthropicRequest, timeout time.Duration, description string) (string, error) {
 	log.Printf("[AI] Calling Anthropic: %s", description)
 	response, err := helper.CallAnthropicAPI(p.baseConf, req, timeout)
@@ -1197,20 +1315,66 @@ func (p *ChatProcessor) callAnthropicWithTracking(ctx context.Context, req model
 func (p *ChatProcessor) runMicrofrontendEdit(ctx context.Context, clarified, fileGraphJSON string, chatHistory []models.ChatMessage, imageURLs []string, existingFiles []models.GitlabFileChange) (*models.ParsedClaudeResponse, error) {
 	log.Printf("[MICROFE EDIT] planning changes for microfrontend id=%s", p.microfrontendID)
 
+	// ── Fetch backend table schema concurrently while the planner runs ──────
+	// Both operations are network-bound and independent.
+	type schemaResult struct {
+		tables []models.TablePlan
+	}
+	schemaCh := make(chan schemaResult, 1)
+	go func() {
+		var tables []models.TablePlan
+		if p.mcpProjectID != "" {
+			if resEnvID, err := p.resolveBuilderResourceID(ctx); err == nil && resEnvID != "" {
+				tables = p.fetchExistingTablePlans(ctx, resEnvID)
+				log.Printf("[MICROFE EDIT] fetched %d backend table(s) for schema context", len(tables))
+			}
+		}
+		schemaCh <- schemaResult{tables: tables}
+	}()
+
 	plan, err := p.planChanges(ctx, clarified, fileGraphJSON, chatHistory, len(imageURLs) > 0)
 	if err != nil {
 		return nil, err
 	}
 	log.Printf("[MICROFE EDIT] planner: files_to_change=%d files_to_create=%d", len(plan.FilesToChange), len(plan.FilesToCreate))
 
-	neededPaths := make([]string, 0, len(plan.FilesToChange))
+	schema := <-schemaCh
+
+	// ── Build enriched clarification that includes API config + table schema ─
+	// This context is prepended to every AI call in this function so the model
+	// always knows which /v2/items/{slug} endpoints it can call.
+	envConfig := extractEnvConfig(existingFiles)
+	enrichedClarified := buildMfeEditContext(clarified, envConfig, schema.tables)
+
+	// ── Collect files the editor needs ──────────────────────────────────────
+	neededPaths := make([]string, 0, len(plan.FilesToChange)+6)
 	for _, f := range plan.FilesToChange {
 		neededPaths = append(neededPaths, f.Path)
 	}
 
+	// Always include API config files so the editor sees correct endpoints,
+	// API key, and hook implementations — even when the planner omitted them.
+	alwaysInclude := []string{
+		".env", "src/config/env.ts", "src/config/axios.ts",
+		"src/hooks/useApi.ts", "src/lib/apiUtils.ts",
+	}
+	existingPathSet := make(map[string]bool, len(existingFiles))
+	for _, ef := range existingFiles {
+		existingPathSet[ef.FilePath] = true
+	}
+	neededPathSet := make(map[string]bool, len(neededPaths))
+	for _, np := range neededPaths {
+		neededPathSet[np] = true
+	}
+	for _, cp := range alwaysInclude {
+		if existingPathSet[cp] && !neededPathSet[cp] {
+			neededPaths = append(neededPaths, cp)
+		}
+	}
+
 	filesContext := p.buildMicrofrontendFilesContext(existingFiles, neededPaths)
 
-	edited, err := p.editCode(ctx, clarified, plan, filesContext, chatHistory, imageURLs)
+	edited, err := p.editCode(ctx, enrichedClarified, plan, filesContext, chatHistory, imageURLs)
 	if err != nil {
 		return nil, err
 	}
@@ -1219,18 +1383,18 @@ func (p *ChatProcessor) runMicrofrontendEdit(ctx context.Context, clarified, fil
 		log.Printf("[MICROFE EDIT] no files returned by editor (AI responded conversationally), falling back to full regeneration")
 		log.Printf("[MICROFE EDIT] AI description was: %s", edited.Description)
 
-		// Build full context from all existing files and regenerate directly
-		allFilesContext := p.buildMicrofrontendFilesContext(existingFiles, func() []string {
-			paths := make([]string, 0, len(existingFiles))
-			for _, f := range existingFiles {
-				paths = append(paths, f.FilePath)
-			}
-			return paths
-		}())
+		// Build full context from all existing files and regenerate directly.
+		allPaths := make([]string, 0, len(existingFiles))
+		for _, f := range existingFiles {
+			allPaths = append(allPaths, f.FilePath)
+		}
+		allFilesContext := p.buildMicrofrontendFilesContext(existingFiles, allPaths)
 
 		fallbackPrompt := fmt.Sprintf(
-			"IMPORTANT: You MUST return JSON. Do NOT respond with text.\n\nTask: %s\n\nExisting project files (modify as needed):\n%s",
-			clarified, allFilesContext,
+			"IMPORTANT: You MUST return JSON. Do NOT respond with text.\n\n"+
+				"Task: %s\n\n"+
+				"Existing project files (modify as needed):\n%s",
+			enrichedClarified, allFilesContext,
 		)
 
 		fallbackResp, err := p.callAnthropicWithTracking(
@@ -1253,7 +1417,7 @@ func (p *ChatProcessor) runMicrofrontendEdit(ctx context.Context, clarified, fil
 		edited, err = helper.ParseClaudeResponse(fallbackResp)
 		if err != nil {
 			log.Printf("[MICROFE EDIT] fallback parse failed, attempting JSON repair: %v", err)
-			edited, err = p.repairJSON(ctx, fallbackResp, clarified, helper.PromptAdminPanelGenerator)
+			edited, err = p.repairJSON(ctx, fallbackResp, enrichedClarified, helper.PromptAdminPanelGenerator)
 			if err != nil {
 				return nil, fmt.Errorf("microfrontend edit fallback: failed after repair: %w", err)
 			}
@@ -1495,6 +1659,55 @@ func (p *ChatProcessor) publishToMicrofrontend(ctx context.Context, projectName,
 	return nil
 }
 
+// extractEnvConfig scans existing microfrontend files for the .env file and
+// returns a formatted API configuration block for injection into prompts.
+// This ensures the AI editor knows the correct base URL, API key, and endpoints.
+// buildMfeEditContext assembles the context block prepended to every AI call
+// when editing an existing microfrontend. It tells the model:
+//   - what .env API config exists (base URL, API key)
+//   - which backend tables are available via /v2/items/{slug}
+func buildMfeEditContext(clarified, envConfig string, tables []models.TablePlan) string {
+	if envConfig == "" && len(tables) == 0 {
+		return clarified
+	}
+	var sb strings.Builder
+	sb.WriteString(clarified)
+	sb.WriteString("\n\n")
+	if envConfig != "" {
+		sb.WriteString(envConfig)
+	}
+	if len(tables) > 0 {
+		sb.WriteString("====================================\n")
+		sb.WriteString("AVAILABLE BACKEND TABLES (use /v2/items/{slug})\n")
+		sb.WriteString("====================================\n")
+		for _, t := range tables {
+			sb.WriteString(fmt.Sprintf("- %s (slug: %s)\n", t.Label, t.Slug))
+			for _, f := range t.Fields {
+				sb.WriteString(fmt.Sprintf("  * %s (%s)\n", f.Slug, f.Type))
+			}
+		}
+		sb.WriteString("\n")
+	}
+	return sb.String()
+}
+
+func extractEnvConfig(files []models.GitlabFileChange) string {
+	for _, f := range files {
+		if f.FilePath != ".env" {
+			continue
+		}
+		var sb strings.Builder
+		sb.WriteString("====================================\n")
+		sb.WriteString("API CONFIGURATION (from existing project .env)\n")
+		sb.WriteString("====================================\n")
+		sb.WriteString(f.Content)
+		sb.WriteString("\nUse /v2/items/{table_slug} with useApiQuery/useApiMutation from @/hooks/useApi.\n")
+		sb.WriteString("Extract responses with extractList/extractCount/extractSingle from @/lib/apiUtils.\n\n")
+		return sb.String()
+	}
+	return ""
+}
+
 // slugify converts a project name to a lowercase hyphen-separated slug
 // valid for use as a GitLab path (only [a-z0-9-]).
 func slugify(name string) string {
@@ -1673,16 +1886,21 @@ func truncateString(s string, maxLen int) string {
 func buildAPIConfigBlock(baseURL, apiKey string, plan *models.ArchitectPlan) string {
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf(
-		"\n====================================\nAPI CONFIGURATION FOR FRONTEND\n====================================\nVITE_API_BASE_URL: %s\nVITE_X_API_KEY: %s\n\nTables to use:\n",
+		"\n====================================\nAPI CONFIGURATION FOR FRONTEND\n====================================\nVITE_API_BASE_URL: %s\nVITE_X_API_KEY: %s\n",
 		baseURL, apiKey,
 	))
-	for _, t := range plan.Tables {
-		sb.WriteString(fmt.Sprintf("- Table: %s, slug: %s\n", t.Label, t.Slug))
-		for _, f := range t.Fields {
-			sb.WriteString(fmt.Sprintf("  * field: %s, type: %s\n", f.Slug, f.Type))
+	if len(plan.Tables) > 0 {
+		sb.WriteString("\nTables to use (call /v2/items/{slug} for CRUD):\n")
+		for _, t := range plan.Tables {
+			sb.WriteString(fmt.Sprintf("- Table: %s (slug: %s)\n", t.Label, t.Slug))
+			for _, f := range t.Fields {
+				sb.WriteString(fmt.Sprintf("  * field: %s (%s)\n", f.Slug, f.Type))
+			}
 		}
 	}
-	sb.WriteString("\nUse this UI Structure provided by the Architect:\n" + plan.UIStructure + "\n")
+	if plan.UIStructure != "" {
+		sb.WriteString("\nUse this UI Structure provided by the Architect:\n" + plan.UIStructure + "\n")
+	}
 	return sb.String()
 }
 

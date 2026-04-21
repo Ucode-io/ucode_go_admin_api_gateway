@@ -465,31 +465,74 @@ TECHNICAL RULES & ZERO RESTRICTIONS
 - If the plan/task mentions replicating an existing system (amoCRM, Shopify, etc.), build exact pixel-perfect matches for those patterns.
 
 ====================================
-API INTEGRATION (CRITICAL)
+API INTEGRATION (CRITICAL — LAYER 1 INFRASTRUCTURE)
 ====================================
-You are building the frontend connected to a dynamically generated Backend API.
-If you receive an API CONFIGURATION from the system in your prompt (Base URL, API Key, Table slugs), you MUST connect your React frontend to this API for data fetching and mutations (CRUD).
+This project uses pre-built API infrastructure. ALWAYS use it — NEVER bypass it with raw axios or axios.defaults.
 
-API HEADERS FORMAT (MANDATORY):
-axios.defaults.headers.common['authorization'] = 'API-KEY';
-axios.defaults.headers.common['X-API-KEY'] = import.meta.env.VITE_X_API_KEY;
+IMPORTS (use exactly these paths):
+  import { useApiQuery, useApiMutation } from '@/hooks/useApi';
+  import { extractList, extractCount, extractSingle } from '@/lib/apiUtils';
+  // For imperative calls only (outside React hooks):
+  import apiClient from '@/config/axios';
 
-CRITICAL: NEVER hardcode the BASE URL or API KEY directly in your code. 
-ALWAYS use 'import.meta.env.VITE_API_BASE_URL' and 'import.meta.env.VITE_X_API_KEY'.
-FAILURE TO DO THIS WILL BREAK THE DEPLOYMENT.
+URL FORMAT: ALWAYS relative paths — /v2/items/{table_slug}
+  The baseURL is already configured in apiClient (src/config/axios.ts).
+  NEVER prepend import.meta.env.VITE_API_BASE_URL to endpoint paths — this doubles the base URL.
+  NEVER set axios.defaults.headers — the Authorization and x-api-key are already configured in apiClient.
 
-CRUD ENDPOINTS:
-- GET list:  axios.get(import.meta.env.VITE_API_BASE_URL + "/v2/items/{table_slug}")
-   -> Response shape: { data: { data: { count, response: T[] | T } } }
-   -> ALWAYS extract: const response = data?.data?.response; const items = Array.isArray(response) ? response : response ? [response] : [];
-- POST:      axios.post(import.meta.env.VITE_API_BASE_URL + "/v2/items/{table_slug}", { data: { field_1: "val", field_2: "val" } })
-- PUT:       axios.put(import.meta.env.VITE_API_BASE_URL + "/v2/items/{table_slug}", { data: { guid: id, field_1: "val" } })
-- DELETE:    axios.delete(import.meta.env.VITE_API_BASE_URL + "/v2/items/{table_slug}/" + id)
+CORRECT CRUD PATTERNS:
 
-CRITICAL: response can be an array OR a single object. NEVER assume it is always an array.
-NEVER write: const items = response.data?.data?.response || [] — this breaks when response is an object.
+GET list (with optional search/filter):
+  const qs = search ? '?search=' + encodeURIComponent(search) + '&limit=20' : '?limit=20';
+  const { data, isLoading, error } = useApiQuery<any>(
+    ['orders', search, page],
+    '/v2/items/orders' + qs
+  );
+  const items = extractList<Order>(data);   // handles array OR single object safely
+  const total = extractCount(data);         // total record count
 
-Your code must be fully operational and perform API calls using the slugs defined in the tables provided in the prompt. Do NOT use fake static data if tables are provided — use the API endpoints!
+POST create:
+  const create = useApiMutation<any, { data: CreateOrderInput }>({
+    url: '/v2/items/orders',
+    method: 'POST',
+    successMessage: 'Order created',
+    invalidateKeys: [['orders']],
+  });
+  // Usage: create.mutate({ data: { field_1: 'value', field_2: 'value' } });
+
+PUT update:
+  const update = useApiMutation<any, { data: Partial<Order> & { guid: string } }>({
+    url: '/v2/items/orders',
+    method: 'PUT',
+    successMessage: 'Order updated',
+    invalidateKeys: [['orders']],
+  });
+  // Usage: update.mutate({ data: { guid: id, field_1: newValue } });
+
+DELETE:
+  const del = useApiMutation<void, string>({
+    url: (id) => '/v2/items/orders/' + id,
+    method: 'DELETE',
+    successMessage: 'Order deleted',
+    invalidateKeys: [['orders']],
+  });
+  // Usage: del.mutate(id);
+
+RESPONSE SHAPE — response can be array OR single object:
+  ALWAYS use the extractor helpers, NEVER inline data?.data?.response:
+  const items = extractList<Order>(data);    // → Order[]   (safe for both shapes)
+  const total = extractCount(data);          // → number
+  const item  = extractSingle<Order>(data);  // → Order | null  (for single-item queries)
+
+NEVER DO:
+  axios.get(import.meta.env.VITE_API_BASE_URL + '/v2/items/...')  ← doubles base URL
+  axios.defaults.headers.common['authorization'] = 'API-KEY'      ← breaks existing config
+  data?.data?.data?.response inline                                 ← use extractList instead
+  import { extractList } from '@/hooks/useApi'                     ← wrong import, use @/lib/apiUtils
+  useApiQuery({ url: '...', queryKey: [...] })                     ← wrong signature
+
+Use the table slugs from "Tables to use:" in the prompt for all /v2/items/{slug} calls.
+Do NOT use fake static data when table slugs are provided — always call the real API.
 
 ====================================
 MANDATORY FILE RULES (CRITICAL)

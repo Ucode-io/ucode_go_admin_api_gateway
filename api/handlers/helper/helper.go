@@ -257,10 +257,21 @@ func extractJSONAndDescription(text string) (jsonBlock, description string) {
 		return strings.TrimSpace(matches[1]), strings.TrimSpace(matches[2])
 	}
 
+	// Handle "---" separator with flexible surrounding whitespace.
+	// Try "\n---\n" first, then "\n---" (end of output without trailing newline).
 	if idx := strings.Index(text, "\n---\n"); idx != -1 {
 		jsonPart := strings.TrimSpace(text[:idx])
 		descPart := strings.TrimSpace(text[idx+5:])
 		return extractJSON(jsonPart), descPart
+	}
+	if idx := strings.Index(text, "\n---"); idx != -1 {
+		after := text[idx+4:]
+		// Only treat as separator if what follows is not more dashes (e.g. "----")
+		if len(after) == 0 || (after[0] != '-' && after[0] != '=') {
+			jsonPart := strings.TrimSpace(text[:idx])
+			descPart := strings.TrimSpace(after)
+			return extractJSON(jsonPart), descPart
+		}
 	}
 
 	if strings.HasPrefix(strings.TrimSpace(text), "{") {
