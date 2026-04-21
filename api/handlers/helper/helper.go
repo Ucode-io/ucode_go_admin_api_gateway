@@ -135,18 +135,14 @@ func repairJSONStrings(input string) string {
 
 // ParseClaudeResponse parses a raw Claude API response into a structured result.
 // Runs up to 3 JSON repair passes if the initial parse fails.
-// If the response was truncated at max_tokens, falls back to partial file recovery
-// so callers receive whatever files were fully generated before the cutoff.
 func ParseClaudeResponse(rawJSON string) (*models.ParsedClaudeResponse, error) {
 	fullText, resp, err := extractTextFromClaudeResponse(rawJSON)
 	if err != nil {
 		return nil, err
 	}
 
-	truncated := resp.StopReason == "max_tokens"
-	if truncated {
-		log.Printf("[PARSE] WARNING: response cut off at max_tokens (input=%d output=%d) — attempting partial recovery",
-			resp.Usage.InputTokens, resp.Usage.OutputTokens)
+	if resp.StopReason == "max_tokens" {
+		log.Printf("[PARSE] WARNING: response cut off by max_tokens — consider increasing MaxTokens (input=%d output=%d)", resp.Usage.InputTokens, resp.Usage.OutputTokens)
 	}
 
 	result := &models.ParsedClaudeResponse{
@@ -176,32 +172,9 @@ func ParseClaudeResponse(rawJSON string) (*models.ParsedClaudeResponse, error) {
 
 				if parseErr != nil {
 					log.Printf("[PARSE] all 3 repair passes failed: %v", parseErr)
-
-					// Pass 4 (max_tokens only): stream-parse the files array and
-					// recover every file object that was complete before the cutoff.
-					if truncated {
-						if partial := recoverPartialProject(fullText); partial != nil {
-							log.Printf("[PARSE] partial recovery succeeded: %d file(s) salvaged before truncation", len(partial.Files))
-							result.Project = partial
-							result.Description = strings.TrimSpace(description)
-							return result, nil
-						}
-					}
-
 					return nil, fmt.Errorf("project JSON parse failed after 3 repair passes: %w", parseErr)
 				}
 				log.Printf("[PARSE] pass-3 (escape repair) succeeded")
-			}
-		}
-
-		// Even when parsing succeeds, the JSON may be structurally truncated and
-		// produce an empty files list. Attempt partial recovery in that case too.
-		if truncated && (len(project.Files) == 0) {
-			if partial := recoverPartialProject(fullText); partial != nil {
-				log.Printf("[PARSE] partial recovery replaced empty parse: %d file(s) salvaged", len(partial.Files))
-				result.Project = partial
-				result.Description = strings.TrimSpace(description)
-				return result, nil
 			}
 		}
 
@@ -210,58 +183,6 @@ func ParseClaudeResponse(rawJSON string) (*models.ParsedClaudeResponse, error) {
 
 	result.Description = strings.TrimSpace(description)
 	return result, nil
-}
-
-// recoverPartialProject streams the "files" JSON array from a truncated Claude
-// response, collecting every ProjectFile object that was fully written before
-// the output was cut off.  Returns nil when nothing usable can be recovered.
-func recoverPartialProject(text string) *models.GeneratedProject {
-	// Locate the start of the files array inside the raw text.
-	filesIdx := strings.Index(text, `"files"`)
-	if filesIdx == -1 {
-		return nil
-	}
-	arrayStart := strings.Index(text[filesIdx:], "[")
-	if arrayStart == -1 {
-		return nil
-	}
-
-	arrayText := text[filesIdx+arrayStart:] // begins with "["
-
-	dec := json.NewDecoder(strings.NewReader(arrayText))
-
-	// Consume the opening "[".
-	tok, err := dec.Token()
-	if err != nil || tok != json.Delim('[') {
-		return nil
-	}
-
-	var files []models.ProjectFile
-	for dec.More() {
-		var file models.ProjectFile
-		if err := dec.Decode(&file); err != nil {
-			break // hit the truncation boundary — stop gracefully
-		}
-		if file.Path != "" && file.Content != "" {
-			files = append(files, file)
-		}
-	}
-
-	if len(files) == 0 {
-		return nil
-	}
-
-	// Best-effort: extract project_name from the raw text before the files array.
-	var projectName string
-	nameRe := regexp.MustCompile(`"project_name"\s*:\s*"([^"\\]+)"`)
-	if m := nameRe.FindStringSubmatch(text[:filesIdx]); len(m) > 1 {
-		projectName = m[1]
-	}
-
-	return &models.GeneratedProject{
-		ProjectName: projectName,
-		Files:       files,
-	}
 }
 
 func ParseHaikuRoutingResult(rawJSON string) (*models.HaikuRoutingResult, error) {
@@ -336,21 +257,10 @@ func extractJSONAndDescription(text string) (jsonBlock, description string) {
 		return strings.TrimSpace(matches[1]), strings.TrimSpace(matches[2])
 	}
 
-	// Handle "---" separator with flexible surrounding whitespace.
-	// Try "\n---\n" first, then "\n---" (end of output without trailing newline).
 	if idx := strings.Index(text, "\n---\n"); idx != -1 {
 		jsonPart := strings.TrimSpace(text[:idx])
 		descPart := strings.TrimSpace(text[idx+5:])
 		return extractJSON(jsonPart), descPart
-	}
-	if idx := strings.Index(text, "\n---"); idx != -1 {
-		after := text[idx+4:]
-		// Only treat as separator if what follows is not more dashes (e.g. "----")
-		if len(after) == 0 || (after[0] != '-' && after[0] != '=') {
-			jsonPart := strings.TrimSpace(text[:idx])
-			descPart := strings.TrimSpace(after)
-			return extractJSON(jsonPart), descPart
-		}
 	}
 
 	if strings.HasPrefix(strings.TrimSpace(text), "{") {
