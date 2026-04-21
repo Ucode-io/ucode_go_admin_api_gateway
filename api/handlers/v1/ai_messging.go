@@ -1126,8 +1126,13 @@ func (p *ChatProcessor) generateProject(ctx context.Context, clarified string, i
 		return nil, fmt.Errorf("generate project: %w", err)
 	}
 
+	truncated := strings.Contains(response, `"stop_reason":"max_tokens"`)
+
 	parsed, parseErr := helper.ParseClaudeResponse(response)
 	if parseErr != nil {
+		if truncated {
+			return nil, fmt.Errorf("generate project: output truncated at max_tokens and no files could be recovered")
+		}
 		log.Printf("[CODE] generate project: parse failed, attempting JSON repair: %v", parseErr)
 		parsed, parseErr = p.repairJSON(ctx, response, clarified, helper.PromptAdminPanelGenerator)
 		if parseErr != nil {
@@ -1135,8 +1140,12 @@ func (p *ChatProcessor) generateProject(ctx context.Context, clarified string, i
 		}
 	}
 
-	if parsed.Project == nil {
+	if parsed.Project == nil || len(parsed.Project.Files) == 0 {
 		return nil, fmt.Errorf("generate project: claude returned empty project")
+	}
+
+	if truncated {
+		log.Printf("[CODE] generate project: output was truncated — using %d partially recovered file(s)", len(parsed.Project.Files))
 	}
 
 	log.Printf("[CODE] ✅ Generate project completed. Built %d files:", len(parsed.Project.Files))
@@ -1188,8 +1197,15 @@ func (p *ChatProcessor) generateAdminPanel(ctx context.Context, clarified string
 		return nil, fmt.Errorf("generate admin panel: %w", err)
 	}
 
+	// Check for max_tokens truncation before parsing so we can skip the useless
+	// repairJSON call (repair only fixes escape sequences, not structural cuts).
+	truncated := strings.Contains(response, `"stop_reason":"max_tokens"`)
+
 	parsed, parseErr := helper.ParseClaudeResponse(response)
 	if parseErr != nil {
+		if truncated {
+			return nil, fmt.Errorf("generate admin panel: output truncated at max_tokens and no files could be recovered")
+		}
 		log.Printf("[CODE] admin panel: parse failed, attempting JSON repair: %v", parseErr)
 		parsed, parseErr = p.repairJSON(ctx, response, clarified, helper.PromptAdminPanelGenerator)
 		if parseErr != nil {
@@ -1197,8 +1213,12 @@ func (p *ChatProcessor) generateAdminPanel(ctx context.Context, clarified string
 		}
 	}
 
-	if parsed.Project == nil {
+	if parsed.Project == nil || len(parsed.Project.Files) == 0 {
 		return nil, fmt.Errorf("generate admin panel: claude returned empty project")
+	}
+
+	if truncated {
+		log.Printf("[CODE] admin panel: output was truncated — using %d partially recovered file(s)", len(parsed.Project.Files))
 	}
 
 	// Merge any template files the AI didn't regenerate (safety fallback)
