@@ -104,7 +104,8 @@ func (h *HandlerV1) GithubConnect(c *gin.Context) {
 	params.Set("client_id", h.baseConf.GithubClientID)
 	params.Set("redirect_uri", h.baseConf.GithubRedirectURI)
 	params.Set("state", state)
-	params.Set("scope", "repo read:user user:email")
+	// Note: for GitHub Apps, scopes are ignored — permissions are configured
+	// in the GitHub App settings (Permissions & events → Repository permissions).
 
 	authURL := githubAuthURL + "?" + params.Encode()
 	h.HandleResponse(c, status_http.OK, authURL)
@@ -219,6 +220,41 @@ func (h *HandlerV1) GithubGetIntegration(c *gin.Context) {
 		ProjectID:     ir.GetProjectId(),
 		EnvironmentID: ir.GetEnvironmentId(),
 	})
+}
+
+// GithubValidateToken checks whether the stored GitHub token is still valid.
+// Calls the GitHub /user API and returns the connected user info if the token is healthy.
+//
+// @Security ApiKeyAuth
+// @ID github_validate_token
+// @Router /v1/github/integration/validate [GET]
+// @Summary Validate stored GitHub token
+// @Tags GitHub Integration
+// @Success 200 {object} status_http.Response{data=models.GithubUser}
+// @Failure 400 {object} status_http.Response{data=string}
+// @Failure 401 {object} status_http.Response{data=string}
+// @Failure 404 {object} status_http.Response{data=string}
+func (h *HandlerV1) GithubValidateToken(c *gin.Context) {
+	projectID, environmentID, ok := getProjectAndEnv(c)
+	if !ok {
+		h.HandleResponse(c, status_http.InvalidArgument, "project_id and environment_id required")
+		return
+	}
+
+	token, err := h.getGithubToken(c.Request.Context(), projectID, environmentID)
+	if err != nil {
+		h.HandleResponse(c, status_http.NotFound, "GitHub integration not found: "+err.Error())
+		return
+	}
+
+	ghUser, err := h.fetchGithubUser(c.Request.Context(), token)
+	if err != nil {
+		// Token exists in DB but GitHub rejects it — needs reconnection
+		h.HandleResponse(c, status_http.Unauthorized, "GitHub token is invalid or revoked — please reconnect: "+err.Error())
+		return
+	}
+
+	h.HandleResponse(c, status_http.OK, ghUser)
 }
 
 // GithubDeleteIntegration removes a GitHub integration by ID.
@@ -439,7 +475,6 @@ func (h *HandlerV1) getGithubToken(ctx context.Context, projectID, environmentID
 	return items[0].GetToken(), nil
 }
 
-// createGithubRepo calls the GitHub API to create a new repository.
 func (h *HandlerV1) createGithubRepo(ctx context.Context, token string, req models.GithubCreateRepoRequest) (*models.GithubRepo, error) {
 	bodyBytes, err := json.Marshal(map[string]any{
 		"name":        req.Name,
@@ -464,6 +499,12 @@ func (h *HandlerV1) createGithubRepo(ctx context.Context, token string, req mode
 
 	if resp.StatusCode != http.StatusCreated {
 		b, _ := io.ReadAll(resp.Body)
+		if resp.StatusCode == http.StatusForbidden {
+			return nil, fmt.Errorf("GitHub token lacks 'repo' scope — please reconnect GitHub via /v1/github/connect")
+		}
+		if resp.StatusCode == http.StatusUnauthorized {
+			return nil, fmt.Errorf("GitHub token is invalid or revoked — please reconnect GitHub via /v1/github/connect")
+		}
 		return nil, fmt.Errorf("github create repo returned %d: %s", resp.StatusCode, string(b))
 	}
 

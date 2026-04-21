@@ -574,6 +574,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	{
 		github.GET("/connect", h.V1.GithubConnect)
 		github.GET("/integration", h.V1.GithubGetIntegration)
+		github.GET("/integration/validate", h.V1.GithubValidateToken)
 		github.DELETE("/integration/:id", h.V1.GithubDeleteIntegration)
 		github.POST("/repo", h.V1.GithubCreateRepo)
 		github.GET("/repos", h.V1.GithubGetRepoList)
