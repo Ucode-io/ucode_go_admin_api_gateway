@@ -6,6 +6,7 @@ import (
 	"log"
 	"regexp"
 	"strings"
+
 	"ucode/ucode_go_api_gateway/api/models"
 )
 
@@ -142,7 +143,13 @@ func ParseClaudeResponse(rawJSON string) (*models.ParsedClaudeResponse, error) {
 	}
 
 	if resp.StopReason == "max_tokens" {
-		log.Printf("[PARSE] WARNING: response cut off by max_tokens — consider increasing MaxTokens (input=%d output=%d)", resp.Usage.InputTokens, resp.Usage.OutputTokens)
+		// The JSON is guaranteed to be truncated — all repair attempts will fail.
+		// Return ErrMaxTokens so callers can surface a useful message to the user
+		// instead of silently attempting to parse a broken response.
+		log.Printf("[PARSE] response cut off by max_tokens (model=%s input=%d output=%d) — aborting parse",
+			resp.Model, resp.Usage.InputTokens, resp.Usage.OutputTokens)
+		return nil, fmt.Errorf("%w (model=%s input_tokens=%d output_tokens=%d)",
+			ErrMaxTokens, resp.Model, resp.Usage.InputTokens, resp.Usage.OutputTokens)
 	}
 
 	result := &models.ParsedClaudeResponse{
@@ -213,7 +220,8 @@ func ParseSonnetPlanResult(rawJSON string) (*models.SonnetPlanResult, error) {
 	}
 
 	if resp.StopReason == "max_tokens" {
-		log.Printf("[PARSE] WARNING: planner response cut off by max_tokens")
+		log.Printf("[PARSE] planner response cut off by max_tokens — aborting")
+		return nil, fmt.Errorf("%w (planner)", ErrMaxTokens)
 	}
 
 	cleaned := extractJSON(fullText)
@@ -233,7 +241,8 @@ func ParsePlanResult(rawJSON string) (*models.HaikuPlan, error) {
 	}
 
 	if resp.StopReason == "max_tokens" {
-		log.Printf("[PARSE] WARNING: plan generator response cut off by max_tokens")
+		log.Printf("[PARSE] plan generator response cut off by max_tokens — aborting")
+		return nil, fmt.Errorf("%w (plan generator)", ErrMaxTokens)
 	}
 
 	cleaned := extractJSON(fullText)

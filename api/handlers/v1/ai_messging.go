@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -431,24 +432,21 @@ func (p *ChatProcessor) runGeneratePlan(ctx context.Context, userRequest string,
 	content := helper.BuildPlanGeneratorMessage(userRequest)
 	messages := buildMessagesWithHistory(chatHistory, []models.ContentBlock{{Type: "text", Text: content}})
 
-	response, err := p.callAnthropicWithTracking(
-		ctx,
-		models.AnthropicRequest{
+	plan, err := callWithTool[models.HaikuPlan](
+		p, ctx,
+		models.AnthropicToolRequest{
 			Model:     p.baseConf.ClaudeModel,
 			MaxTokens: p.baseConf.PlannerMaxTokens,
 			System:    helper.PromptPlanGenerator,
 			Messages:  messages,
+			Tools:     []models.ClaudeFunctionTool{helper.ToolEmitDiagrams},
+			ToolChoice: helper.ForcedTool(helper.ToolEmitDiagrams.Name),
 		},
 		timeoutPlanner,
 		"Generating architectural plan",
 	)
 	if err != nil {
 		return nil, fmt.Errorf("plan generator: %w", err)
-	}
-
-	plan, err := helper.ParsePlanResult(response)
-	if err != nil {
-		return nil, fmt.Errorf("plan generator: parse failed: %w", err)
 	}
 
 	return &models.ParsedClaudeResponse{
@@ -518,13 +516,15 @@ func (p *ChatProcessor) runVisualEdit(ctx context.Context, instruction string, c
 	prompt := helper.BuildVisualEditPrompt(instruction, resolvedContexts, filesContext)
 	messages := buildMessagesWithHistory(chatHistory, buildContentBlocksWithImages(prompt, imageURLs))
 
-	response, err := p.callAnthropicWithTracking(
-		ctx,
-		models.AnthropicRequest{
-			Model:     p.baseConf.ClaudeModel,
-			MaxTokens: p.baseConf.CoderMaxTokens,
-			System:    helper.PromptVisualEdit,
-			Messages:  messages,
+	edited, err := callWithTool[visualEditOutput](
+		p, ctx,
+		models.AnthropicToolRequest{
+			Model:      p.baseConf.ClaudeModel,
+			MaxTokens:  p.baseConf.CoderMaxTokens,
+			System:     helper.PromptVisualEdit,
+			Messages:   messages,
+			Tools:      []models.ClaudeFunctionTool{helper.ToolEmitVisualEdit},
+			ToolChoice: helper.ForcedTool(helper.ToolEmitVisualEdit.Name),
 		},
 		timeoutCoder,
 		fmt.Sprintf("Visual edit: %d elements in %d files", len(resolvedContexts), len(targetPaths)),
@@ -533,39 +533,87 @@ func (p *ChatProcessor) runVisualEdit(ctx context.Context, instruction string, c
 		return nil, fmt.Errorf("visual edit: claude call failed: %w", err)
 	}
 
-	updatedFiles, changeSummary, err := helper.ParseVisualEditResponse(response)
-	if err != nil {
-		log.Printf("[VISUAL EDIT] surgical parse failed (%v), falling back to ParseClaudeResponse", err)
-		parsed, parseErr := helper.ParseClaudeResponse(response)
-		if parseErr != nil {
-			return nil, parseErr
-		}
-		if parsed.Project != nil && len(parsed.Project.Files) > 0 {
-			if pushErr := p.pushMicrofrontendChanges(ctx, parsed.Project.Files); pushErr != nil {
-				return nil, fmt.Errorf("visual edit: push failed: %w", pushErr)
-			}
-		}
-		return &models.ParsedClaudeResponse{Description: parsed.Description}, nil
-	}
-
-	projectFiles := make([]models.ProjectFile, 0, len(updatedFiles))
-	for _, uf := range updatedFiles {
-		projectFiles = append(projectFiles, models.ProjectFile{Path: uf.Path, Content: uf.Content})
-	}
-
-	if len(projectFiles) > 0 {
-		if err = p.pushMicrofrontendChanges(ctx, projectFiles); err != nil {
-			return nil, fmt.Errorf("visual edit: push to u-gen failed: %w", err)
+	if len(edited.Files) > 0 {
+		if pushErr := p.pushMicrofrontendChanges(ctx, edited.Files); pushErr != nil {
+			return nil, fmt.Errorf("visual edit: push to u-gen failed: %w", pushErr)
 		}
 	}
 
-	description := changeSummary
+	description := edited.ChangeSummary
 	if description == "" {
 		description = "✅ Visual edit applied successfully."
 	}
 
-	log.Printf("[VISUAL EDIT] ✅ done — %d files pushed to u-gen, summary=%s", len(projectFiles), changeSummary)
+	log.Printf("[VISUAL EDIT] ✅ done — %d files pushed to u-gen, summary=%s", len(edited.Files), description)
 	return &models.ParsedClaudeResponse{Description: description}, nil
+}
+
+// ============================================================================
+// TOOL-USE GENERIC CALLER
+// ============================================================================
+
+// visualEditOutput is the structured result for visual-edit tool calls.
+type visualEditOutput struct {
+	Files         []models.ProjectFile `json:"files"`
+	ChangeSummary string               `json:"change_summary"`
+}
+
+// callWithTool is a package-level generic function (Go generics don't allow
+// generic methods) that wraps helper.CallAnthropicWithTool with token-usage
+// tracking and user-friendly ErrMaxTokens handling.
+//
+// It returns (*T, error). On ErrMaxTokens it returns a translated error message
+// the caller can forward directly to the user.
+func callWithTool[T any](
+	p *ChatProcessor,
+	ctx context.Context,
+	req models.AnthropicToolRequest,
+	timeout time.Duration,
+	description string,
+) (*T, error) {
+	log.Printf("[AI] Calling Anthropic (tool use): %s", description)
+
+	result, usage, stopReason, err := helper.CallAnthropicWithTool[T](p.baseConf, req, timeout)
+
+	// Record token usage regardless of error — partial usage still counts.
+	go func() {
+		if usage.InputTokens == 0 && usage.OutputTokens == 0 {
+			return
+		}
+		projectID := p.ucodeProjectID
+		if p.mcpUcodeProjectID != "" {
+			projectID = p.mcpUcodeProjectID
+		}
+		_, recErr := p.service.CompanyService().Billing().RecordAiTokenUsage(
+			context.Background(),
+			&pb.RecordAiTokenUsageRequest{
+				ProjectId:    projectID,
+				InputTokens:  int32(usage.InputTokens),
+				OutputTokens: int32(usage.OutputTokens),
+				Model:        req.Model,
+				Description:  description,
+			},
+		)
+		if recErr != nil {
+			log.Printf("[TOKEN RECORD] error recording usage for %s: %v", description, recErr)
+		}
+	}()
+
+	if err != nil {
+		if errors.Is(err, helper.ErrMaxTokens) {
+			log.Printf("[AI] max_tokens for %s (in=%d out=%d)", description, usage.InputTokens, usage.OutputTokens)
+			return nil, fmt.Errorf(
+				"❌ Generation stopped: the project is too large to generate in one pass (used %d output tokens). "+
+					"Please describe a smaller scope or break the request into parts.",
+				usage.OutputTokens,
+			)
+		}
+		log.Printf("[AI] error for %s: %v", description, err)
+		return nil, err
+	}
+
+	log.Printf("[AI] ✅ %s (stop=%s in=%d out=%d)", description, stopReason, usage.InputTokens, usage.OutputTokens)
+	return result, nil
 }
 
 // ============================================================================
@@ -809,13 +857,15 @@ func (p *ChatProcessor) planChanges(ctx context.Context, clarified, fileGraphJSO
 	content := helper.BuildPlannerMessage(clarified, fileGraphJSON, hasImages)
 	messages := buildMessagesWithHistory(chatHistory, []models.ContentBlock{{Type: "text", Text: content}})
 
-	response, err := p.callAnthropicWithTracking(
-		ctx,
-		models.AnthropicRequest{
-			Model:     p.baseConf.ClaudeModel,
-			MaxTokens: p.baseConf.PlannerMaxTokens,
-			System:    helper.PromptPlanner,
-			Messages:  messages,
+	result, err := callWithTool[models.SonnetPlanResult](
+		p, ctx,
+		models.AnthropicToolRequest{
+			Model:      p.baseConf.ClaudeModel,
+			MaxTokens:  p.baseConf.PlannerMaxTokens,
+			System:     helper.PromptPlanner,
+			Messages:   messages,
+			Tools:      []models.ClaudeFunctionTool{helper.ToolPlanChanges},
+			ToolChoice: helper.ForcedTool(helper.ToolPlanChanges.Name),
 		},
 		timeoutPlanner,
 		"Planning code changes",
@@ -823,16 +873,12 @@ func (p *ChatProcessor) planChanges(ctx context.Context, clarified, fileGraphJSO
 	if err != nil {
 		return nil, fmt.Errorf("planner: %w", err)
 	}
-
-	result, err := helper.ParseSonnetPlanResult(response)
-	if err != nil {
-		return nil, fmt.Errorf("planner: parse failed: %w", err)
-	}
 	return result, nil
 }
 
 // editCode applies changes to specific files in an existing project.
-// If the planned files are not found in the project, falls back to free generation.
+// If the planned files are not found in the project yet, falls back to free generation.
+// Uses tool use — no JSON parsing or repair needed.
 func (p *ChatProcessor) editCode(ctx context.Context, clarified string, plan *models.SonnetPlanResult, filesContext string, chatHistory []models.ChatMessage, imageURLs []string) (*models.ParsedClaudeResponse, error) {
 	hasMatchingFiles := filesContext != "No existing files to modify." && filesContext != "No matching files found."
 
@@ -845,20 +891,20 @@ func (p *ChatProcessor) editCode(ctx context.Context, clarified string, plan *mo
 		content := helper.BuildCodeEditorMessage(clarified, string(planJSON), filesContext, len(imageURLs) > 0)
 		contentBlocks = buildContentBlocksWithImages(content, imageURLs)
 	} else {
-		// Planner found files to change but none exist in the project yet —
-		// fall back to free generation using the full code generator prompt.
 		log.Printf("[CODE] planned files not found in project, falling back to free generation")
 		systemPrompt = helper.PromptAdminPanelGenerator
 		contentBlocks = buildContentBlocksWithImages(clarified, imageURLs)
 	}
 
-	response, err := p.callAnthropicWithTracking(
-		ctx,
-		models.AnthropicRequest{
-			Model:     p.baseConf.ClaudeModel,
-			MaxTokens: p.baseConf.CoderMaxTokens,
-			System:    systemPrompt,
-			Messages:  buildMessagesWithHistory(chatHistory, contentBlocks),
+	project, err := callWithTool[models.GeneratedProject](
+		p, ctx,
+		models.AnthropicToolRequest{
+			Model:      p.baseConf.ClaudeModel,
+			MaxTokens:  p.baseConf.CoderMaxTokens,
+			System:     systemPrompt,
+			Messages:   buildMessagesWithHistory(chatHistory, contentBlocks),
+			Tools:      []models.ClaudeFunctionTool{helper.ToolEmitProject},
+			ToolChoice: helper.ForcedTool(helper.ToolEmitProject.Name),
 		},
 		timeoutCoder,
 		"Applying/generating code changes",
@@ -867,75 +913,26 @@ func (p *ChatProcessor) editCode(ctx context.Context, clarified string, plan *mo
 		return nil, fmt.Errorf("code editor: %w", err)
 	}
 
-	parsed, parseErr := helper.ParseClaudeResponse(response)
-	if parseErr != nil {
-		log.Printf("[CODE] parse failed, attempting JSON repair: %v", parseErr)
-		return p.repairJSON(ctx, response, clarified, systemPrompt)
-	}
-	return parsed, nil
-}
-
-// repairJSON asks Claude to fix a broken JSON response it previously generated.
-func (p *ChatProcessor) repairJSON(ctx context.Context, brokenRawResponse, originalTask, systemPrompt string) (*models.ParsedClaudeResponse, error) {
-	brokenText, _ := helper.ExtractPlainText(brokenRawResponse)
-
-	fixPrompt := fmt.Sprintf(
-		"Your previous response contained a JSON object that could not be parsed because "+
-			"some string values had improperly escaped characters "+
-			"(e.g. raw newlines, unescaped backslashes, or invalid control characters inside JSON strings).\n\n"+
-			"Original task: %s\n\n"+
-			"Return the SAME project JSON but with ALL string values correctly escaped:\n"+
-			"  - Newlines inside strings  → \\n\n"+
-			"  - Backslashes inside strings → \\\\\n"+
-			"  - Double quotes inside strings → \\\"\n"+
-			"  - No raw control characters (ASCII < 0x20) anywhere\n\n"+
-			"Output ONLY the corrected raw JSON object starting with { and ending with }. "+
-			"No markdown, no explanation, no backticks.\n\n"+
-			"Broken response to fix (truncated for context):\n%.600s",
-		originalTask, brokenText,
-	)
-
-	retryResponse, err := p.callAnthropicWithTracking(
-		ctx,
-		models.AnthropicRequest{
-			Model:     p.baseConf.ClaudeModel,
-			MaxTokens: p.baseConf.CoderMaxTokens,
-			System:    systemPrompt,
-			Messages: []models.ChatMessage{
-				{Role: "user", Content: []models.ContentBlock{{Type: "text", Text: fixPrompt}}},
-			},
-		},
-		timeoutCoder,
-		"Repairing invalid JSON response",
-	)
-	if err != nil {
-		return nil, fmt.Errorf("JSON repair: API call failed: %w", err)
-	}
-
-	parsed, err := helper.ParseClaudeResponse(retryResponse)
-	if err != nil {
-		return nil, fmt.Errorf("JSON repair: parse still failed: %w", err)
-	}
-
-	fileCount := 0
-	if parsed.Project != nil {
-		fileCount = len(parsed.Project.Files)
-	}
-	log.Printf("[CODE] JSON repair succeeded, files=%d", fileCount)
-	return parsed, nil
+	return &models.ParsedClaudeResponse{
+		Project:     project,
+		Description: "Changes applied successfully.",
+	}, nil
 }
 
 // callArchitect plans the full project structure — tables, fields, UI layout.
+// Uses Anthropic tool use so the response is a validated JSON object — no parsing or repair needed.
 func (p *ChatProcessor) callArchitect(ctx context.Context, clarified string, imageURLs []string) (*models.ArchitectPlan, error) {
-	response, err := p.callAnthropicWithTracking(
-		ctx,
-		models.AnthropicRequest{
+	plan, err := callWithTool[models.ArchitectPlan](
+		p, ctx,
+		models.AnthropicToolRequest{
 			Model:     p.baseConf.ClaudeModel,
 			MaxTokens: p.baseConf.PlannerMaxTokens,
 			System:    helper.PromptArchitect,
 			Messages: []models.ChatMessage{
 				{Role: "user", Content: buildContentBlocksWithImages(clarified, imageURLs)},
 			},
+			Tools:      []models.ClaudeFunctionTool{helper.ToolArchitectPlan},
+			ToolChoice: helper.ForcedTool(helper.ToolArchitectPlan.Name),
 		},
 		timeoutArchitect,
 		"Architecting project structure",
@@ -943,62 +940,23 @@ func (p *ChatProcessor) callArchitect(ctx context.Context, clarified string, ima
 	if err != nil {
 		return nil, fmt.Errorf("architect: %w", err)
 	}
-
-	text, err := helper.ExtractPlainText(response)
-	if err != nil {
-		return nil, fmt.Errorf("architect: extract text: %w", err)
-	}
-
-	log.Printf("\n--- [ARCHITECT RAW RESPONSE] ---\n%s\n--------------------------------\n", text)
-
-	var plan models.ArchitectPlan
-	if err = json.Unmarshal([]byte(helper.CleanJSONResponse(text)), &plan); err != nil {
-		log.Printf("[ARCHITECT] parse failed (%v), attempting JSON repair...", err)
-
-		retryResponse, retryErr := p.callAnthropicWithTracking(
-			ctx,
-			models.AnthropicRequest{
-				Model:     p.baseConf.ClaudeModel,
-				MaxTokens: p.baseConf.PlannerMaxTokens,
-				System:    helper.PromptArchitect,
-				Messages: []models.ChatMessage{
-					{Role: "user", Content: buildContentBlocksWithImages(clarified, imageURLs)},
-					{Role: "assistant", Content: []models.ContentBlock{{Type: "text", Text: text}}},
-					{Role: "user", Content: []models.ContentBlock{{Type: "text", Text: "Your response is not valid JSON. Please fix it and output ONLY a single correct JSON object."}}},
-				},
-			},
-			timeoutArchitect,
-			"Repairing invalid Architect JSON",
-		)
-		if retryErr != nil {
-			return nil, fmt.Errorf("architect: parse failed: %w (repair call also failed: %v)", err, retryErr)
-		}
-
-		retryText, _ := helper.ExtractPlainText(retryResponse)
-		if retryErr = json.Unmarshal([]byte(helper.CleanJSONResponse(retryText)), &plan); retryErr != nil {
-			return nil, fmt.Errorf("architect: parse failed: %w (repair also failed: %v)", err, retryErr)
-		}
-		log.Printf("[ARCHITECT] JSON repair succeeded")
-	}
-
-	return &plan, nil
+	return plan, nil
 }
 
 func (p *ChatProcessor) generateProject(ctx context.Context, clarified string, imageURLs []string, plan *models.ArchitectPlan, apiKey, envId string) (*models.ParsedClaudeResponse, error) {
 	apiConfig := buildAPIConfigBlock(p.baseConf.UcodeBaseUrl, apiKey, plan)
 
-	response, err := p.callAnthropicWithTracking(
-		ctx,
-		models.AnthropicRequest{
+	project, err := callWithTool[models.GeneratedProject](
+		p, ctx,
+		models.AnthropicToolRequest{
 			Model:     p.baseConf.ClaudeModel,
 			MaxTokens: p.baseConf.CoderMaxTokens,
 			System:    helper.PromptAdminPanelGenerator,
 			Messages: []models.ChatMessage{
-				{
-					Role:    "user",
-					Content: buildContentBlocksWithImages(clarified+"\n\n"+apiConfig, imageURLs),
-				},
+				{Role: "user", Content: buildContentBlocksWithImages(clarified+"\n\n"+apiConfig, imageURLs)},
 			},
+			Tools:      []models.ClaudeFunctionTool{helper.ToolEmitProject},
+			ToolChoice: helper.ForcedTool(helper.ToolEmitProject.Name),
 		},
 		timeoutCoder,
 		"Generating full project code",
@@ -1007,28 +965,20 @@ func (p *ChatProcessor) generateProject(ctx context.Context, clarified string, i
 		return nil, fmt.Errorf("generate project: %w", err)
 	}
 
-	parsed, parseErr := helper.ParseClaudeResponse(response)
-	if parseErr != nil {
-		log.Printf("[CODE] generate project: parse failed, attempting JSON repair: %v", parseErr)
-		parsed, parseErr = p.repairJSON(ctx, response, clarified, helper.PromptAdminPanelGenerator)
-		if parseErr != nil {
-			return nil, fmt.Errorf("generate project: failed after repair: %w", parseErr)
-		}
-	}
-
-	if parsed.Project == nil {
+	if len(project.Files) == 0 {
 		return nil, fmt.Errorf("generate project: claude returned empty project")
 	}
 
-	log.Printf("[CODE] ✅ Generate project completed. Built %d files:", len(parsed.Project.Files))
-	for _, f := range parsed.Project.Files {
+	log.Printf("[CODE] ✅ Generate project completed. Built %d files:", len(project.Files))
+	for _, f := range project.Files {
 		log.Printf("  - %s (%d bytes)", f.Path, len(f.Content))
 	}
 
-	return parsed, nil
+	return &models.ParsedClaudeResponse{Project: project}, nil
 }
 
 // generateAdminPanel generates an admin panel using the template system with pre-built hooks and utilities.
+// Uses tool use — the model must populate emit_project with the exact schema.
 func (p *ChatProcessor) generateAdminPanel(ctx context.Context, clarified string, imageURLs []string, plan *models.ArchitectPlan, apiKey, envId string) (*models.ParsedClaudeResponse, error) {
 	apiConfig := buildAPIConfigBlock(p.baseConf.UcodeBaseUrl, apiKey, plan)
 
@@ -1043,24 +993,23 @@ func (p *ChatProcessor) generateAdminPanel(ctx context.Context, clarified string
 		templateCtx.WriteString("Do NOT copy colors or layout from these files.\n")
 		templateCtx.WriteString("src/index.css and src/App.tsx MUST be fully regenerated by you.\n")
 		for _, f := range templateFiles {
-			templateCtx.WriteString(fmt.Sprintf("\n### FILE: %s\n```\n%s\n```\n", f.Path, f.Content))
+			fmt.Fprintf(&templateCtx, "\n### FILE: %s\n```\n%s\n```\n", f.Path, f.Content)
 		}
 	}
 
 	finalPrompt := clarified + "\n\n" + apiConfig + "\n" + templateCtx.String()
 
-	response, err := p.callAnthropicWithTracking(
-		ctx,
-		models.AnthropicRequest{
+	project, err := callWithTool[models.GeneratedProject](
+		p, ctx,
+		models.AnthropicToolRequest{
 			Model:     p.baseConf.ClaudeModel,
 			MaxTokens: p.baseConf.CoderMaxTokens,
 			System:    helper.PromptAdminPanelGenerator,
 			Messages: []models.ChatMessage{
-				{
-					Role:    "user",
-					Content: buildContentBlocksWithImages(finalPrompt, imageURLs),
-				},
+				{Role: "user", Content: buildContentBlocksWithImages(finalPrompt, imageURLs)},
 			},
+			Tools:      []models.ClaudeFunctionTool{helper.ToolEmitProject},
+			ToolChoice: helper.ForcedTool(helper.ToolEmitProject.Name),
 		},
 		timeoutCoder,
 		"Generating admin panel code",
@@ -1069,28 +1018,19 @@ func (p *ChatProcessor) generateAdminPanel(ctx context.Context, clarified string
 		return nil, fmt.Errorf("generate admin panel: %w", err)
 	}
 
-	parsed, parseErr := helper.ParseClaudeResponse(response)
-	if parseErr != nil {
-		log.Printf("[CODE] admin panel: parse failed, attempting JSON repair: %v", parseErr)
-		parsed, parseErr = p.repairJSON(ctx, response, clarified, helper.PromptAdminPanelGenerator)
-		if parseErr != nil {
-			return nil, fmt.Errorf("generate admin panel: failed after repair: %w", parseErr)
-		}
-	}
-
-	if parsed.Project == nil {
+	if len(project.Files) == 0 {
 		return nil, fmt.Errorf("generate admin panel: claude returned empty project")
 	}
 
-	// Merge any template files the AI didn't regenerate (safety fallback)
+	// Merge any template files the AI didn't regenerate (safety net)
 	if len(templateFiles) > 0 {
-		generatedPaths := make(map[string]struct{}, len(parsed.Project.Files))
-		for _, f := range parsed.Project.Files {
+		generatedPaths := make(map[string]struct{}, len(project.Files))
+		for _, f := range project.Files {
 			generatedPaths[f.Path] = struct{}{}
 		}
 		for _, tf := range templateFiles {
 			if _, exists := generatedPaths[tf.Path]; !exists {
-				parsed.Project.Files = append(parsed.Project.Files, models.ProjectFile{
+				project.Files = append(project.Files, models.ProjectFile{
 					Path:    tf.Path,
 					Content: tf.Content,
 				})
@@ -1099,12 +1039,12 @@ func (p *ChatProcessor) generateAdminPanel(ctx context.Context, clarified string
 		}
 	}
 
-	log.Printf("[CODE] ✅ Admin panel generation completed. Total %d files:", len(parsed.Project.Files))
-	for _, f := range parsed.Project.Files {
+	log.Printf("[CODE] ✅ Admin panel generation completed. Total %d files:", len(project.Files))
+	for _, f := range project.Files {
 		log.Printf("  - %s (%d bytes)", f.Path, len(f.Content))
 	}
 
-	return parsed, nil
+	return &models.ParsedClaudeResponse{Project: project}, nil
 }
 
 // ============================================================================
@@ -1215,55 +1155,11 @@ func (p *ChatProcessor) runMicrofrontendEdit(ctx context.Context, clarified, fil
 		return nil, err
 	}
 
+	// With tool use, edited.Project is always populated (the tool schema requires files[]).
+	// An empty files list means the model has nothing to change — return description only.
 	if edited.Project == nil || len(edited.Project.Files) == 0 {
-		log.Printf("[MICROFE EDIT] no files returned by editor (AI responded conversationally), falling back to full regeneration")
-		log.Printf("[MICROFE EDIT] AI description was: %s", edited.Description)
-
-		// Build full context from all existing files and regenerate directly
-		allFilesContext := p.buildMicrofrontendFilesContext(existingFiles, func() []string {
-			paths := make([]string, 0, len(existingFiles))
-			for _, f := range existingFiles {
-				paths = append(paths, f.FilePath)
-			}
-			return paths
-		}())
-
-		fallbackPrompt := fmt.Sprintf(
-			"IMPORTANT: You MUST return JSON. Do NOT respond with text.\n\nTask: %s\n\nExisting project files (modify as needed):\n%s",
-			clarified, allFilesContext,
-		)
-
-		fallbackResp, err := p.callAnthropicWithTracking(
-			ctx,
-			models.AnthropicRequest{
-				Model:     p.baseConf.ClaudeModel,
-				MaxTokens: p.baseConf.CoderMaxTokens,
-				System:    helper.PromptAdminPanelGenerator,
-				Messages: []models.ChatMessage{
-					{Role: "user", Content: []models.ContentBlock{{Type: "text", Text: fallbackPrompt}}},
-				},
-			},
-			timeoutCoder,
-			"Microfrontend edit fallback regeneration",
-		)
-		if err != nil {
-			return nil, fmt.Errorf("microfrontend edit fallback: %w", err)
-		}
-
-		edited, err = helper.ParseClaudeResponse(fallbackResp)
-		if err != nil {
-			log.Printf("[MICROFE EDIT] fallback parse failed, attempting JSON repair: %v", err)
-			edited, err = p.repairJSON(ctx, fallbackResp, clarified, helper.PromptAdminPanelGenerator)
-			if err != nil {
-				return nil, fmt.Errorf("microfrontend edit fallback: failed after repair: %w", err)
-			}
-		}
-
-		if edited.Project == nil || len(edited.Project.Files) == 0 {
-			log.Printf("[MICROFE EDIT] fallback also returned no files — returning description only")
-			return &models.ParsedClaudeResponse{Description: edited.Description}, nil
-		}
-		log.Printf("[MICROFE EDIT] fallback succeeded with %d file(s)", len(edited.Project.Files))
+		log.Printf("[MICROFE EDIT] editor returned no files — nothing to push")
+		return &models.ParsedClaudeResponse{Description: edited.Description}, nil
 	}
 
 	log.Printf("[MICROFE EDIT] pushing %d file(s) to u-gen branch", len(edited.Project.Files))
@@ -1271,7 +1167,6 @@ func (p *ChatProcessor) runMicrofrontendEdit(ctx context.Context, clarified, fil
 		return nil, fmt.Errorf("failed to push microfrontend changes: %w", err)
 	}
 
-	// Return description only — no McpProject save
 	return &models.ParsedClaudeResponse{Description: edited.Description}, nil
 }
 

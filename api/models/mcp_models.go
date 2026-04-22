@@ -139,6 +139,52 @@ type (
 		MCPServerName string `json:"mcp_server_name,omitempty"`
 	}
 
+	// ========================== Claude Tool Use (Function Calling) ==========================
+
+	// ClaudeFunctionTool defines a structured output tool for the Anthropic tool-use API.
+	// When used with tool_choice={type:"tool"}, Claude MUST call this tool and return
+	// a validated JSON object — no text wrapping, no markdown, no escaping needed.
+	ClaudeFunctionTool struct {
+		Name        string                 `json:"name"`
+		Description string                 `json:"description"`
+		InputSchema map[string]interface{} `json:"input_schema"`
+	}
+
+	// ToolChoice forces Claude to call a specific tool.
+	ToolChoice struct {
+		Type string `json:"type"` // "tool" | "auto" | "any"
+		Name string `json:"name,omitempty"`
+	}
+
+	// AnthropicToolRequest is the request body for tool-use API calls.
+	// Use this instead of AnthropicRequest for all structured generation calls
+	// (architect, coder, planner, diagrams, visual edit).
+	AnthropicToolRequest struct {
+		Model      string               `json:"model"`
+		MaxTokens  int                  `json:"max_tokens"`
+		System     string               `json:"system,omitempty"`
+		Messages   []ChatMessage        `json:"messages"`
+		Tools      []ClaudeFunctionTool `json:"tools"`
+		ToolChoice *ToolChoice          `json:"tool_choice,omitempty"`
+	}
+
+	// ToolUseBlock is one content block in the Anthropic response when stop_reason="tool_use".
+	ToolUseBlock struct {
+		Type  string                 `json:"type"` // "tool_use"
+		ID    string                 `json:"id"`
+		Name  string                 `json:"name"`
+		Input map[string]interface{} `json:"input"`
+	}
+
+	// ToolUseResponse is the full Anthropic API response for tool-use calls.
+	ToolUseResponse struct {
+		Model      string         `json:"model"`
+		ID         string         `json:"id"`
+		Content    []ToolUseBlock `json:"content"`
+		StopReason string         `json:"stop_reason"`
+		Usage      ClaudeUsage    `json:"usage"`
+	}
+
 	ContentBlock struct {
 		Type   string       `json:"type"`
 		Text   string       `json:"text,omitempty"`
