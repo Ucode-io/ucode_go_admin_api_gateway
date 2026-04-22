@@ -38,6 +38,9 @@ const (
 	uGenBranch = "u-gen"
 
 	timeoutPublishMicrofrontend = 5 * time.Minute
+
+	// At ~4-8k tokens per file, 6 files ≈ 24-48k output tokens — well within CoderMaxTokens.
+	coderChunkSize = 6
 )
 
 type ChatProcessor struct {
@@ -435,11 +438,11 @@ func (p *ChatProcessor) runGeneratePlan(ctx context.Context, userRequest string,
 	plan, err := callWithTool[models.HaikuPlan](
 		p, ctx,
 		models.AnthropicToolRequest{
-			Model:     p.baseConf.ClaudeModel,
-			MaxTokens: p.baseConf.PlannerMaxTokens,
-			System:    helper.PromptPlanGenerator,
-			Messages:  messages,
-			Tools:     []models.ClaudeFunctionTool{helper.ToolEmitDiagrams},
+			Model:      p.baseConf.ClaudeModel,
+			MaxTokens:  p.baseConf.PlannerMaxTokens,
+			System:     helper.PromptPlanGenerator,
+			Messages:   messages,
+			Tools:      []models.ClaudeFunctionTool{helper.ToolEmitDiagrams},
 			ToolChoice: helper.ForcedTool(helper.ToolEmitDiagrams.Name),
 		},
 		timeoutPlanner,
@@ -454,7 +457,6 @@ func (p *ChatProcessor) runGeneratePlan(ctx context.Context, userRequest string,
 		Plan:        plan,
 	}, nil
 }
-
 
 func (p *ChatProcessor) runCodeChange(ctx context.Context, clarified, fileGraphJSON string, chatHistory []models.ChatMessage, imageURLs []string, projectName string, microfrontFiles []models.GitlabFileChange) (*models.ParsedClaudeResponse, error) {
 	if p.microfrontendID != "" {
@@ -614,6 +616,154 @@ func callWithTool[T any](
 
 	log.Printf("[AI] ✅ %s (stop=%s in=%d out=%d)", description, stopReason, usage.InputTokens, usage.OutputTokens)
 	return result, nil
+}
+
+// ============================================================================
+// CHUNKED GENERATION
+// ============================================================================
+
+func (p *ChatProcessor) generateInChunks(ctx context.Context, systemPrompt string, userPrompt string, imageURLs []string) (*models.GeneratedProject, error) {
+
+	// ── Step 1: Plan the full file list ──────────────────────────────────────
+	log.Printf("[CHUNKED] Planning file list...")
+	planContent := helper.BuildPlannerMessage(userPrompt, "{}", len(imageURLs) > 0)
+	filePlan, err := callWithTool[models.SonnetPlanResult](
+		p, ctx,
+		models.AnthropicToolRequest{
+			Model:      p.baseConf.ClaudeModel,
+			MaxTokens:  p.baseConf.PlannerMaxTokens,
+			System:     helper.PromptPlanner,
+			Messages:   []models.ChatMessage{{Role: "user", Content: []models.ContentBlock{{Type: "text", Text: planContent}}}},
+			Tools:      []models.ClaudeFunctionTool{helper.ToolPlanChanges},
+			ToolChoice: helper.ForcedTool(helper.ToolPlanChanges.Name),
+		},
+		timeoutPlanner,
+		"Planning file list for generation",
+	)
+	if err != nil {
+		return nil, fmt.Errorf("file planner: %w", err)
+	}
+
+	allPaths := make([]string, 0, len(filePlan.FilesToCreate)+len(filePlan.FilesToChange))
+	for _, f := range filePlan.FilesToCreate {
+		allPaths = append(allPaths, f.Path)
+	}
+	for _, f := range filePlan.FilesToChange {
+		allPaths = append(allPaths, f.Path)
+	}
+
+	if len(allPaths) == 0 {
+		return nil, fmt.Errorf("file planner returned empty file list")
+	}
+	log.Printf("[CHUNKED] Planner returned %d files to generate", len(allPaths))
+
+	// ── Step 2: Split and generate ───────────────────────────────────────────
+	chunks := chunkStrings(allPaths, coderChunkSize)
+	fullPlanList := strings.Join(allPaths, "\n")
+
+	var (
+		allFiles    []models.ProjectFile
+		projectName string
+		projectEnv  map[string]any
+	)
+
+	for i, chunk := range chunks {
+		batchInstruction := fmt.Sprintf(
+			"%s\n\n"+
+				"FULL PROJECT FILE LIST (architectural context — all files that will exist):\n%s\n\n"+
+				"YOUR TASK — Generate ONLY these files (batch %d of %d):\n%s\n\n"+
+				"Do NOT generate files outside this batch. Other batches are handled separately.",
+			userPrompt, fullPlanList, i+1, len(chunks), strings.Join(chunk, "\n"),
+		)
+
+		batchProject, batchErr := callWithTool[models.GeneratedProject](
+			p, ctx,
+			models.AnthropicToolRequest{
+				Model:     p.baseConf.ClaudeModel,
+				MaxTokens: p.baseConf.CoderMaxTokens,
+				System:    systemPrompt,
+				Messages: []models.ChatMessage{
+					{Role: "user", Content: buildContentBlocksWithImages(batchInstruction, imageURLs)},
+				},
+				Tools:      []models.ClaudeFunctionTool{helper.ToolEmitProject},
+				ToolChoice: helper.ForcedTool(helper.ToolEmitProject.Name),
+			},
+			timeoutCoder,
+			fmt.Sprintf("Generating chunk %d/%d (%d files)", i+1, len(chunks), len(chunk)),
+		)
+
+		if batchErr != nil {
+			// Return whatever was already generated — don't lose completed chunks.
+			log.Printf("[CHUNKED] chunk %d/%d failed — returning %d already-generated files: %v",
+				i+1, len(chunks), len(allFiles), batchErr)
+			if len(allFiles) > 0 {
+				return &models.GeneratedProject{
+					ProjectName: projectName,
+					Files:       allFiles,
+					Env:         projectEnv,
+				}, batchErr
+			}
+			return nil, batchErr
+		}
+
+		allFiles = append(allFiles, batchProject.Files...)
+		if projectName == "" && batchProject.ProjectName != "" {
+			projectName = batchProject.ProjectName
+		}
+		if projectEnv == nil && len(batchProject.Env) > 0 {
+			projectEnv = batchProject.Env
+		}
+		log.Printf("[CHUNKED] chunk %d/%d done — %d files (running total: %d)",
+			i+1, len(chunks), len(batchProject.Files), len(allFiles))
+	}
+
+	// Deduplicate: if the AI emitted the same path in two chunks, keep the last version.
+	allFiles = deduplicateFiles(allFiles)
+	if projectEnv == nil {
+		projectEnv = map[string]any{}
+	}
+
+	log.Printf("[CHUNKED] ✅ All %d chunks complete — %d unique files", len(chunks), len(allFiles))
+
+	return &models.GeneratedProject{
+		ProjectName: projectName,
+		Files:       allFiles,
+		Env:         projectEnv,
+	}, nil
+}
+
+// deduplicateFiles removes duplicate file paths, keeping the last occurrence.
+// Later chunks have more context and produce the authoritative version of a file.
+func deduplicateFiles(files []models.ProjectFile) []models.ProjectFile {
+	seen := make(map[string]int, len(files)) // path → last index
+	for i, f := range files {
+		seen[f.Path] = i
+	}
+	if len(seen) == len(files) {
+		return files // no duplicates
+	}
+	out := make([]models.ProjectFile, 0, len(seen))
+	for i, f := range files {
+		if seen[f.Path] == i {
+			out = append(out, f)
+		}
+	}
+	return out
+}
+
+func chunkStrings(items []string, size int) [][]string {
+	if size <= 0 {
+		size = coderChunkSize
+	}
+	out := make([][]string, 0, (len(items)+size-1)/size)
+	for i := 0; i < len(items); i += size {
+		end := i + size
+		if end > len(items) {
+			end = len(items)
+		}
+		out = append(out, items[i:end])
+	}
+	return out
 }
 
 // ============================================================================
@@ -943,43 +1093,42 @@ func (p *ChatProcessor) callArchitect(ctx context.Context, clarified string, ima
 	return plan, nil
 }
 
-func (p *ChatProcessor) generateProject(ctx context.Context, clarified string, imageURLs []string, plan *models.ArchitectPlan, apiKey, envId string) (*models.ParsedClaudeResponse, error) {
+func (p *ChatProcessor) generateProject(ctx context.Context, clarified string, imageURLs []string, plan *models.ArchitectPlan, apiKey, _ string) (*models.ParsedClaudeResponse, error) {
 	apiConfig := buildAPIConfigBlock(p.baseConf.UcodeBaseUrl, apiKey, plan)
+	userPrompt := clarified + "\n\n" + apiConfig
 
-	project, err := callWithTool[models.GeneratedProject](
-		p, ctx,
-		models.AnthropicToolRequest{
-			Model:     p.baseConf.ClaudeModel,
-			MaxTokens: p.baseConf.CoderMaxTokens,
-			System:    helper.PromptAdminPanelGenerator,
-			Messages: []models.ChatMessage{
-				{Role: "user", Content: buildContentBlocksWithImages(clarified+"\n\n"+apiConfig, imageURLs)},
-			},
-			Tools:      []models.ClaudeFunctionTool{helper.ToolEmitProject},
-			ToolChoice: helper.ForcedTool(helper.ToolEmitProject.Name),
-		},
-		timeoutCoder,
-		"Generating full project code",
-	)
-	if err != nil {
-		return nil, fmt.Errorf("generate project: %w", err)
+	project, genErr := p.generateInChunks(ctx, helper.PromptAdminPanelGenerator, userPrompt, imageURLs)
+
+	// Partial success: some chunks succeeded before max_tokens hit a later chunk.
+	// Publish what we have so the user doesn't lose already-generated files.
+	if genErr != nil && project != nil && len(project.Files) > 0 {
+		log.Printf("[CODE] partial generation: %d files generated before error — proceeding with partial results", len(project.Files))
+		return &models.ParsedClaudeResponse{
+			Project: project,
+			Description: fmt.Sprintf(
+				"⚠️ Generated %d files (partial). Some later files couldn't be created due to token limits. "+
+					"Ask me to 'complete the missing files' and I'll continue from where we left off.",
+				len(project.Files),
+			),
+		}, nil
 	}
-
+	if genErr != nil {
+		return nil, fmt.Errorf("generate project: %w", genErr)
+	}
 	if len(project.Files) == 0 {
-		return nil, fmt.Errorf("generate project: claude returned empty project")
+		return nil, fmt.Errorf("generate project: no files were generated")
 	}
 
 	log.Printf("[CODE] ✅ Generate project completed. Built %d files:", len(project.Files))
 	for _, f := range project.Files {
 		log.Printf("  - %s (%d bytes)", f.Path, len(f.Content))
 	}
-
 	return &models.ParsedClaudeResponse{Project: project}, nil
 }
 
 // generateAdminPanel generates an admin panel using the template system with pre-built hooks and utilities.
-// Uses tool use — the model must populate emit_project with the exact schema.
-func (p *ChatProcessor) generateAdminPanel(ctx context.Context, clarified string, imageURLs []string, plan *models.ArchitectPlan, apiKey, envId string) (*models.ParsedClaudeResponse, error) {
+// Generation is split into chunks of coderChunkSize files to prevent max_tokens failures.
+func (p *ChatProcessor) generateAdminPanel(ctx context.Context, clarified string, imageURLs []string, plan *models.ArchitectPlan, apiKey, _ string) (*models.ParsedClaudeResponse, error) {
 	apiConfig := buildAPIConfigBlock(p.baseConf.UcodeBaseUrl, apiKey, plan)
 
 	// Inject read-only template files for the AI to import from (not regenerate)
@@ -997,53 +1146,47 @@ func (p *ChatProcessor) generateAdminPanel(ctx context.Context, clarified string
 		}
 	}
 
-	finalPrompt := clarified + "\n\n" + apiConfig + "\n" + templateCtx.String()
+	userPrompt := clarified + "\n\n" + apiConfig + "\n" + templateCtx.String()
 
-	project, err := callWithTool[models.GeneratedProject](
-		p, ctx,
-		models.AnthropicToolRequest{
-			Model:     p.baseConf.ClaudeModel,
-			MaxTokens: p.baseConf.CoderMaxTokens,
-			System:    helper.PromptAdminPanelGenerator,
-			Messages: []models.ChatMessage{
-				{Role: "user", Content: buildContentBlocksWithImages(finalPrompt, imageURLs)},
-			},
-			Tools:      []models.ClaudeFunctionTool{helper.ToolEmitProject},
-			ToolChoice: helper.ForcedTool(helper.ToolEmitProject.Name),
-		},
-		timeoutCoder,
-		"Generating admin panel code",
-	)
-	if err != nil {
-		return nil, fmt.Errorf("generate admin panel: %w", err)
-	}
+	project, genErr := p.generateInChunks(ctx, helper.PromptAdminPanelGenerator, userPrompt, imageURLs)
 
-	if len(project.Files) == 0 {
-		return nil, fmt.Errorf("generate admin panel: claude returned empty project")
-	}
-
-	// Merge any template files the AI didn't regenerate (safety net)
-	if len(templateFiles) > 0 {
+	// Always merge template files — even on partial success the safety net must run.
+	if project != nil && len(templateFiles) > 0 {
 		generatedPaths := make(map[string]struct{}, len(project.Files))
 		for _, f := range project.Files {
 			generatedPaths[f.Path] = struct{}{}
 		}
 		for _, tf := range templateFiles {
 			if _, exists := generatedPaths[tf.Path]; !exists {
-				project.Files = append(project.Files, models.ProjectFile{
-					Path:    tf.Path,
-					Content: tf.Content,
-				})
+				project.Files = append(project.Files, models.ProjectFile{Path: tf.Path, Content: tf.Content})
 				log.Printf("[CODE] merged missing template file: %s", tf.Path)
 			}
 		}
 	}
 
-	log.Printf("[CODE] ✅ Admin panel generation completed. Total %d files:", len(project.Files))
+	// Partial success: chunks 0..N-1 succeeded; publish them and tell the user.
+	if genErr != nil && project != nil && len(project.Files) > 0 {
+		log.Printf("[CODE] partial admin panel: %d files before error — proceeding", len(project.Files))
+		return &models.ParsedClaudeResponse{
+			Project: project,
+			Description: fmt.Sprintf(
+				"⚠️ Generated %d files (partial). Some later files couldn't be created due to token limits. "+
+					"Ask me to 'complete the missing files' and I'll continue from where we left off.",
+				len(project.Files),
+			),
+		}, nil
+	}
+	if genErr != nil {
+		return nil, fmt.Errorf("generate admin panel: %w", genErr)
+	}
+	if project == nil || len(project.Files) == 0 {
+		return nil, fmt.Errorf("generate admin panel: no files were generated")
+	}
+
+	log.Printf("[CODE] ✅ Admin panel completed. Total %d files:", len(project.Files))
 	for _, f := range project.Files {
 		log.Printf("  - %s (%d bytes)", f.Path, len(f.Content))
 	}
-
 	return &models.ParsedClaudeResponse{Project: project}, nil
 }
 
@@ -1091,7 +1234,6 @@ func (p *ChatProcessor) getChatHistory(ctx context.Context) ([]models.ChatMessag
 	}
 	return result, nil
 }
-
 
 func (p *ChatProcessor) callAnthropicWithTracking(ctx context.Context, req models.AnthropicRequest, timeout time.Duration, description string) (string, error) {
 	log.Printf("[AI] Calling Anthropic: %s", description)
