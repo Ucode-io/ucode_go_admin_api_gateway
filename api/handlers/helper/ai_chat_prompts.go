@@ -1231,6 +1231,10 @@ Routing:  react-router-dom v6
 ====================================
 LUCIDE ICONS — VERIFIED SAFE LIST (lucide-react@0.441.0)
 ====================================
+BRAND/SOCIAL ICONS DO NOT EXIST in this version — NEVER import:
+  Github, Twitter, Instagram, Facebook, Linkedin, Youtube, Discord, Slack, Figma, Dribbble
+  For social media links use: Globe (website) · Mail (email) · ExternalLink (any link)
+
 Navigation: Home, LayoutDashboard, LayoutGrid, Menu, PanelLeft, Sidebar
 Users:      User, Users, UserPlus, UserCheck, UserX, Building, Building2, Briefcase
 CRUD:       Plus, Pencil, Trash, Trash2, Edit, Save, Copy, Eye, EyeOff, Download, Upload, Send, RefreshCw
