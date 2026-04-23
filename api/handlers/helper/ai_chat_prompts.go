@@ -417,6 +417,31 @@ NEVER write: const items = response.data?.data?.response || [] — this breaks w
 
 Your code must be fully operational and perform API calls using the slugs defined in the tables provided in the prompt. Do NOT use fake static data if tables are provided — use the API endpoints!
 
+API DATA RENDERING RULE (CRITICAL — applies to ALL types A/B/C):
+  If you call useApiQuery() or make any HTTP request, you MUST render the response data in JSX.
+  NEVER fetch data and display different hardcoded/static content alongside it.
+  Every field returned by the API must be mapped to a visible UI element.
+
+  WRONG pattern (dry fetch — banned):
+    const { data } = useApiQuery(...);           // fetches
+    const faqs = [{ q: 'What is...', a: '...' }]; // hardcoded shown instead
+    return faqs.map(faq => <FAQ {...faq} />);
+
+  RIGHT pattern:
+    const { data, isLoading } = useApiQuery(['faq'], '/v2/items/faq');
+    const items = extractList(data);
+    if (isLoading) return <Skeleton />;
+    if (!items.length) return <EmptyState />;
+    return items.map(item => (
+      <div key={item.guid}>
+        <h3>{item.question}</h3>
+        <p>{item.answer}</p>
+      </div>
+    ));
+
+  Rule: every data-driven section (FAQ, testimonials, team, products, blog, menu) where
+  an API table exists MUST be driven by the API response — not hardcoded arrays.
+
 ====================================
 MANDATORY FILE RULES (CRITICAL)
 ====================================
@@ -789,15 +814,47 @@ From the archetype's accent options, select ONE based on domain emotion:
   Creative / distinct   → bold accents (violet, pink, electric green)
 Never reuse the same accent if a previous generation is remembered.
 
-── PHASE 4: LAYOUT PERSONALITY ──
-Commit to one layout per archetype:
+── PHASE 4: LAYOUT PERSONALITY + VARIATION SEED ──
+Pick a VARIATION SEED (1, 2, or 3) based on the project name length mod 3.
+This seed determines which hero composition and card layout you use. NEVER default to seed 1 every time.
 
-  OBSIDIAN:     Hero centered full-height, grid-lines bg, radial glow · Features alternating or bento (md:grid-cols-12) · Stats horizontal bordered row · CTA dark surface with accent border
-  EDITORIAL:    Hero left-aligned large serif · Features magazine grid (1 large + 2 small) · Stats oversized numbers · CTA full-width dark newspaper banner
-  LUXURY:       Hero full-bleed object-cover image, title bottom-left overlay · Features full-width alternating scroll · Stats inline with gold dividers · CTA single centered gold button
-  WARM PROF:    Hero split text-left image-right · Features icon+title+body 3-col grid · Stats 4-col colored icon bg · CTA accent-color section
-  ELECTRIC:     Hero type-dominant, accent shape bleeds edge · Features horizontal scroll cards · Stats giant numbers · CTA diagonal section break
-  SOFT MINIMAL: Hero centered generous whitespace · Features 2-col or 3-col soft rounded · Stats small understated inline · CTA soft rounded pill button
+  OBSIDIAN (pick by seed):
+    Seed 1: Hero centered full-height · grid-lines bg · radial accent glow center · h1 clamp(56px,8vw,96px)
+    Seed 2: Hero split 60/40 · left: oversized number + tagline · right: 3D mockup card stack
+    Seed 3: Hero full-bleed dark image · animated scanline overlay · title bottom-left with accent underline
+    Features: alternating full-width rows (seed 1) · bento md:grid-cols-12 (seed 2) · horizontal scroll (seed 3)
+    Stats: horizontal bordered row (seed 1) · 4-col glowing cards (seed 2) · single giant number ticker (seed 3)
+
+  EDITORIAL (pick by seed):
+    Seed 1: Hero left-aligned large serif · dot-grid bg · pull-quote accent block
+    Seed 2: Hero full-width newspaper masthead · byline + date · drop-cap first letter
+    Seed 3: Hero 2-col: title left giant · editorial photo collage right
+    Features: 1-large + 2-small magazine grid (seed 1) · 3-col equal editorial cards (seed 2) · timeline vertical (seed 3)
+    Stats: oversized numbers with thin rule (seed 1) · inline stats strip (seed 2) · animated counters (seed 3)
+
+  LUXURY (pick by seed):
+    Seed 1: Hero full-bleed object-cover image · title bottom-left overlay · hairline gold border
+    Seed 2: Hero minimal dark · single large serif word center · thin gold line animation reveals tagline
+    Seed 3: Hero split: pure black left with title · full-bleed image right bleeding edge
+    Features: full-width alternating scroll (seed 1) · portrait grid 4-col (seed 2) · single column editorial (seed 3)
+
+  WARM PROFESSIONAL (pick by seed):
+    Seed 1: Hero split text-left image-right · warm blob shapes behind image
+    Seed 2: Hero centered · large illustrated icon above · subtitle + two CTA buttons
+    Seed 3: Hero asymmetric · 70% content left · photo floats right with border accent
+    Features: icon+title+body 3-col (seed 1) · numbered steps horizontal (seed 2) · icon-left 2-col list (seed 3)
+
+  ELECTRIC (pick by seed):
+    Seed 1: Hero type-dominant · accent color shape bleeds left edge · glitch subtitle animation
+    Seed 2: Hero full-bleed dark photo · animated gradient overlay · title in ALL CAPS bold italic
+    Seed 3: Hero centered with rotating accent ring · countdown timer under title
+    Features: horizontal scroll cards (seed 1) · masonry grid (seed 2) · staggered zigzag rows (seed 3)
+
+  SOFT MINIMAL (pick by seed):
+    Seed 1: Hero centered generous whitespace · organic blob shape bg · italic serif tagline
+    Seed 2: Hero left-aligned · large hand-drawn style underline on key word · muted pastel photo right
+    Seed 3: Hero full-width · soft gradient bg · floating card elements with subtle shadows
+    Features: 2-col rounded cards (seed 1) · 3-col icon soft (seed 2) · horizontal pill tags layout (seed 3)
 
 ── PHASE 5: TEXTURE & ATMOSPHERE ──
 Add ONE CSS-only signature texture per archetype:
@@ -1099,50 +1156,94 @@ TOP PROGRESS BAR (always include — color from archetype accent):
   ELECTRIC: from-[accent] to-[accent]/0 (solid block)
 
 IMAGES — MANDATORY — NO EMPTY SPACES:
-  Every card, feature, team member, or product MUST have an Unsplash image.
-  Use these verified photo IDs:
+  Every card, feature, team member, product, and hero MUST have a real image.
+  ALWAYS add loading="lazy" and an onError fallback — broken images are a hard failure.
+
+  Mandatory image pattern (use on every <img>):
+    <img
+      src="https://images.unsplash.com/photo-XXXXXXXX?auto=format&fit=crop&w=800&q=80"
+      alt="descriptive alt text"
+      loading="lazy"
+      className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+      onError={(e) => {
+        e.currentTarget.onerror = null;
+        e.currentTarget.style.display = 'none';
+        e.currentTarget.parentElement!.style.background = 'linear-gradient(135deg, hsl(var(--muted)) 0%, hsl(var(--accent)/0.3) 100%)';
+      }}
+    />
+
+  Use ?auto=format&fit=crop&w=800&q=80 on ALL Unsplash URLs (NOT ?w=800&q=80 alone).
+
+  VERIFIED PHOTO LIBRARY — pick DIFFERENT photos each time, spread variety:
 
   Tech/SaaS:
-    https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80
-    https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&q=80
-    https://images.unsplash.com/photo-1555421689-491a54179de8?w=800&q=80
-  Blog/Editorial:
-    https://images.unsplash.com/photo-1544025162-d76694265947?w=800&q=80
-    https://images.unsplash.com/photo-1455390582262-e93e2e8a0e20?w=800&q=80
-    https://images.unsplash.com/photo-1493612276216-ee3925520721?w=800&q=80
-  Business:
-    https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&q=80
-    https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80
-    https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80
-  Education:
-    https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&q=80
-    https://images.unsplash.com/photo-1488190211105-8b0e65b80b4e?w=800&q=80
-  Food/Restaurant:
-    https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&q=80
-    https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80
-  Wellness/Lifestyle:
-    https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=800&q=80
-    https://images.unsplash.com/photo-1545205597-3d9d02c29597?w=800&q=80
-  Fashion/Luxury:
-    https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800&q=80
-    https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&q=80
-  Healthcare:
-    https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&q=80
-    https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=800&q=80
-  Real Estate / Architecture:
-    https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80
-    https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=800&q=80
-  Finance / Fintech:
-    https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&q=80
-    https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80
-  Fallback (any domain):
-    https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&q=80
-    https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&q=80
+    photo-1518770660439-4636190af475  photo-1461749280684-dccba630e2f6
+    photo-1555421689-491a54179de8    photo-1558494949-ef010cbdcc31
+    photo-1581472723648-909f4851d4ae  photo-1504868584819-f8e8b4b6d7e3
+    photo-1526374965328-7f61d4dc18c5  photo-1498050108023-c5249f4df085
 
-  Image card pattern:
+  Blog/Editorial:
+    photo-1544025162-d76694265947    photo-1455390582262-e93e2e8a0e20
+    photo-1493612276216-ee3925520721  photo-1471107340929-a87cd0f5b5f3
+    photo-1486312338219-ce68d2c6f44d  photo-1512486130939-2c4f79935e4f
+
+  Business/Corporate:
+    photo-1454165804606-c3d57bc86b40  photo-1507003211169-0a1dd7228f2d
+    photo-1486406146926-c627a92ad1ab  photo-1521737604893-d14cc237f11d
+    photo-1552664730-d307ca884978    photo-1542744173-8e7e53415bb0
+
+  Education:
+    photo-1523050854058-8df90110c9f1  photo-1488190211105-8b0e65b80b4e
+    photo-1434030216411-0b793f4b6f46  photo-1503676260728-1c00da094a0b
+    photo-1524178232363-1fb2b075b655  photo-1456513080510-7bf3a84b82f8
+
+  Food/Restaurant:
+    photo-1414235077428-338989a2e8c0  photo-1504674900247-0877df9cc836
+    photo-1476224203421-9ac39bcb3327  photo-1540189549336-e6e99eb4b951
+    photo-1555126634-323283e090fa    photo-1567620905732-2d1ec7ab7445
+
+  Wellness/Lifestyle:
+    photo-1506126613408-eca07ce68773  photo-1545205597-3d9d02c29597
+    photo-1544367567-0f2fcb009e0b    photo-1571019613454-1cb2f99b2d8b
+    photo-1490645935967-10de6ba17061  photo-1499728603263-13726abce5fd
+
+  Fashion/Luxury:
+    photo-1490481651871-ab68de25d43d  photo-1515886657613-9f3515b0c78f
+    photo-1529139574466-a303027c1d8b  photo-1469334031218-e382a71b716b
+    photo-1445205170230-053b83016050  photo-1483985988355-763728e1802f
+
+  Healthcare:
+    photo-1576091160399-112ba8d25d1d  photo-1579684385127-1ef15d508118
+    photo-1631217868264-e5b90bb7e133  photo-1559757148-5c350d0d3c56
+    photo-1612349317150-e413f6a5b16d  photo-1582719508461-905c673771fd
+
+  Real Estate / Architecture:
+    photo-1560448204-e02f11c3d0e2    photo-1570129477492-45c003edd2be
+    photo-1582268611958-ebfd161ef9cf  photo-1512917774080-9991f1c4c750
+    photo-1613490493576-7fde63acd811  photo-1558618666-fcd25c85cd64
+
+  Finance / Fintech:
+    photo-1611974789855-9c2a0a7236a3  photo-1551288049-bebda4e38f71
+    photo-1460925895917-afdab827c52f  photo-1579621970795-87facc2f976d
+    photo-1504439468489-c8920d796a29  photo-1565514020179-026b92b84bb6
+
+  Travel / Hospitality:
+    photo-1469474968028-56623f02e42e  photo-1488085061387-422e29b40080
+    photo-1530521954074-e64f6810b32d  photo-1436491865332-7a61a109cc05
+
+  Sports / Fitness:
+    photo-1517836357463-d25dfeac3438  photo-1526506118085-60ce8714f8c5
+    photo-1534438327276-14e5300c3a48  photo-1571902943202-507ec2618e8f
+
+  Fallback (any domain):
+    photo-1618005182384-a83a8bd57fbe  photo-1519389950473-47ba0277781c
+    photo-1550745165-9bc0b252726f    photo-1557804506-669a67965ba0
+
+  Card image container pattern:
     <div className="aspect-video overflow-hidden rounded-xl">
-      <img src={post.image} alt={post.title}
-           className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+      <img src="..." alt="..." loading="lazy"
+           className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+           onError={(e) => { e.currentTarget.onerror=null; e.currentTarget.style.display='none'; e.currentTarget.parentElement!.style.background='linear-gradient(135deg,hsl(var(--muted)),hsl(var(--accent)/0.2))'; }} />
     </div>
 
 ====================================
