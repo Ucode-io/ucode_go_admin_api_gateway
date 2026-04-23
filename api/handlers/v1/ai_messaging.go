@@ -1,0 +1,497 @@
+package v1
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"regexp"
+	"strings"
+	"time"
+
+	"ucode/ucode_go_api_gateway/api/models"
+	"ucode/ucode_go_api_gateway/config"
+	as "ucode/ucode_go_api_gateway/genproto/auth_service"
+	pb "ucode/ucode_go_api_gateway/genproto/company_service"
+	pbo "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
+	helperFunc "ucode/ucode_go_api_gateway/pkg/helper"
+	"ucode/ucode_go_api_gateway/services"
+)
+
+const (
+	timeoutHaiku     = 180 * time.Second
+	timeoutArchitect = 900 * time.Second
+	timeoutInspector = 300 * time.Second
+	timeoutPlanner   = 300 * time.Second
+	timeoutCoder     = 900 * time.Second
+
+	// uGenBranch is the branch where all AI-generated code is pushed.
+	// master is only for pipeline triggers (created when the microfrontend is first forked).
+	uGenBranch = "u-gen"
+
+	timeoutPublishMicrofrontend = 5 * time.Minute
+)
+
+type ChatProcessor struct {
+	h                 *HandlerV1
+	service           services.ServiceManagerI
+	baseConf          config.BaseConfig
+	chatId            string
+	mcpProjectId      string
+	resourceEnvId     string
+	ucodeProjectId    string
+	mcpUcodeProjectId string
+
+	userId       string
+	clientTypeId string
+	roleId       string
+	authToken    string // forwarded to the function service for microfrontend creation
+
+	microFrontendId     string // populated after PublishAiGeneratedMicroFrontend succeeds, or from request
+	microFrontendRepoId string // GitLab numeric project Id — stored from publish response or from request
+	newProject          bool   // true → provision a new ucode project; false → create microfrontend in current project
+
+	schemaCache    []models.TableSchema
+	schemaCachedAt time.Time
+}
+
+func newChatProcessor(h *HandlerV1, service services.ServiceManagerI, baseConf config.BaseConfig, chatId, mcpProjectId, resourceEnvId, ucodeProjectId string, userId, clientTypeId, roleId, authToken string) *ChatProcessor {
+	return &ChatProcessor{
+		h:              h,
+		service:        service,
+		baseConf:       baseConf,
+		chatId:         chatId,
+		mcpProjectId:   mcpProjectId,
+		resourceEnvId:  resourceEnvId,
+		ucodeProjectId: ucodeProjectId,
+		userId:         userId,
+		clientTypeId:   clientTypeId,
+		roleId:         roleId,
+		authToken:      authToken,
+	}
+}
+
+// ============================================================================
+// NEW PROJECT BUILD
+// ============================================================================
+
+func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, chatHistory []models.ChatMessage, imageURLs []string, estimatedName string) (*models.ParsedClaudeResponse, error) {
+	plan, err := p.callArchitect(ctx, clarified, imageURLs)
+	if err != nil {
+		return nil, fmt.Errorf("architect phase failed: %w", err)
+	}
+
+	if plan.ProjectName == "" {
+		plan.ProjectName = "AI Project"
+		if estimatedName != "" {
+			plan.ProjectName = estimatedName
+		}
+	}
+
+	log.Printf("[new-project] architect done: name=%q type=%q", plan.ProjectName, plan.ProjectType)
+
+	projectData, err := p.provisionBackend(ctx, plan.ProjectName, p.mcpProjectId)
+	if err != nil {
+		return nil, fmt.Errorf("backend provisioning failed: %w", err)
+	}
+
+	p.mcpProjectId = projectData.McpProjectId
+
+	go func(bPlan *models.ArchitectPlan, resourceEnvId, envId string) {
+		if err := createBackendFromPlan(context.Background(), bPlan, resourceEnvId, p.ucodeProjectId, p.userId, envId, p.service); err != nil {
+			log.Printf("[new-project] async table creation failed: %v", err)
+		}
+	}(plan, projectData.ResourceEnvId, projectData.EnvironmentId)
+
+	var generated *models.ParsedClaudeResponse
+
+	if plan.ProjectType == "admin_panel" {
+		generated, err = p.generateAdminPanel(ctx, clarified, imageURLs, plan, projectData.ApiKey, projectData.EnvironmentId)
+	} else {
+		generated, err = p.generateProject(ctx, clarified, imageURLs, plan, projectData.ApiKey, projectData.EnvironmentId)
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	if err = p.publishToMicrofrontend(ctx, plan.ProjectName, "app", generated, projectData); err != nil {
+		return nil, fmt.Errorf("microfrontend publish failed: %w", err)
+	}
+
+	log.Printf("[new-project] done — mfe_id=%s", p.microFrontendId)
+	return &models.ParsedClaudeResponse{Description: generated.Description}, nil
+}
+
+func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context, clarified string, chatHistory []models.ChatMessage, imageURLs []string, estimatedName string) (*models.ParsedClaudeResponse, error) {
+	plan, err := p.callArchitect(ctx, clarified, imageURLs)
+	if err != nil {
+		return nil, fmt.Errorf("architect phase failed: %w", err)
+	}
+
+	if plan.ProjectName == "" {
+		plan.ProjectName = "AI Project"
+		if estimatedName != "" {
+			plan.ProjectName = estimatedName
+		}
+	}
+
+	log.Printf("[mfe-current] architect done: name=%q type=%q", plan.ProjectName, plan.ProjectType)
+
+	projectData, err := p.getExistingProjectData(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get existing project data: %w", err)
+	}
+
+	var generated *models.ParsedClaudeResponse
+
+	if plan.ProjectType == "admin_panel" {
+		generated, err = p.generateAdminPanel(ctx, clarified, imageURLs, plan, projectData.ApiKey, projectData.EnvironmentId)
+	} else {
+		generated, err = p.generateProject(ctx, clarified, imageURLs, plan, projectData.ApiKey, projectData.EnvironmentId)
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	mfePath := slugify(plan.ProjectName)
+	if len(mfePath) > 10 {
+		mfePath = strings.TrimRight(mfePath[:10], "-")
+	}
+
+	if err = p.publishToMicrofrontend(ctx, plan.ProjectName, mfePath, generated, projectData); err != nil {
+		return nil, fmt.Errorf("microfrontend publish failed: %w", err)
+	}
+
+	log.Printf("[mfe-current] done — mfe_id=%s", p.microFrontendId)
+	return &models.ParsedClaudeResponse{Description: generated.Description}, nil
+}
+
+func (p *ChatProcessor) getExistingProjectData(ctx context.Context) (*models.ProjectData, error) {
+	ucodeProjectId := p.ucodeProjectId
+
+	if p.mcpProjectId != "" {
+		mcpProject, err := p.service.GoObjectBuilderService().McpProject().GetMcpProjectFiles(ctx, &pbo.McpProjectId{
+			ResourceEnvId: p.resourceEnvId,
+			Id:            p.mcpProjectId,
+		})
+		if err == nil && mcpProject != nil && mcpProject.GetUcodeProjectId() != "" {
+			ucodeProjectId = mcpProject.GetUcodeProjectId()
+			log.Printf("[GET EXISTING PROJECT] using ucode_project_id=%s from MCP project", ucodeProjectId)
+		}
+	}
+
+	envList, err := p.h.companyServices.Environment().GetList(ctx, &pb.GetEnvironmentListRequest{
+		ProjectId: ucodeProjectId,
+		Limit:     1,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("get environment list: %w", err)
+	}
+
+	envs := envList.GetEnvironments()
+	if len(envs) == 0 {
+		return nil, fmt.Errorf("no environment found for project %s", ucodeProjectId)
+	}
+	env := envs[0]
+
+	apiKeys, err := p.h.authService.ApiKey().GetList(ctx, &as.GetListReq{
+		EnvironmentId: env.GetId(),
+		ProjectId:     ucodeProjectId,
+		Limit:         1,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("get api keys: %w", err)
+	}
+
+	var apiKey string
+
+	if keys := apiKeys.GetData(); len(keys) > 0 {
+		apiKey = keys[0].GetAppId()
+	}
+
+	return &models.ProjectData{
+		UcodeProjectId: ucodeProjectId,
+		EnvironmentId:  env.GetId(),
+		ResourceEnvId:  env.GetResourceEnvironmentId(),
+		ApiKey:         apiKey,
+	}, nil
+}
+
+func (p *ChatProcessor) provisionBackend(ctx context.Context, projectName string, existingMcpId string) (*models.ProjectData, error) {
+	currentProject, err := p.h.companyServices.Project().GetById(
+		ctx, &pb.GetProjectByIdRequest{
+			ProjectId: p.ucodeProjectId,
+		},
+	)
+	if err != nil {
+		return nil, fmt.Errorf("get current project info: %w", err)
+	}
+
+	backendProject, err := p.h.companyServices.Project().Create(
+		ctx, &pb.CreateProjectRequest{
+			Title:        projectName,
+			CompanyId:    currentProject.GetCompanyId(),
+			K8SNamespace: currentProject.GetK8SNamespace(),
+		},
+	)
+	if err != nil {
+		return nil, fmt.Errorf("create backend project: %w", err)
+	}
+
+	env, err := p.h.companyServices.Environment().CreateV2(
+		ctx, &pb.CreateEnvironmentRequest{
+			CompanyId:    currentProject.GetCompanyId(),
+			ProjectId:    backendProject.GetProjectId(),
+			UserId:       p.userId,
+			ClientTypeId: p.clientTypeId,
+			RoleId:       p.roleId,
+			Name:         "Production",
+			DisplayColor: "#00FF00",
+			Description:  "Production Environment",
+		},
+	)
+	if err != nil {
+		return nil, fmt.Errorf("create environment: %w", err)
+	}
+
+	resource, err := p.h.companyServices.ServiceResource().GetSingle(
+		ctx, &pb.GetSingleServiceResourceReq{
+			ProjectId:     backendProject.GetProjectId(),
+			EnvironmentId: env.GetId(),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		return nil, fmt.Errorf("fetch service resource: %w", err)
+	}
+
+	apiKeys, err := p.h.authService.ApiKey().GetList(
+		ctx, &as.GetListReq{
+			EnvironmentId: env.GetId(),
+			ProjectId:     backendProject.GetProjectId(),
+			Limit:         1,
+		},
+	)
+	if err != nil {
+		return nil, fmt.Errorf("fetch api keys: %w", err)
+	}
+
+	var apiKey string
+	if len(apiKeys.GetData()) > 0 {
+		apiKey = apiKeys.GetData()[0].GetAppId()
+	}
+
+	mcpProjectId := existingMcpId
+	if mcpProjectId != "" {
+		_, err = p.service.GoObjectBuilderService().McpProject().UpdateMcpProject(
+			ctx, &pbo.McpProject{
+				ResourceEnvId:  p.resourceEnvId,
+				Id:             mcpProjectId,
+				Title:          projectName,
+				Description:    "Provisioned by AI architect",
+				UcodeProjectId: backendProject.GetProjectId(),
+				ApiKey:         apiKey,
+				EnvironmentId:  env.GetId(),
+				Status:         "ready",
+			},
+		)
+		if err != nil {
+			return nil, fmt.Errorf("update MCP project: %w", err)
+		}
+	} else {
+		project, err := p.service.GoObjectBuilderService().McpProject().CreateMcpProject(
+			ctx, &pbo.CreateMcpProjectReqeust{
+				ResourceEnvId:  p.resourceEnvId,
+				Title:          projectName,
+				Description:    "Generated by AI Architect",
+				UcodeProjectId: backendProject.GetProjectId(),
+				ApiKey:         apiKey,
+				EnvironmentId:  env.GetId(),
+				Status:         "ready",
+			},
+		)
+		if err != nil {
+			return nil, fmt.Errorf("create MCP project link: %w", err)
+		}
+		mcpProjectId = project.GetId()
+	}
+
+	p.mcpUcodeProjectId = backendProject.GetProjectId()
+
+	return &models.ProjectData{
+		UcodeProjectId: backendProject.GetProjectId(),
+		McpProjectId:   mcpProjectId,
+		ApiKey:         apiKey,
+		EnvironmentId:  env.GetId(),
+		ResourceEnvId:  resource.GetResourceEnvironmentId(),
+	}, nil
+}
+
+// ============================================================================
+// DATA ACCESS HELPERS
+// ============================================================================
+
+func (p *ChatProcessor) saveMessage(ctx context.Context, role, content string, images []string) (*pbo.Message, error) {
+	return p.service.GoObjectBuilderService().AiChat().CreateMessage(ctx, &pbo.CreateMessageRequest{
+		ChatId:        p.chatId,
+		Role:          role,
+		Content:       content,
+		Images:        images,
+		ResourceEnvId: p.resourceEnvId,
+	})
+}
+
+func (p *ChatProcessor) getChatHistory(ctx context.Context) ([]models.ChatMessage, error) {
+	messages, err := p.service.GoObjectBuilderService().AiChat().GetMessages(ctx, &pbo.GetMessagesRequest{
+		ResourceEnvId: p.resourceEnvId,
+		ChatId:        p.chatId,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("get chat history: %w", err)
+	}
+
+	msgList := messages.GetMessages()
+	if len(msgList) > 10 {
+		msgList = msgList[len(msgList)-10:]
+	}
+
+	result := make([]models.ChatMessage, 0, len(msgList))
+	for _, msg := range msgList {
+		text := msg.GetContent()
+		// Strip embedded plan JSON — the AI only needs the marker + description for state detection.
+		if strings.HasPrefix(text, "[DIAGRAMS_GENERATED] ") {
+			if idx := strings.Index(text, "\n"); idx != -1 {
+				text = text[:idx]
+			}
+		}
+		result = append(result, models.ChatMessage{
+			Role:    msg.GetRole(),
+			Content: []models.ContentBlock{{Type: "text", Text: text}},
+		})
+	}
+	return result, nil
+}
+
+func (p *ChatProcessor) saveProject(ctx context.Context, req *models.ParsedClaudeResponse) (*pbo.McpProject, error) {
+	if req == nil || req.Project == nil {
+		return nil, fmt.Errorf("invalid project data")
+	}
+
+	projectEnv, err := helperFunc.ConvertMapToStruct(req.Project.Env)
+	if err != nil {
+		return nil, fmt.Errorf("convert project env: %w", err)
+	}
+
+	var projectFiles []*pbo.McpProjectFiles
+	for _, file := range req.Project.Files {
+		var fileGraph map[string]any
+		if val, ok := req.Project.FileGraph[file.Path].(map[string]any); ok {
+			fileGraph = val
+		}
+		fileGraphStruct, _ := helperFunc.ConvertMapToStruct(fileGraph)
+		projectFiles = append(projectFiles, &pbo.McpProjectFiles{
+			Path:      file.Path,
+			Content:   file.Content,
+			FileGraph: fileGraphStruct,
+		})
+	}
+
+	return p.service.GoObjectBuilderService().McpProject().UpdateMcpProject(ctx, &pbo.McpProject{
+		Id:            p.mcpProjectId,
+		ResourceEnvId: p.resourceEnvId,
+		Title:         truncateString(req.Project.ProjectName, 255),
+		Description:   truncateString(req.Description, 255),
+		ProjectFiles:  projectFiles,
+		ProjectEnv:    projectEnv,
+	})
+}
+
+// ============================================================================
+// UTILITIES
+// ============================================================================
+
+func truncateString(s string, maxLen int) string {
+	s = strings.TrimSpace(s)
+	runes := []rune(s)
+	if len(runes) <= maxLen {
+		return s
+	}
+	if maxLen <= 3 {
+		return string(runes[:maxLen])
+	}
+	return string(runes[:maxLen-3]) + "..."
+}
+
+// buildAPIConfigBlock generates the API configuration section injected into the coder prompt.
+func buildAPIConfigBlock(baseURL, apiKey string, plan *models.ArchitectPlan) string {
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf(
+		"\n====================================\nAPI CONFIGURATION FOR FRONTEND\n====================================\nVITE_API_BASE_URL: %s\nVITE_X_API_KEY: %s\n\nTables to use:\n",
+		baseURL, apiKey,
+	))
+	for _, t := range plan.Tables {
+		sb.WriteString(fmt.Sprintf("- Table: %s, slug: %s\n", t.Label, t.Slug))
+		for _, f := range t.Fields {
+			sb.WriteString(fmt.Sprintf("  * field: %s, type: %s\n", f.Slug, f.Type))
+		}
+	}
+	sb.WriteString("\nUse this UI Structure provided by the Architect:\n" + plan.UIStructure + "\n")
+	return sb.String()
+}
+
+func buildContentBlocksWithImages(textContent string, imageURLs []string) []models.ContentBlock {
+	blocks := make([]models.ContentBlock, 0, len(imageURLs)+1)
+	for _, imageURL := range imageURLs {
+		if strings.TrimSpace(imageURL) != "" {
+			blocks = append(blocks, models.ContentBlock{
+				Type:   "image",
+				Source: &models.ImageSource{Type: "url", URL: imageURL},
+			})
+		}
+	}
+	blocks = append(blocks, models.ContentBlock{Type: "text", Text: textContent})
+	return blocks
+}
+
+func buildMessagesWithHistory(history []models.ChatMessage, contentBlocks []models.ContentBlock) []models.ChatMessage {
+	messages := make([]models.ChatMessage, 0, len(history)+1)
+	messages = append(messages, history...)
+	messages = append(messages, models.ChatMessage{
+		Role:    "user",
+		Content: contentBlocks,
+	})
+	return messages
+}
+
+func buildHistoryText(history []models.ChatMessage) string {
+	if len(history) == 0 {
+		return ""
+	}
+	start := 0
+	if len(history) > 6 {
+		start = len(history) - 6
+	}
+	var sb strings.Builder
+	for _, msg := range history[start:] {
+		var text string
+		for _, block := range msg.Content {
+			if block.Type == "text" {
+				text += block.Text
+			}
+		}
+		sb.WriteString(fmt.Sprintf("[%s]: %s\n", strings.ToUpper(msg.Role), text))
+	}
+	return sb.String()
+}
+
+// slugify converts a project name to a lowercase hyphen-separated slug
+// valid for use as a GitLab path (only [a-z0-9-]).
+func slugify(name string) string {
+	s := strings.ToLower(strings.TrimSpace(name))
+	re := regexp.MustCompile(`[^a-z0-9]+`)
+	s = re.ReplaceAllString(s, "-")
+	s = strings.Trim(s, "-")
+	if len(s) == 0 {
+		s = "ai-project"
+	}
+	return s
+}
