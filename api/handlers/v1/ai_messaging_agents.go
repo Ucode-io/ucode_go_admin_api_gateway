@@ -73,22 +73,22 @@ func callWithTool[T any](p *ChatProcessor, ctx context.Context, req models.Anthr
 // callArchitect asks the architect agent to plan the project structure and design system.
 // existingSchemaCtx (optional): JSON list of existing tables — pass when adding a new microfrontend
 // to an existing project so the architect knows which APIs are already available.
-func (p *ChatProcessor) callArchitect(ctx context.Context, clarified string, imageURLs []string, existingSchemaCtx string) (*models.ArchitectPlan, error) {
+func (p *ChatProcessor) callArchitect(ctx context.Context, clarified string, imageURLs []string, chatHistory []models.ChatMessage, existingSchemaCtx string) (*models.ArchitectPlan, error) {
 	userMsg := clarified
 	if existingSchemaCtx != "" {
 		userMsg += "\n\n====================================\nEXISTING PROJECT TABLES (already provisioned — use these slugs for API calls, do NOT recreate them)\n====================================\n" + existingSchemaCtx
 	}
 
+	messages := buildMessagesWithHistory(chatHistory, buildContentBlocksWithImages(userMsg, imageURLs))
+
 	plan, err := callWithTool[models.ArchitectPlan](
 		p, ctx,
 		models.AnthropicToolRequest{
-			Model:     p.baseConf.ClaudeModel,
+			Model:     p.baseConf.ArchitectModel,
 			MaxTokens: p.baseConf.PlannerMaxTokens,
 			System:    helper.PromptArchitect,
-			Messages: []models.ChatMessage{
-				{Role: "user", Content: buildContentBlocksWithImages(userMsg, imageURLs)},
-			},
-			Tools:      []models.ClaudeFunctionTool{helper.ToolArchitectPlan},
+			Messages:  messages,
+			Tools:     []models.ClaudeFunctionTool{helper.ToolArchitectPlan},
 			ToolChoice: helper.ForcedTool(helper.ToolArchitectPlan.Name),
 		},
 		timeoutArchitect,
@@ -103,7 +103,7 @@ func (p *ChatProcessor) callArchitect(ctx context.Context, clarified string, ima
 // generateCode is the unified code generation agent. It receives the architect's plan
 // (including design tokens) and produces all frontend files.
 // For admin_panel projects it injects template context files and silently merges scaffold files.
-func (p *ChatProcessor) generateCode(ctx context.Context, clarified string, imageURLs []string, plan *models.ArchitectPlan, apiKey string) (*models.ParsedClaudeResponse, error) {
+func (p *ChatProcessor) generateCode(ctx context.Context, clarified string, imageURLs []string, chatHistory []models.ChatMessage, plan *models.ArchitectPlan, apiKey string) (*models.ParsedClaudeResponse, error) {
 	prompt := clarified + "\n\n" + buildAPIConfigBlock(p.baseConf.UcodeBaseUrl, apiKey, plan)
 
 	// For admin panels: inject importable template context files.
@@ -116,25 +116,32 @@ func (p *ChatProcessor) generateCode(ctx context.Context, clarified string, imag
 		if len(contextFiles) > 0 {
 			var templateCtx strings.Builder
 			templateCtx.WriteString("\n====================================\n")
-			templateCtx.WriteString("BASE TEMPLATE FILES (read-only — import only, never re-emit)\n")
+			templateCtx.WriteString("PRE-BUILT UTILITIES — MANDATORY USAGE\n")
 			templateCtx.WriteString("====================================\n")
-			templateCtx.WriteString("Import hooks, utils, and config from these paths. Do not re-implement them.\n")
+			templateCtx.WriteString("The following files ALREADY EXIST in the project. You MUST import from them.\n")
+			templateCtx.WriteString("NEVER re-implement these utilities. NEVER output these files in your response.\n\n")
+			templateCtx.WriteString("REQUIRED IMPORTS (use exactly these paths):\n")
+			templateCtx.WriteString("  import { useApiQuery, useApiMutation } from '@/hooks/useApi'\n")
+			templateCtx.WriteString("  import { extractList, extractSingle, extractCount } from '@/lib/apiUtils'\n")
+			templateCtx.WriteString("  import { cn, formatDate, formatCurrency, getInitials } from '@/lib/utils'\n")
+			templateCtx.WriteString("  import { AppProviders } from '@/components/shared/AppProviders' (wrap root in App.tsx)\n\n")
+			templateCtx.WriteString("FILE CONTENTS FOR REFERENCE:\n")
 			for _, f := range contextFiles {
-				fmt.Fprintf(&templateCtx, "\n### FILE: %s\n```\n%s\n```\n", f.Path, f.Content)
+				fmt.Fprintf(&templateCtx, "\n### %s\n```typescript\n%s\n```\n", f.Path, f.Content)
 			}
 			prompt += templateCtx.String()
 		}
 	}
 
+	messages := buildMessagesWithHistory(chatHistory, buildContentBlocksWithImages(prompt, imageURLs))
+
 	project, err := callWithTool[models.GeneratedProject](
 		p, ctx,
 		models.AnthropicToolRequest{
-			Model:     p.baseConf.ClaudeModel,
-			MaxTokens: p.baseConf.CoderMaxTokens,
-			System:    helper.PromptAdminPanelGenerator,
-			Messages: []models.ChatMessage{
-				{Role: "user", Content: buildContentBlocksWithImages(prompt, imageURLs)},
-			},
+			Model:      p.baseConf.CoderModel,
+			MaxTokens:  p.baseConf.CoderMaxTokens,
+			System:     helper.PromptAdminPanelGenerator,
+			Messages:   messages,
 			Tools:      []models.ClaudeFunctionTool{helper.ToolEmitProject},
 			ToolChoice: helper.ForcedTool(helper.ToolEmitProject.Name),
 		},
@@ -173,7 +180,7 @@ func (p *ChatProcessor) inspectCode(ctx context.Context, userQuestion, filesCont
 	response, err := p.callAnthropicWithTracking(
 		ctx,
 		models.AnthropicRequest{
-			Model:     p.baseConf.ClaudeModel,
+			Model:     p.baseConf.InspectorModel,
 			MaxTokens: p.baseConf.InspectorMaxTokens,
 			System:    helper.PromptInspector,
 			Messages:  messages,
@@ -199,7 +206,7 @@ func (p *ChatProcessor) planChanges(ctx context.Context, clarified, fileGraphJSO
 	result, err := callWithTool[models.SonnetPlanResult](
 		p, ctx,
 		models.AnthropicToolRequest{
-			Model:      p.baseConf.ClaudeModel,
+			Model:      p.baseConf.PlannerModel,
 			MaxTokens:  p.baseConf.PlannerMaxTokens,
 			System:     helper.PromptPlanner,
 			Messages:   messages,
@@ -237,7 +244,7 @@ func (p *ChatProcessor) editCode(ctx context.Context, clarified string, plan *mo
 	project, err := callWithTool[models.GeneratedProject](
 		p, ctx,
 		models.AnthropicToolRequest{
-			Model:      p.baseConf.ClaudeModel,
+			Model:      p.baseConf.CoderModel,
 			MaxTokens:  p.baseConf.CoderMaxTokens,
 			System:     systemPrompt,
 			Messages:   buildMessagesWithHistory(chatHistory, contentBlocks),

@@ -75,7 +75,7 @@ var ToolArchitectPlan = models.ClaudeFunctionTool{
 				"description": "Complete design system tokens. The code generator uses these exact values — fill every field.",
 				"required": []string{
 					"primary_color", "primary_hsl", "background_color", "background_hsl",
-					"surface_color", "sidebar_background", "sidebar_style",
+					"surface_color", "surface_hsl", "sidebar_background", "sidebar_background_hsl", "sidebar_style",
 					"text_color", "text_muted_color", "border_color",
 					"accent_color", "accent_hsl", "font_family", "body_font",
 					"border_radius", "design_inspiration",

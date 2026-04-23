@@ -667,13 +667,13 @@ LAYER 1 — MCP (Foundation) — TYPE A ONLY
   src/index.css and src/App.tsx MUST always be regenerated.
 
   Available imports (TYPE A ONLY — DO NOT USE FOR TYPE B/C):
-    @/hooks/useApi       → useApiQuery, useApiMutation
-    @/lib/apiUtils       → extractList, extractCount, extractSingle
-    @/lib/utils          → cn, formatDate, formatCurrency, getInitials
-    @/types              → PaginationParams, NavItem, TableColumn
-    @/providers          → AppProviders
+    @/hooks/useApi                    → useApiQuery, useApiMutation
+    @/lib/apiUtils                    → extractList, extractCount, extractSingle
+    @/lib/utils                       → cn, formatDate, formatCurrency, getInitials
+    @/types                           → PaginationParams, NavItem, TableColumn
+    @/components/shared/AppProviders  → AppProviders
 
-  TYPE B/C RULE: NEVER import from @/hooks/useApi, @/lib/apiUtils, @/lib/utils, @/types, or @/providers.
+  TYPE B/C RULE: NEVER import from @/hooks/useApi, @/lib/apiUtils, @/lib/utils, @/types, or @/components/shared/AppProviders.
   Any utility you need MUST be generated inline or as a new file in the files[] array.
 
 LAYER 2 — Skills (Generated Code)
@@ -881,7 +881,7 @@ FORBIDDEN:
 ====================================
 LANDING PAGE — TYPE B
 ====================================
-Section sequence is from DYNAMIC DESIGN ENGINE Phase 8. Follow it exactly.
+Follow the ARCHETYPE SECTION SEQUENCE defined above exactly.
 
 MANDATORY MINIMUM SECTIONS (8+):
   1. Navbar        Logo left · links center · CTA right · sticky · archetype nav style · hamburger mobile
@@ -1372,7 +1372,7 @@ TYPE A:
   Modal:      initial={{ opacity:0, scale:0.96 }} animate={{ opacity:1, scale:1 }} transition={{ duration:0.14 }}
   Card hover: whileHover={{ y:-2 }} transition={{ duration:0.1 }}
 
-TYPE B/C: use archetype motion signature from Phase 6 exclusively.
+TYPE B/C: use archetype motion signature from ARCHETYPE MOTION STYLES above exclusively.
   Never apply LUXURY slow fades to ELECTRIC or vice versa.
 
 NEVER:
@@ -1489,24 +1489,22 @@ PRE-OUTPUT CHECKLIST — VERIFY EVERY ITEM
 PROJECT TYPE
 [ ] Type correctly detected: A / B / C
 [ ] Correct file structure generated for type
-[ ] TYPE B/C: DYNAMIC DESIGN ENGINE ran and archetype committed before first file
+[ ] TYPE B/C: archetype selected from DESIGN TOKENS block and applied before first file
 [ ] TYPE B: all 8+ sections present per archetype section sequence
 [ ] TYPE C: all requested pages present with routing
 
-DYNAMIC DESIGN ENGINE (TYPE B/C)
-[ ] Archetype selected from Phase 2 (not defaulted to a previous one)
-[ ] Accent color locked from Phase 3
-[ ] Layout personality applied from Phase 4
-[ ] Texture applied from Phase 5 (CSS only)
-[ ] Motion signature applied from Phase 6 (timing + easing correct for archetype)
-[ ] Component tokens applied from Phase 7 (buttons, cards, nav)
-[ ] Section sequence followed from Phase 8
-[ ] Engine output block committed before first file written
+DESIGN TOKENS (TYPE B/C)
+[ ] Archetype identified from design_inspiration token
+[ ] Accent color from accent_color token applied throughout
+[ ] Texture applied (CSS only) per archetype ARCHETYPE TEXTURE table above
+[ ] Motion signature applied per ARCHETYPE MOTION STYLES table above (timing + easing correct)
+[ ] Component tokens applied per ARCHETYPE CARD + BUTTON STYLES table above
+[ ] Section sequence followed per ARCHETYPE SECTION SEQUENCE table above
 [ ] Description includes: "Archetype: X · Accent: #hex · Font: Y"
 
 IMPORT SAFETY
 [ ] Every non-npm import path has a matching generated file in files[]
-[ ] TYPE B/C: Zero imports from @/hooks/useApi, @/lib/apiUtils, @/lib/utils, @/types, @/providers
+[ ] TYPE B/C: Zero imports from @/hooks/useApi, @/lib/apiUtils, @/lib/utils, @/types, @/components/shared/AppProviders
 [ ] No apostrophes inside JSX {} expressions or template literal CSS values
 
 API CLIENT

@@ -213,12 +213,18 @@ func (p *ChatProcessor) publishToMicrofrontend(ctx context.Context, projectName,
 		return fmt.Errorf("no generated files to publish")
 	}
 
-	// Convert ProjectFile list to the format the function service expects
+	// Convert ProjectFile list to the format the function service expects.
+	// Sanitize paths (strip leading slashes Claude occasionally generates) and
+	// remove null bytes that some parsers reject.
 	files := make([]models.GitlabFileChange, 0, len(generated.Project.Files))
 	for _, f := range generated.Project.Files {
+		cleanPath := strings.TrimLeft(f.Path, "/")
+		if cleanPath == "" {
+			continue
+		}
 		files = append(files, models.GitlabFileChange{
-			FilePath: f.Path,
-			Content:  f.Content,
+			FilePath: cleanPath,
+			Content:  strings.ReplaceAll(f.Content, "\x00", ""),
 		})
 	}
 

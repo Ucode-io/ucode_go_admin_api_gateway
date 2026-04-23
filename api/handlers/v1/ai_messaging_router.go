@@ -99,7 +99,7 @@ func (p *ChatProcessor) runGeneratePlan(ctx context.Context, userRequest string,
 	plan, err := callWithTool[models.HaikuPlan](
 		p, ctx,
 		models.AnthropicToolRequest{
-			Model:      p.baseConf.ClaudeModel,
+			Model:      p.baseConf.PlannerModel,
 			MaxTokens:  p.baseConf.PlannerMaxTokens,
 			System:     helper.PromptPlanGenerator,
 			Messages:   messages,
@@ -182,7 +182,7 @@ func (p *ChatProcessor) runVisualEdit(ctx context.Context, instruction string, c
 	edited, err := callWithTool[visualEditOutput](
 		p, ctx,
 		models.AnthropicToolRequest{
-			Model:      p.baseConf.ClaudeModel,
+			Model:      p.baseConf.CoderModel,
 			MaxTokens:  p.baseConf.CoderMaxTokens,
 			System:     helper.PromptVisualEdit,
 			Messages:   messages,

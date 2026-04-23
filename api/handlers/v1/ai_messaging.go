@@ -75,7 +75,7 @@ func newChatProcessor(h *HandlerV1, service services.ServiceManagerI, baseConf c
 // ============================================================================
 
 func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, chatHistory []models.ChatMessage, imageURLs []string, estimatedName string) (*models.ParsedClaudeResponse, error) {
-	plan, err := p.callArchitect(ctx, clarified, imageURLs, "")
+	plan, err := p.callArchitect(ctx, clarified, imageURLs, chatHistory, "")
 	if err != nil {
 		return nil, fmt.Errorf("architect phase failed: %w", err)
 	}
@@ -102,7 +102,7 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 		}
 	}(plan, projectData.ResourceEnvId, projectData.EnvironmentId)
 
-	generated, err := p.generateCode(ctx, clarified, imageURLs, plan, projectData.ApiKey)
+	generated, err := p.generateCode(ctx, clarified, imageURLs, chatHistory, plan, projectData.ApiKey)
 	if err != nil {
 		return nil, err
 	}
@@ -132,7 +132,7 @@ func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context,
 		schemaCtx = schemaLines.String()
 	}
 
-	plan, err := p.callArchitect(ctx, clarified, imageURLs, schemaCtx)
+	plan, err := p.callArchitect(ctx, clarified, imageURLs, chatHistory, schemaCtx)
 	if err != nil {
 		return nil, fmt.Errorf("architect phase failed: %w", err)
 	}
@@ -151,7 +151,34 @@ func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context,
 		return nil, fmt.Errorf("failed to get existing project data: %w", err)
 	}
 
-	generated, err := p.generateCode(ctx, clarified, imageURLs, plan, projectData.ApiKey)
+	// Create any NEW tables the architect defined that don't yet exist in the project.
+	if len(plan.Tables) > 0 {
+		existingSlugs := make(map[string]bool, len(schema))
+		for _, t := range schema {
+			existingSlugs[t.Slug] = true
+		}
+		newTables := make([]models.TablePlan, 0)
+		for _, t := range plan.Tables {
+			if !existingSlugs[t.Slug] {
+				newTables = append(newTables, t)
+			}
+		}
+		if len(newTables) > 0 {
+			log.Printf("[mfe-current] architect defined %d new table(s) — provisioning async", len(newTables))
+			newPlan := &models.ArchitectPlan{
+				ProjectName: plan.ProjectName,
+				ProjectType: plan.ProjectType,
+				Tables:      newTables,
+			}
+			go func(bPlan *models.ArchitectPlan, resourceEnvId, envId string) {
+				if err := createBackendFromPlan(context.Background(), bPlan, resourceEnvId, p.ucodeProjectId, p.userId, envId, p.service); err != nil {
+					log.Printf("[mfe-current] async table creation failed: %v", err)
+				}
+			}(newPlan, projectData.ResourceEnvId, projectData.EnvironmentId)
+		}
+	}
+
+	generated, err := p.generateCode(ctx, clarified, imageURLs, chatHistory, plan, projectData.ApiKey)
 	if err != nil {
 		return nil, err
 	}
