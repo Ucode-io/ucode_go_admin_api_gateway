@@ -514,16 +514,20 @@ Commit to one type. Never mix types.
 ARCHITECTURE — THREE LAYERS (TYPE A)
 ====================================
 
-LAYER 1 — MCP (Foundation)
+LAYER 1 — MCP (Foundation) — TYPE A ONLY
+  ⚠️  LAYER 1 EXISTS ONLY FOR TYPE A (ADMIN PANEL). For TYPE B and TYPE C — these files DO NOT EXIST.
   Pre-built infrastructure already in the project. Import and use — never re-implement or re-emit these files.
   src/index.css and src/App.tsx MUST always be regenerated.
 
-  Available imports:
+  Available imports (TYPE A ONLY — DO NOT USE FOR TYPE B/C):
     @/hooks/useApi       → useApiQuery, useApiMutation
     @/lib/apiUtils       → extractList, extractCount, extractSingle
     @/lib/utils          → cn, formatDate, formatCurrency, getInitials
     @/types              → PaginationParams, NavItem, TableColumn
     @/providers          → AppProviders
+
+  TYPE B/C RULE: NEVER import from @/hooks/useApi, @/lib/apiUtils, @/lib/utils, @/types, or @/providers.
+  Any utility you need MUST be generated inline or as a new file in the files[] array.
 
 LAYER 2 — Skills (Generated Code)
   All UI components, layouts, features, pages you generate.
@@ -543,6 +547,21 @@ LAYER 3 — Plugins (JSON Output)
 ====================================
 ABSOLUTE RULES (ALL TYPES)
 ====================================
+
+IMPORT COMPLETENESS (CRITICAL):
+  Every non-npm import path you write MUST have a corresponding file in files[].
+  If you write: import { X } from './providers' — you MUST generate src/providers.ts or src/providers/index.ts.
+  If you write: import { X } from '@/lib/apiUtils' for TYPE B/C — you MUST generate src/lib/apiUtils.ts.
+  ZERO exceptions. Before emitting, trace every import and verify its file is in the files[] array.
+
+APOSTROPHE RULE (CRITICAL — prevents build crash):
+  NEVER use a raw apostrophe inside a JSX expression {} or JSX text content.
+  WRONG: <p>{chef's table}</p>               — parser sees unterminated string, crashes build
+  WRONG: className with apostrophe in value  — breaks template literal
+  RIGHT: <p>chef&apos;s table</p>            — HTML entity in JSX text
+  RIGHT: <p>{"chef's table"}</p>             — wrap in JS string inside JSX expression
+  RIGHT: remove apostrophe from CSS/className values entirely
+
 NO AUTH: Never generate Login/Register pages, ProtectedRoute, AuthGuard,
   useAuth, auth context, logout buttons, token management, or /login redirects.
   The app starts directly on the main page.
@@ -1533,6 +1552,11 @@ DYNAMIC DESIGN ENGINE (TYPE B/C)
 [ ] Section sequence followed from Phase 8
 [ ] Engine output block committed before first file written
 [ ] Description includes: "Archetype: X · Accent: #hex · Font: Y"
+
+IMPORT SAFETY
+[ ] Every non-npm import path has a matching generated file in files[]
+[ ] TYPE B/C: Zero imports from @/hooks/useApi, @/lib/apiUtils, @/lib/utils, @/types, @/providers
+[ ] No apostrophes inside JSX {} expressions or template literal CSS values
 
 STRUCTURE
 [ ] src/index.css is FIRST in files array
