@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 
 	"ucode/ucode_go_api_gateway/api/models"
@@ -102,6 +103,22 @@ func CallAnthropicWithTool[T any](baseConf config.BaseConfig, body models.Anthro
 		if block.Type != "tool_use" {
 			continue
 		}
+
+		// Claude occasionally stringifies arrays or objects in tool inputs.
+		// If a value is a string but the target struct expects an object/array, json.Unmarshal fails.
+		// We proactively parse string values that look like JSON arrays or objects.
+		for k, v := range block.Input {
+			if s, ok := v.(string); ok {
+				s = strings.TrimSpace(s)
+				if (strings.HasPrefix(s, "[") && strings.HasSuffix(s, "]")) || (strings.HasPrefix(s, "{") && strings.HasSuffix(s, "}")) {
+					var parsed interface{}
+					if err := json.Unmarshal([]byte(s), &parsed); err == nil {
+						block.Input[k] = parsed
+					}
+				}
+			}
+		}
+
 		// Re-marshal the map → JSON → unmarshal into T.
 		// This is the safe path: the map was already validated by json.Unmarshal above.
 		inputJSON, marshalErr := json.Marshal(block.Input)
