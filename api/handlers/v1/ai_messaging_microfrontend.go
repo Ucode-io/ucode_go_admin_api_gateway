@@ -222,11 +222,20 @@ func (p *ChatProcessor) publishToMicrofrontend(ctx context.Context, projectName,
 		})
 	}
 
+	safeName := slugify(projectName)
+	if safeName == "" {
+		safeName = "ai-project"
+	}
+	safePath := slugify(path)
+	if safePath == "" {
+		safePath = "app"
+	}
+
 	reqBody := models.PublishAiMicroFrontendRequest{
 		ProjectId:     projectData.UcodeProjectId,
 		EnvironmentId: projectData.EnvironmentId,
-		Name:          projectName,
-		Path:          path,
+		Name:          safeName,
+		Path:          safePath,
 		FrameworkType: "REACT",
 		Files:         files,
 	}
