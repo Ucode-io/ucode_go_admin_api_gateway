@@ -17,7 +17,7 @@ import (
 // runMicrofrontendEdit fetches the current files from u-gen, asks the AI to edit
 // them, then pushes the result back to u-gen. No McpProject is touched.
 func (p *ChatProcessor) runMicrofrontendEdit(ctx context.Context, clarified, fileGraphJSON string, chatHistory []models.ChatMessage, imageURLs []string, existingFiles []models.GitlabFileChange) (*models.ParsedClaudeResponse, error) {
-	log.Printf("[MICROFE EDIT] planning changes for microfrontend id=%s", p.microfrontendID)
+	log.Printf("[MICROFE EDIT] planning changes for microfrontend id=%s", p.microFrontendId)
 
 	plan, err := p.planChanges(ctx, clarified, fileGraphJSON, chatHistory, len(imageURLs) > 0)
 	if err != nil {
@@ -67,7 +67,7 @@ func (p *ChatProcessor) runMicrofrontendInspect(ctx context.Context, userQuestio
 // microfrontend's u-gen branch. Returns a flat list of {FilePath, Content}.
 func (p *ChatProcessor) fetchMicrofrontendFiles(ctx context.Context) ([]models.GitlabFileChange, error) {
 	url := p.baseConf.GoFunctionServiceHost + p.baseConf.GoFunctionServiceHTTPPort +
-		"/v2/functions/micro-frontend/files?repo_id=" + p.microfrontendRepoID
+		"/v2/functions/micro-frontend/files?repo_id=" + p.microFrontendRepoId
 
 	httpReq, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
@@ -119,9 +119,9 @@ func (p *ChatProcessor) fetchMicrofrontendFiles(ctx context.Context) ([]models.G
 // commits them to the u-gen branch of the microfrontend's repo.
 func (p *ChatProcessor) pushMicrofrontendChanges(ctx context.Context, generatedFiles []models.ProjectFile) error {
 	repoIDInt := 0
-	fmt.Sscanf(p.microfrontendRepoID, "%d", &repoIDInt)
+	fmt.Sscanf(p.microFrontendRepoId, "%d", &repoIDInt)
 	if repoIDInt == 0 {
-		return fmt.Errorf("invalid microfrontend_repo_id: %q", p.microfrontendRepoID)
+		return fmt.Errorf("invalid microfrontend_repo_id: %q", p.microFrontendRepoId)
 	}
 
 	files := make([]models.GitlabFileChange, 0, len(generatedFiles))
@@ -266,8 +266,8 @@ func (p *ChatProcessor) publishToMicrofrontend(ctx context.Context, projectName,
 		return fmt.Errorf("parse function service response: %w", err)
 	}
 
-	p.microfrontendID = result.Data.ID
-	p.microfrontendRepoID = result.Data.RepoId
+	p.microFrontendId = result.Data.ID
+	p.microFrontendRepoId = result.Data.RepoId
 	log.Printf("[MICROFRONTEND] created id=%s repo_id=%s url=%s", result.Data.ID, result.Data.RepoId, result.Data.Url)
 	return nil
 }

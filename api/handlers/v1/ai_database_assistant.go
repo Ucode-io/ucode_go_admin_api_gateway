@@ -943,7 +943,7 @@ func (p *ChatProcessor) getProjectSchemaCached(ctx context.Context, resourceEnvI
 }
 
 func (p *ChatProcessor) fetchProjectSchema(ctx context.Context, resourceEnvId string) ([]models.TableSchema, error) {
-	if p.mcpProjectID == "" {
+	if p.mcpProjectId == "" {
 		return nil, fmt.Errorf("no backend project associated with this chat")
 	}
 
@@ -1048,8 +1048,8 @@ func formatSchemaForSQL(tables []models.TableSchema) string {
 func (p *ChatProcessor) resolveBuilderResourceID(ctx context.Context) (string, error) {
 
 	mcpProject, err := p.service.GoObjectBuilderService().McpProject().GetMcpProjectFiles(ctx, &nb.McpProjectId{
-		ResourceEnvId: p.resourceEnvID,
-		Id:            p.mcpProjectID,
+		ResourceEnvId: p.resourceEnvId,
+		Id:            p.mcpProjectId,
 	})
 	if err != nil {
 		return "", fmt.Errorf("get MCP project metadata: %w", err)
