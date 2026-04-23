@@ -376,35 +376,41 @@ API INTEGRATION (CRITICAL)
 You are building the frontend connected to a dynamically generated Backend API.
 If you receive an API CONFIGURATION from the system in your prompt (Base URL, API Key, Table slugs), you MUST connect your React frontend to this API for data fetching and mutations (CRUD).
 
-MANDATORY API CLIENT — generate src/lib/api.ts with EXACTLY this content:
-  import axios from 'axios';
-  const api = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL,
-    headers: {
-      'Authorization': 'API-KEY',
-      'X-API-KEY': import.meta.env.VITE_X_API_KEY,
-    },
-  });
-  export default api;
+AXIOS CLIENT — two cases depending on project type:
 
-BOTH HEADERS ARE ALWAYS REQUIRED — every request MUST include:
+TYPE A (admin panel — template provided):
+  Use 'apiClient' from '@/config/axios' — it already has BOTH required headers:
+    Authorization: API-KEY  and  X-API-KEY from env
+  NEVER create a new axios instance. NEVER use raw axios.get/post/put/delete.
+  Use hooks from '@/hooks/useApi' (useApiQuery, useApiMutation) for data fetching.
+  For direct calls: import apiClient from '@/config/axios'; then apiClient.get(...)
+
+TYPE B/C (landing/website — no template):
+  Generate src/lib/api.ts with EXACTLY this content:
+    import axios from 'axios';
+    const api = axios.create({
+      baseURL: import.meta.env.VITE_API_BASE_URL,
+      headers: {
+        'Authorization': 'API-KEY',
+        'X-API-KEY': import.meta.env.VITE_X_API_KEY,
+      },
+    });
+    export default api;
+  Then use 'api' instance for all calls. NEVER use raw axios.
+
+BOTH HEADERS ARE ALWAYS REQUIRED on every request:
   Authorization: API-KEY        (literal string "API-KEY" — NOT a variable, NOT a token)
   X-API-KEY: {value from env}  (the actual API key from VITE_X_API_KEY)
 
-NEVER use axios.get/post/put/delete directly — ALWAYS use the 'api' instance from src/lib/api.ts.
-NEVER set axios.defaults — use the api instance instead.
-NEVER hardcode the BASE URL or API KEY. ALWAYS use VITE_API_BASE_URL and VITE_X_API_KEY.
-
-CRUD ENDPOINTS (use 'api' instance, NOT 'axios'):
-- GET list:   api.get("/v2/items/{table_slug}")
+CRUD ENDPOINTS:
+- GET list:   apiClient.get("/v2/items/{table_slug}")
      Response shape: { data: { data: { count, response: T[] | T } } }
-     Extract: const response = data?.data?.response; const items = Array.isArray(response) ? response : response ? [response] : [];
-- GET single: api.get("/v2/items/{table_slug}/" + id)
-     Response shape: { data: { data: { response: T } } }
-     Extract: const item = data?.data?.response;
-- POST:       api.post("/v2/items/{table_slug}", { data: { field_1: "val", field_2: "val" } })
-- PUT:        api.put("/v2/items/{table_slug}", { data: { guid: id, field_1: "val" } })
-- DELETE:     api.delete("/v2/items/{table_slug}/" + id)
+     Extract with: extractList(data) / extractCount(data) from '@/lib/apiUtils'
+- GET single: apiClient.get("/v2/items/{table_slug}/" + id)
+     Extract with: extractSingle(data) from '@/lib/apiUtils'
+- POST:       apiClient.post("/v2/items/{table_slug}", { data: { field_1: "val", field_2: "val" } })
+- PUT:        apiClient.put("/v2/items/{table_slug}", { data: { guid: id, field_1: "val" } })
+- DELETE:     apiClient.delete("/v2/items/{table_slug}/" + id)
 
 CRITICAL: response can be an array OR a single object. NEVER assume it is always an array.
 NEVER write: const items = response.data?.data?.response || [] — this breaks when response is an object.
@@ -1609,10 +1615,11 @@ IMPORT SAFETY
 [ ] No apostrophes inside JSX {} expressions or template literal CSS values
 
 API CLIENT
-[ ] src/lib/api.ts generated with axios.create({ baseURL, headers: { Authorization: 'API-KEY', X-API-KEY: env } })
-[ ] All API calls use 'api' instance — never raw axios.get/post/put/delete
-[ ] Both headers present: Authorization: API-KEY and X-API-KEY
-[ ] GET single: api.get("/v2/items/{slug}/" + id) used when fetching one record
+[ ] TYPE A: all calls use apiClient from '@/config/axios' — never new axios instance
+[ ] TYPE B/C: src/lib/api.ts generated with correct axios.create + both headers
+[ ] Both headers present everywhere: Authorization: API-KEY and X-API-KEY
+[ ] GET single: apiClient.get("/v2/items/{slug}/" + id) used when fetching one record
+[ ] extractList / extractSingle / extractCount used — never inline data?.data?.data?.response
 
 STRUCTURE
 [ ] src/index.css is FIRST in files array
