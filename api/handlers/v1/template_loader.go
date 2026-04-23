@@ -53,6 +53,44 @@ func GetTemplate(projectType string) []models.ProjectFile {
 	return templateStore[projectType]
 }
 
+// scaffoldPaths are template files that must exist in the output but should NOT
+// be sent to the AI as context (they waste tokens and the AI shouldn't re-emit them).
+var scaffoldPaths = map[string]bool{
+	"package.json":       true,
+	"tailwind.config.js": true,
+	"tsconfig.json":      true,
+	"vite.config.ts":     true,
+	"src/App.tsx":        true,
+	"src/index.css":      true,
+	"src/main.tsx":       true,
+}
+
+// GetTemplateContext returns only files the AI should read and import from
+// (hooks, utils, types, config). These are sent in the coder prompt.
+func GetTemplateContext(projectType string) []models.ProjectFile {
+	all := templateStore[projectType]
+	out := make([]models.ProjectFile, 0, len(all))
+	for _, f := range all {
+		if !scaffoldPaths[f.Path] {
+			out = append(out, f)
+		}
+	}
+	return out
+}
+
+// GetTemplateScaffold returns base scaffold files that are silently merged into
+// the AI output without being sent as prompt context.
+func GetTemplateScaffold(projectType string) []models.ProjectFile {
+	all := templateStore[projectType]
+	out := make([]models.ProjectFile, 0, len(all))
+	for _, f := range all {
+		if scaffoldPaths[f.Path] {
+			out = append(out, f)
+		}
+	}
+	return out
+}
+
 func MergeTemplateWithAIFiles(templateFiles, aiFiles []models.ProjectFile) []models.ProjectFile {
 	aiPathSet := make(map[string]bool, len(aiFiles))
 	for _, f := range aiFiles {

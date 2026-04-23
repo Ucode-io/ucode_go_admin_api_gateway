@@ -180,7 +180,8 @@ type (
 		BorderColor          string `json:"border_color"`
 		AccentColor          string `json:"accent_color"`
 		AccentHSL            string `json:"accent_hsl"`
-		FontFamily           string `json:"font_family"`
+		FontFamily           string `json:"font_family"`      // heading font (e.g. "Syne", "Inter")
+		BodyFont             string `json:"body_font"`         // body font (e.g. "DM Sans", "Inter")
 		BorderRadius         string `json:"border_radius"`
 		DesignInspiration    string `json:"design_inspiration"`
 	}

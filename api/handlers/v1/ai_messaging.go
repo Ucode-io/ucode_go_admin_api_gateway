@@ -75,7 +75,7 @@ func newChatProcessor(h *HandlerV1, service services.ServiceManagerI, baseConf c
 // ============================================================================
 
 func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, chatHistory []models.ChatMessage, imageURLs []string, estimatedName string) (*models.ParsedClaudeResponse, error) {
-	plan, err := p.callArchitect(ctx, clarified, imageURLs)
+	plan, err := p.callArchitect(ctx, clarified, imageURLs, "")
 	if err != nil {
 		return nil, fmt.Errorf("architect phase failed: %w", err)
 	}
@@ -87,7 +87,7 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 		}
 	}
 
-	log.Printf("[new-project] architect done: name=%q type=%q", plan.ProjectName, plan.ProjectType)
+	log.Printf("[new-project] architect done: name=%q type=%q design=%s", plan.ProjectName, plan.ProjectType, plan.Design.DesignInspiration)
 
 	projectData, err := p.provisionBackend(ctx, plan.ProjectName, p.mcpProjectId)
 	if err != nil {
@@ -102,13 +102,7 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 		}
 	}(plan, projectData.ResourceEnvId, projectData.EnvironmentId)
 
-	var generated *models.ParsedClaudeResponse
-
-	if plan.ProjectType == "admin_panel" {
-		generated, err = p.generateAdminPanel(ctx, clarified, imageURLs, plan, projectData.ApiKey, projectData.EnvironmentId)
-	} else {
-		generated, err = p.generateProject(ctx, clarified, imageURLs, plan, projectData.ApiKey, projectData.EnvironmentId)
-	}
+	generated, err := p.generateCode(ctx, clarified, imageURLs, plan, projectData.ApiKey)
 	if err != nil {
 		return nil, err
 	}
@@ -122,7 +116,23 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 }
 
 func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context, clarified string, chatHistory []models.ChatMessage, imageURLs []string, estimatedName string) (*models.ParsedClaudeResponse, error) {
-	plan, err := p.callArchitect(ctx, clarified, imageURLs)
+	// Fetch existing project schema so the architect knows which tables/APIs are already available.
+	var schemaCtx string
+	schema, err := p.getProjectSchemaCached(ctx, p.resourceEnvId)
+	if err != nil {
+		log.Printf("[mfe-current] could not fetch project schema (non-fatal): %v", err)
+	} else if len(schema) > 0 {
+		schemaLines := strings.Builder{}
+		for _, t := range schema {
+			schemaLines.WriteString(fmt.Sprintf("- table: %s (slug: %s)\n", t.Label, t.Slug))
+			for _, f := range t.Fields {
+				schemaLines.WriteString(fmt.Sprintf("  * %s (%s)\n", f.Slug, f.Type))
+			}
+		}
+		schemaCtx = schemaLines.String()
+	}
+
+	plan, err := p.callArchitect(ctx, clarified, imageURLs, schemaCtx)
 	if err != nil {
 		return nil, fmt.Errorf("architect phase failed: %w", err)
 	}
@@ -134,20 +144,14 @@ func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context,
 		}
 	}
 
-	log.Printf("[mfe-current] architect done: name=%q type=%q", plan.ProjectName, plan.ProjectType)
+	log.Printf("[mfe-current] architect done: name=%q type=%q design=%s", plan.ProjectName, plan.ProjectType, plan.Design.DesignInspiration)
 
 	projectData, err := p.getExistingProjectData(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get existing project data: %w", err)
 	}
 
-	var generated *models.ParsedClaudeResponse
-
-	if plan.ProjectType == "admin_panel" {
-		generated, err = p.generateAdminPanel(ctx, clarified, imageURLs, plan, projectData.ApiKey, projectData.EnvironmentId)
-	} else {
-		generated, err = p.generateProject(ctx, clarified, imageURLs, plan, projectData.ApiKey, projectData.EnvironmentId)
-	}
+	generated, err := p.generateCode(ctx, clarified, imageURLs, plan, projectData.ApiKey)
 	if err != nil {
 		return nil, err
 	}
@@ -421,7 +425,7 @@ func truncateString(s string, maxLen int) string {
 	return string(runes[:maxLen-3]) + "..."
 }
 
-// buildAPIConfigBlock generates the API configuration section injected into the coder prompt.
+// buildAPIConfigBlock generates the API configuration + design tokens injected into the coder prompt.
 func buildAPIConfigBlock(baseURL, apiKey string, plan *models.ArchitectPlan) string {
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf(
@@ -435,6 +439,27 @@ func buildAPIConfigBlock(baseURL, apiKey string, plan *models.ArchitectPlan) str
 		}
 	}
 	sb.WriteString("\nUse this UI Structure provided by the Architect:\n" + plan.UIStructure + "\n")
+
+	// Inject design tokens so the coder doesn't have to invent a design system.
+	d := plan.Design
+	if d.PrimaryColor != "" {
+		sb.WriteString("\n====================================\nDESIGN TOKENS\n====================================\n")
+		sb.WriteString(fmt.Sprintf("design_inspiration: %s\n", d.DesignInspiration))
+		sb.WriteString(fmt.Sprintf("font_family (heading): %s\n", d.FontFamily))
+		sb.WriteString(fmt.Sprintf("body_font: %s\n", d.BodyFont))
+		sb.WriteString(fmt.Sprintf("border_radius: %s\n", d.BorderRadius))
+		sb.WriteString(fmt.Sprintf("background_color: %s  (HSL: %s)\n", d.BackgroundColor, d.BackgroundHSL))
+		sb.WriteString(fmt.Sprintf("surface_color: %s  (HSL: %s)\n", d.SurfaceColor, d.SurfaceHSL))
+		sb.WriteString(fmt.Sprintf("primary_color: %s  (HSL: %s)\n", d.PrimaryColor, d.PrimaryHSL))
+		sb.WriteString(fmt.Sprintf("accent_color: %s  (HSL: %s)\n", d.AccentColor, d.AccentHSL))
+		sb.WriteString(fmt.Sprintf("text_color: %s\n", d.TextColor))
+		sb.WriteString(fmt.Sprintf("text_muted_color: %s\n", d.TextMutedColor))
+		sb.WriteString(fmt.Sprintf("border_color: %s\n", d.BorderColor))
+		sb.WriteString(fmt.Sprintf("sidebar_background: %s  (HSL: %s)\n", d.SidebarBackground, d.SidebarBackgroundHSL))
+		sb.WriteString(fmt.Sprintf("sidebar_foreground: %s\n", d.SidebarForeground))
+		sb.WriteString(fmt.Sprintf("sidebar_style: %s\n", d.SidebarStyle))
+	}
+
 	return sb.String()
 }
 

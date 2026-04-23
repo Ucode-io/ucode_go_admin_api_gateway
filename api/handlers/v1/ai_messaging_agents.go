@@ -19,30 +19,23 @@ type visualEditOutput struct {
 	ChangeSummary string               `json:"change_summary"`
 }
 
-func callWithTool[T any](p *ChatProcessor, ctx context.Context, req models.AnthropicToolRequest, timeout time.Duration, description string) (*T, error) {
-	log.Printf("[AI] Calling Anthropic (tool use): %s", description)
-
-	result, usage, stopReason, err := helper.CallAnthropicWithTool[T](p.baseConf, req, timeout)
-
-	// Record token usage regardless of error — partial usage still counts.
+// recordTokenUsage ships token counts to the billing service asynchronously.
+func (p *ChatProcessor) recordTokenUsage(usage models.ClaudeUsage, model, description string) {
+	if usage.InputTokens == 0 && usage.OutputTokens == 0 {
+		return
+	}
+	projectId := p.ucodeProjectId
+	if p.mcpUcodeProjectId != "" {
+		projectId = p.mcpUcodeProjectId
+	}
 	go func() {
-		if usage.InputTokens == 0 && usage.OutputTokens == 0 {
-			return
-		}
-
-		projectId := p.ucodeProjectId
-
-		if p.mcpUcodeProjectId != "" {
-			projectId = p.mcpUcodeProjectId
-		}
-
 		_, recErr := p.service.CompanyService().Billing().RecordAiTokenUsage(
 			context.Background(),
 			&pb.RecordAiTokenUsageRequest{
 				ProjectId:    projectId,
 				InputTokens:  int32(usage.InputTokens),
 				OutputTokens: int32(usage.OutputTokens),
-				Model:        req.Model,
+				Model:        model,
 				Description:  description,
 			},
 		)
@@ -50,6 +43,15 @@ func callWithTool[T any](p *ChatProcessor, ctx context.Context, req models.Anthr
 			log.Printf("[TOKEN RECORD] error recording usage for %s: %v", description, recErr)
 		}
 	}()
+}
+
+func callWithTool[T any](p *ChatProcessor, ctx context.Context, req models.AnthropicToolRequest, timeout time.Duration, description string) (*T, error) {
+	log.Printf("[AI] Calling Anthropic (tool use): %s", description)
+
+	result, usage, stopReason, err := helper.CallAnthropicWithTool[T](p.baseConf, req, timeout)
+
+	// Record token usage regardless of error — partial usage still counts.
+	p.recordTokenUsage(usage, req.Model, description)
 
 	if err != nil {
 		if errors.Is(err, helper.ErrMaxTokens) {
@@ -68,7 +70,15 @@ func callWithTool[T any](p *ChatProcessor, ctx context.Context, req models.Anthr
 	return result, nil
 }
 
-func (p *ChatProcessor) callArchitect(ctx context.Context, clarified string, imageURLs []string) (*models.ArchitectPlan, error) {
+// callArchitect asks the architect agent to plan the project structure and design system.
+// existingSchemaCtx (optional): JSON list of existing tables — pass when adding a new microfrontend
+// to an existing project so the architect knows which APIs are already available.
+func (p *ChatProcessor) callArchitect(ctx context.Context, clarified string, imageURLs []string, existingSchemaCtx string) (*models.ArchitectPlan, error) {
+	userMsg := clarified
+	if existingSchemaCtx != "" {
+		userMsg += "\n\n====================================\nEXISTING PROJECT TABLES (already provisioned — use these slugs for API calls, do NOT recreate them)\n====================================\n" + existingSchemaCtx
+	}
+
 	plan, err := callWithTool[models.ArchitectPlan](
 		p, ctx,
 		models.AnthropicToolRequest{
@@ -76,7 +86,7 @@ func (p *ChatProcessor) callArchitect(ctx context.Context, clarified string, ima
 			MaxTokens: p.baseConf.PlannerMaxTokens,
 			System:    helper.PromptArchitect,
 			Messages: []models.ChatMessage{
-				{Role: "user", Content: buildContentBlocksWithImages(clarified, imageURLs)},
+				{Role: "user", Content: buildContentBlocksWithImages(userMsg, imageURLs)},
 			},
 			Tools:      []models.ClaudeFunctionTool{helper.ToolArchitectPlan},
 			ToolChoice: helper.ForcedTool(helper.ToolArchitectPlan.Name),
@@ -90,58 +100,32 @@ func (p *ChatProcessor) callArchitect(ctx context.Context, clarified string, ima
 	return plan, nil
 }
 
-func (p *ChatProcessor) generateProject(ctx context.Context, clarified string, imageURLs []string, plan *models.ArchitectPlan, apiKey, envId string) (*models.ParsedClaudeResponse, error) {
-	apiConfig := buildAPIConfigBlock(p.baseConf.UcodeBaseUrl, apiKey, plan)
+// generateCode is the unified code generation agent. It receives the architect's plan
+// (including design tokens) and produces all frontend files.
+// For admin_panel projects it injects template context files and silently merges scaffold files.
+func (p *ChatProcessor) generateCode(ctx context.Context, clarified string, imageURLs []string, plan *models.ArchitectPlan, apiKey string) (*models.ParsedClaudeResponse, error) {
+	prompt := clarified + "\n\n" + buildAPIConfigBlock(p.baseConf.UcodeBaseUrl, apiKey, plan)
 
-	project, err := callWithTool[models.GeneratedProject](
-		p, ctx,
-		models.AnthropicToolRequest{
-			Model:     p.baseConf.ClaudeModel,
-			MaxTokens: p.baseConf.CoderMaxTokens,
-			System:    helper.PromptAdminPanelGenerator,
-			Messages: []models.ChatMessage{
-				{Role: "user", Content: buildContentBlocksWithImages(clarified+"\n\n"+apiConfig, imageURLs)},
-			},
-			Tools:      []models.ClaudeFunctionTool{helper.ToolEmitProject},
-			ToolChoice: helper.ForcedTool(helper.ToolEmitProject.Name),
-		},
-		timeoutCoder,
-		"Generating full project code",
-	)
-	if err != nil {
-		return nil, fmt.Errorf("generate project: %w", err)
-	}
+	// For admin panels: inject importable template context files.
+	// Scaffold files (package.json, vite.config.ts, etc.) are merged silently after generation.
+	var scaffoldFiles []models.ProjectFile
+	if plan.ProjectType == "admin_panel" {
+		contextFiles := GetTemplateContext("admin_panel")
+		scaffoldFiles = GetTemplateScaffold("admin_panel")
 
-	if len(project.Files) == 0 {
-		return nil, fmt.Errorf("generate project: claude returned empty project")
-	}
-
-	log.Printf("[generate] project done: %d files", len(project.Files))
-	return &models.ParsedClaudeResponse{Project: project}, nil
-}
-
-func (p *ChatProcessor) generateAdminPanel(ctx context.Context, clarified string, imageURLs []string, plan *models.ArchitectPlan, apiKey, envId string) (*models.ParsedClaudeResponse, error) {
-
-	apiConfig := buildAPIConfigBlock(p.baseConf.UcodeBaseUrl, apiKey, plan)
-
-	var templateCtx strings.Builder
-
-	templateFiles := GetTemplate("admin_panel")
-
-	if len(templateFiles) > 0 {
-		templateCtx.WriteString("\n====================================\n")
-		templateCtx.WriteString("BASE TEMPLATE FILES (read-only — DO NOT output these files)\n")
-		templateCtx.WriteString("====================================\n")
-		templateCtx.WriteString("Import hooks, utils, and config from these paths. Do not re-implement them.\n")
-		templateCtx.WriteString("Do NOT copy colors or layout from these files.\n")
-		templateCtx.WriteString("src/index.css and src/App.tsx MUST be fully regenerated by you.\n")
-		for _, f := range templateFiles {
-			fmt.Fprintf(&templateCtx, "\n### FILE: %s\n```\n%s\n```\n", f.Path, f.Content)
+		if len(contextFiles) > 0 {
+			var templateCtx strings.Builder
+			templateCtx.WriteString("\n====================================\n")
+			templateCtx.WriteString("BASE TEMPLATE FILES (read-only — import only, never re-emit)\n")
+			templateCtx.WriteString("====================================\n")
+			templateCtx.WriteString("Import hooks, utils, and config from these paths. Do not re-implement them.\n")
+			for _, f := range contextFiles {
+				fmt.Fprintf(&templateCtx, "\n### FILE: %s\n```\n%s\n```\n", f.Path, f.Content)
+			}
+			prompt += templateCtx.String()
 		}
 	}
 
-	finalPrompt := clarified + "\n\n" + apiConfig + "\n" + templateCtx.String()
-
 	project, err := callWithTool[models.GeneratedProject](
 		p, ctx,
 		models.AnthropicToolRequest{
@@ -149,41 +133,36 @@ func (p *ChatProcessor) generateAdminPanel(ctx context.Context, clarified string
 			MaxTokens: p.baseConf.CoderMaxTokens,
 			System:    helper.PromptAdminPanelGenerator,
 			Messages: []models.ChatMessage{
-				{Role: "user", Content: buildContentBlocksWithImages(finalPrompt, imageURLs)},
+				{Role: "user", Content: buildContentBlocksWithImages(prompt, imageURLs)},
 			},
 			Tools:      []models.ClaudeFunctionTool{helper.ToolEmitProject},
 			ToolChoice: helper.ForcedTool(helper.ToolEmitProject.Name),
 		},
 		timeoutCoder,
-		"Generating admin panel code",
+		"Generating project code",
 	)
 	if err != nil {
-		return nil, fmt.Errorf("generate admin panel: %w", err)
+		return nil, fmt.Errorf("generate code: %w", err)
 	}
 
 	if len(project.Files) == 0 {
-		return nil, fmt.Errorf("generate admin panel: claude returned empty project")
+		return nil, fmt.Errorf("generate code: claude returned empty project")
 	}
 
-	if len(templateFiles) > 0 {
+	// Silently merge scaffold files that AI must not re-emit (prevents template drift).
+	if len(scaffoldFiles) > 0 {
 		generatedPaths := make(map[string]struct{}, len(project.Files))
-
 		for _, f := range project.Files {
 			generatedPaths[f.Path] = struct{}{}
 		}
-
-		for _, tf := range templateFiles {
-			if _, exists := generatedPaths[tf.Path]; !exists {
-				project.Files = append(project.Files, models.ProjectFile{
-					Path:    tf.Path,
-					Content: tf.Content,
-				})
-				log.Printf("[CODE] merged missing template file: %s", tf.Path)
+		for _, sf := range scaffoldFiles {
+			if _, exists := generatedPaths[sf.Path]; !exists {
+				project.Files = append(project.Files, sf)
 			}
 		}
 	}
 
-	log.Printf("[generate] admin panel done: %d files", len(project.Files))
+	log.Printf("[generate] done: %d files (type=%s)", len(project.Files), plan.ProjectType)
 	return &models.ParsedClaudeResponse{Project: project}, nil
 }
 
@@ -286,28 +265,12 @@ func (p *ChatProcessor) callAnthropicWithTracking(ctx context.Context, req model
 		return "", err
 	}
 
-	go func() {
-		var parsed struct {
-			Usage models.ClaudeUsage `json:"usage"`
-		}
-		if err := json.Unmarshal([]byte(response), &parsed); err == nil && (parsed.Usage.InputTokens > 0 || parsed.Usage.OutputTokens > 0) {
-			projectId := p.ucodeProjectId
-			if p.mcpUcodeProjectId != "" {
-				projectId = p.mcpUcodeProjectId
-			}
-
-			_, recErr := p.service.CompanyService().Billing().RecordAiTokenUsage(context.Background(), &pb.RecordAiTokenUsageRequest{
-				ProjectId:    projectId,
-				InputTokens:  int32(parsed.Usage.InputTokens),
-				OutputTokens: int32(parsed.Usage.OutputTokens),
-				Model:        req.Model,
-				Description:  description,
-			})
-			if recErr != nil {
-				log.Printf("[TOKEN RECORD] error recording usage for %s: %v", description, recErr)
-			}
-		}
-	}()
+	var parsed struct {
+		Usage models.ClaudeUsage `json:"usage"`
+	}
+	if jsonErr := json.Unmarshal([]byte(response), &parsed); jsonErr == nil {
+		p.recordTokenUsage(parsed.Usage, req.Model, description)
+	}
 
 	return response, nil
 }

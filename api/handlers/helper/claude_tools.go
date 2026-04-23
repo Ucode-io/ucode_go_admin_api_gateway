@@ -20,10 +20,10 @@ import "ucode/ucode_go_api_gateway/api/models"
 
 var ToolArchitectPlan = models.ClaudeFunctionTool{
 	Name:        "plan_architecture",
-	Description: "Return the complete project architecture: database tables with fields and mock data, plus a rich UI structure description for the frontend developer.",
+	Description: "Return the complete project architecture: database tables with fields and mock data, a rich UI structure description, and a complete design system for the frontend developer.",
 	InputSchema: map[string]any{
 		"type":     "object",
-		"required": []string{"project_name", "project_type", "tables", "ui_structure"},
+		"required": []string{"project_name", "project_type", "tables", "ui_structure", "design"},
 		"properties": map[string]any{
 			"project_name": map[string]any{"type": "string", "description": "Human-readable project name"},
 			"project_type": map[string]any{
@@ -68,7 +68,39 @@ var ToolArchitectPlan = models.ClaudeFunctionTool{
 			},
 			"ui_structure": map[string]any{
 				"type":        "string",
-				"description": "Rich, detailed description of pages, layout, features and visual design for the frontend developer",
+				"description": "Rich, detailed description of pages, layout, features and visual structure for the frontend developer",
+			},
+			"design": map[string]any{
+				"type":        "object",
+				"description": "Complete design system tokens. The code generator uses these exact values — fill every field.",
+				"required": []string{
+					"primary_color", "primary_hsl", "background_color", "background_hsl",
+					"surface_color", "sidebar_background", "sidebar_style",
+					"text_color", "text_muted_color", "border_color",
+					"accent_color", "accent_hsl", "font_family", "body_font",
+					"border_radius", "design_inspiration",
+				},
+				"properties": map[string]any{
+					"primary_color":      map[string]any{"type": "string", "description": "Hex color, e.g. #6366f1"},
+					"primary_hsl":        map[string]any{"type": "string", "description": "HSL without hsl(), e.g. 239 84% 67%"},
+					"background_color":   map[string]any{"type": "string", "description": "Page background hex"},
+					"background_hsl":     map[string]any{"type": "string", "description": "Page background HSL"},
+					"surface_color":      map[string]any{"type": "string", "description": "Card/panel surface hex"},
+					"surface_hsl":        map[string]any{"type": "string", "description": "Card/panel surface HSL"},
+					"sidebar_background": map[string]any{"type": "string", "description": "Sidebar bg hex"},
+					"sidebar_background_hsl": map[string]any{"type": "string"},
+					"sidebar_foreground": map[string]any{"type": "string", "description": "Sidebar text hex"},
+					"sidebar_style":      map[string]any{"type": "string", "enum": []string{"light", "medium", "dark", "colored"}, "description": "Sidebar visual weight"},
+					"text_color":         map[string]any{"type": "string", "description": "Primary text hex"},
+					"text_muted_color":   map[string]any{"type": "string", "description": "Secondary/muted text hex"},
+					"border_color":       map[string]any{"type": "string", "description": "Border hex"},
+					"accent_color":       map[string]any{"type": "string", "description": "Accent/highlight hex"},
+					"accent_hsl":         map[string]any{"type": "string", "description": "Accent HSL"},
+					"font_family":        map[string]any{"type": "string", "description": "Heading font name, e.g. Syne or Inter"},
+					"body_font":          map[string]any{"type": "string", "description": "Body font name, e.g. DM Sans or Inter"},
+					"border_radius":      map[string]any{"type": "string", "description": "Base border radius, e.g. 8px"},
+					"design_inspiration": map[string]any{"type": "string", "description": "Archetype name or reference, e.g. Obsidian Cinematic or TMS Domain"},
+				},
 			},
 		},
 	},
