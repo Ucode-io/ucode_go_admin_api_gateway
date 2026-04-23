@@ -245,6 +245,9 @@ func (p *ChatProcessor) publishToMicrofrontend(ctx context.Context, projectName,
 		return fmt.Errorf("marshal request: %w", err)
 	}
 
+	log.Printf("[MICROFRONTEND] publish-ai: raw_name=%q raw_path=%q safe_name=%q safe_path=%q project_id=%s env_id=%s files=%d",
+		projectName, path, safeName, safePath, projectData.UcodeProjectId, projectData.EnvironmentId, len(files))
+
 	url := p.baseConf.GoFunctionServiceHost + p.baseConf.GoFunctionServiceHTTPPort + "/v2/functions/micro-frontend/publish-ai"
 
 	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(bodyBytes))
