@@ -409,7 +409,8 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 			}
 		} else {
 			for i, mockRow := range tablePlan.MockData {
-				structData, err := helper.ConvertMapToStruct(mockRow)
+				sanitized := sanitizeMockRow(mockRow, tablePlan.Fields)
+				structData, err := helper.ConvertMapToStruct(sanitized)
 				if err != nil {
 					errs = append(errs, fmt.Sprintf("mock %s[%d] convert: %v", tablePlan.Slug, i, err))
 					continue
@@ -436,6 +437,47 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 
 	log.Printf("[ai_messaging_backend] Successfully completed backend creation")
 	return nil
+}
+
+// sanitizeMockRow coerces mock data values to match their field types.
+// Claude often generates numeric values (JSON numbers) for varchar/text fields
+// which causes pgx "cannot find encode plan for varchar" errors.
+// This converts float64 → string for all string-based field types.
+func sanitizeMockRow(row map[string]any, fields []models.TableFieldPlan) map[string]any {
+	// Build slug → mapped type lookup
+	fieldTypes := make(map[string]string, len(fields))
+	for _, f := range fields {
+		fieldTypes[f.Slug] = mapFieldType(f.Type)
+	}
+
+	out := make(map[string]any, len(row))
+	for k, v := range row {
+		out[k] = coerceMockValue(v, fieldTypes[k])
+	}
+	return out
+}
+
+// coerceMockValue converts v to the right Go type for the given mapped field type.
+// JSON numbers come in as float64; varchar fields need string.
+func coerceMockValue(v any, mappedType string) any {
+	if v == nil {
+		return v
+	}
+	switch mappedType {
+	case "SINGLE_LINE", "MULTI_LINE", "EMAIL", "PHONE", "INTERNATION_PHONE",
+		"PASSWORD", "COLOR", "PICK_LIST", "UUID", "DATE", "DATE_TIME":
+		// These fields are all stored as text in Postgres.
+		// If Claude gave us a number, stringify it.
+		if f, ok := v.(float64); ok {
+			if f == float64(int64(f)) {
+				return fmt.Sprintf("%d", int64(f))
+			}
+			return fmt.Sprintf("%g", f)
+		}
+	case "NUMBER":
+		// NUMBER fields expect a numeric value — nothing to do.
+	}
+	return v
 }
 
 // safeString extracts a non-nil string from an any value.
