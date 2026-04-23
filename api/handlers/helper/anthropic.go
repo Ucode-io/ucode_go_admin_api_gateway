@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -15,6 +16,15 @@ import (
 )
 
 var ErrMaxTokens = errors.New("generation stopped: output exceeded the token limit")
+
+// inputKeys returns the keys of a map for diagnostic logging.
+func inputKeys(m map[string]interface{}) []string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	return keys
+}
 
 func CallAnthropicAPI(baseConf config.BaseConfig, body models.AnthropicRequest, timeout time.Duration) (string, error) {
 	jsonBody, err := json.Marshal(body)
@@ -107,6 +117,8 @@ func CallAnthropicWithTool[T any](baseConf config.BaseConfig, body models.Anthro
 		// Claude occasionally stringifies arrays or objects in tool inputs.
 		// If a value is a string but the target struct expects an object/array, json.Unmarshal fails.
 		// We proactively parse string values that look like JSON arrays or objects.
+		// Two-pass repair: first try as-is, then apply repairJSONStrings (handles literal
+		// newlines inside file content strings — the most common cause of this failure).
 		for k, v := range block.Input {
 			if s, ok := v.(string); ok {
 				s = strings.TrimSpace(s)
@@ -114,6 +126,15 @@ func CallAnthropicWithTool[T any](baseConf config.BaseConfig, body models.Anthro
 					var parsed interface{}
 					if err := json.Unmarshal([]byte(s), &parsed); err == nil {
 						block.Input[k] = parsed
+					} else {
+						// Pass 2: repair unescaped control characters (literal \n, \t, \r
+						// inside JSON string values — common when Claude generates file content).
+						repaired := repairJSONStrings(s)
+						if err2 := json.Unmarshal([]byte(repaired), &parsed); err2 == nil {
+							block.Input[k] = parsed
+						}
+						// If both passes fail, leave block.Input[k] as-is;
+						// the downstream decode will return a clear error.
 					}
 				}
 			}
@@ -128,6 +149,8 @@ func CallAnthropicWithTool[T any](baseConf config.BaseConfig, body models.Anthro
 		}
 		var result T
 		if err = json.Unmarshal(inputJSON, &result); err != nil {
+			log.Printf("[TOOL DECODE] failed to decode tool %q input into %T: %v\nraw input keys: %v",
+				block.Name, result, err, inputKeys(block.Input))
 			return nil, toolResp.Usage, toolResp.StopReason,
 				fmt.Errorf("failed to decode tool %q input into %T: %w", block.Name, result, err)
 		}
