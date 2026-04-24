@@ -280,26 +280,6 @@ func (p *ChatProcessor) provisionBackend(ctx context.Context, projectName string
 		return nil, fmt.Errorf("create environment: %w", err)
 	}
 
-	// CreateV2 provisions the resource synchronously but returns the Environment
-	// object created BEFORE resource provisioning — so ResourceEnvironmentId is empty.
-	// Re-fetch via GetList (which joins with service_resource) to get the populated record.
-	envList, err := p.h.companyServices.Environment().GetList(ctx, &pb.GetEnvironmentListRequest{
-		ProjectId: backendProject.GetProjectId(),
-		Limit:     1,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("re-fetch environment after CreateV2: %w", err)
-	}
-	envs := envList.GetEnvironments()
-	if len(envs) == 0 {
-		return nil, fmt.Errorf("no environment found after CreateV2 for project %s", backendProject.GetProjectId())
-	}
-	resourceEnvId := envs[0].GetResourceEnvironmentId()
-	if resourceEnvId == "" {
-		return nil, fmt.Errorf("ResourceEnvironmentId empty after provisioning env %s", env.GetId())
-	}
-	log.Printf("[provisionBackend] project=%s env=%s resourceEnv=%s", backendProject.GetProjectId(), env.GetId(), resourceEnvId)
-
 	apiKeys, err := p.h.authService.ApiKey().GetList(
 		ctx, &as.GetListReq{
 			EnvironmentId: env.GetId(),
@@ -312,6 +292,7 @@ func (p *ChatProcessor) provisionBackend(ctx context.Context, projectName string
 	}
 
 	var apiKey string
+
 	if len(apiKeys.GetData()) > 0 {
 		apiKey = apiKeys.GetData()[0].GetAppId()
 	}
@@ -353,12 +334,25 @@ func (p *ChatProcessor) provisionBackend(ctx context.Context, projectName string
 
 	p.mcpUcodeProjectId = backendProject.GetProjectId()
 
+	resource, err := p.service.CompanyService().ServiceResource().GetSingle(
+		ctx,
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     backendProject.GetProjectId(),
+			EnvironmentId: env.GetId(),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+
+	if err != nil {
+		return nil, fmt.Errorf("get resource for project: %w", err)
+	}
+
 	return &models.ProjectData{
 		UcodeProjectId: backendProject.GetProjectId(),
 		McpProjectId:   mcpProjectId,
 		ApiKey:         apiKey,
 		EnvironmentId:  env.GetId(),
-		ResourceEnvId:  resourceEnvId,
+		ResourceEnvId:  resource.GetResourceEnvironmentId(),
 	}, nil
 }
 
