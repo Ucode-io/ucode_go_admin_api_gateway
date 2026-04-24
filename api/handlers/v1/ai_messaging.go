@@ -280,17 +280,6 @@ func (p *ChatProcessor) provisionBackend(ctx context.Context, projectName string
 		return nil, fmt.Errorf("create environment: %w", err)
 	}
 
-	resource, err := p.h.companyServices.ServiceResource().GetSingle(
-		ctx, &pb.GetSingleServiceResourceReq{
-			ProjectId:     backendProject.GetProjectId(),
-			EnvironmentId: env.GetId(),
-			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
-		},
-	)
-	if err != nil {
-		return nil, fmt.Errorf("fetch service resource: %w", err)
-	}
-
 	apiKeys, err := p.h.authService.ApiKey().GetList(
 		ctx, &as.GetListReq{
 			EnvironmentId: env.GetId(),
@@ -349,7 +338,7 @@ func (p *ChatProcessor) provisionBackend(ctx context.Context, projectName string
 		McpProjectId:   mcpProjectId,
 		ApiKey:         apiKey,
 		EnvironmentId:  env.GetId(),
-		ResourceEnvId:  resource.GetResourceEnvironmentId(),
+		ResourceEnvId:  env.GetResourceEnvironmentId(),
 	}, nil
 }
 
