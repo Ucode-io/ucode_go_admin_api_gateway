@@ -280,6 +280,19 @@ func (p *ChatProcessor) provisionBackend(ctx context.Context, projectName string
 		return nil, fmt.Errorf("create environment: %w", err)
 	}
 
+	// CreateV2 provisions the resource synchronously but returns the Environment
+	// object created BEFORE resource provisioning — so ResourceEnvironmentId is empty.
+	// Re-fetch to get the fully populated record.
+	env, err = p.h.companyServices.Environment().GetById(ctx, &pb.EnvironmentPrimaryKey{Id: env.GetId()})
+	if err != nil {
+		return nil, fmt.Errorf("re-fetch environment after CreateV2: %w", err)
+	}
+	resourceEnvId := env.GetResourceEnvironmentId()
+	if resourceEnvId == "" {
+		return nil, fmt.Errorf("ResourceEnvironmentId empty after provisioning env %s", env.GetId())
+	}
+	log.Printf("[provisionBackend] project=%s env=%s resourceEnv=%s", backendProject.GetProjectId(), env.GetId(), resourceEnvId)
+
 	apiKeys, err := p.h.authService.ApiKey().GetList(
 		ctx, &as.GetListReq{
 			EnvironmentId: env.GetId(),
@@ -338,7 +351,7 @@ func (p *ChatProcessor) provisionBackend(ctx context.Context, projectName string
 		McpProjectId:   mcpProjectId,
 		ApiKey:         apiKey,
 		EnvironmentId:  env.GetId(),
-		ResourceEnvId:  env.GetResourceEnvironmentId(),
+		ResourceEnvId:  resourceEnvId,
 	}, nil
 }
 
