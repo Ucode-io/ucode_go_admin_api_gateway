@@ -97,11 +97,11 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 
 	p.mcpProjectId = projectData.McpProjectId
 
-	go func(bPlan *models.ArchitectPlan, resourceEnvId, envId string) {
-		if err := createBackendFromPlan(context.Background(), bPlan, resourceEnvId, p.ucodeProjectId, p.userId, envId, p.service); err != nil {
+	go func(bPlan *models.ArchitectPlan, resourceEnvId, ucodeProjectId, userId, envId string) {
+		if err := createBackendFromPlan(context.Background(), bPlan, resourceEnvId, ucodeProjectId, userId, envId, p.service); err != nil {
 			log.Printf("[new-project] async table creation failed: %v", err)
 		}
-	}(plan, projectData.ResourceEnvId, projectData.EnvironmentId)
+	}(plan, projectData.ResourceEnvId, projectData.UcodeProjectId, p.userId, projectData.EnvironmentId)
 
 	generated, err := p.generateCode(ctx, clarified, imageURLs, chatHistory, plan, projectData.ApiKey)
 	if err != nil {
@@ -171,11 +171,11 @@ func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context,
 				ProjectType: plan.ProjectType,
 				Tables:      newTables,
 			}
-			go func(bPlan *models.ArchitectPlan, resourceEnvId, envId string) {
-				if err := createBackendFromPlan(context.Background(), bPlan, resourceEnvId, p.ucodeProjectId, p.userId, envId, p.service); err != nil {
+			go func(bPlan *models.ArchitectPlan, resourceEnvId, ucodeProjectId, userId, envId string) {
+				if err := createBackendFromPlan(context.Background(), bPlan, resourceEnvId, ucodeProjectId, userId, envId, p.service); err != nil {
 					log.Printf("[mfe-current] async table creation failed: %v", err)
 				}
-			}(newPlan, projectData.ResourceEnvId, projectData.EnvironmentId)
+			}(newPlan, projectData.ResourceEnvId, projectData.UcodeProjectId, p.userId, projectData.EnvironmentId)
 		}
 	}
 
