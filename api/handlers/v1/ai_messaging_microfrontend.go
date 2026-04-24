@@ -205,7 +205,6 @@ func (p *ChatProcessor) buildMicrofrontendFilesContext(files []models.GitlabFile
 	return sb.String()
 }
 
-// publishToMicrofrontend creates the microfrontend repo and pushes AI-generated
 // files using a two-phase approach:
 //  1. publish-ai — creates the GitLab repo with a minimal init file
 //  2. push-changes — pushes all content files (same endpoint used for edits)
