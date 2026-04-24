@@ -205,26 +205,27 @@ func (p *ChatProcessor) buildMicrofrontendFilesContext(files []models.GitlabFile
 	return sb.String()
 }
 
-// publishToMicrofrontend calls the function service to create a microfrontend
-// and push all AI-generated files to the u-gen branch.
-// It stores the resulting microfrontend ID on the processor for the response.
+// publishToMicrofrontend creates the microfrontend repo and pushes AI-generated
+// files using a two-phase approach:
+//  1. publish-ai — creates the GitLab repo with a minimal init file
+//  2. push-changes — pushes all content files (same endpoint used for edits)
+//
+// This avoids hitting payload-size or file-count limits on the publish-ai endpoint.
 func (p *ChatProcessor) publishToMicrofrontend(ctx context.Context, projectName, path string, generated *models.ParsedClaudeResponse, projectData *models.ProjectData) error {
 	if generated == nil || generated.Project == nil || len(generated.Project.Files) == 0 {
 		return fmt.Errorf("no generated files to publish")
 	}
 
-	// Convert ProjectFile list to the format the function service expects.
-	// Sanitize paths (strip leading slashes Claude occasionally generates) and
-	// remove null bytes that some parsers reject.
-	files := make([]models.GitlabFileChange, 0, len(generated.Project.Files))
+	// Build the sanitized file list once — used in both phases.
+	allFiles := make([]models.ProjectFile, 0, len(generated.Project.Files))
 	for _, f := range generated.Project.Files {
 		cleanPath := strings.TrimLeft(f.Path, "/")
 		if cleanPath == "" {
 			continue
 		}
-		files = append(files, models.GitlabFileChange{
-			FilePath: cleanPath,
-			Content:  strings.ReplaceAll(f.Content, "\x00", ""),
+		allFiles = append(allFiles, models.ProjectFile{
+			Path:    cleanPath,
+			Content: sanitizeFileContent(f.Content),
 		})
 	}
 
@@ -237,55 +238,95 @@ func (p *ChatProcessor) publishToMicrofrontend(ctx context.Context, projectName,
 		safePath = "app"
 	}
 
-	reqBody := models.PublishAiMicroFrontendRequest{
+	// ── Phase 1: Create the GitLab repo with a single small init file ─────────
+	// We pass only package.json (always present for React projects) so the
+	// publish-ai endpoint can initialize the repo without a large payload.
+	var initFile models.GitlabFileChange
+	for _, f := range allFiles {
+		if f.Path == "package.json" {
+			initFile = models.GitlabFileChange{FilePath: f.Path, Content: f.Content}
+			break
+		}
+	}
+	if initFile.FilePath == "" && len(allFiles) > 0 {
+		// Fallback: use the first (usually smallest) file.
+		initFile = models.GitlabFileChange{FilePath: allFiles[0].Path, Content: allFiles[0].Content}
+	}
+
+	createBody := models.PublishAiMicroFrontendRequest{
 		ProjectId:     projectData.UcodeProjectId,
 		EnvironmentId: projectData.EnvironmentId,
 		Name:          safeName,
 		Path:          safePath,
 		FrameworkType: "REACT",
-		Files:         files,
+		Files:         []models.GitlabFileChange{initFile},
 	}
 
-	bodyBytes, err := json.Marshal(reqBody)
+	createBytes, err := json.Marshal(createBody)
 	if err != nil {
-		return fmt.Errorf("marshal request: %w", err)
+		return fmt.Errorf("marshal create request: %w", err)
 	}
 
-	log.Printf("[MICROFRONTEND] publish-ai: raw_name=%q raw_path=%q safe_name=%q safe_path=%q project_id=%s env_id=%s files=%d",
-		projectName, path, safeName, safePath, projectData.UcodeProjectId, projectData.EnvironmentId, len(files))
+	log.Printf("[MICROFRONTEND] publish-ai (phase 1): name=%q path=%q project_id=%s env_id=%s init_file=%s total_files=%d",
+		safeName, safePath, projectData.UcodeProjectId, projectData.EnvironmentId, initFile.FilePath, len(allFiles))
 
-	url := p.baseConf.GoFunctionServiceHost + p.baseConf.GoFunctionServiceHTTPPort + "/v2/functions/micro-frontend/publish-ai"
-
-	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(bodyBytes))
+	createURL := p.baseConf.GoFunctionServiceHost + p.baseConf.GoFunctionServiceHTTPPort + "/v2/functions/micro-frontend/publish-ai"
+	createReq, err := http.NewRequestWithContext(ctx, http.MethodPost, createURL, bytes.NewReader(createBytes))
 	if err != nil {
-		return fmt.Errorf("build request: %w", err)
+		return fmt.Errorf("build create request: %w", err)
 	}
-	httpReq.Header.Set("Content-Type", "application/json")
-	httpReq.Header.Set("Authorization", p.authToken)
+	createReq.Header.Set("Content-Type", "application/json")
+	createReq.Header.Set("Authorization", p.authToken)
 
 	client := &http.Client{Timeout: timeoutPublishMicrofrontend}
-	resp, err := client.Do(httpReq)
+	createResp, err := client.Do(createReq)
 	if err != nil {
-		return fmt.Errorf("function service call failed: %w", err)
+		return fmt.Errorf("publish-ai call failed: %w", err)
 	}
-	defer resp.Body.Close()
+	defer createResp.Body.Close()
 
-	respBytes, err := io.ReadAll(resp.Body)
+	createRespBytes, err := io.ReadAll(createResp.Body)
 	if err != nil {
-		return fmt.Errorf("read function service response: %w", err)
+		return fmt.Errorf("read publish-ai response: %w", err)
+	}
+	if createResp.StatusCode >= 400 {
+		return fmt.Errorf("publish-ai returned %d: %s", createResp.StatusCode, string(createRespBytes))
 	}
 
-	if resp.StatusCode >= 400 {
-		return fmt.Errorf("function service returned %d: %s", resp.StatusCode, string(respBytes))
+	var createResult models.PublishAiMicroFrontendResponse
+	if err = json.Unmarshal(createRespBytes, &createResult); err != nil {
+		return fmt.Errorf("parse publish-ai response: %w", err)
 	}
 
-	var result models.PublishAiMicroFrontendResponse
-	if err = json.Unmarshal(respBytes, &result); err != nil {
-		return fmt.Errorf("parse function service response: %w", err)
+	p.microFrontendId = createResult.Data.ID
+	p.microFrontendRepoId = createResult.Data.RepoId
+	log.Printf("[MICROFRONTEND] repo created: id=%s repo_id=%s", createResult.Data.ID, createResult.Data.RepoId)
+
+	// ── Phase 2: Push all files via push-changes (proven endpoint) ────────────
+	log.Printf("[MICROFRONTEND] push-changes (phase 2): pushing %d files to repo_id=%s", len(allFiles), p.microFrontendRepoId)
+	if err = p.pushMicrofrontendChanges(ctx, allFiles); err != nil {
+		return fmt.Errorf("push-changes after publish-ai failed: %w", err)
 	}
 
-	p.microFrontendId = result.Data.ID
-	p.microFrontendRepoId = result.Data.RepoId
-	log.Printf("[MICROFRONTEND] created id=%s repo_id=%s url=%s", result.Data.ID, result.Data.RepoId, result.Data.Url)
+	log.Printf("[MICROFRONTEND] ✅ published: id=%s url=%s", p.microFrontendId, createResult.Data.Url)
 	return nil
+}
+
+// sanitizeFileContent removes characters that can cause JSON parse failures
+// in downstream services: null bytes, BOM, and other C0 control characters
+// except standard whitespace (tab=0x09, newline=0x0A, carriage-return=0x0D).
+func sanitizeFileContent(s string) string {
+	var sb strings.Builder
+	sb.Grow(len(s))
+	for _, r := range s {
+		switch {
+		case r == '\t' || r == '\n' || r == '\r':
+			sb.WriteRune(r)
+		case r == '\uFEFF': // BOM — strip silently
+		case r < 0x20: // other C0 control characters — strip
+		default:
+			sb.WriteRune(r)
+		}
+	}
+	return sb.String()
 }

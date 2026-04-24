@@ -2,6 +2,7 @@ package v1
 
 import (
 	"context"
+	"crypto/rand"
 	"fmt"
 	"log"
 	"regexp"
@@ -107,7 +108,7 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 		return nil, err
 	}
 
-	if err = p.publishToMicrofrontend(ctx, plan.ProjectName, "app", generated, projectData); err != nil {
+	if err = p.publishToMicrofrontend(ctx, plan.ProjectName, uniqueMFEPath(), generated, projectData); err != nil {
 		return nil, fmt.Errorf("microfrontend publish failed: %w", err)
 	}
 
@@ -183,12 +184,7 @@ func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context,
 		return nil, err
 	}
 
-	mfePath := slugify(plan.ProjectName)
-	if len(mfePath) > 10 {
-		mfePath = strings.TrimRight(mfePath[:10], "-")
-	}
-
-	if err = p.publishToMicrofrontend(ctx, plan.ProjectName, mfePath, generated, projectData); err != nil {
+	if err = p.publishToMicrofrontend(ctx, plan.ProjectName, uniqueMFEPath(), generated, projectData); err != nil {
 		return nil, fmt.Errorf("microfrontend publish failed: %w", err)
 	}
 
@@ -533,6 +529,18 @@ func buildHistoryText(history []models.ChatMessage) string {
 		sb.WriteString(fmt.Sprintf("[%s]: %s\n", strings.ToUpper(msg.Role), text))
 	}
 	return sb.String()
+}
+
+// uniqueMFEPath returns a short unique GitLab path for a new microfrontend:
+// "app-XXXXXX" where XXXXXX is 6 random lowercase hex chars.
+// This prevents GitLab project name collisions on retries.
+// Format: 10 chars → functionPath in function service stays ≤ 20 chars.
+func uniqueMFEPath() string {
+	b := make([]byte, 3)
+	if _, err := rand.Read(b); err != nil {
+		return fmt.Sprintf("app-%x", time.Now().UnixNano()&0xFFFFFF)
+	}
+	return fmt.Sprintf("app-%x", b)
 }
 
 // slugify converts a project name to a lowercase hyphen-separated slug
