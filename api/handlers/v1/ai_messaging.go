@@ -264,6 +264,8 @@ func (p *ChatProcessor) provisionBackend(ctx context.Context, projectName string
 		return nil, fmt.Errorf("create backend project: %w", err)
 	}
 
+	log.Println("Created ucode project with id:", backendProject.GetProjectId())
+
 	env, err := p.h.companyServices.Environment().CreateV2(
 		ctx, &pb.CreateEnvironmentRequest{
 			CompanyId:    currentProject.GetCompanyId(),
@@ -278,6 +280,22 @@ func (p *ChatProcessor) provisionBackend(ctx context.Context, projectName string
 	)
 	if err != nil {
 		return nil, fmt.Errorf("create environment: %w", err)
+	}
+
+	log.Println("Created environment with id:", backendProject.GetProjectId())
+	log.Println("Getting resource environment_id, with project_id:", backendProject.GetProjectId(), "Env id", env.GetId())
+
+	resource, err := p.service.CompanyService().ServiceResource().GetSingle(
+		ctx,
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     backendProject.GetProjectId(),
+			EnvironmentId: env.GetId(),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+
+	if err != nil {
+		return nil, fmt.Errorf("get resource for project: %w", err)
 	}
 
 	apiKeys, err := p.h.authService.ApiKey().GetList(
@@ -333,19 +351,6 @@ func (p *ChatProcessor) provisionBackend(ctx context.Context, projectName string
 	}
 
 	p.mcpUcodeProjectId = backendProject.GetProjectId()
-
-	resource, err := p.service.CompanyService().ServiceResource().GetSingle(
-		ctx,
-		&pb.GetSingleServiceResourceReq{
-			ProjectId:     backendProject.GetProjectId(),
-			EnvironmentId: env.GetId(),
-			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
-		},
-	)
-
-	if err != nil {
-		return nil, fmt.Errorf("get resource for project: %w", err)
-	}
 
 	return &models.ProjectData{
 		UcodeProjectId: backendProject.GetProjectId(),
