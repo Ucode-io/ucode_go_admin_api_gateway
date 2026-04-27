@@ -240,7 +240,10 @@ func (h *HandlerV1) GetUgenUserProjects(c *gin.Context) {
 						},
 					)
 
-					var envId = envList.GetEnvironments()[0].GetId()
+					var envId string
+					if envList != nil && len(envList.GetEnvironments()) > 0 {
+						envId = envList.GetEnvironments()[0].GetId()
+					}
 
 					projects[jdx] = models.UgenProjectData{
 						Id:            info.GetProjectId(),
