@@ -25,7 +25,10 @@ import (
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) CreateCompany(c *gin.Context) {
-	var company models.CompanyCreateRequest
+	var (
+		company models.CompanyCreateRequest
+		isUgen  = c.Query("is_ugen") == "true"
+	)
 
 	if err := c.ShouldBindJSON(&company); err != nil {
 		h.HandleResponse(c, status_http.BadRequest, err.Error())
@@ -54,6 +57,7 @@ func (h *HandlerV1) CreateCompany(c *gin.Context) {
 			CompanyId:    companyPKey.GetId(),
 			K8SNamespace: "cp-region-type-id",
 			Title:        company.Name,
+			IsUgen:       isUgen,
 		},
 	)
 	if err != nil {
