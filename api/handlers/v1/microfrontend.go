@@ -111,3 +111,57 @@ func (h *HandlerV1) DeleteMicroFrontEnd(c *gin.Context) {
 func (h *HandlerV1) PromoteMicrofrontendToMaster(c *gin.Context) {
 	_ = h.MakeProxy(c, h.baseConf.GoFunctionServiceHost+h.baseConf.GoFunctionServiceHTTPPort, c.Request.URL.Path)
 }
+
+// GetMicrofrontendCommits godoc
+// @Security ApiKeyAuth
+// @ID get_microfrontend_commits
+// @Router /v2/functions/micro-frontend/commits [GET]
+// @Summary Get commit history of a microfrontend repo
+// @Description Returns commits from the master branch (published versions).
+// @Tags Functions
+// @Accept json
+// @Produce json
+// @Param repo_id query string true  "GitLab numeric project ID"
+// @Param limit   query int    false "Number of commits per page (default: 20, max: 100)"
+// @Param page    query int    false "Page number (default: 1)"
+// @Success 200 {object} status_http.Response "Commit list"
+// @Failure 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *HandlerV1) GetMicrofrontendCommits(c *gin.Context) {
+	_ = h.MakeProxy(c, h.baseConf.GoFunctionServiceHost+h.baseConf.GoFunctionServiceHTTPPort, c.Request.URL.Path)
+}
+
+// GetMicrofrontendFilesAtCommit godoc
+// @Security ApiKeyAuth
+// @ID get_microfrontend_files_at_commit
+// @Router /v2/functions/micro-frontend/files-at-commit [GET]
+// @Summary Get all file contents of a microfrontend at a specific commit
+// @Description Fetches the full file tree and each file's raw content at the given commit SHA for previewing a historical version.
+// @Tags Functions
+// @Accept json
+// @Produce json
+// @Param repo_id    query string true "GitLab numeric project ID"
+// @Param commit_sha query string true "Commit SHA to fetch files from"
+// @Success 200 {object} status_http.Response "File list with contents"
+// @Failure 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *HandlerV1) GetMicrofrontendFilesAtCommit(c *gin.Context) {
+	_ = h.MakeProxy(c, h.baseConf.GoFunctionServiceHost+h.baseConf.GoFunctionServiceHTTPPort, c.Request.URL.Path)
+}
+
+// RevertMicrofrontendToCommit godoc
+// @Security ApiKeyAuth
+// @ID revert_microfrontend_to_commit
+// @Router /v2/functions/micro-frontend/revert [POST]
+// @Summary Revert a microfrontend to a specific commit
+// @Description Restores the snapshot of the chosen master commit to the u-gen branch. The user then publishes to go live.
+// @Tags Functions
+// @Accept json
+// @Produce json
+// @Param body body models.RevertMicrofrontendRequest true "repo_id and commit_sha"
+// @Success 200 {object} status_http.Response "Reverted successfully"
+// @Failure 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *HandlerV1) RevertMicrofrontendToCommit(c *gin.Context) {
+	_ = h.MakeProxy(c, h.baseConf.GoFunctionServiceHost+h.baseConf.GoFunctionServiceHTTPPort, c.Request.URL.Path)
+}
