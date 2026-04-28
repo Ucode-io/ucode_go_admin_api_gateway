@@ -102,7 +102,8 @@ func (p *ChatProcessor) callArchitect(ctx context.Context, clarified string, ima
 
 // generateCode is the unified code generation agent. It receives the architect's plan
 // (including design tokens) and produces all frontend files.
-// For admin_panel projects it injects template context files and silently merges scaffold files.
+// For admin_panel projects it injects template context files, runs two-phase generation
+// to avoid max_tokens errors on large projects, and silently merges scaffold files.
 func (p *ChatProcessor) generateCode(ctx context.Context, clarified string, imageURLs []string, chatHistory []models.ChatMessage, plan *models.ArchitectPlan, apiKey string) (*models.ParsedClaudeResponse, error) {
 	prompt := clarified + "\n\n" + buildAPIConfigBlock(p.baseConf.UcodeBaseUrl, apiKey, plan)
 
@@ -131,6 +132,9 @@ func (p *ChatProcessor) generateCode(ctx context.Context, clarified string, imag
 			}
 			prompt += templateCtx.String()
 		}
+
+		// Two-phase generation for admin_panel prevents max_tokens errors on large projects.
+		return p.generateCodeTwoPhase(ctx, prompt, imageURLs, chatHistory, plan, scaffoldFiles)
 	}
 
 	messages := buildMessagesWithHistory(chatHistory, buildContentBlocksWithImages(prompt, imageURLs))
@@ -156,21 +160,143 @@ func (p *ChatProcessor) generateCode(ctx context.Context, clarified string, imag
 		return nil, fmt.Errorf("generate code: claude returned empty project")
 	}
 
+	log.Printf("[generate] done: %d files (type=%s)", len(project.Files), plan.ProjectType)
+	return &models.ParsedClaudeResponse{Project: project}, nil
+}
+
+// generateCodeTwoPhase splits admin_panel generation into two sequential API calls:
+//   - Phase 1: core structural files (App.tsx with all routes, layout, types)
+//   - Phase 2: all remaining feature files using Phase 1 as context
+//
+// This prevents max_tokens failures on large admin panels (25-35 files).
+func (p *ChatProcessor) generateCodeTwoPhase(ctx context.Context, basePrompt string, imageURLs []string, chatHistory []models.ChatMessage, plan *models.ArchitectPlan, scaffoldFiles []models.ProjectFile) (*models.ParsedClaudeResponse, error) {
+	const phase1Instruction = `
+====================================
+PHASE 1 — CORE FILES ONLY
+====================================
+In this phase, generate ONLY these 6 files (no more, no less):
+  1. src/App.tsx           — declare ALL routes for every page you plan to build, including pages from Phase 2
+  2. src/layouts/MainLayout.tsx
+  3. src/components/layout/Sidebar.tsx — full navigation menu listing all planned pages
+  4. src/components/layout/Header.tsx
+  5. src/pages/Dashboard.tsx           — complete implementation
+  6. src/types/index.ts                — ALL TypeScript interfaces for the entire project
+
+DO NOT generate any other files. Phase 2 will generate all remaining pages, components, forms, and tables.
+`
+
+	phase1Messages := buildMessagesWithHistory(chatHistory, buildContentBlocksWithImages(basePrompt+phase1Instruction, imageURLs))
+
+	phase1Project, err := callWithTool[models.GeneratedProject](
+		p, ctx,
+		models.AnthropicToolRequest{
+			Model:      p.baseConf.CoderModel,
+			MaxTokens:  p.baseConf.CoderMaxTokens,
+			System:     helper.PromptAdminPanelGenerator,
+			Messages:   phase1Messages,
+			Tools:      []models.ClaudeFunctionTool{helper.ToolEmitProject},
+			ToolChoice: helper.ForcedTool(helper.ToolEmitProject.Name),
+		},
+		timeoutCoder,
+		"Generating project code (phase 1 — core files)",
+	)
+	if err != nil {
+		return nil, fmt.Errorf("generate code phase 1: %w", err)
+	}
+	if len(phase1Project.Files) == 0 {
+		return nil, fmt.Errorf("generate code phase 1: claude returned empty project")
+	}
+	log.Printf("[generate] phase 1 done: %d files", len(phase1Project.Files))
+
+	// Phase 2: generate all remaining feature files with Phase 1 as context.
+	phase1FilePaths := make(map[string]struct{}, len(phase1Project.Files))
+	for _, f := range phase1Project.Files {
+		phase1FilePaths[f.Path] = struct{}{}
+	}
+
+	phase2Instruction := buildPhase1Context(phase1Project.Files) + `
+====================================
+PHASE 2 — FEATURE FILES ONLY
+====================================
+Generate ALL remaining pages, components, forms, and tables for this project.
+RULES:
+  - DO NOT include any Phase 1 file paths listed above in your output
+  - Use EXACT import paths from Phase 1 files (App.tsx routes, types/index.ts interfaces, layout components)
+  - Every page must match a route already declared in the Phase 1 src/App.tsx
+  - Complete every feature with full CRUD, data tables, forms, and API integration
+`
+
+	phase2Messages := buildMessagesWithHistory(chatHistory, buildContentBlocksWithImages(basePrompt+phase2Instruction, imageURLs))
+
+	phase2Project, err := callWithTool[models.GeneratedProject](
+		p, ctx,
+		models.AnthropicToolRequest{
+			Model:      p.baseConf.CoderModel,
+			MaxTokens:  p.baseConf.CoderMaxTokens,
+			System:     helper.PromptAdminPanelGenerator,
+			Messages:   phase2Messages,
+			Tools:      []models.ClaudeFunctionTool{helper.ToolEmitProject},
+			ToolChoice: helper.ForcedTool(helper.ToolEmitProject.Name),
+		},
+		timeoutCoder,
+		"Generating project code (phase 2 — feature files)",
+	)
+	if err != nil {
+		return nil, fmt.Errorf("generate code phase 2: %w", err)
+	}
+	log.Printf("[generate] phase 2 done: %d files", len(phase2Project.Files))
+
+	// Merge Phase 1 + Phase 2; Phase 1 wins on path conflicts.
+	allFiles := make([]models.ProjectFile, 0, len(phase1Project.Files)+len(phase2Project.Files))
+	allFiles = append(allFiles, phase1Project.Files...)
+	for _, f := range phase2Project.Files {
+		if _, exists := phase1FilePaths[f.Path]; !exists {
+			allFiles = append(allFiles, f)
+		}
+	}
+
 	// Silently merge scaffold files that AI must not re-emit (prevents template drift).
 	if len(scaffoldFiles) > 0 {
-		generatedPaths := make(map[string]struct{}, len(project.Files))
-		for _, f := range project.Files {
+		generatedPaths := make(map[string]struct{}, len(allFiles))
+		for _, f := range allFiles {
 			generatedPaths[f.Path] = struct{}{}
 		}
 		for _, sf := range scaffoldFiles {
 			if _, exists := generatedPaths[sf.Path]; !exists {
-				project.Files = append(project.Files, sf)
+				allFiles = append(allFiles, sf)
 			}
 		}
 	}
 
-	log.Printf("[generate] done: %d files (type=%s)", len(project.Files), plan.ProjectType)
-	return &models.ParsedClaudeResponse{Project: project}, nil
+	projectName := phase1Project.ProjectName
+	if projectName == "" {
+		projectName = phase2Project.ProjectName
+	}
+	merged := &models.GeneratedProject{
+		ProjectName: projectName,
+		Files:       allFiles,
+		FileGraph:   phase1Project.FileGraph,
+		Env:         phase1Project.Env,
+	}
+
+	log.Printf("[generate] two-phase done: %d files total (type=%s)", len(allFiles), plan.ProjectType)
+	return &models.ParsedClaudeResponse{Project: merged}, nil
+}
+
+// buildPhase1Context formats Phase 1 generated files as a prompt section for Phase 2.
+func buildPhase1Context(files []models.ProjectFile) string {
+	var sb strings.Builder
+	sb.WriteString("\n====================================\n")
+	sb.WriteString("PHASE 1 FILES — ALREADY GENERATED (DO NOT REGENERATE)\n")
+	sb.WriteString("====================================\n")
+	sb.WriteString("The following files were generated in Phase 1. You MUST:\n")
+	sb.WriteString("  1. Use EXACT import paths from these files\n")
+	sb.WriteString("  2. NOT include any of these file paths in your output\n")
+	sb.WriteString("  3. Ensure your new files import from these paths correctly\n\n")
+	for _, f := range files {
+		fmt.Fprintf(&sb, "### %s\n```typescript\n%s\n```\n\n", f.Path, f.Content)
+	}
+	return sb.String()
 }
 
 func (p *ChatProcessor) inspectCode(ctx context.Context, userQuestion, filesContext string, chatHistory []models.ChatMessage, imageURLs []string) (string, error) {
