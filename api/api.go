@@ -613,6 +613,9 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		proxyFunctions.PUT("/micro-frontend", h.V1.UpdateMicroFrontEnd)
 		proxyFunctions.DELETE("/micro-frontend/:micro-frontend-id", h.V1.DeleteMicroFrontEnd)
 		proxyFunctions.POST("/micro-frontend/promote", h.V1.PromoteMicrofrontendToMaster)
+		proxyFunctions.GET("/micro-frontend/commits", h.V1.GetMicrofrontendCommits)
+		proxyFunctions.GET("/micro-frontend/files-at-commit", h.V1.GetMicrofrontendFilesAtCommit)
+		proxyFunctions.POST("/micro-frontend/revert", h.V1.RevertMicrofrontendToCommit)
 	}
 
 	proxyGrafana := proxyApi.Group("/grafana")
