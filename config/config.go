@@ -209,12 +209,9 @@ func BaseLoad() BaseConfig {
 	config.ClaudeModel = cast.ToString(GetOrReturnDefaultValue("CLAUDE_MODEL", ""))
 	config.ClaudeHaikuModel = cast.ToString(GetOrReturnDefaultValue("CLAUDE_HAIKU_MODEL", "claude-haiku-4-5"))
 
+	config.ArchitectModel = cast.ToString(GetOrReturnDefaultValue("ARCHITECT_MODEL", "claude-opus-4-6"))
+
 	// Per-agent model overrides (fall back to ClaudeModel when empty)
-	architectModel := cast.ToString(GetOrReturnDefaultValue("ARCHITECT_MODEL", ""))
-	if architectModel == "" {
-		architectModel = config.ClaudeModel
-	}
-	config.ArchitectModel = architectModel
 
 	coderModel := cast.ToString(GetOrReturnDefaultValue("CODER_MODEL", ""))
 	if coderModel == "" {
