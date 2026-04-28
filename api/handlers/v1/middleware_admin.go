@@ -43,7 +43,7 @@ func (h *HandlerV1) AdminAuthMiddleware() gin.HandlerFunc {
 				strArr      = strings.Split(bearerToken, " ")
 			)
 
-			if len(strArr) < 1 && (strArr[0] != "Bearer" && strArr[0] != "API-KEY") {
+			if len(strArr) < 2 || (strArr[0] != "Bearer" && strArr[0] != "API-KEY") {
 				h.log.Error("---ERR->Unexpected token format")
 				_ = c.AbortWithError(http.StatusForbidden, config.ErrTokenFormat)
 				return
@@ -90,6 +90,7 @@ func (h *HandlerV1) AdminAuthMiddleware() gin.HandlerFunc {
 				c.Set("environment_id", environmentId)
 				c.Set("resource_id", resourceId)
 				c.Set("project_id", projectId)
+				c.Set("Auth_Admin", res)
 			case "API-KEY":
 				appId := c.GetHeader("X-API-KEY")
 				apiKey, err := h.authService.ApiKey().GetEnvID(
@@ -126,9 +127,8 @@ func (h *HandlerV1) AdminAuthMiddleware() gin.HandlerFunc {
 				h.log.Error("--AuthMiddleware--", logger.Error(err))
 				h.HandleResponse(c, status_http.BadRequest, err.Error())
 				c.Abort()
+				return
 			}
-
-			c.Set("Auth_Admin", res)
 		}
 
 		c.Next()
