@@ -48,6 +48,9 @@ var (
 
 	// Matches: import.meta.env.VITE_XXX
 	reEnvUsage = regexp.MustCompile(`import\.meta\.env\.(\w+)`)
+
+	// Matches: const X, let X, var X, function X, class X — local declarations
+	reLocalDecl = regexp.MustCompile(`(?:const|let|var|function|class)\s+([A-Z]\w+)`)
 )
 
 // ImportStatement represents one parsed import.
@@ -142,7 +145,44 @@ func validateGeneratedProject(files []models.ProjectFile, envVars map[string]any
 		}
 	}
 
-	// Step 4: Validate env variables.
+	// Step 4: Check for orphaned displayName assignments (e.g. Texarea.displayName where Texarea is not defined).
+	// These cause ReferenceError at module load time — the whole page crashes before React renders.
+	for _, f := range files {
+		if !strings.HasSuffix(f.Path, ".tsx") && !strings.HasSuffix(f.Path, ".ts") {
+			continue
+		}
+		// Collect all locally-declared names (PascalCase only — component names)
+		declared := make(map[string]bool)
+		for _, m := range reLocalDecl.FindAllStringSubmatch(f.Content, -1) {
+			declared[m[1]] = true
+		}
+		// Also treat imported names as "declared"
+		for _, imp := range parseImports(f.Path, f.Content) {
+			if imp.Default != "" {
+				declared[imp.Default] = true
+			}
+			for _, n := range imp.Names {
+				declared[strings.TrimSpace(n)] = true
+			}
+		}
+		// Check every X.displayName = '...' — X must be declared
+		for _, m := range reDisplayName.FindAllStringSubmatch(f.Content, -1) {
+			name := m[1]
+			// Skip known globals
+			if name == "React" || name == "module" || name == "exports" {
+				continue
+			}
+			if !declared[name] {
+				errors = append(errors, ValidationError{
+					Severity: "error",
+					File:     f.Path,
+					Message:  fmt.Sprintf("%s.displayName is assigned but %s is not declared in this file (likely a typo in component name)", name, name),
+				})
+			}
+		}
+	}
+
+	// Step 5: Validate env variables.
 	envErrors := validateEnvVars(files, envVars)
 	errors = append(errors, envErrors...)
 
@@ -438,7 +478,7 @@ func (p *ChatProcessor) repairSingleFile(
 ) (models.ProjectFile, error) {
 	var sb strings.Builder
 
-	sb.WriteString("Fix the TypeScript file below. It has the following import errors:\n\n")
+	sb.WriteString("Fix the TypeScript/TSX file below. It has the following errors:\n\n")
 	for _, e := range errs {
 		fmt.Fprintf(&sb, "  - %s\n", e)
 	}
@@ -466,8 +506,9 @@ func (p *ChatProcessor) repairSingleFile(
 	}
 
 	sb.WriteString("\nRULES:\n")
-	sb.WriteString("  - Fix ONLY the broken imports. Do not rewrite unrelated code.\n")
-	sb.WriteString("  - If a named import does not exist, remove it or replace with the correct name.\n")
+	sb.WriteString("  - Fix ONLY the listed errors. Do not rewrite unrelated code.\n")
+	sb.WriteString("  - For import errors: use correct exported names from the AVAILABLE EXPORTS list above.\n")
+	sb.WriteString("  - For 'X.displayName assigned but X not declared': it is a typo in the component name — rename the const/variable to match the displayName assignment, or fix the displayName to match the const name.\n")
 	sb.WriteString("  - Output the complete corrected file. Never truncate.\n")
 
 	fmt.Fprintf(&sb, "\nFILE: %s\n```typescript\n%s\n```\n", f.Path, f.Content)
@@ -477,7 +518,7 @@ func (p *ChatProcessor) repairSingleFile(
 		models.AnthropicToolRequest{
 			Model:      p.baseConf.ClaudeHaikuModel,
 			MaxTokens:  8000,
-			System:     "You are a TypeScript import-error repair bot. Fix only the import errors listed. Output the complete corrected file via the repair_file tool.",
+			System:     "You are a TypeScript error repair bot. Fix only the listed errors (import errors, typos in component names, orphaned displayName assignments). Output the complete corrected file via the repair_file tool.",
 			Messages:   []models.ChatMessage{{Role: "user", Content: []models.ContentBlock{{Type: "text", Text: sb.String()}}}},
 			Tools:      []models.ClaudeFunctionTool{helper.ToolRepairFile},
 			ToolChoice: helper.ForcedTool(helper.ToolRepairFile.Name),
