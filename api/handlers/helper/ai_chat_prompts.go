@@ -544,6 +544,21 @@ CODE QUALITY
 - Submit buttons show Loader2 spinner when mutation.isPending
 
 ====================================
+NULL SAFETY — MANDATORY
+====================================
+API fields can ALWAYS be null/undefined at runtime. Guard every field before using string methods:
+  ✅ {item.name ?? '—'}                    // display
+  ✅ getInitials(item.name)                 // safe — getInitials handles null/undefined
+  ✅ formatDate(item.created_at)            // safe — formatDate handles null/undefined
+  ✅ truncate(item.description, 80)         // safe — truncate handles null/undefined
+  ✅ (item.name ?? '').toLowerCase()        // before string operations
+  ✅ item.tags?.split(',') ?? []            // before split/join
+  ❌ item.name.split(' ')                   // CRASH if name is null
+  ❌ item.email.toLowerCase()               // CRASH if email is null
+  ❌ item.description.slice(0, 100)         // CRASH if description is null
+Never assume an API field is non-null — always use ?. or ?? or explicit guards.
+
+====================================
 BROWSER BUILD — NO CLI
 ====================================
 No terminal commands, no setup instructions. Output only file content.
@@ -1119,6 +1134,19 @@ NO INLINE STYLES (CRITICAL — banned for static values):
 NO AUTH: Never generate Login/Register pages, ProtectedRoute, AuthGuard,
   useAuth, auth context, logout buttons, token management, or /login redirects.
   The app starts directly on the main page.
+
+NULL SAFETY (CRITICAL — prevents runtime crashes):
+  API fields are ALWAYS nullable at runtime. Guard every field before using string/array methods.
+  ✅ {item.name ?? '—'}                    — safe display
+  ✅ getInitials(item.name)                 — null-safe (accepts null|undefined)
+  ✅ formatDate(item.created_at)            — null-safe (accepts null|undefined)
+  ✅ truncate(item.description, 80)         — null-safe (accepts null|undefined)
+  ✅ (item.name ?? '').toLowerCase()        — guard before string ops
+  ✅ (item.tags ?? '').split(',')           — guard before split
+  ❌ item.name.split(' ')                   — CRASH when name is null
+  ❌ item.email.toLowerCase()               — CRASH when email is null
+  ❌ item.description.slice(0, 100)         — CRASH when description is null
+  Rule: use ?. and ?? everywhere data comes from API. Never assume a field is non-null.
 
 CSS PLACEMENT:
   index.css is imported in App.tsx — NOT in main.tsx.
