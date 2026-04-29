@@ -298,6 +298,13 @@ func (p *ChatProcessor) generateCodeChunked(ctx context.Context, clarified strin
 		if res.err != nil {
 			log.Printf("[chunked] feature chunk %q error: %v", res.group.Name, res.err)
 			failedCount++
+			// Inject page stubs for the failed group so App.tsx route imports don't crash the build.
+			// Without stubs, App.tsx has `import LeavesPage from './pages/LeavesPage'` but the file
+			// doesn't exist → virtual FS build error → entire project fails to open.
+			if stub := buildStubChunk(res.group); len(stub.Files) > 0 {
+				successChunks = append(successChunks, stub)
+				log.Printf("[chunked] injected %d stub file(s) for failed chunk %q", len(stub.Files), res.group.Name)
+			}
 		} else {
 			// Filter each chunk to ONLY its assigned files — prevents cross-group pollution.
 			res.project.Files = filterToGroup(res.project.Files, res.group)
@@ -638,6 +645,35 @@ func buildManifestSummary(manifest *models.ProjectManifest) string {
 		sb.WriteString("\n")
 	}
 	return sb.String()
+}
+
+// buildStubChunk creates minimal placeholder files for a failed chunk so that
+// App.tsx route imports resolve and the virtual FS build doesn't crash.
+// Only page files (src/pages/*.tsx) get stubs — hook/util files are optional imports
+// and don't block the build if absent.
+func buildStubChunk(group models.ManifestGroup) *models.GeneratedProject {
+	files := make([]models.ProjectFile, 0, len(group.Files))
+	for _, f := range group.Files {
+		if strings.HasSuffix(f.Path, ".tsx") && strings.Contains(f.Path, "/pages/") {
+			// Extract component name from path: src/pages/LeavesPage.tsx → LeavesPage
+			base := f.Path[strings.LastIndex(f.Path, "/")+1:]
+			compName := strings.TrimSuffix(base, ".tsx")
+			files = append(files, models.ProjectFile{
+				Path: f.Path,
+				Content: fmt.Sprintf(`import React from 'react'
+
+export default function %s() {
+  return (
+    <div className="flex items-center justify-center h-64">
+      <p className="text-muted-foreground">This section is temporarily unavailable.</p>
+    </div>
+  )
+}
+`, compName),
+			})
+		}
+	}
+	return &models.GeneratedProject{Files: files}
 }
 
 // filterToGroup keeps only files whose paths are explicitly listed in the manifest group.

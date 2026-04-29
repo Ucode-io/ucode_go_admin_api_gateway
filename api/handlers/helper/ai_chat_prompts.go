@@ -387,9 +387,17 @@ GROUP 1 — UI KIT + SHARED PATTERNS (generated AFTER Group 0, BEFORE features �
   Feature groups MUST use DataTable/FormModal/PageHeader — NEVER generate their own versions.
 
 GROUPS 2..N — FEATURES (parallel with each other, depend on Groups 0 AND 1):
-  One group per main table/page section. 4–8 files per group.
   Each group = one XxxPage.tsx + dedicated components + optionally one src/hooks/useXxx.ts.
   Always include a Dashboard group (id=2) as the first feature group.
+
+  ⚠ MAX 10 FEATURE GROUPS TOTAL (Groups 2..11). Hard limit — do NOT exceed.
+  If the project has more than 10 feature areas, COMBINE related ones into one group:
+    COMBINE: employees + employee-profile-tabs → one "employees" group (EmployeesPage + EmployeeProfilePage)
+    COMBINE: recruitment + recruitment-jobs + recruitment-pipeline → one "recruitment" group
+    COMBINE: projects + project-detail-tabs → one "projects" group
+    COMBINE: settings + profile → one "settings" group
+  Rule: "XxxDetail" or "XxxTabs" pages always go in the same group as their parent "Xxx" page.
+  Rule: Never create a group with only 1–2 files if it can be merged with a related group.
 
   HOOK FILE RULE — src/hooks/useXxx.ts exports ONLY hook functions:
     CORRECT: export function useContacts() { ... }
@@ -405,8 +413,9 @@ CONSTRAINTS:
   - Every generated file appears in EXACTLY ONE group
   - Group 0 has EXACTLY 7 files — no exceptions
   - Group 1 has all ui/* files + exactly 3 shared components — never in Group 0 or feature groups
-  - Max 8 files per feature group (split large sections into two groups)
-  - Feature groups depend only on Groups 0 and 1 — never on each other`
+  - Max 8 files per feature group (split large sections into two groups if needed)
+  - Feature groups depend only on Groups 0 and 1 — never on each other
+  - Total feature groups (id ≥ 2): MAXIMUM 10`
 
 	PromptChunkedCoder = `You are a senior React frontend engineer implementing one feature chunk of an admin panel.
 
@@ -546,17 +555,25 @@ CODE QUALITY
 ====================================
 NULL SAFETY — MANDATORY
 ====================================
-API fields can ALWAYS be null/undefined at runtime. Guard every field before using string methods:
-  ✅ {item.name ?? '—'}                    // display
-  ✅ getInitials(item.name)                 // safe — getInitials handles null/undefined
-  ✅ formatDate(item.created_at)            // safe — formatDate handles null/undefined
-  ✅ truncate(item.description, 80)         // safe — truncate handles null/undefined
-  ✅ (item.name ?? '').toLowerCase()        // before string operations
-  ✅ item.tags?.split(',') ?? []            // before split/join
-  ❌ item.name.split(' ')                   // CRASH if name is null
-  ❌ item.email.toLowerCase()               // CRASH if email is null
-  ❌ item.description.slice(0, 100)         // CRASH if description is null
-Never assume an API field is non-null — always use ?. or ?? or explicit guards.
+API fields are ALWAYS nullable at runtime. Guard every field before using string/array methods:
+  ✅ {item.name ?? '—'}                    // safe display
+  ✅ getInitials(item.name)                 // safe — accepts null|undefined
+  ✅ formatDate(item.created_at)            // safe — accepts null|undefined
+  ✅ truncate(item.description, 80)         // safe — accepts null|undefined
+  ✅ (item.name ?? '').toLowerCase()        // guard before string ops
+  ✅ (item.tags ?? '').split(',')           // guard before split
+  ❌ item.name.split(' ')                   // CRASH when name is null
+  ❌ item.email.toLowerCase()               // CRASH when email is null
+  ❌ item.description.slice(0, 100)         // CRASH when description is null
+
+DATE STATE — CRITICAL:
+  NEVER store Date objects in useState — they may not survive renders correctly.
+  ✅ const [year, setYear] = useState<number>(new Date().getFullYear())
+  ✅ const [month, setMonth] = useState<number>(new Date().getMonth() + 1)
+  ✅ const [dateStr, setDateStr] = useState<string>(new Date().toISOString().slice(0, 10))
+  ❌ const [date, setDate] = useState(new Date())   — then calling date.getFullYear() → CRASH
+  ❌ new Date(value) without isNaN guard             — crashes on null/invalid strings
+  For period selectors (payroll etc): always store year and month as separate number states.
 
 ====================================
 BROWSER BUILD — NO CLI
@@ -1181,6 +1198,19 @@ STEP 3 — Layout (TYPE A — domain-deterministic):
   CRM / Finance / HR / Healthcare / E-Commerce / Project / Real Estate → sidebar-left
   Multi-module SaaS / Dev Tools  → icon-rail + expandable panel
   TYPE B / TYPE C                → sticky top-nav only (no sidebar)
+
+SIDEBAR NAV RULES (TYPE A — sidebar-left layout):
+  ⚠ MAX 10 top-level nav items. If more pages exist, group them:
+    Use collapsible groups with a parent label (e.g. "Recruitment" → Jobs, Pipeline, Interviews)
+    Or merge detail pages under their parent (Employees page shows Employee Profile as a tab, not a separate nav item)
+  Icons: use ONLY these lucide-react icon names — they are guaranteed to exist:
+    LayoutDashboard, Users, UserCircle, Briefcase, Building2, FolderOpen, Calendar,
+    FileText, CreditCard, Settings, BarChart3, TrendingUp, ShoppingCart, Package,
+    Truck, MapPin, Bell, Search, ChevronDown, ChevronRight, LogOut, Menu, X,
+    Plus, Edit, Trash2, Eye, Download, Upload, Filter, RefreshCw, Check, AlertCircle
+  NEVER use icon names that don't exist in lucide-react — they render as blank/broken.
+  Each nav item: { icon: LucideIcon, label: string, path: string }
+  Active state: compare location.pathname with item.path using startsWith for nested routes.
 
 STEP 4 — Design Tokens:
   Design tokens are provided in the "DESIGN TOKENS:" block in your prompt.
