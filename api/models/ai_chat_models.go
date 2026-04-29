@@ -202,6 +202,27 @@ type (
 		ResourceEnvId  string `json:"resource_env_id"`
 	}
 
+	// ========================== Chunked Generation Manifest ==========================
+
+	// ManifestFile is one file entry in a project manifest: path + exported names.
+	ManifestFile struct {
+		Path    string   `json:"path"`
+		Exports []string `json:"exports"`
+	}
+
+	// ManifestGroup groups files by dependency level.
+	// Group 0 = foundation (sequential). Groups 1..N = features (parallel).
+	ManifestGroup struct {
+		ID    int            `json:"id"`
+		Name  string         `json:"name"`
+		Files []ManifestFile `json:"files"`
+	}
+
+	// ProjectManifest is the output of the manifest generation step.
+	ProjectManifest struct {
+		Groups []ManifestGroup `json:"groups"`
+	}
+
 	// ========================== AI Database Assistant ==========================
 
 	// FieldSchema — simplified field info sent to Claude for schema awareness
