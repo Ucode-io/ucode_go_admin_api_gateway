@@ -133,11 +133,12 @@ func (p *ChatProcessor) pushMicrofrontendChanges(ctx context.Context, generatedF
 	}
 
 	type pushReq struct {
-		RepoID int                       `json:"repo_id"`
-		Files  []models.GitlabFileChange `json:"files"`
+		RepoID        int                       `json:"repo_id"`
+		Files         []models.GitlabFileChange `json:"files"`
+		CommitMessage string                    `json:"commit_message"`
 	}
 
-	bodyBytes, err := json.Marshal(pushReq{RepoID: repoIDInt, Files: files})
+	bodyBytes, err := json.Marshal(pushReq{RepoID: repoIDInt, Files: files, CommitMessage: p.userMessage})
 	if err != nil {
 		return fmt.Errorf("marshal request: %w", err)
 	}
