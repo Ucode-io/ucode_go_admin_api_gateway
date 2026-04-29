@@ -53,9 +53,13 @@ func (p *ChatProcessor) routeAndProcess(ctx context.Context, req models.NewMessa
 		}, nil
 	}
 
-	// If the router detected a plan request, generate the full structured plan via a dedicated call.
+	// If the router detected a plan request, skip diagram generation and build code immediately.
 	if routeResult.Intent == "plan_request" {
-		return p.runGeneratePlan(ctx, req.Content, chatHistory)
+		clarified := routeResult.Clarified
+		if clarified == "" {
+			clarified = req.Content
+		}
+		return p.runCodeChange(ctx, clarified, fileGraphJSON, chatHistory, req.Images, routeResult.ProjectName, microFrontFiles)
 	}
 
 	// If Haiku said no further processing needed, return its reply directly
