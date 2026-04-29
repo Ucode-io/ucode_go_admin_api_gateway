@@ -29,7 +29,7 @@ const (
 	// master is only for pipeline triggers (created when the microfrontend is first forked).
 	uGenBranch = "u-gen"
 
-	timeoutPublishMicrofrontend = 5 * time.Minute
+	timeoutPublishMicrofrontend = 15 * time.Minute
 )
 
 type ChatProcessor struct {
