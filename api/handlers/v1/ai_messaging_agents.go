@@ -212,6 +212,7 @@ func (p *ChatProcessor) generateCodeChunked(ctx context.Context, clarified strin
 			featureGroups = append(featureGroups, g)
 		}
 	}
+
 	if len(foundationGroup.Files) == 0 || len(featureGroups) == 0 {
 		log.Printf("[chunked] manifest missing foundation or features — falling back to single call")
 		return p.generateCodeSingle(ctx, clarified, imageURLs, chatHistory, plan, apiKey)

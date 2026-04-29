@@ -14,6 +14,12 @@ import (
 	"ucode/ucode_go_api_gateway/api/models"
 )
 
+const publishChunkSize = 30
+
+const pushRetryCount = 3
+
+const pushRetryDelay = 2 * time.Second
+
 // runMicrofrontendEdit fetches the current files from u-gen, asks the AI to edit
 // them, then pushes the result back to u-gen. No McpProject is touched.
 func (p *ChatProcessor) runMicrofrontendEdit(ctx context.Context, clarified, fileGraphJSON string, chatHistory []models.ChatMessage, imageURLs []string, existingFiles []models.GitlabFileChange) (*models.ParsedClaudeResponse, error) {
@@ -45,7 +51,7 @@ func (p *ChatProcessor) runMicrofrontendEdit(ctx context.Context, clarified, fil
 	}
 
 	log.Printf("[MICROFE EDIT] pushing %d file(s) to u-gen branch", len(edited.Project.Files))
-	if err = p.pushMicrofrontendChanges(ctx, edited.Project.Files); err != nil {
+	if err = p.pushMicrofrontendChangesChunked(ctx, edited.Project.Files); err != nil {
 		return nil, fmt.Errorf("failed to push microfrontend changes: %w", err)
 	}
 
@@ -115,8 +121,8 @@ func (p *ChatProcessor) fetchMicrofrontendFiles(ctx context.Context) ([]models.G
 	return files, nil
 }
 
-// pushMicrofrontendChanges sends AI-generated files to the function service which
-// commits them to the u-gen branch of the microfrontend's repo.
+// pushMicrofrontendChanges отправляет файлы в push-changes одним запросом.
+// Используется для небольших правок (edit flow).
 func (p *ChatProcessor) pushMicrofrontendChanges(ctx context.Context, generatedFiles []models.ProjectFile) error {
 	repoIDInt := 0
 	fmt.Sscanf(p.microFrontendRepoId, "%d", &repoIDInt)
@@ -132,13 +138,71 @@ func (p *ChatProcessor) pushMicrofrontendChanges(ctx context.Context, generatedF
 		})
 	}
 
+	return p.doPushChanges(ctx, repoIDInt, files)
+}
+
+// и отправляет каждый с retry. Используется при публикации (121+ файл).
+func (p *ChatProcessor) pushMicrofrontendChangesChunked(ctx context.Context, generatedFiles []models.ProjectFile) error {
+	repoIDInt := 0
+	fmt.Sscanf(p.microFrontendRepoId, "%d", &repoIDInt)
+	if repoIDInt == 0 {
+		return fmt.Errorf("invalid microfrontend_repo_id: %q", p.microFrontendRepoId)
+	}
+
+	files := make([]models.GitlabFileChange, 0, len(generatedFiles))
+	for _, f := range generatedFiles {
+		files = append(files, models.GitlabFileChange{
+			FilePath: f.Path,
+			Content:  f.Content,
+		})
+	}
+
+	total := len(files)
+	chunks := splitIntoChunks(files, publishChunkSize)
+	log.Printf("[MICROFE PUSH] pushing %d files in %d chunk(s) of max %d", total, len(chunks), publishChunkSize)
+
+	for i, chunk := range chunks {
+		log.Printf("[MICROFE PUSH] chunk %d/%d: %d files", i+1, len(chunks), len(chunk))
+
+		var lastErr error
+		for attempt := 1; attempt <= pushRetryCount; attempt++ {
+			lastErr = p.doPushChanges(ctx, repoIDInt, chunk)
+			if lastErr == nil {
+				log.Printf("[MICROFE PUSH] ✅ chunk %d/%d done", i+1, len(chunks))
+				break
+			}
+			log.Printf("[MICROFE PUSH] chunk %d/%d attempt %d/%d failed: %v", i+1, len(chunks), attempt, pushRetryCount, lastErr)
+			if attempt < pushRetryCount {
+				time.Sleep(pushRetryDelay)
+			}
+		}
+
+		if lastErr != nil {
+			return fmt.Errorf("push chunk %d/%d failed after %d attempts: %w", i+1, len(chunks), pushRetryCount, lastErr)
+		}
+	}
+
+	log.Printf("[MICROFE PUSH] ✅ all %d files pushed successfully", total)
+	return nil
+}
+
+// doPushChanges выполняет один HTTP-запрос к push-changes endpoint.
+func (p *ChatProcessor) doPushChanges(ctx context.Context, repoIDInt int, files []models.GitlabFileChange) error {
+	if len(files) == 0 {
+		return fmt.Errorf("doPushChanges: no files provided")
+	}
+
 	type pushReq struct {
 		RepoID        int                       `json:"repo_id"`
 		Files         []models.GitlabFileChange `json:"files"`
 		CommitMessage string                    `json:"commit_message"`
 	}
 
-	bodyBytes, err := json.Marshal(pushReq{RepoID: repoIDInt, Files: files, CommitMessage: p.userMessage})
+	bodyBytes, err := json.Marshal(pushReq{
+		RepoID:        repoIDInt,
+		Files:         files,
+		CommitMessage: p.userMessage,
+	})
 	if err != nil {
 		return fmt.Errorf("marshal request: %w", err)
 	}
@@ -165,6 +229,23 @@ func (p *ChatProcessor) pushMicrofrontendChanges(ctx context.Context, generatedF
 		return fmt.Errorf("function service returned %d: %s", resp.StatusCode, string(respBytes))
 	}
 	return nil
+}
+
+// splitIntoChunks делит слайс на части размером не более chunkSize.
+func splitIntoChunks(files []models.GitlabFileChange, chunkSize int) [][]models.GitlabFileChange {
+	if chunkSize <= 0 {
+		chunkSize = publishChunkSize
+	}
+	var chunks [][]models.GitlabFileChange
+	for len(files) > 0 {
+		end := chunkSize
+		if end > len(files) {
+			end = len(files)
+		}
+		chunks = append(chunks, files[:end])
+		files = files[end:]
+	}
+	return chunks
 }
 
 // buildMicrofrontendFileGraphJSON builds the same file graph JSON that the router
@@ -206,27 +287,35 @@ func (p *ChatProcessor) buildMicrofrontendFilesContext(files []models.GitlabFile
 	return sb.String()
 }
 
-// files using a two-phase approach:
-//  1. publish-ai — creates the GitLab repo with a minimal init file
-//  2. push-changes — pushes all content files (same endpoint used for edits)
+// publishToMicrofrontend публикует сгенерированный проект в microfrontend.
 //
-// This avoids hitting payload-size or file-count limits on the publish-ai endpoint.
+// Стратегия (исправленная):
+//  1. publish-ai — создаём GitLab репо, передаём ВСЕ файлы сразу.
+//     Endpoint требует минимум один коммит с реальными файлами для инициализации ветки u-gen.
+//  2. Если publish-ai вернул ошибку "no files provided" или 5xx — повторяем с retry.
+//
+// Фаза 2 (push-changes) больше НЕ используется при публикации, т.к. publish-ai
+// сам делает первый коммит. push-changes используется только для последующих правок (edit flow).
 func (p *ChatProcessor) publishToMicrofrontend(ctx context.Context, projectName, path string, generated *models.ParsedClaudeResponse, projectData *models.ProjectData) error {
 	if generated == nil || generated.Project == nil || len(generated.Project.Files) == 0 {
 		return fmt.Errorf("no generated files to publish")
 	}
 
-	// Build the sanitized file list once — used in both phases.
-	allFiles := make([]models.ProjectFile, 0, len(generated.Project.Files))
+	// Build the sanitized file list once.
+	allFiles := make([]models.GitlabFileChange, 0, len(generated.Project.Files))
 	for _, f := range generated.Project.Files {
 		cleanPath := strings.TrimLeft(f.Path, "/")
 		if cleanPath == "" {
 			continue
 		}
-		allFiles = append(allFiles, models.ProjectFile{
-			Path:    cleanPath,
-			Content: sanitizeFileContent(f.Content),
+		allFiles = append(allFiles, models.GitlabFileChange{
+			FilePath: cleanPath,
+			Content:  sanitizeFileContent(f.Content),
 		})
+	}
+
+	if len(allFiles) == 0 {
+		return fmt.Errorf("no valid files to publish after sanitization")
 	}
 
 	safeName := slugify(projectName)
@@ -238,20 +327,16 @@ func (p *ChatProcessor) publishToMicrofrontend(ctx context.Context, projectName,
 		safePath = "app"
 	}
 
-	// ── Phase 1: Create the GitLab repo with a single small init file ─────────
-	// We pass only package.json (always present for React projects) so the
-	// publish-ai endpoint can initialize the repo without a large payload.
-	var initFile models.GitlabFileChange
-	for _, f := range allFiles {
-		if f.Path == "package.json" {
-			initFile = models.GitlabFileChange{FilePath: f.Path, Content: f.Content}
-			break
-		}
-	}
-	if initFile.FilePath == "" && len(allFiles) > 0 {
-		// Fallback: use the first (usually smallest) file.
-		initFile = models.GitlabFileChange{FilePath: allFiles[0].Path, Content: allFiles[0].Content}
-	}
+	// ── Phase 1: создаём GitLab репо с ПЕРВЫМ чанком файлов ──────────────────
+	// publish-ai требует реальные файлы для инициализации ветки u-gen.
+	// Передаём первые publishChunkSize файлов (включая package.json если есть).
+	// Остальные файлы пушим через push-changes в Phase 2.
+
+	// Сортируем: package.json всегда первым чтобы repo корректно инициализировался.
+	initFiles := buildInitFiles(allFiles, publishChunkSize)
+
+	log.Printf("[MICROFRONTEND] publish-ai: name=%q path=%q project_id=%s env_id=%s init_files=%d total_files=%d",
+		safeName, safePath, projectData.UcodeProjectId, projectData.EnvironmentId, len(initFiles), len(allFiles))
 
 	createBody := models.PublishAiMicroFrontendRequest{
 		ProjectId:     projectData.UcodeProjectId,
@@ -259,7 +344,7 @@ func (p *ChatProcessor) publishToMicrofrontend(ctx context.Context, projectName,
 		Name:          safeName,
 		Path:          safePath,
 		FrameworkType: "REACT",
-		Files:         []models.GitlabFileChange{initFile},
+		Files:         initFiles,
 	}
 
 	createBytes, err := json.Marshal(createBody)
@@ -267,49 +352,121 @@ func (p *ChatProcessor) publishToMicrofrontend(ctx context.Context, projectName,
 		return fmt.Errorf("marshal create request: %w", err)
 	}
 
-	log.Printf("[MICROFRONTEND] publish-ai (phase 1): name=%q path=%q project_id=%s env_id=%s init_file=%s total_files=%d",
-		safeName, safePath, projectData.UcodeProjectId, projectData.EnvironmentId, initFile.FilePath, len(allFiles))
-
 	createURL := p.baseConf.GoFunctionServiceHost + p.baseConf.GoFunctionServiceHTTPPort + "/v2/functions/micro-frontend/publish-ai"
-	createReq, err := http.NewRequestWithContext(ctx, http.MethodPost, createURL, bytes.NewReader(createBytes))
-	if err != nil {
-		return fmt.Errorf("build create request: %w", err)
+
+	var createResult models.PublishAiMicroFrontendResponse
+
+	// Retry publish-ai до 3 раз — иногда сервис даёт 500 на первом запросе.
+	for attempt := 1; attempt <= pushRetryCount; attempt++ {
+		createResult, err = p.doPublishAI(ctx, createURL, createBytes)
+		if err == nil {
+			break
+		}
+		log.Printf("[MICROFRONTEND] publish-ai attempt %d/%d failed: %v", attempt, pushRetryCount, err)
+		if attempt < pushRetryCount {
+			time.Sleep(pushRetryDelay)
+		}
 	}
-	createReq.Header.Set("Content-Type", "application/json")
-	createReq.Header.Set("Authorization", p.authToken)
+	if err != nil {
+		return fmt.Errorf("microfrontend publish failed: %w", err)
+	}
+
+	p.microFrontendId = createResult.Data.ID
+	p.microFrontendRepoId = createResult.Data.RepoId
+	log.Printf("[MICROFRONTEND] repo created: id=%s repo_id=%s url=%s", createResult.Data.ID, createResult.Data.RepoId, createResult.Data.Url)
+
+	// ── Phase 2: пушим оставшиеся файлы через push-changes (если они есть) ───
+	// Файлы которые уже были в initFiles — пропускаем (они уже в репо).
+	initSet := make(map[string]struct{}, len(initFiles))
+	for _, f := range initFiles {
+		initSet[f.FilePath] = struct{}{}
+	}
+	remainingFiles := make([]models.ProjectFile, 0, len(allFiles))
+	for _, f := range allFiles {
+		if _, alreadyPushed := initSet[f.FilePath]; !alreadyPushed {
+			remainingFiles = append(remainingFiles, models.ProjectFile{
+				Path:    f.FilePath,
+				Content: f.Content,
+			})
+		}
+	}
+
+	if len(remainingFiles) > 0 {
+		log.Printf("[MICROFRONTEND] push-changes: pushing remaining %d files in chunks", len(remainingFiles))
+		if pushErr := p.pushMicrofrontendChangesChunked(ctx, remainingFiles); pushErr != nil {
+			// НЕ фейлим весь деплой — репо уже создан, частичный результат лучше нуля.
+			log.Printf("[MICROFRONTEND] ⚠️ push-changes partial failure (repo exists, %d files missing): %v", len(remainingFiles), pushErr)
+		}
+	}
+
+	log.Printf("[MICROFRONTEND] ✅ published: id=%s url=%s", p.microFrontendId, createResult.Data.Url)
+	return nil
+}
+
+// doPublishAI выполняет один HTTP-запрос к publish-ai endpoint.
+func (p *ChatProcessor) doPublishAI(ctx context.Context, url string, bodyBytes []byte) (models.PublishAiMicroFrontendResponse, error) {
+	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(bodyBytes))
+	if err != nil {
+		return models.PublishAiMicroFrontendResponse{}, fmt.Errorf("build create request: %w", err)
+	}
+	httpReq.Header.Set("Content-Type", "application/json")
+	httpReq.Header.Set("Authorization", p.authToken)
 
 	client := &http.Client{Timeout: timeoutPublishMicrofrontend}
-	createResp, err := client.Do(createReq)
+	createResp, err := client.Do(httpReq)
 	if err != nil {
-		return fmt.Errorf("publish-ai call failed: %w", err)
+		return models.PublishAiMicroFrontendResponse{}, fmt.Errorf("publish-ai call failed: %w", err)
 	}
 	defer createResp.Body.Close()
 
 	createRespBytes, err := io.ReadAll(createResp.Body)
 	if err != nil {
-		return fmt.Errorf("read publish-ai response: %w", err)
+		return models.PublishAiMicroFrontendResponse{}, fmt.Errorf("read publish-ai response: %w", err)
 	}
 	if createResp.StatusCode >= 400 {
-		return fmt.Errorf("publish-ai returned %d: %s", createResp.StatusCode, string(createRespBytes))
+		return models.PublishAiMicroFrontendResponse{}, fmt.Errorf("publish-ai returned %d: %s", createResp.StatusCode, string(createRespBytes))
 	}
 
-	var createResult models.PublishAiMicroFrontendResponse
-	if err = json.Unmarshal(createRespBytes, &createResult); err != nil {
-		return fmt.Errorf("parse publish-ai response: %w", err)
+	var result models.PublishAiMicroFrontendResponse
+	if err = json.Unmarshal(createRespBytes, &result); err != nil {
+		return models.PublishAiMicroFrontendResponse{}, fmt.Errorf("parse publish-ai response: %w", err)
+	}
+	return result, nil
+}
+
+// buildInitFiles возвращает первые n файлов для phase 1, гарантируя что package.json идёт первым.
+func buildInitFiles(allFiles []models.GitlabFileChange, n int) []models.GitlabFileChange {
+	if n <= 0 || n >= len(allFiles) {
+		return allFiles
 	}
 
-	p.microFrontendId = createResult.Data.ID
-	p.microFrontendRepoId = createResult.Data.RepoId
-	log.Printf("[MICROFRONTEND] repo created: id=%s repo_id=%s", createResult.Data.ID, createResult.Data.RepoId)
+	result := make([]models.GitlabFileChange, 0, n)
 
-	// ── Phase 2: Push all files via push-changes (proven endpoint) ────────────
-	log.Printf("[MICROFRONTEND] push-changes (phase 2): pushing %d files to repo_id=%s", len(allFiles), p.microFrontendRepoId)
-	if err = p.pushMicrofrontendChanges(ctx, allFiles); err != nil {
-		return fmt.Errorf("push-changes after publish-ai failed: %w", err)
+	// Сначала ищем package.json — он нужен для инициализации React-репо.
+	pkgIdx := -1
+	for i, f := range allFiles {
+		if f.FilePath == "package.json" {
+			pkgIdx = i
+			break
+		}
 	}
 
-	log.Printf("[MICROFRONTEND] ✅ published: id=%s url=%s", p.microFrontendId, createResult.Data.Url)
-	return nil
+	if pkgIdx >= 0 {
+		result = append(result, allFiles[pkgIdx])
+	}
+
+	// Добавляем остальные файлы до лимита n.
+	for i, f := range allFiles {
+		if len(result) >= n {
+			break
+		}
+		if i == pkgIdx {
+			continue // уже добавили
+		}
+		result = append(result, f)
+	}
+
+	return result
 }
 
 // sanitizeFileContent removes characters that can cause JSON parse failures
