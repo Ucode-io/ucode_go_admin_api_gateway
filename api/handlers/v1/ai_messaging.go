@@ -113,6 +113,11 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 		return nil, fmt.Errorf("microfrontend publish failed: %w", err)
 	}
 
+	_, err = p.saveProject(ctx, generated)
+	if err != nil {
+		log.Println("save project failed:", err)
+	}
+
 	log.Printf("[new-project] done — mfe_id=%s", p.microFrontendId)
 	return &models.ParsedClaudeResponse{Description: generated.Description}, nil
 }
