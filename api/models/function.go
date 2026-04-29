@@ -167,3 +167,4 @@ type GetListCustomEventsStruct struct {
 	Method    string
 	Resource  *pb.ServiceResourceModel
 }
+

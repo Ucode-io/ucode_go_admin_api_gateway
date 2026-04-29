@@ -50,6 +50,7 @@ type ChatProcessor struct {
 	microFrontendId     string // populated after PublishAiGeneratedMicroFrontend succeeds, or from request
 	microFrontendRepoId string // GitLab numeric project Id — stored from publish response or from request
 	newProject          bool   // true → provision a new ucode project; false → create microfrontend in current project
+	userMessage         string // original user message — used as GitLab commit message on u-gen
 
 	schemaCache    []models.TableSchema
 	schemaCachedAt time.Time
