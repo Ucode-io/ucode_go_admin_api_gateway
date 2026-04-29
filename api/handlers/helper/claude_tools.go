@@ -255,6 +255,21 @@ var ToolEmitManifest = models.ClaudeFunctionTool{
 	},
 }
 
+var ToolRepairFile = models.ClaudeFunctionTool{
+	Name:        "repair_file",
+	Description: "Return the corrected content of a single TypeScript/TSX file. Fix all import errors listed in the prompt. Output the complete file — never truncate.",
+	InputSchema: map[string]any{
+		"type":     "object",
+		"required": []string{"content"},
+		"properties": map[string]any{
+			"content": map[string]any{
+				"type":        "string",
+				"description": "Full corrected file content",
+			},
+		},
+	},
+}
+
 // ForcedTool returns a ToolChoice that forces Claude to call a specific tool by name.
 func ForcedTool(toolName string) *models.ToolChoice {
 	return &models.ToolChoice{Type: "tool", Name: toolName}

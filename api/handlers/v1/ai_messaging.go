@@ -464,10 +464,26 @@ func truncateString(s string, maxLen int) string {
 
 // buildAPIConfigBlock generates the API configuration + design tokens injected into the coder prompt.
 func buildAPIConfigBlock(baseURL, apiKey string, plan *models.ArchitectPlan) string {
+	// Detect the actual env variable names used in the template.
+	// The template's axios.ts may use VITE_BASE_URL or VITE_API_BASE_URL —
+	// we must match exactly to prevent CORS/404 errors.
+	envBaseURLKey := "VITE_API_BASE_URL"
+	envAPIKeyKey := "VITE_X_API_KEY"
+	for _, f := range GetTemplateContext("admin_panel") {
+		if strings.Contains(f.Path, "config/axios") || strings.Contains(f.Path, "lib/api") {
+			if strings.Contains(f.Content, "VITE_BASE_URL") && !strings.Contains(f.Content, "VITE_API_BASE_URL") {
+				envBaseURLKey = "VITE_BASE_URL"
+			}
+			if strings.Contains(f.Content, "VITE_API_KEY") && !strings.Contains(f.Content, "VITE_X_API_KEY") {
+				envAPIKeyKey = "VITE_API_KEY"
+			}
+		}
+	}
+
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf(
-		"\n====================================\nAPI CONFIGURATION FOR FRONTEND\n====================================\nVITE_API_BASE_URL: %s\nVITE_X_API_KEY: %s\n\nTables to use:\n",
-		baseURL, apiKey,
+		"\n====================================\nAPI CONFIGURATION FOR FRONTEND\n====================================\n%s: %s\n%s: %s\n\nTables to use:\n",
+		envBaseURLKey, baseURL, envAPIKeyKey, apiKey,
 	))
 	for _, t := range plan.Tables {
 		sb.WriteString(fmt.Sprintf("- Table: %s, slug: %s\n", t.Label, t.Slug))
