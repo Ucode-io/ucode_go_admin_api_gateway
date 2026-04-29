@@ -354,41 +354,65 @@ TYPE B / TYPE C (landing, web) — select ONE archetype based on domain:
 	PromptManifestGenerator = `You are a senior frontend architect planning file structure for a React admin panel.
 Given a project description with tables and UI structure, output the complete file manifest.
 
-GROUP 0 — FOUNDATION (max 7 files, generated first, sequential):
-  Include ONLY these files — no more:
-    src/index.css                          CSS variables and global Tailwind styles
+GROUP 0 — FOUNDATION (exactly 7 files, generated first, sequential):
+  Include EXACTLY these 7 files — no more, no fewer:
+    src/index.css                          CSS variables + global Tailwind styles
     src/main.tsx                           React entry point
     src/App.tsx                            Root router — routes to ALL pages from ALL groups
-    src/types.ts                           All shared TypeScript interfaces
-    src/components/layout/Layout.tsx       Main layout wrapper (renders Sidebar + Header + outlet)
+    src/types.ts                           ALL entity interfaces + shared TypeScript types
+    src/components/layout/Layout.tsx       Main layout wrapper (Sidebar + Header + outlet)
     src/components/layout/Sidebar.tsx      Navigation sidebar with all nav items
     src/components/layout/Header.tsx       Top header bar
 
-  NEVER put src/components/ui/* in Group 0. They belong in Group 1.
-  DO NOT include pre-built template files (already exist, never regenerate):
+  CRITICAL — src/types.ts EXPORTS:
+    For EVERY table in the project define a TypeScript interface with ALL its fields.
+    Example: table "contacts" (fields: name, email, phone, status, company_id) →
+      interface Contact { guid: string; name: string; email: string; phone?: string; status: string; company_id?: string; created_at?: string; }
+    Also include: PaginationParams, SelectOption<T>, FormState and any shared utility types.
+    Entity types live ONLY in src/types.ts. Feature hook files NEVER export types.
+
+  DO NOT include pre-built template files (already exist):
     src/hooks/useApi.ts · src/lib/apiUtils.ts · src/lib/utils.ts
     src/components/shared/AppProviders.tsx · src/config/axios.ts
+  NEVER put src/components/ui/* or src/components/shared/* in Group 0.
 
-GROUP 1 — UI KIT (generated AFTER Group 0, BEFORE feature groups — sequential):
-  All src/components/ui/*.tsx files go HERE — Button, Input, Card, Badge, Table, Dialog,
-  Select, Checkbox, Dropdown, Tabs, Tooltip, Avatar, Skeleton, Switch, Textarea, Label, etc.
-  id=1, name="UI Kit". Max 15 files. No page logic — only reusable primitives.
+GROUP 1 — UI KIT + SHARED PATTERNS (generated AFTER Group 0, BEFORE features — sequential):
+  Two sub-sets in ONE generation call. id=1, name="UI Kit".
   Feature groups MUST NOT start until Group 1 is complete.
+
+  SUB-SET A — src/components/ui/*.tsx (primitive UI components):
+    FILE NAMING: ALL filenames MUST be lowercase (shadcn convention).
+    CORRECT: src/components/ui/button.tsx   WRONG: src/components/ui/Button.tsx
+    Typical set (max 15): button, input, card, badge, table, dialog, select, tabs, tooltip,
+                          avatar, skeleton, label, dropdown-menu, separator, sheet, checkbox, textarea, switch
+
+  SUB-SET B — src/components/shared/*.tsx (composite patterns, built on sub-set A):
+    ALWAYS include these 3 files in EVERY project:
+    src/components/shared/DataTable.tsx   generic reusable table (columns, data, isLoading, emptyMessage, onRowClick)
+    src/components/shared/FormModal.tsx   dialog form wrapper (open, title, onClose, children, isSubmitting, onSubmit)
+    src/components/shared/PageHeader.tsx  page header with action button (title, subtitle, action, onAction)
+
+  Feature groups MUST use DataTable/FormModal/PageHeader — NEVER generate their own versions.
 
 GROUPS 2..N — FEATURES (parallel with each other, depend on Groups 0 AND 1):
   One group per main table/page section. 4–8 files per group.
-  Each group = one PageFile.tsx + its dedicated components + optionally one dedicated hook.
-  Tightly coupled files go in the same group. Groups must NOT depend on each other.
+  Each group = one XxxPage.tsx + dedicated components + optionally one src/hooks/useXxx.ts.
   Always include a Dashboard group (id=2) as the first feature group.
 
+  HOOK FILE RULE — src/hooks/useXxx.ts exports ONLY hook functions:
+    CORRECT: export function useContacts() { ... }
+    WRONG:   export type Contact = { ... }   ← entity types ONLY in src/types.ts
+
 EXPORTS RULE:
-  For each file list ALL exported names (components, hooks, types, functions, constants).
-  Be complete — missing exports will break imports in parallel chunks.
+  For each file list ALL exported names (components, hooks, functions, constants).
+  For src/types.ts: list every entity interface AND common type name.
+  For hook files: hook function names only — NO type names.
+  Be complete — missing exports break imports in parallel chunks.
 
 CONSTRAINTS:
   - Every generated file appears in EXACTLY ONE group
-  - Group 0 has EXACTLY 7 files — never more
-  - Group 1 has all ui/* files — never in Group 0 or feature groups
+  - Group 0 has EXACTLY 7 files — no exceptions
+  - Group 1 has all ui/* files + exactly 3 shared components — never in Group 0 or feature groups
   - Max 8 files per feature group (split large sections into two groups)
   - Feature groups depend only on Groups 0 and 1 — never on each other`
 
@@ -405,36 +429,117 @@ EMIT RULES (strictly enforced):
 3. NEVER re-emit UI Kit files (src/components/ui/*) — they are already generated in Group 1
 4. NEVER create stub or placeholder files for missing imports — all foundation and UI kit imports are satisfied
 5. Use EXACT export names from the manifest (case-sensitive)
+6. NEVER declare or export the same name twice in one file — TypeScript will refuse to compile
 
 ====================================
 IMPORT RULES
 ====================================
-Import freely from foundation:
+Foundation hooks (pre-built template — DO NOT recreate):
   import { useApiQuery, useApiMutation } from '@/hooks/useApi'
+  import { useAppForm } from '@/hooks/useAppForm'
   import { extractList, extractSingle, extractCount } from '@/lib/apiUtils'
   import { cn, formatDate, formatCurrency, getInitials } from '@/lib/utils'
-  import { AppProviders } from '@/components/shared/AppProviders'
-  import apiClient from '@/config/axios'
-  import { Button, Input, Card, Badge, ... } from '@/components/ui/...'
-  import { Sidebar, Layout, Header } from '@/components/layout/...'
+
+Entity types — ALWAYS from '@/types', NEVER redefine:
+  import type { Contact, Lead, Company, Order } from '@/types'
+  The Foundation (Group 0) generated ALL entity interfaces in src/types.ts.
+  NEVER declare: export type Contact = {...} — it already exists in @/types.
+
+Shared patterns — ALWAYS use these, NEVER create your own table/modal/header:
+  import { DataTable } from '@/components/shared/DataTable'
+  import { FormModal } from '@/components/shared/FormModal'
+  import { PageHeader } from '@/components/shared/PageHeader'
+  These are already generated by Group 1 (UIKit phase).
+
+UI Kit components — ALL filenames are LOWERCASE (shadcn convention):
+  import { Button, buttonVariants } from '@/components/ui/button'
+  import { Input } from '@/components/ui/input'
+  import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card'
+  import { Badge } from '@/components/ui/badge'
+  import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+  import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
+  import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
+  import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+  import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
+  import { Skeleton } from '@/components/ui/skeleton'
+  KEY RULE: path is @/components/ui/button NOT @/components/ui/Button
 
 ====================================
-API INTEGRATION
+API HOOKS — EXACT SIGNATURES (READ CAREFULLY)
 ====================================
-Use apiClient from '@/config/axios' — it already has both required headers.
-NEVER create a new axios instance.
+The template provides useApiQuery and useApiMutation. The source is shown below the prompts.
+NEVER invent callback-based or Promise-based variants — they DO NOT exist in this template.
 
-CRUD ENDPOINTS:
-- GET list:   apiClient.get("/v2/items/{table_slug}")
-     Extract: extractList(data) / extractCount(data) from '@/lib/apiUtils'
-- GET single: apiClient.get("/v2/items/{table_slug}/" + id)
-     Extract: extractSingle(data)
-- POST:       apiClient.post("/v2/items/{table_slug}", { data: { field_1: "val" } })
-- PUT:        apiClient.put("/v2/items/{table_slug}", { data: { guid: id, field_1: "val" } })
-- DELETE:     apiClient.delete("/v2/items/{table_slug}/" + id)
+✅ useApiQuery — signature: (queryKey, url, axiosConfig?, queryOptions?)
+  Use <unknown> as the generic — extractList/extractSingle handle the actual typing:
+  const { data, isLoading, error } = useApiQuery<unknown>(['contacts'], '/v2/items/contacts')
+  const contacts = extractList<Contact>(data)   // Contact from '@/types'
+  const total    = extractCount(data)
 
-Response shape: { data: { data: { count, response: T[] | T } } }
-NEVER assume response is always an array — use extractList/extractSingle.
+✅ useApiMutation — signature: takes ONE config OBJECT (not a callback):
+  const createMutation = useApiMutation<Contact, Partial<Contact>>({
+    url: '/v2/items/contacts',
+    method: 'POST',
+    successMessage: 'Created successfully',
+    invalidateKeys: [['contacts']],
+  })
+  createMutation.mutate(formData)
+  createMutation.isPending   // ← React Query v5: isPending, NOT isLoading
+
+✅ DELETE with dynamic URL:
+  const deleteMutation = useApiMutation<void, string>({
+    url: (id) => '/v2/items/contacts/' + id,
+    method: 'DELETE',
+    invalidateKeys: [['contacts']],
+  })
+  deleteMutation.mutate(item.guid)
+
+✅ PUT (update):
+  const updateMutation = useApiMutation<Contact, Partial<Contact>>({
+    url: '/v2/items/contacts',
+    method: 'PUT',
+    successMessage: 'Updated',
+    invalidateKeys: [['contacts']],
+  })
+
+✅ Custom hook pattern (for src/hooks/useContacts.ts):
+  import { useApiQuery, useApiMutation } from '@/hooks/useApi'
+  import { extractList, extractCount, extractSingle } from '@/lib/apiUtils'
+  import type { Contact } from '@/types'   // ← type from @/types, NOT redefined here
+
+  export function useContacts() {
+    return useApiQuery<unknown>(['contacts'], '/v2/items/contacts')
+  }
+  export function useCreateContact() {
+    return useApiMutation<Contact, Partial<Contact>>({
+      url: '/v2/items/contacts', method: 'POST',
+      successMessage: 'Contact created', invalidateKeys: [['contacts']],
+    })
+  }
+  export function useDeleteContact() {
+    return useApiMutation<void, string>({
+      url: (id) => '/v2/items/contacts/' + id, method: 'DELETE',
+      invalidateKeys: [['contacts']],
+    })
+  }
+  // Hook file exports ONLY functions — never reexport or redeclare types
+
+❌ WRONG — NEVER DO THIS:
+  useApiQuery(['x'], async () => { const res = await apiClient.get(...); return res.data })
+  useApiMutation(async (data) => { ... }, { onSuccess: () => ... })
+  mutation.isLoading                // ← doesn't exist in React Query v5 for mutations
+  export type Contact = { ... }     // ← in a hook file — types belong in @/types only
+
+API RESPONSE SHAPE (all endpoints):
+  { data: { data: { count: number, response: T[] | T } } }
+  Always use extractList<T>(data) / extractSingle<T>(data) / extractCount(data) — never index manually.
+
+CRUD URL PATTERNS:
+  GET list:   '/v2/items/{table_slug}'
+  GET single: '/v2/items/{table_slug}/' + id
+  POST:       '/v2/items/{table_slug}'        body: { field_1: value, ... }
+  PUT:        '/v2/items/{table_slug}'        body: { guid: id, field_1: value, ... }
+  DELETE:     '/v2/items/{table_slug}/' + id
 
 ====================================
 CODE QUALITY
@@ -442,10 +547,9 @@ CODE QUALITY
 - TypeScript: all props typed, no any
 - Tailwind CSS only — use CSS variables (--primary, --background, etc.), never hardcode colors
 - Every table: show thead even when rows.length === 0; empty state inside tbody td with colSpan
-- Loading states with skeleton or spinner
-- Error states with clear user message
-- useApiQuery for data fetching, useApiMutation for mutations
+- Loading states with skeleton or spinner; error states with clear user message
 - Every API-driven section must render actual API data — never hardcode alongside fetched data
+- Submit buttons show Loader2 spinner when mutation.isPending
 
 ====================================
 BROWSER BUILD — NO CLI
@@ -458,37 +562,97 @@ RESPONSE FORMAT
 Use emit_project tool. Include ONLY your assigned files.
 env: {} (foundation already has VITE_* vars — only add if you need a NEW one).`
 
-	PromptUIKitCoder = `You are a senior React frontend engineer implementing the UI Kit for an admin panel.
+	PromptUIKitCoder = `You are a senior React frontend engineer implementing the UI Kit + Shared Patterns for an admin panel.
 
 ====================================
 UI KIT PHASE — CRITICAL RULES
 ====================================
-You are generating ONLY src/components/ui/*.tsx files — reusable primitives.
+You are generating TWO sub-sets of files:
+  A) src/components/ui/*.tsx       — primitive components (no API, no routing)
+  B) src/components/shared/*.tsx   — composite patterns built on sub-set A
+
 Foundation (types, layout, App.tsx, index.css) is already generated.
 
 EMIT RULES (strictly enforced):
-1. Emit ONLY files listed in "YOUR FILES TO IMPLEMENT" (all are src/components/ui/*.tsx)
+1. Emit ONLY files listed in "YOUR FILES TO IMPLEMENT"
 2. NEVER re-emit foundation files: index.css, main.tsx, App.tsx, types.ts, src/components/layout/*, src/components/shared/AppProviders.tsx, src/config/axios.ts
-3. These are PRIMITIVE components — no page logic, no API calls, no routing
+3. ui/* components: PRIMITIVE only — no page logic, no API calls, no routing
 4. Use EXACT export names from the manifest (case-sensitive)
+5. FILE NAMING: ALL ui/* filenames MUST be lowercase (shadcn convention):
+   CORRECT: src/components/ui/button.tsx   WRONG: src/components/ui/Button.tsx
 
 ====================================
 IMPORT RULES
 ====================================
-Import freely from foundation:
+For src/components/ui/*:
   import { cn } from '@/lib/utils'
   import { type VariantProps, cva } from 'class-variance-authority' (if needed)
   import * as RadixPrimitive from '@radix-ui/react-*' (if needed)
-Each ui component must be self-contained — never import from other ui/* files.
+  Each ui/* component is self-contained — never import from OTHER ui/* files.
+
+For src/components/shared/* (sub-set B):
+  import freely from ui/* files you generated in this same call.
+  import type { ... } from '@/types'  (entity types if needed)
+  import { cn } from '@/lib/utils'
 
 ====================================
 CODE QUALITY
 ====================================
 - TypeScript: all props typed, no any
 - Tailwind CSS only — use CSS variables (--primary, --background, etc.), never hardcode colors
-- Each component: export named + export default if applicable
+- Each component: named export required; default export optional
 - className prop always supported via cn()
 - Loading/disabled states for interactive components
+
+====================================
+SHARED PATTERNS — REQUIRED COMPONENTS (sub-set B)
+====================================
+After generating all ui/* primitives, generate EXACTLY these 3 shared components.
+They compose ui/* components you already generated in this call.
+
+### src/components/shared/DataTable.tsx
+  export interface Column<T> {
+    key: keyof T | string;
+    label: string;
+    render?: (row: T) => ReactNode;
+  }
+  export interface DataTableProps<T> {
+    columns: Column<T>[];
+    data: T[];
+    isLoading?: boolean;
+    emptyMessage?: string;
+    onRowClick?: (row: T) => void;
+    className?: string;
+  }
+  Uses: Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Skeleton
+  Shows skeleton rows (5) when isLoading. Shows emptyMessage in a centered td with colSpan when data is empty.
+  export function DataTable<T extends Record<string, unknown>>(...) { ... }
+
+### src/components/shared/FormModal.tsx
+  export interface FormModalProps {
+    open: boolean;
+    title: string;
+    onClose: () => void;
+    children: ReactNode;
+    onSubmit?: () => void;
+    isSubmitting?: boolean;
+    submitLabel?: string;
+  }
+  Uses: Dialog, DialogContent, DialogHeader, DialogTitle, Button
+  Submit button shows Loader2 spinner when isSubmitting. Cancel always available.
+  export function FormModal({ open, title, onClose, children, onSubmit, isSubmitting, submitLabel = 'Save' }: FormModalProps) { ... }
+
+### src/components/shared/PageHeader.tsx
+  export interface PageHeaderProps {
+    title: string;
+    subtitle?: string;
+    action?: string;
+    onAction?: () => void;
+    actionIcon?: ReactNode;
+  }
+  Uses: Button (from ui/button)
+  Flex row: title/subtitle on left, action button on right (hidden if no action).
+  export function PageHeader({ title, subtitle, action, onAction, actionIcon }: PageHeaderProps) { ... }
 
 ====================================
 FORWARDREF — MANDATORY FOR ALL PRIMITIVES
@@ -554,8 +718,8 @@ Failure to use forwardRef causes TypeScript error TS2322 in CI (ref prop does no
 ====================================
 RESPONSE FORMAT
 ====================================
-Use emit_project tool. Include ONLY your assigned ui/* files.
-env: {} (no env vars needed for UI primitives).`
+Use emit_project tool. Include ALL assigned files: ui/* primitives + shared/*.
+env: {} (no env vars needed).`
 
 	PromptPlanGenerator = `You are a senior software architect. Based on the user's project description and answers, generate visual diagrams.
 

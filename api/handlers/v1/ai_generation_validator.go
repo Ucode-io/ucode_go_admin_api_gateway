@@ -507,8 +507,9 @@ func applyRepairs(files []models.ProjectFile, repaired []models.ProjectFile) {
 	}
 }
 
-// buildUIKitAPISummary extracts a compact API reference from generated UI Kit files.
-// This is injected into feature chunk prompts so they know exact component APIs.
+// buildUIKitAPISummary extracts a compact API reference from generated UI Kit files
+// (both ui/* primitives and components/shared/* composite patterns).
+// Injected into feature chunk prompts so they know exact component APIs and variant values.
 func buildUIKitAPISummary(uiKitFiles []models.ProjectFile) string {
 	if len(uiKitFiles) == 0 {
 		return ""
@@ -516,32 +517,29 @@ func buildUIKitAPISummary(uiKitFiles []models.ProjectFile) string {
 
 	var sb strings.Builder
 	sb.WriteString("====================================\n")
-	sb.WriteString("UI KIT — COMPONENT API REFERENCE\n")
+	sb.WriteString("UI KIT + SHARED PATTERNS — API REFERENCE\n")
 	sb.WriteString("====================================\n")
-	sb.WriteString("These components are already generated. Use EXACTLY these names and props.\n\n")
+	sb.WriteString("Already generated. Use EXACTLY these names, props, and variant values.\n\n")
 
-	// Regex for extracting interface/type definitions
-	reInterface := regexp.MustCompile(`(?m)export\s+(?:interface|type)\s+(\w+Props)\s*(?:extends\s+[^{]+)?\{`)
+	reInterface := regexp.MustCompile(`(?m)export\s+(?:interface|type)\s+(\w+(?:Props|Column|State))\s*(?:[<{]|extends)`)
 	reVariants := regexp.MustCompile(`(?m)export\s+const\s+(\w+Variants)\s*=`)
+	// Extracts variant KEYS from cva variant blocks: variant: { default: '...', outline: '...' }
+	reVariantBlock := regexp.MustCompile(`(?s)variants\s*:\s*\{(.+?)\}\s*,?\s*defaultVariants`)
+	reVariantEntry := regexp.MustCompile(`(?m)^\s*(\w+)\s*:\s*\{([^}]+)\}`)
+	reVariantKeys := regexp.MustCompile(`(?m)^\s*(\w+)\s*:`)
 
 	for _, f := range uiKitFiles {
-		// Get component name from file
-		fileName := f.Path
-		if idx := strings.LastIndex(fileName, "/"); idx >= 0 {
-			fileName = fileName[idx+1:]
-		}
-
-		// Find exported names
 		var exports []string
 		for _, match := range reExportNamed.FindAllStringSubmatch(f.Content, -1) {
 			exports = append(exports, match[1])
 		}
 		for _, match := range reExportBraces.FindAllStringSubmatch(f.Content, -1) {
 			for _, name := range strings.Split(match[1], ",") {
-				exports = append(exports, strings.TrimSpace(name))
+				if n := strings.TrimSpace(name); n != "" {
+					exports = append(exports, n)
+				}
 			}
 		}
-
 		if len(exports) == 0 {
 			continue
 		}
@@ -549,14 +547,25 @@ func buildUIKitAPISummary(uiKitFiles []models.ProjectFile) string {
 		fmt.Fprintf(&sb, "### %s\n", f.Path)
 		fmt.Fprintf(&sb, "  Exports: [%s]\n", strings.Join(exports, ", "))
 
-		// Show Props interfaces
 		for _, match := range reInterface.FindAllStringSubmatch(f.Content, -1) {
 			fmt.Fprintf(&sb, "  Props: %s\n", match[1])
 		}
 
-		// Show variant definitions
-		for _, match := range reVariants.FindAllStringSubmatch(f.Content, -1) {
-			fmt.Fprintf(&sb, "  Variants: %s (exported)\n", match[1])
+		// Show variant definitions with actual key values so chunks use correct variant names.
+		for _, varMatch := range reVariants.FindAllStringSubmatch(f.Content, -1) {
+			fmt.Fprintf(&sb, "  Variants const: %s\n", varMatch[1])
+		}
+		if blockMatch := reVariantBlock.FindStringSubmatch(f.Content); len(blockMatch) > 1 {
+			for _, entryMatch := range reVariantEntry.FindAllStringSubmatch(blockMatch[1], -1) {
+				variantName := entryMatch[1]
+				var keys []string
+				for _, keyMatch := range reVariantKeys.FindAllStringSubmatch(entryMatch[2], -1) {
+					keys = append(keys, keyMatch[1])
+				}
+				if len(keys) > 0 {
+					fmt.Fprintf(&sb, "  %s values: [%s]\n", variantName, strings.Join(keys, ", "))
+				}
+			}
 		}
 		sb.WriteString("\n")
 	}

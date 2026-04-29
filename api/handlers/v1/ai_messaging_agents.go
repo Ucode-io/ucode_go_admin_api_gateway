@@ -416,6 +416,19 @@ func (p *ChatProcessor) generateFoundation(
 		fmt.Fprintf(&sb, "  %s  (exports: [%s])\n", f.Path, strings.Join(f.Exports, ", "))
 	}
 
+	// Mandate comprehensive types — the single most impactful foundation instruction.
+	// Feature chunks import ALL entity types from '@/types'. If types are missing or wrong here,
+	// every feature chunk that uses them will produce TypeScript errors.
+	sb.WriteString("\n====================================\n")
+	sb.WriteString("CRITICAL — src/types.ts MUST contain ALL entity interfaces\n")
+	sb.WriteString("====================================\n")
+	sb.WriteString("src/types.ts is the SINGLE SOURCE OF TRUTH for all entity types.\n")
+	sb.WriteString("Feature chunks import entity types ONLY from '@/types' — never from feature files.\n")
+	sb.WriteString("For EVERY table in the project, generate a TypeScript interface with ALL fields.\n")
+	sb.WriteString("Use exact field slugs from the table schema below as property names.\n")
+	sb.WriteString("Every entity interface must include: guid (string), created_at? (string), and all domain fields.\n")
+	sb.WriteString("Also include common utility types: PaginationParams, SelectOption<T>.\n\n")
+
 	// Collect page paths from feature groups so App.tsx has complete routing.
 	sb.WriteString("\nFEATURE PAGES — add routes to App.tsx but DO NOT implement them:\n")
 	for _, g := range manifest.Groups {
@@ -553,6 +566,11 @@ func (p *ChatProcessor) generateChunk(
 	sb.WriteString("\n")
 	sb.WriteString(apiConfig)
 	sb.WriteString("\n")
+
+	// Inject template hook files (useApi.ts, apiUtils.ts) so Claude sees the EXACT
+	// TypeScript signatures — this prevents the callback-based hallucination pattern.
+	sb.WriteString(buildTemplateHooksContext())
+
 	sb.WriteString(foundationCtx)
 
 	// Inject UI Kit API reference so the chunk uses exact component names and props.
@@ -668,6 +686,29 @@ func mergeChunks(foundation *models.GeneratedProject, chunks []*models.Generated
 		FileGraph:   foundation.FileGraph,
 		Env:         env,
 	}
+}
+
+// buildTemplateHooksContext injects useApi.ts and apiUtils.ts source into chunk prompts.
+// Feature chunks don't get the full template context (only foundation does), so without
+// this they hallucinate callback-based hook signatures that don't exist in the template.
+func buildTemplateHooksContext() string {
+	critical := map[string]bool{
+		"src/hooks/useApi.ts":    true,
+		"src/hooks/useAppForm.ts": true,
+		"src/lib/apiUtils.ts":    true,
+	}
+	var sb strings.Builder
+	sb.WriteString("\n====================================\n")
+	sb.WriteString("TEMPLATE HOOK SOURCE — READ SIGNATURES CAREFULLY\n")
+	sb.WriteString("====================================\n")
+	sb.WriteString("These files ALREADY EXIST in the project. Import from them using the paths below.\n")
+	sb.WriteString("Use EXACTLY these function signatures — do not invent alternative forms.\n\n")
+	for _, f := range GetTemplateContext("admin_panel") {
+		if critical[f.Path] {
+			fmt.Fprintf(&sb, "### %s\n```typescript\n%s\n```\n\n", f.Path, f.Content)
+		}
+	}
+	return sb.String()
 }
 
 func (p *ChatProcessor) inspectCode(ctx context.Context, userQuestion, filesContext string, chatHistory []models.ChatMessage, imageURLs []string) (string, error) {
