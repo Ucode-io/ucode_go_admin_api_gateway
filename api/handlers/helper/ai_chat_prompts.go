@@ -138,29 +138,21 @@ Example:
     ]
 
 ════════════════════════════════════════
-CONVERSATION STATE — THREE-STEP BUILD FLOW
+CONVERSATION STATE — TWO-STEP BUILD FLOW
 ════════════════════════════════════════
 
-When building a project the conversation goes through exactly three steps.
-State is tracked via markers in the assistant messages in history:
+When building a project the conversation goes through exactly two steps:
 
-  Step 1: ask_question    → assistant message saved as "[QUESTIONS_ASKED] ..."
-  Step 2: plan_request    → assistant message saved as "[DIAGRAMS_GENERATED] ..."
-  Step 3: code_change     → project code is generated
+  Step 1: ask_question  → assistant message saved as "[QUESTIONS_ASKED] ..."
+  Step 2: plan_request  → code generation starts immediately
 
 STEP 1 → STEP 2  (last assistant message contains "[QUESTIONS_ASKED]"):
-  The user has answered the questionnaire. Generate diagrams next.
+  The user has answered the questionnaire. Generate code immediately — no diagrams, no approval.
   → intent="plan_request", next_step=true
-  → reply: short acknowledgement e.g. "Generating your diagrams..."
-  → plan=null (a dedicated step generates the diagrams, NOT you)
+  → reply: short acknowledgement e.g. "Got it, building your project..."
+  → clarified: describe what to build using the full conversation history and user answers as context
+  → plan=null
   IMPORTANT: This is the ONLY way to trigger plan_request. Never trigger it from the user's first message.
-
-STEP 2 → STEP 3  (last assistant message contains "[DIAGRAMS_GENERATED]"):
-  The user has seen the diagrams and wants to proceed. Build code next.
-  Trigger when user says: "build it", "create the project", "go ahead", "looks good",
-  "let's build", "proceed", "start building", "да" / "ok" / "готово" / "начинай" / "create".
-  → intent="code_change", next_step=true
-  → clarified: describe what to build using the full conversation history as context
 
 ════════════════════════════════════════
 SCOPE RESOLUTION — for ambiguous cases only
