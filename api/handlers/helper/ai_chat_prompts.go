@@ -1071,6 +1071,51 @@ APOSTROPHE RULE (CRITICAL — prevents build crash):
   RIGHT: <p>{"chef's table"}</p>             — wrap in JS string inside JSX expression
   RIGHT: remove apostrophe from CSS/className values entirely
 
+REACT ITERATOR KEYS (CRITICAL — fails ESLint react/jsx-key, crashes Vercel build):
+  RULE: The 'key' prop MUST be placed on the outermost element returned by every .map() call.
+  WRONG: items.map(i => <><li>{i.name}</li></>)                  — key missing entirely
+  WRONG: items.map(i => <Fragment><li key={i.id}>{i.name}</li></Fragment>) — key on inner element
+  RIGHT: items.map(i => <li key={i.id}>{i.name}</li>)            — key on outermost element
+  RIGHT: items.map(i => <Fragment key={i.id}><li>{i.name}</li></Fragment>) — key on Fragment
+  BANNED key values — these cause duplicate-key bugs and ESLint failures:
+    key={Math.random()}   — new key on every render, breaks reconciliation
+    key={Date.now()}      — same issue
+    key={index}           — only allowed when list is static and never reordered
+  PREFERRED: key={item.id} · key={item.slug} · key={item.uuid} — stable unique identifiers
+
+NO INLINE STYLES (CRITICAL — banned for static values):
+  style={{}} is FORBIDDEN for colors, spacing, layout, and typography that have a Tailwind equivalent.
+  WRONG: style={{ color: '#6b7280' }}          → use text-muted-foreground
+  WRONG: style={{ backgroundColor: 'white' }}  → use bg-background
+  WRONG: style={{ padding: '16px' }}           → use p-4
+  WRONG: style={{ display: 'flex' }}           → use flex
+  WRONG: style={{ fontSize: '14px' }}          → use text-sm
+  WRONG: style={{ fontWeight: 700 }}           → use font-bold
+  WRONG: style={{ gap: '8px' }}                → use gap-2
+  WRONG: style={{ marginTop: '24px' }}         → use mt-6
+  WRONG: style={{ borderRadius: '8px' }}       → use rounded-lg
+
+  ALLOWED (runtime-computed values only — no Tailwind equivalent):
+    style={{ width: '${progress}%' }}          — dynamic percentage from state
+    style={{ height: '${dynamicPx}px' }}       — pixel value computed at runtime
+    style={{ transform: 'otate(${deg}deg)' }} — dynamic rotation from state
+    style={{ '--custom-var': value } as React.CSSProperties } — CSS variable injection
+
+  INLINE STYLE → TAILWIND CONVERSION TABLE:
+    color: theme token   → text-{token}          (text-foreground, text-primary, etc.)
+    background: token    → bg-{token}            (bg-background, bg-card, etc.)
+    padding             → p-{n} / px-{n} py-{n}
+    margin              → m-{n} / mx-{n} my-{n}
+    gap                 → gap-{n}
+    font-size           → text-{size}            (text-xs through text-5xl)
+    font-weight         → font-{weight}          (font-medium, font-semibold, font-bold)
+    border-radius       → rounded-{size}
+    display             → flex / grid / block / hidden
+    flex-direction      → flex-row / flex-col
+    align-items         → items-{value}
+    justify-content     → justify-{value}
+    overflow            → overflow-{value}
+
 NO AUTH: Never generate Login/Register pages, ProtectedRoute, AuthGuard,
   useAuth, auth context, logout buttons, token management, or /login redirects.
   The app starts directly on the main page.
@@ -1239,6 +1284,54 @@ FORBIDDEN:
   --primary: 243 75% 59%   (generic indigo — banned)
   --primary: 221 83% 53%   (generic blue — banned)
   --background: 0 0% 100%  UNLESS archetype explicitly requires white background
+
+====================================
+COLOR TOKEN HARD BAN (ALL TYPES — ZERO EXCEPTIONS)
+====================================
+The following Tailwind classes and values are ABSOLUTELY FORBIDDEN in all generated TSX files:
+
+BANNED BACKGROUND CLASSES:
+  bg-white · bg-gray-50 · bg-gray-100 · bg-gray-200 · bg-gray-300 · bg-gray-400
+  bg-gray-500 · bg-gray-600 · bg-gray-700 · bg-gray-800 · bg-gray-900 · bg-gray-950
+  bg-slate-* · bg-zinc-* · bg-neutral-* · bg-stone-*  (any shade of these scales)
+
+BANNED PATTERNS:
+  Any hex literal in className: bg-[#ffffff] · bg-[#000000] · text-[#rrggbb] etc.
+  Inline style.backgroundColor or style={{ background: '...' }} for static colors
+  Any color not derived from CSS variables (e.g. bg-red-500 outside semantic badge use)
+
+PAIRING RULE (enforced on every element):
+  Every bg-X class MUST be paired with the correct foreground token:
+    bg-primary        → text-primary-foreground
+    bg-secondary      → text-secondary-foreground
+    bg-accent         → text-accent-foreground
+    bg-muted          → text-muted-foreground
+    bg-card           → text-card-foreground
+    bg-popover        → text-popover-foreground
+    bg-destructive    → text-destructive-foreground
+    bg-sidebar        → text-sidebar-foreground
+  NEVER place dark text on a dark bg token or light text on a light bg token.
+
+QUICK FIX CONVERSION TABLE (apply when refactoring):
+  bg-white            → bg-background  (or bg-card inside cards)
+  bg-gray-50          → bg-muted/40
+  bg-gray-100         → bg-muted
+  bg-gray-200         → bg-border
+  bg-gray-800         → bg-secondary   (dark contexts)
+  bg-gray-900         → bg-background  (dark theme bg)
+  text-gray-400       → text-muted-foreground
+  text-gray-500       → text-muted-foreground
+  text-gray-600       → text-muted-foreground
+  text-gray-900       → text-foreground
+  border-gray-200     → border-border
+  bg-slate-*/zinc-*/neutral-*/stone-* → use nearest CSS variable equivalent above
+
+EXCEPTION (allowed semantic badge colors — badge system only):
+  bg-emerald-50 text-emerald-700 border-emerald-200  (active/success badge)
+  bg-amber-50 text-amber-700 border-amber-200        (warning badge)
+  bg-red-50 text-red-700 border-red-200              (error badge)
+  bg-blue-50 text-blue-700 border-blue-200           (info badge)
+  These are ONLY allowed inside Badge / status pill components, nowhere else.
 
 ====================================
 LANDING PAGE — TYPE B
@@ -1555,6 +1648,22 @@ Requirements:
   - Style MUST match archetype tokens and --radius
   - File names lowercase: button.tsx not Button.tsx
   - Named exports: export function Button(...) {}
+  - NO NATIVE <select> — ALWAYS use shadcn/Radix Select primitives (see rule below)
+
+NO NATIVE <select> (CRITICAL — banned everywhere):
+  WRONG: <select><option value="a">A</option></select>
+  WRONG: <select className="...">...</select>
+  RIGHT: Always use the shadcn Select primitives from @/components/ui/select:
+    import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+    <Select value={value} onValueChange={setValue}>
+      <SelectTrigger><SelectValue placeholder="Choose..." /></SelectTrigger>
+      <SelectContent>
+        <SelectItem value="a">A</SelectItem>
+        <SelectItem value="b">B</SelectItem>
+      </SelectContent>
+    </Select>
+  REASON: Native <select> cannot be styled consistently across browsers and breaks the design system.
+  If select.tsx is not yet generated → add it to the files[] array immediately (see FILE GENERATION ORDER).
 
 ====================================
 FILE GENERATION ORDER (TYPE A — STRICT)
@@ -1868,6 +1977,21 @@ IMPORT SAFETY
 [ ] Every non-npm import path has a matching generated file in files[]
 [ ] TYPE B/C: Zero imports from @/hooks/useApi, @/lib/apiUtils, @/lib/utils, @/types, @/components/shared/AppProviders
 [ ] No apostrophes inside JSX {} expressions or template literal CSS values
+
+COLOR TOKENS
+[ ] Zero forbidden bg-white / bg-gray-* / bg-slate-* / bg-zinc-* / bg-neutral-* / bg-stone-* classes
+[ ] Zero hex literals (#rrggbb) in className or static inline styles for colors
+[ ] Every bg-X class paired with correct text-X-foreground token
+[ ] Inline style={{}} used ONLY for runtime-computed dynamic values (progress %, rotation deg)
+
+REACT KEYS
+[ ] Every .map() has key= on the outermost returned element (not inner child)
+[ ] Fragment keys: <Fragment key={id}> not <Fragment><el key={id}>
+[ ] No Math.random() / Date.now() keys — only stable IDs
+
+SELECT & FORM PRIMITIVES
+[ ] Zero native <select> elements — all replaced with shadcn Select primitives
+[ ] select.tsx generated and present in files[] whenever Select is used
 
 API CLIENT
 [ ] TYPE A: all calls use apiClient from '@/config/axios' — never new axios instance
