@@ -182,7 +182,22 @@ func (p *ChatProcessor) generateCodeSingle(ctx context.Context, clarified string
 		}
 	}
 
-	log.Printf("[generate] done: %d files (type=%s)", len(project.Files), plan.ProjectType)
+	// ── POST-GENERATION VALIDATION + REPAIR ──
+	validationErrors := validateGeneratedProject(project.Files, project.Env)
+	errorCount, _ := logValidationResults(validationErrors)
+
+	if errorCount > 0 {
+		log.Printf("[generate] 🔧 attempting Haiku repair for %d broken files...", errorCount)
+		repaired := p.repairBrokenFiles(ctx, project.Files, validationErrors)
+		if len(repaired) > 0 {
+			applyRepairs(project.Files, repaired)
+			postErrors := validateGeneratedProject(project.Files, project.Env)
+			postCount, _ := logValidationResults(postErrors)
+			log.Printf("[generate] post-repair: %d errors remaining (was %d)", postCount, errorCount)
+		}
+	}
+
+	log.Printf("[generate] done: %d files (type=%s, %d validation errors)", len(project.Files), plan.ProjectType, errorCount)
 	return &models.ParsedClaudeResponse{Project: project}, nil
 }
 
@@ -257,11 +272,18 @@ func (p *ChatProcessor) generateCodeChunked(ctx context.Context, clarified strin
 	foundationCtx := buildFoundationContext(allSharedFiles)
 	manifestSummary := buildManifestSummary(manifest)
 
+	// Build UI Kit API summary — compact reference of exported components, props, variants.
+	// This prevents feature chunks from hallucinating wrong prop names.
+	var uiKitAPISummary string
+	if uiKit != nil {
+		uiKitAPISummary = buildUIKitAPISummary(uiKit.Files)
+	}
+
 	results := make(chan chunkResult, len(featureGroups))
 	for _, group := range featureGroups {
 		g := group
 		go func() {
-			proj, chunkErr := p.generateChunk(ctx, g, foundationCtx, manifestSummary, apiConfig)
+			proj, chunkErr := p.generateChunk(ctx, g, foundationCtx, manifestSummary, apiConfig, uiKitAPISummary)
 			results <- chunkResult{group: g, project: proj, err: chunkErr}
 		}()
 	}
@@ -310,7 +332,22 @@ func (p *ChatProcessor) generateCodeChunked(ctx context.Context, clarified strin
 		}
 	}
 
-	log.Printf("[chunked] done: %d total files (%d feature groups, %d failed)", len(merged.Files), len(featureGroups), failedCount)
+	// ── POST-GENERATION VALIDATION + REPAIR ──
+	validationErrors := validateGeneratedProject(merged.Files, merged.Env)
+	errorCount, _ := logValidationResults(validationErrors)
+
+	if errorCount > 0 {
+		log.Printf("[chunked] 🔧 attempting Haiku repair for %d broken files...", errorCount)
+		repaired := p.repairBrokenFiles(ctx, merged.Files, validationErrors)
+		if len(repaired) > 0 {
+			applyRepairs(merged.Files, repaired)
+			postErrors := validateGeneratedProject(merged.Files, merged.Env)
+			postCount, _ := logValidationResults(postErrors)
+			log.Printf("[chunked] post-repair: %d errors remaining (was %d)", postCount, errorCount)
+		}
+	}
+
+	log.Printf("[chunked] done: %d total files (%d feature groups, %d failed, %d validation errors)", len(merged.Files), len(featureGroups), failedCount, errorCount)
 	return &models.ParsedClaudeResponse{Project: merged}, nil
 }
 
@@ -432,7 +469,7 @@ func (p *ChatProcessor) generateFoundation(
 		models.AnthropicToolRequest{
 			Model:      p.baseConf.CoderModel,
 			MaxTokens:  p.baseConf.CoderMaxTokens,
-			System:     helper.PromptChunkedCoder,
+			System:     helper.PromptAdminPanelGenerator,
 			Messages:   messages,
 			Tools:      []models.ClaudeFunctionTool{helper.ToolEmitProject},
 			ToolChoice: helper.ForcedTool(helper.ToolEmitProject.Name),
@@ -495,12 +532,15 @@ func (p *ChatProcessor) generateUIKit(
 
 // generateChunk generates one feature group in isolation.
 // It receives full foundation file contents so all imports are satisfied.
+// uiKitAPISummary contains a compact API reference of generated UI Kit components
+// (names, props, variants) to prevent feature chunks from hallucinating wrong APIs.
 func (p *ChatProcessor) generateChunk(
 	ctx context.Context,
 	group models.ManifestGroup,
 	foundationCtx string,
 	manifestSummary string,
 	apiConfig string,
+	uiKitAPISummary string,
 ) (*models.GeneratedProject, error) {
 	var sb strings.Builder
 	fmt.Fprintf(&sb, "CHUNKED GENERATION — Feature Group %d: %s\n\n", group.ID, group.Name)
@@ -514,6 +554,13 @@ func (p *ChatProcessor) generateChunk(
 	sb.WriteString(apiConfig)
 	sb.WriteString("\n")
 	sb.WriteString(foundationCtx)
+
+	// Inject UI Kit API reference so the chunk uses exact component names and props.
+	if uiKitAPISummary != "" {
+		sb.WriteString("\n")
+		sb.WriteString(uiKitAPISummary)
+	}
+
 	sb.WriteString("\n====================================\n")
 	sb.WriteString("FULL PROJECT MANIFEST (import reference)\n")
 	sb.WriteString("====================================\n")
