@@ -53,9 +53,9 @@ func GetTemplate(projectType string) []models.ProjectFile {
 	return templateStore[projectType]
 }
 
-// scaffoldPaths are template files that must exist in the output but should NOT
-// be sent to the AI as context (they waste tokens and the AI shouldn't re-emit them).
-var scaffoldPaths = map[string]bool{
+// silentScaffoldPaths are structural files pushed to the repo but NOT shown to AI as context
+// (they waste tokens and AI doesn't need to read them).
+var silentScaffoldPaths = map[string]bool{
 	"package.json":       true,
 	"tailwind.config.js": true,
 	"tsconfig.json":      true,
@@ -65,30 +65,24 @@ var scaffoldPaths = map[string]bool{
 	"src/main.tsx":       true,
 }
 
-// GetTemplateContext returns only files the AI should read and import from
-// (hooks, utils, types, config). These are sent in the coder prompt.
+// GetTemplateContext returns files the AI should read and import from — hooks, utils, types, config.
+// Excludes silent scaffold files (package.json etc) that waste tokens.
 func GetTemplateContext(projectType string) []models.ProjectFile {
 	all := templateStore[projectType]
 	out := make([]models.ProjectFile, 0, len(all))
 	for _, f := range all {
-		if !scaffoldPaths[f.Path] {
+		if !silentScaffoldPaths[f.Path] {
 			out = append(out, f)
 		}
 	}
 	return out
 }
 
-// GetTemplateScaffold returns base scaffold files that are silently merged into
-// the AI output without being sent as prompt context.
+// GetTemplateScaffold returns ALL template files that must be pushed to the repo.
+// Includes both silent structural files and utility files (hooks, lib, config).
+// AI is told not to re-emit these, so the scaffold version always wins via MergeTemplateWithAIFiles.
 func GetTemplateScaffold(projectType string) []models.ProjectFile {
-	all := templateStore[projectType]
-	out := make([]models.ProjectFile, 0, len(all))
-	for _, f := range all {
-		if scaffoldPaths[f.Path] {
-			out = append(out, f)
-		}
-	}
-	return out
+	return templateStore[projectType]
 }
 
 func MergeTemplateWithAIFiles(templateFiles, aiFiles []models.ProjectFile) []models.ProjectFile {

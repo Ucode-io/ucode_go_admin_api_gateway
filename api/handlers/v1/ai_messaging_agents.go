@@ -182,6 +182,9 @@ func (p *ChatProcessor) generateCodeSingle(ctx context.Context, clarified string
 		}
 	}
 
+	// Always force-inject .env with correct credentials — Claude may guess wrong values.
+	project.Files = injectEnvFile(project.Files, p.baseConf.UcodeBaseUrl, apiKey)
+
 	// ── POST-GENERATION VALIDATION + REPAIR ──
 	validationErrors := validateGeneratedProject(project.Files, project.Env)
 	errorCount, _ := logValidationResults(validationErrors)
@@ -331,6 +334,9 @@ func (p *ChatProcessor) generateCodeChunked(ctx context.Context, clarified strin
 			}
 		}
 	}
+
+	// Always force-inject .env with correct credentials — Claude may guess wrong values.
+	merged.Files = injectEnvFile(merged.Files, p.baseConf.UcodeBaseUrl, apiKey)
 
 	// ── POST-GENERATION VALIDATION + REPAIR ──
 	validationErrors := validateGeneratedProject(merged.Files, merged.Env)
@@ -709,6 +715,32 @@ func buildTemplateHooksContext() string {
 		}
 	}
 	return sb.String()
+}
+
+// injectEnvFile always writes a correct .env into the file list, overriding whatever
+// Claude may have generated. We have the real values in Go — no need to trust the AI here.
+func injectEnvFile(files []models.ProjectFile, baseURL, apiKey string) []models.ProjectFile {
+	envBaseURLKey := "VITE_API_BASE_URL"
+	envAPIKeyKey := "VITE_X_API_KEY"
+	for _, f := range GetTemplateContext("admin_panel") {
+		if strings.Contains(f.Path, "config/axios") || strings.Contains(f.Path, "config/env") {
+			if strings.Contains(f.Content, "VITE_BASE_URL") && !strings.Contains(f.Content, "VITE_API_BASE_URL") {
+				envBaseURLKey = "VITE_BASE_URL"
+			}
+			if strings.Contains(f.Content, "VITE_API_KEY") && !strings.Contains(f.Content, "VITE_X_API_KEY") {
+				envAPIKeyKey = "VITE_API_KEY"
+			}
+		}
+	}
+
+	content := fmt.Sprintf("%s=%s\n%s=%s\n", envBaseURLKey, baseURL, envAPIKeyKey, apiKey)
+	for i, f := range files {
+		if f.Path == ".env" || f.Path == ".env.production" {
+			files[i].Content = content
+			return files
+		}
+	}
+	return append(files, models.ProjectFile{Path: ".env", Content: content})
 }
 
 func (p *ChatProcessor) inspectCode(ctx context.Context, userQuestion, filesContext string, chatHistory []models.ChatMessage, imageURLs []string) (string, error) {
