@@ -198,13 +198,16 @@ func (p *ChatProcessor) generateCodeChunked(ctx context.Context, clarified strin
 		return p.generateCodeSingle(ctx, clarified, imageURLs, chatHistory, plan, apiKey)
 	}
 
-	// Split into foundation (group 0) and feature groups (1..N).
+	// Split into foundation (group 0), UI kit (group 1), and feature groups (2..N).
 	var foundationGroup models.ManifestGroup
+	var uiKitGroup models.ManifestGroup
 	var featureGroups []models.ManifestGroup
 
 	for _, g := range manifest.Groups {
 		if g.ID == 0 {
 			foundationGroup = g
+		} else if g.ID == 1 {
+			uiKitGroup = g
 		} else {
 			featureGroups = append(featureGroups, g)
 		}
@@ -214,7 +217,7 @@ func (p *ChatProcessor) generateCodeChunked(ctx context.Context, clarified strin
 		return p.generateCodeSingle(ctx, clarified, imageURLs, chatHistory, plan, apiKey)
 	}
 
-	log.Printf("[chunked] manifest: foundation=%d files, feature_groups=%d", len(foundationGroup.Files), len(featureGroups))
+	log.Printf("[chunked] manifest: foundation=%d files, uikit=%d files, feature_groups=%d", len(foundationGroup.Files), len(uiKitGroup.Files), len(featureGroups))
 
 	// Phase 2: foundation — generate shared files first (sequential).
 	apiConfig := buildAPIConfigBlock(p.baseConf.UcodeBaseUrl, apiKey, plan)
@@ -225,13 +228,32 @@ func (p *ChatProcessor) generateCodeChunked(ctx context.Context, clarified strin
 	}
 
 	// Filter foundation output to ONLY the files it was asked to generate.
-	// Claude sometimes emits feature pages despite being told not to — filtered here so
-	// those leaked stubs don't overwrite real implementations from feature chunks.
 	foundation.Files = filterToGroup(foundation.Files, foundationGroup)
 	log.Printf("[chunked] foundation done: %d files (after filter)", len(foundation.Files))
 
-	// Phase 3: feature groups — parallel goroutines, each gets foundation context.
-	foundationCtx := buildFoundationContext(foundation.Files)
+	// Phase 2b: UI Kit — generate after foundation, before feature groups (sequential).
+	// Feature groups import from ui/*, so UI Kit must be fully ready before they start.
+	var uiKit *models.GeneratedProject
+
+	if len(uiKitGroup.Files) > 0 {
+		foundationCtxForUIKit := buildFoundationContext(foundation.Files)
+		uiKit, err = p.generateUIKit(ctx, uiKitGroup, foundationCtxForUIKit, apiConfig)
+		if err != nil {
+			log.Printf("[chunked] UI kit failed (%v) — continuing without it", err)
+		} else {
+			uiKit.Files = filterToGroup(uiKit.Files, uiKitGroup)
+			log.Printf("[chunked] UI kit done: %d files (after filter)", len(uiKit.Files))
+		}
+	}
+
+	// Phase 3: feature groups — parallel goroutines, each gets foundation + UI kit context.
+	// Build combined context: foundation files + ui kit files.
+	allSharedFiles := make([]models.ProjectFile, 0, len(foundation.Files)+len(uiKitGroup.Files))
+	allSharedFiles = append(allSharedFiles, foundation.Files...)
+	if uiKit != nil {
+		allSharedFiles = append(allSharedFiles, uiKit.Files...)
+	}
+	foundationCtx := buildFoundationContext(allSharedFiles)
 	manifestSummary := buildManifestSummary(manifest)
 
 	results := make(chan chunkResult, len(featureGroups))
@@ -265,8 +287,13 @@ func (p *ChatProcessor) generateCodeChunked(ctx context.Context, clarified strin
 		log.Printf("[chunked] WARNING: %d/%d feature chunks failed — deploying partial project", failedCount, len(featureGroups))
 	}
 
-	// Merge foundation + successful feature chunks.
-	merged := mergeChunks(foundation, successChunks)
+	// Merge foundation + UI kit + successful feature chunks.
+	var allChunks []*models.GeneratedProject
+	if uiKit != nil {
+		allChunks = append(allChunks, uiKit)
+	}
+	allChunks = append(allChunks, successChunks...)
+	merged := mergeChunks(foundation, allChunks)
 
 	// Add scaffold files (package.json, vite.config.ts, etc.).
 	scaffoldFiles := GetTemplateScaffold("admin_panel")
@@ -404,7 +431,7 @@ func (p *ChatProcessor) generateFoundation(
 		models.AnthropicToolRequest{
 			Model:      p.baseConf.CoderModel,
 			MaxTokens:  p.baseConf.CoderMaxTokens,
-			System:     helper.PromptAdminPanelGenerator,
+			System:     helper.PromptChunkedCoder,
 			Messages:   messages,
 			Tools:      []models.ClaudeFunctionTool{helper.ToolEmitProject},
 			ToolChoice: helper.ForcedTool(helper.ToolEmitProject.Name),
@@ -417,6 +444,50 @@ func (p *ChatProcessor) generateFoundation(
 	}
 	if len(project.Files) == 0 {
 		return nil, fmt.Errorf("foundation: empty response")
+	}
+	return project, nil
+}
+
+// generateUIKit generates Group 1 (UI Kit) sequentially after foundation.
+// Feature groups depend on ui/* components, so this must complete before parallel feature generation.
+func (p *ChatProcessor) generateUIKit(
+	ctx context.Context,
+	uiKitGroup models.ManifestGroup,
+	foundationCtx string,
+	apiConfig string,
+) (*models.GeneratedProject, error) {
+	var sb strings.Builder
+	fmt.Fprintf(&sb, "CHUNKED GENERATION — UI Kit (Group 1)\n\n")
+
+	sb.WriteString("YOUR FILES TO IMPLEMENT (emit ONLY these):\n")
+	for _, f := range uiKitGroup.Files {
+		fmt.Fprintf(&sb, "  %s  (exports: [%s])\n", f.Path, strings.Join(f.Exports, ", "))
+	}
+
+	sb.WriteString("\n")
+	sb.WriteString(foundationCtx)
+	sb.WriteString("\n====================================\n")
+	sb.WriteString("REMINDER: Emit ONLY the ui/* files listed above. No page logic, no API calls.\n")
+	sb.WriteString("====================================\n")
+
+	project, err := callWithTool[models.GeneratedProject](
+		p, ctx,
+		models.AnthropicToolRequest{
+			Model:      p.baseConf.CoderModel,
+			MaxTokens:  p.baseConf.CoderMaxTokens,
+			System:     helper.PromptUIKitCoder,
+			Messages:   []models.ChatMessage{{Role: "user", Content: []models.ContentBlock{{Type: "text", Text: sb.String()}}}},
+			Tools:      []models.ClaudeFunctionTool{helper.ToolEmitProject},
+			ToolChoice: helper.ForcedTool(helper.ToolEmitProject.Name),
+		},
+		timeoutCoder,
+		"Generating UI Kit (Group 1)",
+	)
+	if err != nil {
+		return nil, fmt.Errorf("ui kit: %w", err)
+	}
+	if len(project.Files) == 0 {
+		return nil, fmt.Errorf("ui kit: empty response")
 	}
 	return project, nil
 }
