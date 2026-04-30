@@ -867,10 +867,10 @@ Implement the required changes to the provided files based on the task and plan.
 ====================================
 CRITICAL: BROWSER-BASED BUILD SYSTEM
 ====================================
-Your JSON output is consumed by a BROWSER-BASED BUILD SYSTEM.
+Your tool call output is consumed by a BROWSER-BASED BUILD SYSTEM.
 There is NO terminal, NO npm, NO local machine.
 NEVER write cli commands, setup instructions, or "how to run" text.
-Your description after '---' must explain WHAT was changed, NOT how to run.
+The change_summary field in emit_project must explain WHAT was changed, NOT how to run.
 
 ====================================
 IMAGE-DRIVEN UPDATES (CRITICAL)
@@ -921,15 +921,19 @@ TYPE A (admin panel — template provided):
 TYPE B/C (landing/website — no template):
   Generate src/lib/api.ts with EXACTLY this content:
     import axios from 'axios';
-    const api = axios.create({
+    export const apiClient = axios.create({
       baseURL: import.meta.env.VITE_API_BASE_URL,
       headers: {
         'Authorization': 'API-KEY',
         'X-API-KEY': import.meta.env.VITE_X_API_KEY,
       },
     });
-    export default api;
-  Then use 'api' instance for all calls. NEVER use raw axios.
+    export default apiClient;
+  Then use 'apiClient' for all calls: import { apiClient } from '@/lib/api'. NEVER use raw axios.
+  App.tsx MUST wrap the entire app with QueryClientProvider:
+    import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+    const queryClient = new QueryClient();
+    export default function App() { return <QueryClientProvider client={queryClient}>...</QueryClientProvider>; }
 
 BOTH HEADERS ARE ALWAYS REQUIRED on every request:
   Authorization: API-KEY        (literal string "API-KEY" — NOT a variable, NOT a token)
@@ -1131,6 +1135,22 @@ LAYER 1 — MCP (Foundation) — TYPE A ONLY
   TYPE B/C RULE: NEVER import from @/hooks/useApi, @/lib/apiUtils, @/lib/utils, @/types, @/types/common, or @/components/shared/AppProviders.
   Any utility you need MUST be generated inline or as a new file in the files[] array.
 
+  TYPE B/C API CLIENT — when the project needs data fetching, generate src/lib/api.ts with EXACTLY this:
+    import axios from 'axios';
+    export const apiClient = axios.create({
+      baseURL: import.meta.env.VITE_API_BASE_URL,
+      headers: {
+        'Authorization': 'API-KEY',
+        'X-API-KEY': import.meta.env.VITE_X_API_KEY,
+      },
+    });
+    export default apiClient;
+  Import as: import { apiClient } from '@/lib/api';
+  App.tsx for TYPE B/C MUST wrap with QueryClientProvider:
+    import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+    const queryClient = new QueryClient();
+    export default function App() { return <QueryClientProvider client={queryClient}>...</QueryClientProvider>; }
+
 LAYER 2 — Skills (Generated Code)
   All UI components, layouts, features, pages you generate.
   Rules:
@@ -1140,11 +1160,11 @@ LAYER 2 — Skills (Generated Code)
     - Files output in strict dependency order (index.css first, App.tsx last)
     - NEVER import from @/components/ui/* without a corresponding generated file
 
-LAYER 3 — Plugins (JSON Output)
-  Single valid JSON: { project_name, env, files[] }
-  Layer 1 paths → imported only, never re-emitted
-  Layer 2 files → emitted in strict order
-  env values → real non-placeholder values
+LAYER 3 — Output via emit_project tool
+  Call the emit_project tool with: { project_name, env, files[] }
+  Layer 1 paths → imported only, never re-emitted in files[]
+  Layer 2 files → emitted in strict dependency order
+  env values → real non-placeholder values (actual VITE_* keys and values)
 
 ====================================
 ABSOLUTE RULES (ALL TYPES)
@@ -2130,7 +2150,8 @@ SELECT & FORM PRIMITIVES
 
 API CLIENT
 [ ] TYPE A: all calls use apiClient from '@/config/axios' — never new axios instance
-[ ] TYPE B/C: src/lib/api.ts generated with correct axios.create + both headers
+[ ] TYPE B/C: src/lib/api.ts generated — exports: export const apiClient = axios.create(...); export default apiClient
+[ ] TYPE B/C: App.tsx wraps with QueryClientProvider from @tanstack/react-query
 [ ] Both headers present everywhere: Authorization: API-KEY and X-API-KEY
 [ ] GET single: apiClient.get("/v2/items/{slug}/" + id) used when fetching one record
 [ ] extractList / extractSingle / extractCount used — never inline data?.data?.data?.response
@@ -2421,10 +2442,9 @@ func BuildCodeEditorMessage(clarified, planJSON, filesContext string, hasImages 
 	}
 	return fmt.Sprintf(
 		"Task: %s%s\n\nPlan (what to change):\n%s\n\nExisting file contents:\n%s\n\n"+
-			"MANDATORY REMINDER: You MUST output ONLY the JSON structure followed by --- and a description. "+
+			"CRITICAL REMINDER: Call the emit_project tool with ALL modified files. "+
 			"NEVER respond conversationally. NEVER say 'there is already a comprehensive website' or 'would you like me to improve it' or ask any questions. "+
-			"ALWAYS implement the requested changes and return ALL modified files in the JSON format. "+
-			"If the existing code is already good, still output the JSON with the changed files.",
+			"Always call emit_project, even if the existing code looks good — return the changed files.",
 		clarified, imageNote, planJSON, filesContext,
 	)
 }
