@@ -12,6 +12,8 @@ import (
 	"time"
 
 	"ucode/ucode_go_api_gateway/api/models"
+	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
+	"ucode/ucode_go_api_gateway/pkg/helper"
 )
 
 const publishChunkSize = 30
@@ -54,6 +56,12 @@ func (p *ChatProcessor) runMicrofrontendEdit(ctx context.Context, clarified, fil
 	if err = p.pushMicrofrontendChangesChunked(ctx, edited.Project.Files); err != nil {
 		return nil, fmt.Errorf("failed to push microfrontend changes: %w", err)
 	}
+
+	snapshotFiles := make([]models.GitlabFileChange, 0, len(edited.Project.Files))
+	for _, f := range edited.Project.Files {
+		snapshotFiles = append(snapshotFiles, models.GitlabFileChange{FilePath: f.Path, Content: f.Content})
+	}
+	p.createMicrofrontendSnapshot(ctx, snapshotFiles)
 
 	return &models.ParsedClaudeResponse{Description: edited.Description}, nil
 }
@@ -399,6 +407,8 @@ func (p *ChatProcessor) publishToMicrofrontend(ctx context.Context, projectName,
 		}
 	}
 
+	p.createMicrofrontendSnapshot(ctx, allFiles)
+
 	log.Printf("[MICROFRONTEND] ✅ published: id=%s url=%s", p.microFrontendId, createResult.Data.Url)
 	return nil
 }
@@ -467,6 +477,65 @@ func buildInitFiles(allFiles []models.GitlabFileChange, n int) []models.GitlabFi
 	}
 
 	return result
+}
+
+// createMicrofrontendSnapshot saves a version of the current files to the
+// project's microfrontend_versions table. Sets is_current=true on the new
+// version and is_current=false on all previous versions for this microfrontend.
+// Called after every successful AI push — NOT after reverts.
+func (p *ChatProcessor) createMicrofrontendSnapshot(ctx context.Context, files []models.GitlabFileChange) {
+	if p.microFrontendId == "" || p.resourceEnvId == "" {
+		return
+	}
+
+	filesJSON, err := json.Marshal(files)
+	if err != nil {
+		log.Printf("[VERSION] failed to marshal files: %v", err)
+		return
+	}
+
+	// Clear is_current on all existing versions for this microfrontend.
+	if err = p.clearCurrentVersion(ctx); err != nil {
+		log.Printf("[VERSION] failed to clear current version: %v", err)
+	}
+
+	data, err := helper.ConvertMapToStruct(map[string]any{
+		"microfrontend_id": p.microFrontendId,
+		"commit_message":   p.userMessage,
+		"files":            string(filesJSON),
+		"is_current":       true,
+	})
+	if err != nil {
+		log.Printf("[VERSION] failed to convert version data: %v", err)
+		return
+	}
+
+	_, err = p.service.GoObjectBuilderService().Items().Create(ctx, &nb.CommonMessage{
+		TableSlug: "microfrontend_versions",
+		Data:      data,
+		ProjectId: p.resourceEnvId,
+	})
+	if err != nil {
+		log.Printf("[VERSION] failed to create version: %v", err)
+	}
+}
+
+// clearCurrentVersion sets is_current=false on all versions of this microfrontend.
+func (p *ChatProcessor) clearCurrentVersion(ctx context.Context) error {
+	data, err := helper.ConvertMapToStruct(map[string]any{
+		"microfrontend_id": p.microFrontendId,
+		"is_current":       false,
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = p.service.GoObjectBuilderService().Items().MultipleUpdate(ctx, &nb.CommonMessage{
+		TableSlug: "microfrontend_versions",
+		Data:      data,
+		ProjectId: p.resourceEnvId,
+	})
+	return err
 }
 
 // sanitizeFileContent removes characters that can cause JSON parse failures
