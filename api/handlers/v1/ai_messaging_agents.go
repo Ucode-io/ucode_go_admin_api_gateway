@@ -149,18 +149,21 @@ func (p *ChatProcessor) generateCodeSingle(ctx context.Context, clarified string
 
 	messages := buildMessagesWithHistory(chatHistory, buildContentBlocksWithImages(prompt, imageURLs))
 
-	p.emitter().Emit(SSEEvent{Type: EvProgress, Message: "Генерирую код...", Percent: 18})
+	p.emitter().Emit(SSEEvent{Type: EvProgress, Icon: "code-2", Message: "Генерирую исходный код проекта...", Percent: 18})
 
 	var project *models.GeneratedProject
 	if err := withHeartbeat(ctx, p.emitter(),
 		[]string{
-			"Claude генерирует код...",
-			"Создаю компоненты...",
-			"Пишу страницы...",
-			"Настраиваю роутинг...",
-			"Подключаю API хуки...",
-			"Настраиваю стили и темы...",
-			"Продолжаю генерацию...",
+			"Генерирую React компоненты...",
+			"Создаю страницы и формы...",
+			"Пишу бизнес-логику...",
+			"Настраиваю роутинг и навигацию...",
+			"Подключаю API хуки к таблицам...",
+			"Настраиваю CSS стили и темы...",
+			"Создаю layout и sidebar...",
+			"Генерирую CRUD операции...",
+			"Подключаю валидацию форм...",
+			"Финализирую код проекта...",
 		},
 		18, 82, 360*time.Second,
 		func() error {
@@ -204,13 +207,13 @@ func (p *ChatProcessor) generateCodeSingle(ctx context.Context, clarified string
 	project.Files = injectEnvFile(project.Files, p.baseConf.UcodeBaseUrl, apiKey)
 
 	// ── POST-GENERATION VALIDATION + REPAIR ──
-	p.emitter().Emit(SSEEvent{Type: EvProgress, Message: "Проверяю сгенерированный код...", Percent: 83})
-	time.Sleep(400 * time.Millisecond) // validation is instant Go code — pause so the message is visible
+	p.emitter().Emit(SSEEvent{Type: EvProgress, Icon: "shield-check", Message: "Проверяю импорты и зависимости...", Percent: 83})
+	time.Sleep(1500 * time.Millisecond) // validation is instant Go code — pause so the message is visible
 	validationErrors := validateGeneratedProject(project.Files, project.Env)
 	errorCount, _ := logValidationResults(validationErrors)
 
 	if errorCount > 0 {
-		p.emitter().Emit(SSEEvent{Type: EvProgress, Message: fmt.Sprintf("Исправляю %d ошибок...", errorCount), Percent: 84})
+		p.emitter().Emit(SSEEvent{Type: EvRepair, Icon: "wrench", Message: "Исправляю найденные проблемы", Value: fmt.Sprintf("%d ошибок", errorCount), Percent: 84})
 		log.Printf("[generate] 🔧 attempting Haiku repair for %d broken files...", errorCount)
 		repaired := p.repairBrokenFiles(ctx, project.Files, validationErrors)
 		if len(repaired) > 0 {
@@ -233,13 +236,15 @@ func (p *ChatProcessor) generateCodeChunked(ctx context.Context, clarified strin
 	emit := p.emitter()
 
 	// Phase 1: manifest — determine file structure and groups.
-	emit.Emit(SSEEvent{Type: EvProgress, Message: "Планирую структуру файлов...", Percent: 16})
+	emit.Emit(SSEEvent{Type: EvProgress, Icon: "list-tree", Message: "Планирую структуру файлов и зависимости...", Percent: 16})
 	var manifest *models.ProjectManifest
 	if err := withHeartbeat(ctx, emit,
 		[]string{
 			"Планирую структуру файлов...",
 			"Определяю зависимости между модулями...",
-			"Разбиваю проект на группы...",
+			"Разбиваю проект на фичи...",
+			"Рассчитываю порядок генерации...",
+			"Строю граф зависимостей...",
 		},
 		16, 23, 60*time.Second,
 		func() error { var e error; manifest, e = p.generateManifest(ctx, plan, chatHistory); return e },
@@ -279,8 +284,10 @@ func (p *ChatProcessor) generateCodeChunked(ctx context.Context, clarified strin
 	}
 	emit.Emit(SSEEvent{
 		Type:    EvManifest,
+		Icon:    "git-branch",
 		Percent: 23,
-		Message: fmt.Sprintf("Структура готова: %d файлов, %d фич", totalFiles, len(featureGroups)),
+		Message: "Структура проекта спланирована",
+		Value:   fmt.Sprintf("%d файлов · %d фич", totalFiles, len(featureGroups)),
 		Data: ManifestEventData{
 			TotalFiles:   totalFiles,
 			GroupCount:   len(manifest.Groups),
@@ -289,20 +296,22 @@ func (p *ChatProcessor) generateCodeChunked(ctx context.Context, clarified strin
 	})
 	log.Printf("[chunked] manifest: foundation=%d files, uikit=%d files, feature_groups=%d", len(foundationGroup.Files), len(uiKitGroup.Files), len(featureGroups))
 
-	time.Sleep(300 * time.Millisecond) // let manifest event settle before foundation starts
+	time.Sleep(2000 * time.Millisecond) // let user read the manifest structure
 
 	// Phase 2: foundation — generate shared files first (sequential).
 	apiConfig := buildAPIConfigBlock(p.baseConf.UcodeBaseUrl, apiKey, plan)
 
-	emit.Emit(SSEEvent{Type: EvProgress, Message: "Генерирую базовые компоненты...", Percent: 24})
+	emit.Emit(SSEEvent{Type: EvProgress, Icon: "layers", Message: "Генерирую фундамент проекта...", Percent: 24})
 	var foundation *models.GeneratedProject
 	if err := withHeartbeat(ctx, emit,
 		[]string{
-			"Генерирую базовые компоненты...",
-			"Создаю layout и роутинг...",
-			"Пишу типы и хуки...",
-			"Настраиваю навигацию...",
-			"Формирую общие утилиты...",
+			"Создаю layout, sidebar и навигацию...",
+			"Генерирую TypeScript типы и интерфейсы...",
+			"Пишу API хуки и конфигурацию...",
+			"Настраиваю App.tsx и роутинг...",
+			"Формирую общие утилиты и хелперы...",
+			"Создаю глобальные стили и тему...",
+			"Подключаю провайдеры и контекст...",
 		},
 		24, 38, 120*time.Second,
 		func() error {
@@ -316,24 +325,25 @@ func (p *ChatProcessor) generateCodeChunked(ctx context.Context, clarified strin
 	}
 
 	foundation.Files = filterToGroup(foundation.Files, foundationGroup)
-	emit.Emit(SSEEvent{Type: EvProgress, Message: fmt.Sprintf("Foundation готов (%d файлов)", len(foundation.Files)), Percent: 38})
+	emit.Emit(SSEEvent{Type: EvProgress, Icon: "check-circle", Message: "Foundation готов", Value: fmt.Sprintf("%d файлов", len(foundation.Files)), Percent: 38})
 	log.Printf("[chunked] foundation done: %d files (after filter)", len(foundation.Files))
 
 	// Phase 2b: UI Kit — generate after foundation, before feature groups (sequential).
 	var uiKit *models.GeneratedProject
 
 	if len(uiKitGroup.Files) > 0 {
-		time.Sleep(300 * time.Millisecond) // pause between foundation-done and ui-kit-start
-		emit.Emit(SSEEvent{Type: EvProgress, Message: "Создаю UI Kit компоненты...", Percent: 39})
+		time.Sleep(1500 * time.Millisecond) // pause between foundation-done and ui-kit-start
+		emit.Emit(SSEEvent{Type: EvProgress, Icon: "palette", Message: "Создаю UI Kit — дизайн-систему проекта...", Percent: 39})
 		foundationCtxForUIKit := buildFoundationContext(foundation.Files)
 
 		var uiKitErr error
 		if err := withHeartbeat(ctx, emit,
 			[]string{
-				"Создаю UI Kit...",
-				"Пишу Button, Card, Table, Dialog...",
-				"Настраиваю компоненты...",
-				"Добавляю варианты и пропсы...",
+				"Создаю Button, Input, Select...",
+				"Пишу Card, Dialog, Drawer...",
+				"Генерирую DataTable с сортировкой...",
+				"Добавляю варианты, размеры и пропсы...",
+				"Создаю Badge, Avatar, Tooltip...",
 				"Финализирую дизайн-систему...",
 			},
 			39, 50, 120*time.Second,
@@ -348,7 +358,7 @@ func (p *ChatProcessor) generateCodeChunked(ctx context.Context, clarified strin
 			uiKit = nil
 		} else {
 			uiKit.Files = filterToGroup(uiKit.Files, uiKitGroup)
-			emit.Emit(SSEEvent{Type: EvProgress, Message: fmt.Sprintf("UI Kit готов (%d компонентов)", len(uiKit.Files)), Percent: 50})
+			emit.Emit(SSEEvent{Type: EvProgress, Icon: "check-circle", Message: "UI Kit готов", Value: fmt.Sprintf("%d компонентов", len(uiKit.Files)), Percent: 50})
 			log.Printf("[chunked] UI kit done: %d files (after filter)", len(uiKit.Files))
 		}
 	}
@@ -368,11 +378,13 @@ func (p *ChatProcessor) generateCodeChunked(ctx context.Context, clarified strin
 	}
 
 	totalChunks := len(featureGroups)
-	time.Sleep(300 * time.Millisecond) // pause after ui-kit/foundation phase before announcing parallel start
+	time.Sleep(2000 * time.Millisecond) // let user see foundation/ui-kit results
 	emit.Emit(SSEEvent{
 		Type:    EvProgress,
+		Icon:    "zap",
 		Percent: 51,
-		Message: fmt.Sprintf("Запускаю генерацию %d фич параллельно...", totalChunks),
+		Message: "Запускаю параллельную генерацию фич",
+		Value:   fmt.Sprintf("%d фич одновременно", totalChunks),
 	})
 
 	results := make(chan chunkResult, totalChunks)
@@ -392,7 +404,7 @@ func (p *ChatProcessor) generateCodeChunked(ctx context.Context, clarified strin
 				if pct > 76 {
 					pct = 76
 				}
-				emit.Emit(SSEEvent{Type: EvProgress, Message: "Генерирую фичи параллельно...", Percent: pct})
+				emit.Emit(SSEEvent{Type: EvProgress, Icon: "cpu", Message: "Генерирую фичи параллельно...", Percent: pct})
 			case <-stopChunkHB:
 				return
 			}
@@ -409,7 +421,9 @@ func (p *ChatProcessor) generateCodeChunked(ctx context.Context, clarified strin
 			}
 			emit.Emit(SSEEvent{
 				Type:    EvChunkStart,
-				Message: "Генерирую: " + g.Name,
+				Icon:    "package",
+				Message: "Генерирую фичу",
+				Value:   g.Name,
 				Data:    map[string]any{"feature": g.Name},
 			})
 			proj, chunkErr := p.generateChunk(ctx, g, foundationCtx, manifestSummary, apiConfig, uiKitAPISummary)
@@ -436,8 +450,10 @@ func (p *ChatProcessor) generateCodeChunked(ctx context.Context, clarified strin
 			log.Printf("[chunked] ✅ chunk %q: %d files", res.group.Name, len(res.project.Files))
 			emit.Emit(SSEEvent{
 				Type:    EvChunkDone,
+				Icon:    "check-circle",
 				Percent: chunkPct,
-				Message: fmt.Sprintf("%s готов (%d/%d)", res.group.Name, completedChunks, totalChunks),
+				Message: fmt.Sprintf("Фича готова (%d/%d)", completedChunks, totalChunks),
+				Value:   res.group.Name,
 				Data: ChunkDoneData{
 					Feature: res.group.Name,
 					Index:   completedChunks,
@@ -482,20 +498,25 @@ func (p *ChatProcessor) generateCodeChunked(ctx context.Context, clarified strin
 	merged.Files = injectEnvFile(merged.Files, p.baseConf.UcodeBaseUrl, apiKey)
 
 	// ── POST-GENERATION VALIDATION + REPAIR ──
+	time.Sleep(1500 * time.Millisecond) // pause after chunks complete
 	emit.Emit(SSEEvent{
 		Type:    EvProgress,
+		Icon:    "shield-check",
 		Percent: 80,
-		Message: fmt.Sprintf("Проверяю импорты в %d файлах...", len(merged.Files)),
+		Message: "Проверяю качество кода",
+		Value:   fmt.Sprintf("%d файлов", len(merged.Files)),
 	})
-	time.Sleep(400 * time.Millisecond) // validation is instant Go code — pause so the message is visible
+	time.Sleep(1500 * time.Millisecond) // validation is instant Go code — pause so the message is visible
 	validationErrors := validateGeneratedProject(merged.Files, merged.Env)
 	errorCount, _ := logValidationResults(validationErrors)
 
 	if errorCount > 0 {
 		emit.Emit(SSEEvent{
-			Type:    EvProgress,
+			Type:    EvRepair,
+			Icon:    "wrench",
 			Percent: 82,
-			Message: fmt.Sprintf("Нашёл %d проблем — исправляю...", errorCount),
+			Message: "Автоматически исправляю проблемы",
+			Value:   fmt.Sprintf("%d ошибок", errorCount),
 		})
 		log.Printf("[chunked] 🔧 attempting Haiku repair for %d broken files...", errorCount)
 		repaired := p.repairBrokenFiles(ctx, merged.Files, validationErrors)

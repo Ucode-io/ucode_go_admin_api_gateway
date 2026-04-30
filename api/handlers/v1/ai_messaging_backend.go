@@ -29,12 +29,14 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 		emit.Emit(
 			SSEEvent{
 				Type:    EvTableStart,
-				Message: "Создаю таблицу: " + tablePlan.Label,
+				Icon:    "database",
+				Message: "Создаю таблицу",
+				Value:   tablePlan.Label,
 				Data:    map[string]any{"table": tablePlan.Slug, "label": tablePlan.Label},
 			},
 		)
 
-		time.Sleep(3 * time.Second)
+		time.Sleep(1500 * time.Millisecond)
 
 		attributesMap := map[string]any{
 			"label":    "",
@@ -229,12 +231,31 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 		emit.Emit(
 			SSEEvent{
 				Type:    EvTableDone,
-				Message: fmt.Sprintf("✓ Таблица %q создана", tablePlan.Label),
+				Icon:    "database",
+				Message: "Таблица создана",
+				Value:   tablePlan.Label,
 				Data:    map[string]any{"table": tablePlan.Slug, "label": tablePlan.Label, "fields": len(tablePlan.Fields)},
 			},
 		)
 
-		time.Sleep(3 * time.Second)
+		time.Sleep(1500 * time.Millisecond)
+
+		// Emit field creation progress
+		userFields := 0
+		for _, fp := range tablePlan.Fields {
+			if !isSystemField(fp.Slug) && !(tablePlan.IsLoginTable && isAuthField(fp.Slug)) {
+				userFields++
+			}
+		}
+		if userFields > 0 {
+			emit.Emit(SSEEvent{
+				Type:    EvProgress,
+				Icon:    "columns",
+				Message: fmt.Sprintf("Добавляю поля в %s", tablePlan.Label),
+				Value:   fmt.Sprintf("%d полей", userFields),
+			})
+			time.Sleep(800 * time.Millisecond)
+		}
 
 		for _, fieldPlan := range tablePlan.Fields {
 			if isSystemField(fieldPlan.Slug) {

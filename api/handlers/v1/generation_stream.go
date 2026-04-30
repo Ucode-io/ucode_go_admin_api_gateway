@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"strings"
 	"time"
 
 	"ucode/ucode_go_api_gateway/api/models"
@@ -27,9 +28,13 @@ const (
 )
 
 // SSEEvent is a single server-sent event in the generation progress stream.
+// Icon: Lucide icon name for the frontend to render (e.g. "database", "code-2", "wrench").
+// Value: the prominent highlighted value shown larger than Message (e.g. table name, file path).
 type SSEEvent struct {
 	Type    SSEEventType `json:"type"`
 	Message string       `json:"message,omitempty"`
+	Value   string       `json:"value,omitempty"`
+	Icon    string       `json:"icon,omitempty"`
 	Percent int          `json:"percent,omitempty"`
 	Data    any          `json:"data,omitempty"`
 }
@@ -111,7 +116,7 @@ func withHeartbeat(ctx context.Context, emit ProgressEmitter, messages []string,
 	done := make(chan error, 1)
 	go func() { done <- fn() }()
 
-	ticker := time.NewTicker(15 * time.Second)
+	ticker := time.NewTicker(8 * time.Second)
 	defer ticker.Stop()
 
 	start := time.Now()
@@ -127,10 +132,78 @@ func withHeartbeat(ctx context.Context, emit ProgressEmitter, messages []string,
 				frac = 0.9
 			}
 			pct := pctStart + int(float64(pctEnd-pctStart)*frac)
-			emit.Emit(SSEEvent{Type: EvProgress, Message: messages[msgIdx%len(messages)], Percent: pct})
+			emit.Emit(SSEEvent{Type: EvProgress, Icon: "brain", Message: messages[msgIdx%len(messages)], Percent: pct})
 			msgIdx++
 		case <-ctx.Done():
 			return ctx.Err()
 		}
+	}
+}
+
+// emitPublishFiles emits per-file publish progress events so the frontend shows
+// which files are being deployed. Files are grouped by directory and shown
+// with a short delay between groups so the user can follow along.
+func emitPublishFiles(emit ProgressEmitter, files []models.ProjectFile, pctStart int) {
+	if len(files) == 0 {
+		return
+	}
+
+	// Group files by top-level directory for cleaner UX.
+	type dirGroup struct {
+		dir   string
+		files []string
+	}
+	groups := make([]dirGroup, 0)
+	seen := make(map[string]int) // dir → index in groups
+
+	for _, f := range files {
+		dir := "root"
+		if idx := strings.Index(f.Path, "/"); idx != -1 {
+			dir = f.Path[:idx]
+		}
+		if i, ok := seen[dir]; ok {
+			groups[i].files = append(groups[i].files, f.Path)
+		} else {
+			seen[dir] = len(groups)
+			groups = append(groups, dirGroup{dir: dir, files: []string{f.Path}})
+		}
+	}
+
+	emit.Emit(SSEEvent{
+		Type:    EvPublish,
+		Icon:    "upload-cloud",
+		Message: "Публикую проект в GitLab",
+		Value:   fmt.Sprintf("%d файлов", len(files)),
+		Percent: pctStart,
+	})
+
+	time.Sleep(800 * time.Millisecond)
+
+	for i, g := range groups {
+		pct := pctStart + (i+1)*6/len(groups) // spread 6% across groups (93→99)
+		if pct > 99 {
+			pct = 99
+		}
+
+		icon := "file-code"
+		switch g.dir {
+		case "src":
+			icon = "code-2"
+		case "public":
+			icon = "globe"
+		case "root":
+			icon = "settings"
+		}
+
+		emit.Emit(SSEEvent{
+			Type:    EvPublish,
+			Icon:    icon,
+			Message: fmt.Sprintf("Деплою %s/", g.dir),
+			Value:   fmt.Sprintf("%d файлов", len(g.files)),
+			Percent: pct,
+			Data:    map[string]any{"directory": g.dir, "files": g.files},
+		})
+
+		time.Sleep(600 * time.Millisecond)
 	}
 }

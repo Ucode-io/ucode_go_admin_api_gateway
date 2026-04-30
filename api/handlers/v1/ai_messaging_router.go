@@ -140,7 +140,7 @@ func (p *ChatProcessor) runVisualEdit(ctx context.Context, instruction string, c
 	log.Printf("[VISUAL EDIT] starting: count=%d", len(contexts))
 
 	emit := p.emitter()
-	emit.Emit(SSEEvent{Type: EvProgress, Message: "Загружаю файлы проекта...", Percent: 5})
+	emit.Emit(SSEEvent{Type: EvProgress, Icon: "scan-search", Message: "Загружаю файлы проекта...", Percent: 5})
 
 	existingFiles, err := p.fetchMicrofrontendFiles(ctx)
 	if err != nil {
@@ -186,7 +186,9 @@ func (p *ChatProcessor) runVisualEdit(ctx context.Context, instruction string, c
 
 	emit.Emit(SSEEvent{
 		Type:    EvProgress,
-		Message: fmt.Sprintf("Редактирую %d компонент(ов)...", len(targetPaths)),
+		Icon:    "mouse-pointer-click",
+		Message: "Редактирую выбранные элементы",
+		Value:   fmt.Sprintf("%d компонент(ов)", len(targetPaths)),
 		Percent: 10,
 	})
 
@@ -195,7 +197,13 @@ func (p *ChatProcessor) runVisualEdit(ctx context.Context, instruction string, c
 
 	var edited *visualEditOutput
 	if err := withHeartbeat(ctx, emit,
-		[]string{"Редактирую компоненты...", "Применяю визуальные изменения...", "Обновляю стили..."},
+		[]string{
+			"Редактирую компоненты...",
+			"Применяю визуальные изменения...",
+			"Обновляю стили и разметку...",
+			"Проверяю совместимость...",
+			"Финализирую правки...",
+		},
 		10, 85, 120*time.Second,
 		func() error {
 			var e error
@@ -221,7 +229,9 @@ func (p *ChatProcessor) runVisualEdit(ctx context.Context, instruction string, c
 	if len(edited.Files) > 0 {
 		emit.Emit(SSEEvent{
 			Type:    EvPublish,
-			Message: fmt.Sprintf("Публикую %d файл(ов) в GitLab...", len(edited.Files)),
+			Icon:    "upload-cloud",
+			Message: "Публикую изменения",
+			Value:   fmt.Sprintf("%d файл(ов)", len(edited.Files)),
 			Percent: 90,
 		})
 		if pushErr := p.pushMicrofrontendChanges(ctx, edited.Files); pushErr != nil {

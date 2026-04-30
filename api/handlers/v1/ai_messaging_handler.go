@@ -328,6 +328,7 @@ func (h *HandlerV1) handleStreamingMessage(c *gin.Context, processor *ChatProces
 		processor.emitter().Emit(
 			SSEEvent{
 				Type:    EvProgress,
+				Icon:    "sparkles",
 				Message: "Начинаю обработку...",
 				Percent: 1,
 			},
@@ -337,6 +338,7 @@ func (h *HandlerV1) handleStreamingMessage(c *gin.Context, processor *ChatProces
 		if pipelineErr != nil {
 			processor.emitter().Emit(SSEEvent{
 				Type:    EvError,
+				Icon:    "alert-circle",
 				Message: fmt.Sprintf("AI processing failed: %v", pipelineErr),
 			})
 			return
@@ -416,6 +418,7 @@ func (h *HandlerV1) handleStreamingMessage(c *gin.Context, processor *ChatProces
 		processor.emitter().Emit(
 			SSEEvent{
 				Type:    EvDone,
+				Icon:    "check-circle",
 				Percent: 100,
 				Message: aiResponse.Description,
 				Data: map[string]any{

@@ -96,7 +96,16 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 
 	err := withHeartbeat(
 		ctx, emit,
-		[]string{"Анализирую требования...", "Архитектор планирует структуру...", "Создаю дизайн-систему..."},
+		[]string{
+			"Анализирую требования...",
+			"Проектирую структуру базы данных...",
+			"Продумываю навигацию и UX...",
+			"Выбираю дизайн-систему...",
+			"Создаю схему связей между таблицами...",
+			"Определяю ролевую модель и доступы...",
+			"Оцениваю сложность и объём...",
+			"Финализирую архитектуру проекта...",
+		},
 		3, 12, 90*time.Second,
 		func() error {
 			var err error
@@ -124,8 +133,10 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 	emit.Emit(
 		SSEEvent{
 			Type:    EvPlan,
+			Icon:    "layout",
 			Percent: 12,
-			Message: fmt.Sprintf("Спланировано: %d таблиц для проекта %q", len(plan.Tables), plan.ProjectName),
+			Message: fmt.Sprintf("Архитектура готова: %d таблиц", len(plan.Tables)),
+			Value:   plan.ProjectName,
 			Data: PlanEventData{
 				ProjectName: plan.ProjectName,
 				ProjectType: plan.ProjectType,
@@ -137,11 +148,12 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 
 	log.Printf("[new-project] architect done: name=%q type=%q design=%s", plan.ProjectName, plan.ProjectType, plan.Design.DesignInspiration)
 
-	time.Sleep(400 * time.Millisecond) // let user see the plan before backend phase starts
+	time.Sleep(2000 * time.Millisecond) // let user read the plan
 
 	emit.Emit(
 		SSEEvent{
 			Type:    EvProgress,
+			Icon:    "folder-plus",
 			Message: "Создаю проект и окружение...",
 			Percent: 13,
 		},
@@ -154,11 +166,14 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 
 	p.mcpProjectId = projectData.McpProjectId
 
+	time.Sleep(800 * time.Millisecond)
 	emit.Emit(
 		SSEEvent{
 			Type:    EvProgress,
+			Icon:    "database",
 			Percent: 15,
-			Message: fmt.Sprintf("Создаю %d таблиц в базе данных...", len(plan.Tables)),
+			Message: "Создаю таблицы в базе данных",
+			Value:   fmt.Sprintf("%d таблиц", len(plan.Tables)),
 		},
 	)
 
@@ -173,7 +188,7 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 		return nil, err
 	}
 
-	emit.Emit(SSEEvent{Type: EvPublish, Message: "Публикую в GitLab...", Percent: 93})
+	emitPublishFiles(emit, generated.Project.Files, 93)
 	if err = p.publishToMicrofrontend(ctx, plan.ProjectName, uniqueMFEPath(), generated, projectData); err != nil {
 		return nil, fmt.Errorf("microfrontend publish failed: %w", err)
 	}
@@ -208,7 +223,16 @@ func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context,
 
 	var plan *models.ArchitectPlan
 	if err := withHeartbeat(ctx, emit,
-		[]string{"Анализирую требования...", "Архитектор планирует структуру...", "Создаю дизайн-систему..."},
+		[]string{
+			"Анализирую требования...",
+			"Проектирую структуру базы данных...",
+			"Продумываю навигацию и UX...",
+			"Выбираю дизайн-систему...",
+			"Создаю схему связей между таблицами...",
+			"Определяю ролевую модель и доступы...",
+			"Оцениваю сложность и объём...",
+			"Финализирую архитектуру проекта...",
+		},
 		3, 12, 90*time.Second,
 		func() error {
 			var e error
@@ -232,8 +256,10 @@ func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context,
 	}
 	emit.Emit(SSEEvent{
 		Type:    EvPlan,
+		Icon:    "layout",
 		Percent: 12,
-		Message: fmt.Sprintf("Спланировано: %d таблиц для проекта %q", len(plan.Tables), plan.ProjectName),
+		Message: fmt.Sprintf("Архитектура готова: %d таблиц", len(plan.Tables)),
+		Value:   plan.ProjectName,
 		Data: PlanEventData{
 			ProjectName: plan.ProjectName,
 			ProjectType: plan.ProjectType,
@@ -244,9 +270,14 @@ func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context,
 
 	log.Printf("[mfe-current] architect done: name=%q type=%q design=%s", plan.ProjectName, plan.ProjectType, plan.Design.DesignInspiration)
 
-	time.Sleep(400 * time.Millisecond) // let user see the plan before backend phase starts
+	time.Sleep(2000 * time.Millisecond) // let user read the plan
 
-	emit.Emit(SSEEvent{Type: EvProgress, Message: "Получаю данные проекта...", Percent: 13})
+	emit.Emit(SSEEvent{
+		Type:    EvProgress,
+		Icon:    "folder-open",
+		Message: "Получаю данные проекта...",
+		Percent: 13,
+	})
 	projectData, err := p.getExistingProjectData(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get existing project data: %w", err)
@@ -266,10 +297,13 @@ func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context,
 		}
 		if len(newTables) > 0 {
 			log.Printf("[mfe-current] architect defined %d new table(s) — provisioning async", len(newTables))
+			time.Sleep(800 * time.Millisecond)
 			emit.Emit(SSEEvent{
 				Type:    EvProgress,
+				Icon:    "database",
 				Percent: 15,
-				Message: fmt.Sprintf("Создаю %d новых таблиц...", len(newTables)),
+				Message: "Создаю новые таблицы в базе данных",
+				Value:   fmt.Sprintf("%d таблиц", len(newTables)),
 			})
 			newPlan := &models.ArchitectPlan{
 				ProjectName: plan.ProjectName,
@@ -289,7 +323,7 @@ func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context,
 		return nil, err
 	}
 
-	emit.Emit(SSEEvent{Type: EvPublish, Message: "Публикую в GitLab...", Percent: 93})
+	emitPublishFiles(emit, generated.Project.Files, 93)
 	if err = p.publishToMicrofrontend(ctx, plan.ProjectName, uniqueMFEPath(), generated, projectData); err != nil {
 		return nil, fmt.Errorf("microfrontend publish failed: %w", err)
 	}
