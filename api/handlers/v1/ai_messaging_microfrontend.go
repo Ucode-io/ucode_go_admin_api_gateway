@@ -13,7 +13,6 @@ import (
 
 	"ucode/ucode_go_api_gateway/api/models"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
-	"ucode/ucode_go_api_gateway/pkg/helper"
 )
 
 const publishChunkSize = 30
@@ -592,48 +591,15 @@ func (p *ChatProcessor) createMicrofrontendSnapshot(ctx context.Context, files [
 		return
 	}
 
-	// Clear is_current on all existing versions for this microfrontend.
-	if err = p.clearCurrentVersion(ctx); err != nil {
-		log.Printf("[VERSION] failed to clear current version: %v", err)
-	}
-
-	data, err := helper.ConvertMapToStruct(map[string]any{
-		"microfrontend_id": p.microFrontendId,
-		"commit_message":   p.userMessage,
-		"files":            string(filesJSON),
-		"is_current":       true,
-	})
-	if err != nil {
-		log.Printf("[VERSION] failed to convert version data: %v", err)
-		return
-	}
-
-	_, err = p.service.GoObjectBuilderService().Items().Create(ctx, &nb.CommonMessage{
-		TableSlug: "microfrontend_versions",
-		Data:      data,
-		ProjectId: p.resourceEnvId,
+	_, err = p.service.GoObjectBuilderService().MicrofrontendVersions().CreateVersion(ctx, &nb.CreateMicrofrontendVersionRequest{
+		ResourceEnvId:   p.resourceEnvId,
+		MicrofrontendId: p.microFrontendId,
+		CommitMessage:   p.userMessage,
+		Files:           string(filesJSON),
 	})
 	if err != nil {
 		log.Printf("[VERSION] failed to create version: %v", err)
 	}
-}
-
-// clearCurrentVersion sets is_current=false on all versions of this microfrontend.
-func (p *ChatProcessor) clearCurrentVersion(ctx context.Context) error {
-	data, err := helper.ConvertMapToStruct(map[string]any{
-		"microfrontend_id": p.microFrontendId,
-		"is_current":       false,
-	})
-	if err != nil {
-		return err
-	}
-
-	_, err = p.service.GoObjectBuilderService().Items().MultipleUpdate(ctx, &nb.CommonMessage{
-		TableSlug: "microfrontend_versions",
-		Data:      data,
-		ProjectId: p.resourceEnvId,
-	})
-	return err
 }
 
 // sanitizeFileContent removes characters that can cause JSON parse failures

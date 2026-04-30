@@ -11,7 +11,6 @@ import (
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
-	"ucode/ucode_go_api_gateway/pkg/helper"
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cast"
@@ -151,22 +150,13 @@ func (h *HandlerV1) GetMicrofrontendCommits(c *gin.Context) {
 		return
 	}
 
-	filterData, err := helper.ConvertMapToStruct(map[string]any{
-		"microfrontend_id": microfrontendID,
-		"limit":            limit,
-		"offset":           offset,
-	})
-	if err != nil {
-		h.HandleResponse(c, status_http.InternalServerError, "failed to build query: "+err.Error())
-		return
-	}
-
-	resp, err := service.GoObjectBuilderService().Items().GetList(
+	resp, err := service.GoObjectBuilderService().MicrofrontendVersions().GetVersionList(
 		c.Request.Context(),
-		&nb.CommonMessage{
-			TableSlug: "microfrontend_versions",
-			Data:      filterData,
-			ProjectId: resourceEnvId,
+		&nb.GetMicrofrontendVersionListRequest{
+			ResourceEnvId:  resourceEnvId,
+			MicrofrontendId: microfrontendID,
+			Limit:          int32(limit),
+			Offset:         int32(offset),
 		},
 	)
 	if err != nil {
@@ -229,18 +219,11 @@ func (h *HandlerV1) RevertMicrofrontendToCommit(c *gin.Context) {
 	}
 
 	// 1. Fetch snapshot from DB.
-	queryData, err := helper.ConvertMapToStruct(map[string]any{"guid": req.SnapshotID})
-	if err != nil {
-		h.HandleResponse(c, status_http.InternalServerError, "failed to build query: "+err.Error())
-		return
-	}
-
-	snapshotResp, err := service.GoObjectBuilderService().Items().GetSingle(
+	snapshot, err := service.GoObjectBuilderService().MicrofrontendVersions().GetVersion(
 		c.Request.Context(),
-		&nb.CommonMessage{
-			TableSlug: "microfrontend_versions",
-			Data:      queryData,
-			ProjectId: resourceEnvId,
+		&nb.GetMicrofrontendVersionRequest{
+			ResourceEnvId: resourceEnvId,
+			Guid:          req.SnapshotID,
 		},
 	)
 	if err != nil {
@@ -248,15 +231,13 @@ func (h *HandlerV1) RevertMicrofrontendToCommit(c *gin.Context) {
 		return
 	}
 
-	snapshotMap := snapshotResp.GetData().AsMap()
-	filesJSON, _ := snapshotMap["files"].(string)
-	if filesJSON == "" {
+	if snapshot.GetFiles() == "" {
 		h.HandleResponse(c, status_http.InvalidArgument, "snapshot has no files")
 		return
 	}
 
 	var files []models.GitlabFileChange
-	if err = json.Unmarshal([]byte(filesJSON), &files); err != nil {
+	if err = json.Unmarshal([]byte(snapshot.GetFiles()), &files); err != nil {
 		h.HandleResponse(c, status_http.InternalServerError, "failed to parse snapshot files: "+err.Error())
 		return
 	}
@@ -270,8 +251,8 @@ func (h *HandlerV1) RevertMicrofrontendToCommit(c *gin.Context) {
 
 	repoIDInt := cast.ToInt(req.RepoID)
 	commitMsg := fmt.Sprintf("revert: restore snapshot %s", req.SnapshotID)
-	if msg, ok := snapshotMap["commit_message"].(string); ok && msg != "" {
-		commitMsg = fmt.Sprintf("revert to: %s", msg)
+	if snapshot.GetCommitMessage() != "" {
+		commitMsg = fmt.Sprintf("revert to: %s", snapshot.GetCommitMessage())
 	}
 
 	bodyBytes, err := json.Marshal(pushReq{RepoID: repoIDInt, Files: files, CommitMessage: commitMsg})
@@ -305,32 +286,14 @@ func (h *HandlerV1) RevertMicrofrontendToCommit(c *gin.Context) {
 		return
 	}
 
-	// Set is_current=false on all versions, then is_current=true on the reverted one.
-	microfrontendID, _ := snapshotMap["microfrontend_id"].(string)
-	if microfrontendID != "" {
-		clearData, _ := helper.ConvertMapToStruct(map[string]any{
-			"microfrontend_id": microfrontendID,
-			"is_current":       false,
-		})
-		_, _ = service.GoObjectBuilderService().Items().MultipleUpdate(
+	// Mark the reverted snapshot as current.
+	if snapshot.GetMicrofrontendId() != "" {
+		_, _ = service.GoObjectBuilderService().MicrofrontendVersions().SetCurrentVersion(
 			c.Request.Context(),
-			&nb.CommonMessage{
-				TableSlug: "microfrontend_versions",
-				Data:      clearData,
-				ProjectId: resourceEnvId,
-			},
-		)
-
-		setCurrentData, _ := helper.ConvertMapToStruct(map[string]any{
-			"guid":       req.SnapshotID,
-			"is_current": true,
-		})
-		_, _ = service.GoObjectBuilderService().Items().Update(
-			c.Request.Context(),
-			&nb.CommonMessage{
-				TableSlug: "microfrontend_versions",
-				Data:      setCurrentData,
-				ProjectId: resourceEnvId,
+			&nb.SetCurrentMicrofrontendVersionRequest{
+				ResourceEnvId:   resourceEnvId,
+				MicrofrontendId: snapshot.GetMicrofrontendId(),
+				Guid:            req.SnapshotID,
 			},
 		)
 	}
