@@ -31,8 +31,12 @@ var (
 	// Matches: import { X, Y, Z } from '@/path' or './path' or '../path'
 	reImportNamed = regexp.MustCompile(`import\s*\{([^}]+)\}\s*from\s*['"]([^'"]+)['"]`)
 
-	// Matches: import X from '@/path' (default import)
+	// Matches: import X from '@/path' (default import, PascalCase)
 	reImportDefault = regexp.MustCompile(`import\s+([A-Z]\w+)\s+from\s*['"]([^'"]+)['"]`)
+
+	// Matches: import X, { Y, Z } from '@/path' (mixed default + named)
+	// Must run BEFORE reImportNamed/reImportDefault to avoid double-counting.
+	reImportMixed = regexp.MustCompile(`import\s+([A-Za-z]\w*)\s*,\s*\{([^}]+)\}\s*from\s*['"]([^'"]+)['"]`)
 
 	// Matches: export function X, export const X, export class X, export type X, export interface X
 	reExportNamed = regexp.MustCompile(`export\s+(?:function|const|let|var|class|type|interface|enum)\s+(\w+)`)
@@ -124,16 +128,21 @@ func validateGeneratedProject(files []models.ProjectFile, envVars map[string]any
 				}
 			}
 
-			// Check: are all named imports actually exported?
+			// Check: default import — target file must have a default export.
+			if imp.Default != "" && !exportSet["default"] {
+				errors = append(errors, ValidationError{
+					Severity: "error",
+					File:     f.Path,
+					Message:  fmt.Sprintf("default-imports %q from %q but the file has no default export", imp.Default, imp.Path),
+				})
+			}
+
+			// Check: named imports — each must be exported by the target file.
+			// Names are already cleaned (aliases stripped, "type " removed) by parseImports.
 			for _, name := range imp.Names {
-				name = strings.TrimSpace(name)
 				if name == "" || name == "type" {
 					continue
 				}
-				// Strip "type " prefix from type imports
-				name = strings.TrimPrefix(name, "type ")
-				name = strings.TrimSpace(name)
-
 				if !exportSet[name] {
 					errors = append(errors, ValidationError{
 						Severity: "error",
@@ -236,29 +245,84 @@ func buildExportRegistry(files []models.ProjectFile) map[string]map[string]bool 
 	return registry
 }
 
+// cleanImportNames normalises a raw comma-separated names string from inside { }.
+// It strips TypeScript "type " prefix and "as Alias" renaming so only the
+// exported identifier (the name the target file must actually export) remains.
+func cleanImportNames(raw string) []string {
+	parts := strings.Split(raw, ",")
+	out := make([]string, 0, len(parts))
+	for _, p := range parts {
+		n := strings.TrimSpace(p)
+		// "type X" / "type X as Y" — strip leading "type " keyword
+		n = strings.TrimPrefix(n, "type ")
+		n = strings.TrimSpace(n)
+		// "X as Y" — we want to check the exported name X, not the local alias Y
+		if idx := strings.Index(n, " as "); idx >= 0 {
+			n = strings.TrimSpace(n[:idx])
+		}
+		if n != "" {
+			out = append(out, n)
+		}
+	}
+	return out
+}
+
 // parseImports extracts all import statements from a file.
 func parseImports(filePath, content string) []ImportStatement {
 	var imports []ImportStatement
 
-	// Named imports: import { X, Y } from 'path'
-	for _, match := range reImportNamed.FindAllStringSubmatch(content, -1) {
-		names := strings.Split(match[1], ",")
-		cleaned := make([]string, 0, len(names))
-		for _, n := range names {
-			n = strings.TrimSpace(n)
-			if n != "" {
-				cleaned = append(cleaned, n)
+	// Track ranges already consumed by reImportMixed so we don't double-count.
+	mixedRanges := make([][2]int, 0)
+
+	// Mixed imports FIRST: import Default, { X, Y } from 'path'
+	for _, loc := range reImportMixed.FindAllStringSubmatchIndex(content, -1) {
+		match := reImportMixed.FindStringSubmatch(content[loc[0]:loc[1]])
+		if match == nil {
+			continue
+		}
+		mixedRanges = append(mixedRanges, [2]int{loc[0], loc[1]})
+		imports = append(imports, ImportStatement{
+			Default:  match[1],
+			Names:    cleanImportNames(match[2]),
+			Path:     match[3],
+			FilePath: filePath,
+		})
+	}
+
+	isMixed := func(start, end int) bool {
+		for _, r := range mixedRanges {
+			if start >= r[0] && end <= r[1] {
+				return true
 			}
 		}
+		return false
+	}
+
+	// Named imports: import { X, Y } from 'path'
+	for _, loc := range reImportNamed.FindAllStringSubmatchIndex(content, -1) {
+		if isMixed(loc[0], loc[1]) {
+			continue
+		}
+		match := reImportNamed.FindStringSubmatch(content[loc[0]:loc[1]])
+		if match == nil {
+			continue
+		}
 		imports = append(imports, ImportStatement{
-			Names:    cleaned,
+			Names:    cleanImportNames(match[1]),
 			Path:     match[2],
 			FilePath: filePath,
 		})
 	}
 
 	// Default imports: import X from 'path'
-	for _, match := range reImportDefault.FindAllStringSubmatch(content, -1) {
+	for _, loc := range reImportDefault.FindAllStringSubmatchIndex(content, -1) {
+		if isMixed(loc[0], loc[1]) {
+			continue
+		}
+		match := reImportDefault.FindStringSubmatch(content[loc[0]:loc[1]])
+		if match == nil {
+			continue
+		}
 		imports = append(imports, ImportStatement{
 			Default:  match[1],
 			Path:     match[2],
@@ -338,17 +402,25 @@ func isNPMImport(path string) bool {
 // isTemplateFile returns true for files that exist in the pre-built template
 // (not generated by AI, so they won't appear in the files list).
 var templateFilePaths = map[string]bool{
-	"src/hooks/useApi":                    true,
-	"src/hooks/useApi.ts":                 true,
-	"src/hooks/useApi.tsx":                true,
-	"src/lib/apiUtils":                    true,
-	"src/lib/apiUtils.ts":                 true,
-	"src/lib/utils":                       true,
-	"src/lib/utils.ts":                    true,
-	"src/components/shared/AppProviders":  true,
+	"src/hooks/useApi":                       true,
+	"src/hooks/useApi.ts":                    true,
+	"src/hooks/useApi.tsx":                   true,
+	"src/hooks/useAppForm":                   true,
+	"src/hooks/useAppForm.ts":                true,
+	"src/lib/apiUtils":                       true,
+	"src/lib/apiUtils.ts":                    true,
+	"src/lib/utils":                          true,
+	"src/lib/utils.ts":                       true,
+	"src/components/shared/AppProviders":     true,
 	"src/components/shared/AppProviders.tsx": true,
-	"src/config/axios":                    true,
-	"src/config/axios.ts":                 true,
+	"src/config/axios":                       true,
+	"src/config/axios.ts":                    true,
+	"src/config/env":                         true,
+	"src/config/env.ts":                      true,
+	"src/config/queryClient":                 true,
+	"src/config/queryClient.ts":              true,
+	"src/types/common":                       true,
+	"src/types/common.ts":                    true,
 }
 
 func isTemplateFile(path string) bool {
@@ -517,13 +589,13 @@ func (p *ChatProcessor) repairSingleFile(
 		p, ctx,
 		models.AnthropicToolRequest{
 			Model:      p.baseConf.ClaudeHaikuModel,
-			MaxTokens:  8000,
+			MaxTokens:  16000,
 			System:     "You are a TypeScript error repair bot. Fix only the listed errors (import errors, typos in component names, orphaned displayName assignments). Output the complete corrected file via the repair_file tool.",
 			Messages:   []models.ChatMessage{{Role: "user", Content: []models.ContentBlock{{Type: "text", Text: sb.String()}}}},
 			Tools:      []models.ClaudeFunctionTool{helper.ToolRepairFile},
 			ToolChoice: helper.ForcedTool(helper.ToolRepairFile.Name),
 		},
-		60*time.Second,
+		90*time.Second,
 		fmt.Sprintf("Repairing %s", f.Path),
 	)
 	if err != nil {

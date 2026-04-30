@@ -440,7 +440,9 @@ func (p *ChatProcessor) generateFoundation(
 	sb.WriteString("For EVERY table in the project, generate a TypeScript interface with ALL fields.\n")
 	sb.WriteString("Use exact field slugs from the table schema below as property names.\n")
 	sb.WriteString("Every entity interface must include: guid (string), created_at? (string), and all domain fields.\n")
-	sb.WriteString("Also include common utility types: PaginationParams, SelectOption<T>.\n\n")
+	sb.WriteString("Also include: PaginationParams, SelectOption<T>, FormState.\n")
+	sb.WriteString("⚠ DO NOT include NavItem or TableColumn — they are PRE-BUILT in src/types/common.ts.\n")
+	sb.WriteString("  Layout files that need NavItem MUST import from '@/types/common', never from '@/types'.\n\n")
 
 	// Collect page paths from feature groups so App.tsx has complete routing.
 	sb.WriteString("\nFEATURE PAGES — add routes to App.tsx but DO NOT implement them:\n")

@@ -360,8 +360,9 @@ GROUP 0 — FOUNDATION (exactly 7 files, generated first, sequential):
     For EVERY table in the project define a TypeScript interface with ALL its fields.
     Example: table "contacts" (fields: name, email, phone, status, company_id) →
       interface Contact { guid: string; name: string; email: string; phone?: string; status: string; company_id?: string; created_at?: string; }
-    Also include: PaginationParams, SelectOption<T>, FormState and any shared utility types.
+    Also include: PaginationParams, SelectOption<T>, FormState and any project-specific shared types.
     Entity types live ONLY in src/types.ts. Feature hook files NEVER export types.
+    ⚠ DO NOT include NavItem or TableColumn — they are pre-built in src/types/common.ts (import from '@/types/common').
 
   DO NOT include pre-built template files (already exist):
     src/hooks/useApi.ts · src/lib/apiUtils.ts · src/lib/utils.ts
@@ -445,6 +446,11 @@ Entity types — ALWAYS from '@/types', NEVER redefine:
   import type { Contact, Lead, Company, Order } from '@/types'
   The Foundation (Group 0) generated ALL entity interfaces in src/types.ts.
   NEVER declare: export type Contact = {...} — it already exists in @/types.
+
+Pre-built utility types — from '@/types/common' when needed:
+  import type { NavItem, TableColumn, SelectOption, PaginationParams } from '@/types/common'
+  These are pre-built template types. NEVER re-declare them.
+  In practice: chunks rarely need NavItem/TableColumn (layout-only). Use SelectOption<T> for select options.
 
 Shared patterns — ALWAYS use these, NEVER create your own table/modal/header:
   import { DataTable } from '@/components/shared/DataTable'
@@ -738,6 +744,32 @@ Apply forwardRef to every component in src/components/ui/:
   badge.tsx    → React.forwardRef<HTMLDivElement, BadgeProps>
 
 Failure to use forwardRef causes TypeScript error TS2322 in CI (ref prop does not exist on type).
+
+====================================
+REQUIRED EXPORTS — ALL MUST BE PRESENT
+====================================
+Feature chunks import these EXACT names. Missing any one → build crash.
+
+button.tsx:         Button, buttonVariants
+badge.tsx:          Badge, badgeVariants
+card.tsx:           Card, CardHeader, CardContent, CardFooter, CardTitle, CardDescription
+dialog.tsx:         Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger, DialogClose
+input.tsx:          Input
+label.tsx:          Label
+select.tsx:         Select, SelectTrigger, SelectValue, SelectContent, SelectItem, SelectGroup, SelectLabel, SelectSeparator
+table.tsx:          Table, TableHeader, TableBody, TableRow, TableHead, TableCell, TableCaption, TableFooter
+tabs.tsx:           Tabs, TabsList, TabsTrigger, TabsContent
+avatar.tsx:         Avatar, AvatarImage, AvatarFallback
+skeleton.tsx:       Skeleton
+separator.tsx:      Separator
+sheet.tsx:          Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger, SheetFooter, SheetClose
+tooltip.tsx:        Tooltip, TooltipTrigger, TooltipContent, TooltipProvider
+dropdown-menu.tsx:  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuCheckboxItem, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent
+textarea.tsx:       Textarea
+checkbox.tsx:       Checkbox
+switch.tsx:         Switch
+progress.tsx:       Progress
+scroll-area.tsx:    ScrollArea, ScrollBar
 
 ====================================
 RESPONSE FORMAT
@@ -1061,13 +1093,21 @@ LAYER 1 — MCP (Foundation) — TYPE A ONLY
   src/index.css and src/App.tsx MUST always be regenerated.
 
   Available imports (TYPE A ONLY — DO NOT USE FOR TYPE B/C):
-    @/hooks/useApi                    → useApiQuery, useApiMutation
+    @/hooks/useApi                    → useApiQuery, useApiMutation, useApiInfiniteQuery
+    @/hooks/useAppForm                → useAppForm
     @/lib/apiUtils                    → extractList, extractCount, extractSingle
-    @/lib/utils                       → cn, formatDate, formatCurrency, getInitials
-    @/types                           → PaginationParams, NavItem, TableColumn
+    @/lib/utils                       → cn, formatDate, formatCurrency, getInitials, truncate, generateId
+    @/types                           → auto-generated entity interfaces (Contact, Order, etc.) + PaginationParams, SelectOption<T>
+    @/types/common                    → NavItem, TableColumn, ApiResponse, ApiError, LatLng, MapMarker (pre-built, DO NOT redeclare)
+    @/config/axios                    → apiClient (default export)
     @/components/shared/AppProviders  → AppProviders
 
-  TYPE B/C RULE: NEVER import from @/hooks/useApi, @/lib/apiUtils, @/lib/utils, @/types, or @/components/shared/AppProviders.
+  IMPORT PATH RULES (TYPE A):
+    NavItem, TableColumn  → ALWAYS from '@/types/common', never from '@/types'
+    Entity interfaces     → ALWAYS from '@/types' (Contact, Order, etc. generated per project)
+    apiClient             → ALWAYS from '@/config/axios' — never create new axios instance
+
+  TYPE B/C RULE: NEVER import from @/hooks/useApi, @/lib/apiUtils, @/lib/utils, @/types, @/types/common, or @/components/shared/AppProviders.
   Any utility you need MUST be generated inline or as a new file in the files[] array.
 
 LAYER 2 — Skills (Generated Code)
