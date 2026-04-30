@@ -11,7 +11,6 @@ import (
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
-	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 
 	"github.com/gin-gonic/gin"
@@ -162,9 +161,9 @@ func (h *HandlerV1) GetMicrofrontendCommits(c *gin.Context) {
 		return
 	}
 
-	resp, err := service.BuilderService().ItemsService().GetList(
+	resp, err := service.GoObjectBuilderService().Items().GetList(
 		c.Request.Context(),
-		&obs.CommonMessage{
+		&nb.CommonMessage{
 			TableSlug: "microfrontend_versions",
 			Data:      filterData,
 			ProjectId: resourceEnvId,
