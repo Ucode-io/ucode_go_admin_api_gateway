@@ -582,6 +582,27 @@ DATE STATE — CRITICAL:
   For period selectors (payroll etc): always store year and month as separate number states.
 
 ====================================
+TYPESCRIPT BUILD — BANNED PATTERNS (cause CI failures)
+====================================
+
+RECHARTS FORMATTER — NEVER add explicit parameter types in callbacks:
+  ❌ formatter={(value: number, name: string) => [...]}   // recharts@3 uses ValueType|undefined — TS rejects narrowing
+  ✅ formatter={(value, name) => [...]}                   // let TypeScript infer from generic
+  Same applies to labelFormatter, tickFormatter, tooltipFormatter.
+
+OPTIONAL FIELD ASSIGNMENT — use undefined, never null:
+  ❌ { task_key: values.task_key || null }    // TS error: null not assignable to string|undefined
+  ✅ { task_key: values.task_key || undefined }
+  ✅ { ...(values.task_key ? { task_key: values.task_key } : {}) }
+  Rule: field?: Type means string|undefined, NOT string|null.
+
+DESTRUCTURING UNUSED PROPS — never prefix interface property names with _:
+  ❌ const { name, _mobileSidebarOpen } = props    // TS error: _mobileSidebarOpen doesn't exist on type
+  ✅ const { name } = props                        // just omit unused props
+  ✅ const { name, completedPoints: _cp = 0 } = props  // rename with : alias syntax if value needed
+  Rule: _ prefix belongs on the LOCAL variable name via rename, not on the interface property key.
+
+====================================
 BROWSER BUILD — NO CLI
 ====================================
 No terminal commands, no setup instructions. Output only file content.
@@ -1979,6 +2000,22 @@ TYPESCRIPT SAFETY
 - unknown over any · never use ! unless provably safe
 - All params and return values typed
 - JSX: {item.name} · {item.id ?? '—'} · {item.rel?.name} — never render objects or arrays directly
+
+BANNED PATTERNS — these cause TypeScript CI build failures:
+
+  RECHARTS FORMATTER — no explicit param types in callbacks:
+    ❌ formatter={(value: number, name: string) => [...]}  // recharts@3 types are ValueType|undefined
+    ✅ formatter={(value, name) => [...]}                  // let TS infer — applies to all chart callbacks
+
+  OPTIONAL FIELDS — use undefined, not null:
+    ❌ { field: value || null }       // null not assignable to Type|undefined
+    ✅ { field: value || undefined }  // correct
+    ✅ { ...(value ? { field: value } : {}) }
+
+  DESTRUCTURING UNUSED PROPS — never prefix interface property with _:
+    ❌ const { name, _unusedProp } = props   // TS error: property doesn't exist
+    ✅ const { name } = props                // omit unused props entirely
+    ✅ const { prop: _local = default } = props  // rename via : syntax if value needed
 
 ====================================
 FORWARDREF — MANDATORY FOR ALL PRIMITIVES
