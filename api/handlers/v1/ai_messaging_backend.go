@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 	"ucode/ucode_go_api_gateway/config"
 
 	"ucode/ucode_go_api_gateway/api/models"
@@ -16,7 +17,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, resourceEnvId, projectId, userId, envId string, service services.ServiceManagerI) error {
+func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, resourceEnvId, projectId, userId, envId string, service services.ServiceManagerI, emit ProgressEmitter) error {
 	log.Printf("[backend] creating tables for project %s", resourceEnvId)
 
 	plan = ensureLoginTable(plan)
@@ -24,6 +25,18 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 	var errs []string
 
 	for _, tablePlan := range plan.Tables {
+
+		emit.Emit(
+			SSEEvent{
+				Type:    EvTableStart,
+				Icon:    "database",
+				Message: "Создаю таблицу",
+				Value:   tablePlan.Label,
+				Data:    map[string]any{"table": tablePlan.Slug, "label": tablePlan.Label},
+			},
+		)
+
+		time.Sleep(1500 * time.Millisecond)
 
 		attributesMap := map[string]any{
 			"label":    "",
@@ -214,6 +227,35 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 
 		tableId := tableResp.GetId()
 		log.Printf("[backend] table created: %s (id=%s)", tablePlan.Slug, tableId)
+
+		emit.Emit(
+			SSEEvent{
+				Type:    EvTableDone,
+				Icon:    "database",
+				Message: "Таблица создана",
+				Value:   tablePlan.Label,
+				Data:    map[string]any{"table": tablePlan.Slug, "label": tablePlan.Label, "fields": len(tablePlan.Fields)},
+			},
+		)
+
+		time.Sleep(1500 * time.Millisecond)
+
+		// Emit field creation progress
+		userFields := 0
+		for _, fp := range tablePlan.Fields {
+			if !isSystemField(fp.Slug) && !(tablePlan.IsLoginTable && isAuthField(fp.Slug)) {
+				userFields++
+			}
+		}
+		if userFields > 0 {
+			emit.Emit(SSEEvent{
+				Type:    EvProgress,
+				Icon:    "columns",
+				Message: fmt.Sprintf("Добавляю поля в %s", tablePlan.Label),
+				Value:   fmt.Sprintf("%d полей", userFields),
+			})
+			time.Sleep(800 * time.Millisecond)
+		}
 
 		for _, fieldPlan := range tablePlan.Fields {
 			if isSystemField(fieldPlan.Slug) {

@@ -27,11 +27,58 @@ const pushRetryDelay = 2 * time.Second
 func (p *ChatProcessor) runMicrofrontendEdit(ctx context.Context, clarified, fileGraphJSON string, chatHistory []models.ChatMessage, imageURLs []string, existingFiles []models.GitlabFileChange) (*models.ParsedClaudeResponse, error) {
 	log.Printf("[MICROFE EDIT] planning changes for microfrontend id=%s", p.microFrontendId)
 
-	plan, err := p.planChanges(ctx, clarified, fileGraphJSON, chatHistory, len(imageURLs) > 0)
-	if err != nil {
+	emit := p.emitter()
+	emit.Emit(SSEEvent{Type: EvProgress, Icon: "scan-search", Message: "Анализирую проект и планирую изменения...", Percent: 5})
+
+	var plan *models.SonnetPlanResult
+	if err := withHeartbeat(ctx, emit,
+		[]string{
+			"Анализирую структуру проекта...",
+			"Определяю файлы для редактирования...",
+			"Планирую порядок изменений...",
+			"Проверяю зависимости между файлами...",
+		},
+		5, 18, 60*time.Second,
+		func() error {
+			var e error
+			plan, e = p.planChanges(ctx, clarified, fileGraphJSON, chatHistory, len(imageURLs) > 0)
+			return e
+		},
+	); err != nil {
 		return nil, err
 	}
 	log.Printf("[MICROFE EDIT] planner: files_to_change=%d files_to_create=%d", len(plan.FilesToChange), len(plan.FilesToCreate))
+
+	emit.Emit(SSEEvent{
+		Type:    EvProgress,
+		Icon:    "file-diff",
+		Message: "План изменений готов",
+		Value:   fmt.Sprintf("%d изменить · %d создать", len(plan.FilesToChange), len(plan.FilesToCreate)),
+		Percent: 18,
+	})
+	time.Sleep(1500 * time.Millisecond)
+
+	// Show individual files from the plan so user knows EXACTLY what will be changed.
+	for _, f := range plan.FilesToChange {
+		emit.Emit(SSEEvent{
+			Type:    EvProgress,
+			Icon:    "file-edit",
+			Message: f.Description,
+			Value:   f.Path,
+		})
+		time.Sleep(600 * time.Millisecond)
+	}
+	for _, f := range plan.FilesToCreate {
+		emit.Emit(SSEEvent{
+			Type:    EvProgress,
+			Icon:    "file-plus",
+			Message: f.Description,
+			Value:   f.Path,
+		})
+		time.Sleep(600 * time.Millisecond)
+	}
+
+	time.Sleep(800 * time.Millisecond)
 
 	neededPaths := make([]string, 0, len(plan.FilesToChange))
 	for _, f := range plan.FilesToChange {
@@ -40,8 +87,25 @@ func (p *ChatProcessor) runMicrofrontendEdit(ctx context.Context, clarified, fil
 
 	filesContext := p.buildMicrofrontendFilesContext(existingFiles, neededPaths)
 
-	edited, err := p.editCode(ctx, clarified, plan, filesContext, chatHistory, imageURLs)
-	if err != nil {
+	emit.Emit(SSEEvent{Type: EvProgress, Icon: "code-2", Message: "Редактирую исходный код...", Percent: 20})
+
+	var edited *models.ParsedClaudeResponse
+	if err := withHeartbeat(ctx, emit,
+		[]string{
+			"Редактирую компоненты...",
+			"Вношу изменения в логику...",
+			"Обновляю стили и разметку...",
+			"Проверяю совместимость импортов...",
+			"Финализирую правки...",
+			"Генерирую обновлённый код...",
+		},
+		20, 85, 180*time.Second,
+		func() error {
+			var e error
+			edited, e = p.editCode(ctx, clarified, plan, filesContext, chatHistory, imageURLs)
+			return e
+		},
+	); err != nil {
 		return nil, err
 	}
 
@@ -53,7 +117,41 @@ func (p *ChatProcessor) runMicrofrontendEdit(ctx context.Context, clarified, fil
 	}
 
 	log.Printf("[MICROFE EDIT] pushing %d file(s) to u-gen branch", len(edited.Project.Files))
-	if err = p.pushMicrofrontendChangesChunked(ctx, edited.Project.Files); err != nil {
+
+	// Emit per-file publish events so user sees which files are being updated.
+	for i, f := range edited.Project.Files {
+		pct := 86 + (i+1)*10/len(edited.Project.Files) // 86↖96
+		if pct > 96 {
+			pct = 96
+		}
+
+		icon := "file-code"
+		if strings.HasSuffix(f.Path, ".css") {
+			icon = "paintbrush"
+		} else if strings.HasSuffix(f.Path, ".tsx") || strings.HasSuffix(f.Path, ".jsx") {
+			icon = "component"
+		} else if strings.HasSuffix(f.Path, ".ts") {
+			icon = "code-2"
+		}
+
+		emit.Emit(SSEEvent{
+			Type:    EvPublish,
+			Icon:    icon,
+			Message: "Обновляю файл",
+			Value:   f.Path,
+			Percent: pct,
+		})
+		time.Sleep(400 * time.Millisecond)
+	}
+
+	emit.Emit(SSEEvent{
+		Type:    EvPublish,
+		Icon:    "upload-cloud",
+		Message: "Пушу изменения в GitLab",
+		Value:   fmt.Sprintf("%d файлов", len(edited.Project.Files)),
+		Percent: 97,
+	})
+	if err := p.pushMicrofrontendChangesChunked(ctx, edited.Project.Files); err != nil {
 		return nil, fmt.Errorf("failed to push microfrontend changes: %w", err)
 	}
 

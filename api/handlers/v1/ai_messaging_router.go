@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"ucode/ucode_go_api_gateway/api/handlers/helper"
 	"ucode/ucode_go_api_gateway/api/models"
@@ -138,6 +139,9 @@ func (p *ChatProcessor) runCodeChange(ctx context.Context, clarified, fileGraphJ
 func (p *ChatProcessor) runVisualEdit(ctx context.Context, instruction string, contexts []models.VisualContext, chatHistory []models.ChatMessage, imageURLs []string) (*models.ParsedClaudeResponse, error) {
 	log.Printf("[VISUAL EDIT] starting: count=%d", len(contexts))
 
+	emit := p.emitter()
+	emit.Emit(SSEEvent{Type: EvProgress, Icon: "scan-search", Message: "Загружаю файлы проекта...", Percent: 5})
+
 	existingFiles, err := p.fetchMicrofrontendFiles(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("visual edit: failed to fetch microFrontend files: %w", err)
@@ -180,27 +184,56 @@ func (p *ChatProcessor) runVisualEdit(ctx context.Context, instruction string, c
 	}
 	filesContext := p.buildMicrofrontendFilesContext(existingFiles, paths)
 
+	emit.Emit(SSEEvent{
+		Type:    EvProgress,
+		Icon:    "mouse-pointer-click",
+		Message: "Редактирую выбранные элементы",
+		Value:   fmt.Sprintf("%d компонент(ов)", len(targetPaths)),
+		Percent: 10,
+	})
+
 	prompt := helper.BuildVisualEditPrompt(instruction, resolvedContexts, filesContext)
 	messages := buildMessagesWithHistory(chatHistory, buildContentBlocksWithImages(prompt, imageURLs))
 
-	edited, err := callWithTool[visualEditOutput](
-		p, ctx,
-		models.AnthropicToolRequest{
-			Model:      p.baseConf.CoderModel,
-			MaxTokens:  p.baseConf.CoderMaxTokens,
-			System:     helper.PromptVisualEdit,
-			Messages:   messages,
-			Tools:      []models.ClaudeFunctionTool{helper.ToolEmitVisualEdit},
-			ToolChoice: helper.ForcedTool(helper.ToolEmitVisualEdit.Name),
+	var edited *visualEditOutput
+	if err := withHeartbeat(ctx, emit,
+		[]string{
+			"Редактирую компоненты...",
+			"Применяю визуальные изменения...",
+			"Обновляю стили и разметку...",
+			"Проверяю совместимость...",
+			"Финализирую правки...",
 		},
-		timeoutCoder,
-		fmt.Sprintf("Visual edit: %d elements in %d files", len(resolvedContexts), len(targetPaths)),
-	)
-	if err != nil {
+		10, 85, 120*time.Second,
+		func() error {
+			var e error
+			edited, e = callWithTool[visualEditOutput](
+				p, ctx,
+				models.AnthropicToolRequest{
+					Model:      p.baseConf.CoderModel,
+					MaxTokens:  p.baseConf.CoderMaxTokens,
+					System:     helper.PromptVisualEdit,
+					Messages:   messages,
+					Tools:      []models.ClaudeFunctionTool{helper.ToolEmitVisualEdit},
+					ToolChoice: helper.ForcedTool(helper.ToolEmitVisualEdit.Name),
+				},
+				timeoutCoder,
+				fmt.Sprintf("Visual edit: %d elements in %d files", len(resolvedContexts), len(targetPaths)),
+			)
+			return e
+		},
+	); err != nil {
 		return nil, fmt.Errorf("visual edit: claude call failed: %w", err)
 	}
 
 	if len(edited.Files) > 0 {
+		emit.Emit(SSEEvent{
+			Type:    EvPublish,
+			Icon:    "upload-cloud",
+			Message: "Публикую изменения",
+			Value:   fmt.Sprintf("%d файл(ов)", len(edited.Files)),
+			Percent: 90,
+		})
 		if pushErr := p.pushMicrofrontendChanges(ctx, edited.Files); pushErr != nil {
 			return nil, fmt.Errorf("visual edit: push to u-gen failed: %w", pushErr)
 		}
