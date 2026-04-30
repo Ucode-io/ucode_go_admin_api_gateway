@@ -530,6 +530,7 @@ func (p *ChatProcessor) repairBrokenFiles(ctx context.Context, files []models.Pr
 		if !ok {
 			continue
 		}
+		p.emitter().Emit(SSEEvent{Type: EvRepair, Message: "Исправляю: " + filePath, Percent: 86})
 		fixed, err := p.repairSingleFile(ctx, f, errs, exportRegistry)
 		if err != nil {
 			log.Printf("[repair] ⚠️ failed to repair %s: %v", filePath, err)

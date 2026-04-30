@@ -196,10 +196,13 @@ func (p *ChatProcessor) generateCodeSingle(ctx context.Context, clarified string
 	project.Files = injectEnvFile(project.Files, p.baseConf.UcodeBaseUrl, apiKey)
 
 	// ── POST-GENERATION VALIDATION + REPAIR ──
+	p.emitter().Emit(SSEEvent{Type: EvProgress, Message: "Проверяю сгенерированный код...", Percent: 83})
+	time.Sleep(400 * time.Millisecond) // validation is instant Go code — pause so the message is visible
 	validationErrors := validateGeneratedProject(project.Files, project.Env)
 	errorCount, _ := logValidationResults(validationErrors)
 
 	if errorCount > 0 {
+		p.emitter().Emit(SSEEvent{Type: EvProgress, Message: fmt.Sprintf("Исправляю %d ошибок...", errorCount), Percent: 84})
 		log.Printf("[generate] 🔧 attempting Haiku repair for %d broken files...", errorCount)
 		repaired := p.repairBrokenFiles(ctx, project.Files, validationErrors)
 		if len(repaired) > 0 {
@@ -274,6 +277,8 @@ func (p *ChatProcessor) generateCodeChunked(ctx context.Context, clarified strin
 	})
 	log.Printf("[chunked] manifest: foundation=%d files, uikit=%d files, feature_groups=%d", len(foundationGroup.Files), len(uiKitGroup.Files), len(featureGroups))
 
+	time.Sleep(300 * time.Millisecond) // let manifest event settle before foundation starts
+
 	// Phase 2: foundation — generate shared files first (sequential).
 	apiConfig := buildAPIConfigBlock(p.baseConf.UcodeBaseUrl, apiKey, plan)
 
@@ -300,6 +305,7 @@ func (p *ChatProcessor) generateCodeChunked(ctx context.Context, clarified strin
 	var uiKit *models.GeneratedProject
 
 	if len(uiKitGroup.Files) > 0 {
+		time.Sleep(300 * time.Millisecond) // pause between foundation-done and ui-kit-start
 		emit.Emit(SSEEvent{Type: EvProgress, Message: "Создаю UI Kit компоненты...", Percent: 39})
 		foundationCtxForUIKit := buildFoundationContext(foundation.Files)
 
@@ -338,6 +344,7 @@ func (p *ChatProcessor) generateCodeChunked(ctx context.Context, clarified strin
 	}
 
 	totalChunks := len(featureGroups)
+	time.Sleep(300 * time.Millisecond) // pause after ui-kit/foundation phase before announcing parallel start
 	emit.Emit(SSEEvent{
 		Type:    EvProgress,
 		Percent: 51,
@@ -369,9 +376,13 @@ func (p *ChatProcessor) generateCodeChunked(ctx context.Context, clarified strin
 	}()
 	defer close(stopChunkHB) // guaranteed cleanup regardless of early-return path
 
-	for _, group := range featureGroups {
+	for i, group := range featureGroups {
 		g := group
+		startDelay := time.Duration(i) * 120 * time.Millisecond // stagger chunk starts so events don't burst
 		go func() {
+			if startDelay > 0 {
+				time.Sleep(startDelay)
+			}
 			emit.Emit(SSEEvent{
 				Type:    EvChunkStart,
 				Message: "Генерирую: " + g.Name,
@@ -453,6 +464,7 @@ func (p *ChatProcessor) generateCodeChunked(ctx context.Context, clarified strin
 		Percent: 80,
 		Message: fmt.Sprintf("Проверяю импорты в %d файлах...", len(merged.Files)),
 	})
+	time.Sleep(400 * time.Millisecond) // validation is instant Go code — pause so the message is visible
 	validationErrors := validateGeneratedProject(merged.Files, merged.Env)
 	errorCount, _ := logValidationResults(validationErrors)
 
