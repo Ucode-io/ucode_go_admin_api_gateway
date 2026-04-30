@@ -149,20 +149,30 @@ func (p *ChatProcessor) generateCodeSingle(ctx context.Context, clarified string
 
 	messages := buildMessagesWithHistory(chatHistory, buildContentBlocksWithImages(prompt, imageURLs))
 
-	project, err := callWithTool[models.GeneratedProject](
-		p, ctx,
-		models.AnthropicToolRequest{
-			Model:      p.baseConf.CoderModel,
-			MaxTokens:  p.baseConf.CoderMaxTokens,
-			System:     helper.PromptAdminPanelGenerator,
-			Messages:   messages,
-			Tools:      []models.ClaudeFunctionTool{helper.ToolEmitProject},
-			ToolChoice: helper.ForcedTool(helper.ToolEmitProject.Name),
+	p.emitter().Emit(SSEEvent{Type: EvProgress, Message: "Генерирую код...", Percent: 18})
+
+	var project *models.GeneratedProject
+	if err := withHeartbeat(ctx, p.emitter(),
+		[]string{"Claude генерирует код...", "Создаю компоненты...", "Пишу страницы...", "Продолжаю генерацию..."},
+		18, 82, 360*time.Second,
+		func() error {
+			var e error
+			project, e = callWithTool[models.GeneratedProject](
+				p, ctx,
+				models.AnthropicToolRequest{
+					Model:      p.baseConf.CoderModel,
+					MaxTokens:  p.baseConf.CoderMaxTokens,
+					System:     helper.PromptAdminPanelGenerator,
+					Messages:   messages,
+					Tools:      []models.ClaudeFunctionTool{helper.ToolEmitProject},
+					ToolChoice: helper.ForcedTool(helper.ToolEmitProject.Name),
+				},
+				timeoutCoder,
+				"Generating project code",
+			)
+			return e
 		},
-		timeoutCoder,
-		"Generating project code",
-	)
-	if err != nil {
+	); err != nil {
 		return nil, fmt.Errorf("generate code: %w", err)
 	}
 
@@ -209,9 +219,16 @@ func (p *ChatProcessor) generateCodeSingle(ctx context.Context, clarified string
 func (p *ChatProcessor) generateCodeChunked(ctx context.Context, clarified string, imageURLs []string, chatHistory []models.ChatMessage, plan *models.ArchitectPlan, apiKey string) (*models.ParsedClaudeResponse, error) {
 	log.Printf("[chunked] starting chunked generation for admin_panel: %s", plan.ProjectName)
 
+	emit := p.emitter()
+
 	// Phase 1: manifest — determine file structure and groups.
-	manifest, err := p.generateManifest(ctx, plan, chatHistory)
-	if err != nil || len(manifest.Groups) < 2 {
+	emit.Emit(SSEEvent{Type: EvProgress, Message: "Планирую структуру файлов...", Percent: 16})
+	var manifest *models.ProjectManifest
+	if err := withHeartbeat(ctx, emit,
+		[]string{"Планирую структуру файлов...", "Определяю зависимости между модулями..."},
+		16, 23, 60*time.Second,
+		func() error { var e error; manifest, e = p.generateManifest(ctx, plan, chatHistory); return e },
+	); err != nil || len(manifest.Groups) < 2 {
 		log.Printf("[chunked] manifest failed or insufficient groups (%v) — falling back to single call", err)
 		return p.generateCodeSingle(ctx, clarified, imageURLs, chatHistory, plan, apiKey)
 	}
@@ -222,11 +239,12 @@ func (p *ChatProcessor) generateCodeChunked(ctx context.Context, clarified strin
 	var featureGroups []models.ManifestGroup
 
 	for _, g := range manifest.Groups {
-		if g.ID == 0 {
+		switch g.ID {
+		case 0:
 			foundationGroup = g
-		} else if g.ID == 1 {
+		case 1:
 			uiKitGroup = g
-		} else {
+		default:
 			featureGroups = append(featureGroups, g)
 		}
 	}
@@ -236,37 +254,76 @@ func (p *ChatProcessor) generateCodeChunked(ctx context.Context, clarified strin
 		return p.generateCodeSingle(ctx, clarified, imageURLs, chatHistory, plan, apiKey)
 	}
 
+	featureNames := make([]string, 0, len(featureGroups))
+	for _, g := range featureGroups {
+		featureNames = append(featureNames, g.Name)
+	}
+	totalFiles := 0
+	for _, g := range manifest.Groups {
+		totalFiles += len(g.Files)
+	}
+	emit.Emit(SSEEvent{
+		Type:    EvManifest,
+		Percent: 23,
+		Message: fmt.Sprintf("Структура готова: %d файлов, %d фич", totalFiles, len(featureGroups)),
+		Data: ManifestEventData{
+			TotalFiles:   totalFiles,
+			GroupCount:   len(manifest.Groups),
+			FeatureNames: featureNames,
+		},
+	})
 	log.Printf("[chunked] manifest: foundation=%d files, uikit=%d files, feature_groups=%d", len(foundationGroup.Files), len(uiKitGroup.Files), len(featureGroups))
 
 	// Phase 2: foundation — generate shared files first (sequential).
 	apiConfig := buildAPIConfigBlock(p.baseConf.UcodeBaseUrl, apiKey, plan)
-	foundation, err := p.generateFoundation(ctx, clarified, imageURLs, chatHistory, apiConfig, foundationGroup, manifest)
-	if err != nil {
+
+	emit.Emit(SSEEvent{Type: EvProgress, Message: "Генерирую базовые компоненты...", Percent: 24})
+	var foundation *models.GeneratedProject
+	if err := withHeartbeat(ctx, emit,
+		[]string{"Генерирую базовые компоненты...", "Создаю layout и роутинг...", "Пишу типы и хуки..."},
+		24, 38, 120*time.Second,
+		func() error {
+			var e error
+			foundation, e = p.generateFoundation(ctx, clarified, imageURLs, chatHistory, apiConfig, foundationGroup, manifest)
+			return e
+		},
+	); err != nil {
 		log.Printf("[chunked] foundation failed (%v) — falling back to single call", err)
 		return p.generateCodeSingle(ctx, clarified, imageURLs, chatHistory, plan, apiKey)
 	}
 
-	// Filter foundation output to ONLY the files it was asked to generate.
 	foundation.Files = filterToGroup(foundation.Files, foundationGroup)
+	emit.Emit(SSEEvent{Type: EvProgress, Message: fmt.Sprintf("Foundation готов (%d файлов)", len(foundation.Files)), Percent: 38})
 	log.Printf("[chunked] foundation done: %d files (after filter)", len(foundation.Files))
 
 	// Phase 2b: UI Kit — generate after foundation, before feature groups (sequential).
-	// Feature groups import from ui/*, so UI Kit must be fully ready before they start.
 	var uiKit *models.GeneratedProject
 
 	if len(uiKitGroup.Files) > 0 {
+		emit.Emit(SSEEvent{Type: EvProgress, Message: "Создаю UI Kit компоненты...", Percent: 39})
 		foundationCtxForUIKit := buildFoundationContext(foundation.Files)
-		uiKit, err = p.generateUIKit(ctx, uiKitGroup, foundationCtxForUIKit, apiConfig)
-		if err != nil {
-			log.Printf("[chunked] UI kit failed (%v) — continuing without it", err)
+
+		var uiKitErr error
+		if err := withHeartbeat(ctx, emit,
+			[]string{"Создаю UI Kit...", "Пишу Button, Card, Table, Dialog...", "Настраиваю компоненты..."},
+			39, 50, 120*time.Second,
+			func() error {
+				var e error
+				uiKit, e = p.generateUIKit(ctx, uiKitGroup, foundationCtxForUIKit, apiConfig)
+				uiKitErr = e
+				return e
+			},
+		); err != nil {
+			log.Printf("[chunked] UI kit failed (%v) — continuing without it", uiKitErr)
+			uiKit = nil
 		} else {
 			uiKit.Files = filterToGroup(uiKit.Files, uiKitGroup)
+			emit.Emit(SSEEvent{Type: EvProgress, Message: fmt.Sprintf("UI Kit готов (%d компонентов)", len(uiKit.Files)), Percent: 50})
 			log.Printf("[chunked] UI kit done: %d files (after filter)", len(uiKit.Files))
 		}
 	}
 
 	// Phase 3: feature groups — parallel goroutines, each gets foundation + UI kit context.
-	// Build combined context: foundation files + ui kit files.
 	allSharedFiles := make([]models.ProjectFile, 0, len(foundation.Files)+len(uiKitGroup.Files))
 	allSharedFiles = append(allSharedFiles, foundation.Files...)
 	if uiKit != nil {
@@ -275,17 +332,51 @@ func (p *ChatProcessor) generateCodeChunked(ctx context.Context, clarified strin
 	foundationCtx := buildFoundationContext(allSharedFiles)
 	manifestSummary := buildManifestSummary(manifest)
 
-	// Build UI Kit API summary — compact reference of exported components, props, variants.
-	// This prevents feature chunks from hallucinating wrong prop names.
 	var uiKitAPISummary string
 	if uiKit != nil {
 		uiKitAPISummary = buildUIKitAPISummary(uiKit.Files)
 	}
 
-	results := make(chan chunkResult, len(featureGroups))
+	totalChunks := len(featureGroups)
+	emit.Emit(SSEEvent{
+		Type:    EvProgress,
+		Percent: 51,
+		Message: fmt.Sprintf("Запускаю генерацию %d фич параллельно...", totalChunks),
+	})
+
+	results := make(chan chunkResult, totalChunks)
+
+	// Heartbeat goroutine for the parallel chunk phase — emits every 12 s so the
+	// client sees activity even if no chunk completes for a while.
+	stopChunkHB := make(chan struct{})
+	go func() {
+		ticker := time.NewTicker(12 * time.Second)
+		defer ticker.Stop()
+		tick := 0
+		for {
+			select {
+			case <-ticker.C:
+				tick++
+				pct := 51 + tick*2
+				if pct > 76 {
+					pct = 76
+				}
+				emit.Emit(SSEEvent{Type: EvProgress, Message: "Генерирую фичи параллельно...", Percent: pct})
+			case <-stopChunkHB:
+				return
+			}
+		}
+	}()
+	defer close(stopChunkHB) // guaranteed cleanup regardless of early-return path
+
 	for _, group := range featureGroups {
 		g := group
 		go func() {
+			emit.Emit(SSEEvent{
+				Type:    EvChunkStart,
+				Message: "Генерирую: " + g.Name,
+				Data:    map[string]any{"feature": g.Name},
+			})
 			proj, chunkErr := p.generateChunk(ctx, g, foundationCtx, manifestSummary, apiConfig, uiKitAPISummary)
 			results <- chunkResult{group: g, project: proj, err: chunkErr}
 		}()
@@ -293,31 +384,43 @@ func (p *ChatProcessor) generateCodeChunked(ctx context.Context, clarified strin
 
 	var successChunks []*models.GeneratedProject
 	var failedCount int
+	completedChunks := 0
 	for range featureGroups {
 		res := <-results
+		completedChunks++
+		chunkPct := 51 + completedChunks*25/totalChunks
 		if res.err != nil {
 			log.Printf("[chunked] feature chunk %q error: %v", res.group.Name, res.err)
 			failedCount++
-			// Inject page stubs for the failed group so App.tsx route imports don't crash the build.
-			// Without stubs, App.tsx has `import LeavesPage from './pages/LeavesPage'` but the file
-			// doesn't exist → virtual FS build error → entire project fails to open.
 			if stub := buildStubChunk(res.group); len(stub.Files) > 0 {
 				successChunks = append(successChunks, stub)
 				log.Printf("[chunked] injected %d stub file(s) for failed chunk %q", len(stub.Files), res.group.Name)
 			}
 		} else {
-			// Filter each chunk to ONLY its assigned files — prevents cross-group pollution.
 			res.project.Files = filterToGroup(res.project.Files, res.group)
 			log.Printf("[chunked] ✅ chunk %q: %d files", res.group.Name, len(res.project.Files))
+			emit.Emit(SSEEvent{
+				Type:    EvChunkDone,
+				Percent: chunkPct,
+				Message: fmt.Sprintf("%s готов (%d/%d)", res.group.Name, completedChunks, totalChunks),
+				Data: ChunkDoneData{
+					Feature: res.group.Name,
+					Index:   completedChunks,
+					Total:   totalChunks,
+					Files:   res.project.Files,
+				},
+			})
 			successChunks = append(successChunks, res.project)
 		}
 	}
+	// stopChunkHB closed by deferred call above
 
-	if failedCount == len(featureGroups) {
-		return nil, fmt.Errorf("chunked: all %d feature chunks failed", len(featureGroups))
+
+	if failedCount == totalChunks {
+		return nil, fmt.Errorf("chunked: all %d feature chunks failed", totalChunks)
 	}
 	if failedCount > 0 {
-		log.Printf("[chunked] WARNING: %d/%d feature chunks failed — deploying partial project", failedCount, len(featureGroups))
+		log.Printf("[chunked] WARNING: %d/%d feature chunks failed — deploying partial project", failedCount, totalChunks)
 	}
 
 	// Merge foundation + UI kit + successful feature chunks.
@@ -342,14 +445,23 @@ func (p *ChatProcessor) generateCodeChunked(ctx context.Context, clarified strin
 		}
 	}
 
-	// Always force-inject .env with correct credentials — Claude may guess wrong values.
 	merged.Files = injectEnvFile(merged.Files, p.baseConf.UcodeBaseUrl, apiKey)
 
 	// ── POST-GENERATION VALIDATION + REPAIR ──
+	emit.Emit(SSEEvent{
+		Type:    EvProgress,
+		Percent: 80,
+		Message: fmt.Sprintf("Проверяю импорты в %d файлах...", len(merged.Files)),
+	})
 	validationErrors := validateGeneratedProject(merged.Files, merged.Env)
 	errorCount, _ := logValidationResults(validationErrors)
 
 	if errorCount > 0 {
+		emit.Emit(SSEEvent{
+			Type:    EvProgress,
+			Percent: 82,
+			Message: fmt.Sprintf("Нашёл %d проблем — исправляю...", errorCount),
+		})
 		log.Printf("[chunked] 🔧 attempting Haiku repair for %d broken files...", errorCount)
 		repaired := p.repairBrokenFiles(ctx, merged.Files, validationErrors)
 		if len(repaired) > 0 {
@@ -360,7 +472,7 @@ func (p *ChatProcessor) generateCodeChunked(ctx context.Context, clarified strin
 		}
 	}
 
-	log.Printf("[chunked] done: %d total files (%d feature groups, %d failed, %d validation errors)", len(merged.Files), len(featureGroups), failedCount, errorCount)
+	log.Printf("[chunked] done: %d total files (%d feature groups, %d failed, %d validation errors)", len(merged.Files), totalChunks, failedCount, errorCount)
 	return &models.ParsedClaudeResponse{Project: merged}, nil
 }
 

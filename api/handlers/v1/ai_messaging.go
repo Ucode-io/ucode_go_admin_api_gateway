@@ -54,6 +54,17 @@ type ChatProcessor struct {
 
 	schemaCache    []models.TableSchema
 	schemaCachedAt time.Time
+
+	emit ProgressEmitter // nil-safe via emitter(); only set for SSE generation requests
+}
+
+// emitter returns the ProgressEmitter or a no-op if none was set.
+// Safe to call from any goroutine — p.emit is written once before generation starts.
+func (p *ChatProcessor) emitter() ProgressEmitter {
+	if p.emit == nil {
+		return noopEmitter{}
+	}
+	return p.emit
 }
 
 func newChatProcessor(h *HandlerV1, service services.ServiceManagerI, baseConf config.BaseConfig, chatId, mcpProjectId, resourceEnvId, ucodeProjectId string, userId, clientTypeId, roleId, authToken string) *ChatProcessor {
@@ -77,7 +88,23 @@ func newChatProcessor(h *HandlerV1, service services.ServiceManagerI, baseConf c
 // ============================================================================
 
 func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, chatHistory []models.ChatMessage, imageURLs []string, estimatedName string) (*models.ParsedClaudeResponse, error) {
-	plan, err := p.callArchitect(ctx, clarified, imageURLs, chatHistory, "")
+
+	var (
+		emit = p.emitter()
+		plan *models.ArchitectPlan
+	)
+
+	err := withHeartbeat(
+		ctx, emit,
+		[]string{"Анализирую требования...", "Архитектор планирует структуру...", "Создаю дизайн-систему..."},
+		3, 12, 90*time.Second,
+		func() error {
+			var err error
+			plan, err = p.callArchitect(ctx, clarified, imageURLs, chatHistory, "")
+			return err
+		},
+	)
+
 	if err != nil {
 		return nil, fmt.Errorf("architect phase failed: %w", err)
 	}
@@ -89,7 +116,34 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 		}
 	}
 
+	tableNames := make([]string, 0, len(plan.Tables))
+	for _, t := range plan.Tables {
+		tableNames = append(tableNames, t.Label)
+	}
+
+	emit.Emit(
+		SSEEvent{
+			Type:    EvPlan,
+			Percent: 12,
+			Message: fmt.Sprintf("Спланировано: %d таблиц для проекта %q", len(plan.Tables), plan.ProjectName),
+			Data: PlanEventData{
+				ProjectName: plan.ProjectName,
+				ProjectType: plan.ProjectType,
+				Tables:      tableNames,
+				TableCount:  len(plan.Tables),
+			},
+		},
+	)
+
 	log.Printf("[new-project] architect done: name=%q type=%q design=%s", plan.ProjectName, plan.ProjectType, plan.Design.DesignInspiration)
+
+	emit.Emit(
+		SSEEvent{
+			Type:    EvProgress,
+			Message: "Создаю проект и окружение...",
+			Percent: 13,
+		},
+	)
 
 	projectData, err := p.provisionBackend(ctx, plan.ProjectName, p.mcpProjectId)
 	if err != nil {
@@ -98,8 +152,16 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 
 	p.mcpProjectId = projectData.McpProjectId
 
+	emit.Emit(
+		SSEEvent{
+			Type:    EvProgress,
+			Percent: 15,
+			Message: fmt.Sprintf("Создаю %d таблиц в базе данных...", len(plan.Tables)),
+		},
+	)
+
 	go func(bPlan *models.ArchitectPlan, resourceEnvId, ucodeProjectId, userId, envId string) {
-		if err := createBackendFromPlan(context.Background(), bPlan, resourceEnvId, ucodeProjectId, userId, envId, p.service); err != nil {
+		if err := createBackendFromPlan(context.Background(), bPlan, resourceEnvId, ucodeProjectId, userId, envId, p.service, emit); err != nil {
 			log.Printf("[new-project] async table creation failed: %v", err)
 		}
 	}(plan, projectData.ResourceEnvId, projectData.UcodeProjectId, p.userId, projectData.EnvironmentId)
@@ -109,6 +171,7 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 		return nil, err
 	}
 
+	emit.Emit(SSEEvent{Type: EvPublish, Message: "Публикую в GitLab...", Percent: 93})
 	if err = p.publishToMicrofrontend(ctx, plan.ProjectName, uniqueMFEPath(), generated, projectData); err != nil {
 		return nil, fmt.Errorf("microfrontend publish failed: %w", err)
 	}
@@ -123,6 +186,8 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 }
 
 func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context, clarified string, chatHistory []models.ChatMessage, imageURLs []string, estimatedName string) (*models.ParsedClaudeResponse, error) {
+	emit := p.emitter()
+
 	// Fetch existing project schema so the architect knows which tables/APIs are already available.
 	var schemaCtx string
 	schema, err := p.getProjectSchemaCached(ctx, p.resourceEnvId)
@@ -139,8 +204,16 @@ func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context,
 		schemaCtx = schemaLines.String()
 	}
 
-	plan, err := p.callArchitect(ctx, clarified, imageURLs, chatHistory, schemaCtx)
-	if err != nil {
+	var plan *models.ArchitectPlan
+	if err := withHeartbeat(ctx, emit,
+		[]string{"Анализирую требования...", "Архитектор планирует структуру...", "Создаю дизайн-систему..."},
+		3, 12, 90*time.Second,
+		func() error {
+			var e error
+			plan, e = p.callArchitect(ctx, clarified, imageURLs, chatHistory, schemaCtx)
+			return e
+		},
+	); err != nil {
 		return nil, fmt.Errorf("architect phase failed: %w", err)
 	}
 
@@ -151,8 +224,25 @@ func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context,
 		}
 	}
 
+	tableNames := make([]string, 0, len(plan.Tables))
+	for _, t := range plan.Tables {
+		tableNames = append(tableNames, t.Label)
+	}
+	emit.Emit(SSEEvent{
+		Type:    EvPlan,
+		Percent: 12,
+		Message: fmt.Sprintf("Спланировано: %d таблиц для проекта %q", len(plan.Tables), plan.ProjectName),
+		Data: PlanEventData{
+			ProjectName: plan.ProjectName,
+			ProjectType: plan.ProjectType,
+			Tables:      tableNames,
+			TableCount:  len(plan.Tables),
+		},
+	})
+
 	log.Printf("[mfe-current] architect done: name=%q type=%q design=%s", plan.ProjectName, plan.ProjectType, plan.Design.DesignInspiration)
 
+	emit.Emit(SSEEvent{Type: EvProgress, Message: "Получаю данные проекта...", Percent: 13})
 	projectData, err := p.getExistingProjectData(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get existing project data: %w", err)
@@ -172,13 +262,18 @@ func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context,
 		}
 		if len(newTables) > 0 {
 			log.Printf("[mfe-current] architect defined %d new table(s) — provisioning async", len(newTables))
+			emit.Emit(SSEEvent{
+				Type:    EvProgress,
+				Percent: 15,
+				Message: fmt.Sprintf("Создаю %d новых таблиц...", len(newTables)),
+			})
 			newPlan := &models.ArchitectPlan{
 				ProjectName: plan.ProjectName,
 				ProjectType: plan.ProjectType,
 				Tables:      newTables,
 			}
 			go func(bPlan *models.ArchitectPlan, resourceEnvId, ucodeProjectId, userId, envId string) {
-				if err := createBackendFromPlan(context.Background(), bPlan, resourceEnvId, ucodeProjectId, userId, envId, p.service); err != nil {
+				if err := createBackendFromPlan(context.Background(), bPlan, resourceEnvId, ucodeProjectId, userId, envId, p.service, emit); err != nil {
 					log.Printf("[mfe-current] async table creation failed: %v", err)
 				}
 			}(newPlan, projectData.ResourceEnvId, projectData.UcodeProjectId, p.userId, projectData.EnvironmentId)
@@ -190,6 +285,7 @@ func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context,
 		return nil, err
 	}
 
+	emit.Emit(SSEEvent{Type: EvPublish, Message: "Публикую в GitLab...", Percent: 93})
 	if err = p.publishToMicrofrontend(ctx, plan.ProjectName, uniqueMFEPath(), generated, projectData); err != nil {
 		return nil, fmt.Errorf("microfrontend publish failed: %w", err)
 	}

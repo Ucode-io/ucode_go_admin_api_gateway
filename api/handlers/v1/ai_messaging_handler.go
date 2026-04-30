@@ -4,7 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -88,7 +90,16 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 
 	_, err = processor.saveMessage(ctx, "user", userMessage.Content, userMessage.Images)
 	if err != nil {
+		if c.Query("stream") == "true" {
+			h.sseError(c, fmt.Sprintf("failed to save user message: %v", err))
+			return
+		}
 		h.HandleResponse(c, status_http.GRPCError, fmt.Sprintf("failed to save user message: %v", err))
+		return
+	}
+
+	if c.Query("stream") == "true" {
+		h.handleStreamingMessage(c, processor, userMessage, chatHistory, service, resourceEnvID, chatId)
 		return
 	}
 
@@ -265,4 +276,192 @@ func (h *HandlerV1) handlePendingConfirmation(
 		"mcp_project_id":  processor.mcpProjectId,
 		"mutation_result": mutationResult,
 	})
+}
+
+// sseError sends a single SSE error event and closes the connection.
+// Used when the stream setup itself fails (e.g., can't save user message).
+func (h *HandlerV1) sseError(c *gin.Context, msg string) {
+	c.Header("Content-Type", "text/event-stream")
+	c.Header("Cache-Control", "no-cache")
+	c.Header("X-Accel-Buffering", "no")
+	c.Status(200)
+	writeSSEEvent(c.Writer, SSEEvent{Type: EvError, Message: msg})
+	c.Writer.Flush()
+}
+
+// handleStreamingMessage runs the full AI pipeline in a background goroutine
+// and streams SSE progress events to the client in real time.
+//
+// Architecture:
+//
+//	Background goroutine (context.Background) ──emit──▸ eventCh (buffered 64)
+//	                                                         │
+//	Foreground (HTTP goroutine) ◂──read──────────────────────┘──▸ c.Writer (SSE)
+//
+// If the client disconnects, the background goroutine keeps running so tokens
+// are not wasted. Events are silently dropped by the channelEmitter.
+func (h *HandlerV1) handleStreamingMessage(c *gin.Context, processor *ChatProcessor, userMessage models.NewMessageReq, chatHistory []models.ChatMessage, service services.ServiceManagerI, resourceEnvID, chatId string) {
+
+	eventCh := make(chan SSEEvent, 64)
+	processor.emit = &channelEmitter{ch: eventCh}
+
+	// SSE transport headers — must be set before any body write.
+	c.Header("Content-Type", "text/event-stream")
+	c.Header("Cache-Control", "no-cache")
+	c.Header("Connection", "keep-alive")
+	c.Header("X-Accel-Buffering", "no")
+	c.Status(200)
+
+	startTime := time.Now()
+
+	// ── Background: full pipeline + persistence ──────────────────────────
+	// IMPORTANT: use context.Background(), NOT the HTTP request ctx.
+	// If the client disconnects, c.Request.Context() gets cancelled, which
+	// would abort the AI pipeline mid-generation (wasting tokens and money).
+	// The channelEmitter silently drops events when the channel is full/closed.
+
+	pipelineCtx := context.Background()
+
+	go func() {
+		defer close(eventCh)
+
+		processor.emitter().Emit(
+			SSEEvent{
+				Type:    EvProgress,
+				Message: "Начинаю обработку...",
+				Percent: 1,
+			},
+		)
+
+		aiResponse, pipelineErr := processor.routeAndProcess(pipelineCtx, userMessage, chatHistory)
+		if pipelineErr != nil {
+			processor.emitter().Emit(SSEEvent{
+				Type:    EvError,
+				Message: fmt.Sprintf("AI processing failed: %v", pipelineErr),
+			})
+			return
+		}
+
+		if strings.TrimSpace(aiResponse.Description) == "" {
+			switch {
+			case aiResponse.PendingAction != nil:
+				aiResponse.Description = aiResponse.PendingAction.ConfirmationPrompt
+			case len(aiResponse.Questions) > 0:
+				aiResponse.Description = aiResponse.Questions[0].Title
+			case aiResponse.Plan != nil:
+				aiResponse.Description = "Here are the diagrams for your project. Review them and let me know when you're ready to build."
+			default:
+				aiResponse.Description = "Project has been updated."
+			}
+		}
+
+		savedContent := aiResponse.Description
+		if len(aiResponse.Questions) > 0 {
+			savedContent = "[QUESTIONS_ASKED] " + aiResponse.Description
+		} else if aiResponse.Plan != nil {
+			planJSON, _ := json.Marshal(aiResponse.Plan)
+			savedContent = "[DIAGRAMS_GENERATED] " + aiResponse.Description + "\n" + string(planJSON)
+		}
+
+		message, saveErr := processor.saveMessage(pipelineCtx, "assistant", savedContent, nil)
+		if saveErr != nil {
+			log.Printf("[SSE] failed to save assistant message: %v", saveErr)
+		}
+
+		var updatedProject *pbo.McpProject
+
+		if aiResponse.Project != nil {
+			var projErr error
+			updatedProject, projErr = processor.saveProject(pipelineCtx, aiResponse)
+			if projErr != nil {
+				log.Printf("[SSE] failed to save project: %v", projErr)
+			}
+		}
+
+		if len(chatHistory) == 0 {
+			_, _ = service.GoObjectBuilderService().AiChat().UpdateChat(
+				pipelineCtx, &pbo.UpdateChatRequest{
+					ResourceEnvId: resourceEnvID,
+					Id:            chatId,
+					Title:         truncateString(userMessage.Content, 100),
+					Description:   truncateString(aiResponse.Description, 255),
+					ProjectId:     processor.mcpProjectId,
+				},
+			)
+		}
+
+		// Build enriched message for the final event.
+		em := models.EnrichedMessage{Content: aiResponse.Description, Role: "assistant"}
+		if message != nil {
+			em.ID = message.GetId()
+			em.ChatID = message.GetChatId()
+			em.Role = message.GetRole()
+			em.Content = message.GetContent()
+			em.Images = message.GetImages()
+			em.HasFiles = message.GetHasFiles()
+			em.TokensUsed = message.GetTokensUsed()
+			em.CreatedAt = message.GetCreatedAt()
+		}
+		if strings.HasPrefix(em.Content, "[DIAGRAMS_GENERATED] ") {
+			body := strings.TrimPrefix(em.Content, "[DIAGRAMS_GENERATED] ")
+			if idx := strings.Index(body, "\n"); idx != -1 {
+				em.Content = body[:idx]
+			} else {
+				em.Content = body
+			}
+		} else if strings.HasPrefix(em.Content, "[QUESTIONS_ASKED] ") {
+			em.Content = strings.TrimPrefix(em.Content, "[QUESTIONS_ASKED] ")
+		}
+
+		processor.emitter().Emit(
+			SSEEvent{
+				Type:    EvDone,
+				Percent: 100,
+				Message: aiResponse.Description,
+				Data: map[string]any{
+					"message":               em,
+					"project":               updatedProject,
+					"mcp_project_id":        processor.mcpProjectId,
+					"microfrontend_id":      processor.microFrontendId,
+					"microfrontend_repo_id": processor.microFrontendRepoId,
+					"ucode_project_id":      processor.mcpUcodeProjectId,
+					"pending_action":        aiResponse.PendingAction,
+					"questions":             aiResponse.Questions,
+					"plan":                  aiResponse.Plan,
+					"duration_sec":          int(time.Since(startTime).Seconds()),
+				},
+			},
+		)
+	}()
+
+	// ── Foreground: drain eventCh → SSE response ─────────────────────────
+	// We watch for clientGone (disconnect) but must NOT exit early if events
+	// are still in the buffered channel — otherwise EvDone is lost.
+	clientGone := c.Request.Context().Done()
+	keepalive := time.NewTicker(15 * time.Second)
+	defer keepalive.Stop()
+
+	for {
+		select {
+		case ev, ok := <-eventCh:
+			if !ok {
+				return // channel closed — pipeline finished, all events delivered
+			}
+			writeSSEEvent(c.Writer, ev)
+			c.Writer.Flush()
+		case <-keepalive.C:
+			// SSE comment keeps the connection alive through proxies.
+			fmt.Fprintf(c.Writer, ": keepalive\n\n")
+			c.Writer.Flush()
+		case <-clientGone:
+			// Client disconnected — drain remaining buffered events so the
+			// background goroutine is never blocked on a full channel.
+			// The pipeline itself continues on pipelineCtx (context.Background).
+			log.Printf("[SSE] client disconnected — draining remaining events")
+			for range eventCh {
+				// discard
+			}
+			return
+		}
+	}
 }

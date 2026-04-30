@@ -16,7 +16,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, resourceEnvId, projectId, userId, envId string, service services.ServiceManagerI) error {
+func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, resourceEnvId, projectId, userId, envId string, service services.ServiceManagerI, emit ProgressEmitter) error {
 	log.Printf("[backend] creating tables for project %s", resourceEnvId)
 
 	plan = ensureLoginTable(plan)
@@ -24,6 +24,14 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 	var errs []string
 
 	for _, tablePlan := range plan.Tables {
+
+		emit.Emit(
+			SSEEvent{
+				Type:    EvTableStart,
+				Message: "Создаю таблицу: " + tablePlan.Label,
+				Data:    map[string]any{"table": tablePlan.Slug, "label": tablePlan.Label},
+			},
+		)
 
 		attributesMap := map[string]any{
 			"label":    "",
@@ -214,6 +222,14 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 
 		tableId := tableResp.GetId()
 		log.Printf("[backend] table created: %s (id=%s)", tablePlan.Slug, tableId)
+
+		emit.Emit(
+			SSEEvent{
+				Type:    EvTableDone,
+				Message: fmt.Sprintf("✓ Таблица %q создана", tablePlan.Label),
+				Data:    map[string]any{"table": tablePlan.Slug, "label": tablePlan.Label, "fields": len(tablePlan.Fields)},
+			},
+		)
 
 		for _, fieldPlan := range tablePlan.Fields {
 			if isSystemField(fieldPlan.Slug) {
