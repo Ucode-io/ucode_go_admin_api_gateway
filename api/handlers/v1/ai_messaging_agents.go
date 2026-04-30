@@ -153,7 +153,15 @@ func (p *ChatProcessor) generateCodeSingle(ctx context.Context, clarified string
 
 	var project *models.GeneratedProject
 	if err := withHeartbeat(ctx, p.emitter(),
-		[]string{"Claude генерирует код...", "Создаю компоненты...", "Пишу страницы...", "Продолжаю генерацию..."},
+		[]string{
+			"Claude генерирует код...",
+			"Создаю компоненты...",
+			"Пишу страницы...",
+			"Настраиваю роутинг...",
+			"Подключаю API хуки...",
+			"Настраиваю стили и темы...",
+			"Продолжаю генерацию...",
+		},
 		18, 82, 360*time.Second,
 		func() error {
 			var e error
@@ -228,7 +236,11 @@ func (p *ChatProcessor) generateCodeChunked(ctx context.Context, clarified strin
 	emit.Emit(SSEEvent{Type: EvProgress, Message: "Планирую структуру файлов...", Percent: 16})
 	var manifest *models.ProjectManifest
 	if err := withHeartbeat(ctx, emit,
-		[]string{"Планирую структуру файлов...", "Определяю зависимости между модулями..."},
+		[]string{
+			"Планирую структуру файлов...",
+			"Определяю зависимости между модулями...",
+			"Разбиваю проект на группы...",
+		},
 		16, 23, 60*time.Second,
 		func() error { var e error; manifest, e = p.generateManifest(ctx, plan, chatHistory); return e },
 	); err != nil || len(manifest.Groups) < 2 {
@@ -285,7 +297,13 @@ func (p *ChatProcessor) generateCodeChunked(ctx context.Context, clarified strin
 	emit.Emit(SSEEvent{Type: EvProgress, Message: "Генерирую базовые компоненты...", Percent: 24})
 	var foundation *models.GeneratedProject
 	if err := withHeartbeat(ctx, emit,
-		[]string{"Генерирую базовые компоненты...", "Создаю layout и роутинг...", "Пишу типы и хуки..."},
+		[]string{
+			"Генерирую базовые компоненты...",
+			"Создаю layout и роутинг...",
+			"Пишу типы и хуки...",
+			"Настраиваю навигацию...",
+			"Формирую общие утилиты...",
+		},
 		24, 38, 120*time.Second,
 		func() error {
 			var e error
@@ -311,7 +329,13 @@ func (p *ChatProcessor) generateCodeChunked(ctx context.Context, clarified strin
 
 		var uiKitErr error
 		if err := withHeartbeat(ctx, emit,
-			[]string{"Создаю UI Kit...", "Пишу Button, Card, Table, Dialog...", "Настраиваю компоненты..."},
+			[]string{
+				"Создаю UI Kit...",
+				"Пишу Button, Card, Table, Dialog...",
+				"Настраиваю компоненты...",
+				"Добавляю варианты и пропсы...",
+				"Финализирую дизайн-систему...",
+			},
 			39, 50, 120*time.Second,
 			func() error {
 				var e error
@@ -425,7 +449,6 @@ func (p *ChatProcessor) generateCodeChunked(ctx context.Context, clarified strin
 		}
 	}
 	// stopChunkHB closed by deferred call above
-
 
 	if failedCount == totalChunks {
 		return nil, fmt.Errorf("chunked: all %d feature chunks failed", totalChunks)
@@ -861,9 +884,9 @@ func mergeChunks(foundation *models.GeneratedProject, chunks []*models.Generated
 // this they hallucinate callback-based hook signatures that don't exist in the template.
 func buildTemplateHooksContext() string {
 	critical := map[string]bool{
-		"src/hooks/useApi.ts":    true,
+		"src/hooks/useApi.ts":     true,
 		"src/hooks/useAppForm.ts": true,
-		"src/lib/apiUtils.ts":    true,
+		"src/lib/apiUtils.ts":     true,
 	}
 	var sb strings.Builder
 	sb.WriteString("\n====================================\n")

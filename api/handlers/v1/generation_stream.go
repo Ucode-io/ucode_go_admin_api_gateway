@@ -111,7 +111,7 @@ func withHeartbeat(ctx context.Context, emit ProgressEmitter, messages []string,
 	done := make(chan error, 1)
 	go func() { done <- fn() }()
 
-	ticker := time.NewTicker(12 * time.Second)
+	ticker := time.NewTicker(15 * time.Second)
 	defer ticker.Stop()
 
 	start := time.Now()

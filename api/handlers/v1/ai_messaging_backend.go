@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 	"ucode/ucode_go_api_gateway/config"
 
 	"ucode/ucode_go_api_gateway/api/models"
@@ -32,6 +33,8 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 				Data:    map[string]any{"table": tablePlan.Slug, "label": tablePlan.Label},
 			},
 		)
+
+		time.Sleep(3 * time.Second)
 
 		attributesMap := map[string]any{
 			"label":    "",
@@ -230,6 +233,8 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 				Data:    map[string]any{"table": tablePlan.Slug, "label": tablePlan.Label, "fields": len(tablePlan.Fields)},
 			},
 		)
+
+		time.Sleep(3 * time.Second)
 
 		for _, fieldPlan := range tablePlan.Fields {
 			if isSystemField(fieldPlan.Slug) {
