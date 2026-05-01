@@ -237,6 +237,25 @@ func (p *ChatProcessor) runVisualEdit(ctx context.Context, instruction string, c
 		if pushErr := p.pushMicrofrontendChanges(ctx, edited.Files); pushErr != nil {
 			return nil, fmt.Errorf("visual edit: push to u-gen failed: %w", pushErr)
 		}
+
+		// Build full-state snapshot by merging edited files into the existing file list.
+		editedMap := make(map[string]string, len(edited.Files))
+		for _, f := range edited.Files {
+			editedMap[f.Path] = f.Content
+		}
+		fullSnapshot := make([]models.GitlabFileChange, 0, len(existingFiles))
+		for _, f := range existingFiles {
+			if newContent, changed := editedMap[f.FilePath]; changed {
+				fullSnapshot = append(fullSnapshot, models.GitlabFileChange{FilePath: f.FilePath, Content: newContent})
+				delete(editedMap, f.FilePath)
+			} else {
+				fullSnapshot = append(fullSnapshot, f)
+			}
+		}
+		for path, content := range editedMap {
+			fullSnapshot = append(fullSnapshot, models.GitlabFileChange{FilePath: path, Content: content})
+		}
+		p.createMicrofrontendSnapshot(ctx, fullSnapshot, edited.ChangeSummary)
 	}
 
 	description := edited.ChangeSummary

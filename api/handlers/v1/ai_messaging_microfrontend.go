@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"ucode/ucode_go_api_gateway/api/models"
+	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 )
 
 const publishChunkSize = 30
@@ -147,6 +148,29 @@ func (p *ChatProcessor) runMicrofrontendEdit(ctx context.Context, clarified, fil
 	if err := p.pushMicrofrontendChangesChunked(ctx, edited.Project.Files); err != nil {
 		return nil, fmt.Errorf("failed to push microfrontend changes: %w", err)
 	}
+
+	// Build full-state snapshot: merge AI-edited files into the full existing file list
+	// so that reverting to this snapshot restores ALL files to a consistent state.
+	editedMap := make(map[string]string, len(edited.Project.Files))
+	for _, f := range edited.Project.Files {
+		editedMap[f.Path] = f.Content
+	}
+	fullSnapshot := make([]models.GitlabFileChange, 0, len(existingFiles)+len(edited.Project.Files))
+	for _, f := range existingFiles {
+		if newContent, changed := editedMap[f.FilePath]; changed {
+			fullSnapshot = append(fullSnapshot, models.GitlabFileChange{FilePath: f.FilePath, Content: newContent})
+			delete(editedMap, f.FilePath)
+		} else {
+			fullSnapshot = append(fullSnapshot, f)
+		}
+	}
+	// Append newly created files not present in existingFiles.
+	for _, f := range edited.Project.Files {
+		if _, isNew := editedMap[f.Path]; isNew {
+			fullSnapshot = append(fullSnapshot, models.GitlabFileChange{FilePath: f.Path, Content: f.Content})
+		}
+	}
+	p.createMicrofrontendSnapshot(ctx, fullSnapshot, edited.Description)
 
 	return &models.ParsedClaudeResponse{Description: edited.Description}, nil
 }
@@ -466,6 +490,9 @@ func (p *ChatProcessor) publishToMicrofrontend(ctx context.Context, projectName,
 
 	p.microFrontendId = createResult.Data.ID
 	p.microFrontendRepoId = createResult.Data.RepoId
+	if p.microFrontendResourceEnvId == "" {
+		p.microFrontendResourceEnvId = projectData.ResourceEnvId
+	}
 	log.Printf("[MICROFRONTEND] repo created: id=%s repo_id=%s url=%s", createResult.Data.ID, createResult.Data.RepoId, createResult.Data.Url)
 
 	// ── Phase 2: пушим оставшиеся файлы через push-changes (если они есть) ───
@@ -491,6 +518,8 @@ func (p *ChatProcessor) publishToMicrofrontend(ctx context.Context, projectName,
 			log.Printf("[MICROFRONTEND] ⚠️ push-changes partial failure (repo exists, %d files missing): %v", len(remainingFiles), pushErr)
 		}
 	}
+
+	p.createMicrofrontendSnapshot(ctx, allFiles, p.userMessage)
 
 	log.Printf("[MICROFRONTEND] ✅ published: id=%s url=%s", p.microFrontendId, createResult.Data.Url)
 	return nil
@@ -560,6 +589,61 @@ func buildInitFiles(allFiles []models.GitlabFileChange, n int) []models.GitlabFi
 	}
 
 	return result
+}
+
+// snapshotExcluded returns true for files that should never be stored in a
+// snapshot: lockfiles, CI/CD configs, infra files, and env files. These are
+// never edited by AI and can be enormous (e.g. package-lock.json).
+func snapshotExcluded(path string) bool {
+	switch path {
+	case "package-lock.json", "yarn.lock", "pnpm-lock.yaml", ".pnp.js",
+		".gitignore", ".gitattributes",
+		".gitlab-ci.yml", "Dockerfile", "Makefile", "nginx.conf",
+		"README.md", "CHANGELOG.md", "LICENSE":
+		return true
+	}
+	for _, prefix := range []string{".gitlab/", ".husky/", ".github/", "node_modules/"} {
+		if strings.HasPrefix(path, prefix) {
+			return true
+		}
+	}
+	return path == ".env" || strings.HasPrefix(path, ".env.")
+}
+
+// createMicrofrontendSnapshot saves a version of the current files to the
+// child project's microfrontend_versions table. Sets is_current=true on the new
+// version and is_current=false on all previous versions for this microfrontend.
+// Called after every successful AI push — NOT after reverts.
+func (p *ChatProcessor) createMicrofrontendSnapshot(ctx context.Context, files []models.GitlabFileChange, commitMessage string) {
+	if p.microFrontendId == "" || p.microFrontendResourceEnvId == "" {
+		log.Printf("[VERSION] skipping snapshot: microFrontendId=%q resourceEnvId=%q", p.microFrontendId, p.microFrontendResourceEnvId)
+		return
+	}
+
+	filtered := make([]models.GitlabFileChange, 0, len(files))
+	for _, f := range files {
+		if !snapshotExcluded(f.FilePath) {
+			filtered = append(filtered, f)
+		}
+	}
+
+	filesJSON, err := json.Marshal(filtered)
+	if err != nil {
+		log.Printf("[VERSION] failed to marshal files: %v", err)
+		return
+	}
+
+	log.Printf("[VERSION] creating snapshot: microfrontend=%s files=%d (filtered from %d)", p.microFrontendId, len(filtered), len(files))
+
+	_, err = p.service.GoObjectBuilderService().MicrofrontendVersions().CreateVersion(ctx, &nb.CreateMicrofrontendVersionRequest{
+		ResourceEnvId:   p.microFrontendResourceEnvId,
+		MicrofrontendId: p.microFrontendId,
+		CommitMessage:   commitMessage,
+		Files:           string(filesJSON),
+	})
+	if err != nil {
+		log.Printf("[VERSION] failed to create version: %v", err)
+	}
 }
 
 // sanitizeFileContent removes characters that can cause JSON parse failures

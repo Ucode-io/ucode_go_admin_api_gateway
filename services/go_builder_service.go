@@ -38,6 +38,7 @@ type GoBuilderServiceI interface {
 	AiChat() nb.AiChatServiceClient
 	ProjectFolders() nb.ProjectFoldersServiceClient
 	CustomEndpoint() nb.CustomEndpointServiceClient
+	MicrofrontendVersions() nb.MicrofrontendVersionsServiceClient
 }
 
 type goBuilderServiceClient struct {
@@ -63,9 +64,10 @@ type goBuilderServiceClient struct {
 	languageService         nb.LanguageServiceClient
 	mcpProjectService       nb.McpProjectServiceClient
 	customPermissionService nb.CustomPermissionsServiceClient
-	aiChatService           nb.AiChatServiceClient
-	projectFoldersService   nb.ProjectFoldersServiceClient
-	customEndpointService   nb.CustomEndpointServiceClient
+	aiChatService                  nb.AiChatServiceClient
+	projectFoldersService          nb.ProjectFoldersServiceClient
+	customEndpointService          nb.CustomEndpointServiceClient
+	microfrontendVersionsService   nb.MicrofrontendVersionsServiceClient
 }
 
 func NewGoBuilderServiceClient(ctx context.Context, cfg config.Config) (GoBuilderServiceI, error) {
@@ -108,9 +110,10 @@ func NewGoBuilderServiceClient(ctx context.Context, cfg config.Config) (GoBuilde
 		languageService:         nb.NewLanguageServiceClient(connGoBuilderService),
 		mcpProjectService:       nb.NewMcpProjectServiceClient(connGoBuilderService),
 		customPermissionService: nb.NewCustomPermissionsServiceClient(connGoBuilderService),
-		aiChatService:           nb.NewAiChatServiceClient(connGoBuilderService),
-		projectFoldersService:   nb.NewProjectFoldersServiceClient(connGoBuilderService),
-		customEndpointService:   nb.NewCustomEndpointServiceClient(connGoBuilderService),
+		aiChatService:                nb.NewAiChatServiceClient(connGoBuilderService),
+		projectFoldersService:        nb.NewProjectFoldersServiceClient(connGoBuilderService),
+		customEndpointService:        nb.NewCustomEndpointServiceClient(connGoBuilderService),
+		microfrontendVersionsService: nb.NewMicrofrontendVersionsServiceClient(connGoBuilderService),
 	}, nil
 }
 
@@ -212,4 +215,8 @@ func (g *goBuilderServiceClient) ProjectFolders() nb.ProjectFoldersServiceClient
 
 func (g *goBuilderServiceClient) CustomEndpoint() nb.CustomEndpointServiceClient {
 	return g.customEndpointService
+}
+
+func (g *goBuilderServiceClient) MicrofrontendVersions() nb.MicrofrontendVersionsServiceClient {
+	return g.microfrontendVersionsService
 }

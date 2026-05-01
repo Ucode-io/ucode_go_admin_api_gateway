@@ -70,6 +70,7 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 	)
 	processor.microFrontendId = userMessage.MicrofrontendID
 	processor.microFrontendRepoId = userMessage.MicrofrontendRepoID
+	processor.microFrontendResourceEnvId = userMessage.ResourceEnvId
 	processor.newProject = userMessage.NewProject
 	processor.userMessage = userMessage.Content
 

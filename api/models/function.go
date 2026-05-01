@@ -140,6 +140,20 @@ type GetByIdFunctionResponse struct {
 	FuncitonFolderId string `json:"function_folder_id"`
 }
 
+type RevertMicrofrontendRequest struct {
+	RepoID     string `json:"repo_id"`
+	SnapshotID string `json:"snapshot_id"`
+}
+
+
+type MicrofrontendSnapshot struct {
+	ID              string             `json:"id"`
+	MicrofrontendID string             `json:"microfrontend_id"`
+	CommitMessage   string             `json:"commit_message"`
+	Files           []GitlabFileChange `json:"files"`
+	CreatedAt       string             `json:"created_at"`
+}
+
 type MicrofrontForLoginPage struct {
 	Function      *object_builder_service.Function `json:"function"`
 	Id            string                           `json:"id"`
