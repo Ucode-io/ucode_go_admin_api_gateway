@@ -167,6 +167,46 @@ func (h *HandlerV1) GetMicrofrontendCommits(c *gin.Context) {
 	h.HandleResponse(c, status_http.OK, resp)
 }
 
+// GetMicrofrontendVersion godoc
+// @Security ApiKeyAuth
+// @ID get_microfrontend_version
+// @Router /v2/functions/micro-frontend/version [GET]
+// @Summary Get a single microfrontend snapshot with files
+// @Description Returns the full snapshot including the files field for a given snapshot ID.
+// @Tags Functions
+// @Accept json
+// @Produce json
+// @Param snapshot_id query string true "Snapshot UUID"
+// @Success 200 {object} status_http.Response "Snapshot with files"
+// @Failure 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *HandlerV1) GetMicrofrontendVersion(c *gin.Context) {
+	snapshotID := c.Query("snapshot_id")
+	if snapshotID == "" {
+		h.HandleResponse(c, status_http.InvalidArgument, "snapshot_id is required")
+		return
+	}
+
+	service, resourceEnvId, err := h.getAiChatServices(c)
+	if err != nil {
+		return
+	}
+
+	resp, err := service.GoObjectBuilderService().MicrofrontendVersions().GetVersion(
+		c.Request.Context(),
+		&nb.GetMicrofrontendVersionRequest{
+			ResourceEnvId: resourceEnvId,
+			Guid:          snapshotID,
+		},
+	)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.HandleResponse(c, status_http.OK, resp)
+}
+
 // GetMicrofrontendFilesAtCommit godoc
 // @Security ApiKeyAuth
 // @ID get_microfrontend_files_at_commit

@@ -232,6 +232,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v2.PUT("/update-with/:collection", h.V1.UpdateWithParams)
 
 		v2.GET("/functions/micro-frontend/commits", h.V1.GetMicrofrontendCommits)
+		v2.GET("/functions/micro-frontend/version", h.V1.GetMicrofrontendVersion)
 		v2.POST("/functions/micro-frontend/revert", h.V1.RevertMicrofrontendToCommit)
 	}
 

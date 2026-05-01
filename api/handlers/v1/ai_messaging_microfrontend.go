@@ -596,6 +596,25 @@ func buildInitFiles(allFiles []models.GitlabFileChange, n int) []models.GitlabFi
 	return result
 }
 
+// snapshotExcluded returns true for files that should never be stored in a
+// snapshot: lockfiles, CI/CD configs, infra files, and env files. These are
+// never edited by AI and can be enormous (e.g. package-lock.json).
+func snapshotExcluded(path string) bool {
+	switch path {
+	case "package-lock.json", "yarn.lock", "pnpm-lock.yaml", ".pnp.js",
+		".gitignore", ".gitattributes",
+		".gitlab-ci.yml", "Dockerfile", "Makefile", "nginx.conf",
+		"README.md", "CHANGELOG.md", "LICENSE":
+		return true
+	}
+	for _, prefix := range []string{".gitlab/", ".husky/", ".github/", "node_modules/"} {
+		if strings.HasPrefix(path, prefix) {
+			return true
+		}
+	}
+	return path == ".env" || strings.HasPrefix(path, ".env.")
+}
+
 // createMicrofrontendSnapshot saves a version of the current files to the
 // child project's microfrontend_versions table. Sets is_current=true on the new
 // version and is_current=false on all previous versions for this microfrontend.
@@ -606,11 +625,20 @@ func (p *ChatProcessor) createMicrofrontendSnapshot(ctx context.Context, files [
 		return
 	}
 
-	filesJSON, err := json.Marshal(files)
+	filtered := make([]models.GitlabFileChange, 0, len(files))
+	for _, f := range files {
+		if !snapshotExcluded(f.FilePath) {
+			filtered = append(filtered, f)
+		}
+	}
+
+	filesJSON, err := json.Marshal(filtered)
 	if err != nil {
 		log.Printf("[VERSION] failed to marshal files: %v", err)
 		return
 	}
+
+	log.Printf("[VERSION] creating snapshot: microfrontend=%s files=%d (filtered from %d)", p.microFrontendId, len(filtered), len(files))
 
 	_, err = p.service.GoObjectBuilderService().MicrofrontendVersions().CreateVersion(ctx, &nb.CreateMicrofrontendVersionRequest{
 		ResourceEnvId:   p.microFrontendResourceEnvId,
