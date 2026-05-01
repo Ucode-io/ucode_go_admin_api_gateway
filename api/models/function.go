@@ -1,7 +1,6 @@
 package models
 
 import (
-	"encoding/json"
 	"net/http"
 	"net/url"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
@@ -146,18 +145,6 @@ type RevertMicrofrontendRequest struct {
 	SnapshotID string `json:"snapshot_id"`
 }
 
-// MicrofrontendDetailResponse is the function service response for GET /v2/functions/micro-frontend/{id}.
-// The function service returns data as a JSON-encoded string, so Data is RawMessage.
-// ProjectId contains the child project's resource_env_id; EnvId is the environment id.
-type MicrofrontendDetailResponse struct {
-	Data json.RawMessage `json:"data"`
-}
-
-type MicrofrontendDetail struct {
-	ID        string `json:"id"`
-	ProjectId string `json:"project_id"`
-	EnvId     string `json:"env_id"`
-}
 
 type MicrofrontendSnapshot struct {
 	ID              string             `json:"id"`

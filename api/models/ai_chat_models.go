@@ -28,15 +28,15 @@ type (
 	}
 
 	NewMessageReq struct {
-		Content                  string          `json:"content"`
-		Images                   []string        `json:"images"`
-		PendingAction            *PendingAction  `json:"pending_action,omitempty"`
-		Context                  []VisualContext `json:"context,omitempty"`
-		MicrofrontendID          string          `json:"microfrontend_id,omitempty"`
-		MicrofrontendRepoID      string          `json:"microfrontend_repo_id,omitempty"`
-		MicrofrontendResourceEnvID string        `json:"microfrontend_resource_env_id,omitempty"`
-		NewProject               bool            `json:"new_project,omitempty"`
-		UcodeProjectID           string          `json:"ucode_project_id,omitempty"`
+		Content             string          `json:"content"`
+		Images              []string        `json:"images"`
+		PendingAction       *PendingAction  `json:"pending_action,omitempty"`
+		Context             []VisualContext `json:"context,omitempty"`
+		MicrofrontendID     string          `json:"microfrontend_id,omitempty"`
+		MicrofrontendRepoID string          `json:"microfrontend_repo_id,omitempty"`
+		ResourceEnvId       string          `json:"resource_env_id,omitempty"`
+		NewProject          bool            `json:"new_project,omitempty"`
+		UcodeProjectID      string          `json:"ucode_project_id,omitempty"`
 	}
 	SendMessageRequest struct {
 		UserPrompt    string `json:"user_prompt"`

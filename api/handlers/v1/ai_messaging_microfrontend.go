@@ -478,6 +478,9 @@ func (p *ChatProcessor) publishToMicrofrontend(ctx context.Context, projectName,
 
 	p.microFrontendId = createResult.Data.ID
 	p.microFrontendRepoId = createResult.Data.RepoId
+	if p.microFrontendResourceEnvId == "" {
+		p.microFrontendResourceEnvId = projectData.ResourceEnvId
+	}
 	log.Printf("[MICROFRONTEND] repo created: id=%s repo_id=%s url=%s", createResult.Data.ID, createResult.Data.RepoId, createResult.Data.Url)
 
 	// ── Phase 2: пушим оставшиеся файлы через push-changes (если они есть) ───
@@ -581,15 +584,8 @@ func buildInitFiles(allFiles []models.GitlabFileChange, n int) []models.GitlabFi
 // version and is_current=false on all previous versions for this microfrontend.
 // Called after every successful AI push — NOT after reverts.
 func (p *ChatProcessor) createMicrofrontendSnapshot(ctx context.Context, files []models.GitlabFileChange) {
-	if p.microFrontendId == "" {
-		return
-	}
-
-	// Fetch the child project's resource_env_id from the function service.
-	// The function service stores it as "project_id" on the microfrontend record.
-	resourceEnvId, err := p.fetchMicrofrontendResourceEnvId(ctx)
-	if err != nil {
-		log.Printf("[VERSION] failed to get microfrontend resource_env_id: %v", err)
+	if p.microFrontendId == "" || p.microFrontendResourceEnvId == "" {
+		log.Printf("[VERSION] skipping snapshot: microFrontendId=%q resourceEnvId=%q", p.microFrontendId, p.microFrontendResourceEnvId)
 		return
 	}
 
@@ -600,7 +596,7 @@ func (p *ChatProcessor) createMicrofrontendSnapshot(ctx context.Context, files [
 	}
 
 	_, err = p.service.GoObjectBuilderService().MicrofrontendVersions().CreateVersion(ctx, &nb.CreateMicrofrontendVersionRequest{
-		ResourceEnvId:   resourceEnvId,
+		ResourceEnvId:   p.microFrontendResourceEnvId,
 		MicrofrontendId: p.microFrontendId,
 		CommitMessage:   p.userMessage,
 		Files:           string(filesJSON),
@@ -608,53 +604,6 @@ func (p *ChatProcessor) createMicrofrontendSnapshot(ctx context.Context, files [
 	if err != nil {
 		log.Printf("[VERSION] failed to create version: %v", err)
 	}
-}
-
-// fetchMicrofrontendResourceEnvId calls the function service to get the child
-// project's resource_env_id for the current microfrontend (returned as "project_id").
-func (p *ChatProcessor) fetchMicrofrontendResourceEnvId(ctx context.Context) (string, error) {
-	url := p.baseConf.GoFunctionServiceHost + p.baseConf.GoFunctionServiceHTTPPort +
-		"/v2/functions/micro-frontend/" + p.microFrontendId
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
-	if err != nil {
-		return "", err
-	}
-	req.Header.Set("Authorization", p.authToken)
-
-	client := &http.Client{Timeout: 10 * time.Second}
-	resp, err := client.Do(req)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-
-	var outer models.MicrofrontendDetailResponse
-	if err = json.NewDecoder(resp.Body).Decode(&outer); err != nil {
-		return "", err
-	}
-
-	// data may be a JSON object or a JSON-encoded string — handle both.
-	var detail models.MicrofrontendDetail
-	if len(outer.Data) > 0 && outer.Data[0] == '"' {
-		var s string
-		if err = json.Unmarshal(outer.Data, &s); err != nil {
-			return "", err
-		}
-		if err = json.Unmarshal([]byte(s), &detail); err != nil {
-			return "", err
-		}
-	} else {
-		if err = json.Unmarshal(outer.Data, &detail); err != nil {
-			return "", err
-		}
-	}
-
-	if detail.ProjectId == "" {
-		return "", fmt.Errorf("function service returned empty project_id for microfrontend %s", p.microFrontendId)
-	}
-
-	return detail.ProjectId, nil
 }
 
 // sanitizeFileContent removes characters that can cause JSON parse failures
