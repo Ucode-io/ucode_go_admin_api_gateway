@@ -175,7 +175,7 @@ func (p *ChatProcessor) runMicrofrontendEdit(ctx context.Context, clarified, fil
 			fullSnapshot = append(fullSnapshot, models.GitlabFileChange{FilePath: f.Path, Content: f.Content})
 		}
 	}
-	p.createMicrofrontendSnapshot(ctx, fullSnapshot)
+	p.createMicrofrontendSnapshot(ctx, fullSnapshot, edited.Description)
 
 	return &models.ParsedClaudeResponse{Description: edited.Description}, nil
 }
@@ -524,7 +524,7 @@ func (p *ChatProcessor) publishToMicrofrontend(ctx context.Context, projectName,
 		}
 	}
 
-	p.createMicrofrontendSnapshot(ctx, allFiles)
+	p.createMicrofrontendSnapshot(ctx, allFiles, p.userMessage)
 
 	log.Printf("[MICROFRONTEND] ✅ published: id=%s url=%s", p.microFrontendId, createResult.Data.Url)
 	return nil
@@ -619,7 +619,7 @@ func snapshotExcluded(path string) bool {
 // child project's microfrontend_versions table. Sets is_current=true on the new
 // version and is_current=false on all previous versions for this microfrontend.
 // Called after every successful AI push — NOT after reverts.
-func (p *ChatProcessor) createMicrofrontendSnapshot(ctx context.Context, files []models.GitlabFileChange) {
+func (p *ChatProcessor) createMicrofrontendSnapshot(ctx context.Context, files []models.GitlabFileChange, commitMessage string) {
 	if p.microFrontendId == "" || p.microFrontendResourceEnvId == "" {
 		log.Printf("[VERSION] skipping snapshot: microFrontendId=%q resourceEnvId=%q", p.microFrontendId, p.microFrontendResourceEnvId)
 		return
@@ -643,7 +643,7 @@ func (p *ChatProcessor) createMicrofrontendSnapshot(ctx context.Context, files [
 	_, err = p.service.GoObjectBuilderService().MicrofrontendVersions().CreateVersion(ctx, &nb.CreateMicrofrontendVersionRequest{
 		ResourceEnvId:   p.microFrontendResourceEnvId,
 		MicrofrontendId: p.microFrontendId,
-		CommitMessage:   p.userMessage,
+		CommitMessage:   commitMessage,
 		Files:           string(filesJSON),
 	})
 	if err != nil {
