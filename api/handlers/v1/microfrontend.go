@@ -271,6 +271,9 @@ func (h *HandlerV1) RevertMicrofrontendToCommit(c *gin.Context) {
 	}
 	httpReq.Header.Set("Content-Type", "application/json")
 	httpReq.Header.Set("Authorization", c.GetHeader("Authorization"))
+	if apiKey := c.GetHeader("X-API-KEY"); apiKey != "" {
+		httpReq.Header.Set("X-API-KEY", apiKey)
+	}
 
 	client := &http.Client{Timeout: 60 * time.Second}
 	httpResp, err := client.Do(httpReq)
