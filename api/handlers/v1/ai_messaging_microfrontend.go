@@ -629,16 +629,32 @@ func (p *ChatProcessor) fetchMicrofrontendResourceEnvId(ctx context.Context) (st
 	}
 	defer resp.Body.Close()
 
-	var detail models.MicrofrontendDetailResponse
-	if err = json.NewDecoder(resp.Body).Decode(&detail); err != nil {
+	var outer models.MicrofrontendDetailResponse
+	if err = json.NewDecoder(resp.Body).Decode(&outer); err != nil {
 		return "", err
 	}
 
-	if detail.Data.ProjectId == "" {
+	// data may be a JSON object or a JSON-encoded string — handle both.
+	var detail models.MicrofrontendDetail
+	if len(outer.Data) > 0 && outer.Data[0] == '"' {
+		var s string
+		if err = json.Unmarshal(outer.Data, &s); err != nil {
+			return "", err
+		}
+		if err = json.Unmarshal([]byte(s), &detail); err != nil {
+			return "", err
+		}
+	} else {
+		if err = json.Unmarshal(outer.Data, &detail); err != nil {
+			return "", err
+		}
+	}
+
+	if detail.ProjectId == "" {
 		return "", fmt.Errorf("function service returned empty project_id for microfrontend %s", p.microFrontendId)
 	}
 
-	return detail.Data.ProjectId, nil
+	return detail.ProjectId, nil
 }
 
 // sanitizeFileContent removes characters that can cause JSON parse failures
