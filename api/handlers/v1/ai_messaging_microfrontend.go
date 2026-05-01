@@ -154,11 +154,28 @@ func (p *ChatProcessor) runMicrofrontendEdit(ctx context.Context, clarified, fil
 		return nil, fmt.Errorf("failed to push microfrontend changes: %w", err)
 	}
 
-	snapshotFiles := make([]models.GitlabFileChange, 0, len(edited.Project.Files))
+	// Build full-state snapshot: merge AI-edited files into the full existing file list
+	// so that reverting to this snapshot restores ALL files to a consistent state.
+	editedMap := make(map[string]string, len(edited.Project.Files))
 	for _, f := range edited.Project.Files {
-		snapshotFiles = append(snapshotFiles, models.GitlabFileChange{FilePath: f.Path, Content: f.Content})
+		editedMap[f.Path] = f.Content
 	}
-	p.createMicrofrontendSnapshot(ctx, snapshotFiles)
+	fullSnapshot := make([]models.GitlabFileChange, 0, len(existingFiles)+len(edited.Project.Files))
+	for _, f := range existingFiles {
+		if newContent, changed := editedMap[f.FilePath]; changed {
+			fullSnapshot = append(fullSnapshot, models.GitlabFileChange{FilePath: f.FilePath, Content: newContent})
+			delete(editedMap, f.FilePath)
+		} else {
+			fullSnapshot = append(fullSnapshot, f)
+		}
+	}
+	// Append newly created files not present in existingFiles.
+	for _, f := range edited.Project.Files {
+		if _, isNew := editedMap[f.Path]; isNew {
+			fullSnapshot = append(fullSnapshot, models.GitlabFileChange{FilePath: f.Path, Content: f.Content})
+		}
+	}
+	p.createMicrofrontendSnapshot(ctx, fullSnapshot)
 
 	return &models.ParsedClaudeResponse{Description: edited.Description}, nil
 }

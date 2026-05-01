@@ -242,7 +242,7 @@ func (h *HandlerV1) RevertMicrofrontendToCommit(c *gin.Context) {
 		return
 	}
 
-	// 2. Push files to u-gen via function service (no new snapshot saved).
+	// 2. Push files to u-gen via function service in chunks (no new snapshot saved).
 	type pushReq struct {
 		RepoID        int                       `json:"repo_id"`
 		Files         []models.GitlabFileChange `json:"files"`
@@ -255,38 +255,49 @@ func (h *HandlerV1) RevertMicrofrontendToCommit(c *gin.Context) {
 		commitMsg = fmt.Sprintf("revert to: %s", snapshot.GetCommitMessage())
 	}
 
-	bodyBytes, err := json.Marshal(pushReq{RepoID: repoIDInt, Files: files, CommitMessage: commitMsg})
-	if err != nil {
-		h.HandleResponse(c, status_http.InternalServerError, "failed to build push request: "+err.Error())
-		return
-	}
-
-	url := h.baseConf.GoFunctionServiceHost + h.baseConf.GoFunctionServiceHTTPPort +
+	pushURL := h.baseConf.GoFunctionServiceHost + h.baseConf.GoFunctionServiceHTTPPort +
 		"/v2/functions/micro-frontend/push-changes"
+	authHeader := c.GetHeader("Authorization")
+	apiKeyHeader := c.GetHeader("X-API-KEY")
+	httpClient := &http.Client{Timeout: 60 * time.Second}
 
-	httpReq, err := http.NewRequestWithContext(c.Request.Context(), http.MethodPut, url, bytes.NewReader(bodyBytes))
-	if err != nil {
-		h.HandleResponse(c, status_http.InternalServerError, "failed to build http request: "+err.Error())
-		return
-	}
-	httpReq.Header.Set("Content-Type", "application/json")
-	httpReq.Header.Set("Authorization", c.GetHeader("Authorization"))
-	if apiKey := c.GetHeader("X-API-KEY"); apiKey != "" {
-		httpReq.Header.Set("X-API-KEY", apiKey)
-	}
+	const chunkSize = 30
+	for i := 0; i < len(files); i += chunkSize {
+		end := i + chunkSize
+		if end > len(files) {
+			end = len(files)
+		}
+		chunk := files[i:end]
 
-	client := &http.Client{Timeout: 60 * time.Second}
-	httpResp, err := client.Do(httpReq)
-	if err != nil {
-		h.HandleResponse(c, status_http.InternalServerError, "push-changes call failed: "+err.Error())
-		return
-	}
-	defer httpResp.Body.Close()
+		bodyBytes, err := json.Marshal(pushReq{RepoID: repoIDInt, Files: chunk, CommitMessage: commitMsg})
+		if err != nil {
+			h.HandleResponse(c, status_http.InternalServerError, "failed to build push request: "+err.Error())
+			return
+		}
 
-	if httpResp.StatusCode >= 400 {
-		respBytes, _ := io.ReadAll(httpResp.Body)
-		h.HandleResponse(c, status_http.InternalServerError, fmt.Sprintf("push-changes returned %d: %s", httpResp.StatusCode, string(respBytes)))
-		return
+		httpReq, err := http.NewRequestWithContext(c.Request.Context(), http.MethodPut, pushURL, bytes.NewReader(bodyBytes))
+		if err != nil {
+			h.HandleResponse(c, status_http.InternalServerError, "failed to build http request: "+err.Error())
+			return
+		}
+		httpReq.Header.Set("Content-Type", "application/json")
+		httpReq.Header.Set("Authorization", authHeader)
+		if apiKeyHeader != "" {
+			httpReq.Header.Set("X-API-KEY", apiKeyHeader)
+		}
+
+		httpResp, err := httpClient.Do(httpReq)
+		if err != nil {
+			h.HandleResponse(c, status_http.InternalServerError, "push-changes call failed: "+err.Error())
+			return
+		}
+		if httpResp.StatusCode >= 400 {
+			respBytes, _ := io.ReadAll(httpResp.Body)
+			httpResp.Body.Close()
+			h.HandleResponse(c, status_http.InternalServerError, fmt.Sprintf("push-changes returned %d: %s", httpResp.StatusCode, string(respBytes)))
+			return
+		}
+		httpResp.Body.Close()
 	}
 
 	// Mark the reverted snapshot as current.
