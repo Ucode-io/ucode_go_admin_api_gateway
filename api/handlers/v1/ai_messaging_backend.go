@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"strings"
-	"time"
 	"ucode/ucode_go_api_gateway/config"
 
 	"ucode/ucode_go_api_gateway/api/models"
@@ -35,8 +34,6 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 				Data:    map[string]any{"table": tablePlan.Slug, "label": tablePlan.Label},
 			},
 		)
-
-		time.Sleep(1500 * time.Millisecond)
 
 		attributesMap := map[string]any{
 			"label":    "",
@@ -238,8 +235,6 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 			},
 		)
 
-		time.Sleep(1500 * time.Millisecond)
-
 		// Emit field creation progress
 		userFields := 0
 		for _, fp := range tablePlan.Fields {
@@ -254,7 +249,6 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 				Message: fmt.Sprintf("Добавляю поля в %s", tablePlan.Label),
 				Value:   fmt.Sprintf("%d полей", userFields),
 			})
-			time.Sleep(800 * time.Millisecond)
 		}
 
 		for _, fieldPlan := range tablePlan.Fields {

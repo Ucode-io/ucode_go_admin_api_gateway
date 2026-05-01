@@ -7,6 +7,7 @@ import (
 	"log"
 	"regexp"
 	"strings"
+	"sync"
 	"time"
 
 	"ucode/ucode_go_api_gateway/api/models"
@@ -54,6 +55,8 @@ type ChatProcessor struct {
 
 	schemaCache    []models.TableSchema
 	schemaCachedAt time.Time
+
+	prebuiltManifest *models.ProjectManifest // set before generateCode to skip manifest phase
 
 	emit ProgressEmitter // nil-safe via emitter(); only set for SSE generation requests
 }
@@ -148,34 +151,59 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 
 	log.Printf("[new-project] architect done: name=%q type=%q design=%s", plan.ProjectName, plan.ProjectType, plan.Design.DesignInspiration)
 
-	time.Sleep(2000 * time.Millisecond) // let user read the plan
+	time.Sleep(1500 * time.Millisecond) // let user read the plan
 
-	emit.Emit(
-		SSEEvent{
-			Type:    EvProgress,
-			Icon:    "folder-plus",
-			Message: "Создаю проект и окружение...",
-			Percent: 13,
-		},
+	emit.Emit(SSEEvent{
+		Type:    EvProgress,
+		Icon:    "folder-plus",
+		Message: "Создаю проект параллельно с планированием файлов...",
+		Percent: 13,
+	})
+
+	// Provision backend and generate manifest concurrently — both only need plan.
+	var (
+		projectData    *models.ProjectData
+		provisionErr   error
+		eagerManifest  *models.ProjectManifest
 	)
 
-	projectData, err := p.provisionBackend(ctx, plan.ProjectName, p.mcpProjectId)
-	if err != nil {
-		return nil, fmt.Errorf("backend provisioning failed: %w", err)
+	var provWg sync.WaitGroup
+	provWg.Add(2)
+
+	go func() {
+		defer provWg.Done()
+		projectData, provisionErr = p.provisionBackend(ctx, plan.ProjectName, p.mcpProjectId)
+	}()
+
+	go func() {
+		defer provWg.Done()
+		m, err := p.generateManifest(ctx, plan, chatHistory)
+		if err == nil && m != nil && len(m.Groups) >= 2 {
+			eagerManifest = m
+			log.Printf("[new-project] eager manifest ready: %d groups", len(m.Groups))
+		} else {
+			log.Printf("[new-project] eager manifest skipped (err=%v) — will retry in chunked", err)
+		}
+	}()
+
+	provWg.Wait()
+
+	if provisionErr != nil {
+		return nil, fmt.Errorf("backend provisioning failed: %w", provisionErr)
 	}
 
 	p.mcpProjectId = projectData.McpProjectId
+	if eagerManifest != nil {
+		p.prebuiltManifest = eagerManifest
+	}
 
-	time.Sleep(800 * time.Millisecond)
-	emit.Emit(
-		SSEEvent{
-			Type:    EvProgress,
-			Icon:    "database",
-			Percent: 15,
-			Message: "Создаю таблицы в базе данных",
-			Value:   fmt.Sprintf("%d таблиц", len(plan.Tables)),
-		},
-	)
+	emit.Emit(SSEEvent{
+		Type:    EvProgress,
+		Icon:    "database",
+		Percent: 15,
+		Message: "Создаю таблицы в базе данных",
+		Value:   fmt.Sprintf("%d таблиц", len(plan.Tables)),
+	})
 
 	go func(bPlan *models.ArchitectPlan, resourceEnvId, ucodeProjectId, userId, envId string) {
 		if err := createBackendFromPlan(context.Background(), bPlan, resourceEnvId, ucodeProjectId, userId, envId, p.service, emit); err != nil {
@@ -270,7 +298,7 @@ func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context,
 
 	log.Printf("[mfe-current] architect done: name=%q type=%q design=%s", plan.ProjectName, plan.ProjectType, plan.Design.DesignInspiration)
 
-	time.Sleep(2000 * time.Millisecond) // let user read the plan
+	time.Sleep(1500 * time.Millisecond) // let user read the plan
 
 	emit.Emit(SSEEvent{
 		Type:    EvProgress,
@@ -297,7 +325,6 @@ func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context,
 		}
 		if len(newTables) > 0 {
 			log.Printf("[mfe-current] architect defined %d new table(s) — provisioning async", len(newTables))
-			time.Sleep(800 * time.Millisecond)
 			emit.Emit(SSEEvent{
 				Type:    EvProgress,
 				Icon:    "database",

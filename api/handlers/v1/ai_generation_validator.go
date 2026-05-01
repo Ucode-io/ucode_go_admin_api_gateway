@@ -6,6 +6,7 @@ import (
 	"log"
 	"regexp"
 	"strings"
+	"sync"
 	"time"
 
 	"ucode/ucode_go_api_gateway/api/handlers/helper"
@@ -524,20 +525,41 @@ func (p *ChatProcessor) repairBrokenFiles(ctx context.Context, files []models.Pr
 		fileMap[f.Path] = f
 	}
 
-	var repaired []models.ProjectFile
+	type repairResult struct {
+		file models.ProjectFile
+		ok   bool
+	}
+	results := make(chan repairResult, len(errorsByFile))
+
+	var wg sync.WaitGroup
 	for filePath, errs := range errorsByFile {
 		f, ok := fileMap[filePath]
 		if !ok {
 			continue
 		}
-		p.emitter().Emit(SSEEvent{Type: EvRepair, Message: "Исправляю: " + filePath, Percent: 86})
-		fixed, err := p.repairSingleFile(ctx, f, errs, exportRegistry)
-		if err != nil {
-			log.Printf("[repair] ⚠️ failed to repair %s: %v", filePath, err)
-			continue
+		wg.Add(1)
+		go func(f models.ProjectFile, errs []string) {
+			defer wg.Done()
+			p.emitter().Emit(SSEEvent{Type: EvRepair, Message: "Исправляю: " + f.Path, Percent: 86})
+			fixed, err := p.repairSingleFile(ctx, f, errs, exportRegistry)
+			if err != nil {
+				log.Printf("[repair] ⚠️ failed to repair %s: %v", f.Path, err)
+				results <- repairResult{ok: false}
+				return
+			}
+			log.Printf("[repair] ✅ repaired %s", f.Path)
+			results <- repairResult{file: fixed, ok: true}
+		}(f, errs)
+	}
+
+	wg.Wait()
+	close(results)
+
+	var repaired []models.ProjectFile
+	for r := range results {
+		if r.ok {
+			repaired = append(repaired, r.file)
 		}
-		log.Printf("[repair] ✅ repaired %s", filePath)
-		repaired = append(repaired, fixed)
 	}
 	return repaired
 }

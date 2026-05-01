@@ -177,8 +177,6 @@ func emitPublishFiles(emit ProgressEmitter, files []models.ProjectFile, pctStart
 		Percent: pctStart,
 	})
 
-	time.Sleep(800 * time.Millisecond)
-
 	for i, g := range groups {
 		pct := pctStart + (i+1)*6/len(groups) // spread 6% across groups (93→99)
 		if pct > 99 {
@@ -203,7 +201,5 @@ func emitPublishFiles(emit ProgressEmitter, files []models.ProjectFile, pctStart
 			Percent: pct,
 			Data:    map[string]any{"directory": g.dir, "files": g.files},
 		})
-
-		time.Sleep(600 * time.Millisecond)
 	}
 }

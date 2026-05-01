@@ -8,6 +8,7 @@ import (
 	"log"
 	"maps"
 	"strings"
+	"sync"
 	"time"
 
 	"ucode/ucode_go_api_gateway/api/handlers/helper"
@@ -208,7 +209,6 @@ func (p *ChatProcessor) generateCodeSingle(ctx context.Context, clarified string
 
 	// ── POST-GENERATION VALIDATION + REPAIR ──
 	p.emitter().Emit(SSEEvent{Type: EvProgress, Icon: "shield-check", Message: "Проверяю импорты и зависимости...", Percent: 83})
-	time.Sleep(1500 * time.Millisecond) // validation is instant Go code — pause so the message is visible
 	validationErrors := validateGeneratedProject(project.Files, project.Env)
 	errorCount, _ := logValidationResults(validationErrors)
 
@@ -235,22 +235,29 @@ func (p *ChatProcessor) generateCodeChunked(ctx context.Context, clarified strin
 
 	emit := p.emitter()
 
-	// Phase 1: manifest — determine file structure and groups.
-	emit.Emit(SSEEvent{Type: EvProgress, Icon: "list-tree", Message: "Планирую структуру файлов и зависимости...", Percent: 16})
+	// Phase 1: manifest — reuse eager manifest from buildNewProject if available, otherwise generate.
 	var manifest *models.ProjectManifest
-	if err := withHeartbeat(ctx, emit,
-		[]string{
-			"Планирую структуру файлов...",
-			"Определяю зависимости между модулями...",
-			"Разбиваю проект на фичи...",
-			"Рассчитываю порядок генерации...",
-			"Строю граф зависимостей...",
-		},
-		16, 23, 60*time.Second,
-		func() error { var e error; manifest, e = p.generateManifest(ctx, plan, chatHistory); return e },
-	); err != nil || len(manifest.Groups) < 2 {
-		log.Printf("[chunked] manifest failed or insufficient groups (%v) — falling back to single call", err)
-		return p.generateCodeSingle(ctx, clarified, imageURLs, chatHistory, plan, apiKey)
+	if p.prebuiltManifest != nil {
+		manifest = p.prebuiltManifest
+		p.prebuiltManifest = nil
+		log.Printf("[chunked] using prebuilt manifest: %d groups", len(manifest.Groups))
+		emit.Emit(SSEEvent{Type: EvProgress, Icon: "list-tree", Message: "Структура файлов готова", Percent: 23})
+	} else {
+		emit.Emit(SSEEvent{Type: EvProgress, Icon: "list-tree", Message: "Планирую структуру файлов и зависимости...", Percent: 16})
+		if err := withHeartbeat(ctx, emit,
+			[]string{
+				"Планирую структуру файлов...",
+				"Определяю зависимости между модулями...",
+				"Разбиваю проект на фичи...",
+				"Рассчитываю порядок генерации...",
+				"Строю граф зависимостей...",
+			},
+			16, 23, 60*time.Second,
+			func() error { var e error; manifest, e = p.generateManifest(ctx, plan, chatHistory); return e },
+		); err != nil || len(manifest.Groups) < 2 {
+			log.Printf("[chunked] manifest failed or insufficient groups (%v) — falling back to single call", err)
+			return p.generateCodeSingle(ctx, clarified, imageURLs, chatHistory, plan, apiKey)
+		}
 	}
 
 	// Split into foundation (group 0), UI kit (group 1), and feature groups (2..N).
@@ -296,71 +303,81 @@ func (p *ChatProcessor) generateCodeChunked(ctx context.Context, clarified strin
 	})
 	log.Printf("[chunked] manifest: foundation=%d files, uikit=%d files, feature_groups=%d", len(foundationGroup.Files), len(uiKitGroup.Files), len(featureGroups))
 
-	time.Sleep(2000 * time.Millisecond) // let user read the manifest structure
+	time.Sleep(1000 * time.Millisecond)
 
-	// Phase 2: foundation — generate shared files first (sequential).
+	// Phase 2: Foundation + UI Kit in parallel.
+	// ui/* components only import cn() (pre-built template) and CSS variables by name.
+	// shared/* components import type names from @/types — available from manifest exports.
+	// No actual Foundation file contents are needed by UIKit at generation time.
 	apiConfig := buildAPIConfigBlock(p.baseConf.UcodeBaseUrl, apiKey, plan)
 
-	emit.Emit(SSEEvent{Type: EvProgress, Icon: "layers", Message: "Генерирую фундамент проекта...", Percent: 24})
-	var foundation *models.GeneratedProject
+	emit.Emit(SSEEvent{
+		Type:    EvProgress,
+		Icon:    "layers",
+		Message: "Генерирую фундамент и UI Kit параллельно",
+		Value:   fmt.Sprintf("%d + %d файлов", len(foundationGroup.Files), len(uiKitGroup.Files)),
+		Percent: 24,
+	})
+
+	var (
+		foundation *models.GeneratedProject
+		uiKit      *models.GeneratedProject
+		foundErr   error
+	)
+
+	var wg sync.WaitGroup
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		var e error
+		foundation, e = p.generateFoundation(ctx, clarified, imageURLs, chatHistory, apiConfig, foundationGroup, manifest)
+		if e != nil {
+			foundErr = e
+			return
+		}
+		foundation.Files = filterToGroup(foundation.Files, foundationGroup)
+		emit.Emit(SSEEvent{Type: EvProgress, Icon: "check-circle", Message: "Foundation готов", Value: fmt.Sprintf("%d файлов", len(foundation.Files)), Percent: 38})
+		log.Printf("[chunked] foundation done: %d files (after filter)", len(foundation.Files))
+	}()
+
+	if len(uiKitGroup.Files) > 0 {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			stub := buildFoundationStub(foundationGroup)
+			var e error
+			uiKit, e = p.generateUIKit(ctx, uiKitGroup, stub, apiConfig)
+			if e != nil {
+				log.Printf("[chunked] UI kit parallel failed (%v) — continuing without it", e)
+				return
+			}
+			uiKit.Files = filterToGroup(uiKit.Files, uiKitGroup)
+			emit.Emit(SSEEvent{Type: EvProgress, Icon: "check-circle", Message: "UI Kit готов", Value: fmt.Sprintf("%d компонентов", len(uiKit.Files)), Percent: 50})
+			log.Printf("[chunked] UI kit done: %d files (after filter)", len(uiKit.Files))
+		}()
+	}
+
+	// Single heartbeat covers both parallel phases — messages interleave naturally.
 	if err := withHeartbeat(ctx, emit,
 		[]string{
-			"Создаю layout, sidebar и навигацию...",
+			"Генерирую layout, sidebar и навигацию...",
+			"Создаю UI компоненты и дизайн-систему...",
 			"Генерирую TypeScript типы и интерфейсы...",
-			"Пишу API хуки и конфигурацию...",
-			"Настраиваю App.tsx и роутинг...",
-			"Формирую общие утилиты и хелперы...",
-			"Создаю глобальные стили и тему...",
-			"Подключаю провайдеры и контекст...",
+			"Создаю DataTable, FormModal и PageHeader...",
+			"Пишу API хуки и конфигурацию axios...",
+			"Создаю Button, Input, Card, Dialog...",
+			"Формирую глобальные стили и CSS переменные...",
+			"Настраиваю роутинг и App.tsx...",
 		},
-		24, 38, 120*time.Second,
+		24, 50, 180*time.Second,
 		func() error {
-			var e error
-			foundation, e = p.generateFoundation(ctx, clarified, imageURLs, chatHistory, apiConfig, foundationGroup, manifest)
-			return e
+			wg.Wait()
+			return foundErr
 		},
 	); err != nil {
 		log.Printf("[chunked] foundation failed (%v) — falling back to single call", err)
 		return p.generateCodeSingle(ctx, clarified, imageURLs, chatHistory, plan, apiKey)
-	}
-
-	foundation.Files = filterToGroup(foundation.Files, foundationGroup)
-	emit.Emit(SSEEvent{Type: EvProgress, Icon: "check-circle", Message: "Foundation готов", Value: fmt.Sprintf("%d файлов", len(foundation.Files)), Percent: 38})
-	log.Printf("[chunked] foundation done: %d files (after filter)", len(foundation.Files))
-
-	// Phase 2b: UI Kit — generate after foundation, before feature groups (sequential).
-	var uiKit *models.GeneratedProject
-
-	if len(uiKitGroup.Files) > 0 {
-		time.Sleep(1500 * time.Millisecond) // pause between foundation-done and ui-kit-start
-		emit.Emit(SSEEvent{Type: EvProgress, Icon: "palette", Message: "Создаю UI Kit — дизайн-систему проекта...", Percent: 39})
-		foundationCtxForUIKit := buildFoundationContext(foundation.Files)
-
-		var uiKitErr error
-		if err := withHeartbeat(ctx, emit,
-			[]string{
-				"Создаю Button, Input, Select...",
-				"Пишу Card, Dialog, Drawer...",
-				"Генерирую DataTable с сортировкой...",
-				"Добавляю варианты, размеры и пропсы...",
-				"Создаю Badge, Avatar, Tooltip...",
-				"Финализирую дизайн-систему...",
-			},
-			39, 50, 120*time.Second,
-			func() error {
-				var e error
-				uiKit, e = p.generateUIKit(ctx, uiKitGroup, foundationCtxForUIKit, apiConfig)
-				uiKitErr = e
-				return e
-			},
-		); err != nil {
-			log.Printf("[chunked] UI kit failed (%v) — continuing without it", uiKitErr)
-			uiKit = nil
-		} else {
-			uiKit.Files = filterToGroup(uiKit.Files, uiKitGroup)
-			emit.Emit(SSEEvent{Type: EvProgress, Icon: "check-circle", Message: "UI Kit готов", Value: fmt.Sprintf("%d компонентов", len(uiKit.Files)), Percent: 50})
-			log.Printf("[chunked] UI kit done: %d files (after filter)", len(uiKit.Files))
-		}
 	}
 
 	// Phase 3: feature groups — parallel goroutines, each gets foundation + UI kit context.
@@ -378,7 +395,7 @@ func (p *ChatProcessor) generateCodeChunked(ctx context.Context, clarified strin
 	}
 
 	totalChunks := len(featureGroups)
-	time.Sleep(2000 * time.Millisecond) // let user see foundation/ui-kit results
+	time.Sleep(1000 * time.Millisecond)
 	emit.Emit(SSEEvent{
 		Type:    EvProgress,
 		Icon:    "zap",
@@ -498,7 +515,6 @@ func (p *ChatProcessor) generateCodeChunked(ctx context.Context, clarified strin
 	merged.Files = injectEnvFile(merged.Files, p.baseConf.UcodeBaseUrl, apiKey)
 
 	// ── POST-GENERATION VALIDATION + REPAIR ──
-	time.Sleep(1500 * time.Millisecond) // pause after chunks complete
 	emit.Emit(SSEEvent{
 		Type:    EvProgress,
 		Icon:    "shield-check",
@@ -506,7 +522,6 @@ func (p *ChatProcessor) generateCodeChunked(ctx context.Context, clarified strin
 		Message: "Проверяю качество кода",
 		Value:   fmt.Sprintf("%d файлов", len(merged.Files)),
 	})
-	time.Sleep(1500 * time.Millisecond) // validation is instant Go code — pause so the message is visible
 	validationErrors := validateGeneratedProject(merged.Files, merged.Env)
 	errorCount, _ := logValidationResults(validationErrors)
 
@@ -898,6 +913,35 @@ func mergeChunks(foundation *models.GeneratedProject, chunks []*models.Generated
 		FileGraph:   foundation.FileGraph,
 		Env:         env,
 	}
+}
+
+// buildFoundationStub creates a compact context for the UI Kit phase describing what Foundation
+// (Group 0) will produce. Used instead of actual Foundation file contents when Foundation and
+// UI Kit are generated in parallel. Provides manifest exports + standard CSS variable names —
+// everything UI Kit needs to avoid re-implementing Foundation files.
+func buildFoundationStub(foundationGroup models.ManifestGroup) string {
+	var sb strings.Builder
+	sb.WriteString("====================================\n")
+	sb.WriteString("FOUNDATION (Group 0) — ALREADY GENERATED (import freely, NEVER re-emit)\n")
+	sb.WriteString("====================================\n")
+	sb.WriteString("These files exist in the project. Import from them by path. Never re-implement or re-emit.\n\n")
+	for _, f := range foundationGroup.Files {
+		if len(f.Exports) > 0 {
+			fmt.Fprintf(&sb, "  %-52s → exports: [%s]\n", f.Path, strings.Join(f.Exports, ", "))
+		} else {
+			fmt.Fprintf(&sb, "  %s\n", f.Path)
+		}
+	}
+	sb.WriteString("\nCSS VARIABLES (defined in src/index.css — use in Tailwind arbitrary values):\n")
+	sb.WriteString("  --background  --foreground  --card  --card-foreground\n")
+	sb.WriteString("  --primary     --primary-foreground\n")
+	sb.WriteString("  --secondary   --secondary-foreground\n")
+	sb.WriteString("  --muted       --muted-foreground\n")
+	sb.WriteString("  --accent      --accent-foreground\n")
+	sb.WriteString("  --destructive --border  --input  --ring  --radius\n")
+	sb.WriteString("\nEntity interfaces are exported from src/types.ts — import what you need.\n")
+	sb.WriteString("Pre-built utilities: cn() from @/lib/utils, useApiQuery/useApiMutation from @/hooks/useApi.\n")
+	return sb.String()
 }
 
 // buildTemplateHooksContext injects useApi.ts and apiUtils.ts source into chunk prompts.

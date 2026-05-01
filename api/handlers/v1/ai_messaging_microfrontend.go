@@ -54,7 +54,7 @@ func (p *ChatProcessor) runMicrofrontendEdit(ctx context.Context, clarified, fil
 		Value:   fmt.Sprintf("%d изменить · %d создать", len(plan.FilesToChange), len(plan.FilesToCreate)),
 		Percent: 18,
 	})
-	time.Sleep(1500 * time.Millisecond)
+	time.Sleep(800 * time.Millisecond)
 
 	// Show individual files from the plan so user knows EXACTLY what will be changed.
 	for _, f := range plan.FilesToChange {
@@ -64,7 +64,6 @@ func (p *ChatProcessor) runMicrofrontendEdit(ctx context.Context, clarified, fil
 			Message: f.Description,
 			Value:   f.Path,
 		})
-		time.Sleep(600 * time.Millisecond)
 	}
 	for _, f := range plan.FilesToCreate {
 		emit.Emit(SSEEvent{
@@ -73,10 +72,7 @@ func (p *ChatProcessor) runMicrofrontendEdit(ctx context.Context, clarified, fil
 			Message: f.Description,
 			Value:   f.Path,
 		})
-		time.Sleep(600 * time.Millisecond)
 	}
-
-	time.Sleep(800 * time.Millisecond)
 
 	neededPaths := make([]string, 0, len(plan.FilesToChange))
 	for _, f := range plan.FilesToChange {
@@ -139,7 +135,6 @@ func (p *ChatProcessor) runMicrofrontendEdit(ctx context.Context, clarified, fil
 			Value:   f.Path,
 			Percent: pct,
 		})
-		time.Sleep(400 * time.Millisecond)
 	}
 
 	emit.Emit(SSEEvent{

@@ -444,14 +444,23 @@ func (h *HandlerV1) handleStreamingMessage(c *gin.Context, processor *ChatProces
 	keepalive := time.NewTicker(15 * time.Second)
 	defer keepalive.Stop()
 
+	var lastSent time.Time
+	const sseMinInterval = 400 * time.Millisecond
+
 	for {
 		select {
 		case ev, ok := <-eventCh:
 			if !ok {
 				return // channel closed — pipeline finished, all events delivered
 			}
+			if !lastSent.IsZero() {
+				if gap := sseMinInterval - time.Since(lastSent); gap > 0 {
+					time.Sleep(gap)
+				}
+			}
 			writeSSEEvent(c.Writer, ev)
 			c.Writer.Flush()
+			lastSent = time.Now()
 		case <-keepalive.C:
 			// SSE comment keeps the connection alive through proxies.
 			fmt.Fprintf(c.Writer, ": keepalive\n\n")
