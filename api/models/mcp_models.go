@@ -160,12 +160,13 @@ type (
 	// Use this instead of AnthropicRequest for all structured generation calls
 	// (architect, coder, planner, diagrams, visual edit).
 	AnthropicToolRequest struct {
-		Model      string               `json:"model"`
-		MaxTokens  int                  `json:"max_tokens"`
-		System     string               `json:"system,omitempty"`
-		Messages   []ChatMessage        `json:"messages"`
-		Tools      []ClaudeFunctionTool `json:"tools"`
-		ToolChoice *ToolChoice          `json:"tool_choice,omitempty"`
+		Model        string               `json:"model"`
+		MaxTokens    int                  `json:"max_tokens"`
+		System       string               `json:"system,omitempty"`
+		SystemCached bool                 `json:"-"` // if true, System is sent as a cached content block
+		Messages     []ChatMessage        `json:"messages"`
+		Tools        []ClaudeFunctionTool `json:"tools"`
+		ToolChoice   *ToolChoice          `json:"tool_choice,omitempty"`
 	}
 
 	// ToolUseBlock is one content block in the Anthropic response when stop_reason="tool_use".

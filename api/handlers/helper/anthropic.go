@@ -66,8 +66,45 @@ func CallAnthropicAPI(baseConf config.BaseConfig, body models.AnthropicRequest, 
 // Returns ErrMaxTokens when stop_reason=="max_tokens" — callers must not retry with repair.
 //
 // Use this for all structured-generation calls: architect, planner, coder, diagrams, visual edit.
+// cachedToolRequest is the wire format when SystemCached=true.
+// "system" becomes an array of content blocks with cache_control so Anthropic
+// caches the prompt prefix across calls within the 5-minute TTL window.
+type cachedToolRequest struct {
+	Model      string               `json:"model"`
+	MaxTokens  int                  `json:"max_tokens"`
+	System     []cachedSystemBlock  `json:"system"`
+	Messages   []models.ChatMessage `json:"messages"`
+	Tools      []models.ClaudeFunctionTool `json:"tools"`
+	ToolChoice *models.ToolChoice   `json:"tool_choice,omitempty"`
+}
+
+type cachedSystemBlock struct {
+	Type         string            `json:"type"`
+	Text         string            `json:"text"`
+	CacheControl map[string]string `json:"cache_control,omitempty"`
+}
+
 func CallAnthropicWithTool[T any](baseConf config.BaseConfig, body models.AnthropicToolRequest, timeout time.Duration) (*T, models.ClaudeUsage, string, error) {
-	jsonBody, err := json.Marshal(body)
+	var (
+		jsonBody []byte
+		err      error
+	)
+	if body.SystemCached && body.System != "" {
+		jsonBody, err = json.Marshal(cachedToolRequest{
+			Model:     body.Model,
+			MaxTokens: body.MaxTokens,
+			System: []cachedSystemBlock{{
+				Type:         "text",
+				Text:         body.System,
+				CacheControl: map[string]string{"type": "ephemeral"},
+			}},
+			Messages:   body.Messages,
+			Tools:      body.Tools,
+			ToolChoice: body.ToolChoice,
+		})
+	} else {
+		jsonBody, err = json.Marshal(body)
+	}
 	if err != nil {
 		return nil, models.ClaudeUsage{}, "", fmt.Errorf("failed to marshal tool request: %w", err)
 	}
@@ -79,7 +116,15 @@ func CallAnthropicWithTool[T any](baseConf config.BaseConfig, body models.Anthro
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("X-API-Key", baseConf.AnthropicAPIKey)
 	req.Header.Set("anthropic-version", baseConf.AnthropicVersion)
-	req.Header.Set("anthropic-beta", baseConf.AnthropicBeta)
+	betaHeader := baseConf.AnthropicBeta
+	if body.SystemCached {
+		if betaHeader != "" {
+			betaHeader += ",prompt-caching-2024-07-31"
+		} else {
+			betaHeader = "prompt-caching-2024-07-31"
+		}
+	}
+	req.Header.Set("anthropic-beta", betaHeader)
 
 	client := &http.Client{Timeout: timeout}
 	resp, err := client.Do(req)

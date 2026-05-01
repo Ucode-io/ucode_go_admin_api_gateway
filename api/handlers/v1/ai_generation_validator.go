@@ -606,6 +606,26 @@ func (p *ChatProcessor) repairSingleFile(
 	sb.WriteString("  - For 'X.displayName assigned but X not declared': it is a typo in the component name — rename the const/variable to match the displayName assignment, or fix the displayName to match the const name.\n")
 	sb.WriteString("  - Output the complete corrected file. Never truncate.\n")
 
+	// Inject types.ts content so Haiku can fix TypeScript type mismatches accurately.
+	if f.Path != "src/types.ts" {
+		for path, exports := range exportRegistry {
+			if path == "src/types.ts" && len(exports) > 0 {
+				// Find actual file content from the fileMap in the caller
+				sb.WriteString("\nTYPES REFERENCE (src/types.ts — entity interfaces for accurate type fixing):\n")
+				sb.WriteString("  Available types: [")
+				names := make([]string, 0, len(exports))
+				for name := range exports {
+					if name != "default" {
+						names = append(names, name)
+					}
+				}
+				sb.WriteString(strings.Join(names, ", "))
+				sb.WriteString("]\n")
+				break
+			}
+		}
+	}
+
 	fmt.Fprintf(&sb, "\nFILE: %s\n```typescript\n%s\n```\n", f.Path, f.Content)
 
 	fixed, err := callWithTool[repairFileResult](
@@ -707,4 +727,229 @@ func buildUIKitAPISummary(uiKitFiles []models.ProjectFile) string {
 	}
 
 	return sb.String()
+}
+
+// lucideValidIcons is the verified safe list for lucide-react@0.441.0.
+var lucideValidIcons = map[string]bool{
+	// Navigation
+	"Home": true, "LayoutDashboard": true, "LayoutGrid": true, "Menu": true, "PanelLeft": true, "Sidebar": true,
+	// Users
+	"User": true, "Users": true, "UserPlus": true, "UserCheck": true, "UserX": true,
+	"UserCircle": true, "Building": true, "Building2": true, "Briefcase": true,
+	// CRUD
+	"Plus": true, "Pencil": true, "Trash": true, "Trash2": true, "Edit": true,
+	"Save": true, "Copy": true, "Eye": true, "EyeOff": true, "Download": true,
+	"Upload": true, "Send": true, "RefreshCw": true,
+	// Arrows
+	"ArrowLeft": true, "ArrowRight": true, "ArrowUp": true, "ArrowDown": true,
+	"ChevronLeft": true, "ChevronRight": true, "ChevronDown": true, "ChevronUp": true,
+	"ChevronsLeft": true, "ChevronsRight": true, "ExternalLink": true,
+	// Search
+	"Search": true, "Filter": true, "SlidersHorizontal": true, "ListFilter": true,
+	// Status
+	"Check": true, "CheckCircle": true, "CheckCircle2": true, "X": true,
+	"XCircle": true, "AlertCircle": true, "AlertTriangle": true, "Info": true,
+	"Bell": true, "BellRing": true,
+	// Charts
+	"BarChart": true, "BarChart2": true, "BarChart3": true, "LineChart": true,
+	"PieChart": true, "TrendingUp": true, "TrendingDown": true, "Activity": true,
+	// Files
+	"File": true, "FileText": true, "FileCheck": true, "FilePlus": true,
+	"Folder": true, "FolderOpen": true, "Paperclip": true, "BookOpen": true,
+	// Time
+	"Calendar": true, "CalendarDays": true, "Clock": true, "Timer": true,
+	// Money
+	"DollarSign": true, "CreditCard": true, "Wallet": true, "Receipt": true,
+	"ShoppingCart": true, "Package": true, "Banknote": true,
+	// Settings
+	"Settings": true, "Settings2": true, "Wrench": true, "Key": true,
+	"Lock": true, "Shield": true, "ShieldCheck": true,
+	// UI
+	"MoreHorizontal": true, "MoreVertical": true, "Maximize": true, "Minimize": true,
+	"ZoomIn": true, "ZoomOut": true, "Move": true, "GripVertical": true,
+	// Misc
+	"Star": true, "Tag": true, "Hash": true, "Globe": true, "MapPin": true,
+	"Database": true, "Server": true, "Loader2": true, "Sun": true, "Moon": true,
+	"Image": true, "Zap": true, "Flame": true, "Sparkles": true, "Target": true,
+	"Award": true, "ThumbsUp": true, "Phone": true, "Mail": true,
+	"Truck": true, "Layers": true, "Layout": true, "Code": true, "Code2": true,
+	"Terminal": true, "Cpu": true, "Wifi": true, "Link": true, "Link2": true,
+	"Unlink": true, "RefreshCcw": true, "RotateCcw": true, "RotateCw": true,
+	"LogOut": true, "LogIn": true, "Grid": true, "List": true, "Table": true,
+	"Columns": true, "Rows": true, "LayoutList": true, "SquareStack": true,
+	"Inbox": true, "MessageSquare": true, "MessageCircle": true, "HelpCircle": true,
+	"PlayCircle": true, "StopCircle": true, "PauseCircle": true,
+	"Volume2": true, "VolumeX": true, "Mic": true, "MicOff": true,
+	"Video": true, "VideoOff": true, "Camera": true,
+	"Lightbulb": true, "Compass": true, "Navigation": true, "Map": true,
+	"Flag": true, "Bookmark": true, "Heart": true, "HeartOff": true,
+}
+
+// lucideFallbacks maps known non-existent icon names to safe alternatives.
+var lucideFallbacks = map[string]string{
+	"LayoutKanban":     "LayoutGrid",
+	"Kanban":           "LayoutGrid",
+	"KanbanSquare":     "LayoutGrid",
+	"LayoutColumns":    "Columns",
+	"LayoutRows":       "Rows",
+	"TableProperties":  "Table",
+	"TableCellsMerge":  "Table",
+	"UserCog":          "Settings",
+	"UserSettings":     "Settings",
+	"Users2":           "Users",
+	"UsersRound":       "Users",
+	"PersonStanding":   "User",
+	"Contact":          "User",
+	"ContactRound":     "User",
+	"BadgeCheck":       "CheckCircle",
+	"BadgeAlert":       "AlertCircle",
+	"CircleCheck":      "CheckCircle",
+	"CircleX":          "XCircle",
+	"CircleAlert":      "AlertCircle",
+	"OctagonAlert":     "AlertTriangle",
+	"TriangleAlert":    "AlertTriangle",
+	"ShoppingBag":      "ShoppingCart",
+	"Store":            "ShoppingCart",
+	"PackageOpen":      "Package",
+	"PackageCheck":     "Package",
+	"PackagePlus":      "Package",
+	"PackageSearch":    "Package",
+	"PenLine":          "Pencil",
+	"PenSquare":        "Edit",
+	"PencilLine":       "Pencil",
+	"FilePen":          "FileText",
+	"FileEdit":         "FileText",
+	"FileSearch":       "FileText",
+	"FileSpreadsheet":  "FileText",
+	"FileJson":         "FileText",
+	"FileCode":         "Code2",
+	"FolderPlus":       "FolderOpen",
+	"FolderSync":       "FolderOpen",
+	"BookMarked":       "BookOpen",
+	"BookCopy":         "BookOpen",
+	"CalendarCheck":    "Calendar",
+	"CalendarClock":    "Calendar",
+	"CalendarPlus":     "Calendar",
+	"CalendarRange":    "CalendarDays",
+	"CalendarX":        "Calendar",
+	"ClockAlert":       "Clock",
+	"Hourglass":        "Timer",
+	"TimerOff":         "Timer",
+	"Banknote":         "DollarSign",
+	"PiggyBank":        "Wallet",
+	"Coins":            "DollarSign",
+	"HandCoins":        "DollarSign",
+	"BadgeDollarSign":  "DollarSign",
+	"ShieldAlert":      "AlertTriangle",
+	"ShieldOff":        "Shield",
+	"ShieldPlus":       "ShieldCheck",
+	"LockOpen":         "Lock",
+	"LockKeyhole":      "Key",
+	"Fingerprint":      "Key",
+	"ScanLine":         "Search",
+	"QrCode":           "Hash",
+	"Barcode":          "Hash",
+	"NotepadText":      "FileText",
+	"ClipboardList":    "FileText",
+	"ClipboardCheck":   "FileCheck",
+	"ClipboardPlus":    "FilePlus",
+	"Clipboard":        "FileText",
+	"ScrollText":       "FileText",
+	"NotebookText":     "FileText",
+	"WandSparkles":     "Sparkles",
+	"BrainCircuit":     "Cpu",
+	"BrainCog":         "Cpu",
+	"Brain":            "Cpu",
+	"Bot":              "Cpu",
+	"Headphones":       "Volume2",
+	"Speaker":          "Volume2",
+	"Radio":            "Wifi",
+	"Satellite":        "Wifi",
+	"NetworkIcon":      "Server",
+	"Network":          "Server",
+	"HardDrive":        "Database",
+	"HardDriveUpload":  "Upload",
+	"CloudUpload":      "Upload",
+	"CloudDownload":    "Download",
+	"Cloud":            "Globe",
+	"CloudOff":         "Globe",
+	"Globe2":           "Globe",
+	"Earth":            "Globe",
+	"Map":              "MapPin",
+	"Locate":           "MapPin",
+	"MapPinOff":        "MapPin",
+	"RouteOff":         "Navigation",
+	"Route":            "Navigation",
+	"Gauge":            "Activity",
+	"GaugeCircle":      "Activity",
+	"AreaChart":        "BarChart3",
+	"ScatterChart":     "BarChart3",
+	"CandlestickChart": "BarChart3",
+	"ChartBar":         "BarChart3",
+	"ChartLine":        "LineChart",
+	"ChartPie":         "PieChart",
+}
+
+var lucideImportRe = regexp.MustCompile(`import\s*\{([^}]+)\}\s*from\s*['"]lucide-react['"]`)
+
+// fixLucideImports scans all files and replaces invalid lucide-react icon names
+// with verified alternatives. Modifies files in-place.
+func fixLucideImports(files []models.ProjectFile) int {
+	fixed := 0
+	for i, f := range files {
+		if !strings.HasSuffix(f.Path, ".tsx") && !strings.HasSuffix(f.Path, ".ts") {
+			continue
+		}
+		updated, count := fixLucideInContent(f.Content)
+		if count > 0 {
+			files[i].Content = updated
+			fixed += count
+			log.Printf("[lucide-fix] %s: replaced %d invalid icon(s)", f.Path, count)
+		}
+	}
+	return fixed
+}
+
+func fixLucideInContent(content string) (string, int) {
+	totalFixed := 0
+	result := lucideImportRe.ReplaceAllStringFunc(content, func(match string) string {
+		sub := lucideImportRe.FindStringSubmatch(match)
+		if len(sub) < 2 {
+			return match
+		}
+		rawNames := sub[1]
+		parts := strings.Split(rawNames, ",")
+		changed := false
+		for j, p := range parts {
+			trimmed := strings.TrimSpace(p)
+			// handle aliased imports: "LayoutKanban as KanbanIcon"
+			name := trimmed
+			alias := ""
+			if idx := strings.Index(trimmed, " as "); idx != -1 {
+				name = strings.TrimSpace(trimmed[:idx])
+				alias = trimmed[idx:]
+			}
+			replacement, bad := lucideFallbacks[name]
+			if !bad {
+				if !lucideValidIcons[name] && name != "" {
+					replacement = "LayoutGrid" // generic fallback for anything unknown
+					bad = true
+				}
+			}
+			if bad {
+				parts[j] = " " + replacement + alias
+				// also replace usages of the old name in the file body (only if no alias)
+				if alias == "" && name != replacement {
+					content = strings.ReplaceAll(content, name, replacement)
+				}
+				changed = true
+				totalFixed++
+			}
+		}
+		if !changed {
+			return match
+		}
+		return "import {" + strings.Join(parts, ",") + "} from 'lucide-react'"
+	})
+	return result, totalFixed
 }
