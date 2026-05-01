@@ -145,6 +145,16 @@ type RevertMicrofrontendRequest struct {
 	SnapshotID string `json:"snapshot_id"`
 }
 
+// MicrofrontendDetailResponse is the function service response for GET /v2/functions/micro-frontend/{id}.
+// ProjectId contains the child project's resource_env_id; EnvId is the environment id.
+type MicrofrontendDetailResponse struct {
+	Data struct {
+		ID        string `json:"id"`
+		ProjectId string `json:"project_id"`
+		EnvId     string `json:"env_id"`
+	} `json:"data"`
+}
+
 type MicrofrontendSnapshot struct {
 	ID              string             `json:"id"`
 	MicrofrontendID string             `json:"microfrontend_id"`

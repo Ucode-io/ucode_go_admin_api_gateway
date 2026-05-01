@@ -577,11 +577,19 @@ func buildInitFiles(allFiles []models.GitlabFileChange, n int) []models.GitlabFi
 }
 
 // createMicrofrontendSnapshot saves a version of the current files to the
-// project's microfrontend_versions table. Sets is_current=true on the new
+// child project's microfrontend_versions table. Sets is_current=true on the new
 // version and is_current=false on all previous versions for this microfrontend.
 // Called after every successful AI push — NOT after reverts.
 func (p *ChatProcessor) createMicrofrontendSnapshot(ctx context.Context, files []models.GitlabFileChange) {
-	if p.microFrontendId == "" || p.resourceEnvId == "" {
+	if p.microFrontendId == "" {
+		return
+	}
+
+	// Fetch the child project's resource_env_id from the function service.
+	// The function service stores it as "project_id" on the microfrontend record.
+	resourceEnvId, err := p.fetchMicrofrontendResourceEnvId(ctx)
+	if err != nil {
+		log.Printf("[VERSION] failed to get microfrontend resource_env_id: %v", err)
 		return
 	}
 
@@ -592,7 +600,7 @@ func (p *ChatProcessor) createMicrofrontendSnapshot(ctx context.Context, files [
 	}
 
 	_, err = p.service.GoObjectBuilderService().MicrofrontendVersions().CreateVersion(ctx, &nb.CreateMicrofrontendVersionRequest{
-		ResourceEnvId:   p.resourceEnvId,
+		ResourceEnvId:   resourceEnvId,
 		MicrofrontendId: p.microFrontendId,
 		CommitMessage:   p.userMessage,
 		Files:           string(filesJSON),
@@ -600,6 +608,37 @@ func (p *ChatProcessor) createMicrofrontendSnapshot(ctx context.Context, files [
 	if err != nil {
 		log.Printf("[VERSION] failed to create version: %v", err)
 	}
+}
+
+// fetchMicrofrontendResourceEnvId calls the function service to get the child
+// project's resource_env_id for the current microfrontend (returned as "project_id").
+func (p *ChatProcessor) fetchMicrofrontendResourceEnvId(ctx context.Context) (string, error) {
+	url := p.baseConf.GoFunctionServiceHost + p.baseConf.GoFunctionServiceHTTPPort +
+		"/v2/functions/micro-frontend/" + p.microFrontendId
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return "", err
+	}
+	req.Header.Set("Authorization", p.authToken)
+
+	client := &http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	var detail models.MicrofrontendDetailResponse
+	if err = json.NewDecoder(resp.Body).Decode(&detail); err != nil {
+		return "", err
+	}
+
+	if detail.Data.ProjectId == "" {
+		return "", fmt.Errorf("function service returned empty project_id for microfrontend %s", p.microFrontendId)
+	}
+
+	return detail.Data.ProjectId, nil
 }
 
 // sanitizeFileContent removes characters that can cause JSON parse failures
