@@ -331,7 +331,15 @@ func (p *ChatProcessor) generateCodeChunked(ctx context.Context, clarified strin
 	go func() {
 		defer wg.Done()
 		var e error
-		foundation, e = p.generateFoundation(ctx, clarified, imageURLs, chatHistory, apiConfig, foundationGroup, manifest)
+		for attempt := 1; attempt <= 2; attempt++ {
+			foundation, e = p.generateFoundation(ctx, clarified, imageURLs, chatHistory, apiConfig, foundationGroup, manifest)
+			if e == nil {
+				break
+			}
+			if attempt < 2 && !errors.Is(e, helper.ErrMaxTokens) {
+				log.Printf("[chunked] foundation attempt %d failed (%v) — retrying", attempt, e)
+			}
+		}
 		if e != nil {
 			foundErr = e
 			return

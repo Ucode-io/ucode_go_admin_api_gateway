@@ -154,13 +154,15 @@ var ToolEmitProject = models.ClaudeFunctionTool{
 				"description":          "All VITE_* environment variables with their real values",
 			},
 			"files": map[string]any{
-				"type": "array",
+				"type":        "array",
+				"description": "CRITICAL: Must be a JSON array value — never a JSON-encoded string. Each element is an object with path and content.",
+				"minItems":    1,
 				"items": map[string]any{
 					"type":     "object",
 					"required": []string{"path", "content"},
 					"properties": map[string]any{
-						"path":    map[string]any{"type": "string", "description": "Relative path e.g. src/App.tsx"},
-						"content": map[string]any{"type": "string", "description": "Full file content"},
+						"path":    map[string]any{"type": "string", "description": "Relative file path e.g. src/App.tsx"},
+						"content": map[string]any{"type": "string", "description": "Complete file content as a plain string — no extra JSON encoding"},
 					},
 				},
 			},
