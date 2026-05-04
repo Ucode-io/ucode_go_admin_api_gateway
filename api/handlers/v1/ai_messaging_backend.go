@@ -305,34 +305,49 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 
 	// ─── Phase 2: Relations ──────────────────────────────────────────────────────
 	// Calls Relation().Create() which internally creates the RELATION type field
-	// on table_from using RelationFieldId as the field's UUID and RelationFieldSlug
-	// as the column name. Phase 1 already skipped creating these slugs as SINGLE_LINE,
-	// so there is no slug conflict.
-	// This mirrors the proven pattern in api/handlers/v1/table.go (Relation.Create only,
-	// no separate Field.Create call needed).
+	// on table_from. ViewFields must be non-empty — ObtainRandomOne fetches a real
+	// field id from table_from. This mirrors the proven pattern in table.go:1378-1404.
+
+	log.Printf("[backend] Phase 2: %d relations to create (tableIdMap has %d entries)", len(plan.Relations), len(tableIdMap))
 
 	if len(plan.Relations) > 0 {
 		emit.Emit(SSEEvent{
 			Type:    EvProgress,
 			Icon:    "link",
 			Message: fmt.Sprintf("Создаю связи между таблицами (%d)", len(plan.Relations)),
+			Value:   fmt.Sprintf("%d связей", len(plan.Relations)),
 		})
 
 		for _, rel := range plan.Relations {
 			// FK column slug: {table_to}_id (e.g. orders→customers → "customers_id" on orders)
 			relFieldSlug := rel.TableTo + "_id"
 
+			log.Printf("[backend] relation %s→%s: tableFrom_id=%q tableTo exists=%v", rel.TableFrom, rel.TableTo, tableIdMap[rel.TableFrom], tableIdMap[rel.TableTo] != "")
+
 			// Sanity-check: source table must have been created successfully.
 			if tableIdMap[rel.TableFrom] == "" {
-				errs = append(errs, fmt.Sprintf("relation %s→%s: source table %s not created", rel.TableFrom, rel.TableTo, rel.TableFrom))
+				msg := fmt.Sprintf("relation %s→%s: source table not in tableIdMap (was it created?)", rel.TableFrom, rel.TableTo)
+				errs = append(errs, msg)
+				log.Printf("[backend] ⚠️ %s", msg)
+				emit.Emit(SSEEvent{Type: EvProgress, Icon: "alert-triangle", Message: msg})
 				continue
 			}
 
-			// attributes must contain "format":"RELATION" — this is what tells ucode
-			// to render the field as a relation picker instead of a plain varchar.
+			// ObtainRandomOne fetches any existing field id from table_from.
+			// Relation.Create requires ViewFields to be non-empty — without it the
+			// relation is silently rejected. This mirrors table.go:1378-1404.
+			viewField, obtainErr := service.GoObjectBuilderService().Field().ObtainRandomOne(ctx, &nb.ObtainRandomRequest{
+				TableSlug: rel.TableFrom,
+				ProjectId: resourceEnvId,
+				EnvId:     envId,
+			})
+			if obtainErr != nil {
+				log.Printf("[backend] ObtainRandomOne %s failed: %v — skipping relation %s→%s", rel.TableFrom, obtainErr, rel.TableFrom, rel.TableTo)
+				errs = append(errs, fmt.Sprintf("relation %s→%s: ObtainRandomOne failed: %v", rel.TableFrom, rel.TableTo, obtainErr))
+				continue
+			}
+
 			relAttr, _ := helper.ConvertMapToStruct(map[string]any{
-				"format":      "RELATION",
-				"label":       slugToLabel(rel.TableTo),
 				"label_en":    slugToLabel(rel.TableTo),
 				"label_to_en": slugToLabel(rel.TableFrom),
 			})
@@ -347,13 +362,17 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 				RelationToFieldId: uuid.NewString(),
 				ProjectId:         resourceEnvId,
 				EnvId:             envId,
+				ViewFields:        []string{viewField.GetId()},
 				Attributes:        relAttr,
 			})
 			if relErr != nil {
-				errs = append(errs, fmt.Sprintf("relation %s→%s: %v", rel.TableFrom, rel.TableTo, relErr))
-				log.Printf("[backend] ⚠️ Relation.Create Many2One %s→%s failed: %v", rel.TableFrom, rel.TableTo, relErr)
+				msg := fmt.Sprintf("relation %s→%s failed: %v", rel.TableFrom, rel.TableTo, relErr)
+				errs = append(errs, msg)
+				log.Printf("[backend] ⚠️ Relation.Create %s→%s failed: %v", rel.TableFrom, rel.TableTo, relErr)
+				emit.Emit(SSEEvent{Type: EvProgress, Icon: "alert-triangle", Message: fmt.Sprintf("Ошибка связи %s→%s", rel.TableFrom, rel.TableTo), Value: relErr.Error()})
 			} else {
-				log.Printf("[backend] ✅ relation Many2One %s→%s (field slug: %s)", rel.TableFrom, rel.TableTo, relFieldSlug)
+				log.Printf("[backend] ✅ relation Many2One %s→%s created (fk_slug=%s view_field=%s)", rel.TableFrom, rel.TableTo, relFieldSlug, viewField.GetId())
+				emit.Emit(SSEEvent{Type: EvProgress, Icon: "link", Message: fmt.Sprintf("Связь создана: %s → %s", rel.TableFrom, rel.TableTo), Value: relFieldSlug})
 			}
 		}
 	}

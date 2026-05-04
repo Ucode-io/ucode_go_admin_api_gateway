@@ -333,10 +333,22 @@ func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context,
 				Message: "Создаю новые таблицы в базе данных",
 				Value:   fmt.Sprintf("%d таблиц", len(newTables)),
 			})
+			// Keep relations that reference at least one new table so FK columns are created.
+			var newSlugs = make(map[string]bool, len(newTables))
+			for _, t := range newTables {
+				newSlugs[t.Slug] = true
+			}
+			var newRelations []models.TableRelationPlan
+			for _, r := range plan.Relations {
+				if newSlugs[r.TableFrom] || newSlugs[r.TableTo] {
+					newRelations = append(newRelations, r)
+				}
+			}
 			newPlan := &models.ArchitectPlan{
 				ProjectName: plan.ProjectName,
 				ProjectType: plan.ProjectType,
 				Tables:      newTables,
+				Relations:   newRelations,
 			}
 			go func(bPlan *models.ArchitectPlan, resourceEnvId, ucodeProjectId, userId, envId string) {
 				if err := createBackendFromPlan(context.Background(), bPlan, resourceEnvId, ucodeProjectId, userId, envId, p.service, emit); err != nil {
@@ -708,25 +720,36 @@ HOOK PATTERN for role_id / client_type_id selects:
 	if len(plan.Relations) > 0 {
 		sb.WriteString("\nRelations (Many2One — FK column auto-created on source table):\n")
 		for _, r := range plan.Relations {
-			// ucode convention: FK column slug = table_to + "_id"
 			relFieldSlug := r.TableTo + "_id"
 			sb.WriteString(fmt.Sprintf(
-				"- %s → %s: FK field %q on %s table (single Select, load options from %q)\n",
+				"- %s → %s: FK field %q on %s (Select dropdown, load options from GET /v2/items/%s)\n",
 				r.TableFrom, r.TableTo, relFieldSlug, r.TableFrom, r.TableTo,
 			))
 		}
 		sb.WriteString(`
-RELATION API RULES (read carefully — wrong usage breaks the UI):
-  CREATE/UPDATE with relation:
-    Include the FK field in the request body: { "` + `customers_id` + `": "<selected-guid>", ...other fields }
-    Field name = {table_to}_id (e.g. orders→customers → field is "customers_id")
-  FETCH OPTIONS for Select dropdown:
-    POST /v1/object/{table_to}/get-list  body: { "data": { "limit": 100, "offset": 0 } }
-    Use response rows as Select options: value=guid, label=first display field (name/title/label)
-  DISPLAY related record name (in table rows):
-    After fetching the list, join by guid: find the related record by {table_to}_id guid and show its name field
-    OR fetch related record separately: GET /v1/object/{table_to}/{guid}
-  DO NOT use Many2Many or array submission — only single guid value per Many2One field.
+RELATION API RULES — READ CAREFULLY, WRONG USAGE BREAKS THE UI:
+
+VALUE TYPE — CRITICAL:
+  The FK field value is ALWAYS a guid STRING (UUID like "a1b2c3d4-...").
+  NEVER store or submit an integer, number, or index.
+  ❌ WRONG: { "customers_id": 1 }          — integer breaks the relation
+  ❌ WRONG: { "customers_id": "1" }         — numeric string breaks the relation
+  ✅ CORRECT: { "customers_id": "a1b2c3..." } — real guid from the related table
+
+FETCH OPTIONS for <Select> dropdown (use GET /v2/items, NOT the old /v1/object endpoint):
+  const { data: optData } = useApiQuery<unknown>(['{table_to}'], '/v2/items/{table_to}')
+  const options = extractList<{ guid: string; name: string }>(optData)
+  // in <Select>: value={row.guid}  label={row.name ?? row.title ?? row.label}
+
+CREATE/UPDATE with relation — send the guid string:
+  { "{table_to}_id": selectedGuid, ...otherFields }
+  State: const [selectedId, setSelectedId] = useState<string>('')
+  On submit: include selectedId only if non-empty string.
+
+DISPLAY related record name in list view:
+  Join by guid client-side: options.find(o => o.guid === row['{table_to}_id'])?.name ?? '—'
+
+DO NOT use Many2Many, array values, or numeric IDs — only single guid string per Many2One field.
 `)
 	}
 

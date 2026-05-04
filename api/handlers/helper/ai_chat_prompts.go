@@ -615,6 +615,26 @@ DESTRUCTURING UNUSED PROPS — never prefix interface property names with _:
   Rule: _ prefix belongs on the LOCAL variable name via rename, not on the interface property key.
 
 ====================================
+RELATION FIELDS — MANDATORY RULES (applies whenever your chunk has a Many2One relation)
+====================================
+FK field value is ALWAYS a guid STRING (UUID). NEVER store or submit an integer or numeric string.
+  ❌ WRONG: { "customers_id": 1 }           — breaks the relation in ucode
+  ❌ WRONG: { "customers_id": "1" }          — numeric string also breaks it
+  ✅ CORRECT: { "customers_id": "a1b2c3d4-..." } — real guid from GET /v2/items/{table}
+
+State for FK select: const [relId, setRelId] = useState<string>('')
+Select value attr: value={relId}  onValueChange={setRelId}
+On submit: include relId only if relId !== '' (skip empty string — don't send null/0).
+
+FETCH options for relation Select (always GET /v2/items, NOT POST /v1/object/get-list):
+  const { data } = useApiQuery<unknown>(['{table_to}'], '/v2/items/{table_to}')
+  const options = extractList<{ guid: string; name: string }>(data)
+  // <SelectItem key={o.guid} value={o.guid}>{o.name ?? o.title ?? o.label}</SelectItem>
+
+Display related name in list view:
+  options.find(o => o.guid === row['{table_to}_id'])?.name ?? '—'
+
+====================================
 LOGIN TABLE — MANDATORY RULES (if your chunk includes a users/login page)
 ====================================
 A login table stores project users. It has BUILT-IN auth fields (login, password, email, phone)
