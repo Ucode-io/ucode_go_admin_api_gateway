@@ -702,8 +702,8 @@ CREATE FORM — include ALL of these fields (in this order):
   7. [any custom fields defined for this table, e.g. full_name, avatar]
 
 CREATE API endpoint:
-  POST /v1/object/` + slug + `/create
-  body: { "data": { "login":"...", "password":"plaintext", "email":"...", "role_id":"guid", "client_type_id":"guid", ...customFields } }
+  POST /v2/items/` + slug + `
+  body: { "login":"...", "password":"plaintext", "email":"...", "role_id":"guid", "client_type_id":"guid", ...customFields }
   Password is PLAIN TEXT — the platform hashes it. Never hash on the frontend.
 
 EDIT FORM: same fields except password is optional (send only if user typed a new one).

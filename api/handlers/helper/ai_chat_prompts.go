@@ -655,8 +655,8 @@ CREATE FORM must include (in this order):
        options: extractList<{guid:string;name:string}>(data)  →  value=guid, label=name
   7. then any custom fields for this table (e.g. full_name, avatar)
 
-CREATE endpoint: POST /v1/object/{login_slug}/create
-  body: { "data": { "login":"...", "password":"plaintext", "email":"...", "role_id":"guid", "client_type_id":"guid" } }
+CREATE endpoint: POST /v2/items/{login_slug}
+  body: { "login":"...", "password":"plaintext", "email":"...", "role_id":"guid", "client_type_id":"guid" }
   PLAIN TEXT password — never hash on frontend.
 
 EDIT FORM: same but password field is optional (only send if user typed something).
@@ -1312,8 +1312,8 @@ LOGIN TABLE — MANDATORY RULES (if the project has a users / login table):
          response data.data.response[] → value=guid, label=name
     7. then any custom table fields (e.g. full_name, avatar)
 
-  CREATE endpoint: POST /v1/object/{login_slug}/create
-    body: { "data": { "login":"...", "password":"plaintext", "email":"...", "role_id":"guid", "client_type_id":"guid", ...custom } }
+  CREATE endpoint: POST /v2/items/{login_slug}
+    body: { "login":"...", "password":"plaintext", "email":"...", "role_id":"guid", "client_type_id":"guid", ...custom }
     Password is PLAIN TEXT — the platform hashes it. NEVER hash on the frontend.
 
   EDIT FORM: same fields, password is optional (send only when user types a new one).
