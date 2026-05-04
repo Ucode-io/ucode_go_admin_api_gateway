@@ -653,6 +653,32 @@ func buildAPIConfigBlock(baseURL, apiKey string, plan *models.ArchitectPlan) str
 			sb.WriteString(fmt.Sprintf("  * field: %s, type: %s\n", f.Slug, f.Type))
 		}
 	}
+
+	if len(plan.Relations) > 0 {
+		sb.WriteString("\nRelations (Many2One — FK column auto-created on source table):\n")
+		for _, r := range plan.Relations {
+			// ucode convention: FK column slug = table_to + "_id"
+			relFieldSlug := r.TableTo + "_id"
+			sb.WriteString(fmt.Sprintf(
+				"- %s → %s: FK field %q on %s table (single Select, load options from %q)\n",
+				r.TableFrom, r.TableTo, relFieldSlug, r.TableFrom, r.TableTo,
+			))
+		}
+		sb.WriteString(`
+RELATION API RULES (read carefully — wrong usage breaks the UI):
+  CREATE/UPDATE with relation:
+    Include the FK field in the request body: { "` + `customers_id` + `": "<selected-guid>", ...other fields }
+    Field name = {table_to}_id (e.g. orders→customers → field is "customers_id")
+  FETCH OPTIONS for Select dropdown:
+    POST /v1/object/{table_to}/get-list  body: { "data": { "limit": 100, "offset": 0 } }
+    Use response rows as Select options: value=guid, label=first display field (name/title/label)
+  DISPLAY related record name (in table rows):
+    After fetching the list, join by guid: find the related record by {table_to}_id guid and show its name field
+    OR fetch related record separately: GET /v1/object/{table_to}/{guid}
+  DO NOT use Many2Many or array submission — only single guid value per Many2One field.
+`)
+	}
+
 	sb.WriteString("\nUse this UI Structure provided by the Architect:\n" + plan.UIStructure + "\n")
 
 	// Inject design tokens so the coder doesn't have to invent a design system.

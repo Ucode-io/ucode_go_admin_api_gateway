@@ -20,10 +20,10 @@ import "ucode/ucode_go_api_gateway/api/models"
 
 var ToolArchitectPlan = models.ClaudeFunctionTool{
 	Name:        "plan_architecture",
-	Description: "Return the complete project architecture: database tables with fields and mock data, a rich UI structure description, and a complete design system for the frontend developer.",
+	Description: "Return the complete project architecture: database tables with fields and mock data, all relations between tables, a rich UI structure description, and a complete design system for the frontend developer.",
 	InputSchema: map[string]any{
 		"type":     "object",
-		"required": []string{"project_name", "project_type", "tables", "ui_structure", "design"},
+		"required": []string{"project_name", "project_type", "tables", "relations", "ui_structure", "design"},
 		"properties": map[string]any{
 			"project_name": map[string]any{"type": "string", "description": "Human-readable project name"},
 			"project_type": map[string]any{
@@ -62,6 +62,23 @@ var ToolArchitectPlan = models.ClaudeFunctionTool{
 								"type":                 "object",
 								"additionalProperties": true,
 							},
+						},
+					},
+				},
+			},
+			"relations": map[string]any{
+				"type":        "array",
+				"description": "Every foreign-key relationship between tables. Only Many2One is supported. The FK column {table_to}_id is auto-created on table_from (e.g. orders→customers creates column 'customers_id' on orders).",
+				"items": map[string]any{
+					"type":     "object",
+					"required": []string{"table_from", "table_to", "type"},
+					"properties": map[string]any{
+						"table_from": map[string]any{"type": "string", "description": "Source table slug — the 'many' side (e.g. 'orders' when many orders belong to one customer)"},
+						"table_to":   map[string]any{"type": "string", "description": "Target table slug — the 'one' side (e.g. 'customers')"},
+						"type": map[string]any{
+							"type":        "string",
+							"enum":        []string{"Many2One"},
+							"description": "Always Many2One. Creates FK column {table_to}_id on table_from.",
 						},
 					},
 				},

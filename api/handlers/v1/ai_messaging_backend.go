@@ -23,6 +23,9 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 
 	var errs []string
 
+	// ─── Phase 1: Tables + Fields ───────────────────────────────────────────────
+	// Mock data is deferred to Phase 3 so relation FK columns exist before inserts.
+
 	for _, tablePlan := range plan.Tables {
 
 		emit.Emit(
@@ -235,7 +238,6 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 			},
 		)
 
-		// Emit field creation progress
 		userFields := 0
 		for _, fp := range tablePlan.Fields {
 			if !isSystemField(fp.Slug) && !(tablePlan.IsLoginTable && isAuthField(fp.Slug)) {
@@ -283,30 +285,91 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 				errs = append(errs, fmt.Sprintf("field %s.%s: %v", tablePlan.Slug, fieldPlan.Slug, err))
 			}
 		}
+	}
 
+	// ─── Phase 2: Relations ──────────────────────────────────────────────────────
+	// All tables and fields exist now — safe to create FK columns via Relation.Create().
+
+	if len(plan.Relations) > 0 {
+		emit.Emit(SSEEvent{
+			Type:    EvProgress,
+			Icon:    "link",
+			Message: fmt.Sprintf("Создаю связи между таблицами (%d)", len(plan.Relations)),
+		})
+
+		for _, rel := range plan.Relations {
+			// Only Many2One is supported on PostgreSQL. Force it regardless of what plan says.
+			relType := "Many2One"
+			// FK column slug follows ucode convention: {table_to}_id
+			// e.g. orders→customers creates column "customers_id" on orders table
+			relFieldSlug := rel.TableTo + "_id"
+
+			relAttr, _ := helper.ConvertMapToStruct(map[string]any{
+				"label_en":    slugToLabel(rel.TableTo),
+				"label_to_en": slugToLabel(rel.TableFrom),
+			})
+
+			_, relErr := service.GoObjectBuilderService().Relation().Create(ctx, &nb.CreateRelationRequest{
+				Id:                uuid.NewString(),
+				TableFrom:         rel.TableFrom,
+				TableTo:           rel.TableTo,
+				Type:              relType,
+				RelationTableSlug: rel.TableTo,
+				RelationFieldSlug: relFieldSlug,
+				RelationFieldId:   uuid.NewString(),
+				RelationToFieldId: uuid.NewString(),
+				ProjectId:         resourceEnvId,
+				EnvId:             envId,
+				Attributes:        relAttr,
+			})
+			if relErr != nil {
+				errs = append(errs, fmt.Sprintf("relation %s→%s: %v", rel.TableFrom, rel.TableTo, relErr))
+				log.Printf("[backend] ⚠️ relation %s %s→%s failed: %v", relType, rel.TableFrom, rel.TableTo, relErr)
+			} else {
+				log.Printf("[backend] ✅ relation %s %s→%s (field: %s)", relType, rel.TableFrom, rel.TableTo, relFieldSlug)
+			}
+		}
+	}
+
+	// ─── Phase 3: Mock Data ──────────────────────────────────────────────────────
+	// Inserted after relations so FK columns exist for any relation fields in mock rows.
+	// Relation field slugs ({table_to}_id) are stripped to avoid FK constraint violations
+	// since mock GUIDs don't point to real records.
+
+	relFieldSlugs := make(map[string]bool, len(plan.Relations))
+	for _, rel := range plan.Relations {
+		relFieldSlugs[rel.TableTo+"_id"] = true
+	}
+
+	for _, tablePlan := range plan.Tables {
 		if tablePlan.IsLoginTable {
 			if len(tablePlan.MockData) > 0 {
 				log.Printf("[backend] skipping %d mock rows for login table %s", len(tablePlan.MockData), tablePlan.Slug)
 			}
-		} else {
-			for i, mockRow := range tablePlan.MockData {
-				sanitized := sanitizeMockRow(mockRow, tablePlan.Fields)
-				structData, err := helper.ConvertMapToStruct(sanitized)
-				if err != nil {
-					errs = append(errs, fmt.Sprintf("mock %s[%d] convert: %v", tablePlan.Slug, i, err))
-					continue
-				}
+			continue
+		}
 
-				_, err = service.GoObjectBuilderService().Items().Create(
-					ctx, &nb.CommonMessage{
-						TableSlug: tablePlan.Slug,
-						ProjectId: resourceEnvId,
-						Data:      structData,
-					},
-				)
-				if err != nil {
-					errs = append(errs, fmt.Sprintf("mock %s[%d]: %v", tablePlan.Slug, i, err))
-				}
+		for i, mockRow := range tablePlan.MockData {
+			sanitized := sanitizeMockRow(mockRow, tablePlan.Fields)
+			for slug := range relFieldSlugs {
+				delete(sanitized, slug)
+			}
+
+			structData, err := helper.ConvertMapToStruct(sanitized)
+			if err != nil {
+				errs = append(errs, fmt.Sprintf("mock %s[%d] convert: %v", tablePlan.Slug, i, err))
+				continue
+			}
+
+			_, err = service.GoObjectBuilderService().Items().Create(
+				ctx, &nb.CommonMessage{
+					TableSlug: tablePlan.Slug,
+					ProjectId: resourceEnvId,
+					Data:      structData,
+				},
+			)
+			if err != nil {
+				errs = append(errs, fmt.Sprintf("mock %s[%d]: %v", tablePlan.Slug, i, err))
 			}
 		}
 	}
@@ -316,7 +379,7 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 		return fmt.Errorf("backend creation had %d errors: %s", len(errs), strings.Join(errs, "; "))
 	}
 
-	log.Printf("[backend] all tables created successfully")
+	log.Printf("[backend] all tables, relations and mock data created successfully")
 	return nil
 }
 
@@ -412,6 +475,17 @@ func mapFieldType(aiType string) string {
 	default:
 		return "SINGLE_LINE"
 	}
+}
+
+// slugToLabel converts a snake_case slug to a Title Case label (e.g. "product_categories" → "Product Categories").
+func slugToLabel(slug string) string {
+	parts := strings.Split(slug, "_")
+	for i, p := range parts {
+		if len(p) > 0 {
+			parts[i] = strings.ToUpper(p[:1]) + p[1:]
+		}
+	}
+	return strings.Join(parts, " ")
 }
 
 func ensureLoginTable(plan *models.ArchitectPlan) *models.ArchitectPlan {

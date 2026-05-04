@@ -256,9 +256,21 @@ SCHEMA RULES:
 5. Every project MUST have exactly ONE login table: set "is_login_table": true.
 6. For the login table, do NOT include auth fields (login, email, phone, password, tin) — they are auto-created from "login_strategy". Only add custom fields like "full_name", "avatar".
 
+RELATIONS RULES:
+7. Output a "relations" array covering EVERY foreign-key link between tables in this project.
+   Only Many2One is supported: many rows in table_from belong to one row in table_to.
+   The platform auto-creates FK column "{table_to}_id" on table_from.
+   Example: many orders → one customer → {table_from:"orders", table_to:"customers", type:"Many2One"}
+   Result: column "customers_id" is added to the orders table automatically.
+8. DO NOT define the FK as a regular field in table.fields — the relation creates it automatically.
+   WRONG: orders.fields includes {slug:"customers_id", type:"SINGLE_LINE"}
+   CORRECT: relations includes {table_from:"orders", table_to:"customers", type:"Many2One"}
+9. For mock_data: NEVER include relation fields (e.g. "customers_id") — the FK column is created by the relation system after table creation. Omit them entirely from mock rows.
+10. If a project has no relations (e.g., a standalone blog), output an empty array: "relations": [].
+
 UI STRUCTURE RULES:
-7. "ui_structure" must be highly descriptive — it is the full specification for the frontend developer.
-8. No limitations on UI or flexibility.
+11. "ui_structure" must be highly descriptive — it is the full specification for the frontend developer.
+12. No limitations on UI or flexibility.
 
 DESIGN SYSTEM RULES — fill the "design" field completely:
 
