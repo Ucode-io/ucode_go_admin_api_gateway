@@ -43,7 +43,7 @@ func (h *HandlerV1) AdminAuthMiddleware() gin.HandlerFunc {
 				strArr      = strings.Split(bearerToken, " ")
 			)
 
-			if len(strArr) < 2 || (strArr[0] != "Bearer" && strArr[0] != "API-KEY") {
+			if len(strArr) < 1 || (strArr[0] != "Bearer" && strArr[0] != "API-KEY") {
 				h.log.Error("---ERR->Unexpected token format")
 				_ = c.AbortWithError(http.StatusForbidden, config.ErrTokenFormat)
 				return
