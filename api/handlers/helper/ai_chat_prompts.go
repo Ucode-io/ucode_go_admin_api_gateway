@@ -273,13 +273,12 @@ UI STRUCTURE RULES:
 12. No limitations on UI or flexibility.
 
 IMAGE KEYWORDS RULES:
-13. "image_keywords": 2–4 Unsplash search phrases that physically represent this project's domain.
-    Think: what would a photographer shoot for this business?
-    GOOD: ["freight truck highway", "warehouse shelves forklift", "cargo containers port"]
-    GOOD: ["espresso barista", "cozy cafe interior", "latte art"]
-    GOOD: ["doctor patient consultation", "modern clinic", "medical equipment"]
+13. "image_keywords": 2–4 Unsplash search phrases. 
+    CRITICAL: You MUST aim for the "WOW" factor. We need cinematic, ultra-high-quality, aesthetic, and premium professional photography.
+    Phrases should be 2-3 words. Use modifiers like "cinematic", "aesthetic", "minimalist" to guarantee breathtaking visuals.
+    GOOD: ["cinematic freight truck", "aesthetic modern clinic", "premium espresso barista", "minimalist luxury interior"]
     BAD:  ["business", "technology", "office", "management", "app", "platform"]
-    Rule: if the project is logistics → trucks/warehouses, food → dishes/kitchen, healthcare → doctors/clinics.
+    Rule: if the project is logistics → cinematic trucks/warehouses, food → aesthetic dishes/kitchen, healthcare → modern luxury clinic.
     NEVER default to generic tech/office imagery for non-tech domains.
 
 DESIGN SYSTEM RULES — fill the "design" field completely:
@@ -1200,12 +1199,12 @@ TYPE A — ADMIN PANEL / WEB APP:
 TYPE B — LANDING PAGE:
   Signals: "landing page", "landing", "homepage", "marketing page",
            "product page", "SaaS homepage", "coming soon", "hero page"
-  → Single cinematic marketing page. NO admin shell, NO CRUD, NO sidebar.
+  → Single cinematic marketing page. Must look like an Awwwards-winning site (Apple/Stripe/Linear level). NO admin shell, NO CRUD, NO sidebar.
 
 TYPE C — FULL WEBSITE:
   Signals: "website", "corporate site", "company website", "multi-page",
            "blog", "portfolio", "agency", "magazine", "news site"
-  → Multi-page site with routing, real content, cinematic sections.
+  → Multi-page site with routing, real content, cinematic sections. Must drop jaws with premium design.
 
 Rule: "Tables to use:" present → TYPE A. When ambiguous → TYPE B or C.
 Commit to one type. Never mix types.
@@ -1446,6 +1445,17 @@ Apply them exactly:
   - For TYPE B/C: add Google Fonts @import for font_family and body_font
   - For TYPE A: always add Inter @import only
   - Never invent your own palette. Never run design selection. The design is already decided.
+
+====================================
+LANDING PAGE (TYPE B/C) "WOW" FACTOR — MANDATORY
+====================================
+If building a TYPE B or TYPE C project, it MUST NOT look generic. It must drop jaws and feel ultra-premium.
+1. MICRO-INTERACTIONS: Every button, card, and image MUST have a transition and hover state (hover:-translate-y-1 hover:shadow-2xl hover:scale-105 duration-300).
+2. GLASSMORPHISM: Use backdrop-blur-xl, bg-white/5, bg-black/5, or bg-white/60 for navbars, floating cards, and overlay panels.
+3. BENTO GRIDS: Do not use boring equal-column grids for features. Use asymmetrical CSS Grids (Bento Box style) where some feature cards span 2 columns or rows to create visual intrigue.
+4. TYPOGRAPHY: Hero headlines should be massive (text-5xl md:text-7xl lg:text-8xl), with tight tracking (tracking-tighter), and use gradients (bg-clip-text text-transparent bg-gradient-to-r).
+5. RICH ASSETS: Use full-bleed, edge-to-edge imagery with beautiful gradients overlaying them. Mask images with rounded-[2rem] or squircle shapes.
+6. ANIMATIONS: Define custom keyframes in index.css (e.g. float, pulse-glow, fade-in-up) and apply them to elements to make the page feel alive upon load.
 
 ARCHETYPE MOTION STYLES — apply based on design_inspiration token:
   Obsidian Cinematic: fadeUp 0.5s stagger · glow pulses · scroll-line indicator

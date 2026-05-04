@@ -43,7 +43,6 @@ func imgCacheKey(keywords []string) string {
 	return strings.Join(sorted, "|")
 }
 
-// imgixURL appends Imgix sizing params to an Unsplash raw URL.
 func imgixURL(raw string, w, h int) string {
 	sep := "&"
 	if !strings.Contains(raw, "?") {
@@ -52,7 +51,6 @@ func imgixURL(raw string, w, h int) string {
 	return fmt.Sprintf("%s%sw=%d&h=%d&fit=crop&auto=format&q=80", raw, sep, w, h)
 }
 
-// extractKeywords returns the image_keywords set by the Architect (max 4).
 func extractKeywords(plan *models.ArchitectPlan) []string {
 	kw := plan.ImageKeywords
 	if len(kw) > 4 {
@@ -61,7 +59,6 @@ func extractKeywords(plan *models.ArchitectPlan) []string {
 	return kw
 }
 
-// searchUnsplash calls GET /search/photos and returns up to count photos.
 func searchUnsplash(ctx context.Context, accessKey, query string, count int) ([]unsplashPhoto, error) {
 	if count > 30 {
 		count = 30
@@ -71,6 +68,7 @@ func searchUnsplash(ctx context.Context, accessKey, query string, count int) ([]
 		"per_page":       {fmt.Sprintf("%d", count)},
 		"orientation":    {"landscape"},
 		"content_filter": {"high"},
+		"order_by":       {"relevant"},
 	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet,
 		unsplashBase+"/search/photos?"+params.Encode(), nil)
@@ -92,8 +90,12 @@ func searchUnsplash(ctx context.Context, accessKey, query string, count int) ([]
 
 	var data struct {
 		Results []struct {
-			URLs  struct{ Raw string `json:"raw"` }  `json:"urls"`
-			User  struct{ Name string `json:"name"` } `json:"user"`
+			URLs struct {
+				Raw string `json:"raw"`
+			} `json:"urls"`
+			User struct {
+				Name string `json:"name"`
+			} `json:"user"`
 		} `json:"results"`
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
@@ -113,7 +115,7 @@ func searchUnsplash(ctx context.Context, accessKey, query string, count int) ([]
 	return out, nil
 }
 
-// fetchPhotos fetches up to 12 photos for the keywords with a single-keyword fallback.
+// fetchPhotos fetches up to 12 photos for the keywords, fetching individually for better relevance and quality.
 func fetchPhotos(ctx context.Context, accessKey string, keywords []string) ([]unsplashPhoto, error) {
 	key := imgCacheKey(keywords)
 
@@ -125,16 +127,44 @@ func fetchPhotos(ctx context.Context, accessKey string, keywords []string) ([]un
 	imgCacheMu.Unlock()
 
 	const needed = 12
-	photos, err := searchUnsplash(ctx, accessKey, strings.Join(keywords, " "), needed)
-	if err != nil {
-		return nil, err
-	}
-	// If the combined query was too specific, top up with the first keyword alone
-	if len(photos) < needed && len(keywords) > 1 {
-		extra, extraErr := searchUnsplash(ctx, accessKey, keywords[0], needed-len(photos))
-		if extraErr == nil {
-			photos = append(photos, extra...)
+	var allResults [][]unsplashPhoto
+
+	// Fetch up to 15 photos for EACH keyword separately to ensure high quality matches
+	for _, kw := range keywords {
+		if kw == "" {
+			continue
 		}
+		photos, err := searchUnsplash(ctx, accessKey, kw, 15)
+		if err == nil && len(photos) > 0 {
+			allResults = append(allResults, photos)
+		}
+	}
+
+	var photos []unsplashPhoto
+	seen := make(map[string]bool)
+
+	// Round-robin selection to mix diverse concepts
+	for i := 0; i < 15; i++ {
+		for _, group := range allResults {
+			if i < len(group) {
+				p := group[i]
+				if !seen[p.URLHero] {
+					seen[p.URLHero] = true
+					photos = append(photos, p)
+					if len(photos) == needed {
+						break
+					}
+				}
+			}
+		}
+		if len(photos) == needed {
+			break
+		}
+	}
+
+	// Fallback if absolutely no photos were found
+	if len(photos) == 0 {
+		return nil, fmt.Errorf("0 results for %v", keywords)
 	}
 
 	imgCacheMu.Lock()
@@ -147,7 +177,6 @@ func fetchPhotos(ctx context.Context, accessKey string, keywords []string) ([]un
 	return photos, nil
 }
 
-// ImagePoolResult is returned by FetchImagePool.
 type ImagePoolResult struct {
 	Block    string   // formatted prompt block to append to apiConfig; empty on failure
 	Keywords []string // search terms that were used
@@ -155,8 +184,6 @@ type ImagePoolResult struct {
 	Err      error    // non-nil when the API call failed; generation continues either way
 }
 
-// FetchImagePool fetches contextual Unsplash images for the plan and formats them
-// as a prompt block for Claude. Always safe to call — Err is informational only.
 func FetchImagePool(ctx context.Context, accessKey string, plan *models.ArchitectPlan) ImagePoolResult {
 	keywords := extractKeywords(plan)
 	log.Printf("[unsplash] project=%q keywords=%v", plan.ProjectName, keywords)
