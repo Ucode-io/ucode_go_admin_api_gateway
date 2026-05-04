@@ -22,24 +22,18 @@ const (
 	imgCacheMax     = 200
 )
 
-// UnsplashPhoto is one result from the Unsplash search API.
-type UnsplashPhoto struct {
-	ID           string
+var unsplashClient = &http.Client{Timeout: unsplashTimeout}
+
+type unsplashPhoto struct {
 	URLHero      string // 1600×900
 	URLCard      string // 800×600
 	URLThumb     string // 400×300
 	Photographer string
-	PhotoPage    string
-}
-
-// UnsplashResult holds the pre-fetched image pool for a project.
-type UnsplashResult struct {
-	Photos []UnsplashPhoto
 }
 
 var (
 	imgCacheMu  sync.Mutex
-	imgCacheMap = make(map[string]*UnsplashResult, imgCacheMax)
+	imgCacheMap = make(map[string][]unsplashPhoto, imgCacheMax)
 )
 
 func imgCacheKey(keywords []string) string {
@@ -49,59 +43,7 @@ func imgCacheKey(keywords []string) string {
 	return strings.Join(sorted, "|")
 }
 
-// ExtractImageKeywords derives up to 3 search terms from an ArchitectPlan.
-// Strategy: project name significant words first, then unique table labels.
-func ExtractImageKeywords(plan *models.ArchitectPlan) []string {
-	skipWord := map[string]bool{
-		"the": true, "for": true, "and": true, "with": true, "app": true,
-		"panel": true, "system": true, "admin": true, "platform": true,
-		"pro": true, "plus": true, "your": true, "our": true,
-	}
-	skipTable := map[string]bool{
-		"users": true, "user": true, "settings": true, "setting": true,
-		"logs": true, "log": true, "roles": true, "role": true,
-	}
-
-	seen := map[string]bool{}
-	var result []string
-
-	add := func(w string) {
-		w = strings.ToLower(strings.Trim(w, ".,;:!?\"'-_()"))
-		if len(w) > 3 && !skipWord[w] && !seen[w] {
-			seen[w] = true
-			result = append(result, w)
-		}
-	}
-
-	for _, w := range strings.Fields(plan.ProjectName) {
-		add(w)
-	}
-	for _, t := range plan.Tables {
-		for _, part := range strings.Fields(t.Label) {
-			if !skipTable[strings.ToLower(strings.TrimSpace(t.Label))] {
-				add(part)
-			}
-		}
-	}
-
-	if len(result) > 3 {
-		result = result[:3]
-	}
-	return result
-}
-
-// unsplashRaw is the minimal Unsplash /search/photos response shape.
-type unsplashRaw struct {
-	ID   string `json:"id"`
-	URLs struct {
-		Raw string `json:"raw"`
-	} `json:"urls"`
-	User  struct{ Name string `json:"name"` }  `json:"user"`
-	Links struct{ HTML string `json:"html"` } `json:"links"`
-}
-
 // imgixURL appends Imgix sizing params to an Unsplash raw URL.
-// The raw URL may already contain query params (ixid, ixlib), so we join with &.
 func imgixURL(raw string, w, h int) string {
 	sep := "&"
 	if !strings.Contains(raw, "?") {
@@ -110,8 +52,17 @@ func imgixURL(raw string, w, h int) string {
 	return fmt.Sprintf("%s%sw=%d&h=%d&fit=crop&auto=format&q=80", raw, sep, w, h)
 }
 
+// extractKeywords returns the image_keywords set by the Architect (max 4).
+func extractKeywords(plan *models.ArchitectPlan) []string {
+	kw := plan.ImageKeywords
+	if len(kw) > 4 {
+		kw = kw[:4]
+	}
+	return kw
+}
+
 // searchUnsplash calls GET /search/photos and returns up to count photos.
-func searchUnsplash(ctx context.Context, accessKey, query string, count int) ([]UnsplashPhoto, error) {
+func searchUnsplash(ctx context.Context, accessKey, query string, count int) ([]unsplashPhoto, error) {
 	if count > 30 {
 		count = 30
 	}
@@ -128,8 +79,7 @@ func searchUnsplash(ctx context.Context, accessKey, query string, count int) ([]
 	}
 	req.Header.Set("Authorization", "Client-ID "+accessKey)
 
-	client := &http.Client{Timeout: unsplashTimeout}
-	resp, err := client.Do(req)
+	resp, err := unsplashClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -141,30 +91,30 @@ func searchUnsplash(ctx context.Context, accessKey, query string, count int) ([]
 	}
 
 	var data struct {
-		Results []unsplashRaw `json:"results"`
+		Results []struct {
+			URLs  struct{ Raw string `json:"raw"` }  `json:"urls"`
+			User  struct{ Name string `json:"name"` } `json:"user"`
+		} `json:"results"`
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
 		return nil, err
 	}
 
-	out := make([]UnsplashPhoto, 0, len(data.Results))
+	out := make([]unsplashPhoto, 0, len(data.Results))
 	for _, p := range data.Results {
-		out = append(out, UnsplashPhoto{
-			ID:           p.ID,
+		out = append(out, unsplashPhoto{
 			URLHero:      imgixURL(p.URLs.Raw, 1600, 900),
 			URLCard:      imgixURL(p.URLs.Raw, 800, 600),
 			URLThumb:     imgixURL(p.URLs.Raw, 400, 300),
 			Photographer: p.User.Name,
-			PhotoPage:    p.Links.HTML,
 		})
 	}
 	log.Printf("[unsplash] search %q → %d photos", query, len(out))
 	return out, nil
 }
 
-// fetchForPlan fetches 8 photos (2 hero + 6 card) for the given keywords.
-// Falls back to first keyword alone if the primary joined query returns fewer than needed.
-func fetchForPlan(ctx context.Context, accessKey string, keywords []string) (*UnsplashResult, error) {
+// fetchPhotos fetches up to 12 photos for the keywords with a single-keyword fallback.
+func fetchPhotos(ctx context.Context, accessKey string, keywords []string) ([]unsplashPhoto, error) {
 	key := imgCacheKey(keywords)
 
 	imgCacheMu.Lock()
@@ -174,14 +124,12 @@ func fetchForPlan(ctx context.Context, accessKey string, keywords []string) (*Un
 	}
 	imgCacheMu.Unlock()
 
-	const needed = 8
-	query := strings.Join(keywords, " ")
-
-	photos, err := searchUnsplash(ctx, accessKey, query, needed)
+	const needed = 12
+	photos, err := searchUnsplash(ctx, accessKey, strings.Join(keywords, " "), needed)
 	if err != nil {
 		return nil, err
 	}
-	// Fallback if primary query was too specific and returned few results
+	// If the combined query was too specific, top up with the first keyword alone
 	if len(photos) < needed && len(keywords) > 1 {
 		extra, extraErr := searchUnsplash(ctx, accessKey, keywords[0], needed-len(photos))
 		if extraErr == nil {
@@ -189,82 +137,88 @@ func fetchForPlan(ctx context.Context, accessKey string, keywords []string) (*Un
 		}
 	}
 
-	result := &UnsplashResult{Photos: photos}
-
 	imgCacheMu.Lock()
 	if len(imgCacheMap) >= imgCacheMax {
-		imgCacheMap = make(map[string]*UnsplashResult, imgCacheMax) // simple eviction
+		imgCacheMap = make(map[string][]unsplashPhoto, imgCacheMax)
 	}
-	imgCacheMap[key] = result
+	imgCacheMap[key] = photos
 	imgCacheMu.Unlock()
 
-	return result, nil
+	return photos, nil
 }
 
-// FetchImagePoolBlock fetches contextual Unsplash images for the plan and formats them
-// as a structured prompt block that Claude can consume directly.
-//
-// Returns "" (empty string) if:
-//   - accessKey is missing (UNSPLASH_ACCESS_KEY not set)
-//   - the API call fails for any reason
-//
-// In both cases generation continues unaffected — Claude falls back to VERIFIED PHOTO LIBRARY.
-func FetchImagePoolBlock(ctx context.Context, accessKey string, plan *models.ArchitectPlan) string {
-	if accessKey == "" {
-		return ""
-	}
-	keywords := ExtractImageKeywords(plan)
+// ImagePoolResult is returned by FetchImagePool.
+type ImagePoolResult struct {
+	Block    string   // formatted prompt block to append to apiConfig; empty on failure
+	Keywords []string // search terms that were used
+	Count    int      // number of photos fetched
+	Err      error    // non-nil when the API call failed; generation continues either way
+}
+
+// FetchImagePool fetches contextual Unsplash images for the plan and formats them
+// as a prompt block for Claude. Always safe to call — Err is informational only.
+func FetchImagePool(ctx context.Context, accessKey string, plan *models.ArchitectPlan) ImagePoolResult {
+	keywords := extractKeywords(plan)
+	log.Printf("[unsplash] project=%q keywords=%v", plan.ProjectName, keywords)
+
 	if len(keywords) == 0 {
-		return ""
+		return ImagePoolResult{Err: fmt.Errorf("no keywords extracted from plan")}
 	}
 
-	result, err := fetchForPlan(ctx, accessKey, keywords)
+	photos, err := fetchPhotos(ctx, accessKey, keywords)
 	if err != nil {
-		log.Printf("[unsplash] non-fatal fetch error (falling back to library): %v", err)
-		return ""
+		log.Printf("[unsplash] API error: %v", err)
+		return ImagePoolResult{Keywords: keywords, Err: err}
 	}
-	if len(result.Photos) == 0 {
-		return ""
+	if len(photos) == 0 {
+		return ImagePoolResult{Keywords: keywords, Err: fmt.Errorf("0 results for %v", keywords)}
 	}
+
+	log.Printf("[unsplash] ✅ %d photos fetched", len(photos))
 
 	var sb strings.Builder
-	sb.WriteString("════════════════════════════════════════\n")
-	sb.WriteString("IMAGE POOL — USE THESE EXACT URLs\n")
-	sb.WriteString("════════════════════════════════════════\n")
-	fmt.Fprintf(&sb, "Contextual Unsplash images pre-fetched for \"%s\".\n", plan.ProjectName)
-	sb.WriteString("Use these INSTEAD OF the VERIFIED PHOTO LIBRARY below.\n")
-	sb.WriteString("NEVER invent photo IDs. NEVER use placeholder.com / picsum.photos.\n\n")
+	fmt.Fprintf(&sb, "════════════════════════════════════════\n")
+	fmt.Fprintf(&sb, "IMAGE POOL — USE THESE EXACT URLs\n")
+	fmt.Fprintf(&sb, "════════════════════════════════════════\n")
+	fmt.Fprintf(&sb, "Pre-fetched for \"%s\" · query: %s\n", plan.ProjectName, strings.Join(keywords, " "))
+	fmt.Fprintf(&sb, "NEVER invent photo IDs. NEVER use placeholder.com / picsum.photos.\n\n")
 
-	sb.WriteString("HERO (1600×900) — hero sections, full-bleed banners, page backgrounds:\n")
-	for i, p := range result.Photos {
-		if i >= 2 {
+	// Photos 0–2: hero
+	fmt.Fprintf(&sb, "HERO (1600×900) — hero sections, full-bleed banners:\n")
+	for i, p := range photos {
+		if i >= 3 {
 			break
 		}
-		fmt.Fprintf(&sb, "  • %s\n", p.URLHero)
+		fmt.Fprintf(&sb, "  • %s", p.URLHero)
 		if p.Photographer != "" {
-			fmt.Fprintf(&sb, "    by %s\n", p.Photographer)
+			fmt.Fprintf(&sb, "  [%s]", p.Photographer)
 		}
+		fmt.Fprintf(&sb, "\n")
 	}
 
-	sb.WriteString("\nCARD (800×600) — feature cards, product/service sections, team photos:\n")
-	for i, p := range result.Photos {
-		if i < 2 || i >= 8 {
+	// Photos 3–11: cards
+	fmt.Fprintf(&sb, "\nCARD (800×600) — feature cards, section images:\n")
+	for i, p := range photos {
+		if i < 3 {
 			continue
 		}
 		fmt.Fprintf(&sb, "  • %s\n", p.URLCard)
 	}
 
-	sb.WriteString("\nTHUMB (400×300) — table row images, list thumbnails, small cards:\n")
-	for i, p := range result.Photos {
-		if i >= 4 {
+	// Photos 0–5: thumbs (different size, same contextual photos)
+	fmt.Fprintf(&sb, "\nTHUMB (400×300) — table rows, small cards, list images:\n")
+	for i, p := range photos {
+		if i >= 6 {
 			break
 		}
 		fmt.Fprintf(&sb, "  • %s\n", p.URLThumb)
 	}
 
-	sb.WriteString("\nIf you need more images than the pool provides: reuse pool URLs with different size params.\n")
-	sb.WriteString("Always set descriptive alt text on every <img>.\n")
-	sb.WriteString("════════════════════════════════════════\n")
+	fmt.Fprintf(&sb, "════════════════════════════════════════\n")
 
-	return sb.String()
+	return ImagePoolResult{
+		Block:    sb.String(),
+		Keywords: keywords,
+		Count:    len(photos),
+	}
 }

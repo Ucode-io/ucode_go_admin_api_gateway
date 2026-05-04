@@ -23,9 +23,14 @@ var ToolArchitectPlan = models.ClaudeFunctionTool{
 	Description: "Return the complete project architecture: database tables with fields and mock data, all relations between tables, a rich UI structure description, and a complete design system for the frontend developer.",
 	InputSchema: map[string]any{
 		"type":     "object",
-		"required": []string{"project_name", "project_type", "tables", "relations", "ui_structure", "design"},
+		"required": []string{"project_name", "project_type", "tables", "relations", "ui_structure", "design", "image_keywords"},
 		"properties": map[string]any{
 			"project_name": map[string]any{"type": "string", "description": "Human-readable project name"},
+			"image_keywords": map[string]any{
+				"type":  "array",
+				"items": map[string]any{"type": "string"},
+				"description": "2–4 Unsplash search terms that visually represent this project's real-world domain. Be specific and physical: ['freight truck highway','warehouse forklift','shipping containers'] for logistics; ['espresso barista','cafe interior'] for coffee; ['doctor patient','clinic'] for healthcare. NEVER use generic terms like 'business','technology','office','app'.",
+			},
 			"project_type": map[string]any{
 				"type":        "string",
 				"enum":        []string{"admin_panel", "landing", "web", "other"},

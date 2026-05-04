@@ -272,6 +272,16 @@ UI STRUCTURE RULES:
 11. "ui_structure" must be highly descriptive — it is the full specification for the frontend developer.
 12. No limitations on UI or flexibility.
 
+IMAGE KEYWORDS RULES:
+13. "image_keywords": 2–4 Unsplash search phrases that physically represent this project's domain.
+    Think: what would a photographer shoot for this business?
+    GOOD: ["freight truck highway", "warehouse shelves forklift", "cargo containers port"]
+    GOOD: ["espresso barista", "cozy cafe interior", "latte art"]
+    GOOD: ["doctor patient consultation", "modern clinic", "medical equipment"]
+    BAD:  ["business", "technology", "office", "management", "app", "platform"]
+    Rule: if the project is logistics → trucks/warehouses, food → dishes/kitchen, healthcare → doctors/clinics.
+    NEVER default to generic tech/office imagery for non-tech domains.
+
 DESIGN SYSTEM RULES — fill the "design" field completely:
 
 TYPE A (admin_panel) — domain-deterministic palette, font is always Inter:
@@ -680,9 +690,19 @@ ALWAYS add loading="lazy" and onError fallback on every <img>.
     />
 
   URL source (strict priority):
-    1. If IMAGE_POOL block is in your prompt → use those exact URLs (contextual, pre-sized)
-    2. Otherwise → https://images.unsplash.com/photo-{ID}?auto=format&fit=crop&w=800&q=80
-       using a relevant photo ID from your knowledge for this domain
+    1. If IMAGE_POOL block is in your prompt → use those exact URLs (contextual, live from Unsplash)
+    2. Otherwise → pick a real Unsplash photo ID from your knowledge that visually matches
+       the actual physical/real-world domain of the project. Be specific:
+         Logistics/TMS      → truck on highway, warehouse, shipping containers
+         E-Commerce/Retail  → products, shopping bags, package delivery
+         Healthcare         → doctor, clinic, medical equipment
+         Food/Restaurant    → plated dish, restaurant interior, barista
+         Real Estate        → apartment interior, building exterior, luxury lobby
+         Finance            → financial charts, bank interior, businessperson
+         HR/People          → team meeting, coworkers, diverse office
+         Education          → students, library, graduation
+         ⚠ NEVER use laptop/computer/screen photos for non-tech business domains
+       Format: https://images.unsplash.com/photo-{ID}?auto=format&fit=crop&w=800&q=80
 
 ====================================
 BROWSER BUILD — NO CLI
@@ -1670,73 +1690,42 @@ IMAGES — MANDATORY — NO EMPTY SPACES:
   Use ?auto=format&fit=crop&w=800&q=80 on ALL Unsplash URLs (NOT ?w=800&q=80 alone).
 
   URL PRIORITY:
-    1. If IMAGE_POOL block is present in your prompt → use those exact URLs first (contextual, pre-sized)
-    2. Otherwise → use VERIFIED PHOTO LIBRARY below
+    1. If IMAGE_POOL block is present in your prompt → use those exact URLs (contextual, live, pre-sized)
+    2. Otherwise → use your own Unsplash knowledge to pick domain-accurate photo IDs (see below)
 
-  VERIFIED PHOTO LIBRARY — fallback when no IMAGE_POOL is provided, pick DIFFERENT photos each time:
+  ⚠ FALLBACK IMAGE SELECTION — when no IMAGE_POOL is provided:
+  Pick Unsplash photo IDs that VISUALLY represent the real-world physical domain. Be specific.
+  NEVER use laptop/computer/code/screen images for non-tech domains.
 
-  Tech/SaaS:
-    photo-1518770660439-4636190af475  photo-1461749280684-dccba630e2f6
-    photo-1555421689-491a54179de8    photo-1558494949-ef010cbdcc31
-    photo-1581472723648-909f4851d4ae  photo-1504868584819-f8e8b4b6d7e3
-    photo-1526374965328-7f61d4dc18c5  photo-1498050108023-c5249f4df085
+    Logistics / Freight / TMS / Supply Chain
+      → truck on highway, warehouse shelves with forklifts, shipping containers, cargo airplane, delivery van
+    E-Commerce / Retail / Shop / Marketplace
+      → products on shelf, shopping bags, package delivery, hands holding phone with cart, retail store
+    Healthcare / Medical / Clinic / Hospital
+      → doctor with patient, hospital corridor, medical equipment, pharmacy, surgeon
+    Food / Restaurant / Catering / Café
+      → plated gourmet dish, restaurant interior with warm lighting, barista making espresso, fresh ingredients
+    Real Estate / Property / Architecture
+      → modern apartment interior, city skyline aerial, house with garden, luxury lobby
+    Finance / Banking / Fintech / Payments
+      → businessperson reviewing financial charts, modern bank interior, credit card close-up
+    HR / People / Recruitment / Employees
+      → diverse team in office meeting, coworkers collaborating, handshake hiring
+    Education / Learning / Courses / School
+      → students studying at desks, open library, graduation ceremony, online learning setup
+    Travel / Hotel / Tourism / Hospitality
+      → luxury hotel lobby, scenic destination landscape, airport terminal, traveler with luggage
+    Sports / Gym / Fitness / Wellness
+      → gym equipment close-up, athlete in action, yoga class, running track
+    Fashion / Beauty / Luxury goods
+      → fashion editorial portrait, luxury handbag close-up, boutique store interior
+    Tech / SaaS / Dev Tools (ONLY for actual software/API/cloud products)
+      → laptop with clean workspace, developer at multiple monitors, abstract data visualization
+    Manufacturing / Industrial / Factory
+      → factory floor with machinery, industrial worker with helmet, assembly line
 
-  Blog/Editorial:
-    photo-1544025162-d76694265947    photo-1455390582262-e93e2e8a0e20
-    photo-1493612276216-ee3925520721  photo-1471107340929-a87cd0f5b5f3
-    photo-1486312338219-ce68d2c6f44d  photo-1512486130939-2c4f79935e4f
-
-  Business/Corporate:
-    photo-1454165804606-c3d57bc86b40  photo-1507003211169-0a1dd7228f2d
-    photo-1486406146926-c627a92ad1ab  photo-1521737604893-d14cc237f11d
-    photo-1552664730-d307ca884978    photo-1542744173-8e7e53415bb0
-
-  Education:
-    photo-1523050854058-8df90110c9f1  photo-1488190211105-8b0e65b80b4e
-    photo-1434030216411-0b793f4b6f46  photo-1503676260728-1c00da094a0b
-    photo-1524178232363-1fb2b075b655  photo-1456513080510-7bf3a84b82f8
-
-  Food/Restaurant:
-    photo-1414235077428-338989a2e8c0  photo-1504674900247-0877df9cc836
-    photo-1476224203421-9ac39bcb3327  photo-1540189549336-e6e99eb4b951
-    photo-1555126634-323283e090fa    photo-1567620905732-2d1ec7ab7445
-
-  Wellness/Lifestyle:
-    photo-1506126613408-eca07ce68773  photo-1545205597-3d9d02c29597
-    photo-1544367567-0f2fcb009e0b    photo-1571019613454-1cb2f99b2d8b
-    photo-1490645935967-10de6ba17061  photo-1499728603263-13726abce5fd
-
-  Fashion/Luxury:
-    photo-1490481651871-ab68de25d43d  photo-1515886657613-9f3515b0c78f
-    photo-1529139574466-a303027c1d8b  photo-1469334031218-e382a71b716b
-    photo-1445205170230-053b83016050  photo-1483985988355-763728e1802f
-
-  Healthcare:
-    photo-1576091160399-112ba8d25d1d  photo-1579684385127-1ef15d508118
-    photo-1631217868264-e5b90bb7e133  photo-1559757148-5c350d0d3c56
-    photo-1612349317150-e413f6a5b16d  photo-1582719508461-905c673771fd
-
-  Real Estate / Architecture:
-    photo-1560448204-e02f11c3d0e2    photo-1570129477492-45c003edd2be
-    photo-1582268611958-ebfd161ef9cf  photo-1512917774080-9991f1c4c750
-    photo-1613490493576-7fde63acd811  photo-1558618666-fcd25c85cd64
-
-  Finance / Fintech:
-    photo-1611974789855-9c2a0a7236a3  photo-1551288049-bebda4e38f71
-    photo-1460925895917-afdab827c52f  photo-1579621970795-87facc2f976d
-    photo-1504439468489-c8920d796a29  photo-1565514020179-026b92b84bb6
-
-  Travel / Hospitality:
-    photo-1469474968028-56623f02e42e  photo-1488085061387-422e29b40080
-    photo-1530521954074-e64f6810b32d  photo-1436491865332-7a61a109cc05
-
-  Sports / Fitness:
-    photo-1517836357463-d25dfeac3438  photo-1526506118085-60ce8714f8c5
-    photo-1534438327276-14e5300c3a48  photo-1571902943202-507ec2618e8f
-
-  Fallback (any domain):
-    photo-1618005182384-a83a8bd57fbe  photo-1519389950473-47ba0277781c
-    photo-1550745165-9bc0b252726f    photo-1557804506-669a67965ba0
+  Format every image URL as: https://images.unsplash.com/photo-{ID}?auto=format&fit=crop&w=800&q=80
+  Use w=1600&h=900 for hero images, w=800&q=80 for cards, w=400&h=300 for thumbnails.
 
   Card image container pattern:
     <div className="aspect-video overflow-hidden rounded-xl">

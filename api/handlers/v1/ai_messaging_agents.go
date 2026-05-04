@@ -123,8 +123,15 @@ func (p *ChatProcessor) generateCode(ctx context.Context, clarified string, imag
 // generateCodeSingle is the original single-call path for landing pages and websites.
 func (p *ChatProcessor) generateCodeSingle(ctx context.Context, clarified string, imageURLs []string, chatHistory []models.ChatMessage, plan *models.ArchitectPlan, apiKey string) (*models.ParsedClaudeResponse, error) {
 	prompt := clarified + "\n\n" + buildAPIConfigBlock(p.baseConf.UcodeBaseUrl, apiKey, plan)
-	if imgPool := helper.FetchImagePoolBlock(ctx, p.baseConf.UnsplashAccessKey, plan); imgPool != "" {
-		prompt += "\n\n" + imgPool
+	if p.baseConf.UnsplashAccessKey != "" {
+		p.emitter().Emit(SSEEvent{Type: EvProgress, Icon: "image", Message: "Подбираю изображения для проекта...", Percent: 17})
+		pool := helper.FetchImagePool(ctx, p.baseConf.UnsplashAccessKey, plan)
+		if pool.Err != nil {
+			p.emitter().Emit(SSEEvent{Type: EvProgress, Icon: "alert-triangle", Message: "Unsplash: не удалось подобрать фото", Value: pool.Err.Error()})
+		} else {
+			prompt += "\n\n" + pool.Block
+			p.emitter().Emit(SSEEvent{Type: EvProgress, Icon: "image", Message: fmt.Sprintf("Подобрано %d фото по запросу: %s", pool.Count, strings.Join(pool.Keywords, ", ")), Percent: 18})
+		}
 	}
 
 	var scaffoldFiles []models.ProjectFile
@@ -314,8 +321,15 @@ func (p *ChatProcessor) generateCodeChunked(ctx context.Context, clarified strin
 	// No actual Foundation file contents are needed by UIKit at generation time.
 
 	apiConfig := buildAPIConfigBlock(p.baseConf.UcodeBaseUrl, apiKey, plan)
-	if imgPool := helper.FetchImagePoolBlock(ctx, p.baseConf.UnsplashAccessKey, plan); imgPool != "" {
-		apiConfig += "\n\n" + imgPool
+	if p.baseConf.UnsplashAccessKey != "" {
+		emit.Emit(SSEEvent{Type: EvProgress, Icon: "image", Message: "Подбираю изображения для проекта...", Percent: 24})
+		pool := helper.FetchImagePool(ctx, p.baseConf.UnsplashAccessKey, plan)
+		if pool.Err != nil {
+			emit.Emit(SSEEvent{Type: EvProgress, Icon: "alert-triangle", Message: "Unsplash: не удалось подобрать фото", Value: pool.Err.Error()})
+		} else {
+			apiConfig += "\n\n" + pool.Block
+			emit.Emit(SSEEvent{Type: EvProgress, Icon: "image", Message: fmt.Sprintf("Подобрано %d фото по запросу: %s", pool.Count, strings.Join(pool.Keywords, ", ")), Percent: 25})
+		}
 	}
 
 	emit.Emit(SSEEvent{
