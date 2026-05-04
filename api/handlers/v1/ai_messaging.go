@@ -647,11 +647,61 @@ func buildAPIConfigBlock(baseURL, apiKey string, plan *models.ArchitectPlan) str
 		"\n====================================\nAPI CONFIGURATION FOR FRONTEND\n====================================\n%s: %s\n%s: %s\n\nTables to use:\n",
 		envBaseURLKey, baseURL, envAPIKeyKey, apiKey,
 	))
+
+	var loginTableSlugs []string
 	for _, t := range plan.Tables {
-		sb.WriteString(fmt.Sprintf("- Table: %s, slug: %s\n", t.Label, t.Slug))
-		for _, f := range t.Fields {
-			sb.WriteString(fmt.Sprintf("  * field: %s, type: %s\n", f.Slug, f.Type))
+		if t.IsLoginTable {
+			loginTableSlugs = append(loginTableSlugs, t.Slug)
+			sb.WriteString(fmt.Sprintf("- LOGIN TABLE: %s, slug: %s\n", t.Label, t.Slug))
+			sb.WriteString("  * built-in auth fields (always present in DB): login, password, email, phone\n")
+			sb.WriteString("  * always-required system fields: role_id, client_type_id\n")
+			for _, f := range t.Fields {
+				sb.WriteString(fmt.Sprintf("  * custom field: %s, type: %s\n", f.Slug, f.Type))
+			}
+		} else {
+			sb.WriteString(fmt.Sprintf("- Table: %s, slug: %s\n", t.Label, t.Slug))
+			for _, f := range t.Fields {
+				sb.WriteString(fmt.Sprintf("  * field: %s, type: %s\n", f.Slug, f.Type))
+			}
 		}
+	}
+
+	if len(loginTableSlugs) > 0 {
+		slug := loginTableSlugs[0]
+		sb.WriteString(`
+====================================
+LOGIN TABLE — MANDATORY FORM RULES
+====================================
+Login table slug: ` + slug + `
+
+The login table stores project users. It has BUILT-IN auth fields you never define as fields but MUST include in forms.
+
+CREATE FORM — include ALL of these fields (in this order):
+  1. login          <Input type="text">      required
+  2. password       <Input type="password">  required on CREATE, OMIT on EDIT
+  3. email          <Input type="email">     required
+  4. phone          <Input type="tel">       optional
+  5. role_id        <Select>                 REQUIRED — fetch options:
+       POST /v1/object/role/get-list   body: {"data":{"limit":100,"offset":0}}
+       Response path: data.data.response[]   value=row.guid  label=row.name
+  6. client_type_id <Select>                 REQUIRED — fetch options:
+       POST /v1/object/client_type/get-list  body: {"data":{"limit":100,"offset":0}}
+       Response path: data.data.response[]   value=row.guid  label=row.name
+  7. [any custom fields defined for this table, e.g. full_name, avatar]
+
+CREATE API endpoint:
+  POST /v1/object/` + slug + `/create
+  body: { "data": { "login":"...", "password":"plaintext", "email":"...", "role_id":"guid", "client_type_id":"guid", ...customFields } }
+  Password is PLAIN TEXT — the platform hashes it. Never hash on the frontend.
+
+EDIT FORM: same fields except password is optional (send only if user typed a new one).
+LIST VIEW: show login, email, custom name field — NEVER display password column.
+
+HOOK PATTERN for role_id / client_type_id selects:
+  const { data: rolesData } = useApiQuery<unknown>(['roles'], '/v1/object/role/get-list', { method: 'POST', data: { data: { limit: 100, offset: 0 } } })
+  const roles = extractList<{ guid: string; name: string }>(rolesData)
+  // same for client_type
+`)
 	}
 
 	if len(plan.Relations) > 0 {

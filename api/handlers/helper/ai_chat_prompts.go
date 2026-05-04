@@ -615,6 +615,35 @@ DESTRUCTURING UNUSED PROPS — never prefix interface property names with _:
   Rule: _ prefix belongs on the LOCAL variable name via rename, not on the interface property key.
 
 ====================================
+LOGIN TABLE — MANDATORY RULES (if your chunk includes a users/login page)
+====================================
+A login table stores project users. It has BUILT-IN auth fields (login, password, email, phone)
+that always exist in the DB but are NOT listed in the table fields in this prompt.
+
+If the API CONFIG block shows "LOGIN TABLE" for a table, apply these rules for that page:
+
+CREATE FORM must include (in this order):
+  1. login          <Input type="text">      required
+  2. password       <Input type="password">  required CREATE only, OMIT on EDIT
+  3. email          <Input type="email">     required
+  4. phone          <Input type="tel">       optional
+  5. role_id        <Select>                 REQUIRED
+       FETCH: useApiQuery(['roles'], '/v1/object/role/get-list', { method:'POST', data:{data:{limit:100,offset:0}} })
+       options: extractList<{guid:string;name:string}>(data)  →  value=guid, label=name
+  6. client_type_id <Select>                 REQUIRED
+       FETCH: useApiQuery(['client-types'], '/v1/object/client_type/get-list', { method:'POST', data:{data:{limit:100,offset:0}} })
+       options: extractList<{guid:string;name:string}>(data)  →  value=guid, label=name
+  7. then any custom fields for this table (e.g. full_name, avatar)
+
+CREATE endpoint: POST /v1/object/{login_slug}/create
+  body: { "data": { "login":"...", "password":"plaintext", "email":"...", "role_id":"guid", "client_type_id":"guid" } }
+  PLAIN TEXT password — never hash on frontend.
+
+EDIT FORM: same but password field is optional (only send if user typed something).
+LIST VIEW: show login, email, name columns — NEVER show password column.
+Type for login table: interface User { guid:string; login:string; email:string; phone?:string; role_id:string; client_type_id:string; [customFields] }
+
+====================================
 BROWSER BUILD — NO CLI
 ====================================
 No terminal commands, no setup instructions. Output only file content.
@@ -1244,6 +1273,31 @@ NO INLINE STYLES (CRITICAL — banned for static values):
 NO AUTH: Never generate Login/Register pages, ProtectedRoute, AuthGuard,
   useAuth, auth context, logout buttons, token management, or /login redirects.
   The app starts directly on the main page.
+
+LOGIN TABLE — MANDATORY RULES (if the project has a users / login table):
+  The API config block marks login tables with "LOGIN TABLE:". Apply ALL rules below for those pages.
+  A login table has BUILT-IN auth fields always present in the DB (login, password, email, phone).
+  They are NOT listed in the table's fields but MUST appear in every create/edit form.
+
+  CREATE FORM — include in this exact order:
+    1. login          <Input type="text">     required
+    2. password       <Input type="password"> required CREATE only, OMIT on EDIT
+    3. email          <Input type="email">    required
+    4. phone          <Input type="tel">      optional
+    5. role_id        <Select>                REQUIRED
+         FETCH: POST /v1/object/role/get-list  body: {"data":{"limit":100,"offset":0}}
+         response data.data.response[] → value=guid, label=name
+    6. client_type_id <Select>                REQUIRED
+         FETCH: POST /v1/object/client_type/get-list  body: {"data":{"limit":100,"offset":0}}
+         response data.data.response[] → value=guid, label=name
+    7. then any custom table fields (e.g. full_name, avatar)
+
+  CREATE endpoint: POST /v1/object/{login_slug}/create
+    body: { "data": { "login":"...", "password":"plaintext", "email":"...", "role_id":"guid", "client_type_id":"guid", ...custom } }
+    Password is PLAIN TEXT — the platform hashes it. NEVER hash on the frontend.
+
+  EDIT FORM: same fields, password is optional (send only when user types a new one).
+  LIST VIEW: columns = login, email, name/full_name — NEVER include a password column.
 
 NULL SAFETY (CRITICAL — prevents runtime crashes):
   API fields are ALWAYS nullable at runtime. Guard every field before using string/array methods.
