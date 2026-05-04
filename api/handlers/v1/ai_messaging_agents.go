@@ -123,6 +123,9 @@ func (p *ChatProcessor) generateCode(ctx context.Context, clarified string, imag
 // generateCodeSingle is the original single-call path for landing pages and websites.
 func (p *ChatProcessor) generateCodeSingle(ctx context.Context, clarified string, imageURLs []string, chatHistory []models.ChatMessage, plan *models.ArchitectPlan, apiKey string) (*models.ParsedClaudeResponse, error) {
 	prompt := clarified + "\n\n" + buildAPIConfigBlock(p.baseConf.UcodeBaseUrl, apiKey, plan)
+	if imgPool := helper.FetchImagePoolBlock(ctx, p.baseConf.UnsplashAccessKey, plan); imgPool != "" {
+		prompt += "\n\n" + imgPool
+	}
 
 	var scaffoldFiles []models.ProjectFile
 	if plan.ProjectType == "admin_panel" {
@@ -309,7 +312,11 @@ func (p *ChatProcessor) generateCodeChunked(ctx context.Context, clarified strin
 	// ui/* components only import cn() (pre-built template) and CSS variables by name.
 	// shared/* components import type names from @/types — available from manifest exports.
 	// No actual Foundation file contents are needed by UIKit at generation time.
+
 	apiConfig := buildAPIConfigBlock(p.baseConf.UcodeBaseUrl, apiKey, plan)
+	if imgPool := helper.FetchImagePoolBlock(ctx, p.baseConf.UnsplashAccessKey, plan); imgPool != "" {
+		apiConfig += "\n\n" + imgPool
+	}
 
 	emit.Emit(SSEEvent{
 		Type:    EvProgress,

@@ -664,6 +664,27 @@ LIST VIEW: show login, email, name columns — NEVER show password column.
 Type for login table: interface User { guid:string; login:string; email:string; phone?:string; role_id:string; client_type_id:string; [customFields] }
 
 ====================================
+IMAGES — MANDATORY
+====================================
+Every card, feature, hero, or section with visual content MUST have a real image.
+NEVER use placeholder.com, picsum.photos, or via.placeholder.com.
+ALWAYS add loading="lazy" and onError fallback on every <img>.
+
+  Mandatory pattern:
+    <img
+      src="{url}"
+      alt="descriptive text"
+      loading="lazy"
+      className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+      onError={(e) => { e.currentTarget.onerror=null; e.currentTarget.style.display='none'; e.currentTarget.parentElement!.style.background='linear-gradient(135deg,hsl(var(--muted)),hsl(var(--accent)/0.2))'; }}
+    />
+
+  URL source (strict priority):
+    1. If IMAGE_POOL block is in your prompt → use those exact URLs (contextual, pre-sized)
+    2. Otherwise → https://images.unsplash.com/photo-{ID}?auto=format&fit=crop&w=800&q=80
+       using a relevant photo ID from your knowledge for this domain
+
+====================================
 BROWSER BUILD — NO CLI
 ====================================
 No terminal commands, no setup instructions. Output only file content.
@@ -1648,7 +1669,11 @@ IMAGES — MANDATORY — NO EMPTY SPACES:
 
   Use ?auto=format&fit=crop&w=800&q=80 on ALL Unsplash URLs (NOT ?w=800&q=80 alone).
 
-  VERIFIED PHOTO LIBRARY — pick DIFFERENT photos each time, spread variety:
+  URL PRIORITY:
+    1. If IMAGE_POOL block is present in your prompt → use those exact URLs first (contextual, pre-sized)
+    2. Otherwise → use VERIFIED PHOTO LIBRARY below
+
+  VERIFIED PHOTO LIBRARY — fallback when no IMAGE_POOL is provided, pick DIFFERENT photos each time:
 
   Tech/SaaS:
     photo-1518770660439-4636190af475  photo-1461749280684-dccba630e2f6

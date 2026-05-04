@@ -153,6 +153,8 @@ type BaseConfig struct {
 	GithubRedirectURI        string
 	GithubFrontendSuccessURL string
 	GithubFrontendErrorURL   string
+
+	UnsplashAccessKey string
 }
 
 func BaseLoad() BaseConfig {
@@ -250,6 +252,8 @@ func BaseLoad() BaseConfig {
 	config.GithubRedirectURI = cast.ToString(GetOrReturnDefaultValue("GITHUB_REDIRECT_URI", ""))
 	config.GithubFrontendSuccessURL = cast.ToString(GetOrReturnDefaultValue("GITHUB_FRONTEND_SUCCESS_URL", "https://app.u-code.io/settings/github-success"))
 	config.GithubFrontendErrorURL = cast.ToString(GetOrReturnDefaultValue("GITHUB_FRONTEND_ERROR_URL", "https://app.u-code.io/settings/github-error"))
+
+	config.UnsplashAccessKey = cast.ToString(GetOrReturnDefaultValue("UNSPLASH_ACCESS_KEY", ""))
 
 	config.MaxTokens = cast.ToInt(GetOrReturnDefaultValue("MAX_TOKENS", 12000))
 	config.AnalyseProjectMaxTokens = cast.ToInt(GetOrReturnDefaultValue("ANALYSE_PROJECT_MAX_TOKENS", 5000))
