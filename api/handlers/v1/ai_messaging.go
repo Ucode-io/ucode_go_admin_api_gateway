@@ -682,11 +682,11 @@ CREATE FORM — include ALL of these fields (in this order):
   3. email          <Input type="email">     required
   4. phone          <Input type="tel">       optional
   5. role_id        <Select>                 REQUIRED — fetch options:
-       POST /v1/object/role/get-list   body: {"data":{"limit":100,"offset":0}}
-       Response path: data.data.response[]   value=row.guid  label=row.name
+       GET /v2/items/role
+       Response: data.data.response[]   value=row.guid  label=row.name
   6. client_type_id <Select>                 REQUIRED — fetch options:
-       POST /v1/object/client_type/get-list  body: {"data":{"limit":100,"offset":0}}
-       Response path: data.data.response[]   value=row.guid  label=row.name
+       GET /v2/items/client_type
+       Response: data.data.response[]   value=row.guid  label=row.name
   7. [any custom fields defined for this table, e.g. full_name, avatar]
 
 CREATE API endpoint:
@@ -698,9 +698,10 @@ EDIT FORM: same fields except password is optional (send only if user typed a ne
 LIST VIEW: show login, email, custom name field — NEVER display password column.
 
 HOOK PATTERN for role_id / client_type_id selects:
-  const { data: rolesData } = useApiQuery<unknown>(['roles'], '/v1/object/role/get-list', { method: 'POST', data: { data: { limit: 100, offset: 0 } } })
+  const { data: rolesData } = useApiQuery<unknown>(['roles'], '/v2/items/role')
   const roles = extractList<{ guid: string; name: string }>(rolesData)
-  // same for client_type
+  const { data: ctData } = useApiQuery<unknown>(['client-types'], '/v2/items/client_type')
+  const clientTypes = extractList<{ guid: string; name: string }>(ctData)
 `)
 	}
 

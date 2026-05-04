@@ -628,10 +628,10 @@ CREATE FORM must include (in this order):
   3. email          <Input type="email">     required
   4. phone          <Input type="tel">       optional
   5. role_id        <Select>                 REQUIRED
-       FETCH: useApiQuery(['roles'], '/v1/object/role/get-list', { method:'POST', data:{data:{limit:100,offset:0}} })
+       FETCH: useApiQuery<unknown>(['roles'], '/v2/items/role')
        options: extractList<{guid:string;name:string}>(data)  →  value=guid, label=name
   6. client_type_id <Select>                 REQUIRED
-       FETCH: useApiQuery(['client-types'], '/v1/object/client_type/get-list', { method:'POST', data:{data:{limit:100,offset:0}} })
+       FETCH: useApiQuery<unknown>(['client-types'], '/v2/items/client_type')
        options: extractList<{guid:string;name:string}>(data)  →  value=guid, label=name
   7. then any custom fields for this table (e.g. full_name, avatar)
 
@@ -1285,10 +1285,10 @@ LOGIN TABLE — MANDATORY RULES (if the project has a users / login table):
     3. email          <Input type="email">    required
     4. phone          <Input type="tel">      optional
     5. role_id        <Select>                REQUIRED
-         FETCH: POST /v1/object/role/get-list  body: {"data":{"limit":100,"offset":0}}
+         FETCH: GET /v2/items/role
          response data.data.response[] → value=guid, label=name
     6. client_type_id <Select>                REQUIRED
-         FETCH: POST /v1/object/client_type/get-list  body: {"data":{"limit":100,"offset":0}}
+         FETCH: GET /v2/items/client_type
          response data.data.response[] → value=guid, label=name
     7. then any custom table fields (e.g. full_name, avatar)
 

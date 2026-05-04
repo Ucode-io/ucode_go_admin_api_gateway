@@ -23,8 +23,19 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 
 	var errs []string
 
+	// tableIdMap stores the ucode table ID (returned by Table.Create) keyed by table slug.
+	// Used in Phase 2 to create RELATION fields on the correct table.
+	tableIdMap := make(map[string]string, len(plan.Tables))
+
+	// relFieldSlugsToSkip holds FK field slugs ({table_to}_id) that must NOT be created
+	// as plain SINGLE_LINE fields in Phase 1 — they are created as RELATION type in Phase 2.
+	relFieldSlugsToSkip := make(map[string]bool, len(plan.Relations))
+	for _, rel := range plan.Relations {
+		relFieldSlugsToSkip[rel.TableTo+"_id"] = true
+	}
+
 	// ─── Phase 1: Tables + Fields ───────────────────────────────────────────────
-	// Mock data is deferred to Phase 3 so relation FK columns exist before inserts.
+	// Mock data is deferred to Phase 3 so FK columns exist before inserts.
 
 	for _, tablePlan := range plan.Tables {
 
@@ -226,6 +237,7 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 	afterLoginBlock:
 
 		tableId := tableResp.GetId()
+		tableIdMap[tablePlan.Slug] = tableId
 		log.Printf("[backend] table created: %s (id=%s)", tablePlan.Slug, tableId)
 
 		emit.Emit(
@@ -260,6 +272,10 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 			if tablePlan.IsLoginTable && isAuthField(fieldPlan.Slug) {
 				continue
 			}
+			// Skip FK slugs — created as proper RELATION type fields in Phase 2.
+			if relFieldSlugsToSkip[fieldPlan.Slug] {
+				continue
+			}
 
 			mappedType := mapFieldType(fieldPlan.Type)
 
@@ -288,7 +304,12 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 	}
 
 	// ─── Phase 2: Relations ──────────────────────────────────────────────────────
-	// All tables and fields exist now — safe to create FK columns via Relation.Create().
+	// Calls Relation().Create() which internally creates the RELATION type field
+	// on table_from using RelationFieldId as the field's UUID and RelationFieldSlug
+	// as the column name. Phase 1 already skipped creating these slugs as SINGLE_LINE,
+	// so there is no slug conflict.
+	// This mirrors the proven pattern in api/handlers/v1/table.go (Relation.Create only,
+	// no separate Field.Create call needed).
 
 	if len(plan.Relations) > 0 {
 		emit.Emit(SSEEvent{
@@ -298,22 +319,28 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 		})
 
 		for _, rel := range plan.Relations {
-			// Only Many2One is supported on PostgreSQL. Force it regardless of what plan says.
-			relType := "Many2One"
-			// FK column slug follows ucode convention: {table_to}_id
-			// e.g. orders→customers creates column "customers_id" on orders table
+			// FK column slug: {table_to}_id (e.g. orders→customers → "customers_id" on orders)
 			relFieldSlug := rel.TableTo + "_id"
 
+			// Sanity-check: source table must have been created successfully.
+			if tableIdMap[rel.TableFrom] == "" {
+				errs = append(errs, fmt.Sprintf("relation %s→%s: source table %s not created", rel.TableFrom, rel.TableTo, rel.TableFrom))
+				continue
+			}
+
+			// attributes must contain "format":"RELATION" — this is what tells ucode
+			// to render the field as a relation picker instead of a plain varchar.
 			relAttr, _ := helper.ConvertMapToStruct(map[string]any{
+				"format":      "RELATION",
+				"label":       slugToLabel(rel.TableTo),
 				"label_en":    slugToLabel(rel.TableTo),
 				"label_to_en": slugToLabel(rel.TableFrom),
 			})
-
 			_, relErr := service.GoObjectBuilderService().Relation().Create(ctx, &nb.CreateRelationRequest{
 				Id:                uuid.NewString(),
 				TableFrom:         rel.TableFrom,
 				TableTo:           rel.TableTo,
-				Type:              relType,
+				Type:              "Many2One",
 				RelationTableSlug: rel.TableTo,
 				RelationFieldSlug: relFieldSlug,
 				RelationFieldId:   uuid.NewString(),
@@ -324,9 +351,9 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 			})
 			if relErr != nil {
 				errs = append(errs, fmt.Sprintf("relation %s→%s: %v", rel.TableFrom, rel.TableTo, relErr))
-				log.Printf("[backend] ⚠️ relation %s %s→%s failed: %v", relType, rel.TableFrom, rel.TableTo, relErr)
+				log.Printf("[backend] ⚠️ Relation.Create Many2One %s→%s failed: %v", rel.TableFrom, rel.TableTo, relErr)
 			} else {
-				log.Printf("[backend] ✅ relation %s %s→%s (field: %s)", relType, rel.TableFrom, rel.TableTo, relFieldSlug)
+				log.Printf("[backend] ✅ relation Many2One %s→%s (field slug: %s)", rel.TableFrom, rel.TableTo, relFieldSlug)
 			}
 		}
 	}
@@ -472,6 +499,8 @@ func mapFieldType(aiType string) string {
 		return "UUID"
 	case "PICK_LIST", "SELECT", "DROPDOWN":
 		return "PICK_LIST"
+	case "RELATION", "LOOKUP", "FOREIGN_KEY":
+		return "RELATION"
 	default:
 		return "SINGLE_LINE"
 	}
