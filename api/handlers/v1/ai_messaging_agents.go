@@ -90,59 +90,23 @@ func (p *ChatProcessor) callArchitect(ctx context.Context, clarified string, ima
 
 	messages := buildMessagesWithHistory(chatHistory, buildContentBlocksWithImages(userMsg, imageURLs))
 
-	// Adaptive model: use Sonnet for simple projects, Opus for complex ones.
-	architectModel := p.selectArchitectModel(clarified)
-
 	plan, err := callWithTool[models.ArchitectPlan](
 		p, ctx,
 		models.AnthropicToolRequest{
-			Model:        architectModel,
-			MaxTokens:    p.baseConf.PlannerMaxTokens,
-			System:       helper.PromptArchitect,
-			SystemCached: true,
-			Messages:     messages,
-			Tools:        []models.ClaudeFunctionTool{helper.ToolArchitectPlan},
-			ToolChoice:   helper.ForcedTool(helper.ToolArchitectPlan.Name),
+			Model:      p.baseConf.ArchitectModel,
+			MaxTokens:  p.baseConf.PlannerMaxTokens,
+			System:     helper.PromptArchitect,
+			Messages:   messages,
+			Tools:      []models.ClaudeFunctionTool{helper.ToolArchitectPlan},
+			ToolChoice: helper.ForcedTool(helper.ToolArchitectPlan.Name),
 		},
 		timeoutArchitect,
-		fmt.Sprintf("Architecting project structure (model=%s)", architectModel),
+		"Architecting project structure",
 	)
 	if err != nil {
 		return nil, fmt.Errorf("architect: %w", err)
 	}
 	return plan, nil
-}
-
-// selectArchitectModel picks Sonnet for simple projects and Opus for complex ones.
-// Heuristic: short prompts with few domain keywords → simple. Detailed prompts → complex.
-func (p *ChatProcessor) selectArchitectModel(clarified string) string {
-	wordCount := len(strings.Fields(clarified))
-	lc := strings.ToLower(clarified)
-
-	// Complexity signals: multiple tables, integrations, roles, complex features
-	complexSignals := 0
-	complexKeywords := []string{
-		"crm", "erp", "tms", "hrm", "warehouse", "inventory", "accounting",
-		"role", "permission", "approval", "workflow", "pipeline", "kanban",
-		"report", "analytics", "dashboard", "multi-tenant", "integration",
-		"invoice", "payment", "subscription", "calendar", "schedule",
-		"notification", "audit", "compliance", "hierarchy",
-	}
-	for _, kw := range complexKeywords {
-		if strings.Contains(lc, kw) {
-			complexSignals++
-		}
-	}
-
-	isSimple := wordCount < 40 && complexSignals <= 2
-
-	if isSimple {
-		log.Printf("[architect] simple project detected (words=%d signals=%d) → using Sonnet", wordCount, complexSignals)
-		return p.baseConf.PlannerModel // Sonnet — 2x faster
-	}
-
-	log.Printf("[architect] complex project detected (words=%d signals=%d) → using Opus", wordCount, complexSignals)
-	return p.baseConf.ArchitectModel // Opus — better reasoning
 }
 
 // generateCode routes to chunked or single-call generation based on project type.
@@ -240,17 +204,11 @@ func (p *ChatProcessor) generateCodeSingle(ctx context.Context, clarified string
 		}
 	}
 
-	// Always force-inject types.ts and .env with correct values — Claude may hallucinate wrong ones.
-	if plan.ProjectType == "admin_panel" {
-		project.Files = injectTypesFile(project.Files, generateTypesFileFromPlan(plan))
-	}
+	// Always force-inject .env with correct credentials — Claude may guess wrong values.
 	project.Files = injectEnvFile(project.Files, p.baseConf.UcodeBaseUrl, apiKey)
 
 	// ── POST-GENERATION VALIDATION + REPAIR ──
 	p.emitter().Emit(SSEEvent{Type: EvProgress, Icon: "shield-check", Message: "Проверяю импорты и зависимости...", Percent: 83})
-	if n := fixLucideImports(project.Files); n > 0 {
-		log.Printf("[generate] lucide-fix: replaced %d invalid icon(s)", n)
-	}
 	validationErrors := validateGeneratedProject(project.Files, project.Env)
 	errorCount, _ := logValidationResults(validationErrors)
 
@@ -276,10 +234,6 @@ func (p *ChatProcessor) generateCodeChunked(ctx context.Context, clarified strin
 	log.Printf("[chunked] starting chunked generation for admin_panel: %s", plan.ProjectName)
 
 	emit := p.emitter()
-
-	// Pre-build types.ts deterministically from the architect plan.
-	// This guarantees field names match backend schema — no AI hallucination.
-	prebuiltTypes := generateTypesFileFromPlan(plan)
 
 	// Phase 1: manifest — reuse eager manifest from buildNewProject if available, otherwise generate.
 	var manifest *models.ProjectManifest
@@ -434,10 +388,6 @@ func (p *ChatProcessor) generateCodeChunked(ctx context.Context, clarified strin
 		return p.generateCodeSingle(ctx, clarified, imageURLs, chatHistory, plan, apiKey)
 	}
 
-	// Inject pre-built types.ts into foundation files — replaces whatever Claude generated.
-	foundation.Files = injectTypesFile(foundation.Files, prebuiltTypes)
-	log.Printf("[chunked] injected pre-built types.ts (%d bytes)", len(prebuiltTypes.Content))
-
 	// Phase 3: feature groups — parallel goroutines, each gets foundation + UI kit context.
 	allSharedFiles := make([]models.ProjectFile, 0, len(foundation.Files)+len(uiKitGroup.Files))
 	allSharedFiles = append(allSharedFiles, foundation.Files...)
@@ -501,7 +451,7 @@ func (p *ChatProcessor) generateCodeChunked(ctx context.Context, clarified strin
 				Value:   g.Name,
 				Data:    map[string]any{"feature": g.Name},
 			})
-			proj, chunkErr := p.generateChunk(ctx, g, foundationCtx, manifestSummary, apiConfig, uiKitAPISummary, plan)
+			proj, chunkErr := p.generateChunk(ctx, g, foundationCtx, manifestSummary, apiConfig, uiKitAPISummary)
 			results <- chunkResult{group: g, project: proj, err: chunkErr}
 		}()
 	}
@@ -571,7 +521,6 @@ func (p *ChatProcessor) generateCodeChunked(ctx context.Context, clarified strin
 	}
 
 	merged.Files = injectEnvFile(merged.Files, p.baseConf.UcodeBaseUrl, apiKey)
-	merged.Files = injectTypesFile(merged.Files, prebuiltTypes) // ensure deterministic types survive merge
 
 	// ── POST-GENERATION VALIDATION + REPAIR ──
 	emit.Emit(SSEEvent{
@@ -581,9 +530,6 @@ func (p *ChatProcessor) generateCodeChunked(ctx context.Context, clarified strin
 		Message: "Проверяю качество кода",
 		Value:   fmt.Sprintf("%d файлов", len(merged.Files)),
 	})
-	if n := fixLucideImports(merged.Files); n > 0 {
-		log.Printf("[chunked] lucide-fix: replaced %d invalid icon(s)", n)
-	}
 	validationErrors := validateGeneratedProject(merged.Files, merged.Env)
 	errorCount, _ := logValidationResults(validationErrors)
 
@@ -632,13 +578,12 @@ func (p *ChatProcessor) generateManifest(ctx context.Context, plan *models.Archi
 	manifest, err := callWithTool[models.ProjectManifest](
 		p, ctx,
 		models.AnthropicToolRequest{
-			Model:        p.baseConf.PlannerModel,
-			MaxTokens:    8000,
-			System:       helper.PromptManifestGenerator,
-			SystemCached: true,
-			Messages:     messages,
-			Tools:        []models.ClaudeFunctionTool{helper.ToolEmitManifest},
-			ToolChoice:   helper.ForcedTool(helper.ToolEmitManifest.Name),
+			Model:      p.baseConf.PlannerModel,
+			MaxTokens:  8000, // manifest is a compact JSON structure, 32K is wasteful
+			System:     helper.PromptManifestGenerator,
+			Messages:   messages,
+			Tools:      []models.ClaudeFunctionTool{helper.ToolEmitManifest},
+			ToolChoice: helper.ForcedTool(helper.ToolEmitManifest.Name),
 		},
 		timeoutPlanner,
 		"Generating file manifest",
@@ -675,14 +620,18 @@ func (p *ChatProcessor) generateFoundation(
 		fmt.Fprintf(&sb, "  %s  (exports: [%s])\n", f.Path, strings.Join(f.Exports, ", "))
 	}
 
-	// Inform Claude that types.ts is pre-generated — do NOT regenerate.
+	// Mandate comprehensive types — the single most impactful foundation instruction.
+	// Feature chunks import ALL entity types from '@/types'. If types are missing or wrong here,
+	// every feature chunk that uses them will produce TypeScript errors.
 	sb.WriteString("\n====================================\n")
-	sb.WriteString("⚠ src/types.ts IS ALREADY GENERATED — DO NOT RE-EMIT IT ⚠\n")
+	sb.WriteString("CRITICAL — src/types.ts MUST contain ALL entity interfaces\n")
 	sb.WriteString("====================================\n")
-	sb.WriteString("src/types.ts has been deterministically generated from the backend schema.\n")
-	sb.WriteString("It contains ALL entity interfaces with EXACT field slugs, plus PaginationParams, SelectOption<T>, FormState.\n")
-	sb.WriteString("DO NOT include src/types.ts in your output files — it is injected automatically.\n")
-	sb.WriteString("Import entity types from '@/types' as usual. They are guaranteed correct.\n")
+	sb.WriteString("src/types.ts is the SINGLE SOURCE OF TRUTH for all entity types.\n")
+	sb.WriteString("Feature chunks import entity types ONLY from '@/types' — never from feature files.\n")
+	sb.WriteString("For EVERY table in the project, generate a TypeScript interface with ALL fields.\n")
+	sb.WriteString("Use exact field slugs from the table schema below as property names.\n")
+	sb.WriteString("Every entity interface must include: guid (string), created_at? (string), and all domain fields.\n")
+	sb.WriteString("Also include: PaginationParams, SelectOption<T>, FormState.\n")
 	sb.WriteString("⚠ DO NOT include NavItem or TableColumn — they are PRE-BUILT in src/types/common.ts.\n")
 	sb.WriteString("  Layout files that need NavItem MUST import from '@/types/common', never from '@/types'.\n\n")
 
@@ -737,13 +686,12 @@ func (p *ChatProcessor) generateFoundation(
 	project, err := callWithTool[models.GeneratedProject](
 		p, ctx,
 		models.AnthropicToolRequest{
-			Model:        p.baseConf.CoderModel,
-			MaxTokens:    p.baseConf.CoderMaxTokens,
-			System:       helper.PromptAdminPanelGenerator,
-			SystemCached: true,
-			Messages:     messages,
-			Tools:        []models.ClaudeFunctionTool{helper.ToolEmitProject},
-			ToolChoice:   helper.ForcedTool(helper.ToolEmitProject.Name),
+			Model:      p.baseConf.CoderModel,
+			MaxTokens:  p.baseConf.CoderMaxTokens,
+			System:     helper.PromptAdminPanelGenerator,
+			Messages:   messages,
+			Tools:      []models.ClaudeFunctionTool{helper.ToolEmitProject},
+			ToolChoice: helper.ForcedTool(helper.ToolEmitProject.Name),
 		},
 		timeoutCoder,
 		"Generating foundation (Group 0)",
@@ -782,13 +730,12 @@ func (p *ChatProcessor) generateUIKit(
 	project, err := callWithTool[models.GeneratedProject](
 		p, ctx,
 		models.AnthropicToolRequest{
-			Model:        p.baseConf.CoderModel,
-			MaxTokens:    p.baseConf.CoderMaxTokens,
-			System:       helper.PromptUIKitCoder,
-			SystemCached: true,
-			Messages:     []models.ChatMessage{{Role: "user", Content: []models.ContentBlock{{Type: "text", Text: sb.String()}}}},
-			Tools:        []models.ClaudeFunctionTool{helper.ToolEmitProject},
-			ToolChoice:   helper.ForcedTool(helper.ToolEmitProject.Name),
+			Model:      p.baseConf.CoderModel,
+			MaxTokens:  p.baseConf.CoderMaxTokens,
+			System:     helper.PromptUIKitCoder,
+			Messages:   []models.ChatMessage{{Role: "user", Content: []models.ContentBlock{{Type: "text", Text: sb.String()}}}},
+			Tools:      []models.ClaudeFunctionTool{helper.ToolEmitProject},
+			ToolChoice: helper.ForcedTool(helper.ToolEmitProject.Name),
 		},
 		timeoutCoder,
 		"Generating UI Kit (Group 1)",
@@ -806,7 +753,6 @@ func (p *ChatProcessor) generateUIKit(
 // It receives full foundation file contents so all imports are satisfied.
 // uiKitAPISummary contains a compact API reference of generated UI Kit components
 // (names, props, variants) to prevent feature chunks from hallucinating wrong APIs.
-// plan is used to inject exact field slugs per table — prevents field name hallucination.
 func (p *ChatProcessor) generateChunk(
 	ctx context.Context,
 	group models.ManifestGroup,
@@ -814,7 +760,6 @@ func (p *ChatProcessor) generateChunk(
 	manifestSummary string,
 	apiConfig string,
 	uiKitAPISummary string,
-	plan *models.ArchitectPlan,
 ) (*models.GeneratedProject, error) {
 	var sb strings.Builder
 	fmt.Fprintf(&sb, "CHUNKED GENERATION — Feature Group %d: %s\n\n", group.ID, group.Name)
@@ -827,24 +772,6 @@ func (p *ChatProcessor) generateChunk(
 	sb.WriteString("\n")
 	sb.WriteString(apiConfig)
 	sb.WriteString("\n")
-
-	// Inject exact field slugs per table so chunks use real field names in forms/tables.
-	if plan != nil && len(plan.Tables) > 0 {
-		sb.WriteString("\n====================================\n")
-		sb.WriteString("EXACT FIELD SLUGS PER TABLE (use these EXACT names in forms, columns, and API payloads)\n")
-		sb.WriteString("====================================\n")
-		for _, t := range plan.Tables {
-			interfaceName := slugToInterfaceName(t.Slug)
-			fmt.Fprintf(&sb, "Table \"%s\" (interface: %s) fields:\n", t.Slug, interfaceName)
-			for _, f := range t.Fields {
-				if isSystemField(f.Slug) {
-					continue
-				}
-				fmt.Fprintf(&sb, "  - %s (%s) label: \"%s\"\n", f.Slug, mapFieldTypeToTS(f.Type), f.Label)
-			}
-		}
-		sb.WriteString("\n")
-	}
 
 	// Inject template hook files (useApi.ts, apiUtils.ts) so Claude sees the EXACT
 	// TypeScript signatures — this prevents the callback-based hallucination pattern.
@@ -866,13 +793,12 @@ func (p *ChatProcessor) generateChunk(
 	project, err := callWithTool[models.GeneratedProject](
 		p, ctx,
 		models.AnthropicToolRequest{
-			Model:        p.baseConf.CoderModel,
-			MaxTokens:    p.baseConf.CoderMaxTokens,
-			System:       helper.PromptChunkedCoder,
-			SystemCached: true,
-			Messages:     []models.ChatMessage{{Role: "user", Content: []models.ContentBlock{{Type: "text", Text: sb.String()}}}},
-			Tools:        []models.ClaudeFunctionTool{helper.ToolEmitProject},
-			ToolChoice:   helper.ForcedTool(helper.ToolEmitProject.Name),
+			Model:      p.baseConf.CoderModel,
+			MaxTokens:  p.baseConf.CoderMaxTokens,
+			System:     helper.PromptChunkedCoder,
+			Messages:   []models.ChatMessage{{Role: "user", Content: []models.ContentBlock{{Type: "text", Text: sb.String()}}}},
+			Tools:      []models.ClaudeFunctionTool{helper.ToolEmitProject},
+			ToolChoice: helper.ForcedTool(helper.ToolEmitProject.Name),
 		},
 		timeoutCoder,
 		fmt.Sprintf("Generating feature chunk: %s", group.Name),
@@ -1047,105 +973,6 @@ func buildTemplateHooksContext() string {
 		}
 	}
 	return sb.String()
-}
-
-// generateTypesFileFromPlan deterministically builds src/types.ts from the architect plan.
-// This guarantees field names match the backend schema exactly — no AI hallucination.
-// The generated file includes entity interfaces for every table + common shared types.
-func generateTypesFileFromPlan(plan *models.ArchitectPlan) models.ProjectFile {
-	var sb strings.Builder
-
-	sb.WriteString("// Auto-generated entity types — DO NOT EDIT MANUALLY\n")
-	sb.WriteString("// Source: Architect plan (deterministic generation)\n\n")
-
-	for _, t := range plan.Tables {
-		interfaceName := slugToInterfaceName(t.Slug)
-		sb.WriteString(fmt.Sprintf("export interface %s {\n", interfaceName))
-		sb.WriteString("  guid: string;\n")
-		for _, f := range t.Fields {
-			if isSystemField(f.Slug) {
-				continue
-			}
-			if t.IsLoginTable && isAuthField(f.Slug) {
-				continue
-			}
-			tsType := mapFieldTypeToTS(f.Type)
-			sb.WriteString(fmt.Sprintf("  %s?: %s;\n", f.Slug, tsType))
-		}
-		sb.WriteString("  created_at?: string;\n")
-		sb.WriteString("  updated_at?: string;\n")
-		sb.WriteString("}\n\n")
-	}
-
-	// Common shared types used by Foundation and feature chunks.
-	sb.WriteString(`export interface PaginationParams {
-  page?: number;
-  limit?: number;
-  offset?: number;
-  search?: string;
-}
-
-export interface SelectOption<T = string> {
-  value: T;
-  label: string;
-}
-
-export interface FormState {
-  isOpen: boolean;
-  mode: 'create' | 'edit';
-  editingId?: string;
-}
-`)
-
-	return models.ProjectFile{
-		Path:    "src/types.ts",
-		Content: sb.String(),
-	}
-}
-
-// slugToInterfaceName converts a table slug like "order_items" to "OrderItem" (PascalCase, singular).
-func slugToInterfaceName(slug string) string {
-	parts := strings.Split(slug, "_")
-	var result strings.Builder
-	for _, p := range parts {
-		if p == "" {
-			continue
-		}
-		// Naive singularization: strip trailing "s" if length > 3
-		if len(p) > 3 && strings.HasSuffix(p, "s") && !strings.HasSuffix(p, "ss") && !strings.HasSuffix(p, "us") {
-			p = p[:len(p)-1]
-		}
-		result.WriteString(strings.ToUpper(p[:1]) + p[1:])
-	}
-	if result.Len() == 0 {
-		return "Entity"
-	}
-	return result.String()
-}
-
-// mapFieldTypeToTS maps backend field types to TypeScript types for types.ts generation.
-func mapFieldTypeToTS(aiType string) string {
-	switch strings.ToUpper(aiType) {
-	case "NUMBER", "INTEGER", "FLOAT", "DECIMAL", "INT":
-		return "number"
-	case "BOOLEAN", "SWITCH", "CHECKBOX":
-		return "boolean"
-	case "JSON", "OBJECT", "ARRAY", "MAP":
-		return "Record<string, unknown>"
-	default:
-		return "string"
-	}
-}
-
-// injectTypesFile adds or replaces src/types.ts in the file list with the deterministic version.
-func injectTypesFile(files []models.ProjectFile, typesFile models.ProjectFile) []models.ProjectFile {
-	for i, f := range files {
-		if f.Path == "src/types.ts" {
-			files[i].Content = typesFile.Content
-			return files
-		}
-	}
-	return append(files, typesFile)
 }
 
 // injectEnvFile always writes a correct .env into the file list, overriding whatever

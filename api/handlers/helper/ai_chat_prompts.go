@@ -471,11 +471,6 @@ UI Kit components — ALL filenames are LOWERCASE (shadcn convention):
   import { Skeleton } from '@/components/ui/skeleton'
   KEY RULE: path is @/components/ui/button NOT @/components/ui/Button
 
-SELECT ITEM EMPTY VALUE (CRITICAL — crashes Radix UI at runtime):
-  WRONG: <SelectItem value="">All</SelectItem>   -- Radix throws error, "" is reserved
-  RIGHT: <SelectItem value="all">All</SelectItem>
-  Filter logic: if (filter === "all") showAll() else filterBy(filter)
-
 ====================================
 API HOOKS — EXACT SIGNATURES (READ CAREFULLY)
 ====================================
@@ -562,18 +557,6 @@ CODE QUALITY
 - Loading states with skeleton or spinner; error states with clear user message
 - Every API-driven section must render actual API data — never hardcode alongside fetched data
 - Submit buttons show Loader2 spinner when mutation.isPending
-
-NO DUPLICATE CREATE BUTTON (CRITICAL):
-  PageHeader "action" prop renders the only button that opens the create FormModal.
-  NEVER add a second <Button> below the header that also opens the same modal.
-  WRONG:
-    <PageHeader action="Create User" onAction={() => setOpen(true)} />
-    <Button onClick={() => setOpen(true)}>Create User</Button>  -- DUPLICATE, DELETE THIS
-  CORRECT:
-    <PageHeader action="Create User" onAction={() => setOpen(true)} />
-    <FormModal open={open} title="Create User" onClose={() => setOpen(false)} onSubmit={handleSubmit}>
-      ...
-    </FormModal>
 
 ====================================
 NULL SAFETY — MANDATORY
@@ -1246,16 +1229,6 @@ NO INLINE STYLES (CRITICAL — banned for static values):
     justify-content     → justify-{value}
     overflow            → overflow-{value}
 
-NO DUPLICATE CREATE BUTTON (CRITICAL):
-  PageHeader "action" prop renders the only button that opens the create FormModal.
-  NEVER add a second standalone <Button> that also calls setOpen(true).
-  WRONG:
-    <PageHeader action="Create" onAction={() => setOpen(true)} />
-    <Button onClick={() => setOpen(true)}>Create</Button>  -- DUPLICATE, DELETE THIS
-  CORRECT:
-    <PageHeader action="Create" onAction={() => setOpen(true)} />
-    <FormModal open={open} ...>...</FormModal>
-
 NO AUTH: Never generate Login/Register pages, ProtectedRoute, AuthGuard,
   useAuth, auth context, logout buttons, token management, or /login redirects.
   The app starts directly on the main page.
@@ -1830,14 +1803,6 @@ NO NATIVE <select> (CRITICAL — banned everywhere):
     </Select>
   REASON: Native <select> cannot be styled consistently across browsers and breaks the design system.
   If select.tsx is not yet generated → add it to the files[] array immediately (see FILE GENERATION ORDER).
-
-SELECT ITEM EMPTY VALUE (CRITICAL — crashes Radix UI at runtime):
-  <SelectItem value=""> is FORBIDDEN. Radix reserves "" to clear the selection — using it throws:
-  "A <Select.Item /> must have a value prop that is not an empty string."
-  For "All / Any / None" filter options use a non-empty sentinel:
-  WRONG: <SelectItem value="">All statuses</SelectItem>
-  RIGHT: <SelectItem value="all">All statuses</SelectItem>
-  Then in the filter logic: if (status === "all" || !status) fetchAll(); else fetchByStatus(status);
 
 ====================================
 FILE GENERATION ORDER (TYPE A — STRICT)
