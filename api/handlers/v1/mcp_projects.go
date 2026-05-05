@@ -467,7 +467,12 @@ func (h *HandlerV1) ManualSaveMcpProject(c *gin.Context) {
 	}
 
 	// Save a full snapshot of the project after a successful push.
-	if current.FunctionId != "" {
+	microfrontendId := current.FunctionId
+	if microfrontendId == "" {
+		microfrontendId = request.MicrofrontendID
+	}
+
+	if microfrontendId != "" {
 		snapshotFiles := make([]models.GitlabFileChange, 0, len(mergedFiles))
 		for _, f := range mergedFiles {
 			if !snapshotExcluded(f.Path) {
@@ -488,7 +493,7 @@ func (h *HandlerV1) ManualSaveMcpProject(c *gin.Context) {
 				context.Background(),
 				&pbo.CreateMicrofrontendVersionRequest{
 					ResourceEnvId:   resource.ResourceEnvironmentId,
-					MicrofrontendId: current.FunctionId,
+					MicrofrontendId: microfrontendId,
 					CommitMessage:   commitMsg,
 					Files:           string(filesJSON),
 				},

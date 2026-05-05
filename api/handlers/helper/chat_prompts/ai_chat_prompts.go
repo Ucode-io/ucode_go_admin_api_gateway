@@ -86,48 +86,85 @@ When to use:
   - Do NOT use for database or inspect intents — only for build/create/plan requests
   - Do NOT ask about tech stack, framework, TypeScript, or deployment — those are decided automatically
 
-When intent="ask_question", set "questions" to an array of one or more question objects:
+When intent="ask_question", ALWAYS output EXACTLY 3 questions — no more, no fewer.
+The question structure (ids, titles, type) is fixed. The OPTIONS are generated dynamically based on the user's project description.
+
+Fixed question structure:
   [
     {
-      "id": "string (kebab-case, e.g. panel-type)",
-      "title": "string (the question text, same language as user)",
-      "type": "single" | "multi",
-      "options": [{"id": "string", "label": "string"}]
+      "id": "user-types",
+      "title": "<translated: What user types will be in the platform?>",
+      "type": "multi",
+      "options": [/* generate options relevant to the described project, e.g. Admin, Manager, Driver */]
+    },
+    {
+      "id": "module-types",
+      "title": "<translated: What module types (menus) will be in the platform?>",
+      "type": "multi",
+      "options": [/* generate options relevant to the described project, e.g. Dashboard, Orders, Reports */]
+    },
+    {
+      "id": "integrations",
+      "title": "<translated: What integrations do you need?>",
+      "type": "multi",
+      "options": [/* generate options relevant to the described project, e.g. Payment Gateway, SMS, Maps/GPS */]
     }
   ]
 
 Rules:
-  - Include as many questions as needed — this is used for questionnaires, not just one question
-  - "id": unique kebab-case identifier per question (e.g. "panel-type", "target-audience")
-  - "title": the question text in the same language the user wrote in
-  - "type": "single" if only one option should be chosen, "multi" if multiple are allowed
-  - "options": concrete, useful business-level choices per question
-  - Fill "reply" with a brief intro sentence (e.g. "Please answer a few questions to get started.")
+  - ALWAYS output exactly these 3 questions with ids: "user-types", "module-types", "integrations"
+  - Translate the title of each question into the same language the user wrote in
+  - Keep all option "id" values in English kebab-case (e.g. "admin", "order-management", "payment-gateway")
+  - Option "label" values should also be in the same language the user wrote in
+  - Generate 5–10 options per question that make sense for the specific project described
+  - For integrations: do NOT include a "None" option — the user can simply skip selection
+  - Fill "reply" with a brief intro sentence in the user's language
 
 Example:
-  User: "create a panel for me"
+  User: "build me a TMS"
   → intent="ask_question", next_step=false,
     reply="Please answer a few questions to get started.",
     questions=[
       {
-        "id": "panel-type",
-        "title": "What type of panel do you want?",
-        "type": "single",
+        "id": "user-types",
+        "title": "What user types will be in the platform?",
+        "type": "multi",
         "options": [
-          {"id": "crm", "label": "CRM"},
-          {"id": "tms", "label": "TMS"},
-          {"id": "erp", "label": "ERP"},
-          {"id": "custom", "label": "Custom"}
+          {"id": "admin", "label": "Admin"},
+          {"id": "dispatcher", "label": "Dispatcher"},
+          {"id": "driver", "label": "Driver"},
+          {"id": "client", "label": "Client"},
+          {"id": "warehouse-manager", "label": "Warehouse Manager"},
+          {"id": "accountant", "label": "Accountant"}
         ]
       },
       {
-        "id": "target-audience",
-        "title": "Who will use this panel?",
-        "type": "single",
+        "id": "module-types",
+        "title": "What module types (menus) will be in the platform?",
+        "type": "multi",
         "options": [
-          {"id": "internal", "label": "Internal team"},
-          {"id": "clients", "label": "Clients / customers"},
-          {"id": "both", "label": "Both"}
+          {"id": "dashboard", "label": "Dashboard"},
+          {"id": "orders", "label": "Orders"},
+          {"id": "routes", "label": "Routes"},
+          {"id": "drivers", "label": "Drivers"},
+          {"id": "vehicles", "label": "Vehicles"},
+          {"id": "warehouses", "label": "Warehouses"},
+          {"id": "finance", "label": "Finance"},
+          {"id": "reports", "label": "Reports"},
+          {"id": "settings", "label": "Settings"}
+        ]
+      },
+      {
+        "id": "integrations",
+        "title": "What integrations do you need?",
+        "type": "multi",
+        "options": [
+          {"id": "maps-gps", "label": "Maps / GPS"},
+          {"id": "sms", "label": "SMS"},
+          {"id": "payment-gateway", "label": "Payment Gateway"},
+          {"id": "telegram-bot", "label": "Telegram Bot"},
+          {"id": "1c", "label": "1C"},
+          {"id": "rest-api", "label": "External REST API"}
         ]
       }
     ]

@@ -146,9 +146,10 @@ type RevertMicrofrontendRequest struct {
 }
 
 type ManualSaveMcpProjectRequest struct {
-	RepoID        int                `json:"repo_id"`
-	Files         []GitlabFileChange `json:"files"`
-	CommitMessage string             `json:"commit_message,omitempty"`
+	RepoID          int                `json:"repo_id"`
+	Files           []GitlabFileChange `json:"files"`
+	CommitMessage   string             `json:"commit_message,omitempty"`
+	MicrofrontendID string             `json:"microfrontend_id,omitempty"`
 }
 
 
