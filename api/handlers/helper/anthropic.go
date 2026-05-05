@@ -17,6 +17,25 @@ import (
 
 var ErrMaxTokens = errors.New("generation stopped: output exceeded the token limit")
 
+type systemBlock struct {
+	Type         string     `json:"type"` // always "text"
+	Text         string     `json:"text"`
+	CacheControl *cacheCtrl `json:"cache_control,omitempty"`
+}
+
+type cacheCtrl struct {
+	Type string `json:"type"` // "ephemeral"
+}
+
+type wireToolRequest struct {
+	Model      string                      `json:"model"`
+	MaxTokens  int                         `json:"max_tokens"`
+	System     []systemBlock               `json:"system,omitempty"`
+	Messages   []models.ChatMessage        `json:"messages"`
+	Tools      []models.ClaudeFunctionTool `json:"tools"`
+	ToolChoice *models.ToolChoice          `json:"tool_choice,omitempty"`
+}
+
 // inputKeys returns the keys of a map for diagnostic logging.
 func inputKeys(m map[string]interface{}) []string {
 	keys := make([]string, 0, len(m))
@@ -67,7 +86,19 @@ func CallAnthropicAPI(baseConf config.BaseConfig, body models.AnthropicRequest, 
 //
 // Use this for all structured-generation calls: architect, planner, coder, diagrams, visual edit.
 func CallAnthropicWithTool[T any](baseConf config.BaseConfig, body models.AnthropicToolRequest, timeout time.Duration) (*T, models.ClaudeUsage, string, error) {
-	jsonBody, err := json.Marshal(body)
+
+	var wire = wireToolRequest{
+		Model:      body.Model,
+		MaxTokens:  body.MaxTokens,
+		Messages:   body.Messages,
+		Tools:      body.Tools,
+		ToolChoice: body.ToolChoice,
+	}
+	if body.System != "" {
+		wire.System = []systemBlock{{Type: "text", Text: body.System, CacheControl: &cacheCtrl{Type: "ephemeral"}}}
+	}
+
+	jsonBody, err := json.Marshal(wire)
 	if err != nil {
 		return nil, models.ClaudeUsage{}, "", fmt.Errorf("failed to marshal tool request: %w", err)
 	}
@@ -79,7 +110,8 @@ func CallAnthropicWithTool[T any](baseConf config.BaseConfig, body models.Anthro
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("X-API-Key", baseConf.AnthropicAPIKey)
 	req.Header.Set("anthropic-version", baseConf.AnthropicVersion)
-	req.Header.Set("anthropic-beta", baseConf.AnthropicBeta)
+
+	req.Header.Set("anthropic-beta", config.AnthropicCachingBeta)
 
 	client := &http.Client{Timeout: timeout}
 	resp, err := client.Do(req)
@@ -101,24 +133,17 @@ func CallAnthropicWithTool[T any](baseConf config.BaseConfig, body models.Anthro
 		return nil, models.ClaudeUsage{}, "", fmt.Errorf("failed to parse tool response envelope: %w", err)
 	}
 
-	// A truncated response means the tool input is incomplete — cannot be decoded.
 	if toolResp.StopReason == "max_tokens" {
 		return nil, toolResp.Usage, toolResp.StopReason,
 			fmt.Errorf("%w (model=%s input_tokens=%d output_tokens=%d)",
 				ErrMaxTokens, toolResp.Model, toolResp.Usage.InputTokens, toolResp.Usage.OutputTokens)
 	}
 
-	// Find the first tool_use block and decode its input into T.
 	for _, block := range toolResp.Content {
 		if block.Type != "tool_use" {
 			continue
 		}
 
-		// Claude occasionally stringifies arrays or objects in tool inputs.
-		// If a value is a string but the target struct expects an object/array, json.Unmarshal fails.
-		// We proactively parse string values that look like JSON arrays or objects.
-		// Two-pass repair: first try as-is, then apply repairJSONStrings (handles literal
-		// newlines inside file content strings — the most common cause of this failure).
 		for k, v := range block.Input {
 			if s, ok := v.(string); ok {
 				s = strings.TrimSpace(s)
@@ -127,21 +152,15 @@ func CallAnthropicWithTool[T any](baseConf config.BaseConfig, body models.Anthro
 					if err := json.Unmarshal([]byte(s), &parsed); err == nil {
 						block.Input[k] = parsed
 					} else {
-						// Pass 2: repair unescaped control characters (literal \n, \t, \r
-						// inside JSON string values — common when Claude generates file content).
 						repaired := repairJSONStrings(s)
 						if err2 := json.Unmarshal([]byte(repaired), &parsed); err2 == nil {
 							block.Input[k] = parsed
 						}
-						// If both passes fail, leave block.Input[k] as-is;
-						// the downstream decode will return a clear error.
 					}
 				}
 			}
 		}
 
-		// Re-marshal the map → JSON → unmarshal into T.
-		// This is the safe path: the map was already validated by json.Unmarshal above.
 		inputJSON, marshalErr := json.Marshal(block.Input)
 		if marshalErr != nil {
 			return nil, toolResp.Usage, toolResp.StopReason,

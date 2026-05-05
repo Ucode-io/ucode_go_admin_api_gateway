@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 	"time"
+	"ucode/ucode_go_api_gateway/api/handlers/helper/chat_prompts"
 
 	"ucode/ucode_go_api_gateway/api/handlers/helper"
 	"ucode/ucode_go_api_gateway/api/models"
@@ -25,73 +26,12 @@ const (
 	timeoutDatabaseAssistant = 120 * time.Second
 	schemaCacheTTL           = 5 * time.Minute
 
-	// maxAgentIterations is the maximum number of AI↔DB round-trips per user
-	// request. Each iteration is one SQL execution + one AI call.
-	// Set to 8: complex analytics might need several SELECTs before answering.
 	maxAgentIterations = 8
 
-	// defaultSelectLimit caps SELECT result sets so we never pull entire tables
-	// into the AI context window. Applied automatically by EnsureSelectLimit.
 	defaultSelectLimit = 50
 )
 
-// ─────────────────────────────────────────────────────────────────────────────
-// PROTO INTERFACE NOTE
-// ─────────────────────────────────────────────────────────────────────────────
-//
-// You must add the following to new_object_builder_service.proto:
-//
-//   message ExecuteSQLRequest {
-//     string resource_env_id = 1;
-//     string sql             = 2;
-//     repeated string params = 3;  // $1, $2, $3 ... values as strings
-//     bool in_transaction    = 4;  // wrap in BEGIN/COMMIT automatically
-//   }
-//
-//   message ExecuteSQLResponse {
-//     repeated google.protobuf.Struct rows = 1; // SELECT result rows
-//     int64 rows_affected                  = 2; // INSERT/UPDATE/DELETE count
-//     string error                         = 3; // non-empty = server error
-//   }
-//
-//   rpc ExecuteSQL(ExecuteSQLRequest) returns (ExecuteSQLResponse);
-//
-// And expose it through the ObjectBuilder service client interface.
-//
-// ─────────────────────────────────────────────────────────────────────────────
-
-// ─────────────────────────────────────────────────────────────────────────────
-// MODEL ADDITIONS NEEDED
-// ─────────────────────────────────────────────────────────────────────────────
-//
-// In models.DatabaseActionRequest add:
-//   SQL       string `json:"sql,omitempty"`
-//   SQLParams []any  `json:"sql_params,omitempty"`
-//
-// In models.PendingAction add:
-//   SQL       string `json:"sql,omitempty"`
-//   SQLParams []any  `json:"sql_params,omitempty"`
-//
-// ─────────────────────────────────────────────────────────────────────────────
-
-// ─────────────────────────────────────────────────────────────────────────────
-// DATABASE FLOW — agentic loop
-// ─────────────────────────────────────────────────────────────────────────────
-//
-// Each iteration:
-//  1. AI receives schema + accumulated query results → returns JSON with SQL.
-//  2. If the SQL is a SELECT/WITH (read) → execute, accumulate result, repeat.
-//  3. If the SQL is INSERT/UPDATE/DELETE (mutation) → stop loop, return
-//     PendingAction for the frontend confirmation flow.
-//  4. If action="answer" → stop loop, return final formatted reply.
-//
-// The confirmation flow (PendingAction → user clicks Yes/No → executeMutation)
-// is unchanged from the previous implementation.
-func (p *ChatProcessor) runDatabaseFlow(
-	ctx context.Context,
-	clarified string,
-	chatHistory []models.ChatMessage,
-) (*models.ParsedClaudeResponse, error) {
+func (p *ChatProcessor) runDatabaseFlow(ctx context.Context, clarified string, chatHistory []models.ChatMessage) (*models.ParsedClaudeResponse, error) {
 
 	resourceEnvId, err := p.resolveBuilderResourceID(ctx)
 	if err != nil {
@@ -1083,7 +1023,7 @@ func (p *ChatProcessor) callDatabaseAssistant(
 	chatHistory []models.ChatMessage,
 ) (*models.DatabaseActionRequest, error) {
 
-	content := helper.BuildDatabaseMessage(clarified, schemaText, dataContext)
+	content := chat_prompts.BuildDatabaseMessage(clarified, schemaText, dataContext)
 	messages := buildMessagesWithHistory(chatHistory, []models.ContentBlock{{Type: "text", Text: content}})
 
 	response, err := p.callAnthropicWithTracking(
@@ -1091,7 +1031,7 @@ func (p *ChatProcessor) callDatabaseAssistant(
 		models.AnthropicRequest{
 			Model:     p.baseConf.ClaudeModel,
 			MaxTokens: p.baseConf.InspectorMaxTokens,
-			System:    helper.PromptDatabaseAssistant,
+			System:    chat_prompts.PromptDatabaseAssistant,
 			Messages:  messages,
 		},
 		timeoutDatabaseAssistant,

@@ -9,7 +9,8 @@ import (
 	"strings"
 	"sync"
 	"time"
-
+	"ucode/ucode_go_api_gateway/api/handlers/helper"
+	"ucode/ucode_go_api_gateway/api/handlers/helper/chat_prompts"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/config"
 	as "ucode/ucode_go_api_gateway/genproto/auth_service"
@@ -26,8 +27,6 @@ const (
 	timeoutPlanner   = 300 * time.Second
 	timeoutCoder     = 900 * time.Second
 
-	// uGenBranch is the branch where all AI-generated code is pushed.
-	// master is only for pipeline triggers (created when the microfrontend is first forked).
 	uGenBranch = "u-gen"
 
 	timeoutPublishMicrofrontend = 15 * time.Minute
@@ -46,24 +45,22 @@ type ChatProcessor struct {
 	userId       string
 	clientTypeId string
 	roleId       string
-	authToken    string // forwarded to the function service for microfrontend creation
+	authToken    string
 
-	microFrontendId          string // populated after PublishAiGeneratedMicroFrontend succeeds, or from request
-	microFrontendRepoId      string // GitLab numeric project Id — stored from publish response or from request
-	microFrontendResourceEnvId string // child project's resource_env_id for storing microfrontend versions
-	newProject               bool   // true → provision a new ucode project; false → create microfrontend in current project
-	userMessage              string // original user message — used as GitLab commit message on u-gen
+	microFrontendId            string
+	microFrontendRepoId        string
+	microFrontendResourceEnvId string
+	newProject                 bool
+	userMessage                string
 
 	schemaCache    []models.TableSchema
 	schemaCachedAt time.Time
 
-	prebuiltManifest *models.ProjectManifest // set before generateCode to skip manifest phase
+	prebuiltManifest *models.ProjectManifest
 
-	emit ProgressEmitter // nil-safe via emitter(); only set for SSE generation requests
+	emit ProgressEmitter
 }
 
-// emitter returns the ProgressEmitter or a no-op if none was set.
-// Safe to call from any goroutine — p.emit is written once before generation starts.
 func (p *ChatProcessor) emitter() ProgressEmitter {
 	if p.emit == nil {
 		return noopEmitter{}
@@ -170,7 +167,8 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 	)
 
 	var provWg sync.WaitGroup
-	if plan.ProjectType == "admin_panel" {
+	// Manifest is used by generateCodeChunked (admin_panel) and generateCodeChunkedWebsite (web).
+	if plan.ProjectType == "admin_panel" || plan.ProjectType == "web" {
 		provWg.Add(2)
 		go func() {
 			defer provWg.Done()
@@ -546,6 +544,143 @@ func (p *ChatProcessor) provisionBackend(ctx context.Context, projectName string
 		EnvironmentId:  env.GetId(),
 		ResourceEnvId:  resource.GetResourceEnvironmentId(),
 	}, nil
+}
+
+func (p *ChatProcessor) runVisualEdit(ctx context.Context, instruction string, contexts []models.VisualContext, chatHistory []models.ChatMessage, imageURLs []string) (*models.ParsedClaudeResponse, error) {
+	log.Printf("[VISUAL EDIT] starting: count=%d", len(contexts))
+
+	emit := p.emitter()
+	emit.Emit(SSEEvent{Type: EvProgress, Icon: "scan-search", Message: "Загружаю файлы проекта...", Percent: 5})
+
+	existingFiles, err := p.fetchMicrofrontendFiles(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("visual edit: failed to fetch microFrontend files: %w", err)
+	}
+
+	targetPaths := make(map[string]bool)
+	resolvedContexts := make([]models.VisualContext, 0, len(contexts))
+
+	for _, vc := range contexts {
+		var foundPath string
+		for _, f := range existingFiles {
+			if vc.Path != "" && f.FilePath == vc.Path {
+				foundPath = f.FilePath
+				break
+			}
+			if vc.Path == "" && vc.ElementName != "" && strings.Contains(f.Content, vc.ElementName) {
+				foundPath = f.FilePath
+				break
+			}
+		}
+		if foundPath != "" {
+			targetPaths[foundPath] = true
+			vc.Path = foundPath
+			resolvedContexts = append(resolvedContexts, vc)
+		} else {
+			log.Printf("[VISUAL EDIT] WARNING: could not resolve file for element %q (path: %q)", vc.ElementName, vc.Path)
+		}
+	}
+
+	if len(targetPaths) == 0 {
+		log.Printf("[VISUAL EDIT] no specific files found for contexts, falling back to microFrontend edit flow")
+		fileGraphJSON := p.buildMicrofrontendFileGraphJSON(existingFiles)
+		return p.runMicrofrontendEdit(ctx, instruction, fileGraphJSON, chatHistory, imageURLs, existingFiles)
+	}
+
+	paths := make([]string, 0, len(targetPaths))
+	for path := range targetPaths {
+		paths = append(paths, path)
+	}
+	filesContext := p.buildMicrofrontendFilesContext(existingFiles, paths)
+
+	emit.Emit(
+		SSEEvent{
+			Type:    EvProgress,
+			Icon:    "mouse-pointer-click",
+			Message: "Редактирую выбранные элементы",
+			Value:   fmt.Sprintf("%d компонент(ов)", len(targetPaths)),
+			Percent: 10,
+		},
+	)
+
+	prompt := chat_prompts.BuildVisualEditPrompt(instruction, resolvedContexts, filesContext)
+	messages := buildMessagesWithHistory(chatHistory, buildContentBlocksWithImages(prompt, imageURLs))
+
+	var edited *visualEditOutput
+
+	err = withHeartbeat(
+		ctx, emit,
+		[]string{
+			"Редактирую компоненты...",
+			"Применяю визуальные изменения...",
+			"Обновляю стили и разметку...",
+			"Проверяю совместимость...",
+			"Финализирую правки...",
+		},
+		10, 85, 120*time.Second,
+		func() error {
+			var errIn error
+			edited, errIn = callWithTool[visualEditOutput](
+				p, ctx,
+				models.AnthropicToolRequest{
+					Model:      p.baseConf.CoderModel,
+					MaxTokens:  p.baseConf.CoderMaxTokens,
+					System:     chat_prompts.PromptVisualEdit,
+					Messages:   messages,
+					Tools:      []models.ClaudeFunctionTool{helper.ToolEmitVisualEdit},
+					ToolChoice: helper.ForcedTool(helper.ToolEmitVisualEdit.Name),
+				},
+				timeoutCoder,
+				fmt.Sprintf("Visual edit: %d elements in %d files", len(resolvedContexts), len(targetPaths)),
+			)
+			return errIn
+		},
+	)
+	if err != nil {
+		return nil, fmt.Errorf("visual edit: claude call failed: %w", err)
+	}
+
+	if len(edited.Files) > 0 {
+		emit.Emit(
+			SSEEvent{
+				Type:    EvPublish,
+				Icon:    "upload-cloud",
+				Message: "Публикую изменения",
+				Value:   fmt.Sprintf("%d файл(ов)", len(edited.Files)),
+				Percent: 90,
+			},
+		)
+		if pushErr := p.pushMicrofrontendChanges(ctx, edited.Files); pushErr != nil {
+			return nil, fmt.Errorf("visual edit: push to u-gen failed: %w", pushErr)
+		}
+
+		editedMap := make(map[string]string, len(edited.Files))
+		for _, f := range edited.Files {
+			editedMap[f.Path] = f.Content
+		}
+
+		fullSnapshot := make([]models.GitlabFileChange, 0, len(existingFiles))
+		for _, f := range existingFiles {
+			if newContent, changed := editedMap[f.FilePath]; changed {
+				fullSnapshot = append(fullSnapshot, models.GitlabFileChange{FilePath: f.FilePath, Content: newContent})
+				delete(editedMap, f.FilePath)
+			} else {
+				fullSnapshot = append(fullSnapshot, f)
+			}
+		}
+		for path, content := range editedMap {
+			fullSnapshot = append(fullSnapshot, models.GitlabFileChange{FilePath: path, Content: content})
+		}
+		p.createMicrofrontendSnapshot(ctx, fullSnapshot, edited.ChangeSummary)
+	}
+
+	description := edited.ChangeSummary
+	if description == "" {
+		description = "✅ Visual edit applied successfully."
+	}
+
+	log.Printf("[VISUAL EDIT] ✅ done — %d files pushed to u-gen, summary=%s", len(edited.Files), description)
+	return &models.ParsedClaudeResponse{Description: description}, nil
 }
 
 // ============================================================================

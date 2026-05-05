@@ -63,9 +63,16 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 	)
 
 	processor := newChatProcessor(
-		h, service, h.baseConf,
-		chatId, chat.GetProjectId(), resourceEnvID, realProjectID,
-		authInfo.GetUserIdAuth(), authInfo.GetClientTypeId(), authInfo.GetRoleId(),
+		h,
+		service,
+		h.baseConf,
+		chatId,
+		chat.GetProjectId(),
+		resourceEnvID,
+		realProjectID,
+		authInfo.GetUserIdAuth(),
+		authInfo.GetClientTypeId(),
+		authInfo.GetRoleId(),
 		c.GetHeader("Authorization"),
 	)
 	processor.microFrontendId = userMessage.MicrofrontendID
