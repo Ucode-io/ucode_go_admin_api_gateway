@@ -341,6 +341,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			mcpProject.GET("/list", h.V1.GetMcpProjects)
 			mcpProject.GET("/:mcp_project_id", h.V1.GetMcpProjectFiles)
 			mcpProject.PUT("/:mcp_project_id", h.V1.SaveMcpProject)
+			mcpProject.PUT("/:mcp_project_id/manual-save", h.V1.ManualSaveMcpProject)
 			mcpProject.DELETE("/:mcp_project_id", h.V1.DeleteMcpProject)
 		}
 
