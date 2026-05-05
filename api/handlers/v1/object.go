@@ -1532,6 +1532,10 @@ func (h *HandlerV1) GetListInExcel(c *gin.Context) {
 		objectRequest.Data["client_type_id_from_token"] = tokenInfo.GetClientTypeId()
 	}
 
+	if _, hasOffset := objectRequest.Data["utc_offset"]; !hasOffset {
+		objectRequest.Data["utc_offset"] = float64(5)
+	}
+
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
 	if err != nil {
 		h.HandleResponse(c, status_http.InvalidArgument, err.Error())
