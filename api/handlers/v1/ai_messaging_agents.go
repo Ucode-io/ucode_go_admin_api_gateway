@@ -233,6 +233,8 @@ func (p *ChatProcessor) generateCodeSingle(ctx context.Context, clarified string
 		}
 	}
 
+	project.Files = injectMissingCriticalFiles(project.Files, plan.ProjectType)
+
 	// Always force-inject .env with correct credentials — Claude may guess wrong values.
 	project.Files = injectEnvFile(project.Files, p.baseConf.UcodeBaseUrl, apiKey)
 
@@ -548,6 +550,7 @@ func (p *ChatProcessor) generateCodeChunkedAdminPanel(ctx context.Context, clari
 		}
 	}
 
+	merged.Files = injectMissingCriticalFiles(merged.Files, plan.ProjectType)
 	merged.Files = injectEnvFile(merged.Files, p.baseConf.UcodeBaseUrl, apiKey)
 
 	emit.Emit(
@@ -1005,6 +1008,69 @@ func injectEnvFile(files []models.ProjectFile, baseURL, apiKey string) []models.
 	return append(files, models.ProjectFile{Path: ".env", Content: content})
 }
 
+func injectMissingCriticalFiles(files []models.ProjectFile, projectType string) []models.ProjectFile {
+	if projectType != "landing" && projectType != "web" {
+		return files
+	}
+
+	existing := make(map[string]struct{}, len(files))
+	for _, f := range files {
+		existing[f.Path] = struct{}{}
+	}
+
+	// src/lib/utils.ts — always needed by UI Kit components (import { cn } from '@/lib/utils')
+	if _, ok := existing["src/lib/utils.ts"]; !ok {
+		log.Printf("[inject] src/lib/utils.ts missing — injecting fallback")
+		files = append(files, models.ProjectFile{
+			Path: "src/lib/utils.ts",
+			Content: `import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+`,
+		})
+	}
+
+	// src/App.tsx — entry point; if missing the virtual FS build crashes immediately
+	if _, ok := existing["src/App.tsx"]; !ok {
+		log.Printf("[inject] src/App.tsx missing — injecting minimal stub")
+		if projectType == "web" {
+			files = append(files, models.ProjectFile{
+				Path: "src/App.tsx",
+				Content: `import React from 'react';
+import './index.css';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="*" element={<div className="flex items-center justify-center min-h-screen"><p className="text-muted-foreground">Loading...</p></div>} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+`,
+			})
+		} else {
+			files = append(files, models.ProjectFile{
+				Path: "src/App.tsx",
+				Content: `import React from 'react';
+import './index.css';
+
+export default function App() {
+  return <div className="min-h-screen bg-background text-foreground" />;
+}
+`,
+			})
+		}
+	}
+
+	return files
+}
+
 func (p *ChatProcessor) inspectCode(ctx context.Context, userQuestion, filesContext string, chatHistory []models.ChatMessage, imageURLs []string) (string, error) {
 	content := chat_prompts.BuildInspectorMessage(userQuestion, filesContext)
 	messages := buildMessagesWithHistory(chatHistory, buildContentBlocksWithImages(content, imageURLs))
@@ -1339,6 +1405,7 @@ func (p *ChatProcessor) generateCodeChunkedWebsite(ctx context.Context, clarifie
 		}
 	}
 
+	merged.Files = injectMissingCriticalFiles(merged.Files, plan.ProjectType)
 	merged.Files = injectEnvFile(merged.Files, p.baseConf.UcodeBaseUrl, apiKey)
 
 	emit.Emit(SSEEvent{Type: EvProgress, Icon: "shield-check", Percent: 80, Message: "Проверяю качество кода", Value: fmt.Sprintf("%d файлов", len(merged.Files))})

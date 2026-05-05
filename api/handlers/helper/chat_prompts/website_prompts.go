@@ -316,8 +316,10 @@ CRITICAL: export buttonVariants.
 ====================================
 FILE GENERATION ORDER (TYPE C — STRICT)
 ====================================
+SCROLL-TO-TOP RULE: NEVER create src/components/ui/scroll-to-top.tsx — implement the button INLINE in Layout.tsx.
+
  1. src/index.css                     (@import fonts + :root vars + @keyframes + textures)
- 2. src/lib/utils.ts                  (cn helper — ALWAYS generate)
+ 2. src/lib/utils.ts                  (cn helper — ALWAYS generate, REQUIRED by all UI components)
  3. src/lib/api.ts                    (ONLY if project has API tables)
  4. src/types.ts                      (ONLY if project has API tables — entity interfaces)
  5. src/components/ui/button.tsx
@@ -393,7 +395,7 @@ QUALITY
 [ ] framer-motion whileInView on sections in all pages
 [ ] Contact page has react-hook-form with validation
 [ ] All images have onError fallback
-[ ] Scroll-to-top button on all pages (or in Layout)
+[ ] Scroll-to-top button implemented INLINE in Layout.tsx (NEVER as a separate file)
 [ ] Mobile hamburger working
 
 RESPONSIVE
@@ -416,18 +418,20 @@ MOBILE:      Hamburger menu with slide-down links, stacked layouts
 	PromptWebsiteManifestGenerator = `You are a senior frontend architect planning file structure for a React multi-page website.
 Given a project description and UI structure, output a complete file manifest grouped by dependency level.
 
-GROUP 0 — FOUNDATION (exactly 6 files, generated first, sequential):
-  Include EXACTLY these 6 files — no more, no fewer:
+GROUP 0 — FOUNDATION (exactly 7 files, generated first, sequential):
+  Include EXACTLY these 7 files — no more, no fewer:
     src/index.css                              CSS variables + Google Fonts + global Tailwind styles
+    src/lib/utils.ts                           cn() helper — REQUIRED by all UI Kit components
     src/main.tsx                               React entry point
     src/App.tsx                                BrowserRouter + Routes to ALL pages from all groups
-    src/components/layout/Layout.tsx           Wraps every page: <Navbar/> + {children} + <Footer/>
+    src/components/layout/Layout.tsx           Wraps every page: <Navbar/> + {children} + <Footer/> + inline scroll-to-top button
     src/components/layout/Navbar.tsx           Sticky responsive navbar with hamburger mobile menu
     src/components/layout/Footer.tsx           Footer with navigation links and branding
 
   DO NOT include src/types.ts (no CRUD needed for static websites).
   DO NOT include src/lib/api.ts or hook files unless UI structure explicitly requires data fetching.
   NEVER put src/components/ui/* in Group 0.
+  NEVER add a separate scroll-to-top file — implement it inline inside Layout.tsx.
 
 GROUP 1 — UI KIT (generated after Group 0, before pages, sequential):
   id=1, name="UI Kit"
@@ -453,11 +457,12 @@ EXPORTS RULE:
   Pages: just the default export function name (e.g. HomePage).
 
 CONSTRAINTS:
-  - Group 0 has exactly 6 files — no exceptions
+  - Group 0 has exactly 7 files — no exceptions
   - Group 1 has ui/* files only (no layout, no page logic)
   - Groups 2..N have 1–2 page files each
   - Pages depend only on Groups 0 and 1 — never on each other
-  - Total files: 6 + 4–8 ui + 4–8 pages = 14–22 files`
+  - Total files: 7 + 4–8 ui + 4–8 pages = 15–23 files
+  - NEVER create src/components/ui/scroll-to-top.tsx — scroll-to-top is inline in Layout.tsx`
 
 	PromptWebsitePageCoder = `You are a senior React frontend engineer implementing ONE PAGE of a cinematic multi-page website.
 
