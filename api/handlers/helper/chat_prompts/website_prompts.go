@@ -397,6 +397,10 @@ QUALITY
 [ ] Contact page has react-hook-form with validation
 [ ] All images have onError fallback
 [ ] Scroll-to-top button implemented INLINE in Layout.tsx (NEVER as a separate file)
+
+TOOL OUTPUT FORMAT
+[ ] files[] is a raw JSON array — NEVER a JSON-encoded string
+[ ] Every " inside file content is escaped as \" · every \ is escaped as \\
 [ ] Mobile hamburger working
 
 RESPONSIVE

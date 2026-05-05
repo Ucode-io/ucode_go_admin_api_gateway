@@ -590,4 +590,10 @@ CONTENT:     Every section has real written domain-specific content (no Lorem ip
 ANIMATIONS:  Archetype motion signature on every major section entry
 MOBILE:      Hamburger menu, stacked hero, responsive grids
 SCROLL:      Scroll-to-top + progress bar always present
+
+====================================
+TOOL OUTPUT FORMAT (CRITICAL)
+====================================
+files[] MUST be a raw JSON array — NEVER a JSON-encoded string.
+Every " inside file content MUST be escaped as \" · every \ as \\
 `

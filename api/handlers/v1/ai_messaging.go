@@ -796,8 +796,9 @@ func buildAPIConfigBlock(baseURL, apiKey string, plan *models.ArchitectPlan) str
 	}
 
 	sb.WriteString(fmt.Sprintf(
-		"\n====================================\nAPI CONFIGURATION FOR FRONTEND\n====================================\n%s: %s\n%s: %s\n\nTables to use:\n",
+		"\n====================================\nAPI CONFIGURATION FOR FRONTEND\n====================================\n%s: %s\n%s: %s\n\nREQUIRED axios headers (BOTH — never omit either):\n  headers: { 'Authorization': 'API-KEY', '%s': import.meta.env.%s }\n\nTables to use:\n",
 		envBaseURLKey, baseURL, envAPIKeyKey, apiKey,
+		envAPIKeyKey, envAPIKeyKey,
 	))
 
 	for _, t := range plan.Tables {

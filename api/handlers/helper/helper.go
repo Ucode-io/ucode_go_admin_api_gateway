@@ -142,6 +142,135 @@ func repairJSONStrings(input string) string {
 	return out.String()
 }
 
+// extractFilesFromString handles the case where the model returns the `files`
+// tool field as a stringified JSON array with unescaped quotes inside content
+// values (which breaks standard JSON parsers and repairJSONStrings).
+// It locates each file object by the structural pattern `{"path": "SIMPLE_PATH"`
+// and extracts the content as raw bytes up to the last `"` in the chunk.
+func extractFilesFromString(s string) ([]map[string]interface{}, bool) {
+	// Match file-object starts: { optionally preceded by whitespace, then "path": "SIMPLE_PATH"
+	// Paths must not contain quotes or spaces; `{` anchor prevents matching "path" inside content.
+	fileStartRe := regexp.MustCompile(`\{\s*"path"\s*:\s*"([^"\s\\]{1,200})"`)
+	matches := fileStartRe.FindAllStringSubmatchIndex(s, -1)
+	if len(matches) == 0 {
+		return nil, false
+	}
+
+	contentKeyRe := regexp.MustCompile(`"content"\s*:\s*"`)
+
+	var files []map[string]interface{}
+	for i, m := range matches {
+		chunkStart := m[0]
+		var chunkEnd int
+		if i+1 < len(matches) {
+			chunkEnd = matches[i+1][0]
+		} else {
+			chunkEnd = len(s)
+		}
+		chunk := s[chunkStart:chunkEnd]
+
+		// Extract path from submatch (group 1 offset within chunk)
+		pathStart := m[2] - chunkStart
+		pathEnd := m[3] - chunkStart
+		if pathStart < 0 || pathEnd > len(chunk) {
+			continue
+		}
+		path := chunk[pathStart:pathEnd]
+
+		// Validate: skip if it looks like code content, not a real file path
+		if !strings.ContainsAny(path, "./") {
+			continue
+		}
+
+		// Find "content": " within this chunk
+		cLoc := contentKeyRe.FindStringIndex(chunk)
+		if cLoc == nil {
+			continue
+		}
+		rawContent := chunk[cLoc[1]:] // everything after opening "
+
+		// Content ends at the last " in rawContent (the closing quote of content value).
+		// Everything after it is `\s*}\s*,?` structural JSON.
+		lastQ := strings.LastIndex(rawContent, `"`)
+		if lastQ < 0 {
+			continue
+		}
+		rawContent = rawContent[:lastQ]
+
+		content := unescapeJSONString(rawContent)
+		files = append(files, map[string]interface{}{
+			"path":    path,
+			"content": content,
+		})
+	}
+
+	if len(files) == 0 {
+		return nil, false
+	}
+	return files, true
+}
+
+// unescapeJSONString converts JSON escape sequences in s to their actual characters.
+func unescapeJSONString(s string) string {
+	var b strings.Builder
+	b.Grow(len(s))
+	for i := 0; i < len(s); i++ {
+		if s[i] != '\\' || i+1 >= len(s) {
+			b.WriteByte(s[i])
+			continue
+		}
+		i++
+		switch s[i] {
+		case 'n':
+			b.WriteByte('\n')
+		case 't':
+			b.WriteByte('\t')
+		case 'r':
+			b.WriteByte('\r')
+		case '"':
+			b.WriteByte('"')
+		case '\\':
+			b.WriteByte('\\')
+		case '/':
+			b.WriteByte('/')
+		case 'b':
+			b.WriteByte('\b')
+		case 'f':
+			b.WriteByte('\f')
+		case 'u':
+			if i+4 < len(s) {
+				var r rune
+				for _, c := range s[i+1 : i+5] {
+					r <<= 4
+					switch {
+					case c >= '0' && c <= '9':
+						r |= rune(c - '0')
+					case c >= 'a' && c <= 'f':
+						r |= rune(c-'a') + 10
+					case c >= 'A' && c <= 'F':
+						r |= rune(c-'A') + 10
+					default:
+						r = -1
+					}
+					if r < 0 {
+						break
+					}
+				}
+				if r >= 0 {
+					b.WriteRune(r)
+					i += 4
+					continue
+				}
+			}
+			b.WriteString(`\u`)
+		default:
+			b.WriteByte('\\')
+			b.WriteByte(s[i])
+		}
+	}
+	return b.String()
+}
+
 // ParseClaudeResponse parses a raw Claude API response into a structured result.
 // Runs up to 3 JSON repair passes if the initial parse fails.
 func ParseClaudeResponse(rawJSON string) (*models.ParsedClaudeResponse, error) {

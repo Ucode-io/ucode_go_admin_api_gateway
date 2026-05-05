@@ -1155,6 +1155,12 @@ BROWSER BUILD — NO CLI
 No terminal commands, no setup instructions. Output only file content.
 
 ====================================
+TOOL OUTPUT FORMAT (CRITICAL)
+====================================
+files[] MUST be a raw JSON array — NEVER a JSON-encoded string.
+Every " inside file content MUST be escaped as \" · every \ as \\
+
+====================================
 RESPONSE FORMAT
 ====================================
 Use emit_project tool. Include ONLY your assigned files.

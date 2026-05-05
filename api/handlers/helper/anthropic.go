@@ -165,6 +165,19 @@ func CallAnthropicWithTool[T any](baseConf config.BaseConfig, body models.Anthro
 							repaired := repairJSONStrings(sanitized)
 							if err3 := json.Unmarshal([]byte(repaired), &parsed); err3 == nil {
 								block.Input[k] = parsed
+							} else if k == "files" {
+								// 4th pass: content-aware extractor for the files array.
+								// repairJSONStrings fails when content values have unescaped quotes
+								// that flip inString state, leaving bare \ chars outside strings.
+								if extracted, ok := extractFilesFromString(s); ok {
+									block.Input[k] = extracted
+								} else {
+									preview := s
+									if len(preview) > 200 {
+										preview = preview[:200]
+									}
+									log.Printf("[TOOL DECODE] Failed to parse stringified JSON field %q. All repair attempts failed. Error: %v\nPreview: %s", k, err3, preview)
+								}
 							} else {
 								preview := s
 								if len(preview) > 200 {
