@@ -17,7 +17,6 @@ import (
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 )
 
-// chunkResult carries the result of one parallel feature chunk generation.
 type chunkResult struct {
 	group   models.ManifestGroup
 	project *models.GeneratedProject
@@ -29,7 +28,30 @@ type visualEditOutput struct {
 	ChangeSummary string               `json:"change_summary"`
 }
 
-// recordTokenUsage ships token counts to the billing service asynchronously.
+func callWithTool[T any](p *ChatProcessor, _ context.Context, req models.AnthropicToolRequest, timeout time.Duration, description string) (*T, error) {
+	log.Printf("[AI] Calling Anthropic (tool use): %s", description)
+
+	result, usage, stopReason, err := helper.CallAnthropicWithTool[T](p.baseConf, req, timeout)
+
+	p.recordTokenUsage(usage, req.Model, description)
+
+	if err != nil {
+		if errors.Is(err, helper.ErrMaxTokens) {
+			log.Printf("[AI] max_tokens for %s (in=%d out=%d)", description, usage.InputTokens, usage.OutputTokens)
+			return nil, fmt.Errorf(
+				"❌ Generation stopped: the project is too large to generate in one pass (used %d output tokens). "+
+					"Please describe a smaller scope or break the request into parts.",
+				usage.OutputTokens,
+			)
+		}
+		log.Printf("[AI] error for %s: %v", description, err)
+		return nil, err
+	}
+
+	log.Printf("[AI] ✅ %s (stop=%s in=%d out=%d)", description, stopReason, usage.InputTokens, usage.OutputTokens)
+	return result, nil
+}
+
 func (p *ChatProcessor) recordTokenUsage(usage models.ClaudeUsage, model, description string) {
 	if usage.InputTokens == 0 && usage.OutputTokens == 0 {
 		return
@@ -55,34 +77,24 @@ func (p *ChatProcessor) recordTokenUsage(usage models.ClaudeUsage, model, descri
 	}()
 }
 
-func callWithTool[T any](p *ChatProcessor, _ context.Context, req models.AnthropicToolRequest, timeout time.Duration, description string) (*T, error) {
-	log.Printf("[AI] Calling Anthropic (tool use): %s", description)
-
-	result, usage, stopReason, err := helper.CallAnthropicWithTool[T](p.baseConf, req, timeout)
-
-	// Record token usage regardless of error — partial usage still counts.
-	p.recordTokenUsage(usage, req.Model, description)
-
+func (p *ChatProcessor) callAnthropicWithTracking(_ context.Context, req models.AnthropicRequest, timeout time.Duration, description string) (string, error) {
+	log.Printf("[AI] Calling Anthropic: %s", description)
+	response, err := helper.CallAnthropicAPI(p.baseConf, req, timeout)
 	if err != nil {
-		if errors.Is(err, helper.ErrMaxTokens) {
-			log.Printf("[AI] max_tokens for %s (in=%d out=%d)", description, usage.InputTokens, usage.OutputTokens)
-			return nil, fmt.Errorf(
-				"❌ Generation stopped: the project is too large to generate in one pass (used %d output tokens). "+
-					"Please describe a smaller scope or break the request into parts.",
-				usage.OutputTokens,
-			)
-		}
-		log.Printf("[AI] error for %s: %v", description, err)
-		return nil, err
+		log.Printf("[AI] Anthropic error for %s: %v", description, err)
+		return "", err
 	}
 
-	log.Printf("[AI] ✅ %s (stop=%s in=%d out=%d)", description, stopReason, usage.InputTokens, usage.OutputTokens)
-	return result, nil
+	var parsed struct {
+		Usage models.ClaudeUsage `json:"usage"`
+	}
+	if jsonErr := json.Unmarshal([]byte(response), &parsed); jsonErr == nil {
+		p.recordTokenUsage(parsed.Usage, req.Model, description)
+	}
+
+	return response, nil
 }
 
-// callArchitect asks the architect agent to plan the project structure and design system.
-// existingSchemaCtx (optional): JSON list of existing tables — pass when adding a new microfrontend
-// to an existing project so the architect knows which APIs are already available.
 func (p *ChatProcessor) callArchitect(ctx context.Context, clarified string, imageURLs []string, chatHistory []models.ChatMessage, existingSchemaCtx string) (*models.ArchitectPlan, error) {
 	userMsg := clarified
 	if existingSchemaCtx != "" {
@@ -110,11 +122,6 @@ func (p *ChatProcessor) callArchitect(ctx context.Context, clarified string, ima
 	return plan, nil
 }
 
-// generateCode routes to the correct generation strategy based on project type.
-//
-//	admin_panel → chunked (250K+ output, parallel CRUD features)
-//	web         → chunked website (parallel pages, Sonnet model)
-//	landing     → single call (Sonnet model, focused landing prompt)
 func (p *ChatProcessor) generateCode(ctx context.Context, clarified string, imageURLs []string, chatHistory []models.ChatMessage, plan *models.ArchitectPlan, apiKey string) (*models.ParsedClaudeResponse, error) {
 	switch plan.ProjectType {
 	case "admin_panel":
@@ -129,7 +136,6 @@ func (p *ChatProcessor) generateCode(ctx context.Context, clarified string, imag
 	}
 }
 
-// generateCodeSingle is the original single-call path for landing pages and websites.
 func (p *ChatProcessor) generateCodeSingle(ctx context.Context, clarified string, imageURLs []string, chatHistory []models.ChatMessage, plan *models.ArchitectPlan, apiKey string) (*models.ParsedClaudeResponse, error) {
 	prompt := clarified + "\n\n" + buildAPIConfigBlock(p.baseConf.UcodeBaseUrl, apiKey, plan)
 	if p.baseConf.UnsplashAccessKey != "" {
@@ -144,9 +150,9 @@ func (p *ChatProcessor) generateCodeSingle(ctx context.Context, clarified string
 	}
 
 	var scaffoldFiles []models.ProjectFile
-	if plan.ProjectType == "admin_panel" {
-		contextFiles := GetTemplateContext("admin_panel")
-		scaffoldFiles = GetTemplateScaffold("admin_panel")
+	if plan.ProjectType == "admin_panel" || plan.ProjectType == "web" {
+		contextFiles := GetTemplateContext()
+		scaffoldFiles = GetTemplateScaffold()
 		if len(contextFiles) > 0 {
 			var templateCtx strings.Builder
 			templateCtx.WriteString("\n====================================\n")
@@ -185,7 +191,6 @@ func (p *ChatProcessor) generateCodeSingle(ctx context.Context, clarified string
 			"Подключаю валидацию форм...",
 			"Финализирую код проекта...",
 		},
-		18, 82, 360*time.Second,
 		func() error {
 			var e error
 			coderModel := p.baseConf.LandingCoderModel
@@ -255,39 +260,31 @@ func (p *ChatProcessor) generateCodeSingle(ctx context.Context, clarified string
 func (p *ChatProcessor) generateCodeChunkedAdminPanel(ctx context.Context, clarified string, imageURLs []string, chatHistory []models.ChatMessage, plan *models.ArchitectPlan, apiKey string) (*models.ParsedClaudeResponse, error) {
 	log.Printf("[chunked] starting chunked generation for admin_panel: %s", plan.ProjectName)
 
-	emit := p.emitter()
+	var (
+		emit     = p.emitter()
+		manifest *models.ProjectManifest
+	)
 
-	// Phase 1: manifest — reuse eager manifest from buildNewProject if available, otherwise generate.
-	var manifest *models.ProjectManifest
 	if p.prebuiltManifest != nil {
 		manifest = p.prebuiltManifest
 		p.prebuiltManifest = nil
 		log.Printf("[chunked] using prebuilt manifest: %d groups", len(manifest.Groups))
 		emit.Emit(SSEEvent{Type: EvProgress, Icon: "list-tree", Message: "Структура файлов готова", Percent: 23})
 	} else {
-		emit.Emit(SSEEvent{Type: EvProgress, Icon: "list-tree", Message: "Планирую структуру файлов и зависимости...", Percent: 16})
-		if err := withHeartbeat(ctx, emit,
-			[]string{
-				"Планирую структуру файлов...",
-				"Определяю зависимости между модулями...",
-				"Разбиваю проект на фичи...",
-				"Рассчитываю порядок генерации...",
-				"Строю граф зависимостей...",
-			},
-			16, 23, 60*time.Second,
-			func() error { var e error; manifest, e = p.generateManifest(ctx, plan, chatHistory); return e },
-		); err != nil || len(manifest.Groups) < 2 {
-			log.Printf("[chunked] manifest failed or insufficient groups (%v) — falling back to single call", err)
-			return p.generateCodeSingle(ctx, clarified, imageURLs, chatHistory, plan, apiKey)
-		}
+		return nil, fmt.Errorf("generate code: no manifest available")
 	}
 
-	// Split into foundation (group 0), UI kit (group 1), and feature groups (2..N).
-	var foundationGroup models.ManifestGroup
-	var uiKitGroup models.ManifestGroup
-	var featureGroups []models.ManifestGroup
+	var (
+		foundationGroup models.ManifestGroup
+		uiKitGroup      models.ManifestGroup
+		featureGroups   []models.ManifestGroup
+
+		totalFiles = 0
+	)
 
 	for _, g := range manifest.Groups {
+		totalFiles += len(g.Files)
+
 		switch g.ID {
 		case 0:
 			foundationGroup = g
@@ -300,37 +297,32 @@ func (p *ChatProcessor) generateCodeChunkedAdminPanel(ctx context.Context, clari
 
 	if len(foundationGroup.Files) == 0 || len(featureGroups) == 0 {
 		log.Printf("[chunked] manifest missing foundation or features — falling back to single call")
-		return p.generateCodeSingle(ctx, clarified, imageURLs, chatHistory, plan, apiKey)
+		return nil, fmt.Errorf("generate code: foundation or features missing in manifest")
 	}
 
-	featureNames := make([]string, 0, len(featureGroups))
-	for _, g := range featureGroups {
-		featureNames = append(featureNames, g.Name)
+	var featureNames = make([]string, 0, len(featureGroups))
+
+	for _, group := range featureGroups {
+		featureNames = append(featureNames, group.Name)
 	}
-	totalFiles := 0
-	for _, g := range manifest.Groups {
-		totalFiles += len(g.Files)
-	}
-	emit.Emit(SSEEvent{
-		Type:    EvManifest,
-		Icon:    "git-branch",
-		Percent: 23,
-		Message: "Структура проекта спланирована",
-		Value:   fmt.Sprintf("%d файлов · %d фич", totalFiles, len(featureGroups)),
-		Data: ManifestEventData{
-			TotalFiles:   totalFiles,
-			GroupCount:   len(manifest.Groups),
-			FeatureNames: featureNames,
+
+	emit.Emit(
+		SSEEvent{
+			Type:    EvManifest,
+			Icon:    "git-branch",
+			Percent: 23,
+			Message: "Структура проекта спланирована",
+			Value:   fmt.Sprintf("%d файлов · %d фич", totalFiles, len(featureGroups)),
+			Data: ManifestEventData{
+				TotalFiles:   totalFiles,
+				GroupCount:   len(manifest.Groups),
+				FeatureNames: featureNames,
+			},
 		},
-	})
+	)
 	log.Printf("[chunked] manifest: foundation=%d files, uikit=%d files, feature_groups=%d", len(foundationGroup.Files), len(uiKitGroup.Files), len(featureGroups))
 
 	time.Sleep(1000 * time.Millisecond)
-
-	// Phase 2: Foundation + UI Kit in parallel.
-	// ui/* components only import cn() (pre-built template) and CSS variables by name.
-	// shared/* components import type names from @/types — available from manifest exports.
-	// No actual Foundation file contents are needed by UIKit at generation time.
 
 	apiConfig := buildAPIConfigBlock(p.baseConf.UcodeBaseUrl, apiKey, plan)
 	if p.baseConf.UnsplashAccessKey != "" {
@@ -344,37 +336,37 @@ func (p *ChatProcessor) generateCodeChunkedAdminPanel(ctx context.Context, clari
 		}
 	}
 
-	emit.Emit(SSEEvent{
-		Type:    EvProgress,
-		Icon:    "layers",
-		Message: "Генерирую фундамент и UI Kit параллельно",
-		Value:   fmt.Sprintf("%d + %d файлов", len(foundationGroup.Files), len(uiKitGroup.Files)),
-		Percent: 24,
-	})
+	emit.Emit(
+		SSEEvent{
+			Type:    EvProgress,
+			Icon:    "layers",
+			Message: "Генерирую фундамент и UI Kit параллельно",
+			Value:   fmt.Sprintf("%d + %d файлов", len(foundationGroup.Files), len(uiKitGroup.Files)),
+			Percent: 24,
+		},
+	)
 
 	var (
 		foundation *models.GeneratedProject
 		uiKit      *models.GeneratedProject
 		foundErr   error
-	)
 
-	var wg sync.WaitGroup
+		wg sync.WaitGroup
+	)
 
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		var e error
 		for attempt := 1; attempt <= 2; attempt++ {
-			foundation, e = p.generateFoundation(ctx, clarified, imageURLs, chatHistory, apiConfig, foundationGroup, manifest)
-			if e == nil {
+			foundation, foundErr = p.generateFoundation(ctx, clarified, imageURLs, chatHistory, apiConfig, foundationGroup, manifest)
+			if foundErr == nil {
 				break
 			}
-			if attempt < 2 && !errors.Is(e, helper.ErrMaxTokens) {
-				log.Printf("[chunked] foundation attempt %d failed (%v) — retrying", attempt, e)
+			if attempt < 2 && !errors.Is(foundErr, helper.ErrMaxTokens) {
+				log.Printf("[chunked] foundation attempt %d failed (%v) — retrying", attempt, foundErr)
 			}
 		}
-		if e != nil {
-			foundErr = e
+		if foundErr != nil {
 			return
 		}
 		foundation.Files = filterToGroup(foundation.Files, foundationGroup)
@@ -386,11 +378,12 @@ func (p *ChatProcessor) generateCodeChunkedAdminPanel(ctx context.Context, clari
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
+			var err error
+
 			stub := buildFoundationStub(foundationGroup)
-			var e error
-			uiKit, e = p.generateUIKit(ctx, uiKitGroup, stub, apiConfig, p.baseConf.CoderModel)
-			if e != nil {
-				log.Printf("[chunked] UI kit parallel failed (%v) — continuing without it", e)
+			uiKit, err = p.generateUIKit(ctx, uiKitGroup, stub, p.baseConf.CoderModel)
+			if err != nil {
+				log.Printf("[chunked] UI kit parallel failed (%v) — continuing without it", foundErr)
 				return
 			}
 			uiKit.Files = filterToGroup(uiKit.Files, uiKitGroup)
@@ -399,8 +392,7 @@ func (p *ChatProcessor) generateCodeChunkedAdminPanel(ctx context.Context, clari
 		}()
 	}
 
-	// Single heartbeat covers both parallel phases — messages interleave naturally.
-	if err := withHeartbeat(ctx, emit,
+	err := withHeartbeat(ctx, emit,
 		[]string{
 			"Генерирую layout, sidebar и навигацию...",
 			"Создаю UI компоненты и дизайн-систему...",
@@ -411,47 +403,48 @@ func (p *ChatProcessor) generateCodeChunkedAdminPanel(ctx context.Context, clari
 			"Формирую глобальные стили и CSS переменные...",
 			"Настраиваю роутинг и App.tsx...",
 		},
-		24, 50, 180*time.Second,
 		func() error {
 			wg.Wait()
 			return foundErr
 		},
-	); err != nil {
+	)
+	if err != nil {
 		log.Printf("[chunked] foundation failed (%v) — falling back to single call", err)
 		return p.generateCodeSingle(ctx, clarified, imageURLs, chatHistory, plan, apiKey)
 	}
 
-	// Phase 3: feature groups — parallel goroutines, each gets foundation + UI kit context.
 	allSharedFiles := make([]models.ProjectFile, 0, len(foundation.Files)+len(uiKitGroup.Files))
 	allSharedFiles = append(allSharedFiles, foundation.Files...)
 	if uiKit != nil {
 		allSharedFiles = append(allSharedFiles, uiKit.Files...)
 	}
+
 	foundationCtx := buildFoundationContext(allSharedFiles)
 	manifestSummary := buildManifestSummary(manifest)
 
 	var uiKitAPISummary string
+
 	if uiKit != nil {
 		uiKitAPISummary = buildUIKitAPISummary(uiKit.Files)
 	}
 
 	totalChunks := len(featureGroups)
 	time.Sleep(1000 * time.Millisecond)
-	emit.Emit(SSEEvent{
-		Type:    EvProgress,
-		Icon:    "zap",
-		Percent: 51,
-		Message: "Запускаю параллельную генерацию фич",
-		Value:   fmt.Sprintf("%d фич одновременно", totalChunks),
-	})
+	emit.Emit(
+		SSEEvent{
+			Type:    EvProgress,
+			Icon:    "zap",
+			Percent: 51,
+			Message: "Запускаю параллельную генерацию фич",
+			Value:   fmt.Sprintf("%d фич одновременно", totalChunks),
+		},
+	)
 
 	results := make(chan chunkResult, totalChunks)
 
-	// Heartbeat goroutine for the parallel chunk phase — emits every 12 s so the
-	// client sees activity even if no chunk completes for a while.
 	stopChunkHB := make(chan struct{})
 	go func() {
-		ticker := time.NewTicker(12 * time.Second)
+		ticker := time.NewTicker(15 * time.Second)
 		defer ticker.Stop()
 		tick := 0
 		for {
@@ -468,30 +461,34 @@ func (p *ChatProcessor) generateCodeChunkedAdminPanel(ctx context.Context, clari
 			}
 		}
 	}()
-	defer close(stopChunkHB) // guaranteed cleanup regardless of early-return path
+	defer close(stopChunkHB)
 
 	for i, group := range featureGroups {
-		g := group
-		startDelay := time.Duration(i) * 120 * time.Millisecond // stagger chunk starts so events don't burst
+		startDelay := time.Duration(i) * 120 * time.Millisecond
 		go func() {
 			if startDelay > 0 {
 				time.Sleep(startDelay)
 			}
-			emit.Emit(SSEEvent{
-				Type:    EvChunkStart,
-				Icon:    "package",
-				Message: "Генерирую фичу",
-				Value:   g.Name,
-				Data:    map[string]any{"feature": g.Name},
-			})
-			proj, chunkErr := p.generateChunkAdminPanel(ctx, g, foundationCtx, manifestSummary, apiConfig, uiKitAPISummary)
-			results <- chunkResult{group: g, project: proj, err: chunkErr}
+			emit.Emit(
+				SSEEvent{
+					Type:    EvChunkStart,
+					Icon:    "package",
+					Message: "Генерирую фичу",
+					Value:   group.Name,
+					Data:    map[string]any{"feature": group.Name},
+				},
+			)
+			proj, chunkErr := p.generateChunkAdminPanel(ctx, group, foundationCtx, manifestSummary, apiConfig, uiKitAPISummary)
+			results <- chunkResult{group: group, project: proj, err: chunkErr}
 		}()
 	}
 
-	var successChunks []*models.GeneratedProject
-	var failedCount int
-	completedChunks := 0
+	var (
+		successChunks   []*models.GeneratedProject
+		failedCount     int
+		completedChunks = 0
+	)
+
 	for range featureGroups {
 		res := <-results
 		completedChunks++
@@ -522,7 +519,6 @@ func (p *ChatProcessor) generateCodeChunkedAdminPanel(ctx context.Context, clari
 			successChunks = append(successChunks, res.project)
 		}
 	}
-	// stopChunkHB closed by deferred call above
 
 	if failedCount == totalChunks {
 		return nil, fmt.Errorf("chunked: all %d feature chunks failed", totalChunks)
@@ -531,16 +527,15 @@ func (p *ChatProcessor) generateCodeChunkedAdminPanel(ctx context.Context, clari
 		log.Printf("[chunked] WARNING: %d/%d feature chunks failed — deploying partial project", failedCount, totalChunks)
 	}
 
-	// Merge foundation + UI kit + successful feature chunks.
 	var allChunks []*models.GeneratedProject
+
 	if uiKit != nil {
 		allChunks = append(allChunks, uiKit)
 	}
 	allChunks = append(allChunks, successChunks...)
 	merged := mergeChunks(foundation, allChunks)
 
-	// Add scaffold files (package.json, vite.config.ts, etc.).
-	scaffoldFiles := GetTemplateScaffold("admin_panel")
+	scaffoldFiles := GetTemplateScaffold()
 	if len(scaffoldFiles) > 0 {
 		generatedPaths := make(map[string]struct{}, len(merged.Files))
 		for _, f := range merged.Files {
@@ -555,25 +550,28 @@ func (p *ChatProcessor) generateCodeChunkedAdminPanel(ctx context.Context, clari
 
 	merged.Files = injectEnvFile(merged.Files, p.baseConf.UcodeBaseUrl, apiKey)
 
-	// ── POST-GENERATION VALIDATION + REPAIR ──
-	emit.Emit(SSEEvent{
-		Type:    EvProgress,
-		Icon:    "shield-check",
-		Percent: 80,
-		Message: "Проверяю качество кода",
-		Value:   fmt.Sprintf("%d файлов", len(merged.Files)),
-	})
+	emit.Emit(
+		SSEEvent{
+			Type:    EvProgress,
+			Icon:    "shield-check",
+			Percent: 80,
+			Message: "Проверяю качество кода",
+			Value:   fmt.Sprintf("%d файлов", len(merged.Files)),
+		},
+	)
 	validationErrors := validateGeneratedProject(merged.Files, merged.Env)
 	errorCount, _ := logValidationResults(validationErrors)
 
 	if errorCount > 0 {
-		emit.Emit(SSEEvent{
-			Type:    EvRepair,
-			Icon:    "wrench",
-			Percent: 82,
-			Message: "Автоматически исправляю проблемы",
-			Value:   fmt.Sprintf("%d ошибок", errorCount),
-		})
+		emit.Emit(
+			SSEEvent{
+				Type:    EvRepair,
+				Icon:    "wrench",
+				Percent: 82,
+				Message: "Автоматически исправляю проблемы",
+				Value:   fmt.Sprintf("%d ошибок", errorCount),
+			},
+		)
 		log.Printf("[chunked] 🔧 attempting Haiku repair for %d broken files...", errorCount)
 		repaired := p.repairBrokenFiles(ctx, merged.Files, validationErrors)
 		if len(repaired) > 0 {
@@ -590,6 +588,7 @@ func (p *ChatProcessor) generateCodeChunkedAdminPanel(ctx context.Context, clari
 
 func (p *ChatProcessor) generateManifest(ctx context.Context, plan *models.ArchitectPlan, chatHistory []models.ChatMessage) (*models.ProjectManifest, error) {
 	var sb strings.Builder
+
 	fmt.Fprintf(&sb, "Project: %s (type: %s)\n\n", plan.ProjectName, plan.ProjectType)
 	if len(plan.Tables) > 0 {
 		sb.WriteString("Tables:\n")
@@ -612,15 +611,19 @@ func (p *ChatProcessor) generateManifest(ctx context.Context, plan *models.Archi
 		systemPrompt = chat_prompts.PromptWebsiteManifestGenerator
 	}
 
-	messages := buildMessagesWithHistory(chatHistory, []models.ContentBlock{
-		{Type: "text", Text: sb.String()},
-	})
+	messages := buildMessagesWithHistory(
+		chatHistory, []models.ContentBlock{
+			{
+				Type: "text", Text: sb.String(),
+			},
+		},
+	)
 
 	manifest, err := callWithTool[models.ProjectManifest](
 		p, ctx,
 		models.AnthropicToolRequest{
 			Model:      p.baseConf.PlannerModel,
-			MaxTokens:  8000,
+			MaxTokens:  15000,
 			System:     systemPrompt,
 			Messages:   messages,
 			Tools:      []models.ClaudeFunctionTool{helper.ToolEmitManifest},
@@ -635,20 +638,9 @@ func (p *ChatProcessor) generateManifest(ctx context.Context, plan *models.Archi
 	return manifest, nil
 }
 
-// generateFoundation generates Group 0 (shared) files using the full PromptAdminPanelGenerator.
-// It receives the full manifest so App.tsx can include routes to all feature pages.
-func (p *ChatProcessor) generateFoundation(
-	ctx context.Context,
-	clarified string,
-	imageURLs []string,
-	chatHistory []models.ChatMessage,
-	apiConfig string,
-	foundationGroup models.ManifestGroup,
-	manifest *models.ProjectManifest,
-) (*models.GeneratedProject, error) {
+func (p *ChatProcessor) generateFoundation(ctx context.Context, clarified string, imageURLs []string, chatHistory []models.ChatMessage, apiConfig string, foundationGroup models.ManifestGroup, manifest *models.ProjectManifest) (*models.GeneratedProject, error) {
 	var sb strings.Builder
 
-	// Foundation instruction FIRST — before anything else so Claude reads it before processing context.
 	sb.WriteString("====================================\n")
 	sb.WriteString("⚠ CHUNKED GENERATION — FOUNDATION PHASE ONLY ⚠\n")
 	sb.WriteString("====================================\n")
@@ -657,13 +649,11 @@ func (p *ChatProcessor) generateFoundation(
 	sb.WriteString("EMIT ONLY the files in 'YOUR FILES TO GENERATE'. No exceptions.\n\n")
 
 	sb.WriteString("YOUR FILES TO GENERATE (Group 0 — Foundation):\n")
+
 	for _, f := range foundationGroup.Files {
 		fmt.Fprintf(&sb, "  %s  (exports: [%s])\n", f.Path, strings.Join(f.Exports, ", "))
 	}
 
-	// Mandate comprehensive types — the single most impactful foundation instruction.
-	// Feature chunks import ALL entity types from '@/types'. If types are missing or wrong here,
-	// every feature chunk that uses them will produce TypeScript errors.
 	sb.WriteString("\n====================================\n")
 	sb.WriteString("CRITICAL — src/types.ts MUST contain ALL entity interfaces\n")
 	sb.WriteString("====================================\n")
@@ -676,7 +666,6 @@ func (p *ChatProcessor) generateFoundation(
 	sb.WriteString("⚠ DO NOT include NavItem or TableColumn — they are PRE-BUILT in src/types/common.ts.\n")
 	sb.WriteString("  Layout files that need NavItem MUST import from '@/types/common', never from '@/types'.\n\n")
 
-	// Collect page paths from feature groups so App.tsx has complete routing.
 	sb.WriteString("\nFEATURE PAGES — add routes to App.tsx but DO NOT implement them:\n")
 	for _, g := range manifest.Groups {
 		if g.ID == 0 {
@@ -699,8 +688,7 @@ func (p *ChatProcessor) generateFoundation(
 	sb.WriteString("\n\n")
 	sb.WriteString(apiConfig)
 
-	// Inject template context (same as single-call path).
-	contextFiles := GetTemplateContext("admin_panel")
+	contextFiles := GetTemplateContext()
 	if len(contextFiles) > 0 {
 		sb.WriteString("\n====================================\n")
 		sb.WriteString("PRE-BUILT UTILITIES — MANDATORY USAGE\n")
@@ -746,13 +734,7 @@ func (p *ChatProcessor) generateFoundation(
 	return project, nil
 }
 
-func (p *ChatProcessor) generateUIKit(
-	ctx context.Context,
-	uiKitGroup models.ManifestGroup,
-	foundationCtx string,
-	apiConfig string,
-	coderModel string,
-) (*models.GeneratedProject, error) {
+func (p *ChatProcessor) generateUIKit(ctx context.Context, uiKitGroup models.ManifestGroup, foundationCtx string, coderModel string) (*models.GeneratedProject, error) {
 	var sb strings.Builder
 	fmt.Fprintf(&sb, "CHUNKED GENERATION — UI Kit (Group 1)\n\n")
 
@@ -789,15 +771,9 @@ func (p *ChatProcessor) generateUIKit(
 	return project, nil
 }
 
-func (p *ChatProcessor) generateChunkAdminPanel(
-	ctx context.Context,
-	group models.ManifestGroup,
-	foundationCtx string,
-	manifestSummary string,
-	apiConfig string,
-	uiKitAPISummary string,
-) (*models.GeneratedProject, error) {
+func (p *ChatProcessor) generateChunkAdminPanel(ctx context.Context, group models.ManifestGroup, foundationCtx string, manifestSummary string, apiConfig string, uiKitAPISummary string) (*models.GeneratedProject, error) {
 	var sb strings.Builder
+
 	fmt.Fprintf(&sb, "CHUNKED GENERATION — Feature Group %d: %s\n\n", group.ID, group.Name)
 
 	sb.WriteString("YOUR FILES TO IMPLEMENT (emit ONLY these):\n")
@@ -809,13 +785,10 @@ func (p *ChatProcessor) generateChunkAdminPanel(
 	sb.WriteString(apiConfig)
 	sb.WriteString("\n")
 
-	// Inject template hook files (useApi.ts, apiUtils.ts) so Claude sees the EXACT
-	// TypeScript signatures — this prevents the callback-based hallucination pattern.
 	sb.WriteString(buildTemplateHooksContext())
 
 	sb.WriteString(foundationCtx)
 
-	// Inject UI Kit API reference so the chunk uses exact component names and props.
 	if uiKitAPISummary != "" {
 		sb.WriteString("\n")
 		sb.WriteString(uiKitAPISummary)
@@ -959,12 +932,9 @@ func mergeChunks(foundation *models.GeneratedProject, chunks []*models.Generated
 	}
 }
 
-// buildFoundationStub creates a compact context for the UI Kit phase describing what Foundation
-// (Group 0) will produce. Used instead of actual Foundation file contents when Foundation and
-// UI Kit are generated in parallel. Provides manifest exports + standard CSS variable names —
-// everything UI Kit needs to avoid re-implementing Foundation files.
 func buildFoundationStub(foundationGroup models.ManifestGroup) string {
 	var sb strings.Builder
+
 	sb.WriteString("====================================\n")
 	sb.WriteString("FOUNDATION (Group 0) — ALREADY GENERATED (import freely, NEVER re-emit)\n")
 	sb.WriteString("====================================\n")
@@ -988,9 +958,6 @@ func buildFoundationStub(foundationGroup models.ManifestGroup) string {
 	return sb.String()
 }
 
-// buildTemplateHooksContext injects useApi.ts and apiUtils.ts source into chunk prompts.
-// Feature chunks don't get the full template context (only foundation does), so without
-// this they hallucinate callback-based hook signatures that don't exist in the template.
 func buildTemplateHooksContext() string {
 	critical := map[string]bool{
 		"src/hooks/useApi.ts":     true,
@@ -1003,7 +970,7 @@ func buildTemplateHooksContext() string {
 	sb.WriteString("====================================\n")
 	sb.WriteString("These files ALREADY EXIST in the project. Import from them using the paths below.\n")
 	sb.WriteString("Use EXACTLY these function signatures — do not invent alternative forms.\n\n")
-	for _, f := range GetTemplateContext("admin_panel") {
+	for _, f := range GetTemplateContext() {
 		if critical[f.Path] {
 			fmt.Fprintf(&sb, "### %s\n```typescript\n%s\n```\n\n", f.Path, f.Content)
 		}
@@ -1011,12 +978,13 @@ func buildTemplateHooksContext() string {
 	return sb.String()
 }
 
-// injectEnvFile always writes a correct .env into the file list, overriding whatever
-// Claude may have generated. We have the real values in Go — no need to trust the AI here.
 func injectEnvFile(files []models.ProjectFile, baseURL, apiKey string) []models.ProjectFile {
-	envBaseURLKey := "VITE_API_BASE_URL"
-	envAPIKeyKey := "VITE_X_API_KEY"
-	for _, f := range GetTemplateContext("admin_panel") {
+	var (
+		envBaseURLKey = "VITE_API_BASE_URL"
+		envAPIKeyKey  = "VITE_X_API_KEY"
+	)
+
+	for _, f := range GetTemplateContext() {
 		if strings.Contains(f.Path, "config/axios") || strings.Contains(f.Path, "config/env") {
 			if strings.Contains(f.Content, "VITE_BASE_URL") && !strings.Contains(f.Content, "VITE_API_BASE_URL") {
 				envBaseURLKey = "VITE_BASE_URL"
@@ -1128,50 +1096,31 @@ func (p *ChatProcessor) editCode(ctx context.Context, clarified string, plan *mo
 	}, nil
 }
 
-func (p *ChatProcessor) callAnthropicWithTracking(_ context.Context, req models.AnthropicRequest, timeout time.Duration, description string) (string, error) {
-	log.Printf("[AI] Calling Anthropic: %s", description)
-	response, err := helper.CallAnthropicAPI(p.baseConf, req, timeout)
-	if err != nil {
-		log.Printf("[AI] Anthropic error for %s: %v", description, err)
-		return "", err
-	}
-
-	var parsed struct {
-		Usage models.ClaudeUsage `json:"usage"`
-	}
-	if jsonErr := json.Unmarshal([]byte(response), &parsed); jsonErr == nil {
-		p.recordTokenUsage(parsed.Usage, req.Model, description)
-	}
-
-	return response, nil
-}
-
 func (p *ChatProcessor) generateCodeChunkedWebsite(ctx context.Context, clarified string, imageURLs []string, chatHistory []models.ChatMessage, plan *models.ArchitectPlan, apiKey string) (*models.ParsedClaudeResponse, error) {
 	log.Printf("[chunked-web] starting chunked website generation: %s", plan.ProjectName)
-	emit := p.emitter()
+	var (
+		emit     = p.emitter()
+		manifest *models.ProjectManifest
+	)
 
-	// Phase 1: manifest — reuse eager manifest if available.
-	var manifest *models.ProjectManifest
 	if p.prebuiltManifest != nil {
 		manifest = p.prebuiltManifest
 		p.prebuiltManifest = nil
 		log.Printf("[chunked-web] using prebuilt manifest: %d groups", len(manifest.Groups))
 		emit.Emit(SSEEvent{Type: EvProgress, Icon: "list-tree", Message: "Структура страниц готова", Percent: 23})
 	} else {
-		emit.Emit(SSEEvent{Type: EvProgress, Icon: "list-tree", Message: "Планирую структуру страниц...", Percent: 16})
-		if err := withHeartbeat(ctx, emit,
-			[]string{"Планирую страницы сайта...", "Строю структуру компонентов...", "Определяю зависимости..."},
-			16, 23, 60*time.Second,
-			func() error { var e error; manifest, e = p.generateManifest(ctx, plan, chatHistory); return e },
-		); err != nil || len(manifest.Groups) < 2 {
-			log.Printf("[chunked-web] manifest failed (%v) — falling back to single call", err)
-			return p.generateCodeSingle(ctx, clarified, imageURLs, chatHistory, plan, apiKey)
-		}
+		return nil, fmt.Errorf("chunked-web: no manifest available")
 	}
 
-	var foundationGroup, uiKitGroup models.ManifestGroup
-	var pageGroups []models.ManifestGroup
+	var (
+		foundationGroup, uiKitGroup models.ManifestGroup
+		pageGroups                  []models.ManifestGroup
+
+		totalFiles = 0
+	)
 	for _, g := range manifest.Groups {
+		totalFiles += len(g.Files)
+
 		switch g.ID {
 		case 0:
 			foundationGroup = g
@@ -1181,33 +1130,33 @@ func (p *ChatProcessor) generateCodeChunkedWebsite(ctx context.Context, clarifie
 			pageGroups = append(pageGroups, g)
 		}
 	}
+
 	if len(foundationGroup.Files) == 0 || len(pageGroups) == 0 {
 		log.Printf("[chunked-web] manifest missing foundation or pages — falling back to single call")
 		return p.generateCodeSingle(ctx, clarified, imageURLs, chatHistory, plan, apiKey)
 	}
 
-	pageNames := make([]string, 0, len(pageGroups))
+	var pageNames = make([]string, 0, len(pageGroups))
+
 	for _, g := range pageGroups {
 		pageNames = append(pageNames, g.Name)
 	}
-	totalFiles := 0
-	for _, g := range manifest.Groups {
-		totalFiles += len(g.Files)
-	}
-	emit.Emit(SSEEvent{
-		Type:    EvManifest,
-		Icon:    "git-branch",
-		Percent: 23,
-		Message: "Структура сайта спланирована",
-		Value:   fmt.Sprintf("%d файлов · %d страниц", totalFiles, len(pageGroups)),
-		Data: ManifestEventData{
-			TotalFiles:   totalFiles,
-			GroupCount:   len(manifest.Groups),
-			FeatureNames: pageNames,
-		},
-	})
 
-	// Build shared API config block (contains design tokens + image pool).
+	emit.Emit(
+		SSEEvent{
+			Type:    EvManifest,
+			Icon:    "git-branch",
+			Percent: 23,
+			Message: "Структура сайта спланирована",
+			Value:   fmt.Sprintf("%d файлов · %d страниц", totalFiles, len(pageGroups)),
+			Data: ManifestEventData{
+				TotalFiles:   totalFiles,
+				GroupCount:   len(manifest.Groups),
+				FeatureNames: pageNames,
+			},
+		},
+	)
+
 	apiConfig := buildAPIConfigBlock(p.baseConf.UcodeBaseUrl, apiKey, plan)
 	if p.baseConf.UnsplashAccessKey != "" {
 		emit.Emit(SSEEvent{Type: EvProgress, Icon: "image", Message: "Подбираю изображения...", Percent: 24})
@@ -1218,7 +1167,6 @@ func (p *ChatProcessor) generateCodeChunkedWebsite(ctx context.Context, clarifie
 		}
 	}
 
-	// Phase 2: Foundation + UI Kit in parallel (Sonnet for speed).
 	time.Sleep(500 * time.Millisecond)
 	emit.Emit(SSEEvent{Type: EvProgress, Icon: "layers", Message: "Генерирую Layout, Navbar, Footer и UI Kit параллельно...", Percent: 25})
 
@@ -1226,24 +1174,23 @@ func (p *ChatProcessor) generateCodeChunkedWebsite(ctx context.Context, clarifie
 		foundation *models.GeneratedProject
 		uiKit      *models.GeneratedProject
 		foundErr   error
+
+		wg sync.WaitGroup
 	)
-	var wg sync.WaitGroup
 
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		var e error
 		for attempt := 1; attempt <= 2; attempt++ {
-			foundation, e = p.generateWebsiteFoundation(ctx, clarified, imageURLs, chatHistory, apiConfig, foundationGroup, manifest)
-			if e == nil {
+			foundation, foundErr = p.generateWebsiteFoundation(ctx, clarified, imageURLs, chatHistory, apiConfig, foundationGroup, manifest)
+			if foundErr == nil {
 				break
 			}
-			if attempt < 2 && !errors.Is(e, helper.ErrMaxTokens) {
-				log.Printf("[chunked-web] foundation attempt %d failed (%v) — retrying", attempt, e)
+			if attempt < 2 && !errors.Is(foundErr, helper.ErrMaxTokens) {
+				log.Printf("[chunked-web] foundation attempt %d failed (%v) — retrying", attempt, foundErr)
 			}
 		}
-		if e != nil {
-			foundErr = e
+		if foundErr != nil {
 			return
 		}
 		foundation.Files = filterToGroup(foundation.Files, foundationGroup)
@@ -1256,7 +1203,7 @@ func (p *ChatProcessor) generateCodeChunkedWebsite(ctx context.Context, clarifie
 			defer wg.Done()
 			stub := buildFoundationStub(foundationGroup)
 			var e error
-			uiKit, e = p.generateUIKit(ctx, uiKitGroup, stub, apiConfig, p.baseConf.LandingCoderModel)
+			uiKit, e = p.generateUIKit(ctx, uiKitGroup, stub, p.baseConf.LandingCoderModel)
 			if e != nil {
 				log.Printf("[chunked-web] UI kit failed (%v) — continuing without it", e)
 				return
@@ -1266,7 +1213,7 @@ func (p *ChatProcessor) generateCodeChunkedWebsite(ctx context.Context, clarifie
 		}()
 	}
 
-	if err := withHeartbeat(ctx, emit,
+	err := withHeartbeat(ctx, emit,
 		[]string{
 			"Генерирую Layout и навигацию...",
 			"Создаю Navbar и Footer...",
@@ -1274,24 +1221,26 @@ func (p *ChatProcessor) generateCodeChunkedWebsite(ctx context.Context, clarifie
 			"Создаю UI компоненты...",
 			"Формирую глобальные стили и CSS переменные...",
 		},
-		25, 50, 180*time.Second,
 		func() error { wg.Wait(); return foundErr },
-	); err != nil {
+	)
+	if err != nil {
 		log.Printf("[chunked-web] foundation failed (%v) — falling back to single call", err)
 		return p.generateCodeSingle(ctx, clarified, imageURLs, chatHistory, plan, apiKey)
 	}
 
-	// Phase 3: Pages in parallel (each gets foundation context).
 	allSharedFiles := make([]models.ProjectFile, 0, len(foundation.Files))
 	allSharedFiles = append(allSharedFiles, foundation.Files...)
+
 	if uiKit != nil {
 		allSharedFiles = append(allSharedFiles, uiKit.Files...)
 	}
+
 	foundationCtx := buildFoundationContext(allSharedFiles)
 	manifestSummary := buildManifestSummary(manifest)
 
 	totalPages := len(pageGroups)
 	time.Sleep(500 * time.Millisecond)
+
 	emit.Emit(SSEEvent{
 		Type:    EvProgress,
 		Icon:    "zap",
@@ -1324,20 +1273,22 @@ func (p *ChatProcessor) generateCodeChunkedWebsite(ctx context.Context, clarifie
 	defer close(stopHB)
 
 	for i, group := range pageGroups {
-		g := group
 		startDelay := time.Duration(i) * 100 * time.Millisecond
 		go func() {
 			if startDelay > 0 {
 				time.Sleep(startDelay)
 			}
-			emit.Emit(SSEEvent{Type: EvChunkStart, Icon: "file-text", Message: "Генерирую страницу", Value: g.Name, Data: map[string]any{"feature": g.Name}})
-			proj, chunkErr := p.generateWebsitePage(ctx, g, foundationCtx, manifestSummary, apiConfig)
-			pageResults <- chunkResult{group: g, project: proj, err: chunkErr}
+			emit.Emit(SSEEvent{Type: EvChunkStart, Icon: "file-text", Message: "Генерирую страницу", Value: group.Name, Data: map[string]any{"feature": group.Name}})
+			proj, chunkErr := p.generateWebsitePage(ctx, group, foundationCtx, manifestSummary, apiConfig)
+			pageResults <- chunkResult{group: group, project: proj, err: chunkErr}
 		}()
 	}
 
-	var successChunks []*models.GeneratedProject
-	var failedCount int
+	var (
+		successChunks []*models.GeneratedProject
+		failedCount   int
+	)
+
 	for i := range pageGroups {
 		res := <-pageResults
 		completed := i + 1
@@ -1368,13 +1319,14 @@ func (p *ChatProcessor) generateCodeChunkedWebsite(ctx context.Context, clarifie
 	}
 
 	var allChunks []*models.GeneratedProject
+
 	if uiKit != nil {
 		allChunks = append(allChunks, uiKit)
 	}
 	allChunks = append(allChunks, successChunks...)
 	merged := mergeChunks(foundation, allChunks)
 
-	scaffoldFiles := GetTemplateScaffold("web")
+	scaffoldFiles := GetTemplateScaffold()
 	if len(scaffoldFiles) > 0 {
 		generatedPaths := make(map[string]struct{}, len(merged.Files))
 		for _, f := range merged.Files {
@@ -1408,17 +1360,7 @@ func (p *ChatProcessor) generateCodeChunkedWebsite(ctx context.Context, clarifie
 	return &models.ParsedClaudeResponse{Project: merged}, nil
 }
 
-// generateWebsiteFoundation generates Group 0 files (Layout, Navbar, Footer, App.tsx, index.css)
-// for a multi-page website using the website generator prompt and Sonnet model.
-func (p *ChatProcessor) generateWebsiteFoundation(
-	ctx context.Context,
-	clarified string,
-	imageURLs []string,
-	chatHistory []models.ChatMessage,
-	apiConfig string,
-	foundationGroup models.ManifestGroup,
-	manifest *models.ProjectManifest,
-) (*models.GeneratedProject, error) {
+func (p *ChatProcessor) generateWebsiteFoundation(ctx context.Context, clarified string, imageURLs []string, chatHistory []models.ChatMessage, apiConfig string, foundationGroup models.ManifestGroup, manifest *models.ProjectManifest) (*models.GeneratedProject, error) {
 	var sb strings.Builder
 
 	sb.WriteString("====================================\n")
@@ -1483,14 +1425,7 @@ func (p *ChatProcessor) generateWebsiteFoundation(
 	return project, nil
 }
 
-// generateWebsitePage generates one page file with full foundation context injected.
-func (p *ChatProcessor) generateWebsitePage(
-	ctx context.Context,
-	group models.ManifestGroup,
-	foundationCtx string,
-	manifestSummary string,
-	apiConfig string,
-) (*models.GeneratedProject, error) {
+func (p *ChatProcessor) generateWebsitePage(ctx context.Context, group models.ManifestGroup, foundationCtx string, manifestSummary string, apiConfig string) (*models.GeneratedProject, error) {
 	var sb strings.Builder
 	fmt.Fprintf(&sb, "CHUNKED GENERATION — Website Page: %s\n\n", group.Name)
 

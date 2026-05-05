@@ -37,7 +37,6 @@ func (p *ChatProcessor) runMicrofrontendEdit(ctx context.Context, clarified, fil
 			"Планирую порядок изменений...",
 			"Проверяю зависимости между файлами...",
 		},
-		5, 18, 60*time.Second,
 		func() error {
 			var e error
 			plan, e = p.planChanges(ctx, clarified, fileGraphJSON, chatHistory, len(imageURLs) > 0)
@@ -94,7 +93,6 @@ func (p *ChatProcessor) runMicrofrontendEdit(ctx context.Context, clarified, fil
 			"Финализирую правки...",
 			"Генерирую обновлённый код...",
 		},
-		20, 85, 180*time.Second,
 		func() error {
 			var e error
 			edited, e = p.editCode(ctx, clarified, plan, filesContext, chatHistory, imageURLs)
@@ -104,8 +102,6 @@ func (p *ChatProcessor) runMicrofrontendEdit(ctx context.Context, clarified, fil
 		return nil, err
 	}
 
-	// With tool use, edited.Project is always populated (the tool schema requires files[]).
-	// An empty files list means the model has nothing to change — return description only.
 	if edited.Project == nil || len(edited.Project.Files) == 0 {
 		log.Printf("[MICROFE EDIT] editor returned no files — nothing to push")
 		return &models.ParsedClaudeResponse{Description: edited.Description}, nil

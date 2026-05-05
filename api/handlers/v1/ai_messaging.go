@@ -107,7 +107,6 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 			"Оцениваю сложность и объём...",
 			"Финализирую архитектуру проекта...",
 		},
-		3, 12, 90*time.Second,
 		func() error {
 			var err error
 			plan, err = p.callArchitect(ctx, clarified, imageURLs, chatHistory, "")
@@ -149,46 +148,42 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 
 	log.Printf("[new-project] architect done: name=%q type=%q design=%s", plan.ProjectName, plan.ProjectType, plan.Design.DesignInspiration)
 
-	time.Sleep(1500 * time.Millisecond) // let user read the plan
+	time.Sleep(1500 * time.Millisecond)
 
-	emit.Emit(SSEEvent{
-		Type:    EvProgress,
-		Icon:    "folder-plus",
-		Message: "Создаю проект параллельно с планированием файлов...",
-		Percent: 13,
-	})
+	emit.Emit(
+		SSEEvent{
+			Type:    EvProgress,
+			Icon:    "folder-plus",
+			Message: "Создаю проект параллельно с планированием файлов...",
+			Percent: 13,
+		},
+	)
 
-	// Provision backend and (for admin panels only) generate manifest concurrently.
-	// Manifest is only consumed by generateCodeChunked — skip it for landing/website to save time.
 	var (
 		projectData   *models.ProjectData
 		provisionErr  error
 		eagerManifest *models.ProjectManifest
+
+		provWg sync.WaitGroup
 	)
 
-	var provWg sync.WaitGroup
-	// Manifest is used by generateCodeChunked (admin_panel) and generateCodeChunkedWebsite (web).
+	provWg.Add(1)
+	go func() {
+		defer provWg.Done()
+		projectData, provisionErr = p.provisionBackend(ctx, plan.ProjectName, p.mcpProjectId)
+	}()
+
 	if plan.ProjectType == "admin_panel" || plan.ProjectType == "web" {
-		provWg.Add(2)
-		go func() {
-			defer provWg.Done()
-			projectData, provisionErr = p.provisionBackend(ctx, plan.ProjectName, p.mcpProjectId)
-		}()
-		go func() {
-			defer provWg.Done()
-			m, err := p.generateManifest(ctx, plan, chatHistory)
-			if err == nil && m != nil && len(m.Groups) >= 2 {
-				eagerManifest = m
-				log.Printf("[new-project] eager manifest ready: %d groups", len(m.Groups))
-			} else {
-				log.Printf("[new-project] eager manifest skipped (err=%v) — will retry in chunked", err)
-			}
-		}()
-	} else {
 		provWg.Add(1)
 		go func() {
 			defer provWg.Done()
-			projectData, provisionErr = p.provisionBackend(ctx, plan.ProjectName, p.mcpProjectId)
+
+			eagerManifest, err = p.generateManifest(ctx, plan, chatHistory)
+			if err == nil && eagerManifest != nil && len(eagerManifest.Groups) >= 2 {
+				log.Printf("[new-project] eager manifest ready: %d groups", len(eagerManifest.Groups))
+			} else {
+				log.Printf("[new-project] eager manifest skipped (err=%v) — will retry in chunked", err)
+			}
 		}()
 	}
 
@@ -203,16 +198,19 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 		p.prebuiltManifest = eagerManifest
 	}
 
-	emit.Emit(SSEEvent{
-		Type:    EvProgress,
-		Icon:    "database",
-		Percent: 15,
-		Message: "Создаю таблицы в базе данных",
-		Value:   fmt.Sprintf("%d таблиц", len(plan.Tables)),
-	})
+	emit.Emit(
+		SSEEvent{
+			Type:    EvProgress,
+			Icon:    "database",
+			Percent: 15,
+			Message: "Создаю таблицы в базе данных",
+			Value:   fmt.Sprintf("%d таблиц", len(plan.Tables)),
+		},
+	)
 
 	go func(bPlan *models.ArchitectPlan, resourceEnvId, ucodeProjectId, userId, envId string) {
-		if err := createBackendFromPlan(context.Background(), bPlan, resourceEnvId, ucodeProjectId, userId, envId, p.service, emit); err != nil {
+		err = createBackendFromPlan(context.Background(), bPlan, resourceEnvId, ucodeProjectId, userId, envId, p.service, emit)
+		if err != nil {
 			log.Printf("[new-project] async table creation failed: %v", err)
 		}
 	}(plan, projectData.ResourceEnvId, projectData.UcodeProjectId, p.userId, projectData.EnvironmentId)
@@ -267,7 +265,6 @@ func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context,
 			"Оцениваю сложность и объём...",
 			"Финализирую архитектуру проекта...",
 		},
-		3, 12, 90*time.Second,
 		func() error {
 			var e error
 			plan, e = p.callArchitect(ctx, clarified, imageURLs, chatHistory, schemaCtx)
@@ -617,7 +614,6 @@ func (p *ChatProcessor) runVisualEdit(ctx context.Context, instruction string, c
 			"Проверяю совместимость...",
 			"Финализирую правки...",
 		},
-		10, 85, 120*time.Second,
 		func() error {
 			var errIn error
 			edited, errIn = callWithTool[visualEditOutput](
@@ -778,14 +774,17 @@ func truncateString(s string, maxLen int) string {
 	return string(runes[:maxLen-3]) + "..."
 }
 
-// buildAPIConfigBlock generates the API configuration + design tokens injected into the coder prompt.
 func buildAPIConfigBlock(baseURL, apiKey string, plan *models.ArchitectPlan) string {
-	// Detect the actual env variable names used in the template.
-	// The template's axios.ts may use VITE_BASE_URL or VITE_API_BASE_URL —
-	// we must match exactly to prevent CORS/404 errors.
-	envBaseURLKey := "VITE_API_BASE_URL"
-	envAPIKeyKey := "VITE_X_API_KEY"
-	for _, f := range GetTemplateContext("admin_panel") {
+
+	var (
+		envBaseURLKey = "VITE_API_BASE_URL"
+		envAPIKeyKey  = "VITE_X_API_KEY"
+
+		sb              strings.Builder
+		loginTableSlugs []string
+	)
+
+	for _, f := range GetTemplateContext() {
 		if strings.Contains(f.Path, "config/axios") || strings.Contains(f.Path, "lib/api") {
 			if strings.Contains(f.Content, "VITE_BASE_URL") && !strings.Contains(f.Content, "VITE_API_BASE_URL") {
 				envBaseURLKey = "VITE_BASE_URL"
@@ -796,13 +795,11 @@ func buildAPIConfigBlock(baseURL, apiKey string, plan *models.ArchitectPlan) str
 		}
 	}
 
-	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf(
 		"\n====================================\nAPI CONFIGURATION FOR FRONTEND\n====================================\n%s: %s\n%s: %s\n\nTables to use:\n",
 		envBaseURLKey, baseURL, envAPIKeyKey, apiKey,
 	))
 
-	var loginTableSlugs []string
 	for _, t := range plan.Tables {
 		if t.IsLoginTable {
 			loginTableSlugs = append(loginTableSlugs, t.Slug)

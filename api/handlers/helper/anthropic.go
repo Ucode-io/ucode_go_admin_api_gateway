@@ -78,13 +78,6 @@ func CallAnthropicAPI(baseConf config.BaseConfig, body models.AnthropicRequest, 
 	return string(respBytes), nil
 }
 
-// CallAnthropicWithTool sends a tool-use request to the Anthropic API and decodes
-// the first tool_use block's input field directly into *T using JSON round-trip.
-//
-// Returns (result, usage, stopReason, error).
-// Returns ErrMaxTokens when stop_reason=="max_tokens" — callers must not retry with repair.
-//
-// Use this for all structured-generation calls: architect, planner, coder, diagrams, visual edit.
 func CallAnthropicWithTool[T any](baseConf config.BaseConfig, body models.AnthropicToolRequest, timeout time.Duration) (*T, models.ClaudeUsage, string, error) {
 
 	var wire = wireToolRequest{
@@ -146,8 +139,6 @@ func CallAnthropicWithTool[T any](baseConf config.BaseConfig, body models.Anthro
 
 		for k, v := range block.Input {
 			if s, ok := v.(string); ok {
-				// Prevent parsing fields that are strictly meant to be raw text/code,
-				// even if they coincidentally look like valid JSON objects/arrays.
 				if k == "content" || k == "ui_structure" || k == "bpmn_xml" || k == "summary" || k == "change_summary" {
 					continue
 				}
