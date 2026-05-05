@@ -15,11 +15,18 @@ LAYER 1 — MCP (Foundation)
     @/hooks/useApi                    → useApiQuery, useApiMutation, useApiInfiniteQuery
     @/hooks/useAppForm                → useAppForm
     @/lib/apiUtils                    → extractList, extractCount, extractSingle
-    @/lib/utils                       → cn, formatDate, formatCurrency, getInitials, truncate, generateId
+    @/lib/utils                       → cn, formatDate, formatCurrency, formatNumber, getInitials, truncate, generateId, sleep, debounce
     @/types                           → auto-generated entity interfaces (Contact, Order, etc.) + PaginationParams, SelectOption<T>
     @/types/common                    → NavItem, TableColumn, ApiResponse, ApiError, LatLng, MapMarker (pre-built, DO NOT redeclare)
     @/config/axios                    → apiClient (default export)
     @/components/shared/AppProviders  → AppProviders
+
+  UTILS HARD BAN — these functions DO NOT EXIST in @/lib/utils:
+    ❌ formatPrice   → use formatCurrency instead
+    ❌ formatAmount  → use formatCurrency instead
+    ❌ formatMoney   → use formatCurrency instead
+    ❌ formatPriceUSD → use formatCurrency instead
+    RULE: ONLY import names listed above. Any other name crashes the build.
 
   IMPORT PATH RULES:
     NavItem, TableColumn  → ALWAYS from '@/types/common', never from '@/types'
@@ -387,25 +394,28 @@ Routing:  react-router-dom v6
 ====================================
 LUCIDE ICONS — VERIFIED SAFE LIST (lucide-react@0.441.0)
 ====================================
-BRAND/SOCIAL ICONS DO NOT EXIST in this version — NEVER import:
+⚠ CRITICAL: lucide-react@0.441.0 does NOT have many newer icons.
+  If an icon you want is NOT in this EXACT list → pick the closest alternative from the list.
+  NEVER guess. A wrong icon name causes: "SyntaxError: The requested module does not provide an export named 'XxxIcon'" — blank screen.
+
+BRAND/SOCIAL ICONS DO NOT EXIST — NEVER import:
   Github, Twitter, Instagram, Facebook, Linkedin, Youtube, Discord, Slack, Figma, Dribbble
-  For social media links use: Globe (website) · Mail (email) · ExternalLink (any link)
 
-Navigation: Home, LayoutDashboard, LayoutGrid, Menu, PanelLeft, Sidebar
-Users:      User, Users, UserPlus, UserCheck, UserX, Building, Building2, Briefcase
-CRUD:       Plus, Pencil, Trash, Trash2, Edit, Save, Copy, Eye, EyeOff, Download, Upload, Send, RefreshCw
-Arrows:     ArrowLeft, ArrowRight, ArrowUp, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, ChevronsLeft, ChevronsRight, ExternalLink
-Search:     Search, Filter, SlidersHorizontal, ListFilter
-Status:     Check, CheckCircle, CheckCircle2, X, XCircle, AlertCircle, AlertTriangle, Info, Bell, BellRing
-Charts:     BarChart, BarChart2, BarChart3, LineChart, PieChart, TrendingUp, TrendingDown, Activity
-Files:      File, FileText, FileCheck, FilePlus, Folder, FolderOpen, Paperclip, BookOpen
-Time:       Calendar, CalendarDays, Clock, Timer
-Money:      DollarSign, CreditCard, Wallet, Receipt, ShoppingCart, Package, Banknote
-Settings:   Settings, Settings2, Wrench, Key, Lock, Shield, ShieldCheck
-UI:         MoreHorizontal, MoreVertical, Maximize, Minimize, ZoomIn, ZoomOut, Move, GripVertical
-Misc:       Star, Tag, Hash, Globe, MapPin, Database, Server, Loader2, Sun, Moon, Image, Zap, Flame, Sparkles, Target, Award, ThumbsUp, Phone, Mail
+Navigation:   Home, LayoutDashboard, LayoutGrid, LayoutList, Menu, PanelLeft, Sidebar, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, ChevronsLeft, ChevronsRight
+Users:        User, Users, UserPlus, UserCheck, UserX, UserCog, Building, Building2, Briefcase, ContactRound
+CRUD:         Plus, Pencil, Trash, Trash2, Edit, Save, Copy, Eye, EyeOff, Download, Upload, Send, RefreshCw, RotateCcw
+Arrows:       ArrowLeft, ArrowRight, ArrowUp, ArrowDown, ArrowUpDown, MoveUp, MoveDown, ExternalLink
+Search:       Search, Filter, SlidersHorizontal, ListFilter, SortAsc, SortDesc
+Status:       Check, CheckCircle, CheckCircle2, X, XCircle, AlertCircle, AlertTriangle, Info, Bell, BellRing, CircleDot, Circle
+Charts:       BarChart, BarChart2, BarChart3, BarChart4, LineChart, PieChart, TrendingUp, TrendingDown, Activity
+Files:        File, FileText, FileCheck, FilePlus, FileX, Folder, FolderOpen, FolderPlus, Paperclip, BookOpen, ClipboardList
+Time:         Calendar, CalendarDays, CalendarCheck, CalendarX, Clock, Timer, Hourglass
+Money:        DollarSign, CreditCard, Wallet, Receipt, ShoppingCart, ShoppingBag, Package, Package2, Banknote, Coins
+Settings:     Settings, Settings2, Wrench, Key, Lock, Unlock, Shield, ShieldCheck, ShieldAlert
+UI:           MoreHorizontal, MoreVertical, Maximize, Maximize2, Minimize, Minimize2, ZoomIn, ZoomOut, Move, GripVertical, GripHorizontal, SquareStack
+Misc:         Star, StarOff, Tag, Hash, Globe, MapPin, Map, Database, Server, Loader2, Sun, Moon, Image, Zap, Flame, Sparkles, Target, Award, ThumbsUp, ThumbsDown, Phone, Mail, Link, Link2, QrCode, Layers, Box, ArchiveBox, Boxes, Workflow, Network, GitBranch, Code, Code2, Terminal, Cpu
 
-NEVER import icons not in this list. When unsure → use a generic icon from the list above.
+RULE: When in doubt, use a GENERIC icon: Settings for config · FileText for documents · Users for people · BarChart3 for analytics · Package for items · ShoppingCart for orders.
 
 ====================================
 LAYER 2 — UI COMPONENT GENERATION
@@ -858,10 +868,14 @@ EMIT RULES (strictly enforced):
 IMPORT RULES
 ====================================
 Foundation hooks (pre-built template — DO NOT recreate):
-  import { useApiQuery, useApiMutation } from '@/hooks/useApi'
+  import { useApiQuery, useApiMutation, useApiInfiniteQuery } from '@/hooks/useApi'
   import { useAppForm } from '@/hooks/useAppForm'
   import { extractList, extractSingle, extractCount } from '@/lib/apiUtils'
-  import { cn, formatDate, formatCurrency, getInitials } from '@/lib/utils'
+  import { cn, formatDate, formatCurrency, formatNumber, getInitials, truncate, generateId, sleep, debounce } from '@/lib/utils'
+
+UTILS HARD BAN — these names DO NOT EXIST in @/lib/utils and will crash the build:
+  ❌ formatPrice  ❌ formatAmount  ❌ formatMoney  ❌ formatPriceUSD
+  Use formatCurrency(value, 'USD') for monetary values instead.
 
 Entity types — ALWAYS from '@/types', NEVER redefine:
   import type { Contact, Lead, Company, Order } from '@/types'
@@ -1112,6 +1126,28 @@ ALWAYS add loading="lazy" and onError fallback on every <img>.
          Education          → students, library, graduation
          ⚠ NEVER use laptop/computer/screen photos for non-tech business domains
        Format: https://images.unsplash.com/photo-{ID}?auto=format&fit=crop&w=800&q=80
+
+====================================
+LUCIDE ICONS — VERIFIED SAFE LIST (lucide-react@0.441.0)
+====================================
+⚠ CRITICAL: ONLY import icons from this exact list. A wrong name = blank white screen.
+  If unsure → use generic: Settings · FileText · Users · BarChart3 · Package · ShoppingCart
+
+Navigation:   Home, LayoutDashboard, LayoutGrid, LayoutList, Menu, PanelLeft, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, ChevronsLeft, ChevronsRight
+Users:        User, Users, UserPlus, UserCheck, UserX, UserCog, Building, Building2, Briefcase
+CRUD:         Plus, Pencil, Trash, Trash2, Edit, Save, Copy, Eye, EyeOff, Download, Upload, Send, RefreshCw, RotateCcw
+Arrows:       ArrowLeft, ArrowRight, ArrowUp, ArrowDown, ArrowUpDown, ExternalLink
+Search:       Search, Filter, SlidersHorizontal, ListFilter, SortAsc, SortDesc
+Status:       Check, CheckCircle, CheckCircle2, X, XCircle, AlertCircle, AlertTriangle, Info, Bell, BellRing, CircleDot, Circle
+Charts:       BarChart, BarChart2, BarChart3, BarChart4, LineChart, PieChart, TrendingUp, TrendingDown, Activity
+Files:        File, FileText, FileCheck, FilePlus, FileX, Folder, FolderOpen, FolderPlus, Paperclip, BookOpen, ClipboardList
+Time:         Calendar, CalendarDays, CalendarCheck, CalendarX, Clock, Timer, Hourglass
+Money:        DollarSign, CreditCard, Wallet, Receipt, ShoppingCart, ShoppingBag, Package, Package2, Banknote, Coins
+Settings:     Settings, Settings2, Wrench, Key, Lock, Unlock, Shield, ShieldCheck, ShieldAlert
+UI:           MoreHorizontal, MoreVertical, Maximize, Maximize2, Minimize, Minimize2, ZoomIn, ZoomOut, Move, GripVertical, GripHorizontal
+Misc:         Star, Tag, Hash, Globe, MapPin, Map, Database, Server, Loader2, Sun, Moon, Image, Zap, Flame, Sparkles, Target, Award, ThumbsUp, Phone, Mail, Link, Link2, Layers, Box, Boxes, Workflow, Network, GitBranch, Code, Code2, Terminal, Cpu
+
+NEVER import: Github, Twitter, Instagram, Facebook, Linkedin, Youtube, Discord, Slack, Figma, Dribbble
 
 ====================================
 BROWSER BUILD — NO CLI

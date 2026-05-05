@@ -1018,19 +1018,14 @@ func injectMissingCriticalFiles(files []models.ProjectFile, projectType string) 
 		existing[f.Path] = struct{}{}
 	}
 
-	// src/lib/utils.ts — always needed by UI Kit components (import { cn } from '@/lib/utils')
 	if _, ok := existing["src/lib/utils.ts"]; !ok {
-		log.Printf("[inject] src/lib/utils.ts missing — injecting fallback")
-		files = append(files, models.ProjectFile{
-			Path: "src/lib/utils.ts",
-			Content: `import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
-
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
-`,
-		})
+		log.Printf("[inject] src/lib/utils.ts missing — injecting from template")
+		for _, tf := range GetTemplateScaffold() {
+			if tf.Path == "src/lib/utils.ts" {
+				files = append(files, tf)
+				break
+			}
+		}
 	}
 
 	// src/App.tsx — entry point; if missing the virtual FS build crashes immediately

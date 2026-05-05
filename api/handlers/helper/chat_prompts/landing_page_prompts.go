@@ -460,9 +460,10 @@ CRITICAL: export const buttonVariants (other components import it).
 FILE GENERATION ORDER (TYPE B — STRICT)
 ====================================
 SCROLL-TO-TOP RULE: NEVER create src/components/ui/scroll-to-top.tsx — implement the button INLINE in LandingPage.tsx.
+UTILS RULE: src/lib/utils.ts exports ONLY cn(). NEVER add formatPrice, formatDate, or any domain helper to utils.ts. Define format helpers INLINE in the component that needs them.
 
  1. src/index.css                     (@import fonts + :root CSS vars + @keyframes + archetype texture)
- 2. src/lib/utils.ts                  (cn helper — ALWAYS generate, REQUIRED by all UI components)
+ 2. src/lib/utils.ts                  (cn helper ONLY — export function cn(...inputs: ClassValue[]) { return twMerge(clsx(inputs)); })
  3. src/lib/api.ts                    (ONLY if project has API tables)
  4. src/components/ui/button.tsx
  5. src/components/ui/card.tsx

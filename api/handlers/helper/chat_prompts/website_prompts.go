@@ -317,9 +317,10 @@ CRITICAL: export buttonVariants.
 FILE GENERATION ORDER (TYPE C — STRICT)
 ====================================
 SCROLL-TO-TOP RULE: NEVER create src/components/ui/scroll-to-top.tsx — implement the button INLINE in Layout.tsx.
+UTILS RULE: src/lib/utils.ts exports ONLY cn(). NEVER add formatPrice, formatDate, formatCurrency, or any domain helper to utils.ts. Define format helpers INLINE in the component that needs them.
 
  1. src/index.css                     (@import fonts + :root vars + @keyframes + textures)
- 2. src/lib/utils.ts                  (cn helper — ALWAYS generate, REQUIRED by all UI components)
+ 2. src/lib/utils.ts                  (cn helper ONLY — export function cn(...inputs: ClassValue[]) { return twMerge(clsx(inputs)); })
  3. src/lib/api.ts                    (ONLY if project has API tables)
  4. src/types.ts                      (ONLY if project has API tables — entity interfaces)
  5. src/components/ui/button.tsx
@@ -469,13 +470,19 @@ CONSTRAINTS:
 ====================================
 CHUNKED MODE — CRITICAL RULES
 ====================================
-Foundation (Layout, Navbar, Footer, App.tsx, index.css) and UI Kit are already generated.
+Foundation (Layout, Navbar, Footer, App.tsx, index.css, utils.ts) and UI Kit are already generated.
 
 EMIT RULES (strictly enforced):
 1. Emit ONLY the file listed in "YOUR FILE TO IMPLEMENT"
-2. NEVER re-emit: index.css, main.tsx, App.tsx, src/components/layout/*, src/components/ui/*
+2. NEVER re-emit: index.css, main.tsx, App.tsx, src/lib/utils.ts, src/components/layout/*, src/components/ui/*
 3. Your page does NOT import Navbar or Footer directly — Layout.tsx wraps them around every page
 4. Use EXACT export names from the foundation context
+
+UTILS IMPORT RULE:
+  import { cn } from '@/lib/utils'   ← ONLY cn() is exported from utils.ts
+  NEVER import: formatPrice, formatDate, formatCurrency, getInitials from '@/lib/utils'
+  Define format helpers INLINE in this file if needed:
+    const formatPrice = (v: number) => new Intl.NumberFormat('uz-UZ').format(v) + ' сум'
 
 ====================================
 PAGE EXPORT FORMAT
