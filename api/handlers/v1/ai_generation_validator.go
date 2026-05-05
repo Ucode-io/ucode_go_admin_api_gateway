@@ -20,11 +20,13 @@ import (
 // 1. Imports from files that don't exist in the output
 // 2. Named imports that aren't exported by the target file
 // 3. Env variables referenced in code but missing from .env
+// 4. JSX/TSX syntax errors — unbalanced braces/brackets/parens
 //
 // This catches every class of error we've encountered:
 // - Missing exports (Badge.tsx lost QuoteStatusBadge)
 // - API renames (TabList → TabsList)
 // - Missing files (import from non-existent path)
+// - Esbuild "Expected > but found }" crashes (brace mismatch in JSX)
 // ============================================================================
 
 // Compiled regexps for import/export parsing — built once at startup.
@@ -192,7 +194,22 @@ func validateGeneratedProject(files []models.ProjectFile, envVars map[string]any
 		}
 	}
 
-	// Step 5: Validate env variables.
+	// Step 5: Validate JSX/TSX syntax — brace/bracket/paren balance.
+	// Unbalanced delimiters cause Esbuild crashes like "Expected > but found }".
+	for _, f := range files {
+		if !strings.HasSuffix(f.Path, ".tsx") && !strings.HasSuffix(f.Path, ".ts") {
+			continue
+		}
+		if syntaxErr := checkBraceBalance(f.Content); syntaxErr != "" {
+			errors = append(errors, ValidationError{
+				Severity: "error",
+				File:     f.Path,
+				Message:  syntaxErr,
+			})
+		}
+	}
+
+	// Step 6: Validate env variables.
 	envErrors := validateEnvVars(files, envVars)
 	errors = append(errors, envErrors...)
 
@@ -469,6 +486,169 @@ func validateEnvVars(files []models.ProjectFile, envVars map[string]any) []Valid
 	return errors
 }
 
+// checkBraceBalance scans a TypeScript/TSX file and returns an error message
+// if braces {}, brackets [], or parentheses () are unbalanced.
+// It respects string literals (single/double/backtick), comments (// and /* */),
+// and regex literals so that delimiters inside them are not counted.
+//
+// This detects the root cause of Esbuild crashes like "Expected > but found }".
+func checkBraceBalance(content string) string {
+	type delimInfo struct {
+		char byte
+		line int
+	}
+	var stack []delimInfo
+	line := 1
+	i := 0
+	n := len(content)
+
+	for i < n {
+		c := content[i]
+
+		// Track line numbers.
+		if c == '\n' {
+			line++
+			i++
+			continue
+		}
+
+		// Skip single-line comments.
+		if c == '/' && i+1 < n && content[i+1] == '/' {
+			for i < n && content[i] != '\n' {
+				i++
+			}
+			continue
+		}
+
+		// Skip block comments.
+		if c == '/' && i+1 < n && content[i+1] == '*' {
+			i += 2
+			for i+1 < n {
+				if content[i] == '\n' {
+					line++
+				}
+				if content[i] == '*' && content[i+1] == '/' {
+					i += 2
+					break
+				}
+				i++
+			}
+			continue
+		}
+
+		// Skip string literals (double quote).
+		if c == '"' {
+			i++
+			for i < n && content[i] != '"' {
+				if content[i] == '\\' {
+					i++ // skip escaped char
+				}
+				if i < n && content[i] == '\n' {
+					line++
+				}
+				i++
+			}
+			i++ // skip closing "
+			continue
+		}
+
+		// Skip string literals (single quote).
+		if c == '\'' {
+			i++
+			for i < n && content[i] != '\'' {
+				if content[i] == '\\' {
+					i++
+				}
+				if i < n && content[i] == '\n' {
+					line++
+				}
+				i++
+			}
+			i++
+			continue
+		}
+
+		// Skip template literals (backtick) — track ${} depth.
+		if c == '`' {
+			i++
+			tmplDepth := 0
+			for i < n {
+				if content[i] == '\n' {
+					line++
+				}
+				if content[i] == '\\' {
+					i += 2
+					continue
+				}
+				if content[i] == '$' && i+1 < n && content[i+1] == '{' {
+					tmplDepth++
+					i += 2
+					continue
+				}
+				if content[i] == '}' && tmplDepth > 0 {
+					tmplDepth--
+					i++
+					continue
+				}
+				if content[i] == '`' && tmplDepth == 0 {
+					i++
+					break
+				}
+				i++
+			}
+			continue
+		}
+
+		// Opening delimiters.
+		if c == '{' || c == '(' || c == '[' {
+			stack = append(stack, delimInfo{char: c, line: line})
+			i++
+			continue
+		}
+
+		// Closing delimiters.
+		if c == '}' || c == ')' || c == ']' {
+			if len(stack) == 0 {
+				return fmt.Sprintf("SYNTAX ERROR (line ~%d): unexpected closing '%c' with no matching opener — this will crash Esbuild build", line, c)
+			}
+			top := stack[len(stack)-1]
+			stack = stack[:len(stack)-1]
+			var expected byte
+			switch c {
+			case '}':
+				expected = '{'
+			case ')':
+				expected = '('
+			case ']':
+				expected = '['
+			}
+			if top.char != expected {
+				return fmt.Sprintf("SYNTAX ERROR (line ~%d): closing '%c' does not match opening '%c' at line ~%d — this will crash Esbuild build", line, c, top.char, top.line)
+			}
+			i++
+			continue
+		}
+
+		i++
+	}
+
+	if len(stack) > 0 {
+		top := stack[len(stack)-1]
+		var closerName string
+		switch top.char {
+		case '{':
+			closerName = "}"
+		case '(':
+			closerName = ")"
+		case '[':
+			closerName = "]"
+		}
+		return fmt.Sprintf("SYNTAX ERROR: unclosed '%c' opened at line ~%d is never closed (missing '%s') — this will crash Esbuild build", top.char, top.line, closerName)
+	}
+
+	return "" // balanced
+}
+
 // logValidationResults logs all validation errors and returns counts.
 func logValidationResults(errors []ValidationError) (errorCount, warningCount int) {
 	for _, e := range errors {
@@ -604,6 +784,8 @@ func (p *ChatProcessor) repairSingleFile(
 	sb.WriteString("  - Fix ONLY the listed errors. Do not rewrite unrelated code.\n")
 	sb.WriteString("  - For import errors: use correct exported names from the AVAILABLE EXPORTS list above.\n")
 	sb.WriteString("  - For 'X.displayName assigned but X not declared': it is a typo in the component name — rename the const/variable to match the displayName assignment, or fix the displayName to match the const name.\n")
+	sb.WriteString("  - For brace/bracket/paren imbalance: carefully trace through the file and find the exact location of the missing or extra delimiter. Common causes: unclosed ternary in JSX, missing closing brace in .map() callback, extra } after a component return, unclosed template literal.\n")
+	sb.WriteString("  - NEVER use angle-bracket type assertions in .tsx files (const x = <Type>value). ALWAYS use 'as' syntax (const x = value as Type).\n")
 	sb.WriteString("  - Output the complete corrected file. Never truncate.\n")
 
 	fmt.Fprintf(&sb, "\nFILE: %s\n```typescript\n%s\n```\n", f.Path, f.Content)
@@ -612,13 +794,13 @@ func (p *ChatProcessor) repairSingleFile(
 		p, ctx,
 		models.AnthropicToolRequest{
 			Model:      p.baseConf.ClaudeHaikuModel,
-			MaxTokens:  16000,
-			System:     "You are a TypeScript error repair bot. Fix only the listed errors (import errors, typos in component names, orphaned displayName assignments). Output the complete corrected file via the repair_file tool.",
+			MaxTokens:  32000,
+			System:     "You are a TypeScript/TSX error repair bot. Fix the listed errors: import mismatches, typos, displayName issues, AND syntax errors like unbalanced braces/brackets/parentheses. For brace imbalance, carefully trace each { } pair and find the mismatch. Output the complete corrected file via the repair_file tool. Never truncate.",
 			Messages:   []models.ChatMessage{{Role: "user", Content: []models.ContentBlock{{Type: "text", Text: sb.String()}}}},
 			Tools:      []models.ClaudeFunctionTool{helper.ToolRepairFile},
 			ToolChoice: helper.ForcedTool(helper.ToolRepairFile.Name),
 		},
-		90*time.Second,
+		120*time.Second,
 		fmt.Sprintf("Repairing %s", f.Path),
 	)
 	if err != nil {

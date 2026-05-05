@@ -59,6 +59,17 @@ APOSTROPHE RULE (CRITICAL — prevents build crash):
   RIGHT: <p>{"chef's table"}</p>             — wrap in JS string inside JSX expression
   RIGHT: remove apostrophe from CSS/className values entirely
 
+NO ANGLE-BRACKET TYPE ASSERTIONS (CRITICAL — crashes Esbuild in .tsx files):
+  In .tsx files, Esbuild parses angle brackets as JSX tags. Using angle-bracket syntax
+  for type assertions WILL crash the build with "Expected > but found" errors.
+  WRONG: const items = <NavItem[]>[]                — Esbuild sees <NavItem[]> as broken JSX
+  WRONG: const config = <AppConfig>{}               — Esbuild sees <AppConfig> as broken JSX
+  WRONG: const data = <Partial<User>>{ name: '' }   — same crash
+  RIGHT: const items: NavItem[] = []                — type annotation (preferred)
+  RIGHT: const items = [] as NavItem[]              — 'as' assertion (always safe in TSX)
+  RIGHT: const config = {} as AppConfig             — 'as' assertion
+  RULE: ALWAYS use 'as Type' or ': Type' annotation. NEVER use <Type> for casting in TSX.
+
 REACT ITERATOR KEYS (CRITICAL — fails ESLint react/jsx-key, crashes Vercel build):
   RULE: The 'key' prop MUST be placed on the outermost element returned by every .map() call.
   WRONG: items.map(i => <><li>{i.name}</li></>)                  — key missing entirely
@@ -639,6 +650,13 @@ TYPESCRIPT SAFETY
 
 BANNED PATTERNS — these cause TypeScript CI build failures:
 
+  ANGLE-BRACKET ASSERTION (MOST COMMON BUILD CRASH):
+    ❌ const items = <NavItem[]>[]              →  Esbuild crash: Expected ">" but found "["
+    ❌ const obj = <MyType>{}                   →  Esbuild crash: Expected ">" but found "}"
+    ✅ const items: NavItem[] = []              →  type annotation — always safe
+    ✅ const items = [] as NavItem[]            →  'as' assertion — always safe
+    ✅ const obj = {} as MyType                 →  'as' assertion — always safe
+
   RECHARTS FORMATTER — no explicit param types in callbacks:
     ❌ formatter={(value: number, name: string) => [...]}  // recharts@3 types are ValueType|undefined
     ✅ formatter={(value, name) => [...]}                  // let TS infer — applies to all chart callbacks
@@ -987,6 +1005,16 @@ DATE STATE — CRITICAL:
 ====================================
 TYPESCRIPT BUILD — BANNED PATTERNS (cause CI failures)
 ====================================
+
+ANGLE-BRACKET TYPE ASSERTION (MOST COMMON BUILD CRASH — causes "Expected > but found" in Esbuild):
+  In .tsx files, angle brackets are ALWAYS parsed as JSX. Using them for type casting crashes the build.
+  ❌ const items = <NavItem[]>[]              →  CRASH: Expected ">" but found "["
+  ❌ const obj = <MyType>{}                   →  CRASH: Expected ">" but found "}"
+  ❌ const data = <Partial<User>>{ name: '' } →  CRASH
+  ✅ const items: NavItem[] = []              →  type annotation (preferred)
+  ✅ const items = [] as NavItem[]            →  'as' assertion (always safe)
+  ✅ const obj = {} as MyType                 →  'as' assertion (always safe)
+  RULE: NEVER write <Type> before a value in .tsx. ALWAYS use ': Type' or 'as Type'.
 
 RECHARTS FORMATTER — NEVER add explicit parameter types in callbacks:
   ❌ formatter={(value: number, name: string) => [...]}   // recharts@3 uses ValueType|undefined — TS rejects narrowing
