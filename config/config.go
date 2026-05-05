@@ -119,10 +119,11 @@ type BaseConfig struct {
 
 	// Per-agent model overrides — fall back to ClaudeModel if left empty.
 	// Set via env vars so you can change one agent's model without touching the others.
-	ArchitectModel string // ARCHITECT_MODEL — heavy reasoning (tables + design planning)
-	CoderModel     string // CODER_MODEL     — large output (full project code gen)
-	PlannerModel   string // PLANNER_MODEL   — medium reasoning (change planning + visual plan)
-	InspectorModel string // INSPECTOR_MODEL — light Q&A (can use Haiku)
+	ArchitectModel    string // ARCHITECT_MODEL     — heavy reasoning (tables + design planning)
+	CoderModel        string // CODER_MODEL         — large output (admin panel code gen)
+	LandingCoderModel string // LANDING_CODER_MODEL — code gen for landing/website (default: Sonnet for speed)
+	PlannerModel      string // PLANNER_MODEL       — medium reasoning (change planning + visual plan)
+	InspectorModel    string // INSPECTOR_MODEL     — light Q&A (can use Haiku)
 
 	AutomationURL   string
 	OpenFaaSBaseUrl string
@@ -220,6 +221,12 @@ func BaseLoad() BaseConfig {
 		coderModel = config.ClaudeModel
 	}
 	config.CoderModel = coderModel
+
+	landingCoderModel := cast.ToString(GetOrReturnDefaultValue("LANDING_CODER_MODEL", ""))
+	if landingCoderModel == "" {
+		landingCoderModel = coderModel
+	}
+	config.LandingCoderModel = landingCoderModel
 
 	plannerModel := cast.ToString(GetOrReturnDefaultValue("PLANNER_MODEL", ""))
 	if plannerModel == "" {

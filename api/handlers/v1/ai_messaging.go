@@ -161,31 +161,38 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 		Percent: 13,
 	})
 
-	// Provision backend and generate manifest concurrently — both only need plan.
+	// Provision backend and (for admin panels only) generate manifest concurrently.
+	// Manifest is only consumed by generateCodeChunked — skip it for landing/website to save time.
 	var (
-		projectData    *models.ProjectData
-		provisionErr   error
-		eagerManifest  *models.ProjectManifest
+		projectData   *models.ProjectData
+		provisionErr  error
+		eagerManifest *models.ProjectManifest
 	)
 
 	var provWg sync.WaitGroup
-	provWg.Add(2)
-
-	go func() {
-		defer provWg.Done()
-		projectData, provisionErr = p.provisionBackend(ctx, plan.ProjectName, p.mcpProjectId)
-	}()
-
-	go func() {
-		defer provWg.Done()
-		m, err := p.generateManifest(ctx, plan, chatHistory)
-		if err == nil && m != nil && len(m.Groups) >= 2 {
-			eagerManifest = m
-			log.Printf("[new-project] eager manifest ready: %d groups", len(m.Groups))
-		} else {
-			log.Printf("[new-project] eager manifest skipped (err=%v) — will retry in chunked", err)
-		}
-	}()
+	if plan.ProjectType == "admin_panel" {
+		provWg.Add(2)
+		go func() {
+			defer provWg.Done()
+			projectData, provisionErr = p.provisionBackend(ctx, plan.ProjectName, p.mcpProjectId)
+		}()
+		go func() {
+			defer provWg.Done()
+			m, err := p.generateManifest(ctx, plan, chatHistory)
+			if err == nil && m != nil && len(m.Groups) >= 2 {
+				eagerManifest = m
+				log.Printf("[new-project] eager manifest ready: %d groups", len(m.Groups))
+			} else {
+				log.Printf("[new-project] eager manifest skipped (err=%v) — will retry in chunked", err)
+			}
+		}()
+	} else {
+		provWg.Add(1)
+		go func() {
+			defer provWg.Done()
+			projectData, provisionErr = p.provisionBackend(ctx, plan.ProjectName, p.mcpProjectId)
+		}()
+	}
 
 	provWg.Wait()
 

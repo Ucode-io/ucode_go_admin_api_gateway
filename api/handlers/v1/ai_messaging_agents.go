@@ -179,12 +179,17 @@ func (p *ChatProcessor) generateCodeSingle(ctx context.Context, clarified string
 		18, 82, 360*time.Second,
 		func() error {
 			var e error
+			coderModel := p.baseConf.LandingCoderModel
+			systemPrompt := helper.PromptLandingGenerator
+			if plan.ProjectType == "web" {
+				systemPrompt = helper.PromptWebsiteGenerator
+			}
 			project, e = callWithTool[models.GeneratedProject](
 				p, ctx,
 				models.AnthropicToolRequest{
-					Model:      p.baseConf.CoderModel,
+					Model:      coderModel,
 					MaxTokens:  p.baseConf.CoderMaxTokens,
-					System:     helper.PromptAdminPanelGenerator,
+					System:     systemPrompt,
 					Messages:   messages,
 					Tools:      []models.ClaudeFunctionTool{helper.ToolEmitProject},
 					ToolChoice: helper.ForcedTool(helper.ToolEmitProject.Name),
