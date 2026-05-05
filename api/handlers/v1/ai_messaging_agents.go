@@ -1459,6 +1459,25 @@ func (p *ChatProcessor) generateWebsiteFoundation(ctx context.Context, clarified
 	sb.WriteString("\n\n")
 	sb.WriteString(apiConfig)
 
+	contextFiles := GetTemplateContext()
+	if len(contextFiles) > 0 {
+		sb.WriteString("\n====================================\n")
+		sb.WriteString("PRE-BUILT UTILITIES — MANDATORY USAGE\n")
+		sb.WriteString("====================================\n")
+		sb.WriteString("The following files ALREADY EXIST in the project. You MUST import from them.\n")
+		sb.WriteString("NEVER re-implement these utilities. NEVER output these files in your response.\n")
+		sb.WriteString("NEVER create src/lib/api.ts — use @/config/axios instead.\n\n")
+		sb.WriteString("REQUIRED IMPORTS (use exactly these paths):\n")
+		sb.WriteString("  import { useApiQuery, useApiMutation } from '@/hooks/useApi'\n")
+		sb.WriteString("  import { extractList, extractSingle, extractCount } from '@/lib/apiUtils'\n")
+		sb.WriteString("  import { cn } from '@/lib/utils'\n")
+		sb.WriteString("  import { AppProviders } from '@/components/shared/AppProviders' (wrap root in App.tsx)\n\n")
+		sb.WriteString("FILE CONTENTS FOR REFERENCE:\n")
+		for _, f := range contextFiles {
+			fmt.Fprintf(&sb, "\n### %s\n```typescript\n%s\n```\n", f.Path, f.Content)
+		}
+	}
+
 	sb.WriteString("\n====================================\n")
 	sb.WriteString("REMINDER: Emit ONLY the Group 0 files listed above. DO NOT generate page content.\n")
 	sb.WriteString("====================================\n")
@@ -1499,6 +1518,9 @@ func (p *ChatProcessor) generateWebsitePage(ctx context.Context, group models.Ma
 	sb.WriteString("\n")
 	sb.WriteString(apiConfig)
 	sb.WriteString("\n")
+
+	sb.WriteString(buildTemplateHooksContext())
+
 	sb.WriteString(foundationCtx)
 
 	sb.WriteString("\n====================================\n")

@@ -7,32 +7,63 @@ var (
 ARCHITECTURE — TYPE C (MULTI-PAGE WEBSITE)
 ====================================
 You are building a multi-page website with React Router v6.
-There is NO pre-built Layer 1 infrastructure. Generate EVERYTHING from scratch.
 
 PAGES — always include: Home, About, Contact
 Add based on prompt: Services, Portfolio, Blog, Team, Pricing, Cases, Gallery
 
-GENERATE all utilities you need:
+GENERATE these utilities yourself:
   - cn() helper → generate src/lib/utils.ts
   - Any custom hook → generate the file in files[]
 
-NEVER import from: @/hooks/useApi, @/lib/apiUtils, @/types, @/components/shared/AppProviders
+PRE-BUILT INFRASTRUCTURE (already in the project — import and use, NEVER re-implement):
+  When the project has API tables, these files ALREADY EXIST:
+    @/config/axios         → apiClient (default export) — configured with Authorization and X-API-KEY headers
+    @/hooks/useApi         → useApiQuery, useApiMutation — React Query wrappers using apiClient
+    @/lib/apiUtils         → extractList, extractSingle, extractCount — response data extractors
+    @/components/shared/AppProviders → AppProviders (QueryClientProvider + Toaster)
 
-API CLIENT — generate src/lib/api.ts ONLY when project has API tables:
-  import axios from 'axios';
-  export const apiClient = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL,
-    headers: { 'Authorization': 'API-KEY', 'X-API-KEY': import.meta.env.VITE_X_API_KEY },
-  });
-  export default apiClient;
+  NEVER import from: @/types/common (website projects don't have this file)
+  NEVER re-create an axios instance or fetch wrapper — apiClient already handles auth headers.
+
+API CLIENT — USE PRE-BUILT (CRITICAL — when project has API tables):
+  WRONG — never do this:
+    ❌ const res = await fetch(API_BASE + path, { headers: apiHeaders })
+    ❌ export const apiClient = axios.create({ ... })  // in src/lib/api.ts
+    ❌ data.response   or   data.data.response   // wrong nesting
+  RIGHT — always do this:
+    ✅ import { useApiQuery, useApiMutation } from '@/hooks/useApi'
+    ✅ import { extractList, extractSingle, extractCount } from '@/lib/apiUtils'
+    ✅ const { data, isLoading } = useApiQuery<unknown>(['movies'], '/v2/items/movies')
+    ✅ const items = extractList<Movie>(data)
+
+  API RESPONSE SHAPE (all endpoints return this structure):
+    { data: { data: { count: number, response: T[] | T } } }
+    ALWAYS use extractList<T>(data) / extractSingle<T>(data) / extractCount(data).
+    NEVER manually index into the response — the nesting is 3 levels deep and easy to get wrong.
+
+  CRUD URL PATTERNS:
+    GET list:   '/v2/items/{table_slug}'
+    GET single: '/v2/items/{table_slug}/' + id
+    POST:       '/v2/items/{table_slug}'        body: { field: value, ... }
+    PUT:        '/v2/items/{table_slug}'        body: { guid: id, field: value, ... }
+    DELETE:     '/v2/items/{table_slug}/' + id
+
+  useApiQuery SIGNATURE: (queryKey, url, axiosConfig?, queryOptions?)
+    const { data, isLoading, error } = useApiQuery<unknown>(['movies'], '/v2/items/movies')
+    const movies = extractList<Movie>(data)
+
+  useApiMutation SIGNATURE: takes ONE config OBJECT:
+    const createMutation = useApiMutation<Movie, Partial<Movie>>({
+      url: '/v2/items/movies', method: 'POST',
+      successMessage: 'Created', invalidateKeys: [['movies']],
+    })
 
 App.tsx with React Router v6:
   import { BrowserRouter, Routes, Route } from 'react-router-dom';
-  import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-  const queryClient = new QueryClient();
+  import { AppProviders } from '@/components/shared/AppProviders';  // pre-built, wraps QueryClient + Toaster
   export default function App() {
     return (
-      <QueryClientProvider client={queryClient}>
+      <AppProviders>
         <BrowserRouter>
           <Layout>
             <Routes>
@@ -43,7 +74,7 @@ App.tsx with React Router v6:
             </Routes>
           </Layout>
         </BrowserRouter>
-      </QueryClientProvider>
+      </AppProviders>
     );
   }
 
@@ -321,9 +352,8 @@ UTILS RULE: src/lib/utils.ts exports ONLY cn(). NEVER add formatPrice, formatDat
 
  1. src/index.css                     (@import fonts + :root vars + @keyframes + textures)
  2. src/lib/utils.ts                  (cn helper ONLY — export function cn(...inputs: ClassValue[]) { return twMerge(clsx(inputs)); })
- 3. src/lib/api.ts                    (ONLY if project has API tables)
- 4. src/types.ts                      (ONLY if project has API tables — entity interfaces)
- 5. src/components/ui/button.tsx
+ 3. src/types.ts                      (ONLY if project has API tables — entity interfaces)
+ 4. src/components/ui/button.tsx
  6. src/components/ui/card.tsx
  7. src/components/ui/badge.tsx
  8. src/components/ui/accordion.tsx
@@ -370,9 +400,15 @@ DESIGN TOKENS
 [ ] Card and button styles per ARCHETYPE CARD + BUTTON STYLES
 
 IMPORT SAFETY
-[ ] Every non-npm import has matching file in files[]
-[ ] Zero imports from @/hooks/useApi, @/lib/apiUtils, @/types (unless generated)
+[ ] Every non-npm import has matching file in files[] OR is a pre-built template file
+[ ] Pre-built imports allowed: @/hooks/useApi, @/lib/apiUtils, @/config/axios, @/components/shared/AppProviders
 [ ] No apostrophes inside JSX expressions
+
+API CLIENT (if project has API tables)
+[ ] All API calls use useApiQuery / useApiMutation from '@/hooks/useApi' — NEVER raw fetch()
+[ ] Data extraction uses extractList / extractSingle / extractCount from '@/lib/apiUtils'
+[ ] NEVER manually index data.response or data.data.response
+[ ] App.tsx wraps routes in <AppProviders> (provides QueryClient + Toaster)
 
 COLOR TOKENS
 [ ] Zero bg-white/bg-gray-*/bg-slate-* etc.
@@ -434,7 +470,8 @@ GROUP 0 — FOUNDATION (exactly 7 files, generated first, sequential):
     src/components/layout/Footer.tsx           Footer with navigation links and branding
 
   DO NOT include src/types.ts (no CRUD needed for static websites).
-  DO NOT include src/lib/api.ts or hook files unless UI structure explicitly requires data fetching.
+  DO NOT include src/lib/api.ts — the API client is PRE-BUILT in the template (src/config/axios.ts).
+  DO NOT include hook files (src/hooks/*) — useApi is PRE-BUILT in the template.
   NEVER put src/components/ui/* in Group 0.
   NEVER add a separate scroll-to-top file — implement it inline inside Layout.tsx.
 
@@ -509,6 +546,27 @@ React and animation:
   import { useState, useEffect, useRef } from 'react'
   import { motion, useInView } from 'framer-motion'
   import { ArrowUp, ChevronRight, [others from safe list] } from 'lucide-react'
+
+API DATA FETCHING (when this page displays data from API tables):
+  Pre-built hooks and extractors ALREADY EXIST — use them, NEVER use raw fetch():
+  import { useApiQuery, useApiMutation } from '@/hooks/useApi'
+  import { extractList, extractSingle, extractCount } from '@/lib/apiUtils'
+
+  CORRECT pattern:
+    const { data, isLoading, error } = useApiQuery<unknown>(['movies'], '/v2/items/movies')
+    const movies = extractList<Movie>(data)
+    const total = extractCount(data)
+
+  API RESPONSE SHAPE: { data: { data: { count: number, response: T[] | T } } }
+    ALWAYS use extractList / extractSingle / extractCount — NEVER manually index.
+    ❌ WRONG: data?.data?.response    or    data?.response    (wrong nesting depth)
+    ✅ RIGHT: extractList<Movie>(data)  (handles the 3-level nesting correctly)
+
+  CRUD URLS:
+    GET list:   '/v2/items/{slug}'
+    GET single: '/v2/items/{slug}/' + id
+    POST:       '/v2/items/{slug}'       body: { field: value }
+    DELETE:     '/v2/items/{slug}/' + id
 
 BRAND/SOCIAL ICONS DO NOT EXIST in lucide-react@0.441.0 — NEVER import:
   Github, Twitter, Instagram, Facebook, Linkedin, Youtube, Discord
