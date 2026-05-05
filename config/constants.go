@@ -75,6 +75,8 @@ const (
 	KeyUsagePendingPattern = "api_usage:pending:*"
 	KeyUsagePendingPrefix  = "api_usage:pending:"
 	KeyUsageTotalField     = "total"
+
+	AnthropicCachingBeta = "prompt-caching-2024-07-31"
 )
 
 var (

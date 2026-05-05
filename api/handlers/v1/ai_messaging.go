@@ -9,7 +9,8 @@ import (
 	"strings"
 	"sync"
 	"time"
-
+	"ucode/ucode_go_api_gateway/api/handlers/helper"
+	"ucode/ucode_go_api_gateway/api/handlers/helper/chat_prompts"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/config"
 	as "ucode/ucode_go_api_gateway/genproto/auth_service"
@@ -26,8 +27,6 @@ const (
 	timeoutPlanner   = 300 * time.Second
 	timeoutCoder     = 900 * time.Second
 
-	// uGenBranch is the branch where all AI-generated code is pushed.
-	// master is only for pipeline triggers (created when the microfrontend is first forked).
 	uGenBranch = "u-gen"
 
 	timeoutPublishMicrofrontend = 15 * time.Minute
@@ -46,24 +45,22 @@ type ChatProcessor struct {
 	userId       string
 	clientTypeId string
 	roleId       string
-	authToken    string // forwarded to the function service for microfrontend creation
+	authToken    string
 
-	microFrontendId          string // populated after PublishAiGeneratedMicroFrontend succeeds, or from request
-	microFrontendRepoId      string // GitLab numeric project Id — stored from publish response or from request
-	microFrontendResourceEnvId string // child project's resource_env_id for storing microfrontend versions
-	newProject               bool   // true → provision a new ucode project; false → create microfrontend in current project
-	userMessage              string // original user message — used as GitLab commit message on u-gen
+	microFrontendId            string
+	microFrontendRepoId        string
+	microFrontendResourceEnvId string
+	newProject                 bool
+	userMessage                string
 
 	schemaCache    []models.TableSchema
 	schemaCachedAt time.Time
 
-	prebuiltManifest *models.ProjectManifest // set before generateCode to skip manifest phase
+	prebuiltManifest *models.ProjectManifest
 
-	emit ProgressEmitter // nil-safe via emitter(); only set for SSE generation requests
+	emit ProgressEmitter
 }
 
-// emitter returns the ProgressEmitter or a no-op if none was set.
-// Safe to call from any goroutine — p.emit is written once before generation starts.
 func (p *ChatProcessor) emitter() ProgressEmitter {
 	if p.emit == nil {
 		return noopEmitter{}
@@ -110,7 +107,6 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 			"Оцениваю сложность и объём...",
 			"Финализирую архитектуру проекта...",
 		},
-		3, 12, 90*time.Second,
 		func() error {
 			var err error
 			plan, err = p.callArchitect(ctx, clarified, imageURLs, chatHistory, "")
@@ -152,40 +148,44 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 
 	log.Printf("[new-project] architect done: name=%q type=%q design=%s", plan.ProjectName, plan.ProjectType, plan.Design.DesignInspiration)
 
-	time.Sleep(1500 * time.Millisecond) // let user read the plan
+	time.Sleep(1500 * time.Millisecond)
 
-	emit.Emit(SSEEvent{
-		Type:    EvProgress,
-		Icon:    "folder-plus",
-		Message: "Создаю проект параллельно с планированием файлов...",
-		Percent: 13,
-	})
-
-	// Provision backend and generate manifest concurrently — both only need plan.
-	var (
-		projectData    *models.ProjectData
-		provisionErr   error
-		eagerManifest  *models.ProjectManifest
+	emit.Emit(
+		SSEEvent{
+			Type:    EvProgress,
+			Icon:    "folder-plus",
+			Message: "Создаю проект параллельно с планированием файлов...",
+			Percent: 13,
+		},
 	)
 
-	var provWg sync.WaitGroup
-	provWg.Add(2)
+	var (
+		projectData   *models.ProjectData
+		provisionErr  error
+		eagerManifest *models.ProjectManifest
 
+		provWg sync.WaitGroup
+	)
+
+	provWg.Add(1)
 	go func() {
 		defer provWg.Done()
 		projectData, provisionErr = p.provisionBackend(ctx, plan.ProjectName, p.mcpProjectId)
 	}()
 
-	go func() {
-		defer provWg.Done()
-		m, err := p.generateManifest(ctx, plan, chatHistory)
-		if err == nil && m != nil && len(m.Groups) >= 2 {
-			eagerManifest = m
-			log.Printf("[new-project] eager manifest ready: %d groups", len(m.Groups))
-		} else {
-			log.Printf("[new-project] eager manifest skipped (err=%v) — will retry in chunked", err)
-		}
-	}()
+	if plan.ProjectType == "admin_panel" || plan.ProjectType == "web" {
+		provWg.Add(1)
+		go func() {
+			defer provWg.Done()
+
+			eagerManifest, err = p.generateManifest(ctx, plan, chatHistory)
+			if err == nil && eagerManifest != nil && len(eagerManifest.Groups) >= 2 {
+				log.Printf("[new-project] eager manifest ready: %d groups", len(eagerManifest.Groups))
+			} else {
+				log.Printf("[new-project] eager manifest skipped (err=%v) — will retry in chunked", err)
+			}
+		}()
+	}
 
 	provWg.Wait()
 
@@ -198,16 +198,19 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 		p.prebuiltManifest = eagerManifest
 	}
 
-	emit.Emit(SSEEvent{
-		Type:    EvProgress,
-		Icon:    "database",
-		Percent: 15,
-		Message: "Создаю таблицы в базе данных",
-		Value:   fmt.Sprintf("%d таблиц", len(plan.Tables)),
-	})
+	emit.Emit(
+		SSEEvent{
+			Type:    EvProgress,
+			Icon:    "database",
+			Percent: 15,
+			Message: "Создаю таблицы в базе данных",
+			Value:   fmt.Sprintf("%d таблиц", len(plan.Tables)),
+		},
+	)
 
 	go func(bPlan *models.ArchitectPlan, resourceEnvId, ucodeProjectId, userId, envId string) {
-		if err := createBackendFromPlan(context.Background(), bPlan, resourceEnvId, ucodeProjectId, userId, envId, p.service, emit); err != nil {
+		err = createBackendFromPlan(context.Background(), bPlan, resourceEnvId, ucodeProjectId, userId, envId, p.service, emit)
+		if err != nil {
 			log.Printf("[new-project] async table creation failed: %v", err)
 		}
 	}(plan, projectData.ResourceEnvId, projectData.UcodeProjectId, p.userId, projectData.EnvironmentId)
@@ -262,7 +265,6 @@ func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context,
 			"Оцениваю сложность и объём...",
 			"Финализирую архитектуру проекта...",
 		},
-		3, 12, 90*time.Second,
 		func() error {
 			var e error
 			plan, e = p.callArchitect(ctx, clarified, imageURLs, chatHistory, schemaCtx)
@@ -333,10 +335,22 @@ func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context,
 				Message: "Создаю новые таблицы в базе данных",
 				Value:   fmt.Sprintf("%d таблиц", len(newTables)),
 			})
+			// Keep relations that reference at least one new table so FK columns are created.
+			var newSlugs = make(map[string]bool, len(newTables))
+			for _, t := range newTables {
+				newSlugs[t.Slug] = true
+			}
+			var newRelations []models.TableRelationPlan
+			for _, r := range plan.Relations {
+				if newSlugs[r.TableFrom] || newSlugs[r.TableTo] {
+					newRelations = append(newRelations, r)
+				}
+			}
 			newPlan := &models.ArchitectPlan{
 				ProjectName: plan.ProjectName,
 				ProjectType: plan.ProjectType,
 				Tables:      newTables,
+				Relations:   newRelations,
 			}
 			go func(bPlan *models.ArchitectPlan, resourceEnvId, ucodeProjectId, userId, envId string) {
 				if err := createBackendFromPlan(context.Background(), bPlan, resourceEnvId, ucodeProjectId, userId, envId, p.service, emit); err != nil {
@@ -529,6 +543,142 @@ func (p *ChatProcessor) provisionBackend(ctx context.Context, projectName string
 	}, nil
 }
 
+func (p *ChatProcessor) runVisualEdit(ctx context.Context, instruction string, contexts []models.VisualContext, chatHistory []models.ChatMessage, imageURLs []string) (*models.ParsedClaudeResponse, error) {
+	log.Printf("[VISUAL EDIT] starting: count=%d", len(contexts))
+
+	emit := p.emitter()
+	emit.Emit(SSEEvent{Type: EvProgress, Icon: "scan-search", Message: "Загружаю файлы проекта...", Percent: 5})
+
+	existingFiles, err := p.fetchMicrofrontendFiles(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("visual edit: failed to fetch microFrontend files: %w", err)
+	}
+
+	targetPaths := make(map[string]bool)
+	resolvedContexts := make([]models.VisualContext, 0, len(contexts))
+
+	for _, vc := range contexts {
+		var foundPath string
+		for _, f := range existingFiles {
+			if vc.Path != "" && f.FilePath == vc.Path {
+				foundPath = f.FilePath
+				break
+			}
+			if vc.Path == "" && vc.ElementName != "" && strings.Contains(f.Content, vc.ElementName) {
+				foundPath = f.FilePath
+				break
+			}
+		}
+		if foundPath != "" {
+			targetPaths[foundPath] = true
+			vc.Path = foundPath
+			resolvedContexts = append(resolvedContexts, vc)
+		} else {
+			log.Printf("[VISUAL EDIT] WARNING: could not resolve file for element %q (path: %q)", vc.ElementName, vc.Path)
+		}
+	}
+
+	if len(targetPaths) == 0 {
+		log.Printf("[VISUAL EDIT] no specific files found for contexts, falling back to microFrontend edit flow")
+		fileGraphJSON := p.buildMicrofrontendFileGraphJSON(existingFiles)
+		return p.runMicrofrontendEdit(ctx, instruction, fileGraphJSON, chatHistory, imageURLs, existingFiles)
+	}
+
+	paths := make([]string, 0, len(targetPaths))
+	for path := range targetPaths {
+		paths = append(paths, path)
+	}
+	filesContext := p.buildMicrofrontendFilesContext(existingFiles, paths)
+
+	emit.Emit(
+		SSEEvent{
+			Type:    EvProgress,
+			Icon:    "mouse-pointer-click",
+			Message: "Редактирую выбранные элементы",
+			Value:   fmt.Sprintf("%d компонент(ов)", len(targetPaths)),
+			Percent: 10,
+		},
+	)
+
+	prompt := chat_prompts.BuildVisualEditPrompt(instruction, resolvedContexts, filesContext)
+	messages := buildMessagesWithHistory(chatHistory, buildContentBlocksWithImages(prompt, imageURLs))
+
+	var edited *visualEditOutput
+
+	err = withHeartbeat(
+		ctx, emit,
+		[]string{
+			"Редактирую компоненты...",
+			"Применяю визуальные изменения...",
+			"Обновляю стили и разметку...",
+			"Проверяю совместимость...",
+			"Финализирую правки...",
+		},
+		func() error {
+			var errIn error
+			edited, errIn = callWithTool[visualEditOutput](
+				p, ctx,
+				models.AnthropicToolRequest{
+					Model:      p.baseConf.CoderModel,
+					MaxTokens:  p.baseConf.CoderMaxTokens,
+					System:     chat_prompts.PromptVisualEdit,
+					Messages:   messages,
+					Tools:      []models.ClaudeFunctionTool{helper.ToolEmitVisualEdit},
+					ToolChoice: helper.ForcedTool(helper.ToolEmitVisualEdit.Name),
+				},
+				timeoutCoder,
+				fmt.Sprintf("Visual edit: %d elements in %d files", len(resolvedContexts), len(targetPaths)),
+			)
+			return errIn
+		},
+	)
+	if err != nil {
+		return nil, fmt.Errorf("visual edit: claude call failed: %w", err)
+	}
+
+	if len(edited.Files) > 0 {
+		emit.Emit(
+			SSEEvent{
+				Type:    EvPublish,
+				Icon:    "upload-cloud",
+				Message: "Публикую изменения",
+				Value:   fmt.Sprintf("%d файл(ов)", len(edited.Files)),
+				Percent: 90,
+			},
+		)
+		if pushErr := p.pushMicrofrontendChanges(ctx, edited.Files); pushErr != nil {
+			return nil, fmt.Errorf("visual edit: push to u-gen failed: %w", pushErr)
+		}
+
+		editedMap := make(map[string]string, len(edited.Files))
+		for _, f := range edited.Files {
+			editedMap[f.Path] = f.Content
+		}
+
+		fullSnapshot := make([]models.GitlabFileChange, 0, len(existingFiles))
+		for _, f := range existingFiles {
+			if newContent, changed := editedMap[f.FilePath]; changed {
+				fullSnapshot = append(fullSnapshot, models.GitlabFileChange{FilePath: f.FilePath, Content: newContent})
+				delete(editedMap, f.FilePath)
+			} else {
+				fullSnapshot = append(fullSnapshot, f)
+			}
+		}
+		for path, content := range editedMap {
+			fullSnapshot = append(fullSnapshot, models.GitlabFileChange{FilePath: path, Content: content})
+		}
+		p.createMicrofrontendSnapshot(ctx, fullSnapshot, edited.ChangeSummary)
+	}
+
+	description := edited.ChangeSummary
+	if description == "" {
+		description = "✅ Visual edit applied successfully."
+	}
+
+	log.Printf("[VISUAL EDIT] ✅ done — %d files pushed to u-gen, summary=%s", len(edited.Files), description)
+	return &models.ParsedClaudeResponse{Description: description}, nil
+}
+
 // ============================================================================
 // DATA ACCESS HELPERS
 // ============================================================================
@@ -624,14 +774,17 @@ func truncateString(s string, maxLen int) string {
 	return string(runes[:maxLen-3]) + "..."
 }
 
-// buildAPIConfigBlock generates the API configuration + design tokens injected into the coder prompt.
 func buildAPIConfigBlock(baseURL, apiKey string, plan *models.ArchitectPlan) string {
-	// Detect the actual env variable names used in the template.
-	// The template's axios.ts may use VITE_BASE_URL or VITE_API_BASE_URL —
-	// we must match exactly to prevent CORS/404 errors.
-	envBaseURLKey := "VITE_API_BASE_URL"
-	envAPIKeyKey := "VITE_X_API_KEY"
-	for _, f := range GetTemplateContext("admin_panel") {
+
+	var (
+		envBaseURLKey = "VITE_API_BASE_URL"
+		envAPIKeyKey  = "VITE_X_API_KEY"
+
+		sb              strings.Builder
+		loginTableSlugs []string
+	)
+
+	for _, f := range GetTemplateContext() {
 		if strings.Contains(f.Path, "config/axios") || strings.Contains(f.Path, "lib/api") {
 			if strings.Contains(f.Content, "VITE_BASE_URL") && !strings.Contains(f.Content, "VITE_API_BASE_URL") {
 				envBaseURLKey = "VITE_BASE_URL"
@@ -642,17 +795,103 @@ func buildAPIConfigBlock(baseURL, apiKey string, plan *models.ArchitectPlan) str
 		}
 	}
 
-	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf(
 		"\n====================================\nAPI CONFIGURATION FOR FRONTEND\n====================================\n%s: %s\n%s: %s\n\nTables to use:\n",
 		envBaseURLKey, baseURL, envAPIKeyKey, apiKey,
 	))
+
 	for _, t := range plan.Tables {
-		sb.WriteString(fmt.Sprintf("- Table: %s, slug: %s\n", t.Label, t.Slug))
-		for _, f := range t.Fields {
-			sb.WriteString(fmt.Sprintf("  * field: %s, type: %s\n", f.Slug, f.Type))
+		if t.IsLoginTable {
+			loginTableSlugs = append(loginTableSlugs, t.Slug)
+			sb.WriteString(fmt.Sprintf("- LOGIN TABLE: %s, slug: %s\n", t.Label, t.Slug))
+			sb.WriteString("  * built-in auth fields (always present in DB): login, password, email, phone\n")
+			sb.WriteString("  * always-required system fields: role_id, client_type_id\n")
+			for _, f := range t.Fields {
+				sb.WriteString(fmt.Sprintf("  * custom field: %s, type: %s\n", f.Slug, f.Type))
+			}
+		} else {
+			sb.WriteString(fmt.Sprintf("- Table: %s, slug: %s\n", t.Label, t.Slug))
+			for _, f := range t.Fields {
+				sb.WriteString(fmt.Sprintf("  * field: %s, type: %s\n", f.Slug, f.Type))
+			}
 		}
 	}
+
+	if len(loginTableSlugs) > 0 {
+		slug := loginTableSlugs[0]
+		sb.WriteString(`
+====================================
+LOGIN TABLE — MANDATORY FORM RULES
+====================================
+Login table slug: ` + slug + `
+
+The login table stores project users. It has BUILT-IN auth fields you never define as fields but MUST include in forms.
+
+CREATE FORM — include ALL of these fields (in this order):
+  1. login          <Input type="text">      required
+  2. password       <Input type="password">  required on CREATE, OMIT on EDIT
+  3. email          <Input type="email">     required
+  4. phone          <Input type="tel">       optional
+  5. role_id        <Select>                 REQUIRED — fetch options:
+       GET /v2/items/role
+       Response: data.data.response[]   value=row.guid  label=row.name
+  6. client_type_id <Select>                 REQUIRED — fetch options:
+       GET /v2/items/client_type
+       Response: data.data.response[]   value=row.guid  label=row.name
+  7. [any custom fields defined for this table, e.g. full_name, avatar]
+
+CREATE API endpoint:
+  POST /v2/items/` + slug + `
+  body: { "login":"...", "password":"plaintext", "email":"...", "role_id":"guid", "client_type_id":"guid", ...customFields }
+  Password is PLAIN TEXT — the platform hashes it. Never hash on the frontend.
+
+EDIT FORM: same fields except password is optional (send only if user typed a new one).
+LIST VIEW: show login, email, custom name field — NEVER display password column.
+
+HOOK PATTERN for role_id / client_type_id selects:
+  const { data: rolesData } = useApiQuery<unknown>(['roles'], '/v2/items/role')
+  const roles = extractList<{ guid: string; name: string }>(rolesData)
+  const { data: ctData } = useApiQuery<unknown>(['client-types'], '/v2/items/client_type')
+  const clientTypes = extractList<{ guid: string; name: string }>(ctData)
+`)
+	}
+
+	if len(plan.Relations) > 0 {
+		sb.WriteString("\nRelations (Many2One — FK column auto-created on source table):\n")
+		for _, r := range plan.Relations {
+			relFieldSlug := r.TableTo + "_id"
+			sb.WriteString(fmt.Sprintf(
+				"- %s → %s: FK field %q on %s (Select dropdown, load options from GET /v2/items/%s)\n",
+				r.TableFrom, r.TableTo, relFieldSlug, r.TableFrom, r.TableTo,
+			))
+		}
+		sb.WriteString(`
+RELATION API RULES — READ CAREFULLY, WRONG USAGE BREAKS THE UI:
+
+VALUE TYPE — CRITICAL:
+  The FK field value is ALWAYS a guid STRING (UUID like "a1b2c3d4-...").
+  NEVER store or submit an integer, number, or index.
+  ❌ WRONG: { "customers_id": 1 }          — integer breaks the relation
+  ❌ WRONG: { "customers_id": "1" }         — numeric string breaks the relation
+  ✅ CORRECT: { "customers_id": "a1b2c3..." } — real guid from the related table
+
+FETCH OPTIONS for <Select> dropdown (use GET /v2/items, NOT the old /v1/object endpoint):
+  const { data: optData } = useApiQuery<unknown>(['{table_to}'], '/v2/items/{table_to}')
+  const options = extractList<{ guid: string; name: string }>(optData)
+  // in <Select>: value={row.guid}  label={row.name ?? row.title ?? row.label}
+
+CREATE/UPDATE with relation — send the guid string:
+  { "{table_to}_id": selectedGuid, ...otherFields }
+  State: const [selectedId, setSelectedId] = useState<string>('')
+  On submit: include selectedId only if non-empty string.
+
+DISPLAY related record name in list view:
+  Join by guid client-side: options.find(o => o.guid === row['{table_to}_id'])?.name ?? '—'
+
+DO NOT use Many2Many, array values, or numeric IDs — only single guid string per Many2One field.
+`)
+	}
+
 	sb.WriteString("\nUse this UI Structure provided by the Architect:\n" + plan.UIStructure + "\n")
 
 	// Inject design tokens so the coder doesn't have to invent a design system.

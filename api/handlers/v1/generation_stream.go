@@ -109,17 +109,13 @@ func writeSSEEvent(w io.Writer, ev SSEEvent) {
 	fmt.Fprintf(w, "data: %s\n\n", data)
 }
 
-// withHeartbeat runs fn in a goroutine and emits heartbeat progress events every 12 s
-// until fn completes. Percent slowly advances from pctStart toward pctEnd
-// (capped at 90 % of the range so it never reaches pctEnd before fn finishes).
-func withHeartbeat(ctx context.Context, emit ProgressEmitter, messages []string, pctStart, pctEnd int, estimatedDur time.Duration, fn func() error) error {
+func withHeartbeat(ctx context.Context, emit ProgressEmitter, messages []string, fn func() error) error {
 	done := make(chan error, 1)
 	go func() { done <- fn() }()
 
 	ticker := time.NewTicker(8 * time.Second)
 	defer ticker.Stop()
 
-	start := time.Now()
 	msgIdx := 0
 
 	for {
@@ -127,12 +123,7 @@ func withHeartbeat(ctx context.Context, emit ProgressEmitter, messages []string,
 		case err := <-done:
 			return err
 		case <-ticker.C:
-			frac := time.Since(start).Seconds() / estimatedDur.Seconds()
-			if frac > 0.9 {
-				frac = 0.9
-			}
-			pct := pctStart + int(float64(pctEnd-pctStart)*frac)
-			emit.Emit(SSEEvent{Type: EvProgress, Icon: "brain", Message: messages[msgIdx%len(messages)], Percent: pct})
+			emit.Emit(SSEEvent{Type: EvProgress, Icon: "brain", Message: messages[msgIdx%len(messages)], Percent: 10})
 			msgIdx++
 		case <-ctx.Done():
 			return ctx.Err()

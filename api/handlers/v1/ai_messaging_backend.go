@@ -23,6 +23,20 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 
 	var errs []string
 
+	// tableIdMap stores the ucode table ID (returned by Table.Create) keyed by table slug.
+	// Used in Phase 2 to create RELATION fields on the correct table.
+	tableIdMap := make(map[string]string, len(plan.Tables))
+
+	// relFieldSlugsToSkip holds FK field slugs ({table_to}_id) that must NOT be created
+	// as plain SINGLE_LINE fields in Phase 1 — they are created as RELATION type in Phase 2.
+	relFieldSlugsToSkip := make(map[string]bool, len(plan.Relations))
+	for _, rel := range plan.Relations {
+		relFieldSlugsToSkip[rel.TableTo+"_id"] = true
+	}
+
+	// ─── Phase 1: Tables + Fields ───────────────────────────────────────────────
+	// Mock data is deferred to Phase 3 so FK columns exist before inserts.
+
 	for _, tablePlan := range plan.Tables {
 
 		emit.Emit(
@@ -223,6 +237,7 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 	afterLoginBlock:
 
 		tableId := tableResp.GetId()
+		tableIdMap[tablePlan.Slug] = tableId
 		log.Printf("[backend] table created: %s (id=%s)", tablePlan.Slug, tableId)
 
 		emit.Emit(
@@ -235,7 +250,6 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 			},
 		)
 
-		// Emit field creation progress
 		userFields := 0
 		for _, fp := range tablePlan.Fields {
 			if !isSystemField(fp.Slug) && !(tablePlan.IsLoginTable && isAuthField(fp.Slug)) {
@@ -256,6 +270,10 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 				continue
 			}
 			if tablePlan.IsLoginTable && isAuthField(fieldPlan.Slug) {
+				continue
+			}
+			// Skip FK slugs — created as proper RELATION type fields in Phase 2.
+			if relFieldSlugsToSkip[fieldPlan.Slug] {
 				continue
 			}
 
@@ -283,30 +301,121 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 				errs = append(errs, fmt.Sprintf("field %s.%s: %v", tablePlan.Slug, fieldPlan.Slug, err))
 			}
 		}
+	}
 
+	// ─── Phase 2: Relations ──────────────────────────────────────────────────────
+	// Calls Relation().Create() which internally creates the RELATION type field
+	// on table_from. ViewFields must be non-empty — ObtainRandomOne fetches a real
+	// field id from table_from. This mirrors the proven pattern in table.go:1378-1404.
+
+	log.Printf("[backend] Phase 2: %d relations to create (tableIdMap has %d entries)", len(plan.Relations), len(tableIdMap))
+
+	if len(plan.Relations) > 0 {
+		emit.Emit(SSEEvent{
+			Type:    EvProgress,
+			Icon:    "link",
+			Message: fmt.Sprintf("Создаю связи между таблицами (%d)", len(plan.Relations)),
+			Value:   fmt.Sprintf("%d связей", len(plan.Relations)),
+		})
+
+		for _, rel := range plan.Relations {
+			// FK column slug: {table_to}_id (e.g. orders→customers → "customers_id" on orders)
+			relFieldSlug := rel.TableTo + "_id"
+
+			log.Printf("[backend] relation %s→%s: tableFrom_id=%q tableTo exists=%v", rel.TableFrom, rel.TableTo, tableIdMap[rel.TableFrom], tableIdMap[rel.TableTo] != "")
+
+			// Sanity-check: source table must have been created successfully.
+			if tableIdMap[rel.TableFrom] == "" {
+				msg := fmt.Sprintf("relation %s→%s: source table not in tableIdMap (was it created?)", rel.TableFrom, rel.TableTo)
+				errs = append(errs, msg)
+				log.Printf("[backend] ⚠️ %s", msg)
+				emit.Emit(SSEEvent{Type: EvProgress, Icon: "alert-triangle", Message: msg})
+				continue
+			}
+
+			// ObtainRandomOne fetches any existing field id from table_from.
+			// Relation.Create requires ViewFields to be non-empty — without it the
+			// relation is silently rejected. This mirrors table.go:1378-1404.
+			viewField, obtainErr := service.GoObjectBuilderService().Field().ObtainRandomOne(ctx, &nb.ObtainRandomRequest{
+				TableSlug: rel.TableFrom,
+				ProjectId: resourceEnvId,
+				EnvId:     envId,
+			})
+			if obtainErr != nil {
+				log.Printf("[backend] ObtainRandomOne %s failed: %v — skipping relation %s→%s", rel.TableFrom, obtainErr, rel.TableFrom, rel.TableTo)
+				errs = append(errs, fmt.Sprintf("relation %s→%s: ObtainRandomOne failed: %v", rel.TableFrom, rel.TableTo, obtainErr))
+				continue
+			}
+
+			relAttr, _ := helper.ConvertMapToStruct(map[string]any{
+				"label_en":    slugToLabel(rel.TableTo),
+				"label_to_en": slugToLabel(rel.TableFrom),
+			})
+			_, relErr := service.GoObjectBuilderService().Relation().Create(ctx, &nb.CreateRelationRequest{
+				Id:                uuid.NewString(),
+				TableFrom:         rel.TableFrom,
+				TableTo:           rel.TableTo,
+				Type:              "Many2One",
+				RelationTableSlug: rel.TableTo,
+				RelationFieldSlug: relFieldSlug,
+				RelationFieldId:   uuid.NewString(),
+				RelationToFieldId: uuid.NewString(),
+				ProjectId:         resourceEnvId,
+				EnvId:             envId,
+				ViewFields:        []string{viewField.GetId()},
+				Attributes:        relAttr,
+			})
+			if relErr != nil {
+				msg := fmt.Sprintf("relation %s→%s failed: %v", rel.TableFrom, rel.TableTo, relErr)
+				errs = append(errs, msg)
+				log.Printf("[backend] ⚠️ Relation.Create %s→%s failed: %v", rel.TableFrom, rel.TableTo, relErr)
+				emit.Emit(SSEEvent{Type: EvProgress, Icon: "alert-triangle", Message: fmt.Sprintf("Ошибка связи %s→%s", rel.TableFrom, rel.TableTo), Value: relErr.Error()})
+			} else {
+				log.Printf("[backend] ✅ relation Many2One %s→%s created (fk_slug=%s view_field=%s)", rel.TableFrom, rel.TableTo, relFieldSlug, viewField.GetId())
+				emit.Emit(SSEEvent{Type: EvProgress, Icon: "link", Message: fmt.Sprintf("Связь создана: %s → %s", rel.TableFrom, rel.TableTo), Value: relFieldSlug})
+			}
+		}
+	}
+
+	// ─── Phase 3: Mock Data ──────────────────────────────────────────────────────
+	// Inserted after relations so FK columns exist for any relation fields in mock rows.
+	// Relation field slugs ({table_to}_id) are stripped to avoid FK constraint violations
+	// since mock GUIDs don't point to real records.
+
+	relFieldSlugs := make(map[string]bool, len(plan.Relations))
+	for _, rel := range plan.Relations {
+		relFieldSlugs[rel.TableTo+"_id"] = true
+	}
+
+	for _, tablePlan := range plan.Tables {
 		if tablePlan.IsLoginTable {
 			if len(tablePlan.MockData) > 0 {
 				log.Printf("[backend] skipping %d mock rows for login table %s", len(tablePlan.MockData), tablePlan.Slug)
 			}
-		} else {
-			for i, mockRow := range tablePlan.MockData {
-				sanitized := sanitizeMockRow(mockRow, tablePlan.Fields)
-				structData, err := helper.ConvertMapToStruct(sanitized)
-				if err != nil {
-					errs = append(errs, fmt.Sprintf("mock %s[%d] convert: %v", tablePlan.Slug, i, err))
-					continue
-				}
+			continue
+		}
 
-				_, err = service.GoObjectBuilderService().Items().Create(
-					ctx, &nb.CommonMessage{
-						TableSlug: tablePlan.Slug,
-						ProjectId: resourceEnvId,
-						Data:      structData,
-					},
-				)
-				if err != nil {
-					errs = append(errs, fmt.Sprintf("mock %s[%d]: %v", tablePlan.Slug, i, err))
-				}
+		for i, mockRow := range tablePlan.MockData {
+			sanitized := sanitizeMockRow(mockRow, tablePlan.Fields)
+			for slug := range relFieldSlugs {
+				delete(sanitized, slug)
+			}
+
+			structData, err := helper.ConvertMapToStruct(sanitized)
+			if err != nil {
+				errs = append(errs, fmt.Sprintf("mock %s[%d] convert: %v", tablePlan.Slug, i, err))
+				continue
+			}
+
+			_, err = service.GoObjectBuilderService().Items().Create(
+				ctx, &nb.CommonMessage{
+					TableSlug: tablePlan.Slug,
+					ProjectId: resourceEnvId,
+					Data:      structData,
+				},
+			)
+			if err != nil {
+				errs = append(errs, fmt.Sprintf("mock %s[%d]: %v", tablePlan.Slug, i, err))
 			}
 		}
 	}
@@ -316,7 +425,7 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 		return fmt.Errorf("backend creation had %d errors: %s", len(errs), strings.Join(errs, "; "))
 	}
 
-	log.Printf("[backend] all tables created successfully")
+	log.Printf("[backend] all tables, relations and mock data created successfully")
 	return nil
 }
 
@@ -409,9 +518,22 @@ func mapFieldType(aiType string) string {
 		return "UUID"
 	case "PICK_LIST", "SELECT", "DROPDOWN":
 		return "PICK_LIST"
+	case "RELATION", "LOOKUP", "FOREIGN_KEY":
+		return "RELATION"
 	default:
 		return "SINGLE_LINE"
 	}
+}
+
+// slugToLabel converts a snake_case slug to a Title Case label (e.g. "product_categories" → "Product Categories").
+func slugToLabel(slug string) string {
+	parts := strings.Split(slug, "_")
+	for i, p := range parts {
+		if len(p) > 0 {
+			parts[i] = strings.ToUpper(p[:1]) + p[1:]
+		}
+	}
+	return strings.Join(parts, " ")
 }
 
 func ensureLoginTable(plan *models.ArchitectPlan) *models.ArchitectPlan {

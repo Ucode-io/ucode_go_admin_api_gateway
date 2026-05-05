@@ -119,10 +119,11 @@ type BaseConfig struct {
 
 	// Per-agent model overrides — fall back to ClaudeModel if left empty.
 	// Set via env vars so you can change one agent's model without touching the others.
-	ArchitectModel string // ARCHITECT_MODEL — heavy reasoning (tables + design planning)
-	CoderModel     string // CODER_MODEL     — large output (full project code gen)
-	PlannerModel   string // PLANNER_MODEL   — medium reasoning (change planning + visual plan)
-	InspectorModel string // INSPECTOR_MODEL — light Q&A (can use Haiku)
+	ArchitectModel    string // ARCHITECT_MODEL     — heavy reasoning (tables + design planning)
+	CoderModel        string // CODER_MODEL         — large output (admin panel code gen)
+	LandingCoderModel string // LANDING_CODER_MODEL — code gen for landing/website (default: Sonnet for speed)
+	PlannerModel      string // PLANNER_MODEL       — medium reasoning (change planning + visual plan)
+	InspectorModel    string // INSPECTOR_MODEL     — light Q&A (can use Haiku)
 
 	AutomationURL   string
 	OpenFaaSBaseUrl string
@@ -153,6 +154,8 @@ type BaseConfig struct {
 	GithubRedirectURI        string
 	GithubFrontendSuccessURL string
 	GithubFrontendErrorURL   string
+
+	UnsplashAccessKey string
 }
 
 func BaseLoad() BaseConfig {
@@ -219,6 +222,12 @@ func BaseLoad() BaseConfig {
 	}
 	config.CoderModel = coderModel
 
+	landingCoderModel := cast.ToString(GetOrReturnDefaultValue("LANDING_CODER_MODEL", ""))
+	if landingCoderModel == "" {
+		landingCoderModel = coderModel
+	}
+	config.LandingCoderModel = landingCoderModel
+
 	plannerModel := cast.ToString(GetOrReturnDefaultValue("PLANNER_MODEL", ""))
 	if plannerModel == "" {
 		plannerModel = config.ClaudeModel
@@ -250,6 +259,8 @@ func BaseLoad() BaseConfig {
 	config.GithubRedirectURI = cast.ToString(GetOrReturnDefaultValue("GITHUB_REDIRECT_URI", ""))
 	config.GithubFrontendSuccessURL = cast.ToString(GetOrReturnDefaultValue("GITHUB_FRONTEND_SUCCESS_URL", "https://app.u-code.io/settings/github-success"))
 	config.GithubFrontendErrorURL = cast.ToString(GetOrReturnDefaultValue("GITHUB_FRONTEND_ERROR_URL", "https://app.u-code.io/settings/github-error"))
+
+	config.UnsplashAccessKey = cast.ToString(GetOrReturnDefaultValue("UNSPLASH_ACCESS_KEY", ""))
 
 	config.MaxTokens = cast.ToInt(GetOrReturnDefaultValue("MAX_TOKENS", 12000))
 	config.AnalyseProjectMaxTokens = cast.ToInt(GetOrReturnDefaultValue("ANALYSE_PROJECT_MAX_TOKENS", 5000))

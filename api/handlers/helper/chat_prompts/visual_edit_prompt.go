@@ -1,4 +1,4 @@
-package helper
+package chat_prompts
 
 import (
 	"fmt"
@@ -37,8 +37,6 @@ OUTPUT FORMAT (STRICT)
 }
 `
 
-// BuildVisualEditPrompt constructs the user message for the visual edit call.
-// It works with whatever context fields the frontend provided — all are optional.
 func BuildVisualEditPrompt(instruction string, contexts []models.VisualContext, filesContext string) string {
 	var sb strings.Builder
 

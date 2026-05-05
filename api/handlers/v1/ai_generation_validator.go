@@ -20,11 +20,13 @@ import (
 // 1. Imports from files that don't exist in the output
 // 2. Named imports that aren't exported by the target file
 // 3. Env variables referenced in code but missing from .env
+// 4. JSX/TSX syntax errors — unbalanced braces/brackets/parens
 //
 // This catches every class of error we've encountered:
 // - Missing exports (Badge.tsx lost QuoteStatusBadge)
 // - API renames (TabList → TabsList)
 // - Missing files (import from non-existent path)
+// - Esbuild "Expected > but found }" crashes (brace mismatch in JSX)
 // ============================================================================
 
 // Compiled regexps for import/export parsing — built once at startup.
@@ -192,7 +194,22 @@ func validateGeneratedProject(files []models.ProjectFile, envVars map[string]any
 		}
 	}
 
-	// Step 5: Validate env variables.
+	// Step 5: Validate JSX/TSX syntax — brace/bracket/paren balance.
+	// Unbalanced delimiters cause Esbuild crashes like "Expected > but found }".
+	for _, f := range files {
+		if !strings.HasSuffix(f.Path, ".tsx") && !strings.HasSuffix(f.Path, ".ts") {
+			continue
+		}
+		if syntaxErr := checkBraceBalance(f.Content); syntaxErr != "" {
+			errors = append(errors, ValidationError{
+				Severity: "error",
+				File:     f.Path,
+				Message:  syntaxErr,
+			})
+		}
+	}
+
+	// Step 6: Validate env variables.
 	envErrors := validateEnvVars(files, envVars)
 	errors = append(errors, envErrors...)
 
@@ -469,6 +486,169 @@ func validateEnvVars(files []models.ProjectFile, envVars map[string]any) []Valid
 	return errors
 }
 
+// checkBraceBalance scans a TypeScript/TSX file and returns an error message
+// if braces {}, brackets [], or parentheses () are unbalanced.
+// It respects string literals (single/double/backtick), comments (// and /* */),
+// and regex literals so that delimiters inside them are not counted.
+//
+// This detects the root cause of Esbuild crashes like "Expected > but found }".
+func checkBraceBalance(content string) string {
+	type delimInfo struct {
+		char byte
+		line int
+	}
+	var stack []delimInfo
+	line := 1
+	i := 0
+	n := len(content)
+
+	for i < n {
+		c := content[i]
+
+		// Track line numbers.
+		if c == '\n' {
+			line++
+			i++
+			continue
+		}
+
+		// Skip single-line comments.
+		if c == '/' && i+1 < n && content[i+1] == '/' {
+			for i < n && content[i] != '\n' {
+				i++
+			}
+			continue
+		}
+
+		// Skip block comments.
+		if c == '/' && i+1 < n && content[i+1] == '*' {
+			i += 2
+			for i+1 < n {
+				if content[i] == '\n' {
+					line++
+				}
+				if content[i] == '*' && content[i+1] == '/' {
+					i += 2
+					break
+				}
+				i++
+			}
+			continue
+		}
+
+		// Skip string literals (double quote).
+		if c == '"' {
+			i++
+			for i < n && content[i] != '"' {
+				if content[i] == '\\' {
+					i++ // skip escaped char
+				}
+				if i < n && content[i] == '\n' {
+					line++
+				}
+				i++
+			}
+			i++ // skip closing "
+			continue
+		}
+
+		// Skip string literals (single quote).
+		if c == '\'' {
+			i++
+			for i < n && content[i] != '\'' {
+				if content[i] == '\\' {
+					i++
+				}
+				if i < n && content[i] == '\n' {
+					line++
+				}
+				i++
+			}
+			i++
+			continue
+		}
+
+		// Skip template literals (backtick) — track ${} depth.
+		if c == '`' {
+			i++
+			tmplDepth := 0
+			for i < n {
+				if content[i] == '\n' {
+					line++
+				}
+				if content[i] == '\\' {
+					i += 2
+					continue
+				}
+				if content[i] == '$' && i+1 < n && content[i+1] == '{' {
+					tmplDepth++
+					i += 2
+					continue
+				}
+				if content[i] == '}' && tmplDepth > 0 {
+					tmplDepth--
+					i++
+					continue
+				}
+				if content[i] == '`' && tmplDepth == 0 {
+					i++
+					break
+				}
+				i++
+			}
+			continue
+		}
+
+		// Opening delimiters.
+		if c == '{' || c == '(' || c == '[' {
+			stack = append(stack, delimInfo{char: c, line: line})
+			i++
+			continue
+		}
+
+		// Closing delimiters.
+		if c == '}' || c == ')' || c == ']' {
+			if len(stack) == 0 {
+				return fmt.Sprintf("SYNTAX ERROR (line ~%d): unexpected closing '%c' with no matching opener — this will crash Esbuild build", line, c)
+			}
+			top := stack[len(stack)-1]
+			stack = stack[:len(stack)-1]
+			var expected byte
+			switch c {
+			case '}':
+				expected = '{'
+			case ')':
+				expected = '('
+			case ']':
+				expected = '['
+			}
+			if top.char != expected {
+				return fmt.Sprintf("SYNTAX ERROR (line ~%d): closing '%c' does not match opening '%c' at line ~%d — this will crash Esbuild build", line, c, top.char, top.line)
+			}
+			i++
+			continue
+		}
+
+		i++
+	}
+
+	if len(stack) > 0 {
+		top := stack[len(stack)-1]
+		var closerName string
+		switch top.char {
+		case '{':
+			closerName = "}"
+		case '(':
+			closerName = ")"
+		case '[':
+			closerName = "]"
+		}
+		return fmt.Sprintf("SYNTAX ERROR: unclosed '%c' opened at line ~%d is never closed (missing '%s') — this will crash Esbuild build", top.char, top.line, closerName)
+	}
+
+	return "" // balanced
+}
+
 // logValidationResults logs all validation errors and returns counts.
 func logValidationResults(errors []ValidationError) (errorCount, warningCount int) {
 	for _, e := range errors {
@@ -604,27 +784,9 @@ func (p *ChatProcessor) repairSingleFile(
 	sb.WriteString("  - Fix ONLY the listed errors. Do not rewrite unrelated code.\n")
 	sb.WriteString("  - For import errors: use correct exported names from the AVAILABLE EXPORTS list above.\n")
 	sb.WriteString("  - For 'X.displayName assigned but X not declared': it is a typo in the component name — rename the const/variable to match the displayName assignment, or fix the displayName to match the const name.\n")
+	sb.WriteString("  - For brace/bracket/paren imbalance: carefully trace through the file and find the exact location of the missing or extra delimiter. Common causes: unclosed ternary in JSX, missing closing brace in .map() callback, extra } after a component return, unclosed template literal.\n")
+	sb.WriteString("  - NEVER use angle-bracket type assertions in .tsx files (const x = <Type>value). ALWAYS use 'as' syntax (const x = value as Type).\n")
 	sb.WriteString("  - Output the complete corrected file. Never truncate.\n")
-
-	// Inject types.ts content so Haiku can fix TypeScript type mismatches accurately.
-	if f.Path != "src/types.ts" {
-		for path, exports := range exportRegistry {
-			if path == "src/types.ts" && len(exports) > 0 {
-				// Find actual file content from the fileMap in the caller
-				sb.WriteString("\nTYPES REFERENCE (src/types.ts — entity interfaces for accurate type fixing):\n")
-				sb.WriteString("  Available types: [")
-				names := make([]string, 0, len(exports))
-				for name := range exports {
-					if name != "default" {
-						names = append(names, name)
-					}
-				}
-				sb.WriteString(strings.Join(names, ", "))
-				sb.WriteString("]\n")
-				break
-			}
-		}
-	}
 
 	fmt.Fprintf(&sb, "\nFILE: %s\n```typescript\n%s\n```\n", f.Path, f.Content)
 
@@ -632,13 +794,13 @@ func (p *ChatProcessor) repairSingleFile(
 		p, ctx,
 		models.AnthropicToolRequest{
 			Model:      p.baseConf.ClaudeHaikuModel,
-			MaxTokens:  16000,
-			System:     "You are a TypeScript error repair bot. Fix only the listed errors (import errors, typos in component names, orphaned displayName assignments). Output the complete corrected file via the repair_file tool.",
+			MaxTokens:  32000,
+			System:     "You are a TypeScript/TSX error repair bot. Fix the listed errors: import mismatches, typos, displayName issues, AND syntax errors like unbalanced braces/brackets/parentheses. For brace imbalance, carefully trace each { } pair and find the mismatch. Output the complete corrected file via the repair_file tool. Never truncate.",
 			Messages:   []models.ChatMessage{{Role: "user", Content: []models.ContentBlock{{Type: "text", Text: sb.String()}}}},
 			Tools:      []models.ClaudeFunctionTool{helper.ToolRepairFile},
 			ToolChoice: helper.ForcedTool(helper.ToolRepairFile.Name),
 		},
-		90*time.Second,
+		120*time.Second,
 		fmt.Sprintf("Repairing %s", f.Path),
 	)
 	if err != nil {
@@ -727,229 +889,4 @@ func buildUIKitAPISummary(uiKitFiles []models.ProjectFile) string {
 	}
 
 	return sb.String()
-}
-
-// lucideValidIcons is the verified safe list for lucide-react@0.441.0.
-var lucideValidIcons = map[string]bool{
-	// Navigation
-	"Home": true, "LayoutDashboard": true, "LayoutGrid": true, "Menu": true, "PanelLeft": true, "Sidebar": true,
-	// Users
-	"User": true, "Users": true, "UserPlus": true, "UserCheck": true, "UserX": true,
-	"UserCircle": true, "Building": true, "Building2": true, "Briefcase": true,
-	// CRUD
-	"Plus": true, "Pencil": true, "Trash": true, "Trash2": true, "Edit": true,
-	"Save": true, "Copy": true, "Eye": true, "EyeOff": true, "Download": true,
-	"Upload": true, "Send": true, "RefreshCw": true,
-	// Arrows
-	"ArrowLeft": true, "ArrowRight": true, "ArrowUp": true, "ArrowDown": true,
-	"ChevronLeft": true, "ChevronRight": true, "ChevronDown": true, "ChevronUp": true,
-	"ChevronsLeft": true, "ChevronsRight": true, "ExternalLink": true,
-	// Search
-	"Search": true, "Filter": true, "SlidersHorizontal": true, "ListFilter": true,
-	// Status
-	"Check": true, "CheckCircle": true, "CheckCircle2": true, "X": true,
-	"XCircle": true, "AlertCircle": true, "AlertTriangle": true, "Info": true,
-	"Bell": true, "BellRing": true,
-	// Charts
-	"BarChart": true, "BarChart2": true, "BarChart3": true, "LineChart": true,
-	"PieChart": true, "TrendingUp": true, "TrendingDown": true, "Activity": true,
-	// Files
-	"File": true, "FileText": true, "FileCheck": true, "FilePlus": true,
-	"Folder": true, "FolderOpen": true, "Paperclip": true, "BookOpen": true,
-	// Time
-	"Calendar": true, "CalendarDays": true, "Clock": true, "Timer": true,
-	// Money
-	"DollarSign": true, "CreditCard": true, "Wallet": true, "Receipt": true,
-	"ShoppingCart": true, "Package": true, "Banknote": true,
-	// Settings
-	"Settings": true, "Settings2": true, "Wrench": true, "Key": true,
-	"Lock": true, "Shield": true, "ShieldCheck": true,
-	// UI
-	"MoreHorizontal": true, "MoreVertical": true, "Maximize": true, "Minimize": true,
-	"ZoomIn": true, "ZoomOut": true, "Move": true, "GripVertical": true,
-	// Misc
-	"Star": true, "Tag": true, "Hash": true, "Globe": true, "MapPin": true,
-	"Database": true, "Server": true, "Loader2": true, "Sun": true, "Moon": true,
-	"Image": true, "Zap": true, "Flame": true, "Sparkles": true, "Target": true,
-	"Award": true, "ThumbsUp": true, "Phone": true, "Mail": true,
-	"Truck": true, "Layers": true, "Layout": true, "Code": true, "Code2": true,
-	"Terminal": true, "Cpu": true, "Wifi": true, "Link": true, "Link2": true,
-	"Unlink": true, "RefreshCcw": true, "RotateCcw": true, "RotateCw": true,
-	"LogOut": true, "LogIn": true, "Grid": true, "List": true, "Table": true,
-	"Columns": true, "Rows": true, "LayoutList": true, "SquareStack": true,
-	"Inbox": true, "MessageSquare": true, "MessageCircle": true, "HelpCircle": true,
-	"PlayCircle": true, "StopCircle": true, "PauseCircle": true,
-	"Volume2": true, "VolumeX": true, "Mic": true, "MicOff": true,
-	"Video": true, "VideoOff": true, "Camera": true,
-	"Lightbulb": true, "Compass": true, "Navigation": true, "Map": true,
-	"Flag": true, "Bookmark": true, "Heart": true, "HeartOff": true,
-}
-
-// lucideFallbacks maps known non-existent icon names to safe alternatives.
-var lucideFallbacks = map[string]string{
-	"LayoutKanban":     "LayoutGrid",
-	"Kanban":           "LayoutGrid",
-	"KanbanSquare":     "LayoutGrid",
-	"LayoutColumns":    "Columns",
-	"LayoutRows":       "Rows",
-	"TableProperties":  "Table",
-	"TableCellsMerge":  "Table",
-	"UserCog":          "Settings",
-	"UserSettings":     "Settings",
-	"Users2":           "Users",
-	"UsersRound":       "Users",
-	"PersonStanding":   "User",
-	"Contact":          "User",
-	"ContactRound":     "User",
-	"BadgeCheck":       "CheckCircle",
-	"BadgeAlert":       "AlertCircle",
-	"CircleCheck":      "CheckCircle",
-	"CircleX":          "XCircle",
-	"CircleAlert":      "AlertCircle",
-	"OctagonAlert":     "AlertTriangle",
-	"TriangleAlert":    "AlertTriangle",
-	"ShoppingBag":      "ShoppingCart",
-	"Store":            "ShoppingCart",
-	"PackageOpen":      "Package",
-	"PackageCheck":     "Package",
-	"PackagePlus":      "Package",
-	"PackageSearch":    "Package",
-	"PenLine":          "Pencil",
-	"PenSquare":        "Edit",
-	"PencilLine":       "Pencil",
-	"FilePen":          "FileText",
-	"FileEdit":         "FileText",
-	"FileSearch":       "FileText",
-	"FileSpreadsheet":  "FileText",
-	"FileJson":         "FileText",
-	"FileCode":         "Code2",
-	"FolderPlus":       "FolderOpen",
-	"FolderSync":       "FolderOpen",
-	"BookMarked":       "BookOpen",
-	"BookCopy":         "BookOpen",
-	"CalendarCheck":    "Calendar",
-	"CalendarClock":    "Calendar",
-	"CalendarPlus":     "Calendar",
-	"CalendarRange":    "CalendarDays",
-	"CalendarX":        "Calendar",
-	"ClockAlert":       "Clock",
-	"Hourglass":        "Timer",
-	"TimerOff":         "Timer",
-	"Banknote":         "DollarSign",
-	"PiggyBank":        "Wallet",
-	"Coins":            "DollarSign",
-	"HandCoins":        "DollarSign",
-	"BadgeDollarSign":  "DollarSign",
-	"ShieldAlert":      "AlertTriangle",
-	"ShieldOff":        "Shield",
-	"ShieldPlus":       "ShieldCheck",
-	"LockOpen":         "Lock",
-	"LockKeyhole":      "Key",
-	"Fingerprint":      "Key",
-	"ScanLine":         "Search",
-	"QrCode":           "Hash",
-	"Barcode":          "Hash",
-	"NotepadText":      "FileText",
-	"ClipboardList":    "FileText",
-	"ClipboardCheck":   "FileCheck",
-	"ClipboardPlus":    "FilePlus",
-	"Clipboard":        "FileText",
-	"ScrollText":       "FileText",
-	"NotebookText":     "FileText",
-	"WandSparkles":     "Sparkles",
-	"BrainCircuit":     "Cpu",
-	"BrainCog":         "Cpu",
-	"Brain":            "Cpu",
-	"Bot":              "Cpu",
-	"Headphones":       "Volume2",
-	"Speaker":          "Volume2",
-	"Radio":            "Wifi",
-	"Satellite":        "Wifi",
-	"NetworkIcon":      "Server",
-	"Network":          "Server",
-	"HardDrive":        "Database",
-	"HardDriveUpload":  "Upload",
-	"CloudUpload":      "Upload",
-	"CloudDownload":    "Download",
-	"Cloud":            "Globe",
-	"CloudOff":         "Globe",
-	"Globe2":           "Globe",
-	"Earth":            "Globe",
-	"Map":              "MapPin",
-	"Locate":           "MapPin",
-	"MapPinOff":        "MapPin",
-	"RouteOff":         "Navigation",
-	"Route":            "Navigation",
-	"Gauge":            "Activity",
-	"GaugeCircle":      "Activity",
-	"AreaChart":        "BarChart3",
-	"ScatterChart":     "BarChart3",
-	"CandlestickChart": "BarChart3",
-	"ChartBar":         "BarChart3",
-	"ChartLine":        "LineChart",
-	"ChartPie":         "PieChart",
-}
-
-var lucideImportRe = regexp.MustCompile(`import\s*\{([^}]+)\}\s*from\s*['"]lucide-react['"]`)
-
-// fixLucideImports scans all files and replaces invalid lucide-react icon names
-// with verified alternatives. Modifies files in-place.
-func fixLucideImports(files []models.ProjectFile) int {
-	fixed := 0
-	for i, f := range files {
-		if !strings.HasSuffix(f.Path, ".tsx") && !strings.HasSuffix(f.Path, ".ts") {
-			continue
-		}
-		updated, count := fixLucideInContent(f.Content)
-		if count > 0 {
-			files[i].Content = updated
-			fixed += count
-			log.Printf("[lucide-fix] %s: replaced %d invalid icon(s)", f.Path, count)
-		}
-	}
-	return fixed
-}
-
-func fixLucideInContent(content string) (string, int) {
-	totalFixed := 0
-	result := lucideImportRe.ReplaceAllStringFunc(content, func(match string) string {
-		sub := lucideImportRe.FindStringSubmatch(match)
-		if len(sub) < 2 {
-			return match
-		}
-		rawNames := sub[1]
-		parts := strings.Split(rawNames, ",")
-		changed := false
-		for j, p := range parts {
-			trimmed := strings.TrimSpace(p)
-			// handle aliased imports: "LayoutKanban as KanbanIcon"
-			name := trimmed
-			alias := ""
-			if idx := strings.Index(trimmed, " as "); idx != -1 {
-				name = strings.TrimSpace(trimmed[:idx])
-				alias = trimmed[idx:]
-			}
-			replacement, bad := lucideFallbacks[name]
-			if !bad {
-				if !lucideValidIcons[name] && name != "" {
-					replacement = "LayoutGrid" // generic fallback for anything unknown
-					bad = true
-				}
-			}
-			if bad {
-				parts[j] = " " + replacement + alias
-				// also replace usages of the old name in the file body (only if no alias)
-				if alias == "" && name != replacement {
-					content = strings.ReplaceAll(content, name, replacement)
-				}
-				changed = true
-				totalFixed++
-			}
-		}
-		if !changed {
-			return match
-		}
-		return "import {" + strings.Join(parts, ",") + "} from 'lucide-react'"
-	})
-	return result, totalFixed
 }

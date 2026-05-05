@@ -156,6 +156,16 @@ type (
 		Type  string `json:"type"` // SINGLE_LINE, NUMBER, EMAIL, PHONE, DATE, etc.
 	}
 
+	// TableRelationPlan defines a foreign-key relationship between two tables.
+	// Only Many2One is supported for PostgreSQL projects.
+	// The FK column is auto-created by ucode with slug "{table_to}_id"
+	// (e.g. orders→customers creates column "customers_id" on orders table).
+	TableRelationPlan struct {
+		TableFrom string `json:"table_from"` // source table slug (the "many" side)
+		TableTo   string `json:"table_to"`   // target table slug (the "one" side)
+		Type      string `json:"type"`       // always "Many2One" for PostgreSQL
+	}
+
 	TablePlan struct {
 		Slug          string                   `json:"slug"`
 		Label         string                   `json:"label"`
@@ -188,11 +198,13 @@ type (
 	}
 
 	ArchitectPlan struct {
-		ProjectName string      `json:"project_name"`
-		ProjectType string      `json:"project_type"` // "admin_panel" | "landing" | "web" | "other"
-		Tables      []TablePlan `json:"tables"`
-		UIStructure string      `json:"ui_structure"`
-		Design      DesignSpec  `json:"design"`
+		ProjectName   string               `json:"project_name"`
+		ProjectType   string               `json:"project_type"` // "admin_panel" | "landing" | "web" | "other"
+		Tables        []TablePlan          `json:"tables"`
+		Relations     []TableRelationPlan  `json:"relations,omitempty"`
+		UIStructure   string               `json:"ui_structure"`
+		Design        DesignSpec           `json:"design"`
+		ImageKeywords []string             `json:"image_keywords,omitempty"` // Unsplash search terms from Architect
 	}
 
 	ProjectData struct {
