@@ -233,6 +233,8 @@ func (p *ChatProcessor) generateCodeSingle(ctx context.Context, clarified string
 		}
 	}
 
+	project.Files = injectMissingCriticalFiles(project.Files, plan.ProjectType)
+
 	// Always force-inject .env with correct credentials — Claude may guess wrong values.
 	project.Files = injectEnvFile(project.Files, p.baseConf.UcodeBaseUrl, apiKey)
 
@@ -548,6 +550,7 @@ func (p *ChatProcessor) generateCodeChunkedAdminPanel(ctx context.Context, clari
 		}
 	}
 
+	merged.Files = injectMissingCriticalFiles(merged.Files, plan.ProjectType)
 	merged.Files = injectEnvFile(merged.Files, p.baseConf.UcodeBaseUrl, apiKey)
 
 	emit.Emit(
@@ -1005,6 +1008,64 @@ func injectEnvFile(files []models.ProjectFile, baseURL, apiKey string) []models.
 	return append(files, models.ProjectFile{Path: ".env", Content: content})
 }
 
+func injectMissingCriticalFiles(files []models.ProjectFile, projectType string) []models.ProjectFile {
+	if projectType != "landing" && projectType != "web" {
+		return files
+	}
+
+	existing := make(map[string]struct{}, len(files))
+	for _, f := range files {
+		existing[f.Path] = struct{}{}
+	}
+
+	if _, ok := existing["src/lib/utils.ts"]; !ok {
+		log.Printf("[inject] src/lib/utils.ts missing — injecting from template")
+		for _, tf := range GetTemplateScaffold() {
+			if tf.Path == "src/lib/utils.ts" {
+				files = append(files, tf)
+				break
+			}
+		}
+	}
+
+	// src/App.tsx — entry point; if missing the virtual FS build crashes immediately
+	if _, ok := existing["src/App.tsx"]; !ok {
+		log.Printf("[inject] src/App.tsx missing — injecting minimal stub")
+		if projectType == "web" {
+			files = append(files, models.ProjectFile{
+				Path: "src/App.tsx",
+				Content: `import React from 'react';
+import './index.css';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="*" element={<div className="flex items-center justify-center min-h-screen"><p className="text-muted-foreground">Loading...</p></div>} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+`,
+			})
+		} else {
+			files = append(files, models.ProjectFile{
+				Path: "src/App.tsx",
+				Content: `import React from 'react';
+import './index.css';
+
+export default function App() {
+  return <div className="min-h-screen bg-background text-foreground" />;
+}
+`,
+			})
+		}
+	}
+
+	return files
+}
+
 func (p *ChatProcessor) inspectCode(ctx context.Context, userQuestion, filesContext string, chatHistory []models.ChatMessage, imageURLs []string) (string, error) {
 	content := chat_prompts.BuildInspectorMessage(userQuestion, filesContext)
 	messages := buildMessagesWithHistory(chatHistory, buildContentBlocksWithImages(content, imageURLs))
@@ -1339,6 +1400,7 @@ func (p *ChatProcessor) generateCodeChunkedWebsite(ctx context.Context, clarifie
 		}
 	}
 
+	merged.Files = injectMissingCriticalFiles(merged.Files, plan.ProjectType)
 	merged.Files = injectEnvFile(merged.Files, p.baseConf.UcodeBaseUrl, apiKey)
 
 	emit.Emit(SSEEvent{Type: EvProgress, Icon: "shield-check", Percent: 80, Message: "Проверяю качество кода", Value: fmt.Sprintf("%d файлов", len(merged.Files))})
@@ -1397,6 +1459,25 @@ func (p *ChatProcessor) generateWebsiteFoundation(ctx context.Context, clarified
 	sb.WriteString("\n\n")
 	sb.WriteString(apiConfig)
 
+	contextFiles := GetTemplateContext()
+	if len(contextFiles) > 0 {
+		sb.WriteString("\n====================================\n")
+		sb.WriteString("PRE-BUILT UTILITIES — MANDATORY USAGE\n")
+		sb.WriteString("====================================\n")
+		sb.WriteString("The following files ALREADY EXIST in the project. You MUST import from them.\n")
+		sb.WriteString("NEVER re-implement these utilities. NEVER output these files in your response.\n")
+		sb.WriteString("NEVER create src/lib/api.ts — use @/config/axios instead.\n\n")
+		sb.WriteString("REQUIRED IMPORTS (use exactly these paths):\n")
+		sb.WriteString("  import { useApiQuery, useApiMutation } from '@/hooks/useApi'\n")
+		sb.WriteString("  import { extractList, extractSingle, extractCount } from '@/lib/apiUtils'\n")
+		sb.WriteString("  import { cn } from '@/lib/utils'\n")
+		sb.WriteString("  import { AppProviders } from '@/components/shared/AppProviders' (wrap root in App.tsx)\n\n")
+		sb.WriteString("FILE CONTENTS FOR REFERENCE:\n")
+		for _, f := range contextFiles {
+			fmt.Fprintf(&sb, "\n### %s\n```typescript\n%s\n```\n", f.Path, f.Content)
+		}
+	}
+
 	sb.WriteString("\n====================================\n")
 	sb.WriteString("REMINDER: Emit ONLY the Group 0 files listed above. DO NOT generate page content.\n")
 	sb.WriteString("====================================\n")
@@ -1437,6 +1518,9 @@ func (p *ChatProcessor) generateWebsitePage(ctx context.Context, group models.Ma
 	sb.WriteString("\n")
 	sb.WriteString(apiConfig)
 	sb.WriteString("\n")
+
+	sb.WriteString(buildTemplateHooksContext())
+
 	sb.WriteString(foundationCtx)
 
 	sb.WriteString("\n====================================\n")

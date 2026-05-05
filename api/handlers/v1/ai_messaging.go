@@ -796,8 +796,9 @@ func buildAPIConfigBlock(baseURL, apiKey string, plan *models.ArchitectPlan) str
 	}
 
 	sb.WriteString(fmt.Sprintf(
-		"\n====================================\nAPI CONFIGURATION FOR FRONTEND\n====================================\n%s: %s\n%s: %s\n\nTables to use:\n",
+		"\n====================================\nAPI CONFIGURATION FOR FRONTEND\n====================================\n%s: %s\n%s: %s\n\nREQUIRED axios headers (BOTH — never omit either):\n  headers: { 'Authorization': 'API-KEY', '%s': import.meta.env.%s }\n\nTables to use:\n",
 		envBaseURLKey, baseURL, envAPIKeyKey, apiKey,
+		envAPIKeyKey, envAPIKeyKey,
 	))
 
 	for _, t := range plan.Tables {
@@ -878,7 +879,8 @@ VALUE TYPE — CRITICAL:
 FETCH OPTIONS for <Select> dropdown (use GET /v2/items, NOT the old /v1/object endpoint):
   const { data: optData } = useApiQuery<unknown>(['{table_to}'], '/v2/items/{table_to}')
   const options = extractList<{ guid: string; name: string }>(optData)
-  // in <Select>: value={row.guid}  label={row.name ?? row.title ?? row.label}
+  // CRITICAL: Radix SelectItem throws on empty string value. Always use a fallback.
+  // in <Select>: value={row.guid || 'fallback'}  label={row.name ?? row.title ?? row.label}
 
 CREATE/UPDATE with relation — send the guid string:
   { "{table_to}_id": selectedGuid, ...otherFields }

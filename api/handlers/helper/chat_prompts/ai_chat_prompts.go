@@ -273,10 +273,61 @@ Always respond in the same language the user wrote in.`
 2. Frontend UI structure (detailed specification)
 3. Complete design system tokens (colors, fonts, radius — the code generator uses them directly)
 
-PROJECT TYPE CLASSIFICATION (MUST BE EXACTLY ONE OF THESE THREE):
-- "admin_panel" — CRUD, dashboards, management panels, CRM, ERP, sidebar navigation, data tables
-- "web"         — multi-page website, corporate/business site, e-commerce, customer portal, or any web project with multiple public pages (Home, About, Services, Contact). Default choice when user asks for a "website".
-- "landing"     — strict single-page promotional site, simple portfolio, or simple landing page with NO routing to other pages.
+PROJECT TYPE — CLASSIFICATION DECISION TREE (MUST BE EXACTLY ONE OF THREE):
+
+STEP 1 — Who is the primary USER of this interface?
+  → Internal staff / admins / managers / operators     → "admin_panel"
+  → General public / customers / visitors / end-users  → go to STEP 2
+
+STEP 2 — How many pages / routes does the project need?
+  → Multiple pages with navigation (2+ distinct pages) → "web"
+  → Single scrollable page, no page routing            → "landing"
+
+────────────────────────────────────────────────────────────────
+TYPE "admin_panel" — internal tools, management, back-office
+────────────────────────────────────────────────────────────────
+Use ONLY when the interface is operated by admins/staff/managers.
+Characteristics: sidebar navigation, data tables, CRUD forms, dashboards with KPIs.
+
+CLEAR admin_panel signals:
+  "CRM", "ERP", "TMS", "HRM", "admin panel", "management system", "dashboard",
+  "back-office", "inventory management", "order management (for staff)",
+  "employee management", "control panel", "internal tool"
+
+E-COMMERCE SPLIT RULE — critical:
+  "Build a store like Uzum / Amazon / Wildberries (customer side)" → "web"
+  "Build an admin panel to manage orders / products / sellers"     → "admin_panel"
+  When user says "e-commerce site" or "online store" without "admin" → "web"
+
+────────────────────────────────────────────────────────────────
+TYPE "web" — public multi-page website (DEFAULT for websites)
+────────────────────────────────────────────────────────────────
+Use when the project is PUBLIC-FACING and needs 2+ pages with routing.
+
+CLEAR web signals:
+  "website", "multi-page site", "corporate site", "business website",
+  "e-commerce store" (customer-facing), "online shop", "marketplace (customer side)",
+  "university website", "hospital website", "restaurant website",
+  "portfolio with multiple pages", "blog with category/detail pages",
+  any project with Home + About + Services + Contact structure
+
+ALWAYS "web" (never landing) when user references a real multi-page website:
+  "like Uzum", "like Amazon", "like Apple.com", "like Stripe.com",
+  "like university site", "like hospital site", "like a corporate website"
+
+────────────────────────────────────────────────────────────────
+TYPE "landing" — single-page promotional / portfolio
+────────────────────────────────────────────────────────────────
+Use ONLY when explicitly single-page with scroll-based sections, no routing.
+
+CLEAR landing signals:
+  "landing page", "one-page site", "promotional page", "coming soon page",
+  "simple portfolio (single page)", "product launch page", "SaaS landing"
+
+CONFLICT RULE — when in doubt between "web" and "landing":
+  Any mention of About/Services/Blog/Contact as separate pages → "web"
+  Any mention of routing, navigation to other pages → "web"
+  Default to "web" for ambiguous cases
 
 SCHEMA RULES:
 1. Deduce the necessary database tables for the requested application.
