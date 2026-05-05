@@ -438,8 +438,8 @@ NO NATIVE <select> (CRITICAL — banned everywhere):
     <Select value={value} onValueChange={setValue}>
       <SelectTrigger><SelectValue placeholder="Choose..." /></SelectTrigger>
       <SelectContent>
-        <SelectItem value="a">A</SelectItem>
-        <SelectItem value="b">B</SelectItem>
+        {/* CRITICAL: Radix throws if value is empty string. Always provide a fallback! */}
+        <SelectItem value={item.guid || 'fallback'}>{item.name}</SelectItem>
       </SelectContent>
     </Select>
   REASON: Native <select> cannot be styled consistently across browsers and breaks the design system.
@@ -1062,7 +1062,8 @@ On submit: include relId only if relId !== '' (skip empty string — don't send 
 FETCH options for relation Select (always GET /v2/items, NOT POST /v1/object/get-list):
   const { data } = useApiQuery<unknown>(['{table_to}'], '/v2/items/{table_to}')
   const options = extractList<{ guid: string; name: string }>(data)
-  // <SelectItem key={o.guid} value={o.guid}>{o.name ?? o.title ?? o.label}</SelectItem>
+  // CRITICAL: Radix SelectItem throws on empty string value. Always use a fallback.
+  // <SelectItem key={o.guid} value={o.guid || 'fallback'}>{o.name ?? o.title ?? o.label}</SelectItem>
 
 Display related name in list view:
   options.find(o => o.guid === row['{table_to}_id'])?.name ?? '—'
