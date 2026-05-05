@@ -47,15 +47,23 @@ func extractJSON(text string) string {
 
 	if m := genericBlockRegex.FindStringSubmatch(text); len(m) > 1 {
 		candidate := strings.TrimSpace(m[1])
-		if strings.HasPrefix(candidate, "{") {
+		if strings.HasPrefix(candidate, "{") || strings.HasPrefix(candidate, "[") {
 			return candidate
 		}
 	}
 
-	start := strings.Index(text, "{")
-	end := strings.LastIndex(text, "}")
-	if start != -1 && end != -1 && end > start {
-		return strings.TrimSpace(text[start : end+1])
+	startObj := strings.Index(text, "{")
+	endObj := strings.LastIndex(text, "}")
+	startArr := strings.Index(text, "[")
+	endArr := strings.LastIndex(text, "]")
+
+	isObj := startObj != -1 && endObj != -1 && endObj > startObj
+	isArr := startArr != -1 && endArr != -1 && endArr > startArr
+
+	if isObj && (!isArr || startObj < startArr) {
+		return strings.TrimSpace(text[startObj : endObj+1])
+	} else if isArr {
+		return strings.TrimSpace(text[startArr : endArr+1])
 	}
 
 	return strings.TrimSpace(text)

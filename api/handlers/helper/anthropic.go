@@ -146,15 +146,41 @@ func CallAnthropicWithTool[T any](baseConf config.BaseConfig, body models.Anthro
 
 		for k, v := range block.Input {
 			if s, ok := v.(string); ok {
+				// Prevent parsing fields that are strictly meant to be raw text/code,
+				// even if they coincidentally look like valid JSON objects/arrays.
+				if k == "content" || k == "ui_structure" || k == "bpmn_xml" || k == "summary" || k == "change_summary" {
+					continue
+				}
 				s = strings.TrimSpace(s)
+				if strings.HasPrefix(s, "```json") {
+					s = strings.TrimPrefix(s, "```json")
+					s = strings.TrimSuffix(strings.TrimSpace(s), "```")
+					s = strings.TrimSpace(s)
+				} else if strings.HasPrefix(s, "```") {
+					s = strings.TrimPrefix(s, "```")
+					s = strings.TrimSuffix(strings.TrimSpace(s), "```")
+					s = strings.TrimSpace(s)
+				}
+
 				if (strings.HasPrefix(s, "[") && strings.HasSuffix(s, "]")) || (strings.HasPrefix(s, "{") && strings.HasSuffix(s, "}")) {
 					var parsed interface{}
 					if err := json.Unmarshal([]byte(s), &parsed); err == nil {
 						block.Input[k] = parsed
 					} else {
-						repaired := repairJSONStrings(s)
-						if err2 := json.Unmarshal([]byte(repaired), &parsed); err2 == nil {
+						sanitized := sanitizeJSONContent(s)
+						if err2 := json.Unmarshal([]byte(sanitized), &parsed); err2 == nil {
 							block.Input[k] = parsed
+						} else {
+							repaired := repairJSONStrings(sanitized)
+							if err3 := json.Unmarshal([]byte(repaired), &parsed); err3 == nil {
+								block.Input[k] = parsed
+							} else {
+								preview := s
+								if len(preview) > 200 {
+									preview = preview[:200]
+								}
+								log.Printf("[TOOL DECODE] Failed to parse stringified JSON field %q. Repair also failed. Error: %v\nPreview: %s", k, err3, preview)
+							}
 						}
 					}
 				}

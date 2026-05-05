@@ -236,11 +236,10 @@ Always respond in the same language the user wrote in.`
 2. Frontend UI structure (detailed specification)
 3. Complete design system tokens (colors, fonts, radius — the code generator uses them directly)
 
-PROJECT TYPE CLASSIFICATION:
+PROJECT TYPE CLASSIFICATION (MUST BE EXACTLY ONE OF THESE THREE):
 - "admin_panel" — CRUD, dashboards, management panels, CRM, ERP, sidebar navigation, data tables
-- "landing"     — marketing page, portfolio, single-page promotional site
-- "web"         — complex multi-page web app not fitting admin_panel
-- "other"       — everything else
+- "web"         — multi-page website, corporate/business site, e-commerce, customer portal, or any web project with multiple public pages (Home, About, Services, Contact). Default choice when user asks for a "website".
+- "landing"     — strict single-page promotional site, simple portfolio, or simple landing page with NO routing to other pages.
 
 SCHEMA RULES:
 1. Deduce the necessary database tables for the requested application.

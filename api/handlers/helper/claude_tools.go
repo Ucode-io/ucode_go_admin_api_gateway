@@ -33,8 +33,8 @@ var ToolArchitectPlan = models.ClaudeFunctionTool{
 			},
 			"project_type": map[string]any{
 				"type":        "string",
-				"enum":        []string{"admin_panel", "landing", "web", "other"},
-				"description": "Detected project type",
+				"enum":        []string{"admin_panel", "landing", "web"},
+				"description": "Detected project type. ALWAYS choose one of these three. Use 'web' for multi-page websites, 'landing' for strict single-page promotional sites.",
 			},
 			"tables": map[string]any{
 				"type": "array",
