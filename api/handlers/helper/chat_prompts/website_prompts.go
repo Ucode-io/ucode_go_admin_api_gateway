@@ -88,8 +88,17 @@ API CLIENT — USE PRE-BUILT (CRITICAL — when project has API tables):
     })
 
 App.tsx with React Router v6:
+  PAGE IMPORTS — ALWAYS default imports (pages use export default, NEVER named export):
+    ✅ import HomePage from '@/pages/HomePage'
+    ✅ import AboutPage from '@/pages/AboutPage'
+    ✅ import ContactPage from '@/pages/ContactPage'
+    ❌ import { AboutPage } from '@/pages/AboutPage'  → build crash: no named export exists
+
   import { BrowserRouter, Routes, Route } from 'react-router-dom';
   import { AppProviders } from '@/components/shared/AppProviders';  // pre-built, wraps QueryClient + Toaster
+  import HomePage from '@/pages/HomePage';
+  import AboutPage from '@/pages/AboutPage';
+  import ContactPage from '@/pages/ContactPage';
   export default function App() {
     return (
       <AppProviders>
