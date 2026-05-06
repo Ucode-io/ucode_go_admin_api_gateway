@@ -38,9 +38,31 @@ IMPORT COMPLETENESS:
   Every non-npm import path MUST have a corresponding file in files[].
   ZERO exceptions. Trace every import before emitting.
 
-APOSTROPHE RULE (prevents build crash):
-  NEVER use a raw apostrophe inside JSX expression {} or text content.
-  WRONG: <p>{chef's table}</p>   RIGHT: <p>chef&apos;s table</p>  OR  <p>{"chef's table"}</p>
+====================================
+SYNTAX SAFETY & BUILD RULES — MANDATORY
+====================================
+1. STRING LITERALS (CYRILLIC / RUSSIAN / NON-ENGLISH TEXT):
+   NEVER write text words directly into arrays or objects without quotes!
+   ❌ const features = [Поддержка ИИ, Тарифы]      → CRASH: ReferenceError: Тарифы is not defined
+   ✅ const features = ['Поддержка ИИ', 'Тарифы']  → CORRECT
+   ❌ const title = это круто                      → CRASH: Expected ";" but found "круто"
+   ✅ const title = 'это круто'                    → CORRECT
+2. INLINE STYLES MUST BE STRINGS:
+   NEVER use CSS units (px, vw, %, etc.) inside style={{}} without quotes!
+   ❌ style={{ width: 100% }}    → CRASHES ESBUILD: Expected "}" but found "%"
+   ✅ style={{ width: "100%" }}  → CORRECT
+   ✅ style={{ width: 100 }}     → CORRECT (React infers px)
+3. JSX APOSTROPHES:
+   NEVER use unescaped apostrophes in text nodes or JSX expressions.
+   ❌ <p>It's great</p>          → CRASHES ESBUILD
+   ✅ <p>It&apos;s great</p>     → CORRECT
+   ✅ <p>{"It's great"}</p>      → CORRECT
+4. TYPE ASSERTIONS:
+   NEVER use angle brackets for type assertions in .tsx files!
+   ❌ const x = <MyType>y        → CRASHES ESBUILD
+   ✅ const x = y as MyType      → CORRECT
+
+Ensure your code is 100% valid TypeScript. Double-check all curly braces, brackets, and quotes.
 
 REACT ITERATOR KEYS:
   key= MUST be on the outermost element returned by every .map() call.

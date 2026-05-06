@@ -6,7 +6,13 @@ var (
 ====================================
 SYNTAX SAFETY & BUILD RULES — MANDATORY
 ====================================
-1. INLINE STYLES MUST BE STRINGS:
+1. STRING LITERALS (CYRILLIC / RUSSIAN / NON-ENGLISH TEXT):
+   NEVER write text words directly into arrays or objects without quotes!
+   ❌ const features = [Поддержка ИИ, Тарифы]      → CRASH: ReferenceError: Тарифы is not defined
+   ✅ const features = ['Поддержка ИИ', 'Тарифы']  → CORRECT
+   ❌ const title = это круто                      → CRASH: Expected ";" but found "круто"
+   ✅ const title = 'это круто'                    → CORRECT
+2. INLINE STYLES MUST BE STRINGS:
    NEVER use CSS units (px, vw, %, etc.) inside style={{}} without quotes!
    ❌ style={{ width: 100% }}    → CRASHES ESBUILD: Expected "}" but found "%"
    ❌ style={{ width: 100vw }}   → CRASHES ESBUILD: Expected "}" but found "vw"
@@ -698,7 +704,13 @@ Touch targets: min 44px height.
 ====================================
 SYNTAX SAFETY & BUILD RULES — MANDATORY
 ====================================
-1. INLINE STYLES MUST BE STRINGS:
+1. STRING LITERALS (CYRILLIC / RUSSIAN / NON-ENGLISH TEXT):
+   NEVER write text words directly into arrays or objects without quotes!
+   ❌ const features = [Поддержка ИИ, Тарифы]      → CRASH: ReferenceError: Тарифы is not defined
+   ✅ const features = ['Поддержка ИИ', 'Тарифы']  → CORRECT
+   ❌ const title = это круто                      → CRASH: Expected ";" but found "круто"
+   ✅ const title = 'это круто'                    → CORRECT
+2. INLINE STYLES MUST BE STRINGS:
    NEVER use CSS units (px, vw, %, etc.) inside style={{}} without quotes!
    ❌ style={{ width: 100% }}    → CRASHES ESBUILD: Expected "}" but found "%"
    ❌ style={{ width: 100vw }}   → CRASHES ESBUILD: Expected "}" but found "vw"
