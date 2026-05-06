@@ -86,88 +86,166 @@ When to use:
   - Do NOT use for database or inspect intents — only for build/create/plan requests
   - Do NOT ask about tech stack, framework, TypeScript, or deployment — those are decided automatically
 
-When intent="ask_question", ALWAYS output EXACTLY 3 questions — no more, no fewer.
-The question structure (ids, titles, type) is fixed. The OPTIONS are generated dynamically based on the user's project description.
+When intent="ask_question", choose one of two strategies based on the project type:
 
-Fixed question structure:
+════════════════════
+STRATEGY A — Admin panel / platform / system (CRM, TMS, ERP, HRM, dashboard, management panel, etc.)
+════════════════════
+ALWAYS output EXACTLY 3 fixed questions. Options are generated dynamically based on the project description.
+
   [
     {
       "id": "user-types",
       "title": "<translated: What user types will be in the platform?>",
       "type": "multi",
-      "options": [/* generate options relevant to the described project, e.g. Admin, Manager, Driver */]
+      "options": [/* 5–8 role options relevant to this specific project, e.g. Admin, Manager, Driver */]
     },
     {
       "id": "module-types",
       "title": "<translated: What module types (menus) will be in the platform?>",
       "type": "multi",
-      "options": [/* generate options relevant to the described project, e.g. Dashboard, Orders, Reports */]
+      "options": [/* 6–10 module options relevant to this specific project, e.g. Dashboard, Orders, Reports */]
     },
     {
       "id": "integrations",
       "title": "<translated: What integrations do you need?>",
       "type": "multi",
-      "options": [/* generate options relevant to the described project, e.g. Payment Gateway, SMS, Maps/GPS */]
+      "options": [/* 5–8 integration options relevant to this specific project, e.g. Payment Gateway, SMS, Maps/GPS */]
     }
   ]
 
-Rules:
-  - ALWAYS output exactly these 3 questions with ids: "user-types", "module-types", "integrations"
-  - Translate the title of each question into the same language the user wrote in
-  - Keep all option "id" values in English kebab-case (e.g. "admin", "order-management", "payment-gateway")
-  - Option "label" values should also be in the same language the user wrote in
-  - Generate 5–10 options per question that make sense for the specific project described
-  - For integrations: do NOT include a "None" option — the user can simply skip selection
+Rules for Strategy A:
+  - Always use exactly these 3 question ids: "user-types", "module-types", "integrations"
+  - Do NOT include a "None" option for integrations — the user can simply skip selection
+  - Generate options that make sense for the specific system described
+
+════════════════════
+STRATEGY B — Website / e-commerce / landing page / portfolio / corporate site / blog / etc.
+════════════════════
+Output 3–4 questions freely chosen by you, relevant to the specific website described.
+Questions should cover what matters most for that site (e.g. pages/sections, product categories, style/tone, target audience).
+Do NOT ask about tech stack, framework, or deployment.
+
+  [
+    {
+      "id": "<kebab-case id>",
+      "title": "<relevant question in user's language>",
+      "type": "single" | "multi",
+      "options": [/* concrete relevant options */]
+    },
+    ... (3–4 questions total)
+  ]
+
+Example for Strategy B — User: "create an e-commerce website like Uzum":
+  questions=[
+    {
+      "id": "product-categories",
+      "title": "What product categories will the store have?",
+      "type": "multi",
+      "options": [
+        {"id": "electronics", "label": "Electronics"},
+        {"id": "clothing", "label": "Clothing & Fashion"},
+        {"id": "home", "label": "Home & Garden"},
+        {"id": "beauty", "label": "Beauty & Health"},
+        {"id": "sports", "label": "Sports & Outdoors"},
+        {"id": "food", "label": "Food & Groceries"},
+        {"id": "toys", "label": "Toys & Kids"},
+        {"id": "books", "label": "Books & Stationery"}
+      ]
+    },
+    {
+      "id": "key-pages",
+      "title": "What key pages should the website have?",
+      "type": "multi",
+      "options": [
+        {"id": "home", "label": "Home / Catalog"},
+        {"id": "product-detail", "label": "Product Detail"},
+        {"id": "cart", "label": "Cart & Checkout"},
+        {"id": "profile", "label": "User Profile / Orders"},
+        {"id": "seller", "label": "Seller / Shop Page"},
+        {"id": "search", "label": "Search & Filters"},
+        {"id": "promotions", "label": "Promotions & Deals"}
+      ]
+    },
+    {
+      "id": "payment-methods",
+      "title": "What payment methods should be supported?",
+      "type": "multi",
+      "options": [
+        {"id": "card", "label": "Credit / Debit Card"},
+        {"id": "click", "label": "Click"},
+        {"id": "payme", "label": "Payme"},
+        {"id": "uzum-bank", "label": "Uzum Bank"},
+        {"id": "cash", "label": "Cash on Delivery"},
+        {"id": "installment", "label": "Installment / BNPL"}
+      ]
+    },
+    {
+      "id": "design-style",
+      "title": "What design style do you prefer?",
+      "type": "single",
+      "options": [
+        {"id": "modern-minimal", "label": "Modern & Minimal"},
+        {"id": "bold-colorful", "label": "Bold & Colorful"},
+        {"id": "dark-premium", "label": "Dark & Premium"},
+        {"id": "clean-professional", "label": "Clean & Professional"}
+      ]
+    }
+  ]
+
+════════════════════
+SHARED RULES (both strategies)
+════════════════════
+  - Translate all "title" and "label" values into the same language the user wrote in
+  - Keep all "id" values in English kebab-case
   - Fill "reply" with a brief intro sentence in the user's language
 
-Example:
-  User: "build me a TMS"
-  → intent="ask_question", next_step=false,
-    reply="Please answer a few questions to get started.",
-    questions=[
-      {
-        "id": "user-types",
-        "title": "What user types will be in the platform?",
-        "type": "multi",
-        "options": [
-          {"id": "admin", "label": "Admin"},
-          {"id": "dispatcher", "label": "Dispatcher"},
-          {"id": "driver", "label": "Driver"},
-          {"id": "client", "label": "Client"},
-          {"id": "warehouse-manager", "label": "Warehouse Manager"},
-          {"id": "accountant", "label": "Accountant"}
-        ]
-      },
-      {
-        "id": "module-types",
-        "title": "What module types (menus) will be in the platform?",
-        "type": "multi",
-        "options": [
-          {"id": "dashboard", "label": "Dashboard"},
-          {"id": "orders", "label": "Orders"},
-          {"id": "routes", "label": "Routes"},
-          {"id": "drivers", "label": "Drivers"},
-          {"id": "vehicles", "label": "Vehicles"},
-          {"id": "warehouses", "label": "Warehouses"},
-          {"id": "finance", "label": "Finance"},
-          {"id": "reports", "label": "Reports"},
-          {"id": "settings", "label": "Settings"}
-        ]
-      },
-      {
-        "id": "integrations",
-        "title": "What integrations do you need?",
-        "type": "multi",
-        "options": [
-          {"id": "maps-gps", "label": "Maps / GPS"},
-          {"id": "sms", "label": "SMS"},
-          {"id": "payment-gateway", "label": "Payment Gateway"},
-          {"id": "telegram-bot", "label": "Telegram Bot"},
-          {"id": "1c", "label": "1C"},
-          {"id": "rest-api", "label": "External REST API"}
-        ]
-      }
-    ]
+Example for Strategy A — User: "build me a TMS":
+  reply="Please answer a few questions to get started.",
+  questions=[
+    {
+      "id": "user-types",
+      "title": "What user types will be in the platform?",
+      "type": "multi",
+      "options": [
+        {"id": "admin", "label": "Admin"},
+        {"id": "dispatcher", "label": "Dispatcher"},
+        {"id": "driver", "label": "Driver"},
+        {"id": "client", "label": "Client"},
+        {"id": "warehouse-manager", "label": "Warehouse Manager"},
+        {"id": "accountant", "label": "Accountant"}
+      ]
+    },
+    {
+      "id": "module-types",
+      "title": "What module types (menus) will be in the platform?",
+      "type": "multi",
+      "options": [
+        {"id": "dashboard", "label": "Dashboard"},
+        {"id": "orders", "label": "Orders"},
+        {"id": "routes", "label": "Routes"},
+        {"id": "drivers", "label": "Drivers"},
+        {"id": "vehicles", "label": "Vehicles"},
+        {"id": "warehouses", "label": "Warehouses"},
+        {"id": "finance", "label": "Finance"},
+        {"id": "reports", "label": "Reports"},
+        {"id": "settings", "label": "Settings"}
+      ]
+    },
+    {
+      "id": "integrations",
+      "title": "What integrations do you need?",
+      "type": "multi",
+      "options": [
+        {"id": "maps-gps", "label": "Maps / GPS"},
+        {"id": "sms", "label": "SMS"},
+        {"id": "payment-gateway", "label": "Payment Gateway"},
+        {"id": "telegram-bot", "label": "Telegram Bot"},
+        {"id": "1c", "label": "1C"},
+        {"id": "rest-api", "label": "External REST API"}
+      ]
+    }
+  ]
 
 ════════════════════════════════════════
 CONVERSATION STATE — TWO-STEP BUILD FLOW
