@@ -55,6 +55,11 @@ NO INLINE STYLES (for static values):
 
 NO AUTH: Never generate Login, Register, ProtectedRoute, AuthGuard, useAuth, or token management.
 
+BANNED CONFIG FILES — NEVER include these in files[] (pre-built in project template):
+  tsconfig.json · tsconfig.node.json · vite.config.ts · vite.config.js
+  package.json · package-lock.json · tailwind.config.js · postcss.config.js
+  Generating these overwrites the valid template config and breaks CI (tsc/vite build fails).
+
 NULL SAFETY:
   API fields are always nullable. Guard every field:
   ✅ {item.name ?? '—'}   ✅ (item.tags ?? '').split(',')
@@ -493,6 +498,14 @@ BANNED PATTERNS (cause CI failures):
   Recharts formatters: formatter={(value, name) => [...]}  NOT  formatter={(value: number, name: string) => [...]}
   Optional fields: { field: value || undefined }  NOT  { field: value || null }
   Unused destructured props: omit them or rename with : alias syntax
+  OPTIONAL FUNCTION CALLS (TS2722/TS18048):
+    ❌ optionalFn()              →  TS2722: Cannot invoke object which is possibly 'undefined'
+    ✅ optionalFn?.()            →  optional call — always safe
+    ❌ obj?.maybeNum * 2         →  TS2363: arithmetic on possibly-undefined
+    ✅ (obj?.maybeNum ?? 0) * 2
+  ANALYTICS — NEVER GENERATE:
+    NEVER generate src/utils/metrica.ts, Yandex Metrika (ym), Google Analytics, GTM, or any
+    analytics/tracking integration. These require project-specific IDs not available at generation time.
 
 ====================================
 API DATA RENDERING RULE

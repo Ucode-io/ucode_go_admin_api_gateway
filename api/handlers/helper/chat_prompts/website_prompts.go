@@ -129,6 +129,11 @@ NO INLINE STYLES (for static values):
 
 NO AUTH: Never generate Login, Register, ProtectedRoute, AuthGuard, or token management.
 
+BANNED CONFIG FILES — NEVER include these in files[] (pre-built in project template):
+  tsconfig.json · tsconfig.node.json · vite.config.ts · vite.config.js
+  package.json · package-lock.json · tailwind.config.js · postcss.config.js
+  Generating these overwrites the valid template config and breaks CI (tsc/vite build fails).
+
 NULL SAFETY:
   ✅ {item.name ?? '—'}   ✅ (item.tags ?? '').split(',')
   ❌ item.name.split(' ')   ❌ item.email.toLowerCase()
@@ -406,6 +411,16 @@ TYPESCRIPT SAFETY
 - Recharts callbacks: formatter={(value, name) => [...]}  (no explicit types)
 - Optional fields: { field: value || undefined }  not null
 
+OPTIONAL FUNCTION CALLS (TS2722/TS18048 — CI build failure):
+  ❌ optionalFn()              →  TS2722: Cannot invoke object which is possibly 'undefined'
+  ✅ optionalFn?.()            →  optional call — always safe
+  ❌ obj?.maybeNum * 2         →  TS2363: arithmetic on possibly-undefined
+  ✅ (obj?.maybeNum ?? 0) * 2
+
+ANALYTICS — NEVER GENERATE:
+  NEVER generate src/utils/metrica.ts, Yandex Metrika (ym), Google Analytics, GTM, or any
+  analytics/tracking integration. These require project-specific IDs not available at generation time.
+
 ====================================
 PRE-OUTPUT CHECKLIST
 ====================================
@@ -539,6 +554,7 @@ Foundation (Layout, Navbar, Footer, App.tsx, index.css, utils.ts) and UI Kit are
 EMIT RULES (strictly enforced):
 1. Emit ONLY the file listed in "YOUR FILE TO IMPLEMENT"
 2. NEVER re-emit: index.css, main.tsx, App.tsx, src/lib/utils.ts, src/components/layout/*, src/components/ui/*
+3. NEVER emit config files: tsconfig.json, vite.config.ts, package.json, tailwind.config.js — pre-built in template
 3. Your page does NOT import Navbar or Footer directly — Layout.tsx wraps them around every page
 4. Use EXACT export names from the foundation context
 
@@ -700,5 +716,18 @@ SYNTAX SAFETY & BUILD RULES — MANDATORY
    ❌ const x = <MyType>y        → CRASHES ESBUILD
    ✅ const x = y as MyType      → CORRECT
 
-Ensure your code is 100% valid TypeScript. Double-check all curly braces, brackets, and quotes.`
+Ensure your code is 100% valid TypeScript. Double-check all curly braces, brackets, and quotes.
+
+====================================
+TYPESCRIPT CI RULES — BANNED PATTERNS
+====================================
+OPTIONAL FUNCTION CALLS (TS2722/TS18048 — CI build failure):
+  ❌ optionalFn()              →  TS2722: Cannot invoke object which is possibly 'undefined'
+  ✅ optionalFn?.()            →  optional call — always safe
+  ❌ obj?.maybeNum * 2         →  TS2363: arithmetic on possibly-undefined
+  ✅ (obj?.maybeNum ?? 0) * 2
+
+ANALYTICS — NEVER GENERATE:
+  NEVER generate src/utils/metrica.ts, Yandex Metrika (ym), Google Analytics, GTM, or any
+  analytics/tracking integration. These require project-specific IDs not available at generation time.`
 )

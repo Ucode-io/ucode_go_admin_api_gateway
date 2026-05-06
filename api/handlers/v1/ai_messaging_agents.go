@@ -221,6 +221,8 @@ func (p *ChatProcessor) generateCodeSingle(ctx context.Context, clarified string
 		return nil, fmt.Errorf("generate code: claude returned empty project")
 	}
 
+	project.Files = stripForbiddenConfigFiles(project.Files)
+
 	if len(scaffoldFiles) > 0 {
 		generatedPaths := make(map[string]struct{}, len(project.Files))
 		for _, f := range project.Files {
@@ -536,6 +538,8 @@ func (p *ChatProcessor) generateCodeChunkedAdminPanel(ctx context.Context, clari
 	}
 	allChunks = append(allChunks, successChunks...)
 	merged := mergeChunks(foundation, allChunks)
+
+	merged.Files = stripForbiddenConfigFiles(merged.Files)
 
 	scaffoldFiles := GetTemplateScaffold()
 	if len(scaffoldFiles) > 0 {
@@ -1008,6 +1012,33 @@ func injectEnvFile(files []models.ProjectFile, baseURL, apiKey string) []models.
 	return append(files, models.ProjectFile{Path: ".env", Content: content})
 }
 
+var forbiddenConfigFiles = map[string]bool{
+	"tsconfig.json":      true,
+	"tsconfig.node.json": true,
+	"vite.config.ts":     true,
+	"vite.config.js":     true,
+	"package.json":       true,
+	"package-lock.json":  true,
+	"tailwind.config.js": true,
+	"tailwind.config.ts": true,
+	"postcss.config.js":  true,
+	"postcss.config.cjs": true,
+}
+
+// stripForbiddenConfigFiles removes AI-generated config files that are pre-built in the template.
+// Must be called before scaffold injection so the valid template versions get injected instead.
+func stripForbiddenConfigFiles(files []models.ProjectFile) []models.ProjectFile {
+	out := make([]models.ProjectFile, 0, len(files))
+	for _, f := range files {
+		if forbiddenConfigFiles[f.Path] {
+			log.Printf("[strip] removed AI-generated config file: %s", f.Path)
+		} else {
+			out = append(out, f)
+		}
+	}
+	return out
+}
+
 func injectMissingCriticalFiles(files []models.ProjectFile, projectType string) []models.ProjectFile {
 	if projectType != "landing" && projectType != "web" {
 		return files
@@ -1386,6 +1417,8 @@ func (p *ChatProcessor) generateCodeChunkedWebsite(ctx context.Context, clarifie
 	}
 	allChunks = append(allChunks, successChunks...)
 	merged := mergeChunks(foundation, allChunks)
+
+	merged.Files = stripForbiddenConfigFiles(merged.Files)
 
 	scaffoldFiles := GetTemplateScaffold()
 	if len(scaffoldFiles) > 0 {

@@ -126,6 +126,11 @@ NO AUTH: Never generate Login/Register pages, ProtectedRoute, AuthGuard,
   useAuth, auth context, logout buttons, token management, or /login redirects.
   The app starts directly on the main page.
 
+BANNED CONFIG FILES — NEVER include these in files[] (pre-built in project template):
+  tsconfig.json · tsconfig.node.json · vite.config.ts · vite.config.js
+  package.json · package-lock.json · tailwind.config.js · postcss.config.js
+  Generating these overwrites the valid template config and breaks CI (tsc/vite build fails).
+
 LOGIN TABLE — MANDATORY RULES (if the project has a users / login table):
   The API config block marks login tables with "LOGIN TABLE:". Apply ALL rules below for those pages.
   A login table has BUILT-IN auth fields always present in the DB (login, password, email, phone).
@@ -681,6 +686,25 @@ BANNED PATTERNS — these cause TypeScript CI build failures:
     ✅ const { name } = props                // omit unused props entirely
     ✅ const { prop: _local = default } = props  // rename via : syntax if value needed
 
+  COLUMN ARRAY TYPE CAST (TS2352 — CI build failure):
+    Table accepts Column<T>[] where T is a generic. Casting a typed columns array to
+    Column<Record<string,unknown>>[] is rejected by tsc (contravariant render function).
+    ❌ const cols = [{ render: (row: Order) => <span>{row.id}</span> }] as Column<Record<string,unknown>>[]
+    ❌ const data = orders as Record<string,unknown>[]
+    ✅ const cols: Column<Order>[] = [{ render: (row) => <span>{row.id}</span> }]
+       <Table<Order> columns={cols} data={orders} />
+    RULE: annotate the array directly with the entity type. NO cast needed.
+
+  OPTIONAL FUNCTION CALLS (TS2722/TS18048 — CI build failure):
+    ❌ optionalFn()              →  TS2722: Cannot invoke object which is possibly 'undefined'
+    ✅ optionalFn?.()            →  optional call — always safe
+    ❌ obj?.maybeNum * 2         →  TS2363: arithmetic on possibly-undefined
+    ✅ (obj?.maybeNum ?? 0) * 2
+
+  ANALYTICS — NEVER GENERATE:
+    NEVER generate src/utils/metrica.ts, Yandex Metrika (ym), Google Analytics, GTM, or any
+    analytics/tracking integration. These require project-specific IDs not available at generation time.
+
 ====================================
 FORWARDREF — MANDATORY FOR ALL PRIMITIVES
 ====================================
@@ -860,6 +884,7 @@ EMIT RULES (strictly enforced):
 1. Emit ONLY files listed in "YOUR FILES TO IMPLEMENT"
 2. NEVER re-emit foundation files: index.css, main.tsx, App.tsx, types.ts, src/components/layout/*, src/components/shared/AppProviders.tsx, src/config/axios.ts
 3. NEVER re-emit UI Kit files (src/components/ui/*) — they are already generated in Group 1
+4. NEVER emit config files: tsconfig.json, vite.config.ts, package.json, tailwind.config.js — pre-built in template
 4. NEVER create stub or placeholder files for missing imports — all foundation and UI kit imports are satisfied
 5. Use EXACT export names from the manifest (case-sensitive)
 6. NEVER declare or export the same name twice in one file — TypeScript will refuse to compile
@@ -1046,6 +1071,25 @@ DESTRUCTURING UNUSED PROPS — never prefix interface property names with _:
   ✅ const { name } = props                        // just omit unused props
   ✅ const { name, completedPoints: _cp = 0 } = props  // rename with : alias syntax if value needed
   Rule: _ prefix belongs on the LOCAL variable name via rename, not on the interface property key.
+
+COLUMN ARRAY TYPE CAST (TS2352 — CI build failure):
+  Table accepts Column<T>[] where T is a generic. Casting a typed columns array to
+  Column<Record<string,unknown>>[] is rejected by tsc (contravariant render function).
+  ❌ const cols = [{ render: (row: Order) => <span>{row.id}</span> }] as Column<Record<string,unknown>>[]
+  ❌ const data = orders as Record<string,unknown>[]
+  ✅ const cols: Column<Order>[] = [{ render: (row) => <span>{row.id}</span> }]
+     <Table<Order> columns={cols} data={orders} />
+  RULE: annotate the array directly with the entity type. NO cast needed.
+
+OPTIONAL FUNCTION CALLS (TS2722/TS18048 — CI build failure):
+  ❌ optionalFn()              →  TS2722: Cannot invoke object which is possibly 'undefined'
+  ✅ optionalFn?.()            →  optional call — always safe
+  ❌ obj?.maybeNum * 2         →  TS2363: arithmetic on possibly-undefined
+  ✅ (obj?.maybeNum ?? 0) * 2
+
+ANALYTICS — NEVER GENERATE:
+  NEVER generate src/utils/metrica.ts, Yandex Metrika (ym), Google Analytics, GTM, or any
+  analytics/tracking integration. These require project-specific IDs not available at generation time.
 
 ====================================
 RELATION FIELDS — MANDATORY RULES (applies whenever your chunk has a Many2One relation)
