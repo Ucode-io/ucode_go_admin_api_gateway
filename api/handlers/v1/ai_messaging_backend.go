@@ -247,7 +247,6 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 					}
 				}
 
-				// Defer role/client_type creation to Phase 4 (after all tables + mock data).
 				loginTableSlug = tablePlan.Slug
 				if len(plan.ClientTypes) > 0 && clientTypeId != "" {
 					deferredRoles = append(deferredRoles, pendingRole{name: plan.ClientTypes[0], clientTypeId: clientTypeId})
@@ -461,54 +460,32 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 
 		authSvc := service.AuthService()
 
+		// Roles for existing client_types (already have their IDs).
 		for _, r := range deferredRoles {
-			if err := createRoleForClientType(ctx, r.name, r.clientTypeId, projectId, authSvc); err != nil {
+			if err := createRole(ctx, r.name, r.clientTypeId, projectId, authSvc); err != nil {
 				log.Printf("[backend] role %q create failed: %v", r.name, err)
 				errs = append(errs, fmt.Sprintf("role %q: %v", r.name, err))
 			} else {
-				emit.Emit(SSEEvent{
-					Type:    EvProgress,
-					Icon:    "shield-check",
-					Message: "Роль создана",
-					Value:   r.name,
-				})
+				emit.Emit(SSEEvent{Type: EvProgress, Icon: "shield-check", Message: "Роль создана", Value: r.name})
 			}
 		}
 
+		// Extra client_types from plan.ClientTypes[1:] — create each then its role.
 		for _, typeName := range deferredClientTypes {
-			ctResp, ctErr := authSvc.Client().V2CreateClientType(ctx, &auth_service.V2CreateClientTypeRequest{
-				Name:         typeName,
-				ProjectId:    projectId,
-				TableSlug:    loginTableSlug,
-				SessionLimit: 50,
-			})
+			ctID, ctErr := createClientType(ctx, typeName, projectId, loginTableSlug, authSvc)
 			if ctErr != nil {
 				log.Printf("[backend] client_type %q create failed: %v", typeName, ctErr)
 				errs = append(errs, fmt.Sprintf("client_type %q: %v", typeName, ctErr))
 				continue
 			}
-			emit.Emit(SSEEvent{
-				Type:    EvProgress,
-				Icon:    "users",
-				Message: "Тип клиента создан",
-				Value:   typeName,
-			})
+			emit.Emit(SSEEvent{Type: EvProgress, Icon: "users", Message: "Тип клиента создан", Value: typeName})
 
-			ctGUID := ""
-			if ctResp.GetData() != nil {
-				ctGUID, _ = ctResp.GetData().AsMap()["id"].(string)
-			}
-			if ctGUID != "" {
-				if err := createRoleForClientType(ctx, typeName, ctGUID, projectId, authSvc); err != nil {
+			if ctID != "" {
+				if err := createRole(ctx, typeName, ctID, projectId, authSvc); err != nil {
 					log.Printf("[backend] role %q create failed: %v", typeName, err)
 					errs = append(errs, fmt.Sprintf("role %q: %v", typeName, err))
 				} else {
-					emit.Emit(SSEEvent{
-						Type:    EvProgress,
-						Icon:    "shield-check",
-						Message: "Роль создана",
-						Value:   typeName,
-					})
+					emit.Emit(SSEEvent{Type: EvProgress, Icon: "shield-check", Message: "Роль создана", Value: typeName})
 				}
 			}
 		}
@@ -652,7 +629,27 @@ func ensureLoginTable(plan *models.ArchitectPlan) *models.ArchitectPlan {
 	return plan
 }
 
-func createRoleForClientType(ctx context.Context, name, clientTypeId, projectId string, authSvc services.AuthServiceI) error {
+// createClientType creates a new client_type via the auth service and returns its ID.
+func createClientType(ctx context.Context, name, projectId, tableSlug string, authSvc services.AuthServiceI) (string, error) {
+	resp, err := authSvc.Client().V2CreateClientType(ctx, &auth_service.V2CreateClientTypeRequest{
+		ProjectId:    projectId,
+		Name:         name,
+		TableSlug:    tableSlug,
+		SessionLimit: 50,
+	})
+	if err != nil {
+		return "", err
+	}
+	id := ""
+	if resp.GetData() != nil {
+		id, _ = resp.GetData().AsMap()["id"].(string)
+	}
+	log.Printf("[backend] client_type %q created (id=%s)", name, id)
+	return id, nil
+}
+
+// createRole creates a role tied to a client_type via the auth service.
+func createRole(ctx context.Context, name, clientTypeId, projectId string, authSvc services.AuthServiceI) error {
 	if _, err := authSvc.Permission().V2AddRole(ctx, &auth_service.V2AddRoleRequest{
 		ClientTypeId: clientTypeId,
 		ProjectId:    projectId,
