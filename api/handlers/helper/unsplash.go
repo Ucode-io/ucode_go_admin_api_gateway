@@ -178,10 +178,11 @@ func fetchPhotos(ctx context.Context, accessKey string, keywords []string) ([]un
 }
 
 type ImagePoolResult struct {
-	Block    string   // formatted prompt block to append to apiConfig; empty on failure
-	Keywords []string // search terms that were used
-	Count    int      // number of photos fetched
-	Err      error    // non-nil when the API call failed; generation continues either way
+	Block     string   // formatted prompt block to append to apiConfig; empty on failure
+	Keywords  []string // search terms that were used
+	Count     int      // number of photos fetched
+	ThumbURLs []string // first 6 thumb URLs for mock_data image injection
+	Err       error    // non-nil when the API call failed; generation continues either way
 }
 
 func FetchImagePool(ctx context.Context, accessKey string, plan *models.ArchitectPlan) ImagePoolResult {
@@ -243,9 +244,18 @@ func FetchImagePool(ctx context.Context, accessKey string, plan *models.Architec
 
 	fmt.Fprintf(&sb, "════════════════════════════════════════\n")
 
+	thumbURLs := make([]string, 0, 6)
+	for i, ph := range photos {
+		if i >= 6 {
+			break
+		}
+		thumbURLs = append(thumbURLs, ph.URLThumb)
+	}
+
 	return ImagePoolResult{
-		Block:    sb.String(),
-		Keywords: keywords,
-		Count:    len(photos),
+		Block:     sb.String(),
+		Keywords:  keywords,
+		Count:     len(photos),
+		ThumbURLs: thumbURLs,
 	}
 }

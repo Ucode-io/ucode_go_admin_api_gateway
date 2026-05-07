@@ -9,12 +9,19 @@ import (
 	"ucode/ucode_go_api_gateway/config"
 
 	"ucode/ucode_go_api_gateway/api/models"
+	auth_service "ucode/ucode_go_api_gateway/genproto/auth_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/services"
 
 	"github.com/google/uuid"
 )
+
+// pendingRole holds deferred role creation info collected during the login block.
+type pendingRole struct {
+	name         string
+	clientTypeId string
+}
 
 func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, resourceEnvId, projectId, userId, envId string, service services.ServiceManagerI, emit ProgressEmitter) error {
 	log.Printf("[backend] creating tables for project %s", resourceEnvId)
@@ -33,6 +40,11 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 	for _, rel := range plan.Relations {
 		relFieldSlugsToSkip[rel.TableTo+"_id"] = true
 	}
+
+	// Collected during login block; created after Phase 3 so auth service sees all tables.
+	var deferredRoles []pendingRole
+	var deferredClientTypes []string // extra client_type names from plan.ClientTypes[1:]
+	var loginTableSlug string
 
 	// ─── Phase 1: Tables + Fields ───────────────────────────────────────────────
 	// Mock data is deferred to Phase 3 so FK columns exist before inserts.
@@ -121,6 +133,9 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 
 				clientTypeId, _ := firstItem["guid"].(string)
 				firstItem["table_slug"] = tablePlan.Slug
+				if len(plan.ClientTypes) > 0 {
+					firstItem["name"] = plan.ClientTypes[0]
+				}
 
 				updateData, convertErr := helper.ConvertMapToStruct(firstItem)
 				if convertErr != nil {
@@ -230,6 +245,19 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 							errs = append(errs, fmt.Sprintf("user migration %s: %v", existingUserGuid, err))
 						}
 					}
+				}
+
+				// Defer role/client_type creation to Phase 4 (after all tables + mock data).
+				loginTableSlug = tablePlan.Slug
+				if len(plan.ClientTypes) > 0 && clientTypeId != "" {
+					deferredRoles = append(deferredRoles, pendingRole{name: plan.ClientTypes[0], clientTypeId: clientTypeId})
+					deferredClientTypes = append(deferredClientTypes, plan.ClientTypes[1:]...)
+				} else if clientTypeId != "" {
+					ctName, _ := firstItem["name"].(string)
+					if ctName == "" {
+						ctName = tablePlan.Label
+					}
+					deferredRoles = append(deferredRoles, pendingRole{name: ctName, clientTypeId: clientTypeId})
 				}
 			}
 		}
@@ -420,12 +448,78 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 		}
 	}
 
+	// ─── Phase 4: Roles + extra ClientTypes ─────────────────────────────────────
+	// Done last so the auth service sees all tables already created.
+
+	if len(deferredRoles) > 0 || len(deferredClientTypes) > 0 {
+		emit.Emit(SSEEvent{
+			Type:    EvProgress,
+			Icon:    "shield",
+			Message: "Создаю роли и типы клиентов",
+			Value:   fmt.Sprintf("%d ролей", len(deferredRoles)+len(deferredClientTypes)),
+		})
+
+		authSvc := service.AuthService()
+
+		for _, r := range deferredRoles {
+			if err := createRoleForClientType(ctx, r.name, r.clientTypeId, projectId, authSvc); err != nil {
+				log.Printf("[backend] role %q create failed: %v", r.name, err)
+				errs = append(errs, fmt.Sprintf("role %q: %v", r.name, err))
+			} else {
+				emit.Emit(SSEEvent{
+					Type:    EvProgress,
+					Icon:    "shield-check",
+					Message: "Роль создана",
+					Value:   r.name,
+				})
+			}
+		}
+
+		for _, typeName := range deferredClientTypes {
+			ctResp, ctErr := authSvc.Client().V2CreateClientType(ctx, &auth_service.V2CreateClientTypeRequest{
+				Name:         typeName,
+				ProjectId:    projectId,
+				TableSlug:    loginTableSlug,
+				SessionLimit: 50,
+			})
+			if ctErr != nil {
+				log.Printf("[backend] client_type %q create failed: %v", typeName, ctErr)
+				errs = append(errs, fmt.Sprintf("client_type %q: %v", typeName, ctErr))
+				continue
+			}
+			emit.Emit(SSEEvent{
+				Type:    EvProgress,
+				Icon:    "users",
+				Message: "Тип клиента создан",
+				Value:   typeName,
+			})
+
+			ctGUID := ""
+			if ctResp.GetData() != nil {
+				ctGUID, _ = ctResp.GetData().AsMap()["id"].(string)
+			}
+			if ctGUID != "" {
+				if err := createRoleForClientType(ctx, typeName, ctGUID, projectId, authSvc); err != nil {
+					log.Printf("[backend] role %q create failed: %v", typeName, err)
+					errs = append(errs, fmt.Sprintf("role %q: %v", typeName, err))
+				} else {
+					emit.Emit(SSEEvent{
+						Type:    EvProgress,
+						Icon:    "shield-check",
+						Message: "Роль создана",
+						Value:   typeName,
+					})
+				}
+			}
+		}
+	}
+
 	if len(errs) > 0 {
 		log.Printf("[backend] completed with %d errors", len(errs))
 		return fmt.Errorf("backend creation had %d errors: %s", len(errs), strings.Join(errs, "; "))
 	}
 
-	log.Printf("[backend] all tables, relations and mock data created successfully")
+	log.Printf("[backend] all tables, relations, mock data, roles created successfully")
 	return nil
 }
 
@@ -556,6 +650,19 @@ func ensureLoginTable(plan *models.ArchitectPlan) *models.ArchitectPlan {
 
 	plan.Tables = append([]models.TablePlan{defaultUsers}, plan.Tables...)
 	return plan
+}
+
+func createRoleForClientType(ctx context.Context, name, clientTypeId, projectId string, authSvc services.AuthServiceI) error {
+	if _, err := authSvc.Permission().V2AddRole(ctx, &auth_service.V2AddRoleRequest{
+		ClientTypeId: clientTypeId,
+		ProjectId:    projectId,
+		Name:         name,
+		Status:       true,
+	}); err != nil {
+		return err
+	}
+	log.Printf("[backend] role %q created (client_type=%s)", name, clientTypeId)
+	return nil
 }
 
 // unused — kept for reference by older callers in mcp.go path

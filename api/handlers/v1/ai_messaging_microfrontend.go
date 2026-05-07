@@ -411,9 +411,9 @@ func (p *ChatProcessor) buildMicrofrontendFilesContext(files []models.GitlabFile
 //
 // Фаза 2 (push-changes) больше НЕ используется при публикации, т.к. publish-ai
 // сам делает первый коммит. push-changes используется только для последующих правок (edit flow).
-func (p *ChatProcessor) publishToMicrofrontend(ctx context.Context, projectName, path string, generated *models.ParsedClaudeResponse, projectData *models.ProjectData) error {
+func (p *ChatProcessor) publishToMicrofrontend(ctx context.Context, projectName, path string, generated *models.ParsedClaudeResponse, projectData *models.ProjectData) (string, error) {
 	if generated == nil || generated.Project == nil || len(generated.Project.Files) == 0 {
-		return fmt.Errorf("no generated files to publish")
+		return "", fmt.Errorf("no generated files to publish")
 	}
 
 	// Build the sanitized file list once.
@@ -430,7 +430,7 @@ func (p *ChatProcessor) publishToMicrofrontend(ctx context.Context, projectName,
 	}
 
 	if len(allFiles) == 0 {
-		return fmt.Errorf("no valid files to publish after sanitization")
+		return "", fmt.Errorf("no valid files to publish after sanitization")
 	}
 
 	safeName := slugify(projectName)
@@ -464,7 +464,7 @@ func (p *ChatProcessor) publishToMicrofrontend(ctx context.Context, projectName,
 
 	createBytes, err := json.Marshal(createBody)
 	if err != nil {
-		return fmt.Errorf("marshal create request: %w", err)
+		return "", fmt.Errorf("marshal create request: %w", err)
 	}
 
 	createURL := p.baseConf.GoFunctionServiceHost + p.baseConf.GoFunctionServiceHTTPPort + "/v2/functions/micro-frontend/publish-ai"
@@ -483,7 +483,7 @@ func (p *ChatProcessor) publishToMicrofrontend(ctx context.Context, projectName,
 		}
 	}
 	if err != nil {
-		return fmt.Errorf("microfrontend publish failed: %w", err)
+		return "", fmt.Errorf("microfrontend publish failed: %w", err)
 	}
 
 	p.microFrontendId = createResult.Data.ID
@@ -520,7 +520,7 @@ func (p *ChatProcessor) publishToMicrofrontend(ctx context.Context, projectName,
 	p.createMicrofrontendSnapshot(ctx, allFiles, p.userMessage)
 
 	log.Printf("[MICROFRONTEND] ✅ published: id=%s url=%s", p.microFrontendId, createResult.Data.Url)
-	return nil
+	return createResult.Data.Url, nil
 }
 
 // doPublishAI выполняет один HTTP-запрос к publish-ai endpoint.

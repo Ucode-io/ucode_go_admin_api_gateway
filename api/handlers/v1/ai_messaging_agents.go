@@ -138,7 +138,11 @@ func (p *ChatProcessor) generateCode(ctx context.Context, clarified string, imag
 
 func (p *ChatProcessor) generateCodeSingle(ctx context.Context, clarified string, imageURLs []string, chatHistory []models.ChatMessage, plan *models.ArchitectPlan, apiKey string) (*models.ParsedClaudeResponse, error) {
 	prompt := clarified + "\n\n" + buildAPIConfigBlock(p.baseConf.UcodeBaseUrl, apiKey, plan)
-	if p.baseConf.UnsplashAccessKey != "" {
+	if p.cachedImagePool != nil && p.cachedImagePool.Err == nil {
+		prompt += "\n\n" + p.cachedImagePool.Block
+		p.emitter().Emit(SSEEvent{Type: EvProgress, Icon: "image", Message: fmt.Sprintf("Подобрано %d фото: %s", p.cachedImagePool.Count, strings.Join(p.cachedImagePool.Keywords, ", ")), Percent: 18})
+		p.cachedImagePool = nil
+	} else if p.baseConf.UnsplashAccessKey != "" {
 		p.emitter().Emit(SSEEvent{Type: EvProgress, Icon: "image", Message: "Подбираю изображения для проекта...", Percent: 17})
 		pool := helper.FetchImagePool(ctx, p.baseConf.UnsplashAccessKey, plan)
 		if pool.Err != nil {
@@ -329,7 +333,11 @@ func (p *ChatProcessor) generateCodeChunkedAdminPanel(ctx context.Context, clari
 	time.Sleep(1000 * time.Millisecond)
 
 	apiConfig := buildAPIConfigBlock(p.baseConf.UcodeBaseUrl, apiKey, plan)
-	if p.baseConf.UnsplashAccessKey != "" {
+	if p.cachedImagePool != nil && p.cachedImagePool.Err == nil {
+		apiConfig += "\n\n" + p.cachedImagePool.Block
+		emit.Emit(SSEEvent{Type: EvProgress, Icon: "image", Message: fmt.Sprintf("Подобрано %d фото: %s", p.cachedImagePool.Count, strings.Join(p.cachedImagePool.Keywords, ", ")), Percent: 25})
+		p.cachedImagePool = nil
+	} else if p.baseConf.UnsplashAccessKey != "" {
 		emit.Emit(SSEEvent{Type: EvProgress, Icon: "image", Message: "Подбираю изображения для проекта...", Percent: 24})
 		pool := helper.FetchImagePool(ctx, p.baseConf.UnsplashAccessKey, plan)
 		if pool.Err != nil {
@@ -967,16 +975,24 @@ func buildFoundationStub(foundationGroup models.ManifestGroup) string {
 
 func buildTemplateHooksContext() string {
 	critical := map[string]bool{
-		"src/hooks/useApi.ts":     true,
-		"src/hooks/useAppForm.ts": true,
-		"src/lib/apiUtils.ts":     true,
+		"src/hooks/useApi.ts":                    true,
+		"src/hooks/useAppForm.ts":                true,
+		"src/lib/apiUtils.ts":                    true,
+		"src/lib/utils.ts":                       true,
+		"src/components/shared/AppProviders.tsx": true,
 	}
 	var sb strings.Builder
 	sb.WriteString("\n====================================\n")
-	sb.WriteString("TEMPLATE HOOK SOURCE — READ SIGNATURES CAREFULLY\n")
+	sb.WriteString("PRE-BUILT FILES — DO NOT RE-IMPLEMENT, IMPORT FROM THESE\n")
 	sb.WriteString("====================================\n")
-	sb.WriteString("These files ALREADY EXIST in the project. Import from them using the paths below.\n")
-	sb.WriteString("Use EXACTLY these function signatures — do not invent alternative forms.\n\n")
+	sb.WriteString("These files ALREADY EXIST in the project. Use EXACTLY these import paths.\n")
+	sb.WriteString("NEVER create src/lib/api.ts — use @/config/axios instead.\n\n")
+	sb.WriteString("REQUIRED IMPORTS:\n")
+	sb.WriteString("  import { useApiQuery, useApiMutation } from '@/hooks/useApi'\n")
+	sb.WriteString("  import { extractList, extractSingle, extractCount } from '@/lib/apiUtils'\n")
+	sb.WriteString("  import { cn, formatDate, formatCurrency, getInitials, truncate } from '@/lib/utils'\n")
+	sb.WriteString("  import { AppProviders } from '@/components/shared/AppProviders'\n\n")
+	sb.WriteString("FILE CONTENTS FOR REFERENCE:\n\n")
 	for _, f := range GetTemplateContext() {
 		if critical[f.Path] {
 			fmt.Fprintf(&sb, "### %s\n```typescript\n%s\n```\n\n", f.Path, f.Content)
@@ -1003,13 +1019,18 @@ func injectEnvFile(files []models.ProjectFile, baseURL, apiKey string) []models.
 	}
 
 	content := fmt.Sprintf("%s=%s\n%s=%s\n", envBaseURLKey, baseURL, envAPIKeyKey, apiKey)
+
+	envTargets := map[string]bool{".env": true, ".env.development": true, ".env.production": true}
 	for i, f := range files {
-		if f.Path == ".env" || f.Path == ".env.production" {
+		if envTargets[f.Path] {
 			files[i].Content = content
-			return files
+			delete(envTargets, f.Path)
 		}
 	}
-	return append(files, models.ProjectFile{Path: ".env", Content: content})
+	for path := range envTargets {
+		files = append(files, models.ProjectFile{Path: path, Content: content})
+	}
+	return files
 }
 
 var forbiddenConfigFiles = map[string]bool{
@@ -1250,7 +1271,11 @@ func (p *ChatProcessor) generateCodeChunkedWebsite(ctx context.Context, clarifie
 	)
 
 	apiConfig := buildAPIConfigBlock(p.baseConf.UcodeBaseUrl, apiKey, plan)
-	if p.baseConf.UnsplashAccessKey != "" {
+	if p.cachedImagePool != nil && p.cachedImagePool.Err == nil {
+		apiConfig += "\n\n" + p.cachedImagePool.Block
+		emit.Emit(SSEEvent{Type: EvProgress, Icon: "image", Message: fmt.Sprintf("Подобрано %d фото: %s", p.cachedImagePool.Count, strings.Join(p.cachedImagePool.Keywords, ", ")), Percent: 25})
+		p.cachedImagePool = nil
+	} else if p.baseConf.UnsplashAccessKey != "" {
 		emit.Emit(SSEEvent{Type: EvProgress, Icon: "image", Message: "Подбираю изображения...", Percent: 24})
 		pool := helper.FetchImagePool(ctx, p.baseConf.UnsplashAccessKey, plan)
 		if pool.Err == nil {
@@ -1492,24 +1517,7 @@ func (p *ChatProcessor) generateWebsiteFoundation(ctx context.Context, clarified
 	sb.WriteString("\n\n")
 	sb.WriteString(apiConfig)
 
-	contextFiles := GetTemplateContext()
-	if len(contextFiles) > 0 {
-		sb.WriteString("\n====================================\n")
-		sb.WriteString("PRE-BUILT UTILITIES — MANDATORY USAGE\n")
-		sb.WriteString("====================================\n")
-		sb.WriteString("The following files ALREADY EXIST in the project. You MUST import from them.\n")
-		sb.WriteString("NEVER re-implement these utilities. NEVER output these files in your response.\n")
-		sb.WriteString("NEVER create src/lib/api.ts — use @/config/axios instead.\n\n")
-		sb.WriteString("REQUIRED IMPORTS (use exactly these paths):\n")
-		sb.WriteString("  import { useApiQuery, useApiMutation } from '@/hooks/useApi'\n")
-		sb.WriteString("  import { extractList, extractSingle, extractCount } from '@/lib/apiUtils'\n")
-		sb.WriteString("  import { cn } from '@/lib/utils'\n")
-		sb.WriteString("  import { AppProviders } from '@/components/shared/AppProviders' (wrap root in App.tsx)\n\n")
-		sb.WriteString("FILE CONTENTS FOR REFERENCE:\n")
-		for _, f := range contextFiles {
-			fmt.Fprintf(&sb, "\n### %s\n```typescript\n%s\n```\n", f.Path, f.Content)
-		}
-	}
+	sb.WriteString(buildTemplateHooksContext())
 
 	sb.WriteString("\n====================================\n")
 	sb.WriteString("REMINDER: Emit ONLY the Group 0 files listed above. DO NOT generate page content.\n")

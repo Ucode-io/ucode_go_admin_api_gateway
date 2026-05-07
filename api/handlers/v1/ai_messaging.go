@@ -57,6 +57,7 @@ type ChatProcessor struct {
 	schemaCachedAt time.Time
 
 	prebuiltManifest *models.ProjectManifest
+	cachedImagePool  *helper.ImagePoolResult
 
 	emit ProgressEmitter
 }
@@ -163,6 +164,7 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 		projectData   *models.ProjectData
 		provisionErr  error
 		eagerManifest *models.ProjectManifest
+		earlyPool     helper.ImagePoolResult
 
 		provWg sync.WaitGroup
 	)
@@ -187,10 +189,23 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 		}()
 	}
 
+	if p.baseConf.UnsplashAccessKey != "" {
+		provWg.Add(1)
+		go func() {
+			defer provWg.Done()
+			earlyPool = helper.FetchImagePool(ctx, p.baseConf.UnsplashAccessKey, plan)
+		}()
+	}
+
 	provWg.Wait()
 
 	if provisionErr != nil {
 		return nil, fmt.Errorf("backend provisioning failed: %w", provisionErr)
+	}
+
+	if earlyPool.Err == nil && len(earlyPool.ThumbURLs) > 0 {
+		injectMockDataImages(plan, earlyPool.ThumbURLs)
+		p.cachedImagePool = &earlyPool
 	}
 
 	p.mcpProjectId = projectData.McpProjectId
@@ -221,14 +236,17 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 	}
 
 	emitPublishFiles(emit, generated.Project.Files, 93)
-	if err = p.publishToMicrofrontend(ctx, plan.ProjectName, uniqueMFEPath(), generated, projectData); err != nil {
+	mfeURL, err := p.publishToMicrofrontend(ctx, plan.ProjectName, uniqueMFEPath(), generated, projectData)
+	if err != nil {
 		return nil, fmt.Errorf("microfrontend publish failed: %w", err)
 	}
 
-	_, err = p.saveProject(ctx, generated)
-	if err != nil {
-		log.Println("save project failed:", err)
-	}
+	p.injectYandexMetrica(ctx, plan.ProjectName, mfeURL, generated.Project.Files)
+
+	//_, err = p.saveProject(ctx, generated)
+	//if err != nil {
+	//	log.Println("save project failed:", err)
+	//}
 
 	log.Printf("[new-project] done — mfe_id=%s", p.microFrontendId)
 	return &models.ParsedClaudeResponse{Description: generated.Description}, nil
@@ -303,6 +321,18 @@ func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context,
 
 	time.Sleep(1500 * time.Millisecond) // let user read the plan
 
+	var (
+		mfePool   helper.ImagePoolResult
+		mfePoolWg sync.WaitGroup
+	)
+	if p.baseConf.UnsplashAccessKey != "" {
+		mfePoolWg.Add(1)
+		go func() {
+			defer mfePoolWg.Done()
+			mfePool = helper.FetchImagePool(ctx, p.baseConf.UnsplashAccessKey, plan)
+		}()
+	}
+
 	emit.Emit(SSEEvent{
 		Type:    EvProgress,
 		Icon:    "folder-open",
@@ -312,6 +342,12 @@ func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context,
 	projectData, err := p.getExistingProjectData(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get existing project data: %w", err)
+	}
+
+	mfePoolWg.Wait()
+	if mfePool.Err == nil && len(mfePool.ThumbURLs) > 0 {
+		injectMockDataImages(plan, mfePool.ThumbURLs)
+		p.cachedImagePool = &mfePool
 	}
 
 	// Create any NEW tables the architect defined that don't yet exist in the project.
@@ -366,9 +402,12 @@ func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context,
 	}
 
 	emitPublishFiles(emit, generated.Project.Files, 93)
-	if err = p.publishToMicrofrontend(ctx, plan.ProjectName, uniqueMFEPath(), generated, projectData); err != nil {
+	mfeURL, err := p.publishToMicrofrontend(ctx, plan.ProjectName, uniqueMFEPath(), generated, projectData)
+	if err != nil {
 		return nil, fmt.Errorf("microfrontend publish failed: %w", err)
 	}
+
+	p.injectYandexMetrica(ctx, plan.ProjectName, mfeURL, generated.Project.Files)
 
 	log.Printf("[mfe-current] done — mfe_id=%s", p.microFrontendId)
 	return &models.ParsedClaudeResponse{Description: generated.Description}, nil
@@ -813,9 +852,32 @@ func buildAPIConfigBlock(baseURL, apiKey string, plan *models.ArchitectPlan) str
 		} else {
 			sb.WriteString(fmt.Sprintf("- Table: %s, slug: %s\n", t.Label, t.Slug))
 			for _, f := range t.Fields {
-				sb.WriteString(fmt.Sprintf("  * field: %s, type: %s\n", f.Slug, f.Type))
+				hint := fieldRenderHint(f.Slug, f.Type)
+				sb.WriteString(fmt.Sprintf("  * field: %s, type: %s  → %s\n", f.Slug, f.Type, hint))
 			}
 		}
+	}
+
+	if len(plan.Tables) > 0 {
+		sb.WriteString(`
+⚠ MANDATORY API RULE — NO EXCEPTIONS:
+Every non-login table listed above MUST have at least one page or section that:
+  1. Fetches its data using useApiQuery (NEVER hardcoded arrays or objects)
+  2. Renders the fetched data in the UI (cards, lists, tables — whatever fits)
+  3. Uses extractList<T>(data) to extract the response
+Static/hardcoded content is FORBIDDEN when API tables exist.
+
+⚠ CARD DATA RENDERING — inside every .map() ALL content from item fields (see → hints above):
+  DECLARE thumbPool const ABOVE return (3–6 THUMB URLs from IMAGE_POOL in API CONFIG):
+    const thumbPool = ['https://...thumb1', 'https://...thumb2', 'https://...thumb3']
+  IMAGE fields (→ IMAGE hint):    src={item.field_slug ?? thumbPool[i % thumbPool.length]}
+  TEXT fields  (→ TEXT hint):     {item.field_slug ?? '—'}
+  CURRENCY fields (→ CURRENCY):  {formatCurrency(item.field_slug ?? 0)}
+  DATE fields  (→ DATE hint):    {formatDate(item.field_slug ?? '')}
+  HARD BAN inside .map() data cards:
+    ❌ hardcoded image URL as src    ❌ hardcoded title/description    ❌ hardcoded price
+  IMAGE_POOL URLs: hero/background decoration ONLY — never as direct src in .map() data cards.
+`)
 	}
 
 	if len(loginTableSlugs) > 0 {
@@ -917,6 +979,72 @@ DO NOT use Many2Many, array values, or numeric IDs — only single guid string p
 	}
 
 	return sb.String()
+}
+
+func fieldRenderHint(slug, fieldType string) string {
+	slugLower := strings.ToLower(slug)
+
+	imageKW := []string{"image", "photo", "avatar", "cover", "thumbnail", "banner", "img", "picture"}
+	for _, kw := range imageKW {
+		if strings.Contains(slugLower, kw) {
+			return "IMAGE → src={item." + slug + " ?? thumbPool[i % thumbPool.length]}"
+		}
+	}
+
+	moneyKW := []string{"price", "cost", "amount", "salary", "budget", "rate", "fee", "total"}
+	for _, kw := range moneyKW {
+		if strings.Contains(slugLower, kw) {
+			return "CURRENCY → {formatCurrency(item." + slug + " ?? 0)}"
+		}
+	}
+
+	dateKW := []string{"_at", "date", "time", "birth", "created", "updated", "expires"}
+	for _, kw := range dateKW {
+		if strings.Contains(slugLower, kw) {
+			return "DATE → {formatDate(item." + slug + " ?? '')}"
+		}
+	}
+
+	typeLower := strings.ToLower(fieldType)
+	if typeLower == "bool" || typeLower == "boolean" {
+		return "BOOL → {item." + slug + " ? 'Yes' : 'No'}"
+	}
+
+	return "TEXT → {item." + slug + " ?? '—'}"
+}
+
+func isImageSlug(slug string) bool {
+	slugLower := strings.ToLower(slug)
+	for _, kw := range []string{"image", "photo", "avatar", "cover", "thumbnail", "banner", "img", "picture"} {
+		if strings.Contains(slugLower, kw) {
+			return true
+		}
+	}
+	return false
+}
+
+func injectMockDataImages(plan *models.ArchitectPlan, thumbURLs []string) {
+	if len(thumbURLs) == 0 {
+		return
+	}
+	idx := 0
+	for ti := range plan.Tables {
+		for _, f := range plan.Tables[ti].Fields {
+			if !isImageSlug(f.Slug) {
+				continue
+			}
+			for ri := range plan.Tables[ti].MockData {
+				val := plan.Tables[ti].MockData[ri][f.Slug]
+				if val == nil || val == "" {
+					plan.Tables[ti].MockData[ri][f.Slug] = thumbURLs[idx%len(thumbURLs)]
+					idx++
+				}
+			}
+		}
+	}
+	if idx > 0 {
+		log.Printf("[inject-images] patched %d image field(s) in mock_data", idx)
+	}
 }
 
 func buildContentBlocksWithImages(textContent string, imageURLs []string) []models.ContentBlock {

@@ -120,6 +120,14 @@ func (h *HandlerV1) PromoteMicrofrontendToMaster(c *gin.Context) {
 	_ = h.MakeProxy(c, h.baseConf.GoFunctionServiceHost+h.baseConf.GoFunctionServiceHTTPPort, c.Request.URL.Path)
 }
 
+func (h *HandlerV1) CheckPromoteChanges(c *gin.Context) {
+	_ = h.MakeProxy(c, h.baseConf.GoFunctionServiceHost+h.baseConf.GoFunctionServiceHTTPPort, c.Request.URL.Path)
+}
+
+func (h *HandlerV1) GetPromotePipelineStatus(c *gin.Context) {
+	_ = h.MakeProxy(c, h.baseConf.GoFunctionServiceHost+h.baseConf.GoFunctionServiceHTTPPort, c.Request.URL.Path)
+}
+
 // GetMicrofrontendCommits godoc
 // @Security ApiKeyAuth
 // @ID get_microfrontend_commits
@@ -153,10 +161,10 @@ func (h *HandlerV1) GetMicrofrontendCommits(c *gin.Context) {
 	resp, err := service.GoObjectBuilderService().MicrofrontendVersions().GetVersionList(
 		c.Request.Context(),
 		&nb.GetMicrofrontendVersionListRequest{
-			ResourceEnvId:  resourceEnvId,
+			ResourceEnvId:   resourceEnvId,
 			MicrofrontendId: microfrontendID,
-			Limit:          int32(limit),
-			Offset:         int32(offset),
+			Limit:           int32(limit),
+			Offset:          int32(offset),
 		},
 	)
 	if err != nil {
