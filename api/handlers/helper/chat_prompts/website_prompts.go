@@ -603,6 +603,45 @@ NEVER show hardcoded arrays/objects when API tables exist.
 If a table has an image/photo/avatar/thumbnail field — display it from the API response, not Unsplash.
 
 ====================================
+CARD DATA RENDERING — NEVER HARDCODE INSIDE .map()
+====================================
+When rendering data cards from the API, ALL content inside .map() MUST come from the item object.
+Field render hints are in the API CONFIG block (→ IMAGE / TEXT / CURRENCY / DATE after each field).
+
+STEP 1 — Declare thumbPool ABOVE the JSX return (pick 3–6 THUMB URLs from IMAGE_POOL in API CONFIG):
+  const thumbPool = [
+    'https://images.unsplash.com/photo-AAA?auto=format&fit=crop&w=400&q=80',
+    'https://images.unsplash.com/photo-BBB?auto=format&fit=crop&w=400&q=80',
+    'https://images.unsplash.com/photo-CCC?auto=format&fit=crop&w=400&q=80',
+  ]
+
+STEP 2 — .map() with (item, i), render every field from item:
+  {items.map((item, i) => (
+    <div key={item.guid ?? i}>
+      {/* IMAGE field hint → IMAGE: */}
+      <img src={item.image_main ?? thumbPool[i % thumbPool.length]} alt={item.name ?? ''} ... />
+      {/* TEXT field hint → TEXT: */}
+      <h3>{item.name ?? '—'}</h3>
+      <p>{item.description ?? '—'}</p>
+      {/* CURRENCY field hint → CURRENCY: */}
+      <span>{formatCurrency(item.price ?? 0)}</span>
+      {/* DATE field hint → DATE: */}
+      <span>{formatDate(item.created_at ?? '')}</span>
+    </div>
+  ))}
+
+HARD BAN — inside .map() for data cards:
+  ❌ <img src="https://images.unsplash.com/photo-hardcoded..." />  — ignores item image field
+  ❌ <h3>Premium Leather Bag</h3>                                  — hardcoded, ignores item.name
+  ❌ <p>Amazing product description</p>                            — hardcoded, ignores item.description
+  ❌ <span>$1,950</span>                                           — hardcoded price
+
+IMAGE_POOL URLs are for:
+  ✅ Hero sections, background images, decorative non-data elements
+  ✅ thumbPool fallback only: src={item.image_field ?? thumbPool[i % n]}
+  ❌ Never use IMAGE_POOL URL directly as src in a .map() data card
+
+====================================
 PAGE EXPORT FORMAT
 ====================================
 Every page must export a default function:

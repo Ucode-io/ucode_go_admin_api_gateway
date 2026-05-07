@@ -138,7 +138,11 @@ func (p *ChatProcessor) generateCode(ctx context.Context, clarified string, imag
 
 func (p *ChatProcessor) generateCodeSingle(ctx context.Context, clarified string, imageURLs []string, chatHistory []models.ChatMessage, plan *models.ArchitectPlan, apiKey string) (*models.ParsedClaudeResponse, error) {
 	prompt := clarified + "\n\n" + buildAPIConfigBlock(p.baseConf.UcodeBaseUrl, apiKey, plan)
-	if p.baseConf.UnsplashAccessKey != "" {
+	if p.cachedImagePool != nil && p.cachedImagePool.Err == nil {
+		prompt += "\n\n" + p.cachedImagePool.Block
+		p.emitter().Emit(SSEEvent{Type: EvProgress, Icon: "image", Message: fmt.Sprintf("Подобрано %d фото: %s", p.cachedImagePool.Count, strings.Join(p.cachedImagePool.Keywords, ", ")), Percent: 18})
+		p.cachedImagePool = nil
+	} else if p.baseConf.UnsplashAccessKey != "" {
 		p.emitter().Emit(SSEEvent{Type: EvProgress, Icon: "image", Message: "Подбираю изображения для проекта...", Percent: 17})
 		pool := helper.FetchImagePool(ctx, p.baseConf.UnsplashAccessKey, plan)
 		if pool.Err != nil {
@@ -329,7 +333,11 @@ func (p *ChatProcessor) generateCodeChunkedAdminPanel(ctx context.Context, clari
 	time.Sleep(1000 * time.Millisecond)
 
 	apiConfig := buildAPIConfigBlock(p.baseConf.UcodeBaseUrl, apiKey, plan)
-	if p.baseConf.UnsplashAccessKey != "" {
+	if p.cachedImagePool != nil && p.cachedImagePool.Err == nil {
+		apiConfig += "\n\n" + p.cachedImagePool.Block
+		emit.Emit(SSEEvent{Type: EvProgress, Icon: "image", Message: fmt.Sprintf("Подобрано %d фото: %s", p.cachedImagePool.Count, strings.Join(p.cachedImagePool.Keywords, ", ")), Percent: 25})
+		p.cachedImagePool = nil
+	} else if p.baseConf.UnsplashAccessKey != "" {
 		emit.Emit(SSEEvent{Type: EvProgress, Icon: "image", Message: "Подбираю изображения для проекта...", Percent: 24})
 		pool := helper.FetchImagePool(ctx, p.baseConf.UnsplashAccessKey, plan)
 		if pool.Err != nil {
@@ -1258,7 +1266,11 @@ func (p *ChatProcessor) generateCodeChunkedWebsite(ctx context.Context, clarifie
 	)
 
 	apiConfig := buildAPIConfigBlock(p.baseConf.UcodeBaseUrl, apiKey, plan)
-	if p.baseConf.UnsplashAccessKey != "" {
+	if p.cachedImagePool != nil && p.cachedImagePool.Err == nil {
+		apiConfig += "\n\n" + p.cachedImagePool.Block
+		emit.Emit(SSEEvent{Type: EvProgress, Icon: "image", Message: fmt.Sprintf("Подобрано %d фото: %s", p.cachedImagePool.Count, strings.Join(p.cachedImagePool.Keywords, ", ")), Percent: 25})
+		p.cachedImagePool = nil
+	} else if p.baseConf.UnsplashAccessKey != "" {
 		emit.Emit(SSEEvent{Type: EvProgress, Icon: "image", Message: "Подбираю изображения...", Percent: 24})
 		pool := helper.FetchImagePool(ctx, p.baseConf.UnsplashAccessKey, plan)
 		if pool.Err == nil {
