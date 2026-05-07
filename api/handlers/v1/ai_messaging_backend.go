@@ -653,14 +653,12 @@ func createClientType(ctx context.Context, name, projectId, resourceEnvId, table
 	}
 	id := ""
 	if resp.GetData() != nil {
-		id, _ = resp.GetData().AsMap()["id"].(string)
+		id, _ = resp.GetData().AsMap()["guid"].(string)
 	}
 	log.Printf("[backend] client_type %q created (id=%s)", name, id)
 	return id, nil
 }
 
-// createRole creates a role tied to a client_type via the auth service.
-// projectId = resource.ResourceEnvironmentId (NOT ucodeProjectId — matches handler pattern).
 func createRole(ctx context.Context, name, clientTypeId, resourceEnvId, nodeType string, resourceType int32, authSvc services.AuthServiceI) error {
 	if _, err := authSvc.Permission().V2AddRole(ctx, &auth_service.V2AddRoleRequest{
 		ClientTypeId: clientTypeId,
