@@ -221,14 +221,17 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 	}
 
 	emitPublishFiles(emit, generated.Project.Files, 93)
-	if err = p.publishToMicrofrontend(ctx, plan.ProjectName, uniqueMFEPath(), generated, projectData); err != nil {
+	mfeURL, err := p.publishToMicrofrontend(ctx, plan.ProjectName, uniqueMFEPath(), generated, projectData)
+	if err != nil {
 		return nil, fmt.Errorf("microfrontend publish failed: %w", err)
 	}
 
-	_, err = p.saveProject(ctx, generated)
-	if err != nil {
-		log.Println("save project failed:", err)
-	}
+	p.injectYandexMetrica(ctx, plan.ProjectName, mfeURL, generated.Project.Files)
+
+	//_, err = p.saveProject(ctx, generated)
+	//if err != nil {
+	//	log.Println("save project failed:", err)
+	//}
 
 	log.Printf("[new-project] done — mfe_id=%s", p.microFrontendId)
 	return &models.ParsedClaudeResponse{Description: generated.Description}, nil
@@ -366,9 +369,12 @@ func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context,
 	}
 
 	emitPublishFiles(emit, generated.Project.Files, 93)
-	if err = p.publishToMicrofrontend(ctx, plan.ProjectName, uniqueMFEPath(), generated, projectData); err != nil {
+	mfeURL, err := p.publishToMicrofrontend(ctx, plan.ProjectName, uniqueMFEPath(), generated, projectData)
+	if err != nil {
 		return nil, fmt.Errorf("microfrontend publish failed: %w", err)
 	}
+
+	p.injectYandexMetrica(ctx, plan.ProjectName, mfeURL, generated.Project.Files)
 
 	log.Printf("[mfe-current] done — mfe_id=%s", p.microFrontendId)
 	return &models.ParsedClaudeResponse{Description: generated.Description}, nil

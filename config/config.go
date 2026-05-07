@@ -156,6 +156,8 @@ type BaseConfig struct {
 	GithubFrontendErrorURL   string
 
 	UnsplashAccessKey string
+
+	YandexMetricToken string
 }
 
 func BaseLoad() BaseConfig {
@@ -261,6 +263,8 @@ func BaseLoad() BaseConfig {
 	config.GithubFrontendErrorURL = cast.ToString(GetOrReturnDefaultValue("GITHUB_FRONTEND_ERROR_URL", "https://app.u-code.io/settings/github-error"))
 
 	config.UnsplashAccessKey = cast.ToString(GetOrReturnDefaultValue("UNSPLASH_ACCESS_KEY", ""))
+
+	config.YandexMetricToken = cast.ToString(GetOrReturnDefaultValue("YANDEX_METRIC_TOKEN", ""))
 
 	config.MaxTokens = cast.ToInt(GetOrReturnDefaultValue("MAX_TOKENS", 12000))
 	config.AnalyseProjectMaxTokens = cast.ToInt(GetOrReturnDefaultValue("ANALYSE_PROJECT_MAX_TOKENS", 5000))

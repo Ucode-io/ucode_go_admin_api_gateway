@@ -77,6 +77,8 @@ const (
 	KeyUsageTotalField     = "total"
 
 	AnthropicCachingBeta = "prompt-caching-2024-07-31"
+
+	YandexMetricCountersURL = "https://api-metrika.yandex.net/management/v1/counters"
 )
 
 var (
