@@ -235,7 +235,6 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 					}
 				}
 
-				// Create a role for the first (system) client_type and provision any additional ones.
 				if len(plan.ClientTypes) > 0 && clientTypeId != "" {
 					createRoleForClientType(ctx, plan.ClientTypes[0], clientTypeId, resourceEnvId, envId, service)
 
@@ -262,6 +261,13 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 						log.Printf("[backend] client_type %q created (guid=%s)", typeName, ctGUID)
 						createRoleForClientType(ctx, typeName, ctGUID, resourceEnvId, envId, service)
 					}
+				} else if clientTypeId != "" {
+					// Architect didn't specify ClientTypes — create a role using the existing client_type name.
+					ctName, _ := firstItem["name"].(string)
+					if ctName == "" {
+						ctName = tablePlan.Label
+					}
+					createRoleForClientType(ctx, ctName, clientTypeId, resourceEnvId, envId, service)
 				}
 			}
 		}
@@ -590,8 +596,6 @@ func ensureLoginTable(plan *models.ArchitectPlan) *models.ArchitectPlan {
 	return plan
 }
 
-// createRoleForClientType creates a role record linked to the given client_type.
-// client_platform_id is a synthetic UUID — the field is nullable and not used by auth for basic flows.
 func createRoleForClientType(ctx context.Context, name, clientTypeId, resourceEnvId, envId string, service services.ServiceManagerI) {
 	roleData, err := helper.ConvertMapToStruct(map[string]any{
 		"guid":               uuid.NewString(),
