@@ -23,7 +23,10 @@ type pendingRole struct {
 	clientTypeId string
 }
 
-func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, resourceEnvId, projectId, userId, envId string, service services.ServiceManagerI, emit ProgressEmitter) error {
+func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, pd models.ProjectData, service services.ServiceManagerI, emit ProgressEmitter) error {
+	resourceEnvId := pd.ResourceEnvId
+	projectId := pd.UcodeProjectId
+	envId := pd.EnvironmentId
 	log.Printf("[backend] creating tables for project %s", resourceEnvId)
 
 	plan = ensureLoginTable(plan)
@@ -460,9 +463,12 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 
 		authSvc := service.AuthService()
 
-		// Roles for existing client_types (already have their IDs).
+		nodeType := pd.NodeType
+		resourceType := pd.ResourceType
+
+		// Roles for existing client_types (already have their IDs from the login block).
 		for _, r := range deferredRoles {
-			if err := createRole(ctx, r.name, r.clientTypeId, projectId, authSvc); err != nil {
+			if err := createRole(ctx, r.name, r.clientTypeId, resourceEnvId, nodeType, resourceType, authSvc); err != nil {
 				log.Printf("[backend] role %q create failed: %v", r.name, err)
 				errs = append(errs, fmt.Sprintf("role %q: %v", r.name, err))
 			} else {
@@ -472,7 +478,7 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 
 		// Extra client_types from plan.ClientTypes[1:] — create each then its role.
 		for _, typeName := range deferredClientTypes {
-			ctID, ctErr := createClientType(ctx, typeName, projectId, loginTableSlug, authSvc)
+			ctID, ctErr := createClientType(ctx, typeName, projectId, resourceEnvId, loginTableSlug, nodeType, resourceType, authSvc)
 			if ctErr != nil {
 				log.Printf("[backend] client_type %q create failed: %v", typeName, ctErr)
 				errs = append(errs, fmt.Sprintf("client_type %q: %v", typeName, ctErr))
@@ -481,7 +487,7 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 			emit.Emit(SSEEvent{Type: EvProgress, Icon: "users", Message: "Тип клиента создан", Value: typeName})
 
 			if ctID != "" {
-				if err := createRole(ctx, typeName, ctID, projectId, authSvc); err != nil {
+				if err := createRole(ctx, typeName, ctID, resourceEnvId, nodeType, resourceType, authSvc); err != nil {
 					log.Printf("[backend] role %q create failed: %v", typeName, err)
 					errs = append(errs, fmt.Sprintf("role %q: %v", typeName, err))
 				} else {
@@ -630,12 +636,17 @@ func ensureLoginTable(plan *models.ArchitectPlan) *models.ArchitectPlan {
 }
 
 // createClientType creates a new client_type via the auth service and returns its ID.
-func createClientType(ctx context.Context, name, projectId, tableSlug string, authSvc services.AuthServiceI) (string, error) {
+// projectId = resource.ProjectId (ucodeProjectId)
+// resourceEnvId = resource.ResourceEnvironmentId
+func createClientType(ctx context.Context, name, projectId, resourceEnvId, tableSlug, nodeType string, resourceType int32, authSvc services.AuthServiceI) (string, error) {
 	resp, err := authSvc.Client().V2CreateClientType(ctx, &auth_service.V2CreateClientTypeRequest{
-		ProjectId:    projectId,
-		Name:         name,
-		TableSlug:    tableSlug,
-		SessionLimit: 50,
+		ProjectId:              projectId,
+		ResourceEnvrironmentId: resourceEnvId,
+		ResourceType:           resourceType,
+		NodeType:               nodeType,
+		Name:                   name,
+		TableSlug:              tableSlug,
+		SessionLimit:           50,
 	})
 	if err != nil {
 		return "", err
@@ -649,10 +660,13 @@ func createClientType(ctx context.Context, name, projectId, tableSlug string, au
 }
 
 // createRole creates a role tied to a client_type via the auth service.
-func createRole(ctx context.Context, name, clientTypeId, projectId string, authSvc services.AuthServiceI) error {
+// projectId = resource.ResourceEnvironmentId (NOT ucodeProjectId — matches handler pattern).
+func createRole(ctx context.Context, name, clientTypeId, resourceEnvId, nodeType string, resourceType int32, authSvc services.AuthServiceI) error {
 	if _, err := authSvc.Permission().V2AddRole(ctx, &auth_service.V2AddRoleRequest{
 		ClientTypeId: clientTypeId,
-		ProjectId:    projectId,
+		ProjectId:    resourceEnvId,
+		ResourceType: resourceType,
+		NodeType:     nodeType,
 		Name:         name,
 		Status:       true,
 	}); err != nil {
