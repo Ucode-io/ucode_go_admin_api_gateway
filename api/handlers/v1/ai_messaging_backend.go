@@ -9,6 +9,7 @@ import (
 	"ucode/ucode_go_api_gateway/config"
 
 	"ucode/ucode_go_api_gateway/api/models"
+	auth_service "ucode/ucode_go_api_gateway/genproto/auth_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/services"
@@ -16,7 +17,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, resourceEnvId, projectId, userId, envId string, service services.ServiceManagerI, emit ProgressEmitter) error {
+func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, resourceEnvId, projectId, userId, envId string, service services.ServiceManagerI, authService services.AuthServiceManagerI, emit ProgressEmitter) error {
 	log.Printf("[backend] creating tables for project %s", resourceEnvId)
 
 	plan = ensureLoginTable(plan)
@@ -120,7 +121,6 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 				}
 
 				clientTypeId, _ := firstItem["guid"].(string)
-				clientPlatformId, _ := firstItem["client_platform_id"].(string)
 				firstItem["table_slug"] = tablePlan.Slug
 				if len(plan.ClientTypes) > 0 {
 					firstItem["name"] = plan.ClientTypes[0]
@@ -237,30 +237,27 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 				}
 
 				if len(plan.ClientTypes) > 0 && clientTypeId != "" {
-					createRoleForClientType(ctx, plan.ClientTypes[0], clientTypeId, clientPlatformId, resourceEnvId, envId, service)
+					createRoleForClientType(ctx, plan.ClientTypes[0], clientTypeId, projectId, authService)
 
 					for _, typeName := range plan.ClientTypes[1:] {
-						ctGUID := uuid.NewString()
-						ctData, ctConvertErr := helper.ConvertMapToStruct(map[string]any{
-							"guid":       ctGUID,
-							"name":       typeName,
-							"table_slug": tablePlan.Slug,
+						ctResp, ctErr := authService.Client().V2CreateClientType(ctx, &auth_service.V2CreateClientTypeRequest{
+							Name:         typeName,
+							ProjectId:    projectId,
+							TableSlug:    tablePlan.Slug,
+							SessionLimit: 50,
 						})
-						if ctConvertErr != nil {
-							log.Printf("[backend] client_type %q convert failed: %v", typeName, ctConvertErr)
-							continue
-						}
-						if _, ctErr := service.GoObjectBuilderService().Items().Create(ctx, &nb.CommonMessage{
-							TableSlug: "client_type",
-							Data:      ctData,
-							ProjectId: resourceEnvId,
-							EnvId:     envId,
-						}); ctErr != nil {
+						if ctErr != nil {
 							log.Printf("[backend] client_type %q create failed: %v", typeName, ctErr)
 							continue
 						}
+						ctGUID := ""
+						if ctResp.GetData() != nil {
+							ctGUID, _ = ctResp.GetData().AsMap()["id"].(string)
+						}
 						log.Printf("[backend] client_type %q created (guid=%s)", typeName, ctGUID)
-						createRoleForClientType(ctx, typeName, ctGUID, clientPlatformId, resourceEnvId, envId, service)
+						if ctGUID != "" {
+							createRoleForClientType(ctx, typeName, ctGUID, projectId, authService)
+						}
 					}
 				} else if clientTypeId != "" {
 					// Architect didn't specify ClientTypes — create a role using the existing client_type name.
@@ -268,7 +265,7 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 					if ctName == "" {
 						ctName = tablePlan.Label
 					}
-					createRoleForClientType(ctx, ctName, clientTypeId, clientPlatformId, resourceEnvId, envId, service)
+					createRoleForClientType(ctx, ctName, clientTypeId, projectId, authService)
 				}
 			}
 		}
@@ -597,22 +594,12 @@ func ensureLoginTable(plan *models.ArchitectPlan) *models.ArchitectPlan {
 	return plan
 }
 
-func createRoleForClientType(ctx context.Context, name, clientTypeId, clientPlatformId, resourceEnvId, envId string, service services.ServiceManagerI) {
-	roleData, err := helper.ConvertMapToStruct(map[string]any{
-		"guid":               uuid.NewString(),
-		"name":               name,
-		"client_type_id":     clientTypeId,
-		"client_platform_id": clientPlatformId,
-	})
-	if err != nil {
-		log.Printf("[backend] role %q convert failed: %v", name, err)
-		return
-	}
-	if _, err = service.GoObjectBuilderService().Items().Create(ctx, &nb.CommonMessage{
-		TableSlug: "role",
-		Data:      roleData,
-		ProjectId: resourceEnvId,
-		EnvId:     envId,
+func createRoleForClientType(ctx context.Context, name, clientTypeId, projectId string, authService services.AuthServiceManagerI) {
+	if _, err := authService.Permission().V2AddRole(ctx, &auth_service.V2AddRoleRequest{
+		ClientTypeId: clientTypeId,
+		ProjectId:    projectId,
+		Name:         name,
+		Status:       true,
 	}); err != nil {
 		log.Printf("[backend] role %q create failed: %v", name, err)
 		return
