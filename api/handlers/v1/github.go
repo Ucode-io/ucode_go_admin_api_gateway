@@ -110,3 +110,20 @@ func (h *HandlerV1) GithubCreateRepo(c *gin.Context) {
 func (h *HandlerV1) GithubGetRepoList(c *gin.Context) {
 	_ = h.MakeProxy(c, h.baseConf.GoFunctionServiceHost+h.baseConf.GoFunctionServiceHTTPPort, c.Request.URL.Path)
 }
+
+// GithubSyncMicrofrontend proxies to the function service to sync a microfrontend to GitHub.
+//
+// @Security ApiKeyAuth
+// @ID github_sync_microfrontend
+// @Router /v2/functions/micro-frontend/github-sync [POST]
+// @Summary Sync microfrontend to GitHub
+// @Description Creates a GitHub mirror repo, pushes current u-gen files, and registers a webhook.
+// @Tags GitHub Integration
+// @Accept  json
+// @Produce json
+// @Success 200 {object} map[string]any
+// @Failure 400 {object} map[string]any
+// @Failure 500 {object} map[string]any
+func (h *HandlerV1) GithubSyncMicrofrontend(c *gin.Context) {
+	_ = h.MakeProxy(c, h.baseConf.GoFunctionServiceHost+h.baseConf.GoFunctionServiceHTTPPort, c.Request.URL.Path)
+}

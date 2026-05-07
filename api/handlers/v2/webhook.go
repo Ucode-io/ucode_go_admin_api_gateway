@@ -9,3 +9,7 @@ func (h *HandlerV2) CreateWebhook(c *gin.Context) {
 func (h *HandlerV2) HandleWebhook(c *gin.Context) {
 	_ = h.MakeProxy(c, h.baseConf.GoFunctionServiceHost+h.baseConf.GoFunctionServiceHTTPPort, c.Request.URL.Path)
 }
+
+func (h *HandlerV2) HandleGithubWebhook(c *gin.Context) {
+	_ = h.MakeProxy(c, h.baseConf.GoFunctionServiceHost+h.baseConf.GoFunctionServiceHTTPPort, c.Request.URL.Path)
+}

@@ -618,6 +618,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		proxyFunctions.DELETE("/micro-frontend/:micro-frontend-id", h.V1.DeleteMicroFrontEnd)
 		proxyFunctions.POST("/micro-frontend/promote", h.V1.PromoteMicrofrontendToMaster)
 		proxyFunctions.GET("/micro-frontend/files-at-commit", h.V1.GetMicrofrontendFilesAtCommit)
+		proxyFunctions.POST("/micro-frontend/github-sync", h.V1.GithubSyncMicrofrontend)
 	}
 
 	proxyGrafana := proxyApi.Group("/grafana")
@@ -634,7 +635,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		{
 			v2Webhook.POST("/create", h.V2.CreateWebhook)
 			v2Webhook.POST("/handle", h.V2.HandleWebhook)
-
+			v2Webhook.POST("/github", h.V2.HandleGithubWebhook)
 		}
 	}
 
