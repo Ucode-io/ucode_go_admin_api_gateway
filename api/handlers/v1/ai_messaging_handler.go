@@ -58,8 +58,10 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 	}
 
 	var (
-		projectIdObj, _ = c.Get("project_id")
-		realProjectID   = projectIdObj.(string)
+		projectIdObj, _     = c.Get("project_id")
+		environmentIdObj, _ = c.Get("environment_id")
+		realProjectID       = projectIdObj.(string)
+		realEnvironmentID   = environmentIdObj.(string)
 	)
 
 	processor := newChatProcessor(
@@ -78,6 +80,7 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 	processor.microFrontendId = userMessage.MicrofrontendID
 	processor.microFrontendRepoId = userMessage.MicrofrontendRepoID
 	processor.microFrontendResourceEnvId = userMessage.ResourceEnvId
+	processor.companyEnvironmentId = realEnvironmentID
 	processor.newProject = userMessage.NewProject
 	processor.userMessage = userMessage.Content
 

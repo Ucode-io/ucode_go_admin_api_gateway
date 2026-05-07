@@ -50,6 +50,7 @@ type ChatProcessor struct {
 	microFrontendId            string
 	microFrontendRepoId        string
 	microFrontendResourceEnvId string
+	companyEnvironmentId       string
 	newProject                 bool
 	userMessage                string
 
