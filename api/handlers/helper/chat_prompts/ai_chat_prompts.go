@@ -415,6 +415,7 @@ SCHEMA RULES:
 4. NEVER include system fields: created_at, updated_at, deleted_at, guid — they are auto-managed.
 5. Every project MUST have exactly ONE login table: set "is_login_table": true.
 6. For the login table, do NOT include auth fields (login, email, phone, password, tin) — they are auto-created from "login_strategy". Only add custom fields like "full_name", "avatar".
+7. "client_types": for admin_panel — extract user role names verbatim from the conversation (the user's "user-types" question answer). Example: user answered "Administrator, Manager, Driver" → ["Administrator", "Manager", "Driver"]. Always include at least ["Administrator"] if no user types were specified. Leave empty [] for landing/web projects.
 
 RELATIONS RULES:
 7. Output a "relations" array covering EVERY foreign-key link between tables in this project.

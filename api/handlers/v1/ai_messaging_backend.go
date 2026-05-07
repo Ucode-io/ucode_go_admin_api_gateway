@@ -121,6 +121,9 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 
 				clientTypeId, _ := firstItem["guid"].(string)
 				firstItem["table_slug"] = tablePlan.Slug
+				if len(plan.ClientTypes) > 0 {
+					firstItem["name"] = plan.ClientTypes[0]
+				}
 
 				updateData, convertErr := helper.ConvertMapToStruct(firstItem)
 				if convertErr != nil {
@@ -229,6 +232,35 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 							log.Printf("[backend] user migration failed (idx=%d guid=%s): %v", idx, existingUserGuid, err)
 							errs = append(errs, fmt.Sprintf("user migration %s: %v", existingUserGuid, err))
 						}
+					}
+				}
+
+				// Create a role for the first (system) client_type and provision any additional ones.
+				if len(plan.ClientTypes) > 0 && clientTypeId != "" {
+					createRoleForClientType(ctx, plan.ClientTypes[0], clientTypeId, resourceEnvId, envId, service)
+
+					for _, typeName := range plan.ClientTypes[1:] {
+						ctGUID := uuid.NewString()
+						ctData, ctConvertErr := helper.ConvertMapToStruct(map[string]any{
+							"guid":       ctGUID,
+							"name":       typeName,
+							"table_slug": tablePlan.Slug,
+						})
+						if ctConvertErr != nil {
+							log.Printf("[backend] client_type %q convert failed: %v", typeName, ctConvertErr)
+							continue
+						}
+						if _, ctErr := service.GoObjectBuilderService().Items().Create(ctx, &nb.CommonMessage{
+							TableSlug: "client_type",
+							Data:      ctData,
+							ProjectId: resourceEnvId,
+							EnvId:     envId,
+						}); ctErr != nil {
+							log.Printf("[backend] client_type %q create failed: %v", typeName, ctErr)
+							continue
+						}
+						log.Printf("[backend] client_type %q created (guid=%s)", typeName, ctGUID)
+						createRoleForClientType(ctx, typeName, ctGUID, resourceEnvId, envId, service)
 					}
 				}
 			}
@@ -556,6 +588,31 @@ func ensureLoginTable(plan *models.ArchitectPlan) *models.ArchitectPlan {
 
 	plan.Tables = append([]models.TablePlan{defaultUsers}, plan.Tables...)
 	return plan
+}
+
+// createRoleForClientType creates a role record linked to the given client_type.
+// client_platform_id is a synthetic UUID — the field is nullable and not used by auth for basic flows.
+func createRoleForClientType(ctx context.Context, name, clientTypeId, resourceEnvId, envId string, service services.ServiceManagerI) {
+	roleData, err := helper.ConvertMapToStruct(map[string]any{
+		"guid":               uuid.NewString(),
+		"name":               name,
+		"client_type_id":     clientTypeId,
+		"client_platform_id": uuid.NewString(),
+	})
+	if err != nil {
+		log.Printf("[backend] role %q convert failed: %v", name, err)
+		return
+	}
+	if _, err = service.GoObjectBuilderService().Items().Create(ctx, &nb.CommonMessage{
+		TableSlug: "role",
+		Data:      roleData,
+		ProjectId: resourceEnvId,
+		EnvId:     envId,
+	}); err != nil {
+		log.Printf("[backend] role %q create failed: %v", name, err)
+		return
+	}
+	log.Printf("[backend] role %q created (client_type=%s)", name, clientTypeId)
 }
 
 // unused — kept for reference by older callers in mcp.go path

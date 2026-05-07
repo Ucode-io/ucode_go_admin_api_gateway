@@ -23,9 +23,14 @@ var ToolArchitectPlan = models.ClaudeFunctionTool{
 	Description: "Return the complete project architecture: database tables with fields and mock data, all relations between tables, a rich UI structure description, and a complete design system for the frontend developer.",
 	InputSchema: map[string]any{
 		"type":     "object",
-		"required": []string{"project_name", "project_type", "tables", "relations", "ui_structure", "design", "image_keywords"},
+		"required": []string{"project_name", "project_type", "tables", "relations", "ui_structure", "design", "image_keywords", "client_types"},
 		"properties": map[string]any{
 			"project_name": map[string]any{"type": "string", "description": "Human-readable project name"},
+			"client_types": map[string]any{
+				"type":        "array",
+				"items":       map[string]any{"type": "string"},
+				"description": "User role names extracted from the 'user-types' question answer. Each entry creates a separate client_type + role record. admin_panel: always at least [\"Administrator\"]. landing/web: empty [].",
+			},
 			"image_keywords": map[string]any{
 				"type":  "array",
 				"items": map[string]any{"type": "string"},
