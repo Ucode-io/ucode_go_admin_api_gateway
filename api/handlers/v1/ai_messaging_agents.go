@@ -975,10 +975,10 @@ func buildFoundationStub(foundationGroup models.ManifestGroup) string {
 
 func buildTemplateHooksContext() string {
 	critical := map[string]bool{
-		"src/hooks/useApi.ts":                   true,
-		"src/hooks/useAppForm.ts":               true,
-		"src/lib/apiUtils.ts":                   true,
-		"src/lib/utils.ts":                      true,
+		"src/hooks/useApi.ts":                    true,
+		"src/hooks/useAppForm.ts":                true,
+		"src/lib/apiUtils.ts":                    true,
+		"src/lib/utils.ts":                       true,
 		"src/components/shared/AppProviders.tsx": true,
 	}
 	var sb strings.Builder
@@ -1019,13 +1019,18 @@ func injectEnvFile(files []models.ProjectFile, baseURL, apiKey string) []models.
 	}
 
 	content := fmt.Sprintf("%s=%s\n%s=%s\n", envBaseURLKey, baseURL, envAPIKeyKey, apiKey)
+
+	envTargets := map[string]bool{".env": true, ".env.development": true, ".env.production": true}
 	for i, f := range files {
-		if f.Path == ".env" || f.Path == ".env.production" {
+		if envTargets[f.Path] {
 			files[i].Content = content
-			return files
+			delete(envTargets, f.Path)
 		}
 	}
-	return append(files, models.ProjectFile{Path: ".env", Content: content})
+	for path := range envTargets {
+		files = append(files, models.ProjectFile{Path: path, Content: content})
+	}
+	return files
 }
 
 var forbiddenConfigFiles = map[string]bool{

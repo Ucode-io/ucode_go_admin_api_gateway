@@ -90,7 +90,7 @@ func (p *ChatProcessor) injectYandexMetrica(ctx context.Context, projectName, mf
 	updatedFiles := appendYandexMetricaID(files, yandexID)
 	var envFiles []models.ProjectFile
 	for _, f := range updatedFiles {
-		if f.Path == ".env" || f.Path == ".env.production" {
+		if f.Path == ".env" || f.Path == ".env.development" || f.Path == ".env.production" {
 			envFiles = append(envFiles, f)
 		}
 	}
@@ -105,17 +105,17 @@ func (p *ChatProcessor) injectYandexMetrica(ctx context.Context, projectName, mf
 
 func appendYandexMetricaID(files []models.ProjectFile, id int64) []models.ProjectFile {
 	line := fmt.Sprintf("VITE_YANDEX_METRICA_ID=%d\n", id)
-	found := false
+	envTargets := map[string]bool{".env": true, ".env.development": true, ".env.production": true}
 	for i, f := range files {
-		if f.Path == ".env" || f.Path == ".env.production" {
-			found = true
+		if envTargets[f.Path] {
+			delete(envTargets, f.Path)
 			if !strings.Contains(f.Content, "VITE_YANDEX_METRICA_ID") {
 				files[i].Content += line
 			}
 		}
 	}
-	if !found {
-		files = append(files, models.ProjectFile{Path: ".env", Content: line})
+	for path := range envTargets {
+		files = append(files, models.ProjectFile{Path: path, Content: line})
 	}
 	return files
 }
