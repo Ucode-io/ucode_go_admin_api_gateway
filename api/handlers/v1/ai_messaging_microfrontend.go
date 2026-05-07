@@ -309,12 +309,14 @@ func (p *ChatProcessor) doPushChanges(ctx context.Context, repoIDInt int, files 
 		RepoID        int                       `json:"repo_id"`
 		Files         []models.GitlabFileChange `json:"files"`
 		CommitMessage string                    `json:"commit_message"`
+		FunctionID    string                    `json:"function_id"`
 	}
 
 	bodyBytes, err := json.Marshal(pushReq{
 		RepoID:        repoIDInt,
 		Files:         files,
 		CommitMessage: p.userMessage,
+		FunctionID:    p.microFrontendId,
 	})
 	if err != nil {
 		return fmt.Errorf("marshal request: %w", err)
