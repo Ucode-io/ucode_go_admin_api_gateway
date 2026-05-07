@@ -120,6 +120,7 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 				}
 
 				clientTypeId, _ := firstItem["guid"].(string)
+				clientPlatformId, _ := firstItem["client_platform_id"].(string)
 				firstItem["table_slug"] = tablePlan.Slug
 				if len(plan.ClientTypes) > 0 {
 					firstItem["name"] = plan.ClientTypes[0]
@@ -236,7 +237,7 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 				}
 
 				if len(plan.ClientTypes) > 0 && clientTypeId != "" {
-					createRoleForClientType(ctx, plan.ClientTypes[0], clientTypeId, resourceEnvId, envId, service)
+					createRoleForClientType(ctx, plan.ClientTypes[0], clientTypeId, clientPlatformId, resourceEnvId, envId, service)
 
 					for _, typeName := range plan.ClientTypes[1:] {
 						ctGUID := uuid.NewString()
@@ -259,7 +260,7 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 							continue
 						}
 						log.Printf("[backend] client_type %q created (guid=%s)", typeName, ctGUID)
-						createRoleForClientType(ctx, typeName, ctGUID, resourceEnvId, envId, service)
+						createRoleForClientType(ctx, typeName, ctGUID, clientPlatformId, resourceEnvId, envId, service)
 					}
 				} else if clientTypeId != "" {
 					// Architect didn't specify ClientTypes — create a role using the existing client_type name.
@@ -267,7 +268,7 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, reso
 					if ctName == "" {
 						ctName = tablePlan.Label
 					}
-					createRoleForClientType(ctx, ctName, clientTypeId, resourceEnvId, envId, service)
+					createRoleForClientType(ctx, ctName, clientTypeId, clientPlatformId, resourceEnvId, envId, service)
 				}
 			}
 		}
@@ -596,12 +597,12 @@ func ensureLoginTable(plan *models.ArchitectPlan) *models.ArchitectPlan {
 	return plan
 }
 
-func createRoleForClientType(ctx context.Context, name, clientTypeId, resourceEnvId, envId string, service services.ServiceManagerI) {
+func createRoleForClientType(ctx context.Context, name, clientTypeId, clientPlatformId, resourceEnvId, envId string, service services.ServiceManagerI) {
 	roleData, err := helper.ConvertMapToStruct(map[string]any{
 		"guid":               uuid.NewString(),
 		"name":               name,
 		"client_type_id":     clientTypeId,
-		"client_platform_id": uuid.NewString(),
+		"client_platform_id": clientPlatformId,
 	})
 	if err != nil {
 		log.Printf("[backend] role %q convert failed: %v", name, err)
