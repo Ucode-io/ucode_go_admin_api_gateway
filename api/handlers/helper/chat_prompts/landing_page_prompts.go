@@ -38,9 +38,31 @@ IMPORT COMPLETENESS:
   Every non-npm import path MUST have a corresponding file in files[].
   ZERO exceptions. Trace every import before emitting.
 
-APOSTROPHE RULE (prevents build crash):
-  NEVER use a raw apostrophe inside JSX expression {} or text content.
-  WRONG: <p>{chef's table}</p>   RIGHT: <p>chef&apos;s table</p>  OR  <p>{"chef's table"}</p>
+====================================
+SYNTAX SAFETY & BUILD RULES — MANDATORY
+====================================
+1. STRING LITERALS (CYRILLIC / RUSSIAN / NON-ENGLISH TEXT):
+   NEVER write text words directly into arrays or objects without quotes!
+   ❌ const features = [Поддержка ИИ, Тарифы]      → CRASH: ReferenceError: Тарифы is not defined
+   ✅ const features = ['Поддержка ИИ', 'Тарифы']  → CORRECT
+   ❌ const title = это круто                      → CRASH: Expected ";" but found "круто"
+   ✅ const title = 'это круто'                    → CORRECT
+2. INLINE STYLES MUST BE STRINGS:
+   NEVER use CSS units (px, vw, %, etc.) inside style={{}} without quotes!
+   ❌ style={{ width: 100% }}    → CRASHES ESBUILD: Expected "}" but found "%"
+   ✅ style={{ width: "100%" }}  → CORRECT
+   ✅ style={{ width: 100 }}     → CORRECT (React infers px)
+3. JSX APOSTROPHES:
+   NEVER use unescaped apostrophes in text nodes or JSX expressions.
+   ❌ <p>It's great</p>          → CRASHES ESBUILD
+   ✅ <p>It&apos;s great</p>     → CORRECT
+   ✅ <p>{"It's great"}</p>      → CORRECT
+4. TYPE ASSERTIONS:
+   NEVER use angle brackets for type assertions in .tsx files!
+   ❌ const x = <MyType>y        → CRASHES ESBUILD
+   ✅ const x = y as MyType      → CORRECT
+
+Ensure your code is 100% valid TypeScript. Double-check all curly braces, brackets, and quotes.
 
 REACT ITERATOR KEYS:
   key= MUST be on the outermost element returned by every .map() call.
@@ -54,6 +76,11 @@ NO INLINE STYLES (for static values):
   ALLOWED ONLY for: dynamic runtime values (progress %, rotation deg, CSS var injection).
 
 NO AUTH: Never generate Login, Register, ProtectedRoute, AuthGuard, useAuth, or token management.
+
+BANNED CONFIG FILES — NEVER include these in files[] (pre-built in project template):
+  tsconfig.json · tsconfig.node.json · vite.config.ts · vite.config.js
+  package.json · package-lock.json · tailwind.config.js · postcss.config.js
+  Generating these overwrites the valid template config and breaks CI (tsc/vite build fails).
 
 NULL SAFETY:
   API fields are always nullable. Guard every field:
@@ -493,6 +520,14 @@ BANNED PATTERNS (cause CI failures):
   Recharts formatters: formatter={(value, name) => [...]}  NOT  formatter={(value: number, name: string) => [...]}
   Optional fields: { field: value || undefined }  NOT  { field: value || null }
   Unused destructured props: omit them or rename with : alias syntax
+  OPTIONAL FUNCTION CALLS (TS2722/TS18048):
+    ❌ optionalFn()              →  TS2722: Cannot invoke object which is possibly 'undefined'
+    ✅ optionalFn?.()            →  optional call — always safe
+    ❌ obj?.maybeNum * 2         →  TS2363: arithmetic on possibly-undefined
+    ✅ (obj?.maybeNum ?? 0) * 2
+  ANALYTICS — NEVER GENERATE:
+    NEVER generate src/utils/metrica.ts, Yandex Metrika (ym), Google Analytics, GTM, or any
+    analytics/tracking integration. These require project-specific IDs not available at generation time.
 
 ====================================
 API DATA RENDERING RULE

@@ -14,7 +14,7 @@
     },
     {
       "path": "vite.config.ts",
-      "content": "import path from 'path';\nimport { defineConfig } from 'vite';\nimport react from '@vitejs/plugin-react-oxc';\nimport federation from '@originjs/vite-plugin-federation';\n\nexport default defineConfig(({ command }) => ({\n  plugins: [\n    react(),\n    ...(command === 'build' ? [\n      federation({\n        name: 'remote_app',\n        filename: 'remoteEntry.js',\n        exposes: { './App': './src/App.tsx' },\n        shared: ['react', 'react-dom'],\n      }),\n    ] : []),\n  ],\n  build: {\n    modulePreload: false,\n    target: 'esnext',\n    minify: false,\n    cssCodeSplit: false,\n  },\n  resolve: {\n    alias: {\n      '@': path.resolve(__dirname, './src'),\n    },\n  },\n}));\n"
+      "content": "import path from 'path';\nimport { defineConfig } from 'vite';\nimport react from '@vitejs/plugin-react-oxc';\nimport federation from '@originjs/vite-plugin-federation';\n\nexport default defineConfig(({ command }) => ({\n  plugins: [\n    react(),\n    ...(command === 'build' ? [\n      federation({\n        name: 'remote_app',\n        filename: 'remoteEntry.js',\n        exposes: { './App': './src/App.tsx' },\n        shared: ['react', 'react-dom'],\n      }),\n    ] : []),\n  ],\n  build: {\n    outDir: 'build',\n    modulePreload: false,\n    target: 'esnext',\n    minify: false,\n    cssCodeSplit: false,\n  },\n  resolve: {\n    alias: {\n      '@': path.resolve(__dirname, './src'),\n    },\n  },\n}));\n"
     },
     {
       "path": "src/App.tsx",

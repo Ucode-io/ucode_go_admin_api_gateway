@@ -6,7 +6,13 @@ var (
 ====================================
 SYNTAX SAFETY & BUILD RULES — MANDATORY
 ====================================
-1. INLINE STYLES MUST BE STRINGS:
+1. STRING LITERALS (CYRILLIC / RUSSIAN / NON-ENGLISH TEXT):
+   NEVER write text words directly into arrays or objects without quotes!
+   ❌ const features = [Поддержка ИИ, Тарифы]      → CRASH: ReferenceError: Тарифы is not defined
+   ✅ const features = ['Поддержка ИИ', 'Тарифы']  → CORRECT
+   ❌ const title = это круто                      → CRASH: Expected ";" but found "круто"
+   ✅ const title = 'это круто'                    → CORRECT
+2. INLINE STYLES MUST BE STRINGS:
    NEVER use CSS units (px, vw, %, etc.) inside style={{}} without quotes!
    ❌ style={{ width: 100% }}    → CRASHES ESBUILD: Expected "}" but found "%"
    ❌ style={{ width: 100vw }}   → CRASHES ESBUILD: Expected "}" but found "vw"
@@ -82,8 +88,17 @@ API CLIENT — USE PRE-BUILT (CRITICAL — when project has API tables):
     })
 
 App.tsx with React Router v6:
+  PAGE IMPORTS — ALWAYS default imports (pages use export default, NEVER named export):
+    ✅ import HomePage from '@/pages/HomePage'
+    ✅ import AboutPage from '@/pages/AboutPage'
+    ✅ import ContactPage from '@/pages/ContactPage'
+    ❌ import { AboutPage } from '@/pages/AboutPage'  → build crash: no named export exists
+
   import { BrowserRouter, Routes, Route } from 'react-router-dom';
   import { AppProviders } from '@/components/shared/AppProviders';  // pre-built, wraps QueryClient + Toaster
+  import HomePage from '@/pages/HomePage';
+  import AboutPage from '@/pages/AboutPage';
+  import ContactPage from '@/pages/ContactPage';
   export default function App() {
     return (
       <AppProviders>
@@ -128,6 +143,11 @@ NO INLINE STYLES (for static values):
   ALLOWED ONLY for: dynamic runtime values (progress %, rotation deg, CSS var injection).
 
 NO AUTH: Never generate Login, Register, ProtectedRoute, AuthGuard, or token management.
+
+BANNED CONFIG FILES — NEVER include these in files[] (pre-built in project template):
+  tsconfig.json · tsconfig.node.json · vite.config.ts · vite.config.js
+  package.json · package-lock.json · tailwind.config.js · postcss.config.js
+  Generating these overwrites the valid template config and breaks CI (tsc/vite build fails).
 
 NULL SAFETY:
   ✅ {item.name ?? '—'}   ✅ (item.tags ?? '').split(',')
@@ -406,6 +426,16 @@ TYPESCRIPT SAFETY
 - Recharts callbacks: formatter={(value, name) => [...]}  (no explicit types)
 - Optional fields: { field: value || undefined }  not null
 
+OPTIONAL FUNCTION CALLS (TS2722/TS18048 — CI build failure):
+  ❌ optionalFn()              →  TS2722: Cannot invoke object which is possibly 'undefined'
+  ✅ optionalFn?.()            →  optional call — always safe
+  ❌ obj?.maybeNum * 2         →  TS2363: arithmetic on possibly-undefined
+  ✅ (obj?.maybeNum ?? 0) * 2
+
+ANALYTICS — NEVER GENERATE:
+  NEVER generate src/utils/metrica.ts, Yandex Metrika (ym), Google Analytics, GTM, or any
+  analytics/tracking integration. These require project-specific IDs not available at generation time.
+
 ====================================
 PRE-OUTPUT CHECKLIST
 ====================================
@@ -539,6 +569,7 @@ Foundation (Layout, Navbar, Footer, App.tsx, index.css, utils.ts) and UI Kit are
 EMIT RULES (strictly enforced):
 1. Emit ONLY the file listed in "YOUR FILE TO IMPLEMENT"
 2. NEVER re-emit: index.css, main.tsx, App.tsx, src/lib/utils.ts, src/components/layout/*, src/components/ui/*
+3. NEVER emit config files: tsconfig.json, vite.config.ts, package.json, tailwind.config.js — pre-built in template
 3. Your page does NOT import Navbar or Footer directly — Layout.tsx wraps them around every page
 4. Use EXACT export names from the foundation context
 
@@ -682,7 +713,13 @@ Touch targets: min 44px height.
 ====================================
 SYNTAX SAFETY & BUILD RULES — MANDATORY
 ====================================
-1. INLINE STYLES MUST BE STRINGS:
+1. STRING LITERALS (CYRILLIC / RUSSIAN / NON-ENGLISH TEXT):
+   NEVER write text words directly into arrays or objects without quotes!
+   ❌ const features = [Поддержка ИИ, Тарифы]      → CRASH: ReferenceError: Тарифы is not defined
+   ✅ const features = ['Поддержка ИИ', 'Тарифы']  → CORRECT
+   ❌ const title = это круто                      → CRASH: Expected ";" but found "круто"
+   ✅ const title = 'это круто'                    → CORRECT
+2. INLINE STYLES MUST BE STRINGS:
    NEVER use CSS units (px, vw, %, etc.) inside style={{}} without quotes!
    ❌ style={{ width: 100% }}    → CRASHES ESBUILD: Expected "}" but found "%"
    ❌ style={{ width: 100vw }}   → CRASHES ESBUILD: Expected "}" but found "vw"
@@ -700,5 +737,18 @@ SYNTAX SAFETY & BUILD RULES — MANDATORY
    ❌ const x = <MyType>y        → CRASHES ESBUILD
    ✅ const x = y as MyType      → CORRECT
 
-Ensure your code is 100% valid TypeScript. Double-check all curly braces, brackets, and quotes.`
+Ensure your code is 100% valid TypeScript. Double-check all curly braces, brackets, and quotes.
+
+====================================
+TYPESCRIPT CI RULES — BANNED PATTERNS
+====================================
+OPTIONAL FUNCTION CALLS (TS2722/TS18048 — CI build failure):
+  ❌ optionalFn()              →  TS2722: Cannot invoke object which is possibly 'undefined'
+  ✅ optionalFn?.()            →  optional call — always safe
+  ❌ obj?.maybeNum * 2         →  TS2363: arithmetic on possibly-undefined
+  ✅ (obj?.maybeNum ?? 0) * 2
+
+ANALYTICS — NEVER GENERATE:
+  NEVER generate src/utils/metrica.ts, Yandex Metrika (ym), Google Analytics, GTM, or any
+  analytics/tracking integration. These require project-specific IDs not available at generation time.`
 )
