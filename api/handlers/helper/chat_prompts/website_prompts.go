@@ -40,19 +40,18 @@ You are building a multi-page website with React Router v6.
 PAGES — always include: Home, About, Contact
 Add based on prompt: Services, Portfolio, Blog, Team, Pricing, Cases, Gallery
 
-GENERATE these utilities yourself:
-  - cn() helper → generate src/lib/utils.ts
-  - Any custom hook → generate the file in files[]
-
 PRE-BUILT INFRASTRUCTURE (already in the project — import and use, NEVER re-implement):
-  When the project has API tables, these files ALREADY EXIST:
+  These files ALWAYS EXIST regardless of whether the project has API tables:
     @/config/axios         → apiClient (default export) — configured with Authorization and X-API-KEY headers
     @/hooks/useApi         → useApiQuery, useApiMutation — React Query wrappers using apiClient
     @/lib/apiUtils         → extractList, extractSingle, extractCount — response data extractors
+    @/lib/utils            → cn, formatDate, formatCurrency, getInitials, truncate — use freely
     @/components/shared/AppProviders → AppProviders (QueryClientProvider + Toaster)
 
-  NEVER import from: @/types/common (website projects don't have this file)
-  NEVER re-create an axios instance or fetch wrapper — apiClient already handles auth headers.
+  NEVER re-create an axios instance or write custom fetch wrappers — apiClient handles auth.
+  NEVER generate src/lib/utils.ts — it is pre-built with all helpers above.
+  NEVER generate src/main.tsx — it is pre-built (identical for all projects).
+  NEVER import from: @/types/common (not available in website projects).
 
 API CLIENT — USE PRE-BUILT (CRITICAL — when project has API tables):
   WRONG — never do this:
@@ -391,32 +390,31 @@ CRITICAL: export buttonVariants.
 FILE GENERATION ORDER (TYPE C — STRICT)
 ====================================
 SCROLL-TO-TOP RULE: NEVER create src/components/ui/scroll-to-top.tsx — implement the button INLINE in Layout.tsx.
-UTILS RULE: src/lib/utils.ts exports ONLY cn(). NEVER add formatPrice, formatDate, formatCurrency, or any domain helper to utils.ts. Define format helpers INLINE in the component that needs them.
+PRE-BUILT RULE: NEVER generate src/lib/utils.ts or src/main.tsx — they are pre-built in the template.
+  src/lib/utils.ts already has: cn, formatDate, formatCurrency, getInitials, truncate — import freely.
 
  1. src/index.css                     (@import fonts + :root vars + @keyframes + textures)
- 2. src/lib/utils.ts                  (cn helper ONLY — export function cn(...inputs: ClassValue[]) { return twMerge(clsx(inputs)); })
- 3. src/types.ts                      (ONLY if project has API tables — entity interfaces)
- 4. src/components/ui/button.tsx
- 6. src/components/ui/card.tsx
- 7. src/components/ui/badge.tsx
- 8. src/components/ui/accordion.tsx
- 9. src/components/ui/avatar.tsx
-10. src/components/ui/input.tsx
-11. src/components/ui/label.tsx
-12. src/components/ui/textarea.tsx
-13. src/components/ui/[other needed primitives]
-14. src/components/layout/Navbar.tsx  (sticky, glassmorphism, hamburger, active route highlight)
-15. src/components/layout/Footer.tsx
-16. src/components/layout/Layout.tsx  (wraps Navbar + children + Footer)
-17. src/components/sections/[shared section components used across pages]
-18. src/pages/HomePage.tsx            (full landing quality — all archetype sections)
-19. src/pages/AboutPage.tsx
-20. src/pages/ContactPage.tsx         (with react-hook-form contact form)
-21. src/pages/[other pages].tsx
-22. src/App.tsx                       (BrowserRouter + Routes + QueryClientProvider)
-23. src/main.tsx
-24. .env
-25. .env.production
+ 2. src/types.ts                      (ONLY if project has API tables — entity interfaces)
+ 3. src/components/ui/button.tsx
+ 4. src/components/ui/card.tsx
+ 5. src/components/ui/badge.tsx
+ 6. src/components/ui/accordion.tsx
+ 7. src/components/ui/avatar.tsx
+ 8. src/components/ui/input.tsx
+ 9. src/components/ui/label.tsx
+10. src/components/ui/textarea.tsx
+11. src/components/ui/[other needed primitives]
+12. src/components/layout/Navbar.tsx  (sticky, glassmorphism, hamburger, active route highlight)
+13. src/components/layout/Footer.tsx
+14. src/components/layout/Layout.tsx  (wraps Navbar + children + Footer)
+15. src/components/sections/[shared section components used across pages]
+16. src/pages/HomePage.tsx            (full landing quality — all archetype sections)
+17. src/pages/AboutPage.tsx
+18. src/pages/ContactPage.tsx         (with react-hook-form contact form)
+19. src/pages/[other pages].tsx
+20. src/App.tsx                       (BrowserRouter + Routes — import './index.css' on line 1)
+21. .env
+22. .env.production
 
 ====================================
 TYPESCRIPT SAFETY
@@ -454,7 +452,8 @@ DESIGN TOKENS
 
 IMPORT SAFETY
 [ ] Every non-npm import has matching file in files[] OR is a pre-built template file
-[ ] Pre-built imports allowed: @/hooks/useApi, @/lib/apiUtils, @/config/axios, @/components/shared/AppProviders
+[ ] Pre-built imports allowed: @/hooks/useApi, @/lib/apiUtils, @/config/axios, @/lib/utils, @/components/shared/AppProviders
+[ ] NEVER generate src/lib/utils.ts or src/main.tsx (pre-built in template)
 [ ] No apostrophes inside JSX expressions
 
 API CLIENT (if project has API tables)
@@ -473,8 +472,9 @@ REACT KEYS
 
 STRUCTURE
 [ ] src/index.css is FIRST in files[]
-[ ] App.tsx: import React; import './index.css'; BrowserRouter; QueryClientProvider
-[ ] main.tsx does NOT import index.css
+[ ] App.tsx line 1: import './index.css'; BrowserRouter; AppProviders wrapping routes
+[ ] src/lib/utils.ts NOT in files[] (pre-built — never generate)
+[ ] src/main.tsx NOT in files[] (pre-built — never generate)
 [ ] Layout.tsx wraps all pages
 [ ] Navbar uses useLocation for active route highlight
 
@@ -512,19 +512,19 @@ MOBILE:      Hamburger menu with slide-down links, stacked layouts
 	PromptWebsiteManifestGenerator = `You are a senior frontend architect planning file structure for a React multi-page website.
 Given a project description and UI structure, output a complete file manifest grouped by dependency level.
 
-GROUP 0 — FOUNDATION (exactly 7 files, generated first, sequential):
-  Include EXACTLY these 7 files — no more, no fewer:
-    src/index.css                              CSS variables + Google Fonts + global Tailwind styles
-    src/lib/utils.ts                           cn() helper — REQUIRED by all UI Kit components
-    src/main.tsx                               React entry point
+GROUP 0 — FOUNDATION (exactly 5 files, generated first, sequential):
+  Include EXACTLY these 5 files — no more, no fewer:
+    src/index.css                              CSS variables + Google Fonts + @keyframes + archetype texture
     src/App.tsx                                BrowserRouter + Routes to ALL pages from all groups
     src/components/layout/Layout.tsx           Wraps every page: <Navbar/> + {children} + <Footer/> + inline scroll-to-top button
     src/components/layout/Navbar.tsx           Sticky responsive navbar with hamburger mobile menu
     src/components/layout/Footer.tsx           Footer with navigation links and branding
 
-  DO NOT include src/types.ts (no CRUD needed for static websites).
-  DO NOT include src/lib/api.ts — the API client is PRE-BUILT in the template (src/config/axios.ts).
-  DO NOT include hook files (src/hooks/*) — useApi is PRE-BUILT in the template.
+  PRE-BUILT (already in template — DO NOT generate, DO NOT include in groups):
+    src/lib/utils.ts    — cn, formatDate, formatCurrency, getInitials, truncate (import freely)
+    src/main.tsx        — React entry point (identical for all projects)
+    src/hooks/useApi.ts, src/lib/apiUtils.ts, src/config/axios.ts, src/components/shared/AppProviders.tsx
+
   NEVER put src/components/ui/* in Group 0.
   NEVER add a separate scroll-to-top file — implement it inline inside Layout.tsx.
 
@@ -552,11 +552,11 @@ EXPORTS RULE:
   Pages: just the default export function name (e.g. HomePage).
 
 CONSTRAINTS:
-  - Group 0 has exactly 7 files — no exceptions
+  - Group 0 has exactly 5 files — no exceptions
   - Group 1 has ui/* files only (no layout, no page logic)
   - Groups 2..N have 1–2 page files each
   - Pages depend only on Groups 0 and 1 — never on each other
-  - Total files: 7 + 4–8 ui + 4–8 pages = 15–23 files
+  - Total files: 5 + 4–8 ui + 4–8 pages = 13–21 files
   - NEVER create src/components/ui/scroll-to-top.tsx — scroll-to-top is inline in Layout.tsx`
 
 	PromptWebsitePageCoder = `You are a senior React frontend engineer implementing ONE PAGE of a cinematic multi-page website.
@@ -574,10 +574,33 @@ EMIT RULES (strictly enforced):
 4. Use EXACT export names from the foundation context
 
 UTILS IMPORT RULE:
-  import { cn } from '@/lib/utils'   ← ONLY cn() is exported from utils.ts
-  NEVER import: formatPrice, formatDate, formatCurrency, getInitials from '@/lib/utils'
-  Define format helpers INLINE in this file if needed:
-    const formatPrice = (v: number) => new Intl.NumberFormat('uz-UZ').format(v) + ' сум'
+  src/lib/utils.ts is PRE-BUILT with all helpers — import freely:
+  import { cn, formatDate, formatCurrency, getInitials, truncate } from '@/lib/utils'
+  NEVER redefine these helpers inline — they already exist in utils.ts.
+
+====================================
+BANNED API PATTERNS — BUILD WILL FAIL OR DATA WILL BE WRONG
+====================================
+NEVER write these — they bypass the pre-built client and break data fetching:
+  ❌ const apiClient = axios.create({...})           — creates duplicate client without auth
+  ❌ import axios from 'axios'; axios.get(url)       — missing Authorization + X-API-KEY headers
+  ❌ useEffect(() => { fetch(url).then(...) }, [])   — no caching, no error handling, no retry
+  ❌ useEffect(() => { axios.get(url).then(...) }, [])
+  ❌ data?.data?.response   or   data?.response      — wrong nesting depth, returns undefined
+  ❌ const [data, setData] = useState([]); useEffect(fetch, [])
+
+ALWAYS use pre-built hooks:
+  ✅ const { data, isLoading } = useApiQuery<unknown>(['key'], '/v2/items/slug')
+  ✅ const items = extractList<MyType>(data)          — handles 3-level nesting correctly
+  ✅ const item  = extractSingle<MyType>(data)
+  ✅ const total = extractCount(data)
+
+====================================
+MANDATORY: API DATA FOR EVERY TABLE
+====================================
+If API CONFIG lists tables, this page MUST fetch and render data from at least one of them.
+NEVER show hardcoded arrays/objects when API tables exist.
+If a table has an image/photo/avatar/thumbnail field — display it from the API response, not Unsplash.
 
 ====================================
 PAGE EXPORT FORMAT

@@ -824,6 +824,18 @@ func buildAPIConfigBlock(baseURL, apiKey string, plan *models.ArchitectPlan) str
 		}
 	}
 
+	if len(plan.Tables) > 0 {
+		sb.WriteString(`
+⚠ MANDATORY API RULE — NO EXCEPTIONS:
+Every non-login table listed above MUST have at least one page or section that:
+  1. Fetches its data using useApiQuery (NEVER hardcoded arrays or objects)
+  2. Renders the fetched data in the UI (cards, lists, tables — whatever fits)
+  3. Uses extractList<T>(data) to extract the response
+Static/hardcoded content is FORBIDDEN when API tables exist.
+Images: if a table has an image/photo/avatar/thumbnail field — render it from the API data.
+`)
+	}
+
 	if len(loginTableSlugs) > 0 {
 		slug := loginTableSlugs[0]
 		sb.WriteString(`
