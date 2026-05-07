@@ -306,22 +306,18 @@ func (p *ChatProcessor) doPushChanges(ctx context.Context, repoIDInt int, files 
 	}
 
 	type pushReq struct {
-		RepoID               int                       `json:"repo_id"`
-		Files                []models.GitlabFileChange `json:"files"`
-		CommitMessage        string                    `json:"commit_message"`
-		FunctionID           string                    `json:"function_id"`
-		CompanyProjectID     string                    `json:"company_project_id"`
-		CompanyEnvironmentID string                    `json:"company_environment_id"`
-		ResourceEnvironmentID string                   `json:"resource_environment_id"`
+		RepoID                int                       `json:"repo_id"`
+		Files                 []models.GitlabFileChange `json:"files"`
+		CommitMessage         string                    `json:"commit_message"`
+		FunctionID            string                    `json:"function_id"`
+		ResourceEnvironmentID string                    `json:"resource_environment_id"`
 	}
 
 	bodyBytes, err := json.Marshal(pushReq{
-		RepoID:               repoIDInt,
-		Files:                files,
-		CommitMessage:        p.userMessage,
-		FunctionID:           p.microFrontendId,
-		CompanyProjectID:     p.ucodeProjectId,
-		CompanyEnvironmentID: p.companyEnvironmentId,
+		RepoID:                repoIDInt,
+		Files:                 files,
+		CommitMessage:         p.userMessage,
+		FunctionID:            p.microFrontendId,
 		ResourceEnvironmentID: p.microFrontendResourceEnvId,
 	})
 	if err != nil {
