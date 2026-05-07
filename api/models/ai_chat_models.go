@@ -214,6 +214,8 @@ type (
 		UcodeProjectId string `json:"ucode_project_id"`
 		EnvironmentId  string `json:"environment_id"`
 		ResourceEnvId  string `json:"resource_env_id"`
+		NodeType       string `json:"node_type"`
+		ResourceType   int32  `json:"resource_type"`
 	}
 
 	// ========================== Chunked Generation Manifest ==========================
