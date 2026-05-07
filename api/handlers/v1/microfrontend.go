@@ -287,6 +287,7 @@ func (h *HandlerV1) RevertMicrofrontendToCommit(c *gin.Context) {
 		RepoID        int                       `json:"repo_id"`
 		Files         []models.GitlabFileChange `json:"files"`
 		CommitMessage string                    `json:"commit_message"`
+		FunctionID    string                    `json:"function_id"`
 	}
 
 	repoIDInt := cast.ToInt(req.RepoID)
@@ -309,7 +310,7 @@ func (h *HandlerV1) RevertMicrofrontendToCommit(c *gin.Context) {
 		}
 		chunk := files[i:end]
 
-		bodyBytes, err := json.Marshal(pushReq{RepoID: repoIDInt, Files: chunk, CommitMessage: commitMsg})
+		bodyBytes, err := json.Marshal(pushReq{RepoID: repoIDInt, Files: chunk, CommitMessage: commitMsg, FunctionID: snapshot.GetMicrofrontendId()})
 		if err != nil {
 			h.HandleResponse(c, status_http.InternalServerError, "failed to build push request: "+err.Error())
 			return
