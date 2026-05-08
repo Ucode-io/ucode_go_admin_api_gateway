@@ -29,6 +29,7 @@ func (p *ChatProcessor) initTokenBudget(ctx context.Context) {
 		projectId = p.mcpUcodeProjectId
 	}
 	if projectId == "" {
+		log.Printf("[TOKEN BUDGET] skipped: no project_id")
 		return
 	}
 
@@ -64,6 +65,7 @@ func (p *ChatProcessor) initTokenBudget(ctx context.Context) {
 	}
 
 	if snap.DayLimit == 0 && snap.MonthLimit == 0 {
+		log.Printf("[TOKEN BUDGET] skipped: no token limits configured for project_id=%s", projectId)
 		return
 	}
 

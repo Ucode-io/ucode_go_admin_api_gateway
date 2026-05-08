@@ -83,6 +83,10 @@ func (p *ChatProcessor) recordTokenUsage(usage models.ClaudeUsage, model, descri
 }
 
 func (p *ChatProcessor) callAnthropicWithTracking(_ context.Context, req models.AnthropicRequest, timeout time.Duration, description string) (string, error) {
+	if err := p.checkTokenBudget(); err != nil {
+		return "", err
+	}
+
 	log.Printf("[AI] Calling Anthropic: %s", description)
 	response, err := helper.CallAnthropicAPI(p.baseConf, req, timeout)
 	if err != nil {
@@ -95,6 +99,7 @@ func (p *ChatProcessor) callAnthropicWithTracking(_ context.Context, req models.
 	}
 	if jsonErr := json.Unmarshal([]byte(response), &parsed); jsonErr == nil {
 		p.recordTokenUsage(parsed.Usage, req.Model, description)
+		p.deductTokenBudget(int64(parsed.Usage.InputTokens + parsed.Usage.OutputTokens))
 	}
 
 	return response, nil
