@@ -207,6 +207,10 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 		return nil, fmt.Errorf("backend provisioning failed: %w", provisionErr)
 	}
 
+	if earlyPool.Err == nil && projectData != nil {
+		earlyPool = p.uploadImagePool(ctx, projectData.ResourceEnvId, earlyPool)
+	}
+
 	if earlyPool.Err == nil && len(earlyPool.ThumbURLs) > 0 {
 		injectMockDataImages(plan, earlyPool.ThumbURLs)
 		p.cachedImagePool = &earlyPool
@@ -349,6 +353,11 @@ func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context,
 	}
 
 	mfePoolWg.Wait()
+
+	if mfePool.Err == nil && projectData != nil {
+		mfePool = p.uploadImagePool(ctx, projectData.ResourceEnvId, mfePool)
+	}
+
 	if mfePool.Err == nil && len(mfePool.ThumbURLs) > 0 {
 		injectMockDataImages(plan, mfePool.ThumbURLs)
 		p.cachedImagePool = &mfePool

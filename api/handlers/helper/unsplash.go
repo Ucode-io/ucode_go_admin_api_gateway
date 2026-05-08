@@ -24,7 +24,7 @@ const (
 
 var unsplashClient = &http.Client{Timeout: unsplashTimeout}
 
-type unsplashPhoto struct {
+type UnsplashPhoto struct {
 	URLHero      string // 1600×900
 	URLCard      string // 800×600
 	URLThumb     string // 400×300
@@ -33,7 +33,7 @@ type unsplashPhoto struct {
 
 var (
 	imgCacheMu  sync.Mutex
-	imgCacheMap = make(map[string][]unsplashPhoto, imgCacheMax)
+	imgCacheMap = make(map[string][]UnsplashPhoto, imgCacheMax)
 )
 
 func imgCacheKey(keywords []string) string {
@@ -59,7 +59,7 @@ func extractKeywords(plan *models.ArchitectPlan) []string {
 	return kw
 }
 
-func searchUnsplash(ctx context.Context, accessKey, query string, count int) ([]unsplashPhoto, error) {
+func searchUnsplash(ctx context.Context, accessKey, query string, count int) ([]UnsplashPhoto, error) {
 	if count > 30 {
 		count = 30
 	}
@@ -102,9 +102,9 @@ func searchUnsplash(ctx context.Context, accessKey, query string, count int) ([]
 		return nil, err
 	}
 
-	out := make([]unsplashPhoto, 0, len(data.Results))
+	out := make([]UnsplashPhoto, 0, len(data.Results))
 	for _, p := range data.Results {
-		out = append(out, unsplashPhoto{
+		out = append(out, UnsplashPhoto{
 			URLHero:      imgixURL(p.URLs.Raw, 1600, 900),
 			URLCard:      imgixURL(p.URLs.Raw, 800, 600),
 			URLThumb:     imgixURL(p.URLs.Raw, 400, 300),
@@ -115,8 +115,7 @@ func searchUnsplash(ctx context.Context, accessKey, query string, count int) ([]
 	return out, nil
 }
 
-// fetchPhotos fetches up to 12 photos for the keywords, fetching individually for better relevance and quality.
-func fetchPhotos(ctx context.Context, accessKey string, keywords []string) ([]unsplashPhoto, error) {
+func fetchPhotos(ctx context.Context, accessKey string, keywords []string) ([]UnsplashPhoto, error) {
 	key := imgCacheKey(keywords)
 
 	imgCacheMu.Lock()
@@ -127,7 +126,7 @@ func fetchPhotos(ctx context.Context, accessKey string, keywords []string) ([]un
 	imgCacheMu.Unlock()
 
 	const needed = 12
-	var allResults [][]unsplashPhoto
+	var allResults [][]UnsplashPhoto
 
 	// Fetch up to 15 photos for EACH keyword separately to ensure high quality matches
 	for _, kw := range keywords {
@@ -140,7 +139,7 @@ func fetchPhotos(ctx context.Context, accessKey string, keywords []string) ([]un
 		}
 	}
 
-	var photos []unsplashPhoto
+	var photos []UnsplashPhoto
 	seen := make(map[string]bool)
 
 	// Round-robin selection to mix diverse concepts
@@ -169,7 +168,7 @@ func fetchPhotos(ctx context.Context, accessKey string, keywords []string) ([]un
 
 	imgCacheMu.Lock()
 	if len(imgCacheMap) >= imgCacheMax {
-		imgCacheMap = make(map[string][]unsplashPhoto, imgCacheMax)
+		imgCacheMap = make(map[string][]UnsplashPhoto, imgCacheMax)
 	}
 	imgCacheMap[key] = photos
 	imgCacheMu.Unlock()
@@ -178,11 +177,62 @@ func fetchPhotos(ctx context.Context, accessKey string, keywords []string) ([]un
 }
 
 type ImagePoolResult struct {
-	Block     string   // formatted prompt block to append to apiConfig; empty on failure
-	Keywords  []string // search terms that were used
-	Count     int      // number of photos fetched
-	ThumbURLs []string // first 6 thumb URLs for mock_data image injection
-	Err       error    // non-nil when the API call failed; generation continues either way
+	Block       string          // formatted prompt block to append to apiConfig; empty on failure
+	Keywords    []string        // search terms that were used
+	Count       int             // number of photos fetched
+	ThumbURLs   []string        // first 6 thumb URLs for mock_data image injection
+	Photos      []UnsplashPhoto // raw photos list — used by uploadImagePool for CDN re-upload
+	ProjectName string          // project name — used when rebuilding block after CDN upload
+	Err         error           // non-nil when the API call failed; generation continues either way
+}
+
+// BuildPoolBlock rebuilds the IMAGE POOL prompt block and thumb URL list from a photo slice.
+func BuildPoolBlock(projectName string, keywords []string, photos []UnsplashPhoto) (block string, thumbURLs []string) {
+	var sb strings.Builder
+	fmt.Fprintf(&sb, "════════════════════════════════════════\n")
+	fmt.Fprintf(&sb, "IMAGE POOL — USE THESE EXACT URLs\n")
+	fmt.Fprintf(&sb, "════════════════════════════════════════\n")
+	fmt.Fprintf(&sb, "Pre-fetched for \"%s\" · query: %s\n", projectName, strings.Join(keywords, " "))
+	fmt.Fprintf(&sb, "NEVER invent photo IDs. NEVER use placeholder.com / picsum.photos.\n\n")
+
+	fmt.Fprintf(&sb, "HERO (1600×900) — hero sections, full-bleed banners:\n")
+	for i, p := range photos {
+		if i >= 3 {
+			break
+		}
+		fmt.Fprintf(&sb, "  • %s", p.URLHero)
+		if p.Photographer != "" {
+			fmt.Fprintf(&sb, "  [%s]", p.Photographer)
+		}
+		fmt.Fprintf(&sb, "\n")
+	}
+
+	fmt.Fprintf(&sb, "\nCARD (800×600) — feature cards, section images:\n")
+	for i, p := range photos {
+		if i < 3 {
+			continue
+		}
+		fmt.Fprintf(&sb, "  • %s\n", p.URLCard)
+	}
+
+	fmt.Fprintf(&sb, "\nTHUMB (400×300) — table rows, small cards, list images:\n")
+	for i, p := range photos {
+		if i >= 6 {
+			break
+		}
+		fmt.Fprintf(&sb, "  • %s\n", p.URLThumb)
+	}
+
+	fmt.Fprintf(&sb, "════════════════════════════════════════\n")
+
+	thumbURLs = make([]string, 0, 6)
+	for i, ph := range photos {
+		if i >= 6 {
+			break
+		}
+		thumbURLs = append(thumbURLs, ph.URLThumb)
+	}
+	return sb.String(), thumbURLs
 }
 
 func FetchImagePool(ctx context.Context, accessKey string, plan *models.ArchitectPlan) ImagePoolResult {
@@ -204,58 +254,14 @@ func FetchImagePool(ctx context.Context, accessKey string, plan *models.Architec
 
 	log.Printf("[unsplash] ✅ %d photos fetched", len(photos))
 
-	var sb strings.Builder
-	fmt.Fprintf(&sb, "════════════════════════════════════════\n")
-	fmt.Fprintf(&sb, "IMAGE POOL — USE THESE EXACT URLs\n")
-	fmt.Fprintf(&sb, "════════════════════════════════════════\n")
-	fmt.Fprintf(&sb, "Pre-fetched for \"%s\" · query: %s\n", plan.ProjectName, strings.Join(keywords, " "))
-	fmt.Fprintf(&sb, "NEVER invent photo IDs. NEVER use placeholder.com / picsum.photos.\n\n")
-
-	// Photos 0–2: hero
-	fmt.Fprintf(&sb, "HERO (1600×900) — hero sections, full-bleed banners:\n")
-	for i, p := range photos {
-		if i >= 3 {
-			break
-		}
-		fmt.Fprintf(&sb, "  • %s", p.URLHero)
-		if p.Photographer != "" {
-			fmt.Fprintf(&sb, "  [%s]", p.Photographer)
-		}
-		fmt.Fprintf(&sb, "\n")
-	}
-
-	// Photos 3–11: cards
-	fmt.Fprintf(&sb, "\nCARD (800×600) — feature cards, section images:\n")
-	for i, p := range photos {
-		if i < 3 {
-			continue
-		}
-		fmt.Fprintf(&sb, "  • %s\n", p.URLCard)
-	}
-
-	// Photos 0–5: thumbs (different size, same contextual photos)
-	fmt.Fprintf(&sb, "\nTHUMB (400×300) — table rows, small cards, list images:\n")
-	for i, p := range photos {
-		if i >= 6 {
-			break
-		}
-		fmt.Fprintf(&sb, "  • %s\n", p.URLThumb)
-	}
-
-	fmt.Fprintf(&sb, "════════════════════════════════════════\n")
-
-	thumbURLs := make([]string, 0, 6)
-	for i, ph := range photos {
-		if i >= 6 {
-			break
-		}
-		thumbURLs = append(thumbURLs, ph.URLThumb)
-	}
+	block, thumbURLs := BuildPoolBlock(plan.ProjectName, keywords, photos)
 
 	return ImagePoolResult{
-		Block:     sb.String(),
-		Keywords:  keywords,
-		Count:     len(photos),
-		ThumbURLs: thumbURLs,
+		Block:       block,
+		Keywords:    keywords,
+		Count:       len(photos),
+		ThumbURLs:   thumbURLs,
+		Photos:      photos,
+		ProjectName: plan.ProjectName,
 	}
 }
