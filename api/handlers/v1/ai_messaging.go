@@ -59,6 +59,10 @@ type ChatProcessor struct {
 	prebuiltManifest *models.ProjectManifest
 	cachedImagePool  *helper.ImagePoolResult
 
+	tokenBudgetEnabled bool
+	tokenBudgetRemain  int64
+	tokenBudgetSnap    models.TokenBudgetSnapshot
+
 	emit ProgressEmitter
 }
 

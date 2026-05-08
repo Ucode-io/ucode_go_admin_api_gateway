@@ -3,6 +3,7 @@ package v1
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -113,6 +114,11 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 
 	aiResponse, err := processor.routeAndProcess(ctx, userMessage, chatHistory)
 	if err != nil {
+		var tokenErr *TokenLimitError
+		if errors.As(err, &tokenErr) {
+			h.HandleResponse(c, status_http.TooManyRequests, processor.tokenLimitData(tokenErr))
+			return
+		}
 		h.HandleResponse(c, status_http.GRPCError, fmt.Sprintf("ai processing failed: %v", err))
 		return
 	}
@@ -344,11 +350,21 @@ func (h *HandlerV1) handleStreamingMessage(c *gin.Context, processor *ChatProces
 
 		aiResponse, pipelineErr := processor.routeAndProcess(pipelineCtx, userMessage, chatHistory)
 		if pipelineErr != nil {
-			processor.emitter().Emit(SSEEvent{
-				Type:    EvError,
-				Icon:    "alert-circle",
-				Message: fmt.Sprintf("AI processing failed: %v", pipelineErr),
-			})
+			var tokenErr *TokenLimitError
+			if errors.As(pipelineErr, &tokenErr) {
+				processor.emitter().Emit(SSEEvent{
+					Type:    EvError,
+					Icon:    "ban",
+					Message: "Достигнут лимит токенов для этого проекта",
+					Data:    processor.tokenLimitData(tokenErr),
+				})
+			} else {
+				processor.emitter().Emit(SSEEvent{
+					Type:    EvError,
+					Icon:    "alert-circle",
+					Message: fmt.Sprintf("AI processing failed: %v", pipelineErr),
+				})
+			}
 			return
 		}
 
