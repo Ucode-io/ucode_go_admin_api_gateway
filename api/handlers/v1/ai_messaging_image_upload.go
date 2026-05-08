@@ -48,7 +48,7 @@ func (p *ChatProcessor) uploadImagePool(ctx context.Context, resourceEnvId strin
 	_, menuErr := p.service.GoObjectBuilderService().Menu().Create(ctx, &nb.CreateMenuRequest{
 		Label:      folderName,
 		Icon:       "",
-		ParentId:   config.MainMenuID,
+		ParentId:   config.MainFolderID,
 		Type:       "MINIO_FOLDER",
 		ProjectId:  resourceEnvId,
 		NewRouter:  true,
