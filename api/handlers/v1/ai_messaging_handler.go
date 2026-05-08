@@ -93,7 +93,7 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 	processor.microFrontendResourceEnvId = userMessage.ResourceEnvId
 	processor.newProject = userMessage.NewProject
 	processor.userMessage = userMessage.Content
-	processor.mcpProjectId = mcpProject.GetUcodeProjectId()
+	processor.mcpUcodeProjectId = mcpProject.GetUcodeProjectId()
 
 	if userMessage.UcodeProjectID != "" {
 		processor.ucodeProjectId = userMessage.UcodeProjectID

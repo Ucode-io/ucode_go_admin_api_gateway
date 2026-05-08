@@ -24,9 +24,7 @@ func (e *TokenLimitError) Error() string {
 }
 
 func (p *ChatProcessor) initTokenBudget(ctx context.Context) {
-	projectId := p.mcpUcodeProjectId
-
-	if projectId == "" {
+	if p.mcpUcodeProjectId == "" {
 		log.Printf("[TOKEN BUDGET] skipped: no project_id")
 		return
 	}
@@ -39,12 +37,12 @@ func (p *ChatProcessor) initTokenBudget(ctx context.Context) {
 	g, gCtx := errgroup.WithContext(ctx)
 	g.Go(func() error {
 		var err error
-		limitsResp, err = p.h.companyServices.Billing().GetPricingLimits(gCtx, &pb.GetPricingLimitsRequest{ProjectId: projectId})
+		limitsResp, err = p.h.companyServices.Billing().GetPricingLimits(gCtx, &pb.GetPricingLimitsRequest{ProjectId: p.mcpUcodeProjectId})
 		return err
 	})
 	g.Go(func() error {
 		var err error
-		metricsResp, err = p.h.companyServices.Billing().GetAiTokenUsageMetrics(gCtx, &pb.GetAiTokenUsageMetricsRequest{ProjectId: projectId})
+		metricsResp, err = p.h.companyServices.Billing().GetAiTokenUsageMetrics(gCtx, &pb.GetAiTokenUsageMetricsRequest{ProjectId: p.mcpUcodeProjectId})
 		return err
 	})
 	if err := g.Wait(); err != nil {
@@ -64,7 +62,7 @@ func (p *ChatProcessor) initTokenBudget(ctx context.Context) {
 	}
 
 	if snap.DayLimit == 0 && snap.MonthLimit == 0 {
-		log.Printf("[TOKEN BUDGET] skipped: no token limits configured for project_id=%s", projectId)
+		log.Printf("[TOKEN BUDGET] skipped: no token limits configured for project_id=%s", p.mcpUcodeProjectId)
 		return
 	}
 
