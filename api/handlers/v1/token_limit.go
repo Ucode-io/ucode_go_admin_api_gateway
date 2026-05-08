@@ -24,10 +24,8 @@ func (e *TokenLimitError) Error() string {
 }
 
 func (p *ChatProcessor) initTokenBudget(ctx context.Context) {
-	projectId := p.ucodeProjectId
-	if p.mcpUcodeProjectId != "" {
-		projectId = p.mcpUcodeProjectId
-	}
+	projectId := p.mcpUcodeProjectId
+
 	if projectId == "" {
 		log.Printf("[TOKEN BUDGET] skipped: no project_id")
 		return
@@ -56,6 +54,7 @@ func (p *ChatProcessor) initTokenBudget(ctx context.Context) {
 
 	var snap models.TokenBudgetSnapshot
 	for _, l := range limitsResp.GetLimits() {
+		log.Printf("[TOKEN BUDGET] limit type=%q name=%q value=%q", l.GetType(), l.GetName(), l.GetValue())
 		switch l.GetType() {
 		case "tokens_day":
 			snap.DayLimit = cast.ToInt64(l.GetValue())
