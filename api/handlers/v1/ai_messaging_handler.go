@@ -54,8 +54,9 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 
 	mcpProject, err := service.GoObjectBuilderService().McpProject().GetMcpProjectFiles(
 		ctx, &pbo.McpProjectId{
-			Id:           chat.GetProjectId(),
-			WithoutFiles: false,
+			ResourceEnvId: resourceEnvID,
+			Id:            chat.GetProjectId(),
+			WithoutFiles:  false,
 		},
 	)
 	if err != nil {
