@@ -52,6 +52,17 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 		return
 	}
 
+	mcpProject, err := service.GoObjectBuilderService().McpProject().GetMcpProjectFiles(
+		ctx, &pbo.McpProjectId{
+			Id:           chat.GetProjectId(),
+			WithoutFiles: false,
+		},
+	)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, fmt.Sprintf("failed to get mcp project: %v", err))
+		return
+	}
+
 	authInfo, err := h.adminAuthInfo(c)
 	if err != nil {
 		h.HandleResponse(c, status_http.Unauthorized, "unauthorized")
@@ -81,6 +92,7 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 	processor.microFrontendResourceEnvId = userMessage.ResourceEnvId
 	processor.newProject = userMessage.NewProject
 	processor.userMessage = userMessage.Content
+	processor.mcpProjectId = mcpProject.GetUcodeProjectId()
 
 	if userMessage.UcodeProjectID != "" {
 		processor.ucodeProjectId = userMessage.UcodeProjectID

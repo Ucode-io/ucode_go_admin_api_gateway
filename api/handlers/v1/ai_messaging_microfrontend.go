@@ -182,8 +182,6 @@ func (p *ChatProcessor) runMicrofrontendInspect(ctx context.Context, userQuestio
 	return &models.ParsedClaudeResponse{Description: answer}, nil
 }
 
-// fetchMicrofrontendFiles calls the function service to get all files from the
-// microfrontend's u-gen branch. Returns a flat list of {FilePath, Content}.
 func (p *ChatProcessor) fetchMicrofrontendFiles(ctx context.Context) ([]models.GitlabFileChange, error) {
 	url := p.baseConf.GoFunctionServiceHost + p.baseConf.GoFunctionServiceHTTPPort +
 		"/v2/functions/micro-frontend/files?repo_id=" + p.microFrontendRepoId
