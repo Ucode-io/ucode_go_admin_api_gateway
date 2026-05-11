@@ -3,11 +3,41 @@ package models
 type (
 	// ========================== Basic Requests ==========================
 
-	NewMessageReq struct {
-		Content string   `json:"content"`
-		Images  []string `json:"images"`
+	// EnrichedMessage is the HTTP representation of a chat message.
+	// It mirrors pbo.Message but adds a Plan field parsed from embedded content.
+	EnrichedMessage struct {
+		ID         string     `json:"id"`
+		ChatID     string     `json:"chat_id"`
+		Role       string     `json:"role"`
+		Content    string     `json:"content"`
+		Images     []string   `json:"images"`
+		HasFiles   bool       `json:"has_files"`
+		TokensUsed int32      `json:"tokens_used"`
+		CreatedAt  string     `json:"created_at"`
+		Plan       *HaikuPlan `json:"plan,omitempty"`
 	}
 
+	// VisualContext is optional metadata sent by the frontend when the user
+	// selected a specific UI element for visual editing.
+	// All fields are optional — the backend handles whatever is provided.
+	VisualContext struct {
+		Path        string `json:"path,omitempty"`         // e.g. "src/components/layout/TopNav.tsx"
+		Line        int    `json:"line,omitempty"`         // line number inside the file
+		ElementName string `json:"element_name,omitempty"` // data-element-name value
+		OuterHTML   string `json:"outer_html,omitempty"`   // element.outerHTML snapshot
+	}
+
+	NewMessageReq struct {
+		Content             string          `json:"content"`
+		Images              []string        `json:"images"`
+		PendingAction       *PendingAction  `json:"pending_action,omitempty"`
+		Context             []VisualContext `json:"context,omitempty"`
+		MicrofrontendID     string          `json:"microfrontend_id,omitempty"`
+		MicrofrontendRepoID string          `json:"microfrontend_repo_id,omitempty"`
+		ResourceEnvId       string          `json:"resource_env_id,omitempty"`
+		NewProject          bool            `json:"new_project,omitempty"`
+		UcodeProjectID      string          `json:"ucode_project_id,omitempty"`
+	}
 	SendMessageRequest struct {
 		UserPrompt    string `json:"user_prompt"`
 		ChatId        string `json:"chat_id"`
@@ -45,13 +75,28 @@ type (
 		InferenceGeo             string `json:"inference_geo"`
 	}
 
+	QuestionOption struct {
+		ID    string `json:"id"`
+		Label string `json:"label"`
+	}
+
+	AiQuestion struct {
+		ID      string           `json:"id"`
+		Title   string           `json:"title"`
+		Type    string           `json:"type"` // "single" | "multi"
+		Options []QuestionOption `json:"options"`
+	}
+
 	ParsedClaudeResponse struct {
-		Model       string            `json:"model"`
-		MessageID   string            `json:"message_id"`
-		StopReason  string            `json:"stop_reason"`
-		Usage       ClaudeUsage       `json:"usage"`
-		Project     *GeneratedProject `json:"project,omitempty"`
-		Description string            `json:"description"`
+		Model         string            `json:"model"`
+		MessageID     string            `json:"message_id"`
+		StopReason    string            `json:"stop_reason"`
+		Usage         ClaudeUsage       `json:"usage"`
+		Project       *GeneratedProject `json:"project,omitempty"`
+		Description   string            `json:"description"`
+		PendingAction *PendingAction    `json:"pending_action,omitempty"`
+		Questions     []AiQuestion      `json:"questions,omitempty"`
+		Plan          *HaikuPlan        `json:"plan,omitempty"`
 	}
 
 	// ========================== Classification ==========================
@@ -66,22 +111,33 @@ type (
 
 	// ========================== AI Agent Routing ==========================
 
-	// HaikuRoutingResult — ответ Haiku роутера
-	// intent values:
-	//   "chat"             — оффтоп, Haiku отвечает сам, next_step=false
-	//   "project_question" — вопрос о структуре проекта, Haiku отвечает из графа, next_step=false
-	//   "project_inspect"  — вопрос требующий чтения контента файлов (пиксели, цвета, логика), next_step=true
-	//   "code_change"      — изменение/генерация кода, next_step=true
-	HaikuRoutingResult struct {
-		NextStep    bool     `json:"next_step"`
-		Intent      string   `json:"intent"`
-		Reply       string   `json:"reply"`        // готовый ответ если next_step=false
-		Clarified   string   `json:"clarified"`    // уточнённый запрос для code_change
-		FilesNeeded []string `json:"files_needed"` // нужные файлы для project_inspect
-		HasImages   bool     `json:"has_images"`   // есть ли изображения в запросе
+	// PlanInfraEdge — a single directed edge in the infrastructure diagram.
+	PlanInfraEdge struct {
+		From  string `json:"from"`
+		To    string `json:"to"`
+		Label string `json:"label"`
 	}
 
-	// SonnetPlanResult — план Sonnet: какие файлы создать/изменить
+	// HaikuPlan — diagram plan returned after the user answers questionnaire questions.
+	// Contains only the visual diagrams needed before code generation.
+	HaikuPlan struct {
+		BpmnXML      string          `json:"bpmn_xml"`
+		InfraDiagram []PlanInfraEdge `json:"infra_diagram,omitempty"`
+	}
+
+	HaikuRoutingResult struct {
+		NextStep       bool         `json:"next_step"`
+		Intent         string       `json:"intent"`
+		Reply          string       `json:"reply"`
+		Clarified      string       `json:"clarified"`
+		ClarifyOptions []string     `json:"clarify_options"`
+		FilesNeeded    []string     `json:"files_needed"`
+		HasImages      bool         `json:"has_images"`
+		ProjectName    string       `json:"project_name"`
+		Questions      []AiQuestion `json:"questions,omitempty"`
+		Plan           *HaikuPlan   `json:"plan,omitempty"`
+	}
+
 	SonnetPlanResult struct {
 		FilesToChange []FilePlan `json:"files_to_change"`
 		FilesToCreate []FilePlan `json:"files_to_create"`
@@ -91,5 +147,165 @@ type (
 	FilePlan struct {
 		Path        string `json:"path"`
 		Description string `json:"description"`
+	}
+
+	// ========================== Architect Plan ==========================
+	TableFieldPlan struct {
+		Slug  string `json:"slug"`
+		Label string `json:"label"`
+		Type  string `json:"type"` // SINGLE_LINE, NUMBER, EMAIL, PHONE, DATE, etc.
+	}
+
+	// TableRelationPlan defines a foreign-key relationship between two tables.
+	// Only Many2One is supported for PostgreSQL projects.
+	// The FK column is auto-created by ucode with slug "{table_to}_id"
+	// (e.g. orders→customers creates column "customers_id" on orders table).
+	TableRelationPlan struct {
+		TableFrom string `json:"table_from"` // source table slug (the "many" side)
+		TableTo   string `json:"table_to"`   // target table slug (the "one" side)
+		Type      string `json:"type"`       // always "Many2One" for PostgreSQL
+	}
+
+	TablePlan struct {
+		Slug          string                   `json:"slug"`
+		Label         string                   `json:"label"`
+		IsLoginTable  bool                     `json:"is_login_table"`
+		LoginStrategy []string                 `json:"login_strategy"`
+		Fields        []TableFieldPlan         `json:"fields"`
+		MockData      []map[string]interface{} `json:"mock_data"`
+	}
+
+	DesignSpec struct {
+		PrimaryColor         string `json:"primary_color"`
+		PrimaryHSL           string `json:"primary_hsl"`
+		BackgroundColor      string `json:"background_color"`
+		BackgroundHSL        string `json:"background_hsl"`
+		SurfaceColor         string `json:"surface_color"`
+		SurfaceHSL           string `json:"surface_hsl"`
+		SidebarBackground    string `json:"sidebar_background"`
+		SidebarBackgroundHSL string `json:"sidebar_background_hsl"`
+		SidebarForeground    string `json:"sidebar_foreground"`
+		SidebarStyle         string `json:"sidebar_style"` // "dark" | "light" | "colored"
+		TextColor            string `json:"text_color"`
+		TextMutedColor       string `json:"text_muted_color"`
+		BorderColor          string `json:"border_color"`
+		AccentColor          string `json:"accent_color"`
+		AccentHSL            string `json:"accent_hsl"`
+		FontFamily           string `json:"font_family"`      // heading font (e.g. "Syne", "Inter")
+		BodyFont             string `json:"body_font"`         // body font (e.g. "DM Sans", "Inter")
+		BorderRadius         string `json:"border_radius"`
+		DesignInspiration    string `json:"design_inspiration"`
+	}
+
+	ArchitectPlan struct {
+		ProjectName   string              `json:"project_name"`
+		ProjectType   string              `json:"project_type"` // "admin_panel" | "landing" | "web"
+		Tables        []TablePlan         `json:"tables"`
+		Relations     []TableRelationPlan `json:"relations,omitempty"`
+		UIStructure   string              `json:"ui_structure"`
+		Design        DesignSpec          `json:"design"`
+		ImageKeywords []string            `json:"image_keywords,omitempty"`
+		ClientTypes   []string            `json:"client_types,omitempty"` // role names from user-types answer → each becomes client_type + role record
+	}
+
+	ProjectData struct {
+		McpProjectId   string `json:"project_id"`
+		ApiKey         string `json:"api_key"`
+		UcodeProjectId string `json:"ucode_project_id"`
+		EnvironmentId  string `json:"environment_id"`
+		ResourceEnvId  string `json:"resource_env_id"`
+		NodeType       string `json:"node_type"`
+		ResourceType   int32  `json:"resource_type"`
+	}
+
+	// ========================== Chunked Generation Manifest ==========================
+
+	// ManifestFile is one file entry in a project manifest: path + exported names.
+	ManifestFile struct {
+		Path    string   `json:"path"`
+		Exports []string `json:"exports"`
+	}
+
+	// ManifestGroup groups files by dependency level.
+	// Group 0 = foundation (sequential). Groups 1..N = features (parallel).
+	ManifestGroup struct {
+		ID    int            `json:"id"`
+		Name  string         `json:"name"`
+		Files []ManifestFile `json:"files"`
+	}
+
+	// ProjectManifest is the output of the manifest generation step.
+	ProjectManifest struct {
+		Groups []ManifestGroup `json:"groups"`
+	}
+
+	// ========================== AI Database Assistant ==========================
+
+	// FieldSchema — simplified field info sent to Claude for schema awareness
+	FieldSchema struct {
+		Slug  string `json:"slug"`
+		Label string `json:"label"`
+		Type  string `json:"type"`
+	}
+
+	// TableSchema — simplified table info with fields sent to Claude
+	TableSchema struct {
+		Slug   string        `json:"slug"`
+		Label  string        `json:"label"`
+		Fields []FieldSchema `json:"fields"`
+	}
+
+	DatabaseActionRequest struct {
+		Action           string         `json:"action"`
+		TableSlug        string         `json:"table_slug,omitempty"`
+		Filters          map[string]any `json:"filters,omitempty"`
+		Data             map[string]any `json:"data,omitempty"`
+		AggregationField string         `json:"aggregation_field,omitempty"`
+		Aggregation      string         `json:"aggregation,omitempty"`
+		GroupBy          string         `json:"group_by,omitempty"`
+		OrderBy          string         `json:"order_by,omitempty"`
+		Limit            int            `json:"limit,omitempty"`
+		Offset           int            `json:"offset,omitempty"`
+		NeedsMoreData    bool           `json:"needs_more_data"`
+		QueryPlan        string         `json:"query_plan,omitempty"`
+		Reply            string         `json:"reply,omitempty"`
+		SuccessMessage   string         `json:"success_message,omitempty"`
+		CancelMessage    string         `json:"cancel_message,omitempty"`
+		ResourceEnvID    string         `json:"-"` // set by backend, not from AI
+
+		SQL string `json:"sql,omitempty"`
+
+		SQLParams []any `json:"sql_params,omitempty"`
+	}
+
+	PendingAction struct {
+		Action             string         `json:"action"`
+		TableSlug          string         `json:"table_slug,omitempty"`
+		Filters            map[string]any `json:"filters,omitempty"`
+		Data               map[string]any `json:"data,omitempty"`
+		AffectedCount      int            `json:"affected_count,omitempty"`
+		Description        string         `json:"description,omitempty"`
+		ProjectID          string         `json:"project_id,omitempty"`
+		ResourceEnvID      string         `json:"resource_env_id,omitempty"`
+		SuccessMessage     string         `json:"success_message,omitempty"`
+		CancelMessage      string         `json:"cancel_message,omitempty"`
+		ConfirmationPrompt string         `json:"confirmation_prompt,omitempty"`
+		Approved           bool           `json:"approved,omitempty"`
+
+		// ── NEW: SQL mode fields ──────────────────────────────────────────────────
+
+		SQL       string `json:"sql,omitempty"`
+		SQLParams []any  `json:"sql_params,omitempty"`
+	}
+	// ConfirmActionRequest — frontend sends this to confirm/reject a pending action
+	ConfirmActionRequest struct {
+		Confirmed bool `json:"confirmed"`
+	}
+
+	// DatabaseAssistantResponse — full response from the database assistant flow
+	DatabaseAssistantResponse struct {
+		Reply         string         `json:"reply"`
+		Data          any            `json:"data,omitempty"`
+		PendingAction *PendingAction `json:"pending_action,omitempty"`
 	}
 )

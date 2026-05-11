@@ -8,6 +8,47 @@ import (
 	"ucode/ucode_go_api_gateway/services"
 )
 
+type GitlabTreeItem struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	Type string `json:"type"` // "blob" (file) or "tree" (folder)
+	Path string `json:"path"`
+	Mode string `json:"mode"`
+}
+
+type GitlabFileChange struct {
+	FilePath string `json:"file_path"`
+	Content  string `json:"content"`
+}
+
+type GitlabUpdateFileRequest struct {
+	Files  []GitlabFileChange `json:"files"`
+	Branch string             `json:"branch"`
+}
+
+// PublishAiMicroFrontendRequest is sent to the function service to create a
+// microfrontend and push AI-generated files to the u-gen branch.
+type PublishAiMicroFrontendRequest struct {
+	ProjectId     string             `json:"project_id"`
+	EnvironmentId string             `json:"environment_id"`
+	Name          string             `json:"name"`
+	Path          string             `json:"path"`
+	FrameworkType string             `json:"framework_type"`
+	Files         []GitlabFileChange `json:"files"`
+}
+
+// PublishAiMicroFrontendResponse holds the fields we need from the function
+// service response (wrapped in the standard {data: ...} envelope).
+type PublishAiMicroFrontendResponse struct {
+	Status string `json:"status"`
+	Data   struct {
+		ID     string `json:"id"`
+		RepoId string `json:"repo_id"`
+		Url    string `json:"url"`
+		Branch string `json:"branch"`
+	} `json:"data"`
+}
+
 type Function struct {
 	ID               string `json:"id"`
 	Path             string `json:"path"`
@@ -99,6 +140,27 @@ type GetByIdFunctionResponse struct {
 	FuncitonFolderId string `json:"function_folder_id"`
 }
 
+type RevertMicrofrontendRequest struct {
+	RepoID     string `json:"repo_id"`
+	SnapshotID string `json:"snapshot_id"`
+}
+
+type ManualSaveMcpProjectRequest struct {
+	RepoID          int                `json:"repo_id"`
+	Files           []GitlabFileChange `json:"files"`
+	CommitMessage   string             `json:"commit_message,omitempty"`
+	MicrofrontendID string             `json:"microfrontend_id,omitempty"`
+}
+
+
+type MicrofrontendSnapshot struct {
+	ID              string             `json:"id"`
+	MicrofrontendID string             `json:"microfrontend_id"`
+	CommitMessage   string             `json:"commit_message"`
+	Files           []GitlabFileChange `json:"files"`
+	CreatedAt       string             `json:"created_at"`
+}
+
 type MicrofrontForLoginPage struct {
 	Function      *object_builder_service.Function `json:"function"`
 	Id            string                           `json:"id"`
@@ -126,3 +188,4 @@ type GetListCustomEventsStruct struct {
 	Method    string
 	Resource  *pb.ServiceResourceModel
 }
+

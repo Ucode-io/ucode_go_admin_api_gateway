@@ -3,8 +3,8 @@ package v1
 import (
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
+	auth "ucode/ucode_go_api_gateway/genproto/auth_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
-	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
@@ -28,6 +28,9 @@ func (h *HandlerV1) CreateEnvironment(c *gin.Context) {
 	var (
 		environmentRequest pb.CreateEnvironmentRequest
 		resp               = &pb.Environment{}
+
+		isUgen      = c.DefaultQuery("is_uagen", "false") == "true"
+		systemToken = c.GetHeader("system-token")
 	)
 
 	if err := c.ShouldBindJSON(&environmentRequest); err != nil {
@@ -73,6 +76,29 @@ func (h *HandlerV1) CreateEnvironment(c *gin.Context) {
 		return
 	}
 
+	environmentRequest.RoleId = tokenInfo.GetRoleId()
+	environmentRequest.UserId = tokenInfo.GetUserIdAuth()
+	environmentRequest.ClientTypeId = tokenInfo.GetClientTypeId()
+
+	if isUgen && systemToken != "" {
+		authService, conn, err := services.AuthService().Session(c.Request.Context())
+		if err != nil {
+			h.HandleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+		defer conn.Close()
+
+		ugenUserInfo, err := authService.GetUserInfoByToken(c.Request.Context(), &auth.GetUserInfoByTokenReq{Token: systemToken})
+		if err != nil {
+			h.HandleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		environmentRequest.RoleId = ugenUserInfo.GetRoleId()
+		environmentRequest.UserId = ugenUserInfo.GetUserId()
+		environmentRequest.ClientTypeId = ugenUserInfo.GetClientTypeId()
+	}
+
 	var (
 		logReq = &models.CreateVersionHistoryRequest{
 			Services:     services,
@@ -96,10 +122,6 @@ func (h *HandlerV1) CreateEnvironment(c *gin.Context) {
 		}
 		go h.versionHistory(logReq)
 	}()
-
-	environmentRequest.RoleId = tokenInfo.GetRoleId()
-	environmentRequest.UserId = tokenInfo.GetUserIdAuth()
-	environmentRequest.ClientTypeId = tokenInfo.GetClientTypeId()
 
 	resp, err = h.companyServices.Environment().CreateV2(c.Request.Context(), &environmentRequest)
 	if err != nil {
@@ -163,12 +185,6 @@ func (h *HandlerV1) UpdateEnvironment(c *gin.Context) {
 		return
 	}
 
-	structData, err := helper.ConvertMapToStruct(environment.Data)
-	if err != nil {
-		h.HandleResponse(c, status_http.InternalServerError, err.Error())
-		return
-	}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.HandleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -208,7 +224,6 @@ func (h *HandlerV1) UpdateEnvironment(c *gin.Context) {
 			Name:         environment.Name,
 			DisplayColor: environment.DisplayColor,
 			Description:  environment.Description,
-			Data:         structData,
 		}
 		logReq = &models.CreateVersionHistoryRequest{
 			Services:     services,
@@ -368,7 +383,7 @@ func (h *HandlerV1) GetAllEnvironments(c *gin.Context) {
 			Search:         c.Query("search"),
 			ProjectId:      c.Query("project_id"),
 			UserId:         authInfo.GetUserIdAuth(),
-			WithClientType: true,
+			WithClientType: c.DefaultQuery("with_client_type", "true") == "true",
 		},
 	)
 

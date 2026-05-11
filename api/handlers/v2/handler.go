@@ -190,6 +190,15 @@ func (h *HandlerV2) versionHistory(req *models.CreateVersionHistoryRequest) erro
 		}
 	}
 
+	if req.TimeCompleted == "" {
+		req.TimeCompleted = time.Now().Format(time.RFC3339)
+	}
+	if req.Duration == 0 && req.TimeStarted != "" {
+		if t, err := time.Parse(time.RFC3339, req.TimeStarted); err == nil {
+			req.Duration = time.Since(t).Milliseconds()
+		}
+	}
+
 	_, err := req.Services.GetBuilderServiceByType(req.NodeType).VersionHistory().Create(
 		context.Background(),
 		&obs.CreateVersionHistoryRequest{
@@ -208,6 +217,11 @@ func (h *HandlerV2) versionHistory(req *models.CreateVersionHistoryRequest) erro
 			Type:              req.Type,
 			TableSlug:         req.TableSlug,
 			VersionId:         req.VersionId,
+			MethodApi:         req.MethodApi,
+			TimeStarted:       req.TimeStarted,
+			TimeCompleted:     req.TimeCompleted,
+			Duration:          req.Duration,
+			StatusCode:        int64(req.StatusCode),
 		},
 	)
 	if err != nil {
@@ -264,6 +278,19 @@ func (h *HandlerV2) versionHistoryGo(c *gin.Context, req *models.CreateVersionHi
 		}
 	}
 
+	if req.StatusCode == 0 && c != nil {
+		req.StatusCode = c.Writer.Status()
+	}
+
+	if req.TimeCompleted == "" {
+		req.TimeCompleted = time.Now().Format(time.RFC3339)
+	}
+	if req.Duration == 0 && req.TimeStarted != "" {
+		if t, err := time.Parse(time.RFC3339, req.TimeStarted); err == nil {
+			req.Duration = time.Since(t).Milliseconds()
+		}
+	}
+
 	_, err := req.Services.GoObjectBuilderService().VersionHistory().Create(
 		c,
 		&nb.CreateVersionHistoryRequest{
@@ -282,6 +309,11 @@ func (h *HandlerV2) versionHistoryGo(c *gin.Context, req *models.CreateVersionHi
 			Type:              req.Type,
 			TableSlug:         req.TableSlug,
 			VersionId:         req.VersionId,
+			MethodApi:         req.MethodApi,
+			TimeStarted:       req.TimeStarted,
+			TimeCompleted:     req.TimeCompleted,
+			Duration:          req.Duration,
+			StatusCode:        int64(req.StatusCode),
 		},
 	)
 	if err != nil {

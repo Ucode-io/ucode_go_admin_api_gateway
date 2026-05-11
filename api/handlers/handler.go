@@ -8,6 +8,7 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/caching"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
+	"ucode/ucode_go_api_gateway/pkg/vault"
 	"ucode/ucode_go_api_gateway/services"
 	"ucode/ucode_go_api_gateway/storage"
 
@@ -28,7 +29,7 @@ type Handler struct {
 	cache           *caching.ExpiringLRUCache
 }
 
-func NewHandler(baseConf config.BaseConfig, projectConfs map[string]config.Config, log logger.LoggerI, svcs services.ServiceNodesI, cmpServ services.CompanyServiceI, authService services.AuthServiceManagerI, redis storage.RedisStorageI, cache *caching.ExpiringLRUCache, limiter *util.ApiKeyRateLimiter) Handler {
+func NewHandler(baseConf config.BaseConfig, projectConfs map[string]config.Config, log logger.LoggerI, svcs services.ServiceNodesI, cmpServ services.CompanyServiceI, authService services.AuthServiceManagerI, redis storage.RedisStorageI, cache *caching.ExpiringLRUCache, limiter *util.ApiKeyRateLimiter, vaultClient vault.VaultClient) Handler {
 	return Handler{
 		baseConf:        baseConf,
 		projectConfs:    projectConfs,
@@ -37,7 +38,7 @@ func NewHandler(baseConf config.BaseConfig, projectConfs map[string]config.Confi
 		companyServices: cmpServ,
 		authService:     authService,
 		redis:           redis,
-		V1:              v1.NewHandlerV1(baseConf, projectConfs, log, svcs, cmpServ, authService, redis, cache, limiter),
+		V1:              v1.NewHandlerV1(baseConf, projectConfs, log, svcs, cmpServ, authService, redis, cache, limiter, vaultClient),
 		V2:              v2.NewHandlerV2(baseConf, projectConfs, log, svcs, cmpServ, authService, redis, cache, limiter),
 		V3: v3.NewHandlerV3(&v3.HandlerV3Config{
 			BaseConf:        baseConf,

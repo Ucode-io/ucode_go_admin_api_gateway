@@ -22,6 +22,7 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/caching"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
+	"ucode/ucode_go_api_gateway/pkg/vault"
 	"ucode/ucode_go_api_gateway/services"
 	"ucode/ucode_go_api_gateway/storage"
 
@@ -41,9 +42,10 @@ type HandlerV1 struct {
 	redis           storage.RedisStorageI
 	cache           *caching.ExpiringLRUCache
 	rateLimiter     *util.ApiKeyRateLimiter
+	vault           vault.VaultClient
 }
 
-func NewHandlerV1(baseConf config.BaseConfig, projectConfs map[string]config.Config, log logger.LoggerI, svcs services.ServiceNodesI, cmpServ services.CompanyServiceI, authService services.AuthServiceManagerI, redis storage.RedisStorageI, cache *caching.ExpiringLRUCache, limiter *util.ApiKeyRateLimiter) HandlerV1 {
+func NewHandlerV1(baseConf config.BaseConfig, projectConfs map[string]config.Config, log logger.LoggerI, svcs services.ServiceNodesI, cmpServ services.CompanyServiceI, authService services.AuthServiceManagerI, redis storage.RedisStorageI, cache *caching.ExpiringLRUCache, limiter *util.ApiKeyRateLimiter, vaultClient vault.VaultClient) HandlerV1 {
 	return HandlerV1{
 		baseConf:        baseConf,
 		projectConfs:    projectConfs,
@@ -54,6 +56,7 @@ func NewHandlerV1(baseConf config.BaseConfig, projectConfs map[string]config.Con
 		redis:           redis,
 		cache:           cache,
 		rateLimiter:     limiter,
+		vault:           vaultClient,
 	}
 }
 
@@ -223,6 +226,12 @@ func (h *HandlerV1) versionHistory(req *models.CreateVersionHistoryRequest) erro
 			ApiKey:            req.ApiKey,
 			Type:              req.Type,
 			TableSlug:         req.TableSlug,
+			VersionId:         req.VersionId,
+			MethodApi:         req.MethodApi,
+			TimeStarted:       req.TimeStarted,
+			TimeCompleted:     req.TimeCompleted,
+			Duration:          req.Duration,
+			StatusCode:        int64(req.StatusCode),
 		},
 	)
 	if err != nil {
@@ -278,6 +287,19 @@ func (h *HandlerV1) versionHistoryGo(c *gin.Context, req *models.CreateVersionHi
 		}
 	}
 
+	if req.StatusCode == 0 && c != nil {
+		req.StatusCode = c.Writer.Status()
+	}
+
+	if req.TimeCompleted == "" {
+		req.TimeCompleted = time.Now().Format(time.RFC3339)
+	}
+	if req.Duration == 0 && req.TimeStarted != "" {
+		if t, err := time.Parse(time.RFC3339, req.TimeStarted); err == nil {
+			req.Duration = time.Since(t).Milliseconds()
+		}
+	}
+
 	_, err := req.Services.GoObjectBuilderService().VersionHistory().Create(
 		c,
 		&nb.CreateVersionHistoryRequest{
@@ -296,6 +318,11 @@ func (h *HandlerV1) versionHistoryGo(c *gin.Context, req *models.CreateVersionHi
 			Type:              req.Type,
 			TableSlug:         req.TableSlug,
 			VersionId:         req.VersionId,
+			MethodApi:         req.MethodApi,
+			TimeStarted:       req.TimeStarted,
+			TimeCompleted:     req.TimeCompleted,
+			Duration:          req.Duration,
+			StatusCode:        int64(req.StatusCode),
 		},
 	)
 	if err != nil {

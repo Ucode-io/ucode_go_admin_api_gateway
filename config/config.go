@@ -59,6 +59,14 @@ type Config struct {
 	GetRequestRedisPassword string
 
 	OpenAIApiKey string
+
+	// Tracker / Audit Logs
+	AuditMaxBodySize          int64
+	AuditMetricsFlushInterval int
+	AuditFlushInterval        int
+	AuditLogChannelSize       int
+	AuditBatchSize            int
+	AuditLogRetentionDays     int
 }
 
 type BaseConfig struct {
@@ -103,13 +111,24 @@ type BaseConfig struct {
 	AnthropicAPIKey     string
 	AnthropicBeta       string
 	AnthropicBaseAPIURL string
-	ClaudeModel         string
-	ClaudeHaikuModel    string
-	AutomationURL       string
-	OpenFaaSBaseUrl     string
-	KnativeBaseUrl      string
 	AnthropicVersion    string
-	MCPServerURL        string
+
+	// ClaudeModel is the default model for all agents that don't have a dedicated override.
+	ClaudeModel      string
+	ClaudeHaikuModel string
+
+	// Per-agent model overrides — fall back to ClaudeModel if left empty.
+	// Set via env vars so you can change one agent's model without touching the others.
+	ArchitectModel    string // ARCHITECT_MODEL     — heavy reasoning (tables + design planning)
+	CoderModel        string // CODER_MODEL         — large output (admin panel code gen)
+	LandingCoderModel string // LANDING_CODER_MODEL — code gen for landing/website (default: Sonnet for speed)
+	PlannerModel      string // PLANNER_MODEL       — medium reasoning (change planning + visual plan)
+	InspectorModel    string // INSPECTOR_MODEL     — light Q&A (can use Haiku)
+
+	AutomationURL   string
+	OpenFaaSBaseUrl string
+	KnativeBaseUrl  string
+	MCPServerURL    string
 
 	MaxTokens                int
 	AnalyseProjectMaxTokens  int
@@ -121,6 +140,24 @@ type BaseConfig struct {
 	PlannerMaxTokens         int
 
 	UcodeBaseUrl string
+
+	VaultAddress   string
+	VaultRoleID    string
+	VaultSecretID  string
+	VaultMountPath string
+
+	GitlabBaseURL string
+	GitlabToken   string
+
+	GithubClientID           string
+	GithubClientSecret       string
+	GithubRedirectURI        string
+	GithubFrontendSuccessURL string
+	GithubFrontendErrorURL   string
+
+	UnsplashAccessKey string
+
+	YandexMetricToken string
 }
 
 func BaseLoad() BaseConfig {
@@ -176,11 +213,58 @@ func BaseLoad() BaseConfig {
 	config.AnthropicVersion = cast.ToString(GetOrReturnDefaultValue("ANTHROPIC_VERSION", ""))
 	config.ClaudeModel = cast.ToString(GetOrReturnDefaultValue("CLAUDE_MODEL", ""))
 	config.ClaudeHaikuModel = cast.ToString(GetOrReturnDefaultValue("CLAUDE_HAIKU_MODEL", "claude-haiku-4-5"))
+
+	config.ArchitectModel = cast.ToString(GetOrReturnDefaultValue("ARCHITECT_MODEL", "claude-opus-4-6"))
+
+	// Per-agent model overrides (fall back to ClaudeModel when empty)
+
+	coderModel := cast.ToString(GetOrReturnDefaultValue("CODER_MODEL", ""))
+	if coderModel == "" {
+		coderModel = config.ClaudeModel
+	}
+	config.CoderModel = coderModel
+
+	landingCoderModel := cast.ToString(GetOrReturnDefaultValue("LANDING_CODER_MODEL", ""))
+	if landingCoderModel == "" {
+		landingCoderModel = coderModel
+	}
+	config.LandingCoderModel = landingCoderModel
+
+	plannerModel := cast.ToString(GetOrReturnDefaultValue("PLANNER_MODEL", ""))
+	if plannerModel == "" {
+		plannerModel = config.ClaudeModel
+	}
+	config.PlannerModel = plannerModel
+
+	inspectorModel := cast.ToString(GetOrReturnDefaultValue("INSPECTOR_MODEL", ""))
+	if inspectorModel == "" {
+		inspectorModel = config.ClaudeHaikuModel
+	}
+
+	config.InspectorModel = inspectorModel
 	config.AutomationURL = cast.ToString(GetOrReturnDefaultValue("AUTOMATION_URL", ""))
 	config.OpenFaaSBaseUrl = cast.ToString(GetOrReturnDefaultValue("OPENFAAS_BASE_URL", ""))
 	config.KnativeBaseUrl = cast.ToString(GetOrReturnDefaultValue("KNATIVE_BASE_URL", ""))
 	config.MCPServerURL = cast.ToString(GetOrReturnDefaultValue("MCP_SERVER_URL", ""))
 	config.UcodeBaseUrl = cast.ToString(GetOrReturnDefaultValue("UCODE_BASE_URL", "https://admin-api.ucode.run"))
+
+	config.VaultAddress = cast.ToString(GetOrReturnDefaultValue("VAULT_ADDR", ""))
+	config.VaultRoleID = cast.ToString(GetOrReturnDefaultValue("VAULT_ROLE_ID", ""))
+	config.VaultSecretID = cast.ToString(GetOrReturnDefaultValue("VAULT_SECRET_ID", ""))
+	config.VaultMountPath = cast.ToString(GetOrReturnDefaultValue("VAULT_MOUNT_PATH", "approle"))
+
+	config.GitlabBaseURL = cast.ToString(GetOrReturnDefaultValue("GITLAB_BASE_URL", "https://gitlab.udevs.io/"))
+	config.GitlabToken = cast.ToString(GetOrReturnDefaultValue("GITLAB_TOKEN", ""))
+
+	config.GithubClientID = cast.ToString(GetOrReturnDefaultValue("GITHUB_CLIENT_ID", ""))
+	config.GithubClientSecret = cast.ToString(GetOrReturnDefaultValue("GITHUB_CLIENT_SECRET", ""))
+	config.GithubRedirectURI = cast.ToString(GetOrReturnDefaultValue("GITHUB_REDIRECT_URI", ""))
+	config.GithubFrontendSuccessURL = cast.ToString(GetOrReturnDefaultValue("GITHUB_FRONTEND_SUCCESS_URL", "https://app.u-code.io/settings/github-success"))
+	config.GithubFrontendErrorURL = cast.ToString(GetOrReturnDefaultValue("GITHUB_FRONTEND_ERROR_URL", "https://app.u-code.io/settings/github-error"))
+
+	config.UnsplashAccessKey = cast.ToString(GetOrReturnDefaultValue("UNSPLASH_ACCESS_KEY", ""))
+
+	config.YandexMetricToken = cast.ToString(GetOrReturnDefaultValue("YANDEX_METRIC_TOKEN", ""))
 
 	config.MaxTokens = cast.ToInt(GetOrReturnDefaultValue("MAX_TOKENS", 12000))
 	config.AnalyseProjectMaxTokens = cast.ToInt(GetOrReturnDefaultValue("ANALYSE_PROJECT_MAX_TOKENS", 5000))
@@ -188,8 +272,8 @@ func BaseLoad() BaseConfig {
 	config.ClassifyReqeustMaxTokens = cast.ToInt(GetOrReturnDefaultValue("CLASSIFY_MAX_TOKENS", 3000))
 	config.CoderMaxTokens = cast.ToInt(GetOrReturnDefaultValue("CODER_MAX_TOKENS", 64000))
 	config.RouterMaxTokens = cast.ToInt(GetOrReturnDefaultValue("ROUTER_MAX_TOKENS", 4000))
-	config.InspectorMaxTokens = cast.ToInt(GetOrReturnDefaultValue("INSPECTOR_MAX_TOKENS", 8000))
-	config.PlannerMaxTokens = cast.ToInt(GetOrReturnDefaultValue("PLANNER_MAX_TOKENS", 16000))
+	config.InspectorMaxTokens = cast.ToInt(GetOrReturnDefaultValue("INSPECTOR_MAX_TOKENS", 16000))
+	config.PlannerMaxTokens = cast.ToInt(GetOrReturnDefaultValue("PLANNER_MAX_TOKENS", 32000))
 
 	return config
 }
@@ -229,12 +313,19 @@ func Load() Config {
 	config.DocGeneratorGrpcHost = cast.ToString(GetOrReturnDefaultValue("NODE_DOC_GENERATOR_SERVICE_HOST", "localhost"))
 	config.DocGeneratorGrpcPort = cast.ToString(GetOrReturnDefaultValue("NODE_DOC_GENERATOR_GRPC_PORT", ":50051"))
 
-	config.GetRequestRedisHost = cast.ToString(GetOrReturnDefaultValue("GET_REQUEST_REDIS_HOST", ""))
-	config.GetRequestRedisPort = cast.ToString(GetOrReturnDefaultValue("GET_REQUEST_REDIS_PORT", ""))
-	config.GetRequestRedisDatabase = cast.ToInt(GetOrReturnDefaultValue("GET_REQUEST_REDIS_DATABASE", 0))
-	config.GetRequestRedisPassword = cast.ToString(GetOrReturnDefaultValue("GET_REQUEST_REDIS_PASSWORD", ""))
+	config.GetRequestRedisHost = cast.ToString(GetOrReturnDefaultValue("GET_REQUEST_REDIS_HOST", "localhost"))
+	config.GetRequestRedisPort = cast.ToString(GetOrReturnDefaultValue("GET_REQUEST_REDIS_PORT", "6379"))
+	config.GetRequestRedisDatabase = cast.ToInt(GetOrReturnDefaultValue("GET_REQUEST_REDIS_DATABASE", 1))
+	config.GetRequestRedisPassword = cast.ToString(GetOrReturnDefaultValue("GET_REQUEST_REDIS_PASSWORD", "D8ihWNRZ9stYaDoPket4KXu1A6TChzqg"))
 
 	config.OpenAIApiKey = cast.ToString(GetOrReturnDefaultValue("OPENAI_API_KEY", "sk-proj-a2ma7TfGU0msgfY9GDsST3BlbkFJljmuOgGattnpsfQCnJ2C"))
+
+	config.AuditMaxBodySize = cast.ToInt64(GetOrReturnDefaultValue("AUDIT_MAX_BODY_SIZE", 256*1024))
+	config.AuditMetricsFlushInterval = cast.ToInt(GetOrReturnDefaultValue("METRICS_FLUSH_INTERVAL_SEC", 60))
+	config.AuditFlushInterval = cast.ToInt(GetOrReturnDefaultValue("AUDIT_FLUSH_INTERVAL_SEC", 5))
+	config.AuditLogChannelSize = cast.ToInt(GetOrReturnDefaultValue("AUDIT_LOG_CHANNEL_SIZE", 100000))
+	config.AuditBatchSize = cast.ToInt(GetOrReturnDefaultValue("AUDIT_BATCH_SIZE", 100))
+	config.AuditLogRetentionDays = cast.ToInt(GetOrReturnDefaultValue("AUDIT_LOG_RETENTION_DAYS", 30))
 
 	return config
 }

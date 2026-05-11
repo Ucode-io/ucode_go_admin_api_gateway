@@ -41,6 +41,8 @@ import (
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) CreateItem(c *gin.Context) {
+	timeStarted := time.Now().Format(time.RFC3339)
+
 	var (
 		objectRequest               models.CommonMessage
 		resp                        *obs.CommonMessage
@@ -153,6 +155,8 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 		NodeType:     resource.NodeType,
 		ProjectId:    resource.ResourceEnvironmentId,
 		ActionSource: c.Request.URL.String(),
+		MethodApi:    c.Request.Method,
+		TimeStarted:  timeStarted,
 		ActionType:   "CREATE ITEM",
 		UserInfo:     cast.ToString(userId),
 		Request:      &structData,
@@ -178,11 +182,13 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 				statusHttp.CustomMessage = stat.Message()
 			}
 			logReq.Response = err.Error()
+			logReq.StatusCode = statusHttp.Code
 			defer func() { go h.versionHistory(logReq) }()
 			h.HandleResponse(c, statusHttp, err.Error())
 			return
 		}
 		logReq.Response = resp
+		logReq.StatusCode = statusHttp.Code
 		defer func() { go h.versionHistory(logReq) }()
 	case pb.ResourceType_POSTGRESQL:
 		body, err := services.GoObjectBuilderService().Items().Create(
@@ -201,6 +207,7 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 				statusHttp.CustomMessage = stat.Message()
 			}
 			logReq.Response = err.Error()
+			logReq.StatusCode = statusHttp.Code
 			defer func() { go h.versionHistoryGo(c, logReq) }()
 			h.handleDynamicError(c, statusHttp, err)
 			return
@@ -211,6 +218,7 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 		}
 
 		logReq.Response = resp
+		logReq.StatusCode = statusHttp.Code
 		defer func() { go h.versionHistoryGo(c, logReq) }()
 	}
 
@@ -232,8 +240,8 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 			Resource:     resource,
 			ActionType:   "AFTER",
 		},
-			c, // gin context,
-			h, // handler
+			c,
+			h,
 		)
 		if err != nil {
 			h.HandleResponse(c, status_http.InvalidArgument, err.Error()+" in "+functionName)
@@ -355,6 +363,8 @@ func (h *HandlerV2) CreateItems(c *gin.Context) {
 		NodeType:     resource.NodeType,
 		ProjectId:    resource.ResourceEnvironmentId,
 		ActionSource: c.Request.URL.String(),
+		MethodApi:    c.Request.Method,
+		TimeStarted:  time.Now().Format(time.RFC3339),
 		ActionType:   "CREATE ITEM",
 		UserInfo:     cast.ToString(userId),
 		Request:      structData,
@@ -385,6 +395,7 @@ func (h *HandlerV2) CreateItems(c *gin.Context) {
 			return
 		}
 		logReq.Response = resp
+		logReq.StatusCode = statusHttp.Code
 		go h.versionHistory(logReq)
 	case pb.ResourceType_POSTGRESQL:
 		// Does Not Implemented
@@ -441,6 +452,8 @@ func (h *HandlerV2) CreateItems(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) GetSingleItem(c *gin.Context) {
+	timeStarted := time.Now().Format(time.RFC3339)
+
 	var (
 		object     models.CommonMessage
 		statusHttp = status_http.GrpcStatusToHTTP["Ok"]
@@ -498,6 +511,17 @@ func (h *HandlerV2) GetSingleItem(c *gin.Context) {
 
 	redisKey := base64.StdEncoding.EncodeToString(fmt.Appendf(nil, "%s-%s-%s", resource.ResourceEnvironmentId, tableSlug, objectID))
 
+	var logRequest = &models.CreateVersionHistoryRequest{
+		Services:     services,
+		NodeType:     resource.NodeType,
+		ProjectId:    resource.ResourceEnvironmentId,
+		ActionSource: "ITEMS",
+		ActionType:   "GET_ITEM",
+		Request:      structData,
+		TableSlug:    tableSlug,
+		MethodApi:    "GET",
+		TimeStarted:  timeStarted,
+	}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err := services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().GetSingle(
@@ -515,12 +539,23 @@ func (h *HandlerV2) GetSingleItem(c *gin.Context) {
 				statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
 				statusHttp.CustomMessage = stat.Message()
 			}
+			go func() {
+				logRequest.Response = err.Error()
+				logRequest.StatusCode = statusHttp.Code
+				h.versionHistory(logRequest)
+			}()
 			h.HandleResponse(c, statusHttp, err.Error())
 			return
 		}
 
 		statusHttp.CustomMessage = resp.GetCustomMessage()
 		h.HandleResponse(c, statusHttp, resp)
+
+		go func() {
+			logRequest.Response = resp
+			logRequest.StatusCode = statusHttp.Code
+			h.versionHistory(logRequest)
+		}()
 	case pb.ResourceType_POSTGRESQL:
 		redisResp, err := h.redis.Get(c.Request.Context(), redisKey, projectId.(string), resource.NodeType)
 		if err == nil {
@@ -545,6 +580,11 @@ func (h *HandlerV2) GetSingleItem(c *gin.Context) {
 			},
 		)
 		if err != nil {
+			go func() {
+				logRequest.Response = err.Error()
+				logRequest.StatusCode = status_http.GRPCError.Code
+				h.versionHistoryGo(c, logRequest)
+			}()
 			h.HandleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
@@ -559,6 +599,12 @@ func (h *HandlerV2) GetSingleItem(c *gin.Context) {
 
 		statusHttp.CustomMessage = resp.GetCustomMessage()
 		h.HandleResponse(c, statusHttp, resp)
+
+		go func() {
+			logRequest.Response = resp
+			logRequest.StatusCode = statusHttp.Code
+			h.versionHistoryGo(c, logRequest)
+		}()
 	}
 }
 
@@ -578,6 +624,8 @@ func (h *HandlerV2) GetSingleItem(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) GetAllItems(c *gin.Context) {
+	timeStarted := time.Now().Format(time.RFC3339)
+
 	var (
 		resp          *obs.CommonMessage
 		statusHttp    = status_http.GrpcStatusToHTTP["Ok"]
@@ -621,6 +669,10 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 
 	objectRequest["language_setting"] = c.DefaultQuery("language_setting", "")
 
+	if c.DefaultQuery("with_types", "false") == "true" {
+		objectRequest["with_types"] = true
+	}
+
 	structData, err := helper.ConvertMapToStruct(objectRequest)
 	if err != nil {
 		h.HandleResponse(c, status_http.InvalidArgument, err.Error())
@@ -661,6 +713,18 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 
 	redisKey := base64.StdEncoding.EncodeToString(fmt.Appendf(nil, "%s-%s-%s", tableSlug, structData.String(), resource.ResourceEnvironmentId))
 
+	var logRequest = &models.CreateVersionHistoryRequest{
+		Services:     services,
+		NodeType:     resource.NodeType,
+		ProjectId:    resource.ResourceEnvironmentId,
+		ActionSource: "ITEMS",
+		ActionType:   "GET_LIST",
+		Request:      structData,
+		TableSlug:    tableSlug,
+		MethodApi:    "GET",
+		TimeStarted:  timeStarted,
+	}
+
 	if viewId, ok := objectRequest["builder_service_view_id"].(string); ok {
 		if util.IsValidUUID(viewId) {
 			switch resource.ResourceType {
@@ -687,21 +751,30 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 						ProjectId: resource.ResourceEnvironmentId,
 					},
 				)
-
-				if err == nil {
-					if resp.IsCached {
-						jsonData, _ := resp.GetData().MarshalJSON()
-						err = h.redis.SetX(context.Background(), redisKey, string(jsonData), 15*time.Second, resource.ProjectId, resource.NodeType)
-						if err != nil {
-							h.log.Error("Error while setting redis", logger.Error(err))
-						}
-					}
-				}
-
 				if err != nil {
+					go func() {
+						logRequest.Response = err.Error()
+						logRequest.StatusCode = status_http.GRPCError.Code
+						h.versionHistory(logRequest)
+					}()
 					h.HandleResponse(c, status_http.GRPCError, err.Error())
 					return
 				}
+
+				go func() {
+					logRequest.Response = resp
+					logRequest.StatusCode = status_http.OK.Code
+					h.versionHistory(logRequest)
+				}()
+
+				if resp.IsCached {
+					jsonData, _ := resp.GetData().MarshalJSON()
+					err = h.redis.SetX(context.Background(), redisKey, string(jsonData), 15*time.Second, resource.ProjectId, resource.NodeType)
+					if err != nil {
+						h.log.Error("Error while setting redis", logger.Error(err))
+					}
+				}
+
 			case pb.ResourceType_POSTGRESQL:
 				// Does Not Implemented
 				h.HandleResponse(c, status_http.BadRequest, "does not implemented")
@@ -735,21 +808,30 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 					ProjectId: resource.ResourceEnvironmentId,
 				},
 			)
-
-			if err == nil {
-				if resp.IsCached {
-					jsonData, _ := resp.GetData().MarshalJSON()
-					err = h.redis.SetX(context.Background(), redisKey, string(jsonData), 15*time.Second, resource.ProjectId, resource.NodeType)
-					if err != nil {
-						h.log.Error("Error while setting redis", logger.Error(err))
-					}
-				}
-			}
-
 			if err != nil {
+				go func() {
+					logRequest.Response = err.Error()
+					logRequest.StatusCode = status_http.GRPCError.Code
+					h.versionHistory(logRequest)
+				}()
 				h.HandleResponse(c, status_http.GRPCError, err.Error())
 				return
 			}
+
+			go func() {
+				logRequest.Response = resp
+				logRequest.StatusCode = status_http.OK.Code
+				h.versionHistory(logRequest)
+			}()
+
+			if resp.IsCached {
+				jsonData, _ := resp.GetData().MarshalJSON()
+				err = h.redis.SetX(context.Background(), redisKey, string(jsonData), 15*time.Second, resource.ProjectId, resource.NodeType)
+				if err != nil {
+					h.log.Error("Error while setting redis", logger.Error(err))
+				}
+			}
+
 		case pb.ResourceType_POSTGRESQL:
 			redisResp, err := h.redis.Get(context.Background(), redisKey, resource.ProjectId, resource.NodeType)
 			if err == nil {
@@ -769,25 +851,34 @@ func (h *HandlerV2) GetAllItems(c *gin.Context) {
 
 			resp, err := services.GoObjectBuilderService().ObjectBuilder().GetList2(
 				c.Request.Context(), &nb.CommonMessage{
-					TableSlug: tableSlug,
-					Data:      structData,
-					ProjectId: resource.ResourceEnvironmentId,
+					TableSlug:        tableSlug,
+					Data:             structData,
+					ProjectId:        resource.ResourceEnvironmentId,
+					CompanyProjectId: resource.ProjectId,
 				},
 			)
-
-			if err == nil {
-				if resp.IsCached {
-					jsonData, _ := resp.GetData().MarshalJSON()
-					err = h.redis.SetX(context.Background(), redisKey, string(jsonData), 15*time.Second, resource.ProjectId, resource.NodeType)
-					if err != nil {
-						h.log.Error("Error while setting redis", logger.Error(err))
-					}
-				}
-			}
-
 			if err != nil {
+				go func() {
+					logRequest.Response = err.Error()
+					logRequest.StatusCode = status_http.GRPCError.Code
+					h.versionHistoryGo(c, logRequest)
+				}()
 				h.HandleResponse(c, status_http.GRPCError, err.Error())
 				return
+			}
+
+			go func() {
+				logRequest.Response = resp
+				logRequest.StatusCode = status_http.OK.Code
+				h.versionHistoryGo(c, logRequest)
+			}()
+
+			if resp.IsCached {
+				jsonData, _ := resp.GetData().MarshalJSON()
+				err = h.redis.SetX(context.Background(), redisKey, string(jsonData), 15*time.Second, resource.ProjectId, resource.NodeType)
+				if err != nil {
+					h.log.Error("Error while setting redis", logger.Error(err))
+				}
 			}
 
 			statusHttp.CustomMessage = resp.GetCustomMessage()
@@ -964,6 +1055,8 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 			NodeType:     resource.NodeType,
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: c.Request.URL.String(),
+			MethodApi:    c.Request.Method,
+			TimeStarted:  time.Now().Format(time.RFC3339),
 			ActionType:   "UPDATE ITEM",
 			UserInfo:     cast.ToString(userId),
 			Request:      &structData,
@@ -1171,6 +1264,8 @@ func (h *HandlerV2) MultipleUpdateItems(c *gin.Context) {
 			NodeType:     resource.NodeType,
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: c.Request.URL.String(),
+			MethodApi:    c.Request.Method,
+			TimeStarted:  time.Now().Format(time.RFC3339),
 			ActionType:   "UPDATE ITEM",
 			UserInfo:     cast.ToString(userId),
 			Request:      &structData,
@@ -1377,6 +1472,8 @@ func (h *HandlerV2) DeleteItem(c *gin.Context) {
 		NodeType:     resource.NodeType,
 		ProjectId:    resource.ResourceEnvironmentId,
 		ActionSource: c.Request.URL.String(),
+		MethodApi:    c.Request.Method,
+		TimeStarted:  time.Now().Format(time.RFC3339),
 		ActionType:   "DELETE ITEM",
 		UserInfo:     cast.ToString(userId),
 		Request:      structData,
@@ -1583,6 +1680,8 @@ func (h *HandlerV2) DeleteItems(c *gin.Context) {
 			NodeType:     resource.NodeType,
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: c.Request.URL.String(),
+			MethodApi:    c.Request.Method,
+			TimeStarted:  time.Now().Format(time.RFC3339),
 			ActionType:   "DELETE ITEM",
 			UserInfo:     cast.ToString(userId),
 			Request:      &structData,
@@ -1779,6 +1878,8 @@ func (h *HandlerV2) DeleteManyToMany(c *gin.Context) {
 			NodeType:     resource.NodeType,
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: c.Request.URL.String(),
+			MethodApi:    c.Request.Method,
+			TimeStarted:  time.Now().Format(time.RFC3339),
 			ActionType:   "DELETE ITEM",
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
@@ -1959,6 +2060,8 @@ func (h *HandlerV2) AppendManyToMany(c *gin.Context) {
 			NodeType:     resource.NodeType,
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: c.Request.URL.String(),
+			MethodApi:    c.Request.Method,
+			TimeStarted:  time.Now().Format(time.RFC3339),
 			ActionType:   "UPDATE ITEM",
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
@@ -2334,6 +2437,8 @@ func (h *HandlerV2) UpsertMany(c *gin.Context) {
 			NodeType:     resource.NodeType,
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: c.Request.URL.String(),
+			MethodApi:    c.Request.Method,
+			TimeStarted:  time.Now().Format(time.RFC3339),
 			ActionType:   "UPSERT MANY ITEM",
 			UserInfo:     cast.ToString(userId),
 			Request:      &structData,
@@ -2673,4 +2778,292 @@ func (h *HandlerV2) GetBoardData(c *gin.Context) {
 		}
 		h.HandleResponse(c, status_http.OK, resp)
 	}
+}
+
+// GetTableSchema godoc
+// @Security ApiKeyAuth
+// @ID get_table_schema
+// @Router /v2/items/{collection}/schema [GET]
+// @Summary Get table schema
+// @Description Returns table schema (columns, indexes, constraints) equivalent to PostgreSQL \d command
+// @Tags Items
+// @Produce json
+// @Param collection path string true "collection"
+// @Success 200 {object} status_http.Response{data=object} "Table schema"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *HandlerV2) GetTableSchema(c *gin.Context) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.HandleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.HandleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
+		return
+	}
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	services, err := h.GetProjectSrvc(c.Request.Context(), resource.GetProjectId(), resource.NodeType)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	resp, err := services.GoObjectBuilderService().ObjectBuilder().GetTableSchema(
+		c.Request.Context(),
+		&nb.CommonMessage{
+			TableSlug: c.Param("collection"),
+			ProjectId: resource.ResourceEnvironmentId,
+		},
+	)
+	if err != nil {
+		h.handleError(c, status_http.GRPCError, err)
+		return
+	}
+	h.HandleResponse(c, status_http.OK, resp)
+}
+
+// pgTypeToFieldType maps postgres type names to our internal field types.
+// Mirrors TRACKED_TABLES_FIELD_TYPES in object builder.
+var pgTypeToFieldType = map[string]string{
+	"character varying": "SINGLE_LINE",
+	"varchar":           "SINGLE_LINE",
+	"text":              "MULTI_LINE",
+	"enum":              "SINGLE_LINE",
+	"bytea":             "SINGLE_LINE",
+	"citext":            "SINGLE_LINE",
+
+	"jsonb": "JSON",
+	"json":  "JSON",
+
+	"smallint":         "NUMBER",
+	"integer":          "NUMBER",
+	"bigint":           "NUMBER",
+	"numeric":          "FLOAT",
+	"decimal":          "FLOAT",
+	"real":             "FLOAT",
+	"double precision": "FLOAT",
+	"smallserial":      "NUMBER",
+	"serial":           "NUMBER",
+	"bigserial":        "NUMBER",
+	"money":            "FLOAT",
+	"int2":             "NUMBER",
+	"int4":             "NUMBER",
+	"int8":             "NUMBER",
+
+	"timestamp without time zone": "DATE_TIME_WITHOUT_TIME_ZONE",
+	"timestamp with time zone":    "DATE_TIME",
+	"timestamp":                   "DATE_TIME",
+	"timestamptz":                 "DATE_TIME",
+	"date":                        "DATE",
+
+	"boolean": "CHECKBOX",
+
+	"uuid": "UUID",
+
+	"text[]": "MULTISELECT",
+	"uuid[]": "LOOKUPS",
+}
+
+// CreateTableSchemaField godoc
+// @Security ApiKeyAuth
+// @ID create_table_schema_field
+// @Router /v2/items/{collection}/schema [POST]
+// @Summary Create a new field/column for a collection
+// @Description Accepts the same body as POST /v2/fields/:collection but type is a postgres type which gets mapped to a ucode field type
+// @Tags Items
+// @Accept json
+// @Produce json
+// @Param collection path string true "collection"
+// @Param object body models.CreateFieldRequest true "CreateSchemaFieldBody"
+// @Success 201 {object} status_http.Response "Field data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *HandlerV2) CreateTableSchemaField(c *gin.Context) {
+	var fieldRequest models.CreateFieldRequest
+
+	if err := c.ShouldBindJSON(&fieldRequest); err != nil {
+		h.handleError(c, status_http.BadRequest, err)
+		return
+	}
+
+	// Map postgres type to ucode field type
+	ucodeType, ok := pgTypeToFieldType[fieldRequest.Type]
+	if !ok {
+		h.HandleResponse(c, status_http.BadRequest, "unsupported pg_type: "+fieldRequest.Type)
+		return
+	}
+	fieldRequest.Type = ucodeType
+
+	if fieldRequest.ID == "" {
+		fieldRequest.ID = uuid.New().String()
+	}
+
+	attributes, err := helper.ConvertMapToStruct(fieldRequest.Attributes)
+	if err != nil {
+		h.handleError(c, status_http.InvalidArgument, err)
+		return
+	}
+
+	projectId, ok2 := c.Get("project_id")
+	if !ok2 || !util.IsValidUUID(projectId.(string)) {
+		h.handleError(c, status_http.InvalidArgument, errors.New("project id is not valid"))
+		return
+	}
+
+	environmentId, ok3 := c.Get("environment_id")
+	if !ok3 || !util.IsValidUUID(environmentId.(string)) {
+		h.handleError(c, status_http.BadRequest, errors.New("environment id is not valid"))
+		return
+	}
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleError(c, status_http.GRPCError, err)
+		return
+	}
+
+	services, err := h.GetProjectSrvc(c.Request.Context(), resource.GetProjectId(), resource.NodeType)
+	if err != nil {
+		h.handleError(c, status_http.InternalServerError, err)
+		return
+	}
+
+	field := SetTitlePrefix(fieldRequest, "", resource.ResourceEnvironmentId, attributes, false, false)
+
+	var newReq nb.CreateFieldRequest
+	if err = helper.MarshalToStruct(&field, &newReq); err != nil {
+		h.handleError(c, status_http.InternalServerError, err)
+		return
+	}
+
+	resp, err := services.GoObjectBuilderService().Field().Create(c.Request.Context(), &newReq)
+	if err != nil {
+		h.handleError(c, status_http.InternalServerError, err)
+		return
+	}
+	h.HandleResponse(c, status_http.Created, resp)
+}
+
+// UpdateTableSchemaField godoc
+// @Security ApiKeyAuth
+// @ID update_table_schema_field
+// @Router /v2/items/{collection}/schema [PUT]
+// @Summary Update a field/column for a collection
+// @Description Accepts the same body as PUT /v2/fields/:collection but type is a postgres type which gets mapped to a ucode field type
+// @Tags Items
+// @Accept json
+// @Produce json
+// @Param collection path string true "collection"
+// @Param object body models.Field true "UpdateSchemaFieldBody"
+// @Success 200 {object} status_http.Response "Field data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *HandlerV2) UpdateTableSchemaField(c *gin.Context) {
+	var fieldRequest models.Field
+
+	if err := c.ShouldBindJSON(&fieldRequest); err != nil {
+		h.HandleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	// Map postgres type to ucode field type
+	ucodeType, ok := pgTypeToFieldType[fieldRequest.Type]
+	if !ok {
+		h.HandleResponse(c, status_http.BadRequest, "unsupported pg_type: "+fieldRequest.Type)
+		return
+	}
+	fieldRequest.Type = ucodeType
+
+	attributes, err := helper.ConvertMapToStruct(fieldRequest.Attributes)
+	if err != nil {
+		h.HandleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
+	projectId, ok2 := c.Get("project_id")
+	if !ok2 || !util.IsValidUUID(projectId.(string)) {
+		h.HandleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok3 := c.Get("environment_id")
+	if !ok3 || !util.IsValidUUID(environmentId.(string)) {
+		h.HandleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
+		return
+	}
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	services, err := h.GetProjectSrvc(c.Request.Context(), resource.GetProjectId(), resource.NodeType)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	field := obs.Field{
+		Id:                  fieldRequest.ID,
+		Default:             fieldRequest.Default,
+		Type:                fieldRequest.Type,
+		Index:               fieldRequest.Index,
+		Label:               fieldRequest.Label,
+		Slug:                fieldRequest.Slug,
+		TableId:             fieldRequest.TableID,
+		Required:            fieldRequest.Required,
+		Attributes:          attributes,
+		IsVisible:           fieldRequest.IsVisible,
+		AutofillField:       fieldRequest.AutoFillField,
+		AutofillTable:       fieldRequest.AutoFillTable,
+		RelationId:          fieldRequest.RelationId,
+		Automatic:           fieldRequest.Automatic,
+		Unique:              fieldRequest.Unique,
+		RelationField:       fieldRequest.RelationField,
+		ShowLabel:           fieldRequest.ShowLabel,
+		EnableMultilanguage: fieldRequest.EnableMultilanguage,
+		ProjectId:           resource.ResourceEnvironmentId,
+		EnvId:               resource.EnvironmentId,
+	}
+
+	newReq := nb.Field{}
+	if err = helper.MarshalToStruct(&field, &newReq); err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	resp, err := services.GoObjectBuilderService().Field().Update(c.Request.Context(), &newReq)
+	if err != nil {
+		h.handleDynamicError(c, status_http.GRPCError, err)
+		return
+	}
+	h.HandleResponse(c, status_http.OK, resp)
 }

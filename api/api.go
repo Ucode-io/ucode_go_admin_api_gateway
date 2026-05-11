@@ -8,6 +8,7 @@ import (
 
 	"ucode/ucode_go_api_gateway/api/docs"
 	"ucode/ucode_go_api_gateway/api/handlers"
+	"ucode/ucode_go_api_gateway/api/handlers/api_call_limits"
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 
@@ -15,13 +16,13 @@ import (
 	"github.com/opentracing-contrib/go-gin/ginhttp"
 	"github.com/opentracing/opentracing-go"
 	"github.com/spf13/cast"
+	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	"github.com/swaggo/gin-swagger/swaggerFiles"
 )
 
 // SetUpAPI @description This is an api gateway
 // @termsOfService https://u-code.io/
-func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer opentracing.Tracer) {
+func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer opentracing.Tracer, tracker *api_call_limits.Tracker) {
 	docs.SwaggerInfo.Title = cfg.ServiceName
 	docs.SwaggerInfo.Version = cfg.Version
 	docs.SwaggerInfo.Schemes = []string{cfg.HTTPScheme}
@@ -50,12 +51,20 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	// @in header
 	// @name Authorization
 	v1.Use(h.V1.AuthMiddleware(cfg))
+	v1.Use(tracker.Middleware())
 	{
 		v1.POST("/menu-settings", h.V1.CreateMenuSettings)
 		v1.PUT("/menu-settings", h.V1.UpdateMenuSettings)
 		v1.GET("/menu-settings", h.V1.GetAllMenuSettings)
 		v1.GET("/menu-settings/:id", h.V1.GetMenuSettingByID)
 		v1.DELETE("/menu-settings/:id", h.V1.DeleteMenuSettings)
+
+		// Pricing
+		v1.GET("/pricing/all", h.V1.GetAllPricingUsage)
+		v1.GET("/pricing/token-usage", h.V1.GetTokenUsage)
+		v1.GET("/pricing/performance", h.V1.GetPerformanceMetrics)
+		v1.GET("/pricing/api-call/api-metrics", h.V1.GetApiMetrics)
+		v1.GET("/pricing/api-call/api-chart", h.V1.GetApiChart)
 
 		// MINIO
 		v1.POST("/minio/bucket-size", h.V1.BucketSize)
@@ -151,6 +160,12 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1.GET("/files", h.V1.GetAllFiles)
 		v1.POST("/files/word-template", h.V1.WordTemplate)
 
+		// vault
+		v1.GET("/vault/keys", h.V1.GetListVaultKeys)
+		v1.POST("/vault/keys", h.V1.CreateVaultKey)
+		v1.PUT("/vault/keys/:key", h.V1.UpdateVaultKey)
+		v1.DELETE("/vault/keys/:key", h.V1.DeleteVaultKey)
+
 		v1.POST("/language", h.V1.CreateLanguage)
 		v1.GET("/language/:id", h.V1.GetByIdLanguage)
 		v1.GET("/language", h.V1.GetListLanguage)
@@ -211,10 +226,14 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 	v2 := r.Group("/v2")
 	v2.Use(h.V1.AuthMiddleware(cfg))
+	v2.Use(tracker.Middleware())
 	{
 		v2.POST("/object/get-list/:collection", h.V1.GetListV2)
 		v2.PUT("/update-with/:collection", h.V1.UpdateWithParams)
 
+		v2.GET("/functions/micro-frontend/commits", h.V1.GetMicrofrontendCommits)
+		v2.GET("/functions/micro-frontend/version", h.V1.GetMicrofrontendVersion)
+		v2.POST("/functions/micro-frontend/revert", h.V1.RevertMicrofrontendToCommit)
 	}
 
 	v1Slim := r.Group("/v1")
@@ -322,6 +341,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			mcpProject.GET("/list", h.V1.GetMcpProjects)
 			mcpProject.GET("/:mcp_project_id", h.V1.GetMcpProjectFiles)
 			mcpProject.PUT("/:mcp_project_id", h.V1.SaveMcpProject)
+			mcpProject.PUT("/:mcp_project_id/manual-save", h.V1.ManualSaveMcpProject)
 			mcpProject.DELETE("/:mcp_project_id", h.V1.DeleteMcpProject)
 		}
 
@@ -351,6 +371,12 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 		}
 
+		ugen := v1Admin.Group("/ugen")
+		{
+			ugen.GET("/user-projects", h.V1.GetUgenUserProjects)
+			ugen.GET("/company-projects", h.V1.GetUgenCompanyProjects)
+		}
+
 		projectFolders := v1Admin.Group("/project-folders")
 		{
 			projectFolders.POST("", h.V1.CreateProjectFolder)
@@ -359,6 +385,17 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			projectFolders.PUT("/:folder_id", h.V1.UpdateProjectFolder)
 			projectFolders.DELETE("/:folder_id", h.V1.DeleteProjectFolder)
 			projectFolders.PUT("/order", h.V1.UpdateProjectFolderOrder)
+		}
+
+		customEndpoints := v1Admin.Group("/custom-endpoints")
+		{
+			customEndpoints.POST("", h.V1.CreateCustomEndpoint)
+			customEndpoints.PUT("/:id", h.V1.UpdateCustomEndpoint)
+			customEndpoints.GET("", h.V1.GetAllCustomEndpoints)
+			customEndpoints.GET("/:id", h.V1.GetCustomEndpointById)
+			customEndpoints.DELETE("/:id", h.V1.DeleteCustomEndpoint)
+			customEndpoints.POST("/exec-query", h.V1.ExecQuery)
+			customEndpoints.POST("/:id/run", h.V1.RunCustomEndpoint)
 		}
 	}
 
@@ -402,6 +439,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 	clientV2 := r.Group("/v2")
 	clientV2.Use(h.V2.AuthMiddleware())
+	clientV2.Use(tracker.Middleware())
 	// items group
 	v2Items := clientV2.Group("/items")
 	{
@@ -417,16 +455,21 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v2Items.DELETE("/:collection", h.V2.DeleteItems)
 		v2Items.DELETE("/:collection/:id", h.V2.DeleteItem)
 		v2Items.POST("/:collection/aggregation", h.V2.GetListAggregation)
+		v2Items.POST("/:collection/filter", h.V2.GetListWithFilters)
 		v2Items.PUT("/many-to-many", h.V2.AppendManyToMany)                  // TODO test
 		v2Items.DELETE("/many-to-many", h.V2.DeleteManyToMany)               // TODO test
 		v2Items.PUT("/update-row/:collection", h.V2.UpdateRowOrder)          // TODO test
 		v2Items.POST("/:collection/tree", h.V2.AgTree)                       // TODO test
 		v2Items.POST("/:collection/board/structure", h.V2.GetBoardStructure) // TODO test
 		v2Items.POST("/:collection/board", h.V2.GetBoardData)                // TODO test
+		v2Items.GET("/:collection/schema", h.V2.GetTableSchema)
+		v2Items.POST("/:collection/schema", h.V2.CreateTableSchemaField)
+		v2Items.PUT("/:collection/schema", h.V2.UpdateTableSchemaField)
 	}
 
 	v2Version := r.Group("/v2")
 	v2Version.Use(h.V1.AuthMiddleware(cfg))
+	v2Version.Use(tracker.Middleware())
 	{
 		v2Version.POST("/csv/:collection/download", h.V2.GetListInCSV)
 		v2Version.POST("/send-to-gpt", h.V2.SendToGpt)
@@ -527,12 +570,18 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		}
 	}
 
+	// Public GitHub OAuth callback (no auth — GitHub calls this)
+	r.GET("/v1/github/callback", h.V1.GithubCallback)
+
 	github := r.Group("/v1/github")
+	github.Use(h.V1.AuthMiddleware(cfg))
 	{
-		github.GET("/login", h.V2.GithubLogin)
-		github.GET("/user", h.V2.GithubGetUser)
-		github.GET("/repos", h.V2.GithubGetRepos)
-		github.GET("/branches", h.V2.GithubGetBranches)
+		github.GET("/connect", h.V1.GithubConnect)
+		github.GET("/integration", h.V1.GithubGetIntegration)
+		github.GET("/integration/validate", h.V1.GithubValidateToken)
+		github.DELETE("/integration/:id", h.V1.GithubDeleteIntegration)
+		github.POST("/repo", h.V1.GithubCreateRepo)
+		github.GET("/repos", h.V1.GithubGetRepoList)
 	}
 
 	gitlab := r.Group("/v1/gitlab")
@@ -541,6 +590,10 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		gitlab.GET("/user", h.V2.GitlabGetUser)
 		gitlab.GET("/repos", h.V2.GitlabGetRepos)
 		gitlab.GET("/branches", h.V2.GitlabGetBranches)
+		gitlab.GET("/tree", h.V2.GitlabGetTree)
+		gitlab.GET("/file", h.V2.GitlabGetFile)
+		gitlab.PUT("/file", h.V2.GitlabUpdateFile)
+		gitlab.GET("/pipeline", h.V2.GitlabGetPipelineStatus)
 	}
 
 	proxyApi := r.Group("/v2")
@@ -551,6 +604,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		proxyFunction.GET("/:function_id", h.V1.GetNewFunctionByID)
 		proxyFunction.GET("", h.V1.GetAllNewFunctions)
 		proxyFunction.PUT("", h.V1.UpdateNewFunction)
+		proxyFunction.GET("/:function_id/codebase", h.V1.GetFunctionCodebase)
 		proxyFunction.DELETE("/:function_id", h.V1.DeleteNewFunction)
 
 	}
@@ -562,6 +616,12 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		proxyFunctions.GET("/micro-frontend", h.V1.GetAllMicroFrontEnd)
 		proxyFunctions.PUT("/micro-frontend", h.V1.UpdateMicroFrontEnd)
 		proxyFunctions.DELETE("/micro-frontend/:micro-frontend-id", h.V1.DeleteMicroFrontEnd)
+		proxyFunctions.POST("/micro-frontend/promote", h.V1.PromoteMicrofrontendToMaster)
+		proxyFunctions.GET("/micro-frontend/files-at-commit", h.V1.GetMicrofrontendFilesAtCommit)
+		proxyFunctions.POST("/micro-frontend/github-sync", h.V1.GithubSyncMicrofrontend)
+
+		proxyFunctions.GET("/micro-frontend/promote/check-changes", h.V1.CheckPromoteChanges)
+		proxyFunctions.GET("/micro-frontend/promote/pipeline-status/:pipeline_id", h.V1.GetPromotePipelineStatus)
 	}
 
 	proxyGrafana := proxyApi.Group("/grafana")
@@ -578,12 +638,13 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		{
 			v2Webhook.POST("/create", h.V2.CreateWebhook)
 			v2Webhook.POST("/handle", h.V2.HandleWebhook)
-
+			v2Webhook.POST("/github", h.V2.HandleGithubWebhook)
 		}
 	}
 
 	v3 := r.Group("/v3")
 	v3.Use(h.V1.AuthMiddleware(cfg))
+	v3.Use(tracker.Middleware())
 	v3Menus := v3.Group("/menus")
 	{
 		v3Menus.GET("", h.V3.GetAllMenus)

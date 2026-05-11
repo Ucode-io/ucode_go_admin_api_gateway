@@ -1,6 +1,10 @@
 package v1
 
 import (
+	"encoding/json"
+	"fmt"
+	"strings"
+	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
@@ -11,6 +15,44 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cast"
 )
+
+// ==================== Enrichment ====================
+
+// enrichMessages converts raw proto messages into EnrichedMessage slice.
+// For messages saved with [DIAGRAMS_GENERATED] marker, it strips the embedded
+// plan JSON from content and exposes it as a separate Plan field.
+func enrichMessages(msgs []*pbo.Message) []models.EnrichedMessage {
+	result := make([]models.EnrichedMessage, 0, len(msgs))
+	for _, msg := range msgs {
+		em := models.EnrichedMessage{
+			ID:         msg.GetId(),
+			ChatID:     msg.GetChatId(),
+			Role:       msg.GetRole(),
+			Content:    msg.GetContent(),
+			Images:     msg.GetImages(),
+			HasFiles:   msg.GetHasFiles(),
+			TokensUsed: msg.GetTokensUsed(),
+			CreatedAt:  msg.GetCreatedAt(),
+		}
+		content := msg.GetContent()
+		if strings.HasPrefix(content, "[DIAGRAMS_GENERATED] ") {
+			body := strings.TrimPrefix(content, "[DIAGRAMS_GENERATED] ")
+			if idx := strings.Index(body, "\n"); idx != -1 {
+				em.Content = body[:idx]
+				var plan models.HaikuPlan
+				if err := json.Unmarshal([]byte(body[idx+1:]), &plan); err == nil {
+					em.Plan = &plan
+				}
+			} else {
+				em.Content = body
+			}
+		} else if strings.HasPrefix(content, "[QUESTIONS_ASKED] ") {
+			em.Content = strings.TrimPrefix(content, "[QUESTIONS_ASKED] ")
+		}
+		result = append(result, em)
+	}
+	return result
+}
 
 // ==================== Helper ====================
 
@@ -57,10 +99,7 @@ func (h *HandlerV1) getAiChatServices(c *gin.Context) (services.ServiceManagerI,
 // ==================== Chat Endpoints ====================
 
 func (h *HandlerV1) CreateAiChat(c *gin.Context) {
-	var (
-		request pbo.CreateChatRequest
-		project *pbo.McpProject
-	)
+	var request pbo.CreateChatRequest
 
 	if err := c.ShouldBindJSON(&request); err != nil {
 		h.HandleResponse(c, status_http.BadRequest, err.Error())
@@ -72,33 +111,27 @@ func (h *HandlerV1) CreateAiChat(c *gin.Context) {
 		return
 	}
 
-	if len(request.GetProjectId()) == 0 {
-		if request.GetTitle() == "" && request.GetDescription() == "" {
-			h.HandleResponse(c, status_http.InvalidArgument, "project_id or project_name is required")
-			return
-		}
-
-		if request.GetTitle() == "" {
-			request.Title = request.GetDescription()
-		}
-
-		project, err = service.GoObjectBuilderService().McpProject().CreateMcpProject(
-			c.Request.Context(),
-			&pbo.CreateMcpProjectReqeust{
-				ResourceEnvId: resourceEnvId,
-				Title:         request.GetTitle(),
-				Description:   request.GetDescription(),
-			},
-		)
-		if err != nil {
-			h.HandleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-
-		request.ProjectId = project.Id
+	if request.GetTitle() == "" && request.GetDescription() != "" {
+		request.Title = request.GetDescription()
 	}
 
 	request.ResourceEnvId = resourceEnvId
+
+	if request.GetProjectId() == "" {
+		mcpProject, err := service.GoObjectBuilderService().McpProject().CreateMcpProject(
+			c.Request.Context(),
+			&pbo.CreateMcpProjectReqeust{
+				ResourceEnvId: resourceEnvId,
+				Title:         "Draft Project",
+				Description:   "Provisioning...",
+			},
+		)
+		if err != nil {
+			h.HandleResponse(c, status_http.GRPCError, fmt.Sprintf("failed to pre-create mcp project: %v", err))
+			return
+		}
+		request.ProjectId = mcpProject.GetId()
+	}
 
 	response, err := service.GoObjectBuilderService().AiChat().CreateChat(
 		c.Request.Context(), &request,
@@ -170,10 +203,19 @@ func (h *HandlerV1) GetProjectChat(c *gin.Context) {
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return
-
 	}
 
-	h.HandleResponse(c, status_http.OK, chat)
+	h.HandleResponse(c, status_http.OK, map[string]any{
+		"id":           chat.GetId(),
+		"project_id":   chat.GetProjectId(),
+		"title":        chat.GetTitle(),
+		"description":  chat.GetDescription(),
+		"model":        chat.GetModel(),
+		"total_tokens": chat.GetTotalTokens(),
+		"created_at":   chat.GetCreatedAt(),
+		"updated_at":   chat.GetUpdatedAt(),
+		"messages":     enrichMessages(chat.GetMessages()),
+	})
 }
 
 func (h *HandlerV1) UpdateAiChat(c *gin.Context) {
@@ -257,7 +299,10 @@ func (h *HandlerV1) GetAiChatMessages(c *gin.Context) {
 		return
 	}
 
-	h.HandleResponse(c, status_http.OK, response)
+	h.HandleResponse(c, status_http.OK, map[string]any{
+		"messages": enrichMessages(response.GetMessages()),
+		"count":    response.GetCount(),
+	})
 }
 
 func (h *HandlerV1) DeleteAiChatMessage(c *gin.Context) {

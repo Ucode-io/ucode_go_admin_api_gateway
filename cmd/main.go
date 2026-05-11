@@ -2,17 +2,22 @@ package main
 
 import (
 	"context"
+	"fmt"
+	"time"
 	"ucode/ucode_go_api_gateway/api"
 	"ucode/ucode_go_api_gateway/api/handlers"
+	"ucode/ucode_go_api_gateway/api/handlers/api_call_limits"
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/pkg/caching"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
+	"ucode/ucode_go_api_gateway/pkg/vault"
 	"ucode/ucode_go_api_gateway/services"
 	"ucode/ucode_go_api_gateway/storage/redis"
 
 	"github.com/gin-gonic/gin"
+	go_redis "github.com/go-redis/redis/v8"
 	"github.com/opentracing/opentracing-go"
 	"github.com/uber/jaeger-client-go"
 	jaeger_config "github.com/uber/jaeger-client-go/config"
@@ -111,7 +116,36 @@ func main() {
 
 	mapProjectConfs[baseConf.UcodeNamespace] = uConf
 
-	newRedis := redis.NewRedis(mapProjectConfs)
+	newRedis := redis.NewRedis(mapProjectConfs, log)
+
+	centralRedis := go_redis.NewClient(&go_redis.Options{
+		Addr:     fmt.Sprintf("%s:%s", uConf.GetRequestRedisHost, uConf.GetRequestRedisPort),
+		Password: uConf.GetRequestRedisPassword,
+		DB:       uConf.GetRequestRedisDatabase,
+	})
+
+	err = centralRedis.Ping(ctx).Err()
+	if err != nil {
+		log.Error("error connecting to central redis", logger.Error(err), logger.String("host", uConf.GetRequestRedisHost), logger.String("port", uConf.GetRequestRedisPort))
+	} else {
+		log.Info("successfully connected to central redis", logger.String("host", uConf.GetRequestRedisHost), logger.String("port", uConf.GetRequestRedisPort))
+	}
+
+	// =========================== API call count methods ============================
+
+	var (
+		trackerFlushInterval     = time.Second * 10
+		MetConsumerFlushInterval = time.Minute * 10
+	)
+	// L1 to Redis
+	tracker := api_call_limits.NewTracker(centralRedis, trackerFlushInterval)
+	go tracker.Start(ctx)
+
+	// Redis to Postgres
+	consumer := api_call_limits.NewMetricsConsumer(centralRedis, compSrvc, MetConsumerFlushInterval)
+	go consumer.Start(ctx)
+
+	// =================================================================================
 
 	cache, err := caching.NewExpiringLRUCache(config.LRU_CACHE_SIZE)
 	if err != nil {
@@ -124,9 +158,22 @@ func main() {
 
 	limiter := util.NewApiKeyRateLimiter(newRedis, config.RATE_LIMITER_RPS_LIMIT, config.RATE_LIMITER_RPS_LIMIT)
 
-	h := handlers.NewHandler(baseConf, mapProjectConfs, log, projectServiceNodes, compSrvc, authSrvc, newRedis, cache, limiter)
+	var vaultClient vault.VaultClient
+	if baseConf.VaultAddress != "" {
+		vaultClient, err = vault.New(ctx, vault.Config{
+			Address:   baseConf.VaultAddress,
+			RoleID:    baseConf.VaultRoleID,
+			SecretID:  baseConf.VaultSecretID,
+			MountPath: baseConf.VaultMountPath,
+		})
+		if err != nil {
+			log.Error("[ucode] error while initializing vault client", logger.Error(err))
+		}
+	}
 
-	api.SetUpAPI(r, h, baseConf, tracer)
+	h := handlers.NewHandler(baseConf, mapProjectConfs, log, projectServiceNodes, compSrvc, authSrvc, newRedis, cache, limiter, vaultClient)
+
+	api.SetUpAPI(r, h, baseConf, tracer, tracker)
 
 	log.Info("server is running...")
 	if err := r.Run(baseConf.HTTPPort); err != nil {
