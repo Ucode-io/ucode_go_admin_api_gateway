@@ -485,7 +485,6 @@ OVERLAYS & FLOATING ELEMENTS
 ====================================
 All overlays (Dialog, Popover, SelectContent, DropdownMenuContent) MUST be opaque:
   className="z-50 bg-popover text-popover-foreground border shadow-md outline-none"
-  Add bg-white dark:bg-slate-950 as fallback on all dropdown/popover content.
 Modal overlay: bg-black/50 backdrop-blur-sm
 
 ====================================
@@ -597,7 +596,7 @@ BADGE / STATUS SYSTEM (pill shape, dot-prefix):
   Pending / Warning       → bg-amber-50 text-amber-700 border border-amber-200
   Error / Failed / Banned → bg-red-50 text-red-700 border border-red-200
   Info / Draft            → bg-blue-50 text-blue-700 border border-blue-200
-  Neutral / Inactive      → bg-gray-100 text-gray-600 border border-gray-200
+  Neutral / Inactive      → bg-muted text-muted-foreground border border-border
   Dot: <span className="w-1.5 h-1.5 rounded-full bg-current inline-block mr-1.5" />
 
 FORM PATTERNS:
