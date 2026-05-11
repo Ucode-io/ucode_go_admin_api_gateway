@@ -203,7 +203,12 @@ Font import map:
   Source Serif 4:     @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@300;400;600&display=swap');
   Inter:              @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-Add CSS variables in :root after @import:
+IMMEDIATELY after @import font lines, add the three Tailwind directives (MANDATORY — without these, ALL Tailwind classes are invisible):
+  @tailwind base;
+  @tailwind components;
+  @tailwind utilities;
+
+Add CSS variables in :root after the Tailwind directives:
   --font-heading: '[font_family]', serif;
   --font-body:    '[body_font]', sans-serif;
   body           { font-family: var(--font-body); }
@@ -489,7 +494,7 @@ FILE GENERATION ORDER (TYPE B — STRICT)
 SCROLL-TO-TOP RULE: NEVER create src/components/ui/scroll-to-top.tsx — implement the button INLINE in LandingPage.tsx.
 UTILS RULE: src/lib/utils.ts exports ONLY cn(). NEVER add formatPrice, formatDate, or any domain helper to utils.ts. Define format helpers INLINE in the component that needs them.
 
- 1. src/index.css                     (@import fonts + :root CSS vars + @keyframes + archetype texture)
+ 1. src/index.css                     (@import fonts → @tailwind base/components/utilities → :root CSS vars → @keyframes → archetype texture)
  2. src/lib/utils.ts                  (cn helper ONLY — export function cn(...inputs: ClassValue[]) { return twMerge(clsx(inputs)); })
  3. src/lib/api.ts                    (ONLY if project has API tables)
  4. src/components/ui/button.tsx
@@ -578,6 +583,7 @@ STRUCTURE
 [ ] src/App.tsx line 1: import React from 'react'; line 2: import './index.css';
 [ ] main.tsx does NOT import index.css
 [ ] Google Font @import at very top of index.css
+[ ] @tailwind base; @tailwind components; @tailwind utilities; present AFTER @import, BEFORE :root
 [ ] --font-heading and --font-body CSS variables defined
 [ ] Heading font applied to h1 h2 h3 elements
 

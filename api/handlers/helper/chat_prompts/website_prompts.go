@@ -247,7 +247,12 @@ Font import map:
   DM Serif Display:   @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap');
   Bebas Neue:         @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
 
-Add CSS variables in :root:
+IMMEDIATELY after @import font lines, add the three Tailwind directives (MANDATORY — without these, ALL Tailwind classes are invisible):
+  @tailwind base;
+  @tailwind components;
+  @tailwind utilities;
+
+Add CSS variables in :root after the Tailwind directives:
   --font-heading: '[font_family]', serif;
   --font-body:    '[body_font]', sans-serif;
   body           { font-family: var(--font-body); }
@@ -393,7 +398,7 @@ SCROLL-TO-TOP RULE: NEVER create src/components/ui/scroll-to-top.tsx — impleme
 PRE-BUILT RULE: NEVER generate src/lib/utils.ts or src/main.tsx — they are pre-built in the template.
   src/lib/utils.ts already has: cn, formatDate, formatCurrency, getInitials, truncate — import freely.
 
- 1. src/index.css                     (@import fonts + :root vars + @keyframes + textures)
+ 1. src/index.css                     (@import fonts → @tailwind base/components/utilities → :root vars → @keyframes → textures)
  2. src/types.ts                      (ONLY if project has API tables — entity interfaces)
  3. src/components/ui/button.tsx
  4. src/components/ui/card.tsx
@@ -473,6 +478,7 @@ REACT KEYS
 STRUCTURE
 [ ] src/index.css is FIRST in files[]
 [ ] App.tsx line 1: import './index.css'; BrowserRouter; AppProviders wrapping routes
+[ ] @tailwind base; @tailwind components; @tailwind utilities; present AFTER @import, BEFORE :root
 [ ] src/lib/utils.ts NOT in files[] (pre-built — never generate)
 [ ] src/main.tsx NOT in files[] (pre-built — never generate)
 [ ] Layout.tsx wraps all pages
