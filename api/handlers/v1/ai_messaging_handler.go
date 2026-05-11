@@ -70,10 +70,7 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 		return
 	}
 
-	var (
-		projectIdObj, _ = c.Get("project_id")
-		realProjectID   = projectIdObj.(string)
-	)
+	realProjectID := c.GetString("project_id")
 
 	processor := newChatProcessor(
 		h,
