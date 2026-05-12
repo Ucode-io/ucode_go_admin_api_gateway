@@ -171,7 +171,7 @@ STEP 5 — Trace all imports. Zero missing files.
 Every page must feel ultra-premium. Required:
 
 1. MICRO-INTERACTIONS: hover:-translate-y-1 hover:shadow-2xl duration-300 on every card, button, image.
-2. GLASSMORPHISM: backdrop-blur-xl, bg-white/5 or bg-black/5 on navbar, floating cards.
+2. GLASSMORPHISM: backdrop-blur-xl, bg-background/10 on floating cards (navbar uses bg-background/70).
 3. TYPOGRAPHY: Page headlines = large clamp() with archetype styling.
 4. SCROLL REVEAL: framer-motion whileInView on all major sections with archetype timing.
 5. ANIMATIONS: Custom keyframes in index.css applied to hero and key sections.
@@ -192,22 +192,22 @@ Apply ONLY the motion matching the project's design_inspiration token:
 ====================================
 ARCHETYPE CARD + BUTTON STYLES
 ====================================
-  Obsidian:   cards border border-white/7 bg-surface rounded-xl · buttons bg-accent text-background font-semibold glow-shadow
-  Editorial:  cards bg-white shadow-sm rounded-sm border · buttons border-2 border-accent text-accent rounded-none
-  Luxury:     cards border-t border-[hsl(var(--primary)/0.2)] · buttons border border-primary/40 text-primary tracking-widest uppercase text-sm
-  Electric:   cards border border-accent/20 rounded-none · buttons bg-accent text-background font-black skewX(-2deg)
-  Warm Prof:  cards bg-white rounded-2xl shadow-sm · buttons bg-accent text-white rounded-xl shadow-md
-  Soft Min:   cards bg-white rounded-3xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] · buttons bg-accent/10 text-accent rounded-full
+  Obsidian:   cards border border-border/20 bg-card rounded-xl · buttons bg-accent text-background font-semibold glow-shadow
+  Editorial:  cards bg-card shadow-sm rounded-sm border border-border · buttons border-2 border-accent text-accent rounded-none
+  Luxury:     cards border-t border-[hsl(var(--primary)/0.2)] bg-card · buttons border border-primary/40 text-primary tracking-widest uppercase text-sm
+  Electric:   cards border border-accent/20 bg-card rounded-none · buttons bg-accent text-background font-black skewX(-2deg)
+  Warm Prof:  cards bg-card rounded-2xl shadow-sm border border-border/50 · buttons bg-accent text-accent-foreground rounded-xl shadow-md
+  Soft Min:   cards bg-card rounded-3xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] · buttons bg-accent/10 text-accent rounded-full
 
 ====================================
 ARCHETYPE HERO STYLES
 ====================================
-  Obsidian:   bg-[#0a0d12] · grid-line CSS texture · radial accent glow · h1 text-[clamp(56px,8vw,110px)] font-black
-  Editorial:  bg-[#fafaf8] · dot-grid background · h1 text-[clamp(48px,6vw,96px)] serif italic accent
+  Obsidian:   bg-background · grid-line CSS texture · radial accent glow · h1 text-[clamp(56px,8vw,110px)] font-black
+  Editorial:  bg-background · dot-grid background · h1 text-[clamp(48px,6vw,96px)] serif italic accent
   Luxury:     full-bleed image + dark overlay · h1 Cormorant italic bottom-left · letter-spacing-[0.15em]
-  Electric:   bg-[#0f0f0f] · diagonal stripe · h1 font-black text-[clamp(72px,10vw,140px)]
-  Warm Prof:  split layout · bg-[#fffef7] · h1 Plus Jakarta text-[clamp(40px,5vw,72px)] · image right
-  Soft Min:   centered · bg-[#fdfcfb] · organic blobs · h1 Fraunces italic text-[clamp(40px,5vw,80px)]
+  Electric:   bg-background · diagonal stripe · h1 font-black text-[clamp(72px,10vw,140px)]
+  Warm Prof:  split layout · bg-background · h1 Plus Jakarta text-[clamp(40px,5vw,72px)] · image right
+  Soft Min:   centered · bg-background · organic blobs · h1 Fraunces italic text-[clamp(40px,5vw,80px)]
 
 ====================================
 ARCHETYPE TEXTURES (define in index.css)
@@ -247,7 +247,12 @@ Font import map:
   DM Serif Display:   @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap');
   Bebas Neue:         @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
 
-Add CSS variables in :root:
+IMMEDIATELY after @import font lines, add the three Tailwind directives (MANDATORY — without these, ALL Tailwind classes are invisible):
+  @tailwind base;
+  @tailwind components;
+  @tailwind utilities;
+
+Add CSS variables in :root after the Tailwind directives:
   --font-heading: '[font_family]', serif;
   --font-body:    '[body_font]', sans-serif;
   body           { font-family: var(--font-body); }
@@ -393,7 +398,7 @@ SCROLL-TO-TOP RULE: NEVER create src/components/ui/scroll-to-top.tsx — impleme
 PRE-BUILT RULE: NEVER generate src/lib/utils.ts or src/main.tsx — they are pre-built in the template.
   src/lib/utils.ts already has: cn, formatDate, formatCurrency, getInitials, truncate — import freely.
 
- 1. src/index.css                     (@import fonts + :root vars + @keyframes + textures)
+ 1. src/index.css                     (@import fonts → @tailwind base/components/utilities → :root vars → @keyframes → textures)
  2. src/types.ts                      (ONLY if project has API tables — entity interfaces)
  3. src/components/ui/button.tsx
  4. src/components/ui/card.tsx
@@ -473,6 +478,7 @@ REACT KEYS
 STRUCTURE
 [ ] src/index.css is FIRST in files[]
 [ ] App.tsx line 1: import './index.css'; BrowserRouter; AppProviders wrapping routes
+[ ] @tailwind base; @tailwind components; @tailwind utilities; present AFTER @import, BEFORE :root
 [ ] src/lib/utils.ts NOT in files[] (pre-built — never generate)
 [ ] src/main.tsx NOT in files[] (pre-built — never generate)
 [ ] Layout.tsx wraps all pages
@@ -698,11 +704,11 @@ CSS variables are already set in index.css. Use semantic class names only:
 
 Apply archetype rules from DESIGN TOKENS design_inspiration:
   Obsidian Cinematic: dark bg-background, glow accents, grid-line texture on hero
-  Editorial Light:    light bg-[#fafaf8], dot-grid, serif italic on large headings
+  Editorial Light:    light bg-background, dot-grid, serif italic on large headings
   Luxury Dark:        full-bleed imagery, gold/bronze accent, slow opacity-only animations
-  Electric Bold:      bg-[#0f0f0f], diagonal stripes, massive clamped typography
-  Warm Professional:  bg-[#fffef7], split hero, soft shadows
-  Soft Minimal:       bg-[#fdfcfb], organic blob shapes, float animations
+  Electric Bold:      bg-background, diagonal stripes, massive clamped typography
+  Warm Professional:  bg-background, split hero, soft shadows
+  Soft Minimal:       bg-background, organic blob shapes, float animations
 
 FORBIDDEN COLORS (zero exceptions):
   bg-white · bg-gray-* · bg-slate-* · bg-zinc-* · bg-neutral-* · bg-stone-*
