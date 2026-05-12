@@ -638,10 +638,15 @@ func (h *HandlerV1) copyTemplateTableDetails(ctx context.Context, sourceService,
 		}
 	}
 
-	return h.copyTemplateRows(ctx, sourceService, targetService, sourceResourceEnvID, targetResourceEnvID, table.GetSlug())
+	return h.copyTemplateRows(ctx, sourceService, targetService, sourceResourceEnvID, targetResourceEnvID, table)
 }
 
-func (h *HandlerV1) copyTemplateRows(ctx context.Context, sourceService, targetService servicepkg.ServiceManagerI, sourceResourceEnvID, targetResourceEnvID, tableSlug string) error {
+func (h *HandlerV1) copyTemplateRows(ctx context.Context, sourceService, targetService servicepkg.ServiceManagerI, sourceResourceEnvID, targetResourceEnvID string, table *pbo.Table) error {
+	if table.GetIsLoginTable() {
+		return nil
+	}
+
+	tableSlug := table.GetSlug()
 	listData, err := helper.ConvertMapToStruct(map[string]any{
 		"limit":  1000,
 		"offset": 0,
