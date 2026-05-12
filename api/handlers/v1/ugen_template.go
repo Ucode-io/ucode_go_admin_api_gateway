@@ -355,16 +355,6 @@ func (h *HandlerV1) CreateProjectFromTemplate(c *gin.Context) {
 		h.HandleResponse(c, status_http.GRPCError, fmt.Sprintf("publish template microfrontend: %v", err))
 		return
 	}
-	if published.Data.ID != "" {
-		if _, err = mainService.GoObjectBuilderService().McpProject().UpdateMcpProject(ctx, &pbo.McpProject{
-			ResourceEnvId: mainResourceEnvID,
-			Id:            newMcpProject.GetId(),
-			FunctionId:    published.Data.ID,
-		}); err != nil {
-			h.HandleResponse(c, status_http.GRPCError, fmt.Sprintf("link mcp project function: %v", err))
-			return
-		}
-	}
 
 	h.HandleResponse(c, status_http.OK, gin.H{
 		"project_id":                 targetProject.GetProjectId(),
