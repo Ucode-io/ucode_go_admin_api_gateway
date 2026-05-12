@@ -602,6 +602,7 @@ func (h *HandlerV1) copyTemplateTableDetails(ctx context.Context, sourceService,
 		}
 		viewReq.ProjectId = targetResourceEnvID
 		viewReq.EnvId = targetResourceEnvID
+		viewReq.Id = ""
 		if _, err = targetService.GoObjectBuilderService().View().Create(ctx, viewReq); err != nil {
 			return fmt.Errorf("create view %s: %w", view.GetId(), err)
 		}
@@ -790,6 +791,7 @@ func (h *HandlerV1) copyTemplateMenuTree(ctx context.Context, targetService serv
 		EnvId:           targetResourceEnvID,
 		TableId:         menu.GetTableId(),
 		LayoutId:        menu.GetLayoutId(),
+		Id:              menu.GetId(),
 	})
 	if err != nil {
 		return fmt.Errorf("create menu %s: %w", menu.GetLabel(), err)
@@ -900,7 +902,7 @@ func skipUgenTemplateTable(slug string) bool {
 
 func skipUgenTemplateField(slug, fieldType string) bool {
 	switch slug {
-	case "guid", "created_at", "updated_at", "deleted_at", "folder_id":
+	case "guid", "created_at", "updated_at", "deleted_at", "folder_id", "user_id_auth":
 		return true
 	}
 	switch fieldType {
