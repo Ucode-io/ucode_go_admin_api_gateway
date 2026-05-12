@@ -8,6 +8,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"time"
 
 	"ucode/ucode_go_api_gateway/api/models"
@@ -204,9 +205,13 @@ func (h *HandlerV1) CreateProjectFromTemplate(c *gin.Context) {
 		return
 	}
 
-	sourceResourceEnvID := tmpl.GetSourceResourceEnvId()
-	if sourceResourceEnvID == "" {
-		sourceResourceEnvID = mainResourceEnvID
+	sourceDataResourceEnvID := tmpl.GetSourceResourceEnvId()
+	if sourceDataResourceEnvID == "" {
+		sourceDataResourceEnvID = mainResourceEnvID
+	}
+	sourceMcpResourceEnvID := tmpl.GetSourceMcpResourceEnvId()
+	if sourceMcpResourceEnvID == "" {
+		sourceMcpResourceEnvID = sourceDataResourceEnvID
 	}
 	sourceProjectID := tmpl.GetSourceProjectId()
 	if sourceProjectID == "" {
@@ -226,7 +231,7 @@ func (h *HandlerV1) CreateProjectFromTemplate(c *gin.Context) {
 	sourceMcp, err := sourceService.GoObjectBuilderService().McpProject().GetMcpProjectFiles(
 		ctx,
 		&pbo.McpProjectId{
-			ResourceEnvId: sourceResourceEnvID,
+			ResourceEnvId: sourceMcpResourceEnvID,
 			Id:            tmpl.GetMcpProjectId(),
 		},
 	)
@@ -234,7 +239,15 @@ func (h *HandlerV1) CreateProjectFromTemplate(c *gin.Context) {
 		h.HandleResponse(c, status_http.GRPCError, fmt.Sprintf("get source mcp project: %v", err))
 		return
 	}
-	if len(sourceMcp.GetProjectFiles()) == 0 {
+	sourceMcpFiles := cloneMcpProjectFiles(sourceMcp.GetProjectFiles())
+	if len(sourceMcpFiles) == 0 {
+		sourceMcpFiles, err = h.getTemplateMicrofrontendFiles(ctx, sourceService, tmpl, sourceDataResourceEnvID, c.GetHeader("Authorization"))
+		if err != nil {
+			h.HandleResponse(c, status_http.InvalidArgument, err.Error())
+			return
+		}
+	}
+	if len(sourceMcpFiles) == 0 {
 		h.HandleResponse(c, status_http.InvalidArgument, "template source has no microfrontend files")
 		return
 	}
@@ -303,13 +316,12 @@ func (h *HandlerV1) CreateProjectFromTemplate(c *gin.Context) {
 		apiKey = apiKeys.GetData()[0].GetAppId()
 	}
 
-	copiedMcpFiles := cloneMcpProjectFiles(sourceMcp.GetProjectFiles())
 	newMcpProject, err := mainService.GoObjectBuilderService().McpProject().CreateMcpProject(
 		ctx, &pbo.CreateMcpProjectReqeust{
 			ResourceEnvId:  mainResourceEnvID,
 			Title:          projectName,
 			Description:    "Created from template: " + tmpl.GetName(),
-			ProjectFiles:   copiedMcpFiles,
+			ProjectFiles:   sourceMcpFiles,
 			ProjectEnv:     sourceMcp.GetProjectEnv(),
 			UcodeProjectId: targetProject.GetProjectId(),
 			ApiKey:         apiKey,
@@ -333,32 +345,45 @@ func (h *HandlerV1) CreateProjectFromTemplate(c *gin.Context) {
 		ResourceType:   int32(targetResource.GetResourceType()),
 	}
 
-	if err = h.copyUgenTemplateData(ctx, sourceService, targetService, sourceResourceEnvID, targetProjectData.ResourceEnvId); err != nil {
+	if err = h.copyUgenTemplateData(ctx, sourceService, targetService, sourceDataResourceEnvID, targetProjectData.ResourceEnvId); err != nil {
 		h.HandleResponse(c, status_http.GRPCError, fmt.Sprintf("copy template data: %v", err))
 		return
 	}
 
-	published, err := h.publishTemplateMicrofrontend(ctx, projectName, copiedMcpFiles, targetProjectData, c.GetHeader("Authorization"))
+	published, err := h.publishTemplateMicrofrontend(ctx, projectName, sourceMcpFiles, targetProjectData, c.GetHeader("Authorization"))
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, fmt.Sprintf("publish template microfrontend: %v", err))
 		return
 	}
+	if published.Data.ID != "" {
+		if _, err = mainService.GoObjectBuilderService().McpProject().UpdateMcpProject(ctx, &pbo.McpProject{
+			ResourceEnvId: mainResourceEnvID,
+			Id:            newMcpProject.GetId(),
+			FunctionId:    published.Data.ID,
+		}); err != nil {
+			h.HandleResponse(c, status_http.GRPCError, fmt.Sprintf("link mcp project function: %v", err))
+			return
+		}
+	}
 
 	h.HandleResponse(c, status_http.OK, gin.H{
-		"project_id":             targetProject.GetProjectId(),
-		"ucode_project_id":       targetProject.GetProjectId(),
-		"environment_id":         targetEnv.GetId(),
-		"mcp_project_id":         newMcpProject.GetId(),
-		"api_key":                apiKey,
-		"resource_env_id":        targetProjectData.ResourceEnvId,
-		"main_resource_env_id":   mainResourceEnvID,
-		"microfrontend_id":       published.Data.ID,
-		"microfrontend_repo_id":  published.Data.RepoId,
-		"microfrontend_url":      published.Data.Url,
-		"microfrontend_branch":   published.Data.Branch,
-		"template_preview_url":   tmpl.GetPreviewUrl(),
-		"source_mcp_project_id":  tmpl.GetMcpProjectId(),
-		"source_resource_env_id": sourceResourceEnvID,
+		"project_id":                 targetProject.GetProjectId(),
+		"ucode_project_id":           targetProject.GetProjectId(),
+		"environment_id":             targetEnv.GetId(),
+		"mcp_project_id":             newMcpProject.GetId(),
+		"api_key":                    apiKey,
+		"resource_env_id":            targetProjectData.ResourceEnvId,
+		"main_resource_env_id":       mainResourceEnvID,
+		"microfrontend_id":           published.Data.ID,
+		"microfrontend_repo_id":      published.Data.RepoId,
+		"microfrontend_url":          published.Data.Url,
+		"microfrontend_branch":       published.Data.Branch,
+		"template_preview_url":       tmpl.GetPreviewUrl(),
+		"source_mcp_project_id":      tmpl.GetMcpProjectId(),
+		"source_resource_env_id":     sourceDataResourceEnvID,
+		"source_mcp_resource_env_id": sourceMcpResourceEnvID,
+		"source_repo_id":             tmpl.GetSourceRepoId(),
+		"source_function_id":         tmpl.GetSourceFunctionId(),
 	})
 }
 
@@ -372,6 +397,83 @@ func cloneMcpProjectFiles(files []*pbo.McpProjectFiles) []*pbo.McpProjectFiles {
 		})
 	}
 	return copied
+}
+
+type templateMicrofrontendFilesResponse struct {
+	Data struct {
+		Files []struct {
+			Path     string `json:"path"`
+			FilePath string `json:"file_path"`
+			Content  string `json:"content"`
+		} `json:"files"`
+	} `json:"data"`
+}
+
+func (h *HandlerV1) getTemplateMicrofrontendFiles(ctx context.Context, sourceService servicepkg.ServiceManagerI, tmpl *pb.UgenTemplate, sourceDataResourceEnvID, authToken string) ([]*pbo.McpProjectFiles, error) {
+	repoID := tmpl.GetSourceRepoId()
+	if repoID == "" && tmpl.GetSourceFunctionId() != "" {
+		function, err := sourceService.GoObjectBuilderService().Function().GetSingle(ctx, &pbo.FunctionPrimaryKey{
+			Id:        tmpl.GetSourceFunctionId(),
+			ProjectId: sourceDataResourceEnvID,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("get template source function: %w", err)
+		}
+		repoID = function.GetRepoId()
+	}
+	if repoID == "" {
+		return nil, fmt.Errorf("template source has no project_files and no source_repo_id")
+	}
+
+	filesURL := h.baseConf.GoFunctionServiceHost + h.baseConf.GoFunctionServiceHTTPPort +
+		"/v2/functions/micro-frontend/files?repo_id=" + url.QueryEscape(repoID)
+
+	filesReq, err := http.NewRequestWithContext(ctx, http.MethodGet, filesURL, nil)
+	if err != nil {
+		return nil, fmt.Errorf("build template files request: %w", err)
+	}
+	filesReq.Header.Set("Authorization", authToken)
+
+	httpClient := &http.Client{Timeout: 2 * time.Minute}
+	filesResp, err := httpClient.Do(filesReq)
+	if err != nil {
+		return nil, fmt.Errorf("fetch template u-gen files: %w", err)
+	}
+	defer filesResp.Body.Close()
+
+	filesRespBytes, err := io.ReadAll(filesResp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("read template u-gen files response: %w", err)
+	}
+	if filesResp.StatusCode >= 400 {
+		return nil, fmt.Errorf("fetch template u-gen files returned %d: %s", filesResp.StatusCode, string(filesRespBytes))
+	}
+
+	var result templateMicrofrontendFilesResponse
+	if err = json.Unmarshal(filesRespBytes, &result); err != nil {
+		return nil, fmt.Errorf("parse template u-gen files response: %w", err)
+	}
+
+	files := make([]*pbo.McpProjectFiles, 0, len(result.Data.Files))
+	for _, file := range result.Data.Files {
+		filePath := file.Path
+		if filePath == "" {
+			filePath = file.FilePath
+		}
+		if filePath == "" {
+			continue
+		}
+		files = append(files, &pbo.McpProjectFiles{
+			Path:    filePath,
+			Content: file.Content,
+		})
+	}
+	if len(files) == 0 {
+		return nil, fmt.Errorf("template source repo %s has no microfrontend files", repoID)
+	}
+
+	log.Printf("[ugen-template] loaded %d source files from repo_id=%s", len(files), repoID)
+	return files, nil
 }
 
 func (h *HandlerV1) copyUgenTemplateData(ctx context.Context, sourceService, targetService servicepkg.ServiceManagerI, sourceResourceEnvID, targetResourceEnvID string) error {
