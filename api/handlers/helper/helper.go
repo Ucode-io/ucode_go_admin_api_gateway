@@ -142,6 +142,23 @@ func repairJSONStrings(input string) string {
 	return out.String()
 }
 
+// isSourceFilePath returns true when p looks like a project source file path
+// (relative, non-media). Absolute paths (/images/...) and media assets are
+// false positives from content like heroImages.ts that embeds object literals
+// with "path" properties referencing image URLs.
+func isSourceFilePath(p string) bool {
+	if strings.HasPrefix(p, "/") {
+		return false
+	}
+	lower := strings.ToLower(p)
+	for _, ext := range []string{".jpg", ".jpeg", ".png", ".gif", ".webp", ".ico", ".mp4", ".mp3", ".woff", ".woff2", ".ttf", ".eot", ".otf", ".wav", ".ogg", ".avif"} {
+		if strings.HasSuffix(lower, ext) {
+			return false
+		}
+	}
+	return true
+}
+
 // extractFilesFromString handles the case where the model returns the `files`
 // tool field as a stringified JSON array with unescaped quotes inside content
 // values (which breaks standard JSON parsers and repairJSONStrings).
@@ -151,7 +168,17 @@ func extractFilesFromString(s string) ([]map[string]interface{}, bool) {
 	// Match file-object starts: { optionally preceded by whitespace, then "path": "SIMPLE_PATH"
 	// Paths must not contain quotes or spaces; `{` anchor prevents matching "path" inside content.
 	fileStartRe := regexp.MustCompile(`\{\s*"path"\s*:\s*"([^"\s\\]{1,200})"`)
-	matches := fileStartRe.FindAllStringSubmatchIndex(s, -1)
+	allMatches := fileStartRe.FindAllStringSubmatchIndex(s, -1)
+	if len(allMatches) == 0 {
+		return nil, false
+	}
+
+	matches := allMatches[:0]
+	for _, m := range allMatches {
+		if isSourceFilePath(s[m[2]:m[3]]) {
+			matches = append(matches, m)
+		}
+	}
 	if len(matches) == 0 {
 		return nil, false
 	}
