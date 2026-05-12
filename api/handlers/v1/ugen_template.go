@@ -532,7 +532,7 @@ func (h *HandlerV1) copyTemplateTableDetails(ctx context.Context, sourceService,
 		return fmt.Errorf("get fields for %s: %w", table.GetSlug(), err)
 	}
 	for _, field := range fieldsResp.GetFields() {
-		if skipUgenTemplateField(field.GetSlug(), field.GetType()) {
+		if skipUgenTemplateField(field.GetSlug(), field.GetType(), table.GetIsLoginTable()) {
 			continue
 		}
 		createField, err := convert[*pbo.Field, *pbo.CreateFieldRequest](field)
@@ -555,6 +555,9 @@ func (h *HandlerV1) copyTemplateTableDetails(ctx context.Context, sourceService,
 		return fmt.Errorf("get relations for %s: %w", table.GetSlug(), err)
 	}
 	for _, relation := range relationsResp.GetRelations() {
+		if skipUgenTemplateRelation(table, relation) {
+			continue
+		}
 		relation.ProjectId = targetResourceEnvID
 		relation.EnvId = targetResourceEnvID
 		relation.RelationFieldId = uuid.NewString()
@@ -900,13 +903,35 @@ func skipUgenTemplateTable(slug string) bool {
 	}
 }
 
-func skipUgenTemplateField(slug, fieldType string) bool {
+func skipUgenTemplateField(slug, fieldType string, isLoginTable bool) bool {
 	switch slug {
 	case "guid", "created_at", "updated_at", "deleted_at", "folder_id", "user_id_auth":
 		return true
 	}
+	if isLoginTable {
+		switch slug {
+		case "login", "password", "phone", "email", "tin", "last_activity", "client_type_id", "role_id":
+			return true
+		}
+	}
 	switch fieldType {
 	case "LOOKUP", "LOOKUPS":
+		return true
+	default:
+		return false
+	}
+}
+
+func skipUgenTemplateRelation(table *pbo.Table, relation *pbo.CreateRelationRequest) bool {
+	if !table.GetIsLoginTable() {
+		return false
+	}
+	switch relation.GetTableTo() {
+	case "client_type", "role":
+		return true
+	}
+	switch relation.GetFieldFrom() {
+	case "client_type_id", "role_id":
 		return true
 	default:
 		return false
