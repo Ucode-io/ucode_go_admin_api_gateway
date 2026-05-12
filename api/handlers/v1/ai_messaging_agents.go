@@ -29,18 +29,23 @@ type visualEditOutput struct {
 }
 
 func callWithTool[T any](p *ChatProcessor, _ context.Context, req models.AnthropicToolRequest, timeout time.Duration, description string) (*T, error) {
+	if err := p.checkTokenBudget(); err != nil {
+		return nil, err
+	}
+
 	log.Printf("[AI] Calling Anthropic (tool use): %s", description)
 
 	result, usage, stopReason, err := helper.CallAnthropicWithTool[T](p.baseConf, req, timeout)
 
 	p.recordTokenUsage(usage, req.Model, description)
+	p.deductTokenBudget(int64(usage.InputTokens + usage.OutputTokens))
 
 	if err != nil {
 		if errors.Is(err, helper.ErrMaxTokens) {
 			log.Printf("[AI] max_tokens for %s (in=%d out=%d)", description, usage.InputTokens, usage.OutputTokens)
 			return nil, fmt.Errorf(
 				"❌ Generation stopped: the project is too large to generate in one pass (used %d output tokens). "+
-					"Please describe a smaller scope or break the request into parts.",
+					"Please describe a smaller scope or break the request into parts",
 				usage.OutputTokens,
 			)
 		}
@@ -78,6 +83,10 @@ func (p *ChatProcessor) recordTokenUsage(usage models.ClaudeUsage, model, descri
 }
 
 func (p *ChatProcessor) callAnthropicWithTracking(_ context.Context, req models.AnthropicRequest, timeout time.Duration, description string) (string, error) {
+	if err := p.checkTokenBudget(); err != nil {
+		return "", err
+	}
+
 	log.Printf("[AI] Calling Anthropic: %s", description)
 	response, err := helper.CallAnthropicAPI(p.baseConf, req, timeout)
 	if err != nil {
@@ -90,6 +99,7 @@ func (p *ChatProcessor) callAnthropicWithTracking(_ context.Context, req models.
 	}
 	if jsonErr := json.Unmarshal([]byte(response), &parsed); jsonErr == nil {
 		p.recordTokenUsage(parsed.Usage, req.Model, description)
+		p.deductTokenBudget(int64(parsed.Usage.InputTokens + parsed.Usage.OutputTokens))
 	}
 
 	return response, nil

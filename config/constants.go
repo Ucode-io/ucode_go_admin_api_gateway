@@ -65,7 +65,8 @@ const (
 	PermissionDenied string = "Permission denied"
 	SessionExpired   string = "Session has been expired"
 
-	MainMenuID = "c57eedc3-a954-4262-a0af-376c65b5a284"
+	MainMenuID   = "c57eedc3-a954-4262-a0af-376c65b5a284"
+	MainFolderID = "8a6f913a-e3d4-4b73-9fc0-c942f343d0b9"
 
 	KeyRateMin  = "rate:%s:min:%s"  // ProjectID, 2006-01-02-15-04
 	KeyRateHour = "rate:%s:hour:%s" // ProjectID, 2006-01-02-15

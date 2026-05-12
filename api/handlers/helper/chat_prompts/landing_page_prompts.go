@@ -109,7 +109,7 @@ STEP 5 — Trace all imports. Zero missing files.
 This landing page MUST drop jaws and feel ultra-premium. Every rule below is required:
 
 1. MICRO-INTERACTIONS: Every button, card, image — hover state (hover:-translate-y-1 hover:shadow-2xl duration-300).
-2. GLASSMORPHISM: backdrop-blur-xl, bg-white/5 or bg-black/5 on navbar, floating cards, modals.
+2. GLASSMORPHISM: backdrop-blur-xl, bg-background/10 on floating cards and modals (navbar uses bg-background/70 per NAVBAR spec).
 3. BENTO GRIDS: Asymmetrical CSS Grids (md:col-span-8 + md:col-span-4) for features — never equal boring columns.
 4. TYPOGRAPHY: Hero headline = text-[clamp(56px,8vw,110px)] font-black tracking-tighter + gradient bg-clip-text text-transparent.
 5. SCROLL REVEAL: framer-motion whileInView on every major section with archetype timing.
@@ -131,17 +131,17 @@ Apply ONLY the motion matching the project's design_inspiration token:
 ARCHETYPE CARD + BUTTON STYLES
 ====================================
 Apply ONLY the styles matching the project's design_inspiration:
-  Obsidian:   cards → border border-white/7 bg-surface rounded-xl
+  Obsidian:   cards → border border-border/20 bg-card rounded-xl
               buttons → bg-accent text-background font-semibold shadow-[0_0_24px_hsl(var(--accent)/0.4)]
-  Editorial:  cards → bg-white shadow-sm rounded-sm border border-border
+  Editorial:  cards → bg-card shadow-sm rounded-sm border border-border
               buttons → border-2 border-accent text-accent rounded-none hover:bg-accent hover:text-background
-  Luxury:     cards → border-t border-[hsl(var(--primary)/0.2)] bg-surface
+  Luxury:     cards → border-t border-[hsl(var(--primary)/0.2)] bg-card
               buttons → border border-[hsl(var(--primary)/0.4)] text-primary tracking-widest uppercase text-sm
-  Electric:   cards → border border-accent/20 bg-surface rounded-none
+  Electric:   cards → border border-accent/20 bg-card rounded-none
               buttons → bg-accent text-background font-black style={{transform:'skewX(-2deg)'}} hover:brightness-110
-  Warm Prof:  cards → bg-white rounded-2xl shadow-sm border border-border/50
-              buttons → bg-accent text-white rounded-xl shadow-md hover:shadow-lg hover:-translate-y-0.5
-  Soft Min:   cards → bg-white rounded-3xl shadow-[0_4px_24px_rgba(0,0,0,0.06)]
+  Warm Prof:  cards → bg-card rounded-2xl shadow-sm border border-border/50
+              buttons → bg-accent text-accent-foreground rounded-xl shadow-md hover:shadow-lg hover:-translate-y-0.5
+  Soft Min:   cards → bg-card rounded-3xl shadow-[0_4px_24px_rgba(0,0,0,0.06)]
               buttons → bg-accent/10 text-accent rounded-full border border-accent/20 hover:bg-accent/20
 
 ====================================
@@ -158,12 +158,12 @@ Follow EXACTLY for the detected archetype — do not deviate:
 ====================================
 ARCHETYPE HERO STYLES
 ====================================
-  Obsidian:   bg-[#0a0d12] · grid-line texture via CSS · radial accent glow blur-[120px] · h1 text-[clamp(56px,8vw,110px)] font-black tracking-tight
-  Editorial:  bg-[#fafaf8] · dot-grid background · serif italic accent word · h1 text-[clamp(48px,6vw,96px)]
+  Obsidian:   bg-background · grid-line texture via CSS · radial accent glow blur-[120px] · h1 text-[clamp(56px,8vw,110px)] font-black tracking-tight
+  Editorial:  bg-background · dot-grid background · serif italic accent word · h1 text-[clamp(48px,6vw,96px)]
   Luxury:     full-bleed bg-cover image + dark overlay · h1 Cormorant italic bottom-left positioned · letter-spacing-[0.15em]
-  Electric:   bg-[#0f0f0f] · diagonal stripe accent · h1 font-black text-[clamp(72px,10vw,140px)] · accent color bleeds to edge
-  Warm Prof:  split layout (image right) · bg-[#fffef7] · h1 Plus Jakarta text-[clamp(40px,5vw,72px)] · warm radial glow
-  Soft Min:   centered · bg-[#fdfcfb] · organic blob shapes via clip-path · h1 Fraunces italic text-[clamp(40px,5vw,80px)]
+  Electric:   bg-background · diagonal stripe accent · h1 font-black text-[clamp(72px,10vw,140px)] · accent color bleeds to edge
+  Warm Prof:  split layout (image right) · bg-background · h1 Plus Jakarta text-[clamp(40px,5vw,72px)] · warm radial glow
+  Soft Min:   centered · bg-background · organic blob shapes via clip-path · h1 Fraunces italic text-[clamp(40px,5vw,80px)]
 
 ====================================
 ARCHETYPE TEXTURES (define in index.css hero section)
@@ -203,7 +203,12 @@ Font import map:
   Source Serif 4:     @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@300;400;600&display=swap');
   Inter:              @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-Add CSS variables in :root after @import:
+IMMEDIATELY after @import font lines, add the three Tailwind directives (MANDATORY — without these, ALL Tailwind classes are invisible):
+  @tailwind base;
+  @tailwind components;
+  @tailwind utilities;
+
+Add CSS variables in :root after the Tailwind directives:
   --font-heading: '[font_family]', serif;
   --font-body:    '[body_font]', sans-serif;
   body           { font-family: var(--font-body); }
@@ -489,7 +494,7 @@ FILE GENERATION ORDER (TYPE B — STRICT)
 SCROLL-TO-TOP RULE: NEVER create src/components/ui/scroll-to-top.tsx — implement the button INLINE in LandingPage.tsx.
 UTILS RULE: src/lib/utils.ts exports ONLY cn(). NEVER add formatPrice, formatDate, or any domain helper to utils.ts. Define format helpers INLINE in the component that needs them.
 
- 1. src/index.css                     (@import fonts + :root CSS vars + @keyframes + archetype texture)
+ 1. src/index.css                     (@import fonts → @tailwind base/components/utilities → :root CSS vars → @keyframes → archetype texture)
  2. src/lib/utils.ts                  (cn helper ONLY — export function cn(...inputs: ClassValue[]) { return twMerge(clsx(inputs)); })
  3. src/lib/api.ts                    (ONLY if project has API tables)
  4. src/components/ui/button.tsx
@@ -578,6 +583,7 @@ STRUCTURE
 [ ] src/App.tsx line 1: import React from 'react'; line 2: import './index.css';
 [ ] main.tsx does NOT import index.css
 [ ] Google Font @import at very top of index.css
+[ ] @tailwind base; @tailwind components; @tailwind utilities; present AFTER @import, BEFORE :root
 [ ] --font-heading and --font-body CSS variables defined
 [ ] Heading font applied to h1 h2 h3 elements
 
