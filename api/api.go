@@ -345,6 +345,16 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			mcpProject.DELETE("/:mcp_project_id", h.V1.DeleteMcpProject)
 		}
 
+		ugenTemplate := v1Admin.Group("/ugen-template")
+		{
+			ugenTemplate.POST("", h.V1.CreateUgenTemplate)
+			ugenTemplate.GET("", h.V1.GetUgenTemplateList)
+			ugenTemplate.GET("/:id", h.V1.GetUgenTemplateById)
+			ugenTemplate.PUT("/:id", h.V1.UpdateUgenTemplate)
+			ugenTemplate.DELETE("/:id", h.V1.DeleteUgenTemplate)
+			ugenTemplate.POST("/create-project", h.V1.CreateProjectFromTemplate)
+		}
+
 		customPermission := v1Admin.Group("/custom-permission")
 		{
 			customPermission.POST("", h.V1.CreateCustomPermission)
@@ -584,6 +594,30 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		github.GET("/repos", h.V1.GithubGetRepoList)
 	}
 
+	// Public external GitLab OAuth callback
+	r.GET("/v1/ext-gitlab/callback", h.V1.ExtGitlabCallback)
+
+	extGitlab := r.Group("/v1/ext-gitlab")
+	extGitlab.Use(h.V1.AuthMiddleware(cfg))
+	{
+		extGitlab.GET("/connect", h.V1.ExtGitlabConnect)
+		extGitlab.GET("/integration", h.V1.ExtGitlabGetIntegration)
+		extGitlab.GET("/integration/validate", h.V1.ExtGitlabValidateToken)
+		extGitlab.DELETE("/integration/:id", h.V1.ExtGitlabDeleteIntegration)
+	}
+
+	// Public Bitbucket OAuth callback
+	r.GET("/v1/bitbucket/callback", h.V1.BitbucketCallback)
+
+	bitbucket := r.Group("/v1/bitbucket")
+	bitbucket.Use(h.V1.AuthMiddleware(cfg))
+	{
+		bitbucket.GET("/connect", h.V1.BitbucketConnect)
+		bitbucket.GET("/integration", h.V1.BitbucketGetIntegration)
+		bitbucket.GET("/integration/validate", h.V1.BitbucketValidateToken)
+		bitbucket.DELETE("/integration/:id", h.V1.BitbucketDeleteIntegration)
+	}
+
 	gitlab := r.Group("/v1/gitlab")
 	{
 		gitlab.GET("/login", h.V2.GitlabLogin)
@@ -619,6 +653,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		proxyFunctions.POST("/micro-frontend/promote", h.V1.PromoteMicrofrontendToMaster)
 		proxyFunctions.GET("/micro-frontend/files-at-commit", h.V1.GetMicrofrontendFilesAtCommit)
 		proxyFunctions.POST("/micro-frontend/github-sync", h.V1.GithubSyncMicrofrontend)
+		proxyFunctions.POST("/micro-frontend/ext-gitlab-sync", h.V1.ExtGitlabSyncMicrofrontend)
+		proxyFunctions.POST("/micro-frontend/bitbucket-sync", h.V1.BitbucketSyncMicrofrontend)
 
 		proxyFunctions.GET("/micro-frontend/promote/check-changes", h.V1.CheckPromoteChanges)
 		proxyFunctions.GET("/micro-frontend/promote/pipeline-status/:pipeline_id", h.V1.GetPromotePipelineStatus)
@@ -639,6 +675,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			v2Webhook.POST("/create", h.V2.CreateWebhook)
 			v2Webhook.POST("/handle", h.V2.HandleWebhook)
 			v2Webhook.POST("/github", h.V2.HandleGithubWebhook)
+			v2Webhook.POST("/ext-gitlab", h.V2.HandleExtGitlabWebhook)
+			v2Webhook.POST("/bitbucket", h.V2.HandleBitbucketWebhook)
 		}
 	}
 
