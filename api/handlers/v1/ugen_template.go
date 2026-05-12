@@ -804,17 +804,27 @@ func (h *HandlerV1) copyTemplateMenuTree(ctx context.Context, targetService serv
 }
 
 func isProtectedUgenTemplateMenu(id string) bool {
-	switch id {
-	case "c57eedc3-a954-4262-a0af-376c65b5a284", // root
-		"c57eedc3-a954-4262-a0af-376c65b5a282", // content
-		"c57eedc3-a954-4262-a0af-376c65b5a280", // settings
-		"c57eedc3-a954-4262-a0af-376c65b5a278", // analytics
-		"c57eedc3-a954-4262-a0af-376c65b5a276", // pivot
-		"c57eedc3-a954-4262-a0af-376c65b5a274": // report setting
-		return true
-	default:
-		return false
-	}
+	return protectedUgenTemplateMenuIDs[id]
+}
+
+var protectedUgenTemplateMenuIDs = map[string]bool{
+	"c57eedc3-a954-4262-a0af-376c65b5a284": true, // root
+	"c57eedc3-a954-4262-a0af-376c65b5a282": true, // content
+	"c57eedc3-a954-4262-a0af-376c65b5a280": true, // settings
+	"c57eedc3-a954-4262-a0af-376c65b5a278": true, // analytics
+	"c57eedc3-a954-4262-a0af-376c65b5a276": true, // pivot
+	"c57eedc3-a954-4262-a0af-376c65b5a274": true, // report setting
+	"7c26b15e-2360-4f17-8539-449c8829003f": true, // saved pivot
+	"e96b654a-1692-43ed-89a8-de4d2357d891": true, // history pivot
+	"a8de4296-c8c3-48d6-bef0-ee17057733d6": true, // user and permission
+	"d1b3b349-4200-4ba9-8d06-70299795d5e6": true, // data
+	"f7d1fa7d-b857-4a24-a18c-402345f65df8": true, // code
+	"f313614f-f018-4ddc-a0ce-10a1f5716401": true, // resource
+	"db4ffda3-7696-4f56-9f1f-be128d82ae68": true, // api
+	"3b74ee68-26e3-48c8-bc95-257ca7d6aa5c": true, // profile setting
+	"8a6f913a-e3d4-4b73-9fc0-c942f343d0b9": true, // files
+	"744d63e6-0ab7-4f16-a588-d9129cf959d1": true, // wiki
+	"9e988322-cffd-484c-9ed6-460d8701551b": true, // users
 }
 
 func (h *HandlerV1) publishTemplateMicrofrontend(ctx context.Context, projectName string, files []*pbo.McpProjectFiles, target *models.ProjectData, authToken string) (models.PublishAiMicroFrontendResponse, error) {
