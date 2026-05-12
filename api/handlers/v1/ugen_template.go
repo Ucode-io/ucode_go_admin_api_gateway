@@ -703,6 +703,11 @@ func convertAnyStruct(s *structpb.Struct) (map[string]any, error) {
 func (h *HandlerV1) copyTemplateMenus(ctx context.Context, sourceService, targetService servicepkg.ServiceManagerI, sourceResourceEnvID, targetResourceEnvID string) error {
 	const rootMenuID = "c57eedc3-a954-4262-a0af-376c65b5a284"
 
+	keptTargetMenuIDs, err := h.clearTargetTemplateMenus(ctx, targetService, targetResourceEnvID, rootMenuID)
+	if err != nil {
+		return err
+	}
+
 	tree, err := sourceService.GoObjectBuilderService().Menu().GetMenuTree(ctx, &pbo.MenuPrimaryKey{
 		Id:        rootMenuID,
 		ProjectId: sourceResourceEnvID,
@@ -712,16 +717,66 @@ func (h *HandlerV1) copyTemplateMenus(ctx context.Context, sourceService, target
 	}
 
 	for _, child := range tree.GetChildren() {
-		if err = h.copyTemplateMenuTree(ctx, targetService, child, targetResourceEnvID, rootMenuID); err != nil {
+		if err = h.copyTemplateMenuTree(ctx, targetService, child, targetResourceEnvID, rootMenuID, keptTargetMenuIDs); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (h *HandlerV1) copyTemplateMenuTree(ctx context.Context, targetService servicepkg.ServiceManagerI, menu *pbo.MenuTree, targetResourceEnvID, parentID string) error {
+func (h *HandlerV1) clearTargetTemplateMenus(ctx context.Context, targetService servicepkg.ServiceManagerI, targetResourceEnvID, rootMenuID string) (map[string]bool, error) {
+	tree, err := targetService.GoObjectBuilderService().Menu().GetMenuTree(ctx, &pbo.MenuPrimaryKey{
+		Id:        rootMenuID,
+		ProjectId: targetResourceEnvID,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("get target menu tree: %w", err)
+	}
+
+	keptMenuIDs := map[string]bool{
+		rootMenuID: true,
+	}
+	for _, child := range tree.GetChildren() {
+		if err = h.clearTargetTemplateMenuTree(ctx, targetService, child, targetResourceEnvID, keptMenuIDs); err != nil {
+			return nil, err
+		}
+	}
+	return keptMenuIDs, nil
+}
+
+func (h *HandlerV1) clearTargetTemplateMenuTree(ctx context.Context, targetService servicepkg.ServiceManagerI, menu *pbo.MenuTree, targetResourceEnvID string, keptMenuIDs map[string]bool) error {
+	for _, child := range menu.GetChildren() {
+		if err := h.clearTargetTemplateMenuTree(ctx, targetService, child, targetResourceEnvID, keptMenuIDs); err != nil {
+			return err
+		}
+	}
+
+	if isProtectedUgenTemplateMenu(menu.GetId()) {
+		keptMenuIDs[menu.GetId()] = true
+		return nil
+	}
+
+	if _, err := targetService.GoObjectBuilderService().Menu().Delete(ctx, &pbo.MenuPrimaryKey{
+		Id:        menu.GetId(),
+		ProjectId: targetResourceEnvID,
+		EnvId:     targetResourceEnvID,
+	}); err != nil {
+		return fmt.Errorf("delete target menu %s: %w", menu.GetLabel(), err)
+	}
+	return nil
+}
+
+func (h *HandlerV1) copyTemplateMenuTree(ctx context.Context, targetService servicepkg.ServiceManagerI, menu *pbo.MenuTree, targetResourceEnvID, parentID string, keptTargetMenuIDs map[string]bool) error {
+	if keptTargetMenuIDs[menu.GetId()] {
+		for _, child := range menu.GetChildren() {
+			if err := h.copyTemplateMenuTree(ctx, targetService, child, targetResourceEnvID, menu.GetId(), keptTargetMenuIDs); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+
 	created, err := targetService.GoObjectBuilderService().Menu().Create(ctx, &pbo.CreateMenuRequest{
-		Id:              menu.GetId(),
 		Label:           menu.GetLabel(),
 		Icon:            menu.GetIcon(),
 		Type:            menu.GetType(),
@@ -741,11 +796,25 @@ func (h *HandlerV1) copyTemplateMenuTree(ctx context.Context, targetService serv
 	}
 
 	for _, child := range menu.GetChildren() {
-		if err = h.copyTemplateMenuTree(ctx, targetService, child, targetResourceEnvID, created.GetId()); err != nil {
+		if err = h.copyTemplateMenuTree(ctx, targetService, child, targetResourceEnvID, created.GetId(), keptTargetMenuIDs); err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+func isProtectedUgenTemplateMenu(id string) bool {
+	switch id {
+	case "c57eedc3-a954-4262-a0af-376c65b5a284", // root
+		"c57eedc3-a954-4262-a0af-376c65b5a282", // content
+		"c57eedc3-a954-4262-a0af-376c65b5a280", // settings
+		"c57eedc3-a954-4262-a0af-376c65b5a278", // analytics
+		"c57eedc3-a954-4262-a0af-376c65b5a276", // pivot
+		"c57eedc3-a954-4262-a0af-376c65b5a274": // report setting
+		return true
+	default:
+		return false
+	}
 }
 
 func (h *HandlerV1) publishTemplateMicrofrontend(ctx context.Context, projectName string, files []*pbo.McpProjectFiles, target *models.ProjectData, authToken string) (models.PublishAiMicroFrontendResponse, error) {
