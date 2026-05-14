@@ -549,9 +549,21 @@ func (h *HandlerV1) CreateProjectFromTemplate(c *gin.Context) {
 		return
 	}
 
-	published, err := h.publishTemplateMicrofrontend(ctx, projectName, sourceMcpFiles, targetProjectData, c.GetHeader("Authorization"))
+	published, err := h.publishTemplateMicrofrontend(ctx, projectName, sourceMcpFiles, targetProjectData, mainResourceEnvID, c.GetHeader("Authorization"))
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, fmt.Sprintf("publish template microfrontend: %v", err))
+		return
+	}
+
+	if _, err = mainService.GoObjectBuilderService().McpProject().UpdateMcpProject(ctx, &pbo.McpProject{
+		ResourceEnvId:       mainResourceEnvID,
+		Id:                  newMcpProject.GetId(),
+		MicrofrontendId:     published.Data.ID,
+		MicrofrontendRepoId: published.Data.RepoId,
+		MicrofrontendBranch: published.Data.Branch,
+		MicrofrontendUrl:    published.Data.Url,
+	}); err != nil {
+		h.HandleResponse(c, status_http.GRPCError, fmt.Sprintf("save template microfrontend refs: %v", err))
 		return
 	}
 
@@ -1027,7 +1039,7 @@ var protectedUgenTemplateMenuIDs = map[string]bool{
 	"9e988322-cffd-484c-9ed6-460d8701551b": true, // users
 }
 
-func (h *HandlerV1) publishTemplateMicrofrontend(ctx context.Context, projectName string, files []*pbo.McpProjectFiles, target *models.ProjectData, authToken string) (models.PublishAiMicroFrontendResponse, error) {
+func (h *HandlerV1) publishTemplateMicrofrontend(ctx context.Context, projectName string, files []*pbo.McpProjectFiles, target *models.ProjectData, mainResourceEnvID, authToken string) (models.PublishAiMicroFrontendResponse, error) {
 	pubFiles := make([]models.GitlabFileChange, 0, len(files))
 	for _, file := range files {
 		if file.GetPath() == "" {
@@ -1043,12 +1055,14 @@ func (h *HandlerV1) publishTemplateMicrofrontend(ctx context.Context, projectNam
 	}
 
 	publishBody := models.PublishAiMicroFrontendRequest{
-		ProjectId:     target.UcodeProjectId,
-		EnvironmentId: target.EnvironmentId,
-		Name:          slugify(projectName),
-		Path:          uniqueMFEPath(),
-		FrameworkType: "REACT",
-		Files:         pubFiles,
+		ProjectId:        target.UcodeProjectId,
+		EnvironmentId:    target.EnvironmentId,
+		Name:             slugify(projectName),
+		Path:             uniqueMFEPath(),
+		FrameworkType:    "REACT",
+		Files:            pubFiles,
+		McpProjectId:     target.McpProjectId,
+		McpResourceEnvId: mainResourceEnvID,
 	}
 
 	pubBytes, err := json.Marshal(publishBody)

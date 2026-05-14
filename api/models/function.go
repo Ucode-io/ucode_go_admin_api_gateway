@@ -29,12 +29,14 @@ type GitlabUpdateFileRequest struct {
 // PublishAiMicroFrontendRequest is sent to the function service to create a
 // microfrontend and push AI-generated files to the u-gen branch.
 type PublishAiMicroFrontendRequest struct {
-	ProjectId     string             `json:"project_id"`
-	EnvironmentId string             `json:"environment_id"`
-	Name          string             `json:"name"`
-	Path          string             `json:"path"`
-	FrameworkType string             `json:"framework_type"`
-	Files         []GitlabFileChange `json:"files"`
+	ProjectId        string             `json:"project_id"`
+	EnvironmentId    string             `json:"environment_id"`
+	Name             string             `json:"name"`
+	Path             string             `json:"path"`
+	FrameworkType    string             `json:"framework_type"`
+	Files            []GitlabFileChange `json:"files"`
+	McpProjectId     string             `json:"mcp_project_id,omitempty"`
+	McpResourceEnvId string             `json:"mcp_resource_env_id,omitempty"`
 }
 
 // PublishAiMicroFrontendResponse holds the fields we need from the function
@@ -152,7 +154,6 @@ type ManualSaveMcpProjectRequest struct {
 	MicrofrontendID string             `json:"microfrontend_id,omitempty"`
 }
 
-
 type MicrofrontendSnapshot struct {
 	ID              string             `json:"id"`
 	MicrofrontendID string             `json:"microfrontend_id"`
@@ -188,4 +189,3 @@ type GetListCustomEventsStruct struct {
 	Method    string
 	Resource  *pb.ServiceResourceModel
 }
-
