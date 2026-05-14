@@ -454,12 +454,14 @@ func (p *ChatProcessor) publishToMicrofrontend(ctx context.Context, projectName,
 		safeName, safePath, projectData.UcodeProjectId, projectData.EnvironmentId, len(initFiles), len(allFiles))
 
 	createBody := models.PublishAiMicroFrontendRequest{
-		ProjectId:     projectData.UcodeProjectId,
-		EnvironmentId: projectData.EnvironmentId,
-		Name:          safeName,
-		Path:          safePath,
-		FrameworkType: "REACT",
-		Files:         initFiles,
+		ProjectId:        projectData.UcodeProjectId,
+		EnvironmentId:    projectData.EnvironmentId,
+		Name:             safeName,
+		Path:             safePath,
+		FrameworkType:    "REACT",
+		Files:            initFiles,
+		McpProjectId:     projectData.McpProjectId,
+		McpResourceEnvId: p.resourceEnvId,
 	}
 
 	createBytes, err := json.Marshal(createBody)
@@ -490,6 +492,18 @@ func (p *ChatProcessor) publishToMicrofrontend(ctx context.Context, projectName,
 	p.microFrontendRepoId = createResult.Data.RepoId
 	if p.microFrontendResourceEnvId == "" {
 		p.microFrontendResourceEnvId = projectData.ResourceEnvId
+	}
+	if projectData.McpProjectId != "" && p.resourceEnvId != "" {
+		if _, updateErr := p.service.GoObjectBuilderService().McpProject().UpdateMcpProject(ctx, &nb.McpProject{
+			ResourceEnvId:       p.resourceEnvId,
+			Id:                  projectData.McpProjectId,
+			MicrofrontendId:     createResult.Data.ID,
+			MicrofrontendRepoId: createResult.Data.RepoId,
+			MicrofrontendBranch: createResult.Data.Branch,
+			MicrofrontendUrl:    createResult.Data.Url,
+		}); updateErr != nil {
+			return "", fmt.Errorf("save microfrontend refs on MCP project: %w", updateErr)
+		}
 	}
 	log.Printf("[MICROFRONTEND] repo created: id=%s repo_id=%s url=%s", createResult.Data.ID, createResult.Data.RepoId, createResult.Data.Url)
 

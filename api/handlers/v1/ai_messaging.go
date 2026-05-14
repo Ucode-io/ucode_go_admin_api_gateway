@@ -471,6 +471,7 @@ func (p *ChatProcessor) getExistingProjectData(ctx context.Context) (*models.Pro
 
 	return &models.ProjectData{
 		UcodeProjectId: ucodeProjectId,
+		McpProjectId:   p.mcpProjectId,
 		EnvironmentId:  env.GetId(),
 		ResourceEnvId:  env.GetResourceEnvironmentId(),
 		ApiKey:         apiKey,
