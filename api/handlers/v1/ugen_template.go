@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"ucode/ucode_go_api_gateway/api/models"
@@ -36,12 +37,196 @@ func (h *HandlerV1) CreateUgenTemplate(c *gin.Context) {
 		return
 	}
 
+	if err := h.enrichCreateUgenTemplateSource(c, &req); err != nil {
+		h.HandleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
 	resp, err := h.companyServices.UgenTemplate().Create(c.Request.Context(), &req)
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 	h.HandleResponse(c, status_http.OK, resp)
+}
+
+func (h *HandlerV1) enrichCreateUgenTemplateSource(c *gin.Context, req *pb.CreateUgenTemplateReq) error {
+	ctx := c.Request.Context()
+
+	if req.GetMcpProjectId() == "" {
+		return fmt.Errorf("mcp_project_id is required")
+	}
+	if req.GetSourceResourceEnvId() == "" {
+		return fmt.Errorf("source_resource_env_id is required")
+	}
+	if req.GetSourceFunctionId() == "" {
+		return fmt.Errorf("source_function_id is required")
+	}
+
+	sourceMcpResourceEnvID, sourceMcpProjectID, sourceMcpNodeType, err := h.resolveTemplateSourceMcpResource(ctx, c, req.GetSourceMcpResourceEnvId())
+	if err != nil {
+		return err
+	}
+	req.SourceMcpResourceEnvId = sourceMcpResourceEnvID
+
+	sourceMcpService, err := h.GetProjectSrvc(ctx, sourceMcpProjectID, sourceMcpNodeType)
+	if err != nil {
+		return fmt.Errorf("get source mcp project service: %w", err)
+	}
+
+	if _, err = sourceMcpService.GoObjectBuilderService().McpProject().GetMcpProjectFiles(
+		ctx,
+		&pbo.McpProjectId{
+			ResourceEnvId: sourceMcpResourceEnvID,
+			Id:            req.GetMcpProjectId(),
+			WithoutFiles:  true,
+		},
+	); err != nil {
+		return fmt.Errorf("get source mcp project: %w", err)
+	}
+
+	sourceDataResourceEnv, err := h.companyServices.Resource().GetResourceEnvironment(
+		ctx,
+		&pb.GetResourceEnvironmentReq{Id: req.GetSourceResourceEnvId()},
+	)
+	if err != nil {
+		return fmt.Errorf("get source resource env: %w", err)
+	}
+	if sourceDataResourceEnv.GetProjectId() == "" || sourceDataResourceEnv.GetEnvironmentId() == "" {
+		return fmt.Errorf("source_resource_env_id does not resolve project/environment")
+	}
+	if sourceDataResourceEnv.GetServiceType() != 0 && sourceDataResourceEnv.GetServiceType() != int32(pb.ServiceType_BUILDER_SERVICE) {
+		return fmt.Errorf("source_resource_env_id must belong to builder service")
+	}
+	if sourceDataResourceEnv.GetResourceType() != 0 && sourceDataResourceEnv.GetResourceType() != int32(pb.ResourceType_POSTGRESQL) {
+		return fmt.Errorf("source_resource_env_id must belong to postgres resource")
+	}
+
+	sourceDataResource, err := h.companyServices.ServiceResource().GetSingle(
+		ctx,
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     sourceDataResourceEnv.GetProjectId(),
+			EnvironmentId: sourceDataResourceEnv.GetEnvironmentId(),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		return fmt.Errorf("get source builder resource: %w", err)
+	}
+	if sourceDataResource.GetResourceEnvironmentId() != "" && sourceDataResource.GetResourceEnvironmentId() != req.GetSourceResourceEnvId() {
+		return fmt.Errorf("source_resource_env_id does not match source project's builder resource")
+	}
+
+	sourceNodeType := sourceDataResource.GetNodeType()
+	if sourceNodeType == "" {
+		sourceNodeType = sourceDataResourceEnv.GetNodeType()
+	}
+	if sourceNodeType == "" {
+		return fmt.Errorf("source_node_type could not be resolved")
+	}
+
+	req.SourceProjectId = sourceDataResourceEnv.GetProjectId()
+	req.SourceEnvironmentId = sourceDataResourceEnv.GetEnvironmentId()
+	req.SourceNodeType = sourceNodeType
+
+	sourceDataService, err := h.GetProjectSrvc(ctx, req.GetSourceProjectId(), req.GetSourceNodeType())
+	if err != nil {
+		return fmt.Errorf("get source data project service: %w", err)
+	}
+
+	sourceFunction, err := sourceDataService.GoObjectBuilderService().Function().GetSingle(
+		ctx,
+		&pbo.FunctionPrimaryKey{
+			Id:        req.GetSourceFunctionId(),
+			ProjectId: req.GetSourceResourceEnvId(),
+		},
+	)
+	if err != nil {
+		return fmt.Errorf("get source function: %w", err)
+	}
+
+	if req.GetSourceRepoId() == "" {
+		req.SourceRepoId = sourceFunction.GetRepoId()
+	} else if sourceFunction.GetRepoId() != "" && req.GetSourceRepoId() != sourceFunction.GetRepoId() {
+		return fmt.Errorf("source_repo_id does not match source_function_id repo_id")
+	}
+	if req.GetSourceRepoId() == "" {
+		return fmt.Errorf("source_repo_id is required")
+	}
+
+	if req.GetPreviewUrl() == "" && sourceFunction.GetUrl() != "" {
+		req.PreviewUrl = normalizeUgenTemplatePreviewURL(sourceFunction.GetUrl())
+	}
+
+	return nil
+}
+
+func (h *HandlerV1) resolveTemplateSourceMcpResource(ctx context.Context, c *gin.Context, resourceEnvID string) (string, string, string, error) {
+	if resourceEnvID != "" {
+		resEnv, err := h.companyServices.Resource().GetResourceEnvironment(
+			ctx,
+			&pb.GetResourceEnvironmentReq{Id: resourceEnvID},
+		)
+		if err != nil {
+			return "", "", "", fmt.Errorf("get source mcp resource env: %w", err)
+		}
+		if resEnv.GetProjectId() == "" || resEnv.GetEnvironmentId() == "" {
+			return "", "", "", fmt.Errorf("source_mcp_resource_env_id does not resolve project/environment")
+		}
+		nodeType := resEnv.GetNodeType()
+		if nodeType == "" {
+			resource, err := h.companyServices.ServiceResource().GetSingle(
+				ctx,
+				&pb.GetSingleServiceResourceReq{
+					ProjectId:     resEnv.GetProjectId(),
+					EnvironmentId: resEnv.GetEnvironmentId(),
+					ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+				},
+			)
+			if err != nil {
+				return "", "", "", fmt.Errorf("get source mcp builder resource: %w", err)
+			}
+			nodeType = resource.GetNodeType()
+		}
+		if nodeType == "" {
+			return "", "", "", fmt.Errorf("source mcp node_type could not be resolved")
+		}
+		return resourceEnvID, resEnv.GetProjectId(), nodeType, nil
+	}
+
+	projectID, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectID.(string)) {
+		return "", "", "", config.ErrProjectIdValid
+	}
+	environmentID, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentID.(string)) {
+		return "", "", "", config.ErrEnvironmentIdValid
+	}
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		ctx,
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectID.(string),
+			EnvironmentId: environmentID.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		return "", "", "", fmt.Errorf("get current builder resource: %w", err)
+	}
+	if resource.GetResourceEnvironmentId() == "" || resource.GetNodeType() == "" {
+		return "", "", "", fmt.Errorf("current builder resource is incomplete")
+	}
+
+	return resource.GetResourceEnvironmentId(), projectID.(string), resource.GetNodeType(), nil
+}
+
+func normalizeUgenTemplatePreviewURL(rawURL string) string {
+	rawURL = strings.TrimSpace(rawURL)
+	if rawURL == "" || strings.HasPrefix(rawURL, "http://") || strings.HasPrefix(rawURL, "https://") {
+		return rawURL
+	}
+	return "https://" + strings.TrimPrefix(rawURL, "//")
 }
 
 func (h *HandlerV1) GetUgenTemplateById(c *gin.Context) {
