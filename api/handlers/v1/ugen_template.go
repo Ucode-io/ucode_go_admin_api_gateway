@@ -520,6 +520,20 @@ func (h *HandlerV1) CreateProjectFromTemplate(c *gin.Context) {
 		return
 	}
 
+	chat, err := mainService.GoObjectBuilderService().AiChat().CreateChat(
+		ctx,
+		&pbo.CreateChatRequest{
+			ResourceEnvId: mainResourceEnvID,
+			ProjectId:     newMcpProject.GetId(),
+			Title:         projectName,
+			Description:   "Created from template: " + tmpl.GetName(),
+		},
+	)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, fmt.Sprintf("create template project chat: %v", err))
+		return
+	}
+
 	targetProjectData := &models.ProjectData{
 		McpProjectId:   newMcpProject.GetId(),
 		UcodeProjectId: targetProject.GetProjectId(),
@@ -546,6 +560,7 @@ func (h *HandlerV1) CreateProjectFromTemplate(c *gin.Context) {
 		"ucode_project_id":           targetProject.GetProjectId(),
 		"environment_id":             targetEnv.GetId(),
 		"mcp_project_id":             newMcpProject.GetId(),
+		"chat_id":                    chat.GetId(),
 		"api_key":                    apiKey,
 		"resource_env_id":            targetProjectData.ResourceEnvId,
 		"main_resource_env_id":       mainResourceEnvID,
