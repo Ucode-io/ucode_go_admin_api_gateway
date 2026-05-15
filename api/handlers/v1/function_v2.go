@@ -440,6 +440,8 @@ func (h *HandlerV1) FunctionRun(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetAllNewFunctionsForApp(c *gin.Context) {
+	includeCustomEvents := c.DefaultQuery("include_custom_events", "false") == "true"
+
 	limit, err := h.getLimitParam(c)
 	if err != nil {
 		h.HandleResponse(c, status_http.InvalidArgument, err.Error())
@@ -486,11 +488,12 @@ func (h *HandlerV1) GetAllNewFunctionsForApp(c *gin.Context) {
 	case pb.ResourceType_MONGODB:
 		resp, err := services.GetBuilderServiceByType(resource.NodeType).Function().GetList(
 			c.Request.Context(), &obs.GetAllFunctionsRequest{
-				Search:    c.Query("search"),
-				Limit:     int32(limit),
-				Offset:    int32(offset),
-				ProjectId: resource.ResourceEnvironmentId,
-				Type:      []string{config.FUNCTION, config.KNATIVE, config.WORKFLOW},
+				Search:              c.Query("search"),
+				Limit:               int32(limit),
+				Offset:              int32(offset),
+				ProjectId:           resource.ResourceEnvironmentId,
+				Type:                []string{config.FUNCTION, config.KNATIVE, config.WORKFLOW},
+				IncludeCustomEvents: includeCustomEvents,
 			},
 		)
 		if err != nil {
@@ -502,11 +505,12 @@ func (h *HandlerV1) GetAllNewFunctionsForApp(c *gin.Context) {
 	case pb.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderService().Function().GetList(
 			c.Request.Context(), &nb.GetAllFunctionsRequest{
-				Search:    c.Query("search"),
-				Limit:     int32(limit),
-				Offset:    int32(offset),
-				ProjectId: resource.ResourceEnvironmentId,
-				Type:      []string{config.FUNCTION, config.KNATIVE, config.WORKFLOW},
+				Search:              c.Query("search"),
+				Limit:               int32(limit),
+				Offset:              int32(offset),
+				ProjectId:           resource.ResourceEnvironmentId,
+				Type:                []string{config.FUNCTION, config.KNATIVE, config.WORKFLOW},
+				IncludeCustomEvents: includeCustomEvents,
 			},
 		)
 		if err != nil {

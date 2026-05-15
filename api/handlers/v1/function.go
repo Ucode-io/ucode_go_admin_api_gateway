@@ -181,6 +181,7 @@ func (h *HandlerV1) GetFunctionByID(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetAllFunctions(c *gin.Context) {
+	includeCustomEvents := c.DefaultQuery("include_custom_events", "false") == "true"
 
 	limit, err := h.getLimitParam(c)
 	if err != nil {
@@ -229,9 +230,10 @@ func (h *HandlerV1) GetAllFunctions(c *gin.Context) {
 		resp, err := services.GetBuilderServiceByType(resource.NodeType).Function().GetList(
 			c.Request.Context(),
 			&obs.GetAllFunctionsRequest{
-				Search:    c.DefaultQuery("search", ""),
-				Limit:     int32(limit),
-				ProjectId: resource.ResourceEnvironmentId,
+				Search:              c.DefaultQuery("search", ""),
+				Limit:               int32(limit),
+				ProjectId:           resource.ResourceEnvironmentId,
+				IncludeCustomEvents: includeCustomEvents,
 			},
 		)
 		if err != nil {
@@ -244,9 +246,10 @@ func (h *HandlerV1) GetAllFunctions(c *gin.Context) {
 		resp, err := services.GoObjectBuilderService().Function().GetList(
 			c.Request.Context(),
 			&nb.GetAllFunctionsRequest{
-				Search:    c.DefaultQuery("search", ""),
-				Limit:     int32(limit),
-				ProjectId: resource.ResourceEnvironmentId,
+				Search:              c.DefaultQuery("search", ""),
+				Limit:               int32(limit),
+				ProjectId:           resource.ResourceEnvironmentId,
+				IncludeCustomEvents: includeCustomEvents,
 			},
 		)
 		if err != nil {
