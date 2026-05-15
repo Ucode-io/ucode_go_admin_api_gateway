@@ -12,11 +12,13 @@ import (
 )
 
 func (p *ChatProcessor) routeAndProcess(ctx context.Context, req models.NewMessageReq, chatHistory []models.ChatMessage) (*models.ParsedClaudeResponse, error) {
-	p.initTokenBudget(ctx)
-
-	if err := p.checkTokenBudget(); err != nil {
-		return nil, err
-	}
+	// Token budget enforcement is temporarily disabled.
+	// Usage is still recorded after Anthropic calls for pricing analytics.
+	// p.initTokenBudget(ctx)
+	//
+	// if err := p.checkTokenBudget(); err != nil {
+	// 	return nil, err
+	// }
 
 	if len(req.Context) > 0 {
 		if p.mcpProjectId == "" && p.microFrontendId == "" {
