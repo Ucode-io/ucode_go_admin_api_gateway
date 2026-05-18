@@ -325,6 +325,86 @@ export default function FallbackPage() {
 	}
 }
 
+func TestValidateAdminPanelUIQuality_GenericTableOnly(t *testing.T) {
+	files := []models.ProjectFile{
+		{
+			Path: "src/pages/ContactsPage.tsx",
+			Content: `import React from 'react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+export default function ContactsPage() {
+  return <div><h1>Contacts</h1><Table><TableHeader><TableRow><TableHead>Name</TableHead></TableRow></TableHeader><TableBody><TableRow><TableCell>Anna</TableCell></TableRow></TableBody></Table></div>;
+}`,
+		},
+	}
+
+	errors := validateAdminPanelUIQuality(files)
+	found := false
+	for _, e := range errors {
+		if e.Severity == "error" && contains(e.Message, "generic table-only CRUD") {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Errorf("expected admin UI quality error for table-only CRUD, got %d errors: %v", len(errors), errors)
+	}
+}
+
+func TestValidateAdminPanelUIQuality_BasicKanban(t *testing.T) {
+	files := []models.ProjectFile{
+		{
+			Path: "src/pages/LeadsPage.tsx",
+			Content: `import React from 'react';
+export default function LeadsPage() {
+  return <div><h1>Kanban</h1><section><h2>Discovery</h2><div>Wayne Security Audit</div></section><section><h2>Qualification</h2></section><section><h2>Proposal</h2></section></div>;
+}`,
+		},
+	}
+
+	errors := validateAdminPanelUIQuality(files)
+	found := false
+	for _, e := range errors {
+		if e.Severity == "error" && contains(e.Message, "kanban board is too basic") {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Errorf("expected admin UI quality error for basic kanban, got %d errors: %v", len(errors), errors)
+	}
+}
+
+func TestValidateAdminPanelUIQuality_PremiumTablePasses(t *testing.T) {
+	files := []models.ProjectFile{
+		{
+			Path: "src/pages/ContactsPage.tsx",
+			Content: `import React from 'react';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+export default function ContactsPage() {
+  const isLoading = false;
+  return <div>
+    <div className="grid grid-cols-4"><Card>Total contacts</Card><Card>Qualified</Card><Card>Needs follow-up</Card><Card>New this week</Card></div>
+    <div><Input placeholder="Search" /><Select /></div>
+    <Table><TableHeader><TableRow><TableHead>Name</TableHead></TableRow></TableHeader><TableBody>{isLoading ? <TableRow><TableCell><Skeleton /></TableCell></TableRow> : <TableRow className="group hover:bg-muted/40"><TableCell><Badge>Active</Badge><span className="group-hover:opacity-100">Actions</span></TableCell></TableRow>}</TableBody></Table>
+    <div>Pagination Previous Next empty state</div>
+  </div>;
+}`,
+		},
+	}
+
+	errors := validateAdminPanelUIQuality(files)
+	for _, e := range errors {
+		if e.Severity == "error" {
+			t.Errorf("unexpected admin UI quality error: [%s] %s", e.File, e.Message)
+		}
+	}
+}
+
 // TestValidate_ExportBraces — export { X, Y, Z } pattern detected.
 func TestValidate_ExportBraces(t *testing.T) {
 	files := []models.ProjectFile{

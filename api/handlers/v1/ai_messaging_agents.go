@@ -1110,6 +1110,9 @@ func (p *ChatProcessor) validateAndRepairGeneratedProject(ctx context.Context, p
 	var errorCount int
 	for pass := 1; pass <= maxRepairPasses; pass++ {
 		validationErrors := validateGeneratedProject(project.Files, project.Env)
+		if projectType == "admin_panel" {
+			validationErrors = append(validationErrors, validateAdminPanelUIQuality(project.Files)...)
+		}
 		errorCount, _ = logValidationResults(validationErrors)
 		if errorCount == 0 {
 			if pass > 1 {
@@ -1136,6 +1139,9 @@ func (p *ChatProcessor) validateAndRepairGeneratedProject(ctx context.Context, p
 	}
 
 	finalErrors := validateGeneratedProject(project.Files, project.Env)
+	if projectType == "admin_panel" {
+		finalErrors = append(finalErrors, validateAdminPanelUIQuality(project.Files)...)
+	}
 	errorCount, _ = logValidationResults(finalErrors)
 	return errorCount
 }
