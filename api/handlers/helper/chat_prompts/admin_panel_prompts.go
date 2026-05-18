@@ -32,6 +32,15 @@ LAYER 1 — MCP (Foundation)
     NavItem, TableColumn  → ALWAYS from '@/types/common', never from '@/types'
     Entity interfaces     → ALWAYS from '@/types' (Contact, Order, etc. generated per project)
     apiClient             → ALWAYS from '@/config/axios' — never create new axios instance
+    NEVER use leading-slash absolute imports like '/src/components/layout/Layout'.
+      WRONG: import Layout from '/src/components/layout/Layout'
+      RIGHT: import Layout from '@/components/layout/Layout'
+      RIGHT: import Layout from './components/layout/Layout' (only from src/App.tsx)
+    A React component MUST NEVER render itself directly.
+      WRONG: export function Layout() { return <Layout><main /></Layout> }
+      RIGHT: export function Layout({ children }) { return <div>{children}</div> }
+      RIGHT: export function Layout() { return <main><Outlet /></main> }
+      App may render <Layout />, but Layout itself must render children, Outlet, div, main, aside, etc. — never <Layout />.
 
 LAYER 2 — Skills (Generated Code)
   All UI components, layouts, features, pages you generate.
