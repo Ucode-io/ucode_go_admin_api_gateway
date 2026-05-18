@@ -249,6 +249,12 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v2Slim.GET("/object-slim/get-list/:collection", h.V1.GetListSlimV2)
 	}
 
+	v1Public := r.Group("/v1")
+	{
+		v1Public.GET("/ugen-template/public", h.V1.GetUgenTemplateList)
+		v1Public.GET("/ugen-template/public/:id", h.V1.GetUgenTemplateById)
+	}
+
 	v1Admin := r.Group("/v1")
 	v1Admin.Use(h.V1.AdminAuthMiddleware())
 	{
