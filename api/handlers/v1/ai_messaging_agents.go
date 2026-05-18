@@ -255,21 +255,7 @@ func (p *ChatProcessor) generateCodeSingle(ctx context.Context, clarified string
 	project.Files = injectEnvFile(project.Files, p.baseConf.UcodeBaseUrl, apiKey)
 
 	// ── POST-GENERATION VALIDATION + REPAIR ──
-	p.emitter().Emit(SSEEvent{Type: EvProgress, Icon: "shield-check", Message: "Проверяю импорты и зависимости...", Percent: 83})
-	validationErrors := validateGeneratedProject(project.Files, project.Env)
-	errorCount, _ := logValidationResults(validationErrors)
-
-	if errorCount > 0 {
-		p.emitter().Emit(SSEEvent{Type: EvRepair, Icon: "wrench", Message: "Исправляю найденные проблемы", Value: fmt.Sprintf("%d ошибок", errorCount), Percent: 84})
-		log.Printf("[generate] 🔧 attempting Haiku repair for %d broken files...", errorCount)
-		repaired := p.repairBrokenFiles(ctx, project.Files, validationErrors)
-		if len(repaired) > 0 {
-			applyRepairs(project.Files, repaired)
-			postErrors := validateGeneratedProject(project.Files, project.Env)
-			postCount, _ := logValidationResults(postErrors)
-			log.Printf("[generate] post-repair: %d errors remaining (was %d)", postCount, errorCount)
-		}
-	}
+	errorCount := p.validateAndRepairGeneratedProject(ctx, project, plan.ProjectType, 83)
 
 	log.Printf("[generate] done: %d files (type=%s, %d validation errors)", len(project.Files), plan.ProjectType, errorCount)
 	return &models.ParsedClaudeResponse{Project: project}, nil
@@ -584,28 +570,7 @@ func (p *ChatProcessor) generateCodeChunkedAdminPanel(ctx context.Context, clari
 			Value:   fmt.Sprintf("%d файлов", len(merged.Files)),
 		},
 	)
-	validationErrors := validateGeneratedProject(merged.Files, merged.Env)
-	errorCount, _ := logValidationResults(validationErrors)
-
-	if errorCount > 0 {
-		emit.Emit(
-			SSEEvent{
-				Type:    EvRepair,
-				Icon:    "wrench",
-				Percent: 82,
-				Message: "Автоматически исправляю проблемы",
-				Value:   fmt.Sprintf("%d ошибок", errorCount),
-			},
-		)
-		log.Printf("[chunked] 🔧 attempting Haiku repair for %d broken files...", errorCount)
-		repaired := p.repairBrokenFiles(ctx, merged.Files, validationErrors)
-		if len(repaired) > 0 {
-			applyRepairs(merged.Files, repaired)
-			postErrors := validateGeneratedProject(merged.Files, merged.Env)
-			postCount, _ := logValidationResults(postErrors)
-			log.Printf("[chunked] post-repair: %d errors remaining (was %d)", postCount, errorCount)
-		}
-	}
+	errorCount := p.validateAndRepairGeneratedProject(ctx, merged, plan.ProjectType, 80)
 
 	log.Printf("[chunked] done: %d total files (%d feature groups, %d failed, %d validation errors)", len(merged.Files), totalChunks, failedCount, errorCount)
 	return &models.ParsedClaudeResponse{Project: merged}, nil
@@ -1126,6 +1091,59 @@ export default function App() {
 	}
 
 	return files
+}
+
+func (p *ChatProcessor) validateAndRepairGeneratedProject(ctx context.Context, project *models.GeneratedProject, projectType string, startPercent int) int {
+	const maxRepairPasses = 3
+
+	if project == nil {
+		return 0
+	}
+
+	p.emitter().Emit(SSEEvent{
+		Type:    EvProgress,
+		Icon:    "shield-check",
+		Message: "Проверяю build-safety, маршруты и страницы...",
+		Percent: startPercent,
+	})
+
+	var errorCount int
+	for pass := 1; pass <= maxRepairPasses; pass++ {
+		validationErrors := validateGeneratedProject(project.Files, project.Env)
+		if projectType == "admin_panel" {
+			validationErrors = append(validationErrors, validateAdminPanelUIQuality(project.Files)...)
+		}
+		errorCount, _ = logValidationResults(validationErrors)
+		if errorCount == 0 {
+			if pass > 1 {
+				p.emitter().Emit(SSEEvent{Type: EvProgress, Icon: "check-circle", Message: "Ошибки генерации исправлены", Percent: startPercent + 6})
+			}
+			return 0
+		}
+
+		p.emitter().Emit(SSEEvent{
+			Type:    EvRepair,
+			Icon:    "wrench",
+			Percent: startPercent + pass,
+			Message: fmt.Sprintf("Автофикс build/page ошибок: проход %d/%d", pass, maxRepairPasses),
+			Value:   fmt.Sprintf("%d ошибок", errorCount),
+		})
+		log.Printf("[quality-gate] 🔧 repair pass %d/%d for %s: %d errors", pass, maxRepairPasses, projectType, errorCount)
+
+		repaired := p.repairBrokenFiles(ctx, project.Files, validationErrors)
+		if len(repaired) == 0 {
+			log.Printf("[quality-gate] no repairs returned on pass %d", pass)
+			return errorCount
+		}
+		applyRepairs(project.Files, repaired)
+	}
+
+	finalErrors := validateGeneratedProject(project.Files, project.Env)
+	if projectType == "admin_panel" {
+		finalErrors = append(finalErrors, validateAdminPanelUIQuality(project.Files)...)
+	}
+	errorCount, _ = logValidationResults(finalErrors)
+	return errorCount
 }
 
 func (p *ChatProcessor) inspectCode(ctx context.Context, userQuestion, filesContext string, chatHistory []models.ChatMessage, imageURLs []string) (string, error) {

@@ -432,6 +432,39 @@ RELATIONS RULES:
 UI STRUCTURE RULES:
 11. "ui_structure" must be highly descriptive — it is the full specification for the frontend developer.
 12. No limitations on UI or flexibility.
+13. For admin_panel projects, ui_structure MUST be a product-grade UI blueprint, not a generic page list. Include:
+   - product domain and the primary daily workflow in one sentence;
+   - layout choice: sidebar-left, top-nav, or icon-rail with a reason tied to the domain;
+   - dashboard composition: 4 KPI cards, primary work surface, secondary insight panel, activity/alerts area;
+   - for every major table/page: the correct view pattern (table, kanban, calendar, timeline, split-pane, chart-first analytics, detail drawer);
+   - navigation groups with max 10 top-level items;
+   - required states per page: loading, empty, error, mobile;
+   - exact domain-specific widgets that make the UI feel real.
+
+ADMIN PANEL UI BLUEPRINTS — choose by domain:
+  CRM / Sales:
+    dashboard = pipeline command center: KPI strip, horizontal pipeline snapshot, revenue/activity panels, upcoming tasks.
+    leads/deals = full-width kanban pipeline with stage metrics, probability, owner avatars, next action, and right detail drawer.
+    contacts/accounts = relationship workspace: source/status summary cards, filter toolbar, dense table, right profile drawer, recent activity/context.
+    transactions = ledger/reconciliation surface with aging/risk cards, method/status filters, row actions.
+    reports = analytics cockpit with date range, KPI cards, funnel bars, source effectiveness, win/loss and export controls.
+  TMS / Logistics / Compliance:
+    dashboard = active loads + delayed shipments + route exceptions; loads = status timeline + map/list split; drivers/vehicles = compliance cards.
+  Finance / Accounting:
+    dashboard = cash position + receivables + expense trend; transactions = ledger table; invoices = aging buckets + payment status.
+  Healthcare / Clinic:
+    dashboard = appointments today + patient queue + doctor utilization; appointments = calendar/list split; patients = profile drawer with history.
+  HR / People:
+    dashboard = headcount + leave + hiring funnel; employees = people grid/table; leave = calendar; recruitment = pipeline.
+  E-Commerce / Inventory:
+    dashboard = orders + revenue + low stock; orders = fulfillment queue; products = inventory table with stock bars; customers = segmentation cards.
+  Project Management:
+    dashboard = sprint progress + blockers + workload; tasks = kanban; projects = timeline; team = capacity panel.
+  Analytics / Reporting:
+    dashboard = chart-first with filters; reports = saved report list + preview; events = streaming table.
+
+ADMIN PANEL ANTI-GENERIC RULE:
+  ui_structure must explicitly forbid a plain CRUD-only dashboard. At least one page must use a domain-specific pattern beyond a table.
 
 IMAGE KEYWORDS RULES:
 13. "image_keywords": 2–4 Unsplash search phrases. 

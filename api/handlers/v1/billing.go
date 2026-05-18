@@ -50,6 +50,7 @@ func (h *HandlerV1) CreateFare(c *gin.Context) {
 // @Produce json
 // @Param limit query string false "limit"
 // @Param offset query string false "offset"
+// @Param product_type query string false "product_type"
 // @Success 200 {object} status_http.Response{data=pb.Fare} "Fares data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -67,11 +68,13 @@ func (h *HandlerV1) GetAllFares(c *gin.Context) {
 	}
 
 	projectId := c.Query("project-id")
+	productType := c.Query("product_type")
 
 	response, err := h.companyServices.Billing().ListFares(c, &pb.ListRequest{
-		Offset:    int32(offset),
-		Limit:     int32(limit),
-		ProjectId: projectId,
+		Offset:      int32(offset),
+		Limit:       int32(limit),
+		ProjectId:   projectId,
+		ProductType: productType,
 	})
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())

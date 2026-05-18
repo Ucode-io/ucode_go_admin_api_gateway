@@ -58,6 +58,15 @@ var (
 
 	// Matches: const X, let X, var X, function X, class X — local declarations
 	reLocalDecl = regexp.MustCompile(`(?:const|let|var|function|class)\s+([A-Z]\w+)`)
+
+	// Matches common React component declarations.
+	reComponentFunctionDecl = regexp.MustCompile(`(?:export\s+default\s+|export\s+)?function\s+([A-Z]\w*)\s*\(`)
+	reComponentConstArrow   = regexp.MustCompile(`(?s)(?:export\s+)?const\s+([A-Z]\w*)\s*=\s*(?:React\.memo\s*\()?[^=;]{0,240}=>`)
+
+	// Browser-build hazards that are cheap to catch before the generated app is published.
+	reNativeSelect     = regexp.MustCompile(`<\s*select(?:\s|>)`)
+	reEmptySelectItem  = regexp.MustCompile(`<SelectItem\b[^>]*\bvalue\s*=\s*(?:""|''|\{\s*""\s*\}|\{\s*''\s*\})`)
+	reInlineApiNesting = regexp.MustCompile(`data\?\.(?:data\?\.)?(?:data\?\.)?response|data\.data\.response|data\.data\.data\.response`)
 )
 
 // ImportStatement represents one parsed import.
@@ -228,7 +237,207 @@ func validateGeneratedProject(files []models.ProjectFile, envVars map[string]any
 	envErrors := validateEnvVars(files, envVars)
 	errors = append(errors, envErrors...)
 
+	// Step 7: Validate route/page and browser-build hazards that often only show up
+	// after Vite starts rendering each page.
+	pageErrors := validatePageAndRuntimeHazards(files)
+	errors = append(errors, pageErrors...)
+
 	return errors
+}
+
+func validatePageAndRuntimeHazards(files []models.ProjectFile) []ValidationError {
+	var errors []ValidationError
+
+	for _, f := range files {
+		if !strings.HasSuffix(f.Path, ".tsx") && !strings.HasSuffix(f.Path, ".ts") {
+			continue
+		}
+
+		if strings.Contains(f.Content, "This section is temporarily unavailable") {
+			errors = append(errors, ValidationError{
+				Severity: "error",
+				File:     f.Path,
+				Message:  "contains fallback stub UI instead of a real generated page; this page must be implemented before publish",
+			})
+		}
+
+		if reNativeSelect.MatchString(f.Content) {
+			errors = append(errors, ValidationError{
+				Severity: "error",
+				File:     f.Path,
+				Message:  "uses native <select>, which breaks the design system; replace with @/components/ui/select primitives",
+			})
+		}
+
+		if reEmptySelectItem.MatchString(f.Content) {
+			errors = append(errors, ValidationError{
+				Severity: "error",
+				File:     f.Path,
+				Message:  "uses <SelectItem value=\"\">, which crashes Radix Select at runtime; use non-empty sentinel values like 'all' or 'none' and map them back to empty filters in state/query logic",
+			})
+		}
+
+		if reInlineApiNesting.MatchString(f.Content) {
+			errors = append(errors, ValidationError{
+				Severity: "error",
+				File:     f.Path,
+				Message:  "indexes API response manually with data.data.response; use extractList, extractSingle, or extractCount",
+			})
+		}
+
+		for _, componentName := range findSelfRecursiveComponents(f.Path, f.Content) {
+			errors = append(errors, ValidationError{
+				Severity: "error",
+				File:     f.Path,
+				Message:  fmt.Sprintf("component %s renders <%s> inside itself, causing infinite React recursion and Maximum call stack size exceeded", componentName, componentName),
+			})
+		}
+
+		if strings.HasPrefix(f.Path, "src/pages/") && strings.HasSuffix(f.Path, ".tsx") {
+			if strings.Contains(f.Content, "useApiQuery") && !strings.Contains(f.Content, "isLoading") {
+				errors = append(errors, ValidationError{
+					Severity: "warning",
+					File:     f.Path,
+					Message:  "fetches API data but does not appear to render a loading state",
+				})
+			}
+			if strings.Contains(f.Content, "useApiQuery") && !strings.Contains(f.Content, "error") && !strings.Contains(f.Content, "isError") {
+				errors = append(errors, ValidationError{
+					Severity: "warning",
+					File:     f.Path,
+					Message:  "fetches API data but does not appear to render an error state",
+				})
+			}
+		}
+	}
+
+	return errors
+}
+
+func validateAdminPanelUIQuality(files []models.ProjectFile) []ValidationError {
+	var errors []ValidationError
+
+	for _, f := range files {
+		if !isGeneratedAdminScreen(f.Path) {
+			continue
+		}
+		content := f.Content
+		lowerPath := strings.ToLower(f.Path)
+		lowerContent := strings.ToLower(content)
+
+		if strings.Contains(lowerPath, "dashboard") {
+			if !hasAny(content, "grid-cols-4", "lg:grid-cols-4", "xl:grid-cols-4") ||
+				!hasAny(lowerContent, "pipeline", "funnel", "chart", "trend", "forecast", "queue", "timeline", "ledger") ||
+				!hasAny(lowerContent, "recent", "activity", "upcoming", "alert", "risk", "insight") {
+				errors = append(errors, ValidationError{
+					Severity: "error",
+					File:     f.Path,
+					Message:  "admin UI quality: dashboard is not product-grade enough; add 4 domain KPI cards, a primary operational surface, a secondary insight/alert panel, and recent activity while preserving existing APIs and data fields",
+				})
+			}
+			continue
+		}
+
+		if looksLikeKanban(content) && (!hasAny(content, "Avatar", "AvatarFallback", "getInitials") || !hasAny(content, "Sheet", "Dialog", "selected", "details")) {
+			errors = append(errors, ValidationError{
+				Severity: "error",
+				File:     f.Path,
+				Message:  "admin UI quality: kanban board is too basic; add stage aggregate headers, compact metadata chips, owner avatars/initials, responsive columns, and a right-side detail drawer/dialog without changing API hooks or entity fields",
+			})
+		}
+
+		if looksLikeTableOnlyCRUD(content) {
+			errors = append(errors, ValidationError{
+				Severity: "error",
+				File:     f.Path,
+				Message:  "admin UI quality: page looks like generic table-only CRUD; add operational summary cards, grouped filters, status chips, hover row actions, pagination/empty/loading states, and a detail drawer/dialog while preserving API endpoints and JSON contracts",
+			})
+		}
+
+		if strings.Contains(lowerPath, "calendar") && !hasAny(lowerContent, "agenda", "upcoming", "selected", "side", "details") {
+			errors = append(errors, ValidationError{
+				Severity: "error",
+				File:     f.Path,
+				Message:  "admin UI quality: calendar needs a product-grade agenda/detail side panel, event density cues, calendar controls, and empty/loading states while preserving existing integrations",
+			})
+		}
+
+		if strings.Contains(lowerPath, "report") && !hasAny(lowerContent, "preview", "chart", "metric", "export", "insight", "analytics") {
+			errors = append(errors, ValidationError{
+				Severity: "error",
+				File:     f.Path,
+				Message:  "admin UI quality: reports page needs analytics depth; add saved report cards with metrics, preview/insight area, export actions, and status filters while preserving report fields",
+			})
+		}
+	}
+
+	return errors
+}
+
+func isGeneratedAdminScreen(path string) bool {
+	if !strings.HasSuffix(path, ".tsx") {
+		return false
+	}
+	if path == "src/App.tsx" || strings.Contains(path, "/components/ui/") || strings.Contains(path, "/components/layout/") || strings.Contains(path, "/components/shared/") {
+		return false
+	}
+	return strings.Contains(path, "/pages/") || strings.Contains(path, "/features/")
+}
+
+func looksLikeKanban(content string) bool {
+	lower := strings.ToLower(content)
+	return strings.Contains(lower, "kanban") ||
+		(strings.Contains(lower, "discovery") && strings.Contains(lower, "qualification") && strings.Contains(lower, "proposal")) ||
+		(strings.Contains(lower, "to do") && strings.Contains(lower, "in progress") && strings.Contains(lower, "completed"))
+}
+
+func looksLikeTableOnlyCRUD(content string) bool {
+	hasTable := hasAny(content, "<Table", "DataTable", "<table")
+	if !hasTable {
+		return false
+	}
+	hasOperationalContext := hasAny(content, "Card", "Tabs", "Sheet", "Dialog", "Badge", "Avatar", "Progress", "Skeleton")
+	hasGroupedControls := hasAny(content, "Select", "TabsList", "filter", "Search", "Input")
+	hasActionsAndStates := hasAny(content, "group-hover", "isLoading", "Skeleton", "empty", "No ", "Pagination", "Previous", "Next")
+	return !hasOperationalContext || !hasGroupedControls || !hasActionsAndStates
+}
+
+func hasAny(s string, needles ...string) bool {
+	for _, n := range needles {
+		if strings.Contains(s, n) {
+			return true
+		}
+	}
+	return false
+}
+
+func findSelfRecursiveComponents(path, content string) []string {
+	componentNames := make(map[string]bool)
+
+	base := path
+	if idx := strings.LastIndex(base, "/"); idx >= 0 {
+		base = base[idx+1:]
+	}
+	base = strings.TrimSuffix(strings.TrimSuffix(base, ".tsx"), ".ts")
+	if base != "" && base != "index" && base[0] >= 'A' && base[0] <= 'Z' {
+		componentNames[base] = true
+	}
+
+	for _, match := range reComponentFunctionDecl.FindAllStringSubmatch(content, -1) {
+		componentNames[match[1]] = true
+	}
+	for _, match := range reComponentConstArrow.FindAllStringSubmatch(content, -1) {
+		componentNames[match[1]] = true
+	}
+
+	var recursive []string
+	for name := range componentNames {
+		tagRe := regexp.MustCompile(`<\s*/?\s*` + regexp.QuoteMeta(name) + `(?:\s|>|/)`)
+		if tagRe.MatchString(content) {
+			recursive = append(recursive, name)
+		}
+	}
+	return recursive
 }
 
 // buildExportRegistry scans all files and returns a map of path → exported names.
@@ -368,11 +577,18 @@ func parseImports(filePath, content string) []ImportStatement {
 
 // resolveImportPath converts an import path to a file path relative to project root.
 // @/components/ui/Button → src/components/ui/Button
+// /src/components/layout/Layout → src/components/layout/Layout
 // ./utils → (resolved relative to importer)
 func resolveImportPath(importerPath, importPath string) string {
 	// @/ alias → src/
 	if strings.HasPrefix(importPath, "@/") {
 		return "src/" + strings.TrimPrefix(importPath, "@/")
+	}
+
+	// Vite absolute-from-root imports. The generated virtual FS stores paths
+	// without a leading slash, so "/src/..." must resolve to "src/...".
+	if strings.HasPrefix(importPath, "/src/") {
+		return strings.TrimPrefix(importPath, "/")
 	}
 
 	// Relative imports
@@ -422,7 +638,7 @@ func resolveAlternatives(path string) []string {
 
 // isNPMImport returns true for imports from node_modules (no ./ or @/ prefix).
 func isNPMImport(path string) bool {
-	if strings.HasPrefix(path, "./") || strings.HasPrefix(path, "../") || strings.HasPrefix(path, "@/") {
+	if strings.HasPrefix(path, "./") || strings.HasPrefix(path, "../") || strings.HasPrefix(path, "@/") || strings.HasPrefix(path, "/src/") {
 		return false
 	}
 	// Scoped npm packages: @radix-ui/*, @tanstack/*, etc.
@@ -826,6 +1042,9 @@ func (p *ChatProcessor) repairSingleFile(
 	sb.WriteString("  - Fix ONLY the listed errors. Do not rewrite unrelated code.\n")
 	sb.WriteString("  - For import errors: use correct exported names from the AVAILABLE EXPORTS list above.\n")
 	sb.WriteString("  - For 'X.displayName assigned but X not declared': it is a typo in the component name — rename the const/variable to match the displayName assignment, or fix the displayName to match the const name.\n")
+	sb.WriteString("  - For 'component X renders <X> inside itself': this is infinite React recursion. Replace the inner <X> with the intended wrapper element (<div>, <main>, <Outlet />) or import the correct different component name. A component must never render itself directly.\n")
+	sb.WriteString("  - For '<SelectItem value=\"\">' errors: Radix SelectItem values cannot be empty strings. Replace empty option values with non-empty sentinel strings such as 'all', 'none', or 'unassigned'. Update state/filter logic so the sentinel means no filter / empty relation, but NEVER render value=\"\" on SelectItem.\n")
+	sb.WriteString("  - For 'admin UI quality' errors: perform a focused visual/product polish pass on this file. Preserve every API endpoint, hook, mutation, entity field, JSON extraction, route, and generated type. Improve layout density, hierarchy, cards, filters, status chips, detail drawer/dialog, states, and domain-specific widgets only.\n")
 	sb.WriteString("  - For brace/bracket/paren imbalance: carefully trace through the file and find the exact location of the missing or extra delimiter. Common causes: unclosed ternary in JSX, missing closing brace in .map() callback, extra } after a component return, unclosed template literal.\n")
 	sb.WriteString("  - NEVER use angle-bracket type assertions in .tsx files (const x = <Type>value). ALWAYS use 'as' syntax (const x = value as Type).\n")
 	sb.WriteString("  - Output the complete corrected file. Never truncate.\n")
@@ -837,7 +1056,7 @@ func (p *ChatProcessor) repairSingleFile(
 		models.AnthropicToolRequest{
 			Model:      p.baseConf.ClaudeHaikuModel,
 			MaxTokens:  32000,
-			System:     "You are a TypeScript/TSX error repair bot. Fix the listed errors: import mismatches, typos, displayName issues, AND syntax errors like unbalanced braces/brackets/parentheses. For brace imbalance, carefully trace each { } pair and find the mismatch. Output the complete corrected file via the repair_file tool. Never truncate.",
+			System:     "You are a TypeScript/TSX and premium admin-UI repair bot. Fix the listed errors: import mismatches, typos, displayName issues, Radix SelectItem empty-value runtime crashes, React infinite-recursion bugs where a component renders itself, admin UI quality failures, AND syntax errors like unbalanced braces/brackets/parentheses. For admin UI quality failures, preserve backend/API contracts and polish only the current file into a product-grade SaaS screen. Output the complete corrected file via the repair_file tool. Never truncate.",
 			Messages:   []models.ChatMessage{{Role: "user", Content: []models.ContentBlock{{Type: "text", Text: sb.String()}}}},
 			Tools:      []models.ClaudeFunctionTool{helper.ToolRepairFile},
 			ToolChoice: helper.ForcedTool(helper.ToolRepairFile.Name),

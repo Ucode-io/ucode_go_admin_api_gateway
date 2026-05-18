@@ -123,11 +123,11 @@ const baseUrl = import.meta.env.VITE_API_BASE_URL;
 export default function App() { return <DashboardPage />; }`,
 		},
 		{
-			Path: "src/index.css",
+			Path:    "src/index.css",
 			Content: `:root { --primary: 220 80% 50%; }`,
 		},
 		{
-			Path: ".env",
+			Path:    ".env",
 			Content: "VITE_API_BASE_URL=https://api.example.com\nVITE_X_API_KEY=test-key",
 		},
 	}
@@ -218,6 +218,53 @@ func TestValidate_RelativeImportMissing(t *testing.T) {
 	}
 }
 
+func TestValidate_AbsoluteSrcImportMissing(t *testing.T) {
+	files := []models.ProjectFile{
+		{
+			Path: "src/App.tsx",
+			Content: `import React from 'react';
+import Layout from '/src/components/layout/Layout';
+export default function App() { return <Layout />; }`,
+		},
+	}
+
+	errors := validateGeneratedProject(files, nil)
+	found := false
+	for _, e := range errors {
+		if e.Severity == "error" && contains(e.Message, "/src/components/layout/Layout") {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Errorf("expected error for missing absolute /src import, got %d errors: %v", len(errors), errors)
+	}
+}
+
+func TestValidate_SelfRecursiveComponent(t *testing.T) {
+	files := []models.ProjectFile{
+		{
+			Path: "src/components/layout/Layout.tsx",
+			Content: `import React from 'react';
+export default function Layout() {
+  return <Layout><main>Dashboard</main></Layout>;
+}`,
+		},
+	}
+
+	errors := validateGeneratedProject(files, nil)
+	found := false
+	for _, e := range errors {
+		if e.Severity == "error" && contains(e.Message, "renders <Layout> inside itself") {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Errorf("expected error for self-recursive Layout component, got %d errors: %v", len(errors), errors)
+	}
+}
+
 // TestValidate_TemplateFilesSkipped — imports from template files should NOT be flagged.
 func TestValidate_TemplateFilesSkipped(t *testing.T) {
 	files := []models.ProjectFile{
@@ -234,6 +281,135 @@ export function useUsers() { return useApiQuery(['users'], '/v2/items/users'); }
 	for _, e := range errors {
 		if e.Severity == "error" {
 			t.Errorf("template file import flagged as error: [%s] %s", e.File, e.Message)
+		}
+	}
+}
+
+func TestValidate_RuntimeHazards(t *testing.T) {
+	files := []models.ProjectFile{
+		{
+			Path: "src/pages/OrdersPage.tsx",
+			Content: `import React from 'react';
+export default function OrdersPage() {
+  const rows = data?.data?.data?.response ?? [];
+  return <select>{rows.map((r: any) => <option key={r.guid}>{r.name}</option>)}</select>;
+}`,
+		},
+		{
+			Path: "src/pages/FallbackPage.tsx",
+			Content: `import React from 'react';
+export default function FallbackPage() {
+  return <p>This section is temporarily unavailable.</p>;
+}`,
+		},
+		{
+			Path: "src/pages/LeadsPage.tsx",
+			Content: `import React from 'react';
+import { SelectItem } from '@/components/ui/select';
+export default function LeadsPage() {
+  return <SelectItem value="">All statuses</SelectItem>;
+}`,
+		},
+	}
+
+	errors := validateGeneratedProject(files, nil)
+
+	expectMessages := []string{
+		"native <select>",
+		"data.data.response",
+		"fallback stub",
+		"SelectItem value=\"\"",
+	}
+	for _, msg := range expectMessages {
+		found := false
+		for _, e := range errors {
+			if e.Severity == "error" && contains(e.Message, msg) {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Errorf("expected runtime hazard error containing %q, got %v", msg, errors)
+		}
+	}
+}
+
+func TestValidateAdminPanelUIQuality_GenericTableOnly(t *testing.T) {
+	files := []models.ProjectFile{
+		{
+			Path: "src/pages/ContactsPage.tsx",
+			Content: `import React from 'react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+export default function ContactsPage() {
+  return <div><h1>Contacts</h1><Table><TableHeader><TableRow><TableHead>Name</TableHead></TableRow></TableHeader><TableBody><TableRow><TableCell>Anna</TableCell></TableRow></TableBody></Table></div>;
+}`,
+		},
+	}
+
+	errors := validateAdminPanelUIQuality(files)
+	found := false
+	for _, e := range errors {
+		if e.Severity == "error" && contains(e.Message, "generic table-only CRUD") {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Errorf("expected admin UI quality error for table-only CRUD, got %d errors: %v", len(errors), errors)
+	}
+}
+
+func TestValidateAdminPanelUIQuality_BasicKanban(t *testing.T) {
+	files := []models.ProjectFile{
+		{
+			Path: "src/pages/LeadsPage.tsx",
+			Content: `import React from 'react';
+export default function LeadsPage() {
+  return <div><h1>Kanban</h1><section><h2>Discovery</h2><div>Wayne Security Audit</div></section><section><h2>Qualification</h2></section><section><h2>Proposal</h2></section></div>;
+}`,
+		},
+	}
+
+	errors := validateAdminPanelUIQuality(files)
+	found := false
+	for _, e := range errors {
+		if e.Severity == "error" && contains(e.Message, "kanban board is too basic") {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Errorf("expected admin UI quality error for basic kanban, got %d errors: %v", len(errors), errors)
+	}
+}
+
+func TestValidateAdminPanelUIQuality_PremiumTablePasses(t *testing.T) {
+	files := []models.ProjectFile{
+		{
+			Path: "src/pages/ContactsPage.tsx",
+			Content: `import React from 'react';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+export default function ContactsPage() {
+  const isLoading = false;
+  return <div>
+    <div className="grid grid-cols-4"><Card>Total contacts</Card><Card>Qualified</Card><Card>Needs follow-up</Card><Card>New this week</Card></div>
+    <div><Input placeholder="Search" /><Select /></div>
+    <Table><TableHeader><TableRow><TableHead>Name</TableHead></TableRow></TableHeader><TableBody>{isLoading ? <TableRow><TableCell><Skeleton /></TableCell></TableRow> : <TableRow className="group hover:bg-muted/40"><TableCell><Badge>Active</Badge><span className="group-hover:opacity-100">Actions</span></TableCell></TableRow>}</TableBody></Table>
+    <div>Pagination Previous Next empty state</div>
+  </div>;
+}`,
+		},
+	}
+
+	errors := validateAdminPanelUIQuality(files)
+	for _, e := range errors {
+		if e.Severity == "error" {
+			t.Errorf("unexpected admin UI quality error: [%s] %s", e.File, e.Message)
 		}
 	}
 }
