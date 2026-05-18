@@ -570,17 +570,6 @@ PRODUCT-GRADE ADMIN PANEL STANDARD:
     - Preserve all backend contracts: API paths, entity fields, JSON extraction helpers, mutations, and env vars must not be renamed for design reasons.
     - Table-only CRUD is a failure unless the page is truly a dense ledger/audit table and still has summaries, filters, row states, and details.
 
-  DESIGN FROM A SCREEN RECIPE, NOT FROM COMPONENTS:
-    Before coding each page, silently choose one of these page recipes and implement it fully:
-      Command center = KPI strip + main operational panel + side insight/activity panel + quick actions.
-      Work queue = status tabs + grouped filters + dense list/table + selected item drawer.
-      Pipeline board = responsive kanban + stage summaries + card metadata + right detail drawer.
-      Relationship workspace = summary cards + segmented filters + identity table/grid + selected profile drawer.
-      Ledger = money KPI cards + reconciliation filters + compact transaction table + exception/risk panel.
-      Calendar cockpit = calendar grid + agenda rail + selected day detail + integration/status banner.
-      Analytics cockpit = date range toolbar + KPI cards + chart grid + saved/export report controls.
-    Never start from "title + table". Start from the workflow.
-
   FIRST SCREEN / DASHBOARD MUST HAVE:
     - 4 KPI cards tied to the domain, with trends and icons
     - one primary work surface (pipeline, queue, timeline, ledger, calendar, chart panel, or map/list split)
@@ -667,24 +656,6 @@ COMPOSITION RULES:
 
 DRIBBBLE-QUALITY ADMIN VISUAL STANDARD:
   The interface must feel like a polished SaaS dashboard case study, not a stock admin template.
-  Use the selected visual direction from ui_structure. If no direction is provided, infer one from the domain.
-
-  VISUAL DIRECTIONS:
-    Minimal SaaS:
-      References: Notion, Linear, Attio.
-      bg-background with quiet bg-card panels, 1px borders, minimal shadows, compact text, hover-revealed actions.
-    Premium Dark Ops:
-      References: Vercel dark dashboards, incident/ops tools, analytics cockpits.
-      dark surfaces, thin borders, muted grid/chart treatments, accent used sparingly for status and focus.
-    Editorial Light Dashboard:
-      References: high-end finance/HR dashboards on Dribbble.
-      light spacious layout, strong section titles, refined charts, soft panels, measured whitespace.
-    Colorful Product OS:
-      References: modern Dribbble SaaS admin panels.
-      tasteful accent blocks, softly tinted panels, rounded controls, expressive icon badges; never random rainbow colors.
-    Enterprise Dense:
-      References: Retool, Superhuman, Stripe internal tools.
-      compact rows, sticky controls, dense filters, clear hierarchy, low decoration, maximum scannability.
 
   ANTI-OLD-ADMIN RULES:
     ❌ no Bootstrap-looking blue header + gray sidebar template

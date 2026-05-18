@@ -466,16 +466,6 @@ ADMIN PANEL UI BLUEPRINTS — choose by domain:
 ADMIN PANEL ANTI-GENERIC RULE:
   ui_structure must explicitly forbid a plain CRUD-only dashboard. At least one page must use a domain-specific pattern beyond a table.
 
-ADMIN PANEL VISUAL DIRECTION:
-  The UI blueprint must choose ONE modern admin visual direction that fits the domain. Do not default every project to the same Notion-like style.
-  Options:
-    - Minimal SaaS: Notion / Linear / Attio style; calm surfaces, compact rows, subtle borders, precise typography.
-    - Premium Dark Ops: dark operational cockpit; high-contrast cards, glowing but restrained accent, chart-first dashboard.
-    - Editorial Light Dashboard: spacious light UI; strong typography, soft sections, elegant charts, refined empty states.
-    - Colorful Product OS: clean Dribbble-style SaaS; tasteful accent blocks, rounded panels, expressive icons, still data-dense.
-    - Enterprise Dense: Retool/Superhuman-like; compact, efficient, many controls, low decoration, excellent scanning.
-  Include the chosen visual direction by name in ui_structure and describe its layout rhythm, surface treatment, typography, and interaction style.
-
 IMAGE KEYWORDS RULES:
 13. "image_keywords": 2–4 Unsplash search phrases. 
     CRITICAL: You MUST aim for the "WOW" factor. We need cinematic, ultra-high-quality, aesthetic, and premium professional photography.
