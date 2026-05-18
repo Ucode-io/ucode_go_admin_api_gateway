@@ -218,6 +218,29 @@ func TestValidate_RelativeImportMissing(t *testing.T) {
 	}
 }
 
+func TestValidate_AbsoluteSrcImportMissing(t *testing.T) {
+	files := []models.ProjectFile{
+		{
+			Path: "src/App.tsx",
+			Content: `import React from 'react';
+import Layout from '/src/components/layout/Layout';
+export default function App() { return <Layout />; }`,
+		},
+	}
+
+	errors := validateGeneratedProject(files, nil)
+	found := false
+	for _, e := range errors {
+		if e.Severity == "error" && contains(e.Message, "/src/components/layout/Layout") {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Errorf("expected error for missing absolute /src import, got %d errors: %v", len(errors), errors)
+	}
+}
+
 // TestValidate_TemplateFilesSkipped — imports from template files should NOT be flagged.
 func TestValidate_TemplateFilesSkipped(t *testing.T) {
 	files := []models.ProjectFile{

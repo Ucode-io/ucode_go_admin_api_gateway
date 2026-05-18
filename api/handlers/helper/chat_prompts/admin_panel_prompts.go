@@ -32,6 +32,10 @@ LAYER 1 — MCP (Foundation)
     NavItem, TableColumn  → ALWAYS from '@/types/common', never from '@/types'
     Entity interfaces     → ALWAYS from '@/types' (Contact, Order, etc. generated per project)
     apiClient             → ALWAYS from '@/config/axios' — never create new axios instance
+    NEVER use leading-slash absolute imports like '/src/components/layout/Layout'.
+      WRONG: import Layout from '/src/components/layout/Layout'
+      RIGHT: import Layout from '@/components/layout/Layout'
+      RIGHT: import Layout from './components/layout/Layout' (only from src/App.tsx)
 
 LAYER 2 — Skills (Generated Code)
   All UI components, layouts, features, pages you generate.

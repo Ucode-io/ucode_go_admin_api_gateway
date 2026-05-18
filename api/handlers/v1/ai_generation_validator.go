@@ -430,11 +430,18 @@ func parseImports(filePath, content string) []ImportStatement {
 
 // resolveImportPath converts an import path to a file path relative to project root.
 // @/components/ui/Button → src/components/ui/Button
+// /src/components/layout/Layout → src/components/layout/Layout
 // ./utils → (resolved relative to importer)
 func resolveImportPath(importerPath, importPath string) string {
 	// @/ alias → src/
 	if strings.HasPrefix(importPath, "@/") {
 		return "src/" + strings.TrimPrefix(importPath, "@/")
+	}
+
+	// Vite absolute-from-root imports. The generated virtual FS stores paths
+	// without a leading slash, so "/src/..." must resolve to "src/...".
+	if strings.HasPrefix(importPath, "/src/") {
+		return strings.TrimPrefix(importPath, "/")
 	}
 
 	// Relative imports
@@ -484,7 +491,7 @@ func resolveAlternatives(path string) []string {
 
 // isNPMImport returns true for imports from node_modules (no ./ or @/ prefix).
 func isNPMImport(path string) bool {
-	if strings.HasPrefix(path, "./") || strings.HasPrefix(path, "../") || strings.HasPrefix(path, "@/") {
+	if strings.HasPrefix(path, "./") || strings.HasPrefix(path, "../") || strings.HasPrefix(path, "@/") || strings.HasPrefix(path, "/src/") {
 		return false
 	}
 	// Scoped npm packages: @radix-ui/*, @tanstack/*, etc.
