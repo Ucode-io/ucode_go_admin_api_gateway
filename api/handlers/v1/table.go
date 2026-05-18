@@ -124,6 +124,8 @@ func (h *HandlerV1) CreateTable(c *gin.Context) {
 			h.HandleResponse(c, status_http.GRPCError, err.Error())
 		}
 
+		newReq.UcodeProjectId = resource.ProjectId
+
 		resp, err := services.GoObjectBuilderService().Table().Create(
 			c.Request.Context(),
 			&newReq,

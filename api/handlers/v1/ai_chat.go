@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -55,6 +56,25 @@ func enrichMessages(msgs []*pbo.Message) []models.EnrichedMessage {
 }
 
 // ==================== Helper ====================
+
+func (h *HandlerV1) getBuilderService(ctx context.Context, projectId, environmentId string) (services.ServiceManagerI, string, error) {
+	resource, err := h.companyServices.ServiceResource().GetSingle(ctx, &pb.GetSingleServiceResourceReq{
+		ProjectId:     projectId,
+		EnvironmentId: environmentId,
+		ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+	})
+	if err != nil {
+		return nil, "", err
+	}
+	if resource.ResourceType != pb.ResourceType_POSTGRESQL {
+		return nil, "", fmt.Errorf("resource type not supported: %s", resource.ResourceType)
+	}
+	service, err := h.GetProjectSrvc(ctx, projectId, resource.NodeType)
+	if err != nil {
+		return nil, "", err
+	}
+	return service, resource.ResourceEnvironmentId, nil
+}
 
 func (h *HandlerV1) getAiChatServices(c *gin.Context) (services.ServiceManagerI, string, error) {
 	projectId, ok := c.Get("project_id")

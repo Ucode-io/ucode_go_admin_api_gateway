@@ -80,6 +80,8 @@ const (
 	AnthropicCachingBeta = "prompt-caching-2024-07-31"
 
 	YandexMetricCountersURL = "https://api-metrika.yandex.net/management/v1/counters"
+
+	UGEN_FREE_PLAN_ID = "07d8a364-ebb2-4291-a452-f44b335cb031"
 )
 
 var (
