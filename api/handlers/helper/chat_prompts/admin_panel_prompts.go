@@ -447,15 +447,24 @@ Requirements:
 NO NATIVE <select> (CRITICAL — banned everywhere):
   WRONG: <select><option value="a">A</option></select>
   WRONG: <select className="...">...</select>
+  WRONG: <SelectItem value="">All statuses</SelectItem> — Radix crashes at runtime
+  WRONG: <SelectItem value={''}>All</SelectItem> — same crash
   RIGHT: Always use the shadcn Select primitives from @/components/ui/select:
     import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
     <Select value={value} onValueChange={setValue}>
       <SelectTrigger><SelectValue placeholder="Choose..." /></SelectTrigger>
       <SelectContent>
         {/* CRITICAL: Radix throws if value is empty string. Always provide a fallback! */}
+        <SelectItem value="all">All statuses</SelectItem>
         <SelectItem value={item.guid || 'fallback'}>{item.name}</SelectItem>
       </SelectContent>
     </Select>
+  FILTER RULE: For "All" / "None" / "Unassigned" options, use non-empty sentinel values:
+    const [status, setStatus] = useState('all');
+    const effectiveStatus = status === 'all' ? '' : status;
+    <SelectItem value="all">All statuses</SelectItem>
+    <SelectItem value="none">None</SelectItem>
+    NEVER render <SelectItem value="">.
   REASON: Native <select> cannot be styled consistently across browsers and breaks the design system.
   If select.tsx is not yet generated → add it to the files[] array immediately (see FILE GENERATION ORDER).
 
@@ -576,9 +585,32 @@ PRODUCT-GRADE ADMIN PANEL STANDARD:
 
 DOMAIN-SPECIFIC PAGE PATTERNS:
   CRM / SALES:
-    Dashboard: pipeline KPIs, conversion funnel, next activities.
-    Leads/Deals: kanban board by stage + right-side detail drawer.
-    Contacts/Companies: dense table with tags, last activity, owner, quick filters.
+    Dashboard:
+      - Use a command-center layout: 4 KPI cards across top, then a 2-column area.
+      - Main panel: horizontal pipeline preview with stage columns/cards, not only progress bars.
+      - Side panel: "Next best actions" or recent activity timeline with 5 items.
+      - Bottom panels: recent transactions + hot contacts/accounts.
+    Leads/Deals:
+      - Use a full-width pipeline board. The board container must span the page width.
+      - Each stage header shows stage name, count, total value, avg probability.
+      - Each card shows title, amount, probability, priority/status chip, due/close date, owner avatar/initials, and a next action.
+      - Include search, stage/owner/priority filters, kanban/table toggle, and New button.
+      - Include a right-side detail drawer/dialog for selected lead/deal with timeline and key fields.
+      - Avoid accidental clipping: use grid minmax columns or clear horizontal scroll with padding; no half-hidden last column.
+    Contacts/Companies:
+      - NEVER output only a table. Required: 3-4 summary cards above table (total, qualified/customer, stale/no activity, new this week).
+      - Required toolbar: search, source/status/owner/company filters, view toggle where useful.
+      - Table first cell must be identity cell: avatar/logo, name, title/industry, company/account.
+      - Required columns when data exists: status/source, owner or last activity, value/revenue or relationship health.
+      - Required selected profile drawer/dialog: contact/company header, key fields, related deals, recent activity, quick actions.
+    Calendar:
+      - Required: sync banner, month/week/day controls, calendar grid, agenda/right rail.
+      - Empty agenda must still show useful suggested actions and upcoming placeholders, not just "No events".
+    Transactions/Payments:
+      - Required ledger surface: paid/pending/failed/overdue KPI cards, filter toolbar, compact transaction table, gateway/status chips.
+      - Add exception/reconciliation panel or selected transaction drawer when feasible.
+    Reports:
+      - Required analytics cockpit: date range segmented control, export buttons, KPI cards, funnel/source charts, saved reports or insights.
 
   TMS / LOGISTICS / COMPLIANCE:
     Dashboard: active loads, delayed shipments, SLA risk, compliance exceptions.
@@ -624,24 +656,6 @@ COMPOSITION RULES:
 
 DRIBBBLE-QUALITY ADMIN VISUAL STANDARD:
   The interface must feel like a polished SaaS dashboard case study, not a stock admin template.
-  Use the selected visual direction from ui_structure. If no direction is provided, infer one from the domain.
-
-  VISUAL DIRECTIONS:
-    Minimal SaaS:
-      References: Notion, Linear, Attio.
-      bg-background with quiet bg-card panels, 1px borders, minimal shadows, compact text, hover-revealed actions.
-    Premium Dark Ops:
-      References: Vercel dark dashboards, incident/ops tools, analytics cockpits.
-      dark surfaces, thin borders, muted grid/chart treatments, accent used sparingly for status and focus.
-    Editorial Light Dashboard:
-      References: high-end finance/HR dashboards on Dribbble.
-      light spacious layout, strong section titles, refined charts, soft panels, measured whitespace.
-    Colorful Product OS:
-      References: modern Dribbble SaaS admin panels.
-      tasteful accent blocks, softly tinted panels, rounded controls, expressive icon badges; never random rainbow colors.
-    Enterprise Dense:
-      References: Retool, Superhuman, Stripe internal tools.
-      compact rows, sticky controls, dense filters, clear hierarchy, low decoration, maximum scannability.
 
   ANTI-OLD-ADMIN RULES:
     ❌ no Bootstrap-looking blue header + gray sidebar template
@@ -652,6 +666,10 @@ DRIBBBLE-QUALITY ADMIN VISUAL STANDARD:
     ❌ no toy-like kanban cards with loud unrelated colors
     ❌ no all-caps giant headings inside dense dashboards
     ❌ no page that is only a title + table without toolbar, states, and context
+    ❌ no row actions as plain "Edit" / "Del" text links; use icon buttons with hover reveal
+    ❌ no empty right panels that only say "No upcoming events"; provide useful suggested actions/context
+    ❌ no kanban board with a visibly clipped last column; design the board width intentionally
+    ❌ no Contacts/Companies page as a simple table only
 
   MODERN DETAIL RULES:
     - Surfaces: bg-card / bg-background with border-border/50; shadows only when needed.
@@ -683,6 +701,8 @@ TABLE QUALITY RULES:
     - status uses dot Badge, never plain text only
     - actions are icon buttons revealed on hover
     - empty/loading/error states match the same layout dimensions
+    - table pages must include summary cards and a detail drawer/dialog unless they are pure audit logs
+    - NEVER use visible text links "Edit" and "Del" as the primary row actions
 
 BUTTON VARIANTS — generate all in button.tsx:
   default:     bg-primary text-primary-foreground shadow-sm hover:bg-primary/90
@@ -1088,6 +1108,30 @@ Required by page type:
   Calendar: agenda/detail side panel, event density cues, controls, empty/loading states.
   Reports: saved report cards, metrics, preview/insight area, export actions, status/type filters.
 
+Concrete CRM recipes:
+  Contacts / Leads:
+    - Top: 3-4 source/status summary cards.
+    - Middle: search + status/source/company/owner filters.
+    - Body: dense identity table with avatar/name/title/company/status/source/last activity.
+    - Interaction: selected profile Sheet/Dialog with related deals, recent activity, quick actions.
+    - NEVER emit just a table with Edit/Del text links.
+  Accounts / Companies:
+    - Top: account health cards (active, prospects, at risk, revenue).
+    - Body: company cards or table with logo/avatar, industry, revenue, employees, owner, health.
+    - Interaction: account detail drawer with contacts, open deals, notes/timeline.
+  Deals / Opportunities:
+    - Full-width kanban; stage headers include count, value, avg probability.
+    - Cards include amount, probability, priority, close date, owner avatar, next action.
+    - Must include responsive grid/minmax or deliberate horizontal scroll; last column must not look cut off.
+  Tasks:
+    - Kanban with status counts, overdue counts, assignee/priority/type chips, due dates, selected task details.
+  Calendar:
+    - Calendar grid + agenda rail + selected day details + sync status + suggested event actions.
+  Transactions:
+    - Ledger with KPI cards, gateway/status filters, exception/reconciliation context, compact money table.
+  Reports:
+    - Analytics cockpit with date range, export controls, KPI cards, chart panels, saved insights.
+
 Failure patterns:
   - title + table only
   - empty kanban cards with only a name and price
@@ -1266,11 +1310,13 @@ FK field value is ALWAYS a guid STRING (UUID). NEVER store or submit an integer 
 State for FK select: const [relId, setRelId] = useState<string>('')
 Select value attr: value={relId}  onValueChange={setRelId}
 On submit: include relId only if relId !== '' (skip empty string — don't send null/0).
+Radix SelectItem value attr: NEVER value="". If you need a visible "No relation" option, use value="none" and convert it to '' before submit.
 
 FETCH options for relation Select (always GET /v2/items, NOT POST /v1/object/get-list):
   const { data } = useApiQuery<unknown>(['{table_to}'], '/v2/items/{table_to}')
   const options = extractList<{ guid: string; name: string }>(data)
   // CRITICAL: Radix SelectItem throws on empty string value. Always use a fallback.
+  // For "All" filters use value="all", not value="".
   // <SelectItem key={o.guid} value={o.guid || 'fallback'}>{o.name ?? o.title ?? o.label}</SelectItem>
 
 Display related name in list view:

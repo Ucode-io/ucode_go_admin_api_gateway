@@ -443,7 +443,11 @@ UI STRUCTURE RULES:
 
 ADMIN PANEL UI BLUEPRINTS — choose by domain:
   CRM / Sales:
-    dashboard = pipeline health + revenue KPIs + activity feed; leads/deals = kanban pipeline with side drawer; contacts = dense table + relationship cards.
+    dashboard = pipeline command center: KPI strip, horizontal pipeline snapshot, revenue/activity panels, upcoming tasks.
+    leads/deals = full-width kanban pipeline with stage metrics, probability, owner avatars, next action, and right detail drawer.
+    contacts/accounts = relationship workspace: source/status summary cards, filter toolbar, dense table, right profile drawer, recent activity/context.
+    transactions = ledger/reconciliation surface with aging/risk cards, method/status filters, row actions.
+    reports = analytics cockpit with date range, KPI cards, funnel bars, source effectiveness, win/loss and export controls.
   TMS / Logistics / Compliance:
     dashboard = active loads + delayed shipments + route exceptions; loads = status timeline + map/list split; drivers/vehicles = compliance cards.
   Finance / Accounting:
@@ -461,16 +465,6 @@ ADMIN PANEL UI BLUEPRINTS — choose by domain:
 
 ADMIN PANEL ANTI-GENERIC RULE:
   ui_structure must explicitly forbid a plain CRUD-only dashboard. At least one page must use a domain-specific pattern beyond a table.
-
-ADMIN PANEL VISUAL DIRECTION:
-  The UI blueprint must choose ONE modern admin visual direction that fits the domain. Do not default every project to the same Notion-like style.
-  Options:
-    - Minimal SaaS: Notion / Linear / Attio style; calm surfaces, compact rows, subtle borders, precise typography.
-    - Premium Dark Ops: dark operational cockpit; high-contrast cards, glowing but restrained accent, chart-first dashboard.
-    - Editorial Light Dashboard: spacious light UI; strong typography, soft sections, elegant charts, refined empty states.
-    - Colorful Product OS: clean Dribbble-style SaaS; tasteful accent blocks, rounded panels, expressive icons, still data-dense.
-    - Enterprise Dense: Retool/Superhuman-like; compact, efficient, many controls, low decoration, excellent scanning.
-  Include the chosen visual direction by name in ui_structure and describe its layout rhythm, surface treatment, typography, and interaction style.
 
 IMAGE KEYWORDS RULES:
 13. "image_keywords": 2–4 Unsplash search phrases. 

@@ -65,6 +65,7 @@ var (
 
 	// Browser-build hazards that are cheap to catch before the generated app is published.
 	reNativeSelect     = regexp.MustCompile(`<\s*select(?:\s|>)`)
+	reEmptySelectItem  = regexp.MustCompile(`<SelectItem\b[^>]*\bvalue\s*=\s*(?:""|''|\{\s*""\s*\}|\{\s*''\s*\})`)
 	reInlineApiNesting = regexp.MustCompile(`data\?\.(?:data\?\.)?(?:data\?\.)?response|data\.data\.response|data\.data\.data\.response`)
 )
 
@@ -265,6 +266,14 @@ func validatePageAndRuntimeHazards(files []models.ProjectFile) []ValidationError
 				Severity: "error",
 				File:     f.Path,
 				Message:  "uses native <select>, which breaks the design system; replace with @/components/ui/select primitives",
+			})
+		}
+
+		if reEmptySelectItem.MatchString(f.Content) {
+			errors = append(errors, ValidationError{
+				Severity: "error",
+				File:     f.Path,
+				Message:  "uses <SelectItem value=\"\">, which crashes Radix Select at runtime; use non-empty sentinel values like 'all' or 'none' and map them back to empty filters in state/query logic",
 			})
 		}
 
@@ -1034,6 +1043,7 @@ func (p *ChatProcessor) repairSingleFile(
 	sb.WriteString("  - For import errors: use correct exported names from the AVAILABLE EXPORTS list above.\n")
 	sb.WriteString("  - For 'X.displayName assigned but X not declared': it is a typo in the component name — rename the const/variable to match the displayName assignment, or fix the displayName to match the const name.\n")
 	sb.WriteString("  - For 'component X renders <X> inside itself': this is infinite React recursion. Replace the inner <X> with the intended wrapper element (<div>, <main>, <Outlet />) or import the correct different component name. A component must never render itself directly.\n")
+	sb.WriteString("  - For '<SelectItem value=\"\">' errors: Radix SelectItem values cannot be empty strings. Replace empty option values with non-empty sentinel strings such as 'all', 'none', or 'unassigned'. Update state/filter logic so the sentinel means no filter / empty relation, but NEVER render value=\"\" on SelectItem.\n")
 	sb.WriteString("  - For 'admin UI quality' errors: perform a focused visual/product polish pass on this file. Preserve every API endpoint, hook, mutation, entity field, JSON extraction, route, and generated type. Improve layout density, hierarchy, cards, filters, status chips, detail drawer/dialog, states, and domain-specific widgets only.\n")
 	sb.WriteString("  - For brace/bracket/paren imbalance: carefully trace through the file and find the exact location of the missing or extra delimiter. Common causes: unclosed ternary in JSX, missing closing brace in .map() callback, extra } after a component return, unclosed template literal.\n")
 	sb.WriteString("  - NEVER use angle-bracket type assertions in .tsx files (const x = <Type>value). ALWAYS use 'as' syntax (const x = value as Type).\n")
@@ -1046,7 +1056,7 @@ func (p *ChatProcessor) repairSingleFile(
 		models.AnthropicToolRequest{
 			Model:      p.baseConf.ClaudeHaikuModel,
 			MaxTokens:  32000,
-			System:     "You are a TypeScript/TSX and premium admin-UI repair bot. Fix the listed errors: import mismatches, typos, displayName issues, React infinite-recursion bugs where a component renders itself, admin UI quality failures, AND syntax errors like unbalanced braces/brackets/parentheses. For admin UI quality failures, preserve backend/API contracts and polish only the current file into a product-grade SaaS screen. Output the complete corrected file via the repair_file tool. Never truncate.",
+			System:     "You are a TypeScript/TSX and premium admin-UI repair bot. Fix the listed errors: import mismatches, typos, displayName issues, Radix SelectItem empty-value runtime crashes, React infinite-recursion bugs where a component renders itself, admin UI quality failures, AND syntax errors like unbalanced braces/brackets/parentheses. For admin UI quality failures, preserve backend/API contracts and polish only the current file into a product-grade SaaS screen. Output the complete corrected file via the repair_file tool. Never truncate.",
 			Messages:   []models.ChatMessage{{Role: "user", Content: []models.ContentBlock{{Type: "text", Text: sb.String()}}}},
 			Tools:      []models.ClaudeFunctionTool{helper.ToolRepairFile},
 			ToolChoice: helper.ForcedTool(helper.ToolRepairFile.Name),

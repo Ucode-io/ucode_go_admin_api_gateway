@@ -302,6 +302,14 @@ export default function FallbackPage() {
   return <p>This section is temporarily unavailable.</p>;
 }`,
 		},
+		{
+			Path: "src/pages/LeadsPage.tsx",
+			Content: `import React from 'react';
+import { SelectItem } from '@/components/ui/select';
+export default function LeadsPage() {
+  return <SelectItem value="">All statuses</SelectItem>;
+}`,
+		},
 	}
 
 	errors := validateGeneratedProject(files, nil)
@@ -310,6 +318,7 @@ export default function FallbackPage() {
 		"native <select>",
 		"data.data.response",
 		"fallback stub",
+		"SelectItem value=\"\"",
 	}
 	for _, msg := range expectMessages {
 		found := false
