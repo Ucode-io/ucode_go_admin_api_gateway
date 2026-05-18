@@ -443,7 +443,11 @@ UI STRUCTURE RULES:
 
 ADMIN PANEL UI BLUEPRINTS — choose by domain:
   CRM / Sales:
-    dashboard = pipeline health + revenue KPIs + activity feed; leads/deals = kanban pipeline with side drawer; contacts = dense table + relationship cards.
+    dashboard = pipeline command center: KPI strip, horizontal pipeline snapshot, revenue/activity panels, upcoming tasks.
+    leads/deals = full-width kanban pipeline with stage metrics, probability, owner avatars, next action, and right detail drawer.
+    contacts/accounts = relationship workspace: source/status summary cards, filter toolbar, dense table, right profile drawer, recent activity/context.
+    transactions = ledger/reconciliation surface with aging/risk cards, method/status filters, row actions.
+    reports = analytics cockpit with date range, KPI cards, funnel bars, source effectiveness, win/loss and export controls.
   TMS / Logistics / Compliance:
     dashboard = active loads + delayed shipments + route exceptions; loads = status timeline + map/list split; drivers/vehicles = compliance cards.
   Finance / Accounting:

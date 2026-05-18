@@ -570,6 +570,17 @@ PRODUCT-GRADE ADMIN PANEL STANDARD:
     - Preserve all backend contracts: API paths, entity fields, JSON extraction helpers, mutations, and env vars must not be renamed for design reasons.
     - Table-only CRUD is a failure unless the page is truly a dense ledger/audit table and still has summaries, filters, row states, and details.
 
+  DESIGN FROM A SCREEN RECIPE, NOT FROM COMPONENTS:
+    Before coding each page, silently choose one of these page recipes and implement it fully:
+      Command center = KPI strip + main operational panel + side insight/activity panel + quick actions.
+      Work queue = status tabs + grouped filters + dense list/table + selected item drawer.
+      Pipeline board = responsive kanban + stage summaries + card metadata + right detail drawer.
+      Relationship workspace = summary cards + segmented filters + identity table/grid + selected profile drawer.
+      Ledger = money KPI cards + reconciliation filters + compact transaction table + exception/risk panel.
+      Calendar cockpit = calendar grid + agenda rail + selected day detail + integration/status banner.
+      Analytics cockpit = date range toolbar + KPI cards + chart grid + saved/export report controls.
+    Never start from "title + table". Start from the workflow.
+
   FIRST SCREEN / DASHBOARD MUST HAVE:
     - 4 KPI cards tied to the domain, with trends and icons
     - one primary work surface (pipeline, queue, timeline, ledger, calendar, chart panel, or map/list split)
@@ -585,9 +596,32 @@ PRODUCT-GRADE ADMIN PANEL STANDARD:
 
 DOMAIN-SPECIFIC PAGE PATTERNS:
   CRM / SALES:
-    Dashboard: pipeline KPIs, conversion funnel, next activities.
-    Leads/Deals: kanban board by stage + right-side detail drawer.
-    Contacts/Companies: dense table with tags, last activity, owner, quick filters.
+    Dashboard:
+      - Use a command-center layout: 4 KPI cards across top, then a 2-column area.
+      - Main panel: horizontal pipeline preview with stage columns/cards, not only progress bars.
+      - Side panel: "Next best actions" or recent activity timeline with 5 items.
+      - Bottom panels: recent transactions + hot contacts/accounts.
+    Leads/Deals:
+      - Use a full-width pipeline board. The board container must span the page width.
+      - Each stage header shows stage name, count, total value, avg probability.
+      - Each card shows title, amount, probability, priority/status chip, due/close date, owner avatar/initials, and a next action.
+      - Include search, stage/owner/priority filters, kanban/table toggle, and New button.
+      - Include a right-side detail drawer/dialog for selected lead/deal with timeline and key fields.
+      - Avoid accidental clipping: use grid minmax columns or clear horizontal scroll with padding; no half-hidden last column.
+    Contacts/Companies:
+      - NEVER output only a table. Required: 3-4 summary cards above table (total, qualified/customer, stale/no activity, new this week).
+      - Required toolbar: search, source/status/owner/company filters, view toggle where useful.
+      - Table first cell must be identity cell: avatar/logo, name, title/industry, company/account.
+      - Required columns when data exists: status/source, owner or last activity, value/revenue or relationship health.
+      - Required selected profile drawer/dialog: contact/company header, key fields, related deals, recent activity, quick actions.
+    Calendar:
+      - Required: sync banner, month/week/day controls, calendar grid, agenda/right rail.
+      - Empty agenda must still show useful suggested actions and upcoming placeholders, not just "No events".
+    Transactions/Payments:
+      - Required ledger surface: paid/pending/failed/overdue KPI cards, filter toolbar, compact transaction table, gateway/status chips.
+      - Add exception/reconciliation panel or selected transaction drawer when feasible.
+    Reports:
+      - Required analytics cockpit: date range segmented control, export buttons, KPI cards, funnel/source charts, saved reports or insights.
 
   TMS / LOGISTICS / COMPLIANCE:
     Dashboard: active loads, delayed shipments, SLA risk, compliance exceptions.
@@ -661,6 +695,10 @@ DRIBBBLE-QUALITY ADMIN VISUAL STANDARD:
     ❌ no toy-like kanban cards with loud unrelated colors
     ❌ no all-caps giant headings inside dense dashboards
     ❌ no page that is only a title + table without toolbar, states, and context
+    ❌ no row actions as plain "Edit" / "Del" text links; use icon buttons with hover reveal
+    ❌ no empty right panels that only say "No upcoming events"; provide useful suggested actions/context
+    ❌ no kanban board with a visibly clipped last column; design the board width intentionally
+    ❌ no Contacts/Companies page as a simple table only
 
   MODERN DETAIL RULES:
     - Surfaces: bg-card / bg-background with border-border/50; shadows only when needed.
@@ -692,6 +730,8 @@ TABLE QUALITY RULES:
     - status uses dot Badge, never plain text only
     - actions are icon buttons revealed on hover
     - empty/loading/error states match the same layout dimensions
+    - table pages must include summary cards and a detail drawer/dialog unless they are pure audit logs
+    - NEVER use visible text links "Edit" and "Del" as the primary row actions
 
 BUTTON VARIANTS — generate all in button.tsx:
   default:     bg-primary text-primary-foreground shadow-sm hover:bg-primary/90
@@ -1096,6 +1136,30 @@ Required by page type:
   Table/List: summary cards, grouped filters, status chips, hover row actions, pagination/empty/loading states, detail drawer/dialog.
   Calendar: agenda/detail side panel, event density cues, controls, empty/loading states.
   Reports: saved report cards, metrics, preview/insight area, export actions, status/type filters.
+
+Concrete CRM recipes:
+  Contacts / Leads:
+    - Top: 3-4 source/status summary cards.
+    - Middle: search + status/source/company/owner filters.
+    - Body: dense identity table with avatar/name/title/company/status/source/last activity.
+    - Interaction: selected profile Sheet/Dialog with related deals, recent activity, quick actions.
+    - NEVER emit just a table with Edit/Del text links.
+  Accounts / Companies:
+    - Top: account health cards (active, prospects, at risk, revenue).
+    - Body: company cards or table with logo/avatar, industry, revenue, employees, owner, health.
+    - Interaction: account detail drawer with contacts, open deals, notes/timeline.
+  Deals / Opportunities:
+    - Full-width kanban; stage headers include count, value, avg probability.
+    - Cards include amount, probability, priority, close date, owner avatar, next action.
+    - Must include responsive grid/minmax or deliberate horizontal scroll; last column must not look cut off.
+  Tasks:
+    - Kanban with status counts, overdue counts, assignee/priority/type chips, due dates, selected task details.
+  Calendar:
+    - Calendar grid + agenda rail + selected day details + sync status + suggested event actions.
+  Transactions:
+    - Ledger with KPI cards, gateway/status filters, exception/reconciliation context, compact money table.
+  Reports:
+    - Analytics cockpit with date range, export controls, KPI cards, chart panels, saved insights.
 
 Failure patterns:
   - title + table only
