@@ -552,6 +552,14 @@ UI QUALITY STANDARDS
 PRODUCT-GRADE ADMIN PANEL STANDARD:
   The app must feel like a real SaaS work surface, not a CRUD demo.
   Every screen needs a clear operational purpose: monitor, decide, triage, create, approve, reconcile, assign, or investigate.
+  A generated admin panel is judged as a product, not as code completion. Generic screens will be auto-repaired before publish.
+
+  10/10 QUALITY BAR:
+    - Every page must answer: what does this user decide or do here?
+    - Use domain-specific surfaces: CRM pipelines, POS order queues, finance ledgers, HR workload, logistics timelines, report previews.
+    - Every major page needs at least one premium detail: side drawer, split panel, stage metrics, mini chart, activity timeline, owner avatars, aging/risk buckets, or saved views.
+    - Preserve all backend contracts: API paths, entity fields, JSON extraction helpers, mutations, and env vars must not be renamed for design reasons.
+    - Table-only CRUD is a failure unless the page is truly a dense ledger/audit table and still has summaries, filters, row states, and details.
 
   FIRST SCREEN / DASHBOARD MUST HAVE:
     - 4 KPI cards tied to the domain, with trends and icons
@@ -660,6 +668,13 @@ KANBAN QUALITY RULES:
     - cards use subtle border + hover elevation, not loud backgrounds
     - top toolbar has search, stage/status filters, view toggle, and add button
     - clicking/opening a card should use a right detail drawer when feasible
+    - columns must fit the viewport using responsive grid/minmax or graceful horizontal scroll with visible affordance; never let the last column look accidentally cut off
+
+DETAIL DRAWER / SPLIT PANEL RULE:
+  For Leads, Deals, Orders, Tasks, Payments, Users, Contacts, Companies, Reports:
+    - selecting a row/card should reveal details in a Sheet/Dialog/split panel when feasible
+    - include identity header, status, key fields, timeline/activity, and primary actions
+    - never create a dead empty detail panel; use real generated mock data if API data is absent
 
 TABLE QUALITY RULES:
   If a page uses a table, it must look like a premium data product:
@@ -1007,6 +1022,7 @@ SMOOTHNESS:  active:scale-[0.98]; group-hover reveal on table rows
 CHUNKED MODE — CRITICAL RULES
 ====================================
 You are generating ONE GROUP of files. Foundation (types, layout, UI primitives, App.tsx, index.css) is already generated.
+Each chunk is still judged by the final admin UI quality gate. Do not produce generic CRUD screens just because this is a chunk.
 
 EMIT RULES (strictly enforced):
 1. Emit ONLY files listed in "YOUR FILES TO IMPLEMENT"
@@ -1058,6 +1074,26 @@ UI Kit components — ALL filenames are LOWERCASE (shadcn convention):
   import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
   import { Skeleton } from '@/components/ui/skeleton'
   KEY RULE: path is @/components/ui/button NOT @/components/ui/Button
+
+====================================
+PREMIUM ADMIN UI QUALITY BAR
+====================================
+Every feature screen must look like a product-grade SaaS surface, not a bare CRUD page.
+Preserve all API endpoints, hooks, entity fields, JSON extraction helpers, routes, and mutations exactly. Improve presentation only.
+
+Required by page type:
+  Dashboard: 4 domain KPIs + primary operational surface + secondary insight/alert panel + recent activity.
+  Kanban/Pipeline: stage aggregates, compact metadata chips, owner avatars/initials, responsive columns, detail drawer/dialog.
+  Table/List: summary cards, grouped filters, status chips, hover row actions, pagination/empty/loading states, detail drawer/dialog.
+  Calendar: agenda/detail side panel, event density cues, controls, empty/loading states.
+  Reports: saved report cards, metrics, preview/insight area, export actions, status/type filters.
+
+Failure patterns:
+  - title + table only
+  - empty kanban cards with only a name and price
+  - huge whitespace with sparse controls
+  - reports as plain cards with no analytics/preview/export context
+  - calendar as plain grid with no agenda/details
 
 ====================================
 API HOOKS — EXACT SIGNATURES (READ CAREFULLY)
