@@ -31,13 +31,8 @@ func parseStorageLimitToMB(val string) float64 {
 }
 
 func (h *HandlerV1) GetAllPricingUsage(c *gin.Context) {
-	projectId, ok := c.Get("project_id")
-	if !ok {
-		h.HandleResponse(c, status_http.BadRequest, "project_id is required")
-		return
-	}
-	projectIDStr := cast.ToString(projectId)
-	environmentIDStr := cast.ToString(c.MustGet("environment_id"))
+	projectId := cast.ToString(c.MustGet("project_id"))
+	environmentId := cast.ToString(c.MustGet("environment_id"))
 
 	limitsResp := &company_service.GetPricingLimitsResponse{}
 	usageResp := &nb.GetResourceUsageResponse{}
@@ -49,7 +44,7 @@ func (h *HandlerV1) GetAllPricingUsage(c *gin.Context) {
 	g, gCtx := errgroup.WithContext(c.Request.Context())
 
 	g.Go(func() error {
-		resp, err := h.companyServices.Billing().GetPricingLimits(gCtx, &company_service.GetPricingLimitsRequest{ProjectId: projectIDStr})
+		resp, err := h.companyServices.Billing().GetPricingLimits(gCtx, &company_service.GetPricingLimitsRequest{ProjectId: projectId})
 		if err != nil {
 			h.log.Error(fmt.Sprintf("[GetAllPricingUsage] GetPricingLimits failed: %v", err))
 			return nil
@@ -58,7 +53,7 @@ func (h *HandlerV1) GetAllPricingUsage(c *gin.Context) {
 		return nil
 	})
 	g.Go(func() error {
-		service, resourceEnvId, err := h.getBuilderService(gCtx, projectIDStr, environmentIDStr)
+		service, resourceEnvId, err := h.getBuilderService(gCtx, projectId, environmentId)
 		if err != nil {
 			h.log.Error(fmt.Sprintf("[GetAllPricingUsage] getBuilderService failed: %v", err))
 			return nil
@@ -72,7 +67,7 @@ func (h *HandlerV1) GetAllPricingUsage(c *gin.Context) {
 		return nil
 	})
 	g.Go(func() error {
-		resp, err := h.authService.User().GetProjectUsersCount(gCtx, &auth_service.GetProjectUsersCountRequest{ProjectId: projectIDStr})
+		resp, err := h.authService.User().GetProjectUsersCount(gCtx, &auth_service.GetProjectUsersCountRequest{ProjectId: projectId})
 		if err != nil {
 			h.log.Error(fmt.Sprintf("[GetAllPricingUsage] GetProjectUsersCount failed: %v", err))
 			return nil
@@ -81,7 +76,7 @@ func (h *HandlerV1) GetAllPricingUsage(c *gin.Context) {
 		return nil
 	})
 	g.Go(func() error {
-		resp, err := h.authService.ApiKey().GetProjectApiKeysCount(gCtx, &auth_service.GetProjectApiKeysCountRequest{ProjectId: projectIDStr})
+		resp, err := h.authService.ApiKey().GetProjectApiKeysCount(gCtx, &auth_service.GetProjectApiKeysCountRequest{ProjectId: projectId})
 		if err != nil {
 			h.log.Error(fmt.Sprintf("[GetAllPricingUsage] GetProjectApiKeysCount failed: %v", err))
 			return nil
@@ -90,7 +85,7 @@ func (h *HandlerV1) GetAllPricingUsage(c *gin.Context) {
 		return nil
 	})
 	g.Go(func() error {
-		resp, err := h.companyServices.Billing().GetAiTokenUsageMetrics(gCtx, &company_service.GetAiTokenUsageMetricsRequest{ProjectId: projectIDStr})
+		resp, err := h.companyServices.Billing().GetAiTokenUsageMetrics(gCtx, &company_service.GetAiTokenUsageMetricsRequest{ProjectId: projectId})
 		if err != nil {
 			h.log.Error(fmt.Sprintf("[GetAllPricingUsage] GetAiTokenUsageMetrics failed: %v", err))
 			return nil
@@ -99,7 +94,7 @@ func (h *HandlerV1) GetAllPricingUsage(c *gin.Context) {
 		return nil
 	})
 	g.Go(func() error {
-		resp, err := h.companyServices.Billing().GetApiCallMonitoringMetrics(gCtx, &company_service.GetApiCallMonitoringMetricsRequest{ProjectId: projectIDStr})
+		resp, err := h.companyServices.Billing().GetApiCallMonitoringMetrics(gCtx, &company_service.GetApiCallMonitoringMetricsRequest{ProjectId: projectId})
 		if err != nil {
 			h.log.Error(fmt.Sprintf("[GetAllPricingUsage] GetApiCallMonitoringMetrics failed: %v", err))
 			return nil

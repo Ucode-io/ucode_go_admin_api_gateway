@@ -17,7 +17,6 @@ import (
 	"github.com/google/uuid"
 )
 
-// pendingRole holds deferred role creation info collected during the login block.
 type pendingRole struct {
 	name         string
 	clientTypeId string
@@ -77,16 +76,17 @@ func createBackendFromPlan(ctx context.Context, plan *models.ArchitectPlan, pd m
 		attributes, _ := helper.ConvertMapToStruct(attributesMap)
 
 		tableReq := &nb.CreateTableRequest{
-			Label:        tablePlan.Label,
-			Slug:         tablePlan.Slug,
-			ProjectId:    resourceEnvId,
-			EnvId:        envId,
-			MenuId:       config.MainMenuID,
-			ViewId:       uuid.NewString(),
-			LayoutId:     uuid.NewString(),
-			ShowInMenu:   true,
-			Attributes:   attributes,
-			IsLoginTable: tablePlan.IsLoginTable,
+			Label:          tablePlan.Label,
+			Slug:           tablePlan.Slug,
+			ProjectId:      resourceEnvId,
+			EnvId:          envId,
+			MenuId:         config.MainMenuID,
+			ViewId:         uuid.NewString(),
+			LayoutId:       uuid.NewString(),
+			ShowInMenu:     true,
+			Attributes:     attributes,
+			IsLoginTable:   tablePlan.IsLoginTable,
+			UcodeProjectId: projectId,
 		}
 
 		tableResp, err := service.GoObjectBuilderService().Table().Create(ctx, tableReq)
