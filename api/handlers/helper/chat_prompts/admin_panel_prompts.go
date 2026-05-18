@@ -447,15 +447,24 @@ Requirements:
 NO NATIVE <select> (CRITICAL — banned everywhere):
   WRONG: <select><option value="a">A</option></select>
   WRONG: <select className="...">...</select>
+  WRONG: <SelectItem value="">All statuses</SelectItem> — Radix crashes at runtime
+  WRONG: <SelectItem value={''}>All</SelectItem> — same crash
   RIGHT: Always use the shadcn Select primitives from @/components/ui/select:
     import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
     <Select value={value} onValueChange={setValue}>
       <SelectTrigger><SelectValue placeholder="Choose..." /></SelectTrigger>
       <SelectContent>
         {/* CRITICAL: Radix throws if value is empty string. Always provide a fallback! */}
+        <SelectItem value="all">All statuses</SelectItem>
         <SelectItem value={item.guid || 'fallback'}>{item.name}</SelectItem>
       </SelectContent>
     </Select>
+  FILTER RULE: For "All" / "None" / "Unassigned" options, use non-empty sentinel values:
+    const [status, setStatus] = useState('all');
+    const effectiveStatus = status === 'all' ? '' : status;
+    <SelectItem value="all">All statuses</SelectItem>
+    <SelectItem value="none">None</SelectItem>
+    NEVER render <SelectItem value="">.
   REASON: Native <select> cannot be styled consistently across browsers and breaks the design system.
   If select.tsx is not yet generated → add it to the files[] array immediately (see FILE GENERATION ORDER).
 
@@ -1266,11 +1275,13 @@ FK field value is ALWAYS a guid STRING (UUID). NEVER store or submit an integer 
 State for FK select: const [relId, setRelId] = useState<string>('')
 Select value attr: value={relId}  onValueChange={setRelId}
 On submit: include relId only if relId !== '' (skip empty string — don't send null/0).
+Radix SelectItem value attr: NEVER value="". If you need a visible "No relation" option, use value="none" and convert it to '' before submit.
 
 FETCH options for relation Select (always GET /v2/items, NOT POST /v1/object/get-list):
   const { data } = useApiQuery<unknown>(['{table_to}'], '/v2/items/{table_to}')
   const options = extractList<{ guid: string; name: string }>(data)
   // CRITICAL: Radix SelectItem throws on empty string value. Always use a fallback.
+  // For "All" filters use value="all", not value="".
   // <SelectItem key={o.guid} value={o.guid || 'fallback'}>{o.name ?? o.title ?? o.label}</SelectItem>
 
 Display related name in list view:
