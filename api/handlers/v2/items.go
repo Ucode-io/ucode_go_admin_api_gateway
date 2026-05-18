@@ -1155,6 +1155,40 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 	statusHttp.CustomMessage = resp.GetCustomMessage()
 }
 
+// UpdateItemByID godoc
+// @Security ApiKeyAuth
+// @ID update_item_by_id
+// @Router /v2/items/{collection}/{id} [PUT]
+// @Summary Update item by id
+// @Description Update item by id
+// @Tags Items
+// @Accept json
+// @Produce json
+// @Param collection path string true "collection"
+// @Param id path string true "id"
+// @Param item body models.CommonMessage true "UpdateItemRequestBody"
+// @Success 200 {object} status_http.Response{data=models.CommonMessage} "Item data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *HandlerV2) UpdateItemByIDSwaggerDoc(c *gin.Context) {}
+
+// PatchItemByID godoc
+// @Security ApiKeyAuth
+// @ID patch_item_by_id
+// @Router /v2/items/{collection}/{id} [PATCH]
+// @Summary Patch item by id
+// @Description Patch item by id
+// @Tags Items
+// @Accept json
+// @Produce json
+// @Param collection path string true "collection"
+// @Param id path string true "id"
+// @Param item body models.CommonMessage true "UpdateItemRequestBody"
+// @Success 200 {object} status_http.Response{data=models.CommonMessage} "Item data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *HandlerV2) PatchItemByIDSwaggerDoc(c *gin.Context) {}
+
 // MultipleUpdateItems godoc
 // @Security ApiKeyAuth
 // @ID multiple_update_items

@@ -621,6 +621,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		bitbucket.GET("/connect", h.V1.BitbucketConnect)
 		bitbucket.GET("/integration", h.V1.BitbucketGetIntegration)
 		bitbucket.GET("/integration/validate", h.V1.BitbucketValidateToken)
+		bitbucket.GET("/workspaces", h.V1.BitbucketWorkspaces)
 		bitbucket.DELETE("/integration/:id", h.V1.BitbucketDeleteIntegration)
 	}
 

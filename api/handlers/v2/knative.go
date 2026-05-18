@@ -26,12 +26,14 @@ type ApiKey struct {
 // @ID v2_invoke_function_by_path
 // @Router /v2/invoke_function/{function-path} [POST]
 // @Summary Invoke Function By Path
-// @Description Invoke Function By Path
+// @Description Invoke a server function by function path. This is the public function-service invoke API used by frontend and mobile clients.
 // @Tags Function
 // @Accept json
 // @Produce json
+// @Param Authorization header string true "Bearer access token or API-KEY"
+// @Param X-API-KEY header string false "API key when Authorization is API-KEY"
 // @Param InvokeFunctionByPathRequest body models.CommonMessage true "InvokeFunctionByPathRequest"
-// @Success 201 {object} status_http.Response{data=models.InvokeFunctionRequest} "Function data"
+// @Success 201 {object} status_http.Response{data=models.InvokeFunctionResponse} "Function data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) InvokeFunctionByPath(c *gin.Context) {

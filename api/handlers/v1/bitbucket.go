@@ -64,6 +64,20 @@ func (h *HandlerV1) BitbucketValidateToken(c *gin.Context) {
 	_ = h.MakeProxy(c, h.baseConf.GoFunctionServiceHost+h.baseConf.GoFunctionServiceHTTPPort, c.Request.URL.Path)
 }
 
+// BitbucketWorkspaces proxies to the function service to list accessible Bitbucket workspaces.
+//
+// @Security ApiKeyAuth
+// @ID bitbucket_workspaces
+// @Router /v1/bitbucket/workspaces [GET]
+// @Summary List Bitbucket Workspaces
+// @Tags Bitbucket Integration
+// @Success 200 {object} map[string]any
+// @Failure 401 {object} map[string]any
+// @Failure 500 {object} map[string]any
+func (h *HandlerV1) BitbucketWorkspaces(c *gin.Context) {
+	_ = h.MakeProxy(c, h.baseConf.GoFunctionServiceHost+h.baseConf.GoFunctionServiceHTTPPort, c.Request.URL.Path)
+}
+
 // BitbucketDeleteIntegration proxies to the function service to delete a Bitbucket integration.
 //
 // @Security ApiKeyAuth
