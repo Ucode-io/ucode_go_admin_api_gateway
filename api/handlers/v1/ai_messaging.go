@@ -493,6 +493,7 @@ func (p *ChatProcessor) provisionBackend(ctx context.Context, projectName string
 			Title:        sanitizeProjectNameForBackend(projectName),
 			CompanyId:    currentProject.GetCompanyId(),
 			K8SNamespace: currentProject.GetK8SNamespace(),
+			FareId:       config.UGEN_FREE_PLAN_ID,
 		},
 	)
 	if err != nil {
