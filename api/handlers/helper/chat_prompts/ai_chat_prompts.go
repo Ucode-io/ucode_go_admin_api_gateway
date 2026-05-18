@@ -432,6 +432,45 @@ RELATIONS RULES:
 UI STRUCTURE RULES:
 11. "ui_structure" must be highly descriptive — it is the full specification for the frontend developer.
 12. No limitations on UI or flexibility.
+13. For admin_panel projects, ui_structure MUST be a product-grade UI blueprint, not a generic page list. Include:
+   - product domain and the primary daily workflow in one sentence;
+   - layout choice: sidebar-left, top-nav, or icon-rail with a reason tied to the domain;
+   - dashboard composition: 4 KPI cards, primary work surface, secondary insight panel, activity/alerts area;
+   - for every major table/page: the correct view pattern (table, kanban, calendar, timeline, split-pane, chart-first analytics, detail drawer);
+   - navigation groups with max 10 top-level items;
+   - required states per page: loading, empty, error, mobile;
+   - exact domain-specific widgets that make the UI feel real.
+
+ADMIN PANEL UI BLUEPRINTS — choose by domain:
+  CRM / Sales:
+    dashboard = pipeline health + revenue KPIs + activity feed; leads/deals = kanban pipeline with side drawer; contacts = dense table + relationship cards.
+  TMS / Logistics / Compliance:
+    dashboard = active loads + delayed shipments + route exceptions; loads = status timeline + map/list split; drivers/vehicles = compliance cards.
+  Finance / Accounting:
+    dashboard = cash position + receivables + expense trend; transactions = ledger table; invoices = aging buckets + payment status.
+  Healthcare / Clinic:
+    dashboard = appointments today + patient queue + doctor utilization; appointments = calendar/list split; patients = profile drawer with history.
+  HR / People:
+    dashboard = headcount + leave + hiring funnel; employees = people grid/table; leave = calendar; recruitment = pipeline.
+  E-Commerce / Inventory:
+    dashboard = orders + revenue + low stock; orders = fulfillment queue; products = inventory table with stock bars; customers = segmentation cards.
+  Project Management:
+    dashboard = sprint progress + blockers + workload; tasks = kanban; projects = timeline; team = capacity panel.
+  Analytics / Reporting:
+    dashboard = chart-first with filters; reports = saved report list + preview; events = streaming table.
+
+ADMIN PANEL ANTI-GENERIC RULE:
+  ui_structure must explicitly forbid a plain CRUD-only dashboard. At least one page must use a domain-specific pattern beyond a table.
+
+ADMIN PANEL VISUAL DIRECTION:
+  The UI blueprint must choose ONE modern admin visual direction that fits the domain. Do not default every project to the same Notion-like style.
+  Options:
+    - Minimal SaaS: Notion / Linear / Attio style; calm surfaces, compact rows, subtle borders, precise typography.
+    - Premium Dark Ops: dark operational cockpit; high-contrast cards, glowing but restrained accent, chart-first dashboard.
+    - Editorial Light Dashboard: spacious light UI; strong typography, soft sections, elegant charts, refined empty states.
+    - Colorful Product OS: clean Dribbble-style SaaS; tasteful accent blocks, rounded panels, expressive icons, still data-dense.
+    - Enterprise Dense: Retool/Superhuman-like; compact, efficient, many controls, low decoration, excellent scanning.
+  Include the chosen visual direction by name in ui_structure and describe its layout rhythm, surface treatment, typography, and interaction style.
 
 IMAGE KEYWORDS RULES:
 13. "image_keywords": 2–4 Unsplash search phrases. 

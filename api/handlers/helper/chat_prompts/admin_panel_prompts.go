@@ -540,6 +540,126 @@ TRANSITIONS: transition-colors duration-150 on all interactive elements
 ====================================
 UI QUALITY STANDARDS
 ====================================
+PRODUCT-GRADE ADMIN PANEL STANDARD:
+  The app must feel like a real SaaS work surface, not a CRUD demo.
+  Every screen needs a clear operational purpose: monitor, decide, triage, create, approve, reconcile, assign, or investigate.
+
+  FIRST SCREEN / DASHBOARD MUST HAVE:
+    - 4 KPI cards tied to the domain, with trends and icons
+    - one primary work surface (pipeline, queue, timeline, ledger, calendar, chart panel, or map/list split)
+    - one secondary insight panel (alerts, exceptions, upcoming work, recommendations, risk list)
+    - recent activity or audit trail
+    - quick actions that map to real tasks
+
+  DO NOT make a dashboard that is only:
+    ❌ generic "Total Users / Total Orders / Revenue" cards
+    ❌ equal 3-column cards with lorem-like text
+    ❌ a single table with no context
+    ❌ charts with fake labels unrelated to the domain
+
+DOMAIN-SPECIFIC PAGE PATTERNS:
+  CRM / SALES:
+    Dashboard: pipeline KPIs, conversion funnel, next activities.
+    Leads/Deals: kanban board by stage + right-side detail drawer.
+    Contacts/Companies: dense table with tags, last activity, owner, quick filters.
+
+  TMS / LOGISTICS / COMPLIANCE:
+    Dashboard: active loads, delayed shipments, SLA risk, compliance exceptions.
+    Loads/Orders: status timeline + table; use route/stop cards when fields support it.
+    Drivers/Vehicles: compliance cards, status badges, document expiry warnings.
+
+  FINANCE / ACCOUNTING:
+    Dashboard: cash balance, receivables, payables, monthly trend.
+    Transactions: ledger-style dense table with running total visual treatment.
+    Invoices/Payments: aging buckets, payment status badges, reconciliation queue.
+
+  HEALTHCARE / CLINIC:
+    Dashboard: today appointments, waiting queue, doctor utilization.
+    Appointments: calendar/list split, status badges, patient quick view.
+    Patients: profile drawer, contact details, visit history section.
+
+  HR / PEOPLE:
+    Dashboard: headcount, leave, open roles, onboarding progress.
+    Employees: people table/grid with department, role, status, quick profile drawer.
+    Leave/Recruitment: calendar or pipeline pattern instead of plain table.
+
+  E-COMMERCE / INVENTORY:
+    Dashboard: order volume, revenue, low-stock count, fulfillment backlog.
+    Orders: fulfillment queue with status tabs and bulk actions.
+    Products/Inventory: stock bars, low-stock badges, category filters.
+
+  PROJECT MANAGEMENT:
+    Dashboard: sprint progress, blocked tasks, workload, deadlines.
+    Tasks: kanban board by status, assignee avatars, due-date badges.
+    Projects: timeline/list hybrid with progress bars.
+
+  ANALYTICS / REPORTING:
+    Dashboard: chart-first layout with filter bar.
+    Reports: saved report cards + preview panel.
+    Events/Metrics: dense table plus trend charts.
+
+COMPOSITION RULES:
+  - Use split panes, drawers, tabs, kanban columns, timeline rows, chart panels, and command-like filters when the domain calls for them.
+  - Tables are allowed, but every table page needs search, filters, pagination, row actions, loading, empty and error states.
+  - At least one major non-dashboard page MUST use a non-table pattern when the domain supports it.
+  - Every repeated card must have stable dimensions; hover states must not shift layout.
+  - Visual hierarchy: page title -> operational summary -> primary work surface -> supporting panels.
+
+DRIBBBLE-QUALITY ADMIN VISUAL STANDARD:
+  The interface must feel like a polished SaaS dashboard case study, not a stock admin template.
+  Use the selected visual direction from ui_structure. If no direction is provided, infer one from the domain.
+
+  VISUAL DIRECTIONS:
+    Minimal SaaS:
+      References: Notion, Linear, Attio.
+      bg-background with quiet bg-card panels, 1px borders, minimal shadows, compact text, hover-revealed actions.
+    Premium Dark Ops:
+      References: Vercel dark dashboards, incident/ops tools, analytics cockpits.
+      dark surfaces, thin borders, muted grid/chart treatments, accent used sparingly for status and focus.
+    Editorial Light Dashboard:
+      References: high-end finance/HR dashboards on Dribbble.
+      light spacious layout, strong section titles, refined charts, soft panels, measured whitespace.
+    Colorful Product OS:
+      References: modern Dribbble SaaS admin panels.
+      tasteful accent blocks, softly tinted panels, rounded controls, expressive icon badges; never random rainbow colors.
+    Enterprise Dense:
+      References: Retool, Superhuman, Stripe internal tools.
+      compact rows, sticky controls, dense filters, clear hierarchy, low decoration, maximum scannability.
+
+  ANTI-OLD-ADMIN RULES:
+    ❌ no Bootstrap-looking blue header + gray sidebar template
+    ❌ no huge heavy drop shadows
+    ❌ no random gradients as page backgrounds
+    ❌ no thick black borders around every card
+    ❌ no oversized icons inside colored squares on every card
+    ❌ no toy-like kanban cards with loud unrelated colors
+    ❌ no all-caps giant headings inside dense dashboards
+    ❌ no page that is only a title + table without toolbar, states, and context
+
+  MODERN DETAIL RULES:
+    - Surfaces: bg-card / bg-background with border-border/50; shadows only when needed.
+    - Toolbar: every data page needs a sticky or clearly grouped control row: search, filters, view switch, primary action.
+    - Detail view: prefer right-side drawer or split panel for row/card details instead of full-screen dead-end pages.
+    - Metadata: use compact chips, avatars, small icons, dates, counts, and status dots.
+    - Hover: reveal secondary row/card actions on hover; primary actions remain visible.
+    - Typography: dashboard headings compact; metrics use tabular-nums; metadata uses text-xs text-muted-foreground.
+
+KANBAN QUALITY RULES:
+  If a page uses kanban, it must look like a modern product board:
+    - columns have sticky headers with stage name, count, and small aggregate metric if relevant
+    - cards are compact with title, 2-4 metadata chips, owner avatar/initials, due date/status
+    - cards use subtle border + hover elevation, not loud backgrounds
+    - top toolbar has search, stage/status filters, view toggle, and add button
+    - clicking/opening a card should use a right detail drawer when feasible
+
+TABLE QUALITY RULES:
+  If a page uses a table, it must look like a premium data product:
+    - compact rows, sticky header when feasible, muted uppercase column labels
+    - first column has strong identity cell (name + subtitle/avatar/status)
+    - status uses dot Badge, never plain text only
+    - actions are icon buttons revealed on hover
+    - empty/loading/error states match the same layout dimensions
+
 BUTTON VARIANTS — generate all in button.tsx:
   default:     bg-primary text-primary-foreground shadow-sm hover:bg-primary/90
   outline:     border border-input bg-background hover:bg-accent hover:text-accent-foreground
