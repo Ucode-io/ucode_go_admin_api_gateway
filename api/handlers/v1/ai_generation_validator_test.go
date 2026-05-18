@@ -123,11 +123,11 @@ const baseUrl = import.meta.env.VITE_API_BASE_URL;
 export default function App() { return <DashboardPage />; }`,
 		},
 		{
-			Path: "src/index.css",
+			Path:    "src/index.css",
 			Content: `:root { --primary: 220 80% 50%; }`,
 		},
 		{
-			Path: ".env",
+			Path:    ".env",
 			Content: "VITE_API_BASE_URL=https://api.example.com\nVITE_X_API_KEY=test-key",
 		},
 	}
@@ -234,6 +234,46 @@ export function useUsers() { return useApiQuery(['users'], '/v2/items/users'); }
 	for _, e := range errors {
 		if e.Severity == "error" {
 			t.Errorf("template file import flagged as error: [%s] %s", e.File, e.Message)
+		}
+	}
+}
+
+func TestValidate_RuntimeHazards(t *testing.T) {
+	files := []models.ProjectFile{
+		{
+			Path: "src/pages/OrdersPage.tsx",
+			Content: `import React from 'react';
+export default function OrdersPage() {
+  const rows = data?.data?.data?.response ?? [];
+  return <select>{rows.map((r: any) => <option key={r.guid}>{r.name}</option>)}</select>;
+}`,
+		},
+		{
+			Path: "src/pages/FallbackPage.tsx",
+			Content: `import React from 'react';
+export default function FallbackPage() {
+  return <p>This section is temporarily unavailable.</p>;
+}`,
+		},
+	}
+
+	errors := validateGeneratedProject(files, nil)
+
+	expectMessages := []string{
+		"native <select>",
+		"data.data.response",
+		"fallback stub",
+	}
+	for _, msg := range expectMessages {
+		found := false
+		for _, e := range errors {
+			if e.Severity == "error" && contains(e.Message, msg) {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Errorf("expected runtime hazard error containing %q, got %v", msg, errors)
 		}
 	}
 }

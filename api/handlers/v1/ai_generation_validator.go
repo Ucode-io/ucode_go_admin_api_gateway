@@ -58,6 +58,10 @@ var (
 
 	// Matches: const X, let X, var X, function X, class X — local declarations
 	reLocalDecl = regexp.MustCompile(`(?:const|let|var|function|class)\s+([A-Z]\w+)`)
+
+	// Browser-build hazards that are cheap to catch before the generated app is published.
+	reNativeSelect     = regexp.MustCompile(`<\s*select(?:\s|>)`)
+	reInlineApiNesting = regexp.MustCompile(`data\?\.(?:data\?\.)?(?:data\?\.)?response|data\.data\.response|data\.data\.data\.response`)
 )
 
 // ImportStatement represents one parsed import.
@@ -227,6 +231,64 @@ func validateGeneratedProject(files []models.ProjectFile, envVars map[string]any
 	// Step 6: Validate env variables.
 	envErrors := validateEnvVars(files, envVars)
 	errors = append(errors, envErrors...)
+
+	// Step 7: Validate route/page and browser-build hazards that often only show up
+	// after Vite starts rendering each page.
+	pageErrors := validatePageAndRuntimeHazards(files)
+	errors = append(errors, pageErrors...)
+
+	return errors
+}
+
+func validatePageAndRuntimeHazards(files []models.ProjectFile) []ValidationError {
+	var errors []ValidationError
+
+	for _, f := range files {
+		if !strings.HasSuffix(f.Path, ".tsx") && !strings.HasSuffix(f.Path, ".ts") {
+			continue
+		}
+
+		if strings.Contains(f.Content, "This section is temporarily unavailable") {
+			errors = append(errors, ValidationError{
+				Severity: "error",
+				File:     f.Path,
+				Message:  "contains fallback stub UI instead of a real generated page; this page must be implemented before publish",
+			})
+		}
+
+		if reNativeSelect.MatchString(f.Content) {
+			errors = append(errors, ValidationError{
+				Severity: "error",
+				File:     f.Path,
+				Message:  "uses native <select>, which breaks the design system; replace with @/components/ui/select primitives",
+			})
+		}
+
+		if reInlineApiNesting.MatchString(f.Content) {
+			errors = append(errors, ValidationError{
+				Severity: "error",
+				File:     f.Path,
+				Message:  "indexes API response manually with data.data.response; use extractList, extractSingle, or extractCount",
+			})
+		}
+
+		if strings.HasPrefix(f.Path, "src/pages/") && strings.HasSuffix(f.Path, ".tsx") {
+			if strings.Contains(f.Content, "useApiQuery") && !strings.Contains(f.Content, "isLoading") {
+				errors = append(errors, ValidationError{
+					Severity: "warning",
+					File:     f.Path,
+					Message:  "fetches API data but does not appear to render a loading state",
+				})
+			}
+			if strings.Contains(f.Content, "useApiQuery") && !strings.Contains(f.Content, "error") && !strings.Contains(f.Content, "isError") {
+				errors = append(errors, ValidationError{
+					Severity: "warning",
+					File:     f.Path,
+					Message:  "fetches API data but does not appear to render an error state",
+				})
+			}
+		}
+	}
 
 	return errors
 }
