@@ -70,6 +70,7 @@ func (p *ChatProcessor) recordTokenUsage(usage models.ClaudeUsage, model, descri
 			context.Background(),
 			&pb.RecordAiTokenUsageRequest{
 				ProjectId:    projectId,
+				CompanyId:    p.companyId,
 				InputTokens:  int32(usage.InputTokens),
 				OutputTokens: int32(usage.OutputTokens),
 				Model:        model,

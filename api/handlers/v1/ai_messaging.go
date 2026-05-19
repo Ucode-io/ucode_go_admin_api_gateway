@@ -42,6 +42,7 @@ type ChatProcessor struct {
 	resourceEnvId     string
 	ucodeProjectId    string
 	mcpUcodeProjectId string
+	companyId         string
 
 	userId       string
 	clientTypeId string
@@ -482,6 +483,8 @@ func (p *ChatProcessor) provisionBackend(ctx context.Context, projectName string
 	if err != nil {
 		return nil, fmt.Errorf("get current project info: %w", err)
 	}
+
+	p.companyId = currentProject.GetCompanyId()
 
 	if err = billing.CheckProjectCountLimit(ctx, p.h.companyServices, currentProject.GetCompanyId(), currentProject.GetFareId()); err != nil {
 		return nil, err

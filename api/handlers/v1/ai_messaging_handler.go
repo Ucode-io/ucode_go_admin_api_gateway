@@ -13,6 +13,7 @@ import (
 
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
+	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	pbo "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	"ucode/ucode_go_api_gateway/services"
 )
@@ -94,6 +95,10 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 
 	if userMessage.UcodeProjectID != "" {
 		processor.ucodeProjectId = userMessage.UcodeProjectID
+	}
+
+	if proj, projErr := h.companyServices.Project().GetById(ctx, &pb.GetProjectByIdRequest{ProjectId: realProjectID}); projErr == nil {
+		processor.companyId = proj.GetCompanyId()
 	}
 
 	chatHistory, err := processor.getChatHistory(ctx)
