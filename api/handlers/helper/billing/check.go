@@ -179,7 +179,7 @@ func CheckProjectCountLimit(ctx context.Context, companyServices services.Compan
 
 	projectList, err := companyServices.Project().GetList(ctx, &pb.GetProjectListRequest{CompanyId: companyId})
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get project list: %w", err)
 	}
 
 	limitResp, err := companyServices.Billing().CompareFunction(ctx, &pb.CompareFunctionRequest{
@@ -188,7 +188,7 @@ func CheckProjectCountLimit(ctx context.Context, companyServices services.Compan
 		Count:  projectList.GetCount() + 1,
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to check billing limit: %w", err)
 	}
 
 	if !limitResp.GetHasAccess() {
