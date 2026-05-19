@@ -73,6 +73,7 @@ func (w *BillingLimitWorker) run(ctx context.Context) {
 			return
 		case <-ticker.C:
 			w.refreshAll(ctx)
+			w.refreshApiLimits(ctx)
 		}
 	}
 }
@@ -161,4 +162,88 @@ func (w *BillingLimitWorker) refreshProject(ctx context.Context, projectId strin
 	if err = w.rdb.Set(ctx, limitKey, val, 15*time.Minute).Err(); err != nil {
 		log.Printf("[BillingLimitWorker] Redis SET project=%s: %v", projectId, err)
 	}
+}
+
+func (w *BillingLimitWorker) refreshApiLimits(ctx context.Context) {
+	var cursor uint64
+	for {
+		keys, next, err := w.rdb.Scan(ctx, cursor, config.KeyUsagePendingPattern, 100).Result()
+		if err != nil {
+			log.Printf("[BillingLimitWorker] refreshApiLimits SCAN error: %v", err)
+			return
+		}
+
+		for _, key := range keys {
+			projectId := key[len(config.KeyUsagePendingPrefix):]
+			w.refreshApiLimit(ctx, projectId)
+		}
+
+		cursor = next
+		if cursor == 0 {
+			break
+		}
+	}
+}
+
+func (w *BillingLimitWorker) refreshApiLimit(ctx context.Context, projectId string) {
+	fareId, err := w.getFareId(ctx, projectId)
+	if err != nil || fareId == "" {
+		return
+	}
+
+	metricsResp, err := w.companyService.Billing().GetApiCallMonitoringMetrics(
+		ctx, &pb.GetApiCallMonitoringMetricsRequest{ProjectId: projectId},
+	)
+	if err != nil {
+		log.Printf("[BillingLimitWorker] GetApiCallMonitoringMetrics project=%s: %v", projectId, err)
+		return
+	}
+
+	// If there are no recorded calls yet, the project is clearly within its limit.
+	totalCalls := metricsResp.GetTotalMonthlyCalls()
+	if totalCalls == 0 {
+		w.rdb.Set(ctx, fmt.Sprintf(config.KeyBillingApiLimit, projectId), "1", 15*time.Minute)
+		return
+	}
+
+	limitResp, err := w.companyService.Billing().CompareFunction(ctx, &pb.CompareFunctionRequest{
+		Type:   config.FARE_REQUEST_PER_MONTH,
+		FareId: fareId,
+		Count:  int32(totalCalls),
+	})
+	if err != nil {
+		log.Printf("[BillingLimitWorker] CompareFunction(api) project=%s: %v", projectId, err)
+		return
+	}
+
+	val := "1"
+	if !limitResp.GetHasAccess() {
+		val = "0"
+	}
+
+	limitKey := fmt.Sprintf(config.KeyBillingApiLimit, projectId)
+	if err = w.rdb.Set(ctx, limitKey, val, 15*time.Minute).Err(); err != nil {
+		log.Printf("[BillingLimitWorker] Redis SET api_limit project=%s: %v", projectId, err)
+	}
+}
+
+func (w *BillingLimitWorker) getFareId(ctx context.Context, projectId string) (string, error) {
+	fareKey := fmt.Sprintf(config.KeyBillingFareId, projectId)
+
+	if cached, err := w.rdb.Get(ctx, fareKey).Result(); err == nil && cached != "" {
+		return cached, nil
+	}
+
+	proj, err := w.companyService.Project().GetById(
+		ctx, &pb.GetProjectByIdRequest{ProjectId: projectId},
+	)
+	if err != nil {
+		return "", err
+	}
+
+	fareId := proj.GetFareId()
+	if fareId != "" {
+		w.rdb.Set(ctx, fareKey, fareId, 30*time.Minute)
+	}
+	return fareId, nil
 }

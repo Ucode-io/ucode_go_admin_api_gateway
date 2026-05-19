@@ -51,7 +51,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	// @in header
 	// @name Authorization
 	v1.Use(h.V1.AuthMiddleware(cfg))
-	v1.Use(tracker.Middleware())
+	v1.Use(tracker.ApiCallCountMiddleware())
 	{
 		v1.POST("/menu-settings", h.V1.CreateMenuSettings)
 		v1.PUT("/menu-settings", h.V1.UpdateMenuSettings)
@@ -226,7 +226,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 	v2 := r.Group("/v2")
 	v2.Use(h.V1.AuthMiddleware(cfg))
-	v2.Use(tracker.Middleware())
+	v2.Use(tracker.ApiCallCountMiddleware())
 	{
 		v2.POST("/object/get-list/:collection", h.V1.GetListV2)
 		v2.PUT("/update-with/:collection", h.V1.UpdateWithParams)
@@ -455,7 +455,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 	clientV2 := r.Group("/v2")
 	clientV2.Use(h.V2.AuthMiddleware())
-	clientV2.Use(tracker.Middleware())
+	clientV2.Use(tracker.ApiCallCountMiddleware())
+	clientV2.Use(tracker.BillingLimitMiddleware())
 	// items group
 	v2Items := clientV2.Group("/items")
 	{
@@ -485,7 +486,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 	v2Version := r.Group("/v2")
 	v2Version.Use(h.V1.AuthMiddleware(cfg))
-	v2Version.Use(tracker.Middleware())
+	v2Version.Use(tracker.ApiCallCountMiddleware())
 	{
 		v2Version.POST("/csv/:collection/download", h.V2.GetListInCSV)
 		v2Version.POST("/send-to-gpt", h.V2.SendToGpt)
@@ -689,7 +690,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 	v3 := r.Group("/v3")
 	v3.Use(h.V1.AuthMiddleware(cfg))
-	v3.Use(tracker.Middleware())
+	v3.Use(tracker.ApiCallCountMiddleware())
 	v3Menus := v3.Group("/menus")
 	{
 		v3Menus.GET("", h.V3.GetAllMenus)
