@@ -83,8 +83,13 @@ const (
 
 	UGEN_FREE_PLAN_ID = "07d8a364-ebb2-4291-a452-f44b335cb031"
 
-	// Fare (billing) types
-	FARE_ASSET_SIZE string = "asset_size"
+	FARE_ASSET_SIZE    string = "asset_size"
+	FARE_DATABASE_SIZE string = "database"
+
+	KeyBillingDbLimit        = "billing:db_limit:%s" // projectId → "1"(allowed) | "0"(blocked)
+	KeyBillingDbLimitPattern = "billing:db_limit:*"
+	KeyBillingDbLimitPrefix  = "billing:db_limit:"
+	KeyBillingDbCtx          = "billing:db_ctx:%s" // projectId → JSON context for worker
 )
 
 var (

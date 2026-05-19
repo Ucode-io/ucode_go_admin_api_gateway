@@ -27,6 +27,7 @@ import (
 	"ucode/ucode_go_api_gateway/storage"
 
 	"github.com/gin-gonic/gin"
+	go_redis "github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -40,12 +41,13 @@ type HandlerV1 struct {
 	companyServices services.CompanyServiceI
 	authService     services.AuthServiceManagerI
 	redis           storage.RedisStorageI
+	centralRedis    *go_redis.Client
 	cache           *caching.ExpiringLRUCache
 	rateLimiter     *util.ApiKeyRateLimiter
 	vault           vault.VaultClient
 }
 
-func NewHandlerV1(baseConf config.BaseConfig, projectConfs map[string]config.Config, log logger.LoggerI, svcs services.ServiceNodesI, cmpServ services.CompanyServiceI, authService services.AuthServiceManagerI, redis storage.RedisStorageI, cache *caching.ExpiringLRUCache, limiter *util.ApiKeyRateLimiter, vaultClient vault.VaultClient) HandlerV1 {
+func NewHandlerV1(baseConf config.BaseConfig, projectConfs map[string]config.Config, log logger.LoggerI, svcs services.ServiceNodesI, cmpServ services.CompanyServiceI, authService services.AuthServiceManagerI, redis storage.RedisStorageI, centralRedis *go_redis.Client, cache *caching.ExpiringLRUCache, limiter *util.ApiKeyRateLimiter, vaultClient vault.VaultClient) HandlerV1 {
 	return HandlerV1{
 		baseConf:        baseConf,
 		projectConfs:    projectConfs,
@@ -54,6 +56,7 @@ func NewHandlerV1(baseConf config.BaseConfig, projectConfs map[string]config.Con
 		companyServices: cmpServ,
 		authService:     authService,
 		redis:           redis,
+		centralRedis:    centralRedis,
 		cache:           cache,
 		rateLimiter:     limiter,
 		vault:           vaultClient,

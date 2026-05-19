@@ -20,6 +20,7 @@ import (
 	"ucode/ucode_go_api_gateway/storage"
 
 	"github.com/gin-gonic/gin"
+	go_redis "github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -36,6 +37,7 @@ type HandlerV3 struct {
 	companyServices services.CompanyServiceI
 	authService     services.AuthServiceManagerI
 	redis           storage.RedisStorageI
+	centralRedis    *go_redis.Client
 	cache           *caching.ExpiringLRUCache
 	rateLimiter     *util.ApiKeyRateLimiter
 }
@@ -48,6 +50,7 @@ type HandlerV3Config struct {
 	CompanyServices services.CompanyServiceI
 	AuthService     services.AuthServiceManagerI
 	Redis           storage.RedisStorageI
+	CentralRedis    *go_redis.Client
 	Cache           *caching.ExpiringLRUCache
 	RateLimiter     *util.ApiKeyRateLimiter
 }
@@ -61,6 +64,7 @@ func NewHandlerV3(cf *HandlerV3Config) HandlerV3 {
 		companyServices: cf.CompanyServices,
 		authService:     cf.AuthService,
 		redis:           cf.Redis,
+		centralRedis:    cf.CentralRedis,
 		cache:           cf.Cache,
 		rateLimiter:     cf.RateLimiter,
 	}

@@ -13,6 +13,7 @@ import (
 	"ucode/ucode_go_api_gateway/storage"
 
 	"github.com/gin-gonic/gin"
+	go_redis "github.com/go-redis/redis/v8"
 )
 
 type Handler struct {
@@ -23,13 +24,14 @@ type Handler struct {
 	companyServices services.CompanyServiceI
 	authService     services.AuthServiceManagerI
 	redis           storage.RedisStorageI
+	centralRedis    *go_redis.Client
 	V1              v1.HandlerV1
 	V2              v2.HandlerV2
 	V3              v3.HandlerV3
 	cache           *caching.ExpiringLRUCache
 }
 
-func NewHandler(baseConf config.BaseConfig, projectConfs map[string]config.Config, log logger.LoggerI, svcs services.ServiceNodesI, cmpServ services.CompanyServiceI, authService services.AuthServiceManagerI, redis storage.RedisStorageI, cache *caching.ExpiringLRUCache, limiter *util.ApiKeyRateLimiter, vaultClient vault.VaultClient) Handler {
+func NewHandler(baseConf config.BaseConfig, projectConfs map[string]config.Config, log logger.LoggerI, svcs services.ServiceNodesI, cmpServ services.CompanyServiceI, authService services.AuthServiceManagerI, redis storage.RedisStorageI, centralRedis *go_redis.Client, cache *caching.ExpiringLRUCache, limiter *util.ApiKeyRateLimiter, vaultClient vault.VaultClient) Handler {
 	return Handler{
 		baseConf:        baseConf,
 		projectConfs:    projectConfs,
@@ -38,8 +40,9 @@ func NewHandler(baseConf config.BaseConfig, projectConfs map[string]config.Confi
 		companyServices: cmpServ,
 		authService:     authService,
 		redis:           redis,
-		V1:              v1.NewHandlerV1(baseConf, projectConfs, log, svcs, cmpServ, authService, redis, cache, limiter, vaultClient),
-		V2:              v2.NewHandlerV2(baseConf, projectConfs, log, svcs, cmpServ, authService, redis, cache, limiter),
+		centralRedis:    centralRedis,
+		V1:              v1.NewHandlerV1(baseConf, projectConfs, log, svcs, cmpServ, authService, redis, centralRedis, cache, limiter, vaultClient),
+		V2:              v2.NewHandlerV2(baseConf, projectConfs, log, svcs, cmpServ, authService, redis, centralRedis, cache, limiter),
 		V3: v3.NewHandlerV3(&v3.HandlerV3Config{
 			BaseConf:        baseConf,
 			ProjectConfs:    projectConfs,
@@ -48,6 +51,7 @@ func NewHandler(baseConf config.BaseConfig, projectConfs map[string]config.Confi
 			CompanyServices: cmpServ,
 			AuthService:     authService,
 			Redis:           redis,
+			CentralRedis:    centralRedis,
 			RateLimiter:     limiter,
 			Cache:           cache,
 		}),
