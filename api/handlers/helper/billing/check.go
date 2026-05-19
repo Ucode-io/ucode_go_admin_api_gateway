@@ -168,6 +168,35 @@ func CheckDatabaseLimit(ctx context.Context, rdb *redis.Client, companyServices 
 	return nil
 }
 
+// ─── Project count limit ───────────────────────────────────────────────────
+
+var ErrProjectLimitExceeded = errors.New("project limit reached for your current plan. Please upgrade to create more projects")
+
+func CheckProjectCountLimit(ctx context.Context, companyServices services.CompanyServiceI, companyId, fareId string) error {
+	if fareId == "" {
+		return nil
+	}
+
+	projectList, err := companyServices.Project().GetList(ctx, &pb.GetProjectListRequest{CompanyId: companyId})
+	if err != nil {
+		return err
+	}
+
+	limitResp, err := companyServices.Billing().CompareFunction(ctx, &pb.CompareFunctionRequest{
+		Type:   config.FARE_PROJECTS,
+		FareId: fareId,
+		Count:  projectList.GetCount() + 1,
+	})
+	if err != nil {
+		return err
+	}
+
+	if !limitResp.GetHasAccess() {
+		return ErrProjectLimitExceeded
+	}
+	return nil
+}
+
 func storeBillingCache(ctx context.Context, rdb *redis.Client, projectId, resourceEnvId, nodeType, fareId string, allowed bool) {
 	limitKey := fmt.Sprintf(config.KeyBillingDbLimit, projectId)
 	ctxKey := fmt.Sprintf(config.KeyBillingDbCtx, projectId)

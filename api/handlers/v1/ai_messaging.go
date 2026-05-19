@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 	"ucode/ucode_go_api_gateway/api/handlers/helper"
+	"ucode/ucode_go_api_gateway/api/handlers/helper/billing"
 	"ucode/ucode_go_api_gateway/api/handlers/helper/chat_prompts"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/config"
@@ -486,6 +487,10 @@ func (p *ChatProcessor) provisionBackend(ctx context.Context, projectName string
 	)
 	if err != nil {
 		return nil, fmt.Errorf("get current project info: %w", err)
+	}
+
+	if err = billing.CheckProjectCountLimit(ctx, p.h.companyServices, currentProject.GetCompanyId(), currentProject.GetFareId()); err != nil {
+		return nil, err
 	}
 
 	backendProject, err := p.h.companyServices.Project().Create(

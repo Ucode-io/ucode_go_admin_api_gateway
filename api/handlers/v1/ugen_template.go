@@ -12,6 +12,9 @@ import (
 	"strings"
 	"time"
 
+	"errors"
+
+	"ucode/ucode_go_api_gateway/api/handlers/helper/billing"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
@@ -434,6 +437,15 @@ func (h *HandlerV1) CreateProjectFromTemplate(c *gin.Context) {
 	}
 	if len(sourceMcpFiles) == 0 {
 		h.HandleResponse(c, status_http.InvalidArgument, "template source has no microfrontend files")
+		return
+	}
+
+	if err = billing.CheckProjectCountLimit(ctx, h.companyServices, headProject.GetCompanyId(), headProject.GetFareId()); err != nil {
+		if errors.Is(err, billing.ErrProjectLimitExceeded) {
+			h.HandleResponse(c, status_http.PaymentRequired, err.Error())
+		} else {
+			h.HandleResponse(c, status_http.GRPCError, err.Error())
+		}
 		return
 	}
 

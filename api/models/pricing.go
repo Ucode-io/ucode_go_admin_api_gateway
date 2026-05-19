@@ -19,6 +19,7 @@ type AllPricingUsage struct {
 	MonthlyTokens   PricingUsage `json:"monthly_tokens"`
 	MonthlyApiCalls PricingUsage `json:"monthly_api_calls"`
 	AvgResponseTime PricingUsage `json:"avg_response_time"`
+	Projects        PricingUsage `json:"projects"`
 }
 
 type PerformanceMetricsResponse struct {

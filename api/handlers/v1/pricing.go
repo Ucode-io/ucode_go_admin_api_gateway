@@ -40,6 +40,7 @@ func (h *HandlerV1) GetAllPricingUsage(c *gin.Context) {
 	apiKeysResp := &auth_service.GetProjectApiKeysCountResponse{}
 	tokenMetrics := &company_service.GetAiTokenUsageMetricsResponse{}
 	apiMetrics := &company_service.GetApiCallMonitoringMetricsResponse{}
+	ugenStatus := &company_service.GetProjectUgenStatusResponse{}
 
 	g, gCtx := errgroup.WithContext(c.Request.Context())
 
@@ -102,6 +103,15 @@ func (h *HandlerV1) GetAllPricingUsage(c *gin.Context) {
 		apiMetrics = resp
 		return nil
 	})
+	g.Go(func() error {
+		resp, err := h.companyServices.Project().GetProjectUgenStatus(gCtx, &company_service.GetProjectUgenStatusRequest{ProjectId: projectId})
+		if err != nil {
+			h.log.Error(fmt.Sprintf("[GetAllPricingUsage] GetProjectUgenStatus failed: %v", err))
+			return nil
+		}
+		ugenStatus = resp
+		return nil
+	})
 
 	_ = g.Wait()
 
@@ -117,6 +127,7 @@ func (h *HandlerV1) GetAllPricingUsage(c *gin.Context) {
 		TodayTokens:     models.PricingUsage{Current: float64(tokenMetrics.TodayInputTokens + tokenMetrics.TodayOutputTokens), Unit: "tokens"},
 		MonthlyTokens:   models.PricingUsage{Current: float64(tokenMetrics.MonthlyInputTokens + tokenMetrics.MonthlyOutputTokens), Unit: "tokens"},
 		MonthlyApiCalls: models.PricingUsage{Current: float64(apiMetrics.TotalMonthlyCalls), Unit: "count"},
+		Projects:        models.PricingUsage{Current: float64(ugenStatus.CompanyProjectsCount), Unit: "count"},
 	}
 
 	for _, limit := range limitsResp.Limits {
@@ -145,6 +156,8 @@ func (h *HandlerV1) GetAllPricingUsage(c *gin.Context) {
 			response.TodayTokens.Limit = cast.ToFloat64(limit.Value)
 		case "tokens_month":
 			response.MonthlyTokens.Limit = cast.ToFloat64(limit.Value)
+		case "projects":
+			response.Projects.Limit = cast.ToFloat64(limit.Value)
 		}
 	}
 
