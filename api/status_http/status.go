@@ -49,6 +49,11 @@ var (
 		Status:      "FORBIDDEN",
 		Description: "...",
 	}
+	PaymentRequired = Status{
+		Code:        402,
+		Status:      "PAYMENT_REQUIRED",
+		Description: "Billing plan limit has been reached",
+	}
 	TooManyRequests = Status{
 		Code:        429,
 		Status:      "TOO_MANY_REQUESTS",

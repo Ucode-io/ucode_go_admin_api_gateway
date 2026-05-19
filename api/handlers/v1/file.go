@@ -15,6 +15,7 @@ import (
 	"strings"
 	"time"
 
+	"ucode/ucode_go_api_gateway/api/handlers/helper/billing"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
@@ -96,6 +97,15 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	if err = billing.CheckAssetSizeLimit(c.Request.Context(), h.companyServices, services, projectId.(string), resource.ResourceEnvironmentId, file.File.Size); err != nil {
+		if errors.Is(err, billing.ErrAssetLimitExceeded) {
+			h.HandleResponse(c, status_http.PaymentRequired, err.Error())
+		} else {
+			h.HandleResponse(c, status_http.GRPCError, err.Error())
+		}
 		return
 	}
 
@@ -916,9 +926,7 @@ func (h *HandlerV1) Upload(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) UploadFile(c *gin.Context) {
-	var (
-		file models.File
-	)
+	var file models.File
 
 	err := c.ShouldBind(&file)
 	if err != nil {
@@ -932,69 +940,6 @@ func (h *HandlerV1) UploadFile(c *gin.Context) {
 	file.File.Filename = strings.ReplaceAll(file.File.Filename, " ", "")
 	file.File.Filename = fmt.Sprintf("%s_%s", fName.String(), file.File.Filename)
 	dst, _ := os.Getwd()
-
-	minioClient, err := minio.New(h.baseConf.MinioEndpoint, &minio.Options{
-		Creds:  credentials.NewStaticV4(h.baseConf.MinioAccessKeyID, h.baseConf.MinioSecretAccessKey, ""),
-		Secure: h.baseConf.MinioProtocol,
-	})
-
-	if err != nil {
-		h.HandleResponse(c, status_http.BadRequest, err.Error())
-		return
-	}
-	err = c.SaveUploadedFile(file.File, dst+"/"+file.File.Filename)
-	if err != nil {
-		h.HandleResponse(c, status_http.BadRequest, err.Error())
-		return
-	}
-	fileLink := "https://" + h.baseConf.MinioEndpoint + "/docs/" + file.File.Filename
-	splitedFileName := strings.Split(fileNameForObjectBuilder, ".")
-	f, err := os.Stat(dst + "/" + file.File.Filename)
-	if err != nil {
-		h.HandleResponse(c, status_http.BadRequest, err.Error())
-		return
-	}
-	ContentTypeOfFile := file.File.Header["Content-Type"][0]
-
-	_, err = minioClient.FPutObject(
-		context.Background(),
-		"docs",
-		file.File.Filename,
-		dst+"/"+file.File.Filename,
-		minio.PutObjectOptions{ContentType: ContentTypeOfFile},
-	)
-	if err != nil {
-		h.HandleResponse(c, status_http.BadRequest, err.Error())
-		err = os.Remove(dst + "/" + file.File.Filename)
-		if err != nil {
-			h.log.Error("cant remove file")
-		}
-
-		return
-	}
-	err = os.Remove(dst + "/" + file.File.Filename)
-	if err != nil {
-		h.log.Error("cant remove file")
-	}
-
-	var tags []string
-	if c.Query("tags") != "" {
-		tags = strings.Split(c.Query("tags"), ",")
-	}
-	var requestMap = make(map[string]any)
-	requestMap["table_slug"] = c.Param("collection")
-	requestMap["object_id"] = c.Param("object_id")
-	requestMap["date"] = time.Now().Format(time.RFC3339)
-	requestMap["tags"] = tags
-	requestMap["size"] = int32(f.Size())
-	requestMap["type"] = splitedFileName[len(splitedFileName)-1]
-	requestMap["file_link"] = fileLink
-	requestMap["name"] = fileNameForObjectBuilder
-	structData, err := helper.ConvertMapToStruct(requestMap)
-	if err != nil {
-		h.HandleResponse(c, status_http.BadRequest, err.Error())
-		return
-	}
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -1029,6 +974,77 @@ func (h *HandlerV1) UploadFile(c *gin.Context) {
 	)
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	if err = billing.CheckAssetSizeLimit(c.Request.Context(), h.companyServices, services, projectId.(string), resource.ResourceEnvironmentId, file.File.Size); err != nil {
+		if errors.Is(err, billing.ErrAssetLimitExceeded) {
+			h.HandleResponse(c, status_http.PaymentRequired, err.Error())
+		} else {
+			h.HandleResponse(c, status_http.GRPCError, err.Error())
+		}
+		return
+	}
+
+	minioClient, err := minio.New(h.baseConf.MinioEndpoint, &minio.Options{
+		Creds:  credentials.NewStaticV4(h.baseConf.MinioAccessKeyID, h.baseConf.MinioSecretAccessKey, ""),
+		Secure: h.baseConf.MinioProtocol,
+	})
+	if err != nil {
+		h.HandleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	err = c.SaveUploadedFile(file.File, dst+"/"+file.File.Filename)
+	if err != nil {
+		h.HandleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+	fileLink := "https://" + h.baseConf.MinioEndpoint + "/docs/" + file.File.Filename
+	splitedFileName := strings.Split(fileNameForObjectBuilder, ".")
+	f, err := os.Stat(dst + "/" + file.File.Filename)
+	if err != nil {
+		h.HandleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+	ContentTypeOfFile := file.File.Header["Content-Type"][0]
+
+	_, err = minioClient.FPutObject(
+		context.Background(),
+		"docs",
+		file.File.Filename,
+		dst+"/"+file.File.Filename,
+		minio.PutObjectOptions{ContentType: ContentTypeOfFile},
+	)
+	if err != nil {
+		h.HandleResponse(c, status_http.BadRequest, err.Error())
+		err = os.Remove(dst + "/" + file.File.Filename)
+		if err != nil {
+			h.log.Error("cant remove file")
+		}
+		return
+	}
+	err = os.Remove(dst + "/" + file.File.Filename)
+	if err != nil {
+		h.log.Error("cant remove file")
+	}
+
+	var tags []string
+	if c.Query("tags") != "" {
+		tags = strings.Split(c.Query("tags"), ",")
+	}
+	var requestMap = make(map[string]any)
+	requestMap["table_slug"] = c.Param("collection")
+	requestMap["object_id"] = c.Param("object_id")
+	requestMap["date"] = time.Now().Format(time.RFC3339)
+	requestMap["tags"] = tags
+	requestMap["size"] = int32(f.Size())
+	requestMap["type"] = splitedFileName[len(splitedFileName)-1]
+	requestMap["file_link"] = fileLink
+	requestMap["name"] = fileNameForObjectBuilder
+	structData, err := helper.ConvertMapToStruct(requestMap)
+	if err != nil {
+		h.HandleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
