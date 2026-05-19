@@ -167,18 +167,16 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 
 	var (
 		projectData   *models.ProjectData
-		provisionErr  error
 		eagerManifest *models.ProjectManifest
 		earlyPool     helper.ImagePoolResult
 
 		provWg sync.WaitGroup
 	)
 
-	provWg.Add(1)
-	go func() {
-		defer provWg.Done()
-		projectData, provisionErr = p.provisionBackend(ctx, plan.ProjectName, p.mcpProjectId)
-	}()
+	projectData, err = p.provisionBackend(ctx, plan.ProjectName, p.mcpProjectId)
+	if err != nil {
+		return nil, fmt.Errorf("backend provisioning failed: %w", err)
+	}
 
 	if plan.ProjectType == "admin_panel" || plan.ProjectType == "web" {
 		provWg.Add(1)
@@ -203,10 +201,6 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 	}
 
 	provWg.Wait()
-
-	if provisionErr != nil {
-		return nil, fmt.Errorf("backend provisioning failed: %w", provisionErr)
-	}
 
 	if earlyPool.Err == nil && projectData != nil {
 		earlyPool = p.uploadImagePool(ctx, projectData.ResourceEnvId, earlyPool)

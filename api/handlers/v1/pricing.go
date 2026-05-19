@@ -104,7 +104,15 @@ func (h *HandlerV1) GetAllPricingUsage(c *gin.Context) {
 		return nil
 	})
 	g.Go(func() error {
-		resp, err := h.companyServices.Project().GetProjectUgenStatus(gCtx, &company_service.GetProjectUgenStatusRequest{ProjectId: projectId})
+		project, err := h.companyServices.Project().GetById(gCtx, &company_service.GetProjectByIdRequest{ProjectId: projectId})
+		if err != nil {
+			h.log.Error(fmt.Sprintf("[GetAllPricingUsage] GetProjectById failed: %v", err))
+			return nil
+		}
+		resp, err := h.companyServices.Project().GetProjectUgenStatus(gCtx, &company_service.GetProjectUgenStatusRequest{
+			ProjectId: projectId,
+			CompanyId: project.GetCompanyId(),
+		})
 		if err != nil {
 			h.log.Error(fmt.Sprintf("[GetAllPricingUsage] GetProjectUgenStatus failed: %v", err))
 			return nil
