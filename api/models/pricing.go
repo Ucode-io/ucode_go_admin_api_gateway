@@ -54,3 +54,25 @@ type DailyChartPoint struct {
 	Date  string `json:"date"`
 	Count int64  `json:"count"`
 }
+
+type CompanyStat struct {
+	Current int32 `json:"current"`
+	Limit   int32 `json:"limit"`
+}
+
+type CompanyTokenStat struct {
+	InputTokens  int64 `json:"input_tokens"`
+	OutputTokens int64 `json:"output_tokens"`
+	Limit        int64 `json:"limit"`
+}
+
+type CompanyTokenStats struct {
+	Daily   CompanyTokenStat `json:"daily"`
+	Monthly CompanyTokenStat `json:"monthly"`
+}
+
+type CompanyStatsResponse struct {
+	Tokens       CompanyTokenStats `json:"tokens"`
+	ProjectCount CompanyStat       `json:"project_count"`
+	BuilderCount CompanyStat       `json:"builder_count"`
+}

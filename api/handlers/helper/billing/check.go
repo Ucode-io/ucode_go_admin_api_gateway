@@ -185,7 +185,7 @@ func CheckProjectCountLimit(ctx context.Context, companyServices services.Compan
 	limitResp, err := companyServices.Billing().CompareFunction(ctx, &pb.CompareFunctionRequest{
 		Type:   config.FARE_PROJECTS,
 		FareId: fareId,
-		Count:  projectList.GetCount() + 1,
+		Count:  projectList.GetCount(),
 	})
 	if err != nil {
 		return fmt.Errorf("failed to check billing limit: %w", err)
