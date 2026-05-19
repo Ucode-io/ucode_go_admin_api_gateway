@@ -131,6 +131,12 @@ message Fare {
   string product_type = 16;
 }
 
+// FareItemGroup
+message FareItemGroup {
+  string id = 1;
+  string name = 2;
+}
+
 // FareItem
 message FareItem {
   string id = 1;
@@ -138,6 +144,7 @@ message FareItem {
   string parent_id = 3;
   string info = 4;
   string type = 5;
+  FareItemGroup group = 6;
 }
 
 // FareItemPrice
@@ -371,10 +378,12 @@ message RecordAiTokenUsageRequest {
   int32 output_tokens = 3;
   string model = 4;
   string description = 5;
+  string company_id = 6;
 }
 
 message GetAiTokenUsageMetricsRequest {
   string project_id = 1;
+  string company_id = 2;
 }
 
 message GetAiTokenUsageMetricsResponse {
