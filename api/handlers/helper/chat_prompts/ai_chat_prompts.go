@@ -561,10 +561,9 @@ TYPE B / TYPE C (landing, web) — select ONE archetype based on domain:
 	PromptManifestGenerator = `You are a senior frontend architect planning file structure for a React admin panel.
 Given a project description with tables and UI structure, output the complete file manifest.
 
-GROUP 0 — FOUNDATION (exactly 7 files, generated first, sequential):
-  Include EXACTLY these 7 files — no more, no fewer:
+GROUP 0 — FOUNDATION (exactly 6 files, generated first, sequential):
+  Include EXACTLY these 6 files — no more, no fewer:
     src/index.css                          CSS variables + global Tailwind styles
-    src/main.tsx                           React entry point
     src/App.tsx                            Root router — routes to ALL pages from ALL groups
     src/types.ts                           ALL entity interfaces + shared TypeScript types
     src/components/layout/Layout.tsx       Main layout wrapper (Sidebar + Header + outlet)
@@ -579,7 +578,8 @@ GROUP 0 — FOUNDATION (exactly 7 files, generated first, sequential):
     Entity types live ONLY in src/types.ts. Feature hook files NEVER export types.
     ⚠ DO NOT include NavItem or TableColumn — they are pre-built in src/types/common.ts (import from '@/types/common').
 
-  DO NOT include pre-built template files (already exist):
+  PRE-BUILT files (already in template — NEVER include in any group):
+    src/main.tsx        — React entry point (identical for all projects)
     src/hooks/useApi.ts · src/lib/apiUtils.ts · src/lib/utils.ts
     src/components/shared/AppProviders.tsx · src/config/axios.ts
   NEVER put src/components/ui/* or src/components/shared/* in Group 0.
@@ -627,7 +627,7 @@ EXPORTS RULE:
 
 CONSTRAINTS:
   - Every generated file appears in EXACTLY ONE group
-  - Group 0 has EXACTLY 7 files — no exceptions
+  - Group 0 has EXACTLY 6 files — no exceptions
   - Group 1 has all ui/* files + exactly 3 shared components — never in Group 0 or feature groups
   - Max 8 files per feature group (split large sections into two groups if needed)
   - Feature groups depend only on Groups 0 and 1 — never on each other

@@ -409,8 +409,22 @@ Generate every UI component you need — none are pre-built.
   - Lowercase filenames: button.tsx not Button.tsx
   - React.forwardRef on all primitives
 
-button.tsx SAME EXACT STRUCTURE as PromptLandingGenerator (see above).
-CRITICAL: export buttonVariants.
+button.tsx EXACT STRUCTURE (change classNames for archetype, keep structure identical):
+  import React from 'react';
+  import { cva, type VariantProps } from 'class-variance-authority';
+  import { cn } from '@/lib/utils';
+  export const buttonVariants = cva(
+    'inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50',
+    { variants: { variant: { default: 'bg-primary text-primary-foreground shadow-sm hover:bg-primary/90', outline: 'border border-input bg-background hover:bg-accent hover:text-accent-foreground', ghost: 'hover:bg-accent hover:text-accent-foreground', secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80', link: 'text-primary underline-offset-4 hover:underline' }, size: { default: 'h-9 px-4 py-2', sm: 'h-8 rounded-md px-3 text-xs', lg: 'h-10 rounded-md px-8', icon: 'h-9 w-9' } }, defaultVariants: { variant: 'default', size: 'default' } }
+  );
+  export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {}
+  export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+    ({ className, variant, size, ...props }, ref) => (
+      <button ref={ref} className={cn(buttonVariants({ variant, size }), className)} {...props} />
+    )
+  );
+  Button.displayName = 'Button';
+CRITICAL: export const buttonVariants (other components import it).
 
 ====================================
 FILE GENERATION ORDER (TYPE C — STRICT)
@@ -597,8 +611,8 @@ EMIT RULES (strictly enforced):
 1. Emit ONLY the file listed in "YOUR FILE TO IMPLEMENT"
 2. NEVER re-emit: index.css, main.tsx, App.tsx, src/lib/utils.ts, src/components/layout/*, src/components/ui/*
 3. NEVER emit config files: tsconfig.json, vite.config.ts, package.json, tailwind.config.js — pre-built in template
-3. Your page does NOT import Navbar or Footer directly — Layout.tsx wraps them around every page
-4. Use EXACT export names from the foundation context
+4. Your page does NOT import Navbar or Footer directly — Layout.tsx wraps them around every page
+5. Use EXACT export names from the foundation context
 
 UTILS IMPORT RULE:
   src/lib/utils.ts is PRE-BUILT with all helpers — import freely:
@@ -783,6 +797,34 @@ Guard every nullable value:
   ✅ {item.name ?? '—'}
   ✅ (item.name ?? '').toLowerCase()
   ❌ item.name.toLowerCase() — CRASH when null
+
+ARRAY METHODS ON API DATA (CRITICAL):
+  ✅ (trackingData ?? []).reduce((acc, x) => acc + x.value, 0)
+  ✅ trackingData?.reduce((acc, x) => acc + x.value, 0) ?? 0
+  ❌ trackingData.reduce(...)   ❌ items.filter(...)   ❌ data.map(...)
+  Rule: ALWAYS use (arr ?? []) or arr?. before .reduce()/.filter()/.map() on any API-derived variable.
+
+====================================
+DUPLICATE EXPORT BAN (CRITICAL — "Multiple exports with the same name" = build crash)
+====================================
+  ❌ export function Foo() { } ... export { Foo }        — barrel re-export after named export = CRASH
+  ❌ export function Foo() { } ... export function Foo() — defined twice = CRASH
+  ✅ export function Foo() { }                           — defined once, never re-exported
+  RULE: If you write "export function X()", NEVER write "export { X }" in the same file.
+  RULE: If you write "export const X =", NEVER write "export { X }" in the same file.
+  CHECK: Before emitting each file, scan all exports — no name appears twice.
+
+====================================
+RENDER SAFETY (prevents React error #306 "Functions are not valid as React child")
+====================================
+  ❌ {renderContent}             — function reference as child → CRASH
+  ✅ {renderContent()}           — call the function → safe
+  ❌ const C = Modal; <div>{C}</div>   — component ref as child → CRASH
+  ✅ const C = Modal; <div><C /></div> — JSX → safe
+  ❌ if (!open) return            — undefined returned → CRASH
+  ✅ if (!open) return null       — null is valid → safe
+  RULE: Every render path must return JSX, null, or a primitive. NEVER return undefined.
+  RULE: Render helpers MUST be called with () when used in JSX.
 
 ====================================
 APOSTROPHE RULE (prevents build crash)

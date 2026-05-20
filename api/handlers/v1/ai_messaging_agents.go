@@ -209,9 +209,14 @@ func (p *ChatProcessor) generateCodeSingle(ctx context.Context, clarified string
 		func() error {
 			var e error
 			coderModel := p.baseConf.LandingCoderModel
-			systemPrompt := chat_prompts.PromptLandingGenerator
-			if plan.ProjectType == "web" {
+			var systemPrompt string
+			switch plan.ProjectType {
+			case "web":
 				systemPrompt = chat_prompts.PromptWebsiteGenerator
+			case "admin_panel":
+				systemPrompt = chat_prompts.PromptAdminPanelGenerator
+			default:
+				systemPrompt = chat_prompts.PromptLandingGenerator
 			}
 			project, e = callWithTool[models.GeneratedProject](
 				p, ctx,

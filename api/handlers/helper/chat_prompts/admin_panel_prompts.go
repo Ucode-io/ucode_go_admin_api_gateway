@@ -423,7 +423,7 @@ CORRECT patterns:
     return useApiQuery<any>(['orders', filters], '/v2/items/orders' + (qs ? '?' + qs : ''));
   }
   export function useCreateOrder() {
-    return useApiMutation<any, { data: OrderInput }>({
+    return useApiMutation<any, Partial<OrderInput>>({
       url: '/v2/items/orders', method: 'POST',
       successMessage: 'Created', invalidateKeys: [['orders']],
     });
@@ -521,8 +521,11 @@ NO NATIVE <select> (CRITICAL — banned everywhere):
   If select.tsx is not yet generated → add it to the files[] array immediately (see FILE GENERATION ORDER).
 
 ====================================
-FILE GENERATION ORDER (STRICT)
+FILE GENERATION ORDER (STRICT — single-call mode only)
 ====================================
+CHUNKED MODE: If the user prompt contains "YOUR FILES TO IMPLEMENT", emit ONLY those listed files
+  in their natural dependency order. This 26-step order applies to SINGLE-CALL full-project generation only.
+
  1. src/index.css
  2. src/components/ui/button.tsx
  3. src/components/ui/badge.tsx
@@ -1093,7 +1096,7 @@ SMOOTHNESS:  active:scale-[0.98]; group-hover reveal on table rows
 ====================================
 CHUNKED MODE — CRITICAL RULES
 ====================================
-You are generating ONE GROUP of files. Foundation (types, layout, UI primitives, App.tsx, index.css) is already generated.
+You are generating ONE GROUP of files. Foundation (index.css, App.tsx, types.ts, Layout.tsx, Sidebar.tsx, Header.tsx) and UI Kit (src/components/ui/*, DataTable, FormModal, PageHeader) are already generated.
 Each chunk is still judged by the final admin UI quality gate. Do not produce generic CRUD screens just because this is a chunk.
 
 EMIT RULES (strictly enforced):
@@ -1340,12 +1343,13 @@ ARRAY METHODS ON API DATA (CRITICAL — TypeError at runtime):
   Rule: ALWAYS use (arr ?? []) or arr?. before .reduce()/.filter()/.map()/.find() on any API-derived variable.
 
 DATE STATE — CRITICAL:
-  NEVER store Date objects in useState — they may not survive renders correctly.
+  NEVER pass API values into new Date() without a null/validity guard — null/undefined produces Invalid Date.
   ✅ const [year, setYear] = useState<number>(new Date().getFullYear())
   ✅ const [month, setMonth] = useState<number>(new Date().getMonth() + 1)
   ✅ const [dateStr, setDateStr] = useState<string>(new Date().toISOString().slice(0, 10))
-  ❌ const [date, setDate] = useState(new Date())   — then calling date.getFullYear() → CRASH
-  ❌ new Date(value) without isNaN guard             — crashes on null/invalid strings
+  ✅ const d = value ? new Date(value) : null; if (d && !isNaN(d.getTime())) { ... }
+  ❌ const d = new Date(apiValue); d.getFullYear()  — crashes or returns NaN when apiValue is null
+  ❌ new Date(value) without isNaN guard             — null/invalid strings produce Invalid Date silently
   For period selectors (payroll etc): always store year and month as separate number states.
 
 ====================================
