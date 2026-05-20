@@ -22,6 +22,10 @@ func (t *Tracker) BillingLimitMiddleware() gin.HandlerFunc {
 			return
 		}
 
+		if config.RateLimitSkipFiles[c.Param("collection")] {
+			c.Next()
+		}
+
 		limitKey := fmt.Sprintf(config.KeyBillingApiLimit, projectID)
 		if val, err := t.rdb.Get(context.Background(), limitKey).Result(); err == nil && val == "0" {
 			c.AbortWithStatusJSON(http.StatusPaymentRequired, status_http.Response{
