@@ -142,8 +142,13 @@ func (p *ChatProcessor) tokenLimitData(err *TokenLimitError) models.TokenLimitDa
 	if spent < 0 {
 		spent = 0
 	}
+	code := "token_month_limit"
+	if err.Period == "day" {
+		code = "token_day_limit"
+	}
 	return models.TokenLimitData{
-		Type:       "token_limit_exceeded",
+		Type:       "payment_required",
+		Code:       code,
 		Period:     err.Period,
 		Used:       err.Used,
 		Limit:      err.Limit,

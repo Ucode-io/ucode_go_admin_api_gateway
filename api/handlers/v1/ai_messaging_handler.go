@@ -11,6 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"ucode/ucode_go_api_gateway/api/handlers/helper/billing"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
@@ -99,6 +100,7 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 
 	if proj, projErr := h.companyServices.Project().GetById(ctx, &pb.GetProjectByIdRequest{ProjectId: realProjectID}); projErr == nil {
 		processor.companyId = proj.GetCompanyId()
+		processor.fareId = proj.GetFareId()
 	}
 
 	chatHistory, err := processor.getChatHistory(ctx)
@@ -131,7 +133,7 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 	if err != nil {
 		var tokenErr *TokenLimitError
 		if errors.As(err, &tokenErr) {
-			h.HandleResponse(c, status_http.TooManyRequests, processor.tokenLimitData(tokenErr))
+			h.HandleResponse(c, status_http.PaymentRequired, processor.tokenLimitData(tokenErr))
 			return
 		}
 		h.HandleResponse(c, status_http.GRPCError, fmt.Sprintf("ai processing failed: %v", err))
@@ -366,14 +368,26 @@ func (h *HandlerV1) handleStreamingMessage(c *gin.Context, processor *ChatProces
 		aiResponse, pipelineErr := processor.routeAndProcess(pipelineCtx, userMessage, chatHistory)
 		if pipelineErr != nil {
 			var tokenErr *TokenLimitError
-			if errors.As(pipelineErr, &tokenErr) {
+			switch {
+			case errors.As(pipelineErr, &tokenErr):
 				processor.emitter().Emit(SSEEvent{
 					Type:    EvError,
 					Icon:    "ban",
 					Message: "Достигнут лимит токенов для этого проекта",
 					Data:    processor.tokenLimitData(tokenErr),
 				})
-			} else {
+			case errors.Is(pipelineErr, billing.ErrProjectLimitExceeded):
+				processor.emitter().Emit(SSEEvent{
+					Type:    EvError,
+					Icon:    "credit-card",
+					Message: "Project limit reached. Please upgrade your plan.",
+					Data: models.PaymentRequiredData{
+						Type: "payment_required",
+						Code: "project_limit",
+						Unit: "projects",
+					},
+				})
+			default:
 				processor.emitter().Emit(SSEEvent{
 					Type:    EvError,
 					Icon:    "alert-circle",

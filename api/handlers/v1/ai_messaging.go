@@ -43,6 +43,7 @@ type ChatProcessor struct {
 	ucodeProjectId    string
 	mcpUcodeProjectId string
 	companyId         string
+	fareId            string
 
 	userId       string
 	clientTypeId string
@@ -96,6 +97,10 @@ func newChatProcessor(h *HandlerV1, service services.ServiceManagerI, baseConf c
 // ============================================================================
 
 func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, chatHistory []models.ChatMessage, imageURLs []string, estimatedName string) (*models.ParsedClaudeResponse, error) {
+
+	if err := billing.CheckProjectCountLimit(ctx, p.h.companyServices, p.companyId, p.fareId); err != nil {
+		return nil, err
+	}
 
 	var (
 		emit = p.emitter()
@@ -485,10 +490,6 @@ func (p *ChatProcessor) provisionBackend(ctx context.Context, projectName string
 	}
 
 	p.companyId = currentProject.GetCompanyId()
-
-	if err = billing.CheckProjectCountLimit(ctx, p.h.companyServices, currentProject.GetCompanyId(), currentProject.GetFareId()); err != nil {
-		return nil, err
-	}
 
 	backendProject, err := p.h.companyServices.Project().Create(
 		ctx, &pb.CreateProjectRequest{

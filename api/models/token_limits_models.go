@@ -1,7 +1,8 @@
 package models
 
 type TokenLimitData struct {
-	Type       string `json:"type"`   // always "token_limit_exceeded"
+	Type       string `json:"type"`   // "payment_required"
+	Code       string `json:"code"`   // "token_day_limit" | "token_month_limit"
 	Period     string `json:"period"` // "day" | "month"
 	Used       int64  `json:"used"`
 	Limit      int64  `json:"limit"`

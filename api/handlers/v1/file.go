@@ -102,7 +102,11 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 
 	if err = billing.CheckAssetSizeLimit(c.Request.Context(), h.companyServices, services, projectId.(string), resource.ResourceEnvironmentId, file.File.Size); err != nil {
 		if errors.Is(err, billing.ErrAssetLimitExceeded) {
-			h.HandleResponse(c, status_http.PaymentRequired, err.Error())
+			h.HandleResponse(c, status_http.PaymentRequired, models.PaymentRequiredData{
+				Type: "payment_required",
+				Code: "asset_limit",
+				Unit: "mb",
+			})
 		} else {
 			h.HandleResponse(c, status_http.GRPCError, err.Error())
 		}
@@ -979,7 +983,11 @@ func (h *HandlerV1) UploadFile(c *gin.Context) {
 
 	if err = billing.CheckAssetSizeLimit(c.Request.Context(), h.companyServices, services, projectId.(string), resource.ResourceEnvironmentId, file.File.Size); err != nil {
 		if errors.Is(err, billing.ErrAssetLimitExceeded) {
-			h.HandleResponse(c, status_http.PaymentRequired, err.Error())
+			h.HandleResponse(c, status_http.PaymentRequired, models.PaymentRequiredData{
+				Type: "payment_required",
+				Code: "asset_limit",
+				Unit: "mb",
+			})
 		} else {
 			h.HandleResponse(c, status_http.GRPCError, err.Error())
 		}

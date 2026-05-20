@@ -442,7 +442,11 @@ func (h *HandlerV1) CreateProjectFromTemplate(c *gin.Context) {
 
 	if err = billing.CheckProjectCountLimit(ctx, h.companyServices, headProject.GetCompanyId(), headProject.GetFareId()); err != nil {
 		if errors.Is(err, billing.ErrProjectLimitExceeded) {
-			h.HandleResponse(c, status_http.PaymentRequired, err.Error())
+			h.HandleResponse(c, status_http.PaymentRequired, models.PaymentRequiredData{
+				Type: "payment_required",
+				Code: "project_limit",
+				Unit: "projects",
+			})
 		} else {
 			h.HandleResponse(c, status_http.GRPCError, err.Error())
 		}

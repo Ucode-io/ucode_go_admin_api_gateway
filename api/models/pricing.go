@@ -76,3 +76,9 @@ type CompanyStatsResponse struct {
 	ProjectCount CompanyStat       `json:"project_count"`
 	BuilderCount CompanyStat       `json:"builder_count"`
 }
+
+type PaymentRequiredData struct {
+	Type string `json:"type"`          // always "payment_required"
+	Code string `json:"code"`          // "project_limit" | "api_call_limit" | "asset_limit" | "database_limit" | "table_limit"
+	Unit string `json:"unit,omitempty"` // "projects" | "requests" | "mb" | "tables"
+}

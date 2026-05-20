@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"sync/atomic"
 
+	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
 
@@ -26,7 +27,11 @@ func (t *Tracker) BillingLimitMiddleware() gin.HandlerFunc {
 			c.AbortWithStatusJSON(http.StatusPaymentRequired, status_http.Response{
 				Status:      status_http.PaymentRequired.Status,
 				Description: "Monthly API call limit exceeded. Please upgrade your plan.",
-				Data:        nil,
+				Data: models.PaymentRequiredData{
+					Type: "payment_required",
+					Code: "api_call_limit",
+					Unit: "requests",
+				},
 			})
 			return
 		}
