@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	"ucode/ucode_go_api_gateway/config"
@@ -65,14 +66,21 @@ func CheckAssetSizeLimit(ctx context.Context, companyServices services.CompanySe
 	}
 
 	totalMB := int32((uRes.assetBytes + newFileSizeBytes) / 1024 / 1024)
+
+	log.Printf("[billing] CheckAssetSizeLimit: projectId=%s fareId=%s assetBytes=%d newFileBytes=%d totalMB=%d",
+		projectId, pRes.fareId, uRes.assetBytes, newFileSizeBytes, totalMB)
+
 	limitResp, err := companyServices.Billing().CompareFunction(ctx, &pb.CompareFunctionRequest{
 		Type:   config.FARE_ASSET_SIZE,
 		FareId: pRes.fareId,
 		Count:  totalMB,
 	})
 	if err != nil {
+		log.Printf("[billing] CheckAssetSizeLimit: CompareFunction error: %v", err)
 		return err
 	}
+
+	log.Printf("[billing] CheckAssetSizeLimit: hasAccess=%v", limitResp.GetHasAccess())
 
 	if !limitResp.GetHasAccess() {
 		return ErrAssetLimitExceeded
