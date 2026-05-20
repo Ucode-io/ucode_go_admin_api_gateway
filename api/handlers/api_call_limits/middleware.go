@@ -24,6 +24,7 @@ func (t *Tracker) BillingLimitMiddleware() gin.HandlerFunc {
 
 		if config.RateLimitSkipFiles[c.Param("collection")] {
 			c.Next()
+			return
 		}
 
 		limitKey := fmt.Sprintf(config.KeyBillingApiLimit, projectID)
