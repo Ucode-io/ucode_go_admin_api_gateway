@@ -33,6 +33,7 @@ func parseStorageLimitToMB(val string) float64 {
 func (h *HandlerV1) GetAllPricingUsage(c *gin.Context) {
 	projectId := cast.ToString(c.MustGet("project_id"))
 	environmentId := cast.ToString(c.MustGet("environment_id"))
+	h.log.Info(fmt.Sprintf("[pricing] GetAllPricingUsage: projectId=%s environmentId=%s", projectId, environmentId))
 
 	limitsResp := &company_service.GetPricingLimitsResponse{}
 	usageResp := &nb.GetResourceUsageResponse{}
