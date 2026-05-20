@@ -99,7 +99,19 @@ func (h *HandlerV2) HandleResponse(c *gin.Context, status status_http.Status, da
 
 func (h *HandlerV2) handleError(c *gin.Context, statusHttp status_http.Status, err error) {
 	st, _ := status.FromError(err)
-	if statusHttp.Status == status_http.BadRequest.Status {
+	if statusHttp.Status == status_http.Unauthorized.Status {
+		c.JSON(http.StatusUnauthorized, status_http.Response{
+			Status:      statusHttp.Status,
+			Description: st.String(),
+			Data:        config.SessionExpired,
+		})
+	} else if statusHttp.Status == status_http.Forbidden.Status {
+		c.JSON(http.StatusForbidden, status_http.Response{
+			Status:      statusHttp.Status,
+			Description: st.String(),
+			Data:        config.SessionExpired,
+		})
+	} else if statusHttp.Status == status_http.BadRequest.Status {
 		c.JSON(http.StatusInternalServerError, status_http.Response{
 			Status:        statusHttp.Status,
 			Description:   st.String(),
@@ -119,18 +131,6 @@ func (h *HandlerV2) handleError(c *gin.Context, statusHttp status_http.Status, e
 			Description:   st.String(),
 			Data:          "Required data is not provided.",
 			CustomMessage: statusHttp.CustomMessage,
-		})
-	} else if statusHttp.Status == status_http.Unauthorized.Status {
-		c.JSON(http.StatusUnauthorized, status_http.Response{
-			Status:      statusHttp.Status,
-			Description: st.String(),
-			Data:        config.SessionExpired,
-		})
-	} else if statusHttp.Status == status_http.Forbidden.Status {
-		c.JSON(http.StatusForbidden, status_http.Response{
-			Status:      statusHttp.Status,
-			Description: st.String(),
-			Data:        config.SessionExpired,
 		})
 	} else if st.Err() != nil {
 		c.JSON(http.StatusInternalServerError, status_http.Response{
