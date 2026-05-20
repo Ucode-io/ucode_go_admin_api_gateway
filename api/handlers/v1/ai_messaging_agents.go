@@ -1037,29 +1037,50 @@ func stripForbiddenConfigFiles(files []models.ProjectFile) []models.ProjectFile 
 }
 
 func injectMissingCriticalFiles(files []models.ProjectFile, projectType string) []models.ProjectFile {
-	if projectType != "landing" && projectType != "web" {
-		return files
-	}
-
 	existing := make(map[string]struct{}, len(files))
 	for _, f := range files {
 		existing[f.Path] = struct{}{}
 	}
 
-	if _, ok := existing["src/lib/utils.ts"]; !ok {
-		log.Printf("[inject] src/lib/utils.ts missing — injecting from template")
-		for _, tf := range GetTemplateScaffold() {
-			if tf.Path == "src/lib/utils.ts" {
-				files = append(files, tf)
-				break
+	// src/lib/utils.ts — only needed for landing/web (pre-built in admin_panel template scaffold)
+	if projectType == "landing" || projectType == "web" {
+		if _, ok := existing["src/lib/utils.ts"]; !ok {
+			log.Printf("[inject] src/lib/utils.ts missing — injecting from template")
+			for _, tf := range GetTemplateScaffold() {
+				if tf.Path == "src/lib/utils.ts" {
+					files = append(files, tf)
+					break
+				}
 			}
 		}
 	}
 
-	// src/App.tsx — entry point; if missing the virtual FS build crashes immediately
+	// src/App.tsx — mandatory for ALL project types; missing = blank screen / virtual FS crash
 	if _, ok := existing["src/App.tsx"]; !ok {
-		log.Printf("[inject] src/App.tsx missing — injecting minimal stub")
-		if projectType == "web" {
+		log.Printf("[inject] src/App.tsx missing — injecting minimal stub (type=%s)", projectType)
+		switch projectType {
+		case "admin_panel":
+			files = append(files, models.ProjectFile{
+				Path: "src/App.tsx",
+				Content: `import React from 'react'
+import './index.css'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { AppProviders } from '@/components/shared/AppProviders'
+
+export default function App() {
+  return (
+    <AppProviders>
+      <BrowserRouter>
+        <Routes>
+          <Route path="*" element={<div className="flex items-center justify-center min-h-screen"><p className="text-muted-foreground">Loading...</p></div>} />
+        </Routes>
+      </BrowserRouter>
+    </AppProviders>
+  )
+}
+`,
+			})
+		case "web":
 			files = append(files, models.ProjectFile{
 				Path: "src/App.tsx",
 				Content: `import React from 'react';
@@ -1077,7 +1098,7 @@ export default function App() {
 }
 `,
 			})
-		} else {
+		default:
 			files = append(files, models.ProjectFile{
 				Path: "src/App.tsx",
 				Content: `import React from 'react';

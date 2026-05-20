@@ -151,6 +151,27 @@ BANNED CONFIG FILES — NEVER include these in files[] (pre-built in project tem
 NULL SAFETY:
   ✅ {item.name ?? '—'}   ✅ (item.tags ?? '').split(',')
   ❌ item.name.split(' ')   ❌ item.email.toLowerCase()
+  ARRAY METHODS ON API DATA (CRITICAL):
+  ✅ (trackingData ?? []).reduce((acc, x) => acc + x.value, 0)
+  ✅ trackingData?.reduce((acc, x) => acc + x.value, 0) ?? 0
+  ❌ trackingData.reduce(...)   ❌ items.filter(...)   ❌ data.map(...)
+  Rule: ALWAYS use (arr ?? []) or arr?. before .reduce()/.filter()/.map() on any API-derived variable.
+
+DUPLICATE EXPORT BAN (CRITICAL — "Multiple exports with the same name" = build crash):
+  ❌ export function Foo() { } ... export { Foo }        — barrel re-export after named export = CRASH
+  ❌ export function Foo() { } ... export function Foo() — defined twice = CRASH
+  ✅ export function Foo() { }                           — defined once, never re-exported
+  RULE: If you write "export function X()", NEVER write "export { X }" in the same file.
+
+RENDER SAFETY (prevents React error #306 "Functions are not valid as React child"):
+  ❌ {renderContent}             — function reference as child → CRASH
+  ✅ {renderContent()}           — call the function → safe
+  ❌ const C = Modal; <div>{C}</div>   — component ref as child → CRASH
+  ✅ const C = Modal; <div><C /></div> — JSX → safe
+  ❌ if (!open) return            — undefined returned → CRASH
+  ✅ if (!open) return null       — null is valid → safe
+  RULE: Every render path must return JSX, null, or a primitive. NEVER return undefined.
+  RULE: Render helpers MUST be called with () when used in JSX.
 
 CSS PLACEMENT:
   index.css imported in App.tsx, NOT in main.tsx.

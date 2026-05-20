@@ -667,6 +667,25 @@ For src/components/shared/* (sub-set B):
   import { cn } from '@/lib/utils'
 
 ====================================
+DUPLICATE EXPORT BAN (CRITICAL — causes "Multiple exports with the same name" build crash)
+====================================
+Every export name must appear EXACTLY ONCE per file.
+
+  ❌ WRONG — barrel re-export after named export:
+    export function Button() { ... }
+    export { Button }            // CRASH: already a named export above
+
+  ❌ WRONG — component defined twice:
+    export function Input() { ... }
+    ...
+    export function Input() { ... }   // CRASH: duplicate
+
+  ✅ CORRECT:
+    export const Button = React.forwardRef<...>(...)   // defined once, no re-export
+
+  RULE: If you use "export function X()" or "export const X =", NEVER write "export { X }" in the same file.
+
+====================================
 CODE QUALITY
 ====================================
 - TypeScript: all props typed, no any

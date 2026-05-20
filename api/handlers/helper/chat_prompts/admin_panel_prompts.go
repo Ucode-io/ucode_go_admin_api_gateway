@@ -75,6 +75,47 @@ APOSTROPHE RULE (CRITICAL — prevents build crash):
   RIGHT: <p>{"chef's table"}</p>             — wrap in JS string inside JSX expression
   RIGHT: remove apostrophe from CSS/className values entirely
 
+DUPLICATE EXPORT BAN (CRITICAL — causes "Multiple exports with the same name" build crash):
+  Every export name must appear EXACTLY ONCE in a file. This is the most common generation bug.
+
+  ❌ WRONG — barrel re-export after named function (most common mistake):
+    export function DateRangeSelector() { ... }
+    export { DateRangeSelector }           // CRASH: already a named export above
+
+  ❌ WRONG — same component/hook defined twice in one file:
+    export function FinanceSummaryCards() { ... }
+    // ... more code ...
+    export function FinanceSummaryCards() { ... }   // CRASH: duplicate definition
+
+  ❌ WRONG — multiple hooks with barrel re-export at end:
+    export function useSettings() { ... }
+    export function useUsers() { ... }
+    export { useSettings, useUsers }       // CRASH: already named exports above
+
+  ✅ CORRECT — define once, never re-export:
+    export function DateRangeSelector() { ... }   // only this — no export {} at end
+    export function useSettings() { ... }          // named once, done
+    export function useUsers() { ... }             // same file is fine — but NO export {} after
+
+  RULE: If you write "export function X()", NEVER also write "export { X }" in the same file.
+  RULE: Before finishing a file, scan it top-to-bottom — every exported name must appear exactly ONCE.
+
+RENDER SAFETY (CRITICAL — prevents React error #306 "Functions are not valid as React child"):
+  ❌ {renderContent}            — passes function reference as child → CRASH
+  ✅ {renderContent()}          — calls the function, returns JSX → safe
+
+  ❌ const C = MyModal; return <div>{C}</div>  — component ref as child → CRASH
+  ✅ const C = MyModal; return <div><C /></div> — JSX syntax → safe
+
+  ❌ if (!open) return           — returns undefined from component → CRASH in parent
+  ✅ if (!open) return null      — null is valid React child → safe
+
+  ❌ condition && someObject     — objects/functions as JSX child → CRASH
+  ✅ condition ? <Element /> : null
+
+  RULE: Every branch of a component's render must return JSX, null, or a primitive — NEVER undefined.
+  RULE: Render helpers (renderCard, renderRow, etc.) MUST be called with () when used in JSX.
+
 NO ANGLE-BRACKET TYPE ASSERTIONS (CRITICAL — crashes Esbuild in .tsx files):
   In .tsx files, Esbuild parses angle brackets as JSX tags. Using angle-bracket syntax
   for type assertions WILL crash the build with "Expected > but found" errors.
@@ -177,6 +218,17 @@ NULL SAFETY (CRITICAL — prevents runtime crashes):
   ❌ item.email.toLowerCase()               — CRASH when email is null
   ❌ item.description.slice(0, 100)         — CRASH when description is null
   Rule: use ?. and ?? everywhere data comes from API. Never assume a field is non-null.
+
+  ARRAY METHODS ON API DATA (CRITICAL — TypeError at runtime):
+  Data from API is undefined while loading. NEVER call array methods directly on raw API data.
+  ✅ (trackingData ?? []).reduce((acc, x) => acc + x.value, 0)  — safe with fallback []
+  ✅ trackingData?.reduce((acc, x) => acc + x.value, 0) ?? 0    — optional chain + default
+  ✅ extractList<T>(data).reduce(...)    — extractList always returns [] for undefined data
+  ❌ trackingData.reduce(...)            — CRASH: "reduce is not a function" when undefined
+  ❌ items.filter(x => x.active)        — CRASH when items is null/undefined
+  ❌ data.map(x => x.name)              — CRASH when data is null/undefined
+  Rule: ALWAYS use (arr ?? []) or arr?. before .reduce() / .filter() / .map() / .find() on any API-derived variable.
+  Preferred: use extractList<T>(data) — it always returns a safe [] even before data loads.
 
 CSS PLACEMENT:
   index.css is imported in App.tsx — NOT in main.tsx.
@@ -1049,9 +1101,46 @@ EMIT RULES (strictly enforced):
 2. NEVER re-emit foundation files: index.css, main.tsx, App.tsx, types.ts, src/components/layout/*, src/components/shared/AppProviders.tsx, src/config/axios.ts
 3. NEVER re-emit UI Kit files (src/components/ui/*) — they are already generated in Group 1
 4. NEVER emit config files: tsconfig.json, vite.config.ts, package.json, tailwind.config.js — pre-built in template
-4. NEVER create stub or placeholder files for missing imports — all foundation and UI kit imports are satisfied
-5. Use EXACT export names from the manifest (case-sensitive)
-6. NEVER declare or export the same name twice in one file — TypeScript will refuse to compile
+5. NEVER create stub or placeholder files for missing imports — all foundation and UI kit imports are satisfied
+6. Use EXACT export names from the manifest (case-sensitive)
+
+DUPLICATE EXPORT BAN (CRITICAL — "Multiple exports with the same name" = build crash):
+  Every export name must appear EXACTLY ONCE per file. This is the #1 most common generation error.
+
+  ❌ WRONG — barrel re-export after named function (the most common mistake):
+    export function DateRangeSelector() { ... }
+    export { DateRangeSelector }            // CRASH: already a named export above
+
+  ❌ WRONG — same function/component defined twice:
+    export function FinanceSummaryCards() { ... }
+    ...more code...
+    export function FinanceSummaryCards() { ... }   // CRASH: duplicate definition
+
+  ❌ WRONG — hook file with barrel re-export at end:
+    export function useSettings() { ... }
+    export function useUsers() { ... }
+    export { useSettings, useUsers }        // CRASH: already named exports above
+
+  ✅ CORRECT — define once, never re-export:
+    export function DateRangeSelector() { ... }  // defined once, no export {} at end
+    export function useSettings() { ... }         // named once, done
+    export function useUsers() { ... }            // same file OK, but NO export {} after
+
+  RULE: If you write "export function X()", NEVER write "export { X }" anywhere in that file.
+  RULE: Scan file top-to-bottom before submitting — each exported name must appear exactly ONCE.
+
+RENDER SAFETY (CRITICAL — prevents React error #306 "Functions are not valid as React child"):
+  ❌ {renderContent}             — passes function reference as child → CRASH
+  ✅ {renderContent()}           — calls function, returns JSX → safe
+
+  ❌ const C = MyModal; return <div>{C}</div>   — component ref as child → CRASH
+  ✅ const C = MyModal; return <div><C /></div>  — JSX syntax → safe
+
+  ❌ if (!open) return            — returns undefined from component → CRASH
+  ✅ if (!open) return null       — null is valid React child → safe
+
+  RULE: Every render path must return JSX, null, or a primitive — NEVER undefined.
+  RULE: Render helpers (renderCard, renderRow, etc.) MUST be called with () when used in JSX.
 
 ====================================
 IMPORT RULES
@@ -1239,6 +1328,16 @@ API fields are ALWAYS nullable at runtime. Guard every field before using string
   ❌ item.name.split(' ')                   // CRASH when name is null
   ❌ item.email.toLowerCase()               // CRASH when email is null
   ❌ item.description.slice(0, 100)         // CRASH when description is null
+
+ARRAY METHODS ON API DATA (CRITICAL — TypeError at runtime):
+  Data from API is undefined while loading. NEVER call array methods directly on raw API data.
+  ✅ (trackingData ?? []).reduce((acc, x) => acc + x.value, 0)  // safe with fallback []
+  ✅ trackingData?.reduce((acc, x) => acc + x.value, 0) ?? 0    // optional chain + default
+  ✅ extractList<T>(data).reduce(...)    // extractList always returns [] for undefined
+  ❌ trackingData.reduce(...)            // CRASH: "reduce is not a function" when undefined
+  ❌ items.filter(x => x.active)        // CRASH when items is null/undefined
+  ❌ data.map(x => x.name)              // CRASH when data is null/undefined
+  Rule: ALWAYS use (arr ?? []) or arr?. before .reduce()/.filter()/.map()/.find() on any API-derived variable.
 
 DATE STATE — CRITICAL:
   NEVER store Date objects in useState — they may not survive renders correctly.
