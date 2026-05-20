@@ -26,13 +26,7 @@ type BillingLimitWorker struct {
 	cancelFn       context.CancelFunc
 }
 
-func NewBillingLimitWorker(
-	rdb *redis.Client,
-	serviceNodes services.ServiceNodesI,
-	companyService services.CompanyServiceI,
-	ucodeNamespace string,
-	flushInterval time.Duration,
-) *BillingLimitWorker {
+func NewBillingLimitWorker(rdb *redis.Client, serviceNodes services.ServiceNodesI, companyService services.CompanyServiceI, ucodeNamespace string, flushInterval time.Duration) *BillingLimitWorker {
 	return &BillingLimitWorker{
 		rdb:            rdb,
 		serviceNodes:   serviceNodes,
