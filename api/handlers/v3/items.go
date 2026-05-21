@@ -77,11 +77,7 @@ func (h *HandlerV3) CreateItem(c *gin.Context) {
 
 	if err = billing.CheckDatabaseLimit(c.Request.Context(), h.centralRedis, h.companyServices, services, projectId.(string), resource.ResourceEnvironmentId, resource.NodeType); err != nil {
 		if errors.Is(err, billing.ErrDatabaseLimitExceeded) {
-			h.HandleResponse(c, status_http.PaymentRequired, models.PaymentRequiredData{
-				Type: "payment_required",
-				Code: "database_limit",
-				Unit: "mb",
-			})
+			h.HandleResponse(c, status_http.PaymentRequired, models.PaymentDatabaseLimit)
 		} else {
 			h.HandleResponse(c, status_http.GRPCError, err.Error())
 		}
@@ -284,11 +280,7 @@ func (h *HandlerV3) CreateItems(c *gin.Context) {
 
 	if err = billing.CheckDatabaseLimit(c.Request.Context(), h.centralRedis, h.companyServices, services, projectId.(string), resource.ResourceEnvironmentId, resource.NodeType); err != nil {
 		if errors.Is(err, billing.ErrDatabaseLimitExceeded) {
-			h.HandleResponse(c, status_http.PaymentRequired, models.PaymentRequiredData{
-				Type: "payment_required",
-				Code: "database_limit",
-				Unit: "mb",
-			})
+			h.HandleResponse(c, status_http.PaymentRequired, models.PaymentDatabaseLimit)
 		} else {
 			h.HandleResponse(c, status_http.GRPCError, err.Error())
 		}
@@ -2114,11 +2106,7 @@ func (h *HandlerV3) UpsertMany(c *gin.Context) {
 
 	if err = billing.CheckDatabaseLimit(c.Request.Context(), h.centralRedis, h.companyServices, services, projectId.(string), resource.ResourceEnvironmentId, resource.NodeType); err != nil {
 		if errors.Is(err, billing.ErrDatabaseLimitExceeded) {
-			h.HandleResponse(c, status_http.PaymentRequired, models.PaymentRequiredData{
-				Type: "payment_required",
-				Code: "database_limit",
-				Unit: "mb",
-			})
+			h.HandleResponse(c, status_http.PaymentRequired, models.PaymentDatabaseLimit)
 		} else {
 			h.HandleResponse(c, status_http.GRPCError, err.Error())
 		}

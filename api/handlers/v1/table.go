@@ -135,11 +135,7 @@ func (h *HandlerV1) CreateTable(c *gin.Context) {
 		if err != nil {
 			logReq.Response = err.Error()
 			if st, ok := grpcstatus.FromError(err); ok && st.Code() == codes.ResourceExhausted {
-				h.HandleResponse(c, status_http.PaymentRequired, models.PaymentRequiredData{
-					Type: "payment_required",
-					Code: "table_limit",
-					Unit: "tables",
-				})
+				h.HandleResponse(c, status_http.PaymentRequired, models.PaymentTableLimit)
 			} else {
 				h.HandleResponse(c, status_http.GRPCError, err.Error())
 			}

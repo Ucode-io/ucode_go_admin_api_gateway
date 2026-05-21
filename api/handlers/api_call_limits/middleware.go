@@ -32,11 +32,7 @@ func (t *Tracker) BillingLimitMiddleware() gin.HandlerFunc {
 			c.AbortWithStatusJSON(http.StatusPaymentRequired, status_http.Response{
 				Status:      status_http.PaymentRequired.Status,
 				Description: "Monthly API call limit exceeded. Please upgrade your plan.",
-				Data: models.PaymentRequiredData{
-					Type: "payment_required",
-					Code: "api_call_limit",
-					Unit: "requests",
-				},
+				Data: models.PaymentApiCallLimit,
 			})
 			return
 		}

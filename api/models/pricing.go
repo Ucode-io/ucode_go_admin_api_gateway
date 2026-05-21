@@ -77,8 +77,35 @@ type CompanyStatsResponse struct {
 	BuilderCount CompanyStat       `json:"builder_count"`
 }
 
+const (
+	PaymentRequiredType = "payment_required"
+
+	PaymentCodeDatabaseLimit   = "database_limit"
+	PaymentCodeAssetLimit      = "asset_limit"
+	PaymentCodeTableLimit      = "table_limit"
+	PaymentCodeProjectLimit    = "project_limit"
+	PaymentCodeApiCallLimit    = "api_call_limit"
+	PaymentCodeTokenDayLimit   = "token_day_limit"
+	PaymentCodeTokenMonthLimit = "token_month_limit"
+
+	PaymentUnitMB       = "mb"
+	PaymentUnitTables   = "tables"
+	PaymentUnitProjects = "projects"
+	PaymentUnitRequests = "requests"
+	PaymentUnitTokens   = "tokens"
+)
+
 type PaymentRequiredData struct {
-	Type string `json:"type"`          // always "payment_required"
-	Code string `json:"code"`          // "project_limit" | "api_call_limit" | "asset_limit" | "database_limit" | "table_limit"
-	Unit string `json:"unit,omitempty"` // "projects" | "requests" | "mb" | "tables"
+	Type string `json:"type"`           // always PaymentRequiredType
+	Code string `json:"code"`           // PaymentCode* constants
+	Unit string `json:"unit,omitempty"` // PaymentUnit* constants
 }
+
+// Predefined sentinels — use these instead of inline literals.
+var (
+	PaymentDatabaseLimit = PaymentRequiredData{Type: PaymentRequiredType, Code: PaymentCodeDatabaseLimit, Unit: PaymentUnitMB}
+	PaymentAssetLimit    = PaymentRequiredData{Type: PaymentRequiredType, Code: PaymentCodeAssetLimit, Unit: PaymentUnitMB}
+	PaymentTableLimit    = PaymentRequiredData{Type: PaymentRequiredType, Code: PaymentCodeTableLimit, Unit: PaymentUnitTables}
+	PaymentProjectLimit  = PaymentRequiredData{Type: PaymentRequiredType, Code: PaymentCodeProjectLimit, Unit: PaymentUnitProjects}
+	PaymentApiCallLimit  = PaymentRequiredData{Type: PaymentRequiredType, Code: PaymentCodeApiCallLimit, Unit: PaymentUnitRequests}
+)
