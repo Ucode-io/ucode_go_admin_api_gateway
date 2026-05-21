@@ -44,6 +44,8 @@ func (h *HandlerV1) RedirectShortURL(c *gin.Context) {
 		return
 	}
 
+	log.Println("REDIRECTING Slug: ", slug)
+
 	//ctx := c.Request.Context()
 	//
 	//if h.centralRedis != nil {
