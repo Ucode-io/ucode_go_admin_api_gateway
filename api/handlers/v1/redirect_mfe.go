@@ -3,6 +3,7 @@ package v1
 import (
 	"context"
 	"crypto/rand"
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -43,14 +44,14 @@ func (h *HandlerV1) RedirectShortURL(c *gin.Context) {
 		return
 	}
 
-	ctx := c.Request.Context()
-
-	if h.centralRedis != nil {
-		if url, err := h.centralRedis.Get(ctx, mfeShortLinkRedisPrefix+slug).Result(); err == nil {
-			c.Redirect(http.StatusMovedPermanently, url)
-			return
-		}
-	}
+	//ctx := c.Request.Context()
+	//
+	//if h.centralRedis != nil {
+	//	if url, err := h.centralRedis.Get(ctx, mfeShortLinkRedisPrefix+slug).Result(); err == nil {
+	//		c.Redirect(http.StatusMovedPermanently, url)
+	//		return
+	//	}
+	//}
 
 	link, err := h.companyServices.MfeShortLink().GetBySlug(ctx, &cs.MfeShortLinkSlugReq{Slug: slug})
 	if err != nil || link.GetUrl() == "" {
@@ -58,11 +59,13 @@ func (h *HandlerV1) RedirectShortURL(c *gin.Context) {
 		return
 	}
 
-	if h.centralRedis != nil {
-		go func() {
-			_ = h.centralRedis.Set(context.Background(), mfeShortLinkRedisPrefix+slug, link.GetUrl(), mfeShortLinkRedisTTL).Err()
-		}()
-	}
+	//if h.centralRedis != nil {
+	//	go func() {
+	//		_ = h.centralRedis.Set(context.Background(), mfeShortLinkRedisPrefix+slug, link.GetUrl(), mfeShortLinkRedisTTL).Err()
+	//	}()
+	//}
+
+	log.Println("REDIRECTING Url: ", link.GetUrl())
 
 	c.Redirect(http.StatusMovedPermanently, link.GetUrl())
 }
