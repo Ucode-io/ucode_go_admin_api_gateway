@@ -8,6 +8,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"ucode/ucode_go_api_gateway/api/models"
@@ -20,6 +21,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cast"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func (h *HandlerV1) GetMcpProjects(c *gin.Context) {
@@ -332,6 +335,97 @@ func (h *HandlerV1) GetMfeShortLink(c *gin.Context) {
 			"mcp_project_id": link.GetMcpProjectId(),
 		},
 	)
+}
+
+// CreateMfeShortLink creates a short link for an existing microfrontend.
+// Idempotent: if a short link for this function_id already exists, returns it without creating a new one.
+func (h *HandlerV1) CreateMfeShortLink(c *gin.Context) {
+	var req models.CreateMfeShortLinkRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		h.HandleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	if !util.IsValidUUID(req.FunctionId) {
+		h.HandleResponse(c, status_http.InvalidArgument, "function_id must be a valid UUID")
+		return
+	}
+	if !util.IsValidUUID(req.McpProjectId) {
+		h.HandleResponse(c, status_http.InvalidArgument, "mcp_project_id must be a valid UUID")
+		return
+	}
+	if req.Url == "" {
+		h.HandleResponse(c, status_http.InvalidArgument, "url is required")
+		return
+	}
+
+	ctx := c.Request.Context()
+
+	// Idempotency: return existing link if already created for this function.
+	if existing, err := h.companyServices.MfeShortLink().GetByFunctionId(
+		ctx, &pb.MfeShortLinkFunctionReq{FunctionId: req.FunctionId},
+	); err == nil && existing.GetSlug() != "" {
+		h.HandleResponse(c, status_http.OK, map[string]string{
+			"short_url":      mfeShortURL(h.baseConf.ShortURLBase, existing.GetSlug()),
+			"slug":           existing.GetSlug(),
+			"url":            existing.GetUrl(),
+			"function_id":    existing.GetFunctionId(),
+			"mcp_project_id": existing.GetMcpProjectId(),
+		})
+		return
+	}
+
+	name := slugify(req.Name)
+	if len(name) > 40 {
+		name = strings.TrimRight(name[:40], "-")
+	}
+	if name == "" {
+		name = "project"
+	}
+	uuidHex := strings.ReplaceAll(req.McpProjectId, "-", "")
+	base := name + "-" + uuidHex[:8]
+
+	var link *pb.MfeShortLink
+	for attempt := 1; attempt <= 5; attempt++ {
+		slug := base
+		if attempt > 1 {
+			slug = fmt.Sprintf("%s-%d", base, attempt)
+		}
+		var err error
+		link, err = h.companyServices.MfeShortLink().Create(ctx, &pb.MfeShortLink{
+			Slug:         slug,
+			Url:          req.Url,
+			ProjectId:    req.ProjectId,
+			McpProjectId: req.McpProjectId,
+			FunctionId:   req.FunctionId,
+		})
+		if err == nil {
+			break
+		}
+		if status.Code(err) != codes.AlreadyExists {
+			h.HandleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+		link = nil
+	}
+	if link == nil {
+		h.HandleResponse(c, status_http.GRPCError, "failed to generate unique slug after 5 attempts")
+		return
+	}
+
+	if h.centralRedis != nil {
+		go func() {
+			_ = h.centralRedis.Set(context.Background(), mfeShortLinkRedisPrefix+link.GetSlug(), link.GetUrl(), mfeShortLinkRedisTTL).Err()
+		}()
+	}
+
+	h.HandleResponse(c, status_http.OK, map[string]string{
+		"short_url":      mfeShortURL(h.baseConf.ShortURLBase, link.GetSlug()),
+		"slug":           link.GetSlug(),
+		"url":            link.GetUrl(),
+		"function_id":    link.GetFunctionId(),
+		"mcp_project_id": link.GetMcpProjectId(),
+	})
 }
 
 func (h *HandlerV1) ManualSaveMcpProject(c *gin.Context) {

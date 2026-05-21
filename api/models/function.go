@@ -154,6 +154,14 @@ type ManualSaveMcpProjectRequest struct {
 	MicrofrontendID string             `json:"microfrontend_id,omitempty"`
 }
 
+type CreateMfeShortLinkRequest struct {
+	FunctionId   string `json:"function_id"`
+	McpProjectId string `json:"mcp_project_id"`
+	ProjectId    string `json:"project_id"` // optional — ucode project id
+	Url          string `json:"url"`
+	Name         string `json:"name"` // used for slug generation
+}
+
 type MicrofrontendSnapshot struct {
 	ID              string             `json:"id"`
 	MicrofrontendID string             `json:"microfrontend_id"`
