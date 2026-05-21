@@ -149,6 +149,8 @@ type BaseConfig struct {
 	GitlabBaseURL string
 	GitlabToken   string
 
+	ShortURLBase string
+
 	GithubClientID           string
 	GithubClientSecret       string
 	GithubRedirectURI        string
@@ -255,6 +257,8 @@ func BaseLoad() BaseConfig {
 
 	config.GitlabBaseURL = cast.ToString(GetOrReturnDefaultValue("GITLAB_BASE_URL", "https://gitlab.udevs.io/"))
 	config.GitlabToken = cast.ToString(GetOrReturnDefaultValue("GITLAB_TOKEN", ""))
+
+	config.ShortURLBase = cast.ToString(GetOrReturnDefaultValue("SHORT_URL_BASE", "https://u-code.io"))
 
 	config.GithubClientID = cast.ToString(GetOrReturnDefaultValue("GITHUB_CLIENT_ID", ""))
 	config.GithubClientSecret = cast.ToString(GetOrReturnDefaultValue("GITHUB_CLIENT_SECRET", ""))

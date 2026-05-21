@@ -12,7 +12,11 @@ import (
 	"time"
 
 	"ucode/ucode_go_api_gateway/api/models"
+	cs "ucode/ucode_go_api_gateway/genproto/company_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
+
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 const publishChunkSize = 30
@@ -505,6 +509,11 @@ func (p *ChatProcessor) publishToMicrofrontend(ctx context.Context, projectName,
 			return "", fmt.Errorf("save microfrontend refs on MCP project: %w", updateErr)
 		}
 	}
+
+	if shortURL := p.createShortLink(ctx, projectName, createResult.Data.Url, projectData); shortURL != "" {
+		projectData.ShortURL = shortURL
+	}
+
 	log.Printf("[MICROFRONTEND] repo created: id=%s repo_id=%s url=%s", createResult.Data.ID, createResult.Data.RepoId, createResult.Data.Url)
 
 	// ── Phase 2: пушим оставшиеся файлы через push-changes (если они есть) ───
@@ -675,4 +684,59 @@ func sanitizeFileContent(s string) string {
 		}
 	}
 	return sb.String()
+}
+
+func (p *ChatProcessor) createShortLink(ctx context.Context, projectName, mfeURL string, projectData *models.ProjectData) string {
+	if p.companyServices == nil || projectData.UcodeProjectId == "" || mfeURL == "" {
+		return ""
+	}
+
+	name := slugify(projectName)
+	if len(name) > 40 {
+		name = strings.TrimRight(name[:40], "-")
+	}
+	if name == "" {
+		name = "project"
+	}
+	uuidHex := strings.ReplaceAll(projectData.McpProjectId, "-", "")
+	if len(uuidHex) < 8 {
+		return ""
+	}
+	base := name + "-" + uuidHex[:8]
+
+	var link *cs.MfeShortLink
+	for attempt := 1; attempt <= 5; attempt++ {
+		slug := base
+		if attempt > 1 {
+			slug = fmt.Sprintf("%s-%d", base, attempt)
+		}
+		var err error
+		link, err = p.companyServices.MfeShortLink().Create(ctx, &cs.MfeShortLink{
+			Slug:         slug,
+			Url:          mfeURL,
+			ProjectId:    projectData.UcodeProjectId,
+			McpProjectId: projectData.McpProjectId,
+			FunctionId:   p.microFrontendId,
+		})
+		if err == nil {
+			break
+		}
+		// Only retry on unique constraint violation; any other error is terminal.
+		if status.Code(err) != codes.AlreadyExists {
+			log.Printf("[SHORT_LINK] non-retryable error: slug=%s err=%v", slug, err)
+			return ""
+		}
+		log.Printf("[SHORT_LINK] slug collision, retrying: slug=%s attempt=%d", slug, attempt)
+		link = nil
+	}
+	if link == nil {
+		return ""
+	}
+
+	if p.h != nil && p.h.centralRedis != nil {
+		_ = p.h.centralRedis.Set(context.Background(), mfeShortLinkRedisPrefix+link.Slug, link.GetUrl(), mfeShortLinkRedisTTL).Err()
+	}
+
+	shortURL := mfeShortURL(p.baseConf.ShortURLBase, link.Slug)
+	return shortURL
 }

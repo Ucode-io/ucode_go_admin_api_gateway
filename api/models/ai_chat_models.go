@@ -216,6 +216,7 @@ type (
 		ResourceEnvId  string `json:"resource_env_id"`
 		NodeType       string `json:"node_type"`
 		ResourceType   int32  `json:"resource_type"`
+		ShortURL       string `json:"short_url,omitempty"`
 	}
 
 	// ========================== Chunked Generation Manifest ==========================

@@ -15,6 +15,7 @@ import (
 	"ucode/ucode_go_api_gateway/config"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	pbo "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
+	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
@@ -285,11 +286,52 @@ func (h *HandlerV1) DeleteMcpProject(c *gin.Context) {
 		return
 	}
 
+	// Удаляем short link из company_service и Redis.
+	// Используем ucode_project_id из удалённого проекта (если вернулся).
+	if ucodeProjectId := response.GetUcodeProjectId(); ucodeProjectId != "" {
+		go func() {
+			ctx := context.Background()
+			if _, delErr := h.companyServices.MfeShortLink().DeleteByProjectId(
+				ctx, &pb.MfeShortLinkProjectReq{ProjectId: ucodeProjectId},
+			); delErr != nil {
+				h.log.Error("delete mfe short link", logger.String("project_id", ucodeProjectId), logger.Error(delErr))
+			}
+		}()
+	}
+
 	h.HandleResponse(c, status_http.OK, response)
 }
 
 func (h *HandlerV1) PublishMcpProjectFront(c *gin.Context) {
 	_ = h.MakeProxy(c, h.baseConf.GoFunctionServiceHost+h.baseConf.GoFunctionServiceHTTPPort, c.Request.URL.Path)
+}
+
+func (h *HandlerV1) GetMfeShortLink(c *gin.Context) {
+	functionId := c.Param("function_id")
+	if !util.IsValidUUID(functionId) {
+		h.HandleResponse(c, status_http.InvalidArgument, "function_id must be a valid UUID")
+		return
+	}
+
+	link, err := h.companyServices.MfeShortLink().GetByFunctionId(
+		c.Request.Context(),
+		&pb.MfeShortLinkFunctionReq{FunctionId: functionId},
+	)
+	if err != nil {
+		h.HandleResponse(c, status_http.NotFound, "short link not found")
+		return
+	}
+
+	h.HandleResponse(
+		c, status_http.OK,
+		map[string]string{
+			"short_url":      mfeShortURL(h.baseConf.ShortURLBase, link.GetSlug()),
+			"slug":           link.GetSlug(),
+			"url":            link.GetUrl(),
+			"function_id":    link.GetFunctionId(),
+			"mcp_project_id": link.GetMcpProjectId(),
+		},
+	)
 }
 
 func (h *HandlerV1) ManualSaveMcpProject(c *gin.Context) {
@@ -422,9 +464,9 @@ func (h *HandlerV1) ManualSaveMcpProject(c *gin.Context) {
 	}
 
 	type pushReq struct {
-		RepoID        int                        `json:"repo_id"`
-		Files         []models.GitlabFileChange  `json:"files"`
-		CommitMessage string                     `json:"commit_message"`
+		RepoID        int                       `json:"repo_id"`
+		Files         []models.GitlabFileChange `json:"files"`
+		CommitMessage string                    `json:"commit_message"`
 	}
 
 	pushBody, err := json.Marshal(pushReq{
