@@ -2,6 +2,7 @@ package v1
 
 import (
 	"context"
+	"crypto/rand"
 	"net/http"
 	"strings"
 	"time"
@@ -14,10 +15,25 @@ import (
 const (
 	mfeShortLinkRedisPrefix = "mfe:s:"
 	mfeShortLinkRedisTTL    = 30 * 24 * time.Hour
+	mfeSlugLength           = 6
+	mfeSlugAlphabet         = "abcdefghijklmnopqrstuvwxyz0123456789"
 )
 
 func mfeShortURL(base, slug string) string {
 	return strings.TrimRight(base, "/") + "/p/" + slug
+}
+
+// generateSlug returns a random mfeSlugLength-character base36 string.
+// Uses crypto/rand; collisions handled by the caller via retry.
+func generateSlug() (string, error) {
+	b := make([]byte, mfeSlugLength)
+	if _, err := rand.Read(b); err != nil {
+		return "", err
+	}
+	for i := range b {
+		b[i] = mfeSlugAlphabet[b[i]%byte(len(mfeSlugAlphabet))]
+	}
+	return string(b), nil
 }
 
 func (h *HandlerV1) RedirectShortURL(c *gin.Context) {

@@ -258,7 +258,7 @@ func BaseLoad() BaseConfig {
 	config.GitlabBaseURL = cast.ToString(GetOrReturnDefaultValue("GITLAB_BASE_URL", "https://gitlab.udevs.io/"))
 	config.GitlabToken = cast.ToString(GetOrReturnDefaultValue("GITLAB_TOKEN", ""))
 
-	config.ShortURLBase = cast.ToString(GetOrReturnDefaultValue("SHORT_URL_BASE", "https://u-code.io"))
+	config.ShortURLBase = cast.ToString(GetOrReturnDefaultValue("SHORT_URL_BASE", "app.ucode.co"))
 
 	config.GithubClientID = cast.ToString(GetOrReturnDefaultValue("GITHUB_CLIENT_ID", ""))
 	config.GithubClientSecret = cast.ToString(GetOrReturnDefaultValue("GITHUB_CLIENT_SECRET", ""))

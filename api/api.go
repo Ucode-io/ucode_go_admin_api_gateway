@@ -354,6 +354,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			mcpProject.PUT("/:mcp_project_id/manual-save", h.V1.ManualSaveMcpProject)
 			mcpProject.DELETE("/:mcp_project_id", h.V1.DeleteMcpProject)
 			mcpProject.GET("/short-link/:function_id", h.V1.GetMfeShortLink)
+			mcpProject.POST("/short-link", h.V1.CreateMfeShortLink)
 		}
 
 		ugenTemplate := v1Admin.Group("/ugen-template")
