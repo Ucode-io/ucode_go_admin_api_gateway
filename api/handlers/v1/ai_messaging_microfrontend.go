@@ -691,6 +691,8 @@ func (p *ChatProcessor) createShortLink(ctx context.Context, mfeURL string, proj
 		return ""
 	}
 
+	mfeURL = "https://" + mfeURL
+
 	var link *cs.MfeShortLink
 	for range 5 {
 		slug, err := generateSlug()

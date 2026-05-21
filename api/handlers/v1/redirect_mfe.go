@@ -23,8 +23,6 @@ func mfeShortURL(base, slug string) string {
 	return strings.TrimRight(base, "/") + "/p/" + slug
 }
 
-// normalizeURL ensures the URL has an https:// scheme.
-// Some MFE URLs are stored without a scheme (e.g. "xxx.u-code.io").
 func normalizeURL(u string) string {
 	if strings.HasPrefix(u, "http://") || strings.HasPrefix(u, "https://") {
 		return u
