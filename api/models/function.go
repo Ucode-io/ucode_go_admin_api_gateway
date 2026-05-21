@@ -159,7 +159,6 @@ type CreateMfeShortLinkRequest struct {
 	McpProjectId string `json:"mcp_project_id"`
 	ProjectId    string `json:"project_id"` // optional — ucode project id
 	Url          string `json:"url"`
-	Name         string `json:"name"` // used for slug generation
 }
 
 type MicrofrontendSnapshot struct {

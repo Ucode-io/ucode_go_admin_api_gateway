@@ -8,7 +8,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"strings"
 	"time"
 
 	"ucode/ucode_go_api_gateway/api/models"
@@ -375,23 +374,13 @@ func (h *HandlerV1) CreateMfeShortLink(c *gin.Context) {
 		return
 	}
 
-	name := slugify(req.Name)
-	if len(name) > 40 {
-		name = strings.TrimRight(name[:40], "-")
-	}
-	if name == "" {
-		name = "project"
-	}
-	uuidHex := strings.ReplaceAll(req.McpProjectId, "-", "")
-	base := name + "-" + uuidHex[:8]
-
 	var link *pb.MfeShortLink
-	for attempt := 1; attempt <= 5; attempt++ {
-		slug := base
-		if attempt > 1 {
-			slug = fmt.Sprintf("%s-%d", base, attempt)
+	for range 5 {
+		slug, err := generateSlug()
+		if err != nil {
+			h.HandleResponse(c, status_http.InternalServerError, "failed to generate slug")
+			return
 		}
-		var err error
 		link, err = h.companyServices.MfeShortLink().Create(ctx, &pb.MfeShortLink{
 			Slug:         slug,
 			Url:          req.Url,

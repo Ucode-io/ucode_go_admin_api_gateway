@@ -510,7 +510,7 @@ func (p *ChatProcessor) publishToMicrofrontend(ctx context.Context, projectName,
 		}
 	}
 
-	if shortURL := p.createShortLink(ctx, projectName, createResult.Data.Url, projectData); shortURL != "" {
+	if shortURL := p.createShortLink(ctx, createResult.Data.Url, projectData); shortURL != "" {
 		projectData.ShortURL = shortURL
 	}
 
@@ -686,31 +686,18 @@ func sanitizeFileContent(s string) string {
 	return sb.String()
 }
 
-func (p *ChatProcessor) createShortLink(ctx context.Context, projectName, mfeURL string, projectData *models.ProjectData) string {
-	if p.companyServices == nil || projectData.UcodeProjectId == "" || mfeURL == "" {
+func (p *ChatProcessor) createShortLink(ctx context.Context, mfeURL string, projectData *models.ProjectData) string {
+	if p.companyServices == nil || mfeURL == "" {
 		return ""
 	}
-
-	name := slugify(projectName)
-	if len(name) > 40 {
-		name = strings.TrimRight(name[:40], "-")
-	}
-	if name == "" {
-		name = "project"
-	}
-	uuidHex := strings.ReplaceAll(projectData.McpProjectId, "-", "")
-	if len(uuidHex) < 8 {
-		return ""
-	}
-	base := name + "-" + uuidHex[:8]
 
 	var link *cs.MfeShortLink
-	for attempt := 1; attempt <= 5; attempt++ {
-		slug := base
-		if attempt > 1 {
-			slug = fmt.Sprintf("%s-%d", base, attempt)
+	for range 5 {
+		slug, err := generateSlug()
+		if err != nil {
+			log.Printf("[SHORT_LINK] rand error: %v", err)
+			return ""
 		}
-		var err error
 		link, err = p.companyServices.MfeShortLink().Create(ctx, &cs.MfeShortLink{
 			Slug:         slug,
 			Url:          mfeURL,
@@ -721,12 +708,10 @@ func (p *ChatProcessor) createShortLink(ctx context.Context, projectName, mfeURL
 		if err == nil {
 			break
 		}
-		// Only retry on unique constraint violation; any other error is terminal.
 		if status.Code(err) != codes.AlreadyExists {
-			log.Printf("[SHORT_LINK] non-retryable error: slug=%s err=%v", slug, err)
+			log.Printf("[SHORT_LINK] non-retryable error: %v", err)
 			return ""
 		}
-		log.Printf("[SHORT_LINK] slug collision, retrying: slug=%s attempt=%d", slug, attempt)
 		link = nil
 	}
 	if link == nil {
@@ -737,6 +722,5 @@ func (p *ChatProcessor) createShortLink(ctx context.Context, projectName, mfeURL
 		_ = p.h.centralRedis.Set(context.Background(), mfeShortLinkRedisPrefix+link.Slug, link.GetUrl(), mfeShortLinkRedisTTL).Err()
 	}
 
-	shortURL := mfeShortURL(p.baseConf.ShortURLBase, link.Slug)
-	return shortURL
+	return mfeShortURL(p.baseConf.ShortURLBase, link.Slug)
 }
