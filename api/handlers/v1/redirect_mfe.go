@@ -53,7 +53,7 @@ func (h *HandlerV1) RedirectShortURL(c *gin.Context) {
 	//	}
 	//}
 
-	link, err := h.companyServices.MfeShortLink().GetBySlug(ctx, &cs.MfeShortLinkSlugReq{Slug: slug})
+	link, err := h.companyServices.MfeShortLink().GetBySlug(context.Background(), &cs.MfeShortLinkSlugReq{Slug: slug})
 	if err != nil || link.GetUrl() == "" {
 		c.JSON(http.StatusNotFound, gin.H{"error": "short link not found"})
 		return
