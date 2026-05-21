@@ -25,6 +25,7 @@ type CompanyServiceI interface {
 	Visualization() company_service.VisualizationServiceClient
 	Template() company_service.TemplateMetadataServiceClient
 	UgenTemplate() company_service.UgenTemplateServiceClient
+	MfeShortLink() company_service.MfeShortLinkServiceClient
 }
 
 type companyServiceClient struct {
@@ -41,6 +42,7 @@ type companyServiceClient struct {
 	visualizationService       company_service.VisualizationServiceClient
 	templateService            company_service.TemplateMetadataServiceClient
 	ugenTemplateService        company_service.UgenTemplateServiceClient
+	mfeShortLinkService        company_service.MfeShortLinkServiceClient
 }
 
 func NewCompanyServiceClient(ctx context.Context, cfg config.Config) (CompanyServiceI, error) {
@@ -72,6 +74,7 @@ func NewCompanyServiceClient(ctx context.Context, cfg config.Config) (CompanySer
 		visualizationService:       company_service.NewVisualizationServiceClient(connCompanyService),
 		templateService:            company_service.NewTemplateMetadataServiceClient(connCompanyService),
 		ugenTemplateService:        company_service.NewUgenTemplateServiceClient(connCompanyService),
+		mfeShortLinkService:        company_service.NewMfeShortLinkServiceClient(connCompanyService),
 	}, nil
 }
 
@@ -125,4 +128,8 @@ func (g *companyServiceClient) Template() company_service.TemplateMetadataServic
 
 func (g *companyServiceClient) UgenTemplate() company_service.UgenTemplateServiceClient {
 	return g.ugenTemplateService
+}
+
+func (g *companyServiceClient) MfeShortLink() company_service.MfeShortLinkServiceClient {
+	return g.mfeShortLinkService
 }

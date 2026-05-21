@@ -36,6 +36,7 @@ const (
 type ChatProcessor struct {
 	h                 *HandlerV1
 	service           services.ServiceManagerI
+	companyServices   services.CompanyServiceI
 	baseConf          config.BaseConfig
 	chatId            string
 	mcpProjectId      string
@@ -78,17 +79,18 @@ func (p *ChatProcessor) emitter() ProgressEmitter {
 
 func newChatProcessor(h *HandlerV1, service services.ServiceManagerI, baseConf config.BaseConfig, chatId, mcpProjectId, resourceEnvId, ucodeProjectId string, userId, clientTypeId, roleId, authToken string) *ChatProcessor {
 	return &ChatProcessor{
-		h:              h,
-		service:        service,
-		baseConf:       baseConf,
-		chatId:         chatId,
-		mcpProjectId:   mcpProjectId,
-		resourceEnvId:  resourceEnvId,
-		ucodeProjectId: ucodeProjectId,
-		userId:         userId,
-		clientTypeId:   clientTypeId,
-		roleId:         roleId,
-		authToken:      authToken,
+		h:               h,
+		service:         service,
+		companyServices: h.companyServices,
+		baseConf:        baseConf,
+		chatId:          chatId,
+		mcpProjectId:    mcpProjectId,
+		resourceEnvId:   resourceEnvId,
+		ucodeProjectId:  ucodeProjectId,
+		userId:          userId,
+		clientTypeId:    clientTypeId,
+		roleId:          roleId,
+		authToken:       authToken,
 	}
 }
 
@@ -1154,8 +1156,6 @@ func sanitizeProjectNameForBackend(name string) string {
 	return result
 }
 
-// slugify converts a project name to a lowercase hyphen-separated slug
-// valid for use as a GitLab path (only [a-z0-9-]).
 func slugify(name string) string {
 	s := strings.ToLower(strings.TrimSpace(name))
 	re := regexp.MustCompile(`[^a-z0-9]+`)

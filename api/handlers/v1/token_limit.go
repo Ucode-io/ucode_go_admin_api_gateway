@@ -142,17 +142,17 @@ func (p *ChatProcessor) tokenLimitData(err *TokenLimitError) models.TokenLimitDa
 	if spent < 0 {
 		spent = 0
 	}
-	code := "token_month_limit"
+	code := models.PaymentCodeTokenMonthLimit
 	if err.Period == "day" {
-		code = "token_day_limit"
+		code = models.PaymentCodeTokenDayLimit
 	}
 	return models.TokenLimitData{
-		Type:       "payment_required",
+		Type:       models.PaymentRequiredType,
 		Code:       code,
 		Period:     err.Period,
 		Used:       err.Used,
 		Limit:      err.Limit,
-		Unit:       "tokens",
+		Unit:       models.PaymentUnitTokens,
 		DayUsed:    snap.DayUsed + spent,
 		DayLimit:   snap.DayLimit,
 		MonthUsed:  snap.MonthUsed + spent,

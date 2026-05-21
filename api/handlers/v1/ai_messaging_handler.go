@@ -381,11 +381,7 @@ func (h *HandlerV1) handleStreamingMessage(c *gin.Context, processor *ChatProces
 					Type:    EvError,
 					Icon:    "credit-card",
 					Message: "Project limit reached. Please upgrade your plan.",
-					Data: models.PaymentRequiredData{
-						Type: "payment_required",
-						Code: "project_limit",
-						Unit: "projects",
-					},
+					Data: models.PaymentProjectLimit,
 				})
 			default:
 				processor.emitter().Emit(SSEEvent{

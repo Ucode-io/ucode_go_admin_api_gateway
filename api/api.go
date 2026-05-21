@@ -37,6 +37,9 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 	r.GET("/v1/login-microfront", h.V1.GetLoginMicroFrontBySubdomain)
 
+	// Short link redirect — публичный, без аутентификации
+	r.GET("/p/:slug", h.V1.RedirectShortURL)
+
 	r.GET("/v1/fare", h.V1.GetAllFares)
 	r.GET("v1/chart", h.V1.GetChart)
 	r.Any("v1/functions/:function-id/run", h.V1.FunctionRun)
@@ -350,6 +353,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			mcpProject.PUT("/:mcp_project_id", h.V1.SaveMcpProject)
 			mcpProject.PUT("/:mcp_project_id/manual-save", h.V1.ManualSaveMcpProject)
 			mcpProject.DELETE("/:mcp_project_id", h.V1.DeleteMcpProject)
+			mcpProject.GET("/short-link/:function_id", h.V1.GetMfeShortLink)
 		}
 
 		ugenTemplate := v1Admin.Group("/ugen-template")
