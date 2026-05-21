@@ -3,7 +3,6 @@ package v1
 import (
 	"context"
 	"crypto/rand"
-	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -22,6 +21,15 @@ const (
 
 func mfeShortURL(base, slug string) string {
 	return strings.TrimRight(base, "/") + "/p/" + slug
+}
+
+// normalizeURL ensures the URL has an https:// scheme.
+// Some MFE URLs are stored without a scheme (e.g. "xxx.u-code.io").
+func normalizeURL(u string) string {
+	if strings.HasPrefix(u, "http://") || strings.HasPrefix(u, "https://") {
+		return u
+	}
+	return "https://" + u
 }
 
 // generateSlug returns a random mfeSlugLength-character base36 string.
@@ -44,30 +52,28 @@ func (h *HandlerV1) RedirectShortURL(c *gin.Context) {
 		return
 	}
 
-	log.Println("REDIRECTING Slug: ", slug)
+	ctx := c.Request.Context()
 
-	//ctx := c.Request.Context()
-	//
-	//if h.centralRedis != nil {
-	//	if url, err := h.centralRedis.Get(ctx, mfeShortLinkRedisPrefix+slug).Result(); err == nil {
-	//		c.Redirect(http.StatusMovedPermanently, url)
-	//		return
-	//	}
-	//}
+	if h.centralRedis != nil {
+		if url, err := h.centralRedis.Get(ctx, mfeShortLinkRedisPrefix+slug).Result(); err == nil {
+			c.Redirect(http.StatusMovedPermanently, normalizeURL(url))
+			return
+		}
+	}
 
-	link, err := h.companyServices.MfeShortLink().GetBySlug(context.Background(), &cs.MfeShortLinkSlugReq{Slug: slug})
+	link, err := h.companyServices.MfeShortLink().GetBySlug(ctx, &cs.MfeShortLinkSlugReq{Slug: slug})
 	if err != nil || link.GetUrl() == "" {
 		c.JSON(http.StatusNotFound, gin.H{"error": "short link not found"})
 		return
 	}
 
-	//if h.centralRedis != nil {
-	//	go func() {
-	//		_ = h.centralRedis.Set(context.Background(), mfeShortLinkRedisPrefix+slug, link.GetUrl(), mfeShortLinkRedisTTL).Err()
-	//	}()
-	//}
+	targetURL := normalizeURL(link.GetUrl())
 
-	log.Println("REDIRECTING Url: ", link.GetUrl())
+	if h.centralRedis != nil {
+		go func() {
+			_ = h.centralRedis.Set(context.Background(), mfeShortLinkRedisPrefix+slug, targetURL, mfeShortLinkRedisTTL).Err()
+		}()
+	}
 
-	c.Redirect(http.StatusMovedPermanently, link.GetUrl())
+	c.Redirect(http.StatusMovedPermanently, targetURL)
 }
