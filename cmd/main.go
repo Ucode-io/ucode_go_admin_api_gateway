@@ -145,6 +145,10 @@ func main() {
 	consumer := api_call_limits.NewMetricsConsumer(centralRedis, compSrvc, MetConsumerFlushInterval)
 	go consumer.Start(ctx)
 
+	// Database-size billing limit — pre-computes allowed/blocked per project every 5 min
+	billingWorker := api_call_limits.NewBillingLimitWorker(centralRedis, projectServiceNodes, compSrvc, baseConf.UcodeNamespace, 5*time.Minute)
+	go billingWorker.Start(ctx)
+
 	// =================================================================================
 
 	cache, err := caching.NewExpiringLRUCache(config.LRU_CACHE_SIZE)
@@ -171,7 +175,7 @@ func main() {
 		}
 	}
 
-	h := handlers.NewHandler(baseConf, mapProjectConfs, log, projectServiceNodes, compSrvc, authSrvc, newRedis, cache, limiter, vaultClient)
+	h := handlers.NewHandler(baseConf, mapProjectConfs, log, projectServiceNodes, compSrvc, authSrvc, newRedis, centralRedis, cache, limiter, vaultClient)
 
 	api.SetUpAPI(r, h, baseConf, tracer, tracker)
 

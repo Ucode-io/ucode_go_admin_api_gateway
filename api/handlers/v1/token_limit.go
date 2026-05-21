@@ -37,12 +37,12 @@ func (p *ChatProcessor) initTokenBudget(ctx context.Context) {
 	g, gCtx := errgroup.WithContext(ctx)
 	g.Go(func() error {
 		var err error
-		limitsResp, err = p.h.companyServices.Billing().GetPricingLimits(gCtx, &pb.GetPricingLimitsRequest{ProjectId: p.mcpUcodeProjectId})
+		limitsResp, err = p.h.companyServices.Billing().GetPricingLimits(gCtx, &pb.GetPricingLimitsRequest{ProjectId: p.ucodeProjectId})
 		return err
 	})
 	g.Go(func() error {
 		var err error
-		metricsResp, err = p.h.companyServices.Billing().GetAiTokenUsageMetrics(gCtx, &pb.GetAiTokenUsageMetricsRequest{ProjectId: p.mcpUcodeProjectId})
+		metricsResp, err = p.h.companyServices.Billing().GetAiTokenUsageMetrics(gCtx, &pb.GetAiTokenUsageMetricsRequest{CompanyId: p.companyId})
 		return err
 	})
 	if err := g.Wait(); err != nil {
@@ -142,8 +142,13 @@ func (p *ChatProcessor) tokenLimitData(err *TokenLimitError) models.TokenLimitDa
 	if spent < 0 {
 		spent = 0
 	}
+	code := "token_month_limit"
+	if err.Period == "day" {
+		code = "token_day_limit"
+	}
 	return models.TokenLimitData{
-		Type:       "token_limit_exceeded",
+		Type:       "payment_required",
+		Code:       code,
 		Period:     err.Period,
 		Used:       err.Used,
 		Limit:      err.Limit,

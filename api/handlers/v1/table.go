@@ -17,6 +17,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/spf13/cast"
+	"google.golang.org/grpc/codes"
+	grpcstatus "google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
@@ -132,7 +134,15 @@ func (h *HandlerV1) CreateTable(c *gin.Context) {
 		)
 		if err != nil {
 			logReq.Response = err.Error()
-			h.HandleResponse(c, status_http.GRPCError, err.Error())
+			if st, ok := grpcstatus.FromError(err); ok && st.Code() == codes.ResourceExhausted {
+				h.HandleResponse(c, status_http.PaymentRequired, models.PaymentRequiredData{
+					Type: "payment_required",
+					Code: "table_limit",
+					Unit: "tables",
+				})
+			} else {
+				h.HandleResponse(c, status_http.GRPCError, err.Error())
+			}
 		} else {
 			table.Id = resp.Id
 			logReq.Current = &table

@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 	"ucode/ucode_go_api_gateway/api/handlers/helper"
+	"ucode/ucode_go_api_gateway/api/handlers/helper/billing"
 	"ucode/ucode_go_api_gateway/api/handlers/helper/chat_prompts"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/config"
@@ -41,6 +42,8 @@ type ChatProcessor struct {
 	resourceEnvId     string
 	ucodeProjectId    string
 	mcpUcodeProjectId string
+	companyId         string
+	fareId            string
 
 	userId       string
 	clientTypeId string
@@ -94,6 +97,10 @@ func newChatProcessor(h *HandlerV1, service services.ServiceManagerI, baseConf c
 // ============================================================================
 
 func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, chatHistory []models.ChatMessage, imageURLs []string, estimatedName string) (*models.ParsedClaudeResponse, error) {
+
+	if err := billing.CheckProjectCountLimit(ctx, p.h.companyServices, p.companyId, p.fareId); err != nil {
+		return nil, err
+	}
 
 	var (
 		emit = p.emitter()
@@ -166,18 +173,16 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 
 	var (
 		projectData   *models.ProjectData
-		provisionErr  error
 		eagerManifest *models.ProjectManifest
 		earlyPool     helper.ImagePoolResult
 
 		provWg sync.WaitGroup
 	)
 
-	provWg.Add(1)
-	go func() {
-		defer provWg.Done()
-		projectData, provisionErr = p.provisionBackend(ctx, plan.ProjectName, p.mcpProjectId)
-	}()
+	projectData, err = p.provisionBackend(ctx, plan.ProjectName, p.mcpProjectId)
+	if err != nil {
+		return nil, fmt.Errorf("backend provisioning failed: %w", err)
+	}
 
 	if plan.ProjectType == "admin_panel" || plan.ProjectType == "web" {
 		provWg.Add(1)
@@ -202,10 +207,6 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 	}
 
 	provWg.Wait()
-
-	if provisionErr != nil {
-		return nil, fmt.Errorf("backend provisioning failed: %w", provisionErr)
-	}
 
 	if earlyPool.Err == nil && projectData != nil {
 		earlyPool = p.uploadImagePool(ctx, projectData.ResourceEnvId, earlyPool)
@@ -487,6 +488,8 @@ func (p *ChatProcessor) provisionBackend(ctx context.Context, projectName string
 	if err != nil {
 		return nil, fmt.Errorf("get current project info: %w", err)
 	}
+
+	p.companyId = currentProject.GetCompanyId()
 
 	backendProject, err := p.h.companyServices.Project().Create(
 		ctx, &pb.CreateProjectRequest{

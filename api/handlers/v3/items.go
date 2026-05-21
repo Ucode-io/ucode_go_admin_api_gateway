@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"time"
 	hHelper "ucode/ucode_go_api_gateway/api/handlers/helper"
+	"ucode/ucode_go_api_gateway/api/handlers/helper/billing"
 
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -71,6 +72,19 @@ func (h *HandlerV3) CreateItem(c *gin.Context) {
 	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	if err = billing.CheckDatabaseLimit(c.Request.Context(), h.centralRedis, h.companyServices, services, projectId.(string), resource.ResourceEnvironmentId, resource.NodeType); err != nil {
+		if errors.Is(err, billing.ErrDatabaseLimitExceeded) {
+			h.HandleResponse(c, status_http.PaymentRequired, models.PaymentRequiredData{
+				Type: "payment_required",
+				Code: "database_limit",
+				Unit: "mb",
+			})
+		} else {
+			h.HandleResponse(c, status_http.GRPCError, err.Error())
+		}
 		return
 	}
 
@@ -265,6 +279,19 @@ func (h *HandlerV3) CreateItems(c *gin.Context) {
 	services, err := h.GetProjectSrvc(c.Request.Context(), resource.GetProjectId(), resource.NodeType)
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	if err = billing.CheckDatabaseLimit(c.Request.Context(), h.centralRedis, h.companyServices, services, projectId.(string), resource.ResourceEnvironmentId, resource.NodeType); err != nil {
+		if errors.Is(err, billing.ErrDatabaseLimitExceeded) {
+			h.HandleResponse(c, status_http.PaymentRequired, models.PaymentRequiredData{
+				Type: "payment_required",
+				Code: "database_limit",
+				Unit: "mb",
+			})
+		} else {
+			h.HandleResponse(c, status_http.GRPCError, err.Error())
+		}
 		return
 	}
 
@@ -2082,6 +2109,19 @@ func (h *HandlerV3) UpsertMany(c *gin.Context) {
 	)
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	if err = billing.CheckDatabaseLimit(c.Request.Context(), h.centralRedis, h.companyServices, services, projectId.(string), resource.ResourceEnvironmentId, resource.NodeType); err != nil {
+		if errors.Is(err, billing.ErrDatabaseLimitExceeded) {
+			h.HandleResponse(c, status_http.PaymentRequired, models.PaymentRequiredData{
+				Type: "payment_required",
+				Code: "database_limit",
+				Unit: "mb",
+			})
+		} else {
+			h.HandleResponse(c, status_http.GRPCError, err.Error())
+		}
 		return
 	}
 

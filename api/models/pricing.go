@@ -19,6 +19,7 @@ type AllPricingUsage struct {
 	MonthlyTokens   PricingUsage `json:"monthly_tokens"`
 	MonthlyApiCalls PricingUsage `json:"monthly_api_calls"`
 	AvgResponseTime PricingUsage `json:"avg_response_time"`
+	Projects        PricingUsage `json:"projects"`
 }
 
 type PerformanceMetricsResponse struct {
@@ -52,4 +53,32 @@ type ApiChartResponse struct {
 type DailyChartPoint struct {
 	Date  string `json:"date"`
 	Count int64  `json:"count"`
+}
+
+type CompanyStat struct {
+	Current int32 `json:"current"`
+	Limit   int32 `json:"limit"`
+}
+
+type CompanyTokenStat struct {
+	InputTokens  int64 `json:"input_tokens"`
+	OutputTokens int64 `json:"output_tokens"`
+	Limit        int64 `json:"limit"`
+}
+
+type CompanyTokenStats struct {
+	Daily   CompanyTokenStat `json:"daily"`
+	Monthly CompanyTokenStat `json:"monthly"`
+}
+
+type CompanyStatsResponse struct {
+	Tokens       CompanyTokenStats `json:"tokens"`
+	ProjectCount CompanyStat       `json:"project_count"`
+	BuilderCount CompanyStat       `json:"builder_count"`
+}
+
+type PaymentRequiredData struct {
+	Type string `json:"type"`          // always "payment_required"
+	Code string `json:"code"`          // "project_limit" | "api_call_limit" | "asset_limit" | "database_limit" | "table_limit"
+	Unit string `json:"unit,omitempty"` // "projects" | "requests" | "mb" | "tables"
 }

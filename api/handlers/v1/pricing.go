@@ -33,6 +33,7 @@ func parseStorageLimitToMB(val string) float64 {
 func (h *HandlerV1) GetAllPricingUsage(c *gin.Context) {
 	projectId := cast.ToString(c.MustGet("project_id"))
 	environmentId := cast.ToString(c.MustGet("environment_id"))
+	h.log.Info(fmt.Sprintf("[pricing] GetAllPricingUsage: projectId=%s environmentId=%s", projectId, environmentId))
 
 	limitsResp := &company_service.GetPricingLimitsResponse{}
 	usageResp := &nb.GetResourceUsageResponse{}
@@ -40,6 +41,7 @@ func (h *HandlerV1) GetAllPricingUsage(c *gin.Context) {
 	apiKeysResp := &auth_service.GetProjectApiKeysCountResponse{}
 	tokenMetrics := &company_service.GetAiTokenUsageMetricsResponse{}
 	apiMetrics := &company_service.GetApiCallMonitoringMetricsResponse{}
+	ugenStatus := &company_service.GetProjectUgenStatusResponse{}
 
 	g, gCtx := errgroup.WithContext(c.Request.Context())
 
@@ -102,6 +104,23 @@ func (h *HandlerV1) GetAllPricingUsage(c *gin.Context) {
 		apiMetrics = resp
 		return nil
 	})
+	g.Go(func() error {
+		project, err := h.companyServices.Project().GetById(gCtx, &company_service.GetProjectByIdRequest{ProjectId: projectId})
+		if err != nil {
+			h.log.Error(fmt.Sprintf("[GetAllPricingUsage] GetProjectById failed: %v", err))
+			return nil
+		}
+		resp, err := h.companyServices.Project().GetProjectUgenStatus(gCtx, &company_service.GetProjectUgenStatusRequest{
+			ProjectId: projectId,
+			CompanyId: project.GetCompanyId(),
+		})
+		if err != nil {
+			h.log.Error(fmt.Sprintf("[GetAllPricingUsage] GetProjectUgenStatus failed: %v", err))
+			return nil
+		}
+		ugenStatus = resp
+		return nil
+	})
 
 	_ = g.Wait()
 
@@ -117,6 +136,7 @@ func (h *HandlerV1) GetAllPricingUsage(c *gin.Context) {
 		TodayTokens:     models.PricingUsage{Current: float64(tokenMetrics.TodayInputTokens + tokenMetrics.TodayOutputTokens), Unit: "tokens"},
 		MonthlyTokens:   models.PricingUsage{Current: float64(tokenMetrics.MonthlyInputTokens + tokenMetrics.MonthlyOutputTokens), Unit: "tokens"},
 		MonthlyApiCalls: models.PricingUsage{Current: float64(apiMetrics.TotalMonthlyCalls), Unit: "count"},
+		Projects:        models.PricingUsage{Current: float64(ugenStatus.CompanyProjectsCount - 1), Unit: "count"},
 	}
 
 	for _, limit := range limitsResp.Limits {
@@ -145,6 +165,8 @@ func (h *HandlerV1) GetAllPricingUsage(c *gin.Context) {
 			response.TodayTokens.Limit = cast.ToFloat64(limit.Value)
 		case "tokens_month":
 			response.MonthlyTokens.Limit = cast.ToFloat64(limit.Value)
+		case "projects":
+			response.Projects.Limit = cast.ToFloat64(limit.Value)
 		}
 	}
 
@@ -183,6 +205,112 @@ func (h *HandlerV1) GetTokenUsage(c *gin.Context) {
 			InputTokens:  resp.MonthlyInputTokens,
 			OutputTokens: resp.MonthlyOutputTokens,
 		},
+	})
+}
+
+// GetCompanyStats godoc
+// @Summary Company-level stats
+// @Description AI token usage (daily & monthly), total project count, and builder project count — all scoped to the company
+// @Tags Billing
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Success 200 {object} status_http.Response{data=models.CompanyStatsResponse} "Company stats"
+// @Failure 401
+// @Router /v1/pricing/company-stats [get]
+func (h *HandlerV1) GetCompanyStats(c *gin.Context) {
+	projectId := cast.ToString(c.MustGet("project_id"))
+	ctx := c.Request.Context()
+
+	proj, err := h.companyServices.Project().GetById(ctx, &company_service.GetProjectByIdRequest{ProjectId: projectId})
+	if err != nil {
+		h.log.Error("[GetCompanyStats] GetById error", logger.Error(err))
+		h.HandleResponse(c, status_http.InternalServerError, err.Error())
+		return
+	}
+	companyId := proj.GetCompanyId()
+
+	var (
+		tokenMetrics = &company_service.GetAiTokenUsageMetricsResponse{}
+		limitsResp   = &company_service.GetPricingLimitsResponse{}
+		projectCount int32
+	)
+
+	g, gCtx := errgroup.WithContext(ctx)
+
+	g.Go(func() error {
+		resp, gErr := h.companyServices.Billing().GetAiTokenUsageMetrics(gCtx, &company_service.GetAiTokenUsageMetricsRequest{
+			CompanyId: companyId,
+		})
+		if gErr != nil {
+			h.log.Error(fmt.Sprintf("[GetCompanyStats] GetAiTokenUsageMetrics failed: %v", gErr))
+			return nil
+		}
+		tokenMetrics = resp
+		return nil
+	})
+
+	g.Go(func() error {
+		resp, gErr := h.companyServices.Billing().GetPricingLimits(gCtx, &company_service.GetPricingLimitsRequest{
+			ProjectId: projectId,
+		})
+		if gErr != nil {
+			h.log.Error(fmt.Sprintf("[GetCompanyStats] GetPricingLimits failed: %v", gErr))
+			return nil
+		}
+		limitsResp = resp
+		return nil
+	})
+
+	g.Go(func() error {
+		resp, gErr := h.companyServices.Project().GetList(gCtx, &company_service.GetProjectListRequest{
+			CompanyId: companyId,
+			Limit:     1,
+		})
+		if gErr != nil {
+			h.log.Error(fmt.Sprintf("[GetCompanyStats] GetProjectList failed: %v", gErr))
+			return nil
+		}
+		projectCount = resp.GetCount()
+		return nil
+	})
+
+	_ = g.Wait()
+
+	var (
+		dailyTokenLimit   int64
+		monthlyTokenLimit int64
+		projectLimit      int32
+	)
+	for _, limit := range limitsResp.GetLimits() {
+		switch limit.Type {
+		case "tokens_day":
+			dailyTokenLimit = cast.ToInt64(limit.Value)
+		case "tokens_month":
+			monthlyTokenLimit = cast.ToInt64(limit.Value)
+		case "projects":
+			projectLimit = cast.ToInt32(limit.Value)
+		}
+	}
+
+	h.HandleResponse(c, status_http.OK, models.CompanyStatsResponse{
+		Tokens: models.CompanyTokenStats{
+			Daily: models.CompanyTokenStat{
+				InputTokens:  tokenMetrics.GetTodayInputTokens(),
+				OutputTokens: tokenMetrics.GetTodayOutputTokens(),
+				Limit:        dailyTokenLimit,
+			},
+			Monthly: models.CompanyTokenStat{
+				InputTokens:  tokenMetrics.GetMonthlyInputTokens(),
+				OutputTokens: tokenMetrics.GetMonthlyOutputTokens(),
+				Limit:        monthlyTokenLimit,
+			},
+		},
+		ProjectCount: models.CompanyStat{
+			Current: projectCount,
+			Limit:   projectLimit,
+		},
+		BuilderCount: models.CompanyStat{},
 	})
 }
 
