@@ -778,8 +778,8 @@ func (p *ChatProcessor) getChatHistory(ctx context.Context) ([]models.ChatMessag
 	result := make([]models.ChatMessage, 0, len(msgList))
 	for _, msg := range msgList {
 		text := msg.GetContent()
-		// Strip embedded plan JSON — the AI only needs the marker + description for state detection.
-		if strings.HasPrefix(text, "[DIAGRAMS_GENERATED] ") {
+		// Strip embedded JSON — the AI only needs the marker + description for state detection.
+		if strings.HasPrefix(text, "[DIAGRAMS_GENERATED] ") || strings.HasPrefix(text, "[QUESTIONS_ASKED] ") {
 			if idx := strings.Index(text, "\n"); idx != -1 {
 				text = text[:idx]
 			}

@@ -48,7 +48,16 @@ func enrichMessages(msgs []*pbo.Message) []models.EnrichedMessage {
 				em.Content = body
 			}
 		} else if strings.HasPrefix(content, "[QUESTIONS_ASKED] ") {
-			em.Content = strings.TrimPrefix(content, "[QUESTIONS_ASKED] ")
+			body := strings.TrimPrefix(content, "[QUESTIONS_ASKED] ")
+			if idx := strings.Index(body, "\n"); idx != -1 {
+				em.Content = body[:idx]
+				var questions []models.AiQuestion
+				if err := json.Unmarshal([]byte(body[idx+1:]), &questions); err == nil {
+					em.Questions = questions
+				}
+			} else {
+				em.Content = body
+			}
 		}
 		result = append(result, em)
 	}

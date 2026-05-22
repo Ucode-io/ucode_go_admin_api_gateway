@@ -158,7 +158,8 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 	)
 
 	if len(aiResponse.Questions) > 0 {
-		savedContent = "[QUESTIONS_ASKED] " + aiResponse.Description
+		questionsJSON, _ := json.Marshal(aiResponse.Questions)
+		savedContent = "[QUESTIONS_ASKED] " + aiResponse.Description + "\n" + string(questionsJSON)
 	} else if aiResponse.Plan != nil {
 		planJSON, _ := json.Marshal(aiResponse.Plan)
 		savedContent = "[DIAGRAMS_GENERATED] " + aiResponse.Description + "\n" + string(planJSON)
@@ -408,7 +409,8 @@ func (h *HandlerV1) handleStreamingMessage(c *gin.Context, processor *ChatProces
 
 		savedContent := aiResponse.Description
 		if len(aiResponse.Questions) > 0 {
-			savedContent = "[QUESTIONS_ASKED] " + aiResponse.Description
+			questionsJSON, _ := json.Marshal(aiResponse.Questions)
+			savedContent = "[QUESTIONS_ASKED] " + aiResponse.Description + "\n" + string(questionsJSON)
 		} else if aiResponse.Plan != nil {
 			planJSON, _ := json.Marshal(aiResponse.Plan)
 			savedContent = "[DIAGRAMS_GENERATED] " + aiResponse.Description + "\n" + string(planJSON)
