@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"net/url"
 	"time"
-	hHelper "ucode/ucode_go_api_gateway/api/handlers/helper"
 	"ucode/ucode_go_api_gateway/api/handlers/billing"
+	hHelper "ucode/ucode_go_api_gateway/api/handlers/helper"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
@@ -91,13 +91,15 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 		return
 	}
 
-	if err = billing.CheckDatabaseLimit(c.Request.Context(), h.centralRedis, h.companyServices, services, projectId.(string), resource.ResourceEnvironmentId, resource.NodeType); err != nil {
-		if errors.Is(err, billing.ErrDatabaseLimitExceeded) {
-			h.HandleResponse(c, status_http.PaymentRequired, models.PaymentDatabaseLimit)
-		} else {
-			h.HandleResponse(c, status_http.GRPCError, err.Error())
+	if resource.ResourceType == pb.ResourceType_POSTGRESQL {
+		if err = billing.CheckDatabaseLimit(c.Request.Context(), h.centralRedis, h.companyServices, services, projectId.(string), resource.ResourceEnvironmentId, resource.NodeType); err != nil {
+			if errors.Is(err, billing.ErrDatabaseLimitExceeded) {
+				h.HandleResponse(c, status_http.PaymentRequired, models.PaymentDatabaseLimit)
+			} else {
+				h.HandleResponse(c, status_http.GRPCError, err.Error())
+			}
+			return
 		}
-		return
 	}
 
 	objectRequest.Data["company_service_project_id"] = resource.GetProjectId()
@@ -322,13 +324,15 @@ func (h *HandlerV2) CreateItems(c *gin.Context) {
 		return
 	}
 
-	if err = billing.CheckDatabaseLimit(c.Request.Context(), h.centralRedis, h.companyServices, services, projectId.(string), resource.ResourceEnvironmentId, resource.NodeType); err != nil {
-		if errors.Is(err, billing.ErrDatabaseLimitExceeded) {
-			h.HandleResponse(c, status_http.PaymentRequired, models.PaymentDatabaseLimit)
-		} else {
-			h.HandleResponse(c, status_http.GRPCError, err.Error())
+	if resource.ResourceType == pb.ResourceType_POSTGRESQL {
+		if err = billing.CheckDatabaseLimit(c.Request.Context(), h.centralRedis, h.companyServices, services, projectId.(string), resource.ResourceEnvironmentId, resource.NodeType); err != nil {
+			if errors.Is(err, billing.ErrDatabaseLimitExceeded) {
+				h.HandleResponse(c, status_http.PaymentRequired, models.PaymentDatabaseLimit)
+			} else {
+				h.HandleResponse(c, status_http.GRPCError, err.Error())
+			}
+			return
 		}
-		return
 	}
 
 	request := make(map[string]any)
@@ -2478,13 +2482,15 @@ func (h *HandlerV2) UpsertMany(c *gin.Context) {
 		return
 	}
 
-	if err = billing.CheckDatabaseLimit(c.Request.Context(), h.centralRedis, h.companyServices, services, projectId.(string), resource.ResourceEnvironmentId, resource.NodeType); err != nil {
-		if errors.Is(err, billing.ErrDatabaseLimitExceeded) {
-			h.HandleResponse(c, status_http.PaymentRequired, models.PaymentDatabaseLimit)
-		} else {
-			h.HandleResponse(c, status_http.GRPCError, err.Error())
+	if resource.ResourceType == pb.ResourceType_POSTGRESQL {
+		if err = billing.CheckDatabaseLimit(c.Request.Context(), h.centralRedis, h.companyServices, services, projectId.(string), resource.ResourceEnvironmentId, resource.NodeType); err != nil {
+			if errors.Is(err, billing.ErrDatabaseLimitExceeded) {
+				h.HandleResponse(c, status_http.PaymentRequired, models.PaymentDatabaseLimit)
+			} else {
+				h.HandleResponse(c, status_http.GRPCError, err.Error())
+			}
+			return
 		}
-		return
 	}
 
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
