@@ -33,9 +33,9 @@ type ApiKey struct {
 // @Param Authorization header string true "Bearer access token or API-KEY"
 // @Param X-API-KEY header string false "API key when Authorization is API-KEY"
 // @Param InvokeFunctionByPathRequest body models.CommonMessage true "InvokeFunctionByPathRequest"
-// @Success 201 {object} status_http.Response{data=models.InvokeFunctionResponse} "Function data"
-// @Response 400 {object} status_http.Response{data=string} "Bad Request"
-// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+// @Success 201 {object} status.Response{data=models.InvokeFunctionResponse} "Function data"
+// @Response 400 {object} status.Response{data=string} "Bad Request"
+// @Failure 500 {object} status.Response{data=string} "Server Error"
 func (h *HandlerV2) InvokeFunctionByPath(c *gin.Context) {
 	_ = h.MakeProxy(c, h.baseConf.GoFunctionServiceHost+h.baseConf.GoFunctionServiceHTTPPort, c.Request.URL.Path)
 }

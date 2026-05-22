@@ -17,7 +17,7 @@ import (
 // @Produce json
 // @Param token query string true "token"
 // @Param project_id query string true "project_id"
-// @Success 201 {object} status_http.Response{data=models.GitlabBranch} "Data"
+// @Success 201 {object} status_http.Response{data=object} "Data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) GitlabGetBranches(c *gin.Context) {
@@ -33,7 +33,7 @@ func (h *HandlerV2) GitlabGetBranches(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param token query string false "token"
-// @Success 201 {object} status_http.Response{data=models.GitlabProjectResponse} "Data"
+// @Success 201 {object} status_http.Response{data=object} "Data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) GitlabGetRepos(c *gin.Context) {
@@ -49,7 +49,7 @@ func (h *HandlerV2) GitlabGetRepos(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param token query string false "token"
-// @Success 201 {object} status_http.Response{data=models.GitlabUser} "Data"
+// @Success 201 {object} status_http.Response{data=object} "Data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) GitlabGetUser(c *gin.Context) {
