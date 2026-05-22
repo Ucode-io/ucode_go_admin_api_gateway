@@ -681,7 +681,8 @@ func readableFieldType(t string) string {
 	return t
 }
 
-// readmeDesignSection renders the design system table if design data is available.
+// readmeDesignSection renders the full design system — color palette, CSS variables,
+// Tailwind config snippet, and typography. Enough for an AI agent to write correct styles.
 func readmeDesignSection(d models.DesignSpec) string {
 	if d.DesignInspiration == "" && d.PrimaryColor == "" && d.FontFamily == "" {
 		return ""
@@ -689,33 +690,156 @@ func readmeDesignSection(d models.DesignSpec) string {
 
 	var sb strings.Builder
 	sb.WriteString("## Design System\n\n")
-	sb.WriteString("All visual tokens are configured in `tailwind.config.ts`.\n\n")
-	sb.WriteString("| Property | Value |\n|---|---|\n")
 
 	if d.DesignInspiration != "" {
-		fmt.Fprintf(&sb, "| Style inspiration | %s |\n", slugToTitle(d.DesignInspiration))
-	}
-	if d.PrimaryColor != "" {
-		fmt.Fprintf(&sb, "| Primary color | `%s` |\n", d.PrimaryColor)
-	}
-	if d.BackgroundColor != "" {
-		fmt.Fprintf(&sb, "| Background | `%s` |\n", d.BackgroundColor)
-	}
-	if d.SurfaceColor != "" {
-		fmt.Fprintf(&sb, "| Surface / card | `%s` |\n", d.SurfaceColor)
-	}
-	switch {
-	case d.FontFamily != "" && d.BodyFont != "" && d.FontFamily != d.BodyFont:
-		fmt.Fprintf(&sb, "| Heading font | %s |\n", d.FontFamily)
-		fmt.Fprintf(&sb, "| Body font | %s |\n", d.BodyFont)
-	case d.FontFamily != "":
-		fmt.Fprintf(&sb, "| Font | %s |\n", d.FontFamily)
-	}
-	if d.BorderRadius != "" {
-		fmt.Fprintf(&sb, "| Border radius | %s |\n", d.BorderRadius)
+		fmt.Fprintf(&sb, "Style: **%s**\n\n", slugToTitle(d.DesignInspiration))
 	}
 
-	sb.WriteString("\n")
+	// ── Color palette ─────────────────────────────────────────────────────────
+
+	type colorRow struct {
+		name string
+		hex  string
+		hsl  string
+	}
+	colors := []colorRow{
+		{"Primary", d.PrimaryColor, d.PrimaryHSL},
+		{"Accent", d.AccentColor, d.AccentHSL},
+		{"Background", d.BackgroundColor, d.BackgroundHSL},
+		{"Surface / card", d.SurfaceColor, d.SurfaceHSL},
+		{"Sidebar", d.SidebarBackground, d.SidebarBackgroundHSL},
+		{"Text", d.TextColor, ""},
+		{"Text muted", d.TextMutedColor, ""},
+		{"Border", d.BorderColor, ""},
+	}
+
+	hasColors := false
+	for _, c := range colors {
+		if c.hex != "" {
+			hasColors = true
+			break
+		}
+	}
+
+	if hasColors {
+		sb.WriteString("### Color Palette\n\n")
+		sb.WriteString("| Token | Hex | HSL |\n|---|---|---|\n")
+		for _, c := range colors {
+			if c.hex == "" {
+				continue
+			}
+			hsl := c.hsl
+			if hsl == "" {
+				hsl = "—"
+			}
+			fmt.Fprintf(&sb, "| %s | `%s` | `%s` |\n", c.name, c.hex, hsl)
+		}
+		sb.WriteString("\n")
+	}
+
+	// ── CSS custom properties ─────────────────────────────────────────────────
+	// These are the variables used in globals.css / index.css.
+
+	hasCSSVars := d.PrimaryHSL != "" || d.BackgroundHSL != "" || d.AccentHSL != ""
+	if hasCSSVars {
+		sb.WriteString("### CSS Variables\n\n")
+		sb.WriteString("Defined in `src/index.css` (or `src/styles/globals.css`).\n")
+		sb.WriteString("Use these in Tailwind classes via `hsl(var(--token))`.\n\n")
+		sb.WriteString("```css\n:root {\n")
+		if d.PrimaryHSL != "" {
+			fmt.Fprintf(&sb, "  --primary:    %s;\n", d.PrimaryHSL)
+		}
+		if d.AccentHSL != "" {
+			fmt.Fprintf(&sb, "  --accent:     %s;\n", d.AccentHSL)
+		}
+		if d.BackgroundHSL != "" {
+			fmt.Fprintf(&sb, "  --background: %s;\n", d.BackgroundHSL)
+		}
+		if d.SurfaceHSL != "" {
+			fmt.Fprintf(&sb, "  --surface:    %s;\n", d.SurfaceHSL)
+		}
+		if d.SidebarBackgroundHSL != "" {
+			fmt.Fprintf(&sb, "  --sidebar:    %s;\n", d.SidebarBackgroundHSL)
+		}
+		if d.BorderRadius != "" {
+			fmt.Fprintf(&sb, "  --radius:     %s;\n", d.BorderRadius)
+		}
+		sb.WriteString("}\n```\n\n")
+	}
+
+	// ── Tailwind config snippet ───────────────────────────────────────────────
+
+	sb.WriteString("### Tailwind Config\n\n")
+	sb.WriteString("Defined in `tailwind.config.ts` under `theme.extend`.\n\n")
+	sb.WriteString("```ts\ntheme: {\n  extend: {\n")
+
+	// Colors
+	sb.WriteString("    colors: {\n")
+	if d.PrimaryHSL != "" {
+		fmt.Fprintf(&sb, "      primary:    'hsl(%s)',\n", d.PrimaryHSL)
+	} else if d.PrimaryColor != "" {
+		fmt.Fprintf(&sb, "      primary:    '%s',\n", d.PrimaryColor)
+	}
+	if d.AccentHSL != "" {
+		fmt.Fprintf(&sb, "      accent:     'hsl(%s)',\n", d.AccentHSL)
+	} else if d.AccentColor != "" {
+		fmt.Fprintf(&sb, "      accent:     '%s',\n", d.AccentColor)
+	}
+	if d.BackgroundHSL != "" {
+		fmt.Fprintf(&sb, "      background: 'hsl(%s)',\n", d.BackgroundHSL)
+	} else if d.BackgroundColor != "" {
+		fmt.Fprintf(&sb, "      background: '%s',\n", d.BackgroundColor)
+	}
+	if d.SurfaceHSL != "" {
+		fmt.Fprintf(&sb, "      surface:    'hsl(%s)',\n", d.SurfaceHSL)
+	} else if d.SurfaceColor != "" {
+		fmt.Fprintf(&sb, "      surface:    '%s',\n", d.SurfaceColor)
+	}
+	if d.TextColor != "" {
+		fmt.Fprintf(&sb, "      foreground: '%s',\n", d.TextColor)
+	}
+	if d.TextMutedColor != "" {
+		fmt.Fprintf(&sb, "      muted:      '%s',\n", d.TextMutedColor)
+	}
+	if d.BorderColor != "" {
+		fmt.Fprintf(&sb, "      border:     '%s',\n", d.BorderColor)
+	}
+	sb.WriteString("    },\n")
+
+	// Fonts
+	if d.FontFamily != "" || d.BodyFont != "" {
+		sb.WriteString("    fontFamily: {\n")
+		if d.FontFamily != "" {
+			fmt.Fprintf(&sb, "      heading: ['%s', 'sans-serif'],\n", d.FontFamily)
+		}
+		if d.BodyFont != "" && d.BodyFont != d.FontFamily {
+			fmt.Fprintf(&sb, "      body:    ['%s', 'sans-serif'],\n", d.BodyFont)
+		} else if d.FontFamily != "" {
+			fmt.Fprintf(&sb, "      body:    ['%s', 'sans-serif'],\n", d.FontFamily)
+		}
+		sb.WriteString("    },\n")
+	}
+
+	// Border radius
+	if d.BorderRadius != "" {
+		sb.WriteString("    borderRadius: {\n")
+		fmt.Fprintf(&sb, "      DEFAULT: '%s',\n", d.BorderRadius)
+		sb.WriteString("    },\n")
+	}
+
+	sb.WriteString("  },\n},\n```\n\n")
+
+	// ── Usage hint ────────────────────────────────────────────────────────────
+
+	sb.WriteString("### Usage in Components\n\n")
+	sb.WriteString("```tsx\n")
+	sb.WriteString("// ✅ correct — use semantic token names\n")
+	sb.WriteString("<div className=\"bg-surface text-foreground border border-border\" />\n")
+	sb.WriteString("<button className=\"bg-primary text-white hover:bg-primary/90\" />\n\n")
+	sb.WriteString("// ❌ wrong — never hardcode hex colors in components\n")
+	sb.WriteString("<div className=\"bg-[#1e293b]\" />\n")
+	sb.WriteString("```\n\n")
+
 	return sb.String()
 }
 
