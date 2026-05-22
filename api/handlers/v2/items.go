@@ -9,7 +9,7 @@ import (
 	"net/url"
 	"time"
 	hHelper "ucode/ucode_go_api_gateway/api/handlers/helper"
-	"ucode/ucode_go_api_gateway/api/handlers/helper/billing"
+	"ucode/ucode_go_api_gateway/api/handlers/billing"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"

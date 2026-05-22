@@ -1,10 +1,9 @@
-package api_call_limits
+package apilimits
 
 import (
 	"context"
 	"log"
 	"strconv"
-	"sync"
 	"time"
 
 	"ucode/ucode_go_api_gateway/config"
@@ -14,12 +13,13 @@ import (
 	"github.com/go-redis/redis/v8"
 )
 
+// MetricsConsumer drains pending API usage counts from Redis and logs them to
+// the billing service (PostgreSQL via gRPC) on a regular interval.
 type MetricsConsumer struct {
+	worker
 	rdb            *redis.Client
 	companyService services.CompanyServiceI
 	flushInterval  time.Duration
-	wg             sync.WaitGroup
-	cancelFn       context.CancelFunc
 }
 
 func NewMetricsConsumer(rdb *redis.Client, companyService services.CompanyServiceI, flushInterval time.Duration) *MetricsConsumer {
@@ -31,27 +31,18 @@ func NewMetricsConsumer(rdb *redis.Client, companyService services.CompanyServic
 }
 
 func (c *MetricsConsumer) Start(ctx context.Context) {
-	innerCtx, cancel := context.WithCancel(ctx)
-	c.cancelFn = cancel
-
-	c.wg.Add(1)
-	go func() { defer c.wg.Done(); c.dbFlusher(innerCtx) }()
-
-	log.Printf("[Consumer] started: db_flush_interval=%v", c.flushInterval)
+	c.spawn(ctx, c.run)
+	log.Printf("[MetricsConsumer] started db_flush_interval=%v", c.flushInterval)
 }
 
 func (c *MetricsConsumer) Stop() {
-	if c.cancelFn != nil {
-		c.cancelFn()
-	}
-	c.wg.Wait()
-	log.Println("[Consumer] stopped")
+	c.shutdown()
+	log.Println("[MetricsConsumer] stopped")
 }
 
-func (c *MetricsConsumer) dbFlusher(ctx context.Context) {
+func (c *MetricsConsumer) run(ctx context.Context) {
 	ticker := time.NewTicker(c.flushInterval)
 	defer ticker.Stop()
-
 	for {
 		select {
 		case <-ctx.Done():
@@ -65,49 +56,47 @@ func (c *MetricsConsumer) dbFlusher(ctx context.Context) {
 func (c *MetricsConsumer) flushApiUsage(ctx context.Context) {
 	var cursor uint64
 	for {
-		keys, next, err := c.rdb.Scan(ctx, cursor, config.KeyUsagePendingPattern, 100).Result()
+		keys, next, err := c.rdb.Scan(ctx, cursor, config.KeyUsagePendingPattern, redisScanBatch).Result()
 		if err != nil {
-			log.Printf("[Consumer] usage SCAN error: %v", err)
-			return
-		}
-
-		if len(keys) == 0 {
+			log.Printf("[MetricsConsumer] SCAN error: %v", err)
 			return
 		}
 
 		for _, key := range keys {
 			projectID := key[len(config.KeyUsagePendingPrefix):]
-
-			countStr, err := c.rdb.HGet(ctx, key, config.KeyUsageTotalField).Result()
-			if err != nil {
-				continue
-			}
-
-			count, err := strconv.ParseInt(countStr, 10, 64)
-			if err != nil || count <= 0 {
-				continue
-			}
-
-			_, err = c.companyService.Billing().LogUsage(ctx, &pb.LogUsageRequest{
-				ProjectId: projectID,
-				Count:     count,
-				TimeRange: 3600,
-				DateTime:  time.Now().Truncate(time.Hour).Format("2006-01-02 15:00:00"),
-			})
-
-			if err != nil {
-				log.Printf("[MetricsConsumer] ERROR sending LogUsage for project %s: %v", projectID, err)
-				continue
-			}
-
-			if err := c.rdb.HIncrBy(ctx, key, config.KeyUsageTotalField, -count).Err(); err != nil {
-				log.Printf("[Consumer] HIncrBy error key=%s: %v", key, err)
-			}
+			c.logProjectUsage(ctx, key, projectID)
 		}
 
 		cursor = next
 		if cursor == 0 {
 			break
 		}
+	}
+}
+
+func (c *MetricsConsumer) logProjectUsage(ctx context.Context, key, projectID string) {
+	countStr, err := c.rdb.HGet(ctx, key, config.KeyUsageTotalField).Result()
+	if err != nil {
+		return
+	}
+	count, err := strconv.ParseInt(countStr, 10, 64)
+	if err != nil || count <= 0 {
+		return
+	}
+
+	_, err = c.companyService.Billing().LogUsage(ctx, &pb.LogUsageRequest{
+		ProjectId: projectID,
+		Count:     count,
+		TimeRange: usageLogTimeRangeSec,
+		DateTime:  time.Now().Truncate(time.Hour).Format("2006-01-02 15:00:00"),
+	})
+	if err != nil {
+		// Leave count in Redis — will retry on next tick.
+		log.Printf("[MetricsConsumer] LogUsage project=%s: %v", projectID, err)
+		return
+	}
+
+	if err = c.rdb.HIncrBy(ctx, key, config.KeyUsageTotalField, -count).Err(); err != nil {
+		log.Printf("[MetricsConsumer] HIncrBy project=%s: %v", projectID, err)
 	}
 }

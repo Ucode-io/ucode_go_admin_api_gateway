@@ -1,9 +1,8 @@
-package api_call_limits
+package apilimits
 
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"sync/atomic"
 
@@ -14,15 +13,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// BillingLimitMiddleware aborts requests when a project's monthly API call
+// limit flag is set to "0" in Redis by BillingLimitWorker.
 func (t *Tracker) BillingLimitMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		projectID := c.GetString("project_id")
-		if projectID == "" {
-			c.Next()
-			return
-		}
-
-		if config.RateLimitSkipFiles[c.Param("collection")] {
+		if projectID == "" || config.RateLimitSkipFiles[c.Param("collection")] {
 			c.Next()
 			return
 		}
@@ -32,7 +28,7 @@ func (t *Tracker) BillingLimitMiddleware() gin.HandlerFunc {
 			c.AbortWithStatusJSON(http.StatusPaymentRequired, status_http.Response{
 				Status:      status_http.PaymentRequired.Status,
 				Description: "Monthly API call limit exceeded. Please upgrade your plan.",
-				Data: models.PaymentApiCallLimit,
+				Data:        models.PaymentApiCallLimit,
 			})
 			return
 		}
@@ -41,20 +37,14 @@ func (t *Tracker) BillingLimitMiddleware() gin.HandlerFunc {
 	}
 }
 
+// ApiCallCountMiddleware increments the per-project L1 counter on every request.
+// Counts are flushed to Redis by Tracker on its flush interval.
 func (t *Tracker) ApiCallCountMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		projectID := c.GetString("project_id")
-
-		if projectID != "" {
+		if projectID := c.GetString("project_id"); projectID != "" {
 			counter, _ := t.l1Cache.LoadOrStore(projectID, &atomic.Int64{})
-			switch v := counter.(type) {
-			case *atomic.Int64:
-				v.Add(1)
-			default:
-				log.Printf("[ApiCallLimits] Warning: Invalid counter type in L1 cache for project %s", projectID)
-			}
+			counter.(*atomic.Int64).Add(1)
 		}
-
 		c.Next()
 	}
 }

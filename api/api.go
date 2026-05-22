@@ -8,7 +8,7 @@ import (
 
 	"ucode/ucode_go_api_gateway/api/docs"
 	"ucode/ucode_go_api_gateway/api/handlers"
-	"ucode/ucode_go_api_gateway/api/handlers/api_call_limits"
+	apilimits "ucode/ucode_go_api_gateway/api/handlers/api_call_limits"
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 
@@ -22,7 +22,7 @@ import (
 
 // SetUpAPI @description This is an api gateway
 // @termsOfService https://u-code.io/
-func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer opentracing.Tracer, tracker *api_call_limits.Tracker) {
+func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer opentracing.Tracer, tracker *apilimits.Tracker) {
 	docs.SwaggerInfo.Title = cfg.ServiceName
 	docs.SwaggerInfo.Version = cfg.Version
 	docs.SwaggerInfo.Schemes = []string{cfg.HTTPScheme}

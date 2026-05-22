@@ -1,4 +1,4 @@
-package api_call_limits
+package apilimits
 
 import (
 	"context"
@@ -13,12 +13,13 @@ import (
 	"github.com/go-redis/redis/v8"
 )
 
+// Tracker counts incoming API calls in an L1 in-memory cache and flushes
+// totals to Redis on a regular interval. Safe for concurrent middleware use.
 type Tracker struct {
+	worker
 	flushInterval time.Duration
 	rdb           *redis.Client
 	l1Cache       sync.Map
-	wg            sync.WaitGroup
-	cancelFn      context.CancelFunc
 }
 
 func NewTracker(rdb *redis.Client, flushInterval time.Duration) *Tracker {
@@ -29,76 +30,60 @@ func NewTracker(rdb *redis.Client, flushInterval time.Duration) *Tracker {
 }
 
 func (t *Tracker) Start(ctx context.Context) {
-	innerCtx, cancel := context.WithCancel(ctx)
-	t.cancelFn = cancel
-
-	t.wg.Add(1)
-	go func() {
-		defer t.wg.Done()
-		t.metricsWorker(innerCtx)
-	}()
-
-	log.Printf("[Tracker] started: flush_interval=%v", t.flushInterval)
+	t.spawn(ctx, t.run)
+	log.Printf("[Tracker] started flush_interval=%v", t.flushInterval)
 }
 
 func (t *Tracker) Stop() {
-	if t.cancelFn != nil {
-		t.cancelFn()
-	}
-	t.wg.Wait()
-	t.flushMetricsToRedis()
+	t.shutdown()
+	t.flush() // final drain on graceful shutdown
 	log.Println("[Tracker] stopped")
 }
 
-func (t *Tracker) metricsWorker(ctx context.Context) {
+func (t *Tracker) run(ctx context.Context) {
 	ticker := time.NewTicker(t.flushInterval)
 	defer ticker.Stop()
-
 	for {
 		select {
 		case <-ctx.Done():
 			return
 		case <-ticker.C:
-			t.flushMetricsToRedis()
+			t.flush()
 		}
 	}
 }
 
-func (t *Tracker) flushMetricsToRedis() {
+func (t *Tracker) flush() {
 	ctx := context.Background()
 	now := time.Now()
 	pipe := t.rdb.Pipeline()
-	var hasData bool
+	hasData := false
 
 	t.l1Cache.Range(func(k, v any) bool {
 		projectID := k.(string)
 		delta := v.(*atomic.Int64).Swap(0)
-
-		if delta > 0 {
-			hasData = true
-
-			minKey := fmt.Sprintf(config.KeyRateMin, projectID, now.Format("2006-01-02-15-04"))
-			hourKey := fmt.Sprintf(config.KeyRateHour, projectID, now.Format("2006-01-02-15"))
-			dayKey := fmt.Sprintf(config.KeyRateDay, projectID, now.Format("2006-01-02"))
-
-			pipe.IncrBy(ctx, minKey, delta)
-			pipe.Expire(ctx, minKey, 15*time.Minute)
-
-			pipe.IncrBy(ctx, hourKey, delta)
-			pipe.Expire(ctx, hourKey, 24*time.Hour)
-
-			pipe.IncrBy(ctx, dayKey, delta)
-			pipe.Expire(ctx, dayKey, 48*time.Hour)
-
-			usageKey := fmt.Sprintf(config.KeyUsagePending, projectID)
-			pipe.HIncrBy(ctx, usageKey, config.KeyUsageTotalField, delta)
+		if delta == 0 {
+			return true
 		}
+		hasData = true
+
+		minKey := fmt.Sprintf(config.KeyRateMin, projectID, now.Format("2006-01-02-15-04"))
+		hourKey := fmt.Sprintf(config.KeyRateHour, projectID, now.Format("2006-01-02-15"))
+		dayKey := fmt.Sprintf(config.KeyRateDay, projectID, now.Format("2006-01-02"))
+
+		pipe.IncrBy(ctx, minKey, delta)
+		pipe.Expire(ctx, minKey, 15*time.Minute)
+		pipe.IncrBy(ctx, hourKey, delta)
+		pipe.Expire(ctx, hourKey, 24*time.Hour)
+		pipe.IncrBy(ctx, dayKey, delta)
+		pipe.Expire(ctx, dayKey, 48*time.Hour)
+		pipe.HIncrBy(ctx, fmt.Sprintf(config.KeyUsagePending, projectID), config.KeyUsageTotalField, delta)
 		return true
 	})
 
 	if hasData {
 		if _, err := pipe.Exec(ctx); err != nil {
-			log.Printf("[Tracker] ERROR flushing to redis: %v", err)
+			log.Printf("[Tracker] flush error: %v", err)
 		}
 	}
 }

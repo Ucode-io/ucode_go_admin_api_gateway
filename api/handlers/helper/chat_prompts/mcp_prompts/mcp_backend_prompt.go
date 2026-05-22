@@ -1,4 +1,4 @@
-package helper
+package mcp_prompts
 
 import (
 	"errors"
@@ -11,7 +11,7 @@ var (
 	SystemPromptBackend = `You are connected to an MCP server named "ucode" and have access to tools via the mcp_toolset.
 AVAILABLE TOOLS:
 - get_dbml: Get database schema
-- create_table: Create a new table  
+- create_table: Create a new table
 - update_table: Add fields and relations to a table (bulk)
 - create_table_item: Create a row/record in a table (CRITICAL - must use for test data)
 - create_menu: Create a menu
@@ -164,11 +164,11 @@ STEP 7: Create test data for each table (CRITICAL: Create exactly 3 items per ta
 CRITICAL RULES FOR TEST DATA CREATION:
 1. **Iterate ALL Tables**: Do not stop after creating data for just 2 or 3 tables. If you created 10 tables in Step 3, you MUST create test data for all 10 tables.
 2. **Quantity**: Create exactly **3 records** per table.
-3. **Dependency Order (Crucial)**: 
+3. **Dependency Order (Crucial)**:
    - First create records in parent tables (tables referenced by others).
    - Then create records in child tables (tables containing foreign keys).
    - SAVE the 'id' from parent records to use in child records.
-4. **Realistic Data**: 
+4. **Realistic Data**:
    - Use realistic names, dates, and numbers suitable for the industry (Finance, Healthcare, etc.).
    - For ENUMs, use valid options defined in Step 2.
    - For RELATIONS, use only valid IDs from previously created records.
@@ -222,7 +222,7 @@ AVAILABLE MCP TOOLS (via mcp_toolset):
 You have access to these tools through the MCP server "ucode":
 
 1. get_dbml - Get current database schema
-   Parameters: 
+   Parameters:
      - project-id: "%s"
      - environment-id: "%s"
      - x-api-key: "%s"
@@ -242,7 +242,7 @@ You have access to these tools through the MCP server "ucode":
      - xapikey: "%s"
      - fields: Array of field objects
      - relations: Array of relation objects
-   
+
    Field types available:
      - SINGLE_LINE: Short text (names, titles)
      - TEXT: Long text (descriptions)
@@ -252,7 +252,7 @@ You have access to these tools through the MCP server "ucode":
      - BOOLEAN: True/false
      - ENUM: Predefined options
      - RELATION: Foreign key to another table
-   
+
    Field object structure:
    {
      "type": "SINGLE_LINE",
@@ -261,7 +261,7 @@ You have access to these tools through the MCP server "ucode":
      "required": true,
      "attributes": {}
    }
-   
+
    Example: update_table({tableSlug: "users", xapikey: "%s", fields: [{type: "SINGLE_LINE", label: "Name", slug: "name", required: true}, {type: "TEXT", label: "Bio", slug: "bio"}], relations: []})
 
 4. create_field - Create single field (USE ONLY FOR EXPLICIT SINGLE FIELD REQUESTS)
@@ -321,7 +321,7 @@ environment-id: %s
 x-api-key: %s
 main-menu-id: %s
 
-TASK: 
+TASK:
 Analyze the user request above and execute the appropriate MCP tool calls to fulfill it.
 Return a clear, concise message about what was done.
 If any operation fails, report the error clearly.

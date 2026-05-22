@@ -7,6 +7,7 @@ import (
 	"log"
 	"time"
 	"ucode/ucode_go_api_gateway/api/handlers/helper"
+	"ucode/ucode_go_api_gateway/api/handlers/helper/chat_prompts/mcp_prompts"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
@@ -39,7 +40,7 @@ func (h *HandlerV1) McpCreateBackend(c *gin.Context) {
 		request.Method = "project"
 	}
 
-	content, message, err := helper.BuildBackendPrompt(
+	content, message, err := mcp_prompts.BuildBackendPrompt(
 		models.GeneratePromptRequest{
 			ProjectId:     scope.ProjectId,
 			EnvironmentId: scope.EnvironmentId,
@@ -100,7 +101,7 @@ func (h *HandlerV1) McpGenerateProject(c *gin.Context) {
 	}
 
 	go func() {
-		bgContent, _, bgErr := helper.BuildBackendPrompt(
+		bgContent, _, bgErr := mcp_prompts.BuildBackendPrompt(
 			models.GeneratePromptRequest{
 				ProjectId:     scope.ProjectId,
 				EnvironmentId: scope.EnvironmentId,
@@ -122,7 +123,7 @@ func (h *HandlerV1) McpGenerateProject(c *gin.Context) {
 		log.Println("Background Backend generation completed successfully")
 	}()
 
-	userPrompt := helper.BuildFrontendGeneratePrompt(
+	userPrompt := mcp_prompts.BuildFrontendGeneratePrompt(
 		models.GeneratePromptRequest{
 			ProjectId:     scope.ProjectId,
 			EnvironmentId: scope.EnvironmentId,
@@ -249,7 +250,7 @@ func (h *HandlerV1) MCPUpdateFrontend(c *gin.Context) {
 		}
 
 		if !classification.RequiresFrontend {
-			backendContent, backendMsg, err := helper.BuildBackendPrompt(promptReq)
+			backendContent, backendMsg, err := mcp_prompts.BuildBackendPrompt(promptReq)
 			if err != nil {
 				h.HandleResponse(c, status_http.GRPCError, err.Error())
 				return
@@ -264,7 +265,7 @@ func (h *HandlerV1) MCPUpdateFrontend(c *gin.Context) {
 		}
 
 		go func() {
-			content, _, err := helper.BuildBackendPrompt(promptReq)
+			content, _, err := mcp_prompts.BuildBackendPrompt(promptReq)
 			if err != nil {
 				log.Println("Backend async build failed: " + err.Error())
 				return
@@ -313,7 +314,7 @@ func (h *HandlerV1) MCPUpdateFrontend(c *gin.Context) {
 		Context:     request.Context,
 	}
 
-	analysisPrompt, err := helper.BuildFrontendAnalyzePrompt(analyzeReq)
+	analysisPrompt, err := mcp_prompts.BuildFrontendAnalyzePrompt(analyzeReq)
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -357,7 +358,7 @@ func (h *HandlerV1) MCPUpdateFrontend(c *gin.Context) {
 		Context:        request.Context,
 	}
 
-	updatePrompt, err := helper.BuildFrontendUpdatePrompt(updateReq)
+	updatePrompt, err := mcp_prompts.BuildFrontendUpdatePrompt(updateReq)
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -502,8 +503,8 @@ func (h *HandlerV1) McpGenerateProjectV2(c *gin.Context) {
 		}
 
 		var (
-			backendPrompt  = helper.BuildBackendPromptWithPlan(generatePromptReq, req.BackendPlan)
-			frontendPrompt = helper.BuildFrontendPromptWithPlan(generatePromptReq, req.FrontendPlan)
+			backendPrompt  = mcp_prompts.BuildBackendPromptWithPlan(generatePromptReq, req.BackendPlan)
+			frontendPrompt = mcp_prompts.BuildFrontendPromptWithPlan(generatePromptReq, req.FrontendPlan)
 		)
 
 		go func() {
@@ -525,7 +526,7 @@ func (h *HandlerV1) McpGenerateProjectV2(c *gin.Context) {
 		}
 
 		go func() {
-			content, _, err := helper.BuildBackendPrompt(generatePromptReq)
+			content, _, err := mcp_prompts.BuildBackendPrompt(generatePromptReq)
 			if err != nil {
 				log.Printf("Backend generation failed: %v\n", err)
 				return
@@ -537,7 +538,7 @@ func (h *HandlerV1) McpGenerateProjectV2(c *gin.Context) {
 			log.Println("Backend operation completed:")
 		}()
 
-		userPrompt := helper.BuildFrontendGeneratePrompt(generatePromptReq)
+		userPrompt := mcp_prompts.BuildFrontendGeneratePrompt(generatePromptReq)
 
 		generatedProject, err = h.generateFrontendProject(userPrompt, req.ImageURLs)
 		if err != nil {
@@ -608,14 +609,14 @@ func (h *HandlerV1) generateBackendPlan(userPrompt string) (string, error) {
 		body = models.AnthropicRequest{
 			Model:     h.baseConf.ClaudeModel,
 			MaxTokens: h.baseConf.GeneratePlanMaxTokens,
-			System:    helper.SystemPromptPlanBackend,
+			System:    mcp_prompts.SystemPromptPlanBackend,
 			Messages: []models.ChatMessage{
 				{
 					Role: "user",
 					Content: []models.ContentBlock{
 						{
 							Type: "text",
-							Text: helper.BuildBackendPlanPrompt(userPrompt),
+							Text: mcp_prompts.BuildBackendPlanPrompt(userPrompt),
 						},
 					},
 				},
@@ -661,13 +662,13 @@ func (h *HandlerV1) generateFrontendPlan(userPrompt string, imageURLs []string) 
 
 	contentBlocks = append(contentBlocks, models.ContentBlock{
 		Type: "text",
-		Text: helper.BuildFrontendPlanPrompt(userPrompt, len(imageURLs) > 0),
+		Text: mcp_prompts.BuildFrontendPlanPrompt(userPrompt, len(imageURLs) > 0),
 	})
 
 	body = models.AnthropicRequest{
 		Model:     h.baseConf.ClaudeModel,
 		MaxTokens: h.baseConf.GeneratePlanMaxTokens,
-		System:    helper.SystemPromptPlanFrontend,
+		System:    mcp_prompts.SystemPromptPlanFrontend,
 		Messages: []models.ChatMessage{
 			{
 				Role:    "user",
@@ -735,7 +736,7 @@ func (h *HandlerV1) sendAnthropicBackend(content string) (string, error) {
 		models.AnthropicRequest{
 			Model:     h.baseConf.ClaudeModel,
 			MaxTokens: h.baseConf.MaxTokens,
-			System:    helper.SystemPromptBackend,
+			System:    mcp_prompts.SystemPromptBackend,
 			Messages: []models.ChatMessage{
 				{
 					Role: "user",
@@ -793,7 +794,7 @@ func (h *HandlerV1) generateFrontendProject(userPrompt string, imageURLs []strin
 	body = models.AnthropicRequest{
 		Model:     h.baseConf.ClaudeModel,
 		MaxTokens: h.baseConf.MaxTokens,
-		System:    helper.SystemPromptGenerateFrontend,
+		System:    mcp_prompts.SystemPromptGenerateFrontend,
 		Messages: []models.ChatMessage{
 			{
 				Role:    "user",
@@ -827,11 +828,11 @@ func (h *HandlerV1) generateFrontendProject(userPrompt string, imageURLs []strin
 func (h *HandlerV1) classifyRequest(prompt string, imageURLs []string) (*models.RequestClassification, error) {
 	var (
 		hasImages            = len(imageURLs) > 0
-		classificationPrompt = helper.BuildClassificationPrompt(prompt, hasImages)
+		classificationPrompt = mcp_prompts.BuildClassificationPrompt(prompt, hasImages)
 		body                 = models.AnthropicRequest{
 			Model:     h.baseConf.ClaudeModel,
 			MaxTokens: h.baseConf.ClassifyReqeustMaxTokens,
-			System:    helper.SystemPromptClassifyRequest,
+			System:    mcp_prompts.SystemPromptClassifyRequest,
 			Messages: []models.ChatMessage{
 				{
 					Role: "user",
@@ -904,7 +905,7 @@ func (h *HandlerV1) analyzeProject(userPrompt string, imageURLs []string) (*mode
 	body = models.AnthropicRequest{
 		Model:     h.baseConf.ClaudeModel,
 		MaxTokens: h.baseConf.AnalyseProjectMaxTokens,
-		System:    helper.SystemPromptAnalyzeFrontend,
+		System:    mcp_prompts.SystemPromptAnalyzeFrontend,
 		Messages: []models.ChatMessage{
 			{
 				Role:    "user",
@@ -963,7 +964,7 @@ func (h *HandlerV1) updateProject(userPrompt string, imageURLs []string) (*model
 	body = models.AnthropicRequest{
 		Model:     h.baseConf.ClaudeModel,
 		MaxTokens: h.baseConf.MaxTokens,
-		System:    helper.SystemPromptUpdateFrontend,
+		System:    mcp_prompts.SystemPromptUpdateFrontend,
 		Messages: []models.ChatMessage{
 			{
 				Role:    "user",

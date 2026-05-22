@@ -1,13 +1,13 @@
-package api_call_limits
+package apilimits
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
 	"log"
-	"sync"
 	"time"
 
+	"ucode/ucode_go_api_gateway/api/handlers/billing"
 	"ucode/ucode_go_api_gateway/config"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
@@ -16,14 +16,15 @@ import (
 	"github.com/go-redis/redis/v8"
 )
 
+// BillingLimitWorker periodically refreshes per-project billing limit flags in
+// Redis so that BillingLimitMiddleware can enforce limits without a DB round-trip.
 type BillingLimitWorker struct {
+	worker
 	rdb            *redis.Client
 	serviceNodes   services.ServiceNodesI
 	companyService services.CompanyServiceI
 	ucodeNamespace string
 	flushInterval  time.Duration
-	wg             sync.WaitGroup
-	cancelFn       context.CancelFunc
 }
 
 func NewBillingLimitWorker(rdb *redis.Client, serviceNodes services.ServiceNodesI, companyService services.CompanyServiceI, ucodeNamespace string, flushInterval time.Duration) *BillingLimitWorker {
@@ -37,30 +38,18 @@ func NewBillingLimitWorker(rdb *redis.Client, serviceNodes services.ServiceNodes
 }
 
 func (w *BillingLimitWorker) Start(ctx context.Context) {
-	innerCtx, cancel := context.WithCancel(ctx)
-	w.cancelFn = cancel
-
-	w.wg.Add(1)
-	go func() {
-		defer w.wg.Done()
-		w.run(innerCtx)
-	}()
-
-	log.Printf("[BillingLimitWorker] started: refresh_interval=%v", w.flushInterval)
+	w.spawn(ctx, w.run)
+	log.Printf("[BillingLimitWorker] started refresh_interval=%v", w.flushInterval)
 }
 
 func (w *BillingLimitWorker) Stop() {
-	if w.cancelFn != nil {
-		w.cancelFn()
-	}
-	w.wg.Wait()
+	w.shutdown()
 	log.Println("[BillingLimitWorker] stopped")
 }
 
 func (w *BillingLimitWorker) run(ctx context.Context) {
 	ticker := time.NewTicker(w.flushInterval)
 	defer ticker.Stop()
-
 	for {
 		select {
 		case <-ctx.Done():
@@ -72,28 +61,17 @@ func (w *BillingLimitWorker) run(ctx context.Context) {
 	}
 }
 
-// billingCtxEntry mirrors billing.billingCacheCtx — same JSON tags, same fields.
-// Kept local to avoid a package-level import cycle.
-type billingCtxEntry struct {
-	EnvId    string `json:"e"`
-	FareId   string `json:"f"`
-	NodeType string `json:"n"`
-}
-
 func (w *BillingLimitWorker) refreshAll(ctx context.Context) {
 	var cursor uint64
 	for {
-		keys, next, err := w.rdb.Scan(ctx, cursor, config.KeyBillingDbLimitPattern, 100).Result()
+		keys, next, err := w.rdb.Scan(ctx, cursor, config.KeyBillingDbLimitPattern, redisScanBatch).Result()
 		if err != nil {
 			log.Printf("[BillingLimitWorker] SCAN error: %v", err)
 			return
 		}
-
 		for _, key := range keys {
-			projectId := key[len(config.KeyBillingDbLimitPrefix):]
-			w.refreshProject(ctx, projectId)
+			w.refreshProject(ctx, key[len(config.KeyBillingDbLimitPrefix):])
 		}
-
 		cursor = next
 		if cursor == 0 {
 			break
@@ -102,20 +80,16 @@ func (w *BillingLimitWorker) refreshAll(ctx context.Context) {
 }
 
 func (w *BillingLimitWorker) refreshProject(ctx context.Context, projectId string) {
-	ctxKey := fmt.Sprintf(config.KeyBillingDbCtx, projectId)
-
-	raw, err := w.rdb.Get(ctx, ctxKey).Result()
+	raw, err := w.rdb.Get(ctx, fmt.Sprintf(config.KeyBillingDbCtx, projectId)).Result()
 	if err != nil {
-		// Context not yet written (first live check not done) — skip until it is.
-		return
+		return // context not yet written — skip until first live check
 	}
 
-	var entry billingCtxEntry
+	var entry billing.CacheEntry
 	if err = json.Unmarshal([]byte(raw), &entry); err != nil || entry.EnvId == "" || entry.FareId == "" {
 		return
 	}
 
-	// Resolve the right service for this project's node type.
 	namespace := w.ucodeNamespace
 	if entry.NodeType == config.ENTER_PRICE_TYPE {
 		namespace = projectId
@@ -135,43 +109,30 @@ func (w *BillingLimitWorker) refreshProject(ctx context.Context, projectId strin
 		return
 	}
 
-	dbSizeMB := int32(usage.GetDatabaseSize() / 1024 / 1024)
-
 	limitResp, err := w.companyService.Billing().CompareFunction(ctx, &pb.CompareFunctionRequest{
 		Type:   config.FARE_DATABASE_SIZE,
 		FareId: entry.FareId,
-		Count:  dbSizeMB,
+		Count:  int32(usage.GetDatabaseSize() / 1024 / 1024),
 	})
 	if err != nil {
 		log.Printf("[BillingLimitWorker] CompareFunction project=%s: %v", projectId, err)
 		return
 	}
 
-	val := "1"
-	if !limitResp.GetHasAccess() {
-		val = "0"
-	}
-
-	limitKey := fmt.Sprintf(config.KeyBillingDbLimit, projectId)
-	if err = w.rdb.Set(ctx, limitKey, val, 15*time.Minute).Err(); err != nil {
-		log.Printf("[BillingLimitWorker] Redis SET project=%s: %v", projectId, err)
-	}
+	w.setBillingFlag(ctx, fmt.Sprintf(config.KeyBillingDbLimit, projectId), limitResp.GetHasAccess(), 15*time.Minute)
 }
 
 func (w *BillingLimitWorker) refreshApiLimits(ctx context.Context) {
 	var cursor uint64
 	for {
-		keys, next, err := w.rdb.Scan(ctx, cursor, config.KeyUsagePendingPattern, 100).Result()
+		keys, next, err := w.rdb.Scan(ctx, cursor, config.KeyUsagePendingPattern, redisScanBatch).Result()
 		if err != nil {
 			log.Printf("[BillingLimitWorker] refreshApiLimits SCAN error: %v", err)
 			return
 		}
-
 		for _, key := range keys {
-			projectId := key[len(config.KeyUsagePendingPrefix):]
-			w.refreshApiLimit(ctx, projectId)
+			w.refreshApiLimit(ctx, key[len(config.KeyUsagePendingPrefix):])
 		}
-
 		cursor = next
 		if cursor == 0 {
 			break
@@ -193,10 +154,10 @@ func (w *BillingLimitWorker) refreshApiLimit(ctx context.Context, projectId stri
 		return
 	}
 
-	// If there are no recorded calls yet, the project is clearly within its limit.
 	totalCalls := metricsResp.GetTotalMonthlyCalls()
 	if totalCalls == 0 {
-		w.rdb.Set(ctx, fmt.Sprintf(config.KeyBillingApiLimit, projectId), "1", 15*time.Minute)
+		// No recorded calls — clearly within limit.
+		w.setBillingFlag(ctx, fmt.Sprintf(config.KeyBillingApiLimit, projectId), true, 15*time.Minute)
 		return
 	}
 
@@ -210,27 +171,16 @@ func (w *BillingLimitWorker) refreshApiLimit(ctx context.Context, projectId stri
 		return
 	}
 
-	val := "1"
-	if !limitResp.GetHasAccess() {
-		val = "0"
-	}
-
-	limitKey := fmt.Sprintf(config.KeyBillingApiLimit, projectId)
-	if err = w.rdb.Set(ctx, limitKey, val, 15*time.Minute).Err(); err != nil {
-		log.Printf("[BillingLimitWorker] Redis SET api_limit project=%s: %v", projectId, err)
-	}
+	w.setBillingFlag(ctx, fmt.Sprintf(config.KeyBillingApiLimit, projectId), limitResp.GetHasAccess(), 15*time.Minute)
 }
 
 func (w *BillingLimitWorker) getFareId(ctx context.Context, projectId string) (string, error) {
 	fareKey := fmt.Sprintf(config.KeyBillingFareId, projectId)
-
 	if cached, err := w.rdb.Get(ctx, fareKey).Result(); err == nil && cached != "" {
 		return cached, nil
 	}
 
-	proj, err := w.companyService.Project().GetById(
-		ctx, &pb.GetProjectByIdRequest{ProjectId: projectId},
-	)
+	proj, err := w.companyService.Project().GetById(ctx, &pb.GetProjectByIdRequest{ProjectId: projectId})
 	if err != nil {
 		return "", err
 	}
@@ -240,4 +190,15 @@ func (w *BillingLimitWorker) getFareId(ctx context.Context, projectId string) (s
 		w.rdb.Set(ctx, fareKey, fareId, 30*time.Minute)
 	}
 	return fareId, nil
+}
+
+// setBillingFlag writes "1" (allowed) or "0" (blocked) to the given Redis key.
+func (w *BillingLimitWorker) setBillingFlag(ctx context.Context, key string, allowed bool, ttl time.Duration) {
+	val := "1"
+	if !allowed {
+		val = "0"
+	}
+	if err := w.rdb.Set(ctx, key, val, ttl).Err(); err != nil {
+		log.Printf("[BillingLimitWorker] SET %s: %v", key, err)
+	}
 }

@@ -1,4 +1,4 @@
-package helper
+package mcp_prompts
 
 import (
 	"fmt"

@@ -93,7 +93,9 @@ func CheckAssetSizeLimit(ctx context.Context, companyServices services.CompanySe
 
 var ErrDatabaseLimitExceeded = errors.New("your database size limit has been reached on your current plan. Please upgrade to add more data")
 
-type billingCacheCtx struct {
+// CacheEntry is the billing context persisted per project in Redis.
+// Shared with BillingLimitWorker so it can refresh limits without extra DB calls.
+type CacheEntry struct {
 	EnvId    string `json:"e"`
 	FareId   string `json:"f"`
 	NodeType string `json:"n"`
@@ -214,7 +216,7 @@ func storeBillingCache(ctx context.Context, rdb *redis.Client, projectId, resour
 		val = "0"
 	}
 
-	ctxData, err := json.Marshal(billingCacheCtx{EnvId: resourceEnvId, FareId: fareId, NodeType: nodeType})
+	ctxData, err := json.Marshal(CacheEntry{EnvId: resourceEnvId, FareId: fareId, NodeType: nodeType})
 	if err != nil {
 		return
 	}

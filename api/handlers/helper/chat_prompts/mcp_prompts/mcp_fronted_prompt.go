@@ -1,4 +1,4 @@
-package helper
+package mcp_prompts
 
 import (
 	"encoding/json"
@@ -844,8 +844,8 @@ Before generating, ask yourself:
 STRICT OUTPUT FORMAT
 ====================================
 You are acting as a REST API. Return ONLY the JSON object.
-Do NOT use markdown code blocks. 
-Do NOT include any commentary. 
+Do NOT use markdown code blocks.
+Do NOT include any commentary.
 
 Your response MUST start with '{' and end with '}'.
 

@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"ucode/ucode_go_api_gateway/api/handlers/helper/billing"
+	"ucode/ucode_go_api_gateway/api/handlers/billing"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
