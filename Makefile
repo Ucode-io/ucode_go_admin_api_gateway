@@ -39,7 +39,12 @@ push-image:
 	docker push ${REGISTRY}/${PROJECT_NAME}/${APP}:${ENV_TAG}
 
 swag-init:
-	swag init -g api/api.go -o api/docs --parseDependency
+	@tmp_log=$$(mktemp); \
+	echo "Generating swagger docs..."; \
+	if swag init -g api/api.go -o api/docs --parseDependency > $$tmp_log 2>&1; then status=0; else status=$$?; fi; \
+	grep -vE '(^/usr/local/go/src/.*cannot range over|^/usr/local/go/src/.*cannot infer|warning: failed to evaluate const default)' $$tmp_log || true; \
+	rm -f $$tmp_log; \
+	exit $$status
 	
 run:
 	go run cmd/main.go

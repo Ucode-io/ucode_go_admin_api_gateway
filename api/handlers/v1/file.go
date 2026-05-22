@@ -43,7 +43,7 @@ import (
 // @Produce json
 // @Param file formData file true "file"
 // @Param folder_name query string true "folder_name"
-// @Success 200 {object} status_http.Response{data=Path} "Path"
+// @Success 200 {object} status_http.Response{data=models.Path} "Path"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) UploadToFolder(c *gin.Context) {
@@ -825,7 +825,7 @@ func (h *HandlerV1) WordTemplate(c *gin.Context) {
 // @Accept multipart/form-data
 // @Produce json
 // @Param file formData file true "file"
-// @Success 200 {object} status_http.Response{data=Path} "Path"
+// @Success 200 {object} status_http.Response{data=models.Path} "Path"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) Upload(c *gin.Context) {
@@ -924,7 +924,7 @@ func (h *HandlerV1) Upload(c *gin.Context) {
 // @Param collection path string true "collection"
 // @Param object_id path string true "object_id"
 // @Param tags query string false "tags"
-// @Success 200 {object} status_http.Response{data=Path} "Path"
+// @Success 200 {object} status_http.Response{data=models.Path} "Path"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) UploadFile(c *gin.Context) {

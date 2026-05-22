@@ -31,6 +31,7 @@ import (
 // @Tags Table
 // @Accept json
 // @Produce json
+// @Param project-id query string true "project-id"
 // @Param table body models.CreateTableRequest true "CreateTableRequestBody"
 // @Success 201 {object} status_http.Response{data=obs.Table} "Table data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -544,6 +545,7 @@ func (h *HandlerV1) UpdateTable(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param table_id path string true "table_id"
+// @Param project-id query string true "project-id"
 // @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -726,6 +728,7 @@ func (h *HandlerV1) DeleteTable(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param collection path string true "collection"
+// @Param projectId query string true "projectId"
 // @Param language_setting query string false "language_setting"
 // @Param object body models.CommonMessage true "GetListObjectRequestBody"
 // @Success 200 {object} status_http.Response{data=models.CommonMessage} "ObjectBody"

@@ -544,6 +544,7 @@ func (h *HandlerV2) UpdateSearch(c *gin.Context) {
 // @Produce json
 // @Param collection path string true "collection"
 // @Param id path string true "id"
+// @Param project-id query string true "project-id"
 // @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"

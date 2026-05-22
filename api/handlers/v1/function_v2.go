@@ -32,7 +32,7 @@ import (
 // @Accept json
 // @Produce json
 // @Param Function body models.CreateFunctionRequest true "CreateFunctionRequestBody"
-// @Success 201 {object} status_http.Response{data=new_function_service.Function} "Function data"
+// @Success 201 {object} status_http.Response{data=object} "Function data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) CreateNewFunction(c *gin.Context) {
@@ -51,7 +51,7 @@ func (h *HandlerV1) CreateNewFunction(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param function_id path string true "function_id"
-// @Success 200 {object} status_http.Response{data=new_function_service.Function} "FunctionBody"
+// @Success 200 {object} status_http.Response{data=object} "FunctionBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetNewFunctionByID(c *gin.Context) {
@@ -121,9 +121,9 @@ func (h *HandlerV1) DeleteNewFunction(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param function_id path string true "function_id"
-// @Success 200 {object} status.Response{data=map[string][]gitlab.RepoFile} "Codebase files"
-// @Response 400 {object} status.Response{data=string} "Bad Request"
-// @Failure 500 {object} status.Response{data=string} "Server Error"
+// @Success 200 {object} status_http.Response{data=object} "Codebase files"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetFunctionCodebase(c *gin.Context) {
 	_ = h.MakeProxy(c, h.baseConf.GoFunctionServiceHost+h.baseConf.GoFunctionServiceHTTPPort, c.Request.URL.Path)
 }

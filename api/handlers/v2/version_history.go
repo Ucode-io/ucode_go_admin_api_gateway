@@ -348,7 +348,7 @@ func (h *HandlerV2) UpdateVersionHistory(c *gin.Context) {
 // @Produce json
 // @Param environment_id path string true "environment_id"
 // @Param filters query obs.GetAllRquest true "filters"
-// @Success 200 {object} status_http.Response{data=models.CommonMessage} "ObjectBody"
+// @Success 200 {object} status_http.Response{data=object} "ObjectBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV2) VersionHistoryExcelDownload(c *gin.Context) {
