@@ -11,6 +11,16 @@ import (
 	"ucode/ucode_go_api_gateway/api/models"
 )
 
+const (
+	intentAskQuestion    = "ask_question"
+	intentPlanRequest    = "plan_request"
+	intentClarify        = "clarify"
+	intentProjectQuestion = "project_question"
+	intentProjectInspect = "project_inspect"
+	intentCodeChange     = "code_change"
+	intentDatabaseQuery  = "database_query"
+)
+
 func (p *ChatProcessor) routeAndProcess(ctx context.Context, req models.NewMessageReq, chatHistory []models.ChatMessage) (*models.ParsedClaudeResponse, error) {
 	// Token budget enforcement is temporarily disabled.
 	// Usage is still recorded after Anthropic calls for pricing analytics.
@@ -54,14 +64,14 @@ func (p *ChatProcessor) routeAndProcess(ctx context.Context, req models.NewMessa
 
 	log.Printf("[ROUTER] intent=%s next_step=%v files_needed=%d", routeResult.Intent, routeResult.NextStep, len(routeResult.FilesNeeded))
 
-	if routeResult.Intent == "ask_question" {
+	if routeResult.Intent == intentAskQuestion {
 		return &models.ParsedClaudeResponse{
 			Description: routeResult.Reply,
 			Questions:   routeResult.Questions,
 		}, nil
 	}
 
-	if routeResult.Intent == "plan_request" {
+	if routeResult.Intent == intentPlanRequest {
 		clarified := routeResult.Clarified
 		if clarified == "" {
 			clarified = req.Content
@@ -75,10 +85,10 @@ func (p *ChatProcessor) routeAndProcess(ctx context.Context, req models.NewMessa
 
 	switch routeResult.Intent {
 
-	case "clarify", "project_question":
+	case intentClarify, intentProjectQuestion:
 		return &models.ParsedClaudeResponse{Description: routeResult.Reply}, nil
 
-	case "project_inspect":
+	case intentProjectInspect:
 		if p.microFrontendId != "" {
 			return p.runMicrofrontendInspect(ctx, req.Content, routeResult.FilesNeeded, chatHistory, req.Images, microFrontFiles)
 		}
@@ -86,10 +96,10 @@ func (p *ChatProcessor) routeAndProcess(ctx context.Context, req models.NewMessa
 			Description: "No project exists yet. Please create a project first by describing what you want to build.",
 		}, nil
 
-	case "code_change":
+	case intentCodeChange:
 		return p.runCodeChange(ctx, routeResult.Clarified, fileGraphJSON, chatHistory, req.Images, routeResult.ProjectName, microFrontFiles)
 
-	case "database_query":
+	case intentDatabaseQuery:
 		clarified := strings.TrimSpace(routeResult.Clarified)
 		if clarified == "" {
 			clarified = req.Content

@@ -19,11 +19,15 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-const publishChunkSize = 30
+const (
+	publishChunkSize = 30
+	pushRetryCount   = 3
+	pushRetryDelay   = 2 * time.Second
 
-const pushRetryCount = 3
-
-const pushRetryDelay = 2 * time.Second
+	mfeFilesPath   = "/v2/functions/micro-frontend/files"
+	mfePushPath    = "/v2/functions/micro-frontend/push-changes"
+	mfePublishPath = "/v2/functions/micro-frontend/publish-ai"
+)
 
 // runMicrofrontendEdit fetches the current files from u-gen, asks the AI to edit
 // them, then pushes the result back to u-gen. No McpProject is touched.
@@ -188,7 +192,7 @@ func (p *ChatProcessor) runMicrofrontendInspect(ctx context.Context, userQuestio
 
 func (p *ChatProcessor) fetchMicrofrontendFiles(ctx context.Context) ([]models.GitlabFileChange, error) {
 	url := p.baseConf.GoFunctionServiceHost + p.baseConf.GoFunctionServiceHTTPPort +
-		"/v2/functions/micro-frontend/files?repo_id=" + p.microFrontendRepoId
+		mfeFilesPath + "?repo_id=" + p.microFrontendRepoId
 
 	httpReq, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
@@ -326,8 +330,7 @@ func (p *ChatProcessor) doPushChanges(ctx context.Context, repoIDInt int, files 
 		return fmt.Errorf("marshal request: %w", err)
 	}
 
-	url := p.baseConf.GoFunctionServiceHost + p.baseConf.GoFunctionServiceHTTPPort +
-		"/v2/functions/micro-frontend/push-changes"
+	url := p.baseConf.GoFunctionServiceHost + p.baseConf.GoFunctionServiceHTTPPort + mfePushPath
 
 	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPut, url, bytes.NewReader(bodyBytes))
 	if err != nil {
@@ -473,7 +476,7 @@ func (p *ChatProcessor) publishToMicrofrontend(ctx context.Context, projectName,
 		return "", fmt.Errorf("marshal create request: %w", err)
 	}
 
-	createURL := p.baseConf.GoFunctionServiceHost + p.baseConf.GoFunctionServiceHTTPPort + "/v2/functions/micro-frontend/publish-ai"
+	createURL := p.baseConf.GoFunctionServiceHost + p.baseConf.GoFunctionServiceHTTPPort + mfePublishPath
 
 	var createResult models.PublishAiMicroFrontendResponse
 

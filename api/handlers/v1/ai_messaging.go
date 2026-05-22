@@ -104,6 +104,8 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 		return nil, err
 	}
 
+	startedAt := time.Now()
+
 	var (
 		emit = p.emitter()
 		plan *models.ArchitectPlan
@@ -260,10 +262,11 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 	//}
 
 	log.Printf("[new-project] done — mfe_id=%s", p.microFrontendId)
-	return &models.ParsedClaudeResponse{Description: buildProjectSummary(plan, generated.Project.Files)}, nil
+	return &models.ParsedClaudeResponse{Description: buildProjectSummary(plan, generated.Project.Files, int(time.Since(startedAt).Seconds()))}, nil
 }
 
 func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context, clarified string, chatHistory []models.ChatMessage, imageURLs []string, estimatedName string) (*models.ParsedClaudeResponse, error) {
+	startedAt := time.Now()
 	emit := p.emitter()
 
 	// Fetch existing project schema so the architect knows which tables/APIs are already available.
@@ -426,7 +429,7 @@ func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context,
 	p.injectYandexMetrica(ctx, plan.ProjectName, mfeURL, generated.Project.Files)
 
 	log.Printf("[mfe-current] done — mfe_id=%s", p.microFrontendId)
-	return &models.ParsedClaudeResponse{Description: buildProjectSummary(plan, generated.Project.Files)}, nil
+	return &models.ParsedClaudeResponse{Description: buildProjectSummary(plan, generated.Project.Files, int(time.Since(startedAt).Seconds()))}, nil
 }
 
 func (p *ChatProcessor) getExistingProjectData(ctx context.Context) (*models.ProjectData, error) {
@@ -1167,116 +1170,3 @@ func slugify(name string) string {
 	return s
 }
 
-// buildProjectSummary produces a rich Markdown completion message shown to the user
-// instead of the generic "Project has been updated." fallback.
-func buildProjectSummary(plan *models.ArchitectPlan, files []models.ProjectFile) string {
-	var sb strings.Builder
-
-	// ── Header ────────────────────────────────────────────────────────────────
-	switch plan.ProjectType {
-	case "admin_panel":
-		fmt.Fprintf(&sb, "✅ **%s** сгенерирован и готов к работе!\n", plan.ProjectName)
-	case "web":
-		fmt.Fprintf(&sb, "✅ **%s** — сайт готов!\n", plan.ProjectName)
-	default:
-		fmt.Fprintf(&sb, "✅ **%s** — лендинг готов!\n", plan.ProjectName)
-	}
-
-	// ── Backend tables (admin_panel / web) ────────────────────────────────────
-	if plan.ProjectType != "landing" && len(plan.Tables) > 0 {
-		var loginLabel string
-		var userTables []models.TablePlan
-		for _, t := range plan.Tables {
-			if t.IsLoginTable {
-				loginLabel = t.Label
-			} else {
-				userTables = append(userTables, t)
-			}
-		}
-
-		sb.WriteString("\n")
-		if loginLabel != "" {
-			fmt.Fprintf(&sb, "🗄 **База данных** — %d таблиц, авторизация через *%s*\n", len(plan.Tables), loginLabel)
-		} else {
-			fmt.Fprintf(&sb, "🗄 **База данных** — %d таблиц\n", len(plan.Tables))
-		}
-
-		items := make([]string, 0, len(userTables))
-		for _, t := range userTables {
-			if len(t.Fields) > 0 {
-				items = append(items, fmt.Sprintf("%s (%d п.)", t.Label, len(t.Fields)))
-			} else {
-				items = append(items, t.Label)
-			}
-		}
-		if len(items) > 0 {
-			fmt.Fprintf(&sb, "%s\n", strings.Join(items, " · "))
-		}
-		if len(plan.Relations) > 0 {
-			fmt.Fprintf(&sb, "%d связей между таблицами\n", len(plan.Relations))
-		}
-	}
-
-	// ── Frontend pages / modules ───────────────────────────────────────────────
-	pages := extractProjectPages(files)
-	sb.WriteString("\n")
-	if len(pages) > 0 {
-		if plan.ProjectType == "admin_panel" {
-			fmt.Fprintf(&sb, "🖥 **Интерфейс** — %d модулей, %d файлов\n", len(pages), len(files))
-		} else {
-			fmt.Fprintf(&sb, "🖥 **Интерфейс** — %d страниц, %d файлов\n", len(pages), len(files))
-		}
-		fmt.Fprintf(&sb, "%s\n", strings.Join(pages, " · "))
-	} else {
-		fmt.Fprintf(&sb, "📦 **%d файлов** сгенерировано\n", len(files))
-	}
-
-	// ── User roles ─────────────────────────────────────────────────────────────
-	if len(plan.ClientTypes) > 0 {
-		fmt.Fprintf(&sb, "\n👥 **Роли:** %s\n", strings.Join(plan.ClientTypes, ", "))
-	}
-
-	return strings.TrimRight(sb.String(), "\n")
-}
-
-// extractProjectPages returns human-readable page/module names from src/pages/*Page.tsx paths.
-func extractProjectPages(files []models.ProjectFile) []string {
-	seen := make(map[string]bool)
-	var names []string
-	for _, f := range files {
-		if !strings.HasSuffix(f.Path, ".tsx") || !strings.Contains(f.Path, "/pages/") {
-			continue
-		}
-		base := f.Path[strings.LastIndex(f.Path, "/")+1:]
-		name := strings.TrimSuffix(strings.TrimSuffix(base, ".tsx"), "Page")
-		switch name {
-		case "", "index", "Index", "NotFound", "Error", "Loading", "Login", "Auth", "Register":
-			continue
-		}
-		if seen[name] {
-			continue
-		}
-		seen[name] = true
-		names = append(names, camelCaseToWords(name))
-	}
-	return names
-}
-
-// camelCaseToWords splits CamelCase into space-separated words.
-// "AttendanceLeave" → "Attendance Leave", "HRManager" → "HR Manager"
-func camelCaseToWords(s string) string {
-	runes := []rune(s)
-	var out []rune
-	for i, r := range runes {
-		if i > 0 && r >= 'A' && r <= 'Z' {
-			prev := runes[i-1]
-			if prev >= 'a' && prev <= 'z' {
-				out = append(out, ' ')
-			} else if i+1 < len(runes) && runes[i+1] >= 'a' && runes[i+1] <= 'z' && prev >= 'A' && prev <= 'Z' {
-				out = append(out, ' ')
-			}
-		}
-		out = append(out, r)
-	}
-	return string(out)
-}

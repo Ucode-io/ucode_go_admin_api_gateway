@@ -3,6 +3,7 @@ package v1
 import (
 	"context"
 	"crypto/rand"
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -60,7 +61,13 @@ func (h *HandlerV1) RedirectShortURL(c *gin.Context) {
 	}
 
 	link, err := h.companyServices.MfeShortLink().GetBySlug(ctx, &cs.MfeShortLinkSlugReq{Slug: slug})
-	if err != nil || link.GetUrl() == "" {
+	if err != nil {
+		log.Printf("[SHORT_LINK] GetBySlug slug=%s err=%v", slug, err)
+		c.JSON(http.StatusNotFound, gin.H{"error": "short link not found"})
+		return
+	}
+	if link.GetUrl() == "" {
+		log.Printf("[SHORT_LINK] GetBySlug slug=%s returned empty url", slug)
 		c.JSON(http.StatusNotFound, gin.H{"error": "short link not found"})
 		return
 	}
