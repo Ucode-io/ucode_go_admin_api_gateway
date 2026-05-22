@@ -190,13 +190,15 @@ func (h *HandlerV2) UploadFile(c *gin.Context) {
 		return
 	}
 
-	if err = billing.CheckAssetSizeLimit(c.Request.Context(), h.companyServices, services, projectId.(string), resource.ResourceEnvironmentId, file.File.Size); err != nil {
-		if errors.Is(err, billing.ErrAssetLimitExceeded) {
-			h.HandleResponse(c, status_http.PaymentRequired, models.PaymentAssetLimit)
-		} else {
-			h.HandleResponse(c, status_http.GRPCError, err.Error())
+	if resource.ResourceType == pb.ResourceType_POSTGRESQL {
+		if err = billing.CheckAssetSizeLimit(c.Request.Context(), h.companyServices, services, projectId.(string), resource.ResourceEnvironmentId, file.File.Size); err != nil {
+			if errors.Is(err, billing.ErrAssetLimitExceeded) {
+				h.HandleResponse(c, status_http.PaymentRequired, models.PaymentAssetLimit)
+			} else {
+				h.HandleResponse(c, status_http.GRPCError, err.Error())
+			}
+			return
 		}
-		return
 	}
 
 	minioClient, err := minio.New(h.baseConf.MinioEndpoint, &minio.Options{
@@ -348,13 +350,15 @@ func (h *HandlerV2) UploadToFolder(c *gin.Context) {
 		return
 	}
 
-	if err = billing.CheckAssetSizeLimit(c.Request.Context(), h.companyServices, services, projectId.(string), resource.ResourceEnvironmentId, file.File.Size); err != nil {
-		if errors.Is(err, billing.ErrAssetLimitExceeded) {
-			h.HandleResponse(c, status_http.PaymentRequired, models.PaymentAssetLimit)
-		} else {
-			h.HandleResponse(c, status_http.GRPCError, err.Error())
+	if resource.ResourceType == pb.ResourceType_POSTGRESQL {
+		if err = billing.CheckAssetSizeLimit(c.Request.Context(), h.companyServices, services, projectId.(string), resource.ResourceEnvironmentId, file.File.Size); err != nil {
+			if errors.Is(err, billing.ErrAssetLimitExceeded) {
+				h.HandleResponse(c, status_http.PaymentRequired, models.PaymentAssetLimit)
+			} else {
+				h.HandleResponse(c, status_http.GRPCError, err.Error())
+			}
+			return
 		}
-		return
 	}
 
 	var title string = file.File.Filename
