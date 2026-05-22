@@ -132,14 +132,14 @@ func (p *ChatProcessor) routeRequest(userPrompt, fileGraphJSON string, hasImages
 	response, err := p.callAnthropicWithTracking(
 		context.Background(),
 		models.AnthropicRequest{
-			Model:     p.baseConf.ClaudeHaikuModel,
-			MaxTokens: p.baseConf.RouterMaxTokens,
+			Model:     p.baseConf.Agents.Router.Model,
+			MaxTokens: p.baseConf.Agents.Router.MaxTokens,
 			System:    chat_prompts.PromptRouter,
 			Messages: []models.ChatMessage{
 				{Role: "user", Content: []models.ContentBlock{{Type: "text", Text: content}}},
 			},
 		},
-		timeoutHaiku,
+		p.baseConf.Agents.Router.Timeout,
 		"Routing user intent",
 	)
 	if err != nil {

@@ -1054,7 +1054,7 @@ func (p *ChatProcessor) repairSingleFile(
 	fixed, err := callWithTool[repairFileResult](
 		p, ctx,
 		models.AnthropicToolRequest{
-			Model:      p.baseConf.ClaudeHaikuModel,
+			Model:      p.baseConf.Agents.Router.Model,
 			MaxTokens:  32000,
 			System:     "You are a TypeScript/TSX and premium admin-UI repair bot. Fix the listed errors: import mismatches, typos, displayName issues, Radix SelectItem empty-value runtime crashes, React infinite-recursion bugs where a component renders itself, admin UI quality failures, AND syntax errors like unbalanced braces/brackets/parentheses. For admin UI quality failures, preserve backend/API contracts and polish only the current file into a product-grade SaaS screen. Output the complete corrected file via the repair_file tool. Never truncate.",
 			Messages:   []models.ChatMessage{{Role: "user", Content: []models.ContentBlock{{Type: "text", Text: sb.String()}}}},

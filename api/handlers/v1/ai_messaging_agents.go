@@ -117,14 +117,14 @@ func (p *ChatProcessor) callArchitect(ctx context.Context, clarified string, ima
 	plan, err := callWithTool[models.ArchitectPlan](
 		p, ctx,
 		models.AnthropicToolRequest{
-			Model:      p.baseConf.ArchitectModel,
-			MaxTokens:  p.baseConf.PlannerMaxTokens,
+			Model:      p.baseConf.Agents.Architect.Model,
+			MaxTokens:  p.baseConf.Agents.Architect.MaxTokens,
 			System:     chat_prompts.PromptArchitect,
 			Messages:   messages,
 			Tools:      []models.ClaudeFunctionTool{helper.ToolArchitectPlan},
 			ToolChoice: helper.ForcedTool(helper.ToolArchitectPlan.Name),
 		},
-		timeoutArchitect,
+		p.baseConf.Agents.Architect.Timeout,
 		"Architecting project structure",
 	)
 	if err != nil {
@@ -208,7 +208,6 @@ func (p *ChatProcessor) generateCodeSingle(ctx context.Context, clarified string
 		},
 		func() error {
 			var e error
-			coderModel := p.baseConf.LandingCoderModel
 			var systemPrompt string
 			switch plan.ProjectType {
 			case "web":
@@ -221,14 +220,14 @@ func (p *ChatProcessor) generateCodeSingle(ctx context.Context, clarified string
 			project, e = callWithTool[models.GeneratedProject](
 				p, ctx,
 				models.AnthropicToolRequest{
-					Model:      coderModel,
-					MaxTokens:  p.baseConf.CoderMaxTokens,
+					Model:      p.baseConf.Agents.LandingCoder.Model,
+					MaxTokens:  p.baseConf.Agents.LandingCoder.MaxTokens,
 					System:     systemPrompt,
 					Messages:   messages,
 					Tools:      []models.ClaudeFunctionTool{helper.ToolEmitProject},
 					ToolChoice: helper.ForcedTool(helper.ToolEmitProject.Name),
 				},
-				timeoutCoder,
+				p.baseConf.Agents.Coder.Timeout,
 				"Generating project code",
 			)
 			return e
@@ -395,7 +394,7 @@ func (p *ChatProcessor) generateCodeChunkedAdminPanel(ctx context.Context, clari
 			var err error
 
 			stub := buildFoundationStub(foundationGroup)
-			uiKit, err = p.generateUIKit(ctx, uiKitGroup, stub, p.baseConf.CoderModel)
+			uiKit, err = p.generateUIKit(ctx, uiKitGroup, stub, p.baseConf.Agents.Coder.Model)
 			if err != nil {
 				log.Printf("[chunked] UI kit parallel failed (%v) — continuing without it", foundErr)
 				return
@@ -618,14 +617,14 @@ func (p *ChatProcessor) generateManifest(ctx context.Context, plan *models.Archi
 	manifest, err := callWithTool[models.ProjectManifest](
 		p, ctx,
 		models.AnthropicToolRequest{
-			Model:      p.baseConf.PlannerModel,
+			Model:      p.baseConf.Agents.Planner.Model,
 			MaxTokens:  15000,
 			System:     systemPrompt,
 			Messages:   messages,
 			Tools:      []models.ClaudeFunctionTool{helper.ToolEmitManifest},
 			ToolChoice: helper.ForcedTool(helper.ToolEmitManifest.Name),
 		},
-		timeoutPlanner,
+		p.baseConf.Agents.Planner.Timeout,
 		"Generating file manifest",
 	)
 	if err != nil {
@@ -711,14 +710,14 @@ func (p *ChatProcessor) generateFoundation(ctx context.Context, clarified string
 	project, err := callWithTool[models.GeneratedProject](
 		p, ctx,
 		models.AnthropicToolRequest{
-			Model:      p.baseConf.CoderModel,
-			MaxTokens:  p.baseConf.CoderMaxTokens,
+			Model:      p.baseConf.Agents.Coder.Model,
+			MaxTokens:  p.baseConf.Agents.Coder.MaxTokens,
 			System:     chat_prompts.PromptAdminPanelGenerator,
 			Messages:   messages,
 			Tools:      []models.ClaudeFunctionTool{helper.ToolEmitProject},
 			ToolChoice: helper.ForcedTool(helper.ToolEmitProject.Name),
 		},
-		timeoutCoder,
+		p.baseConf.Agents.Coder.Timeout,
 		"Generating foundation (Group 0)",
 	)
 	if err != nil {
@@ -749,13 +748,13 @@ func (p *ChatProcessor) generateUIKit(ctx context.Context, uiKitGroup models.Man
 		p, ctx,
 		models.AnthropicToolRequest{
 			Model:      coderModel,
-			MaxTokens:  p.baseConf.CoderMaxTokens,
+			MaxTokens:  p.baseConf.Agents.Coder.MaxTokens,
 			System:     chat_prompts.PromptUIKitCoder,
 			Messages:   []models.ChatMessage{{Role: "user", Content: []models.ContentBlock{{Type: "text", Text: sb.String()}}}},
 			Tools:      []models.ClaudeFunctionTool{helper.ToolEmitProject},
 			ToolChoice: helper.ForcedTool(helper.ToolEmitProject.Name),
 		},
-		timeoutCoder,
+		p.baseConf.Agents.Coder.Timeout,
 		"Generating UI Kit (Group 1)",
 	)
 	if err != nil {
@@ -798,14 +797,14 @@ func (p *ChatProcessor) generateChunkAdminPanel(ctx context.Context, group model
 	project, err := callWithTool[models.GeneratedProject](
 		p, ctx,
 		models.AnthropicToolRequest{
-			Model:      p.baseConf.CoderModel,
-			MaxTokens:  p.baseConf.CoderMaxTokens,
+			Model:      p.baseConf.Agents.Coder.Model,
+			MaxTokens:  p.baseConf.Agents.Coder.MaxTokens,
 			System:     chat_prompts.PromptChunkedCoderAdminPanel,
 			Messages:   []models.ChatMessage{{Role: "user", Content: []models.ContentBlock{{Type: "text", Text: sb.String()}}}},
 			Tools:      []models.ClaudeFunctionTool{helper.ToolEmitProject},
 			ToolChoice: helper.ForcedTool(helper.ToolEmitProject.Name),
 		},
-		timeoutCoder,
+		p.baseConf.Agents.Coder.Timeout,
 		fmt.Sprintf("Generating feature chunk: %s", group.Name),
 	)
 	if err != nil {
@@ -1180,12 +1179,12 @@ func (p *ChatProcessor) inspectCode(ctx context.Context, userQuestion, filesCont
 	response, err := p.callAnthropicWithTracking(
 		ctx,
 		models.AnthropicRequest{
-			Model:     p.baseConf.InspectorModel,
-			MaxTokens: p.baseConf.InspectorMaxTokens,
+			Model:     p.baseConf.Agents.Inspector.Model,
+			MaxTokens: p.baseConf.Agents.Inspector.MaxTokens,
 			System:    chat_prompts.PromptInspector,
 			Messages:  messages,
 		},
-		timeoutInspector,
+		p.baseConf.Agents.Inspector.Timeout,
 		"Inspecting code context",
 	)
 	if err != nil {
@@ -1206,14 +1205,14 @@ func (p *ChatProcessor) planChanges(ctx context.Context, clarified, fileGraphJSO
 	result, err := callWithTool[models.SonnetPlanResult](
 		p, ctx,
 		models.AnthropicToolRequest{
-			Model:      p.baseConf.PlannerModel,
-			MaxTokens:  p.baseConf.PlannerMaxTokens,
+			Model:      p.baseConf.Agents.Planner.Model,
+			MaxTokens:  p.baseConf.Agents.Planner.MaxTokens,
 			System:     chat_prompts.PromptPlanner,
 			Messages:   messages,
 			Tools:      []models.ClaudeFunctionTool{helper.ToolPlanChanges},
 			ToolChoice: helper.ForcedTool(helper.ToolPlanChanges.Name),
 		},
-		timeoutPlanner,
+		p.baseConf.Agents.Planner.Timeout,
 		"Planning code changes",
 	)
 	if err != nil {
@@ -1244,14 +1243,14 @@ func (p *ChatProcessor) editCode(ctx context.Context, clarified string, plan *mo
 	project, err := callWithTool[models.GeneratedProject](
 		p, ctx,
 		models.AnthropicToolRequest{
-			Model:      p.baseConf.CoderModel,
-			MaxTokens:  p.baseConf.CoderMaxTokens,
+			Model:      p.baseConf.Agents.Coder.Model,
+			MaxTokens:  p.baseConf.Agents.Coder.MaxTokens,
 			System:     systemPrompt,
 			Messages:   buildMessagesWithHistory(chatHistory, contentBlocks),
 			Tools:      []models.ClaudeFunctionTool{helper.ToolEmitProject},
 			ToolChoice: helper.ForcedTool(helper.ToolEmitProject.Name),
 		},
-		timeoutCoder,
+		p.baseConf.Agents.Coder.Timeout,
 		"Applying/generating code changes",
 	)
 	if err != nil {
@@ -1375,7 +1374,7 @@ func (p *ChatProcessor) generateCodeChunkedWebsite(ctx context.Context, clarifie
 			defer wg.Done()
 			stub := buildFoundationStub(foundationGroup)
 			var e error
-			uiKit, e = p.generateUIKit(ctx, uiKitGroup, stub, p.baseConf.LandingCoderModel)
+			uiKit, e = p.generateUIKit(ctx, uiKitGroup, stub, p.baseConf.Agents.LandingCoder.Model)
 			if e != nil {
 				log.Printf("[chunked-web] UI kit failed (%v) — continuing without it", e)
 				return
@@ -1583,14 +1582,14 @@ func (p *ChatProcessor) generateWebsiteFoundation(ctx context.Context, clarified
 	project, err := callWithTool[models.GeneratedProject](
 		p, ctx,
 		models.AnthropicToolRequest{
-			Model:      p.baseConf.LandingCoderModel,
-			MaxTokens:  p.baseConf.CoderMaxTokens,
+			Model:      p.baseConf.Agents.LandingCoder.Model,
+			MaxTokens:  p.baseConf.Agents.Coder.MaxTokens,
 			System:     chat_prompts.PromptWebsiteGenerator,
 			Messages:   messages,
 			Tools:      []models.ClaudeFunctionTool{helper.ToolEmitProject},
 			ToolChoice: helper.ForcedTool(helper.ToolEmitProject.Name),
 		},
-		timeoutCoder,
+		p.baseConf.Agents.Coder.Timeout,
 		"Generating website foundation (Group 0)",
 	)
 	if err != nil {
@@ -1627,14 +1626,14 @@ func (p *ChatProcessor) generateWebsitePage(ctx context.Context, group models.Ma
 	project, err := callWithTool[models.GeneratedProject](
 		p, ctx,
 		models.AnthropicToolRequest{
-			Model:      p.baseConf.LandingCoderModel,
-			MaxTokens:  p.baseConf.CoderMaxTokens,
+			Model:      p.baseConf.Agents.LandingCoder.Model,
+			MaxTokens:  p.baseConf.Agents.Coder.MaxTokens,
 			System:     chat_prompts.PromptWebsitePageCoder,
 			Messages:   []models.ChatMessage{{Role: "user", Content: []models.ContentBlock{{Type: "text", Text: sb.String()}}}},
 			Tools:      []models.ClaudeFunctionTool{helper.ToolEmitProject},
 			ToolChoice: helper.ForcedTool(helper.ToolEmitProject.Name),
 		},
-		timeoutCoder,
+		p.baseConf.Agents.Coder.Timeout,
 		fmt.Sprintf("Generating website page: %s", group.Name),
 	)
 	if err != nil {

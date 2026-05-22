@@ -1030,7 +1030,7 @@ func (p *ChatProcessor) callDatabaseAssistant(
 		ctx,
 		models.AnthropicRequest{
 			Model:     p.baseConf.ClaudeModel,
-			MaxTokens: p.baseConf.InspectorMaxTokens,
+			MaxTokens: p.baseConf.Agents.Inspector.MaxTokens,
 			System:    chat_prompts.PromptDatabaseAssistant,
 			Messages:  messages,
 		},

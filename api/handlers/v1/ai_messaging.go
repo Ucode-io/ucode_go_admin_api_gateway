@@ -22,12 +22,6 @@ import (
 )
 
 const (
-	timeoutHaiku     = 180 * time.Second
-	timeoutArchitect = 900 * time.Second
-	timeoutInspector = 300 * time.Second
-	timeoutPlanner   = 300 * time.Second
-	timeoutCoder     = 900 * time.Second
-
 	uGenBranch = "u-gen"
 
 	timeoutPublishMicrofrontend = 15 * time.Minute
@@ -693,14 +687,14 @@ func (p *ChatProcessor) runVisualEdit(ctx context.Context, instruction string, c
 			edited, errIn = callWithTool[visualEditOutput](
 				p, ctx,
 				models.AnthropicToolRequest{
-					Model:      p.baseConf.CoderModel,
-					MaxTokens:  p.baseConf.CoderMaxTokens,
+					Model:      p.baseConf.Agents.Coder.Model,
+					MaxTokens:  p.baseConf.Agents.Coder.MaxTokens,
 					System:     chat_prompts.PromptVisualEdit,
 					Messages:   messages,
 					Tools:      []models.ClaudeFunctionTool{helper.ToolEmitVisualEdit},
 					ToolChoice: helper.ForcedTool(helper.ToolEmitVisualEdit.Name),
 				},
-				timeoutCoder,
+				p.baseConf.Agents.Coder.Timeout,
 				fmt.Sprintf("Visual edit: %d elements in %d files", len(resolvedContexts), len(targetPaths)),
 			)
 			return errIn

@@ -1,0 +1,80 @@
+package config
+
+import "time"
+
+type (
+	AgentConfig struct {
+		Model     string
+		MaxTokens int
+		Timeout   time.Duration
+	}
+
+	AIAgents struct {
+		// Router classifies user intent on every message (fast + cheap).
+		Router AgentConfig
+
+		// Architect plans project structure: tables, design, relations.
+		Architect AgentConfig
+
+		// Coder generates code for admin_panel and web projects (chunked).
+		Coder AgentConfig
+
+		// LandingCoder generates code for landing pages and single-file paths.
+		LandingCoder AgentConfig
+
+		// Planner decides which files to change in the edit flow.
+		Planner AgentConfig
+
+		// Inspector answers questions about existing code and validates output.
+		Inspector AgentConfig
+
+		// DatabaseAssistant generates and executes database queries.
+		DatabaseAssistant AgentConfig
+	}
+)
+
+func loadAIAgents(defaultModel string) AIAgents {
+	const (
+		haiku  = "claude-haiku-4-5-20251001"
+		sonnet = "claude-sonnet-4-6"
+		opus   = "claude-opus-4-7"
+	)
+
+	return AIAgents{
+		Router: AgentConfig{
+			Model:     haiku,
+			MaxTokens: 2000,
+			Timeout:   60 * time.Second,
+		},
+		Architect: AgentConfig{
+			Model:     opus,
+			MaxTokens: 16000,
+			Timeout:   180 * time.Second,
+		},
+		Coder: AgentConfig{
+			Model:     sonnet,
+			MaxTokens: 64000,
+			Timeout:   900 * time.Second,
+		},
+		LandingCoder: AgentConfig{
+			Model:     sonnet,
+			MaxTokens: 64000,
+			Timeout:   900 * time.Second,
+		},
+		Planner: AgentConfig{
+			Model:     sonnet,
+			MaxTokens: 16000,
+			Timeout:   180 * time.Second,
+		},
+		Inspector: AgentConfig{
+			Model:     haiku,
+			MaxTokens: 8000,
+			Timeout:   120 * time.Second,
+		},
+		DatabaseAssistant: AgentConfig{
+			Model:     sonnet,
+			MaxTokens: 4000,
+			Timeout:   60 * time.Second,
+		},
+	}
+}

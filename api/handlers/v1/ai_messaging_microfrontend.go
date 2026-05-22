@@ -112,7 +112,7 @@ func (p *ChatProcessor) runMicrofrontendEdit(ctx context.Context, clarified, fil
 
 	if edited.Project == nil || len(edited.Project.Files) == 0 {
 		log.Printf("[MICROFE EDIT] editor returned no files — nothing to push")
-		return &models.ParsedClaudeResponse{Description: edited.Description}, nil
+		return &models.ParsedClaudeResponse{Description: buildUpdateSummary(plan, nil, p.userMessage)}, nil
 	}
 
 	log.Printf("[MICROFE EDIT] pushing %d file(s) to u-gen branch", len(edited.Project.Files))
@@ -176,7 +176,7 @@ func (p *ChatProcessor) runMicrofrontendEdit(ctx context.Context, clarified, fil
 	}
 	p.createMicrofrontendSnapshot(ctx, fullSnapshot, edited.Description)
 
-	return &models.ParsedClaudeResponse{Description: edited.Description}, nil
+	return &models.ParsedClaudeResponse{Description: buildUpdateSummary(plan, edited.Project.Files, p.userMessage)}, nil
 }
 
 // runMicrofrontendInspect answers questions about the microfrontend's current code
