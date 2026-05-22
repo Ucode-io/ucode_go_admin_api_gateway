@@ -9,8 +9,8 @@ import (
 	"strings"
 	"sync"
 	"time"
-	"ucode/ucode_go_api_gateway/api/handlers/helper"
 	"ucode/ucode_go_api_gateway/api/handlers/billing"
+	"ucode/ucode_go_api_gateway/api/handlers/helper"
 	"ucode/ucode_go_api_gateway/api/handlers/helper/chat_prompts"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/config"
@@ -248,6 +248,11 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 		return nil, err
 	}
 
+	generated.Project.Files = append(
+		[]models.ProjectFile{buildReadmeFile(plan, generated.Project.Files)},
+		generated.Project.Files...,
+	)
+
 	emitPublishFiles(emit, generated.Project.Files, 93)
 	mfeURL, err := p.publishToMicrofrontend(ctx, plan.ProjectName, uniqueMFEPath(), generated, projectData)
 	if err != nil {
@@ -419,6 +424,11 @@ func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context,
 	if err != nil {
 		return nil, err
 	}
+
+	generated.Project.Files = append(
+		[]models.ProjectFile{buildReadmeFile(plan, generated.Project.Files)},
+		generated.Project.Files...,
+	)
 
 	emitPublishFiles(emit, generated.Project.Files, 93)
 	mfeURL, err := p.publishToMicrofrontend(ctx, plan.ProjectName, uniqueMFEPath(), generated, projectData)
@@ -1169,4 +1179,3 @@ func slugify(name string) string {
 	}
 	return s
 }
-
