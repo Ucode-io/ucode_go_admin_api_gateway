@@ -1,6 +1,22 @@
 package models
 
 type (
+	// ProjectFile is one file in a generated or edited project.
+	ProjectFile struct {
+		Path          string `json:"path"`
+		Content       string `json:"content"`
+		ChangeSummary string `json:"change_summary,omitempty"`
+		Purpose       string `json:"purpose,omitempty"`
+	}
+
+	// GeneratedProject is the output of a full code-generation step.
+	GeneratedProject struct {
+		ProjectName string         `json:"project_name"`
+		Files       []ProjectFile  `json:"files"`
+		FileGraph   map[string]any `json:"file_graph"`
+		Env         map[string]any `json:"env"`
+	}
+
 	RouterInput struct {
 		UserMessage   string
 		FileGraphJSON string

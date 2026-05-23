@@ -1,6 +1,25 @@
 package models
 
 type (
+	// ========================== Core Message Types ==========================
+
+	ContentBlock struct {
+		Type   string       `json:"type"`
+		Text   string       `json:"text,omitempty"`
+		Source *ImageSource `json:"source,omitempty"`
+	}
+
+	ImageSource struct {
+		Type      string `json:"type" default:"url"`
+		URL       string `json:"url,omitempty"`
+		MediaType string `json:"media_type,omitempty"`
+	}
+
+	ChatMessage struct {
+		Role    string         `json:"role"`
+		Content []ContentBlock `json:"content"`
+	}
+
 	// ========================== Basic Requests ==========================
 
 	// EnrichedMessage is the HTTP representation of a chat message.

@@ -114,8 +114,12 @@ type BaseConfig struct {
 	AnthropicVersion    string
 
 	ClaudeModel string
+	Agents      AIAgents
 
-	Agents AIAgents
+	AIProvider AIProvider
+
+	GeminiAPIKey string
+	GeminiAgents AIAgents
 
 	AutomationURL   string
 	OpenFaaSBaseUrl string
@@ -204,7 +208,11 @@ func BaseLoad() BaseConfig {
 	config.AnthropicVersion = cast.ToString(GetOrReturnDefaultValue("ANTHROPIC_VERSION", ""))
 	config.ClaudeModel = cast.ToString(GetOrReturnDefaultValue("CLAUDE_MODEL", ""))
 
-	config.Agents = loadAIAgents(config.ClaudeModel)
+	config.AIProvider = AIProvider(cast.ToString(GetOrReturnDefaultValue("AI_PROVIDER", string(AIProviderGemini))))
+	config.Agents = loadAIAgents()
+	config.GeminiAgents = loadGeminiAgents()
+
+	config.GeminiAPIKey = cast.ToString(GetOrReturnDefaultValue("GEMINI_API_KEY", ""))
 
 	config.AutomationURL = cast.ToString(GetOrReturnDefaultValue("AUTOMATION_URL", ""))
 	config.OpenFaaSBaseUrl = cast.ToString(GetOrReturnDefaultValue("OPENFAAS_BASE_URL", ""))

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"ucode/ucode_go_api_gateway/api/handlers/ai"
 	"ucode/ucode_go_api_gateway/api/models"
 )
 
@@ -30,43 +31,13 @@ func buildAgentMessages(history []models.ChatMessage, blocks []models.ContentBlo
 	return messages
 }
 
-func buildHistoryText(history []models.ChatMessage) string {
-	if len(history) == 0 {
-		return ""
-	}
-	start := 0
-	if len(history) > 6 {
-		start = len(history) - 6
-	}
-	var sb strings.Builder
-	for _, msg := range history[start:] {
-		var text string
-		for _, block := range msg.Content {
-			if block.Type == "text" {
-				text += block.Text
-			}
-		}
-		if text == "" {
-			continue
-		}
-		if msg.Role == "assistant" {
-			sb.WriteString("Assistant: ")
-		} else {
-			sb.WriteString("User: ")
-		}
-		sb.WriteString(text)
-		sb.WriteString("\n")
-	}
-	return sb.String()
-}
-
 func parseHaikuRoutingResult(rawJSON string) (*models.HaikuRoutingResult, error) {
 	fullText, err := extractPlainText(rawJSON)
 	if err != nil {
 		return nil, err
 	}
 
-	cleaned := extractJSONFromText(fullText)
+	cleaned := ai.ExtractJSONFromText(fullText)
 
 	var result models.HaikuRoutingResult
 	if err := json.Unmarshal([]byte(cleaned), &result); err != nil {
@@ -92,40 +63,6 @@ func extractPlainText(rawJSON string) (string, error) {
 		}
 	}
 	return strings.TrimSpace(strings.Join(parts, "\n")), nil
-}
-
-func extractJSONFromText(text string) string {
-	// Try ```json ... ``` first
-	if idx := strings.Index(text, "```json"); idx != -1 {
-		rest := text[idx+7:]
-		if end := strings.Index(rest, "```"); end != -1 {
-			return strings.TrimSpace(rest[:end])
-		}
-	}
-	// Try ``` ... ``` with a JSON container
-	if idx := strings.Index(text, "```"); idx != -1 {
-		rest := text[idx+3:]
-		if end := strings.Index(rest, "```"); end != -1 {
-			candidate := strings.TrimSpace(rest[:end])
-			if strings.HasPrefix(candidate, "{") || strings.HasPrefix(candidate, "[") {
-				return candidate
-			}
-		}
-	}
-	startObj := strings.Index(text, "{")
-	endObj := strings.LastIndex(text, "}")
-	startArr := strings.Index(text, "[")
-	endArr := strings.LastIndex(text, "]")
-
-	isObj := startObj != -1 && endObj != -1 && endObj > startObj
-	isArr := startArr != -1 && endArr != -1 && endArr > startArr
-
-	if isObj && (!isArr || startObj < startArr) {
-		return strings.TrimSpace(text[startObj : endObj+1])
-	} else if isArr {
-		return strings.TrimSpace(text[startArr : endArr+1])
-	}
-	return strings.TrimSpace(text)
 }
 
 func wrapMaxTokens(err error, usage models.LLMUsage, stage string) error {

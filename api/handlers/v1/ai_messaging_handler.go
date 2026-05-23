@@ -357,6 +357,13 @@ func (h *HandlerV1) handleStreamingMessage(c *gin.Context, processor *ChatProces
 	go func() {
 		defer close(eventCh)
 
+		provData := processor.providerEventData()
+		processor.emitter().Emit(SSEEvent{
+			Type:    EvProvider,
+			Icon:    "cpu",
+			Message: fmt.Sprintf("AI provider: %s (%s)", provData.Provider, provData.CoderModel),
+			Data:    provData,
+		})
 		processor.emitter().Emit(
 			SSEEvent{
 				Type:    EvProgress,

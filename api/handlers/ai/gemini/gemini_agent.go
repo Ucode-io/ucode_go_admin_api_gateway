@@ -1,4 +1,4 @@
-package anthropic
+package gemini
 
 import (
 	"context"
@@ -13,33 +13,32 @@ import (
 	"ucode/ucode_go_api_gateway/config"
 )
 
-type AnthropicAgent struct {
+type GeminiAgent struct {
 	conf    config.BaseConfig
 	tracker ai.UsageTracker
 }
 
-func NewAnthropicAgent(conf config.BaseConfig, tracker ai.UsageTracker) ai.Agent {
-	return &AnthropicAgent{conf: conf, tracker: tracker}
+func NewGeminiAgent(conf config.BaseConfig, tracker ai.UsageTracker) ai.Agent {
+	return &GeminiAgent{conf: conf, tracker: tracker}
 }
 
-// ── Agent interface implementation ────────────────────────────────────────────
-
-func (a *AnthropicAgent) RouteRequest(ctx context.Context, in models.RouterInput) (*models.HaikuRoutingResult, error) {
+func (a *GeminiAgent) RouteRequest(_ context.Context, in models.RouterInput) (*models.HaikuRoutingResult, error) {
 	historyText := ai.BuildHistoryText(in.History)
 	content := chat_prompts.BuildRouterMessage(in.UserMessage, in.FileGraphJSON, in.HasImages, historyText)
 
-	messages := []models.ChatMessage{
-		{Role: "user", Content: []models.ContentBlock{{Type: "text", Text: content}}},
+	contents := []geminiContent{
+		{Role: "user", Parts: []geminiPart{{Text: content}}},
 	}
 
-	raw, usage, err := callAnthropicText(a.conf, a.conf.Agents.Router, chat_prompts.PromptRouter, messages)
-	a.tracker.RecordUsage(usage, a.conf.Agents.Router.Model, "Routing user intent")
+	cfg := a.conf.GeminiAgents.Router
+	text, usage, err := callGeminiText(a.conf, cfg, chat_prompts.PromptRouter, contents)
+	a.tracker.RecordUsage(usage, cfg.Model, "Routing user intent")
 	a.tracker.Deduct(int64(usage.InputTokens + usage.OutputTokens))
 	if err != nil {
 		return nil, fmt.Errorf("router: %w", err)
 	}
 
-	result, err := parseHaikuRoutingResult(raw)
+	result, err := parseRoutingResult(text)
 	if err != nil {
 		return nil, fmt.Errorf("router: parse: %w", err)
 	}
@@ -47,16 +46,17 @@ func (a *AnthropicAgent) RouteRequest(ctx context.Context, in models.RouterInput
 	return result, nil
 }
 
-func (a *AnthropicAgent) ArchitectProject(ctx context.Context, in models.ArchitectInput) (*models.ArchitectPlan, error) {
+func (a *GeminiAgent) ArchitectProject(_ context.Context, in models.ArchitectInput) (*models.ArchitectPlan, error) {
 	userMsg := in.Clarified
 	if in.ExistingSchemaCtx != "" {
 		userMsg += "\n\n====================================\nEXISTING PROJECT TABLES (already provisioned — use these slugs for API calls, do NOT recreate them)\n====================================\n" + in.ExistingSchemaCtx
 	}
 
-	messages := buildAgentMessages(in.History, buildContentBlocks(userMsg, in.Images))
+	contents := buildGeminiContents(in.History, buildGeminiParts(userMsg, in.Images))
 
-	raw, usage, _, err := a.callTool(a.conf.Agents.Architect, chat_prompts.PromptArchitect, messages, ToolArchitectPlan)
-	a.tracker.RecordUsage(usage, a.conf.Agents.Architect.Model, "Architecting project structure")
+	cfg := a.conf.GeminiAgents.Architect
+	raw, usage, err := callGeminiTool(a.conf, cfg, chat_prompts.PromptArchitect, contents, toolArchitectPlan)
+	a.tracker.RecordUsage(usage, cfg.Model, "Architecting project structure")
 	a.tracker.Deduct(int64(usage.InputTokens + usage.OutputTokens))
 	if err != nil {
 		return nil, wrapMaxTokens(err, usage, "architect")
@@ -69,7 +69,7 @@ func (a *AnthropicAgent) ArchitectProject(ctx context.Context, in models.Archite
 	return &plan, nil
 }
 
-func (a *AnthropicAgent) GenerateManifest(ctx context.Context, in models.ManifestInput) (*models.ProjectManifest, error) {
+func (a *GeminiAgent) GenerateManifest(_ context.Context, in models.ManifestInput) (*models.ProjectManifest, error) {
 	var sb strings.Builder
 	fmt.Fprintf(&sb, "Project: %s (type: %s)\n\n", in.Plan.ProjectName, in.Plan.ProjectType)
 	if len(in.Plan.Tables) > 0 {
@@ -93,10 +93,11 @@ func (a *AnthropicAgent) GenerateManifest(ctx context.Context, in models.Manifes
 		systemPrompt = chat_prompts.PromptWebsiteManifestGenerator
 	}
 
-	messages := buildAgentMessages(in.History, []models.ContentBlock{{Type: "text", Text: sb.String()}})
+	contents := buildGeminiContents(in.History, []geminiPart{{Text: sb.String()}})
 
-	raw, usage, _, err := a.callTool(a.conf.Agents.Planner, systemPrompt, messages, ToolEmitManifest)
-	a.tracker.RecordUsage(usage, a.conf.Agents.Planner.Model, "Generating file manifest")
+	cfg := a.conf.GeminiAgents.Planner
+	raw, usage, err := callGeminiTool(a.conf, cfg, systemPrompt, contents, toolEmitManifest)
+	a.tracker.RecordUsage(usage, cfg.Model, "Generating file manifest")
 	a.tracker.Deduct(int64(usage.InputTokens + usage.OutputTokens))
 	if err != nil {
 		return nil, wrapMaxTokens(err, usage, "manifest")
@@ -109,12 +110,13 @@ func (a *AnthropicAgent) GenerateManifest(ctx context.Context, in models.Manifes
 	return &manifest, nil
 }
 
-func (a *AnthropicAgent) PlanChanges(ctx context.Context, in models.PlannerInput) (*models.SonnetPlanResult, error) {
+func (a *GeminiAgent) PlanChanges(_ context.Context, in models.PlannerInput) (*models.SonnetPlanResult, error) {
 	content := chat_prompts.BuildPlannerMessage(in.Clarified, in.FileGraphJSON, in.HasImages)
-	messages := buildAgentMessages(in.History, []models.ContentBlock{{Type: "text", Text: content}})
+	contents := buildGeminiContents(in.History, []geminiPart{{Text: content}})
 
-	raw, usage, _, err := a.callTool(a.conf.Agents.Planner, chat_prompts.PromptPlanner, messages, ToolPlanChanges)
-	a.tracker.RecordUsage(usage, a.conf.Agents.Planner.Model, "Planning code changes")
+	cfg := a.conf.GeminiAgents.Planner
+	raw, usage, err := callGeminiTool(a.conf, cfg, chat_prompts.PromptPlanner, contents, toolPlanChanges)
+	a.tracker.RecordUsage(usage, cfg.Model, "Planning code changes")
 	a.tracker.Deduct(int64(usage.InputTokens + usage.OutputTokens))
 	if err != nil {
 		return nil, wrapMaxTokens(err, usage, "planner")
@@ -127,45 +129,42 @@ func (a *AnthropicAgent) PlanChanges(ctx context.Context, in models.PlannerInput
 	return &result, nil
 }
 
-func (a *AnthropicAgent) InspectCode(ctx context.Context, in models.InspectorInput) (string, error) {
+func (a *GeminiAgent) InspectCode(_ context.Context, in models.InspectorInput) (string, error) {
 	content := chat_prompts.BuildInspectorMessage(in.Question, in.FilesContext)
-	messages := buildAgentMessages(in.History, buildContentBlocks(content, in.Images))
+	contents := buildGeminiContents(in.History, buildGeminiParts(content, in.Images))
 
-	raw, usage, err := callAnthropicText(a.conf, a.conf.Agents.Inspector, chat_prompts.PromptInspector, messages)
-	a.tracker.RecordUsage(usage, a.conf.Agents.Inspector.Model, "Inspecting code context")
+	cfg := a.conf.GeminiAgents.Inspector
+	text, usage, err := callGeminiText(a.conf, cfg, chat_prompts.PromptInspector, contents)
+	a.tracker.RecordUsage(usage, cfg.Model, "Inspecting code context")
 	a.tracker.Deduct(int64(usage.InputTokens + usage.OutputTokens))
 	if err != nil {
 		return "", fmt.Errorf("inspector: %w", err)
 	}
-
-	answer, err := extractPlainText(raw)
-	if err != nil {
-		return "", fmt.Errorf("inspector: extract text: %w", err)
-	}
-	return answer, nil
+	return text, nil
 }
 
-func (a *AnthropicAgent) EditCode(ctx context.Context, in models.EditorInput) (*models.GeneratedProject, error) {
+func (a *GeminiAgent) EditCode(_ context.Context, in models.EditorInput) (*models.GeneratedProject, error) {
 	var (
-		systemPrompt  string
-		contentBlocks []models.ContentBlock
+		systemPrompt string
+		parts        []geminiPart
 	)
 
 	if in.HasMatchingFiles {
 		systemPrompt = chat_prompts.PromptCodeEditor
 		planJSON, _ := json.Marshal(in.Plan)
 		content := chat_prompts.BuildCodeEditorMessage(in.Clarified, string(planJSON), in.FilesContext, len(in.Images) > 0)
-		contentBlocks = buildContentBlocks(content, in.Images)
+		parts = buildGeminiParts(content, in.Images)
 	} else {
-		log.Printf("[editor] planned files not found — falling back to free generation")
+		log.Printf("[gemini editor] planned files not found — falling back to free generation")
 		systemPrompt = chat_prompts.PromptAdminPanelGenerator
-		contentBlocks = buildContentBlocks(in.Clarified, in.Images)
+		parts = buildGeminiParts(in.Clarified, in.Images)
 	}
 
-	messages := buildAgentMessages(in.History, contentBlocks)
+	contents := buildGeminiContents(in.History, parts)
 
-	raw, usage, _, err := a.callTool(a.conf.Agents.Coder, systemPrompt, messages, ToolEmitProject)
-	a.tracker.RecordUsage(usage, a.conf.Agents.Coder.Model, "Applying code changes")
+	cfg := a.conf.GeminiAgents.Coder
+	raw, usage, err := callGeminiTool(a.conf, cfg, systemPrompt, contents, toolEmitProject)
+	a.tracker.RecordUsage(usage, cfg.Model, "Applying code changes")
 	a.tracker.Deduct(int64(usage.InputTokens + usage.OutputTokens))
 	if err != nil {
 		return nil, wrapMaxTokens(err, usage, "editor")
@@ -178,10 +177,10 @@ func (a *AnthropicAgent) EditCode(ctx context.Context, in models.EditorInput) (*
 	return &project, nil
 }
 
-func (a *AnthropicAgent) GenerateCode(ctx context.Context, agentCfg config.AgentConfig, systemPrompt, userPrompt string, images []string, history []models.ChatMessage, desc string) (*models.GeneratedProject, error) {
-	messages := buildAgentMessages(history, buildContentBlocks(userPrompt, images))
+func (a *GeminiAgent) GenerateCode(_ context.Context, agentCfg config.AgentConfig, systemPrompt, userPrompt string, images []string, history []models.ChatMessage, desc string) (*models.GeneratedProject, error) {
+	contents := buildGeminiContents(history, buildGeminiParts(userPrompt, images))
 
-	raw, usage, _, err := a.callTool(agentCfg, systemPrompt, messages, ToolEmitProject)
+	raw, usage, err := callGeminiTool(a.conf, agentCfg, systemPrompt, contents, toolEmitProject)
 	a.tracker.RecordUsage(usage, agentCfg.Model, desc)
 	a.tracker.Deduct(int64(usage.InputTokens + usage.OutputTokens))
 	if err != nil {
@@ -195,12 +194,12 @@ func (a *AnthropicAgent) GenerateCode(ctx context.Context, agentCfg config.Agent
 	return &project, nil
 }
 
-func (a *AnthropicAgent) GenerateCodeNoHistory(ctx context.Context, agentCfg config.AgentConfig, systemPrompt, userPrompt, desc string) (*models.GeneratedProject, error) {
-	messages := []models.ChatMessage{
-		{Role: "user", Content: []models.ContentBlock{{Type: "text", Text: userPrompt}}},
+func (a *GeminiAgent) GenerateCodeNoHistory(_ context.Context, agentCfg config.AgentConfig, systemPrompt, userPrompt, desc string) (*models.GeneratedProject, error) {
+	contents := []geminiContent{
+		{Role: "user", Parts: []geminiPart{{Text: userPrompt}}},
 	}
 
-	raw, usage, _, err := a.callTool(agentCfg, systemPrompt, messages, ToolEmitProject)
+	raw, usage, err := callGeminiTool(a.conf, agentCfg, systemPrompt, contents, toolEmitProject)
 	a.tracker.RecordUsage(usage, agentCfg.Model, desc)
 	a.tracker.Deduct(int64(usage.InputTokens + usage.OutputTokens))
 	if err != nil {
@@ -214,9 +213,12 @@ func (a *AnthropicAgent) GenerateCodeNoHistory(ctx context.Context, agentCfg con
 	return &project, nil
 }
 
-func (a *AnthropicAgent) VisualEdit(_ context.Context, in models.VisualEditInput) ([]models.ProjectFile, string, error) {
-	raw, usage, _, err := a.callTool(a.conf.Agents.Coder, chat_prompts.PromptVisualEdit, in.Messages, ToolEmitVisualEdit)
-	a.tracker.RecordUsage(usage, a.conf.Agents.Coder.Model, "Visual edit")
+func (a *GeminiAgent) VisualEdit(_ context.Context, in models.VisualEditInput) ([]models.ProjectFile, string, error) {
+	contents := convertMessages(in.Messages)
+
+	cfg := a.conf.GeminiAgents.Coder
+	raw, usage, err := callGeminiTool(a.conf, cfg, chat_prompts.PromptVisualEdit, contents, toolEmitVisualEdit)
+	a.tracker.RecordUsage(usage, cfg.Model, "Visual edit")
 	a.tracker.Deduct(int64(usage.InputTokens + usage.OutputTokens))
 	if err != nil {
 		return nil, "", fmt.Errorf("visual edit: %w", err)
@@ -232,17 +234,17 @@ func (a *AnthropicAgent) VisualEdit(_ context.Context, in models.VisualEditInput
 	return out.Files, out.ChangeSummary, nil
 }
 
-func (a *AnthropicAgent) RepairFile(_ context.Context, in models.RepairFileInput) (models.ProjectFile, error) {
-	repairCfg := a.conf.Agents.Router
+func (a *GeminiAgent) RepairFile(_ context.Context, in models.RepairFileInput) (models.ProjectFile, error) {
+	repairCfg := a.conf.GeminiAgents.Coder
 	repairCfg.MaxTokens = 32000
 	repairCfg.Timeout = 120 * time.Second
 
-	messages := []models.ChatMessage{
-		{Role: "user", Content: []models.ContentBlock{{Type: "text", Text: in.UserPrompt}}},
+	contents := []geminiContent{
+		{Role: "user", Parts: []geminiPart{{Text: in.UserPrompt}}},
 	}
 	const repairSystem = "You are a TypeScript/TSX and premium admin-UI repair bot. Fix the listed errors: import mismatches, typos, displayName issues, Radix SelectItem empty-value runtime crashes, React infinite-recursion bugs where a component renders itself, admin UI quality failures, AND syntax errors like unbalanced braces/brackets/parentheses. For admin UI quality failures, preserve backend/API contracts and polish only the current file into a product-grade SaaS screen. Output the complete corrected file via the repair_file tool. Never truncate."
 
-	raw, usage, _, err := a.callTool(repairCfg, repairSystem, messages, ToolRepairFile)
+	raw, usage, err := callGeminiTool(a.conf, repairCfg, repairSystem, contents, toolRepairFile)
 	a.tracker.RecordUsage(usage, repairCfg.Model, fmt.Sprintf("Repair %s", in.File.Path))
 	a.tracker.Deduct(int64(usage.InputTokens + usage.OutputTokens))
 	if err != nil {
@@ -261,24 +263,16 @@ func (a *AnthropicAgent) RepairFile(_ context.Context, in models.RepairFileInput
 	return models.ProjectFile{Path: in.File.Path, Content: result.Content}, nil
 }
 
-func (a *AnthropicAgent) DatabaseQuery(_ context.Context, in models.DatabaseQueryInput) (*models.DatabaseActionRequest, error) {
+func (a *GeminiAgent) DatabaseQuery(_ context.Context, in models.DatabaseQueryInput) (*models.DatabaseActionRequest, error) {
 	content := chat_prompts.BuildDatabaseMessage(in.Clarified, in.SchemaText, in.DataContext)
-	messages := buildAgentMessages(in.History, []models.ContentBlock{{Type: "text", Text: content}})
+	contents := buildGeminiContents(in.History, []geminiPart{{Text: content}})
 
-	dbCfg := a.conf.Agents.Inspector
-	dbCfg.Model = a.conf.ClaudeModel
-	dbCfg.Timeout = 120 * time.Second
-
-	body, usage, err := callAnthropicText(a.conf, dbCfg, chat_prompts.PromptDatabaseAssistant, messages)
-	a.tracker.RecordUsage(usage, dbCfg.Model, "Database query")
+	cfg := a.conf.GeminiAgents.Inspector
+	text, usage, err := callGeminiText(a.conf, cfg, chat_prompts.PromptDatabaseAssistant, contents)
+	a.tracker.RecordUsage(usage, cfg.Model, "Database query")
 	a.tracker.Deduct(int64(usage.InputTokens + usage.OutputTokens))
 	if err != nil {
 		return nil, fmt.Errorf("database query: %w", err)
-	}
-
-	text, err := extractPlainText(body)
-	if err != nil {
-		return nil, fmt.Errorf("database query: extract text: %w", err)
 	}
 
 	var action models.DatabaseActionRequest
@@ -286,18 +280,4 @@ func (a *AnthropicAgent) DatabaseQuery(_ context.Context, in models.DatabaseQuer
 		return nil, fmt.Errorf("database query: parse action JSON: %w | raw=%.300s", err, text)
 	}
 	return &action, nil
-}
-
-func (a *AnthropicAgent) callTool(agentCfg config.AgentConfig, system string, messages []models.ChatMessage, tool claudeFunctionTool) ([]byte, models.LLMUsage, string, error) {
-	wire := wireToolRequest{
-		Model:      agentCfg.Model,
-		MaxTokens:  agentCfg.MaxTokens,
-		Messages:   messages,
-		Tools:      []claudeFunctionTool{tool},
-		ToolChoice: ForcedTool(tool.Name),
-	}
-	if system != "" {
-		wire.System = []systemBlock{{Type: "text", Text: system, CacheControl: &cacheCtrl{Type: "ephemeral"}}}
-	}
-	return callAnthropicTool(a.conf, wire, agentCfg.Timeout)
 }

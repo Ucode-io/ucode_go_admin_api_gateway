@@ -1,25 +1,13 @@
-package anthropic
+package gemini
 
-// ============================================================================
-// Claude Function Tool Schemas
-//
-// Each variable here corresponds to one Anthropic tool-use tool.
-// When a tool is passed with tool_choice={type:"tool", name:"<name>"}, Claude
-// MUST populate the tool's input_schema exactly — no text, no markdown, no JSON
-// escaping bugs.  The output is decoded directly into the matching Go struct.
-//
-// Tool ↔ Go struct mapping:
-//   ToolArchitectPlan  → models.ArchitectPlan
-//   ToolPlanChanges    → models.SonnetPlanResult
-//   ToolEmitProject    → models.GeneratedProject
-//   ToolEmitDiagrams   → models.HaikuPlan
-//   ToolEmitVisualEdit → VisualEditOutput  (defined in ai_messging.go)
-// ============================================================================
+// Tool definitions mirror claude_tools.go but use Gemini's funcDeclaration format.
+// Names and JSON Schema parameter maps are identical to the Anthropic tools so both
+// providers produce output that unmarshals into the same Go structs.
 
-var ToolArchitectPlan = claudeFunctionTool{
+var toolArchitectPlan = funcDeclaration{
 	Name:        "plan_architecture",
 	Description: "Return the complete project architecture: database tables with fields and mock data, all relations between tables, a rich UI structure description, and a complete design system for the frontend developer.",
-	InputSchema: map[string]any{
+	Parameters: map[string]any{
 		"type":     "object",
 		"required": []string{"project_name", "project_type", "tables", "relations", "ui_structure", "design", "image_keywords", "client_types"},
 		"properties": map[string]any{
@@ -76,17 +64,16 @@ var ToolArchitectPlan = claudeFunctionTool{
 			},
 			"relations": map[string]any{
 				"type":        "array",
-				"description": "Every foreign-key relationship between tables. Only Many2One is supported. The FK column {table_to}_id is auto-created on table_from (e.g. orders→customers creates column 'customers_id' on orders).",
+				"description": "Every foreign-key relationship between tables. Only Many2One is supported. The FK column {table_to}_id is auto-created on table_from.",
 				"items": map[string]any{
 					"type":     "object",
 					"required": []string{"table_from", "table_to", "type"},
 					"properties": map[string]any{
-						"table_from": map[string]any{"type": "string", "description": "Source table slug — the 'many' side (e.g. 'orders' when many orders belong to one customer)"},
-						"table_to":   map[string]any{"type": "string", "description": "Target table slug — the 'one' side (e.g. 'customers')"},
+						"table_from": map[string]any{"type": "string"},
+						"table_to":   map[string]any{"type": "string"},
 						"type": map[string]any{
-							"type":        "string",
-							"enum":        []string{"Many2One"},
-							"description": "Always Many2One. Creates FK column {table_to}_id on table_from.",
+							"type": "string",
+							"enum": []string{"Many2One"},
 						},
 					},
 				},
@@ -106,35 +93,35 @@ var ToolArchitectPlan = claudeFunctionTool{
 					"border_radius", "design_inspiration",
 				},
 				"properties": map[string]any{
-					"primary_color":          map[string]any{"type": "string", "description": "Hex color, e.g. #6366f1"},
-					"primary_hsl":            map[string]any{"type": "string", "description": "HSL without hsl(), e.g. 239 84% 67%"},
-					"background_color":       map[string]any{"type": "string", "description": "Page background hex"},
-					"background_hsl":         map[string]any{"type": "string", "description": "Page background HSL"},
-					"surface_color":          map[string]any{"type": "string", "description": "Card/panel surface hex"},
-					"surface_hsl":            map[string]any{"type": "string", "description": "Card/panel surface HSL"},
-					"sidebar_background":     map[string]any{"type": "string", "description": "Sidebar bg hex"},
+					"primary_color":          map[string]any{"type": "string"},
+					"primary_hsl":            map[string]any{"type": "string"},
+					"background_color":       map[string]any{"type": "string"},
+					"background_hsl":         map[string]any{"type": "string"},
+					"surface_color":          map[string]any{"type": "string"},
+					"surface_hsl":            map[string]any{"type": "string"},
+					"sidebar_background":     map[string]any{"type": "string"},
 					"sidebar_background_hsl": map[string]any{"type": "string"},
-					"sidebar_foreground":     map[string]any{"type": "string", "description": "Sidebar text hex"},
-					"sidebar_style":          map[string]any{"type": "string", "enum": []string{"light", "medium", "dark", "colored"}, "description": "Sidebar visual weight"},
-					"text_color":             map[string]any{"type": "string", "description": "Primary text hex"},
-					"text_muted_color":       map[string]any{"type": "string", "description": "Secondary/muted text hex"},
-					"border_color":           map[string]any{"type": "string", "description": "Border hex"},
-					"accent_color":           map[string]any{"type": "string", "description": "Accent/highlight hex"},
-					"accent_hsl":             map[string]any{"type": "string", "description": "Accent HSL"},
-					"font_family":            map[string]any{"type": "string", "description": "Heading font name, e.g. Syne or Inter"},
-					"body_font":              map[string]any{"type": "string", "description": "Body font name, e.g. DM Sans or Inter"},
-					"border_radius":          map[string]any{"type": "string", "description": "Base border radius, e.g. 8px"},
-					"design_inspiration":     map[string]any{"type": "string", "description": "Archetype name or reference, e.g. Obsidian Cinematic or TMS Domain"},
+					"sidebar_foreground":     map[string]any{"type": "string"},
+					"sidebar_style":          map[string]any{"type": "string", "enum": []string{"light", "medium", "dark", "colored"}},
+					"text_color":             map[string]any{"type": "string"},
+					"text_muted_color":       map[string]any{"type": "string"},
+					"border_color":           map[string]any{"type": "string"},
+					"accent_color":           map[string]any{"type": "string"},
+					"accent_hsl":             map[string]any{"type": "string"},
+					"font_family":            map[string]any{"type": "string"},
+					"body_font":              map[string]any{"type": "string"},
+					"border_radius":          map[string]any{"type": "string"},
+					"design_inspiration":     map[string]any{"type": "string"},
 				},
 			},
 		},
 	},
 }
 
-var ToolPlanChanges = claudeFunctionTool{
+var toolPlanChanges = funcDeclaration{
 	Name:        "plan_changes",
 	Description: "List every file that needs to be created or modified to fulfil the requested code change. Do not include file contents — only paths and one-sentence descriptions.",
-	InputSchema: map[string]any{
+	Parameters: map[string]any{
 		"type":     "object",
 		"required": []string{"files_to_change", "files_to_create", "summary"},
 		"properties": map[string]any{
@@ -160,15 +147,15 @@ var ToolPlanChanges = claudeFunctionTool{
 					},
 				},
 			},
-			"summary": map[string]any{"type": "string", "description": "One sentence summary of what will change"},
+			"summary": map[string]any{"type": "string"},
 		},
 	},
 }
 
-var ToolEmitProject = claudeFunctionTool{
+var toolEmitProject = funcDeclaration{
 	Name:        "emit_project",
 	Description: "Return the complete set of generated project files. Include every file needed to run the project. File contents must be complete — never truncate.",
-	InputSchema: map[string]any{
+	Parameters: map[string]any{
 		"type":     "object",
 		"required": []string{"project_name", "files", "env"},
 		"properties": map[string]any{
@@ -186,8 +173,8 @@ var ToolEmitProject = claudeFunctionTool{
 					"type":     "object",
 					"required": []string{"path", "content"},
 					"properties": map[string]any{
-						"path":    map[string]any{"type": "string", "description": "Relative file path e.g. src/App.tsx"},
-						"content": map[string]any{"type": "string", "description": "Complete file content as a plain string — no extra JSON encoding"},
+						"path":    map[string]any{"type": "string"},
+						"content": map[string]any{"type": "string"},
 					},
 				},
 			},
@@ -195,37 +182,10 @@ var ToolEmitProject = claudeFunctionTool{
 	},
 }
 
-var ToolEmitDiagrams = claudeFunctionTool{
-	Name:        "emit_diagrams",
-	Description: "Return the BPMN 2.0 process diagram and the infrastructure dependency diagram for the project.",
-	InputSchema: map[string]any{
-		"type":     "object",
-		"required": []string{"bpmn_xml", "infra_diagram"},
-		"properties": map[string]any{
-			"bpmn_xml": map[string]any{
-				"type":        "string",
-				"description": "Full BPMN 2.0 XML. Newlines must be literal \\n inside the string value.",
-			},
-			"infra_diagram": map[string]any{
-				"type": "array",
-				"items": map[string]any{
-					"type":     "object",
-					"required": []string{"from", "to", "label"},
-					"properties": map[string]any{
-						"from":  map[string]any{"type": "string"},
-						"to":    map[string]any{"type": "string"},
-						"label": map[string]any{"type": "string"},
-					},
-				},
-			},
-		},
-	},
-}
-
-var ToolEmitVisualEdit = claudeFunctionTool{
+var toolEmitVisualEdit = funcDeclaration{
 	Name:        "emit_visual_edit",
 	Description: "Return the surgically edited files and a one-sentence summary of what was changed. Only include files that actually changed.",
-	InputSchema: map[string]any{
+	Parameters: map[string]any{
 		"type":     "object",
 		"required": []string{"files", "change_summary"},
 		"properties": map[string]any{
@@ -236,19 +196,19 @@ var ToolEmitVisualEdit = claudeFunctionTool{
 					"required": []string{"path", "content"},
 					"properties": map[string]any{
 						"path":    map[string]any{"type": "string"},
-						"content": map[string]any{"type": "string", "description": "Complete updated file content"},
+						"content": map[string]any{"type": "string"},
 					},
 				},
 			},
-			"change_summary": map[string]any{"type": "string", "description": "One sentence describing what was changed and why"},
+			"change_summary": map[string]any{"type": "string"},
 		},
 	},
 }
 
-var ToolEmitManifest = claudeFunctionTool{
+var toolEmitManifest = funcDeclaration{
 	Name:        "emit_manifest",
 	Description: "Return the complete file manifest for a React admin panel, grouped by dependency level. Group 0 = foundation (generated first). Groups 1..N = features (generated in parallel after foundation).",
-	InputSchema: map[string]any{
+	Parameters: map[string]any{
 		"type":     "object",
 		"required": []string{"groups"},
 		"properties": map[string]any{
@@ -258,19 +218,18 @@ var ToolEmitManifest = claudeFunctionTool{
 					"type":     "object",
 					"required": []string{"id", "name", "files"},
 					"properties": map[string]any{
-						"id":   map[string]any{"type": "integer", "description": "0 for foundation, 1..N for feature groups"},
-						"name": map[string]any{"type": "string", "description": "Group name, e.g. 'foundation', 'users', 'orders'"},
+						"id":   map[string]any{"type": "integer"},
+						"name": map[string]any{"type": "string"},
 						"files": map[string]any{
 							"type": "array",
 							"items": map[string]any{
 								"type":     "object",
 								"required": []string{"path", "exports"},
 								"properties": map[string]any{
-									"path": map[string]any{"type": "string", "description": "Relative file path, e.g. src/pages/UsersPage.tsx"},
+									"path": map[string]any{"type": "string"},
 									"exports": map[string]any{
-										"type":        "array",
-										"items":       map[string]any{"type": "string"},
-										"description": "All exported names from this file that other files might import",
+										"type":  "array",
+										"items": map[string]any{"type": "string"},
 									},
 								},
 							},
@@ -282,10 +241,10 @@ var ToolEmitManifest = claudeFunctionTool{
 	},
 }
 
-var ToolRepairFile = claudeFunctionTool{
+var toolRepairFile = funcDeclaration{
 	Name:        "repair_file",
 	Description: "Return the corrected content of a single TypeScript/TSX file. Fix all import errors listed in the prompt. Output the complete file — never truncate.",
-	InputSchema: map[string]any{
+	Parameters: map[string]any{
 		"type":     "object",
 		"required": []string{"content"},
 		"properties": map[string]any{
@@ -295,8 +254,4 @@ var ToolRepairFile = claudeFunctionTool{
 			},
 		},
 	},
-}
-
-func ForcedTool(toolName string) *toolChoice {
-	return &toolChoice{Type: "tool", Name: toolName}
 }

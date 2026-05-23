@@ -607,7 +607,7 @@ func (h *HandlerV1) resolveProjectScope(c *gin.Context) (*models.ProjectScope, e
 
 func (h *HandlerV1) generateBackendPlan(userPrompt string) (string, error) {
 	var (
-		body = models.AnthropicRequest{
+		body = anthropic.AnthropicRequest{
 			Model:     h.baseConf.ClaudeModel,
 			MaxTokens: h.baseConf.GeneratePlanMaxTokens,
 			System:    mcp_prompts.SystemPromptPlanBackend,
@@ -645,7 +645,7 @@ func (h *HandlerV1) generateBackendPlan(userPrompt string) (string, error) {
 func (h *HandlerV1) generateFrontendPlan(userPrompt string, imageURLs []string) (string, error) {
 	var (
 		contentBlocks []models.ContentBlock
-		body          models.AnthropicRequest
+		body          anthropic.AnthropicRequest
 		apiResponse   models.ClaudeResponse
 	)
 
@@ -666,7 +666,7 @@ func (h *HandlerV1) generateFrontendPlan(userPrompt string, imageURLs []string) 
 		Text: mcp_prompts.BuildFrontendPlanPrompt(userPrompt, len(imageURLs) > 0),
 	})
 
-	body = models.AnthropicRequest{
+	body = anthropic.AnthropicRequest{
 		Model:     h.baseConf.ClaudeModel,
 		MaxTokens: h.baseConf.GeneratePlanMaxTokens,
 		System:    mcp_prompts.SystemPromptPlanFrontend,
@@ -734,7 +734,7 @@ func (h *HandlerV1) saveFrontendProject(ctx context.Context, services services.S
 
 func (h *HandlerV1) sendAnthropicBackend(content string) (string, error) {
 	return anthropic.CallAnthropicAPI(h.baseConf,
-		models.AnthropicRequest{
+		anthropic.AnthropicRequest{
 			Model:     h.baseConf.ClaudeModel,
 			MaxTokens: h.baseConf.MaxTokens,
 			System:    mcp_prompts.SystemPromptBackend,
@@ -749,14 +749,14 @@ func (h *HandlerV1) sendAnthropicBackend(content string) (string, error) {
 					},
 				},
 			},
-			MCPServers: []models.MCPServer{
+			MCPServers: []anthropic.MCPServer{
 				{
 					Type: "url",
 					URL:  h.baseConf.MCPServerURL,
 					Name: "ucode",
 				},
 			},
-			Tools: []models.MCPTool{
+			Tools: []anthropic.MCPTool{
 				{
 					Type:          "mcp_toolset",
 					MCPServerName: "ucode",
@@ -770,7 +770,7 @@ func (h *HandlerV1) sendAnthropicBackend(content string) (string, error) {
 func (h *HandlerV1) generateFrontendProject(userPrompt string, imageURLs []string) (*models.GeneratedProject, error) {
 	var (
 		contentBlocks []models.ContentBlock
-		body          models.AnthropicRequest
+		body          anthropic.AnthropicRequest
 		apiResponse   models.ClaudeResponse
 		project       models.GeneratedProject
 	)
@@ -792,7 +792,7 @@ func (h *HandlerV1) generateFrontendProject(userPrompt string, imageURLs []strin
 		Text: userPrompt,
 	})
 
-	body = models.AnthropicRequest{
+	body = anthropic.AnthropicRequest{
 		Model:     h.baseConf.ClaudeModel,
 		MaxTokens: h.baseConf.MaxTokens,
 		System:    mcp_prompts.SystemPromptGenerateFrontend,
@@ -830,7 +830,7 @@ func (h *HandlerV1) classifyRequest(prompt string, imageURLs []string) (*models.
 	var (
 		hasImages            = len(imageURLs) > 0
 		classificationPrompt = mcp_prompts.BuildClassificationPrompt(prompt, hasImages)
-		body                 = models.AnthropicRequest{
+		body                 = anthropic.AnthropicRequest{
 			Model:     h.baseConf.ClaudeModel,
 			MaxTokens: h.baseConf.ClassifyReqeustMaxTokens,
 			System:    mcp_prompts.SystemPromptClassifyRequest,
@@ -881,7 +881,7 @@ func (h *HandlerV1) classifyRequest(prompt string, imageURLs []string) (*models.
 func (h *HandlerV1) analyzeProject(userPrompt string, imageURLs []string) (*models.AnalysisResult, error) {
 	var (
 		contentBlocks []models.ContentBlock
-		body          models.AnthropicRequest
+		body          anthropic.AnthropicRequest
 		apiResponse   models.ClaudeResponse
 		analysis      models.AnalysisResult
 	)
@@ -903,7 +903,7 @@ func (h *HandlerV1) analyzeProject(userPrompt string, imageURLs []string) (*mode
 		Text: userPrompt,
 	})
 
-	body = models.AnthropicRequest{
+	body = anthropic.AnthropicRequest{
 		Model:     h.baseConf.ClaudeModel,
 		MaxTokens: h.baseConf.AnalyseProjectMaxTokens,
 		System:    mcp_prompts.SystemPromptAnalyzeFrontend,
@@ -940,7 +940,7 @@ func (h *HandlerV1) analyzeProject(userPrompt string, imageURLs []string) (*mode
 func (h *HandlerV1) updateProject(userPrompt string, imageURLs []string) (*models.UpdateResult, error) {
 	var (
 		contentBlocks []models.ContentBlock
-		body          models.AnthropicRequest
+		body          anthropic.AnthropicRequest
 		apiResponse   models.ClaudeResponse
 		update        models.UpdateResult
 	)
@@ -962,7 +962,7 @@ func (h *HandlerV1) updateProject(userPrompt string, imageURLs []string) (*model
 		Text: userPrompt,
 	})
 
-	body = models.AnthropicRequest{
+	body = anthropic.AnthropicRequest{
 		Model:     h.baseConf.ClaudeModel,
 		MaxTokens: h.baseConf.MaxTokens,
 		System:    mcp_prompts.SystemPromptUpdateFrontend,
@@ -972,14 +972,14 @@ func (h *HandlerV1) updateProject(userPrompt string, imageURLs []string) (*model
 				Content: contentBlocks,
 			},
 		},
-		MCPServers: []models.MCPServer{
+		MCPServers: []anthropic.MCPServer{
 			{
 				Type: "url",
 				URL:  h.baseConf.MCPServerURL,
 				Name: "ucode",
 			},
 		},
-		Tools: []models.MCPTool{
+		Tools: []anthropic.MCPTool{
 			{
 				Type:          "mcp_toolset",
 				MCPServerName: "ucode",

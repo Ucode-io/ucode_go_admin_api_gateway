@@ -134,7 +134,7 @@ func (p *ChatProcessor) generateCodeSingle(ctx context.Context, clarified string
 			}
 			project, e = p.agent.GenerateCode(
 				ctx,
-				p.baseConf.Agents.LandingCoder,
+				p.agentCfgs().LandingCoder,
 				systemPrompt,
 				prompt,
 				imageURLs,
@@ -305,7 +305,7 @@ func (p *ChatProcessor) generateCodeChunkedAdminPanel(ctx context.Context, clari
 			var err error
 
 			stub := buildFoundationStub(foundationGroup)
-			uiKit, err = p.generateUIKit(ctx, uiKitGroup, stub, p.baseConf.Agents.Coder)
+			uiKit, err = p.generateUIKit(ctx, uiKitGroup, stub, p.agentCfgs().Coder)
 			if err != nil {
 				log.Printf("[chunked] UI kit parallel failed (%v) — continuing without it", foundErr)
 				return
@@ -565,7 +565,7 @@ func (p *ChatProcessor) generateFoundation(ctx context.Context, clarified string
 	sb.WriteString("====================================\n")
 
 	project, err := p.agent.GenerateCode(ctx,
-		p.baseConf.Agents.Coder,
+		p.agentCfgs().Coder,
 		chat_prompts2.PromptAdminPanelGenerator,
 		sb.String(),
 		imageURLs,
@@ -642,7 +642,7 @@ func (p *ChatProcessor) generateChunkAdminPanel(ctx context.Context, group model
 
 	project, err := p.agent.GenerateCodeNoHistory(
 		ctx,
-		p.baseConf.Agents.Coder,
+		p.agentCfgs().Coder,
 		chat_prompts2.PromptChunkedCoderAdminPanel,
 		sb.String(),
 		fmt.Sprintf("Generating feature chunk: %s", group.Name),
@@ -1123,7 +1123,7 @@ func (p *ChatProcessor) generateCodeChunkedWebsite(ctx context.Context, clarifie
 			defer wg.Done()
 			stub := buildFoundationStub(foundationGroup)
 			var e error
-			uiKit, e = p.generateUIKit(ctx, uiKitGroup, stub, p.baseConf.Agents.LandingCoder)
+			uiKit, e = p.generateUIKit(ctx, uiKitGroup, stub, p.agentCfgs().LandingCoder)
 			if e != nil {
 				log.Printf("[chunked-web] UI kit failed (%v) — continuing without it", e)
 				return
@@ -1327,7 +1327,7 @@ func (p *ChatProcessor) generateWebsiteFoundation(ctx context.Context, clarified
 	sb.WriteString("====================================\n")
 
 	project, err := p.agent.GenerateCode(ctx,
-		p.baseConf.Agents.LandingCoder,
+		p.agentCfgs().LandingCoder,
 		chat_prompts2.PromptWebsiteGenerator,
 		sb.String(),
 		imageURLs,
@@ -1367,7 +1367,7 @@ func (p *ChatProcessor) generateWebsitePage(ctx context.Context, group models.Ma
 
 	project, err := p.agent.GenerateCodeNoHistory(
 		ctx,
-		p.baseConf.Agents.LandingCoder,
+		p.agentCfgs().LandingCoder,
 		chat_prompts2.PromptWebsitePageCoder,
 		sb.String(),
 		fmt.Sprintf("Generating website page: %s", group.Name),

@@ -6,11 +6,12 @@ import (
 	"fmt"
 	"net/http"
 	"time"
+	"ucode/ucode_go_api_gateway/api/handlers/ai"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/config"
 )
 
-func CallAnthropicAPI(baseConf config.BaseConfig, body models.AnthropicRequest, timeout time.Duration) (string, error) {
+func CallAnthropicAPI(baseConf config.BaseConfig, body AnthropicRequest, timeout time.Duration) (string, error) {
 	jsonBody, err := json.Marshal(body)
 	if err != nil {
 		return "", fmt.Errorf("marshal request: %w", err)
@@ -29,7 +30,7 @@ func CallAnthropicAPI(baseConf config.BaseConfig, body models.AnthropicRequest, 
 }
 
 func callAnthropicText(conf config.BaseConfig, agentCfg config.AgentConfig, system string, messages []models.ChatMessage) (string, models.LLMUsage, error) {
-	body, err := CallAnthropicAPI(conf, models.AnthropicRequest{
+	body, err := CallAnthropicAPI(conf, AnthropicRequest{
 		Model:     agentCfg.Model,
 		MaxTokens: agentCfg.MaxTokens,
 		System:    system,
@@ -73,7 +74,7 @@ func callAnthropicTool(conf config.BaseConfig, wire wireToolRequest, timeout tim
 		return nil, models.LLMUsage{}, "", err
 	}
 
-	var toolResp models.ToolUseResponse
+	var toolResp toolUseResponse
 	if err = json.Unmarshal([]byte(respBody), &toolResp); err != nil {
 		return nil, models.LLMUsage{}, "", fmt.Errorf("parse tool response envelope: %w", err)
 	}
@@ -93,7 +94,7 @@ func callAnthropicTool(conf config.BaseConfig, wire wireToolRequest, timeout tim
 		if block.Type != "tool_use" {
 			continue
 		}
-		repairStringifiedFields(block.Input)
+		ai.RepairStringifiedFields(block.Input)
 		inputJSON, marshalErr := json.Marshal(block.Input)
 		if marshalErr != nil {
 			return nil, usage, toolResp.StopReason,
@@ -105,4 +106,3 @@ func callAnthropicTool(conf config.BaseConfig, wire wireToolRequest, timeout tim
 	return nil, usage, toolResp.StopReason,
 		fmt.Errorf("no tool_use block in response (stop_reason=%q)", toolResp.StopReason)
 }
-

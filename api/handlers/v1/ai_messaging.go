@@ -12,6 +12,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/handlers/ai"
 	"ucode/ucode_go_api_gateway/api/handlers/ai/anthropic"
 	"ucode/ucode_go_api_gateway/api/handlers/ai/chat_prompts"
+	"ucode/ucode_go_api_gateway/api/handlers/ai/gemini"
 	"ucode/ucode_go_api_gateway/api/handlers/billing"
 	"ucode/ucode_go_api_gateway/api/handlers/helper"
 	"ucode/ucode_go_api_gateway/api/models"
@@ -67,6 +68,24 @@ type ChatProcessor struct {
 	emit  ProgressEmitter
 }
 
+func (p *ChatProcessor) agentCfgs() config.AIAgents {
+	switch p.baseConf.AIProvider {
+	case config.AIProviderGemini:
+		return p.baseConf.GeminiAgents
+	default:
+		return p.baseConf.Agents
+	}
+}
+
+func (p *ChatProcessor) providerEventData() ProviderEventData {
+	cfgs := p.agentCfgs()
+	return ProviderEventData{
+		Provider:    string(p.baseConf.AIProvider),
+		RouterModel: cfgs.Router.Model,
+		CoderModel:  cfgs.Coder.Model,
+	}
+}
+
 func (p *ChatProcessor) emitter() ProgressEmitter {
 	if p.emit == nil {
 		return noopEmitter{}
@@ -89,7 +108,13 @@ func newChatProcessor(h *HandlerV1, service services.ServiceManagerI, baseConf c
 		roleId:          roleId,
 		authToken:       authToken,
 	}
-	p.agent = anthropic.NewAnthropicAgent(baseConf, p)
+	switch baseConf.AIProvider {
+	case config.AIProviderGemini:
+		p.agent = gemini.NewGeminiAgent(baseConf, p)
+	default:
+		p.agent = anthropic.NewAnthropicAgent(baseConf, p)
+	}
+	log.Printf("[ai] provider=%s router=%s coder=%s", baseConf.AIProvider, p.agentCfgs().Router.Model, p.agentCfgs().Coder.Model)
 	return p
 }
 

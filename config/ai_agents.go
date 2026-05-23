@@ -33,7 +33,49 @@ type (
 	}
 )
 
-func loadAIAgents(defaultModel string) AIAgents {
+func loadGeminiAgents() AIAgents {
+	const flash = "gemini-2.0-flash"
+
+	return AIAgents{
+		Router: AgentConfig{
+			Model:     flash,
+			MaxTokens: 2000,
+			Timeout:   60 * time.Second,
+		},
+		Architect: AgentConfig{
+			Model:     flash,
+			MaxTokens: 16000,
+			Timeout:   180 * time.Second,
+		},
+		Coder: AgentConfig{
+			Model:     flash,
+			MaxTokens: 65536,
+			Timeout:   900 * time.Second,
+		},
+		LandingCoder: AgentConfig{
+			Model:     flash,
+			MaxTokens: 65536,
+			Timeout:   900 * time.Second,
+		},
+		Planner: AgentConfig{
+			Model:     flash,
+			MaxTokens: 16000,
+			Timeout:   180 * time.Second,
+		},
+		Inspector: AgentConfig{
+			Model:     flash,
+			MaxTokens: 8000,
+			Timeout:   120 * time.Second,
+		},
+		DatabaseAssistant: AgentConfig{
+			Model:     flash,
+			MaxTokens: 4000,
+			Timeout:   60 * time.Second,
+		},
+	}
+}
+
+func loadAIAgents() AIAgents {
 	const (
 		haiku  = "claude-haiku-4-5-20251001"
 		sonnet = "claude-sonnet-4-6"
