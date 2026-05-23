@@ -92,8 +92,8 @@ type CreateTemplate struct {
 // @Tags Template
 // @Accept json
 // @Produce json
-// @Param template body tmp.CreateTemplateReq true "CreateTemplateReq"
-// @Success 201 {object} status_http.Response{data=tmp.Template} "Template data"
+// @Param template body CreateTemplateReq true "CreateTemplateReq"
+// @Success 201 {object} status_http.Response{data=object} "Template data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) CreateTemplate(c *gin.Context) {
@@ -413,7 +413,7 @@ func convert[T any, U any](in T) (U, error) {
 // @Accept json
 // @Produce json
 // @Param template-id path string true "template-id"
-// @Success 200 {object} status_http.Response{data=tmp.Template} "TemplateBody"
+// @Success 200 {object} status_http.Response{data=object} "TemplateBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetSingleTemplate(c *gin.Context) {
@@ -509,7 +509,7 @@ func (h *HandlerV1) DeleteTemplate(c *gin.Context) {
 // @Param folder-id query string true "folder-id"
 // @Param limit query string false "limit"
 // @Param offset query string false "offset"
-// @Success 200 {object} status_http.Response{data=tmp.GetListFolderRes} "FolderBody"
+// @Success 200 {object} status_http.Response{data=object} "FolderBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetListTemplate(c *gin.Context) {

@@ -2857,6 +2857,7 @@ func (h *HandlerV2) GetBoardData(c *gin.Context) {
 // @Tags Items
 // @Produce json
 // @Param collection path string true "collection"
+// @Param project-id query string true "project-id"
 // @Success 200 {object} status_http.Response{data=object} "Table schema"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -2957,6 +2958,7 @@ var pgTypeToFieldType = map[string]string{
 // @Accept json
 // @Produce json
 // @Param collection path string true "collection"
+// @Param project-id query string true "project-id"
 // @Param object body models.CreateFieldRequest true "CreateSchemaFieldBody"
 // @Success 201 {object} status_http.Response "Field data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -3043,6 +3045,7 @@ func (h *HandlerV2) CreateTableSchemaField(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param collection path string true "collection"
+// @Param project-id query string true "project-id"
 // @Param object body models.Field true "UpdateSchemaFieldBody"
 // @Success 200 {object} status_http.Response "Field data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"

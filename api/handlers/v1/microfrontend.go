@@ -26,7 +26,7 @@ import (
 // @Accept json
 // @Produce json
 // @Param MicroFrontend body models.CreateFunctionRequest true "MicroFrontend"
-// @Success 201 {object} status_http.Response{data=new_function_service.Function} "Data"
+// @Success 201 {object} status_http.Response{data=object} "Data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) CreateMicroFrontEnd(c *gin.Context) {
@@ -43,7 +43,7 @@ func (h *HandlerV1) CreateMicroFrontEnd(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param micro-frontend-id path string true "micro-frontend-id"
-// @Success 200 {object} status_http.Response{data=new_function_service.Function} "Data"
+// @Success 200 {object} status_http.Response{data=object} "Data"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetMicroFrontEndByID(c *gin.Context) {
@@ -112,7 +112,7 @@ func (h *HandlerV1) DeleteMicroFrontEnd(c *gin.Context) {
 // @Tags Functions
 // @Accept json
 // @Produce json
-// @Param body body models.PushMicrofrontendChangesRequest true "repo_id required"
+// @Param body body object true "repo_id required"
 // @Success 200 {object} status_http.Response "OK"
 // @Failure 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"

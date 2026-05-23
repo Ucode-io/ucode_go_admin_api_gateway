@@ -287,7 +287,7 @@ func (h *HandlerV1) DeleteCompany(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param Project body pb.CreateProjectRequest true "CompanyProjectCreateRequest"
-// @Success 201 {object} status_http.Response{data=models.CompanyProjectCreateResponse} "Project data"
+// @Success 201 {object} status_http.Response{data=pb.CreateProjectResponse} "Project data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) CreateCompanyProject(c *gin.Context) {

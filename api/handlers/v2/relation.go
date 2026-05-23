@@ -173,6 +173,7 @@ func (h *HandlerV2) GetByIdRelation(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param collection path string true "collection"
+// @Param project-id query string true "project-id"
 // @Param table body obs.CreateRelationRequest true "CreateRelationRequestBody"
 // @Success 201 {object} status_http.Response{data=string} "Relation data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -277,13 +278,15 @@ func (h *HandlerV2) CreateRelation(c *gin.Context) {
 // GetAllRelations godoc
 // @Security ApiKeyAuth
 // @ID get_all_relations
-// @Router /v2/relation [GET]
+// @Router /v2/relations/{collection} [GET]
 // @Security ApiKeyAuth
 // @Summary Get all relations
 // @Description Get all relations
 // @Tags Relation
 // @Accept json
 // @Produce json
+// @Param collection path string true "collection"
+// @Param project-id query string true "project-id"
 // @Param filters query obs.GetAllRelationsRequest true "filters"
 // @Success 200 {object} status_http.Response{data=string} "RelationBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
