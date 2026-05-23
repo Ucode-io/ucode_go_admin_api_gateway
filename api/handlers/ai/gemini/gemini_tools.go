@@ -53,11 +53,8 @@ var toolArchitectPlan = funcDeclaration{
 							},
 						},
 						"mock_data": map[string]any{
-							"type": "array",
-							"items": map[string]any{
-								"type":                 "object",
-								"additionalProperties": true,
-							},
+							"type":  "array",
+							"items": map[string]any{"type": "object"},
 						},
 					},
 				},
@@ -161,14 +158,12 @@ var toolEmitProject = funcDeclaration{
 		"properties": map[string]any{
 			"project_name": map[string]any{"type": "string"},
 			"env": map[string]any{
-				"type":                 "object",
-				"additionalProperties": map[string]any{"type": "string"},
-				"description":          "All VITE_* environment variables with their real values",
+				"type":        "object",
+				"description": "All VITE_* environment variables with their real values",
 			},
 			"files": map[string]any{
 				"type":        "array",
 				"description": "CRITICAL: Must be a JSON array value — never a JSON-encoded string. Each element is an object with path and content.",
-				"minItems":    1,
 				"items": map[string]any{
 					"type":     "object",
 					"required": []string{"path", "content"},
