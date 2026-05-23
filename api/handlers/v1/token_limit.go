@@ -91,7 +91,7 @@ func (p *ChatProcessor) initTokenBudget(ctx context.Context) {
 		remain, snap.DayUsed, snap.DayLimit, snap.MonthUsed, snap.MonthLimit)
 }
 
-func (p *ChatProcessor) checkTokenBudget() error {
+func (p *ChatProcessor) Check() error {
 	if !p.tokenBudgetEnabled {
 		return nil
 	}
@@ -101,7 +101,7 @@ func (p *ChatProcessor) checkTokenBudget() error {
 	return nil
 }
 
-func (p *ChatProcessor) deductTokenBudget(tokens int64) {
+func (p *ChatProcessor) Deduct(tokens int64) {
 	if !p.tokenBudgetEnabled || tokens <= 0 {
 		return
 	}

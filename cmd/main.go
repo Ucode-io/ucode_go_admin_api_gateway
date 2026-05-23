@@ -6,7 +6,7 @@ import (
 	"time"
 	"ucode/ucode_go_api_gateway/api"
 	"ucode/ucode_go_api_gateway/api/handlers"
-	apilimits "ucode/ucode_go_api_gateway/api/handlers/api_call_limits"
+	apilimits2 "ucode/ucode_go_api_gateway/api/handlers/billing/api_call_limits"
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/pkg/caching"
 	"ucode/ucode_go_api_gateway/pkg/helper"
@@ -138,15 +138,15 @@ func main() {
 		MetConsumerFlushInterval = time.Minute * 10
 	)
 	// L1 to Redis
-	tracker := apilimits.NewTracker(centralRedis, trackerFlushInterval)
+	tracker := apilimits2.NewTracker(centralRedis, trackerFlushInterval)
 	go tracker.Start(ctx)
 
 	// Redis to Postgres
-	consumer := apilimits.NewMetricsConsumer(centralRedis, compSrvc, MetConsumerFlushInterval)
+	consumer := apilimits2.NewMetricsConsumer(centralRedis, compSrvc, MetConsumerFlushInterval)
 	go consumer.Start(ctx)
 
 	// Database-size billing limit — pre-computes allowed/blocked per project every 5 min
-	billingWorker := apilimits.NewBillingLimitWorker(centralRedis, projectServiceNodes, compSrvc, baseConf.UcodeNamespace, 5*time.Minute)
+	billingWorker := apilimits2.NewBillingLimitWorker(centralRedis, projectServiceNodes, compSrvc, baseConf.UcodeNamespace, 5*time.Minute)
 	go billingWorker.Start(ctx)
 
 	// =================================================================================

@@ -6,9 +6,6 @@ import (
 	"fmt"
 	"strings"
 	"time"
-	"ucode/ucode_go_api_gateway/api/handlers/helper/chat_prompts"
-
-	"ucode/ucode_go_api_gateway/api/handlers/helper"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
@@ -1023,35 +1020,12 @@ func (p *ChatProcessor) callDatabaseAssistant(
 	chatHistory []models.ChatMessage,
 ) (*models.DatabaseActionRequest, error) {
 
-	content := chat_prompts.BuildDatabaseMessage(clarified, schemaText, dataContext)
-	messages := buildMessagesWithHistory(chatHistory, []models.ContentBlock{{Type: "text", Text: content}})
-
-	response, err := p.callAnthropicWithTracking(
-		ctx,
-		models.AnthropicRequest{
-			Model:     p.baseConf.ClaudeModel,
-			MaxTokens: p.baseConf.Agents.Inspector.MaxTokens,
-			System:    chat_prompts.PromptDatabaseAssistant,
-			Messages:  messages,
-		},
-		timeoutDatabaseAssistant,
-		"Executing database assistant agent loop",
-	)
-	if err != nil {
-		return nil, fmt.Errorf("Anthropic API error: %w", err)
-	}
-
-	text, err := helper.ExtractPlainText(response)
-	if err != nil {
-		return nil, fmt.Errorf("extract text from response: %w", err)
-	}
-
-	var action models.DatabaseActionRequest
-	if err = json.Unmarshal([]byte(helper.CleanJSONResponse(text)), &action); err != nil {
-		return nil, fmt.Errorf("parse action JSON: %w | raw=%.300s", err, text)
-	}
-
-	return &action, nil
+	return p.agent.DatabaseQuery(ctx, models.DatabaseQueryInput{
+		Clarified:   clarified,
+		SchemaText:  schemaText,
+		DataContext: dataContext,
+		History:     chatHistory,
+	})
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

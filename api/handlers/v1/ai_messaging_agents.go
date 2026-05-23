@@ -2,7 +2,6 @@ package v1
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -10,7 +9,9 @@ import (
 	"strings"
 	"sync"
 	"time"
-	"ucode/ucode_go_api_gateway/api/handlers/helper/chat_prompts"
+	"ucode/ucode_go_api_gateway/api/handlers/ai/anthropic"
+	chat_prompts2 "ucode/ucode_go_api_gateway/api/handlers/ai/chat_prompts"
+	"ucode/ucode_go_api_gateway/config"
 
 	"ucode/ucode_go_api_gateway/api/handlers/helper"
 	"ucode/ucode_go_api_gateway/api/models"
@@ -23,41 +24,7 @@ type chunkResult struct {
 	err     error
 }
 
-type visualEditOutput struct {
-	Files         []models.ProjectFile `json:"files"`
-	ChangeSummary string               `json:"change_summary"`
-}
-
-func callWithTool[T any](p *ChatProcessor, _ context.Context, req models.AnthropicToolRequest, timeout time.Duration, description string) (*T, error) {
-	if err := p.checkTokenBudget(); err != nil {
-		return nil, err
-	}
-
-	log.Printf("[AI] Calling Anthropic (tool use): %s", description)
-
-	result, usage, stopReason, err := helper.CallAnthropicWithTool[T](p.baseConf, req, timeout)
-
-	p.recordTokenUsage(usage, req.Model, description)
-	p.deductTokenBudget(int64(usage.InputTokens + usage.OutputTokens))
-
-	if err != nil {
-		if errors.Is(err, helper.ErrMaxTokens) {
-			log.Printf("[AI] max_tokens for %s (in=%d out=%d)", description, usage.InputTokens, usage.OutputTokens)
-			return nil, fmt.Errorf(
-				"❌ Generation stopped: the project is too large to generate in one pass (used %d output tokens). "+
-					"Please describe a smaller scope or break the request into parts",
-				usage.OutputTokens,
-			)
-		}
-		log.Printf("[AI] error for %s: %v", description, err)
-		return nil, err
-	}
-
-	log.Printf("[AI] ✅ %s (stop=%s in=%d out=%d)", description, stopReason, usage.InputTokens, usage.OutputTokens)
-	return result, nil
-}
-
-func (p *ChatProcessor) recordTokenUsage(usage models.ClaudeUsage, model, description string) {
+func (p *ChatProcessor) RecordUsage(usage models.LLMUsage, model, description string) {
 	if usage.InputTokens == 0 && usage.OutputTokens == 0 {
 		return
 	}
@@ -81,56 +48,6 @@ func (p *ChatProcessor) recordTokenUsage(usage models.ClaudeUsage, model, descri
 			log.Printf("[TOKEN RECORD] error recording usage for %s: %v", description, recErr)
 		}
 	}()
-}
-
-func (p *ChatProcessor) callAnthropicWithTracking(_ context.Context, req models.AnthropicRequest, timeout time.Duration, description string) (string, error) {
-	if err := p.checkTokenBudget(); err != nil {
-		return "", err
-	}
-
-	log.Printf("[AI] Calling Anthropic: %s", description)
-	response, err := helper.CallAnthropicAPI(p.baseConf, req, timeout)
-	if err != nil {
-		log.Printf("[AI] Anthropic error for %s: %v", description, err)
-		return "", err
-	}
-
-	var parsed struct {
-		Usage models.ClaudeUsage `json:"usage"`
-	}
-	if jsonErr := json.Unmarshal([]byte(response), &parsed); jsonErr == nil {
-		p.recordTokenUsage(parsed.Usage, req.Model, description)
-		p.deductTokenBudget(int64(parsed.Usage.InputTokens + parsed.Usage.OutputTokens))
-	}
-
-	return response, nil
-}
-
-func (p *ChatProcessor) callArchitect(ctx context.Context, clarified string, imageURLs []string, chatHistory []models.ChatMessage, existingSchemaCtx string) (*models.ArchitectPlan, error) {
-	userMsg := clarified
-	if existingSchemaCtx != "" {
-		userMsg += "\n\n====================================\nEXISTING PROJECT TABLES (already provisioned — use these slugs for API calls, do NOT recreate them)\n====================================\n" + existingSchemaCtx
-	}
-
-	messages := buildMessagesWithHistory(chatHistory, buildContentBlocksWithImages(userMsg, imageURLs))
-
-	plan, err := callWithTool[models.ArchitectPlan](
-		p, ctx,
-		models.AnthropicToolRequest{
-			Model:      p.baseConf.Agents.Architect.Model,
-			MaxTokens:  p.baseConf.Agents.Architect.MaxTokens,
-			System:     chat_prompts.PromptArchitect,
-			Messages:   messages,
-			Tools:      []models.ClaudeFunctionTool{helper.ToolArchitectPlan},
-			ToolChoice: helper.ForcedTool(helper.ToolArchitectPlan.Name),
-		},
-		p.baseConf.Agents.Architect.Timeout,
-		"Architecting project structure",
-	)
-	if err != nil {
-		return nil, fmt.Errorf("architect: %w", err)
-	}
-	return plan, nil
 }
 
 func (p *ChatProcessor) generateCode(ctx context.Context, clarified string, imageURLs []string, chatHistory []models.ChatMessage, plan *models.ArchitectPlan, apiKey string) (*models.ParsedClaudeResponse, error) {
@@ -188,8 +105,6 @@ func (p *ChatProcessor) generateCodeSingle(ctx context.Context, clarified string
 		}
 	}
 
-	messages := buildMessagesWithHistory(chatHistory, buildContentBlocksWithImages(prompt, imageURLs))
-
 	p.emitter().Emit(SSEEvent{Type: EvProgress, Icon: "code-2", Message: "Генерирую исходный код проекта...", Percent: 18})
 
 	var project *models.GeneratedProject
@@ -211,23 +126,19 @@ func (p *ChatProcessor) generateCodeSingle(ctx context.Context, clarified string
 			var systemPrompt string
 			switch plan.ProjectType {
 			case "web":
-				systemPrompt = chat_prompts.PromptWebsiteGenerator
+				systemPrompt = chat_prompts2.PromptWebsiteGenerator
 			case "admin_panel":
-				systemPrompt = chat_prompts.PromptAdminPanelGenerator
+				systemPrompt = chat_prompts2.PromptAdminPanelGenerator
 			default:
-				systemPrompt = chat_prompts.PromptLandingGenerator
+				systemPrompt = chat_prompts2.PromptLandingGenerator
 			}
-			project, e = callWithTool[models.GeneratedProject](
-				p, ctx,
-				models.AnthropicToolRequest{
-					Model:      p.baseConf.Agents.LandingCoder.Model,
-					MaxTokens:  p.baseConf.Agents.LandingCoder.MaxTokens,
-					System:     systemPrompt,
-					Messages:   messages,
-					Tools:      []models.ClaudeFunctionTool{helper.ToolEmitProject},
-					ToolChoice: helper.ForcedTool(helper.ToolEmitProject.Name),
-				},
-				p.baseConf.Agents.Coder.Timeout,
+			project, e = p.agent.GenerateCode(
+				ctx,
+				p.baseConf.Agents.LandingCoder,
+				systemPrompt,
+				prompt,
+				imageURLs,
+				chatHistory,
 				"Generating project code",
 			)
 			return e
@@ -375,7 +286,7 @@ func (p *ChatProcessor) generateCodeChunkedAdminPanel(ctx context.Context, clari
 			if foundErr == nil {
 				break
 			}
-			if attempt < 2 && !errors.Is(foundErr, helper.ErrMaxTokens) {
+			if attempt < 2 && !errors.Is(foundErr, anthropic.ErrMaxTokens) {
 				log.Printf("[chunked] foundation attempt %d failed (%v) — retrying", attempt, foundErr)
 			}
 		}
@@ -394,7 +305,7 @@ func (p *ChatProcessor) generateCodeChunkedAdminPanel(ctx context.Context, clari
 			var err error
 
 			stub := buildFoundationStub(foundationGroup)
-			uiKit, err = p.generateUIKit(ctx, uiKitGroup, stub, p.baseConf.Agents.Coder.Model)
+			uiKit, err = p.generateUIKit(ctx, uiKitGroup, stub, p.baseConf.Agents.Coder)
 			if err != nil {
 				log.Printf("[chunked] UI kit parallel failed (%v) — continuing without it", foundErr)
 				return
@@ -581,58 +492,6 @@ func (p *ChatProcessor) generateCodeChunkedAdminPanel(ctx context.Context, clari
 	return &models.ParsedClaudeResponse{Project: merged}, nil
 }
 
-func (p *ChatProcessor) generateManifest(ctx context.Context, plan *models.ArchitectPlan, chatHistory []models.ChatMessage) (*models.ProjectManifest, error) {
-	var sb strings.Builder
-
-	fmt.Fprintf(&sb, "Project: %s (type: %s)\n\n", plan.ProjectName, plan.ProjectType)
-	if len(plan.Tables) > 0 {
-		sb.WriteString("Tables:\n")
-		for _, t := range plan.Tables {
-			fmt.Fprintf(&sb, "- %s (slug: %s): ", t.Label, t.Slug)
-			for i, f := range t.Fields {
-				if i > 0 {
-					sb.WriteString(", ")
-				}
-				sb.WriteString(f.Slug)
-			}
-			sb.WriteString("\n")
-		}
-		sb.WriteString("\n")
-	}
-	sb.WriteString("UI Structure:\n" + plan.UIStructure)
-
-	systemPrompt := chat_prompts.PromptManifestGenerator
-	if plan.ProjectType == "web" {
-		systemPrompt = chat_prompts.PromptWebsiteManifestGenerator
-	}
-
-	messages := buildMessagesWithHistory(
-		chatHistory, []models.ContentBlock{
-			{
-				Type: "text", Text: sb.String(),
-			},
-		},
-	)
-
-	manifest, err := callWithTool[models.ProjectManifest](
-		p, ctx,
-		models.AnthropicToolRequest{
-			Model:      p.baseConf.Agents.Planner.Model,
-			MaxTokens:  15000,
-			System:     systemPrompt,
-			Messages:   messages,
-			Tools:      []models.ClaudeFunctionTool{helper.ToolEmitManifest},
-			ToolChoice: helper.ForcedTool(helper.ToolEmitManifest.Name),
-		},
-		p.baseConf.Agents.Planner.Timeout,
-		"Generating file manifest",
-	)
-	if err != nil {
-		return nil, fmt.Errorf("manifest: %w", err)
-	}
-	return manifest, nil
-}
-
 func (p *ChatProcessor) generateFoundation(ctx context.Context, clarified string, imageURLs []string, chatHistory []models.ChatMessage, apiConfig string, foundationGroup models.ManifestGroup, manifest *models.ProjectManifest) (*models.GeneratedProject, error) {
 	var sb strings.Builder
 
@@ -705,19 +564,12 @@ func (p *ChatProcessor) generateFoundation(ctx context.Context, clarified string
 	sb.WriteString("REMINDER: Emit ONLY the Group 0 files listed at the top. DO NOT generate feature pages.\n")
 	sb.WriteString("====================================\n")
 
-	messages := buildMessagesWithHistory(chatHistory, buildContentBlocksWithImages(sb.String(), imageURLs))
-
-	project, err := callWithTool[models.GeneratedProject](
-		p, ctx,
-		models.AnthropicToolRequest{
-			Model:      p.baseConf.Agents.Coder.Model,
-			MaxTokens:  p.baseConf.Agents.Coder.MaxTokens,
-			System:     chat_prompts.PromptAdminPanelGenerator,
-			Messages:   messages,
-			Tools:      []models.ClaudeFunctionTool{helper.ToolEmitProject},
-			ToolChoice: helper.ForcedTool(helper.ToolEmitProject.Name),
-		},
-		p.baseConf.Agents.Coder.Timeout,
+	project, err := p.agent.GenerateCode(ctx,
+		p.baseConf.Agents.Coder,
+		chat_prompts2.PromptAdminPanelGenerator,
+		sb.String(),
+		imageURLs,
+		chatHistory,
 		"Generating foundation (Group 0)",
 	)
 	if err != nil {
@@ -729,7 +581,7 @@ func (p *ChatProcessor) generateFoundation(ctx context.Context, clarified string
 	return project, nil
 }
 
-func (p *ChatProcessor) generateUIKit(ctx context.Context, uiKitGroup models.ManifestGroup, foundationCtx string, coderModel string) (*models.GeneratedProject, error) {
+func (p *ChatProcessor) generateUIKit(ctx context.Context, uiKitGroup models.ManifestGroup, foundationCtx string, agent config.AgentConfig) (*models.GeneratedProject, error) {
 	var sb strings.Builder
 	fmt.Fprintf(&sb, "CHUNKED GENERATION — UI Kit (Group 1)\n\n")
 
@@ -744,17 +596,11 @@ func (p *ChatProcessor) generateUIKit(ctx context.Context, uiKitGroup models.Man
 	sb.WriteString("REMINDER: Emit ONLY the ui/* files listed above. No page logic, no API calls.\n")
 	sb.WriteString("====================================\n")
 
-	project, err := callWithTool[models.GeneratedProject](
-		p, ctx,
-		models.AnthropicToolRequest{
-			Model:      coderModel,
-			MaxTokens:  p.baseConf.Agents.Coder.MaxTokens,
-			System:     chat_prompts.PromptUIKitCoder,
-			Messages:   []models.ChatMessage{{Role: "user", Content: []models.ContentBlock{{Type: "text", Text: sb.String()}}}},
-			Tools:      []models.ClaudeFunctionTool{helper.ToolEmitProject},
-			ToolChoice: helper.ForcedTool(helper.ToolEmitProject.Name),
-		},
-		p.baseConf.Agents.Coder.Timeout,
+	project, err := p.agent.GenerateCodeNoHistory(
+		ctx,
+		agent,
+		chat_prompts2.PromptUIKitCoder,
+		sb.String(),
 		"Generating UI Kit (Group 1)",
 	)
 	if err != nil {
@@ -794,17 +640,11 @@ func (p *ChatProcessor) generateChunkAdminPanel(ctx context.Context, group model
 	sb.WriteString("====================================\n")
 	sb.WriteString(manifestSummary)
 
-	project, err := callWithTool[models.GeneratedProject](
-		p, ctx,
-		models.AnthropicToolRequest{
-			Model:      p.baseConf.Agents.Coder.Model,
-			MaxTokens:  p.baseConf.Agents.Coder.MaxTokens,
-			System:     chat_prompts.PromptChunkedCoderAdminPanel,
-			Messages:   []models.ChatMessage{{Role: "user", Content: []models.ContentBlock{{Type: "text", Text: sb.String()}}}},
-			Tools:      []models.ClaudeFunctionTool{helper.ToolEmitProject},
-			ToolChoice: helper.ForcedTool(helper.ToolEmitProject.Name),
-		},
-		p.baseConf.Agents.Coder.Timeout,
+	project, err := p.agent.GenerateCodeNoHistory(
+		ctx,
+		p.baseConf.Agents.Coder,
+		chat_prompts2.PromptChunkedCoderAdminPanel,
+		sb.String(),
 		fmt.Sprintf("Generating feature chunk: %s", group.Name),
 	)
 	if err != nil {
@@ -1172,97 +1012,6 @@ func (p *ChatProcessor) validateAndRepairGeneratedProject(ctx context.Context, p
 	return errorCount
 }
 
-func (p *ChatProcessor) inspectCode(ctx context.Context, userQuestion, filesContext string, chatHistory []models.ChatMessage, imageURLs []string) (string, error) {
-	content := chat_prompts.BuildInspectorMessage(userQuestion, filesContext)
-	messages := buildMessagesWithHistory(chatHistory, buildContentBlocksWithImages(content, imageURLs))
-
-	response, err := p.callAnthropicWithTracking(
-		ctx,
-		models.AnthropicRequest{
-			Model:     p.baseConf.Agents.Inspector.Model,
-			MaxTokens: p.baseConf.Agents.Inspector.MaxTokens,
-			System:    chat_prompts.PromptInspector,
-			Messages:  messages,
-		},
-		p.baseConf.Agents.Inspector.Timeout,
-		"Inspecting code context",
-	)
-	if err != nil {
-		return "", fmt.Errorf("inspector: %w", err)
-	}
-
-	answer, err := helper.ExtractPlainText(response)
-	if err != nil {
-		return "", fmt.Errorf("inspector: extract text: %w", err)
-	}
-	return answer, nil
-}
-
-func (p *ChatProcessor) planChanges(ctx context.Context, clarified, fileGraphJSON string, chatHistory []models.ChatMessage, hasImages bool) (*models.SonnetPlanResult, error) {
-	content := chat_prompts.BuildPlannerMessage(clarified, fileGraphJSON, hasImages)
-	messages := buildMessagesWithHistory(chatHistory, []models.ContentBlock{{Type: "text", Text: content}})
-
-	result, err := callWithTool[models.SonnetPlanResult](
-		p, ctx,
-		models.AnthropicToolRequest{
-			Model:      p.baseConf.Agents.Planner.Model,
-			MaxTokens:  p.baseConf.Agents.Planner.MaxTokens,
-			System:     chat_prompts.PromptPlanner,
-			Messages:   messages,
-			Tools:      []models.ClaudeFunctionTool{helper.ToolPlanChanges},
-			ToolChoice: helper.ForcedTool(helper.ToolPlanChanges.Name),
-		},
-		p.baseConf.Agents.Planner.Timeout,
-		"Planning code changes",
-	)
-	if err != nil {
-		return nil, fmt.Errorf("planner: %w", err)
-	}
-	return result, nil
-}
-
-func (p *ChatProcessor) editCode(ctx context.Context, clarified string, plan *models.SonnetPlanResult, filesContext string, chatHistory []models.ChatMessage, imageURLs []string) (*models.ParsedClaudeResponse, error) {
-	hasMatchingFiles := filesContext != "No existing files to modify." && filesContext != "No matching files found."
-
-	var (
-		systemPrompt  string
-		contentBlocks []models.ContentBlock
-	)
-
-	if hasMatchingFiles {
-		systemPrompt = chat_prompts.PromptCodeEditor
-		planJSON, _ := json.Marshal(plan)
-		content := chat_prompts.BuildCodeEditorMessage(clarified, string(planJSON), filesContext, len(imageURLs) > 0)
-		contentBlocks = buildContentBlocksWithImages(content, imageURLs)
-	} else {
-		log.Printf("[CODE] planned files not found in project, falling back to free generation")
-		systemPrompt = chat_prompts.PromptAdminPanelGenerator
-		contentBlocks = buildContentBlocksWithImages(clarified, imageURLs)
-	}
-
-	project, err := callWithTool[models.GeneratedProject](
-		p, ctx,
-		models.AnthropicToolRequest{
-			Model:      p.baseConf.Agents.Coder.Model,
-			MaxTokens:  p.baseConf.Agents.Coder.MaxTokens,
-			System:     systemPrompt,
-			Messages:   buildMessagesWithHistory(chatHistory, contentBlocks),
-			Tools:      []models.ClaudeFunctionTool{helper.ToolEmitProject},
-			ToolChoice: helper.ForcedTool(helper.ToolEmitProject.Name),
-		},
-		p.baseConf.Agents.Coder.Timeout,
-		"Applying/generating code changes",
-	)
-	if err != nil {
-		return nil, fmt.Errorf("code editor: %w", err)
-	}
-
-	return &models.ParsedClaudeResponse{
-		Project:     project,
-		Description: "Changes applied successfully.",
-	}, nil
-}
-
 func (p *ChatProcessor) generateCodeChunkedWebsite(ctx context.Context, clarified string, imageURLs []string, chatHistory []models.ChatMessage, plan *models.ArchitectPlan, apiKey string) (*models.ParsedClaudeResponse, error) {
 	log.Printf("[chunked-web] starting chunked website generation: %s", plan.ProjectName)
 	var (
@@ -1357,7 +1106,7 @@ func (p *ChatProcessor) generateCodeChunkedWebsite(ctx context.Context, clarifie
 			if foundErr == nil {
 				break
 			}
-			if attempt < 2 && !errors.Is(foundErr, helper.ErrMaxTokens) {
+			if attempt < 2 && !errors.Is(foundErr, anthropic.ErrMaxTokens) {
 				log.Printf("[chunked-web] foundation attempt %d failed (%v) — retrying", attempt, foundErr)
 			}
 		}
@@ -1374,7 +1123,7 @@ func (p *ChatProcessor) generateCodeChunkedWebsite(ctx context.Context, clarifie
 			defer wg.Done()
 			stub := buildFoundationStub(foundationGroup)
 			var e error
-			uiKit, e = p.generateUIKit(ctx, uiKitGroup, stub, p.baseConf.Agents.LandingCoder.Model)
+			uiKit, e = p.generateUIKit(ctx, uiKitGroup, stub, p.baseConf.Agents.LandingCoder)
 			if e != nil {
 				log.Printf("[chunked-web] UI kit failed (%v) — continuing without it", e)
 				return
@@ -1577,19 +1326,12 @@ func (p *ChatProcessor) generateWebsiteFoundation(ctx context.Context, clarified
 	sb.WriteString("REMINDER: Emit ONLY the Group 0 files listed above. DO NOT generate page content.\n")
 	sb.WriteString("====================================\n")
 
-	messages := buildMessagesWithHistory(chatHistory, buildContentBlocksWithImages(sb.String(), imageURLs))
-
-	project, err := callWithTool[models.GeneratedProject](
-		p, ctx,
-		models.AnthropicToolRequest{
-			Model:      p.baseConf.Agents.LandingCoder.Model,
-			MaxTokens:  p.baseConf.Agents.Coder.MaxTokens,
-			System:     chat_prompts.PromptWebsiteGenerator,
-			Messages:   messages,
-			Tools:      []models.ClaudeFunctionTool{helper.ToolEmitProject},
-			ToolChoice: helper.ForcedTool(helper.ToolEmitProject.Name),
-		},
-		p.baseConf.Agents.Coder.Timeout,
+	project, err := p.agent.GenerateCode(ctx,
+		p.baseConf.Agents.LandingCoder,
+		chat_prompts2.PromptWebsiteGenerator,
+		sb.String(),
+		imageURLs,
+		chatHistory,
 		"Generating website foundation (Group 0)",
 	)
 	if err != nil {
@@ -1623,17 +1365,11 @@ func (p *ChatProcessor) generateWebsitePage(ctx context.Context, group models.Ma
 	sb.WriteString("====================================\n")
 	sb.WriteString(manifestSummary)
 
-	project, err := callWithTool[models.GeneratedProject](
-		p, ctx,
-		models.AnthropicToolRequest{
-			Model:      p.baseConf.Agents.LandingCoder.Model,
-			MaxTokens:  p.baseConf.Agents.Coder.MaxTokens,
-			System:     chat_prompts.PromptWebsitePageCoder,
-			Messages:   []models.ChatMessage{{Role: "user", Content: []models.ContentBlock{{Type: "text", Text: sb.String()}}}},
-			Tools:      []models.ClaudeFunctionTool{helper.ToolEmitProject},
-			ToolChoice: helper.ForcedTool(helper.ToolEmitProject.Name),
-		},
-		p.baseConf.Agents.Coder.Timeout,
+	project, err := p.agent.GenerateCodeNoHistory(
+		ctx,
+		p.baseConf.Agents.LandingCoder,
+		chat_prompts2.PromptWebsitePageCoder,
+		sb.String(),
 		fmt.Sprintf("Generating website page: %s", group.Name),
 	)
 	if err != nil {

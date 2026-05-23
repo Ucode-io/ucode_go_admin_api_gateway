@@ -47,7 +47,12 @@ func (p *ChatProcessor) runMicrofrontendEdit(ctx context.Context, clarified, fil
 		},
 		func() error {
 			var e error
-			plan, e = p.planChanges(ctx, clarified, fileGraphJSON, chatHistory, len(imageURLs) > 0)
+			plan, e = p.agent.PlanChanges(ctx, models.PlannerInput{
+				Clarified:     clarified,
+				FileGraphJSON: fileGraphJSON,
+				HasImages:     len(imageURLs) > 0,
+				History:       chatHistory,
+			})
 			return e
 		},
 	); err != nil {
@@ -91,7 +96,7 @@ func (p *ChatProcessor) runMicrofrontendEdit(ctx context.Context, clarified, fil
 
 	emit.Emit(SSEEvent{Type: EvProgress, Icon: "code-2", Message: "Редактирую исходный код...", Percent: 20})
 
-	var edited *models.ParsedClaudeResponse
+	var editedProject *models.GeneratedProject
 	if err := withHeartbeat(ctx, emit,
 		[]string{
 			"Редактирую компоненты...",
@@ -102,24 +107,32 @@ func (p *ChatProcessor) runMicrofrontendEdit(ctx context.Context, clarified, fil
 			"Генерирую обновлённый код...",
 		},
 		func() error {
+			hasMatchingFiles := filesContext != "No existing files to modify." && filesContext != "No matching files found."
 			var e error
-			edited, e = p.editCode(ctx, clarified, plan, filesContext, chatHistory, imageURLs)
+			editedProject, e = p.agent.EditCode(ctx, models.EditorInput{
+				Clarified:        clarified,
+				Plan:             plan,
+				FilesContext:     filesContext,
+				Images:           imageURLs,
+				History:          chatHistory,
+				HasMatchingFiles: hasMatchingFiles,
+			})
 			return e
 		},
 	); err != nil {
 		return nil, err
 	}
 
-	if edited.Project == nil || len(edited.Project.Files) == 0 {
+	if editedProject == nil || len(editedProject.Files) == 0 {
 		log.Printf("[MICROFE EDIT] editor returned no files — nothing to push")
 		return &models.ParsedClaudeResponse{Description: buildUpdateSummary(plan, nil, p.userMessage)}, nil
 	}
 
-	log.Printf("[MICROFE EDIT] pushing %d file(s) to u-gen branch", len(edited.Project.Files))
+	log.Printf("[MICROFE EDIT] pushing %d file(s) to u-gen branch", len(editedProject.Files))
 
 	// Emit per-file publish events so user sees which files are being updated.
-	for i, f := range edited.Project.Files {
-		pct := 86 + (i+1)*10/len(edited.Project.Files) // 86↖96
+	for i, f := range editedProject.Files {
+		pct := 86 + (i+1)*10/len(editedProject.Files) // 86↖96
 		if pct > 96 {
 			pct = 96
 		}
@@ -146,20 +159,20 @@ func (p *ChatProcessor) runMicrofrontendEdit(ctx context.Context, clarified, fil
 		Type:    EvPublish,
 		Icon:    "upload-cloud",
 		Message: "Пушу изменения в GitLab",
-		Value:   fmt.Sprintf("%d файлов", len(edited.Project.Files)),
+		Value:   fmt.Sprintf("%d файлов", len(editedProject.Files)),
 		Percent: 97,
 	})
-	if err := p.pushMicrofrontendChangesChunked(ctx, edited.Project.Files); err != nil {
+	if err := p.pushMicrofrontendChangesChunked(ctx, editedProject.Files); err != nil {
 		return nil, fmt.Errorf("failed to push microfrontend changes: %w", err)
 	}
 
 	// Build full-state snapshot: merge AI-edited files into the full existing file list
 	// so that reverting to this snapshot restores ALL files to a consistent state.
-	editedMap := make(map[string]string, len(edited.Project.Files))
-	for _, f := range edited.Project.Files {
+	editedMap := make(map[string]string, len(editedProject.Files))
+	for _, f := range editedProject.Files {
 		editedMap[f.Path] = f.Content
 	}
-	fullSnapshot := make([]models.GitlabFileChange, 0, len(existingFiles)+len(edited.Project.Files))
+	fullSnapshot := make([]models.GitlabFileChange, 0, len(existingFiles)+len(editedProject.Files))
 	for _, f := range existingFiles {
 		if newContent, changed := editedMap[f.FilePath]; changed {
 			fullSnapshot = append(fullSnapshot, models.GitlabFileChange{FilePath: f.FilePath, Content: newContent})
@@ -169,21 +182,26 @@ func (p *ChatProcessor) runMicrofrontendEdit(ctx context.Context, clarified, fil
 		}
 	}
 	// Append newly created files not present in existingFiles.
-	for _, f := range edited.Project.Files {
+	for _, f := range editedProject.Files {
 		if _, isNew := editedMap[f.Path]; isNew {
 			fullSnapshot = append(fullSnapshot, models.GitlabFileChange{FilePath: f.Path, Content: f.Content})
 		}
 	}
-	p.createMicrofrontendSnapshot(ctx, fullSnapshot, edited.Description)
+	p.createMicrofrontendSnapshot(ctx, fullSnapshot, "Changes applied successfully.")
 
-	return &models.ParsedClaudeResponse{Description: buildUpdateSummary(plan, edited.Project.Files, p.userMessage)}, nil
+	return &models.ParsedClaudeResponse{Description: buildUpdateSummary(plan, editedProject.Files, p.userMessage)}, nil
 }
 
 // runMicrofrontendInspect answers questions about the microfrontend's current code
 // by loading the requested files from the u-gen branch.
 func (p *ChatProcessor) runMicrofrontendInspect(ctx context.Context, userQuestion string, filesNeeded []string, chatHistory []models.ChatMessage, imageURLs []string, existingFiles []models.GitlabFileChange) (*models.ParsedClaudeResponse, error) {
 	filesContext := p.buildMicrofrontendFilesContext(existingFiles, filesNeeded)
-	answer, err := p.inspectCode(ctx, userQuestion, filesContext, chatHistory, imageURLs)
+	answer, err := p.agent.InspectCode(ctx, models.InspectorInput{
+		Question:     userQuestion,
+		FilesContext: filesContext,
+		Images:       imageURLs,
+		History:      chatHistory,
+	})
 	if err != nil {
 		return nil, err
 	}

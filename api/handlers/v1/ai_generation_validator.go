@@ -7,9 +7,7 @@ import (
 	"regexp"
 	"strings"
 	"sync"
-	"time"
 
-	"ucode/ucode_go_api_gateway/api/handlers/helper"
 	"ucode/ucode_go_api_gateway/api/models"
 )
 
@@ -1051,26 +1049,10 @@ func (p *ChatProcessor) repairSingleFile(
 
 	fmt.Fprintf(&sb, "\nFILE: %s\n```typescript\n%s\n```\n", f.Path, f.Content)
 
-	fixed, err := callWithTool[repairFileResult](
-		p, ctx,
-		models.AnthropicToolRequest{
-			Model:      p.baseConf.Agents.Router.Model,
-			MaxTokens:  32000,
-			System:     "You are a TypeScript/TSX and premium admin-UI repair bot. Fix the listed errors: import mismatches, typos, displayName issues, Radix SelectItem empty-value runtime crashes, React infinite-recursion bugs where a component renders itself, admin UI quality failures, AND syntax errors like unbalanced braces/brackets/parentheses. For admin UI quality failures, preserve backend/API contracts and polish only the current file into a product-grade SaaS screen. Output the complete corrected file via the repair_file tool. Never truncate.",
-			Messages:   []models.ChatMessage{{Role: "user", Content: []models.ContentBlock{{Type: "text", Text: sb.String()}}}},
-			Tools:      []models.ClaudeFunctionTool{helper.ToolRepairFile},
-			ToolChoice: helper.ForcedTool(helper.ToolRepairFile.Name),
-		},
-		120*time.Second,
-		fmt.Sprintf("Repairing %s", f.Path),
-	)
-	if err != nil {
-		return models.ProjectFile{}, err
-	}
-	if fixed.Content == "" {
-		return models.ProjectFile{}, fmt.Errorf("repair returned empty content")
-	}
-	return models.ProjectFile{Path: f.Path, Content: fixed.Content}, nil
+	return p.agent.RepairFile(ctx, models.RepairFileInput{
+		File:       f,
+		UserPrompt: sb.String(),
+	})
 }
 
 // applyRepairs patches repaired file contents back into the file list in-place.

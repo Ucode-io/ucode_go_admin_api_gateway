@@ -9,9 +9,11 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"ucode/ucode_go_api_gateway/api/handlers/ai"
+	"ucode/ucode_go_api_gateway/api/handlers/ai/anthropic"
+	"ucode/ucode_go_api_gateway/api/handlers/ai/chat_prompts"
 	"ucode/ucode_go_api_gateway/api/handlers/billing"
 	"ucode/ucode_go_api_gateway/api/handlers/helper"
-	"ucode/ucode_go_api_gateway/api/handlers/helper/chat_prompts"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/config"
 	as "ucode/ucode_go_api_gateway/genproto/auth_service"
@@ -61,7 +63,8 @@ type ChatProcessor struct {
 	tokenBudgetRemain  int64
 	tokenBudgetSnap    models.TokenBudgetSnapshot
 
-	emit ProgressEmitter
+	agent ai.Agent
+	emit  ProgressEmitter
 }
 
 func (p *ChatProcessor) emitter() ProgressEmitter {
@@ -72,7 +75,7 @@ func (p *ChatProcessor) emitter() ProgressEmitter {
 }
 
 func newChatProcessor(h *HandlerV1, service services.ServiceManagerI, baseConf config.BaseConfig, chatId, mcpProjectId, resourceEnvId, ucodeProjectId string, userId, clientTypeId, roleId, authToken string) *ChatProcessor {
-	return &ChatProcessor{
+	p := &ChatProcessor{
 		h:               h,
 		service:         service,
 		companyServices: h.companyServices,
@@ -86,6 +89,8 @@ func newChatProcessor(h *HandlerV1, service services.ServiceManagerI, baseConf c
 		roleId:          roleId,
 		authToken:       authToken,
 	}
+	p.agent = anthropic.NewAnthropicAgent(baseConf, p)
+	return p
 }
 
 // ============================================================================
@@ -119,7 +124,11 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 		},
 		func() error {
 			var err error
-			plan, err = p.callArchitect(ctx, clarified, imageURLs, chatHistory, "")
+			plan, err = p.agent.ArchitectProject(ctx, models.ArchitectInput{
+				Clarified: clarified,
+				Images:    imageURLs,
+				History:   chatHistory,
+			})
 			return err
 		},
 	)
@@ -187,7 +196,10 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 		go func() {
 			defer provWg.Done()
 
-			eagerManifest, err = p.generateManifest(ctx, plan, chatHistory)
+			eagerManifest, err = p.agent.GenerateManifest(ctx, models.ManifestInput{
+				Plan:    plan,
+				History: chatHistory,
+			})
 			if err == nil && eagerManifest != nil && len(eagerManifest.Groups) >= 2 {
 				log.Printf("[new-project] eager manifest ready: %d groups", len(eagerManifest.Groups))
 			} else {
@@ -298,7 +310,12 @@ func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context,
 		},
 		func() error {
 			var e error
-			plan, e = p.callArchitect(ctx, clarified, imageURLs, chatHistory, schemaCtx)
+			plan, e = p.agent.ArchitectProject(ctx, models.ArchitectInput{
+				Clarified:         clarified,
+				ExistingSchemaCtx: schemaCtx,
+				Images:            imageURLs,
+				History:           chatHistory,
+			})
 			return e
 		},
 	); err != nil {
@@ -671,7 +688,8 @@ func (p *ChatProcessor) runVisualEdit(ctx context.Context, instruction string, c
 	prompt := chat_prompts.BuildVisualEditPrompt(instruction, resolvedContexts, filesContext)
 	messages := buildMessagesWithHistory(chatHistory, buildContentBlocksWithImages(prompt, imageURLs))
 
-	var edited *visualEditOutput
+	var editedFiles []models.ProjectFile
+	var editedSummary string
 
 	err = withHeartbeat(
 		ctx, emit,
@@ -684,42 +702,31 @@ func (p *ChatProcessor) runVisualEdit(ctx context.Context, instruction string, c
 		},
 		func() error {
 			var errIn error
-			edited, errIn = callWithTool[visualEditOutput](
-				p, ctx,
-				models.AnthropicToolRequest{
-					Model:      p.baseConf.Agents.Coder.Model,
-					MaxTokens:  p.baseConf.Agents.Coder.MaxTokens,
-					System:     chat_prompts.PromptVisualEdit,
-					Messages:   messages,
-					Tools:      []models.ClaudeFunctionTool{helper.ToolEmitVisualEdit},
-					ToolChoice: helper.ForcedTool(helper.ToolEmitVisualEdit.Name),
-				},
-				p.baseConf.Agents.Coder.Timeout,
-				fmt.Sprintf("Visual edit: %d elements in %d files", len(resolvedContexts), len(targetPaths)),
-			)
+			editedFiles, editedSummary, errIn = p.agent.VisualEdit(ctx, models.VisualEditInput{Messages: messages})
 			return errIn
 		},
 	)
 	if err != nil {
 		return nil, fmt.Errorf("visual edit: claude call failed: %w", err)
 	}
+	_ = editedSummary
 
-	if len(edited.Files) > 0 {
+	if len(editedFiles) > 0 {
 		emit.Emit(
 			SSEEvent{
 				Type:    EvPublish,
 				Icon:    "upload-cloud",
 				Message: "Публикую изменения",
-				Value:   fmt.Sprintf("%d файл(ов)", len(edited.Files)),
+				Value:   fmt.Sprintf("%d файл(ов)", len(editedFiles)),
 				Percent: 90,
 			},
 		)
-		if pushErr := p.pushMicrofrontendChanges(ctx, edited.Files); pushErr != nil {
+		if pushErr := p.pushMicrofrontendChanges(ctx, editedFiles); pushErr != nil {
 			return nil, fmt.Errorf("visual edit: push to u-gen failed: %w", pushErr)
 		}
 
-		editedMap := make(map[string]string, len(edited.Files))
-		for _, f := range edited.Files {
+		editedMap := make(map[string]string, len(editedFiles))
+		for _, f := range editedFiles {
 			editedMap[f.Path] = f.Content
 		}
 
@@ -735,15 +742,15 @@ func (p *ChatProcessor) runVisualEdit(ctx context.Context, instruction string, c
 		for path, content := range editedMap {
 			fullSnapshot = append(fullSnapshot, models.GitlabFileChange{FilePath: path, Content: content})
 		}
-		p.createMicrofrontendSnapshot(ctx, fullSnapshot, edited.ChangeSummary)
+		p.createMicrofrontendSnapshot(ctx, fullSnapshot, editedSummary)
 	}
 
-	description := edited.ChangeSummary
+	description := editedSummary
 	if description == "" {
 		description = "✅ Visual edit applied successfully."
 	}
 
-	log.Printf("[VISUAL EDIT] ✅ done — %d files pushed to u-gen, summary=%s", len(edited.Files), description)
+	log.Printf("[VISUAL EDIT] ✅ done — %d files pushed to u-gen, summary=%s", len(editedFiles), description)
 	return &models.ParsedClaudeResponse{Description: description}, nil
 }
 

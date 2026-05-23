@@ -1,4 +1,4 @@
-package helper
+package anthropic
 
 import "ucode/ucode_go_api_gateway/api/models"
 
@@ -32,8 +32,8 @@ var ToolArchitectPlan = models.ClaudeFunctionTool{
 				"description": "User role names extracted from the 'user-types' question answer. Each entry creates a separate client_type + role record. admin_panel: always at least [\"Administrator\"]. landing/web: empty [].",
 			},
 			"image_keywords": map[string]any{
-				"type":  "array",
-				"items": map[string]any{"type": "string"},
+				"type":        "array",
+				"items":       map[string]any{"type": "string"},
 				"description": "2–4 Unsplash search terms that visually represent this project's real-world domain. Be specific and physical: ['freight truck highway','warehouse forklift','shipping containers'] for logistics; ['espresso barista','cafe interior'] for coffee; ['doctor patient','clinic'] for healthcare. NEVER use generic terms like 'business','technology','office','app'.",
 			},
 			"project_type": map[string]any{
@@ -299,7 +299,6 @@ var ToolRepairFile = models.ClaudeFunctionTool{
 	},
 }
 
-// ForcedTool returns a ToolChoice that forces Claude to call a specific tool by name.
 func ForcedTool(toolName string) *models.ToolChoice {
 	return &models.ToolChoice{Type: "tool", Name: toolName}
 }

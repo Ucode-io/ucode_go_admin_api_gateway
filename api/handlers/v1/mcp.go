@@ -6,8 +6,9 @@ import (
 	"fmt"
 	"log"
 	"time"
+	"ucode/ucode_go_api_gateway/api/handlers/ai/anthropic"
 	"ucode/ucode_go_api_gateway/api/handlers/helper"
-	"ucode/ucode_go_api_gateway/api/handlers/helper/chat_prompts/mcp_prompts"
+	"ucode/ucode_go_api_gateway/api/handlers/helper/mcp_prompts"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
@@ -625,7 +626,7 @@ func (h *HandlerV1) generateBackendPlan(userPrompt string) (string, error) {
 		apiResponse models.ClaudeResponse
 	)
 
-	respText, err := helper.CallAnthropicAPI(h.baseConf, body, 300*time.Second)
+	respText, err := anthropic.CallAnthropicAPI(h.baseConf, body, 300*time.Second)
 	if err != nil {
 		return "", fmt.Errorf("backend plan API call failed: %w", err)
 	}
@@ -677,7 +678,7 @@ func (h *HandlerV1) generateFrontendPlan(userPrompt string, imageURLs []string) 
 		},
 	}
 
-	respText, err := helper.CallAnthropicAPI(h.baseConf, body, 300*time.Second)
+	respText, err := anthropic.CallAnthropicAPI(h.baseConf, body, 300*time.Second)
 	if err != nil {
 		return "", fmt.Errorf("frontend plan API call failed: %w", err)
 	}
@@ -732,7 +733,7 @@ func (h *HandlerV1) saveFrontendProject(ctx context.Context, services services.S
 // ==================== Send Anthropic Request methods ====================
 
 func (h *HandlerV1) sendAnthropicBackend(content string) (string, error) {
-	return helper.CallAnthropicAPI(h.baseConf,
+	return anthropic.CallAnthropicAPI(h.baseConf,
 		models.AnthropicRequest{
 			Model:     h.baseConf.ClaudeModel,
 			MaxTokens: h.baseConf.MaxTokens,
@@ -803,7 +804,7 @@ func (h *HandlerV1) generateFrontendProject(userPrompt string, imageURLs []strin
 		},
 	}
 
-	respText, err := helper.CallAnthropicAPI(h.baseConf, body, 420*time.Second)
+	respText, err := anthropic.CallAnthropicAPI(h.baseConf, body, 420*time.Second)
 	if err != nil {
 		return nil, err
 	}
@@ -849,7 +850,7 @@ func (h *HandlerV1) classifyRequest(prompt string, imageURLs []string) (*models.
 		classification models.RequestClassification
 	)
 
-	respText, err := helper.CallAnthropicAPI(h.baseConf, body, 60*time.Second)
+	respText, err := anthropic.CallAnthropicAPI(h.baseConf, body, 60*time.Second)
 	if err != nil {
 		return nil, fmt.Errorf("classification API call failed: %w", err)
 	}
@@ -914,7 +915,7 @@ func (h *HandlerV1) analyzeProject(userPrompt string, imageURLs []string) (*mode
 		},
 	}
 
-	respText, err := helper.CallAnthropicAPI(h.baseConf, body, 120*time.Second)
+	respText, err := anthropic.CallAnthropicAPI(h.baseConf, body, 120*time.Second)
 	if err != nil {
 		return nil, err
 	}
@@ -986,7 +987,7 @@ func (h *HandlerV1) updateProject(userPrompt string, imageURLs []string) (*model
 		},
 	}
 
-	respText, err := helper.CallAnthropicAPI(h.baseConf, body, 420*time.Second)
+	respText, err := anthropic.CallAnthropicAPI(h.baseConf, body, 420*time.Second)
 	if err != nil {
 		return nil, err
 	}

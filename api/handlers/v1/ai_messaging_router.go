@@ -2,31 +2,26 @@ package v1
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"strings"
-	"ucode/ucode_go_api_gateway/api/handlers/helper/chat_prompts"
-
-	"ucode/ucode_go_api_gateway/api/handlers/helper"
 	"ucode/ucode_go_api_gateway/api/models"
 )
 
 const (
-	intentAskQuestion    = "ask_question"
-	intentPlanRequest    = "plan_request"
-	intentClarify        = "clarify"
+	intentAskQuestion     = "ask_question"
+	intentPlanRequest     = "plan_request"
+	intentClarify         = "clarify"
 	intentProjectQuestion = "project_question"
-	intentProjectInspect = "project_inspect"
-	intentCodeChange     = "code_change"
-	intentDatabaseQuery  = "database_query"
+	intentProjectInspect  = "project_inspect"
+	intentCodeChange      = "code_change"
+	intentDatabaseQuery   = "database_query"
 )
 
 func (p *ChatProcessor) routeAndProcess(ctx context.Context, req models.NewMessageReq, chatHistory []models.ChatMessage) (*models.ParsedClaudeResponse, error) {
 	// Token budget enforcement is temporarily disabled.
 	// Usage is still recorded after Anthropic calls for pricing analytics.
 	// p.initTokenBudget(ctx)
-	//
-	// if err := p.checkTokenBudget(); err != nil {
+	// if err := p.Check(); err != nil {
 	// 	return nil, err
 	// }
 
@@ -57,7 +52,12 @@ func (p *ChatProcessor) routeAndProcess(ctx context.Context, req models.NewMessa
 		}
 	}
 
-	routeResult, err := p.routeRequest(req.Content, fileGraphJSON, hasImages, chatHistory)
+	routeResult, err := p.agent.RouteRequest(ctx, models.RouterInput{
+		UserMessage:   req.Content,
+		FileGraphJSON: fileGraphJSON,
+		HasImages:     hasImages,
+		History:       chatHistory,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -123,34 +123,4 @@ func (p *ChatProcessor) runCodeChange(ctx context.Context, clarified, fileGraphJ
 
 	log.Printf("[CODE] new_project=false — creating microFrontend in current project")
 	return p.buildMicrofrontendForCurrentProject(ctx, clarified, chatHistory, imageURLs, projectName)
-}
-
-func (p *ChatProcessor) routeRequest(userPrompt, fileGraphJSON string, hasImages bool, chatHistory []models.ChatMessage) (*models.HaikuRoutingResult, error) {
-	historyText := buildHistoryText(chatHistory)
-	content := chat_prompts.BuildRouterMessage(userPrompt, fileGraphJSON, hasImages, historyText)
-
-	response, err := p.callAnthropicWithTracking(
-		context.Background(),
-		models.AnthropicRequest{
-			Model:     p.baseConf.Agents.Router.Model,
-			MaxTokens: p.baseConf.Agents.Router.MaxTokens,
-			System:    chat_prompts.PromptRouter,
-			Messages: []models.ChatMessage{
-				{Role: "user", Content: []models.ContentBlock{{Type: "text", Text: content}}},
-			},
-		},
-		p.baseConf.Agents.Router.Timeout,
-		"Routing user intent",
-	)
-	if err != nil {
-		return nil, fmt.Errorf("router (haiku): %w", err)
-	}
-
-	result, err := helper.ParseHaikuRoutingResult(response)
-	if err != nil {
-		return nil, fmt.Errorf("router: parse failed: %w", err)
-	}
-
-	result.HasImages = hasImages
-	return result, nil
 }
