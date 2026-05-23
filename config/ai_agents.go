@@ -34,7 +34,7 @@ type (
 )
 
 func loadGeminiAgents() AIAgents {
-	const flash = "gemini-2.0-flash"
+	const flash = "gemini-2.5-flash"
 
 	return AIAgents{
 		Router: AgentConfig{
