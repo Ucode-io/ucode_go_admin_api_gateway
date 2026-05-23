@@ -1,11 +1,11 @@
 package anthropic
 
 import (
-	"errors"
+	"ucode/ucode_go_api_gateway/api/handlers/ai"
 	"ucode/ucode_go_api_gateway/api/models"
 )
 
-var ErrMaxTokens = errors.New("generation stopped: output exceeded the token limit")
+var ErrMaxTokens = ai.ErrMaxTokens
 
 type (
 	// ── Anthropic REST wire types ─────────────────────────────────────────────

@@ -9,7 +9,7 @@ import (
 	"strings"
 	"sync"
 	"time"
-	"ucode/ucode_go_api_gateway/api/handlers/ai/anthropic"
+	"ucode/ucode_go_api_gateway/api/handlers/ai"
 	chat_prompts2 "ucode/ucode_go_api_gateway/api/handlers/ai/chat_prompts"
 	"ucode/ucode_go_api_gateway/config"
 
@@ -286,7 +286,7 @@ func (p *ChatProcessor) generateCodeChunkedAdminPanel(ctx context.Context, clari
 			if foundErr == nil {
 				break
 			}
-			if attempt < 2 && !errors.Is(foundErr, anthropic.ErrMaxTokens) {
+			if attempt < 2 && !errors.Is(foundErr, ai.ErrMaxTokens) {
 				log.Printf("[chunked] foundation attempt %d failed (%v) — retrying", attempt, foundErr)
 			}
 		}
@@ -1106,7 +1106,7 @@ func (p *ChatProcessor) generateCodeChunkedWebsite(ctx context.Context, clarifie
 			if foundErr == nil {
 				break
 			}
-			if attempt < 2 && !errors.Is(foundErr, anthropic.ErrMaxTokens) {
+			if attempt < 2 && !errors.Is(foundErr, ai.ErrMaxTokens) {
 				log.Printf("[chunked-web] foundation attempt %d failed (%v) — retrying", attempt, foundErr)
 			}
 		}

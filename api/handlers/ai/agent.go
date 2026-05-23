@@ -2,10 +2,14 @@ package ai
 
 import (
 	"context"
+	"errors"
 
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/config"
 )
+
+// ErrMaxTokens is the shared sentinel for "output token limit exceeded" across all providers.
+var ErrMaxTokens = errors.New("generation stopped: output exceeded the token limit")
 
 type UsageTracker interface {
 	RecordUsage(usage models.LLMUsage, model, desc string)

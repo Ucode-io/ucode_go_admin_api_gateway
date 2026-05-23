@@ -1,8 +1,9 @@
 package gemini
 
-import "errors"
+import "ucode/ucode_go_api_gateway/api/handlers/ai"
 
-var ErrMaxTokens = errors.New("generation stopped: output exceeded the token limit")
+// ErrMaxTokens aliases ai.ErrMaxTokens so errors.Is checks within this package still work.
+var ErrMaxTokens = ai.ErrMaxTokens
 
 type (
 	geminiRequest struct {

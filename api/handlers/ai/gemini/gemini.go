@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -101,30 +102,52 @@ func doRequest(apiKey, model string, timeout time.Duration, body geminiRequest) 
 	}
 
 	url := fmt.Sprintf(baseURL, model, apiKey)
-	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(jsonBody))
-	if err != nil {
-		return geminiResponse{}, fmt.Errorf("gemini: create request: %w", err)
-	}
-	req.Header.Set("Content-Type", "application/json")
-
 	client := &http.Client{Timeout: timeout}
-	httpResp, err := client.Do(req)
-	if err != nil {
-		return geminiResponse{}, fmt.Errorf("gemini: request failed: %w", err)
-	}
-	defer httpResp.Body.Close()
 
-	respBytes, err := io.ReadAll(httpResp.Body)
-	if err != nil {
-		return geminiResponse{}, fmt.Errorf("gemini: read response: %w", err)
-	}
-	if httpResp.StatusCode != http.StatusOK {
-		return geminiResponse{}, fmt.Errorf("gemini: unexpected status %d: %s", httpResp.StatusCode, string(respBytes))
+	const maxRetries = 4
+	backoffs := []time.Duration{10 * time.Second, 30 * time.Second, 60 * time.Second}
+
+	for attempt := 0; attempt < maxRetries; attempt++ {
+		if attempt > 0 {
+			wait := backoffs[attempt-1]
+			log.Printf("[GEMINI] 429 rate limit — waiting %v before retry %d/%d (model=%s)", wait, attempt, maxRetries-1, model)
+			time.Sleep(wait)
+		}
+
+		req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(jsonBody))
+		if err != nil {
+			return geminiResponse{}, fmt.Errorf("gemini: create request: %w", err)
+		}
+		req.Header.Set("Content-Type", "application/json")
+
+		httpResp, err := client.Do(req)
+		if err != nil {
+			return geminiResponse{}, fmt.Errorf("gemini: request failed: %w", err)
+		}
+
+		respBytes, readErr := io.ReadAll(httpResp.Body)
+		httpResp.Body.Close()
+		if readErr != nil {
+			return geminiResponse{}, fmt.Errorf("gemini: read response: %w", readErr)
+		}
+
+		if httpResp.StatusCode == http.StatusTooManyRequests {
+			if attempt < maxRetries-1 {
+				continue
+			}
+			return geminiResponse{}, fmt.Errorf("gemini: rate limit exceeded after %d retries: %s", maxRetries, string(respBytes))
+		}
+
+		if httpResp.StatusCode != http.StatusOK {
+			return geminiResponse{}, fmt.Errorf("gemini: unexpected status %d: %s", httpResp.StatusCode, string(respBytes))
+		}
+
+		var resp geminiResponse
+		if err = json.Unmarshal(respBytes, &resp); err != nil {
+			return geminiResponse{}, fmt.Errorf("gemini: parse response: %w", err)
+		}
+		return resp, nil
 	}
 
-	var resp geminiResponse
-	if err = json.Unmarshal(respBytes, &resp); err != nil {
-		return geminiResponse{}, fmt.Errorf("gemini: parse response: %w", err)
-	}
-	return resp, nil
+	return geminiResponse{}, fmt.Errorf("gemini: all retries exhausted (model=%s)", model)
 }
