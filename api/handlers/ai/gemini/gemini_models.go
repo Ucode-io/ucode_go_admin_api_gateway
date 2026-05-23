@@ -6,11 +6,11 @@ var ErrMaxTokens = errors.New("generation stopped: output exceeded the token lim
 
 type (
 	geminiRequest struct {
-		SystemInstruction *geminiContent   `json:"system_instruction,omitempty"`
+		SystemInstruction *geminiContent   `json:"systemInstruction,omitempty"`
 		Contents          []geminiContent  `json:"contents"`
 		Tools             []geminiTool     `json:"tools,omitempty"`
-		ToolConfig        *geminiToolCfg   `json:"tool_config,omitempty"`
-		GenerationConfig  generationConfig `json:"generation_config"`
+		ToolConfig        *geminiToolCfg   `json:"toolConfig,omitempty"`
+		GenerationConfig  generationConfig `json:"generationConfig"`
 	}
 
 	geminiContent struct {
@@ -19,13 +19,13 @@ type (
 	}
 
 	geminiPart struct {
-		Text         string           `json:"text,omitempty"`
-		InlineData   *geminiInline    `json:"inline_data,omitempty"`
-		FunctionCall *geminiFuncCall  `json:"function_call,omitempty"`
+		Text         string          `json:"text,omitempty"`
+		InlineData   *geminiInline   `json:"inlineData,omitempty"`
+		FunctionCall *geminiFuncCall `json:"functionCall,omitempty"`
 	}
 
 	geminiInline struct {
-		MimeType string `json:"mime_type"`
+		MimeType string `json:"mimeType"`
 		Data     string `json:"data"` // base64-encoded
 	}
 
@@ -35,7 +35,7 @@ type (
 	}
 
 	geminiTool struct {
-		FunctionDeclarations []funcDeclaration `json:"function_declarations"`
+		FunctionDeclarations []funcDeclaration `json:"functionDeclarations"`
 	}
 
 	funcDeclaration struct {
@@ -45,30 +45,30 @@ type (
 	}
 
 	geminiToolCfg struct {
-		FunctionCallingConfig funcCallingConfig `json:"function_calling_config"`
+		FunctionCallingConfig funcCallingConfig `json:"functionCallingConfig"`
 	}
 
 	funcCallingConfig struct {
 		Mode                 string   `json:"mode"` // "AUTO" | "ANY" | "NONE"
-		AllowedFunctionNames []string `json:"allowed_function_names,omitempty"`
+		AllowedFunctionNames []string `json:"allowedFunctionNames,omitempty"`
 	}
 
 	generationConfig struct {
-		MaxOutputTokens int `json:"max_output_tokens"`
+		MaxOutputTokens int `json:"maxOutputTokens"`
 	}
 
 	geminiResponse struct {
 		Candidates    []geminiCandidate `json:"candidates"`
-		UsageMetadata geminiUsage       `json:"usage_metadata"`
+		UsageMetadata geminiUsage       `json:"usageMetadata"`
 	}
 
 	geminiCandidate struct {
 		Content      geminiContent `json:"content"`
-		FinishReason string        `json:"finish_reason"` // "STOP" | "MAX_TOKENS" | "SAFETY" | ...
+		FinishReason string        `json:"finishReason"` // "STOP" | "MAX_TOKENS" | "SAFETY" | ...
 	}
 
 	geminiUsage struct {
-		PromptTokenCount     int `json:"prompt_token_count"`
-		CandidatesTokenCount int `json:"candidates_token_count"`
+		PromptTokenCount     int `json:"promptTokenCount"`
+		CandidatesTokenCount int `json:"candidatesTokenCount"`
 	}
 )
