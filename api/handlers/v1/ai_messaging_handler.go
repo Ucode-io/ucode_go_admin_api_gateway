@@ -98,10 +98,18 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 		processor.ucodeProjectId = userMessage.UcodeProjectID
 	}
 
-	if proj, projErr := h.companyServices.Project().GetById(ctx, &pb.GetProjectByIdRequest{ProjectId: realProjectID}); projErr == nil {
-		processor.companyId = proj.GetCompanyId()
-		processor.fareId = proj.GetFareId()
+	proj, projErr := h.companyServices.Project().GetById(ctx, &pb.GetProjectByIdRequest{ProjectId: realProjectID})
+	if projErr != nil {
+		h.HandleResponse(c, status_http.GRPCError, fmt.Sprintf("failed to get project: %v", projErr))
+		return
 	}
+	processor.companyId = proj.GetCompanyId()
+	processor.fareId = proj.GetFareId()
+	if processor.fareId == "" {
+		h.HandleResponse(c, status_http.GRPCError, "project fare not found")
+		return
+	}
+	processor.initAgent()
 
 	chatHistory, err := processor.getChatHistory(ctx)
 	if err != nil {
@@ -361,7 +369,7 @@ func (h *HandlerV1) handleStreamingMessage(c *gin.Context, processor *ChatProces
 		processor.emitter().Emit(SSEEvent{
 			Type:    EvProvider,
 			Icon:    "cpu",
-			Message: fmt.Sprintf("AI provider: %s (%s)", provData.Provider, provData.CoderModel),
+			Message: processor.providerLabel(),
 			Data:    provData,
 		})
 		processor.emitter().Emit(

@@ -210,7 +210,7 @@ func BaseLoad() BaseConfig {
 	config.AnthropicVersion = cast.ToString(GetOrReturnDefaultValue("ANTHROPIC_VERSION", ""))
 	config.ClaudeModel = cast.ToString(GetOrReturnDefaultValue("CLAUDE_MODEL", ""))
 
-	config.AIProvider = AIProvider(cast.ToString(GetOrReturnDefaultValue("AI_PROVIDER", string(AIProviderGemini))))
+	config.AIProvider = AIProvider(cast.ToString(GetOrReturnDefaultValue("AI_PROVIDER", string(AIProviderClaude))))
 	config.Agents = loadAIAgents()
 	config.GeminiAgents = loadGeminiAgents()
 

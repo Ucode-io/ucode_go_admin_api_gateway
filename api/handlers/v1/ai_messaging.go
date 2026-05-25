@@ -77,13 +77,35 @@ func (p *ChatProcessor) agentCfgs() config.AIAgents {
 	}
 }
 
+func (p *ChatProcessor) isFree() bool {
+	return p.fareId == config.UGEN_FREE_PLAN_ID
+}
+
 func (p *ChatProcessor) providerEventData() ProviderEventData {
+	// Free-tier: interactive=Gemini (router/edit), generation=Claude (code/architect).
+	if p.isFree() {
+		return ProviderEventData{
+			Provider:    "gemini+claude",
+			RouterModel: p.baseConf.GeminiAgents.Router.Model,
+			CoderModel:  p.baseConf.Agents.Coder.Model,
+		}
+	}
 	cfgs := p.agentCfgs()
 	return ProviderEventData{
 		Provider:    string(p.baseConf.AIProvider),
 		RouterModel: cfgs.Router.Model,
 		CoderModel:  cfgs.Coder.Model,
 	}
+}
+
+// providerLabel returns a human-readable string shown in the SSE stream so the
+// user knows exactly which model handles their request.
+func (p *ChatProcessor) providerLabel() string {
+	d := p.providerEventData()
+	if p.isFree() {
+		return fmt.Sprintf("%s (routing) · %s (generation)", d.RouterModel, d.CoderModel)
+	}
+	return d.CoderModel
 }
 
 func (p *ChatProcessor) emitter() ProgressEmitter {
@@ -108,14 +130,26 @@ func newChatProcessor(h *HandlerV1, service services.ServiceManagerI, baseConf c
 		roleId:          roleId,
 		authToken:       authToken,
 	}
-	switch baseConf.AIProvider {
-	case config.AIProviderGemini:
-		p.agent = gemini.NewGeminiAgent(baseConf, h.geminiKeyPool, p)
-	default:
-		p.agent = anthropic.NewAnthropicAgent(baseConf, p)
-	}
-	log.Printf("[ai] provider=%s router=%s coder=%s", baseConf.AIProvider, p.agentCfgs().Router.Model, p.agentCfgs().Coder.Model)
 	return p
+}
+
+func (p *ChatProcessor) initAgent() {
+	if p.fareId == config.UGEN_FREE_PLAN_ID {
+		p.agent = ai.NewDualAgent(
+			gemini.NewGeminiAgent(p.baseConf, p.h.geminiKeyPool, p),
+			anthropic.NewAnthropicAgent(p.baseConf, p),
+		)
+		log.Printf("[ai] free tier: interactive=gemini generation=anthropic")
+		return
+	}
+	switch p.baseConf.AIProvider {
+	case config.AIProviderGemini:
+		p.agent = gemini.NewGeminiAgent(p.baseConf, p.h.geminiKeyPool, p)
+	default:
+		p.agent = anthropic.NewAnthropicAgent(p.baseConf, p)
+	}
+	cfgs := p.agentCfgs()
+	log.Printf("[ai] provider=%s router=%s coder=%s", p.baseConf.AIProvider, cfgs.Router.Model, cfgs.Coder.Model)
 }
 
 // ============================================================================
