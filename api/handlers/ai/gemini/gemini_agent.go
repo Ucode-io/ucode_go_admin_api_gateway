@@ -15,11 +15,16 @@ import (
 
 type GeminiAgent struct {
 	conf    config.BaseConfig
+	pool    *KeyPool
 	tracker ai.UsageTracker
 }
 
-func NewGeminiAgent(conf config.BaseConfig, tracker ai.UsageTracker) ai.Agent {
-	return &GeminiAgent{conf: conf, tracker: tracker}
+func NewGeminiAgent(conf config.BaseConfig, pool *KeyPool, tracker ai.UsageTracker) ai.Agent {
+	// If no pool provided, build a single-key pool from config as fallback.
+	if pool == nil && conf.GeminiAPIKey != "" {
+		pool, _ = NewKeyPool([]string{conf.GeminiAPIKey})
+	}
+	return &GeminiAgent{conf: conf, pool: pool, tracker: tracker}
 }
 
 func (a *GeminiAgent) RouteRequest(_ context.Context, in models.RouterInput) (*models.HaikuRoutingResult, error) {
@@ -31,7 +36,7 @@ func (a *GeminiAgent) RouteRequest(_ context.Context, in models.RouterInput) (*m
 	}
 
 	cfg := a.conf.GeminiAgents.Router
-	text, usage, err := callGeminiText(a.conf, cfg, chat_prompts.PromptRouter, contents)
+	text, usage, err := callGeminiText(a.pool, cfg, chat_prompts.PromptRouter, contents)
 	a.tracker.RecordUsage(usage, cfg.Model, "Routing user intent")
 	a.tracker.Deduct(int64(usage.InputTokens + usage.OutputTokens))
 	if err != nil {
@@ -55,7 +60,7 @@ func (a *GeminiAgent) ArchitectProject(_ context.Context, in models.ArchitectInp
 	contents := buildGeminiContents(in.History, buildGeminiParts(userMsg, in.Images))
 
 	cfg := a.conf.GeminiAgents.Architect
-	raw, usage, err := callGeminiTool(a.conf, cfg, chat_prompts.PromptArchitect, contents, toolArchitectPlan)
+	raw, usage, err := callGeminiTool(a.pool, cfg, chat_prompts.PromptArchitect, contents, toolArchitectPlan)
 	a.tracker.RecordUsage(usage, cfg.Model, "Architecting project structure")
 	a.tracker.Deduct(int64(usage.InputTokens + usage.OutputTokens))
 	if err != nil {
@@ -96,7 +101,7 @@ func (a *GeminiAgent) GenerateManifest(_ context.Context, in models.ManifestInpu
 	contents := buildGeminiContents(in.History, []geminiPart{{Text: sb.String()}})
 
 	cfg := a.conf.GeminiAgents.Planner
-	raw, usage, err := callGeminiTool(a.conf, cfg, systemPrompt, contents, toolEmitManifest)
+	raw, usage, err := callGeminiTool(a.pool, cfg, systemPrompt, contents, toolEmitManifest)
 	a.tracker.RecordUsage(usage, cfg.Model, "Generating file manifest")
 	a.tracker.Deduct(int64(usage.InputTokens + usage.OutputTokens))
 	if err != nil {
@@ -115,7 +120,7 @@ func (a *GeminiAgent) PlanChanges(_ context.Context, in models.PlannerInput) (*m
 	contents := buildGeminiContents(in.History, []geminiPart{{Text: content}})
 
 	cfg := a.conf.GeminiAgents.Planner
-	raw, usage, err := callGeminiTool(a.conf, cfg, chat_prompts.PromptPlanner, contents, toolPlanChanges)
+	raw, usage, err := callGeminiTool(a.pool, cfg, chat_prompts.PromptPlanner, contents, toolPlanChanges)
 	a.tracker.RecordUsage(usage, cfg.Model, "Planning code changes")
 	a.tracker.Deduct(int64(usage.InputTokens + usage.OutputTokens))
 	if err != nil {
@@ -134,7 +139,7 @@ func (a *GeminiAgent) InspectCode(_ context.Context, in models.InspectorInput) (
 	contents := buildGeminiContents(in.History, buildGeminiParts(content, in.Images))
 
 	cfg := a.conf.GeminiAgents.Inspector
-	text, usage, err := callGeminiText(a.conf, cfg, chat_prompts.PromptInspector, contents)
+	text, usage, err := callGeminiText(a.pool, cfg, chat_prompts.PromptInspector, contents)
 	a.tracker.RecordUsage(usage, cfg.Model, "Inspecting code context")
 	a.tracker.Deduct(int64(usage.InputTokens + usage.OutputTokens))
 	if err != nil {
@@ -163,7 +168,7 @@ func (a *GeminiAgent) EditCode(_ context.Context, in models.EditorInput) (*model
 	contents := buildGeminiContents(in.History, parts)
 
 	cfg := a.conf.GeminiAgents.Coder
-	raw, usage, err := callGeminiTool(a.conf, cfg, systemPrompt, contents, toolEmitProject)
+	raw, usage, err := callGeminiTool(a.pool, cfg, systemPrompt, contents, toolEmitProject)
 	a.tracker.RecordUsage(usage, cfg.Model, "Applying code changes")
 	a.tracker.Deduct(int64(usage.InputTokens + usage.OutputTokens))
 	if err != nil {
@@ -180,7 +185,7 @@ func (a *GeminiAgent) EditCode(_ context.Context, in models.EditorInput) (*model
 func (a *GeminiAgent) GenerateCode(_ context.Context, agentCfg config.AgentConfig, systemPrompt, userPrompt string, images []string, history []models.ChatMessage, desc string) (*models.GeneratedProject, error) {
 	contents := buildGeminiContents(history, buildGeminiParts(userPrompt, images))
 
-	raw, usage, err := callGeminiTool(a.conf, agentCfg, systemPrompt, contents, toolEmitProject)
+	raw, usage, err := callGeminiTool(a.pool, agentCfg, systemPrompt, contents, toolEmitProject)
 	a.tracker.RecordUsage(usage, agentCfg.Model, desc)
 	a.tracker.Deduct(int64(usage.InputTokens + usage.OutputTokens))
 	if err != nil {
@@ -199,7 +204,7 @@ func (a *GeminiAgent) GenerateCodeNoHistory(_ context.Context, agentCfg config.A
 		{Role: "user", Parts: []geminiPart{{Text: userPrompt}}},
 	}
 
-	raw, usage, err := callGeminiTool(a.conf, agentCfg, systemPrompt, contents, toolEmitProject)
+	raw, usage, err := callGeminiTool(a.pool, agentCfg, systemPrompt, contents, toolEmitProject)
 	a.tracker.RecordUsage(usage, agentCfg.Model, desc)
 	a.tracker.Deduct(int64(usage.InputTokens + usage.OutputTokens))
 	if err != nil {
@@ -217,7 +222,7 @@ func (a *GeminiAgent) VisualEdit(_ context.Context, in models.VisualEditInput) (
 	contents := convertMessages(in.Messages)
 
 	cfg := a.conf.GeminiAgents.Coder
-	raw, usage, err := callGeminiTool(a.conf, cfg, chat_prompts.PromptVisualEdit, contents, toolEmitVisualEdit)
+	raw, usage, err := callGeminiTool(a.pool, cfg, chat_prompts.PromptVisualEdit, contents, toolEmitVisualEdit)
 	a.tracker.RecordUsage(usage, cfg.Model, "Visual edit")
 	a.tracker.Deduct(int64(usage.InputTokens + usage.OutputTokens))
 	if err != nil {
@@ -244,7 +249,7 @@ func (a *GeminiAgent) RepairFile(_ context.Context, in models.RepairFileInput) (
 	}
 	const repairSystem = "You are a TypeScript/TSX and premium admin-UI repair bot. Fix the listed errors: import mismatches, typos, displayName issues, Radix SelectItem empty-value runtime crashes, React infinite-recursion bugs where a component renders itself, admin UI quality failures, AND syntax errors like unbalanced braces/brackets/parentheses. For admin UI quality failures, preserve backend/API contracts and polish only the current file into a product-grade SaaS screen. Output the complete corrected file via the repair_file tool. Never truncate."
 
-	raw, usage, err := callGeminiTool(a.conf, repairCfg, repairSystem, contents, toolRepairFile)
+	raw, usage, err := callGeminiTool(a.pool, repairCfg, repairSystem, contents, toolRepairFile)
 	a.tracker.RecordUsage(usage, repairCfg.Model, fmt.Sprintf("Repair %s", in.File.Path))
 	a.tracker.Deduct(int64(usage.InputTokens + usage.OutputTokens))
 	if err != nil {
@@ -268,7 +273,7 @@ func (a *GeminiAgent) DatabaseQuery(_ context.Context, in models.DatabaseQueryIn
 	contents := buildGeminiContents(in.History, []geminiPart{{Text: content}})
 
 	cfg := a.conf.GeminiAgents.Inspector
-	text, usage, err := callGeminiText(a.conf, cfg, chat_prompts.PromptDatabaseAssistant, contents)
+	text, usage, err := callGeminiText(a.pool, cfg, chat_prompts.PromptDatabaseAssistant, contents)
 	a.tracker.RecordUsage(usage, cfg.Model, "Database query")
 	a.tracker.Deduct(int64(usage.InputTokens + usage.OutputTokens))
 	if err != nil {

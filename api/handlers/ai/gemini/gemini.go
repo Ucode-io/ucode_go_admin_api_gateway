@@ -18,14 +18,14 @@ const baseURL = "https://generativelanguage.googleapis.com/v1beta/models/%s:gene
 
 // callGeminiText sends a free-text request (no tools) and returns the text content
 // of the first candidate. Used by RouteRequest, InspectCode, DatabaseQuery.
-func callGeminiText(conf config.BaseConfig, agentCfg config.AgentConfig, system string, contents []geminiContent) (string, models.LLMUsage, error) {
+func callGeminiText(pool *KeyPool, agentCfg config.AgentConfig, system string, contents []geminiContent) (string, models.LLMUsage, error) {
 	req := geminiRequest{
 		SystemInstruction: systemContent(system),
 		Contents:          contents,
 		GenerationConfig:  generationConfig{MaxOutputTokens: agentCfg.MaxTokens},
 	}
 
-	resp, err := doRequest(conf.GeminiAPIKey, agentCfg.Model, agentCfg.Timeout, req)
+	resp, err := doRequest(pool, agentCfg.Model, agentCfg.Timeout, req)
 	if err != nil {
 		return "", models.LLMUsage{}, err
 	}
@@ -47,7 +47,7 @@ func callGeminiText(conf config.BaseConfig, agentCfg config.AgentConfig, system 
 
 // callGeminiTool sends a function-calling request with mode=ANY forcing the model
 // to call the specified tool. Returns the raw JSON bytes of the function args.
-func callGeminiTool(conf config.BaseConfig, agentCfg config.AgentConfig, system string, contents []geminiContent, tool funcDeclaration) ([]byte, models.LLMUsage, error) {
+func callGeminiTool(pool *KeyPool, agentCfg config.AgentConfig, system string, contents []geminiContent, tool funcDeclaration) ([]byte, models.LLMUsage, error) {
 	req := geminiRequest{
 		SystemInstruction: systemContent(system),
 		Contents:          contents,
@@ -61,7 +61,7 @@ func callGeminiTool(conf config.BaseConfig, agentCfg config.AgentConfig, system 
 		GenerationConfig: generationConfig{MaxOutputTokens: agentCfg.MaxTokens},
 	}
 
-	resp, err := doRequest(conf.GeminiAPIKey, agentCfg.Model, agentCfg.Timeout, req)
+	resp, err := doRequest(pool, agentCfg.Model, agentCfg.Timeout, req)
 	if err != nil {
 		return nil, models.LLMUsage{}, err
 	}
@@ -95,26 +95,25 @@ func callGeminiTool(conf config.BaseConfig, agentCfg config.AgentConfig, system 
 		tool.Name, cand.FinishReason)
 }
 
-func doRequest(apiKey, model string, timeout time.Duration, body geminiRequest) (geminiResponse, error) {
+// doRequest executes a Gemini API call with automatic key rotation on 429.
+// On each 429 the key is cooled down and the next key is tried immediately.
+// Returns ErrAllKeysRateLimited (via pick) if every key is on cooldown.
+func doRequest(pool *KeyPool, model string, timeout time.Duration, body geminiRequest) (geminiResponse, error) {
 	jsonBody, err := json.Marshal(body)
 	if err != nil {
 		return geminiResponse{}, fmt.Errorf("gemini: marshal request: %w", err)
 	}
 
-	url := fmt.Sprintf(baseURL, model, apiKey)
 	client := &http.Client{Timeout: timeout}
+	maxAttempts := len(pool.keys) // each attempt either succeeds or burns one key
 
-	const maxRetries = 4
-	backoffs := []time.Duration{10 * time.Second, 30 * time.Second, 60 * time.Second}
-
-	for attempt := 0; attempt < maxRetries; attempt++ {
-		if attempt > 0 {
-			wait := backoffs[attempt-1]
-			log.Printf("[GEMINI] 429 rate limit — waiting %v before retry %d/%d (model=%s)", wait, attempt, maxRetries-1, model)
-			time.Sleep(wait)
+	for attempt := 0; attempt < maxAttempts; attempt++ {
+		key, idx, err := pool.pick()
+		if err != nil {
+			return geminiResponse{}, err // ErrAllKeysRateLimited — surface immediately
 		}
 
-		req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(jsonBody))
+		req, err := http.NewRequest(http.MethodPost, fmt.Sprintf(baseURL, model, key), bytes.NewBuffer(jsonBody))
 		if err != nil {
 			return geminiResponse{}, fmt.Errorf("gemini: create request: %w", err)
 		}
@@ -132,14 +131,15 @@ func doRequest(apiKey, model string, timeout time.Duration, body geminiRequest) 
 		}
 
 		if httpResp.StatusCode == http.StatusTooManyRequests {
-			if attempt < maxRetries-1 {
-				continue
-			}
-			return geminiResponse{}, fmt.Errorf("gemini: rate limit exceeded after %d retries: %s", maxRetries, string(respBytes))
+			log.Printf("[GEMINI] key[%d] 429 (attempt %d/%d, model=%s) — rotating key",
+				idx, attempt+1, maxAttempts, model)
+			pool.markRateLimited(idx)
+			continue
 		}
 
 		if httpResp.StatusCode != http.StatusOK {
-			return geminiResponse{}, fmt.Errorf("gemini: unexpected status %d: %s", httpResp.StatusCode, string(respBytes))
+			return geminiResponse{}, fmt.Errorf("gemini: unexpected status %d: %s",
+				httpResp.StatusCode, string(respBytes))
 		}
 
 		var resp geminiResponse
@@ -149,5 +149,5 @@ func doRequest(apiKey, model string, timeout time.Duration, body geminiRequest) 
 		return resp, nil
 	}
 
-	return geminiResponse{}, fmt.Errorf("gemini: all retries exhausted (model=%s)", model)
+	return geminiResponse{}, fmt.Errorf("gemini: all %d key attempts exhausted (model=%s)", maxAttempts, model)
 }
