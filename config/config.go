@@ -3,6 +3,7 @@ package config
 import (
 	"log"
 	"os"
+	"strings"
 
 	"github.com/joho/godotenv"
 	"github.com/spf13/cast"
@@ -118,8 +119,9 @@ type BaseConfig struct {
 
 	AIProvider AIProvider
 
-	GeminiAPIKey string
-	GeminiAgents AIAgents
+	GeminiAPIKey  string
+	GeminiAPIKeys []string
+	GeminiAgents  AIAgents
 
 	AutomationURL   string
 	OpenFaaSBaseUrl string
@@ -212,7 +214,7 @@ func BaseLoad() BaseConfig {
 	config.Agents = loadAIAgents()
 	config.GeminiAgents = loadGeminiAgents()
 
-	config.GeminiAPIKey = cast.ToString(GetOrReturnDefaultValue("GEMINI_API_KEY", ""))
+	config.GeminiAPIKeys, config.GeminiAPIKey = loadGeminiKeys()
 
 	config.AutomationURL = cast.ToString(GetOrReturnDefaultValue("AUTOMATION_URL", ""))
 	config.OpenFaaSBaseUrl = cast.ToString(GetOrReturnDefaultValue("OPENFAAS_BASE_URL", ""))
@@ -302,10 +304,29 @@ func Load() Config {
 
 func GetOrReturnDefaultValue(key string, defaultValue any) any {
 	val, exists := os.LookupEnv(key)
-
 	if exists {
 		return val
 	}
-
 	return defaultValue
+}
+
+// loadGeminiKeys reads API keys from env.
+// GEMINI_API_KEYS (comma-separated) takes priority; falls back to GEMINI_API_KEY.
+// Returns (keys, primaryKey).
+func loadGeminiKeys() ([]string, string) {
+	if raw := cast.ToString(GetOrReturnDefaultValue("GEMINI_API_KEYS", "")); raw != "" {
+		var keys []string
+		for _, k := range strings.Split(raw, ",") {
+			if k = strings.TrimSpace(k); k != "" {
+				keys = append(keys, k)
+			}
+		}
+		if len(keys) > 0 {
+			return keys, keys[0]
+		}
+	}
+	if single := cast.ToString(GetOrReturnDefaultValue("GEMINI_API_KEY", "")); single != "" {
+		return []string{single}, single
+	}
+	return nil, ""
 }

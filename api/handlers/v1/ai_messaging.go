@@ -110,7 +110,7 @@ func newChatProcessor(h *HandlerV1, service services.ServiceManagerI, baseConf c
 	}
 	switch baseConf.AIProvider {
 	case config.AIProviderGemini:
-		p.agent = gemini.NewGeminiAgent(baseConf, p)
+		p.agent = gemini.NewGeminiAgent(baseConf, h.geminiKeyPool, p)
 	default:
 		p.agent = anthropic.NewAnthropicAgent(baseConf, p)
 	}

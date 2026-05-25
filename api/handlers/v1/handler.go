@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"net/url"
@@ -13,6 +14,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"ucode/ucode_go_api_gateway/api/handlers/ai/gemini"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
@@ -45,10 +47,11 @@ type HandlerV1 struct {
 	cache           *caching.ExpiringLRUCache
 	rateLimiter     *util.ApiKeyRateLimiter
 	vault           vault.VaultClient
+	geminiKeyPool   *gemini.KeyPool
 }
 
 func NewHandlerV1(baseConf config.BaseConfig, projectConfs map[string]config.Config, log logger.LoggerI, svcs services.ServiceNodesI, cmpServ services.CompanyServiceI, authService services.AuthServiceManagerI, redis storage.RedisStorageI, centralRedis *go_redis.Client, cache *caching.ExpiringLRUCache, limiter *util.ApiKeyRateLimiter, vaultClient vault.VaultClient) HandlerV1 {
-	return HandlerV1{
+	h := HandlerV1{
 		baseConf:        baseConf,
 		projectConfs:    projectConfs,
 		log:             log,
@@ -61,6 +64,16 @@ func NewHandlerV1(baseConf config.BaseConfig, projectConfs map[string]config.Con
 		rateLimiter:     limiter,
 		vault:           vaultClient,
 	}
+	if len(baseConf.GeminiAPIKeys) > 0 {
+		pool, err := gemini.NewKeyPool(baseConf.GeminiAPIKeys)
+		if err != nil {
+			log.Error(fmt.Sprintf("[gemini] key pool error: %v", err))
+		} else {
+			h.geminiKeyPool = pool
+			log.Info(fmt.Sprintf("[gemini] key pool ready: %d keys", len(baseConf.GeminiAPIKeys)))
+		}
+	}
+	return h
 }
 
 func (h *HandlerV1) GetProjectSrvc(c context.Context, projectId string, nodeType string) (services.ServiceManagerI, error) {
