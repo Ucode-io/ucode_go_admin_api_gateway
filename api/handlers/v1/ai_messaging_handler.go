@@ -372,14 +372,13 @@ func (h *HandlerV1) handleStreamingMessage(c *gin.Context, processor *ChatProces
 			Message: processor.providerLabel(),
 			Data:    provData,
 		})
-		processor.emitter().Emit(
-			SSEEvent{
-				Type:    EvProgress,
-				Icon:    "sparkles",
-				Message: "Начинаю обработку...",
-				Percent: 1,
-			},
-		)
+		processor.emitter().Emit(SSEEvent{
+			Type:    EvProgress,
+			Icon:    "sparkles",
+			Message: "Начинаю обработку...",
+			Value:   processor.routerModel(),
+			Percent: 1,
+		})
 
 		aiResponse, pipelineErr := processor.routeAndProcess(pipelineCtx, userMessage, chatHistory)
 		if pipelineErr != nil {
