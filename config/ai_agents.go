@@ -120,4 +120,3 @@ func loadAIAgents() AIAgents {
 		},
 	}
 }
-

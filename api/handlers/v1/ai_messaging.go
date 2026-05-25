@@ -108,12 +108,11 @@ func (p *ChatProcessor) generationModel() string {
 }
 
 func (p *ChatProcessor) providerEventData() ProviderEventData {
-	// Free-tier: interactive=Gemini (router/edit), generation=Claude (code/architect).
 	if p.isFree() {
 		return ProviderEventData{
 			Provider:    "gemini+claude",
 			RouterModel: p.baseConf.GeminiAgents.Router.Model,
-			CoderModel:  p.baseConf.Agents.Coder.Model,
+			CoderModel:  p.baseConf.Agents.Architect.Model, // architect runs first for generation
 		}
 	}
 	cfgs := p.agentCfgs()
@@ -124,14 +123,19 @@ func (p *ChatProcessor) providerEventData() ProviderEventData {
 	}
 }
 
-// providerLabel returns a human-readable string shown in the SSE stream so the
-// user knows exactly which model handles their request.
+// providerLabel returns the model name for the current request shown in the first SSE event.
 func (p *ChatProcessor) providerLabel() string {
-	d := p.providerEventData()
-	if p.isFree() {
-		return fmt.Sprintf("%s (routing) · %s (generation)", d.RouterModel, d.CoderModel)
+	if !p.isFree() {
+		return p.agentCfgs().Coder.Model
 	}
-	return d.CoderModel
+	switch {
+	case p.newProject:
+		return p.generationModel()
+	case p.microFrontendId != "":
+		return p.interactiveModel()
+	default:
+		return p.routerModel()
+	}
 }
 
 func (p *ChatProcessor) emitter() ProgressEmitter {
@@ -160,7 +164,7 @@ func newChatProcessor(h *HandlerV1, service services.ServiceManagerI, baseConf c
 }
 
 func (p *ChatProcessor) initAgent() {
-	if p.fareId == config.UGEN_FREE_PLAN_ID {
+	if p.isFree() {
 		p.agent = ai.NewDualAgent(
 			gemini.NewGeminiAgent(p.baseConf, p.h.geminiKeyPool, p),
 			anthropic.NewAnthropicAgent(p.baseConf, p),
