@@ -109,6 +109,7 @@ func (p *ChatProcessor) generateCodeSingle(ctx context.Context, clarified string
 
 	var project *models.GeneratedProject
 	if err := withHeartbeat(ctx, p.emitter(),
+		p.generationModel(),
 		[]string{
 			"Генерирую React компоненты...",
 			"Создаю страницы и формы...",
@@ -317,6 +318,7 @@ func (p *ChatProcessor) generateCodeChunkedAdminPanel(ctx context.Context, clari
 	}
 
 	err := withHeartbeat(ctx, emit,
+		p.generationModel(),
 		[]string{
 			"Генерирую layout, sidebar и навигацию...",
 			"Создаю UI компоненты и дизайн-систему...",
@@ -1134,6 +1136,7 @@ func (p *ChatProcessor) generateCodeChunkedWebsite(ctx context.Context, clarifie
 	}
 
 	err := withHeartbeat(ctx, emit,
+		p.generationModel(),
 		[]string{
 			"Генерирую Layout и навигацию...",
 			"Создаю Navbar и Footer...",

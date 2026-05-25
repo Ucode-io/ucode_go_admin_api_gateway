@@ -81,6 +81,32 @@ func (p *ChatProcessor) isFree() bool {
 	return p.fareId == config.UGEN_FREE_PLAN_ID
 }
 
+// routerModel returns the model that classifies user intent (RouteRequest).
+func (p *ChatProcessor) routerModel() string {
+	if p.isFree() {
+		return p.baseConf.GeminiAgents.Router.Model
+	}
+	return p.agentCfgs().Router.Model
+}
+
+// interactiveModel returns the model used for latency-sensitive calls:
+// PlanChanges, EditCode, InspectCode, VisualEdit, DatabaseQuery.
+func (p *ChatProcessor) interactiveModel() string {
+	if p.isFree() {
+		return p.baseConf.GeminiAgents.Planner.Model
+	}
+	return p.agentCfgs().Planner.Model
+}
+
+// generationModel returns the model used for quality-sensitive calls:
+// ArchitectProject, GenerateManifest, GenerateCode, RepairFile.
+func (p *ChatProcessor) generationModel() string {
+	if p.isFree() {
+		return p.baseConf.Agents.Architect.Model
+	}
+	return p.agentCfgs().Architect.Model
+}
+
 func (p *ChatProcessor) providerEventData() ProviderEventData {
 	// Free-tier: interactive=Gemini (router/edit), generation=Claude (code/architect).
 	if p.isFree() {
@@ -171,6 +197,7 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 
 	err := withHeartbeat(
 		ctx, emit,
+		p.generationModel(),
 		[]string{
 			"Анализирую требования...",
 			"Проектирую структуру базы данных...",
@@ -357,6 +384,7 @@ func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context,
 
 	var plan *models.ArchitectPlan
 	if err := withHeartbeat(ctx, emit,
+		p.generationModel(),
 		[]string{
 			"Анализирую требования...",
 			"Проектирую структуру базы данных...",
@@ -752,6 +780,7 @@ func (p *ChatProcessor) runVisualEdit(ctx context.Context, instruction string, c
 
 	err = withHeartbeat(
 		ctx, emit,
+		p.interactiveModel(),
 		[]string{
 			"Редактирую компоненты...",
 			"Применяю визуальные изменения...",

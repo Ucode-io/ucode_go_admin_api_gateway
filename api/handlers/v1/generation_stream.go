@@ -118,7 +118,7 @@ func writeSSEEvent(w io.Writer, ev SSEEvent) {
 	fmt.Fprintf(w, "data: %s\n\n", data)
 }
 
-func withHeartbeat(ctx context.Context, emit ProgressEmitter, messages []string, fn func() error) error {
+func withHeartbeat(ctx context.Context, emit ProgressEmitter, model string, messages []string, fn func() error) error {
 	done := make(chan error, 1)
 	go func() { done <- fn() }()
 
@@ -132,7 +132,7 @@ func withHeartbeat(ctx context.Context, emit ProgressEmitter, messages []string,
 		case err := <-done:
 			return err
 		case <-ticker.C:
-			emit.Emit(SSEEvent{Type: EvProgress, Icon: "brain", Message: messages[msgIdx%len(messages)], Percent: 10})
+			emit.Emit(SSEEvent{Type: EvProgress, Icon: "brain", Message: messages[msgIdx%len(messages)], Value: model, Percent: 10})
 			msgIdx++
 		case <-ctx.Done():
 			return ctx.Err()
