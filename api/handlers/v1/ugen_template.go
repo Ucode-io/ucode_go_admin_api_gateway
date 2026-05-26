@@ -60,7 +60,29 @@ func (h *HandlerV1) enrichCreateUgenTemplateSource(c *gin.Context, req *pb.Creat
 		return fmt.Errorf("mcp_project_id is required")
 	}
 	if req.GetSourceResourceEnvId() == "" {
-		return fmt.Errorf("source_resource_env_id is required")
+		projectID, ok := c.Get("project_id")
+		if !ok || !util.IsValidUUID(projectID.(string)) {
+			return config.ErrProjectIdValid
+		}
+		environmentID, ok := c.Get("environment_id")
+		if !ok || !util.IsValidUUID(environmentID.(string)) {
+			return config.ErrEnvironmentIdValid
+		}
+		resource, err := h.companyServices.ServiceResource().GetSingle(
+			ctx,
+			&pb.GetSingleServiceResourceReq{
+				ProjectId:     projectID.(string),
+				EnvironmentId: environmentID.(string),
+				ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+			},
+		)
+		if err != nil {
+			return fmt.Errorf("get source builder resource from context: %w", err)
+		}
+		if resource.GetResourceEnvironmentId() == "" {
+			return fmt.Errorf("source_resource_env_id could not be resolved from current project")
+		}
+		req.SourceResourceEnvId = resource.GetResourceEnvironmentId()
 	}
 	if req.GetSourceFunctionId() == "" {
 		return fmt.Errorf("source_function_id is required")
