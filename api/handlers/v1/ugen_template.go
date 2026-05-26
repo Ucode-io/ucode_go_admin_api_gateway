@@ -141,7 +141,7 @@ func (h *HandlerV1) enrichCreateUgenTemplateSource(c *gin.Context, req *pb.Creat
 		ctx,
 		&pbo.FunctionPrimaryKey{
 			Id:        req.GetSourceFunctionId(),
-			ProjectId: req.GetSourceResourceEnvId(),
+			ProjectId: req.GetSourceMcpResourceEnvId(),
 		},
 	)
 	if err != nil {
