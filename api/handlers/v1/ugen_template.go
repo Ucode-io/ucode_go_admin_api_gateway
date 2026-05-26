@@ -80,7 +80,7 @@ func (h *HandlerV1) enrichCreateUgenTemplateSource(c *gin.Context, req *pb.Creat
 	if _, err = sourceMcpService.GoObjectBuilderService().McpProject().GetMcpProjectFiles(
 		ctx,
 		&pbo.McpProjectId{
-			ResourceEnvId: sourceMcpResourceEnvID,
+			ResourceEnvId: req.GetSourceResourceEnvId(),
 			Id:            req.GetMcpProjectId(),
 			WithoutFiles:  true,
 		},
