@@ -57,6 +57,9 @@ var (
 	// Matches: const X, let X, var X, function X, class X — local declarations
 	reLocalDecl = regexp.MustCompile(`(?:const|let|var|function|class)\s+([A-Z]\w+)`)
 
+	// Matches word-apostrophe-word: Ko'rildi, Og'zaki, it's — unquoted in JS = build crash.
+	reWordApostropheWord = regexp.MustCompile(`[A-Za-z]'[A-Za-z]`)
+
 	// Matches common React component declarations.
 	reComponentFunctionDecl = regexp.MustCompile(`(?:export\s+default\s+|export\s+)?function\s+([A-Z]\w*)\s*\(`)
 	reComponentConstArrow   = regexp.MustCompile(`(?s)(?:export\s+)?const\s+([A-Z]\w*)\s*=\s*(?:React\.memo\s*\()?[^=;]{0,240}=>`)
@@ -227,6 +230,13 @@ func validateGeneratedProject(files []models.ProjectFile, envVars map[string]any
 				Severity: "error",
 				File:     f.Path,
 				Message:  syntaxErr,
+			})
+		}
+		if apostropheErr := checkUnquotedApostropheWords(f.Content); apostropheErr != "" {
+			errors = append(errors, ValidationError{
+				Severity: "error",
+				File:     f.Path,
+				Message:  apostropheErr,
 			})
 		}
 	}
@@ -742,6 +752,91 @@ func validateEnvVars(files []models.ProjectFile, envVars map[string]any) []Valid
 	return errors
 }
 
+func isAlphaNumeric(c byte) bool {
+	return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '_' || c == '$'
+}
+
+// maskDoubleAndBacktickStrings replaces content inside "..." and `...` with spaces
+// so apostrophe checks don't produce false positives on properly-quoted strings.
+func maskDoubleAndBacktickStrings(line string) string {
+	var b strings.Builder
+	i := 0
+	for i < len(line) {
+		c := line[i]
+		switch c {
+		case '"':
+			b.WriteByte('"')
+			i++
+			for i < len(line) && line[i] != '"' {
+				if line[i] == '\\' && i+1 < len(line) {
+					i++
+					b.WriteByte(' ')
+				}
+				b.WriteByte(' ')
+				i++
+			}
+			if i < len(line) {
+				b.WriteByte('"')
+				i++
+			}
+		case '`':
+			b.WriteByte('`')
+			i++
+			for i < len(line) && line[i] != '`' {
+				if line[i] == '\\' && i+1 < len(line) {
+					i += 2
+					b.WriteString("  ")
+					continue
+				}
+				b.WriteByte(' ')
+				i++
+			}
+			if i < len(line) {
+				b.WriteByte('`')
+				i++
+			}
+		default:
+			b.WriteByte(c)
+			i++
+		}
+	}
+	return b.String()
+}
+
+// checkUnquotedApostropheWords detects words like Ko'rildi, Og'zaki used as bare
+// JavaScript identifiers (not wrapped in string quotes). Esbuild treats the apostrophe
+// as a string opener, producing "Expected } but found [word]" build crashes.
+// Returns a single error string listing ALL affected lines so the repair pass fixes them all.
+func checkUnquotedApostropheWords(content string) string {
+	lines := strings.Split(content, "\n")
+	var badLines []int
+	for i, line := range lines {
+		trimmed := strings.TrimSpace(line)
+		if trimmed == "" ||
+			strings.HasPrefix(trimmed, "//") ||
+			strings.HasPrefix(trimmed, "*") ||
+			strings.HasPrefix(trimmed, "/*") {
+			continue
+		}
+		// Mask properly-quoted strings so "Ko'rildi" or `Ko'rildi` don't trigger.
+		stripped := maskDoubleAndBacktickStrings(line)
+		if reWordApostropheWord.MatchString(stripped) {
+			badLines = append(badLines, i+1)
+		}
+	}
+	if len(badLines) == 0 {
+		return ""
+	}
+	lineNums := make([]string, len(badLines))
+	for i, ln := range badLines {
+		lineNums[i] = fmt.Sprintf("%d", ln)
+	}
+	return fmt.Sprintf(
+		"SYNTAX ERROR (lines %s): word(s) with apostrophe used as unquoted JS expression (e.g. Ko'rildi, Og'zaki, Ko'rib chiqilmoqda) — esbuild crashes with 'Expected } but found [word]'. Scan the ENTIRE file and wrap EVERY such word in double quotes: Ko'rildi → \"Ko'rildi\", Ko'rib chiqilmoqda → \"Ko'rib chiqilmoqda\". Check arrays, object values, const assignments, JSX attributes. JSX text nodes like <Badge>Ko'rildi</Badge> are the only exception.",
+		strings.Join(lineNums, ", "),
+	)
+}
+
 // checkBraceBalance scans a TypeScript/TSX file and returns an error message
 // if braces {}, brackets [], or parentheses () are unbalanced.
 // It respects string literals (single/double/backtick), comments (// and /* */),
@@ -809,7 +904,14 @@ func checkBraceBalance(content string) string {
 		}
 
 		// Skip string literals (single quote).
+		// EXCEPTION: if ' is immediately preceded by a letter/digit it is an apostrophe
+		// inside a word (Uzbek: Ko'rildi, French: it's) — NOT a JS string opener.
+		// Real JS string openers are always preceded by whitespace or a punctuator.
 		if c == '\'' {
+			if i > 0 && isAlphaNumeric(content[i-1]) {
+				i++ // treat as ordinary character, not string delimiter
+				continue
+			}
 			i++
 			for i < n && content[i] != '\'' {
 				if content[i] == '\\' {
@@ -1043,6 +1145,7 @@ func (p *ChatProcessor) repairSingleFile(
 	sb.WriteString("  - For 'component X renders <X> inside itself': this is infinite React recursion. Replace the inner <X> with the intended wrapper element (<div>, <main>, <Outlet />) or import the correct different component name. A component must never render itself directly.\n")
 	sb.WriteString("  - For '<SelectItem value=\"\">' errors: Radix SelectItem values cannot be empty strings. Replace empty option values with non-empty sentinel strings such as 'all', 'none', or 'unassigned'. Update state/filter logic so the sentinel means no filter / empty relation, but NEVER render value=\"\" on SelectItem.\n")
 	sb.WriteString("  - For 'admin UI quality' errors: perform a focused visual/product polish pass on this file. Preserve every API endpoint, hook, mutation, entity field, JSON extraction, route, and generated type. Improve layout density, hierarchy, cards, filters, status chips, detail drawer/dialog, states, and domain-specific widgets only.\n")
+	sb.WriteString("  - For 'word with apostrophe used as unquoted JS expression' errors: the file contains Uzbek/non-ASCII text like Ko'rildi, Ko'rib chiqilmoqda, Og'zaki used directly as JavaScript identifiers without string quotes. This crashes esbuild. Find EVERY such word in arrays, object property values, variable assignments, JSX attribute values — wrap each one in double quotes. Example: { label: Ko'rildi } → { label: \"Ko'rildi\" }, [Ko'rib] → [\"Ko'rib\"]. JSX text nodes are fine: <Badge>Ko'rildi</Badge> does NOT need change, only JS expression contexts.\n")
 	sb.WriteString("  - For brace/bracket/paren imbalance: carefully trace through the file and find the exact location of the missing or extra delimiter. Common causes: unclosed ternary in JSX, missing closing brace in .map() callback, extra } after a component return, unclosed template literal.\n")
 	sb.WriteString("  - NEVER use angle-bracket type assertions in .tsx files (const x = <Type>value). ALWAYS use 'as' syntax (const x = value as Type).\n")
 	sb.WriteString("  - Output the complete corrected file. Never truncate.\n")

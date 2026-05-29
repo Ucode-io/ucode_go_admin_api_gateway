@@ -75,6 +75,30 @@ APOSTROPHE RULE (CRITICAL — prevents build crash):
   RIGHT: <p>{"chef's table"}</p>             — wrap in JS string inside JSX expression
   RIGHT: remove apostrophe from CSS/className values entirely
 
+NON-ENGLISH TEXT WITH APOSTROPHES (CRITICAL — most common crash for Uzbek/French/CIS projects):
+  Uzbek words like Ko'rildi, Ko'rib chiqilmoqda, Og'zaki, Qo'shimcha contain ASCII apostrophe.
+  In JavaScript, a bare apostrophe after a letter is NEVER a string delimiter — it is a SYNTAX ERROR.
+  Esbuild crashes with "Expected } but found [word]" when these appear unquoted in JS code.
+
+  RULE: Any text containing an apostrophe MUST be wrapped in double quotes in ALL JS/TS contexts:
+
+  WRONG — object literal value:   { label: Ko'rildi }
+  WRONG — array element:          [Ko'rildi, Ko'rib chiqilmoqda]
+  WRONG — variable assignment:    const x = Ko'rildi
+  WRONG — JSX attribute:          <Badge title={Ko'rildi} />
+  WRONG — JSX expression:         <Badge>{Ko'rildi}</Badge>
+  WRONG — function argument:      toast.success(Muvaffaqiyatli saqlandi)
+
+  RIGHT — everywhere in JS/TS:    { label: "Ko'rildi" }
+  RIGHT — everywhere in JS/TS:    ["Ko'rildi", "Ko'rib chiqilmoqda"]
+  RIGHT — everywhere in JS/TS:    const x = "Ko'rildi"
+  RIGHT — JSX text node (no {}):  <Badge>Ko'rildi</Badge>  (JSX text — valid without quotes)
+  RIGHT — JSX expression:         <Badge>{"Ko'rildi"}</Badge>
+
+  SCAN RULE: Before emitting any file for a non-English project, scan ALL string values.
+  Every status label, category name, region name, option label, toast message, placeholder
+  that contains ' must be inside "double quotes". No exceptions.
+
 DUPLICATE EXPORT BAN (CRITICAL — causes "Multiple exports with the same name" build crash):
   Every export name must appear EXACTLY ONCE in a file. This is the most common generation bug.
 
@@ -1106,6 +1130,14 @@ EMIT RULES (strictly enforced):
 4. NEVER emit config files: tsconfig.json, vite.config.ts, package.json, tailwind.config.js — pre-built in template
 5. NEVER create stub or placeholder files for missing imports — all foundation and UI kit imports are satisfied
 6. Use EXACT export names from the manifest (case-sensitive)
+
+NON-ENGLISH TEXT WITH APOSTROPHES (CRITICAL — most common crash for Uzbek/French/CIS projects):
+  Words like Ko'rildi, Ko'rib chiqilmoqda, Og'zaki, Qo'shimcha contain ASCII apostrophe.
+  In JavaScript, a bare apostrophe after a letter is a SYNTAX ERROR — esbuild crashes.
+  RULE: Wrap ALL such text in double quotes in every JS/TS context (arrays, objects, assignments, props).
+  WRONG: { label: Ko'rildi }   WRONG: [Ko'rib, Og'zaki]   WRONG: const x = Ko'rildi
+  RIGHT: { label: "Ko'rildi" } RIGHT: ["Ko'rib", "Og'zaki"] RIGHT: const x = "Ko'rildi"
+  JSX text nodes are the ONLY exception: <Badge>Ko'rildi</Badge> is valid without quotes.
 
 DUPLICATE EXPORT BAN (CRITICAL — "Multiple exports with the same name" = build crash):
   Every export name must appear EXACTLY ONCE per file. This is the #1 most common generation error.
