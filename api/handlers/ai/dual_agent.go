@@ -22,7 +22,7 @@ func NewDualAgent(interactive, generation Agent) Agent {
 }
 
 func (d *DualAgent) RouteRequest(ctx context.Context, in models.RouterInput) (*models.HaikuRoutingResult, error) {
-	return d.interactive.RouteRequest(ctx, in)
+	return d.generation.RouteRequest(ctx, in)
 }
 
 func (d *DualAgent) PlanChanges(ctx context.Context, in models.PlannerInput) (*models.SonnetPlanResult, error) {
