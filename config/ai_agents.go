@@ -86,12 +86,12 @@ func loadAIAgents() AIAgents {
 		Router: AgentConfig{
 			Model:     haiku,
 			MaxTokens: 2000,
-			Timeout:   60 * time.Second,
+			Timeout:   90 * time.Second,
 		},
 		Architect: AgentConfig{
 			Model:     opus,
 			MaxTokens: 16000,
-			Timeout:   180 * time.Second,
+			Timeout:   600 * time.Second,
 		},
 		Coder: AgentConfig{
 			Model:     sonnet,
@@ -106,17 +106,17 @@ func loadAIAgents() AIAgents {
 		Planner: AgentConfig{
 			Model:     sonnet,
 			MaxTokens: 16000,
-			Timeout:   180 * time.Second,
+			Timeout:   300 * time.Second,
 		},
 		Inspector: AgentConfig{
 			Model:     haiku,
 			MaxTokens: 8000,
-			Timeout:   120 * time.Second,
+			Timeout:   180 * time.Second,
 		},
 		DatabaseAssistant: AgentConfig{
 			Model:     sonnet,
 			MaxTokens: 4000,
-			Timeout:   60 * time.Second,
+			Timeout:   120 * time.Second,
 		},
 	}
 }
