@@ -27,7 +27,7 @@ var ToolArchitectPlan = claudeFunctionTool{
 			"client_types": map[string]any{
 				"type":        "array",
 				"items":       map[string]any{"type": "string"},
-				"description": "User role names extracted from the 'user-types' question answer. Each entry creates a separate client_type + role record. admin_panel: always at least [\"Administrator\"]. landing/web: empty [].",
+				"description": "User role names extracted from the 'user-types' question answer. Each entry creates a separate client_type + role record. admin_panel and webapp: always at least [\"Administrator\"] (webapp products have end-user roles too). landing/web: empty [].",
 			},
 			"image_keywords": map[string]any{
 				"type":        "array",
@@ -36,8 +36,8 @@ var ToolArchitectPlan = claudeFunctionTool{
 			},
 			"project_type": map[string]any{
 				"type":        "string",
-				"enum":        []string{"admin_panel", "landing", "web"},
-				"description": "Detected project type. ALWAYS choose one of these three. Use 'web' for multi-page websites, 'landing' for strict single-page promotional sites.",
+				"enum":        []string{"admin_panel", "landing", "web", "webapp"},
+				"description": "Detected project type. ALWAYS choose one of these four. KEYWORD OVERRIDE (highest priority unless it is explicitly an internal staff/admin tool): if the user calls it an 'app', 'web app', 'webapp', 'mobile app', 'application', or 'mobile application' → choose 'webapp'. There is NO mobile/native type — a mobile app is built as a responsive 'webapp'. Otherwise: 'landing' = strict single-page promotional site. 'web' = multi-page marketing/content website. 'admin_panel' = internal back-office tool for staff to manage data. 'webapp' = a product SaaS workspace used by end-users (Linear/Notion/Trello/Slack/Asana-like) — focused, keyboard-driven app shell with workspace nav, command palette, boards/lists/inbox, NOT a marketing site and NOT an internal admin dashboard.",
 			},
 			"tables": map[string]any{
 				"type": "array",
