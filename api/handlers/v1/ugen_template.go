@@ -12,9 +12,6 @@ import (
 	"strings"
 	"time"
 
-	"errors"
-
-	"ucode/ucode_go_api_gateway/api/handlers/billing"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
@@ -462,14 +459,14 @@ func (h *HandlerV1) CreateProjectFromTemplate(c *gin.Context) {
 		return
 	}
 
-	if err = billing.CheckProjectCountLimit(ctx, h.companyServices, mainService, mainResourceEnvID, headProject.GetFareId()); err != nil {
-		if errors.Is(err, billing.ErrProjectLimitExceeded) {
-			h.HandleResponse(c, status_http.PaymentRequired, models.PaymentProjectLimit)
-		} else {
-			h.HandleResponse(c, status_http.GRPCError, err.Error())
-		}
-		return
-	}
+	//if err = billing.CheckProjectCountLimit(ctx, h.companyServices, mainService, mainResourceEnvID, headProject.GetFareId()); err != nil {
+	//	if errors.Is(err, billing.ErrProjectLimitExceeded) {
+	//		h.HandleResponse(c, status_http.PaymentRequired, models.PaymentProjectLimit)
+	//	} else {
+	//		h.HandleResponse(c, status_http.GRPCError, err.Error())
+	//	}
+	//	return
+	//}
 
 	targetProject, err := h.companyServices.Project().Create(
 		ctx, &pb.CreateProjectRequest{
