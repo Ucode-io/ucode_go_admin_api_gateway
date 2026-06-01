@@ -45,6 +45,8 @@ func summaryHeader(plan *models.ArchitectPlan) string {
 		return fmt.Sprintf("✅ **%s** сгенерирован и готов к работе!\n", plan.ProjectName)
 	case "web":
 		return fmt.Sprintf("✅ **%s** — сайт готов!\n", plan.ProjectName)
+	case "webapp":
+		return fmt.Sprintf("✅ **%s** — веб-приложение готово!\n", plan.ProjectName)
 	default:
 		return fmt.Sprintf("✅ **%s** — лендинг готов!\n", plan.ProjectName)
 	}
@@ -198,7 +200,7 @@ func summaryPages(plan *models.ArchitectPlan, files []models.ProjectFile) string
 				fmt.Fprintf(&sb, "• %s\n", s)
 			}
 		}
-	case "web":
+	case "web", "webapp":
 		names := extractProjectPages(files)
 		if len(names) == 0 {
 			names = parseSectionsFromUIStructure(plan.UIStructure)
