@@ -182,20 +182,23 @@ func CheckDatabaseLimit(ctx context.Context, rdb *redis.Client, companyServices 
 
 var ErrProjectLimitExceeded = errors.New("project limit reached for your current plan. Please upgrade to create more projects")
 
-func CheckProjectCountLimit(ctx context.Context, companyServices services.CompanyServiceI, companyId, fareId string) error {
+func CheckProjectCountLimit(ctx context.Context, companyServices services.CompanyServiceI, srvc services.ServiceManagerI, resourceEnvId, fareId string) error {
 	if fareId == "" {
 		return nil
 	}
 
-	projectList, err := companyServices.Project().GetList(ctx, &pb.GetProjectListRequest{CompanyId: companyId})
+	countResp, err := srvc.GoObjectBuilderService().McpProject().GetPublishedMcpProjectCount(
+		ctx,
+		&nb.GetPublishedMcpProjectCountReq{ResourceEnvId: resourceEnvId},
+	)
 	if err != nil {
-		return fmt.Errorf("failed to get project list: %w", err)
+		return fmt.Errorf("failed to get published project count: %w", err)
 	}
 
 	limitResp, err := companyServices.Billing().CompareFunction(ctx, &pb.CompareFunctionRequest{
 		Type:   config.FARE_PROJECTS,
 		FareId: fareId,
-		Count:  projectList.GetCount(),
+		Count:  countResp.GetCount(),
 	})
 	if err != nil {
 		return fmt.Errorf("failed to check billing limit: %w", err)

@@ -188,7 +188,7 @@ func (p *ChatProcessor) initAgent() {
 
 func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, chatHistory []models.ChatMessage, imageURLs []string, estimatedName string) (*models.ParsedClaudeResponse, error) {
 
-	if err := billing.CheckProjectCountLimit(ctx, p.h.companyServices, p.companyId, p.fareId); err != nil {
+	if err := billing.CheckProjectCountLimit(ctx, p.h.companyServices, p.service, p.resourceEnvId, p.fareId); err != nil {
 		return nil, err
 	}
 

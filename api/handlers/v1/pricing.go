@@ -219,31 +219,49 @@ func (h *HandlerV1) GetTokenUsage(c *gin.Context) {
 // @Failure 401
 // @Router /v1/pricing/company-stats [get]
 func (h *HandlerV1) GetCompanyStats(c *gin.Context) {
-	projectId := cast.ToString(c.MustGet("project_id"))
-	ctx := c.Request.Context()
+	var (
+		projectId     = cast.ToString(c.MustGet("project_id"))
+		environmentId = cast.ToString(c.MustGet("environment_id"))
 
-	proj, err := h.companyServices.Project().GetById(ctx, &company_service.GetProjectByIdRequest{ProjectId: projectId})
+		companyId string
+
+		ctx = c.Request.Context()
+	)
+
+	project, err := h.companyServices.Project().GetById(ctx, &company_service.GetProjectByIdRequest{ProjectId: projectId})
 	if err != nil {
-		h.log.Error("[GetCompanyStats] GetById error", logger.Error(err))
+		h.log.Error("[GetCompanyStats] GetById", logger.Error(err))
 		h.HandleResponse(c, status_http.InternalServerError, err.Error())
 		return
 	}
-	companyId := proj.GetCompanyId()
+	companyId = project.GetCompanyId()
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		ctx, &company_service.GetSingleServiceResourceReq{
+			ProjectId:     projectId,
+			EnvironmentId: environmentId,
+			ServiceType:   company_service.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err == nil && resource.GetResourceType() == company_service.ResourceType_POSTGRESQL {
+		h.log.Error("[GetCompanyStats] GetSingleServiceResourceReq", logger.Error(err))
+		h.HandleResponse(c, status_http.InternalServerError, err.Error())
+		return
+	}
 
 	var (
-		tokenMetrics = &company_service.GetAiTokenUsageMetricsResponse{}
-		limitsResp   = &company_service.GetPricingLimitsResponse{}
+		tokenMetrics = new(company_service.GetAiTokenUsageMetricsResponse)
+		limitsResp   = new(company_service.GetPricingLimitsResponse)
 		projectCount int32
+		builderCount int32
 	)
 
 	g, gCtx := errgroup.WithContext(ctx)
 
 	g.Go(func() error {
-		resp, gErr := h.companyServices.Billing().GetAiTokenUsageMetrics(gCtx, &company_service.GetAiTokenUsageMetricsRequest{
-			CompanyId: companyId,
-		})
-		if gErr != nil {
-			h.log.Error(fmt.Sprintf("[GetCompanyStats] GetAiTokenUsageMetrics failed: %v", gErr))
+		resp, err := h.companyServices.Billing().GetAiTokenUsageMetrics(gCtx, &company_service.GetAiTokenUsageMetricsRequest{CompanyId: companyId})
+		if err != nil {
+			h.log.Error("[GetCompanyStats] GetAiTokenUsageMetrics", logger.Error(err))
 			return nil
 		}
 		tokenMetrics = resp
@@ -251,11 +269,9 @@ func (h *HandlerV1) GetCompanyStats(c *gin.Context) {
 	})
 
 	g.Go(func() error {
-		resp, gErr := h.companyServices.Billing().GetPricingLimits(gCtx, &company_service.GetPricingLimitsRequest{
-			ProjectId: projectId,
-		})
-		if gErr != nil {
-			h.log.Error(fmt.Sprintf("[GetCompanyStats] GetPricingLimits failed: %v", gErr))
+		resp, err := h.companyServices.Billing().GetPricingLimits(gCtx, &company_service.GetPricingLimitsRequest{ProjectId: projectId})
+		if err != nil {
+			h.log.Error("[GetCompanyStats] GetPricingLimits", logger.Error(err))
 			return nil
 		}
 		limitsResp = resp
@@ -263,25 +279,24 @@ func (h *HandlerV1) GetCompanyStats(c *gin.Context) {
 	})
 
 	g.Go(func() error {
-		resp, gErr := h.companyServices.Project().GetList(gCtx, &company_service.GetProjectListRequest{
-			CompanyId: companyId,
-			Limit:     1,
-		})
-		if gErr != nil {
-			h.log.Error(fmt.Sprintf("[GetCompanyStats] GetProjectList failed: %v", gErr))
+		resp, err := h.companyServices.Project().GetList(gCtx, &company_service.GetProjectListRequest{CompanyId: companyId, Limit: 1})
+		if err != nil {
+			h.log.Error("[GetCompanyStats] GetProjectList", logger.Error(err))
 			return nil
 		}
 		projectCount = resp.GetCount()
 		return nil
 	})
 
-	_ = g.Wait()
+	g.Wait()
 
 	var (
 		dailyTokenLimit   int64
 		monthlyTokenLimit int64
 		projectLimit      int32
+		builderLimit      int32
 	)
+
 	for _, limit := range limitsResp.GetLimits() {
 		switch limit.Type {
 		case "tokens_day":
@@ -290,27 +305,18 @@ func (h *HandlerV1) GetCompanyStats(c *gin.Context) {
 			monthlyTokenLimit = cast.ToInt64(limit.Value)
 		case "projects":
 			projectLimit = cast.ToInt32(limit.Value)
+		case "builder_projects":
+			builderLimit = cast.ToInt32(limit.Value)
 		}
 	}
 
 	h.HandleResponse(c, status_http.OK, models.CompanyStatsResponse{
 		Tokens: models.CompanyTokenStats{
-			Daily: models.CompanyTokenStat{
-				InputTokens:  tokenMetrics.GetTodayInputTokens(),
-				OutputTokens: tokenMetrics.GetTodayOutputTokens(),
-				Limit:        dailyTokenLimit,
-			},
-			Monthly: models.CompanyTokenStat{
-				InputTokens:  tokenMetrics.GetMonthlyInputTokens(),
-				OutputTokens: tokenMetrics.GetMonthlyOutputTokens(),
-				Limit:        monthlyTokenLimit,
-			},
+			Daily:   models.CompanyTokenStat{InputTokens: tokenMetrics.GetTodayInputTokens(), OutputTokens: tokenMetrics.GetTodayOutputTokens(), Limit: dailyTokenLimit},
+			Monthly: models.CompanyTokenStat{InputTokens: tokenMetrics.GetMonthlyInputTokens(), OutputTokens: tokenMetrics.GetMonthlyOutputTokens(), Limit: monthlyTokenLimit},
 		},
-		ProjectCount: models.CompanyStat{
-			Current: projectCount - 1,
-			Limit:   projectLimit,
-		},
-		BuilderCount: models.CompanyStat{},
+		ProjectCount: models.CompanyStat{Current: projectCount, Limit: projectLimit},
+		BuilderCount: models.CompanyStat{Current: builderCount, Limit: builderLimit},
 	})
 }
 
