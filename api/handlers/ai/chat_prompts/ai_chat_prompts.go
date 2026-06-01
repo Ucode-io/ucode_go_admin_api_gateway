@@ -351,13 +351,27 @@ Always respond in the same language the user wrote in.`
 2. Frontend UI structure (detailed specification)
 3. Complete design system tokens (colors, fonts, radius — the code generator uses them directly)
 
-PROJECT TYPE — CLASSIFICATION DECISION TREE (MUST BE EXACTLY ONE OF THREE):
+PROJECT TYPE — CLASSIFICATION DECISION TREE (MUST BE EXACTLY ONE OF FOUR):
+
+STEP 0 — Keyword override (CHECK FIRST, highest priority after admin_panel):
+  If the user calls the project an "app", "web app", "webapp", "mobile app", "application",
+  "mobile application", or any phrase using the word "app" → classify as "webapp".
+  (There is NO mobile/native type — a "mobile app" request is built as a responsive web app of type "webapp".)
+  ONLY exception: if it is EXPLICITLY an internal staff back-office / management / admin tool
+  (e.g. "admin app", "management app for our staff") → "admin_panel" wins. Otherwise the "app" wording → "webapp".
 
 STEP 1 — Who is the primary USER of this interface?
   → Internal staff / admins / managers / operators     → "admin_panel"
-  → General public / customers / visitors / end-users  → go to STEP 2
+  → End-users USING A PRODUCT to get work done         → go to STEP 2
+  → General public / customers / visitors reading info → go to STEP 3
 
-STEP 2 — How many pages / routes does the project need?
+STEP 2 — Is this a product application (a tool/workspace people log in to and use), not a website to read?
+  → Yes — a focused SaaS product workspace (issue tracker, kanban/boards, docs/notes, team chat,
+    helpdesk inbox, CRM-lite workspace, scheduling app, file workspace, personal tracker)
+    used repeatedly by end-users to DO something                                   → "webapp"
+  → No — it is primarily content/marketing to read and browse                       → go to STEP 3
+
+STEP 3 — How many pages / routes does the (content/marketing) project need?
   → Multiple pages with navigation (2+ distinct pages) → "web"
   → Single scrollable page, no page routing            → "landing"
 
@@ -376,6 +390,37 @@ E-COMMERCE SPLIT RULE — critical:
   "Build a store like Uzum / Amazon / Wildberries (customer side)" → "web"
   "Build an admin panel to manage orders / products / sellers"     → "admin_panel"
   When user says "e-commerce site" or "online store" without "admin" → "web"
+
+admin_panel vs webapp — critical:
+  admin_panel = INTERNAL staff manage other people's/business data (back-office, KPI dashboards, CRUD tables).
+  webapp      = an END-USER PRODUCT people use to do their own work (a workspace/tool they live in daily).
+  "internal dashboard to manage X" → admin_panel · "an app like Linear/Notion/Trello for users" → webapp
+
+────────────────────────────────────────────────────────────────
+TYPE "webapp" — end-user SaaS product workspace (Linear/Notion/Trello/Slack/Asana tier)
+────────────────────────────────────────────────────────────────
+Use when the project is a PRODUCT APPLICATION that end-users log into and use repeatedly to get work done —
+a focused, keyboard-driven workspace, NOT a marketing site and NOT an internal back-office admin.
+
+Characteristics: app shell with a left navigation rail + top app bar + ⌘K command palette;
+primary surfaces are grouped lists / kanban boards / docs / message threads / inboxes / calendars
+with a right-hand detail inspector; productivity-dense UI; the user is the owner of the data they manage.
+
+CLEAR webapp signals:
+  ANY use of "app", "web app", "webapp", "mobile app", "application", "mobile application"
+  "app like Linear / Jira / Asana / Trello / Notion / Height / ClickUp / Slack / Intercom / Attio",
+  "issue tracker", "task manager", "kanban board app", "project management tool",
+  "team workspace", "docs/notes app", "knowledge base app", "team chat", "helpdesk inbox",
+  "scheduling app", "CRM workspace (used by the team daily)", "productivity tool", "SaaS app/workspace"
+
+MOBILE NOTE: there is no native/mobile project type. "mobile app", "mobile application",
+  "Android/iOS app" → build as "webapp" (a responsive web application). Never refuse for lack of a mobile type.
+
+webapp vs landing/web:
+  "a SaaS landing page to promote our app" → "landing" (it is marketing, not the product)
+  "the actual app / product / workspace itself" → "webapp"
+  If the user wants the working product (boards, tasks, docs, inbox) → "webapp", not "web".
+  If the user says "app" / "web app" / "mobile app" → "webapp" (per STEP 0), not "web".
 
 ────────────────────────────────────────────────────────────────
 TYPE "web" — public multi-page website (DEFAULT for websites)
@@ -415,7 +460,7 @@ SCHEMA RULES:
 4. NEVER include system fields: created_at, updated_at, deleted_at, guid — they are auto-managed.
 5. Every project MUST have exactly ONE login table: set "is_login_table": true.
 6. For the login table, do NOT include auth fields (login, email, phone, password, tin) — they are auto-created from "login_strategy". Only add custom fields like "full_name", "avatar".
-7. "client_types": for admin_panel — extract user role names verbatim from the conversation (the user's "user-types" question answer). Example: user answered "Administrator, Manager, Driver" → ["Administrator", "Manager", "Driver"]. Always include at least ["Administrator"] if no user types were specified. Leave empty [] for landing/web projects.
+7. "client_types": for admin_panel and webapp — extract user role names verbatim from the conversation (the user's "user-types" question answer). Example: user answered "Administrator, Manager, Driver" → ["Administrator", "Manager", "Driver"]. Always include at least ["Administrator"] if no user types were specified (webapp products are multi-user and have roles too). Leave empty [] for landing/web projects.
 
 RELATIONS RULES:
 7. Output a "relations" array covering EVERY foreign-key link between tables in this project.
@@ -466,6 +511,36 @@ ADMIN PANEL UI BLUEPRINTS — choose by domain:
 ADMIN PANEL ANTI-GENERIC RULE:
   ui_structure must explicitly forbid a plain CRUD-only dashboard. At least one page must use a domain-specific pattern beyond a table.
 
+13b. For webapp projects, ui_structure MUST describe an end-user PRODUCT WORKSPACE (Linear/Notion/Trello/Slack/Asana tier), NOT an internal admin dashboard. Include:
+   - the product and the primary daily job of the end-user in one sentence;
+   - the WORKSPACE SHELL: a top app bar (workspace switcher + global ⌘K command palette trigger + quick-create + avatar),
+     a left navigation rail (grouped nav, favorites/recents, collapses to an icon strip under ~1100px, Sheet drawer on mobile),
+     and a right-hand detail INSPECTOR panel for the selected record;
+   - the DEFAULT view is a focused entry surface (e.g. "My Issues" / "Inbox" / "Today" / a default board or list) — NOT a metrics/KPI dashboard;
+   - for every major table/page: the correct PRODUCT surface (grouped list, kanban board, doc/page, message thread, inbox/queue, calendar) with an inspector — never a bare table;
+   - navigation groups with max 8 top-level items;
+   - required states per page: loading, empty (teaches next action), error, mobile;
+   - productivity-dense layout, keyboard-friendly, believable seed content (real-sounding issue/doc/channel/member names).
+
+WEBAPP UI BLUEPRINTS — choose by product type:
+  Issue / Project tracking (Linear/Jira-like):
+    default = "My Issues" grouped list (by status) with list/board toggle; board = kanban by status with stage counts; issue = right inspector with status/priority/assignee controls + activity.
+  Docs / Knowledge (Notion-like):
+    rail = page tree; main = document reader/editor with breadcrumb + blocks; recents/TOC side panel.
+  Boards / Kanban (Trello/Asana-like):
+    full-width board with sticky column headers + counts, compact cards (labels, members, due), card → inspector with checklist/comments.
+  Messaging / Collaboration (Slack-like):
+    rail = channels + DMs; main = message thread with composer; optional thread/details inspector.
+  CRM-lite workspace (Attio/Folk-like):
+    saved-view tabs + records list with custom fields; record profile inspector with related items + notes timeline.
+  Support / Helpdesk:
+    inbox layout = queue list + selected conversation + customer/context inspector.
+  Scheduling / Calendar:
+    calendar grid (month/week) + agenda rail + event create dialog + status chips.
+
+WEBAPP ANTI-GENERIC RULE:
+  ui_structure must forbid a marketing layout (no hero/pricing/testimonials) AND forbid an internal KPI dashboard as the home. The home is a focused product view, and selectable records open an inspector, never a dead-end page.
+
 IMAGE KEYWORDS RULES:
 13. "image_keywords": 2–4 Unsplash search phrases. 
     CRITICAL: You MUST aim for the "WOW" factor. We need cinematic, ultra-high-quality, aesthetic, and premium professional photography.
@@ -477,7 +552,10 @@ IMAGE KEYWORDS RULES:
 
 DESIGN SYSTEM RULES — fill the "design" field completely:
 
-TYPE A (admin_panel) — domain-deterministic palette, font is always Inter:
+TYPE A (admin_panel AND webapp) — domain-deterministic palette, font is always Inter.
+  webapp uses this SAME TYPE A palette logic (it has a left rail/sidebar, so it NEEDS sidebar tokens).
+  For webapp, prefer a tight border_radius ("8px" or less) for the shadcn new-york productivity look,
+  and pick the closest domain palette (issue/task/docs/team tools → Project Management or Default):
   TMS / Compliance / Logistics:
     background #f8f9fa · surface #ffffff · primary #4f46e5 · primary_hsl "239 84% 67%"
     accent #6366f1 · accent_hsl "239 84% 67%" · sidebar dark #1e293b · sidebar_foreground #f8fafc
@@ -518,7 +596,7 @@ TYPE A (admin_panel) — domain-deterministic palette, font is always Inter:
     background #f9fafb · surface #ffffff · primary #6366f1 · primary_hsl "239 84% 67%"
     accent #f59e0b · accent_hsl "38 92% 50%" · sidebar #1e293b · sidebar_foreground #f8fafc
     text #111827 · text_muted #6b7280 · border #e5e7eb · border_radius "8px" · sidebar_style "dark"
-  font_family: "Inter" · body_font: "Inter" (always for admin_panel)
+  font_family: "Inter" · body_font: "Inter" (always for admin_panel and webapp)
   design_inspiration: [domain name, e.g. "CRM Domain", "TMS Domain"]
 
 TYPE B / TYPE C (landing, web) — select ONE archetype based on domain:
@@ -916,7 +994,7 @@ If you receive an API CONFIGURATION from the system in your prompt (Base URL, AP
 
 AXIOS CLIENT — two cases depending on project type:
 
-TYPE A (admin panel — template provided):
+TYPE A (admin panel AND webapp — template provided):
   Use 'apiClient' from '@/config/axios' — it already has BOTH required headers:
     Authorization: API-KEY  and  X-API-KEY from env
   NEVER create a new axios instance. NEVER use raw axios.get/post/put/delete.

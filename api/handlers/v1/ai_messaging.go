@@ -280,7 +280,7 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 		return nil, fmt.Errorf("backend provisioning failed: %w", err)
 	}
 
-	if plan.ProjectType == "admin_panel" || plan.ProjectType == "web" {
+	if plan.ProjectType == "admin_panel" || plan.ProjectType == "web" || plan.ProjectType == "webapp" {
 		provWg.Add(1)
 		go func() {
 			defer provWg.Done()
