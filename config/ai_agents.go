@@ -90,7 +90,7 @@ func loadAIAgents() AIAgents {
 		},
 		Architect: AgentConfig{
 			Model:     opus,
-			MaxTokens: 16000,
+			MaxTokens: 32000,
 			Timeout:   600 * time.Second,
 		},
 		Coder: AgentConfig{

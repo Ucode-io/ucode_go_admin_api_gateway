@@ -75,6 +75,7 @@ type CompanyStatsResponse struct {
 	Tokens       CompanyTokenStats `json:"tokens"`
 	ProjectCount CompanyStat       `json:"project_count"`
 	BuilderCount CompanyStat       `json:"builder_count"`
+	UserCount    CompanyStat       `json:"user_count"`
 }
 
 const (

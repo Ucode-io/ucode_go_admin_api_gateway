@@ -254,6 +254,7 @@ func (h *HandlerV1) GetCompanyStats(c *gin.Context) {
 		limitsResp   = new(company_service.GetPricingLimitsResponse)
 		projectCount int32
 		builderCount int32
+		userCount    int32
 	)
 
 	g, gCtx := errgroup.WithContext(ctx)
@@ -288,6 +289,16 @@ func (h *HandlerV1) GetCompanyStats(c *gin.Context) {
 		return nil
 	})
 
+	g.Go(func() error {
+		resp, err := h.authService.User().GetCompanyUsersCount(gCtx, &auth_service.GetCompanyUsersCountRequest{CompanyId: companyId})
+		if err != nil {
+			h.log.Error("[GetCompanyStats] GetCompanyUsersCount", logger.Error(err))
+			return nil
+		}
+		userCount = resp.GetCount()
+		return nil
+	})
+
 	g.Wait()
 
 	var (
@@ -295,6 +306,7 @@ func (h *HandlerV1) GetCompanyStats(c *gin.Context) {
 		monthlyTokenLimit int64
 		projectLimit      int32
 		builderLimit      int32
+		userLimit         int32
 	)
 
 	for _, limit := range limitsResp.GetLimits() {
@@ -307,6 +319,8 @@ func (h *HandlerV1) GetCompanyStats(c *gin.Context) {
 			projectLimit = cast.ToInt32(limit.Value)
 		case "builder_projects":
 			builderLimit = cast.ToInt32(limit.Value)
+		case "users_count":
+			userLimit = cast.ToInt32(limit.Value)
 		}
 	}
 
@@ -317,6 +331,7 @@ func (h *HandlerV1) GetCompanyStats(c *gin.Context) {
 		},
 		ProjectCount: models.CompanyStat{Current: projectCount, Limit: projectLimit},
 		BuilderCount: models.CompanyStat{Current: builderCount, Limit: builderLimit},
+		UserCount:    models.CompanyStat{Current: userCount, Limit: userLimit},
 	})
 }
 
