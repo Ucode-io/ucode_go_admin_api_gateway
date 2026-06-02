@@ -17,6 +17,21 @@ type resolvedRoute struct {
 	ImportFrom string // value used inside lazy(import('...')), without .tsx, with @/ prefix
 }
 
+// stripPageTsx drops `src/Page.tsx` from the file list. The model sometimes
+// invents it as a microfrontend entry with MemoryRouter, which conflicts with
+// the federation contract (`./App` → `./src/App.tsx`) and steals `import './index.css'`.
+func stripPageTsx(files []models.ProjectFile) []models.ProjectFile {
+	out := files[:0]
+	for _, f := range files {
+		if f.Path == "src/Page.tsx" {
+			log.Printf("[merge-routes] dropping stray src/Page.tsx (federation entry is src/App.tsx)")
+			continue
+		}
+		out = append(out, f)
+	}
+	return out
+}
+
 const pageLoaderSource = `export function PageLoader() {
   return (
     <div className="flex h-screen w-full items-center justify-center">
@@ -43,6 +58,11 @@ func mergeAppRoutes(files []models.ProjectFile, manifest *models.ProjectManifest
 	if len(manifest.Routes) == 0 {
 		return files
 	}
+
+	// Strip any stray src/Page.tsx the model invented as an alternate microfrontend entry.
+	// Vite federation exposes './App' → './src/App.tsx'; Page.tsx is dead code and
+	// occasionally absorbs `import './index.css'`, which then never reaches the host bundle.
+	files = stripPageTsx(files)
 
 	appIdx := -1
 	for i, f := range files {
@@ -105,6 +125,9 @@ func mergeAppRoutes(files []models.ProjectFile, manifest *models.ProjectManifest
 	}
 
 	var sb strings.Builder
+	// index.css must be imported here — App.tsx is the federation entry (vite.config.ts
+	// exposes './App'). Without this the host loads the remote without Tailwind variables.
+	sb.WriteString("import './index.css';\n")
 	sb.WriteString("import { lazy, Suspense } from 'react';\n")
 	sb.WriteString("import { BrowserRouter, Routes, Route } from 'react-router-dom';\n")
 	sb.WriteString("import { AppProviders } from '@/components/shared/AppProviders';\n")

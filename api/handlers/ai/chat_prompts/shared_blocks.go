@@ -36,6 +36,17 @@ The named export's identifier MUST be identical to the filename without .tsx:
 
 If you violate this contract, the preview crashes with React error #306 the moment
 the user navigates to that route (because m.<Name> resolves to undefined).
+
+APP.TSX IS THE ONLY ENTRY (federation expose './App' → './src/App.tsx'):
+  ❌ NEVER create src/Page.tsx, src/Root.tsx, or any alternate microfrontend entry — App.tsx IS the entry.
+  ❌ NEVER use MemoryRouter — App.tsx uses BrowserRouter.
+  ✅ src/main.tsx is for local dev only; it just imports App and renders it.
+
+CSS IMPORT RULES:
+  ✅ src/App.tsx starts with: import './index.css';
+  ❌ NEVER put 'import "./index.css"' in any page file, in main.tsx, or in a new Page.tsx.
+  Reason: App.tsx is what the host loads via federation; if index.css is imported elsewhere
+  the host bundle ships without Tailwind variables and every preview turns black-and-white.
 ====================================
 `
 }
