@@ -1071,6 +1071,8 @@ func (p *ChatProcessor) validateAndRepairGeneratedProject(ctx context.Context, p
 		return 0
 	}
 
+	project.Files = ensureAppEntryDefaultExport(project.Files)
+
 	p.emitter().Emit(SSEEvent{
 		Type:    EvProgress,
 		Icon:    "shield-check",
@@ -1108,6 +1110,7 @@ func (p *ChatProcessor) validateAndRepairGeneratedProject(ctx context.Context, p
 			return errorCount
 		}
 		applyRepairs(project.Files, repaired)
+		project.Files = ensureAppEntryDefaultExport(project.Files)
 	}
 
 	finalErrors := validateGeneratedProject(project.Files, project.Env)
@@ -1376,21 +1379,7 @@ func (p *ChatProcessor) generateCodeChunkedWebsite(ctx context.Context, clarifie
 	merged.Files = mergeAppRoutes(merged.Files, manifest)
 
 	emit.Emit(SSEEvent{Type: EvProgress, Icon: "shield-check", Percent: 80, Message: "Проверяю качество кода", Value: fmt.Sprintf("%d файлов", len(merged.Files))})
-	validationErrors := validateGeneratedProject(merged.Files, merged.Env)
-	validationErrors = append(validationErrors, validateAgainstManifest(merged.Files, manifest)...)
-	errorCount, _ := logValidationResults(validationErrors)
-
-	if errorCount > 0 {
-		emit.Emit(SSEEvent{Type: EvRepair, Icon: "wrench", Percent: 82, Message: "Автоматически исправляю проблемы", Value: fmt.Sprintf("%d ошибок", errorCount)})
-		repaired := p.repairBrokenFiles(ctx, merged.Files, validationErrors)
-		if len(repaired) > 0 {
-			applyRepairs(merged.Files, repaired)
-			postErrors := validateGeneratedProject(merged.Files, merged.Env)
-			postErrors = append(postErrors, validateAgainstManifest(merged.Files, manifest)...)
-			postCount, _ := logValidationResults(postErrors)
-			log.Printf("[chunked-web] post-repair: %d errors remaining (was %d)", postCount, errorCount)
-		}
-	}
+	errorCount := p.validateAndRepairGeneratedProject(ctx, merged, plan.ProjectType, 80)
 
 	log.Printf("[chunked-web] done: %d total files (%d pages, %d failed, %d validation errors)", len(merged.Files), totalPages, failedCount, errorCount)
 	return &models.ParsedClaudeResponse{Project: merged}, nil

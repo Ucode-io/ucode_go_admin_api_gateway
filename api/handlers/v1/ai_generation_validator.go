@@ -120,6 +120,10 @@ type LazyImport struct {
 func validateGeneratedProject(files []models.ProjectFile, envVars map[string]any) []ValidationError {
 	var errors []ValidationError
 
+	// Step 0: Validate preview entry contract. The virtual host entry always
+	// imports default from src/App.tsx, so this is a build-time hard failure.
+	errors = append(errors, validateAppEntryContract(files)...)
+
 	// Step 1: Build export registry — path → set of exported names.
 	exportRegistry := buildExportRegistry(files)
 
@@ -1381,6 +1385,7 @@ func (p *ChatProcessor) repairSingleFile(
 
 	sb.WriteString("\nRULES:\n")
 	sb.WriteString("  - Fix ONLY the listed errors. Do not rewrite unrelated code.\n")
+	sb.WriteString("  - src/App.tsx is the preview entry. It MUST export default App (`export default function App()` or `export default App;`). The host imports default from virtual:/src/App, so a named-only App export is a build failure.\n")
 	sb.WriteString("  - For import errors: use correct exported names from the AVAILABLE EXPORTS list above.\n")
 	sb.WriteString("  - For 'lazy import expects named export X but the file does not export it' errors: the lazy resolver in App.tsx wants a NAMED export. If THIS file is the page and currently uses `export default function X`, rewrite it as `export function X` (named export). Keep the function body identical. Do NOT touch App.tsx.\n")
 	sb.WriteString("  - For 'X.displayName assigned but X not declared': it is a typo in the component name — rename the const/variable to match the displayName assignment, or fix the displayName to match the const name.\n")
