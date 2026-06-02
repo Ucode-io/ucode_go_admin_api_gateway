@@ -71,6 +71,7 @@ func (a *GeminiAgent) ArchitectProject(_ context.Context, in models.ArchitectInp
 	if err = json.Unmarshal(raw, &plan); err != nil {
 		return nil, fmt.Errorf("architect: decode: %w", err)
 	}
+	models.ApplyProjectTypeKeywordOverride(&plan, in.Clarified)
 	return &plan, nil
 }
 
