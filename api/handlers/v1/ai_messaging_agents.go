@@ -189,6 +189,8 @@ func (p *ChatProcessor) generateCodeChunkedAdminPanel(ctx context.Context, clari
 	if p.prebuiltManifest != nil {
 		manifest = p.prebuiltManifest
 		p.prebuiltManifest = nil
+		p.currentManifest = manifest
+		defer func() { p.currentManifest = nil }()
 		log.Printf("[chunked] using prebuilt manifest: %d groups", len(manifest.Groups))
 		emit.Emit(SSEEvent{Type: EvProgress, Icon: "list-tree", Message: "Структура файлов готова", Percent: 23})
 	} else {
@@ -305,7 +307,7 @@ func (p *ChatProcessor) generateCodeChunkedAdminPanel(ctx context.Context, clari
 			defer wg.Done()
 			var err error
 
-			stub := buildFoundationStub(foundationGroup)
+			stub := buildFoundationStubWithManifest(foundationGroup, manifest)
 			uiKit, err = p.generateUIKit(ctx, uiKitGroup, stub, p.agentCfgs().Coder)
 			if err != nil {
 				log.Printf("[chunked] UI kit parallel failed (%v) — continuing without it", foundErr)
@@ -478,6 +480,7 @@ func (p *ChatProcessor) generateCodeChunkedAdminPanel(ctx context.Context, clari
 
 	merged.Files = injectMissingCriticalFiles(merged.Files, plan.ProjectType)
 	merged.Files = injectEnvFile(merged.Files, p.baseConf.UcodeBaseUrl, apiKey)
+	merged.Files = mergeAppRoutes(merged.Files, manifest)
 
 	emit.Emit(
 		SSEEvent{
@@ -522,7 +525,8 @@ func (p *ChatProcessor) generateFoundation(ctx context.Context, clarified string
 	sb.WriteString("⚠ DO NOT include NavItem or TableColumn — they are PRE-BUILT in src/types/common.ts.\n")
 	sb.WriteString("  Layout files that need NavItem MUST import from '@/types/common', never from '@/types'.\n\n")
 
-	sb.WriteString("\nFEATURE PAGES — add routes to App.tsx but DO NOT implement them:\n")
+	sb.WriteString("\nFEATURE PAGES — add lazy imports + routes to App.tsx but DO NOT implement them:\n")
+	sb.WriteString("(One `const PageName = lazy(...)` declaration above the App component and one <Route> inside <Routes> per page below. Full pattern is documented in the system prompt — do not re-explain here.)\n")
 	for _, g := range manifest.Groups {
 		if g.ID == 0 {
 			continue
@@ -532,6 +536,17 @@ func (p *ChatProcessor) generateFoundation(ctx context.Context, clarified string
 				fmt.Fprintf(&sb, "  %s  → component: [%s]\n", f.Path, strings.Join(f.Exports, ", "))
 			}
 		}
+	}
+
+	// Note: ExportConventionBlock + LazyAppTsxExemplar are baked into PromptAdminPanelGenerator
+	// (cacheable system prompt) — do NOT re-inject here.
+	if routesBlock := buildExpectedRoutesBlock(manifest); routesBlock != "" {
+		sb.WriteString("\n")
+		sb.WriteString(routesBlock)
+	}
+	if typesBlock := buildExpectedEntityTypesBlock(manifest); typesBlock != "" {
+		sb.WriteString("\n")
+		sb.WriteString(typesBlock)
 	}
 
 	sb.WriteString("\nFULL PROJECT MANIFEST (for routing and types reference):\n")
@@ -628,7 +643,8 @@ func (p *ChatProcessor) generateChunkAdminPanel(ctx context.Context, group model
 	sb.WriteString(apiConfig)
 	sb.WriteString("\n")
 
-	sb.WriteString(buildTemplateHooksContext())
+	// Template API signatures (useApi/useAppForm/apiUtils/utils/AppProviders) are baked into
+	// PromptChunkedCoderAdminPanel via TemplateAPIDigest — do not re-inject the full source here.
 
 	sb.WriteString(foundationCtx)
 
@@ -673,16 +689,73 @@ func buildFoundationContext(files []models.ProjectFile) string {
 	return sb.String()
 }
 
-// buildManifestSummary formats the manifest as readable text for context injection.
+// buildManifestSummary formats the manifest for prompt context, including
+// Kind/Route metadata so feature chunks can tell pages from shared files.
 func buildManifestSummary(manifest *models.ProjectManifest) string {
 	var sb strings.Builder
-	for _, g := range manifest.Groups {
-		fmt.Fprintf(&sb, "Group %d (%s):\n", g.ID, g.Name)
-		for _, f := range g.Files {
-			fmt.Fprintf(&sb, "  %s → [%s]\n", f.Path, strings.Join(f.Exports, ", "))
+	for _, group := range manifest.Groups {
+		fmt.Fprintf(&sb, "Group %d (%s):\n", group.ID, group.Name)
+		for _, file := range group.Files {
+			var meta []string
+			if file.Kind != "" {
+				meta = append(meta, "kind="+file.Kind)
+			}
+			if file.Route != "" {
+				meta = append(meta, "route="+file.Route)
+			}
+			metaStr := ""
+			if len(meta) > 0 {
+				metaStr = "  [" + strings.Join(meta, ", ") + "]"
+			}
+			fmt.Fprintf(&sb, "  %s → [%s]%s\n", file.Path, strings.Join(file.Exports, ", "), metaStr)
 		}
 		sb.WriteString("\n")
 	}
+	return sb.String()
+}
+
+// buildExpectedRoutesBlock renders manifest.Routes as a non-negotiable contract
+// for Foundation so App.tsx is emitted with the exact (path, page, file) tuples.
+func buildExpectedRoutesBlock(manifest *models.ProjectManifest) string {
+	if manifest == nil || len(manifest.Routes) == 0 {
+		return ""
+	}
+	var sb strings.Builder
+	sb.WriteString("====================================\n")
+	sb.WriteString("GLOBAL ROUTE MAP (non-negotiable — App.tsx MUST contain exactly these)\n")
+	sb.WriteString("====================================\n")
+	for _, route := range manifest.Routes {
+		fmt.Fprintf(&sb, "  path=%q  →  <%s />  (file: %s)\n", route.Path, route.PageName, route.FilePath)
+	}
+	sb.WriteString("\nFor each entry above emit:\n")
+	sb.WriteString("  const PageName = lazy(() => import('@/pages/PageName').then(m => ({ default: m.PageName })));\n")
+	sb.WriteString("  <Route path=\"...\" element={<PageName />} />\n")
+	return sb.String()
+}
+
+// buildExpectedEntityTypesBlock renders manifest.EntityTypes as a strict
+// contract for src/types.ts: Foundation must export exactly these interfaces
+// so feature chunks can import them by the names they expect.
+func buildExpectedEntityTypesBlock(manifest *models.ProjectManifest) string {
+	if manifest == nil || len(manifest.EntityTypes) == 0 {
+		return ""
+	}
+	var sb strings.Builder
+	sb.WriteString("====================================\n")
+	sb.WriteString("EXPECTED ENTITY INTERFACES (non-negotiable — src/types.ts MUST export exactly these)\n")
+	sb.WriteString("====================================\n")
+	for _, entity := range manifest.EntityTypes {
+		fmt.Fprintf(&sb, "export interface %s {\n", entity.Name)
+		for _, field := range entity.Fields {
+			opt := ""
+			if field.Optional {
+				opt = "?"
+			}
+			fmt.Fprintf(&sb, "  %s%s: %s;\n", field.Name, opt, field.TSType)
+		}
+		sb.WriteString("}\n\n")
+	}
+	sb.WriteString("Feature pages will import these EXACT names from '@/types'. Do not rename them.\n")
 	return sb.String()
 }
 
@@ -769,18 +842,48 @@ func mergeChunks(foundation *models.GeneratedProject, chunks []*models.Generated
 	}
 }
 
-func buildFoundationStub(foundationGroup models.ManifestGroup) string {
+// buildFoundationStubWithManifest is the textual stub passed to UIKit/Feature
+// prompts. When manifest is non-nil it also injects the page-export and
+// entity-type contracts so feature chunks never have to guess names.
+func buildFoundationStubWithManifest(foundationGroup models.ManifestGroup, manifest *models.ProjectManifest) string {
 	var sb strings.Builder
 
 	sb.WriteString("====================================\n")
 	sb.WriteString("FOUNDATION (Group 0) — ALREADY GENERATED (import freely, NEVER re-emit)\n")
 	sb.WriteString("====================================\n")
 	sb.WriteString("These files exist in the project. Import from them by path. Never re-implement or re-emit.\n\n")
-	for _, f := range foundationGroup.Files {
-		if len(f.Exports) > 0 {
-			fmt.Fprintf(&sb, "  %-52s → exports: [%s]\n", f.Path, strings.Join(f.Exports, ", "))
+	for _, file := range foundationGroup.Files {
+		if len(file.Exports) > 0 {
+			fmt.Fprintf(&sb, "  %-52s → exports: [%s]\n", file.Path, strings.Join(file.Exports, ", "))
 		} else {
-			fmt.Fprintf(&sb, "  %s\n", f.Path)
+			fmt.Fprintf(&sb, "  %s\n", file.Path)
+		}
+	}
+
+	if manifest != nil && len(manifest.Routes) > 0 {
+		sb.WriteString("\n====================================\n")
+		sb.WriteString("EXPECTED EXPORTS PER PAGE (use these EXACT names in your imports + components)\n")
+		sb.WriteString("====================================\n")
+		for _, route := range manifest.Routes {
+			fmt.Fprintf(&sb, "  %s  →  export function %s()  (route: %s)\n", route.FilePath, route.PageName, route.Path)
+		}
+		sb.WriteString("App.tsx already loads these via lazy(...).then(m => ({ default: m.PageName })). Your page MUST use the matching named export.\n")
+	}
+
+	if manifest != nil && len(manifest.EntityTypes) > 0 {
+		sb.WriteString("\n====================================\n")
+		sb.WriteString("ENTITY TYPE NAMES IN src/types.ts (import from '@/types' — exact names)\n")
+		sb.WriteString("====================================\n")
+		for _, entity := range manifest.EntityTypes {
+			fields := make([]string, 0, len(entity.Fields))
+			for _, field := range entity.Fields {
+				opt := ""
+				if field.Optional {
+					opt = "?"
+				}
+				fields = append(fields, fmt.Sprintf("%s%s: %s", field.Name, opt, field.TSType))
+			}
+			fmt.Fprintf(&sb, "  %s { %s }\n", entity.Name, strings.Join(fields, "; "))
 		}
 	}
 	sb.WriteString("\nCSS VARIABLES (defined in src/index.css — use in Tailwind arbitrary values):\n")
@@ -978,6 +1081,7 @@ func (p *ChatProcessor) validateAndRepairGeneratedProject(ctx context.Context, p
 	var errorCount int
 	for pass := 1; pass <= maxRepairPasses; pass++ {
 		validationErrors := validateGeneratedProject(project.Files, project.Env)
+		validationErrors = append(validationErrors, validateAgainstManifest(project.Files, p.currentManifest)...)
 		if projectType == "admin_panel" {
 			validationErrors = append(validationErrors, validateAdminPanelUIQuality(project.Files)...)
 		}
@@ -1007,6 +1111,7 @@ func (p *ChatProcessor) validateAndRepairGeneratedProject(ctx context.Context, p
 	}
 
 	finalErrors := validateGeneratedProject(project.Files, project.Env)
+	finalErrors = append(finalErrors, validateAgainstManifest(project.Files, p.currentManifest)...)
 	if projectType == "admin_panel" {
 		finalErrors = append(finalErrors, validateAdminPanelUIQuality(project.Files)...)
 	}
@@ -1024,6 +1129,8 @@ func (p *ChatProcessor) generateCodeChunkedWebsite(ctx context.Context, clarifie
 	if p.prebuiltManifest != nil {
 		manifest = p.prebuiltManifest
 		p.prebuiltManifest = nil
+		p.currentManifest = manifest
+		defer func() { p.currentManifest = nil }()
 		log.Printf("[chunked-web] using prebuilt manifest: %d groups", len(manifest.Groups))
 		emit.Emit(SSEEvent{Type: EvProgress, Icon: "list-tree", Message: "Структура страниц готова", Percent: 23})
 	} else {
@@ -1123,7 +1230,7 @@ func (p *ChatProcessor) generateCodeChunkedWebsite(ctx context.Context, clarifie
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			stub := buildFoundationStub(foundationGroup)
+			stub := buildFoundationStubWithManifest(foundationGroup, manifest)
 			var e error
 			uiKit, e = p.generateUIKit(ctx, uiKitGroup, stub, p.agentCfgs().LandingCoder)
 			if e != nil {
@@ -1266,9 +1373,11 @@ func (p *ChatProcessor) generateCodeChunkedWebsite(ctx context.Context, clarifie
 
 	merged.Files = injectMissingCriticalFiles(merged.Files, plan.ProjectType)
 	merged.Files = injectEnvFile(merged.Files, p.baseConf.UcodeBaseUrl, apiKey)
+	merged.Files = mergeAppRoutes(merged.Files, manifest)
 
 	emit.Emit(SSEEvent{Type: EvProgress, Icon: "shield-check", Percent: 80, Message: "Проверяю качество кода", Value: fmt.Sprintf("%d файлов", len(merged.Files))})
 	validationErrors := validateGeneratedProject(merged.Files, merged.Env)
+	validationErrors = append(validationErrors, validateAgainstManifest(merged.Files, manifest)...)
 	errorCount, _ := logValidationResults(validationErrors)
 
 	if errorCount > 0 {
@@ -1277,6 +1386,7 @@ func (p *ChatProcessor) generateCodeChunkedWebsite(ctx context.Context, clarifie
 		if len(repaired) > 0 {
 			applyRepairs(merged.Files, repaired)
 			postErrors := validateGeneratedProject(merged.Files, merged.Env)
+			postErrors = append(postErrors, validateAgainstManifest(merged.Files, manifest)...)
 			postCount, _ := logValidationResults(postErrors)
 			log.Printf("[chunked-web] post-repair: %d errors remaining (was %d)", postCount, errorCount)
 		}
@@ -1301,7 +1411,8 @@ func (p *ChatProcessor) generateWebsiteFoundation(ctx context.Context, clarified
 		fmt.Fprintf(&sb, "  %s  (exports: [%s])\n", f.Path, strings.Join(f.Exports, ", "))
 	}
 
-	sb.WriteString("\nPAGES — add routes to App.tsx but DO NOT implement their content:\n")
+	sb.WriteString("\nPAGES — add lazy imports + routes to App.tsx but DO NOT implement their content:\n")
+	sb.WriteString("(One `const PageName = lazy(...)` declaration above the App component and one <Route> inside <Routes> per page below. Full pattern is documented in the system prompt — do not re-explain here.)\n")
 	for _, g := range manifest.Groups {
 		if g.ID == 0 {
 			continue
@@ -1311,6 +1422,17 @@ func (p *ChatProcessor) generateWebsiteFoundation(ctx context.Context, clarified
 				fmt.Fprintf(&sb, "  %s  → component: [%s]\n", f.Path, strings.Join(f.Exports, ", "))
 			}
 		}
+	}
+
+	// Note: ExportConventionBlock + LazyAppTsxExemplar are baked into PromptWebsiteGenerator
+	// (cacheable system prompt) — do NOT re-inject here.
+	if routesBlock := buildExpectedRoutesBlock(manifest); routesBlock != "" {
+		sb.WriteString("\n")
+		sb.WriteString(routesBlock)
+	}
+	if typesBlock := buildExpectedEntityTypesBlock(manifest); typesBlock != "" {
+		sb.WriteString("\n")
+		sb.WriteString(typesBlock)
 	}
 
 	sb.WriteString("\nFULL MANIFEST (for routing reference):\n")
@@ -1359,7 +1481,8 @@ func (p *ChatProcessor) generateWebsitePage(ctx context.Context, group models.Ma
 	sb.WriteString(apiConfig)
 	sb.WriteString("\n")
 
-	sb.WriteString(buildTemplateHooksContext())
+	// Template API signatures (useApi/useAppForm/apiUtils/utils/AppProviders) are baked into
+	// PromptWebsitePageCoder via TemplateAPIDigest — do not re-inject the full source here.
 
 	sb.WriteString(foundationCtx)
 

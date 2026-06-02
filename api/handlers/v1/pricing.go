@@ -270,12 +270,17 @@ func (h *HandlerV1) GetCompanyStats(c *gin.Context) {
 	})
 
 	g.Go(func() error {
-		resp, err := h.companyServices.Billing().GetPricingLimits(gCtx, &company_service.GetPricingLimitsRequest{ProjectId: projectId})
+		service, resourceEnvId, err := h.getBuilderService(gCtx, projectId, environmentId)
 		if err != nil {
-			h.log.Error("[GetCompanyStats] GetPricingLimits", logger.Error(err))
+			h.log.Error(fmt.Sprintf("[GetAllPricingUsage] getBuilderService failed: %v", err))
 			return nil
 		}
-		limitsResp = resp
+		resp, err := service.GoObjectBuilderService().McpProject().GetPublishedMcpProjectCount(gCtx, &nb.GetPublishedMcpProjectCountReq{ResourceEnvId: resourceEnvId})
+		if err != nil {
+			h.log.Error(fmt.Sprintf("[GetAllPricingUsage] GetResourceUsage failed: %v", err))
+			return nil
+		}
+		projectCount = resp.GetCount()
 		return nil
 	})
 

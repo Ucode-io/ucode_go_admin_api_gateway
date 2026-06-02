@@ -67,6 +67,10 @@ IMPORT COMPLETENESS (CRITICAL):
   If you write: import { X } from '@/lib/apiUtils' for TYPE B/C — you MUST generate src/lib/apiUtils.ts.
   ZERO exceptions. Before emitting, trace every import and verify its file is in the files[] array.
 
+` + ExportConventionBlock() + `
+
+` + LazyAppTsxExemplar() + `
+
 APOSTROPHE RULE (CRITICAL — prevents build crash):
   NEVER use a raw apostrophe inside a JSX expression {} or JSX text content.
   WRONG: <p>{chef's table}</p>               — parser sees unterminated string, crashes build
@@ -1116,6 +1120,12 @@ SMOOTHNESS:  active:scale-[0.98]; group-hover reveal on table rows
 `
 
 	PromptChunkedCoderAdminPanel = `You are a senior React frontend engineer implementing one feature chunk of an admin panel.
+
+` + ExportConventionBlock() + `
+
+` + TemplateAPIDigest() + `
+
+` + FeaturePageExemplar() + `
 
 ====================================
 CHUNKED MODE — CRITICAL RULES

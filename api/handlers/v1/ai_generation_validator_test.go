@@ -491,6 +491,253 @@ Button.displayName = 'Button';`,
 	}
 }
 
+// TestValidateLazyImports_HappyPath — App.tsx uses lazy with named extractor; page exports named — no errors.
+func TestValidateLazyImports_HappyPath(t *testing.T) {
+	files := []models.ProjectFile{
+		{
+			Path: "src/App.tsx",
+			Content: `import { lazy, Suspense } from 'react';
+const HomePage = lazy(() => import('@/pages/HomePage').then(m => ({ default: m.HomePage })));
+export default function App() { return <Suspense><HomePage/></Suspense>; }`,
+		},
+		{
+			Path:    "src/pages/HomePage.tsx",
+			Content: `export function HomePage() { return <div>Home</div>; }`,
+		},
+	}
+	errors := validateGeneratedProject(files, nil)
+	for _, e := range errors {
+		if contains(e.Message, "lazy") {
+			t.Errorf("expected no lazy-import errors, got: %s", e.Message)
+		}
+	}
+}
+
+// TestValidateLazyImports_MissingNamedExport — App.tsx expects m.HomePage, file only has default. Should error.
+// This is the exact root cause of React error #306 the user reported.
+func TestValidateLazyImports_MissingNamedExport(t *testing.T) {
+	files := []models.ProjectFile{
+		{
+			Path: "src/App.tsx",
+			Content: `import { lazy } from 'react';
+const HomePage = lazy(() => import('@/pages/HomePage').then(m => ({ default: m.HomePage })));`,
+		},
+		{
+			Path:    "src/pages/HomePage.tsx",
+			Content: `export default function HomePage() { return <div>Home</div>; }`,
+		},
+	}
+	errors := validateGeneratedProject(files, nil)
+	found := false
+	for _, e := range errors {
+		if e.Severity == "error" && contains(e.Message, "lazy import expects named export") && contains(e.Message, "HomePage") {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Errorf("expected lazy-named-export error for default-only file, got %d errors: %v", len(errors), errors)
+	}
+}
+
+// TestValidateLazyImports_WrongName — typo in extractor (m.Home vs HomePage). Should error.
+func TestValidateLazyImports_WrongName(t *testing.T) {
+	files := []models.ProjectFile{
+		{
+			Path: "src/App.tsx",
+			Content: `import { lazy } from 'react';
+const HomePage = lazy(() => import('@/pages/HomePage').then(m => ({ default: m.Home })));`,
+		},
+		{
+			Path:    "src/pages/HomePage.tsx",
+			Content: `export function HomePage() { return <div/>; }`,
+		},
+	}
+	errors := validateGeneratedProject(files, nil)
+	found := false
+	for _, e := range errors {
+		if e.Severity == "error" && contains(e.Message, "named export") && contains(e.Message, "Home") {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Errorf("expected lazy-import error for m.Home typo, got %d errors: %v", len(errors), errors)
+	}
+}
+
+// TestValidateLazyImports_DefaultLazy_NoDefault — lazy without .then expects default export.
+func TestValidateLazyImports_DefaultLazy_NoDefault(t *testing.T) {
+	files := []models.ProjectFile{
+		{
+			Path: "src/App.tsx",
+			Content: `import { lazy } from 'react';
+const HomePage = lazy(() => import('@/pages/HomePage'));`,
+		},
+		{
+			Path:    "src/pages/HomePage.tsx",
+			Content: `export function HomePage() { return <div/>; }`,
+		},
+	}
+	errors := validateGeneratedProject(files, nil)
+	found := false
+	for _, e := range errors {
+		if e.Severity == "error" && contains(e.Message, "no default export") {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Errorf("expected lazy-without-then default-export error, got %d errors: %v", len(errors), errors)
+	}
+}
+
+// TestExportDefaultRelaxed_AllFourForms — buildExportRegistry recognises all four export-default shapes.
+// All four register `default` only; the identifier inside `export default X` is module-local and
+// is NOT exposed as a named export (named import would fail).
+func TestExportDefaultRelaxed_AllFourForms(t *testing.T) {
+	cases := []struct {
+		name    string
+		content string
+		// expectNamedAlso=true means the identifier ALSO appears as a normal named export
+		// (e.g. `export const Foo = ...; export default Foo;`).
+		expectNamedAlso bool
+		identifier      string
+	}{
+		{"function form", `export default function Foo() {}`, false, "Foo"},
+		{"class form", `export default class Bar {}`, false, "Bar"},
+		{"identifier form", `const Baz = () => null; export default Baz;`, false, "Baz"},
+		{"memo wrapped", `const Qux = () => null; export default React.memo(Qux);`, false, "Qux"},
+		{"named + default", `export const Foo = () => null; export default Foo;`, true, "Foo"},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			files := []models.ProjectFile{{Path: "src/X.tsx", Content: c.content}}
+			reg := buildExportRegistry(files)
+			ex := reg["src/X.tsx"]
+			if !ex["default"] {
+				t.Errorf("[%s] expected default export to be registered", c.name)
+			}
+			if c.expectNamedAlso && !ex[c.identifier] {
+				t.Errorf("[%s] expected named export %q ALSO registered, got: %v", c.name, c.identifier, ex)
+			}
+			if !c.expectNamedAlso && ex[c.identifier] {
+				t.Errorf("[%s] expected %q NOT registered as named (it is module-local), got: %v", c.name, c.identifier, ex)
+			}
+		})
+	}
+}
+
+// TestParseLazyImports_VariousSpacings — regex tolerates whitespace variations.
+func TestParseLazyImports_VariousSpacings(t *testing.T) {
+	cases := []string{
+		`lazy(() => import('@/pages/A').then(m => ({ default: m.A })))`,
+		`lazy( ( ) => import( '@/pages/B' ).then( m => ( { default: m.B } ) ) )`,
+		`lazy(() => import("@/pages/C"))`, // no .then
+		`lazy(async () => import('@/pages/D').then((mod) => ({ default: mod.D })))`,
+	}
+	expected := []struct{ Path, Name string }{
+		{"@/pages/A", "A"},
+		{"@/pages/B", "B"},
+		{"@/pages/C", ""},
+		{"@/pages/D", "D"},
+	}
+	for i, c := range cases {
+		got := parseLazyImports("src/App.tsx", c)
+		if len(got) == 0 {
+			t.Errorf("[case %d] failed to parse: %q", i, c)
+			continue
+		}
+		if got[0].Path != expected[i].Path {
+			t.Errorf("[case %d] path mismatch: want %q got %q", i, expected[i].Path, got[0].Path)
+		}
+		if got[0].NamedExport != expected[i].Name {
+			t.Errorf("[case %d] name mismatch: want %q got %q", i, expected[i].Name, got[0].NamedExport)
+		}
+	}
+}
+
+// TestMergeAppRoutes_RebuildsFromManifest — the merger should overwrite App.tsx
+// with the canonical lazy + Route shape derived from manifest.Routes + actual page exports.
+func TestMergeAppRoutes_RebuildsFromManifest(t *testing.T) {
+	files := []models.ProjectFile{
+		{Path: "src/App.tsx", Content: `// will be overwritten`},
+		{Path: "src/pages/HomePage.tsx", Content: `export function HomePage() { return <div/>; }`},
+		{Path: "src/pages/AboutPage.tsx", Content: `export function AboutPage() { return <div/>; }`},
+	}
+	manifest := &models.ProjectManifest{
+		ExportStyle: "named-lazy",
+		Routes: []models.ManifestRoute{
+			{Path: "/", PageName: "HomePage", FilePath: "src/pages/HomePage.tsx"},
+			{Path: "/about", PageName: "AboutPage", FilePath: "src/pages/AboutPage.tsx"},
+		},
+	}
+	got := mergeAppRoutes(files, manifest)
+	var app string
+	for _, f := range got {
+		if f.Path == "src/App.tsx" {
+			app = f.Content
+			break
+		}
+	}
+	if !contains(app, "m.HomePage") || !contains(app, "m.AboutPage") {
+		t.Errorf("App.tsx missing expected lazy named extractors:\n%s", app)
+	}
+	if !contains(app, `path="/"`) || !contains(app, `path="/about"`) {
+		t.Errorf("App.tsx missing expected routes:\n%s", app)
+	}
+}
+
+// TestMergeAppRoutes_SkipsLegacyManifest — without ExportStyle="named-lazy" the merger no-ops.
+func TestMergeAppRoutes_SkipsLegacyManifest(t *testing.T) {
+	original := `legacy App.tsx untouched`
+	files := []models.ProjectFile{
+		{Path: "src/App.tsx", Content: original},
+		{Path: "src/pages/HomePage.tsx", Content: `export default function HomePage() {}`},
+	}
+	manifest := &models.ProjectManifest{
+		Routes: []models.ManifestRoute{{Path: "/", PageName: "HomePage", FilePath: "src/pages/HomePage.tsx"}},
+		// ExportStyle deliberately empty → legacy.
+	}
+	got := mergeAppRoutes(files, manifest)
+	for _, f := range got {
+		if f.Path == "src/App.tsx" && f.Content != original {
+			t.Errorf("legacy App.tsx was mutated. before=%q after=%q", original, f.Content)
+		}
+	}
+}
+
+// TestMergeAppRoutes_DropsRoutesWithMissingExports — if a page file lacks the named
+// export the route refers to, merger must skip it rather than emit a broken App.tsx.
+func TestMergeAppRoutes_DropsRoutesWithMissingExports(t *testing.T) {
+	files := []models.ProjectFile{
+		{Path: "src/App.tsx", Content: `// will be overwritten`},
+		{Path: "src/pages/HomePage.tsx", Content: `export function HomePage() {}`},
+		// AboutPage exports nothing useful — should be skipped.
+		{Path: "src/pages/AboutPage.tsx", Content: `export default function AboutPage() {}`},
+	}
+	manifest := &models.ProjectManifest{
+		ExportStyle: "named-lazy",
+		Routes: []models.ManifestRoute{
+			{Path: "/", PageName: "HomePage", FilePath: "src/pages/HomePage.tsx"},
+			{Path: "/about", PageName: "AboutPage", FilePath: "src/pages/AboutPage.tsx"},
+		},
+	}
+	got := mergeAppRoutes(files, manifest)
+	var app string
+	for _, f := range got {
+		if f.Path == "src/App.tsx" {
+			app = f.Content
+		}
+	}
+	if !contains(app, "m.HomePage") {
+		t.Errorf("expected HomePage to be present; got:\n%s", app)
+	}
+	if contains(app, "m.AboutPage") {
+		t.Errorf("AboutPage should be dropped (no named export); got:\n%s", app)
+	}
+}
+
 func contains(s, substr string) bool {
 	return len(s) >= len(substr) && searchSubstring(s, substr)
 }

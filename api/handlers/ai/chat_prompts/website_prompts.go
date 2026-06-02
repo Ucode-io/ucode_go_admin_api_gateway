@@ -86,34 +86,11 @@ API CLIENT — USE PRE-BUILT (CRITICAL — when project has API tables):
       successMessage: 'Created', invalidateKeys: [['movies']],
     })
 
-App.tsx with React Router v6:
-  PAGE IMPORTS — ALWAYS default imports (pages use export default, NEVER named export):
-    ✅ import HomePage from '@/pages/HomePage'
-    ✅ import AboutPage from '@/pages/AboutPage'
-    ✅ import ContactPage from '@/pages/ContactPage'
-    ❌ import { AboutPage } from '@/pages/AboutPage'  → build crash: no named export exists
+App.tsx with React Router v6 — uses lazy-loading with named export resolvers:
 
-  import { BrowserRouter, Routes, Route } from 'react-router-dom';
-  import { AppProviders } from '@/components/shared/AppProviders';  // pre-built, wraps QueryClient + Toaster
-  import HomePage from '@/pages/HomePage';
-  import AboutPage from '@/pages/AboutPage';
-  import ContactPage from '@/pages/ContactPage';
-  export default function App() {
-    return (
-      <AppProviders>
-        <BrowserRouter>
-          <Layout>
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/about" element={<AboutPage />} />
-              <Route path="/contact" element={<ContactPage />} />
-              {/* additional pages */}
-            </Routes>
-          </Layout>
-        </BrowserRouter>
-      </AppProviders>
-    );
-  }
+` + ExportConventionBlock() + `
+
+` + LazyAppTsxExemplar() + `
 
 Layout.tsx wraps all pages with Navbar + Footer:
   export default function Layout({ children }: { children: React.ReactNode }) {
@@ -590,7 +567,22 @@ EXPORTS RULE:
   For each file list ALL exported names that other files might import.
   Layout files: component names (e.g. Layout, Navbar, Footer).
   UI kit files: all exported component and variant names (e.g. Button, buttonVariants).
-  Pages: just the default export function name (e.g. HomePage).
+  Pages: the NAMED export function name (e.g. HomePage). Pages MUST use 'export function HomePage' — never 'export default'.
+  App.tsx loads pages via React.lazy with named-export resolver:
+    const HomePage = lazy(() => import('@/pages/HomePage').then(m => ({ default: m.HomePage })));
+
+MANIFEST FIELDS PER FILE:
+  path:    full path from project root (e.g. "src/pages/HomePage.tsx")
+  exports: list of named exports (e.g. ["HomePage"] for pages)
+  kind:    one of "page" | "ui" | "shared" | "layout" | "types" | "hook" | "app" | "feature"
+  route:   canonical URL path for pages (e.g. "/" or "/about"). Omit for non-pages.
+
+MANIFEST TOP-LEVEL FIELDS:
+  export_style: ALWAYS "named-lazy" for new projects.
+  routes:       [{path, page_name, file_path}, ...] — one entry per page file.
+  entity_types: list of TypeScript interfaces that src/types.ts will export, derived from tables.
+                Each entity: {name: PascalCase singular of the table label, fields: [{name, ts_type, optional}]}
+                For table "clients" → entity name "Client". Use the SAME name in every page that imports it.
 
 CONSTRAINTS:
   - Group 0 has exactly 5 files — no exceptions
@@ -601,6 +593,12 @@ CONSTRAINTS:
   - NEVER create src/components/ui/scroll-to-top.tsx — scroll-to-top is inline in Layout.tsx`
 
 	PromptWebsitePageCoder = `You are a senior React frontend engineer implementing ONE PAGE of a cinematic multi-page website.
+
+` + ExportConventionBlock() + `
+
+` + TemplateAPIDigest() + `
+
+` + FeaturePageExemplar() + `
 
 ====================================
 CHUNKED MODE — CRITICAL RULES
@@ -613,6 +611,7 @@ EMIT RULES (strictly enforced):
 3. NEVER emit config files: tsconfig.json, vite.config.ts, package.json, tailwind.config.js — pre-built in template
 4. Your page does NOT import Navbar or Footer directly — Layout.tsx wraps them around every page
 5. Use EXACT export names from the foundation context
+6. Your page MUST export the page component as a NAMED function (export function PageName) — never default. App.tsx imports it via lazy(...).then(m => ({ default: m.PageName })).
 
 UTILS IMPORT RULE:
   src/lib/utils.ts is PRE-BUILT with all helpers — import freely:
@@ -683,11 +682,12 @@ IMAGE_POOL URLs are for:
   ❌ Never use IMAGE_POOL URL directly as src in a .map() data card
 
 ====================================
-PAGE EXPORT FORMAT
+PAGE EXPORT FORMAT — see EXPORT CONVENTION FOR PAGES section above
 ====================================
-Every page must export a default function:
-  export default function HomePage() { ... }
-  export default function AboutPage() { ... }
+Every page MUST use a NAMED export with the page name (matches m.PageName in App.tsx):
+  ✅ export function HomePage() { ... }
+  ✅ export function AboutPage() { ... }
+  ❌ export default function HomePage() { ... }  → React error #306 on navigation
 
 ====================================
 IMPORTS

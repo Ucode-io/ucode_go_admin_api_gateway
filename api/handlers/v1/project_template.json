@@ -18,7 +18,11 @@
     },
     {
       "path": "src/App.tsx",
-      "content": "import { BrowserRouter, Routes, Route } from 'react-router-dom';\nimport { AppProviders } from '@/components/shared/AppProviders';\n\nexport default function App() {\n  return (\n    <BrowserRouter>\n      <AppProviders>\n        <Routes>\n          {/* [AI: Generate unique routes and redirects based on the domain] */}\n        </Routes>\n      </AppProviders>\n    </BrowserRouter>\n  );\n}"
+      "content": "import { lazy, Suspense } from 'react';\nimport { BrowserRouter, Routes, Route } from 'react-router-dom';\nimport { AppProviders } from '@/components/shared/AppProviders';\nimport { PageLoader } from '@/components/shared/PageLoader';\n\n/* [AI: Declare one `const PageName = lazy(...)` per entry in manifest.Routes, ABOVE the App component.\n   Pages MUST be loaded with the named-export resolver — never `lazy(() => import(...))` alone:\n     const HomePage = lazy(() =>\n       import('@/pages/HomePage').then((m) => ({ default: m.HomePage }))\n     );\n   The named export `HomePage` MUST exist in '@/pages/HomePage'. ] */\n\nexport default function App() {\n  return (\n    <BrowserRouter>\n      <AppProviders>\n        <Suspense fallback={<PageLoader />}>\n          <Routes>\n            {/* [AI: one <Route path=\"...\" element={<PageName />} /> per manifest.Routes entry] */}\n          </Routes>\n        </Suspense>\n      </AppProviders>\n    </BrowserRouter>\n  );\n}\n"
+    },
+    {
+      "path": "src/components/shared/PageLoader.tsx",
+      "content": "export function PageLoader() {\n  return (\n    <div className=\"flex h-screen w-full items-center justify-center\">\n      <div className=\"h-10 w-10 animate-spin rounded-full border-4 border-muted border-t-primary\" />\n    </div>\n  );\n}\n"
     },
     {
       "path": "src/index.css",

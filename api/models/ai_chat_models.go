@@ -241,10 +241,14 @@ type (
 
 	// ========================== Chunked Generation Manifest ==========================
 
-	// ManifestFile is one file entry in a project manifest: path + exported names.
+	// ManifestFile is one file entry in a project manifest: path + exported names + role metadata.
 	ManifestFile struct {
-		Path    string   `json:"path"`
-		Exports []string `json:"exports"`
+		Path           string              `json:"path"`
+		Exports        []string            `json:"exports"`
+		Kind           string              `json:"kind,omitempty"`            // "page" | "ui" | "shared" | "layout" | "types" | "hook" | "app" | "feature"
+		Route          string              `json:"route,omitempty"`           // canonical URL path for pages
+		PropsInterface string              `json:"props_interface,omitempty"` // for ui-kit components
+		Variants       map[string][]string `json:"variants,omitempty"`        // e.g. {"variant":["default","outline"],"size":["sm","md","lg"]}
 	}
 
 	// ManifestGroup groups files by dependency level.
@@ -255,9 +259,34 @@ type (
 		Files []ManifestFile `json:"files"`
 	}
 
+	// ManifestRoute maps a URL path to a page component and its file.
+	ManifestRoute struct {
+		Path     string `json:"path"`      // e.g. "/about"
+		PageName string `json:"page_name"` // e.g. "AboutPage" — named export from FilePath
+		FilePath string `json:"file_path"` // e.g. "src/pages/AboutPage.tsx"
+	}
+
+	// ManifestEntityField is one field of an entity interface.
+	ManifestEntityField struct {
+		Name     string `json:"name"`
+		TSType   string `json:"ts_type"` // "string" | "number" | "boolean" | "Date" | etc.
+		Optional bool   `json:"optional,omitempty"`
+	}
+
+	// ManifestEntityType describes a TypeScript interface that types.ts must export.
+	ManifestEntityType struct {
+		Name   string                `json:"name"` // PascalCase interface name, e.g. "Contact"
+		Fields []ManifestEntityField `json:"fields"`
+	}
+
 	// ProjectManifest is the output of the manifest generation step.
+	// ExportStyle/EntityTypes/Routes are optional: legacy manifests without
+	// them fall through to the old generation path.
 	ProjectManifest struct {
-		Groups []ManifestGroup `json:"groups"`
+		Groups      []ManifestGroup      `json:"groups"`
+		ExportStyle string               `json:"export_style,omitempty"` // "named-lazy" (new default) | "default-export" (legacy)
+		EntityTypes []ManifestEntityType `json:"entity_types,omitempty"`
+		Routes      []ManifestRoute      `json:"routes,omitempty"`
 	}
 
 	// ========================== AI Database Assistant ==========================
