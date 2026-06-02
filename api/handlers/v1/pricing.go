@@ -243,9 +243,10 @@ func (h *HandlerV1) GetCompanyStats(c *gin.Context) {
 			ServiceType:   company_service.ServiceType_BUILDER_SERVICE,
 		},
 	)
-	if err == nil && resource.GetResourceType() == company_service.ResourceType_POSTGRESQL {
+	
+	if err != nil || resource.GetResourceType() != company_service.ResourceType_POSTGRESQL {
 		h.log.Error("[GetCompanyStats] GetSingleServiceResourceReq", logger.Error(err))
-		h.HandleResponse(c, status_http.InternalServerError, err.Error())
+		h.HandleResponse(c, status_http.InternalServerError, logger.Error(err))
 		return
 	}
 
