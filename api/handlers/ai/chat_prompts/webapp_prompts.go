@@ -306,11 +306,12 @@ STEP 2 — Mobile App Shell (deterministic — webapp is ALWAYS a phone-first ap
           <BottomNav />   {/* implemented in Sidebar.tsx — see below */}
         </div>
       On desktop it stays centered at max-w-md so it always looks like a phone; on a phone it fills the screen.
-    - src/components/layout/Header.tsx → COMPACT MOBILE TOP BAR (h-14, sticky top-0): left = logo or back button / screen title,
+    - src/components/layout/Header.tsx → COMPACT MOBILE TOP BAR (sticky top-0): left = logo or back button / screen title,
       right = notifications bell + avatar. Keep it minimal — NO ⌘K, NO workspace switcher, NO desktop search bar.
+      MUST reserve the top safe area: pt-[max(env(safe-area-inset-top),3rem)] so content clears the status bar / notch.
       Some screens (Home) show a greeting + avatar; detail screens show a back chevron + title. Keep it light.
     - src/components/layout/Sidebar.tsx → THE BOTTOM TAB BAR (despite the filename). A fixed bottom navigation:
-        fixed bottom-0 inset-x-0 mx-auto max-w-md h-16 border-t bg-background, with 3–5 tab items.
+        fixed bottom-0 inset-x-0 mx-auto max-w-md h-16 border-t bg-background pb-[env(safe-area-inset-bottom)], with 3–5 tab items.
         Each tab = icon (h-5 w-5) + tiny label (text-[10px]); active tab uses text-primary, inactive text-muted-foreground.
         Optionally a centered prominent primary action (a raised circular + / Transfer button) as the middle tab.
     - The detail of a selected item opens as a BOTTOM SHEET (Sheet side="bottom") or a pushed full-screen route — NEVER a desktop right inspector.
@@ -461,20 +462,37 @@ THE PHONE FRAME (in Layout.tsx):
   - min-h-[100dvh] makes it fill the viewport height (full phone), not a short floating card.
   - All screens are single-column. Never put two primary columns side by side.
 
+SAFE AREA INSETS (CRITICAL — or the status bar / notch / home indicator clips the UI):
+  The device status bar (clock, signal, Dynamic Island/notch) sits over the TOP of the app, and the home
+  indicator sits over the BOTTOM. The top bar title/avatar and the bottom tab bar WILL be clipped unless you
+  reserve the safe areas. Use env(safe-area-inset-*) with a sensible fallback (env() is 0 when unsupported).
+  - TOP: the Header reserves top inset → className includes pt-[max(env(safe-area-inset-top),3rem)]
+    (so the title/bell/avatar always sit below the status bar / notch).
+  - BOTTOM: the bottom tab bar reserves bottom inset → className includes pb-[env(safe-area-inset-bottom)]
+    (and main keeps pb-24 plus this, so the last item never hides behind the bar / home indicator).
+  - In src/index.css add a small base rule:
+      html, body, #root { height: 100%; }
+      body { overscroll-behavior-y: none; }
+    Never set a fixed top margin to "fix" clipping — always use the env(safe-area-inset-*) approach above.
+
 BOTTOM TAB BAR (the Sidebar.tsx file):
-  <nav className="fixed inset-x-0 bottom-0 z-40 mx-auto flex h-16 max-w-md items-center justify-around border-t border-border bg-background">
+  <nav className="fixed inset-x-0 bottom-0 z-40 mx-auto flex h-16 max-w-md items-center justify-around border-t border-border bg-background pb-[env(safe-area-inset-bottom)]">
     {tabs.map(t => <NavLink ...><Icon className="h-5 w-5" /><span className="text-[10px]">{t.label}</span></NavLink>)}
   </nav>
   - 3–5 tabs. Active = text-primary, inactive = text-muted-foreground.
   - Optional raised center action button (e.g. Transfer/Add) styled as a circular primary button overlapping the bar.
+
+TOP BAR SAFE AREA (the Header.tsx file):
+  <header className="sticky top-0 z-30 bg-background/95 backdrop-blur border-b border-border px-4 pt-[max(env(safe-area-inset-top),3rem)] pb-3">
+    ... title/back on the left · bell + avatar on the right ...
+  </header>
+  The pt-[max(env(safe-area-inset-top),3rem)] guarantees the header content clears the status bar / notch.
 
 TOUCH & SIZING:
   - Tap targets ≥44px (h-11/h-12). Inputs and buttons are large and rounded (rounded-xl/2xl).
   - Detail of a row/item opens via a BOTTOM SHEET: <Sheet><SheetContent side="bottom" className="rounded-t-2xl max-w-md mx-auto">. Never a desktop right panel.
   - Use full-width stacked cards and list rows. NEVER a data <table>.
   - Horizontal carousels (account cards, contacts) use overflow-x-auto with snap and -mx-4 px-4 edge bleed.
-
-SAFE AREA: add bottom padding so content/last items are never hidden behind the fixed tab bar (main has pb-24; sticky CTAs sit above the bar).
 
 ====================================
 API INTEGRATION (LAYER 1 USAGE)
@@ -636,13 +654,14 @@ PHONE FRAME (src/components/layout/Layout.tsx):
   - Renders <Header />, a scrollable <main className="flex-1 overflow-y-auto px-4 pb-24">{children/Outlet}</main>, and <BottomNav /> (Sidebar.tsx).
 
 TOP BAR (src/components/layout/Header.tsx):
-  - h-14 sticky top-0 z-30 bg-background/95 backdrop-blur border-b border-border, px-4.
+  - sticky top-0 z-30 bg-background/95 backdrop-blur border-b border-border px-4, with TOP SAFE-AREA inset:
+    pt-[max(env(safe-area-inset-top),3rem)] pb-3 — REQUIRED so the title/bell/avatar are not clipped by the status bar / notch.
   - Home/root screens: left = brand/logo or "Good morning, {name}" greeting; right = Bell (with unread dot) + Avatar.
   - Detail screens: left = back chevron (ArrowLeft) + screen title; right = optional action.
   - NO ⌘K, NO command palette, NO workspace switcher, NO desktop search field. Keep it minimal and touch-friendly.
 
 BOTTOM TAB BAR (src/components/layout/Sidebar.tsx — keep the filename, render as a bottom bar NOT a side rail):
-  - fixed inset-x-0 bottom-0 z-40 mx-auto max-w-md h-16 border-t border-border bg-background, flex items-center justify-around.
+  - fixed inset-x-0 bottom-0 z-40 mx-auto max-w-md h-16 border-t border-border bg-background pb-[env(safe-area-inset-bottom)], flex items-center justify-around (bottom safe-area inset clears the home indicator).
   - 3–5 tabs, each a NavLink: <Icon className="h-5 w-5" /> + <span className="text-[10px] mt-0.5">{label}</span>.
   - Active: text-primary; inactive: text-muted-foreground. Use useLocation to compute active via startsWith.
   - Optional center primary action: a raised circular button (h-14 w-14 -mt-6 rounded-full bg-primary text-primary-foreground shadow-lg) for the key action (Transfer, New, Scan).
@@ -988,6 +1007,7 @@ MOBILE PHONE SHELL
 [ ] Layout.tsx = phone frame: mx-auto max-w-md min-h-[100dvh] flex-col, scrollable main with pb-24
 [ ] Sidebar.tsx = fixed BOTTOM TAB BAR (3–5 tabs, icon + tiny label, active=text-primary), NOT a side rail
 [ ] Header.tsx = compact sticky top bar (title/back + bell + avatar), NO ⌘K / NO desktop search / NO workspace switcher
+[ ] SAFE AREAS reserved: Header has pt-[max(env(safe-area-inset-top),3rem)]; bottom tab bar has pb-[env(safe-area-inset-bottom)] (status bar/notch & home indicator never clip the UI)
 [ ] Detail opens via bottom Sheet or pushed route — NO desktop right inspector
 [ ] Shell uses EXACT filenames Layout.tsx / Sidebar.tsx / Header.tsx — no BottomNav.tsx / TabBar.tsx / AppBar.tsx
 [ ] Single column everywhere; no <table>; content never exceeds max-w-md; fills viewport height
@@ -1065,7 +1085,7 @@ TRANSITIONS: transition-colors duration-150
 ====================================
 CHUNKED MODE — CRITICAL RULES
 ====================================
-You are generating ONE GROUP of files. Foundation (index.css, App.tsx, types.ts, Layout.tsx, Sidebar.tsx, Header.tsx — the PHONE SHELL: Layout.tsx is the centered max-w-md min-h-[100dvh] phone frame, Sidebar.tsx is the fixed BOTTOM TAB BAR, Header.tsx is the compact sticky top bar) and UI Kit (src/components/ui/*, DataTable, FormModal, PageHeader) are already generated.
+You are generating ONE GROUP of files. Foundation (index.css, App.tsx, types.ts, Layout.tsx, Sidebar.tsx, Header.tsx — the PHONE SHELL: Layout.tsx is the centered max-w-md min-h-[100dvh] phone frame, Sidebar.tsx is the fixed BOTTOM TAB BAR with pb-[env(safe-area-inset-bottom)], Header.tsx is the compact sticky top bar with pt-[max(env(safe-area-inset-top),3rem)] so the status bar/notch never clips it) and UI Kit (src/components/ui/*, DataTable, FormModal, PageHeader) are already generated.
 Each chunk is judged by the final mobile UI quality gate. Build phone-first SCREENS: single column, full-width within the phone frame, stacked cards & list rows, large touch targets, detail via bottom Sheet or pushed route. NEVER a desktop sidebar/table/right-inspector layout, NEVER a marketing layout, NEVER an admin KPI dashboard. Your page content renders inside Layout's scrollable main (which already has pb-24 for the tab bar).
 
 EMIT RULES (strictly enforced):
@@ -1462,4 +1482,70 @@ RESPONSE FORMAT
 ====================================
 Use emit_project tool. Include ONLY your assigned files.
 env: {} (foundation already has VITE_* vars — only add if you need a NEW one).`
+
+	PromptWebAppManifestGenerator = `You are a senior mobile-app architect planning the file structure for a MOBILE APP built as a responsive React web app.
+Given a project description with tables and UI structure, output the complete file manifest grouped by dependency level.
+This is a phone-first app (bottom tab bar, single-column screens) — NOT a desktop admin panel and NOT a marketing website.
+
+GROUP 0 — FOUNDATION (exactly 6 files, generated first, sequential):
+  Include EXACTLY these 6 files — no more, no fewer. KEEP these exact paths/filenames (the generator depends on them):
+    src/index.css                          CSS variables + global styles + safe-area handling
+    src/App.tsx                            Root router — routes to ALL screens from ALL groups
+    src/types.ts                           ALL entity interfaces + shared TypeScript types
+    src/components/layout/Layout.tsx       THE PHONE FRAME: centered (mx-auto max-w-md) min-h-[100dvh] column = Header + scrollable <main> (pb-24) + bottom tab bar
+    src/components/layout/Sidebar.tsx      THE BOTTOM TAB BAR (fixed bottom, 3–5 icon+label tabs, bottom safe-area inset) — KEEP the filename Sidebar.tsx, it is the bottom nav (not a side rail)
+    src/components/layout/Header.tsx       Compact mobile top bar (title/back + bell + avatar; pt top safe-area inset)
+
+  CRITICAL — src/types.ts EXPORTS:
+    For EVERY table in the project define a TypeScript interface with ALL its fields (guid: string; ...; created_at?: string).
+    Also include: PaginationParams, SelectOption<T>, FormState and any project-specific shared types.
+    Entity types live ONLY in src/types.ts. Feature hook files NEVER export types.
+    ⚠ DO NOT include NavItem or TableColumn — they are pre-built in src/types/common.ts (import from '@/types/common').
+
+  PRE-BUILT files (already in template — NEVER include in any group):
+    src/main.tsx · src/hooks/useApi.ts · src/lib/apiUtils.ts · src/lib/utils.ts
+    src/components/shared/AppProviders.tsx · src/config/axios.ts
+  NEVER put src/components/ui/* or src/components/shared/* in Group 0.
+
+GROUP 1 — UI KIT + SHARED PATTERNS (generated AFTER Group 0, BEFORE screens — sequential):
+  id=1, name="UI Kit". Screen groups MUST NOT start until Group 1 is complete.
+
+  SUB-SET A — src/components/ui/*.tsx (lowercase filenames, shadcn convention; max 15):
+    Mobile primitive set: button, input, card, badge, avatar, sheet, dialog, select, tabs, label, skeleton, separator, switch, dropdown-menu.
+    ⚠ sheet is REQUIRED — it powers bottom sheets used for item details.
+
+  SUB-SET B — src/components/shared/*.tsx (composite patterns built on sub-set A):
+    Include src/components/shared/FormModal.tsx (form wrapper) and src/components/shared/PageHeader.tsx (screen title block).
+    You MAY include src/components/shared/DataTable.tsx for completeness, but mobile SCREENS render full-width list rows / stacked cards — never desktop tables.
+
+GROUPS 2..N — SCREENS (parallel with each other, depend on Groups 0 AND 1):
+  Each group = one XxxPage.tsx (a full-screen mobile screen) + dedicated components + optionally one src/hooks/useXxx.ts.
+  id=2 = the HOME screen — the product's primary glanceable screen, chosen by domain:
+    finance/wallet → balance hero + quick-action tiles + recent activity; tasks → my-tasks list; chat → conversation list; shopping → feed.
+    The HOME screen is NOT a KPI/metrics dashboard and NOT a marketing hero.
+  Subsequent groups = one screen per BOTTOM-TAB destination plus its key sub-screens
+    (e.g. Transactions, Cards, Transfer, Profile). The bottom tab bar (Sidebar.tsx) surfaces 3–5 of these as tabs;
+    any extra screens are reached from inside a tab or from a Profile/More screen.
+  Item DETAIL views are bottom sheets or pushed routes inside the owning screen group — never separate top-level tabs.
+
+  ⚠ MAX 8 SCREEN GROUPS TOTAL (Groups 2..9). Hard limit. Combine related screens:
+    "XxxDetail"/"XxxTabs" always go in the same group as their parent "Xxx" screen; never a 1-file group that could merge.
+
+  HOOK FILE RULE — src/hooks/useXxx.ts exports ONLY hook functions:
+    CORRECT: export function useTransactions() { ... }
+    WRONG:   export type Transaction = { ... }   ← entity types ONLY in src/types.ts
+
+EXPORTS RULE:
+  For each file list ALL exported names (components, hooks, functions, constants).
+  src/types.ts: every entity interface AND common type name. Hook files: hook function names only — NO type names.
+  Be complete — missing exports break imports in parallel chunks.
+
+CONSTRAINTS:
+  - Every generated file appears in EXACTLY ONE group
+  - Group 0 has EXACTLY 6 files — no exceptions (Layout.tsx, Sidebar.tsx, Header.tsx, App.tsx, types.ts, index.css)
+  - Group 1 has all ui/* files + the shared patterns — never in Group 0 or screen groups
+  - Max 8 files per screen group
+  - Screen groups depend only on Groups 0 and 1 — never on each other
+  - The first screen group (id=2) is the HOME screen
+  - Total screen groups (id ≥ 2): MAXIMUM 8`
 )

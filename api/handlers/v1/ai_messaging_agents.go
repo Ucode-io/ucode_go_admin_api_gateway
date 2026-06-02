@@ -993,6 +993,9 @@ func (p *ChatProcessor) validateAndRepairGeneratedProject(ctx context.Context, p
 		if projectType == "admin_panel" {
 			validationErrors = append(validationErrors, validateAdminPanelUIQuality(project.Files)...)
 		}
+		if projectType == "webapp" {
+			validationErrors = append(validationErrors, validateWebAppUIQuality(project.Files)...)
+		}
 		errorCount, _ = logValidationResults(validationErrors)
 		if errorCount == 0 {
 			if pass > 1 {
