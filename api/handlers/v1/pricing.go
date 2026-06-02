@@ -261,22 +261,22 @@ func (h *HandlerV1) GetCompanyStats(c *gin.Context) {
 	g, gCtx := errgroup.WithContext(ctx)
 
 	g.Go(func() error {
-		resp, err := h.companyServices.Billing().GetAiTokenUsageMetrics(gCtx, &company_service.GetAiTokenUsageMetricsRequest{CompanyId: companyId})
-		if err != nil {
-			h.log.Error("[GetCompanyStats] GetAiTokenUsageMetrics", logger.Error(err))
-			return nil
-		}
-		tokenMetrics = resp
-		return nil
-	})
-
-	g.Go(func() error {
 		resp, err := h.companyServices.Billing().GetPricingLimits(gCtx, &company_service.GetPricingLimitsRequest{ProjectId: projectId})
 		if err != nil {
 			h.log.Error("[GetCompanyStats] GetPricingLimits", logger.Error(err))
 			return nil
 		}
 		limitsResp = resp
+		return nil
+	})
+
+	g.Go(func() error {
+		resp, err := h.companyServices.Billing().GetAiTokenUsageMetrics(gCtx, &company_service.GetAiTokenUsageMetricsRequest{CompanyId: companyId})
+		if err != nil {
+			h.log.Error("[GetCompanyStats] GetAiTokenUsageMetrics", logger.Error(err))
+			return nil
+		}
+		tokenMetrics = resp
 		return nil
 	})
 
@@ -313,7 +313,7 @@ func (h *HandlerV1) GetCompanyStats(c *gin.Context) {
 			h.log.Error("[GetCompanyStats] GetCompanyUsersCount", logger.Error(err))
 			return nil
 		}
-		userCount = resp.GetCount()
+		builderCount = resp.GetCount()
 		return nil
 	})
 
