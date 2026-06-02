@@ -243,7 +243,7 @@ func (h *HandlerV1) GetCompanyStats(c *gin.Context) {
 			ServiceType:   company_service.ServiceType_BUILDER_SERVICE,
 		},
 	)
-	
+
 	if err != nil || resource.GetResourceType() != company_service.ResourceType_POSTGRESQL {
 		h.log.Error("[GetCompanyStats] GetSingleServiceResourceReq", logger.Error(err))
 		h.HandleResponse(c, status_http.InternalServerError, logger.Error(err))
@@ -271,26 +271,28 @@ func (h *HandlerV1) GetCompanyStats(c *gin.Context) {
 	})
 
 	g.Go(func() error {
+		resp, err := h.companyServices.Billing().GetPricingLimits(gCtx, &company_service.GetPricingLimitsRequest{ProjectId: projectId})
+		if err != nil {
+			h.log.Error("[GetCompanyStats] GetPricingLimits", logger.Error(err))
+			return nil
+		}
+		limitsResp = resp
+		return nil
+	})
+
+	g.Go(func() error {
 		service, resourceEnvId, err := h.getBuilderService(gCtx, projectId, environmentId)
 		if err != nil {
 			h.log.Error(fmt.Sprintf("[GetAllPricingUsage] getBuilderService failed: %v", err))
 			return nil
 		}
+
 		resp, err := service.GoObjectBuilderService().McpProject().GetPublishedMcpProjectCount(gCtx, &nb.GetPublishedMcpProjectCountReq{ResourceEnvId: resourceEnvId})
 		if err != nil {
 			h.log.Error(fmt.Sprintf("[GetAllPricingUsage] GetResourceUsage failed: %v", err))
 			return nil
 		}
-		projectCount = resp.GetCount()
-		return nil
-	})
 
-	g.Go(func() error {
-		resp, err := h.companyServices.Project().GetList(gCtx, &company_service.GetProjectListRequest{CompanyId: companyId, Limit: 1})
-		if err != nil {
-			h.log.Error("[GetCompanyStats] GetProjectList", logger.Error(err))
-			return nil
-		}
 		projectCount = resp.GetCount()
 		return nil
 	})
@@ -311,7 +313,7 @@ func (h *HandlerV1) GetCompanyStats(c *gin.Context) {
 			h.log.Error("[GetCompanyStats] GetCompanyUsersCount", logger.Error(err))
 			return nil
 		}
-		builderCount = resp.GetCount()
+		userCount = resp.GetCount()
 		return nil
 	})
 
