@@ -511,35 +511,34 @@ ADMIN PANEL UI BLUEPRINTS — choose by domain:
 ADMIN PANEL ANTI-GENERIC RULE:
   ui_structure must explicitly forbid a plain CRUD-only dashboard. At least one page must use a domain-specific pattern beyond a table.
 
-13b. For webapp projects, ui_structure MUST describe an end-user PRODUCT WORKSPACE (Linear/Notion/Trello/Slack/Asana tier), NOT an internal admin dashboard. Include:
+13b. For webapp projects, ui_structure MUST describe a MOBILE APP (a phone-first app, like Revolut/Cash App/Linear-Mobile/Notion-Mobile), NOT a desktop dashboard and NOT a marketing site. Include:
    - the product and the primary daily job of the end-user in one sentence;
-   - the WORKSPACE SHELL: a top app bar (workspace switcher + global ⌘K command palette trigger + quick-create + avatar),
-     a left navigation rail (grouped nav, favorites/recents, collapses to an icon strip under ~1100px, Sheet drawer on mobile),
-     and a right-hand detail INSPECTOR panel for the selected record;
-   - the DEFAULT view is a focused entry surface (e.g. "My Issues" / "Inbox" / "Today" / a default board or list) — NOT a metrics/KPI dashboard;
-   - for every major table/page: the correct PRODUCT surface (grouped list, kanban board, doc/page, message thread, inbox/queue, calendar) with an inspector — never a bare table;
-   - navigation groups with max 8 top-level items;
-   - required states per page: loading, empty (teaches next action), error, mobile;
-   - productivity-dense layout, keyboard-friendly, believable seed content (real-sounding issue/doc/channel/member names).
+   - the MOBILE SHELL: a centered phone-width frame (max-w-md, full viewport height), a compact sticky TOP BAR
+     (screen title or greeting + notifications + avatar; back button on detail screens — NO command palette, NO desktop search),
+     and a FIXED BOTTOM TAB BAR with 3–5 tabs (icon + tiny label); optional raised center action button (e.g. Transfer/Add/Scan);
+   - the HOME screen is a glanceable entry surface appropriate to the product (e.g. finance → balance hero card + quick-action tiles + recent activity list; tasks → my-tasks list; chat → conversation list) — NOT a KPI/metrics dashboard, NOT a marketing hero;
+   - for every screen: single-column stacked cards / full-width list rows (leading icon/avatar + title/subtitle + trailing value) — NEVER a data table;
+   - selecting an item opens a BOTTOM SHEET or a pushed full-screen detail route (with a back button) — NEVER a desktop right-side inspector;
+   - 3–5 bottom-tab destinations max; secondary screens live inside tabs or under a Profile/More tab;
+   - required states per screen: loading (skeleton), empty (teaches next action), error (retry);
+   - touch-first: tap targets ≥44px, large rounded cards/buttons, big numbers; believable seed content (real merchants/people/amounts/messages).
 
-WEBAPP UI BLUEPRINTS — choose by product type:
-  Issue / Project tracking (Linear/Jira-like):
-    default = "My Issues" grouped list (by status) with list/board toggle; board = kanban by status with stage counts; issue = right inspector with status/priority/assignee controls + activity.
-  Docs / Knowledge (Notion-like):
-    rail = page tree; main = document reader/editor with breadcrumb + blocks; recents/TOC side panel.
-  Boards / Kanban (Trello/Asana-like):
-    full-width board with sticky column headers + counts, compact cards (labels, members, due), card → inspector with checklist/comments.
-  Messaging / Collaboration (Slack-like):
-    rail = channels + DMs; main = message thread with composer; optional thread/details inspector.
-  CRM-lite workspace (Attio/Folk-like):
-    saved-view tabs + records list with custom fields; record profile inspector with related items + notes timeline.
-  Support / Helpdesk:
-    inbox layout = queue list + selected conversation + customer/context inspector.
+WEBAPP (MOBILE) UI BLUEPRINTS — choose by product type:
+  Finance / Wallet / Banking (Revolut/Cash App-like):
+    home = balance hero + quick-actions grid (Transfer/Pay/Top Up/Cards) + account cards carousel + recent transactions list; transactions = grouped-by-day rows, tap → detail sheet; transfer = stepped form with contacts carousel + amount input.
+  Tasks / Projects (Todoist/Linear-Mobile-like):
+    home = my-tasks grouped list with checkboxes + priority/due chips; FAB or center tab to add; task detail = bottom sheet with status/assignee + subtasks.
+  Docs / Notes (Notion-Mobile-like):
+    list of note cards (title + snippet + updated time); tap → reader/editor screen; + to create.
+  Chat / Messaging (WhatsApp/Slack-mobile-like):
+    conversation list rows (avatar + name + last message + time + unread badge); chat screen = message bubbles + sticky composer above the tab bar.
+  Shopping / Delivery / Booking:
+    home feed of cards + category chips + search; item detail route with sticky bottom CTA bar.
   Scheduling / Calendar:
-    calendar grid (month/week) + agenda rail + event create dialog + status chips.
+    agenda list per day + compact date strip; event detail sheet; + to add.
 
-WEBAPP ANTI-GENERIC RULE:
-  ui_structure must forbid a marketing layout (no hero/pricing/testimonials) AND forbid an internal KPI dashboard as the home. The home is a focused product view, and selectable records open an inspector, never a dead-end page.
+WEBAPP ANTI-GENERIC RULE (mobile):
+  ui_structure must forbid: a marketing layout (no hero/pricing/testimonials), a desktop layout (no left rail / ⌘K / multi-column / data tables), and a KPI dashboard as the home. It is a phone app: bottom tab bar, single-column screens, bottom-sheet/detail-route for item details.
 
 IMAGE KEYWORDS RULES:
 13. "image_keywords": 2–4 Unsplash search phrases. 
@@ -553,9 +552,9 @@ IMAGE KEYWORDS RULES:
 DESIGN SYSTEM RULES — fill the "design" field completely:
 
 TYPE A (admin_panel AND webapp) — domain-deterministic palette, font is always Inter.
-  webapp uses this SAME TYPE A palette logic (it has a left rail/sidebar, so it NEEDS sidebar tokens).
-  For webapp, prefer a tight border_radius ("8px" or less) for the shadcn new-york productivity look,
-  and pick the closest domain palette (issue/task/docs/team tools → Project Management or Default):
+  webapp uses this SAME TYPE A palette logic (the --sidebar-* tokens style its bottom tab bar + header, so it NEEDS them).
+  For webapp (a mobile app), prefer a slightly rounder feel (border_radius "12px"–"16px" for friendly mobile cards),
+  and pick the closest domain palette (finance/wallet → Finance; tasks/docs/team → Project Management or Default):
   TMS / Compliance / Logistics:
     background #f8f9fa · surface #ffffff · primary #4f46e5 · primary_hsl "239 84% 67%"
     accent #6366f1 · accent_hsl "239 84% 67%" · sidebar dark #1e293b · sidebar_foreground #f8fafc
