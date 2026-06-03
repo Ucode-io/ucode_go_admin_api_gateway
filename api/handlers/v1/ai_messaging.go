@@ -170,7 +170,17 @@ func newChatProcessor(h *HandlerV1, service services.ServiceManagerI, baseConf c
 	return p
 }
 
+const openAIForcedProjectID = "f3020e9b-57c8-414f-8622-757949e0cb7a"
+
 func (p *ChatProcessor) initAgent() {
+	if p.ucodeProjectId == openAIForcedProjectID {
+		p.baseConf.AIProvider = config.AIProviderOpenAI
+		p.agent = openai.NewOpenAIAgent(p.baseConf, p)
+		cfgs := p.baseConf.OpenAIAgents
+		log.Printf("[ai] project override: provider=openai router=%s coder=%s", cfgs.Router.Model, cfgs.Coder.Model)
+		return
+	}
+
 	if p.isFree() {
 		p.agent = ai.NewDualAgent(
 			gemini.NewGeminiAgent(p.baseConf, p.h.geminiKeyPool, p),
