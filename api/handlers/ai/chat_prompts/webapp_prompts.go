@@ -588,6 +588,75 @@ NEVER:
   useApiQuery({ url: '...', queryKey: [...] }) — wrong signature
 
 ====================================
+REFERENCE — A FULLY-WIRED LIST SCREEN (copy this WIRING for any list/browse/catalog screen; every control does something real)
+====================================
+function ProductsScreen() {
+  const navigate = useNavigate();
+  const [search, setSearch] = useState('');
+  const [category, setCategory] = useState<string | null>(null); // null = ALL → fresh screen shows EVERYTHING
+  const [filterOpen, setFilterOpen] = useState(false);
+
+  const params = new URLSearchParams();
+  if (search) params.set('search', search);                       // search drives the API query
+  const qs = params.toString();
+  const { data, isLoading, isError, refetch } = useApiQuery<unknown>(
+    ['products', search],
+    '/v2/items/products' + (qs ? '?' + qs : ''),
+  );
+  const all = extractList<Product>(data);
+  const categories = Array.from(new Set(all.map((p) => p.category).filter(Boolean)));
+  const items = category ? all.filter((p) => p.category === category) : all; // category filter (client-side)
+
+  return (
+    <div className="space-y-3 pb-24">
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search" className="pl-9" />
+      </div>
+      <div className="flex items-center gap-2 overflow-x-auto">
+        <Button variant="outline" size="sm" onClick={() => setFilterOpen(true)}>
+          <SlidersHorizontal className="mr-1 h-4 w-4" /> Filters
+        </Button>
+        {category && (
+          <Badge variant="secondary" className="gap-1">{category}
+            <button onClick={() => setCategory(null)} aria-label="Remove filter"><X className="h-3 w-3" /></button>
+          </Badge>
+        )}
+      </div>
+      {isLoading ? <Skeleton className="h-20 w-full" />
+        : isError ? <div className="py-8 text-center"><Button onClick={() => refetch()}>Retry</Button></div>
+        : items.length === 0 ? <p className="py-8 text-center text-muted-foreground">Nothing here yet</p>
+        : items.map((p) => (
+            <button key={p.guid} onClick={() => navigate('/products/' + p.guid)}
+              className="flex w-full items-center gap-3 rounded-xl border bg-card p-3 text-left">
+              <div className="flex-1">
+                <p className="font-medium">{p.name}</p>
+                <p className="text-sm text-muted-foreground">{formatCurrency(p.price)}</p>
+              </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+            </button>
+          ))}
+      <Sheet open={filterOpen} onOpenChange={setFilterOpen}>
+        <SheetContent side="bottom" className="mx-auto max-w-md rounded-t-2xl">
+          <SheetHeader><SheetTitle>Filters</SheetTitle></SheetHeader>
+          <div className="space-y-2 py-4">
+            {categories.map((c) => (
+              <button key={c} onClick={() => setCategory(c)}
+                className={cn('w-full rounded-lg border p-3 text-left', category === c && 'border-primary')}>{c}</button>
+            ))}
+          </div>
+          <SheetFooter className="flex-row gap-2">
+            <Button variant="outline" className="flex-1" onClick={() => setCategory(null)}>Reset</Button>
+            <Button className="flex-1" onClick={() => setFilterOpen(false)}>Apply</Button>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
+    </div>
+  );
+}
+WHY EVERY CONTROL WORKS: search onChange→state→query · Filters→opens sheet · chip X→clears that one filter · Reset→clears all · Apply→closes sheet · row tap→navigates to detail · category=null by default→ALL items show (never "0 items" on a fresh screen). Replicate this wiring on every list/search/filter screen — no decorative controls.
+
+====================================
 AVAILABLE NPM PACKAGES
 ====================================
 Styling:  tailwindcss, tailwindcss-animate, class-variance-authority, clsx, tailwind-merge
@@ -1310,6 +1379,75 @@ FULLY DYNAMIC — RENDER REAL API DATA (not hardcoded):
   - Create/edit/delete via useApiMutation with invalidateKeys so the screen refreshes.
   - Believable seed text is ONLY a fallback for the empty state; never hardcode rows alongside live data.
   - Each screen tied to a table MUST fetch + render it with loading (skeleton) / empty (hint+CTA) / error (retry) states.
+
+====================================
+REFERENCE — A FULLY-WIRED LIST SCREEN (copy this WIRING; every control does something real)
+====================================
+function ProductsScreen() {
+  const navigate = useNavigate();
+  const [search, setSearch] = useState('');
+  const [category, setCategory] = useState<string | null>(null); // null = ALL → fresh screen shows EVERYTHING
+  const [filterOpen, setFilterOpen] = useState(false);
+
+  const params = new URLSearchParams();
+  if (search) params.set('search', search);                       // search drives the API query
+  const qs = params.toString();
+  const { data, isLoading, isError, refetch } = useApiQuery<unknown>(
+    ['products', search],
+    '/v2/items/products' + (qs ? '?' + qs : ''),
+  );
+  const all = extractList<Product>(data);
+  const categories = Array.from(new Set(all.map((p) => p.category).filter(Boolean)));
+  const items = category ? all.filter((p) => p.category === category) : all; // category filter (client-side)
+
+  return (
+    <div className="space-y-3 pb-24">
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search" className="pl-9" />
+      </div>
+      <div className="flex items-center gap-2 overflow-x-auto">
+        <Button variant="outline" size="sm" onClick={() => setFilterOpen(true)}>
+          <SlidersHorizontal className="mr-1 h-4 w-4" /> Filters
+        </Button>
+        {category && (
+          <Badge variant="secondary" className="gap-1">{category}
+            <button onClick={() => setCategory(null)} aria-label="Remove filter"><X className="h-3 w-3" /></button>
+          </Badge>
+        )}
+      </div>
+      {isLoading ? <Skeleton className="h-20 w-full" />
+        : isError ? <div className="py-8 text-center"><Button onClick={() => refetch()}>Retry</Button></div>
+        : items.length === 0 ? <p className="py-8 text-center text-muted-foreground">Nothing here yet</p>
+        : items.map((p) => (
+            <button key={p.guid} onClick={() => navigate('/products/' + p.guid)}
+              className="flex w-full items-center gap-3 rounded-xl border bg-card p-3 text-left">
+              <div className="flex-1">
+                <p className="font-medium">{p.name}</p>
+                <p className="text-sm text-muted-foreground">{formatCurrency(p.price)}</p>
+              </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+            </button>
+          ))}
+      <Sheet open={filterOpen} onOpenChange={setFilterOpen}>
+        <SheetContent side="bottom" className="mx-auto max-w-md rounded-t-2xl">
+          <SheetHeader><SheetTitle>Filters</SheetTitle></SheetHeader>
+          <div className="space-y-2 py-4">
+            {categories.map((c) => (
+              <button key={c} onClick={() => setCategory(c)}
+                className={cn('w-full rounded-lg border p-3 text-left', category === c && 'border-primary')}>{c}</button>
+            ))}
+          </div>
+          <SheetFooter className="flex-row gap-2">
+            <Button variant="outline" className="flex-1" onClick={() => setCategory(null)}>Reset</Button>
+            <Button className="flex-1" onClick={() => setFilterOpen(false)}>Apply</Button>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
+    </div>
+  );
+}
+WHY EVERY CONTROL WORKS: search onChange→state→query · Filters→opens sheet · chip X→clears that one filter · Reset→clears all · Apply→closes sheet · row tap→navigates to detail · category=null by default→ALL items show (never "0 items" on a fresh screen). Replicate this wiring on every list/search/filter screen — no decorative controls.
 
 ====================================
 API HOOKS — EXACT SIGNATURES (READ CAREFULLY)
