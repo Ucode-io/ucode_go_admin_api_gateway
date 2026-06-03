@@ -269,6 +269,18 @@ NULL SAFETY (CRITICAL — prevents runtime crashes):
   Rule: ALWAYS use (arr ?? []) or arr?. before .reduce() / .filter() / .map() / .find() on any API-derived variable.
   Preferred: use extractList<T>(data) — it always returns a safe [] even before data loads.
 
+  NUMBER METHODS ON API DATA (CRITICAL — prevents "x.toFixed is not a function" crash):
+  API numeric fields arrive as STRINGS ("4.5"), null, or undefined — NEVER assume they are numbers.
+  .toFixed() / .toLocaleString() exist ONLY on real numbers, so calling them on API values CRASHES the screen.
+  ❌ sellerRating.toFixed(1)             — CRASH: toFixed is not a function (rating is a string/null)
+  ❌ item.price.toLocaleString()         — CRASH when price is a string/null
+  ❌ product.rating.toFixed(1)           — same
+  ✅ Number(sellerRating ?? 0).toFixed(1)        — coerce first, always safe
+  ✅ Number(item.price ?? 0).toLocaleString()
+  ✅ formatCurrency(item.price)          — null-safe helper (use for money)
+  ✅ formatNumber(item.count)            — null-safe helper (use for counts/quantities)
+  Rule: ALWAYS wrap with Number(x ?? 0) before .toFixed()/.toLocaleString(), OR use formatCurrency/formatNumber. NEVER call a number method directly on an API field.
+
 CSS PLACEMENT:
   index.css is imported in App.tsx — NOT in main.tsx.
   App.tsx first two lines must be:
@@ -523,6 +535,13 @@ INTERACTIVITY — EVERY CONTROL MUST WORK (CRITICAL — no dead buttons):
       • open a bottom Sheet that shows/edits that content (preferred when there is no dedicated screen), OR
       • navigate to a real sub-route that you also add to App.tsx and render as a real screen.
       A settings row that is just text + a chevron with NO onClick is a BUG. If you cannot build a full sub-screen, open a Sheet with the relevant fields/content (or, as a last resort, a Sheet/toast explaining the action) — but NEVER a dead row.
+  - FILTERS / SEARCH / SORT / VIEW TOGGLE must actually work and drive the list:
+      • Keep filter/search/sort in useState; the value feeds the useApiQuery params (or filters the extracted list). Changing a control re-queries / re-filters.
+      • The "Filters" button opens a working filter Sheet; applying updates state and closes the sheet; the visible list changes.
+      • Each active filter CHIP has an X that REMOVES just that filter (updates state). "Reset filters" clears ALL filter state back to defaults.
+      • Sort dropdown actually reorders; grid/list toggle actually switches layout.
+      • ⚠ Do NOT filter everything out by default — default state shows ALL items. A fresh screen must NOT show "0 items / no match" because of a pre-applied filter.
+  - CLOSE / DISMISS (X) buttons everywhere: each X must truly close its sheet/dialog/banner (onClick → setOpen(false)) or remove its chip. No dead X buttons.
   - NO AUTH: do NOT add "Log Out", login, or account-auth rows on the Profile screen (this app has no auth). Profile shows editable profile fields + app settings rows only.
   RULE: if you render a Button/tile/row, it MUST have an onClick (or be a NavLink/Link) that does something real. Wire state (useState) for sheets/dialogs and react-router (useNavigate/NavLink) for navigation. Trace every control before finishing — zero no-op buttons.
 
@@ -1280,6 +1299,8 @@ INTERACTIVITY — EVERY CONTROL MUST WORK (no dead buttons):
   - Quick-action tiles and "See all"/"Manage" links → each navigates or opens a sheet. No no-op controls.
   - List rows/cards → onClick opens a detail Sheet or navigates to a detail route. Forms → onSubmit calls a real mutation.
   - SETTINGS / PROFILE / MENU rows (Payment Methods, Notifications, Privacy, Help, Edit Profile, etc.): EACH row MUST open a bottom Sheet with that content/fields, or navigate to a real sub-route. A row that is just text + chevron with NO onClick is a BUG. If no dedicated screen exists, open a Sheet with the fields (last resort: a Sheet/toast describing the action) — never a dead row.
+  - FILTERS / SEARCH / SORT / VIEW TOGGLE must work and drive the list: keep them in useState feeding the useApiQuery params (or filtering the extracted list); the "Filters" button opens a Sheet that applies on confirm; each filter chip's X removes just that filter; "Reset filters" clears all filter state; sort reorders; grid/list toggles layout. Default state shows ALL items — never pre-apply a filter that yields "0 items".
+  - CLOSE / DISMISS (X) buttons: each X must truly close its sheet/dialog/banner (onClick → setOpen(false)) or remove its chip. No dead X.
   - NO AUTH: do NOT render "Log Out"/login/account-auth rows on Profile (this app has no auth) — editable profile fields + app settings rows only.
   - Trace every control before finishing — zero buttons without a handler.
 
@@ -1397,6 +1418,12 @@ ARRAY METHODS ON API DATA (CRITICAL — TypeError at runtime):
   ❌ tasks.reduce(...)                   // CRASH when undefined
   ❌ data.map(x => x.name)               // CRASH when data is null/undefined
   Rule: ALWAYS use (arr ?? []) or arr?. before .reduce()/.filter()/.map()/.find() on any API-derived variable.
+
+NUMBER METHODS ON API DATA (CRITICAL — "x.toFixed is not a function" crash):
+  API numeric fields arrive as STRINGS ("4.5"), null, or undefined. .toFixed()/.toLocaleString() exist only on real numbers.
+  ❌ sellerRating.toFixed(1)   ❌ item.price.toLocaleString()   ❌ product.rating.toFixed(1)   // all CRASH on string/null
+  ✅ Number(sellerRating ?? 0).toFixed(1)   ✅ formatCurrency(item.price)   ✅ formatNumber(item.count)
+  Rule: ALWAYS Number(x ?? 0) before .toFixed()/.toLocaleString(), or use formatCurrency/formatNumber. Never call a number method directly on an API field.
 
 DATE STATE — CRITICAL:
   NEVER pass API values into new Date() without a null/validity guard — null/undefined produces Invalid Date.
