@@ -364,6 +364,9 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			ugenTemplate.GET("/:id", h.V1.GetUgenTemplateById)
 			ugenTemplate.PUT("/:id", h.V1.UpdateUgenTemplate)
 			ugenTemplate.DELETE("/:id", h.V1.DeleteUgenTemplate)
+			ugenTemplate.POST("/:id/reaction", h.V1.SetUgenTemplateReaction)
+			ugenTemplate.DELETE("/:id/reaction", h.V1.DeleteUgenTemplateReaction)
+			ugenTemplate.GET("/:id/reactions", h.V1.GetUgenTemplateReactionList)
 			ugenTemplate.POST("/create-project", h.V1.CreateProjectFromTemplate)
 		}
 

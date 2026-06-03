@@ -30,6 +30,54 @@ import (
 
 // ─── CRUD ────────────────────────────────────────────────────────────────────
 
+type ugenTemplateResponse struct {
+	Id                     string   `json:"id"`
+	Name                   string   `json:"name"`
+	Description            string   `json:"description"`
+	Photo                  string   `json:"photo"`
+	McpProjectId           string   `json:"mcp_project_id"`
+	OrderNumber            int32    `json:"order_number"`
+	CreatedAt              string   `json:"created_at"`
+	UpdatedAt              string   `json:"updated_at"`
+	DeletedAt              int64    `json:"deleted_at"`
+	PreviewUrl             string   `json:"preview_url"`
+	SourceResourceEnvId    string   `json:"source_resource_env_id"`
+	SourceProjectId        string   `json:"source_project_id"`
+	SourceEnvironmentId    string   `json:"source_environment_id"`
+	SourceNodeType         string   `json:"source_node_type"`
+	SourceMcpResourceEnvId string   `json:"source_mcp_resource_env_id"`
+	SourceFunctionId       string   `json:"source_function_id"`
+	SourceRepoId           string   `json:"source_repo_id"`
+	Images                 []string `json:"images"`
+	LikeCount              int32    `json:"like_count"`
+	DislikeCount           int32    `json:"dislike_count"`
+	CurrentUserReaction    string   `json:"current_user_reaction"`
+}
+
+type ugenTemplateListResponse struct {
+	Templates []*ugenTemplateResponse `json:"templates"`
+	Count     int32                   `json:"count"`
+}
+
+type ugenTemplateReactionResponse struct {
+	Id           string `json:"id"`
+	TemplateId   string `json:"template_id"`
+	UserId       string `json:"user_id"`
+	ReactionType string `json:"reaction_type"`
+	CreatedAt    string `json:"created_at"`
+	UpdatedAt    string `json:"updated_at"`
+	DeletedAt    int64  `json:"deleted_at"`
+}
+
+type ugenTemplateReactionListResponse struct {
+	Reactions []*ugenTemplateReactionResponse `json:"reactions"`
+	Count     int32                           `json:"count"`
+}
+
+type setUgenTemplateReactionRequest struct {
+	ReactionType string `json:"reaction_type" binding:"required"`
+}
+
 func (h *HandlerV1) CreateUgenTemplate(c *gin.Context) {
 	var req pb.CreateUgenTemplateReq
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -47,7 +95,7 @@ func (h *HandlerV1) CreateUgenTemplate(c *gin.Context) {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	h.HandleResponse(c, status_http.OK, resp)
+	h.HandleResponse(c, status_http.OK, newUgenTemplateResponse(resp))
 }
 
 func (h *HandlerV1) enrichCreateUgenTemplateSource(c *gin.Context, req *pb.CreateUgenTemplateReq) error {
@@ -260,13 +308,16 @@ func (h *HandlerV1) GetUgenTemplateById(c *gin.Context) {
 
 	resp, err := h.companyServices.UgenTemplate().GetById(
 		c.Request.Context(),
-		&pb.GetUgenTemplateByIdReq{Id: id},
+		&pb.GetUgenTemplateByIdReq{
+			Id:     id,
+			UserId: getOptionalUgenTemplateUserID(c),
+		},
 	)
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	h.HandleResponse(c, status_http.OK, resp)
+	h.HandleResponse(c, status_http.OK, newUgenTemplateResponse(resp))
 }
 
 func (h *HandlerV1) GetUgenTemplateList(c *gin.Context) {
@@ -278,13 +329,17 @@ func (h *HandlerV1) GetUgenTemplateList(c *gin.Context) {
 
 	resp, err := h.companyServices.UgenTemplate().List(
 		c.Request.Context(),
-		&pb.GetUgenTemplateListReq{Limit: limit, Offset: offset},
+		&pb.GetUgenTemplateListReq{
+			Limit:  limit,
+			Offset: offset,
+			UserId: getOptionalUgenTemplateUserID(c),
+		},
 	)
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	h.HandleResponse(c, status_http.OK, resp)
+	h.HandleResponse(c, status_http.OK, newUgenTemplateListResponse(resp))
 }
 
 func (h *HandlerV1) UpdateUgenTemplate(c *gin.Context) {
@@ -304,7 +359,7 @@ func (h *HandlerV1) UpdateUgenTemplate(c *gin.Context) {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	h.HandleResponse(c, status_http.OK, resp)
+	h.HandleResponse(c, status_http.OK, newUgenTemplateResponse(resp))
 }
 
 func (h *HandlerV1) DeleteUgenTemplate(c *gin.Context) {
@@ -323,6 +378,244 @@ func (h *HandlerV1) DeleteUgenTemplate(c *gin.Context) {
 		return
 	}
 	h.HandleResponse(c, status_http.OK, gin.H{"message": "deleted"})
+}
+
+func (h *HandlerV1) SetUgenTemplateReaction(c *gin.Context) {
+	templateID := c.Param("id")
+	if !util.IsValidUUID(templateID) {
+		h.HandleResponse(c, status_http.InvalidArgument, "invalid id")
+		return
+	}
+
+	var req setUgenTemplateReactionRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		h.HandleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	reactionType, err := ugenTemplateReactionTypeFromRequest(req.ReactionType)
+	if err != nil {
+		h.HandleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
+	userID, err := h.getUgenTemplateUserID(c)
+	if err != nil {
+		h.HandleResponse(c, status_http.Unauthorized, err.Error())
+		return
+	}
+
+	resp, err := h.companyServices.UgenTemplate().SetReaction(
+		c.Request.Context(),
+		&pb.SetUgenTemplateReactionReq{
+			TemplateId:   templateID,
+			UserId:       userID,
+			ReactionType: reactionType,
+		},
+	)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+	h.HandleResponse(c, status_http.OK, newUgenTemplateReactionResponse(resp))
+}
+
+func (h *HandlerV1) DeleteUgenTemplateReaction(c *gin.Context) {
+	templateID := c.Param("id")
+	if !util.IsValidUUID(templateID) {
+		h.HandleResponse(c, status_http.InvalidArgument, "invalid id")
+		return
+	}
+
+	userID, err := h.getUgenTemplateUserID(c)
+	if err != nil {
+		h.HandleResponse(c, status_http.Unauthorized, err.Error())
+		return
+	}
+
+	_, err = h.companyServices.UgenTemplate().DeleteReaction(
+		c.Request.Context(),
+		&pb.DeleteUgenTemplateReactionReq{
+			TemplateId: templateID,
+			UserId:     userID,
+		},
+	)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+	h.HandleResponse(c, status_http.OK, gin.H{"message": "deleted"})
+}
+
+func (h *HandlerV1) GetUgenTemplateReactionList(c *gin.Context) {
+	templateID := c.Param("id")
+	if !util.IsValidUUID(templateID) {
+		h.HandleResponse(c, status_http.InvalidArgument, "invalid id")
+		return
+	}
+
+	reactionType, err := ugenTemplateOptionalReactionTypeFromRequest(c.Query("reaction_type"))
+	if err != nil {
+		h.HandleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
+	limit := cast.ToInt32(c.Query("limit"))
+	offset := cast.ToInt32(c.Query("offset"))
+	if limit == 0 {
+		limit = 10
+	}
+
+	resp, err := h.companyServices.UgenTemplate().ListReactions(
+		c.Request.Context(),
+		&pb.GetUgenTemplateReactionListReq{
+			TemplateId:   templateID,
+			ReactionType: reactionType,
+			Limit:        limit,
+			Offset:       offset,
+		},
+	)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+	h.HandleResponse(c, status_http.OK, newUgenTemplateReactionListResponse(resp))
+}
+
+func newUgenTemplateListResponse(resp *pb.GetUgenTemplateListResponse) *ugenTemplateListResponse {
+	if resp == nil {
+		return &ugenTemplateListResponse{}
+	}
+
+	templates := make([]*ugenTemplateResponse, 0, len(resp.GetTemplates()))
+	for _, template := range resp.GetTemplates() {
+		templates = append(templates, newUgenTemplateResponse(template))
+	}
+
+	return &ugenTemplateListResponse{
+		Templates: templates,
+		Count:     resp.GetCount(),
+	}
+}
+
+func newUgenTemplateResponse(t *pb.UgenTemplate) *ugenTemplateResponse {
+	if t == nil {
+		return nil
+	}
+
+	return &ugenTemplateResponse{
+		Id:                     t.GetId(),
+		Name:                   t.GetName(),
+		Description:            t.GetDescription(),
+		Photo:                  t.GetPhoto(),
+		McpProjectId:           t.GetMcpProjectId(),
+		OrderNumber:            t.GetOrderNumber(),
+		CreatedAt:              t.GetCreatedAt(),
+		UpdatedAt:              t.GetUpdatedAt(),
+		DeletedAt:              t.GetDeletedAt(),
+		PreviewUrl:             t.GetPreviewUrl(),
+		SourceResourceEnvId:    t.GetSourceResourceEnvId(),
+		SourceProjectId:        t.GetSourceProjectId(),
+		SourceEnvironmentId:    t.GetSourceEnvironmentId(),
+		SourceNodeType:         t.GetSourceNodeType(),
+		SourceMcpResourceEnvId: t.GetSourceMcpResourceEnvId(),
+		SourceFunctionId:       t.GetSourceFunctionId(),
+		SourceRepoId:           t.GetSourceRepoId(),
+		Images:                 t.GetImages(),
+		LikeCount:              t.GetLikeCount(),
+		DislikeCount:           t.GetDislikeCount(),
+		CurrentUserReaction:    ugenTemplateReactionTypeToResponse(t.GetCurrentUserReaction()),
+	}
+}
+
+func newUgenTemplateReactionListResponse(resp *pb.GetUgenTemplateReactionListResponse) *ugenTemplateReactionListResponse {
+	if resp == nil {
+		return &ugenTemplateReactionListResponse{}
+	}
+
+	reactions := make([]*ugenTemplateReactionResponse, 0, len(resp.GetReactions()))
+	for _, reaction := range resp.GetReactions() {
+		reactions = append(reactions, newUgenTemplateReactionResponse(reaction))
+	}
+
+	return &ugenTemplateReactionListResponse{
+		Reactions: reactions,
+		Count:     resp.GetCount(),
+	}
+}
+
+func newUgenTemplateReactionResponse(reaction *pb.UgenTemplateReaction) *ugenTemplateReactionResponse {
+	if reaction == nil {
+		return nil
+	}
+	return &ugenTemplateReactionResponse{
+		Id:           reaction.GetId(),
+		TemplateId:   reaction.GetTemplateId(),
+		UserId:       reaction.GetUserId(),
+		ReactionType: ugenTemplateReactionTypeToResponse(reaction.GetReactionType()),
+		CreatedAt:    reaction.GetCreatedAt(),
+		UpdatedAt:    reaction.GetUpdatedAt(),
+		DeletedAt:    reaction.GetDeletedAt(),
+	}
+}
+
+func (h *HandlerV1) getUgenTemplateUserID(c *gin.Context) (string, error) {
+	authInfo, err := h.adminAuthInfo(c)
+	if err != nil {
+		return "", err
+	}
+	userID := authInfo.GetUserIdAuth()
+	if userID == "" {
+		userID = authInfo.GetUserId()
+	}
+	if userID == "" {
+		return "", fmt.Errorf("user_id is required")
+	}
+	return userID, nil
+}
+
+func getOptionalUgenTemplateUserID(c *gin.Context) string {
+	data, ok := c.Get("Auth_Admin")
+	if !ok {
+		return ""
+	}
+	authInfo, ok := data.(*as.HasAccessSuperAdminRes)
+	if !ok {
+		return ""
+	}
+	if authInfo.GetUserIdAuth() != "" {
+		return authInfo.GetUserIdAuth()
+	}
+	return authInfo.GetUserId()
+}
+
+func ugenTemplateOptionalReactionTypeFromRequest(reactionType string) (pb.UgenTemplateReactionType, error) {
+	if strings.TrimSpace(reactionType) == "" {
+		return pb.UgenTemplateReactionType_UGEN_TEMPLATE_REACTION_TYPE_UNSPECIFIED, nil
+	}
+	return ugenTemplateReactionTypeFromRequest(reactionType)
+}
+
+func ugenTemplateReactionTypeFromRequest(reactionType string) (pb.UgenTemplateReactionType, error) {
+	switch strings.ToLower(strings.TrimSpace(reactionType)) {
+	case "like", "ugen_template_reaction_type_like":
+		return pb.UgenTemplateReactionType_UGEN_TEMPLATE_REACTION_TYPE_LIKE, nil
+	case "dislike", "ugen_template_reaction_type_dislike":
+		return pb.UgenTemplateReactionType_UGEN_TEMPLATE_REACTION_TYPE_DISLIKE, nil
+	default:
+		return pb.UgenTemplateReactionType_UGEN_TEMPLATE_REACTION_TYPE_UNSPECIFIED, fmt.Errorf("reaction_type must be like or dislike")
+	}
+}
+
+func ugenTemplateReactionTypeToResponse(reactionType pb.UgenTemplateReactionType) string {
+	switch reactionType {
+	case pb.UgenTemplateReactionType_UGEN_TEMPLATE_REACTION_TYPE_LIKE:
+		return "like"
+	case pb.UgenTemplateReactionType_UGEN_TEMPLATE_REACTION_TYPE_DISLIKE:
+		return "dislike"
+	default:
+		return ""
+	}
 }
 
 // ─── Create project from template ────────────────────────────────────────────
