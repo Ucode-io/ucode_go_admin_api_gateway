@@ -376,7 +376,7 @@ func (h *HandlerV1) handleStreamingMessage(c *gin.Context, processor *ChatProces
 			Type:    EvProgress,
 			Icon:    "sparkles",
 			Message: "Начинаю обработку...",
-			Value:   processor.routerModel(),
+			Value:   processor.agentCfgs().Router.Model,
 			Percent: 1,
 		})
 

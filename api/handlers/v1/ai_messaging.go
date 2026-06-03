@@ -87,39 +87,7 @@ func (p *ChatProcessor) agentCfgs() config.AIAgents {
 	}
 }
 
-func (p *ChatProcessor) isFree() bool {
-	return p.fareId == config.UGEN_FREE_PLAN_ID
-}
-
-func (p *ChatProcessor) routerModel() string {
-	if p.isFree() {
-		return p.baseConf.GeminiAgents.Router.Model
-	}
-	return p.agentCfgs().Router.Model
-}
-
-func (p *ChatProcessor) interactiveModel() string {
-	if p.isFree() {
-		return p.baseConf.GeminiAgents.Planner.Model
-	}
-	return p.agentCfgs().Planner.Model
-}
-
-func (p *ChatProcessor) generationModel() string {
-	if p.isFree() {
-		return p.baseConf.Agents.Architect.Model
-	}
-	return p.agentCfgs().Architect.Model
-}
-
 func (p *ChatProcessor) providerEventData() ProviderEventData {
-	if p.isFree() {
-		return ProviderEventData{
-			Provider:    "gemini+claude",
-			RouterModel: p.baseConf.GeminiAgents.Router.Model,
-			CoderModel:  p.baseConf.Agents.Architect.Model, // architect runs first for generation
-		}
-	}
 	cfgs := p.agentCfgs()
 	return ProviderEventData{
 		Provider:    string(p.baseConf.AIProvider),
@@ -129,18 +97,16 @@ func (p *ChatProcessor) providerEventData() ProviderEventData {
 }
 
 func (p *ChatProcessor) providerLabel() string {
-	if !p.isFree() {
-		return p.agentCfgs().Coder.Model
-	}
+	cfgs := p.agentCfgs()
 	switch {
 	case p.newProject:
-		return p.generationModel()
+		return cfgs.Architect.Model
 
 	case p.microFrontendId != "":
-		return p.interactiveModel()
+		return cfgs.Coder.Model
 
 	default:
-		return p.routerModel()
+		return cfgs.Router.Model
 	}
 }
 
@@ -176,28 +142,17 @@ func (p *ChatProcessor) initAgent() {
 	if p.ucodeProjectId == openAIForcedProjectID {
 		p.baseConf.AIProvider = config.AIProviderOpenAI
 		p.agent = openai.NewOpenAIAgent(p.baseConf, p)
-		cfgs := p.baseConf.OpenAIAgents
-		log.Printf("[ai] project override: provider=openai router=%s coder=%s", cfgs.Router.Model, cfgs.Coder.Model)
-		return
-	}
+	} else {
+		switch p.baseConf.AIProvider {
+		case config.AIProviderGemini:
+			p.agent = gemini.NewGeminiAgent(p.baseConf, p.h.geminiKeyPool, p)
 
-	if p.isFree() {
-		p.agent = ai.NewDualAgent(
-			gemini.NewGeminiAgent(p.baseConf, p.h.geminiKeyPool, p),
-			anthropic.NewAnthropicAgent(p.baseConf, p),
-		)
-		log.Printf("[ai] free tier: interactive=gemini generation=anthropic")
-		return
-	}
-	switch p.baseConf.AIProvider {
-	case config.AIProviderGemini:
-		p.agent = gemini.NewGeminiAgent(p.baseConf, p.h.geminiKeyPool, p)
+		case config.AIProviderOpenAI:
+			p.agent = openai.NewOpenAIAgent(p.baseConf, p)
 
-	case config.AIProviderOpenAI:
-		p.agent = openai.NewOpenAIAgent(p.baseConf, p)
-
-	default:
-		p.agent = anthropic.NewAnthropicAgent(p.baseConf, p)
+		default:
+			p.agent = anthropic.NewAnthropicAgent(p.baseConf, p)
+		}
 	}
 
 	cfgs := p.agentCfgs()
@@ -223,7 +178,7 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 
 	err := withHeartbeat(
 		ctx, emit,
-		p.generationModel(),
+		p.agentCfgs().Architect.Model,
 		[]string{
 			"Анализирую требования...",
 			"Проектирую структуру базы данных...",
@@ -410,7 +365,7 @@ func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context,
 
 	var plan *models.ArchitectPlan
 	if err := withHeartbeat(ctx, emit,
-		p.generationModel(),
+		p.agentCfgs().Architect.Model,
 		[]string{
 			"Анализирую требования...",
 			"Проектирую структуру базы данных...",
@@ -806,7 +761,7 @@ func (p *ChatProcessor) runVisualEdit(ctx context.Context, instruction string, c
 
 	err = withHeartbeat(
 		ctx, emit,
-		p.interactiveModel(),
+		p.agentCfgs().Coder.Model,
 		[]string{
 			"Редактирую компоненты...",
 			"Применяю визуальные изменения...",
