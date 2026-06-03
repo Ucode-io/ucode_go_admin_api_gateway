@@ -123,6 +123,10 @@ type BaseConfig struct {
 	GeminiAPIKeys []string
 	GeminiAgents  AIAgents
 
+	OpenAIAPIKey  string
+	OpenAIBaseURL string
+	OpenAIAgents  AIAgents
+
 	AutomationURL   string
 	OpenFaaSBaseUrl string
 	KnativeBaseUrl  string
@@ -215,6 +219,10 @@ func BaseLoad() BaseConfig {
 	config.GeminiAgents = loadGeminiAgents()
 
 	config.GeminiAPIKeys, config.GeminiAPIKey = loadGeminiKeys()
+
+	config.OpenAIAPIKey = cast.ToString(GetOrReturnDefaultValue("OPENAI_API_KEY", ""))
+	config.OpenAIBaseURL = cast.ToString(GetOrReturnDefaultValue("OPENAI_BASE_URL", ""))
+	config.OpenAIAgents = loadOpenAIAgents()
 
 	config.AutomationURL = cast.ToString(GetOrReturnDefaultValue("AUTOMATION_URL", ""))
 	config.OpenFaaSBaseUrl = cast.ToString(GetOrReturnDefaultValue("OPENFAAS_BASE_URL", ""))

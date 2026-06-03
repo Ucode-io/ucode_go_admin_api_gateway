@@ -33,6 +33,53 @@ type (
 	}
 )
 
+func loadOpenAIAgents() AIAgents {
+	const (
+		nano = "gpt-5.4-nano"
+		mini = "gpt-5.4-mini"
+		mid  = "gpt-5.4"
+		top  = "gpt-5.5"
+	)
+
+	return AIAgents{
+		Router: AgentConfig{
+			Model:     nano,
+			MaxTokens: 2000,
+			Timeout:   90 * time.Second,
+		},
+		Architect: AgentConfig{
+			Model:     top,
+			MaxTokens: 32000,
+			Timeout:   600 * time.Second,
+		},
+		Coder: AgentConfig{
+			Model:     mid,
+			MaxTokens: 64000,
+			Timeout:   900 * time.Second,
+		},
+		LandingCoder: AgentConfig{
+			Model:     mid,
+			MaxTokens: 64000,
+			Timeout:   900 * time.Second,
+		},
+		Planner: AgentConfig{
+			Model:     mini,
+			MaxTokens: 16000,
+			Timeout:   300 * time.Second,
+		},
+		Inspector: AgentConfig{
+			Model:     mini,
+			MaxTokens: 8000,
+			Timeout:   180 * time.Second,
+		},
+		DatabaseAssistant: AgentConfig{
+			Model:     nano,
+			MaxTokens: 4000,
+			Timeout:   120 * time.Second,
+		},
+	}
+}
+
 func loadGeminiAgents() AIAgents {
 	const flash = "gemini-2.5-flash"
 

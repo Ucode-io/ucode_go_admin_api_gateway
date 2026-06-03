@@ -13,6 +13,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/handlers/ai/anthropic"
 	"ucode/ucode_go_api_gateway/api/handlers/ai/chat_prompts"
 	"ucode/ucode_go_api_gateway/api/handlers/ai/gemini"
+	"ucode/ucode_go_api_gateway/api/handlers/ai/openai"
 	"ucode/ucode_go_api_gateway/api/handlers/billing"
 	"ucode/ucode_go_api_gateway/api/handlers/helper"
 	"ucode/ucode_go_api_gateway/api/models"
@@ -77,6 +78,10 @@ func (p *ChatProcessor) agentCfgs() config.AIAgents {
 	switch p.baseConf.AIProvider {
 	case config.AIProviderGemini:
 		return p.baseConf.GeminiAgents
+
+	case config.AIProviderOpenAI:
+		return p.baseConf.OpenAIAgents
+
 	default:
 		return p.baseConf.Agents
 	}
@@ -86,7 +91,6 @@ func (p *ChatProcessor) isFree() bool {
 	return p.fareId == config.UGEN_FREE_PLAN_ID
 }
 
-// routerModel returns the model that classifies user intent (RouteRequest).
 func (p *ChatProcessor) routerModel() string {
 	if p.isFree() {
 		return p.baseConf.GeminiAgents.Router.Model
@@ -94,8 +98,6 @@ func (p *ChatProcessor) routerModel() string {
 	return p.agentCfgs().Router.Model
 }
 
-// interactiveModel returns the model used for latency-sensitive calls:
-// PlanChanges, EditCode, InspectCode, VisualEdit, DatabaseQuery.
 func (p *ChatProcessor) interactiveModel() string {
 	if p.isFree() {
 		return p.baseConf.GeminiAgents.Planner.Model
@@ -103,8 +105,6 @@ func (p *ChatProcessor) interactiveModel() string {
 	return p.agentCfgs().Planner.Model
 }
 
-// generationModel returns the model used for quality-sensitive calls:
-// ArchitectProject, GenerateManifest, GenerateCode, RepairFile.
 func (p *ChatProcessor) generationModel() string {
 	if p.isFree() {
 		return p.baseConf.Agents.Architect.Model
@@ -128,7 +128,6 @@ func (p *ChatProcessor) providerEventData() ProviderEventData {
 	}
 }
 
-// providerLabel returns the model name for the current request shown in the first SSE event.
 func (p *ChatProcessor) providerLabel() string {
 	if !p.isFree() {
 		return p.agentCfgs().Coder.Model
@@ -136,8 +135,10 @@ func (p *ChatProcessor) providerLabel() string {
 	switch {
 	case p.newProject:
 		return p.generationModel()
+
 	case p.microFrontendId != "":
 		return p.interactiveModel()
+
 	default:
 		return p.routerModel()
 	}
@@ -147,6 +148,7 @@ func (p *ChatProcessor) emitter() ProgressEmitter {
 	if p.emit == nil {
 		return noopEmitter{}
 	}
+
 	return p.emit
 }
 
@@ -180,9 +182,14 @@ func (p *ChatProcessor) initAgent() {
 	switch p.baseConf.AIProvider {
 	case config.AIProviderGemini:
 		p.agent = gemini.NewGeminiAgent(p.baseConf, p.h.geminiKeyPool, p)
+
+	case config.AIProviderOpenAI:
+		p.agent = openai.NewOpenAIAgent(p.baseConf, p)
+
 	default:
 		p.agent = anthropic.NewAnthropicAgent(p.baseConf, p)
 	}
+
 	cfgs := p.agentCfgs()
 	log.Printf("[ai] provider=%s router=%s coder=%s", p.baseConf.AIProvider, cfgs.Router.Model, cfgs.Coder.Model)
 }

@@ -7,4 +7,5 @@ type AIProvider string
 const (
 	AIProviderClaude AIProvider = "claude"
 	AIProviderGemini AIProvider = "gemini"
+	AIProviderOpenAI AIProvider = "openai"
 )
