@@ -225,7 +225,7 @@ type (
 		UIStructure   string              `json:"ui_structure"`
 		Design        DesignSpec          `json:"design"`
 		ImageKeywords []string            `json:"image_keywords,omitempty"`
-		ClientTypes   []string            `json:"client_types,omitempty"` // role names from user-types answer → each becomes client_type + role record
+		ClientTypes   []string            `json:"client_types,omitempty"` // silently inferred access personas → each becomes client_type + role record
 	}
 
 	ProjectData struct {

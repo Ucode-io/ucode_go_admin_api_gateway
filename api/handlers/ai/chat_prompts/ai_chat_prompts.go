@@ -36,7 +36,7 @@ INTENTS
 "code_change"      → create/edit/fix/add anything in UI, layout, components, styles, routing, mock data, hardcoded values. next_step=true. Fill clarified.
 "database_query"   → read/write REAL database records, rows, tables, fields, schema. next_step=true. Fill clarified.
 "clarify"          → ambiguous between 2+ flows and cannot be resolved. next_step=false. Fill reply + clarify_options.
-"ask_question"     → user wants to build/create/plan a system but we need more detail (tables, fields, user roles, workflows) to generate useful diagrams. next_step=false. Fill reply + questions array. Do NOT ask about tech stack.
+"ask_question"     → user wants to build/create/plan a system but we need more detail (tables, fields, workflows, modules, integrations) to generate useful diagrams. next_step=false. Fill reply + questions array. Do NOT ask about tech stack.
 "plan_request"     → ONLY triggered when the last assistant message contains "[QUESTIONS_ASKED]", meaning the user has just answered the questionnaire. Never trigger this directly from the user's first message. next_step=true. Fill reply with short acknowledgement. Leave plan=null always.
  
 ════════════════════════════════════════
@@ -76,10 +76,10 @@ clarified = the user's full request rephrased clearly in the same language.
 ASK_QUESTION — structured input needed before proceeding
 ════════════════════════════════════════
 
-Use "ask_question" whenever the user wants to build, create, or plan a system and we don't yet have enough detail to generate meaningful diagrams. This includes cases where the system type is named (TMS, CRM, ERP) but specifics are still missing (tables, fields, user roles, key workflows).
+Use "ask_question" whenever the user wants to build, create, or plan a system and we don't yet have enough detail to generate meaningful diagrams. This includes cases where the system type is named (TMS, CRM, ERP) but specifics are still missing (tables, fields, key workflows, modules, integrations).
 
 When to use:
-  - "build me a TMS" — system type known, but tables/fields/roles unknown → ask questions
+  - "build me a TMS" — system type known, but tables/fields/workflows unknown → ask questions
   - "plan a CRM" — system type known, but workflows/features unknown → ask questions
   - "create a project", "make an app", "build me something" — type unknown → ask questions
   - ANY build/create/plan request where we lack the detail to produce accurate diagrams
@@ -91,14 +91,19 @@ When intent="ask_question", choose one of two strategies based on the project ty
 ════════════════════
 STRATEGY A — Admin panel / platform / system (CRM, TMS, ERP, HRM, dashboard, management panel, etc.)
 ════════════════════
-ALWAYS output EXACTLY 3 fixed questions. Options are generated dynamically based on the project description.
+ALWAYS output EXACTLY 3 fixed questions. The platform options are fixed; module and integration options are generated dynamically based on the project description.
 
   [
     {
-      "id": "user-types",
-      "title": "<translated: What user types will be in the platform?>",
+      "id": "platform-types",
+      "title": "<translated: What platforms do you need?>",
       "type": "multi",
-      "options": [/* 5–8 role options relevant to this specific project, e.g. Admin, Manager, Driver */]
+      "options": [
+        {"id": "admin-panel", "label": "<translated: Admin panel>"},
+        {"id": "website", "label": "<translated: Website>"},
+        {"id": "landing-page", "label": "<translated: Landing page>"},
+        {"id": "mobile-app", "label": "<translated: Mobile App>"}
+      ]
     },
     {
       "id": "module-types",
@@ -115,9 +120,10 @@ ALWAYS output EXACTLY 3 fixed questions. Options are generated dynamically based
   ]
 
 Rules for Strategy A:
-  - Always use exactly these 3 question ids: "user-types", "module-types", "integrations"
+  - Always use exactly these 3 question ids: "platform-types", "module-types", "integrations"
+  - The "platform-types" options are fixed and must be exactly: "admin-panel", "website", "landing-page", "mobile-app"
   - Do NOT include a "None" option for integrations — the user can simply skip selection
-  - Generate options that make sense for the specific system described
+  - Generate module and integration options that make sense for the specific system described
 
 ════════════════════
 STRATEGY B — Website / e-commerce / landing page / portfolio / corporate site / blog / etc.
@@ -204,16 +210,14 @@ Example for Strategy A — User: "build me a TMS":
   reply="Please answer a few questions to get started.",
   questions=[
     {
-      "id": "user-types",
-      "title": "What user types will be in the platform?",
+      "id": "platform-types",
+      "title": "What platforms do you need?",
       "type": "multi",
       "options": [
-        {"id": "admin", "label": "Admin"},
-        {"id": "dispatcher", "label": "Dispatcher"},
-        {"id": "driver", "label": "Driver"},
-        {"id": "client", "label": "Client"},
-        {"id": "warehouse-manager", "label": "Warehouse Manager"},
-        {"id": "accountant", "label": "Accountant"}
+        {"id": "admin-panel", "label": "Admin panel"},
+        {"id": "website", "label": "Website"},
+        {"id": "landing-page", "label": "Landing page"},
+        {"id": "mobile-app", "label": "Mobile App"}
       ]
     },
     {
@@ -460,7 +464,7 @@ SCHEMA RULES:
 4. NEVER include system fields: created_at, updated_at, deleted_at, guid — they are auto-managed.
 5. Every project MUST have exactly ONE login table: set "is_login_table": true.
 6. For the login table, do NOT include auth fields (login, email, phone, password, tin) — they are auto-created from "login_strategy". Only add custom fields like "full_name", "avatar".
-7. "client_types": for admin_panel and webapp — extract user role names verbatim from the conversation (the user's "user-types" question answer). Example: user answered "Administrator, Manager, Driver" → ["Administrator", "Manager", "Driver"]. Always include at least ["Administrator"] if no user types were specified (webapp products are multi-user and have roles too). Leave empty [] for landing/web projects.
+7. "client_types": for admin_panel and webapp — infer a small set of sensible access persona names silently from the project domain and workflows. Always include "Administrator" first, and add 1–4 domain-appropriate names when useful (e.g. ["Administrator", "Dispatcher", "Driver"] for TMS). Do NOT treat questionnaire platform choices as client types. Leave empty [] for landing/web projects.
 
 RELATIONS RULES:
 7. Output a "relations" array covering EVERY foreign-key link between tables in this project.

@@ -27,7 +27,7 @@ var ToolArchitectPlan = claudeFunctionTool{
 			"client_types": map[string]any{
 				"type":        "array",
 				"items":       map[string]any{"type": "string"},
-				"description": "User role names extracted from the 'user-types' question answer. Each entry creates a separate client_type + role record. admin_panel and webapp: always at least [\"Administrator\"] (webapp products have end-user roles too). landing/web: empty [].",
+				"description": "Access persona names inferred silently from the project domain and workflows. Each entry creates a separate client_type + role record. admin_panel and webapp: always include \"Administrator\" first and add 1-4 sensible domain-specific names when useful. Do not derive these from platform questionnaire choices. landing/web: empty [].",
 			},
 			"image_keywords": map[string]any{
 				"type":        "array",
