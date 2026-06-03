@@ -443,11 +443,30 @@ func validateWebAppUIQuality(files []models.ProjectFile) []ValidationError {
 					File:     f.Path,
 					Message:  "webapp UI: navigation must be a FIXED BOTTOM TAB BAR (fixed inset-x-0 bottom-0, 3–5 icon+label tabs), NOT a desktop side rail (no w-56/w-60/w-64/border-r/full-height column).",
 				})
-			} else if !strings.Contains(content, "safe-area-inset-bottom") {
+				continue
+			}
+			if !strings.Contains(content, "safe-area-inset-bottom") {
 				errors = append(errors, ValidationError{
 					Severity: "error",
 					File:     f.Path,
 					Message:  "webapp UI: the bottom tab bar must reserve the bottom safe area — add pb-[env(safe-area-inset-bottom)] so it clears the home indicator.",
+				})
+			}
+			// The fixed bar MUST be fully opaque or page content shows through it.
+			if hasAny(content, "bg-transparent", "bg-background/", "bg-card/") || !hasAny(content, "bg-background", "bg-card") {
+				errors = append(errors, ValidationError{
+					Severity: "error",
+					File:     f.Path,
+					Message:  "webapp UI: the bottom tab bar must have a SOLID opaque background (bg-background) — never transparent/translucent (no bg-background/NN, no bg-transparent, no blur-only). Content scrolling underneath must be fully hidden.",
+				})
+			}
+			// A center FAB / action button must be wired, not decorative.
+			if strings.Contains(content, "rounded-full") && hasAny(content, "Plus", "ArrowLeftRight", "Send", "Scan", "QrCode", "Camera") &&
+				!hasAny(content, "onClick", "navigate", "useNavigate", "to=", "<Link", "<NavLink") {
+				errors = append(errors, ValidationError{
+					Severity: "error",
+					File:     f.Path,
+					Message:  "webapp UI: the center action button (FAB) is not wired. Add onClick to navigate to a create route (useNavigate) or open a create bottom Sheet (useState). No dead buttons.",
 				})
 			}
 			continue
@@ -1263,7 +1282,7 @@ func (p *ChatProcessor) repairSingleFile(
 	sb.WriteString("  - For '<SelectItem value=\"\">' errors: Radix SelectItem values cannot be empty strings. Replace empty option values with non-empty sentinel strings such as 'all', 'none', or 'unassigned'. Update state/filter logic so the sentinel means no filter / empty relation, but NEVER render value=\"\" on SelectItem.\n")
 	sb.WriteString("  - For 'admin UI quality' errors: perform a focused visual/product polish pass on this file. Preserve every API endpoint, hook, mutation, entity field, JSON extraction, route, and generated type. Improve layout density, hierarchy, cards, filters, status chips, detail drawer/dialog, states, and domain-specific widgets only.\n")
 	sb.WriteString("  - For 'word with apostrophe used as unquoted JS expression' errors: the file contains Uzbek/non-ASCII text like Ko'rildi, Ko'rib chiqilmoqda, Og'zaki used directly as JavaScript identifiers without string quotes. This crashes esbuild. Find EVERY such word in arrays, object property values, variable assignments, JSX attribute values — wrap each one in double quotes. Example: { label: Ko'rildi } → { label: \"Ko'rildi\" }, [Ko'rib] → [\"Ko'rib\"]. JSX text nodes are fine: <Badge>Ko'rildi</Badge> does NOT need change, only JS expression contexts.\n")
-	sb.WriteString("  - For 'webapp UI' errors: this is a MOBILE APP (responsive web). Fix toward a phone layout — a centered max-w-md min-h-[100dvh] frame, a fixed bottom tab bar (NOT a desktop side rail), a compact top bar (NO ⌘K), single-column stacked cards/list rows (NOT data tables or KPI dashboards), bottom-sheet/detail-route for item details, and lucide icons rendered as <Icon/> components (never icon-name strings). Preserve all APIs, hooks, fields, routes, and types.\n")
+	sb.WriteString("  - For 'webapp UI' errors: this is a MOBILE APP (responsive web). Fix toward a phone layout — a centered max-w-md min-h-[100dvh] frame, a fixed bottom tab bar (NOT a desktop side rail) with a SOLID opaque bg-background (no /opacity, no transparent, no blur-only), a compact top bar (NO ⌘K), single-column stacked cards/list rows (NOT data tables or KPI dashboards), bottom-sheet/detail-route for item details, and lucide icons rendered as <Icon/> components (never icon-name strings). EVERY button/tab/tile/row/FAB must be wired (onClick navigate via useNavigate/NavLink, or open a Sheet via useState, or fire a useApiMutation) — no dead buttons. Render real API data (useApiQuery + extractList), not hardcoded values. Preserve all APIs, hooks, fields, routes, and types.\n")
 	sb.WriteString("  - For brace/bracket/paren imbalance: carefully trace through the file and find the exact location of the missing or extra delimiter. Common causes: unclosed ternary in JSX, missing closing brace in .map() callback, extra } after a component return, unclosed template literal.\n")
 	sb.WriteString("  - NEVER use angle-bracket type assertions in .tsx files (const x = <Type>value). ALWAYS use 'as' syntax (const x = value as Type).\n")
 	sb.WriteString("  - Output the complete corrected file. Never truncate.\n")
