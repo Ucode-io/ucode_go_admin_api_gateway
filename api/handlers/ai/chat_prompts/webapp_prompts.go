@@ -475,15 +475,25 @@ SAFE AREA INSETS (CRITICAL — or the status bar / notch / home indicator clips 
       body { overscroll-behavior-y: none; }
     Never set a fixed top margin to "fix" clipping — always use the env(safe-area-inset-*) approach above.
 
+FIXED BARS MUST BE FULLY OPAQUE (CRITICAL — or page content shows through them):
+  The fixed bottom tab bar and the sticky header sit OVER scrolling content. They MUST have a SOLID, fully opaque
+  background so nothing bleeds through. Use bg-background (or bg-card) with NO opacity modifier and NO reliance on blur.
+  ❌ bg-background/80 · bg-background/90 · bg-background/95 · bg-transparent · only "backdrop-blur" with no solid bg · only "border-t" with no bg
+  ✅ bg-background  (solid) — content scrolling underneath is fully hidden
+  The bottom bar also needs a solid bg behind the safe-area pb so the home-indicator gap is not see-through.
+
 BOTTOM TAB BAR (the Sidebar.tsx file):
   <nav className="fixed inset-x-0 bottom-0 z-40 mx-auto flex h-16 max-w-md items-center justify-around border-t border-border bg-background pb-[env(safe-area-inset-bottom)]">
-    {tabs.map(t => <NavLink ...><Icon className="h-5 w-5" /><span className="text-[10px]">{t.label}</span></NavLink>)}
+    {tabs.map(t => <NavLink key={t.path} to={t.path} className={({isActive}) => cn('flex flex-col items-center justify-center gap-0.5 flex-1 h-full', isActive ? 'text-primary' : 'text-muted-foreground')}>
+      <Icon className="h-5 w-5" /><span className="text-[10px]">{t.label}</span></NavLink>)}
   </nav>
-  - 3–5 tabs. Active = text-primary, inactive = text-muted-foreground.
-  - Optional raised center action button (e.g. Transfer/Add) styled as a circular primary button overlapping the bar.
+  - 3–5 tabs. Each tab is a react-router NavLink with a real "to" route. Active = text-primary, inactive = text-muted-foreground.
+  - bg-background is SOLID (opaque) — never translucent.
+  - Optional raised center action button (e.g. Transfer/Add/＋): a circular primary button that MUST be wired —
+    onClick={() => navigate('/create')} or onClick={() => setCreateOpen(true)} to open a create screen/sheet. NEVER a dead button.
 
 TOP BAR SAFE AREA (the Header.tsx file):
-  <header className="sticky top-0 z-30 bg-background/95 backdrop-blur border-b border-border px-4 pt-[max(env(safe-area-inset-top),3rem)] pb-3">
+  <header className="sticky top-0 z-30 bg-background border-b border-border px-4 pt-[max(env(safe-area-inset-top),3rem)] pb-3">
     ... title/back on the left · bell + avatar on the right ...
   </header>
   The pt-[max(env(safe-area-inset-top),3rem)] guarantees the header content clears the status bar / notch.
@@ -493,6 +503,25 @@ TOUCH & SIZING:
   - Detail of a row/item opens via a BOTTOM SHEET: <Sheet><SheetContent side="bottom" className="rounded-t-2xl max-w-md mx-auto">. Never a desktop right panel.
   - Use full-width stacked cards and list rows. NEVER a data <table>.
   - Horizontal carousels (account cards, contacts) use overflow-x-auto with snap and -mx-4 px-4 edge bleed.
+
+INTERACTIVITY — EVERY CONTROL MUST WORK (CRITICAL — no dead buttons):
+  A mobile app where buttons do nothing is a failure. Every interactive element MUST have a real, wired effect:
+  - Bottom tabs → react-router <NavLink to="/route"> (each route renders a real screen in App.tsx).
+  - The center ＋/FAB → onClick that navigates to a create route or opens a create bottom Sheet (useState + <Sheet open=...>). Never decorative.
+  - Quick-action tiles (Transfer/Pay/Scan/etc.) → each onClick navigates (useNavigate) or opens a Sheet/Dialog. No tile is a no-op.
+  - List rows / cards → onClick opens a detail Sheet or navigates to a detail route (useNavigate('/x/' + id)).
+  - "See all" / "Manage" / chevrons → navigate to the relevant screen.
+  - Header bell/avatar → open a sheet/menu or navigate (notifications/profile).
+  - Forms → onSubmit calls a real useApiMutation; submit shows Loader2 while isPending; success → toast + close/navigate.
+  RULE: if you render a Button/tile/row, it MUST have an onClick (or be a NavLink/Link) that does something real. Wire state (useState) for sheets/dialogs and react-router (useNavigate/NavLink) for navigation. Trace every control before finishing — zero no-op buttons.
+
+FULLY DYNAMIC — DATA COMES FROM THE API (not hardcoded):
+  Lists, cards, counts, and detail fields render REAL data fetched via useApiQuery from /v2/items/{table}.
+  - Fetch with useApiQuery, read with extractList/extractSingle/extractCount, then .map() over the result.
+  - Counts/labels ("12,480 enrolled", balances, totals) come from the data, not string literals.
+  - Create/edit/delete use useApiMutation and invalidate the query so the UI updates.
+  - Believable seed content is ONLY a fallback for the empty state — never hardcoded alongside fetched data.
+  - Every screen tied to a table MUST fetch and render that table; loading → skeleton, empty → hint+CTA, error → retry.
 
 ====================================
 API INTEGRATION (LAYER 1 USAGE)
@@ -654,7 +683,7 @@ PHONE FRAME (src/components/layout/Layout.tsx):
   - Renders <Header />, a scrollable <main className="flex-1 overflow-y-auto px-4 pb-24">{children/Outlet}</main>, and <BottomNav /> (Sidebar.tsx).
 
 TOP BAR (src/components/layout/Header.tsx):
-  - sticky top-0 z-30 bg-background/95 backdrop-blur border-b border-border px-4, with TOP SAFE-AREA inset:
+  - sticky top-0 z-30 bg-background border-b border-border px-4, with TOP SAFE-AREA inset:
     pt-[max(env(safe-area-inset-top),3rem)] pb-3 — REQUIRED so the title/bell/avatar are not clipped by the status bar / notch.
   - Home/root screens: left = brand/logo or "Good morning, {name}" greeting; right = Bell (with unread dot) + Avatar.
   - Detail screens: left = back chevron (ArrowLeft) + screen title; right = optional action.
@@ -1054,10 +1083,16 @@ QUALITY
 MOBILE
 [ ] Layout = max-w-md min-h-[100dvh] centered phone frame
 [ ] Fixed bottom tab bar (Sidebar.tsx), 3–5 tabs, active highlighted
-[ ] Compact sticky Header (no ⌘K / no desktop search)
+[ ] Bottom bar + header are SOLID opaque bg-background (no /opacity, no transparent, no blur-only) — content never shows through
+[ ] Compact sticky Header (no ⌘K / no desktop search); safe-area insets reserved (top + bottom)
 [ ] Detail via bottom Sheet or pushed route (no right inspector)
 [ ] Single column; no <table>; main has pb-24 so nothing hides behind the tab bar
 [ ] Touch targets ≥44px
+
+INTERACTIVITY & DATA
+[ ] EVERY button/tab/tile/row/FAB is wired (onClick navigate / open Sheet / mutation) — zero dead buttons
+[ ] The center ＋/FAB navigates to a create route or opens a create Sheet
+[ ] Screens fetch real data via useApiQuery and render it (counts/labels from data, not literals); CRUD via useApiMutation + invalidate
 
 TYPESCRIPT
 [ ] All params typed, no unguarded non-null assertions
@@ -1219,10 +1254,25 @@ Failure patterns (auto-repaired/rejected):
 
 MOBILE-CONSISTENT VISUALS:
   - Surfaces: bg-background screen, bg-card cards/sheets; rounded-2xl cards; subtle shadow-sm/md allowed on mobile.
+  - Any fixed/sticky bar you render must be SOLID opaque bg-background (never bg-background/NN, bg-transparent, or blur-only) so content does not show through it.
   - Status as chips/dots (semantic colors), never plain text only.
   - Buttons: explicit variant; main actions full-width (w-full h-12 rounded-xl); Loader2 spinner when isPending.
   - Actions are tappable & visible (no hover reveal); active:scale-[0.98] for tactile feedback.
   - Loading skeletons match content shape; empty states teach the next action; error states offer retry.
+
+INTERACTIVITY — EVERY CONTROL MUST WORK (no dead buttons):
+  - Every Button/tile/row/chevron/FAB MUST have a real effect: onClick that navigates (useNavigate / <NavLink>) OR opens a Sheet/Dialog (useState) OR fires a useApiMutation. Wire state for sheets and react-router for navigation.
+  - A ＋/FAB or "New" button → navigate to a create route or open a create bottom Sheet. NEVER decorative.
+  - Quick-action tiles and "See all"/"Manage" links → each navigates or opens a sheet. No no-op controls.
+  - List rows/cards → onClick opens a detail Sheet or navigates to a detail route. Forms → onSubmit calls a real mutation.
+  - Trace every control before finishing — zero buttons without a handler.
+
+FULLY DYNAMIC — RENDER REAL API DATA (not hardcoded):
+  - Fetch with useApiQuery from /v2/items/{table}; read via extractList/extractSingle/extractCount; .map() the result.
+  - Counts/labels/amounts ("12,480 enrolled", balances, totals) come from the data — never string literals next to fetched data.
+  - Create/edit/delete via useApiMutation with invalidateKeys so the screen refreshes.
+  - Believable seed text is ONLY a fallback for the empty state; never hardcode rows alongside live data.
+  - Each screen tied to a table MUST fetch + render it with loading (skeleton) / empty (hint+CTA) / error (retry) states.
 
 ====================================
 API HOOKS — EXACT SIGNATURES (READ CAREFULLY)
