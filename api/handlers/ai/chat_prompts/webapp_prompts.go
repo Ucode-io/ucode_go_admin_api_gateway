@@ -484,13 +484,19 @@ FIXED BARS MUST BE FULLY OPAQUE (CRITICAL — or page content shows through them
 
 BOTTOM TAB BAR (the Sidebar.tsx file):
   <nav className="fixed inset-x-0 bottom-0 z-40 mx-auto flex h-16 max-w-md items-center justify-around border-t border-border bg-background pb-[env(safe-area-inset-bottom)]">
-    {tabs.map(t => <NavLink key={t.path} to={t.path} className={({isActive}) => cn('flex flex-col items-center justify-center gap-0.5 flex-1 h-full', isActive ? 'text-primary' : 'text-muted-foreground')}>
-      <Icon className="h-5 w-5" /><span className="text-[10px]">{t.label}</span></NavLink>)}
+    {tabs.map(t => <NavLink key={t.path} to={t.path} className={({isActive}) => cn('flex flex-1 flex-col items-center justify-center gap-0.5', isActive ? 'text-primary' : 'text-muted-foreground')}>
+      <Icon className="h-5 w-5" /><span className="text-[10px] font-medium">{t.label}</span></NavLink>)}
   </nav>
-  - 3–5 tabs. Each tab is a react-router NavLink with a real "to" route. Active = text-primary, inactive = text-muted-foreground.
+  DEFAULT: 4–5 EQUAL labeled tabs (standard iOS/Android pattern). Each tab = NavLink with a real "to" route + visible icon AND label.
+  - EVERY tab shows BOTH an icon and a text label — never an icon with no label, never a label with no icon.
+  - Active = text-primary (optionally a subtle bg-primary/10 rounded pill). Inactive = text-muted-foreground (must stay readable on the bar).
   - bg-background is SOLID (opaque) — never translucent.
-  - Optional raised center action button (e.g. Transfer/Add/＋): a circular primary button that MUST be wired —
-    onClick={() => navigate('/create')} or onClick={() => setCreateOpen(true)} to open a create screen/sheet. NEVER a dead button.
+  CENTER ACTION BUTTON (FAB) — only if the app has ONE obvious primary action (e.g. New/Add/Scan/Compose). If unsure, DO NOT add one — just use equal tabs.
+    When you do add it:
+      - It is a HIGH-CONTRAST raised circular button: bg-primary text-primary-foreground shadow-lg (NOT a dark/low-contrast circle, NOT bg-background/bg-muted).
+      - Use a MEANINGFUL icon for the action: Plus (create), Search/Scan, Send. NEVER a generic/decorative icon like a compass unless the app is literally maps/navigation.
+      - It MUST be wired: onClick={() => navigate('/create')} or onClick={() => setCreateOpen(true)}. NEVER a dead button.
+      - It replaces NOTHING the user needs — keep the real tabs labeled and reachable. Prefer a small label under it too.
 
 TOP BAR SAFE AREA (the Header.tsx file):
   <header className="sticky top-0 z-30 bg-background border-b border-border px-4 pt-[max(env(safe-area-inset-top),3rem)] pb-3">
@@ -513,6 +519,11 @@ INTERACTIVITY — EVERY CONTROL MUST WORK (CRITICAL — no dead buttons):
   - "See all" / "Manage" / chevrons → navigate to the relevant screen.
   - Header bell/avatar → open a sheet/menu or navigate (notifications/profile).
   - Forms → onSubmit calls a real useApiMutation; submit shows Loader2 while isPending; success → toast + close/navigate.
+  - SETTINGS / PROFILE / MENU rows (Payment Methods, Notifications, Privacy, Help, Edit Profile, etc.): EACH row MUST do something:
+      • open a bottom Sheet that shows/edits that content (preferred when there is no dedicated screen), OR
+      • navigate to a real sub-route that you also add to App.tsx and render as a real screen.
+      A settings row that is just text + a chevron with NO onClick is a BUG. If you cannot build a full sub-screen, open a Sheet with the relevant fields/content (or, as a last resort, a Sheet/toast explaining the action) — but NEVER a dead row.
+  - NO AUTH: do NOT add "Log Out", login, or account-auth rows on the Profile screen (this app has no auth). Profile shows editable profile fields + app settings rows only.
   RULE: if you render a Button/tile/row, it MUST have an onClick (or be a NavLink/Link) that does something real. Wire state (useState) for sheets/dialogs and react-router (useNavigate/NavLink) for navigation. Trace every control before finishing — zero no-op buttons.
 
 FULLY DYNAMIC — DATA COMES FROM THE API (not hardcoded):
@@ -1091,7 +1102,10 @@ MOBILE
 
 INTERACTIVITY & DATA
 [ ] EVERY button/tab/tile/row/FAB is wired (onClick navigate / open Sheet / mutation) — zero dead buttons
-[ ] The center ＋/FAB navigates to a create route or opens a create Sheet
+[ ] Every bottom tab shows BOTH icon AND label; inactive tabs readable; active = text-primary
+[ ] Center FAB (only if used) is high-contrast bg-primary text-primary-foreground with a meaningful icon (Plus/Scan/Send, never a generic compass) and is wired
+[ ] Settings/Profile rows (Payment Methods, Notifications, etc.) each open a Sheet or navigate — none are dead text+chevron rows
+[ ] No "Log Out"/auth rows anywhere (no-auth app)
 [ ] Screens fetch real data via useApiQuery and render it (counts/labels from data, not literals); CRUD via useApiMutation + invalidate
 
 TYPESCRIPT
@@ -1120,7 +1134,7 @@ TRANSITIONS: transition-colors duration-150
 ====================================
 CHUNKED MODE — CRITICAL RULES
 ====================================
-You are generating ONE GROUP of files. Foundation (index.css, App.tsx, types.ts, Layout.tsx, Sidebar.tsx, Header.tsx — the PHONE SHELL: Layout.tsx is the centered max-w-md min-h-[100dvh] phone frame, Sidebar.tsx is the fixed BOTTOM TAB BAR with pb-[env(safe-area-inset-bottom)], Header.tsx is the compact sticky top bar with pt-[max(env(safe-area-inset-top),3rem)] so the status bar/notch never clips it) and UI Kit (src/components/ui/*, DataTable, FormModal, PageHeader) are already generated.
+You are generating ONE GROUP of files. Foundation (index.css, App.tsx, types.ts, Layout.tsx, Sidebar.tsx, Header.tsx — the PHONE SHELL: Layout.tsx is the centered max-w-md min-h-[100dvh] phone frame, Sidebar.tsx is the fixed BOTTOM TAB BAR with pb-[env(safe-area-inset-bottom)], Header.tsx is the compact sticky top bar with pt-[max(env(safe-area-inset-top),3rem)] so the status bar/notch never clips it) and UI Kit (src/components/ui/*, FormModal, PageHeader) are already generated.
 Each chunk is judged by the final mobile UI quality gate. Build phone-first SCREENS: single column, full-width within the phone frame, stacked cards & list rows, large touch targets, detail via bottom Sheet or pushed route. NEVER a desktop sidebar/table/right-inspector layout, NEVER a marketing layout, NEVER an admin KPI dashboard. Your page content renders inside Layout's scrollable main (which already has pb-24 for the tab bar).
 
 EMIT RULES (strictly enforced):
@@ -1199,11 +1213,11 @@ Pre-built utility types — from '@/types/common' when needed:
   import type { NavItem, TableColumn, SelectOption, PaginationParams } from '@/types/common'
   These are pre-built template types. NEVER re-declare them.
 
-Shared patterns — ALWAYS use these, NEVER create your own table/modal/header:
-  import { DataTable } from '@/components/shared/DataTable'
-  import { FormModal } from '@/components/shared/FormModal'
-  import { PageHeader } from '@/components/shared/PageHeader'
-  These are already generated by Group 1 (UIKit phase).
+Shared patterns (already generated by Group 1 — import, never recreate):
+  import { FormModal } from '@/components/shared/FormModal'    // form wrapper (use inside a bottom Sheet / screen)
+  import { PageHeader } from '@/components/shared/PageHeader'   // optional screen title block
+  ⚠ Do NOT use DataTable on mobile — a data table is a desktop pattern. Render full-width list rows / stacked cards instead.
+  Only import a shared component if you actually use it (unused imports of optional files can break the build).
 
 UI Kit components — ALL filenames are LOWERCASE (shadcn convention):
   import { Button, buttonVariants } from '@/components/ui/button'
@@ -1265,6 +1279,8 @@ INTERACTIVITY — EVERY CONTROL MUST WORK (no dead buttons):
   - A ＋/FAB or "New" button → navigate to a create route or open a create bottom Sheet. NEVER decorative.
   - Quick-action tiles and "See all"/"Manage" links → each navigates or opens a sheet. No no-op controls.
   - List rows/cards → onClick opens a detail Sheet or navigates to a detail route. Forms → onSubmit calls a real mutation.
+  - SETTINGS / PROFILE / MENU rows (Payment Methods, Notifications, Privacy, Help, Edit Profile, etc.): EACH row MUST open a bottom Sheet with that content/fields, or navigate to a real sub-route. A row that is just text + chevron with NO onClick is a BUG. If no dedicated screen exists, open a Sheet with the fields (last resort: a Sheet/toast describing the action) — never a dead row.
+  - NO AUTH: do NOT render "Log Out"/login/account-auth rows on Profile (this app has no auth) — editable profile fields + app settings rows only.
   - Trace every control before finishing — zero buttons without a handler.
 
 FULLY DYNAMIC — RENDER REAL API DATA (not hardcoded):
@@ -1565,8 +1581,8 @@ GROUP 1 — UI KIT + SHARED PATTERNS (generated AFTER Group 0, BEFORE screens �
     ⚠ sheet is REQUIRED — it powers bottom sheets used for item details.
 
   SUB-SET B — src/components/shared/*.tsx (composite patterns built on sub-set A):
-    Include src/components/shared/FormModal.tsx (form wrapper) and src/components/shared/PageHeader.tsx (screen title block).
-    You MAY include src/components/shared/DataTable.tsx for completeness, but mobile SCREENS render full-width list rows / stacked cards — never desktop tables.
+    Include ONLY src/components/shared/FormModal.tsx (form wrapper) and src/components/shared/PageHeader.tsx (screen title block).
+    Do NOT include DataTable.tsx — mobile screens use full-width list rows / stacked cards, never desktop tables.
 
 GROUPS 2..N — SCREENS (parallel with each other, depend on Groups 0 AND 1):
   Each group = one XxxPage.tsx (a full-screen mobile screen) + dedicated components + optionally one src/hooks/useXxx.ts.

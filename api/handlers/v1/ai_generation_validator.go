@@ -443,20 +443,13 @@ func validateWebAppUIQuality(files []models.ProjectFile) []ValidationError {
 				})
 			}
 			// The fixed bar MUST be fully opaque or page content shows through it.
-			if hasAny(content, "bg-transparent", "bg-background/", "bg-card/") || !hasAny(content, "bg-background", "bg-card") {
+			// Reliable signals only: an explicitly transparent/translucent BACKGROUND token, or no solid bg token at all.
+			// (We do NOT flag bg-card/.. or bg-primary/.. — those are commonly used on inner pills/indicators, not the bar bg.)
+			if hasAny(content, "bg-transparent", "bg-background/") || !hasAny(content, "bg-background", "bg-card") {
 				errors = append(errors, ValidationError{
 					Severity: "error",
 					File:     f.Path,
 					Message:  "webapp UI: the bottom tab bar must have a SOLID opaque background (bg-background) — never transparent/translucent (no bg-background/NN, no bg-transparent, no blur-only). Content scrolling underneath must be fully hidden.",
-				})
-			}
-			// A center FAB / action button must be wired, not decorative.
-			if strings.Contains(content, "rounded-full") && hasAny(content, "Plus", "ArrowLeftRight", "Send", "Scan", "QrCode", "Camera") &&
-				!hasAny(content, "onClick", "navigate", "useNavigate", "to=", "<Link", "<NavLink") {
-				errors = append(errors, ValidationError{
-					Severity: "error",
-					File:     f.Path,
-					Message:  "webapp UI: the center action button (FAB) is not wired. Add onClick to navigate to a create route (useNavigate) or open a create bottom Sheet (useState). No dead buttons.",
 				})
 			}
 			continue
