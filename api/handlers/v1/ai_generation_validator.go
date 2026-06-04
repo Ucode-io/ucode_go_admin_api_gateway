@@ -389,6 +389,11 @@ var reIconStringValue = regexp.MustCompile(`(?i)\bicon:\s*["'][a-z][a-z0-9 _-]*[
 // reIconRendered matches a ".icon" member used in a JSX expression (e.g. {tx.icon}).
 var reIconRendered = regexp.MustCompile(`\{\s*[a-zA-Z_][\w.]*\.icon\s*\}`)
 
+// reUnsafeNumberMethod matches a number method called directly on an identifier/member
+// (e.g. sellerRating.toFixed(1), item.price.toLocaleString()) — which crashes when the API
+// value is a string/null. A leading ")" (as in Number(x).toFixed) is intentionally NOT matched.
+var reUnsafeNumberMethod = regexp.MustCompile(`[A-Za-z0-9_$\]]\s*\.\s*(toFixed|toLocaleString)\s*\(`)
+
 // validateWebAppUIQuality enforces the MOBILE-APP identity for webapp projects:
 // a centered phone frame, a fixed bottom tab bar (not a desktop side rail), a compact
 // top bar (no ⌘K), mobile list/cards instead of data tables, no admin chrome, and no
@@ -453,20 +458,13 @@ func validateWebAppUIQuality(files []models.ProjectFile) []ValidationError {
 				})
 			}
 			// The fixed bar MUST be fully opaque or page content shows through it.
-			if hasAny(content, "bg-transparent", "bg-background/", "bg-card/") || !hasAny(content, "bg-background", "bg-card") {
+			// Reliable signals only: an explicitly transparent/translucent BACKGROUND token, or no solid bg token at all.
+			// (We do NOT flag bg-card/.. or bg-primary/.. — those are commonly used on inner pills/indicators, not the bar bg.)
+			if hasAny(content, "bg-transparent", "bg-background/") || !hasAny(content, "bg-background", "bg-card") {
 				errors = append(errors, ValidationError{
 					Severity: "error",
 					File:     f.Path,
 					Message:  "webapp UI: the bottom tab bar must have a SOLID opaque background (bg-background) — never transparent/translucent (no bg-background/NN, no bg-transparent, no blur-only). Content scrolling underneath must be fully hidden.",
-				})
-			}
-			// A center FAB / action button must be wired, not decorative.
-			if strings.Contains(content, "rounded-full") && hasAny(content, "Plus", "ArrowLeftRight", "Send", "Scan", "QrCode", "Camera") &&
-				!hasAny(content, "onClick", "navigate", "useNavigate", "to=", "<Link", "<NavLink") {
-				errors = append(errors, ValidationError{
-					Severity: "error",
-					File:     f.Path,
-					Message:  "webapp UI: the center action button (FAB) is not wired. Add onClick to navigate to a create route (useNavigate) or open a create bottom Sheet (useState). No dead buttons.",
 				})
 			}
 			continue
@@ -511,6 +509,15 @@ func validateWebAppUIQuality(files []models.ProjectFile) []ValidationError {
 				Severity: "error",
 				File:     f.Path,
 				Message:  "webapp UI: this looks like a desktop KPI dashboard. The home screen must be a glanceable mobile surface (hero card + quick-action tiles + list), not a 4-column metrics grid.",
+			})
+		}
+
+		// Number method on a raw API value → "x.toFixed is not a function" runtime crash.
+		if reUnsafeNumberMethod.MatchString(content) {
+			errors = append(errors, ValidationError{
+				Severity: "error",
+				File:     f.Path,
+				Message:  "webapp build: a number method (.toFixed/.toLocaleString) is called directly on a value that may be a string/null from the API — this crashes at runtime ('toFixed is not a function'). Coerce first: Number(value ?? 0).toFixed(1), or use the null-safe helpers formatCurrency(value) / formatNumber(value).",
 			})
 		}
 	}

@@ -269,6 +269,18 @@ NULL SAFETY (CRITICAL — prevents runtime crashes):
   Rule: ALWAYS use (arr ?? []) or arr?. before .reduce() / .filter() / .map() / .find() on any API-derived variable.
   Preferred: use extractList<T>(data) — it always returns a safe [] even before data loads.
 
+  NUMBER METHODS ON API DATA (CRITICAL — prevents "x.toFixed is not a function" crash):
+  API numeric fields arrive as STRINGS ("4.5"), null, or undefined — NEVER assume they are numbers.
+  .toFixed() / .toLocaleString() exist ONLY on real numbers, so calling them on API values CRASHES the screen.
+  ❌ sellerRating.toFixed(1)             — CRASH: toFixed is not a function (rating is a string/null)
+  ❌ item.price.toLocaleString()         — CRASH when price is a string/null
+  ❌ product.rating.toFixed(1)           — same
+  ✅ Number(sellerRating ?? 0).toFixed(1)        — coerce first, always safe
+  ✅ Number(item.price ?? 0).toLocaleString()
+  ✅ formatCurrency(item.price)          — null-safe helper (use for money)
+  ✅ formatNumber(item.count)            — null-safe helper (use for counts/quantities)
+  Rule: ALWAYS wrap with Number(x ?? 0) before .toFixed()/.toLocaleString(), OR use formatCurrency/formatNumber. NEVER call a number method directly on an API field.
+
 CSS PLACEMENT:
   index.css is imported in App.tsx — NOT in main.tsx.
   App.tsx first two lines must be:
@@ -484,13 +496,19 @@ FIXED BARS MUST BE FULLY OPAQUE (CRITICAL — or page content shows through them
 
 BOTTOM TAB BAR (the Sidebar.tsx file):
   <nav className="fixed inset-x-0 bottom-0 z-40 mx-auto flex h-16 max-w-md items-center justify-around border-t border-border bg-background pb-[env(safe-area-inset-bottom)]">
-    {tabs.map(t => <NavLink key={t.path} to={t.path} className={({isActive}) => cn('flex flex-col items-center justify-center gap-0.5 flex-1 h-full', isActive ? 'text-primary' : 'text-muted-foreground')}>
-      <Icon className="h-5 w-5" /><span className="text-[10px]">{t.label}</span></NavLink>)}
+    {tabs.map(t => <NavLink key={t.path} to={t.path} className={({isActive}) => cn('flex flex-1 flex-col items-center justify-center gap-0.5', isActive ? 'text-primary' : 'text-muted-foreground')}>
+      <Icon className="h-5 w-5" /><span className="text-[10px] font-medium">{t.label}</span></NavLink>)}
   </nav>
-  - 3–5 tabs. Each tab is a react-router NavLink with a real "to" route. Active = text-primary, inactive = text-muted-foreground.
+  DEFAULT: 4–5 EQUAL labeled tabs (standard iOS/Android pattern). Each tab = NavLink with a real "to" route + visible icon AND label.
+  - EVERY tab shows BOTH an icon and a text label — never an icon with no label, never a label with no icon.
+  - Active = text-primary (optionally a subtle bg-primary/10 rounded pill). Inactive = text-muted-foreground (must stay readable on the bar).
   - bg-background is SOLID (opaque) — never translucent.
-  - Optional raised center action button (e.g. Transfer/Add/＋): a circular primary button that MUST be wired —
-    onClick={() => navigate('/create')} or onClick={() => setCreateOpen(true)} to open a create screen/sheet. NEVER a dead button.
+  CENTER ACTION BUTTON (FAB) — only if the app has ONE obvious primary action (e.g. New/Add/Scan/Compose). If unsure, DO NOT add one — just use equal tabs.
+    When you do add it:
+      - It is a HIGH-CONTRAST raised circular button: bg-primary text-primary-foreground shadow-lg (NOT a dark/low-contrast circle, NOT bg-background/bg-muted).
+      - Use a MEANINGFUL icon for the action: Plus (create), Search/Scan, Send. NEVER a generic/decorative icon like a compass unless the app is literally maps/navigation.
+      - It MUST be wired: onClick={() => navigate('/create')} or onClick={() => setCreateOpen(true)}. NEVER a dead button.
+      - It replaces NOTHING the user needs — keep the real tabs labeled and reachable. Prefer a small label under it too.
 
 TOP BAR SAFE AREA (the Header.tsx file):
   <header className="sticky top-0 z-30 bg-background border-b border-border px-4 pt-[max(env(safe-area-inset-top),3rem)] pb-3">
@@ -513,6 +531,18 @@ INTERACTIVITY — EVERY CONTROL MUST WORK (CRITICAL — no dead buttons):
   - "See all" / "Manage" / chevrons → navigate to the relevant screen.
   - Header bell/avatar → open a sheet/menu or navigate (notifications/profile).
   - Forms → onSubmit calls a real useApiMutation; submit shows Loader2 while isPending; success → toast + close/navigate.
+  - SETTINGS / PROFILE / MENU rows (Payment Methods, Notifications, Privacy, Help, Edit Profile, etc.): EACH row MUST do something:
+      • open a bottom Sheet that shows/edits that content (preferred when there is no dedicated screen), OR
+      • navigate to a real sub-route that you also add to App.tsx and render as a real screen.
+      A settings row that is just text + a chevron with NO onClick is a BUG. If you cannot build a full sub-screen, open a Sheet with the relevant fields/content (or, as a last resort, a Sheet/toast explaining the action) — but NEVER a dead row.
+  - FILTERS / SEARCH / SORT / VIEW TOGGLE must actually work and drive the list:
+      • Keep filter/search/sort in useState; the value feeds the useApiQuery params (or filters the extracted list). Changing a control re-queries / re-filters.
+      • The "Filters" button opens a working filter Sheet; applying updates state and closes the sheet; the visible list changes.
+      • Each active filter CHIP has an X that REMOVES just that filter (updates state). "Reset filters" clears ALL filter state back to defaults.
+      • Sort dropdown actually reorders; grid/list toggle actually switches layout.
+      • ⚠ Do NOT filter everything out by default — default state shows ALL items. A fresh screen must NOT show "0 items / no match" because of a pre-applied filter.
+  - CLOSE / DISMISS (X) buttons everywhere: each X must truly close its sheet/dialog/banner (onClick → setOpen(false)) or remove its chip. No dead X buttons.
+  - NO AUTH: do NOT add "Log Out", login, or account-auth rows on the Profile screen (this app has no auth). Profile shows editable profile fields + app settings rows only.
   RULE: if you render a Button/tile/row, it MUST have an onClick (or be a NavLink/Link) that does something real. Wire state (useState) for sheets/dialogs and react-router (useNavigate/NavLink) for navigation. Trace every control before finishing — zero no-op buttons.
 
 FULLY DYNAMIC — DATA COMES FROM THE API (not hardcoded):
@@ -556,6 +586,75 @@ NEVER:
   data?.data?.data?.response inline
   import { extractList } from '@/hooks/useApi'
   useApiQuery({ url: '...', queryKey: [...] }) — wrong signature
+
+====================================
+REFERENCE — A FULLY-WIRED LIST SCREEN (copy this WIRING for any list/browse/catalog screen; every control does something real)
+====================================
+function ProductsScreen() {
+  const navigate = useNavigate();
+  const [search, setSearch] = useState('');
+  const [category, setCategory] = useState<string | null>(null); // null = ALL → fresh screen shows EVERYTHING
+  const [filterOpen, setFilterOpen] = useState(false);
+
+  const params = new URLSearchParams();
+  if (search) params.set('search', search);                       // search drives the API query
+  const qs = params.toString();
+  const { data, isLoading, isError, refetch } = useApiQuery<unknown>(
+    ['products', search],
+    '/v2/items/products' + (qs ? '?' + qs : ''),
+  );
+  const all = extractList<Product>(data);
+  const categories = Array.from(new Set(all.map((p) => p.category).filter(Boolean)));
+  const items = category ? all.filter((p) => p.category === category) : all; // category filter (client-side)
+
+  return (
+    <div className="space-y-3 pb-24">
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search" className="pl-9" />
+      </div>
+      <div className="flex items-center gap-2 overflow-x-auto">
+        <Button variant="outline" size="sm" onClick={() => setFilterOpen(true)}>
+          <SlidersHorizontal className="mr-1 h-4 w-4" /> Filters
+        </Button>
+        {category && (
+          <Badge variant="secondary" className="gap-1">{category}
+            <button onClick={() => setCategory(null)} aria-label="Remove filter"><X className="h-3 w-3" /></button>
+          </Badge>
+        )}
+      </div>
+      {isLoading ? <Skeleton className="h-20 w-full" />
+        : isError ? <div className="py-8 text-center"><Button onClick={() => refetch()}>Retry</Button></div>
+        : items.length === 0 ? <p className="py-8 text-center text-muted-foreground">Nothing here yet</p>
+        : items.map((p) => (
+            <button key={p.guid} onClick={() => navigate('/products/' + p.guid)}
+              className="flex w-full items-center gap-3 rounded-xl border bg-card p-3 text-left">
+              <div className="flex-1">
+                <p className="font-medium">{p.name}</p>
+                <p className="text-sm text-muted-foreground">{formatCurrency(p.price)}</p>
+              </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+            </button>
+          ))}
+      <Sheet open={filterOpen} onOpenChange={setFilterOpen}>
+        <SheetContent side="bottom" className="mx-auto max-w-md rounded-t-2xl">
+          <SheetHeader><SheetTitle>Filters</SheetTitle></SheetHeader>
+          <div className="space-y-2 py-4">
+            {categories.map((c) => (
+              <button key={c} onClick={() => setCategory(c)}
+                className={cn('w-full rounded-lg border p-3 text-left', category === c && 'border-primary')}>{c}</button>
+            ))}
+          </div>
+          <SheetFooter className="flex-row gap-2">
+            <Button variant="outline" className="flex-1" onClick={() => setCategory(null)}>Reset</Button>
+            <Button className="flex-1" onClick={() => setFilterOpen(false)}>Apply</Button>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
+    </div>
+  );
+}
+WHY EVERY CONTROL WORKS: search onChange→state→query · Filters→opens sheet · chip X→clears that one filter · Reset→clears all · Apply→closes sheet · row tap→navigates to detail · category=null by default→ALL items show (never "0 items" on a fresh screen). Replicate this wiring on every list/search/filter screen — no decorative controls.
 
 ====================================
 AVAILABLE NPM PACKAGES
@@ -1091,7 +1190,10 @@ MOBILE
 
 INTERACTIVITY & DATA
 [ ] EVERY button/tab/tile/row/FAB is wired (onClick navigate / open Sheet / mutation) — zero dead buttons
-[ ] The center ＋/FAB navigates to a create route or opens a create Sheet
+[ ] Every bottom tab shows BOTH icon AND label; inactive tabs readable; active = text-primary
+[ ] Center FAB (only if used) is high-contrast bg-primary text-primary-foreground with a meaningful icon (Plus/Scan/Send, never a generic compass) and is wired
+[ ] Settings/Profile rows (Payment Methods, Notifications, etc.) each open a Sheet or navigate — none are dead text+chevron rows
+[ ] No "Log Out"/auth rows anywhere (no-auth app)
 [ ] Screens fetch real data via useApiQuery and render it (counts/labels from data, not literals); CRUD via useApiMutation + invalidate
 
 TYPESCRIPT
@@ -1120,7 +1222,7 @@ TRANSITIONS: transition-colors duration-150
 ====================================
 CHUNKED MODE — CRITICAL RULES
 ====================================
-You are generating ONE GROUP of files. Foundation (index.css, App.tsx, types.ts, Layout.tsx, Sidebar.tsx, Header.tsx — the PHONE SHELL: Layout.tsx is the centered max-w-md min-h-[100dvh] phone frame, Sidebar.tsx is the fixed BOTTOM TAB BAR with pb-[env(safe-area-inset-bottom)], Header.tsx is the compact sticky top bar with pt-[max(env(safe-area-inset-top),3rem)] so the status bar/notch never clips it) and UI Kit (src/components/ui/*, DataTable, FormModal, PageHeader) are already generated.
+You are generating ONE GROUP of files. Foundation (index.css, App.tsx, types.ts, Layout.tsx, Sidebar.tsx, Header.tsx — the PHONE SHELL: Layout.tsx is the centered max-w-md min-h-[100dvh] phone frame, Sidebar.tsx is the fixed BOTTOM TAB BAR with pb-[env(safe-area-inset-bottom)], Header.tsx is the compact sticky top bar with pt-[max(env(safe-area-inset-top),3rem)] so the status bar/notch never clips it) and UI Kit (src/components/ui/*, FormModal, PageHeader) are already generated.
 Each chunk is judged by the final mobile UI quality gate. Build phone-first SCREENS: single column, full-width within the phone frame, stacked cards & list rows, large touch targets, detail via bottom Sheet or pushed route. NEVER a desktop sidebar/table/right-inspector layout, NEVER a marketing layout, NEVER an admin KPI dashboard. Your page content renders inside Layout's scrollable main (which already has pb-24 for the tab bar).
 
 EMIT RULES (strictly enforced):
@@ -1199,11 +1301,11 @@ Pre-built utility types — from '@/types/common' when needed:
   import type { NavItem, TableColumn, SelectOption, PaginationParams } from '@/types/common'
   These are pre-built template types. NEVER re-declare them.
 
-Shared patterns — ALWAYS use these, NEVER create your own table/modal/header:
-  import { DataTable } from '@/components/shared/DataTable'
-  import { FormModal } from '@/components/shared/FormModal'
-  import { PageHeader } from '@/components/shared/PageHeader'
-  These are already generated by Group 1 (UIKit phase).
+Shared patterns (already generated by Group 1 — import, never recreate):
+  import { FormModal } from '@/components/shared/FormModal'    // form wrapper (use inside a bottom Sheet / screen)
+  import { PageHeader } from '@/components/shared/PageHeader'   // optional screen title block
+  ⚠ Do NOT use DataTable on mobile — a data table is a desktop pattern. Render full-width list rows / stacked cards instead.
+  Only import a shared component if you actually use it (unused imports of optional files can break the build).
 
 UI Kit components — ALL filenames are LOWERCASE (shadcn convention):
   import { Button, buttonVariants } from '@/components/ui/button'
@@ -1265,6 +1367,10 @@ INTERACTIVITY — EVERY CONTROL MUST WORK (no dead buttons):
   - A ＋/FAB or "New" button → navigate to a create route or open a create bottom Sheet. NEVER decorative.
   - Quick-action tiles and "See all"/"Manage" links → each navigates or opens a sheet. No no-op controls.
   - List rows/cards → onClick opens a detail Sheet or navigates to a detail route. Forms → onSubmit calls a real mutation.
+  - SETTINGS / PROFILE / MENU rows (Payment Methods, Notifications, Privacy, Help, Edit Profile, etc.): EACH row MUST open a bottom Sheet with that content/fields, or navigate to a real sub-route. A row that is just text + chevron with NO onClick is a BUG. If no dedicated screen exists, open a Sheet with the fields (last resort: a Sheet/toast describing the action) — never a dead row.
+  - FILTERS / SEARCH / SORT / VIEW TOGGLE must work and drive the list: keep them in useState feeding the useApiQuery params (or filtering the extracted list); the "Filters" button opens a Sheet that applies on confirm; each filter chip's X removes just that filter; "Reset filters" clears all filter state; sort reorders; grid/list toggles layout. Default state shows ALL items — never pre-apply a filter that yields "0 items".
+  - CLOSE / DISMISS (X) buttons: each X must truly close its sheet/dialog/banner (onClick → setOpen(false)) or remove its chip. No dead X.
+  - NO AUTH: do NOT render "Log Out"/login/account-auth rows on Profile (this app has no auth) — editable profile fields + app settings rows only.
   - Trace every control before finishing — zero buttons without a handler.
 
 FULLY DYNAMIC — RENDER REAL API DATA (not hardcoded):
@@ -1273,6 +1379,75 @@ FULLY DYNAMIC — RENDER REAL API DATA (not hardcoded):
   - Create/edit/delete via useApiMutation with invalidateKeys so the screen refreshes.
   - Believable seed text is ONLY a fallback for the empty state; never hardcode rows alongside live data.
   - Each screen tied to a table MUST fetch + render it with loading (skeleton) / empty (hint+CTA) / error (retry) states.
+
+====================================
+REFERENCE — A FULLY-WIRED LIST SCREEN (copy this WIRING; every control does something real)
+====================================
+function ProductsScreen() {
+  const navigate = useNavigate();
+  const [search, setSearch] = useState('');
+  const [category, setCategory] = useState<string | null>(null); // null = ALL → fresh screen shows EVERYTHING
+  const [filterOpen, setFilterOpen] = useState(false);
+
+  const params = new URLSearchParams();
+  if (search) params.set('search', search);                       // search drives the API query
+  const qs = params.toString();
+  const { data, isLoading, isError, refetch } = useApiQuery<unknown>(
+    ['products', search],
+    '/v2/items/products' + (qs ? '?' + qs : ''),
+  );
+  const all = extractList<Product>(data);
+  const categories = Array.from(new Set(all.map((p) => p.category).filter(Boolean)));
+  const items = category ? all.filter((p) => p.category === category) : all; // category filter (client-side)
+
+  return (
+    <div className="space-y-3 pb-24">
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search" className="pl-9" />
+      </div>
+      <div className="flex items-center gap-2 overflow-x-auto">
+        <Button variant="outline" size="sm" onClick={() => setFilterOpen(true)}>
+          <SlidersHorizontal className="mr-1 h-4 w-4" /> Filters
+        </Button>
+        {category && (
+          <Badge variant="secondary" className="gap-1">{category}
+            <button onClick={() => setCategory(null)} aria-label="Remove filter"><X className="h-3 w-3" /></button>
+          </Badge>
+        )}
+      </div>
+      {isLoading ? <Skeleton className="h-20 w-full" />
+        : isError ? <div className="py-8 text-center"><Button onClick={() => refetch()}>Retry</Button></div>
+        : items.length === 0 ? <p className="py-8 text-center text-muted-foreground">Nothing here yet</p>
+        : items.map((p) => (
+            <button key={p.guid} onClick={() => navigate('/products/' + p.guid)}
+              className="flex w-full items-center gap-3 rounded-xl border bg-card p-3 text-left">
+              <div className="flex-1">
+                <p className="font-medium">{p.name}</p>
+                <p className="text-sm text-muted-foreground">{formatCurrency(p.price)}</p>
+              </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+            </button>
+          ))}
+      <Sheet open={filterOpen} onOpenChange={setFilterOpen}>
+        <SheetContent side="bottom" className="mx-auto max-w-md rounded-t-2xl">
+          <SheetHeader><SheetTitle>Filters</SheetTitle></SheetHeader>
+          <div className="space-y-2 py-4">
+            {categories.map((c) => (
+              <button key={c} onClick={() => setCategory(c)}
+                className={cn('w-full rounded-lg border p-3 text-left', category === c && 'border-primary')}>{c}</button>
+            ))}
+          </div>
+          <SheetFooter className="flex-row gap-2">
+            <Button variant="outline" className="flex-1" onClick={() => setCategory(null)}>Reset</Button>
+            <Button className="flex-1" onClick={() => setFilterOpen(false)}>Apply</Button>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
+    </div>
+  );
+}
+WHY EVERY CONTROL WORKS: search onChange→state→query · Filters→opens sheet · chip X→clears that one filter · Reset→clears all · Apply→closes sheet · row tap→navigates to detail · category=null by default→ALL items show (never "0 items" on a fresh screen). Replicate this wiring on every list/search/filter screen — no decorative controls.
 
 ====================================
 API HOOKS — EXACT SIGNATURES (READ CAREFULLY)
@@ -1381,6 +1556,12 @@ ARRAY METHODS ON API DATA (CRITICAL — TypeError at runtime):
   ❌ tasks.reduce(...)                   // CRASH when undefined
   ❌ data.map(x => x.name)               // CRASH when data is null/undefined
   Rule: ALWAYS use (arr ?? []) or arr?. before .reduce()/.filter()/.map()/.find() on any API-derived variable.
+
+NUMBER METHODS ON API DATA (CRITICAL — "x.toFixed is not a function" crash):
+  API numeric fields arrive as STRINGS ("4.5"), null, or undefined. .toFixed()/.toLocaleString() exist only on real numbers.
+  ❌ sellerRating.toFixed(1)   ❌ item.price.toLocaleString()   ❌ product.rating.toFixed(1)   // all CRASH on string/null
+  ✅ Number(sellerRating ?? 0).toFixed(1)   ✅ formatCurrency(item.price)   ✅ formatNumber(item.count)
+  Rule: ALWAYS Number(x ?? 0) before .toFixed()/.toLocaleString(), or use formatCurrency/formatNumber. Never call a number method directly on an API field.
 
 DATE STATE — CRITICAL:
   NEVER pass API values into new Date() without a null/validity guard — null/undefined produces Invalid Date.
@@ -1565,8 +1746,8 @@ GROUP 1 — UI KIT + SHARED PATTERNS (generated AFTER Group 0, BEFORE screens �
     ⚠ sheet is REQUIRED — it powers bottom sheets used for item details.
 
   SUB-SET B — src/components/shared/*.tsx (composite patterns built on sub-set A):
-    Include src/components/shared/FormModal.tsx (form wrapper) and src/components/shared/PageHeader.tsx (screen title block).
-    You MAY include src/components/shared/DataTable.tsx for completeness, but mobile SCREENS render full-width list rows / stacked cards — never desktop tables.
+    Include ONLY src/components/shared/FormModal.tsx (form wrapper) and src/components/shared/PageHeader.tsx (screen title block).
+    Do NOT include DataTable.tsx — mobile screens use full-width list rows / stacked cards, never desktop tables.
 
 GROUPS 2..N — SCREENS (parallel with each other, depend on Groups 0 AND 1):
   Each group = one XxxPage.tsx (a full-screen mobile screen) + dedicated components + optionally one src/hooks/useXxx.ts.
