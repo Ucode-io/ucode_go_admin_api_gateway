@@ -959,6 +959,59 @@ func TestValidateLayoutShape_AcceptsOutletAndChildren(t *testing.T) {
 	}
 }
 
+// TestDedupTsTsxPairs_DropsShadowedTs — the bug class from the portfolio
+// landing report: Vite picks .tsx, the .ts shadow drifts in exports, repair
+// loop chases its tail. Dedup must drop the .ts when .tsx of same stem exists.
+func TestDedupTsTsxPairs_DropsShadowedTs(t *testing.T) {
+	files := []models.ProjectFile{
+		{Path: "src/hooks/use-mobile.ts", Content: `export function useMobile() { return false; }`},
+		{Path: "src/hooks/use-mobile.tsx", Content: `export function useIsMobile() { return false; }`},
+		{Path: "src/components/sections/Community.tsx", Content: `import { useIsMobile } from '@/hooks/use-mobile';`},
+	}
+	out := dedupTsTsxPairs(files)
+	for _, f := range out {
+		if f.Path == "src/hooks/use-mobile.ts" {
+			t.Errorf("expected use-mobile.ts to be dropped (shadowed by .tsx); still present")
+		}
+	}
+	foundTsx := false
+	for _, f := range out {
+		if f.Path == "src/hooks/use-mobile.tsx" {
+			foundTsx = true
+		}
+	}
+	if !foundTsx {
+		t.Errorf("expected use-mobile.tsx to survive; got %d files", len(out))
+	}
+}
+
+// TestDedupTsTsxPairs_KeepsTsWhenNoTsxSibling — pure utility files in .ts
+// without a .tsx counterpart must pass through untouched.
+func TestDedupTsTsxPairs_KeepsTsWhenNoTsxSibling(t *testing.T) {
+	files := []models.ProjectFile{
+		{Path: "src/lib/utils.ts", Content: `export function cn() {}`},
+		{Path: "src/types.ts", Content: `export interface Foo {}`},
+		{Path: "src/App.tsx", Content: ``},
+	}
+	out := dedupTsTsxPairs(files)
+	if len(out) != 3 {
+		t.Errorf("expected all 3 files to survive (no .tsx shadows present); got %d", len(out))
+	}
+}
+
+// TestDedupTsTsxPairs_OnlyMatchesExactStem — `use-mobile.ts` must NOT be
+// dropped by the unrelated `use-mobile-state.tsx` (different stem).
+func TestDedupTsTsxPairs_OnlyMatchesExactStem(t *testing.T) {
+	files := []models.ProjectFile{
+		{Path: "src/hooks/use-mobile.ts", Content: `export function useMobile() {}`},
+		{Path: "src/hooks/use-mobile-state.tsx", Content: `export function useMobileState() {}`},
+	}
+	out := dedupTsTsxPairs(files)
+	if len(out) != 2 {
+		t.Errorf("expected both files to survive (stems don't match); got %d", len(out))
+	}
+}
+
 func contains(s, substr string) bool {
 	return len(s) >= len(substr) && searchSubstring(s, substr)
 }

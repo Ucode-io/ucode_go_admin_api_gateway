@@ -71,6 +71,39 @@ func detectLayoutBinding(files []models.ProjectFile, registry map[string]map[str
 	return &layoutBinding{ImportLine: importLine, UsesOutlet: usesOutlet}
 }
 
+// dedupTsTsxPairs removes `X.ts` when `X.tsx` exists with the same stem.
+// Vite resolves `import 'foo'` to `foo.tsx` first, then `foo.ts`, so a stray
+// `.ts` shadow file is dead code that confuses both validators and repair LLMs:
+// they cannot tell which version is canonical, may patch the wrong one, and
+// the build keeps failing because Vite still imports the unmodified `.tsx`.
+//
+// Concrete failure this prevents (real user report, portfolio landing):
+// Claude generated both `use-mobile.ts` (exporting `useMobile`) and
+// `use-mobile.tsx` (exporting `useIsMobile`). Community.tsx imported
+// `useMobile`, Vite picked `.tsx`, and every repair pass produced "Done"
+// while the same error returned. The fix is structural: the .ts shadow must
+// go before validation, so the repair sees a single source of truth.
+func dedupTsTsxPairs(files []models.ProjectFile) []models.ProjectFile {
+	tsxPaths := make(map[string]bool, len(files))
+	for _, f := range files {
+		if strings.HasSuffix(f.Path, ".tsx") {
+			tsxPaths[strings.TrimSuffix(f.Path, ".tsx")] = true
+		}
+	}
+	out := files[:0]
+	for _, f := range files {
+		if strings.HasSuffix(f.Path, ".ts") {
+			stem := strings.TrimSuffix(f.Path, ".ts")
+			if tsxPaths[stem] {
+				log.Printf("[dedup] dropping %s — shadowed by %s.tsx", f.Path, stem)
+				continue
+			}
+		}
+		out = append(out, f)
+	}
+	return out
+}
+
 // stripPageTsx drops `src/Page.tsx` from the file list. The model sometimes
 // invents it as a microfrontend entry with MemoryRouter, which conflicts with
 // the federation contract (`./App` → `./src/App.tsx`) and steals `import './index.css'`.

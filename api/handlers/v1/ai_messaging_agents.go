@@ -1114,6 +1114,10 @@ func (p *ChatProcessor) validateAndRepairGeneratedProject(ctx context.Context, p
 		return 0
 	}
 
+	// Dedup .ts/.tsx shadows BEFORE validation — without this the repair loop
+	// chases a moving target and stalls on "no progress" while the broken file
+	// is dead code Vite never imports.
+	project.Files = dedupTsTsxPairs(project.Files)
 	project.Files = ensureAppEntryDefaultExport(project.Files)
 
 	p.emitter().Emit(SSEEvent{
@@ -1164,6 +1168,10 @@ func (p *ChatProcessor) validateAndRepairGeneratedProject(ctx context.Context, p
 			return errorCount
 		}
 		applyRepairs(project.Files, repaired)
+		// Re-dedup: repair can re-introduce a .ts shadow by mistake when
+		// trying to "fix" the wrong file. Cleaning each pass keeps subsequent
+		// validation honest.
+		project.Files = dedupTsTsxPairs(project.Files)
 		project.Files = ensureAppEntryDefaultExport(project.Files)
 	}
 
