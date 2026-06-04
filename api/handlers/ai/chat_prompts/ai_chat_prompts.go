@@ -521,6 +521,7 @@ ADMIN PANEL ANTI-GENERIC RULE:
   ui_structure must explicitly forbid a plain CRUD-only dashboard. At least one page must use a domain-specific pattern beyond a table.
 
 13b. For webapp projects, ui_structure MUST describe a MOBILE APP (a phone-first app, like Revolut/Cash App/Linear-Mobile/Notion-Mobile), NOT a desktop dashboard and NOT a marketing site. Include:
+   - DESIGN REFERENCE (when the user named an app/style like "Revolut"/"Spotify"/"iOS"/"Material You", or attached a screenshot): OPEN ui_structure with a "DESIGN REFERENCE: <name>" line, then describe the specifics to match — layout & navigation shape, density, color MOOD (light vs dark), corner radius, and motion. Every screen MUST follow it, and the design tokens MUST reflect it (see DESIGN). This is the spec — do not drift to a generic look;
    - the product and the primary daily job of the end-user in one sentence;
    - the MOBILE SHELL: a centered phone-width frame (max-w-md, full viewport height), a compact sticky TOP BAR
      (screen title or greeting + notifications + avatar; back button on detail screens — NO command palette, NO desktop search),
@@ -545,6 +546,16 @@ WEBAPP (MOBILE) UI BLUEPRINTS — choose by product type:
     home feed of cards + category chips + search; item detail route with sticky bottom CTA bar.
   Scheduling / Calendar:
     agenda list per day + compact date strip; event detail sheet; + to add.
+  Driver / Courier / Field-service / Gig-worker (Uber Driver/Wolt Courier-like) — the OPERATOR app, NOT the customer ordering flow:
+    home = an online/offline toggle + a today's-earnings hero + stats (jobs done, hours, rating) + the active job OR an incoming-job card with accept/decline; jobs/deliveries = list of assigned/available tasks with status + distance/ETA, tap → job detail (pickup→dropoff steps, map link, call, mark complete); earnings = balance + per-day/per-trip breakdown; profile = vehicle/status + ratings.
+  Fitness / Health / Habit (Strava/Apple Fitness-like):
+    home = today's rings/streak hero + quick-log tiles + recent entries; activity = grouped log rows with metrics; goals = progress cards; workout/entry detail = bottom sheet.
+  Social / Community feed (Instagram/X-like):
+    home = vertical feed of post cards (author + content + media + like/comment) + a compose FAB; profile = avatar/bio + grid; post detail = thread with comments.
+  Media / Streaming (Spotify/Podcasts-like):
+    home = horizontal shelves of artwork cards by category; item detail = cover + track/episode list; a mini-player bar pinned above the bottom tab bar.
+  Learning / Education (Duolingo/Coursera-mobile-like):
+    home = continue-learning hero + course cards; course detail = lesson list with progress; lesson = content screen with next/prev; profile = streak/progress.
 
 WEBAPP ANTI-GENERIC RULE (mobile):
   ui_structure must forbid: a marketing layout (no hero/pricing/testimonials), a desktop layout (no left rail / ⌘K / multi-column / data tables), and a KPI dashboard as the home. It is a phone app: bottom tab bar, single-column screens, bottom-sheet/detail-route for item details.
@@ -641,6 +652,7 @@ TYPE B / TYPE C (landing, web) — select ONE archetype based on domain:
     design_inspiration "Soft Minimal"
 
   If images are attached: extract the dominant colors from the images and use them instead of archetype defaults.
+  WEBAPP ONLY — if a webapp user NAMES a reference app / brand / style (e.g. "like Revolut", "Spotify", "Notion", "Linear", "iOS", "Material You", "dark"/"minimal"/"glassy"): adopt THAT reference's aesthetic for the webapp tokens — its palette MOOD (light vs DARK background+text), its primary/accent color family, and its border_radius / density — and let it OVERRIDE the webapp domain default. Guides: Spotify / Apple Music → dark background, vivid accent; Revolut / Cash App → bold tinted hero on clean light surfaces; Notion / Linear → calm neutral, light, crisp, smaller radius; Material You → light, tonal, large radius. A named reference is text-only — still output real hex values, chosen to match it. (admin_panel, web, and landing keep their domain/archetype palettes — do NOT apply this override to them.)
   sidebar_background for TYPE B/C: same as background_color (no sidebar in landing/web).
 `
 
