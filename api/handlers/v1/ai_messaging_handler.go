@@ -14,6 +14,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/handlers/billing"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
+	"ucode/ucode_go_api_gateway/config"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	pbo "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	"ucode/ucode_go_api_gateway/services"
@@ -94,6 +95,23 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 	processor.userMessage = userMessage.Content
 	processor.mcpUcodeProjectId = mcpProject.GetUcodeProjectId()
 
+	// Lazy self-heal: persist the normalised provider so chats with empty
+	// or unknown model migrate transparently on the next read or filter.
+	storedModel := chat.GetModel()
+	processor.chatModel = config.ParseAIProvider(storedModel)
+	if normalised := string(processor.chatModel); storedModel != normalised {
+		go func() {
+			_, _ = service.GoObjectBuilderService().AiChat().UpdateChat(
+				context.Background(),
+				&pbo.UpdateChatRequest{
+					ResourceEnvId: resourceEnvID,
+					Id:            chatId,
+					Model:         normalised,
+				},
+			)
+		}()
+	}
+
 	if userMessage.UcodeProjectID != "" {
 		processor.ucodeProjectId = userMessage.UcodeProjectID
 	}
@@ -109,6 +127,7 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 		h.HandleResponse(c, status_http.GRPCError, "project fare not found")
 		return
 	}
+
 	processor.initAgent()
 
 	chatHistory, err := processor.getChatHistory(ctx)
@@ -396,7 +415,7 @@ func (h *HandlerV1) handleStreamingMessage(c *gin.Context, processor *ChatProces
 					Type:    EvError,
 					Icon:    "credit-card",
 					Message: "Project limit reached. Please upgrade your plan.",
-					Data: models.PaymentProjectLimit,
+					Data:    models.PaymentProjectLimit,
 				})
 			default:
 				processor.emitter().Emit(SSEEvent{

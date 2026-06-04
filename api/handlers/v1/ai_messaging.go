@@ -32,11 +32,13 @@ const (
 )
 
 type ChatProcessor struct {
-	h                 *HandlerV1
-	service           services.ServiceManagerI
-	companyServices   services.CompanyServiceI
-	baseConf          config.BaseConfig
+	h               *HandlerV1
+	service         services.ServiceManagerI
+	companyServices services.CompanyServiceI
+	baseConf        config.BaseConfig
+
 	chatId            string
+	chatModel         config.AIProvider
 	mcpProjectId      string
 	resourceEnvId     string
 	ucodeProjectId    string
@@ -75,7 +77,7 @@ type ChatProcessor struct {
 }
 
 func (p *ChatProcessor) agentCfgs() config.AIAgents {
-	switch p.baseConf.AIProvider {
+	switch p.chatModel {
 	case config.AIProviderGemini:
 		return p.baseConf.GeminiAgents
 
@@ -90,7 +92,7 @@ func (p *ChatProcessor) agentCfgs() config.AIAgents {
 func (p *ChatProcessor) providerEventData() ProviderEventData {
 	cfgs := p.agentCfgs()
 	return ProviderEventData{
-		Provider:    string(p.baseConf.AIProvider),
+		Provider:    string(p.chatModel),
 		RouterModel: cfgs.Router.Model,
 		CoderModel:  cfgs.Coder.Model,
 	}
@@ -136,27 +138,20 @@ func newChatProcessor(h *HandlerV1, service services.ServiceManagerI, baseConf c
 	return p
 }
 
-const openAIForcedProjectID = "f3020e9b-57c8-414f-8622-757949e0cb7a"
-
 func (p *ChatProcessor) initAgent() {
-	if p.ucodeProjectId == openAIForcedProjectID {
-		p.baseConf.AIProvider = config.AIProviderOpenAI
+	switch p.chatModel {
+	case config.AIProviderGemini:
+		p.agent = gemini.NewGeminiAgent(p.baseConf, p.h.geminiKeyPool, p)
+
+	case config.AIProviderOpenAI:
 		p.agent = openai.NewOpenAIAgent(p.baseConf, p)
-	} else {
-		switch p.baseConf.AIProvider {
-		case config.AIProviderGemini:
-			p.agent = gemini.NewGeminiAgent(p.baseConf, p.h.geminiKeyPool, p)
 
-		case config.AIProviderOpenAI:
-			p.agent = openai.NewOpenAIAgent(p.baseConf, p)
-
-		default:
-			p.agent = anthropic.NewAnthropicAgent(p.baseConf, p)
-		}
+	default:
+		p.agent = anthropic.NewAnthropicAgent(p.baseConf, p)
 	}
 
 	cfgs := p.agentCfgs()
-	log.Printf("[ai] provider=%s router=%s coder=%s", p.baseConf.AIProvider, cfgs.Router.Model, cfgs.Coder.Model)
+	log.Printf("[ai] chat=%s provider=%s router=%s coder=%s", p.chatId, p.chatModel, cfgs.Router.Model, cfgs.Coder.Model)
 }
 
 // ============================================================================

@@ -144,6 +144,8 @@ func (h *HandlerV1) CreateAiChat(c *gin.Context) {
 		request.Title = request.GetDescription()
 	}
 
+	request.Model = string(config.ParseAIProvider(request.Model))
+
 	request.ResourceEnvId = resourceEnvId
 
 	if request.GetProjectId() == "" {
@@ -239,7 +241,7 @@ func (h *HandlerV1) GetProjectChat(c *gin.Context) {
 		"project_id":   chat.GetProjectId(),
 		"title":        chat.GetTitle(),
 		"description":  chat.GetDescription(),
-		"model":        chat.GetModel(),
+		"model":        string(config.ParseAIProvider(chat.GetModel())),
 		"total_tokens": chat.GetTotalTokens(),
 		"created_at":   chat.GetCreatedAt(),
 		"updated_at":   chat.GetUpdatedAt(),
@@ -265,6 +267,11 @@ func (h *HandlerV1) UpdateAiChat(c *gin.Context) {
 
 	request.ResourceEnvId = resourceEnvId
 	request.Id = chatId
+
+	// PATCH semantics: empty Model means "leave current provider unchanged".
+	if request.GetModel() != "" {
+		request.Model = string(config.ParseAIProvider(request.Model))
+	}
 
 	response, err := service.GoObjectBuilderService().AiChat().UpdateChat(
 		c.Request.Context(), &request,
