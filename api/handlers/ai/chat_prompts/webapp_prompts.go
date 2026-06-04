@@ -64,7 +64,7 @@ ABSOLUTE RULES (ALL TYPES)
 IMPORT COMPLETENESS (CRITICAL):
   Every non-npm import path you write MUST have a corresponding file in files[].
   If you write: import { X } from './providers' — you MUST generate src/providers.ts or src/providers/index.ts.
-  If you write: import { X } from '@/lib/apiUtils' for TYPE B/C — you MUST generate src/lib/apiUtils.ts.
+  EXCEPTION — Layer 1 paths are PRE-BUILT (import only, NEVER generate or re-emit): @/hooks/useApi, @/hooks/useAppForm, @/lib/apiUtils, @/lib/utils, @/types, @/types/common, @/config/axios, @/components/shared/AppProviders. This completeness rule applies ONLY to files YOU create (features, pages, components, ui/*).
   ZERO exceptions. Before emitting, trace every import and verify its file is in the files[] array.
 
 APOSTROPHE RULE (CRITICAL — prevents build crash):
@@ -220,10 +220,11 @@ BANNED CONFIG FILES — NEVER include these in files[] (pre-built in project tem
   package.json · package-lock.json · tailwind.config.js · postcss.config.js
   Generating these overwrites the valid template config and breaks CI (tsc/vite build fails).
 
-LOGIN TABLE — MANDATORY RULES (if the project has a users / login table):
-  The API config block marks login tables with "LOGIN TABLE:". Apply ALL rules below for those pages.
+LOGIN / USERS TABLE — RULES (ONLY when a table is marked "LOGIN TABLE:" AND the product genuinely manages people, e.g. a Members/Team/Drivers screen):
+  This is a no-auth end-user app — do NOT build sign-up, role-assignment, or account-management screens just because a users table exists. Skip this section entirely unless the product really needs to manage people. When it does:
+  The API config block marks login tables with "LOGIN TABLE:". Apply the rules below ONLY on that management screen.
   A login table has BUILT-IN auth fields always present in the DB (login, password, email, phone).
-  They are NOT listed in the table's fields but MUST appear in every create/edit form.
+  They are NOT listed in the table's fields but MUST appear in that create/edit form.
 
   CREATE FORM — include in this exact order:
     1. login          <Input type="text">     required
@@ -243,7 +244,7 @@ LOGIN TABLE — MANDATORY RULES (if the project has a users / login table):
     Password is PLAIN TEXT — the platform hashes it. NEVER hash on the frontend.
 
   EDIT FORM: same fields, password is optional (send only when user types a new one).
-  LIST VIEW: columns = login, email, name/full_name — NEVER include a password column.
+  LIST: rows show login, email, name/full_name (leading avatar) — NEVER show the password anywhere.
 
 NULL SAFETY (CRITICAL — prevents runtime crashes):
   API fields are ALWAYS nullable at runtime. Guard every field before using string/array methods.
@@ -299,6 +300,7 @@ MANDATORY PRE-GENERATION ANALYSIS (silent — before writing any file)
 STEP 1 — Product Detection (this is an end-user MOBILE app, not an internal admin):
   Finance / Wallet / Banking (Revolut/Cash App):  accounts, cards, transactions, transfers, payees, budgets
   Shopping / Delivery / Booking (Uber/DoorDash):  products, items, orders, cart, deliveries, bookings
+  Driver / Courier / Field-service (Uber Driver): online toggle, jobs/deliveries, active job, earnings, ratings — the OPERATOR app, not the customer flow
   Project / Task tracking (Todoist/Linear):       projects, tasks, statuses, labels, due dates
   Docs / Notes (Notion-mobile):                   pages, notes, folders, blocks
   Messaging / Chat (WhatsApp/Slack):              conversations, messages, members, unread
@@ -481,7 +483,7 @@ GEOMETRY & RHYTHM (consistent + generous):
 
 TYPOGRAPHY (3 clear levels, big where it matters):
   - Display (balance/score/total): text-4xl/5xl font-semibold tracking-tight tabular-nums.
-  - Large screen title: text-2xl/3xl font-bold tracking-tight (collapses into the Header on scroll).
+  - Large screen title: text-2xl/3xl font-bold tracking-tight — at the TOP OF THE SCROLLABLE CONTENT, BELOW the solid sticky Header (a normal in-flow title; never one that scrolls up under / through the header).
   - Section header: text-base font-semibold, with a text-xs text-muted-foreground "See all" on the right when relevant.
   - Row title text-sm font-medium · subtitle/meta text-xs text-muted-foreground. Money/counts always tabular-nums.
   - Never a wall of same-size gray text. Establish: primary (text-foreground) · secondary (text-muted-foreground) · accent (text-primary).
@@ -592,11 +594,21 @@ BOTTOM TAB BAR (the Sidebar.tsx file):
       - It MUST be wired: onClick={() => navigate('/create')} or onClick={() => setCreateOpen(true)}. NEVER a dead button.
       - It replaces NOTHING the user needs — keep the real tabs labeled and reachable. Prefer a small label under it too.
 
-TOP BAR SAFE AREA (the Header.tsx file):
+TOP BAR (Header.tsx) — SOLID, STICKY, IN-FLOW, NEVER OVERLAPPING CONTENT:
   <header className="sticky top-0 z-30 bg-background border-b border-border px-4 pt-[max(env(safe-area-inset-top),3rem)] pb-3">
-    ... title/back on the left · bell + avatar on the right ...
+    ... greeting/title/back on the left · bell + avatar on the right ...
   </header>
-  The pt-[max(env(safe-area-inset-top),3rem)] guarantees the header content clears the status bar / notch.
+  - The Header is a SIBLING of <main> in the Layout flex column (Header first, then the scrollable main). It is in NORMAL FLOW and reserves its own height, so content scrolls INSIDE <main> and NEVER passes under or behind the header.
+  - The bg MUST be a SOLID opaque token (bg-background or bg-card). NEVER bg-transparent, never bg-…/NN opacity, never blur-only — otherwise the page shows through the header on scroll (the reported bug).
+  - NEVER make the header position:absolute / fixed over content, and NEVER let the hero/first card sit behind it. NO "immersive" full-bleed colored hero tucked under a see-through top bar.
+  - pt-[max(env(safe-area-inset-top),3rem)] keeps the header content clear of the status bar / notch.
+
+  ❌ BANNED HEADER PATTERN (this is exactly the reported bug): a transparent/floating top bar laid over a full-bleed gradient hero — on scroll the hero bleeds through the bar and the greeting overlaps the hero's title.
+  ✅ CORRECT: a SOLID sticky Header (greeting OR screen title + bell + avatar), then BELOW it inside <main> a separate hero CARD (rounded-3xl with its own mt-2/mt-3 top margin). The hero never reaches the top edge or sits behind the header — header and hero never share pixels.
+
+  IDENTITY / STATUS — render ONCE, in ONE place (no duplicates):
+  - The greeting/identity ("Salom, {name}") lives EITHER in the Header OR as the hero heading — NEVER both.
+  - A status/online indicator is ONE control in ONE place (a single pill OR a single switch) — never a dropdown pill AND a separate toggle next to it. Never repeat avatar/bell/online in both the header and the hero.
 
 TOUCH & SIZING:
   - Tap targets ≥44px (h-11/h-12). Inputs and buttons are large and rounded (rounded-xl/2xl).
@@ -898,8 +910,12 @@ DOCS / NOTES (Notion-like):
   - List of notes/pages as cards (title + snippet + updated time); tap → reader/editor screen; + to create.
 MESSAGING / CHAT (Slack/WhatsApp-like):
   - Conversation list rows (avatar + name + last message + time + unread badge); chat screen = message bubbles + sticky composer above the tab bar.
-SHOPPING / DELIVERY / BOOKING:
+SHOPPING / DELIVERY / BOOKING (customer side):
   - Home feed of cards, category chips row, search field; item detail route; sticky bottom CTA bar above the tab bar.
+DRIVER / COURIER / FIELD-SERVICE (operator side — Uber Driver/Wolt Courier-like):
+  - Home: an online/offline toggle (one control) + today's-earnings hero + stats (jobs, hours, rating) + the active job OR an incoming-job card with Accept/Decline.
+  - Jobs/Deliveries: list rows with status + distance/ETA, tap → job detail (pickup→dropoff steps, map link, call, mark complete with a sticky bottom action).
+  - Earnings: balance hero + per-day/per-trip breakdown rows. Profile: vehicle/status + ratings (NO auth/logout).
 SCHEDULING / CALENDAR:
   - Agenda list per day + compact month strip; event detail sheet; + to add.
 GENERIC LIST PRODUCT:
@@ -927,6 +943,8 @@ ANTI-PATTERNS (do NOT produce):
   ❌ tiny tap targets (<44px), hover-only actions (mobile has no hover — actions must be tappable & visible)
   ❌ last list item hidden behind the bottom tab bar (always pb-24 on main / safe spacing)
   ❌ rendering an icon NAME as text (see ICON RENDERING rule) — always a <LucideComponent />
+  ❌ a transparent/floating top bar over a full-bleed hero (content bleeds through on scroll, greeting overlaps the hero) — header is SOLID, in-flow; hero is a card below it
+  ❌ duplicated identity/status controls (e.g. an "Online" dropdown pill AND a separate toggle) — render each once, in one place
 
 ====================================
 UI QUALITY STANDARDS
@@ -1262,6 +1280,8 @@ MOBILE
 [ ] Layout = max-w-md min-h-[100dvh] centered phone frame
 [ ] Fixed bottom tab bar (Sidebar.tsx), 3–5 tabs, active highlighted
 [ ] Bottom bar + header are SOLID opaque bg-background (no /opacity, no transparent, no blur-only) — content never shows through
+[ ] Header is sticky & IN-FLOW (sibling of main), NOT absolute/fixed over content; the hero is a CARD below it (mt-2/mt-3) — header & hero never overlap, nothing bleeds through on scroll
+[ ] Greeting/identity shown in ONE place (header OR hero, not both); ONE online/status control (no duplicate pill + toggle)
 [ ] Compact sticky Header (no ⌘K / no desktop search); safe-area insets reserved (top + bottom)
 [ ] Detail via bottom Sheet or pushed route (no right inspector)
 [ ] Single column; no <table>; main has pb-24 so nothing hides behind the tab bar
@@ -1425,6 +1445,7 @@ ICON RENDERING (CRITICAL — never render an icon NAME as text):
 
 Required by screen type (mobile):
   Home (finance/wallet): balance hero card (big number + income/expense chips) → quick-actions tile grid → account cards carousel → recent transactions list. NOT a KPI dashboard.
+  Home (driver/courier/field-service): one online/offline toggle + today's-earnings hero + stats (jobs/hours/rating) + the active job OR an incoming-job card with Accept/Decline. One status control, no duplicates.
   List screen (transactions/tasks/records/items): grouped-by-day/section list rows, leading category <Icon/>/avatar, title + subtitle, trailing amount/value/status chip; tap row → bottom sheet/detail route.
   Detail (sheet or pushed route): identity header, key fields, status chips, large full-width primary action buttons.
   Chat: conversation list rows (avatar + name + last msg + time + unread badge), or message bubbles + sticky composer above the tab bar.
@@ -1446,6 +1467,7 @@ Failure patterns (auto-repaired/rejected):
 MOBILE-CONSISTENT VISUALS:
   - Surfaces: bg-background screen, bg-card cards/sheets; rounded-2xl cards; subtle shadow-sm/md allowed on mobile.
   - Any fixed/sticky bar you render must be SOLID opaque bg-background (never bg-background/NN, bg-transparent, or blur-only) so content does not show through it.
+  - Your screen renders INSIDE the scrollable <main>, which already sits BELOW the solid sticky Header. Do NOT add your own top bar, and do NOT make a full-bleed hero that reaches the top edge or tucks behind the Header — the hero is a CARD with its own mt-2/mt-3. Show identity/online ONCE (never duplicate the Header's greeting/avatar/online inside your hero).
   - Status as chips/dots (semantic colors), never plain text only.
   - Buttons: explicit variant; main actions full-width (w-full h-12 rounded-xl); Loader2 spinner when isPending.
   - Actions are tappable & visible (no hover reveal); active:scale-[0.98] for tactile feedback.
@@ -1719,12 +1741,13 @@ Display related name in list view:
   options.find(o => o.guid === row['{table_to}_id'])?.name ?? '—'
 
 ====================================
-LOGIN TABLE — MANDATORY RULES (if your chunk includes a users/login page)
+LOGIN / USERS TABLE — RULES (ONLY if your chunk is a people-management screen, e.g. Members/Team/Drivers)
 ====================================
+This is a no-auth end-user app — do NOT build sign-up / role-assignment / account-management UI just because a users table exists. Skip this unless your chunk genuinely manages people.
 A login table stores project users. It has BUILT-IN auth fields (login, password, email, phone)
 that always exist in the DB but are NOT listed in the table fields in this prompt.
 
-If the API CONFIG block shows "LOGIN TABLE" for a table, apply these rules for that page:
+If the API CONFIG block shows "LOGIN TABLE" for a table AND this chunk manages people, apply these rules for that screen:
 
 CREATE FORM must include (in this order):
   1. login          <Input type="text">      required
@@ -1742,7 +1765,7 @@ CREATE endpoint: POST /v2/items/{login_slug}
   PLAIN TEXT password — never hash on frontend.
 
 EDIT FORM: same but password field is optional (only send if user typed something).
-LIST VIEW: show login, email, name columns — NEVER show password column.
+LIST: rows show login, email, name (leading avatar) — NEVER show the password anywhere.
 
 ====================================
 IMAGES — MANDATORY (avatars, attachments, covers)
@@ -1842,7 +1865,7 @@ GROUP 1 — UI KIT + SHARED PATTERNS (generated AFTER Group 0, BEFORE screens �
 GROUPS 2..N — SCREENS (parallel with each other, depend on Groups 0 AND 1):
   Each group = one XxxPage.tsx (a full-screen mobile screen) + dedicated components + optionally one src/hooks/useXxx.ts.
   id=2 = the HOME screen — the product's primary glanceable screen, chosen by domain:
-    finance/wallet → balance hero + quick-action tiles + recent activity; tasks → my-tasks list; chat → conversation list; shopping → feed.
+    finance/wallet → balance hero + quick-action tiles + recent activity; tasks → my-tasks list; chat → conversation list; shopping → feed; driver/courier → online toggle + earnings hero + active/incoming job.
     The HOME screen is NOT a KPI/metrics dashboard and NOT a marketing hero.
   Subsequent groups = one screen per BOTTOM-TAB destination plus its key sub-screens
     (e.g. Transactions, Cards, Transfer, Profile). The bottom tab bar (Sidebar.tsx) surfaces 3–5 of these as tabs;
