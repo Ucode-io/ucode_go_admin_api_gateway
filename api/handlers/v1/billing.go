@@ -560,6 +560,31 @@ func (h *HandlerV1) ListDiscounts(c *gin.Context) {
 	h.HandleResponse(c, status_http.OK, response)
 }
 
+// ListBillingPeriods godoc
+// @Security ApiKeyAuth
+// @Router /v1/billing-periods [GET]
+// @Summary List billing periods
+// @Description List Ugen billing periods
+// @Tags Subscription
+// @Accept json
+// @Produce json
+// @Success 200 {object} status_http.Response{data=pb.ListBillingPeriodsResponse} "Billing periods"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *HandlerV1) ListBillingPeriods(c *gin.Context) {
+	productType := c.DefaultQuery("product_type", "ugen")
+
+	response, err := h.companyServices.Billing().ListBillingPeriods(c, &pb.ListBillingPeriodsRequest{
+		ProductType: productType,
+	})
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.HandleResponse(c, status_http.OK, response)
+}
+
 // UpdateSubscriptionEndDate godoc
 // @Security ApiKeyAuth
 // @Router /v1/subscription [PUT]
@@ -585,6 +610,35 @@ func (h *HandlerV1) UpdateSubscriptionEndDate(c *gin.Context) {
 	}
 
 	response, err := h.companyServices.Billing().UpdateSubscriptionEndDate(c, &request)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.HandleResponse(c, status_http.OK, response)
+}
+
+// CancelSubscription godoc
+// @Security ApiKeyAuth
+// @Router /v1/subscription/cancel [PATCH]
+// @Summary Cancel subscription at period end
+// @Description Schedule active Ugen subscription cancellation at current period end
+// @Tags Subscription
+// @Accept json
+// @Produce json
+// @Success 200 {object} status_http.Response{data=pb.Subscription} "Subscription"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *HandlerV1) CancelSubscription(c *gin.Context) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.HandleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	response, err := h.companyServices.Billing().CancelSubscription(c, &pb.CancelSubscriptionRequest{
+		ProjectId: projectId.(string),
+	})
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return
