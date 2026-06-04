@@ -577,7 +577,7 @@ CHUNKED MODE: If the user prompt contains "YOUR FILES TO IMPLEMENT", emit ONLY t
 21. src/features/{name}/api.ts
 22. src/features/{name}/components/*.tsx
 23. src/pages/{Name}Page.tsx
-24. src/App.tsx  ← import './index.css' FIRST LINE · <Toaster />
+24. src/App.tsx  ← import './index.css' FIRST LINE  (Toaster is already inside pre-built AppProviders — do NOT add another)
 25. .env
 26. .env.production
 
@@ -864,7 +864,7 @@ TOAST (mandatory):
   import { toast } from 'sonner';
   toast.success('{Entity} created') · toast.success('Changes saved') · toast.success('{Entity} deleted')
   toast.error('Something went wrong. Please try again.')
-  In App.tsx: <Toaster position="top-right" richColors closeButton />
+  NOTE: The pre-built AppProviders already renders <Toaster /> globally — do NOT add another in App.tsx.
 
 ====================================
 ANIMATIONS
@@ -1054,7 +1054,7 @@ API CLIENT
 STRUCTURE
 [ ] src/index.css is FIRST in files array
 [ ] src/App.tsx line 1: import './index.css';
-[ ] <Toaster position="top-right" richColors closeButton /> in App.tsx
+[ ] NO duplicate <Toaster /> in App.tsx (pre-built AppProviders already provides it)
 [ ] main.tsx does NOT import index.css
 [ ] No package.json in generated files
 [ ] FILES IN ORDER: index.css → ui/* → layout/* → features/* → pages/* → App.tsx → .env

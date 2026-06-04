@@ -525,8 +525,8 @@ func (p *ChatProcessor) generateFoundation(ctx context.Context, clarified string
 	sb.WriteString("⚠ DO NOT include NavItem or TableColumn — they are PRE-BUILT in src/types/common.ts.\n")
 	sb.WriteString("  Layout files that need NavItem MUST import from '@/types/common', never from '@/types'.\n\n")
 
-	sb.WriteString("\nFEATURE PAGES — add lazy imports + routes to App.tsx but DO NOT implement them:\n")
-	sb.WriteString("(One `const PageName = lazy(...)` declaration above the App component and one <Route> inside <Routes> per page below. Full pattern is documented in the system prompt — do not re-explain here.)\n")
+	sb.WriteString("\nFEATURE PAGES — add lazy imports + routes to App.tsx but DO NOT implement the page bodies:\n")
+	sb.WriteString("(Exact wrapping pattern — Layout parent route, Sidebar path constraints, 404 catch — is fully specified in the GLOBAL ROUTE MAP block below. Follow it literally.)\n")
 	for _, g := range manifest.Groups {
 		if g.ID == 0 {
 			continue
@@ -540,7 +540,7 @@ func (p *ChatProcessor) generateFoundation(ctx context.Context, clarified string
 
 	// Note: ExportConventionBlock + LazyAppTsxExemplar are baked into PromptAdminPanelGenerator
 	// (cacheable system prompt) — do NOT re-inject here.
-	if routesBlock := buildExpectedRoutesBlock(manifest); routesBlock != "" {
+	if routesBlock := buildExpectedRoutesBlock(manifest, "admin_panel"); routesBlock != "" {
 		sb.WriteString("\n")
 		sb.WriteString(routesBlock)
 	}
@@ -716,20 +716,63 @@ func buildManifestSummary(manifest *models.ProjectManifest) string {
 
 // buildExpectedRoutesBlock renders manifest.Routes as a non-negotiable contract
 // for Foundation so App.tsx is emitted with the exact (path, page, file) tuples.
-func buildExpectedRoutesBlock(manifest *models.ProjectManifest) string {
+//
+// Routes MUST be wrapped in Layout so the app shell paints around every page.
+// The wrap pattern differs by project type:
+//
+//   - admin_panel: Layout uses <Outlet /> (React Router v6 parent-route pattern)
+//     because admin Layout owns navigation chrome and renders pages through Outlet.
+//   - web: Layout takes `{ children }` (per website_prompts.go contract) and
+//     wraps <Routes> directly. Outlet would conflict with the website Layout shape.
+//
+// Both variants always emit a wildcard "*" route as the safety net for typos
+// and stale sidebar links. The post-merge rebuilder enforces the wrap anyway,
+// but the prompt must agree — otherwise Claude streams a Layout-less App.tsx
+// that visibly flashes wrong.
+//
+// Sidebar.tsx (admin) / Navbar.tsx (web) MUST use the exact paths from the map.
+// Without this constraint Claude invents `/dashboard`, `/settings` that have no
+// matching route → menu clicks land on a blank page.
+func buildExpectedRoutesBlock(manifest *models.ProjectManifest, projectType string) string {
 	if manifest == nil || len(manifest.Routes) == 0 {
 		return ""
 	}
 	var sb strings.Builder
 	sb.WriteString("====================================\n")
-	sb.WriteString("GLOBAL ROUTE MAP (non-negotiable — App.tsx MUST contain exactly these)\n")
+	sb.WriteString("GLOBAL ROUTE MAP (non-negotiable — App.tsx + nav files MUST use exactly these paths)\n")
 	sb.WriteString("====================================\n")
 	for _, route := range manifest.Routes {
 		fmt.Fprintf(&sb, "  path=%q  →  <%s />  (file: %s)\n", route.Path, route.PageName, route.FilePath)
 	}
-	sb.WriteString("\nFor each entry above emit:\n")
-	sb.WriteString("  const PageName = lazy(() => import('@/pages/PageName').then(m => ({ default: m.PageName })));\n")
-	sb.WriteString("  <Route path=\"...\" element={<PageName />} />\n")
+	sb.WriteString("\nApp.tsx — emit one lazy const per route above, then wrap ALL routes in Layout:\n")
+	sb.WriteString("  import Layout from '@/components/layout/Layout';\n")
+	sb.WriteString("  const PageName = lazy(() => import('@/pages/PageName').then(m => ({ default: m.PageName })));\n\n")
+
+	if projectType == "web" {
+		// Website Layout takes { children } per website_prompts.go contract.
+		sb.WriteString("  <Layout>                                          ← children-prop wrapper\n")
+		sb.WriteString("    <Routes>\n")
+		sb.WriteString("      <Route path=\"/\" element={<HomePage />} />\n")
+		sb.WriteString("      <Route path=\"/...\" element={<...Page />} />\n")
+		sb.WriteString("      <Route path=\"*\" element={<Navigate to=\"/\" replace />} />  ← typo/404 catch\n")
+		sb.WriteString("    </Routes>\n")
+		sb.WriteString("  </Layout>\n")
+		sb.WriteString("Layout.tsx — signature: `export default function Layout({ children }: { children: React.ReactNode })`.\n")
+		sb.WriteString("            Render `{children}` between <Navbar /> and <Footer />.\n")
+		sb.WriteString("Navbar.tsx — every nav link MUST use a path from the ROUTE MAP above. Do NOT invent /home, /pricing, /blog unless that exact path is listed.\n")
+	} else {
+		// Admin Layout uses <Outlet /> — React Router v6 idiomatic, lets the
+		// shell (sidebar + header) stay mounted across navigation.
+		sb.WriteString("  <Routes>\n")
+		sb.WriteString("    <Route element={<Layout />}>                    ← MANDATORY shell wrapper\n")
+		sb.WriteString("      <Route path=\"/\" element={<HomePage />} />\n")
+		sb.WriteString("      <Route path=\"/...\" element={<...Page />} />\n")
+		sb.WriteString("    </Route>\n")
+		sb.WriteString("    <Route path=\"*\" element={<Navigate to=\"/\" replace />} />  ← typo/404 catch\n")
+		sb.WriteString("  </Routes>\n")
+		sb.WriteString("Layout.tsx — MUST `import { Outlet } from 'react-router-dom'` and render <Outlet /> where pages go.\n")
+		sb.WriteString("Sidebar.tsx — every nav item MUST use a path from the ROUTE MAP above. Do NOT invent /dashboard, /settings, /profile unless that exact path is listed.\n")
+	}
 	return sb.String()
 }
 
@@ -1080,7 +1123,10 @@ func (p *ChatProcessor) validateAndRepairGeneratedProject(ctx context.Context, p
 		Percent: startPercent,
 	})
 
-	var errorCount int
+	var (
+		errorCount    int
+		prevErrorCount = -1
+	)
 	for pass := 1; pass <= maxRepairPasses; pass++ {
 		validationErrors := validateGeneratedProject(project.Files, project.Env)
 		validationErrors = append(validationErrors, validateAgainstManifest(project.Files, p.currentManifest)...)
@@ -1094,6 +1140,14 @@ func (p *ChatProcessor) validateAndRepairGeneratedProject(ctx context.Context, p
 			}
 			return 0
 		}
+		// No-progress early exit: previous pass attempted repairs but error
+		// count didn't drop. Repair prompt clearly can't fix the remaining set,
+		// so another identical pass burns 30-90s of LLM time for zero benefit.
+		if prevErrorCount >= 0 && errorCount >= prevErrorCount {
+			log.Printf("[quality-gate] no progress (%d → %d), stopping after pass %d", prevErrorCount, errorCount, pass-1)
+			return errorCount
+		}
+		prevErrorCount = errorCount
 
 		p.emitter().Emit(SSEEvent{
 			Type:    EvRepair,
@@ -1415,7 +1469,7 @@ func (p *ChatProcessor) generateWebsiteFoundation(ctx context.Context, clarified
 
 	// Note: ExportConventionBlock + LazyAppTsxExemplar are baked into PromptWebsiteGenerator
 	// (cacheable system prompt) — do NOT re-inject here.
-	if routesBlock := buildExpectedRoutesBlock(manifest); routesBlock != "" {
+	if routesBlock := buildExpectedRoutesBlock(manifest, "web"); routesBlock != "" {
 		sb.WriteString("\n")
 		sb.WriteString(routesBlock)
 	}

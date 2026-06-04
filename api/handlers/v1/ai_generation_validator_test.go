@@ -738,6 +738,227 @@ func TestMergeAppRoutes_DropsRoutesWithMissingExports(t *testing.T) {
 	}
 }
 
+// TestMergeAppRoutes_WrapsInLayoutOutlet — admin Layout uses <Outlet />; merger
+// must emit parent-route pattern so the sidebar/header shell paints around pages.
+func TestMergeAppRoutes_WrapsInLayoutOutlet(t *testing.T) {
+	files := []models.ProjectFile{
+		{Path: "src/App.tsx", Content: `// overwritten`},
+		{Path: "src/components/layout/Layout.tsx", Content: `import { Outlet } from 'react-router-dom';
+export default function Layout() { return <main><Outlet /></main>; }`},
+		{Path: "src/pages/HomePage.tsx", Content: `export function HomePage() {}`},
+	}
+	manifest := &models.ProjectManifest{
+		ExportStyle: "named-lazy",
+		Routes:      []models.ManifestRoute{{Path: "/", PageName: "HomePage", FilePath: "src/pages/HomePage.tsx"}},
+	}
+	got := mergeAppRoutes(files, manifest)
+	var app string
+	for _, f := range got {
+		if f.Path == "src/App.tsx" {
+			app = f.Content
+		}
+	}
+	if !contains(app, "import Layout from '@/components/layout/Layout'") {
+		t.Errorf("expected Layout import; got:\n%s", app)
+	}
+	if !contains(app, "<Route element={<Layout />}>") {
+		t.Errorf("expected outlet parent-route wrapping; got:\n%s", app)
+	}
+}
+
+// TestMergeAppRoutes_WrapsInLayoutChildren — website Layout uses { children };
+// merger must emit <Layout> wrapping <Routes>.
+func TestMergeAppRoutes_WrapsInLayoutChildren(t *testing.T) {
+	files := []models.ProjectFile{
+		{Path: "src/App.tsx", Content: `// overwritten`},
+		{Path: "src/components/layout/Layout.tsx", Content: `export default function Layout({ children }: { children: React.ReactNode }) { return <div>{children}</div>; }`},
+		{Path: "src/pages/HomePage.tsx", Content: `export function HomePage() {}`},
+	}
+	manifest := &models.ProjectManifest{
+		ExportStyle: "named-lazy",
+		Routes:      []models.ManifestRoute{{Path: "/", PageName: "HomePage", FilePath: "src/pages/HomePage.tsx"}},
+	}
+	got := mergeAppRoutes(files, manifest)
+	var app string
+	for _, f := range got {
+		if f.Path == "src/App.tsx" {
+			app = f.Content
+		}
+	}
+	if !contains(app, "import Layout from '@/components/layout/Layout'") {
+		t.Errorf("expected Layout import; got:\n%s", app)
+	}
+	if !contains(app, "<Layout>") || !contains(app, "</Layout>") {
+		t.Errorf("expected <Layout> wrapper around <Routes>; got:\n%s", app)
+	}
+	if contains(app, "<Route element={<Layout />}>") {
+		t.Errorf("children-Layout must not use outlet pattern; got:\n%s", app)
+	}
+}
+
+// TestMergeAppRoutes_NoLayoutNoWrap — landing-style projects have no Layout;
+// merger must fall back to the unwrapped template instead of inventing imports.
+func TestMergeAppRoutes_NoLayoutNoWrap(t *testing.T) {
+	files := []models.ProjectFile{
+		{Path: "src/App.tsx", Content: `// overwritten`},
+		{Path: "src/pages/HomePage.tsx", Content: `export function HomePage() {}`},
+	}
+	manifest := &models.ProjectManifest{
+		ExportStyle: "named-lazy",
+		Routes:      []models.ManifestRoute{{Path: "/", PageName: "HomePage", FilePath: "src/pages/HomePage.tsx"}},
+	}
+	got := mergeAppRoutes(files, manifest)
+	var app string
+	for _, f := range got {
+		if f.Path == "src/App.tsx" {
+			app = f.Content
+		}
+	}
+	if contains(app, "from '@/components/layout/Layout'") {
+		t.Errorf("must not import non-existent Layout; got:\n%s", app)
+	}
+	if contains(app, "<Layout") {
+		t.Errorf("must not reference Layout when file is absent; got:\n%s", app)
+	}
+}
+
+// TestEnsureDefaultRoutes_InjectsRootAndDashboard — Nexus-ERP scenario: the
+// architect drops Dashboard from the manifest entirely but DashboardPage.tsx
+// still gets generated. Sidebar links to "/dashboard" → blank page in prod.
+// Merger must rescue: synthesize "/" + "/dashboard" pointing at the orphan page.
+func TestEnsureDefaultRoutes_InjectsRootAndDashboard(t *testing.T) {
+	files := []models.ProjectFile{
+		{Path: "src/App.tsx", Content: `// overwritten`},
+		{Path: "src/pages/DashboardPage.tsx", Content: `export function DashboardPage() {}`},
+		{Path: "src/pages/OrdersPage.tsx", Content: `export function OrdersPage() {}`},
+	}
+	manifest := &models.ProjectManifest{
+		ExportStyle: "named-lazy",
+		Routes: []models.ManifestRoute{
+			// Note: DashboardPage is orphaned — file exists but no route.
+			{Path: "/orders", PageName: "OrdersPage", FilePath: "src/pages/OrdersPage.tsx"},
+		},
+	}
+	got := mergeAppRoutes(files, manifest)
+	var app string
+	for _, f := range got {
+		if f.Path == "src/App.tsx" {
+			app = f.Content
+		}
+	}
+	if !contains(app, `path="/"`) {
+		t.Errorf("expected synthesized root route; got:\n%s", app)
+	}
+	if !contains(app, `path="/dashboard"`) {
+		t.Errorf("expected synthesized /dashboard route for orphan DashboardPage; got:\n%s", app)
+	}
+}
+
+// TestEnsureDefaultRoutes_RespectsExistingDashboardMapping — when architect
+// deliberately maps DashboardPage to a non-"/dashboard" path, merger must NOT
+// fight that choice by inventing a duplicate route.
+func TestEnsureDefaultRoutes_RespectsExistingDashboardMapping(t *testing.T) {
+	files := []models.ProjectFile{
+		{Path: "src/App.tsx", Content: `// overwritten`},
+		{Path: "src/pages/DashboardPage.tsx", Content: `export function DashboardPage() {}`},
+	}
+	manifest := &models.ProjectManifest{
+		ExportStyle: "named-lazy",
+		Routes: []models.ManifestRoute{
+			{Path: "/overview", PageName: "DashboardPage", FilePath: "src/pages/DashboardPage.tsx"},
+		},
+	}
+	got := mergeAppRoutes(files, manifest)
+	var app string
+	for _, f := range got {
+		if f.Path == "src/App.tsx" {
+			app = f.Content
+		}
+	}
+	if contains(app, `path="/dashboard"`) {
+		t.Errorf("must not invent /dashboard when DashboardPage already has a route; got:\n%s", app)
+	}
+}
+
+// TestMergeAppRoutes_EmitsWildcardCatch — every shape (outlet, children, none)
+// must end with <Route path="*" .../> so typos and stale sidebar links redirect
+// to "/" instead of rendering a blank screen.
+func TestMergeAppRoutes_EmitsWildcardCatch(t *testing.T) {
+	cases := []struct {
+		name  string
+		files []models.ProjectFile
+	}{
+		{
+			name: "outlet",
+			files: []models.ProjectFile{
+				{Path: "src/App.tsx", Content: ``},
+				{Path: "src/components/layout/Layout.tsx", Content: `import { Outlet } from 'react-router-dom'; export default function Layout() { return <Outlet />; }`},
+				{Path: "src/pages/HomePage.tsx", Content: `export function HomePage() {}`},
+			},
+		},
+		{
+			name: "children",
+			files: []models.ProjectFile{
+				{Path: "src/App.tsx", Content: ``},
+				{Path: "src/components/layout/Layout.tsx", Content: `export default function Layout({ children }) { return <div>{children}</div>; }`},
+				{Path: "src/pages/HomePage.tsx", Content: `export function HomePage() {}`},
+			},
+		},
+		{
+			name: "no-layout",
+			files: []models.ProjectFile{
+				{Path: "src/App.tsx", Content: ``},
+				{Path: "src/pages/HomePage.tsx", Content: `export function HomePage() {}`},
+			},
+		},
+	}
+	manifest := &models.ProjectManifest{
+		ExportStyle: "named-lazy",
+		Routes:      []models.ManifestRoute{{Path: "/", PageName: "HomePage", FilePath: "src/pages/HomePage.tsx"}},
+	}
+	for _, c := range cases {
+		got := mergeAppRoutes(c.files, manifest)
+		var app string
+		for _, f := range got {
+			if f.Path == "src/App.tsx" {
+				app = f.Content
+			}
+		}
+		if !contains(app, `path="*"`) || !contains(app, `<Navigate to="/" replace />`) {
+			t.Errorf("[%s] missing wildcard fallback route; got:\n%s", c.name, app)
+		}
+		if !contains(app, "Navigate") || !contains(app, "react-router-dom") {
+			t.Errorf("[%s] Navigate must be imported from react-router-dom; got:\n%s", c.name, app)
+		}
+	}
+}
+
+// TestValidateLayoutShape_FlagsBareLayout — Layout that neither uses Outlet
+// nor accepts children leaves the app shell empty; validator must catch it.
+func TestValidateLayoutShape_FlagsBareLayout(t *testing.T) {
+	files := []models.ProjectFile{
+		{Path: "src/components/layout/Layout.tsx", Content: `export default function Layout() { return <aside>menu</aside>; }`},
+	}
+	errs := validateLayoutShape(files)
+	if len(errs) == 0 {
+		t.Errorf("expected validator to flag Outlet-less Layout, got no errors")
+	}
+}
+
+// TestValidateLayoutShape_AcceptsOutletAndChildren — both contracts are valid.
+func TestValidateLayoutShape_AcceptsOutletAndChildren(t *testing.T) {
+	cases := []string{
+		`import { Outlet } from 'react-router-dom'; export default function Layout() { return <main><Outlet /></main>; }`,
+		`export default function Layout({ children }) { return <div>{children}</div>; }`,
+	}
+	for i, content := range cases {
+		errs := validateLayoutShape([]models.ProjectFile{{Path: "src/components/layout/Layout.tsx", Content: content}})
+		if len(errs) != 0 {
+			t.Errorf("[case %d] expected no errors, got %v", i, errs)
+		}
+	}
+}
+
 func contains(s, substr string) bool {
 	return len(s) >= len(substr) && searchSubstring(s, substr)
 }

@@ -159,12 +159,18 @@ USAGE RULES:
 }
 
 // LazyAppTsxExemplar is a copy-pasteable App.tsx skeleton demonstrating the
-// named-lazy pattern. Foundation prompts inject it as the structure to copy.
+// named-lazy pattern. Foundation prompts inject it as the structural skeleton.
+//
+// The exact route-wrapping shape (Layout parent + 404 catch) is project-specific
+// and lives in the GLOBAL ROUTE MAP block of each Foundation user message.
+// This exemplar only owns the structural concerns: import order, AppProviders
+// placement, Suspense fallback, and the named-lazy pattern.
 func LazyAppTsxExemplar() string {
-	return `EXACT SHAPE for src/App.tsx (copy structure, replace pages with manifest.Routes):
+	return `EXACT SHAPE for src/App.tsx (copy structure; the GLOBAL ROUTE MAP in your prompt fills the <Routes> body):
 
+import './index.css';
 import { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AppProviders } from '@/components/shared/AppProviders';
 import { PageLoader } from '@/components/shared/PageLoader';
 
@@ -177,11 +183,8 @@ export default function App() {
     <BrowserRouter>
       <AppProviders>
         <Suspense fallback={<PageLoader />}>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/about" element={<AboutPage />} />
-            {/* one <Route> per entry in manifest.Routes */}
-          </Routes>
+          {/* The GLOBAL ROUTE MAP in your prompt specifies the exact <Routes> body,
+              including the mandatory Layout wrapper and the "*" fallback route. */}
         </Suspense>
       </AppProviders>
     </BrowserRouter>

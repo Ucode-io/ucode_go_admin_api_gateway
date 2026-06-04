@@ -288,7 +288,37 @@ func validateGeneratedProject(files []models.ProjectFile, envVars map[string]any
 	lazyErrors := validateLazyImports(files, exportRegistry)
 	errors = append(errors, lazyErrors...)
 
+	// Step 9: Layout contract. Empty/Outlet-less Layout files silently swallow
+	// every route and the admin shell never paints. Skip when no Layout exists
+	// (landing / single-page projects are exempt).
+	layoutErrors := validateLayoutShape(files)
+	errors = append(errors, layoutErrors...)
+
 	return errors
+}
+
+// validateLayoutShape ensures src/components/layout/Layout.tsx renders either
+// <Outlet /> (parent-route pattern) or accepts a `children` prop. A Layout
+// that does neither will render its header/sidebar but no page content — the
+// classic "menus disappear, content blank" bug.
+func validateLayoutShape(files []models.ProjectFile) []ValidationError {
+	const layoutPath = "src/components/layout/Layout.tsx"
+	for _, f := range files {
+		if f.Path != layoutPath {
+			continue
+		}
+		hasOutlet := strings.Contains(f.Content, "<Outlet")
+		hasChildren := strings.Contains(f.Content, "children")
+		if !hasOutlet && !hasChildren {
+			return []ValidationError{{
+				Severity: "error",
+				File:     f.Path,
+				Message:  "Layout must render <Outlet /> from react-router-dom OR accept a `children` prop and render it. Without either, all routed pages render blank.",
+			}}
+		}
+		return nil
+	}
+	return nil
 }
 
 // validateAgainstManifest reports drift between what the manifest promised
