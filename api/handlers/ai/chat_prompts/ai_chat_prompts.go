@@ -353,12 +353,16 @@ Always respond in the same language the user wrote in.`
 
 PROJECT TYPE — CLASSIFICATION DECISION TREE (MUST BE EXACTLY ONE OF FOUR):
 
-STEP 0 — Keyword override (CHECK FIRST, highest priority after admin_panel):
-  If the user calls the project an "app", "web app", "webapp", "mobile app", "application",
-  "mobile application", or any phrase using the word "app" → classify as "webapp".
-  (There is NO mobile/native type — a "mobile app" request is built as a responsive web app of type "webapp".)
-  ONLY exception: if it is EXPLICITLY an internal staff back-office / management / admin tool
-  (e.g. "admin app", "management app for our staff") → "admin_panel" wins. Otherwise the "app" wording → "webapp".
+STEP 0 — Keyword override (CHECK FIRST):
+  If the user calls the project a consumer / end-user "app", "web app", "webapp", "mobile app",
+  "application", or "mobile application" — a product an END-USER uses for THEMSELVES (banking,
+  fitness, shopping, delivery, booking, social, messaging, music, a personal tracker) → "webapp".
+  (There is NO mobile/native type — a "mobile app" is built as a responsive web app of type "webapp".)
+  EXCEPTION — stays "admin_panel" even if the word "app" appears: a tool whose job is to MANAGE a
+  business's own data/operations for staff — manage orders/products/inventory/customers/employees,
+  back-office, internal/admin dashboard, "for our staff/team", CRM/ERP/CMS, "admin app".
+  Rule of thumb: "an app to manage [a business's] orders/inventory/staff" → admin_panel;
+  "an app to pay / book / track / shop / chat / manage your own tasks" → webapp.
 
 STEP 1 — Who is the primary USER of this interface?
   → Internal staff / admins / managers / operators     → "admin_panel"
@@ -392,35 +396,40 @@ E-COMMERCE SPLIT RULE — critical:
   When user says "e-commerce site" or "online store" without "admin" → "web"
 
 admin_panel vs webapp — critical:
-  admin_panel = INTERNAL staff manage other people's/business data (back-office, KPI dashboards, CRUD tables).
-  webapp      = an END-USER PRODUCT people use to do their own work (a workspace/tool they live in daily).
-  "internal dashboard to manage X" → admin_panel · "an app like Linear/Notion/Trello for users" → webapp
+  admin_panel = INTERNAL staff manage a business's data/operations — back-office, KPI dashboards, CRUD tables, left SIDEBAR.
+  webapp      = an END-USER MOBILE app a person uses for themselves (pay/book/track/shop/chat) — bottom tab bar, NO sidebar.
+  "internal dashboard / app to manage orders/inventory/staff" → admin_panel · "a banking/fitness/delivery app for end-users" → webapp
 
 ────────────────────────────────────────────────────────────────
-TYPE "webapp" — end-user SaaS product workspace (Linear/Notion/Trello/Slack/Asana tier)
+TYPE "webapp" — end-user MOBILE app, built as a responsive web app (Revolut / Cash App / Robinhood / Spotify / Uber tier)
 ────────────────────────────────────────────────────────────────
-Use when the project is a PRODUCT APPLICATION that end-users log into and use repeatedly to get work done —
-a focused, keyboard-driven workspace, NOT a marketing site and NOT an internal back-office admin.
+Use when the project is a PRODUCT an END-USER uses for THEMSELVES on their phone — banking/wallet,
+fitness/health, shopping/delivery/food, booking/reservation, social/messaging, music/media, a personal
+tracker — NOT a marketing site and NOT an internal back-office admin tool.
 
-Characteristics: app shell with a left navigation rail + top app bar + ⌘K command palette;
-primary surfaces are grouped lists / kanban boards / docs / message threads / inboxes / calendars
-with a right-hand detail inspector; productivity-dense UI; the user is the owner of the data they manage.
+Characteristics: a phone-first app shell — a centered phone-width frame (full viewport height), a compact
+sticky TOP BAR (screen title or greeting + notifications + avatar; back button on detail screens — NO
+command palette, NO desktop search), and a FIXED BOTTOM TAB BAR (3–5 tabs, icon + label; optional raised
+center action button). Single-column screens of stacked cards / full-width list rows; tapping an item opens
+a BOTTOM SHEET or pushes a full-screen detail route. Touch-first: large tap targets, big numbers, rounded cards.
 
 CLEAR webapp signals:
-  ANY use of "app", "web app", "webapp", "mobile app", "application", "mobile application"
-  "app like Linear / Jira / Asana / Trello / Notion / Height / ClickUp / Slack / Intercom / Attio",
-  "issue tracker", "task manager", "kanban board app", "project management tool",
-  "team workspace", "docs/notes app", "knowledge base app", "team chat", "helpdesk inbox",
-  "scheduling app", "CRM workspace (used by the team daily)", "productivity tool", "SaaS app/workspace"
+  consumer/end-user "app", "web app", "webapp", "mobile app", "application", "mobile application",
+  banking / wallet / finance app, fitness / health app, shopping / delivery / food app,
+  booking / reservation app, social / messaging / chat app, music / media app, personal tracker,
+  "an app for [end-users] to pay / book / track / shop / chat / order"
 
 MOBILE NOTE: there is no native/mobile project type. "mobile app", "mobile application",
-  "Android/iOS app" → build as "webapp" (a responsive web application). Never refuse for lack of a mobile type.
+  "Android/iOS app" → build as "webapp" (a responsive, mobile-styled web application). Never refuse for lack of a mobile type.
+
+webapp vs admin_panel:
+  "an app to MANAGE orders/inventory/staff/customers (a business's own data)" → "admin_panel" (sidebar, tables, CRUD)
+  "an app an end-user uses for themselves (pay/book/track/shop/chat)"          → "webapp" (mobile, bottom tabs)
 
 webapp vs landing/web:
-  "a SaaS landing page to promote our app" → "landing" (it is marketing, not the product)
-  "the actual app / product / workspace itself" → "webapp"
-  If the user wants the working product (boards, tasks, docs, inbox) → "webapp", not "web".
-  If the user says "app" / "web app" / "mobile app" → "webapp" (per STEP 0), not "web".
+  "a landing page to promote our app" → "landing" (it is marketing, not the product)
+  "the actual app / product itself"   → "webapp"
+  If the user says consumer "app" / "web app" / "mobile app" → "webapp" (per STEP 0), not "web".
 
 ────────────────────────────────────────────────────────────────
 TYPE "web" — public multi-page website (DEFAULT for websites)

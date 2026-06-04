@@ -272,7 +272,7 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 		provWg sync.WaitGroup
 	)
 
-	projectData, err = p.provisionBackend(ctx, plan.ProjectName, p.mcpProjectId)
+	projectData, err = p.provisionBackend(ctx, plan.ProjectName, p.mcpProjectId, plan.ProjectType)
 	if err != nil {
 		return nil, fmt.Errorf("backend provisioning failed: %w", err)
 	}
@@ -346,7 +346,7 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 	)
 
 	emitPublishFiles(emit, generated.Project.Files, 93)
-	mfeURL, err := p.publishToMicrofrontend(ctx, plan.ProjectName, uniqueMFEPath(), generated, projectData)
+	mfeURL, err := p.publishToMicrofrontend(ctx, plan.ProjectName, uniqueMFEPath(), generated, projectData, plan.ProjectType)
 	if err != nil {
 		return nil, fmt.Errorf("microfrontend publish failed: %w", err)
 	}
@@ -529,7 +529,7 @@ func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context,
 	)
 
 	emitPublishFiles(emit, generated.Project.Files, 93)
-	mfeURL, err := p.publishToMicrofrontend(ctx, plan.ProjectName, uniqueMFEPath(), generated, projectData)
+	mfeURL, err := p.publishToMicrofrontend(ctx, plan.ProjectName, uniqueMFEPath(), generated, projectData, plan.ProjectType)
 	if err != nil {
 		return nil, fmt.Errorf("microfrontend publish failed: %w", err)
 	}
@@ -592,7 +592,7 @@ func (p *ChatProcessor) getExistingProjectData(ctx context.Context) (*models.Pro
 	}, nil
 }
 
-func (p *ChatProcessor) provisionBackend(ctx context.Context, projectName string, existingMcpId string) (*models.ProjectData, error) {
+func (p *ChatProcessor) provisionBackend(ctx context.Context, projectName string, existingMcpId string, projectType string) (*models.ProjectData, error) {
 	currentProject, err := p.h.companyServices.Project().GetById(
 		ctx, &pb.GetProjectByIdRequest{
 			ProjectId: p.ucodeProjectId,
@@ -679,6 +679,7 @@ func (p *ChatProcessor) provisionBackend(ctx context.Context, projectName string
 				ApiKey:         apiKey,
 				EnvironmentId:  env.GetId(),
 				Status:         "ready",
+				ProjectType:    projectType,
 			},
 		)
 		if err != nil {
@@ -694,6 +695,7 @@ func (p *ChatProcessor) provisionBackend(ctx context.Context, projectName string
 				ApiKey:         apiKey,
 				EnvironmentId:  env.GetId(),
 				Status:         "ready",
+				ProjectType:    projectType,
 			},
 		)
 		if err != nil {

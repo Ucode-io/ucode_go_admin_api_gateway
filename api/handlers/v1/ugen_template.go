@@ -525,6 +525,7 @@ func (h *HandlerV1) CreateProjectFromTemplate(c *gin.Context) {
 			EnvironmentId:  targetEnv.GetId(),
 			Status:         "ready",
 			AppVisibility:  sourceMcp.GetAppVisibility(),
+			ProjectType:    sourceMcp.GetProjectType(),
 		},
 	)
 	if err != nil {

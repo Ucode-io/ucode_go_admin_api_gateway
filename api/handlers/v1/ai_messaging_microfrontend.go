@@ -438,7 +438,7 @@ func (p *ChatProcessor) buildMicrofrontendFilesContext(files []models.GitlabFile
 //
 // Фаза 2 (push-changes) больше НЕ используется при публикации, т.к. publish-ai
 // сам делает первый коммит. push-changes используется только для последующих правок (edit flow).
-func (p *ChatProcessor) publishToMicrofrontend(ctx context.Context, projectName, path string, generated *models.ParsedClaudeResponse, projectData *models.ProjectData) (string, error) {
+func (p *ChatProcessor) publishToMicrofrontend(ctx context.Context, projectName, path string, generated *models.ParsedClaudeResponse, projectData *models.ProjectData, projectType string) (string, error) {
 	if generated == nil || generated.Project == nil || len(generated.Project.Files) == 0 {
 		return "", fmt.Errorf("no generated files to publish")
 	}
@@ -528,6 +528,7 @@ func (p *ChatProcessor) publishToMicrofrontend(ctx context.Context, projectName,
 			MicrofrontendRepoId: createResult.Data.RepoId,
 			MicrofrontendBranch: createResult.Data.Branch,
 			MicrofrontendUrl:    createResult.Data.Url,
+			ProjectType:         projectType,
 		}); updateErr != nil {
 			return "", fmt.Errorf("save microfrontend refs on MCP project: %w", updateErr)
 		}
