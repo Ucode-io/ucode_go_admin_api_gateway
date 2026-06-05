@@ -243,9 +243,10 @@ func (h *HandlerV1) GetCompanyStats(c *gin.Context) {
 			ServiceType:   company_service.ServiceType_BUILDER_SERVICE,
 		},
 	)
-	if err == nil && resource.GetResourceType() == company_service.ResourceType_POSTGRESQL {
+
+	if err != nil || resource.GetResourceType() != company_service.ResourceType_POSTGRESQL {
 		h.log.Error("[GetCompanyStats] GetSingleServiceResourceReq", logger.Error(err))
-		h.HandleResponse(c, status_http.InternalServerError, err.Error())
+		h.HandleResponse(c, status_http.InternalServerError, logger.Error(err))
 		return
 	}
 
@@ -260,16 +261,6 @@ func (h *HandlerV1) GetCompanyStats(c *gin.Context) {
 	g, gCtx := errgroup.WithContext(ctx)
 
 	g.Go(func() error {
-		resp, err := h.companyServices.Billing().GetAiTokenUsageMetrics(gCtx, &company_service.GetAiTokenUsageMetricsRequest{CompanyId: companyId})
-		if err != nil {
-			h.log.Error("[GetCompanyStats] GetAiTokenUsageMetrics", logger.Error(err))
-			return nil
-		}
-		tokenMetrics = resp
-		return nil
-	})
-
-	g.Go(func() error {
 		resp, err := h.companyServices.Billing().GetPricingLimits(gCtx, &company_service.GetPricingLimitsRequest{ProjectId: projectId})
 		if err != nil {
 			h.log.Error("[GetCompanyStats] GetPricingLimits", logger.Error(err))
@@ -280,11 +271,28 @@ func (h *HandlerV1) GetCompanyStats(c *gin.Context) {
 	})
 
 	g.Go(func() error {
-		resp, err := h.companyServices.Project().GetList(gCtx, &company_service.GetProjectListRequest{CompanyId: companyId, Limit: 1})
+		resp, err := h.companyServices.Billing().GetAiTokenUsageMetrics(gCtx, &company_service.GetAiTokenUsageMetricsRequest{CompanyId: companyId})
 		if err != nil {
-			h.log.Error("[GetCompanyStats] GetProjectList", logger.Error(err))
+			h.log.Error("[GetCompanyStats] GetAiTokenUsageMetrics", logger.Error(err))
 			return nil
 		}
+		tokenMetrics = resp
+		return nil
+	})
+
+	g.Go(func() error {
+		service, resourceEnvId, err := h.getBuilderService(gCtx, projectId, environmentId)
+		if err != nil {
+			h.log.Error(fmt.Sprintf("[GetAllPricingUsage] getBuilderService failed: %v", err))
+			return nil
+		}
+
+		resp, err := service.GoObjectBuilderService().McpProject().GetPublishedMcpProjectCount(gCtx, &nb.GetPublishedMcpProjectCountReq{ResourceEnvId: resourceEnvId})
+		if err != nil {
+			h.log.Error(fmt.Sprintf("[GetAllPricingUsage] GetResourceUsage failed: %v", err))
+			return nil
+		}
+
 		projectCount = resp.GetCount()
 		return nil
 	})
@@ -296,6 +304,16 @@ func (h *HandlerV1) GetCompanyStats(c *gin.Context) {
 			return nil
 		}
 		userCount = resp.GetCount()
+		return nil
+	})
+
+	g.Go(func() error {
+		resp, err := h.authService.User().GetProjectUsersCount(gCtx, &auth_service.GetProjectUsersCountRequest{ProjectId: projectId})
+		if err != nil {
+			h.log.Error("[GetCompanyStats] GetCompanyUsersCount", logger.Error(err))
+			return nil
+		}
+		builderCount = resp.GetCount()
 		return nil
 	})
 
@@ -317,7 +335,7 @@ func (h *HandlerV1) GetCompanyStats(c *gin.Context) {
 			monthlyTokenLimit = cast.ToInt64(limit.Value)
 		case "projects":
 			projectLimit = cast.ToInt32(limit.Value)
-		case "builder_projects":
+		case "builders":
 			builderLimit = cast.ToInt32(limit.Value)
 		case "users_count":
 			userLimit = cast.ToInt32(limit.Value)
@@ -330,7 +348,7 @@ func (h *HandlerV1) GetCompanyStats(c *gin.Context) {
 			Monthly: models.CompanyTokenStat{InputTokens: tokenMetrics.GetMonthlyInputTokens(), OutputTokens: tokenMetrics.GetMonthlyOutputTokens(), Limit: monthlyTokenLimit},
 		},
 		ProjectCount: models.CompanyStat{Current: projectCount, Limit: projectLimit},
-		BuilderCount: models.CompanyStat{Current: builderCount, Limit: builderLimit},
+		Builders:     models.CompanyStat{Current: builderCount, Limit: builderLimit},
 		UserCount:    models.CompanyStat{Current: userCount, Limit: userLimit},
 	})
 }

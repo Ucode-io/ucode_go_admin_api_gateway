@@ -442,6 +442,25 @@ TYPOGRAPHY MOBILE SCALE (scale down on mobile):
 
 TOUCH TARGETS: min h-11 (44px) for all buttons, nav links, accordion triggers.
 
+NEVER INVENT RESPONSIVE HOOKS (CRITICAL — common build crash):
+  Do NOT generate src/hooks/use-mobile.tsx, use-media-query, useIsMobile, useViewport, useWindowSize, or any custom JS-driven device-detection hook for landing pages. They drift out of sync with imports, ship duplicate .ts/.tsx pairs, and break the build with "No matching export" errors.
+
+  Mobile/desktop branching MUST use Tailwind responsive classes only:
+    Show on mobile only:   <div className="md:hidden">...</div>
+    Show on desktop only:  <div className="hidden md:block">...</div>
+    Different layout:      <div className="flex flex-col lg:flex-row">...</div>
+    Different text size:   <h1 className="text-4xl md:text-6xl">...</h1>
+
+  When mobile menu state IS unavoidable, inline it: const [menuOpen, setMenuOpen] = useState(false);  inside the Navbar component. No external hook file.
+
+  RULE: If you find yourself writing useMobile, useIsMobile, useMediaQuery, or any device-detection hook — STOP and use Tailwind classes instead.
+
+ONE FILE PER NAME (CRITICAL — prevents shadow file build failures):
+  Never emit both X.ts and X.tsx for the same stem. Vite picks .tsx and silently ignores .ts, but exports drift between the two and the build dies with "No matching export". Pick one extension per file:
+    .tsx → file contains JSX (every component, every page, hooks that return JSX)
+    .ts  → no JSX (pure utilities, types, hooks with no JSX returns)
+  When in doubt for a hook file → use .ts. NEVER ship both for the same name.
+
 ====================================
 AVAILABLE NPM PACKAGES
 ====================================

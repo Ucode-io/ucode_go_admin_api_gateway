@@ -48,6 +48,25 @@ var (
 	// Matches: export default function X or export default class X
 	reExportDefault = regexp.MustCompile(`export\s+default\s+(?:function|class)\s+(\w+)`)
 
+	// Matches: export default IdentifierName; — bare identifier re-export.
+	// Captures the identifier so the registry can record it as both `default` AND `IdentifierName`.
+	reExportDefaultIdent = regexp.MustCompile(`export\s+default\s+([A-Z]\w*)\s*;`)
+
+	// Matches: export default React.memo(X) / export default memo(X) / export default forwardRef(X) wrappers.
+	// Captures the wrapped component name.
+	reExportDefaultWrapped = regexp.MustCompile(`export\s+default\s+(?:React\.)?(?:memo|forwardRef|observer)\s*\(\s*([A-Z]\w*)`)
+
+	// Matches: const X = lazy(() => import('@/path')[.then(...)]) — code-splitting page declarations.
+	// Captures X so findSelfRecursiveComponents and lazy validators can find them.
+	reLazyConstDecl = regexp.MustCompile(`(?:export\s+)?const\s+([A-Z]\w*)\s*=\s*lazy\s*\(`)
+
+	// Matches a lazy import call: lazy(() => import('@/path')) or
+	// lazy(() => import('@/path').then(m => ({ default: m.NamedExport }))).
+	// Capture 1: import path.
+	// Capture 2: named export from `m.<NamedExport>` (empty when the file's default is used).
+	// Whitespace and async are tolerated; arbitrary arrow-arg names (`m`, `mod`, `x`) are tolerated.
+	reImportLazy = regexp.MustCompile(`lazy\s*\(\s*(?:async\s*)?\(\s*\)\s*=>\s*import\s*\(\s*['"]([^'"]+)['"]\s*\)(?:\s*\.\s*then\s*\(\s*(?:\([^)]*\)|\w+)\s*=>\s*\(?\s*\{\s*default\s*:\s*\w+\s*\.\s*(\w+)\s*\}\s*\)?\s*\)\s*)?`)
+
 	// Matches: X.displayName = 'X' pattern (React.forwardRef components)
 	reDisplayName = regexp.MustCompile(`(\w+)\.displayName\s*=`)
 
@@ -85,12 +104,25 @@ type ValidationError struct {
 	Message  string
 }
 
+// LazyImport represents one `lazy(() => import('@/path')...)` call.
+// NamedExport is empty when the call relies on the file's default export;
+// otherwise it holds the identifier read from `.then(m => ({ default: m.X }))`.
+type LazyImport struct {
+	Path        string
+	NamedExport string
+	FilePath    string
+}
+
 // validateGeneratedProject scans all merged files for import/export mismatches
 // and env variable inconsistencies. Returns a list of validation errors.
 //
 // Call this after mergeChunks() and before publishing.
 func validateGeneratedProject(files []models.ProjectFile, envVars map[string]any) []ValidationError {
 	var errors []ValidationError
+
+	// Step 0: Validate preview entry contract. The virtual host entry always
+	// imports default from src/App.tsx, so this is a build-time hard failure.
+	errors = append(errors, validateAppEntryContract(files)...)
 
 	// Step 1: Build export registry — path → set of exported names.
 	exportRegistry := buildExportRegistry(files)
@@ -249,6 +281,130 @@ func validateGeneratedProject(files []models.ProjectFile, envVars map[string]any
 	// after Vite starts rendering each page.
 	pageErrors := validatePageAndRuntimeHazards(files)
 	errors = append(errors, pageErrors...)
+
+	// Step 8: Validate React.lazy() calls against the export registry.
+	// Catches the common "lazy(m.HomePage) but HomePage is default export only" pattern
+	// that causes React error #306 at runtime navigation. parseImports never sees these.
+	lazyErrors := validateLazyImports(files, exportRegistry)
+	errors = append(errors, lazyErrors...)
+
+	// Step 9: Layout contract. Empty/Outlet-less Layout files silently swallow
+	// every route and the admin shell never paints. Skip when no Layout exists
+	// (landing / single-page projects are exempt).
+	layoutErrors := validateLayoutShape(files)
+	errors = append(errors, layoutErrors...)
+
+	return errors
+}
+
+// validateLayoutShape ensures src/components/layout/Layout.tsx renders either
+// <Outlet /> (parent-route pattern) or accepts a `children` prop. A Layout
+// that does neither will render its header/sidebar but no page content — the
+// classic "menus disappear, content blank" bug.
+func validateLayoutShape(files []models.ProjectFile) []ValidationError {
+	const layoutPath = "src/components/layout/Layout.tsx"
+	for _, f := range files {
+		if f.Path != layoutPath {
+			continue
+		}
+		hasOutlet := strings.Contains(f.Content, "<Outlet")
+		hasChildren := strings.Contains(f.Content, "children")
+		if !hasOutlet && !hasChildren {
+			return []ValidationError{{
+				Severity: "error",
+				File:     f.Path,
+				Message:  "Layout must render <Outlet /> from react-router-dom OR accept a `children` prop and render it. Without either, all routed pages render blank.",
+			}}
+		}
+		return nil
+	}
+	return nil
+}
+
+// validateAgainstManifest reports drift between what the manifest promised
+// and what was actually generated. No-ops when manifest is nil.
+func validateAgainstManifest(files []models.ProjectFile, manifest *models.ProjectManifest) []ValidationError {
+	if manifest == nil {
+		return nil
+	}
+	var errors []ValidationError
+	registry := buildExportRegistry(files)
+	fileSet := make(map[string]bool, len(files))
+	for _, f := range files {
+		fileSet[f.Path] = true
+	}
+
+	if manifest.ExportStyle == "named-lazy" {
+		for _, route := range manifest.Routes {
+			if route.FilePath == "" || route.PageName == "" {
+				continue
+			}
+			exports, ok := registry[route.FilePath]
+			if !ok {
+				for _, alt := range resolveAlternatives(route.FilePath) {
+					if found, exists := registry[alt]; exists {
+						exports = found
+						ok = true
+						break
+					}
+				}
+			}
+			if !ok {
+				errors = append(errors, ValidationError{
+					Severity: "error",
+					File:     "src/App.tsx",
+					Message:  fmt.Sprintf("manifest route %q points to %q but that file is not in the generated output", route.Path, route.FilePath),
+				})
+				continue
+			}
+			if !exports[route.PageName] {
+				errors = append(errors, ValidationError{
+					Severity: "error",
+					File:     route.FilePath,
+					Message:  fmt.Sprintf("manifest expects this file to export named function %q (for route %q), but it does not", route.PageName, route.Path),
+				})
+			}
+		}
+	}
+
+	if len(manifest.EntityTypes) > 0 && fileSet["src/types.ts"] {
+		typesExports := registry["src/types.ts"]
+		for _, entity := range manifest.EntityTypes {
+			if entity.Name == "" {
+				continue
+			}
+			if !typesExports[entity.Name] {
+				errors = append(errors, ValidationError{
+					Severity: "warning",
+					File:     "src/types.ts",
+					Message:  fmt.Sprintf("manifest expects entity interface %q but src/types.ts does not export it (features importing %q will fail)", entity.Name, entity.Name),
+				})
+			}
+		}
+	}
+
+	for _, group := range manifest.Groups {
+		for _, entry := range group.Files {
+			if entry.Kind != "page" || len(entry.Exports) == 0 {
+				continue
+			}
+			exports, ok := registry[entry.Path]
+			if !ok {
+				continue
+			}
+			expected := entry.Exports[0]
+			if expected == "" {
+				continue
+			}
+			if !exports[expected] {
+				errors = append(errors, ValidationError{
+					Severity: "error",
+					File:     entry.Path,
+					Message:  fmt.Sprintf("manifest declares this page exports %q but the file does not export that name (lazy(m.%s) will resolve to undefined)", expected, expected),
+				})
+			}
+		}
+	}
 
 	return errors
 }
@@ -580,6 +736,10 @@ func findSelfRecursiveComponents(path, content string) []string {
 	for _, match := range reComponentConstArrow.FindAllStringSubmatch(content, -1) {
 		componentNames[match[1]] = true
 	}
+	// const X = lazy(...) — also a valid component declaration for App.tsx style.
+	for _, match := range reLazyConstDecl.FindAllStringSubmatch(content, -1) {
+		componentNames[match[1]] = true
+	}
 
 	var recursive []string
 	for name := range componentNames {
@@ -616,20 +776,18 @@ func buildExportRegistry(files []models.ProjectFile) map[string]map[string]bool 
 			}
 		}
 
-		// export default function X / export default class X
-		for _, match := range reExportDefault.FindAllStringSubmatch(f.Content, -1) {
-			exports[match[1]] = true
+		// All four `export default` shapes only expose `default`. The inner identifier
+		// is module-local — `import { X } from '...'` against any of these would fail.
+		if reExportDefault.MatchString(f.Content) ||
+			reExportDefaultIdent.MatchString(f.Content) ||
+			reExportDefaultWrapped.MatchString(f.Content) ||
+			strings.Contains(f.Content, "export default") {
 			exports["default"] = true
 		}
 
 		// X.displayName = 'X' — React.forwardRef pattern
 		for _, match := range reDisplayName.FindAllStringSubmatch(f.Content, -1) {
 			exports[match[1]] = true
-		}
-
-		// export default X (simple)
-		if strings.Contains(f.Content, "export default") {
-			exports["default"] = true
 		}
 
 		registry[f.Path] = exports
@@ -724,6 +882,80 @@ func parseImports(filePath, content string) []ImportStatement {
 	}
 
 	return imports
+}
+
+// parseLazyImports extracts every `lazy(() => import(...)...)` call.
+// parseImports cannot see these because they are not top-level `import` statements.
+func parseLazyImports(filePath, content string) []LazyImport {
+	if !strings.Contains(content, "lazy(") {
+		return nil
+	}
+	var imports []LazyImport
+	for _, m := range reImportLazy.FindAllStringSubmatch(content, -1) {
+		imports = append(imports, LazyImport{
+			Path:        m[1],
+			NamedExport: m[2],
+			FilePath:    filePath,
+		})
+	}
+	return imports
+}
+
+// validateLazyImports verifies, for each `lazy(...)` call:
+//   - the target file exists in the generated output
+//   - if `.then(m => ({ default: m.X }))` is used, X is exported as a NAMED export
+//     (default-only files cause `m.X === undefined` → React error #306 at navigation)
+//   - if no `.then`, the target file has a `default` export
+func validateLazyImports(files []models.ProjectFile, registry map[string]map[string]bool) []ValidationError {
+	var errors []ValidationError
+	for _, f := range files {
+		lazyImports := parseLazyImports(f.Path, f.Content)
+		for _, imp := range lazyImports {
+			if isNPMImport(imp.Path) {
+				continue
+			}
+			resolvedPath := resolveImportPath(f.Path, imp.Path)
+			if resolvedPath == "" {
+				continue
+			}
+			exportSet, exists := registry[resolvedPath]
+			if !exists {
+				for _, alt := range resolveAlternatives(resolvedPath) {
+					if e, ok := registry[alt]; ok {
+						exportSet = e
+						exists = true
+						break
+					}
+				}
+			}
+			if !exists {
+				errors = append(errors, ValidationError{
+					Severity: "error",
+					File:     f.Path,
+					Message:  fmt.Sprintf("lazy import from %q but file does not exist in generated output", imp.Path),
+				})
+				continue
+			}
+			if imp.NamedExport != "" {
+				if !exportSet[imp.NamedExport] {
+					errors = append(errors, ValidationError{
+						Severity: "error",
+						File:     f.Path,
+						Message:  fmt.Sprintf("lazy import expects named export %q from %q but the file does not export it (m.%s will be undefined → React error #306)", imp.NamedExport, imp.Path, imp.NamedExport),
+					})
+				}
+			} else {
+				if !exportSet["default"] {
+					errors = append(errors, ValidationError{
+						Severity: "error",
+						File:     f.Path,
+						Message:  fmt.Sprintf("lazy import from %q has no .then resolver and the target file has no default export", imp.Path),
+					})
+				}
+			}
+		}
+	}
+	return errors
 }
 
 // resolveImportPath converts an import path to a file path relative to project root.
@@ -1222,7 +1454,7 @@ func (p *ChatProcessor) repairBrokenFiles(ctx context.Context, files []models.Pr
 		go func(f models.ProjectFile, errs []string) {
 			defer wg.Done()
 			p.emitter().Emit(SSEEvent{Type: EvRepair, Message: "Исправляю: " + f.Path, Percent: 86})
-			fixed, err := p.repairSingleFile(ctx, f, errs, exportRegistry)
+			fixed, err := p.repairSingleFile(ctx, f, errs, exportRegistry, files, p.currentManifest)
 			if err != nil {
 				log.Printf("[repair] ⚠️ failed to repair %s: %v", f.Path, err)
 				results <- repairResult{ok: false}
@@ -1246,11 +1478,16 @@ func (p *ChatProcessor) repairBrokenFiles(ctx context.Context, files []models.Pr
 }
 
 // repairSingleFile sends one broken file to Haiku and returns the fixed version.
+// allFiles + manifest are used to enrich the prompt with App.tsx context, manifest
+// entry, and expected import/export pairs — so repair can fix lazy/named mismatches
+// even when the error originates in App.tsx (which itself is read-only here).
 func (p *ChatProcessor) repairSingleFile(
 	ctx context.Context,
 	f models.ProjectFile,
 	errs []string,
 	exportRegistry map[string]map[string]bool,
+	allFiles []models.ProjectFile,
+	manifest *models.ProjectManifest,
 ) (models.ProjectFile, error) {
 	var sb strings.Builder
 
@@ -1281,9 +1518,49 @@ func (p *ChatProcessor) repairSingleFile(
 		}
 	}
 
+	// Manifest entry for the target file — gives the agent the authoritative
+	// kind/route/exports contract instead of guessing from naming.
+	if manifest != nil {
+		for _, g := range manifest.Groups {
+			for _, mf := range g.Files {
+				if mf.Path == f.Path {
+					fmt.Fprintf(&sb, "\nMANIFEST ENTRY for this file: kind=%s, exports=[%s]", mf.Kind, strings.Join(mf.Exports, ", "))
+					if mf.Route != "" {
+						fmt.Fprintf(&sb, ", route=%s", mf.Route)
+					}
+					sb.WriteString("\n")
+				}
+			}
+		}
+	}
+
+	// App.tsx reference — most import errors trace back to a wrong lazy(m.X) in App.tsx.
+	// We attach it so the agent sees the contract it must satisfy.
+	if f.Path != "src/App.tsx" {
+		for _, af := range allFiles {
+			if af.Path == "src/App.tsx" {
+				sb.WriteString("\n=== APP.TSX (READ-ONLY reference — do not modify this file; align your exports to match what App.tsx expects) ===\n```typescript\n")
+				sb.WriteString(af.Content)
+				sb.WriteString("\n```\n")
+				break
+			}
+		}
+	}
+
+	// If repairing App.tsx, list the full lazy→page contract from the manifest.
+	if f.Path == "src/App.tsx" && manifest != nil && len(manifest.Routes) > 0 {
+		sb.WriteString("\n=== EXPECTED ROUTES (manifest contract — App.tsx must contain exactly these) ===\n")
+		for _, r := range manifest.Routes {
+			fmt.Fprintf(&sb, "  path=%q  →  const %s = lazy(() => import('@/pages/%s').then(m => ({ default: m.%s })));  // file: %s\n",
+				r.Path, r.PageName, strings.TrimSuffix(strings.TrimPrefix(r.FilePath, "src/pages/"), ".tsx"), r.PageName, r.FilePath)
+		}
+	}
+
 	sb.WriteString("\nRULES:\n")
 	sb.WriteString("  - Fix ONLY the listed errors. Do not rewrite unrelated code.\n")
+	sb.WriteString("  - src/App.tsx is the preview entry. It MUST export default App (`export default function App()` or `export default App;`). The host imports default from virtual:/src/App, so a named-only App export is a build failure.\n")
 	sb.WriteString("  - For import errors: use correct exported names from the AVAILABLE EXPORTS list above.\n")
+	sb.WriteString("  - For 'lazy import expects named export X but the file does not export it' errors: the lazy resolver in App.tsx wants a NAMED export. If THIS file is the page and currently uses `export default function X`, rewrite it as `export function X` (named export). Keep the function body identical. Do NOT touch App.tsx.\n")
 	sb.WriteString("  - For 'X.displayName assigned but X not declared': it is a typo in the component name — rename the const/variable to match the displayName assignment, or fix the displayName to match the const name.\n")
 	sb.WriteString("  - For 'component X renders <X> inside itself': this is infinite React recursion. Replace the inner <X> with the intended wrapper element (<div>, <main>, <Outlet />) or import the correct different component name. A component must never render itself directly.\n")
 	sb.WriteString("  - For '<SelectItem value=\"\">' errors: Radix SelectItem values cannot be empty strings. Replace empty option values with non-empty sentinel strings such as 'all', 'none', or 'unassigned'. Update state/filter logic so the sentinel means no filter / empty relation, but NEVER render value=\"\" on SelectItem.\n")

@@ -247,11 +247,16 @@ var ToolEmitVisualEdit = claudeFunctionTool{
 
 var ToolEmitManifest = claudeFunctionTool{
 	Name:        "emit_manifest",
-	Description: "Return the complete file manifest for a React admin panel, grouped by dependency level. Group 0 = foundation (generated first). Groups 1..N = features (generated in parallel after foundation).",
+	Description: "Return the complete file manifest for a React admin panel, grouped by dependency level. Group 0 = foundation (generated first). Groups 1..N = features (generated in parallel after foundation). Also emit top-level `routes` (path↔page↔file map) and `entity_types` (TypeScript interfaces src/types.ts must export) — features use them as a hard contract.",
 	InputSchema: map[string]any{
 		"type":     "object",
 		"required": []string{"groups"},
 		"properties": map[string]any{
+			"export_style": map[string]any{
+				"type":        "string",
+				"enum":        []string{"named-lazy", "default-export"},
+				"description": "Page export convention. ALWAYS set to 'named-lazy' for new projects: pages use `export function PageName()`, App.tsx loads them with `lazy(() => import('@/pages/PageName').then(m => ({ default: m.PageName })))`. 'default-export' is reserved for legacy regeneration.",
+			},
 			"groups": map[string]any{
 				"type": "array",
 				"items": map[string]any{
@@ -270,8 +275,65 @@ var ToolEmitManifest = claudeFunctionTool{
 									"exports": map[string]any{
 										"type":        "array",
 										"items":       map[string]any{"type": "string"},
-										"description": "All exported names from this file that other files might import",
+										"description": "All NAMED exports from this file. For pages this is exactly [PageName] — same as the route's page_name.",
 									},
+									"kind": map[string]any{
+										"type":        "string",
+										"enum":        []string{"page", "ui", "shared", "layout", "types", "hook", "app", "feature"},
+										"description": "Role of this file: 'page' for routed pages, 'ui' for primitive UI kit, 'shared' for DataTable/FormModal/etc., 'layout' for Layout/Navbar/Footer, 'types' for src/types.ts, 'hook' for src/hooks/*, 'app' for src/App.tsx, 'feature' for non-page feature components.",
+									},
+									"route": map[string]any{
+										"type":        "string",
+										"description": "Canonical URL path for pages (e.g. '/' or '/users/:id'). Omit for non-pages.",
+									},
+									"props_interface": map[string]any{
+										"type":        "string",
+										"description": "For ui-kit components, the TS interface name (e.g. 'ButtonProps'). Omit otherwise.",
+									},
+									"variants": map[string]any{
+										"type":        "object",
+										"description": "For ui-kit components built with cva, the variant axes and allowed values, e.g. {variant: ['default','outline'], size: ['sm','md','lg']}. Omit otherwise.",
+										"additionalProperties": map[string]any{
+											"type":  "array",
+											"items": map[string]any{"type": "string"},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			"routes": map[string]any{
+				"type":        "array",
+				"description": "Global route map: every page that App.tsx must register. One entry per page file. Order is the order routes appear in App.tsx.",
+				"items": map[string]any{
+					"type":     "object",
+					"required": []string{"path", "page_name", "file_path"},
+					"properties": map[string]any{
+						"path":      map[string]any{"type": "string", "description": "URL path, e.g. '/' or '/users/:id'."},
+						"page_name": map[string]any{"type": "string", "description": "Named export from the file (e.g. 'HomePage'). MUST match exports[0] of the page file."},
+						"file_path": map[string]any{"type": "string", "description": "Absolute project path, e.g. 'src/pages/HomePage.tsx'."},
+					},
+				},
+			},
+			"entity_types": map[string]any{
+				"type":        "array",
+				"description": "TypeScript interfaces that src/types.ts MUST export. One entry per table; field list is exhaustive. Foundation reads this as a hard contract.",
+				"items": map[string]any{
+					"type":     "object",
+					"required": []string{"name", "fields"},
+					"properties": map[string]any{
+						"name": map[string]any{"type": "string", "description": "PascalCase singular of the table label, e.g. 'Client' for table 'clients'."},
+						"fields": map[string]any{
+							"type": "array",
+							"items": map[string]any{
+								"type":     "object",
+								"required": []string{"name", "ts_type"},
+								"properties": map[string]any{
+									"name":     map[string]any{"type": "string"},
+									"ts_type":  map[string]any{"type": "string", "description": "TS type: 'string' | 'number' | 'boolean' | 'Date' | 'string[]' | etc."},
+									"optional": map[string]any{"type": "boolean"},
 								},
 							},
 						},

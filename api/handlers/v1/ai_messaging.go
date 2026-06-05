@@ -13,6 +13,8 @@ import (
 	"ucode/ucode_go_api_gateway/api/handlers/ai/anthropic"
 	"ucode/ucode_go_api_gateway/api/handlers/ai/chat_prompts"
 	"ucode/ucode_go_api_gateway/api/handlers/ai/gemini"
+	"ucode/ucode_go_api_gateway/api/handlers/ai/openai"
+	"ucode/ucode_go_api_gateway/api/handlers/billing"
 	"ucode/ucode_go_api_gateway/api/handlers/helper"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/config"
@@ -30,11 +32,13 @@ const (
 )
 
 type ChatProcessor struct {
-	h                 *HandlerV1
-	service           services.ServiceManagerI
-	companyServices   services.CompanyServiceI
-	baseConf          config.BaseConfig
+	h               *HandlerV1
+	service         services.ServiceManagerI
+	companyServices services.CompanyServiceI
+	baseConf        config.BaseConfig
+
 	chatId            string
+	chatModel         config.AIProvider
 	mcpProjectId      string
 	resourceEnvId     string
 	ucodeProjectId    string
@@ -57,7 +61,12 @@ type ChatProcessor struct {
 	schemaCachedAt time.Time
 
 	prebuiltManifest *models.ProjectManifest
-	cachedImagePool  *helper.ImagePoolResult
+
+	// currentManifest outlives prebuiltManifest consumption so validate/repair
+	// can still reference the route + entity contract.
+	currentManifest *models.ProjectManifest
+
+	cachedImagePool *helper.ImagePoolResult
 
 	tokenBudgetEnabled bool
 	tokenBudgetRemain  int64
@@ -68,72 +77,38 @@ type ChatProcessor struct {
 }
 
 func (p *ChatProcessor) agentCfgs() config.AIAgents {
-	switch p.baseConf.AIProvider {
+	switch p.chatModel {
 	case config.AIProviderGemini:
 		return p.baseConf.GeminiAgents
+
+	case config.AIProviderOpenAI:
+		return p.baseConf.OpenAIAgents
+
 	default:
 		return p.baseConf.Agents
 	}
 }
 
-func (p *ChatProcessor) isFree() bool {
-	return p.fareId == config.UGEN_FREE_PLAN_ID
-}
-
-// routerModel returns the model that classifies user intent (RouteRequest).
-func (p *ChatProcessor) routerModel() string {
-	if p.isFree() {
-		return p.baseConf.GeminiAgents.Router.Model
-	}
-	return p.agentCfgs().Router.Model
-}
-
-// interactiveModel returns the model used for latency-sensitive calls:
-// PlanChanges, EditCode, InspectCode, VisualEdit, DatabaseQuery.
-func (p *ChatProcessor) interactiveModel() string {
-	if p.isFree() {
-		return p.baseConf.GeminiAgents.Planner.Model
-	}
-	return p.agentCfgs().Planner.Model
-}
-
-// generationModel returns the model used for quality-sensitive calls:
-// ArchitectProject, GenerateManifest, GenerateCode, RepairFile.
-func (p *ChatProcessor) generationModel() string {
-	if p.isFree() {
-		return p.baseConf.Agents.Architect.Model
-	}
-	return p.agentCfgs().Architect.Model
-}
-
 func (p *ChatProcessor) providerEventData() ProviderEventData {
-	if p.isFree() {
-		return ProviderEventData{
-			Provider:    "gemini+claude",
-			RouterModel: p.baseConf.GeminiAgents.Router.Model,
-			CoderModel:  p.baseConf.Agents.Architect.Model, // architect runs first for generation
-		}
-	}
 	cfgs := p.agentCfgs()
 	return ProviderEventData{
-		Provider:    string(p.baseConf.AIProvider),
+		Provider:    string(p.chatModel),
 		RouterModel: cfgs.Router.Model,
 		CoderModel:  cfgs.Coder.Model,
 	}
 }
 
-// providerLabel returns the model name for the current request shown in the first SSE event.
 func (p *ChatProcessor) providerLabel() string {
-	if !p.isFree() {
-		return p.agentCfgs().Coder.Model
-	}
+	cfgs := p.agentCfgs()
 	switch {
 	case p.newProject:
-		return p.generationModel()
+		return cfgs.Architect.Model
+
 	case p.microFrontendId != "":
-		return p.interactiveModel()
+		return cfgs.Coder.Model
+
 	default:
-		return p.routerModel()
+		return cfgs.Router.Model
 	}
 }
 
@@ -141,6 +116,7 @@ func (p *ChatProcessor) emitter() ProgressEmitter {
 	if p.emit == nil {
 		return noopEmitter{}
 	}
+
 	return p.emit
 }
 
@@ -163,22 +139,19 @@ func newChatProcessor(h *HandlerV1, service services.ServiceManagerI, baseConf c
 }
 
 func (p *ChatProcessor) initAgent() {
-	if p.isFree() {
-		p.agent = ai.NewDualAgent(
-			gemini.NewGeminiAgent(p.baseConf, p.h.geminiKeyPool, p),
-			anthropic.NewAnthropicAgent(p.baseConf, p),
-		)
-		log.Printf("[ai] free tier: interactive=gemini generation=anthropic")
-		return
-	}
-	switch p.baseConf.AIProvider {
+	switch p.chatModel {
 	case config.AIProviderGemini:
 		p.agent = gemini.NewGeminiAgent(p.baseConf, p.h.geminiKeyPool, p)
+
+	case config.AIProviderOpenAI:
+		p.agent = openai.NewOpenAIAgent(p.baseConf, p)
+
 	default:
 		p.agent = anthropic.NewAnthropicAgent(p.baseConf, p)
 	}
+
 	cfgs := p.agentCfgs()
-	log.Printf("[ai] provider=%s router=%s coder=%s", p.baseConf.AIProvider, cfgs.Router.Model, cfgs.Coder.Model)
+	log.Printf("[ai] chat=%s provider=%s router=%s coder=%s", p.chatId, p.chatModel, cfgs.Router.Model, cfgs.Coder.Model)
 }
 
 // ============================================================================
@@ -187,9 +160,9 @@ func (p *ChatProcessor) initAgent() {
 
 func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, chatHistory []models.ChatMessage, imageURLs []string, estimatedName string) (*models.ParsedClaudeResponse, error) {
 
-	//if err := billing.CheckProjectCountLimit(ctx, p.h.companyServices, p.service, p.resourceEnvId, p.fareId); err != nil {
-	//	return nil, err
-	//}
+	if err := billing.CheckProjectCountLimit(ctx, p.h.companyServices, p.service, p.resourceEnvId, p.fareId); err != nil {
+		return nil, err
+	}
 
 	startedAt := time.Now()
 
@@ -200,7 +173,7 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 
 	err := withHeartbeat(
 		ctx, emit,
-		p.generationModel(),
+		p.agentCfgs().Architect.Model,
 		[]string{
 			"Анализирую требования...",
 			"Проектирую структуру базы данных...",
@@ -387,7 +360,7 @@ func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context,
 
 	var plan *models.ArchitectPlan
 	if err := withHeartbeat(ctx, emit,
-		p.generationModel(),
+		p.agentCfgs().Architect.Model,
 		[]string{
 			"Анализирую требования...",
 			"Проектирую структуру базы данных...",
@@ -612,7 +585,7 @@ func (p *ChatProcessor) provisionBackend(ctx context.Context, projectName string
 			Title:        sanitizeProjectNameForBackend(projectName),
 			CompanyId:    currentProject.GetCompanyId(),
 			K8SNamespace: currentProject.GetK8SNamespace(),
-			FareId:       config.UGEN_FREE_PLAN_ID,
+			FareId:       p.fareId,
 		},
 	)
 	if err != nil {
@@ -785,7 +758,7 @@ func (p *ChatProcessor) runVisualEdit(ctx context.Context, instruction string, c
 
 	err = withHeartbeat(
 		ctx, emit,
-		p.interactiveModel(),
+		p.agentCfgs().Coder.Model,
 		[]string{
 			"Редактирую компоненты...",
 			"Применяю визуальные изменения...",

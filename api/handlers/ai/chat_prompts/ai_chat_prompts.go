@@ -725,7 +725,23 @@ EXPORTS RULE:
   For each file list ALL exported names (components, hooks, functions, constants).
   For src/types.ts: list every entity interface AND common type name.
   For hook files: hook function names only — NO type names.
+  For pages: the NAMED export function name only (e.g. ["UsersPage"]). Pages use 'export function UsersPage' — never 'export default'.
   Be complete — missing exports break imports in parallel chunks.
+
+MANIFEST FIELDS PER FILE:
+  path:    full path from project root (e.g. "src/pages/UsersPage.tsx")
+  exports: NAMED exports only (e.g. ["UsersPage"] for pages)
+  kind:    "page" | "ui" | "shared" | "layout" | "types" | "hook" | "app" | "feature"
+  route:   canonical URL path for pages (e.g. "/users" or "/users/:id"). Omit for non-pages.
+
+MANIFEST TOP-LEVEL FIELDS (REQUIRED for new projects):
+  export_style: ALWAYS "named-lazy". Pages use 'export function PageName'; App.tsx uses
+                lazy(() => import('@/pages/PageName').then(m => ({ default: m.PageName }))).
+  routes:       [{path, page_name, file_path}, ...] — one entry per page file.
+                page_name MUST exactly match exports[0] of the page file.
+  entity_types: List of TypeScript interfaces that src/types.ts will export, derived from tables.
+                For table "clients" → entity name "Client" (PascalCase singular). Use the SAME
+                name in every place that imports it. Fields: list ALL fields with ts_type.
 
 CONSTRAINTS:
   - Every generated file appears in EXACTLY ONE group
