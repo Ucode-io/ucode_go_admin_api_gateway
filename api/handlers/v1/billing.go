@@ -618,6 +618,35 @@ func (h *HandlerV1) UpdateSubscriptionEndDate(c *gin.Context) {
 	h.HandleResponse(c, status_http.OK, response)
 }
 
+// GetCurrentSubscription godoc
+// @Security ApiKeyAuth
+// @Router /v1/subscription/current [GET]
+// @Summary Get current subscription
+// @Description Get current active or pending downgrade subscription for the authenticated project
+// @Tags Subscription
+// @Accept json
+// @Produce json
+// @Success 200 {object} status_http.Response{data=pb.Subscription} "Subscription"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *HandlerV1) GetCurrentSubscription(c *gin.Context) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.HandleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	response, err := h.companyServices.Billing().GetSubscription(c, &pb.PrimaryKey{
+		ProjectId: projectId.(string),
+	})
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.HandleResponse(c, status_http.OK, response)
+}
+
 // CancelSubscription godoc
 // @Security ApiKeyAuth
 // @Router /v1/subscription/cancel [PATCH]

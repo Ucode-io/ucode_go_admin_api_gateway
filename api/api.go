@@ -227,6 +227,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		}
 
 		v1.PUT("/subscription", h.V1.UpdateSubscriptionEndDate)
+		v1.GET("/subscription/current", h.V1.GetCurrentSubscription)
 		v1.PATCH("/subscription/cancel", h.V1.CancelSubscription)
 	}
 
