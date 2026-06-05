@@ -543,6 +543,34 @@ Screen archetypes to compose:
   - PROFILE / MORE (tab): editable profile + grouped settings rows (each opens a sheet or sub-route) — NO auth/logout rows.
 Reachability: every screen ≤2 taps from a tab; never bury the primary action; keep exactly 3–5 tabs (overflow → a More/Profile tab).
 
+ROUTE TREE (App.tsx) — NESTED ROUTES WITH REAL DETAIL SCREENS (depth, not just sheets):
+  A real mobile app has a back-stack — tapping a row PUSHES a full screen you can back out of. Do NOT ship a flat app where every "detail" is only a bottom sheet. Model the IA above as NESTED react-router v6 routes. The shell mounts ONCE around the routes (Header + bottom tab bar persist; only <Outlet/> swaps):
+    export default function App() {
+      return (
+        <AppProviders>
+          <BrowserRouter>
+            <Routes>
+              <Route element={<Layout />}>                                {/* persistent shell: Header + <Outlet/> + bottom tab bar */}
+                <Route path="/" element={<HomePage />} />                  {/* tab: Home (index) */}
+                <Route path="/orders" element={<OrdersPage />} />          {/* tab: a list screen */}
+                <Route path="/orders/:id" element={<OrderDetailPage />} /> {/* PUSHED detail — a FULL screen, real back-stack */}
+                <Route path="/profile" element={<ProfilePage />} />        {/* tab: Profile/More */}
+              </Route>
+              <Route path="/orders/new" element={<OrderCreatePage />} />   {/* long create/edit = full-screen modal route OUTSIDE Layout (no tab bar) */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+            <Toaster position="top-right" richColors closeButton />
+          </BrowserRouter>
+        </AppProviders>
+      );
+    }
+  RULES:
+  - AppProviders + BrowserRouter are the root (AppProviders is pre-built). Tab NavLinks in Sidebar.tsx point ONLY at each tab's index route (/, /orders, /profile).
+  - EVERY primary entity list MUST have a PUSHED detail route "/<entity>/:id" rendering a full-screen XxxDetailPage — open it with navigate('/orders/' + id); the Header on that screen shows a back chevron wired to navigate(-1). At least the main entity is a pushed route, NOT only a sheet.
+  - ROUTES are for navigable destinations (tabs, item detail, multi-step/long create). SHEETS are for lightweight overlays (quick edit, filters, confirm, pickers, short create). Pick route vs sheet by that rule — don't make everything a sheet.
+  - Long create/edit forms render as a full-screen modal ROUTE placed OUTSIDE <Layout/> (so the bottom tab bar is hidden), with their own top bar (X/back + title + sticky submit).
+  - Every path referenced by a NavLink or navigate() MUST be declared here and render a real screen — zero dangling links, zero dead routes. The "*" catch-all redirects home.
+
 ====================================
 MOBILE-FIRST LAYOUT — MANDATORY (this is a phone app)
 ====================================
@@ -1246,6 +1274,7 @@ STRUCTURE
 [ ] main.tsx does NOT import index.css
 [ ] No package.json in generated files
 [ ] FILES IN ORDER: index.css → ui/* → layout/* → features/* → pages/* → App.tsx → .env
+[ ] ROUTE TREE: tab routes nested under <Layout/> (Outlet); each primary entity has a PUSHED /:id detail screen (not only a sheet); long create/edit is a modal route outside Layout; every NavLink/navigate() path is declared and renders a real screen; "*" → redirect home
 
 THEME
 [ ] --primary from committed design tokens
@@ -1453,8 +1482,10 @@ Required by screen type (mobile):
   Feed/Browse: category chips row + search field + cards; item detail route; sticky bottom CTA bar when relevant.
 
 DETAIL PATTERN (mobile — NOT a desktop inspector):
-  Tapping a row/card opens a BOTTOM SHEET (<Sheet><SheetContent side="bottom" className="mx-auto max-w-md rounded-t-2xl">) or navigates to a full-screen detail route with a back button in Header.
-  Include identity header, key fields, status, and primary actions wired to real mutations. NEVER a desktop right-side panel.
+  Route vs sheet (real navigation depth, not a flat app):
+  - If your assigned files include a XxxDetailPage (check the manifest below), the item detail is a PUSHED FULL-SCREEN route: list rows call navigate('/<entity>/' + item.guid); the DetailPage reads the id via useParams, fetches the single item (useApiQuery + extractSingle), and its Header shows a back chevron wired to navigate(-1). This is the back-stack — do NOT collapse it into a sheet.
+  - Use a BOTTOM SHEET (<Sheet><SheetContent side="bottom" className="mx-auto max-w-md rounded-t-2xl">) only for lightweight overlays: quick edit, filters, confirm, pickers, short create. Long create/edit is its own full-screen XxxCreatePage/XxxEditPage route (when planned).
+  Either way include an identity header, key fields, status, and primary actions wired to real mutations. NEVER a desktop right-side panel.
 
 Failure patterns (auto-repaired/rejected):
   - a data <table> (desktop) — use stacked cards / list rows
@@ -1834,7 +1865,7 @@ Plan screens so the coder can build a FEATURED App Store-grade app: a focal hero
 GROUP 0 — FOUNDATION (exactly 6 files, generated first, sequential):
   Include EXACTLY these 6 files — no more, no fewer. KEEP these exact paths/filenames (the generator depends on them):
     src/index.css                          CSS variables + global styles + safe-area handling
-    src/App.tsx                            Root router — routes to ALL screens from ALL groups
+    src/App.tsx                            Root router — NESTED routes: tab screens + each entity's /:id detail route under <Layout/> (Outlet), long create/edit as a modal route OUTSIDE Layout
     src/types.ts                           ALL entity interfaces + shared TypeScript types
     src/components/layout/Layout.tsx       THE PHONE FRAME: centered (mx-auto max-w-md) min-h-[100dvh] column = Header + scrollable <main> (pb-24) + bottom tab bar
     src/components/layout/Sidebar.tsx      THE BOTTOM TAB BAR (fixed bottom, 3–5 icon+label tabs, bottom safe-area inset) — KEEP the filename Sidebar.tsx, it is the bottom nav (not a side rail)
@@ -1870,7 +1901,11 @@ GROUPS 2..N — SCREENS (parallel with each other, depend on Groups 0 AND 1):
   Subsequent groups = one screen per BOTTOM-TAB destination plus its key sub-screens
     (e.g. Transactions, Cards, Transfer, Profile). The bottom tab bar (Sidebar.tsx) surfaces 3–5 of these as tabs;
     any extra screens are reached from inside a tab or from a Profile/More screen.
-  Item DETAIL views are bottom sheets or pushed routes inside the owning screen group — never separate top-level tabs.
+  NAVIGATION DEPTH — plan a real back-stack, not a flat app:
+    - For each PRIMARY entity list, the same screen group MUST include a PUSHED full-screen detail page (e.g. OrderDetailPage) wired to a "/<entity>/:id" route — reached via navigate, with a back chevron. Detail is a real screen, not only a sheet.
+    - Long create/edit forms = a dedicated XxxCreatePage / XxxEditPage in the owning group, planned as a full-screen modal route OUTSIDE Layout (tab bar hidden). Short edits/filters/confirm stay bottom sheets (no extra file).
+    - Derive the screen inventory from the tables: each primary table → a list screen (tab or sub-screen) + its pushed detail route. Don't ship fewer screens than the data model implies.
+  Item DETAIL pushed pages live in the owning screen group — never as separate top-level tabs.
 
   ⚠ MAX 8 SCREEN GROUPS TOTAL (Groups 2..9). Hard limit. Combine related screens:
     "XxxDetail"/"XxxTabs" always go in the same group as their parent "Xxx" screen; never a 1-file group that could merge.

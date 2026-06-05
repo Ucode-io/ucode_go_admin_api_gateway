@@ -532,7 +532,7 @@ ADMIN PANEL ANTI-GENERIC RULE:
      and a FIXED BOTTOM TAB BAR with 3–5 tabs (icon + tiny label); optional raised center action button (e.g. Transfer/Add/Scan);
    - the HOME screen is a glanceable entry surface appropriate to the product (e.g. finance → balance hero card + quick-action tiles + recent activity list; tasks → my-tasks list; chat → conversation list) — NOT a KPI/metrics dashboard, NOT a marketing hero;
    - for every screen: single-column stacked cards / full-width list rows (leading icon/avatar + title/subtitle + trailing value) — NEVER a data table;
-   - selecting an item opens a BOTTOM SHEET or a pushed full-screen detail route (with a back button) — NEVER a desktop right-side inspector;
+   - NAVIGATION DEPTH (real back-stack): describe a nested route tree — tab index routes + a PUSHED full-screen detail route "/<entity>/:id" for each primary entity list (with a back button), plus long create/edit as a full-screen modal route. Item detail is a real pushed screen, NOT only a bottom sheet; reserve sheets for quick edit/filter/confirm. Derive the screen inventory from the tables (each primary table → a list screen + its detail route);
    - 3–5 bottom-tab destinations max; secondary screens live inside tabs or under a Profile/More tab;
    - required states per screen: loading (skeleton), empty (teaches next action), error (retry);
    - touch-first: tap targets ≥44px, large rounded cards/buttons, big numbers; believable seed content (real merchants/people/amounts/messages).
