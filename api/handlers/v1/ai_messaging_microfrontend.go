@@ -99,7 +99,7 @@ func (p *ChatProcessor) runMicrofrontendEdit(ctx context.Context, clarified, fil
 
 	var editedProject *models.GeneratedProject
 	if err := withHeartbeat(ctx, emit,
-		p.agentCfgs().Coder.Model,
+		p.editModel(),
 		[]string{
 			"Редактирую компоненты...",
 			"Вношу изменения в логику...",

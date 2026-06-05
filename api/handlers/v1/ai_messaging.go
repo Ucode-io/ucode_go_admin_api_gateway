@@ -84,8 +84,25 @@ func (p *ChatProcessor) agentCfgs() config.AIAgents {
 	case config.AIProviderOpenAI:
 		return p.baseConf.OpenAIAgents
 
+	case config.AIProviderAuto:
+		return p.autoAgentCfgs()
+
 	default:
 		return p.baseConf.Agents
+	}
+}
+
+func (p *ChatProcessor) autoAgentCfgs() config.AIAgents {
+	claude := p.baseConf.Agents
+	openai := p.baseConf.OpenAIAgents
+	return config.AIAgents{
+		Router:            claude.Router,
+		Architect:         claude.Architect,
+		Coder:             claude.Coder,
+		LandingCoder:      claude.LandingCoder,
+		Inspector:         claude.Inspector,
+		Planner:           openai.Planner,
+		DatabaseAssistant: openai.DatabaseAssistant,
 	}
 }
 
@@ -96,6 +113,13 @@ func (p *ChatProcessor) providerEventData() ProviderEventData {
 		RouterModel: cfgs.Router.Model,
 		CoderModel:  cfgs.Coder.Model,
 	}
+}
+
+func (p *ChatProcessor) editModel() string {
+	if p.chatModel == config.AIProviderAuto {
+		return p.baseConf.OpenAIAgents.Coder.Model
+	}
+	return p.agentCfgs().Coder.Model
 }
 
 func (p *ChatProcessor) providerLabel() string {
@@ -145,6 +169,12 @@ func (p *ChatProcessor) initAgent() {
 
 	case config.AIProviderOpenAI:
 		p.agent = openai.NewOpenAIAgent(p.baseConf, p)
+
+	case config.AIProviderAuto:
+		p.agent = ai.NewAutoAgent(
+			anthropic.NewAnthropicAgent(p.baseConf, p),
+			openai.NewOpenAIAgent(p.baseConf, p),
+		)
 
 	default:
 		p.agent = anthropic.NewAnthropicAgent(p.baseConf, p)
@@ -756,7 +786,7 @@ func (p *ChatProcessor) runVisualEdit(ctx context.Context, instruction string, c
 
 	err = withHeartbeat(
 		ctx, emit,
-		p.agentCfgs().Coder.Model,
+		p.editModel(),
 		[]string{
 			"Редактирую компоненты...",
 			"Применяю визуальные изменения...",
