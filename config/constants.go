@@ -91,12 +91,12 @@ const (
 	KeyBillingDbLimit        = "billing:db_limit:%s" // projectId → "1"(allowed) | "0"(blocked)
 	KeyBillingDbLimitPattern = "billing:db_limit:*"
 	KeyBillingDbLimitPrefix  = "billing:db_limit:"
-	KeyBillingDbCtx          = "billing:db_ctx:%s" // projectId → JSON context for worker
+	KeyBillingDbCtx          = "billing:db_ctx:%s"   // projectId → JSON context for worker
 
 	KeyBillingApiLimit = "billing:api_limit:%s" // projectId → "1"(allowed) | "0"(blocked)
 	KeyBillingFareId   = "billing:fare_id:%s"   // projectId → fareId string, TTL=30min
 
-	UgenSuperAdminProjectId = "ab56fb4f-833b-4798-8d5a-da39f3639b34"
+	UgenSuperAdminUserId = "c12c163c-38ee-4b37-8854-1dc9285fc3f8"
 )
 
 var (

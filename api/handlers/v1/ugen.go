@@ -328,13 +328,13 @@ func (h *HandlerV1) GetUgenUserProjects(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string}
 func (h *HandlerV1) ListUgenProjects(c *gin.Context) {
 
-	projectId, ok := c.Get("project_id")
+	userId, ok := c.Get("user_id")
 	if !ok {
-		h.HandleResponse(c, status_http.BadRequest, "project_id is required")
+		h.HandleResponse(c, status_http.BadRequest, "user_id is required")
 		return
 	}
 
-	if projectId != config.UgenSuperAdminProjectId {
+	if userId != config.UgenSuperAdminUserId {
 		h.HandleResponse(c, status_http.Forbidden, "permission denied")
 		return
 	}
