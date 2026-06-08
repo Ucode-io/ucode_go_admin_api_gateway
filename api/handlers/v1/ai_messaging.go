@@ -123,16 +123,15 @@ func (p *ChatProcessor) editModel() string {
 }
 
 func (p *ChatProcessor) providerLabel() string {
-	cfgs := p.agentCfgs()
 	switch {
 	case p.newProject:
-		return cfgs.Architect.Model
+		return p.agentCfgs().Architect.Model
 
 	case p.microFrontendId != "":
-		return cfgs.Coder.Model
+		return p.editModel()
 
 	default:
-		return cfgs.Router.Model
+		return p.agentCfgs().Router.Model
 	}
 }
 
