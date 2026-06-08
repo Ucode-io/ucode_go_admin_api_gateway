@@ -350,7 +350,7 @@ func (h *HandlerV1) ListUgenProjects(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.Project().ListUgenProjects(ctx, &pb.ListUgenProjectsRequest{
+	resp, err := h.companyServices.Project().ListUgenProjects(c.Request.Context(), &pb.ListUgenProjectsRequest{
 		Limit:  int32(limit),
 		Offset: int32(offset),
 		Search: c.Query("search"),
