@@ -66,6 +66,7 @@ func (a *AnthropicAgent) ArchitectProject(ctx context.Context, in models.Archite
 	if err = json.Unmarshal(raw, &plan); err != nil {
 		return nil, fmt.Errorf("architect: decode: %w", err)
 	}
+	models.ApplyProjectTypeKeywordOverride(&plan, in.Clarified)
 	return &plan, nil
 }
 
@@ -91,6 +92,8 @@ func (a *AnthropicAgent) GenerateManifest(ctx context.Context, in models.Manifes
 	systemPrompt := chat_prompts.PromptManifestGenerator
 	if in.Plan.ProjectType == "web" {
 		systemPrompt = chat_prompts.PromptWebsiteManifestGenerator
+	} else if in.Plan.ProjectType == "webapp" {
+		systemPrompt = chat_prompts.PromptWebAppManifestGenerator
 	}
 
 	messages := buildAgentMessages(in.History, []models.ContentBlock{{Type: "text", Text: sb.String()}})
