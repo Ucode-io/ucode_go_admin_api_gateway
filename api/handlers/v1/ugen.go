@@ -2,6 +2,7 @@ package v1
 
 import (
 	"sync"
+	"ucode/ucode_go_api_gateway/config"
 
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -58,9 +59,9 @@ func (h *HandlerV1) GetUgenCompanyProjects(c *gin.Context) {
 	}
 
 	var (
-		result  = make([]models.UgenProjectResp, 0, len(projectIds))
-		wg      sync.WaitGroup
-		mu      sync.Mutex
+		result   = make([]models.UgenProjectResp, 0, len(projectIds))
+		wg       sync.WaitGroup
+		mu       sync.Mutex
 		firstErr error
 	)
 
@@ -309,4 +310,55 @@ func (h *HandlerV1) GetUgenUserProjects(c *gin.Context) {
 	}
 
 	h.HandleResponse(c, status_http.OK, result)
+}
+
+// ListUgenProjects godoc
+// @Security ApiKeyAuth
+// @ID list_ugen_projects
+// @Router /v1/ugen/projects [GET]
+// @Summary List all is_ugen projects (admin)
+// @Description Returns a paginated list of all is_ugen projects across companies. Each item includes a default environment ID (Production preferred, first-created otherwise) and the project count of its company.
+// @Tags Ugen
+// @Produce json
+// @Param limit query int false "limit"
+// @Param offset query int false "offset"
+// @Param search query string false "search by project title"
+// @Success 200 {object} status_http.Response{data=models.ListUgenProjectsResp}
+// @Failure 400 {object} status_http.Response{data=string}
+// @Failure 500 {object} status_http.Response{data=string}
+func (h *HandlerV1) ListUgenProjects(c *gin.Context) {
+
+	projectId, ok := c.Get("projectId")
+	if !ok {
+		h.HandleResponse(c, status_http.BadRequest, "project_id is required")
+		return
+	}
+
+	if projectId != config.UgenSuperAdminProjectId {
+		h.HandleResponse(c, status_http.Forbidden, "permission denied")
+		return
+	}
+
+	limit, err := h.getLimitParam(c)
+	if err != nil {
+		h.HandleResponse(c, status_http.BadRequest, "invalid limit")
+		return
+	}
+	offset, err := h.getOffsetParam(c)
+	if err != nil {
+		h.HandleResponse(c, status_http.BadRequest, "invalid offset")
+		return
+	}
+
+	resp, err := h.companyServices.Project().ListUgenProjects(ctx, &pb.ListUgenProjectsRequest{
+		Limit:  int32(limit),
+		Offset: int32(offset),
+		Search: c.Query("search"),
+	})
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.HandleResponse(c, status_http.OK, resp)
 }
