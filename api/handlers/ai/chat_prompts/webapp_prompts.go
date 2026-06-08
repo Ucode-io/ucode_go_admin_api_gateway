@@ -678,6 +678,15 @@ INTERACTIVITY — EVERY CONTROL MUST WORK (CRITICAL — no dead buttons):
   - NO AUTH: do NOT add "Log Out", login, or account-auth rows on the Profile screen (this app has no auth). Profile shows editable profile fields + app settings rows only.
   RULE: if you render a Button/tile/row, it MUST have an onClick (or be a NavLink/Link) that does something real. Wire state (useState) for sheets/dialogs and react-router (useNavigate/NavLink) for navigation. Trace every control before finishing — zero no-op buttons.
 
+COMMON INTERACTIVE BUGS — WIRE THESE CORRECTLY (each was a real reported failure):
+  - SHOW/HIDE BALANCE (eye toggle): the eye button MUST flip real state AND the number must react. const [hideBalance, setHideBalance] = useState(false); the Eye/EyeOff button toggles it; render {hideBalance ? '••••••' : formatCurrency(amount)}. NEVER render an eye toggle that leaves the amount unchanged. If the balance shows on Home AND Cards, each screen wires its own toggle (or a shared hook) — tapping it MUST visibly mask/unmask.
+  - AMOUNT / NUMERIC INPUTS MUST BE TYPEABLE: keep the value in a STRING state, not a number. const [amount, setAmount] = useState(''); <input inputMode="decimal" value={amount} onChange={e => setAmount(e.target.value.replace(/[^0-9.]/g, ''))} />. Parse to Number ONLY at submit (Number(amount)). NEVER bind value={Number(x)} (drops partial input / NaN blanks the field), never run a strict mask that rejects keystrokes, never leave the field disabled/readOnly. A keypad UI writes into this SAME state.
+  - MULTI-STEP / TRANSFER / CHECKOUT FLOWS MUST COMPLETE TO SUCCESS: the final step creates the record via useApiMutation against /v2/items/{table}, then navigates to the success screen. Never dead-end or throw mid-flow.
+  - OTP / VERIFICATION IS CLIENT-SIDE PASS-THROUGH (no-auth app — there is NO SMS/OTP backend): if you show an OTP/confirm step, accept ANY entered code (or a fixed demo code), advance on submit, and proceed to the real create + success. NEVER call a non-existent /verify-otp-style endpoint and NEVER block or error the flow on verification. Prefer adding an OTP step only if it visibly succeeds and moves forward.
+  - SCAN / QR ACTIONS: a Scan/QR tile opens a SIMULATED scanner (sheet or screen), then navigates to a REAL, declared destination route (e.g. the payment/confirm screen) — never a wrong or undeclared route (browsers can't reliably scan; simulate, then route).
+  - HOVER IS A DESKTOP-PREVIEW ARTIFACT: the app is previewed in a desktop browser, so hover: visual changes fire under the mouse and look wrong on a phone. Do NOT put hover: state-changes (hover:bg / hover:scale / hover:shadow / group-hover reveals) on the sticky Header, the bottom tab bar, or hero/balance cards. Use active: for press feedback; keep hover only as the subtle shadcn button default.
+  - ROUTING LIVES ONLY IN src/App.tsx: never create a src/Page.tsx or a second router/route-resolver file — declare every route in App.tsx (see ROUTE TREE).
+
 FULLY DYNAMIC — DATA COMES FROM THE API (not hardcoded):
   Lists, cards, counts, and detail fields render REAL data fetched via useApiQuery from /v2/items/{table}.
   - Fetch with useApiQuery, read with extractList/extractSingle/extractCount, then .map() over the result.
@@ -1333,6 +1342,8 @@ MOBILE
 
 INTERACTIVITY & DATA
 [ ] EVERY button/tab/tile/row/FAB is wired (onClick navigate / open Sheet / mutation) — zero dead buttons
+[ ] Show/hide balance toggle flips state AND masks/unmasks the number (not a dead eye); amount/numeric inputs are typeable (string state + inputMode, parse Number only at submit — not value={Number(x)}/disabled)
+[ ] Transfer/checkout/OTP flow completes to success (real mutation + navigate); any OTP/verify step is client-side pass-through, never calls a missing endpoint or errors; Scan/QR routes to a real declared screen
 [ ] Every bottom tab shows BOTH icon AND label; inactive tabs readable; active = text-primary
 [ ] Center FAB (only if used) is high-contrast bg-primary text-primary-foreground with a meaningful icon (Plus/Scan/Send, never a generic compass) and is wired
 [ ] Settings/Profile rows (Payment Methods, Notifications, etc.) each open a Sheet or navigate — none are dead text+chevron rows
@@ -1529,6 +1540,12 @@ INTERACTIVITY — EVERY CONTROL MUST WORK (no dead buttons):
   - CLOSE / DISMISS (X) buttons: each X must truly close its sheet/dialog/banner (onClick → setOpen(false)) or remove its chip. No dead X.
   - NO AUTH: do NOT render "Log Out"/login/account-auth rows on Profile (this app has no auth) — editable profile fields + app settings rows only.
   - Trace every control before finishing — zero buttons without a handler.
+  COMMON BUGS — wire correctly (real reported failures):
+  - Show/hide balance (eye): toggle real state AND mask the number — const [hideBalance,setHideBalance]=useState(false); render {hideBalance ? '••••••' : formatCurrency(x)}. Never an eye that does nothing.
+  - Amount/numeric inputs MUST be typeable: hold value in a STRING state (useState('')), <input inputMode="decimal" value={amount} onChange={e=>setAmount(e.target.value.replace(/[^0-9.]/g,''))}/>; parse Number() only at submit. Never value={Number(x)}, never a strict mask, never disabled/readOnly.
+  - Transfer/checkout/OTP flows complete to success: final step fires a real useApiMutation then navigates to success. An OTP/verify step is CLIENT-SIDE pass-through (no SMS backend) — accept any code, advance; NEVER call a non-existent verify endpoint or throw/block on it.
+  - Scan/QR → simulated scanner, then navigate to a REAL declared route (never a wrong/undeclared one).
+  - No hover: state-changes on sticky Header, bottom tab bar, or hero/balance cards (hover fires in desktop preview and looks wrong) — use active: for press feedback.
 
 FULLY DYNAMIC — RENDER REAL API DATA (not hardcoded):
   - Fetch with useApiQuery from /v2/items/{table}; read via extractList/extractSingle/extractCount; .map() the result.
