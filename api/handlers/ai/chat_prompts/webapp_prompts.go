@@ -586,6 +586,17 @@ THE PHONE FRAME (in Layout.tsx):
   - min-h-[100dvh] makes it fill the viewport height (full phone), not a short floating card.
   - All screens are single-column. Never put two primary columns side by side.
 
+SCROLL RESET ON NAVIGATION (CRITICAL — in Layout.tsx; fixes "I open another screen and it is already scrolled down"):
+  <main> is the SCROLL CONTAINER and it STAYS MOUNTED across route changes (only the <Outlet/> content swaps), so its scrollTop CARRIES OVER between screens — open a new tab/detail and it appears mid-scroll. Reset it on every navigation:
+    export function Layout() {
+      const mainRef = useRef<HTMLElement>(null);
+      const { pathname } = useLocation();
+      useEffect(() => { mainRef.current?.scrollTo({ top: 0 }); }, [pathname]);
+      return (<div className="...">  <Header />  <main ref={mainRef} className="flex-1 overflow-y-auto px-4 pb-24"><Outlet /></main>  <BottomNav />  </div>);
+    }
+  ⚠ The page scrolls INSIDE <main> (overflow-y-auto), NOT the window — so window.scrollTo(0,0) and any window-based <ScrollToTop> do NOTHING. You MUST reset the <main> element (via its ref), keyed on useLocation().pathname.
+  EXCEPTION: a chat/message THREAD screen opens at the BOTTOM (latest message) and manages its own scroll — see MESSAGING / CHAT. This reset still applies to all list/feed/detail screens.
+
 SAFE AREA INSETS (CRITICAL — or the status bar / notch / home indicator clips the UI):
   The device status bar (clock, signal, Dynamic Island/notch) sits over the TOP of the app, and the home
   indicator sits over the BOTTOM. The top bar title/avatar and the bottom tab bar WILL be clipped unless you
@@ -937,7 +948,10 @@ ISSUE / TASK / PROJECT (Linear/Todoist-like):
 DOCS / NOTES (Notion-like):
   - List of notes/pages as cards (title + snippet + updated time); tap → reader/editor screen; + to create.
 MESSAGING / CHAT (Slack/WhatsApp-like):
-  - Conversation list rows (avatar + name + last message + time + unread badge); chat screen = message bubbles + sticky composer above the tab bar.
+  - Conversation list rows (avatar + name + last message + time + unread badge); tap a row → push the chat THREAD screen (/chat/:id or /messages/:id), NOT a sheet.
+  - Chat THREAD screen = scrollable message bubbles + a STICKY composer pinned above the bottom tab bar. It is its OWN scroll area and MUST OPEN AT THE BOTTOM (newest message), not the top:
+      give the messages list a ref (or a bottom sentinel div) and on mount + whenever messages change do bottomRef.current?.scrollIntoView() (or listRef.scrollTop = listRef.scrollHeight). Use behavior:'auto' on first paint so it lands at the latest message with no visible jump-from-top.
+  - Do NOT let the global route scroll-reset leave a chat thread at the top showing the oldest message — the thread controls its own scroll to the bottom.
 SHOPPING / DELIVERY / BOOKING (customer side):
   - Home feed of cards, category chips row, search field; item detail route; sticky bottom CTA bar above the tab bar.
 DRIVER / COURIER / FIELD-SERVICE (operator side — Uber Driver/Wolt Courier-like):
@@ -1258,6 +1272,7 @@ API CLIENT
 
 MOBILE PHONE SHELL
 [ ] Layout.tsx = phone frame: mx-auto max-w-md min-h-[100dvh] flex-col, scrollable main with pb-24
+[ ] Layout.tsx resets scroll on navigation: <main ref> + useEffect(() => mainRef.current?.scrollTo({top:0}), [pathname]) — NOT window.scrollTo (page scrolls inside <main>); chat thread is the only screen that opens at the bottom
 [ ] Sidebar.tsx = fixed BOTTOM TAB BAR (3–5 tabs, icon + tiny label, active=text-primary), NOT a side rail
 [ ] Header.tsx = compact sticky top bar (title/back + bell + avatar), NO ⌘K / NO desktop search / NO workspace switcher
 [ ] SAFE AREAS reserved: Header has pt-[max(env(safe-area-inset-top),3rem)]; bottom tab bar has pb-[env(safe-area-inset-bottom)] (status bar/notch & home indicator never clip the UI)
@@ -1477,7 +1492,7 @@ Required by screen type (mobile):
   Home (driver/courier/field-service): one online/offline toggle + today's-earnings hero + stats (jobs/hours/rating) + the active job OR an incoming-job card with Accept/Decline. One status control, no duplicates.
   List screen (transactions/tasks/records/items): grouped-by-day/section list rows, leading category <Icon/>/avatar, title + subtitle, trailing amount/value/status chip; tap row → bottom sheet/detail route.
   Detail (sheet or pushed route): identity header, key fields, status chips, large full-width primary action buttons.
-  Chat: conversation list rows (avatar + name + last msg + time + unread badge), or message bubbles + sticky composer above the tab bar.
+  Chat: conversation list rows (avatar + name + last msg + time + unread badge) → tap pushes the thread route; the thread screen = scrollable message bubbles + sticky composer above the tab bar, and it MUST OPEN AT THE BOTTOM (newest message) — scroll a bottom sentinel into view (scrollIntoView) on mount and on every messages change. Never leave a chat thread sitting at the top showing the oldest message.
   Form/Create: full-screen or bottom-sheet form, large rounded inputs, full-width submit at the bottom.
   Feed/Browse: category chips row + search field + cards; item detail route; sticky bottom CTA bar when relevant.
 
