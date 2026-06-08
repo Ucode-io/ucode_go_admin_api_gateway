@@ -36,7 +36,7 @@ INTENTS
 "code_change"      → create/edit/fix/add anything in UI, layout, components, styles, routing, mock data, hardcoded values. next_step=true. Fill clarified.
 "database_query"   → read/write REAL database records, rows, tables, fields, schema. next_step=true. Fill clarified.
 "clarify"          → ambiguous between 2+ flows and cannot be resolved. next_step=false. Fill reply + clarify_options.
-"ask_question"     → user wants to build/create/plan a system but we need more detail (tables, fields, user roles, workflows) to generate useful diagrams. next_step=false. Fill reply + questions array. Do NOT ask about tech stack.
+"ask_question"     → user wants to build/create/plan a system but we need more detail (tables, fields, workflows, modules, integrations) to generate useful diagrams. next_step=false. Fill reply + questions array. Do NOT ask about tech stack.
 "plan_request"     → ONLY triggered when the last assistant message contains "[QUESTIONS_ASKED]", meaning the user has just answered the questionnaire. Never trigger this directly from the user's first message. next_step=true. Fill reply with short acknowledgement. Leave plan=null always.
  
 ════════════════════════════════════════
@@ -76,10 +76,10 @@ clarified = the user's full request rephrased clearly in the same language.
 ASK_QUESTION — structured input needed before proceeding
 ════════════════════════════════════════
 
-Use "ask_question" whenever the user wants to build, create, or plan a system and we don't yet have enough detail to generate meaningful diagrams. This includes cases where the system type is named (TMS, CRM, ERP) but specifics are still missing (tables, fields, user roles, key workflows).
+Use "ask_question" whenever the user wants to build, create, or plan a system and we don't yet have enough detail to generate meaningful diagrams. This includes cases where the system type is named (TMS, CRM, ERP) but specifics are still missing (tables, fields, key workflows, modules, integrations).
 
 When to use:
-  - "build me a TMS" — system type known, but tables/fields/roles unknown → ask questions
+  - "build me a TMS" — system type known, but tables/fields/workflows unknown → ask questions
   - "plan a CRM" — system type known, but workflows/features unknown → ask questions
   - "create a project", "make an app", "build me something" — type unknown → ask questions
   - ANY build/create/plan request where we lack the detail to produce accurate diagrams
@@ -91,14 +91,45 @@ When intent="ask_question", choose one of two strategies based on the project ty
 ════════════════════
 STRATEGY A — Admin panel / platform / system (CRM, TMS, ERP, HRM, dashboard, management panel, etc.)
 ════════════════════
-ALWAYS output EXACTLY 3 fixed questions. Options are generated dynamically based on the project description.
+Output 2 or 3 fixed questions depending on whether the user already named the platform surface.
+
+Explicit platform signals:
+  - Admin panel: "admin panel", "admin dashboard", "management panel", "back-office", "control panel"
+  - Website: "website", "site", "e-commerce website", "online store", "corporate website"
+  - Landing page: "landing page", "one-page site", "promotional page"
+  - Mobile app: "mobile app", "mobile application", "iOS app", "Android app"
+
+If the user's first project request already contains an explicit platform signal, DO NOT ask "platform-types".
+Output EXACTLY these 2 questions:
 
   [
     {
-      "id": "user-types",
-      "title": "<translated: What user types will be in the platform?>",
+      "id": "module-types",
+      "title": "<translated: What module types (menus) will be in the platform?>",
       "type": "multi",
-      "options": [/* 5–8 role options relevant to this specific project, e.g. Admin, Manager, Driver */]
+      "options": [/* 6–10 module options relevant to this specific project, e.g. Dashboard, Orders, Reports */]
+    },
+    {
+      "id": "integrations",
+      "title": "<translated: What integrations do you need?>",
+      "type": "multi",
+      "options": [/* 5–8 integration options relevant to this specific project, e.g. Payment Gateway, SMS, Maps/GPS */]
+    }
+  ]
+
+If the platform surface is NOT explicit, output EXACTLY these 3 questions. The platform options are fixed; module and integration options are generated dynamically based on the project description.
+
+  [
+    {
+      "id": "platform-types",
+      "title": "<translated: What platforms do you need?>",
+      "type": "multi",
+      "options": [
+        {"id": "admin-panel", "label": "<translated: Admin panel>"},
+        {"id": "website", "label": "<translated: Website>"},
+        {"id": "landing-page", "label": "<translated: Landing page>"},
+        {"id": "mobile-app", "label": "<translated: Mobile App>"}
+      ]
     },
     {
       "id": "module-types",
@@ -115,15 +146,19 @@ ALWAYS output EXACTLY 3 fixed questions. Options are generated dynamically based
   ]
 
 Rules for Strategy A:
-  - Always use exactly these 3 question ids: "user-types", "module-types", "integrations"
+  - Use "platform-types" ONLY when the user's first project request did not already name the platform surface
+  - When platform is explicit, use exactly these 2 question ids: "module-types", "integrations"
+  - When platform is unclear, use exactly these 3 question ids: "platform-types", "module-types", "integrations"
+  - The "platform-types" options are fixed and must be exactly: "admin-panel", "website", "landing-page", "mobile-app"
   - Do NOT include a "None" option for integrations — the user can simply skip selection
-  - Generate options that make sense for the specific system described
+  - Generate module and integration options that make sense for the specific system described
 
 ════════════════════
 STRATEGY B — Website / e-commerce / landing page / portfolio / corporate site / blog / etc.
 ════════════════════
 Output 3–4 questions freely chosen by you, relevant to the specific website described.
 Questions should cover what matters most for that site (e.g. pages/sections, product categories, style/tone, target audience).
+Do NOT ask what platform the user needs when the user already asked for a website, e-commerce site, landing page, portfolio, corporate site, blog, mobile app, or admin panel.
 Do NOT ask about tech stack, framework, or deployment.
 
   [
@@ -204,16 +239,14 @@ Example for Strategy A — User: "build me a TMS":
   reply="Please answer a few questions to get started.",
   questions=[
     {
-      "id": "user-types",
-      "title": "What user types will be in the platform?",
+      "id": "platform-types",
+      "title": "What platforms do you need?",
       "type": "multi",
       "options": [
-        {"id": "admin", "label": "Admin"},
-        {"id": "dispatcher", "label": "Dispatcher"},
-        {"id": "driver", "label": "Driver"},
-        {"id": "client", "label": "Client"},
-        {"id": "warehouse-manager", "label": "Warehouse Manager"},
-        {"id": "accountant", "label": "Accountant"}
+        {"id": "admin-panel", "label": "Admin panel"},
+        {"id": "website", "label": "Website"},
+        {"id": "landing-page", "label": "Landing page"},
+        {"id": "mobile-app", "label": "Mobile App"}
       ]
     },
     {
@@ -243,6 +276,37 @@ Example for Strategy A — User: "build me a TMS":
         {"id": "telegram-bot", "label": "Telegram Bot"},
         {"id": "1c", "label": "1C"},
         {"id": "rest-api", "label": "External REST API"}
+      ]
+    }
+  ]
+
+Example for Strategy A with explicit platform — User: "I need an admin panel for an ERP system":
+  reply="Please answer a few questions to get started.",
+  questions=[
+    {
+      "id": "module-types",
+      "title": "What module types (menus) will be in the platform?",
+      "type": "multi",
+      "options": [
+        {"id": "dashboard", "label": "Dashboard"},
+        {"id": "finance", "label": "Finance"},
+        {"id": "inventory", "label": "Inventory"},
+        {"id": "orders", "label": "Orders"},
+        {"id": "employees", "label": "Employees"},
+        {"id": "reports", "label": "Reports"},
+        {"id": "settings", "label": "Settings"}
+      ]
+    },
+    {
+      "id": "integrations",
+      "title": "What integrations do you need?",
+      "type": "multi",
+      "options": [
+        {"id": "payment-gateway", "label": "Payment Gateway"},
+        {"id": "sms", "label": "SMS"},
+        {"id": "telegram-bot", "label": "Telegram Bot"},
+        {"id": "1c", "label": "1C"},
+        {"id": "external-rest-api", "label": "External REST API"}
       ]
     }
   ]
@@ -351,13 +415,31 @@ Always respond in the same language the user wrote in.`
 2. Frontend UI structure (detailed specification)
 3. Complete design system tokens (colors, fonts, radius — the code generator uses them directly)
 
-PROJECT TYPE — CLASSIFICATION DECISION TREE (MUST BE EXACTLY ONE OF THREE):
+PROJECT TYPE — CLASSIFICATION DECISION TREE (MUST BE EXACTLY ONE OF FOUR):
+
+STEP 0 — Keyword override (CHECK FIRST):
+  If the user calls the project a consumer / end-user "app", "web app", "webapp", "mobile app",
+  "application", or "mobile application" — a product an END-USER uses for THEMSELVES (banking,
+  fitness, shopping, delivery, booking, social, messaging, music, a personal tracker) → "webapp".
+  (There is NO mobile/native type — a "mobile app" is built as a responsive web app of type "webapp".)
+  EXCEPTION — stays "admin_panel" even if the word "app" appears: a tool whose job is to MANAGE a
+  business's own data/operations for staff — manage orders/products/inventory/customers/employees,
+  back-office, internal/admin dashboard, "for our staff/team", CRM/ERP/CMS, "admin app".
+  Rule of thumb: "an app to manage [a business's] orders/inventory/staff" → admin_panel;
+  "an app to pay / book / track / shop / chat / manage your own tasks" → webapp.
 
 STEP 1 — Who is the primary USER of this interface?
   → Internal staff / admins / managers / operators     → "admin_panel"
-  → General public / customers / visitors / end-users  → go to STEP 2
+  → End-users USING A PRODUCT to get work done         → go to STEP 2
+  → General public / customers / visitors reading info → go to STEP 3
 
-STEP 2 — How many pages / routes does the project need?
+STEP 2 — Is this a product application (a tool/workspace people log in to and use), not a website to read?
+  → Yes — a focused SaaS product workspace (issue tracker, kanban/boards, docs/notes, team chat,
+    helpdesk inbox, CRM-lite workspace, scheduling app, file workspace, personal tracker)
+    used repeatedly by end-users to DO something                                   → "webapp"
+  → No — it is primarily content/marketing to read and browse                       → go to STEP 3
+
+STEP 3 — How many pages / routes does the (content/marketing) project need?
   → Multiple pages with navigation (2+ distinct pages) → "web"
   → Single scrollable page, no page routing            → "landing"
 
@@ -376,6 +458,42 @@ E-COMMERCE SPLIT RULE — critical:
   "Build a store like Uzum / Amazon / Wildberries (customer side)" → "web"
   "Build an admin panel to manage orders / products / sellers"     → "admin_panel"
   When user says "e-commerce site" or "online store" without "admin" → "web"
+
+admin_panel vs webapp — critical:
+  admin_panel = INTERNAL staff manage a business's data/operations — back-office, KPI dashboards, CRUD tables, left SIDEBAR.
+  webapp      = an END-USER MOBILE app a person uses for themselves (pay/book/track/shop/chat) — bottom tab bar, NO sidebar.
+  "internal dashboard / app to manage orders/inventory/staff" → admin_panel · "a banking/fitness/delivery app for end-users" → webapp
+
+────────────────────────────────────────────────────────────────
+TYPE "webapp" — end-user MOBILE app, built as a responsive web app (Revolut / Cash App / Robinhood / Spotify / Uber tier)
+────────────────────────────────────────────────────────────────
+Use when the project is a PRODUCT an END-USER uses for THEMSELVES on their phone — banking/wallet,
+fitness/health, shopping/delivery/food, booking/reservation, social/messaging, music/media, a personal
+tracker — NOT a marketing site and NOT an internal back-office admin tool.
+
+Characteristics: a phone-first app shell — a centered phone-width frame (full viewport height), a compact
+sticky TOP BAR (screen title or greeting + notifications + avatar; back button on detail screens — NO
+command palette, NO desktop search), and a FIXED BOTTOM TAB BAR (3–5 tabs, icon + label; optional raised
+center action button). Single-column screens of stacked cards / full-width list rows; tapping an item opens
+a BOTTOM SHEET or pushes a full-screen detail route. Touch-first: large tap targets, big numbers, rounded cards.
+
+CLEAR webapp signals:
+  consumer/end-user "app", "web app", "webapp", "mobile app", "application", "mobile application",
+  banking / wallet / finance app, fitness / health app, shopping / delivery / food app,
+  booking / reservation app, social / messaging / chat app, music / media app, personal tracker,
+  "an app for [end-users] to pay / book / track / shop / chat / order"
+
+MOBILE NOTE: there is no native/mobile project type. "mobile app", "mobile application",
+  "Android/iOS app" → build as "webapp" (a responsive, mobile-styled web application). Never refuse for lack of a mobile type.
+
+webapp vs admin_panel:
+  "an app to MANAGE orders/inventory/staff/customers (a business's own data)" → "admin_panel" (sidebar, tables, CRUD)
+  "an app an end-user uses for themselves (pay/book/track/shop/chat)"          → "webapp" (mobile, bottom tabs)
+
+webapp vs landing/web:
+  "a landing page to promote our app" → "landing" (it is marketing, not the product)
+  "the actual app / product itself"   → "webapp"
+  If the user says consumer "app" / "web app" / "mobile app" → "webapp" (per STEP 0), not "web".
 
 ────────────────────────────────────────────────────────────────
 TYPE "web" — public multi-page website (DEFAULT for websites)
@@ -415,7 +533,7 @@ SCHEMA RULES:
 4. NEVER include system fields: created_at, updated_at, deleted_at, guid — they are auto-managed.
 5. Every project MUST have exactly ONE login table: set "is_login_table": true.
 6. For the login table, do NOT include auth fields (login, email, phone, password, tin) — they are auto-created from "login_strategy". Only add custom fields like "full_name", "avatar".
-7. "client_types": for admin_panel — extract user role names verbatim from the conversation (the user's "user-types" question answer). Example: user answered "Administrator, Manager, Driver" → ["Administrator", "Manager", "Driver"]. Always include at least ["Administrator"] if no user types were specified. Leave empty [] for landing/web projects.
+7. "client_types": for admin_panel and webapp — infer a small set of sensible access persona names silently from the project domain and workflows. Always include "Administrator" first, and add 1–4 domain-appropriate names when useful (e.g. ["Administrator", "Dispatcher", "Driver"] for TMS). Do NOT treat questionnaire platform choices as client types. Leave empty [] for landing/web projects.
 
 RELATIONS RULES:
 7. Output a "relations" array covering EVERY foreign-key link between tables in this project.
@@ -466,6 +584,46 @@ ADMIN PANEL UI BLUEPRINTS — choose by domain:
 ADMIN PANEL ANTI-GENERIC RULE:
   ui_structure must explicitly forbid a plain CRUD-only dashboard. At least one page must use a domain-specific pattern beyond a table.
 
+13b. For webapp projects, ui_structure MUST describe a MOBILE APP (a phone-first app, like Revolut/Cash App/Linear-Mobile/Notion-Mobile), NOT a desktop dashboard and NOT a marketing site. Include:
+   - DESIGN REFERENCE (when the user named an app/style like "Revolut"/"Spotify"/"iOS"/"Material You", or attached a screenshot): OPEN ui_structure with a "DESIGN REFERENCE: <name>" line, then describe the specifics to match — layout & navigation shape, density, color MOOD (light vs dark), corner radius, and motion. Every screen MUST follow it, and the design tokens MUST reflect it (see DESIGN). This is the spec — do not drift to a generic look;
+   - the product and the primary daily job of the end-user in one sentence;
+   - the MOBILE SHELL: a centered phone-width frame (max-w-md, full viewport height), a compact sticky TOP BAR
+     (screen title or greeting + notifications + avatar; back button on detail screens — NO command palette, NO desktop search),
+     and a FIXED BOTTOM TAB BAR with 3–5 tabs (icon + tiny label); optional raised center action button (e.g. Transfer/Add/Scan);
+   - the HOME screen is a glanceable entry surface appropriate to the product (e.g. finance → balance hero card + quick-action tiles + recent activity list; tasks → my-tasks list; chat → conversation list) — NOT a KPI/metrics dashboard, NOT a marketing hero;
+   - for every screen: single-column stacked cards / full-width list rows (leading icon/avatar + title/subtitle + trailing value) — NEVER a data table;
+   - NAVIGATION DEPTH (real back-stack): describe a nested route tree — tab index routes + a PUSHED full-screen detail route "/<entity>/:id" for each primary entity list (with a back button), plus long create/edit as a full-screen modal route. Item detail is a real pushed screen, NOT only a bottom sheet; reserve sheets for quick edit/filter/confirm. Derive the screen inventory from the tables (each primary table → a list screen + its detail route);
+   - 3–5 bottom-tab destinations max; secondary screens live inside tabs or under a Profile/More tab;
+   - required states per screen: loading (skeleton), empty (teaches next action), error (retry);
+   - touch-first: tap targets ≥44px, large rounded cards/buttons, big numbers; believable seed content (real merchants/people/amounts/messages).
+
+WEBAPP (MOBILE) UI BLUEPRINTS — choose by product type:
+  Finance / Wallet / Banking (Revolut/Cash App-like):
+    home = balance hero + quick-actions grid (Transfer/Pay/Top Up/Cards) + account cards carousel + recent transactions list; transactions = grouped-by-day rows, tap → detail sheet; transfer = stepped form with contacts carousel + amount input.
+  Tasks / Projects (Todoist/Linear-Mobile-like):
+    home = my-tasks grouped list with checkboxes + priority/due chips; FAB or center tab to add; task detail = bottom sheet with status/assignee + subtasks.
+  Docs / Notes (Notion-Mobile-like):
+    list of note cards (title + snippet + updated time); tap → reader/editor screen; + to create.
+  Chat / Messaging (WhatsApp/Slack-mobile-like):
+    conversation list rows (avatar + name + last message + time + unread badge); chat screen = message bubbles + sticky composer above the tab bar.
+  Shopping / Delivery / Booking:
+    home feed of cards + category chips + search; item detail route with sticky bottom CTA bar.
+  Scheduling / Calendar:
+    agenda list per day + compact date strip; event detail sheet; + to add.
+  Driver / Courier / Field-service / Gig-worker (Uber Driver/Wolt Courier-like) — the OPERATOR app, NOT the customer ordering flow:
+    home = an online/offline toggle + a today's-earnings hero + stats (jobs done, hours, rating) + the active job OR an incoming-job card with accept/decline; jobs/deliveries = list of assigned/available tasks with status + distance/ETA, tap → job detail (pickup→dropoff steps, map link, call, mark complete); earnings = balance + per-day/per-trip breakdown; profile = vehicle/status + ratings.
+  Fitness / Health / Habit (Strava/Apple Fitness-like):
+    home = today's rings/streak hero + quick-log tiles + recent entries; activity = grouped log rows with metrics; goals = progress cards; workout/entry detail = bottom sheet.
+  Social / Community feed (Instagram/X-like):
+    home = vertical feed of post cards (author + content + media + like/comment) + a compose FAB; profile = avatar/bio + grid; post detail = thread with comments.
+  Media / Streaming (Spotify/Podcasts-like):
+    home = horizontal shelves of artwork cards by category; item detail = cover + track/episode list; a mini-player bar pinned above the bottom tab bar.
+  Learning / Education (Duolingo/Coursera-mobile-like):
+    home = continue-learning hero + course cards; course detail = lesson list with progress; lesson = content screen with next/prev; profile = streak/progress.
+
+WEBAPP ANTI-GENERIC RULE (mobile):
+  ui_structure must forbid: a marketing layout (no hero/pricing/testimonials), a desktop layout (no left rail / ⌘K / multi-column / data tables), and a KPI dashboard as the home. It is a phone app: bottom tab bar, single-column screens, bottom-sheet/detail-route for item details.
+
 IMAGE KEYWORDS RULES:
 13. "image_keywords": 2–4 Unsplash search phrases. 
     CRITICAL: You MUST aim for the "WOW" factor. We need cinematic, ultra-high-quality, aesthetic, and premium professional photography.
@@ -477,7 +635,10 @@ IMAGE KEYWORDS RULES:
 
 DESIGN SYSTEM RULES — fill the "design" field completely:
 
-TYPE A (admin_panel) — domain-deterministic palette, font is always Inter:
+TYPE A (admin_panel AND webapp) — domain-deterministic palette, font is always Inter.
+  webapp uses this SAME TYPE A palette logic (the --sidebar-* tokens style its bottom tab bar + header, so it NEEDS them).
+  For webapp (a mobile app), prefer a slightly rounder feel (border_radius "12px"–"16px" for friendly mobile cards),
+  and pick the closest domain palette (finance/wallet → Finance; tasks/docs/team → Project Management or Default):
   TMS / Compliance / Logistics:
     background #f8f9fa · surface #ffffff · primary #4f46e5 · primary_hsl "239 84% 67%"
     accent #6366f1 · accent_hsl "239 84% 67%" · sidebar dark #1e293b · sidebar_foreground #f8fafc
@@ -518,7 +679,7 @@ TYPE A (admin_panel) — domain-deterministic palette, font is always Inter:
     background #f9fafb · surface #ffffff · primary #6366f1 · primary_hsl "239 84% 67%"
     accent #f59e0b · accent_hsl "38 92% 50%" · sidebar #1e293b · sidebar_foreground #f8fafc
     text #111827 · text_muted #6b7280 · border #e5e7eb · border_radius "8px" · sidebar_style "dark"
-  font_family: "Inter" · body_font: "Inter" (always for admin_panel)
+  font_family: "Inter" · body_font: "Inter" (always for admin_panel and webapp)
   design_inspiration: [domain name, e.g. "CRM Domain", "TMS Domain"]
 
 TYPE B / TYPE C (landing, web) — select ONE archetype based on domain:
@@ -555,6 +716,7 @@ TYPE B / TYPE C (landing, web) — select ONE archetype based on domain:
     design_inspiration "Soft Minimal"
 
   If images are attached: extract the dominant colors from the images and use them instead of archetype defaults.
+  WEBAPP ONLY — if a webapp user NAMES a reference app / brand / style (e.g. "like Revolut", "Spotify", "Notion", "Linear", "iOS", "Material You", "dark"/"minimal"/"glassy"): adopt THAT reference's aesthetic for the webapp tokens — its palette MOOD (light vs DARK background+text), its primary/accent color family, and its border_radius / density — and let it OVERRIDE the webapp domain default. Guides: Spotify / Apple Music → dark background, vivid accent; Revolut / Cash App → bold tinted hero on clean light surfaces; Notion / Linear → calm neutral, light, crisp, smaller radius; Material You → light, tonal, large radius. A named reference is text-only — still output real hex values, chosen to match it. (admin_panel, web, and landing keep their domain/archetype palettes — do NOT apply this override to them.)
   sidebar_background for TYPE B/C: same as background_color (no sidebar in landing/web).
 `
 
@@ -932,7 +1094,7 @@ If you receive an API CONFIGURATION from the system in your prompt (Base URL, AP
 
 AXIOS CLIENT — two cases depending on project type:
 
-TYPE A (admin panel — template provided):
+TYPE A (admin panel AND webapp — template provided):
   Use 'apiClient' from '@/config/axios' — it already has BOTH required headers:
     Authorization: API-KEY  and  X-API-KEY from env
   NEVER create a new axios instance. NEVER use raw axios.get/post/put/delete.

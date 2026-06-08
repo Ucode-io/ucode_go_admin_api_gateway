@@ -538,6 +538,149 @@ func validateAdminPanelUIQuality(files []models.ProjectFile) []ValidationError {
 	return errors
 }
 
+// reIconStringValue matches an icon stored as a STRING literal in data (e.g. icon: "zap"),
+// which is the root of the "icon name rendered as text" bug.
+var reIconStringValue = regexp.MustCompile(`(?i)\bicon:\s*["'][a-z][a-z0-9 _-]*["']`)
+
+// reIconRendered matches a ".icon" member used in a JSX expression (e.g. {tx.icon}).
+var reIconRendered = regexp.MustCompile(`\{\s*[a-zA-Z_][\w.]*\.icon\s*\}`)
+
+// reUnsafeNumberMethod matches a number method called directly on an identifier/member
+// (e.g. sellerRating.toFixed(1), item.price.toLocaleString()) — which crashes when the API
+// value is a string/null. A leading ")" (as in Number(x).toFixed) is intentionally NOT matched.
+var reUnsafeNumberMethod = regexp.MustCompile(`[A-Za-z0-9_$\]]\s*\.\s*(toFixed|toLocaleString)\s*\(`)
+
+// validateWebAppUIQuality enforces the MOBILE-APP identity for webapp projects:
+// a centered phone frame, a fixed bottom tab bar (not a desktop side rail), a compact
+// top bar (no ⌘K), mobile list/cards instead of data tables, no admin chrome, and no
+// icon-name-as-text bug. Severity "error" triggers an auto-repair pass.
+func validateWebAppUIQuality(files []models.ProjectFile) []ValidationError {
+	var errors []ValidationError
+
+	for _, f := range files {
+		if !strings.HasSuffix(f.Path, ".tsx") {
+			continue
+		}
+		content := f.Content
+		lower := strings.ToLower(content)
+
+		// Admin / marketing chrome leaked into any file → wrong product identity.
+		if hasAny(content, "Admin Panel", "Admin Console", "Command Center", "Platform overview", "Start Free Trial", "Watch the Film") {
+			errors = append(errors, ValidationError{
+				Severity: "error",
+				File:     f.Path,
+				Message:  "webapp UI: remove admin/marketing chrome (Admin Panel/Admin Console/Command Center/Start Free Trial). This is an end-user MOBILE app — use a product home screen, a compact mobile top bar, and a fixed bottom tab bar.",
+			})
+		}
+
+		// Icon name stored as a string AND rendered (the 'zap'/'shopping cart' text bug).
+		if reIconStringValue.MatchString(content) && reIconRendered.MatchString(content) {
+			errors = append(errors, ValidationError{
+				Severity: "error",
+				File:     f.Path,
+				Message:  "webapp UI: an icon name is stored as a string and rendered as text (shows literal 'zap'/'shopping cart'). Map the name to an imported lucide component (const ICONS = { key: Zap }; const Icon = ICONS[k] ?? Circle; <Icon className=\"h-5 w-5\" />) — never render the icon-name string.",
+			})
+		}
+
+		switch {
+		case strings.HasSuffix(f.Path, "/layout/Layout.tsx"):
+			// The phone frame: centered, mobile-width, full-height.
+			if !hasAny(content, "max-w-md", "max-w-sm", "max-w-[") {
+				errors = append(errors, ValidationError{
+					Severity: "error",
+					File:     f.Path,
+					Message:  "webapp UI: Layout must be a centered phone frame — wrap the app in mx-auto max-w-md min-h-[100dvh] flex flex-col, with a scrollable <main> (pb-24) and a fixed bottom tab bar.",
+				})
+			}
+			continue
+
+		case strings.HasSuffix(f.Path, "/layout/Sidebar.tsx"):
+			// Must be a FIXED BOTTOM TAB BAR, not a desktop side rail.
+			isBottomBar := strings.Contains(lower, "bottom-0")
+			looksLikeSideRail := hasAny(content, "w-56", "w-60", "w-64", "flex-col h-full", "border-r")
+			if !isBottomBar || looksLikeSideRail {
+				errors = append(errors, ValidationError{
+					Severity: "error",
+					File:     f.Path,
+					Message:  "webapp UI: navigation must be a FIXED BOTTOM TAB BAR (fixed inset-x-0 bottom-0, 3–5 icon+label tabs), NOT a desktop side rail (no w-56/w-60/w-64/border-r/full-height column).",
+				})
+				continue
+			}
+			if !strings.Contains(content, "safe-area-inset-bottom") {
+				errors = append(errors, ValidationError{
+					Severity: "error",
+					File:     f.Path,
+					Message:  "webapp UI: the bottom tab bar must reserve the bottom safe area — add pb-[env(safe-area-inset-bottom)] so it clears the home indicator.",
+				})
+			}
+			// The fixed bar MUST be fully opaque or page content shows through it.
+			// Reliable signals only: an explicitly transparent/translucent BACKGROUND token, or no solid bg token at all.
+			// (We do NOT flag bg-card/.. or bg-primary/.. — those are commonly used on inner pills/indicators, not the bar bg.)
+			if hasAny(content, "bg-transparent", "bg-background/") || !hasAny(content, "bg-background", "bg-card") {
+				errors = append(errors, ValidationError{
+					Severity: "error",
+					File:     f.Path,
+					Message:  "webapp UI: the bottom tab bar must have a SOLID opaque background (bg-background) — never transparent/translucent (no bg-background/NN, no bg-transparent, no blur-only). Content scrolling underneath must be fully hidden.",
+				})
+			}
+			continue
+
+		case strings.HasSuffix(f.Path, "/layout/Header.tsx"):
+			// Compact mobile top bar — no command palette / ⌘K / desktop search.
+			if hasAny(content, "⌘K", "⌘ K", "CommandPalette", "cmdk", "command palette") {
+				errors = append(errors, ValidationError{
+					Severity: "error",
+					File:     f.Path,
+					Message:  "webapp UI: Header must be a compact mobile top bar (title/back + bell + avatar). Remove the ⌘K command palette and desktop search — those are desktop patterns.",
+				})
+			}
+			// Top safe-area: header content must clear the status bar / notch.
+			if !strings.Contains(content, "safe-area-inset-top") {
+				errors = append(errors, ValidationError{
+					Severity: "error",
+					File:     f.Path,
+					Message:  "webapp UI: the top bar must reserve the top safe area — add pt-[max(env(safe-area-inset-top),3rem)] so the title/bell/avatar are not clipped by the status bar / notch / Dynamic Island.",
+				})
+			}
+			continue
+		}
+
+		// Screen files (pages / features).
+		if !isGeneratedAdminScreen(f.Path) {
+			continue
+		}
+
+		// Desktop data table → should be mobile list rows / stacked cards.
+		if hasAny(content, "<table", "<Table ", "<Table>", "DataTable") {
+			errors = append(errors, ValidationError{
+				Severity: "error",
+				File:     f.Path,
+				Message:  "webapp UI: replace the data <table> with mobile list rows / stacked cards (full-width rows: leading icon/avatar + title/subtitle + trailing value, tap → bottom sheet/detail route).",
+			})
+		}
+
+		// Desktop KPI dashboard grid as a screen.
+		if hasAny(content, "grid-cols-4", "lg:grid-cols-4", "xl:grid-cols-4") && hasAny(lower, "kpi", "total ", "metric", "stat card", "overview") {
+			errors = append(errors, ValidationError{
+				Severity: "error",
+				File:     f.Path,
+				Message:  "webapp UI: this looks like a desktop KPI dashboard. The home screen must be a glanceable mobile surface (hero card + quick-action tiles + list), not a 4-column metrics grid.",
+			})
+		}
+
+		// Number method on a raw API value → "x.toFixed is not a function" runtime crash.
+		if reUnsafeNumberMethod.MatchString(content) {
+			errors = append(errors, ValidationError{
+				Severity: "error",
+				File:     f.Path,
+				Message:  "webapp build: a number method (.toFixed/.toLocaleString) is called directly on a value that may be a string/null from the API — this crashes at runtime ('toFixed is not a function'). Coerce first: Number(value ?? 0).toFixed(1), or use the null-safe helpers formatCurrency(value) / formatNumber(value).",
+			})
+		}
+	}
+
+	return errors
+}
+
 func isGeneratedAdminScreen(path string) bool {
 	if !strings.HasSuffix(path, ".tsx") {
 		return false
@@ -1423,6 +1566,7 @@ func (p *ChatProcessor) repairSingleFile(
 	sb.WriteString("  - For '<SelectItem value=\"\">' errors: Radix SelectItem values cannot be empty strings. Replace empty option values with non-empty sentinel strings such as 'all', 'none', or 'unassigned'. Update state/filter logic so the sentinel means no filter / empty relation, but NEVER render value=\"\" on SelectItem.\n")
 	sb.WriteString("  - For 'admin UI quality' errors: perform a focused visual/product polish pass on this file. Preserve every API endpoint, hook, mutation, entity field, JSON extraction, route, and generated type. Improve layout density, hierarchy, cards, filters, status chips, detail drawer/dialog, states, and domain-specific widgets only.\n")
 	sb.WriteString("  - For 'word with apostrophe used as unquoted JS expression' errors: the file contains Uzbek/non-ASCII text like Ko'rildi, Ko'rib chiqilmoqda, Og'zaki used directly as JavaScript identifiers without string quotes. This crashes esbuild. Find EVERY such word in arrays, object property values, variable assignments, JSX attribute values — wrap each one in double quotes. Example: { label: Ko'rildi } → { label: \"Ko'rildi\" }, [Ko'rib] → [\"Ko'rib\"]. JSX text nodes are fine: <Badge>Ko'rildi</Badge> does NOT need change, only JS expression contexts.\n")
+	sb.WriteString("  - For 'webapp UI' errors: this is a MOBILE APP (responsive web). Fix toward a phone layout — a centered max-w-md min-h-[100dvh] frame, a fixed bottom tab bar (NOT a desktop side rail) with a SOLID opaque bg-background (no /opacity, no transparent, no blur-only), a compact top bar (NO ⌘K), single-column stacked cards/list rows (NOT data tables or KPI dashboards), bottom-sheet/detail-route for item details, and lucide icons rendered as <Icon/> components (never icon-name strings). EVERY button/tab/tile/row/FAB must be wired (onClick navigate via useNavigate/NavLink, or open a Sheet via useState, or fire a useApiMutation) — no dead buttons. Render real API data (useApiQuery + extractList), not hardcoded values. Preserve all APIs, hooks, fields, routes, and types.\n")
 	sb.WriteString("  - For brace/bracket/paren imbalance: carefully trace through the file and find the exact location of the missing or extra delimiter. Common causes: unclosed ternary in JSX, missing closing brace in .map() callback, extra } after a component return, unclosed template literal.\n")
 	sb.WriteString("  - NEVER use angle-bracket type assertions in .tsx files (const x = <Type>value). ALWAYS use 'as' syntax (const x = value as Type).\n")
 	sb.WriteString("  - Output the complete corrected file. Never truncate.\n")

@@ -71,6 +71,7 @@ func (a *GeminiAgent) ArchitectProject(_ context.Context, in models.ArchitectInp
 	if err = json.Unmarshal(raw, &plan); err != nil {
 		return nil, fmt.Errorf("architect: decode: %w", err)
 	}
+	models.ApplyProjectTypeKeywordOverride(&plan, in.Clarified)
 	return &plan, nil
 }
 
@@ -96,6 +97,8 @@ func (a *GeminiAgent) GenerateManifest(_ context.Context, in models.ManifestInpu
 	systemPrompt := chat_prompts.PromptManifestGenerator
 	if in.Plan.ProjectType == "web" {
 		systemPrompt = chat_prompts.PromptWebsiteManifestGenerator
+	} else if in.Plan.ProjectType == "webapp" {
+		systemPrompt = chat_prompts.PromptWebAppManifestGenerator
 	}
 
 	contents := buildGeminiContents(in.History, []geminiPart{{Text: sb.String()}})

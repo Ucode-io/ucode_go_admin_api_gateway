@@ -52,7 +52,7 @@ func (p *ChatProcessor) RecordUsage(usage models.LLMUsage, model, description st
 
 func (p *ChatProcessor) generateCode(ctx context.Context, clarified string, imageURLs []string, chatHistory []models.ChatMessage, plan *models.ArchitectPlan, apiKey string) (*models.ParsedClaudeResponse, error) {
 	switch plan.ProjectType {
-	case "admin_panel":
+	case "admin_panel", "webapp":
 		log.Println("GENERATION CODE: generateCodeChunked")
 		return p.generateCodeChunkedAdminPanel(ctx, clarified, imageURLs, chatHistory, plan, apiKey)
 	case "web":
@@ -82,7 +82,7 @@ func (p *ChatProcessor) generateCodeSingle(ctx context.Context, clarified string
 	}
 
 	var scaffoldFiles []models.ProjectFile
-	if plan.ProjectType == "admin_panel" || plan.ProjectType == "web" {
+	if plan.ProjectType == "admin_panel" || plan.ProjectType == "web" || plan.ProjectType == "webapp" {
 		contextFiles := GetTemplateContext()
 		scaffoldFiles = GetTemplateScaffold()
 		if len(contextFiles) > 0 {
@@ -130,6 +130,8 @@ func (p *ChatProcessor) generateCodeSingle(ctx context.Context, clarified string
 				systemPrompt = chat_prompts2.PromptWebsiteGenerator
 			case "admin_panel":
 				systemPrompt = chat_prompts2.PromptAdminPanelGenerator
+			case "webapp":
+				systemPrompt = chat_prompts2.PromptWebAppGenerator
 			default:
 				systemPrompt = chat_prompts2.PromptLandingGenerator
 			}
@@ -273,6 +275,11 @@ func (p *ChatProcessor) generateCodeChunkedAdminPanel(ctx context.Context, clari
 		},
 	)
 
+	foundationPrompt := chat_prompts2.PromptAdminPanelGenerator
+	if plan.ProjectType == "webapp" {
+		foundationPrompt = chat_prompts2.PromptWebAppGenerator
+	}
+
 	var (
 		foundation *models.GeneratedProject
 		uiKit      *models.GeneratedProject
@@ -285,7 +292,7 @@ func (p *ChatProcessor) generateCodeChunkedAdminPanel(ctx context.Context, clari
 	go func() {
 		defer wg.Done()
 		for attempt := 1; attempt <= 2; attempt++ {
-			foundation, foundErr = p.generateFoundation(ctx, clarified, imageURLs, chatHistory, apiConfig, foundationGroup, manifest)
+			foundation, foundErr = p.generateFoundation(ctx, clarified, imageURLs, chatHistory, apiConfig, foundationGroup, manifest, foundationPrompt)
 			if foundErr == nil {
 				break
 			}
@@ -356,6 +363,11 @@ func (p *ChatProcessor) generateCodeChunkedAdminPanel(ctx context.Context, clari
 		uiKitAPISummary = buildUIKitAPISummary(uiKit.Files)
 	}
 
+	chunkPrompt := chat_prompts2.PromptChunkedCoderAdminPanel
+	if plan.ProjectType == "webapp" {
+		chunkPrompt = chat_prompts2.PromptChunkedCoderWebApp
+	}
+
 	totalChunks := len(featureGroups)
 	time.Sleep(1000 * time.Millisecond)
 	emit.Emit(
@@ -406,7 +418,7 @@ func (p *ChatProcessor) generateCodeChunkedAdminPanel(ctx context.Context, clari
 					Data:    map[string]any{"feature": group.Name},
 				},
 			)
-			proj, chunkErr := p.generateChunkAdminPanel(ctx, group, foundationCtx, manifestSummary, apiConfig, uiKitAPISummary)
+			proj, chunkErr := p.generateChunkAdminPanel(ctx, group, foundationCtx, manifestSummary, apiConfig, uiKitAPISummary, chunkPrompt)
 			results <- chunkResult{group: group, project: proj, err: chunkErr}
 		}()
 	}
@@ -497,7 +509,7 @@ func (p *ChatProcessor) generateCodeChunkedAdminPanel(ctx context.Context, clari
 	return &models.ParsedClaudeResponse{Project: merged}, nil
 }
 
-func (p *ChatProcessor) generateFoundation(ctx context.Context, clarified string, imageURLs []string, chatHistory []models.ChatMessage, apiConfig string, foundationGroup models.ManifestGroup, manifest *models.ProjectManifest) (*models.GeneratedProject, error) {
+func (p *ChatProcessor) generateFoundation(ctx context.Context, clarified string, imageURLs []string, chatHistory []models.ChatMessage, apiConfig string, foundationGroup models.ManifestGroup, manifest *models.ProjectManifest, foundationPrompt string) (*models.GeneratedProject, error) {
 	var sb strings.Builder
 
 	sb.WriteString("====================================\n")
@@ -583,7 +595,7 @@ func (p *ChatProcessor) generateFoundation(ctx context.Context, clarified string
 
 	project, err := p.agent.GenerateCode(ctx,
 		p.agentCfgs().Coder,
-		chat_prompts2.PromptAdminPanelGenerator,
+		foundationPrompt,
 		sb.String(),
 		imageURLs,
 		chatHistory,
@@ -629,7 +641,7 @@ func (p *ChatProcessor) generateUIKit(ctx context.Context, uiKitGroup models.Man
 	return project, nil
 }
 
-func (p *ChatProcessor) generateChunkAdminPanel(ctx context.Context, group models.ManifestGroup, foundationCtx string, manifestSummary string, apiConfig string, uiKitAPISummary string) (*models.GeneratedProject, error) {
+func (p *ChatProcessor) generateChunkAdminPanel(ctx context.Context, group models.ManifestGroup, foundationCtx string, manifestSummary string, apiConfig string, uiKitAPISummary string, chunkPrompt string) (*models.GeneratedProject, error) {
 	var sb strings.Builder
 
 	fmt.Fprintf(&sb, "CHUNKED GENERATION — Feature Group %d: %s\n\n", group.ID, group.Name)
@@ -661,7 +673,7 @@ func (p *ChatProcessor) generateChunkAdminPanel(ctx context.Context, group model
 	project, err := p.agent.GenerateCodeNoHistory(
 		ctx,
 		p.agentCfgs().Coder,
-		chat_prompts2.PromptChunkedCoderAdminPanel,
+		chunkPrompt,
 		sb.String(),
 		fmt.Sprintf("Generating feature chunk: %s", group.Name),
 	)
@@ -1051,7 +1063,7 @@ func injectMissingCriticalFiles(files []models.ProjectFile, projectType string) 
 	if _, ok := existing["src/App.tsx"]; !ok {
 		log.Printf("[inject] src/App.tsx missing — injecting minimal stub (type=%s)", projectType)
 		switch projectType {
-		case "admin_panel":
+		case "admin_panel", "webapp":
 			files = append(files, models.ProjectFile{
 				Path: "src/App.tsx",
 				Content: `import React from 'react'
@@ -1136,6 +1148,9 @@ func (p *ChatProcessor) validateAndRepairGeneratedProject(ctx context.Context, p
 		validationErrors = append(validationErrors, validateAgainstManifest(project.Files, p.currentManifest)...)
 		if projectType == "admin_panel" {
 			validationErrors = append(validationErrors, validateAdminPanelUIQuality(project.Files)...)
+		}
+		if projectType == "webapp" {
+			validationErrors = append(validationErrors, validateWebAppUIQuality(project.Files)...)
 		}
 		errorCount, _ = logValidationResults(validationErrors)
 		if errorCount == 0 {

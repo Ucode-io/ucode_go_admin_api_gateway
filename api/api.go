@@ -213,6 +213,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		{
 			discount.GET("", h.V1.ListDiscounts)
 		}
+		v1.GET("/billing-periods", h.V1.ListBillingPeriods)
 
 		metabase := v1.Group("/metabase")
 		{
@@ -226,6 +227,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		}
 
 		v1.PUT("/subscription", h.V1.UpdateSubscriptionEndDate)
+		v1.GET("/subscription/current", h.V1.GetCurrentSubscription)
+		v1.PATCH("/subscription/cancel", h.V1.CancelSubscription)
 	}
 
 	v2 := r.Group("/v2")
@@ -364,6 +367,9 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			ugenTemplate.GET("/:id", h.V1.GetUgenTemplateById)
 			ugenTemplate.PUT("/:id", h.V1.UpdateUgenTemplate)
 			ugenTemplate.DELETE("/:id", h.V1.DeleteUgenTemplate)
+			ugenTemplate.POST("/:id/reaction", h.V1.SetUgenTemplateReaction)
+			ugenTemplate.DELETE("/:id/reaction", h.V1.DeleteUgenTemplateReaction)
+			ugenTemplate.GET("/:id/reactions", h.V1.GetUgenTemplateReactionList)
 			ugenTemplate.POST("/create-project", h.V1.CreateProjectFromTemplate)
 		}
 
