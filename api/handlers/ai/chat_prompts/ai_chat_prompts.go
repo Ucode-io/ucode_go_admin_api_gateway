@@ -91,7 +91,33 @@ When intent="ask_question", choose one of two strategies based on the project ty
 ════════════════════
 STRATEGY A — Admin panel / platform / system (CRM, TMS, ERP, HRM, dashboard, management panel, etc.)
 ════════════════════
-ALWAYS output EXACTLY 3 fixed questions. The platform options are fixed; module and integration options are generated dynamically based on the project description.
+Output 2 or 3 fixed questions depending on whether the user already named the platform surface.
+
+Explicit platform signals:
+  - Admin panel: "admin panel", "admin dashboard", "management panel", "back-office", "control panel"
+  - Website: "website", "site", "e-commerce website", "online store", "corporate website"
+  - Landing page: "landing page", "one-page site", "promotional page"
+  - Mobile app: "mobile app", "mobile application", "iOS app", "Android app"
+
+If the user's first project request already contains an explicit platform signal, DO NOT ask "platform-types".
+Output EXACTLY these 2 questions:
+
+  [
+    {
+      "id": "module-types",
+      "title": "<translated: What module types (menus) will be in the platform?>",
+      "type": "multi",
+      "options": [/* 6–10 module options relevant to this specific project, e.g. Dashboard, Orders, Reports */]
+    },
+    {
+      "id": "integrations",
+      "title": "<translated: What integrations do you need?>",
+      "type": "multi",
+      "options": [/* 5–8 integration options relevant to this specific project, e.g. Payment Gateway, SMS, Maps/GPS */]
+    }
+  ]
+
+If the platform surface is NOT explicit, output EXACTLY these 3 questions. The platform options are fixed; module and integration options are generated dynamically based on the project description.
 
   [
     {
@@ -120,7 +146,9 @@ ALWAYS output EXACTLY 3 fixed questions. The platform options are fixed; module 
   ]
 
 Rules for Strategy A:
-  - Always use exactly these 3 question ids: "platform-types", "module-types", "integrations"
+  - Use "platform-types" ONLY when the user's first project request did not already name the platform surface
+  - When platform is explicit, use exactly these 2 question ids: "module-types", "integrations"
+  - When platform is unclear, use exactly these 3 question ids: "platform-types", "module-types", "integrations"
   - The "platform-types" options are fixed and must be exactly: "admin-panel", "website", "landing-page", "mobile-app"
   - Do NOT include a "None" option for integrations — the user can simply skip selection
   - Generate module and integration options that make sense for the specific system described
@@ -130,6 +158,7 @@ STRATEGY B — Website / e-commerce / landing page / portfolio / corporate site 
 ════════════════════
 Output 3–4 questions freely chosen by you, relevant to the specific website described.
 Questions should cover what matters most for that site (e.g. pages/sections, product categories, style/tone, target audience).
+Do NOT ask what platform the user needs when the user already asked for a website, e-commerce site, landing page, portfolio, corporate site, blog, mobile app, or admin panel.
 Do NOT ask about tech stack, framework, or deployment.
 
   [
@@ -247,6 +276,37 @@ Example for Strategy A — User: "build me a TMS":
         {"id": "telegram-bot", "label": "Telegram Bot"},
         {"id": "1c", "label": "1C"},
         {"id": "rest-api", "label": "External REST API"}
+      ]
+    }
+  ]
+
+Example for Strategy A with explicit platform — User: "I need an admin panel for an ERP system":
+  reply="Please answer a few questions to get started.",
+  questions=[
+    {
+      "id": "module-types",
+      "title": "What module types (menus) will be in the platform?",
+      "type": "multi",
+      "options": [
+        {"id": "dashboard", "label": "Dashboard"},
+        {"id": "finance", "label": "Finance"},
+        {"id": "inventory", "label": "Inventory"},
+        {"id": "orders", "label": "Orders"},
+        {"id": "employees", "label": "Employees"},
+        {"id": "reports", "label": "Reports"},
+        {"id": "settings", "label": "Settings"}
+      ]
+    },
+    {
+      "id": "integrations",
+      "title": "What integrations do you need?",
+      "type": "multi",
+      "options": [
+        {"id": "payment-gateway", "label": "Payment Gateway"},
+        {"id": "sms", "label": "SMS"},
+        {"id": "telegram-bot", "label": "Telegram Bot"},
+        {"id": "1c", "label": "1C"},
+        {"id": "external-rest-api", "label": "External REST API"}
       ]
     }
   ]
