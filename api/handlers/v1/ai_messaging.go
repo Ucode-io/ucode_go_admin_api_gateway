@@ -14,7 +14,6 @@ import (
 	"ucode/ucode_go_api_gateway/api/handlers/ai/chat_prompts"
 	"ucode/ucode_go_api_gateway/api/handlers/ai/gemini"
 	"ucode/ucode_go_api_gateway/api/handlers/ai/openai"
-	"ucode/ucode_go_api_gateway/api/handlers/billing"
 	"ucode/ucode_go_api_gateway/api/handlers/helper"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/config"
@@ -188,11 +187,6 @@ func (p *ChatProcessor) initAgent() {
 // ============================================================================
 
 func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, chatHistory []models.ChatMessage, imageURLs []string, estimatedName string) (*models.ParsedClaudeResponse, error) {
-
-	if err := billing.CheckProjectCountLimit(ctx, p.h.companyServices, p.service, p.resourceEnvId, p.fareId); err != nil {
-		return nil, err
-	}
-
 	startedAt := time.Now()
 
 	var (

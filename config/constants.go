@@ -86,7 +86,6 @@ const (
 	FARE_ASSET_SIZE        string = "asset_size"
 	FARE_DATABASE_SIZE     string = "database"
 	FARE_REQUEST_PER_MONTH string = "request_per_month"
-	FARE_PROJECTS          string = "projects"
 
 	KeyBillingDbLimit        = "billing:db_limit:%s" // projectId → "1"(allowed) | "0"(blocked)
 	KeyBillingDbLimitPattern = "billing:db_limit:*"
