@@ -302,6 +302,44 @@ SIDEBAR NAV RULES:
   Each nav item: { icon: LucideIcon, label: string, path: string }
   Active state: compare location.pathname with item.path using startsWith for nested routes.
 
+PERMISSION-GATED NAV (MANDATORY when a sidebar/top-nav exists):
+  The host (ugen) supplies a per-role permission map so an invited/shared user only sees the
+  nav items their role is allowed to read. You MUST honor it. Generate exactly this:
+
+  1. Create src/lib/permissions.ts:
+       import { useEffect, useState } from "react";
+       type PermFlags = { read?: boolean; write?: boolean; update?: boolean; delete?: boolean };
+       type PermMap = Record<string, PermFlags>;          // keyed by nav path, e.g. { "/users": { read: false } }
+       function parseEnvPerms(): PermMap {
+         try { return JSON.parse(import.meta.env.VITE_UCODE_PERMISSIONS || "{}"); } catch { return {}; }
+       }
+       let current: PermMap = parseEnvPerms();
+       const listeners = new Set<(m: PermMap) => void>();
+       if (typeof window !== "undefined") {
+         window.addEventListener("message", (e: MessageEvent) => {
+           if (e?.data?.type === "UCODE_PERMISSIONS" && e.data.permissions) {
+             current = e.data.permissions as PermMap;
+             listeners.forEach((fn) => fn(current));
+           }
+         });
+       }
+       export function useUcodePermissions(): PermMap {
+         const [m, setM] = useState<PermMap>(current);
+         useEffect(() => { listeners.add(setM); setM(current); return () => { listeners.delete(setM); }; }, []);
+         return m;
+       }
+       // Default VISIBLE unless an entry explicitly sets read === false.
+       export function canRead(perms: PermMap, path: string): boolean { return perms[path]?.read !== false; }
+
+  2. In the Sidebar/Navbar component, gate every nav item by its path:
+       const perms = useUcodePermissions();
+       const visibleItems = navItems.filter((item) => canRead(perms, item.path));
+       // render visibleItems instead of navItems. Also hide a collapsible group whose children all became hidden.
+
+  RULES: never hard-fail if the map is empty (default = show all). Match strictly by item.path (the
+  exact route string). This is the ONLY auth-related code allowed despite the NO AUTH rule — it is
+  presentation-only nav filtering, not an auth guard.
+
 STEP 3 — Design Tokens:
   Design tokens are provided in the "DESIGN TOKENS:" block in your prompt.
   Use those exact values for CSS variables in src/index.css. Do NOT invent a palette.
