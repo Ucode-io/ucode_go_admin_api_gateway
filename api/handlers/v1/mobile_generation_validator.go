@@ -57,6 +57,21 @@ func validateMobileGeneratedProject(files []models.ProjectFile) []ValidationErro
 	return validationErrors
 }
 
+// mobileContractErrorCount returns the count of fatal (error-severity) Capacitor
+// contract violations — missing entry files, BrowserRouter instead of HashRouter,
+// React Native/Expo or unapproved Capacitor imports, server.url, etc. Mobile gates
+// ONLY on these. UI-quality and manifest-completeness findings are best-effort, the
+// same as the webapp this wraps, so a mobile app is exactly as shippable as a webapp.
+func mobileContractErrorCount(files []models.ProjectFile) int {
+	count := 0
+	for _, e := range validateMobileGeneratedProject(files) {
+		if e.Severity == "error" {
+			count++
+		}
+	}
+	return count
+}
+
 func validateCapacitorIndexHTML(content string) []ValidationError {
 	if content == "" {
 		return nil

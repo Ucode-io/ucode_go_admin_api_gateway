@@ -186,8 +186,15 @@ func (p *ChatProcessor) generateCodeSingle(ctx context.Context, clarified string
 
 	// ── POST-GENERATION VALIDATION + REPAIR ──
 	errorCount := p.validateAndRepairGeneratedProject(ctx, project, plan.ProjectType, 83)
-	if plan.ProjectType == mobileProjectType && errorCount > 0 {
-		return nil, fmt.Errorf("generate code: mobile quality gate found %d error(s)", errorCount)
+	if plan.ProjectType == mobileProjectType {
+		// Gate ONLY on the Capacitor contract; UI-quality/manifest findings are
+		// best-effort (parity with webapp, which ships with them).
+		if contractErrs := mobileContractErrorCount(project.Files); contractErrs > 0 {
+			return nil, fmt.Errorf("generate code: Capacitor mobile contract gate found %d error(s)", contractErrs)
+		}
+		if errorCount > 0 {
+			log.Printf("[generate] mobile shipping with %d non-fatal quality finding(s) (parity with webapp)", errorCount)
+		}
 	}
 
 	log.Printf("[generate] done: %d files (type=%s, %d validation errors)", len(project.Files), plan.ProjectType, errorCount)
@@ -537,8 +544,15 @@ func (p *ChatProcessor) generateCodeChunkedApplication(ctx context.Context, clar
 		},
 	)
 	errorCount := p.validateAndRepairGeneratedProject(ctx, merged, plan.ProjectType, 80)
-	if plan.ProjectType == mobileProjectType && errorCount > 0 {
-		return nil, fmt.Errorf("generate code: Capacitor mobile quality gate found %d error(s)", errorCount)
+	if plan.ProjectType == mobileProjectType {
+		// Gate ONLY on the Capacitor contract; UI-quality/manifest findings are
+		// best-effort (parity with webapp, which ships with them).
+		if contractErrs := mobileContractErrorCount(merged.Files); contractErrs > 0 {
+			return nil, fmt.Errorf("generate code: Capacitor mobile contract gate found %d error(s)", contractErrs)
+		}
+		if errorCount > 0 {
+			log.Printf("[chunked] mobile shipping with %d non-fatal quality finding(s) (parity with webapp)", errorCount)
+		}
 	}
 
 	log.Printf("[chunked] done: %d total files (%d feature groups, %d failed, %d validation errors)", len(merged.Files), totalChunks, failedCount, errorCount)
