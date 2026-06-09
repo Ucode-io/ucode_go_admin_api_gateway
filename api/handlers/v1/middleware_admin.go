@@ -91,6 +91,7 @@ func (h *HandlerV1) AdminAuthMiddleware() gin.HandlerFunc {
 				c.Set("resource_id", resourceId)
 				c.Set("project_id", projectId)
 				c.Set("Auth_Admin", res)
+				c.Set("user_id", res.UserId)
 			case "API-KEY":
 				appId := c.GetHeader("X-API-KEY")
 				apiKey, err := h.authService.ApiKey().GetEnvID(

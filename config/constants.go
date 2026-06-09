@@ -95,6 +95,8 @@ const (
 
 	KeyBillingApiLimit = "billing:api_limit:%s" // projectId → "1"(allowed) | "0"(blocked)
 	KeyBillingFareId   = "billing:fare_id:%s"   // projectId → fareId string, TTL=30min
+
+	UgenSuperAdminUserId = "c12c163c-38ee-4b37-8854-1dc9285fc3f8"
 )
 
 var (

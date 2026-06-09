@@ -84,8 +84,25 @@ func (p *ChatProcessor) agentCfgs() config.AIAgents {
 	case config.AIProviderOpenAI:
 		return p.baseConf.OpenAIAgents
 
+	case config.AIProviderAuto:
+		return p.autoAgentCfgs()
+
 	default:
 		return p.baseConf.Agents
+	}
+}
+
+func (p *ChatProcessor) autoAgentCfgs() config.AIAgents {
+	claude := p.baseConf.Agents
+	openai := p.baseConf.OpenAIAgents
+	return config.AIAgents{
+		Router:            claude.Router,
+		Architect:         claude.Architect,
+		Coder:             claude.Coder,
+		LandingCoder:      claude.LandingCoder,
+		Inspector:         claude.Inspector,
+		Planner:           openai.Planner,
+		DatabaseAssistant: openai.DatabaseAssistant,
 	}
 }
 
@@ -98,17 +115,23 @@ func (p *ChatProcessor) providerEventData() ProviderEventData {
 	}
 }
 
+func (p *ChatProcessor) editModel() string {
+	if p.chatModel == config.AIProviderAuto {
+		return p.baseConf.OpenAIAgents.Coder.Model
+	}
+	return p.agentCfgs().Coder.Model
+}
+
 func (p *ChatProcessor) providerLabel() string {
-	cfgs := p.agentCfgs()
 	switch {
 	case p.newProject:
-		return cfgs.Architect.Model
+		return p.agentCfgs().Architect.Model
 
 	case p.microFrontendId != "":
-		return cfgs.Coder.Model
+		return p.editModel()
 
 	default:
-		return cfgs.Router.Model
+		return p.agentCfgs().Router.Model
 	}
 }
 
@@ -145,6 +168,12 @@ func (p *ChatProcessor) initAgent() {
 
 	case config.AIProviderOpenAI:
 		p.agent = openai.NewOpenAIAgent(p.baseConf, p)
+
+	case config.AIProviderAuto:
+		p.agent = ai.NewAutoAgent(
+			anthropic.NewAnthropicAgent(p.baseConf, p),
+			openai.NewOpenAIAgent(p.baseConf, p),
+		)
 
 	default:
 		p.agent = anthropic.NewAnthropicAgent(p.baseConf, p)
@@ -253,7 +282,7 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 		return nil, fmt.Errorf("backend provisioning failed: %w", err)
 	}
 
-	if plan.ProjectType == "admin_panel" || plan.ProjectType == "web" || plan.ProjectType == "webapp" {
+	if plan.ProjectType == "admin_panel" || plan.ProjectType == "web" || usesWebAppGenerator(plan.ProjectType) {
 		provWg.Add(1)
 		go func() {
 			defer provWg.Done()
@@ -305,9 +334,8 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 	)
 
 	go func(bPlan *models.ArchitectPlan, pd models.ProjectData) {
-		err = createBackendFromPlan(context.Background(), bPlan, pd, p.service, emit)
-		if err != nil {
-			log.Printf("[new-project] async table creation failed: %v", err)
+		if backendErr := createBackendFromPlan(context.Background(), bPlan, pd, p.service, emit); backendErr != nil {
+			log.Printf("[new-project] async table creation failed: %v", backendErr)
 		}
 	}(plan, *projectData)
 
@@ -328,6 +356,17 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 	}
 
 	p.injectYandexMetrica(ctx, plan.ProjectName, mfeURL, generated.Project.Files)
+
+	if plan.ProjectType == mobileProjectType {
+		mobileProject := newMobileProject(generated.Project)
+		emitMobileProject(emit, mobileProject)
+		log.Printf("[new-project] Capacitor mobile published: mfe_id=%s files=%d", p.microFrontendId, len(generated.Project.Files))
+		return &models.ParsedClaudeResponse{
+			Project:       generated.Project,
+			MobileProject: mobileProject,
+			Description:   buildProjectSummary(plan, generated.Project.Files, int(time.Since(startedAt).Seconds())),
+		}, nil
+	}
 
 	//_, err = p.saveProject(ctx, generated)
 	//if err != nil {
@@ -494,6 +533,20 @@ func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context,
 		}
 	}
 
+	if plan.ProjectType == "admin_panel" || plan.ProjectType == "web" || usesWebAppGenerator(plan.ProjectType) {
+		manifest, manifestErr := p.agent.GenerateManifest(ctx, models.ManifestInput{
+			Plan:    plan,
+			History: chatHistory,
+		})
+		if manifestErr != nil {
+			return nil, fmt.Errorf("manifest generation failed: %w", manifestErr)
+		}
+		if manifest == nil || len(manifest.Groups) < 2 {
+			return nil, fmt.Errorf("manifest generation returned incomplete structure")
+		}
+		p.prebuiltManifest = manifest
+	}
+
 	generated, err := p.generateCode(ctx, clarified, imageURLs, chatHistory, plan, projectData.ApiKey)
 	if err != nil {
 		return nil, err
@@ -511,6 +564,17 @@ func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context,
 	}
 
 	p.injectYandexMetrica(ctx, plan.ProjectName, mfeURL, generated.Project.Files)
+
+	if plan.ProjectType == mobileProjectType {
+		mobileProject := newMobileProject(generated.Project)
+		emitMobileProject(emit, mobileProject)
+		log.Printf("[mfe-current] Capacitor mobile published: mfe_id=%s files=%d", p.microFrontendId, len(generated.Project.Files))
+		return &models.ParsedClaudeResponse{
+			Project:       generated.Project,
+			MobileProject: mobileProject,
+			Description:   buildProjectSummary(plan, generated.Project.Files, int(time.Since(startedAt).Seconds())),
+		}, nil
+	}
 
 	log.Printf("[mfe-current] done — mfe_id=%s", p.microFrontendId)
 	return &models.ParsedClaudeResponse{Description: buildProjectSummary(plan, generated.Project.Files, int(time.Since(startedAt).Seconds()))}, nil
@@ -758,7 +822,7 @@ func (p *ChatProcessor) runVisualEdit(ctx context.Context, instruction string, c
 
 	err = withHeartbeat(
 		ctx, emit,
-		p.agentCfgs().Coder.Model,
+		p.editModel(),
 		[]string{
 			"Редактирую компоненты...",
 			"Применяю визуальные изменения...",
@@ -889,6 +953,11 @@ func (p *ChatProcessor) saveProject(ctx context.Context, req *models.ParsedClaud
 		})
 	}
 
+	projectType := ""
+	if req.MobileProject != nil {
+		projectType = req.MobileProject.ProjectType
+	}
+
 	return p.service.GoObjectBuilderService().McpProject().UpdateMcpProject(ctx, &pbo.McpProject{
 		Id:            p.mcpProjectId,
 		ResourceEnvId: p.resourceEnvId,
@@ -896,6 +965,7 @@ func (p *ChatProcessor) saveProject(ctx context.Context, req *models.ParsedClaud
 		Description:   truncateString(req.Description, 255),
 		ProjectFiles:  projectFiles,
 		ProjectEnv:    projectEnv,
+		ProjectType:   projectType,
 	})
 }
 

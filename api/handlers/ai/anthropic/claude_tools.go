@@ -27,7 +27,7 @@ var ToolArchitectPlan = claudeFunctionTool{
 			"client_types": map[string]any{
 				"type":        "array",
 				"items":       map[string]any{"type": "string"},
-				"description": "Access persona names inferred silently from the project domain and workflows. Each entry creates a separate client_type + role record. admin_panel and webapp: always include \"Administrator\" first and add 1-4 sensible domain-specific names when useful. Do not derive these from platform questionnaire choices. landing/web: empty [].",
+				"description": "Access persona names inferred silently from the project domain and workflows. Each entry creates a separate client_type + role record. admin_panel, webapp, and mobile: always include \"Administrator\" first and add 1-4 sensible domain-specific names when useful. Do not derive these from platform questionnaire choices. landing/web: empty [].",
 			},
 			"image_keywords": map[string]any{
 				"type":        "array",
@@ -36,7 +36,7 @@ var ToolArchitectPlan = claudeFunctionTool{
 			},
 			"project_type": map[string]any{
 				"type":        "string",
-				"enum":        []string{"admin_panel", "landing", "web", "webapp"},
+				"enum":        []string{"admin_panel", "landing", "web", "webapp", "mobile"},
 				"description": "Detected project type. ALWAYS choose one of these four. KEYWORD OVERRIDE (highest priority unless it is explicitly an internal staff/admin tool): if the user calls it an 'app', 'web app', 'webapp', 'mobile app', 'application', or 'mobile application' → choose 'webapp'. There is NO mobile/native type — a mobile app is built as a responsive 'webapp'. Otherwise: 'landing' = strict single-page promotional site. 'web' = multi-page marketing/content website. 'admin_panel' = internal back-office tool for staff to manage data. 'webapp' = a product SaaS workspace used by end-users (Linear/Notion/Trello/Slack/Asana-like) — focused, keyboard-driven app shell with workspace nav, command palette, boards/lists/inbox, NOT a marketing site and NOT an internal admin dashboard.",
 			},
 			"tables": map[string]any{
