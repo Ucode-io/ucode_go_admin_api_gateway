@@ -194,6 +194,10 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 		plan *models.ArchitectPlan
 	)
 
+	if err := p.Check(); err != nil {
+		return nil, err
+	}
+
 	err := withHeartbeat(
 		ctx, emit,
 		p.agentCfgs().Architect.Model,
@@ -379,6 +383,10 @@ func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context,
 			}
 		}
 		schemaCtx = schemaLines.String()
+	}
+
+	if err := p.Check(); err != nil {
+		return nil, err
 	}
 
 	var plan *models.ArchitectPlan
@@ -775,6 +783,10 @@ func (p *ChatProcessor) runVisualEdit(ctx context.Context, instruction string, c
 
 	prompt := chat_prompts.BuildVisualEditPrompt(instruction, resolvedContexts, filesContext)
 	messages := buildMessagesWithHistory(chatHistory, buildContentBlocksWithImages(prompt, imageURLs))
+
+	if err := p.Check(); err != nil {
+		return nil, err
+	}
 
 	var editedFiles []models.ProjectFile
 	var editedSummary string
