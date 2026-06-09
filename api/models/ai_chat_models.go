@@ -113,10 +113,20 @@ type (
 		StopReason    string            `json:"stop_reason"`
 		Usage         ClaudeUsage       `json:"usage"`
 		Project       *GeneratedProject `json:"project,omitempty"`
+		MobileProject *MobileProject    `json:"mobile_project,omitempty"`
 		Description   string            `json:"description"`
 		PendingAction *PendingAction    `json:"pending_action,omitempty"`
 		Questions     []AiQuestion      `json:"questions,omitempty"`
 		Plan          *HaikuPlan        `json:"plan,omitempty"`
+	}
+
+	MobileProject struct {
+		ProjectName    string        `json:"project_name"`
+		ProjectType    string        `json:"project_type"`
+		Runtime        string        `json:"runtime"`
+		RuntimeVersion string        `json:"runtime_version"`
+		WebDir         string        `json:"web_dir"`
+		Files          []ProjectFile `json:"files"`
 	}
 
 	// ========================== Classification ==========================
@@ -211,15 +221,15 @@ type (
 		BorderColor          string `json:"border_color"`
 		AccentColor          string `json:"accent_color"`
 		AccentHSL            string `json:"accent_hsl"`
-		FontFamily           string `json:"font_family"`      // heading font (e.g. "Syne", "Inter")
-		BodyFont             string `json:"body_font"`         // body font (e.g. "DM Sans", "Inter")
+		FontFamily           string `json:"font_family"` // heading font (e.g. "Syne", "Inter")
+		BodyFont             string `json:"body_font"`   // body font (e.g. "DM Sans", "Inter")
 		BorderRadius         string `json:"border_radius"`
 		DesignInspiration    string `json:"design_inspiration"`
 	}
 
 	ArchitectPlan struct {
 		ProjectName   string              `json:"project_name"`
-		ProjectType   string              `json:"project_type"` // "admin_panel" | "landing" | "web" | "webapp"
+		ProjectType   string              `json:"project_type"` // "admin_panel" | "landing" | "web" | "webapp" | "mobile"
 		Tables        []TablePlan         `json:"tables"`
 		Relations     []TableRelationPlan `json:"relations,omitempty"`
 		UIStructure   string              `json:"ui_structure"`

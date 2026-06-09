@@ -22,8 +22,9 @@ var toolArchitectPlan = chatTool{
 					"description": "2–4 Unsplash search terms that visually represent this project's real-world domain. Be specific and physical.",
 				},
 				"project_type": map[string]any{
-					"type": "string",
-					"enum": []string{"admin_panel", "landing", "web"},
+					"type":        "string",
+					"enum":        []string{"admin_panel", "landing", "web", "webapp", "mobile"},
+					"description": "Detected project type. 'mobile' = installable React/Vite app packaged with Capacitor for iOS/Android. 'webapp' = responsive web app/PWA delivered by URL. A bare 'mobile app' must use the platform-types answer; if unresolved, prefer 'mobile'.",
 				},
 				"tables": map[string]any{
 					"type": "array",
