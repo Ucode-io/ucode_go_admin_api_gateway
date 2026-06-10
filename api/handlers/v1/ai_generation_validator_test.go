@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"strings"
 	"testing"
 
 	"ucode/ucode_go_api_gateway/api/models"
@@ -1009,6 +1010,40 @@ func TestDedupTsTsxPairs_OnlyMatchesExactStem(t *testing.T) {
 	out := dedupTsTsxPairs(files)
 	if len(out) != 2 {
 		t.Errorf("expected both files to survive (stems don't match); got %d", len(out))
+	}
+}
+
+func TestValidateWebAppUIQualityRejectsTransparentOverlayHeader(t *testing.T) {
+	files := []models.ProjectFile{{
+		Path: "src/components/layout/Header.tsx",
+		Content: `export function Header() {
+  return <header className="fixed top-0 bg-background/80 backdrop-blur pt-[max(env(safe-area-inset-top),3rem)]">Header</header>
+}`,
+	}}
+
+	errors := validateWebAppUIQuality(files)
+	var messages []string
+	for _, validationError := range errors {
+		messages = append(messages, validationError.Message)
+	}
+	joined := strings.Join(messages, "\n")
+	for _, expected := range []string{"SOLID opaque background", "sticky and remain in normal layout flow"} {
+		if !strings.Contains(joined, expected) {
+			t.Fatalf("expected %q validation error, got: %s", expected, joined)
+		}
+	}
+}
+
+func TestValidateWebAppUIQualityAcceptsSolidStickyHeader(t *testing.T) {
+	files := []models.ProjectFile{{
+		Path: "src/components/layout/Header.tsx",
+		Content: `export function Header() {
+  return <header className="sticky top-0 bg-background pt-[max(env(safe-area-inset-top),3rem)]">Header</header>
+}`,
+	}}
+
+	if errors := validateWebAppUIQuality(files); len(errors) != 0 {
+		t.Fatalf("expected solid sticky Header to pass, got: %+v", errors)
 	}
 }
 

@@ -642,6 +642,28 @@ func validateWebAppUIQuality(files []models.ProjectFile) []ValidationError {
 					Message:  "webapp UI: the top bar must reserve the top safe area — add pt-[max(env(safe-area-inset-top),3rem)] so the title/bell/avatar are not clipped by the status bar / notch / Dynamic Island.",
 				})
 			}
+			headerTag := firstOpeningTag(content, "header")
+			if headerTag == "" {
+				headerTag = content
+			}
+			hasTranslucentBackground := hasAny(headerTag,
+				"bg-transparent", "bg-background/", "bg-card/", "bg-primary/", "bg-secondary/", "bg-muted/")
+			hasSolidBackground := hasAny(headerTag,
+				"bg-background", "bg-card", "bg-primary", "bg-secondary", "bg-muted", "bg-sidebar", "bg-white", "bg-black", "bg-[")
+			if hasTranslucentBackground || !hasSolidBackground {
+				errors = append(errors, ValidationError{
+					Severity: "error",
+					File:     f.Path,
+					Message:  "webapp UI: Header must have a SOLID opaque background on the <header> element (for example bg-background or bg-card). Never use transparent/translucent backgrounds or blur-only styling because the hero and scrolling content become unreadable behind it.",
+				})
+			}
+			if hasAny(headerTag, "absolute", "fixed") {
+				errors = append(errors, ValidationError{
+					Severity: "error",
+					File:     f.Path,
+					Message:  "webapp UI: Header must be sticky and remain in normal layout flow, not absolute/fixed over the hero or page content. Use sticky top-0 with the hero rendered below it.",
+				})
+			}
 			continue
 		}
 
@@ -716,6 +738,18 @@ func hasAny(s string, needles ...string) bool {
 		}
 	}
 	return false
+}
+
+func firstOpeningTag(content, tag string) string {
+	start := strings.Index(content, "<"+tag)
+	if start == -1 {
+		return ""
+	}
+	end := strings.Index(content[start:], ">")
+	if end == -1 {
+		return ""
+	}
+	return content[start : start+end+1]
 }
 
 func findSelfRecursiveComponents(path, content string) []string {
@@ -1566,7 +1600,7 @@ func (p *ChatProcessor) repairSingleFile(
 	sb.WriteString("  - For '<SelectItem value=\"\">' errors: Radix SelectItem values cannot be empty strings. Replace empty option values with non-empty sentinel strings such as 'all', 'none', or 'unassigned'. Update state/filter logic so the sentinel means no filter / empty relation, but NEVER render value=\"\" on SelectItem.\n")
 	sb.WriteString("  - For 'admin UI quality' errors: perform a focused visual/product polish pass on this file. Preserve every API endpoint, hook, mutation, entity field, JSON extraction, route, and generated type. Improve layout density, hierarchy, cards, filters, status chips, detail drawer/dialog, states, and domain-specific widgets only.\n")
 	sb.WriteString("  - For 'word with apostrophe used as unquoted JS expression' errors: the file contains Uzbek/non-ASCII text like Ko'rildi, Ko'rib chiqilmoqda, Og'zaki used directly as JavaScript identifiers without string quotes. This crashes esbuild. Find EVERY such word in arrays, object property values, variable assignments, JSX attribute values — wrap each one in double quotes. Example: { label: Ko'rildi } → { label: \"Ko'rildi\" }, [Ko'rib] → [\"Ko'rib\"]. JSX text nodes are fine: <Badge>Ko'rildi</Badge> does NOT need change, only JS expression contexts.\n")
-	sb.WriteString("  - For 'webapp UI' errors: this is a MOBILE APP (responsive web). Fix toward a phone layout — a centered max-w-md min-h-[100dvh] frame, a fixed bottom tab bar (NOT a desktop side rail) with a SOLID opaque bg-background (no /opacity, no transparent, no blur-only), a compact top bar (NO ⌘K), single-column stacked cards/list rows (NOT data tables or KPI dashboards), bottom-sheet/detail-route for item details, and lucide icons rendered as <Icon/> components (never icon-name strings). EVERY button/tab/tile/row/FAB must be wired (onClick navigate via useNavigate/NavLink, or open a Sheet via useState, or fire a useApiMutation) — no dead buttons. Render real API data (useApiQuery + extractList), not hardcoded values. Preserve all APIs, hooks, fields, routes, and types.\n")
+	sb.WriteString("  - For 'webapp UI' errors: this is a MOBILE APP (responsive web). Fix toward a phone layout — a centered max-w-md min-h-[100dvh] frame, a fixed bottom tab bar (NOT a desktop side rail) with a SOLID opaque bg-background (no /opacity, no transparent, no blur-only), and a compact sticky in-flow Header with a SOLID opaque background plus pt-[max(env(safe-area-inset-top),3rem)] (never absolute/fixed/transparent over the hero). Use single-column stacked cards/list rows (NOT data tables or KPI dashboards), bottom-sheet/detail-route for item details, and lucide icons rendered as <Icon/> components (never icon-name strings). EVERY button/tab/tile/row/FAB must be wired (onClick navigate via useNavigate/NavLink, or open a Sheet via useState, or fire a useApiMutation) — no dead buttons. Render real API data (useApiQuery + extractList), not hardcoded values. Preserve all APIs, hooks, fields, routes, and types.\n")
 	sb.WriteString("  - For brace/bracket/paren imbalance: carefully trace through the file and find the exact location of the missing or extra delimiter. Common causes: unclosed ternary in JSX, missing closing brace in .map() callback, extra } after a component return, unclosed template literal.\n")
 	sb.WriteString("  - NEVER use angle-bracket type assertions in .tsx files (const x = <Type>value). ALWAYS use 'as' syntax (const x = value as Type).\n")
 	sb.WriteString("  - Output the complete corrected file. Never truncate.\n")
