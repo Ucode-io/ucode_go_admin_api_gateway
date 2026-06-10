@@ -330,6 +330,8 @@ func capacitorCapabilityPackage(capability models.MobileCapability) string {
 		return "@capacitor/camera"
 	case models.MobileCapabilityLocalNotifications:
 		return "@capacitor/local-notifications"
+	case models.MobileCapabilityBiometricAuth:
+		return capacitorBiometricPackage
 	default:
 		return ""
 	}
@@ -341,6 +343,8 @@ func capacitorCapabilityWrapper(capability models.MobileCapability) string {
 		return "src/lib/mobile/camera.ts"
 	case models.MobileCapabilityLocalNotifications:
 		return "src/lib/mobile/localNotifications.ts"
+	case models.MobileCapabilityBiometricAuth:
+		return "src/lib/mobile/biometric.ts"
 	default:
 		return ""
 	}

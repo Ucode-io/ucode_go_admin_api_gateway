@@ -26,7 +26,7 @@ func capacitorPromptAddendum(capabilities []models.MobileCapability) string {
 		case models.MobileCapabilityPushNotifications:
 			builder.WriteString("- push_notifications: build-worker requirement only; create UI/preferences, but do not import or fake a push plugin.\n")
 		case models.MobileCapabilityBiometricAuth:
-			builder.WriteString("- biometric_auth: build-worker requirement only; create UI/fallback auth flow, but do not import a biometric plugin.\n")
+			builder.WriteString("- biometric_auth: import isBiometricAvailable/authenticateBiometric from '@/lib/mobile/biometric'. Gate the biometric option on isBiometricAvailable() and call authenticateBiometric() on the unlock/login action — this triggers REAL Face ID / Touch ID / fingerprint on device (browser preview falls back to a confirm). NEVER render a fake or static biometric button, and never import the biometric plugin directly.\n")
 		case models.MobileCapabilityIdentityVerification:
 			builder.WriteString("- identity_verification: external backend/provider requirement; create capture/upload UI using the approved camera wrapper, but do not fake verification.\n")
 		default:
