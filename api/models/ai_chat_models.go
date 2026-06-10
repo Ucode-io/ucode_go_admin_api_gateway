@@ -25,16 +25,19 @@ type (
 	// EnrichedMessage is the HTTP representation of a chat message.
 	// It mirrors pbo.Message but adds a Plan field parsed from embedded content.
 	EnrichedMessage struct {
-		ID         string       `json:"id"`
-		ChatID     string       `json:"chat_id"`
-		Role       string       `json:"role"`
-		Content    string       `json:"content"`
-		Images     []string     `json:"images"`
-		HasFiles   bool         `json:"has_files"`
-		TokensUsed int32        `json:"tokens_used"`
-		CreatedAt  string       `json:"created_at"`
-		Plan       *HaikuPlan   `json:"plan,omitempty"`
-		Questions  []AiQuestion `json:"questions,omitempty"`
+		ID                  string       `json:"id"`
+		ChatID              string       `json:"chat_id"`
+		Role                string       `json:"role"`
+		Content             string       `json:"content"`
+		Images              []string     `json:"images"`
+		HasFiles            bool         `json:"has_files"`
+		TokensUsed          int32        `json:"tokens_used"`
+		CreatedAt           string       `json:"created_at"`
+		LikeCount           int32        `json:"like_count"`
+		DislikeCount        int32        `json:"dislike_count"`
+		CurrentUserReaction string       `json:"current_user_reaction"`
+		Plan                *HaikuPlan   `json:"plan,omitempty"`
+		Questions           []AiQuestion `json:"questions,omitempty"`
 	}
 
 	// VisualContext is optional metadata sent by the frontend when the user

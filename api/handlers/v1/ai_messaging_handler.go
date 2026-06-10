@@ -11,7 +11,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"ucode/ucode_go_api_gateway/api/handlers/billing"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
@@ -410,13 +409,6 @@ func (h *HandlerV1) handleStreamingMessage(c *gin.Context, processor *ChatProces
 					Icon:    "ban",
 					Message: "Достигнут лимит токенов для этого проекта",
 					Data:    processor.tokenLimitData(tokenErr),
-				})
-			case errors.Is(pipelineErr, billing.ErrProjectLimitExceeded):
-				processor.emitter().Emit(SSEEvent{
-					Type:    EvError,
-					Icon:    "credit-card",
-					Message: "Project limit reached. Please upgrade your plan.",
-					Data:    models.PaymentProjectLimit,
 				})
 			default:
 				processor.emitter().Emit(SSEEvent{

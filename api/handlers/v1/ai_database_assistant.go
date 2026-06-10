@@ -60,6 +60,10 @@ func (p *ChatProcessor) runDatabaseFlow(ctx context.Context, clarified string, c
 				"Do NOT set needs_more_data=true.]"
 		}
 
+		if err := p.Check(); err != nil {
+			return nil, err
+		}
+
 		action, err := p.callDatabaseAssistant(ctx, clarified, schemaText, dataContext, chatHistory)
 		if err != nil {
 			return nil, fmt.Errorf("AI call failed (iter %d): %w", i, err)

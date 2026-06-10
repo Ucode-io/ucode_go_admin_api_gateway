@@ -84,14 +84,12 @@ const (
 	PaymentCodeDatabaseLimit   = "database_limit"
 	PaymentCodeAssetLimit      = "asset_limit"
 	PaymentCodeTableLimit      = "table_limit"
-	PaymentCodeProjectLimit    = "project_limit"
 	PaymentCodeApiCallLimit    = "api_call_limit"
 	PaymentCodeTokenDayLimit   = "token_day_limit"
 	PaymentCodeTokenMonthLimit = "token_month_limit"
 
 	PaymentUnitMB       = "mb"
 	PaymentUnitTables   = "tables"
-	PaymentUnitProjects = "projects"
 	PaymentUnitRequests = "requests"
 	PaymentUnitTokens   = "tokens"
 )
@@ -107,6 +105,5 @@ var (
 	PaymentDatabaseLimit = PaymentRequiredData{Type: PaymentRequiredType, Code: PaymentCodeDatabaseLimit, Unit: PaymentUnitMB}
 	PaymentAssetLimit    = PaymentRequiredData{Type: PaymentRequiredType, Code: PaymentCodeAssetLimit, Unit: PaymentUnitMB}
 	PaymentTableLimit    = PaymentRequiredData{Type: PaymentRequiredType, Code: PaymentCodeTableLimit, Unit: PaymentUnitTables}
-	PaymentProjectLimit  = PaymentRequiredData{Type: PaymentRequiredType, Code: PaymentCodeProjectLimit, Unit: PaymentUnitProjects}
 	PaymentApiCallLimit  = PaymentRequiredData{Type: PaymentRequiredType, Code: PaymentCodeApiCallLimit, Unit: PaymentUnitRequests}
 )
