@@ -21,7 +21,8 @@ and listenForAndroidBackButton.
 
 MOBILE RUNTIME REQUIREMENTS:
 - Keep the phone-first shell, fixed bottom tabs, single-column screens, and touch targets >= 44px.
-- Respect safe areas with CSS env(safe-area-inset-top/right/bottom/left), especially the bottom tab bar.
+- Respect safe areas with CSS env(safe-area-inset-top/right/bottom/left). The sticky Header must reserve the
+  top inset and have a solid opaque background; it must never float transparently over the hero/content.
 - Do not rely on hover, desktop-only keyboard shortcuts, or wide data tables.
 - Use browser-compatible APIs by default. Import from '@/lib/capacitor' only when native behavior is needed.
 - Native plugin calls must keep a browser fallback so the microfrontend preview continues to work.
