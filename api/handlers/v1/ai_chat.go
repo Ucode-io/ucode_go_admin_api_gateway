@@ -144,17 +144,32 @@ type aiChatMessageReactionResponse struct {
 
 func (h *HandlerV1) getAiChatUserID(c *gin.Context) (string, error) {
 	authInfo, err := h.adminAuthInfo(c)
-	if err != nil {
+	if err == nil {
+		userID := authInfo.GetUserIdAuth()
+		if userID == "" {
+			userID = authInfo.GetUserId()
+		}
+		if userID != "" {
+			return userID, nil
+		}
+	}
+
+	authDataRaw, ok := c.Get("auth")
+	if !ok {
 		return "", err
 	}
-	userID := authInfo.GetUserIdAuth()
-	if userID == "" {
-		userID = authInfo.GetUserId()
+	authData, ok := authDataRaw.(models.AuthData)
+	if !ok || authData.Type != "API-KEY" {
+		return "", err
 	}
-	if userID == "" {
-		return "", fmt.Errorf("user_id is required")
+
+	for _, key := range []string{"id", "app_id", "client_id"} {
+		if userID := strings.TrimSpace(fmt.Sprintf("%v", authData.Data[key])); userID != "" && userID != "<nil>" {
+			return userID, nil
+		}
 	}
-	return userID, nil
+
+	return "", fmt.Errorf("user_id is required")
 }
 
 func aiChatMessageReactionTypeFromRequest(reactionType string) (pbo.MessageReactionType, error) {
