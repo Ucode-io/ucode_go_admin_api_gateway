@@ -70,6 +70,35 @@ export async function scheduleLocalNotification(title: string, body: string, at:
 }
 `
 
+const capacitorBiometricBridge = `import { BiometricAuth } from '@aparajita/capacitor-biometric-auth';
+import { isNativePlatform } from '@/lib/capacitor';
+
+// Whether THIS device can use Face ID / Touch ID / fingerprint. Gate biometric UI on this.
+export async function isBiometricAvailable(): Promise<boolean> {
+  if (!isNativePlatform) return false;
+  try {
+    const info = await BiometricAuth.checkBiometry();
+    return info.isAvailable;
+  } catch {
+    return false;
+  }
+}
+
+// Prompts the REAL native Face ID / Touch ID / fingerprint. Resolves true on success.
+export async function authenticateBiometric(reason = 'Authenticate to continue'): Promise<boolean> {
+  if (!isNativePlatform) {
+    // Biometric runs only on a real device; confirm in the browser preview so the flow continues.
+    return window.confirm(reason + '\n\n(Biometric unlock runs on a real device.)');
+  }
+  try {
+    await BiometricAuth.authenticate({ reason, cancelTitle: 'Cancel', allowDeviceCredential: true });
+    return true;
+  } catch {
+    return false;
+  }
+}
+`
+
 type capacitorCapabilityManifest struct {
 	Capabilities        []models.MobileCapability `json:"capabilities"`
 	RuntimeReady        []models.MobileCapability `json:"runtime_ready"`
@@ -86,6 +115,9 @@ func applyCapacitorCapabilities(files []models.ProjectFile, dependencies map[str
 		case models.MobileCapabilityLocalNotifications:
 			dependencies["@capacitor/local-notifications"] = capacitorPackageVersion
 			files = upsertProjectFile(files, models.ProjectFile{Path: "src/lib/mobile/localNotifications.ts", Content: capacitorLocalNotificationsBridge})
+		case models.MobileCapabilityBiometricAuth:
+			dependencies[capacitorBiometricPackage] = capacitorBiometricPackageVersion
+			files = upsertProjectFile(files, models.ProjectFile{Path: "src/lib/mobile/biometric.ts", Content: capacitorBiometricBridge})
 		}
 	}
 
@@ -102,7 +134,7 @@ func newCapacitorCapabilityManifest(capabilities []models.MobileCapability) capa
 	for _, capability := range manifest.Capabilities {
 		manifest.BuildWorkerRequired = append(manifest.BuildWorkerRequired, capability)
 		switch capability {
-		case models.MobileCapabilityCamera, models.MobileCapabilityLocalNotifications:
+		case models.MobileCapabilityCamera, models.MobileCapabilityLocalNotifications, models.MobileCapabilityBiometricAuth:
 			manifest.RuntimeReady = append(manifest.RuntimeReady, capability)
 		}
 	}
