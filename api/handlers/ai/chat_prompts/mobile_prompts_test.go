@@ -7,7 +7,7 @@ import (
 )
 
 func TestMobilePlatformPromptDifferentiatesWebAndCapacitor(t *testing.T) {
-	for _, expected := range []string{`"id": "web-app"`, `"id": "mobile-app"`, `installable Capacitor app`} {
+	for _, expected := range []string{`"id": "web-app"`, `"id": "mobile-app"`, `installable Capacitor mobile app`} {
 		if !strings.Contains(PromptRouter, expected) {
 			t.Fatalf("PromptRouter must contain %q", expected)
 		}

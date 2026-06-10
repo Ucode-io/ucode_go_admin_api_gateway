@@ -72,6 +72,7 @@ func (a *GeminiAgent) ArchitectProject(_ context.Context, in models.ArchitectInp
 		return nil, fmt.Errorf("architect: decode: %w", err)
 	}
 	models.ApplyProjectTypeKeywordOverride(&plan, in.Clarified)
+	models.ApplyMobileCapabilityKeywordOverride(&plan, in.Clarified)
 	return &plan, nil
 }
 

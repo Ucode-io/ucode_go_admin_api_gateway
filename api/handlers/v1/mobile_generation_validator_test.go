@@ -9,7 +9,7 @@ import (
 
 func TestValidateMobileGeneratedProjectAcceptsCapacitorProject(t *testing.T) {
 	files := append([]models.ProjectFile(nil), GetTemplateScaffold()...)
-	files, err := applyCapacitorScaffold(files, "Pocket CRM", "project-12345678")
+	files, err := applyCapacitorScaffold(files, "Pocket CRM", "project-12345678", nil)
 	if err != nil {
 		t.Fatalf("apply Capacitor scaffold: %v", err)
 	}
@@ -32,7 +32,7 @@ func TestValidateMobileGeneratedProjectRejectsMissingCapacitorConfig(t *testing.
 
 func TestValidateMobileGeneratedProjectRequiresHashRouter(t *testing.T) {
 	files := append([]models.ProjectFile(nil), GetTemplateScaffold()...)
-	files, err := applyCapacitorScaffold(files, "Pocket CRM", "project-12345678")
+	files, err := applyCapacitorScaffold(files, "Pocket CRM", "project-12345678", nil)
 	if err != nil {
 		t.Fatalf("apply Capacitor scaffold: %v", err)
 	}
@@ -50,7 +50,7 @@ func TestValidateMobileGeneratedProjectRequiresHashRouter(t *testing.T) {
 
 func TestValidateMobileGeneratedProjectRejectsExpoAndRemoteServer(t *testing.T) {
 	files := append([]models.ProjectFile(nil), GetTemplateScaffold()...)
-	files, err := applyCapacitorScaffold(files, "Pocket CRM", "project-12345678")
+	files, err := applyCapacitorScaffold(files, "Pocket CRM", "project-12345678", nil)
 	if err != nil {
 		t.Fatalf("apply Capacitor scaffold: %v", err)
 	}
@@ -78,7 +78,7 @@ func TestValidateMobileGeneratedProjectRejectsExpoAndRemoteServer(t *testing.T) 
 
 func TestValidateMobileGeneratedProjectRejectsUnapprovedCapacitorPlugin(t *testing.T) {
 	files := append([]models.ProjectFile(nil), GetTemplateScaffold()...)
-	files, err := applyCapacitorScaffold(files, "Pocket CRM", "project-12345678")
+	files, err := applyCapacitorScaffold(files, "Pocket CRM", "project-12345678", nil)
 	if err != nil {
 		t.Fatalf("apply Capacitor scaffold: %v", err)
 	}
@@ -94,4 +94,36 @@ func TestValidateMobileGeneratedProjectRejectsUnapprovedCapacitorPlugin(t *testi
 		}
 	}
 	t.Fatalf("expected unapproved Capacitor plugin error, got: %+v", validationErrors)
+}
+
+func TestValidateMobileGeneratedProjectAcceptsDeclaredCameraWrapper(t *testing.T) {
+	files := append([]models.ProjectFile(nil), GetTemplateScaffold()...)
+	files, err := applyCapacitorScaffold(files, "Pocket CRM", "project-12345678", []models.MobileCapability{models.MobileCapabilityCamera})
+	if err != nil {
+		t.Fatalf("apply Capacitor scaffold: %v", err)
+	}
+
+	if validationErrors := validateMobileGeneratedProject(files); len(validationErrors) != 0 {
+		t.Fatalf("expected valid camera capability project, got errors: %+v", validationErrors)
+	}
+}
+
+func TestValidateMobileGeneratedProjectRejectsDirectCameraImport(t *testing.T) {
+	files := append([]models.ProjectFile(nil), GetTemplateScaffold()...)
+	files, err := applyCapacitorScaffold(files, "Pocket CRM", "project-12345678", []models.MobileCapability{models.MobileCapabilityCamera})
+	if err != nil {
+		t.Fatalf("apply Capacitor scaffold: %v", err)
+	}
+	files = upsertProjectFile(files, models.ProjectFile{
+		Path:    "src/pages/HomePage.tsx",
+		Content: `import { Camera } from '@capacitor/camera'; export function HomePage() { return null; }`,
+	})
+
+	validationErrors := validateMobileGeneratedProject(files)
+	for _, validationError := range validationErrors {
+		if strings.Contains(validationError.Message, `unapproved Capacitor import "@capacitor/camera"`) {
+			return
+		}
+	}
+	t.Fatalf("expected direct camera import error, got: %+v", validationErrors)
 }

@@ -566,6 +566,10 @@ SCHEMA RULES:
 5. Every project MUST have exactly ONE login table: set "is_login_table": true.
 6. For the login table, do NOT include auth fields (login, email, phone, password, tin) — they are auto-created from "login_strategy". Only add custom fields like "full_name", "avatar".
 7. "client_types": for admin_panel, webapp, and mobile — infer a small set of sensible access persona names silently from the project domain and workflows. Always include "Administrator" first, and add 1–4 domain-appropriate names when useful (e.g. ["Administrator", "Dispatcher", "Driver"] for TMS). Do NOT treat questionnaire platform choices as client types. Leave empty [] for landing/web projects.
+8. "mobile_capabilities": for mobile projects only, list explicitly requested native requirements using only:
+   "camera", "local_notifications", "push_notifications", "biometric_auth", "identity_verification".
+   Identity verification implies camera. Biometric authentication means Face ID/Touch ID/fingerprint device authentication;
+   it is not identity/KYC verification. Leave empty [] for non-mobile projects.
 
 RELATIONS RULES:
 7. Output a "relations" array covering EVERY foreign-key link between tables in this project.

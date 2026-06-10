@@ -41,7 +41,7 @@ export function listenForAndroidBackButton(handler: () => void) {
 }
 `
 
-func applyCapacitorScaffold(files []models.ProjectFile, projectName, projectID string) ([]models.ProjectFile, error) {
+func applyCapacitorScaffold(files []models.ProjectFile, projectName, projectID string, capabilities []models.MobileCapability) ([]models.ProjectFile, error) {
 	packageIndex := projectFileIndex(files, "package.json")
 	if packageIndex == -1 {
 		return nil, fmt.Errorf("capacitor scaffold: package.json is missing")
@@ -69,6 +69,7 @@ func applyCapacitorScaffold(files []models.ProjectFile, projectName, projectID s
 	} {
 		dependencies[name] = capacitorPackageVersion
 	}
+	files = applyCapacitorCapabilities(files, dependencies, capabilities)
 
 	devDependencies := packageJSONSection(packageJSON, "devDependencies")
 	for _, name := range []string{"@capacitor/android", "@capacitor/cli", "@capacitor/ios"} {

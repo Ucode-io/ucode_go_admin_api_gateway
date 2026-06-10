@@ -20,6 +20,7 @@ func validateMobileGeneratedProject(files []models.ProjectFile) []ValidationErro
 		"package.json",
 		"index.html",
 		"capacitor.config.ts",
+		"mobile.capabilities.json",
 		"vite.config.ts",
 		"src/App.tsx",
 		"src/main.tsx",
@@ -34,10 +35,13 @@ func validateMobileGeneratedProject(files []models.ProjectFile) []ValidationErro
 		}
 	}
 
-	validationErrors = append(validationErrors, validateCapacitorPackageJSON(contentByPath["package.json"])...)
+	capabilities, manifestErrors := validateCapacitorCapabilityManifest(contentByPath["mobile.capabilities.json"])
+	validationErrors = append(validationErrors, manifestErrors...)
+	validationErrors = append(validationErrors, validateCapacitorPackageJSON(contentByPath["package.json"], capabilities)...)
 	validationErrors = append(validationErrors, validateCapacitorIndexHTML(contentByPath["index.html"])...)
 	validationErrors = append(validationErrors, validateCapacitorConfig(contentByPath["capacitor.config.ts"])...)
-	validationErrors = append(validationErrors, validateCapacitorSource(files)...)
+	validationErrors = append(validationErrors, validateCapacitorSource(files, capabilities)...)
+	validationErrors = append(validationErrors, validateCapacitorCapabilityFiles(contentByPath, capabilities)...)
 	if appContent := contentByPath["src/App.tsx"]; appContent != "" {
 		switch {
 		case strings.Contains(appContent, "BrowserRouter"):
@@ -90,7 +94,7 @@ func validateCapacitorIndexHTML(content string) []ValidationError {
 	return validationErrors
 }
 
-func validateCapacitorPackageJSON(content string) []ValidationError {
+func validateCapacitorPackageJSON(content string, capabilities []models.MobileCapability) []ValidationError {
 	if content == "" {
 		return nil
 	}
@@ -121,6 +125,16 @@ func validateCapacitorPackageJSON(content string) []ValidationError {
 			})
 		}
 	}
+	for _, capability := range capabilities {
+		dependency := capacitorCapabilityPackage(capability)
+		if dependency != "" && packageJSON.Dependencies[dependency] == "" {
+			validationErrors = append(validationErrors, ValidationError{
+				Severity: "error",
+				File:     "package.json",
+				Message:  fmt.Sprintf("missing Capacitor capability dependency %q", dependency),
+			})
+		}
+	}
 	for _, dependency := range []string{"@capacitor/android", "@capacitor/cli", "@capacitor/ios"} {
 		if packageJSON.DevDependencies[dependency] == "" {
 			validationErrors = append(validationErrors, ValidationError{
@@ -135,7 +149,7 @@ func validateCapacitorPackageJSON(content string) []ValidationError {
 		"devDependencies": packageJSON.DevDependencies,
 	} {
 		for dependency := range dependencies {
-			if strings.HasPrefix(dependency, "@capacitor/") && !isApprovedCapacitorPackage(dependency) {
+			if strings.HasPrefix(dependency, "@capacitor/") && !isApprovedCapacitorPackage(dependency, capabilities) {
 				validationErrors = append(validationErrors, ValidationError{
 					Severity: "error",
 					File:     "package.json",
@@ -188,7 +202,7 @@ func validateCapacitorConfig(content string) []ValidationError {
 	return validationErrors
 }
 
-func validateCapacitorSource(files []models.ProjectFile) []ValidationError {
+func validateCapacitorSource(files []models.ProjectFile, capabilities []models.MobileCapability) []ValidationError {
 	var validationErrors []ValidationError
 	capacitorImport := regexp.MustCompile(`@capacitor/[a-z0-9-]+`)
 	for _, file := range files {
@@ -215,7 +229,7 @@ func validateCapacitorSource(files []models.ProjectFile) []ValidationError {
 			continue
 		}
 		for _, dependency := range capacitorImport.FindAllString(file.Content, -1) {
-			if !isApprovedCapacitorPackage(dependency) {
+			if !isApprovedCapacitorSourceImport(file.Path, dependency, capabilities) {
 				validationErrors = append(validationErrors, ValidationError{
 					Severity: "error",
 					File:     file.Path,
@@ -227,7 +241,7 @@ func validateCapacitorSource(files []models.ProjectFile) []ValidationError {
 	return validationErrors
 }
 
-func isApprovedCapacitorPackage(packageName string) bool {
+func isApprovedCapacitorPackage(packageName string, capabilities []models.MobileCapability) bool {
 	switch packageName {
 	case "@capacitor/android",
 		"@capacitor/app",
@@ -238,7 +252,108 @@ func isApprovedCapacitorPackage(packageName string) bool {
 		"@capacitor/keyboard",
 		"@capacitor/status-bar":
 		return true
-	default:
+	}
+	for _, capability := range capabilities {
+		if capacitorCapabilityPackage(capability) == packageName {
+			return true
+		}
+	}
+	return false
+}
+
+func isApprovedCapacitorSourceImport(path, packageName string, capabilities []models.MobileCapability) bool {
+	if !isApprovedCapacitorPackage(packageName, capabilities) {
 		return false
 	}
+	switch packageName {
+	case "@capacitor/camera":
+		return path == "src/lib/mobile/camera.ts"
+	case "@capacitor/local-notifications":
+		return path == "src/lib/mobile/localNotifications.ts"
+	default:
+		return true
+	}
+}
+
+func validateCapacitorCapabilityManifest(content string) ([]models.MobileCapability, []ValidationError) {
+	if content == "" {
+		return nil, nil
+	}
+
+	var manifest capacitorCapabilityManifest
+	if err := json.Unmarshal([]byte(content), &manifest); err != nil {
+		return nil, []ValidationError{{
+			Severity: "error",
+			File:     "mobile.capabilities.json",
+			Message:  "invalid JSON: " + err.Error(),
+		}}
+	}
+
+	canonical := models.CanonicalMobileCapabilities(manifest.Capabilities)
+	if len(canonical) != len(manifest.Capabilities) {
+		return canonical, []ValidationError{{
+			Severity: "error",
+			File:     "mobile.capabilities.json",
+			Message:  "contains duplicate or unsupported mobile capabilities",
+		}}
+	}
+	expected := newCapacitorCapabilityManifest(canonical)
+	if !equalMobileCapabilities(manifest.RuntimeReady, expected.RuntimeReady) ||
+		!equalMobileCapabilities(manifest.BuildWorkerRequired, expected.BuildWorkerRequired) {
+		return canonical, []ValidationError{{
+			Severity: "error",
+			File:     "mobile.capabilities.json",
+			Message:  "runtime_ready or build_worker_required does not match declared capabilities",
+		}}
+	}
+	return canonical, nil
+}
+
+func validateCapacitorCapabilityFiles(contentByPath map[string]string, capabilities []models.MobileCapability) []ValidationError {
+	var validationErrors []ValidationError
+	for _, capability := range capabilities {
+		path := capacitorCapabilityWrapper(capability)
+		if path != "" && contentByPath[path] == "" {
+			validationErrors = append(validationErrors, ValidationError{
+				Severity: "error",
+				File:     path,
+				Message:  fmt.Sprintf("required wrapper for mobile capability %q is missing", capability),
+			})
+		}
+	}
+	return validationErrors
+}
+
+func capacitorCapabilityPackage(capability models.MobileCapability) string {
+	switch capability {
+	case models.MobileCapabilityCamera:
+		return "@capacitor/camera"
+	case models.MobileCapabilityLocalNotifications:
+		return "@capacitor/local-notifications"
+	default:
+		return ""
+	}
+}
+
+func capacitorCapabilityWrapper(capability models.MobileCapability) string {
+	switch capability {
+	case models.MobileCapabilityCamera:
+		return "src/lib/mobile/camera.ts"
+	case models.MobileCapabilityLocalNotifications:
+		return "src/lib/mobile/localNotifications.ts"
+	default:
+		return ""
+	}
+}
+
+func equalMobileCapabilities(left, right []models.MobileCapability) bool {
+	if len(left) != len(right) {
+		return false
+	}
+	for index := range left {
+		if left[index] != right[index] {
+			return false
+		}
+	}
+	return true
 }

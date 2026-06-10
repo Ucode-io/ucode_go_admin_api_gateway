@@ -358,7 +358,7 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 	p.injectYandexMetrica(ctx, plan.ProjectName, mfeURL, generated.Project.Files)
 
 	if plan.ProjectType == mobileProjectType {
-		mobileProject := newMobileProject(generated.Project)
+		mobileProject := newMobileProject(generated.Project, plan.MobileCapabilities)
 		emitMobileProject(emit, mobileProject)
 		log.Printf("[new-project] Capacitor mobile published: mfe_id=%s files=%d", p.microFrontendId, len(generated.Project.Files))
 		return &models.ParsedClaudeResponse{
@@ -566,7 +566,7 @@ func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context,
 	p.injectYandexMetrica(ctx, plan.ProjectName, mfeURL, generated.Project.Files)
 
 	if plan.ProjectType == mobileProjectType {
-		mobileProject := newMobileProject(generated.Project)
+		mobileProject := newMobileProject(generated.Project, plan.MobileCapabilities)
 		emitMobileProject(emit, mobileProject)
 		log.Printf("[mfe-current] Capacitor mobile published: mfe_id=%s files=%d", p.microFrontendId, len(generated.Project.Files))
 		return &models.ParsedClaudeResponse{

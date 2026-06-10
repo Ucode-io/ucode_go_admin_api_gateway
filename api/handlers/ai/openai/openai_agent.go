@@ -69,6 +69,7 @@ func (a *OpenAIAgent) ArchitectProject(ctx context.Context, in models.ArchitectI
 		return nil, fmt.Errorf("architect: decode: %w", err)
 	}
 	models.ApplyProjectTypeKeywordOverride(&plan, in.Clarified)
+	models.ApplyMobileCapabilityKeywordOverride(&plan, in.Clarified)
 	return &plan, nil
 }
 
