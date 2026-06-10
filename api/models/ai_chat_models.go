@@ -121,12 +121,13 @@ type (
 	}
 
 	MobileProject struct {
-		ProjectName    string        `json:"project_name"`
-		ProjectType    string        `json:"project_type"`
-		Runtime        string        `json:"runtime"`
-		RuntimeVersion string        `json:"runtime_version"`
-		WebDir         string        `json:"web_dir"`
-		Files          []ProjectFile `json:"files"`
+		ProjectName    string             `json:"project_name"`
+		ProjectType    string             `json:"project_type"`
+		Runtime        string             `json:"runtime"`
+		RuntimeVersion string             `json:"runtime_version"`
+		WebDir         string             `json:"web_dir"`
+		Capabilities   []MobileCapability `json:"capabilities"`
+		Files          []ProjectFile      `json:"files"`
 	}
 
 	// ========================== Classification ==========================
@@ -228,14 +229,15 @@ type (
 	}
 
 	ArchitectPlan struct {
-		ProjectName   string              `json:"project_name"`
-		ProjectType   string              `json:"project_type"` // "admin_panel" | "landing" | "web" | "webapp" | "mobile"
-		Tables        []TablePlan         `json:"tables"`
-		Relations     []TableRelationPlan `json:"relations,omitempty"`
-		UIStructure   string              `json:"ui_structure"`
-		Design        DesignSpec          `json:"design"`
-		ImageKeywords []string            `json:"image_keywords,omitempty"`
-		ClientTypes   []string            `json:"client_types,omitempty"` // silently inferred access personas → each becomes client_type + role record
+		ProjectName        string              `json:"project_name"`
+		ProjectType        string              `json:"project_type"` // "admin_panel" | "landing" | "web" | "webapp" | "mobile"
+		Tables             []TablePlan         `json:"tables"`
+		Relations          []TableRelationPlan `json:"relations,omitempty"`
+		UIStructure        string              `json:"ui_structure"`
+		Design             DesignSpec          `json:"design"`
+		ImageKeywords      []string            `json:"image_keywords,omitempty"`
+		ClientTypes        []string            `json:"client_types,omitempty"` // silently inferred access personas → each becomes client_type + role record
+		MobileCapabilities []MobileCapability  `json:"mobile_capabilities,omitempty"`
 	}
 
 	ProjectData struct {
