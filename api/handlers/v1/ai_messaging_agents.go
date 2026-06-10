@@ -67,7 +67,7 @@ func (p *ChatProcessor) generateCode(ctx context.Context, clarified string, imag
 func (p *ChatProcessor) generateCodeSingle(ctx context.Context, clarified string, imageURLs []string, chatHistory []models.ChatMessage, plan *models.ArchitectPlan, apiKey string) (*models.ParsedClaudeResponse, error) {
 	apiConfig := buildAPIConfigBlock(p.baseConf.UcodeBaseUrl, apiKey, plan)
 	if plan.ProjectType == mobileProjectType {
-		apiConfig += "\n\n" + capacitorPromptAddendum()
+		apiConfig += "\n\n" + capacitorPromptAddendum(plan.MobileCapabilities)
 	}
 	prompt := clarified + "\n\n" + apiConfig
 	if p.cachedImagePool != nil && p.cachedImagePool.Err == nil {
@@ -178,14 +178,14 @@ func (p *ChatProcessor) generateCodeSingle(ctx context.Context, clarified string
 	project.Files = injectEnvFile(project.Files, p.baseConf.UcodeBaseUrl, apiKey)
 	if plan.ProjectType == mobileProjectType {
 		var scaffoldErr error
-		project.Files, scaffoldErr = applyCapacitorScaffold(project.Files, plan.ProjectName, p.mcpProjectId)
+		project.Files, scaffoldErr = applyCapacitorScaffold(project.Files, plan.ProjectName, p.mcpProjectId, plan.MobileCapabilities)
 		if scaffoldErr != nil {
 			return nil, scaffoldErr
 		}
 	}
 
 	// ── POST-GENERATION VALIDATION + REPAIR ──
-	errorCount := p.validateAndRepairGeneratedProject(ctx, project, plan.ProjectType, 83)
+	errorCount := p.validateAndRepairGeneratedProject(ctx, project, plan.ProjectType, plan.MobileCapabilities, 83)
 	if plan.ProjectType == mobileProjectType {
 		// Gate ONLY on the Capacitor contract; UI-quality/manifest findings are
 		// best-effort (parity with webapp, which ships with them).
@@ -272,7 +272,7 @@ func (p *ChatProcessor) generateCodeChunkedApplication(ctx context.Context, clar
 
 	apiConfig := buildAPIConfigBlock(p.baseConf.UcodeBaseUrl, apiKey, plan)
 	if plan.ProjectType == mobileProjectType {
-		apiConfig += "\n\n" + capacitorPromptAddendum()
+		apiConfig += "\n\n" + capacitorPromptAddendum(plan.MobileCapabilities)
 	}
 	if p.cachedImagePool != nil && p.cachedImagePool.Err == nil {
 		apiConfig += "\n\n" + p.cachedImagePool.Block
@@ -528,7 +528,7 @@ func (p *ChatProcessor) generateCodeChunkedApplication(ctx context.Context, clar
 	merged.Files = injectEnvFile(merged.Files, p.baseConf.UcodeBaseUrl, apiKey)
 	merged.Files = mergeAppRoutes(merged.Files, manifest)
 	if plan.ProjectType == mobileProjectType {
-		merged.Files, err = applyCapacitorScaffold(merged.Files, plan.ProjectName, p.mcpProjectId)
+		merged.Files, err = applyCapacitorScaffold(merged.Files, plan.ProjectName, p.mcpProjectId, plan.MobileCapabilities)
 		if err != nil {
 			return nil, err
 		}
@@ -543,7 +543,7 @@ func (p *ChatProcessor) generateCodeChunkedApplication(ctx context.Context, clar
 			Value:   fmt.Sprintf("%d файлов", len(merged.Files)),
 		},
 	)
-	errorCount := p.validateAndRepairGeneratedProject(ctx, merged, plan.ProjectType, 80)
+	errorCount := p.validateAndRepairGeneratedProject(ctx, merged, plan.ProjectType, plan.MobileCapabilities, 80)
 	if plan.ProjectType == mobileProjectType {
 		// Gate ONLY on the Capacitor contract; UI-quality/manifest findings are
 		// best-effort (parity with webapp, which ships with them).
@@ -1169,7 +1169,7 @@ export default function App() {
 	return files
 }
 
-func (p *ChatProcessor) validateAndRepairGeneratedProject(ctx context.Context, project *models.GeneratedProject, projectType string, startPercent int) int {
+func (p *ChatProcessor) validateAndRepairGeneratedProject(ctx context.Context, project *models.GeneratedProject, projectType string, capabilities []models.MobileCapability, startPercent int) int {
 	const maxRepairPasses = 3
 
 	if project == nil {
@@ -1242,7 +1242,7 @@ func (p *ChatProcessor) validateAndRepairGeneratedProject(ctx context.Context, p
 		project.Files = dedupTsTsxPairs(project.Files)
 		project.Files = ensureAppEntryDefaultExport(project.Files)
 		if projectType == mobileProjectType {
-			normalized, normalizeErr := applyCapacitorScaffold(project.Files, project.ProjectName, p.mcpProjectId)
+			normalized, normalizeErr := applyCapacitorScaffold(project.Files, project.ProjectName, p.mcpProjectId, capabilities)
 			if normalizeErr != nil {
 				log.Printf("[quality-gate] restore Capacitor scaffold: %v", normalizeErr)
 			} else {
@@ -1523,7 +1523,7 @@ func (p *ChatProcessor) generateCodeChunkedWebsite(ctx context.Context, clarifie
 	merged.Files = mergeAppRoutes(merged.Files, manifest)
 
 	emit.Emit(SSEEvent{Type: EvProgress, Icon: "shield-check", Percent: 80, Message: "Проверяю качество кода", Value: fmt.Sprintf("%d файлов", len(merged.Files))})
-	errorCount := p.validateAndRepairGeneratedProject(ctx, merged, plan.ProjectType, 80)
+	errorCount := p.validateAndRepairGeneratedProject(ctx, merged, plan.ProjectType, nil, 80)
 
 	log.Printf("[chunked-web] done: %d total files (%d pages, %d failed, %d validation errors)", len(merged.Files), totalPages, failedCount, errorCount)
 	return &models.ParsedClaudeResponse{Project: merged}, nil

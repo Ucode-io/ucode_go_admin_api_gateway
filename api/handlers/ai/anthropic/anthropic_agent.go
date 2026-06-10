@@ -67,6 +67,7 @@ func (a *AnthropicAgent) ArchitectProject(ctx context.Context, in models.Archite
 		return nil, fmt.Errorf("architect: decode: %w", err)
 	}
 	models.ApplyProjectTypeKeywordOverride(&plan, in.Clarified)
+	models.ApplyMobileCapabilityKeywordOverride(&plan, in.Clarified)
 	return &plan, nil
 }
 

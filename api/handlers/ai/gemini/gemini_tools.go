@@ -12,6 +12,11 @@ var toolArchitectPlan = funcDeclaration{
 		"required": []string{"project_name", "project_type", "tables", "relations", "ui_structure", "design", "image_keywords", "client_types"},
 		"properties": map[string]any{
 			"project_name": map[string]any{"type": "string", "description": "Human-readable project name"},
+			"mobile_capabilities": map[string]any{
+				"type":        "array",
+				"items":       map[string]any{"type": "string", "enum": []string{"camera", "local_notifications", "push_notifications", "biometric_auth", "identity_verification"}},
+				"description": "Native capabilities explicitly required by a mobile project. Use only listed enum values; identity_verification also requires camera. Empty [] for non-mobile projects.",
+			},
 			"client_types": map[string]any{
 				"type":        "array",
 				"items":       map[string]any{"type": "string"},

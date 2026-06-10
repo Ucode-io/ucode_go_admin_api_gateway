@@ -213,13 +213,14 @@ func emitPublishFiles(emit ProgressEmitter, files []models.ProjectFile, pctStart
 	}
 }
 
-func newMobileProject(project *models.GeneratedProject) *models.MobileProject {
+func newMobileProject(project *models.GeneratedProject, capabilities []models.MobileCapability) *models.MobileProject {
 	return &models.MobileProject{
 		ProjectName:    project.ProjectName,
 		ProjectType:    mobileProjectType,
 		Runtime:        mobileRuntime,
 		RuntimeVersion: capacitorRuntimeVersion,
 		WebDir:         capacitorWebDir,
+		Capabilities:   models.CanonicalMobileCapabilities(capabilities),
 		Files:          append([]models.ProjectFile(nil), project.Files...),
 	}
 }

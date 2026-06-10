@@ -54,7 +54,7 @@ func TestNewMobileProjectContract(t *testing.T) {
 		Files:       []models.ProjectFile{{Path: "App.tsx", Content: "app"}},
 	}
 
-	mobileProject := newMobileProject(generated)
+	mobileProject := newMobileProject(generated, []models.MobileCapability{models.MobileCapabilityCamera})
 
 	if mobileProject.ProjectType != mobileProjectType ||
 		mobileProject.Runtime != mobileRuntime ||
@@ -64,5 +64,8 @@ func TestNewMobileProjectContract(t *testing.T) {
 	}
 	if len(mobileProject.Files) != 1 || mobileProject.Files[0].Path != "App.tsx" {
 		t.Fatalf("unexpected mobile project files: %+v", mobileProject.Files)
+	}
+	if len(mobileProject.Capabilities) != 1 || mobileProject.Capabilities[0] != models.MobileCapabilityCamera {
+		t.Fatalf("unexpected mobile project capabilities: %+v", mobileProject.Capabilities)
 	}
 }

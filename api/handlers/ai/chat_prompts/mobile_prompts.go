@@ -11,7 +11,8 @@ This project is an installable iOS/Android app built from the generated React + 
 It is NOT React Native and does NOT use Expo. Keep using the webapp architecture, DOM, Tailwind CSS,
 React Router, src/pages/* and the existing web API utilities.
 
-The backend injects package.json Capacitor dependencies, index.html, capacitor.config.ts, and src/lib/capacitor.ts.
+The backend injects package.json Capacitor dependencies, index.html, capacitor.config.ts, src/lib/capacitor.ts,
+mobile.capabilities.json, and approved native capability wrappers.
 NEVER emit or replace those files. NEVER emit ios/ or android/ directories; a trusted build worker creates
 them later with npx cap add and updates them with npx cap sync. The backend also normalizes the generated
 BrowserRouter to HashRouter so routes survive native WebView reloads.
@@ -25,4 +26,5 @@ MOBILE RUNTIME REQUIREMENTS:
 - Use browser-compatible APIs by default. Import from '@/lib/capacitor' only when native behavior is needed.
 - Native plugin calls must keep a browser fallback so the microfrontend preview continues to work.
 - Do not import React Native, Expo, @expo/*, or arbitrary Capacitor plugins.
+- Use only the approved wrapper imports listed in the capability block below. Never import plugins directly.
 `
