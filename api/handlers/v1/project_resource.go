@@ -1,6 +1,8 @@
 package v1
 
 import (
+	"strings"
+
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
@@ -49,10 +51,28 @@ func (h *HandlerV1) AddResourceToProject(c *gin.Context) {
 	request.ProjectId = projectId.(string)
 	request.EnvironmentId = environmentId.(string)
 
+	if request.GetType() == pb.ResourceType_GOOGLE_DRIVE {
+		if request.GetSettings() == nil || request.GetSettings().GetGoogleDrive() == nil || strings.TrimSpace(request.GetSettings().GetGoogleDrive().GetRefreshToken()) == "" {
+			h.HandleResponse(c, status_http.BadRequest, "use /v1/google-drive/connect to connect Google Drive")
+			return
+		}
+
+		if request.Name == "" {
+			request.Name = "Google Drive"
+		}
+		request.Settings = sanitizeGoogleDriveSettingsForStorage(request.GetSettings(), h.baseConf.GoogleDriveVisibility)
+	}
+
 	resp, err := h.companyServices.Resource().AddResourceToProject(c.Request.Context(), request)
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return
+	}
+
+	if request.GetType() == pb.ResourceType_GOOGLE_DRIVE {
+		resp.Settings = request.GetSettings()
+		resp.ResourceType = int32(request.GetType())
+		sanitizeGoogleDriveResourceForResponse(resp)
 	}
 
 	h.HandleResponse(c, status_http.Created, resp)
@@ -117,6 +137,77 @@ func (h *HandlerV1) UpdateProjectResource(c *gin.Context) {
 	request.ProjectId = projectId.(string)
 	request.EnvironmentId = environmentId.(string)
 
+	if shouldSanitizeGoogleDriveSettings(request) {
+		current, err := h.companyServices.Resource().GetSingleProjectResouece(c.Request.Context(), &pb.PrimaryKeyProjectResource{
+			Id:            request.GetId(),
+			ProjectId:     request.GetProjectId(),
+			EnvironmentId: request.GetEnvironmentId(),
+		})
+		if err != nil {
+			h.HandleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		if current.GetType() == pb.ResourceType_GOOGLE_DRIVE.String() || request.GetType() == pb.ResourceType_GOOGLE_DRIVE.String() || request.GetResourceType() == int32(pb.ResourceType_GOOGLE_DRIVE) {
+			var currentDrive *pb.GoogleDriveCredentials
+			if current.GetSettings() != nil {
+				currentDrive = current.GetSettings().GetGoogleDrive()
+			}
+			var requestDrive *pb.GoogleDriveCredentials
+			if request.GetSettings() != nil {
+				requestDrive = request.GetSettings().GetGoogleDrive()
+			}
+
+			folderID := ""
+			if currentDrive != nil {
+				folderID = currentDrive.GetFolderId()
+			}
+			if folderID == "" && requestDrive != nil {
+				folderID = requestDrive.GetFolderId()
+			}
+			if strings.TrimSpace(folderID) == "" {
+				h.HandleResponse(c, status_http.BadRequest, "google drive resource folder_id is empty")
+				return
+			}
+
+			visibility := strings.TrimSpace(h.baseConf.GoogleDriveVisibility)
+			if visibility == "" {
+				visibility = "private"
+			}
+			if requestDrive != nil && strings.TrimSpace(requestDrive.GetVisibility()) != "" {
+				visibility = requestDrive.GetVisibility()
+			}
+
+			refreshToken := ""
+			authType := "oauth"
+			if currentDrive != nil {
+				refreshToken = currentDrive.GetRefreshToken()
+				if strings.TrimSpace(currentDrive.GetAuthType()) != "" {
+					authType = currentDrive.GetAuthType()
+				}
+			}
+			if requestDrive != nil {
+				if strings.TrimSpace(requestDrive.GetRefreshToken()) != "" {
+					refreshToken = requestDrive.GetRefreshToken()
+				}
+				if strings.TrimSpace(requestDrive.GetAuthType()) != "" {
+					authType = requestDrive.GetAuthType()
+				}
+			}
+
+			request.Type = pb.ResourceType_GOOGLE_DRIVE.String()
+			request.ResourceType = int32(pb.ResourceType_GOOGLE_DRIVE)
+			request.Settings = &pb.Settings{
+				GoogleDrive: &pb.GoogleDriveCredentials{
+					AuthType:     authType,
+					FolderId:     folderID,
+					Visibility:   visibility,
+					RefreshToken: refreshToken,
+				},
+			}
+		}
+	}
+
 	var (
 		logReq = &models.CreateVersionHistoryRequest{
 			Services:     services,
@@ -125,7 +216,7 @@ func (h *HandlerV1) UpdateProjectResource(c *gin.Context) {
 			ActionSource: c.Request.URL.String(),
 			ActionType:   "UPDATE",
 			UserInfo:     cast.ToString(userId),
-			Request:      &request,
+			Request:      googleDriveProjectResourceForLog(request),
 		}
 	)
 
@@ -146,6 +237,75 @@ func (h *HandlerV1) UpdateProjectResource(c *gin.Context) {
 	}
 
 	h.HandleResponse(c, status_http.OK, resp)
+}
+
+func shouldSanitizeGoogleDriveSettings(resource *pb.ProjectResource) bool {
+	if resource == nil {
+		return false
+	}
+	if resource.GetType() == pb.ResourceType_GOOGLE_DRIVE.String() || resource.GetResourceType() == int32(pb.ResourceType_GOOGLE_DRIVE) {
+		return true
+	}
+	return resource.GetSettings() != nil && resource.GetSettings().GetGoogleDrive() != nil
+}
+
+func sanitizeGoogleDriveSettingsForStorage(settings *pb.Settings, defaultVisibility string) *pb.Settings {
+	if settings == nil || settings.GetGoogleDrive() == nil {
+		return &pb.Settings{}
+	}
+
+	visibility := strings.TrimSpace(defaultVisibility)
+	if visibility == "" {
+		visibility = "private"
+	}
+	if settings != nil && settings.GetGoogleDrive() != nil && strings.TrimSpace(settings.GetGoogleDrive().GetVisibility()) != "" {
+		visibility = settings.GetGoogleDrive().GetVisibility()
+	}
+
+	drive := settings.GetGoogleDrive()
+	authType := strings.TrimSpace(drive.GetAuthType())
+	if authType == "" {
+		authType = "oauth"
+	}
+
+	return &pb.Settings{
+		GoogleDrive: &pb.GoogleDriveCredentials{
+			AuthType:     authType,
+			FolderId:     strings.TrimSpace(drive.GetFolderId()),
+			Visibility:   visibility,
+			RefreshToken: strings.TrimSpace(drive.GetRefreshToken()),
+		},
+	}
+}
+
+func sanitizeGoogleDriveResourceForResponse(resource *pb.ProjectResource) {
+	if resource == nil || resource.GetSettings() == nil || resource.GetSettings().GetGoogleDrive() == nil {
+		return
+	}
+
+	drive := resource.GetSettings().GetGoogleDrive()
+	resource.Settings.GoogleDrive = &pb.GoogleDriveCredentials{
+		AuthType:   drive.GetAuthType(),
+		FolderId:   drive.GetFolderId(),
+		Visibility: drive.GetVisibility(),
+	}
+}
+
+func googleDriveProjectResourceForLog(resource *pb.ProjectResource) *pb.ProjectResource {
+	if resource == nil || resource.GetSettings() == nil || resource.GetSettings().GetGoogleDrive() == nil {
+		return resource
+	}
+
+	safe := *resource
+	drive := resource.GetSettings().GetGoogleDrive()
+	safe.Settings = &pb.Settings{
+		GoogleDrive: &pb.GoogleDriveCredentials{
+			AuthType:   drive.GetAuthType(),
+			FolderId:   drive.GetFolderId(),
+			Visibility: drive.GetVisibility(),
+		},
+	}
+	return &safe
 }
 
 // GetListProjectResource godoc
@@ -189,6 +349,10 @@ func (h *HandlerV1) GetListProjectResourceList(c *gin.Context) {
 		return
 	}
 
+	for _, resource := range resp.GetResources() {
+		sanitizeGoogleDriveResourceForResponse(resource)
+	}
+
 	h.HandleResponse(c, status_http.OK, resp)
 }
 
@@ -229,6 +393,8 @@ func (h *HandlerV1) GetSingleProjectResource(c *gin.Context) {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	sanitizeGoogleDriveResourceForResponse(resp)
 
 	h.HandleResponse(c, status_http.OK, resp)
 }

@@ -172,7 +172,14 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 		finalFilename = fmt.Sprintf("%s_%s.%s", fName.String(), baseName, imgFormat)
 	}
 
-	driveUpload, driveConfigured, err := fileupload.NewGoogleDriveUploader(h.companyServices.Resource()).UploadIfConfigured(
+	driveUpload, driveConfigured, err := fileupload.NewGoogleDriveUploader(h.companyServices.Resource(), fileupload.GoogleDriveConfig{
+		ClientID:           h.baseConf.GoogleDriveClientID,
+		ClientSecret:       h.baseConf.GoogleDriveClientSecret,
+		RedirectURI:        h.baseConf.GoogleDriveRedirectURI,
+		ServiceAccountJSON: h.baseConf.GoogleDriveServiceAccountJSON,
+		ParentFolderID:     h.baseConf.GoogleDriveParentFolderID,
+		Visibility:         h.baseConf.GoogleDriveVisibility,
+	}).UploadIfConfigured(
 		c.Request.Context(),
 		fileupload.GoogleDriveUploadRequest{
 			ProjectID:     projectId.(string),
@@ -1053,7 +1060,14 @@ func (h *HandlerV1) UploadFile(c *gin.Context) {
 	}
 	defer object.Close()
 
-	driveUpload, driveConfigured, err := fileupload.NewGoogleDriveUploader(h.companyServices.Resource()).UploadIfConfigured(
+	driveUpload, driveConfigured, err := fileupload.NewGoogleDriveUploader(h.companyServices.Resource(), fileupload.GoogleDriveConfig{
+		ClientID:           h.baseConf.GoogleDriveClientID,
+		ClientSecret:       h.baseConf.GoogleDriveClientSecret,
+		RedirectURI:        h.baseConf.GoogleDriveRedirectURI,
+		ServiceAccountJSON: h.baseConf.GoogleDriveServiceAccountJSON,
+		ParentFolderID:     h.baseConf.GoogleDriveParentFolderID,
+		Visibility:         h.baseConf.GoogleDriveVisibility,
+	}).UploadIfConfigured(
 		c.Request.Context(),
 		fileupload.GoogleDriveUploadRequest{
 			ProjectID:     projectId.(string),
