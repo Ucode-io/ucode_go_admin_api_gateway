@@ -200,9 +200,20 @@ NO INLINE STYLES (CRITICAL — banned for static values):
     justify-content     → justify-{value}
     overflow            → overflow-{value}
 
-NO AUTH: Never generate Login/Register pages, ProtectedRoute, AuthGuard,
-  useAuth, auth context, logout buttons, token management, or /login redirects.
-  The app starts directly on the main page.
+AUTH MODE RULE:
+  Default is AUTH MODE = none: never generate Login/Register pages, ProtectedRoute, AuthGuard,
+  useAuth, auth context, logout buttons, token management, or /login redirects. The app starts directly on the main page.
+
+  If the API CONFIGURATION block explicitly says AUTH MODE = login, this overrides the default NO AUTH rule:
+    - Generate src/lib/auth.ts with sessionStorage token helpers, login(), logout(), getToken(), and a request interceptor for apiClient.
+    - Generate a LoginPage and ProtectedRoute. Without a token, public/share runtime shows LoginPage.
+    - LoginPage must know client_type. Fetch GET /v2/items/client_type before login using static API-key headers, show a Select when multiple client types exist, and pass the selected guid as client_type.
+    - login() calls POST /v2/login with header Environment-Id: import.meta.env.VITE_UCODE_ENVIRONMENT_ID and body:
+        { username, password, client_type, project_id: import.meta.env.VITE_UCODE_PROJECT_ID }
+      Store data.token.access_token from the response.
+    - After login, call GET /v2/custom-permission/nav-map with Authorization: Bearer <token> and feed it into src/lib/permissions.ts.
+    - Public/share /v2/items/* data requests after login use Authorization: Bearer <token>, not API-KEY. The only public pre-login API-key exception is GET /v2/items/client_type for the LoginPage selector.
+    - Trusted ugen preview exception: if window.__UCODE_PREVIEW_CONTEXT?.trusted is true or UCODE_PREVIEW_CONTEXT postMessage is received, bypass LoginPage and keep static API-key headers for preview data only.
 
 BANNED CONFIG FILES — NEVER include these in files[] (pre-built in project template):
   tsconfig.json · tsconfig.node.json · vite.config.ts · vite.config.js
@@ -299,8 +310,63 @@ SIDEBAR NAV RULES:
     Truck, MapPin, Bell, Search, ChevronDown, ChevronRight, LogOut, Menu, X,
     Plus, Edit, Trash2, Eye, Download, Upload, Filter, RefreshCw, Check, AlertCircle
   NEVER use icon names that don't exist in lucide-react — they render as blank/broken.
-  Each nav item: { icon: LucideIcon, label: string, path: string }
-  Active state: compare location.pathname with item.path using startsWith for nested routes.
+  Each nav item MUST expose its route as one of: path, href, or to. Prefer path, but if the local
+  NavItem type uses href, use href consistently. Active state compares location.pathname with that
+  route using startsWith for nested routes.
+
+PERMISSION-GATED NAV (MANDATORY when a sidebar/top-nav exists):
+  The host (ugen) supplies a per-role permission map so an invited/shared user only sees the
+  nav items their role is allowed to read. You MUST honor it. Generate exactly this:
+
+  1. Create src/lib/permissions.ts:
+       import { useEffect, useState } from "react";
+       type PermFlags = { read?: boolean; write?: boolean; update?: boolean; delete?: boolean };
+       type PermMap = Record<string, PermFlags>;          // keyed by nav path, e.g. { "/users": { read: false } }
+       function parseEnvPerms(): PermMap {
+         try { return JSON.parse(import.meta.env.VITE_UCODE_PERMISSIONS || "{}"); } catch { return {}; }
+       }
+       let current: PermMap = parseEnvPerms();
+       const listeners = new Set<(m: PermMap) => void>();
+       function applyPerms(next: PermMap) {
+         current = next;
+         listeners.forEach((fn) => fn(current));
+       }
+       if (typeof window !== "undefined") {
+         window.addEventListener("message", (e: MessageEvent) => {
+           if (e?.data?.type === "UCODE_PERMISSIONS" && e.data.permissions) {
+             applyPerms(e.data.permissions as PermMap);
+           }
+         });
+       }
+       export function setUcodePermissions(next: PermMap): void { applyPerms(next); }
+       export function useUcodePermissions(): PermMap {
+         const [m, setM] = useState<PermMap>(current);
+         useEffect(() => { listeners.add(setM); setM(current); return () => { listeners.delete(setM); }; }, []);
+         return m;
+       }
+       const isLoginMode = import.meta.env.VITE_UCODE_AUTH_MODE === "login";
+       // AUTH MODE = none: default visible unless an entry explicitly sets read === false.
+       // AUTH MODE = login: after nav-map is loaded, missing routes are NOT readable.
+       export function canRead(perms: PermMap, path: string): boolean {
+         const entry = perms[path];
+         if (entry) return entry.read !== false;
+         return !isLoginMode;
+       }
+
+  2. In the Sidebar/Navbar component, gate every nav item by its route path:
+       const perms = useUcodePermissions();
+       const getNavRoute = (item: any) => item.path || item.href || item.to || "/";
+       const visibleItems = navItems.filter((item) => canRead(perms, getNavRoute(item)));
+       // render visibleItems instead of navItems. Also hide a collapsible group whose children all became hidden.
+
+  RULES: Match strictly by the route string in item.path/item.href/item.to. The custom permission
+  attributes.nav_path value must equal that route string, e.g. "/employees" for href: "/employees".
+  In AUTH MODE = none, never hard-fail if the map is empty (default = show all); this remains
+  presentation-only nav filtering, not an auth guard. In AUTH MODE = login, also support an exported
+  setter/update function so the nav-map loaded after login can replace the current permission map.
+  In AUTH MODE = login, do NOT render the full sidebar before nav-map finishes loading; show a small
+  loading/skeleton state. After nav-map is loaded, hide any nav item whose route is missing from the
+  map or whose read flag is false. Login mode is deny-by-default for sidebar routes.
 
 STEP 3 — Design Tokens:
   Design tokens are provided in the "DESIGN TOKENS:" block in your prompt.
@@ -1047,7 +1113,8 @@ SELECT & FORM PRIMITIVES
 
 API CLIENT
 [ ] All calls use apiClient from '@/config/axios' — never new axios instance
-[ ] Both headers present everywhere: Authorization: API-KEY and X-API-KEY
+[ ] AUTH MODE = none: both headers present everywhere: Authorization: API-KEY and X-API-KEY
+[ ] AUTH MODE = login: public data calls use Authorization: Bearer <token>; static API-KEY headers are used only for trusted ugen preview
 [ ] GET single: apiClient.get("/v2/items/{slug}/" + id) used when fetching one record
 [ ] extractList / extractSingle / extractCount used — never inline data?.data?.data?.response
 
@@ -1067,7 +1134,8 @@ THEME
 [ ] --radius from density tier
 
 AUTH
-[ ] Zero auth code anywhere
+[ ] AUTH MODE = none: zero auth code anywhere
+[ ] AUTH MODE = login: LoginPage, ProtectedRoute, auth.ts, logout, Bearer token, nav-map, and trusted ugen preview bypass are implemented
 
 DATA
 [ ] No data?.data?.response inline — only extractList / extractSingle / extractCount

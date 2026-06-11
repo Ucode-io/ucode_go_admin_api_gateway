@@ -50,22 +50,22 @@ func (p *ChatProcessor) RecordUsage(usage models.LLMUsage, model, description st
 	}()
 }
 
-func (p *ChatProcessor) generateCode(ctx context.Context, clarified string, imageURLs []string, chatHistory []models.ChatMessage, plan *models.ArchitectPlan, apiKey string) (*models.ParsedClaudeResponse, error) {
+func (p *ChatProcessor) generateCode(ctx context.Context, clarified string, imageURLs []string, chatHistory []models.ChatMessage, plan *models.ArchitectPlan, projectData *models.ProjectData) (*models.ParsedClaudeResponse, error) {
 	switch plan.ProjectType {
 	case "admin_panel", "webapp", mobileProjectType:
 		log.Println("GENERATION CODE: generateCodeChunked")
-		return p.generateCodeChunkedApplication(ctx, clarified, imageURLs, chatHistory, plan, apiKey)
+		return p.generateCodeChunkedApplication(ctx, clarified, imageURLs, chatHistory, plan, projectData)
 	case "web":
 		log.Println("GENERATION CODE: generateCodeChunkedWebsite")
-		return p.generateCodeChunkedWebsite(ctx, clarified, imageURLs, chatHistory, plan, apiKey)
+		return p.generateCodeChunkedWebsite(ctx, clarified, imageURLs, chatHistory, plan, projectData)
 	default:
 		log.Println("GENERATION CODE: generateCodeSingle (landing)")
-		return p.generateCodeSingle(ctx, clarified, imageURLs, chatHistory, plan, apiKey)
+		return p.generateCodeSingle(ctx, clarified, imageURLs, chatHistory, plan, projectData)
 	}
 }
 
-func (p *ChatProcessor) generateCodeSingle(ctx context.Context, clarified string, imageURLs []string, chatHistory []models.ChatMessage, plan *models.ArchitectPlan, apiKey string) (*models.ParsedClaudeResponse, error) {
-	apiConfig := buildAPIConfigBlock(p.baseConf.UcodeBaseUrl, apiKey, plan)
+func (p *ChatProcessor) generateCodeSingle(ctx context.Context, clarified string, imageURLs []string, chatHistory []models.ChatMessage, plan *models.ArchitectPlan, projectData *models.ProjectData) (*models.ParsedClaudeResponse, error) {
+	apiConfig := buildAPIConfigBlock(p.baseConf.UcodeBaseUrl, projectData, plan)
 	if plan.ProjectType == mobileProjectType {
 		apiConfig += "\n\n" + capacitorPromptAddendum(plan.MobileCapabilities)
 	}
@@ -175,7 +175,7 @@ func (p *ChatProcessor) generateCodeSingle(ctx context.Context, clarified string
 	project.Files = injectMissingCriticalFiles(project.Files, plan.ProjectType)
 
 	// Always force-inject credentials — Claude may guess wrong values.
-	project.Files = injectEnvFile(project.Files, p.baseConf.UcodeBaseUrl, apiKey)
+	project.Files = injectEnvFile(project.Files, p.baseConf.UcodeBaseUrl, projectData)
 	if plan.ProjectType == mobileProjectType {
 		var scaffoldErr error
 		project.Files, scaffoldErr = applyCapacitorScaffold(project.Files, plan.ProjectName, p.mcpProjectId, plan.MobileCapabilities)
@@ -201,7 +201,7 @@ func (p *ChatProcessor) generateCodeSingle(ctx context.Context, clarified string
 	return &models.ParsedClaudeResponse{Project: project}, nil
 }
 
-func (p *ChatProcessor) generateCodeChunkedApplication(ctx context.Context, clarified string, imageURLs []string, chatHistory []models.ChatMessage, plan *models.ArchitectPlan, apiKey string) (*models.ParsedClaudeResponse, error) {
+func (p *ChatProcessor) generateCodeChunkedApplication(ctx context.Context, clarified string, imageURLs []string, chatHistory []models.ChatMessage, plan *models.ArchitectPlan, projectData *models.ProjectData) (*models.ParsedClaudeResponse, error) {
 	log.Printf("[chunked] starting chunked generation for %s: %s", plan.ProjectType, plan.ProjectName)
 
 	var (
@@ -270,7 +270,7 @@ func (p *ChatProcessor) generateCodeChunkedApplication(ctx context.Context, clar
 
 	time.Sleep(1000 * time.Millisecond)
 
-	apiConfig := buildAPIConfigBlock(p.baseConf.UcodeBaseUrl, apiKey, plan)
+	apiConfig := buildAPIConfigBlock(p.baseConf.UcodeBaseUrl, projectData, plan)
 	if plan.ProjectType == mobileProjectType {
 		apiConfig += "\n\n" + capacitorPromptAddendum(plan.MobileCapabilities)
 	}
@@ -379,7 +379,7 @@ func (p *ChatProcessor) generateCodeChunkedApplication(ctx context.Context, clar
 	)
 	if err != nil {
 		log.Printf("[chunked] foundation failed (%v) — falling back to single call", err)
-		return p.generateCodeSingle(ctx, clarified, imageURLs, chatHistory, plan, apiKey)
+		return p.generateCodeSingle(ctx, clarified, imageURLs, chatHistory, plan, projectData)
 	}
 
 	allSharedFiles := make([]models.ProjectFile, 0, len(foundation.Files)+len(uiKitGroup.Files))
@@ -525,7 +525,7 @@ func (p *ChatProcessor) generateCodeChunkedApplication(ctx context.Context, clar
 	}
 
 	merged.Files = injectMissingCriticalFiles(merged.Files, plan.ProjectType)
-	merged.Files = injectEnvFile(merged.Files, p.baseConf.UcodeBaseUrl, apiKey)
+	merged.Files = injectEnvFile(merged.Files, p.baseConf.UcodeBaseUrl, projectData)
 	merged.Files = mergeAppRoutes(merged.Files, manifest)
 	if plan.ProjectType == mobileProjectType {
 		merged.Files, err = applyCapacitorScaffold(merged.Files, plan.ProjectName, p.mcpProjectId, plan.MobileCapabilities)
@@ -1031,11 +1031,24 @@ func buildTemplateHooksContext() string {
 	return sb.String()
 }
 
-func injectEnvFile(files []models.ProjectFile, baseURL, apiKey string) []models.ProjectFile {
+func injectEnvFile(files []models.ProjectFile, baseURL string, projectData *models.ProjectData) []models.ProjectFile {
 	var (
 		envBaseURLKey = "VITE_API_BASE_URL"
 		envAPIKeyKey  = "VITE_X_API_KEY"
 	)
+
+	apiKey := ""
+	authMode := "none"
+	ucodeProjectId := ""
+	environmentId := ""
+	if projectData != nil {
+		apiKey = projectData.ApiKey
+		ucodeProjectId = projectData.UcodeProjectId
+		environmentId = projectData.EnvironmentId
+		if strings.EqualFold(projectData.AuthMode, "login") {
+			authMode = "login"
+		}
+	}
 
 	for _, f := range GetTemplateContext() {
 		if strings.Contains(f.Path, "config/axios") || strings.Contains(f.Path, "config/env") {
@@ -1048,7 +1061,7 @@ func injectEnvFile(files []models.ProjectFile, baseURL, apiKey string) []models.
 		}
 	}
 
-	content := fmt.Sprintf("%s=%s\n%s=%s\n", envBaseURLKey, baseURL, envAPIKeyKey, apiKey)
+	content := fmt.Sprintf("%s=%s\n%s=%s\nVITE_UCODE_AUTH_MODE=%s\nVITE_UCODE_PROJECT_ID=%s\nVITE_UCODE_ENVIRONMENT_ID=%s\n", envBaseURLKey, baseURL, envAPIKeyKey, apiKey, authMode, ucodeProjectId, environmentId)
 
 	envTargets := map[string]bool{".env": true, ".env.development": true, ".env.production": true}
 	for i, f := range files {
@@ -1266,7 +1279,7 @@ func (p *ChatProcessor) validateAndRepairGeneratedProject(ctx context.Context, p
 	return errorCount
 }
 
-func (p *ChatProcessor) generateCodeChunkedWebsite(ctx context.Context, clarified string, imageURLs []string, chatHistory []models.ChatMessage, plan *models.ArchitectPlan, apiKey string) (*models.ParsedClaudeResponse, error) {
+func (p *ChatProcessor) generateCodeChunkedWebsite(ctx context.Context, clarified string, imageURLs []string, chatHistory []models.ChatMessage, plan *models.ArchitectPlan, projectData *models.ProjectData) (*models.ParsedClaudeResponse, error) {
 	log.Printf("[chunked-web] starting chunked website generation: %s", plan.ProjectName)
 	var (
 		emit     = p.emitter()
@@ -1305,7 +1318,7 @@ func (p *ChatProcessor) generateCodeChunkedWebsite(ctx context.Context, clarifie
 
 	if len(foundationGroup.Files) == 0 || len(pageGroups) == 0 {
 		log.Printf("[chunked-web] manifest missing foundation or pages — falling back to single call")
-		return p.generateCodeSingle(ctx, clarified, imageURLs, chatHistory, plan, apiKey)
+		return p.generateCodeSingle(ctx, clarified, imageURLs, chatHistory, plan, projectData)
 	}
 
 	var pageNames = make([]string, 0, len(pageGroups))
@@ -1329,7 +1342,7 @@ func (p *ChatProcessor) generateCodeChunkedWebsite(ctx context.Context, clarifie
 		},
 	)
 
-	apiConfig := buildAPIConfigBlock(p.baseConf.UcodeBaseUrl, apiKey, plan)
+	apiConfig := buildAPIConfigBlock(p.baseConf.UcodeBaseUrl, projectData, plan)
 	if p.cachedImagePool != nil && p.cachedImagePool.Err == nil {
 		apiConfig += "\n\n" + p.cachedImagePool.Block
 		emit.Emit(SSEEvent{Type: EvProgress, Icon: "image", Message: fmt.Sprintf("Подобрано %d фото: %s", p.cachedImagePool.Count, strings.Join(p.cachedImagePool.Keywords, ", ")), Percent: 25})
@@ -1402,7 +1415,7 @@ func (p *ChatProcessor) generateCodeChunkedWebsite(ctx context.Context, clarifie
 	)
 	if err != nil {
 		log.Printf("[chunked-web] foundation failed (%v) — falling back to single call", err)
-		return p.generateCodeSingle(ctx, clarified, imageURLs, chatHistory, plan, apiKey)
+		return p.generateCodeSingle(ctx, clarified, imageURLs, chatHistory, plan, projectData)
 	}
 
 	allSharedFiles := make([]models.ProjectFile, 0, len(foundation.Files))
@@ -1519,7 +1532,7 @@ func (p *ChatProcessor) generateCodeChunkedWebsite(ctx context.Context, clarifie
 	}
 
 	merged.Files = injectMissingCriticalFiles(merged.Files, plan.ProjectType)
-	merged.Files = injectEnvFile(merged.Files, p.baseConf.UcodeBaseUrl, apiKey)
+	merged.Files = injectEnvFile(merged.Files, p.baseConf.UcodeBaseUrl, projectData)
 	merged.Files = mergeAppRoutes(merged.Files, manifest)
 
 	emit.Emit(SSEEvent{Type: EvProgress, Icon: "shield-check", Percent: 80, Message: "Проверяю качество кода", Value: fmt.Sprintf("%d файлов", len(merged.Files))})
