@@ -592,7 +592,7 @@ func (p *ChatProcessor) getExistingProjectData(ctx context.Context) (*models.Pro
 			Id:            p.mcpProjectId,
 		})
 		if err == nil && mcpProject != nil {
-			authMode = getMcpProjectAuthMode(mcpProject)
+			authMode = resolveGeneratedAuthMode(&models.ProjectData{AuthMode: getMcpProjectAuthMode(mcpProject)}, mcpProject.GetProjectType())
 			if mcpProject.GetUcodeProjectId() != "" {
 				ucodeProjectId = mcpProject.GetUcodeProjectId()
 				log.Printf("[GET EXISTING PROJECT] using ucode_project_id=%s from MCP project", ucodeProjectId)
@@ -652,8 +652,21 @@ func getMcpProjectAuthMode(project *pbo.McpProject) string {
 	return "none"
 }
 
+func resolveGeneratedAuthMode(projectData *models.ProjectData, projectType string) string {
+	if strings.EqualFold(projectType, "admin_panel") {
+		return "login"
+	}
+
+	if projectData != nil && strings.EqualFold(projectData.AuthMode, "login") {
+		return "login"
+	}
+
+	return "none"
+}
+
 func (p *ChatProcessor) provisionBackend(ctx context.Context, projectName string, existingMcpId string, projectType string) (*models.ProjectData, error) {
 	authMode := "none"
+	projectEnvMap := make(map[string]any)
 	if existingMcpId != "" {
 		mcpProject, err := p.service.GoObjectBuilderService().McpProject().GetMcpProjectFiles(ctx, &pbo.McpProjectId{
 			ResourceEnvId: p.resourceEnvId,
@@ -662,6 +675,11 @@ func (p *ChatProcessor) provisionBackend(ctx context.Context, projectName string
 		})
 		if err == nil && mcpProject != nil {
 			authMode = getMcpProjectAuthMode(mcpProject)
+			if mcpProject.GetProjectEnv() != nil {
+				for key, value := range mcpProject.GetProjectEnv().AsMap() {
+					projectEnvMap[key] = value
+				}
+			}
 		}
 	}
 
@@ -739,6 +757,15 @@ func (p *ChatProcessor) provisionBackend(ctx context.Context, projectName string
 		apiKey = apiKeys.GetData()[0].GetAppId()
 	}
 
+	authMode = resolveGeneratedAuthMode(&models.ProjectData{AuthMode: authMode}, projectType)
+	if authMode == "login" {
+		projectEnvMap["auth_mode"] = "login"
+	}
+	projectEnv, err := helperFunc.ConvertMapToStruct(projectEnvMap)
+	if err != nil {
+		return nil, fmt.Errorf("convert MCP project env: %w", err)
+	}
+
 	mcpProjectId := existingMcpId
 	if mcpProjectId != "" {
 		_, err = p.service.GoObjectBuilderService().McpProject().UpdateMcpProject(
@@ -752,6 +779,7 @@ func (p *ChatProcessor) provisionBackend(ctx context.Context, projectName string
 				EnvironmentId:  env.GetId(),
 				Status:         "ready",
 				ProjectType:    projectType,
+				ProjectEnv:     projectEnv,
 			},
 		)
 		if err != nil {
@@ -768,6 +796,7 @@ func (p *ChatProcessor) provisionBackend(ctx context.Context, projectName string
 				EnvironmentId:  env.GetId(),
 				Status:         "ready",
 				ProjectType:    projectType,
+				ProjectEnv:     projectEnv,
 			},
 		)
 		if err != nil {
@@ -1032,7 +1061,11 @@ func buildAPIConfigBlock(baseURL string, projectData *models.ProjectData, plan *
 		loginTableSlugs []string
 	)
 
-	authMode := "none"
+	projectType := ""
+	if plan != nil {
+		projectType = plan.ProjectType
+	}
+	authMode := resolveGeneratedAuthMode(projectData, projectType)
 	apiKey := ""
 	ucodeProjectId := ""
 	environmentId := ""
@@ -1040,9 +1073,6 @@ func buildAPIConfigBlock(baseURL string, projectData *models.ProjectData, plan *
 		apiKey = projectData.ApiKey
 		ucodeProjectId = projectData.UcodeProjectId
 		environmentId = projectData.EnvironmentId
-		if strings.EqualFold(projectData.AuthMode, "login") {
-			authMode = "login"
-		}
 	}
 
 	for _, f := range GetTemplateContext() {

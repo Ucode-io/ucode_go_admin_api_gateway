@@ -175,7 +175,7 @@ func (p *ChatProcessor) generateCodeSingle(ctx context.Context, clarified string
 	project.Files = injectMissingCriticalFiles(project.Files, plan.ProjectType)
 
 	// Always force-inject credentials — Claude may guess wrong values.
-	project.Files = injectEnvFile(project.Files, p.baseConf.UcodeBaseUrl, projectData)
+	project.Files = injectEnvFile(project.Files, p.baseConf.UcodeBaseUrl, projectData, plan.ProjectType)
 	if plan.ProjectType == mobileProjectType {
 		var scaffoldErr error
 		project.Files, scaffoldErr = applyCapacitorScaffold(project.Files, plan.ProjectName, p.mcpProjectId, plan.MobileCapabilities)
@@ -525,7 +525,7 @@ func (p *ChatProcessor) generateCodeChunkedApplication(ctx context.Context, clar
 	}
 
 	merged.Files = injectMissingCriticalFiles(merged.Files, plan.ProjectType)
-	merged.Files = injectEnvFile(merged.Files, p.baseConf.UcodeBaseUrl, projectData)
+	merged.Files = injectEnvFile(merged.Files, p.baseConf.UcodeBaseUrl, projectData, plan.ProjectType)
 	merged.Files = mergeAppRoutes(merged.Files, manifest)
 	if plan.ProjectType == mobileProjectType {
 		merged.Files, err = applyCapacitorScaffold(merged.Files, plan.ProjectName, p.mcpProjectId, plan.MobileCapabilities)
@@ -1031,23 +1031,20 @@ func buildTemplateHooksContext() string {
 	return sb.String()
 }
 
-func injectEnvFile(files []models.ProjectFile, baseURL string, projectData *models.ProjectData) []models.ProjectFile {
+func injectEnvFile(files []models.ProjectFile, baseURL string, projectData *models.ProjectData, projectType string) []models.ProjectFile {
 	var (
 		envBaseURLKey = "VITE_API_BASE_URL"
 		envAPIKeyKey  = "VITE_X_API_KEY"
 	)
 
 	apiKey := ""
-	authMode := "none"
+	authMode := resolveGeneratedAuthMode(projectData, projectType)
 	ucodeProjectId := ""
 	environmentId := ""
 	if projectData != nil {
 		apiKey = projectData.ApiKey
 		ucodeProjectId = projectData.UcodeProjectId
 		environmentId = projectData.EnvironmentId
-		if strings.EqualFold(projectData.AuthMode, "login") {
-			authMode = "login"
-		}
 	}
 
 	for _, f := range GetTemplateContext() {
@@ -1532,7 +1529,7 @@ func (p *ChatProcessor) generateCodeChunkedWebsite(ctx context.Context, clarifie
 	}
 
 	merged.Files = injectMissingCriticalFiles(merged.Files, plan.ProjectType)
-	merged.Files = injectEnvFile(merged.Files, p.baseConf.UcodeBaseUrl, projectData)
+	merged.Files = injectEnvFile(merged.Files, p.baseConf.UcodeBaseUrl, projectData, plan.ProjectType)
 	merged.Files = mergeAppRoutes(merged.Files, manifest)
 
 	emit.Emit(SSEEvent{Type: EvProgress, Icon: "shield-check", Percent: 80, Message: "Проверяю качество кода", Value: fmt.Sprintf("%d файлов", len(merged.Files))})
