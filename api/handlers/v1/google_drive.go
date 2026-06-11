@@ -14,21 +14,28 @@ import (
 
 	"ucode/ucode_go_api_gateway/api/handlers/fileupload"
 	"ucode/ucode_go_api_gateway/api/status_http"
+	gatewayConfig "ucode/ucode_go_api_gateway/config"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
+	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
+	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
+	helperFunc "ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"golang.org/x/oauth2"
 )
 
 const (
 	googleDriveOAuthStatePrefix = "google-drive-oauth-state:"
 	googleDriveOAuthStateTTL    = 10 * time.Minute
+	googleDriveFolderMenuType   = "GOOGLE_DRIVE_FOLDER"
 )
 
 type googleDriveOAuthState struct {
 	ProjectID     string `json:"project_id"`
 	EnvironmentID string `json:"environment_id"`
+	McpProjectID  string `json:"mcp_project_id,omitempty"`
 	UserID        string `json:"user_id"`
 }
 
@@ -52,6 +59,12 @@ func (h *HandlerV1) GoogleDriveConnect(c *gin.Context) {
 		return
 	}
 
+	mcpProjectID := strings.TrimSpace(c.Query("mcp_project_id"))
+	if mcpProjectID != "" && !util.IsValidUUID(mcpProjectID) {
+		h.HandleResponse(c, status_http.InvalidArgument, "mcp_project_id is an invalid uuid")
+		return
+	}
+
 	oauthConfig, err := fileupload.NewOAuthConfig(h.googleDriveConfig())
 	if err != nil {
 		h.HandleResponse(c, status_http.BadRequest, err.Error())
@@ -72,6 +85,7 @@ func (h *HandlerV1) GoogleDriveConnect(c *gin.Context) {
 	if err := h.storeGoogleDriveOAuthState(c.Request.Context(), state, googleDriveOAuthState{
 		ProjectID:     projectID.(string),
 		EnvironmentID: environmentID.(string),
+		McpProjectID:  mcpProjectID,
 		UserID:        userID,
 	}); err != nil {
 		h.HandleResponse(c, status_http.InternalServerError, err.Error())
@@ -90,7 +104,12 @@ func (h *HandlerV1) GoogleDriveConnect(c *gin.Context) {
 		return
 	}
 
-	h.HandleResponse(c, status_http.OK, gin.H{"auth_url": authURL})
+	c.PureJSON(status_http.OK.Code, status_http.Response{
+		Status:        status_http.OK.Status,
+		Description:   status_http.OK.Description,
+		Data:          gin.H{"auth_url": authURL},
+		CustomMessage: status_http.OK.CustomMessage,
+	})
 }
 
 // GoogleDriveCallback godoc
@@ -123,17 +142,17 @@ func (h *HandlerV1) GoogleDriveCallback(c *gin.Context) {
 	config := h.googleDriveConfig()
 	oauthConfig, err := fileupload.NewOAuthConfig(config)
 	if err != nil {
-		h.redirectGoogleDriveOAuth(c, false, "oauth_config_error")
+		h.redirectGoogleDriveOAuth(c, false, "oauth_config_error", state)
 		return
 	}
 
 	token, err := oauthConfig.Exchange(c.Request.Context(), code)
 	if err != nil {
-		h.redirectGoogleDriveOAuth(c, false, "token_exchange_failed")
+		h.redirectGoogleDriveOAuth(c, false, "token_exchange_failed", state)
 		return
 	}
 	if strings.TrimSpace(token.RefreshToken) == "" {
-		h.redirectGoogleDriveOAuth(c, false, "refresh_token_missing")
+		h.redirectGoogleDriveOAuth(c, false, "refresh_token_missing", state)
 		return
 	}
 
@@ -141,13 +160,13 @@ func (h *HandlerV1) GoogleDriveCallback(c *gin.Context) {
 		ProjectId: state.ProjectID,
 	})
 	if err != nil {
-		h.redirectGoogleDriveOAuth(c, false, "project_not_found")
+		h.redirectGoogleDriveOAuth(c, false, "project_not_found", state)
 		return
 	}
 
 	credentials, err := fileupload.OAuthCredentialsFromRefreshToken(config, token.RefreshToken)
 	if err != nil {
-		h.redirectGoogleDriveOAuth(c, false, "oauth_credentials_error")
+		h.redirectGoogleDriveOAuth(c, false, "oauth_credentials_error", state)
 		return
 	}
 
@@ -156,7 +175,7 @@ func (h *HandlerV1) GoogleDriveCallback(c *gin.Context) {
 		Name: fileupload.ProjectFolderName(project.GetTitle(), state.ProjectID),
 	})
 	if err != nil {
-		h.redirectGoogleDriveOAuth(c, false, "folder_create_failed")
+		h.redirectGoogleDriveOAuth(c, false, "folder_create_failed", state)
 		return
 	}
 
@@ -170,11 +189,16 @@ func (h *HandlerV1) GoogleDriveCallback(c *gin.Context) {
 	}
 
 	if err := h.upsertGoogleDriveResource(c.Request.Context(), state, settings); err != nil {
-		h.redirectGoogleDriveOAuth(c, false, "resource_save_failed")
+		h.redirectGoogleDriveOAuth(c, false, "resource_save_failed", state)
 		return
 	}
 
-	h.redirectGoogleDriveOAuth(c, true, "")
+	if err := h.ensureGoogleDriveFolderMenu(c.Request.Context(), state, folder.GetFolderID()); err != nil {
+		h.redirectGoogleDriveOAuth(c, false, "menu_create_failed", state)
+		return
+	}
+
+	h.redirectGoogleDriveOAuth(c, true, "", state)
 }
 
 func (h *HandlerV1) googleDriveConfig() fileupload.GoogleDriveConfig {
@@ -229,6 +253,85 @@ func (h *HandlerV1) upsertGoogleDriveResource(ctx context.Context, state googleD
 	return err
 }
 
+func (h *HandlerV1) ensureGoogleDriveFolderMenu(ctx context.Context, state googleDriveOAuthState, folderID string) error {
+	resource, err := h.companyServices.ServiceResource().GetSingle(ctx, &pb.GetSingleServiceResourceReq{
+		ProjectId:     state.ProjectID,
+		EnvironmentId: state.EnvironmentID,
+		ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+	})
+	if err != nil {
+		return err
+	}
+
+	services, err := h.GetProjectSrvc(ctx, state.ProjectID, resource.NodeType)
+	if err != nil {
+		return err
+	}
+
+	attributes, err := helperFunc.ConvertMapToStruct(map[string]any{
+		"label_en":  "Google Drive",
+		"label_ru":  "Google Drive",
+		"path":      fileupload.DriveStorageName,
+		"storage":   fileupload.DriveStorageName,
+		"folder_id": folderID,
+	})
+	if err != nil {
+		return err
+	}
+
+	menuID := googleDriveFolderMenuID(state.ProjectID, state.EnvironmentID)
+
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		menuClient := services.GetBuilderServiceByType(resource.NodeType).Menu()
+		if _, err := menuClient.GetByID(ctx, &obs.MenuPrimaryKey{
+			Id:        menuID,
+			ProjectId: resource.ResourceEnvironmentId,
+		}); err == nil {
+			return nil
+		}
+
+		_, err = menuClient.Create(ctx, &obs.CreateMenuRequest{
+			Id:         menuID,
+			Label:      "Google Drive",
+			Icon:       "",
+			ParentId:   gatewayConfig.MainFolderID,
+			Type:       googleDriveFolderMenuType,
+			ProjectId:  resource.ResourceEnvironmentId,
+			NewRouter:  true,
+			Attributes: attributes,
+		})
+		return err
+
+	case pb.ResourceType_POSTGRESQL:
+		menuClient := services.GoObjectBuilderService().Menu()
+		if _, err := menuClient.GetByID(ctx, &nb.MenuPrimaryKey{
+			Id:        menuID,
+			ProjectId: resource.ResourceEnvironmentId,
+		}); err == nil {
+			return nil
+		}
+
+		_, err = menuClient.Create(ctx, &nb.CreateMenuRequest{
+			Id:         menuID,
+			Label:      "Google Drive",
+			Icon:       "",
+			ParentId:   gatewayConfig.MainFolderID,
+			Type:       googleDriveFolderMenuType,
+			ProjectId:  resource.ResourceEnvironmentId,
+			NewRouter:  true,
+			Attributes: attributes,
+		})
+		return err
+	}
+
+	return nil
+}
+
+func googleDriveFolderMenuID(projectID, environmentID string) string {
+	return uuid.NewSHA1(uuid.NameSpaceOID, []byte("google-drive-folder:"+projectID+":"+environmentID)).String()
+}
+
 func (h *HandlerV1) storeGoogleDriveOAuthState(ctx context.Context, state string, payload googleDriveOAuthState) error {
 	body, err := json.Marshal(payload)
 	if err != nil {
@@ -278,17 +381,30 @@ func (h *HandlerV1) popGoogleDriveOAuthState(ctx context.Context, state string) 
 	return payload, nil
 }
 
-func (h *HandlerV1) redirectGoogleDriveOAuth(c *gin.Context, success bool, reason string) {
+func (h *HandlerV1) redirectGoogleDriveOAuth(c *gin.Context, success bool, reason string, states ...googleDriveOAuthState) {
 	target := h.baseConf.GoogleDriveFrontendErrorURL
 	if success {
 		target = h.baseConf.GoogleDriveFrontendSuccessURL
 	}
+	target = strings.TrimSpace(target)
+	hasConfiguredTarget := target != ""
 	if target == "" {
 		if success {
 			target = "/?google_drive=success"
 		} else {
 			target = "/?google_drive=error"
 		}
+	}
+
+	var state googleDriveOAuthState
+	if len(states) > 0 {
+		state = states[0]
+		target = applyGoogleDriveRedirectPlaceholders(target, state)
+	}
+
+	if hasConfiguredTarget {
+		c.Redirect(http.StatusTemporaryRedirect, target)
+		return
 	}
 
 	u, err := url.Parse(target)
@@ -302,11 +418,32 @@ func (h *HandlerV1) redirectGoogleDriveOAuth(c *gin.Context, success bool, reaso
 				q.Set("reason", reason)
 			}
 		}
+		if state.ProjectID != "" {
+			q.Set("project_id", state.ProjectID)
+		}
+		if state.EnvironmentID != "" {
+			q.Set("environment_id", state.EnvironmentID)
+		}
+		if state.McpProjectID != "" {
+			q.Set("mcp_project_id", state.McpProjectID)
+		}
 		u.RawQuery = q.Encode()
 		target = u.String()
 	}
 
 	c.Redirect(http.StatusTemporaryRedirect, target)
+}
+
+func applyGoogleDriveRedirectPlaceholders(target string, state googleDriveOAuthState) string {
+	replacer := strings.NewReplacer(
+		"{project_id}", url.PathEscape(state.ProjectID),
+		":project_id", url.PathEscape(state.ProjectID),
+		"{environment_id}", url.PathEscape(state.EnvironmentID),
+		":environment_id", url.PathEscape(state.EnvironmentID),
+		"{mcp_project_id}", url.PathEscape(state.McpProjectID),
+		":mcp_project_id", url.PathEscape(state.McpProjectID),
+	)
+	return replacer.Replace(target)
 }
 
 func newGoogleDriveOAuthState() (string, error) {

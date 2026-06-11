@@ -25,6 +25,7 @@ const (
 	drivePublicRole         = "reader"
 	drivePublicType         = "anyone"
 	driveFolderMimeType     = "application/vnd.google-apps.folder"
+	driveOAuthAuthURL       = "https://accounts.google.com/o/oauth2/v2/auth"
 	driveViewLinkURLPattern = "https://drive.google.com/file/d/%s/view"
 	driveFolderURLPattern   = "https://drive.google.com/drive/folders/%s"
 )
@@ -275,8 +276,11 @@ func NewOAuthConfig(config GoogleDriveConfig) (*oauth2.Config, error) {
 		ClientID:     strings.TrimSpace(config.ClientID),
 		ClientSecret: strings.TrimSpace(config.ClientSecret),
 		RedirectURL:  strings.TrimSpace(config.RedirectURI),
-		Endpoint:     google.Endpoint,
-		Scopes:       []string{drive.DriveFileScope},
+		Endpoint: oauth2.Endpoint{
+			AuthURL:  driveOAuthAuthURL,
+			TokenURL: google.Endpoint.TokenURL,
+		},
+		Scopes: []string{drive.DriveFileScope},
 	}, nil
 }
 
