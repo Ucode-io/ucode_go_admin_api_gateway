@@ -156,6 +156,15 @@ type BaseConfig struct {
 
 	UnsplashAccessKey string
 
+	GoogleDriveClientID           string
+	GoogleDriveClientSecret       string
+	GoogleDriveRedirectURI        string
+	GoogleDriveFrontendSuccessURL string
+	GoogleDriveFrontendErrorURL   string
+	GoogleDriveServiceAccountJSON string
+	GoogleDriveParentFolderID     string
+	GoogleDriveVisibility         string
+
 	YandexMetricToken string
 }
 
@@ -244,6 +253,15 @@ func BaseLoad() BaseConfig {
 	config.GithubFrontendErrorURL = cast.ToString(GetOrReturnDefaultValue("GITHUB_FRONTEND_ERROR_URL", "https://app.u-code.io/settings/github-error"))
 
 	config.UnsplashAccessKey = cast.ToString(GetOrReturnDefaultValue("UNSPLASH_ACCESS_KEY", ""))
+
+	config.GoogleDriveClientID = cast.ToString(GetOrReturnDefaultValue("GOOGLE_DRIVE_CLIENT_ID", ""))
+	config.GoogleDriveClientSecret = cast.ToString(GetOrReturnDefaultValue("GOOGLE_DRIVE_CLIENT_SECRET", ""))
+	config.GoogleDriveRedirectURI = cast.ToString(GetOrReturnDefaultValue("GOOGLE_DRIVE_REDIRECT_URI", ""))
+	config.GoogleDriveFrontendSuccessURL = cast.ToString(GetOrReturnDefaultValue("GOOGLE_DRIVE_FRONTEND_SUCCESS_URL", "https://app.u-code.io/settings/google-drive-success"))
+	config.GoogleDriveFrontendErrorURL = cast.ToString(GetOrReturnDefaultValue("GOOGLE_DRIVE_FRONTEND_ERROR_URL", "https://app.u-code.io/settings/google-drive-error"))
+	config.GoogleDriveServiceAccountJSON = cast.ToString(GetOrReturnDefaultValue("GOOGLE_DRIVE_SERVICE_ACCOUNT_JSON", ""))
+	config.GoogleDriveParentFolderID = cast.ToString(GetOrReturnDefaultValue("GOOGLE_DRIVE_PARENT_FOLDER_ID", ""))
+	config.GoogleDriveVisibility = cast.ToString(GetOrReturnDefaultValue("GOOGLE_DRIVE_VISIBILITY", "anyone_with_link"))
 
 	config.YandexMetricToken = cast.ToString(GetOrReturnDefaultValue("YANDEX_METRIC_TOKEN", ""))
 

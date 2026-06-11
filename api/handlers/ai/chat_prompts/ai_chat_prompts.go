@@ -96,8 +96,13 @@ Output 2 or 3 fixed questions depending on whether the user already named the pl
 Explicit platform signals:
   - Admin panel: "admin panel", "admin dashboard", "management panel", "back-office", "control panel"
   - Website: "website", "site", "e-commerce website", "online store", "corporate website"
+  - Web app: "web app", "webapp", "responsive web app", "PWA"
   - Landing page: "landing page", "one-page site", "promotional page"
-  - Mobile app: "mobile app", "mobile application", "iOS app", "Android app"
+  - Installable mobile app: "mobile app", "mobile application", "iOS app", "Android app", "Capacitor app", "App Store app", "Play Store app"
+
+"mobile app" and "mobile application" name an installable Capacitor mobile app — treat them as an EXPLICIT
+mobile platform signal (do NOT ask "platform-types"). A user who wants a responsive web app instead must say
+"web app" / "responsive web app" / "PWA". Only ask "platform-types" when NO platform surface is named at all.
 
 If the user's first project request already contains an explicit platform signal, DO NOT ask "platform-types".
 Output EXACTLY these 2 questions:
@@ -122,11 +127,12 @@ If the platform surface is NOT explicit, output EXACTLY these 3 questions. The p
   [
     {
       "id": "platform-types",
-      "title": "<translated: What platforms do you need?>",
-      "type": "multi",
+      "title": "<translated: Which platform should be generated?>",
+      "type": "single",
       "options": [
         {"id": "admin-panel", "label": "<translated: Admin panel>"},
         {"id": "website", "label": "<translated: Website>"},
+        {"id": "web-app", "label": "<translated: Web App>"},
         {"id": "landing-page", "label": "<translated: Landing page>"},
         {"id": "mobile-app", "label": "<translated: Mobile App>"}
       ]
@@ -147,9 +153,11 @@ If the platform surface is NOT explicit, output EXACTLY these 3 questions. The p
 
 Rules for Strategy A:
   - Use "platform-types" ONLY when the user's first project request did not already name the platform surface
+  - "mobile app" / "mobile application" IS an explicit platform surface (installable mobile) — do not ask "platform-types" for it
   - When platform is explicit, use exactly these 2 question ids: "module-types", "integrations"
   - When platform is unclear, use exactly these 3 question ids: "platform-types", "module-types", "integrations"
-  - The "platform-types" options are fixed and must be exactly: "admin-panel", "website", "landing-page", "mobile-app"
+  - "platform-types" is always type="single"; the generated project has exactly one platform surface
+  - The "platform-types" options are fixed and must be exactly: "admin-panel", "website", "web-app", "landing-page", "mobile-app"
   - Do NOT include a "None" option for integrations — the user can simply skip selection
   - Generate module and integration options that make sense for the specific system described
 
@@ -158,7 +166,7 @@ STRATEGY B — Website / e-commerce / landing page / portfolio / corporate site 
 ════════════════════
 Output 3–4 questions freely chosen by you, relevant to the specific website described.
 Questions should cover what matters most for that site (e.g. pages/sections, product categories, style/tone, target audience).
-Do NOT ask what platform the user needs when the user already asked for a website, e-commerce site, landing page, portfolio, corporate site, blog, mobile app, or admin panel.
+Do NOT ask what platform the user needs when the user already asked for a website, e-commerce site, landing page, portfolio, corporate site, blog, web app, mobile app, installable/iOS/Android/Capacitor app, or admin panel.
 Do NOT ask about tech stack, framework, or deployment.
 
   [
@@ -240,11 +248,12 @@ Example for Strategy A — User: "build me a TMS":
   questions=[
     {
       "id": "platform-types",
-      "title": "What platforms do you need?",
-      "type": "multi",
+      "title": "Which platform should be generated?",
+      "type": "single",
       "options": [
         {"id": "admin-panel", "label": "Admin panel"},
         {"id": "website", "label": "Website"},
+        {"id": "web-app", "label": "Web App"},
         {"id": "landing-page", "label": "Landing page"},
         {"id": "mobile-app", "label": "Mobile App"}
       ]
@@ -415,13 +424,17 @@ Always respond in the same language the user wrote in.`
 2. Frontend UI structure (detailed specification)
 3. Complete design system tokens (colors, fonts, radius — the code generator uses them directly)
 
-PROJECT TYPE — CLASSIFICATION DECISION TREE (MUST BE EXACTLY ONE OF FOUR):
+PROJECT TYPE — CLASSIFICATION DECISION TREE (MUST BE EXACTLY ONE OF FIVE):
 
 STEP 0 — Keyword override (CHECK FIRST):
-  If the user calls the project a consumer / end-user "app", "web app", "webapp", "mobile app",
-  "application", or "mobile application" — a product an END-USER uses for THEMSELVES (banking,
+  If the user calls the project a consumer / end-user "app", "web app", "webapp",
+  or a standalone "application" that is NOT the phrase "mobile application" — a product an END-USER uses for THEMSELVES (banking,
   fitness, shopping, delivery, booking, social, messaging, music, a personal tracker) → "webapp".
-  (There is NO mobile/native type — a "mobile app" is built as a responsive web app of type "webapp".)
+  WEB APP → "webapp" when the user SELECTED the "web-app" platform option.
+  MOBILE → "mobile" (an installable React/Vite app packaged with Capacitor): when the user SELECTED the
+  "mobile-app" platform option, says "mobile app" / "mobile application", or explicitly wants an
+  Android / iOS / Capacitor / App Store / Play Store app. Never downgrade "mobile app" / "mobile application"
+  to "webapp" — those phrases always mean the installable mobile product.
   EXCEPTION — stays "admin_panel" even if the word "app" appears: a tool whose job is to MANAGE a
   business's own data/operations for staff — manage orders/products/inventory/customers/employees,
   back-office, internal/admin dashboard, "for our staff/team", CRM/ERP/CMS, "admin app".
@@ -478,13 +491,14 @@ center action button). Single-column screens of stacked cards / full-width list 
 a BOTTOM SHEET or pushes a full-screen detail route. Touch-first: large tap targets, big numbers, rounded cards.
 
 CLEAR webapp signals:
-  consumer/end-user "app", "web app", "webapp", "mobile app", "application", "mobile application",
+  consumer/end-user "app", "web app", "webapp", "responsive web app", "PWA", standalone "application" (not "mobile application"),
   banking / wallet / finance app, fitness / health app, shopping / delivery / food app,
   booking / reservation app, social / messaging / chat app, music / media app, personal tracker,
   "an app for [end-users] to pay / book / track / shop / chat / order"
 
-MOBILE NOTE: there is no native/mobile project type. "mobile app", "mobile application",
-  "Android/iOS app" → build as "webapp" (a responsive, mobile-styled web application). Never refuse for lack of a mobile type.
+MOBILE NOTE:
+  → "mobile" — an installable React/Vite + Capacitor app — when the user selected mobile-app, says "mobile app" / "mobile application", or explicitly wants Capacitor / Android / iOS / App Store / Play Store distribution.
+  → "webapp" — a responsive, mobile-styled WEB app — when the user selected web-app or explicitly wants web app / responsive web / PWA.
 
 webapp vs admin_panel:
   "an app to MANAGE orders/inventory/staff/customers (a business's own data)" → "admin_panel" (sidebar, tables, CRUD)
@@ -493,7 +507,25 @@ webapp vs admin_panel:
 webapp vs landing/web:
   "a landing page to promote our app" → "landing" (it is marketing, not the product)
   "the actual app / product itself"   → "webapp"
-  If the user says consumer "app" / "web app" / "mobile app" → "webapp" (per STEP 0), not "web".
+  If the user says consumer "app" / "web app" / "webapp" → "webapp" (per STEP 0), not "web".
+
+────────────────────────────────────────────────────────────────
+TYPE "mobile" — an installable mobile app built with React + Vite + Capacitor
+────────────────────────────────────────────────────────────────
+Use when the user selected the "mobile-app" platform option, says "mobile app" / "mobile application", or
+explicitly wants an Android / iOS / Capacitor / App Store / Play Store app. Do NOT use for a selected
+"web-app" or explicit responsive web app / PWA request.
+Stack: the same phone-first React + Vite + Tailwind webapp UI, packaged into native iOS/Android containers
+with Capacitor. Browser preview remains available; native projects are created later by a trusted build worker.
+
+For "mobile", ui_structure MUST describe an installable phone app:
+  - a fixed bottom TAB BAR with 3–5 tabs; list/home pages link to full-screen detail routes, and create/edit use mobile dialogs/sheets;
+  - single-column phone-first pages with cards and full-width list rows — NEVER a desktop data table;
+  - the HOME screen matches the domain like a phone app (finance → balance hero + quick-action tiles + recent activity;
+    tasks → my-tasks list; chat → conversation list) — NOT a KPI dashboard, NOT a marketing hero;
+  - touch-first: large tap targets, safe-area CSS, big numbers, rounded cards; believable seed content;
+  - any Capacitor plugin usage must keep a browser fallback for the web preview.
+Forbid: React Native, Expo, a desktop layout (sidebar / multi-column / data table), and a marketing site.
 
 ────────────────────────────────────────────────────────────────
 TYPE "web" — public multi-page website (DEFAULT for websites)
@@ -533,7 +565,11 @@ SCHEMA RULES:
 4. NEVER include system fields: created_at, updated_at, deleted_at, guid — they are auto-managed.
 5. Every project MUST have exactly ONE login table: set "is_login_table": true.
 6. For the login table, do NOT include auth fields (login, email, phone, password, tin) — they are auto-created from "login_strategy". Only add custom fields like "full_name", "avatar".
-7. "client_types": for admin_panel and webapp — infer a small set of sensible access persona names silently from the project domain and workflows. Always include "Administrator" first, and add 1–4 domain-appropriate names when useful (e.g. ["Administrator", "Dispatcher", "Driver"] for TMS). Do NOT treat questionnaire platform choices as client types. Leave empty [] for landing/web projects.
+7. "client_types": for admin_panel, webapp, and mobile — infer a small set of sensible access persona names silently from the project domain and workflows. Always include "Administrator" first, and add 1–4 domain-appropriate names when useful (e.g. ["Administrator", "Dispatcher", "Driver"] for TMS). Do NOT treat questionnaire platform choices as client types. Leave empty [] for landing/web projects.
+8. "mobile_capabilities": for mobile projects only, list explicitly requested native requirements using only:
+   "camera", "local_notifications", "push_notifications", "biometric_auth", "identity_verification".
+   Identity verification implies camera. Biometric authentication means Face ID/Touch ID/fingerprint device authentication;
+   it is not identity/KYC verification. Leave empty [] for non-mobile projects.
 
 RELATIONS RULES:
 7. Output a "relations" array covering EVERY foreign-key link between tables in this project.
@@ -635,9 +671,10 @@ IMAGE KEYWORDS RULES:
 
 DESIGN SYSTEM RULES — fill the "design" field completely:
 
-TYPE A (admin_panel AND webapp) — domain-deterministic palette, font is always Inter.
+TYPE A (admin_panel, webapp AND mobile) — domain-deterministic palette, font is always Inter.
   webapp uses this SAME TYPE A palette logic (the --sidebar-* tokens style its bottom tab bar + header, so it NEEDS them).
-  For webapp (a mobile app), prefer a slightly rounder feel (border_radius "12px"–"16px" for friendly mobile cards),
+  mobile (the installable Capacitor app) uses the same webapp palette and CSS variables because both flows share the React/Vite UI generator.
+  For webapp and mobile, prefer a slightly rounder feel (border_radius "12px"–"16px" for friendly mobile cards),
   and pick the closest domain palette (finance/wallet → Finance; tasks/docs/team → Project Management or Default):
   TMS / Compliance / Logistics:
     background #f8f9fa · surface #ffffff · primary #4f46e5 · primary_hsl "239 84% 67%"
@@ -679,7 +716,7 @@ TYPE A (admin_panel AND webapp) — domain-deterministic palette, font is always
     background #f9fafb · surface #ffffff · primary #6366f1 · primary_hsl "239 84% 67%"
     accent #f59e0b · accent_hsl "38 92% 50%" · sidebar #1e293b · sidebar_foreground #f8fafc
     text #111827 · text_muted #6b7280 · border #e5e7eb · border_radius "8px" · sidebar_style "dark"
-  font_family: "Inter" · body_font: "Inter" (always for admin_panel and webapp)
+  font_family: "Inter" · body_font: "Inter" (always for admin_panel, webapp, and mobile)
   design_inspiration: [domain name, e.g. "CRM Domain", "TMS Domain"]
 
 TYPE B / TYPE C (landing, web) — select ONE archetype based on domain:

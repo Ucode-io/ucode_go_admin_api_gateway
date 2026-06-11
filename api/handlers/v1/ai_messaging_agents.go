@@ -52,9 +52,9 @@ func (p *ChatProcessor) RecordUsage(usage models.LLMUsage, model, description st
 
 func (p *ChatProcessor) generateCode(ctx context.Context, clarified string, imageURLs []string, chatHistory []models.ChatMessage, plan *models.ArchitectPlan, projectData *models.ProjectData) (*models.ParsedClaudeResponse, error) {
 	switch plan.ProjectType {
-	case "admin_panel", "webapp":
+	case "admin_panel", "webapp", mobileProjectType:
 		log.Println("GENERATION CODE: generateCodeChunked")
-		return p.generateCodeChunkedAdminPanel(ctx, clarified, imageURLs, chatHistory, plan, projectData)
+		return p.generateCodeChunkedApplication(ctx, clarified, imageURLs, chatHistory, plan, projectData)
 	case "web":
 		log.Println("GENERATION CODE: generateCodeChunkedWebsite")
 		return p.generateCodeChunkedWebsite(ctx, clarified, imageURLs, chatHistory, plan, projectData)
@@ -65,7 +65,11 @@ func (p *ChatProcessor) generateCode(ctx context.Context, clarified string, imag
 }
 
 func (p *ChatProcessor) generateCodeSingle(ctx context.Context, clarified string, imageURLs []string, chatHistory []models.ChatMessage, plan *models.ArchitectPlan, projectData *models.ProjectData) (*models.ParsedClaudeResponse, error) {
-	prompt := clarified + "\n\n" + buildAPIConfigBlock(p.baseConf.UcodeBaseUrl, projectData, plan)
+	apiConfig := buildAPIConfigBlock(p.baseConf.UcodeBaseUrl, projectData, plan)
+	if plan.ProjectType == mobileProjectType {
+		apiConfig += "\n\n" + capacitorPromptAddendum(plan.MobileCapabilities)
+	}
+	prompt := clarified + "\n\n" + apiConfig
 	if p.cachedImagePool != nil && p.cachedImagePool.Err == nil {
 		prompt += "\n\n" + p.cachedImagePool.Block
 		p.emitter().Emit(SSEEvent{Type: EvProgress, Icon: "image", Message: fmt.Sprintf("Подобрано %d фото: %s", p.cachedImagePool.Count, strings.Join(p.cachedImagePool.Keywords, ", ")), Percent: 18})
@@ -82,7 +86,7 @@ func (p *ChatProcessor) generateCodeSingle(ctx context.Context, clarified string
 	}
 
 	var scaffoldFiles []models.ProjectFile
-	if plan.ProjectType == "admin_panel" || plan.ProjectType == "web" || plan.ProjectType == "webapp" {
+	if plan.ProjectType == "admin_panel" || plan.ProjectType == "web" || usesWebAppGenerator(plan.ProjectType) {
 		contextFiles := GetTemplateContext()
 		scaffoldFiles = GetTemplateScaffold()
 		if len(contextFiles) > 0 {
@@ -130,7 +134,7 @@ func (p *ChatProcessor) generateCodeSingle(ctx context.Context, clarified string
 				systemPrompt = chat_prompts2.PromptWebsiteGenerator
 			case "admin_panel":
 				systemPrompt = chat_prompts2.PromptAdminPanelGenerator
-			case "webapp":
+			case "webapp", mobileProjectType:
 				systemPrompt = chat_prompts2.PromptWebAppGenerator
 			default:
 				systemPrompt = chat_prompts2.PromptLandingGenerator
@@ -170,18 +174,35 @@ func (p *ChatProcessor) generateCodeSingle(ctx context.Context, clarified string
 
 	project.Files = injectMissingCriticalFiles(project.Files, plan.ProjectType)
 
-	// Always force-inject .env with correct credentials — Claude may guess wrong values.
+	// Always force-inject credentials — Claude may guess wrong values.
 	project.Files = injectEnvFile(project.Files, p.baseConf.UcodeBaseUrl, projectData)
+	if plan.ProjectType == mobileProjectType {
+		var scaffoldErr error
+		project.Files, scaffoldErr = applyCapacitorScaffold(project.Files, plan.ProjectName, p.mcpProjectId, plan.MobileCapabilities)
+		if scaffoldErr != nil {
+			return nil, scaffoldErr
+		}
+	}
 
 	// ── POST-GENERATION VALIDATION + REPAIR ──
-	errorCount := p.validateAndRepairGeneratedProject(ctx, project, plan.ProjectType, 83)
+	errorCount := p.validateAndRepairGeneratedProject(ctx, project, plan.ProjectType, plan.MobileCapabilities, 83)
+	if plan.ProjectType == mobileProjectType {
+		// Gate ONLY on the Capacitor contract; UI-quality/manifest findings are
+		// best-effort (parity with webapp, which ships with them).
+		if contractErrs := mobileContractErrorCount(project.Files); contractErrs > 0 {
+			return nil, fmt.Errorf("generate code: Capacitor mobile contract gate found %d error(s)", contractErrs)
+		}
+		if errorCount > 0 {
+			log.Printf("[generate] mobile shipping with %d non-fatal quality finding(s) (parity with webapp)", errorCount)
+		}
+	}
 
 	log.Printf("[generate] done: %d files (type=%s, %d validation errors)", len(project.Files), plan.ProjectType, errorCount)
 	return &models.ParsedClaudeResponse{Project: project}, nil
 }
 
-func (p *ChatProcessor) generateCodeChunkedAdminPanel(ctx context.Context, clarified string, imageURLs []string, chatHistory []models.ChatMessage, plan *models.ArchitectPlan, projectData *models.ProjectData) (*models.ParsedClaudeResponse, error) {
-	log.Printf("[chunked] starting chunked generation for admin_panel: %s", plan.ProjectName)
+func (p *ChatProcessor) generateCodeChunkedApplication(ctx context.Context, clarified string, imageURLs []string, chatHistory []models.ChatMessage, plan *models.ArchitectPlan, projectData *models.ProjectData) (*models.ParsedClaudeResponse, error) {
+	log.Printf("[chunked] starting chunked generation for %s: %s", plan.ProjectType, plan.ProjectName)
 
 	var (
 		emit     = p.emitter()
@@ -250,6 +271,9 @@ func (p *ChatProcessor) generateCodeChunkedAdminPanel(ctx context.Context, clari
 	time.Sleep(1000 * time.Millisecond)
 
 	apiConfig := buildAPIConfigBlock(p.baseConf.UcodeBaseUrl, projectData, plan)
+	if plan.ProjectType == mobileProjectType {
+		apiConfig += "\n\n" + capacitorPromptAddendum(plan.MobileCapabilities)
+	}
 	if p.cachedImagePool != nil && p.cachedImagePool.Err == nil {
 		apiConfig += "\n\n" + p.cachedImagePool.Block
 		emit.Emit(SSEEvent{Type: EvProgress, Icon: "image", Message: fmt.Sprintf("Подобрано %d фото: %s", p.cachedImagePool.Count, strings.Join(p.cachedImagePool.Keywords, ", ")), Percent: 25})
@@ -276,7 +300,7 @@ func (p *ChatProcessor) generateCodeChunkedAdminPanel(ctx context.Context, clari
 	)
 
 	foundationPrompt := chat_prompts2.PromptAdminPanelGenerator
-	if plan.ProjectType == "webapp" {
+	if usesWebAppGenerator(plan.ProjectType) {
 		foundationPrompt = chat_prompts2.PromptWebAppGenerator
 	}
 
@@ -292,7 +316,7 @@ func (p *ChatProcessor) generateCodeChunkedAdminPanel(ctx context.Context, clari
 	go func() {
 		defer wg.Done()
 		for attempt := 1; attempt <= 2; attempt++ {
-			foundation, foundErr = p.generateFoundation(ctx, clarified, imageURLs, chatHistory, apiConfig, foundationGroup, manifest, foundationPrompt)
+			foundation, foundErr = p.generateFoundation(ctx, clarified, imageURLs, chatHistory, apiConfig, foundationGroup, manifest, foundationPrompt, plan.ProjectType)
 			if foundErr == nil {
 				break
 			}
@@ -326,18 +350,28 @@ func (p *ChatProcessor) generateCodeChunkedAdminPanel(ctx context.Context, clari
 		}()
 	}
 
-	err := withHeartbeat(ctx, emit,
-		p.agentCfgs().Coder.Model,
-		[]string{
+	heartbeatMessages := []string{
+		"Генерирую layout и навигацию...",
+		"Создаю UI компоненты и дизайн-систему...",
+		"Генерирую TypeScript типы и интерфейсы...",
+		"Пишу API хуки и конфигурацию axios...",
+		"Формирую глобальные стили и CSS переменные...",
+		"Настраиваю роутинг и App.tsx...",
+	}
+	if plan.ProjectType == "admin_panel" {
+		heartbeatMessages = []string{
 			"Генерирую layout, sidebar и навигацию...",
 			"Создаю UI компоненты и дизайн-систему...",
 			"Генерирую TypeScript типы и интерфейсы...",
 			"Создаю DataTable, FormModal и PageHeader...",
 			"Пишу API хуки и конфигурацию axios...",
-			"Создаю Button, Input, Card, Dialog...",
-			"Формирую глобальные стили и CSS переменные...",
 			"Настраиваю роутинг и App.tsx...",
-		},
+		}
+	}
+
+	err := withHeartbeat(ctx, emit,
+		p.agentCfgs().Coder.Model,
+		heartbeatMessages,
 		func() error {
 			wg.Wait()
 			return foundErr
@@ -364,7 +398,7 @@ func (p *ChatProcessor) generateCodeChunkedAdminPanel(ctx context.Context, clari
 	}
 
 	chunkPrompt := chat_prompts2.PromptChunkedCoderAdminPanel
-	if plan.ProjectType == "webapp" {
+	if usesWebAppGenerator(plan.ProjectType) {
 		chunkPrompt = chat_prompts2.PromptChunkedCoderWebApp
 	}
 
@@ -493,6 +527,12 @@ func (p *ChatProcessor) generateCodeChunkedAdminPanel(ctx context.Context, clari
 	merged.Files = injectMissingCriticalFiles(merged.Files, plan.ProjectType)
 	merged.Files = injectEnvFile(merged.Files, p.baseConf.UcodeBaseUrl, projectData)
 	merged.Files = mergeAppRoutes(merged.Files, manifest)
+	if plan.ProjectType == mobileProjectType {
+		merged.Files, err = applyCapacitorScaffold(merged.Files, plan.ProjectName, p.mcpProjectId, plan.MobileCapabilities)
+		if err != nil {
+			return nil, err
+		}
+	}
 
 	emit.Emit(
 		SSEEvent{
@@ -503,13 +543,23 @@ func (p *ChatProcessor) generateCodeChunkedAdminPanel(ctx context.Context, clari
 			Value:   fmt.Sprintf("%d файлов", len(merged.Files)),
 		},
 	)
-	errorCount := p.validateAndRepairGeneratedProject(ctx, merged, plan.ProjectType, 80)
+	errorCount := p.validateAndRepairGeneratedProject(ctx, merged, plan.ProjectType, plan.MobileCapabilities, 80)
+	if plan.ProjectType == mobileProjectType {
+		// Gate ONLY on the Capacitor contract; UI-quality/manifest findings are
+		// best-effort (parity with webapp, which ships with them).
+		if contractErrs := mobileContractErrorCount(merged.Files); contractErrs > 0 {
+			return nil, fmt.Errorf("generate code: Capacitor mobile contract gate found %d error(s)", contractErrs)
+		}
+		if errorCount > 0 {
+			log.Printf("[chunked] mobile shipping with %d non-fatal quality finding(s) (parity with webapp)", errorCount)
+		}
+	}
 
 	log.Printf("[chunked] done: %d total files (%d feature groups, %d failed, %d validation errors)", len(merged.Files), totalChunks, failedCount, errorCount)
 	return &models.ParsedClaudeResponse{Project: merged}, nil
 }
 
-func (p *ChatProcessor) generateFoundation(ctx context.Context, clarified string, imageURLs []string, chatHistory []models.ChatMessage, apiConfig string, foundationGroup models.ManifestGroup, manifest *models.ProjectManifest, foundationPrompt string) (*models.GeneratedProject, error) {
+func (p *ChatProcessor) generateFoundation(ctx context.Context, clarified string, imageURLs []string, chatHistory []models.ChatMessage, apiConfig string, foundationGroup models.ManifestGroup, manifest *models.ProjectManifest, foundationPrompt, projectType string) (*models.GeneratedProject, error) {
 	var sb strings.Builder
 
 	sb.WriteString("====================================\n")
@@ -552,7 +602,7 @@ func (p *ChatProcessor) generateFoundation(ctx context.Context, clarified string
 
 	// Note: ExportConventionBlock + LazyAppTsxExemplar are baked into PromptAdminPanelGenerator
 	// (cacheable system prompt) — do NOT re-inject here.
-	if routesBlock := buildExpectedRoutesBlock(manifest, "admin_panel"); routesBlock != "" {
+	if routesBlock := buildExpectedRoutesBlock(manifest, projectType); routesBlock != "" {
 		sb.WriteString("\n")
 		sb.WriteString(routesBlock)
 	}
@@ -1076,7 +1126,7 @@ func injectMissingCriticalFiles(files []models.ProjectFile, projectType string) 
 	if _, ok := existing["src/App.tsx"]; !ok {
 		log.Printf("[inject] src/App.tsx missing — injecting minimal stub (type=%s)", projectType)
 		switch projectType {
-		case "admin_panel", "webapp":
+		case "admin_panel", "webapp", mobileProjectType:
 			files = append(files, models.ProjectFile{
 				Path: "src/App.tsx",
 				Content: `import React from 'react'
@@ -1132,7 +1182,7 @@ export default function App() {
 	return files
 }
 
-func (p *ChatProcessor) validateAndRepairGeneratedProject(ctx context.Context, project *models.GeneratedProject, projectType string, startPercent int) int {
+func (p *ChatProcessor) validateAndRepairGeneratedProject(ctx context.Context, project *models.GeneratedProject, projectType string, capabilities []models.MobileCapability, startPercent int) int {
 	const maxRepairPasses = 3
 
 	if project == nil {
@@ -1162,8 +1212,11 @@ func (p *ChatProcessor) validateAndRepairGeneratedProject(ctx context.Context, p
 		if projectType == "admin_panel" {
 			validationErrors = append(validationErrors, validateAdminPanelUIQuality(project.Files)...)
 		}
-		if projectType == "webapp" {
+		if usesWebAppGenerator(projectType) {
 			validationErrors = append(validationErrors, validateWebAppUIQuality(project.Files)...)
+		}
+		if projectType == mobileProjectType {
+			validationErrors = append(validationErrors, validateMobileGeneratedProject(project.Files)...)
 		}
 		errorCount, _ = logValidationResults(validationErrors)
 		if errorCount == 0 {
@@ -1201,12 +1254,26 @@ func (p *ChatProcessor) validateAndRepairGeneratedProject(ctx context.Context, p
 		// validation honest.
 		project.Files = dedupTsTsxPairs(project.Files)
 		project.Files = ensureAppEntryDefaultExport(project.Files)
+		if projectType == mobileProjectType {
+			normalized, normalizeErr := applyCapacitorScaffold(project.Files, project.ProjectName, p.mcpProjectId, capabilities)
+			if normalizeErr != nil {
+				log.Printf("[quality-gate] restore Capacitor scaffold: %v", normalizeErr)
+			} else {
+				project.Files = normalized
+			}
+		}
 	}
 
 	finalErrors := validateGeneratedProject(project.Files, project.Env)
 	finalErrors = append(finalErrors, validateAgainstManifest(project.Files, p.currentManifest)...)
 	if projectType == "admin_panel" {
 		finalErrors = append(finalErrors, validateAdminPanelUIQuality(project.Files)...)
+	}
+	if usesWebAppGenerator(projectType) {
+		finalErrors = append(finalErrors, validateWebAppUIQuality(project.Files)...)
+	}
+	if projectType == mobileProjectType {
+		finalErrors = append(finalErrors, validateMobileGeneratedProject(project.Files)...)
 	}
 	errorCount, _ = logValidationResults(finalErrors)
 	return errorCount
@@ -1469,7 +1536,7 @@ func (p *ChatProcessor) generateCodeChunkedWebsite(ctx context.Context, clarifie
 	merged.Files = mergeAppRoutes(merged.Files, manifest)
 
 	emit.Emit(SSEEvent{Type: EvProgress, Icon: "shield-check", Percent: 80, Message: "Проверяю качество кода", Value: fmt.Sprintf("%d файлов", len(merged.Files))})
-	errorCount := p.validateAndRepairGeneratedProject(ctx, merged, plan.ProjectType, 80)
+	errorCount := p.validateAndRepairGeneratedProject(ctx, merged, plan.ProjectType, nil, 80)
 
 	log.Printf("[chunked-web] done: %d total files (%d pages, %d failed, %d validation errors)", len(merged.Files), totalPages, failedCount, errorCount)
 	return &models.ParsedClaudeResponse{Project: merged}, nil

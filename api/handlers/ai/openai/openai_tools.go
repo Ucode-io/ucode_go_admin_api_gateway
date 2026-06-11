@@ -11,6 +11,11 @@ var toolArchitectPlan = chatTool{
 			"required": []string{"project_name", "project_type", "tables", "relations", "ui_structure", "design", "image_keywords", "client_types"},
 			"properties": map[string]any{
 				"project_name": map[string]any{"type": "string"},
+				"mobile_capabilities": map[string]any{
+					"type":        "array",
+					"items":       map[string]any{"type": "string", "enum": []string{"camera", "local_notifications", "push_notifications", "biometric_auth", "identity_verification"}},
+					"description": "Native capabilities explicitly required by a mobile project. Use only listed enum values; identity_verification also requires camera. Empty [] for non-mobile projects.",
+				},
 				"client_types": map[string]any{
 					"type":        "array",
 					"items":       map[string]any{"type": "string"},
@@ -22,8 +27,9 @@ var toolArchitectPlan = chatTool{
 					"description": "2–4 Unsplash search terms that visually represent this project's real-world domain. Be specific and physical.",
 				},
 				"project_type": map[string]any{
-					"type": "string",
-					"enum": []string{"admin_panel", "landing", "web"},
+					"type":        "string",
+					"enum":        []string{"admin_panel", "landing", "web", "webapp", "mobile"},
+					"description": "Detected project type. 'mobile' = installable React/Vite app packaged with Capacitor for iOS/Android. 'webapp' = responsive web app/PWA delivered by URL. A bare 'mobile app' must use the platform-types answer; if unresolved, prefer 'mobile'.",
 				},
 				"tables": map[string]any{
 					"type": "array",

@@ -25,16 +25,19 @@ type (
 	// EnrichedMessage is the HTTP representation of a chat message.
 	// It mirrors pbo.Message but adds a Plan field parsed from embedded content.
 	EnrichedMessage struct {
-		ID         string       `json:"id"`
-		ChatID     string       `json:"chat_id"`
-		Role       string       `json:"role"`
-		Content    string       `json:"content"`
-		Images     []string     `json:"images"`
-		HasFiles   bool         `json:"has_files"`
-		TokensUsed int32        `json:"tokens_used"`
-		CreatedAt  string       `json:"created_at"`
-		Plan       *HaikuPlan   `json:"plan,omitempty"`
-		Questions  []AiQuestion `json:"questions,omitempty"`
+		ID                  string       `json:"id"`
+		ChatID              string       `json:"chat_id"`
+		Role                string       `json:"role"`
+		Content             string       `json:"content"`
+		Images              []string     `json:"images"`
+		HasFiles            bool         `json:"has_files"`
+		TokensUsed          int32        `json:"tokens_used"`
+		CreatedAt           string       `json:"created_at"`
+		LikeCount           int32        `json:"like_count"`
+		DislikeCount        int32        `json:"dislike_count"`
+		CurrentUserReaction string       `json:"current_user_reaction"`
+		Plan                *HaikuPlan   `json:"plan,omitempty"`
+		Questions           []AiQuestion `json:"questions,omitempty"`
 	}
 
 	// VisualContext is optional metadata sent by the frontend when the user
@@ -113,10 +116,21 @@ type (
 		StopReason    string            `json:"stop_reason"`
 		Usage         ClaudeUsage       `json:"usage"`
 		Project       *GeneratedProject `json:"project,omitempty"`
+		MobileProject *MobileProject    `json:"mobile_project,omitempty"`
 		Description   string            `json:"description"`
 		PendingAction *PendingAction    `json:"pending_action,omitempty"`
 		Questions     []AiQuestion      `json:"questions,omitempty"`
 		Plan          *HaikuPlan        `json:"plan,omitempty"`
+	}
+
+	MobileProject struct {
+		ProjectName    string             `json:"project_name"`
+		ProjectType    string             `json:"project_type"`
+		Runtime        string             `json:"runtime"`
+		RuntimeVersion string             `json:"runtime_version"`
+		WebDir         string             `json:"web_dir"`
+		Capabilities   []MobileCapability `json:"capabilities"`
+		Files          []ProjectFile      `json:"files"`
 	}
 
 	// ========================== Classification ==========================
@@ -218,14 +232,15 @@ type (
 	}
 
 	ArchitectPlan struct {
-		ProjectName   string              `json:"project_name"`
-		ProjectType   string              `json:"project_type"` // "admin_panel" | "landing" | "web" | "webapp"
-		Tables        []TablePlan         `json:"tables"`
-		Relations     []TableRelationPlan `json:"relations,omitempty"`
-		UIStructure   string              `json:"ui_structure"`
-		Design        DesignSpec          `json:"design"`
-		ImageKeywords []string            `json:"image_keywords,omitempty"`
-		ClientTypes   []string            `json:"client_types,omitempty"` // silently inferred access personas → each becomes client_type + role record
+		ProjectName        string              `json:"project_name"`
+		ProjectType        string              `json:"project_type"` // "admin_panel" | "landing" | "web" | "webapp" | "mobile"
+		Tables             []TablePlan         `json:"tables"`
+		Relations          []TableRelationPlan `json:"relations,omitempty"`
+		UIStructure        string              `json:"ui_structure"`
+		Design             DesignSpec          `json:"design"`
+		ImageKeywords      []string            `json:"image_keywords,omitempty"`
+		ClientTypes        []string            `json:"client_types,omitempty"` // silently inferred access personas → each becomes client_type + role record
+		MobileCapabilities []MobileCapability  `json:"mobile_capabilities,omitempty"`
 	}
 
 	ProjectData struct {

@@ -349,7 +349,7 @@ func (h *HandlerV1) GetCompanyStats(c *gin.Context) {
 		},
 		ProjectCount: models.CompanyStat{Current: projectCount, Limit: projectLimit},
 		Builders:     models.CompanyStat{Current: builderCount, Limit: builderLimit},
-		UserCount:    models.CompanyStat{Current: userCount, Limit: userLimit},
+		UserCount:    models.CompanyStat{Current: userCount - builderCount, Limit: userLimit},
 	})
 }
 

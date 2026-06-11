@@ -28,7 +28,11 @@ func buildProjectSummary(plan *models.ArchitectPlan, files []models.ProjectFile,
 	sb.WriteString("\n")
 	sb.WriteString(summaryPages(plan, files))
 
-	sb.WriteString("\n⚙️ React 18 · TypeScript · Tailwind CSS · Vite\n")
+	if plan.ProjectType == mobileProjectType {
+		fmt.Fprintf(&sb, "\n⚙️ React 18 · TypeScript · Tailwind CSS · Vite · Capacitor %s\n", capacitorRuntimeVersion)
+	} else {
+		sb.WriteString("\n⚙️ React 18 · TypeScript · Tailwind CSS · Vite\n")
+	}
 
 	if len(plan.ClientTypes) > 0 {
 		fmt.Fprintf(&sb, "👥 **Роли:** %s\n", strings.Join(plan.ClientTypes, ", "))
@@ -47,6 +51,8 @@ func summaryHeader(plan *models.ArchitectPlan) string {
 		return fmt.Sprintf("✅ **%s** — сайт готов!\n", plan.ProjectName)
 	case "webapp":
 		return fmt.Sprintf("✅ **%s** — мобильное приложение готово!\n", plan.ProjectName)
+	case mobileProjectType:
+		return fmt.Sprintf("✅ **%s** — устанавливаемое мобильное приложение готово!\n", plan.ProjectName)
 	default:
 		return fmt.Sprintf("✅ **%s** — лендинг готов!\n", plan.ProjectName)
 	}
@@ -63,6 +69,8 @@ func summaryStats(files []models.ProjectFile, projectType string, durationSec in
 		label := "страниц"
 		if projectType == "admin_panel" {
 			label = "модулей"
+		} else if projectType == mobileProjectType {
+			label = "экранов"
 		}
 		parts = append(parts, fmt.Sprintf("%d %s", pages, label))
 	}
@@ -208,6 +216,14 @@ func summaryPages(plan *models.ArchitectPlan, files []models.ProjectFile) string
 		if len(names) > 0 {
 			fmt.Fprintf(&sb, "📱 **Экраны** (%d)\n%s\n", len(names), strings.Join(names, " · "))
 		}
+	case mobileProjectType:
+		names := extractProjectPages(files)
+		if len(names) == 0 {
+			names = parseSectionsFromUIStructure(plan.UIStructure)
+		}
+		if len(names) > 0 {
+			fmt.Fprintf(&sb, "📱 **Экраны** (%d)\n%s\n", len(names), strings.Join(names, " · "))
+		}
 	case "web":
 		names := extractProjectPages(files)
 		if len(names) == 0 {
@@ -231,7 +247,7 @@ func summaryPages(plan *models.ArchitectPlan, files []models.ProjectFile) string
 func categorizeFiles(files []models.ProjectFile) (pages, components, hooks int) {
 	for _, f := range files {
 		switch {
-		case strings.HasSuffix(f.Path, ".tsx") && strings.Contains(f.Path, "/pages/"):
+		case strings.HasSuffix(f.Path, ".tsx") && (strings.Contains(f.Path, "/pages/") || strings.Contains(f.Path, "/screens/")):
 			pages++
 		case strings.HasSuffix(f.Path, ".tsx"):
 			components++

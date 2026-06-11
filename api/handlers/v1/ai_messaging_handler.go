@@ -11,7 +11,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"ucode/ucode_go_api_gateway/api/handlers/billing"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
@@ -250,6 +249,7 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 		"pending_action":        aiResponse.PendingAction,
 		"questions":             aiResponse.Questions,
 		"plan":                  aiResponse.Plan,
+		"mobile_project":        aiResponse.MobileProject,
 	})
 }
 
@@ -358,7 +358,7 @@ func (h *HandlerV1) sseError(c *gin.Context, msg string) {
 //	Foreground (HTTP goroutine) ◂──read──────────────────────┘──▸ c.Writer (SSE)
 //
 // If the client disconnects, the background goroutine keeps running so tokens
-// are not wasted. Events are silently dropped by the channelEmitter.
+// are not wasted. Progress events may be dropped; terminal/mobile events are guaranteed.
 func (h *HandlerV1) handleStreamingMessage(c *gin.Context, processor *ChatProcessor, userMessage models.NewMessageReq, chatHistory []models.ChatMessage, service services.ServiceManagerI, resourceEnvID, chatId string) {
 
 	eventCh := make(chan SSEEvent, 64)
@@ -377,7 +377,7 @@ func (h *HandlerV1) handleStreamingMessage(c *gin.Context, processor *ChatProces
 	// IMPORTANT: use context.Background(), NOT the HTTP request ctx.
 	// If the client disconnects, c.Request.Context() gets cancelled, which
 	// would abort the AI pipeline mid-generation (wasting tokens and money).
-	// The channelEmitter silently drops events when the channel is full/closed.
+	// The channelEmitter may drop progress events when the channel is full.
 
 	pipelineCtx := context.Background()
 
@@ -409,13 +409,6 @@ func (h *HandlerV1) handleStreamingMessage(c *gin.Context, processor *ChatProces
 					Icon:    "ban",
 					Message: "Достигнут лимит токенов для этого проекта",
 					Data:    processor.tokenLimitData(tokenErr),
-				})
-			case errors.Is(pipelineErr, billing.ErrProjectLimitExceeded):
-				processor.emitter().Emit(SSEEvent{
-					Type:    EvError,
-					Icon:    "credit-card",
-					Message: "Project limit reached. Please upgrade your plan.",
-					Data:    models.PaymentProjectLimit,
 				})
 			default:
 				processor.emitter().Emit(SSEEvent{
@@ -515,6 +508,7 @@ func (h *HandlerV1) handleStreamingMessage(c *gin.Context, processor *ChatProces
 					"pending_action":        aiResponse.PendingAction,
 					"questions":             aiResponse.Questions,
 					"plan":                  aiResponse.Plan,
+					"mobile_project":        aiResponse.MobileProject,
 					"duration_sec":          int(time.Since(startTime).Seconds()),
 				},
 			},

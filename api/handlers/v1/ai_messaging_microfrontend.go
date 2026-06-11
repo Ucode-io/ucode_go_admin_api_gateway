@@ -37,6 +37,10 @@ func (p *ChatProcessor) runMicrofrontendEdit(ctx context.Context, clarified, fil
 	emit := p.emitter()
 	emit.Emit(SSEEvent{Type: EvProgress, Icon: "scan-search", Message: "Анализирую проект и планирую изменения...", Percent: 5})
 
+	if err := p.Check(); err != nil {
+		return nil, err
+	}
+
 	var plan *models.SonnetPlanResult
 	if err := withHeartbeat(ctx, emit,
 		p.agentCfgs().Planner.Model,
@@ -96,6 +100,10 @@ func (p *ChatProcessor) runMicrofrontendEdit(ctx context.Context, clarified, fil
 	filesContext := p.buildMicrofrontendFilesContext(existingFiles, neededPaths)
 
 	emit.Emit(SSEEvent{Type: EvProgress, Icon: "code-2", Message: "Редактирую исходный код...", Percent: 20})
+
+	if err := p.Check(); err != nil {
+		return nil, err
+	}
 
 	var editedProject *models.GeneratedProject
 	if err := withHeartbeat(ctx, emit,
@@ -197,6 +205,10 @@ func (p *ChatProcessor) runMicrofrontendEdit(ctx context.Context, clarified, fil
 // runMicrofrontendInspect answers questions about the microfrontend's current code
 // by loading the requested files from the u-gen branch.
 func (p *ChatProcessor) runMicrofrontendInspect(ctx context.Context, userQuestion string, filesNeeded []string, chatHistory []models.ChatMessage, imageURLs []string, existingFiles []models.GitlabFileChange) (*models.ParsedClaudeResponse, error) {
+	if err := p.Check(); err != nil {
+		return nil, err
+	}
+
 	filesContext := p.buildMicrofrontendFilesContext(existingFiles, filesNeeded)
 	answer, err := p.agent.InspectCode(ctx, models.InspectorInput{
 		Question:     userQuestion,
