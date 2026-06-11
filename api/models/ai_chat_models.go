@@ -251,6 +251,7 @@ type (
 		ResourceEnvId  string `json:"resource_env_id"`
 		NodeType       string `json:"node_type"`
 		ResourceType   int32  `json:"resource_type"`
+		AuthMode       string `json:"auth_mode,omitempty"`
 		ShortURL       string `json:"short_url,omitempty"`
 	}
 
