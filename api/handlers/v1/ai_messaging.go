@@ -1040,7 +1040,7 @@ func buildAPIConfigBlock(baseURL string, projectData *models.ProjectData, plan *
 		apiKey = projectData.ApiKey
 		ucodeProjectId = projectData.UcodeProjectId
 		environmentId = projectData.EnvironmentId
-		if plan != nil && plan.ProjectType == "admin_panel" && strings.EqualFold(projectData.AuthMode, "login") {
+		if strings.EqualFold(projectData.AuthMode, "login") {
 			authMode = "login"
 		}
 	}

@@ -310,8 +310,9 @@ SIDEBAR NAV RULES:
     Truck, MapPin, Bell, Search, ChevronDown, ChevronRight, LogOut, Menu, X,
     Plus, Edit, Trash2, Eye, Download, Upload, Filter, RefreshCw, Check, AlertCircle
   NEVER use icon names that don't exist in lucide-react — they render as blank/broken.
-  Each nav item: { icon: LucideIcon, label: string, path: string }
-  Active state: compare location.pathname with item.path using startsWith for nested routes.
+  Each nav item MUST expose its route as one of: path, href, or to. Prefer path, but if the local
+  NavItem type uses href, use href consistently. Active state compares location.pathname with that
+  route using startsWith for nested routes.
 
 PERMISSION-GATED NAV (MANDATORY when a sidebar/top-nav exists):
   The host (ugen) supplies a per-role permission map so an invited/shared user only sees the
@@ -343,18 +344,29 @@ PERMISSION-GATED NAV (MANDATORY when a sidebar/top-nav exists):
          useEffect(() => { listeners.add(setM); setM(current); return () => { listeners.delete(setM); }; }, []);
          return m;
        }
-       // Default VISIBLE unless an entry explicitly sets read === false.
-       export function canRead(perms: PermMap, path: string): boolean { return perms[path]?.read !== false; }
+       const isLoginMode = import.meta.env.VITE_UCODE_AUTH_MODE === "login";
+       // AUTH MODE = none: default visible unless an entry explicitly sets read === false.
+       // AUTH MODE = login: after nav-map is loaded, missing routes are NOT readable.
+       export function canRead(perms: PermMap, path: string): boolean {
+         const entry = perms[path];
+         if (entry) return entry.read !== false;
+         return !isLoginMode;
+       }
 
-  2. In the Sidebar/Navbar component, gate every nav item by its path:
+  2. In the Sidebar/Navbar component, gate every nav item by its route path:
        const perms = useUcodePermissions();
-       const visibleItems = navItems.filter((item) => canRead(perms, item.path));
+       const getNavRoute = (item: any) => item.path || item.href || item.to || "/";
+       const visibleItems = navItems.filter((item) => canRead(perms, getNavRoute(item)));
        // render visibleItems instead of navItems. Also hide a collapsible group whose children all became hidden.
 
-  RULES: never hard-fail if the map is empty (default = show all). Match strictly by item.path (the
-  exact route string). In AUTH MODE = none this is the only auth-related code allowed and remains
+  RULES: Match strictly by the route string in item.path/item.href/item.to. The custom permission
+  attributes.nav_path value must equal that route string, e.g. "/employees" for href: "/employees".
+  In AUTH MODE = none, never hard-fail if the map is empty (default = show all); this remains
   presentation-only nav filtering, not an auth guard. In AUTH MODE = login, also support an exported
   setter/update function so the nav-map loaded after login can replace the current permission map.
+  In AUTH MODE = login, do NOT render the full sidebar before nav-map finishes loading; show a small
+  loading/skeleton state. After nav-map is loaded, hide any nav item whose route is missing from the
+  map or whose read flag is false. Login mode is deny-by-default for sidebar routes.
 
 STEP 3 — Design Tokens:
   Design tokens are provided in the "DESIGN TOKENS:" block in your prompt.
