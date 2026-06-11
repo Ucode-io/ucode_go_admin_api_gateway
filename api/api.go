@@ -467,9 +467,16 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	}
 
 	clientV2 := r.Group("/v2")
+	clientV2.POST("/login", h.V2.V2Login)
 	clientV2.Use(h.V2.AuthMiddleware())
 	clientV2.Use(tracker.ApiCallCountMiddleware())
 	clientV2.Use(tracker.BillingLimitMiddleware())
+
+	v2CustomPermission := clientV2.Group("/custom-permission")
+	{
+		v2CustomPermission.GET("/nav-map", h.V2.GetCustomPermissionNavMap)
+	}
+
 	// items group
 	v2Items := clientV2.Group("/items")
 	{

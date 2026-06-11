@@ -340,7 +340,7 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 		}
 	}(plan, *projectData)
 
-	generated, err := p.generateCode(ctx, clarified, imageURLs, chatHistory, plan, projectData.ApiKey)
+	generated, err := p.generateCode(ctx, clarified, imageURLs, chatHistory, plan, projectData)
 	if err != nil {
 		return nil, err
 	}
@@ -523,7 +523,7 @@ func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context,
 		}
 	}
 
-	generated, err := p.generateCode(ctx, clarified, imageURLs, chatHistory, plan, projectData.ApiKey)
+	generated, err := p.generateCode(ctx, clarified, imageURLs, chatHistory, plan, projectData)
 	if err != nil {
 		return nil, err
 	}
@@ -547,15 +547,19 @@ func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context,
 
 func (p *ChatProcessor) getExistingProjectData(ctx context.Context) (*models.ProjectData, error) {
 	ucodeProjectId := p.ucodeProjectId
+	authMode := "none"
 
 	if p.mcpProjectId != "" {
 		mcpProject, err := p.service.GoObjectBuilderService().McpProject().GetMcpProjectFiles(ctx, &pbo.McpProjectId{
 			ResourceEnvId: p.resourceEnvId,
 			Id:            p.mcpProjectId,
 		})
-		if err == nil && mcpProject != nil && mcpProject.GetUcodeProjectId() != "" {
-			ucodeProjectId = mcpProject.GetUcodeProjectId()
-			log.Printf("[GET EXISTING PROJECT] using ucode_project_id=%s from MCP project", ucodeProjectId)
+		if err == nil && mcpProject != nil {
+			authMode = getMcpProjectAuthMode(mcpProject)
+			if mcpProject.GetUcodeProjectId() != "" {
+				ucodeProjectId = mcpProject.GetUcodeProjectId()
+				log.Printf("[GET EXISTING PROJECT] using ucode_project_id=%s from MCP project", ucodeProjectId)
+			}
 		}
 	}
 
@@ -594,10 +598,36 @@ func (p *ChatProcessor) getExistingProjectData(ctx context.Context) (*models.Pro
 		EnvironmentId:  env.GetId(),
 		ResourceEnvId:  env.GetResourceEnvironmentId(),
 		ApiKey:         apiKey,
+		AuthMode:       authMode,
 	}, nil
 }
 
+func getMcpProjectAuthMode(project *pbo.McpProject) string {
+	if project == nil || project.GetProjectEnv() == nil {
+		return "none"
+	}
+
+	mode, ok := project.GetProjectEnv().AsMap()["auth_mode"].(string)
+	if ok && strings.EqualFold(mode, "login") {
+		return "login"
+	}
+
+	return "none"
+}
+
 func (p *ChatProcessor) provisionBackend(ctx context.Context, projectName string, existingMcpId string, projectType string) (*models.ProjectData, error) {
+	authMode := "none"
+	if existingMcpId != "" {
+		mcpProject, err := p.service.GoObjectBuilderService().McpProject().GetMcpProjectFiles(ctx, &pbo.McpProjectId{
+			ResourceEnvId: p.resourceEnvId,
+			Id:            existingMcpId,
+			WithoutFiles:  true,
+		})
+		if err == nil && mcpProject != nil {
+			authMode = getMcpProjectAuthMode(mcpProject)
+		}
+	}
+
 	currentProject, err := p.h.companyServices.Project().GetById(
 		ctx, &pb.GetProjectByIdRequest{
 			ProjectId: p.ucodeProjectId,
@@ -719,6 +749,7 @@ func (p *ChatProcessor) provisionBackend(ctx context.Context, projectName string
 		ResourceEnvId:  resource.GetResourceEnvironmentId(),
 		NodeType:       resource.GetNodeType(),
 		ResourceType:   int32(resource.GetResourceType()),
+		AuthMode:       authMode,
 	}, nil
 }
 
@@ -944,7 +975,7 @@ func truncateString(s string, maxLen int) string {
 	return string(runes[:maxLen-3]) + "..."
 }
 
-func buildAPIConfigBlock(baseURL, apiKey string, plan *models.ArchitectPlan) string {
+func buildAPIConfigBlock(baseURL string, projectData *models.ProjectData, plan *models.ArchitectPlan) string {
 
 	var (
 		envBaseURLKey = "VITE_API_BASE_URL"
@@ -953,6 +984,19 @@ func buildAPIConfigBlock(baseURL, apiKey string, plan *models.ArchitectPlan) str
 		sb              strings.Builder
 		loginTableSlugs []string
 	)
+
+	authMode := "none"
+	apiKey := ""
+	ucodeProjectId := ""
+	environmentId := ""
+	if projectData != nil {
+		apiKey = projectData.ApiKey
+		ucodeProjectId = projectData.UcodeProjectId
+		environmentId = projectData.EnvironmentId
+		if plan != nil && plan.ProjectType == "admin_panel" && strings.EqualFold(projectData.AuthMode, "login") {
+			authMode = "login"
+		}
+	}
 
 	for _, f := range GetTemplateContext() {
 		if strings.Contains(f.Path, "config/axios") || strings.Contains(f.Path, "lib/api") {
@@ -966,10 +1010,35 @@ func buildAPIConfigBlock(baseURL, apiKey string, plan *models.ArchitectPlan) str
 	}
 
 	sb.WriteString(fmt.Sprintf(
-		"\n====================================\nAPI CONFIGURATION FOR FRONTEND\n====================================\n%s: %s\n%s: %s\n\nREQUIRED axios headers (BOTH — never omit either):\n  headers: { 'Authorization': 'API-KEY', '%s': import.meta.env.%s }\n\nTables to use:\n",
-		envBaseURLKey, baseURL, envAPIKeyKey, apiKey,
-		envAPIKeyKey, envAPIKeyKey,
+		"\n====================================\nAPI CONFIGURATION FOR FRONTEND\n====================================\n%s: %s\n%s: %s\nVITE_UCODE_AUTH_MODE: %s\nVITE_UCODE_PROJECT_ID: %s\nVITE_UCODE_ENVIRONMENT_ID: %s\n",
+		envBaseURLKey, baseURL, envAPIKeyKey, apiKey, authMode, ucodeProjectId, environmentId,
 	))
+
+	if authMode == "login" {
+		sb.WriteString(`
+AUTH MODE = login:
+  Public/share runtime MUST use real end-user login and Bearer auth.
+  Login endpoint: POST /v2/login with header Environment-Id: import.meta.env.VITE_UCODE_ENVIRONMENT_ID
+  Login body: { username, password, client_type, project_id: import.meta.env.VITE_UCODE_PROJECT_ID }
+  Token: data.token.access_token from the login response.
+  After login: GET /v2/custom-permission/nav-map with Authorization: Bearer <token>.
+  All /v2/items/* data requests in public runtime: Authorization: Bearer <token>.
+  Do NOT send X-API-KEY for public runtime data requests in login mode.
+  Pre-login client type bootstrap: GET /v2/items/client_type may use the static API-key headers below so LoginPage can pass client_type to /v2/login.
+  Trusted ugen preview exception: if window.__UCODE_PREVIEW_CONTEXT?.trusted is true or a UCODE_PREVIEW_CONTEXT postMessage is received, skip LoginPage and use the static API key headers below for preview data only.
+
+STATIC PREVIEW headers for trusted ugen preview only:
+  headers: { 'Authorization': 'API-KEY', '` + envAPIKeyKey + `': import.meta.env.` + envAPIKeyKey + ` }
+
+`)
+	} else {
+		sb.WriteString(fmt.Sprintf(
+			"\nAUTH MODE = none:\nREQUIRED axios headers (BOTH — never omit either):\n  headers: { 'Authorization': 'API-KEY', '%s': import.meta.env.%s }\n\n",
+			envAPIKeyKey, envAPIKeyKey,
+		))
+	}
+
+	sb.WriteString("Tables to use:\n")
 
 	for _, t := range plan.Tables {
 		if t.IsLoginTable {
