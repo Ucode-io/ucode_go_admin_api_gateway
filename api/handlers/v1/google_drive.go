@@ -65,9 +65,24 @@ func (h *HandlerV1) GoogleDriveConnect(c *gin.Context) {
 		return
 	}
 
+	userID := ""
+	if value, ok := c.Get("user_id"); ok {
+		userID, _ = value.(string)
+	}
+
 	oauthConfig, err := fileupload.NewOAuthConfig(h.googleDriveConfig())
 	if err != nil {
 		h.HandleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	if err := h.ensureGoogleDriveFolderMenuForExistingResource(c.Request.Context(), googleDriveOAuthState{
+		ProjectID:     projectID.(string),
+		EnvironmentID: environmentID.(string),
+		McpProjectID:  mcpProjectID,
+		UserID:        userID,
+	}); err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
@@ -75,11 +90,6 @@ func (h *HandlerV1) GoogleDriveConnect(c *gin.Context) {
 	if err != nil {
 		h.HandleResponse(c, status_http.InternalServerError, err.Error())
 		return
-	}
-
-	userID := ""
-	if value, ok := c.Get("user_id"); ok {
-		userID, _ = value.(string)
 	}
 
 	if err := h.storeGoogleDriveOAuthState(c.Request.Context(), state, googleDriveOAuthState{
@@ -251,6 +261,35 @@ func (h *HandlerV1) upsertGoogleDriveResource(ctx context.Context, state googleD
 		Settings:      settings,
 	})
 	return err
+}
+
+func (h *HandlerV1) ensureGoogleDriveFolderMenuForExistingResource(ctx context.Context, state googleDriveOAuthState) error {
+	list, err := h.companyServices.Resource().GetProjectResourceList(ctx, &pb.GetProjectResourceListRequest{
+		ProjectId:     state.ProjectID,
+		EnvironmentId: state.EnvironmentID,
+		Type:          pb.ResourceType_GOOGLE_DRIVE,
+	})
+	if err != nil {
+		return err
+	}
+	if len(list.GetResources()) == 0 {
+		return nil
+	}
+	if len(list.GetResources()) > 1 {
+		return errors.New("multiple google drive resources configured for project environment")
+	}
+
+	settings := list.GetResources()[0].GetSettings()
+	if settings == nil || settings.GetGoogleDrive() == nil {
+		return nil
+	}
+
+	folderID := strings.TrimSpace(settings.GetGoogleDrive().GetFolderId())
+	if folderID == "" {
+		return nil
+	}
+
+	return h.ensureGoogleDriveFolderMenu(ctx, state, folderID)
 }
 
 func (h *HandlerV1) ensureGoogleDriveFolderMenu(ctx context.Context, state googleDriveOAuthState, folderID string) error {
