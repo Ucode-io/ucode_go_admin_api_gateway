@@ -518,7 +518,8 @@ func buildAgentSystemPrompt(agent *nb.Agent, toolset agentToolset) string {
 			b.WriteString(fmt.Sprintf("- %s: %s\n", slug, strings.Join(allowedOps(toolset.perms[slug]), ", ")))
 		}
 
-		b.WriteString("\nWhen you have fully addressed the request, reply with a final natural-language message and stop calling tools.")
+		b.WriteString("\nWhen the request is to create, update, or delete data, perform that change yourself with these tools rather than describing it or handing a value back — once you call the tool the change is already saved, so never ask the caller to save anything and never hedge about whether it was applied. When a value you produce belongs in a record field, write the clean final value itself (e.g. a concise description), not a report about it.")
+		b.WriteString("\nWhen you have fully addressed the request, reply with a final natural-language message and stop calling tools. Keep that reply brief and to the point — a short confirmation of what you did, with no unnecessary markdown tables, headings, or disclaimers.")
 	}
 
 	b.WriteString("\n\n## External data\n")

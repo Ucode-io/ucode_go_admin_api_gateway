@@ -187,18 +187,25 @@ func (p *ChatProcessor) integrateAgentIntoFrontend(ctx context.Context, agent *n
 }
 
 // selectAgentIntegrationFiles picks the existing files the integrator must see in
-// full to do its job: the app shell/routing (so a global chat widget can be mounted
-// everywhere) plus the feature files that work with the agent's own tables (so an
-// action-triggered agent can be wired into the right form/page — e.g. a company
-// create form whose onSubmit should call the agent). Shell files come first; both
-// groups are deduped and individually capped to keep the prompt focused.
+// full to do its job: the data-access helpers (so it reads created/updated records
+// from the correct response envelope), the app shell/routing (so a global chat widget
+// can be mounted everywhere), plus the feature files that work with the agent's own
+// tables (so an action-triggered agent can be wired into the right form/page — e.g. a
+// company create form whose onSubmit should call the agent). Data-layer files come
+// first; all groups are deduped and the shell/feature groups individually capped.
 func selectAgentIntegrationFiles(files []models.GitlabFileChange, perms []*nb.AgentPermission) []string {
+	dataLayer := selectAgentDataLayerFiles(files)
 	shell := selectAgentShellFiles(files)
 	feature := selectAgentFeatureFiles(files, perms)
 
-	seen := make(map[string]bool, len(shell)+len(feature))
-	selected := make([]string, 0, len(shell)+len(feature))
-	for _, path := range append(shell, feature...) {
+	ordered := make([]string, 0, len(dataLayer)+len(shell)+len(feature))
+	ordered = append(ordered, dataLayer...)
+	ordered = append(ordered, shell...)
+	ordered = append(ordered, feature...)
+
+	seen := make(map[string]bool, len(ordered))
+	selected := make([]string, 0, len(ordered))
+	for _, path := range ordered {
 		if seen[path] {
 			continue
 		}
@@ -206,6 +213,34 @@ func selectAgentIntegrationFiles(files []models.GitlabFileChange, perms []*nb.Ag
 		selected = append(selected, path)
 	}
 	return selected
+}
+
+// selectAgentDataLayerFiles finds the project's API/data-access helpers — the hooks
+// that talk to the backend (useApi) and the response unwrappers (apiUtils). The
+// integrator must see these in full: a mutation's result is the RAW response envelope
+// ({ data: { count, response } }), so wiring an action-triggered agent into an
+// onSuccess callback requires unwrapping the created record with extractSingle before
+// reading its guid. Feeding the real source removes any guesswork about the envelope
+// and prevents the agent from being wired in but never actually firing.
+func selectAgentDataLayerFiles(files []models.GitlabFileChange) []string {
+	hints := []string{"lib/apiutils.", "hooks/useapi."}
+
+	matched := make([]string, 0, len(hints))
+	for _, f := range files {
+		lower := strings.ToLower(f.FilePath)
+		if !strings.HasPrefix(lower, "src/") {
+			continue
+		}
+		for _, h := range hints {
+			if strings.Contains(lower, h) {
+				matched = append(matched, f.FilePath)
+				break
+			}
+		}
+	}
+
+	sort.Strings(matched)
+	return matched
 }
 
 // selectAgentShellFiles picks the files most likely to be the app shell (the

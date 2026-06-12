@@ -49,12 +49,33 @@ YOUR JOB
 ====================================
 1. Build the UI the builder asked for and connect it to the agent:
    - For a chat experience (the common case): a polished, on-brand chat widget — typically a floating launcher button that opens a chat panel — built on useAgent(). Render the transcript, a text input, a send button, loading state, and error state. Auto-scroll to the latest message.
-   - For an action-triggered experience (e.g. "after saving, ask the agent to ..."): call runAgent() at the right moment and surface the reply inline. Pass the relevant record/state as the context argument.
+   - For an action-triggered experience (e.g. "after a deal is created, enrich it"): call runAgent() at the EXACT moment the event fires — almost always inside the create/update mutation's onSuccess callback in the page/hook that owns it. Pass the affected record (its id + the relevant fields) as the context argument, and word the message as the TASK to perform ("A deal was just created, enrich it: …"), NOT as "return some text for us to save". The AGENT does the work itself: it has its own database tools and, when granted write access to the target table, it updates the record DIRECTLY on the server. So your frontend has only two jobs: (a) fire runAgent with the record as context, and (b) invalidate/refetch the relevant query so the agent's server-side change appears. Do NOT capture the agent's reply text and persist it with a second mutation — that round-trip is wrong: it duplicates the write, and the reply is a human-facing confirmation, not a value destined for a database field. Only fall back to writing the reply yourself if the agent was NOT granted write access to that table. This is an EDIT to that existing page/hook, NOT a standalone component mounted in the shell: a component that the event never reaches will never call the agent, so runAgent stays dead code.
    - Match what the builder actually requested. If they only asked for a chat assistant, build only that.
 
-2. MOUNT it so end-users can reach it. A floating widget belongs in the app shell (the layout/root that wraps every page) so it appears everywhere — find that file in the provided file graph and render the widget there. A page-specific feature belongs on the relevant page.
+2. MOUNT it so end-users can reach it. A floating widget belongs in the app shell (the layout/root that wraps every page) so it appears everywhere — find that file in the provided file graph and render the widget there. A page-specific feature belongs on the relevant page. An action-triggered agent is "mounted" by wiring runAgent() directly into the event handler that triggers it — there is nothing to mount in the shell.
 
 3. HARDCODE the agent id. You are given the exact agent_id — define it as a const in the widget (e.g. const AGENT_ID = "..."). Never read it from user input or env.
+
+====================================
+DATA LAYER — READING RECORDS (CRITICAL)
+====================================
+This app talks to the backend through '@/hooks/useApi' (useApiQuery, useApiMutation) and unwraps every response with '@/lib/apiUtils' (extractList, extractSingle, extractCount). BOTH hooks resolve to the RAW response envelope, shaped:
+    { data: { count: number, response: T | T[] } }
+The record(s) are nested inside — NEVER read fields (.guid, .name, ...) off the envelope directly.
+
+- From query data:   const deal = extractSingle<Deal>(data);   const deals = extractList<Deal>(data);
+- A mutation result is the SAME envelope. Inside useApiMutation({ options: { onSuccess } }), the FIRST argument is the envelope, NOT the record:
+    options: {
+      onSuccess: (result) => {
+        const deal = extractSingle<Deal>(result);   // ← unwrap FIRST
+        if (deal?.guid) {
+          // now you have the real id + fields — safe to call runAgent / pass as context
+        }
+      },
+    }
+  ❌ onSuccess: (deal) => { if (deal.guid) runAgent(...) }   // deal.guid is ALWAYS undefined → the guard silently fails → the agent NEVER fires.
+
+When you wire an action-triggered agent into a create/update flow, you MUST unwrap the created/updated record with extractSingle BEFORE reading its guid or passing it to runAgent. Reading a field straight off the raw mutation result is the #1 reason an agent gets wired in but never actually runs.
 
 ====================================
 DESIGN & QUALITY RULES
@@ -114,7 +135,7 @@ func BuildAgentIntegrationMessage(view models.AgentIntegrationView) string {
 	sb.WriteString("\n")
 
 	sb.WriteString("\n====================================\n")
-	sb.WriteString("RELEVANT CURRENT FILES (full content — the app shell to mount a chat widget, plus the feature pages/forms to wire an action-triggered agent into)\n")
+	sb.WriteString("RELEVANT CURRENT FILES (full content — the data-access helpers (useApi/apiUtils) that show the exact response envelope, the app shell to mount a chat widget, plus the feature pages/forms to wire an action-triggered agent into)\n")
 	sb.WriteString("====================================\n")
 	sb.WriteString(view.FilesContext)
 	sb.WriteString("\n")

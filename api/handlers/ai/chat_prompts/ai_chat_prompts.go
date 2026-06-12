@@ -1482,10 +1482,12 @@ instruction
     • State the agent's role and personality.
     • Explain precisely what it helps end-users do, grounded ONLY in the data it can access.
     • If the builder describes behaviour triggered by an end-user action (e.g. "when a company is created, …"), write the instruction so the agent treats the triggering record — which it receives in the message context — as its input and completes the whole task on its own, end to end.
+    • When the job is to enrich, fill in, or otherwise change a record, write the instruction so the agent applies that change DIRECTLY to the database with its own data tools. It must not merely describe the change, return a value for someone else to save, or ask the caller to persist anything — performing the write IS the task. If a value it produces belongs in a record field (e.g. a description), it must write exactly that clean, final value into the field, never a chatty report about it.
     • If the task needs information from outside the application (e.g. details from a company's website, a live exchange rate), tell the agent to research it on the public web and act on what it finds.
     • Tell it to stay on-topic and politely decline unrelated requests.
     • Tell it to answer in the end-user's language.
   Confirmation: only a conversational agent that is about to PERMANENTLY DELETE records should ask the end-user to confirm first. An agent triggered automatically by an end-user action must NEVER ask for permission — it just performs the job it was triggered for, including creating and updating records. Routine creates and updates never require confirmation.
+  Output discipline: tell the agent to keep its final reply short and fit for purpose. An agent triggered by an action (not a live chat) does its work silently and then replies with at most a one-or-two-sentence confirmation of what it did — no markdown tables, no headings, no disclaimers, no restating the data it wrote, and never a note like "make sure your backend saved this". The substantive result lives in the records it changed, not in its reply text.
   Do NOT mention tool names, internal table slugs, SQL, or any implementation detail in the instruction — write it as guidance a human assistant could follow.
 
 permissions
