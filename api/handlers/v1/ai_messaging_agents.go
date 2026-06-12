@@ -160,17 +160,7 @@ func (p *ChatProcessor) generateCodeSingle(ctx context.Context, clarified string
 
 	project.Files = stripForbiddenConfigFiles(project.Files)
 
-	if len(scaffoldFiles) > 0 {
-		generatedPaths := make(map[string]struct{}, len(project.Files))
-		for _, f := range project.Files {
-			generatedPaths[f.Path] = struct{}{}
-		}
-		for _, sf := range scaffoldFiles {
-			if _, exists := generatedPaths[sf.Path]; !exists {
-				project.Files = append(project.Files, sf)
-			}
-		}
-	}
+	project.Files = mergeTemplateScaffold(project.Files, scaffoldFiles)
 
 	project.Files = injectMissingCriticalFiles(project.Files, plan.ProjectType)
 
@@ -511,18 +501,7 @@ func (p *ChatProcessor) generateCodeChunkedApplication(ctx context.Context, clar
 
 	merged.Files = stripForbiddenConfigFiles(merged.Files)
 
-	scaffoldFiles := GetTemplateScaffold()
-	if len(scaffoldFiles) > 0 {
-		generatedPaths := make(map[string]struct{}, len(merged.Files))
-		for _, f := range merged.Files {
-			generatedPaths[f.Path] = struct{}{}
-		}
-		for _, sf := range scaffoldFiles {
-			if _, exists := generatedPaths[sf.Path]; !exists {
-				merged.Files = append(merged.Files, sf)
-			}
-		}
-	}
+	merged.Files = mergeTemplateScaffold(merged.Files, GetTemplateScaffold())
 
 	merged.Files = injectMissingCriticalFiles(merged.Files, plan.ProjectType)
 	merged.Files = injectEnvFile(merged.Files, p.baseConf.UcodeBaseUrl, projectData, plan.ProjectType)
@@ -1566,18 +1545,7 @@ func (p *ChatProcessor) generateCodeChunkedWebsite(ctx context.Context, clarifie
 
 	merged.Files = stripForbiddenConfigFiles(merged.Files)
 
-	scaffoldFiles := GetTemplateScaffold()
-	if len(scaffoldFiles) > 0 {
-		generatedPaths := make(map[string]struct{}, len(merged.Files))
-		for _, f := range merged.Files {
-			generatedPaths[f.Path] = struct{}{}
-		}
-		for _, sf := range scaffoldFiles {
-			if _, exists := generatedPaths[sf.Path]; !exists {
-				merged.Files = append(merged.Files, sf)
-			}
-		}
-	}
+	merged.Files = mergeTemplateScaffold(merged.Files, GetTemplateScaffold())
 
 	merged.Files = injectMissingCriticalFiles(merged.Files, plan.ProjectType)
 	merged.Files = injectEnvFile(merged.Files, p.baseConf.UcodeBaseUrl, projectData, plan.ProjectType)
