@@ -30,6 +30,10 @@ type (
 
 		// DatabaseAssistant generates and executes database queries.
 		DatabaseAssistant AgentConfig
+
+		// AgentBuilder generates reusable end-user agent definitions (system
+		// prompt + minimal table permissions) from a builder's description.
+		AgentBuilder AgentConfig
 	}
 )
 
@@ -77,6 +81,11 @@ func loadOpenAIAgents() AIAgents {
 			MaxTokens: 4000,
 			Timeout:   120 * time.Second,
 		},
+		AgentBuilder: AgentConfig{
+			Model:     mid,
+			MaxTokens: 8000,
+			Timeout:   180 * time.Second,
+		},
 	}
 }
 
@@ -118,6 +127,11 @@ func loadGeminiAgents() AIAgents {
 			Model:     flash,
 			MaxTokens: 4000,
 			Timeout:   60 * time.Second,
+		},
+		AgentBuilder: AgentConfig{
+			Model:     flash,
+			MaxTokens: 8000,
+			Timeout:   120 * time.Second,
 		},
 	}
 }
@@ -164,6 +178,11 @@ func loadAIAgents() AIAgents {
 			Model:     sonnet,
 			MaxTokens: 4000,
 			Timeout:   120 * time.Second,
+		},
+		AgentBuilder: AgentConfig{
+			Model:     sonnet,
+			MaxTokens: 8000,
+			Timeout:   180 * time.Second,
 		},
 	}
 }

@@ -28,4 +28,6 @@ type Agent interface {
 	VisualEdit(ctx context.Context, in models.VisualEditInput) ([]models.ProjectFile, string, error)
 	RepairFile(ctx context.Context, in models.RepairFileInput) (models.ProjectFile, error)
 	DatabaseQuery(ctx context.Context, in models.DatabaseQueryInput) (*models.DatabaseActionRequest, error)
+	BuildAgentSpec(ctx context.Context, in models.AgentSpecInput) (*models.AgentSpec, error)
+	IntegrateAgent(ctx context.Context, in models.AgentIntegrationInput) ([]models.ProjectFile, string, error)
 }

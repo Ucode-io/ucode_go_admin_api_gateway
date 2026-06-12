@@ -36,6 +36,7 @@ type GoBuilderServiceI interface {
 	McpProject() nb.McpProjectServiceClient
 	CustomPermission() nb.CustomPermissionsServiceClient
 	AiChat() nb.AiChatServiceClient
+	Agent() nb.AgentServiceClient
 	ProjectFolders() nb.ProjectFoldersServiceClient
 	CustomEndpoint() nb.CustomEndpointServiceClient
 	MicrofrontendVersions() nb.MicrofrontendVersionsServiceClient
@@ -65,6 +66,7 @@ type goBuilderServiceClient struct {
 	mcpProjectService       nb.McpProjectServiceClient
 	customPermissionService nb.CustomPermissionsServiceClient
 	aiChatService                  nb.AiChatServiceClient
+	agentService                   nb.AgentServiceClient
 	projectFoldersService          nb.ProjectFoldersServiceClient
 	customEndpointService          nb.CustomEndpointServiceClient
 	microfrontendVersionsService   nb.MicrofrontendVersionsServiceClient
@@ -111,6 +113,7 @@ func NewGoBuilderServiceClient(ctx context.Context, cfg config.Config) (GoBuilde
 		mcpProjectService:       nb.NewMcpProjectServiceClient(connGoBuilderService),
 		customPermissionService: nb.NewCustomPermissionsServiceClient(connGoBuilderService),
 		aiChatService:                nb.NewAiChatServiceClient(connGoBuilderService),
+		agentService:                 nb.NewAgentServiceClient(connGoBuilderService),
 		projectFoldersService:        nb.NewProjectFoldersServiceClient(connGoBuilderService),
 		customEndpointService:        nb.NewCustomEndpointServiceClient(connGoBuilderService),
 		microfrontendVersionsService: nb.NewMicrofrontendVersionsServiceClient(connGoBuilderService),
@@ -207,6 +210,10 @@ func (g *goBuilderServiceClient) CustomPermission() nb.CustomPermissionsServiceC
 
 func (g *goBuilderServiceClient) AiChat() nb.AiChatServiceClient {
 	return g.aiChatService
+}
+
+func (g *goBuilderServiceClient) Agent() nb.AgentServiceClient {
+	return g.agentService
 }
 
 func (g *goBuilderServiceClient) ProjectFolders() nb.ProjectFoldersServiceClient {
