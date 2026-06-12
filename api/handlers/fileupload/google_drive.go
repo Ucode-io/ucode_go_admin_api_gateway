@@ -18,16 +18,18 @@ import (
 )
 
 const (
-	DriveStorageName        = "google_drive"
-	driveAuthTypeOAuth      = "oauth"
-	driveAuthTypeService    = "service_account"
-	driveVisibilityPrivate  = "private"
-	drivePublicRole         = "reader"
-	drivePublicType         = "anyone"
-	driveFolderMimeType     = "application/vnd.google-apps.folder"
-	driveOAuthAuthURL       = "https://accounts.google.com/o/oauth2/v2/auth"
-	driveViewLinkURLPattern = "https://drive.google.com/file/d/%s/view"
-	driveFolderURLPattern   = "https://drive.google.com/drive/folders/%s"
+	DriveStorageName          = "google_drive"
+	GoogleDriveStorageType    = "google_drive"
+	MinioStorageType          = "minio"
+	driveAuthTypeOAuth        = "oauth"
+	driveAuthTypeService      = "service_account"
+	driveVisibilityPrivate    = "private"
+	drivePublicRole           = "reader"
+	drivePublicType           = "anyone"
+	driveFolderMimeType       = "application/vnd.google-apps.folder"
+	driveOAuthAuthURL         = "https://accounts.google.com/o/oauth2/v2/auth"
+	drivePublicFileURLPattern = "https://lh3.googleusercontent.com/d/%s"
+	driveFolderURLPattern     = "https://drive.google.com/drive/folders/%s"
 )
 
 type googleDriveClient interface {
@@ -331,7 +333,7 @@ func (googleDriveAPIClient) Upload(ctx context.Context, credentials *pb.GoogleDr
 	created, err := service.Files.Create(fileMeta).
 		Media(req.Reader, googleapi.ContentType(req.ContentType)).
 		SupportsAllDrives(true).
-		Fields("id", "webViewLink").
+		Fields("id").
 		Context(ctx).
 		Do()
 	if err != nil {
@@ -352,14 +354,9 @@ func (googleDriveAPIClient) Upload(ctx context.Context, credentials *pb.GoogleDr
 		}
 	}
 
-	link := created.WebViewLink
-	if link == "" {
-		link = fmt.Sprintf(driveViewLinkURLPattern, created.Id)
-	}
-
 	return &GoogleDriveUploadResult{
 		FileID:       created.Id,
-		Link:         link,
+		Link:         fmt.Sprintf(drivePublicFileURLPattern, created.Id),
 		FileNameDisk: created.Id,
 		Storage:      DriveStorageName,
 	}, nil

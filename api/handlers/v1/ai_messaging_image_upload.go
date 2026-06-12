@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"time"
 
+	"ucode/ucode_go_api_gateway/api/handlers/fileupload"
 	"ucode/ucode_go_api_gateway/api/handlers/helper"
 	"ucode/ucode_go_api_gateway/config"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
@@ -98,6 +99,7 @@ func (p *ChatProcessor) uploadImagePool(ctx context.Context, resourceEnvId strin
 				Id:               fileID,
 				Title:            filename,
 				Storage:          folderName,
+				StorageType:      fileupload.MinioStorageType,
 				FileNameDisk:     filename,
 				FileNameDownload: filename,
 				Link:             link,
