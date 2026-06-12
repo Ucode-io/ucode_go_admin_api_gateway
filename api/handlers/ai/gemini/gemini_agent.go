@@ -72,7 +72,6 @@ func (a *GeminiAgent) ArchitectProject(_ context.Context, in models.ArchitectInp
 		return nil, fmt.Errorf("architect: decode: %w", err)
 	}
 	models.ApplyProjectTypeKeywordOverride(&plan, in.Clarified)
-	models.ApplyMobileCapabilityKeywordOverride(&plan, in.Clarified)
 	return &plan, nil
 }
 
@@ -98,7 +97,7 @@ func (a *GeminiAgent) GenerateManifest(_ context.Context, in models.ManifestInpu
 	systemPrompt := chat_prompts.PromptManifestGenerator
 	if in.Plan.ProjectType == "web" {
 		systemPrompt = chat_prompts.PromptWebsiteManifestGenerator
-	} else if in.Plan.ProjectType == "webapp" || in.Plan.ProjectType == "mobile" {
+	} else if in.Plan.ProjectType == "webapp" {
 		systemPrompt = chat_prompts.PromptWebAppManifestGenerator
 	}
 
@@ -243,6 +242,27 @@ func (a *GeminiAgent) VisualEdit(_ context.Context, in models.VisualEditInput) (
 	return out.Files, out.ChangeSummary, nil
 }
 
+func (a *GeminiAgent) IntegrateAgent(_ context.Context, in models.AgentIntegrationInput) ([]models.ProjectFile, string, error) {
+	contents := convertMessages(in.Messages)
+
+	cfg := a.conf.GeminiAgents.Coder
+	raw, usage, err := callGeminiTool(a.pool, cfg, chat_prompts.PromptAgentIntegrator, contents, toolIntegrateAgent)
+	a.tracker.RecordUsage(usage, cfg.Model, "Integrating agent into frontend")
+	a.tracker.Deduct(int64(usage.InputTokens + usage.OutputTokens))
+	if err != nil {
+		return nil, "", wrapMaxTokens(err, usage, "integrate agent")
+	}
+
+	var out struct {
+		Files         []models.ProjectFile `json:"files"`
+		ChangeSummary string               `json:"change_summary"`
+	}
+	if err = json.Unmarshal(raw, &out); err != nil {
+		return nil, "", fmt.Errorf("integrate agent: decode: %w", err)
+	}
+	return out.Files, out.ChangeSummary, nil
+}
+
 func (a *GeminiAgent) RepairFile(_ context.Context, in models.RepairFileInput) (models.ProjectFile, error) {
 	repairCfg := a.conf.GeminiAgents.Coder
 	repairCfg.MaxTokens = 32000
@@ -289,4 +309,23 @@ func (a *GeminiAgent) DatabaseQuery(_ context.Context, in models.DatabaseQueryIn
 		return nil, fmt.Errorf("database query: parse action JSON: %w | raw=%.300s", err, text)
 	}
 	return &action, nil
+}
+
+func (a *GeminiAgent) BuildAgentSpec(_ context.Context, in models.AgentSpecInput) (*models.AgentSpec, error) {
+	content := chat_prompts.BuildAgentBuilderMessage(in.Description, in.SchemaText)
+	contents := buildGeminiContents(in.History, buildGeminiParts(content, nil))
+
+	cfg := a.conf.GeminiAgents.AgentBuilder
+	raw, usage, err := callGeminiTool(a.pool, cfg, chat_prompts.PromptAgentBuilder, contents, toolBuildAgentSpec)
+	a.tracker.RecordUsage(usage, cfg.Model, "Building agent definition")
+	a.tracker.Deduct(int64(usage.InputTokens + usage.OutputTokens))
+	if err != nil {
+		return nil, wrapMaxTokens(err, usage, "agent builder")
+	}
+
+	var spec models.AgentSpec
+	if err = json.Unmarshal(raw, &spec); err != nil {
+		return nil, fmt.Errorf("agent builder: decode: %w", err)
+	}
+	return &spec, nil
 }

@@ -20,9 +20,15 @@ type (
 	}
 
 	geminiPart struct {
-		Text         string          `json:"text,omitempty"`
-		InlineData   *geminiInline   `json:"inlineData,omitempty"`
-		FunctionCall *geminiFuncCall `json:"functionCall,omitempty"`
+		Text             string              `json:"text,omitempty"`
+		InlineData       *geminiInline       `json:"inlineData,omitempty"`
+		FunctionCall     *geminiFuncCall     `json:"functionCall,omitempty"`
+		FunctionResponse *geminiFuncResponse `json:"functionResponse,omitempty"`
+	}
+
+	geminiFuncResponse struct {
+		Name     string         `json:"name"`
+		Response map[string]any `json:"response"`
 	}
 
 	geminiInline struct {

@@ -256,6 +256,33 @@ var toolEmitVisualEdit = chatTool{
 	},
 }
 
+var toolIntegrateAgent = chatTool{
+	Type: "function",
+	Function: functionDef{
+		Name:        "integrate_agent",
+		Description: "Return the files that wire the AI agent into the frontend (the new widget/component plus the app-shell file it is mounted in) and a one-sentence summary. Only include files you create or change — never the provided agentClient.ts/useAgent.ts.",
+		Strict:      false,
+		Parameters: map[string]any{
+			"type":     "object",
+			"required": []string{"files", "change_summary"},
+			"properties": map[string]any{
+				"files": map[string]any{
+					"type": "array",
+					"items": map[string]any{
+						"type":     "object",
+						"required": []string{"path", "content"},
+						"properties": map[string]any{
+							"path":    map[string]any{"type": "string"},
+							"content": map[string]any{"type": "string"},
+						},
+					},
+				},
+				"change_summary": map[string]any{"type": "string"},
+			},
+		},
+	},
+}
+
 var toolRepairFile = chatTool{
 	Type: "function",
 	Function: functionDef{
@@ -299,6 +326,41 @@ var emitProjectStructuredSchema = responseFormat{
 						"properties": map[string]any{
 							"path":    map[string]any{"type": "string"},
 							"content": map[string]any{"type": "string"},
+						},
+					},
+				},
+			},
+		},
+	},
+}
+
+var toolBuildAgentSpec = chatTool{
+	Type: "function",
+	Function: functionDef{
+		Name:        "build_agent",
+		Description: "Return the complete definition of a reusable AI agent for the application's end-users: a short name, a one-sentence description, a full system-prompt instruction, the minimal per-table data permissions it needs, and a short confirmation reply for the builder.",
+		Strict:      false,
+		Parameters: map[string]any{
+			"type":     "object",
+			"required": []string{"name", "description", "instruction", "permissions", "reply"},
+			"properties": map[string]any{
+				"name":        map[string]any{"type": "string", "description": "Short, human-readable agent name, e.g. 'Order Assistant'."},
+				"description": map[string]any{"type": "string", "description": "One-sentence summary of what the agent does, for the builder's reference."},
+				"instruction": map[string]any{"type": "string", "description": "The agent's complete system prompt: its role, personality, what it helps end-users with, and how it should behave. Write it in the same language as the builder's request. Do NOT mention tool names or internal table slugs."},
+				"reply":       map[string]any{"type": "string", "description": "A short, friendly confirmation message for the builder, in the builder's language, summarizing the agent you created."},
+				"permissions": map[string]any{
+					"type":        "array",
+					"description": "The minimal set of table permissions the agent needs. Grant only what is necessary. Each table_slug MUST be one of the slugs from the provided project schema — never invent slugs.",
+					"items": map[string]any{
+						"type":     "object",
+						"required": []string{"table_slug"},
+						"properties": map[string]any{
+							"table_slug": map[string]any{"type": "string", "description": "Slug of a table from the project schema."},
+							"can_create": map[string]any{"type": "boolean", "description": "Allow creating records."},
+							"can_read":   map[string]any{"type": "boolean", "description": "Allow fetching a single record by id."},
+							"can_update": map[string]any{"type": "boolean", "description": "Allow updating records."},
+							"can_delete": map[string]any{"type": "boolean", "description": "Allow deleting records."},
+							"can_list":   map[string]any{"type": "boolean", "description": "Allow listing/searching records."},
 						},
 					},
 				},

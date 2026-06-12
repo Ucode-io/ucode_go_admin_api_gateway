@@ -15,8 +15,10 @@ type (
 	}
 
 	chatMessage struct {
-		Role    string `json:"role"`
-		Content any    `json:"content,omitempty"` // string | []contentPart
+		Role       string     `json:"role"`
+		Content    any        `json:"content,omitempty"` // string | []contentPart
+		ToolCalls  []toolCall `json:"tool_calls,omitempty"`
+		ToolCallID string     `json:"tool_call_id,omitempty"`
 	}
 
 	contentPart struct {
