@@ -970,9 +970,5 @@ func (h *HandlerV2) GetAllFiles(c *gin.Context) {
 }
 
 func normalizeGoogleDriveFolderName(folderName string) string {
-	folderName = strings.TrimSpace(folderName)
-	if strings.EqualFold(folderName, "Google Drive") {
-		return fileupload.DriveStorageName
-	}
-	return folderName
+	return fileupload.NormalizeGoogleDriveFolderName(folderName)
 }
