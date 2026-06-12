@@ -673,7 +673,7 @@ func TestMergeAppRoutes_RebuildsFromManifest(t *testing.T) {
 			{Path: "/about", PageName: "AboutPage", FilePath: "src/pages/AboutPage.tsx"},
 		},
 	}
-	got := mergeAppRoutes(files, manifest)
+	got := mergeAppRoutes(files, manifest, "web")
 	var app string
 	for _, f := range got {
 		if f.Path == "src/App.tsx" {
@@ -700,7 +700,7 @@ func TestMergeAppRoutes_SkipsLegacyManifest(t *testing.T) {
 		Routes: []models.ManifestRoute{{Path: "/", PageName: "HomePage", FilePath: "src/pages/HomePage.tsx"}},
 		// ExportStyle deliberately empty → legacy.
 	}
-	got := mergeAppRoutes(files, manifest)
+	got := mergeAppRoutes(files, manifest, "web")
 	for _, f := range got {
 		if f.Path == "src/App.tsx" && f.Content != original {
 			t.Errorf("legacy App.tsx was mutated. before=%q after=%q", original, f.Content)
@@ -724,7 +724,7 @@ func TestMergeAppRoutes_DropsRoutesWithMissingExports(t *testing.T) {
 			{Path: "/about", PageName: "AboutPage", FilePath: "src/pages/AboutPage.tsx"},
 		},
 	}
-	got := mergeAppRoutes(files, manifest)
+	got := mergeAppRoutes(files, manifest, "web")
 	var app string
 	for _, f := range got {
 		if f.Path == "src/App.tsx" {
@@ -752,7 +752,7 @@ export default function Layout() { return <main><Outlet /></main>; }`},
 		ExportStyle: "named-lazy",
 		Routes:      []models.ManifestRoute{{Path: "/", PageName: "HomePage", FilePath: "src/pages/HomePage.tsx"}},
 	}
-	got := mergeAppRoutes(files, manifest)
+	got := mergeAppRoutes(files, manifest, "web")
 	var app string
 	for _, f := range got {
 		if f.Path == "src/App.tsx" {
@@ -779,7 +779,7 @@ func TestMergeAppRoutes_WrapsInLayoutChildren(t *testing.T) {
 		ExportStyle: "named-lazy",
 		Routes:      []models.ManifestRoute{{Path: "/", PageName: "HomePage", FilePath: "src/pages/HomePage.tsx"}},
 	}
-	got := mergeAppRoutes(files, manifest)
+	got := mergeAppRoutes(files, manifest, "web")
 	var app string
 	for _, f := range got {
 		if f.Path == "src/App.tsx" {
@@ -808,7 +808,7 @@ func TestMergeAppRoutes_NoLayoutNoWrap(t *testing.T) {
 		ExportStyle: "named-lazy",
 		Routes:      []models.ManifestRoute{{Path: "/", PageName: "HomePage", FilePath: "src/pages/HomePage.tsx"}},
 	}
-	got := mergeAppRoutes(files, manifest)
+	got := mergeAppRoutes(files, manifest, "web")
 	var app string
 	for _, f := range got {
 		if f.Path == "src/App.tsx" {
@@ -840,7 +840,7 @@ func TestEnsureDefaultRoutes_InjectsRootAndDashboard(t *testing.T) {
 			{Path: "/orders", PageName: "OrdersPage", FilePath: "src/pages/OrdersPage.tsx"},
 		},
 	}
-	got := mergeAppRoutes(files, manifest)
+	got := mergeAppRoutes(files, manifest, "web")
 	var app string
 	for _, f := range got {
 		if f.Path == "src/App.tsx" {
@@ -869,7 +869,7 @@ func TestEnsureDefaultRoutes_RespectsExistingDashboardMapping(t *testing.T) {
 			{Path: "/overview", PageName: "DashboardPage", FilePath: "src/pages/DashboardPage.tsx"},
 		},
 	}
-	got := mergeAppRoutes(files, manifest)
+	got := mergeAppRoutes(files, manifest, "web")
 	var app string
 	for _, f := range got {
 		if f.Path == "src/App.tsx" {
@@ -918,7 +918,7 @@ func TestMergeAppRoutes_EmitsWildcardCatch(t *testing.T) {
 		Routes:      []models.ManifestRoute{{Path: "/", PageName: "HomePage", FilePath: "src/pages/HomePage.tsx"}},
 	}
 	for _, c := range cases {
-		got := mergeAppRoutes(c.files, manifest)
+		got := mergeAppRoutes(c.files, manifest, "web")
 		var app string
 		for _, f := range got {
 			if f.Path == "src/App.tsx" {
@@ -1044,6 +1044,82 @@ func TestValidateWebAppUIQualityAcceptsSolidStickyHeader(t *testing.T) {
 
 	if errors := validateWebAppUIQuality(files); len(errors) != 0 {
 		t.Fatalf("expected solid sticky Header to pass, got: %+v", errors)
+	}
+}
+
+func TestMergeAppRoutes_AdminPanelAddsLoginAndProtectedRoute(t *testing.T) {
+	files := []models.ProjectFile{
+		{Path: "src/App.tsx", Content: `// overwritten`},
+		{Path: "src/components/layout/Layout.tsx", Content: `import { Outlet } from 'react-router-dom'; export default function Layout() { return <Outlet />; }`},
+		{Path: "src/pages/HomePage.tsx", Content: `export function HomePage() {}`},
+	}
+	manifest := &models.ProjectManifest{
+		ExportStyle: "named-lazy",
+		Routes:      []models.ManifestRoute{{Path: "/", PageName: "HomePage", FilePath: "src/pages/HomePage.tsx"}},
+	}
+
+	got := mergeAppRoutes(files, manifest, "admin_panel")
+	var app string
+	for _, f := range got {
+		if f.Path == "src/App.tsx" {
+			app = f.Content
+		}
+	}
+
+	for _, expected := range []string{
+		"@/components/auth/LoginPage",
+		"@/components/auth/ProtectedRoute",
+		`path="/login"`,
+		"<ProtectedRoute><Layout /></ProtectedRoute>",
+	} {
+		if !contains(app, expected) {
+			t.Fatalf("expected %q in admin App.tsx, got:\n%s", expected, app)
+		}
+	}
+}
+
+func TestValidateAdminPanelAuthFlagsUngatedSidebar(t *testing.T) {
+	files := []models.ProjectFile{
+		{Path: "src/App.tsx", Content: `import { LoginPage } from '@/components/auth/LoginPage'; import { ProtectedRoute } from '@/components/auth/ProtectedRoute'; export default function App(){ return <><Route path="/login" element={<LoginPage />} /><ProtectedRoute><div /></ProtectedRoute></>; }`},
+		{Path: "src/lib/auth.ts", Content: `export function getToken(){ return null }`},
+		{Path: "src/lib/permissions.ts", Content: `export function useUcodePermissions(){ return {} } export function canRead(){ return true }`},
+		{Path: "src/components/auth/LoginPage.tsx", Content: `export function LoginPage(){ return null }`},
+		{Path: "src/components/auth/ProtectedRoute.tsx", Content: `export function ProtectedRoute({children}){ return children }`},
+		{Path: "src/components/layout/Sidebar.tsx", Content: `export function Sidebar(){ const navItems = [{ path: '/users' }]; return <nav>{navItems.length}</nav> }`},
+	}
+
+	errs := validateAdminPanelAuth(files)
+	found := false
+	for _, err := range errs {
+		if err.File == "src/components/layout/Sidebar.tsx" && contains(err.Message, "useUcodePermissions") {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("expected ungated Sidebar auth validation error, got: %+v", errs)
+	}
+}
+
+func TestValidateAdminPanelAuthFlagsManualApiKeyHeaders(t *testing.T) {
+	files := []models.ProjectFile{
+		{Path: "src/App.tsx", Content: `import { LoginPage } from '@/components/auth/LoginPage'; import { ProtectedRoute } from '@/components/auth/ProtectedRoute'; export default function App(){ return <><Route path="/login" element={<LoginPage />} /><ProtectedRoute><div /></ProtectedRoute></>; }`},
+		{Path: "src/lib/auth.ts", Content: `export function getToken(){ return null }`},
+		{Path: "src/lib/permissions.ts", Content: `export function useUcodePermissions(){ return {} } export function canRead(){ return true }`},
+		{Path: "src/components/auth/LoginPage.tsx", Content: `export function LoginPage(){ return null }`},
+		{Path: "src/components/auth/ProtectedRoute.tsx", Content: `export function ProtectedRoute({children}){ return children }`},
+		{Path: "src/components/layout/Sidebar.tsx", Content: `import { useUcodePermissions, canRead } from '@/lib/permissions'; export function Sidebar(){ const perms = useUcodePermissions(); return canRead(perms, '/users') ? <nav /> : null }`},
+		{Path: "src/pages/UsersPage.tsx", Content: `export function UsersPage(){ fetch('/v2/items/users', { headers: { Authorization: 'API-KEY' } }); return null }`},
+	}
+
+	errs := validateAdminPanelAuth(files)
+	found := false
+	for _, err := range errs {
+		if err.File == "src/pages/UsersPage.tsx" && contains(err.Message, "API-KEY") {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("expected manual API-key validation error, got: %+v", errs)
 	}
 }
 

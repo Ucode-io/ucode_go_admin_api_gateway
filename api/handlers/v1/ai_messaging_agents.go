@@ -526,7 +526,7 @@ func (p *ChatProcessor) generateCodeChunkedApplication(ctx context.Context, clar
 
 	merged.Files = injectMissingCriticalFiles(merged.Files, plan.ProjectType)
 	merged.Files = injectEnvFile(merged.Files, p.baseConf.UcodeBaseUrl, projectData, plan.ProjectType)
-	merged.Files = mergeAppRoutes(merged.Files, manifest)
+	merged.Files = mergeAppRoutes(merged.Files, manifest, plan.ProjectType)
 	if plan.ProjectType == mobileProjectType {
 		merged.Files, err = applyCapacitorScaffold(merged.Files, plan.ProjectName, p.mcpProjectId, plan.MobileCapabilities)
 		if err != nil {
@@ -1086,6 +1086,51 @@ var forbiddenConfigFiles = map[string]bool{
 	"postcss.config.cjs": true,
 }
 
+var adminPanelRuntimeTemplateFiles = []string{
+	"src/config/axios.ts",
+	"src/lib/auth.ts",
+	"src/lib/permissions.ts",
+	"src/components/auth/LoginPage.tsx",
+	"src/components/auth/ProtectedRoute.tsx",
+}
+
+func ensureTemplateFiles(files []models.ProjectFile, requiredPaths []string, replaceExisting bool) []models.ProjectFile {
+	templates := make(map[string]models.ProjectFile, len(requiredPaths))
+	for _, tf := range GetTemplateScaffold() {
+		for _, path := range requiredPaths {
+			if tf.Path == path {
+				templates[path] = tf
+				break
+			}
+		}
+	}
+
+	existing := make(map[string]int, len(files))
+	for i, f := range files {
+		existing[f.Path] = i
+	}
+
+	for _, path := range requiredPaths {
+		tf, ok := templates[path]
+		if !ok {
+			log.Printf("[inject] template file %s not found in scaffold", path)
+			continue
+		}
+		if idx, exists := existing[path]; exists {
+			if replaceExisting && files[idx].Content != tf.Content {
+				log.Printf("[inject] replacing %s with template runtime file", path)
+				files[idx].Content = tf.Content
+			}
+			continue
+		}
+		log.Printf("[inject] %s missing — injecting from template", path)
+		files = append(files, tf)
+		existing[path] = len(files) - 1
+	}
+
+	return files
+}
+
 // stripForbiddenConfigFiles removes AI-generated config files that are pre-built in the template.
 // Must be called before scaffold injection so the valid template versions get injected instead.
 func stripForbiddenConfigFiles(files []models.ProjectFile) []models.ProjectFile {
@@ -1101,6 +1146,10 @@ func stripForbiddenConfigFiles(files []models.ProjectFile) []models.ProjectFile 
 }
 
 func injectMissingCriticalFiles(files []models.ProjectFile, projectType string) []models.ProjectFile {
+	if strings.EqualFold(projectType, "admin_panel") {
+		files = ensureTemplateFiles(files, adminPanelRuntimeTemplateFiles, true)
+	}
+
 	existing := make(map[string]struct{}, len(files))
 	for _, f := range files {
 		existing[f.Path] = struct{}{}
@@ -1208,6 +1257,7 @@ func (p *ChatProcessor) validateAndRepairGeneratedProject(ctx context.Context, p
 		validationErrors = append(validationErrors, validateAgainstManifest(project.Files, p.currentManifest)...)
 		if projectType == "admin_panel" {
 			validationErrors = append(validationErrors, validateAdminPanelUIQuality(project.Files)...)
+			validationErrors = append(validationErrors, validateAdminPanelAuth(project.Files)...)
 		}
 		if usesWebAppGenerator(projectType) {
 			validationErrors = append(validationErrors, validateWebAppUIQuality(project.Files)...)
@@ -1265,6 +1315,7 @@ func (p *ChatProcessor) validateAndRepairGeneratedProject(ctx context.Context, p
 	finalErrors = append(finalErrors, validateAgainstManifest(project.Files, p.currentManifest)...)
 	if projectType == "admin_panel" {
 		finalErrors = append(finalErrors, validateAdminPanelUIQuality(project.Files)...)
+		finalErrors = append(finalErrors, validateAdminPanelAuth(project.Files)...)
 	}
 	if usesWebAppGenerator(projectType) {
 		finalErrors = append(finalErrors, validateWebAppUIQuality(project.Files)...)
@@ -1530,7 +1581,7 @@ func (p *ChatProcessor) generateCodeChunkedWebsite(ctx context.Context, clarifie
 
 	merged.Files = injectMissingCriticalFiles(merged.Files, plan.ProjectType)
 	merged.Files = injectEnvFile(merged.Files, p.baseConf.UcodeBaseUrl, projectData, plan.ProjectType)
-	merged.Files = mergeAppRoutes(merged.Files, manifest)
+	merged.Files = mergeAppRoutes(merged.Files, manifest, plan.ProjectType)
 
 	emit.Emit(SSEEvent{Type: EvProgress, Icon: "shield-check", Percent: 80, Message: "Проверяю качество кода", Value: fmt.Sprintf("%d файлов", len(merged.Files))})
 	errorCount := p.validateAndRepairGeneratedProject(ctx, merged, plan.ProjectType, nil, 80)
