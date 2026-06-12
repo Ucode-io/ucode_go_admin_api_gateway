@@ -99,15 +99,77 @@ func (p *ChatProcessor) integrateAgentIntoFrontend(ctx context.Context, agent *n
 		return "", nil
 	}
 
-	for _, f := range mergedFiles {
-		emit.Emit(SSEEvent{Type: EvPublish, Icon: "file-code", Message: "Обновляю файл", Value: f.Path})
+	// Build lookup sets to tell updates apart from new files and template injections.
+	existingPathSet := make(map[string]bool, len(existingFiles))
+	for _, f := range existingFiles {
+		existingPathSet[f.FilePath] = true
 	}
+	templatePathSet := make(map[string]bool, len(templateFiles))
+	for _, f := range templateFiles {
+		templatePathSet[f.Path] = true
+	}
+
+	var updateCount, createCount int
+	for _, f := range mergedFiles {
+		if existingPathSet[f.Path] {
+			updateCount++
+		} else {
+			createCount++
+		}
+	}
+
+	// Summary event mirrors the "N изменить · M создать" format from the edit flow.
+	summaryParts := make([]string, 0, 2)
+	if updateCount > 0 {
+		summaryParts = append(summaryParts, fmt.Sprintf("%d изменить", updateCount))
+	}
+	if createCount > 0 {
+		summaryParts = append(summaryParts, fmt.Sprintf("%d создать", createCount))
+	}
+	emit.Emit(SSEEvent{
+		Type:    EvProgress,
+		Icon:    "file-diff",
+		Message: "Применяю изменения в интерфейсе",
+		Value:   strings.Join(summaryParts, " · "),
+		Percent: 84,
+	})
+
+	// Per-file publish events — progressive percent (86→96) and icon by extension,
+	// matching the microfrontend update flow exactly.
+	total := len(mergedFiles)
+	for i, f := range mergedFiles {
+		pct := 86 + (i+1)*10/total
+		if pct > 96 {
+			pct = 96
+		}
+
+		var message string
+		icon := agentFileIcon(f.Path)
+		switch {
+		case templatePathSet[f.Path]:
+			message = "Добавляю клиент агента"
+		case existingPathSet[f.Path]:
+			message = "Обновляю файл"
+		default:
+			message = "Создаю файл"
+			icon = "file-plus"
+		}
+
+		emit.Emit(SSEEvent{
+			Type:    EvPublish,
+			Icon:    icon,
+			Message: message,
+			Value:   f.Path,
+			Percent: pct,
+		})
+	}
+
 	emit.Emit(SSEEvent{
 		Type:    EvPublish,
 		Icon:    "upload-cloud",
-		Message: "Публикую изменения",
-		Value:   fmt.Sprintf("%d файл(ов)", len(mergedFiles)),
-		Percent: 92,
+		Message: "Пушу изменения в GitLab",
+		Value:   fmt.Sprintf("%d файлов", total),
+		Percent: 97,
 	})
 
 	if err := p.pushMicrofrontendChangesChunked(ctx, mergedFiles); err != nil {
@@ -272,6 +334,21 @@ func formatAgentCapabilities(perms []*nb.AgentPermission) string {
 		fmt.Fprintf(&sb, "- %s: %s\n", perm.GetTableSlug(), strings.Join(allowedOps(perm), ", "))
 	}
 	return sb.String()
+}
+
+// agentFileIcon returns the Lucide icon name for a file based on its extension,
+// matching the same palette used in the microfrontend update flow.
+func agentFileIcon(path string) string {
+	switch {
+	case strings.HasSuffix(path, ".css") || strings.HasSuffix(path, ".scss"):
+		return "paintbrush"
+	case strings.HasSuffix(path, ".tsx") || strings.HasSuffix(path, ".jsx"):
+		return "component"
+	case strings.HasSuffix(path, ".ts") || strings.HasSuffix(path, ".js"):
+		return "code-2"
+	default:
+		return "file-code"
+	}
 }
 
 // mergeAgentFiles combines the model's output with the authoritative template
