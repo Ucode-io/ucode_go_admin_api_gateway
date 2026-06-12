@@ -58,7 +58,7 @@ func (p *ChatProcessor) runCreateAgent(ctx context.Context, clarified string, ch
 	emit.Emit(SSEEvent{Type: EvProgress, Icon: "sparkles", Message: fmt.Sprintf("Создаю агента «%s»...", name), Percent: 15})
 	agent, err := p.service.GoObjectBuilderService().Agent().CreateAgent(ctx, &nb.CreateAgentRequest{
 		ResourceEnvId: resourceEnvId,
-		ProjectId:     resourceEnvId,
+		ProjectId:     p.mcpProjectId,
 		Name:          name,
 		Description:   spec.Description,
 		Instruction:   spec.Instruction,
