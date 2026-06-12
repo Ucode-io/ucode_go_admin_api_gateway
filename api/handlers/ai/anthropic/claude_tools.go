@@ -245,6 +245,29 @@ var ToolEmitVisualEdit = claudeFunctionTool{
 	},
 }
 
+var ToolIntegrateAgent = claudeFunctionTool{
+	Name:        "integrate_agent",
+	Description: "Return the files that wire the AI agent into the frontend (the new widget/component plus the app-shell file it is mounted in) and a one-sentence summary. Only include files you create or change — never the provided agentClient.ts/useAgent.ts.",
+	InputSchema: map[string]any{
+		"type":     "object",
+		"required": []string{"files", "change_summary"},
+		"properties": map[string]any{
+			"files": map[string]any{
+				"type": "array",
+				"items": map[string]any{
+					"type":     "object",
+					"required": []string{"path", "content"},
+					"properties": map[string]any{
+						"path":    map[string]any{"type": "string"},
+						"content": map[string]any{"type": "string", "description": "Complete file content"},
+					},
+				},
+			},
+			"change_summary": map[string]any{"type": "string", "description": "One sentence describing what was added and where the agent was mounted"},
+		},
+	},
+}
+
 var ToolEmitManifest = claudeFunctionTool{
 	Name:        "emit_manifest",
 	Description: "Return the complete file manifest for a React admin panel, grouped by dependency level. Group 0 = foundation (generated first). Groups 1..N = features (generated in parallel after foundation). Also emit top-level `routes` (path↔page↔file map) and `entity_types` (TypeScript interfaces src/types.ts must export) — features use them as a hard contract.",

@@ -242,6 +242,27 @@ func (a *GeminiAgent) VisualEdit(_ context.Context, in models.VisualEditInput) (
 	return out.Files, out.ChangeSummary, nil
 }
 
+func (a *GeminiAgent) IntegrateAgent(_ context.Context, in models.AgentIntegrationInput) ([]models.ProjectFile, string, error) {
+	contents := convertMessages(in.Messages)
+
+	cfg := a.conf.GeminiAgents.Coder
+	raw, usage, err := callGeminiTool(a.pool, cfg, chat_prompts.PromptAgentIntegrator, contents, toolIntegrateAgent)
+	a.tracker.RecordUsage(usage, cfg.Model, "Integrating agent into frontend")
+	a.tracker.Deduct(int64(usage.InputTokens + usage.OutputTokens))
+	if err != nil {
+		return nil, "", wrapMaxTokens(err, usage, "integrate agent")
+	}
+
+	var out struct {
+		Files         []models.ProjectFile `json:"files"`
+		ChangeSummary string               `json:"change_summary"`
+	}
+	if err = json.Unmarshal(raw, &out); err != nil {
+		return nil, "", fmt.Errorf("integrate agent: decode: %w", err)
+	}
+	return out.Files, out.ChangeSummary, nil
+}
+
 func (a *GeminiAgent) RepairFile(_ context.Context, in models.RepairFileInput) (models.ProjectFile, error) {
 	repairCfg := a.conf.GeminiAgents.Coder
 	repairCfg.MaxTokens = 32000

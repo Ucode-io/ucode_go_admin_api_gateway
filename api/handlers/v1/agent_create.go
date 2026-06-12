@@ -3,6 +3,7 @@ package v1
 import (
 	"context"
 	"fmt"
+	"log"
 	"sort"
 	"strings"
 
@@ -15,6 +16,7 @@ import (
 // permissions against the real project schema, persists the agent, and returns a
 // builder-facing confirmation.
 func (p *ChatProcessor) runCreateAgent(ctx context.Context, clarified string, chatHistory []models.ChatMessage) (*models.ParsedClaudeResponse, error) {
+	emit := p.emitter()
 
 	resourceEnvId, err := p.resolveBuilderResourceID(ctx)
 	if err != nil {
@@ -31,6 +33,7 @@ func (p *ChatProcessor) runCreateAgent(ctx context.Context, clarified string, ch
 		}, nil
 	}
 
+	emit.Emit(SSEEvent{Type: EvProgress, Icon: "bot", Message: "Проектирую агента...", Percent: 5})
 	spec, err := p.agent.BuildAgentSpec(ctx, models.AgentSpecInput{
 		Description: clarified,
 		SchemaText:  formatSchemaForSQL(schema),
@@ -52,6 +55,7 @@ func (p *ChatProcessor) runCreateAgent(ctx context.Context, clarified string, ch
 		name = "AI Agent"
 	}
 
+	emit.Emit(SSEEvent{Type: EvProgress, Icon: "sparkles", Message: fmt.Sprintf("Создаю агента «%s»...", name), Percent: 15})
 	agent, err := p.service.GoObjectBuilderService().Agent().CreateAgent(ctx, &nb.CreateAgentRequest{
 		ResourceEnvId: resourceEnvId,
 		ProjectId:     resourceEnvId,
@@ -71,10 +75,24 @@ func (p *ChatProcessor) runCreateAgent(ctx context.Context, clarified string, ch
 	if reply == "" {
 		reply = fmt.Sprintf("Агент «%s» создан.", agent.GetName())
 	}
+	description := reply + "\n\n" + formatAgentSummary(agent)
 
-	return &models.ParsedClaudeResponse{
-		Description: reply + "\n\n" + formatAgentSummary(agent),
-	}, nil
+	// Immediately wire the agent into the existing frontend so end-users can reach
+	// it. Integration is a best-effort follow-up: the agent is already persisted,
+	// so a failure here downgrades to a soft warning instead of failing the request.
+	integrationSummary, err := p.integrateAgentIntoFrontend(ctx, agent, clarified, chatHistory)
+	if err != nil {
+		log.Printf("[AGENT INTEGRATE] failed for agent %s: %v", agent.GetId(), err)
+		description += "\n\n⚠️ Агент создан, но не удалось автоматически встроить его в интерфейс. Попробуйте ещё раз позже."
+		return &models.ParsedClaudeResponse{Description: description}, nil
+	}
+
+	if integrationSummary != "" {
+		description += "\n\n" + integrationSummary
+		emit.Emit(SSEEvent{Type: EvProgress, Icon: "check-circle", Message: fmt.Sprintf("Агент «%s» готов и подключён", agent.GetName()), Percent: 100})
+	}
+
+	return &models.ParsedClaudeResponse{Description: description}, nil
 }
 
 // buildValidatedPermissions converts the model's proposed permissions into proto

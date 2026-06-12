@@ -236,6 +236,27 @@ func (a *OpenAIAgent) VisualEdit(ctx context.Context, in models.VisualEditInput)
 	return out.Files, out.ChangeSummary, nil
 }
 
+func (a *OpenAIAgent) IntegrateAgent(ctx context.Context, in models.AgentIntegrationInput) ([]models.ProjectFile, string, error) {
+	messages := convertMessages(in.Messages)
+
+	cfg := a.conf.OpenAIAgents.Coder
+	raw, usage, err := callTool(ctx, a.conf, cfg, chat_prompts.PromptAgentIntegrator, messages, toolIntegrateAgent)
+	a.tracker.RecordUsage(usage, cfg.Model, "Integrating agent into frontend")
+	a.tracker.Deduct(int64(usage.InputTokens + usage.OutputTokens))
+	if err != nil {
+		return nil, "", fmt.Errorf("integrate agent: %w", err)
+	}
+
+	var out struct {
+		Files         []models.ProjectFile `json:"files"`
+		ChangeSummary string               `json:"change_summary"`
+	}
+	if err = json.Unmarshal(raw, &out); err != nil {
+		return nil, "", fmt.Errorf("integrate agent: decode: %w", err)
+	}
+	return out.Files, out.ChangeSummary, nil
+}
+
 func (a *OpenAIAgent) RepairFile(ctx context.Context, in models.RepairFileInput) (models.ProjectFile, error) {
 	// Code-specialized model handles TSX repair; widen output for full-file rewrites.
 	repairCfg := a.conf.OpenAIAgents.Coder

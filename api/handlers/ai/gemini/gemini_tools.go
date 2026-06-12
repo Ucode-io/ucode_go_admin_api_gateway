@@ -236,6 +236,29 @@ var toolEmitManifest = funcDeclaration{
 	},
 }
 
+var toolIntegrateAgent = funcDeclaration{
+	Name:        "integrate_agent",
+	Description: "Return the files that wire the AI agent into the frontend (the new widget/component plus the app-shell file it is mounted in) and a one-sentence summary. Only include files you create or change — never the provided agentClient.ts/useAgent.ts.",
+	Parameters: map[string]any{
+		"type":     "object",
+		"required": []string{"files", "change_summary"},
+		"properties": map[string]any{
+			"files": map[string]any{
+				"type": "array",
+				"items": map[string]any{
+					"type":     "object",
+					"required": []string{"path", "content"},
+					"properties": map[string]any{
+						"path":    map[string]any{"type": "string"},
+						"content": map[string]any{"type": "string"},
+					},
+				},
+			},
+			"change_summary": map[string]any{"type": "string"},
+		},
+	},
+}
+
 var toolRepairFile = funcDeclaration{
 	Name:        "repair_file",
 	Description: "Return the corrected content of a single TypeScript/TSX file. Fix all import errors listed in the prompt. Output the complete file — never truncate.",

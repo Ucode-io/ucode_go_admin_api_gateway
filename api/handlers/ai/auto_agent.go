@@ -74,3 +74,7 @@ func (a *AutoAgent) DatabaseQuery(ctx context.Context, in models.DatabaseQueryIn
 func (a *AutoAgent) BuildAgentSpec(ctx context.Context, in models.AgentSpecInput) (*models.AgentSpec, error) {
 	return a.claude.BuildAgentSpec(ctx, in)
 }
+
+func (a *AutoAgent) IntegrateAgent(ctx context.Context, in models.AgentIntegrationInput) ([]models.ProjectFile, string, error) {
+	return a.claude.IntegrateAgent(ctx, in)
+}

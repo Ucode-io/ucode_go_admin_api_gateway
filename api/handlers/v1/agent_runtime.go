@@ -92,6 +92,10 @@ func buildAgentToolset(perms []*nb.AgentPermission) agentToolset {
 		defs = append(defs, itemDeleteTool(sortStrings(deletable)))
 	}
 
+	// web_fetch is always available: it lets the agent research up-to-date external
+	// data (e.g. exchange rates) that does not live in the project's own tables.
+	defs = append(defs, webFetchTool())
+
 	return agentToolset{defs: defs, perms: permMap}
 }
 
@@ -203,9 +207,13 @@ func itemDeleteTool(tables []string) ai.ToolDef {
 // drives the native tool-use loop until the model produces a final answer (or the
 // step budget is exhausted / an error occurs), then finalizes the run. The
 // returned AgentRun carries the terminal status, output, steps and token usage.
-func (h *HandlerV1) runAgent(ctx context.Context, service services.ServiceManagerI, resourceEnvId string, agent *nb.Agent, message string) (*nb.AgentRun, error) {
+func (h *HandlerV1) runAgent(ctx context.Context, service services.ServiceManagerI, resourceEnvId string, agent *nb.Agent, message string, runContext map[string]any) (*nb.AgentRun, error) {
 
-	inputStruct, _ := helperFunc.ConvertMapToStruct(map[string]any{"message": message})
+	inputMap := map[string]any{"message": message}
+	if len(runContext) > 0 {
+		inputMap["context"] = runContext
+	}
+	inputStruct, _ := helperFunc.ConvertMapToStruct(inputMap)
 
 	run, err := service.GoObjectBuilderService().Agent().CreateAgentRun(ctx, &nb.CreateAgentRunRequest{
 		ResourceEnvId: resourceEnvId,
@@ -226,7 +234,13 @@ func (h *HandlerV1) runAgent(ctx context.Context, service services.ServiceManage
 		maxSteps = defaultAgentMaxSteps
 	}
 
-	messages := []ai.ConversationMessage{{Role: "user", Text: message}}
+	userText := message
+	if len(runContext) > 0 {
+		if ctxJSON, jErr := json.Marshal(runContext); jErr == nil {
+			userText = message + "\n\n## Context provided by the application\n" + string(ctxJSON)
+		}
+	}
+	messages := []ai.ConversationMessage{{Role: "user", Text: userText}}
 
 	var (
 		steps       []*nb.AgentRunStep
@@ -317,6 +331,11 @@ func (h *HandlerV1) runAgent(ctx context.Context, service services.ServiceManage
 // the agent's permission rule for the targeted table. It returns a JSON string
 // result (or an error message) and whether the call failed.
 func (h *HandlerV1) executeAgentTool(ctx context.Context, service services.ServiceManagerI, resourceEnvId, projectId string, toolset agentToolset, call ai.ToolCall) (string, bool) {
+
+	// web_fetch is not a table operation, so it bypasses the permission matrix.
+	if call.Name == "web_fetch" {
+		return executeWebFetch(ctx, call)
+	}
 
 	tableSlug := cast.ToString(call.Input["table_slug"])
 	if tableSlug == "" {
@@ -501,6 +520,9 @@ func buildAgentSystemPrompt(agent *nb.Agent, toolset agentToolset) string {
 
 		b.WriteString("\nWhen you have fully addressed the request, reply with a final natural-language message and stop calling tools.")
 	}
+
+	b.WriteString("\n\n## External data\n")
+	b.WriteString("Use the web_fetch tool to fetch public web URLs (e.g. JSON APIs or pages) when you need up-to-date external information such as exchange rates, prices, or reference data that is not stored in the application. For anything that lives in the application's own database, use the data tools above instead.")
 
 	return b.String()
 }

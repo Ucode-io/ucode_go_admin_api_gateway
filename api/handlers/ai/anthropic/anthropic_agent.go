@@ -235,6 +235,24 @@ func (a *AnthropicAgent) VisualEdit(_ context.Context, in models.VisualEditInput
 	return out.Files, out.ChangeSummary, nil
 }
 
+func (a *AnthropicAgent) IntegrateAgent(_ context.Context, in models.AgentIntegrationInput) ([]models.ProjectFile, string, error) {
+	raw, usage, _, err := a.callTool(a.conf.Agents.Coder, chat_prompts.PromptAgentIntegrator, in.Messages, ToolIntegrateAgent)
+	a.tracker.RecordUsage(usage, a.conf.Agents.Coder.Model, "Integrating agent into frontend")
+	a.tracker.Deduct(int64(usage.InputTokens + usage.OutputTokens))
+	if err != nil {
+		return nil, "", wrapMaxTokens(err, usage, "integrate agent")
+	}
+
+	var out struct {
+		Files         []models.ProjectFile `json:"files"`
+		ChangeSummary string               `json:"change_summary"`
+	}
+	if err = json.Unmarshal(raw, &out); err != nil {
+		return nil, "", fmt.Errorf("integrate agent: decode: %w", err)
+	}
+	return out.Files, out.ChangeSummary, nil
+}
+
 func (a *AnthropicAgent) RepairFile(_ context.Context, in models.RepairFileInput) (models.ProjectFile, error) {
 	repairCfg := a.conf.Agents.Router
 	repairCfg.MaxTokens = 32000

@@ -166,7 +166,8 @@ func (h *HandlerV1) DeleteAgent(c *gin.Context) {
 // ==================== Agent Execution ====================
 
 type runAgentRequest struct {
-	Message string `json:"message"`
+	Message string         `json:"message"`
+	Context map[string]any `json:"context"`
 }
 
 func (h *HandlerV1) RunAgent(c *gin.Context) {
@@ -211,7 +212,63 @@ func (h *HandlerV1) RunAgent(c *gin.Context) {
 		return
 	}
 
-	run, err := h.runAgent(c.Request.Context(), service, resourceEnvId, agent, request.Message)
+	run, err := h.runAgent(c.Request.Context(), service, resourceEnvId, agent, request.Message, request.Context)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.HandleResponse(c, status_http.OK, run)
+}
+
+// RunAgentPublic is the end-user surface for talking to an agent: it backs the
+// POST /v2/agents/:agent-id/run route consumed by the generated frontend's
+// agentClient. End-users authenticate with the project's X-API-KEY (V2
+// middleware), which resolves the same project/environment context as the admin
+// surface. The agent must be enabled; disabled agents are not reachable here.
+func (h *HandlerV1) RunAgentPublic(c *gin.Context) {
+	var (
+		request runAgentRequest
+		agentId = c.Param("agent-id")
+	)
+
+	if !util.IsValidUUID(agentId) {
+		h.HandleResponse(c, status_http.InvalidArgument, "invalid agent-id")
+		return
+	}
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		h.HandleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+	if request.Message == "" {
+		h.HandleResponse(c, status_http.BadRequest, "message is required")
+		return
+	}
+
+	service, resourceEnvId, err := h.getAiChatServices(c)
+	if err != nil {
+		return
+	}
+
+	agent, err := service.GoObjectBuilderService().Agent().GetAgent(
+		c.Request.Context(),
+		&pbo.AgentPrimaryKey{
+			ResourceEnvId: resourceEnvId,
+			Id:            agentId,
+		},
+	)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	if !agent.GetEnabled() {
+		h.HandleResponse(c, status_http.InvalidArgument, "agent is disabled")
+		return
+	}
+
+	run, err := h.runAgent(c.Request.Context(), service, resourceEnvId, agent, request.Message, request.Context)
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return

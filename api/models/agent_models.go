@@ -70,6 +70,30 @@ type (
 		Messages []ChatMessage
 	}
 
+	// AgentIntegrationInput carries pre-built messages for the integrate_agent tool
+	// call: wiring a just-created end-user agent into the generated frontend project.
+	// The caller (v1) builds the prompt, resolves file contexts, and supplies the
+	// agent API contract so the model only has to place and style the widget.
+	AgentIntegrationInput struct {
+		Messages []ChatMessage
+	}
+
+	// AgentIntegrationView is everything the integration prompt needs to wire a
+	// freshly-created agent into the existing frontend: who the agent is, what it
+	// can do, what the builder asked for, and enough of the project to place the
+	// widget correctly. The runAgent client and useAgent hook are injected as
+	// template files, so the model only writes UI that consumes them.
+	AgentIntegrationView struct {
+		AgentName     string
+		AgentID       string
+		Purpose       string
+		Capabilities  string
+		UserRequest   string
+		TemplateFiles []string
+		FileGraphJSON string
+		FilesContext  string
+	}
+
 	// RepairFileInput carries the file to repair and the pre-built user prompt
 	// (errors + available exports + rules). The agent applies the repair tool.
 	RepairFileInput struct {

@@ -514,6 +514,11 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v2Items.PUT("/:collection/schema", h.V2.UpdateTableSchemaField)
 	}
 
+	v2Agents := clientV2.Group("/agents")
+	{
+		v2Agents.POST("/:agent-id/run", h.V1.RunAgentPublic)
+	}
+
 	v2Version := r.Group("/v2")
 	v2Version.Use(h.V1.AuthMiddleware(cfg))
 	v2Version.Use(tracker.ApiCallCountMiddleware())
