@@ -321,6 +321,81 @@ func validateLayoutShape(files []models.ProjectFile) []ValidationError {
 	return nil
 }
 
+func validateAdminPanelAuth(files []models.ProjectFile) []ValidationError {
+	var errors []ValidationError
+	fileMap := make(map[string]string, len(files))
+	for _, f := range files {
+		fileMap[f.Path] = f.Content
+	}
+
+	required := []string{
+		"src/lib/auth.ts",
+		"src/lib/permissions.ts",
+		"src/components/auth/LoginPage.tsx",
+		"src/components/auth/ProtectedRoute.tsx",
+	}
+	for _, path := range required {
+		if _, ok := fileMap[path]; !ok {
+			errors = append(errors, ValidationError{
+				Severity: "error",
+				File:     "src/App.tsx",
+				Message:  fmt.Sprintf("admin auth runtime missing %s; inject it from project_template scaffold", path),
+			})
+		}
+	}
+
+	app := fileMap["src/App.tsx"]
+	if app != "" {
+		if !strings.Contains(app, "@/components/auth/ProtectedRoute") || !strings.Contains(app, "<ProtectedRoute>") {
+			errors = append(errors, ValidationError{
+				Severity: "error",
+				File:     "src/App.tsx",
+				Message:  "admin auth runtime: App.tsx must import ProtectedRoute and wrap every private route element with <ProtectedRoute>...</ProtectedRoute>; only /login is public",
+			})
+		}
+		if !strings.Contains(app, `path="/login"`) || !strings.Contains(app, "@/components/auth/LoginPage") {
+			errors = append(errors, ValidationError{
+				Severity: "error",
+				File:     "src/App.tsx",
+				Message:  `admin auth runtime: App.tsx must expose public route path="/login" using LoginPage`,
+			})
+		}
+	}
+
+	if sidebar := fileMap["src/components/layout/Sidebar.tsx"]; sidebar != "" {
+		if !strings.Contains(sidebar, "useUcodePermissions") || !strings.Contains(sidebar, "canRead") {
+			errors = append(errors, ValidationError{
+				Severity: "error",
+				File:     "src/components/layout/Sidebar.tsx",
+				Message:  "admin auth runtime: Sidebar must import { useUcodePermissions, canRead } from '@/lib/permissions', compute each nav route from item.path || item.href || item.to, and render only items where canRead(perms, route) is true; hide groups with no visible children",
+			})
+		}
+	}
+
+	for _, f := range files {
+		if !strings.HasSuffix(f.Path, ".ts") && !strings.HasSuffix(f.Path, ".tsx") {
+			continue
+		}
+		if f.Path == "src/config/axios.ts" || f.Path == "src/lib/auth.ts" || strings.HasPrefix(f.Path, "src/components/auth/") {
+			continue
+		}
+		lower := strings.ToLower(f.Content)
+		if strings.Contains(lower, "x-api-key") ||
+			strings.Contains(lower, "authorization: 'api-key") ||
+			strings.Contains(lower, `authorization: "api-key`) ||
+			strings.Contains(lower, "authorization': 'api-key") ||
+			strings.Contains(lower, `authorization": "api-key`) {
+			errors = append(errors, ValidationError{
+				Severity: "error",
+				File:     f.Path,
+				Message:  "admin auth runtime: data files must not add API-KEY/X-API-KEY manually in login mode; use @/hooks/useApi or @/config/axios so Bearer token and trusted-preview exception are applied centrally",
+			})
+		}
+	}
+
+	return errors
+}
+
 // validateAgainstManifest reports drift between what the manifest promised
 // and what was actually generated. No-ops when manifest is nil.
 func validateAgainstManifest(files []models.ProjectFile, manifest *models.ProjectManifest) []ValidationError {
@@ -1091,6 +1166,22 @@ var templateFileExports = map[string]map[string]bool{
 		"cn": true, "formatDate": true, "formatCurrency": true, "formatNumber": true,
 		"getInitials": true, "truncate": true, "generateId": true, "sleep": true, "debounce": true,
 	},
+	"src/lib/auth": {
+		"fetchClientTypes": true, "getCurrentUser": true, "getToken": true, "isLoginMode": true,
+		"isTrustedPreview": true, "login": true, "logout": true, "setToken": true, "subscribePreviewContext": true,
+	},
+	"src/lib/auth.ts": {
+		"fetchClientTypes": true, "getCurrentUser": true, "getToken": true, "isLoginMode": true,
+		"isTrustedPreview": true, "login": true, "logout": true, "setToken": true, "subscribePreviewContext": true,
+	},
+	"src/lib/permissions": {
+		"canRead": true, "initNavMapFromAuth": true, "resetUcodePermissions": true,
+		"setUcodePermissions": true, "useUcodePermissions": true, "useUcodePermissionsReady": true,
+	},
+	"src/lib/permissions.ts": {
+		"canRead": true, "initNavMapFromAuth": true, "resetUcodePermissions": true,
+		"setUcodePermissions": true, "useUcodePermissions": true, "useUcodePermissionsReady": true,
+	},
 	"src/types/common": {
 		"NavItem": true, "TableColumn": true, "ApiResponse": true, "ApiError": true,
 		"SelectOption": true, "PaginationParams": true, "LatLng": true, "MapMarker": true,
@@ -1103,6 +1194,10 @@ var templateFileExports = map[string]map[string]bool{
 	"src/config/axios.ts":                    {"default": true, "apiClient": true},
 	"src/components/shared/AppProviders":     {"AppProviders": true},
 	"src/components/shared/AppProviders.tsx": {"AppProviders": true},
+	"src/components/auth/LoginPage":          {"LoginPage": true},
+	"src/components/auth/LoginPage.tsx":      {"LoginPage": true},
+	"src/components/auth/ProtectedRoute":     {"ProtectedRoute": true},
+	"src/components/auth/ProtectedRoute.tsx": {"ProtectedRoute": true},
 }
 
 // isTemplateFile returns true for files that exist in the pre-built template.
@@ -1599,6 +1694,9 @@ func (p *ChatProcessor) repairSingleFile(
 	sb.WriteString("  - For 'component X renders <X> inside itself': this is infinite React recursion. Replace the inner <X> with the intended wrapper element (<div>, <main>, <Outlet />) or import the correct different component name. A component must never render itself directly.\n")
 	sb.WriteString("  - For '<SelectItem value=\"\">' errors: Radix SelectItem values cannot be empty strings. Replace empty option values with non-empty sentinel strings such as 'all', 'none', or 'unassigned'. Update state/filter logic so the sentinel means no filter / empty relation, but NEVER render value=\"\" on SelectItem.\n")
 	sb.WriteString("  - For 'admin UI quality' errors: perform a focused visual/product polish pass on this file. Preserve every API endpoint, hook, mutation, entity field, JSON extraction, route, and generated type. Improve layout density, hierarchy, cards, filters, status chips, detail drawer/dialog, states, and domain-specific widgets only.\n")
+	sb.WriteString("  - For 'admin auth runtime' errors in App.tsx: import LoginPage from '@/components/auth/LoginPage' and ProtectedRoute from '@/components/auth/ProtectedRoute'; add public route path=\"/login\"; wrap all private page/layout routes in <ProtectedRoute>...</ProtectedRoute>.\n")
+	sb.WriteString("  - For 'admin auth runtime' errors in Sidebar.tsx: import { useUcodePermissions, canRead } from '@/lib/permissions'; call const perms = useUcodePermissions(); derive route = item.path || item.href || item.to || '/'; render filtered items only; hide empty groups.\n")
+	sb.WriteString("  - For 'admin auth runtime' API-key errors: remove manual Authorization: 'API-KEY' and X-API-KEY headers from feature data files. Use @/hooks/useApi or @/config/axios; the template axios interceptor chooses Bearer vs trusted-preview API key.\n")
 	sb.WriteString("  - For 'word with apostrophe used as unquoted JS expression' errors: the file contains Uzbek/non-ASCII text like Ko'rildi, Ko'rib chiqilmoqda, Og'zaki used directly as JavaScript identifiers without string quotes. This crashes esbuild. Find EVERY such word in arrays, object property values, variable assignments, JSX attribute values — wrap each one in double quotes. Example: { label: Ko'rildi } → { label: \"Ko'rildi\" }, [Ko'rib] → [\"Ko'rib\"]. JSX text nodes are fine: <Badge>Ko'rildi</Badge> does NOT need change, only JS expression contexts.\n")
 	sb.WriteString("  - For 'webapp UI' errors: this is a MOBILE APP (responsive web). Fix toward a phone layout — a centered max-w-md min-h-[100dvh] frame, a fixed bottom tab bar (NOT a desktop side rail) with a SOLID opaque bg-background (no /opacity, no transparent, no blur-only), and a compact sticky in-flow Header with a SOLID opaque background plus pt-[max(env(safe-area-inset-top),3rem)] (never absolute/fixed/transparent over the hero). Use single-column stacked cards/list rows (NOT data tables or KPI dashboards), bottom-sheet/detail-route for item details, and lucide icons rendered as <Icon/> components (never icon-name strings). EVERY button/tab/tile/row/FAB must be wired (onClick navigate via useNavigate/NavLink, or open a Sheet via useState, or fire a useApiMutation) — no dead buttons. Render real API data (useApiQuery + extractList), not hardcoded values. Preserve all APIs, hooks, fields, routes, and types.\n")
 	sb.WriteString("  - For brace/bracket/paren imbalance: carefully trace through the file and find the exact location of the missing or extra delimiter. Common causes: unclosed ternary in JSX, missing closing brace in .map() callback, extra } after a component return, unclosed template literal.\n")

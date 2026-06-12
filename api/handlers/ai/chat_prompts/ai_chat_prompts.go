@@ -780,6 +780,8 @@ GROUP 0 — FOUNDATION (exactly 6 files, generated first, sequential):
   PRE-BUILT files (already in template — NEVER include in any group):
     src/main.tsx        — React entry point (identical for all projects)
     src/hooks/useApi.ts · src/lib/apiUtils.ts · src/lib/utils.ts
+    src/lib/auth.ts · src/lib/permissions.ts
+    src/components/auth/LoginPage.tsx · src/components/auth/ProtectedRoute.tsx
     src/components/shared/AppProviders.tsx · src/config/axios.ts
   NEVER put src/components/ui/* or src/components/shared/* in Group 0.
 

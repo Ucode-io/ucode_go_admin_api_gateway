@@ -243,33 +243,66 @@ func ensureDefaultRoutes(resolved []resolvedRoute, files []models.ProjectFile, r
 //	layout==nil          → flat routes  (landing / no-shell projects)
 //	layout.UsesOutlet    → nested parent route around all children
 //	!layout.UsesOutlet   → <Layout> wraps the <Routes> block
-func writeRoutes(sb *strings.Builder, resolved []resolvedRoute, layout *layoutBinding) {
+func writeRoutes(sb *strings.Builder, resolved []resolvedRoute, layout *layoutBinding, protectAdminRoutes bool) {
 	const indent = "          "
 	const wildcard = `<Route path="*" element={<Navigate to="/" replace />} />`
 
-	emitPageRoutes := func(prefix string) {
+	emitLoginRoute := func() {
+		if protectAdminRoutes {
+			fmt.Fprintf(sb, "%s  <Route path=\"/login\" element={<LoginPage />} />\n", indent)
+		}
+	}
+
+	pageElement := func(pageName string) string {
+		if protectAdminRoutes {
+			return fmt.Sprintf("<ProtectedRoute><%s /></ProtectedRoute>", pageName)
+		}
+		return fmt.Sprintf("<%s />", pageName)
+	}
+
+	emitPageRoutes := func(prefix string, wrapPages bool) {
 		for _, r := range resolved {
-			fmt.Fprintf(sb, "%s<Route path=%q element={<%s />} />\n", prefix, r.Path, r.PageName)
+			element := fmt.Sprintf("<%s />", r.PageName)
+			if wrapPages {
+				element = pageElement(r.PageName)
+			}
+			fmt.Fprintf(sb, "%s<Route path=%q element={%s} />\n", prefix, r.Path, element)
 		}
 	}
 
 	switch {
 	case layout == nil:
 		fmt.Fprintf(sb, "%s<Routes>\n", indent)
-		emitPageRoutes(indent + "  ")
+		emitLoginRoute()
+		emitPageRoutes(indent+"  ", protectAdminRoutes)
 		fmt.Fprintf(sb, "%s  %s\n", indent, wildcard)
 		fmt.Fprintf(sb, "%s</Routes>\n", indent)
 	case layout.UsesOutlet:
 		fmt.Fprintf(sb, "%s<Routes>\n", indent)
-		fmt.Fprintf(sb, "%s  <Route element={<Layout />}>\n", indent)
-		emitPageRoutes(indent + "    ")
+		emitLoginRoute()
+		if protectAdminRoutes {
+			fmt.Fprintf(sb, "%s  <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>\n", indent)
+		} else {
+			fmt.Fprintf(sb, "%s  <Route element={<Layout />}>\n", indent)
+		}
+		emitPageRoutes(indent+"    ", false)
 		fmt.Fprintf(sb, "%s  </Route>\n", indent)
 		fmt.Fprintf(sb, "%s  %s\n", indent, wildcard)
 		fmt.Fprintf(sb, "%s</Routes>\n", indent)
 	default:
+		if protectAdminRoutes {
+			fmt.Fprintf(sb, "%s<Routes>\n", indent)
+			emitLoginRoute()
+			for _, r := range resolved {
+				fmt.Fprintf(sb, "%s  <Route path=%q element={<ProtectedRoute><Layout><%s /></Layout></ProtectedRoute>} />\n", indent, r.Path, r.PageName)
+			}
+			fmt.Fprintf(sb, "%s  %s\n", indent, wildcard)
+			fmt.Fprintf(sb, "%s</Routes>\n", indent)
+			return
+		}
 		fmt.Fprintf(sb, "%s<Layout>\n", indent)
 		fmt.Fprintf(sb, "%s  <Routes>\n", indent)
-		emitPageRoutes(indent + "    ")
+		emitPageRoutes(indent+"    ", false)
 		fmt.Fprintf(sb, "%s    %s\n", indent, wildcard)
 		fmt.Fprintf(sb, "%s  </Routes>\n", indent)
 		fmt.Fprintf(sb, "%s</Layout>\n", indent)
@@ -295,7 +328,7 @@ const pageLoaderSource = `export function PageLoader() {
 // whole class of bugs.
 //
 // Gated on manifest.ExportStyle == "named-lazy". Legacy manifests fall through.
-func mergeAppRoutes(files []models.ProjectFile, manifest *models.ProjectManifest) []models.ProjectFile {
+func mergeAppRoutes(files []models.ProjectFile, manifest *models.ProjectManifest, projectType string) []models.ProjectFile {
 	if manifest == nil || manifest.ExportStyle != "named-lazy" {
 		return files
 	}
@@ -371,6 +404,7 @@ func mergeAppRoutes(files []models.ProjectFile, manifest *models.ProjectManifest
 	resolved = ensureDefaultRoutes(resolved, files, registry)
 
 	layout := detectLayoutBinding(files, registry)
+	protectAdminRoutes := strings.EqualFold(projectType, "admin_panel")
 
 	var sb strings.Builder
 	// index.css must be imported here — App.tsx is the federation entry (vite.config.ts
@@ -380,6 +414,10 @@ func mergeAppRoutes(files []models.ProjectFile, manifest *models.ProjectManifest
 	sb.WriteString("import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';\n")
 	sb.WriteString("import { AppProviders } from '@/components/shared/AppProviders';\n")
 	sb.WriteString("import { PageLoader } from '@/components/shared/PageLoader';\n")
+	if protectAdminRoutes {
+		sb.WriteString("import { LoginPage } from '@/components/auth/LoginPage';\n")
+		sb.WriteString("import { ProtectedRoute } from '@/components/auth/ProtectedRoute';\n")
+	}
 	if layout != nil {
 		sb.WriteString(layout.ImportLine)
 	}
@@ -400,7 +438,7 @@ func mergeAppRoutes(files []models.ProjectFile, manifest *models.ProjectManifest
 	sb.WriteString("    <BrowserRouter>\n")
 	sb.WriteString("      <AppProviders>\n")
 	sb.WriteString("        <Suspense fallback={<PageLoader />}>\n")
-	writeRoutes(&sb, resolved, layout)
+	writeRoutes(&sb, resolved, layout, protectAdminRoutes)
 	sb.WriteString("        </Suspense>\n")
 	sb.WriteString("      </AppProviders>\n")
 	sb.WriteString("    </BrowserRouter>\n")
