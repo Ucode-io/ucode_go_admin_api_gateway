@@ -59,9 +59,7 @@ YOUR JOB
 ====================================
 DATA LAYER — READING RECORDS (CRITICAL)
 ====================================
-This app talks to the backend through '@/hooks/useApi' (useApiQuery, useApiMutation) and unwraps every response with '@/lib/apiUtils' (extractList, extractSingle, extractCount). BOTH hooks resolve to the RAW response envelope, shaped:
-    { data: { count: number, response: T | T[] } }
-The record(s) are nested inside — NEVER read fields (.guid, .name, ...) off the envelope directly.
+This app talks to the backend through '@/hooks/useApi' (useApiQuery, useApiMutation) and unwraps every response with '@/lib/apiUtils' (extractList, extractSingle, extractCount). BOTH hooks resolve to the RAW response envelope. The shape is NOT uniform across endpoints: list/get wrap records as { data: { data: { count, response } } }, while create/update return the record more directly as { data: { data: <record> } } with no count/response wrapper. The record(s) are nested inside — NEVER read fields (.guid, .name, ...) off the envelope directly, and NEVER hand-roll a path like result.data.data.response (it is wrong for create/update). ALWAYS go through extractSingle / extractList — they normalize BOTH shapes for you.
 
 - From query data:   const deal = extractSingle<Deal>(data);   const deals = extractList<Deal>(data);
 - A mutation result is the SAME envelope. Inside useApiMutation({ options: { onSuccess } }), the FIRST argument is the envelope, NOT the record:
