@@ -148,8 +148,8 @@ func (u *GoogleDriveUploader) UploadIfConfigured(ctx context.Context, req Google
 	}
 
 	uploadCredentials := credentials
-	folderName := strings.TrimSpace(req.FolderName)
-	if folderName != "" && !strings.EqualFold(folderName, DriveStorageName) {
+	folderName := NormalizeGoogleDriveFolderName(req.FolderName)
+	if folderName != "" && folderName != DriveStorageName {
 		folder, err := u.ensureUploadFolder(ctx, credentials, folderName)
 		if err != nil {
 			return nil, true, err
@@ -584,6 +584,15 @@ func ProjectFolderName(projectName, projectID string) string {
 	}
 
 	return name
+}
+
+func NormalizeGoogleDriveFolderName(folderName string) string {
+	folderName = strings.TrimSpace(folderName)
+	normalized := strings.ToLower(strings.ReplaceAll(folderName, " ", "_"))
+	if normalized == DriveStorageName {
+		return DriveStorageName
+	}
+	return folderName
 }
 
 func (r *GoogleDriveFolderResult) GetFolderID() string {
