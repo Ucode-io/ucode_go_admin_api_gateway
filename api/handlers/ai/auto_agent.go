@@ -70,3 +70,7 @@ func (a *AutoAgent) RepairFile(ctx context.Context, in models.RepairFileInput) (
 func (a *AutoAgent) DatabaseQuery(ctx context.Context, in models.DatabaseQueryInput) (*models.DatabaseActionRequest, error) {
 	return a.openai.DatabaseQuery(ctx, in)
 }
+
+func (a *AutoAgent) BuildAgentSpec(ctx context.Context, in models.AgentSpecInput) (*models.AgentSpec, error) {
+	return a.claude.BuildAgentSpec(ctx, in)
+}

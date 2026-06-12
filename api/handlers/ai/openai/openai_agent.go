@@ -285,3 +285,22 @@ func (a *OpenAIAgent) DatabaseQuery(ctx context.Context, in models.DatabaseQuery
 	}
 	return &action, nil
 }
+
+func (a *OpenAIAgent) BuildAgentSpec(ctx context.Context, in models.AgentSpecInput) (*models.AgentSpec, error) {
+	content := chat_prompts.BuildAgentBuilderMessage(in.Description, in.SchemaText)
+	messages := buildOpenAIMessages(in.History, []contentPart{{Type: "text", Text: content}})
+
+	cfg := a.conf.OpenAIAgents.AgentBuilder
+	raw, usage, err := callTool(ctx, a.conf, cfg, chat_prompts.PromptAgentBuilder, messages, toolBuildAgentSpec)
+	a.tracker.RecordUsage(usage, cfg.Model, "Building agent definition")
+	a.tracker.Deduct(int64(usage.InputTokens + usage.OutputTokens))
+	if err != nil {
+		return nil, wrapMaxTokens(err, usage, "agent builder")
+	}
+
+	var spec models.AgentSpec
+	if err = json.Unmarshal(raw, &spec); err != nil {
+		return nil, fmt.Errorf("agent builder: decode: %w", err)
+	}
+	return &spec, nil
+}

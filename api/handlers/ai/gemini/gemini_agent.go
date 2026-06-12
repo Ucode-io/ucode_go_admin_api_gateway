@@ -289,3 +289,22 @@ func (a *GeminiAgent) DatabaseQuery(_ context.Context, in models.DatabaseQueryIn
 	}
 	return &action, nil
 }
+
+func (a *GeminiAgent) BuildAgentSpec(_ context.Context, in models.AgentSpecInput) (*models.AgentSpec, error) {
+	content := chat_prompts.BuildAgentBuilderMessage(in.Description, in.SchemaText)
+	contents := buildGeminiContents(in.History, buildGeminiParts(content, nil))
+
+	cfg := a.conf.GeminiAgents.AgentBuilder
+	raw, usage, err := callGeminiTool(a.pool, cfg, chat_prompts.PromptAgentBuilder, contents, toolBuildAgentSpec)
+	a.tracker.RecordUsage(usage, cfg.Model, "Building agent definition")
+	a.tracker.Deduct(int64(usage.InputTokens + usage.OutputTokens))
+	if err != nil {
+		return nil, wrapMaxTokens(err, usage, "agent builder")
+	}
+
+	var spec models.AgentSpec
+	if err = json.Unmarshal(raw, &spec); err != nil {
+		return nil, fmt.Errorf("agent builder: decode: %w", err)
+	}
+	return &spec, nil
+}

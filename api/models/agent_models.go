@@ -84,4 +84,33 @@ type (
 		DataContext string
 		History     []ChatMessage
 	}
+
+	// AgentSpecInput carries a builder's natural-language request to generate a
+	// reusable end-user agent, plus the project schema the agent may operate on.
+	AgentSpecInput struct {
+		Description string
+		SchemaText  string
+		History     []ChatMessage
+	}
+
+	// AgentSpec is the generated definition of a reusable agent: a system prompt
+	// (Instruction), display metadata, and the minimal per-table permissions it
+	// needs. Reply is a short confirmation message shown back to the builder.
+	AgentSpec struct {
+		Name        string                `json:"name"`
+		Description string                `json:"description"`
+		Instruction string                `json:"instruction"`
+		Reply       string                `json:"reply"`
+		Permissions []AgentSpecPermission `json:"permissions"`
+	}
+
+	// AgentSpecPermission grants an agent a set of operations on one table.
+	AgentSpecPermission struct {
+		TableSlug string `json:"table_slug"`
+		CanCreate bool   `json:"can_create"`
+		CanRead   bool   `json:"can_read"`
+		CanUpdate bool   `json:"can_update"`
+		CanDelete bool   `json:"can_delete"`
+		CanList   bool   `json:"can_list"`
+	}
 )

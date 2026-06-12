@@ -291,6 +291,24 @@ func (a *AnthropicAgent) DatabaseQuery(_ context.Context, in models.DatabaseQuer
 	return &action, nil
 }
 
+func (a *AnthropicAgent) BuildAgentSpec(_ context.Context, in models.AgentSpecInput) (*models.AgentSpec, error) {
+	content := chat_prompts.BuildAgentBuilderMessage(in.Description, in.SchemaText)
+	messages := buildAgentMessages(in.History, []models.ContentBlock{{Type: "text", Text: content}})
+
+	raw, usage, _, err := a.callTool(a.conf.Agents.AgentBuilder, chat_prompts.PromptAgentBuilder, messages, ToolBuildAgentSpec)
+	a.tracker.RecordUsage(usage, a.conf.Agents.AgentBuilder.Model, "Building agent definition")
+	a.tracker.Deduct(int64(usage.InputTokens + usage.OutputTokens))
+	if err != nil {
+		return nil, wrapMaxTokens(err, usage, "agent builder")
+	}
+
+	var spec models.AgentSpec
+	if err = json.Unmarshal(raw, &spec); err != nil {
+		return nil, fmt.Errorf("agent builder: decode: %w", err)
+	}
+	return &spec, nil
+}
+
 func (a *AnthropicAgent) callTool(agentCfg config.AgentConfig, system string, messages []models.ChatMessage, tool claudeFunctionTool) ([]byte, models.LLMUsage, string, error) {
 	wire := wireToolRequest{
 		Model:      agentCfg.Model,

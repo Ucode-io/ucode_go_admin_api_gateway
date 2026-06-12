@@ -359,6 +359,37 @@ var ToolRepairFile = claudeFunctionTool{
 	},
 }
 
+var ToolBuildAgentSpec = claudeFunctionTool{
+	Name:        "build_agent",
+	Description: "Return the complete definition of a reusable AI agent for the application's end-users: a short name, a one-sentence description, a full system-prompt instruction, the minimal per-table data permissions it needs, and a short confirmation reply for the builder.",
+	InputSchema: map[string]any{
+		"type":     "object",
+		"required": []string{"name", "description", "instruction", "permissions", "reply"},
+		"properties": map[string]any{
+			"name":        map[string]any{"type": "string", "description": "Short, human-readable agent name, e.g. 'Order Assistant'."},
+			"description": map[string]any{"type": "string", "description": "One-sentence summary of what the agent does, for the builder's reference."},
+			"instruction": map[string]any{"type": "string", "description": "The agent's complete system prompt: its role, personality, what it helps end-users with, and how it should behave. Write it in the same language as the builder's request. Do NOT mention tool names or internal table slugs."},
+			"reply":       map[string]any{"type": "string", "description": "A short, friendly confirmation message for the builder, in the builder's language, summarizing the agent you created."},
+			"permissions": map[string]any{
+				"type":        "array",
+				"description": "The minimal set of table permissions the agent needs. Grant only what is necessary. Each table_slug MUST be one of the slugs from the provided project schema — never invent slugs.",
+				"items": map[string]any{
+					"type":     "object",
+					"required": []string{"table_slug"},
+					"properties": map[string]any{
+						"table_slug": map[string]any{"type": "string", "description": "Slug of a table from the project schema."},
+						"can_create": map[string]any{"type": "boolean", "description": "Allow creating records."},
+						"can_read":   map[string]any{"type": "boolean", "description": "Allow fetching a single record by id."},
+						"can_update": map[string]any{"type": "boolean", "description": "Allow updating records."},
+						"can_delete": map[string]any{"type": "boolean", "description": "Allow deleting records."},
+						"can_list":   map[string]any{"type": "boolean", "description": "Allow listing/searching records."},
+					},
+				},
+			},
+		},
+	},
+}
+
 func ForcedTool(toolName string) *toolChoice {
 	return &toolChoice{Type: "tool", Name: toolName}
 }
