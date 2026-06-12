@@ -93,6 +93,7 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 	processor.newProject = userMessage.NewProject
 	processor.userMessage = userMessage.Content
 	processor.mcpUcodeProjectId = mcpProject.GetUcodeProjectId()
+	processor.ucodeProjectId = mcpProject.GetId()
 
 	// Lazy self-heal: persist the normalised provider so chats with empty
 	// or unknown model migrate transparently on the next read or filter.
