@@ -11,9 +11,7 @@ import (
 
 	"ucode/ucode_go_api_gateway/api/handlers/fileupload"
 	"ucode/ucode_go_api_gateway/api/handlers/helper"
-	"ucode/ucode_go_api_gateway/config"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
-	helperFunc "ucode/ucode_go_api_gateway/pkg/helper"
 
 	"github.com/google/uuid"
 	"github.com/minio/minio-go/v7"
@@ -30,7 +28,8 @@ func (p *ChatProcessor) uploadImagePool(ctx context.Context, resourceEnvId strin
 		return pool
 	}
 
-	folderName := helper.SanitizeFolderName(pool.ProjectName)
+	// folderName := helper.SanitizeFolderName(pool.ProjectName)
+	folderName := "Media"
 
 	minioClient, err := minio.New(p.baseConf.MinioEndpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(p.baseConf.MinioAccessKeyID, p.baseConf.MinioSecretAccessKey, ""),
@@ -42,22 +41,22 @@ func (p *ChatProcessor) uploadImagePool(ctx context.Context, resourceEnvId strin
 	}
 
 	// Create MINIO_FOLDER menu entry — same logic as HandlerV3.CreateMenu PostgreSQL path
-	attrs, _ := helperFunc.ConvertMapToStruct(map[string]any{
-		"label_ru": folderName,
-		"label_en": folderName,
-	})
-	_, menuErr := p.service.GoObjectBuilderService().Menu().Create(ctx, &nb.CreateMenuRequest{
-		Label:      folderName,
-		Icon:       "",
-		ParentId:   config.MainFolderID,
-		Type:       "MINIO_FOLDER",
-		ProjectId:  resourceEnvId,
-		NewRouter:  true,
-		Attributes: attrs,
-	})
-	if menuErr != nil {
-		log.Printf("[cdn-upload] MINIO_FOLDER menu warning (continuing): %v", menuErr)
-	}
+	// attrs, _ := helperFunc.ConvertMapToStruct(map[string]any{
+	// 	"label_ru": folderName,
+	// 	"label_en": folderName,
+	// })
+	// _, menuErr := p.service.GoObjectBuilderService().Menu().Create(ctx, &nb.CreateMenuRequest{
+	// 	Label:      folderName,
+	// 	Icon:       "",
+	// 	ParentId:   config.MainFolderID,
+	// 	Type:       "MINIO_FOLDER",
+	// 	ProjectId:  resourceEnvId,
+	// 	NewRouter:  true,
+	// 	Attributes: attrs,
+	// })
+	// if menuErr != nil {
+	// 	log.Printf("[cdn-upload] MINIO_FOLDER menu warning (continuing): %v", menuErr)
+	// }
 
 	cdnURLs := make([]string, len(pool.Photos))
 	for i, ph := range pool.Photos {

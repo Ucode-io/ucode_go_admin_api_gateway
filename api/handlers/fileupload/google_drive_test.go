@@ -31,6 +31,11 @@ type fakeDriveClient struct {
 	creds              *pb.GoogleDriveCredentials
 	folderResult       *GoogleDriveFolderResult
 	folderErr          error
+	findFolderResult   *GoogleDriveFolderResult
+	findFolderErr      error
+	findFolderCalled   bool
+	findFolderReq      GoogleDriveFindFolderRequest
+	findFolderCreds    *pb.GoogleDriveCredentials
 	createFolderCalled bool
 	createFolderReq    GoogleDriveCreateFolderRequest
 	createFolderCreds  *pb.GoogleDriveCredentials
@@ -41,6 +46,13 @@ func (f *fakeDriveClient) Upload(ctx context.Context, credentials *pb.GoogleDriv
 	f.req = req
 	f.creds = credentials
 	return f.result, f.err
+}
+
+func (f *fakeDriveClient) FindFolder(ctx context.Context, credentials *pb.GoogleDriveCredentials, req GoogleDriveFindFolderRequest) (*GoogleDriveFolderResult, error) {
+	f.findFolderCalled = true
+	f.findFolderReq = req
+	f.findFolderCreds = credentials
+	return f.findFolderResult, f.findFolderErr
 }
 
 func (f *fakeDriveClient) CreateFolder(ctx context.Context, credentials *pb.GoogleDriveCredentials, req GoogleDriveCreateFolderRequest) (*GoogleDriveFolderResult, error) {
@@ -147,6 +159,106 @@ func TestGoogleDriveUploaderUploadIfConfiguredUploadsWithSettings(t *testing.T) 
 	require.Equal(t, "file.txt", client.req.FileName)
 	require.Equal(t, "drive-file-id", result.FileID)
 	require.Equal(t, DriveStorageName, result.Storage)
+}
+
+func TestGoogleDriveUploaderUploadIfConfiguredUsesExistingLogicalFolder(t *testing.T) {
+	resources := &fakeResourceService{
+		response: &pb.ListProjectResource{
+			Resources: []*pb.ProjectResource{
+				{
+					Id: "drive-resource",
+					Settings: &pb.Settings{
+						GoogleDrive: &pb.GoogleDriveCredentials{
+							AuthType:     "oauth",
+							FolderId:     "project-root-folder-id",
+							RefreshToken: "refresh-token",
+						},
+					},
+				},
+			},
+		},
+	}
+	client := &fakeDriveClient{
+		findFolderResult: &GoogleDriveFolderResult{FolderID: "media-folder-id", Name: "Media"},
+		result: &GoogleDriveUploadResult{
+			FileID:       "drive-file-id",
+			Link:         "https://lh3.googleusercontent.com/d/drive-file-id",
+			FileNameDisk: "drive-file-id",
+			Storage:      DriveStorageName,
+		},
+	}
+	uploader := NewGoogleDriveUploaderWithClient(resources, GoogleDriveConfig{
+		ClientID:     "client-id",
+		ClientSecret: "client-secret",
+	}, client)
+
+	result, configured, err := uploader.UploadIfConfigured(context.Background(), GoogleDriveUploadRequest{
+		ProjectID:     "project-id",
+		EnvironmentID: "environment-id",
+		FolderName:    "Media",
+		FileName:      "file.txt",
+		ContentType:   "text/plain",
+		Reader:        strings.NewReader("file"),
+	})
+
+	require.NoError(t, err)
+	require.True(t, configured)
+	require.True(t, client.findFolderCalled)
+	require.False(t, client.createFolderCalled)
+	require.Equal(t, "Media", client.findFolderReq.Name)
+	require.Equal(t, "project-root-folder-id", client.findFolderReq.ParentFolderID)
+	require.Equal(t, "media-folder-id", client.creds.GetFolderId())
+	require.Equal(t, "Media", result.Storage)
+}
+
+func TestGoogleDriveUploaderUploadIfConfiguredCreatesLogicalFolder(t *testing.T) {
+	resources := &fakeResourceService{
+		response: &pb.ListProjectResource{
+			Resources: []*pb.ProjectResource{
+				{
+					Id: "drive-resource",
+					Settings: &pb.Settings{
+						GoogleDrive: &pb.GoogleDriveCredentials{
+							AuthType:     "oauth",
+							FolderId:     "project-root-folder-id",
+							RefreshToken: "refresh-token",
+						},
+					},
+				},
+			},
+		},
+	}
+	client := &fakeDriveClient{
+		folderResult: &GoogleDriveFolderResult{FolderID: "created-media-folder-id", Name: "Media"},
+		result: &GoogleDriveUploadResult{
+			FileID:       "drive-file-id",
+			Link:         "https://lh3.googleusercontent.com/d/drive-file-id",
+			FileNameDisk: "drive-file-id",
+			Storage:      DriveStorageName,
+		},
+	}
+	uploader := NewGoogleDriveUploaderWithClient(resources, GoogleDriveConfig{
+		ClientID:     "client-id",
+		ClientSecret: "client-secret",
+	}, client)
+
+	result, configured, err := uploader.UploadIfConfigured(context.Background(), GoogleDriveUploadRequest{
+		ProjectID:     "project-id",
+		EnvironmentID: "environment-id",
+		FolderName:    "Media",
+		FileName:      "file.txt",
+		ContentType:   "text/plain",
+		Reader:        strings.NewReader("file"),
+	})
+
+	require.NoError(t, err)
+	require.True(t, configured)
+	require.True(t, client.findFolderCalled)
+	require.True(t, client.createFolderCalled)
+	require.Equal(t, "Media", client.createFolderReq.Name)
+	require.Equal(t, "project-root-folder-id", client.createFolderReq.ParentFolderID)
+	require.Equal(t, "created-media-folder-id", client.creds.GetFolderId())
+	require.Equal(t, "Media", result.Storage)
 }
 
 func TestGoogleDriveUploaderUploadIfConfiguredRequiresPlatformCredentials(t *testing.T) {

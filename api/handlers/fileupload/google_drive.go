@@ -34,6 +34,7 @@ const (
 
 type googleDriveClient interface {
 	Upload(ctx context.Context, credentials *pb.GoogleDriveCredentials, req GoogleDriveUploadRequest) (*GoogleDriveUploadResult, error)
+	FindFolder(ctx context.Context, credentials *pb.GoogleDriveCredentials, req GoogleDriveFindFolderRequest) (*GoogleDriveFolderResult, error)
 	CreateFolder(ctx context.Context, credentials *pb.GoogleDriveCredentials, req GoogleDriveCreateFolderRequest) (*GoogleDriveFolderResult, error)
 }
 
@@ -50,6 +51,7 @@ type resourceService interface {
 type GoogleDriveUploadRequest struct {
 	ProjectID     string
 	EnvironmentID string
+	FolderName    string
 	FileName      string
 	ContentType   string
 	Size          int64
@@ -73,6 +75,11 @@ type GoogleDriveConfig struct {
 }
 
 type GoogleDriveCreateFolderRequest struct {
+	Name           string
+	ParentFolderID string
+}
+
+type GoogleDriveFindFolderRequest struct {
 	Name           string
 	ParentFolderID string
 }
@@ -140,12 +147,50 @@ func (u *GoogleDriveUploader) UploadIfConfigured(ctx context.Context, req Google
 		return nil, true, err
 	}
 
-	result, err := u.client.Upload(ctx, credentials, req)
+	uploadCredentials := credentials
+	folderName := strings.TrimSpace(req.FolderName)
+	if folderName != "" && !strings.EqualFold(folderName, DriveStorageName) {
+		folder, err := u.ensureUploadFolder(ctx, credentials, folderName)
+		if err != nil {
+			return nil, true, err
+		}
+
+		uploadCredentials = cloneGoogleDriveCredentials(credentials)
+		uploadCredentials.FolderId = folder.GetFolderID()
+	}
+
+	result, err := u.client.Upload(ctx, uploadCredentials, req)
 	if err != nil {
 		return nil, true, err
 	}
+	if folderName != "" {
+		result.Storage = folderName
+	}
 
 	return result, true, nil
+}
+
+func (u *GoogleDriveUploader) ensureUploadFolder(ctx context.Context, credentials *pb.GoogleDriveCredentials, folderName string) (*GoogleDriveFolderResult, error) {
+	parentFolderID := strings.TrimSpace(credentials.GetFolderId())
+	if parentFolderID == "" {
+		return nil, errors.New("google drive resource folder_id is empty")
+	}
+
+	folder, err := u.client.FindFolder(ctx, credentials, GoogleDriveFindFolderRequest{
+		Name:           folderName,
+		ParentFolderID: parentFolderID,
+	})
+	if err != nil {
+		return nil, err
+	}
+	if folder != nil && folder.GetFolderID() != "" {
+		return folder, nil
+	}
+
+	return u.client.CreateFolder(ctx, credentials, GoogleDriveCreateFolderRequest{
+		Name:           folderName,
+		ParentFolderID: parentFolderID,
+	})
 }
 
 func (u *GoogleDriveUploader) ProvisionProjectFolder(ctx context.Context, req GoogleDriveFolderRequest) (*GoogleDriveFolderResult, error) {
@@ -362,6 +407,55 @@ func (googleDriveAPIClient) Upload(ctx context.Context, credentials *pb.GoogleDr
 	}, nil
 }
 
+func (googleDriveAPIClient) FindFolder(ctx context.Context, credentials *pb.GoogleDriveCredentials, req GoogleDriveFindFolderRequest) (*GoogleDriveFolderResult, error) {
+	folderName := strings.TrimSpace(req.Name)
+	if folderName == "" {
+		return nil, errors.New("google drive folder name is empty")
+	}
+
+	service, err := newDriveService(ctx, credentials)
+	if err != nil {
+		return nil, err
+	}
+
+	escapedName := strings.ReplaceAll(folderName, "'", "\\'")
+	queryParts := []string{
+		fmt.Sprintf("name = '%s'", escapedName),
+		fmt.Sprintf("mimeType = '%s'", driveFolderMimeType),
+		"trashed = false",
+	}
+	if parentFolderID := strings.TrimSpace(req.ParentFolderID); parentFolderID != "" {
+		queryParts = append(queryParts, fmt.Sprintf("'%s' in parents", strings.ReplaceAll(parentFolderID, "'", "\\'")))
+	}
+
+	files, err := service.Files.List().
+		Q(strings.Join(queryParts, " and ")).
+		SupportsAllDrives(true).
+		IncludeItemsFromAllDrives(true).
+		Fields("files(id, webViewLink, name)").
+		PageSize(1).
+		Context(ctx).
+		Do()
+	if err != nil {
+		return nil, err
+	}
+	if len(files.Files) == 0 {
+		return nil, nil
+	}
+
+	folder := files.Files[0]
+	link := folder.WebViewLink
+	if link == "" {
+		link = fmt.Sprintf(driveFolderURLPattern, folder.Id)
+	}
+
+	return &GoogleDriveFolderResult{
+		FolderID: folder.Id,
+		Link:     link,
+		Name:     folder.Name,
+	}, nil
+}
+
 func (googleDriveAPIClient) CreateFolder(ctx context.Context, credentials *pb.GoogleDriveCredentials, req GoogleDriveCreateFolderRequest) (*GoogleDriveFolderResult, error) {
 	if strings.TrimSpace(req.Name) == "" {
 		return nil, errors.New("google drive folder name is empty")
@@ -399,6 +493,22 @@ func (googleDriveAPIClient) CreateFolder(ctx context.Context, credentials *pb.Go
 		Link:     link,
 		Name:     created.Name,
 	}, nil
+}
+
+func cloneGoogleDriveCredentials(credentials *pb.GoogleDriveCredentials) *pb.GoogleDriveCredentials {
+	if credentials == nil {
+		return nil
+	}
+
+	return &pb.GoogleDriveCredentials{
+		AuthType:           credentials.GetAuthType(),
+		FolderId:           credentials.GetFolderId(),
+		Visibility:         credentials.GetVisibility(),
+		ClientId:           credentials.GetClientId(),
+		ClientSecret:       credentials.GetClientSecret(),
+		RefreshToken:       credentials.GetRefreshToken(),
+		ServiceAccountJson: credentials.GetServiceAccountJson(),
+	}
 }
 
 func newDriveService(ctx context.Context, credentials *pb.GoogleDriveCredentials) (*drive.Service, error) {

@@ -457,6 +457,7 @@ func (h *HandlerV2) UploadToFolder(c *gin.Context) {
 		fileupload.GoogleDriveUploadRequest{
 			ProjectID:     projectId.(string),
 			EnvironmentID: environmentId.(string),
+			FolderName:    folder_name,
 			FileName:      file.File.Filename,
 			ContentType:   file.File.Header.Get("Content-Type"),
 			Size:          file.File.Size,
