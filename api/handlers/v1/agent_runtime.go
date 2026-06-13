@@ -27,13 +27,8 @@ import (
 )
 
 const (
-	// agentRunMaxTokens is the per-step output budget. It must be large enough for
-	// the agent to emit a complete create_pdf document (a styled HTML proposal/КП
-	// can run many thousands of tokens) in a SINGLE step — at 8192 the model ran
-	// out mid-generation and the run failed before the PDF was ever produced. This
-	// matches the 32000 used by the code-gen/repair paths for the same models.
-	agentRunMaxTokens    = 32000
-	agentStepTimeout     = 120 * time.Second
+	agentRunMaxTokens    = 52000
+	agentStepTimeout     = 520 * time.Second
 	defaultAgentMaxSteps = 12
 
 	// maxAgentTruncationRetries is how many times a single run may recover from a
@@ -44,26 +39,13 @@ const (
 	agentStatusSucceeded = "succeeded"
 	agentStatusFailed    = "failed"
 
-	// pdfRenderTimeout caps a single create_pdf round-trip to the document
-	// generator (HTML → PDF via headless Chrome), so a stuck renderer cannot
-	// hang the whole agent step.
-	pdfRenderTimeout = 60 * time.Second
-	// agentFilesFolder is the MinIO object-key prefix (within the project's
-	// environment bucket) where agent-generated documents are stored.
+	pdfRenderTimeout = 120 * time.Second
+
 	agentFilesFolder = "agent-files"
 
-	// agentRunTotalTimeout is the overall budget for one agent run. The run is
-	// detached from the caller's request context (so an end-user closing their
-	// browser mid-run cannot cancel the model calls, the agent's server-side
-	// writes, or the run's persistence); this timeout is the safety bound that
-	// keeps a runaway run from living forever on that detached context. The loop
-	// is already bounded by maxSteps × per-step timeout, so this only guards
-	// against a hung downstream call — set well above any realistic run.
-	agentRunTotalTimeout = 15 * time.Minute
-	// agentFinalizeTimeout bounds the final UpdateAgentRun write. It runs on its
-	// own short-lived, cancellation-immune context so the run record is ALWAYS
-	// persisted — even if the run itself hit agentRunTotalTimeout.
-	agentFinalizeTimeout = 20 * time.Second
+	agentRunTotalTimeout = 20 * time.Minute
+
+	agentFinalizeTimeout = 100 * time.Second
 )
 
 // agentTruncationRecoveryNote is appended to the system prompt after a step hit the
