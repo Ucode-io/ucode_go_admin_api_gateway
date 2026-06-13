@@ -505,7 +505,7 @@ func (p *ChatProcessor) generateCodeChunkedApplication(ctx context.Context, clar
 
 	merged.Files = injectMissingCriticalFiles(merged.Files, plan.ProjectType)
 	merged.Files = injectEnvFile(merged.Files, p.baseConf.UcodeBaseUrl, projectData, plan.ProjectType)
-	merged.Files = mergeAppRoutes(merged.Files, manifest, plan.ProjectType)
+	merged.Files = mergeAppRoutes(merged.Files, manifest)
 	if plan.ProjectType == mobileProjectType {
 		merged.Files, err = applyCapacitorScaffold(merged.Files, plan.ProjectName, p.mcpProjectId, plan.MobileCapabilities)
 		if err != nil {
@@ -1017,13 +1017,8 @@ func injectEnvFile(files []models.ProjectFile, baseURL string, projectData *mode
 	)
 
 	apiKey := ""
-	authMode := resolveGeneratedAuthMode(projectData, projectType)
-	ucodeProjectId := ""
-	environmentId := ""
 	if projectData != nil {
 		apiKey = projectData.ApiKey
-		ucodeProjectId = projectData.UcodeProjectId
-		environmentId = projectData.EnvironmentId
 	}
 
 	for _, f := range GetTemplateContext() {
@@ -1037,7 +1032,7 @@ func injectEnvFile(files []models.ProjectFile, baseURL string, projectData *mode
 		}
 	}
 
-	content := fmt.Sprintf("%s=%s\n%s=%s\nVITE_UCODE_AUTH_MODE=%s\nVITE_UCODE_PROJECT_ID=%s\nVITE_UCODE_ENVIRONMENT_ID=%s\n", envBaseURLKey, baseURL, envAPIKeyKey, apiKey, authMode, ucodeProjectId, environmentId)
+	content := fmt.Sprintf("%s=%s\n%s=%s\n", envBaseURLKey, baseURL, envAPIKeyKey, apiKey)
 
 	envTargets := map[string]bool{".env": true, ".env.development": true, ".env.production": true}
 	for i, f := range files {
@@ -1251,7 +1246,6 @@ func (p *ChatProcessor) validateAndRepairGeneratedProject(ctx context.Context, p
 		validationErrors = append(validationErrors, validateAgainstManifest(project.Files, p.currentManifest)...)
 		if projectType == "admin_panel" {
 			validationErrors = append(validationErrors, validateAdminPanelUIQuality(project.Files)...)
-			validationErrors = append(validationErrors, validateAdminPanelAuth(project.Files)...)
 		}
 		if usesWebAppGenerator(projectType) {
 			validationErrors = append(validationErrors, validateWebAppUIQuality(project.Files)...)
@@ -1321,7 +1315,6 @@ func (p *ChatProcessor) validateAndRepairGeneratedProject(ctx context.Context, p
 	finalErrors = append(finalErrors, validateAgainstManifest(project.Files, p.currentManifest)...)
 	if projectType == "admin_panel" {
 		finalErrors = append(finalErrors, validateAdminPanelUIQuality(project.Files)...)
-		finalErrors = append(finalErrors, validateAdminPanelAuth(project.Files)...)
 	}
 	if usesWebAppGenerator(projectType) {
 		finalErrors = append(finalErrors, validateWebAppUIQuality(project.Files)...)
@@ -1576,7 +1569,7 @@ func (p *ChatProcessor) generateCodeChunkedWebsite(ctx context.Context, clarifie
 
 	merged.Files = injectMissingCriticalFiles(merged.Files, plan.ProjectType)
 	merged.Files = injectEnvFile(merged.Files, p.baseConf.UcodeBaseUrl, projectData, plan.ProjectType)
-	merged.Files = mergeAppRoutes(merged.Files, manifest, plan.ProjectType)
+	merged.Files = mergeAppRoutes(merged.Files, manifest)
 
 	emit.Emit(SSEEvent{Type: EvProgress, Icon: "shield-check", Percent: 80, Message: "Проверяю качество кода", Value: fmt.Sprintf("%d файлов", len(merged.Files))})
 	errorCount := p.validateAndRepairGeneratedProject(ctx, merged, plan.ProjectType, nil, 80)

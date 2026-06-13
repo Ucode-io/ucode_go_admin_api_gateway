@@ -144,23 +144,6 @@ src/lib/utils.ts
   getInitials(name: string): string
   truncate(text: string, max: number): string
 
-src/lib/auth.ts
-  login(username, password, clientType) — POST /v2/login, stores data.token.access_token in sessionStorage
-  fetchClientTypes() — pre-login GET /v2/items/client_type using static API-key headers
-  getToken(), setToken(token), logout(), getCurrentUser()
-  isLoginMode(), isTrustedPreview(), subscribePreviewContext(listener)
-
-src/lib/permissions.ts
-  useUcodePermissions(), useUcodePermissionsReady()
-  canRead(perms, path) — login mode is deny-by-default unless trusted preview has no injected map
-  setUcodePermissions(map), resetUcodePermissions(), initNavMapFromAuth(token?)
-
-src/components/auth/LoginPage.tsx
-  LoginPage({ onSuccess? }) — generated admin panels use this for /login
-
-src/components/auth/ProtectedRoute.tsx
-  ProtectedRoute({ children }) — blocks public/share runtime until login; bypasses trusted ugen preview
-
 src/components/shared/AppProviders.tsx
   AppProviders({ children }) — wraps QueryClientProvider + Toaster (sonner)
 

@@ -14,7 +14,6 @@ import (
 	"ucode/ucode_go_api_gateway/api/models"
 	cs "ucode/ucode_go_api_gateway/genproto/company_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
-	helperFunc "ucode/ucode_go_api_gateway/pkg/helper"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -534,7 +533,7 @@ func (p *ChatProcessor) publishToMicrofrontend(ctx context.Context, projectName,
 		p.microFrontendResourceEnvId = projectData.ResourceEnvId
 	}
 	if projectData.McpProjectId != "" && p.resourceEnvId != "" {
-		updateReq := &nb.McpProject{
+		if _, updateErr := p.service.GoObjectBuilderService().McpProject().UpdateMcpProject(ctx, &nb.McpProject{
 			ResourceEnvId:       p.resourceEnvId,
 			Id:                  projectData.McpProjectId,
 			MicrofrontendId:     createResult.Data.ID,
@@ -542,29 +541,7 @@ func (p *ChatProcessor) publishToMicrofrontend(ctx context.Context, projectName,
 			MicrofrontendBranch: createResult.Data.Branch,
 			MicrofrontendUrl:    createResult.Data.Url,
 			ProjectType:         projectType,
-		}
-
-		if resolveGeneratedAuthMode(projectData, projectType) == "login" {
-			projectEnvMap := make(map[string]any)
-			currentMcpProject, fetchErr := p.service.GoObjectBuilderService().McpProject().GetMcpProjectFiles(ctx, &nb.McpProjectId{
-				ResourceEnvId: p.resourceEnvId,
-				Id:            projectData.McpProjectId,
-				WithoutFiles:  true,
-			})
-			if fetchErr == nil && currentMcpProject != nil && currentMcpProject.GetProjectEnv() != nil {
-				for key, value := range currentMcpProject.GetProjectEnv().AsMap() {
-					projectEnvMap[key] = value
-				}
-			}
-			projectEnvMap["auth_mode"] = "login"
-			projectEnv, convertErr := helperFunc.ConvertMapToStruct(projectEnvMap)
-			if convertErr != nil {
-				return "", fmt.Errorf("convert MCP project env: %w", convertErr)
-			}
-			updateReq.ProjectEnv = projectEnv
-		}
-
-		if _, updateErr := p.service.GoObjectBuilderService().McpProject().UpdateMcpProject(ctx, updateReq); updateErr != nil {
+		}); updateErr != nil {
 			return "", fmt.Errorf("save microfrontend refs on MCP project: %w", updateErr)
 		}
 	}

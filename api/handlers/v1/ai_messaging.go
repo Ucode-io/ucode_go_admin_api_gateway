@@ -1063,18 +1063,9 @@ func buildAPIConfigBlock(baseURL string, projectData *models.ProjectData, plan *
 		loginTableSlugs []string
 	)
 
-	projectType := ""
-	if plan != nil {
-		projectType = plan.ProjectType
-	}
-	authMode := resolveGeneratedAuthMode(projectData, projectType)
 	apiKey := ""
-	ucodeProjectId := ""
-	environmentId := ""
 	if projectData != nil {
 		apiKey = projectData.ApiKey
-		ucodeProjectId = projectData.UcodeProjectId
-		environmentId = projectData.EnvironmentId
 	}
 
 	for _, f := range GetTemplateContext() {
@@ -1089,35 +1080,10 @@ func buildAPIConfigBlock(baseURL string, projectData *models.ProjectData, plan *
 	}
 
 	sb.WriteString(fmt.Sprintf(
-		"\n====================================\nAPI CONFIGURATION FOR FRONTEND\n====================================\n%s: %s\n%s: %s\nVITE_UCODE_AUTH_MODE: %s\nVITE_UCODE_PROJECT_ID: %s\nVITE_UCODE_ENVIRONMENT_ID: %s\n",
-		envBaseURLKey, baseURL, envAPIKeyKey, apiKey, authMode, ucodeProjectId, environmentId,
+		"\n====================================\nAPI CONFIGURATION FOR FRONTEND\n====================================\n%s: %s\n%s: %s\n\nREQUIRED axios headers (BOTH — never omit either):\n  headers: { 'Authorization': 'API-KEY', '%s': import.meta.env.%s }\n\nTables to use:\n",
+		envBaseURLKey, baseURL, envAPIKeyKey, apiKey,
+		envAPIKeyKey, envAPIKeyKey,
 	))
-
-	if authMode == "login" {
-		sb.WriteString(`
-AUTH MODE = login:
-  Public/share runtime MUST use real end-user login and Bearer auth.
-  Login endpoint: POST /v2/login with header Environment-Id: import.meta.env.VITE_UCODE_ENVIRONMENT_ID
-  Login body: { username, password, client_type, project_id: import.meta.env.VITE_UCODE_PROJECT_ID }
-  Token: data.token.access_token from the login response.
-  After login: GET /v2/custom-permission/nav-map with Authorization: Bearer <token>.
-  All /v2/items/* data requests in public runtime: Authorization: Bearer <token>.
-  Do NOT send X-API-KEY for public runtime data requests in login mode.
-  Pre-login client type bootstrap: GET /v2/items/client_type may use the static API-key headers below so LoginPage can pass client_type to /v2/login.
-  Trusted ugen preview exception: if window.__UCODE_PREVIEW_CONTEXT?.trusted is true or a UCODE_PREVIEW_CONTEXT postMessage is received, skip LoginPage and use the static API key headers below for preview data only.
-
-STATIC PREVIEW headers for trusted ugen preview only:
-  headers: { 'Authorization': 'API-KEY', '` + envAPIKeyKey + `': import.meta.env.` + envAPIKeyKey + ` }
-
-`)
-	} else {
-		sb.WriteString(fmt.Sprintf(
-			"\nAUTH MODE = none:\nREQUIRED axios headers (BOTH — never omit either):\n  headers: { 'Authorization': 'API-KEY', '%s': import.meta.env.%s }\n\n",
-			envAPIKeyKey, envAPIKeyKey,
-		))
-	}
-
-	sb.WriteString("Tables to use:\n")
 
 	for _, t := range plan.Tables {
 		if t.IsLoginTable {
