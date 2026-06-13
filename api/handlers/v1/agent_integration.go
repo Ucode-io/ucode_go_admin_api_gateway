@@ -99,15 +99,77 @@ func (p *ChatProcessor) integrateAgentIntoFrontend(ctx context.Context, agent *n
 		return "", nil
 	}
 
-	for _, f := range mergedFiles {
-		emit.Emit(SSEEvent{Type: EvPublish, Icon: "file-code", Message: "Обновляю файл", Value: f.Path})
+	// Build lookup sets to tell updates apart from new files and template injections.
+	existingPathSet := make(map[string]bool, len(existingFiles))
+	for _, f := range existingFiles {
+		existingPathSet[f.FilePath] = true
 	}
+	templatePathSet := make(map[string]bool, len(templateFiles))
+	for _, f := range templateFiles {
+		templatePathSet[f.Path] = true
+	}
+
+	var updateCount, createCount int
+	for _, f := range mergedFiles {
+		if existingPathSet[f.Path] {
+			updateCount++
+		} else {
+			createCount++
+		}
+	}
+
+	// Summary event mirrors the "N изменить · M создать" format from the edit flow.
+	summaryParts := make([]string, 0, 2)
+	if updateCount > 0 {
+		summaryParts = append(summaryParts, fmt.Sprintf("%d изменить", updateCount))
+	}
+	if createCount > 0 {
+		summaryParts = append(summaryParts, fmt.Sprintf("%d создать", createCount))
+	}
+	emit.Emit(SSEEvent{
+		Type:    EvProgress,
+		Icon:    "file-diff",
+		Message: "Применяю изменения в интерфейсе",
+		Value:   strings.Join(summaryParts, " · "),
+		Percent: 84,
+	})
+
+	// Per-file publish events — progressive percent (86→96) and icon by extension,
+	// matching the microfrontend update flow exactly.
+	total := len(mergedFiles)
+	for i, f := range mergedFiles {
+		pct := 86 + (i+1)*10/total
+		if pct > 96 {
+			pct = 96
+		}
+
+		var message string
+		icon := agentFileIcon(f.Path)
+		switch {
+		case templatePathSet[f.Path]:
+			message = "Добавляю клиент агента"
+		case existingPathSet[f.Path]:
+			message = "Обновляю файл"
+		default:
+			message = "Создаю файл"
+			icon = "file-plus"
+		}
+
+		emit.Emit(SSEEvent{
+			Type:    EvPublish,
+			Icon:    icon,
+			Message: message,
+			Value:   f.Path,
+			Percent: pct,
+		})
+	}
+
 	emit.Emit(SSEEvent{
 		Type:    EvPublish,
 		Icon:    "upload-cloud",
-		Message: "Публикую изменения",
-		Value:   fmt.Sprintf("%d файл(ов)", len(mergedFiles)),
-		Percent: 92,
+		Message: "Пушу изменения в GitLab",
+		Value:   fmt.Sprintf("%d файлов", total),
+		Percent: 97,
 	})
 
 	if err := p.pushMicrofrontendChangesChunked(ctx, mergedFiles); err != nil {
@@ -125,18 +187,25 @@ func (p *ChatProcessor) integrateAgentIntoFrontend(ctx context.Context, agent *n
 }
 
 // selectAgentIntegrationFiles picks the existing files the integrator must see in
-// full to do its job: the app shell/routing (so a global chat widget can be mounted
-// everywhere) plus the feature files that work with the agent's own tables (so an
-// action-triggered agent can be wired into the right form/page — e.g. a company
-// create form whose onSubmit should call the agent). Shell files come first; both
-// groups are deduped and individually capped to keep the prompt focused.
+// full to do its job: the data-access helpers (so it reads created/updated records
+// from the correct response envelope), the app shell/routing (so a global chat widget
+// can be mounted everywhere), plus the feature files that work with the agent's own
+// tables (so an action-triggered agent can be wired into the right form/page — e.g. a
+// company create form whose onSubmit should call the agent). Data-layer files come
+// first; all groups are deduped and the shell/feature groups individually capped.
 func selectAgentIntegrationFiles(files []models.GitlabFileChange, perms []*nb.AgentPermission) []string {
+	dataLayer := selectAgentDataLayerFiles(files)
 	shell := selectAgentShellFiles(files)
 	feature := selectAgentFeatureFiles(files, perms)
 
-	seen := make(map[string]bool, len(shell)+len(feature))
-	selected := make([]string, 0, len(shell)+len(feature))
-	for _, path := range append(shell, feature...) {
+	ordered := make([]string, 0, len(dataLayer)+len(shell)+len(feature))
+	ordered = append(ordered, dataLayer...)
+	ordered = append(ordered, shell...)
+	ordered = append(ordered, feature...)
+
+	seen := make(map[string]bool, len(ordered))
+	selected := make([]string, 0, len(ordered))
+	for _, path := range ordered {
 		if seen[path] {
 			continue
 		}
@@ -144,6 +213,34 @@ func selectAgentIntegrationFiles(files []models.GitlabFileChange, perms []*nb.Ag
 		selected = append(selected, path)
 	}
 	return selected
+}
+
+// selectAgentDataLayerFiles finds the project's API/data-access helpers — the hooks
+// that talk to the backend (useApi) and the response unwrappers (apiUtils). The
+// integrator must see these in full: a mutation's result is the RAW response envelope
+// ({ data: { count, response } }), so wiring an action-triggered agent into an
+// onSuccess callback requires unwrapping the created record with extractSingle before
+// reading its guid. Feeding the real source removes any guesswork about the envelope
+// and prevents the agent from being wired in but never actually firing.
+func selectAgentDataLayerFiles(files []models.GitlabFileChange) []string {
+	hints := []string{"lib/apiutils.", "hooks/useapi."}
+
+	matched := make([]string, 0, len(hints))
+	for _, f := range files {
+		lower := strings.ToLower(f.FilePath)
+		if !strings.HasPrefix(lower, "src/") {
+			continue
+		}
+		for _, h := range hints {
+			if strings.Contains(lower, h) {
+				matched = append(matched, f.FilePath)
+				break
+			}
+		}
+	}
+
+	sort.Strings(matched)
+	return matched
 }
 
 // selectAgentShellFiles picks the files most likely to be the app shell (the
@@ -272,6 +369,21 @@ func formatAgentCapabilities(perms []*nb.AgentPermission) string {
 		fmt.Fprintf(&sb, "- %s: %s\n", perm.GetTableSlug(), strings.Join(allowedOps(perm), ", "))
 	}
 	return sb.String()
+}
+
+// agentFileIcon returns the Lucide icon name for a file based on its extension,
+// matching the same palette used in the microfrontend update flow.
+func agentFileIcon(path string) string {
+	switch {
+	case strings.HasSuffix(path, ".css") || strings.HasSuffix(path, ".scss"):
+		return "paintbrush"
+	case strings.HasSuffix(path, ".tsx") || strings.HasSuffix(path, ".jsx"):
+		return "component"
+	case strings.HasSuffix(path, ".ts") || strings.HasSuffix(path, ".js"):
+		return "code-2"
+	default:
+		return "file-code"
+	}
 }
 
 // mergeAgentFiles combines the model's output with the authoritative template

@@ -170,6 +170,14 @@ type runAgentRequest struct {
 	Context map[string]any `json:"context"`
 }
 
+// runAgentResponse is the payload returned by the agent run endpoints. It embeds
+// the AgentRun (so existing fields like output/status/steps stay at the top level)
+// and adds any files the agent produced during the run for the frontend to deliver.
+type runAgentResponse struct {
+	*pbo.AgentRun
+	Files []agentFile `json:"files"`
+}
+
 func (h *HandlerV1) RunAgent(c *gin.Context) {
 	var (
 		request runAgentRequest
@@ -212,13 +220,13 @@ func (h *HandlerV1) RunAgent(c *gin.Context) {
 		return
 	}
 
-	run, err := h.runAgent(c.Request.Context(), service, resourceEnvId, agent, request.Message, request.Context)
+	run, files, err := h.runAgent(c.Request.Context(), service, resourceEnvId, agent, request.Message, request.Context)
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.HandleResponse(c, status_http.OK, run)
+	h.HandleResponse(c, status_http.OK, runAgentResponse{AgentRun: run, Files: files})
 }
 
 // RunAgentPublic is the end-user surface for talking to an agent: it backs the
@@ -268,13 +276,13 @@ func (h *HandlerV1) RunAgentPublic(c *gin.Context) {
 		return
 	}
 
-	run, err := h.runAgent(c.Request.Context(), service, resourceEnvId, agent, request.Message, request.Context)
+	run, files, err := h.runAgent(c.Request.Context(), service, resourceEnvId, agent, request.Message, request.Context)
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.HandleResponse(c, status_http.OK, run)
+	h.HandleResponse(c, status_http.OK, runAgentResponse{AgentRun: run, Files: files})
 }
 
 // ==================== Agent Run Endpoints (audit trail) ====================

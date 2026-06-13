@@ -71,6 +71,8 @@ type ChatProcessor struct {
 	tokenBudgetRemain  int64
 	tokenBudgetSnap    models.TokenBudgetSnapshot
 
+	ucodeMcpProjectId string
+
 	agent ai.Agent
 	emit  ProgressEmitter
 }

@@ -1,8 +1,10 @@
 package v1
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"sort"
 	"strings"
@@ -12,22 +14,73 @@ import (
 	"ucode/ucode_go_api_gateway/api/handlers/ai/anthropic"
 	"ucode/ucode_go_api_gateway/api/handlers/ai/gemini"
 	"ucode/ucode_go_api_gateway/api/handlers/ai/openai"
+	"ucode/ucode_go_api_gateway/genproto/doc_generator_service"
 	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	helperFunc "ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/services"
 
+	"github.com/google/uuid"
+	"github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/spf13/cast"
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
 const (
-	agentRunMaxTokens    = 4096
+	// agentRunMaxTokens is the per-step output budget. It must be large enough for
+	// the agent to emit a complete create_pdf document (a styled HTML proposal/КП
+	// can run many thousands of tokens) in a SINGLE step — at 8192 the model ran
+	// out mid-generation and the run failed before the PDF was ever produced. This
+	// matches the 32000 used by the code-gen/repair paths for the same models.
+	agentRunMaxTokens    = 32000
 	agentStepTimeout     = 120 * time.Second
-	defaultAgentMaxSteps = 8
+	defaultAgentMaxSteps = 12
+
+	// maxAgentTruncationRetries is how many times a single run may recover from a
+	// step that hit the output-token limit. Instead of failing the whole run, we
+	// steer the model to stop narrating and emit only its tool call, then retry.
+	maxAgentTruncationRetries = 3
 
 	agentStatusSucceeded = "succeeded"
 	agentStatusFailed    = "failed"
+
+	// pdfRenderTimeout caps a single create_pdf round-trip to the document
+	// generator (HTML → PDF via headless Chrome), so a stuck renderer cannot
+	// hang the whole agent step.
+	pdfRenderTimeout = 60 * time.Second
+	// agentFilesFolder is the MinIO object-key prefix (within the project's
+	// environment bucket) where agent-generated documents are stored.
+	agentFilesFolder = "agent-files"
+
+	// agentRunTotalTimeout is the overall budget for one agent run. The run is
+	// detached from the caller's request context (so an end-user closing their
+	// browser mid-run cannot cancel the model calls, the agent's server-side
+	// writes, or the run's persistence); this timeout is the safety bound that
+	// keeps a runaway run from living forever on that detached context. The loop
+	// is already bounded by maxSteps × per-step timeout, so this only guards
+	// against a hung downstream call — set well above any realistic run.
+	agentRunTotalTimeout = 15 * time.Minute
+	// agentFinalizeTimeout bounds the final UpdateAgentRun write. It runs on its
+	// own short-lived, cancellation-immune context so the run record is ALWAYS
+	// persisted — even if the run itself hit agentRunTotalTimeout.
+	agentFinalizeTimeout = 20 * time.Second
 )
+
+// agentTruncationRecoveryNote is appended to the system prompt after a step hit the
+// output-token limit. It tells the model the previous reply was cut off and to stop
+// narrating — emit only the tool call (e.g. create_pdf) — so the retry can finish.
+const agentTruncationRecoveryNote = "\n\n## URGENT: your previous reply was cut off — it exceeded the output limit\n" +
+	"Do NOT write out any reasoning, calculations, tables, or explanations in your message text. " +
+	"Compute everything silently. If you need to produce a document, call the create_pdf tool RIGHT NOW with the final, complete HTML and nothing else. " +
+	"If you were performing data changes, call the next tool directly. Keep any natural-language text to a single short sentence."
+
+// agentFile is a document an agent produced during a run (e.g. a generated PDF).
+// It is returned alongside the run so the frontend can let the user download it.
+type agentFile struct {
+	Name        string `json:"name"`
+	URL         string `json:"url"`
+	ContentType string `json:"content_type"`
+}
 
 // newChatModel resolves the concrete provider for an agent's model id.
 func (h *HandlerV1) newChatModel(model string) ai.ChatModel {
@@ -95,6 +148,10 @@ func buildAgentToolset(perms []*nb.AgentPermission) agentToolset {
 	// web_fetch is always available: it lets the agent research up-to-date external
 	// data (e.g. exchange rates) that does not live in the project's own tables.
 	defs = append(defs, webFetchTool())
+
+	// create_pdf is always available: it turns model-authored HTML into a stored,
+	// downloadable PDF so agents can deliver finished documents (proposals, reports).
+	defs = append(defs, createPDFTool())
 
 	return agentToolset{defs: defs, perms: permMap}
 }
@@ -201,13 +258,44 @@ func itemDeleteTool(tables []string) ai.ToolDef {
 	}
 }
 
+func createPDFTool() ai.ToolDef {
+	return ai.ToolDef{
+		Name:        "create_pdf",
+		Description: "Render a finished document into a downloadable PDF and store it. Use this whenever the user needs a polished document to download — a commercial proposal (КП), invoice, report, contract, certificate, etc. You author the document yourself as a single complete, self-contained HTML page and pass it in `html`; it is rendered to PDF exactly as given. Returns the public URL of the generated PDF.",
+		InputSchema: map[string]any{
+			"type": "object",
+			"properties": map[string]any{
+				"title": map[string]any{
+					"type":        "string",
+					"description": "Short human-readable document title, used to name the file (e.g. \"Commercial Proposal - Acme\").",
+				},
+				"html": map[string]any{
+					"type":        "string",
+					"description": "A complete standalone HTML document (<!doctype html><html>…</html>) with ALL styling inline or inside a <style> block — no external CSS, JS or web fonts are loaded. Design it to look professional on A4: sensible margins, clear typography, and tables for any figures.",
+				},
+			},
+			"required": []string{"html"},
+		},
+	}
+}
+
 // ── engine ────────────────────────────────────────────────────────────────────
 
 // runAgent executes one agent invocation: it opens an agent_run audit record,
 // drives the native tool-use loop until the model produces a final answer (or the
 // step budget is exhausted / an error occurs), then finalizes the run. The
-// returned AgentRun carries the terminal status, output, steps and token usage.
-func (h *HandlerV1) runAgent(ctx context.Context, service services.ServiceManagerI, resourceEnvId string, agent *nb.Agent, message string, runContext map[string]any) (*nb.AgentRun, error) {
+// returned AgentRun carries the terminal status, output, steps and token usage;
+// the returned files are any documents the agent generated during the run (e.g.
+// PDFs) for the caller to surface to the end-user.
+func (h *HandlerV1) runAgent(ctx context.Context, service services.ServiceManagerI, resourceEnvId string, agent *nb.Agent, message string, runContext map[string]any) (*nb.AgentRun, []agentFile, error) {
+	// Detach the run from the caller's request context. A run can take a while
+	// (several model round-trips plus PDF rendering); if the end-user's HTTP
+	// connection drops, we still want the agent to finish its server-side work
+	// and persist the run. WithoutCancel ignores the parent's cancellation while
+	// preserving its values (e.g. auth metadata needed by downstream gRPC calls);
+	// the timeout bounds a runaway run.
+	runCtx, cancelRun := context.WithTimeout(context.WithoutCancel(ctx), agentRunTotalTimeout)
+	defer cancelRun()
 
 	inputMap := map[string]any{"message": message}
 	if len(runContext) > 0 {
@@ -215,14 +303,14 @@ func (h *HandlerV1) runAgent(ctx context.Context, service services.ServiceManage
 	}
 	inputStruct, _ := helperFunc.ConvertMapToStruct(inputMap)
 
-	run, err := service.GoObjectBuilderService().Agent().CreateAgentRun(ctx, &nb.CreateAgentRunRequest{
+	run, err := service.GoObjectBuilderService().Agent().CreateAgentRun(runCtx, &nb.CreateAgentRunRequest{
 		ResourceEnvId: resourceEnvId,
 		AgentId:       agent.GetId(),
 		ProjectId:     agent.GetProjectId(),
 		Input:         inputStruct,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("create agent run: %w", err)
+		return nil, nil, fmt.Errorf("create agent run: %w", err)
 	}
 
 	model := h.newChatModel(agent.GetModel())
@@ -243,18 +331,21 @@ func (h *HandlerV1) runAgent(ctx context.Context, service services.ServiceManage
 	messages := []ai.ConversationMessage{{Role: "user", Text: userText}}
 
 	var (
-		steps       []*nb.AgentRunStep
-		totalTokens int32
-		finalText   string
-		lastText    string
-		runErr      error
+		steps             []*nb.AgentRunStep
+		producedFiles     []agentFile
+		totalTokens       int32
+		finalText         string
+		lastText          string
+		runErr            error
+		effectiveSystem   = system
+		truncationRetries int
 	)
 
 	for step := 0; step < maxSteps; step++ {
-		result, callErr := model.Complete(ctx, ai.CompletionRequest{
+		result, callErr := model.Complete(runCtx, ai.CompletionRequest{
 			Model:     agent.GetModel(),
 			MaxTokens: agentRunMaxTokens,
-			System:    system,
+			System:    effectiveSystem,
 			Messages:  messages,
 			Tools:     toolset.defs,
 			Timeout:   agentStepTimeout,
@@ -263,9 +354,22 @@ func (h *HandlerV1) runAgent(ctx context.Context, service services.ServiceManage
 			totalTokens += int32(result.Usage.InputTokens + result.Usage.OutputTokens)
 		}
 		if callErr != nil {
+			// A truncated step (the model hit the output-token limit) is recoverable:
+			// it tried to say or build too much at once. Rather than failing the whole
+			// run, steer it to stop narrating and emit only its tool call, then retry
+			// the step with the SAME conversation. This keeps a verbose model from
+			// killing a run that was one create_pdf call away from finishing.
+			if errors.Is(callErr, ai.ErrMaxTokens) && truncationRetries < maxAgentTruncationRetries {
+				truncationRetries++
+				effectiveSystem = system + agentTruncationRecoveryNote
+				continue
+			}
 			runErr = callErr
 			break
 		}
+		// Recovered: a clean step resets the steering so later steps get the plain prompt.
+		truncationRetries = 0
+		effectiveSystem = system
 		if result.Text != "" {
 			lastText = result.Text
 		}
@@ -283,7 +387,22 @@ func (h *HandlerV1) runAgent(ctx context.Context, service services.ServiceManage
 
 		toolResults := make([]ai.ToolResult, 0, len(result.ToolCalls))
 		for _, call := range result.ToolCalls {
-			content, isErr := h.executeAgentTool(ctx, service, resourceEnvId, agent.GetProjectId(), toolset, call)
+			// create_pdf is dispatched here (not in executeAgentTool) because it is the
+			// only tool that yields an out-of-band artifact, and this loop owns the
+			// collection of produced files.
+			var (
+				content string
+				isErr   bool
+			)
+			if call.Name == "create_pdf" {
+				var file *agentFile
+				content, isErr, file = h.executeCreatePDF(runCtx, service, resourceEnvId, call)
+				if file != nil {
+					producedFiles = append(producedFiles, *file)
+				}
+			} else {
+				content, isErr = h.executeAgentTool(runCtx, service, resourceEnvId, agent.GetProjectId(), toolset, call)
+			}
 			toolResults = append(toolResults, ai.ToolResult{
 				ToolCallID: call.ID,
 				Content:    content,
@@ -311,7 +430,12 @@ func (h *HandlerV1) runAgent(ctx context.Context, service services.ServiceManage
 		status, errMsg = agentStatusFailed, runErr.Error()
 	}
 
-	updated, err := service.GoObjectBuilderService().Agent().UpdateAgentRun(ctx, &nb.UpdateAgentRunRequest{
+	// Persist the run on a fresh, cancellation-immune context so the record is
+	// always written — even if the run hit its own deadline above.
+	finalizeCtx, cancelFinalize := context.WithTimeout(context.WithoutCancel(ctx), agentFinalizeTimeout)
+	defer cancelFinalize()
+
+	updated, err := service.GoObjectBuilderService().Agent().UpdateAgentRun(finalizeCtx, &nb.UpdateAgentRunRequest{
 		ResourceEnvId: resourceEnvId,
 		Id:            run.GetId(),
 		Status:        status,
@@ -321,10 +445,10 @@ func (h *HandlerV1) runAgent(ctx context.Context, service services.ServiceManage
 		Error:         errMsg,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("finalize agent run: %w", err)
+		return nil, nil, fmt.Errorf("finalize agent run: %w", err)
 	}
 
-	return updated, nil
+	return updated, producedFiles, nil
 }
 
 // executeAgentTool runs a single tool call against the project's items, enforcing
@@ -497,6 +621,117 @@ func (h *HandlerV1) lookupItem(ctx context.Context, service services.ServiceMana
 	return items[0], true, nil
 }
 
+// executeCreatePDF renders the model-authored HTML into a PDF via the document
+// generator service, stores it in the project's environment bucket, and returns a
+// JSON tool result for the model plus the produced file for the caller to surface.
+func (h *HandlerV1) executeCreatePDF(ctx context.Context, service services.ServiceManagerI, resourceEnvId string, call ai.ToolCall) (string, bool, *agentFile) {
+
+	html := strings.TrimSpace(cast.ToString(call.Input["html"]))
+	if html == "" {
+		return "error: html is required and must be a complete HTML document", true, nil
+	}
+
+	renderCtx, cancel := context.WithTimeout(ctx, pdfRenderTimeout)
+	defer cancel()
+
+	resp, err := service.DocGeneratorService().DocumentGenerator().ConvertHtml(renderCtx, &doc_generator_service.ConvertHtmlRequest{
+		Data:         []byte(html),
+		InputFormat:  "HTML",
+		OutputFormat: "PDF",
+	})
+	if err != nil {
+		return "error: pdf rendering failed: " + err.Error(), true, nil
+	}
+	if !resp.GetSuccess() {
+		msg := resp.GetErrorMessage()
+		if msg == "" {
+			msg = "document generator returned no document"
+		}
+		return "error: pdf rendering failed: " + msg, true, nil
+	}
+	pdf := resp.GetData()
+	if len(pdf) == 0 {
+		return "error: pdf rendering returned an empty document", true, nil
+	}
+
+	fileName := pdfFileName(cast.ToString(call.Input["title"]))
+	fileURL, err := h.uploadAgentPDF(ctx, resourceEnvId, fileName, pdf)
+	if err != nil {
+		return "error: storing the generated pdf failed: " + err.Error(), true, nil
+	}
+
+	file := &agentFile{Name: fileName, URL: fileURL, ContentType: "application/pdf"}
+	return marshalToolResult(map[string]any{
+		"status": "created",
+		"name":   fileName,
+		"url":    fileURL,
+	}), false, file
+}
+
+// uploadAgentPDF stores PDF bytes in the project's environment bucket under the
+// agent-files prefix and returns the public URL.
+func (h *HandlerV1) uploadAgentPDF(ctx context.Context, resourceEnvId, fileName string, data []byte) (string, error) {
+
+	minioClient, err := minio.New(h.baseConf.MinioEndpoint, &minio.Options{
+		Creds:  credentials.NewStaticV4(h.baseConf.MinioAccessKeyID, h.baseConf.MinioSecretAccessKey, ""),
+		Secure: h.baseConf.MinioProtocol,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	objectPath := agentFilesFolder + "/" + fileName
+	if _, err = minioClient.PutObject(
+		ctx,
+		resourceEnvId,
+		objectPath,
+		bytes.NewReader(data),
+		int64(len(data)),
+		minio.PutObjectOptions{ContentType: "application/pdf"},
+	); err != nil {
+		return "", err
+	}
+
+	return "https://" + h.baseConf.MinioEndpoint + "/" + resourceEnvId + "/" + objectPath, nil
+}
+
+// pdfFileName builds a unique, URL-safe PDF file name from an optional title.
+func pdfFileName(title string) string {
+	slug := slugifyForFile(title)
+	if slug == "" {
+		slug = "document"
+	}
+	return uuid.NewString() + "_" + slug + ".pdf"
+}
+
+// slugifyForFile reduces an arbitrary (possibly non-ASCII) title to a short,
+// lowercase, URL-safe slug. Non-ASCII titles collapse to empty, in which case the
+// caller falls back to a default name.
+func slugifyForFile(s string) string {
+	s = strings.ToLower(strings.TrimSpace(s))
+
+	var b strings.Builder
+	lastDash := false
+	for _, r := range s {
+		switch {
+		case (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9'):
+			b.WriteRune(r)
+			lastDash = false
+		case r == ' ' || r == '-' || r == '_':
+			if !lastDash && b.Len() > 0 {
+				b.WriteByte('-')
+				lastDash = true
+			}
+		}
+	}
+
+	out := strings.Trim(b.String(), "-")
+	if len(out) > 60 {
+		out = strings.Trim(out[:60], "-")
+	}
+	return out
+}
+
 // ── prompt + small helpers ────────────────────────────────────────────────────
 
 func buildAgentSystemPrompt(agent *nb.Agent, toolset agentToolset) string {
@@ -515,14 +750,22 @@ func buildAgentSystemPrompt(agent *nb.Agent, toolset agentToolset) string {
 		}
 		sort.Strings(slugs)
 		for _, slug := range slugs {
-			b.WriteString(fmt.Sprintf("- %s: %s\n", slug, strings.Join(allowedOps(toolset.perms[slug]), ", ")))
+			fmt.Fprintf(&b, "- %s: %s\n", slug, strings.Join(allowedOps(toolset.perms[slug]), ", "))
 		}
 
-		b.WriteString("\nWhen you have fully addressed the request, reply with a final natural-language message and stop calling tools.")
+		b.WriteString("\nWhen the request is to create, update, or delete data, perform that change yourself with these tools rather than describing it or handing a value back — once you call the tool the change is already saved, so never ask the caller to save anything and never hedge about whether it was applied. When a value you produce belongs in a record field, write the clean final value itself (e.g. a concise description), not a report about it.")
+		b.WriteString("\nWhen you have fully addressed the request, reply with a final natural-language message and stop calling tools. Keep that reply brief and to the point — a short confirmation of what you did, with no unnecessary markdown tables, headings, or disclaimers.")
 	}
 
 	b.WriteString("\n\n## External data\n")
 	b.WriteString("Use the web_fetch tool to fetch public web URLs (e.g. JSON APIs or pages) when you need up-to-date external information such as exchange rates, prices, or reference data that is not stored in the application. For anything that lives in the application's own database, use the data tools above instead.")
+
+	b.WriteString("\n\n## Producing documents\n")
+	b.WriteString("When the user needs a finished document to download — a commercial proposal (КП), invoice, report, contract, certificate and the like — produce it yourself with the create_pdf tool. ")
+	b.WriteString("You write the whole document as ONE complete, self-contained HTML page (all styling inline or in a <style> block; no external CSS, JS or web fonts) and pass it as `html`; it is rendered to PDF exactly as given and stored, and create_pdf returns its download URL. ")
+	b.WriteString("Make it genuinely professional and on-topic: a clean letterhead/title, well-structured sections, and proper tables for any line items or figures, laid out for A4. You are responsible for the wording and for any calculations or totals the document needs — compute them yourself and present the final values; do not leave placeholders. ")
+	b.WriteString("Do NOT narrate your reasoning or spell out the calculations step by step in your reply text — work them out silently and put the final numbers straight into the document's HTML. Writing out a long calculation walkthrough wastes your output budget and can cut you off before you emit the document; go directly to the create_pdf call with the finished HTML. ")
+	b.WriteString("After create_pdf succeeds, just briefly confirm the document is ready — the application delivers the download to the user, so never paste raw HTML or the full document text into your reply.")
 
 	return b.String()
 }

@@ -22,25 +22,32 @@ WHAT ALREADY EXISTS (DO NOT RECREATE)
 The networking layer is already provided as project files. They are CORRECT and AUTHORITATIVE — never re-emit, modify, or duplicate them:
 
 1. src/lib/agentClient.ts
+     export interface AgentFile { name: string; url: string; content_type: string }
      export async function runAgent(
        agentId: string,
        message: string,
        context?: Record<string, unknown>,
-     ): Promise<{ reply: string; run: AgentRun }>
-   Sends one message to the agent and resolves with its text reply. Throws on failure.
+     ): Promise<{ reply: string; run: AgentRun; files: AgentFile[] }>
+     export function downloadAgentFile(file: AgentFile): void
+   runAgent sends one message to the agent and resolves with its text reply AND any
+   files the agent generated server-side (e.g. a PDF it produced with its create_pdf
+   tool). 'files' is always an array (empty when none). downloadAgentFile triggers a
+   browser download/open of one of those files. Throws on failure.
 
 2. src/hooks/useAgent.ts
      export function useAgent(
        agentId: string,
-       options?: { context?: Record<string, unknown> },
+       options?: { context?: Record<string, unknown>; autoDownloadFiles?: boolean },
      ): {
-       messages: { id: string; role: 'user' | 'assistant'; content: string }[];
+       messages: { id: string; role: 'user' | 'assistant'; content: string; files?: AgentFile[] }[];
        isLoading: boolean;
        error: string | null;
        send: (text: string) => Promise<void>;
        reset: () => void;
      }
-   A ready-made chat session hook. Prefer this for any conversational UI.
+   A ready-made chat session hook. Prefer this for any conversational UI. When an
+   assistant reply carries generated files they appear on that message's 'files'
+   array; pass autoDownloadFiles: true to also download them automatically.
 
 Import these with the project's '@/' alias. Do NOT call axios or fetch directly — everything goes through these two files.
 
@@ -49,12 +56,39 @@ YOUR JOB
 ====================================
 1. Build the UI the builder asked for and connect it to the agent:
    - For a chat experience (the common case): a polished, on-brand chat widget — typically a floating launcher button that opens a chat panel — built on useAgent(). Render the transcript, a text input, a send button, loading state, and error state. Auto-scroll to the latest message.
-   - For an action-triggered experience (e.g. "after saving, ask the agent to ..."): call runAgent() at the right moment and surface the reply inline. Pass the relevant record/state as the context argument.
+   - For an action-triggered experience (e.g. "after a deal is created, enrich it"): call runAgent() at the EXACT moment the event fires — almost always inside the create/update mutation's onSuccess callback in the page/hook that owns it. Pass the affected record (its id + the relevant fields) as the context argument, and word the message as the TASK to perform ("A deal was just created, enrich it: …"), NOT as "return some text for us to save". The AGENT does the work itself: it has its own database tools and, when granted write access to the target table, it updates the record DIRECTLY on the server. So your frontend has only two jobs: (a) fire runAgent with the record as context, and (b) invalidate/refetch the relevant query so the agent's server-side change appears. Do NOT capture the agent's reply text and persist it with a second mutation — that round-trip is wrong: it duplicates the write, and the reply is a human-facing confirmation, not a value destined for a database field. Only fall back to writing the reply yourself if the agent was NOT granted write access to that table. This is an EDIT to that existing page/hook, NOT a standalone component mounted in the shell: a component that the event never reaches will never call the agent, so runAgent stays dead code.
    - Match what the builder actually requested. If they only asked for a chat assistant, build only that.
 
-2. MOUNT it so end-users can reach it. A floating widget belongs in the app shell (the layout/root that wraps every page) so it appears everywhere — find that file in the provided file graph and render the widget there. A page-specific feature belongs on the relevant page.
+2. MOUNT it so end-users can reach it. A floating widget belongs in the app shell (the layout/root that wraps every page) so it appears everywhere — find that file in the provided file graph and render the widget there. A page-specific feature belongs on the relevant page. An action-triggered agent is "mounted" by wiring runAgent() directly into the event handler that triggers it — there is nothing to mount in the shell.
 
 3. HARDCODE the agent id. You are given the exact agent_id — define it as a const in the widget (e.g. const AGENT_ID = "..."). Never read it from user input or env.
+
+====================================
+DELIVERING GENERATED FILES (PDFs, etc.)
+====================================
+Some agents PRODUCE a downloadable document (e.g. a commercial proposal / КП, invoice or report rendered to PDF on the server). When they do, runAgent's resolved 'files' array is non-empty (each item: { name, url, content_type }). Deliver those files to the user — never drop them:
+- Chat UI (useAgent): every assistant message may carry message.files. Render a clear download affordance for each (e.g. a "Download PDF" button/link pointing at file.url, target="_blank"). If the agent's whole job is to hand the user a finished document, pass useAgent(AGENT_ID, { autoDownloadFiles: true }) so the file also downloads the moment it is ready.
+- Action-triggered (runAgent directly): after the call resolves, deliver the document immediately — const { files } = await runAgent(...); files.forEach(downloadAgentFile); — so the browser downloads/opens it right after the triggering event. Do this in addition to refetching any record the agent changed.
+- If 'files' is empty, there is nothing to deliver — just show the reply. Never fabricate a download link; only ever use the url values returned in 'files'.
+
+====================================
+DATA LAYER — READING RECORDS (CRITICAL)
+====================================
+This app talks to the backend through '@/hooks/useApi' (useApiQuery, useApiMutation) and unwraps every response with '@/lib/apiUtils' (extractList, extractSingle, extractCount). BOTH hooks resolve to the RAW response envelope. The shape is NOT uniform across endpoints: list/get wrap records as { data: { data: { count, response } } }, while create/update return the record more directly as { data: { data: <record> } } with no count/response wrapper. The record(s) are nested inside — NEVER read fields (.guid, .name, ...) off the envelope directly, and NEVER hand-roll a path like result.data.data.response (it is wrong for create/update). ALWAYS go through extractSingle / extractList — they normalize BOTH shapes for you.
+
+- From query data:   const deal = extractSingle<Deal>(data);   const deals = extractList<Deal>(data);
+- A mutation result is the SAME envelope. Inside useApiMutation({ options: { onSuccess } }), the FIRST argument is the envelope, NOT the record:
+    options: {
+      onSuccess: (result) => {
+        const deal = extractSingle<Deal>(result);   // ← unwrap FIRST
+        if (deal?.guid) {
+          // now you have the real id + fields — safe to call runAgent / pass as context
+        }
+      },
+    }
+  ❌ onSuccess: (deal) => { if (deal.guid) runAgent(...) }   // deal.guid is ALWAYS undefined → the guard silently fails → the agent NEVER fires.
+
+When you wire an action-triggered agent into a create/update flow, you MUST unwrap the created/updated record with extractSingle BEFORE reading its guid or passing it to runAgent. Reading a field straight off the raw mutation result is the #1 reason an agent gets wired in but never actually runs.
 
 ====================================
 DESIGN & QUALITY RULES
@@ -114,7 +148,7 @@ func BuildAgentIntegrationMessage(view models.AgentIntegrationView) string {
 	sb.WriteString("\n")
 
 	sb.WriteString("\n====================================\n")
-	sb.WriteString("RELEVANT CURRENT FILES (full content — the app shell to mount a chat widget, plus the feature pages/forms to wire an action-triggered agent into)\n")
+	sb.WriteString("RELEVANT CURRENT FILES (full content — the data-access helpers (useApi/apiUtils) that show the exact response envelope, the app shell to mount a chat widget, plus the feature pages/forms to wire an action-triggered agent into)\n")
 	sb.WriteString("====================================\n")
 	sb.WriteString(view.FilesContext)
 	sb.WriteString("\n")
