@@ -90,6 +90,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		//table
 		v1.POST("/table", h.V1.CreateTable)
 		v1.GET("/table", h.V1.GetAllTables)
+		v1.GET("/table-list", h.V1.GetAllTablesWithAdditional)
 		v1.GET("/table/:table_id", h.V1.GetTableByID)
 		v1.POST("/table-details/:collection", h.V1.GetTableDetails)
 		v1.PUT("/table", h.V1.UpdateTable)
