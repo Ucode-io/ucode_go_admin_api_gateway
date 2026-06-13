@@ -81,21 +81,20 @@ export async function runAgent(
 }
 
 /**
- * downloadAgentFile triggers a browser download (or opens, for cross-origin storage)
- * of a file the agent generated. Call it after runAgent resolves to deliver a
- * generated document to the user.
+ * openAgentFile opens a file the agent generated in a new browser tab.
+ * The browser's native PDF viewer provides its own Save/Download button —
+ * no cross-origin download tricks needed. The URL is also persisted in the
+ * database record so the user can always retrieve it later.
+ *
+ * @deprecated alias downloadAgentFile kept for backwards compatibility
  */
-export function downloadAgentFile(file: AgentFile): void {
-  if (typeof document === 'undefined' || !file || !file.url) return;
-  const a = document.createElement('a');
-  a.href = file.url;
-  a.download = file.name || '';
-  a.target = '_blank';
-  a.rel = 'noopener';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+export function openAgentFile(file: AgentFile): void {
+  if (!file?.url) return;
+  window.open(file.url, '_blank', 'noopener,noreferrer');
 }
+
+/** @alias openAgentFile */
+export const downloadAgentFile = openAgentFile;
 
 export default runAgent;
 `
