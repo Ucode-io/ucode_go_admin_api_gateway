@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"regexp"
+	"sort"
 	"strings"
 	"sync"
 
@@ -1606,6 +1607,57 @@ func (p *ChatProcessor) repairBrokenFiles(ctx context.Context, files []models.Pr
 	return repaired
 }
 
+// dependentExports returns the sorted set of export names that OTHER files in the
+// project import from targetPath. A repair of targetPath must never drop any of
+// these names — doing so dangles the importer (e.g. Header importing
+// { SidebarContent } from a Sidebar repaired into a single component). "default"
+// in the result means some file does `import X from './target'` and relies on the
+// default export. Reuses the same import-resolution helpers as the export registry.
+func dependentExports(targetPath string, allFiles []models.ProjectFile) []string {
+	expected := map[string]bool{}
+	for _, other := range allFiles {
+		if other.Path == targetPath {
+			continue
+		}
+		for _, imp := range parseImports(other.Path, other.Content) {
+			if isNPMImport(imp.Path) {
+				continue
+			}
+			resolved := resolveImportPath(other.Path, imp.Path)
+			if resolved == "" {
+				continue
+			}
+			match := resolved == targetPath
+			if !match {
+				for _, alt := range resolveAlternatives(resolved) {
+					if alt == targetPath {
+						match = true
+						break
+					}
+				}
+			}
+			if !match {
+				continue
+			}
+			for _, n := range imp.Names {
+				n = strings.TrimSpace(n)
+				if n != "" && n != "type" {
+					expected[n] = true
+				}
+			}
+			if imp.Default != "" {
+				expected["default"] = true
+			}
+		}
+	}
+	names := make([]string, 0, len(expected))
+	for n := range expected {
+		names = append(names, n)
+	}
+	sort.Strings(names)
+	return names
+}
+
 // repairSingleFile sends one broken file to Haiku and returns the fixed version.
 // allFiles + manifest are used to enrich the prompt with App.tsx context, manifest
 // entry, and expected import/export pairs — so repair can fix lazy/named mismatches
@@ -1663,6 +1715,14 @@ func (p *ChatProcessor) repairSingleFile(
 		}
 	}
 
+	// Reverse-dependency contract: other files in the project import THIS file and
+	// rely on the names they import. A repair must NEVER drop a depended-on export —
+	// doing so dangles the importer (root cause of the Header→Sidebar "No matching
+	// export SidebarContent" build break). Tell the model to keep every such export.
+	if dependents := dependentExports(f.Path, allFiles); len(dependents) > 0 {
+		fmt.Fprintf(&sb, "\nOTHER FILES IMPORT THIS FILE AND DEPEND ON THESE EXPORTS — you MUST keep exporting ALL of them (do NOT remove or rename them); only ADD the requested fix: [%s]\n", strings.Join(dependents, ", "))
+	}
+
 	// App.tsx reference — most import errors trace back to a wrong lazy(m.X) in App.tsx.
 	// We attach it so the agent sees the contract it must satisfy.
 	if f.Path != "src/App.tsx" {
@@ -1695,7 +1755,7 @@ func (p *ChatProcessor) repairSingleFile(
 	sb.WriteString("  - For '<SelectItem value=\"\">' errors: Radix SelectItem values cannot be empty strings. Replace empty option values with non-empty sentinel strings such as 'all', 'none', or 'unassigned'. Update state/filter logic so the sentinel means no filter / empty relation, but NEVER render value=\"\" on SelectItem.\n")
 	sb.WriteString("  - For 'admin UI quality' errors: perform a focused visual/product polish pass on this file. Preserve every API endpoint, hook, mutation, entity field, JSON extraction, route, and generated type. Improve layout density, hierarchy, cards, filters, status chips, detail drawer/dialog, states, and domain-specific widgets only.\n")
 	sb.WriteString("  - For 'admin auth runtime' errors in App.tsx: import LoginPage from '@/components/auth/LoginPage' and ProtectedRoute from '@/components/auth/ProtectedRoute'; add public route path=\"/login\"; wrap all private page/layout routes in <ProtectedRoute>...</ProtectedRoute>.\n")
-	sb.WriteString("  - For 'admin auth runtime' errors in Sidebar.tsx: import { useUcodePermissions, canRead } from '@/lib/permissions'; call const perms = useUcodePermissions(); derive route = item.path || item.href || item.to || '/'; render filtered items only; hide empty groups.\n")
+	sb.WriteString("  - For 'admin auth runtime' errors in Sidebar.tsx: import { useUcodePermissions, canRead } from '@/lib/permissions'; call const perms = useUcodePermissions(); derive route = item.path || item.href || item.to || '/'; render filtered items only; hide empty groups. PRESERVE every existing `export` in this file (including any subcomponents such as SidebarContent that other files import) — only ADD the permission-filtering logic; never remove or rename exports.\n")
 	sb.WriteString("  - For 'admin auth runtime' API-key errors: remove manual Authorization: 'API-KEY' and X-API-KEY headers from feature data files. Use @/hooks/useApi or @/config/axios; the template axios interceptor chooses Bearer vs trusted-preview API key.\n")
 	sb.WriteString("  - For 'word with apostrophe used as unquoted JS expression' errors: the file contains Uzbek/non-ASCII text like Ko'rildi, Ko'rib chiqilmoqda, Og'zaki used directly as JavaScript identifiers without string quotes. This crashes esbuild. Find EVERY such word in arrays, object property values, variable assignments, JSX attribute values — wrap each one in double quotes. Example: { label: Ko'rildi } → { label: \"Ko'rildi\" }, [Ko'rib] → [\"Ko'rib\"]. JSX text nodes are fine: <Badge>Ko'rildi</Badge> does NOT need change, only JS expression contexts.\n")
 	sb.WriteString("  - For 'webapp UI' errors: this is a MOBILE APP (responsive web). Fix toward a phone layout — a centered max-w-md min-h-[100dvh] frame, a fixed bottom tab bar (NOT a desktop side rail) with a SOLID opaque bg-background (no /opacity, no transparent, no blur-only), and a compact sticky in-flow Header with a SOLID opaque background plus pt-[max(env(safe-area-inset-top),3rem)] (never absolute/fixed/transparent over the hero). Use single-column stacked cards/list rows (NOT data tables or KPI dashboards), bottom-sheet/detail-route for item details, and lucide icons rendered as <Icon/> components (never icon-name strings). EVERY button/tab/tile/row/FAB must be wired (onClick navigate via useNavigate/NavLink, or open a Sheet via useState, or fire a useApiMutation) — no dead buttons. Render real API data (useApiQuery + extractList), not hardcoded values. Preserve all APIs, hooks, fields, routes, and types.\n")
