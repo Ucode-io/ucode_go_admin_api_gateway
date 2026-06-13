@@ -15,7 +15,7 @@ import (
 // agent from the builder's natural-language description, validates the requested
 // permissions against the real project schema, persists the agent, and returns a
 // builder-facing confirmation.
-func (p *ChatProcessor) runCreateAgent(ctx context.Context, clarified string, chatHistory []models.ChatMessage) (*models.ParsedClaudeResponse, error) {
+func (p *ChatProcessor) runCreateAgent(ctx context.Context, clarified string, chatHistory []models.ChatMessage, attachmentURLs []string) (*models.ParsedClaudeResponse, error) {
 	emit := p.emitter()
 
 	resourceEnvId, err := p.resolveBuilderResourceID(ctx)
@@ -33,11 +33,21 @@ func (p *ChatProcessor) runCreateAgent(ctx context.Context, clarified string, ch
 		}, nil
 	}
 
+	// The builder may attach example/template documents (xlsx/pptx/docx) on the same
+	// URL channel as images. Extract their text so the model can bake that exact
+	// format into the agent it designs (e.g. the layout of a sample КП).
+	var referenceDocs string
+	if len(attachmentURLs) > 0 {
+		emit.Emit(SSEEvent{Type: EvProgress, Icon: "file-text", Message: "Изучаю прикреплённые документы...", Percent: 3})
+		referenceDocs = p.extractReferenceDocsText(ctx, attachmentURLs)
+	}
+
 	emit.Emit(SSEEvent{Type: EvProgress, Icon: "bot", Message: "Проектирую агента...", Percent: 5})
 	spec, err := p.agent.BuildAgentSpec(ctx, models.AgentSpecInput{
-		Description: clarified,
-		SchemaText:  formatSchemaForSQL(schema),
-		History:     chatHistory,
+		Description:   clarified,
+		SchemaText:    formatSchemaForSQL(schema),
+		History:       chatHistory,
+		ReferenceDocs: referenceDocs,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("build agent spec: %w", err)

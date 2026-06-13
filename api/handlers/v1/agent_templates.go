@@ -48,15 +48,23 @@ export interface AgentRun {
   error: string;
 }
 
+/** A document the agent generated during the run (e.g. a PDF) for the user to download. */
+export interface AgentFile {
+  name: string;
+  url: string;
+  content_type: string;
+}
+
 export interface RunAgentResult {
   reply: string;
   run: AgentRun;
+  files: AgentFile[];
 }
 
 /**
  * runAgent sends a single message to a server-side AI agent and resolves with its
- * reply. Pass optional structured context (e.g. the record the user is viewing) so
- * the agent can ground its answer.
+ * reply plus any files it generated. Pass optional structured context (e.g. the
+ * record the user is viewing) so the agent can ground its answer.
  */
 export async function runAgent(
   agentId: string,
@@ -64,28 +72,50 @@ export async function runAgent(
   context?: Record<string, unknown>,
 ): Promise<RunAgentResult> {
   const res = await apiClient.post('/v2/agents/' + agentId + '/run', { message, context });
-  const run: AgentRun = res?.data?.data ?? ({} as AgentRun);
-  if (run.status === 'failed') {
-    throw new Error(run.error || 'Agent run failed');
+  const payload = (res?.data?.data ?? {}) as AgentRun & { files?: AgentFile[] };
+  if (payload.status === 'failed') {
+    throw new Error(payload.error || 'Agent run failed');
   }
-  return { reply: run.output ?? '', run };
+  const files = Array.isArray(payload.files) ? payload.files : [];
+  return { reply: payload.output ?? '', run: payload as AgentRun, files };
+}
+
+/**
+ * downloadAgentFile triggers a browser download (or opens, for cross-origin storage)
+ * of a file the agent generated. Call it after runAgent resolves to deliver a
+ * generated document to the user.
+ */
+export function downloadAgentFile(file: AgentFile): void {
+  if (typeof document === 'undefined' || !file || !file.url) return;
+  const a = document.createElement('a');
+  a.href = file.url;
+  a.download = file.name || '';
+  a.target = '_blank';
+  a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 }
 
 export default runAgent;
 `
 
 const useAgentTemplate = `import { useCallback, useRef, useState } from 'react';
-import { runAgent } from '@/lib/agentClient';
+import { runAgent, downloadAgentFile, type AgentFile } from '@/lib/agentClient';
 
 export interface AgentMessage {
   id: string;
   role: 'user' | 'assistant';
   content: string;
+  /** Files the agent generated for this reply (e.g. a PDF). Render a download link for each. */
+  files?: AgentFile[];
 }
 
 export interface UseAgentOptions {
   /** Optional structured context sent with every message (e.g. the current record). */
   context?: Record<string, unknown>;
+  /** When true, generated files are also downloaded automatically as they arrive. */
+  autoDownloadFiles?: boolean;
 }
 
 export interface UseAgentResult {
@@ -111,6 +141,8 @@ export function useAgent(agentId: string, options: UseAgentOptions = {}): UseAge
 
   const contextRef = useRef(options.context);
   contextRef.current = options.context;
+  const autoDownloadRef = useRef(options.autoDownloadFiles);
+  autoDownloadRef.current = options.autoDownloadFiles;
 
   const send = useCallback(
     async (text: string) => {
@@ -122,8 +154,13 @@ export function useAgent(agentId: string, options: UseAgentOptions = {}): UseAge
       setMessages((prev) => [...prev, { id: nextId(), role: 'user', content: trimmed }]);
 
       try {
-        const { reply } = await runAgent(agentId, trimmed, contextRef.current);
-        setMessages((prev) => [...prev, { id: nextId(), role: 'assistant', content: reply }]);
+        const { reply, files } = await runAgent(agentId, trimmed, contextRef.current);
+        const assistant: AgentMessage = { id: nextId(), role: 'assistant', content: reply };
+        if (files.length > 0) {
+          assistant.files = files;
+          if (autoDownloadRef.current) files.forEach(downloadAgentFile);
+        }
+        setMessages((prev) => [...prev, assistant]);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Something went wrong');
       } finally {

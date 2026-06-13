@@ -112,7 +112,7 @@ func (p *ChatProcessor) routeAndProcess(ctx context.Context, req models.NewMessa
 			clarified = req.Content
 			log.Printf("[ROUTER] create_agent: clarified was empty, using raw content")
 		}
-		return p.runCreateAgent(ctx, clarified, chatHistory)
+		return p.runCreateAgent(ctx, clarified, chatHistory, req.Images)
 	}
 
 	return &models.ParsedClaudeResponse{Description: routeResult.Reply}, nil

@@ -312,7 +312,7 @@ func (a *OpenAIAgent) DatabaseQuery(ctx context.Context, in models.DatabaseQuery
 }
 
 func (a *OpenAIAgent) BuildAgentSpec(ctx context.Context, in models.AgentSpecInput) (*models.AgentSpec, error) {
-	content := chat_prompts.BuildAgentBuilderMessage(in.Description, in.SchemaText)
+	content := chat_prompts.BuildAgentBuilderMessage(in.Description, in.SchemaText, in.ReferenceDocs)
 	messages := buildOpenAIMessages(in.History, []contentPart{{Type: "text", Text: content}})
 
 	cfg := a.conf.OpenAIAgents.AgentBuilder

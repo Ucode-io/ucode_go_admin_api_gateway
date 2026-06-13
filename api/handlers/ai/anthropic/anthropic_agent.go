@@ -311,7 +311,7 @@ func (a *AnthropicAgent) DatabaseQuery(_ context.Context, in models.DatabaseQuer
 }
 
 func (a *AnthropicAgent) BuildAgentSpec(_ context.Context, in models.AgentSpecInput) (*models.AgentSpec, error) {
-	content := chat_prompts.BuildAgentBuilderMessage(in.Description, in.SchemaText)
+	content := chat_prompts.BuildAgentBuilderMessage(in.Description, in.SchemaText, in.ReferenceDocs)
 	messages := buildAgentMessages(in.History, []models.ContentBlock{{Type: "text", Text: content}})
 
 	raw, usage, _, err := a.callTool(a.conf.Agents.AgentBuilder, chat_prompts.PromptAgentBuilder, messages, ToolBuildAgentSpec)
