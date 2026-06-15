@@ -68,6 +68,8 @@ func (a *OpenAIAgent) ArchitectProject(ctx context.Context, in models.ArchitectI
 	if err = json.Unmarshal(raw, &plan); err != nil {
 		return nil, fmt.Errorf("architect: decode: %w", err)
 	}
+	models.ApplyProjectTypeKeywordOverride(&plan, in.Clarified)
+	models.ApplyMobileCapabilityKeywordOverride(&plan, in.Clarified)
 	return &plan, nil
 }
 
@@ -93,6 +95,8 @@ func (a *OpenAIAgent) GenerateManifest(ctx context.Context, in models.ManifestIn
 	systemPrompt := chat_prompts.PromptManifestGenerator
 	if in.Plan.ProjectType == "web" {
 		systemPrompt = chat_prompts.PromptWebsiteManifestGenerator
+	} else if in.Plan.ProjectType == "webapp" || in.Plan.ProjectType == "mobile" {
+		systemPrompt = chat_prompts.PromptWebAppManifestGenerator
 	}
 
 	messages := buildOpenAIMessages(in.History, []contentPart{{Type: "text", Text: sb.String()}})
@@ -308,7 +312,7 @@ func (a *OpenAIAgent) DatabaseQuery(ctx context.Context, in models.DatabaseQuery
 }
 
 func (a *OpenAIAgent) BuildAgentSpec(ctx context.Context, in models.AgentSpecInput) (*models.AgentSpec, error) {
-	content := chat_prompts.BuildAgentBuilderMessage(in.Description, in.SchemaText)
+	content := chat_prompts.BuildAgentBuilderMessage(in.Description, in.SchemaText, in.ReferenceDocs)
 	messages := buildOpenAIMessages(in.History, []contentPart{{Type: "text", Text: content}})
 
 	cfg := a.conf.OpenAIAgents.AgentBuilder

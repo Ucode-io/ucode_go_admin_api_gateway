@@ -26,14 +26,17 @@ func enrichMessages(msgs []*pbo.Message) []models.EnrichedMessage {
 	result := make([]models.EnrichedMessage, 0, len(msgs))
 	for _, msg := range msgs {
 		em := models.EnrichedMessage{
-			ID:         msg.GetId(),
-			ChatID:     msg.GetChatId(),
-			Role:       msg.GetRole(),
-			Content:    msg.GetContent(),
-			Images:     msg.GetImages(),
-			HasFiles:   msg.GetHasFiles(),
-			TokensUsed: msg.GetTokensUsed(),
-			CreatedAt:  msg.GetCreatedAt(),
+			ID:                  msg.GetId(),
+			ChatID:              msg.GetChatId(),
+			Role:                msg.GetRole(),
+			Content:             msg.GetContent(),
+			Images:              msg.GetImages(),
+			HasFiles:            msg.GetHasFiles(),
+			TokensUsed:          msg.GetTokensUsed(),
+			CreatedAt:           msg.GetCreatedAt(),
+			LikeCount:           msg.GetLikeCount(),
+			DislikeCount:        msg.GetDislikeCount(),
+			CurrentUserReaction: aiChatMessageReactionTypeToResponse(msg.GetCurrentUserReaction()),
 		}
 		content := msg.GetContent()
 		if strings.HasPrefix(content, "[DIAGRAMS_GENERATED] ") {
@@ -123,6 +126,87 @@ func (h *HandlerV1) getAiChatServices(c *gin.Context) (services.ServiceManagerI,
 	}
 
 	return service, resource.ResourceEnvironmentId, nil
+}
+
+type setAiChatMessageReactionRequest struct {
+	ReactionType string `json:"reaction_type" binding:"required"`
+}
+
+type aiChatMessageReactionResponse struct {
+	Id           string `json:"id"`
+	MessageId    string `json:"message_id"`
+	UserId       string `json:"user_id"`
+	ReactionType string `json:"reaction_type"`
+	CreatedAt    string `json:"created_at"`
+	UpdatedAt    string `json:"updated_at"`
+	DeletedAt    int64  `json:"deleted_at"`
+}
+
+func (h *HandlerV1) getAiChatUserID(c *gin.Context) (string, error) {
+	authInfo, err := h.adminAuthInfo(c)
+	if err == nil {
+		userID := authInfo.GetUserIdAuth()
+		if userID == "" {
+			userID = authInfo.GetUserId()
+		}
+		if userID != "" {
+			return userID, nil
+		}
+	}
+
+	authDataRaw, ok := c.Get("auth")
+	if !ok {
+		return "", err
+	}
+	authData, ok := authDataRaw.(models.AuthData)
+	if !ok || authData.Type != "API-KEY" {
+		return "", err
+	}
+
+	for _, key := range []string{"id", "app_id", "client_id"} {
+		if userID := strings.TrimSpace(fmt.Sprintf("%v", authData.Data[key])); userID != "" && userID != "<nil>" {
+			return userID, nil
+		}
+	}
+
+	return "", fmt.Errorf("user_id is required")
+}
+
+func aiChatMessageReactionTypeFromRequest(reactionType string) (pbo.MessageReactionType, error) {
+	switch strings.ToLower(strings.TrimSpace(reactionType)) {
+	case "like", "message_reaction_type_like":
+		return pbo.MessageReactionType_MESSAGE_REACTION_TYPE_LIKE, nil
+	case "dislike", "message_reaction_type_dislike":
+		return pbo.MessageReactionType_MESSAGE_REACTION_TYPE_DISLIKE, nil
+	default:
+		return pbo.MessageReactionType_MESSAGE_REACTION_TYPE_UNSPECIFIED, fmt.Errorf("reaction_type must be like or dislike")
+	}
+}
+
+func aiChatMessageReactionTypeToResponse(reactionType pbo.MessageReactionType) string {
+	switch reactionType {
+	case pbo.MessageReactionType_MESSAGE_REACTION_TYPE_LIKE:
+		return "like"
+	case pbo.MessageReactionType_MESSAGE_REACTION_TYPE_DISLIKE:
+		return "dislike"
+	default:
+		return ""
+	}
+}
+
+func newAiChatMessageReactionResponse(reaction *pbo.MessageReaction) *aiChatMessageReactionResponse {
+	if reaction == nil {
+		return nil
+	}
+	return &aiChatMessageReactionResponse{
+		Id:           reaction.GetId(),
+		MessageId:    reaction.GetMessageId(),
+		UserId:       reaction.GetUserId(),
+		ReactionType: aiChatMessageReactionTypeToResponse(reaction.GetReactionType()),
+		CreatedAt:    reaction.GetCreatedAt(),
+		UpdatedAt:    reaction.GetUpdatedAt(),
+		DeletedAt:    reaction.GetDeletedAt(),
+	}
 }
 
 // ==================== Chat Endpoints ====================
@@ -222,6 +306,11 @@ func (h *HandlerV1) GetProjectChat(c *gin.Context) {
 		withMessages = c.DefaultQuery("with_messages", "true") == "true"
 		projectId    = c.Param("project-id")
 	)
+	userID, err := h.getAiChatUserID(c)
+	if err != nil {
+		h.HandleResponse(c, status_http.Unauthorized, err.Error())
+		return
+	}
 
 	chat, err := service.GoObjectBuilderService().AiChat().GetChatByProjectId(
 		c.Request.Context(),
@@ -229,6 +318,7 @@ func (h *HandlerV1) GetProjectChat(c *gin.Context) {
 			ResourceEnvId: resourceEnvId,
 			ProjectId:     projectId,
 			WithMessages:  withMessages,
+			UserId:        userID,
 		},
 	)
 	if err != nil {
@@ -320,6 +410,11 @@ func (h *HandlerV1) GetAiChatMessages(c *gin.Context) {
 		limit  = cast.ToInt32(c.DefaultQuery("limit", "50"))
 		offset = cast.ToInt32(c.DefaultQuery("offset", "0"))
 	)
+	userID, err := h.getAiChatUserID(c)
+	if err != nil {
+		h.HandleResponse(c, status_http.Unauthorized, err.Error())
+		return
+	}
 
 	response, err := service.GoObjectBuilderService().AiChat().GetMessages(
 		c.Request.Context(),
@@ -328,6 +423,7 @@ func (h *HandlerV1) GetAiChatMessages(c *gin.Context) {
 			ChatId:        chatId,
 			Limit:         limit,
 			Offset:        offset,
+			UserId:        userID,
 		},
 	)
 	if err != nil {
@@ -339,6 +435,87 @@ func (h *HandlerV1) GetAiChatMessages(c *gin.Context) {
 		"messages": enrichMessages(response.GetMessages()),
 		"count":    response.GetCount(),
 	})
+}
+
+func (h *HandlerV1) SetAiChatMessageReaction(c *gin.Context) {
+	messageID := c.Param("message_id")
+	if !util.IsValidUUID(messageID) {
+		h.HandleResponse(c, status_http.InvalidArgument, "invalid message_id")
+		return
+	}
+
+	var req setAiChatMessageReactionRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		h.HandleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	reactionType, err := aiChatMessageReactionTypeFromRequest(req.ReactionType)
+	if err != nil {
+		h.HandleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
+	userID, err := h.getAiChatUserID(c)
+	if err != nil {
+		h.HandleResponse(c, status_http.Unauthorized, err.Error())
+		return
+	}
+
+	service, resourceEnvId, err := h.getAiChatServices(c)
+	if err != nil {
+		return
+	}
+
+	response, err := service.GoObjectBuilderService().AiChat().SetMessageReaction(
+		c.Request.Context(),
+		&pbo.SetMessageReactionRequest{
+			ResourceEnvId: resourceEnvId,
+			MessageId:     messageID,
+			UserId:        userID,
+			ReactionType:  reactionType,
+		},
+	)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.HandleResponse(c, status_http.OK, newAiChatMessageReactionResponse(response))
+}
+
+func (h *HandlerV1) DeleteAiChatMessageReaction(c *gin.Context) {
+	messageID := c.Param("message_id")
+	if !util.IsValidUUID(messageID) {
+		h.HandleResponse(c, status_http.InvalidArgument, "invalid message_id")
+		return
+	}
+
+	userID, err := h.getAiChatUserID(c)
+	if err != nil {
+		h.HandleResponse(c, status_http.Unauthorized, err.Error())
+		return
+	}
+
+	service, resourceEnvId, err := h.getAiChatServices(c)
+	if err != nil {
+		return
+	}
+
+	_, err = service.GoObjectBuilderService().AiChat().DeleteMessageReaction(
+		c.Request.Context(),
+		&pbo.DeleteMessageReactionRequest{
+			ResourceEnvId: resourceEnvId,
+			MessageId:     messageID,
+			UserId:        userID,
+		},
+	)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.HandleResponse(c, status_http.OK, gin.H{"message": "deleted"})
 }
 
 func (h *HandlerV1) DeleteAiChatMessage(c *gin.Context) {

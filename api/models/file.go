@@ -7,6 +7,7 @@ type FileCreateRequest struct {
 	Description      string   `json:"description"`
 	Tags             []string `json:"tags"`
 	Storage          string   `json:"storage"`
+	StorageType      string   `json:"storage_type"`
 	FileNameDisk     string   `json:"file_name_disk"`
 	FileNameDownload string   `json:"file_name_download"`
 	Link             string   `json:"link"`

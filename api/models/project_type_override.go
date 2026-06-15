@@ -5,10 +5,9 @@ import (
 	"strings"
 )
 
-// appKeywordRe matches EXPLICIT consumer/end-user app wording that should map to a
-// webapp (an end-user mobile app), e.g. "web app", "webapp", "mobile app".
+// appKeywordRe matches explicit responsive-web app wording.
 // This is the STRONG signal — strong enough to override even an admin_panel guess.
-var appKeywordRe = regexp.MustCompile(`(?i)\b(web ?app|webapp|mobile ?app|mobile application|web application)\b`)
+var appKeywordRe = regexp.MustCompile(`(?i)\b(web[\s-]?app|webapp|web application|responsive web app|pwa)\b`)
 
 // appForRe matches product phrasing like "app for tracking ..." / "app to manage ...".
 // This is a WEAK, ambiguous signal: "an app to manage orders" is almost always an admin
@@ -47,24 +46,22 @@ var adminSignals = []string{
 var managementIntentRe = regexp.MustCompile(`(?i)\b(manag\w*|inventory|warehouse|back[\s-]?office|crud)\b`)
 
 // ApplyProjectTypeKeywordOverride deterministically corrects the architect's
-// project-type classification for the most common miss: the user explicitly asked
-// for a consumer "app" / "web app" / "mobile app" (a phone product) but the LLM, swayed
-// by a marketing-flavored description, classified it as "web" or "landing".
+// project-type classification when the user explicitly selected an installable
+// mobile app or named a responsive web app.
 //
 // Behavior:
-//   - Leaves an already-correct "webapp" untouched.
 //   - Backs off entirely on explicit marketing-site signals
 //     (so "build a landing page for my app" stays a landing page).
-//   - web / landing → webapp on ANY app-wording (explicit "web app" OR weak "app for/to").
-//   - admin_panel → webapp ONLY on EXPLICIT consumer-app wording ("mobile app"/"web app"),
+//   - Explicit installable/mobile-store signals always map to mobile.
+//   - "mobile app" / "mobile application" maps to mobile (an explicit installable-mobile signal;
+//     the router treats it the same and does not ask the platform-types question).
+//   - web / landing → webapp on non-ambiguous app wording (explicit "web app" OR weak "app for/to").
+//   - admin_panel → webapp ONLY on EXPLICIT web-app wording,
 //     never on the weak "app for/to" phrasing, and only when there is NO admin or
 //     management framing. This keeps real admin/management tools as admin panels
 //     (with their sidebar) instead of turning them into sidebar-less mobile apps.
-//
-// There is no native/mobile project type, so "mobile app" is intentionally mapped to
-// "webapp" (a mobile-styled responsive web app).
 func ApplyProjectTypeKeywordOverride(plan *ArchitectPlan, userPrompt string) {
-	if plan == nil || plan.ProjectType == "webapp" {
+	if plan == nil {
 		return
 	}
 
@@ -75,6 +72,22 @@ func ApplyProjectTypeKeywordOverride(plan *ArchitectPlan, userPrompt string) {
 		if strings.Contains(lower, s) {
 			return
 		}
+	}
+
+	if strings.Contains(lower, "web-app") {
+		plan.ProjectType = "webapp"
+		return
+	}
+	if hasInstallableMobileSignal(lower) {
+		plan.ProjectType = "mobile"
+		return
+	}
+	if strings.Contains(lower, "mobile app") || strings.Contains(lower, "mobile application") {
+		plan.ProjectType = "mobile"
+		return
+	}
+	if plan.ProjectType == "webapp" {
+		return
 	}
 
 	hasExplicitApp := appKeywordRe.MatchString(lower)
@@ -89,7 +102,7 @@ func ApplyProjectTypeKeywordOverride(plan *ArchitectPlan, userPrompt string) {
 		plan.ProjectType = "webapp"
 	case "admin_panel":
 		// Conservative: the architect detected internal/management intent. Only override on
-		// EXPLICIT consumer-app wording, never the weak "app for/to", and only when there is
+		// EXPLICIT web-app wording, never the weak "app for/to", and only when there is
 		// no admin/management framing at all.
 		if !hasExplicitApp {
 			return
@@ -103,5 +116,36 @@ func ApplyProjectTypeKeywordOverride(plan *ArchitectPlan, userPrompt string) {
 			return // "manage X / inventory / back office" → admin panel, not a mobile app
 		}
 		plan.ProjectType = "webapp"
+	case "mobile":
+		if hasExplicitApp {
+			plan.ProjectType = "webapp"
+		}
 	}
+}
+
+func hasInstallableMobileSignal(prompt string) bool {
+	signals := []string{
+		"mobile-app",
+		"ios app",
+		"ios application",
+		"android app",
+		"android application",
+		"installable app",
+		"native app",
+		"capacitor",
+		"app store",
+		"play store",
+		"play market",
+		// Legacy explicit runtime requests still select the mobile product surface;
+		// generation itself is standardized on Capacitor.
+		"react native",
+		"expo app",
+		"expo go",
+	}
+	for _, signal := range signals {
+		if strings.Contains(prompt, signal) {
+			return true
+		}
+	}
+	return false
 }

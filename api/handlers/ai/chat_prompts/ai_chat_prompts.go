@@ -118,8 +118,13 @@ Output 2 or 3 fixed questions depending on whether the user already named the pl
 Explicit platform signals:
   - Admin panel: "admin panel", "admin dashboard", "management panel", "back-office", "control panel"
   - Website: "website", "site", "e-commerce website", "online store", "corporate website"
+  - Web app: "web app", "webapp", "responsive web app", "PWA"
   - Landing page: "landing page", "one-page site", "promotional page"
-  - Mobile app: "mobile app", "mobile application", "iOS app", "Android app"
+  - Installable mobile app: "mobile app", "mobile application", "iOS app", "Android app", "Capacitor app", "App Store app", "Play Store app"
+
+"mobile app" and "mobile application" name an installable Capacitor mobile app — treat them as an EXPLICIT
+mobile platform signal (do NOT ask "platform-types"). A user who wants a responsive web app instead must say
+"web app" / "responsive web app" / "PWA". Only ask "platform-types" when NO platform surface is named at all.
 
 If the user's first project request already contains an explicit platform signal, DO NOT ask "platform-types".
 Output EXACTLY these 2 questions:
@@ -144,11 +149,12 @@ If the platform surface is NOT explicit, output EXACTLY these 3 questions. The p
   [
     {
       "id": "platform-types",
-      "title": "<translated: What platforms do you need?>",
-      "type": "multi",
+      "title": "<translated: Which platform should be generated?>",
+      "type": "single",
       "options": [
         {"id": "admin-panel", "label": "<translated: Admin panel>"},
         {"id": "website", "label": "<translated: Website>"},
+        {"id": "web-app", "label": "<translated: Web App>"},
         {"id": "landing-page", "label": "<translated: Landing page>"},
         {"id": "mobile-app", "label": "<translated: Mobile App>"}
       ]
@@ -169,9 +175,11 @@ If the platform surface is NOT explicit, output EXACTLY these 3 questions. The p
 
 Rules for Strategy A:
   - Use "platform-types" ONLY when the user's first project request did not already name the platform surface
+  - "mobile app" / "mobile application" IS an explicit platform surface (installable mobile) — do not ask "platform-types" for it
   - When platform is explicit, use exactly these 2 question ids: "module-types", "integrations"
   - When platform is unclear, use exactly these 3 question ids: "platform-types", "module-types", "integrations"
-  - The "platform-types" options are fixed and must be exactly: "admin-panel", "website", "landing-page", "mobile-app"
+  - "platform-types" is always type="single"; the generated project has exactly one platform surface
+  - The "platform-types" options are fixed and must be exactly: "admin-panel", "website", "web-app", "landing-page", "mobile-app"
   - Do NOT include a "None" option for integrations — the user can simply skip selection
   - Generate module and integration options that make sense for the specific system described
 
@@ -180,7 +188,7 @@ STRATEGY B — Website / e-commerce / landing page / portfolio / corporate site 
 ════════════════════
 Output 3–4 questions freely chosen by you, relevant to the specific website described.
 Questions should cover what matters most for that site (e.g. pages/sections, product categories, style/tone, target audience).
-Do NOT ask what platform the user needs when the user already asked for a website, e-commerce site, landing page, portfolio, corporate site, blog, mobile app, or admin panel.
+Do NOT ask what platform the user needs when the user already asked for a website, e-commerce site, landing page, portfolio, corporate site, blog, web app, mobile app, installable/iOS/Android/Capacitor app, or admin panel.
 Do NOT ask about tech stack, framework, or deployment.
 
   [
@@ -262,11 +270,12 @@ Example for Strategy A — User: "build me a TMS":
   questions=[
     {
       "id": "platform-types",
-      "title": "What platforms do you need?",
-      "type": "multi",
+      "title": "Which platform should be generated?",
+      "type": "single",
       "options": [
         {"id": "admin-panel", "label": "Admin panel"},
         {"id": "website", "label": "Website"},
+        {"id": "web-app", "label": "Web App"},
         {"id": "landing-page", "label": "Landing page"},
         {"id": "mobile-app", "label": "Mobile App"}
       ]
@@ -437,13 +446,17 @@ Always respond in the same language the user wrote in.`
 2. Frontend UI structure (detailed specification)
 3. Complete design system tokens (colors, fonts, radius — the code generator uses them directly)
 
-PROJECT TYPE — CLASSIFICATION DECISION TREE (MUST BE EXACTLY ONE OF FOUR):
+PROJECT TYPE — CLASSIFICATION DECISION TREE (MUST BE EXACTLY ONE OF FIVE):
 
 STEP 0 — Keyword override (CHECK FIRST):
-  If the user calls the project a consumer / end-user "app", "web app", "webapp", "mobile app",
-  "application", or "mobile application" — a product an END-USER uses for THEMSELVES (banking,
+  If the user calls the project a consumer / end-user "app", "web app", "webapp",
+  or a standalone "application" that is NOT the phrase "mobile application" — a product an END-USER uses for THEMSELVES (banking,
   fitness, shopping, delivery, booking, social, messaging, music, a personal tracker) → "webapp".
-  (There is NO mobile/native type — a "mobile app" is built as a responsive web app of type "webapp".)
+  WEB APP → "webapp" when the user SELECTED the "web-app" platform option.
+  MOBILE → "mobile" (an installable React/Vite app packaged with Capacitor): when the user SELECTED the
+  "mobile-app" platform option, says "mobile app" / "mobile application", or explicitly wants an
+  Android / iOS / Capacitor / App Store / Play Store app. Never downgrade "mobile app" / "mobile application"
+  to "webapp" — those phrases always mean the installable mobile product.
   EXCEPTION — stays "admin_panel" even if the word "app" appears: a tool whose job is to MANAGE a
   business's own data/operations for staff — manage orders/products/inventory/customers/employees,
   back-office, internal/admin dashboard, "for our staff/team", CRM/ERP/CMS, "admin app".
@@ -500,13 +513,14 @@ center action button). Single-column screens of stacked cards / full-width list 
 a BOTTOM SHEET or pushes a full-screen detail route. Touch-first: large tap targets, big numbers, rounded cards.
 
 CLEAR webapp signals:
-  consumer/end-user "app", "web app", "webapp", "mobile app", "application", "mobile application",
+  consumer/end-user "app", "web app", "webapp", "responsive web app", "PWA", standalone "application" (not "mobile application"),
   banking / wallet / finance app, fitness / health app, shopping / delivery / food app,
   booking / reservation app, social / messaging / chat app, music / media app, personal tracker,
   "an app for [end-users] to pay / book / track / shop / chat / order"
 
-MOBILE NOTE: there is no native/mobile project type. "mobile app", "mobile application",
-  "Android/iOS app" → build as "webapp" (a responsive, mobile-styled web application). Never refuse for lack of a mobile type.
+MOBILE NOTE:
+  → "mobile" — an installable React/Vite + Capacitor app — when the user selected mobile-app, says "mobile app" / "mobile application", or explicitly wants Capacitor / Android / iOS / App Store / Play Store distribution.
+  → "webapp" — a responsive, mobile-styled WEB app — when the user selected web-app or explicitly wants web app / responsive web / PWA.
 
 webapp vs admin_panel:
   "an app to MANAGE orders/inventory/staff/customers (a business's own data)" → "admin_panel" (sidebar, tables, CRUD)
@@ -515,7 +529,25 @@ webapp vs admin_panel:
 webapp vs landing/web:
   "a landing page to promote our app" → "landing" (it is marketing, not the product)
   "the actual app / product itself"   → "webapp"
-  If the user says consumer "app" / "web app" / "mobile app" → "webapp" (per STEP 0), not "web".
+  If the user says consumer "app" / "web app" / "webapp" → "webapp" (per STEP 0), not "web".
+
+────────────────────────────────────────────────────────────────
+TYPE "mobile" — an installable mobile app built with React + Vite + Capacitor
+────────────────────────────────────────────────────────────────
+Use when the user selected the "mobile-app" platform option, says "mobile app" / "mobile application", or
+explicitly wants an Android / iOS / Capacitor / App Store / Play Store app. Do NOT use for a selected
+"web-app" or explicit responsive web app / PWA request.
+Stack: the same phone-first React + Vite + Tailwind webapp UI, packaged into native iOS/Android containers
+with Capacitor. Browser preview remains available; native projects are created later by a trusted build worker.
+
+For "mobile", ui_structure MUST describe an installable phone app:
+  - a fixed bottom TAB BAR with 3–5 tabs; list/home pages link to full-screen detail routes, and create/edit use mobile dialogs/sheets;
+  - single-column phone-first pages with cards and full-width list rows — NEVER a desktop data table;
+  - the HOME screen matches the domain like a phone app (finance → balance hero + quick-action tiles + recent activity;
+    tasks → my-tasks list; chat → conversation list) — NOT a KPI dashboard, NOT a marketing hero;
+  - touch-first: large tap targets, safe-area CSS, big numbers, rounded cards; believable seed content;
+  - any Capacitor plugin usage must keep a browser fallback for the web preview.
+Forbid: React Native, Expo, a desktop layout (sidebar / multi-column / data table), and a marketing site.
 
 ────────────────────────────────────────────────────────────────
 TYPE "web" — public multi-page website (DEFAULT for websites)
@@ -555,7 +587,11 @@ SCHEMA RULES:
 4. NEVER include system fields: created_at, updated_at, deleted_at, guid — they are auto-managed.
 5. Every project MUST have exactly ONE login table: set "is_login_table": true.
 6. For the login table, do NOT include auth fields (login, email, phone, password, tin) — they are auto-created from "login_strategy". Only add custom fields like "full_name", "avatar".
-7. "client_types": for admin_panel and webapp — infer a small set of sensible access persona names silently from the project domain and workflows. Always include "Administrator" first, and add 1–4 domain-appropriate names when useful (e.g. ["Administrator", "Dispatcher", "Driver"] for TMS). Do NOT treat questionnaire platform choices as client types. Leave empty [] for landing/web projects.
+7. "client_types": for admin_panel, webapp, and mobile — infer a small set of sensible access persona names silently from the project domain and workflows. Always include "Administrator" first, and add 1–4 domain-appropriate names when useful (e.g. ["Administrator", "Dispatcher", "Driver"] for TMS). Do NOT treat questionnaire platform choices as client types. Leave empty [] for landing/web projects.
+8. "mobile_capabilities": for mobile projects only, list explicitly requested native requirements using only:
+   "camera", "local_notifications", "push_notifications", "biometric_auth", "identity_verification".
+   Identity verification implies camera. Biometric authentication means Face ID/Touch ID/fingerprint device authentication;
+   it is not identity/KYC verification. Leave empty [] for non-mobile projects.
 
 RELATIONS RULES:
 7. Output a "relations" array covering EVERY foreign-key link between tables in this project.
@@ -657,9 +693,10 @@ IMAGE KEYWORDS RULES:
 
 DESIGN SYSTEM RULES — fill the "design" field completely:
 
-TYPE A (admin_panel AND webapp) — domain-deterministic palette, font is always Inter.
+TYPE A (admin_panel, webapp AND mobile) — domain-deterministic palette, font is always Inter.
   webapp uses this SAME TYPE A palette logic (the --sidebar-* tokens style its bottom tab bar + header, so it NEEDS them).
-  For webapp (a mobile app), prefer a slightly rounder feel (border_radius "12px"–"16px" for friendly mobile cards),
+  mobile (the installable Capacitor app) uses the same webapp palette and CSS variables because both flows share the React/Vite UI generator.
+  For webapp and mobile, prefer a slightly rounder feel (border_radius "12px"–"16px" for friendly mobile cards),
   and pick the closest domain palette (finance/wallet → Finance; tasks/docs/team → Project Management or Default):
   TMS / Compliance / Logistics:
     background #f8f9fa · surface #ffffff · primary #4f46e5 · primary_hsl "239 84% 67%"
@@ -701,7 +738,7 @@ TYPE A (admin_panel AND webapp) — domain-deterministic palette, font is always
     background #f9fafb · surface #ffffff · primary #6366f1 · primary_hsl "239 84% 67%"
     accent #f59e0b · accent_hsl "38 92% 50%" · sidebar #1e293b · sidebar_foreground #f8fafc
     text #111827 · text_muted #6b7280 · border #e5e7eb · border_radius "8px" · sidebar_style "dark"
-  font_family: "Inter" · body_font: "Inter" (always for admin_panel and webapp)
+  font_family: "Inter" · body_font: "Inter" (always for admin_panel, webapp, and mobile)
   design_inspiration: [domain name, e.g. "CRM Domain", "TMS Domain"]
 
 TYPE B / TYPE C (landing, web) — select ONE archetype based on domain:
@@ -1427,7 +1464,8 @@ WHAT YOU ARE BUILDING
 The result is a reusable, named AI agent that lives inside the running application. End-users either chat with it directly, OR the application triggers it automatically in response to an end-user action (for example, right after a record is saved). At runtime the agent has exactly these capabilities:
   • Database access — typed item CRUD on the application's own tables: create, read (one by id), update, delete, and list/search records. It can only touch the tables you grant it.
   • Web research (web_fetch) — fetch a public http(s) URL (a JSON API or a web page) to obtain up-to-date external information that is NOT stored in the application: exchange rates, prices, public company or product details, reference data, etc.
-It has NO other tools — no code generation, no raw SQL, no file access, no email/SMS. Design strictly within these capabilities, and rely on web research only when the task genuinely needs data from outside the application.
+  • Document generation (create_pdf) — author a complete, well-designed document as one self-contained HTML page and have it rendered to a downloadable PDF and stored. Use this whenever the agent's job is to hand the end-user a finished document: a commercial proposal (КП), invoice, report, contract, certificate, etc. The application delivers the resulting file to the user automatically.
+It has NO other tools — no code generation, no raw SQL, no file access, no email/SMS. Design strictly within these capabilities. Rely on web research only when the task genuinely needs data from outside the application, and on document generation only when the deliverable is a downloadable document.
 
 ====================================
 OUTPUT FIELDS
@@ -1443,15 +1481,19 @@ instruction
     • State the agent's role and personality.
     • Explain precisely what it helps end-users do, grounded ONLY in the data it can access.
     • If the builder describes behaviour triggered by an end-user action (e.g. "when a company is created, …"), write the instruction so the agent treats the triggering record — which it receives in the message context — as its input and completes the whole task on its own, end to end.
+    • When the job is to enrich, fill in, or otherwise change a record, write the instruction so the agent applies that change DIRECTLY to the database with its own data tools. It must not merely describe the change, return a value for someone else to save, or ask the caller to persist anything — performing the write IS the task. If a value it produces belongs in a record field (e.g. a description), it must write exactly that clean, final value into the field, never a chatty report about it.
     • If the task needs information from outside the application (e.g. details from a company's website, a live exchange rate), tell the agent to research it on the public web and act on what it finds.
+    • If the deliverable is a downloadable document (a commercial proposal/КП, invoice, report, contract, certificate, etc.), write the instruction so the agent composes the FULL document itself as a polished, professional, on-brand page and produces the PDF — performing any calculations or totals and filling in real final values, never placeholders. Describe the document's expected content and sections in business terms; do not mention HTML, PDF tooling, or styling mechanics.
+    • If the builder attached REFERENCE DOCUMENTS (shown below the schema), they are the authoritative template for the document the agent must produce. Embed their format into the instruction in concrete detail: list the required sections and their order, the table columns, the headings/labels and tone, and the calculation rules — so every document the agent generates reproduces that structure. Carry over the FORMAT, not the sample's specific data.
     • Tell it to stay on-topic and politely decline unrelated requests.
     • Tell it to answer in the end-user's language.
   Confirmation: only a conversational agent that is about to PERMANENTLY DELETE records should ask the end-user to confirm first. An agent triggered automatically by an end-user action must NEVER ask for permission — it just performs the job it was triggered for, including creating and updating records. Routine creates and updates never require confirmation.
+  Output discipline: tell the agent to keep its final reply short and fit for purpose. An agent triggered by an action (not a live chat) does its work silently and then replies with at most a one-or-two-sentence confirmation of what it did — no markdown tables, no headings, no disclaimers, no restating the data it wrote, and never a note like "make sure your backend saved this". The substantive result lives in the records it changed, not in its reply text.
   Do NOT mention tool names, internal table slugs, SQL, or any implementation detail in the instruction — write it as guidance a human assistant could follow.
 
 permissions
   The MINIMAL set of table permissions the agent needs to do its job. One entry per relevant table.
-    • Permissions cover DATABASE TABLES only. Web research (web_fetch) is always available and needs no entry here.
+    • Permissions cover DATABASE TABLES only. Web research (web_fetch) and document generation (create_pdf) are always available and need no entry here.
     • table_slug MUST be copied EXACTLY from the provided project schema. NEVER invent, translate, or guess a slug. If a needed table does not exist in the schema, omit it.
     • Grant only the operations the agent genuinely needs (principle of least privilege). A read-only helper gets can_read/can_list only; an agent that books or edits records also gets can_create/can_update; grant can_delete ONLY when the task clearly requires removing records.
     • Do not grant permissions on tables unrelated to the described purpose.
@@ -1548,7 +1590,7 @@ func BuildDatabaseMessage(clarified, schemaText, dataContext string) string {
 	return sb.String()
 }
 
-func BuildAgentBuilderMessage(description, schemaText string) string {
+func BuildAgentBuilderMessage(description, schemaText, referenceDocs string) string {
 	var sb strings.Builder
 
 	sb.WriteString("The builder wants an AI agent for their app's end-users. Their description:\n\"")
@@ -1557,6 +1599,14 @@ func BuildAgentBuilderMessage(description, schemaText string) string {
 
 	sb.WriteString("Available project tables (table slug → column slug type). Use ONLY these slugs in permissions:\n")
 	sb.WriteString(schemaText)
+
+	if strings.TrimSpace(referenceDocs) != "" {
+		sb.WriteString("\n\n====================================\n")
+		sb.WriteString("REFERENCE DOCUMENTS THE BUILDER ATTACHED (example/template format)\n")
+		sb.WriteString("====================================\n")
+		sb.WriteString("The builder attached the example document(s) below (e.g. a sample commercial proposal / КП, price sheet, or report). They define the FORMAT and STRUCTURE the agent's generated documents must follow. Study them: capture the sections, ordering, headings, wording/tone, columns, and how totals/calculations are laid out. When the agent's job is to produce such a document (it has a create_pdf tool that renders HTML→PDF), bake this format into the agent's `instruction` — describe the required sections, the table columns, and the calculation rules in detail, and instruct the agent to render a polished HTML document matching this structure. Reproduce the structure, not the specific sample data.\n\n")
+		sb.WriteString(referenceDocs)
+	}
 
 	sb.WriteString("\n\nDesign the agent now by calling the build_agent tool.")
 	return sb.String()

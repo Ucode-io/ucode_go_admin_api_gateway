@@ -396,6 +396,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 			aiChat.POST("/new-messages/:chat-id", h.V1.CreateAiChatMessage)
 			aiChat.GET("/messages/:chat-id", h.V1.GetAiChatMessages)
+			aiChat.POST("/messages/:message_id/reaction", h.V1.SetAiChatMessageReaction)
+			aiChat.DELETE("/messages/:message_id/reaction", h.V1.DeleteAiChatMessageReaction)
 			aiChat.DELETE("/messages/:message_id", h.V1.DeleteAiChatMessage)
 
 		}
@@ -625,6 +627,15 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 	// Public GitHub OAuth callback (no auth — GitHub calls this)
 	r.GET("/v1/github/callback", h.V1.GithubCallback)
+
+	// Public Google Drive OAuth callback (no auth — Google calls this)
+	r.GET("/v1/google-drive/callback", h.V1.GoogleDriveCallback)
+
+	googleDrive := r.Group("/v1/google-drive")
+	googleDrive.Use(h.V1.AuthMiddleware(cfg))
+	{
+		googleDrive.GET("/connect", h.V1.GoogleDriveConnect)
+	}
 
 	github := r.Group("/v1/github")
 	github.Use(h.V1.AuthMiddleware(cfg))

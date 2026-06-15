@@ -71,6 +71,8 @@ type ChatProcessor struct {
 	tokenBudgetRemain  int64
 	tokenBudgetSnap    models.TokenBudgetSnapshot
 
+	ucodeMcpProjectId string
+
 	agent ai.Agent
 	emit  ProgressEmitter
 }
@@ -280,7 +282,7 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 		return nil, fmt.Errorf("backend provisioning failed: %w", err)
 	}
 
-	if plan.ProjectType == "admin_panel" || plan.ProjectType == "web" || plan.ProjectType == "webapp" {
+	if plan.ProjectType == "admin_panel" || plan.ProjectType == "web" || usesWebAppGenerator(plan.ProjectType) {
 		provWg.Add(1)
 		go func() {
 			defer provWg.Done()
@@ -332,13 +334,12 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 	)
 
 	go func(bPlan *models.ArchitectPlan, pd models.ProjectData) {
-		err = createBackendFromPlan(context.Background(), bPlan, pd, p.service, emit)
-		if err != nil {
-			log.Printf("[new-project] async table creation failed: %v", err)
+		if backendErr := createBackendFromPlan(context.Background(), bPlan, pd, p.service, emit); backendErr != nil {
+			log.Printf("[new-project] async table creation failed: %v", backendErr)
 		}
 	}(plan, *projectData)
 
-	generated, err := p.generateCode(ctx, clarified, imageURLs, chatHistory, plan, projectData.ApiKey)
+	generated, err := p.generateCode(ctx, clarified, imageURLs, chatHistory, plan, projectData)
 	if err != nil {
 		return nil, err
 	}
@@ -355,6 +356,17 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 	}
 
 	p.injectYandexMetrica(ctx, plan.ProjectName, mfeURL, generated.Project.Files)
+
+	if plan.ProjectType == mobileProjectType {
+		mobileProject := newMobileProject(generated.Project, plan.MobileCapabilities)
+		emitMobileProject(emit, mobileProject)
+		log.Printf("[new-project] Capacitor mobile published: mfe_id=%s files=%d", p.microFrontendId, len(generated.Project.Files))
+		return &models.ParsedClaudeResponse{
+			Project:       generated.Project,
+			MobileProject: mobileProject,
+			Description:   buildProjectSummary(plan, generated.Project.Files, int(time.Since(startedAt).Seconds())),
+		}, nil
+	}
 
 	//_, err = p.saveProject(ctx, generated)
 	//if err != nil {
@@ -525,7 +537,21 @@ func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context,
 		}
 	}
 
-	generated, err := p.generateCode(ctx, clarified, imageURLs, chatHistory, plan, projectData.ApiKey)
+	if plan.ProjectType == "admin_panel" || plan.ProjectType == "web" || usesWebAppGenerator(plan.ProjectType) {
+		manifest, manifestErr := p.agent.GenerateManifest(ctx, models.ManifestInput{
+			Plan:    plan,
+			History: chatHistory,
+		})
+		if manifestErr != nil {
+			return nil, fmt.Errorf("manifest generation failed: %w", manifestErr)
+		}
+		if manifest == nil || len(manifest.Groups) < 2 {
+			return nil, fmt.Errorf("manifest generation returned incomplete structure")
+		}
+		p.prebuiltManifest = manifest
+	}
+
+	generated, err := p.generateCode(ctx, clarified, imageURLs, chatHistory, plan, projectData)
 	if err != nil {
 		return nil, err
 	}
@@ -543,21 +569,36 @@ func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context,
 
 	p.injectYandexMetrica(ctx, plan.ProjectName, mfeURL, generated.Project.Files)
 
+	if plan.ProjectType == mobileProjectType {
+		mobileProject := newMobileProject(generated.Project, plan.MobileCapabilities)
+		emitMobileProject(emit, mobileProject)
+		log.Printf("[mfe-current] Capacitor mobile published: mfe_id=%s files=%d", p.microFrontendId, len(generated.Project.Files))
+		return &models.ParsedClaudeResponse{
+			Project:       generated.Project,
+			MobileProject: mobileProject,
+			Description:   buildProjectSummary(plan, generated.Project.Files, int(time.Since(startedAt).Seconds())),
+		}, nil
+	}
+
 	log.Printf("[mfe-current] done — mfe_id=%s", p.microFrontendId)
 	return &models.ParsedClaudeResponse{Description: buildProjectSummary(plan, generated.Project.Files, int(time.Since(startedAt).Seconds()))}, nil
 }
 
 func (p *ChatProcessor) getExistingProjectData(ctx context.Context) (*models.ProjectData, error) {
 	ucodeProjectId := p.ucodeProjectId
+	authMode := "none"
 
 	if p.mcpProjectId != "" {
 		mcpProject, err := p.service.GoObjectBuilderService().McpProject().GetMcpProjectFiles(ctx, &pbo.McpProjectId{
 			ResourceEnvId: p.resourceEnvId,
 			Id:            p.mcpProjectId,
 		})
-		if err == nil && mcpProject != nil && mcpProject.GetUcodeProjectId() != "" {
-			ucodeProjectId = mcpProject.GetUcodeProjectId()
-			log.Printf("[GET EXISTING PROJECT] using ucode_project_id=%s from MCP project", ucodeProjectId)
+		if err == nil && mcpProject != nil {
+			authMode = resolveGeneratedAuthMode(&models.ProjectData{AuthMode: getMcpProjectAuthMode(mcpProject)}, mcpProject.GetProjectType())
+			if mcpProject.GetUcodeProjectId() != "" {
+				ucodeProjectId = mcpProject.GetUcodeProjectId()
+				log.Printf("[GET EXISTING PROJECT] using ucode_project_id=%s from MCP project", ucodeProjectId)
+			}
 		}
 	}
 
@@ -596,10 +637,54 @@ func (p *ChatProcessor) getExistingProjectData(ctx context.Context) (*models.Pro
 		EnvironmentId:  env.GetId(),
 		ResourceEnvId:  env.GetResourceEnvironmentId(),
 		ApiKey:         apiKey,
+		AuthMode:       authMode,
 	}, nil
 }
 
+func getMcpProjectAuthMode(project *pbo.McpProject) string {
+	if project == nil || project.GetProjectEnv() == nil {
+		return "none"
+	}
+
+	mode, ok := project.GetProjectEnv().AsMap()["auth_mode"].(string)
+	if ok && strings.EqualFold(mode, "login") {
+		return "login"
+	}
+
+	return "none"
+}
+
+func resolveGeneratedAuthMode(projectData *models.ProjectData, projectType string) string {
+	if strings.EqualFold(projectType, "admin_panel") {
+		return "login"
+	}
+
+	if projectData != nil && strings.EqualFold(projectData.AuthMode, "login") {
+		return "login"
+	}
+
+	return "none"
+}
+
 func (p *ChatProcessor) provisionBackend(ctx context.Context, projectName string, existingMcpId string, projectType string) (*models.ProjectData, error) {
+	authMode := "none"
+	projectEnvMap := make(map[string]any)
+	if existingMcpId != "" {
+		mcpProject, err := p.service.GoObjectBuilderService().McpProject().GetMcpProjectFiles(ctx, &pbo.McpProjectId{
+			ResourceEnvId: p.resourceEnvId,
+			Id:            existingMcpId,
+			WithoutFiles:  true,
+		})
+		if err == nil && mcpProject != nil {
+			authMode = getMcpProjectAuthMode(mcpProject)
+			if mcpProject.GetProjectEnv() != nil {
+				for key, value := range mcpProject.GetProjectEnv().AsMap() {
+					projectEnvMap[key] = value
+				}
+			}
+		}
+	}
+
 	currentProject, err := p.h.companyServices.Project().GetById(
 		ctx, &pb.GetProjectByIdRequest{
 			ProjectId: p.ucodeProjectId,
@@ -674,6 +759,15 @@ func (p *ChatProcessor) provisionBackend(ctx context.Context, projectName string
 		apiKey = apiKeys.GetData()[0].GetAppId()
 	}
 
+	authMode = resolveGeneratedAuthMode(&models.ProjectData{AuthMode: authMode}, projectType)
+	if authMode == "login" {
+		projectEnvMap["auth_mode"] = "login"
+	}
+	projectEnv, err := helperFunc.ConvertMapToStruct(projectEnvMap)
+	if err != nil {
+		return nil, fmt.Errorf("convert MCP project env: %w", err)
+	}
+
 	mcpProjectId := existingMcpId
 	if mcpProjectId != "" {
 		_, err = p.service.GoObjectBuilderService().McpProject().UpdateMcpProject(
@@ -687,6 +781,7 @@ func (p *ChatProcessor) provisionBackend(ctx context.Context, projectName string
 				EnvironmentId:  env.GetId(),
 				Status:         "ready",
 				ProjectType:    projectType,
+				ProjectEnv:     projectEnv,
 			},
 		)
 		if err != nil {
@@ -703,6 +798,7 @@ func (p *ChatProcessor) provisionBackend(ctx context.Context, projectName string
 				EnvironmentId:  env.GetId(),
 				Status:         "ready",
 				ProjectType:    projectType,
+				ProjectEnv:     projectEnv,
 			},
 		)
 		if err != nil {
@@ -721,6 +817,7 @@ func (p *ChatProcessor) provisionBackend(ctx context.Context, projectName string
 		ResourceEnvId:  resource.GetResourceEnvironmentId(),
 		NodeType:       resource.GetNodeType(),
 		ResourceType:   int32(resource.GetResourceType()),
+		AuthMode:       authMode,
 	}, nil
 }
 
@@ -924,6 +1021,11 @@ func (p *ChatProcessor) saveProject(ctx context.Context, req *models.ParsedClaud
 		})
 	}
 
+	projectType := ""
+	if req.MobileProject != nil {
+		projectType = req.MobileProject.ProjectType
+	}
+
 	return p.service.GoObjectBuilderService().McpProject().UpdateMcpProject(ctx, &pbo.McpProject{
 		Id:            p.mcpProjectId,
 		ResourceEnvId: p.resourceEnvId,
@@ -931,6 +1033,7 @@ func (p *ChatProcessor) saveProject(ctx context.Context, req *models.ParsedClaud
 		Description:   truncateString(req.Description, 255),
 		ProjectFiles:  projectFiles,
 		ProjectEnv:    projectEnv,
+		ProjectType:   projectType,
 	})
 }
 
@@ -950,7 +1053,7 @@ func truncateString(s string, maxLen int) string {
 	return string(runes[:maxLen-3]) + "..."
 }
 
-func buildAPIConfigBlock(baseURL, apiKey string, plan *models.ArchitectPlan) string {
+func buildAPIConfigBlock(baseURL string, projectData *models.ProjectData, plan *models.ArchitectPlan) string {
 
 	var (
 		envBaseURLKey = "VITE_API_BASE_URL"
@@ -959,6 +1062,11 @@ func buildAPIConfigBlock(baseURL, apiKey string, plan *models.ArchitectPlan) str
 		sb              strings.Builder
 		loginTableSlugs []string
 	)
+
+	apiKey := ""
+	if projectData != nil {
+		apiKey = projectData.ApiKey
+	}
 
 	for _, f := range GetTemplateContext() {
 		if strings.Contains(f.Path, "config/axios") || strings.Contains(f.Path, "lib/api") {

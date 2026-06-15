@@ -111,10 +111,14 @@ type (
 
 	// AgentSpecInput carries a builder's natural-language request to generate a
 	// reusable end-user agent, plus the project schema the agent may operate on.
+	// ReferenceDocs holds text extracted from example/template documents the builder
+	// attached (e.g. an xlsx/pptx sample КП), so the model can bake that format into
+	// the agent's instruction.
 	AgentSpecInput struct {
-		Description string
-		SchemaText  string
-		History     []ChatMessage
+		Description   string
+		SchemaText    string
+		History       []ChatMessage
+		ReferenceDocs string
 	}
 
 	// AgentSpec is the generated definition of a reusable agent: a system prompt

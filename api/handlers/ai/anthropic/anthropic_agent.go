@@ -67,6 +67,7 @@ func (a *AnthropicAgent) ArchitectProject(ctx context.Context, in models.Archite
 		return nil, fmt.Errorf("architect: decode: %w", err)
 	}
 	models.ApplyProjectTypeKeywordOverride(&plan, in.Clarified)
+	models.ApplyMobileCapabilityKeywordOverride(&plan, in.Clarified)
 	return &plan, nil
 }
 
@@ -92,7 +93,7 @@ func (a *AnthropicAgent) GenerateManifest(ctx context.Context, in models.Manifes
 	systemPrompt := chat_prompts.PromptManifestGenerator
 	if in.Plan.ProjectType == "web" {
 		systemPrompt = chat_prompts.PromptWebsiteManifestGenerator
-	} else if in.Plan.ProjectType == "webapp" {
+	} else if in.Plan.ProjectType == "webapp" || in.Plan.ProjectType == "mobile" {
 		systemPrompt = chat_prompts.PromptWebAppManifestGenerator
 	}
 
@@ -310,7 +311,7 @@ func (a *AnthropicAgent) DatabaseQuery(_ context.Context, in models.DatabaseQuer
 }
 
 func (a *AnthropicAgent) BuildAgentSpec(_ context.Context, in models.AgentSpecInput) (*models.AgentSpec, error) {
-	content := chat_prompts.BuildAgentBuilderMessage(in.Description, in.SchemaText)
+	content := chat_prompts.BuildAgentBuilderMessage(in.Description, in.SchemaText, in.ReferenceDocs)
 	messages := buildAgentMessages(in.History, []models.ContentBlock{{Type: "text", Text: content}})
 
 	raw, usage, _, err := a.callTool(a.conf.Agents.AgentBuilder, chat_prompts.PromptAgentBuilder, messages, ToolBuildAgentSpec)

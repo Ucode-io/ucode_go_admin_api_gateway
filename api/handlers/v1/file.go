@@ -172,11 +172,19 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 		finalFilename = fmt.Sprintf("%s_%s.%s", fName.String(), baseName, imgFormat)
 	}
 
-	driveUpload, driveConfigured, err := fileupload.NewGoogleDriveUploader(h.companyServices.Resource()).UploadIfConfigured(
+	driveUpload, driveConfigured, err := fileupload.NewGoogleDriveUploader(h.companyServices.Resource(), fileupload.GoogleDriveConfig{
+		ClientID:           h.baseConf.GoogleDriveClientID,
+		ClientSecret:       h.baseConf.GoogleDriveClientSecret,
+		RedirectURI:        h.baseConf.GoogleDriveRedirectURI,
+		ServiceAccountJSON: h.baseConf.GoogleDriveServiceAccountJSON,
+		ParentFolderID:     h.baseConf.GoogleDriveParentFolderID,
+		Visibility:         h.baseConf.GoogleDriveVisibility,
+	}).UploadIfConfigured(
 		c.Request.Context(),
 		fileupload.GoogleDriveUploadRequest{
 			ProjectID:     projectId.(string),
 			EnvironmentID: environmentId.(string),
+			FolderName:    folderName,
 			FileName:      finalFilename,
 			ContentType:   contentType,
 			Size:          uploadSize,
@@ -194,6 +202,7 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 				Id:               fName.String(),
 				Title:            title,
 				Storage:          driveUpload.Storage,
+				StorageType:      fileupload.GoogleDriveStorageType,
 				FileNameDisk:     driveUpload.FileNameDisk,
 				FileNameDownload: title,
 				Link:             driveUpload.Link,
@@ -211,6 +220,7 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 				Id:               fName.String(),
 				Title:            title,
 				Storage:          driveUpload.Storage,
+				StorageType:      fileupload.GoogleDriveStorageType,
 				FileNameDisk:     driveUpload.FileNameDisk,
 				FileNameDownload: title,
 				Link:             driveUpload.Link,
@@ -254,6 +264,7 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 			Id:               fName.String(),
 			Title:            title,
 			Storage:          folderName,
+			StorageType:      fileupload.MinioStorageType,
 			FileNameDisk:     finalFilename,
 			FileNameDownload: title,
 			Link:             resource.ResourceEnvironmentId + "/" + folderName + "/" + finalFilename,
@@ -271,6 +282,7 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 			Id:               fName.String(),
 			Title:            title,
 			Storage:          folderName,
+			StorageType:      fileupload.MinioStorageType,
 			FileNameDisk:     finalFilename,
 			FileNameDownload: title,
 			Link:             resource.ResourceEnvironmentId + "/" + folderName + "/" + finalFilename,
@@ -721,8 +733,9 @@ func (h *HandlerV1) DeleteFiles(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *HandlerV1) GetAllFiles(c *gin.Context) {
 	var (
-		limit, _  = strconv.Atoi(c.DefaultQuery("limit", "10"))
-		offset, _ = strconv.Atoi(c.DefaultQuery("offset", "0"))
+		limit, _   = strconv.Atoi(c.DefaultQuery("limit", "10"))
+		offset, _  = strconv.Atoi(c.DefaultQuery("offset", "0"))
+		folderName = normalizeGoogleDriveFolderName(c.DefaultQuery("folder_name", ""))
 	)
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -761,7 +774,7 @@ func (h *HandlerV1) GetAllFiles(c *gin.Context) {
 				Search:     c.DefaultQuery("search", ""),
 				Sort:       c.DefaultQuery("sort", ""),
 				ProjectId:  resource.ResourceEnvironmentId,
-				FolderName: c.DefaultQuery("folder_name", ""),
+				FolderName: folderName,
 				Limit:      int32(limit),
 				Offset:     int32(offset),
 			},
@@ -779,7 +792,7 @@ func (h *HandlerV1) GetAllFiles(c *gin.Context) {
 				Search:     c.DefaultQuery("search", ""),
 				Sort:       c.DefaultQuery("sort", ""),
 				ProjectId:  resource.ResourceEnvironmentId,
-				FolderName: c.DefaultQuery("folder_name", ""),
+				FolderName: folderName,
 				Limit:      int32(limit),
 				Offset:     int32(offset),
 			},
@@ -793,6 +806,10 @@ func (h *HandlerV1) GetAllFiles(c *gin.Context) {
 		h.HandleResponse(c, status_http.OK, resp)
 
 	}
+}
+
+func normalizeGoogleDriveFolderName(folderName string) string {
+	return fileupload.NormalizeGoogleDriveFolderName(folderName)
 }
 
 // WordTemplate godoc
@@ -1053,7 +1070,14 @@ func (h *HandlerV1) UploadFile(c *gin.Context) {
 	}
 	defer object.Close()
 
-	driveUpload, driveConfigured, err := fileupload.NewGoogleDriveUploader(h.companyServices.Resource()).UploadIfConfigured(
+	driveUpload, driveConfigured, err := fileupload.NewGoogleDriveUploader(h.companyServices.Resource(), fileupload.GoogleDriveConfig{
+		ClientID:           h.baseConf.GoogleDriveClientID,
+		ClientSecret:       h.baseConf.GoogleDriveClientSecret,
+		RedirectURI:        h.baseConf.GoogleDriveRedirectURI,
+		ServiceAccountJSON: h.baseConf.GoogleDriveServiceAccountJSON,
+		ParentFolderID:     h.baseConf.GoogleDriveParentFolderID,
+		Visibility:         h.baseConf.GoogleDriveVisibility,
+	}).UploadIfConfigured(
 		c.Request.Context(),
 		fileupload.GoogleDriveUploadRequest{
 			ProjectID:     projectId.(string),

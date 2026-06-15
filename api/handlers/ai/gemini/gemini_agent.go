@@ -312,7 +312,7 @@ func (a *GeminiAgent) DatabaseQuery(_ context.Context, in models.DatabaseQueryIn
 }
 
 func (a *GeminiAgent) BuildAgentSpec(_ context.Context, in models.AgentSpecInput) (*models.AgentSpec, error) {
-	content := chat_prompts.BuildAgentBuilderMessage(in.Description, in.SchemaText)
+	content := chat_prompts.BuildAgentBuilderMessage(in.Description, in.SchemaText, in.ReferenceDocs)
 	contents := buildGeminiContents(in.History, buildGeminiParts(content, nil))
 
 	cfg := a.conf.GeminiAgents.AgentBuilder
