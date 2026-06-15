@@ -71,7 +71,11 @@ export async function runAgent(
   message: string,
   context?: Record<string, unknown>,
 ): Promise<RunAgentResult> {
-  const res = await apiClient.post('/v2/agents/' + agentId + '/run', { message, context });
+  // Agent runs can take up to 20 minutes server-side — override the shared
+  // axios instance timeout so the frontend never cancels a long-running run.
+  const res = await apiClient.post('/v2/agents/' + agentId + '/run', { message, context }, {
+    timeout: 25 * 60 * 1000,
+  });
   const payload = (res?.data?.data ?? {}) as AgentRun & { files?: AgentFile[] };
   if (payload.status === 'failed') {
     throw new Error(payload.error || 'Agent run failed');
