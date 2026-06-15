@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 	"ucode/ucode_go_api_gateway/api/handlers/billing"
+	"ucode/ucode_go_api_gateway/api/handlers/fileupload"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
@@ -201,6 +202,71 @@ func (h *HandlerV2) UploadFile(c *gin.Context) {
 		}
 	}
 
+	ContentTypeOfFile := file.File.Header.Get("Content-Type")
+	object, err := file.File.Open()
+	if err != nil {
+		h.HandleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+	defer object.Close()
+
+	driveUpload, driveConfigured, err := fileupload.NewGoogleDriveUploader(h.companyServices.Resource()).UploadIfConfigured(
+		c.Request.Context(),
+		fileupload.GoogleDriveUploadRequest{
+			ProjectID:     projectId.(string),
+			EnvironmentID: environmentId.(string),
+			FileName:      file.File.Filename,
+			ContentType:   ContentTypeOfFile,
+			Size:          file.File.Size,
+			Reader:        object,
+		},
+	)
+	if err != nil {
+		h.HandleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+	if driveConfigured {
+		splitedFileName := strings.Split(fileNameForObjectBuilder, ".")
+		var tags []string
+		if c.Query("tags") != "" {
+			tags = strings.Split(c.Query("tags"), ",")
+		}
+
+		requestMap := make(map[string]any)
+		requestMap["table_slug"] = c.Param("collection")
+		requestMap["object_id"] = c.Param("id")
+		requestMap["date"] = time.Now().Format(time.RFC3339)
+		requestMap["tags"] = tags
+		requestMap["size"] = int32(file.File.Size)
+		requestMap["type"] = splitedFileName[len(splitedFileName)-1]
+		requestMap["file_link"] = driveUpload.Link
+		requestMap["name"] = fileNameForObjectBuilder
+		structData, err := helper.ConvertMapToStruct(requestMap)
+		if err != nil {
+			h.HandleResponse(c, status_http.BadRequest, err.Error())
+			return
+		}
+
+		_, err = services.GetBuilderServiceByType(resource.NodeType).ObjectBuilder().Create(
+			c.Request.Context(),
+			&obs.CommonMessage{
+				TableSlug: "file",
+				Data:      structData,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.HandleResponse(c, status_http.InternalServerError, err.Error())
+			return
+		}
+
+		h.HandleResponse(c, status_http.Created, Path{
+			Filename: file.File.Filename,
+			Hash:     fName.String(),
+		})
+		return
+	}
+
 	minioClient, err := minio.New(h.baseConf.MinioEndpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(h.baseConf.MinioAccessKeyID, h.baseConf.MinioSecretAccessKey, ""),
 		Secure: h.baseConf.MinioProtocol,
@@ -222,7 +288,6 @@ func (h *HandlerV2) UploadFile(c *gin.Context) {
 		h.HandleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
-	ContentTypeOfFile := file.File.Header["Content-Type"][0]
 
 	_, err = minioClient.FPutObject(
 		context.Background(),
@@ -372,6 +437,42 @@ func (h *HandlerV2) UploadToFolder(c *gin.Context) {
 		return
 	}
 	defer object.Close()
+
+	driveUpload, driveConfigured, err := fileupload.NewGoogleDriveUploader(h.companyServices.Resource()).UploadIfConfigured(
+		c.Request.Context(),
+		fileupload.GoogleDriveUploadRequest{
+			ProjectID:     projectId.(string),
+			EnvironmentID: environmentId.(string),
+			FileName:      file.File.Filename,
+			ContentType:   file.File.Header.Get("Content-Type"),
+			Size:          file.File.Size,
+			Reader:        object,
+		},
+	)
+	if err != nil {
+		h.HandleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+	if driveConfigured {
+		resp, err := services.GetBuilderServiceByType(resource.NodeType).File().Create(c.Request.Context(), &obs.CreateFileRequest{
+			Id:               fName.String(),
+			Title:            title,
+			Storage:          driveUpload.Storage,
+			FileNameDisk:     driveUpload.FileNameDisk,
+			FileNameDownload: title,
+			Link:             driveUpload.Link,
+			FileSize:         file.File.Size,
+			ProjectId:        resource.ResourceEnvironmentId,
+		})
+		if err != nil {
+			h.HandleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		h.HandleResponse(c, status_http.Created, resp)
+		return
+	}
+
 	minioClient, err := minio.New(h.baseConf.MinioEndpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(h.baseConf.MinioAccessKeyID, h.baseConf.MinioSecretAccessKey, ""),
 		Secure: h.baseConf.MinioProtocol,
