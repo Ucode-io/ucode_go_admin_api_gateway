@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -21,6 +22,11 @@ import (
 	grpcstatus "google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/structpb"
 )
+
+type tableAdditionalRequest struct {
+	AdditionalField  string   `json:"additional_field"`
+	AdditionalValues []string `json:"additional_values"`
+}
 
 // CreateTable godoc
 // @Security ApiKeyAuth
@@ -347,6 +353,289 @@ func (h *HandlerV1) GetAllTables(c *gin.Context) {
 
 		h.HandleResponse(c, status_http.OK, resp)
 	}
+}
+
+// GetAllTablesWithAdditional godoc
+// @Security ApiKeyAuth
+// @ID get_all_tables_with_additional
+// @Router /v1/table-list [GET]
+// @Summary Get all tables with additional selected tables
+// @Description Get all tables with selected tables prepended from additional_request
+// @Tags Table
+// @Accept json
+// @Produce json
+// @Param filters query models.GetAllTablesRequest true "filters"
+// @Param additional_request query string false "JSON object with additional_field and additional_values"
+// @Param additional_field query string false "Selected table field, currently id"
+// @Param additional_values query []string false "Selected table ids"
+// @Success 200 {object} status_http.Response{data=obs.GetAllTablesResponse} "TableBody"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *HandlerV1) GetAllTablesWithAdditional(c *gin.Context) {
+	var (
+		resourceEnvironmentId string
+		resourceType          pb.ResourceType
+		nodeType              string
+	)
+
+	offset, err := h.getOffsetParam(c)
+	if err != nil {
+		h.HandleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
+	limit, err := h.getLimitParam(c)
+	if err != nil {
+		h.HandleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
+	additionalRequest, err := parseTableAdditionalRequest(c)
+	if err != nil {
+		h.HandleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.HandleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.HandleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
+		return
+	}
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	resourceEnvironmentId = resource.ResourceEnvironmentId
+	resourceType = resource.ResourceType
+	nodeType = resource.NodeType
+
+	var isLoginTable bool
+	var isLoginTableStr = c.Query("is_login_table")
+	if isLoginTableStr == "true" {
+		isLoginTable = true
+	}
+
+	services, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), nodeType)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	switch resourceType {
+	case pb.ResourceType_MONGODB:
+		tableService := services.GetBuilderServiceByType(nodeType).Table()
+		resp, err := tableService.GetAll(
+			c.Request.Context(), &obs.GetAllTablesRequest{
+				Limit:        int32(limit),
+				Offset:       int32(offset),
+				Search:       c.DefaultQuery("search", ""),
+				ProjectId:    resourceEnvironmentId,
+				FolderId:     c.Query("folder_id"),
+				IsLoginTable: isLoginTable,
+			},
+		)
+		if err != nil {
+			h.HandleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		selectedTables := make([]*obs.Table, 0, len(additionalRequest.AdditionalValues))
+		for _, id := range additionalRequest.AdditionalValues {
+			table, err := tableService.GetByID(
+				c.Request.Context(),
+				&obs.TablePrimaryKey{
+					Id:        id,
+					ProjectId: resourceEnvironmentId,
+				},
+			)
+			if err != nil {
+				if st, ok := grpcstatus.FromError(err); ok && st.Code() == codes.NotFound {
+					continue
+				}
+				h.HandleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+			selectedTables = append(selectedTables, table)
+		}
+		resp.Tables = mergeObsTables(selectedTables, resp.GetTables())
+
+		h.HandleResponse(c, status_http.OK, resp)
+	case pb.ResourceType_POSTGRESQL:
+		tableService := services.GoObjectBuilderService().Table()
+		resp, err := tableService.GetAll(
+			c.Request.Context(), &nb.GetAllTablesRequest{
+				Limit:        int32(limit),
+				Offset:       int32(offset),
+				Search:       c.DefaultQuery("search", ""),
+				ProjectId:    resourceEnvironmentId,
+				IsLoginTable: isLoginTable,
+			},
+		)
+		if err != nil {
+			h.HandleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		selectedTables := make([]*nb.Table, 0, len(additionalRequest.AdditionalValues))
+		for _, id := range additionalRequest.AdditionalValues {
+			table, err := tableService.GetByID(
+				c.Request.Context(), &nb.TablePrimaryKey{
+					Id:        id,
+					ProjectId: resourceEnvironmentId,
+				},
+			)
+			if err != nil {
+				if st, ok := grpcstatus.FromError(err); ok && st.Code() == codes.NotFound {
+					continue
+				}
+				h.HandleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+			selectedTables = append(selectedTables, table)
+		}
+		resp.Tables = mergeNbTables(selectedTables, resp.GetTables())
+
+		h.HandleResponse(c, status_http.OK, resp)
+	}
+}
+
+func parseTableAdditionalRequest(c *gin.Context) (tableAdditionalRequest, error) {
+	req := tableAdditionalRequest{}
+
+	if raw := c.Query("additional_request"); raw != "" {
+		if err := json.Unmarshal([]byte(raw), &req); err != nil {
+			return req, err
+		}
+	}
+
+	if field := c.Query("additional_field"); field != "" {
+		req.AdditionalField = field
+	}
+
+	if values := c.QueryArray("additional_values"); len(values) > 0 {
+		req.AdditionalValues = splitQueryValues(values)
+	}
+
+	if req.AdditionalField == "" && len(req.AdditionalValues) == 0 {
+		return req, nil
+	}
+
+	if req.AdditionalField != "id" {
+		return req, fmt.Errorf("additional_field must be id")
+	}
+
+	req.AdditionalValues = uniqueValidUUIDs(req.AdditionalValues)
+
+	return req, nil
+}
+
+func splitQueryValues(values []string) []string {
+	result := make([]string, 0, len(values))
+	for _, value := range values {
+		for _, part := range strings.Split(value, ",") {
+			result = append(result, part)
+		}
+	}
+
+	return result
+}
+
+func uniqueValidUUIDs(values []string) []string {
+	result := make([]string, 0, len(values))
+	seen := make(map[string]struct{}, len(values))
+
+	for _, value := range values {
+		value = strings.TrimSpace(value)
+		if value == "" || !util.IsValidUUID(value) {
+			continue
+		}
+
+		if _, ok := seen[value]; ok {
+			continue
+		}
+
+		seen[value] = struct{}{}
+		result = append(result, value)
+	}
+
+	return result
+}
+
+func mergeObsTables(selectedTables, tables []*obs.Table) []*obs.Table {
+	seen := make(map[string]struct{}, len(selectedTables)+len(tables))
+	result := make([]*obs.Table, 0, len(selectedTables)+len(tables))
+
+	for _, table := range selectedTables {
+		if table == nil || table.GetId() == "" {
+			continue
+		}
+		if _, ok := seen[table.GetId()]; ok {
+			continue
+		}
+
+		seen[table.GetId()] = struct{}{}
+		result = append(result, table)
+	}
+
+	for _, table := range tables {
+		if table == nil || table.GetId() == "" {
+			continue
+		}
+		if _, ok := seen[table.GetId()]; ok {
+			continue
+		}
+
+		seen[table.GetId()] = struct{}{}
+		result = append(result, table)
+	}
+
+	return result
+}
+
+func mergeNbTables(selectedTables, tables []*nb.Table) []*nb.Table {
+	seen := make(map[string]struct{}, len(selectedTables)+len(tables))
+	result := make([]*nb.Table, 0, len(selectedTables)+len(tables))
+
+	for _, table := range selectedTables {
+		if table == nil || table.GetId() == "" {
+			continue
+		}
+		if _, ok := seen[table.GetId()]; ok {
+			continue
+		}
+
+		seen[table.GetId()] = struct{}{}
+		result = append(result, table)
+	}
+
+	for _, table := range tables {
+		if table == nil || table.GetId() == "" {
+			continue
+		}
+		if _, ok := seen[table.GetId()]; ok {
+			continue
+		}
+
+		seen[table.GetId()] = struct{}{}
+		result = append(result, table)
+	}
+
+	return result
 }
 
 // UpdateTable godoc
