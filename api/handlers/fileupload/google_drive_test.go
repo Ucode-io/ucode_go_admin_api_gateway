@@ -88,7 +88,7 @@ func TestGoogleDriveUploaderUploadIfConfiguredFallbackWhenCompanyServiceDoesNotS
 		err: errors.New(`rpc error: code = Internal desc = ERROR: invalid input value for enum resource_type: "15" (SQLSTATE 22P02)`),
 	}
 	client := &fakeDriveClient{}
-	uploader := NewGoogleDriveUploaderWithClient(resources, client)
+	uploader := NewGoogleDriveUploaderWithClient(resources, GoogleDriveConfig{}, client)
 
 	result, configured, err := uploader.UploadIfConfigured(context.Background(), GoogleDriveUploadRequest{
 		ProjectID:     "project-id",
