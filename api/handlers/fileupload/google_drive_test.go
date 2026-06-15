@@ -66,6 +66,7 @@ func TestGoogleDriveUploaderUploadIfConfiguredFallbackWhenResourceMissing(t *tes
 	resources := &fakeResourceService{
 		response: &pb.ListProjectResource{},
 	}
+	
 	client := &fakeDriveClient{}
 	uploader := NewGoogleDriveUploaderWithClient(resources, GoogleDriveConfig{}, client)
 
