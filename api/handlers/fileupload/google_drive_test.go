@@ -59,6 +59,26 @@ func TestGoogleDriveUploaderUploadIfConfiguredFallbackWhenResourceMissing(t *tes
 	require.Equal(t, pb.ResourceType_GOOGLE_DRIVE, resources.request.GetType())
 }
 
+func TestGoogleDriveUploaderUploadIfConfiguredFallbackWhenCompanyServiceDoesNotSupportGoogleDriveType(t *testing.T) {
+	resources := &fakeResourceService{
+		err: errors.New(`rpc error: code = Internal desc = ERROR: invalid input value for enum resource_type: "15" (SQLSTATE 22P02)`),
+	}
+	client := &fakeDriveClient{}
+	uploader := NewGoogleDriveUploaderWithClient(resources, client)
+
+	result, configured, err := uploader.UploadIfConfigured(context.Background(), GoogleDriveUploadRequest{
+		ProjectID:     "project-id",
+		EnvironmentID: "environment-id",
+		FileName:      "file.txt",
+		Reader:        strings.NewReader("file"),
+	})
+
+	require.NoError(t, err)
+	require.False(t, configured)
+	require.Nil(t, result)
+	require.False(t, client.called)
+}
+
 func TestGoogleDriveUploaderUploadIfConfiguredRejectsMultipleResources(t *testing.T) {
 	resources := &fakeResourceService{
 		response: &pb.ListProjectResource{
