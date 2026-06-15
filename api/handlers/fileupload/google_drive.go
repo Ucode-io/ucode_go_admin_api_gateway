@@ -212,7 +212,6 @@ func isUnsupportedGoogleDriveResourceTypeError(err error) bool {
 	if err == nil {
 		return false
 	}
-
 	msg := strings.ToLower(err.Error())
 	return strings.Contains(msg, "invalid input value for enum resource_type") &&
 		(strings.Contains(msg, `"15"`) || strings.Contains(msg, "google_drive"))
