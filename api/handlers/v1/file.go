@@ -184,6 +184,7 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 		fileupload.GoogleDriveUploadRequest{
 			ProjectID:     projectId.(string),
 			EnvironmentID: environmentId.(string),
+			FolderName:    folderName,
 			FileName:      finalFilename,
 			ContentType:   contentType,
 			Size:          uploadSize,
@@ -201,6 +202,7 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 				Id:               fName.String(),
 				Title:            title,
 				Storage:          driveUpload.Storage,
+				StorageType:      fileupload.GoogleDriveStorageType,
 				FileNameDisk:     driveUpload.FileNameDisk,
 				FileNameDownload: title,
 				Link:             driveUpload.Link,
@@ -218,6 +220,7 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 				Id:               fName.String(),
 				Title:            title,
 				Storage:          driveUpload.Storage,
+				StorageType:      fileupload.GoogleDriveStorageType,
 				FileNameDisk:     driveUpload.FileNameDisk,
 				FileNameDownload: title,
 				Link:             driveUpload.Link,
@@ -261,6 +264,7 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 			Id:               fName.String(),
 			Title:            title,
 			Storage:          folderName,
+			StorageType:      fileupload.MinioStorageType,
 			FileNameDisk:     finalFilename,
 			FileNameDownload: title,
 			Link:             resource.ResourceEnvironmentId + "/" + folderName + "/" + finalFilename,
@@ -278,6 +282,7 @@ func (h *HandlerV1) UploadToFolder(c *gin.Context) {
 			Id:               fName.String(),
 			Title:            title,
 			Storage:          folderName,
+			StorageType:      fileupload.MinioStorageType,
 			FileNameDisk:     finalFilename,
 			FileNameDownload: title,
 			Link:             resource.ResourceEnvironmentId + "/" + folderName + "/" + finalFilename,
@@ -804,11 +809,7 @@ func (h *HandlerV1) GetAllFiles(c *gin.Context) {
 }
 
 func normalizeGoogleDriveFolderName(folderName string) string {
-	folderName = strings.TrimSpace(folderName)
-	if strings.EqualFold(folderName, "Google Drive") {
-		return fileupload.DriveStorageName
-	}
-	return folderName
+	return fileupload.NormalizeGoogleDriveFolderName(folderName)
 }
 
 // WordTemplate godoc

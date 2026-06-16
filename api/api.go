@@ -90,6 +90,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		//table
 		v1.POST("/table", h.V1.CreateTable)
 		v1.GET("/table", h.V1.GetAllTables)
+		v1.GET("/table-list", h.V1.GetAllTablesWithAdditional)
 		v1.GET("/table/:table_id", h.V1.GetTableByID)
 		v1.POST("/table-details/:collection", h.V1.GetTableDetails)
 		v1.PUT("/table", h.V1.UpdateTable)
@@ -401,6 +402,23 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 		}
 
+		agents := v1Admin.Group("/agents")
+		{
+			agents.POST("", h.V1.CreateAgent)
+			agents.GET("", h.V1.GetAllAgents)
+			agents.GET("/:agent-id", h.V1.GetAgent)
+			agents.PUT("/:agent-id", h.V1.UpdateAgent)
+			agents.DELETE("/:agent-id", h.V1.DeleteAgent)
+
+			agents.POST("/:agent-id/run", h.V1.RunAgent)
+			agents.GET("/:agent-id/runs", h.V1.GetAgentRuns)
+		}
+
+		agentRuns := v1Admin.Group("/agent-runs")
+		{
+			agentRuns.GET("/:run-id", h.V1.GetAgentRun)
+		}
+
 		ugen := v1Admin.Group("/ugen")
 		{
 			ugen.GET("/user-projects", h.V1.GetUgenUserProjects)
@@ -504,6 +522,11 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v2Items.GET("/:collection/schema", h.V2.GetTableSchema)
 		v2Items.POST("/:collection/schema", h.V2.CreateTableSchemaField)
 		v2Items.PUT("/:collection/schema", h.V2.UpdateTableSchemaField)
+	}
+
+	v2Agents := clientV2.Group("/agents")
+	{
+		v2Agents.POST("/:agent-id/run", h.V1.RunAgentPublic)
 	}
 
 	v2Version := r.Group("/v2")

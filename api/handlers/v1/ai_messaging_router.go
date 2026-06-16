@@ -15,6 +15,7 @@ const (
 	intentProjectInspect  = "project_inspect"
 	intentCodeChange      = "code_change"
 	intentDatabaseQuery   = "database_query"
+	intentCreateAgent     = "create_agent"
 )
 
 func (p *ChatProcessor) routeAndProcess(ctx context.Context, req models.NewMessageReq, chatHistory []models.ChatMessage) (*models.ParsedClaudeResponse, error) {
@@ -104,6 +105,14 @@ func (p *ChatProcessor) routeAndProcess(ctx context.Context, req models.NewMessa
 			log.Printf("[ROUTER] database_query: clarified was empty, using raw content")
 		}
 		return p.runDatabaseFlow(ctx, clarified, chatHistory)
+
+	case intentCreateAgent:
+		clarified := strings.TrimSpace(routeResult.Clarified)
+		if clarified == "" {
+			clarified = req.Content
+			log.Printf("[ROUTER] create_agent: clarified was empty, using raw content")
+		}
+		return p.runCreateAgent(ctx, clarified, chatHistory, req.Images)
 	}
 
 	return &models.ParsedClaudeResponse{Description: routeResult.Reply}, nil

@@ -504,8 +504,11 @@ Page header:  flex-col sm:flex-row
 MOBILE SIDEBAR:
   import { Sheet, SheetContent } from '@/components/ui/sheet';
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  Desktop: <aside className="hidden lg:flex w-60 ...">
-  Mobile: <Sheet open={sidebarOpen}><SheetContent side="left">
+  Desktop: <aside className="hidden lg:flex w-60 bg-sidebar text-sidebar-foreground ...">
+  Mobile: <Sheet open={sidebarOpen}><SheetContent side="left" className="bg-sidebar text-sidebar-foreground p-0 w-60">
+  SIDEBAR BACKGROUND: the container (<aside> AND the mobile <SheetContent>) MUST carry a solid background.
+  The Tailwind class is bg-sidebar (it maps to --sidebar-background) — never invent bg-sidebar-background-style names.
+  Pair it with text-sidebar-foreground. Without bg-sidebar the panel renders transparent (page bleeds through).
 
 ====================================
 API INTEGRATION (LAYER 1 USAGE)

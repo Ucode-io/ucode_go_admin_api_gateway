@@ -70,6 +70,30 @@ type (
 		Messages []ChatMessage
 	}
 
+	// AgentIntegrationInput carries pre-built messages for the integrate_agent tool
+	// call: wiring a just-created end-user agent into the generated frontend project.
+	// The caller (v1) builds the prompt, resolves file contexts, and supplies the
+	// agent API contract so the model only has to place and style the widget.
+	AgentIntegrationInput struct {
+		Messages []ChatMessage
+	}
+
+	// AgentIntegrationView is everything the integration prompt needs to wire a
+	// freshly-created agent into the existing frontend: who the agent is, what it
+	// can do, what the builder asked for, and enough of the project to place the
+	// widget correctly. The runAgent client and useAgent hook are injected as
+	// template files, so the model only writes UI that consumes them.
+	AgentIntegrationView struct {
+		AgentName     string
+		AgentID       string
+		Purpose       string
+		Capabilities  string
+		UserRequest   string
+		TemplateFiles []string
+		FileGraphJSON string
+		FilesContext  string
+	}
+
 	// RepairFileInput carries the file to repair and the pre-built user prompt
 	// (errors + available exports + rules). The agent applies the repair tool.
 	RepairFileInput struct {
@@ -83,5 +107,38 @@ type (
 		SchemaText  string
 		DataContext string
 		History     []ChatMessage
+	}
+
+	// AgentSpecInput carries a builder's natural-language request to generate a
+	// reusable end-user agent, plus the project schema the agent may operate on.
+	// ReferenceDocs holds text extracted from example/template documents the builder
+	// attached (e.g. an xlsx/pptx sample КП), so the model can bake that format into
+	// the agent's instruction.
+	AgentSpecInput struct {
+		Description   string
+		SchemaText    string
+		History       []ChatMessage
+		ReferenceDocs string
+	}
+
+	// AgentSpec is the generated definition of a reusable agent: a system prompt
+	// (Instruction), display metadata, and the minimal per-table permissions it
+	// needs. Reply is a short confirmation message shown back to the builder.
+	AgentSpec struct {
+		Name        string                `json:"name"`
+		Description string                `json:"description"`
+		Instruction string                `json:"instruction"`
+		Reply       string                `json:"reply"`
+		Permissions []AgentSpecPermission `json:"permissions"`
+	}
+
+	// AgentSpecPermission grants an agent a set of operations on one table.
+	AgentSpecPermission struct {
+		TableSlug string `json:"table_slug"`
+		CanCreate bool   `json:"can_create"`
+		CanRead   bool   `json:"can_read"`
+		CanUpdate bool   `json:"can_update"`
+		CanDelete bool   `json:"can_delete"`
+		CanList   bool   `json:"can_list"`
 	}
 )

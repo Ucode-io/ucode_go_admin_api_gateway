@@ -457,6 +457,7 @@ func (h *HandlerV2) UploadToFolder(c *gin.Context) {
 		fileupload.GoogleDriveUploadRequest{
 			ProjectID:     projectId.(string),
 			EnvironmentID: environmentId.(string),
+			FolderName:    folder_name,
 			FileName:      file.File.Filename,
 			ContentType:   file.File.Header.Get("Content-Type"),
 			Size:          file.File.Size,
@@ -472,6 +473,7 @@ func (h *HandlerV2) UploadToFolder(c *gin.Context) {
 			Id:               fName.String(),
 			Title:            title,
 			Storage:          driveUpload.Storage,
+			StorageType:      fileupload.GoogleDriveStorageType,
 			FileNameDisk:     driveUpload.FileNameDisk,
 			FileNameDownload: title,
 			Link:             driveUpload.Link,
@@ -518,6 +520,7 @@ func (h *HandlerV2) UploadToFolder(c *gin.Context) {
 		Id:               fName.String(),
 		Title:            title,
 		Storage:          folder_name,
+		StorageType:      fileupload.MinioStorageType,
 		FileNameDisk:     file.File.Filename,
 		FileNameDownload: title,
 		Link:             resource.ResourceEnvironmentId + "/" + folder_name + "/" + file.File.Filename,
@@ -967,9 +970,5 @@ func (h *HandlerV2) GetAllFiles(c *gin.Context) {
 }
 
 func normalizeGoogleDriveFolderName(folderName string) string {
-	folderName = strings.TrimSpace(folderName)
-	if strings.EqualFold(folderName, "Google Drive") {
-		return fileupload.DriveStorageName
-	}
-	return folderName
+	return fileupload.NormalizeGoogleDriveFolderName(folderName)
 }

@@ -236,6 +236,24 @@ func (a *AnthropicAgent) VisualEdit(_ context.Context, in models.VisualEditInput
 	return out.Files, out.ChangeSummary, nil
 }
 
+func (a *AnthropicAgent) IntegrateAgent(_ context.Context, in models.AgentIntegrationInput) ([]models.ProjectFile, string, error) {
+	raw, usage, _, err := a.callTool(a.conf.Agents.Coder, chat_prompts.PromptAgentIntegrator, in.Messages, ToolIntegrateAgent)
+	a.tracker.RecordUsage(usage, a.conf.Agents.Coder.Model, "Integrating agent into frontend")
+	a.tracker.Deduct(int64(usage.InputTokens + usage.OutputTokens))
+	if err != nil {
+		return nil, "", wrapMaxTokens(err, usage, "integrate agent")
+	}
+
+	var out struct {
+		Files         []models.ProjectFile `json:"files"`
+		ChangeSummary string               `json:"change_summary"`
+	}
+	if err = json.Unmarshal(raw, &out); err != nil {
+		return nil, "", fmt.Errorf("integrate agent: decode: %w", err)
+	}
+	return out.Files, out.ChangeSummary, nil
+}
+
 func (a *AnthropicAgent) RepairFile(_ context.Context, in models.RepairFileInput) (models.ProjectFile, error) {
 	repairCfg := a.conf.Agents.Router
 	repairCfg.MaxTokens = 32000
@@ -290,6 +308,24 @@ func (a *AnthropicAgent) DatabaseQuery(_ context.Context, in models.DatabaseQuer
 		return nil, fmt.Errorf("database query: parse action JSON: %w | raw=%.300s", err, text)
 	}
 	return &action, nil
+}
+
+func (a *AnthropicAgent) BuildAgentSpec(_ context.Context, in models.AgentSpecInput) (*models.AgentSpec, error) {
+	content := chat_prompts.BuildAgentBuilderMessage(in.Description, in.SchemaText, in.ReferenceDocs)
+	messages := buildAgentMessages(in.History, []models.ContentBlock{{Type: "text", Text: content}})
+
+	raw, usage, _, err := a.callTool(a.conf.Agents.AgentBuilder, chat_prompts.PromptAgentBuilder, messages, ToolBuildAgentSpec)
+	a.tracker.RecordUsage(usage, a.conf.Agents.AgentBuilder.Model, "Building agent definition")
+	a.tracker.Deduct(int64(usage.InputTokens + usage.OutputTokens))
+	if err != nil {
+		return nil, wrapMaxTokens(err, usage, "agent builder")
+	}
+
+	var spec models.AgentSpec
+	if err = json.Unmarshal(raw, &spec); err != nil {
+		return nil, fmt.Errorf("agent builder: decode: %w", err)
+	}
+	return &spec, nil
 }
 
 func (a *AnthropicAgent) callTool(agentCfg config.AgentConfig, system string, messages []models.ChatMessage, tool claudeFunctionTool) ([]byte, models.LLMUsage, string, error) {
