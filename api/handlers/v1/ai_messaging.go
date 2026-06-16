@@ -915,6 +915,9 @@ func (p *ChatProcessor) runVisualEdit(ctx context.Context, instruction string, c
 	_ = editedSummary
 
 	if len(editedFiles) > 0 {
+		// Keep the pre-built auth runtime intact even when a visual edit touches
+		// (or the model rewrites) LoginPage / auth.ts / permissions.ts.
+		editedFiles = enforceAuthRuntime(editedFiles, existingFiles)
 		emit.Emit(
 			SSEEvent{
 				Type:    EvPublish,

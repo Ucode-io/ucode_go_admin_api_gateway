@@ -139,6 +139,11 @@ func (p *ChatProcessor) runMicrofrontendEdit(ctx context.Context, clarified, fil
 		return &models.ParsedClaudeResponse{Description: buildUpdateSummary(plan, nil, p.userMessage)}, nil
 	}
 
+	// The edit path bypasses mergeTemplateScaffold, so the editor can ship a
+	// stubbed LoginPage / rewritten auth runtime and pre-fix panels never heal.
+	// Force the pre-built auth files from the template before pushing.
+	editedProject.Files = enforceAuthRuntime(editedProject.Files, existingFiles)
+
 	log.Printf("[MICROFE EDIT] pushing %d file(s) to u-gen branch", len(editedProject.Files))
 
 	// Emit per-file publish events so user sees which files are being updated.
