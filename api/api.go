@@ -42,6 +42,9 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 	r.GET("/v1/fare", h.V1.GetAllFares)
 	r.GET("v1/chart", h.V1.GetChart)
+
+	// Public: lightweight X-API-KEY validation for session bootstrap (MCP). No AuthMiddleware/billing.
+	r.GET("/v1/api-key/validate", h.V1.ValidateApiKey)
 	r.Any("v1/functions/:function-id/run", h.V1.FunctionRun)
 
 	r.Any("/v1/transcoder/webhook", h.V1.TranscoderWebhook)

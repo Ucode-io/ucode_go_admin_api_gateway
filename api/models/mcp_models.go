@@ -99,4 +99,11 @@ type (
 		Path   string `json:"path"`
 		Reason string `json:"reason"`
 	}
+
+	ValidateApiKeyResponse struct {
+		Valid         bool   `json:"valid"`
+		AppId         string `json:"app_id"`
+		ProjectId     string `json:"project_id"`
+		EnvironmentId string `json:"environment_id"`
+	}
 )
