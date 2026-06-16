@@ -122,7 +122,7 @@ func (u *GoogleDriveUploader) UploadIfConfigured(ctx context.Context, req Google
 		Type:          pb.ResourceType_GOOGLE_DRIVE,
 	})
 	if err != nil {
-		if isUnsupportedGoogleDriveResourceTypeError(err) {
+		if IsUnsupportedGoogleDriveResourceTypeError(err) {
 			return nil, false, nil
 		}
 		return nil, false, err
@@ -561,7 +561,7 @@ func shouldMakePublic(visibility string) bool {
 	return strings.ToLower(strings.TrimSpace(visibility)) != driveVisibilityPrivate
 }
 
-func isUnsupportedGoogleDriveResourceTypeError(err error) bool {
+func IsUnsupportedGoogleDriveResourceTypeError(err error) bool {
 	if err == nil {
 		return false
 	}
