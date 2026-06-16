@@ -152,7 +152,7 @@ src/lib/auth.ts
 
 src/lib/permissions.ts
   useUcodePermissions(), useUcodePermissionsReady()
-  canRead(perms, path) — login mode is deny-by-default unless trusted preview has no injected map
+  canRead(perms, path) — denylist: a route is visible unless its entry sets read === false; routes missing from the map stay visible
   setUcodePermissions(map), resetUcodePermissions(), initNavMapFromAuth(token?)
 
 src/components/auth/LoginPage.tsx

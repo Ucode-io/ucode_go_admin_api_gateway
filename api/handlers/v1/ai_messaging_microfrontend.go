@@ -557,6 +557,9 @@ func (p *ChatProcessor) publishToMicrofrontend(ctx context.Context, projectName,
 				}
 			}
 			projectEnvMap["auth_mode"] = "login"
+			if navRoutes := buildNavRoutesEnvPayload(p.navRoutes); len(navRoutes) > 0 {
+				projectEnvMap["nav_routes"] = navRoutes
+			}
 			projectEnv, convertErr := helperFunc.ConvertMapToStruct(projectEnvMap)
 			if convertErr != nil {
 				return "", fmt.Errorf("convert MCP project env: %w", convertErr)
@@ -784,4 +787,58 @@ func (p *ChatProcessor) createShortLink(ctx context.Context, mfeURL string, proj
 	}
 
 	return mfeShortURL(p.baseConf.ShortURLBase, link.Slug)
+}
+
+// buildNavRoutesEnvPayload converts manifest routes into a stable, UI-friendly
+// list persisted on the MCP project's project_env (nav_routes). It drops dynamic
+// (param/splat) routes that can't be nav targets and derives a human label from
+// the page name so the custom-permission editor can offer a routes dropdown.
+func buildNavRoutesEnvPayload(routes []models.ManifestRoute) []any {
+	seen := make(map[string]bool, len(routes))
+	out := make([]any, 0, len(routes))
+	for _, r := range routes {
+		path := strings.TrimSpace(r.Path)
+		if path == "" || strings.ContainsAny(path, ":*") || seen[path] {
+			continue
+		}
+		seen[path] = true
+		out = append(out, map[string]any{
+			"path":  path,
+			"label": navRouteLabel(r),
+		})
+	}
+	return out
+}
+
+// navRouteLabel produces a readable label, e.g. "PaymentGatewaysPage" -> "Payment Gateways".
+func navRouteLabel(r models.ManifestRoute) string {
+	if label := splitCamel(strings.TrimSuffix(r.PageName, "Page")); label != "" {
+		return label
+	}
+	if r.Path == "/" || r.Path == "" {
+		return "Dashboard"
+	}
+	cleaned := strings.NewReplacer("/", " ", "-", " ", "_", " ").Replace(strings.Trim(r.Path, "/"))
+	return titleWords(cleaned)
+}
+
+// splitCamel turns "PaymentGateways" into "Payment Gateways".
+func splitCamel(s string) string {
+	var b strings.Builder
+	for i, ch := range s {
+		if i > 0 && ch >= 'A' && ch <= 'Z' {
+			b.WriteByte(' ')
+		}
+		b.WriteRune(ch)
+	}
+	return strings.TrimSpace(b.String())
+}
+
+// titleWords capitalizes each space-separated word.
+func titleWords(s string) string {
+	parts := strings.Fields(s)
+	for i, p := range parts {
+		parts[i] = strings.ToUpper(p[:1]) + p[1:]
+	}
+	return strings.Join(parts, " ")
 }
