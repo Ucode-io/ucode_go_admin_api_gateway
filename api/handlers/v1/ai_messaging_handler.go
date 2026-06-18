@@ -143,11 +143,12 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 
 	_, err = processor.saveMessage(ctx, "user", userMessage.Content, userMessage.Images)
 	if err != nil {
+		chatErr := newSaveMessageError(err)
 		if c.Query("stream") == "true" {
-			h.sseError(c, fmt.Sprintf("failed to save user message: %v", err))
+			h.sseError(c, chatErr)
 			return
 		}
-		h.HandleResponse(c, status_http.GRPCError, fmt.Sprintf("failed to save user message: %v", err))
+		h.HandleResponse(c, status_http.GRPCError, errorResponseBody(chatErr))
 		return
 	}
 
@@ -158,12 +159,17 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 
 	aiResponse, err := processor.routeAndProcess(ctx, userMessage, chatHistory)
 	if err != nil {
+		// Persist before responding so the failure survives a disconnect and
+		// shows up in chat history on the next page load.
+		chatErr := processor.persistPipelineError(ctx, err)
+
 		var tokenErr *TokenLimitError
 		if errors.As(err, &tokenErr) {
+			// Preserve the existing 402 billing flow for token-limit hits.
 			h.HandleResponse(c, status_http.PaymentRequired, processor.tokenLimitData(tokenErr))
 			return
 		}
-		h.HandleResponse(c, status_http.GRPCError, fmt.Sprintf("ai processing failed: %v", err))
+		h.HandleResponse(c, status_http.GRPCError, errorResponseBody(chatErr))
 		return
 	}
 
@@ -338,14 +344,21 @@ func (h *HandlerV1) handlePendingConfirmation(
 	})
 }
 
-// sseError sends a single SSE error event and closes the connection.
-// Used when the stream setup itself fails (e.g., can't save user message).
-func (h *HandlerV1) sseError(c *gin.Context, msg string) {
+// sseError sends a single structured EvError event for pre-pipeline failures
+// (e.g. the user message can't be persisted) and closes the connection. The
+// payload mirrors the EvError produced by the pipeline so the frontend has a
+// single rendering branch for all SSE errors.
+func (h *HandlerV1) sseError(c *gin.Context, chatErr models.AiChatError) {
 	c.Header("Content-Type", "text/event-stream")
 	c.Header("Cache-Control", "no-cache")
 	c.Header("X-Accel-Buffering", "no")
 	c.Status(200)
-	writeSSEEvent(c.Writer, SSEEvent{Type: EvError, Message: msg})
+	writeSSEEvent(c.Writer, SSEEvent{
+		Type:    EvError,
+		Icon:    IconAlertCircle,
+		Message: chatErr.Message,
+		Data:    errorEventData(chatErr, nil),
+	})
 	c.Writer.Flush()
 }
 
@@ -402,22 +415,23 @@ func (h *HandlerV1) handleStreamingMessage(c *gin.Context, processor *ChatProces
 
 		aiResponse, pipelineErr := processor.routeAndProcess(pipelineCtx, userMessage, chatHistory)
 		if pipelineErr != nil {
+			// Persist first: SSE may be lost to a disconnect, but the chat
+			// log must reflect what happened.
+			chatErr := processor.persistPipelineError(pipelineCtx, pipelineErr)
+
+			icon := IconAlertCircle
+			var extras map[string]any
 			var tokenErr *TokenLimitError
-			switch {
-			case errors.As(pipelineErr, &tokenErr):
-				processor.emitter().Emit(SSEEvent{
-					Type:    EvError,
-					Icon:    "ban",
-					Message: "Достигнут лимит токенов для этого проекта",
-					Data:    processor.tokenLimitData(tokenErr),
-				})
-			default:
-				processor.emitter().Emit(SSEEvent{
-					Type:    EvError,
-					Icon:    "alert-circle",
-					Message: fmt.Sprintf("AI processing failed: %v", pipelineErr),
-				})
+			if errors.As(pipelineErr, &tokenErr) {
+				icon = IconBan
+				extras = map[string]any{"token_limit": processor.tokenLimitData(tokenErr)}
 			}
+			processor.emitter().Emit(SSEEvent{
+				Type:    EvError,
+				Icon:    icon,
+				Message: chatErr.Message,
+				Data:    errorEventData(chatErr, extras),
+			})
 			return
 		}
 

@@ -966,6 +966,11 @@ func (p *ChatProcessor) saveMessage(ctx context.Context, role, content string, i
 	})
 }
 
+// chatHistoryWindow is wider than the router's own window so
+// DetectConversationState can still find a state marker that fell outside the
+// router's view (e.g. when a long TZ was pasted between question and answer).
+const chatHistoryWindow = 20
+
 func (p *ChatProcessor) getChatHistory(ctx context.Context) ([]models.ChatMessage, error) {
 	messages, err := p.service.GoObjectBuilderService().AiChat().GetMessages(ctx, &pbo.GetMessagesRequest{
 		ResourceEnvId: p.resourceEnvId,
@@ -976,25 +981,33 @@ func (p *ChatProcessor) getChatHistory(ctx context.Context) ([]models.ChatMessag
 	}
 
 	msgList := messages.GetMessages()
-	if len(msgList) > 10 {
-		msgList = msgList[len(msgList)-10:]
+	if len(msgList) > chatHistoryWindow {
+		msgList = msgList[len(msgList)-chatHistoryWindow:]
 	}
 
 	result := make([]models.ChatMessage, 0, len(msgList))
 	for _, msg := range msgList {
-		text := msg.GetContent()
-		// Strip embedded JSON — the AI only needs the marker + description for state detection.
-		if strings.HasPrefix(text, "[DIAGRAMS_GENERATED] ") || strings.HasPrefix(text, "[QUESTIONS_ASKED] ") {
-			if idx := strings.Index(text, "\n"); idx != -1 {
-				text = text[:idx]
-			}
-		}
 		result = append(result, models.ChatMessage{
 			Role:    msg.GetRole(),
-			Content: []models.ContentBlock{{Type: "text", Text: text}},
+			Content: []models.ContentBlock{{Type: "text", Text: stripMarkerJSON(msg.GetContent())}},
 		})
 	}
 	return result, nil
+}
+
+// stripMarkerJSON drops the JSON payload from a marker-prefixed message so the
+// router context stays small. The marker and one-line summary are kept because
+// DetectConversationState branches on the prefix.
+func stripMarkerJSON(text string) string {
+	switch {
+	case strings.HasPrefix(text, ai.MarkerDiagramsGenerated+" "),
+		strings.HasPrefix(text, ai.MarkerQuestionsAsked+" "),
+		strings.HasPrefix(text, ai.MarkerError+" "):
+		if idx := strings.Index(text, "\n"); idx != -1 {
+			return text[:idx]
+		}
+	}
+	return text
 }
 
 func (p *ChatProcessor) saveProject(ctx context.Context, req *models.ParsedClaudeResponse) (*pbo.McpProject, error) {
