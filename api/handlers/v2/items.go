@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"time"
 	"ucode/ucode_go_api_gateway/api/handlers/billing"
+	"ucode/ucode_go_api_gateway/api/handlers/googlecalendar"
 	hHelper "ucode/ucode_go_api_gateway/api/handlers/helper"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -259,6 +260,19 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 			h.HandleResponse(c, status_http.InvalidArgument, err.Error()+" in "+functionName)
 			return
 		}
+	}
+
+	if err := googlecalendar.SyncCreate(c.Request.Context(), googlecalendar.SyncRequest{
+		CompanyServices: h.companyServices,
+		Services:        services,
+		Resource:        resource,
+		ProjectID:       projectId.(string),
+		EnvironmentID:   environmentId.(string),
+		TableSlug:       c.Param("collection"),
+		Data:            objectRequest.Data,
+		Config:          h.googleCalendarConfig(),
+	}); err != nil {
+		h.log.Error("google calendar create sync failed", logger.Error(err))
 	}
 
 	statusHttp.CustomMessage = resp.GetCustomMessage()
@@ -1170,10 +1184,35 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 			c, // gin context,
 			h, // handler
 		)
-		if err != nil {
-			h.HandleResponse(c, status_http.GRPCError, err.Error()+" in "+functionName)
+		if actionErr != nil {
 			return
 		}
+	}
+	beforeData := singleObject.GetData().AsMap()
+	if nested, ok := beforeData["data"].(map[string]any); ok {
+		beforeData = nested
+	}
+	syncData := make(map[string]any, len(beforeData)+len(objectRequest.Data)+2)
+	for key, value := range beforeData {
+		syncData[key] = value
+	}
+	for key, value := range objectRequest.Data {
+		syncData[key] = value
+	}
+	if _, ok := syncData["guid"]; !ok {
+		syncData["guid"] = id
+	}
+	if err := googlecalendar.SyncUpdate(c.Request.Context(), googlecalendar.SyncRequest{
+		CompanyServices: h.companyServices,
+		Services:        services,
+		Resource:        resource,
+		ProjectID:       projectId.(string),
+		EnvironmentID:   environmentId.(string),
+		TableSlug:       c.Param("collection"),
+		Data:            syncData,
+		Config:          h.googleCalendarConfig(),
+	}); err != nil {
+		h.log.Error("google calendar update sync failed", logger.Error(err))
 	}
 	statusHttp.CustomMessage = resp.GetCustomMessage()
 }
@@ -1612,8 +1651,29 @@ func (h *HandlerV2) DeleteItem(c *gin.Context) {
 		}
 	}
 
+	if err := googlecalendar.SyncDelete(c.Request.Context(), googlecalendar.SyncRequest{
+		CompanyServices: h.companyServices,
+		Services:        services,
+		Resource:        resource,
+		ProjectID:       projectId.(string),
+		EnvironmentID:   environmentId.(string),
+		TableSlug:       c.Param("collection"),
+		Data:            objectRequest.Data,
+		Config:          h.googleCalendarConfig(),
+	}); err != nil {
+		h.log.Error("google calendar delete sync failed", logger.Error(err))
+	}
+
 	statusHttp.CustomMessage = resp.GetCustomMessage()
 	h.HandleResponse(c, statusHttp, resp)
+}
+
+func (h *HandlerV2) googleCalendarConfig() googlecalendar.Config {
+	return googlecalendar.Config{
+		ClientID:     h.baseConf.GoogleCalendarClientID,
+		ClientSecret: h.baseConf.GoogleCalendarClientSecret,
+		RedirectURI:  h.baseConf.GoogleCalendarRedirectURI,
+	}
 }
 
 // DeleteManyObject godoc

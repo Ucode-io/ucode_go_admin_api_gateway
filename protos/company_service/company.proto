@@ -34,6 +34,7 @@ enum ResourceType {
     TRANSCODER = 13;
     MAILCHIMP = 14;
     GOOGLE_DRIVE = 15;
+    GOOGLE_CALENDAR = 16;
 }
 
 enum SettingType {
