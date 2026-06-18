@@ -19,9 +19,15 @@ import (
 
 // ==================== Enrichment ====================
 
-// enrichMessages converts raw proto messages into EnrichedMessage slice.
-// For messages saved with [DIAGRAMS_GENERATED] marker, it strips the embedded
-// plan JSON from content and exposes it as a separate Plan field.
+// enrichMessages converts raw proto messages into the HTTP EnrichedMessage
+// shape. Marker-prefixed assistant content is split so the frontend gets the
+// JSON payload pre-parsed into the appropriate typed field:
+//
+//	[DIAGRAMS_GENERATED] → em.Plan
+//	[QUESTIONS_ASKED]    → em.Questions
+//	[ERROR]              → em.Error
+//
+// em.Content always ends up holding only the first-line human-readable summary.
 func enrichMessages(msgs []*pbo.Message) []models.EnrichedMessage {
 	result := make([]models.EnrichedMessage, 0, len(msgs))
 	for _, msg := range msgs {
@@ -38,33 +44,50 @@ func enrichMessages(msgs []*pbo.Message) []models.EnrichedMessage {
 			DislikeCount:        msg.GetDislikeCount(),
 			CurrentUserReaction: aiChatMessageReactionTypeToResponse(msg.GetCurrentUserReaction()),
 		}
-		content := msg.GetContent()
-		if strings.HasPrefix(content, "[DIAGRAMS_GENERATED] ") {
-			body := strings.TrimPrefix(content, "[DIAGRAMS_GENERATED] ")
-			if idx := strings.Index(body, "\n"); idx != -1 {
-				em.Content = body[:idx]
-				var plan models.HaikuPlan
-				if err := json.Unmarshal([]byte(body[idx+1:]), &plan); err == nil {
-					em.Plan = &plan
-				}
-			} else {
-				em.Content = body
-			}
-		} else if strings.HasPrefix(content, "[QUESTIONS_ASKED] ") {
-			body := strings.TrimPrefix(content, "[QUESTIONS_ASKED] ")
-			if idx := strings.Index(body, "\n"); idx != -1 {
-				em.Content = body[:idx]
-				var questions []models.AiQuestion
-				if err := json.Unmarshal([]byte(body[idx+1:]), &questions); err == nil {
-					em.Questions = questions
-				}
-			} else {
-				em.Content = body
-			}
-		}
+		applyMarker(&em, msg.GetContent())
 		result = append(result, em)
 	}
 	return result
+}
+
+// applyMarker parses a marker-prefixed content string and populates the
+// matching typed field on em. Unknown or unparseable payloads are tolerated:
+// em.Content already holds the raw value as a fallback.
+func applyMarker(em *models.EnrichedMessage, content string) {
+	switch {
+	case strings.HasPrefix(content, "[DIAGRAMS_GENERATED] "):
+		summary, payload := splitMarkerBody(content, "[DIAGRAMS_GENERATED] ")
+		em.Content = summary
+		var plan models.HaikuPlan
+		if payload != "" && json.Unmarshal([]byte(payload), &plan) == nil {
+			em.Plan = &plan
+		}
+	case strings.HasPrefix(content, "[QUESTIONS_ASKED] "):
+		summary, payload := splitMarkerBody(content, "[QUESTIONS_ASKED] ")
+		em.Content = summary
+		var questions []models.AiQuestion
+		if payload != "" && json.Unmarshal([]byte(payload), &questions) == nil {
+			em.Questions = questions
+		}
+	case strings.HasPrefix(content, "[ERROR] "):
+		summary, payload := splitMarkerBody(content, "[ERROR] ")
+		em.Content = summary
+		var chatErr models.AiChatError
+		if payload != "" && json.Unmarshal([]byte(payload), &chatErr) == nil {
+			em.Error = &chatErr
+		}
+	}
+}
+
+// splitMarkerBody splits "<prefix><summary>\n<json>" into (summary, json).
+// When no newline is present the whole body is treated as summary and the
+// payload comes back empty.
+func splitMarkerBody(content, prefix string) (summary, payload string) {
+	body := strings.TrimPrefix(content, prefix)
+	if idx := strings.Index(body, "\n"); idx != -1 {
+		return body[:idx], body[idx+1:]
+	}
+	return body, ""
 }
 
 // ==================== Helper ====================
@@ -232,7 +255,9 @@ func (h *HandlerV1) CreateAiChat(c *gin.Context) {
 
 	request.ResourceEnvId = resourceEnvId
 
-	if request.GetProjectId() == "" {
+	// ucode chats operate on an EXISTING project, so the frontend always supplies
+	// its project_id; only ugen chats auto-provision a draft MCP project here.
+	if request.GetProjectId() == "" && request.GetType() != chatTypeUcode {
 		mcpProject, err := service.GoObjectBuilderService().McpProject().CreateMcpProject(
 			c.Request.Context(),
 			&pbo.CreateMcpProjectReqeust{
@@ -269,6 +294,7 @@ func (h *HandlerV1) GetAllChats(c *gin.Context) {
 		title          = c.Query("title")
 		model          = c.Query("model")
 		projectId      = c.Query("project_id")
+		chatType       = c.Query("type")
 		orderBy        = c.Query("order_by")
 		orderDirection = c.Query("order_direction")
 		limit          = cast.ToInt32(c.DefaultQuery("limit", "20"))
@@ -282,6 +308,7 @@ func (h *HandlerV1) GetAllChats(c *gin.Context) {
 			Title:          title,
 			Model:          model,
 			ProjectId:      projectId,
+			Type:           chatType,
 			OrderBy:        orderBy,
 			OrderDirection: orderDirection,
 			Limit:          limit,
@@ -332,6 +359,7 @@ func (h *HandlerV1) GetProjectChat(c *gin.Context) {
 		"title":        chat.GetTitle(),
 		"description":  chat.GetDescription(),
 		"model":        string(config.ParseAIProvider(chat.GetModel())),
+		"type":         chat.GetType(),
 		"total_tokens": chat.GetTotalTokens(),
 		"created_at":   chat.GetCreatedAt(),
 		"updated_at":   chat.GetUpdatedAt(),

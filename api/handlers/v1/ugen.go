@@ -362,3 +362,39 @@ func (h *HandlerV1) ListUgenProjects(c *gin.Context) {
 
 	h.HandleResponse(c, status_http.OK, resp)
 }
+
+// ExportUgenProjects godoc
+// @Security ApiKeyAuth
+// @ID export_ugen_projects
+// @Router /v1/ugen/projects/export [GET]
+// @Summary Export all is_ugen projects to Excel (admin)
+// @Description Generates an Excel file of all is_ugen projects and returns its download URL.
+// @Tags Ugen
+// @Produce json
+// @Param search query string false "search by project title"
+// @Success 200 {object} status_http.Response{data=company_service.ExportUgenProjectsResponse}
+// @Failure 403 {object} status_http.Response{data=string}
+// @Failure 500 {object} status_http.Response{data=string}
+func (h *HandlerV1) ExportUgenProjects(c *gin.Context) {
+
+	userId, ok := c.Get("user_id")
+	if !ok {
+		h.HandleResponse(c, status_http.BadRequest, "user_id is required")
+		return
+	}
+
+	if userId != config.UgenSuperAdminUserId {
+		h.HandleResponse(c, status_http.Forbidden, "permission denied")
+		return
+	}
+
+	resp, err := h.companyServices.Project().ExportUgenProjects(c.Request.Context(), &pb.ExportUgenProjectsRequest{
+		Search: c.Query("search"),
+	})
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.HandleResponse(c, status_http.OK, resp)
+}
