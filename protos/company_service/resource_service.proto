@@ -351,6 +351,7 @@ message Settings {
     MetabaseCredentials metabase = 7;
     MailchimpCredentials mailchimp = 8;
     GoogleDriveCredentials google_drive = 9;
+    GoogleCalendarCredentials google_calendar = 10;
 }
 
 message SmsCredentials {
@@ -406,6 +407,27 @@ message GoogleDriveCredentials {
     string client_secret = 5;
     string refresh_token = 6;
     string service_account_json = 7;
+}
+
+message GoogleCalendarCredentials {
+    string auth_type = 1;
+    string calendar_id = 2;
+    string client_id = 3;
+    string client_secret = 4;
+    string refresh_token = 5;
+    string sync_direction = 6;
+    GoogleCalendarMapping mapping = 7;
+}
+
+message GoogleCalendarMapping {
+    string table_slug = 1;
+    string title_field = 2;
+    string start_field = 3;
+    string end_field = 4;
+    string description_field = 5;
+    string location_field = 6;
+    string attendees_field = 7;
+    string status_field = 8;
 }
 
 message Github {
