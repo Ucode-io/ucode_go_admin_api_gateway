@@ -49,38 +49,33 @@ const (
 )
 
 // agentTruncationRecoveryNote is appended to the system prompt after a step hit the
-// output-token limit. It tells the model the previous reply was cut off and to stop
-// narrating — emit only the tool call (e.g. create_pdf) — so the retry can finish.
 const agentTruncationRecoveryNote = "\n\n## URGENT: your previous reply was cut off — it exceeded the output limit\n" +
 	"Do NOT write out any reasoning, calculations, tables, or explanations in your message text. " +
 	"Compute everything silently. If you need to produce a document, call the create_pdf tool RIGHT NOW with the final, complete HTML and nothing else. " +
 	"If you were performing data changes, call the next tool directly. Keep any natural-language text to a single short sentence."
 
 // agentFile is a document an agent produced during a run (e.g. a generated PDF).
-// It is returned alongside the run so the frontend can let the user download it.
 type agentFile struct {
 	Name        string `json:"name"`
 	URL         string `json:"url"`
 	ContentType string `json:"content_type"`
 }
 
-// newChatModel resolves the concrete provider for an agent's model id.
 func (h *HandlerV1) newChatModel(model string) ai.ChatModel {
 	switch {
 	case strings.HasPrefix(model, "gpt"):
 		return openai.NewOpenAIChatModel(h.baseConf)
 	case strings.HasPrefix(model, "gemini"):
 		return gemini.NewGeminiChatModel(h.baseConf, h.geminiKeyPool)
-	default: // claude* and any unknown id fall back to Anthropic
+	default:
 		return anthropic.NewAnthropicChatModel(h.baseConf)
 	}
 }
 
 // agentToolset is the per-agent tool surface plus the permission matrix used to
-// authorize every tool call server-side (defense in depth on top of the schema).
 type agentToolset struct {
 	defs  []ai.ToolDef
-	perms map[string]*nb.AgentPermission // table_slug → rule
+	perms map[string]*nb.AgentPermission
 }
 
 func buildAgentToolset(perms []*nb.AgentPermission) agentToolset {

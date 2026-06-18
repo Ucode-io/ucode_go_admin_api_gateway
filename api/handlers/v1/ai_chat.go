@@ -232,7 +232,9 @@ func (h *HandlerV1) CreateAiChat(c *gin.Context) {
 
 	request.ResourceEnvId = resourceEnvId
 
-	if request.GetProjectId() == "" {
+	// ucode chats operate on an EXISTING project, so the frontend always supplies
+	// its project_id; only ugen chats auto-provision a draft MCP project here.
+	if request.GetProjectId() == "" && request.GetType() != chatTypeUcode {
 		mcpProject, err := service.GoObjectBuilderService().McpProject().CreateMcpProject(
 			c.Request.Context(),
 			&pbo.CreateMcpProjectReqeust{
@@ -269,6 +271,7 @@ func (h *HandlerV1) GetAllChats(c *gin.Context) {
 		title          = c.Query("title")
 		model          = c.Query("model")
 		projectId      = c.Query("project_id")
+		chatType       = c.Query("type")
 		orderBy        = c.Query("order_by")
 		orderDirection = c.Query("order_direction")
 		limit          = cast.ToInt32(c.DefaultQuery("limit", "20"))
@@ -282,6 +285,7 @@ func (h *HandlerV1) GetAllChats(c *gin.Context) {
 			Title:          title,
 			Model:          model,
 			ProjectId:      projectId,
+			Type:           chatType,
 			OrderBy:        orderBy,
 			OrderDirection: orderDirection,
 			Limit:          limit,
@@ -332,6 +336,7 @@ func (h *HandlerV1) GetProjectChat(c *gin.Context) {
 		"title":        chat.GetTitle(),
 		"description":  chat.GetDescription(),
 		"model":        string(config.ParseAIProvider(chat.GetModel())),
+		"type":         chat.GetType(),
 		"total_tokens": chat.GetTotalTokens(),
 		"created_at":   chat.GetCreatedAt(),
 		"updated_at":   chat.GetUpdatedAt(),

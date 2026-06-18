@@ -398,6 +398,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			aiChat.DELETE("/:chat-id", h.V1.DeleteAiChat)
 
 			aiChat.POST("/new-messages/:chat-id", h.V1.CreateAiChatMessage)
+			aiChat.POST("/ucode-messages/:chat-id", h.V1.CreateUcodeChatMessage)
 			aiChat.GET("/messages/:chat-id", h.V1.GetAiChatMessages)
 			aiChat.POST("/messages/:message_id/reaction", h.V1.SetAiChatMessageReaction)
 			aiChat.DELETE("/messages/:message_id/reaction", h.V1.DeleteAiChatMessageReaction)
