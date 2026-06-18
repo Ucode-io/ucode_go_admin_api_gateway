@@ -203,6 +203,7 @@ func (p *ChatProcessor) generateCodeChunkedApplication(ctx context.Context, clar
 		manifest = p.prebuiltManifest
 		p.prebuiltManifest = nil
 		p.currentManifest = manifest
+		p.navRoutes = manifest.Routes
 		defer func() { p.currentManifest = nil }()
 		log.Printf("[chunked] using prebuilt manifest: %d groups", len(manifest.Groups))
 		emit.Emit(SSEEvent{Type: EvProgress, Icon: "list-tree", Message: "Структура файлов готова", Percent: 23})
@@ -1230,7 +1231,22 @@ func (p *ChatProcessor) validateAndRepairGeneratedProject(ctx context.Context, p
 	var (
 		errorCount     int
 		prevErrorCount = -1
+		prevSigs       map[string]bool
 	)
+	// sigOf reduces a validation result to the SET of distinct error identities
+	// (file::message). Comparing identities instead of raw counts lets the no-progress
+	// guard tell a genuine stall apart from a repair that SWAPS one error for a
+	// newly-introduced different one (e.g. Sidebar missing-perms → Header dangling
+	// SidebarContent import) — the latter changes the set and earns another pass.
+	sigOf := func(errs []ValidationError) map[string]bool {
+		m := make(map[string]bool, len(errs))
+		for _, e := range errs {
+			if e.Severity == "error" {
+				m[e.File+"::"+e.Message] = true
+			}
+		}
+		return m
+	}
 	for pass := 1; pass <= maxRepairPasses; pass++ {
 		validationErrors := validateGeneratedProject(project.Files, project.Env)
 		validationErrors = append(validationErrors, validateAgainstManifest(project.Files, p.currentManifest)...)
@@ -1251,14 +1267,26 @@ func (p *ChatProcessor) validateAndRepairGeneratedProject(ctx context.Context, p
 			}
 			return 0
 		}
-		// No-progress early exit: previous pass attempted repairs but error
-		// count didn't drop. Repair prompt clearly can't fix the remaining set,
-		// so another identical pass burns 30-90s of LLM time for zero benefit.
-		if prevErrorCount >= 0 && errorCount >= prevErrorCount {
-			log.Printf("[quality-gate] no progress (%d → %d), stopping after pass %d", prevErrorCount, errorCount, pass-1)
+		// No-progress early exit: stop ONLY when this pass introduced NO new error
+		// identity AND the count didn't drop. Comparing signatures (file::message)
+		// rather than raw counts means a repair that swaps one error for a newly-
+		// introduced different one (e.g. fixing Sidebar's missing perms but dropping
+		// the SidebarContent export Header depends on) is NOT mistaken for a stall —
+		// the new identity earns another pass that can repair it.
+		curSigs := sigOf(validationErrors)
+		introducedNew := false
+		for s := range curSigs {
+			if !prevSigs[s] {
+				introducedNew = true
+				break
+			}
+		}
+		if prevSigs != nil && !introducedNew && errorCount >= prevErrorCount {
+			log.Printf("[quality-gate] no progress (%d → %d, no new error identities), stopping after pass %d", prevErrorCount, errorCount, pass-1)
 			return errorCount
 		}
 		prevErrorCount = errorCount
+		prevSigs = curSigs
 
 		p.emitter().Emit(SSEEvent{
 			Type:    EvRepair,
@@ -1317,6 +1345,7 @@ func (p *ChatProcessor) generateCodeChunkedWebsite(ctx context.Context, clarifie
 		manifest = p.prebuiltManifest
 		p.prebuiltManifest = nil
 		p.currentManifest = manifest
+		p.navRoutes = manifest.Routes
 		defer func() { p.currentManifest = nil }()
 		log.Printf("[chunked-web] using prebuilt manifest: %d groups", len(manifest.Groups))
 		emit.Emit(SSEEvent{Type: EvProgress, Icon: "list-tree", Message: "Структура страниц готова", Percent: 23})

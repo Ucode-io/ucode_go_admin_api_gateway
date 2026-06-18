@@ -65,6 +65,11 @@ type ChatProcessor struct {
 	// can still reference the route + entity contract.
 	currentManifest *models.ProjectManifest
 
+	// navRoutes captures the manifest's page routes for persistence into the MCP
+	// project's project_env (nav_routes). currentManifest is nil'd via defer once
+	// generation returns, so this survives until publishToMicrofrontend runs.
+	navRoutes []models.ManifestRoute
+
 	cachedImagePool *helper.ImagePoolResult
 
 	tokenBudgetEnabled bool
@@ -910,6 +915,9 @@ func (p *ChatProcessor) runVisualEdit(ctx context.Context, instruction string, c
 	_ = editedSummary
 
 	if len(editedFiles) > 0 {
+		// Keep the pre-built auth runtime intact even when a visual edit touches
+		// (or the model rewrites) LoginPage / auth.ts / permissions.ts.
+		editedFiles = enforceAuthRuntime(editedFiles, existingFiles)
 		emit.Emit(
 			SSEEvent{
 				Type:    EvPublish,

@@ -349,13 +349,12 @@ PERMISSION-GATED NAV (MANDATORY when a sidebar/top-nav exists):
          useEffect(() => { listeners.add(setM); setM(current); return () => { listeners.delete(setM); }; }, []);
          return m;
        }
-       const isLoginMode = import.meta.env.VITE_UCODE_AUTH_MODE === "login";
-       // AUTH MODE = none: default visible unless an entry explicitly sets read === false.
-       // AUTH MODE = login: after nav-map is loaded, missing routes are NOT readable.
+       // Denylist model (both AUTH modes): a nav item is visible unless an entry
+       // explicitly sets read === false. Routes missing from the map stay visible.
        export function canRead(perms: PermMap, path: string): boolean {
          const entry = perms[path];
          if (entry) return entry.read !== false;
-         return !isLoginMode;
+         return true;
        }
 
   2. In the Sidebar/Navbar component, gate every nav item by its route path:
@@ -366,12 +365,12 @@ PERMISSION-GATED NAV (MANDATORY when a sidebar/top-nav exists):
 
   RULES: Match strictly by the route string in item.path/item.href/item.to. The custom permission
   attributes.nav_path value must equal that route string, e.g. "/employees" for href: "/employees".
-  In AUTH MODE = none, never hard-fail if the map is empty (default = show all); this remains
-  presentation-only nav filtering, not an auth guard. In AUTH MODE = login, also support an exported
-  setter/update function so the nav-map loaded after login can replace the current permission map.
-  In AUTH MODE = login, do NOT render the full sidebar before nav-map finishes loading; show a small
-  loading/skeleton state. After nav-map is loaded, hide any nav item whose route is missing from the
-  map or whose read flag is false. Login mode is deny-by-default for sidebar routes.
+  Never hard-fail if the map is empty (default = show all); this remains presentation-only nav
+  filtering, not an auth guard. In AUTH MODE = login, also support an exported setter/update function
+  so the nav-map loaded after login can replace the current permission map. In AUTH MODE = login, do
+  NOT render the full sidebar before nav-map finishes loading; show a small loading/skeleton state.
+  After nav-map is loaded, hide ONLY nav items whose entry has read === false; items missing from the
+  map stay visible (denylist / default-allow for sidebar routes).
 
 STEP 3 — Design Tokens:
   Design tokens are provided in the "DESIGN TOKENS:" block in your prompt.
@@ -505,8 +504,11 @@ Page header:  flex-col sm:flex-row
 MOBILE SIDEBAR:
   import { Sheet, SheetContent } from '@/components/ui/sheet';
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  Desktop: <aside className="hidden lg:flex w-60 ...">
-  Mobile: <Sheet open={sidebarOpen}><SheetContent side="left">
+  Desktop: <aside className="hidden lg:flex w-60 bg-sidebar text-sidebar-foreground ...">
+  Mobile: <Sheet open={sidebarOpen}><SheetContent side="left" className="bg-sidebar text-sidebar-foreground p-0 w-60">
+  SIDEBAR BACKGROUND: the container (<aside> AND the mobile <SheetContent>) MUST carry a solid background.
+  The Tailwind class is bg-sidebar (it maps to --sidebar-background) — never invent bg-sidebar-background-style names.
+  Pair it with text-sidebar-foreground. Without bg-sidebar the panel renders transparent (page bleeds through).
 
 ====================================
 API INTEGRATION (LAYER 1 USAGE)

@@ -638,10 +638,21 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	// Public Google Drive OAuth callback (no auth — Google calls this)
 	r.GET("/v1/google-drive/callback", h.V1.GoogleDriveCallback)
 
+	// Public Google Calendar OAuth callback (no auth — Google calls this)
+	r.GET("/v1/google-calendar/callback", h.V1.GoogleCalendarCallback)
+
 	googleDrive := r.Group("/v1/google-drive")
 	googleDrive.Use(h.V1.AuthMiddleware(cfg))
 	{
 		googleDrive.GET("/connect", h.V1.GoogleDriveConnect)
+	}
+
+	googleCalendar := r.Group("/v1/google-calendar")
+	googleCalendar.Use(h.V1.AuthMiddleware(cfg))
+	{
+		googleCalendar.GET("/connect", h.V1.GoogleCalendarConnect)
+		googleCalendar.GET("/mapping", h.V1.GetGoogleCalendarMapping)
+		googleCalendar.PUT("/mapping", h.V1.UpdateGoogleCalendarMapping)
 	}
 
 	github := r.Group("/v1/github")
