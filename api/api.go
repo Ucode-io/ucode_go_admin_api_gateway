@@ -427,6 +427,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			ugen.GET("/user-projects", h.V1.GetUgenUserProjects)
 			ugen.GET("/company-projects", h.V1.GetUgenCompanyProjects)
 			ugen.GET("/projects/all", h.V1.ListUgenProjects)
+			ugen.GET("/projects/export", h.V1.ExportUgenProjects)
 		}
 
 		projectFolders := v1Admin.Group("/project-folders")
