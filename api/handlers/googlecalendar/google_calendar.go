@@ -412,12 +412,27 @@ func eventFromData(mapping *pb.GoogleCalendarMapping, data map[string]any) (*cal
 		event.Attendees = attendeesFromValue(data[mapping.GetAttendeesField()])
 	}
 	if mapping.GetStatusField() != "" {
-		status := strings.TrimSpace(fmt.Sprint(data[mapping.GetStatusField()]))
-		if status != "" && status != "<nil>" {
+		if status := googleEventStatus(data[mapping.GetStatusField()]); status != "" {
 			event.Status = status
 		}
 	}
 	return event, nil
+}
+
+func googleEventStatus(value any) string {
+	status := strings.ToLower(strings.TrimSpace(fmt.Sprint(value)))
+	switch status {
+	case "", "<nil>":
+		return ""
+	case "confirmed", "confirm", "scheduled", "planned", "active", "approved":
+		return "confirmed"
+	case "tentative", "pending", "draft":
+		return "tentative"
+	case "cancelled", "canceled", "cancel":
+		return "cancelled"
+	default:
+		return ""
+	}
 }
 
 func eventDateTime(value any) (*calendar.EventDateTime, error) {
