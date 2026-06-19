@@ -160,7 +160,7 @@ func EnsureHiddenFieldsForTable(ctx context.Context, services services.ServiceMa
 		return err
 	}
 	fields, err := services.GoObjectBuilderService().Field().GetAll(ctx, &nb.GetAllFieldsRequest{
-		TableId:   table.GetId(),
+		Limit:     1000,
 		TableSlug: mapping.GetTableSlug(),
 		ProjectId: resourceEnvID,
 	})
