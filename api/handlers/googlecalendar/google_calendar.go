@@ -146,8 +146,22 @@ func EnsureHiddenFields(ctx context.Context, services services.ServiceManagerI, 
 	if err != nil {
 		return err
 	}
+	return EnsureHiddenFieldsForTable(ctx, services, resourceEnvID, table, mapping)
+}
+
+func EnsureHiddenFieldsForTable(ctx context.Context, services services.ServiceManagerI, resourceEnvID string, table *nb.Table, mapping *pb.GoogleCalendarMapping) error {
+	if table == nil {
+		return errors.New("table is required")
+	}
+	if strings.TrimSpace(mapping.GetTableSlug()) == "" {
+		mapping.TableSlug = table.GetSlug()
+	}
+	if err := ValidateMapping(mapping); err != nil {
+		return err
+	}
 	fields, err := services.GoObjectBuilderService().Field().GetAll(ctx, &nb.GetAllFieldsRequest{
 		TableId:   table.GetId(),
+		TableSlug: mapping.GetTableSlug(),
 		ProjectId: resourceEnvID,
 	})
 	if err != nil {
@@ -197,6 +211,17 @@ func EnsureHiddenFields(ctx context.Context, services services.ServiceManagerI, 
 	}
 
 	return nil
+}
+
+func ResolveTable(ctx context.Context, services services.ServiceManagerI, resourceEnvID, tableID, tableSlug string) (*nb.Table, error) {
+	tableID = strings.TrimSpace(tableID)
+	if tableID != "" {
+		return services.GoObjectBuilderService().Table().GetByID(ctx, &nb.TablePrimaryKey{
+			Id:        tableID,
+			ProjectId: resourceEnvID,
+		})
+	}
+	return findTableBySlug(ctx, services, resourceEnvID, strings.TrimSpace(tableSlug))
 }
 
 func validateMappingFields(mapping *pb.GoogleCalendarMapping, fieldTypes map[string]string) error {
