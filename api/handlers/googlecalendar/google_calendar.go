@@ -361,7 +361,7 @@ func syncUpsert(ctx context.Context, req SyncRequest, update bool) error {
 	}
 	event, err := eventFromData(mapping, req.Data)
 	if err != nil {
-		_ = saveSyncState(ctx, req, "", "error", err.Error())
+		_ = saveSyncState(ctx, req, "", "error", googleCalendarErrorMessage(err))
 		return err
 	}
 
@@ -369,7 +369,7 @@ func syncUpsert(ctx context.Context, req SyncRequest, update bool) error {
 	if !update || eventID == "" || eventID == "<nil>" {
 		created, err := client.CreateEvent(ctx, credentials, event)
 		if err != nil {
-			_ = saveSyncState(ctx, req, "", "error", err.Error())
+			_ = saveSyncState(ctx, req, "", "error", googleCalendarErrorMessage(err))
 			return err
 		}
 		return saveSyncState(ctx, req, created.Id, "synced", "")
@@ -377,7 +377,7 @@ func syncUpsert(ctx context.Context, req SyncRequest, update bool) error {
 
 	updated, err := client.UpdateEvent(ctx, credentials, eventID, event)
 	if err != nil {
-		_ = saveSyncState(ctx, req, eventID, "error", err.Error())
+		_ = saveSyncState(ctx, req, eventID, "error", googleCalendarErrorMessage(err))
 		return err
 	}
 	return saveSyncState(ctx, req, updated.Id, "synced", "")
@@ -436,6 +436,10 @@ func googleEventStatus(value any) string {
 }
 
 func eventDateTime(value any) (*calendar.EventDateTime, error) {
+	if typed, ok := value.(time.Time); ok {
+		return &calendar.EventDateTime{DateTime: typed.Format(time.RFC3339)}, nil
+	}
+
 	raw := strings.TrimSpace(fmt.Sprint(value))
 	if raw == "" || raw == "<nil>" {
 		return nil, errors.New("date value is empty")
@@ -452,7 +456,31 @@ func eventDateTime(value any) (*calendar.EventDateTime, error) {
 	if t, err := time.Parse("2006-01-02 15:04:05", raw); err == nil {
 		return &calendar.EventDateTime{DateTime: t.Format(time.RFC3339)}, nil
 	}
+	for _, layout := range []string{
+		"2006-01-02T15:04:05",
+		"2006-01-02T15:04",
+		"2006-01-02 15:04",
+		"2006-01-02T15:04:05.999999999",
+		"2006-01-02 15:04:05.999999999",
+	} {
+		if t, err := time.Parse(layout, raw); err == nil {
+			return &calendar.EventDateTime{DateTime: t.Format(time.RFC3339)}, nil
+		}
+	}
 	return &calendar.EventDateTime{DateTime: raw}, nil
+}
+
+func googleCalendarErrorMessage(err error) string {
+	if err == nil {
+		return ""
+	}
+	if gErr, ok := err.(*googleapi.Error); ok {
+		body := strings.TrimSpace(gErr.Body)
+		if body != "" {
+			return fmt.Sprintf("%s: %s", gErr.Error(), body)
+		}
+	}
+	return err.Error()
 }
 
 func attendeesFromValue(value any) []*calendar.EventAttendee {
