@@ -426,8 +426,8 @@ func (h *HandlerV1) SlimAuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 					return
 				}
 
-				if resource.ProjectStatus == config.STATUS_INACTIVE {
-					h.HandleResponse(c, status_http.BadRequest, "project is inactive")
+				if message, blocking := config.ProjectStatusMessage(resource.ProjectStatus); blocking {
+					h.HandleResponse(c, status_http.BadRequest, message)
 					c.Abort()
 					return
 				}

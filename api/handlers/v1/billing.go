@@ -675,3 +675,32 @@ func (h *HandlerV1) CancelSubscription(c *gin.Context) {
 
 	h.HandleResponse(c, status_http.OK, response)
 }
+
+// GetProjectBillingStatus godoc
+// @Security ApiKeyAuth
+// @Router /v1/billing/status [GET]
+// @Summary Get project billing status
+// @Description Return the project's billing status and, when the next renewal is within 10 days and the balance cannot cover it, a low-balance warning with the shortfall
+// @Tags Billing
+// @Accept json
+// @Produce json
+// @Success 200 {object} status_http.Response{data=pb.GetProjectBillingStatusResponse} "Project billing status"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *HandlerV1) GetProjectBillingStatus(c *gin.Context) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.HandleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	response, err := h.companyServices.Billing().GetProjectBillingStatus(c, &pb.GetProjectBillingStatusRequest{
+		ProjectId: projectId.(string),
+	})
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.HandleResponse(c, status_http.OK, response)
+}

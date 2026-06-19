@@ -46,6 +46,7 @@ service BillingService {
   rpc GetSubscription(PrimaryKey) returns (Subscription);
   rpc UpdateSubscription(Subscription) returns (Subscription);
   rpc CancelSubscription(CancelSubscriptionRequest) returns (Subscription);
+  rpc GetProjectBillingStatus(GetProjectBillingStatusRequest) returns (GetProjectBillingStatusResponse);
 
   //Discount
   rpc ListDiscounts(ListRequest) returns (ListDiscountsResponse);
@@ -353,6 +354,29 @@ message Subscription {
 
 message CancelSubscriptionRequest {
   string project_id = 1;
+}
+
+message GetProjectBillingStatusRequest {
+  string project_id = 1;
+}
+
+// GetProjectBillingStatusResponse reports a project's billing health. project_status
+// is always populated. low_balance_warning is true only when the project is within
+// days_until_renewal <= 10 of its next renewal AND available_funds (balance plus
+// credit_limit) cannot cover next_charge; shortfall then holds the missing amount.
+message GetProjectBillingStatusResponse {
+  string project_status = 1;
+  string subscription_status = 2;
+  string product_type = 3;
+  string renewal_date = 4;
+  int32 days_until_renewal = 5;
+  double next_charge = 6;
+  double project_balance = 7;
+  double credit_limit = 8;
+  double available_funds = 9;
+  double shortfall = 10;
+  bool low_balance_warning = 11;
+  string currency_code = 12;
 }
 
 message BillingPeriod {
