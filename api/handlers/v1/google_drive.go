@@ -30,6 +30,12 @@ const (
 	googleDriveOAuthStatePrefix = "google-drive-oauth-state:"
 	googleDriveOAuthStateTTL    = 10 * time.Minute
 	googleDriveFolderMenuType   = "GOOGLE_DRIVE_FOLDER"
+
+	// Lightweight frontend pages the popup lands on so it can postMessage its
+	// opener and self-close (mirrors the GitHub/Bitbucket /oauth/success flow),
+	// instead of surfacing a full dashboard.
+	googleDriveSuccessPath = "/settings/google-drive-success"
+	googleDriveErrorPath   = "/settings/google-drive-error"
 )
 
 type googleDriveOAuthState struct {
@@ -37,6 +43,10 @@ type googleDriveOAuthState struct {
 	EnvironmentID string `json:"environment_id"`
 	McpProjectID  string `json:"mcp_project_id,omitempty"`
 	UserID        string `json:"user_id"`
+	// FrontendOrigin is the origin (scheme://host) of the app that opened the
+	// OAuth popup, captured from the connect request. The callback redirects the
+	// popup back here so it closes on the same app that started the flow.
+	FrontendOrigin string `json:"frontend_origin,omitempty"`
 }
 
 // GoogleDriveConnect godoc
@@ -70,6 +80,10 @@ func (h *HandlerV1) GoogleDriveConnect(c *gin.Context) {
 		userID, _ = value.(string)
 	}
 
+	// Captured from the browser-set Origin/Referer of this connect XHR so the
+	// callback can return the popup to the same app that opened it.
+	frontendOrigin := resolveGoogleDriveFrontendOrigin(c)
+
 	oauthConfig, err := fileupload.NewOAuthConfig(h.googleDriveConfig())
 	if err != nil {
 		h.HandleResponse(c, status_http.BadRequest, err.Error())
@@ -93,10 +107,11 @@ func (h *HandlerV1) GoogleDriveConnect(c *gin.Context) {
 	}
 
 	if err := h.storeGoogleDriveOAuthState(c.Request.Context(), state, googleDriveOAuthState{
-		ProjectID:     projectID.(string),
-		EnvironmentID: environmentID.(string),
-		McpProjectID:  mcpProjectID,
-		UserID:        userID,
+		ProjectID:      projectID.(string),
+		EnvironmentID:  environmentID.(string),
+		McpProjectID:   mcpProjectID,
+		UserID:         userID,
+		FrontendOrigin: frontendOrigin,
 	}); err != nil {
 		h.HandleResponse(c, status_http.InternalServerError, err.Error())
 		return
@@ -424,6 +439,26 @@ func (h *HandlerV1) popGoogleDriveOAuthState(ctx context.Context, state string) 
 }
 
 func (h *HandlerV1) redirectGoogleDriveOAuth(c *gin.Context, success bool, reason string, states ...googleDriveOAuthState) {
+	var state googleDriveOAuthState
+	if len(states) > 0 {
+		state = states[0]
+	}
+
+	// Preferred path: send the popup back to the frontend origin that opened it
+	// (captured at connect time). It lands on the lightweight
+	// google-drive-success/error page on the SAME app, which postMessages its
+	// opener and self-closes — exactly like the GitHub/Bitbucket flow. This
+	// avoids surfacing an unrelated dashboard when the configured frontend URL
+	// points at another origin or at the project page.
+	if origin := strings.TrimSpace(state.FrontendOrigin); origin != "" {
+		if target := buildGoogleDriveOriginRedirect(origin, success, reason, state); target != "" {
+			c.Redirect(http.StatusTemporaryRedirect, target)
+			return
+		}
+	}
+
+	// Fallback: the origin could not be determined — use the configured frontend
+	// URL as before.
 	target := h.baseConf.GoogleDriveFrontendErrorURL
 	if success {
 		target = h.baseConf.GoogleDriveFrontendSuccessURL
@@ -438,9 +473,7 @@ func (h *HandlerV1) redirectGoogleDriveOAuth(c *gin.Context, success bool, reaso
 		}
 	}
 
-	var state googleDriveOAuthState
 	if len(states) > 0 {
-		state = states[0]
 		target = applyGoogleDriveRedirectPlaceholders(target, state)
 	}
 
@@ -474,6 +507,67 @@ func (h *HandlerV1) redirectGoogleDriveOAuth(c *gin.Context, success bool, reaso
 	}
 
 	c.Redirect(http.StatusTemporaryRedirect, target)
+}
+
+// resolveGoogleDriveFrontendOrigin derives the origin (scheme://host) of the app
+// that initiated the OAuth flow from the browser-set Origin header, falling back
+// to the Referer. Both are set by the browser on the connect XHR, so they
+// identify the real caller and are safe to redirect back to (not user-spoofable
+// for a victim's session). Returns "" when neither yields a valid http(s) origin.
+func resolveGoogleDriveFrontendOrigin(c *gin.Context) string {
+	origin := strings.TrimSpace(c.GetHeader("Origin"))
+	if origin == "" {
+		if ref := strings.TrimSpace(c.Request.Referer()); ref != "" {
+			if u, err := url.Parse(ref); err == nil && u.Scheme != "" && u.Host != "" {
+				origin = u.Scheme + "://" + u.Host
+			}
+		}
+	}
+	if origin == "" {
+		return ""
+	}
+	u, err := url.Parse(origin)
+	if err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.Host == "" {
+		return ""
+	}
+	return u.Scheme + "://" + u.Host
+}
+
+// buildGoogleDriveOriginRedirect builds the popup redirect URL on the captured
+// frontend origin, pointing at the lightweight success/error close-page and
+// carrying the OAuth result + ids as query params. Returns "" if the URL can't
+// be built so the caller can fall back to the configured target.
+func buildGoogleDriveOriginRedirect(origin string, success bool, reason string, state googleDriveOAuthState) string {
+	path := googleDriveErrorPath
+	if success {
+		path = googleDriveSuccessPath
+	}
+
+	u, err := url.Parse(strings.TrimRight(origin, "/") + path)
+	if err != nil {
+		return ""
+	}
+
+	q := u.Query()
+	if success {
+		q.Set("google_drive", "success")
+	} else {
+		q.Set("google_drive", "error")
+		if reason != "" {
+			q.Set("reason", reason)
+		}
+	}
+	if state.ProjectID != "" {
+		q.Set("project_id", state.ProjectID)
+	}
+	if state.EnvironmentID != "" {
+		q.Set("environment_id", state.EnvironmentID)
+	}
+	if state.McpProjectID != "" {
+		q.Set("mcp_project_id", state.McpProjectID)
+	}
+	u.RawQuery = q.Encode()
+	return u.String()
 }
 
 func applyGoogleDriveRedirectPlaceholders(target string, state googleDriveOAuthState) string {

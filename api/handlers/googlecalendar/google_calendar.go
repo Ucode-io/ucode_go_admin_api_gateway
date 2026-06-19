@@ -12,6 +12,7 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/services"
 
+	"github.com/google/uuid"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	calendar "google.golang.org/api/calendar/v3"
@@ -146,12 +147,34 @@ func EnsureHiddenFields(ctx context.Context, services services.ServiceManagerI, 
 	if err != nil {
 		return err
 	}
+	return EnsureHiddenFieldsForTable(ctx, services, resourceEnvID, table, mapping)
+}
+
+func EnsureHiddenFieldsForTable(ctx context.Context, services services.ServiceManagerI, resourceEnvID string, table *nb.Table, mapping *pb.GoogleCalendarMapping) error {
+	if table == nil {
+		return errors.New("table is required")
+	}
+	resourceEnvID = strings.TrimSpace(resourceEnvID)
+	if resourceEnvID == "" {
+		return errors.New("resource environment id is required")
+	}
+	tableID := strings.TrimSpace(table.GetId())
+	if tableID == "" {
+		return errors.New("table id is required")
+	}
+	if strings.TrimSpace(mapping.GetTableSlug()) == "" {
+		mapping.TableSlug = table.GetSlug()
+	}
+	if err := ValidateMapping(mapping); err != nil {
+		return err
+	}
 	fields, err := services.GoObjectBuilderService().Field().GetAll(ctx, &nb.GetAllFieldsRequest{
-		TableId:   table.GetId(),
+		Limit:     1000,
+		TableSlug: mapping.GetTableSlug(),
 		ProjectId: resourceEnvID,
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("get fields for table %q: %w", mapping.GetTableSlug(), err)
 	}
 
 	existing := make(map[string]bool, len(fields.GetFields()))
@@ -184,7 +207,8 @@ func EnsureHiddenFields(ctx context.Context, services services.ServiceManagerI, 
 			"system":   true,
 		})
 		if _, err := services.GoObjectBuilderService().Field().Create(ctx, &nb.CreateFieldRequest{
-			TableId:    table.GetId(),
+			Id:         uuid.NewString(),
+			TableId:    tableID,
 			ProjectId:  resourceEnvID,
 			Slug:       field.slug,
 			Label:      field.label,
@@ -192,11 +216,45 @@ func EnsureHiddenFields(ctx context.Context, services services.ServiceManagerI, 
 			IsVisible:  false,
 			Attributes: attributes,
 		}); err != nil {
-			return err
+			return fmt.Errorf("create hidden field %q for table_id %q project_id %q: %w", field.slug, tableID, resourceEnvID, err)
 		}
 	}
 
 	return nil
+}
+
+func ResolveTable(ctx context.Context, services services.ServiceManagerI, resourceEnvID, tableID, tableSlug string) (*nb.Table, error) {
+	tableID = strings.TrimSpace(tableID)
+	tableSlug = strings.TrimSpace(tableSlug)
+	if strings.TrimSpace(resourceEnvID) == "" {
+		return nil, errors.New("resource environment id is required")
+	}
+	if tableID != "" {
+		table, err := services.GoObjectBuilderService().Table().GetByID(ctx, &nb.TablePrimaryKey{
+			Id:        tableID,
+			ProjectId: resourceEnvID,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("get table by id %q project_id %q: %w", tableID, resourceEnvID, err)
+		}
+		if table == nil {
+			return nil, fmt.Errorf("table %q not found", tableID)
+		}
+		if strings.TrimSpace(table.GetId()) == "" {
+			table.Id = tableID
+		}
+		if strings.TrimSpace(table.GetSlug()) == "" {
+			table.Slug = tableSlug
+		}
+		if strings.TrimSpace(table.GetSlug()) == "" {
+			return nil, fmt.Errorf("table %q has empty slug; send table_slug with the mapping request", tableID)
+		}
+		return table, nil
+	}
+	if tableSlug == "" {
+		return nil, errors.New("table_id or table_slug is required")
+	}
+	return findTableBySlug(ctx, services, resourceEnvID, tableSlug)
 }
 
 func validateMappingFields(mapping *pb.GoogleCalendarMapping, fieldTypes map[string]string) error {
@@ -303,7 +361,7 @@ func syncUpsert(ctx context.Context, req SyncRequest, update bool) error {
 	}
 	event, err := eventFromData(mapping, req.Data)
 	if err != nil {
-		_ = saveSyncState(ctx, req, "", "error", err.Error())
+		_ = saveSyncState(ctx, req, "", "error", googleCalendarErrorMessage(err))
 		return err
 	}
 
@@ -311,7 +369,7 @@ func syncUpsert(ctx context.Context, req SyncRequest, update bool) error {
 	if !update || eventID == "" || eventID == "<nil>" {
 		created, err := client.CreateEvent(ctx, credentials, event)
 		if err != nil {
-			_ = saveSyncState(ctx, req, "", "error", err.Error())
+			_ = saveSyncState(ctx, req, "", "error", googleCalendarErrorMessage(err))
 			return err
 		}
 		return saveSyncState(ctx, req, created.Id, "synced", "")
@@ -319,7 +377,7 @@ func syncUpsert(ctx context.Context, req SyncRequest, update bool) error {
 
 	updated, err := client.UpdateEvent(ctx, credentials, eventID, event)
 	if err != nil {
-		_ = saveSyncState(ctx, req, eventID, "error", err.Error())
+		_ = saveSyncState(ctx, req, eventID, "error", googleCalendarErrorMessage(err))
 		return err
 	}
 	return saveSyncState(ctx, req, updated.Id, "synced", "")
@@ -354,15 +412,34 @@ func eventFromData(mapping *pb.GoogleCalendarMapping, data map[string]any) (*cal
 		event.Attendees = attendeesFromValue(data[mapping.GetAttendeesField()])
 	}
 	if mapping.GetStatusField() != "" {
-		status := strings.TrimSpace(fmt.Sprint(data[mapping.GetStatusField()]))
-		if status != "" && status != "<nil>" {
+		if status := googleEventStatus(data[mapping.GetStatusField()]); status != "" {
 			event.Status = status
 		}
 	}
 	return event, nil
 }
 
+func googleEventStatus(value any) string {
+	status := strings.ToLower(strings.TrimSpace(fmt.Sprint(value)))
+	switch status {
+	case "", "<nil>":
+		return ""
+	case "confirmed", "confirm", "scheduled", "planned", "active", "approved":
+		return "confirmed"
+	case "tentative", "pending", "draft":
+		return "tentative"
+	case "cancelled", "canceled", "cancel":
+		return "cancelled"
+	default:
+		return ""
+	}
+}
+
 func eventDateTime(value any) (*calendar.EventDateTime, error) {
+	if typed, ok := value.(time.Time); ok {
+		return &calendar.EventDateTime{DateTime: typed.Format(time.RFC3339)}, nil
+	}
+
 	raw := strings.TrimSpace(fmt.Sprint(value))
 	if raw == "" || raw == "<nil>" {
 		return nil, errors.New("date value is empty")
@@ -379,7 +456,31 @@ func eventDateTime(value any) (*calendar.EventDateTime, error) {
 	if t, err := time.Parse("2006-01-02 15:04:05", raw); err == nil {
 		return &calendar.EventDateTime{DateTime: t.Format(time.RFC3339)}, nil
 	}
+	for _, layout := range []string{
+		"2006-01-02T15:04:05",
+		"2006-01-02T15:04",
+		"2006-01-02 15:04",
+		"2006-01-02T15:04:05.999999999",
+		"2006-01-02 15:04:05.999999999",
+	} {
+		if t, err := time.Parse(layout, raw); err == nil {
+			return &calendar.EventDateTime{DateTime: t.Format(time.RFC3339)}, nil
+		}
+	}
 	return &calendar.EventDateTime{DateTime: raw}, nil
+}
+
+func googleCalendarErrorMessage(err error) string {
+	if err == nil {
+		return ""
+	}
+	if gErr, ok := err.(*googleapi.Error); ok {
+		body := strings.TrimSpace(gErr.Body)
+		if body != "" {
+			return fmt.Sprintf("%s: %s", gErr.Error(), body)
+		}
+	}
+	return err.Error()
 }
 
 func attendeesFromValue(value any) []*calendar.EventAttendee {
@@ -451,12 +552,20 @@ func saveSyncState(ctx context.Context, req SyncRequest, eventID, status, lastEr
 }
 
 func findTableBySlug(ctx context.Context, services services.ServiceManagerI, resourceEnvID, tableSlug string) (*nb.Table, error) {
+	resourceEnvID = strings.TrimSpace(resourceEnvID)
+	tableSlug = strings.TrimSpace(tableSlug)
+	if resourceEnvID == "" {
+		return nil, errors.New("resource environment id is required")
+	}
+	if tableSlug == "" {
+		return nil, errors.New("table_slug is required")
+	}
 	tables, err := services.GoObjectBuilderService().Table().GetAll(ctx, &nb.GetAllTablesRequest{
 		ProjectId: resourceEnvID,
 		Limit:     1000,
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get tables for project_id %q: %w", resourceEnvID, err)
 	}
 	for _, table := range tables.GetTables() {
 		if table.GetSlug() == tableSlug {

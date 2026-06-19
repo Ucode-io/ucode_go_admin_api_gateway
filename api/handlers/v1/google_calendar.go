@@ -24,6 +24,12 @@ import (
 const (
 	googleCalendarOAuthStatePrefix = "google-calendar-oauth-state:"
 	googleCalendarOAuthStateTTL    = 10 * time.Minute
+
+	// Lightweight frontend pages the popup lands on so it can postMessage its
+	// opener and self-close (mirrors the GitHub/Bitbucket /oauth/success flow),
+	// instead of surfacing a full dashboard.
+	googleCalendarSuccessPath = "/settings/google-calendar-success"
+	googleCalendarErrorPath   = "/settings/google-calendar-error"
 )
 
 type googleCalendarOAuthState struct {
@@ -31,6 +37,35 @@ type googleCalendarOAuthState struct {
 	EnvironmentID string `json:"environment_id"`
 	McpProjectID  string `json:"mcp_project_id,omitempty"`
 	UserID        string `json:"user_id"`
+	// FrontendOrigin is the origin (scheme://host) of the app that opened the
+	// OAuth popup, captured from the connect request. The callback redirects the
+	// popup back here so it closes on the same app that started the flow.
+	FrontendOrigin string `json:"frontend_origin,omitempty"`
+}
+
+type googleCalendarMappingRequest struct {
+	TableID          string `json:"table_id"`
+	TableSlug        string `json:"table_slug"`
+	TitleField       string `json:"title_field"`
+	StartField       string `json:"start_field"`
+	EndField         string `json:"end_field"`
+	DescriptionField string `json:"description_field"`
+	LocationField    string `json:"location_field"`
+	AttendeesField   string `json:"attendees_field"`
+	StatusField      string `json:"status_field"`
+}
+
+func (r googleCalendarMappingRequest) toProto() *pb.GoogleCalendarMapping {
+	return &pb.GoogleCalendarMapping{
+		TableSlug:        strings.TrimSpace(r.TableSlug),
+		TitleField:       strings.TrimSpace(r.TitleField),
+		StartField:       strings.TrimSpace(r.StartField),
+		EndField:         strings.TrimSpace(r.EndField),
+		DescriptionField: strings.TrimSpace(r.DescriptionField),
+		LocationField:    strings.TrimSpace(r.LocationField),
+		AttendeesField:   strings.TrimSpace(r.AttendeesField),
+		StatusField:      strings.TrimSpace(r.StatusField),
+	}
 }
 
 // GoogleCalendarConnect godoc
@@ -64,6 +99,10 @@ func (h *HandlerV1) GoogleCalendarConnect(c *gin.Context) {
 		userID, _ = value.(string)
 	}
 
+	// Captured from the browser-set Origin/Referer of this connect XHR so the
+	// callback can return the popup to the same app that opened it.
+	frontendOrigin := resolveGoogleCalendarFrontendOrigin(c)
+
 	oauthConfig, err := googlecalendar.NewOAuthConfig(h.googleCalendarConfig())
 	if err != nil {
 		h.HandleResponse(c, status_http.BadRequest, err.Error())
@@ -77,10 +116,11 @@ func (h *HandlerV1) GoogleCalendarConnect(c *gin.Context) {
 	}
 
 	payload := googleCalendarOAuthState{
-		ProjectID:     projectID.(string),
-		EnvironmentID: environmentID.(string),
-		McpProjectID:  mcpProjectID,
-		UserID:        userID,
+		ProjectID:      projectID.(string),
+		EnvironmentID:  environmentID.(string),
+		McpProjectID:   mcpProjectID,
+		UserID:         userID,
+		FrontendOrigin: frontendOrigin,
 	}
 	if err := h.storeGoogleCalendarOAuthState(c.Request.Context(), state, payload); err != nil {
 		h.HandleResponse(c, status_http.InternalServerError, err.Error())
@@ -171,15 +211,12 @@ func (h *HandlerV1) GoogleCalendarCallback(c *gin.Context) {
 // @Summary Save Google Calendar table field mapping
 // @Tags Google Calendar Integration
 func (h *HandlerV1) UpdateGoogleCalendarMapping(c *gin.Context) {
-	var mapping pb.GoogleCalendarMapping
-	if err := c.ShouldBindJSON(&mapping); err != nil {
+	var request googleCalendarMappingRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
 		h.HandleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
-	if err := googlecalendar.ValidateMapping(&mapping); err != nil {
-		h.HandleResponse(c, status_http.BadRequest, err.Error())
-		return
-	}
+	mapping := request.toProto()
 
 	projectID, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectID.(string)) {
@@ -194,11 +231,15 @@ func (h *HandlerV1) UpdateGoogleCalendarMapping(c *gin.Context) {
 
 	resource, credentials, configured, err := googlecalendar.GetConfiguredResource(c.Request.Context(), h.companyServices, projectID.(string), environmentID.(string))
 	if err != nil {
-		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		h.HandleResponse(c, status_http.GRPCError, fmt.Errorf("get configured google calendar resource: %w", err).Error())
 		return
 	}
 	if !configured || credentials == nil || strings.TrimSpace(credentials.GetRefreshToken()) == "" {
 		h.HandleResponse(c, status_http.BadRequest, "use /v1/google-calendar/connect to connect Google Calendar")
+		return
+	}
+	if !util.IsValidUUID(resource.GetId()) {
+		h.HandleResponse(c, status_http.InternalServerError, "google calendar project resource id is empty or invalid")
 		return
 	}
 
@@ -208,20 +249,30 @@ func (h *HandlerV1) UpdateGoogleCalendarMapping(c *gin.Context) {
 		ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 	})
 	if err != nil {
-		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		h.HandleResponse(c, status_http.GRPCError, fmt.Errorf("get builder service resource: %w", err).Error())
+		return
+	}
+	if !util.IsValidUUID(builderResource.GetResourceEnvironmentId()) {
+		h.HandleResponse(c, status_http.InternalServerError, "builder resource environment id is empty or invalid")
 		return
 	}
 	services, err := h.GetProjectSrvc(c.Request.Context(), projectID.(string), builderResource.NodeType)
 	if err != nil {
-		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		h.HandleResponse(c, status_http.GRPCError, fmt.Errorf("get project object-builder service: %w", err).Error())
 		return
 	}
-	if err := googlecalendar.EnsureHiddenFields(c.Request.Context(), services, builderResource.ResourceEnvironmentId, &mapping); err != nil {
-		h.HandleResponse(c, status_http.GRPCError, err.Error())
+	table, err := googlecalendar.ResolveTable(c.Request.Context(), services, builderResource.ResourceEnvironmentId, request.TableID, mapping.GetTableSlug())
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, fmt.Errorf("resolve google calendar mapping table: %w", err).Error())
+		return
+	}
+	mapping.TableSlug = table.GetSlug()
+	if err := googlecalendar.EnsureHiddenFieldsForTable(c.Request.Context(), services, builderResource.ResourceEnvironmentId, table, mapping); err != nil {
+		h.HandleResponse(c, status_http.GRPCError, fmt.Errorf("ensure google calendar hidden fields: %w", err).Error())
 		return
 	}
 
-	credentials.Mapping = &mapping
+	credentials.Mapping = mapping
 	credentials.SyncDirection = googlecalendar.SyncDirection
 	credentials.CalendarId = googlecalendar.DefaultCalendarID
 	update := &pb.ProjectResource{
@@ -237,7 +288,7 @@ func (h *HandlerV1) UpdateGoogleCalendarMapping(c *gin.Context) {
 		update.Name = "Google Calendar"
 	}
 	if _, err := h.companyServices.Resource().UpdateProjectResource(c.Request.Context(), update); err != nil {
-		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		h.HandleResponse(c, status_http.GRPCError, fmt.Errorf("update google calendar project resource: %w", err).Error())
 		return
 	}
 
@@ -298,6 +349,9 @@ func (h *HandlerV1) upsertGoogleCalendarResource(ctx context.Context, state goog
 
 	if len(list.GetResources()) == 1 {
 		current := list.GetResources()[0]
+		if !util.IsValidUUID(current.GetId()) {
+			return errors.New("google calendar project resource id is empty or invalid")
+		}
 		name := current.GetName()
 		if name == "" {
 			name = "Google Calendar"
@@ -380,6 +434,26 @@ func (h *HandlerV1) popGoogleCalendarOAuthState(ctx context.Context, state strin
 }
 
 func (h *HandlerV1) redirectGoogleCalendarOAuth(c *gin.Context, success bool, reason string, states ...googleCalendarOAuthState) {
+	var state googleCalendarOAuthState
+	if len(states) > 0 {
+		state = states[0]
+	}
+
+	// Preferred path: send the popup back to the frontend origin that opened it
+	// (captured at connect time). It lands on the lightweight
+	// google-calendar-success/error page on the SAME app, which postMessages its
+	// opener and self-closes — exactly like the GitHub/Bitbucket flow. This
+	// avoids surfacing an unrelated dashboard when the configured frontend URL
+	// points at another origin or at the project page.
+	if origin := strings.TrimSpace(state.FrontendOrigin); origin != "" {
+		if target := buildGoogleCalendarOriginRedirect(origin, success, reason, state); target != "" {
+			c.Redirect(http.StatusTemporaryRedirect, target)
+			return
+		}
+	}
+
+	// Fallback: the origin could not be determined — use the configured frontend
+	// URL as before.
 	target := h.baseConf.GoogleCalendarFrontendErrorURL
 	if success {
 		target = h.baseConf.GoogleCalendarFrontendSuccessURL
@@ -394,9 +468,7 @@ func (h *HandlerV1) redirectGoogleCalendarOAuth(c *gin.Context, success bool, re
 		}
 	}
 
-	var state googleCalendarOAuthState
 	if len(states) > 0 {
-		state = states[0]
 		target = applyGoogleCalendarRedirectPlaceholders(target, state)
 	}
 
@@ -430,6 +502,67 @@ func (h *HandlerV1) redirectGoogleCalendarOAuth(c *gin.Context, success bool, re
 	}
 
 	c.Redirect(http.StatusTemporaryRedirect, target)
+}
+
+// resolveGoogleCalendarFrontendOrigin derives the origin (scheme://host) of the
+// app that initiated the OAuth flow from the browser-set Origin header, falling
+// back to the Referer. Both are set by the browser on the connect XHR, so they
+// identify the real caller and are safe to redirect back to (not user-spoofable
+// for a victim's session). Returns "" when neither yields a valid http(s) origin.
+func resolveGoogleCalendarFrontendOrigin(c *gin.Context) string {
+	origin := strings.TrimSpace(c.GetHeader("Origin"))
+	if origin == "" {
+		if ref := strings.TrimSpace(c.Request.Referer()); ref != "" {
+			if u, err := url.Parse(ref); err == nil && u.Scheme != "" && u.Host != "" {
+				origin = u.Scheme + "://" + u.Host
+			}
+		}
+	}
+	if origin == "" {
+		return ""
+	}
+	u, err := url.Parse(origin)
+	if err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.Host == "" {
+		return ""
+	}
+	return u.Scheme + "://" + u.Host
+}
+
+// buildGoogleCalendarOriginRedirect builds the popup redirect URL on the captured
+// frontend origin, pointing at the lightweight success/error close-page and
+// carrying the OAuth result + ids as query params. Returns "" if the URL can't
+// be built so the caller can fall back to the configured target.
+func buildGoogleCalendarOriginRedirect(origin string, success bool, reason string, state googleCalendarOAuthState) string {
+	path := googleCalendarErrorPath
+	if success {
+		path = googleCalendarSuccessPath
+	}
+
+	u, err := url.Parse(strings.TrimRight(origin, "/") + path)
+	if err != nil {
+		return ""
+	}
+
+	q := u.Query()
+	if success {
+		q.Set("google_calendar", "success")
+	} else {
+		q.Set("google_calendar", "error")
+		if reason != "" {
+			q.Set("reason", reason)
+		}
+	}
+	if state.ProjectID != "" {
+		q.Set("project_id", state.ProjectID)
+	}
+	if state.EnvironmentID != "" {
+		q.Set("environment_id", state.EnvironmentID)
+	}
+	if state.McpProjectID != "" {
+		q.Set("mcp_project_id", state.McpProjectID)
+	}
+	u.RawQuery = q.Encode()
+	return u.String()
 }
 
 func applyGoogleCalendarRedirectPlaceholders(target string, state googleCalendarOAuthState) string {

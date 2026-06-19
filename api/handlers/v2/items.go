@@ -960,12 +960,6 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 		return
 	}
 
-	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
-
-	if err != nil {
-		h.HandleResponse(c, status_http.InvalidArgument, err.Error())
-		return
-	}
 	if objectRequest.Data["guid"] != nil {
 		id = objectRequest.Data["guid"].(string)
 	} else {
@@ -976,6 +970,12 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 			h.HandleResponse(c, status_http.BadRequest, "guid is required")
 			return
 		}
+	}
+
+	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
+	if err != nil {
+		h.HandleResponse(c, status_http.InvalidArgument, err.Error())
+		return
 	}
 
 	projectId, ok := c.Get("project_id")
@@ -1190,6 +1190,9 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 	}
 	beforeData := singleObject.GetData().AsMap()
 	if nested, ok := beforeData["data"].(map[string]any); ok {
+		beforeData = nested
+	}
+	if nested, ok := beforeData["response"].(map[string]any); ok {
 		beforeData = nested
 	}
 	syncData := make(map[string]any, len(beforeData)+len(objectRequest.Data)+2)
@@ -1651,6 +1654,15 @@ func (h *HandlerV2) DeleteItem(c *gin.Context) {
 		}
 	}
 
+	syncData := objectRequest.Data
+	if resp != nil && resp.Data != nil {
+		if responseData := resp.Data.AsMap(); len(responseData) > 0 {
+			syncData = responseData
+		}
+	}
+	if _, ok := syncData["guid"]; !ok {
+		syncData["guid"] = objectID
+	}
 	if err := googlecalendar.SyncDelete(c.Request.Context(), googlecalendar.SyncRequest{
 		CompanyServices: h.companyServices,
 		Services:        services,
@@ -1658,7 +1670,7 @@ func (h *HandlerV2) DeleteItem(c *gin.Context) {
 		ProjectID:       projectId.(string),
 		EnvironmentID:   environmentId.(string),
 		TableSlug:       c.Param("collection"),
-		Data:            objectRequest.Data,
+		Data:            syncData,
 		Config:          h.googleCalendarConfig(),
 	}); err != nil {
 		h.log.Error("google calendar delete sync failed", logger.Error(err))
