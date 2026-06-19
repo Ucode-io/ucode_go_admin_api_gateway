@@ -153,6 +153,10 @@ func EnsureHiddenFieldsForTable(ctx context.Context, services services.ServiceMa
 	if table == nil {
 		return errors.New("table is required")
 	}
+	tableID := strings.TrimSpace(table.GetId())
+	if tableID == "" {
+		return errors.New("table id is required")
+	}
 	if strings.TrimSpace(mapping.GetTableSlug()) == "" {
 		mapping.TableSlug = table.GetSlug()
 	}
@@ -198,7 +202,7 @@ func EnsureHiddenFieldsForTable(ctx context.Context, services services.ServiceMa
 			"system":   true,
 		})
 		if _, err := services.GoObjectBuilderService().Field().Create(ctx, &nb.CreateFieldRequest{
-			TableId:    table.GetId(),
+			TableId:    tableID,
 			ProjectId:  resourceEnvID,
 			Slug:       field.slug,
 			Label:      field.label,
@@ -215,13 +219,33 @@ func EnsureHiddenFieldsForTable(ctx context.Context, services services.ServiceMa
 
 func ResolveTable(ctx context.Context, services services.ServiceManagerI, resourceEnvID, tableID, tableSlug string) (*nb.Table, error) {
 	tableID = strings.TrimSpace(tableID)
+	tableSlug = strings.TrimSpace(tableSlug)
+	if strings.TrimSpace(resourceEnvID) == "" {
+		return nil, errors.New("resource environment id is required")
+	}
 	if tableID != "" {
-		return services.GoObjectBuilderService().Table().GetByID(ctx, &nb.TablePrimaryKey{
+		table, err := services.GoObjectBuilderService().Table().GetByID(ctx, &nb.TablePrimaryKey{
 			Id:        tableID,
 			ProjectId: resourceEnvID,
 		})
+		if err != nil {
+			return nil, err
+		}
+		if table == nil {
+			return nil, fmt.Errorf("table %q not found", tableID)
+		}
+		if strings.TrimSpace(table.GetId()) == "" {
+			table.Id = tableID
+		}
+		if strings.TrimSpace(table.GetSlug()) == "" {
+			table.Slug = tableSlug
+		}
+		return table, nil
 	}
-	return findTableBySlug(ctx, services, resourceEnvID, strings.TrimSpace(tableSlug))
+	if tableSlug == "" {
+		return nil, errors.New("table_id or table_slug is required")
+	}
+	return findTableBySlug(ctx, services, resourceEnvID, tableSlug)
 }
 
 func validateMappingFields(mapping *pb.GoogleCalendarMapping, fieldTypes map[string]string) error {
