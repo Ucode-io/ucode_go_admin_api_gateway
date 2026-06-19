@@ -272,8 +272,8 @@ func BaseLoad() BaseConfig {
 	config.GoogleCalendarClientID = cast.ToString(GetOrReturnDefaultValue("GOOGLE_CALENDAR_CLIENT_ID", ""))
 	config.GoogleCalendarClientSecret = cast.ToString(GetOrReturnDefaultValue("GOOGLE_CALENDAR_CLIENT_SECRET", ""))
 	config.GoogleCalendarRedirectURI = cast.ToString(GetOrReturnDefaultValue("GOOGLE_CALENDAR_REDIRECT_URI", ""))
-	config.GoogleCalendarFrontendSuccessURL = cast.ToString(GetOrReturnDefaultValue("GOOGLE_CALENDAR_FRONTEND_SUCCESS_URL", "https://app.u-code.io/settings/google-calendar-success"))
-	config.GoogleCalendarFrontendErrorURL = cast.ToString(GetOrReturnDefaultValue("GOOGLE_CALENDAR_FRONTEND_ERROR_URL", "https://app.u-code.io/settings/google-calendar-error"))
+	config.GoogleCalendarFrontendSuccessURL = cast.ToString(GetOrReturnDefaultValue("GOOGLE_CALENDAR_FRONTEND_SUCCESS_URL", "https://app.u-code.io/settings/google-drive-success"))
+	config.GoogleCalendarFrontendErrorURL = cast.ToString(GetOrReturnDefaultValue("GOOGLE_CALENDAR_FRONTEND_ERROR_URL", "https://app.u-code.io/settings/google-drive-error"))
 
 	config.YandexMetricToken = cast.ToString(GetOrReturnDefaultValue("YANDEX_METRIC_TOKEN", ""))
 

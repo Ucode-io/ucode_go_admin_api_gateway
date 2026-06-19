@@ -33,6 +33,31 @@ type googleCalendarOAuthState struct {
 	UserID        string `json:"user_id"`
 }
 
+type googleCalendarMappingRequest struct {
+	TableID          string `json:"table_id"`
+	TableSlug        string `json:"table_slug"`
+	TitleField       string `json:"title_field"`
+	StartField       string `json:"start_field"`
+	EndField         string `json:"end_field"`
+	DescriptionField string `json:"description_field"`
+	LocationField    string `json:"location_field"`
+	AttendeesField   string `json:"attendees_field"`
+	StatusField      string `json:"status_field"`
+}
+
+func (r googleCalendarMappingRequest) toProto() *pb.GoogleCalendarMapping {
+	return &pb.GoogleCalendarMapping{
+		TableSlug:        strings.TrimSpace(r.TableSlug),
+		TitleField:       strings.TrimSpace(r.TitleField),
+		StartField:       strings.TrimSpace(r.StartField),
+		EndField:         strings.TrimSpace(r.EndField),
+		DescriptionField: strings.TrimSpace(r.DescriptionField),
+		LocationField:    strings.TrimSpace(r.LocationField),
+		AttendeesField:   strings.TrimSpace(r.AttendeesField),
+		StatusField:      strings.TrimSpace(r.StatusField),
+	}
+}
+
 // GoogleCalendarConnect godoc
 // @Security ApiKeyAuth
 // @ID google_calendar_connect
@@ -171,15 +196,12 @@ func (h *HandlerV1) GoogleCalendarCallback(c *gin.Context) {
 // @Summary Save Google Calendar table field mapping
 // @Tags Google Calendar Integration
 func (h *HandlerV1) UpdateGoogleCalendarMapping(c *gin.Context) {
-	var mapping pb.GoogleCalendarMapping
-	if err := c.ShouldBindJSON(&mapping); err != nil {
+	var request googleCalendarMappingRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
 		h.HandleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
-	if err := googlecalendar.ValidateMapping(&mapping); err != nil {
-		h.HandleResponse(c, status_http.BadRequest, err.Error())
-		return
-	}
+	mapping := request.toProto()
 
 	projectID, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectID.(string)) {
@@ -216,12 +238,18 @@ func (h *HandlerV1) UpdateGoogleCalendarMapping(c *gin.Context) {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	if err := googlecalendar.EnsureHiddenFields(c.Request.Context(), services, builderResource.ResourceEnvironmentId, &mapping); err != nil {
+	table, err := googlecalendar.ResolveTable(c.Request.Context(), services, builderResource.ResourceEnvironmentId, request.TableID, mapping.GetTableSlug())
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+	mapping.TableSlug = table.GetSlug()
+	if err := googlecalendar.EnsureHiddenFieldsForTable(c.Request.Context(), services, builderResource.ResourceEnvironmentId, table, mapping); err != nil {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	credentials.Mapping = &mapping
+	credentials.Mapping = mapping
 	credentials.SyncDirection = googlecalendar.SyncDirection
 	credentials.CalendarId = googlecalendar.DefaultCalendarID
 	update := &pb.ProjectResource{
