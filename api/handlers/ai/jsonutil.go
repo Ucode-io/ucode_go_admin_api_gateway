@@ -43,23 +43,46 @@ func ExtractJSONFromText(text string) string {
 	return strings.TrimSpace(text)
 }
 
-// BuildHistoryText converts the last 6 history turns into plain "User: / Assistant: " text.
+// State markers prefixed on assistant messages. The router branches on the
+// most recent one (see DetectConversationState); they must stay in sync with
+// what the chat handler writes.
+const (
+	MarkerQuestionsAsked    = "[QUESTIONS_ASKED]"
+	MarkerDiagramsGenerated = "[DIAGRAMS_GENERATED]"
+	MarkerError             = "[ERROR]"
+)
+
+// routerHistoryWindow caps the transcript sent to the router. Long initial
+// requests (multi-page TZ documents) used to push the [QUESTIONS_ASKED] marker
+// out of a 6-turn window and trigger an infinite question loop.
+const routerHistoryWindow = 12
+
+var stateMarkers = []string{MarkerQuestionsAsked, MarkerDiagramsGenerated, MarkerError}
+
+// BuildHistoryText renders history for the router prompt. The most recent
+// state marker is carried over to the top even when it falls outside the
+// recency window, so routing never depends on what survived truncation.
 func BuildHistoryText(history []models.ChatMessage) string {
 	if len(history) == 0 {
 		return ""
 	}
+
 	start := 0
-	if len(history) > 6 {
-		start = len(history) - 6
+	if len(history) > routerHistoryWindow {
+		start = len(history) - routerHistoryWindow
 	}
+
 	var sb strings.Builder
-	for _, msg := range history[start:] {
-		var text string
-		for _, block := range msg.Content {
-			if block.Type == "text" {
-				text += block.Text
-			}
+	if idx, marker := mostRecentStateMarker(history); marker != "" && idx < start {
+		if firstLine := strings.SplitN(messageText(history[idx]), "\n", 2)[0]; firstLine != "" {
+			sb.WriteString("Assistant (carried over from earlier in the conversation, still describes current state): ")
+			sb.WriteString(firstLine)
+			sb.WriteByte('\n')
 		}
+	}
+
+	for _, msg := range history[start:] {
+		text := messageText(msg)
 		if text == "" {
 			continue
 		}
@@ -69,7 +92,48 @@ func BuildHistoryText(history []models.ChatMessage) string {
 			sb.WriteString("User: ")
 		}
 		sb.WriteString(text)
-		sb.WriteString("\n")
+		sb.WriteByte('\n')
+	}
+	return sb.String()
+}
+
+// DetectConversationState returns the marker on the most recent assistant
+// message, or "" if none. It scans the full history so callers see state
+// even when the marker falls outside the router's truncation window.
+func DetectConversationState(history []models.ChatMessage) string {
+	_, marker := mostRecentStateMarker(history)
+	return marker
+}
+
+// mostRecentStateMarker returns the index and marker of the most recent
+// assistant message that starts with a known marker. If the latest assistant
+// message is not a marker, state is treated as "none" — older markers are
+// considered superseded.
+func mostRecentStateMarker(history []models.ChatMessage) (int, string) {
+	for i := len(history) - 1; i >= 0; i-- {
+		if history[i].Role != "assistant" {
+			continue
+		}
+		text := messageText(history[i])
+		if text == "" {
+			continue
+		}
+		for _, marker := range stateMarkers {
+			if strings.HasPrefix(text, marker) {
+				return i, marker
+			}
+		}
+		return -1, ""
+	}
+	return -1, ""
+}
+
+func messageText(msg models.ChatMessage) string {
+	var sb strings.Builder
+	for _, block := range msg.Content {
+		if block.Type == "text" {
+			sb.WriteString(block.Text)
+		}
 	}
 	return sb.String()
 }

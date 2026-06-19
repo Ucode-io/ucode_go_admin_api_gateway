@@ -673,7 +673,7 @@ func TestMergeAppRoutes_RebuildsFromManifest(t *testing.T) {
 			{Path: "/about", PageName: "AboutPage", FilePath: "src/pages/AboutPage.tsx"},
 		},
 	}
-	got := mergeAppRoutes(files, manifest, "web")
+	got := mergeAppRoutes(files, manifest)
 	var app string
 	for _, f := range got {
 		if f.Path == "src/App.tsx" {
@@ -700,7 +700,7 @@ func TestMergeAppRoutes_SkipsLegacyManifest(t *testing.T) {
 		Routes: []models.ManifestRoute{{Path: "/", PageName: "HomePage", FilePath: "src/pages/HomePage.tsx"}},
 		// ExportStyle deliberately empty → legacy.
 	}
-	got := mergeAppRoutes(files, manifest, "web")
+	got := mergeAppRoutes(files, manifest)
 	for _, f := range got {
 		if f.Path == "src/App.tsx" && f.Content != original {
 			t.Errorf("legacy App.tsx was mutated. before=%q after=%q", original, f.Content)
@@ -724,7 +724,7 @@ func TestMergeAppRoutes_DropsRoutesWithMissingExports(t *testing.T) {
 			{Path: "/about", PageName: "AboutPage", FilePath: "src/pages/AboutPage.tsx"},
 		},
 	}
-	got := mergeAppRoutes(files, manifest, "web")
+	got := mergeAppRoutes(files, manifest)
 	var app string
 	for _, f := range got {
 		if f.Path == "src/App.tsx" {
@@ -752,7 +752,7 @@ export default function Layout() { return <main><Outlet /></main>; }`},
 		ExportStyle: "named-lazy",
 		Routes:      []models.ManifestRoute{{Path: "/", PageName: "HomePage", FilePath: "src/pages/HomePage.tsx"}},
 	}
-	got := mergeAppRoutes(files, manifest, "web")
+	got := mergeAppRoutes(files, manifest)
 	var app string
 	for _, f := range got {
 		if f.Path == "src/App.tsx" {
@@ -779,7 +779,7 @@ func TestMergeAppRoutes_WrapsInLayoutChildren(t *testing.T) {
 		ExportStyle: "named-lazy",
 		Routes:      []models.ManifestRoute{{Path: "/", PageName: "HomePage", FilePath: "src/pages/HomePage.tsx"}},
 	}
-	got := mergeAppRoutes(files, manifest, "web")
+	got := mergeAppRoutes(files, manifest)
 	var app string
 	for _, f := range got {
 		if f.Path == "src/App.tsx" {
@@ -808,7 +808,7 @@ func TestMergeAppRoutes_NoLayoutNoWrap(t *testing.T) {
 		ExportStyle: "named-lazy",
 		Routes:      []models.ManifestRoute{{Path: "/", PageName: "HomePage", FilePath: "src/pages/HomePage.tsx"}},
 	}
-	got := mergeAppRoutes(files, manifest, "web")
+	got := mergeAppRoutes(files, manifest)
 	var app string
 	for _, f := range got {
 		if f.Path == "src/App.tsx" {
@@ -840,7 +840,7 @@ func TestEnsureDefaultRoutes_InjectsRootAndDashboard(t *testing.T) {
 			{Path: "/orders", PageName: "OrdersPage", FilePath: "src/pages/OrdersPage.tsx"},
 		},
 	}
-	got := mergeAppRoutes(files, manifest, "web")
+	got := mergeAppRoutes(files, manifest)
 	var app string
 	for _, f := range got {
 		if f.Path == "src/App.tsx" {
@@ -869,7 +869,7 @@ func TestEnsureDefaultRoutes_RespectsExistingDashboardMapping(t *testing.T) {
 			{Path: "/overview", PageName: "DashboardPage", FilePath: "src/pages/DashboardPage.tsx"},
 		},
 	}
-	got := mergeAppRoutes(files, manifest, "web")
+	got := mergeAppRoutes(files, manifest)
 	var app string
 	for _, f := range got {
 		if f.Path == "src/App.tsx" {
@@ -918,7 +918,7 @@ func TestMergeAppRoutes_EmitsWildcardCatch(t *testing.T) {
 		Routes:      []models.ManifestRoute{{Path: "/", PageName: "HomePage", FilePath: "src/pages/HomePage.tsx"}},
 	}
 	for _, c := range cases {
-		got := mergeAppRoutes(c.files, manifest, "web")
+		got := mergeAppRoutes(c.files, manifest)
 		var app string
 		for _, f := range got {
 			if f.Path == "src/App.tsx" {
@@ -1047,82 +1047,6 @@ func TestValidateWebAppUIQualityAcceptsSolidStickyHeader(t *testing.T) {
 	}
 }
 
-func TestMergeAppRoutes_AdminPanelAddsLoginAndProtectedRoute(t *testing.T) {
-	files := []models.ProjectFile{
-		{Path: "src/App.tsx", Content: `// overwritten`},
-		{Path: "src/components/layout/Layout.tsx", Content: `import { Outlet } from 'react-router-dom'; export default function Layout() { return <Outlet />; }`},
-		{Path: "src/pages/HomePage.tsx", Content: `export function HomePage() {}`},
-	}
-	manifest := &models.ProjectManifest{
-		ExportStyle: "named-lazy",
-		Routes:      []models.ManifestRoute{{Path: "/", PageName: "HomePage", FilePath: "src/pages/HomePage.tsx"}},
-	}
-
-	got := mergeAppRoutes(files, manifest, "admin_panel")
-	var app string
-	for _, f := range got {
-		if f.Path == "src/App.tsx" {
-			app = f.Content
-		}
-	}
-
-	for _, expected := range []string{
-		"@/components/auth/LoginPage",
-		"@/components/auth/ProtectedRoute",
-		`path="/login"`,
-		"<ProtectedRoute><Layout /></ProtectedRoute>",
-	} {
-		if !contains(app, expected) {
-			t.Fatalf("expected %q in admin App.tsx, got:\n%s", expected, app)
-		}
-	}
-}
-
-func TestValidateAdminPanelAuthFlagsUngatedSidebar(t *testing.T) {
-	files := []models.ProjectFile{
-		{Path: "src/App.tsx", Content: `import { LoginPage } from '@/components/auth/LoginPage'; import { ProtectedRoute } from '@/components/auth/ProtectedRoute'; export default function App(){ return <><Route path="/login" element={<LoginPage />} /><ProtectedRoute><div /></ProtectedRoute></>; }`},
-		{Path: "src/lib/auth.ts", Content: `export function getToken(){ return null }`},
-		{Path: "src/lib/permissions.ts", Content: `export function useUcodePermissions(){ return {} } export function canRead(){ return true }`},
-		{Path: "src/components/auth/LoginPage.tsx", Content: `export function LoginPage(){ return null }`},
-		{Path: "src/components/auth/ProtectedRoute.tsx", Content: `export function ProtectedRoute({children}){ return children }`},
-		{Path: "src/components/layout/Sidebar.tsx", Content: `export function Sidebar(){ const navItems = [{ path: '/users' }]; return <nav>{navItems.length}</nav> }`},
-	}
-
-	errs := validateAdminPanelAuth(files)
-	found := false
-	for _, err := range errs {
-		if err.File == "src/components/layout/Sidebar.tsx" && contains(err.Message, "useUcodePermissions") {
-			found = true
-		}
-	}
-	if !found {
-		t.Fatalf("expected ungated Sidebar auth validation error, got: %+v", errs)
-	}
-}
-
-func TestValidateAdminPanelAuthFlagsManualApiKeyHeaders(t *testing.T) {
-	files := []models.ProjectFile{
-		{Path: "src/App.tsx", Content: `import { LoginPage } from '@/components/auth/LoginPage'; import { ProtectedRoute } from '@/components/auth/ProtectedRoute'; export default function App(){ return <><Route path="/login" element={<LoginPage />} /><ProtectedRoute><div /></ProtectedRoute></>; }`},
-		{Path: "src/lib/auth.ts", Content: `export function getToken(){ return null }`},
-		{Path: "src/lib/permissions.ts", Content: `export function useUcodePermissions(){ return {} } export function canRead(){ return true }`},
-		{Path: "src/components/auth/LoginPage.tsx", Content: `export function LoginPage(){ return null }`},
-		{Path: "src/components/auth/ProtectedRoute.tsx", Content: `export function ProtectedRoute({children}){ return children }`},
-		{Path: "src/components/layout/Sidebar.tsx", Content: `import { useUcodePermissions, canRead } from '@/lib/permissions'; export function Sidebar(){ const perms = useUcodePermissions(); return canRead(perms, '/users') ? <nav /> : null }`},
-		{Path: "src/pages/UsersPage.tsx", Content: `export function UsersPage(){ fetch('/v2/items/users', { headers: { Authorization: 'API-KEY' } }); return null }`},
-	}
-
-	errs := validateAdminPanelAuth(files)
-	found := false
-	for _, err := range errs {
-		if err.File == "src/pages/UsersPage.tsx" && contains(err.Message, "API-KEY") {
-			found = true
-		}
-	}
-	if !found {
-		t.Fatalf("expected manual API-key validation error, got: %+v", errs)
-	}
-}
-
 func contains(s, substr string) bool {
 	return len(s) >= len(substr) && searchSubstring(s, substr)
 }
@@ -1134,78 +1058,4 @@ func searchSubstring(s, substr string) bool {
 		}
 	}
 	return false
-}
-
-// TestDependentExports_PreservesDependedOnExports verifies the reverse-dependency
-// contract that fix (b) feeds into repairSingleFile: every name another file imports
-// from a target file is reported, so an isolated repair never silently drops it.
-// Regression for the Header→Sidebar "No matching export SidebarContent" build break:
-// before the fix, repairing Sidebar.tsx alone could drop the SidebarContent export
-// that Header.tsx imports.
-func TestDependentExports_PreservesDependedOnExports(t *testing.T) {
-	files := []models.ProjectFile{
-		{
-			Path: "src/components/layout/Sidebar.tsx",
-			Content: "import { useUcodePermissions, canRead } from '@/lib/permissions';\n" +
-				"export function SidebarContent() { return null; }\n" +
-				"export function Sidebar() { return <SidebarContent />; }",
-		},
-		{
-			// Header imports an INTERNAL of Sidebar — the exact bug shape.
-			Path:    "src/components/layout/Header.tsx",
-			Content: "import { SidebarContent } from './Sidebar';\nexport function Header() { return <SidebarContent />; }",
-		},
-		{
-			// Layout imports the top-level component.
-			Path:    "src/components/layout/Layout.tsx",
-			Content: "import { Sidebar } from './Sidebar';\nexport function Layout() { return <Sidebar />; }",
-		},
-		{
-			// Unrelated file — npm import + a DIFFERENT local file. Must NOT
-			// contribute to Sidebar's dependent set.
-			Path:    "src/pages/OrdersPage.tsx",
-			Content: "import React from 'react';\nimport { Button } from '@/components/ui/button';\nexport function OrdersPage() { return <Button />; }",
-		},
-	}
-
-	got := dependentExports("src/components/layout/Sidebar.tsx", files)
-	want := []string{"Sidebar", "SidebarContent"} // sorted; both depended on
-	if !equalStringSlices(got, want) {
-		t.Fatalf("dependentExports(Sidebar.tsx) = %v, want %v (SidebarContent MUST be surfaced so a repair keeps it)", got, want)
-	}
-}
-
-// TestDependentExports_DefaultImportAndExclusions checks that a default import is
-// reported as "default", and that a file nobody imports yields an empty set (npm
-// imports point away and never count).
-func TestDependentExports_DefaultImportAndExclusions(t *testing.T) {
-	files := []models.ProjectFile{
-		{
-			Path:    "src/components/ui/button.tsx",
-			Content: "import React from 'react';\nexport default function Button() { return null; }",
-		},
-		{
-			Path:    "src/pages/HomePage.tsx",
-			Content: "import Button from '@/components/ui/button';\nexport function HomePage() { return <Button />; }",
-		},
-	}
-
-	if got := dependentExports("src/components/ui/button.tsx", files); !equalStringSlices(got, []string{"default"}) {
-		t.Fatalf("dependentExports(button.tsx) = %v, want [default]", got)
-	}
-	if got := dependentExports("src/pages/HomePage.tsx", files); len(got) != 0 {
-		t.Errorf("expected no dependents for HomePage.tsx (only an npm import points away), got %v", got)
-	}
-}
-
-func equalStringSlices(a, b []string) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for i := range a {
-		if a[i] != b[i] {
-			return false
-		}
-	}
-	return true
 }

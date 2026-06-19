@@ -27,6 +27,65 @@ const (
 	EvMobileProj SSEEventType = "mobile_project"
 	EvDone       SSEEventType = "done"
 	EvError      SSEEventType = "error"
+	// EvWarning marks a recoverable problem the AI ran into (e.g. a single tool
+	// call failed) — generation continues. Distinct from the terminal EvError so
+	// the frontend can render it as an inline note instead of a fatal banner.
+	EvWarning SSEEventType = "warning"
+)
+
+const (
+	// Status & feedback
+	IconCheckCircle   = "check-circle"   // success, done
+	IconAlertCircle   = "alert-circle"   // error
+	IconAlertTriangle = "alert-triangle" // warning, partial error
+	IconBan           = "ban"            // hard stop (e.g. token limit)
+
+	// AI / generation
+	IconSparkles = "sparkles" // AI start, initial prompt
+	IconBrain    = "brain"    // model thinking / heartbeat
+	IconCPU      = "cpu"      // active model / provider
+	IconZap      = "zap"      // parallel generation
+	IconBot      = "bot"      // agent design
+
+	// Schema building (ucode)
+	IconDatabase   = "database"    // table create/done
+	IconColumns    = "columns"     // field added
+	IconLink       = "link"        // relation created
+	IconFolder     = "folder"      // menu folder
+	IconFolderOpen = "folder-open" // folder open / browse
+	IconFolderPlus = "folder-plus" // new folder created
+	IconPlusCircle = "plus-circle" // insert rows / add item
+
+	// Code / files
+	IconCode      = "code-2"    // code generation / editing
+	IconFileText  = "file-text" // document / page / file
+	IconFileDiff  = "file-diff" // diff / planner output
+	IconFileEdit  = "file-edit" // editing existing file
+	IconFilePlus  = "file-plus" // creating new file
+	IconFileCode  = "file-code" // source code file
+	IconListTree  = "list-tree" // file/page structure
+	IconGitBranch = "git-branch"
+
+	// Project / publish
+	IconUploadCloud  = "upload-cloud"        // deploy / publish
+	IconScanSearch   = "scan-search"         // analyse / inspect
+	IconPackage      = "package"             // feature chunk
+	IconLayers       = "layers"              // UI kit / foundation
+	IconLayout       = "layout"              // page layout
+	IconPlug         = "plug"                // agent / integration
+	IconMousePointer = "mouse-pointer-click" // interactive / visual edit
+	IconSmartphone   = "smartphone"          // mobile project
+	IconImage        = "image"               // image / photo
+	IconGlobe        = "globe"               // public / web
+	IconSettings     = "settings"            // config files
+
+	// Auth / roles
+	IconShield      = "shield"       // role creation
+	IconShieldCheck = "shield-check" // role ready
+	IconUsers       = "users"        // client types
+
+	// Agent / tool
+	IconWrench = "wrench" // repair / fix
 )
 
 // SSEEvent is a single server-sent event in the generation progress stream.

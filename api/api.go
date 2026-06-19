@@ -42,6 +42,9 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 	r.GET("/v1/fare", h.V1.GetAllFares)
 	r.GET("v1/chart", h.V1.GetChart)
+
+	// Public: lightweight X-API-KEY validation for session bootstrap (MCP). No AuthMiddleware/billing.
+	r.GET("/v1/api-key/validate", h.V1.ValidateApiKey)
 	r.Any("v1/functions/:function-id/run", h.V1.FunctionRun)
 
 	r.Any("/v1/transcoder/webhook", h.V1.TranscoderWebhook)
@@ -395,6 +398,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			aiChat.DELETE("/:chat-id", h.V1.DeleteAiChat)
 
 			aiChat.POST("/new-messages/:chat-id", h.V1.CreateAiChatMessage)
+			aiChat.POST("/ucode-messages/:chat-id", h.V1.CreateUcodeChatMessage)
 			aiChat.GET("/messages/:chat-id", h.V1.GetAiChatMessages)
 			aiChat.POST("/messages/:message_id/reaction", h.V1.SetAiChatMessageReaction)
 			aiChat.DELETE("/messages/:message_id/reaction", h.V1.DeleteAiChatMessageReaction)
@@ -424,6 +428,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			ugen.GET("/user-projects", h.V1.GetUgenUserProjects)
 			ugen.GET("/company-projects", h.V1.GetUgenCompanyProjects)
 			ugen.GET("/projects/all", h.V1.ListUgenProjects)
+			ugen.GET("/projects/export", h.V1.ExportUgenProjects)
 		}
 
 		projectFolders := v1Admin.Group("/project-folders")
@@ -487,16 +492,9 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	}
 
 	clientV2 := r.Group("/v2")
-	clientV2.POST("/login", h.V2.V2Login)
 	clientV2.Use(h.V2.AuthMiddleware())
 	clientV2.Use(tracker.ApiCallCountMiddleware())
 	clientV2.Use(tracker.BillingLimitMiddleware())
-
-	v2CustomPermission := clientV2.Group("/custom-permission")
-	{
-		v2CustomPermission.GET("/nav-map", h.V2.GetCustomPermissionNavMap)
-	}
-
 	// items group
 	v2Items := clientV2.Group("/items")
 	{

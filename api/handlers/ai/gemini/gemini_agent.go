@@ -29,7 +29,8 @@ func NewGeminiAgent(conf config.BaseConfig, pool *KeyPool, tracker ai.UsageTrack
 
 func (a *GeminiAgent) RouteRequest(_ context.Context, in models.RouterInput) (*models.HaikuRoutingResult, error) {
 	historyText := ai.BuildHistoryText(in.History)
-	content := chat_prompts.BuildRouterMessage(in.UserMessage, in.FileGraphJSON, in.HasImages, historyText)
+	state := ai.DetectConversationState(in.History)
+	content := chat_prompts.BuildRouterMessage(in.UserMessage, in.FileGraphJSON, in.HasImages, historyText, state)
 
 	contents := []geminiContent{
 		{Role: "user", Parts: []geminiPart{{Text: content}}},

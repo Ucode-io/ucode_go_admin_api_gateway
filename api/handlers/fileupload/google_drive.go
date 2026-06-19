@@ -122,6 +122,9 @@ func (u *GoogleDriveUploader) UploadIfConfigured(ctx context.Context, req Google
 		Type:          pb.ResourceType_GOOGLE_DRIVE,
 	})
 	if err != nil {
+		if IsUnsupportedGoogleDriveResourceTypeError(err) {
+			return nil, false, nil
+		}
 		return nil, false, err
 	}
 
@@ -556,6 +559,15 @@ func newDriveService(ctx context.Context, credentials *pb.GoogleDriveCredentials
 
 func shouldMakePublic(visibility string) bool {
 	return strings.ToLower(strings.TrimSpace(visibility)) != driveVisibilityPrivate
+}
+
+func IsUnsupportedGoogleDriveResourceTypeError(err error) bool {
+	if err == nil {
+		return false
+	}
+	msg := strings.ToLower(err.Error())
+	return strings.Contains(msg, "invalid input value for enum resource_type") &&
+		(strings.Contains(msg, `"15"`) || strings.Contains(msg, "google_drive"))
 }
 
 func ProjectFolderName(projectName, projectID string) string {

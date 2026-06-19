@@ -270,6 +270,9 @@ func (h *HandlerV1) ensureGoogleDriveFolderMenuForExistingResource(ctx context.C
 		Type:          pb.ResourceType_GOOGLE_DRIVE,
 	})
 	if err != nil {
+		if fileupload.IsUnsupportedGoogleDriveResourceTypeError(err) {
+			return nil
+		}
 		return err
 	}
 	if len(list.GetResources()) == 0 {

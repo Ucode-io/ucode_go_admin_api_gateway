@@ -974,6 +974,11 @@ func (p *ChatProcessor) saveMessage(ctx context.Context, role, content string, i
 	})
 }
 
+// chatHistoryWindow is wider than the router's own window so
+// DetectConversationState can still find a state marker that fell outside the
+// router's view (e.g. when a long TZ was pasted between question and answer).
+const chatHistoryWindow = 20
+
 func (p *ChatProcessor) getChatHistory(ctx context.Context) ([]models.ChatMessage, error) {
 	messages, err := p.service.GoObjectBuilderService().AiChat().GetMessages(ctx, &pbo.GetMessagesRequest{
 		ResourceEnvId: p.resourceEnvId,
@@ -984,25 +989,33 @@ func (p *ChatProcessor) getChatHistory(ctx context.Context) ([]models.ChatMessag
 	}
 
 	msgList := messages.GetMessages()
-	if len(msgList) > 10 {
-		msgList = msgList[len(msgList)-10:]
+	if len(msgList) > chatHistoryWindow {
+		msgList = msgList[len(msgList)-chatHistoryWindow:]
 	}
 
 	result := make([]models.ChatMessage, 0, len(msgList))
 	for _, msg := range msgList {
-		text := msg.GetContent()
-		// Strip embedded JSON — the AI only needs the marker + description for state detection.
-		if strings.HasPrefix(text, "[DIAGRAMS_GENERATED] ") || strings.HasPrefix(text, "[QUESTIONS_ASKED] ") {
-			if idx := strings.Index(text, "\n"); idx != -1 {
-				text = text[:idx]
-			}
-		}
 		result = append(result, models.ChatMessage{
 			Role:    msg.GetRole(),
-			Content: []models.ContentBlock{{Type: "text", Text: text}},
+			Content: []models.ContentBlock{{Type: "text", Text: stripMarkerJSON(msg.GetContent())}},
 		})
 	}
 	return result, nil
+}
+
+// stripMarkerJSON drops the JSON payload from a marker-prefixed message so the
+// router context stays small. The marker and one-line summary are kept because
+// DetectConversationState branches on the prefix.
+func stripMarkerJSON(text string) string {
+	switch {
+	case strings.HasPrefix(text, ai.MarkerDiagramsGenerated+" "),
+		strings.HasPrefix(text, ai.MarkerQuestionsAsked+" "),
+		strings.HasPrefix(text, ai.MarkerError+" "):
+		if idx := strings.Index(text, "\n"); idx != -1 {
+			return text[:idx]
+		}
+	}
+	return text
 }
 
 func (p *ChatProcessor) saveProject(ctx context.Context, req *models.ParsedClaudeResponse) (*pbo.McpProject, error) {
@@ -1071,18 +1084,9 @@ func buildAPIConfigBlock(baseURL string, projectData *models.ProjectData, plan *
 		loginTableSlugs []string
 	)
 
-	projectType := ""
-	if plan != nil {
-		projectType = plan.ProjectType
-	}
-	authMode := resolveGeneratedAuthMode(projectData, projectType)
 	apiKey := ""
-	ucodeProjectId := ""
-	environmentId := ""
 	if projectData != nil {
 		apiKey = projectData.ApiKey
-		ucodeProjectId = projectData.UcodeProjectId
-		environmentId = projectData.EnvironmentId
 	}
 
 	for _, f := range GetTemplateContext() {
@@ -1097,35 +1101,10 @@ func buildAPIConfigBlock(baseURL string, projectData *models.ProjectData, plan *
 	}
 
 	sb.WriteString(fmt.Sprintf(
-		"\n====================================\nAPI CONFIGURATION FOR FRONTEND\n====================================\n%s: %s\n%s: %s\nVITE_UCODE_AUTH_MODE: %s\nVITE_UCODE_PROJECT_ID: %s\nVITE_UCODE_ENVIRONMENT_ID: %s\n",
-		envBaseURLKey, baseURL, envAPIKeyKey, apiKey, authMode, ucodeProjectId, environmentId,
+		"\n====================================\nAPI CONFIGURATION FOR FRONTEND\n====================================\n%s: %s\n%s: %s\n\nREQUIRED axios headers (BOTH — never omit either):\n  headers: { 'Authorization': 'API-KEY', '%s': import.meta.env.%s }\n\nTables to use:\n",
+		envBaseURLKey, baseURL, envAPIKeyKey, apiKey,
+		envAPIKeyKey, envAPIKeyKey,
 	))
-
-	if authMode == "login" {
-		sb.WriteString(`
-AUTH MODE = login:
-  Public/share runtime MUST use real end-user login and Bearer auth.
-  Login endpoint: POST /v2/login with header Environment-Id: import.meta.env.VITE_UCODE_ENVIRONMENT_ID
-  Login body: { username, password, client_type, project_id: import.meta.env.VITE_UCODE_PROJECT_ID }
-  Token: data.token.access_token from the login response.
-  After login: GET /v2/custom-permission/nav-map with Authorization: Bearer <token>.
-  All /v2/items/* data requests in public runtime: Authorization: Bearer <token>.
-  Do NOT send X-API-KEY for public runtime data requests in login mode.
-  Pre-login client type bootstrap: GET /v2/items/client_type may use the static API-key headers below so LoginPage can pass client_type to /v2/login.
-  Trusted ugen preview exception: if window.__UCODE_PREVIEW_CONTEXT?.trusted is true or a UCODE_PREVIEW_CONTEXT postMessage is received, skip LoginPage and use the static API key headers below for preview data only.
-
-STATIC PREVIEW headers for trusted ugen preview only:
-  headers: { 'Authorization': 'API-KEY', '` + envAPIKeyKey + `': import.meta.env.` + envAPIKeyKey + ` }
-
-`)
-	} else {
-		sb.WriteString(fmt.Sprintf(
-			"\nAUTH MODE = none:\nREQUIRED axios headers (BOTH — never omit either):\n  headers: { 'Authorization': 'API-KEY', '%s': import.meta.env.%s }\n\n",
-			envAPIKeyKey, envAPIKeyKey,
-		))
-	}
-
-	sb.WriteString("Tables to use:\n")
 
 	for _, t := range plan.Tables {
 		if t.IsLoginTable {

@@ -211,21 +211,9 @@ ICON RENDERING (CRITICAL — never render an icon NAME as text):
   RULE: a value like "zap" / "shopping cart" / "arrow-down-left" is a LOOKUP KEY, never JSX text.
   RULE: every icon on screen is a <LucideComponent /> imported from 'lucide-react' (or an inline <svg>), with className sizing.
 
-AUTH MODE RULE:
-  Default is AUTH MODE = none: never generate Login/Register pages, ProtectedRoute, AuthGuard,
-  useAuth, auth context, logout buttons, token management, or /login redirects. The app starts directly on the main screen.
-
-  If the API CONFIGURATION block explicitly says AUTH MODE = login, this overrides the default NO AUTH rule:
-    - Generate src/lib/auth.ts with sessionStorage token helpers, login(), logout(), getToken(), and a request interceptor for apiClient.
-    - Generate a LoginPage and ProtectedRoute. Without a token, public/share runtime shows LoginPage.
-    - LoginPage must know client_type. Fetch GET /v2/items/client_type before login using static API-key headers, show a Select when multiple client types exist, and pass the selected guid as client_type.
-    - login() calls POST /v2/login with header Environment-Id: import.meta.env.VITE_UCODE_ENVIRONMENT_ID and body:
-        { username, password, client_type, project_id: import.meta.env.VITE_UCODE_PROJECT_ID }
-      Store data.token.access_token from the response.
-    - After login, call GET /v2/custom-permission/nav-map with Authorization: Bearer <token> and feed it into src/lib/permissions.ts.
-    - Public/share /v2/items/* data requests after login use Authorization: Bearer <token>, not API-KEY. The only public pre-login API-key exception is GET /v2/items/client_type for the LoginPage selector.
-    - Trusted ugen preview exception: if window.__UCODE_PREVIEW_CONTEXT?.trusted is true or UCODE_PREVIEW_CONTEXT postMessage is received, bypass LoginPage and keep static API-key headers for preview data only.
-    - Bottom navigation/sidebar is deny-by-default after nav-map loads: hide items whose route is missing or read=false.
+NO AUTH: Never generate Login/Register pages, ProtectedRoute, AuthGuard,
+  useAuth, auth context, logout buttons, token management, or /login redirects.
+  The app starts directly on the main screen.
 
 BANNED CONFIG FILES — NEVER include these in files[] (pre-built in project template):
   tsconfig.json · tsconfig.node.json · vite.config.ts · vite.config.js
@@ -350,17 +338,8 @@ BOTTOM TAB NAV RULES:
     FileText, Folder, MessageSquare, Hash, Users, UserCircle, User, Wallet, CreditCard,
     Send, ArrowLeftRight, Search, Bell, Settings, Plus, Star, BarChart3, Compass
   NEVER use icon names that don't exist in lucide-react — they render as blank/broken.
-  Each tab MUST expose its route as one of: path, href, or to. Prefer path, but if the local
-  NavItem type uses href, use href consistently. Active state compares location.pathname with that
-  route using startsWith for nested routes.
-
-PERMISSION-GATED NAV (MANDATORY in AUTH MODE = login when bottom nav/sidebar/top-nav exists):
-  Create src/lib/permissions.ts with useUcodePermissions(), setUcodePermissions(), and canRead().
-  Gate every nav item with const getNavRoute = (item: any) => item.path || item.href || item.to || "/";
-  then render only navItems.filter((item) => canRead(perms, getNavRoute(item))). The custom permission
-  attributes.nav_path value must equal that route string, e.g. "/employees" for href: "/employees".
-  In AUTH MODE = login, after nav-map is loaded, missing routes are not readable. Do not show the full
-  nav before nav-map finishes loading. In AUTH MODE = none, an empty permission map defaults to visible.
+  Each tab: { icon: LucideIcon, label: string, path: string }
+  Active state: compare location.pathname with item.path using startsWith for nested routes.
 
 STEP 3 — Design Tokens:
   Design tokens are provided in the "DESIGN TOKENS:" block in your prompt.

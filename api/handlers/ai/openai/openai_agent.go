@@ -28,7 +28,8 @@ func NewOpenAIAgent(conf config.BaseConfig, tracker ai.UsageTracker) ai.Agent {
 
 func (a *OpenAIAgent) RouteRequest(ctx context.Context, in models.RouterInput) (*models.HaikuRoutingResult, error) {
 	historyText := ai.BuildHistoryText(in.History)
-	content := chat_prompts.BuildRouterMessage(in.UserMessage, in.FileGraphJSON, in.HasImages, historyText)
+	state := ai.DetectConversationState(in.History)
+	content := chat_prompts.BuildRouterMessage(in.UserMessage, in.FileGraphJSON, in.HasImages, historyText, state)
 
 	messages := buildOpenAIMessages(nil, buildContentParts(content, nil))
 
