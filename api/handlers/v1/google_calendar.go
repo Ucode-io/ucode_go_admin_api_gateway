@@ -231,11 +231,15 @@ func (h *HandlerV1) UpdateGoogleCalendarMapping(c *gin.Context) {
 
 	resource, credentials, configured, err := googlecalendar.GetConfiguredResource(c.Request.Context(), h.companyServices, projectID.(string), environmentID.(string))
 	if err != nil {
-		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		h.HandleResponse(c, status_http.GRPCError, fmt.Errorf("get configured google calendar resource: %w", err).Error())
 		return
 	}
 	if !configured || credentials == nil || strings.TrimSpace(credentials.GetRefreshToken()) == "" {
 		h.HandleResponse(c, status_http.BadRequest, "use /v1/google-calendar/connect to connect Google Calendar")
+		return
+	}
+	if !util.IsValidUUID(resource.GetId()) {
+		h.HandleResponse(c, status_http.InternalServerError, "google calendar project resource id is empty or invalid")
 		return
 	}
 
@@ -245,22 +249,26 @@ func (h *HandlerV1) UpdateGoogleCalendarMapping(c *gin.Context) {
 		ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 	})
 	if err != nil {
-		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		h.HandleResponse(c, status_http.GRPCError, fmt.Errorf("get builder service resource: %w", err).Error())
+		return
+	}
+	if !util.IsValidUUID(builderResource.GetResourceEnvironmentId()) {
+		h.HandleResponse(c, status_http.InternalServerError, "builder resource environment id is empty or invalid")
 		return
 	}
 	services, err := h.GetProjectSrvc(c.Request.Context(), projectID.(string), builderResource.NodeType)
 	if err != nil {
-		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		h.HandleResponse(c, status_http.GRPCError, fmt.Errorf("get project object-builder service: %w", err).Error())
 		return
 	}
 	table, err := googlecalendar.ResolveTable(c.Request.Context(), services, builderResource.ResourceEnvironmentId, request.TableID, mapping.GetTableSlug())
 	if err != nil {
-		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		h.HandleResponse(c, status_http.GRPCError, fmt.Errorf("resolve google calendar mapping table: %w", err).Error())
 		return
 	}
 	mapping.TableSlug = table.GetSlug()
 	if err := googlecalendar.EnsureHiddenFieldsForTable(c.Request.Context(), services, builderResource.ResourceEnvironmentId, table, mapping); err != nil {
-		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		h.HandleResponse(c, status_http.GRPCError, fmt.Errorf("ensure google calendar hidden fields: %w", err).Error())
 		return
 	}
 
@@ -280,7 +288,7 @@ func (h *HandlerV1) UpdateGoogleCalendarMapping(c *gin.Context) {
 		update.Name = "Google Calendar"
 	}
 	if _, err := h.companyServices.Resource().UpdateProjectResource(c.Request.Context(), update); err != nil {
-		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		h.HandleResponse(c, status_http.GRPCError, fmt.Errorf("update google calendar project resource: %w", err).Error())
 		return
 	}
 
@@ -341,6 +349,9 @@ func (h *HandlerV1) upsertGoogleCalendarResource(ctx context.Context, state goog
 
 	if len(list.GetResources()) == 1 {
 		current := list.GetResources()[0]
+		if !util.IsValidUUID(current.GetId()) {
+			return errors.New("google calendar project resource id is empty or invalid")
+		}
 		name := current.GetName()
 		if name == "" {
 			name = "Google Calendar"

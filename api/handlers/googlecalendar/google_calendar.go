@@ -12,6 +12,7 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/services"
 
+	"github.com/google/uuid"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	calendar "google.golang.org/api/calendar/v3"
@@ -153,6 +154,10 @@ func EnsureHiddenFieldsForTable(ctx context.Context, services services.ServiceMa
 	if table == nil {
 		return errors.New("table is required")
 	}
+	resourceEnvID = strings.TrimSpace(resourceEnvID)
+	if resourceEnvID == "" {
+		return errors.New("resource environment id is required")
+	}
 	tableID := strings.TrimSpace(table.GetId())
 	if tableID == "" {
 		return errors.New("table id is required")
@@ -169,7 +174,7 @@ func EnsureHiddenFieldsForTable(ctx context.Context, services services.ServiceMa
 		ProjectId: resourceEnvID,
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("get fields for table %q: %w", mapping.GetTableSlug(), err)
 	}
 
 	existing := make(map[string]bool, len(fields.GetFields()))
@@ -202,6 +207,7 @@ func EnsureHiddenFieldsForTable(ctx context.Context, services services.ServiceMa
 			"system":   true,
 		})
 		if _, err := services.GoObjectBuilderService().Field().Create(ctx, &nb.CreateFieldRequest{
+			Id:         uuid.NewString(),
 			TableId:    tableID,
 			ProjectId:  resourceEnvID,
 			Slug:       field.slug,
@@ -210,7 +216,7 @@ func EnsureHiddenFieldsForTable(ctx context.Context, services services.ServiceMa
 			IsVisible:  false,
 			Attributes: attributes,
 		}); err != nil {
-			return err
+			return fmt.Errorf("create hidden field %q for table_id %q project_id %q: %w", field.slug, tableID, resourceEnvID, err)
 		}
 	}
 
@@ -229,7 +235,7 @@ func ResolveTable(ctx context.Context, services services.ServiceManagerI, resour
 			ProjectId: resourceEnvID,
 		})
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("get table by id %q project_id %q: %w", tableID, resourceEnvID, err)
 		}
 		if table == nil {
 			return nil, fmt.Errorf("table %q not found", tableID)
@@ -239,6 +245,9 @@ func ResolveTable(ctx context.Context, services services.ServiceManagerI, resour
 		}
 		if strings.TrimSpace(table.GetSlug()) == "" {
 			table.Slug = tableSlug
+		}
+		if strings.TrimSpace(table.GetSlug()) == "" {
+			return nil, fmt.Errorf("table %q has empty slug; send table_slug with the mapping request", tableID)
 		}
 		return table, nil
 	}
@@ -500,12 +509,20 @@ func saveSyncState(ctx context.Context, req SyncRequest, eventID, status, lastEr
 }
 
 func findTableBySlug(ctx context.Context, services services.ServiceManagerI, resourceEnvID, tableSlug string) (*nb.Table, error) {
+	resourceEnvID = strings.TrimSpace(resourceEnvID)
+	tableSlug = strings.TrimSpace(tableSlug)
+	if resourceEnvID == "" {
+		return nil, errors.New("resource environment id is required")
+	}
+	if tableSlug == "" {
+		return nil, errors.New("table_slug is required")
+	}
 	tables, err := services.GoObjectBuilderService().Table().GetAll(ctx, &nb.GetAllTablesRequest{
 		ProjectId: resourceEnvID,
 		Limit:     1000,
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get tables for project_id %q: %w", resourceEnvID, err)
 	}
 	for _, table := range tables.GetTables() {
 		if table.GetSlug() == tableSlug {
