@@ -43,6 +43,7 @@ const (
 	StepActionRelation = "relation"
 	StepActionMenu     = "menu"
 	StepActionItems    = "items"
+	StepActionData     = "data" // read-only query (count / list / aggregate)
 )
 
 // Step statuses describe the lifecycle of a single build step.
@@ -229,6 +230,8 @@ func ucodeToolMeta(toolName string) (action, icon, noun string) {
 		return StepActionMenu, IconFolder, "раздел меню"
 	case toolInsertItems:
 		return StepActionItems, IconPlusCircle, "записи"
+	case toolCountItems, toolListItems, toolAggregateItems:
+		return StepActionData, IconScanSearch, "данные"
 	default:
 		return toolName, IconAlertTriangle, toolName
 	}

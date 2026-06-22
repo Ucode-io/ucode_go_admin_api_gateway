@@ -21,11 +21,32 @@ const (
 	toolCreateRelation = "create_relation"
 	toolCreateMenu     = "create_menu"
 	toolInsertItems    = "insert_items"
+
+	toolCountItems     = "count_items"
+	toolListItems      = "list_items"
+	toolAggregateItems = "aggregate_items"
+)
+
+const (
+	ucodeListDefaultLimit = 20
+	ucodeListMaxLimit     = 50
 )
 
 var ucodeFieldTypes = []string{
 	"SINGLE_LINE", "MULTI_LINE", "NUMBER", "BOOLEAN", "DATE", "DATE_TIME",
 	"EMAIL", "PHONE", "PHOTO", "JSON", "PICK_LIST",
+}
+
+var (
+	ucodeAggregateFuncs   = []string{"COUNT", "SUM", "AVG", "MIN", "MAX"}
+	ucodeAggregateFuncSet = map[string]bool{"COUNT": true, "SUM": true, "AVG": true, "MIN": true, "MAX": true}
+)
+
+// ucodeSystemFields are columns present on every project table. They are always
+// valid filter / aggregation targets even though they are not user-defined fields
+// returned by the schema cache.
+var ucodeSystemFields = map[string]bool{
+	"guid": true, "created_at": true, "updated_at": true, "deleted_at": true,
 }
 
 func ucodeToolDefs() []ai.ToolDef {
@@ -117,6 +138,89 @@ func ucodeToolDefs() []ai.ToolDef {
 				"required": []string{"table_slug", "items"},
 			},
 		},
+		{
+			Name:        toolCountItems,
+			Description: "Count how many records a table holds, optionally filtered. Use this to answer \"how many …\" questions. Returns the total count.",
+			InputSchema: map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"table_slug": map[string]any{"type": "string", "description": "Slug of the table to count."},
+					"search": map[string]any{
+						"type":        "string",
+						"description": "Optional free-text search across the table's searchable text fields (case-insensitive). The count reflects it.",
+					},
+					"filters": ucodeFilterSchema(),
+				},
+				"required": []string{"table_slug"},
+			},
+		},
+		{
+			Name:        toolListItems,
+			Description: "Read records from a table, optionally filtered, searched, sorted and paginated. Use this to answer \"show me / which …\" questions. Returns the matching records plus the total count of all matches (limit/offset do not change the count). Foreign keys appear as ids unless include_relations is set.",
+			InputSchema: map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"table_slug": map[string]any{"type": "string", "description": "Slug of the table to read."},
+					"offset": map[string]any{
+						"type":        "integer",
+						"description": "Number of records to skip for pagination (default 0). Combine with limit to page through results.",
+					},
+					"search": map[string]any{
+						"type":        "string",
+						"description": "Optional free-text search across the table's searchable text fields (case-insensitive).",
+					},
+					"sort_by": map[string]any{
+						"type":        "string",
+						"description": "Optional field slug to sort by. Defaults to newest first. Use with sort_dir and limit for \"top / most / highest\" questions.",
+					},
+					"sort_dir": map[string]any{
+						"type":        "string",
+						"enum":        []string{"asc", "desc"},
+						"description": "Sort direction for sort_by. Defaults to desc.",
+					},
+					"include_relations": map[string]any{
+						"type":        "boolean",
+						"description": "When true, each foreign-key field also returns the linked row as \"<field>_data\", resolving related data (e.g. the customer behind an order) instead of just its id. Defaults to false.",
+					},
+					"filters": ucodeFilterSchema(),
+					"limit": map[string]any{
+						"type":        "integer",
+						"description": fmt.Sprintf("Maximum records to return (default %d, max %d).", ucodeListDefaultLimit, ucodeListMaxLimit),
+					},
+				},
+				"required": []string{"table_slug"},
+			},
+		},
+		{
+			Name:        toolAggregateItems,
+			Description: "Compute an aggregate over a table: COUNT, SUM, AVG, MIN or MAX of a field, optionally grouped by another field and filtered. Use this for totals, averages and breakdowns (e.g. \"total revenue\", \"balance by customer type\"). Returns one result row per group (or a single row when not grouped).",
+			InputSchema: map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"table_slug": map[string]any{"type": "string", "description": "Slug of the table to aggregate."},
+					"function": map[string]any{
+						"type":        "string",
+						"enum":        ucodeAggregateFuncs,
+						"description": "Aggregate function. COUNT may omit field (counts rows); SUM/AVG/MIN/MAX require a numeric field.",
+					},
+					"field":    map[string]any{"type": "string", "description": "Field slug to aggregate. Required for SUM/AVG/MIN/MAX, optional for COUNT."},
+					"group_by": map[string]any{"type": "string", "description": "Optional field slug to group the results by."},
+					"filters":  ucodeFilterSchema(),
+				},
+				"required": []string{"table_slug", "function"},
+			},
+		},
+	}
+}
+
+// ucodeFilterSchema is the shared schema for the read tools' optional filters: an
+// object keyed by field slug. Values are matched for equality, or use a comparison
+// object such as {"$gte": 100} with the operators $gt, $gte, $lt, $lte, $in.
+func ucodeFilterSchema() map[string]any {
+	return map[string]any{
+		"type":                 "object",
+		"description":          `Optional filters keyed by field slug. A plain value matches that field: text fields match case-insensitively by substring (e.g. {"name": "iva"} finds "Ivan"), id/number/boolean fields match exactly. A list value [a,b] matches any of them (IN). A comparison object {"$gte": 100} supports $gt, $gte, $lt, $lte and $in for ranges.`,
+		"additionalProperties": true,
 	}
 }
 
@@ -134,6 +238,12 @@ func (s *ucodeChatSession) executeTool(ctx context.Context, call ai.ToolCall) (s
 		return s.toolCreateMenu(ctx, call)
 	case toolInsertItems:
 		return s.toolInsertItems(ctx, call)
+	case toolCountItems:
+		return s.toolCountItems(ctx, call)
+	case toolListItems:
+		return s.toolListItems(ctx, call)
+	case toolAggregateItems:
+		return s.toolAggregateItems(ctx, call)
 	default:
 		return fmt.Sprintf("error: unknown tool %q", call.Name), true
 	}
@@ -557,6 +667,311 @@ func (s *ucodeChatSession) toolInsertItems(ctx context.Context, call ai.ToolCall
 	}
 
 	return marshalToolResult(result), created == 0 && len(failures) > 0
+}
+
+// ── read-only data tools ──────────────────────────────────────────────────────
+//
+// These let the builder answer questions about the project's actual records
+// (counts, samples, totals) without ever modifying data. They are read-only by
+// construction: count_items / list_items go through the parameterized GetList2
+// path (field names are whitelisted server-side, values are bound parameters),
+// and aggregate_items builds its SQL fragments here in Go from columns that are
+// validated against the real schema first — the model never authors raw SQL.
+
+func (s *ucodeChatSession) toolCountItems(ctx context.Context, call ai.ToolCall) (string, bool) {
+	tableSlug, errStr, isErr := s.resolveReadTable(ctx, cast.ToString(call.Input["table_slug"]))
+	if isErr {
+		return errStr, true
+	}
+	filters := asStringMap(call.Input["filters"])
+	if msg, bad := s.validateReadFields(ctx, tableSlug, mapKeys(filters)); bad {
+		return msg, true
+	}
+	search := strings.TrimSpace(cast.ToString(call.Input["search"]))
+
+	s.emitReadProgress(tableSlug, "Считаю записи")
+
+	listData, err := s.getList(ctx, tableSlug, readQuery{filters: filters, search: search, limit: 1})
+	if err != nil {
+		return "error: " + err.Error(), true
+	}
+
+	result := map[string]any{"table_slug": tableSlug, "count": extractCountFromData(listData)}
+	if len(filters) > 0 {
+		result["filters"] = filters
+	}
+	if search != "" {
+		result["search"] = search
+	}
+	return marshalToolResult(result), false
+}
+
+func (s *ucodeChatSession) toolListItems(ctx context.Context, call ai.ToolCall) (string, bool) {
+	tableSlug, errStr, isErr := s.resolveReadTable(ctx, cast.ToString(call.Input["table_slug"]))
+	if isErr {
+		return errStr, true
+	}
+	filters := asStringMap(call.Input["filters"])
+	sortField := normalizeSlug(cast.ToString(call.Input["sort_by"]))
+
+	toCheck := mapKeys(filters)
+	if sortField != "" {
+		toCheck = append(toCheck, sortField)
+	}
+	if msg, bad := s.validateReadFields(ctx, tableSlug, toCheck); bad {
+		return msg, true
+	}
+
+	limit := cast.ToInt(call.Input["limit"])
+	if limit <= 0 {
+		limit = ucodeListDefaultLimit
+	}
+	if limit > ucodeListMaxLimit {
+		limit = ucodeListMaxLimit
+	}
+
+	offset := cast.ToInt(call.Input["offset"])
+	if offset < 0 {
+		offset = 0
+	}
+
+	search := strings.TrimSpace(cast.ToString(call.Input["search"]))
+	sortAsc := strings.EqualFold(strings.TrimSpace(cast.ToString(call.Input["sort_dir"])), "asc")
+	withRelations := cast.ToBool(call.Input["include_relations"])
+
+	s.emitReadProgress(tableSlug, "Читаю записи")
+
+	listData, err := s.getList(ctx, tableSlug, readQuery{
+		filters:       filters,
+		limit:         limit,
+		offset:        offset,
+		search:        search,
+		sortField:     sortField,
+		sortAsc:       sortAsc,
+		withRelations: withRelations,
+	})
+	if err != nil {
+		return "error: " + err.Error(), true
+	}
+
+	items := extractItemsFromData(listData)
+	result := map[string]any{
+		"table_slug": tableSlug,
+		"count":      extractCountFromData(listData),
+		"returned":   len(items),
+		"items":      items,
+	}
+	if offset > 0 {
+		result["offset"] = offset
+	}
+	return marshalToolResult(result), false
+}
+
+func (s *ucodeChatSession) toolAggregateItems(ctx context.Context, call ai.ToolCall) (string, bool) {
+	tableSlug, errStr, isErr := s.resolveReadTable(ctx, cast.ToString(call.Input["table_slug"]))
+	if isErr {
+		return errStr, true
+	}
+
+	function := strings.ToUpper(strings.TrimSpace(cast.ToString(call.Input["function"])))
+	if !ucodeAggregateFuncSet[function] {
+		return fmt.Sprintf("error: function must be one of %s", strings.Join(ucodeAggregateFuncs, ", ")), true
+	}
+
+	field := normalizeSlug(cast.ToString(call.Input["field"]))
+	groupBy := normalizeSlug(cast.ToString(call.Input["group_by"]))
+	filters := asStringMap(call.Input["filters"])
+
+	if function != "COUNT" && field == "" {
+		return fmt.Sprintf("error: field is required for %s", function), true
+	}
+
+	// Validate every referenced column against the real schema before it is ever
+	// formatted into a SQL fragment — this is what keeps the raw aggregation safe.
+	toCheck := mapKeys(filters)
+	if field != "" {
+		toCheck = append(toCheck, field)
+	}
+	if groupBy != "" {
+		toCheck = append(toCheck, groupBy)
+	}
+	if msg, bad := s.validateReadFields(ctx, tableSlug, toCheck); bad {
+		return msg, true
+	}
+
+	s.emitReadProgress(tableSlug, "Считаю агрегат")
+
+	aggExpr := "COUNT(*) AS result"
+	if field != "" {
+		aggExpr = fmt.Sprintf(`%s("%s") AS result`, function, field)
+	}
+
+	columns := []string{aggExpr}
+	queryParams := map[string]any{
+		"operation": "SELECT",
+		"table":     fmt.Sprintf(`"%s"`, tableSlug),
+		"where":     buildWhereClause(filters),
+	}
+	if groupBy != "" {
+		quoted := fmt.Sprintf(`"%s"`, groupBy)
+		columns = append([]string{quoted}, columns...)
+		queryParams["group_by"] = []string{quoted}
+	}
+	queryParams["columns"] = columns
+
+	structData, err := helper.ConvertMapToStruct(queryParams)
+	if err != nil {
+		return "error: " + err.Error(), true
+	}
+	resp, err := s.service.GoObjectBuilderService().ObjectBuilder().GetListAggregation(ctx, &nb.CommonMessage{
+		TableSlug: tableSlug,
+		ProjectId: s.resourceEnvId,
+		Data:      structData,
+	})
+	if err != nil {
+		return "error: " + err.Error(), true
+	}
+
+	aggData, _ := helper.ConvertStructToMap(resp.GetData())
+	result := map[string]any{
+		"table_slug": tableSlug,
+		"function":   function,
+		"results":    extractItemsFromData(aggData),
+	}
+	if field != "" {
+		result["field"] = field
+	}
+	if groupBy != "" {
+		result["group_by"] = groupBy
+	}
+	return marshalToolResult(result), false
+}
+
+// readQuery holds the options for a read through the parameterized GetList2 path.
+// Field names in filters and sortField must already be validated against the schema
+// by the caller; every value is bound as a query parameter server-side.
+type readQuery struct {
+	filters       map[string]any
+	limit         int
+	offset        int
+	search        string
+	sortField     string
+	sortAsc       bool
+	withRelations bool
+}
+
+// getList runs a read via the parameterized GetList2 path and returns the decoded
+// response map ({response, count}). It only assembles the request payload GetListV2
+// understands — filtering, search, sorting and pagination all happen server-side.
+func (s *ucodeChatSession) getList(ctx context.Context, tableSlug string, q readQuery) (map[string]any, error) {
+	dataMap := make(map[string]any, len(q.filters)+5)
+	for k, v := range q.filters {
+		dataMap[k] = v
+	}
+	dataMap["limit"] = q.limit
+	dataMap["offset"] = q.offset
+	dataMap["with_relations"] = q.withRelations
+	if q.search != "" {
+		dataMap["search"] = q.search
+	}
+	// created_at is the builder's default sort and is skipped by its ORDER BY logic,
+	// so emitting it alone yields a dangling "ORDER BY"; only set an explicit order
+	// for other fields and otherwise keep the default newest-first ordering.
+	if q.sortField != "" && q.sortField != "created_at" {
+		dir := -1
+		if q.sortAsc {
+			dir = 1
+		}
+		dataMap["order"] = map[string]any{q.sortField: dir}
+	}
+
+	structData, err := helper.ConvertMapToStruct(dataMap)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := s.service.GoObjectBuilderService().ObjectBuilder().GetList2(ctx, &nb.CommonMessage{
+		TableSlug: tableSlug,
+		ProjectId: s.resourceEnvId,
+		Data:      structData,
+	})
+	if err != nil {
+		return nil, err
+	}
+	listData, _ := helper.ConvertStructToMap(resp.GetData())
+	return listData, nil
+}
+
+// resolveReadTable normalizes the slug, warms the table cache and confirms the
+// table exists. On failure it returns the tool-error string and isErr=true.
+func (s *ucodeChatSession) resolveReadTable(ctx context.Context, raw string) (tableSlug, errStr string, isErr bool) {
+	tableSlug = normalizeSlug(raw)
+	if tableSlug == "" {
+		return "", "error: table_slug is required", true
+	}
+	if err := s.ensureTablesLoaded(ctx); err != nil {
+		return "", "error: " + err.Error(), true
+	}
+	if _, ok := s.tableIDs[tableSlug]; !ok {
+		return "", fmt.Sprintf("error: table %q does not exist", tableSlug), true
+	}
+	return tableSlug, "", false
+}
+
+// validateReadFields rejects any referenced column that is neither a user-defined
+// field of the table nor a system column. This whitelist is the safety boundary
+// for the aggregation path, where column names are formatted into raw SQL.
+func (s *ucodeChatSession) validateReadFields(ctx context.Context, tableSlug string, fields []string) (errStr string, isErr bool) {
+	wanted := make([]string, 0, len(fields))
+	for _, f := range fields {
+		if f = strings.TrimSpace(f); f != "" {
+			wanted = append(wanted, f)
+		}
+	}
+	if len(wanted) == 0 {
+		return "", false
+	}
+	if err := s.ensureFieldsLoaded(ctx, tableSlug); err != nil {
+		return "error: " + err.Error(), true
+	}
+	for _, f := range wanted {
+		if ucodeSystemFields[f] || s.fieldSets[tableSlug][f] {
+			continue
+		}
+		return fmt.Sprintf("error: unknown field %q on table %q; known fields: %s",
+			f, tableSlug, strings.Join(s.knownFields(tableSlug), ", ")), true
+	}
+	return "", false
+}
+
+// knownFields returns the sorted set of columns valid for filtering/aggregation:
+// the table's user fields plus the always-present system columns.
+func (s *ucodeChatSession) knownFields(tableSlug string) []string {
+	out := make([]string, 0, len(s.fieldSets[tableSlug])+len(ucodeSystemFields))
+	for slug := range s.fieldSets[tableSlug] {
+		out = append(out, slug)
+	}
+	for slug := range ucodeSystemFields {
+		out = append(out, slug)
+	}
+	return sortStrings(out)
+}
+
+func (s *ucodeChatSession) emitReadProgress(tableSlug, message string) {
+	s.emit.Emit(SSEEvent{
+		Type:    EvProgress,
+		Icon:    IconScanSearch,
+		Message: message,
+		Value:   tableSlug,
+		Data:    UcodeStepData{Action: StepActionData, Status: StepStatusDone, Table: tableSlug},
+	})
+}
+
+func mapKeys(m map[string]any) []string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	return keys
 }
 
 func normalizeSlug(s string) string {

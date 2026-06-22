@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 	"ucode/ucode_go_api_gateway/api/models"
@@ -426,18 +427,56 @@ func buildWhereClause(filters map[string]any) string {
 			for op, opVal := range val {
 				switch op {
 				case "$gt":
-					conditions = append(conditions, fmt.Sprintf(`"%s" > %v`, k, opVal))
+					conditions = append(conditions, fmt.Sprintf(`"%s" > %s`, k, sqlLiteral(opVal)))
 				case "$gte":
-					conditions = append(conditions, fmt.Sprintf(`"%s" >= %v`, k, opVal))
+					conditions = append(conditions, fmt.Sprintf(`"%s" >= %s`, k, sqlLiteral(opVal)))
 				case "$lt":
-					conditions = append(conditions, fmt.Sprintf(`"%s" < %v`, k, opVal))
+					conditions = append(conditions, fmt.Sprintf(`"%s" < %s`, k, sqlLiteral(opVal)))
 				case "$lte":
-					conditions = append(conditions, fmt.Sprintf(`"%s" <= %v`, k, opVal))
+					conditions = append(conditions, fmt.Sprintf(`"%s" <= %s`, k, sqlLiteral(opVal)))
+				case "$in":
+					if list := sqlInList(opVal); list != "" {
+						conditions = append(conditions, fmt.Sprintf(`"%s" IN (%s)`, k, list))
+					}
 				}
 			}
 		}
 	}
 	return strings.Join(conditions, " AND ")
+}
+
+// sqlLiteral renders a scalar filter value as a safe SQL literal: strings are
+// single-quote escaped, numbers are formatted without scientific notation, and
+// booleans are emitted verbatim. Field names are validated against the table
+// schema by callers, so only values ever flow through here.
+func sqlLiteral(v any) string {
+	switch val := v.(type) {
+	case string:
+		return "'" + strings.ReplaceAll(val, "'", "''") + "'"
+	case bool:
+		return fmt.Sprintf("%v", val)
+	case float64:
+		return strconv.FormatFloat(val, 'f', -1, 64)
+	case json.Number:
+		return val.String()
+	default:
+		return "'" + strings.ReplaceAll(fmt.Sprintf("%v", val), "'", "''") + "'"
+	}
+}
+
+// sqlInList renders the operand of an $in filter as a comma-separated list of SQL
+// literals. It returns "" when the operand is not a non-empty list, so the caller
+// can drop the condition entirely rather than emit an empty IN ().
+func sqlInList(v any) string {
+	items, ok := v.([]any)
+	if !ok || len(items) == 0 {
+		return ""
+	}
+	parts := make([]string, 0, len(items))
+	for _, it := range items {
+		parts = append(parts, sqlLiteral(it))
+	}
+	return strings.Join(parts, ", ")
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
