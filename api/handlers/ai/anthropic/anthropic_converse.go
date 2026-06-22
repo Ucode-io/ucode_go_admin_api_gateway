@@ -16,10 +16,30 @@ import (
 // with native tool_use / tool_result content blocks for multi-turn loops.
 type AnthropicChatModel struct {
 	conf config.BaseConfig
+
+	// apiKeyOverride, when non-empty, is used instead of conf.AnthropicAPIKey.
+	// It lets callers bill a separate Anthropic key per workload (e.g. the ucode
+	// builder vs the ugen generator) while sharing the rest of the config.
+	apiKeyOverride string
 }
 
 func NewAnthropicChatModel(conf config.BaseConfig) ai.ChatModel {
 	return &AnthropicChatModel{conf: conf}
+}
+
+// NewAnthropicChatModelWithKey builds a model that authenticates with apiKey
+// instead of the config's default Anthropic key. An empty apiKey falls back to
+// conf.AnthropicAPIKey, so callers can pass through without a nil check.
+func NewAnthropicChatModelWithKey(conf config.BaseConfig, apiKey string) ai.ChatModel {
+	return &AnthropicChatModel{conf: conf, apiKeyOverride: apiKey}
+}
+
+// apiKey returns the override when set, otherwise the config default.
+func (m *AnthropicChatModel) apiKey() string {
+	if m.apiKeyOverride != "" {
+		return m.apiKeyOverride
+	}
+	return m.conf.AnthropicAPIKey
 }
 
 // ── wire types (multi-turn, tool-aware) ───────────────────────────────────────
@@ -97,7 +117,7 @@ func (m *AnthropicChatModel) Complete(ctx context.Context, req ai.CompletionRequ
 		return nil, fmt.Errorf("anthropic: create request: %w", err)
 	}
 	httpReq.Header.Set("Content-Type", "application/json")
-	httpReq.Header.Set("X-API-Key", m.conf.AnthropicAPIKey)
+	httpReq.Header.Set("X-API-Key", m.apiKey())
 	httpReq.Header.Set("anthropic-version", m.conf.AnthropicVersion)
 	httpReq.Header.Set("anthropic-beta", config.AnthropicCachingBeta)
 

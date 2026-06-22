@@ -111,17 +111,22 @@ func (h *HandlerV1) getBuilderService(ctx context.Context, projectId, environmen
 	return service, resource.ResourceEnvironmentId, nil
 }
 
-func (h *HandlerV1) getAiChatServices(c *gin.Context) (services.ServiceManagerI, string, error) {
+// resolveAiChatService resolves the builder ServiceManager together with the
+// underlying PostgreSQL resource for the request's project/environment. It writes
+// the HTTP error response itself on failure, so callers only need to check err.
+// Callers that need auth context (node_type, resource_type) — e.g. creating
+// client_types/roles for a login table — use this instead of getAiChatServices.
+func (h *HandlerV1) resolveAiChatService(c *gin.Context) (services.ServiceManagerI, *pb.ServiceResourceModel, error) {
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.HandleResponse(c, status_http.InvalidArgument, config.ErrProjectIdValid)
-		return nil, "", config.ErrProjectIdValid
+		return nil, nil, config.ErrProjectIdValid
 	}
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		h.HandleResponse(c, status_http.InvalidArgument, config.ErrEnvironmentIdValid)
-		return nil, "", config.ErrEnvironmentIdValid
+		return nil, nil, config.ErrEnvironmentIdValid
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
@@ -134,21 +139,29 @@ func (h *HandlerV1) getAiChatServices(c *gin.Context) (services.ServiceManagerI,
 	)
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
-		return nil, "", err
+		return nil, nil, err
 	}
 
 	if resource.ResourceType != pb.ResourceType_POSTGRESQL {
 		h.HandleResponse(c, status_http.InvalidArgument, "resource type not supported")
-		return nil, "", config.ErrProjectIdValid
+		return nil, nil, config.ErrProjectIdValid
 	}
 
 	service, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
-		return nil, "", err
+		return nil, nil, err
 	}
 
-	return service, resource.ResourceEnvironmentId, nil
+	return service, resource, nil
+}
+
+func (h *HandlerV1) getAiChatServices(c *gin.Context) (services.ServiceManagerI, string, error) {
+	service, resource, err := h.resolveAiChatService(c)
+	if err != nil {
+		return nil, "", err
+	}
+	return service, resource.GetResourceEnvironmentId(), nil
 }
 
 type setAiChatMessageReactionRequest struct {

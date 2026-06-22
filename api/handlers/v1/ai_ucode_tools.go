@@ -15,12 +15,13 @@ import (
 )
 
 const (
-	toolGetSchema      = "get_schema"
-	toolCreateTable    = "create_table"
-	toolCreateField    = "create_field"
-	toolCreateRelation = "create_relation"
-	toolCreateMenu     = "create_menu"
-	toolInsertItems    = "insert_items"
+	toolGetSchema        = "get_schema"
+	toolCreateTable      = "create_table"
+	toolCreateLoginTable = "create_login_table"
+	toolCreateField      = "create_field"
+	toolCreateRelation   = "create_relation"
+	toolCreateMenu       = "create_menu"
+	toolInsertItems      = "insert_items"
 
 	toolCountItems     = "count_items"
 	toolListItems      = "list_items"
@@ -36,6 +37,15 @@ var ucodeFieldTypes = []string{
 	"SINGLE_LINE", "MULTI_LINE", "NUMBER", "BOOLEAN", "DATE", "DATE_TIME",
 	"EMAIL", "PHONE", "PHOTO", "JSON", "PICK_LIST",
 }
+
+// ucodeLoginStrategies are the identifier types end-users may authenticate with.
+// The object builder auto-creates the matching auth columns (login/email/phone +
+// password) when a table is created with auth_info.login_strategy set.
+var (
+	ucodeLoginStrategies   = []string{"login", "email", "phone"}
+	ucodeLoginStrategySet  = map[string]bool{"login": true, "email": true, "phone": true}
+	ucodeDefaultLoginStrat = []string{"login"}
+)
 
 var (
 	ucodeAggregateFuncs   = []string{"COUNT", "SUM", "AVG", "MIN", "MAX"}
@@ -75,6 +85,35 @@ func ucodeToolDefs() []ai.ToolDef {
 					"menu_id": map[string]any{
 						"type":        "string",
 						"description": "Optional. Place the table under this menu folder (a menu_id returned by create_menu). Defaults to the main menu.",
+					},
+				},
+				"required": []string{"slug", "label"},
+			},
+		},
+		{
+			Name:        toolCreateLoginTable,
+			Description: "Create a table whose rows are end-users that can authenticate (sign in) to the app. The platform automatically adds the authentication columns (password plus the chosen identifier fields) — do NOT add them with create_field. Optionally provide client_type_name to also create a new audience (client_type) bound to this table together with a role, so the table is immediately usable for sign-in. No-op (status=already_exists) if the slug exists.",
+			InputSchema: map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"slug":  map[string]any{"type": "string", "description": "snake_case identifier, e.g. \"customer\"."},
+					"label": map[string]any{"type": "string", "description": "Human-readable name, e.g. \"Customer\"."},
+					"login_strategy": map[string]any{
+						"type":        "array",
+						"items":       map[string]any{"type": "string", "enum": ucodeLoginStrategies},
+						"description": "How users sign in. Any of \"login\", \"email\", \"phone\" (you may combine several). Defaults to [\"login\"] when omitted.",
+					},
+					"client_type_name": map[string]any{
+						"type":        "string",
+						"description": "Optional. When set, also creates a new audience (client_type) bound to this table plus a role — use it when the user is introducing a distinct group of users (e.g. customers separate from admins). Omit it if the audience already exists.",
+					},
+					"role_name": map[string]any{
+						"type":        "string",
+						"description": "Optional role name for the created client_type. Defaults to client_type_name. Ignored unless client_type_name is set.",
+					},
+					"menu_id": map[string]any{
+						"type":        "string",
+						"description": "Optional. Place the table under this menu folder. Defaults to the main menu.",
 					},
 				},
 				"required": []string{"slug", "label"},
@@ -230,6 +269,8 @@ func (s *ucodeChatSession) executeTool(ctx context.Context, call ai.ToolCall) (s
 		return s.toolGetSchema(ctx, call)
 	case toolCreateTable:
 		return s.toolCreateTable(ctx, call)
+	case toolCreateLoginTable:
+		return s.toolCreateLoginTable(ctx, call)
 	case toolCreateField:
 		return s.toolCreateField(ctx, call)
 	case toolCreateRelation:
@@ -413,6 +454,186 @@ func (s *ucodeChatSession) toolCreateTable(ctx context.Context, call ai.ToolCall
 	})
 
 	return marshalToolResult(map[string]any{"status": "created", "table_slug": slug, "table_id": resp.GetId()}), false
+}
+
+// toolCreateLoginTable creates a table marked is_login_table so its rows can
+// authenticate. The object builder auto-creates the auth columns from
+// auth_info.login_strategy, so this tool never creates login/email/phone/password
+// fields itself. When client_type_name is given it also provisions a new audience
+// (client_type bound to this table) plus a role via the auth service, mirroring the
+// extra-client-type path of createBackendFromPlan. A failure to wire the audience is
+// non-fatal: the login table already exists and the error is reported back to the AI.
+func (s *ucodeChatSession) toolCreateLoginTable(ctx context.Context, call ai.ToolCall) (string, bool) {
+	slug := normalizeSlug(cast.ToString(call.Input["slug"]))
+	if slug == "" {
+		return "error: slug is required", true
+	}
+	label := strings.TrimSpace(cast.ToString(call.Input["label"]))
+	if label == "" {
+		label = slugToLabel(slug)
+	}
+
+	strategy, err := normalizeLoginStrategy(call.Input["login_strategy"])
+	if err != nil {
+		return "error: " + err.Error(), true
+	}
+
+	if err := s.ensureTablesLoaded(ctx); err != nil {
+		return "error: " + err.Error(), true
+	}
+	if id, exists := s.tableIDs[slug]; exists {
+		s.emit.Emit(SSEEvent{
+			Type:    EvTableDone,
+			Icon:    IconShield,
+			Message: "Таблица входа уже существует",
+			Value:   label,
+			Data:    UcodeStepData{Action: StepActionLogin, Status: StepStatusSkipped, Table: slug, Label: label, Reason: "already_exists"},
+		})
+		return marshalToolResult(map[string]any{"status": "already_exists", "table_slug": slug, "table_id": id}), false
+	}
+
+	menuID := config.MainMenuID
+	if mid := strings.TrimSpace(cast.ToString(call.Input["menu_id"])); mid != "" {
+		menuID = mid
+	}
+
+	attrs, err := helper.ConvertMapToStruct(map[string]any{
+		"label":     "",
+		"label_en":  label,
+		"auth_info": map[string]any{"login_strategy": strategy},
+	})
+	if err != nil {
+		return "error: " + err.Error(), true
+	}
+
+	s.emit.Emit(SSEEvent{
+		Type:    EvTableStart,
+		Icon:    IconShield,
+		Message: "Создаю таблицу входа",
+		Value:   label,
+		Data:    UcodeStepData{Action: StepActionLogin, Status: StepStatusStarted, Table: slug, Label: label, Strategy: strings.Join(strategy, ", ")},
+	})
+
+	resp, err := s.service.GoObjectBuilderService().Table().Create(ctx, &nb.CreateTableRequest{
+		Label:          label,
+		Slug:           slug,
+		ProjectId:      s.resourceEnvId,
+		EnvId:          s.envId,
+		MenuId:         menuID,
+		ViewId:         uuid.NewString(),
+		LayoutId:       uuid.NewString(),
+		ShowInMenu:     true,
+		Attributes:     attrs,
+		IsLoginTable:   true,
+		UcodeProjectId: s.projectId,
+	})
+	if err != nil {
+		return "error: " + err.Error(), true
+	}
+
+	s.tableIDs[slug] = resp.GetId()
+	// The object builder auto-creates the auth columns; drop any cached field set so
+	// a later get_schema reload reflects the real columns instead of an empty set.
+	delete(s.fieldSets, slug)
+	s.stats.LoginTables++
+
+	s.emit.Emit(SSEEvent{
+		Type:    EvTableDone,
+		Icon:    IconShield,
+		Message: "Таблица входа создана",
+		Value:   label,
+		Data:    UcodeStepData{Action: StepActionLogin, Status: StepStatusDone, Table: slug, Label: label, Strategy: strings.Join(strategy, ", ")},
+	})
+
+	result := map[string]any{
+		"status":         "created",
+		"table_slug":     slug,
+		"table_id":       resp.GetId(),
+		"login_strategy": strategy,
+	}
+
+	clientTypeName := strings.TrimSpace(cast.ToString(call.Input["client_type_name"]))
+	if clientTypeName == "" {
+		return marshalToolResult(result), false
+	}
+
+	authSvc := s.service.AuthService()
+	clientTypeID, ctErr := createClientType(ctx, clientTypeName, s.projectId, s.resourceEnvId, slug, s.nodeType, s.resourceType, authSvc)
+	if ctErr != nil {
+		result["client_type_error"] = ctErr.Error()
+		return marshalToolResult(result), false
+	}
+	s.stats.ClientTypes++
+	result["client_type_id"] = clientTypeID
+	result["client_type_name"] = clientTypeName
+
+	s.emit.Emit(SSEEvent{
+		Type:    EvProgress,
+		Icon:    IconUsers,
+		Message: "Создан тип клиента",
+		Value:   clientTypeName,
+		Data:    UcodeStepData{Action: StepActionLogin, Status: StepStatusDone, Table: slug, ClientType: clientTypeName},
+	})
+
+	roleName := strings.TrimSpace(cast.ToString(call.Input["role_name"]))
+	if roleName == "" {
+		roleName = clientTypeName
+	}
+	if clientTypeID != "" {
+		if roleErr := createRole(ctx, roleName, clientTypeID, s.resourceEnvId, s.nodeType, s.resourceType, authSvc); roleErr != nil {
+			result["role_error"] = roleErr.Error()
+		} else {
+			s.stats.Roles++
+			result["role_name"] = roleName
+			s.emit.Emit(SSEEvent{
+				Type:    EvProgress,
+				Icon:    IconShieldCheck,
+				Message: "Создана роль",
+				Value:   roleName,
+				Data:    UcodeStepData{Action: StepActionLogin, Status: StepStatusDone, Table: slug, Role: roleName},
+			})
+		}
+	}
+
+	return marshalToolResult(result), false
+}
+
+// normalizeLoginStrategy validates and de-duplicates the requested sign-in
+// strategies, accepting a JSON array, a single string or nil. It defaults to
+// ["login"] and rejects any value outside login/email/phone.
+func normalizeLoginStrategy(raw any) ([]string, error) {
+	var candidates []string
+	switch v := raw.(type) {
+	case string:
+		if t := strings.TrimSpace(v); t != "" {
+			candidates = append(candidates, t)
+		}
+	case []any:
+		for _, item := range v {
+			if t := strings.TrimSpace(cast.ToString(item)); t != "" {
+				candidates = append(candidates, t)
+			}
+		}
+	case []string:
+		candidates = append(candidates, v...)
+	}
+
+	seen := make(map[string]bool, len(candidates))
+	out := make([]string, 0, len(candidates))
+	for _, c := range candidates {
+		c = strings.ToLower(strings.TrimSpace(c))
+		if !ucodeLoginStrategySet[c] {
+			return nil, fmt.Errorf("invalid login_strategy %q; allowed: %s", c, strings.Join(ucodeLoginStrategies, ", "))
+		}
+		if !seen[c] {
+			seen[c] = true
+			out = append(out, c)
+		}
+	}
+	if len(out) == 0 {
+		return append([]string(nil), ucodeDefaultLoginStrat...), nil
+	}
+	return out, nil
 }
 
 func (s *ucodeChatSession) toolCreateField(ctx context.Context, call ai.ToolCall) (string, bool) {

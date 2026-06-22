@@ -32,8 +32,6 @@ const (
 	defaultAgentMaxSteps = 12
 
 	// maxAgentTruncationRetries is how many times a single run may recover from a
-	// step that hit the output-token limit. Instead of failing the whole run, we
-	// steer the model to stop narrating and emit only its tool call, then retry.
 	maxAgentTruncationRetries = 3
 
 	agentStatusSucceeded = "succeeded"
@@ -65,14 +63,28 @@ func (h *HandlerV1) newChatModel(model string) ai.ChatModel {
 	switch {
 	case strings.HasPrefix(model, "gpt"):
 		return openai.NewOpenAIChatModel(h.baseConf)
+
 	case strings.HasPrefix(model, "gemini"):
 		return gemini.NewGeminiChatModel(h.baseConf, h.geminiKeyPool)
+
 	default:
 		return anthropic.NewAnthropicChatModel(h.baseConf)
 	}
 }
 
-// agentToolset is the per-agent tool surface plus the permission matrix used to
+func (h *HandlerV1) newUcodeChatModel(model string) ai.ChatModel {
+	switch {
+	case strings.HasPrefix(model, "gpt"):
+		return openai.NewOpenAIChatModel(h.baseConf)
+
+	case strings.HasPrefix(model, "gemini"):
+		return gemini.NewGeminiChatModel(h.baseConf, h.geminiKeyPool)
+
+	default:
+		return anthropic.NewAnthropicChatModelWithKey(h.baseConf, h.baseConf.AnthropicAPIKeyUcode)
+	}
+}
+
 type agentToolset struct {
 	defs  []ai.ToolDef
 	perms map[string]*nb.AgentPermission

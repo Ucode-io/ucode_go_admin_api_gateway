@@ -109,10 +109,11 @@ type BaseConfig struct {
 	StripeApiKey        string
 	StripeWebhookSecret string
 
-	AnthropicAPIKey     string
-	AnthropicBeta       string
-	AnthropicBaseAPIURL string
-	AnthropicVersion    string
+	AnthropicAPIKey      string
+	AnthropicAPIKeyUcode string
+	AnthropicBeta        string
+	AnthropicBaseAPIURL  string
+	AnthropicVersion     string
 
 	ClaudeModel string
 	Agents      AIAgents
@@ -222,6 +223,7 @@ func BaseLoad() BaseConfig {
 	config.StripeWebhookSecret = cast.ToString(GetOrReturnDefaultValue("STRIPE_WEBHOOK_SECRET", ""))
 
 	config.AnthropicAPIKey = cast.ToString(GetOrReturnDefaultValue("ANTHROPIC_API_KEY", ""))
+	config.AnthropicAPIKeyUcode = cast.ToString(GetOrReturnDefaultValue("ANTHROPIC_API_KEY_UCODE", ""))
 	config.AnthropicBeta = cast.ToString(GetOrReturnDefaultValue("ANTHROPIC_BETA", ""))
 	config.AnthropicBaseAPIURL = cast.ToString(GetOrReturnDefaultValue("ANTHROPIC_BASE_API_URL", ""))
 	config.AnthropicVersion = cast.ToString(GetOrReturnDefaultValue("ANTHROPIC_VERSION", ""))

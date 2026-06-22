@@ -34,8 +34,6 @@ const (
 	ucodeHistoryWindow = 20
 )
 
-// Step actions name the kind of object a build step touched. They double as the
-// machine-readable discriminator the frontend switches on to render each event.
 const (
 	StepActionSchema   = "schema"
 	StepActionTable    = "table"
@@ -43,7 +41,8 @@ const (
 	StepActionRelation = "relation"
 	StepActionMenu     = "menu"
 	StepActionItems    = "items"
-	StepActionData     = "data" // read-only query (count / list / aggregate)
+	StepActionData     = "data"  // read-only query (count / list / aggregate)
+	StepActionLogin    = "login" // login table + its client_type / role
 )
 
 // Step statuses describe the lifecycle of a single build step.
@@ -55,33 +54,36 @@ const (
 )
 
 // UcodeStepData is the structured payload attached to every ucode build event.
-// The frontend reads these typed fields to render a precise developer timeline
-// instead of parsing human-readable message strings.
 type UcodeStepData struct {
-	Action     string `json:"action"`                // see StepAction* constants
-	Status     string `json:"status"`                // see StepStatus* constants
-	Table      string `json:"table,omitempty"`       // affected table slug
-	TableFrom  string `json:"table_from,omitempty"`  // relation: "many" side
-	TableTo    string `json:"table_to,omitempty"`    // relation: "one" side
-	Field      string `json:"field,omitempty"`       // affected field slug
-	FieldType  string `json:"field_type,omitempty"`  // resolved field type
-	ForeignKey string `json:"foreign_key,omitempty"` // relation: generated FK field
-	MenuID     string `json:"menu_id,omitempty"`     // created menu folder id
-	Label      string `json:"label,omitempty"`       // human-readable name
-	Reason     string `json:"reason,omitempty"`      // why skipped/failed
-	Created    int    `json:"created,omitempty"`     // items inserted
-	Failed     int    `json:"failed,omitempty"`      // items that errored
-	Total      int    `json:"total,omitempty"`       // items requested
+	Action     string `json:"action"`
+	Status     string `json:"status"`
+	Table      string `json:"table,omitempty"`
+	TableFrom  string `json:"table_from,omitempty"`
+	TableTo    string `json:"table_to,omitempty"`
+	Field      string `json:"field,omitempty"`
+	FieldType  string `json:"field_type,omitempty"`
+	ForeignKey string `json:"foreign_key,omitempty"`
+	MenuID     string `json:"menu_id,omitempty"`
+	ClientType string `json:"client_type,omitempty"`
+	Role       string `json:"role,omitempty"`
+	Strategy   string `json:"strategy,omitempty"`
+	Label      string `json:"label,omitempty"`
+	Reason     string `json:"reason,omitempty"`
+	Created    int    `json:"created,omitempty"`
+	Failed     int    `json:"failed,omitempty"`
+	Total      int    `json:"total,omitempty"`
 }
 
 // ucodeBuildStats accumulates what a single run created so the terminal event can
-// show the developer a precise summary card.
 type ucodeBuildStats struct {
-	Tables    int `json:"tables"`
-	Fields    int `json:"fields"`
-	Relations int `json:"relations"`
-	Menus     int `json:"menus"`
-	Items     int `json:"items"`
+	Tables      int `json:"tables"`
+	LoginTables int `json:"login_tables"`
+	ClientTypes int `json:"client_types"`
+	Roles       int `json:"roles"`
+	Fields      int `json:"fields"`
+	Relations   int `json:"relations"`
+	Menus       int `json:"menus"`
+	Items       int `json:"items"`
 }
 
 type ucodeChatSession struct {
@@ -98,6 +100,10 @@ type ucodeChatSession struct {
 	projectId     string
 	chatId        string
 
+	// Auth context, needed to create client_types/roles for a login table.
+	nodeType     string
+	resourceType int32
+
 	tablesLoaded bool
 	tableIDs     map[string]string
 	fieldSets    map[string]map[string]bool
@@ -105,32 +111,35 @@ type ucodeChatSession struct {
 	stats ucodeBuildStats
 }
 
-// agentsForProvider resolves the per-provider agent configuration. Unknown and
 func (h *HandlerV1) agentsForProvider(provider config.AIProvider) config.AIAgents {
 	switch provider {
 	case config.AIProviderGemini:
 		return h.baseConf.GeminiAgents
+
 	case config.AIProviderOpenAI:
 		return h.baseConf.OpenAIAgents
+
 	default:
 		return h.baseConf.Agents
 	}
 }
 
-func (h *HandlerV1) newUcodeChatSession(service services.ServiceManagerI, resourceEnvId, envId, projectId, chatId string, provider config.AIProvider) *ucodeChatSession {
+func (h *HandlerV1) newUcodeChatSession(service services.ServiceManagerI, resourceEnvId, envId, projectId, chatId, nodeType string, resourceType int32, provider config.AIProvider) *ucodeChatSession {
 	modelID := h.agentsForProvider(provider).Planner.Model
 
 	return &ucodeChatSession{
 		h:             h,
 		service:       service,
 		emit:          noopEmitter{},
-		model:         h.newChatModel(modelID),
+		model:         h.newUcodeChatModel(modelID),
 		modelID:       modelID,
 		provider:      provider,
 		resourceEnvId: resourceEnvId,
 		envId:         envId,
 		projectId:     projectId,
 		chatId:        chatId,
+		nodeType:      nodeType,
+		resourceType:  resourceType,
 		tableIDs:      make(map[string]string),
 		fieldSets:     make(map[string]map[string]bool),
 	}
@@ -184,8 +193,6 @@ func (s *ucodeChatSession) run(ctx context.Context, userText string, history []a
 			break
 		}
 
-		// Surface the model's reasoning that precedes a tool batch — it explains
-		// to the developer *why* the next objects are about to be built.
 		if narration := strings.TrimSpace(result.Text); narration != "" {
 			s.emit.Emit(SSEEvent{Type: EvProgress, Icon: IconBrain, Message: truncateString(narration, 280)})
 		}
@@ -222,6 +229,8 @@ func ucodeToolMeta(toolName string) (action, icon, noun string) {
 		return StepActionSchema, IconScanSearch, "схему"
 	case toolCreateTable:
 		return StepActionTable, IconDatabase, "таблицу"
+	case toolCreateLoginTable:
+		return StepActionLogin, IconShield, "таблицу входа"
 	case toolCreateField:
 		return StepActionField, IconColumns, "поле"
 	case toolCreateRelation:
@@ -307,10 +316,11 @@ func (h *HandlerV1) CreateUcodeChatMessage(c *gin.Context) {
 		return
 	}
 
-	service, resourceEnvId, err := h.getAiChatServices(c)
+	service, resource, err := h.resolveAiChatService(c)
 	if err != nil {
 		return
 	}
+	resourceEnvId := resource.GetResourceEnvironmentId()
 
 	environmentId := c.GetString("environment_id")
 	projectId := c.GetString("project_id")
@@ -324,7 +334,7 @@ func (h *HandlerV1) CreateUcodeChatMessage(c *gin.Context) {
 		return
 	}
 
-	session := h.newUcodeChatSession(service, resourceEnvId, environmentId, projectId, chatId, config.ParseAIProvider(chat.GetModel()))
+	session := h.newUcodeChatSession(service, resourceEnvId, environmentId, projectId, chatId, resource.GetNodeType(), int32(resource.GetResourceType()), config.ParseAIProvider(chat.GetModel()))
 
 	history, err := session.history(ctx)
 	if err != nil {
