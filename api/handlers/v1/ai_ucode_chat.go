@@ -331,11 +331,12 @@ func (h *HandlerV1) CreateUcodeChatMessage(c *gin.Context) {
 	isFirstMessage := len(history) == 0
 
 	if _, err = session.saveMessage(ctx, "user", userMessage.Content); err != nil {
+		chatErr := newSaveMessageError(err)
 		if streaming {
-			h.sseError(c, fmt.Sprintf("failed to save user message: %v", err))
+			h.sseError(c, chatErr)
 			return
 		}
-		h.HandleResponse(c, status_http.GRPCError, fmt.Sprintf("failed to save user message: %v", err))
+		h.HandleResponse(c, status_http.GRPCError, errorResponseBody(chatErr))
 		return
 	}
 

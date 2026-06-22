@@ -2,6 +2,9 @@ package config
 
 import (
 	"time"
+
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 const (
@@ -34,9 +37,41 @@ const (
 	ENTER_PRICE_TYPE                     string = "ENTER_PRICE"
 	CACHE_WAIT                           string = "WAIT"
 
-	STATUS_INACTIVE string = "inactive"
-	PUBLIC_STATUS   string = "unapproved"
+	// Project statuses that block write access. Reads are still allowed; writes are
+	// rejected with a clear, status-specific message.
+	STATUS_INACTIVE           string = "inactive"
+	STATUS_INSUFFICIENT_FUNDS string = "insufficient_funds"
+	STATUS_BLOCKED            string = "blocked"
+
+	PUBLIC_STATUS string = "unapproved"
 )
+
+// ProjectStatusMessages maps each blocking project status to the user-facing
+// message shown when access is refused.
+var ProjectStatusMessages = map[string]string{
+	STATUS_INACTIVE:           "Your project is inactive. Please contact support to reactivate it.",
+	STATUS_INSUFFICIENT_FUNDS: "Your project is suspended due to insufficient balance. Please top up your balance to continue.",
+	STATUS_BLOCKED:            "Your project has been blocked. Please contact support.",
+}
+
+// ProjectStatusMessage returns the message for a blocking project status, or
+// ("", false) when the status permits writes.
+func ProjectStatusMessage(projectStatus string) (string, bool) {
+	message, blocking := ProjectStatusMessages[projectStatus]
+	return message, blocking
+}
+
+// BlockingStatusMessage translates a PermissionDenied error from the auth service
+// into its user-facing message, returning false for any other error. The auth gate
+// signals a blocking project status by carrying the raw status string in the
+// gRPC error message.
+func BlockingStatusMessage(err error) (string, bool) {
+	st, ok := status.FromError(err)
+	if !ok || st.Code() != codes.PermissionDenied {
+		return "", false
+	}
+	return ProjectStatusMessage(st.Message())
+}
 
 const (
 	LRU_CACHE_SIZE                       = 10000

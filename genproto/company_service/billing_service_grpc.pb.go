@@ -57,6 +57,7 @@ type BillingServiceClient interface {
 	GetSubscription(ctx context.Context, in *PrimaryKey, opts ...grpc.CallOption) (*Subscription, error)
 	UpdateSubscription(ctx context.Context, in *Subscription, opts ...grpc.CallOption) (*Subscription, error)
 	CancelSubscription(ctx context.Context, in *CancelSubscriptionRequest, opts ...grpc.CallOption) (*Subscription, error)
+	GetProjectBillingStatus(ctx context.Context, in *GetProjectBillingStatusRequest, opts ...grpc.CallOption) (*GetProjectBillingStatusResponse, error)
 	// Discount
 	ListDiscounts(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListDiscountsResponse, error)
 	ListBillingPeriods(ctx context.Context, in *ListBillingPeriodsRequest, opts ...grpc.CallOption) (*ListBillingPeriodsResponse, error)
@@ -328,6 +329,15 @@ func (c *billingServiceClient) CancelSubscription(ctx context.Context, in *Cance
 	return out, nil
 }
 
+func (c *billingServiceClient) GetProjectBillingStatus(ctx context.Context, in *GetProjectBillingStatusRequest, opts ...grpc.CallOption) (*GetProjectBillingStatusResponse, error) {
+	out := new(GetProjectBillingStatusResponse)
+	err := c.cc.Invoke(ctx, "/company_service.BillingService/GetProjectBillingStatus", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *billingServiceClient) ListDiscounts(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListDiscountsResponse, error) {
 	out := new(ListDiscountsResponse)
 	err := c.cc.Invoke(ctx, "/company_service.BillingService/ListDiscounts", in, out, opts...)
@@ -438,6 +448,7 @@ type BillingServiceServer interface {
 	GetSubscription(context.Context, *PrimaryKey) (*Subscription, error)
 	UpdateSubscription(context.Context, *Subscription) (*Subscription, error)
 	CancelSubscription(context.Context, *CancelSubscriptionRequest) (*Subscription, error)
+	GetProjectBillingStatus(context.Context, *GetProjectBillingStatusRequest) (*GetProjectBillingStatusResponse, error)
 	// Discount
 	ListDiscounts(context.Context, *ListRequest) (*ListDiscountsResponse, error)
 	ListBillingPeriods(context.Context, *ListBillingPeriodsRequest) (*ListBillingPeriodsResponse, error)
@@ -537,6 +548,9 @@ func (UnimplementedBillingServiceServer) UpdateSubscription(context.Context, *Su
 }
 func (UnimplementedBillingServiceServer) CancelSubscription(context.Context, *CancelSubscriptionRequest) (*Subscription, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CancelSubscription not implemented")
+}
+func (UnimplementedBillingServiceServer) GetProjectBillingStatus(context.Context, *GetProjectBillingStatusRequest) (*GetProjectBillingStatusResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetProjectBillingStatus not implemented")
 }
 func (UnimplementedBillingServiceServer) ListDiscounts(context.Context, *ListRequest) (*ListDiscountsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListDiscounts not implemented")
@@ -1079,6 +1093,24 @@ func _BillingService_CancelSubscription_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _BillingService_GetProjectBillingStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetProjectBillingStatusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BillingServiceServer).GetProjectBillingStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/company_service.BillingService/GetProjectBillingStatus",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BillingServiceServer).GetProjectBillingStatus(ctx, req.(*GetProjectBillingStatusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _BillingService_ListDiscounts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ListRequest)
 	if err := dec(in); err != nil {
@@ -1341,6 +1373,10 @@ var BillingService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CancelSubscription",
 			Handler:    _BillingService_CancelSubscription_Handler,
+		},
+		{
+			MethodName: "GetProjectBillingStatus",
+			Handler:    _BillingService_GetProjectBillingStatus_Handler,
 		},
 		{
 			MethodName: "ListDiscounts",

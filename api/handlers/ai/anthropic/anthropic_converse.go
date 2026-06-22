@@ -47,9 +47,13 @@ type (
 		Text string `json:"text,omitempty"`
 
 		// type=tool_use
-		ID    string         `json:"id,omitempty"`
-		Name  string         `json:"name,omitempty"`
-		Input map[string]any `json:"input,omitempty"`
+		ID   string `json:"id,omitempty"`
+		Name string `json:"name,omitempty"`
+		// Pointer (not bare map) so omitempty drops only nil — a pointer to an
+		// empty map still renders as "input": {}, which Anthropic requires for
+		// every tool_use block (parameter-less tools would otherwise be sent
+		// without input and rejected with `tool_use.input: Field required`).
+		Input *map[string]any `json:"input,omitempty"`
 
 		// type=tool_result
 		ToolUseID string `json:"tool_use_id,omitempty"`
@@ -159,11 +163,15 @@ func toAnthropicMessages(messages []ai.ConversationMessage) []converseMessage {
 		}
 
 		for _, tc := range msg.ToolCalls {
+			input := tc.Input
+			if input == nil {
+				input = map[string]any{}
+			}
 			blocks = append(blocks, converseBlock{
 				Type:  "tool_use",
 				ID:    tc.ID,
 				Name:  tc.Name,
-				Input: tc.Input,
+				Input: &input,
 			})
 		}
 

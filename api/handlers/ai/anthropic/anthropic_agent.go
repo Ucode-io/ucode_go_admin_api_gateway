@@ -26,7 +26,8 @@ func NewAnthropicAgent(conf config.BaseConfig, tracker ai.UsageTracker) ai.Agent
 
 func (a *AnthropicAgent) RouteRequest(ctx context.Context, in models.RouterInput) (*models.HaikuRoutingResult, error) {
 	historyText := ai.BuildHistoryText(in.History)
-	content := chat_prompts.BuildRouterMessage(in.UserMessage, in.FileGraphJSON, in.HasImages, historyText)
+	state := ai.DetectConversationState(in.History)
+	content := chat_prompts.BuildRouterMessage(in.UserMessage, in.FileGraphJSON, in.HasImages, historyText, state)
 
 	messages := []models.ChatMessage{
 		{Role: "user", Content: []models.ContentBlock{{Type: "text", Text: content}}},

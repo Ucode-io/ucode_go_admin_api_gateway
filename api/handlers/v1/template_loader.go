@@ -52,6 +52,55 @@ var forceTemplatePaths = map[string]bool{
 	"src/components/auth/ProtectedRoute.tsx": true,
 }
 
+// forcedTemplateFile returns the template version of a forceTemplatePaths file.
+func forcedTemplateFile(path string) (models.ProjectFile, bool) {
+	if !forceTemplatePaths[path] {
+		return models.ProjectFile{}, false
+	}
+	for _, f := range projectTemplate {
+		if f.Path == path {
+			return f, true
+		}
+	}
+	return models.ProjectFile{}, false
+}
+
+// enforceAuthRuntime guarantees the forceTemplatePaths auth files match the
+// template on the EDIT path (full generation already forces them via
+// mergeTemplateScaffold). The editor agent can still emit a stubbed LoginPage
+// ("simulate login", no /v2/login call) or rewrite auth.ts/permissions.ts, and
+// panels generated before the force-overwrite landed carry that stub forever
+// because edits never re-run the scaffold merge. This:
+//   - overwrites any edited protected file with the template version, and
+//   - heals a drifted/missing live file by injecting the template version,
+// so sign-in works regardless of model output or panel age.
+func enforceAuthRuntime(edited []models.ProjectFile, existing []models.GitlabFileChange) []models.ProjectFile {
+	existingByPath := make(map[string]string, len(existing))
+	for _, f := range existing {
+		existingByPath[f.FilePath] = f.Content
+	}
+
+	idx := make(map[string]int, len(edited))
+	for i, f := range edited {
+		idx[f.Path] = i
+	}
+
+	for path := range forceTemplatePaths {
+		tmpl, ok := forcedTemplateFile(path)
+		if !ok {
+			continue
+		}
+		if i, editedHere := idx[path]; editedHere {
+			edited[i] = tmpl
+			continue
+		}
+		if cur, exists := existingByPath[path]; !exists || cur != tmpl.Content {
+			edited = append(edited, tmpl)
+		}
+	}
+	return edited
+}
+
 // mergeTemplateScaffold merges template scaffold files into the generated set:
 // files in forceTemplatePaths always win (overwriting model output); every other
 // scaffold file is added only when the model did not already produce it.

@@ -41,9 +41,12 @@ func (h *HandlerV3) hasAccess(c *gin.Context) (*auth_service.V2HasAccessUserRes,
 		},
 	)
 	if err != nil {
+		if message, blocking := config.BlockingStatusMessage(err); blocking {
+			h.HandleResponse(c, status_http.BadRequest, message)
+			return nil, false
+		}
 		permissionErrors := map[string]struct{}{
 			status.Error(codes.PermissionDenied, config.PermissionDenied).Error(): {},
-			status.Error(codes.PermissionDenied, config.InactiveStatus).Error():   {},
 		}
 		if _, exists := permissionErrors[err.Error()]; exists {
 			h.HandleResponse(c, status_http.BadRequest, err.Error())

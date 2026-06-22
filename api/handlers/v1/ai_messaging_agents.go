@@ -203,6 +203,7 @@ func (p *ChatProcessor) generateCodeChunkedApplication(ctx context.Context, clar
 		manifest = p.prebuiltManifest
 		p.prebuiltManifest = nil
 		p.currentManifest = manifest
+		p.navRoutes = manifest.Routes
 		defer func() { p.currentManifest = nil }()
 		log.Printf("[chunked] using prebuilt manifest: %d groups", len(manifest.Groups))
 		emit.Emit(SSEEvent{Type: EvProgress, Icon: "list-tree", Message: "Структура файлов готова", Percent: 23})
@@ -1337,6 +1338,7 @@ func (p *ChatProcessor) generateCodeChunkedWebsite(ctx context.Context, clarifie
 		manifest = p.prebuiltManifest
 		p.prebuiltManifest = nil
 		p.currentManifest = manifest
+		p.navRoutes = manifest.Routes
 		defer func() { p.currentManifest = nil }()
 		log.Printf("[chunked-web] using prebuilt manifest: %d groups", len(manifest.Groups))
 		emit.Emit(SSEEvent{Type: EvProgress, Icon: "list-tree", Message: "Структура страниц готова", Percent: 23})

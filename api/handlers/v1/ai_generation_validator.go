@@ -1614,9 +1614,33 @@ func (p *ChatProcessor) repairSingleFile(
 }
 
 // applyRepairs patches repaired file contents back into the file list in-place.
+// isProtectedTemplateFile reports whether a path is a pre-built file that must
+// always keep its template content (auth runtime + axios), never model output.
+func isProtectedTemplateFile(path string) bool {
+	if forceTemplatePaths[path] {
+		return true
+	}
+	for _, p := range adminPanelRuntimeTemplateFiles {
+		if p == path {
+			return true
+		}
+	}
+	return false
+}
+
 func applyRepairs(files []models.ProjectFile, repaired []models.ProjectFile) {
 	patchMap := make(map[string]string, len(repaired))
 	for _, f := range repaired {
+		// Never let a repair pass overwrite the pre-built auth runtime. The
+		// repair model is usually triggered by an App.tsx wiring error, but it
+		// often re-emits a stubbed LoginPage ("simulate login", no /v2/login)
+		// alongside the legit App.tsx fix. mergeTemplateScaffold and
+		// injectMissingCriticalFiles already forced the template BEFORE repair;
+		// applying the model's version here silently breaks sign-in again.
+		if isProtectedTemplateFile(f.Path) {
+			log.Printf("[quality-gate] skipping repair of protected template file: %s", f.Path)
+			continue
+		}
 		patchMap[f.Path] = f.Content
 	}
 	for i := range files {

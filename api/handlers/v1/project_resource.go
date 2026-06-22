@@ -3,6 +3,7 @@ package v1
 import (
 	"strings"
 
+	"ucode/ucode_go_api_gateway/api/handlers/googlecalendar"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
@@ -62,6 +63,16 @@ func (h *HandlerV1) AddResourceToProject(c *gin.Context) {
 		}
 		request.Settings = sanitizeGoogleDriveSettingsForStorage(request.GetSettings(), h.baseConf.GoogleDriveVisibility)
 	}
+	if request.GetType() == pb.ResourceType_GOOGLE_CALENDAR {
+		if request.GetSettings() == nil || request.GetSettings().GetGoogleCalendar() == nil || strings.TrimSpace(request.GetSettings().GetGoogleCalendar().GetRefreshToken()) == "" {
+			h.HandleResponse(c, status_http.BadRequest, "use /v1/google-calendar/connect to connect Google Calendar")
+			return
+		}
+		if request.Name == "" {
+			request.Name = "Google Calendar"
+		}
+		request.Settings = sanitizeGoogleCalendarSettingsForStorage(request.GetSettings())
+	}
 
 	resp, err := h.companyServices.Resource().AddResourceToProject(c.Request.Context(), request)
 	if err != nil {
@@ -73,6 +84,11 @@ func (h *HandlerV1) AddResourceToProject(c *gin.Context) {
 		resp.Settings = request.GetSettings()
 		resp.ResourceType = int32(request.GetType())
 		sanitizeGoogleDriveResourceForResponse(resp)
+	}
+	if request.GetType() == pb.ResourceType_GOOGLE_CALENDAR {
+		resp.Settings = request.GetSettings()
+		resp.ResourceType = int32(request.GetType())
+		sanitizeGoogleCalendarResourceForResponse(resp)
 	}
 
 	h.HandleResponse(c, status_http.Created, resp)
@@ -207,6 +223,34 @@ func (h *HandlerV1) UpdateProjectResource(c *gin.Context) {
 			}
 		}
 	}
+	if shouldSanitizeGoogleCalendarSettings(request) {
+		if request.GetSettings() == nil || request.GetSettings().GetGoogleCalendar() == nil {
+			h.HandleResponse(c, status_http.BadRequest, "google calendar settings are required")
+			return
+		}
+		current, err := h.companyServices.Resource().GetSingleProjectResouece(c.Request.Context(), &pb.PrimaryKeyProjectResource{
+			Id:            request.GetId(),
+			ProjectId:     request.GetProjectId(),
+			EnvironmentId: request.GetEnvironmentId(),
+		})
+		if err != nil {
+			h.HandleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+		requestCalendar := request.GetSettings().GetGoogleCalendar()
+		if current.GetSettings() != nil && current.GetSettings().GetGoogleCalendar() != nil {
+			currentCalendar := current.GetSettings().GetGoogleCalendar()
+			if strings.TrimSpace(requestCalendar.GetRefreshToken()) == "" {
+				requestCalendar.RefreshToken = currentCalendar.GetRefreshToken()
+			}
+			if strings.TrimSpace(requestCalendar.GetCalendarId()) == "" {
+				requestCalendar.CalendarId = currentCalendar.GetCalendarId()
+			}
+		}
+		request.Type = pb.ResourceType_GOOGLE_CALENDAR.String()
+		request.ResourceType = int32(pb.ResourceType_GOOGLE_CALENDAR)
+		request.Settings = sanitizeGoogleCalendarSettingsForStorage(request.GetSettings())
+	}
 
 	var (
 		logReq = &models.CreateVersionHistoryRequest{
@@ -216,7 +260,7 @@ func (h *HandlerV1) UpdateProjectResource(c *gin.Context) {
 			ActionSource: c.Request.URL.String(),
 			ActionType:   "UPDATE",
 			UserInfo:     cast.ToString(userId),
-			Request:      googleDriveProjectResourceForLog(request),
+			Request:      projectResourceForLog(request),
 		}
 	)
 
@@ -308,6 +352,84 @@ func googleDriveProjectResourceForLog(resource *pb.ProjectResource) *pb.ProjectR
 	return &safe
 }
 
+func shouldSanitizeGoogleCalendarSettings(resource *pb.ProjectResource) bool {
+	if resource == nil {
+		return false
+	}
+	if resource.GetType() == pb.ResourceType_GOOGLE_CALENDAR.String() || resource.GetResourceType() == int32(pb.ResourceType_GOOGLE_CALENDAR) {
+		return true
+	}
+	return resource.GetSettings() != nil && resource.GetSettings().GetGoogleCalendar() != nil
+}
+
+func sanitizeGoogleCalendarSettingsForStorage(settings *pb.Settings) *pb.Settings {
+	if settings == nil || settings.GetGoogleCalendar() == nil {
+		return &pb.Settings{}
+	}
+	calendarSettings := settings.GetGoogleCalendar()
+	authType := strings.TrimSpace(calendarSettings.GetAuthType())
+	if authType == "" {
+		authType = "oauth"
+	}
+	calendarID := strings.TrimSpace(calendarSettings.GetCalendarId())
+	if calendarID == "" {
+		calendarID = googlecalendar.DefaultCalendarID
+	}
+	syncDirection := strings.TrimSpace(calendarSettings.GetSyncDirection())
+	if syncDirection == "" {
+		syncDirection = googlecalendar.SyncDirection
+	}
+	return &pb.Settings{
+		GoogleCalendar: &pb.GoogleCalendarCredentials{
+			AuthType:      authType,
+			CalendarId:    calendarID,
+			RefreshToken:  strings.TrimSpace(calendarSettings.GetRefreshToken()),
+			SyncDirection: syncDirection,
+			Mapping:       calendarSettings.GetMapping(),
+		},
+	}
+}
+
+func sanitizeGoogleCalendarResourceForResponse(resource *pb.ProjectResource) {
+	if resource == nil || resource.GetSettings() == nil || resource.GetSettings().GetGoogleCalendar() == nil {
+		return
+	}
+	calendarSettings := resource.GetSettings().GetGoogleCalendar()
+	resource.Settings.GoogleCalendar = &pb.GoogleCalendarCredentials{
+		AuthType:      calendarSettings.GetAuthType(),
+		CalendarId:    calendarSettings.GetCalendarId(),
+		SyncDirection: calendarSettings.GetSyncDirection(),
+		Mapping:       calendarSettings.GetMapping(),
+	}
+}
+
+func googleCalendarProjectResourceForLog(resource *pb.ProjectResource) *pb.ProjectResource {
+	if resource == nil || resource.GetSettings() == nil || resource.GetSettings().GetGoogleCalendar() == nil {
+		return resource
+	}
+	safe := *resource
+	calendarSettings := resource.GetSettings().GetGoogleCalendar()
+	safe.Settings = &pb.Settings{
+		GoogleCalendar: &pb.GoogleCalendarCredentials{
+			AuthType:      calendarSettings.GetAuthType(),
+			CalendarId:    calendarSettings.GetCalendarId(),
+			SyncDirection: calendarSettings.GetSyncDirection(),
+			Mapping:       calendarSettings.GetMapping(),
+		},
+	}
+	return &safe
+}
+
+func projectResourceForLog(resource *pb.ProjectResource) *pb.ProjectResource {
+	if resource == nil {
+		return resource
+	}
+	if resource.GetSettings() != nil && resource.GetSettings().GetGoogleCalendar() != nil {
+		return googleCalendarProjectResourceForLog(resource)
+	}
+	return googleDriveProjectResourceForLog(resource)
+}
+
 // GetListProjectResource godoc
 // @Security ApiKeyAuth
 // @ID get_list_project_resource
@@ -351,6 +473,7 @@ func (h *HandlerV1) GetListProjectResourceList(c *gin.Context) {
 
 	for _, resource := range resp.GetResources() {
 		sanitizeGoogleDriveResourceForResponse(resource)
+		sanitizeGoogleCalendarResourceForResponse(resource)
 	}
 
 	h.HandleResponse(c, status_http.OK, resp)
@@ -395,6 +518,7 @@ func (h *HandlerV1) GetSingleProjectResource(c *gin.Context) {
 	}
 
 	sanitizeGoogleDriveResourceForResponse(resp)
+	sanitizeGoogleCalendarResourceForResponse(resp)
 
 	h.HandleResponse(c, status_http.OK, resp)
 }

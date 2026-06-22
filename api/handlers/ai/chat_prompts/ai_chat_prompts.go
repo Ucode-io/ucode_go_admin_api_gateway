@@ -1510,23 +1510,37 @@ RULES
 4. Keep the instruction practical and end-user oriented; keep the reply concise.`
 )
 
-func BuildRouterMessage(userPrompt, fileGraphJSON string, hasImages bool, chatHistory string) string {
-	var (
-		imageNote    string
-		historyBlock string
-	)
+// BuildRouterMessage assembles the router user-message: prompt, optional image
+// note, recent history, and an authoritative state hint derived from the FULL
+// history by the caller. The state hint exists because relying on the AI to
+// spot a [QUESTIONS_ASKED] marker inside free-text history is brittle when the
+// transcript is truncated or the initial user message is long.
+func BuildRouterMessage(userPrompt, fileGraphJSON string, hasImages bool, chatHistory, conversationState string) string {
+	var imageNote, historyBlock, stateBlock string
 
 	if hasImages {
 		imageNote = "\n\nIMAGES ARE ATTACHED to this message. The user has provided visual reference(s). Set has_images=true in your response."
 	}
-
 	if chatHistory != "" {
 		historyBlock = fmt.Sprintf("\n\nRECENT CONVERSATION HISTORY (last messages, oldest first):\n%s", chatHistory)
 	}
 
+	switch conversationState {
+	case "[QUESTIONS_ASKED]":
+		stateBlock = "\n\nCONVERSATION STATE (authoritative): the most recent assistant message is [QUESTIONS_ASKED]. " +
+			"The user is responding to that questionnaire — this satisfies the precondition for intent=\"plan_request\". " +
+			"Choose plan_request UNLESS the user explicitly asks something unrelated to the questionnaire."
+	case "[DIAGRAMS_GENERATED]":
+		stateBlock = "\n\nCONVERSATION STATE (authoritative): the most recent assistant message is [DIAGRAMS_GENERATED]. " +
+			"Diagrams have been shown to the user; treat new messages as feedback or follow-up requests on that plan."
+	case "[ERROR]":
+		stateBlock = "\n\nCONVERSATION STATE (authoritative): the previous generation attempt failed and the assistant message is [ERROR]. " +
+			"The user may be retrying, asking what went wrong, or refining the request — handle accordingly."
+	}
+
 	return fmt.Sprintf(
-		"User message: \"%s\"%s%s\n\nCurrent project file_graph:\n%s",
-		userPrompt, imageNote, historyBlock, fileGraphJSON,
+		"User message: \"%s\"%s%s%s\n\nCurrent project file_graph:\n%s",
+		userPrompt, imageNote, historyBlock, stateBlock, fileGraphJSON,
 	)
 }
 

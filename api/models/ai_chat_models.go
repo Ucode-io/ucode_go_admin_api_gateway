@@ -23,7 +23,8 @@ type (
 	// ========================== Basic Requests ==========================
 
 	// EnrichedMessage is the HTTP representation of a chat message.
-	// It mirrors pbo.Message but adds a Plan field parsed from embedded content.
+	// It mirrors pbo.Message but adds Plan / Questions / Error fields parsed
+	// from the marker-prefixed content the backend persists in chat history.
 	EnrichedMessage struct {
 		ID                  string       `json:"id"`
 		ChatID              string       `json:"chat_id"`
@@ -38,6 +39,19 @@ type (
 		CurrentUserReaction string       `json:"current_user_reaction"`
 		Plan                *HaikuPlan   `json:"plan,omitempty"`
 		Questions           []AiQuestion `json:"questions,omitempty"`
+		Error               *AiChatError `json:"error,omitempty"`
+	}
+
+	// AiChatError is the structured failure payload persisted with [ERROR]
+	// assistant messages and emitted in SSE EvError events. The frontend uses
+	// it to render specialized failure UI; see docs/frontend/CHAT_ERROR_MESSAGES.md.
+	AiChatError struct {
+		Code       string `json:"code"`                  // stable identity, frontend switches on this
+		Phase      string `json:"phase"`                 // pipeline phase that failed
+		Message    string `json:"message"`               // user-facing summary, already localized
+		Details    string `json:"details,omitempty"`     // raw error text; gate behind a toggle, never show verbatim
+		Retryable  bool   `json:"retryable"`             // drives the "Retry" button
+		UserAction string `json:"user_action,omitempty"` // localized next-step hint
 	}
 
 	// VisualContext is optional metadata sent by the frontend when the user
