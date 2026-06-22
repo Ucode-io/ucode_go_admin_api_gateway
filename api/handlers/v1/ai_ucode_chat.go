@@ -34,8 +34,6 @@ const (
 	ucodeHistoryWindow = 20
 )
 
-// Step actions name the kind of object a build step touched. They double as the
-// machine-readable discriminator the frontend switches on to render each event.
 const (
 	StepActionSchema   = "schema"
 	StepActionTable    = "table"
@@ -56,30 +54,27 @@ const (
 )
 
 // UcodeStepData is the structured payload attached to every ucode build event.
-// The frontend reads these typed fields to render a precise developer timeline
-// instead of parsing human-readable message strings.
 type UcodeStepData struct {
-	Action     string `json:"action"`                // see StepAction* constants
-	Status     string `json:"status"`                // see StepStatus* constants
-	Table      string `json:"table,omitempty"`       // affected table slug
-	TableFrom  string `json:"table_from,omitempty"`  // relation: "many" side
-	TableTo    string `json:"table_to,omitempty"`    // relation: "one" side
-	Field      string `json:"field,omitempty"`       // affected field slug
-	FieldType  string `json:"field_type,omitempty"`  // resolved field type
-	ForeignKey string `json:"foreign_key,omitempty"` // relation: generated FK field
-	MenuID     string `json:"menu_id,omitempty"`     // created menu folder id
-	ClientType string `json:"client_type,omitempty"` // login: created client_type (audience)
-	Role       string `json:"role,omitempty"`        // login: created role
-	Strategy   string `json:"strategy,omitempty"`    // login: strategies, comma-joined
-	Label      string `json:"label,omitempty"`       // human-readable name
-	Reason     string `json:"reason,omitempty"`      // why skipped/failed
-	Created    int    `json:"created,omitempty"`     // items inserted
-	Failed     int    `json:"failed,omitempty"`      // items that errored
-	Total      int    `json:"total,omitempty"`       // items requested
+	Action     string `json:"action"`
+	Status     string `json:"status"`
+	Table      string `json:"table,omitempty"`
+	TableFrom  string `json:"table_from,omitempty"`
+	TableTo    string `json:"table_to,omitempty"`
+	Field      string `json:"field,omitempty"`
+	FieldType  string `json:"field_type,omitempty"`
+	ForeignKey string `json:"foreign_key,omitempty"`
+	MenuID     string `json:"menu_id,omitempty"`
+	ClientType string `json:"client_type,omitempty"`
+	Role       string `json:"role,omitempty"`
+	Strategy   string `json:"strategy,omitempty"`
+	Label      string `json:"label,omitempty"`
+	Reason     string `json:"reason,omitempty"`
+	Created    int    `json:"created,omitempty"`
+	Failed     int    `json:"failed,omitempty"`
+	Total      int    `json:"total,omitempty"`
 }
 
 // ucodeBuildStats accumulates what a single run created so the terminal event can
-// show the developer a precise summary card.
 type ucodeBuildStats struct {
 	Tables      int `json:"tables"`
 	LoginTables int `json:"login_tables"`
@@ -116,13 +111,14 @@ type ucodeChatSession struct {
 	stats ucodeBuildStats
 }
 
-// agentsForProvider resolves the per-provider agent configuration. Unknown and
 func (h *HandlerV1) agentsForProvider(provider config.AIProvider) config.AIAgents {
 	switch provider {
 	case config.AIProviderGemini:
 		return h.baseConf.GeminiAgents
+
 	case config.AIProviderOpenAI:
 		return h.baseConf.OpenAIAgents
+
 	default:
 		return h.baseConf.Agents
 	}
@@ -135,7 +131,7 @@ func (h *HandlerV1) newUcodeChatSession(service services.ServiceManagerI, resour
 		h:             h,
 		service:       service,
 		emit:          noopEmitter{},
-		model:         h.newChatModel(modelID),
+		model:         h.newUcodeChatModel(modelID),
 		modelID:       modelID,
 		provider:      provider,
 		resourceEnvId: resourceEnvId,
@@ -197,8 +193,6 @@ func (s *ucodeChatSession) run(ctx context.Context, userText string, history []a
 			break
 		}
 
-		// Surface the model's reasoning that precedes a tool batch — it explains
-		// to the developer *why* the next objects are about to be built.
 		if narration := strings.TrimSpace(result.Text); narration != "" {
 			s.emit.Emit(SSEEvent{Type: EvProgress, Icon: IconBrain, Message: truncateString(narration, 280)})
 		}
