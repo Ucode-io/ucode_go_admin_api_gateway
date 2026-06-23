@@ -1,11 +1,11 @@
 package v2
 
 import (
-	"log"
 	"net/http"
 
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
+	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -50,6 +50,12 @@ func (h *HandlerV2) MovieUpload(c *gin.Context) {
 		h.HandleResponse(c, status_http.InternalServerError, "builder resource environment id is invalid")
 		return
 	}
+	h.log.Info("tusd upload bucket resolved",
+		logger.String("project_id", projectIDString),
+		logger.String("environment_id", environmentIDString),
+		logger.String("resource_environment_id", bucketName),
+		logger.String("upload_id", c.Param("any")),
+	)
 
 	handler, err := h.movieUploadHandler(bucketName)
 	if err != nil {
@@ -66,6 +72,7 @@ func (h *HandlerV2) movieUploadHandler(bucketName string) (*tusd.Handler, error)
 	defer h.tusdMu.Unlock()
 
 	if handler, ok := h.tusdHandlers[bucketName]; ok {
+		h.log.Info("tusd upload handler reused", logger.String("bucket", bucketName))
 		return handler, nil
 	}
 	if h.tusdHandlers == nil {
@@ -105,15 +112,18 @@ func (h *HandlerV2) movieUploadHandler(bucketName string) (*tusd.Handler, error)
 	}
 
 	h.tusdHandlers[bucketName] = handler
-	go h.eventHandler(handler, "handler")
+	h.log.Info("tusd upload handler created", logger.String("bucket", bucketName))
+	go h.eventHandler(handler, bucketName)
 	return handler, nil
 }
 
-func (h *HandlerV2) eventHandler(handler *tusd.Handler, s string) {
+func (h *HandlerV2) eventHandler(handler *tusd.Handler, bucketName string) {
 	go func() {
 		for event := range handler.CompleteUploads {
-			log.Printf("Upload %s finished\n", event.Upload.ID)
-			log.Printf("status:  >>>>>>>>>> %s \n", s)
+			h.log.Info("tusd upload completed",
+				logger.String("bucket", bucketName),
+				logger.String("upload_id", event.Upload.ID),
+			)
 		}
 	}()
 }
@@ -157,11 +167,11 @@ func (h *HandlerV2) Tusd() *tusd.Handler {
 		for {
 			select {
 			case event := <-handler.UploadProgress:
-				log.Printf("-------------------UPLOAD FINISHED--------------- %s\n", event.Upload.ID)
+				h.log.Info("tusd upload progress", logger.String("bucket", ResourceEnvironmentId), logger.String("upload_id", event.Upload.ID))
 			case event := <-handler.CompleteUploads:
-				log.Printf("-------------------UPLOAD FINISHED--------------- %s\n", event.Upload.ID)
+				h.log.Info("tusd upload completed", logger.String("bucket", ResourceEnvironmentId), logger.String("upload_id", event.Upload.ID))
 			case event := <-handler.TerminatedUploads:
-				log.Printf("---------------UPLOAD TERMINATED--------------- %s\n", event.Upload.ID)
+				h.log.Info("tusd upload terminated", logger.String("bucket", ResourceEnvironmentId), logger.String("upload_id", event.Upload.ID))
 			}
 		}
 	}()
