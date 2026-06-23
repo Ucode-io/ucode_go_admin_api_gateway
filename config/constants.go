@@ -118,6 +118,10 @@ const (
 
 	UGEN_FREE_PLAN_ID = "07d8a364-ebb2-4291-a452-f44b335cb031"
 
+	// AI products that token usage is attributed to.
+	PRODUCT_TYPE_UCODE string = "ucode"
+	PRODUCT_TYPE_UGEN  string = "ugen"
+
 	FARE_ASSET_SIZE        string = "asset_size"
 	FARE_DATABASE_SIZE     string = "database"
 	FARE_REQUEST_PER_MONTH string = "request_per_month"

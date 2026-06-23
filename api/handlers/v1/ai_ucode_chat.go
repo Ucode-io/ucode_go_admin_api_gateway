@@ -14,6 +14,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
+	pbcs "ucode/ucode_go_api_gateway/genproto/company_service"
 	pbo "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	"ucode/ucode_go_api_gateway/services"
 )
@@ -98,6 +99,7 @@ type ucodeChatSession struct {
 	resourceEnvId string
 	envId         string
 	projectId     string
+	companyId     string
 	chatId        string
 
 	// Auth context, needed to create client_types/roles for a login table.
@@ -124,7 +126,7 @@ func (h *HandlerV1) agentsForProvider(provider config.AIProvider) config.AIAgent
 	}
 }
 
-func (h *HandlerV1) newUcodeChatSession(service services.ServiceManagerI, resourceEnvId, envId, projectId, chatId, nodeType string, resourceType int32, provider config.AIProvider) *ucodeChatSession {
+func (h *HandlerV1) newUcodeChatSession(service services.ServiceManagerI, resourceEnvId, envId, projectId, companyId, chatId, nodeType string, resourceType int32, provider config.AIProvider) *ucodeChatSession {
 	modelID := h.agentsForProvider(provider).Planner.Model
 
 	return &ucodeChatSession{
@@ -137,6 +139,7 @@ func (h *HandlerV1) newUcodeChatSession(service services.ServiceManagerI, resour
 		resourceEnvId: resourceEnvId,
 		envId:         envId,
 		projectId:     projectId,
+		companyId:     companyId,
 		chatId:        chatId,
 		nodeType:      nodeType,
 		resourceType:  resourceType,
@@ -170,6 +173,7 @@ func (s *ucodeChatSession) run(ctx context.Context, userText string, history []a
 		})
 		if result != nil {
 			totalTokens += int32(result.Usage.InputTokens + result.Usage.OutputTokens)
+			s.recordUsage(result.Usage, fmt.Sprintf("u-code builder step %d", step+1))
 		}
 		if err != nil {
 			if finalText == "" {
@@ -263,13 +267,37 @@ func (s *ucodeChatSession) emitToolFailure(toolName, content string) {
 	})
 }
 
-func (s *ucodeChatSession) saveMessage(ctx context.Context, role, content string) (*pbo.Message, error) {
+func (s *ucodeChatSession) saveMessage(ctx context.Context, role, content string, tokensUsed int32) (*pbo.Message, error) {
 	return s.service.GoObjectBuilderService().AiChat().CreateMessage(ctx, &pbo.CreateMessageRequest{
 		ResourceEnvId: s.resourceEnvId,
 		ChatId:        s.chatId,
 		Role:          role,
 		Content:       content,
+		TokensUsed:    tokensUsed,
 	})
+}
+
+func (s *ucodeChatSession) recordUsage(usage models.LLMUsage, description string) {
+	if usage.InputTokens == 0 && usage.OutputTokens == 0 {
+		return
+	}
+	go func() {
+		_, err := s.service.CompanyService().Billing().RecordAiTokenUsage(
+			context.Background(),
+			&pbcs.RecordAiTokenUsageRequest{
+				ProjectId:    s.projectId,
+				CompanyId:    s.companyId,
+				InputTokens:  int32(usage.InputTokens),
+				OutputTokens: int32(usage.OutputTokens),
+				Model:        s.modelID,
+				Description:  description,
+				Product:      config.PRODUCT_TYPE_UCODE,
+			},
+		)
+		if err != nil {
+			log.Printf("[ucode] record token usage: %v", err)
+		}
+	}()
 }
 
 func (s *ucodeChatSession) history(ctx context.Context) ([]ai.ConversationMessage, error) {
@@ -322,8 +350,16 @@ func (h *HandlerV1) CreateUcodeChatMessage(c *gin.Context) {
 	}
 	resourceEnvId := resource.GetResourceEnvironmentId()
 
-	environmentId := c.GetString("environment_id")
-	projectId := c.GetString("project_id")
+	var (
+		environmentId = c.GetString("environment_id")
+		projectId     = c.GetString("project_id")
+
+		companyId string
+	)
+
+	if proj, projErr := h.companyServices.Project().GetById(ctx, &pbcs.GetProjectByIdRequest{ProjectId: projectId}); projErr == nil {
+		companyId = proj.GetCompanyId()
+	}
 
 	chat, err := service.GoObjectBuilderService().AiChat().GetChat(ctx, &pbo.ChatPrimaryKey{
 		ResourceEnvId: resourceEnvId,
@@ -334,7 +370,7 @@ func (h *HandlerV1) CreateUcodeChatMessage(c *gin.Context) {
 		return
 	}
 
-	session := h.newUcodeChatSession(service, resourceEnvId, environmentId, projectId, chatId, resource.GetNodeType(), int32(resource.GetResourceType()), config.ParseAIProvider(chat.GetModel()))
+	session := h.newUcodeChatSession(service, resourceEnvId, environmentId, projectId, companyId, chatId, resource.GetNodeType(), int32(resource.GetResourceType()), config.ParseAIProvider(chat.GetModel()))
 
 	history, err := session.history(ctx)
 	if err != nil {
@@ -343,7 +379,7 @@ func (h *HandlerV1) CreateUcodeChatMessage(c *gin.Context) {
 	}
 	isFirstMessage := len(history) == 0
 
-	if _, err = session.saveMessage(ctx, "user", userMessage.Content); err != nil {
+	if _, err = session.saveMessage(ctx, "user", userMessage.Content, 0); err != nil {
 		chatErr := newSaveMessageError(err)
 		if streaming {
 			h.sseError(c, chatErr)
@@ -358,13 +394,13 @@ func (h *HandlerV1) CreateUcodeChatMessage(c *gin.Context) {
 		return
 	}
 
-	finalText, _, runErr := session.run(ctx, userMessage.Content, history)
+	finalText, totalTokens, runErr := session.run(ctx, userMessage.Content, history)
 	if runErr != nil {
 		h.HandleResponse(c, status_http.GRPCError, fmt.Sprintf("ucode build failed: %v", runErr))
 		return
 	}
 
-	message, err := session.saveMessage(ctx, "assistant", finalText)
+	message, err := session.saveMessage(ctx, "assistant", finalText, totalTokens)
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, fmt.Sprintf("failed to save ai message: %v", err))
 		return
@@ -405,13 +441,13 @@ func (h *HandlerV1) runUcodeStreaming(c *gin.Context, session *ucodeChatSession,
 		})
 		session.emit.Emit(SSEEvent{Type: EvProgress, Icon: IconSparkles, Message: "Анализирую запрос...", Percent: 1})
 
-		finalText, _, runErr := session.run(runCtx, userText, history)
+		finalText, totalTokens, runErr := session.run(runCtx, userText, history)
 		if runErr != nil {
 			session.emit.Emit(SSEEvent{Type: EvError, Icon: IconAlertCircle, Message: fmt.Sprintf("Не удалось построить объекты: %v", runErr)})
 			return
 		}
 
-		message, saveErr := session.saveMessage(runCtx, "assistant", finalText)
+		message, saveErr := session.saveMessage(runCtx, "assistant", finalText, totalTokens)
 		if saveErr != nil {
 			log.Printf("[ucode] failed to save assistant message: %v", saveErr)
 		}
