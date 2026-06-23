@@ -121,7 +121,6 @@ func (h *HandlerV1) McpGenerateProject(c *gin.Context) {
 			log.Printf("Background sendAnthropicBackend Error: %v", bgErr)
 			return
 		}
-		log.Println("Background Backend generation completed successfully")
 	}()
 
 	userPrompt := mcp_prompts.BuildFrontendGeneratePrompt(
@@ -220,8 +219,6 @@ func (h *HandlerV1) MCPUpdateFrontend(c *gin.Context) {
 		return
 	}
 
-	log.Println("========== STEP 1: CLASSIFYING REQUEST ==========")
-
 	classification, err := h.classifyRequest(request.Prompt, request.ImageURLs)
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, "Classification failed: "+err.Error())
@@ -276,7 +273,6 @@ func (h *HandlerV1) MCPUpdateFrontend(c *gin.Context) {
 				log.Println("Backend async send failed: " + err.Error())
 				return
 			}
-			log.Println("Async backend operation completed successfully")
 		}()
 	}
 
@@ -305,8 +301,6 @@ func (h *HandlerV1) MCPUpdateFrontend(c *gin.Context) {
 		filesGraphMap[file.Path] = file.FileGraph.AsMap()
 		filesMap[file.Path] = file.Content
 	}
-
-	log.Println("========== STEP 5: ANALYZING FRONTEND CHANGES ==========")
 
 	var analyzeReq = models.AnalyzeFrontendPromptRequest{
 		UserRequest: request.Prompt,
@@ -536,7 +530,6 @@ func (h *HandlerV1) McpGenerateProjectV2(c *gin.Context) {
 				log.Printf("Backend execution failed: %v\n", err)
 				return
 			}
-			log.Println("Backend operation completed:")
 		}()
 
 		userPrompt := mcp_prompts.BuildFrontendGeneratePrompt(generatePromptReq)

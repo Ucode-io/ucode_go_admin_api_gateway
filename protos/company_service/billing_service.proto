@@ -432,6 +432,7 @@ message RecordAiTokenUsageRequest {
   string model = 4;
   string description = 5;
   string company_id = 6;
+  string product = 7; // "ucode" | "ugen"; empty defaults to "ugen"
 }
 
 message GetAiTokenUsageMetricsRequest {

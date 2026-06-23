@@ -42,6 +42,7 @@ func (p *ChatProcessor) RecordUsage(usage models.LLMUsage, model, description st
 				OutputTokens: int32(usage.OutputTokens),
 				Model:        model,
 				Description:  description,
+				Product:      config.PRODUCT_TYPE_UGEN,
 			},
 		)
 		if recErr != nil {

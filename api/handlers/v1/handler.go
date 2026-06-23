@@ -5,11 +5,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"net/url"
 	"strconv"
-	"strings"
 	"time"
 	"unicode"
 	"unicode/utf8"
@@ -146,13 +144,13 @@ func (h *HandlerV1) handleError(c *gin.Context, statusHttp status_http.Status, e
 		c.JSON(http.StatusUnauthorized, status_http.Response{
 			Status:      statusHttp.Status,
 			Description: st.String(),
-			Data:        strings.ToUpper(st.Message()[:1]) + st.Message()[1:],
+			Data:        capitalFirstLetter(st.Message()),
 		})
 	} else if statusHttp.Status == status_http.Forbidden.Status {
 		c.JSON(http.StatusForbidden, status_http.Response{
 			Status:      statusHttp.Status,
 			Description: st.String(),
-			Data:        strings.ToUpper(st.Message()[:1]) + st.Message()[1:],
+			Data:        capitalFirstLetter(st.Message()),
 		})
 	} else if st.Err() != nil {
 		c.JSON(http.StatusInternalServerError, status_http.Response{
@@ -342,7 +340,6 @@ func (h *HandlerV1) versionHistoryGo(c *gin.Context, req *models.CreateVersionHi
 		},
 	)
 	if err != nil {
-		log.Println("ERROR FROM VERSION CREATE >>>>>", err)
 		return err
 	}
 	return nil
