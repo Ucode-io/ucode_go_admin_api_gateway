@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"sync"
 	"time"
 
 	"ucode/ucode_go_api_gateway/api/models"
@@ -25,6 +26,7 @@ import (
 	"github.com/gin-gonic/gin"
 	go_redis "github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
+	tusd "github.com/tus/tusd/pkg/handler"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -40,6 +42,8 @@ type HandlerV2 struct {
 	centralRedis    *go_redis.Client
 	cache           *caching.ExpiringLRUCache
 	rateLimiter     *util.ApiKeyRateLimiter
+	tusdHandlers    map[string]*tusd.Handler
+	tusdMu          sync.Mutex
 }
 
 func NewHandlerV2(baseConf config.BaseConfig, projectConfs map[string]config.Config, log logger.LoggerI, svcs services.ServiceNodesI, cmpServ services.CompanyServiceI, authService services.AuthServiceManagerI, redis storage.RedisStorageI, centralRedis *go_redis.Client, cache *caching.ExpiringLRUCache, limiter *util.ApiKeyRateLimiter) HandlerV2 {
@@ -54,6 +58,7 @@ func NewHandlerV2(baseConf config.BaseConfig, projectConfs map[string]config.Con
 		centralRedis:    centralRedis,
 		cache:           cache,
 		rateLimiter:     limiter,
+		tusdHandlers:    make(map[string]*tusd.Handler),
 	}
 }
 
