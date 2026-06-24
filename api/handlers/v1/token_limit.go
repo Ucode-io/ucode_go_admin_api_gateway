@@ -13,6 +13,14 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+var unlimitedTokenProjects = map[string]bool{
+	"f90c520f-eb6a-496c-9fa0-c38095d4793b": true,
+}
+
+func (p *ChatProcessor) tokenLimitExempt() bool {
+	return unlimitedTokenProjects[p.ucodeProjectId] || unlimitedTokenProjects[p.mcpUcodeProjectId]
+}
+
 type TokenLimitError struct {
 	Period string
 	Used   int64
@@ -92,7 +100,7 @@ func (p *ChatProcessor) initTokenBudget(ctx context.Context) {
 }
 
 func (p *ChatProcessor) Check() error {
-	if !p.tokenBudgetEnabled {
+	if !p.tokenBudgetEnabled || p.tokenLimitExempt() {
 		return nil
 	}
 	if atomic.LoadInt64(&p.tokenBudgetRemain) <= 0 {
