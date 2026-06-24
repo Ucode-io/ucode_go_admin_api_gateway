@@ -1,21 +1,86 @@
 package v2
 
 import (
-	"log"
+	"net/http"
+
+	"ucode/ucode_go_api_gateway/api/status_http"
+	pb "ucode/ucode_go_api_gateway/genproto/company_service"
+	"ucode/ucode_go_api_gateway/pkg/logger"
+	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/aws/aws-sdk-go/aws"
 	awscredentials "github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/gin-gonic/gin"
 	tusd "github.com/tus/tusd/pkg/handler"
 	"github.com/tus/tusd/pkg/s3store"
 )
 
-func (h *HandlerV2) MovieUpload() *tusd.Handler {
-	ResourceEnvironmentId := "75fd774f-f048-4658-9244-4be214ce293c"
-	//defaultBucket := "ucode"
+func (h *HandlerV2) MovieUpload(c *gin.Context) {
+	projectID, ok := c.Get("project_id")
+	projectIDString, isString := projectID.(string)
+	if !ok || !isString || !util.IsValidUUID(projectIDString) {
+		h.HandleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentID, ok := c.Get("environment_id")
+	environmentIDString, isString := environmentID.(string)
+	if !ok || !isString || !util.IsValidUUID(environmentIDString) {
+		h.HandleResponse(c, status_http.InvalidArgument, "environment id is an invalid uuid")
+		return
+	}
+
+	resource, err := h.companyServices.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectIDString,
+			EnvironmentId: environmentIDString,
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	bucketName := resource.GetResourceEnvironmentId()
+	if !util.IsValidUUID(bucketName) {
+		h.HandleResponse(c, status_http.InternalServerError, "builder resource environment id is invalid")
+		return
+	}
+	h.log.Info("tusd upload bucket resolved",
+		logger.String("project_id", projectIDString),
+		logger.String("environment_id", environmentIDString),
+		logger.String("resource_environment_id", bucketName),
+		logger.String("upload_id", c.Param("any")),
+	)
+
+	handler, err := h.movieUploadHandler(bucketName)
+	if err != nil {
+		h.log.Error("error while starting movie upload handler")
+		h.HandleResponse(c, status_http.InternalServerError, err.Error())
+		return
+	}
+
+	http.StripPrefix("/v2/upload-file/", handler).ServeHTTP(c.Writer, c.Request)
+}
+
+func (h *HandlerV2) movieUploadHandler(bucketName string) (*tusd.Handler, error) {
+	h.tusdMu.Lock()
+	defer h.tusdMu.Unlock()
+
+	if handler, ok := h.tusdHandlers[bucketName]; ok {
+		h.log.Info("tusd upload handler reused", logger.String("bucket", bucketName))
+		return handler, nil
+	}
+	if h.tusdHandlers == nil {
+		h.tusdHandlers = make(map[string]*tusd.Handler)
+	}
+
 	s3Config := aws.NewConfig().
-		WithRegion("us-east-1"). // Change to your region
+		WithRegion("us-east-1").
 		WithCredentials(awscredentials.NewStaticCredentials(
 			h.baseConf.MinioAccessKeyID,
 			h.baseConf.MinioSecretAccessKey,
@@ -25,10 +90,10 @@ func (h *HandlerV2) MovieUpload() *tusd.Handler {
 
 	sess, err := session.NewSession(s3Config)
 	if err != nil {
-		h.log.Error("error while starting movie upload handler")
+		return nil, err
 	}
 
-	s3Store := s3store.New(ResourceEnvironmentId, s3.New(sess))
+	s3Store := s3store.New(bucketName, s3.New(sess))
 
 	composer := tusd.NewStoreComposer()
 	s3Store.UseIn(composer)
@@ -43,18 +108,22 @@ func (h *HandlerV2) MovieUpload() *tusd.Handler {
 	})
 
 	if err != nil {
-		h.log.Error("err while tusd new handler")
+		return nil, err
 	}
 
-	go h.eventHandler(handler, "handler")
-	return handler
+	h.tusdHandlers[bucketName] = handler
+	h.log.Info("tusd upload handler created", logger.String("bucket", bucketName))
+	go h.eventHandler(handler, bucketName)
+	return handler, nil
 }
 
-func (h *HandlerV2) eventHandler(handler *tusd.Handler, s string) {
+func (h *HandlerV2) eventHandler(handler *tusd.Handler, bucketName string) {
 	go func() {
 		for event := range handler.CompleteUploads {
-			log.Printf("Upload %s finished\n", event.Upload.ID)
-			log.Printf("status:  >>>>>>>>>> %s \n", s)
+			h.log.Info("tusd upload completed",
+				logger.String("bucket", bucketName),
+				logger.String("upload_id", event.Upload.ID),
+			)
 		}
 	}()
 }
@@ -98,11 +167,11 @@ func (h *HandlerV2) Tusd() *tusd.Handler {
 		for {
 			select {
 			case event := <-handler.UploadProgress:
-				log.Printf("-------------------UPLOAD FINISHED--------------- %s\n", event.Upload.ID)
+				h.log.Info("tusd upload progress", logger.String("bucket", ResourceEnvironmentId), logger.String("upload_id", event.Upload.ID))
 			case event := <-handler.CompleteUploads:
-				log.Printf("-------------------UPLOAD FINISHED--------------- %s\n", event.Upload.ID)
+				h.log.Info("tusd upload completed", logger.String("bucket", ResourceEnvironmentId), logger.String("upload_id", event.Upload.ID))
 			case event := <-handler.TerminatedUploads:
-				log.Printf("---------------UPLOAD TERMINATED--------------- %s\n", event.Upload.ID)
+				h.log.Info("tusd upload terminated", logger.String("bucket", ResourceEnvironmentId), logger.String("upload_id", event.Upload.ID))
 			}
 		}
 	}()
