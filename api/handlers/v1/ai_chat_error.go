@@ -12,9 +12,6 @@ import (
 	"ucode/ucode_go_api_gateway/api/models"
 )
 
-// Error codes the frontend switches on to render specialized failure UI
-// (retry buttons, top-up prompts, contact-support banners). Stable contract;
-// see docs/frontend/CHAT_ERROR_MESSAGES.md.
 const (
 	ErrCodeTokenLimit       = "TOKEN_LIMIT_EXCEEDED"
 	ErrCodeMaxTokens        = "AI_MAX_TOKENS"
@@ -29,8 +26,6 @@ const (
 	ErrCodeInternal         = "INTERNAL_ERROR"
 )
 
-// Pipeline phases. detectPhase derives the value from wrapped error messages so
-// no structured phase has to be threaded through every call.
 const (
 	PhaseRouting      = "routing"
 	PhaseArchitect    = "architect"
@@ -42,10 +37,6 @@ const (
 	PhaseUnknown      = "unknown"
 )
 
-// persistPipelineError classifies a pipeline failure and saves it as an
-// assistant message with the [ERROR] marker. Best-effort: a failed save is
-// logged but never overrides the caller's error reporting path. The returned
-// value is suitable for sending in SSE EvError.Data.
 func (p *ChatProcessor) persistPipelineError(ctx context.Context, err error) models.AiChatError {
 	chatErr := classifyPipelineError(err)
 	body := buildErrorChatBody(chatErr)
@@ -55,10 +46,6 @@ func (p *ChatProcessor) persistPipelineError(ctx context.Context, err error) mod
 	return chatErr
 }
 
-// classifyPipelineError converts a Go error into a structured AiChatError.
-// Order matters: specific sentinels (TokenLimitError, ErrMaxTokens, ctx
-// cancellation) are matched before falling through to phase-prefix matching.
-// detectPhase mirrors the fmt.Errorf wraps in ai_messaging*.go — keep them in sync.
 func classifyPipelineError(err error) models.AiChatError {
 	if err == nil {
 		return models.AiChatError{}
@@ -87,8 +74,6 @@ func classifyPipelineError(err error) models.AiChatError {
 		}
 	}
 
-	// A deadline here is from an inner HTTP call: the streaming path passes
-	// context.Background() through, so a cancel can't be a client disconnect.
 	if errors.Is(err, context.DeadlineExceeded) || errors.Is(err, context.Canceled) {
 		return models.AiChatError{
 			Code:       ErrCodeTimeout,
@@ -163,9 +148,6 @@ func classifyPipelineError(err error) models.AiChatError {
 	}
 }
 
-// detectPhase string-matches the error message against pipeline-phase wraps.
-// The substrings here must mirror fmt.Errorf prefixes in ai_messaging.go /
-// ai_messaging_agents.go — they are the only signal we have.
 func detectPhase(err error) string {
 	if err == nil {
 		return PhaseUnknown
@@ -190,9 +172,6 @@ func detectPhase(err error) string {
 	return PhaseUnknown
 }
 
-// buildErrorChatBody serializes AiChatError into the on-the-wire chat-history
-// format: "[ERROR] <summary>\n<json>". The first line stays human-readable so
-// the AI sees a clean summary in subsequent router turns.
 func buildErrorChatBody(e models.AiChatError) string {
 	raw, _ := json.Marshal(e)
 	headline := strings.TrimSpace(e.Message)
@@ -202,8 +181,6 @@ func buildErrorChatBody(e models.AiChatError) string {
 	return fmt.Sprintf("%s %s\n%s", ai.MarkerError, headline, string(raw))
 }
 
-// newSaveMessageError builds an INTERNAL_ERROR for the pre-pipeline case where
-// the user's own message could not be persisted.
 func newSaveMessageError(err error) models.AiChatError {
 	return models.AiChatError{
 		Code:       ErrCodeInternal,
@@ -215,9 +192,6 @@ func newSaveMessageError(err error) models.AiChatError {
 	}
 }
 
-// errorResponseBody is the standard JSON body for HTTP error responses. The
-// `message` field is a convenience copy of `error.message` for callers that
-// only render top-level text.
 func errorResponseBody(e models.AiChatError) map[string]any {
 	return map[string]any{
 		"error":   e,
@@ -225,8 +199,6 @@ func errorResponseBody(e models.AiChatError) map[string]any {
 	}
 }
 
-// errorEventData is the standard payload for the SSE EvError `data` field.
-// extras are merged in for variants like TOKEN_LIMIT that carry billing info.
 func errorEventData(e models.AiChatError, extras map[string]any) map[string]any {
 	data := map[string]any{"error": e}
 	for k, v := range extras {

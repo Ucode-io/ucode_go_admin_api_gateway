@@ -159,13 +159,12 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 
 	aiResponse, err := processor.routeAndProcess(ctx, userMessage, chatHistory)
 	if err != nil {
-		// Persist before responding so the failure survives a disconnect and
-		// shows up in chat history on the next page load.
 		chatErr := processor.persistPipelineError(ctx, err)
+
+		log.Println("GENERATION ERROR:", err)
 
 		var tokenErr *TokenLimitError
 		if errors.As(err, &tokenErr) {
-			// Preserve the existing 402 billing flow for token-limit hits.
 			h.HandleResponse(c, status_http.PaymentRequired, processor.tokenLimitData(tokenErr))
 			return
 		}
