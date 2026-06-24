@@ -57,6 +57,9 @@ type (
 		Images           []string
 		History          []ChatMessage
 		HasMatchingFiles bool
+
+		Chunked      bool
+		FullPlanJSON string
 	}
 
 	LLMUsage struct {

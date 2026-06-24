@@ -1325,6 +1325,34 @@ Apply forwardRef to every component in src/components/ui/:
 
 Failure to use forwardRef causes TypeScript error TS2322 in CI (ref prop does not exist on type).`
 
+	PromptCodeEditorChunk = `You are an elite Senior Frontend Engineer working as ONE worker on a PARALLEL TEAM.
+A single larger change has been split across several workers. You own a SUBSET of the files.
+
+====================================
+SCOPED PARALLEL EDIT — READ THIS FIRST (it OVERRIDES any "return ALL files" wording further below)
+====================================
+You are given TWO file lists in the task message:
+  1. THE FULL CHANGE PLAN — every file the whole team will change or create, each with a
+     description. This is your SHARED CONTRACT. Read it so your imports, exported names,
+     prop shapes, route paths, query keys, type and function signatures EXACTLY match the
+     files other workers are producing at the same time.
+  2. YOUR ASSIGNED FILES — the ONLY files you are allowed to output.
+
+HARD RULES:
+- Emit the COMPLETE, FINAL content of EVERY assigned file. Never a diff, never truncated,
+  never a placeholder or "// unchanged" comment.
+- Output ONLY files from YOUR ASSIGNED FILES. NEVER output a file that is not assigned to you —
+  another worker owns it, and anything you emit for it is discarded (so emitting it only wastes
+  your output budget and risks truncating the files you DO own).
+- Wherever the rules below say "return ALL modified files", it means ALL of YOUR ASSIGNED files —
+  NOT the whole project.
+- Return every assigned file even if it "looks fine" — a missing assigned file is treated as a
+  failure for that file.
+- Treat files in the FULL PLAN that are NOT assigned to you as fixed external modules: import from
+  them and match their planned interface, but do not redefine or re-emit them.
+
+` + PromptCodeEditor
+
 	PromptDatabaseAssistant = `You are an expert PostgreSQL Database Assistant with direct read/write access to a live database.
 Your mission: understand user requests precisely, write correct parameterized PostgreSQL SQL, execute multi-step queries when needed, and deliver clear formatted answers.
  
@@ -1569,6 +1597,24 @@ func BuildCodeEditorMessage(clarified, planJSON, filesContext string, hasImages 
 			"NEVER respond conversationally. NEVER say 'there is already a comprehensive website' or 'would you like me to improve it' or ask any questions. "+
 			"Always call emit_project, even if the existing code looks good — return the changed files.",
 		clarified, imageNote, planJSON, filesContext,
+	)
+}
+
+func BuildCodeEditorChunkMessage(clarified, assignedPlanJSON, fullPlanJSON, filesContext string, hasImages bool) string {
+	var imageNote string
+	if hasImages {
+		imageNote = "\n\nIMAGES ARE PROVIDED as visual reference. Extract EXACT hex colors, replicate the EXACT layout, typography, spacing, shadows and border-radius. Do NOT guess colors."
+	}
+
+	return fmt.Sprintf(
+		"Overall task (context only — you implement just your assigned slice):\n%s%s\n\n"+
+			"FULL CHANGE PLAN (shared contract across all parallel workers — match these interfaces, but do NOT emit files that are not assigned to you):\n%s\n\n"+
+			"YOUR ASSIGNED FILES (emit the COMPLETE content of EXACTLY these — nothing more, nothing less):\n%s\n\n"+
+			"Existing file contents (current source of your assigned files, plus the project tree for resolving imports):\n%s\n\n"+
+			"CRITICAL: Call the emit_project tool with ONLY your assigned files, each with full content. "+
+			"NEVER respond conversationally, NEVER ask questions, NEVER emit a file you were not assigned. "+
+			"Keep every shared interface identical to the FULL CHANGE PLAN so the separately-edited files link cleanly.",
+		clarified, imageNote, fullPlanJSON, assignedPlanJSON, filesContext,
 	)
 }
 
