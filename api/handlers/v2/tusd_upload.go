@@ -1,7 +1,11 @@
 package v2
 
 import (
+	"context"
+	"mime"
 	"net/http"
+	"net/url"
+	"strings"
 
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
@@ -93,7 +97,8 @@ func (h *HandlerV2) movieUploadHandler(bucketName string) (*tusd.Handler, error)
 		return nil, err
 	}
 
-	s3Store := s3store.New(bucketName, s3.New(sess))
+	s3Client := s3.New(sess)
+	s3Store := s3store.New(bucketName, s3Client)
 
 	composer := tusd.NewStoreComposer()
 	s3Store.UseIn(composer)
@@ -113,19 +118,71 @@ func (h *HandlerV2) movieUploadHandler(bucketName string) (*tusd.Handler, error)
 
 	h.tusdHandlers[bucketName] = handler
 	h.log.Info("tusd upload handler created", logger.String("bucket", bucketName))
-	go h.eventHandler(handler, bucketName)
+	go h.eventHandler(handler, bucketName, s3Client)
 	return handler, nil
 }
 
-func (h *HandlerV2) eventHandler(handler *tusd.Handler, bucketName string) {
+func (h *HandlerV2) eventHandler(handler *tusd.Handler, bucketName string, s3Client *s3.S3) {
 	go func() {
 		for event := range handler.CompleteUploads {
+			objectKey := event.Upload.Storage["Key"]
+			if objectKey == "" {
+				h.log.Error("tusd upload completed without an object key", logger.String("bucket", bucketName), logger.String("upload_id", event.Upload.ID))
+				continue
+			}
+
+			contentType := movieContentType(event.Upload.MetaData["filetype"])
+			if err := setObjectContentType(context.Background(), s3Client, bucketName, objectKey, contentType); err != nil {
+				h.log.Error("tusd upload content type update failed",
+					logger.Error(err),
+					logger.String("bucket", bucketName),
+					logger.String("object_key", objectKey),
+					logger.String("content_type", contentType),
+				)
+				continue
+			}
+
 			h.log.Info("tusd upload completed",
 				logger.String("bucket", bucketName),
 				logger.String("upload_id", event.Upload.ID),
+				logger.String("object_key", objectKey),
+				logger.String("content_type", contentType),
 			)
 		}
 	}()
+}
+
+func movieContentType(fileType string) string {
+	mediaType, _, err := mime.ParseMediaType(fileType)
+	if err == nil && strings.HasPrefix(mediaType, "video/") {
+		return mediaType
+	}
+
+	return "video/mp4"
+}
+
+func setObjectContentType(ctx context.Context, s3Client *s3.S3, bucketName, objectKey, contentType string) error {
+	head, err := s3Client.HeadObjectWithContext(ctx, &s3.HeadObjectInput{
+		Bucket: aws.String(bucketName),
+		Key:    aws.String(objectKey),
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = s3Client.CopyObjectWithContext(ctx, &s3.CopyObjectInput{
+		Bucket:             aws.String(bucketName),
+		Key:                aws.String(objectKey),
+		CopySource:         aws.String(bucketName + "/" + url.PathEscape(objectKey)),
+		MetadataDirective:  aws.String(s3.MetadataDirectiveReplace),
+		Metadata:           head.Metadata,
+		ContentType:        aws.String(contentType),
+		ContentDisposition: aws.String("inline"),
+		CacheControl:       head.CacheControl,
+		ContentEncoding:    head.ContentEncoding,
+		ContentLanguage:    head.ContentLanguage,
+	})
+	return err
 }
 
 func (h *HandlerV2) Tusd() *tusd.Handler {
