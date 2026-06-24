@@ -22,6 +22,11 @@ import (
 	pbo "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	helperFunc "ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/services"
+	"unicode"
+
+	"golang.org/x/text/runes"
+	"golang.org/x/text/transform"
+	"golang.org/x/text/unicode/norm"
 )
 
 const (
@@ -1365,8 +1370,6 @@ func uniqueMFEPath() string {
 	return fmt.Sprintf("app-%x", b)
 }
 
-// sanitizeProjectNameForBackend transliterates Cyrillic characters to Latin equivalents
-// so the project name is safe as a PostgreSQL username/database component in a URL.
 func sanitizeProjectNameForBackend(name string) string {
 	cyrillicMap := map[rune]string{
 		'а': "a", 'б': "b", 'в': "v", 'г': "g", 'д': "d", 'е': "e", 'ё': "yo",
@@ -1388,7 +1391,23 @@ func sanitizeProjectNameForBackend(name string) string {
 			sb.WriteRune(r)
 		}
 	}
-	result := strings.TrimSpace(sb.String())
+
+	folded, _, err := transform.String(
+		transform.Chain(norm.NFD, runes.Remove(runes.In(unicode.Mn)), norm.NFC),
+		sb.String(),
+	)
+	if err != nil {
+		folded = sb.String()
+	}
+
+	var ascii strings.Builder
+	for _, r := range folded {
+		if r <= unicode.MaxASCII {
+			ascii.WriteRune(r)
+		}
+	}
+
+	result := strings.TrimSpace(ascii.String())
 	if result == "" {
 		return "project"
 	}
