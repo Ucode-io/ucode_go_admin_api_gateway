@@ -173,6 +173,8 @@ type BaseConfig struct {
 	GoogleCalendarFrontendErrorURL   string
 
 	YandexMetricToken string
+
+	FacebookWebhookVerifyToken string
 }
 
 func BaseLoad() BaseConfig {
@@ -278,6 +280,8 @@ func BaseLoad() BaseConfig {
 	config.GoogleCalendarFrontendErrorURL = cast.ToString(GetOrReturnDefaultValue("GOOGLE_CALENDAR_FRONTEND_ERROR_URL", "https://app.u-code.io/settings/google-drive-error"))
 
 	config.YandexMetricToken = cast.ToString(GetOrReturnDefaultValue("YANDEX_METRIC_TOKEN", ""))
+
+	config.FacebookWebhookVerifyToken = cast.ToString(GetOrReturnDefaultValue("FACEBOOK_WEBHOOK_VERIFY_TOKEN", ""))
 
 	config.MaxTokens = cast.ToInt(GetOrReturnDefaultValue("MAX_TOKENS", 12000))
 	config.AnalyseProjectMaxTokens = cast.ToInt(GetOrReturnDefaultValue("ANALYSE_PROJECT_MAX_TOKENS", 5000))
