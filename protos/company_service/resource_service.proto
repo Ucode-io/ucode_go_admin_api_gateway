@@ -352,6 +352,7 @@ message Settings {
     MailchimpCredentials mailchimp = 8;
     GoogleDriveCredentials google_drive = 9;
     GoogleCalendarCredentials google_calendar = 10;
+    TelegramCredentials telegram = 11;
 }
 
 message SmsCredentials {
@@ -428,6 +429,32 @@ message GoogleCalendarMapping {
     string location_field = 6;
     string attendees_field = 7;
     string status_field = 8;
+}
+
+// Telegram secrets are stored in the configured secrets provider.  This
+// project-resource setting deliberately contains only public bot metadata and
+// the reference needed by trusted backend services to load the secret.
+message TelegramCredentials {
+    string bot_id = 1;
+    string bot_username = 2;
+    string secret_path = 3;
+    string status = 4;
+    TelegramChatMapping mapping = 5;
+}
+
+// The selected table remains the project's source of truth for conversations.
+// Message and attachment records live in dedicated Ugen Telegram system tables.
+message TelegramChatMapping {
+    string table_id = 1;
+    string table_slug = 2;
+    string telegram_chat_id_field = 3;
+    string telegram_user_id_field = 4;
+    string display_name_field = 5;
+    string username_field = 6;
+    string last_message_field = 7;
+    string last_message_at_field = 8;
+    string unread_count_field = 9;
+    string status_field = 10;
 }
 
 message Github {
