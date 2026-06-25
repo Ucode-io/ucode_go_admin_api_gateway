@@ -909,14 +909,30 @@ func (h *HandlerV1) resolveTelegramCurrentTarget(ctx context.Context, c *gin.Con
 }
 
 func (h *HandlerV1) requireTelegramInboxAccess(c *gin.Context) bool {
-	if !strings.HasPrefix(strings.ToLower(strings.TrimSpace(c.GetHeader("Authorization"))), "bearer ") {
-		h.HandleResponse(c, status_http.Forbidden, "telegram inbox requires an authenticated user session")
-		return false
+	authHeader := strings.ToLower(strings.TrimSpace(c.GetHeader("Authorization")))
+	if strings.HasPrefix(authHeader, "bearer ") {
+		if _, err := h.GetAuthInfo(c); err != nil {
+			return false
+		}
+		return true
 	}
-	if _, err := h.GetAuthInfo(c); err != nil {
-		return false
+	if strings.HasPrefix(authHeader, "api-key ") {
+		if _, ok := c.Get("auth"); !ok {
+			h.HandleResponse(c, status_http.Forbidden, "telegram inbox requires an authenticated api key")
+			return false
+		}
+		if _, ok := c.Get("project_id"); !ok {
+			h.HandleResponse(c, status_http.Forbidden, "telegram inbox requires project context")
+			return false
+		}
+		if _, ok := c.Get("environment_id"); !ok {
+			h.HandleResponse(c, status_http.Forbidden, "telegram inbox requires environment context")
+			return false
+		}
+		return true
 	}
-	return true
+	h.HandleResponse(c, status_http.Forbidden, "telegram inbox requires an authenticated user session or api key")
+	return false
 }
 
 func (h *HandlerV1) getTelegramResource(ctx context.Context, target *telegramProjectTarget) (*pb.ProjectResource, error) {
