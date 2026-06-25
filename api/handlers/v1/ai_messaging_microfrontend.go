@@ -8,6 +8,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"sort"
 	"strings"
 	"time"
 
@@ -28,6 +29,26 @@ const (
 	mfeFilesPath   = "/v2/functions/micro-frontend/files"
 	mfePushPath    = "/v2/functions/micro-frontend/push-changes"
 	mfePublishPath = "/v2/functions/micro-frontend/publish-ai"
+
+	editChunkMaxFiles       = 5
+	editChunkMaxConcurrency = 5
+	editChunkMaxAttempts    = 2
+	editChunkRetryDelay     = 2 * time.Second
+)
+
+type (
+	// editChunk is a bounded set of files edited by one model call.
+	editChunk struct {
+		index  int
+		change []models.FilePlan
+		create []models.FilePlan
+	}
+
+	editChunkResult struct {
+		chunk editChunk
+		files []models.ProjectFile
+		err   error
+	}
 )
 
 // runMicrofrontendEdit fetches the current files from u-gen, asks the AI to edit
@@ -36,12 +57,13 @@ func (p *ChatProcessor) runMicrofrontendEdit(ctx context.Context, clarified, fil
 	log.Printf("[MICROFE EDIT] planning changes for microfrontend id=%s", p.microFrontendId)
 
 	emit := p.emitter()
-	emit.Emit(SSEEvent{Type: EvProgress, Icon: "scan-search", Message: "Анализирую проект и планирую изменения...", Percent: 5})
+	emit.Emit(SSEEvent{Type: EvProgress, Icon: IconScanSearch, Message: "Анализирую проект и планирую изменения...", Percent: 5})
 
 	if err := p.Check(); err != nil {
 		return nil, err
 	}
 
+	// Phase 1: plan which files to change or create.
 	var plan *models.SonnetPlanResult
 	if err := withHeartbeat(ctx, emit,
 		p.agentCfgs().Planner.Model,
@@ -68,144 +90,382 @@ func (p *ChatProcessor) runMicrofrontendEdit(ctx context.Context, clarified, fil
 
 	emit.Emit(SSEEvent{
 		Type:    EvProgress,
-		Icon:    "file-diff",
+		Icon:    IconFileDiff,
 		Message: "План изменений готов",
 		Value:   fmt.Sprintf("%d изменить · %d создать", len(plan.FilesToChange), len(plan.FilesToCreate)),
 		Percent: 18,
 	})
 	time.Sleep(800 * time.Millisecond)
 
-	// Show individual files from the plan so user knows EXACTLY what will be changed.
 	for _, f := range plan.FilesToChange {
-		emit.Emit(SSEEvent{
-			Type:    EvProgress,
-			Icon:    "file-edit",
-			Message: f.Description,
-			Value:   f.Path,
-		})
+		emit.Emit(SSEEvent{Type: EvProgress, Icon: IconFileEdit, Message: f.Description, Value: f.Path})
 	}
 	for _, f := range plan.FilesToCreate {
-		emit.Emit(SSEEvent{
-			Type:    EvProgress,
-			Icon:    "file-plus",
-			Message: f.Description,
-			Value:   f.Path,
-		})
+		emit.Emit(SSEEvent{Type: EvProgress, Icon: IconFilePlus, Message: f.Description, Value: f.Path})
 	}
-
-	neededPaths := make([]string, 0, len(plan.FilesToChange))
-	for _, f := range plan.FilesToChange {
-		neededPaths = append(neededPaths, f.Path)
-	}
-
-	filesContext := p.buildMicrofrontendFilesContext(existingFiles, neededPaths)
-
-	emit.Emit(SSEEvent{Type: EvProgress, Icon: "code-2", Message: "Редактирую исходный код...", Percent: 20})
 
 	if err := p.Check(); err != nil {
 		return nil, err
 	}
 
-	var editedProject *models.GeneratedProject
-	if err := withHeartbeat(ctx, emit,
-		p.editModel(),
-		[]string{
-			"Редактирую компоненты...",
-			"Вношу изменения в логику...",
-			"Обновляю стили и разметку...",
-			"Проверяю совместимость импортов...",
-			"Финализирую правки...",
-			"Генерирую обновлённый код...",
-		},
-		func() error {
-			hasMatchingFiles := filesContext != "No existing files to modify." && filesContext != "No matching files found."
-			var e error
-			editedProject, e = p.agent.EditCode(ctx, models.EditorInput{
-				Clarified:        clarified,
-				Plan:             plan,
-				FilesContext:     filesContext,
-				Images:           imageURLs,
-				History:          chatHistory,
-				HasMatchingFiles: hasMatchingFiles,
-			})
-			return e
-		},
-	); err != nil {
+	// Phase 2: edit the planned files in bounded, parallel chunks.
+	edited, failed := p.runChunkedEdit(ctx, clarified, plan, imageURLs, chatHistory, existingFiles)
+
+	if len(edited) == 0 {
+		log.Printf("[MICROFE EDIT] editor produced no files — nothing to push")
+		return &models.ParsedClaudeResponse{Description: buildChunkedUpdateSummary(plan, nil, failed, p.userMessage)}, nil
+	}
+
+	// Phase 3: publish.
+	if err := p.applyEditedFiles(ctx, edited, existingFiles); err != nil {
 		return nil, err
 	}
 
-	if editedProject == nil || len(editedProject.Files) == 0 {
-		log.Printf("[MICROFE EDIT] editor returned no files — nothing to push")
-		return &models.ParsedClaudeResponse{Description: buildUpdateSummary(plan, nil, p.userMessage)}, nil
+	return &models.ParsedClaudeResponse{Description: buildChunkedUpdateSummary(plan, edited, failed, p.userMessage)}, nil
+}
+
+// retries is isolated: its files are reported as failed and left untouched
+// rather than failing the whole update.
+func (p *ChatProcessor) runChunkedEdit(ctx context.Context, clarified string, plan *models.SonnetPlanResult, imageURLs []string, chatHistory []models.ChatMessage, existingFiles []models.GitlabFileChange) (edited []models.ProjectFile, failed []models.FilePlan) {
+	emit := p.emitter()
+
+	chunks := planEditChunks(plan)
+	total := len(chunks)
+	if total == 0 {
+		return nil, nil
 	}
 
-	// The edit path bypasses mergeTemplateScaffold, so the editor can ship a
-	// stubbed LoginPage / rewritten auth runtime and pre-fix panels never heal.
-	// Force the pre-built auth files from the template before pushing.
-	editedProject.Files = enforceAuthRuntime(editedProject.Files, existingFiles)
+	tree := buildProjectTree(existingFiles)
 
-	log.Printf("[MICROFE EDIT] pushing %d file(s) to u-gen branch", len(editedProject.Files))
+	fullPlanJSON, _ := json.Marshal(plan)
 
-	// Emit per-file publish events so user sees which files are being updated.
-	for i, f := range editedProject.Files {
-		pct := 86 + (i+1)*10/len(editedProject.Files) // 86↖96
-		if pct > 96 {
-			pct = 96
+	log.Printf("[MICROFE EDIT] chunked edit: %d chunk(s), max %d files each", total, editChunkMaxFiles)
+
+	fileCount := len(plan.FilesToChange) + len(plan.FilesToCreate)
+	modeEvent := SSEEvent{
+		Type:    EvProgress,
+		Icon:    IconCode,
+		Message: "Редактирую код за один проход",
+		Value:   fmt.Sprintf("%d файлов", fileCount),
+		Percent: 20,
+		Data:    map[string]any{"mode": "single", "chunks": total, "files": fileCount},
+	}
+	if total > 1 {
+		modeEvent.Icon = IconZap
+		modeEvent.Message = "Редактирую код параллельно"
+		modeEvent.Value = fmt.Sprintf("%d групп · %d файлов", total, fileCount)
+		modeEvent.Data = map[string]any{"mode": "chunked", "chunks": total, "files": fileCount}
+	}
+	emit.Emit(modeEvent)
+
+	results := make(chan editChunkResult, total)
+	sem := make(chan struct{}, editChunkMaxConcurrency)
+
+	stopHB := make(chan struct{})
+	go chunkEditHeartbeat(emit, stopHB)
+
+	for _, chunk := range chunks {
+		go func(chunk editChunk) {
+			sem <- struct{}{}
+			defer func() { <-sem }()
+
+			chunkFileCount := len(chunk.change) + len(chunk.create)
+			emit.Emit(SSEEvent{
+				Type:    EvChunkStart,
+				Icon:    IconPackage,
+				Message: fmt.Sprintf("Редактирую группу %d/%d", chunk.index, total),
+				Value:   fmt.Sprintf("%d файлов", chunkFileCount),
+				Data:    map[string]any{"index": chunk.index, "total": total, "files": chunkFileCount},
+			})
+
+			files, err := p.runEditChunk(ctx, chunk, clarified, string(fullPlanJSON), imageURLs, chatHistory, tree, existingFiles)
+			results <- editChunkResult{chunk: chunk, files: files, err: err}
+		}(chunk)
+	}
+
+	completed := 0
+	for range chunks {
+		res := <-results
+		completed++
+		pct := 20 + completed*62/total // 20 → 82
+
+		chunkFiles := append(append([]models.FilePlan{}, res.chunk.change...), res.chunk.create...)
+
+		if res.err != nil || len(res.files) == 0 {
+			failed = append(failed, chunkFiles...)
+			log.Printf("[MICROFE EDIT] chunk %d/%d skipped (%d file(s) left unchanged): %v", completed, total, len(chunkFiles), res.err)
+			emit.Emit(SSEEvent{
+				Type:    EvWarning,
+				Icon:    IconAlertTriangle,
+				Message: fmt.Sprintf("Группа пропущена (%d/%d)", completed, total),
+				Value:   fmt.Sprintf("%d файлов без изменений", len(chunkFiles)),
+				Percent: pct,
+				Data:    map[string]any{"index": res.chunk.index, "total": total, "files": len(chunkFiles)},
+			})
+			continue
 		}
 
-		icon := "file-code"
-		if strings.HasSuffix(f.Path, ".css") {
-			icon = "paintbrush"
-		} else if strings.HasSuffix(f.Path, ".tsx") || strings.HasSuffix(f.Path, ".jsx") {
-			icon = "component"
-		} else if strings.HasSuffix(f.Path, ".ts") {
-			icon = "code-2"
+		edited = append(edited, res.files...)
+
+		produced := make(map[string]bool, len(res.files))
+		for _, f := range res.files {
+			produced[f.Path] = true
+		}
+		for _, fp := range chunkFiles {
+			if !produced[fp.Path] {
+				failed = append(failed, fp)
+			}
 		}
 
 		emit.Emit(SSEEvent{
-			Type:    EvPublish,
-			Icon:    icon,
-			Message: "Обновляю файл",
-			Value:   f.Path,
+			Type:    EvChunkDone,
+			Icon:    IconCheckCircle,
+			Message: fmt.Sprintf("Группа готова (%d/%d)", completed, total),
+			Value:   fmt.Sprintf("%d файлов", len(res.files)),
 			Percent: pct,
+			Data: ChunkDoneData{
+				Feature: fmt.Sprintf("Группа %d", res.chunk.index),
+				Index:   res.chunk.index,
+				Total:   total,
+				Files:   res.files,
+			},
 		})
+	}
+	close(stopHB)
+
+	return dedupeProjectFiles(edited), failed
+}
+
+func (p *ChatProcessor) runEditChunk(ctx context.Context, chunk editChunk, clarified, fullPlanJSON string, imageURLs []string, chatHistory []models.ChatMessage, tree string, existingFiles []models.GitlabFileChange) ([]models.ProjectFile, error) {
+	subPlan := &models.SonnetPlanResult{
+		FilesToChange: chunk.change,
+		FilesToCreate: chunk.create,
+	}
+	filesContext := p.buildEditChunkContext(chunk, existingFiles, tree)
+
+	var lastErr error
+	for attempt := 1; attempt <= editChunkMaxAttempts; attempt++ {
+		project, err := p.agent.EditCode(ctx, models.EditorInput{
+			Clarified:    clarified,
+			Plan:         subPlan,
+			FullPlanJSON: fullPlanJSON,
+			FilesContext: filesContext,
+			Images:       imageURLs,
+			History:      chatHistory,
+			Chunked:      true,
+		})
+		if err == nil {
+			if project == nil {
+				return nil, nil
+			}
+			return filterEditChunkFiles(project.Files, chunk), nil
+		}
+
+		lastErr = err
+		log.Printf("[MICROFE EDIT] chunk %d attempt %d/%d failed: %v", chunk.index, attempt, editChunkMaxAttempts, err)
+		if attempt < editChunkMaxAttempts {
+			time.Sleep(editChunkRetryDelay)
+		}
+	}
+	return nil, lastErr
+}
+
+func planEditChunks(plan *models.SonnetPlanResult) []editChunk {
+	var (
+		chunks []editChunk
+		cur    = editChunk{index: 1}
+	)
+
+	flush := func() {
+		if len(cur.change) == 0 && len(cur.create) == 0 {
+			return
+		}
+		chunks = append(chunks, cur)
+		cur = editChunk{index: len(chunks) + 1}
+	}
+
+	add := func(fp models.FilePlan, isCreate bool) {
+		if len(cur.change)+len(cur.create) >= editChunkMaxFiles {
+			flush()
+		}
+		if isCreate {
+			cur.create = append(cur.create, fp)
+		} else {
+			cur.change = append(cur.change, fp)
+		}
+	}
+
+	for _, fp := range plan.FilesToChange {
+		add(fp, false)
+	}
+	for _, fp := range plan.FilesToCreate {
+		add(fp, true)
+	}
+	flush()
+
+	return chunks
+}
+
+func buildProjectTree(files []models.GitlabFileChange) string {
+	if len(files) == 0 {
+		return ""
+	}
+	paths := make([]string, 0, len(files))
+	for _, f := range files {
+		paths = append(paths, f.FilePath)
+	}
+	sort.Strings(paths)
+
+	var sb strings.Builder
+	sb.WriteString("PROJECT FILE TREE (read-only — resolve imports against these paths; do NOT recreate a file unless it is in the plan):\n")
+	for _, path := range paths {
+		sb.WriteString("- ")
+		sb.WriteString(path)
+		sb.WriteByte('\n')
+	}
+	return sb.String()
+}
+
+func (p *ChatProcessor) buildEditChunkContext(chunk editChunk, existing []models.GitlabFileChange, tree string) string {
+	paths := make([]string, 0, len(chunk.change))
+	for _, fp := range chunk.change {
+		paths = append(paths, fp.Path)
+	}
+
+	var sb strings.Builder
+	if tree != "" {
+		sb.WriteString(tree)
+		sb.WriteByte('\n')
+	}
+	sb.WriteString(p.buildMicrofrontendFilesContext(existing, paths))
+	return sb.String()
+}
+
+func filterEditChunkFiles(files []models.ProjectFile, chunk editChunk) []models.ProjectFile {
+	allowed := make(map[string]bool, len(chunk.change)+len(chunk.create))
+	for _, fp := range chunk.change {
+		allowed[fp.Path] = true
+	}
+	for _, fp := range chunk.create {
+		allowed[fp.Path] = true
+	}
+
+	out := make([]models.ProjectFile, 0, len(files))
+	for _, f := range files {
+		if allowed[f.Path] && strings.TrimSpace(f.Content) != "" {
+			out = append(out, f)
+		}
+	}
+	return out
+}
+
+func dedupeProjectFiles(files []models.ProjectFile) []models.ProjectFile {
+	if len(files) <= 1 {
+		return files
+	}
+	indexByPath := make(map[string]int, len(files))
+	out := make([]models.ProjectFile, 0, len(files))
+	for _, f := range files {
+		if i, ok := indexByPath[f.Path]; ok {
+			out[i] = f
+			continue
+		}
+		indexByPath[f.Path] = len(out)
+		out = append(out, f)
+	}
+	return out
+}
+
+func chunkEditHeartbeat(emit ProgressEmitter, stop <-chan struct{}) {
+	ticker := time.NewTicker(15 * time.Second)
+	defer ticker.Stop()
+
+	messages := []string{
+		"Редактирую компоненты...",
+		"Вношу изменения в логику...",
+		"Обновляю стили и разметку...",
+		"Проверяю совместимость импортов...",
+		"Финализирую правки...",
+	}
+	i := 0
+	for {
+		select {
+		case <-ticker.C:
+			emit.Emit(SSEEvent{Type: EvProgress, Icon: IconBrain, Message: messages[i%len(messages)]})
+			i++
+		case <-stop:
+			return
+		}
+	}
+}
+
+func (p *ChatProcessor) applyEditedFiles(ctx context.Context, edited []models.ProjectFile, existingFiles []models.GitlabFileChange) error {
+	emit := p.emitter()
+
+	edited = enforceAuthRuntime(edited, existingFiles)
+
+	log.Printf("[MICROFE EDIT] pushing %d file(s) to u-gen branch", len(edited))
+
+	for i, f := range edited {
+		pct := 86 + (i+1)*10/len(edited) // 86 → 96
+		if pct > 96 {
+			pct = 96
+		}
+		emit.Emit(SSEEvent{Type: EvPublish, Icon: editFileIcon(f.Path), Message: "Обновляю файл", Value: f.Path, Percent: pct})
 	}
 
 	emit.Emit(SSEEvent{
 		Type:    EvPublish,
-		Icon:    "upload-cloud",
+		Icon:    IconUploadCloud,
 		Message: "Пушу изменения в GitLab",
-		Value:   fmt.Sprintf("%d файлов", len(editedProject.Files)),
+		Value:   fmt.Sprintf("%d файлов", len(edited)),
 		Percent: 97,
 	})
-	if err := p.pushMicrofrontendChangesChunked(ctx, editedProject.Files); err != nil {
-		return nil, fmt.Errorf("failed to push microfrontend changes: %w", err)
+	if err := p.pushMicrofrontendChangesChunked(ctx, edited); err != nil {
+		return fmt.Errorf("failed to push microfrontend changes: %w", err)
 	}
 
-	// Build full-state snapshot: merge AI-edited files into the full existing file list
-	// so that reverting to this snapshot restores ALL files to a consistent state.
-	editedMap := make(map[string]string, len(editedProject.Files))
-	for _, f := range editedProject.Files {
-		editedMap[f.Path] = f.Content
+	p.createMicrofrontendSnapshot(ctx, buildFullSnapshot(existingFiles, edited), "Changes applied successfully.")
+	return nil
+}
+
+func editFileIcon(path string) string {
+	switch {
+	case strings.HasSuffix(path, ".css"):
+		return IconPaintbrush
+	case strings.HasSuffix(path, ".tsx"), strings.HasSuffix(path, ".jsx"):
+		return IconComponent
+	case strings.HasSuffix(path, ".ts"):
+		return IconCode
+	default:
+		return IconFileCode
 	}
-	fullSnapshot := make([]models.GitlabFileChange, 0, len(existingFiles)+len(editedProject.Files))
-	for _, f := range existingFiles {
-		if newContent, changed := editedMap[f.FilePath]; changed {
-			fullSnapshot = append(fullSnapshot, models.GitlabFileChange{FilePath: f.FilePath, Content: newContent})
-			delete(editedMap, f.FilePath)
+}
+
+// buildFullSnapshot merges edited files into the full existing file list so that
+// reverting to this snapshot restores every file to a consistent state.
+func buildFullSnapshot(existing []models.GitlabFileChange, edited []models.ProjectFile) []models.GitlabFileChange {
+	editedByPath := make(map[string]string, len(edited))
+	for _, f := range edited {
+		editedByPath[f.Path] = f.Content
+	}
+
+	snapshot := make([]models.GitlabFileChange, 0, len(existing)+len(edited))
+	for _, f := range existing {
+		if content, changed := editedByPath[f.FilePath]; changed {
+			snapshot = append(snapshot, models.GitlabFileChange{FilePath: f.FilePath, Content: content})
+			delete(editedByPath, f.FilePath)
 		} else {
-			fullSnapshot = append(fullSnapshot, f)
+			snapshot = append(snapshot, f)
 		}
 	}
-	// Append newly created files not present in existingFiles.
-	for _, f := range editedProject.Files {
-		if _, isNew := editedMap[f.Path]; isNew {
-			fullSnapshot = append(fullSnapshot, models.GitlabFileChange{FilePath: f.Path, Content: f.Content})
+	// Append newly created files not present in the existing list.
+	for _, f := range edited {
+		if _, isNew := editedByPath[f.Path]; isNew {
+			snapshot = append(snapshot, models.GitlabFileChange{FilePath: f.Path, Content: f.Content})
 		}
 	}
-	p.createMicrofrontendSnapshot(ctx, fullSnapshot, "Changes applied successfully.")
-
-	return &models.ParsedClaudeResponse{Description: buildUpdateSummary(plan, editedProject.Files, p.userMessage)}, nil
+	return snapshot
 }
 
 // runMicrofrontendInspect answers questions about the microfrontend's current code

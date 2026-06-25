@@ -178,6 +178,8 @@ type BaseConfig struct {
 	TelegramWebhookBaseURL       string
 
 	YandexMetricToken string
+
+	FacebookWebhookVerifyToken string
 }
 
 func BaseLoad() BaseConfig {
@@ -288,6 +290,8 @@ func BaseLoad() BaseConfig {
 	config.TelegramWebhookBaseURL = strings.TrimRight(cast.ToString(GetOrReturnDefaultValue("TELEGRAM_WEBHOOK_BASE_URL", config.UcodeBaseUrl)), "/")
 
 	config.YandexMetricToken = cast.ToString(GetOrReturnDefaultValue("YANDEX_METRIC_TOKEN", ""))
+
+	config.FacebookWebhookVerifyToken = cast.ToString(GetOrReturnDefaultValue("FACEBOOK_WEBHOOK_VERIFY_TOKEN", ""))
 
 	config.MaxTokens = cast.ToInt(GetOrReturnDefaultValue("MAX_TOKENS", 12000))
 	config.AnalyseProjectMaxTokens = cast.ToInt(GetOrReturnDefaultValue("ANALYSE_PROJECT_MAX_TOKENS", 5000))

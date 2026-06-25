@@ -58,6 +58,10 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	// Real Stripe PaymentIntent endpoint
 	r.POST("/stripe/webhook", h.V1.StripeWebhook)
 
+	// Facebook (Meta) Lead Ads webhook — public, Meta calls it
+	r.GET("/webhook/facebook", h.V1.FacebookWebhookVerify)
+	r.POST("/webhook/facebook", h.V1.FacebookWebhookReceive)
+
 	v1 := r.Group("/v1")
 	// @securityDefinitions.apikey ApiKeyAuth
 	// @in header

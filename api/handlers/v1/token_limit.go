@@ -13,6 +13,16 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+// unlimitedTokenCompanies are exempt from token-limit blocking: the budget is
+// still tracked and deducted, but Check never refuses them. Keyed by company id.
+var unlimitedTokenCompanies = map[string]bool{
+	"324f86b1-4dd7-48cf-adcd-ec430548b942": true,
+}
+
+func (p *ChatProcessor) tokenLimitExempt() bool {
+	return unlimitedTokenCompanies[p.companyId]
+}
+
 type TokenLimitError struct {
 	Period string
 	Used   int64
@@ -92,7 +102,7 @@ func (p *ChatProcessor) initTokenBudget(ctx context.Context) {
 }
 
 func (p *ChatProcessor) Check() error {
-	if !p.tokenBudgetEnabled {
+	if !p.tokenBudgetEnabled || p.tokenLimitExempt() {
 		return nil
 	}
 	if atomic.LoadInt64(&p.tokenBudgetRemain) <= 0 {

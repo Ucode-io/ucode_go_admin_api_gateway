@@ -57,14 +57,16 @@ const (
 	IconPlusCircle = "plus-circle" // insert rows / add item
 
 	// Code / files
-	IconCode      = "code-2"    // code generation / editing
-	IconFileText  = "file-text" // document / page / file
-	IconFileDiff  = "file-diff" // diff / planner output
-	IconFileEdit  = "file-edit" // editing existing file
-	IconFilePlus  = "file-plus" // creating new file
-	IconFileCode  = "file-code" // source code file
-	IconListTree  = "list-tree" // file/page structure
-	IconGitBranch = "git-branch"
+	IconCode       = "code-2"    // code generation / editing
+	IconFileText   = "file-text" // document / page / file
+	IconFileDiff   = "file-diff" // diff / planner output
+	IconFileEdit   = "file-edit" // editing existing file
+	IconFilePlus   = "file-plus" // creating new file
+	IconFileCode   = "file-code" // source code file
+	IconListTree   = "list-tree" // file/page structure
+	IconGitBranch  = "git-branch"
+	IconComponent  = "component"  // React component (.tsx/.jsx)
+	IconPaintbrush = "paintbrush" // stylesheet (.css)
 
 	// Project / publish
 	IconUploadCloud  = "upload-cloud"        // deploy / publish

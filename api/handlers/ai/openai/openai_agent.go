@@ -156,7 +156,12 @@ func (a *OpenAIAgent) EditCode(ctx context.Context, in models.EditorInput) (*mod
 		parts        []contentPart
 	)
 
-	if in.HasMatchingFiles {
+	if in.Chunked {
+		systemPrompt = chat_prompts.PromptCodeEditorChunk
+		assignedJSON, _ := json.Marshal(in.Plan)
+		content := chat_prompts.BuildCodeEditorChunkMessage(in.Clarified, string(assignedJSON), in.FullPlanJSON, in.FilesContext, len(in.Images) > 0)
+		parts = buildContentParts(content, in.Images)
+	} else if in.HasMatchingFiles {
 		systemPrompt = chat_prompts.PromptCodeEditor
 		planJSON, _ := json.Marshal(in.Plan)
 		content := chat_prompts.BuildCodeEditorMessage(in.Clarified, string(planJSON), in.FilesContext, len(in.Images) > 0)
