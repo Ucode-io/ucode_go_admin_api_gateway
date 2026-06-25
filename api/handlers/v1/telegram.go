@@ -916,7 +916,7 @@ func (h *HandlerV1) requireTelegramInboxAccess(c *gin.Context) bool {
 		}
 		return true
 	}
-	if strings.HasPrefix(authHeader, "api-key ") {
+	if authHeader == "api-key" || strings.HasPrefix(authHeader, "api-key ") {
 		if _, ok := c.Get("auth"); !ok {
 			h.HandleResponse(c, status_http.Forbidden, "telegram inbox requires an authenticated api key")
 			return false
@@ -1605,7 +1605,12 @@ func (h *HandlerV1) listTelegramChatRows(ctx context.Context, target *telegramPr
 			columns = append(columns, fmt.Sprintf("%s AS %s", telegramQuoteIdentifier(field), telegramQuoteIdentifier(alias)))
 		}
 	}
-	query := fmt.Sprintf(`SELECT %s FROM %s WHERE deleted_at IS NULL`, strings.Join(columns, ", "), telegramQuoteIdentifier(mapping.GetTableSlug()))
+	query := fmt.Sprintf(`SELECT %s FROM %s WHERE deleted_at IS NULL AND %s IS NOT NULL AND COALESCE(%s::text, '') <> ''`,
+		strings.Join(columns, ", "),
+		telegramQuoteIdentifier(mapping.GetTableSlug()),
+		telegramQuoteIdentifier(mapping.GetTelegramChatIdField()),
+		telegramQuoteIdentifier(mapping.GetTelegramChatIdField()),
+	)
 	params := []string{}
 	if strings.TrimSpace(search) != "" && mapping.GetDisplayNameField() != "" {
 		params = append(params, ".*"+regexp.QuoteMeta(strings.TrimSpace(search))+".*")
