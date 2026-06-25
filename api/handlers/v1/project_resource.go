@@ -52,6 +52,10 @@ func (h *HandlerV1) AddResourceToProject(c *gin.Context) {
 	request.ProjectId = projectId.(string)
 	request.EnvironmentId = environmentId.(string)
 
+	if isTelegramAddResourceRequest(request) {
+		h.HandleResponse(c, status_http.BadRequest, "use /v1/mcp_project/:id/telegram endpoints to manage Telegram Support")
+		return
+	}
 	if request.GetType() == pb.ResourceType_GOOGLE_DRIVE {
 		if request.GetSettings() == nil || request.GetSettings().GetGoogleDrive() == nil || strings.TrimSpace(request.GetSettings().GetGoogleDrive().GetRefreshToken()) == "" {
 			h.HandleResponse(c, status_http.BadRequest, "use /v1/google-drive/connect to connect Google Drive")
@@ -153,6 +157,21 @@ func (h *HandlerV1) UpdateProjectResource(c *gin.Context) {
 	request.ProjectId = projectId.(string)
 	request.EnvironmentId = environmentId.(string)
 
+	if isTelegramProjectResource(request) {
+		h.HandleResponse(c, status_http.BadRequest, "use /v1/mcp_project/:id/telegram endpoints to manage Telegram Support")
+		return
+	}
+	if util.IsValidUUID(request.GetId()) {
+		current, currentErr := h.companyServices.Resource().GetSingleProjectResouece(c.Request.Context(), &pb.PrimaryKeyProjectResource{
+			Id:            request.GetId(),
+			ProjectId:     request.GetProjectId(),
+			EnvironmentId: request.GetEnvironmentId(),
+		})
+		if currentErr == nil && isTelegramProjectResource(current) {
+			h.HandleResponse(c, status_http.BadRequest, "use /v1/mcp_project/:id/telegram endpoints to manage Telegram Support")
+			return
+		}
+	}
 	if shouldSanitizeGoogleDriveSettings(request) {
 		current, err := h.companyServices.Resource().GetSingleProjectResouece(c.Request.Context(), &pb.PrimaryKeyProjectResource{
 			Id:            request.GetId(),
@@ -420,9 +439,62 @@ func googleCalendarProjectResourceForLog(resource *pb.ProjectResource) *pb.Proje
 	return &safe
 }
 
+func isTelegramAddResourceRequest(resource *pb.AddResourceToProjectRequest) bool {
+	if resource == nil {
+		return false
+	}
+	if resource.GetType() == pb.ResourceType_TELEGRAM {
+		return true
+	}
+	return resource.GetSettings() != nil && resource.GetSettings().GetTelegram() != nil
+}
+
+func isTelegramProjectResource(resource *pb.ProjectResource) bool {
+	if resource == nil {
+		return false
+	}
+	if resource.GetType() == pb.ResourceType_TELEGRAM.String() || resource.GetResourceType() == int32(pb.ResourceType_TELEGRAM) {
+		return true
+	}
+	return resource.GetSettings() != nil && resource.GetSettings().GetTelegram() != nil
+}
+
+func sanitizeTelegramResourceForResponse(resource *pb.ProjectResource) {
+	if resource == nil || resource.GetSettings() == nil || resource.GetSettings().GetTelegram() == nil {
+		return
+	}
+	telegramSettings := resource.GetSettings().GetTelegram()
+	resource.Settings.Telegram = &pb.TelegramCredentials{
+		BotId:       telegramSettings.GetBotId(),
+		BotUsername: telegramSettings.GetBotUsername(),
+		Status:      telegramSettings.GetStatus(),
+		Mapping:     telegramSettings.GetMapping(),
+	}
+}
+
+func telegramProjectResourceForLog(resource *pb.ProjectResource) *pb.ProjectResource {
+	if resource == nil || resource.GetSettings() == nil || resource.GetSettings().GetTelegram() == nil {
+		return resource
+	}
+	safe := *resource
+	telegramSettings := resource.GetSettings().GetTelegram()
+	safe.Settings = &pb.Settings{
+		Telegram: &pb.TelegramCredentials{
+			BotId:       telegramSettings.GetBotId(),
+			BotUsername: telegramSettings.GetBotUsername(),
+			Status:      telegramSettings.GetStatus(),
+			Mapping:     telegramSettings.GetMapping(),
+		},
+	}
+	return &safe
+}
+
 func projectResourceForLog(resource *pb.ProjectResource) *pb.ProjectResource {
 	if resource == nil {
 		return resource
+	}
+	if resource.GetSettings() != nil && resource.GetSettings().GetTelegram() != nil {
+		return telegramProjectResourceForLog(resource)
 	}
 	if resource.GetSettings() != nil && resource.GetSettings().GetGoogleCalendar() != nil {
 		return googleCalendarProjectResourceForLog(resource)
@@ -474,6 +546,7 @@ func (h *HandlerV1) GetListProjectResourceList(c *gin.Context) {
 	for _, resource := range resp.GetResources() {
 		sanitizeGoogleDriveResourceForResponse(resource)
 		sanitizeGoogleCalendarResourceForResponse(resource)
+		sanitizeTelegramResourceForResponse(resource)
 	}
 
 	h.HandleResponse(c, status_http.OK, resp)
@@ -519,6 +592,7 @@ func (h *HandlerV1) GetSingleProjectResource(c *gin.Context) {
 
 	sanitizeGoogleDriveResourceForResponse(resp)
 	sanitizeGoogleCalendarResourceForResponse(resp)
+	sanitizeTelegramResourceForResponse(resp)
 
 	h.HandleResponse(c, status_http.OK, resp)
 }
@@ -559,6 +633,12 @@ func (h *HandlerV1) DeleteProjectResource(c *gin.Context) {
 	request.ProjectId = projectId.(string)
 	request.EnvironmentId = environmentId.(string)
 	request.Id = c.Param("id")
+
+	current, currentErr := h.companyServices.Resource().GetSingleProjectResouece(c.Request.Context(), request)
+	if currentErr == nil && isTelegramProjectResource(current) {
+		h.HandleResponse(c, status_http.BadRequest, "use /v1/mcp_project/:id/telegram endpoints to disconnect Telegram Support")
+		return
+	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
 		c.Request.Context(), &pb.GetSingleServiceResourceReq{

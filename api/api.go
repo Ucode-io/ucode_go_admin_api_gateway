@@ -49,6 +49,11 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	r.Any("v1/functions/:function-id/run", h.V1.FunctionRun)
 
 	r.Any("/v1/transcoder/webhook", h.V1.TranscoderWebhook)
+	// Telegram webhooks are deliberately public. Each handler validates the
+	// secret Telegram sends in X-Telegram-Bot-Api-Secret-Token before reading
+	// or changing project data.
+	r.POST("/v1/telegram/manager/webhook", h.V1.TelegramManagerWebhook)
+	r.POST("/v1/telegram/webhook/:project_id/:environment_id/:resource_id", h.V1.TelegramProjectWebhook)
 
 	// Real Stripe PaymentIntent endpoint
 	r.POST("/stripe/webhook", h.V1.StripeWebhook)
@@ -104,6 +109,15 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1.PUT("/table", h.V1.UpdateTable)
 		v1.PUT("/table/:collection/mcp", h.V1.UpdateTableByMCP)
 		v1.DELETE("/table/:table_id", h.V1.DeleteTable)
+
+		telegram := v1.Group("/telegram")
+		{
+			telegram.GET("/chats", h.V1.ListTelegramChats)
+			telegram.GET("/chats/:chat_id/messages", h.V1.ListTelegramMessages)
+			telegram.POST("/chats/:chat_id/messages", h.V1.SendTelegramMessage)
+			telegram.GET("/messages/:message_id/attachments", h.V1.ListTelegramMessageAttachments)
+			telegram.GET("/messages/:message_id/attachments/:attachment_id", h.V1.ProxyTelegramAttachment)
+		}
 
 		v1.POST("/connections", h.V1.CreateConnectionAndSchema)
 		v1.GET("/connections/:connection_id/tables", h.V1.GetTrackedUntrackedTables)
@@ -353,6 +367,18 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 		mcpProject := v1Admin.Group("/mcp_project")
 		{
+			telegram := mcpProject.Group("/:mcp_project_id/telegram")
+			{
+				telegram.GET("/mapping-options", h.V1.GetTelegramMappingOptions)
+				telegram.POST("/managed-session", h.V1.CreateTelegramManagedSession)
+				telegram.GET("/managed-session/:session_id", h.V1.GetTelegramManagedSession)
+				telegram.POST("/connect-existing", h.V1.ConnectExistingTelegramBot)
+				telegram.GET("", h.V1.GetTelegramIntegration)
+				telegram.DELETE("", h.V1.DisconnectTelegramIntegration)
+				telegram.GET("/inbox-prompt", h.V1.GetTelegramInboxPrompt)
+				telegram.POST("/inbox-ready", h.V1.MarkTelegramInboxReady)
+			}
+
 			mcpProject.POST("/create-plan", h.V1.McpGeneratePlan)
 			mcpProject.POST("/generate-project/with-plan", h.V1.McpGenerateProjectV2)
 

@@ -172,6 +172,11 @@ type BaseConfig struct {
 	GoogleCalendarFrontendSuccessURL string
 	GoogleCalendarFrontendErrorURL   string
 
+	TelegramManagerBotToken      string
+	TelegramManagerBotUsername   string
+	TelegramManagerWebhookSecret string
+	TelegramWebhookBaseURL       string
+
 	YandexMetricToken string
 
 	FacebookWebhookVerifyToken string
@@ -278,6 +283,11 @@ func BaseLoad() BaseConfig {
 	config.GoogleCalendarRedirectURI = cast.ToString(GetOrReturnDefaultValue("GOOGLE_CALENDAR_REDIRECT_URI", ""))
 	config.GoogleCalendarFrontendSuccessURL = cast.ToString(GetOrReturnDefaultValue("GOOGLE_CALENDAR_FRONTEND_SUCCESS_URL", "https://app.u-code.io/settings/google-drive-success"))
 	config.GoogleCalendarFrontendErrorURL = cast.ToString(GetOrReturnDefaultValue("GOOGLE_CALENDAR_FRONTEND_ERROR_URL", "https://app.u-code.io/settings/google-drive-error"))
+
+	config.TelegramManagerBotToken = cast.ToString(GetOrReturnDefaultValue("TELEGRAM_MANAGER_BOT_TOKEN", ""))
+	config.TelegramManagerBotUsername = strings.TrimPrefix(cast.ToString(GetOrReturnDefaultValue("TELEGRAM_MANAGER_BOT_USERNAME", "")), "@")
+	config.TelegramManagerWebhookSecret = cast.ToString(GetOrReturnDefaultValue("TELEGRAM_MANAGER_WEBHOOK_SECRET", ""))
+	config.TelegramWebhookBaseURL = strings.TrimRight(cast.ToString(GetOrReturnDefaultValue("TELEGRAM_WEBHOOK_BASE_URL", config.UcodeBaseUrl)), "/")
 
 	config.YandexMetricToken = cast.ToString(GetOrReturnDefaultValue("YANDEX_METRIC_TOKEN", ""))
 
