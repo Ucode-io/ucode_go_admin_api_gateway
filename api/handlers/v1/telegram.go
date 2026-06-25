@@ -1130,9 +1130,7 @@ func (h *HandlerV1) ensureTelegramMessageRelation(ctx context.Context, target *t
 			return nil
 		}
 	}
-	viewField, err := target.Services.GoObjectBuilderService().Field().ObtainRandomOne(ctx, &pbo.ObtainRandomRequest{
-		TableSlug: telegramMessagesTable, ProjectId: target.ResourceEnvID, EnvId: target.EnvironmentID,
-	})
+	viewFieldID, err := h.telegramMessageRelationViewFieldID(ctx, target)
 	if err != nil {
 		return fmt.Errorf("get telegram message field for relation: %w", err)
 	}
@@ -1146,11 +1144,42 @@ func (h *HandlerV1) ensureTelegramMessageRelation(ctx context.Context, target *t
 		Id: uuid.NewString(), TableFrom: telegramMessagesTable, TableTo: mapping.GetTableSlug(), Type: "Many2One",
 		RelationTableSlug: mapping.GetTableSlug(), RelationFieldSlug: relationField,
 		RelationFieldId: uuid.NewString(), RelationToFieldId: uuid.NewString(),
-		ProjectId: target.ResourceEnvID, EnvId: target.EnvironmentID, ViewFields: []string{viewField.GetId()}, Attributes: attributes,
+		ProjectId: target.ResourceEnvID, EnvId: target.EnvironmentID, ViewFields: []string{viewFieldID}, Attributes: attributes,
 	}); err != nil {
 		return fmt.Errorf("create telegram message relation: %w", err)
 	}
 	return nil
+}
+
+func (h *HandlerV1) telegramMessageRelationViewFieldID(ctx context.Context, target *telegramProjectTarget) (string, error) {
+	fields, err := target.Services.GoObjectBuilderService().Field().GetAll(ctx, &pbo.GetAllFieldsRequest{
+		TableSlug: telegramMessagesTable,
+		ProjectId: target.ResourceEnvID,
+		Limit:     500,
+	})
+	if err != nil {
+		return "", err
+	}
+	if len(fields.GetFields()) == 0 {
+		return "", errors.New("telegram message table has no fields")
+	}
+	preferredSlugs := map[string]struct{}{"text": {}, "telegram_message_id": {}}
+	for _, slug := range []string{"text", "telegram_message_id"} {
+		for _, field := range fields.GetFields() {
+			if field.GetSlug() == slug && field.GetId() != "" {
+				return field.GetId(), nil
+			}
+		}
+	}
+	for _, field := range fields.GetFields() {
+		if _, preferred := preferredSlugs[field.GetSlug()]; preferred {
+			continue
+		}
+		if field.GetId() != "" {
+			return field.GetId(), nil
+		}
+	}
+	return "", errors.New("telegram message table fields have no ids")
 }
 
 type telegramSystemField struct {
