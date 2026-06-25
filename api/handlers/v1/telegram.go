@@ -1006,7 +1006,7 @@ func (h *HandlerV1) prepareTelegramMapping(ctx context.Context, target *telegram
 			return nil, attrErr
 		}
 		if _, err = target.Services.GoObjectBuilderService().Field().Create(ctx, &pbo.CreateFieldRequest{
-			TableId: table.GetId(), ProjectId: target.ResourceEnvID, EnvId: target.EnvironmentID,
+			Id: uuid.NewString(), TableId: table.GetId(), ProjectId: target.ResourceEnvID, EnvId: target.EnvironmentID,
 			Slug: mapping.GetTelegramChatIdField(), Label: "Telegram chat ID", Type: "SINGLE_LINE", Unique: true,
 			IsVisible: false, Attributes: attrs,
 		}); err != nil {
