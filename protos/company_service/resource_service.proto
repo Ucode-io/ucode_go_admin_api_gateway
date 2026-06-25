@@ -6,6 +6,7 @@ option go_package="genproto/company_service";
 import "company.proto";
 import "projects_service.proto";
 import "integration_resource_service.proto";
+import "google/protobuf/struct.proto";
 
 service ResourceService {
     rpc AddResource(AddResourceRequest) returns (AddResourceResponse) {}
@@ -72,6 +73,7 @@ message AddResourceToProjectRequest {
     string client_type_id = 10;
     string company_id = 11;
     string node_type = 12;
+    google.protobuf.Struct secret = 13;
 }
 
 message GetProjectResourceListRequest {
@@ -89,6 +91,7 @@ message ProjectResource {
     repeated VariableResource variables = 6;
     Settings settings = 7;
     int32 resource_type = 8;
+    google.protobuf.Struct secret = 9;
 }
 
 message ListProjectResource {

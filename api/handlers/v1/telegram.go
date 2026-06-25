@@ -577,7 +577,7 @@ func (h *HandlerV1) DisconnectTelegramIntegration(c *gin.Context) {
 		return
 	}
 
-	secret, err := h.loadTelegramSecret(c.Request.Context(), resource.GetSettings().GetTelegram().GetSecretPath())
+	secret, err := h.loadTelegramSecret(resource)
 	if err == nil && secret.BotToken != "" {
 		_ = newTelegramAPIClient(secret.BotToken).deleteWebhook(c.Request.Context())
 	}
@@ -588,9 +588,6 @@ func (h *HandlerV1) DisconnectTelegramIntegration(c *gin.Context) {
 	}); err != nil {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return
-	}
-	if resource.GetSettings().GetTelegram().GetSecretPath() != "" {
-		_ = h.vault.Delete(c.Request.Context(), resource.GetSettings().GetTelegram().GetSecretPath())
 	}
 	h.HandleResponse(c, status_http.NoContent, gin.H{})
 }
@@ -629,7 +626,7 @@ func (h *HandlerV1) TelegramProjectWebhook(c *gin.Context) {
 		c.Status(http.StatusNotFound)
 		return
 	}
-	secret, err := h.loadTelegramSecret(c.Request.Context(), resource.GetSettings().GetTelegram().GetSecretPath())
+	secret, err := h.loadTelegramSecret(resource)
 	if err != nil || subtle.ConstantTimeCompare([]byte(c.GetHeader("X-Telegram-Bot-Api-Secret-Token")), []byte(secret.WebhookSecret)) != 1 {
 		c.Status(http.StatusUnauthorized)
 		return
@@ -766,7 +763,7 @@ func (h *HandlerV1) ProxyTelegramAttachment(c *gin.Context) {
 		h.HandleResponse(c, status_http.NotFound, "telegram integration is not connected")
 		return
 	}
-	secret, err := h.loadTelegramSecret(c.Request.Context(), resource.GetSettings().GetTelegram().GetSecretPath())
+	secret, err := h.loadTelegramSecret(resource)
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -825,7 +822,7 @@ func (h *HandlerV1) SendTelegramMessage(c *gin.Context) {
 		h.HandleResponse(c, status_http.NotFound, err.Error())
 		return
 	}
-	secret, err := h.loadTelegramSecret(c.Request.Context(), resource.GetSettings().GetTelegram().GetSecretPath())
+	secret, err := h.loadTelegramSecret(resource)
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -1206,33 +1203,34 @@ func (h *HandlerV1) connectTelegramBot(ctx context.Context, target *telegramProj
 		return nil, errors.New("telegram integration is already connected; disconnect it before replacing the bot")
 	}
 
-	secretPathID := uuid.NewString()
-	secretPath := fmt.Sprintf("telegram/%s/%s", target.ProjectID, secretPathID)
 	webhookSecret, err := telegramRandomToken(24)
 	if err != nil {
 		return nil, err
 	}
-	if err = h.vault.Put(ctx, secretPath, map[string]any{"bot_token": strings.TrimSpace(token), "webhook_secret": webhookSecret}); err != nil {
-		return nil, fmt.Errorf("store telegram credentials: %w", err)
+	secret, err := structpb.NewStruct(map[string]any{"bot_token": strings.TrimSpace(token), "webhook_secret": webhookSecret})
+	if err != nil {
+		return nil, fmt.Errorf("prepare telegram credentials: %w", err)
 	}
+	settings := &pb.Settings{Telegram: &pb.TelegramCredentials{
+		BotId: fmt.Sprint(bot.ID), BotUsername: bot.Username, Status: "pending_ui", Mapping: mapping,
+	}}
 
 	resource, err := h.companyServices.Resource().AddResourceToProject(ctx, &pb.AddResourceToProjectRequest{
 		Name: "Telegram Support", ProjectId: target.ProjectID, EnvironmentId: target.EnvironmentID, Type: pb.ResourceType_TELEGRAM,
-		Settings: &pb.Settings{Telegram: &pb.TelegramCredentials{
-			BotId: fmt.Sprint(bot.ID), BotUsername: bot.Username, SecretPath: secretPath, Status: "pending_ui", Mapping: mapping,
-		}},
+		Settings: settings,
+		Secret:   secret,
 	})
 	if err != nil {
-		_ = h.vault.Delete(ctx, secretPath)
 		return nil, fmt.Errorf("save telegram resource: %w", err)
 	}
 
 	webhookURL := fmt.Sprintf("%s/v1/telegram/webhook/%s/%s/%s", strings.TrimRight(h.baseConf.TelegramWebhookBaseURL, "/"), target.ProjectID, target.EnvironmentID, resource.GetId())
 	if err = newTelegramAPIClient(token).setWebhook(ctx, webhookURL, webhookSecret, []string{"message"}); err != nil {
 		_, _ = h.companyServices.Resource().DeleteProjectResource(ctx, &pb.PrimaryKeyProjectResource{Id: resource.GetId(), ProjectId: target.ProjectID, EnvironmentId: target.EnvironmentID})
-		_ = h.vault.Delete(ctx, secretPath)
 		return nil, fmt.Errorf("set telegram webhook: %w", err)
 	}
+	resource.Settings = settings
+	resource.Secret = nil
 	return resource, nil
 }
 
@@ -1626,19 +1624,17 @@ func (h *HandlerV1) telegramChatIDForRecord(ctx context.Context, target *telegra
 	return chatID, nil
 }
 
-func (h *HandlerV1) loadTelegramSecret(ctx context.Context, secretPath string) (telegramSecret, error) {
-	if strings.TrimSpace(secretPath) == "" {
-		return telegramSecret{}, errors.New("telegram secret path is empty")
+func (h *HandlerV1) loadTelegramSecret(resource *pb.ProjectResource) (telegramSecret, error) {
+	if resource == nil {
+		return telegramSecret{}, errors.New("telegram resource is missing")
 	}
-	data, err := h.vault.Get(ctx, secretPath)
-	if err != nil {
-		return telegramSecret{}, err
+	if resource.GetSecret() != nil {
+		secret := telegramSecret{BotToken: telegramSecretString(resource.GetSecret().AsMap(), "bot_token"), WebhookSecret: telegramSecretString(resource.GetSecret().AsMap(), "webhook_secret")}
+		if secret.BotToken != "" && secret.WebhookSecret != "" {
+			return secret, nil
+		}
 	}
-	secret := telegramSecret{BotToken: telegramSecretString(data, "bot_token"), WebhookSecret: telegramSecretString(data, "webhook_secret")}
-	if secret.BotToken == "" || secret.WebhookSecret == "" {
-		return telegramSecret{}, errors.New("telegram credentials are incomplete")
-	}
-	return secret, nil
+	return telegramSecret{}, errors.New("telegram credentials are missing")
 }
 
 func telegramSecretString(data map[string]any, key string) string {

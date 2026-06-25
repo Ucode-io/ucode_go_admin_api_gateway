@@ -51,6 +51,7 @@ func (h *HandlerV1) AddResourceToProject(c *gin.Context) {
 
 	request.ProjectId = projectId.(string)
 	request.EnvironmentId = environmentId.(string)
+	request.Secret = nil
 
 	if isTelegramAddResourceRequest(request) {
 		h.HandleResponse(c, status_http.BadRequest, "use /v1/mcp_project/:id/telegram endpoints to manage Telegram Support")
@@ -83,6 +84,7 @@ func (h *HandlerV1) AddResourceToProject(c *gin.Context) {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+	resp.Secret = nil
 
 	if request.GetType() == pb.ResourceType_GOOGLE_DRIVE {
 		resp.Settings = request.GetSettings()
@@ -156,6 +158,7 @@ func (h *HandlerV1) UpdateProjectResource(c *gin.Context) {
 
 	request.ProjectId = projectId.(string)
 	request.EnvironmentId = environmentId.(string)
+	request.Secret = nil
 
 	if isTelegramProjectResource(request) {
 		h.HandleResponse(c, status_http.BadRequest, "use /v1/mcp_project/:id/telegram endpoints to manage Telegram Support")
@@ -345,6 +348,7 @@ func sanitizeGoogleDriveResourceForResponse(resource *pb.ProjectResource) {
 	if resource == nil || resource.GetSettings() == nil || resource.GetSettings().GetGoogleDrive() == nil {
 		return
 	}
+	resource.Secret = nil
 
 	drive := resource.GetSettings().GetGoogleDrive()
 	resource.Settings.GoogleDrive = &pb.GoogleDriveCredentials{
@@ -360,6 +364,7 @@ func googleDriveProjectResourceForLog(resource *pb.ProjectResource) *pb.ProjectR
 	}
 
 	safe := *resource
+	safe.Secret = nil
 	drive := resource.GetSettings().GetGoogleDrive()
 	safe.Settings = &pb.Settings{
 		GoogleDrive: &pb.GoogleDriveCredentials{
@@ -413,6 +418,7 @@ func sanitizeGoogleCalendarResourceForResponse(resource *pb.ProjectResource) {
 	if resource == nil || resource.GetSettings() == nil || resource.GetSettings().GetGoogleCalendar() == nil {
 		return
 	}
+	resource.Secret = nil
 	calendarSettings := resource.GetSettings().GetGoogleCalendar()
 	resource.Settings.GoogleCalendar = &pb.GoogleCalendarCredentials{
 		AuthType:      calendarSettings.GetAuthType(),
@@ -427,6 +433,7 @@ func googleCalendarProjectResourceForLog(resource *pb.ProjectResource) *pb.Proje
 		return resource
 	}
 	safe := *resource
+	safe.Secret = nil
 	calendarSettings := resource.GetSettings().GetGoogleCalendar()
 	safe.Settings = &pb.Settings{
 		GoogleCalendar: &pb.GoogleCalendarCredentials{
@@ -463,6 +470,7 @@ func sanitizeTelegramResourceForResponse(resource *pb.ProjectResource) {
 	if resource == nil || resource.GetSettings() == nil || resource.GetSettings().GetTelegram() == nil {
 		return
 	}
+	resource.Secret = nil
 	telegramSettings := resource.GetSettings().GetTelegram()
 	resource.Settings.Telegram = &pb.TelegramCredentials{
 		BotId:       telegramSettings.GetBotId(),
@@ -477,6 +485,7 @@ func telegramProjectResourceForLog(resource *pb.ProjectResource) *pb.ProjectReso
 		return resource
 	}
 	safe := *resource
+	safe.Secret = nil
 	telegramSettings := resource.GetSettings().GetTelegram()
 	safe.Settings = &pb.Settings{
 		Telegram: &pb.TelegramCredentials{
@@ -493,6 +502,9 @@ func projectResourceForLog(resource *pb.ProjectResource) *pb.ProjectResource {
 	if resource == nil {
 		return resource
 	}
+	safe := *resource
+	safe.Secret = nil
+	resource = &safe
 	if resource.GetSettings() != nil && resource.GetSettings().GetTelegram() != nil {
 		return telegramProjectResourceForLog(resource)
 	}
@@ -544,6 +556,7 @@ func (h *HandlerV1) GetListProjectResourceList(c *gin.Context) {
 	}
 
 	for _, resource := range resp.GetResources() {
+		resource.Secret = nil
 		sanitizeGoogleDriveResourceForResponse(resource)
 		sanitizeGoogleCalendarResourceForResponse(resource)
 		sanitizeTelegramResourceForResponse(resource)
@@ -590,6 +603,7 @@ func (h *HandlerV1) GetSingleProjectResource(c *gin.Context) {
 		return
 	}
 
+	resp.Secret = nil
 	sanitizeGoogleDriveResourceForResponse(resp)
 	sanitizeGoogleCalendarResourceForResponse(resp)
 	sanitizeTelegramResourceForResponse(resp)
