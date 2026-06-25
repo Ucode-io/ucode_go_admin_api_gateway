@@ -9,10 +9,14 @@ import (
 )
 
 func (h *HandlerV1) FacebookWebhookVerify(c *gin.Context) {
-	var mode = c.Query("hub.mode")
+	var (
+		mode      = c.Query("hub.mode")
+		token     = c.Query("hub.verify_token")
+		challenge = c.Query("hub.challenge")
+	)
 
-	if mode == "subscribe" {
-		c.String(http.StatusOK, h.baseConf.FacebookWebhookVerifyToken)
+	if mode == "subscribe" && token == h.baseConf.FacebookWebhookVerifyToken && token != "" {
+		c.String(http.StatusOK, challenge)
 		return
 	}
 
