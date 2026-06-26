@@ -41,10 +41,17 @@ service ResourceService {
     rpc DeleteVariableResource(PrimaryKeyVariableResource) returns (Empty) {}
 
     rpc AddResourceToProject(AddResourceToProjectRequest) returns(ProjectResource) {}
+    rpc UpsertProjectResource(AddResourceToProjectRequest) returns(ProjectResource) {}
     rpc GetProjectResourceList(GetProjectResourceListRequest) returns (ListProjectResource) {}
     rpc GetSingleProjectResouece(PrimaryKeyProjectResource) returns (ProjectResource) {}
     rpc UpdateProjectResource(ProjectResource) returns (Empty) {}
     rpc DeleteProjectResource(PrimaryKeyProjectResource) returns (Empty) {}
+    rpc GetProjectResourcesByExternalId(GetByExternalIdRequest) returns (ListProjectResource) {}
+}
+
+message GetByExternalIdRequest {
+    string external_id = 1;
+    ResourceType type = 2;
 }
 
 message UpdateVariableResourceRequest {
@@ -74,6 +81,7 @@ message AddResourceToProjectRequest {
     string company_id = 11;
     string node_type = 12;
     google.protobuf.Struct secret = 13;
+    string external_id = 14;
 }
 
 message GetProjectResourceListRequest {
@@ -92,6 +100,7 @@ message ProjectResource {
     Settings settings = 7;
     int32 resource_type = 8;
     google.protobuf.Struct secret = 9;
+    string external_id = 10;
 }
 
 message ListProjectResource {
@@ -356,6 +365,7 @@ message Settings {
     GoogleDriveCredentials google_drive = 9;
     GoogleCalendarCredentials google_calendar = 10;
     TelegramCredentials telegram = 11;
+    FacebookLeadsCredentials facebook_leads = 12;
 }
 
 message SmsCredentials {
@@ -458,6 +468,36 @@ message TelegramChatMapping {
     string last_message_at_field = 8;
     string unread_count_field = 9;
     string status_field = 10;
+}
+
+// Meta (Facebook) Lead Ads. external_id of the project_resource holds page_id.
+// The page access token is stored here openly (like Google refresh_token); it is
+// what fetches the full lead and keeps the leadgen subscription alive.
+message FacebookLeadsCredentials {
+    string page_id = 1;
+    string page_name = 2;
+    string page_access_token = 3;
+    string connected_user_id = 4;
+    string connected_at = 5;
+    string status = 6;
+    repeated FacebookLeadFormMapping forms = 7;
+}
+
+// One lead form mapped to one project table. A page may have many forms; each
+// gets its own target table (forms are not merged into a single table).
+message FacebookLeadFormMapping {
+    string form_id = 1;
+    string form_name = 2;
+    string table_slug = 3;
+    repeated FacebookLeadFieldMapping fields = 4;
+}
+
+// One Meta lead field mapped to one ucode table field. lead_field is the Meta
+// question key (== field_data[].name), not the label.
+message FacebookLeadFieldMapping {
+    string lead_field = 1;
+    string table_field = 2;
+    bool required = 3;
 }
 
 message Github {
