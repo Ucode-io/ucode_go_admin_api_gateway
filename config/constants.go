@@ -140,7 +140,7 @@ const (
 	FacebookOAuthStatePrefix = "facebook-oauth-state:"
 	FacebookOAuthStateTTL    = 10 * time.Minute
 	FacebookIntegrationName  = "Facebook Lead Ads"
-	FacebookOAuthScopes      = "pages_show_list,pages_manage_metadata,pages_read_engagement,leads_retrieval"
+	FacebookOAuthScopes      = "pages_show_list,pages_read_engagement,leads_retrieval,pages_manage_ads"
 	FacebookSubscribedFields = "leadgen"
 	FacebookResourceType     = "META_LEADS"
 	FacebookStatusActive     = "active"

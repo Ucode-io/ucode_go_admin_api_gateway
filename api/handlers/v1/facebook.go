@@ -72,8 +72,6 @@ func (h *HandlerV1) FacebookWebhookReceive(c *gin.Context) {
 		return
 	}
 
-	// Authenticate the call as Meta's before trusting the payload. A bad/missing
-	// signature is answered with 200 (so Meta won't retry) but left unprocessed.
 	if !h.verifyFacebookSignature(c.GetHeader(config.FacebookSignatureHeader), body) {
 		h.log.Warn("facebook webhook: signature verification failed")
 		c.JSON(http.StatusOK, gin.H{"ok": true})
@@ -81,7 +79,8 @@ func (h *HandlerV1) FacebookWebhookReceive(c *gin.Context) {
 	}
 
 	var event models.FacebookLeadWebhookEvent
-	if err := json.Unmarshal(body, &event); err != nil {
+
+	if err = json.Unmarshal(body, &event); err != nil {
 		h.log.Error("facebook webhook: invalid payload", logger.Error(err))
 		c.JSON(http.StatusOK, gin.H{"ok": true})
 		return
@@ -106,12 +105,11 @@ func (h *HandlerV1) processFacebookLeadEvent(event models.FacebookLeadWebhookEve
 
 	ctx := context.Background()
 	for _, entry := range event.Entry {
-		pageID := entry.ID
 		for _, change := range entry.Changes {
 			if change.Field != config.FacebookWebhookFieldLead {
 				continue
 			}
-			h.ingestFacebookLead(ctx, pageID, change.Value)
+			h.ingestFacebookLead(ctx, entry.ID, change.Value)
 		}
 	}
 }
@@ -121,16 +119,22 @@ func (h *HandlerV1) ingestFacebookLead(ctx context.Context, pageID string, value
 		pageID = value.PageID
 	}
 
-	list, err := h.companyServices.Resource().GetProjectResourcesByExternalId(ctx, &pb.GetByExternalIdRequest{
-		ExternalId: pageID,
-		Type:       pb.ResourceType_META_LEADS,
-	})
+	list, err := h.companyServices.Resource().GetProjectResourcesByExternalId(
+		ctx, &pb.GetByExternalIdRequest{
+			ExternalId: pageID,
+			Type:       pb.ResourceType_META_LEADS,
+		},
+	)
 	if err != nil {
 		h.log.Error("facebook lead: resolve resources failed", logger.Error(err))
 		return
 	}
 
-	resources := list.GetResources()
+	var (
+		resources = list.GetResources()
+		lead      *models.FacebookLead
+	)
+
 	if len(resources) == 0 {
 		h.log.Warn("facebook lead: no project mapped for page",
 			logger.String("page_id", pageID),
@@ -139,14 +143,16 @@ func (h *HandlerV1) ingestFacebookLead(ctx context.Context, pageID string, value
 		return
 	}
 
-	var lead *models.FacebookLead
 	for _, resource := range resources {
-		credentials := resource.GetSettings().GetFacebookLeads()
+		var (
+			credentials = resource.GetSettings().GetFacebookLeads()
+			mapping     *pb.FacebookLeadFormMapping
+		)
+
 		if credentials == nil {
 			continue
 		}
 
-		var mapping *pb.FacebookLeadFormMapping
 		for _, form := range credentials.GetForms() {
 			if form.GetFormId() == value.FormID {
 				mapping = form
@@ -154,7 +160,6 @@ func (h *HandlerV1) ingestFacebookLead(ctx context.Context, pageID string, value
 			}
 		}
 		if mapping == nil {
-			// Lead came from a form with no mapping in this project — skip + log.
 			h.log.Info("facebook lead: form not mapped, skipping",
 				logger.String("page_id", pageID),
 				logger.String("form_id", value.FormID),
@@ -182,14 +187,12 @@ func (h *HandlerV1) ingestFacebookLead(ctx context.Context, pageID string, value
 	}
 }
 
-// writeFacebookLead maps the lead's field_data onto the configured table columns
-// and inserts a row. The guid is derived deterministically from the leadgen_id,
-// so a duplicate webhook delivery targets the same primary key instead of
-// creating a second lead.
 func (h *HandlerV1) writeFacebookLead(ctx context.Context, resource *pb.ProjectResource, mapping *pb.FacebookLeadFormMapping, lead models.FacebookLead, value models.FacebookLeadChangeValue) error {
-	values := facebookLeadValues(lead.FieldData)
+	var (
+		values = facebookLeadValues(lead.FieldData)
+		data   = map[string]any{}
+	)
 
-	data := map[string]any{}
 	for _, field := range mapping.GetFields() {
 		raw, present := values[strings.ToLower(field.GetLeadField())]
 		if !present || raw == "" {
@@ -240,6 +243,7 @@ func (h *HandlerV1) writeFacebookLead(ctx context.Context, resource *pb.ProjectR
 
 func facebookLeadValues(fieldData []models.FacebookFieldData) map[string]string {
 	values := make(map[string]string, len(fieldData))
+
 	for _, field := range fieldData {
 		if len(field.Values) > 0 {
 			values[strings.ToLower(field.Name)] = field.Values[0]
@@ -258,6 +262,7 @@ func (h *HandlerV1) verifyFacebookSignature(header string, body []byte) bool {
 	if !strings.HasPrefix(header, config.FacebookSignaturePrefix) {
 		return false
 	}
+
 	provided, err := hex.DecodeString(strings.TrimPrefix(header, config.FacebookSignaturePrefix))
 	if err != nil {
 		return false
