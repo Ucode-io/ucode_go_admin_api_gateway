@@ -29,10 +29,11 @@ import (
 )
 
 const (
-	telegramManagedSessionPrefix = "telegram:managed-session:"
-	telegramManagedNoncePrefix   = "telegram:managed-nonce:"
-	telegramManagedUserPrefix    = "telegram:managed-user:"
-	telegramManagedSessionTTL    = 30 * time.Minute
+	telegramManagedSessionPrefix  = "telegram:managed-session:"
+	telegramManagedNoncePrefix    = "telegram:managed-nonce:"
+	telegramManagedUserPrefix     = "telegram:managed-user:"
+	telegramManagedUsernamePrefix = "telegram:managed-username:"
+	telegramManagedSessionTTL     = 30 * time.Minute
 
 	telegramContactsTable    = "ugen_telegram_contacts"
 	telegramMessagesTable    = "ugen_telegram_messages"
@@ -1326,7 +1327,15 @@ func (h *HandlerV1) storeTelegramManagedSession(ctx context.Context, session *te
 	if err = h.centralRedis.Set(ctx, telegramManagedSessionPrefix+session.ID, body, ttl).Err(); err != nil {
 		return err
 	}
-	return h.centralRedis.Set(ctx, telegramManagedNoncePrefix+session.Nonce, session.ID, ttl).Err()
+	if err = h.centralRedis.Set(ctx, telegramManagedNoncePrefix+session.Nonce, session.ID, ttl).Err(); err != nil {
+		return err
+	}
+	if username := telegramManagedUsernameKey(session.SuggestedUsername); username != "" {
+		if err = h.centralRedis.Set(ctx, telegramManagedUsernamePrefix+username, session.ID, ttl).Err(); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (h *HandlerV1) loadTelegramManagedSession(ctx context.Context, id string) (*telegramManagedSession, error) {
@@ -1400,16 +1409,22 @@ func (h *HandlerV1) handleTelegramManagerStart(ctx context.Context, message *tel
 }
 
 func (h *HandlerV1) handleTelegramManagedBotUpdate(ctx context.Context, managed *telegramManaged) {
-	if h.centralRedis == nil || managed.User.ID == 0 || managed.Bot.ID == 0 {
+	if h.centralRedis == nil || managed.Bot.ID == 0 {
 		return
 	}
-	sessionID, err := h.centralRedis.Get(ctx, telegramManagedUserPrefix+fmt.Sprint(managed.User.ID)).Result()
+	sessionID, err := h.telegramManagedSessionIDForBotUpdate(ctx, managed)
 	if err != nil {
 		return
 	}
 	session, err := h.loadTelegramManagedSession(ctx, sessionID)
-	if err != nil || session.Status != "awaiting_creation" || time.Now().After(session.ExpiresAt) {
+	if err != nil || time.Now().After(session.ExpiresAt) {
 		return
+	}
+	if session.Status != "awaiting_creation" && session.Status != "awaiting_link" {
+		return
+	}
+	if managed.User.ID != 0 {
+		session.TelegramUserID = fmt.Sprint(managed.User.ID)
 	}
 
 	manager := newTelegramAPIClient(h.baseConf.TelegramManagerBotToken)
@@ -1434,6 +1449,23 @@ func (h *HandlerV1) handleTelegramManagedBotUpdate(ctx context.Context, managed 
 	}
 	session.Status, session.BotUsername, session.ErrorMessage = "completed", managed.Bot.Username, ""
 	_ = h.storeTelegramManagedSession(ctx, session)
+}
+
+func (h *HandlerV1) telegramManagedSessionIDForBotUpdate(ctx context.Context, managed *telegramManaged) (string, error) {
+	if h.centralRedis == nil || managed == nil {
+		return "", errors.New("telegram managed session not found")
+	}
+	if username := telegramManagedUsernameKey(managed.Bot.Username); username != "" {
+		if sessionID, err := h.centralRedis.Get(ctx, telegramManagedUsernamePrefix+username).Result(); err == nil && sessionID != "" {
+			return sessionID, nil
+		}
+	}
+	if managed.User.ID != 0 {
+		if sessionID, err := h.centralRedis.Get(ctx, telegramManagedUserPrefix+fmt.Sprint(managed.User.ID)).Result(); err == nil && sessionID != "" {
+			return sessionID, nil
+		}
+	}
+	return "", errors.New("telegram managed session not found")
 }
 
 func (h *HandlerV1) persistTelegramIncomingMessage(ctx context.Context, target *telegramProjectTarget, mapping *pb.TelegramChatMapping, update telegramUpdate, message *telegramMessage, raw string) error {
@@ -1819,6 +1851,15 @@ func normalizeTelegramBotUsername(input, displayName string) string {
 	}
 	if len(username) > 32 {
 		username = strings.TrimSuffix(username[:28], "_") + "_bot"
+	}
+	return username
+}
+
+func telegramManagedUsernameKey(username string) string {
+	username = strings.TrimPrefix(strings.TrimSpace(username), "@")
+	username = strings.ToLower(username)
+	if username == "" {
+		return ""
 	}
 	return username
 }
