@@ -577,7 +577,7 @@ func (h *HandlerV1) DisconnectTelegramIntegration(c *gin.Context) {
 		return
 	}
 
-	secret, err := h.loadTelegramSecret(c.Request.Context(), resource.GetSettings().GetTelegram().GetSecretPath())
+	secret, err := h.loadTelegramSecret(resource)
 	if err == nil && secret.BotToken != "" {
 		_ = newTelegramAPIClient(secret.BotToken).deleteWebhook(c.Request.Context())
 	}
@@ -588,9 +588,6 @@ func (h *HandlerV1) DisconnectTelegramIntegration(c *gin.Context) {
 	}); err != nil {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return
-	}
-	if resource.GetSettings().GetTelegram().GetSecretPath() != "" {
-		_ = h.vault.Delete(c.Request.Context(), resource.GetSettings().GetTelegram().GetSecretPath())
 	}
 	h.HandleResponse(c, status_http.NoContent, gin.H{})
 }
@@ -629,7 +626,7 @@ func (h *HandlerV1) TelegramProjectWebhook(c *gin.Context) {
 		c.Status(http.StatusNotFound)
 		return
 	}
-	secret, err := h.loadTelegramSecret(c.Request.Context(), resource.GetSettings().GetTelegram().GetSecretPath())
+	secret, err := h.loadTelegramSecret(resource)
 	if err != nil || subtle.ConstantTimeCompare([]byte(c.GetHeader("X-Telegram-Bot-Api-Secret-Token")), []byte(secret.WebhookSecret)) != 1 {
 		c.Status(http.StatusUnauthorized)
 		return
@@ -766,7 +763,7 @@ func (h *HandlerV1) ProxyTelegramAttachment(c *gin.Context) {
 		h.HandleResponse(c, status_http.NotFound, "telegram integration is not connected")
 		return
 	}
-	secret, err := h.loadTelegramSecret(c.Request.Context(), resource.GetSettings().GetTelegram().GetSecretPath())
+	secret, err := h.loadTelegramSecret(resource)
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -825,7 +822,7 @@ func (h *HandlerV1) SendTelegramMessage(c *gin.Context) {
 		h.HandleResponse(c, status_http.NotFound, err.Error())
 		return
 	}
-	secret, err := h.loadTelegramSecret(c.Request.Context(), resource.GetSettings().GetTelegram().GetSecretPath())
+	secret, err := h.loadTelegramSecret(resource)
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -912,14 +909,30 @@ func (h *HandlerV1) resolveTelegramCurrentTarget(ctx context.Context, c *gin.Con
 }
 
 func (h *HandlerV1) requireTelegramInboxAccess(c *gin.Context) bool {
-	if !strings.HasPrefix(strings.ToLower(strings.TrimSpace(c.GetHeader("Authorization"))), "bearer ") {
-		h.HandleResponse(c, status_http.Forbidden, "telegram inbox requires an authenticated user session")
-		return false
+	authHeader := strings.ToLower(strings.TrimSpace(c.GetHeader("Authorization")))
+	if strings.HasPrefix(authHeader, "bearer ") {
+		if _, err := h.GetAuthInfo(c); err != nil {
+			return false
+		}
+		return true
 	}
-	if _, err := h.GetAuthInfo(c); err != nil {
-		return false
+	if authHeader == "api-key" || strings.HasPrefix(authHeader, "api-key ") {
+		if _, ok := c.Get("auth"); !ok {
+			h.HandleResponse(c, status_http.Forbidden, "telegram inbox requires an authenticated api key")
+			return false
+		}
+		if _, ok := c.Get("project_id"); !ok {
+			h.HandleResponse(c, status_http.Forbidden, "telegram inbox requires project context")
+			return false
+		}
+		if _, ok := c.Get("environment_id"); !ok {
+			h.HandleResponse(c, status_http.Forbidden, "telegram inbox requires environment context")
+			return false
+		}
+		return true
 	}
-	return true
+	h.HandleResponse(c, status_http.Forbidden, "telegram inbox requires an authenticated user session or api key")
+	return false
 }
 
 func (h *HandlerV1) getTelegramResource(ctx context.Context, target *telegramProjectTarget) (*pb.ProjectResource, error) {
@@ -960,6 +973,9 @@ func (h *HandlerV1) telegramMapping(ctx context.Context, target *telegramProject
 	if mapping == nil {
 		return nil, errors.New("telegram mapping is missing")
 	}
+	if err = h.applyTelegramDefaultMappingFields(ctx, target, mapping); err != nil {
+		return nil, err
+	}
 	return mapping, nil
 }
 
@@ -993,6 +1009,7 @@ func (h *HandlerV1) prepareTelegramMapping(ctx context.Context, target *telegram
 	for _, field := range fields.GetFields() {
 		known[field.GetSlug()] = field
 	}
+	applyTelegramDefaultMappingFieldsFromKnown(mapping, known)
 
 	if !telegramIdentifierPattern.MatchString(mapping.GetTelegramChatIdField()) {
 		return nil, fmt.Errorf("invalid mapped field %q", mapping.GetTelegramChatIdField())
@@ -1006,7 +1023,7 @@ func (h *HandlerV1) prepareTelegramMapping(ctx context.Context, target *telegram
 			return nil, attrErr
 		}
 		if _, err = target.Services.GoObjectBuilderService().Field().Create(ctx, &pbo.CreateFieldRequest{
-			TableId: table.GetId(), ProjectId: target.ResourceEnvID, EnvId: target.EnvironmentID,
+			Id: uuid.NewString(), TableId: table.GetId(), ProjectId: target.ResourceEnvID, EnvId: target.EnvironmentID,
 			Slug: mapping.GetTelegramChatIdField(), Label: "Telegram chat ID", Type: "SINGLE_LINE", Unique: true,
 			IsVisible: false, Attributes: attrs,
 		}); err != nil {
@@ -1030,6 +1047,63 @@ func (h *HandlerV1) prepareTelegramMapping(ctx context.Context, target *telegram
 		return nil, fmt.Errorf("mapped unread_count field %q must use NUMBER", field)
 	}
 	return mapping, nil
+}
+
+func (h *HandlerV1) applyTelegramDefaultMappingFields(ctx context.Context, target *telegramProjectTarget, mapping *pb.TelegramChatMapping) error {
+	if mapping == nil || !util.IsValidUUID(mapping.GetTableId()) {
+		return nil
+	}
+	fields, err := target.Services.GoObjectBuilderService().Field().GetAll(ctx, &pbo.GetAllFieldsRequest{TableId: mapping.GetTableId(), ProjectId: target.ResourceEnvID, Limit: 500})
+	if err != nil {
+		return fmt.Errorf("get telegram mapped table fields: %w", err)
+	}
+	known := make(map[string]*pbo.Field, len(fields.GetFields()))
+	for _, field := range fields.GetFields() {
+		known[field.GetSlug()] = field
+	}
+	applyTelegramDefaultMappingFieldsFromKnown(mapping, known)
+	return nil
+}
+
+func applyTelegramDefaultMappingFieldsFromKnown(mapping *pb.TelegramChatMapping, known map[string]*pbo.Field) {
+	if mapping == nil || len(known) == 0 {
+		return
+	}
+	if mapping.TelegramUserIdField == "" {
+		mapping.TelegramUserIdField = telegramFirstExistingField(known, "", "telegram_user_id")
+	}
+	if mapping.DisplayNameField == "" {
+		mapping.DisplayNameField = telegramFirstExistingField(known, "", "customer_name", "display_name", "name")
+	}
+	if mapping.UsernameField == "" {
+		mapping.UsernameField = telegramFirstExistingField(known, "", "telegram_username", "username")
+	}
+	if mapping.LastMessageField == "" {
+		mapping.LastMessageField = telegramFirstExistingField(known, "", "last_message")
+	}
+	if mapping.LastMessageAtField == "" {
+		mapping.LastMessageAtField = telegramFirstExistingField(known, "DATE_TIME", "last_message_at")
+	}
+	if mapping.UnreadCountField == "" {
+		mapping.UnreadCountField = telegramFirstExistingField(known, "NUMBER", "unread_count")
+	}
+	if mapping.StatusField == "" {
+		mapping.StatusField = telegramFirstExistingField(known, "", "status")
+	}
+}
+
+func telegramFirstExistingField(known map[string]*pbo.Field, requiredType string, slugs ...string) string {
+	for _, slug := range slugs {
+		field := known[slug]
+		if field == nil {
+			continue
+		}
+		if requiredType != "" && field.GetType() != requiredType {
+			continue
+		}
+		return slug
+	}
+	return ""
 }
 
 func (h *HandlerV1) ensureTelegramSystemTables(ctx context.Context, target *telegramProjectTarget, mapping *pb.TelegramChatMapping) error {
@@ -1130,9 +1204,7 @@ func (h *HandlerV1) ensureTelegramMessageRelation(ctx context.Context, target *t
 			return nil
 		}
 	}
-	viewField, err := target.Services.GoObjectBuilderService().Field().ObtainRandomOne(ctx, &pbo.ObtainRandomRequest{
-		TableSlug: telegramMessagesTable, ProjectId: target.ResourceEnvID, EnvId: target.EnvironmentID,
-	})
+	viewFieldID, err := h.telegramMessageRelationViewFieldID(ctx, target)
 	if err != nil {
 		return fmt.Errorf("get telegram message field for relation: %w", err)
 	}
@@ -1146,11 +1218,42 @@ func (h *HandlerV1) ensureTelegramMessageRelation(ctx context.Context, target *t
 		Id: uuid.NewString(), TableFrom: telegramMessagesTable, TableTo: mapping.GetTableSlug(), Type: "Many2One",
 		RelationTableSlug: mapping.GetTableSlug(), RelationFieldSlug: relationField,
 		RelationFieldId: uuid.NewString(), RelationToFieldId: uuid.NewString(),
-		ProjectId: target.ResourceEnvID, EnvId: target.EnvironmentID, ViewFields: []string{viewField.GetId()}, Attributes: attributes,
+		ProjectId: target.ResourceEnvID, EnvId: target.EnvironmentID, ViewFields: []string{viewFieldID}, Attributes: attributes,
 	}); err != nil {
 		return fmt.Errorf("create telegram message relation: %w", err)
 	}
 	return nil
+}
+
+func (h *HandlerV1) telegramMessageRelationViewFieldID(ctx context.Context, target *telegramProjectTarget) (string, error) {
+	fields, err := target.Services.GoObjectBuilderService().Field().GetAll(ctx, &pbo.GetAllFieldsRequest{
+		TableSlug: telegramMessagesTable,
+		ProjectId: target.ResourceEnvID,
+		Limit:     500,
+	})
+	if err != nil {
+		return "", err
+	}
+	if len(fields.GetFields()) == 0 {
+		return "", errors.New("telegram message table has no fields")
+	}
+	preferredSlugs := map[string]struct{}{"text": {}, "telegram_message_id": {}}
+	for _, slug := range []string{"text", "telegram_message_id"} {
+		for _, field := range fields.GetFields() {
+			if field.GetSlug() == slug && field.GetId() != "" {
+				return field.GetId(), nil
+			}
+		}
+	}
+	for _, field := range fields.GetFields() {
+		if _, preferred := preferredSlugs[field.GetSlug()]; preferred {
+			continue
+		}
+		if field.GetId() != "" {
+			return field.GetId(), nil
+		}
+	}
+	return "", errors.New("telegram message table fields have no ids")
 }
 
 type telegramSystemField struct {
@@ -1177,33 +1280,34 @@ func (h *HandlerV1) connectTelegramBot(ctx context.Context, target *telegramProj
 		return nil, errors.New("telegram integration is already connected; disconnect it before replacing the bot")
 	}
 
-	secretPathID := uuid.NewString()
-	secretPath := fmt.Sprintf("telegram/%s/%s", target.ProjectID, secretPathID)
 	webhookSecret, err := telegramRandomToken(24)
 	if err != nil {
 		return nil, err
 	}
-	if err = h.vault.Put(ctx, secretPath, map[string]any{"bot_token": strings.TrimSpace(token), "webhook_secret": webhookSecret}); err != nil {
-		return nil, fmt.Errorf("store telegram credentials: %w", err)
+	secret, err := structpb.NewStruct(map[string]any{"bot_token": strings.TrimSpace(token), "webhook_secret": webhookSecret})
+	if err != nil {
+		return nil, fmt.Errorf("prepare telegram credentials: %w", err)
 	}
+	settings := &pb.Settings{Telegram: &pb.TelegramCredentials{
+		BotId: fmt.Sprint(bot.ID), BotUsername: bot.Username, Status: "pending_ui", Mapping: mapping,
+	}}
 
 	resource, err := h.companyServices.Resource().AddResourceToProject(ctx, &pb.AddResourceToProjectRequest{
 		Name: "Telegram Support", ProjectId: target.ProjectID, EnvironmentId: target.EnvironmentID, Type: pb.ResourceType_TELEGRAM,
-		Settings: &pb.Settings{Telegram: &pb.TelegramCredentials{
-			BotId: fmt.Sprint(bot.ID), BotUsername: bot.Username, SecretPath: secretPath, Status: "pending_ui", Mapping: mapping,
-		}},
+		Settings: settings,
+		Secret:   secret,
 	})
 	if err != nil {
-		_ = h.vault.Delete(ctx, secretPath)
 		return nil, fmt.Errorf("save telegram resource: %w", err)
 	}
 
 	webhookURL := fmt.Sprintf("%s/v1/telegram/webhook/%s/%s/%s", strings.TrimRight(h.baseConf.TelegramWebhookBaseURL, "/"), target.ProjectID, target.EnvironmentID, resource.GetId())
 	if err = newTelegramAPIClient(token).setWebhook(ctx, webhookURL, webhookSecret, []string{"message"}); err != nil {
 		_, _ = h.companyServices.Resource().DeleteProjectResource(ctx, &pb.PrimaryKeyProjectResource{Id: resource.GetId(), ProjectId: target.ProjectID, EnvironmentId: target.EnvironmentID})
-		_ = h.vault.Delete(ctx, secretPath)
 		return nil, fmt.Errorf("set telegram webhook: %w", err)
 	}
+	resource.Settings = settings
+	resource.Secret = nil
 	return resource, nil
 }
 
@@ -1437,8 +1541,20 @@ func (h *HandlerV1) upsertTelegramChat(ctx context.Context, target *telegramProj
 }
 
 func (h *HandlerV1) updateTelegramChatSummary(ctx context.Context, target *telegramProjectTarget, mapping *pb.TelegramChatMapping, guid string, message *telegramMessage) error {
-	setClauses := make([]string, 0, 3)
-	params := make([]string, 0, 4)
+	setClauses := make([]string, 0, 7)
+	params := make([]string, 0, 8)
+	if field := mapping.GetTelegramUserIdField(); field != "" {
+		setClauses = append(setClauses, telegramQuoteIdentifier(field)+fmt.Sprintf(" = $%d", len(params)+1))
+		params = append(params, fmt.Sprint(message.From.ID))
+	}
+	if field := mapping.GetDisplayNameField(); field != "" {
+		setClauses = append(setClauses, telegramQuoteIdentifier(field)+fmt.Sprintf(" = $%d", len(params)+1))
+		params = append(params, telegramDisplayName(message))
+	}
+	if field := mapping.GetUsernameField(); field != "" {
+		setClauses = append(setClauses, telegramQuoteIdentifier(field)+fmt.Sprintf(" = $%d", len(params)+1))
+		params = append(params, message.From.Username)
+	}
 	if field := mapping.GetLastMessageField(); field != "" {
 		setClauses = append(setClauses, telegramQuoteIdentifier(field)+fmt.Sprintf(" = $%d", len(params)+1))
 		params = append(params, telegramMessageText(message))
@@ -1449,6 +1565,10 @@ func (h *HandlerV1) updateTelegramChatSummary(ctx context.Context, target *teleg
 	}
 	if field := mapping.GetUnreadCountField(); field != "" {
 		setClauses = append(setClauses, telegramQuoteIdentifier(field)+" = COALESCE("+telegramQuoteIdentifier(field)+", 0) + 1")
+	}
+	if field := mapping.GetStatusField(); field != "" {
+		setClauses = append(setClauses, telegramQuoteIdentifier(field)+fmt.Sprintf(" = COALESCE(NULLIF(%s::text, ''), $%d)", telegramQuoteIdentifier(field), len(params)+1))
+		params = append(params, "open")
 	}
 	if len(setClauses) == 0 {
 		return nil
@@ -1562,7 +1682,12 @@ func (h *HandlerV1) listTelegramChatRows(ctx context.Context, target *telegramPr
 			columns = append(columns, fmt.Sprintf("%s AS %s", telegramQuoteIdentifier(field), telegramQuoteIdentifier(alias)))
 		}
 	}
-	query := fmt.Sprintf(`SELECT %s FROM %s WHERE deleted_at IS NULL`, strings.Join(columns, ", "), telegramQuoteIdentifier(mapping.GetTableSlug()))
+	query := fmt.Sprintf(`SELECT %s FROM %s WHERE deleted_at IS NULL AND %s IS NOT NULL AND COALESCE(%s::text, '') <> ''`,
+		strings.Join(columns, ", "),
+		telegramQuoteIdentifier(mapping.GetTableSlug()),
+		telegramQuoteIdentifier(mapping.GetTelegramChatIdField()),
+		telegramQuoteIdentifier(mapping.GetTelegramChatIdField()),
+	)
 	params := []string{}
 	if strings.TrimSpace(search) != "" && mapping.GetDisplayNameField() != "" {
 		params = append(params, ".*"+regexp.QuoteMeta(strings.TrimSpace(search))+".*")
@@ -1597,19 +1722,17 @@ func (h *HandlerV1) telegramChatIDForRecord(ctx context.Context, target *telegra
 	return chatID, nil
 }
 
-func (h *HandlerV1) loadTelegramSecret(ctx context.Context, secretPath string) (telegramSecret, error) {
-	if strings.TrimSpace(secretPath) == "" {
-		return telegramSecret{}, errors.New("telegram secret path is empty")
+func (h *HandlerV1) loadTelegramSecret(resource *pb.ProjectResource) (telegramSecret, error) {
+	if resource == nil {
+		return telegramSecret{}, errors.New("telegram resource is missing")
 	}
-	data, err := h.vault.Get(ctx, secretPath)
-	if err != nil {
-		return telegramSecret{}, err
+	if resource.GetSecret() != nil {
+		secret := telegramSecret{BotToken: telegramSecretString(resource.GetSecret().AsMap(), "bot_token"), WebhookSecret: telegramSecretString(resource.GetSecret().AsMap(), "webhook_secret")}
+		if secret.BotToken != "" && secret.WebhookSecret != "" {
+			return secret, nil
+		}
 	}
-	secret := telegramSecret{BotToken: telegramSecretString(data, "bot_token"), WebhookSecret: telegramSecretString(data, "webhook_secret")}
-	if secret.BotToken == "" || secret.WebhookSecret == "" {
-		return telegramSecret{}, errors.New("telegram credentials are incomplete")
-	}
-	return secret, nil
+	return telegramSecret{}, errors.New("telegram credentials are missing")
 }
 
 func telegramSecretString(data map[string]any, key string) string {
