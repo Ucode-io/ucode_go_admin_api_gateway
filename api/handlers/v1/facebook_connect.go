@@ -87,7 +87,7 @@ func (h *HandlerV1) FacebookConnect(c *gin.Context) {
 			"scope":         {config.FacebookOAuthScopes},
 		}
 		authURL = fmt.Sprintf("%s/%s/dialog/oauth?%s",
-			config.FacebookDialogBaseURL,
+			h.baseConf.FacebookAuthBaseURL,
 			h.baseConf.FacebookGraphAPIVersion,
 			query.Encode(),
 		)

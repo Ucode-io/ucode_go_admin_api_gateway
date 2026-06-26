@@ -137,7 +137,6 @@ const (
 	UgenSuperAdminUserId = "c12c163c-38ee-4b37-8854-1dc9285fc3f8"
 
 	// Meta (Facebook) Lead Ads
-	FacebookDialogBaseURL    = "https://www.facebook.com"
 	FacebookOAuthStatePrefix = "facebook-oauth-state:"
 	FacebookOAuthStateTTL    = 10 * time.Minute
 	FacebookIntegrationName  = "Facebook Lead Ads"
