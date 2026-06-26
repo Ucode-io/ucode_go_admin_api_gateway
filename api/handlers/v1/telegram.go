@@ -973,6 +973,9 @@ func (h *HandlerV1) telegramMapping(ctx context.Context, target *telegramProject
 	if mapping == nil {
 		return nil, errors.New("telegram mapping is missing")
 	}
+	if err = h.applyTelegramDefaultMappingFields(ctx, target, mapping); err != nil {
+		return nil, err
+	}
 	return mapping, nil
 }
 
@@ -1006,6 +1009,7 @@ func (h *HandlerV1) prepareTelegramMapping(ctx context.Context, target *telegram
 	for _, field := range fields.GetFields() {
 		known[field.GetSlug()] = field
 	}
+	applyTelegramDefaultMappingFieldsFromKnown(mapping, known)
 
 	if !telegramIdentifierPattern.MatchString(mapping.GetTelegramChatIdField()) {
 		return nil, fmt.Errorf("invalid mapped field %q", mapping.GetTelegramChatIdField())
@@ -1043,6 +1047,63 @@ func (h *HandlerV1) prepareTelegramMapping(ctx context.Context, target *telegram
 		return nil, fmt.Errorf("mapped unread_count field %q must use NUMBER", field)
 	}
 	return mapping, nil
+}
+
+func (h *HandlerV1) applyTelegramDefaultMappingFields(ctx context.Context, target *telegramProjectTarget, mapping *pb.TelegramChatMapping) error {
+	if mapping == nil || !util.IsValidUUID(mapping.GetTableId()) {
+		return nil
+	}
+	fields, err := target.Services.GoObjectBuilderService().Field().GetAll(ctx, &pbo.GetAllFieldsRequest{TableId: mapping.GetTableId(), ProjectId: target.ResourceEnvID, Limit: 500})
+	if err != nil {
+		return fmt.Errorf("get telegram mapped table fields: %w", err)
+	}
+	known := make(map[string]*pbo.Field, len(fields.GetFields()))
+	for _, field := range fields.GetFields() {
+		known[field.GetSlug()] = field
+	}
+	applyTelegramDefaultMappingFieldsFromKnown(mapping, known)
+	return nil
+}
+
+func applyTelegramDefaultMappingFieldsFromKnown(mapping *pb.TelegramChatMapping, known map[string]*pbo.Field) {
+	if mapping == nil || len(known) == 0 {
+		return
+	}
+	if mapping.TelegramUserIdField == "" {
+		mapping.TelegramUserIdField = telegramFirstExistingField(known, "", "telegram_user_id")
+	}
+	if mapping.DisplayNameField == "" {
+		mapping.DisplayNameField = telegramFirstExistingField(known, "", "customer_name", "display_name", "name")
+	}
+	if mapping.UsernameField == "" {
+		mapping.UsernameField = telegramFirstExistingField(known, "", "telegram_username", "username")
+	}
+	if mapping.LastMessageField == "" {
+		mapping.LastMessageField = telegramFirstExistingField(known, "", "last_message")
+	}
+	if mapping.LastMessageAtField == "" {
+		mapping.LastMessageAtField = telegramFirstExistingField(known, "DATE_TIME", "last_message_at")
+	}
+	if mapping.UnreadCountField == "" {
+		mapping.UnreadCountField = telegramFirstExistingField(known, "NUMBER", "unread_count")
+	}
+	if mapping.StatusField == "" {
+		mapping.StatusField = telegramFirstExistingField(known, "", "status")
+	}
+}
+
+func telegramFirstExistingField(known map[string]*pbo.Field, requiredType string, slugs ...string) string {
+	for _, slug := range slugs {
+		field := known[slug]
+		if field == nil {
+			continue
+		}
+		if requiredType != "" && field.GetType() != requiredType {
+			continue
+		}
+		return slug
+	}
+	return ""
 }
 
 func (h *HandlerV1) ensureTelegramSystemTables(ctx context.Context, target *telegramProjectTarget, mapping *pb.TelegramChatMapping) error {
@@ -1480,8 +1541,20 @@ func (h *HandlerV1) upsertTelegramChat(ctx context.Context, target *telegramProj
 }
 
 func (h *HandlerV1) updateTelegramChatSummary(ctx context.Context, target *telegramProjectTarget, mapping *pb.TelegramChatMapping, guid string, message *telegramMessage) error {
-	setClauses := make([]string, 0, 3)
-	params := make([]string, 0, 4)
+	setClauses := make([]string, 0, 7)
+	params := make([]string, 0, 8)
+	if field := mapping.GetTelegramUserIdField(); field != "" {
+		setClauses = append(setClauses, telegramQuoteIdentifier(field)+fmt.Sprintf(" = $%d", len(params)+1))
+		params = append(params, fmt.Sprint(message.From.ID))
+	}
+	if field := mapping.GetDisplayNameField(); field != "" {
+		setClauses = append(setClauses, telegramQuoteIdentifier(field)+fmt.Sprintf(" = $%d", len(params)+1))
+		params = append(params, telegramDisplayName(message))
+	}
+	if field := mapping.GetUsernameField(); field != "" {
+		setClauses = append(setClauses, telegramQuoteIdentifier(field)+fmt.Sprintf(" = $%d", len(params)+1))
+		params = append(params, message.From.Username)
+	}
 	if field := mapping.GetLastMessageField(); field != "" {
 		setClauses = append(setClauses, telegramQuoteIdentifier(field)+fmt.Sprintf(" = $%d", len(params)+1))
 		params = append(params, telegramMessageText(message))
@@ -1492,6 +1565,10 @@ func (h *HandlerV1) updateTelegramChatSummary(ctx context.Context, target *teleg
 	}
 	if field := mapping.GetUnreadCountField(); field != "" {
 		setClauses = append(setClauses, telegramQuoteIdentifier(field)+" = COALESCE("+telegramQuoteIdentifier(field)+", 0) + 1")
+	}
+	if field := mapping.GetStatusField(); field != "" {
+		setClauses = append(setClauses, telegramQuoteIdentifier(field)+fmt.Sprintf(" = COALESCE(NULLIF(%s::text, ''), $%d)", telegramQuoteIdentifier(field), len(params)+1))
+		params = append(params, "open")
 	}
 	if len(setClauses) == 0 {
 		return nil
