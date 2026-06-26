@@ -72,8 +72,6 @@ func (h *HandlerV1) FacebookWebhookReceive(c *gin.Context) {
 		return
 	}
 
-	// Authenticate the call as Meta's before trusting the payload. A bad/missing
-	// signature is answered with 200 (so Meta won't retry) but left unprocessed.
 	if !h.verifyFacebookSignature(c.GetHeader(config.FacebookSignatureHeader), body) {
 		h.log.Warn("facebook webhook: signature verification failed")
 		c.JSON(http.StatusOK, gin.H{"ok": true})
@@ -81,7 +79,8 @@ func (h *HandlerV1) FacebookWebhookReceive(c *gin.Context) {
 	}
 
 	var event models.FacebookLeadWebhookEvent
-	if err := json.Unmarshal(body, &event); err != nil {
+
+	if err = json.Unmarshal(body, &event); err != nil {
 		h.log.Error("facebook webhook: invalid payload", logger.Error(err))
 		c.JSON(http.StatusOK, gin.H{"ok": true})
 		return
@@ -258,6 +257,7 @@ func (h *HandlerV1) verifyFacebookSignature(header string, body []byte) bool {
 	if !strings.HasPrefix(header, config.FacebookSignaturePrefix) {
 		return false
 	}
+
 	provided, err := hex.DecodeString(strings.TrimPrefix(header, config.FacebookSignaturePrefix))
 	if err != nil {
 		return false
