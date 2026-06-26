@@ -179,6 +179,12 @@ type BaseConfig struct {
 
 	YandexMetricToken string
 
+	FacebookAppID           string
+	FacebookAppSecret       string
+	FacebookRedirectURI     string
+	FacebookGraphBaseURL    string
+	FacebookGraphAPIVersion string
+
 	FacebookWebhookVerifyToken string
 }
 
@@ -291,6 +297,11 @@ func BaseLoad() BaseConfig {
 
 	config.YandexMetricToken = cast.ToString(GetOrReturnDefaultValue("YANDEX_METRIC_TOKEN", ""))
 
+	config.FacebookAppID = cast.ToString(GetOrReturnDefaultValue("FACEBOOK_APP_ID", ""))
+	config.FacebookAppSecret = cast.ToString(GetOrReturnDefaultValue("FACEBOOK_APP_SECRET", ""))
+	config.FacebookRedirectURI = cast.ToString(GetOrReturnDefaultValue("FACEBOOK_REDIRECT_URI", ""))
+	config.FacebookGraphBaseURL = strings.TrimRight(cast.ToString(GetOrReturnDefaultValue("FACEBOOK_GRAPH_BASE_URL", "https://graph.facebook.com")), "/")
+	config.FacebookGraphAPIVersion = cast.ToString(GetOrReturnDefaultValue("FACEBOOK_GRAPH_API_VERSION", "v21.0"))
 	config.FacebookWebhookVerifyToken = cast.ToString(GetOrReturnDefaultValue("FACEBOOK_WEBHOOK_VERIFY_TOKEN", ""))
 
 	config.MaxTokens = cast.ToInt(GetOrReturnDefaultValue("MAX_TOKENS", 12000))

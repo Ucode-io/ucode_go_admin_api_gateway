@@ -8,6 +8,7 @@ import "company.proto";
 
 service IntegrationResourceService {
   rpc CreateIntegrationResource(CreateIntegrationResourceRequest) returns (IntegrationResource) {}
+  rpc UpsertIntegrationResource(CreateIntegrationResourceRequest) returns (IntegrationResource) {}
   rpc GetById(IntegrationResourcePrimaryKey) returns (IntegrationResource) {}
   rpc GetByUsername(GetByUsernameRequest) returns (GetByUsernameResponse) {}
   rpc GetIntegrationResourceList(GetListIntegrationResourceRequest) returns (GetListIntegrationResourceResponse) {}
