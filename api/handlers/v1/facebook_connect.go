@@ -391,8 +391,6 @@ func (h *HandlerV1) redirectFacebookOAuth(c *gin.Context, out facebookOAuthOutco
 	c.Redirect(http.StatusTemporaryRedirect, u.String())
 }
 
-// resolveFacebookRedirectURL captures the full page the user started from so the
-// callback can return them there: an explicit ?redirect_uri, else the Referer.
 func resolveFacebookRedirectURL(c *gin.Context) string {
 	if raw := strings.TrimSpace(c.Query("redirect_uri")); raw != "" {
 		return raw
