@@ -57,6 +57,10 @@ func (h *HandlerV1) AddResourceToProject(c *gin.Context) {
 		h.HandleResponse(c, status_http.BadRequest, "use /v1/mcp_project/:id/telegram endpoints to manage Telegram Support")
 		return
 	}
+	if isInstagramAddResourceRequest(request) {
+		h.HandleResponse(c, status_http.BadRequest, "use /v1/mcp_project/:id/instagram endpoints to manage Instagram Support")
+		return
+	}
 	if request.GetType() == pb.ResourceType_GOOGLE_DRIVE {
 		if request.GetSettings() == nil || request.GetSettings().GetGoogleDrive() == nil || strings.TrimSpace(request.GetSettings().GetGoogleDrive().GetRefreshToken()) == "" {
 			h.HandleResponse(c, status_http.BadRequest, "use /v1/google-drive/connect to connect Google Drive")
@@ -164,6 +168,10 @@ func (h *HandlerV1) UpdateProjectResource(c *gin.Context) {
 		h.HandleResponse(c, status_http.BadRequest, "use /v1/mcp_project/:id/telegram endpoints to manage Telegram Support")
 		return
 	}
+	if isInstagramProjectResource(request) {
+		h.HandleResponse(c, status_http.BadRequest, "use /v1/mcp_project/:id/instagram endpoints to manage Instagram Support")
+		return
+	}
 	if util.IsValidUUID(request.GetId()) {
 		current, currentErr := h.companyServices.Resource().GetSingleProjectResouece(c.Request.Context(), &pb.PrimaryKeyProjectResource{
 			Id:            request.GetId(),
@@ -172,6 +180,10 @@ func (h *HandlerV1) UpdateProjectResource(c *gin.Context) {
 		})
 		if currentErr == nil && isTelegramProjectResource(current) {
 			h.HandleResponse(c, status_http.BadRequest, "use /v1/mcp_project/:id/telegram endpoints to manage Telegram Support")
+			return
+		}
+		if currentErr == nil && isInstagramProjectResource(current) {
+			h.HandleResponse(c, status_http.BadRequest, "use /v1/mcp_project/:id/instagram endpoints to manage Instagram Support")
 			return
 		}
 	}
@@ -480,6 +492,66 @@ func sanitizeTelegramResourceForResponse(resource *pb.ProjectResource) {
 	}
 }
 
+func isInstagramAddResourceRequest(resource *pb.AddResourceToProjectRequest) bool {
+	if resource == nil {
+		return false
+	}
+	if resource.GetType() == pb.ResourceType_INSTAGRAM {
+		return true
+	}
+	return resource.GetSettings() != nil && resource.GetSettings().GetInstagram() != nil
+}
+
+func isInstagramProjectResource(resource *pb.ProjectResource) bool {
+	if resource == nil {
+		return false
+	}
+	if resource.GetType() == pb.ResourceType_INSTAGRAM.String() || resource.GetResourceType() == int32(pb.ResourceType_INSTAGRAM) {
+		return true
+	}
+	return resource.GetSettings() != nil && resource.GetSettings().GetInstagram() != nil
+}
+
+func sanitizeInstagramResourceForResponse(resource *pb.ProjectResource) {
+	if resource == nil || resource.GetSettings() == nil || resource.GetSettings().GetInstagram() == nil {
+		return
+	}
+	resource.Secret = nil
+	instagramSettings := resource.GetSettings().GetInstagram()
+	resource.Settings.Instagram = &pb.InstagramCredentials{
+		IgId:              instagramSettings.GetIgId(),
+		Username:          instagramSettings.GetUsername(),
+		AccountType:       instagramSettings.GetAccountType(),
+		ProfilePictureUrl: instagramSettings.GetProfilePictureUrl(),
+		Status:            instagramSettings.GetStatus(),
+		ConnectedUserId:   instagramSettings.GetConnectedUserId(),
+		ConnectedAt:       instagramSettings.GetConnectedAt(),
+		Mapping:           instagramSettings.GetMapping(),
+	}
+}
+
+func instagramProjectResourceForLog(resource *pb.ProjectResource) *pb.ProjectResource {
+	if resource == nil || resource.GetSettings() == nil || resource.GetSettings().GetInstagram() == nil {
+		return resource
+	}
+	safe := *resource
+	safe.Secret = nil
+	instagramSettings := resource.GetSettings().GetInstagram()
+	safe.Settings = &pb.Settings{
+		Instagram: &pb.InstagramCredentials{
+			IgId:              instagramSettings.GetIgId(),
+			Username:          instagramSettings.GetUsername(),
+			AccountType:       instagramSettings.GetAccountType(),
+			ProfilePictureUrl: instagramSettings.GetProfilePictureUrl(),
+			Status:            instagramSettings.GetStatus(),
+			ConnectedUserId:   instagramSettings.GetConnectedUserId(),
+			ConnectedAt:       instagramSettings.GetConnectedAt(),
+			Mapping:           instagramSettings.GetMapping(),
+		},
+	}
+	return &safe
+}
+
 func telegramProjectResourceForLog(resource *pb.ProjectResource) *pb.ProjectResource {
 	if resource == nil || resource.GetSettings() == nil || resource.GetSettings().GetTelegram() == nil {
 		return resource
@@ -507,6 +579,9 @@ func projectResourceForLog(resource *pb.ProjectResource) *pb.ProjectResource {
 	resource = &safe
 	if resource.GetSettings() != nil && resource.GetSettings().GetTelegram() != nil {
 		return telegramProjectResourceForLog(resource)
+	}
+	if resource.GetSettings() != nil && resource.GetSettings().GetInstagram() != nil {
+		return instagramProjectResourceForLog(resource)
 	}
 	if resource.GetSettings() != nil && resource.GetSettings().GetGoogleCalendar() != nil {
 		return googleCalendarProjectResourceForLog(resource)
@@ -560,6 +635,7 @@ func (h *HandlerV1) GetListProjectResourceList(c *gin.Context) {
 		sanitizeGoogleDriveResourceForResponse(resource)
 		sanitizeGoogleCalendarResourceForResponse(resource)
 		sanitizeTelegramResourceForResponse(resource)
+		sanitizeInstagramResourceForResponse(resource)
 	}
 
 	h.HandleResponse(c, status_http.OK, resp)
@@ -607,6 +683,7 @@ func (h *HandlerV1) GetSingleProjectResource(c *gin.Context) {
 	sanitizeGoogleDriveResourceForResponse(resp)
 	sanitizeGoogleCalendarResourceForResponse(resp)
 	sanitizeTelegramResourceForResponse(resp)
+	sanitizeInstagramResourceForResponse(resp)
 
 	h.HandleResponse(c, status_http.OK, resp)
 }
@@ -651,6 +728,10 @@ func (h *HandlerV1) DeleteProjectResource(c *gin.Context) {
 	current, currentErr := h.companyServices.Resource().GetSingleProjectResouece(c.Request.Context(), request)
 	if currentErr == nil && isTelegramProjectResource(current) {
 		h.HandleResponse(c, status_http.BadRequest, "use /v1/mcp_project/:id/telegram endpoints to disconnect Telegram Support")
+		return
+	}
+	if currentErr == nil && isInstagramProjectResource(current) {
+		h.HandleResponse(c, status_http.BadRequest, "use /v1/mcp_project/:id/instagram endpoints to disconnect Instagram Support")
 		return
 	}
 

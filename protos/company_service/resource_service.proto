@@ -366,6 +366,7 @@ message Settings {
     GoogleCalendarCredentials google_calendar = 10;
     TelegramCredentials telegram = 11;
     FacebookLeadsCredentials facebook_leads = 12;
+    InstagramCredentials instagram = 13;
 }
 
 message SmsCredentials {
@@ -498,6 +499,34 @@ message FacebookLeadFieldMapping {
     string lead_field = 1;
     string table_field = 2;
     bool required = 3;
+}
+
+// Instagram Direct Messaging. external_id of the project_resource holds ig_id.
+// Access tokens are stored in project_resource.secret, not in this public
+// settings payload.
+message InstagramCredentials {
+    string ig_id = 1;
+    string username = 2;
+    string account_type = 3;
+    string profile_picture_url = 4;
+    string status = 5;
+    string connected_user_id = 6;
+    string connected_at = 7;
+    InstagramChatMapping mapping = 8;
+}
+
+message InstagramChatMapping {
+    string table_id = 1;
+    string table_slug = 2;
+    string instagram_user_id_field = 3;
+    string username_field = 4;
+    string display_name_field = 5;
+    string profile_picture_field = 6;
+    string last_message_field = 7;
+    string last_message_at_field = 8;
+    string unread_count_field = 9;
+    string status_field = 10;
+    string conversation_id_field = 11;
 }
 
 message Github {
